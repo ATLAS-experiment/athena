@@ -17,7 +17,7 @@ namespace PFO {
     m_PFO_tracksExpectedEnergyDeposit = Book1D("PFO_tracksExpectedEnergyDeposit",m_sPFOContainerName+"PFO_tracksExpectedEnergyDeposit",11,-1,10);
 
     m_PFO_isInDenseEnvironment_etaBinA = Book1D("PFO_isInDenseEnvironment_binA",m_sPFOContainerName+"PFO_isInDenseEnvironment (|eta| < 1)",3,-1,2);
-    m_PFO_tracksExpectedEnergyDeposit_etaBinA = Book1D("PFO_tracksExpectedEnergyDeposit_binA)",m_sPFOContainerName+"PFO_tracksExpectedEnergyDeposit (|eta| < 1)",11,-1,10);
+    m_PFO_tracksExpectedEnergyDeposit_etaBinA = Book1D("PFO_tracksExpectedEnergyDeposit_binA",m_sPFOContainerName+"PFO_tracksExpectedEnergyDeposit (|eta| < 1)",11,-1,10);
 
     m_PFO_isInDenseEnvironment_etaBinB = Book1D("PFO_isInDenseEnvironment_binB",m_sPFOContainerName+"PFO_isInDenseEnvironment (1 <= |eta| < 2)",3,-1,2);
     m_PFO_tracksExpectedEnergyDeposit_etaBinB = Book1D("PFO_tracksExpectedEnergyDeposit_binB",m_sPFOContainerName+"PFO_tracksExpectedEnergyDeposit (1 <= |eta| < 2)",11,-1,10);
