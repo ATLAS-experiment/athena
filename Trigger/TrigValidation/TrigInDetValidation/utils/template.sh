@@ -196,9 +196,6 @@ fi
 
 if [ $RUNATHENA -eq 1 ]; then 
 
-# don't need to fetch the job options if using those from the release
-# get_files -jo @REPLACEJOBOPTIONS
-
 
 # run athena in separate directories
 
