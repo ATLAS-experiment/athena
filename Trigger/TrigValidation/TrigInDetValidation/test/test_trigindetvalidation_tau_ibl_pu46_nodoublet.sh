@@ -140,8 +140,6 @@ function waitonallproc   {
 
 # run athena  
 
-iathena=0
-
 function runathena { 
    timestamp  "runathena:"
 
@@ -161,10 +159,7 @@ function runathena {
      echo "ARGS: $ARGS"
      echo -e "\nrunning athena in athena-$1\n"
      athena.py  -c "$ARGS"              TrigInDetValidation/TrigInDetValidation_RTT_topOptions_TauSlice.py  &> athena-local-$1.log
-
-     echo "art-result: $? athena_$iathena"
-
-     ((iathena++))
+     echo "art-result: $? athena_$1"
 
      pwd
      ls -lt
@@ -207,7 +202,11 @@ if [ $LOCAL -eq 1 ]; then
       # get number of files 
       NFILES=$(grep "^#[[:space:]]*art-input-nfiles:" $0 | sed 's|.*art-input-nfiles:[[:space:]]*||g')
       [ $NFILES -lt 1 ] && echo "not enough files: $NFILES" && exit -1
-      _jobList=$(TIDAdataset.py $RTTJOBNAME)
+#     this python doesn;t work in 21.3 and beyond - leave commented by way of documentation
+#     _jobList=$(TIDAdataset.py $RTTJOBNAME)
+      DATASET=$(grep "^#[[:space:]]*art-input:" $0 | sed 's|.*art-input:[[:space:]]*||g')
+      _jobList=$(\ls /eos/atlas/atlascerngroupdisk/proj-sit/trigindet/$DATASET/* )
+
       for git in $_jobList ; do [ $NFILES -gt 0 ] || break ; jobList="$jobList ARTConfig=['$git']" ; ((NFILES--)) ; echo "running over $git"  ; done
 else
       fileList="['${ArtInFile//,/', '}']"
@@ -219,7 +218,8 @@ fi
 
 if [ $RUNATHENA -eq 1 ]; then 
 
-get_files -jo            TrigInDetValidation/TrigInDetValidation_RTT_topOptions_TauSlice.py
+# don't need to fetch the job options if using those from the release
+# get_files -jo            TrigInDetValidation/TrigInDetValidation_RTT_topOptions_TauSlice.py
 
 
 # run athena in separate directories
