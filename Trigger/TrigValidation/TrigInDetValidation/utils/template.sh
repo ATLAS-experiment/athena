@@ -180,7 +180,11 @@ if [ $LOCAL -eq 1 ]; then
       # get number of files 
       NFILES=$(grep "^#[[:space:]]*art-input-nfiles:" $0 | sed 's|.*art-input-nfiles:[[:space:]]*||g')
       [ $NFILES -lt 1 ] && echo "not enough files: $NFILES" && exit -1
-      _jobList=$(TIDAdataset.py $RTTJOBNAME)
+#     this python doesn;t work in 21.3 and beyond - leave commented by way of documentation
+#     _jobList=$(TIDAdataset.py $RTTJOBNAME)
+      DATASET=$(grep "^#[[:space:]]*art-input:" $0 | sed 's|.*art-input:[[:space:]]*||g')
+      _jobList=$(\ls /eos/atlas/atlascerngroupdisk/proj-sit/trigindet/$DATASET/* )
+
       for git in $_jobList ; do [ $NFILES -gt 0 ] || break ; jobList="$jobList ARTConfig=['$git']" ; ((NFILES--)) ; echo "running over $git"  ; done
 else
       fileList="['${ArtInFile//,/', '}']"
@@ -191,8 +195,6 @@ fi
 
 
 if [ $RUNATHENA -eq 1 ]; then 
-
-get_files -jo @REPLACEJOBOPTIONS
 
 
 # run athena in separate directories
