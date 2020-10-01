@@ -13,7 +13,7 @@ from MuonCnvExample.MuonCalibFlags import muonCalibFlags
 from RecExConfig.RecFlags import rec
 
 # configure calib algs for standalone
-f muonRecFlags.doCalibNtuple():
+if muonRecFlags.doCalibNtuple():
     from MuonRecExample import MuonAlignConfig
     from MuonCnvExample import setupMuonCalibNtuple
     setupMuonCalibNtuple()
