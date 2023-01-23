@@ -60,7 +60,7 @@ public:
 
     virtual StatusCode initBranches(const std::vector<const Trk::ITrackTruthClassifier*>& classifiers,
                                     bool,
-                                    const std::vector<std::string> trackCollectionNames);
+                                    const std::vector<std::string>& trackCollectionNames);
 
 private:
 

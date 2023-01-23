@@ -556,7 +556,8 @@ bool Trk::TrackDiff::diffStateInfo(const Trk::TrackStateData* refTrackState,
         detType = refTrackState->detType();
         detTypeName = refTrackState->detTypeName();
         //surfaceCenter << "(" << refTrackState->surface()->center().x() << ", " << refTrackState->surface()->center().y() << "," <<refTrackState->surface()->center().z() << ")";
-    } else {
+    }
+    else if (compareTrackState) {
         // we have a compared state without ref state
         isFake = true;
         foundDiff = true;
