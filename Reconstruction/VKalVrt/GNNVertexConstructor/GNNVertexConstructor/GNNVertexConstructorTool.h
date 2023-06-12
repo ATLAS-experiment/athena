@@ -42,6 +42,8 @@ namespace Trk {
   class VxSecVKalVertexInfo;
 } // namespace Trk
 
+#include "xAODTracking/TrackParticleContainer.h"
+
 namespace Rec {
 
 struct workVectorArrxAOD {

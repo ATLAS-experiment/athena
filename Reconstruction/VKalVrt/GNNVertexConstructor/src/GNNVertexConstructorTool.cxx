@@ -5,47 +5,49 @@
 
 namespace Rec {
     
-    GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string& type, const std::string& name, const IInterface* parent):
-    AthAlgTool(type,name,parent)
-    {
-//
-// Declare additional interface
-//
-    declareInterface< IGNNVertexConstructorInterface >(this);
-    ATH_MSG_DEBUG("GNNVertexConstructorTool constructor called");
+    GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string& type, const std::string& name, const IInterface* parent)
+    : AthAlgTool(type,name,parent){
+
+      declareInterface< IGNNVertexConstructorInterface >(this);
+      ATH_MSG_DEBUG("GNNVertexConstructorTool constructor called");
     }   
      /* Destructor */
-    GNNVertexConstructorTool::~GNNVertexConstructorTool()
-    {
-    ATH_MSG_DEBUG("GNNVertexConstructorTool destructor called");
+    
+    GNNVertexConstructorTool::~GNNVertexConstructorTool(){
+
+      ATH_MSG_DEBUG("GNNVertexConstructorTool destructor called");
     }
 
 
 
-    StatusCode GNNVertexConstructorTool::initialize()
-    {
+    StatusCode GNNVertexConstructorTool::initialize(){
 
-    ATH_MSG_DEBUG("GNNVertexConstructor Tool in initialize()");
+      ATH_MSG_DEBUG("GNNVertexConstructor Tool in initialize()");
 
-    return StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
     
-    StatusCode GNNVertexConstructorTool::finalize()
-    {
+    StatusCode GNNVertexConstructorTool::finalize(){
 
-    ATH_MSG_DEBUG("GNNVertexConstructor Tool in finalize()");
+      ATH_MSG_DEBUG("GNNVertexConstructor Tool in finalize()");
     
-    return StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
-    unsigned int GNNVertexConstructorTool::addTwoNumbers( const unsigned int & NoOne,
-                                                     const unsigned int & NoTwo) const
-    
-    {
-    unsigned int sum=NoOne+NoTwo;
-    return sum;
+    unsigned int GNNVertexConstructorTool::addTwoNumbers( const unsigned int & NoOne, const unsigned int & NoTwo) const {
+      unsigned int sum=NoOne+NoTwo;
+      return sum;
     }
 
+    StatusCode GNNVertexConstructorTool::decorateTracks( const xAOD::TrackParticleContainer& trkCont ) const {
+
+      ATH_MSG_DEBUG("GNNVertexConstructor Tool decorating tracks");
+
+      int sum = trkCont.size();
+      ATH_MSG_DEBUG("Size is = " << sum );      
+
+      return StatusCode::SUCCESS;
+    }
 
 }  // end Rec namespace
