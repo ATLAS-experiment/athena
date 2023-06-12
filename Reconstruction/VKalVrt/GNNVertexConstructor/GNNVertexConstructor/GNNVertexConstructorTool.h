@@ -4,6 +4,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GNNVertexConstructor/IGNNVertexConstructorInterface.h"
 
+#include "xAODTracking/TrackParticleContainer.h"
+
 namespace Rec {
 
    class GNNVertexConstructorTool : public AthAlgTool, virtual public IGNNVertexConstructorInterface {
@@ -19,8 +21,8 @@ namespace Rec {
 
 
       
-      unsigned int addTwoNumbers( const unsigned int & NoOne,
-                                                     const unsigned int & NoTwo) const final;
+      unsigned int addTwoNumbers( const unsigned int & NoOne, const unsigned int & NoTwo) const final;
+      virtual StatusCode decorateTracks( const xAOD::TrackParticleContainer& trkCont ) const;
 
     private:
   };

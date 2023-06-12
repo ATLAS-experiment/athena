@@ -6,6 +6,7 @@
 #include "GNNVertexConstructor/IGNNVertexConstructorInterface.h"
 #include "GaudiKernel/ToolHandle.h"
 
+#include "xAODTracking/TrackParticleContainer.h"
 
 namespace Rec {
 
@@ -20,7 +21,7 @@ namespace Rec {
 
     private:
       ToolHandle<Rec::IGNNVertexConstructorInterface> m_testTool;
-      
+      SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inTrackKey{this, "InputTrackContainer", "InDetTrackParticles", "Input track particle container"};      
         
 
   };

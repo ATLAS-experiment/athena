@@ -4,6 +4,7 @@
 // Gaudi includes
 #include "AthenaBaseComps/AthAlgTool.h"
 
+#include "xAODTracking/TrackParticleContainer.h"
  
 //------------------------------------------------------------------------
 namespace Rec {
@@ -22,8 +23,8 @@ namespace Rec {
     
     
   */
-      virtual unsigned int addTwoNumbers( const unsigned int & NoOne,
-                                                     const unsigned int & NoTwo) const =0;
+      virtual unsigned int addTwoNumbers( const unsigned int & NoOne, const unsigned int & NoTwo) const =0;
+      virtual StatusCode decorateTracks( const xAOD::TrackParticleContainer& trkCont ) const = 0;
 
   };
 
