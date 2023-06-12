@@ -45,7 +45,7 @@ namespace Rec {
     }
 
 
-    ATH_CHECK(m_testTool->decorateTracks(*inTracks));
+    ATH_CHECK(m_testTool->decorateTracks(inTracks.ptr(), ctx));
 
     return StatusCode::SUCCESS;
 

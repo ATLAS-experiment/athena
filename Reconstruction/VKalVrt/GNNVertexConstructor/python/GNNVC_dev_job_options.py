@@ -57,11 +57,36 @@ def main():
 
     import AthenaCommon.Constants as Lvl
     from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorAlgCfg
-    from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorToolCfg
+    #from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorToolCfg
 
     acc.merge(GNNVertexConstructorAlgCfg(flags, name="LME_devAlg", OutputLevel=Lvl.DEBUG))
 
     ##---
+
+    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+    TRUTH0SlimmingHelper = SlimmingHelper("TRUTH0SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    TRUTH0SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD:EventAuxInfo',
+                                               'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
+                                               'TruthVertices':'xAOD::TruthVertexContainer','TruthVerticesAux':'xAOD::TruthVertexAuxContainer',
+                                               'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer'} 
+
+    TRUTH0SlimmingHelper.AllVariables = [ 'EventInfo',
+                                          'TruthEvents', 
+                                          'TruthVertices',
+                                          'TruthParticles']
+
+    # Metadata
+    #TRUTH0MetaDataItems = [ "xAOD::TruthMetaDataContainer#TruthMetaData", "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux." ]
+
+    # Create output stream 
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
+    TRUTH0ItemList+=["xAOD::TrackParticleContainer#DecoratedTrackParticles","xAOD::TrackParticlesContainer#DecoratedTrackParticlesAux."]
+    acc.merge(OutputStreamCfg(flags, "GNNVertexOutput", ItemList=TRUTH0ItemList))
+
+
+
+    ##--
 
     acc.printConfig(withDetails=True, summariseProps=True)
     status = acc.run()
