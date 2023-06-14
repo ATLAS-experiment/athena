@@ -81,7 +81,7 @@ def main():
     # Create output stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
-    TRUTH0ItemList+=["xAOD::TrackParticleContainer#DecoratedTrackParticles","xAOD::TrackParticlesContainer#DecoratedTrackParticlesAux."]
+    TRUTH0ItemList+=["xAOD::TrackParticleContainer#DecoratedTrackParticles","xAOD::TrackParticleContainer#DecoratedTrackParticlesAux."]
     acc.merge(OutputStreamCfg(flags, "GNNVertexOutput", ItemList=TRUTH0ItemList))
 
 

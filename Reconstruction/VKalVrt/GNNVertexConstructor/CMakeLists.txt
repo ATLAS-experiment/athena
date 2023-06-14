@@ -11,7 +11,7 @@ atlas_add_component( GNNVertexConstructor
 atlas_add_library(   GNNVertexConstructorLib
                      src/*.cxx
                      PUBLIC_HEADERS GNNVertexConstructor 
-                     LINK_LIBRARIES AthenaBaseComps xAODTracking )
+                     LINK_LIBRARIES AthenaBaseComps StoreGateLib xAODTracking )
                      
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

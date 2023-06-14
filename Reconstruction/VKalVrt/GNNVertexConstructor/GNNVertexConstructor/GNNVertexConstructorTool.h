@@ -3,7 +3,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GNNVertexConstructor/IGNNVertexConstructorInterface.h"
-
+#include "StoreGate/ReadDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
 namespace Rec {
@@ -23,11 +24,16 @@ namespace Rec {
       
       unsigned int addTwoNumbers( const unsigned int & NoOne, const unsigned int & NoTwo) const final;
       virtual StatusCode decorateTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const;
+      virtual StatusCode readDecorTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const;
+      
       
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>  m_decorTrackKey{ this, "TrackDecorKey", ".passGNN", "if track passes some GNN criteria"};
       Gaudi::Property<std::string>   m_tracksKey { this, "TrackContainername", "InDetTrackParticles", "Track container name (same calling alg)" };
 
-
+      SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_decorReadKey{ this, "TrackReadKey", "", "read tracks that pass GNN criteria"};
+      Gaudi::Property<std::string>  m_readKey { this, "TrackContainerName", "InDetTrackParticle", "Track Container name (same calling alg)"};
+      
+      
     private:
   };
 }

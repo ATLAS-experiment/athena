@@ -25,7 +25,7 @@ namespace Rec {
   */
       virtual unsigned int addTwoNumbers( const unsigned int & NoOne, const unsigned int & NoTwo) const =0;
       virtual StatusCode decorateTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const = 0;
-
+      virtual StatusCode readDecorTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctv ) const = 0;
   };
 
 }  //end namespace

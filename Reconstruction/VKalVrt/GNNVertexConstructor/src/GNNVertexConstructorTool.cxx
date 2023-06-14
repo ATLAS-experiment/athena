@@ -3,6 +3,8 @@
 //
 
 #include "StoreGate/WriteDecorHandle.h"
+#include "StoreGate/ReadDecorHandle.h"
+
 
 namespace Rec {
     
@@ -10,6 +12,7 @@ namespace Rec {
     : AthAlgTool(type,name,parent){
 
       declareInterface< IGNNVertexConstructorInterface >(this);
+      declareProperty("ReadKey", m_decorReadKey="InDetTrackParicles.passGNN");
       ATH_MSG_DEBUG("GNNVertexConstructorTool constructor called");
     }   
      /* Destructor */
@@ -19,6 +22,8 @@ namespace Rec {
       ATH_MSG_DEBUG("GNNVertexConstructorTool destructor called");
     }
 
+//Initialize the decoration key
+
     StatusCode GNNVertexConstructorTool::initKey(const std::string &containerKey,
                               SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> &decokey) const {
      decokey = containerKey + decokey.key();
@@ -27,19 +32,21 @@ namespace Rec {
      return StatusCode::SUCCESS;
     }
 
-
-
+//Initialize ---------------------------------------------------------------------------
     StatusCode GNNVertexConstructorTool::initialize(){
 
       ATH_MSG_DEBUG("GNNVertexConstructor Tool in initialize()");
 
       ATH_CHECK(initKey(m_tracksKey, m_decorTrackKey));      
-
-      //ATH_CHECK(m_decorTrackKey.initialize());
+      //ATH_CHECK(initReadKey(m_readKey, m_readDecorKey);
+      
+      
+      ATH_CHECK(m_decorReadKey.initialize());
 
       return StatusCode::SUCCESS;
     }
-    
+
+//Finalize -------------------------------------------------------------------------------    
     StatusCode GNNVertexConstructorTool::finalize(){
 
       ATH_MSG_DEBUG("GNNVertexConstructor Tool in finalize()");
@@ -47,12 +54,16 @@ namespace Rec {
       return StatusCode::SUCCESS;
     }
 
+//Will be called in the excute section in the Algorithm cxx file ------------------------------
 
+//Dummy Tool that adds 2 numbers
     unsigned int GNNVertexConstructorTool::addTwoNumbers( const unsigned int & NoOne, const unsigned int & NoTwo) const {
       unsigned int sum=NoOne+NoTwo;
       return sum;
     }
 
+
+//Decoration Tool that adds a decoration to the container --------------------------------------------------------------------
     StatusCode GNNVertexConstructorTool::decorateTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const {
 
       ATH_MSG_DEBUG("GNNVertexConstructor Tool decorating tracks");
@@ -69,6 +80,7 @@ namespace Rec {
         if(pt > 150){
     
           ATH_MSG_DEBUG("Track pt is = " << pt );
+          ATH_MSG_DEBUG("Decorator added!!!!");
           decorTrackKey( *track ) = "pass";
 
         }
@@ -76,5 +88,28 @@ namespace Rec {
 
       return StatusCode::SUCCESS;
     }
+    
+    
+//Read a decoration tool from a container  ---------------------------------------------------------------------------    
+    StatusCode GNNVertexConstructorTool::readDecorTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const {
+    
+    
+      ATH_MSG_DEBUG("GNNVertexConstructor Tool reading decoratorations from a container");
+      
+      SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::string> readTrackKey(m_decorReadKey, ctx);
+      
+     for ( auto track : *trkCont ){
+
+        float pt = track->pt()/1000.;
+
+        if(pt > 150){
+          ATH_MSG_DEBUG("Contains a decorator");
+          ATH_MSG_DEBUG("Decorator is " << readTrackKey( *track ));
+        }
+      
+      }
+      return StatusCode::SUCCESS;
+    }
 
 }  // end Rec namespace
+
