@@ -1,9 +1,11 @@
-// Header include
+// Headers
 #include "GNNVertexConstructor/GNNVertexConstructorTool.h"
-//
-
+//Headers to Read & Write Decorations
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
+
+
+
 
 
 namespace Rec {

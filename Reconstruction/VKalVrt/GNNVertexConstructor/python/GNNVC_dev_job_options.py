@@ -57,6 +57,7 @@ def main():
 
     import AthenaCommon.Constants as Lvl
     from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorAlgCfg
+    #from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNToolCfg
     #from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorToolCfg
 
     acc.merge(GNNVertexConstructorAlgCfg(flags, name="LME_devAlg", OutputLevel=Lvl.DEBUG))
