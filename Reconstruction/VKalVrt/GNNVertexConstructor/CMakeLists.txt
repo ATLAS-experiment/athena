@@ -3,15 +3,60 @@
 # Declare the package name:
 atlas_subdir( GNNVertexConstructor )
 
+# External dependencies:
+find_package( Boost COMPONENTS filesystem )
+find_package( lwtnn )
+find_package( ROOT COMPONENTS Core MathCore )
+find_package( onnxruntime )
+
+
 atlas_add_component( GNNVertexConstructor 
                      src/components/*.cxx
-                     LINK_LIBRARIES GNNVertexConstructorLib AthenaBaseComps )
+                     LINK_LIBRARIES GNNVertexConstructorLib 
+                                    AthenaBaseComps 
+                                    StoreGateLib 
+                                    xAODTracking 
+                                    xAODEventInfo 
+                                    xAODJet 
+                                    xAODBTagging 
+                                    FlavorTagDiscriminants  
+                                    GaudiKernel
+                                    AsgTools
+                                    SystematicsHandlesLib
+                                    FTagAnalysisInterfacesLib
+                                    FourMomUtils
+                                    TruthUtils
+                                    AthContainers
+                                    AthLinks
+ )
 
 
 atlas_add_library(   GNNVertexConstructorLib
                      src/*.cxx
-                     PUBLIC_HEADERS GNNVertexConstructor 
-                     LINK_LIBRARIES AthenaBaseComps StoreGateLib xAODTracking )
+                     PUBLIC_HEADERS GNNVertexConstructor
+                     PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+                     PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils 
+                     LINK_LIBRARIES AthenaBaseComps 
+                                    StoreGateLib 
+                                    xAODTracking 
+                                    xAODEventInfo 
+                                    xAODJet 
+                                    xAODBTagging 
+                                    FlavorTagDiscriminants  
+                                    GaudiKernel
+                                    AsgTools
+                                    SystematicsHandlesLib
+                                    FTagAnalysisInterfacesLib
+                                    FourMomUtils
+                                    TruthUtils
+                                    AthContainers
+                                    AthLinks
+ )
                      
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+
+
+
