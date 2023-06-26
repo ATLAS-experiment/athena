@@ -164,8 +164,11 @@ StatusCode LArSC2Ntuple::initialize() {
   }//m_fillTType
 
   if(m_fillCaloTT) {
-     CHECK( m_ttTool.retrieve() );
-     m_ntNTT = 20000;
+     sc = m_evt_nt->addItem("NTT",m_ntNTT,0,20000);
+     if (sc.isFailure()) {
+       ATH_MSG_ERROR( "addItem 'Net' failed" );
+       return sc;
+     }
      sc = m_evt_nt->addItem("TTeta",  m_ntNTT, m_TTeta);
      if (sc.isFailure()) {
         ATH_MSG_ERROR( "addItem 'TTeta' failed" );
@@ -590,23 +593,22 @@ StatusCode LArSC2Ntuple::execute()
 
   }
   if(m_fillCaloTT){
-    SG::ReadHandle<xAOD::TriggerTowerContainer> tts(m_triggerTowerContainerKey, ctx);
-    if(tts.isValid()) {
+    const DataVector<LVL1::TriggerTower>* TTVector;
+    if ( evtStore()->retrieve(TTVector,m_triggerTowerKey).isFailure() ) {
+       ATH_MSG_WARNING("Could not get the Calo TTs, will not fill...");
+    } else {
       unsigned count=0; 
-      for (const auto* x : *tts) {
-           if(m_ttTool->isTile(*x)) continue;
-           m_TTeta[count]=x->eta();
-           m_TTphi[count]=x->phi();
-           if(x->layer()==0) { // EM 
-              m_TTEem[count]=x->adc()[x->adcPeak()];
-              m_TTEhad[count]=0;
-           } else { //HAD
-              m_TTEem[count]=0;
-              m_TTEhad[count]=x->adc()[x->adcPeak()];
-           }
+      ATH_MSG_INFO("Got TT vector of the sixe " <<  TTVector->size());
+      DataVector<LVL1::TriggerTower>::const_iterator x; 
+      for ( x = TTVector->begin(); x < TTVector->end(); ++x ){
+           m_TTeta[count]=(*x)->eta();
+           m_TTphi[count]=(*x)->phi();
+           m_TTEem[count]=(*x)->emEnergy();
+           m_TTEhad[count]=(*x)->hadEnergy();
            ++count;
-           if(count==m_ntNTT) break;
+           if(count==20000) break;
       }
+      m_ntNTT=count;
     }
   }
 
