@@ -4,8 +4,12 @@ import os
 import os.path
 
 ##---
-
-inputDir = "/home/atlas/lukem/mc20_13TeV.312939.PowhegPythia8EvtGen_ZH_H125_a35a35_4b_ctau100.recon.AOD.e7962_e5984_s3126_r13051_r13474/"
+#inputDir = "/tank/awharton/ForLME/Data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_PHYS.grp22_v02_p5632/"
+inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_LLP1.grp22_v01_p5600/"
+#inputDir = "/tank/awharton/ForLME/Data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_PHYSLITE.grp22_v02_p5632/"
+#inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427884.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
+#inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427882.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
+#inputDir = "/cvmfs/atlas.cern.ch/repo/tutorials/asg/cern-jun2022/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8357_s3802_r13508_p5057"
 maxEvents = 10
 
 ##---
