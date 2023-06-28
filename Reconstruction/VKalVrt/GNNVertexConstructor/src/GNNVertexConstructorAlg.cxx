@@ -74,12 +74,12 @@ namespace Rec {
 
 
     // container we read in
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     ATH_CHECK(eventInfo.isValid());
 
     // get the jets
     SG::ReadHandle<ConstDataVector<xAOD::JetContainer>> jetHandle(
-        m_jetContainerKey);
+								  m_jetContainerKey, ctx);
     ATH_CHECK(jetHandle.isValid());
 
     ConstDataVector<xAOD::JetContainer> jets = *jetHandle;
@@ -88,8 +88,15 @@ namespace Rec {
     for (const xAOD::Jet *jet : jets)
     {
       m_gnn_Tool->decorate(*jet);
+      ATH_MSG_DEBUG("A jet decorated");
     }
     
+    for (const xAOD::Jet *jet : jets)
+      {
+	m_gnn_Tool->decorateWithDefaults(*jet);
+	ATH_MSG_DEBUG("Deco with Default");
+      }
+
     ATH_MSG_DEBUG("Jet should have been decorated");
         
     return StatusCode::SUCCESS;

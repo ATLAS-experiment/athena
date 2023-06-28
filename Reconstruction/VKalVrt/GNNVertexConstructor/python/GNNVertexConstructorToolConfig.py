@@ -50,7 +50,8 @@ def GNNVertexConstructorAlgCfg(flags, name="LMEdevAlg", **kwargs):
     tool = acc.popToolsAndMerge(GNNVertexConstructorToolCfg(flags)) #fix name
     #need imprt and call function name
     gnnTool = acc.popToolsAndMerge(GNNToolCfg(flags, 
-                                              NNFile=NNFile))
+                                              NNFile="../network.onnx",
+                                              ))
         
     acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, TestTool=tool, GNNTool=gnnTool, **kwargs))
     

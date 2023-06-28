@@ -41,7 +41,7 @@ namespace Rec {
       
     struct GNNProperties {
     
-    std::string nnFile = "cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/BTagging/20230608/gn2v00/antikt4empflow/network.onnx";
+    std::string nnFile = "../network.onnx";
     
     };
       
@@ -52,7 +52,7 @@ namespace Rec {
       
       /// @brief the name of the jet container to use
       SG::ReadHandleKey<ConstDataVector<xAOD::JetContainer>> m_jetContainerKey{
-      this, "jetContainerKey", "", "xAOD::JetContainer to read"};
+      this, "jetContainerKey", "AntiKt4EMPFlowJets", "xAOD::JetContainer to read"};
       /// @brief the name of the EventInfo object
       SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{
       this, "eventInfoKey", "EventInfo", "EventInfo container to use"};
