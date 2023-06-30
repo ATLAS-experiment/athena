@@ -15,6 +15,7 @@ namespace Rec {
 
       declareInterface< IGNNVertexConstructorInterface >(this);
       declareProperty("ReadKey", m_decorReadKey="InDetTrackParicles.passGNN");
+      //declareProperty("JetReadKey", m_readJetKey="");
       ATH_MSG_DEBUG("GNNVertexConstructorTool constructor called");
     }   
      /* Destructor */
@@ -113,5 +114,24 @@ namespace Rec {
       return StatusCode::SUCCESS;
     }
 
-}  // end Rec namespace
 
+
+//Read Decorations from Jet Containers
+/*
+  StatusCode GNNVertexConstructorTool::readDecorJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const {
+  
+    
+    ATH_MSG_DEBUG("Reading the Jet Decorators that been added");
+    
+    SG::ReadDecorHandle<xAOD::JetContainer, std::string> readJetKey(m_readJetKey, ctx);
+    
+    for (auto jet : *jetCont){
+    
+      ATH_MSG_DEBUG("Decorator is  " <<readJetKey( *jet ));
+    
+    }
+    
+  return StatusCode::SUCCESS;
+  }*/
+  
+}  // end Rec namespace
