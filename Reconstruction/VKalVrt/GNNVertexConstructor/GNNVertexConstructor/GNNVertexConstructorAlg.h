@@ -6,7 +6,7 @@
 #include "GNNVertexConstructor/IGNNVertexConstructorInterface.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODTracking/TrackParticleContainer.h"
-
+#include "StoreGate/ReadDecorHandleKey.h"
 //Headers to use the GNN Tool
 #include "FlavorTagDiscriminants/GNN.h"
 #include "FlavorTagDiscriminants/GNNTool.h"
@@ -52,7 +52,7 @@ namespace Rec {
       
       /// @brief the name of the jet container to use
       SG::ReadHandleKey<ConstDataVector<xAOD::JetContainer>> m_jetContainerKey{
-      this, "jetContainerKey", "AntiKt4EMPFlowJets", "xAOD::JetContainer to read"};
+      this, "jetContainerKey", "", "xAOD::JetContainer to read"};
       /// @brief the name of the EventInfo object
       SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{
       this, "eventInfoKey", "EventInfo", "EventInfo container to use"};
@@ -66,6 +66,9 @@ namespace Rec {
       this, "gnn_Tool", "", "GNN Decorator tool"};
       
       GNNProperties m_props;
+      
+      SG::ReadDecorHandleKey<xAOD::JetContainer>m_jetReadKey{
+      this, "jetDecoReadKey", "", "Jet GNN Deco Read Key"};
       
   };
 }

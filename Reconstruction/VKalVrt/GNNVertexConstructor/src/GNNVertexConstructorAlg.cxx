@@ -18,6 +18,7 @@ namespace Rec {
       declareProperty("nnFile", m_props.nnFile, "the path to the netowrk file used to run inference");
       declareProperty("TestTool",m_testTool, "The test Tool");
       declareProperty("GNNTool",m_gnn_Tool, "The GNN Tool");
+      declareProperty("GNNJetRead", m_jetReadKey="JetKey.GNN");
      }
 
 //Initialize  ---------------------------------------------------------------
@@ -27,6 +28,7 @@ namespace Rec {
     ATH_CHECK( m_testTool.retrieve() );
     ATH_CHECK( m_gnn_Tool.retrieve() );
     
+    ATH_CHECK( m_jetReadKey.initialize() );
     ATH_CHECK( m_inTrackKey.initialize() );
     ATH_CHECK(m_jetContainerKey.initialize());
     ATH_CHECK(m_eventInfoKey.initialize());
@@ -89,6 +91,17 @@ namespace Rec {
     {
       m_gnn_Tool->decorate(*jet);
       ATH_MSG_DEBUG("A jet decorated");
+      
+    }
+    
+    SG::ReadDecorHandle<xAOD::JetContainer, std::string>jetsDecoHandle(m_jetReadKey, ctx);
+    ATH_CHECK(jetsDecoHandle.isValid());
+    
+    //ConstDataVector<xAOD::JetContainer>jetsDeco=*jetsDecoHandle;
+    
+/*    for (const xAOD::Jet *jet : jetsDecoHandle){
+    
+    ATH_MSG_DEBUG("Decorator= "<<jetsDecoHandle(jet));
     }
     
     for (const xAOD::Jet *jet : jets)
@@ -98,7 +111,7 @@ namespace Rec {
       }
 
     ATH_MSG_DEBUG("Jet should have been decorated");
-        
+    ATH_CHECK(m_testTool->readDecorJet(jets&));*/
     return StatusCode::SUCCESS;
 
   }

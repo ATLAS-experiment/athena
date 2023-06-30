@@ -5,7 +5,12 @@ import os.path
 
 ##---
 #inputDir = "/tank/awharton/ForLME/Data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_PHYS.grp22_v02_p5632/"
-inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_LLP1.grp22_v01_p5600/"
+#inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_LLP1.grp22_v01_p5600/"
+#inputDir =  "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427929.physics_Main.deriv.DAOD_FTAG1.f1246_m2112_p5444/"
+#inputDir = "/tank/awharton/ForLME/Data/data22_13p6TeV.00440613.physics_Main.deriv.DAOD_FTAG1.f1321_m2153_p5444/"
+inputDir = "/tank/awharton/ForLME/Data/mc21_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.deriv.DAOD_FTAG1.e8453_s3873_r13829_p5654/"
+#inputDir = "/tank/awharton/ForLME/Data/mc21_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.deriv.DAOD_FTAG1.e8453_e8455_s3873_s3874_r13829_r13831_p5654/"
+
 #inputDir = "/tank/awharton/ForLME/Data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_PHYSLITE.grp22_v02_p5632/"
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427884.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427882.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
