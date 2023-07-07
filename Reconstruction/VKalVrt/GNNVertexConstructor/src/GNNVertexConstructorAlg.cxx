@@ -8,32 +8,43 @@
 #include <xAODJet/JetContainer.h>
 #include <xAODTracking/TrackParticleContainer.h>
 #include <xAODTracking/VertexContainer.h>
+//#include "GaudiKernel/ITHistSvc.h"
+
 
 namespace Rec {
 
   GNNVertexConstructorAlg::GNNVertexConstructorAlg(const std::string& name, ISvcLocator* pSvcLocator) 
     : AthReentrantAlgorithm( name, pSvcLocator ),
-    m_testTool("Rec::GNNVertexConstructorTool/testTool", this), m_props() {
+      m_VtxTool("Rec::GNNVertexConstructorTool/VtxTool", this), m_props() {
       
       declareProperty("nnFile", m_props.nnFile, "the path to the netowrk file used to run inference");
-      declareProperty("TestTool",m_testTool, "The test Tool");
+      declareProperty("VtxTool",m_VtxTool, "The GNN Vtxing Tool");
       declareProperty("GNNTool",m_gnn_Tool, "The GNN Tool");
-      declareProperty("GNNJetRead", m_jetReadKey="JetKey.GNN");
+     //declareProperty("GNNJetRead", m_jetReadKey="pb.pb");
      }
 
 //Initialize  ---------------------------------------------------------------
   StatusCode GNNVertexConstructorAlg::initialize(){
   
     ATH_MSG_DEBUG("devAlg: In devAlg::initialize()");
-    ATH_CHECK( m_testTool.retrieve() );
+    
+    //Retriecing needed keys
+    ATH_CHECK( m_VtxTool.retrieve() );
     ATH_CHECK( m_gnn_Tool.retrieve() );
     
+    //m_jetReadKey=m_jetContainerName+"."+m_jetReadKey.key();
+    
+    //Initializing Keys
     ATH_CHECK( m_jetReadKey.initialize() );
     ATH_CHECK( m_inTrackKey.initialize() );
     ATH_CHECK(m_jetContainerKey.initialize());
     ATH_CHECK(m_eventInfoKey.initialize());
 
     ATH_MSG_DEBUG("Initialize bTagging Tool (GNN) from: " + m_props.nnFile);
+    
+    //ANA_CHECK (book(TH1F ("PB scores from GNN", "PB scores from GNN", 10, -10, 10))); // pb scores
+
+    
     return StatusCode::SUCCESS;
 
   }
@@ -52,7 +63,7 @@ namespace Rec {
     ATH_MSG_DEBUG("devAlg: In devAlg::execute()");
   
   
-    unsigned int sum = m_testTool -> addTwoNumbers(4, 9);
+    unsigned int sum = m_VtxTool -> addTwoNumbers(4, 9);
   
     ATH_MSG_DEBUG("SUM is = " << sum );
 
@@ -65,23 +76,19 @@ namespace Rec {
     }
 
     //Calling the tools to write decorations and read the the decoration
-    ATH_CHECK(m_testTool->decorateTracks(inTracks.ptr(), ctx));
+    ATH_CHECK(m_VtxTool->decorateTracks(inTracks.ptr(), ctx));
     
-    ATH_CHECK(m_testTool->readDecorTracks(inTracks.ptr(), ctx));
+    ATH_CHECK(m_VtxTool->readDecorTracks(inTracks.ptr(), ctx));
     
     
     //Using the GNN Tool to decorate and then read the decorations
-    //Using Model /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/BTagging/20230608/gn2v00/antikt4empflow/network.onnx
-    //Unsure how to implement model
-
-
+    
     // container we read in
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
     ATH_CHECK(eventInfo.isValid());
 
     // get the jets
-    SG::ReadHandle<ConstDataVector<xAOD::JetContainer>> jetHandle(
-								  m_jetContainerKey, ctx);
+    SG::ReadHandle<ConstDataVector<xAOD::JetContainer>> jetHandle(m_jetContainerKey, ctx);
     ATH_CHECK(jetHandle.isValid());
 
     ConstDataVector<xAOD::JetContainer> jets = *jetHandle;
@@ -89,29 +96,17 @@ namespace Rec {
     // apply the GNNTool to the jets
     for (const xAOD::Jet *jet : jets)
     {
-      m_gnn_Tool->decorate(*jet);
-      ATH_MSG_DEBUG("A jet decorated");
-      
+      m_gnn_Tool->decorate(*jet, *jet);
+      ATH_MSG_DEBUG("A jet decorated pt= " << jet->pt()/1000);
     }
-    
-    SG::ReadDecorHandle<xAOD::JetContainer, std::string>jetsDecoHandle(m_jetReadKey, ctx);
-    ATH_CHECK(jetsDecoHandle.isValid());
-    
-    //ConstDataVector<xAOD::JetContainer>jetsDeco=*jetsDecoHandle;
-    
-/*    for (const xAOD::Jet *jet : jetsDecoHandle){
-    
-    ATH_MSG_DEBUG("Decorator= "<<jetsDecoHandle(jet));
-    }
-    
-    for (const xAOD::Jet *jet : jets)
-      {
-	m_gnn_Tool->decorateWithDefaults(*jet);
-	ATH_MSG_DEBUG("Deco with Default");
-      }
+        
 
-    ATH_MSG_DEBUG("Jet should have been decorated");
-    ATH_CHECK(m_testTool->readDecorJet(jets&));*/
+   // SG::ReadHandle<xAOD::JetContainer> jetsDecoHandle(m_jetReadKey, ctx);
+    //ATH_CHECK(jetsDecoHandle.isValid());
+    
+    //ATH_CHECK(m_VtxTool->readDecorJet(jetsDecoHandle.ptr(), ctx));
+   // hist ("PB scores from GNN") ->Fill(m_VtxTool->readDecorJet(jetsDecoHandle.ptr(), ctx));
+    
     return StatusCode::SUCCESS;
 
   }

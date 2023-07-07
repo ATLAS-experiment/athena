@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AnaAlgorithm.DualUseConfig import createAlgorithm
+#from AnaAlgorithm.DualUseConfig import createAlgorithm
 from FlavorTagDiscriminants.FlavorTagNNConfig import GNNToolCfg
 ##---
 
@@ -18,27 +18,21 @@ def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
 def GNNVertexConstructorAlgCfg(flags, name="LMEdevAlg", jetkey="AntiKt4EMPFlowJets",  **kwargs):
     acc = ComponentAccumulator()
     
-# select the good emerging jets
-    acc.addEventAlgo(
-        CompFactory.Rec.EmergingJetSelectorAlg(
-            "EmergingJet_Selector",
-            jetContainerInKey=jetkey,
-            jetContainerOutKey=f"{jetkey}_sel",
-            minPt=50000,
-            maxEta=2.50,
-        )
-    )
+
     gnnTool = acc.getPrimaryAndMerge(
             GNNToolCfg(
                 flags,
                 NNFile="../network.onnx",
-                trackLinkType="IPARTICLE",
+                trackLinkType="IPARTICLE",  #Either IPARTICLE or  TRACK_PARTICLE
                 variableRemapping={"BTagTrackToJetAssociator" : "GhostTrack"},
                 )
     ) 
     tool = acc.popToolsAndMerge(GNNVertexConstructorToolCfg(flags)) 
     
-    acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, TestTool=tool, GNNTool=gnnTool, jetContainerKey=f"{jetkey}_sel", jetDecoReadKey=jetKey, **kwargs))
+    acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, VtxTool=tool, GNNTool=gnnTool, 
+                                                                                  jetContainerKey=jetkey, 
+                                                                                  jetDecoReadKey=jetkey, 
+                                                                                  **kwargs))
     return acc
 ##---
 
@@ -57,3 +51,13 @@ def main():
 if "__main__" == __name__:
     main()
     
+'''# select the good emerging jets
+    acc.addEventAlgo(
+        CompFactory.Rec.EmergingJetSelectorAlg(
+            "EmergingJet_Selector",
+            jetContainerInKey=jetkey,
+            jetContainerOutKey=f"{jetkey}_sel",
+            minPt=50000,
+            maxEta=2.50,
+        )
+    )'''

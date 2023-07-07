@@ -6,9 +6,8 @@ atlas_subdir( GNNVertexConstructor )
 # External dependencies:
 find_package( Boost COMPONENTS filesystem )
 find_package( lwtnn )
-find_package( ROOT COMPONENTS Core MathCore )
 find_package( onnxruntime )
-find_package(ROOT COMPONENTS Core Tree Hist REQUIRED)
+find_package(ROOT COMPONENTS Core MathCore Tree Hist RIO pthread REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
 
@@ -30,6 +29,7 @@ atlas_add_component( GNNVertexConstructor
                                     TruthUtils
                                     AthContainers
                                     AthLinks
+                                    AnaAlgorithmLib
  )
 
 
@@ -54,6 +54,7 @@ atlas_add_library(   GNNVertexConstructorLib
                                     TruthUtils
                                     AthContainers
                                     AthLinks
+                                    AnaAlgorithmLib
  )
                      
 # Install files from the package:
