@@ -8,16 +8,18 @@ import os.path
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_LLP1.grp22_v01_p5600/"
 #inputDir =  "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427929.physics_Main.deriv.DAOD_FTAG1.f1246_m2112_p5444/"
 #inputDir = "/tank/awharton/ForLME/Data/data22_13p6TeV.00440613.physics_Main.deriv.DAOD_FTAG1.f1321_m2153_p5444/"
-inputDir = "/tank/awharton/ForLME/Data/mc21_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.deriv.DAOD_FTAG1.e8453_s3873_r13829_p5654/"
-#inputDir = "/tank/awharton/ForLME/Data/mc21_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.deriv.DAOD_FTAG1.e8453_e8455_s3873_s3874_r13829_r13831_p5654/"
+#inputDir = "/tank/awharton/ForLME/Data/mc21_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.deriv.DAOD_FTAG1.e8453_s3873_r13829_p5654/"
+inputDir = "/tank/awharton/ForLME/Data/mc21_13p6TeV.601237.PhPy8EG_A14_ttbar_hdamp258p75_allhad.deriv.DAOD_FTAG1.e8453_e8455_s3873_s3874_r13829_r13831_p5654/"
 
 #inputDir = "/tank/awharton/ForLME/Data/data22_13p6TeV.periodAllYear.physics_Main.PhysCont.DAOD_PHYSLITE.grp22_v02_p5632/"
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427884.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427882.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
 #inputDir = "/cvmfs/atlas.cern.ch/repo/tutorials/asg/cern-jun2022/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8357_s3802_r13508_p5057"
-maxEvents = 10
+maxEvents = 5
 
 ##---
+
+
 
 
 def getInputFiles():
@@ -78,12 +80,16 @@ def main():
     TRUTH0SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD:EventAuxInfo',
                                                'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
                                                'TruthVertices':'xAOD::TruthVertexContainer','TruthVerticesAux':'xAOD::TruthVertexAuxContainer',
-                                               'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer'} 
+                                               'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer',
+                                               'AntiKt4EMPFlowJets':'xAOD::JetContainer', 'AntiKt4EMPFlowJetsAux': 'xAOD::JetAuxContainer',
+                                               'BTagging':'xAOD::BTaggingContainer', 'BTaggingAux': 'xAOD::BTaggingAuxContainer'} 
 
     TRUTH0SlimmingHelper.AllVariables = [ 'EventInfo',
                                           'TruthEvents', 
                                           'TruthVertices',
-                                          'TruthParticles']
+                                          'TruthParticles',
+                                          'AntiKt4EMPFlowJets',
+                                          'BTagging']
 
     # Metadata
     #TRUTH0MetaDataItems = [ "xAOD::TruthMetaDataContainer#TruthMetaData", "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux." ]
@@ -92,11 +98,8 @@ def main():
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
     TRUTH0ItemList+=["xAOD::TrackParticleContainer#DecoratedTrackParticles","xAOD::TrackParticleContainer#DecoratedTrackParticlesAux."]
-    acc.merge(OutputStreamCfg(flags, "GNNVertexOutput", ItemList=TRUTH0ItemList))
+    acc.merge(OutputStreamCfg(flags, "GNNVertexOutputDeco-p5654", ItemList=TRUTH0ItemList))
 
-
-
-    ##--
 
     acc.printConfig(withDetails=True, summariseProps=True)
     status = acc.run()

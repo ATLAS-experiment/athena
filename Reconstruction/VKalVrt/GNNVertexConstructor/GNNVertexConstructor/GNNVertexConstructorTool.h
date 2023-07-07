@@ -43,6 +43,7 @@ namespace Trk {
 } // namespace Trk
 
 #include "xAODTracking/TrackParticleContainer.h"
+
 //Headers to use the GNN Tool
 #include "FlavorTagDiscriminants/GNN.h"
 #include "FlavorTagDiscriminants/GNNTool.h"
@@ -56,7 +57,15 @@ namespace Trk {
 #include "lwtnn/parse_json.hh"
 
 #include <fstream>
+//#include <TH1.h>
 
+
+class TH1D;
+class TH2D;
+class TH1F;
+class TProfile;
+class TTree;
+class ITHistSvc;
 
 namespace Rec {
 
