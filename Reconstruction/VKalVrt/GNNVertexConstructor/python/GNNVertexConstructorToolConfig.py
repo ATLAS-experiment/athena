@@ -10,15 +10,6 @@ from FlavorTagDiscriminants.FlavorTagNNConfig import GNNToolCfg
 def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
     acc = ComponentAccumulator()
 
-    acc.setPrivateTools(CompFactory.Rec.GNNVertexConstructorTool(**kwargs))
-    return acc
-    
-
-#Algorithm Config    
-def GNNVertexConstructorAlgCfg(flags, name="LMEdevAlg", jetkey="AntiKt4EMPFlowJets",  **kwargs):
-    acc = ComponentAccumulator()
-    
-
     gnnTool = acc.getPrimaryAndMerge(
             GNNToolCfg(
                 flags,
@@ -27,12 +18,18 @@ def GNNVertexConstructorAlgCfg(flags, name="LMEdevAlg", jetkey="AntiKt4EMPFlowJe
                 variableRemapping={"BTagTrackToJetAssociator" : "GhostTrack"},
                 )
     ) 
+    acc.setPrivateTools(CompFactory.Rec.GNNVertexConstructorTool(GNNTool=gnnTool, **kwargs))
+    return acc
+    
+
+#Algorithm Config    
+def GNNVertexConstructorAlgCfg(flags, name="LMEdevAlg", jetkey="AntiKt4EMPFlowJets",  **kwargs):
+    acc = ComponentAccumulator()
+    
+
     tool = acc.popToolsAndMerge(GNNVertexConstructorToolCfg(flags)) 
     
-    acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, VtxTool=tool, GNNTool=gnnTool, 
-                                                                                  jetContainerKey=jetkey, 
-                                                                                  jetDecoReadKey=jetkey, 
-                                                                                  **kwargs))
+    acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, VtxTool=tool, jetDecoReadKey=jetkey, **kwargs))
     return acc
 ##---
 

@@ -50,8 +50,8 @@ namespace Rec {
 
       //ReadHandles      
       SG::ReadHandleKey<xAOD::TrackParticleContainer>          m_inTrackKey{this, "InputTrackContainer", "InDetTrackParticles", "Input track particle container"};      
-      SG::ReadHandleKey<ConstDataVector<xAOD::JetContainer>>   m_jetContainerKey{this, "jetContainerKey", "", "xAOD::JetContainer to read"};
-      SG::ReadHandleKey<xAOD::EventInfo>                       m_eventInfoKey{this, "eventInfoKey", "EventInfo", "EventInfo container to use"};
+      //SG::ReadHandleKey<ConstDataVector<xAOD::JetContainer>>   m_jetContainerKey{this, "jetContainerKey", "", "xAOD::JetContainer to read"};
+      //SG::ReadHandleKey<xAOD::EventInfo>                       m_eventInfoKey{this, "eventInfoKey", "EventInfo", "EventInfo container to use"};
       //Deco
       SG::ReadDecorHandleKey<xAOD::JetContainer>               m_jetReadKey{this, "jetDecoReadKey", "", "Jet GNN Deco Read Key"};
       

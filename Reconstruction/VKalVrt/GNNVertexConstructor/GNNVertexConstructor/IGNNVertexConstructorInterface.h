@@ -28,6 +28,8 @@ namespace Rec {
       virtual StatusCode decorateTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const = 0;
       virtual StatusCode readDecorTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const = 0;
       virtual StatusCode readDecorJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const = 0;
+      virtual StatusCode GNNDecoJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const = 0;
+      //virtual StatusCode UnionFindAlg ( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const = 0;
   };
 
 }  //end namespace

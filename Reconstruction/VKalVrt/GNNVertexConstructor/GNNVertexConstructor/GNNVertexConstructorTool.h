@@ -12,11 +12,11 @@
 #include "FlavorTagDiscriminants/GNNTool.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
-
+#include "GaudiKernel/ToolHandle.h"
 #include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
+#include <xAODEventInfo/EventInfo.h>
 
-//#include "PathResolver/PathResolver.h"
 #include "lwtnn/parse_json.hh"
 
 #include <fstream>
@@ -52,6 +52,10 @@ namespace Rec {
       virtual StatusCode decorateTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const;
       virtual StatusCode readDecorTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const;
       virtual StatusCode readDecorJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const;
+      virtual StatusCode GNNDecoJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const;
+      //virtual StatusCode UnionFindAlg( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const;
+      
+      
       
       //Read and Write Decor Handles
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>  m_decorTrackKey{ this, "TrackDecorKey", ".passGNN", "if track passes some GNN criteria"};
@@ -63,28 +67,25 @@ namespace Rec {
       Gaudi::Property<std::string>   m_readKey { this, "TrackContainerName", "InDetTrackParticle", "Track Container name (same calling alg)"};
       Gaudi::Property<std::string>   m_readJKey{this, "JetContainerName", "", "Jet Container Name"};
       
+       
+      // @brief the pre-configured GNNTool to use
+      ToolHandle<FlavorTagDiscriminants::GNNTool>     m_gnn_Tool{this, "gnn_Tool", "", "GNN Decorator tool"};
+      
+      //ReadHandles      
+      //SG::ReadHandleKey<ConstDataVector<xAOD::JetContainer>>   m_jetContainerKey{this, "jetContainerKey", "AntiKt4EMPFlowJets", "xAOD::JetContainer to read"};
+      SG::ReadHandleKey<xAOD::EventInfo>                       m_eventInfoKey{this, "eventInfoKey", "EventInfo", "EventInfo container to use"};
+      //Deco
+      SG::ReadDecorHandleKey<xAOD::JetContainer>               m_jetReadKey{this, "jetDecoReadKey", "", "Jet GNN Deco Read Key"};
+      //SG::ReadHandleKey<xAOD::TrackParticleContainer>          m_inTrackLinkKey{this, "InputTrackContainer", "InDetTrackParticles", "Input track particle container"};
+      
+      /// Gaudi Props
+      Gaudi::Property<std::string> m_deco_suffix{this, "suffix", "", "Suffix to add after the decoration"};
+      Gaudi::Property<std::string> m_jetContainerName{this, "JetContainerName", "AntiKt4EMPFlowJets", "Jet Container Name"};
+      
+      
     private:
 
-      double m_w_1{};
-      struct DevTuple;
-      struct Hists{
-        StatusCode book (ITHistSvc& histSvc, const std::string& histDir);
-        TTree* m_tuple{};
-        DevTuple*  m_curTup;
-        TH1F* m_hb_pb_score{};
-      
-      };
-      std::unique_ptr<Hists> m_h;
-      bool m_fillHist{};
-      std::string m_instanceName;
-      
-      
-      Hists& getHists() const;
-      
-     
-            
-      ///TTree *m_myTree;
-      //TH1 *m_myHist;
+  
   };
 }
 
