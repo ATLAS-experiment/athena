@@ -49,11 +49,11 @@ namespace Trk {
 #include "FlavorTagDiscriminants/GNNTool.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
-
+#include "GaudiKernel/ToolHandle.h"
 #include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
+#include <xAODEventInfo/EventInfo.h>
 
-//#include "PathResolver/PathResolver.h"
 #include "lwtnn/parse_json.hh"
 
 #include <fstream>

@@ -5,6 +5,8 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
+#include "vector"
+#include "iostream"
 #include "TH1.h"
 #include "TH2.h"
 #include "TTree.h"
@@ -14,16 +16,17 @@
 namespace Rec {
     
     GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string& type, const std::string& name, const IInterface* parent)
-    : AthAlgTool(type,name,parent),
-      m_fillHist(true)
+    : AthAlgTool(type,name,parent)
+    //,      m_fillHist(true)
+      
     {
 
       declareInterface< IGNNVertexConstructorInterface >(this);
       declareProperty("ReadKey", m_decorReadKey="InDetTrackParticles.passGNN");
-      declareProperty("JetReadKey", m_readJetKey="BTagging_AntiKt4EMPFlowAuxDyn.pb");
-      declareProperty("FillHist",   m_fillHist, "Fill technical histograms"  );
-      
-      m_instanceName="Test-Plot";
+      declareProperty("JetReadKey", m_readJetKey="BTagging_AntiKt4EMPFlowAuxDyn.TrackLinks");
+      //declareProperty("FillHist",   m_fillHist, "Fill technical histograms"  );
+      declareProperty("GNNTool",m_gnn_Tool, "The GNN Tool");
+      //m_instanceName="Test-Plot";
       
       ATH_MSG_DEBUG("GNNVertexConstructorTool constructor called");
     }   
@@ -56,45 +59,15 @@ namespace Rec {
       
       ATH_CHECK(m_readJetKey.initialize());
       ATH_CHECK(m_decorReadKey.initialize());
+      ATH_CHECK( m_gnn_Tool.retrieve() );
       
-      ITHistSvc*     hist_root=0;
-       if(m_fillHist){
-       if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
-         ATH_MSG_FATAL("Filling histograms not supported in MT jobs.");
-         return StatusCode::FAILURE;
-       }
-
-       StatusCode sc = service( "THistSvc", hist_root); 
-       if( sc.isFailure() )  ATH_MSG_DEBUG("Could not find THistSvc service");
-       else                  ATH_MSG_DEBUG("NewVrtSecInclusiveTool Histograms found");
-       std::string histDir;
-       histDir="run/"+m_instanceName+"/";
-
-       m_h = std::make_unique<Hists>();
-       ATH_CHECK( m_h->book (*hist_root, histDir) );
-
-       m_w_1 = 1.;
-     }
-
-
-      //ANA_CHECK (book (TH1F ("PB scores from GNN", "PB scores from GNN", 10, -10, 10))); // pb scores
-      
+      //ATH_CHECK(m_inTrackLinkKey.initialize());
+      //ATH_CHECK(m_jetContainerKey.initialize());
+      ATH_CHECK(m_eventInfoKey.initialize());
+    
       return StatusCode::SUCCESS;
     }
    
-  StatusCode GNNVertexConstructorTool::Hists::book (ITHistSvc& histSvc,
-                                                  const std::string& histDir)
-  {
-    m_hb_pb_score = new TH1F("pbScoreGNN","GNNPBscore",50,0.0,1.0);
-
-    ATH_CHECK( histSvc.regHist(histDir+"pbScoreGNN", m_hb_pb_score) );
-
-
-
-
-    return StatusCode::SUCCESS;
-  }
-
 
 //Finalize     
     StatusCode GNNVertexConstructorTool::finalize(){
@@ -148,7 +121,7 @@ namespace Rec {
       
       SG::ReadDecorHandle<xAOD::TrackParticleContainer, std::string> readTrackKey(m_decorReadKey, ctx);
       
-     for ( auto track : *trkCont ){
+      for ( auto track : *trkCont ){
 
         float pt = track->pt()/1000.;
 
@@ -161,41 +134,181 @@ namespace Rec {
       }
       return StatusCode::SUCCESS;
     }
+//Decorating the jets using the GNN
+    StatusCode GNNVertexConstructorTool::GNNDecoJet ( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const{
+    
+    ATH_MSG_DEBUG("Using GNN within Tool");
+    
+    // apply the GNNTool to the jets
+    for (auto jet : *jetCont)
+    {
+      m_gnn_Tool->decorate(*jet);
+      ATH_MSG_DEBUG("A jet decorated pt= " << jet->pt()/1000);
+    /*  auto out = m_gnn_Tool->getDecoratorKeys();
+      
+      for (auto const& na : out){
+      ATH_MSG_DEBUG("Outputs " << na);
+    }*/
+    }
 
+    
+    return StatusCode::SUCCESS;
+    }
+    
 //Read Decoration from a Jet Container
     StatusCode GNNVertexConstructorTool::readDecorJet ( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const{
     
     ATH_MSG_DEBUG("Reading a Decor in Jet");
     
-    SG::ReadDecorHandle<xAOD::JetContainer, float> readJetHandle(m_readJetKey, ctx);
+    SG::ReadDecorHandle<xAOD::JetContainer, std::vector<ElementLink<DataVector<xAOD::TrackParticle_v1 > > > > readJetHandle(m_readJetKey, ctx);
     
+    //Opening the TrackParticle Container
+    
+
+      
+      
     for (auto jet : *jetCont){
+      
+        //auto link=readJetHandle(*jet);
+        ATH_MSG_DEBUG("TrackLinks with *"<< readJetHandle(*jet) );
+        auto trackCollection=readJetHandle(*jet);
+        for (auto track : trackCollection){
+          ATH_MSG_DEBUG("thingy "<< (*track)->pt()); 
+        }
+   }
     
-     ATH_MSG_DEBUG("pb score = "<< readJetHandle(*jet));
-    // h.m_pb_score->Fill(readJetHandle(*jet));
-     if(m_fillHist){
-      Hists& h = getHists();
-      ATH_MSG_DEBUG("Plot");
-      h.m_hb_pb_score->Fill(readJetHandle(*jet));
-      //h.m_hb_pb_score->Draw();
-    };
-     //h.m_pb_score ->Fill(readJetHandle(*jet));
+   /* for (auto tl : *link){
+    
+      ATH_MSG_DEBUG("Track?????? " <<     
+    }*/
+    return StatusCode::SUCCESS;
     }
+    
+
+/*
+The following functions will be used to perform the Union Find Algorithm
+-> Make the edge scores symmetric
+-> Run a single step of the union find alg
+-> Run edge score symmetrication and union find returning new vertex indices
+
+Following example from union_find.py on salt
+
+Do i want new cxx + .h files for these and then call in?
+*/   
+/*
+    StatusCode GNNVertexConstructorTool::EdgeScoreSym( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const{
+    
+      
+      ATH_MSG_DEBUG("Reading a Decor in Jet");
+      SG::ReadDecorHandle<xAOD::JetContainer, float> readJetHandle(m_readJetKey, ctx); //Change read handle to get node numbers
+      SG::ReadDecorHandle<xAOD::JetContainer, float> readJetHandle(m_readJetKey, ctx); //Change read handle to get edge numbers      
+      
+      //Remove jets without edges
+      //if node number is greater than 1?
+      
+      //Need to find names
+      node_numbers= decos from gnn
+      edge_numbers= decos from gnn
+      
+      //Will be vectors
+      auto EmptyJet =[](const std::float &s){
+      return s.find_first_not_of(" \t")==std::float::npos;
+      };
+      
+      node_numbers.erase(std::remove_if(node_numbers.begin(), node_numbers.end(), EmptyJet), node_numbers.end();
+      edge_numbers.erase(std::remove_if(edge_numbers.begin(), edge_numbers.end(), EmptyJet), edge_numbers.end();
+      
+      std::vector<float> cum_score{};
+      
+      
+      
+      //Calculate cumulative edge numbers and offsets for symmetric index calculations
+      
+      //Calculate opposite edge indices (asssumes edges sorted by source->destination and vice versa)
+      
+      //Return the new edge scores 
+      //what does torch.sigmoid do???
+      
+      
+      ATH_MSG_DEBUG("Blah");  
+      
+      
+    
+    return StatusCode::SUCCESS;
+    }
+    
+
+
+
+    StatusCode GNNVertexConstructorTool::UnionFindSingle( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const{
+    
+      ATH_MSG_DEBUG("Reading a Decor in Jet");
+      SG::ReadDecorHandle<xAOD::JetContainer, float> readJetHandle(m_readJetKey, ctx);
+      
+      
+/*Run a single step of the union find algorithm.
+
+Takes a score matrix with shape (edges in batch, 1) and a tensor with
+the number of nodes in each graph of the batch as well as a tensor specifying
+for which graphs the algorithm has already terminated. Returns updated vertex
+index and algorithm termination tensors.
+*/
+
+
+//First need a for loop to go over all node numbers
+
+//Create arrays with node indices for source & destination nodes of each edge
+
+//Pick out minimum betwwen source and destination node ids, filter edges with scores <0.5
+
+//Get the lowest node id for each node across all edges for each node
+
+//Return the node indices and updates node indices     
+      
+      
+ /*     
+      ATH_MSG_DEBUG("Blah");
+      
+      
+      
+      
+    
+    return StatusCode::SUCCESS;
+    }
+        
+    StatusCode GNNVertexConstructorTool::UnionFindAlg( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const{
+    
+    //MAY NEED TO MOVE TO ALG CXX FILE
+    //CAN CALL PREVIOUS FUNCTIONS WITHIN TOOL??????
+    
+    
+    //This will run edge score symmetrization and union find
+    
+    //Wrapper functino which returns the reconstructed vertex indices in shape (nodes in batch, 1). Assumes mask of shape (batch, max_tracks)
+    
+    
+    //if mask has shape  (batch, max_tracks, 1) then squeeze last dimension???
+    
+    //pad mask with additional track to avoid onnx error
+    
+    //symmetrize edge scores
+    
+    //update node asignemtns until no more changes occur
+    
+    //return the node indices unsqueezed
+      ATH_MSG_DEBUG("Blah");
+      
+      
+      
+      
     
     return StatusCode::SUCCESS;
     }
 
+*/
 
 
 
-
-  GNNVertexConstructorTool::Hists&
-  GNNVertexConstructorTool::getHists() const
-  {
-    // We earlier checked that no more than one thread is being used.
-    Hists* h ATLAS_THREAD_SAFE = m_h.get();
-    return *h;
-  }
 
   
 }  // end Rec namespace

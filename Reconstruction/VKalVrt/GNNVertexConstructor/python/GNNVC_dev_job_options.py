@@ -15,7 +15,7 @@ inputDir = "/tank/awharton/ForLME/Data/mc21_13p6TeV.601237.PhPy8EG_A14_ttbar_hda
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427884.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427882.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
 #inputDir = "/cvmfs/atlas.cern.ch/repo/tutorials/asg/cern-jun2022/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8357_s3802_r13508_p5057"
-maxEvents = 5
+maxEvents = 4
 
 ##---
 
@@ -82,14 +82,16 @@ def main():
                                                'TruthVertices':'xAOD::TruthVertexContainer','TruthVerticesAux':'xAOD::TruthVertexAuxContainer',
                                                'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer',
                                                'AntiKt4EMPFlowJets':'xAOD::JetContainer', 'AntiKt4EMPFlowJetsAux': 'xAOD::JetAuxContainer',
-                                               'BTagging':'xAOD::BTaggingContainer', 'BTaggingAux': 'xAOD::BTaggingAuxContainer'} 
+                                               'BTagging':'xAOD::BTaggingContainer', 'BTaggingAux': 'xAOD::BTaggingAuxContainer',
+                                               'TrackParticle':'xAOD::TrackParticleContainer', 'TrackParticleAux': 'xAOD::TrackParticleAuxContainer'} 
 
     TRUTH0SlimmingHelper.AllVariables = [ 'EventInfo',
                                           'TruthEvents', 
                                           'TruthVertices',
                                           'TruthParticles',
                                           'AntiKt4EMPFlowJets',
-                                          'BTagging']
+                                          'BTagging',
+                                          'TrackParticle']
 
     # Metadata
     #TRUTH0MetaDataItems = [ "xAOD::TruthMetaDataContainer#TruthMetaData", "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux." ]
@@ -98,7 +100,7 @@ def main():
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
     TRUTH0ItemList+=["xAOD::TrackParticleContainer#DecoratedTrackParticles","xAOD::TrackParticleContainer#DecoratedTrackParticlesAux."]
-    acc.merge(OutputStreamCfg(flags, "GNNVertexOutputDeco-p5654", ItemList=TRUTH0ItemList))
+    acc.merge(OutputStreamCfg(flags, "GNNVertexOutputDecoNew", ItemList=TRUTH0ItemList))
 
 
     acc.printConfig(withDetails=True, summariseProps=True)
