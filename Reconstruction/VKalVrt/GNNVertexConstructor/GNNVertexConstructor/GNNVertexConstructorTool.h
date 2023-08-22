@@ -50,11 +50,30 @@ namespace Trk {
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
 #include "GaudiKernel/ToolHandle.h"
+//Header for Data Containers
 #include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
-#include <xAODEventInfo/EventInfo.h>
+#include "xAODJet/JetAuxContainer.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "xAODTruth/TruthEventContainer.h"
+#include "xAODCore/AuxContainerBase.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/VertexAuxContainer.h"
+#include "xAODTracking/TrackParticle.h"
 
+#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 #include "lwtnn/parse_json.hh"
+#include <vector>
+#include "GaudiKernel/ServiceHandle.h"
+//Remove in boost > 1.76 when the boost iterator issue
+//is solved see ATLASRECTS-6358
+#define BOOST_ALLOW_DEPRECATED_HEADERS
+#include "boost/graph/adjacency_list.hpp"
+
+#include "BeamSpotConditionsData/BeamSpotData.h"
+#include "VxSecVertex/VxSecVertexInfo.h"
+
 
 #include <fstream>
 //#include <TH1.h>
@@ -66,6 +85,12 @@ class TH1F;
 class TProfile;
 class TTree;
 class ITHistSvc;
+
+namespace Trk{
+  class TrkVKalVrtFitter;
+  class IVertexFitter;
+  class IVKalState;
+}
 
 namespace Rec {
 

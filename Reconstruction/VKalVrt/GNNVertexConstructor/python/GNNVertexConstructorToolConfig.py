@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-#from AnaAlgorithm.DualUseConfig import createAlgorithm
 from FlavorTagDiscriminants.FlavorTagNNConfig import GNNToolCfg
 from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
