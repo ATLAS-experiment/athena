@@ -2,14 +2,16 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-#from AnaAlgorithm.DualUseConfig import createAlgorithm
 from FlavorTagDiscriminants.FlavorTagNNConfig import GNNToolCfg
+from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
+from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 ##---
 
 #Tool Config
 def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
     acc = ComponentAccumulator()
-
+    acc.merge(BeamSpotCondAlgCfg(flags))
     gnnTool = acc.getPrimaryAndMerge(
             GNNToolCfg(
                 flags,
@@ -18,6 +20,10 @@ def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
                 variableRemapping={"BTagTrackToJetAssociator" : "GhostTrack"},
                 )
     ) 
+    
+    kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    kwargs.setdefault("ExtrapolatorName", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    
     acc.setPrivateTools(CompFactory.Rec.GNNVertexConstructorTool(GNNTool=gnnTool, **kwargs))
     return acc
     
@@ -43,18 +49,11 @@ def main():
     
     gnntoolClass = CompFactory.FlavorTagDiscriminants.GNNTool
     help(gnntoolClass)
+    
+    VrtFitClass=CompFactory.Trk.TrkVKalVrtFitter
+    help(VrtFitClass)
 ##---
 
 if "__main__" == __name__:
     main()
     
-'''# select the good emerging jets
-    acc.addEventAlgo(
-        CompFactory.Rec.EmergingJetSelectorAlg(
-            "EmergingJet_Selector",
-            jetContainerInKey=jetkey,
-            jetContainerOutKey=f"{jetkey}_sel",
-            minPt=50000,
-            maxEta=2.50,
-        )
-    )'''

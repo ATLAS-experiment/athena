@@ -4,7 +4,8 @@
 atlas_subdir( GNNVertexConstructor )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem )
+#find_package( Boost COMPONENTS filesystem )
+find_package( Boost )
 find_package( lwtnn )
 find_package( onnxruntime )
 find_package(ROOT COMPONENTS Core MathCore Tree Hist RIO pthread REQUIRED)
@@ -13,13 +14,56 @@ find_package(nlohmann_json REQUIRED)
 
 atlas_add_component( GNNVertexConstructor 
                      src/components/*.cxx
-                     LINK_LIBRARIES GNNVertexConstructorLib 
+                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${Boost_LIBRARIES} 
+                                    ${ROOT_LIBRARIES}
+                                    GNNVertexConstructorLib 
+                                    AthenaBaseComps 
+                                    StoreGateLib 
+                                    xAODTracking 
+                                    xAODEventInfo 
+                                    xAODJet 
+                                    xAODBTagging
+                                    xAODCore 
+                                    FlavorTagDiscriminants  
+                                    GaudiKernel
+                                    AsgTools
+                                    SystematicsHandlesLib
+                                    FTagAnalysisInterfacesLib
+                                    FourMomUtils
+                                    TruthUtils
+                                    AthContainers
+                                    AthLinks
+                                    AnaAlgorithmLib
+				                            TrkVKalVrtFitterLib 
+                                    AnalysisUtilsLib  
+                                    GeoPrimitives 
+                                    BeamSpotConditionsData 
+                                    MVAUtils 
+                                    PathResolver 
+                                    TrkExInterfaces 
+                                    TrkGeometry 
+                                    TrkNeutralParameters 
+                                    TrkTrackSummary  
+                                    VxSecVertex 
+                                    VxVertex
+                                    xAODTruth
+ )
+
+atlas_add_library(   GNNVertexConstructorLib
+                     src/*.cxx
+                     PUBLIC_HEADERS GNNVertexConstructor
+                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+                     PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils 
+                     LINK_LIBRARIES ${Boost_LIBRARIES} 
+                                    ${ROOT_LIBRARIES}
                                     AthenaBaseComps 
                                     StoreGateLib 
                                     xAODTracking 
                                     xAODEventInfo 
                                     xAODJet 
                                     xAODBTagging 
+                                    xAODCore
                                     FlavorTagDiscriminants  
                                     GaudiKernel
                                     AsgTools
@@ -30,31 +74,18 @@ atlas_add_component( GNNVertexConstructor
                                     AthContainers
                                     AthLinks
                                     AnaAlgorithmLib
- )
-
-
-atlas_add_library(   GNNVertexConstructorLib
-                     src/*.cxx
-                     PUBLIC_HEADERS GNNVertexConstructor
-                     PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-                     PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils 
-                     LINK_LIBRARIES AthenaBaseComps 
-                                    StoreGateLib 
-                                    xAODTracking 
-                                    xAODEventInfo 
-                                    xAODJet 
-                                    xAODBTagging 
-                                    FlavorTagDiscriminants  
-                                    GaudiKernel
-                                    AsgTools
-                                    SystematicsHandlesLib
-                                    FTagAnalysisInterfacesLib
-                                    FourMomUtils
-                                    TruthUtils
-                                    AthContainers
-                                    AthLinks
-                                    AnaAlgorithmLib
+				                            TrkVKalVrtFitterLib 
+                                    AnalysisUtilsLib  
+                                    GeoPrimitives 
+                                    BeamSpotConditionsData 
+                                    MVAUtils  
+                                    TrkExInterfaces 
+                                    TrkGeometry 
+                                    TrkNeutralParameters 
+                                    TrkTrackSummary  
+                                    VxSecVertex
+                                    VxVertex 
+                                    xAODTruth
  )
                      
 # Install files from the package:

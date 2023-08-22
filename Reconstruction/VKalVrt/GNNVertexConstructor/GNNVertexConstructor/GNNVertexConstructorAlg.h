@@ -11,7 +11,7 @@
 #include "FlavorTagDiscriminants/GNNTool.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
-
+#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include <AthContainers/ConstDataVector.h>
 #include "xAODBTagging/BTagging.h"

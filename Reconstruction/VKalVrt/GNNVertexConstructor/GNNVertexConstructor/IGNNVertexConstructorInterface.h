@@ -29,7 +29,8 @@ namespace Rec {
       virtual StatusCode readDecorTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const = 0;
       virtual StatusCode readDecorJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const = 0;
       virtual StatusCode GNNDecoJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const = 0;
-      //virtual StatusCode UnionFindAlg ( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const = 0;
+      //virtual StatusCode vrtFitter( std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >  > & vrt ) const = 0;
+      
   };
 
 }  //end namespace
