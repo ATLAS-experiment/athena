@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_TAUXVECTOR_H
 #define XAODROOTACCESS_TOOLS_TAUXVECTOR_H
@@ -12,11 +12,9 @@
 // Forward declaration(s):
 class TClass;
 class TVirtualCollectionProxy;
-namespace SG {
-   class IAuxTypeVectorFactory;
-}
 
 namespace xAOD {
+   class TAuxVectorFactory;
 
    /// Auxiliary vector type for types known to ROOT
    ///
@@ -33,7 +31,7 @@ namespace xAOD {
 
    public:
       /// Constructor
-      TAuxVector( const SG::IAuxTypeVectorFactory* factory,
+      TAuxVector( const TAuxVectorFactory* factory,
                   SG::auxid_t auxid,
                   const ::TClass* cl, size_t size, size_t capacity );
       /// Copy constructor
@@ -79,7 +77,7 @@ namespace xAOD {
       void clearRange( void* dst, size_t n );
 
       /// The parent factory object
-      const SG::IAuxTypeVectorFactory* m_factory;
+      const TAuxVectorFactory* m_factory;
       /// ROOT's description of the vector type
       /// Cloned from the proxy held by the TClass and permanently bound
       /// to m_vec.  That makes things a bit more efficient, and prevents

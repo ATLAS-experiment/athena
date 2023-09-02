@@ -66,7 +66,11 @@ namespace xAOD {
                          size_t n ) const override;
 
       /// Clear the payload of a given range inside a vector
-      virtual void clear( void* dst, size_t dst_index ) const override;
+      void clear( void* dst, size_t dst_index, size_t n ) const;
+      virtual void clear( SG::auxid_t auxid,
+                          SG::AuxVectorData& dst,
+                          size_t dst_index,
+                          size_t n ) const override;
 
       /// Size of the elements inside the vector type
       virtual size_t getEltSize() const override;

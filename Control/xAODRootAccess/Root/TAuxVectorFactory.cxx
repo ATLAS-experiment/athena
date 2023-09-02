@@ -168,26 +168,40 @@ namespace xAOD {
       return;
    }
 
-   void TAuxVectorFactory::clear( void* dst, size_t dst_index ) const {
+   void TAuxVectorFactory::clear( void* dst,
+                                  size_t dst_index,
+                                  size_t n ) const {
 
       // The size of one element in memory:
       const size_t eltsz = m_proxy->GetIncrement();
 
       // Get the memory address of the element:
-      dst = reinterpret_cast< void* >( reinterpret_cast< unsigned long >( dst ) +
-                                       eltsz * dst_index );
+      char* dptr = reinterpret_cast< char* >( dst ) + eltsz * dst_index;
 
       TMethodCall* mc = m_assign.call();
       if( mc ) {
          // Assign the default element's contents to this object:
-         mc->ResetParam();
-         mc->SetParam( ( Long_t ) m_defElt );
-         mc->Execute( dst );
+         for (size_t i = 0; i < n; ++i) {
+            mc->ResetParam();
+            mc->SetParam( ( Long_t ) m_defElt );
+            mc->Execute( static_cast<void*>( dptr ) );
+            dptr += eltsz;
+         }
       } else {
          // Set the memory to zero:
-         memset( dst, 0, eltsz );
+         memset( dst, 0, eltsz*n );
       }
 
+      return;
+   }
+
+
+   void TAuxVectorFactory::clear( SG::auxid_t auxid,
+                                  SG::AuxVectorData& dst,
+                                  size_t dst_index,
+                                  size_t n ) const {
+
+      clear( dst.getDataArray (auxid), dst_index, n );
       return;
    }
 

@@ -99,6 +99,13 @@ void test1()
   assert (ptr2[0] == 4);
   assert (ptr2[1] == 1);
   assert (ptr2[2] == 13);
+
+  // Clear
+
+  fac.clear (1, avd1, 0, 2);
+  assert (ptr[0] == 0);
+  assert (ptr[1] == 0);
+  assert (ptr[2] == 12);
 }
 
 
@@ -149,6 +156,13 @@ void test2()
   assert (ptr2[0] == "4");
   assert (ptr2[1] == "1");
   assert (ptr2[2] == "13");
+
+  // Clear
+
+  fac.clear (1, avd1, 0, 2);
+  assert (ptr[0] == "");
+  assert (ptr[1] == "");
+  assert (ptr[2] == "12");
 }
 
 
