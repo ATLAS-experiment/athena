@@ -283,17 +283,22 @@ void test3()
   int* ptr = reinterpret_cast<int*> (vec->toPtr());
   ptr[0] = 1;
   ptr[1] = 2;
+  ptr[2] = 3;
+  ptr[3] = 4;
   fac.copy (ptr, 5, ptr, 1);
   assert (ptr[1] == 2);
   assert (ptr[5] == 2);
-
-  fac.clear (ptr, 1);
-  assert (ptr[1] == 0);
 
   AuxVectorData_test avd1;
   AuxStoreInternal_test store1;
   avd1.setStore (&store1);
   store1.addVector (std::move(vec), false);
+
+  fac.clear (1, avd1, 1, 2);
+  assert (ptr[0] == 1);
+  assert (ptr[1] == 0);
+  assert (ptr[2] == 0);
+  assert (ptr[3] == 4);
 
   ptr[0] = 1;
   ptr[1] = 2;
@@ -326,17 +331,22 @@ void test4()
   std::string* ptr = reinterpret_cast<std::string*> (vec->toPtr());
   ptr[0] = "1";
   ptr[1] = "2";
+  ptr[2] = "3";
+  ptr[3] = "4";
   fac.copy (ptr, 5, ptr, 1);
   assert (ptr[1] == "2");
   assert (ptr[5] == "2");
-
-  fac.clear (ptr, 1);
-  assert (ptr[1] == "");
 
   AuxVectorData_test avd1;
   AuxStoreInternal_test store1;
   avd1.setStore (&store1);
   store1.addVector (std::move(vec), false);
+
+  fac.clear (1, avd1, 1, 2);
+  assert (ptr[0] == "1");
+  assert (ptr[1] == "");
+  assert (ptr[2] == "");
+  assert (ptr[3] == "4");
 
   fac.swap (1, avd1, 0, avd1, 5, 1);
   assert (ptr[0] == "2");
