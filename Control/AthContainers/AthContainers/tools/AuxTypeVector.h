@@ -274,14 +274,6 @@ public:
                              const void* src,  size_t src_index);
 
 
-  /**
-   * @brief Clear an element within a vector (static method).
-   * @param dst Pointer to the start of the vector's data.
-   * @param dst_index Index of the element in the vector.
-   */
-  static void clear (void* dst, size_t dst_index);
-
-
 private:
   /**
    * @brief Helper for @c insertMove.
