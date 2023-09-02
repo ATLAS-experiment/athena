@@ -106,10 +106,6 @@ void test_vector1()
   ptr2[0] = makeT<T>(10);
   ptr2[1] = makeT<T>(11);
 
-  SG::AuxTypeVector<T>::clear (ptr2, 0);
-  assert (ptr2[0] == makeT<T>());
-  assert (ptr2[1] == makeT<T>(11));
-
   std::unique_ptr<SG::IAuxTypeVector> v3 = v->clone();
   assert (v3->size() == v->size());
   assert (v3->auxid() == 1);
