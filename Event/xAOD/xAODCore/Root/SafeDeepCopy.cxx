@@ -49,10 +49,11 @@ namespace xAOD {
       const size_t oindex = copy.index();
       SG::auxid_set_t other_ids = ocont->getAuxIDs();
       SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+      SG::AuxVectorData& copy_container = *copy.container();
 
       // Copy the variables that exist on the input object:
       for( SG::auxid_t auxid : other_ids ) {
-         void* dst = copy.container()->getDataArray( auxid );
+         void* dst = copy_container.getDataArray( auxid );
          // This is the tricky part. In certain cases an input object/container
          // can claim that it has a certain variable, but still not be able to
          // provide it. Most usually this happens when reading a container from
@@ -63,7 +64,7 @@ namespace xAOD {
             src = ocont->getDataArray( auxid );
          } catch( const SG::ExcBadAuxVar& ) {
             // In this case just fill dummy values into the output:
-            r.clear( auxid, dst, oindex );
+            r.clear( auxid, copy_container, oindex, 1 );
             continue;
          }
          // Apparently the copy *can* be done:
@@ -72,8 +73,7 @@ namespace xAOD {
       // Clear out the variables that only exist on the output object:
       for( SG::auxid_t auxid : copy.container()->getWritableAuxIDs() ) {
          if( !other_ids.test( auxid ) ) {
-            void* dst = copy.container()->getDataArray( auxid );
-            r.clear( auxid, dst, oindex );
+            r.clear( auxid, copy_container, oindex, 1 );
          }
       }
    }
