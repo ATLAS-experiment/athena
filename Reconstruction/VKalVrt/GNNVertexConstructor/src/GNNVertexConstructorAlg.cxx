@@ -63,9 +63,9 @@ namespace Rec {
     }
 
     //Calling the tools to write decorations and read the the decoration
-    ATH_CHECK(m_VtxTool->decorateTracks(inTracks.ptr(), ctx));
+    //ATH_CHECK(m_VtxTool->decorateTracks(inTracks.ptr(), ctx));
     
-    ATH_CHECK(m_VtxTool->readDecorTracks(inTracks.ptr(), ctx));
+    //ATH_CHECK(m_VtxTool->readDecorTracks(inTracks.ptr(), ctx));
     
     
     SG::ReadHandle<xAOD::JetContainer> jetsDecoHandle(m_jetReadKey, ctx);

@@ -23,6 +23,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/Vertex.h"
 
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -37,13 +38,16 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 
-
+#include "TH1.h"
+#include "TH2.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include <fstream>
 //#include <TH1.h>
 
 
 class TH1D;
 class TH2D;
+class TH2F;
 class TH1F;
 class TProfile;
 class TTree;
@@ -115,8 +119,12 @@ namespace Rec {
       SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
       ToolHandle<Trk::IExtrapolator>  m_extrapolator{this,"ExtrapolatorName","Trk::Extrapolator/Extrapolator"};
       ToolHandle<Trk::TrkVKalVrtFitter> m_VrtFit;
+      
       const xAOD::Vertex*  m_thePV;
       const xAOD::VertexContainer*        m_vertexTES; // primary vertex container
+      SG::WriteHandleKey<xAOD::VertexContainer>  m_foundVerticesKey{this,"GNNVertexContainerName","AllGNNVertices","Found GNN vertices container"};
+      
+
       
       //{this, "SecVtxToo", "", "Secondary Vertexing Tool"};
 
@@ -136,7 +144,10 @@ namespace Rec {
       
     private:
     
-    std::vector<xAOD::Vertex*> vrtFitter( workVectorArrxAOD * inpParticlesxAOD, std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >  > & vrt ) const;
+    std::vector<xAOD::Vertex*> vrtFitter( workVectorArrxAOD * inpParticlesxAOD, 
+                                          std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >  > & vrt, 
+                                          const EventContext& ctx,
+                                          std::unique_ptr<xAOD::VertexContainer>& VtxCont ) const;
       
 
      using compatibilityGraph_t = boost::adjacency_list<boost::listS, boost::vecS, boost::undirectedS>;
@@ -156,12 +167,13 @@ namespace Rec {
          double BDT=1.1;
       };
       
-      void select2TrVrt(std::vector<const xAOD::TrackParticle*> & SelectedTracks, const xAOD::Vertex  & primVrt,
+ /*      void select2TrVrt(std::vector<const xAOD::TrackParticle*> & SelectedTracks, const xAOD::Vertex  & primVrt,
                         std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >> & vrt,
-                        compatibilityGraph_t& compatibilityGraph) const;
+                        compatibilityGraph_t& compatibilityGraph
+                        ) const;
 
-
-/*    struct clique_visitor
+ 
+   struct clique_visitor
       {
         clique_visitor(std::vector< std::vector<int> > & input): m_allCliques(input){ input.clear();}
         
@@ -177,6 +189,23 @@ namespace Rec {
     
       };*/
 
+
+  //Making Histograms
+  
+  TH1F* m_vertex_pos{};
+/*  struct DevTuple;
+  struct Hists{
+    StatusCode book (ITHistSvc& histSvc, const std::string& histDir);
+    TTree* m_tuple{};
+    DevTuple*  m_curTup;
+    
+    TH2F* m_vertex_chi{};
+    TH1F* m_vertex_mass{};
+    TH1F* m_vertex_pT{};
+  };
+   std::unique_ptr<Hists> m_h;
+
+*/
     
   };
 }

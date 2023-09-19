@@ -7,15 +7,12 @@
 #include "GaudiKernel/ConcurrencyFlags.h"
 #include "vector"
 #include "iostream"
-#include "TH1.h"
-#include "TH2.h"
 #include "TTree.h"
 #include "TMath.h"
 #include "TFile.h"
 #include "map"
 #include "set"
 #include "iterator"
-#include "iostream"
 #include "AnalysisUtils/AnalysisMisc.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
@@ -32,7 +29,8 @@ namespace Rec {
     GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string& type, const std::string& name, const IInterface* parent)
     : AthAlgTool(type,name,parent),
       m_VrtFit("Trk::TrkVKalVrtFitter/VertexFitterTool",this),
-      m_thePV(nullptr)
+      m_thePV(nullptr),
+      m_vertex_pos (nullptr)      
       
     //,      m_fillHist(true)
       
@@ -47,6 +45,7 @@ namespace Rec {
       //declareProperty("FillHist",   m_fillHist, "Fill technical histograms"  );
       declareProperty("GNNTool",m_gnn_Tool, "The GNN Tool");
       declareProperty("VertexFitterTool", m_VrtFit, "The vertex fitting tool");
+      
       //declareProperty("
       //m_instanceName="Test-Plot";
       
@@ -88,27 +87,42 @@ namespace Rec {
       ATH_CHECK( m_extrapolator.retrieve() );
       ATH_CHECK( m_beamSpotKey.initialize());
       ATH_CHECK( m_VrtFit.retrieve() );
+      ATH_CHECK( m_foundVerticesKey.initialize() );
       
       //ATH_CHECK(m_inTrackLinkKey.initialize());
       //ATH_CHECK(m_jetContainerKey.initialize());
       ATH_CHECK( m_eventInfoKey.initialize());
-    
-    
-      //Making a Vertex Container
       
- /*     const <xAOD::Vertex> GNNVertexContainer = nullptr;
-      const <xAOD::Vertex> GNNVertexAuxContainer = nullptr;
-    
-      std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> InDetAdaptiveMultiSecVtxFinderTool::doVertexing(
-        const std::vector<Trk::ITrackLink*>& trackVector) {
-        xAOD::VertexContainer* theVertexContainer = new xAOD::VertexContainer;
-        xAOD::VertexAuxContainer* theVertexAuxContainer = new xAOD::VertexAuxContainer;
-        theVertexContainer->setStore(theVertexAuxContainer);
-        
+
+/*      ITHistSvc*     hist_root=0;
+      StatusCode sc = service( "THistSvc", hist_root); 
+      std::string histDir;
+      histDir="GNNVertex/";
+      
+      m_h = std::make_unique<Hists>();
+      ATH_CHECK( m_h->book (*hist_root, histDir) );
 */
+
+
+
+  
   
       return StatusCode::SUCCESS;
     }
+    
+    
+/*    //Histograms
+    StatusCode GNNVertexConstructorTool::Hists::book (ITHistSvc& histSvc,
+                                                  const std::string& histDir)
+  {
+    
+    m_vertex_pos=new TH2F ("vertex_pos", "vertex_pos", 10, 0., 500, 10, 0., 1000);
+    
+    ATH_CHECK( histSvc.regHist(histDir+"vertex_pos", m_vertex_pos) );
+  }*/
+  
+  
+  
   
 //Finalize     
     StatusCode GNNVertexConstructorTool::finalize(){
@@ -193,7 +207,7 @@ namespace Rec {
 //Read Decoration from a Jet Container
     StatusCode GNNVertexConstructorTool::readDecorJet ( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const{
     
-    ATH_MSG_DEBUG("Reading a Decor in Jet");
+    //ATH_MSG_DEBUG("Reading a Decor in Jet");
     
     SG::ReadDecorHandle<xAOD::JetContainer, std::vector<ElementLink<DataVector<xAOD::TrackParticle_v1 > > > > readJetHandle_TL(m_jetReadKey_TL, ctx);
     SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char,std::allocator<char> > >readJetHandle_TO(m_jetReadKey_TO, ctx);
@@ -203,13 +217,23 @@ namespace Rec {
     //Create a map of track links and track vertexing values (Using mutlimap)
 
     std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >  > VertexMap;    //empty Multi Vertex Map Container
+    
+    
+    
+    // Create the new container and its auxiliary store.
+    auto GNNvertexContainer      = std::make_unique<xAOD::VertexContainer>();
+    auto GNNvertexAuxContainer   = std::make_unique<xAOD::AuxContainerBase>();
+    GNNvertexContainer->setStore (GNNvertexAuxContainer.get()); //< Connect the two
 
+
+
+    
     for (auto jet : *jetCont) {    //Loop over Jets
       VertexMap.clear();
       auto vertexCollection=readJetHandle_TV(*jet);
       auto trackCollection=readJetHandle_TL(*jet);
       
-      ATH_MSG_DEBUG("New Jet");        
+      //ATH_MSG_DEBUG("New Jet");        
       int i=0;
       
       for (auto v: vertexCollection){
@@ -218,7 +242,7 @@ namespace Rec {
           i++;
       }
       std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >>::iterator itr;
-      ATH_MSG_DEBUG("Printing Map");
+      //ATH_MSG_DEBUG("Printing Map");
       
       workVectorArrxAOD * tmpVectxAOD=new workVectorArrxAOD();
  //     tmpVectxAOD->inpTrk.resize(inpTrk.size());
@@ -230,60 +254,61 @@ namespace Rec {
       tmpVectxAOD->beamZ=beamSpotHandle->beamPos().z();
       tmpVectxAOD->tanBeamTiltX=tan(beamSpotHandle->beamTilt(0));
       tmpVectxAOD->tanBeamTiltY=tan(beamSpotHandle->beamTilt(1));
-
       
-      auto GNNVTX=GNNVertexConstructorTool::vrtFitter(tmpVectxAOD, VertexMap);
       
-      //std::unique_ptr<Trk::VxSecVertexInfo> res = std::make_unique<Trk::VxSecVertexInfo>(Trk::VxSecVertexInfo(GNNVTX));
-     /* for (itr=VertexMap.begin(); itr != VertexMap.end(); ++itr){
       
-        ATH_MSG_DEBUG("\t" << itr->first <<"\t"<< itr->second <<"\n");
+      auto GNNVTX=GNNVertexConstructorTool::vrtFitter(tmpVectxAOD, VertexMap, ctx, GNNvertexContainer);
       
-      }*/
+      delete tmpVectxAOD;
+      
+      
     
     }
-
-    return StatusCode::SUCCESS;
+    
+    ATH_MSG_INFO("Vertex Container " << GNNvertexContainer->size());
+    StatusCode sc;
+      
+    sc= (evtStore()->record (GNNvertexContainer.release(), "GNNVtxs"));
+    sc= (evtStore()->record (GNNvertexAuxContainer.release(), "GNNVtxsAux."));
+   
+     return StatusCode::SUCCESS;
 
     }
     
     //Vertex Fitting
 
-  std::vector<xAOD::Vertex*> GNNVertexConstructorTool::vrtFitter( workVectorArrxAOD * xAODwrk, std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >  > & vrt ) const{
+  std::vector<xAOD::Vertex*> GNNVertexConstructorTool::vrtFitter( workVectorArrxAOD * xAODwrk, 
+                                                                  std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >  > & vrt, 
+                                                                  const EventContext& ctx, 
+                                                                  std::unique_ptr<xAOD::VertexContainer>& VtxCont ) const{
 
     ATH_MSG_DEBUG("Vertex fitter called ");
+    
     std::vector<xAOD::Vertex*>finalVertices(0);
-    //Using the Multimap that has the grouping of the tracks to a single vertex
-    //Vertexing tool is <Trk::TrkVKalVrtFitter> m_VrtFit
+    
+    ATH_MSG_DEBUG("Added Vertexes 0= " << VtxCont->size());
+    
+         
     
     
-    //Retrieve all the tracks linked to a specific key in multimap
-    //If key only has 1 track ignore??
-    //With # tracks >1 perform a vertex fit
-    
-    //First need an initial vertex position (use estimVrtPos)
-    //then set an approx vertex as a starting point (use setApproximateVertex)
-    //Perform a fit (use VKalVrtFit)
-    
-    /*VKalVrtFit requirements
+/*    xAOD::VertexContainer *TestVertexContainer( nullptr );
+    ATH_CHECK( evtStore()->retrieve( TestVertexContainer, "BTagging_AntiKt4EMPFlowSecVtx" ) );
     
     
-    */
-   // Create the new container and its auxiliary store.
-   //  auto GNNvertex = std::make_unique<xAOD::VertexContainer>();
-   //  auto GNNvertexAux = std::make_unique<xAOD::AuxContainerBase>();
-   //  GNNvertex->setStore (GNNvertexAux.get()); //< Connect the two
-   
-   
-    xAOD::TrackParticle *Test =new xAOD::TrackParticle();
+     
+    xAOD::TrackParticle *Test =new xAOD::TrackParticle;
     ATH_MSG_DEBUG("GNNblah" );
-    Test->setTime(0.5);
+    //Test->setTime(0.5);
     
     xAOD::Vertex *GNNvertex = new xAOD::Vertex;
     ATH_MSG_DEBUG("GNNblah 2" );
-    GNNvertex->x();
+    TestVertexContainer->emplace_back(GNNvertex);
+    
+    
+    GNNvertex->setX(59.6);
+    ATH_MSG_DEBUG(GNNvertex->x());
     //GNNvertex->setVertexType(xAOD::VxType::SecVtx);
-    ATH_MSG_DEBUG("GNNblah 3" );
+    ATH_MSG_DEBUG("GNNblah 3" );*/
     
   /*  ATH_CHECK(evtStore()->retrieve( m_vertexTES, "PrimaryVertices"));
     
@@ -308,7 +333,7 @@ namespace Rec {
     
     StatusCode sc;
     
-    ATH_MSG_DEBUG("Test 1");
+    
     
     xAODwrk->tmpListTracks.clear();
     auto lastKey = (vrt.end())->first;          //returns next value after last key - easier for "for loop"
@@ -321,57 +346,40 @@ namespace Rec {
         for (auto i = elements.first; i != elements.second; ++i){        //printing the map 
           //ATH_MSG_DEBUG(" test " << i->first << ": " << i->second << '\n');
           xAODwrk->listSelTracks.push_back(*(i->second));
-          //GNNvertex->push_back(xAODwrk->listSelTracks);
-          //(xAODwrk->listSelTracks).emplace(GNNvertex);
-          ATH_MSG_DEBUG("jbfakjbf");
+          
           
           auto trkLink= i->second;
           //ATH_MSG_DEBUG(*trkLink->type());
           //GNNvertex->addTrackAtVertex(trkLink, 1.);
-          ATH_MSG_DEBUG("Test 2");
+          
           } 
         
     
-    
-        //m_VrtFit->VKalVtrFit(*state, false);
-      //auto nTracks =vrt.count(k);
+
       
       
-     // std::vector<double> iniVrtPos=estimVrtPos(nTracks,listSelTracks,foundVrt2t);
-      
-      //m_VrtFit->setApproximateVertex(iniVrtPos[0], iniVrtPos[1], iniVrtPos[2], *state); /*Use as starting point*/
-      
-      //xAOD::Vertex* GNNVtx =new xAOD::Vertex();
-      
-    /*  for (auto *trk: xAODwrk->listSelTracks){
-        ElementLink<xAOD::TrackParticleContainer> trkElementLink (*(xAODwrk->listSelTracks, trk->index());
-        GNNvertex->addTrackAtVertex(trkElementLink, 1.);
-        
-      }*/
-      
-      ATH_MSG_DEBUG("Test 3");
       sc =(m_VrtFit->VKalVrtFit(xAODwrk->listSelTracks, neutralPartDummy,
                                              newvrt.vertex,     newvrt.vertexMom, newvrt.vertexCharge, newvrt.vertexCov,
                                              newvrt.chi2PerTrk, newvrt.trkAtVrt,  newvrt.chi2,
                                              *state, false));
       if( sc.isFailure() )           continue;
       
-      /*if(foundVrts && foundVrts->vertices().size()){
-         const std::vector<xAOD::Vertex*> vtmp=foundVrts->vertices();
-         for(auto & iv :  vtmp) {
-           GNNVtxs->push_back(iv);
-           }*/
-      //GNNVtxs->push_back(GNNVtx);
-      //GNNVtx->setPosition(newvrt.vertex);
-      //finalVertices.push_back(newvrt.vertex[0,0,0]);
       ATH_MSG_DEBUG("Found IniVertex="<<newvrt.vertex[0]<<", "<<newvrt.vertex[1]<<", "<<newvrt.vertex[2]);
       
+      
+      float r= sqrt(newvrt.vertex[0]*newvrt.vertex[0]+newvrt.vertex[1]*newvrt.vertex[1]);
+      
+      
+      //m_vertex_pos->Fill(newvrt.vertex[0]);
+      
+      //hist("Vertex_chi2")->Fill(r, newvrt.chi2);
       // Compatibility to the primary vertex.
-      Amg::Vector3D vDist = newvrt.vertex ;//- m_thePV->position();
-      ATH_MSG_DEBUG("Test 5");
+      Amg::Vector3D vDist = newvrt.vertex ;// - m_thePV->position();
+      
       double vPos=(vDist.x()*newvrt.vertexMom.Px()+vDist.y()*newvrt.vertexMom.Py()+vDist.z()*newvrt.vertexMom.Pz())/newvrt.vertexMom.Rho();
       
-      ATH_MSG_DEBUG("Test 4");
+      xAOD::Vertex *GNNvertex = new xAOD::Vertex;
+      VtxCont->emplace_back(GNNvertex);
       GNNvertex->setVertexType(xAOD::VxType::SecVtx);
       GNNvertex->setPosition( newvrt.vertex);
       GNNvertex->setFitQuality(newvrt.chi2, 1);
@@ -382,22 +390,11 @@ namespace Rec {
       GNNvertex->auxdata<bool> ("isFake")    = true;
       
       ATH_MSG_DEBUG("Test 6");
-      //ATH_MSG_VERBOSE("with Chi2="<<newvrt.chi2<<" Ntrk="<<NPTR<<" trk1,2="<<newvrt.selTrk[0]<<", "<<newvrt.selTrk[1]);
-
+      
       } 
-       
-
       
     }
-    ATH_MSG_DEBUG("Finished for loop of K");
-    
-    //ATH_CHECK (evtStore()->record(GNNvertex.release(), "GNNvertex"));
-// Record the objects into the event store
-//   ANA_CHECK (evtStore()->record (GNNVtxs.release(), "GNNVtxs"));
-//   ANA_CHECK (evtStore()->record (GNNVtxsAux.release(), "GNNVtxsAux."));
    
-    
-    
     return finalVertices;
   }    
 
