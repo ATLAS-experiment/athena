@@ -83,7 +83,8 @@ def main():
                                                'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer',
                                                'AntiKt4EMPFlowJets':'xAOD::JetContainer', 'AntiKt4EMPFlowJetsAux': 'xAOD::JetAuxContainer',
                                                'BTagging':'xAOD::BTaggingContainer', 'BTaggingAux': 'xAOD::BTaggingAuxContainer',
-                                               'TrackParticle':'xAOD::TrackParticleContainer', 'TrackParticleAux': 'xAOD::TrackParticleAuxContainer'} 
+                                               'TrackParticle':'xAOD::TrackParticleContainer', 'TrackParticleAux': 'xAOD::TrackParticleAuxContainer',
+                                               'VertexContainer':'xAOD::VertexContainer', 'VertexContainerAux':'xAOD::VertexAuxContainer'} 
 
     TRUTH0SlimmingHelper.AllVariables = [ 'EventInfo',
                                           'TruthEvents', 
@@ -91,7 +92,8 @@ def main():
                                           'TruthParticles',
                                           'AntiKt4EMPFlowJets',
                                           'BTagging',
-                                          'TrackParticle']
+                                          'TrackParticle',
+                                          'Vertex']
 
     # Metadata
     #TRUTH0MetaDataItems = [ "xAOD::TruthMetaDataContainer#TruthMetaData", "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux." ]
@@ -100,6 +102,7 @@ def main():
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
     TRUTH0ItemList+=["xAOD::TrackParticleContainer#DecoratedTrackParticles","xAOD::TrackParticleContainer#DecoratedTrackParticlesAux."]
+    TRUTH0ItemList+=["xAOD::VertexContainer#GNNvertexContainer", "xAOD::VertexContainer#GNNvertexContainerAux"]
     acc.merge(OutputStreamCfg(flags, "GNNVertexOutputDecoNew", ItemList=TRUTH0ItemList))
 
 

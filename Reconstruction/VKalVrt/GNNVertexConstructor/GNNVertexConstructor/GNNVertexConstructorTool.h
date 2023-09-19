@@ -60,6 +60,7 @@ namespace Trk {
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/Vertex.h"
 
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -74,13 +75,16 @@ namespace Trk {
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 
-
+#include "TH1.h"
+#include "TH2.h"
+#include "GaudiKernel/ITHistSvc.h"
 #include <fstream>
 //#include <TH1.h>
 
 
 class TH1D;
 class TH2D;
+class TH2F;
 class TH1F;
 class TProfile;
 class TTree;
