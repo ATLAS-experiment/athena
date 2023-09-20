@@ -6,16 +6,10 @@ import re
 import ROOT as R
 from subprocess import Popen, PIPE
 from array import array
-
-try:
-    from AthenaCommon.Utils import unixtools
-    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasStyle.C'))
-    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasLabels.C'))
-    R.gROOT.LoadMacro(unixtools.find_datafile('ZLumiScripts/AtlasStyle/AtlasUtils.C'))
-except Exception:
-    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasStyle.C")
-    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasLabels.C")
-    R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasUtils.C")
+    
+R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasStyle.C")
+R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasLabels.C")
+R.gROOT.LoadMacro(os.getcwd() + "/plotting/AtlasStyle/AtlasUtils.C")
 
 def get_grl(year):
     CVMFS = "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists"
@@ -29,6 +23,9 @@ def get_grl(year):
         grl = CVMFS + "/data18_13TeV/20190708/data18_13TeV.periodAllYear_DetStatus-v105-pro22-13_Unknown_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.xml" 
     elif year == "22":
         grl = CVMFS + "/data22_13p6TeV/20230207/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"
+    elif year == "23":
+        #grl = CVMFS + "/data23_13p6TeV/20230712/physics_25ns.xml"
+        grl = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/data23_grl/data23_13p6TeV_grl.xml"
     pipe = Popen(["grep", "RunList", grl], stdout=PIPE, stderr=PIPE)
     runs = re.sub("[^0-9,]", "", str(pipe.communicate()[0])).split(",")
 

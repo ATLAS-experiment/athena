@@ -15,6 +15,7 @@ import math
 from array import array
 import time
 import argparse
+import glob
     
 parser = argparse.ArgumentParser()
 parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
@@ -31,9 +32,13 @@ absolute = args.absolute
 indir = args.indir
 outdir = args.outdir
 
+print("------------------------------------------")
+print("Begin Yearwise Lumi vs Time")
+print("------------------------------------------")
+
 # Do all of the ugly plot stlying here
-if year == "all": 
-    years = ["22"]
+if year == "run3": 
+    years = ["22", "23"]
     out_tag = "_run3"
     time_format = "%m/%y"
     if args.absolute:
@@ -44,11 +49,11 @@ if year == "all":
     date_tag = "Run 3, #sqrt{s} = 13.6 TeV"
     norm_type = "Run3"
     if channel is not None: 
-        xval = 0.30
-        yval = 0.33
+        xval = 0.25
+        yval = 0.85
     else:
-        xval = 0.43
-        yval = 0.33
+        xval = 0.25
+        yval = 0.85
     set_size = 1
 else: 
     years = [year]
@@ -58,7 +63,7 @@ else:
     xtitle = 'Date in 20' + year
     date_tag = "Data 20" + year  + ", #sqrt{s} = 13.6 TeV"
     norm_type = "year"
-    xval = 0.235
+    xval = 0.20
     yval = 0.86
     set_size = 0
 
@@ -85,22 +90,45 @@ elif channel == "Zll":
     else:
         leg_entry = "L_{Z #rightarrow ll}^{"+norm_type+"-normalised}/L_{ATLAS}"
 
-
 def main():
     if args.comp: 
         channel_comparison(years)
     else: 
         zcounting_vs_atlas(channel, years)
+    #CountZ(years)
 
 def channel_comparison(years):
+
+    print("------------------------------------------")
+    print("Begin Yearwise Lumi Channel Comparison vs Time")
+    print("------------------------------------------")
+
     dict_zlumi = {}
-    for year in years: 
-        for channel in ["Zee", "Zmumu"]: 
-            maindir  = indir + "data"+year+"_13p6TeV/"
+    for year in years:  
+
+        #maindir  = indir #+ "data"+year+"_13p6TeV/"
+        print("year = ", year)
+
+        if year == "23":
+
+            grl = []
             grl = pt.get_grl(year)
+            print("2023 grl = ", grl)
+
+            maindir = args.indir
+
+        elif year == "22":
+            maindir = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/temp/physics_Main_MC23a/"
+            grl = pt.get_grl(year)
+            print("2022 grl = ", grl) 
+                
+        else:
+            grl = pt.get_grl(year)
+            print("other grl = ", grl)
+
+        for channel in ["Zee", "Zmumu"]:
 
             for run in grl: 
-
                 dfz = pd.read_csv(maindir + "run_" + run + ".csv")
                 dfz_small = dfz
                 dfz_small['ZLumi'] = dfz_small[channel + 'Lumi']
@@ -124,36 +152,29 @@ def channel_comparison(years):
                 timestamp = R.TDatime(timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5])
                 timestamp = timestamp.Convert()
                 dict_zlumi[channel, run] = (zlumi, zerr, timestamp)
-
-            # Grab start of the run for plotting later on
-            run_start = dfz_small['LBStart'].iloc[0]
-            timestamp = time.gmtime(run_start)
-            timestamp = R.TDatime(timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5])
-            timestamp = timestamp.Convert()
-            dict_zlumi[channel, run] = (zlumi, zerr, timestamp)
     
+    print("grl = ", grl)
     vec_times     = array('d')
     vec_ratio     = array('d')
     vec_ratio_err = array('d')
     keys = [key[1] for key in dict_zlumi if "Zee" in key]
 
     # If plotting vs. date simply calculate integrated lumi per run and fill array
-    for key in sorted(keys): 
-        ratio = dict_zlumi["Zee", key][0]/dict_zlumi["Zmumu", key][0]
-        error = ratio * math.sqrt( pow(dict_zlumi["Zee", key][1]/dict_zlumi["Zee", key][0], 2) + pow(dict_zlumi["Zmumu", key][1]/dict_zlumi["Zmumu", key][0], 2) )
-        date  = dict_zlumi["Zee", key][2]
-        if key == "438323":
-            print("ratio", ratio)
-            print("error", error)
+    for key in sorted(keys):
+        try:
+            ratio = dict_zlumi["Zee", key][0]/dict_zlumi["Zmumu", key][0]
+            error = ratio * math.sqrt( pow(dict_zlumi["Zee", key][1]/dict_zlumi["Zee", key][0], 2) + pow(dict_zlumi["Zmumu", key][1]/dict_zlumi["Zmumu", key][0], 2) )
+            date  = dict_zlumi["Zee", key][2]
         
-        vec_times.append(date)
-        vec_ratio.append(ratio)
-        vec_ratio_err.append(error)
-
-    # Check for runs outside of y-axis range
-    for i in vec_ratio:
-        if i < ymin or i > ymax:
-            print(i)
+            if ratio < ymin or ratio > ymax:
+                print("Run", key, "has ratio", ratio)
+                print("Outside of y-axis range")
+            else:
+                vec_times.append(date)
+                vec_ratio.append(ratio)
+                vec_ratio_err.append(error)
+        except KeyError:
+            print("Cannot do ratio for", key)
 
     tg = R.TGraphErrors(len(vec_times), vec_times, vec_ratio, R.nullptr, vec_ratio_err)
     leg = R.TLegend(0.645, 0.72, 0.805, 0.91)
@@ -187,14 +208,32 @@ def channel_comparison(years):
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()
 
-    pt.drawAtlasLabel(xval, 0.86, "Internal")
+    #pt.drawAtlasLabel(xval, 0.86, "Internal")
+    pt.drawAtlasLabel(xval, 0.86, "Work In Progress")
     pt.drawText(xval, 0.80, date_tag, set_size)
+
+    new_trig_line = R.TLine(1683743066.0, 0.95, 1683743066.0, 1.05)
+        
+    new_trig_line.SetLineColor(R.kBlue)
+    new_trig_line.SetLineWidth(3)
+    new_trig_line.SetLineStyle(2)
+    new_trig_line.Draw("same")
+    R.gPad.Update()
+    
     tg.GetYaxis().SetRangeUser(ymin, ymax)
     tg.GetXaxis().SetTitle(xtitle)
     tg.GetXaxis().SetTimeDisplay(2)
-    tg.GetXaxis().SetNdivisions(509)
+    tg.GetXaxis().SetNdivisions(9,R.kFALSE)
     tg.GetXaxis().SetTimeFormat(time_format)
     tg.GetXaxis().SetTimeOffset(0,"gmt")
+
+    if years == ["22", "23"]:
+        plot_title = "Ratio of Electron and Muon channel Z-counting Luminosities across Run 3"
+    else:
+        plot_title = "Ratio of Electron and Muon channel Z-counting Luminosities across 20" + years[0]
+
+    tg.SetTitle(plot_title)
+    c1.Update()
     c1.SaveAs(outdir + "channel_comp_data"+out_tag+".pdf")
 
 
@@ -203,6 +242,11 @@ def zcounting_vs_atlas(channel, years):
     Plot normalised comparison of Z-counting luminosity to ATLAS luminosity.
     This can be done as a function of time and pileup.
     """
+    
+    print("------------------------------------------")
+    print("Begin Yearwise ", channel, " Lumi ATLAS comparison vs Time")
+    print("------------------------------------------")
+
     arr_date  = []
     arr_olumi = []
     arr_zlumi = []
@@ -210,11 +254,26 @@ def zcounting_vs_atlas(channel, years):
     run_num   = []
 
     for year in years:
-        maindir  = indir + "data"+year+"_13p6TeV/"
-        grl = pt.get_grl(year)
+        print("year = ", year)
+
+        if year == "23":
+
+            grl = []
+            grl = pt.get_grl(year)
+            print("2023 grl = ", grl)
+
+            maindir = args.indir
+
+        elif year == "22":
+            maindir = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/temp/physics_Main_MC23a/"
+            grl = pt.get_grl(year)
+            print("other grl = ", grl)
+                
+        else:
+            grl = pt.get_grl(year)
+            print("other grl = ", grl)
+
         for run in grl:
-            run = run.replace('.csv', '')
-            run = run.replace('run_', '')
 
             dfz = pd.read_csv(maindir + "run_" + run + ".csv")
             dfz_small = dfz
@@ -260,6 +319,16 @@ def zcounting_vs_atlas(channel, years):
     arr_olumi = np.array(arr_olumi)
     arr_zlumi = np.array(arr_zlumi)
     arr_zerr = np.array(arr_zerr)
+    print("arr_zlumi = ", arr_zlumi)
+    total_zlumi = arr_zlumi.sum()/1000000
+    total_zlumi_string = "Official Data Quality, " + str(round(total_zlumi, 2)) + " fb^-1"
+
+    # calculate ratio to ATLAS preferred lumi
+    arr_zlumi_ratio = arr_zlumi/arr_olumi
+    arr_zerr_ratio  = arr_zerr/arr_olumi
+    print("Lumi array = ", arr_zlumi_ratio)
+
+#-----------Normalisation------------
 
     print("Official lumi", np.sum(arr_olumi))
     # Calculate and apply overall normalisation
@@ -268,60 +337,110 @@ def zcounting_vs_atlas(channel, years):
     else:
         normalisation = np.sum(arr_zlumi) / np.sum(arr_olumi)
 
+    print("norm = ", normalisation)
     # do normalisation to period integral
-    arr_zlumi /= normalisation
-    arr_zerr  /= normalisation
-    # calculate ratio to ATLAS preferred lumi
-    arr_zlumi /= arr_olumi
-    arr_zerr  /= arr_olumi
+    arr_zlumi_ratio /= normalisation
+    arr_zerr_ratio  /= normalisation
+    
+    print("Lumi array = ", arr_zlumi_ratio)
 
-    tg = R.TGraphErrors(len(arr_date), arr_date, array('d',arr_zlumi), R.nullptr, array('d',arr_zerr))
+#-----------Normalisation------------
+
+    tg = R.TGraphErrors(len(arr_date), arr_date, array('d',arr_zlumi_ratio), R.nullptr, array('d',arr_zerr_ratio))
+
+    if args.absolute:
+        if channel == "Zee":
+            if years == ["22", "23"]:
+                plot_title = "Ratio of absolute Z->ee counting Luminosity to ATLAS Luminosity across Run 3"
+            else:
+                plot_title = "Ratio of absolute Z->ee counting Luminosity to ATLAS Luminosity across 20" + years[0]
+        if channel == "Zmumu":
+            if years == ["22", "23"]:
+                plot_title = "Ratio of absolute Z->mumu counting Luminosity to ATLAS Luminosity across Run 3"
+            else:
+                plot_title = "Ratio of absolute Z->mumu counting Luminosity to ATLAS Luminosity across 20" + years[0]
+        if channel == "Zll":
+            if years == ["22", "23"]:
+                plot_title = "Ratio of absolute Z->ll counting Luminosity to ATLAS Luminosity across Run 3"
+            else:
+                plot_title = "Ratio of absolute Z->ll counting Luminosity to ATLAS Luminosity across 20" + years[0]
+    else:
+        if channel == "Zee":
+            if years == ["22", "23"]:
+                plot_title = "Ratio of normalised Z->ee counting Luminosity to ATLAS Luminosity across Run 3"
+            else:
+                plot_title = "Ratio of normalised Z->ee counting Luminosity to ATLAS Luminosity across 20" + years[0]
+        if channel == "Zmumu":
+            if years == ["22", "23"]:
+                plot_title = "Ratio of normalised Z->mumu counting Luminosity to ATLAS Luminosity across Run 3"
+            else:
+                plot_title = "Ratio of normalised Z->mumu counting Luminosity to ATLAS Luminosity across 20" + years[0]
+        if channel == "Zll":
+            if years == ["22", "23"]:
+                plot_title = "Ratio of normalised Z->ll counting Luminosity to ATLAS Luminosity across Run 3"
+            else:
+                plot_title = "Ratio of normalised Z->ll counting Luminosity to ATLAS Luminosity across 20" + years[0]
+
+    tg.SetTitle(plot_title+";"+xtitle+";"+ytitle)
+
     # Depending if we're plotting over whole Run-3, change canvas size
     if out_tag == "_run3":
-        c1 = R.TCanvas("c1", "c1", 2000, 1000)
+        c1 = R.TCanvas("c1", "c1", 2000, 1200)
+        c1.SetTopMargin(0.1)
     else:
-        c1 = R.TCanvas()
+        c1 = R.TCanvas("c1", "c1", 1000, 750)
+        c1.SetTopMargin(0.1)
+
     tg.Draw('ap')
-    tg.GetXaxis().SetTitle(xtitle)
     tg.GetYaxis().SetRangeUser(ymin, ymax)
     
     # Plot 68% percentile band
-    stdev = np.percentile(abs(arr_zlumi - np.median(arr_zlumi)), 68)
+    stdev = np.percentile(abs(arr_zlumi_ratio - np.median(arr_zlumi_ratio)), 68)
     print("68% band =", stdev)
     tg.Fit('pol0', '0q')
     mean = tg.GetFunction('pol0').GetParameter(0)
     print("const of pol0 fit", mean) 
-    print("median", np.median(arr_zlumi)) 
-    print("mean", np.mean(arr_zlumi)) 
+    print("median", np.median(arr_zlumi_ratio)) 
+    print("mean", np.mean(arr_zlumi_ratio)) 
     
     line1 = pt.make_bands(arr_date, stdev, mean)
     line1.Draw("same 3")
     tg.Draw('same ep')
 
-    leg = R.TLegend(0.65, 0.23, 0.79, 0.48)
+    leg = R.TLegend(0.55, 0.20, 0.69, 0.45)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.045)
-    tg.GetYaxis().SetTitle(ytitle)
     leg.AddEntry(tg, leg_entry, "ep")
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()
     
     if args.absolute:
-        pt.drawAtlasLabel(xval, yval-0.45, "Internal")
-        pt.drawText(xval, yval-0.51, date_tag, set_size)
-        pt.drawText(xval, yval-0.57, zstring, set_size)
-        pt.drawText(xval, yval-0.63, "OflLumi-Run3-003", set_size)
+        #pt.drawAtlasLabel(xval, yval-0.47, "Internal")
+        pt.drawAtlasLabel(xval, yval-0.47, "Work In Progress")        
+        pt.drawText(xval, yval-0.53, date_tag, set_size)
+        pt.drawText(xval, yval-0.59, zstring, set_size)
+        pt.drawText(xval, yval-0.65, "OflLumi-Run3-003", set_size)
     else:
-        pt.drawAtlasLabel(xval, yval, "Internal")
-        pt.drawText(xval, yval-0.06, date_tag, set_size)
-        pt.drawText(xval, yval-0.12, zstring, set_size)
-        pt.drawText(xval, yval-0.18, "OflLumi-Run3-003", set_size)
+        #pt.drawAtlasLabel(xval, yval-0.47, "Internal")
+        pt.drawAtlasLabel(xval, yval-0.47, "Work In Progress")
+        pt.drawText(xval, yval-0.53, date_tag, set_size)
+        pt.drawText(xval, yval-0.59, zstring, set_size)
+        pt.drawText(xval, yval-0.65, "OflLumi-Run3-003", set_size)
+        pt.drawText(xval, yval-0.02, total_zlumi_string, set_size)
+
+    pt.drawText(xval-0.12, 0.95, plot_title, set_size)
+
     tg.GetYaxis().SetRangeUser(ymin, ymax)
-    tg.GetXaxis().SetTitle(xtitle)
+    #tg.GetXaxis().SetTitle(xtitle)
     tg.GetXaxis().SetTimeDisplay(2)
-    tg.GetXaxis().SetNdivisions(509)
+    tg.GetXaxis().SetLabelSize(0.04)
+    tg.GetYaxis().SetLabelSize(0.04)
+    tg.GetXaxis().SetNdivisions(9,R.kFALSE)
     tg.GetXaxis().SetTimeFormat(time_format)
     tg.GetXaxis().SetTimeOffset(0,"gmt")
+    
+    c1.Update()
+    c1.Modified()
 
     if args.absolute:
         c1.SaveAs(outdir + channel + "_counting_data"+out_tag+"_abs.pdf")

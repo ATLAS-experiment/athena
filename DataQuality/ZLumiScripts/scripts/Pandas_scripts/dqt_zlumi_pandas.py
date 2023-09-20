@@ -14,6 +14,7 @@ from DQUtils.iov_arrangement import inverse_lblb
 import ZLumiScripts.tools.zlumi_alleff as dq_eff
 import ZLumiScripts.tools.zlumi_mc_cf as dq_cf
 
+
 from DataQualityUtils import doZLumi
 
 # testing toy sampling
@@ -32,18 +33,23 @@ parser.add_argument('--useofficial', action='store_true', help='Use official lum
 parser.add_argument('--lumifolder', type=str, help='Lumi folder', default='/TRIGGER/OFLLUMI/OflPrefLumi')
 parser.add_argument('--lumitag', type=str, help='Lumi tag', default='OflLumi-Run3-003')
 parser.add_argument('--outdir', type=str, help='Directory to dump plots', default='plots')
+parser.add_argument('--update', type=str, help='On = Update current plots, Off = Only create plots from new runs', default = 'off')
 parser.add_argument('--dblivetime', action='store_true', help='Look up livetime from DB')
-parser.add_argument('--campaign', type=str, help='mc16a/d/e, mc21')
+parser.add_argument('--campaign', type=str, help='mc16a/d/e, mc21, mc23a')
 
 args     = parser.parse_args()
 campaign = args.campaign
+update = args.update
 
 BINWIDTH      = 10
 ZPURITYFACTOR = 0.9935
-if args.campaign == "mc21":
+if args.campaign == "mc21" or "mc23a":
     ZXSEC = 2.0675
 else:
     ZXSEC = 1.929
+
+zee_missing_lbs = []
+zmumu_missing_lbs = []
 
 ntoys = 10000000
 do_toys = False
@@ -56,7 +62,21 @@ for key in fin.GetListOfKeys():
         runnumber = runname.replace('run_','')
         break
 
-if args.campaign == "mc21":
+print("Starting HIST to CSV conversion for Run ", runnumber)
+exit_string = "CSV file already exists for Run " + runnumber + ". Moving to next run..."
+
+if args.outdir: 
+    out_dir = args.outdir
+    os.system("mkdir -p " + out_dir)
+    out_dir += "/" + runname + ".csv"
+    if os.path.exists(out_dir) and update == "off":
+        sys.exit(exit_string)
+else: 
+    out_dir = runname + ".csv"
+    if os.path.exists(out_dir) and update == "off":
+        sys.exit(exit_string)
+
+if args.campaign == "mc21" or "mc23a":
     lb_length_name = '%s/GLOBAL/DQTGlobalWZFinder/duration_vs_LB' % runname
     livetime_name = '%s/GLOBAL/DQTGlobalWZFinder/avgLiveFrac_vs_LB' % runname
 else:
@@ -194,32 +214,23 @@ for pileup in o_recoeff_fit:
     arr_rec_eff.append(o_recoeff_fit[pileup]/o_recoerr_fit[pileup])
     arr_rec_err.append(1/pow(o_recoerr_fit[pileup], 0.5))
 
-if arr_mu:  # skip if no data
-    tg_fit = ROOT.TGraphErrors(len(arr_mu), arr_mu, arr_rec_eff, ROOT.nullptr, arr_rec_err)
-    if len(o_recoeff_fit) == 1:
-        fit_type = "pol0"
-    elif len(o_recoeff_fit) == 2:
-        fit_type = "pol1"
-    elif len(o_recoeff_fit) > 2:
-        fit_type = "pol2"
+tg_fit = ROOT.TGraphErrors(len(arr_mu), arr_mu, arr_rec_eff, ROOT.nullptr, arr_rec_err)
+if len(o_recoeff_fit) == 1:
+    fit_type = "pol0"
+elif len(o_recoeff_fit) == 2:
+    fit_type = "pol1"
+elif len(o_recoeff_fit) > 2:
+    fit_type = "pol2"
 
-    print("Fit type", fit_type, "pileup bins", len(o_recoeff_fit))
-    tg_fit.Fit(fit_type, "q")
-
-
-if args.outdir: 
-    out_dir = args.outdir
-    os.system("mkdir -p " + out_dir)
-    out_dir = os.path.join(out_dir, runname + ".csv")
-else: 
-    out_dir = runname + ".csv"
+print("Fit type", fit_type, "pileup bins", len(o_recoeff_fit))
+tg_fit.Fit(fit_type, "q")
 
 csvfile = open(out_dir, 'w')
 csvwriter = csv.writer(csvfile, delimiter=',')
 csvwriter.writerow(['FillNum','RunNum','LBNum','LBStart','LBEnd','LBLive','LBFull','OffLumi','OffMu', 'PassGRL', 
-                    'ZeeRaw','ZeeRawErr','ZeeN1','ZeeN2','ZeeEffTrig','ZeeErrTrig','ZeeEffReco','ZeeErrReco','ZeeEffComb','ZeeErrComb','ZeeEffAComb','ZeeErrAComb','ZeeDefTrig','ZeeDefReco','ZeeLumi','ZeeLumiErr','ZeeRate',
+                    'ZeeRaw','ZeeRawErr','ZeeN1','ZeeN2','ZeeEffTrig','ZeeErrTrig','ZeeEffReco','ZeeErrReco','ZeeEffComb','ZeeErrComb','ZeeEffAComb','ZeeErrAComb','ZeeDefTrig','ZeeDefReco','ZeeLumi','ZeeLumiErr',
                     'ZmumuRaw','ZmumuRawErr','ZmumuN1','ZmumuN2','ZmumuEffTrig','ZmumuErrTrig','ZmumuEffReco','ZmumuErrReco','ZmumuEffComb','ZmumuErrComb','ZmumuEffAComb','ZmumuErrAComb',
-                    'ZmumuDefTrig','ZmumuDefReco','ZmumuLumi','ZmumuLumiErr','ZmumuRate',
+                    'ZmumuDefTrig','ZmumuDefReco','ZmumuLumi','ZmumuLumiErr', 
                     'ZllLumi', 'ZllLumiErr'])
 
 lb_minus_one_reco_eff = {}
@@ -264,7 +275,7 @@ for ibin in range(1, int(lbmax-lbmin)+1):
             #hpass   = fin.Get("%s/%s/GLOBAL/DQTGlobalWZFinder/m_ele_tight_passkine" % (runname, lb))
             #hphoton.GetXaxis().SetRangeUser(66000, 250000)
             #hpass.GetXaxis().SetRangeUser(66000, 250000)
-            if args.campaign == "mc21":
+            if args.campaign == "mc21" or "mc23a":
                 ACCEPTANCE = 0.2971
             else:
                 ACCEPTANCE = 0.2996
@@ -278,7 +289,7 @@ for ibin in range(1, int(lbmax-lbmin)+1):
             hms = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_match_ss' % (runname, lb))
             hno = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_nomatch_os' % (runname, lb))
             hns = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_nomatch_ss' % (runname, lb))
-            if args.campaign == "mc21":
+            if args.campaign == "mc21" or "mc23a":
                 ACCEPTANCE = 0.3292
             else:
                 ACCEPTANCE = 0.3323224
@@ -287,7 +298,11 @@ for ibin in range(1, int(lbmax-lbmin)+1):
             z_m    = fin.Get(hname).Integral()
             z_merr = math.sqrt(z_m)
         except AttributeError: 
-            logging.error('Something unfortunate has happened; LB %d missing from Z count' % (ibin + lbmin - 0.5))
+            if channel == "Zee":
+                zee_missing_lbs.append(int(ibin+lbmin-0.5))
+            elif channel == "Zmumu":
+                zmumu_missing_lbs.append(int(ibin+lbmin-0.5))                
+
             continue
 
         
@@ -368,16 +383,16 @@ for ibin in range(1, int(lbmax-lbmin)+1):
 
         lblive = divisor[ibin]
 
-        if lblive < 0: 
+        if lblive < 9: 
             continue
 
         loclivetime = lblive
         run = int(runname.replace("run_", ""))
         if do_toys: 
-            effcy     = arr_comb * dq_cf.correction(official_mu[ibin], channel, campaign)
+            effcy     = arr_comb * dq_cf.correction(official_mu[ibin], channel, campaign, run)
         else:
-            effcy     = eff_comb * dq_cf.correction(official_mu[ibin], channel, campaign)
-            effcyerr  = err_comb * dq_cf.correction(official_mu[ibin], channel, campaign)
+            effcy     = eff_comb * dq_cf.correction(official_mu[ibin], channel, campaign, run)
+            effcyerr  = err_comb * dq_cf.correction(official_mu[ibin], channel, campaign, run)
         
         if run == 302831 and this_lb < 11:
             loclivetime = 0
@@ -394,21 +409,18 @@ for ibin in range(1, int(lbmax-lbmin)+1):
         else:
             loclivetime = lblive 
 
-        zlumi = zlumistat = zrate = 0.0
-        CORRECTIONS = ZPURITYFACTOR/ACCEPTANCE/ZXSEC
+        zlumi = zlumistat = 0.0
         if do_toys and loclivetime != 0.0:
-                arr_zlumi = np.divide(arr_NZ, effcy) * CORRECTIONS/loclivetime
+                arr_zlumi = np.divide(arr_NZ, effcy) * (ZPURITYFACTOR/ACCEPTANCE/ZXSEC)/loclivetime
                 arr_zlumi = arr_zlumi[~np.isnan(arr_zlumi)]
                 zlumi     = np.median(arr_zlumi)
                 zlumistat = arr_zlumi.std()
-                zrate     = zlumi / CORRECTIONS
         elif (loclivetime != 0.0 and effcy != 0.0):
-                zlumi     = (z_m/effcy)*CORRECTIONS/loclivetime
-                zlumistat = math.sqrt(pow(z_merr/effcy, 2) + pow(z_m/effcy**2*effcyerr, 2))*CORRECTIONS/loclivetime
-                zrate     = zlumi / CORRECTIONS
+                zlumi     = (z_m/effcy)*(ZPURITYFACTOR/ACCEPTANCE/ZXSEC)/loclivetime
+                zlumistat = math.sqrt(pow(z_merr/effcy, 2) + pow(z_m/effcy**2*effcyerr, 2))*ZPURITYFACTOR/ACCEPTANCE/ZXSEC/loclivetime
 
 
-        out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat, zrate]    
+        out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat]    
 
     run = int(runname.replace("run_", ""))
        
@@ -418,5 +430,8 @@ for ibin in range(1, int(lbmax-lbmin)+1):
     zll_lumi_err = 0.5 * math.sqrt( pow(out_dict['Zee'][error_index], 2) + pow(out_dict['Zmumu'][error_index], 2) )
     out_write = [this_fill, run, this_lb, lb_start_end[this_lb][0], lb_start_end[this_lb][1], loclivetime, lb_full[ibin], official_lum_zero[ibin], official_mu[ibin], passgrl] + out_dict["Zee"] + out_dict["Zmumu"] + [zll_lumi, zll_lumi_err]
     csvwriter.writerow(out_write)
+
+print("Missing LBs in Zee channel: ", zee_missing_lbs)
+print("Missing LBs in Zmumu channel: ", zmumu_missing_lbs)
 
 csvfile.close()
