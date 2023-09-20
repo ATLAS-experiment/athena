@@ -44,6 +44,7 @@ set(FTDSource
   Root/VRJetOverlapDecorator.cxx
   Root/FTagDataDependencyNames.cxx
   Root/TrackClassifier.cxx
+  Root/TracksLoader.cxx
   Root/StringUtils.cxx
 )
 if (NOT XAOD_STANDALONE)

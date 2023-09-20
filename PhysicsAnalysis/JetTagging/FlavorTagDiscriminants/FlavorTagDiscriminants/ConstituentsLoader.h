@@ -79,10 +79,12 @@ namespace FlavorTagDiscriminants {
     // Virtual class to represent loader of any type of constituents
     class ConstituentsLoader {
         public:
-            virtual input_pair getData(const xAOD::Jet& jet, const SG::AuxElement& btag) = 0;
+            ConstituentsLoader(FTagConstituentsSequenceConfig cfg) {
+              config = cfg;
+            };
+            virtual std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) = 0;
 
         private:
-            std::string name;
             FTagConstituentsSequenceConfig config;
     };
 }
