@@ -6,6 +6,10 @@
 #define TRACKS_LOADER_H
 
 // local includes
+#include "FlavorTagDiscriminants/FlipTagEnums.h"
+#include "FlavorTagDiscriminants/AssociationEnums.h"
+#include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
+
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
@@ -26,11 +30,29 @@
 #include <regex>
 
 namespace FlavorTagDiscriminants {
+
+    // tracksConfig getter
+
+    FTagConstituentsSequenceConfig convertTracksConfig(
+      FTagTrackSequenceConfig config
+    );
+
+    std::tuple<
+      std::vector<FTagConstituentsSequenceConfig>,
+      FTagOptions>
+    createTracksLoaderConfig( lwt::GraphConfig& config,
+      FlipTagConfig flip_config,
+      std::map<std::string, std::string> remap_scalar,
+      TrackLinkType track_link_type
+    );
+
+
     // Subclass for Tracks loader inherited from abstract ConstituentsLoader class
     class TracksLoader : public ConstituentsLoader {
       public:
+        // TracksLoader();
         TracksLoader(FTagConstituentsSequenceConfig, const FTagOptions& options);
-        std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) override;
+        std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const override ;
       private:
         // typedefs
         typedef std::pair<std::string, double> NamedVar;

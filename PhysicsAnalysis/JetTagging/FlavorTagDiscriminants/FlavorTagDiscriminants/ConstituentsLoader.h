@@ -82,7 +82,7 @@ namespace FlavorTagDiscriminants {
             ConstituentsLoader(FTagConstituentsSequenceConfig cfg) {
               config = cfg;
             };
-            virtual std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) = 0;
+            virtual std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const = 0;
 
         private:
             FTagConstituentsSequenceConfig config;

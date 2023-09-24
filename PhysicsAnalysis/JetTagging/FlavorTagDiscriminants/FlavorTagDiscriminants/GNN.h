@@ -18,6 +18,7 @@
 #include "FlavorTagDiscriminants/GNNOptions.h"
 
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
+#include "FlavorTagDiscriminants/TracksLoader.h"
 
 // EDM includes
 #include "xAODBTagging/BTaggingFwd.h"
@@ -88,6 +89,7 @@ namespace FlavorTagDiscriminants {
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
     std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
+    std::shared_ptr<const TracksLoader> m_trackLoader;
 
     Decorators m_decorators;
     float m_defaultValue;

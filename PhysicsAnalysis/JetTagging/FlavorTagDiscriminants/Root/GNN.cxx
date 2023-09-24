@@ -14,6 +14,7 @@
 #include "PathResolver/PathResolver.h"
 
 #include <fstream>
+#include <iostream>
 
 namespace {
   const std::string jetLinkName = "jetLink";
@@ -27,7 +28,8 @@ namespace FlavorTagDiscriminants {
     m_onnxUtil(nullptr),
     m_jetLink(jetLinkName),
     m_defaultValue(o.default_output_value),
-    m_decorate_tracks(o.decorate_tracks)
+    m_decorate_tracks(o.decorate_tracks),
+    m_trackLoader(nullptr)
   {
     // track decoration is allowed only for non-production builds
     if (m_decorate_tracks) {
@@ -52,7 +54,19 @@ namespace FlavorTagDiscriminants {
     // Create configuration objects for data preprocessing.
     auto [inputs, track_sequences, options] = dataprep::createGetterConfig(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
-
+    std::cout << "TEST 1 " << std::endl;
+    // auto [tracksLoaderConfig, tmp_options] = createTracksLoaderConfig(
+    //   config, flip_config, variableRemapping, trackLinkType
+    // );
+    std::cout << track_sequences.size() << std::endl;
+    if (track_sequences.size() > 0){
+      auto tracksLoaderConfig = convertTracksConfig(
+        track_sequences[0]
+      );
+      std::cout << "TEST 2 " << std::endl; 
+      m_trackLoader = std::make_shared<TracksLoader>(tracksLoaderConfig, options);
+    }
+    std::cout << "TEST 3 " << std::endl;
     // Initialize jet and b-tagging input getters.
     auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromBTag = vb;
@@ -165,6 +179,16 @@ namespace FlavorTagDiscriminants {
       std::vector<int64_t> track_feat_dim = {num_tracks, num_track_vars};
 
       input_pair track_info (track_feat, track_feat_dim);
+      if (m_trackLoader){
+        auto loader_out = m_trackLoader->getData(jet, btag);
+        auto loader_track_feat = loader_out.second.first;
+        std::cout << "Vector size: OLD " << track_feat.size() << " NEW " << loader_track_feat.size() << std::endl;
+        for (uint64_t i = 0; i < track_feat.size(); i++){
+          if (std::fabs(loader_track_feat.at(i) - track_feat.at(i)) > 0.001) {
+              std::cout << "DIFFERENCE " << i << std::endl;
+          }
+        }
+      }
       gnn_input.insert({"track_features", track_info});
     }
 
