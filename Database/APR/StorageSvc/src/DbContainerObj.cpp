@@ -163,6 +163,17 @@ DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
   return Error;
 }
 
+/// Check if we can access the container
+DbStatus DbContainerObj::checkAccess() {
+  DbStatus result = Error;
+  auto container = db()->createContainer(type());
+  if( database().isValid() && container ) {
+    result = container->checkAccess(database(), name());
+  }
+  releasePtr(container);
+  return result;
+}
+
 /// Close Database container
 DbStatus DbContainerObj::close()   {
   if ( retire().isSuccess() )    {

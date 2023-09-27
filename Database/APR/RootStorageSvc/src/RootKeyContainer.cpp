@@ -418,6 +418,24 @@ DbStatus RootKeyContainer::open(DbDatabase&           dbH,
   return Error;
 }
 
+/// This is a specialized method that checks if we can access the underlying TDirectory
+DbStatus RootKeyContainer::checkAccess(DbDatabase& dbH,
+                                       const std::string& dir_nam) const
+{
+  if ( dbH.isValid() )    {
+    IDbDatabase* idb = dbH.info();
+    auto rootDb = dynamic_cast<RootDatabase*>(idb);
+    if (rootDb && rootDb->file()->Get<TDirectory>(dir_nam.c_str())) {
+      return Success;
+    }
+  }
+  DbPrint log( dir_nam );
+  log << DbPrintLvl::Debug << "Cannot access container '" << dir_nam << "', invalid Database handle or "
+      << "container is not of type Directory."
+      << DbPrint::endmsg;
+  return Error;
+}
+
 // Define selection criteria
 DbStatus RootKeyContainer::select(DbSelect& /* crit */) {
   if ( 0 != m_dir )    {

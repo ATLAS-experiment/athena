@@ -852,21 +852,54 @@ def _read_guid(filename):
     import ROOT
     root_file = ROOT.TFile.Open( _get_pfn(filename) )
     params = root_file.Get('##Params')
+    try:
+        from ROOT import RNTuple as rnt
+    except ImportError:
+        from ROOT.Experimental import RNTuple as rnt
     if not params:
         return
-    if not isinstance(params, ROOT.TTree):
+    if not isinstance(params, ROOT.TTree) and not isinstance(params, rnt) and not isinstance(params, ROOT.TDirectory):
         raise NotImplementedError(f"Cannot extract GUID from object {params!r} of type {type(params)!r}")
 
     regex = re.compile(r'\[NAME=(\w+)\]\[VALUE=(.*)\]', re.ASCII)
     fid = None
 
-    for entry in params:
-        param = entry.GetLeaf('db_string').GetValueString()
-
-        result = regex.match(param)
-        if result and result.group(1) == 'FID' :
-            # don't exit yet, it's the last FID entry that counts
-            fid = result.group(2)
+    if isinstance(params, ROOT.TTree):
+        for entry in params:
+            param = entry.GetLeaf('db_string').GetValueString()
+            result = regex.match(param)
+            if result and result.group(1) == 'FID' :
+                # don't exit yet, it's the last FID entry that counts
+                fid = result.group(2)
+    elif isinstance(params, rnt):
+        try:
+            from ROOT import RNTupleReader
+        except ImportError:
+            from ROOT.Experimental import RNTupleReader
+        reader = RNTupleReader.Open(params)
+        try:
+            entry = reader.CreateEntry()
+        except AttributeError:
+            entry = reader.GetModel().CreateEntry()
+        for idx in range(reader.GetNEntries()):
+            reader.LoadEntry(idx, entry)
+            try:
+                result = regex.match(str(entry['db_string']))
+            except (AttributeError, TypeError) as err:
+                # Early RNTuple implementation doesn't allow reading
+                # strings on the python side, might be triggering it...
+                msg.error(f"Cannot read FID from ##Params in RNTuple w/ ROOT error: {err}")
+                return None
+            if result and result.group(1) == 'FID' :
+                # don't exit yet, it's the last FID entry that counts
+                fid = result.group(2)
+    elif isinstance(params, ROOT.TDirectory):
+        for key in params.GetListOfKeys():
+            param = params.Get(key.GetName())
+            result = regex.match(str(param))
+            if result and result.group(1) == 'FID' :
+                # don't exit yet, it's the last FID entry that counts
+                fid = result.group(2)
 
     return fid
 

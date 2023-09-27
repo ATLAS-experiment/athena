@@ -344,6 +344,7 @@ def initConfigFlags():
         acf.addFlag("IOVDb.SqliteFolders",(),help="Folders listed here will be taken from the IOVDb.SqliteInput file instead of the production db. If empty, all folders found in the file are used.")
 #PoolSvc Flags:
     acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0, help='maximum number of open files')
+    acf.addFlag('PoolSvc.DefaultContainerType', 'ROOTTREEINDEX', help='set the underlying POOL storage technology for the default container type')
 
 
     def __bfield():

@@ -75,6 +75,9 @@ namespace pool  {
                           const std::string& nam, 
                           const DbTypeInfo* info,
                           DbAccessMode mod);
+    /// Check if we can access the container for reading with the given type
+    virtual DbStatus checkAccess(DbDatabase& dbH,
+                                 const std::string& nam) const override final;
     /// Ask if a given shape is supported
     virtual DbStatus isShapeSupported(const DbTypeInfo* /* typ */ ) const
     { return true;    }

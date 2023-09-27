@@ -8,6 +8,7 @@ def PoolSvcCfg(flags, withCatalogs=False, **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("MaxFilesOpen", flags.PoolSvc.MaxFilesOpen)
+    kwargs.setdefault("DefaultContainerType", flags.PoolSvc.DefaultContainerType)
 
     if withCatalogs:
         catalogs = [
