@@ -73,6 +73,7 @@ namespace Rec {
     
    
     ATH_CHECK(m_VtxTool->GNNDecoJet(jetsDecoHandle.ptr(), ctx));
+    ATH_MSG_DEBUG("Test debug");
     ATH_CHECK(m_VtxTool->readDecorJet(jetsDecoHandle.ptr(), ctx));
     //ATH_CHECK(m_VtxTool->vrtFitter(inTracks.ptr(), ctx)); 
     

@@ -15,8 +15,8 @@ def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
     gnnTool = acc.getPrimaryAndMerge(
             GNNToolCfg(
                 flags,
-                NNFile="../network.onnx",
-                trackLinkType="IPARTICLE",  #Either IPARTICLE or  TRACK_PARTICLE
+                NNFile           ="../network.onnx",
+                trackLinkType    ="IPARTICLE",  #Either IPARTICLE or  TRACK_PARTICLE
                 variableRemapping={"BTagTrackToJetAssociator" : "GhostTrack"},
                 )
     ) 

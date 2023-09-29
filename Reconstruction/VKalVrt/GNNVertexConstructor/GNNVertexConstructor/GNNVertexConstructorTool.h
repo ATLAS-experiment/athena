@@ -87,20 +87,8 @@ namespace Rec {
       
       StatusCode initKey(const std::string&, SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> &decokey) const;
       
-      unsigned int addTwoNumbers( const unsigned int & NoOne, const unsigned int & NoTwo) const final;                    //can be removed later
-      virtual StatusCode decorateTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const;    //can be removed later
-      virtual StatusCode readDecorTracks( const xAOD::TrackParticleContainer* trkCont, const EventContext& ctx ) const;   //can be removed later
-      
-      
       virtual StatusCode readDecorJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const; 
-      
-                 
-      //virtual StatusCode vrtFitter( std::multimap<int, ElementLink<DataVector<xAOD::TrackParticle_v1 > >  > & vrt ) const;
-      
       virtual StatusCode GNNDecoJet( const xAOD::JetContainer* jetCont, const EventContext& ctx ) const;
-      
-      
-      
       
       //Read and Write Decor Handles
       SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>  m_decorTrackKey{ this, "TrackDecorKey", ".passGNN", "if track passes some GNN criteria"};
@@ -192,20 +180,43 @@ namespace Rec {
 
   //Making Histograms
   
-  TH1F* m_vertex_pos{};
-/*  struct DevTuple;
+  //TH1F* m_vertex_pos{};
+  double m_w_1{};
+  struct DevTuple;
   struct Hists{
     StatusCode book (ITHistSvc& histSvc, const std::string& histDir);
     TTree* m_tuple{};
     DevTuple*  m_curTup;
     
-    TH2F* m_vertex_chi{};
+    TH1F* m_vertex_chi2{};
     TH1F* m_vertex_mass{};
     TH1F* m_vertex_pT{};
+    TH1F* m_vertex_d0{};
+    TH1F* m_vertex_r{};
+    TH1F* m_vertex_chiTrk{};
+    TH1F* m_vertex_charge{};
   };
-   std::unique_ptr<Hists> m_h;
+  
+    std::unique_ptr<Hists> m_h;
+    
+    
+    
+    std::string m_calibFileName;
+    
+    Hists& getHists() const;
 
-*/
+struct DevTuple 
+     { 
+       static constexpr int maxNTrk=100;
+       static constexpr int maxNVrt=100;
+       float   chi2;
+       float   mass;
+       float   pT;
+       float   d0;
+       float   r;
+       float   chiTrk;
+       float   charge;
+     };
     
   };
 }

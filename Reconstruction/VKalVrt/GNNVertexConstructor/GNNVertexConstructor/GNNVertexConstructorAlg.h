@@ -56,8 +56,8 @@ namespace Rec {
       SG::ReadDecorHandleKey<xAOD::JetContainer>               m_jetReadKey{this, "jetDecoReadKey", "", "Jet GNN Deco Read Key"};
       
       /// Gaudi Props
-      Gaudi::Property<std::string> m_deco_suffix{this, "suffix", "", "Suffix to add after the decoration"};
-      Gaudi::Property<std::string> m_jetContainerName{this, "JetContainerName", "AntiKt4EMPFlowJets", "Jet Container Name"};
+      //Gaudi::Property<std::string> m_deco_suffix{this, "suffix", "", "Suffix to add after the decoration"};
+      //Gaudi::Property<std::string> m_jetContainerName{this, "JetContainerName", "AntiKt4EMPFlowJets", "Jet Container Name"};
       
       //GNN Properties
       GNNProperties m_props;
