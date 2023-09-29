@@ -15,7 +15,8 @@ inputDir = "/tank/awharton/ForLME/Data/mc21_13p6TeV.601237.PhPy8EG_A14_ttbar_hda
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427884.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
 #inputDir = "/home/atlas/lukem/QT-SecVtxTool/data/data22_13p6TeV.00427882.physics_Main.deriv.DAOD_PHYS.r13928_p5279_p5514/"
 #inputDir = "/cvmfs/atlas.cern.ch/repo/tutorials/asg/cern-jun2022/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.deriv.DAOD_PHYS.e8357_s3802_r13508_p5057"
-maxEvents = 4
+maxEvents = 6
+
 
 ##---
 
@@ -76,34 +77,51 @@ def main():
     ##---
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TRUTH0SlimmingHelper = SlimmingHelper("TRUTH0SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
-    TRUTH0SlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD:EventAuxInfo',
+    from AthenaConfiguration.Enums import MetadataCategory
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+
+    
+    GNNSlimmingHelper = SlimmingHelper("GNNSlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
+    
+    GNNSlimmingHelper.AppendToDictionary = {'EventInfo':'xAOD::EventInfo','EventInfoAux':'xAOD:EventAuxInfo',
                                                'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
                                                'TruthVertices':'xAOD::TruthVertexContainer','TruthVerticesAux':'xAOD::TruthVertexAuxContainer',
                                                'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer',
                                                'AntiKt4EMPFlowJets':'xAOD::JetContainer', 'AntiKt4EMPFlowJetsAux': 'xAOD::JetAuxContainer',
                                                'BTagging':'xAOD::BTaggingContainer', 'BTaggingAux': 'xAOD::BTaggingAuxContainer',
                                                'TrackParticle':'xAOD::TrackParticleContainer', 'TrackParticleAux': 'xAOD::TrackParticleAuxContainer',
-                                               'VertexContainer':'xAOD::VertexContainer', 'VertexContainerAux':'xAOD::VertexAuxContainer'} 
+                                               'GNNVertex':'xAOD::VertexContainer', 'GNNVertexAux':'xAOD::VertexAuxContainer'} 
 
-    TRUTH0SlimmingHelper.AllVariables = [ 'EventInfo',
-                                          'TruthEvents', 
-                                          'TruthVertices',
-                                          'TruthParticles',
-                                          'AntiKt4EMPFlowJets',
-                                          'BTagging',
-                                          'TrackParticle',
-                                          'Vertex']
+    GNNSlimmingHelper.AllVariables = [  'EventInfo',
+                                        'TruthEvents', 
+                                        'TruthVertices',
+                                        'TruthParticles',
+                                        'AntiKt4EMPFlowJets',
+                                        'BTagging',
+                                        'TrackParticle',
+                                        'GNNVertex']
 
     # Metadata
     #TRUTH0MetaDataItems = [ "xAOD::TruthMetaDataContainer#TruthMetaData", "xAOD::TruthMetaDataAuxContainer#TruthMetaDataAux." ]
 
     # Create output stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    TRUTH0ItemList = TRUTH0SlimmingHelper.GetItemList()
-    TRUTH0ItemList+=["xAOD::TrackParticleContainer#DecoratedTrackParticles","xAOD::TrackParticleContainer#DecoratedTrackParticlesAux."]
-    TRUTH0ItemList+=["xAOD::VertexContainer#GNNvertexContainer", "xAOD::VertexContainer#GNNvertexContainerAux"]
-    acc.merge(OutputStreamCfg(flags, "GNNVertexOutputDecoNew", ItemList=TRUTH0ItemList))
+    
+    #GNNItemList = GNNSlimmingHelper.GetItemList()
+    
+    #GNNItemList+=["xAOD::TrackParticleContainer#DecoratedTrackParticles","xAOD::TrackParticleContainer#DecoratedTrackParticlesAux."]
+    
+    StaticContent=[]
+    StaticContent+=["xAOD::VertexContainer#GNNVertex."]
+    StaticContent+=["xAOD::VertexAuxContainer#GNNVertexAux."]
+    
+    GNNSlimmingHelper.StaticContent=StaticContent
+    
+    GNNItemList = GNNSlimmingHelper.GetItemList()
+    
+    acc.merge(OutputStreamCfg(flags, "GNNVertex", ItemList=GNNItemList))
+    #acc.merge(SetupMetaDataForStreamCfg(flags, "GNNVertex", createMetadata=[MetadataCategory.CutFlowMetaData]))
+
 
 
     acc.printConfig(withDetails=True, summariseProps=True)
@@ -111,6 +129,7 @@ def main():
     
     print (status)
 
+    return(acc)
 ##---
 
 if "__main__" == __name__:
