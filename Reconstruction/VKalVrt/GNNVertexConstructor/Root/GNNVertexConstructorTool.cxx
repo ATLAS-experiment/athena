@@ -153,6 +153,15 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         xAOD::Vertex *GNNvertex = new xAOD::Vertex;
         outVertexContainer->emplace_back(GNNvertex);
 
+        // Registering tracks comprising the vertex to xAOD::Vertex
+        // loop over the tracks comprising the vertex
+        for( const auto *trk : xAODwrk->listSelTracks ) {
+          // Acquire link the track to the vertex
+          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
+          // Register the link to the vertex
+          GNNvertex->addTrackAtVertex( link_trk, 1. );
+        }
+
         GNNvertex->setVertexType(xAOD::VxType::SecVtx);
         GNNvertex->setPosition(newvrt.vertex);
         GNNvertex->setFitQuality(newvrt.chi2, 1);
