@@ -28,6 +28,9 @@ def FTAG1KernelCfg(flags, name='FTAG1Kernel', **kwargs):
     if flags.BTagging.AddV0Finder:
         acc.merge(V0ToolCfg(flags, augmentationTools=augmentationTools, tool_name_prefix="FTAG1", container_name_prefix="FTAG"))
 
+    from GNNVertexConstructor.GNNVertexConstructorToolConfig import GNNVertexConstructorAlgCfg
+    acc.merge(GNNVertexConstructorAlgCfg(flags, name="LME_devAlg", OutputLevel=Lvl.DEBUG))
+
     # thinning tools
     thinningTools = []
 
@@ -136,7 +139,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                                        'NVSI_SecVrt_Loose' : 'xAOD::VertexContainer','NVSI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
 
     # Append to dictionary
-
+    FTAG1SlimmingHelper.AppendToDictionary.update({'GNNVertex':'xAOD::VertexContainer', 'GNNVertexAux':'xAOD::VertexAuxContainer'})
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
@@ -164,7 +167,10 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % cascades]
 
 
-    
+    excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+    FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexContainer#GNNVertex"]
+    FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#GNNVertex."+excludedVertexAuxData]
+
     FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper, StaticContent)
 
 
