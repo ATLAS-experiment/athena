@@ -17,7 +17,8 @@ namespace Rec {
 GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, const std::string &name,
                                                    const IInterface *parent)
     : AthAlgTool(type, name, parent),
-      m_vertexFitterTool("Trk::TrkVKalVrtFitter/VertexFitterTool", this) {
+      m_vertexFitterTool("Trk::TrkVKalVrtFitter/VertexFitterTool", this),
+      m_jetCollection("AntiKt4EMPFlowJets") {
   declareInterface<IGNNVertexConstructorInterface>(this);
 
   declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlowAuxDyn.TrackLinks");
@@ -42,6 +43,9 @@ StatusCode GNNVertexConstructorTool::initialize() {
   ATH_CHECK(m_trackLinksKey.initialize());
   ATH_CHECK(m_vertexLinksKey.initialize());
 
+  m_jetWriteDecorKeyVertexLink = m_jetCollection + ".GNNVerticesLink";
+  ATH_CHECK( m_jetWriteDecorKeyVertexLink.initialize()); 
+
   // Retrieve tools
   ATH_CHECK(m_gnn_Tool.retrieve());
   ATH_CHECK(m_vertexFitterTool.retrieve());
@@ -50,6 +54,7 @@ StatusCode GNNVertexConstructorTool::initialize() {
 
   ATH_CHECK(m_eventInfoKey.initialize());
 
+  // @Luke TODO: what is this parameter?
   m_w_1 = 1.;
 
   return StatusCode::SUCCESS;
@@ -73,12 +78,16 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
   SG::ReadDecorHandle<xAOD::JetContainer, TLC> trackLinksHandle(m_trackLinksKey, ctx);
   SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char, std::allocator<char>>>
       vertexLinksHandle(m_vertexLinksKey, ctx);
+  SG::WriteDecorHandle< xAOD::JetContainer, std::vector<ElementLink<xAOD::VertexContainer>>> 
+      jetWriteDecorHandleVertexLink (m_jetWriteDecorKeyVertexLink, ctx);
 
   // Create a map of track links and track vertexing values (Using mutlimap)
   std::multimap<int, TL> vertexMap;
 
   // Loop over the jets
   for (const auto &jet : *inJetContainer) {
+
+
     vertexMap.clear();
 
     auto vertexCollection = vertexLinksHandle(*jet);
@@ -153,6 +162,10 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         GNNvertex->auxdata<float>("vPos") = vPos;
         GNNvertex->auxdata<bool>("isFake") = true;
 
+        ElementLink< xAOD::VertexContainer> linkVertex;
+        linkVertex.setElement(GNNvertex);
+        linkVertex.setStorableObject(*outVertexContainer);
+        jetWriteDecorHandleVertexLink(*jet).push_back(linkVertex);
 
         // @Luke TODO: build vertex links and add to jet
       }

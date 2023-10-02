@@ -65,6 +65,10 @@ public:
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "eventInfoKey", "EventInfo",
                                                     "EventInfo container to use"};
 
+  // Write handles
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetWriteDecorKeyVertexLink{this,"jetDecorKeyJetLink",
+    "","WriteDecorHandleKey for adding VertexLink to Jets"};
+
   // Conditions
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData",
                                                            "SG key for beam spot"};
@@ -72,6 +76,8 @@ public:
 private:
   double m_w_1{};
   float m_chiScale[11]{};
+  std::string m_jetCollection;
+
   struct WrkVrt {
     bool Good = true;
     std::deque<long int> selTrk;

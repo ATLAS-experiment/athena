@@ -186,6 +186,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     # Add ExtraVariables
     FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper)
+    FTAG1SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GNNVerticesLink"]
    
     # Trigger content
     FtagBaseContent.trigger_setup(FTAG1SlimmingHelper, trigger_option)
