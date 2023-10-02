@@ -73,28 +73,24 @@ namespace Trk {
 #include "boost/graph/adjacency_list.hpp"
 
 #include "BeamSpotConditionsData/BeamSpotData.h"
+#include "FlavorTagDiscriminants/GNNTool.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "xAODJet/JetContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/Vertex.h"
+#include "xAODTracking/VertexContainer.h"
 
-#include "TH1.h"
-#include "TH2.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include <fstream>
-//#include <TH1.h>
+#include <vector>
 
-
-class TH1D;
-class TH2D;
-class TH2F;
-class TH1F;
-class TProfile;
-class TTree;
-class ITHistSvc;
-
-namespace Trk{
-  class TrkVKalVrtFitter;
-  class IVertexFitter;
-  class IVKalState;
-}
+namespace Trk {
+class TrkVKalVrtFitter;
+class IVertexFitter;
+class IVKalState;
+} // namespace Trk
 
 namespace Rec {
 
