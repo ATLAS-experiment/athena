@@ -1,7 +1,5 @@
 #include "GNNVertexConstructor/GNNVertexConstructorTool.h"
-#include "GNNVertexConstructor/GNNVertexConstructorAlg.h"
-#include "FlavorTagDiscriminants/GNN.h"
-#include "FlavorTagDiscriminants/GNNTool.h"
+#include "src/GNNVertexConstructorAlg.h"
 
 using namespace Rec;
 

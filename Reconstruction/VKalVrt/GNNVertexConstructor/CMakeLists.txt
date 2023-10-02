@@ -13,7 +13,7 @@ find_package(nlohmann_json REQUIRED)
 
 
 atlas_add_component( GNNVertexConstructor 
-                     src/components/*.cxx
+                     src/*.h src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${Boost_LIBRARIES} 
                                     ${ROOT_LIBRARIES}
@@ -35,7 +35,7 @@ atlas_add_component( GNNVertexConstructor
                                     AthContainers
                                     AthLinks
                                     AnaAlgorithmLib
-				                            TrkVKalVrtFitterLib 
+                                    TrkVKalVrtFitterLib 
                                     AnalysisUtilsLib  
                                     GeoPrimitives 
                                     BeamSpotConditionsData 
@@ -51,7 +51,7 @@ atlas_add_component( GNNVertexConstructor
  )
 
 atlas_add_library(   GNNVertexConstructorLib
-                     src/*.cxx
+                     GNNVertexConstructor/*.h Root/*.cxx
                      PUBLIC_HEADERS GNNVertexConstructor
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
                      PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils 
@@ -74,7 +74,7 @@ atlas_add_library(   GNNVertexConstructorLib
                                     AthContainers
                                     AthLinks
                                     AnaAlgorithmLib
-				                            TrkVKalVrtFitterLib 
+                                    TrkVKalVrtFitterLib 
                                     AnalysisUtilsLib  
                                     GeoPrimitives 
                                     BeamSpotConditionsData 

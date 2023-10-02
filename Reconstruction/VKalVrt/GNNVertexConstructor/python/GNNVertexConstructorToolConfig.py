@@ -4,11 +4,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from FlavorTagDiscriminants.FlavorTagNNConfig import GNNToolCfg
 from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
-from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-##---
 
-#Tool Config
 def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
@@ -22,23 +19,17 @@ def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
     ) 
     
     kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    kwargs.setdefault("ExtrapolatorName", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
     
     acc.setPrivateTools(CompFactory.Rec.GNNVertexConstructorTool(GNNTool=gnnTool, **kwargs))
     return acc
     
 
-#Algorithm Config    
 def GNNVertexConstructorAlgCfg(flags, name="LMEdevAlg", jetkey="AntiKt4EMPFlowJets",  **kwargs):
     acc = ComponentAccumulator()
     
-
     tool = acc.popToolsAndMerge(GNNVertexConstructorToolCfg(flags)) 
-    
-    acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, VtxTool=tool, jetDecoReadKey=jetkey, **kwargs))
+    acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, VtxTool=tool, inputJetContainer=jetkey, **kwargs))
     return acc
-##---
-
 
 def main():
     algClass = CompFactory.Rec.GNNVertexConstructorAlg
@@ -52,7 +43,6 @@ def main():
     
     VrtFitClass=CompFactory.Trk.TrkVKalVrtFitter
     help(VrtFitClass)
-##---
 
 if "__main__" == __name__:
     main()
