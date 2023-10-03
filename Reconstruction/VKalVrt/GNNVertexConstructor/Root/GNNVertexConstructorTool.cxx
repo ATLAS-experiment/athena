@@ -80,13 +80,17 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       vertexLinksHandle(m_vertexLinksKey, ctx);
   SG::WriteDecorHandle< xAOD::JetContainer, std::vector<ElementLink<xAOD::VertexContainer>>> 
       jetWriteDecorHandleVertexLink (m_jetWriteDecorKeyVertexLink, ctx);
+  // Vertex decorators
+  SG::AuxElement::Decorator<float> decor_mass("mass");
+  SG::AuxElement::Decorator<float> decor_pT("pt");
+  SG::AuxElement::Decorator<float> decor_charge("charge");
+  SG::AuxElement::Decorator<float> decor_vPos("vPos");
 
   // Create a map of track links and track vertexing values (Using mutlimap)
   std::multimap<int, TL> vertexMap;
 
   // Loop over the jets
   for (const auto &jet : *inJetContainer) {
-
 
     vertexMap.clear();
 
@@ -149,7 +153,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
                        vDist.z() * newvrt.vertexMom.Pz()) /
                       newvrt.vertexMom.Rho();
 
-        // @Luke TODO: need to add the tracks to the vertex
         xAOD::Vertex *GNNvertex = new xAOD::Vertex;
         outVertexContainer->emplace_back(GNNvertex);
 
@@ -165,18 +168,16 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         GNNvertex->setVertexType(xAOD::VxType::SecVtx);
         GNNvertex->setPosition(newvrt.vertex);
         GNNvertex->setFitQuality(newvrt.chi2, 1);
-        GNNvertex->auxdata<float>("mass") = newvrt.vertexMom.M();
-        GNNvertex->auxdata<float>("pT") = newvrt.vertexMom.Perp();
-        GNNvertex->auxdata<float>("charge") = newvrt.vertexCharge;
-        GNNvertex->auxdata<float>("vPos") = vPos;
-        GNNvertex->auxdata<bool>("isFake") = true;
+
+        decor_mass(*GNNvertex) = newvrt.vertexMom.M();
+        decor_pT(*GNNvertex) = newvrt.vertexMom.Perp();
+        decor_charge(*GNNvertex) = newvrt.vertexCharge;
+        decor_vPos(*GNNvertex) = vPos;
 
         ElementLink< xAOD::VertexContainer> linkVertex;
         linkVertex.setElement(GNNvertex);
         linkVertex.setStorableObject(*outVertexContainer);
         jetWriteDecorHandleVertexLink(*jet).push_back(linkVertex);
-
-        // @Luke TODO: build vertex links and add to jet
       }
     }
     delete xAODwrk;
