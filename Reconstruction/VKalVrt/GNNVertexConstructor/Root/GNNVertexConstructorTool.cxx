@@ -23,7 +23,7 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
 
   declareProperty("JetTrackLinks", m_trackLinksKey = "BTagging_AntiKt4EMPFlowAuxDyn.TrackLinks");
   declareProperty("JetVertexLinks",
-                  m_vertexLinksKey = "BTagging_AntiKt4EMPFlowAuxDyn.track_vertexing");
+                  m_vertexLinksKey = "BTagging_AntiKt4EMPFlowAuxDyn.vertex_indices");
 
   declareProperty("GNNTool", m_gnn_Tool, "GNN Tool");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
