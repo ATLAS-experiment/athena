@@ -10,6 +10,7 @@
 #include "FlavorTagDiscriminants/AssociationEnums.h"
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/ConstituentsLoader.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -245,6 +246,17 @@ namespace FlavorTagDiscriminants {
     typedef std::vector<std::pair<std::regex, std::string> > StringRegexes;
     StringRegexes getNameFlippers(const FlipTagConfig& flip_config);
 
+    // Get the configuration structures based on the lwtnn NN
+    // structure.
+    std::tuple<
+      std::vector<FTagInputConfig>,
+      std::vector<FTagConstituentsSequenceConfig>,
+      FTagOptions>
+    createGetterConfigNew( lwt::GraphConfig& graph_config,
+      FlipTagConfig flip_config,
+      std::map<std::string, std::string> remap_scalar,
+      TrackLinkType track_link_type);
+    
     // Get the configuration structures based on the lwtnn NN
     // structure.
     std::tuple<

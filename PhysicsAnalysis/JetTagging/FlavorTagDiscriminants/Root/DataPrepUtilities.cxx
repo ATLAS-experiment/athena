@@ -6,6 +6,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/customGetter.h"
 #include "FlavorTagDiscriminants/StringUtils.h"
+#include "FlavorTagDiscriminants/TracksLoader.h"
 
 #include "xAODBTagging/BTaggingUtilities.h"
 
@@ -633,6 +634,130 @@ namespace FlavorTagDiscriminants {
     //
     std::tuple<
       std::vector<FTagInputConfig>,
+      std::vector<FTagConstituentsSequenceConfig>,
+      FTagOptions>
+    createGetterConfigNew( lwt::GraphConfig& config,
+      FlipTagConfig flip_config,
+      std::map<std::string, std::string> remap_scalar,
+      TrackLinkType track_link_type
+    ){
+
+      // we rewrite the inputs if we're using flip taggers
+      StringRegexes flip_converters = getFlipConverters(flip_config);
+
+      // some sequences also need to be sign-flipped. We apply this by
+      // changing the input scaling and normalizations
+      std::regex flip_sequences(".*signed_[dz]0.*");
+
+      if (flip_config != FlipTagConfig::STANDARD) {
+        rewriteFlipConfig(config, flip_converters);
+      }
+
+      // build the standard inputs
+
+      // type and default value-finding regexes are hardcoded for now
+      TypeRegexes type_regexes = {
+        {".*_isDefaults"_r, EDMType::CHAR},
+        // TODO: in the future we should migrate RNN and IPxD
+        // variables to floats. This is outside the scope of the
+        // current flavor tagging developments and AFT-438.
+        {"IP[23]D(Neg)?_[pbc](b|c|u|tau)"_r, EDMType::FLOAT},
+        {"SV1(Flip)?_[pbc](b|c|u|tau)"_r, EDMType::FLOAT},
+        {"(rnnip|iprnn|dips[^_]*)(flip)?_p(b|c|u|tau)"_r, EDMType::FLOAT},
+        {"(JetFitter|SV1|JetFitterSecondaryVertex)(Flip)?_[Nn].*"_r, EDMType::INT},
+        {"(JetFitter|SV1|JetFitterSecondaryVertex).*"_r, EDMType::FLOAT},
+        {"(log_)?pt|abs_eta|eta|phi|energy|mass"_r, EDMType::CUSTOM_GETTER},
+        {"softMuon_p[bcu]"_r, EDMType::FLOAT},
+        {"softMuon_.*"_r, EDMType::FLOAT},
+      };
+
+      StringRegexes default_flag_regexes{
+        {"IP2D_.*"_r, "IP2D_isDefaults"},
+        {"IP2DNeg_.*"_r, "IP2DNeg_isDefaults"},
+        {"IP3D_.*"_r, "IP3D_isDefaults"},
+        {"IP3DNeg_.*"_r, "IP3DNeg_isDefaults"},
+        {"SV1_.*"_r, "SV1_isDefaults"},
+        {"SV1Flip_.*"_r, "SV1Flip_isDefaults"},
+        {"JetFitter_.*"_r, "JetFitter_isDefaults"},
+        {"JetFitterFlip_.*"_r, "JetFitterFlip_isDefaults"},
+        {"JetFitterSecondaryVertex_.*"_r, "JetFitterSecondaryVertex_isDefaults"},
+        {"JetFitterSecondaryVertexFlip_.*"_r, "JetFitterSecondaryVertexFlip_isDefaults"},
+        {"rnnip_.*"_r, "rnnip_isDefaults"},
+        {"(dips[^_]*)_.*"_r, "$1_isDefaults"},
+        {"rnnipflip_.*"_r, "rnnipflip_isDefaults"},
+        {"iprnn_.*"_r, ""},
+        {"smt_.*"_r, "softMuon_isDefaults"},
+        {"softMuon_.*"_r, "softMuon_isDefaults"},
+        {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}}; // no default for custom cases
+
+      std::vector<FTagInputConfig> input_config;
+      for (auto& node: config.inputs){
+        // allow the user to remape some of the inputs
+        remap_inputs(node.variables, remap_scalar,
+               node.defaults);
+
+        std::vector<std::string> input_names;
+        for (const auto& var: node.variables) {
+          input_names.push_back(var.name);
+        }
+
+        // check to make sure the next line doesn't overwrite something
+        // TODO: figure out how to support multiple scalar input nodes
+        if (!input_config.empty()) {
+          throw std::logic_error(
+            "We don't currently support multiple scalar input nodes");
+        }
+        input_config = get_input_config(
+        input_names, type_regexes, default_flag_regexes);
+      }
+
+      // build the constituents inputs
+
+      std::vector<std::pair<std::string, std::vector<std::string>>> constituent_names;
+      for (auto& node: config.input_sequences) {
+        remap_inputs(node.variables, remap_scalar,
+		     node.defaults);
+
+        std::vector<std::string> names;
+        for (const auto& var: node.variables) {
+          std::cout << node.name << "  " << var.name << std::endl;
+          names.push_back(var.name);
+        }
+        constituent_names.emplace_back(node.name, names);
+      }
+
+      std::vector<FTagConstituentsSequenceConfig> constituent_configs;
+      for (auto el: constituent_names){
+        if (el.first.find("tracks") != std::string::npos){
+          constituent_configs.push_back(createTracksLoaderConfig(el, flip_config));
+        }
+      }
+
+      // some additional options
+      FTagOptions options;
+      if (auto h = remap_scalar.extract(options.track_prefix)) {
+        options.track_prefix = h.mapped();
+      }
+      if (auto h = remap_scalar.extract(options.track_link_name)) {
+        options.track_link_name = h.mapped();
+      }
+      if (auto h = remap_scalar.extract(options.invalid_ip_key)) {
+        options.invalid_ip_key = h.mapped();
+      }
+      options.flip = flip_config;
+      options.remap_scalar = remap_scalar;
+      options.track_link_type = track_link_type;
+      return std::make_tuple(input_config, constituent_configs, options);
+    }
+
+    // Translate string config to config objects
+    //
+    // This parses the saved NN configuration structure and translates
+    // informaton encoded as strings into structures and enums to be
+    // consumed by the code that actually constructs the NN.
+    //
+    std::tuple<
+      std::vector<FTagInputConfig>,
       std::vector<FTagTrackSequenceConfig>,
       FTagOptions>
     createGetterConfig( lwt::GraphConfig& config,
@@ -716,7 +841,7 @@ namespace FlavorTagDiscriminants {
         input_names, type_regexes, default_flag_regexes);
       }
 
-      // build the track inputs
+      // build the constituents inputs
 
       std::vector<std::pair<std::string, std::vector<std::string> > > trk_names;
       for (auto& node: config.input_sequences) {
@@ -725,6 +850,7 @@ namespace FlavorTagDiscriminants {
 
         std::vector<std::string> names;
         for (const auto& var: node.variables) {
+          std::cout << node.name << "  " << var.name << std::endl;
           names.push_back(var.name);
         }
         trk_names.emplace_back(node.name, names);

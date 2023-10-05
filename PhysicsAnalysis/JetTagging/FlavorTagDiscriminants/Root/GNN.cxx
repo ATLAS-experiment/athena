@@ -52,19 +52,19 @@ namespace FlavorTagDiscriminants {
     auto lwt_config = m_onnxUtil->getLwtConfig();
 
     // Create configuration objects for data preprocessing.
-    auto [inputs, track_sequences, options] = dataprep::createGetterConfig(
+    auto [inputs, constituents_configs, options] = dataprep::createGetterConfigNew(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
     std::cout << "TEST 1 " << std::endl;
     // auto [tracksLoaderConfig, tmp_options] = createTracksLoaderConfig(
     //   config, flip_config, variableRemapping, trackLinkType
     // );
-    std::cout << track_sequences.size() << std::endl;
-    if (track_sequences.size() > 0){
-      auto tracksLoaderConfig = convertTracksConfig(
-        track_sequences[0]
-      );
+    std::cout << constituents_configs.size() << std::endl;
+    std::vector<FTagTrackSequenceConfig> track_sequences;
+    if (constituents_configs.size() > 0){
+      auto tracksLoaderConfig = constituents_configs[0];
       std::cout << "TEST 2 " << std::endl; 
       m_trackLoader = std::make_shared<TracksLoader>(tracksLoaderConfig, options);
+      track_sequences = convertTracksConfigBack(constituents_configs[0]);
     }
     std::cout << "TEST 3 " << std::endl;
     // Initialize jet and b-tagging input getters.

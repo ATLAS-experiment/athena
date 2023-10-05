@@ -36,14 +36,12 @@ namespace FlavorTagDiscriminants {
     FTagConstituentsSequenceConfig convertTracksConfig(
       FTagTrackSequenceConfig config
     );
-
-    std::tuple<
-      std::vector<FTagConstituentsSequenceConfig>,
-      FTagOptions>
-    createTracksLoaderConfig( lwt::GraphConfig& config,
-      FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar,
-      TrackLinkType track_link_type
+    std::vector<FTagTrackSequenceConfig> convertTracksConfigBack(
+      FTagConstituentsSequenceConfig config
+    );
+    FTagConstituentsSequenceConfig createTracksLoaderConfig(
+      std::pair<std::string, std::vector<std::string>> trk_names,
+      FlipTagConfig flip_config
     );
 
 
