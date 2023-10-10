@@ -15,7 +15,6 @@ import math
 from array import array
 import time
 import argparse
-import glob
     
 parser = argparse.ArgumentParser()
 parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
@@ -24,6 +23,8 @@ parser.add_argument('--comp', action='store_true', help='Compare Zee and Zmumu?'
 parser.add_argument('--absolute', action='store_true', help='Compare absolute luminosity')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
+parser.add_argument('--2022_dir', type=str, help='Input directory for 2022 data')
+parser.add_argument('--2023_dir', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
@@ -31,6 +32,8 @@ channel = args.channel
 absolute = args.absolute
 indir = args.indir
 outdir = args.outdir
+2022_dir = args.2022_dir
+2023_dir = args.2023_dir
 
 print("------------------------------------------")
 print("Begin Yearwise Lumi vs Time")
@@ -115,10 +118,10 @@ def channel_comparison(years):
             grl = pt.get_grl(year)
             print("2023 grl = ", grl)
 
-            maindir = args.indir
+            maindir = args.indir + 2023_dir
 
         elif year == "22":
-            maindir = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/temp/physics_Main_MC23a/"
+            maindir = args.indir + 2022_dir 
             grl = pt.get_grl(year)
             print("2022 grl = ", grl) 
                 
@@ -208,8 +211,7 @@ def channel_comparison(years):
     leg.AddEntry(line1, "68% band", "f")
     leg.Draw()
 
-    #pt.drawAtlasLabel(xval, 0.86, "Internal")
-    pt.drawAtlasLabel(xval, 0.86, "Work In Progress")
+    pt.drawAtlasLabel(xval, 0.86, "Internal")
     pt.drawText(xval, 0.80, date_tag, set_size)
 
     new_trig_line = R.TLine(1683743066.0, 0.95, 1683743066.0, 1.05)
@@ -262,10 +264,10 @@ def zcounting_vs_atlas(channel, years):
             grl = pt.get_grl(year)
             print("2023 grl = ", grl)
 
-            maindir = args.indir
+            maindir = args.indir + 2023_dir
 
         elif year == "22":
-            maindir = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/temp/physics_Main_MC23a/"
+            maindir = args.indir + 2023_dir
             grl = pt.get_grl(year)
             print("other grl = ", grl)
                 
@@ -349,38 +351,9 @@ def zcounting_vs_atlas(channel, years):
     tg = R.TGraphErrors(len(arr_date), arr_date, array('d',arr_zlumi_ratio), R.nullptr, array('d',arr_zerr_ratio))
 
     if args.absolute:
-        if channel == "Zee":
-            if years == ["22", "23"]:
-                plot_title = "Ratio of absolute Z->ee counting Luminosity to ATLAS Luminosity across Run 3"
-            else:
-                plot_title = "Ratio of absolute Z->ee counting Luminosity to ATLAS Luminosity across 20" + years[0]
-        if channel == "Zmumu":
-            if years == ["22", "23"]:
-                plot_title = "Ratio of absolute Z->mumu counting Luminosity to ATLAS Luminosity across Run 3"
-            else:
-                plot_title = "Ratio of absolute Z->mumu counting Luminosity to ATLAS Luminosity across 20" + years[0]
-        if channel == "Zll":
-            if years == ["22", "23"]:
-                plot_title = "Ratio of absolute Z->ll counting Luminosity to ATLAS Luminosity across Run 3"
-            else:
-                plot_title = "Ratio of absolute Z->ll counting Luminosity to ATLAS Luminosity across 20" + years[0]
+        plot_title = "Ratio of absolute "+ zstring +" Luminosity to ATLAS Luminosity across " + norm_type
     else:
-        if channel == "Zee":
-            if years == ["22", "23"]:
-                plot_title = "Ratio of normalised Z->ee counting Luminosity to ATLAS Luminosity across Run 3"
-            else:
-                plot_title = "Ratio of normalised Z->ee counting Luminosity to ATLAS Luminosity across 20" + years[0]
-        if channel == "Zmumu":
-            if years == ["22", "23"]:
-                plot_title = "Ratio of normalised Z->mumu counting Luminosity to ATLAS Luminosity across Run 3"
-            else:
-                plot_title = "Ratio of normalised Z->mumu counting Luminosity to ATLAS Luminosity across 20" + years[0]
-        if channel == "Zll":
-            if years == ["22", "23"]:
-                plot_title = "Ratio of normalised Z->ll counting Luminosity to ATLAS Luminosity across Run 3"
-            else:
-                plot_title = "Ratio of normalised Z->ll counting Luminosity to ATLAS Luminosity across 20" + years[0]
-
+        plot_title = "Ratio of normalised "+ zstring +" Luminosity to ATLAS Luminosity across " + norm_type
     tg.SetTitle(plot_title+";"+xtitle+";"+ytitle)
 
     # Depending if we're plotting over whole Run-3, change canvas size
@@ -415,14 +388,12 @@ def zcounting_vs_atlas(channel, years):
     leg.Draw()
     
     if args.absolute:
-        #pt.drawAtlasLabel(xval, yval-0.47, "Internal")
-        pt.drawAtlasLabel(xval, yval-0.47, "Work In Progress")        
+        pt.drawAtlasLabel(xval, yval-0.47, "Internal")       
         pt.drawText(xval, yval-0.53, date_tag, set_size)
         pt.drawText(xval, yval-0.59, zstring, set_size)
         pt.drawText(xval, yval-0.65, "OflLumi-Run3-003", set_size)
     else:
-        #pt.drawAtlasLabel(xval, yval-0.47, "Internal")
-        pt.drawAtlasLabel(xval, yval-0.47, "Work In Progress")
+        pt.drawAtlasLabel(xval, yval-0.47, "Internal")
         pt.drawText(xval, yval-0.53, date_tag, set_size)
         pt.drawText(xval, yval-0.59, zstring, set_size)
         pt.drawText(xval, yval-0.65, "OflLumi-Run3-003", set_size)
@@ -431,7 +402,6 @@ def zcounting_vs_atlas(channel, years):
     pt.drawText(xval-0.12, 0.95, plot_title, set_size)
 
     tg.GetYaxis().SetRangeUser(ymin, ymax)
-    #tg.GetXaxis().SetTitle(xtitle)
     tg.GetXaxis().SetTimeDisplay(2)
     tg.GetXaxis().SetLabelSize(0.04)
     tg.GetYaxis().SetLabelSize(0.04)

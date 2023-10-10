@@ -43,7 +43,7 @@ update = args.update
 
 BINWIDTH      = 10
 ZPURITYFACTOR = 0.9935
-if args.campaign == "mc21" or "mc23a":
+if args.campaign in ["mc21", "mc23a"]:
     ZXSEC = 2.0675
 else:
     ZXSEC = 1.929
@@ -76,7 +76,7 @@ else:
     if os.path.exists(out_dir) and update == "off":
         sys.exit(exit_string)
 
-if args.campaign == "mc21" or "mc23a":
+if args.campaign in ["mc21", "mc23a"]:
     lb_length_name = '%s/GLOBAL/DQTGlobalWZFinder/duration_vs_LB' % runname
     livetime_name = '%s/GLOBAL/DQTGlobalWZFinder/avgLiveFrac_vs_LB' % runname
 else:
@@ -228,8 +228,8 @@ tg_fit.Fit(fit_type, "q")
 csvfile = open(out_dir, 'w')
 csvwriter = csv.writer(csvfile, delimiter=',')
 csvwriter.writerow(['FillNum','RunNum','LBNum','LBStart','LBEnd','LBLive','LBFull','OffLumi','OffMu', 'PassGRL', 
-                    'ZeeRaw','ZeeRawErr','ZeeN1','ZeeN2','ZeeEffTrig','ZeeErrTrig','ZeeEffReco','ZeeErrReco','ZeeEffComb','ZeeErrComb','ZeeEffAComb','ZeeErrAComb','ZeeDefTrig','ZeeDefReco','ZeeLumi','ZeeLumiErr',
-                    'ZmumuRaw','ZmumuRawErr','ZmumuN1','ZmumuN2','ZmumuEffTrig','ZmumuErrTrig','ZmumuEffReco','ZmumuErrReco','ZmumuEffComb','ZmumuErrComb','ZmumuEffAComb','ZmumuErrAComb',
+                    'ZeeRaw','ZeeRawErr','ZeeN1','ZeeN2','ZeeEffTrig','ZeeErrTrig','ZeeEffReco','ZeeErrReco','ZeeEffComb','ZeeErrComb','ZeeEffAComb','ZeeErrAComb','ZeeDefTrig','ZeeDefReco','ZeeLumi','ZeeLumiErr','ZeeRate',
+                    'ZmumuRaw','ZmumuRawErr','ZmumuN1','ZmumuN2','ZmumuEffTrig','ZmumuErrTrig','ZmumuEffReco','ZmumuErrReco','ZmumuEffComb','ZmumuErrComb','ZmumuEffAComb','ZmumuErrAComb','ZmumuRate',
                     'ZmumuDefTrig','ZmumuDefReco','ZmumuLumi','ZmumuLumiErr', 
                     'ZllLumi', 'ZllLumiErr'])
 
@@ -275,7 +275,7 @@ for ibin in range(1, int(lbmax-lbmin)+1):
             #hpass   = fin.Get("%s/%s/GLOBAL/DQTGlobalWZFinder/m_ele_tight_passkine" % (runname, lb))
             #hphoton.GetXaxis().SetRangeUser(66000, 250000)
             #hpass.GetXaxis().SetRangeUser(66000, 250000)
-            if args.campaign == "mc21" or "mc23a":
+            if args.campaign in ["mc21", "mc23a"]:
                 ACCEPTANCE = 0.2971
             else:
                 ACCEPTANCE = 0.2996
@@ -289,7 +289,7 @@ for ibin in range(1, int(lbmax-lbmin)+1):
             hms = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_match_ss' % (runname, lb))
             hno = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_nomatch_os' % (runname, lb))
             hns = fin.Get('%s/%s/GLOBAL/DQTGlobalWZFinder/m_muloosetp_nomatch_ss' % (runname, lb))
-            if args.campaign == "mc21" or "mc23a":
+            if args.campaign in ["mc21", "mc23a"]:
                 ACCEPTANCE = 0.3292
             else:
                 ACCEPTANCE = 0.3323224
@@ -409,18 +409,22 @@ for ibin in range(1, int(lbmax-lbmin)+1):
         else:
             loclivetime = lblive 
 
-        zlumi = zlumistat = 0.0
+        zlumi = zlumistat = zrate = 0.0
+        CORRECTIONS = ZPURITYFACTOR/ACCEPTANCE/ZXSEC
+
         if do_toys and loclivetime != 0.0:
-                arr_zlumi = np.divide(arr_NZ, effcy) * (ZPURITYFACTOR/ACCEPTANCE/ZXSEC)/loclivetime
+                arr_zlumi = np.divide(arr_NZ, effcy) * (CORRECTIONS)/loclivetime
                 arr_zlumi = arr_zlumi[~np.isnan(arr_zlumi)]
                 zlumi     = np.median(arr_zlumi)
                 zlumistat = arr_zlumi.std()
+                zrate     = zlumi / CORRECTIONS
         elif (loclivetime != 0.0 and effcy != 0.0):
-                zlumi     = (z_m/effcy)*(ZPURITYFACTOR/ACCEPTANCE/ZXSEC)/loclivetime
-                zlumistat = math.sqrt(pow(z_merr/effcy, 2) + pow(z_m/effcy**2*effcyerr, 2))*ZPURITYFACTOR/ACCEPTANCE/ZXSEC/loclivetime
+                zlumi     = (z_m/effcy)*(CORRECTIONS)/loclivetime
+                zlumistat = math.sqrt(pow(z_merr/effcy, 2) + pow(z_m/effcy**2*effcyerr, 2))*CORRECTIONS/loclivetime
+                zrate     = zlumi / CORRECTIONS
 
 
-        out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat]    
+        out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat,zrate]    
 
     run = int(runname.replace("run_", ""))
        

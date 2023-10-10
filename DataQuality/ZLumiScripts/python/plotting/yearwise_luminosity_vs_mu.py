@@ -15,6 +15,8 @@ parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--comp', action='store_true', help='Compare Zee and Zmumu?')
 parser.add_argument('--indir', type=str, help='Input CSV file directory')
 parser.add_argument('--outdir', type=str, help='Output plot directory')
+parser.add_argument('--2022_dir', type=str, help='Input directory for 2022 data')
+parser.add_argument('--2023_dir', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
@@ -22,6 +24,8 @@ channel = args.channel
 comp = args.comp
 indir = args.indir
 outdir = args.outdir
+2022_dir = args.2022_dir
+2023_dir = args.2023_dir
 print("------------------------------------------")
 print("Begin Yearwise Lumi vs Mu")
 print("------------------------------------------")
@@ -61,8 +65,6 @@ elif year == "run3":
     grl = pt.get_grl("22")
     grl.extend(pt.get_grl("23"))
 
-    print("grl = ")
-    print(grl)
     date_string = "Run 3, #sqrt{s} = 13.6 TeV"
     outfile = "ZeeZmm_counting_data_ratio_v_mu_run3.pdf"
 elif year == "22":
@@ -74,7 +76,6 @@ elif year == "23":
     grl = []
     grl = pt.get_grl(year)
 
-    print("grl = ", grl)
     outfile = "ZeeZmm_counting_data_ratio_v_mu_20"+year+".pdf"
 else: 
     date_string = "Data 20"+year+", #sqrt{s} = 13 TeV"
@@ -89,9 +90,9 @@ def main():
         run = run.replace('.csv', '')
         run = run.replace('run_', '')
         if int(run) < 450000:
-            indir = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/temp/physics_Main_MC23a/"
+            indir = args.indir + 2022_dir
         else:
-            indir = args.indir
+            indir = args.indir + 2023_dir
         dfz = pd.read_csv(indir + "run_" + run + ".csv")
         dfz_small = dfz
         if comp: 
@@ -141,10 +142,8 @@ def main():
 
     print("Creating Histogram...")
     h_total = R.TH1F("h_total", "", len(bins)-1, bins)
-    print(df['Ratio'])
 
     nan_list = df[df['Ratio'].isnull()].index.tolist()
-    print('NaN List = ', nan_list)
     
     arr_ratio = []
     
@@ -161,7 +160,6 @@ def main():
         except KeyError:
             print("Cannot do ratio for", xbin)
 
-    print("arr_ratio = ", arr_ratio)
     arr_ratio = np.array(arr_ratio)
 
     stdev    = np.percentile(abs(arr_ratio - np.median(arr_ratio)), 68)
@@ -211,13 +209,11 @@ def main():
         zstring = ""
 
     if comp:
-        #pt.drawAtlasLabel(0.2, 0.88, "Internal")
-        pt.drawAtlasLabel(0.2, 0.88, "Work In Progress")
+        pt.drawAtlasLabel(0.2, 0.88, "Internal")
         pt.drawText(0.2, 0.82, date_string)
         pt.drawText(0.2, 0.76, zstring)
     else:
-        #pt.drawAtlasLabel(xmin, 0.88, "Internal")
-        pt.drawAtlasLabel(xmin, 0.88, "Work In Progress")
+        pt.drawAtlasLabel(xmin, 0.88, "Internal")
         pt.drawText(xmin, 0.82, date_string)
         pt.drawText(xmin, 0.76, zstring)
         pt.drawText(xmin, 0.68, "OflLumi-Run3-003")

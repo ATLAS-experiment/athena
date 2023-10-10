@@ -5,15 +5,12 @@
 Plot trigger and reconstruction efficiencies over entire data-periods.
 """
 
-import numpy as np
 import pandas as pd
 import ROOT as R
 import python_tools as pt
 import tools.zlumi_mc_cf as dq_cf
-import math
 from math import sqrt
 from array import array
-import time
 import argparse
     
 parser = argparse.ArgumentParser()
@@ -21,12 +18,16 @@ parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
+parser.add_argument('--2022_dir', type=str, help='Input directory for 2022 data')
+parser.add_argument('--2023_dir', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
 channel = args.channel
 indir = args.indir
 outdir = args.outdir
+2022_dir = args.2022_dir
+2023_dir = args.2023_dir
 
 if year == "run3": 
     years = ["22", "23"]
@@ -88,7 +89,7 @@ def plot_efficiency_comb(channel, years):
             grl = []
             print("grl before = ")
             print(grl)
-            maindir = args.indir
+            maindir = args.indir + 2023_dir
 
             grl = pt.get_grl(year)
 
@@ -100,7 +101,7 @@ def plot_efficiency_comb(channel, years):
             grl = []
             print("grl before = ")
             print(grl)
-            maindir = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/temp/physics_Main_MC23a/"
+            maindir = args.indir + 2022_dir
 
             grl = pt.get_grl(year)
 
@@ -144,7 +145,7 @@ def plot_efficiency_comb(channel, years):
                     dict_comb_err[pileup] += weight_comb
 
                 if not dict_mu:
-                    print("File "+infilename+ " has no filled lumi blocks!")
+                    print("File has no filled lumi blocks!")
                     return
 
         for pileup in dict_mu:
@@ -155,23 +156,20 @@ def plot_efficiency_comb(channel, years):
             
             vec_mu.append(pileup)
 
-        if channel == "Zee": 
-            lep = "e"
+        if channel == "Zee":
             channel_string = "Z #rightarrow ee"
             ymin, ymax = 0.52, 0.74
-        elif channel == "Zmumu": 
-            lep = "#mu"
+        elif channel == "Zmumu":
             channel_string = "Z #rightarrow #mu#mu"
             ymin, ymax = 0.74, 0.84
 
         if year == "22":
             
-            comb_graph_22 = R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err);
+            comb_graph_22 = R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err)
             comb_graph_22.GetHistogram().SetYTitle("#varepsilon_{event}^{"+channel_string+"}#times F^{MC}")
             comb_graph_22.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
             comb_graph_22.SetMarkerSize(1)
             comb_graph_22.GetHistogram().SetXTitle("Pileup (#mu)")
-            #graph_dict[year] = comb_graph_22
             comb_graph_22.Draw("ap")
             comb_graph_22.GetXaxis().SetRangeUser(8,80)
             comb_graph_22.Draw("ap")
@@ -182,11 +180,10 @@ def plot_efficiency_comb(channel, years):
 
         if year == "23":
             
-            comb_graph_23 = R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err);
+            comb_graph_23 = R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err)
             comb_graph_23.GetHistogram().SetYTitle("#varepsilon_{event}^{"+channel_string+"}#times F^{MC}")
             comb_graph_23.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
             comb_graph_23.SetMarkerSize(1)
-            #graph_dict[year] = comb_graph_23
             comb_graph_23.Draw("samep")
             comb_graph_23.GetXaxis().SetRangeUser(8,80)
             comb_graph_23.Draw("samep")
@@ -194,23 +191,12 @@ def plot_efficiency_comb(channel, years):
             leg.SetBorderSize(0)
             leg.SetTextSize(0.07)
             leg.AddEntry(comb_graph_23, "Data 20"+year, "ep")
-
-        
-        #if year == list(graph_dict)[0]:
-        #    graph_dict[year].Draw("ap")
-        #else:
-        #    graph_dict[year].Draw("sameap")
-
-        #leg.SetBorderSize(0)
-        #leg.SetTextSize(0.07)
-        #leg.AddEntry(graph_dict[year], "Data 20"+year, "ep")
     
     print(graph_dict)
 
     if channel == "Zee":
 
-        #pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
-        pt.drawAtlasLabel(0.2, ymax-0.4, "Work In Progress")
+        pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
         if year in ['15', '16', '17', '18']:
             pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13 TeV")
         else:
@@ -219,8 +205,7 @@ def plot_efficiency_comb(channel, years):
 
     elif channel == "Zmumu":
 
-        #pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
-        pt.drawAtlasLabel(0.2, ymax-0.5, "Work In Progress")
+        pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
         if year in ['15', '16', '17', '18']:
             pt.drawText(0.2, ymax-0.56, "Data 20" + year + ", #sqrt{s} = 13 TeV")
         else:

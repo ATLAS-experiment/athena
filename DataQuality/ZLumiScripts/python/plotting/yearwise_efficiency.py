@@ -20,12 +20,16 @@ parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
+parser.add_argument('--2022_dir', type=str, help='Input directory for 2022 data')
+parser.add_argument('--2023_dir', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
 channel = args.channel
 indir = args.indir
 outdir = args.outdir
+2022_dir = args.2022_dir
+2023_dir = args.2023_dir
 
 if year == "run3": 
     years = ["22", "23"]
@@ -72,7 +76,7 @@ def plot_efficiency_comb(channel, years):
             grl = []
             print("grl before = ")
             print(grl)
-            maindir = args.indir
+            maindir = args.indir + 2023_dir
 
             grl = pt.get_grl(year)
 
@@ -84,7 +88,7 @@ def plot_efficiency_comb(channel, years):
             grl = []
             print("grl before = ")
             print(grl)
-            maindir = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/temp/physics_Main_MC23a/"
+            maindir = args.indir + 2022_dir
 
             grl = pt.get_grl(year)
 
@@ -154,7 +158,7 @@ def plot_efficiency_comb(channel, years):
         channel_string = "Z #rightarrow #mu#mu"
         ymin, ymax = 0.74, 0.80
 
-    comb_graph = R.TGraphErrors(len(arr_date), arr_date, arr_combeff, R.nullptr,arr_comberr);
+    comb_graph = R.TGraphErrors(len(arr_date), arr_date, arr_combeff, R.nullptr,arr_comberr)
     comb_graph.GetHistogram().SetYTitle("Efficiency")
     comb_graph.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
     comb_graph.GetXaxis().SetTimeDisplay(2)
@@ -170,8 +174,7 @@ def plot_efficiency_comb(channel, years):
     if channel == "Zee":
         
         leg = R.TLegend(0.645, 0.4, 0.805, 0.6)
-        #pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
-        pt.drawAtlasLabel(0.2, ymax-0.4, "Work In Progress")
+        pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
         if year in ['15', '16', '17', '18']:
             pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13 TeV")
         else:
@@ -181,8 +184,7 @@ def plot_efficiency_comb(channel, years):
     elif channel == "Zmumu":
         
         leg = R.TLegend(0.645, 0.4, 0.805, 0.6)
-        #pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
-        pt.drawAtlasLabel(0.2, ymax-0.4, "Work In Progress")
+        pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
         if year in ['15', '16', '17', '18']:
             pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13 TeV")
         else:
@@ -231,7 +233,7 @@ def plot_efficiency(channel, years):
             grl = []
             print("grl before = ")
             print(grl)
-            maindir = args.indir
+            maindir = args.indir + 2023_dir
 
             grl = pt.get_grl(year)
 
@@ -243,7 +245,7 @@ def plot_efficiency(channel, years):
             grl = []
             print("grl before = ")
             print(grl)
-            maindir = "/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/temp/physics_Main_MC23a/"
+            maindir = args.indir + 2022_dir
 
             grl = pt.get_grl(year)
 
@@ -326,7 +328,7 @@ def plot_efficiency(channel, years):
         channel_string = "Z #rightarrow #mu#mu"
         ymin, ymax = 0.64, 0.96
 
-    trig_graph = R.TGraphErrors(len(arr_date), arr_date, arr_trigeff, R.nullptr,arr_trigerr);
+    trig_graph = R.TGraphErrors(len(arr_date), arr_date, arr_trigeff, R.nullptr,arr_trigerr)
     trig_graph.GetHistogram().SetYTitle("Efficiency")
     trig_graph.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
     trig_graph.GetXaxis().SetTimeDisplay(2)
@@ -335,7 +337,7 @@ def plot_efficiency(channel, years):
     trig_graph.GetXaxis().SetTimeOffset(0,"gmt")
     trig_graph.SetMarkerSize(1)
         
-    reco_graph = R.TGraphErrors(len(arr_date), arr_date, arr_recoeff, R.nullptr,arr_recoerr);
+    reco_graph = R.TGraphErrors(len(arr_date), arr_date, arr_recoeff, R.nullptr,arr_recoerr)
     reco_graph.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
     reco_graph.GetXaxis().SetTimeDisplay(2)
     reco_graph.GetXaxis().SetNdivisions(9,R.kFALSE)
@@ -354,8 +356,7 @@ def plot_efficiency(channel, years):
     if channel == "Zee":
         
         leg = R.TLegend(0.645, 0.74, 0.805, 0.94)
-        #pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
-        pt.drawAtlasLabel(0.2, ymax-0.06, "Work In Progress")
+        pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
         if year in ['15', '16', '17', '18']:
             pt.drawText(0.2, ymax-0.12, "Data 20" + year + ", #sqrt{s} = 13 TeV")
         else:
@@ -365,8 +366,7 @@ def plot_efficiency(channel, years):
     elif channel == "Zmumu":
         
         leg = R.TLegend(0.645, 0.4, 0.805, 0.6)
-        #pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
-        pt.drawAtlasLabel(0.2, ymax-0.4, "Work In Progress")
+        pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
         if year in ['15', '16', '17', '18']:
             pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13 TeV")
         else:
