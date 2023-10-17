@@ -90,6 +90,7 @@ namespace Trk {
 class TrkVKalVrtFitter;
 class IVertexFitter;
 class IVKalState;
+class VxSecVKalVertexInfo;
 } // namespace Trk
 
 namespace Rec {
