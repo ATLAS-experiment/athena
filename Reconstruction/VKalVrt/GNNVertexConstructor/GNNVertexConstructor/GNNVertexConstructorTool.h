@@ -24,6 +24,7 @@ namespace Trk {
 class TrkVKalVrtFitter;
 class IVertexFitter;
 class IVKalState;
+class VxSecVKalVertexInfo;
 } // namespace Trk
 
 namespace Rec {
@@ -31,7 +32,6 @@ namespace Rec {
 struct workVectorArrxAOD {
   std::vector<const xAOD::TrackParticle *> listSelTracks; // Selected tracks after quality cuts
   std::vector<const xAOD::TrackParticle *> tmpListTracks;
-  std::vector<const xAOD::TrackParticle *> inpTrk; // All tracks provided to tool
   double beamX = 0.;
   double beamY = 0.;
   double beamZ = 0.;
@@ -50,7 +50,10 @@ public:
   StatusCode finalize();
 
   virtual StatusCode decorateJets(const xAOD::JetContainer*) const;
-  virtual StatusCode performVertexFit(const xAOD::JetContainer*, xAOD::VertexContainer*, const EventContext&) const;
+  virtual StatusCode performVertexFit(const xAOD::JetContainer*, 
+                                      xAOD::VertexContainer*, 
+                                      const xAOD::Vertex & primaryVertex, 
+                                      const EventContext&) const;
 
   // Tools
   ToolHandle<FlavorTagDiscriminants::GNNTool> m_gnn_Tool{this, "gnn_Tool", "",
@@ -72,10 +75,12 @@ public:
   // Conditions
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData",
                                                            "SG key for beam spot"};
-
+  
+  //Access the Primary Vertex Info
+  const xAOD::Vertex* m_thePV;
+  
 private:
-  double m_w_1{};
-  float m_chiScale[11]{};
+  
   std::string m_jetCollection;
 
   struct WrkVrt {
@@ -88,10 +93,7 @@ private:
     std::vector<double> chi2PerTrk;
     std::vector<std::vector<double>> trkAtVrt;
     double chi2{};
-    double projectedVrt = 0.;
-    int detachedTrack = -1;
-    double BDT = 1.1;
-  };
+    };//end WrkVrt
 };
 } // namespace Rec
 

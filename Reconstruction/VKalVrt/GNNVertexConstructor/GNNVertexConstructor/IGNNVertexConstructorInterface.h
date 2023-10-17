@@ -14,7 +14,10 @@ namespace Rec {
     public:
       static const InterfaceID& interfaceID() { return IID_IGNNVertexConstructorInterface;}
 
-      virtual StatusCode performVertexFit( const xAOD::JetContainer* jetCont, xAOD::VertexContainer* vertexCont, const EventContext& ctx ) const = 0;
+      virtual StatusCode performVertexFit( const xAOD::JetContainer* jetCont, 
+                                           xAOD::VertexContainer* vertexCont, 
+                                           const xAOD::Vertex & primaryVertex, 
+                                           const EventContext& ctx ) const = 0;
       
   };
 

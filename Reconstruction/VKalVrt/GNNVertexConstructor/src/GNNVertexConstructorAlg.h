@@ -17,13 +17,18 @@ public:
 
 private:
   // Tools
-  ToolHandle<Rec::GNNVertexConstructorTool> m_VtxTool;
+  ToolHandle<Rec::GNNVertexConstructorTool>   m_VtxTool;
   // Input jets
-  SG::ReadHandleKey<xAOD::JetContainer> m_inJetsKey{
+  SG::ReadHandleKey<xAOD::JetContainer>       m_inJetsKey{
       this, "inputJetContainer", "AntiKt4EMPFlowJets", "Input jet container"};
   // Output vertices
-  SG::WriteHandleKey<xAOD::VertexContainer> m_outVertexKey{
+  SG::WriteHandleKey<xAOD::VertexContainer>   m_outVertexKey{
       this, "outputVertexContainer", "GNNVertices", "Output vertex container"};
+  
+  //Input Primary Vertices
+  SG::ReadHandleKey<xAOD::VertexContainer>    m_pvContainerKey{
+      this,"PrimaryVertexContainer","PrimaryVertices","Read PrimaryVertices container"};
+
 };
 
 } // namespace Rec
