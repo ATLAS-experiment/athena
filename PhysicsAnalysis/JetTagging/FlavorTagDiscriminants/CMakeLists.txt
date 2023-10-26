@@ -45,6 +45,7 @@ set(FTDSource
   Root/FTagDataDependencyNames.cxx
   Root/TrackClassifier.cxx
   Root/TracksLoader.cxx
+  Root/IParticlesLoader.cxx
   Root/StringUtils.cxx
 )
 if (NOT XAOD_STANDALONE)
