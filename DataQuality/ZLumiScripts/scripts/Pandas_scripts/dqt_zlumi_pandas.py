@@ -229,9 +229,8 @@ csvfile = open(out_dir, 'w')
 csvwriter = csv.writer(csvfile, delimiter=',')
 csvwriter.writerow(['FillNum','RunNum','LBNum','LBStart','LBEnd','LBLive','LBFull','OffLumi','OffMu', 'PassGRL', 
                     'ZeeRaw','ZeeRawErr','ZeeN1','ZeeN2','ZeeEffTrig','ZeeErrTrig','ZeeEffReco','ZeeErrReco','ZeeEffComb','ZeeErrComb','ZeeEffAComb','ZeeErrAComb','ZeeDefTrig','ZeeDefReco','ZeeLumi','ZeeLumiErr','ZeeRate',
-                    'ZmumuRaw','ZmumuRawErr','ZmumuN1','ZmumuN2','ZmumuEffTrig','ZmumuErrTrig','ZmumuEffReco','ZmumuErrReco','ZmumuEffComb','ZmumuErrComb','ZmumuEffAComb','ZmumuErrAComb','ZmumuRate',
-                    'ZmumuDefTrig','ZmumuDefReco','ZmumuLumi','ZmumuLumiErr', 
-                    'ZllLumi', 'ZllLumiErr'])
+                    'ZmumuRaw','ZmumuRawErr','ZmumuN1','ZmumuN2','ZmumuEffTrig','ZmumuErrTrig','ZmumuEffReco','ZmumuErrReco','ZmumuEffComb','ZmumuErrComb','ZmumuEffAComb','ZmumuErrAComb','ZmumuDefTrig','ZmumuDefReco','ZmumuLumi','ZmumuLumiErr','ZmumuRate',
+                    'ZllLumi','ZllLumiErr'])
 
 lb_minus_one_reco_eff = {}
 lb_minus_one_reco_eff["Zee"]   = [1.0, 1.0, 1]
@@ -424,12 +423,12 @@ for ibin in range(1, int(lbmax-lbmin)+1):
                 zrate     = zlumi / CORRECTIONS
 
 
-        out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat,zrate]    
+        out_dict[channel] = [z_m, z_merr, N1, N2, eff_trig, err_trig, eff_reco, err_reco, eff_comb, err_comb, eff_Acomb, err_Acomb, defaulted_trig_eff, defaulted_reco_eff, zlumi, zlumistat, zrate]    
 
     run = int(runname.replace("run_", ""))
        
-    lumi_index = len(out_dict['Zee'])-2
-    error_index = len(out_dict['Zee'])-1
+    lumi_index = len(out_dict['Zee'])-3
+    error_index = len(out_dict['Zee'])-2
     zll_lumi = (out_dict['Zee'][lumi_index] + out_dict['Zmumu'][lumi_index])/2
     zll_lumi_err = 0.5 * math.sqrt( pow(out_dict['Zee'][error_index], 2) + pow(out_dict['Zmumu'][error_index], 2) )
     out_write = [this_fill, run, this_lb, lb_start_end[this_lb][0], lb_start_end[this_lb][1], loclivetime, lb_full[ibin], official_lum_zero[ibin], official_mu[ibin], passgrl] + out_dict["Zee"] + out_dict["Zmumu"] + [zll_lumi, zll_lumi_err]

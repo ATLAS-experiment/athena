@@ -3,10 +3,9 @@
 
 import numpy as np
 import pandas as pd
-from . import python_tools as pt
+import python_tools as pt
 import ROOT as R
 import os
-import math
 from array import array
 import argparse
 import re
@@ -65,7 +64,7 @@ def plot_channel(channel):
         LumiString = "L_{Z #rightarrow ee}"
         name = 'e'
 
-        # Drop LBs with no Z-counting information
+        #Drop LBs with no Z-counting information
         dfz0 = dfz.copy()
         if args.dropzero:
             dfz = dfz.drop(dfz[(dfz.ZeeLumi == 0)].index)
@@ -76,7 +75,7 @@ def plot_channel(channel):
         LumiString = "L_{Z #rightarrow #mu#mu}"
         name = '#mu'
 
-        # Drop LBs with no Z-counting information
+        #Drop LBs with no Z-counting information
         dfz0 = dfz.copy()
         if args.dropzero:
             dfz = dfz.drop(dfz[(dfz.ZmumuLumi == 0)].index)
@@ -87,32 +86,31 @@ def plot_channel(channel):
         LumiString = "L_{Z #rightarrow ll}"
         name = 'l'
 
-        # Drop LBs with no Z-counting information
+        #Drop LBs with no Z-counting information
         dfz0 = dfz.copy()
         if args.dropzero:
             dfz = dfz.drop(dfz[(dfz.ZllLumi == 0)].index)
 
     #Calculate mean per LB against ATLAS
     dfz = dfz.drop(dfz[(dfz['LBLive']<10) | (dfz['PassGRL']==0)].index)
-    print(dfz['OffLumi'])
 
     if len(dfz):
-            ratio = array('d', dfz[channel+'Lumi']/dfz['OffLumi'])
-            print("mean for "+channel+": ",  list(dfz[channel+'Lumi']), list(dfz['OffLumi']), np.mean(ratio))
-        else:
-            ratio = 1
-            print("No valid LBs found")
+        ratio = array('d', dfz[channel+'Lumi']/dfz['OffLumi'])
+        print("mean for "+channel+": ", np.mean(ratio))
+    else:
+        ratio = 1
+        print("No valid LBs found")
 
     dfz['OffDelLumi'] = dfz['OffLumi']*dfz['LBFull']
 
-    # Scale by livetime
+    #Scale by livetime
     for entry in [Lumi, LumiErr,'OffLumi']:  
         dfz[entry] *= dfz['LBLive']
 
-    # Square uncertainties
+    #Square uncertainties
     dfz[LumiErr] *= dfz[LumiErr]
 
-    # Merge by groups of 20 LBs or pileup bins
+    #Merge by groups of 20 LBs or pileup bins
     if args.usemu:
         dfz['OffMu'] = dfz['OffMu'].astype(int)
         dfz = dfz.groupby(['OffMu']).sum()
@@ -145,7 +143,6 @@ def plot_channel(channel):
 
     print("Making Z-counting vs. ATLAS plots!")
     channel_string = "Z #rightarrow "+name+name
-    lep = name
     
     if args.usemu: 
         leg = R.TLegend(0.6, 0.28, 0.75, 0.50)
@@ -163,8 +160,8 @@ def plot_channel(channel):
             outfile = filepfx+channel+"_vs_atlas"
 
     normalisation = 1
-        if len(dfz) and not args.absolute:
-            normalisation = dfz[channel+'Lumi'].sum() / dfz['OffLumi'].sum()
+    if len(dfz) and not args.absolute:
+        normalisation = dfz[channel+'Lumi'].sum() / dfz['OffLumi'].sum()
 
     if len(dfz):
 
@@ -252,10 +249,10 @@ def plot_channel(channel):
     hr.GetXaxis().SetTitle(xtitle)
     
     hr.GetYaxis().SetTitleSize(0.05)
-        if args.absolute and args.t0:
-            hr.GetYaxis().SetRangeUser(0.9, 1.1)
-        else:
-            hr.GetYaxis().SetRangeUser(0.95, 1.05)
+    if args.absolute and args.t0:
+        hr.GetYaxis().SetRangeUser(0.9, 1.1)
+    else:
+        hr.GetYaxis().SetRangeUser(0.95, 1.05)
 
     line0 = R.TLine(xmin, 1.0, xmax, 1.0)
     line0.SetLineStyle(2)
@@ -273,7 +270,7 @@ def plot_channel(channel):
     hr.GetYaxis().SetLabelSize(0.045)
     hr.GetYaxis().SetNdivisions(3)
 
-    pt.drawAtlasLabel(0.2, 0.86, "Work in Progress")
+    pt.drawAtlasLabel(0.2, 0.86, "Internal")
     if not args.t0:
         if year in ['15', '16', '17', '18']:
             pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13 TeV")
@@ -297,14 +294,14 @@ def plot_channel(channel):
     if not args.t0:
             c1.SaveAs(os.path.join(outdirstr, outfile + ".eps"))
             c1.SaveAs(os.path.join(outdirstr, outfile + ".pdf"))
-        else:
-            rfo.WriteTObject(c1, outfile)
-            if channel == 'Zmumu':
-                rfo.WriteTObject(hz, 'z_lumi')
-                rfo.WriteTObject(hr, 'z_lumi_ratio')
-        c1.Clear()
+    else:
+        rfo.WriteTObject(c1, outfile)
+        if channel == 'Zmumu':
+            rfo.WriteTObject(hz, 'z_lumi')
+            rfo.WriteTObject(hr, 'z_lumi_ratio')
+    c1.Clear()
 
-    # Plot ratio with fit
+    #Plot ratio with fit
     c2 = R.TCanvas()
     hr.Draw('ap0')
 
@@ -318,23 +315,20 @@ def plot_channel(channel):
         hr.GetYaxis().SetRangeUser(0.9, 1.1)
         hr.GetYaxis().SetNdivisions()
 
+        mean = hr.GetFunction("pol0").GetParameter(0)
+        stdev = np.percentile(abs(arr_rat - np.median(arr_rat)), 68)
+
         line0 = pt.make_bands(arr_bins, stdev, mean)
         line0.Draw("same 3")
         hr.Draw("same ep0")
         hr.GetFunction('pol0').Draw('same l')
-            
 
-        chi2 = hr.GetFunction('pol0').GetChisquare()
-        ndf  = hr.GetFunction('pol0').GetNDF()
-
-        mean = hr.GetFunction("pol0").GetParameter(0)
-        stdev = np.percentile(abs(arr_rat - np.median(arr_rat)), 68)
         print("####")
-        print("stdev =", stdev)
+        print("stdev = ", stdev)
+        print("mean = ", mean)
         print("####")
 
-    #pt.drawAtlasLabel(0.2, 0.86, "Internal")
-    pt.drawAtlasLabel(0.2, 0.86, "Work in Progress")
+    pt.drawAtlasLabel(0.2, 0.86, "Internal")
     if not args.t0:
         if year == "22" or year == "23":
             pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
@@ -342,7 +336,8 @@ def plot_channel(channel):
             pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13 TeV")
     pt.drawText(0.2, 0.74, "LHC Fill " + lhc_fill)
     pt.drawText(0.2, 0.68,  channel_string + " counting")
-
+    
+    mean = hr.GetFunction("pol0").GetParameter(0)
     leg = R.TLegend(0.17, 0.2, 0.90, 0.3)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.05)
@@ -358,10 +353,6 @@ def plot_channel(channel):
     else:
         rfo.WriteTObject(c2, f'{outfile}_ratio')
     
-    print("Zlumi Arr: ")
-
-    print(arr_zlumi)
-    
     return arr_zlumi, arr_zlumi_err
 
 def plot_ratio(zeelumi, zeelumierr, zmumulumi, zmumulumierr):
@@ -373,8 +364,17 @@ def plot_ratio(zeelumi, zeelumierr, zmumulumi, zmumulumierr):
     run_number = str(int(dfz.RunNum[0]))
     lhc_fill   = str(int(dfz.FillNum[0]))
     
+    if not args.t0:
+        outdirstr = outdir + run_number
+        filepfx = f'data{year}_{run_number}_'
+    else:
+        outdirstr = outdir
+        filepfx = ''
 
-     #Calculate mean per LB against ATLAS
+    if args.t0:
+        rfo = R.TFile.Open(os.path.join(outdirstr, 'zlumi.root'), 'RECREATE')
+
+    #Calculate mean per LB against ATLAS
     dfz = dfz.drop(dfz[(dfz['LBLive']<10) | (dfz['PassGRL']==0)].index)
 
     # Scale by livetime
@@ -434,7 +434,7 @@ def plot_ratio(zeelumi, zeelumierr, zmumulumi, zmumulumierr):
     gr.Draw("same ep")
 
     latex = R.TLatex()
-    R.ATLASLabel(0.2, 0.86, "Work in Progress")
+    R.ATLASLabel(0.2, 0.86, "Internal")
     if not args.t0:
         if year in ['15', '16', '17', '18']:
             latex.DrawLatexNDC(0.2, 0.80, "Data 20" +year+ ", #sqrt{s} = 13 TeV")

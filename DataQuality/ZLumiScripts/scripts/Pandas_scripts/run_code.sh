@@ -11,7 +11,7 @@ CVMFS="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists"
 indir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/MergedOutputs/HighMu/data23_13p6TeV/All_Outputs/"
 
 #outdir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data22_13p6TeV/physics_Main_MC23a/"
-outdir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data23_13p6TeV/physics_Main_customgrl/"
+outdir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data23_13p6TeV/physics_Main_officialgrl/"
 
 
 for dir in $indir
@@ -24,8 +24,9 @@ do
     
 	[ $year == 22 ] && grl="${CVMFS}/data22_13p6TeV/20230207/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml" && campaign=mc23a
 	
-	[ $year == 23 ] && grl="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/data23_grl/data23_13p6TeV_grl.xml" && campaign=mc23a
-	 #&& grl="${CVMFS}/data23_13p6TeV/20230712/physics_25ns.xml"
+	[ $year == 23 ] && grl="${CVMFS}/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml" && campaign=mc23a
+	#&& grl="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/data23_grl/data23_13p6TeV_grl.xml"
+	  
 
 	if [[ $batch = "local" ]]
 	then

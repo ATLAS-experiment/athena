@@ -17,14 +17,14 @@ import time
 import argparse
     
 parser = argparse.ArgumentParser()
-parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
+parser.add_argument('--year', type=str, help='15-18 or 22-23, Run3 for full Run-3')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--comp', action='store_true', help='Compare Zee and Zmumu?')
 parser.add_argument('--absolute', action='store_true', help='Compare absolute luminosity')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
-parser.add_argument('--2022_dir', type=str, help='Input directory for 2022 data')
-parser.add_argument('--2023_dir', type=str, help='Input directory for 2023 data')
+parser.add_argument('--dir_2022', type=str, help='Input directory for 2022 data')
+parser.add_argument('--dir_2023', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
@@ -32,8 +32,8 @@ channel = args.channel
 absolute = args.absolute
 indir = args.indir
 outdir = args.outdir
-2022_dir = args.2022_dir
-2023_dir = args.2023_dir
+dir_2022 = args.dir_2022
+dir_2023 = args.dir_2023
 
 print("------------------------------------------")
 print("Begin Yearwise Lumi vs Time")
@@ -98,7 +98,6 @@ def main():
         channel_comparison(years)
     else: 
         zcounting_vs_atlas(channel, years)
-    #CountZ(years)
 
 def channel_comparison(years):
 
@@ -109,19 +108,15 @@ def channel_comparison(years):
     dict_zlumi = {}
     for year in years:  
 
-        #maindir  = indir #+ "data"+year+"_13p6TeV/"
         print("year = ", year)
 
         if year == "23":
-
-            grl = []
+            maindir = args.indir + dir_2023
             grl = pt.get_grl(year)
             print("2023 grl = ", grl)
 
-            maindir = args.indir + 2023_dir
-
         elif year == "22":
-            maindir = args.indir + 2022_dir 
+            maindir = args.indir + dir_2022 
             grl = pt.get_grl(year)
             print("2022 grl = ", grl) 
                 
@@ -136,9 +131,11 @@ def channel_comparison(years):
                 dfz_small = dfz
                 dfz_small['ZLumi'] = dfz_small[channel + 'Lumi']
                 dfz_small['ZLumiErr'] = dfz_small[channel + 'LumiErr']
-                dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)   
+                dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
+                dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
                 # Cut out all runs shorter than 40 minutes
-                if dfz_small['LBLive'].sum()/60 < 40: 
+                if dfz_small['LBLive'].sum()/60 < 40:
+                    print("Skip Run", run, "because of live time", dfz_small['LBLive'].sum()/60, "min")
                     continue
  
                 dfz_small['ZLumi'] *= dfz_small['LBLive']
@@ -155,8 +152,7 @@ def channel_comparison(years):
                 timestamp = R.TDatime(timestamp[0], timestamp[1], timestamp[2], timestamp[3], timestamp[4], timestamp[5])
                 timestamp = timestamp.Convert()
                 dict_zlumi[channel, run] = (zlumi, zerr, timestamp)
-    
-    print("grl = ", grl)
+
     vec_times     = array('d')
     vec_ratio     = array('d')
     vec_ratio_err = array('d')
@@ -259,17 +255,14 @@ def zcounting_vs_atlas(channel, years):
         print("year = ", year)
 
         if year == "23":
-
-            grl = []
+            maindir = args.indir + dir_2023
             grl = pt.get_grl(year)
             print("2023 grl = ", grl)
 
-            maindir = args.indir + 2023_dir
-
         elif year == "22":
-            maindir = args.indir + 2023_dir
+            maindir = args.indir + dir_2022
             grl = pt.get_grl(year)
-            print("other grl = ", grl)
+            print("2022 grl = ", grl)
                 
         else:
             grl = pt.get_grl(year)
@@ -283,6 +276,7 @@ def zcounting_vs_atlas(channel, years):
             dfz_small['ZLumiErr'] = dfz_small[channel + 'LumiErr']
             dfz_small['LBLive'] = dfz_small['LBLive']
             dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
+            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
 
             # Cut out all runs shorter than 40 minutes
             if dfz_small['LBLive'].sum()/60 < 40:
@@ -321,30 +315,23 @@ def zcounting_vs_atlas(channel, years):
     arr_olumi = np.array(arr_olumi)
     arr_zlumi = np.array(arr_zlumi)
     arr_zerr = np.array(arr_zerr)
-    print("arr_zlumi = ", arr_zlumi)
     total_zlumi = arr_zlumi.sum()/1000000
     total_zlumi_string = "Official Data Quality, " + str(round(total_zlumi, 2)) + " fb^-1"
 
-    # calculate ratio to ATLAS preferred lumi
-    arr_zlumi_ratio = arr_zlumi/arr_olumi
-    arr_zerr_ratio  = arr_zerr/arr_olumi
-    print("Lumi array = ", arr_zlumi_ratio)
-
 #-----------Normalisation------------
 
-    print("Official lumi", np.sum(arr_olumi))
     # Calculate and apply overall normalisation
     if args.absolute:
         normalisation = 1.0
     else:
         normalisation = np.sum(arr_zlumi) / np.sum(arr_olumi)
-
-    print("norm = ", normalisation)
     # do normalisation to period integral
-    arr_zlumi_ratio /= normalisation
-    arr_zerr_ratio  /= normalisation
+    arr_zlumi /= normalisation
+    arr_zerr  /= normalisation
     
-    print("Lumi array = ", arr_zlumi_ratio)
+    # calculate ratio to ATLAS preferred lumi
+    arr_zlumi_ratio = arr_zlumi/arr_olumi
+    arr_zerr_ratio  = arr_zerr/arr_olumi
 
 #-----------Normalisation------------
 

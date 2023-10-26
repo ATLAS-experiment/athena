@@ -8,7 +8,7 @@ Plot trigger and reconstruction efficiencies over entire data-periods.
 import pandas as pd
 import ROOT as R
 import python_tools as pt
-import tools.zlumi_mc_cf as dq_cf
+import ZLumiScripts.tools.zlumi_mc_cf as dq_cf
 from math import sqrt
 from array import array
 import argparse
@@ -18,16 +18,16 @@ parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
-parser.add_argument('--2022_dir', type=str, help='Input directory for 2022 data')
-parser.add_argument('--2023_dir', type=str, help='Input directory for 2023 data')
+parser.add_argument('--dir_2022', type=str, help='Input directory for 2022 data')
+parser.add_argument('--dir_2023', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
 channel = args.channel
 indir = args.indir
 outdir = args.outdir
-2022_dir = args.2022_dir
-2023_dir = args.2023_dir
+dir_2022 = args.dir_2022
+dir_2023 = args.dir_2023
 
 if year == "run3": 
     years = ["22", "23"]
@@ -66,11 +66,11 @@ def plot_efficiency_comb(channel, years):
 
     if channel == "Zee":
         
-        leg = R.TLegend(0.645, 0.2, 0.805, 0.4)
+        leg = R.TLegend(0.645, 0.7, 0.805, 0.9)
 
     elif channel == "Zmumu":
         
-        leg = R.TLegend(0.645, 0.2, 0.805, 0.4)
+        leg = R.TLegend(0.645, 0.7, 0.805, 0.9)
     
     for year in years:
 
@@ -87,9 +87,7 @@ def plot_efficiency_comb(channel, years):
         if year == "23":
 
             grl = []
-            print("grl before = ")
-            print(grl)
-            maindir = args.indir + 2023_dir
+            maindir = args.indir + dir_2023
 
             grl = pt.get_grl(year)
 
@@ -99,9 +97,7 @@ def plot_efficiency_comb(channel, years):
         elif year == "22":
 
             grl = []
-            print("grl before = ")
-            print(grl)
-            maindir = args.indir + 2022_dir
+            maindir = args.indir + dir_2022
 
             grl = pt.get_grl(year)
 
@@ -121,8 +117,9 @@ def plot_efficiency_comb(channel, years):
             dfz_small['LBLive'] = dfz_small['LBLive']
             dfz_small['OffMu'] = dfz_small['OffMu']
             dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
+            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
 
-             # Cut out all runs shorter than 40 minutes
+             Cut out all runs shorter than 40 minutes
             if dfz_small['LBLive'].sum()/60 < 40:
                 print("Skip Run", run, "because of live time", dfz_small['LBLive'].sum()/60, "min")
                 continue
@@ -191,25 +188,23 @@ def plot_efficiency_comb(channel, years):
             leg.SetBorderSize(0)
             leg.SetTextSize(0.07)
             leg.AddEntry(comb_graph_23, "Data 20"+year, "ep")
-    
-    print(graph_dict)
 
     if channel == "Zee":
 
-        pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
+        pt.drawAtlasLabel(0.6, ymax-0.46, "Internal")
         if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13 TeV")
+            pt.drawText(0.2, ymax-0.46, date_tag)
         else:
-            pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
+            pt.drawText(0.2, ymax-0.46, date_tag)
         pt.drawText(0.2, ymax-0.52, channel_string + " counting")
 
     elif channel == "Zmumu":
 
-        pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
+        pt.drawAtlasLabel(0.6, ymax-0.56, "Internal")
         if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, ymax-0.56, "Data 20" + year + ", #sqrt{s} = 13 TeV")
+            pt.drawText(0.2, ymax-0.56, date_tag)
         else:
-            pt.drawText(0.2, ymax-0.56, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
+            pt.drawText(0.2, ymax-0.56, date_tag)
         pt.drawText(0.2, ymax-0.62, channel_string + " counting")
 
     leg.Draw()

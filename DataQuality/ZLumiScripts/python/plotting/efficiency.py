@@ -49,8 +49,8 @@ def plot_channel(channel):
             ymax = 0.55
             leg = R.TLegend(0.7, 0.37, 0.8, 0.6)
         else: 
-            ymax = 0.88
-            leg = R.TLegend(0.7, 0.7, 0.8, 0.93)
+            ymax = 0.40
+            leg = R.TLegend(0.7, 0.22, 0.8, 0.45)
     elif channel == "Zmumu": 
         channel_string = "Z #rightarrow #mu#mu"
         lep = "#mu"
@@ -134,8 +134,7 @@ def plot_channel(channel):
     trig_graph.Draw("ap")
     reco_graph.Draw("p")
         
-    #pt.drawAtlasLabel(0.2, ymax, "Internal")
-    pt.drawAtlasLabel(0.2, ymax, "Work In Progress")
+    pt.drawAtlasLabel(0.2, ymax, "Internal")
     if year in ['15', '16', '17', '18']:
         pt.drawText(0.2, ymax-0.06, "Data 20" + year + ", #sqrt{s} = 13 TeV")
     else:

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import ROOT as R
 import python_tools as pt
-import tools.zlumi_mc_cf as dq_cf
+import ZLumiScripts.tools.zlumi_mc_cf as dq_cf
 import math
 from array import array
 import time
@@ -20,16 +20,16 @@ parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
 parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--indir', type=str, help='Input directory for CSV files')
 parser.add_argument('--outdir', type=str, help='Output directory for plots')
-parser.add_argument('--2022_dir', type=str, help='Input directory for 2022 data')
-parser.add_argument('--2023_dir', type=str, help='Input directory for 2023 data')
+parser.add_argument('--dir_2022', type=str, help='Input directory for 2022 data')
+parser.add_argument('--dir_2023', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
 channel = args.channel
 indir = args.indir
 outdir = args.outdir
-2022_dir = args.2022_dir
-2023_dir = args.2023_dir
+dir_2022 = args.dir_2022
+dir_2023 = args.dir_2023
 
 if year == "run3": 
     years = ["22", "23"]
@@ -74,9 +74,7 @@ def plot_efficiency_comb(channel, years):
         if year == "23":
 
             grl = []
-            print("grl before = ")
-            print(grl)
-            maindir = args.indir + 2023_dir
+            maindir = args.indir + dir_2023
 
             grl = pt.get_grl(year)
 
@@ -86,9 +84,7 @@ def plot_efficiency_comb(channel, years):
         elif year == "22":
 
             grl = []
-            print("grl before = ")
-            print(grl)
-            maindir = args.indir + 2022_dir
+            maindir = args.indir + dir_2022
 
             grl = pt.get_grl(year)
 
@@ -108,8 +104,9 @@ def plot_efficiency_comb(channel, years):
             dfz_small['LBLive'] = dfz_small['LBLive']
             dfz_small['OffMu'] = dfz_small['OffMu']
             dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
+            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
 
-             # Cut out all runs shorter than 40 minutes
+            # Cut out all runs shorter than 40 minutes
             if dfz_small['LBLive'].sum()/60 < 40:
                 print("Skip Run", run, "because of live time", dfz_small['LBLive'].sum()/60, "min")
                 continue
@@ -138,15 +135,12 @@ def plot_efficiency_comb(channel, years):
             
             arr_date.append(timestamp)
             arr_combeff.append(comb_eff_avg)
-            print('Average event-level efficiency = ', comb_eff_avg)
             arr_comberr.append(comb_err_avg)
             run_num.append(run)
 
     arr_date = array('d', arr_date)
-    print("date array = ", arr_date)
 
     arr_combeff = np.array(arr_combeff)
-    print("comb array = ", arr_combeff)
     arr_comberr = np.array(arr_comberr)
 
     if channel == "Zee": 
@@ -176,9 +170,9 @@ def plot_efficiency_comb(channel, years):
         leg = R.TLegend(0.645, 0.4, 0.805, 0.6)
         pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
         if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13 TeV")
+            pt.drawText(0.2, ymax-0.46, date_tag)
         else:
-            pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
+            pt.drawText(0.2, ymax-0.46, date_tag)
         pt.drawText(0.2, ymax-0.52, channel_string + " counting")
 
     elif channel == "Zmumu":
@@ -186,9 +180,9 @@ def plot_efficiency_comb(channel, years):
         leg = R.TLegend(0.645, 0.4, 0.805, 0.6)
         pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
         if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13 TeV")
+            pt.drawText(0.2, ymax-0.46, date_tag)
         else:
-            pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
+            pt.drawText(0.2, ymax-0.46, date_tag)
         pt.drawText(0.2, ymax-0.52, channel_string + " counting")
 
     leg.SetBorderSize(0)
@@ -204,9 +198,6 @@ def plot_efficiency_comb(channel, years):
         new_trig_line.SetLineStyle(2)
         new_trig_line.Draw("same")
         R.gPad.Update()
-
-    #elif channel == "Zmumu":
-        #new_trig_line = R.TLine(1683743066.0, 0.69, 1683743066.0, 0.96)
 
     comb_graph.GetHistogram().SetXTitle("Date")
     c1.SaveAs(outdir + "event_eff_v_time_"+channel+"_data"+out_tag+"_"+".eps")
@@ -231,9 +222,7 @@ def plot_efficiency(channel, years):
         if year == "23":
 
             grl = []
-            print("grl before = ")
-            print(grl)
-            maindir = args.indir + 2023_dir
+            maindir = args.indir + dir_2023
 
             grl = pt.get_grl(year)
 
@@ -243,9 +232,7 @@ def plot_efficiency(channel, years):
         elif year == "22":
 
             grl = []
-            print("grl before = ")
-            print(grl)
-            maindir = args.indir + 2022_dir
+            maindir = args.indir + dir_2022
 
             grl = pt.get_grl(year)
 
@@ -266,6 +253,7 @@ def plot_efficiency(channel, years):
             dfz_small['RecoErr'] = dfz_small[channel + 'ErrReco']
             dfz_small['LBLive'] = dfz_small['LBLive']
             dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
+            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
 
             # Cut out all runs shorter than 40 minutes
             if dfz_small['LBLive'].sum()/60 < 40:
@@ -302,27 +290,22 @@ def plot_efficiency(channel, years):
             
             arr_date.append(timestamp)
             arr_trigeff.append(trig_eff_avg)
-            print('Average trigger efficiency = ', trig_eff_avg)
             arr_trigerr.append(trig_err_avg)
             arr_recoeff.append(reco_eff_avg)
-            print('Average reconstruction efficiency = ', reco_eff_avg)
             arr_recoerr.append(reco_err_avg)
             run_num.append(run)
 
     arr_date = array('d', arr_date)
-    print("date array = ", arr_date)
 
     arr_trigeff = np.array(arr_trigeff)
-    print("trig array = ", arr_trigeff)
     arr_trigerr = np.array(arr_trigerr)
     arr_recoeff = np.array(arr_recoeff)
-    print("reco array = ", arr_recoeff)
     arr_recoerr = np.array(arr_recoerr)
 
     if channel == "Zee": 
         lep = "e"
         channel_string = "Z #rightarrow ee"
-        ymin, ymax = 0.79, 0.92
+        ymin, ymax = 0.64, 0.96
     elif channel == "Zmumu": 
         lep = "#mu"
         channel_string = "Z #rightarrow #mu#mu"
@@ -354,24 +337,24 @@ def plot_efficiency(channel, years):
     reco_graph.Draw("p")
 
     if channel == "Zee":
-        
-        leg = R.TLegend(0.645, 0.74, 0.805, 0.94)
-        pt.drawAtlasLabel(0.2, ymax-0.06, "Internal")
+
+        leg = R.TLegend(0.645, 0.2, 0.805, 0.4)
+        pt.drawAtlasLabel(0.2, ymax-0.64, "Internal")
         if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, ymax-0.12, "Data 20" + year + ", #sqrt{s} = 13 TeV")
+            pt.drawText(0.2, ymax-0.70, date_tag)
         else:
-            pt.drawText(0.2, ymax-0.12, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
-        pt.drawText(0.2, ymax-0.18, channel_string + " counting")
+            pt.drawText(0.2, ymax-0.70, date_tag)
+        pt.drawText(0.2, ymax-0.76, channel_string + " counting")
 
     elif channel == "Zmumu":
         
-        leg = R.TLegend(0.645, 0.4, 0.805, 0.6)
-        pt.drawAtlasLabel(0.2, ymax-0.4, "Internal")
+        leg = R.TLegend(0.645, 0.45, 0.805, 0.65)
+        pt.drawAtlasLabel(0.2, ymax-0.36, "Internal")
         if year in ['15', '16', '17', '18']:
-            pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13 TeV")
+            pt.drawText(0.2, ymax-0.42, date_tag)
         else:
-            pt.drawText(0.2, ymax-0.46, "Data 20" + year + ", #sqrt{s} = 13.6 TeV")
-        pt.drawText(0.2, ymax-0.52, channel_string + " counting")
+            pt.drawText(0.2, ymax-0.42, date_tag)
+        pt.drawText(0.2, ymax-0.48, channel_string + " counting")
 
     leg.SetBorderSize(0)
     leg.SetTextSize(0.07)
@@ -381,17 +364,12 @@ def plot_efficiency(channel, years):
     leg.Draw()
     
     if channel == "Zee":
-        new_trig_line = R.TLine(1683743066.0, 0.79, 1683743066.0, 0.92)
+        new_trig_line = R.TLine(1683743066.0, ymin, 1683743066.0, ymax)
         new_trig_line.SetLineColor(R.kBlue)
         new_trig_line.SetLineWidth(3)
         new_trig_line.SetLineStyle(2)
         new_trig_line.Draw("same")
         R.gPad.Update()
-
-    #elif channel == "Zmumu":
-        #new_trig_line = R.TLine(1683743066.0, 0.69, 1683743066.0, 0.96)
-        
-    
 
     trig_graph.GetHistogram().SetXTitle("Date")
     c1.SaveAs(outdir + "eff_v_time_"+channel+"_data"+out_tag+"_"+".eps")

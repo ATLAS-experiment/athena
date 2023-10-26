@@ -2,8 +2,8 @@
 
 #script to make all plots
 
-indir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data23_13p6TeV/physics_Main_officialgrl/"
-outdir="/eos/home-j/jnewell/data23_13p6TeV_physics_plot_customgrl3/"
+indir="/eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/CSVOutputs/HighMu/data23_13p6TeV/physics_Main_officialgrl_test/"
+outdir="/eos/home-j/jnewell/data23_13p6TeV_physics_plot_officialgrl/"
 
 filelist=$(ls $indir)
 for file in $filelist;

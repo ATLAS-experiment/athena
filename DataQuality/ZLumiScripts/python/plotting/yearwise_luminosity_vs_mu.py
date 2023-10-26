@@ -15,8 +15,8 @@ parser.add_argument('--channel', type=str, help='Zee or Zmumu')
 parser.add_argument('--comp', action='store_true', help='Compare Zee and Zmumu?')
 parser.add_argument('--indir', type=str, help='Input CSV file directory')
 parser.add_argument('--outdir', type=str, help='Output plot directory')
-parser.add_argument('--2022_dir', type=str, help='Input directory for 2022 data')
-parser.add_argument('--2023_dir', type=str, help='Input directory for 2023 data')
+parser.add_argument('--dir_2022', type=str, help='Input directory for 2022 data')
+parser.add_argument('--dir_2023', type=str, help='Input directory for 2023 data')
 
 args    = parser.parse_args()
 year    = args.year
@@ -24,8 +24,8 @@ channel = args.channel
 comp = args.comp
 indir = args.indir
 outdir = args.outdir
-2022_dir = args.2022_dir
-2023_dir = args.2023_dir
+dir_2022 = args.dir_2022
+dir_2023 = args.dir_2023
 print("------------------------------------------")
 print("Begin Yearwise Lumi vs Mu")
 print("------------------------------------------")
@@ -61,6 +61,7 @@ if year == "run2":
     outfile = "ZeeZmm_counting_data_ratio_v_mu_run2.pdf"
 elif year == "run3":            
     grl = []
+    out_tag = "_run3"
 
     grl = pt.get_grl("22")
     grl.extend(pt.get_grl("23"))
@@ -68,19 +69,22 @@ elif year == "run3":
     date_string = "Run 3, #sqrt{s} = 13.6 TeV"
     outfile = "ZeeZmm_counting_data_ratio_v_mu_run3.pdf"
 elif year == "22":
+    out_tag = year
     date_string = "Data 20"+year+", #sqrt{s} = 13.6 TeV"
     grl = pt.get_grl(year)
-    outfile = "ZeeZmm_counting_data_ratio_v_mu_20"+year+".pdf"
+    outfile = "ZeeZmm_counting_data_ratio_v_mu"+out_tag+".pdf"
 elif year == "23":
+    out_tag = year
     date_string = "Data 20"+year+", #sqrt{s} = 13.6 TeV"
     grl = []
     grl = pt.get_grl(year)
 
-    outfile = "ZeeZmm_counting_data_ratio_v_mu_20"+year+".pdf"
-else: 
+    outfile = "ZeeZmm_counting_data_ratio_v_mu"+out_tag+".pdf"
+else:
+    out_tag = year
     date_string = "Data 20"+year+", #sqrt{s} = 13 TeV"
     grl = pt.get_grl(year)
-    outfile = "ZeeZmm_counting_data_ratio_v_mu_20"+year+".pdf"
+    outfile = "ZeeZmm_counting_data_ratio_v_mu"+out_tag+".pdf"
 
 ymin, ymax = 0.94, 1.06
 
@@ -90,9 +94,9 @@ def main():
         run = run.replace('.csv', '')
         run = run.replace('run_', '')
         if int(run) < 450000:
-            indir = args.indir + 2022_dir
+            indir = args.indir + dir_2022
         else:
-            indir = args.indir + 2023_dir
+            indir = args.indir + dir_2023
         dfz = pd.read_csv(indir + "run_" + run + ".csv")
         dfz_small = dfz
         if comp: 
@@ -103,6 +107,7 @@ def main():
             dfz_small['ZmumuLumi']    *= dfz_small['LBLive']
             dfz_small['ZmumuLumiErr'] *= dfz_small['LBLive']
             dfz_small['ZmumuLumiErr'] *= dfz_small['ZmumuLumiErr']
+            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
         else:
             dfz_small['ZLumi'] = dfz_small[channel + 'Lumi']
             dfz_small['ZLumiErr'] = dfz_small[channel + 'LumiErr']
@@ -111,10 +116,11 @@ def main():
             dfz_small['ZLumi']    *= dfz_small['LBLive']
             dfz_small['ZLumiErr'] *= dfz_small['LBLive']
             dfz_small['ZLumiErr'] *= dfz_small['ZLumiErr']
+            dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
 
         # Cut out all runs shorter than 40 minutes
-        if dfz_small['LBLive'].sum() == 0: 
-            print("Run ", run, " is too short")
+        if dfz_small['LBLive'].sum()/60 < 40:
+            print("Skip Run", run, "because of live time", dfz_small['LBLive'].sum()/60, "min")
             continue
             
         # Cut out early 2016 runs with "strange" bunch structure
@@ -224,7 +230,7 @@ def main():
     if comp:
         c1.SaveAs(outdir + outfile)
     else: 
-        c1.SaveAs(outdir + channel + "_counting_data_ratio_v_mu_20"+year+".pdf")
+        c1.SaveAs(outdir + channel + "_counting_data_ratio_v_mu"+out_tag+".pdf")
 
 if __name__ == "__main__":
     pt.setAtlasStyle()

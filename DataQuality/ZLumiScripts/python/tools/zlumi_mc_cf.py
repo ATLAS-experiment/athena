@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def correction(mu, runmode, campaign, run=None):
     if runmode == "Zee":
