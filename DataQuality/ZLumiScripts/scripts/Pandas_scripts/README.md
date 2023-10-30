@@ -20,7 +20,7 @@ Each row of the csv file corresponds to a single luminosity block, and contains 
 ```
 ls <grid_output>/* > tomerge.txt
 DQHistogramMerge.py tomerge.txt tree_<run_number>.root
-
+```
 # EOS space
 
 The Run 3 outputs can be found at the following directories:
