@@ -117,10 +117,17 @@ python plotting/plot_kinematics.py --infile $infile
 
 ## Making plots for the entire Run 3 dataset
 _Note_: The input (indir) and output (outdir) directories will need to be changed in plot_yearwise.sh.
-As well as defining input and output directories, individual input directories must be given for each year, i.e. dir_2022, dir_2023. This is laid out such that dir_2022 and dir_2023 share a parent directory but data for each year is stored in separate subdirectories. For example, Run 3 data is stored in the CSVOutputs directory with subdirectoried data22_13p6TeV/ and data23_13p6TeV/.
+
+As well as defining input and output directories, individual input directories must be given for each year, i.e. dir_2022, dir_2023.
+
+ This is laid out such that dir_2022 and dir_2023 share a parent directory but data for each year is stored in separate subdirectories. 
+
+For example, Run 3 data is stored in the CSVOutputs directory with subdirectoried data22_13p6TeV/ and data23_13p6TeV/.
 
 Produce plots covering the full 2022, 2023 or Run 3 datasets by using plot_yearwise.sh.
+
 This provides distributions showing the time and pileup dependence of luminosity across the full year (or years) as well as time and pileup dependence of single lepton trigger and reconstruction efficiencies.
+
 The code can loop through individual years using:
 ```
 for year in 22 23
@@ -152,6 +159,7 @@ done
 This can also be done by running:
 ```
 ./plot_yearwise.sh
+```
 
 # Making separate sets of plots for all runs in one directory at once
 __Note_: The input (indir) and output (outdir) directories will need to be changed in this script.
