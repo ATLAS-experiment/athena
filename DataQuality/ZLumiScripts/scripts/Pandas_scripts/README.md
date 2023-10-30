@@ -52,11 +52,15 @@ Preliminary GRL - /eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/data23_
 ## Note on CSVOutputs for 2023:
 
 2023 CSV Outputs are divided into two directories:
+
 physics_Main_customgrl/
+
 physics_Main_officialgrl/
 
-This contains CSV files processed with MC23a MCCFs using either the preliminary GRL (used to stay up to date with latest ATLAS runs) or the official GRL.  
+This contains CSV files processed with MC23a MCCFs using either the preliminary GRL (used to stay up to date with latest ATLAS runs) or the official GRL.
+  
 Preliminary GRL - /eos/atlas/atlascerngroupdisk/perf-lumi/Zcounting/Run3/data23_13p6TeV_grl.xml (up to run 456685)
+
 Official GRL - /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml (up to run 456749)
 
 ## Note on Merged Outputs for 2023:
@@ -72,11 +76,27 @@ Older files are preiodically removed from here so files are gathered by other me
 Using a single 2022 run (tree_430580.root) as an illustrative example:
 ```
 source setup.sh
-infile="tree_430580.root"
 grl="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunLists/data22_13p6TeV/20220902/data22_13p6TeV.periodF_DetStatus-v108-pro28_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"
+infile="tree_430580.root"
+campaign=mc23a
 outdir="<your_output_directory>"
+update=on
 
-python -u dqt_zlumi_pandas.py --dblivetime --useofficial --campaign mc21 --infile $infile --grl $grl --outdir $outdir
+python -u dqt_zlumi_pandas.py --dblivetime --useofficial --grl $grl --infile $infile --campaign $campaign --outdir $outdir --update $update
+```
+campaign: Determines the Monte Carlo Correction Factors to be used in the code. These are found in zlumi_mc_cf.py in the python/tools/ directory.
+
+update: Set to "on" to run over all available hist files and overwrite any csv files currently in the outdir. Set to off to only run over hist files that don't have csv files in the outdir.
+
+# Running over the entire dataset
+_Note_: The input (indir) and output (out_dir) directories will need to be changed at the top of the script run_code.sh.
+```
+batch=local # Set to "local" to run all jobs locally in a loop
+
+for year in 23
+do
+    ./run_code.sh $year $batch $update
+done
 ```
 
 # Making single run plots
@@ -93,17 +113,6 @@ python plotting/luminosity.py --usemu --infile <input_csv_file> --outdir <output
 
 # Kinematic plots - this plotting script takes the histograms in the merged root file rather than the produced csv
 python plotting/plot_kinematics.py --infile $infile
-```
-
-# Running over the entire dataset
-_Note_: The input (indir) and output (out_dir) directories will need to be changed at the top of the script run_code.sh.
-```
-batch=local # Set to "local" to run all jobs locally in a loop
-update=on # Set to "on" to run over all available hist files and overwrite any csv files currently in the outdir. Set to off to only run over hist files that don't have csv files in the outdir.
-for year in 23
-do
-    ./run_code.sh $year $batch $update
-done
 ```
 
 ## Making plots for the entire Run 3 dataset
