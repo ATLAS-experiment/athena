@@ -2,8 +2,7 @@
 
 year=$1
 batch=$2
-stream=$3
-update=$4
+update=$3
 
 CVMFS="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists"
 
