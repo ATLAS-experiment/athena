@@ -11,6 +11,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
+#include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
@@ -18,13 +19,21 @@
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 
+
 #include <vector>
 
+
+class TH2D;
+class TH1F;
+class TProfile;
+class TTree;
+class ITHistSvc;
+
 namespace Trk {
-class TrkVKalVrtFitter;
-class IVertexFitter;
-class IVKalState;
-class VxSecVKalVertexInfo;
+  class TrkVKalVrtFitter;
+  class IVertexFitter;
+  class IVKalState;
+  class VxSecVKalVertexInfo;
 } // namespace Trk
 
 namespace Rec {
@@ -59,6 +68,8 @@ public:
   ToolHandle<FlavorTagDiscriminants::GNNTool> m_gnn_Tool{this, "gnn_Tool", "",
                                                          "GNN Decorator tool"};
   ToolHandle<Trk::TrkVKalVrtFitter> m_vertexFitterTool;
+    
+  //Trk::TrkVKalVrtFitter8 m_vertexFitterTool;
 
   // Read handles
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackLinksKey{
@@ -80,12 +91,21 @@ public:
   const xAOD::Vertex* m_thePV;
   
 private:
+
+
   
   std::string m_jetCollection;
 
+//double VrtVrtDist(const xAOD::Vertex & PrimVrt, const Amg::Vector3D & SecVrt, 
+//                                  const std::vector<double> VrtErr,double& Signif ) const;
+
+
+  TLorentzVector TotalMom(const std::vector<const xAOD::TrackParticle*>& selTrk) const; 
+  //std::vector<double> estimVrtPos( int nTrk, std::deque<long int> &selTrk, std::map<long int,std::vector<double>> & vrt) const;
+  
   struct WrkVrt {
     bool Good = true;
-    std::deque<long int> selTrk;
+//    std::deque<long int> selTrk;
     Amg::Vector3D vertex;
     TLorentzVector vertexMom;
     long int vertexCharge{};
@@ -93,7 +113,33 @@ private:
     std::vector<double> chi2PerTrk;
     std::vector<std::vector<double>> trkAtVrt;
     double chi2{};
+    double projectedVrt=0.;
+    int detachedTrack=-1;
+    double BDT=1.1;
+
+    //inline double ndof() const { return 2.0*( selTrk.size() ) - 3.0; }  //Taken from VrtSecInclusive
     };//end WrkVrt
+    
+    bool m_existIBL;
+    double m_Xbeampipe;
+    double m_Ybeampipe;
+    double m_XlayerB;
+    double m_YlayerB;
+    double m_Xlayer1;
+    double m_Ylayer1;
+    double m_Xlayer2;
+    double m_Ylayer2;
+    double m_Rbeampipe;
+    double m_RlayerB;
+    double m_Rlayer1;
+    double m_Rlayer2;
+    double m_Rlayer3;
+    double m_SVResolutionR;
+
+    bool     m_MultiVertex;
+    bool     m_MultiWithPrimary;
+    double m_massPi ;
+    
 };
 } // namespace Rec
 

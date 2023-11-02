@@ -48,6 +48,7 @@ atlas_add_component( GNNVertexConstructor
                                     VxSecVertex 
                                     VxVertex
                                     xAODTruth
+                                    TrkToolInterfaces                                    
  )
 
 atlas_add_library(   GNNVertexConstructorLib
@@ -86,6 +87,7 @@ atlas_add_library(   GNNVertexConstructorLib
                                     VxSecVertex
                                     VxVertex 
                                     xAODTruth
+                                    TrkToolInterfaces                                    
  )
                      
 # Install files from the package:
