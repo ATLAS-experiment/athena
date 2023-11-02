@@ -232,6 +232,9 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 
         xAODwrk->listSelTracks.clear();
 
+        xAODwrk->listSelTracks.clear();
+//        //newvrt.selTrk.clear();
+              
         //Retrieve the tracks and push to working xAOD
         for (auto i = elements.first; i != elements.second; ++i) {
           xAODwrk->listSelTracks.push_back(*(i->second));
@@ -359,6 +362,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       }//end of 2 Track requirement
     }
     delete xAODwrk;
+    //delete WrkVrt;
   } // end loop over jets
   return StatusCode::SUCCESS;
 } // end performVertexFit

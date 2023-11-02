@@ -77,6 +77,7 @@ namespace Trk {
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
+#include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
@@ -84,13 +85,21 @@ namespace Trk {
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 
+
 #include <vector>
 
+
+class TH2D;
+class TH1F;
+class TProfile;
+class TTree;
+class ITHistSvc;
+
 namespace Trk {
-class TrkVKalVrtFitter;
-class IVertexFitter;
-class IVKalState;
-class VxSecVKalVertexInfo;
+  class TrkVKalVrtFitter;
+  class IVertexFitter;
+  class IVKalState;
+  class VxSecVKalVertexInfo;
 } // namespace Trk
 
 namespace Rec {
@@ -155,7 +164,7 @@ private:
  
   struct WrkVrt {
     bool Good = true;
-    std::deque<long int> selTrk;
+//    std::deque<long int> selTrk;
     Amg::Vector3D vertex;
     TLorentzVector vertexMom;
     long int vertexCharge{};
