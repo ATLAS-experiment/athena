@@ -11,6 +11,10 @@
 //                                                            //
 //  Author: Riccardo-Maria BIANCHI (rbianchi@cern.ch)         //
 //  Initial version: September 2013                           //
+//
+//  Main updates: 
+//  - 2023 Nov, Riccardo.Maria.Bianchi@cern.ch, 
+//    Added HTML support in labels
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
@@ -557,6 +561,13 @@ void VP1EventDisplayEditor::addTextLabel(QString text, QFont font)
 // adding the label to the m_scene
 QGraphicsTextItem* item = m_scene->addText(text, font);
 item->setFlags(QGraphicsItem::ItemIsMovable);
+
+// The addText() method creates a TextItem with 'plain text.
+// So, we now set again the text property with the setHtml()
+// method, so users can use HTML tags to stylize their labels.
+// That's especially useful in this context, to add labels
+// with the Pt values of the physics objects.
+item->setHtml(text);
 
 // set the user's preferred color
 if (m_d->ui.radioButton_whiteText->isChecked()) {
