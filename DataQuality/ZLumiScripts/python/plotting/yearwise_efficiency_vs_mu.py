@@ -119,7 +119,7 @@ def plot_efficiency_comb(channel, years):
             dfz_small = dfz_small.drop(dfz_small[dfz_small.ZLumi == 0].index)
             dfz_small = dfz_small.drop(dfz_small[(dfz_small['LBLive']<10) | (dfz_small['PassGRL']==0)].index)
 
-             Cut out all runs shorter than 40 minutes
+            #Cut out all runs shorter than 40 minutes
             if dfz_small['LBLive'].sum()/60 < 40:
                 print("Skip Run", run, "because of live time", dfz_small['LBLive'].sum()/60, "min")
                 continue
@@ -156,19 +156,20 @@ def plot_efficiency_comb(channel, years):
         if channel == "Zee":
             channel_string = "Z #rightarrow ee"
             ymin, ymax = 0.52, 0.74
+            xmin, xmax = 0, 80
         elif channel == "Zmumu":
             channel_string = "Z #rightarrow #mu#mu"
             ymin, ymax = 0.74, 0.84
+            xmin, xmax = 0, 80
 
         if year == "22":
             
             comb_graph_22 = R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err)
             comb_graph_22.GetHistogram().SetYTitle("#varepsilon_{event}^{"+channel_string+"}#times F^{MC}")
             comb_graph_22.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
+            comb_graph_22.GetHistogram().GetXaxis().SetLimits(xmin, xmax)
             comb_graph_22.SetMarkerSize(1)
             comb_graph_22.GetHistogram().SetXTitle("Pileup (#mu)")
-            comb_graph_22.Draw("ap")
-            comb_graph_22.GetXaxis().SetRangeUser(8,80)
             comb_graph_22.Draw("ap")
             leg.SetBorderSize(0)
             leg.SetTextSize(0.07)
@@ -180,9 +181,8 @@ def plot_efficiency_comb(channel, years):
             comb_graph_23 = R.TGraphErrors(len(vec_comb), vec_mu, vec_comb, R.nullptr, vec_comb_err)
             comb_graph_23.GetHistogram().SetYTitle("#varepsilon_{event}^{"+channel_string+"}#times F^{MC}")
             comb_graph_23.GetHistogram().GetYaxis().SetRangeUser(ymin, ymax)
+            comb_graph_23.GetHistogram().GetXaxis().SetLimits(xmin, xmax)
             comb_graph_23.SetMarkerSize(1)
-            comb_graph_23.Draw("samep")
-            comb_graph_23.GetXaxis().SetRangeUser(8,80)
             comb_graph_23.Draw("samep")
             comb_graph_23.SetMarkerColor(R.kRed)
             leg.SetBorderSize(0)

@@ -162,7 +162,7 @@ This can also be done by running:
 ```
 
 # Making separate sets of plots for all runs in one directory at once
-__Note_: The input (indir) and output (outdir) directories will need to be changed in this script.
+_Note_: The input (indir) and output (outdir) directories will need to be changed in this script.
 
 ```
 ./plot_all.sh
