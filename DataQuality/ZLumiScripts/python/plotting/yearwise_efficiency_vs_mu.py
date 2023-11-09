@@ -61,7 +61,6 @@ def main():
 
 def plot_efficiency_comb(channel, years):
 
-    graph_dict = {}
     c1 = R.TCanvas()
 
     if channel == "Zee":
