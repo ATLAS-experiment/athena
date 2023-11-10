@@ -9,6 +9,7 @@ atlas_depends_on_subdirs( PUBLIC
                           xAODMuon
                           TopEvent
                           PileupReweighting
+			  TrigDecisionTool
                           ElectronEfficiencyCorrection
                           TauAnalysisTools
                           JetJvtEfficiency
@@ -43,6 +44,7 @@ atlas_add_library( TopCorrections Root/*.cxx Root/*.h Root/*.icc
                                   xAODMuon
                                   TopEvent
                                   PileupReweightingLib
+				  TrigDecisionToolLib
                                   ElectronEfficiencyCorrectionLib
                                   TauAnalysisToolsLib
                                   JetJvtEfficiencyLib

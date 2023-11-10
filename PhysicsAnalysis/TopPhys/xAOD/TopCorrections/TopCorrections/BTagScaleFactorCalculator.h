@@ -29,6 +29,14 @@
 
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
+
+
+#include <vector>
+#include <map>
+#include <string>
+
+
 
 // Forward declaration(s):
 namespace top {
@@ -53,6 +61,10 @@ namespace top {
 
     // Function to print out information about internal tools
     StatusCode debug();
+
+    StatusCode retrieveTriggerJets();
+    float getOnlineWeight(const xAOD::Jet*,std::string,std::string,std::vector<uint>&,float&,float&,float&,float&) const;
+
   private:
     std::shared_ptr<top::TopConfig> m_config;
 
@@ -66,6 +78,11 @@ namespace top {
     ///B-tagging selection tools
     std::unordered_map<std::string, ToolHandle<IBTaggingSelectionTool> > m_btagSelTools;
     std::unordered_map<std::string, ToolHandle<IBTaggingSelectionTool> > m_trkjet_btagSelTools;
+
+    ///Trigger decision tool and jet vectors for online
+    std::map<std::string,std::map<std::string,std::vector<TLorentzVector>>> m_onlineJets;
+    std::map<std::string,std::map<std::string,std::vector<float>>> m_onlineBtagging;
+    ToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool;
   };
 } // namespace
 #endif

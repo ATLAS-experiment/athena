@@ -614,7 +614,7 @@ namespace top {
                       "Base PDF set used to recalculate XF1,XF2 values if they are zero. Will be added to LHAPDFSets.",
                       " ");
     registerParameter("BTagCDIPath", "Path to the b-tagging CDI file. Default: Using the hardcoded path.", "Default");
-//    registerParameter("BTagOnlineCDIPath", "Path to the online b-tagging CDI file. Default: not provided.", "None");
+    registerParameter("BTagOnlineCDIPath", "Path to the online b-tagging CDI file. Default: not provided.", "None");
 
     registerParameter("BTaggingWP",
                       "DEPRECATED OPTION, use BTaggingCaloJetWP and BTaggingTrackJetWP for specifying b-tagging WPs for jet collections using calorimeter information and for track jets respectively.",

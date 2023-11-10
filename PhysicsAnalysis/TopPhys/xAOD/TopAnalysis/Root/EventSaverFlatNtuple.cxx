@@ -498,8 +498,16 @@ namespace top {
             m_perjet_weight_bTagSF_eigen_C_down[tagWP] = std::vector<std::vector<float> >();
             m_perjet_weight_bTagSF_eigen_Light_up[tagWP] = std::vector<std::vector<float> >();
             m_perjet_weight_bTagSF_eigen_Light_down[tagWP] = std::vector<std::vector<float> >();
+
+            m_perjet_weight_bTagMCeff[tagWP] = std::vector<float>();
+            m_perjet_weight_bTagMCeff_eigen_B_up[tagWP] = std::vector<std::vector<float> >();
+            m_perjet_weight_bTagMCeff_eigen_B_down[tagWP] = std::vector<std::vector<float> >();
+
             systematicTree->makeOutputVariable(m_perjet_weight_bTagSF[tagWP],
                                                "weight_perjet_bTagSF_" + shortBtagWP(tagWP));
+            systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff[tagWP],
+                                               "weight_perjet_bTagMCeff_" + shortBtagWP(tagWP));
+
             if ((systematicTree->name() != nominalTTreeName) && (systematicTree->name() != nominalLooseTTreeName) && !(m_config->dumpBtagSystsInSystTrees())) continue;
             systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_eigen_B_up[tagWP], "weight_perjet_bTagSF_" + shortBtagWP(
                                                  tagWP) + "_eigenvars_B_up");
@@ -513,6 +521,13 @@ namespace top {
                                                  tagWP) + "_eigenvars_Light_up");
             systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_eigen_Light_down[tagWP], "weight_perjet_bTagSF_" + shortBtagWP(
                                                  tagWP) + "_eigenvars_Light_down");
+
+            systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_eigen_B_up[tagWP], "weight_perjet_bTagMCeff_" + shortBtagWP(
+                                                 tagWP) + "_eigenvars_B_up");
+            systematicTree->makeOutputVariable(m_perjet_weight_bTagMCeff_eigen_B_down[tagWP], "weight_perjet_bTagMCeff_" + shortBtagWP(
+                                                 tagWP) + "_eigenvars_B_down");
+
+
             for (const std::string& name : m_config->btagging_namedSysts(tagWP)) {
               systematicTree->makeOutputVariable(m_perjet_weight_bTagSF_named_up[tagWP][name], "weight_perjet_bTagSF_" + shortBtagWP(
                                                    tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
@@ -2981,12 +2996,18 @@ namespace top {
 
         if (m_config->isMC() && m_config->storePerJetBtagSFs()) {
           m_perjet_weight_bTagSF[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+          m_perjet_weight_bTagMCeff[tagWP].resize(event.m_jets.size()-n_jet_electrons);
+
           m_perjet_weight_bTagSF_eigen_B_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_B_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_C_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_C_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_C_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_C_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_Light_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_Light_eigenvars(tagWP)));
           m_perjet_weight_bTagSF_eigen_Light_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_Light_eigenvars(tagWP)));
+
+          m_perjet_weight_bTagMCeff_eigen_B_up[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+          m_perjet_weight_bTagMCeff_eigen_B_down[tagWP].resize(event.m_jets.size()-n_jet_electrons, std::vector<float>(m_config->btagging_num_B_eigenvars(tagWP)));
+
           for (const std::string& name : m_config->btagging_namedSysts(tagWP)) {
             m_perjet_weight_bTagSF_named_up[tagWP][name].resize(event.m_jets.size()-n_jet_electrons);
             m_perjet_weight_bTagSF_named_down[tagWP][name].resize(event.m_jets.size()-n_jet_electrons);
@@ -3098,9 +3119,13 @@ namespace top {
             if (std::find(m_config->bTagWP_calibrated().begin(),
               m_config->bTagWP_calibrated().end(), tagWP) == m_config->bTagWP_calibrated().end()) continue;
             m_perjet_weight_bTagSF[tagWP][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_nom");
+            m_perjet_weight_bTagMCeff[tagWP][i] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_nom");
+
             for (size_t ivar = 0; ivar < m_config->btagging_num_B_eigenvars(tagWP); ++ivar) {
               m_perjet_weight_bTagSF_eigen_B_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1up");
               m_perjet_weight_bTagSF_eigen_B_down[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1down");
+              m_perjet_weight_bTagMCeff_eigen_B_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1up");
+              m_perjet_weight_bTagMCeff_eigen_B_down[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_FT_EFF_Eigen_B_" + std::to_string(ivar) + "__1down");
             }
             for (size_t ivar = 0; ivar < m_config->btagging_num_C_eigenvars(tagWP); ++ivar) {
               m_perjet_weight_bTagSF_eigen_C_up[tagWP][i][ivar] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_FT_EFF_Eigen_C_" + std::to_string(ivar) + "__1up");

@@ -2087,8 +2087,8 @@ namespace top {
     {m_cdi_path_warning = flag;}
     const std::string bTaggingCDIPath() const
     {return m_btagging_cdi_path;}
-    //    const std::string bTaggingOnlineCDIPath() const
-    //    {return m_btagging_online_cdi_path;}
+    const std::string bTaggingOnlineCDIPath() const
+    {return m_btagging_online_cdi_path;}
     const std::string& bTaggingCalibration_B() const
     {return m_btagging_calibration_B;};
     const std::string& bTaggingCalibration_C() const

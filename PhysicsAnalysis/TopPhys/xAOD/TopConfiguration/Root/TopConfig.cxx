@@ -1728,7 +1728,7 @@ namespace top {
     }
 
     m_btagging_cdi_path = settings->value("BTagCDIPath");
-    //    m_btagging_online_cdi_path = settings->value("BTagOnlineCDIPath");
+    m_btagging_online_cdi_path = settings->value("BTagOnlineCDIPath");
 
     // now get all Btagging WP from the config file, and store them properly in a map.
     // Need function to compare the cut value with the WP and vice versa
