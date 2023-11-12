@@ -1,0 +1,536 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#include "TrackToTrackParticleCnvAlg.h"
+
+#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
+#include "Acts/Definitions/Units.hpp"
+#include "Acts/Propagator/detail/JacobianEngine.hpp"
+#include "ActsInterop/Logger.h"
+
+#include "xAODTracking/TrackParticleAuxContainer.h"
+#include "MagFieldElements/AtlasFieldCache.h"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "GaudiKernel/PhysicalConstants.h"
+
+#include "DataHandleUtils.h"
+#include "CurvilinearCovarianceHelper.h"
+#include "HitSummaryDataUtils.h"
+#include "ExpectedHitUtils.h"
+
+#include <tuple>
+#include <sstream>
+
+namespace {
+
+   /** @brief extract the lower triangle for the given covariance matrix and store it in a vector.
+    * @param covMatrix the covariance matrix
+    * @param n_rows_max only consider this number of rows at most.
+    * @return vector of the lower triangle of the covariance matrix i.e. cov(0,0), cov(1,0), cov(1,1), ...
+    * Will clear the given vector and fill it with the lower triangle of the covariace up to the maximum row.
+    */
+   template <typename T, class T_SquareMatrix>
+   inline void lowerTriangleToVector(const T_SquareMatrix& covMatrix,
+                                     std::vector<T>& vec, unsigned int n_rows_max) {
+      assert( n_rows <= covMatrix.rows() && covMatrix.rows() == covMatrix.cols());
+      vec.clear();
+      unsigned int n_rows = std::min(n_rows_max, static_cast<unsigned int>(covMatrix.rows()));
+      vec.reserve((n_rows+1)*n_rows/2);
+      for (unsigned int i = 0; i < n_rows; ++i) {
+         for (unsigned int j = 0; j <= i; ++j) {
+            vec.emplace_back(covMatrix(i, j));
+         }
+      }
+   }
+
+   /** @brief extract the lower triangle for the given covariance matrix, store it in a vector and scale the last row by the given factor.
+    * @param covMatrix the covariance matrix
+    * @param n_rows_max only consider this number of rows at most.
+    * @param last_element_scale scale to be applied to the last row
+    * @return vector of the lower triangle of the covariance matrix
+              i.e. cov(0,0), cov(1,0), cov(1,1), ... cov(last_row-1,0)*scale, ... cov(last_row-1,last_row-1)*scale*scale
+    * Will clear the given vector and fill it with the lower triangle of the covariace up to the maximum row, and also
+    * scale the elements of the last row by the given factor.
+    */
+   template <typename T, class T_SquareMatrix>
+   inline void lowerTriangleToVectorScaleLastRow(const T_SquareMatrix& covMatrix,
+                                                 std::vector<T>& vec, unsigned int n_rows_max,
+                                                 typename T_SquareMatrix::Scalar last_element_scale) {
+      assert( n_rows <= covMatrix.rows() && covMatrix.rows() == covMatrix.cols());
+      vec.clear();
+      unsigned int n_rows = std::min(n_rows_max, static_cast<unsigned int>(covMatrix.rows()));
+      vec.reserve((n_rows+1)*n_rows/2);
+      for (unsigned int i = 0; i < n_rows; ++i) {
+         for (unsigned int j = 0; j <= i; ++j) {
+            vec.emplace_back(covMatrix(i, j));
+         }
+      }
+      typename std::vector<T>::iterator cov_iter = vec.end();
+      --cov_iter;
+      *cov_iter *= last_element_scale; // apply scale twice to diagonal element
+      for (unsigned int i=0; i<n_rows_max; ++i) {
+         *cov_iter *= last_element_scale;
+         --cov_iter;
+      }
+   }
+
+   /** @brief Helper to set the given summary value in the summary of the given track particle
+    * @param track_particle the track particle for which the summary is updated
+    * @param value the new value to set in the track summary
+    * @param summary_type the summary type to be updated. 
+    */
+   void setSummaryValue(xAOD::TrackParticle &track_particle, uint8_t value, xAOD::SummaryType summary_type) {
+      uint8_t tmp = value;
+      track_particle.setSummaryValue(tmp, summary_type);
+   }
+}
+
+namespace {
+   // Create lut to map neasurement types (pixel and strips only) to hit summary types. 
+   std::array<unsigned short,ActsTrk::to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> makeMeasurementToSummaryTypeMap() {
+      std::array<unsigned short,ActsTrk::to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> ret;
+      for (unsigned short &elm : ret) {
+         elm = xAOD::numberOfTrackSummaryTypes;
+      }
+      assert(ActsTrk::to_underlying(xAODUncalibMeasType::sTgcStripType)+1u == 8u );
+      ret.at(ActsTrk::to_underlying(xAOD::UncalibMeasType::PixelClusterType)) = xAOD::numberOfPixelHits;
+      ret.at(ActsTrk::to_underlying(xAOD::UncalibMeasType::StripClusterType)) = xAOD::numberOfSCTHits;
+      return ret;
+   }
+}
+
+namespace ActsTrk
+{
+  std::vector<std::pair<Acts::PdgParticle, xAOD::ParticleHypothesis> > TrackToTrackParticleCnvAlg::s_actsHypothesisToxAOD;
+
+  void TrackToTrackParticleCnvAlg::initParticleHypothesisMap() {
+      if (s_actsHypothesisToxAOD.empty()) {
+         s_actsHypothesisToxAOD.reserve(7);
+         s_actsHypothesisToxAOD.push_back( std::make_pair( Acts::eElectron , xAOD::electron) );
+         s_actsHypothesisToxAOD.push_back( std::make_pair( Acts::eMuon , xAOD::muon) );
+         s_actsHypothesisToxAOD.push_back( std::make_pair( Acts::ePionPlus , xAOD::pion) );
+         s_actsHypothesisToxAOD.push_back( std::make_pair( Acts::eProton , xAOD::proton) );
+         s_actsHypothesisToxAOD.push_back( std::make_pair( Acts::ePionZero , xAOD::pi0) );
+         s_actsHypothesisToxAOD.push_back( std::make_pair( Acts::eNeutron , xAOD::neutron) );
+         s_actsHypothesisToxAOD.push_back( std::make_pair( Acts::eGamma , xAOD::photon) );
+     }
+   }
+
+
+  TrackToTrackParticleCnvAlg::TrackToTrackParticleCnvAlg(const std::string &name,
+                                                         ISvcLocator *pSvcLocator)
+      : AthReentrantAlgorithm(name, pSvcLocator)
+  {
+  }
+
+  StatusCode TrackToTrackParticleCnvAlg::initialize()
+  {
+     ATH_CHECK( m_tracksContainerKey.initialize() );
+     ATH_CHECK( m_trackParticlesOutKey.initialize() );
+     ATH_CHECK( m_beamSpotKey.initialize() );
+     ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
+
+     ATH_CHECK( m_extrapolationTool.retrieve() ); // for extrapolation to beamline
+
+     // propagator for conversion to curvilnear parameters
+     {
+        auto logger = makeActsAthenaLogger(this, "Prop");
+
+        Navigator::Config cfg{m_extrapolationTool->trackingGeometryTool()->trackingGeometry()};
+        cfg.resolvePassive = false;
+        cfg.resolveMaterial = true;
+        cfg.resolveSensitive = true;
+        auto navigtor_logger = logger->cloneWithSuffix("Navigator");
+        m_propagator = std::make_unique<Propagator>(std::move(Stepper(std::move(std::make_shared<ATLASMagneticFieldWrapper>()))),
+                                                    std::move(Navigator(cfg,std::move(navigtor_logger))),
+                                                    std::move(logger));
+     }
+
+     // for layer/module-type information per hit
+     ATH_CHECK( m_siDetEleCollKey.initialize() );
+     if (m_siDetEleCollToMeasurementType.size() == m_siDetEleCollKey.size()) {
+        unsigned int collection_idx=0;
+        for (int type : m_siDetEleCollToMeasurementType ) {
+           if (type <1 || type >2) {
+              ATH_MSG_ERROR("Invalid measurement type (" << type << ") given for collection "  << collection_idx << " : "
+                            << m_siDetEleCollKey[collection_idx].key()
+                            << ". Expected 1 for pixel, 2 for strips.");
+              return StatusCode::FAILURE;
+           }
+           ++collection_idx;
+        }
+     }
+     else {
+        ATH_MSG_ERROR("Expected exactly one value in SiDetEleCollToMeasurementType per SiDetectorElementCollection. But got "
+                      << m_siDetEleCollToMeasurementType.size() << " instead of " << m_siDetEleCollKey.size() << ".");
+        return StatusCode::FAILURE;
+     }
+
+     if (m_pixelExpectLayerCylinder.size() != 2) {
+        ATH_MSG_ERROR("Expected 2 values for PixelExpectLayerCylinder a cylinder radius and half length but got "
+                      << m_pixelExpectLayerCylinder.size() << ".");
+        return StatusCode::FAILURE;
+     }
+     m_innerExtrapolationVolume = Acts::Surface::makeShared<Acts::CylinderSurface>(Acts::Transform3::Identity(),
+                                                                                   m_pixelExpectLayerCylinder[0],
+                                                                                   m_pixelExpectLayerCylinder[1]);
+     initParticleHypothesisMap();
+
+     return StatusCode::SUCCESS;
+  }
+
+  StatusCode TrackToTrackParticleCnvAlg::finalize()
+  {
+     return StatusCode::SUCCESS;
+  }
+
+  StatusCode TrackToTrackParticleCnvAlg::execute(const EventContext &ctx) const
+  {
+    SG::WriteHandle<xAOD::TrackParticleContainer> wh_track_particles( m_trackParticlesOutKey, ctx);
+    if (wh_track_particles.record(std::make_unique<xAOD::TrackParticleContainer>(),
+                                  std::make_unique<xAOD::TrackParticleAuxContainer>()).isFailure()) {
+       ATH_MSG_ERROR("Failed to record track particle container with key " << m_trackParticlesOutKey.key() );
+       return StatusCode::FAILURE;
+    }
+
+    xAOD::TrackParticleContainer *track_particles = wh_track_particles.ptr();
+
+    const InDet::BeamSpotData *beamspot_data=nullptr;
+    MAKE_CHECKED_OPTIONAL_HANDLE(ctx, m_beamSpotKey, "beamspot data" , beamspot_data);
+    const ActsTrk::TrackContainer *tracksContainer=nullptr;
+    MAKE_CHECKED_HANDLE(ctx, m_tracksContainerKey, "tracks", tracksContainer);
+
+    const AtlasFieldCacheCondObj *field_cond_data=nullptr;
+    MAKE_CHECKED_HANDLE(ctx, m_fieldCacheCondObjInputKey, "Atlas field", field_cond_data);
+    MagField::AtlasFieldCache fieldCache;
+    field_cond_data->getInitializedCache(fieldCache);
+
+    const ActsGeometryContext &gctx = m_extrapolationTool->trackingGeometryTool()->getNominalGeometryContext();
+    std::shared_ptr<Acts::PerigeeSurface> perigee_surface = makePerigeeSurface(beamspot_data);
+    unsigned int track_i=0;
+    track_particles->reserve( tracksContainer->size());
+
+    std::array<const InDetDD::SiDetectorElementCollection *,to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> siDetEleColl {};
+    for (unsigned int idx=0; idx <m_siDetEleCollToMeasurementType.size(); ++idx ) {
+       MAKE_CHECKED_HANDLE(ctx, m_siDetEleCollKey[idx], "detector element collection",
+                           siDetEleColl[m_siDetEleCollToMeasurementType[idx] ] );
+    }
+
+   static const std::array<unsigned short,to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u>
+      measurementToSummaryType ATLAS_THREAD_SAFE (makeMeasurementToSummaryTypeMap());
+
+
+    
+    // re-used temporaries
+    std::vector<float> tmp_cov_vector;
+    std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType > tmp_param_state_idx;
+    tmp_param_state_idx.reserve(30);
+    Amg::Vector3D magnFieldVect;
+    std::vector<std::vector<float>> parametersVec;
+    HitSummaryData hitInfo;
+
+    unsigned int converted_track_states=0;
+    
+    using namespace Acts::UnitLiterals;
+     --track_i; // to have track_i at the begining of the loop
+    for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : *tracksContainer) {
+       ++track_i;
+       track_particles->push_back( new xAOD::TrackParticle );
+       xAOD::TrackParticle *track_particle=track_particles->back();
+
+       // convert defining parameters
+       // @TODO add support for other modes available in the legacy converter : wrt a vertex, origin, beamspot ?
+       Acts::BoundTrackParameters perigeeParam = parametersAtBeamLine(ctx, track, *perigee_surface);
+       track_particle->setDefiningParameters(perigeeParam.parameters()[Acts::eBoundLoc0],
+                                             perigeeParam.parameters()[Acts::eBoundLoc1],
+                                             perigeeParam.parameters()[Acts::eBoundPhi],
+                                             perigeeParam.parameters()[Acts::eBoundTheta],
+                                             perigeeParam.parameters()[Acts::eBoundQOverP] * 1_MeV);
+       if (perigeeParam.covariance().has_value()) {
+          // only use the 5x5 sub-matrix of the full covariance matrix
+          lowerTriangleToVectorScaleLastRow(perigeeParam.covariance().value(),tmp_cov_vector,5, 1_MeV);
+          track_particle->setDefiningParametersCovMatrixVec(tmp_cov_vector);
+       }
+       // optional beam tilt
+       if (beamspot_data) {
+         track_particle->setBeamlineTiltX(beamspot_data->beamTilt(0));
+         track_particle->setBeamlineTiltY(beamspot_data->beamTilt(1));
+       }
+
+       // fit info, quality
+       track_particle->setFitQuality(track.chi2(), track.nDoF());
+       track_particle->setPatternRecognitionInfo( (1ul << xAOD::SiSPSeededFinder) );
+       track_particle->setTrackFitter(xAOD::KalmanFitter);
+
+       const Acts::ParticleHypothesis &hypothesis = track.particleHypothesis();
+       track_particle->setParticleHypothesis(convertParticleHypothesis( hypothesis.absolutePdg() ));
+       constexpr float inv_1_MeV = 1/1_MeV;
+       // gather track state indices for parameter conversion
+       // @TODO add support for muons
+       
+       // xAOD::UncalibMeasType::sTgcStripType + 1 is expected to be the number of UncalibMeasTypes
+       std::array<std::array<uint8_t,to_underlying(HitCategory::N)>,
+                 to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> specialHitCounts{};
+
+       SumOfValues chi2_stat;
+       gatherTrackSummaryData(*tracksContainer,
+                              track,
+                              siDetEleColl,
+                              measurementToSummaryType,
+                              chi2_stat,
+                              hitInfo,
+                              tmp_param_state_idx,
+                              specialHitCounts);
+       
+       // Muon
+       //    MdtDriftCircleType = 3
+       //    RpcStripType = 4,
+       //    TgcStripType = 5,
+       //    MMClusterType = 6,
+       //    sTgcStripType = 7,
+
+       // pixel summaries
+       std::array< std::tuple< uint8_t, uint8_t, uint8_t, bool >, 4> copy_summary {
+          std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelTotal),
+                          static_cast<uint8_t>(xAOD::numberOfContribPixelLayers),
+                          static_cast<uint8_t>(xAOD::numberOfPixelHits),
+                          false),
+
+          std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelBarrelFlat),
+                          static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelFlatLayers),
+                          static_cast<uint8_t>(xAOD::numberOfPixelBarrelFlatHits),
+                          true),
+
+          std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelBarrelInclined),
+                          static_cast<uint8_t>(xAOD::numberOfContribPixelBarrelInclinedLayers),
+                          static_cast<uint8_t>(xAOD::numberOfPixelBarrelInclinedHits),
+                          true),
+
+          std::make_tuple(static_cast<uint8_t>(HitSummaryData::pixelEndcap),
+                          static_cast<uint8_t>(xAOD::numberOfContribPixelEndcap),
+                          static_cast<uint8_t>(xAOD::numberOfPixelEndcapHits),\
+                          true) };
+
+       for (auto [src_region, dest_xaod_summary_layer, dest_xaod_summary_hits, add_outlier] : copy_summary ) {
+          setSummaryValue(*track_particle,
+                          hitInfo.contributingLayers( static_cast<HitSummaryData::DetectorRegion>(src_region)),
+                          static_cast<xAOD::SummaryType>(dest_xaod_summary_layer));
+          setSummaryValue(*track_particle,
+                            hitInfo.contributingHits(static_cast<HitSummaryData::DetectorRegion>(src_region))
+                          + ( add_outlier
+                              ? hitInfo.contributingOutlierHits(static_cast<HitSummaryData::DetectorRegion>(src_region))
+                              : 0),
+                          static_cast<xAOD::SummaryType>(dest_xaod_summary_hits));
+       }
+       setSummaryValue(*track_particle,
+                        hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,0)
+                       +hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,0),
+                       xAOD::numberOfInnermostPixelLayerEndcapHits);
+       setSummaryValue(*track_particle,
+                       hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,0),
+                       xAOD::numberOfInnermostPixelLayerEndcapOutliers);
+       setSummaryValue(*track_particle,
+                        hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,1)
+                       +hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelEndcap,2)
+                       +hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,1)
+                       +hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,2),
+                       xAOD::numberOfNextToInnermostPixelLayerEndcapHits);
+       setSummaryValue(*track_particle,
+                        hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,1)
+                       +hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelEndcap,2),
+                       xAOD::numberOfNextToInnermostPixelLayerEndcapOutliers);
+       setSummaryValue(*track_particle,
+                       hitInfo.contributingOutlierHits(HitSummaryData::pixelTotal),
+                       //                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::PixelClusterType)][HitCategory::Outlier],
+                       xAOD::numberOfPixelOutliers);
+       setSummaryValue(*track_particle,
+                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::PixelClusterType)][HitCategory::Hole],
+                       xAOD::numberOfPixelHoles);
+       // do not expect pixel hits if there are not contributing pixel hits in the flat barrel and expectIfPixelContributes is true
+       std::array<unsigned int,4> expect_layer_pattern = ((   !m_expectIfPixelContributes.value()
+                                                           || hitInfo.contributingLayers(HitSummaryData::pixelTotal))
+                                                          ? expectedLayerPattern(ctx,
+                                                                                 *m_extrapolationTool,
+                                                                                 perigeeParam,
+                                                                                 *m_innerExtrapolationVolume)
+                                                          : std::array<unsigned int,4> {0u,0u, 0u,0u} );
+
+       // @TODO consider end-caps  for inner most pixel hits ?
+       setSummaryValue(*track_particle,
+                       static_cast<uint8_t>((expect_layer_pattern[0] & (1<<0)) != 0 ),
+                       xAOD::expectInnermostPixelLayerHit);
+       setSummaryValue(*track_particle,
+                       static_cast<uint8_t>((expect_layer_pattern[0] & (1<<1)) != 0 ),
+                       xAOD::expectNextToInnermostPixelLayerHit);
+       setSummaryValue(*track_particle,
+                       static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelBarrelFlat,0)),
+                       xAOD::numberOfInnermostPixelLayerHits);
+       setSummaryValue(*track_particle,
+                       static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelBarrelFlat,0)),
+                       xAOD::numberOfInnermostPixelLayerOutliers);
+       setSummaryValue(*track_particle,
+                       static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Hit>(HitSummaryData::pixelBarrelFlat,1)),
+                       xAOD::numberOfNextToInnermostPixelLayerHits);
+       setSummaryValue(*track_particle,
+                       static_cast<unsigned int >(hitInfo.sum<HitSummaryData::Outlier>(HitSummaryData::pixelBarrelFlat,1)),
+                       xAOD::numberOfNextToInnermostPixelLayerOutliers);
+
+       // Strip summaries
+       setSummaryValue(*track_particle,
+                       hitInfo.contributingHits( HitSummaryData::stripTotal ),
+                       xAOD::numberOfSCTHits);
+       setSummaryValue(*track_particle,
+                       hitInfo.contributingOutlierHits( HitSummaryData::stripTotal ),
+                       //                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::StripClusterType)][HitCategory::Outlier],
+                       xAOD::numberOfSCTOutliers);
+       setSummaryValue(*track_particle,
+                       specialHitCounts[to_underlying(xAOD::UncalibMeasType::StripClusterType)][HitCategory::Hole],
+                       xAOD::numberOfSCTHoles);
+
+       double biased_chi2_variance = chi2_stat.biasedVariance();
+       setSummaryValue(*track_particle,
+                       static_cast<uint8_t> (biased_chi2_variance>0.
+                                             ? std::min(static_cast<unsigned int>(std::sqrt(biased_chi2_variance) * 100),255u)
+                                             : 0u),
+                       xAOD::standardDeviationOfChi2OS);
+
+       setSummaryValue(*track_particle,
+                        hitInfo.contributingOutlierHits( HitSummaryData::pixelTotal )
+                       +hitInfo.contributingOutlierHits( HitSummaryData::stripTotal ),
+                       xAOD::numberOfOutliersOnTrack);
+
+
+       // @TODO slect states for which parameters are stored
+       if (m_firstAndLastParamOnly && tmp_param_state_idx.size()>2) {
+          tmp_param_state_idx[1]=tmp_param_state_idx.back();
+          tmp_param_state_idx.erase(tmp_param_state_idx.begin()+2,tmp_param_state_idx.end());
+       }
+
+       // store track parameters and covariances for slected states
+       parametersVec.clear();
+       parametersVec.reserve(tmp_param_state_idx.size());
+       unsigned int state_i=0;
+       --state_i;
+
+       for(std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType>::const_reverse_iterator
+              idx_iter = tmp_param_state_idx.rbegin();
+           idx_iter != tmp_param_state_idx.rend();
+           ++idx_iter) {
+          //       for(ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType idx : tmp_param_state_idx) {
+          ++state_i;
+          ActsTrk::TrackStateBackend::ConstTrackStateProxy
+             state = tracksContainer->trackStateContainer().getTrackState(*idx_iter);
+          auto flag = state.typeFlags();
+          const Acts::BoundTrackParameters
+             actsParam(state.referenceSurface().getSharedPtr(),
+                       !flag.test(Acts::TrackStateFlag::OutlierFlag) ? state.smoothed()           : state.filtered(),
+                       !flag.test(Acts::TrackStateFlag::OutlierFlag) ? state.smoothedCovariance() : state.filteredCovariance(),
+                       hypothesis);
+
+          Acts::Vector3 position = actsParam.position(gctx.context());
+          Acts::Vector3 momentum = actsParam.momentum();
+
+          // scaling from Acts momentume units (GeV) to Athena Units (MeV)
+          for (unsigned int i=0; i<momentum.rows(); ++i) {
+             momentum(i) *= inv_1_MeV;
+          }
+
+
+          if (actsParam.covariance()) {
+             Acts::MagneticFieldContext mfContext = m_extrapolationTool->getMagneticFieldContext(ctx);
+             Acts::GeometryContext tgContext = gctx.context();
+
+             magnFieldVect.setZero();
+             fieldCache.getField(position.data(), magnFieldVect.data());
+             // scaling from Athena magnetic field units kT to Acts units T
+             {
+                using namespace Acts::UnitLiterals;
+                magnFieldVect *= 1000_T;
+             }
+
+             auto curvilinear_cov_result = convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
+             if (curvilinear_cov_result.has_value()) {
+                Acts::BoundSquareMatrix &curvilinear_cov = curvilinear_cov_result.value();
+
+                // convert q/p components from GeV (Acts) to MeV (Athena)
+                for (unsigned int col_i=0; col_i<4; ++col_i) {
+                   curvilinear_cov(col_i,4) *= 1_MeV;
+                   curvilinear_cov(4,col_i) *= 1_MeV;
+                }
+                curvilinear_cov(4,4) *= (1_MeV * 1_MeV);
+
+                std::size_t param_idx = parametersVec.size();
+                // only use the 5x5 sub-matrix of the full covariance matrix
+                lowerTriangleToVector(curvilinear_cov,tmp_cov_vector,5);
+                if (tmp_cov_vector.size() != 15) {
+                   ATH_MSG_ERROR("Invalid size of lower triangle cov " << tmp_cov_vector.size() <<  " != 15" 
+                                 << " input matrix : " << curvilinear_cov.rows() << " x " << curvilinear_cov.cols() );
+                }
+                track_particle->setTrackParameterCovarianceMatrix(param_idx, tmp_cov_vector);
+             }
+          }
+          parametersVec.emplace_back(std::vector<float>{
+                static_cast<float>(position[0]),static_cast<float>(position[1]),static_cast<float>(position[2]),
+                static_cast<float>(momentum[0]),static_cast<float>(momentum[1]),static_cast<float>(momentum[2]) });
+          ++converted_track_states;
+
+
+       }
+       for (const std::vector<float> &param : parametersVec) {
+          if (param.size() != 6) {
+             ATH_MSG_ERROR("Invalid size of param element " << param.size() <<  " != 6" );
+          }
+       }
+       track_particle->setTrackParameters(parametersVec);
+    }
+    ATH_MSG_DEBUG( "Converted " <<  tracksContainer->size() << " acts tracks into " << track_particles->size()
+                  << " track particles with parameters for " << converted_track_states << " track states.");
+
+    return StatusCode::SUCCESS;
+  }
+
+  std::shared_ptr<Acts::PerigeeSurface> TrackToTrackParticleCnvAlg::makePerigeeSurface(const InDet::BeamSpotData *beamspot_data) {
+     // @from TrackToVertex::trackAtBeamline
+     Acts::Vector3 beamspot(0., 0., 0.);
+     float tiltx = 0.0;
+     float tilty = 0.0;
+     if (beamspot_data) {
+        beamspot = Acts::Vector3(beamspot_data->beamVtx().position());
+        tiltx =  beamspot_data->beamTilt(0);
+        tilty =  beamspot_data->beamTilt(1);
+     }
+     Acts::Translation3 translation(beamspot);
+     Acts::Transform3 transform( translation * Acts::RotationMatrix3::Identity() );
+     transform *= Acts::AngleAxis3(tilty, Acts::Vector3(0.,1.,0.));
+     transform *= Acts::AngleAxis3(tiltx, Acts::Vector3(1.,0.,0.));
+     return Acts::Surface::makeShared<Acts::PerigeeSurface>(transform);
+  }
+
+  Acts::BoundTrackParameters TrackToTrackParticleCnvAlg::parametersAtBeamLine(const EventContext &ctx,
+                                                        const typename ActsTrk::TrackContainer::ConstTrackProxy &track,
+                                                        const Acts::PerigeeSurface &perigee_surface) const {
+     Acts::BoundTrackParameters trackParam(track.referenceSurface().getSharedPtr(),
+                                           track.parameters(),
+                                           track.covariance(),
+                                           track.particleHypothesis());
+
+     std::optional<const Acts::BoundTrackParameters>
+        perigeeParam = m_extrapolationTool->propagate(ctx,
+                                                      trackParam,
+                                                      perigee_surface,
+                                                      Acts::Direction::Backward, // @TODO try forward if backward fails ?
+                                                      m_paramExtrapolationParLimit.value());
+     if (!perigeeParam.has_value()) {
+        ATH_MSG_WARNING( "Failed to extrapolate to perigee");
+        return trackParam;
+     }
+     else {
+        return perigeeParam.value();
+     }
+  }
+
+}
