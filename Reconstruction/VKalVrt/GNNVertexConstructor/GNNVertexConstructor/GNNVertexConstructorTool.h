@@ -84,10 +84,13 @@ namespace Trk {
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
+#include "TrkToolInterfaces/ITrackSummaryTool.h"
+#include "TMath.h"
 
-
-#include <vector>
-
+#include "vector"
+#include "iostream"
+#include "iterator"
+#include "map"
 
 class TH2D;
 class TH1F;
@@ -164,7 +167,7 @@ private:
  
   struct WrkVrt {
     bool Good = true;
-//    std::deque<long int> selTrk;
+    std::deque<long int> selTrk;
     Amg::Vector3D vertex;
     TLorentzVector vertexMom;
     long int vertexCharge{};

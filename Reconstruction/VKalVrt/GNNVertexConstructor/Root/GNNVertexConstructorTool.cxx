@@ -362,7 +362,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       }//end of 2 Track requirement
     }
     delete xAODwrk;
-    //delete WrkVrt;
   } // end loop over jets
   return StatusCode::SUCCESS;
 } // end performVertexFit
