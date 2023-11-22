@@ -6,6 +6,9 @@
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
+#include "AnalysisUtils/AnalysisMisc.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "FlavorTagDiscriminants/GNNTool.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -18,10 +21,13 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
+#include "TrkToolInterfaces/ITrackSummaryTool.h"
+#include "TMath.h"
 
-
-#include <vector>
-
+#include "vector"
+#include "iostream"
+#include "iterator"
+#include "map"
 
 class TH2D;
 class TH1F;
@@ -40,7 +46,6 @@ namespace Rec {
 
 struct workVectorArrxAOD {
   std::vector<const xAOD::TrackParticle *> listSelTracks; // Selected tracks after quality cuts
-  std::vector<const xAOD::TrackParticle *> tmpListTracks;
   double beamX = 0.;
   double beamY = 0.;
   double beamZ = 0.;
@@ -69,8 +74,6 @@ public:
                                                          "GNN Decorator tool"};
   ToolHandle<Trk::TrkVKalVrtFitter> m_vertexFitterTool;
     
-  //Trk::TrkVKalVrtFitter8 m_vertexFitterTool;
-
   // Read handles
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackLinksKey{
       this, "trackLinksKey", "", "Jet GNN Deco Read Key for track link"};
@@ -91,21 +94,17 @@ public:
   const xAOD::Vertex* m_thePV;
   
 private:
-
-
-  
+ 
   std::string m_jetCollection;
 
-//double VrtVrtDist(const xAOD::Vertex & PrimVrt, const Amg::Vector3D & SecVrt, 
-//                                  const std::vector<double> VrtErr,double& Signif ) const;
-
-
   TLorentzVector TotalMom(const std::vector<const xAOD::TrackParticle*>& selTrk) const; 
-  //std::vector<double> estimVrtPos( int nTrk, std::deque<long int> &selTrk, std::map<long int,std::vector<double>> & vrt) const;
   
+  double vrtVrtDist(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
+                                  const std::vector<double>& vrtErr,double& signif ) const;
+ 
   struct WrkVrt {
     bool Good = true;
-//    std::deque<long int> selTrk;
+    std::deque<long int> selTrk;
     Amg::Vector3D vertex;
     TLorentzVector vertexMom;
     long int vertexCharge{};
@@ -116,8 +115,6 @@ private:
     double projectedVrt=0.;
     int detachedTrack=-1;
     double BDT=1.1;
-
-    //inline double ndof() const { return 2.0*( selTrk.size() ) - 3.0; }  //Taken from VrtSecInclusive
     };//end WrkVrt
     
     bool m_existIBL;
@@ -135,9 +132,8 @@ private:
     double m_Rlayer2;
     double m_Rlayer3;
     double m_SVResolutionR;
-
-    bool     m_MultiVertex;
-    bool     m_MultiWithPrimary;
+    bool   m_MultiWithPrimary;
+    double m_minD0;
     double m_massPi ;
     
 };

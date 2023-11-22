@@ -1,17 +1,8 @@
 // Headers
 #include "GNNVertexConstructor/GNNVertexConstructorTool.h"
 // Headers to Read & Write Decorations
-#include "AnalysisUtils/AnalysisMisc.h"
-#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "iostream"
-#include "iterator"
-#include "map"
-#include "vector"
-#include  "TrkToolInterfaces/ITrackSummaryTool.h"
-#include  "TMath.h"
-
 
 namespace Rec {
 
@@ -32,15 +23,12 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_RlayerB   (0.),  // in jobO or initialize()
       m_Rlayer1   (0.),
       m_Rlayer2   (0.),
-      m_MultiVertex(false),
-      m_MultiWithPrimary(false)
+      m_MultiWithPrimary(false),
+      m_minD0(0.1)
       {
   declareInterface<IGNNVertexConstructorInterface>(this);
-
-  declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.TrackLinks");
-  declareProperty("JetVertexLinks",
-                  m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.vertex_indices");
-
+  declareProperty("JetTrackLinks",  m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.TrackLinks");
+  declareProperty("JetVertexLinks", m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.vertex_indices");
   declareProperty("GNNTool", m_gnn_Tool, "GNN Tool");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
   declareProperty("ExistIBL",   m_existIBL, "Inform whether 3-layer or 4-layer detector is used "  );
@@ -56,13 +44,9 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
   declareProperty("RlayerB",   m_RlayerB  );
   declareProperty("Rlayer1",   m_Rlayer1  );
   declareProperty("Rlayer2",   m_Rlayer2  );
-  declareProperty("MultiVertex",        m_MultiVertex,       "Run Multiple Secondary Vertices in jet finder"  );
-  declareProperty("MultiWithPrimary",   m_MultiWithPrimary,  "Find Multiple Secondary Vertices + primary vertex in jet. MultiVertex Finder only!"  );
-  
+  declareProperty("MultiWithPrimary", m_MultiWithPrimary, "Find Multiple Secondary Vertices + primary vertex in jet.MultiVertex Finder only!"  );
+  declareProperty("mind0", m_minD0, "D0 cut on tracks");
   m_massPi  = 139.5702 ;
-  
-//  m_instanceName=name;
-
 }
 
 /* Destructor */
@@ -74,8 +58,6 @@ StatusCode GNNVertexConstructorTool::initialize() {
 
   ATH_MSG_DEBUG("GNNVertexConstructor Tool in initialize()");
 
-  //bool m_existIBL=True;
-  
   if(m_existIBL){ // 4-layer pixel detector
    if( m_Rbeampipe==0.)  m_Rbeampipe=24.0;    
    if( m_RlayerB  ==0.)  m_RlayerB  =34.0;
@@ -99,7 +81,6 @@ StatusCode GNNVertexConstructorTool::initialize() {
   // Retrieve tools
   ATH_CHECK(m_gnn_Tool.retrieve());
   ATH_CHECK(m_vertexFitterTool.retrieve());
-
   //Additional Info for Vertex Fit
   ATH_CHECK(m_beamSpotKey.initialize());
   ATH_CHECK(m_eventInfoKey.initialize());
@@ -128,57 +109,38 @@ const
    }
    return sum; 
  }
-/*
-std::vector<double> GNNVertexConstructorTool::estimVrtPos( int nTrk, std::deque<long int> &selTrk, std::map<long int, std::vector<double>> & vrt) const
+ 
+double GNNVertexConstructorTool::vrtVrtDist(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
+                                          const std::vector<double>& secVrtErr, double& signif)
+  const
   {
-    std::vector<double> estimation(3,0.);
-    int ntsel=selTrk.size();
-    for( int i=0; i<ntsel-1; i++){
-       for( int j=i+1; j<ntsel; j++){
-          int k = selTrk[i]<selTrk[j] ? selTrk[i]*nTrk+selTrk[j] : selTrk[j]*nTrk+selTrk[i];
-          estimation[0]+=vrt.at(k)[0];
-          estimation[1]+=vrt[k][1];
-          estimation[2]+=vrt[k][2];
-    }  }
-    estimation[0] /= ntsel*(ntsel-1)/2;
-    estimation[1] /= ntsel*(ntsel-1)/2;
-    estimation[2] /= ntsel*(ntsel-1)/2;
-    return estimation;
-  }*/
+    double distx =  primVrt.x()- secVrt.x();
+    double disty =  primVrt.y()- secVrt.y();
+    double distz =  primVrt.z()- secVrt.z();
 
+    AmgSymMatrix(3)  primCovMtx=primVrt.covariancePosition();  //Create
+    primCovMtx(0,0) += secVrtErr[0];
+    primCovMtx(0,1) += secVrtErr[1];
+    primCovMtx(1,0) += secVrtErr[1];
+    primCovMtx(1,1) += secVrtErr[2];
+    primCovMtx(0,2) += secVrtErr[3];
+    primCovMtx(2,0) += secVrtErr[3];
+    primCovMtx(1,2) += secVrtErr[4];
+    primCovMtx(2,1) += secVrtErr[4];
+    primCovMtx(2,2) += secVrtErr[5];
 
-//  double GNNVertexConstructorTool::VrtVrtDist(const xAOD::Vertex & PrimVrt, const Amg::Vector3D & SecVrt, 
-//                                          const std::vector<double> SecVrtErr, double& Signif)
-//  const
-//  {
-//    double distx =  PrimVrt.x()- SecVrt.x();
-//    double disty =  PrimVrt.y()- SecVrt.y();
-//    double distz =  PrimVrt.z()- SecVrt.z();
-//
-//
-//    AmgSymMatrix(3)  PrimCovMtx=PrimVrt.covariancePosition();  //Create
-//    PrimCovMtx(0,0) += SecVrtErr[0];
-//    PrimCovMtx(0,1) += SecVrtErr[1];
-//    PrimCovMtx(1,0) += SecVrtErr[1];
-//    PrimCovMtx(1,1) += SecVrtErr[2];
-//    PrimCovMtx(0,2) += SecVrtErr[3];
-//    PrimCovMtx(2,0) += SecVrtErr[3];
-//    PrimCovMtx(1,2) += SecVrtErr[4];
-//    PrimCovMtx(2,1) += SecVrtErr[4];
-//    PrimCovMtx(2,2) += SecVrtErr[5];
-//
-//    AmgSymMatrix(3)  WgtMtx = PrimCovMtx.inverse();
-//
-//    Signif = distx*WgtMtx(0,0)*distx
-//            +disty*WgtMtx(1,1)*disty
-//            +distz*WgtMtx(2,2)*distz
-//         +2.*distx*WgtMtx(0,1)*disty
-//         +2.*distx*WgtMtx(0,2)*distz
-//         +2.*disty*WgtMtx(1,2)*distz;
-//    Signif=sqrt(Signif);
-//    if( Signif!=Signif ) Signif = 0.;
-//    return sqrt(distx*distx+disty*disty+distz*distz);
-//  }
+    AmgSymMatrix(3)  wgtMtx = primCovMtx.inverse();
+
+    signif = distx*wgtMtx(0,0)*distx
+            +disty*wgtMtx(1,1)*disty
+            +distz*wgtMtx(2,2)*distz
+         +2.*distx*wgtMtx(0,1)*disty
+         +2.*distx*wgtMtx(0,2)*distz
+         +2.*disty*wgtMtx(1,2)*distz;
+    signif=std::sqrt(std::abs(signif));
+    if( signif!=signif ) signif = 0.;
+    return std::sqrt(distx*distx+disty*disty+distz*distz);
+  }
 
 //Perform Vertex fit using the jet decorations of the GNN
 StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *inJetContainer,
@@ -209,6 +171,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
   SG::AuxElement::Decorator<float> decor_N2Tpair("N2Tpair");
   SG::AuxElement::Decorator<float> decor_minDstMat("minDstMat");
   SG::AuxElement::Decorator<float> decor_efracsv("efracsv");
+  SG::AuxElement::Decorator<float> decor_badChi2("badChi");
   
   // Create a map of track links and track vertexing values (Using mutlimap)
   std::multimap<int, TL> vertexMap;
@@ -226,9 +189,10 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     //Fill the map
     int i = 0;
     for (auto v : vertexCollection) {
+      if ((*trackCollection[i])->d0()<m_minD0) continue;
       vertexMap.insert(std::pair<int, TL>(v, (trackCollection[i])));
       i++;
-    }
+      }
     
     std::multimap<int, TL>::iterator itr;
 
@@ -261,17 +225,20 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         auto elements = vertexMap.equal_range(k);
               
         int NTRKS =vertexMap.count(k);
+        
+        
         std::vector<double> InpMass(NTRKS,m_massPi);
         m_vertexFitterTool->setMassInputParticles( InpMass, *state);
 
         xAODwrk->listSelTracks.clear();
-//        //newvrt.selTrk.clear();
-              
+
         //Retrieve the tracks and push to working xAOD
         for (auto i = elements.first; i != elements.second; ++i) {
           xAODwrk->listSelTracks.push_back(*(i->second));
-          //newvrt.selTrk.push_back((i->first));
+          //ATH_MSG_DEBUG((*(i->second))->d0());
           }
+       
+       ATH_MSG_DEBUG("#Tracks test " << xAODwrk->listSelTracks.size());
         
        Amg::Vector3D FitVertex, vDist;
        TLorentzVector jetDir(jet->p4().Px(),jet->p4().Py(),jet->p4().Pz(), jet->p4().E()); //Jet Direction
@@ -298,26 +265,31 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
             newvrt.vertexCharge, newvrt.vertexCov, newvrt.chi2PerTrk, newvrt.trkAtVrt, newvrt.chi2,
             *state, false));          
         if (sc.isFailure())          continue;
+
+        //Chi2 Cut       
+        auto NDOF = 2*(newvrt.trkAtVrt.size())-3.0;  //From VrtSecInclusive
         
-        //Chi2 Cut        
-        if (newvrt.chi2<20){
+        ATH_MSG_INFO("NDOF  " << NDOF);
+             
+        if (newvrt.chi2/NDOF<=20 ){ 
         ATH_MSG_DEBUG("Found IniVertex=" << newvrt.vertex[0] << ", " << newvrt.vertex[1] << ", "
                                          << newvrt.vertex[2] << " trks " << newvrt.trkAtVrt.size());
 
         Amg::Vector3D vDir = newvrt.vertex - primVrt.position();  //Vertex Dirction in relation to Primary
-        
-        Amg::Vector3D jetVrtDir(jet->p4().Px()*vDir[0],jet->p4().Py()*vDir[1],jet->p4().Pz()*vDir[2]);
+               
+        Amg::Vector3D jetVrtDir(jet->p4().Px(),jet->p4().Py(),jet->p4().Pz());
         
         double vPos = (vDir.x() * newvrt.vertexMom.Px() + vDir.y() * newvrt.vertexMom.Py() +
                        vDir.z() * newvrt.vertexMom.Pz()) /
                       newvrt.vertexMom.Rho();
-      
+        
+        double Lxy=sqrt(vDir[0]*vDir[0]+vDir[1]*vDir[1]);
         double L3D =sqrt(vDir[0]*vDir[0]+vDir[1]*vDir[1]+vDir[2]*vDir[2]);
         ATH_MSG_DEBUG("L3D  " << L3D);
         
         double drJPVSV = Amg::deltaR(jetVrtDir,vDir); //DeltaR
 
-        int NGTatVtx=newvrt.trkAtVrt.size();
+        int NGTatVtx=newvrt.trkAtVrt.size(); //# Tracks in Vertex
        
         double xvt=newvrt.vertex[0]; double yvt=newvrt.vertex[1];
         double Dist2DBP=sqrt( (xvt-m_Xbeampipe)*(xvt-m_Xbeampipe) + (yvt-m_Ybeampipe)*(yvt-m_Ybeampipe) ); 
@@ -331,20 +303,23 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         minDstMat=TMath::Min(minDstMat,fabs(Dist2DBP-m_Rbeampipe));
         if(m_existIBL) minDstMat=TMath::Min(minDstMat,fabs(Dist2DL2-m_Rlayer3));  // 4-layer pixel detector
        
-//        ATH_MSG_DEBUG("min dst Material   " << minDstMat);
-        
         TLorentzVector MomentumJet = TotalMom(xAODwrk->listSelTracks);
         
+        ATH_MSG_DEBUG("Sum Tracks " << MomentumJet.E());
+        ATH_MSG_DEBUG("Vertex " << newvrt.vertexMom.E());
+        ATH_MSG_DEBUG("Jets " << jet->p4().E());
+        
         double eRatio = newvrt.vertexMom.E()/jet->p4().E(); 
-        ATH_MSG_DEBUG("Test E ration MomJet " << eRatio);
+
+        double signif3D;
+        double Signif3D=vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);          
         
-        double Signif3D=L3D/newvrt.chi2;
+        if(newvrt.vertex.perp()>m_Rbeampipe && Signif3D<20.)  continue; 
         
-       if(newvrt.vertex.perp()>m_Rbeampipe && Signif3D<20.)  continue; 
-               
+        //Make New Container        
         xAOD::Vertex *GNNvertex = new xAOD::Vertex;
         outVertexContainer->emplace_back(GNNvertex);
-
+               
         // Registering tracks comprising the vertex to xAOD::Vertex
         // loop over the tracks comprising the vertex
         for( const auto *trk : xAODwrk->listSelTracks ) {
@@ -357,15 +332,14 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         //Add Vertex Info into Container        
         GNNvertex->setVertexType(xAOD::VxType::SecVtx);
         GNNvertex->setPosition(newvrt.vertex);
-        GNNvertex->setFitQuality(newvrt.chi2, 1);
-
+        GNNvertex->setFitQuality(newvrt.chi2, NDOF);
         decor_mass(*GNNvertex)            = newvrt.vertexMom.M();
         decor_pT(*GNNvertex)              = newvrt.vertexMom.Perp();
         decor_charge(*GNNvertex)          = newvrt.vertexCharge;
         decor_vPos(*GNNvertex)            = vPos;
-        decor_Lxy(*GNNvertex)             = sqrt(vDir[0]*vDir[0]+vDir[1]*vDir[1]);
+        decor_Lxy(*GNNvertex)             = Lxy;
         decor_L3D(*GNNvertex)             = L3D;
-        decor_significance3d(*GNNvertex)  = L3D/newvrt.chi2;
+        decor_significance3d(*GNNvertex)  = Signif3D; 
         decor_NGTinSvx(*GNNvertex)        = NGTatVtx;
         decor_deltaR(*GNNvertex)          = drJPVSV;
         decor_minDstMat(*GNNvertex)       = minDstMat;
@@ -379,12 +353,12 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         linkVertex.setElement(GNNvertex);
         linkVertex.setStorableObject(*outVertexContainer);
         jetWriteDecorHandleVertexLink(*jet).push_back(linkVertex);
-      
+       
       }//end of Chi2 cut
+      
       }//end of 2 Track requirement
     }
     delete xAODwrk;
-    //delete WrkVrt;
   } // end loop over jets
   return StatusCode::SUCCESS;
 } // end performVertexFit
