@@ -531,16 +531,16 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
 
   zdcDataAnalyzer->SetNonlinCorrParams(0, nonLinearCorrCoeffic);
 
-    std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoeffic;
-  timeCorrCoeffic[0][0] =  {2.410188, -0.025826, 0.065930, 0.006983, -0.008872, -0.001515};
-  timeCorrCoeffic[0][1] = {2.963645, -0.008860, 0.014781, 0.005681, 0.005547, 0.000878};
-  timeCorrCoeffic[0][2] = {2.449642, 0.014227, 0.013660, 0.004378, 0.000030, -0.000073};
-  timeCorrCoeffic[0][3] = {2.156037, 0.015385, 0.006799, 0.001156, 0.001487, 0.000534};
-
-  timeCorrCoeffic[1][0] = {2.846303, -0.103128, 0.078904, 0.027932, -0.009349, -0.002391};
-  timeCorrCoeffic[1][1] = {-0.092121, 0.000107, 0.017273, 0.007691, 0.004378, 0.000415};
-  timeCorrCoeffic[1][2] = {-0.678132, 0.006028, -0.002485, -0.003520, 0.000385, 0.000387};
-  timeCorrCoeffic[1][3] = {1.873812, 0.016677, 0.004617, 0.002920, 0.003346, 0.000828};
+  std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoeffic;
+  timeCorrCoeffic[0][0] = {0, -0.025826, 0.065930, 0.006983, -0.008872, -0.001515};
+  timeCorrCoeffic[0][1] = {0, -0.008860, 0.014781, 0.005681, 0.005547, 0.000878};
+  timeCorrCoeffic[0][2] = {0, 0.014227, 0.013660, 0.004378, 0.000030, -0.000073};
+  timeCorrCoeffic[0][3] = {0, 0.015385, 0.006799, 0.001156, 0.001487, 0.000534};
+  
+  timeCorrCoeffic[1][0] = {0, -0.103128, 0.078904, 0.027932, -0.009349, -0.002391};
+  timeCorrCoeffic[1][1] = {0, 0.000107, 0.017273, 0.007691, 0.004378, 0.000415};
+  timeCorrCoeffic[1][2] = {0, 0.006028, -0.002485, -0.003520, 0.000385, 0.000387};
+  timeCorrCoeffic[1][3] = {0, 0.016677, 0.004617, 0.002920, 0.003346, 0.000828};
 
   zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoeffic, timeCorrCoeffic);
 
