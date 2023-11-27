@@ -542,7 +542,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   timeCorrCoeffic[1][2] = {-0.678132, 0.006028, -0.002485, -0.003520, 0.000385, 0.000387};
   timeCorrCoeffic[1][3] = {1.873812, 0.016677, 0.004617, 0.002920, 0.003346, 0.000828};
 
-  ana->SetSlewingCoeff(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoeffic, timeCorrCoeffic);
+  zdcDataAnalyzer->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLog, 0, 700, timeCorrCoeffic, timeCorrCoeffic);
 
   
   // Set the amplitude fit range limits                                                                       
