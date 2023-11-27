@@ -264,12 +264,14 @@ void ZDCDataAnalyzer::SetCutValues(const ZDCModuleFloatArray& chisqDivAmpCutHG, 
   }
 }
 
-void ZDCDataAnalyzer::SetTimingCorrParams(const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
+void ZDCDataAnalyzer::SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrMode mode, float refADC, float refScale,
+					  const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
 					  const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr)
 {
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
-      m_moduleAnalyzers[side][module]->SetTimingCorrParams(HGParamArr.at(side).at(module), LGParamArr.at(side).at(module));
+      m_moduleAnalyzers[side][module]->SetTimingCorrParams(mode, refADC, refScale,
+							   HGParamArr.at(side).at(module), LGParamArr.at(side).at(module));
     }
   }
 

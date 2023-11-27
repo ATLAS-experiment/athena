@@ -95,16 +95,11 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const s
   m_deltaTSample(deltaTSample),
   m_pedestal(pedestal), m_gainHG(gainHG), m_forceLG(false), m_fitFunction(fitFunction),
   m_peak2ndDerivMinSample(peak2ndDerivMinSample),
-  m_peak2ndDerivMinTolerance(1),
-  m_peak2ndDerivMinThreshLG(peak2ndDerivMinThreshLG),
+    m_peak2ndDerivMinThreshLG(peak2ndDerivMinThreshLG),
   m_peak2ndDerivMinThreshHG(peak2ndDerivMinThreshHG),
-  m_useDelayed(false),
-  m_enableRepass(false),
-  m_haveTimingCorrections(false),
-  m_haveNonlinCorr(false), m_initializedFits(false),
   m_ADCSamplesHGSub(Nsample, 0), m_ADCSamplesLGSub(Nsample, 0),
   m_ADCSSampSigHG(Nsample, 0), m_ADCSSampSigLG(Nsample, 0), 
-    m_samplesSub(Nsample, 0)
+  m_samplesSub(Nsample, 0)
 {
   // Create the histogram used for fitting
   //
@@ -1169,18 +1164,27 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
 
     m_fitTimeCorr = m_fitTimeSub;
 
-    if (m_haveTimingCorrections) {
-
+    if (m_timingCorrMode != NoTimingCorr) {
       //
-      // We correct relative to the middle of the amplitude range, divided by 100 to make corrections smaller
+      // We correct relative to the m_timingCorrRefADC using m_timingCorrScale to scale
       //
-      float t0CorrFact = (m_fitAmplitude - 500) / 100.;
+      double t0CorrFact = (m_fitAmplitude - m_timingCorrRefADC) / m_timingCorrScale;
+      if (m_timingCorrMode == TimingCorrLog) t0CorrFact = std::log(t0CorrFact);
 
-      float correction = (t0CorrParams[0] + t0CorrParams[1] * t0CorrFact + t0CorrParams[2] * t0CorrFact * t0CorrFact + t0CorrParams[3] * t0CorrFact * t0CorrFact * t0CorrFact);
+      // Calculate the correction using a polynomial of power determined by the size of the vector.
+      //   For historical reasons we include here a constant term, though it is degenerate with
+      //   the nominal t0 and/or timing calibrations.
+      //
+      float correction = 0;
 
+      for (unsigned int ipow = 0; ipow < t0CorrParams.size(); ipow++) {
+	correction += t0CorrParams[ipow]*std::pow(t0CorrFact, double(ipow));
+      }
+
+      // The correction represents the offset of the timing value from zero so we subtract the result
+      //
       m_fitTimeCorr -= correction;
     }
-
 
     // Now check for valid chisq and valid time
     //

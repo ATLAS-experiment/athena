@@ -41,12 +41,14 @@ public:
         BadT0Bit              = 12, //  &4096
         ExcludeEarlyLGBit     = 13, //  &8192
         ExcludeLateLGBit      = 14, //  &16384
-        preExpTailBit         = 15,  // &32768
+        preExpTailBit         = 15, //  &32768
         //
-        FitMinAmpBit          = 16,   // 0x10000
-        RepassPulseBit        = 17,    // 0x20000
+        FitMinAmpBit          = 16, // 0x10000
+        RepassPulseBit        = 17, // 0x20000
         ArmSumIncludeBit      = 18,
        };
+
+  enum TimingCorrMode {NoTimingCorr = 0, TimingCorrLin, TimingCorrLog};
 
 private:
   typedef std::vector<float>::const_iterator SampleCIter;
@@ -72,20 +74,20 @@ private:
   float m_deltaTSample;
   int m_pedestal;
   float m_gainHG;
-  bool m_forceLG;
+  bool m_forceLG{false};
   float m_tmin;
   float m_tmax;
 
   std::string m_fitFunction;
-  size_t m_2ndDerivStep{};
+  size_t m_2ndDerivStep{1};
   size_t m_peak2ndDerivMinSample;
-  size_t m_peak2ndDerivMinTolerance;
+  size_t m_peak2ndDerivMinTolerance{1};
   float m_peak2ndDerivMinThreshLG;
   float m_peak2ndDerivMinThreshHG;
 
-  bool m_useDelayed;
+  bool m_useDelayed{false};
 
-  bool m_enableRepass;
+  bool m_enableRepass{false};
   float m_peak2ndDerivMinRepassLG{};
   float m_peak2ndDerivMinRepassHG{};
 
@@ -136,11 +138,13 @@ private:
   float m_fitAmpMaxLG{};      // Minimum amplitude in the fit
 
   //
-  bool m_haveTimingCorrections;
+  unsigned int m_timingCorrMode{NoTimingCorr};
+  float m_timingCorrRefADC{500};
+  float m_timingCorrScale{100};
   std::vector<float> m_LGT0CorrParams; // Parameters used to correct the fit LG times
   std::vector<float> m_HGT0CorrParams; // Parameters used to correct the fit HG times
 
-  bool m_haveNonlinCorr;
+  bool m_haveNonlinCorr{false};
   float m_nonLinCorrRefADC;
   std::vector<float> m_nonLinCorrParams;
 
@@ -148,7 +152,7 @@ private:
   //
   mutable std::unique_ptr<TH1> m_fitHist;
 
-  bool m_initializedFits;
+  bool m_initializedFits{false};
   std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapper;
   std::unique_ptr<ZDCPrePulseFitWrapper> m_prePulseFitWrapper;
 
@@ -377,14 +381,17 @@ public:
 
   void SetADCOverUnderflowValues(int HGOverflowADC, int HGUnderflowADC, int LGOverflowADC);
 
-  void SetTimingCorrParams(const std::vector<float>& HGT0CorrParams, const std::vector<float>& LGT0CorrParams)
+  void SetTimingCorrParams(TimingCorrMode mode, float refADC, float refScale,
+			   const std::vector<float>& HGT0CorrParams, const std::vector<float>& LGT0CorrParams)
   {
-    if (HGT0CorrParams.size() == 4 && LGT0CorrParams.size() == 4) {
+    m_timingCorrMode = mode;
+    if (mode != NoTimingCorr) {
+      m_timingCorrRefADC = refADC;
+      m_timingCorrScale = refScale;
+
       m_HGT0CorrParams = HGT0CorrParams;
       m_LGT0CorrParams = LGT0CorrParams;
-      m_haveTimingCorrections = true;
     }
-    else throw std::runtime_error ("SetTimingCorrParams");
   }
 
   void SetFitTimeMax(float tmax);
