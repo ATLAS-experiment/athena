@@ -154,8 +154,9 @@ public:
                     const ZDCModuleFloatArray&  deltaT0MinLG, const ZDCModuleFloatArray& deltaT0MaxLG);
 
 
-  void SetTimingCorrParams(const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
-                           const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr);
+  void SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrMode mode, float refADC, float refScale,
+			   const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
+			   const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr);
 
   void SetNonlinCorrParams(float refADC, const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams);
 
