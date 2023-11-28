@@ -765,15 +765,15 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       //      the number of provided coefficients 
       //
       if (m_haveNonlinCorr) {
-        float ampCorrFact = (m_amplitude - m_nonLinCorrRefADC) / 1000. ;
+        float ampCorrFact = (m_fitAmplitude - m_nonLinCorrRefADC) / 1000. ;
 	
 	float invNLCorr = 1.0;
 	for (size_t power = 1; power <= m_nonLinCorrParams.size(); power++) {
 	  invNLCorr += m_nonLinCorrParams[power - 1]*pow(ampCorrFact, power);
 	}
 
-        m_amplitude /= invNLCorr;
-        m_ampError /= invNLCorr;
+        m_fitAmplitude /= invNLCorr;
+        m_fitAmpError /= invNLCorr;
       }
       
       //
