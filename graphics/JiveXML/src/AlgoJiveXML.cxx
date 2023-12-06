@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JiveXML/AlgoJiveXML.h"
@@ -19,7 +19,17 @@
 namespace JiveXML{
 
   AlgoJiveXML::AlgoJiveXML(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator) {}
+    AthAlgorithm(name, pSvcLocator) {
+
+    //Array of tools that retrieve the data, set public and createIf as default
+    declareProperty("DataRetrievers", m_DataRetrievers = ToolHandleArray<IDataRetriever>( NULL ,true));
+
+    //Generate XMLFormatTool as default privat format tool
+    declareProperty("FormatTool", m_FormatTool = ToolHandle<IFormatTool>("JiveXML::XMLFormatTool/XMLFormatTool",this));
+
+    //Array of tools for streaming events, set public and createIf as default
+    declareProperty("StreamTools", m_StreamTools = ToolHandleArray<IStreamTool>(NULL,true));
+  }
 
   /**
    * Initialize - called once in the beginning
@@ -27,7 +37,8 @@ namespace JiveXML{
    * - Get GeometryWriters and write geometry if asked for
    * - Get the formatting tool
    * - Get the data retrievers
-   * - Get the streaming tools, including defaults if asked for   */
+   * - Get the streaming tools, including defaults if asked for
+   */
   StatusCode AlgoJiveXML::initialize(){
 
     //be verbose
@@ -80,14 +91,22 @@ namespace JiveXML{
      */
     ATH_MSG_DEBUG("Retrieving streaming tools");
     if (m_writeToFile){
-      ATH_MSG_INFO("Retrieving default file streaming tool");
-      ATH_CHECK(m_StreamToFileTool.retrieve());
+      ATH_MSG_INFO("Adding default file streaming tool");
+      m_StreamTools.push_back("JiveXML::StreamToFileTool/StreamToFileTool");
     }
     /// Get the streaming tools
     if (m_onlineMode == true){
-      ATH_MSG_INFO("Retrieving default server streaming tool");
-      ATH_CHECK(m_StreamToFileTool.retrieve());
+      m_StreamTools.push_back("JiveXML::StreamToServerTool/StreamToServerTool");
    }
+
+    if (m_StreamTools.size() == 0) {
+      ATH_MSG_WARNING("No streaming tools defined, events will be created but not stored!");
+    } else {
+      if (m_StreamTools.retrieve().isFailure()){
+        ATH_MSG_ERROR("Unable to retrieve streaming tools !");
+        return StatusCode::FAILURE;
+      }
+    }
 
     /**
      * Get the IDataRetrievers requested in the m_dataTypes list from the toolSvc 
@@ -118,13 +137,18 @@ namespace JiveXML{
     ATH_MSG_INFO("Retrieving data from " << m_DataRetrievers.size() << " tools" );
 
     ATH_MSG_INFO("List property settings: ");
+    ATH_MSG_INFO("WantPublicStreams: " << m_wantPublicStreams);
+    ATH_MSG_INFO("WantCalibrationStreams: " << m_wantCalibrationStreams);
+    ATH_MSG_INFO("WantMonitoringStreams: " << m_wantMonitoringStreams);
+    ATH_MSG_INFO("WantPhysicsStreams: " << m_wantPhysicsStreams);
     ATH_MSG_INFO("AtlasRelease: " << m_AtlasRelease);
     ATH_MSG_INFO("DataTypes: " << m_dataTypes );
     ATH_MSG_INFO("WriteToFile: " << m_writeToFile);
     ATH_MSG_INFO("OnlineMode: " << m_onlineMode);
     ATH_MSG_INFO("WriteGeometry: " << m_writeGeometry);
     ATH_MSG_INFO("GeometryVersion: " << m_geometryVersionIn);
-    ATH_MSG_INFO("GeoWriterNames: " << m_GeoWriterNames);
+    ATH_MSG_INFO("GeoWriterNames: "  << m_GeoWriterNames );
+
     return StatusCode::SUCCESS;
   }
 
@@ -135,6 +159,7 @@ namespace JiveXML{
    * - pass formatted events to streamers
    */
   StatusCode AlgoJiveXML::execute() {
+
     /** 
      * Firstly retrieve all the event header information 
      */
@@ -157,7 +182,7 @@ namespace JiveXML{
       return StatusCode::FAILURE;
     }else{
     // Event/xAOD/xAODEventInfo/trunk/xAODEventInfo/versions/EventInfo_v1.h
-     ATH_MSG_INFO(" xAODEventInfo: runNumber: "  << eventInfo->runNumber()  // is '222222' for mc events ?
+     ATH_MSG_VERBOSE(" xAODEventInfo: runNumber: "  << eventInfo->runNumber()  // is '222222' for mc events ?
           << ", eventNumber: " << eventInfo->eventNumber()
           << ", mcChannelNumber: " << eventInfo->mcChannelNumber()
           << ", mcEventNumber: "  << eventInfo->mcEventNumber() // MC: use this instead of runNumber
@@ -289,17 +314,16 @@ namespace JiveXML{
     /**
      * Now stream the events to all registered streaming tools
      */
-
-    ATH_MSG_INFO("Streaming event to file");
-    if ( (m_StreamToFileTool->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() )){
-	  ATH_MSG_WARNING( "Could not stream event to file" );
+    ATH_MSG_DEBUG( "Starting loop over event streamers" );
+    //Loop over streaming tools
+    ToolHandleArray<IStreamTool>::iterator StreamToolsItr = m_StreamTools.begin();
+    for ( ; StreamToolsItr != m_StreamTools.end(); ++StreamToolsItr ){
+      ATH_MSG_INFO("Streaming event to " << (*StreamToolsItr)->name() );
+        if ( (*StreamToolsItr)->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() ){
+           ATH_MSG_WARNING( "Could not stream event to " << (*StreamToolsItr)->name() );
+        } 
     }
-    if(m_onlineMode==true){
-      ATH_MSG_INFO("Streaming event to server");
-      if ( (m_StreamToServerTool->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() )){
-	ATH_MSG_WARNING( "Could not stream event to server" );
-      }
-    }
+    ATH_MSG_DEBUG( "Finished loop over event streamers" );
 
     return StatusCode::SUCCESS;
   }
@@ -315,9 +339,31 @@ namespace JiveXML{
     /// Release all the tools
     m_DataRetrievers.release().ignore();
     m_FormatTool.release().ignore();
-    m_StreamToFileTool.release().ignore();
-    m_StreamToServerTool.release().ignore();
-    
+    m_StreamTools.release().ignore();
+
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode AlgoJiveXML::chooseStream(const std::vector< xAOD::EventInfo::StreamTag > evtStreamTags){
+    std::vector<std::string> wantedStreamTypes;
+    if (m_wantPublicStreams){
+      wantedStreamTypes.emplace_back("Public");
+    }
+    if (m_wantCalibrationStreams){
+      wantedStreamTypes.emplace_back("calibration");
+    }
+    if (m_wantMonitoringStreams){
+      wantedStreamTypes.emplace_back("monitoring");
+    }
+    if (m_wantPhysicsStreams){
+      wantedStreamTypes.emplace_back("physics");
+    }
+      std::vector< xAOD::EventInfo::StreamTag > goodStreams;
+    for (const auto& evtStreamTag : evtStreamTags) {
+      ATH_MSG_INFO( "Stream Tag in function: " << evtStreamTag.type() << "_" << evtStreamTag.name());
+      // if evtStreamTag.type() is in wantedStreamTypes add to goodStreams
+    }
+    //randomize goodStreams and return first value as choosen Stream
     return StatusCode::SUCCESS;
   }
 } //namespace

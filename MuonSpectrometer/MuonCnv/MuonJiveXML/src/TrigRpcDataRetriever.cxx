@@ -42,6 +42,11 @@ namespace JiveXML {
     // retrieve the collection of RDO
     SG::ReadHandle<RpcPadContainer> rdoContainer(m_sgKey);
 
+    if (!rdoContainer.isValid()) {
+      ATH_MSG_WARNING("Unable to retrieve: " << m_sgKey);
+      return(StatusCode::SUCCESS);
+    }
+
     int ndata=0;
     for (auto containerIt=rdoContainer->begin(); containerIt!=rdoContainer->end(); ++containerIt) {
       ndata += (*containerIt)->size();

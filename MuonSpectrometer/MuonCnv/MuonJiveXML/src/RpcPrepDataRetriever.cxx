@@ -40,6 +40,11 @@ namespace JiveXML {
 
     SG::ReadHandle<Muon::RpcPrepDataContainer> rpcContainer(m_sgKey);
 
+    if (!rpcContainer.isValid()) {
+      ATH_MSG_WARNING("Unable to retrieve: " << m_sgKey);
+      return(StatusCode::SUCCESS);
+    }
+
     int ndata = 0;
     Muon::RpcPrepDataContainer::const_iterator containerIt;
     for (containerIt=rpcContainer->begin(); containerIt!=rpcContainer->end(); ++containerIt) {
