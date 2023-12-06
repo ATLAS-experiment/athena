@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
-
 
 def getATLASVersion():
     import os
@@ -48,7 +47,7 @@ def getDataTypes(flags, haveRDO=False, readAOD=False):
         # Taken from CaloJiveXML_DataTypes.py
         # TODO find correct flag and check the LArDigitRetriever is doing what we want it to do
         #if doLArDigits:
-            #data_types += ["JiveXML::LArDigitRetriever/LArDigitRetriever"]
+       # data_types += ["JiveXML::LArDigitRetriever/LArDigitRetriever"]
         #else:
         data_types += ["JiveXML::CaloFCalRetriever/CaloFCalRetriever"]
         data_types += ["JiveXML::CaloLArRetriever/CaloLArRetriever"]
@@ -180,6 +179,11 @@ def TrackRetrieverCfg(flags, name="TrackRetriever", **kwargs):
     # kwargs.setdefault("DoWriteHLT", True)
     ### switch residual data off:
     kwargs.setdefault("DoWriteResiduals", False)
+    if flags.Common.isOnline:    
+        doHitsDetails = False
+    else:
+        doHitsDetails = True
+    kwargs.setdefault("DoHitsDetails", doHitsDetails)
     the_tool = CompFactory.JiveXML.TrackRetriever(name, **kwargs)
     result.addPublicTool(the_tool)
     return result
@@ -211,129 +215,95 @@ def CaloRetrieversCfg(flags, **kwargs):
     from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
     result.merge(LArADC2MeVCondAlgCfg (flags))
 
-    from AthenaConfiguration.Enums import Format
-    if flags.Input.Format is Format.BS:
-        tileDigitsContainer = "TileDigitsCnt"
-
-        if flags.Tile.doOpt2:
-            tileRawChannelContainer = 'TileRawChannelOpt2'
-        elif flags.Tile.doOptATLAS:
-            tileRawChannelContainer = 'TileRawChannelFixed'
-        elif flags.Tile.doFitCOOL:
-            tileRawChannelContainer = 'TileRawChannelFitCool'
-        elif flags.Tile.doFit:
-            tileRawChannelContainer = 'TileRawChannelFit'
-        else:
-            tileRawChannelContainer = 'TileRawChannelCnt'
-
-    else:
-        if "TileDigitsCnt" in flags.Input.Collections:
-            tileDigitsContainer = "TileDigitsCnt"
-        elif "TileDigitsFlt" in flags.Input.Collections:
-            tileDigitsContainer = "TileDigitsFlt"
-
-        if "TileRawChannelOpt2" in flags.Input.Collections:
-            tileRawChannelContainer = 'TileRawChannelOpt2'
-        elif "TileRawChannelFitCool" in flags.Input.Collections:
-            tileRawChannelContainer = 'TileRawChannelFitCool'
-        elif "TileRawChannelFit" in flags.Input.Collections:
-            tileRawChannelContainer = 'TileRawChannelFit'
-        elif "TileRawChannelCnt" in flags.Input.Collections:
-            tileRawChannelContainer = 'TileRawChannelCnt'
-
-    from CaloJiveXML.CaloJiveXMLConf import JiveXML__LArDigitRetriever
-    theLArDigitRetriever = JiveXML__LArDigitRetriever(name="LArDigitRetriever")
-    theLArDigitRetriever.DoLArDigit = False
-    theLArDigitRetriever.DoHECDigit = False
-    theLArDigitRetriever.DoFCalDigit = False
-
-    if (theLArDigitRetriever.DoLArDigit or theLArDigitRetriever.DoHECDigit or theLArDigitRetriever.DoFCalDigit):
-        result.addPublicTool(
-            CompFactory.JiveXML.LArDigitRetriever(
-                name="LArDigitRetriever",
-                DoLArDigit=False,
-                DoHECDigit=False,
-                DoFCalDigit=False,
-            )
-        )
- 
-    else:
-        result.addPublicTool(
-            CompFactory.JiveXML.CaloFCalRetriever(
-                name="CaloFCalRetriever",
-                DoFCalCellDetails=False,
-                DoBadFCal=False,
-            )
-        )
-
-        result.addPublicTool(
-            CompFactory.JiveXML.CaloLArRetriever(
-                name="CaloLArRetriever",
-                DoLArCellDetails=False,
-                DoBadLAr=False,
-            )
-        )
-
-        result.addPublicTool(
-            CompFactory.JiveXML.CaloHECRetriever(
-                name="CaloHECRetriever",
-                DoHECCellDetails=False,
-                DoBadHEC=False,
-            )
-        )
+    rawChannelContainer = flags.Tile.RawChannelContainer
+    digitsContainer = "TileDigitsCnt"
+    if "TileDigitsFlt" in flags.Input.Collections:
+        digitsContainer = "TileDigitsFlt"
 
     result.addPublicTool(
         CompFactory.JiveXML.CaloClusterRetriever(name = "CaloClusterRetriever",**kwargs
         )
     )
     
+    if flags.Common.isOnline:
+        doTileCellDetails = True
+        doTileDigit = True
+    else:
+        doTileCellDetails = False
+        doTileDigit = False
     result.addPublicTool(
         CompFactory.JiveXML.CaloTileRetriever(
             name = "CaloTileRetriever",
-            TileDigitsContainer = tileDigitsContainer,
-            TileRawChannelContainer = tileRawChannelContainer,
-            DoTileCellDetails = False,
-            DoTileDigit = False,
+            TileDigitsContainer = digitsContainer,
+            TileRawChannelContainer = rawChannelContainer,
+            DoTileCellDetails = doTileCellDetails,
+            DoTileDigit = doTileDigit,
             DoBadTile = False,
         )
     )
 
+    if flags.Common.isOnline:
+        doMBTSDigits = True
+        doMBTSCellDetails = True
+    else:
+        doMBTSDigits = False
+        doMBTSCellDetails = False
+
     result.addPublicTool(
         CompFactory.JiveXML.CaloMBTSRetriever(
             name = "CaloMBTSRetriever",
-            TileDigitsContainer= tileDigitsContainer,
-            TileRawChannelContainer = tileRawChannelContainer,
-            DoMBTSDigits = False,
+            TileDigitsContainer= digitsContainer,
+            TileRawChannelContainer = rawChannelContainer,
+            DoMBTSDigits = doMBTSDigits,
+            DoMBTSCellDetails = doMBTSCellDetails,
         )
     )
 
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloFCalRetriever(
+            name = "CaloFCalRetriever",
+            DoFCalCellDetails = False,
+            DoBadFCal = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloLArRetriever(
+            name = "CaloLArRetriever",
+            DoLArCellDetails = False,
+            DoBadLAr = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloHECRetriever(
+            name = "CaloHECRetriever",
+            DoHECCellDetails = False,
+            DoBadHEC = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.LArDigitRetriever(
+            name = "LArDigitRetriever",
+            DoLArDigit = False,
+            DoHECDigit = False,
+            DoFCalDigit = False,
+        )
+    )
     return result
 
 
 def MuonRetrieversCfg(flags, **kwargs):
     result = ComponentAccumulator()
+    # TODO add in other retrievers
+    # Based on MuonJiveXML_DataTypes.py
     #kwargs.setdefault("StoreGateKey", "MDT_DriftCircles")
 
-    if flags.Detector.EnableMuon:
-        # Taken from MuonJiveXML_DataTypes.py
-        if flags.Detector.EnableMDT:
-            result.addPublicTool(CompFactory.JiveXML.MdtPrepDataRetriever(name="MdtPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnableTGC:
-            result.addPublicTool(CompFactory.JiveXML.TgcPrepDataRetriever(name="TgcPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnableRPC:
-            result.addPublicTool(CompFactory.JiveXML.RpcPrepDataRetriever(name="RpcPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnableCSC:
-            result.addPublicTool(CompFactory.JiveXML.CSCClusterRetriever(name="CSCClusterRetriever"), **kwargs)
-            result.addPublicTool(CompFactory.JiveXML.CscPrepDataRetriever(name="CscPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnablesTGC:
-            result.addPublicTool(CompFactory.JiveXML.sTgcPrepDataRetriever(name="sTgcPrepDataRetriever"), **kwargs)
-        if flags.Detector.EnableMM:
-            result.addPublicTool(CompFactory.JiveXML.MMPrepDataRetriever(name="MMPrepDataRetriever"), **kwargs)
-        # TODO Not sure if below are still needed?
-        # data_types += ["JiveXML::TrigMuonROIRetriever/TrigMuonROIRetriever"]
-        # data_types += ["JiveXML::MuidTrackRetriever/MuidTrackRetriever]
-        # data_types += ["JiveXML::TrigRpcDataRetriever/TrigRpcDataRetriever"]
-
+    result.addPublicTool(
+        CompFactory.JiveXML.MdtPrepDataRetriever(name = "MdtPrepDataRetriever",**kwargs
+        )
+    )
     return result
 
 
@@ -416,6 +386,7 @@ def xAODRetrieversCfg(flags):
     )
     return result
 
+
 def TriggerRetrieversCfg(flags):
     result = ComponentAccumulator()
     if flags.Reco.EnableTrigger:
@@ -459,7 +430,8 @@ def TriggerRetrieversCfg(flags):
         )
     return result
 
-def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
+
+def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
     # This is based on a few old-style configuation files:
     # JiveXML_RecEx_config.py
     # JiveXML_jobOptionBase.py
@@ -467,9 +439,12 @@ def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
 
     kwargs.setdefault("AtlasRelease", getATLASVersion())
     kwargs.setdefault("WriteToFile", True)
-    kwargs.setdefault("OnlineMode", False)
-    ### Enable this to recreate the geometry XML files for Atlantis
+    # Enable this to recreate the geometry XML files for Atlantis
     kwargs.setdefault("WriteGeometry", False)
+    if flags.Common.isOnline:
+        kwargs.setdefault("OnlineMode", True)
+    else:
+        kwargs.setdefault("OnlineMode", False)
 
     # This next bit sets the data types, then we set the associated public tools
     readAOD = False  # FIXME - set this properly
@@ -498,4 +473,6 @@ def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
 
     the_alg = CompFactory.JiveXML.AlgoJiveXML(name="AlgoJiveXML", **kwargs)
     result.addEventAlgo(the_alg, primary=True)
+    
+    
     return result

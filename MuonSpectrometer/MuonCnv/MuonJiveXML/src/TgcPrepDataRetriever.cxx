@@ -38,6 +38,11 @@ namespace JiveXML {
 
     SG::ReadHandle<Muon::TgcPrepDataContainer> tgcContainer(m_sgKey);
 
+    if (!tgcContainer.isValid()) {
+      ATH_MSG_WARNING("Unable to retrieve: " << m_sgKey);
+      return(StatusCode::SUCCESS);
+    }
+
     int ndata = 0;
     Muon::TgcPrepDataContainer::const_iterator containerIt;
     for (containerIt=tgcContainer->begin(); containerIt!=tgcContainer->end(); ++containerIt) {
