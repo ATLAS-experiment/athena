@@ -427,7 +427,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   m_deltaTSample = 3.125;
   m_numSample = 24;
   
-  const int deriv2ndThreshDSHG = -35;
+  const int deriv2ndThreshDSHG = -25;
   const int deriv2ndThreshDSLG = -10;
   const unsigned int peakSample = 10;
 
@@ -440,7 +440,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
   
   ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh;
-    ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCutHG, chisqDivAmpCutLG;
+  ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCutHG, chisqDivAmpCutLG;
   ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{1.1, 1.1, 1.1, 1.1},
@@ -504,10 +504,10 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
   zdcDataAnalyzer->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
   
-    // Enable two-pass analysis                                                                                 
+  // Enable two-pass analysis                                                                                 
   //                                                                                                          
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-12, -12, -12, -12},
-								   {-12, -12, -12, -12}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-10, -10, -10, -10},
+								   {-10, -10, -10, -10}}};
   
   ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
 								   {-8, -8, -8, -8}}};
@@ -556,7 +556,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   
   // Set the amplitude fit range limits                                                                       
   //                                                                                                          
-  zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
+  zdcDataAnalyzer->SetFitMinMaxAmpValues(2, 2, 6000, 6000);
   
   RPDConfig rpdConfig{};
   rpdConfig.nRows = 4;
