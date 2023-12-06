@@ -40,7 +40,10 @@ namespace JiveXML {
     ATH_MSG_VERBOSE("Retrieving " << dataTypeName()); 
 
     SG::ReadHandle<Muon::MdtPrepDataContainer> mdtContainer(m_sgKey);
-
+    if (!mdtContainer.isValid()) {
+      ATH_MSG_WARNING("Unable to retrieve: " << m_sgKey);
+      return(StatusCode::SUCCESS);
+    }
 
     int ndata = 0;
     Muon::MdtPrepDataContainer::const_iterator containerIt;
