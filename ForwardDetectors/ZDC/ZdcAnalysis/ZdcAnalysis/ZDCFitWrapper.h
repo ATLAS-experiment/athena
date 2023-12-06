@@ -495,11 +495,10 @@ public:
 
   virtual float GetShapeParameter(size_t index) const override
   {
-    // if (index == 0) return m_tau1;
-    // else if (index == 1) return m_tau2;
-    // else if (index < 5) return GetWrapperTF1()->GetParameter(index);
-    // else throw std::runtime_error("Fit parameter does not exist.");
-    return 0;
+    if (index == 0) return m_tau1;
+    else if (index == 1) return m_tau2;
+    else if (index < 5) return GetWrapperTF1()->GetParameter(index);
+    else throw std::runtime_error("Fit parameter does not exist.");
   }
 
   virtual float GetBkgdMaxFraction() const override
