@@ -518,18 +518,18 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //
   // Non-linear corrections
   //
-  std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoeffic;
+  std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoefficHG, nonLinearCorrCoefficLG;
   
-  nonLinearCorrCoeffic[0][0] = {-0.039464, 0.013250, -0.003676};
-  nonLinearCorrCoeffic[0][1] = {-0.050573, 0.019664, -0.004340};
-  nonLinearCorrCoeffic[0][2] = {-0.052816, 0.016221, -0.003364};
-  nonLinearCorrCoeffic[0][3] = {-0.014327, 0.000226, -0.000943};
-  nonLinearCorrCoeffic[1][0] = {-0.059663, 0.019482, -0.004615};
-  nonLinearCorrCoeffic[1][1] = {-0.036908, 0.008920, -0.002805};
-  nonLinearCorrCoeffic[1][2] = {-0.046814, 0.019434, -0.004207};
-  nonLinearCorrCoeffic[1][3] = {-0.060879, 0.026635, -0.004833};
+  nonLinearCorrCoefficHG[0][0] = {-0.039464, 0.013250, -0.003676};
+  nonLinearCorrCoefficHG[0][1] = {-0.050573, 0.019664, -0.004340};
+  nonLinearCorrCoefficHG[0][2] = {-0.052816, 0.016221, -0.003364};
+  nonLinearCorrCoefficHG[0][3] = {-0.014327, 0.000226, -0.000943};
+  nonLinearCorrCoefficHG[1][0] = {-0.059663, 0.019482, -0.004615};
+  nonLinearCorrCoefficHG[1][1] = {-0.036908, 0.008920, -0.002805};
+  nonLinearCorrCoefficHG[1][2] = {-0.046814, 0.019434, -0.004207};
+  nonLinearCorrCoefficHG[1][3] = {-0.060879, 0.026635, -0.004833};
 
-  zdcDataAnalyzer->SetNonlinCorrParams(0, nonLinearCorrCoeffic);
+  zdcDataAnalyzer->SetNonlinCorrParams(0, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
 
   std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoefficHG, timeCorrCoefficLG;
   timeCorrCoefficHG[0][0] = {0.07, -0.020672, 0.070206, 0.004961, -0.010821, -0.001835};
@@ -1031,7 +1031,7 @@ void ZdcAnalysisTool::initialize40MHz()
     slewingParamsLG[1][2] = {0, 1.393e-01, 8.113e-02, -2.594e-03  };
     slewingParamsLG[1][3] = {0, 1.939e-01, 2.188e-02, -5.579e-02  };
 
-    std::array<std::array<std::vector<float>, 4>, 2> moduleHGNonLinCorr;
+    std::array<std::array<std::vector<float>, 4>, 2> moduleHGNonLinCorr, moduleLGNonLinCorr;
     moduleHGNonLinCorr[0][0] = { -3.76800e-02, 4.63597e-02};
     moduleHGNonLinCorr[0][1] = { -1.02185e-01, -1.17548e-01};
     moduleHGNonLinCorr[0][2] = { -8.78451e-02, -1.52174e-01};
@@ -1049,7 +1049,7 @@ void ZdcAnalysisTool::initialize40MHz()
     m_zdcDataAnalyzer_40MHz->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, DeltaT0CutLowHG, DeltaT0CutHighHG, DeltaT0CutLowLG, DeltaT0CutHighLG);
     m_zdcDataAnalyzer_40MHz->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLin, 500, 100,
 						 slewingParamsHG, slewingParamsLG);
-    m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, moduleHGNonLinCorr);
+    m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, moduleHGNonLinCorr, moduleLGNonLinCorr);
     m_zdcDataAnalyzer_40MHz->SetSaveFitFunc(false);
 
 }
@@ -1140,7 +1140,7 @@ void ZdcAnalysisTool::initialize80MHz()
     slewingParamsLG[1][2] = {0, -26.8e-2, -2.64e-2, -5.3e-3 };
     slewingParamsLG[1][3] = {0, -13.2e-2,  0.45e-2, -2.4e-3 };
 
-    std::array<std::array<std::vector<float>, 4>, 2> moduleHGNonLinCorr;
+    std::array<std::array<std::vector<float>, 4>, 2> moduleHGNonLinCorr, moduleLGNonLinCorr;
     moduleHGNonLinCorr[0][0] = { -3.76800e-02, 4.63597e-02};
     moduleHGNonLinCorr[0][1] = { -1.02185e-01, -1.17548e-01};
     moduleHGNonLinCorr[0][2] = { -8.78451e-02, -1.52174e-01};
@@ -1158,7 +1158,7 @@ void ZdcAnalysisTool::initialize80MHz()
     m_zdcDataAnalyzer_80MHz->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, DeltaT0CutLowHG, DeltaT0CutHighHG, DeltaT0CutLowLG, DeltaT0CutHighLG);
     m_zdcDataAnalyzer_80MHz->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLin, 500, 100,
 						 slewingParamsHG, slewingParamsLG);
-    m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, moduleHGNonLinCorr);
+    m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, moduleHGNonLinCorr, moduleLGNonLinCorr);
     m_zdcDataAnalyzer_80MHz->SetSaveFitFunc(false);
 }
 
