@@ -7,6 +7,7 @@
 #include "JiveXML/IGeometryWriter.h"
 #include "JiveXML/XMLFormatTool.h"
 #include "JiveXML/StreamToFileTool.h"
+#include "JiveXML/StreamToServerTool.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -19,19 +20,6 @@ namespace JiveXML{
 
   AlgoJiveXML::AlgoJiveXML(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator) {
-
-    //Configurable properties
-    declareProperty("AtlasRelease"       ,m_AtlasRelease = "unknown", "The Athena release number");
-    declareProperty("DataTypes"          ,m_dataTypes, "List of data retriever names to be run");
-    declareProperty("WriteToFile"        ,m_writeToFile = true, "Whether XML files shall be produced");
-    declareProperty("OnlineMode"         ,m_onlineMode  = false, "Whether an XMLRPC server shall be started");
-    declareProperty("WriteGeometry"      ,m_writeGeometry = false, "Whether Geometry-XML files shall be produced");
-    declareProperty("GeometryVersion"    ,m_geometryVersionIn = "default", "Geometry version as read from Athena");
-    declareProperty("GeometryWriterTools",m_GeoWriterNames, "The names of the geometry-writer tools");
-
-    /// Default list of geometries to write
-    m_GeoWriterNames.push_back("JiveXML::GeometryWriter/GeometryWriter");
-    m_GeoWriterNames.push_back("JiveXML::MuonGeometryWriter/MuonGeometryWriter");
 
     //Array of tools that retrieve the data, set public and createIf as default
     declareProperty("DataRetrievers", m_DataRetrievers = ToolHandleArray<IDataRetriever>( NULL ,true));
@@ -106,12 +94,11 @@ namespace JiveXML{
       ATH_MSG_INFO("Adding default file streaming tool");
       m_StreamTools.push_back("JiveXML::StreamToFileTool/StreamToFileTool");
     }
-    if (m_onlineMode){
-      ATH_MSG_INFO("Adding default XMLRPC streaming tool");
-      m_StreamTools.push_back("JiveXML::XMLRPCStreamTool/XMLRPCStreamTool");
-    }
-
     /// Get the streaming tools
+    if (m_onlineMode == true){
+      m_StreamTools.push_back("JiveXML::StreamToServerTool/StreamToServerTool");
+   }
+
     if (m_StreamTools.size() == 0) {
       ATH_MSG_WARNING("No streaming tools defined, events will be created but not stored!");
     } else {
@@ -148,6 +135,19 @@ namespace JiveXML{
       }
 
     ATH_MSG_INFO("Retrieving data from " << m_DataRetrievers.size() << " tools" );
+
+    ATH_MSG_INFO("List property settings: ");
+    ATH_MSG_INFO("WantPublicStreams: " << m_wantPublicStreams);
+    ATH_MSG_INFO("WantCalibrationStreams: " << m_wantCalibrationStreams);
+    ATH_MSG_INFO("WantMonitoringStreams: " << m_wantMonitoringStreams);
+    ATH_MSG_INFO("WantPhysicsStreams: " << m_wantPhysicsStreams);
+    ATH_MSG_INFO("AtlasRelease: " << m_AtlasRelease);
+    ATH_MSG_INFO("DataTypes: " << m_dataTypes );
+    ATH_MSG_INFO("WriteToFile: " << m_writeToFile);
+    ATH_MSG_INFO("OnlineMode: " << m_onlineMode);
+    ATH_MSG_INFO("WriteGeometry: " << m_writeGeometry);
+    ATH_MSG_INFO("GeometryVersion: " << m_geometryVersionIn);
+    ATH_MSG_INFO("GeoWriterNames: "  << m_GeoWriterNames );
 
     return StatusCode::SUCCESS;
   }
@@ -341,6 +341,29 @@ namespace JiveXML{
     m_FormatTool.release().ignore();
     m_StreamTools.release().ignore();
 
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode AlgoJiveXML::chooseStream(const std::vector< xAOD::EventInfo::StreamTag > evtStreamTags){
+    std::vector<std::string> wantedStreamTypes;
+    if (m_wantPublicStreams){
+      wantedStreamTypes.emplace_back("Public");
+    }
+    if (m_wantCalibrationStreams){
+      wantedStreamTypes.emplace_back("calibration");
+    }
+    if (m_wantMonitoringStreams){
+      wantedStreamTypes.emplace_back("monitoring");
+    }
+    if (m_wantPhysicsStreams){
+      wantedStreamTypes.emplace_back("physics");
+    }
+      std::vector< xAOD::EventInfo::StreamTag > goodStreams;
+    for (const auto& evtStreamTag : evtStreamTags) {
+      ATH_MSG_INFO( "Stream Tag in function: " << evtStreamTag.type() << "_" << evtStreamTag.name());
+      // if evtStreamTag.type() is in wantedStreamTypes add to goodStreams
+    }
+    //randomize goodStreams and return first value as choosen Stream
     return StatusCode::SUCCESS;
   }
 } //namespace
