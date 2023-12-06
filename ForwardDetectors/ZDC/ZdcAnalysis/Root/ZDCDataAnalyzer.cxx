@@ -277,11 +277,15 @@ void ZDCDataAnalyzer::SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrMode mode,
 
 }
 
-void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams)
+void ZDCDataAnalyzer::SetNonlinCorrParams(float refADC, float refScale,
+					  const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams,
+					  const std::array<std::array<std::vector<float>, 4>, 2>& LGNonlinCorrParams)
 {
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
-      m_moduleAnalyzers[side][module]->SetNonlinCorrParams(refADC, HGNonlinCorrParams[side][module]);
+      m_moduleAnalyzers[side][module]->SetNonlinCorrParams(refADC, refScale,
+							   HGNonlinCorrParams[side][module],
+							   LGNonlinCorrParams[side][module]);
     }
   }
 }
