@@ -89,7 +89,7 @@ flags.Output.doWriteESD = True
 
 if testWithoutPartition or isOfflineTest:
     #flags.Input.Files = ['/detwork/dqm/EventDisplays_test_data/data23_13p6TeV.00454188.physics_Main.daq.RAW._lb0633._SFO-12._0002.data']
-    flags.Input.Files = ['/afs/cern.ch/work/m/myexley/ED-files/nominal/data23_13p6TeV.00454188.physics_Main.daq.RAW._lb0633._SFO-12._0002.data']
+    flags.Input.Files = ['/eos/home-m/myexley/sharedWithATLASauthors/data23_13p6TeV.00454188.physics_Main.daq.RAW._lb0633._SFO-12._0002.data']
 else:
     flags.Input.Files = [] # Files are read from the ATLAS (or GM test) partition
 
