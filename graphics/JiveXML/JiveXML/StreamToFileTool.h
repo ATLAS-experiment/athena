@@ -35,6 +35,7 @@ namespace JiveXML {
 
     private:
 
+      Gaudi::Property<std::string> m_mytest {this, "MyTest", "", "My test"};
       /** Prefix put in front of file name */
       std::string m_FileNamePrefix;
       

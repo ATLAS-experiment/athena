@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <JiveXML/StreamToFileTool.h>
@@ -30,7 +30,6 @@ namespace JiveXML {
    * Intialize - called once at the beginning
    */
   StatusCode StreamToFileTool::initialize(){
-
     return StatusCode::SUCCESS;
   }
 
@@ -49,6 +48,7 @@ namespace JiveXML {
    */
    StatusCode StreamToFileTool::StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* EventBuffer ) { 
    
+     if (msgLvl(MSG::INFO)) msg(MSG::INFO) << " m_FileNamePrefix: " << m_FileNamePrefix << endmsg;
      /// Get a pointer to a new file
      std::ofstream* outFile;
      StatusCode sc = NewFile(EventNumber,RunNumber,outFile);
@@ -57,7 +57,6 @@ namespace JiveXML {
            << EventNumber << " from run " << RunNumber << endmsg;
        return sc;
      }
-
      /// Stream this event into the file 
      (*outFile) << EventBuffer->str();
      outFile->flush();

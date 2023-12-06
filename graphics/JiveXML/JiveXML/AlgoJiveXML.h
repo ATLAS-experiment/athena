@@ -10,7 +10,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/MsgStream.h"
 #include "JiveXML/IDataRetriever.h"
-
+#include "xAODEventInfo/EventInfo.h"
 #include <vector>
 
 //Forward declarations
@@ -40,29 +40,23 @@ namespace JiveXML {
       StatusCode initialize();
       StatusCode execute();
       StatusCode finalize();
-
     private:
 
-      /** @name Configurable options */  
-      //@{
-      //Whether default server stream shall be created
-      bool m_onlineMode;
-      //Whether events shall be written to a file
-      bool m_writeToFile;
-      //Whether XML geometry information shall be generated
-      bool m_writeGeometry;
-      // Geometry version from Athena
-      std::string m_geometryVersionIn;
-      // Athena release version
-      std::string m_AtlasRelease;
-      //@}
+      StatusCode chooseStream(const std::vector< xAOD::EventInfo::StreamTag >);
 
+      //Configurable properties
+      Gaudi::Property<bool> m_wantPublicStreams {this, "WantPublicStreams", false, "If running online, is the Public stream wanted."};
+      Gaudi::Property<bool> m_wantCalibrationStreams {this, "WantCalibrationStreams", false, "If running online, are the calibration streams wanted."};
+      Gaudi::Property<bool> m_wantMonitoringStreams {this, "WantMonitoringStreams", false, "If running online, are the monitoring streams wanted."};
+      Gaudi::Property<bool> m_wantPhysicsStreams {this, "WantPhysicsStreams", true, "If running online, are the physics streams wanted."};
 
-      /** List of dataTypes to be retrieved and written to xml */
-      std::vector<std::string> m_dataTypes;
-
-      /** List of geometry writer tools to be called */
-      std::vector<std::string> m_GeoWriterNames;
+      Gaudi::Property<std::string> m_AtlasRelease {this, "AtlasRelease", "unknown", "The Athena release number"};
+      Gaudi::Property<std::vector<std::string>> m_dataTypes {this, "DataTypes", {}, "List of data retriever names to be run"}; 
+      Gaudi::Property<bool> m_writeToFile {this, "WriteToFile", true, "Whether XML files shall be produced"};
+      Gaudi::Property<bool> m_onlineMode {this, "OnlineMode", false, "Whether an XMLRPC server shall be started"};
+      Gaudi::Property<bool> m_writeGeometry {this, "WriteGeometry", false, "Whether Geometry-XML files shall be produced"};
+      Gaudi::Property<std::string> m_geometryVersionIn {this, "GeometryVersion", "default", "Geometry version as read from Athena"};
+      Gaudi::Property<std::vector<std::string>> m_GeoWriterNames {this, "GeoWriterNames", {"JiveXML::GeometryWriter/GeometryWriter","JiveXML::MuonGeometryWriter/MuonGeometryWriter"}, "The names of the geometry-writer tools"};
 
     protected:
 
