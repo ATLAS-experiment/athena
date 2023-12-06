@@ -244,6 +244,7 @@ void ZDCPulseAnalyzer::Reset(bool repass)
   if (m_initializedFits) {
     m_defaultFitWrapper ->SetT0Range(m_defaultT0Min, m_defaultT0Max);
     m_prePulseFitWrapper->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+    m_preExpFitWrapper->SetT0Range(m_defaultT0Min, m_defaultT0Max);
   }
   
   // -----------------------
@@ -440,16 +441,14 @@ void ZDCPulseAnalyzer::SetupFitFunctions()
     m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
   }
   else if (m_fitFunction == "FermiExpLHCf") {
-    //if (!m_fixTau1 || !m_fixTau2) {
-      //
-      // Use the variable tau version of the expFermiFit
-      //
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausLHCf(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2, m_nominalTau1, m_nominalTau2));
-    // }
-    // else {
-    //   m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
-    // }
+    //
+    // Use the variable tau version of the expFermiFit
+    //
+    m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausLHCf(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2,
+											      m_nominalTau1, m_nominalTau2));
 
+    m_preExpFitWrapper = std::unique_ptr<ZDCFitExpFermiLHCfPreExp>(new ZDCFitExpFermiLHCfPreExp(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2, 6, false));
+    
     m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
   }
   else if (m_fitFunction == "FermiExpLinear") {
@@ -757,30 +756,27 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
         }
       }
 
-      //  If we have a non-linear correction, apply it here
-      //
-      //    We apply it as an inverse correction - i.e. we divide by a correction
-      //      term tha is a sum of coefficients times the ADC minus a reference
-      //      to a power. The lowest power is 1, the highest is deteremined by
-      //      the number of provided coefficients 
-      //
-      if (m_haveNonlinCorr) {
-        float ampCorrFact = (m_fitAmplitude - m_nonLinCorrRefADC) / 1000. ;
-	
-	float invNLCorr = 1.0;
-	for (size_t power = 1; power <= m_nonLinCorrParams.size(); power++) {
-	  invNLCorr += m_nonLinCorrParams[power - 1]*pow(ampCorrFact, power);
-	}
+       // If we have a non-linear correction, apply it here
+      
+       //   We apply it as an inverse correction - i.e. we divide by a correction
+       //     term tha is a sum of coefficients times the ADC minus a reference
+       //     to a power. The lowest power is 1, the highest is deteremined by
+       //     the number of provided coefficients 
 
-        m_fitAmplitude /= invNLCorr;
-        m_fitAmpError /= invNLCorr;
+      double invNLCorr = 1.0;
+      if (m_haveNonlinCorr) {
+        float ampCorrFact = (m_fitAmplitude - m_nonLinCorrRefADC) / m_nonLinCorrRefScale;
+	
+	for (size_t power = 1; power <= m_nonLinCorrParamsLG.size(); power++) {
+	  invNLCorr += m_nonLinCorrParamsLG[power - 1]*pow(ampCorrFact, power);
+	}
       }
       
       //
       // Multiply amplitude by gain factor
       //
-      m_amplitude     = m_fitAmplitude * m_gainFactorLG;
-      m_ampError      = m_fitAmpError  * m_gainFactorLG;
+      m_amplitude     = m_fitAmplitude / invNLCorr * m_gainFactorLG;
+      m_ampError      = m_fitAmpError / invNLCorr * m_gainFactorLG;
       m_preSampleAmp  = m_preSample    * m_gainFactorLG;
       m_preAmplitude  = m_fitPreAmp    * m_gainFactorLG;
       m_postAmplitude = m_fitPostAmp   * m_gainFactorLG;
@@ -826,11 +822,11 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
       //      the number of provided coefficients 
       //
       if (m_haveNonlinCorr) {
-        float ampCorrFact = (m_amplitude - m_nonLinCorrRefADC) / 1000. ;
+        float ampCorrFact = (m_amplitude - m_nonLinCorrRefADC) / m_nonLinCorrRefScale;
 	
 	float invNLCorr = 1.0;
-	for (size_t power = 1; power <= m_nonLinCorrParams.size(); power++) {
-	  invNLCorr += m_nonLinCorrParams[power - 1]*pow(ampCorrFact, power);
+	for (size_t power = 1; power <= m_nonLinCorrParamsHG.size(); power++) {
+	  invNLCorr += m_nonLinCorrParamsHG[power - 1]*pow(ampCorrFact, power);
 	}
 
         m_amplitude /= invNLCorr;
@@ -1208,8 +1204,11 @@ void ZDCPulseAnalyzer::DoFit(double maxChisqDivAmp)
   if (ampInitial < fitAmpMin) ampInitial = fitAmpMin * 1.5;
 
   ZDCFitWrapper* fitWrapper = m_defaultFitWrapper.get();
-  if (PrePulse()) fitWrapper = m_prePulseFitWrapper.get();
-
+  if (PrePulse()) {
+    //    fitWrapper = m_prePulseFitWrapper.get();
+    fitWrapper = m_preExpFitWrapper.get();
+  }
+  
   if (m_adjTimeRangeEvent) {
     m_fitTMin = std::max(m_fitTMin, m_deltaTSample * m_minSampleEvt - m_deltaTSample / 2);
     m_fitTMax = std::min(m_fitTMax, m_deltaTSample * m_maxSampleEvt + m_deltaTSample / 2);
@@ -1225,14 +1224,16 @@ void ZDCPulseAnalyzer::DoFit(double maxChisqDivAmp)
   if (PrePulse()) {
     //
     //
-    (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetInitialPrePulse(m_initialPrePulseAmp, m_initialPrePulseT0, m_initialExpAmp, m_fixPrePulse);
+    // (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetInitialPrePulse(m_initialPrePulseAmp, m_initialPrePulseT0, m_initialExpAmp, m_fixPrePulse);
 
-    if (m_initialPrePulseT0 < 0) {
-      (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetPrePulseT0Range(-25, 0);
-    }
-    else {
-      (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetPrePulseT0Range(-m_deltaTSample / 2, (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance)*m_deltaTSample);
-    }
+    (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->SetInitialExpPulse(m_initialExpAmp);
+
+    // if (m_initialPrePulseT0 < 0) {
+    //   (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetPrePulseT0Range(-25, 0);
+    // }
+    // else {
+    //   (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetPrePulseT0Range(-m_deltaTSample / 2, (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance)*m_deltaTSample);
+    // }
   }
 
   // Now perform the fit
@@ -1303,8 +1304,13 @@ void ZDCPulseAnalyzer::DoFit(double maxChisqDivAmp)
     m_fitHist->GetListOfFunctions()->Add(fitWrapper->GetWrapperTF1RawPtr());
   }
 
+  // std::cout << "Min test:: tag = " << m_tag << ", amplitude = " << fitAmp << ", minimumn = " <<  fitAmpMin
+  // 	    << ", m_fitMinAmp = " << m_fitMinAmp << std::endl;
+
   m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
   m_fitAmplitude = fitWrapper->GetAmplitude();
+  m_fitAmpError = fitWrapper->GetAmpError();
+
   m_fitTime      = fitWrapper->GetTime();
 
   m_fitTimeSub = m_fitTime - t0Initial;
@@ -1315,7 +1321,12 @@ void ZDCPulseAnalyzer::DoFit(double maxChisqDivAmp)
   m_fitTau1 = fitWrapper->GetTau1();
   m_fitTau2 = fitWrapper->GetTau2();
 
-  m_fitAmpError = fitWrapper->GetAmpError();
+  // Here we need to check if the fit amplitude is small (close) enough to fitAmpMin.
+  // with "< 1+epsilon" where epsilon ~ 1%
+  if (m_fitAmplitude < fitAmpMin * 1.01) {
+    m_fitMinAmp = true;
+  }
+
 }
 
 void ZDCPulseAnalyzer::DoFitCombined(double)
