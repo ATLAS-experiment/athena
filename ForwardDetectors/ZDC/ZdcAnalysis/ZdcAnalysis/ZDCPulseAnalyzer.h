@@ -146,7 +146,9 @@ private:
 
   bool m_haveNonlinCorr{false};
   float m_nonLinCorrRefADC;
-  std::vector<float> m_nonLinCorrParams;
+  float m_nonLinCorrRefScale;
+  std::vector<float> m_nonLinCorrParamsHG;
+  std::vector<float> m_nonLinCorrParamsLG;
 
   // Histogram used to perform the fits and function wrappers
   //
@@ -155,6 +157,7 @@ private:
   bool m_initializedFits{false};
   std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapper;
   std::unique_ptr<ZDCPrePulseFitWrapper> m_prePulseFitWrapper;
+  std::unique_ptr<ZDCPreExpFitWrapper> m_preExpFitWrapper;
 
   // Members to keep track of adjustments to time range used in analysis/fit
   //
@@ -396,16 +399,23 @@ public:
 
   void SetFitTimeMax(float tmax);
 
-  void SetNonlinCorrParams(float refADC, const std::vector<float>& params)
+  void SetNonlinCorrParams(float refADC, float refScale, const std::vector<float>& paramsHG, const std::vector<float>& paramsLG)
   {
-    //  Check for valid length
-    //
-    //    if (params.size() != 2) throw std::runtime_error ("SetNonlinCorrParams");
+    std::string HGParamsStr = "HG coefficients = ", LGParamsStr = "LG coefficients = ";
 
-    (*m_msgFunc_p)(ZDCMsg::Info, ("Setting non-linear parameters for module: " + m_tag + ", vlues = " + std::to_string(params[0]) + ", " + std::to_string(params[1])));
+    for (auto val : paramsHG) {HGParamsStr += std::to_string(val) + " ";}
+    for (auto val : paramsLG) {LGParamsStr += std::to_string(val) + " ";}
+    
+    (*m_msgFunc_p)(ZDCMsg::Info, ("Setting non-linear parameters for module: " + m_tag + ", reference ADC = " +
+				  std::to_string(refADC) + ", reference scale = " + std::to_string(refScale)));
+
+    (*m_msgFunc_p)(ZDCMsg::Info, HGParamsStr);
+    (*m_msgFunc_p)(ZDCMsg::Info, LGParamsStr);
 
     m_nonLinCorrRefADC = refADC;
-    m_nonLinCorrParams = params;
+    m_nonLinCorrRefScale = refScale;
+    m_nonLinCorrParamsHG = paramsHG;
+    m_nonLinCorrParamsLG = paramsLG;
     m_haveNonlinCorr = true;
   }
 
