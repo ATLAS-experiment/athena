@@ -529,7 +529,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   nonLinearCorrCoefficHG[1][2] = {-0.046814, 0.019434, -0.004207};
   nonLinearCorrCoefficHG[1][3] = {-0.060879, 0.026635, -0.004833};
 
-  zdcDataAnalyzer->SetNonlinCorrParams(0, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
+  zdcDataAnalyzer->SetNonlinCorrParams(0, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
 
   std::array<std::array<std::vector<float>, 4>, 2> timeCorrCoefficHG, timeCorrCoefficLG;
   timeCorrCoefficHG[0][0] = {0.07, -0.020672, 0.070206, 0.004961, -0.010821, -0.001835};
@@ -1049,7 +1049,7 @@ void ZdcAnalysisTool::initialize40MHz()
     m_zdcDataAnalyzer_40MHz->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, DeltaT0CutLowHG, DeltaT0CutHighHG, DeltaT0CutLowLG, DeltaT0CutHighLG);
     m_zdcDataAnalyzer_40MHz->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLin, 500, 100,
 						 slewingParamsHG, slewingParamsLG);
-    m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, moduleHGNonLinCorr, moduleLGNonLinCorr);
+    m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
     m_zdcDataAnalyzer_40MHz->SetSaveFitFunc(false);
 
 }
@@ -1158,7 +1158,7 @@ void ZdcAnalysisTool::initialize80MHz()
     m_zdcDataAnalyzer_80MHz->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, DeltaT0CutLowHG, DeltaT0CutHighHG, DeltaT0CutLowLG, DeltaT0CutHighLG);
     m_zdcDataAnalyzer_80MHz->SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrLin, 500, 100,
 						 slewingParamsHG, slewingParamsLG);
-    m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, moduleHGNonLinCorr, moduleLGNonLinCorr);
+    m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
     m_zdcDataAnalyzer_80MHz->SetSaveFitFunc(false);
 }
 
