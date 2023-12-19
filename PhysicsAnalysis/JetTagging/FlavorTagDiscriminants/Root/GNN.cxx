@@ -27,9 +27,10 @@ namespace FlavorTagDiscriminants {
   GNN::GNN(const std::string& nn_file, const GNNOptions& o):
     m_onnxUtil(nullptr),
     m_jetLink(jetLinkName),
-    m_defaultValue(o.default_output_value),
+    m_defaultValue(o.default_output_value)
     m_decorate_tracks(o.decorate_tracks),
-    m_trackLoader(nullptr)
+    // m_trackLoader(nullptr),
+    // m_flowLoader(nullptr)
   {
     // track decoration is allowed only for non-production builds
     if (m_decorate_tracks) {
@@ -63,8 +64,11 @@ namespace FlavorTagDiscriminants {
     if (constituents_configs.size() > 0){
       auto tracksLoaderConfig = constituents_configs[0];
       std::cout << "TEST 2 " << std::endl; 
-      m_trackLoader = std::make_shared<TracksLoader>(tracksLoaderConfig, options);
+      // m_trackLoader = std::make_shared<TracksLoader>(tracksLoaderConfig, options);
       track_sequences = convertTracksConfigBack(constituents_configs[0]);
+      std::cout << "TEST 2F " << std::endl; 
+      // m_flowLoader = std::make_shared<IParticlesLoader>(tracksLoaderConfig, options);
+      // m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(tracksLoaderConfig, options));
     }
     std::cout << "TEST 3 " << std::endl;
     // Initialize jet and b-tagging input getters.
@@ -179,16 +183,19 @@ namespace FlavorTagDiscriminants {
       std::vector<int64_t> track_feat_dim = {num_tracks, num_track_vars};
 
       input_pair track_info (track_feat, track_feat_dim);
-      if (m_trackLoader){
-        auto loader_out = m_trackLoader->getData(jet, btag);
-        auto loader_track_feat = loader_out.second.first;
-        std::cout << "Vector size: OLD " << track_feat.size() << " NEW " << loader_track_feat.size() << std::endl;
-        for (uint64_t i = 0; i < track_feat.size(); i++){
-          if (std::fabs(loader_track_feat.at(i) - track_feat.at(i)) > 0.001) {
-              std::cout << "DIFFERENCE " << i << std::endl;
-          }
-        }
-      }
+      // if (m_trackLoader){
+      //   auto loader_out = m_trackLoader->getData(jet, btag);
+      //   auto loader_track_feat = loader_out.second.first;
+      //   std::cout << "Vector size: OLD " << track_feat.size() << " NEW " << loader_track_feat.size() << std::endl;
+      //   for (uint64_t i = 0; i < track_feat.size(); i++){
+      //     if (std::fabs(loader_track_feat.at(i) - track_feat.at(i)) > 0.001) {
+      //         std::cout << "DIFFERENCE " << i << std::endl;
+      //     }
+      //   }
+      // }
+      // if (m_constituentsLoaders.size() > 0){
+      //   auto flow_out = m_constituentsLoaders[0]->getData(jet, btag);
+      // }
       gnn_input.insert({"track_features", track_info});
     }
 

@@ -18,6 +18,7 @@
 
 // STL includes
 #include <string>
+#include <iostream>
 #include <vector>
 
 namespace FlavorTagDiscriminants {
@@ -75,12 +76,16 @@ namespace FlavorTagDiscriminants {
         }
     };
 
-
     // Virtual class to represent loader of any type of constituents
     class ConstituentsLoader {
         public:
             ConstituentsLoader(FTagConstituentsSequenceConfig cfg) {
               config = cfg;
+            };
+            // ConstituentsLoader(const ConstituentsLoader&) = delete;
+            // ConstituentsLoader(ConstituentsLoader&&) = default;
+            virtual ~ConstituentsLoader() {
+              std::cout << "DELETED" << std::endl;
             };
             virtual std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const = 0;
 

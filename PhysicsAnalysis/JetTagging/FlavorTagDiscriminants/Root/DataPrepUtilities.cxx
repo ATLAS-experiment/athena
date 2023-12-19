@@ -735,13 +735,17 @@ namespace FlavorTagDiscriminants {
 
       // some additional options
       FTagOptions options;
+      
       if (auto h = remap_scalar.extract(options.track_prefix)) {
         options.track_prefix = h.mapped();
+        std::cout << "TRK_PREF: " << options.track_prefix << std::endl;
       }
       if (auto h = remap_scalar.extract(options.track_link_name)) {
         options.track_link_name = h.mapped();
+        std::cout << "TRK_LINK: " << options.track_link_name << std::endl;
       }
       if (auto h = remap_scalar.extract(options.invalid_ip_key)) {
+        std::cout << "IP_KEY: " << options.invalid_ip_key << std::endl;
         options.invalid_ip_key = h.mapped();
       }
       options.flip = flip_config;
@@ -991,7 +995,7 @@ namespace FlavorTagDiscriminants {
           }
           track_data_deps.merge(deps);
 
-	  if (auto h = remap.extract(input_cfg.name)){
+	        if (auto h = remap.extract(input_cfg.name)){
             used_remap.insert(h.key());
           }
 
