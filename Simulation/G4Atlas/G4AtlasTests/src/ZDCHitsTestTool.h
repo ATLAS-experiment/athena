@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4AT_ZDCHITSTESTTOOL
@@ -23,7 +23,7 @@ public:
 
   // globals
   TH1 *m_zdc[2][4],*m_rpd[2][16];
-  const ZdcID* m_ZdcID;
+  const ZdcID* m_ZdcID = nullptr;
 
 };
 
