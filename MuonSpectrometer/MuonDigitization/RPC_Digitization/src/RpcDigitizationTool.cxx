@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1517,9 +1517,6 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
     // int stripetadead = 0 ; // not used
     // int stripphidead = 0 ; // not used
 
-    int stripetagood = 0;
-    int stripphigood = 0;
-
     unsigned int index = stationName - 2;
     // BML and BMS, BOL and BOS  come first (stationName= 2 and 3, 4 and 5 -> index 0-3)
     if (stationName > 5 && stationName < 50) index = index - 2;
@@ -1702,7 +1699,7 @@ StatusCode RpcDigitizationTool::DetectionEfficiency(const EventContext& ctx, con
         // if projected tracks number too low or inconsistent values get efficiencies from joboption and overwrite previous values
         if (applySpecialPatch || RPC_ProjectedTracksEta < m_CutProjectedTracks || RPC_ProjectedTracksEta > 10000000 ||
             EtaPanelEfficiency > 1 || EtaPanelEfficiency < 0 || PhiPanelEfficiency > 1 || PhiPanelEfficiency < 0 || GapEfficiency > 1 ||
-            GapEfficiency < 0 || stripetagood == 1 || stripphigood == 1) {
+            GapEfficiency < 0) {
             if (index > m_PhiAndEtaEff_A.size() || index > m_OnlyEtaEff_A.size() || index > m_OnlyPhiEff_A.size()) {
                 ATH_MSG_ERROR("Index out of array in Detection Efficiency SideA COOLDB" << index << " stationName = " << stationName);
                 return StatusCode::FAILURE;
