@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerMatchingTool/MatchingImplementation.h"
@@ -17,7 +17,7 @@ const Trig::TrigDecisionTool* MatchingImplementation::tdt() const {
   return std::as_const(m_tool).m_trigDecTool.operator->();
 }
 
-  bool MatchingImplementation::assocIsMatched(IAssociationStrategy::index_assignment_t association, const std::vector<std::vector<double> >& matrix, double threshold) const {
+  bool MatchingImplementation::assocIsMatched(const IAssociationStrategy::index_assignment_t& association, const std::vector<std::vector<double> >& matrix, double threshold) const {
   int ndim =  matrix.size();
   if(!ndim) return false;
 
