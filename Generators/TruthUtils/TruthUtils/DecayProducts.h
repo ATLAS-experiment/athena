@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTHUTILS_DECAYPRODUCTS_H
 #define TRUTHUTILS_DECAYPRODUCTS_H
@@ -15,8 +15,8 @@ public:
     int pd(int i1, int i2) const { int ret = 0; for ( auto & a: m_pids) if (i1 <= a.first && a.first <= i2) ret += a.second; return ret; }
     int apd(int i1, int i2) const { int ret = 0; for ( auto & a: m_apids) if (i1 <= a.first && a.first <= i2) ret += a.second; return ret; }
     int apd(int i) const { return m_apids.count(i)?m_apids.at(i):0; }
-    int pd(std::vector<int> i) const { int ret = 0; for ( auto ii: i) ret += pd(ii); return ret;}
-    int apd(std::vector<int> i) const { int ret = 0; for ( auto ii: i) ret += apd(ii); return ret; }
+    int pd(const std::vector<int>& i) const { int ret = 0; for ( auto ii: i) ret += pd(ii); return ret;}
+    int apd(const std::vector<int>& i) const { int ret = 0; for ( auto ii: i) ret += apd(ii); return ret; }
     size_t size() const { return m_size; }
     int apply(bool (*func)(const int&)) const { int ret = 0; for ( auto & a: m_pids) if (func(a.first)) ret+=a.second; return ret;  }
     std::map<int,int>  m_pids;
