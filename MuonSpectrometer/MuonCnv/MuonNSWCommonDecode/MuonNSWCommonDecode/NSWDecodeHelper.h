@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef _MUON_NSW_DECODE_HELPER_H_
-#define _MUON_NSW_DECODE_HELPER_H_
+#ifndef MUONNSWCOMMONDECODE_NSWDECODEHELPER_H
+#define MUONNSWCOMMONDECODE_NSWDECODEHELPER_H
 
 #include <stdint.h>
 #include <stdexcept>
@@ -144,7 +144,7 @@ namespace Muon
       constexpr int8_t max_bit(const T &number) {
       constexpr int8_t num_bits = sizeof(number) * 8 - 1;
       for (int8_t bit = num_bits; bit >= 0; --bit) {
-	if (number & (1 << bit))
+	if (number & (1u << bit))
 	  return bit;
       }
       return -1;
@@ -157,7 +157,7 @@ namespace Muon
       constexpr int8_t min_bit(const T &number) {
       constexpr int8_t num_bits = sizeof(number) * 8 - 1;  
       for (size_t bit = 0; bit <= num_bits; ++bit) {
-	if (number & (1 << bit))
+	if (number & (1u << bit))
 	  return bit;
       }
       return -1;
@@ -184,6 +184,4 @@ inline uint32_t Muon::nsw::helper::get_bits (uint32_t word, uint32_t mask, uint8
 //  return word; //TODO 
 //}
 
-#endif // _MUON_NSW_DECODE_HELPER_H_
-
-
+#endif // not MUONNSWCOMMONDECODE_NSWDECODEHELPER_H
