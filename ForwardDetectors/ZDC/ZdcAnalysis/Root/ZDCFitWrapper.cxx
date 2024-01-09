@@ -404,8 +404,8 @@ void ZDCFitExpFermiLHCfPreExp::ConstrainFit()
   //
   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
 
-  if (!m_fixTau) theTF1->FixParameter(3, getDefaultExpTau());
-  else theTF1->FixParameter(2, 0);
+  theTF1->FixParameter(3, getDefaultExpTau());
+  theTF1->FixParameter(2, 0);
 
   theTF1->FixParameter(4, 0);
   theTF1->FixParameter(5, 0);
@@ -413,17 +413,15 @@ void ZDCFitExpFermiLHCfPreExp::ConstrainFit()
 void ZDCFitExpFermiLHCfPreExp::UnconstrainFit()
 {
   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
-  if (!m_fixTau) {
-    theTF1->ReleaseParameter(3);
-    theTF1->SetParLimits(3, 5, 10);
-  }
-  else {
-    theTF1->ReleaseParameter(2);
-    theTF1->SetParLimits(2, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
-  }
+
+  theTF1->ReleaseParameter(3);
+  theTF1->SetParLimits(3, 6, 9);
+
+  theTF1->ReleaseParameter(2);
+  theTF1->SetParLimits(2, 0, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
   
   theTF1->ReleaseParameter(4);
-  theTF1->SetParLimits(4, 0, 0.2);
+  theTF1->SetParLimits(4, 0, 0.25);
 
   theTF1->ReleaseParameter(5);
   theTF1->SetParLimits(5, -50, 50);
