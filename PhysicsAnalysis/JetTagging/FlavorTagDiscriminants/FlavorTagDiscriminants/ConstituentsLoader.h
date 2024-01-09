@@ -89,6 +89,7 @@ namespace FlavorTagDiscriminants {
             };
             virtual std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const = 0;
 
+            FTagDataDependencyNames deps;
         private:
             FTagConstituentsSequenceConfig config;
     };

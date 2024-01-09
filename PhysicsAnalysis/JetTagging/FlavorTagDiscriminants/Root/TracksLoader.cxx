@@ -4,7 +4,6 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
-#include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 
 #include "FlavorTagDiscriminants/customGetter.h"
 #include "FlavorTagDiscriminants/TracksLoader.h"
@@ -513,7 +512,6 @@ namespace FlavorTagDiscriminants {
             throw std::logic_error("Unknown TrackLinkType");
         }
         std::cout << "TEST TRACK 2 " << std::endl;
-        FTagDataDependencyNames deps;
         std::map<std::string, std::string> remap = options.remap_scalar;
         std::set<std::string> used_remap;
 
