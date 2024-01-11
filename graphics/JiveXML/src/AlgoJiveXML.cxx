@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JiveXML/AlgoJiveXML.h"
@@ -147,8 +147,7 @@ namespace JiveXML{
     ATH_MSG_INFO("OnlineMode: " << m_onlineMode);
     ATH_MSG_INFO("WriteGeometry: " << m_writeGeometry);
     ATH_MSG_INFO("GeometryVersion: " << m_geometryVersionIn);
-    ATH_MSG_INFO("GeoWriterNames: "  << m_GeoWriterNames );
-
+    ATH_MSG_INFO("GeoWriterNames: " << m_GeoWriterNames);
     return StatusCode::SUCCESS;
   }
 
@@ -159,7 +158,6 @@ namespace JiveXML{
    * - pass formatted events to streamers
    */
   StatusCode AlgoJiveXML::execute() {
-
     /** 
      * Firstly retrieve all the event header information 
      */

@@ -24,6 +24,7 @@ namespace JiveXML {
     declareProperty("FileNamePrefix", m_FileNamePrefix = "JiveXML");
     /// The file name suffix
     declareProperty("FileNameSuffix", m_FileNameSuffix = ".xml");
+    
   }
 
   /**
@@ -47,8 +48,7 @@ namespace JiveXML {
    * @param EventBuffer the string holding the complete event
    */
    StatusCode StreamToFileTool::StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* EventBuffer ) { 
-   
-     if (msgLvl(MSG::INFO)) msg(MSG::INFO) << " m_FileNamePrefix: " << m_FileNamePrefix << endmsg;
+     if (msgLvl(MSG::INFO)) msg(MSG::INFO) << " m_FileNamePrefix: " << m_FileNamePrefix << " my test: " << m_mytest << endmsg;
      /// Get a pointer to a new file
      std::ofstream* outFile;
      StatusCode sc = NewFile(EventNumber,RunNumber,outFile);

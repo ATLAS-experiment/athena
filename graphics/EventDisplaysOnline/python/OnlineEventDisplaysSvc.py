@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """This service runs in the online Athena event display threads. It
 manages the distribution of incoming events to the right event display streams.
@@ -31,7 +31,7 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                 self.StreamToFileTool = None
                 self.StreamToServerTool = None
                 self.VP1EventProducer = None
-
+                
                 self.run = 0
                 self.event = 0
                 self.stream = ''
@@ -55,7 +55,6 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
         def getJobOptions(self):
                 self.StreamToFileTool = PyAthena.py_tool('JiveXML::StreamToFileTool', iface='IProperty')
                 self.StreamToServerTool = PyAthena.py_tool('JiveXML::StreamToServerTool', iface='IProperty')
-
                 # Some casting magic is needed to access algorithm properties
                 from GaudiPython.Bindings import gbl, InterfaceCast
                 vp1alg = PyAthena.py_alg('VP1EventProd')
@@ -167,8 +166,12 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                         self.directory = "%s/.Unknown" % self.output
                 try:
                         # Set output stream for JiveXML event streaming (file and server)
+                        print('stream name and file name prefix:',"%s" % self.stream, "%s/JiveXML" % self.directory)
                         self.StreamToServerTool.getProperty('StreamName').setValue("%s" % self.stream)
                         self.StreamToFileTool.getProperty('FileNamePrefix').setValue("%s/JiveXML" % self.directory)
+                        print(self.StreamToFileTool.getProperty("MyTest").value())
+                        self.StreamToFileTool.getProperty("MyTest").setValue("updated")
+                        print(self.StreamToFileTool.getProperty("MyTest").value())
                         self.msg.debug("Directory in try: %s", self.directory)
                 except Exception as err:
                         self.msg.error("Exception occured while setting job options: %s", err)
