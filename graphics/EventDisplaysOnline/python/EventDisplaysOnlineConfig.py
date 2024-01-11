@@ -59,7 +59,6 @@ flags = initConfigFlags()
 if not isOfflineTest:
     from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
     autoConfigOnlineRecoFlags(flags, partitionName)
-flags.Concurrency.NumThreads = 1
 
 # Conditions tag
 if isOfflineTest:
@@ -76,7 +75,7 @@ else:
     flags.Beam.BunchSpacing = 25 # ns
 flags.Trigger.triggerConfig='DB'
 
-# Test wth a small amount of events and write out to tmp dir
+# Test wth a small amount of events and write out to e.g. a tmp dir
 if testWithoutPartition or partitionName != 'ATLAS' or isOfflineTest:
     flags.Exec.MaxEvents = 3
     flags.Output.ESDFileName = outputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
@@ -93,12 +92,14 @@ if testWithoutPartition or isOfflineTest:
 else:
     flags.Input.Files = [] # Files are read from the ATLAS (or GM test) partition
 
-flags.Reco.EnableTrigger = False
+flags.Reco.EnableTrigger = False # TODO test True
 flags.LAr.doHVCorr = False # ATLASRECTS-6823
 flags.Exec.OutputLevel = INFO
 
 if isOfflineTest:
     flags.Common.isOnline = False
+else:
+    flags.Common.isOnline = True
 
 if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
     # Read run number from the partition
@@ -107,7 +108,7 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
     from ispy import ISObject, IPCPartition
     RunParams = ISObject(IPCPartition(partitionName), 'RunParams.RunParams', 'RunParams')
     RunParams.checkout()
-    flags.Input.RunNumber = RunParams.run_number
+    flags.Input.RunNumbers = [RunParams.run_number]
     
     # Get the B field
     (solenoidOn,toroidOn)=GetBFields()
@@ -118,8 +119,8 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
 
 # GM test partition needs to be given the below info
 if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9') or testWithoutPartition:# or isOfflineTest:
-    flags.Input.RunNumber = [412343]
-    flags.Input.LumiBlockNumber = [1]
+    flags.Input.RunNumbers = [412343]
+    flags.Input.LumiBlockNumbers = [1]
     flags.Input.ProjectName = projectName
 
 if not testWithoutPartition:
@@ -129,12 +130,15 @@ if not testWithoutPartition:
 flags.lock()
 flags.dump()
 ##----------------------------------------------------------------------##
+
 from RecJobTransforms.RecoSteering import RecoSteering
 acc = RecoSteering(flags)
 
-from IOVDbSvc.IOVDbSvcConfig import addOverride
-acc.merge(addOverride(flags, "/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v2"))
-acc.merge(addOverride(flags,"/TRT/Calib/PID_NN", "TRTCalibPID_NN_v1"))
+#from IOVDbSvc.IOVDbSvcConfig import addOverride
+#if isOfflineTest:
+#    acc.merge(addOverride(flags,"/TRT/Calib/PID_NN", "TRTCalibPID_NN_v1"))
+#else:
+#    acc.merge(addOverride(flags, "/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v2"))
 
 if isHIMode:
     maxEvents=200
@@ -173,17 +177,14 @@ if not testWithoutPartition:
         bytestreamInput.KeyValue = [ 'Test_emon_push' ]
         bytestreamInput.KeyCount = 1
 
-def StreamToFileToolCfg(flags, name="StreamToFileTool",**kwargs):
+def StreamToFileToolCfg(flags,**kwargs):
     result = ComponentAccumulator()
-    # if testing and you need to see the output change below to e.g. /tmp/username
-    OutputDirectory = outputDirectory
     prefixFileName = "%s/.Unknown/JiveXML" % outputDirectory
-    #set the StreamName as prefix
     kwargs.setdefault("FileNamePrefix", prefixFileName)
-    the_tool = CompFactory.JiveXML.StreamToFileTool(name,**kwargs)
-    result.addPublicTool(the_tool)
+    the_tool = CompFactory.JiveXML.StreamToFileTool(**kwargs)
+    result.setPrivateTools(the_tool)
     return result
-acc.merge(StreamToFileToolCfg(flags))
+acc.popToolsAndMerge(StreamToFileToolCfg(flags))
 
 if not isOfflineTest:
     def StreamToServerToolCfg(flags, name="StreamToServerTool",**kwargs):
@@ -211,6 +212,11 @@ acc.addService(OnlineEventDisplaysSvc(
 
 ), create=True)
 
+# This creates an ESD file per event which is renamed and moved to the desired output
+# dir in the VP1 Event Prod alg
+from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
+acc.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
+
 StreamESD = acc.getEventAlgo("OutputStreamESD")
 vp1Alg = CompFactory.VP1EventProd(name="VP1EventProd", InputPoolFile = StreamESD.OutputFile)
 acc.addEventAlgo(vp1Alg)
@@ -218,7 +224,7 @@ acc.addEventAlgo(vp1Alg)
 acc.getService("PoolSvc").WriteCatalog = "xmlcatalog_file:PoolFileCatalog_%s_%s.xml" % (jobId[3], jobId[4])
 
 ##----------------------------------------------------------------------##
-## Neeed line below to fix error that occurs when trying to             ##
+## Need line below to fix error that occurs when trying to              ##
 ## get CaloRec::ToolConstants/H1WeightsCone4Topo DataObject             ##
 ##----------------------------------------------------------------------##
 acc.getService("PoolSvc").ReadCatalog += ["xmlcatalog_file:/det/dqm/GlobalMonitoring/PoolFileCatalog_M7/PoolFileCatalog.xml"]

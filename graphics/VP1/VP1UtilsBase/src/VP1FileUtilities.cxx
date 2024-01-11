@@ -73,6 +73,7 @@ void VP1FileUtilities::produceNewFile(const std::string& sourceFile,
   // Check if the sourceFile exists
   QString srcName(sourceFile.c_str());
   QFile srcFile(srcName);
+  std::cout << "VP1FileUtilities melissa: " <<  sourceFile << std::endl;
   if(!srcFile.exists())
     throw std::runtime_error("Source file does not exist!");
 
@@ -117,8 +118,9 @@ void VP1FileUtilities::produceNewFile(const std::string& sourceFile,
   }
 
 
-      // the operation to time (for elapsed time)
-      char ch; std::cout << '?' && std::cin >> ch ;
+  // the operation to time (for elapsed time)
+  //char ch;
+  //  std::cout << '?' && (std::cin >> ch);
 
 
 
