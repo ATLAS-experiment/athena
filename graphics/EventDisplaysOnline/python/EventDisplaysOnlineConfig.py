@@ -222,6 +222,11 @@ acc.addService(svc, create=True)
 from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
 acc.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
 
+# This creates an ESD file per event which is renamed and moved to the desired output
+# dir in the VP1 Event Prod alg
+from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
+acc.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
+
 StreamESD = acc.getEventAlgo("OutputStreamESD")
 vp1Alg = CompFactory.VP1EventProd(name="VP1EventProd", InputPoolFile = StreamESD.OutputFile)
 acc.addEventAlgo(vp1Alg)
