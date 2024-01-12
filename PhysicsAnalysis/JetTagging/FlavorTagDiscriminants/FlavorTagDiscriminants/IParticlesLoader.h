@@ -31,10 +31,15 @@ namespace FlavorTagDiscriminants {
       protected:
         // typedefs
         typedef xAOD::Jet Jet;
+        typedef std::pair<std::string, double> NamedVar;
+        typedef std::pair<std::string, std::vector<double> > NamedSeq;
         // tracks typedefs
         typedef std::vector<const xAOD::IParticle*> IParticles;
         typedef std::function<double(const xAOD::IParticle*,
                                     const Jet&)> IParticleSortVar;
+
+        // getter function
+        typedef std::function<NamedSeq(const Jet&, const IParticles&)> SeqFromIParticles;
 
         // usings for IParticle getter
         using AE = SG::AuxElement;
@@ -45,9 +50,13 @@ namespace FlavorTagDiscriminants {
         IParticleSortVar iparticleSortVar(ConstituentsSortOrder, const FTagOptions&);
         
         std::vector<const xAOD::IParticle*> getIParticlesFromJet(const xAOD::Jet& jet) const;
+        std::pair<SeqFromIParticles,std::set<std::string>> seqFromIParticles(
+          const FTagConstituentsInputConfig&, const FTagOptions&);
 
+        std::vector<SeqFromIParticles> m_sequencesFromIParticles;
         IParticleSortVar m_iparticleSortVar;
         std::function<IPV(const Jet&)> m_associator;
+        bool m_isCharged;
     };
 }
 

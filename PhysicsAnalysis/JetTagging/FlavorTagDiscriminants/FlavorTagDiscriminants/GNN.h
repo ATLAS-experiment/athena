@@ -91,7 +91,7 @@ namespace FlavorTagDiscriminants {
     std::vector<internal::VarFromJet> m_varsFromJet;
     std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
     // std::vector<std::shared_ptr<ConstituentsLoader>> m_constituentsLoaders;
-    std::shared_ptr<const TracksLoader> m_trackLoader;
+    // std::shared_ptr<const TracksLoader> m_trackLoader;
     std::shared_ptr<const IParticlesLoader> m_flowLoader;
 
     Decorators m_decorators;
