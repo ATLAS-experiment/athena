@@ -1,6 +1,6 @@
 
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonReadoutGeomCnvAlg.h"
 
@@ -107,6 +107,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
             station->setPhysVol(parentPhysVol);
         }
         const MuonGMR4::MdtReadoutElement::parameterBook& pars{copyMe->getParameters()};
+        // cppcheck-suppress invalidLifetime; ok: mgr took ownership.
         PVLink parentPhysVol{station->getPhysVol()};
         GeoFullPhysVol* physVol{new GeoFullPhysVol(readOutVol->getLogVol())};
         parentPhysVol->add(new GeoTransform(readOutToStation(readOutVol).inverse()));
@@ -114,6 +115,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
 
         std::unique_ptr<MuonGM::MdtReadoutElement> newElement = std::make_unique<MuonGM::MdtReadoutElement>(physVol, stName, mgr);
         newElement->setIdentifier(reId);
+        // cppcheck-suppress invalidLifetime; ok: mgr took ownership.
         newElement->setParentMuonStation(station);
         /// Define the dimensions
         newElement->setLongRsize(2*pars.halfY);
