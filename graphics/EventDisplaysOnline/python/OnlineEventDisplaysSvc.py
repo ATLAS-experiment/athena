@@ -10,7 +10,7 @@ __author__  = "Eric Jansen <eric.jansen@cern.ch>"
 
 import os, grp, stat, random
 from ipc import IPCPartition
-from ispy import ISInfoDictionary, ISInfoAny, ISObject
+from ispy import ISInfoDictionary
 from AthenaPython import PyAthena
 from AthenaPython.PyAthena import StatusCode
 from PyAnalysisCore import PyEventTools
@@ -28,7 +28,7 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                 self.zpgid = None
                 self.partition = None
 
-                self.StreamToFileTool = None
+                self.StreamToFileTool = kw.get('StreamToFileTool')
                 self.StreamToServerTool = None
                 self.VP1EventProducer = None
                 
@@ -46,7 +46,13 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
 
                 self.partition = IPCPartition('ATLAS')
                 self.dict = ISInfoDictionary(self.partition)
-                self.zpgid = grp.getgrnam("zp").gr_gid
+                try:
+                        self.zpgid = grp.getgrnam("zp").gr_gid
+                except:
+                        # If running on private machine, zp group might not exist. 
+                        # Just set to the likely value
+                        self.zpgid = 1307 
+
                 return StatusCode.Success
 
         def finalize(self):
