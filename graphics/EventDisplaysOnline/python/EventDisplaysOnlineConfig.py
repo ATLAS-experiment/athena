@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetRunType, GetBFields, WaitForPartition
-from AthenaCommon.Constants import INFO, DEBUG, ERROR, WARNING
+from AthenaCommon.Constants import INFO, DEBUG
 
 isHIMode = False #TODO
 #TODO isBeamSplashMode = False
@@ -108,6 +108,7 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
     from ispy import ISObject, IPCPartition
     RunParams = ISObject(IPCPartition(partitionName), 'RunParams.RunParams', 'RunParams')
     RunParams.checkout()
+    flags.Input.OverrideRunNumber = True
     flags.Input.RunNumbers = [RunParams.run_number]
     
     # Get the B field
@@ -118,7 +119,8 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
     flags.BField.endcapToroidOn = toroidOn
 
 # GM test partition needs to be given the below info
-if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9') or testWithoutPartition:# or isOfflineTest:
+if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9') or testWithoutPartition:
+    flags.Input.OverrideRunNumber = True
     flags.Input.RunNumbers = [412343]
     flags.Input.LumiBlockNumbers = [1]
     flags.Input.ProjectName = projectName
@@ -184,7 +186,7 @@ def StreamToFileToolCfg(flags,**kwargs):
     the_tool = CompFactory.JiveXML.StreamToFileTool(**kwargs)
     result.setPrivateTools(the_tool)
     return result
-acc.popToolsAndMerge(StreamToFileToolCfg(flags))
+streamToFileTool = acc.popToolsAndMerge(StreamToFileToolCfg(flags))
 
 if not isOfflineTest:
     def StreamToServerToolCfg(flags, name="StreamToServerTool",**kwargs):
@@ -202,15 +204,16 @@ from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
 acc.merge(AlgoJiveXMLCfg(flags))
 
 from EventDisplaysOnline.OnlineEventDisplaysSvc import OnlineEventDisplaysSvc
-acc.addService(OnlineEventDisplaysSvc(
+svc = OnlineEventDisplaysSvc(
     name = "OnlineEventDisplaysSvc",
     OutputLevel = DEBUG,               # Verbosity
     MaxEvents = maxEvents,             # Number of events to keep per stream
     OutputDirectory = outputDirectory, # Base directory for streams
     ProjectTags = projectTags,         # Project tags that are allowed to be made public
     Public = publicStreams,            # These streams go into public stream when Ready4Physics
-
-), create=True)
+    StreamToFileTool = streamToFileTool,
+)
+acc.addService(svc, create=True)
 
 # This creates an ESD file per event which is renamed and moved to the desired output
 # dir in the VP1 Event Prod alg
