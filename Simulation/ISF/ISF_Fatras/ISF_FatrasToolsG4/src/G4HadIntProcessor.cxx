@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -176,7 +176,7 @@ std::map<int,G4VProcess*>::const_iterator iFatras::G4HadIntProcessor::initProces
   ATH_MSG_VERBOSE( "  [ g4sim ] Registering Geant4 processes for particles with pdg code " << pdg );
 
   // return value
-  std::map<int,G4VProcess*>::const_iterator ret;
+  std::map<int,G4VProcess*>::const_iterator ret = m_g4HadrInelasticProcesses.end();
 
 
   G4ParticleDefinition *parDef = G4ParticleTable::GetParticleTable()->FindParticle( pdg);
@@ -184,7 +184,7 @@ std::map<int,G4VProcess*>::const_iterator iFatras::G4HadIntProcessor::initProces
   // check if everythin is set up properly
   if ( !parDef || !parDef->GetProcessManager() ) {
     ATH_MSG_WARNING( "  [ ---- ] Unable to register particle type with PDG code " << pdg );
-    return m_g4HadrInelasticProcesses.end();
+    return ret;
 
   }
 
