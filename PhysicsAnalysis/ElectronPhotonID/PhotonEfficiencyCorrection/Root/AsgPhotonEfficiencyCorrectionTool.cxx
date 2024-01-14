@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -414,7 +414,7 @@ std::string AsgPhotonEfficiencyCorrectionTool::getFileName(const std::string& is
   // First locate the map file:
   std::string mapFileName = PathResolverFindCalibFile( m_mapFile );
   if(mapFileName.empty()){
-	ATH_MSG_ERROR ( "Somthing wrong with reading the map file, check you input: " << m_mapFile );
+	ATH_MSG_ERROR ( "Can't read map file " << m_mapFile );
 	return mapFileName;	// return an empty string
   }
   
