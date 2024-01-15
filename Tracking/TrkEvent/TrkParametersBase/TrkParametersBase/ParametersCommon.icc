@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trk
@@ -15,6 +15,7 @@ template <int DIM, class T>
     std::optional<AmgSymMatrix(DIM)>&& covariance, const T chargeDef)
     : m_parameters(parameters),
       m_covariance(std::move(covariance)),
+      // cppcheck-suppress missingReturn; false positive
       m_chargeDef(chargeDef) {}
 
 // Helper protected ctor
