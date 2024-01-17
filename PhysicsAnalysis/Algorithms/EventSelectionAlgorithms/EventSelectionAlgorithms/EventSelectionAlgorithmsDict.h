@@ -16,6 +16,8 @@
 #include <EventSelectionAlgorithms/SaveFilterAlg.h>
 #include <EventSelectionAlgorithms/SignEnums.h>
 #include <EventSelectionAlgorithms/NObjectPtSelectorAlg.h>
+#include <EventSelectionAlgorithms/NObjectMassSelectorAlg.h>
+#include <EventSelectionAlgorithms/NLargeRJetMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h>
 

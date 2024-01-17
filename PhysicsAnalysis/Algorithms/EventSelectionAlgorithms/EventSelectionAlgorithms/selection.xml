@@ -9,6 +9,8 @@
   <class name="CP::SaveFilterAlg" />
   <class name="CP::SignEnums" />
   <class name="CP::NObjectPtSelectorAlg" />
+  <class name="CP::NObjectMassSelectorAlg" />
+  <class name="CP::NLargeRJetMassWindowSelectorAlg" />
   <class name="CP::DileptonOSSFInvariantMassWindowSelectorAlg" />
   <class name="CP::SumNElNMuPtSelectorAlg" />
 
