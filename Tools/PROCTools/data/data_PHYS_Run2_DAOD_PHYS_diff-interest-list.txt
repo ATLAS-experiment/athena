@@ -12,10 +12,10 @@ AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.GN2(.*)
 
 # JetEtMiss branches
 AntiKt4EMPFlowJetsAuxDyn(.*)
-Kt4EMPFlowEventShapeAux.Density
-Kt4EMPFlowPUSBEventShapeAux.Density
-Kt4EMPFlowNeutEventShapeAux.Density
-PrimaryVerticesAux.vertexType
+Kt4EMPFlowEventShapeAuxDyn.Density
+Kt4EMPFlowPUSBEventShapeAuxDyn.Density
+Kt4EMPFlowNeutEventShapeAuxDyn.Density
+PrimaryVerticesAuxDyn.vertexType
 AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn(.*)
 AntiKt10UFOCSSKJetsAuxDyn.NumTrkPt500
 AntiKt10UFOCSSKJetsAuxDyn.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets

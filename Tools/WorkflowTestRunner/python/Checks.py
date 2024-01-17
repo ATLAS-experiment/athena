@@ -190,6 +190,9 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
                 if "leaves differ" in line:  # Catches changes in branches
                     self.logger.error(line.strip())
                     passed_frozen_tier0_test = False
+                if "ERROR" in line:  # Catches other issues (including unmatched branches)
+                    self.logger.error(line.strip())
+                    passed_frozen_tier0_test = False
                 if "INFO all good." in line:
                     all_good = True
 
