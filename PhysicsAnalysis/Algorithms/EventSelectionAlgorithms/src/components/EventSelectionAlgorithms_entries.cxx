@@ -12,6 +12,8 @@
 #include <EventSelectionAlgorithms/TransverseMassSelectorAlg.h>
 #include <EventSelectionAlgorithms/SaveFilterAlg.h>
 #include <EventSelectionAlgorithms/NObjectPtSelectorAlg.h>
+#include <EventSelectionAlgorithms/NObjectMassSelectorAlg.h>
+#include <EventSelectionAlgorithms/NLargeRJetMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/DileptonOSSFInvariantMassWindowSelectorAlg.h>
 #include <EventSelectionAlgorithms/SumNElNMuPtSelectorAlg.h>
 
@@ -23,5 +25,7 @@ DECLARE_COMPONENT (CP::DileptonInvariantMassWindowSelectorAlg)
 DECLARE_COMPONENT (CP::TransverseMassSelectorAlg)
 DECLARE_COMPONENT (CP::SaveFilterAlg)
 DECLARE_COMPONENT (CP::NObjectPtSelectorAlg)
+DECLARE_COMPONENT (CP::NObjectMassSelectorAlg)
+DECLARE_COMPONENT (CP::NLargeRJetMassWindowSelectorAlg)
 DECLARE_COMPONENT (CP::DileptonOSSFInvariantMassWindowSelectorAlg)
 DECLARE_COMPONENT (CP::SumNElNMuPtSelectorAlg)
