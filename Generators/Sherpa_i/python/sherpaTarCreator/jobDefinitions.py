@@ -71,12 +71,11 @@ def mkCreateLibsJob(options, prevJob):
       job.cmds += ["echo 'genSeq.Sherpa_i.Parameters += [ \"INIT_ONLY=1\", \"EVENTS=0\", \"FRAGMENTATION=Off\", \"MI_HANDLER=None\", \"LOG_FILE=\"]\n' > events.py"]
     else:
       job.cmds += ["rm -rf Process/Amegic.zip Process/Comix.zip Process/Sherpa.zip Process/Amegic"]
+      job.cmds += ["echo 'genSeq.Sherpa_i.BaseFragment += \"\"\"\nINIT_ONLY: 1\nEVENTS: 0\nFRAGMENTATION: Off\nMI_HANDLER: None\n\"\"\"' > events.py"]
+      
     job.cmds += ["outputEVNTFile=$(mktemp -u /tmp/XXXXXXXX.pool.root)"]
     job.cmds += ["returncode=0"]
-    if os.environ["SHERPAVER"].startswith('2.'):
-      job.cmds += ["Gen_tf.py --ecmEnergy="+str(options.ecm[0]*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+options.jobOptionDir[0]+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} || returncode=$?"]
-    else:
-      job.cmds += ["Gen_tf.py --ecmEnergy="+str(options.ecm[0]*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+options.jobOptionDir[0]+" --outputEVNTFile=${outputEVNTFile} || returncode=$?"]
+    job.cmds += ["Gen_tf.py --ecmEnergy="+str(options.ecm[0]*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+options.jobOptionDir[0]+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} || returncode=$?"]
     job.cmds += ["echo Pasting log.generate ==============="]
     job.cmds += ["cat log.generate"]
     job.cmds += ["echo Gen_tf exited with return code $returncode"]
