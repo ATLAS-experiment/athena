@@ -11,6 +11,7 @@
 **********************************/
 
 #include <cmath>
+#include <string>
 
 #include "L1TopoAlgorithms/KalmanMETCorrection.h"
 #include "L1TopoCommon/Exception.h"
@@ -29,6 +30,10 @@ TCS::KalmanMETCorrection::KalmanMETCorrection(const std::string & name) : Decisi
 {
    defineParameter("InputWidth", 9);
    defineParameter("NumResultBits", 6);
+   constexpr size_t nWeightWords = 49;
+   for (size_t weightIndex = 0; weightIndex < nWeightWords; weightIndex++) {
+      defineParameter("weights"+std::to_string(weightIndex), 0);   
+   }
    defineParameter("MinET", 0);
    defineParameter("KFXE",0,0);
    defineParameter("KFXE",0,1);
@@ -77,7 +82,9 @@ TCS::KalmanMETCorrection::processBitCorrect( const std::vector<TCS::TOBArray con
    if(input.size()!=2) {
       TCS_EXCEPTION("KalmanMETCorrection alg must have exactly two input list (jets and MET list), but got " << input.size());
    }
-
+    //TEMPORARILY TURNED INTO A STUB (to avoid understood exceptions)
+    // TODO: re-write based on Run 3 prescription
+    return TCS::StatusCode::SUCCESS;
 
    const TCS::GenericTOB & met = (*input[0])[0];
 
@@ -162,6 +169,9 @@ TCS::KalmanMETCorrection::process( const std::vector<TCS::TOBArray const *> & in
       TCS_EXCEPTION("KalmanMETCorrection alg must have exactly two input list (jets and MET list), but got " << input.size());
    }
 
+    //TEMPORARILY TURNED INTO A STUB (to avoid understood exceptions)
+    // TODO: re-write based on Run 3 prescription
+return TCS::StatusCode::SUCCESS;
 
    const TCS::GenericTOB & met = (*input[0])[0];
 

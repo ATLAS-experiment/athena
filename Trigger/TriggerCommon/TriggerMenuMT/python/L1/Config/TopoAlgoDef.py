@@ -10,6 +10,7 @@
 import L1TopoAlgorithms.L1TopoAlgConfig as AlgConf
 import L1TopoHardware.L1TopoHardware as HW
 from .L1CaloThresholdMapping import get_threshold_cut
+from .L1TopoKFMETweights import KFMETweightParameters
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -231,10 +232,12 @@ class TopoAlgoDef:
         tm.registerTopoAlgo(alg)
 
         #jJets inputs
-        # TODO: switch to phase-I inputs when KF algorithm is fixed
-        alg = AlgConf.JetNoSort( name = 'AjJall', inputs = 'JetTobArray', outputs = 'AjJall' ) 
+        alg = AlgConf.jJetNoSort( name = 'AjJall_1BC', inputs = 'jJetTobs', outputs = 'AjJall_1BC' ) 
         alg.addgeneric('InputWidth', HW.jJetInputWidth)
         alg.addgeneric('OutputWidth', HW.jJetInputWidth)
+        # reduce number of pipelining registers used in firmware to allow for more
+        # latency to be used inside the KFMET decision algorithm
+        alg.addgeneric('NumRegisters', 1)
         tm.registerTopoAlgo(alg)
 
         #jJ lists
@@ -298,9 +301,12 @@ class TopoAlgoDef:
 
         # MET
         # No additional parameters
-        alg = AlgConf.jXENoSort( name = 'jXENoSort', inputs = 'jXETobs', outputs = 'jXENoSort' )
+        alg = AlgConf.jXENoSort( name = 'jXENoSort_1BC', inputs = 'jXETobs', outputs = 'jXENoSort_1BC' )
         alg.addgeneric('InputWidth', HW.jMetInputWidth)
         alg.addgeneric('OutputWidth', HW.metOutputWidth)
+        # reduce number of pipelining registers used in firmware to allow for more
+        # latency to be used inside the KFMET decision algorithm
+        alg.addgeneric('NumRegisters', 1)
         tm.registerTopoAlgo(alg)
 
         alg = AlgConf.jXESort( name = 'jXE', inputs = 'jXETobs', outputs = 'jXE' )
@@ -1165,13 +1171,18 @@ class TopoAlgoDef:
             for k in x:
                 setattr (d, k, x[k])            
             log.debug("Define %s", toponame)            
-            inputList = ['jXENoSort', 'AjJall']
+            inputList = ['jXENoSort_1BC', 'AjJall_1BC']
             toponames=[]
             for minxe in d.Threlist:
                 toponames.append("KF-jXE%s-AjJall"  % (minxe))            
             alg = AlgConf.KalmanMETCorrection( name = "KF-jXE-AjJall", inputs = inputList, outputs = toponames )
             alg.addgeneric('InputWidth', HW.jJetInputWidth)
             alg.addgeneric('NumResultBits', len(toponames))
+            for key, value in KFMETweightParameters.items():
+                # add weight (scale factor) parameters
+                # these weights are compacted into 32bit words in order to limit the number
+                # of registers needed to load them in firmware
+                alg.addvariable(key, value)
             alg.addvariable('MinET', 0)
             for bitid,minxe in enumerate(d.Threlist):
                 alg.addvariable('KFXE', str(minxe), bitid)            
