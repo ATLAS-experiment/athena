@@ -19,22 +19,18 @@ from os import environ
 ### globals -------------------------------------------------------------------
 g_ALLOWED_MODES = ('summary', 'semi-detailed', 'detailed')
 g_ALLOWED_ERROR_MODES = ('bailout', 'resilient')
-g_args = None
 
 ### classes -------------------------------------------------------------------
 
 ### functions -----------------------------------------------------------------
-def _is_detailed():
-    global g_args
-    return g_args.mode == 'detailed'
+def _is_detailed(args):
+    return args.mode == 'detailed'
 
-def _is_summary():
-    global g_args
-    return g_args.mode == 'summary'
+def _is_summary(args):
+    return args.mode == 'summary'
 
-def _is_exit_early():
-    global g_args
-    return g_args.error_mode == 'bailout'
+def _is_exit_early(args):
+    return args.error_mode == 'bailout'
 
 # Possibly compare two vectors.  If nan_equal, then consider NaNs to be equal.
 # Returns None if we have two matching vectors.
@@ -52,6 +48,7 @@ _vectypes = {'std::vector<float>',
              'std::vector<unsigned char>',
              'std::vector<long long>',
              'std::vector<unsigned long long>'}
+
 def _vecdiff (v1, v2, nan_equal):
     if getattr(type(type(v1)), '__cpp_name__', None) not in _vectypes:
         return -1
@@ -144,9 +141,6 @@ allowed: %(choices)s
 
 def main(args):
     """diff two ROOT files (containers and sizes)"""
-
-    global g_args
-    g_args = args
 
     # We allocate many python objects at once.
     # Running GC less often by jacking up the threshold speeds things up
@@ -315,51 +309,48 @@ def main(args):
             return skip_leaf (leafname, skip_leaves)
 
         def filter_branches(leaves):
-            good_leaves = set()
+            matches = set()
             for regex in args.branches_of_interest:
                 test = re.compile(regex)
-                matches = {l for l in leaves if test.match(l)}
-                if not matches:
-                    msg.error(f'no match for branch of interest: {regex}')
-                good_leaves.update(matches)
-            return good_leaves
+                matches.update({l for l in leaves if test.match(l)})
+            return matches
 
         skipset = frozenset(args.ignore_leaves)
-        old_leaves = infos['old']['leaves'] - infos['new']['leaves']
+        removed_leaves = infos['old']['leaves'] - infos['new']['leaves']
+        added_leaves = infos['new']['leaves'] - infos['old']['leaves']
+        
         if args.branches_of_interest:
-            old_leaves = filter_branches(old_leaves)
+            removed_leaves = filter_branches(removed_leaves)
+            added_leaves = filter_branches(added_leaves)
         else:
-            old_leaves = {l for l in old_leaves if not skip_leaf(l, skipset)}
-        if old_leaves:
-            old_leaves_list = list(old_leaves)
-            old_leaves_list.sort()
+            removed_leaves = {l for l in removed_leaves if not skip_leaf(l, skipset)}
+            added_leaves = {l for l in added_leaves if not skip_leaf(l, skipset)}
+
+        if removed_leaves:
+            removed_leaves_list = list(removed_leaves)
+            removed_leaves_list.sort()
             if args.exact_branches:
                 msg.error('the following variables exist only in the old file !')
-                for l in old_leaves_list:
+                for l in removed_leaves_list:
                     msg.error(' - [%s]', l)
             else:
                 msg.warning('the following variables exist only in the old file !')
-                for l in old_leaves_list:
+                for l in removed_leaves_list:
                     msg.warning(' - [%s]', l)
-        new_leaves = infos['new']['leaves'] - infos['old']['leaves']
-        if args.branches_of_interest:
-            new_leaves = filter_branches(new_leaves)
-        else:
-            new_leaves = {l for l in new_leaves if not skip_leaf(l, skipset)}
-        if new_leaves:
-            new_leaves_list = list(new_leaves)
-            new_leaves_list.sort()
+        if added_leaves:
+            added_leaves_list = list(added_leaves)
+            added_leaves_list.sort()
             if args.exact_branches:
                 msg.error('the following variables exist only in the new file !')
-                for l in new_leaves_list:
+                for l in added_leaves_list:
                     msg.error(' - [%s]', l)
             else:
                 msg.warning('the following variables exist only in the new file !')
-                for l in new_leaves_list:
+                for l in added_leaves_list:
                     msg.warning(' - [%s]', l)
 
         # need to remove trailing dots as they confuse reach_next()
-        skip_leaves = [ l.rstrip('.') for l in old_leaves | new_leaves | set(args.ignore_leaves) ]
+        skip_leaves = [ l.rstrip('.') for l in removed_leaves | added_leaves | set(args.ignore_leaves) ]
         for l in skip_leaves:
             msg.debug('skipping [%s]', l)
         skip_leaves = frozenset (skip_leaves)
@@ -369,15 +360,19 @@ def main(args):
         branches = oldBranches & newBranches
 
         if args.branches_of_interest:
-            BOI_matches = set()
-            #branches_of_interest = [ b.rstrip('.') for b in set(args.branches_of_interest) ]
             branches_of_interest = args.branches_of_interest
 
+            # check that all branches of interest exist in the new file
+            for regex in branches_of_interest:
+                test = re.compile(regex)
+                if not {l for l in infos['new']['leaves'] if test.match(l)}:
+                    msg.error(f'no match in new file for branch of interest: {regex}')
+
+            BOI_matches = set()
             for branch_of_interest in branches_of_interest:
                 try:
                     r = re.compile(branch_of_interest)
                     BOI_matches.update(filter(r.match, branches))
-                     
                 except TypeError:
                     continue
 
@@ -393,7 +388,7 @@ def main(args):
         n_good = 0
         n_bad = 0
         if args.exact_branches:
-            n_bad += len(old_leaves) + len(new_leaves)
+            n_bad += len(removed_leaves) + len(added_leaves)
         import collections
         summary = collections.defaultdict(int)
 
@@ -551,7 +546,7 @@ def main(args):
             else:
                 in_synch = d_old and d_new and d_old[0] == d_new[0] and d_old[2] == d_new[2] and id_old == id_new
             if not in_synch:
-                if _is_detailed():
+                if _is_detailed(args):
                     if d_old:
                         msg.info('::sync-old %s','.'.join(["%03i"%ientry]+list(map(str, d_old[2]))))
                     else:
@@ -597,12 +592,12 @@ def main(args):
                     # Let's see if we can reconcile
                     # If not, just bail out to avoid false positivies
                     if read_old and not read_new:
-                        if _is_detailed():
+                        if _is_detailed(args):
                             msg.info('::sync-old skipping entry')
                         fold.allgood = False
                         summary[leaf_old] += 1
                     elif read_new and not read_old:
-                        if _is_detailed():
+                        if _is_detailed(args):
                             msg.info('::sync-new skipping entry')
                         fnew.allgood = False
                         summary[leaf_new] += 1
@@ -616,7 +611,7 @@ def main(args):
                         summary[leaf_new] += 1
                         break
  
-                if _is_exit_early():
+                if _is_exit_early(args):
                     msg.info('*** exit on first error ***')
                     break
                 continue
@@ -631,7 +626,7 @@ def main(args):
                 diff_value = '%.8f%%' % (diff_value,)
             except Exception:
                 pass
-            if _is_detailed():
+            if _is_detailed(args):
                 msg.info('%s %r -> %r => diff= [%s]', n, iold, inew, diff_value)
                 pass
             summary[leafname_fromdump(d_old)] += 1
@@ -644,7 +639,7 @@ def main(args):
         msg.info('Found [%s] identical leaves', n_good)
         msg.info('Found [%s] different leaves', n_bad)
 
-        if not _is_summary():
+        if not _is_summary(args):
             keys = sorted(summary.keys())
             for n in keys:
                 v = summary[n]
