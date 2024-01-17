@@ -177,6 +177,11 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     return CP::CorrectionCode::Ok;
   }
 
+  // skip taus which are not 1 or 3 prong
+  if( xTau.nTracks() != 1 && xTau.nTracks() != 3) {
+    return CP::CorrectionCode::Ok;  
+  } 
+
   // get prong extension for histogram name
   std::string sProng = ConvertProngToString(xTau.nTracks());
 
@@ -370,18 +375,10 @@ StatusCode CommonSmearingTool::beginEvent()
   return StatusCode::SUCCESS;
 }
 
-/*
-  prongness converter, note that it returns "_3p" for all values, except
-  fProngness==1, i.e. for 0, 2, 3, 4, 5...
- */
 //______________________________________________________________________________
 std::string CommonSmearingTool::ConvertProngToString(const int fProngness) const
 {
-  std::string prong = "";
-  if (fProngness == 0)
-    ATH_MSG_DEBUG("passed tau with 0 tracks, which is not supported, taking multiprong SF for now");
-  fProngness == 1 ? prong = "_1p" : prong = "_3p";
-  return prong;
+  return fProngness == 1 ? "_1p" : "_3p";
 }
 
 //______________________________________________________________________________
