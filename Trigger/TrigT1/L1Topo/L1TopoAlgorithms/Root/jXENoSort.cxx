@@ -18,6 +18,7 @@ TCS::jXENoSort::jXENoSort(const std::string & name) : SortingAlg(name) {
 
    defineParameter( "InputWidth", 2 ); // for FW
    defineParameter( "OutputWidth", 2 ); // for FW
+   defineParameter( "NumRegisters", 2); // for FW
 
 }
 

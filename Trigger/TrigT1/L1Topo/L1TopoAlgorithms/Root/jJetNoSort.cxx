@@ -20,6 +20,7 @@ TCS::jJetNoSort::jJetNoSort(const std::string & name) :
 {
    defineParameter( "InputWidth", 64 ); // for FW
    defineParameter( "OutputWidth", 64 );
+   defineParameter( "NumRegisters", 2); // for FW
 }
 
 

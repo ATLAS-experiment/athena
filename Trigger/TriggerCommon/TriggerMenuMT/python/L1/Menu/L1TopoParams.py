@@ -220,7 +220,7 @@ L1TopoParams = {
                                                       'MaxMSqr']},
  'JetHT': {'comment': 'All following pars are MinHt',
            'parameters': ['MinET', 'MinEta', 'MaxEta', 'MinHt']},
- 'KalmanMETCorrection': {'comment': '', 'parameters': ['MinET'] + 6*['KFXE']},
+ 'KalmanMETCorrection': {'comment': '', 'parameters': [f'weights{i}' for i in range(49)] + ['MinET'] + 6*['KFXE']},
  'MetNoSort': {'comment': '', 'parameters': []},
  'MetSort': {'comment': '', 'parameters': []},
  'DeltaPhiMinIncl2': {'comment': '',
@@ -281,9 +281,10 @@ L1TopoParams = {
  'jEmSort': {'comment': '', 'parameters': ['MinEta', 'MaxEta','IsoMin','Frac1Min','Frac2Min']},
  'jJetSelect': {'comment': '', 'parameters': ['MinET', 'MinEta', 'MaxEta']},
  'jJetSort': {'comment': '', 'parameters': ['MinEta', 'MaxEta']},
-
+ 'jJetNoSort': {'comment': '', 'parameters': []},
  'JetNoSort': {'comment': '', 'parameters': []},
-    # For the time being, no dedicated algs for gJetNoSort, jJetNoSort, jLJetNoSort
+ 
+ # For the time being, no dedicated algs for gJetNoSort, jLJetNoSort
  'jXENoSort': {'comment': '', 'parameters': []},
  'gXENoSort': {'comment': '', 'parameters': []},
 }
