@@ -45,6 +45,7 @@ if DetFlags.readRDOBS.LAr_on():
        topSequence+=LArRawDataReadingAlg() 
         
 if DetFlags.readRDOBS.Tile_on():
+    svcMgr.ByteStreamCnvSvc.ROD2ROBmap = [ "-1" ]
     svcMgr.ByteStreamAddressProviderSvc.TypeNames += [
         "TileRawChannelContainer/TileRawChannelCnt",
         "TileRawChannelContainer/MuRcvRawChCnt",
