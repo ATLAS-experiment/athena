@@ -197,6 +197,8 @@ StatusCode TileTBMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
   // In case you want to measure the execution time
   auto timer = Monitored::Timer("TIME_execute");
 
+  using Tile = TileCalibUtils;
+
   SG::ReadHandle<CaloCellContainer> caloCellContainer(m_caloCellContainerKey, ctx);
   ATH_CHECK( caloCellContainer.isValid() );
 

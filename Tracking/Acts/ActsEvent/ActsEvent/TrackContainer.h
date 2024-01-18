@@ -6,11 +6,11 @@
 #define ACTSTRKEVENT_TRACKCONTAINER_H 1
 
 #include "ActsEvent/MultiTrajectory.h"
-#include "ActsEvent/TrackSummaryContainer.h"
+#include "ActsEvent/TrackStorageContainer.h"
 
 namespace ActsTrk {
-using MutableTrackBackend = ActsTrk::MutableTrackSummaryContainer;
-using TrackBackend = ActsTrk::TrackSummaryContainer;
+using MutableTrackBackend = ActsTrk::MutableTrackStorageContainer;
+using TrackBackend = ActsTrk::TrackStorageContainer;
 using MutableTrackStateBackend = ActsTrk::MutableMultiTrajectory;
 using TrackStateBackend = ActsTrk::MultiTrajectory;
 

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -333,13 +333,7 @@ if __name__ == '__main__':
     import os
 
     flags = initConfigFlags()
-    flags.Common.isOnline = True
     flags.Input.Files = [args.input] if os.path.isfile(args.input) else Input.get_input(args.input).paths
-    if not flags.Input.isMC:
-        from AthenaConfiguration.TestDefaults import defaultGeometryTags
-        flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
-        from AthenaConfiguration.Enums import LHCPeriod
-        flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' if flags.GeoModel.Run is LHCPeriod.Run3 else 'CONDBR2-HLTP-2018-04'
     flags.Output.AODFileName = 'AOD.pool.root'
     flags.Exec.MaxEvents = args.nevents
     flags.Concurrency.NumThreads = 1
@@ -351,6 +345,10 @@ if __name__ == '__main__':
     flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
     flags.Trigger.triggerConfig = 'FILE'
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    if not flags.Input.isMC and flags.GeoModel.Run is LHCPeriod.Run2:
+        flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags

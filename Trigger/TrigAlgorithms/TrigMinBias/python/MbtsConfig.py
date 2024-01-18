@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from TrigMinBias.TrigMinBiasMonitoring import MbtsFexMonitoring
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -25,12 +25,13 @@ def MbtsSGInputCfg(flags):
 
 
 if __name__ == '__main__':
+    from AthenaCommon.Configurable import Configurable
+    Configurable.configurableRun3Behavior=1
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     flags = initConfigFlags()
     flags.Input.Files=defaultTestFiles.RAW_RUN2 # or ESD or AOD or ...
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.lock()
 
     acc=ComponentAccumulator()
