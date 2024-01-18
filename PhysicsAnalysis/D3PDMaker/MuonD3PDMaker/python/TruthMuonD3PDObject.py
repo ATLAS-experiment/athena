@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file  MuonD3PDMaker/python/TruthMuonD3PDObject.py
 # $author  Srivas Prasad <srivas.prasad@cern.ch>
@@ -6,40 +6,32 @@
 # @brief   dump true muons - modeled on Tau code
 
 
-import MuonD3PDMaker
-import EventCommonD3PDMaker
 from D3PDMakerCoreComps.D3PDObject         import make_SGDataVector_D3PDObject
-from D3PDMakerConfig.D3PDMakerFlags        import D3PDMakerFlags
-from AthenaCommon.AlgSequence              import AlgSequence
-from RecExConfig.ObjKeyStore               import cfgKeyStore
-import TruthD3PDMaker
+from AthenaConfiguration.ComponentFactory  import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 TruthMuonD3PDObject = make_SGDataVector_D3PDObject ('DataVector<xAOD::TruthParticle_v1>',
-                                                    'TruthMuons',
+                                                    'D3PDTruthMuons',
                                                     'muonTruth_',
                                                     'TruthMuonD3PDObject')
-def _truthMuonAlgHook (c, prefix, sgkey,
+def _truthMuonAlgHook (c, flags, acc, *args,
                        TruthContainer = 'TruthParticles',
+                       sgkey = None,
+                       prefix = None,
                        **kw):
-    preseq = AlgSequence(D3PDMakerFlags.PreD3PDAlgSeqName())
-
-    # Is the container already in SG?
-    if cfgKeyStore.isInInput ('DataVector<xAOD::TruthParticle_v1>', sgkey):
-        return
-
-    # Is the algorithm already in the sequence?
     algname = prefix + 'TruthMuonsToSG'
-    if hasattr (preseq, algname):
-        return
 
     from TruthD3PDMaker.MCTruthClassifierConfig \
-         import D3PDMCTruthClassifier
-    preseq += MuonD3PDMaker.TruthMuonsToSG \
-              (algname,
-               TruthMuonContainer = sgkey,
-               TruthContainer = TruthContainer,
-               Classifier = D3PDMCTruthClassifier)
+        import D3PDMCTruthClassifierCfg
+    acc.merge (D3PDMCTruthClassifierCfg (flags))
+
+    acc.addEventAlgo (D3PD.TruthMuonsToSG \
+                      (algname,
+                       TruthMuonContainer = sgkey,
+                       TruthContainer = TruthContainer,
+                       Classifier = acc.getPublicTool ('D3PDMCTruthClassifier')))
     return
 TruthMuonD3PDObject.defineHook (_truthMuonAlgHook)
 
@@ -48,20 +40,26 @@ TruthMuonD3PDObject.defineHook (_truthMuonAlgHook)
 # Blocks
 #-----------------------------------------------------------------------------
 TruthMuonD3PDObject.defineBlock (0, 'Kinematics',
-                                 EventCommonD3PDMaker.FourMomFillerTool,
+                                 D3PD.FourMomFillerTool,
                                  WriteEt = False,
                                  WritePt = True,
                                  WriteEtaPhi = True )
 TruthMuonD3PDObject.defineBlock (0, 'Info',
-                                 TruthD3PDMaker.TruthParticleFillerTool,
+                                 # TruthD3PDMaker
+                                 D3PD.TruthParticleFillerTool,
                                  PDGIDVariable = 'PDGID')
-from TruthD3PDMaker.MCTruthClassifierConfig \
-     import D3PDMCTruthClassifier
-TruthMuonD3PDObject.defineBlock (0, 'Classification',
-                                 TruthD3PDMaker.TruthParticleClassificationFillerTool,
-                                 Classifier = D3PDMCTruthClassifier)
-#delete TruthMuonFiller?
+truthMuon = \
+    TruthMuonD3PDObject.defineBlock (0, 'Classification',
+                                     # TruthD3PDMaker
+                                     D3PD.TruthParticleClassificationFillerTool)
+def _truthClassifierHook (c, flags, acc, *args, **kw):
+    from TruthD3PDMaker.MCTruthClassifierConfig \
+        import D3PDMCTruthClassifierCfg
+    acc.merge (D3PDMCTruthClassifierCfg (flags))
+    c.Classifier = acc.getPublicTool ('D3PDMCTruthClassifier')
+    return
+truthMuon.defineHook (_truthClassifierHook)
 
 TruthMuonD3PDObject.defineBlock(99, "TruthHits",
-                                MuonD3PDMaker.MuonTruthHitsFillerTool )
+                                D3PD.MuonTruthHitsFillerTool )
 

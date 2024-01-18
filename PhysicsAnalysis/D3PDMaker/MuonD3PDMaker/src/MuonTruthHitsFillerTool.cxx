@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -113,11 +113,12 @@ StatusCode MuonTruthHitsFillerTool::fillHitCounts (int barcode)
 
   bool found = false;
   for (const std::string& key : m_PRD_TruthNames) {
-    const PRD_MultiTruthCollection* collection = nullptr;
-    if (!evtStore()->retrieve(collection, key).isSuccess()) {
-      ATH_MSG_WARNING(  "PRD_MultiTruthCollection " << key << " NOT found");
+    if (!evtStore()->contains<PRD_MultiTruthCollection>(key)) {
+      ATH_MSG_DEBUG(  "PRD_MultiTruthCollection " << key << " NOT found");
       continue;
     }
+    const PRD_MultiTruthCollection* collection = nullptr;
+    ATH_CHECK( evtStore()->retrieve(collection, key) );
 
     for (const PRD_MultiTruthCollection::value_type& mc : *collection) {
       // check if gen particle same as input
