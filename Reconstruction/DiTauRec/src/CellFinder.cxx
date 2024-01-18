@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,6 +13,9 @@
 #include "CaloEvent/CaloCellContainer.h"
 
 #include "fastjet/PseudoJet.hh"
+
+#include "tauRecTools/KineUtils.h"
+
 
 CellFinder::CellFinder(const std::string& type,
 		       const std::string& name,
@@ -85,14 +88,11 @@ StatusCode CellFinder::execute(DiTauCandidateData * data,
       // register cell hash as already seen
       cellSeen.set(cc->caloDDE()->calo_hash());            
 
-      TLorentzVector temp_cc_p4;
-      temp_cc_p4.SetPtEtaPhiM(cc->pt(), cc->eta(), cc->phi(), cc->m());
-
       // check if cell is in one of the subjets cones
+      double dR;
       for (const auto& subjet : vSubjets) {
-        TLorentzVector temp_sub_p4;
-        temp_sub_p4.SetPtEtaPhiM(subjet.pt(), subjet.eta(), subjet.phi_std(), subjet.m());        
-	if (temp_cc_p4.DeltaR(temp_sub_p4) < m_Rsubjet) {
+	dR = Tau1P3PKineUtils::deltaR(subjet.eta(), subjet.phi_std(), cc->eta(), cc->phi());
+	if (dR < m_Rsubjet) {
 	  subjetCells.push_back(cc);
 	}
       }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """This service runs in the online Athena event display threads. It
 manages the distribution of incoming events to the right event display streams.
@@ -28,10 +28,10 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                 self.zpgid = None
                 self.partition = None
 
-                self.StreamToFileTool = None
+                self.StreamToFileTool = kw.get('StreamToFileTool')
                 self.StreamToServerTool = None
                 self.VP1EventProducer = None
-
+                
                 self.run = 0
                 self.event = 0
                 self.stream = ''
@@ -46,21 +46,26 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
 
                 self.partition = IPCPartition('ATLAS')
                 self.dict = ISInfoDictionary(self.partition)
-                self.zpgid = grp.getgrnam("zp").gr_gid
+                try:
+                        self.zpgid = grp.getgrnam("zp").gr_gid
+                except:
+                        # If running on private machine, zp group might not exist. 
+                        # Just set to the likely value
+                        self.zpgid = 1307 
                 return StatusCode.Success
 
         def finalize(self):
                 return StatusCode.Success
 
         def getJobOptions(self):
-                self.StreamToFileTool = PyAthena.py_tool('JiveXML::StreamToFileTool', iface='IProperty')
+                #self.StreamToFileTool = PyAthena.py_tool('JiveXML::StreamToFileTool', iface='IProperty')
                 self.StreamToServerTool = PyAthena.py_tool('JiveXML::StreamToServerTool', iface='IProperty')
-
                 # Some casting magic is needed to access algorithm properties
                 from GaudiPython.Bindings import gbl, InterfaceCast
                 vp1alg = PyAthena.py_alg('VP1EventProd')
                 self.VP1EventProducer = InterfaceCast(gbl.IProperty).cast(vp1alg)
-
+                print(type(self.StreamToFileTool))
+                print(self.StreamToFileTool.MyTest)
                 self.msg.info("StreamToFileTool: %s", self.StreamToFileTool)
                 self.msg.info("StreamToServerTool: %s", self.StreamToServerTool)
                 self.msg.info("VP1EventProducer: %s", self.VP1EventProducer)
@@ -167,8 +172,12 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                         self.directory = "%s/.Unknown" % self.output
                 try:
                         # Set output stream for JiveXML event streaming (file and server)
+                        print('stream name and file name prefix:',"%s" % self.stream, "%s/JiveXML" % self.directory)
                         self.StreamToServerTool.getProperty('StreamName').setValue("%s" % self.stream)
                         self.StreamToFileTool.getProperty('FileNamePrefix').setValue("%s/JiveXML" % self.directory)
+                        print(self.StreamToFileTool.getProperty("MyTest").value())
+                        self.StreamToFileTool.getProperty("MyTest").setValue("updated")
+                        print(self.StreamToFileTool.getProperty("MyTest").value())
                         self.msg.debug("Directory in try: %s", self.directory)
                 except Exception as err:
                         self.msg.error("Exception occured while setting job options: %s", err)

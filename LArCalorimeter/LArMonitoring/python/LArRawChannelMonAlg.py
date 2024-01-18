@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 """!@file LArRawChannelMonAlg.py
@@ -15,33 +15,55 @@ from GaudiKernel.SystemOfUnits import MeV, GeV
 _USE_LEGACY_BINNING_IN_ENDCAPS = True
 
 
-def LArRawChannelMonConfig(flags):
+def LArRawChannelMonConfigOld(inputFlags):
+    from AthenaMonitoring import AthMonitorCfgHelperOld
+    from AthenaMonitoring.DQMonFlags import DQMonFlags
+    from AthenaCommon.BeamFlags import jobproperties
+    from LArMonitoring.LArMonitoringConf import LArRawChannelMonAlg
+    cosmics = jobproperties.Beam.beamType() == 'cosmics'
+    stream = _get_stream(DQMonFlags)
+    from LArMonTools.LArMonFlags import LArMonFlags
+    signal = LArMonFlags.doLArRawMonitorSignal()
+    helper = AthMonitorCfgHelperOld(inputFlags, 'LArRawChannelMonAlgOldCfg')
+    alg = LArRawChannelMonConfigCore(
+        helper, instance=LArRawChannelMonAlg, inputFlags=inputFlags,
+        cosmics=cosmics, stream=stream, doSignal=signal)
+    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+    if not athenaCommonFlags.isOnline():
+       from AthenaCommon.AlgSequence import AthSequencer
+       #if not hasattr (condSeq,"Calo_"+alg.NoiseKey+"Alg"):
+       if len([_ for _ in AthSequencer("AthCondSeq") if _.getName()=="Calo_"+str(alg.NoiseKey)+"Alg"]) == 0:
+          from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
+          CaloNoiseCondAlg(noisetype=alg.NoiseKey.Path)
+       from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
+       alg.AtlasReadyFilterTool = [GetAtlasReadyFilterTool()]
+    return helper.result()
+
+
+def LArRawChannelMonConfig(inputFlags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaMonitoring import AthMonitorCfgHelper
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
     from AthenaConfiguration.Enums import BeamType
-    cosmics = (flags.Beam.Type is BeamType.Cosmics)
-    stream = _get_stream(flags.DQ)
-    try:
-       signal = flags.LArMon.doLArRawMonitorSignal
-    except AttributeError:
-       signal = False
-    helper = AthMonitorCfgHelper(flags, 'LArRawChannelMonAlgCfg')
+    cosmics = (inputFlags.Beam.Type is BeamType.Cosmics)
+    stream = _get_stream(inputFlags.DQ)
+    signal = inputFlags.LArMon.doLArRawMonitorSignal
+    helper = AthMonitorCfgHelper(inputFlags, 'LArRawChannelMonAlgCfg')
     alg = LArRawChannelMonConfigCore(
         helper, instance=CompFactory.LArRawChannelMonAlg,
-        flags=flags, cosmics=cosmics, stream=stream, doSignal=signal)
-    noise_alg = CaloNoiseCondAlgCfg(flags, noisetype=alg.NoiseKey.Path)
+        inputFlags=inputFlags, cosmics=cosmics, stream=stream, doSignal=signal)
+    noise_alg = CaloNoiseCondAlgCfg(inputFlags, noisetype=alg.NoiseKey.Path)
     accumulator = ComponentAccumulator()
     accumulator.merge(noise_alg)
     alg.AtlasReadyFilterTool.append(
-        accumulator.popToolsAndMerge(AtlasReadyFilterCfg(flags)))
+        accumulator.popToolsAndMerge(AtlasReadyFilterCfg(inputFlags)))
     accumulator.merge(helper.result())
     return accumulator
 
 
-def LArRawChannelMonConfigCore(helper, instance, flags, cosmics, stream, doSignal):
+def LArRawChannelMonConfigCore(helper, instance, inputFlags, cosmics, stream, doSignal):
     alg = helper.addAlgorithm(instance, 'LArRawChannelMonAlg')
     alg.occupancy_thresholds = [
         100 * MeV,  # EMBA
@@ -104,7 +126,7 @@ def LArRawChannelMonConfigCore(helper, instance, flags, cosmics, stream, doSigna
     alg.db_and_ofc_only = True
 
     from LArConfiguration.LArConfigFlags import RawChannelSource
-    if flags.LAr.RawChannelSource is RawChannelSource.Calculated:
+    if inputFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
        alg.LArRawChannelContainerKey="LArRawChannels_FromDigits"
 
     # Histograms for different partitions are handled together via a
@@ -306,28 +328,26 @@ def _superslot_channel_axis_ranges(partition):
 
 
 if __name__=='__main__':
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import WARNING
     log.setLevel(WARNING)
 
-    from LArMonitoring.LArMonConfigFlags import addLArMonFlags
-    flags.addFlagsCategory("LArMon", addLArMonFlags)
+    from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
+    createLArMonConfigFlags()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.Enums import BeamType
-    flags.Input.Files = defaultTestFiles.RAW_RUN2
-    flags.Output.HISTFileName = 'LArRawChannelMonOutput.root'
-    flags.DQ.enableLumiAccess = False
-    flags.DQ.useTrigger = False
-    flags.Beam.Type = BeamType.Collisions
-    flags.lock()
+    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
+    ConfigFlags.Output.HISTFileName = 'LArRawChannelMonOutput.root'
+    ConfigFlags.DQ.enableLumiAccess = False
+    ConfigFlags.DQ.useTrigger = False
+    ConfigFlags.Beam.Type = BeamType.Collisions
+    ConfigFlags.lock()
 
     from CaloRec.CaloRecoConfig import CaloRecoCfg
-    cfg = CaloRecoCfg(flags)
-    acc = LArRawChannelMonConfig(flags)
+    cfg = CaloRecoCfg(ConfigFlags)
+    acc = LArRawChannelMonConfig(ConfigFlags)
     cfg.merge(acc)
     f = open("LArRawChannelMon.pkl", "wb")
     cfg.store(f)

@@ -1,20 +1,28 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArDigitMonConfig(flags):
+def LArDigitMonConfigOld(inputFlags):
+    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
+    from LArMonitoring.LArMonitoringConf import LArDigitMonAlg
+
+    helper = AthMonitorCfgHelperOld(inputFlags, 'LArDigitMonAlgCfg')
+    LArDigitMonConfigCore(helper, LArDigitMonAlg,inputFlags)
+    return helper.result()
+
+def LArDigitMonConfig(inputFlags):
     '''Function to configures some algorithms in the monitoring system.'''
 
     # The following class will make a sequence, configure algorithms, and link                                                                   
     # them to GenericMonitoringTools                                                                                                                                 
     
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'LArDigitMonAlgCfg')
+    helper = AthMonitorCfgHelper(inputFlags,'LArDigitMonAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    return LArDigitMonConfigCore(helper, CompFactory.LArDigitMonAlg,flags)
+    return LArDigitMonConfigCore(helper, CompFactory.LArDigitMonAlg,inputFlags)
 
-def LArDigitMonConfigCore(helper, algoinstance,flags):
+def LArDigitMonConfigCore(helper, algoinstance,inputFlags):
 
 
     from LArMonitoring.GlobalVariables import lArDQGlobals
@@ -184,35 +192,34 @@ def LArDigitMonConfigCore(helper, algoinstance,flags):
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import initConfigFlags
-   flags = initConfigFlags()
-
+   from AthenaConfiguration.AllConfigFlags import ConfigFlags
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
-   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
-   flags.addFlagsCategory("LArMon", addLArMonFlags)
+
+   from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
+   createLArMonConfigFlags()
 
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   flags.Input.Files = defaultTestFiles.RAW_RUN2
+   ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
 
-   flags.Output.HISTFileName = 'LArDigitsMonOutput.root'
-   flags.DQ.enableLumiAccess = False
-   flags.DQ.useTrigger = False
-   flags.lock()
+   ConfigFlags.Output.HISTFileName = 'LArDigitsMonOutput.root'
+   ConfigFlags.DQ.enableLumiAccess = False
+   ConfigFlags.DQ.useTrigger = False
+   ConfigFlags.lock()
 
    from CaloRec.CaloRecoConfig import CaloRecoCfg
-   cfg=CaloRecoCfg(flags)
+   cfg=CaloRecoCfg(ConfigFlags)
 
    from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
-   cfg.merge(LArNoisyROSummaryCfg(flags))
+   cfg.merge(LArNoisyROSummaryCfg(ConfigFlags))
 
   # from LArMonitoring.LArDigitMonAlg import LArDigitMonConfig
-   aff_acc = LArDigitMonConfig(flags)
+   aff_acc = LArDigitMonConfig(ConfigFlags)
    cfg.merge(aff_acc)
 
-   flags.dump()
+   ConfigFlags.dump()
    f=open("LArDigitMon.pkl","wb")
    cfg.store(f)
    f.close()

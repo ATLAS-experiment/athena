@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETREADOUTGEOMETRY_STRIPBOXDESIGN_H
@@ -41,8 +41,7 @@ public:
                    const int nStrips,
                    const double pitch,
                    const double length,
-                   InDetDD::DetectorType detectorType = InDetDD::Undefined,
-                   const double zShift=0.0);
+		   const double zShift=0.0);
 
     ~StripBoxDesign() = default;
 
@@ -55,92 +54,90 @@ public:
 //    the more natural 2D (strip, row) identifier. The following methods convert 1D to 2D and v.v.
 //
     std::pair<int,int> getStripRow(SiCellId id) const final;
-    virtual int strip1Dim(int strip, int row) const override;
+    int strip1Dim(int strip, int row) const;
     int diodes() const; 
-    virtual int diodesInRow(const int row) const override; 
+    int diodesInRow(const int row) const; 
 //
 //    Pure virtual methods in base class:
 //
     // Distance to nearest detector active edge (+ve = inside, -ve = outside)
-    virtual void distanceToDetectorEdge(const SiLocalPosition &localPosition, double &etaDist,
-                                        double &phiDist) const override;
+    void distanceToDetectorEdge(const SiLocalPosition &localPosition, double &etaDist,
+                                double &phiDist) const;
 
     // check if the position is in active area
-    virtual bool inActiveArea(const SiLocalPosition &chargePos, bool checkBondGap = true) const override;
+    bool inActiveArea(const SiLocalPosition &chargePos, bool checkBondGap = true) const;
 
     // Element boundary
-    virtual const Trk::SurfaceBounds &bounds() const override;
+    const Trk::SurfaceBounds &bounds() const;
 
     // Retrieve the two ends of a "strip"
-    virtual std::pair<SiLocalPosition, SiLocalPosition> endsOfStrip(
-        const SiLocalPosition &position) const override;
+    std::pair<SiLocalPosition, SiLocalPosition> endsOfStrip(
+        const SiLocalPosition &position) const;
 
     // Phi-pitch (strip-width). Two names for same thing
-    virtual double stripPitch(const SiLocalPosition &localPosition) const override;
+    double stripPitch(const SiLocalPosition &localPosition) const;
     double stripPitch(const SiCellId &cellId) const;
-    virtual double stripPitch() const override;
-    virtual double phiPitch(const SiLocalPosition &localPosition) const override;
+    double stripPitch() const;
+    double phiPitch(const SiLocalPosition &localPosition) const;
     double phiPitch(const SiCellId &cellId) const;
-    virtual double phiPitch() const override;
+    double phiPitch() const;
 
     // distance to the nearest diode in units of pitch, from 0.0 to 0.5,
     // this method should be fast as it is called for every surface charge
     // in the SCT_SurfaceChargesGenerator
     // an active area check, done in the Generator anyway, is removed here
-    virtual double scaledDistanceToNearestDiode(const SiLocalPosition &chargePos) const override;
+    double scaledDistanceToNearestDiode(const SiLocalPosition &chargePos) const;
 
     // readout or diode id -> position, size
-    virtual SiDiodesParameters parameters(const SiCellId &cellId) const override;
-    virtual SiLocalPosition localPositionOfCell(const SiCellId &cellId) const override;
-    virtual SiLocalPosition localPositionOfCluster(const SiCellId &cellId, int clusterSize) const override;
+    SiDiodesParameters parameters(const SiCellId &cellId) const;
+    SiLocalPosition localPositionOfCell(const SiCellId &cellId) const;
+    SiLocalPosition localPositionOfCluster(const SiCellId &cellId, int clusterSize) const;
 
     // position -> id
-    virtual SiCellId cellIdOfPosition(const SiLocalPosition &localPos) const override;
+    SiCellId cellIdOfPosition(const SiLocalPosition &localPos) const;
     // id to position
     SiLocalPosition positionFromStrip(const SiCellId &cellId) const;
-    virtual SiLocalPosition positionFromStrip(const int stripNumber) const override;
+    SiLocalPosition positionFromStrip(const int stripNumber) const;
 
     // row and strip from 1-dim strip number
-    virtual int row(int stripId1Dim) const override;
-    virtual int strip(int stripId1Dim) const override;
+    int row(int stripId1Dim) const;
+    int strip(int stripId1Dim) const;
 
     // Find and fill a vector with all neighbour strips of a given cell
-    virtual void neighboursOfCell(const SiCellId &cellId,
-                                  std::vector<SiCellId> &neighbours) const override;
-    virtual SiCellId cellIdInRange(const SiCellId &) const override;
+    void neighboursOfCell(const SiCellId &cellId,
+                          std::vector<SiCellId> &neighbours) const;
+    SiCellId cellIdInRange(const SiCellId &) const;
 
     // For Strip sensors, readout cell == diode cell. Overload the SCT_ModuleSideDesign
     // member
-    virtual SiReadoutCellId readoutIdOfCell(const SiCellId &cellId) const override;
+    SiReadoutCellId readoutIdOfCell(const SiCellId &cellId) const;
     
-    virtual const Amg::Transform3D moduleShift() const override final;
-
-    virtual InDetDD::DetectorType type() const override final;
+    const Amg::Transform3D moduleShift() const final;
 
     // ---------------------------------------------------------------------------------------
     // DEPRECATED at least for Strips
-    virtual HepGeom::Vector3D<double> phiMeasureSegment(const SiLocalPosition &position) const override;
+    HepGeom::Vector3D<double> phiMeasureSegment(const SiLocalPosition &position) const;
 
     // Method to calculate length of a strip. Which strip??
-    virtual double length() const override;
+    double length() const;
 
     // Method to calculate average width of a module. What is it used for??
-    virtual double width() const override;
+    double width() const;
 
     // Method to calculate minimum width of a module
-    virtual double minWidth() const override;
+    double minWidth() const;
 
     // Method to calculate maximum width of a module
-    virtual double maxWidth() const override;
+    double maxWidth() const;
 
     // Pitch in eta direction Deprecated for strips: it varies in endcap
-    virtual double etaPitch() const override;
+    double etaPitch() const;
 
     // Return true if hit local direction is the same as readout direction.
-    virtual bool swapHitPhiReadoutDirection() const override;
-    virtual bool swapHitEtaReadoutDirection() const override;
+    bool swapHitPhiReadoutDirection() const;
+    bool swapHitEtaReadoutDirection() const;
 
-    virtual bool nearBondGap(const SiLocalPosition &, double) const override;
+    bool nearBondGap(const SiLocalPosition &, double) const;
 
     // ------------------------------------------------------------------------------------------
 
@@ -151,9 +148,9 @@ public:
     double stripLength(const SiCellId &cellId) const;
 
     // Give upper and lower boundaries, and length, of dead area
-    virtual double deadAreaUpperBoundary() const override;
-    virtual double deadAreaLowerBoundary() const override;
-    virtual double deadAreaLength() const override;
+    double deadAreaUpperBoundary() const;
+    double deadAreaLowerBoundary() const;
+    double deadAreaLength() const;
 private:
     int m_nRows;
     int m_nStrips;
@@ -219,10 +216,6 @@ inline int StripBoxDesign::row(int stripId1Dim) const {
 
 inline int StripBoxDesign::strip(int stripId1Dim) const {
     return stripId1Dim % m_nStrips; 
-}
-
-inline InDetDD::DetectorType StripBoxDesign::type() const{
-    return m_detectorType;
 }
 
 /// DEPRECATED for StripBoxDesign; no dead area
