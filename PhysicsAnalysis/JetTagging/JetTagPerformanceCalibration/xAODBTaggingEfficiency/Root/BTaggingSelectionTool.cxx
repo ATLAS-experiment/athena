@@ -145,7 +145,9 @@ StatusCode BTaggingSelectionTool::initialize() {
       ATH_MSG_WARNING( "Running in Continuous WP and using 1D c-tagging");
       m_continuous   = true;
       m_continuouscuts.push_back(-1.e4);
-      // the working points are defined above in the 'm_wps_raw' string
+      // For GN2v01, we have different WPs than the default ones.
+      if ( m_taggerName == "GN2v01" )
+        m_wps_raw="FixedCutBEff_90, FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_65";
       std::vector<std::string> workingpoints = split(m_wps_raw, ',');
       std::sort(workingpoints.begin(), workingpoints.end());
       std::reverse(workingpoints.begin(), workingpoints.end()); // put in descending order
@@ -595,12 +597,14 @@ int BTaggingSelectionTool::getQuantile(double pT, double eta, double tag_weight 
   }
   //////////////////////
   // Cheatsheet:
-  // returns 5 if between 60% and 0%
-  // returns 4 if between 70% and 60%
-  // returns 3 if between 77% and 70%
-  // returns 2 if between 85% and 77%
-  // returns 1 if between 100% and 85%
-  // return -1 not in b-tagging acceptance
+  // With n WPs,  (from highest to lowest) A1 , A2, A3, ..., An
+  // return -1 if not in b-tagging acceptance
+  // return  1 if between 100% and A1
+  // return  2 if between A1   and A2
+  // return  3 if between A2   and A3
+  // ...
+  // return n   if between An-1 and An
+  // return n+1 if between An   and 0%
   //////////////////////
 
   int bin_index(-1);
@@ -608,13 +612,14 @@ int BTaggingSelectionTool::getQuantile(double pT, double eta, double tag_weight 
   if (! checkRange(pT, eta,acceptData)) return bin_index;
 
   // If in b-tagging acceptance, cont.tagging
-  for (int i=1; i<=5; ++i) {
+  int numBins = m_continuouscuts.size(); 
+  for (int i=1; i<=numBins; ++i) {
     if (tag_weight < m_continuouscuts[i]) {
       bin_index = i;
       break;
     }
-    else if (tag_weight >= m_continuouscuts[5]){
-      bin_index = 5;
+    else if (tag_weight >= m_continuouscuts[numBins]){
+      bin_index = numBins;
       break;
     }
   }
