@@ -51,10 +51,12 @@ public:
                   const AtlasFieldMap* fieldMap);
 
   /**
-   * Move-able but not copy-able
+   * Move-able and copy-able
    */
   AtlasFieldCache& operator=(AtlasFieldCache&& other) = default;
   AtlasFieldCache(AtlasFieldCache&& other) = default;
+  AtlasFieldCache(const AtlasFieldCache& other) = default;
+  AtlasFieldCache& operator=(const AtlasFieldCache& other) = default;
   ~AtlasFieldCache() = default;
 
   /** get B field value at given position
@@ -81,8 +83,6 @@ public:
   bool toroidOn() const;
 
 private:
-  AtlasFieldCache(const AtlasFieldCache& other) = delete;
-  AtlasFieldCache& operator=(const AtlasFieldCache& other) = delete;
 
   /// fill given magnetic field zone */
   bool fillFieldCache(double z, double r, double phi);
