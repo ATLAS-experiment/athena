@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Framework import(s):
 import ROOT
@@ -24,7 +24,8 @@ def makePhotonAnalysisSequence( dataType, workingPoint,
                                 ptSelectionOutput = False,
                                 enableCutflow = False,
                                 enableKinematicHistograms = False,
-                                defineSystObjectLinks = False ):
+                                defineSystObjectLinks = False,
+                                forceFullSimConfig = False):
     """Create a photon analysis algorithm sequence
 
     Keywrod arguments:
@@ -67,9 +68,11 @@ def makePhotonAnalysisSequence( dataType, workingPoint,
                                    crackVeto = crackVeto,
                                    enableCleaning = enableCleaning, cleaningAllowLate = cleaningAllowLate,
                                    recomputeIsEM = recomputeIsEM,
-                                   ptSelectionOutput = ptSelectionOutput)
+                                   ptSelectionOutput = ptSelectionOutput,
+                                   forceFullSimConfig = forceFullSimConfig)
     makePhotonWorkingPointSequence (seq, dataType, workingPoint, postfix = postfix,
-                                    recomputeIsEM = recomputeIsEM )
+                                    recomputeIsEM = recomputeIsEM,
+                                    forceFullSimConfig = forceFullSimConfig)
     makeSharedObjectSequence (seq, deepCopyOutput = deepCopyOutput,
                               shallowViewOutput = shallowViewOutput,
                               postfix = '_Photon' + postfix,
@@ -90,7 +93,8 @@ def makePhotonCalibrationSequence( seq, dataType,
                                    enableCleaning = True,
                                    cleaningAllowLate = False,
                                    recomputeIsEM = False,
-                                   ptSelectionOutput = False ):
+                                   ptSelectionOutput = False,
+                                   forceFullSimConfig = False):
     """Create photon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -114,6 +118,10 @@ def makePhotonCalibrationSequence( seq, dataType,
     # Make sure we received a valid data type.
     if dataType not in [ 'data', 'mc', 'afii' ]:
         raise ValueError( 'Invalid data type: %s' % dataType )
+
+    if forceFullSimConfig:
+        print("WARNING! You are running makePhotonCalibrationSequence forcing full sim config")
+        print("WARNING! This is only intended to be used for testing purposes")
 
     cleaningWP = 'NoTime' if cleaningAllowLate else ''
 
@@ -193,7 +201,8 @@ def makePhotonCalibrationSequence( seq, dataType,
                     'CP::EgammaCalibrationAndSmearingTool' )
     alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
     alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-    alg.calibrationAndSmearingTool.useFastSim = int(dataType == 'afii')
+    alg.calibrationAndSmearingTool.useFastSim = (0 if forceFullSimConfig
+                                                 else int(dataType == 'afii'))
     seq.append( alg, inputPropName = 'egammas', outputPropName = 'egammasOut',
                 stageName = 'calibration',
                 dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
@@ -215,11 +224,9 @@ def makePhotonCalibrationSequence( seq, dataType,
                            'PhotonIsolationCorrectionAlg' + postfix )
     addPrivateTool( alg, 'isolationCorrectionTool',
                     'CP::IsolationCorrectionTool' )
-    if dataType == 'data':
-        alg.isolationCorrectionTool.IsMC = 0
-    else:
-        alg.isolationCorrectionTool.IsMC = 1
-        pass
+    alg.isolationCorrectionTool.IsMC = int(dataType != 'data')
+    alg.isolationCorrectionTool.AFII_corr = (0 if forceFullSimConfig
+                                             else dataType == 'afii')
     seq.append( alg, inputPropName = 'egammas', outputPropName = 'egammasOut',
                 stageName = 'selection',
                 dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
@@ -230,7 +237,8 @@ def makePhotonCalibrationSequence( seq, dataType,
 
 
 def makePhotonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
-                                    recomputeIsEM = False ):
+                                    recomputeIsEM = False,
+                                    forceFullSimConfig = False):
     """Create photon analysis algorithms for a single working point
 
     Keywrod arguments:
@@ -246,6 +254,10 @@ def makePhotonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
     # Make sure we received a valid data type.
     if dataType not in [ 'data', 'mc', 'afii' ]:
         raise ValueError( 'Invalid data type: %s' % dataType )
+
+    if forceFullSimConfig:
+        print("WARNING! You are running makePhotonWorkingPointSequence forcing full sim config")
+        print("WARNING! This is only intended to be used for testing purposes")
 
     splitWP = workingPoint.split ('.')
     if len (splitWP) != 2 :
@@ -308,8 +320,9 @@ def makePhotonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
                     'AsgPhotonEfficiencyCorrectionTool' )
     alg.scaleFactorDecoration = 'ph_effSF' + postfix + '_%SYS%'
     if dataType == 'afii':
+        print("WARNING! No AFII ID SFs are available for now for photon efficiency")
         alg.efficiencyCorrectionTool.ForceDataType = \
-          PATCore.ParticleDataType.Full  # no AFII ID SFs for now
+          PATCore.ParticleDataType.Full
     elif dataType == 'mc':
         alg.efficiencyCorrectionTool.ForceDataType = \
           PATCore.ParticleDataType.Full

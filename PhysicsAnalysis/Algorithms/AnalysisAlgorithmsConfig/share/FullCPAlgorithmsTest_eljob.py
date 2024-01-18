@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022  CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -80,6 +80,9 @@ isPhyslite = options.physlite
 noPhysliteBroken = options.no_physlite_broken
 geometry = options.geometry
 
+# No R24 FastSim recommendations for EGamma yet
+forceEGammaFullSimConfig = True
+
 if dataType not in ["data", "mc", "afii"] :
     raise Exception ("invalid data type: " + dataType)
 
@@ -125,7 +128,8 @@ algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = options.no_systematics,
                        hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
                        noPhysliteBroken=noPhysliteBroken, geometry=geometry,
-                       autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR)
+                       autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR,
+                       forceEGammaFullSimConfig=forceEGammaFullSimConfig)
 printSequenceAlgs( algSeq ) # For debugging
 algSeq.addSelfToJob( job )
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -24,11 +24,14 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('trackSelection', True, type=bool)
         self.addOption ('recalibratePhyslite', True, type=bool)
         self.addOption ('minPt', 4.5e3, type=float)
-
-
+        self.addOption ('forceFullSimConfig', False, type=bool)
 
     def makeAlgs (self, config) :
-        
+
+        if self.forceFullSimConfig:
+            print("WARNING! You are running ElectronCalibrationConfig forcing full sim config")
+            print("WARNING! This is only intended to be used for testing purposes")
+
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisElectrons")
         else :
@@ -81,7 +84,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
                                'CP::EgammaCalibrationAndSmearingTool' )
         alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
         alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        alg.calibrationAndSmearingTool.useFastSim = int( config.dataType() is DataType.FastSim )
+        alg.calibrationAndSmearingTool.useFastSim = (
+            0 if self.forceFullSimConfig
+            else int( config.dataType() is DataType.FastSim ))
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -106,7 +111,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
             config.addPrivateTool( 'isolationCorrectionTool',
                                    'CP::IsolationCorrectionTool' )
             alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
-            alg.isolationCorrectionTool.AFII_corr = config.dataType() is DataType.FastSim
+            alg.isolationCorrectionTool.AFII_corr = (
+                0 if self.forceFullSimConfig
+                else config.dataType() is DataType.FastSim)
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
@@ -134,9 +141,14 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('chargeIDSelection', False, type=bool)
         self.addOption ('doFSRSelection', False, type=bool)
         self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
+        self.addOption ('forceFullSimConfig', False, type=bool)
 
 
     def makeAlgs (self, config) :
+
+        if self.forceFullSimConfig:
+            print("WARNING! You are running ElectronWorkingPointConfig forcing full sim config")
+            print("WARNING! This is only intended to be used for testing purposes")
 
         selectionPostfix = self.selectionName
         if selectionPostfix != '' and selectionPostfix[0] != '_' :
@@ -279,8 +291,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() is DataType.FastSim:
-                alg.efficiencyCorrectionTool.ForceDataType = \
-                    PATCore.ParticleDataType.Fast
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig
+                    else PATCore.ParticleDataType.Fast)
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
@@ -302,8 +315,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.efficiencyCorrectionTool.IdKey = self.likelihoodWP.replace("LH","")
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() is DataType.FastSim:
-                alg.efficiencyCorrectionTool.ForceDataType = \
-                    PATCore.ParticleDataType.Fast
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig
+                    else PATCore.ParticleDataType.Fast)
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
@@ -326,8 +340,9 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
             if config.dataType() is DataType.FastSim:
-                alg.efficiencyCorrectionTool.ForceDataType = \
-                    PATCore.ParticleDataType.Fast
+                alg.efficiencyCorrectionTool.ForceDataType = (
+                    PATCore.ParticleDataType.Full if self.forceFullSimConfig
+                    else PATCore.ParticleDataType.Fast)
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
@@ -350,7 +365,8 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 def makeElectronCalibrationConfig( seq, containerName, postfix = None,
                                    crackVeto = None,
                                    ptSelectionOutput = None,
-                                   isolationCorrection = None):
+                                   isolationCorrection = None,
+                                   forceFullSimConfig = None):
     """Create electron calibration configuration blocks
 
     This makes all the algorithms that need to be run first befor
@@ -365,12 +381,14 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
       isolationCorrection -- Whether or not to perform isolation correction
       ptSelectionOutput -- Whether or not to apply pt selection when creating
                            output containers.
+      forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
 
     config = ElectronCalibrationConfig (containerName)
     config.setOptionValue ('crackVeto', crackVeto, noneAction='ignore')
     config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
     config.setOptionValue ('isolationCorrection', isolationCorrection, noneAction='ignore')
+    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig, noneAction='ignore')
     seq.append (config)
 
 
@@ -381,7 +399,8 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                                     selectionName,
                                     recomputeLikelihood = None,
                                     chargeIDSelection = None,
-                                    noEffSF = None ):
+                                    noEffSF = None,
+                                    forceFullSimConfig = None):
     """Create electron analysis configuration blocks
 
     Keyword arguments:
@@ -393,6 +412,7 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
       recomputeLikelihood -- Whether to rerun the LH. If not, use derivation flags
       chargeIDSelection -- Whether or not to perform charge ID/flip selection
       noEffSF -- Disables the calculation of efficiencies and scale factors
+      forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
 
 
@@ -406,4 +426,5 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
     config.setOptionValue ('recomputeLikelihood', recomputeLikelihood, noneAction='ignore')
     config.setOptionValue ('chargeIDSelection', chargeIDSelection, noneAction='ignore')
     config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
+    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig, noneAction='ignore')
     seq.append (config)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AsgAnalysisAlgorithms.AnalysisObjectSharedSequence import makeSharedObjectSequence
@@ -22,7 +22,8 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
                                   trackSelection = True,
                                   enableCutflow = False,
                                   enableKinematicHistograms = False,
-                                  defineSystObjectLinks = False ):
+                                  defineSystObjectLinks = False,
+                                  forceFullSimConfig = False):
     """Create an electron analysis algorithm sequence
 
     Keyword arguments:
@@ -67,10 +68,12 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
                                      crackVeto = crackVeto,
                                      ptSelectionOutput = ptSelectionOutput,
                                      trackSelection = trackSelection, 
-                                     isolationCorrection = isolationCorrection)
+                                     isolationCorrection = isolationCorrection,
+                                     forceFullSimConfig = forceFullSimConfig)
     makeElectronWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,
                                       recomputeLikelihood = recomputeLikelihood,
-                                      chargeIDSelection = chargeIDSelection)
+                                      chargeIDSelection = chargeIDSelection,
+                                      forceFullSimConfig = forceFullSimConfig)
     makeSharedObjectSequence (seq, deepCopyOutput = deepCopyOutput,
                               shallowViewOutput = shallowViewOutput,
                               postfix = '_Electron' + postfix,
@@ -89,7 +92,8 @@ def makeElectronCalibrationSequence( seq, dataType, postfix = '',
                                      crackVeto = False,
                                      ptSelectionOutput = False,
                                      trackSelection = False,
-                                     isolationCorrection = False):
+                                     isolationCorrection = False,
+                                     forceFullSimConfig = False):
     """Create electron calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -111,6 +115,10 @@ def makeElectronCalibrationSequence( seq, dataType, postfix = '',
     # Make sure we received a valid data type.
     if dataType not in [ 'data', 'mc', 'afii' ]:
         raise ValueError( 'Invalid data type: %s' % dataType )
+
+    if forceFullSimConfig:
+        print("WARNING! You are running makeElectronCalibrationSequence forcing full sim config")
+        print("WARNING! This is only intended to be used for testing purposes")
 
     # Set up a shallow copy to decorate
     alg = createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' + postfix )
@@ -167,7 +175,8 @@ def makeElectronCalibrationSequence( seq, dataType, postfix = '',
                     'CP::EgammaCalibrationAndSmearingTool' )
     alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
     alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-    alg.calibrationAndSmearingTool.useFastSim = int(dataType == 'afii')
+    alg.calibrationAndSmearingTool.useFastSim = (0 if forceFullSimConfig
+                                                 else int(dataType == 'afii'))
     seq.append( alg, inputPropName = 'egammas', outputPropName = 'egammasOut',
                 stageName = 'calibration',
                 dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
@@ -190,11 +199,9 @@ def makeElectronCalibrationSequence( seq, dataType, postfix = '',
                                'ElectronIsolationCorrectionAlg' + postfix )
         addPrivateTool( alg, 'isolationCorrectionTool',
                         'CP::IsolationCorrectionTool' )
-        if dataType == 'data':
-            alg.isolationCorrectionTool.IsMC = 0
-        else:
-            alg.isolationCorrectionTool.IsMC = 1
-            pass
+        alg.isolationCorrectionTool.IsMC = int(dataType != 'data')
+        alg.isolationCorrectionTool.AFII_corr = (0 if forceFullSimConfig
+                                                 else dataType == 'afii')
         seq.append( alg, inputPropName = 'egammas', outputPropName = 'egammasOut',
                     stageName = 'calibration',
                     dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
@@ -206,7 +213,8 @@ def makeElectronCalibrationSequence( seq, dataType, postfix = '',
 def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
                                       postfix = '',
                                       recomputeLikelihood = False,
-                                      chargeIDSelection = False ):
+                                      chargeIDSelection = False,
+                                      forceFullSimConfig = False ):
     """Create electron analysis algorithms for a single working point
 
     Keyword arguments:
@@ -223,6 +231,10 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
     # Make sure we received a valid data type.
     if dataType not in [ 'data', 'mc', 'afii' ]:
         raise ValueError( 'Invalid data type: %s' % dataType )
+
+    if forceFullSimConfig:
+        print("WARNING! You are running makeElectronWorkingPointSequence forcing full sim config")
+        print("WARNING! This is only intended to be used for testing purposes")
 
     splitWP = workingPoint.split ('.')
     if len (splitWP) != 2 :
@@ -319,8 +331,9 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
     alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
     alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
     if dataType == 'afii':
-        alg.efficiencyCorrectionTool.ForceDataType = \
-          PATCore.ParticleDataType.Fast
+        alg.efficiencyCorrectionTool.ForceDataType = (
+            PATCore.ParticleDataType.Full if forceFullSimConfig
+            else PATCore.ParticleDataType.Fast)
     elif dataType == 'mc':
         alg.efficiencyCorrectionTool.ForceDataType = \
           PATCore.ParticleDataType.Full

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -83,7 +83,7 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
     algSeq += copyalg
 
 
-def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, noSystematics, autoconfigFromFlags=None) :
+def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, noSystematics, autoconfigFromFlags=None, forceEGammaFullSimConfig=False) :
 
     vars = []
     metVars = []
@@ -259,18 +259,23 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     # ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
     if noPhysliteBroken :
         workingpoint = workingpoint.split('.')[0] + '.NonIso'
-    electronSequence = makeElectronAnalysisSequence( dataType, workingpoint, postfix = 'loose',
-                                                     recomputeLikelihood=recomputeLikelihood, enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
+    electronSequence = makeElectronAnalysisSequence(
+        dataType, workingpoint, postfix = 'loose',
+        recomputeLikelihood=recomputeLikelihood, enableCutflow=True,
+        enableKinematicHistograms=True, shallowViewOutput = False,
+        forceFullSimConfig=forceEGammaFullSimConfig)
     electronSequence.configure( inputName = input,
                                 outputName = 'AnaElectrons_%SYS%' )
     algSeq += electronSequence
-    vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
-              'OutElectrons_NOSYS.phi -> el_phi',
-              'OutElectrons_NOSYS.eta -> el_eta',
-              'OutElectrons_NOSYS.charge -> el_charge',
-              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
-    if dataType != 'data' and not forCompare:
-        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
+
+    if not(forceEGammaFullSimConfig and dataType=='afii' and forCompare):
+        vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
+                  'OutElectrons_NOSYS.phi -> el_phi',
+                  'OutElectrons_NOSYS.eta -> el_eta',
+                  'OutElectrons_NOSYS.charge -> el_charge',
+                  'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%',]
+        if dataType != 'data' and not forCompare:
+            vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%',]
 
 
     # Include, and then set up the photon analysis sequence:
@@ -280,8 +285,11 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         input = 'AnalysisPhotons'
     else :
         input = 'Photons'
-    photonSequence = makePhotonAnalysisSequence( dataType, 'Tight.FixedCutTight', postfix = 'tight',
-                                                 recomputeIsEM=False, enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
+    photonSequence = makePhotonAnalysisSequence(
+        dataType, 'Tight.FixedCutTight', postfix = 'tight',
+        recomputeIsEM=False, enableCutflow=True,
+        enableKinematicHistograms=True, shallowViewOutput = False,
+        forceFullSimConfig=forceEGammaFullSimConfig)
     photonSequence.configure( inputName = input,
                               outputName = 'AnaPhotons_%SYS%' )
     algSeq += photonSequence
@@ -470,11 +478,12 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     algSeq += overlapSequence
     vars += [
         'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
-        'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
         'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
         'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
         'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
     ]
+    if not(forceEGammaFullSimConfig and dataType=='afii' and forCompare):
+        vars += ['OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%']
 
     if dataType != 'data' :
         # Include, and then set up the generator analysis sequence:
@@ -540,7 +549,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
 
 
 def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
-        geometry=None, autoconfigFromFlags=None, noSystematics=None, onlyNominalOR=False) :
+                        geometry=None, autoconfigFromFlags=None, noSystematics=None, onlyNominalOR=False,  forceEGammaFullSimConfig=False) :
 
     vars = []
     metVars = []
@@ -557,12 +566,13 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq = ConfigSequence ()
 
     outputContainers = {'mu_' : 'OutMuons',
-                        'el_' : 'OutElectrons',
                         'ph_' : 'OutPhotons',
                         'tau_': 'OutTauJets',
                         'jet_': 'OutJets',
                         'met_': 'AnaMET',
                         ''    : 'EventInfo'}
+    if not(forceEGammaFullSimConfig and dataType=='afii' and forCompare):
+        outputContainers['el_'] = 'OutElectrons'
 
     # create factory object to build block configurations
     from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
@@ -643,11 +653,13 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     recomputeLikelihood=False
     configSeq += makeConfig ('Electrons',
         containerName='AnaElectrons' )
+    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += makeConfig ('Electrons.WorkingPoint',
         containerName='AnaElectrons',
         selectionName='loose')
+    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     if forCompare :
         configSeq.setOptionValue ('.noEffSF', True)
     if likelihood:
@@ -668,12 +680,14 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     # Include, and then set up the photon analysis algorithm sequence:
     configSeq += makeConfig ('Photons',
         containerName='AnaPhotons' )
+    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recomputeIsEM', False)
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += makeConfig ('Photons.WorkingPoint',
         containerName='AnaPhotons',
         selectionName='tight')
+    configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     if forCompare :
         configSeq.setOptionValue ('.noEffSF', True)
     configSeq.setOptionValue ('.qualityWP', 'Tight')
@@ -915,8 +929,8 @@ def printSequenceAlgs (sequence) :
 
 
 def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hardCuts = False,
-            isPhyslite = False, noPhysliteBroken = False, geometry = None, autoconfigFromFlags = None,
-            onlyNominalOR = False) :
+                  isPhyslite = False, noPhysliteBroken = False, geometry = None, autoconfigFromFlags = None, onlyNominalOR = False,
+                  forceEGammaFullSimConfig = False) :
 
     # do some harder cuts on all object types, this is mostly used for
     # benchmarking
@@ -939,7 +953,8 @@ def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hard
         ca = makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
                                  isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
                                  geometry=geometry, onlyNominalOR=onlyNominalOR,
-                                 autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
+                                 autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics,
+                                 forceEGammaFullSimConfig=forceEGammaFullSimConfig)
     elif yamlPath :
         from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText
         ca = makeSequenceText(yamlPath, dataType, algSeq, geometry=geometry,
@@ -948,7 +963,8 @@ def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hard
     else :
         ca = makeSequenceOld (dataType, algSeq, forCompare=forCompare,
                               isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                              autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
+                              autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics,
+                              forceEGammaFullSimConfig=forceEGammaFullSimConfig)
 
     if ca is not None:
         return ca
