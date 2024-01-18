@@ -187,7 +187,7 @@ ISF_FastCaloSim...   INFO   E12(TileBar0)=12609.2 E12/E=0.254221
 ISF_FastCaloSim...   INFO   E13(TileBar1)=13976.6 E13/E=0.28179
 ISF_FastCaloSim...   INFO   E14(TileBar2)=2384.6 E14/E=0.0480772
 ISF_FastCaloSim...   INFO   AuxInfo has 2 elements
-ISF_FastCaloSim...   INFO     776773022 : bool=23 char= int=23 float=3.22299e-44 double=1.13635e-322 void*=0x17
-ISF_FastCaloSim...   INFO     2331614212 : bool=0 char=  int=0 float=0 double=1 void*=0x3ff0000000000000
+ISF_FastCaloSim...   INFO     776773022 :  int=23 float=3.22299e-44 double=1.13635e-322 void*=0x17
+ISF_FastCaloSim...   INFO     2331614212 :  int=0 float=0 double=1 void*=0x3ff0000000000000
 ISF_FastCaloSim...SUCCESS Program ends
 

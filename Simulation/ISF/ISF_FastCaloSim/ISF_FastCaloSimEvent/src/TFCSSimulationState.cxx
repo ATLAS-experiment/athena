@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandomEngine.h"
@@ -48,8 +48,15 @@ void TFCSSimulationState::Print(Option_t *) const {
   if (!m_AuxInfo.empty()) {
     ATH_MSG_INFO("  AuxInfo has " << m_AuxInfo.size() << " elements");
     for (const auto &a : m_AuxInfo) {
-      ATH_MSG_INFO("    " << a.first << " : bool=" << a.second.b
-                          << " char=" << a.second.c << " int=" << a.second.i
+      ATH_MSG_INFO("    " << a.first << " : "
+                          // Dont print as char/bool.
+                          // Accessing as a bool is likely to undefined
+                          // behavior (which triggers a warning from
+                          // the sanitizer).  As a char, it may not
+                          // be printable.
+                          //<< "bool=" << a.second.b
+                          //<< " char=" << a.second.c
+                          << " int=" << a.second.i
                           << " float=" << a.second.f << " double=" << a.second.d
                           << " void*=" << a.second.p);
     }
