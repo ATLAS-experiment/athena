@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os
 
@@ -384,8 +384,12 @@ def createTriggerRecoFlags():
     flags = AthConfigFlags()
 
     # Additional flags to filter chains
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT import allSignatures
-    flags.addFlag("Trigger.enabledSignatures", allSignatures(), help='list of enabled trigger signatures')
+    def _allSignatures (prevFlags):
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT import allSignatures
+        l = list(allSignatures())
+        l.sort()
+        return l
+    flags.addFlag("Trigger.enabledSignatures", _allSignatures, help='list of enabled trigger signatures')
     flags.addFlag("Trigger.disabledSignatures", [], help='list of disabled trigger signatures')
     flags.addFlag("Trigger.selectChains", [], help='list of enabled chains')
     flags.addFlag("Trigger.disableChains", [], help='list of disabled chains')
