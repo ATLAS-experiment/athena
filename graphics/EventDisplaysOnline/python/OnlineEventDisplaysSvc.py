@@ -10,7 +10,7 @@ __author__  = "Eric Jansen <eric.jansen@cern.ch>"
 
 import os, grp, stat, random
 from ipc import IPCPartition
-from ispy import ISInfoDictionary
+from ispy import ISInfoDictionary, ISInfoAny, ISObject
 from AthenaPython import PyAthena
 from AthenaPython.PyAthena import StatusCode
 from PyAnalysisCore import PyEventTools
