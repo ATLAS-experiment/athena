@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,7 +43,7 @@ class LArFlatFromFile: public AthAlgorithm
   void ofcFlat(const std::string& input, const std::string& outputName);
 
 
-  void errIfConnected(const HWIdentifier chid, const int gain, const std::string& objName, const std::string& message=0) const;
+  void errIfConnected(const HWIdentifier chid, const int gain, const std::string& objName, const std::string& message="") const;
 
   unsigned m_hashMax{};
   const LArOnlineID* m_onlineID{};
