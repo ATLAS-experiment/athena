@@ -1,25 +1,34 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
+def LArFEBMonConfigOld(inputFlags, cellDebug=False, dspDebug=False):
+    from AthenaMonitoring import AthMonitorCfgHelperOld
+    from LArMonitoring.LArMonitoringConf import  LArFEBMonAlg
 
-def LArFEBMonConfig(flags, cellDebug=False, dspDebug=False):
+    helper = AthMonitorCfgHelperOld(inputFlags, 'LArFEBMonAlgOldCfg')
+    LArFEBMonConfigCore(helper, LArFEBMonAlg,inputFlags,cellDebug, dspDebug)
+
+    return helper.result()
+
+
+def LArFEBMonConfig(inputFlags, cellDebug=False, dspDebug=False):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'LArFEBMonAlgCfg')
+    helper = AthMonitorCfgHelper(inputFlags,'LArFEBMonAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    LArFEBMonConfigCore(helper, CompFactory.LArFEBMonAlg,flags,cellDebug, dspDebug)
+    LArFEBMonConfigCore(helper, CompFactory.LArFEBMonAlg,inputFlags,cellDebug, dspDebug)
 
     rv = ComponentAccumulator()
 
     # adding LArFebErrorSummary algo
     from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
-    rv.merge(LArFebErrorSummaryMakerCfg(flags))
+    rv.merge(LArFebErrorSummaryMakerCfg(inputFlags))
     
     rv.merge(helper.result())
 
     return rv
 
-def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=False):
+def LArFEBMonConfigCore(helper,algoinstance,inputFlags, cellDebug=False, dspDebug=False):
 
     from LArMonitoring.GlobalVariables import lArDQGlobals
 
@@ -38,7 +47,7 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
     isCOMP200=False
     from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
     if isComponentAccumulatorCfg():
-      if "COMP200" in flags.IOVDb.DatabaseInstance:
+      if "COMP200" in inputFlags.IOVDb.DatabaseInstance:
          isCOMP200=True
     else:      
       from IOVDbSvc.CondDB import conddb
@@ -60,7 +69,7 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
               pass
           if not havethem:
              from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-             helper.resobj.merge(IOVDbSvcCfg(flags))
+             helper.resobj.merge(IOVDbSvcCfg(inputFlags))
              condLoader=helper.resobj.getCondAlgo("CondInputLoader")
              iovDbSvc=helper.resobj.getService("IOVDbSvc")
        else:   
@@ -79,7 +88,7 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
        obj='LArDSPThresholdsComplete'
        if isComponentAccumulatorCfg():
            from IOVDbSvc.IOVDbSvcConfig import addFolders
-           helper.resobj.merge(addFolders(flags,fld,db,obj))
+           helper.resobj.merge(addFolders(inputFlags,fld,db,obj))
        else:
            conddb.addFolder (db, fld, className=obj)
        larFEBMonAlg.Run1DSPThresholdsKey = 'LArDSPThresholds'
@@ -201,7 +210,7 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
 
     isOnline=False
     if isComponentAccumulatorCfg() :
-      if flags.DQ.Environment == 'online':
+      if inputFlags.DQ.Environment == 'online':
          isOnline=True
     else:
       from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
@@ -410,37 +419,36 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import initConfigFlags
-   flags = initConfigFlags()
-
+   from AthenaConfiguration.AllConfigFlags import ConfigFlags
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
-   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
-   flags.addFlagsCategory("LArMon", addLArMonFlags)
+
+   from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
+   createLArMonConfigFlags()
 
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   flags.Input.Files = defaultTestFiles.RAW_RUN2
+   ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
 
-   flags.Output.HISTFileName = 'LArFEBMonOutput.root'
-   flags.DQ.enableLumiAccess = True
-   flags.DQ.useTrigger = False
-   flags.lock()
+   ConfigFlags.Output.HISTFileName = 'LArFEBMonOutput.root'
+   ConfigFlags.DQ.enableLumiAccess = True
+   ConfigFlags.DQ.useTrigger = False
+   ConfigFlags.lock()
 
 
    from CaloRec.CaloRecoConfig import CaloRecoCfg
-   cfg=CaloRecoCfg(flags)
+   cfg=CaloRecoCfg(ConfigFlags)
 
    #from CaloD3PDMaker.CaloD3PDConfig import CaloD3PDCfg,CaloD3PDAlg
-   #cfg.merge(CaloD3PDCfg(flags, filename=flags.Output.HISTFileName, streamname='CombinedMonitoring'))
+   #cfg.merge(CaloD3PDCfg(ConfigFlags, filename=ConfigFlags.Output.HISTFileName, streamname='CombinedMonitoring'))
 
-   aff_acc = LArFEBMonConfig(flags)
+   aff_acc = LArFEBMonConfig(ConfigFlags)
    cfg.merge(aff_acc)
 
    cfg.printConfig()
 
-   flags.dump()
+   ConfigFlags.dump()
    f=open("LArFEBMon.pkl","wb")
    cfg.store(f)
    f.close()

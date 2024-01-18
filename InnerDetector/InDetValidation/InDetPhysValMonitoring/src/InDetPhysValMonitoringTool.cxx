@@ -159,8 +159,6 @@ InDetPhysValMonitoringTool::initialize() {
     IDPVM::addReadDecoratorHandleKeys(*this, m_jetContainerName, empty_prefix, required_int_jet_decorations, m_intJetDecor);
   }
 
-  ATH_CHECK(m_weight_pileup_key.initialize(m_doPRW));
-
   m_usingSpecialPileupSwitch = (m_pileupSwitch != "All");
   return StatusCode::SUCCESS;
 }

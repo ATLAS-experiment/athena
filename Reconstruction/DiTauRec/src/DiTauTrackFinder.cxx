@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/DiTauTrackFinder.h"
@@ -13,6 +13,7 @@
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 
 #include "tauRecTools/TrackSort.h"
+#include "tauRecTools/KineUtils.h"
 #include "StoreGate/ReadHandle.h"
 
 #include "fastjet/PseudoJet.hh"
@@ -25,11 +26,13 @@ DiTauTrackFinder::DiTauTrackFinder(const std::string& type,
   m_MaxDrJet(1.0),
   m_MaxDrSubjet(0.2),
   m_TrackSelectorTool("")
+  // m_ParticleCaloExtensionTool("")
 {
   declareInterface<DiTauToolBase > (this);
   declareProperty("MaxDrJet", m_MaxDrJet);
   declareProperty("MaxDrSubjet", m_MaxDrSubjet);
   declareProperty("TrackSelectorTool", m_TrackSelectorTool);
+  // declareProperty("ParticleCaloExtensionTool", m_ParticleCaloExtensionTool);
 }
 
 
@@ -83,19 +86,15 @@ StatusCode DiTauTrackFinder::execute(DiTauCandidateData * data,
 
   // drop subjets without good tracks
   std::vector<fastjet::PseudoJet> vSubjets = data->subjets;
-  int nTracks;
+  double nTracks;
+  double dR;
   for (auto subjet_itr = vSubjets.begin(); subjet_itr != vSubjets.end(); ) {
     nTracks = 0;
-
-    TLorentzVector temp_p4;
-    temp_p4.SetPtEtaPhiM(subjet_itr->pt(), subjet_itr->eta(), subjet_itr->phi_std(), subjet_itr->m()); 
-
     for (const auto& track : tauTracks) {
-      if ( temp_p4.DeltaR(track->p4()) < m_MaxDrSubjet) nTracks++;
+      dR = Tau1P3PKineUtils::deltaR(subjet_itr->eta(), subjet_itr->phi_std(), track->eta(), track->phi());
+      if (dR < m_MaxDrSubjet) nTracks++;
     }
-
     ATH_MSG_DEBUG("number of tracks in subjet: "<< nTracks);
-
     if (nTracks == 0) {
       ATH_MSG_DEBUG("number of tracks is zero. Drop subjet");
       subjet_itr = vSubjets.erase(subjet_itr); //point subjet_itr to the next element/end of the vector
@@ -174,21 +173,21 @@ DiTauTrackFinder::DiTauTrackType DiTauTrackFinder::diTauTrackType(const DiTauCan
 
   xAOD::DiTauJet *pDiTau = data->xAODDiTau;
 
+  double dRJet = Tau1P3PKineUtils::deltaR(pDiTau->eta(), pDiTau->phi(), track->eta(), track->phi());
+
   // check if track is outside the jet ditau cone
-  if ( pDiTau->p4().DeltaR(track->p4()) > m_MaxDrJet) return OutsideTrack;
+  if (dRJet > m_MaxDrJet) return OutsideTrack;
     
   // check quality criteria
   bool goodTrack = m_TrackSelectorTool->decision(*track, pVertex);
   if (!goodTrack) return DiTauOtherTrack;
 
   // check if track is inside a subjet
+  double dR = 100;
   std::vector<fastjet::PseudoJet> vSubjets = data->subjets;
   for (const auto &subjet : vSubjets) {
-
-    TLorentzVector temp_p4;
-    temp_p4.SetPtEtaPhiM(subjet.pt(), subjet.eta(), subjet.phi_std(), subjet.m());
-
-    if (temp_p4.DeltaR(track->p4()) < m_MaxDrSubjet)
+    dR = Tau1P3PKineUtils::deltaR(subjet.eta(), subjet.phi_std(), track->eta(), track->phi());
+    if (dR < m_MaxDrSubjet)
       return DiTauSubjetTrack;
   }
 

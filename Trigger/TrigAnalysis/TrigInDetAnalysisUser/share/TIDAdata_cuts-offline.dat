@@ -5,12 +5,7 @@ pT     = 400;
 pT     = 1000;
 #endif
 
-#if defined(ITk)
-	eta = 4.5;
-#else
-	eta = 2.5;
-#endif
-
+eta    = 2.5;
 #if defined(LARGED0)
    a0=10.;
 #elif defined(LARGED0_EL)
