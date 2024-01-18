@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
 
 #include "JetTagCalibration/JetTagCalibCondAlg.h"
 
+//#include "JetTagTools/HistoHelperRoot.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "PoolSvc/IPoolSvc.h"
 #include "FileCatalog/IFileCatalog.h"
@@ -178,6 +179,11 @@ namespace Analysis {
     //RNNIP tagger
     if (std::find(m_taggers.begin(), m_taggers.end(), "RNNIP") != m_taggers.end()) {
       initializeRNNIP();
+    }
+
+    //JetVertexCharge tagger
+    if (std::find(m_taggers.begin(), m_taggers.end(), "JetVertexCharge") != m_taggers.end()) {
+      initializeJetVertexCharge();
     }
 
     //MultiSV tagger
@@ -371,6 +377,36 @@ namespace Analysis {
 		  "RNNIP");
       }
     }
+  }
+
+  
+  void JetTagCalibCondAlg::initializeJetVertexCharge()
+  {
+    std::string taggerNameBase = "JetVertexCharge";
+    //MVA xml files
+    this->registerHistogram(taggerNameBase, taggerNameBase+"Calib_cat_JC_SVC_noMu");
+    this->registerHistogram(taggerNameBase, taggerNameBase+"Calib_cat_JC_SVC_incMu");
+    this->registerHistogram(taggerNameBase, taggerNameBase+"Calib_cat_JC_SVC_TVC_noMu");
+    this->registerHistogram(taggerNameBase, taggerNameBase+"Calib_cat_JC_SVC_TVC_incMu");
+    this->registerHistogram(taggerNameBase, taggerNameBase+"Calib_cat_JC_incMu");
+
+    //reference histos
+    this->registerHistogram(taggerNameBase, "jvc_JC_SVC_noMu_b");
+    this->registerHistogram(taggerNameBase, "jvc_JC_SVC_noMu_bbar");
+    this->registerHistogram(taggerNameBase, "jvc_JC_SVC_incMu_b");
+    this->registerHistogram(taggerNameBase, "jvc_JC_SVC_incMu_bbar");
+    this->registerHistogram(taggerNameBase, "jvc_JC_SVC_TVC_noMu_b");
+    this->registerHistogram(taggerNameBase, "jvc_JC_SVC_TVC_noMu_bbar");
+    this->registerHistogram(taggerNameBase, "jvc_JC_SVC_TVC_incMu_b");
+    this->registerHistogram(taggerNameBase, "jvc_JC_SVC_TVC_incMu_bbar");
+    this->registerHistogram(taggerNameBase, "jvc_JC_incMu_b");
+    this->registerHistogram(taggerNameBase, "jvc_JC_incMu_bbar");
+    this->registerHistogram(taggerNameBase, "jvc_JC_noMu_b");
+    this->registerHistogram(taggerNameBase, "jvc_JC_noMu_bbar");
+    this->registerHistogram(taggerNameBase, "jvc_SVC_b");
+    this->registerHistogram(taggerNameBase, "jvc_SVC_bbar");
+    this->registerHistogram(taggerNameBase, "jvc_JC_all_b");
+    this->registerHistogram(taggerNameBase, "jvc_JC_all_bbar");
   }
 
   void JetTagCalibCondAlg::initializeMultiSV(const std::string& taggerNameBase)

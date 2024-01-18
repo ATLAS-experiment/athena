@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
 /* **************************************************************************
@@ -17,8 +17,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "BTagging/IBTagTool.h"
-#include "JetTagTools/ITagTool.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <string>
 #include <vector>
@@ -29,6 +29,7 @@
 /** The namespace of all packages in PhysicsAnalysis/JetTagging */
 namespace Analysis
 {
+  class ITagTool;
 
   /**  \class BTagTool
   The BTagTool class is a prototype implementation of a general jet tag strategy
@@ -68,7 +69,7 @@ namespace Analysis
 
       /** Constructors and destructors */
       BTagTool(const std::string&,const std::string&,const IInterface*);
-      virtual ~BTagTool() = default;
+      virtual ~BTagTool();
 
       /** Main routines specific to an ATHENA algorithm */
       virtual StatusCode initialize() override;
@@ -88,7 +89,13 @@ namespace Analysis
       ToolHandleArray< ITagTool > m_bTagToolHandleArray;
       std::map<std::string, ITagTool*> m_bTagTool; //!< map to the btag tools
 
+      std::string m_BaselineTagger; //!< whose result is stored in the combinedlikelihhod datamember of the jet
+
+      std::string m_vxPrimaryName;           //!< Name of primary vertex container
       SG::ReadHandleKey<xAOD::VertexContainer> m_VertexCollectionName {this, "vxPrimaryCollectionName", "", "Input primary vertex container"};
+
+
+      std::string m_runModus;                //!< the run modus of the btagger (reference or analysis)
 
   }; // End class
 } // End namespace

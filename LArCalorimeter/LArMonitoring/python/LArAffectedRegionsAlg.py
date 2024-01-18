@@ -1,20 +1,30 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArAffectedRegionsConfig(flags):
+def LArAffectedRegionsConfigOld(inputFlags):
+    
+    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
+    from LArMonitoring.LArMonitoringConf import LArAffectedRegionsAlg
+
+    helper = AthMonitorCfgHelperOld(inputFlags,'LArAffectedRegionsAlgOldCfg')
+    LArAffectedRegionsConfigCore(helper, LArAffectedRegionsAlg, inputFlags)
+
+    return helper.result() 
+
+def LArAffectedRegionsConfig(inputFlags):
     '''Function to configures some algorithms in the monitoring system.'''
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'LArAffectedRegionsAlgCfg')
+    helper = AthMonitorCfgHelper(inputFlags,'LArAffectedRegionsAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    LArAffectedRegionsConfigCore(helper, CompFactory.LArAffectedRegionsAlg, flags)
+    LArAffectedRegionsConfigCore(helper, CompFactory.LArAffectedRegionsAlg, inputFlags)
 
     return helper.result()
 
 
-def LArAffectedRegionsConfigCore(helper, algoinstance, flags):
+def LArAffectedRegionsConfigCore(helper, algoinstance, inputFlags):
 
     larAffectedRegAlg = helper.addAlgorithm(algoinstance,'larAffectedRegAlg')
 
@@ -27,7 +37,7 @@ def LArAffectedRegionsConfigCore(helper, algoinstance, flags):
     isOnline=False
     from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
     if isComponentAccumulatorCfg():
-       if flags.DQ.Environment == 'online':
+       if inputFlags.DQ.Environment == 'online':
           isOnline=True
     else:
        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
@@ -369,29 +379,27 @@ def LArAffectedRegionsConfigCore(helper, algoinstance, flags):
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-
-    from LArMonitoring.LArMonConfigFlags import addLArMonFlags
-    flags.addFlagsCategory("LArMon", addLArMonFlags)
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
+    createLArMonConfigFlags()
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
 
-    flags.Output.HISTFileName = 'LArAffectedRegionsOutput.root'
-    flags.DQ.enableLumiAccess = False
-    flags.DQ.useTrigger = False
-    flags.lock()
+    ConfigFlags.Output.HISTFileName = 'LArAffectedRegionsOutput.root'
+    ConfigFlags.DQ.enableLumiAccess = False
+    ConfigFlags.DQ.useTrigger = False
+    ConfigFlags.lock()
 
 
     from CaloRec.CaloRecoConfig import CaloRecoCfg
-    cfg=CaloRecoCfg(flags)
+    cfg=CaloRecoCfg(ConfigFlags)
 
     #add affected regions
-    affregmon = LArAffectedRegionsConfig(flags)
+    affregmon = LArAffectedRegionsConfig(ConfigFlags)
     cfg.merge(affregmon)
 
-    flags.dump()
+    ConfigFlags.dump()
     f=open("AffectedRegionsMonMaker.pkl","wb")
     cfg.store(f)
     f.close()

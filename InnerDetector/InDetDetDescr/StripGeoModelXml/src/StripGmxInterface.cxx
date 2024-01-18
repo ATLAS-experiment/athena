@@ -192,16 +192,6 @@ void StripGmxInterface::makeSiStripBox(const std::string &typeName,
   getParameter(typeName, parameters, "pitch", pitch);
   getParameter(typeName, parameters, "stripLength", length);
 
-  //At the moment, we'd only ever want StripBarrel for this detector type, so throw a WARNING if it differs
-  //However, in future this may be different, so implementing the functionality to set this anyway 
-  InDetDD::DetectorType detectorType{InDetDD::StripBarrel};
-  int detectorTypeEnum = 0;
-  if (checkParameter(typeName, parameters, "detectorType", detectorTypeEnum)) {
-    if (detectorTypeEnum == 4) detectorType = InDetDD::StripBarrel;
-    else ATH_MSG_WARNING("Non-strip barrel type set for strip box DetectorElement - is this intended?");
-  }
-
-
   //
   // Make Sensor Design and add to DetectorManager
   //
@@ -222,8 +212,7 @@ void StripGmxInterface::makeSiStripBox(const std::string &typeName,
                                                          nRows,
                                                          nStrips,
                                                          pitch,
-                                                         length,
-                                                         detectorType);
+                                                         length);
 
     for (int i = 0; i< splitLevel; i++) {
       for (int side : {0,1}) { //need different additional shift transform per side...
@@ -239,7 +228,6 @@ void StripGmxInterface::makeSiStripBox(const std::string &typeName,
                                                        nStrips,
                                                        pitch,
                                                        length,
-                                                       detectorType,
                                                        zShift);
 
         design->setMother(motherDesign.get());
@@ -262,8 +250,7 @@ void StripGmxInterface::makeSiStripBox(const std::string &typeName,
                                                    nRows,
                                                    nStrips,
                                                    pitch,
-                                                   length,
-                                                   detectorType);
+                                                   length);
 
     // Add to map for addSensor routine
     m_geometryMap[typeName] = design.get();
@@ -371,16 +358,6 @@ void StripGmxInterface::makeStereoAnnulus(const std::string &typeName,
 
   if (checkParameter(typeName, parameters, "usePC", usePC)) ATH_MSG_INFO("Using polar co-ordinates for strip stereo annulus modules");
 
- 
-   //At the moment, we'd only ever want StripEndcap for this detector type, so throw a WARNING if it differs
-  //However, in future this may be different, so implementing the functionality to set this anyway 
-  InDetDD::DetectorType detectorType{InDetDD::StripEndcap};
-  int detectorTypeEnum = 0;
-  if (checkParameter(typeName, parameters, "detectorType", detectorTypeEnum)) {
-    if (detectorTypeEnum == 5) detectorType = InDetDD::StripEndcap;
-    else ATH_MSG_WARNING("Non-strip endcap type set for strip annulus DetectorElement - is this intended?");
-  }
- 
   //
   //  Make Sensor Design and add it to the DetectorManager
   //
@@ -404,8 +381,7 @@ void StripGmxInterface::makeStereoAnnulus(const std::string &typeName,
                                                                    endR,
                                                                    stereoAngle,
                                                                    centreR,
-                                                                   usePC,
-                                                                   detectorType);
+                                                                   usePC);
 
     for (int i = 0; i < splitLevel; i++) {
       singleRowStrips.clear();
@@ -435,8 +411,7 @@ void StripGmxInterface::makeStereoAnnulus(const std::string &typeName,
                                                                stereoAngle,
                                                                thisCentreR,
                                                                centreR,
-                                                               usePC,
-                                                               detectorType);
+                                                               usePC);
 
       // Add to map for addSensor routine
       std::string splitName = typeName + "_" + std::to_string(i);
@@ -465,8 +440,7 @@ void StripGmxInterface::makeStereoAnnulus(const std::string &typeName,
                                                              endR,
                                                              stereoAngle,
                                                              centreR,
-                                                             usePC,
-                                                             detectorType);
+                                                             usePC);
 
     m_geometryMap[typeName] = design.get();
     m_detectorManager->addDesign(std::move(design));

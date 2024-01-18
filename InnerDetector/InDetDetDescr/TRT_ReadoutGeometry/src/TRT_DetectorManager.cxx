@@ -541,10 +541,6 @@ namespace InDetDD {
           return alignmentChange;
        }
     }
-    // Avoid cppcheck warning.
-    if (!atrlistcol) {
-      return alignmentChange;
-    }
     {
       // loop over objects in collection
       //cppcheck-suppress nullPointerRedundantCheck
