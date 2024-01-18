@@ -1,9 +1,11 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import TrackD3PDMaker
 from D3PDMakerCoreComps.SimpleAssociation import SimpleAssociation
 from D3PDMakerCoreComps.flagTestLOD import flagTestLOD, deferFlag
-from TrackD3PDMaker.TrackD3PDMakerFlags import TrackD3PDFlags
+from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
 
 def perigeeLOD (expr, flags):
     func = flagTestLOD (expr, flags)
@@ -19,7 +21,7 @@ def perigeeLOD (expr, flags):
 
 
 def PerigeeAssociation (parent, associator, blockname, suffix='',
-                        flags = TrackD3PDFlags,
+                        flags = D3PDMakerFlags.Track,
                         fillMomName = 'False',
                         levelName = None,
                         **kw):
@@ -29,21 +31,21 @@ def PerigeeAssociation (parent, associator, blockname, suffix='',
     perigeeAssoc.defineBlock (perigeeLOD ('%s or %s>0' %(fillMomName,levelName),
                                           flags),
                               blockname,
-                              TrackD3PDMaker.PerigeeFillerTool,
+                              D3PD.PerigeeFillerTool,
                               Suffix = suffix,
                               FillPerigee = deferFlag('%s>0'%levelName,flags),
                               FillMomentum = deferFlag(fillMomName,flags))
 
     perigeeCovarianceAssoc = SimpleAssociation (
         perigeeAssoc,
-        TrackD3PDMaker.PerigeeCovarianceAssociationTool,
+        D3PD.PerigeeCovarianceAssociationTool,
         blockname = blockname + 'Assoc',
-        level = flagTestLOD('%s>=2'%levelName,flags))
+        level = flagTestLOD('%s>=2'%levelName, flags))
 
     perigeeCovarianceAssoc.defineBlock (
         flagTestLOD('%s>=2'%levelName,flags),
         blockname + 'Error',
-        TrackD3PDMaker.CovarianceFillerTool,
+        D3PD.CovarianceFillerTool,
         Error = deferFlag ('storeDiagonalCovarianceAsErrors', flags),
         DiagCovariance = deferFlag('not storeDiagonalCovarianceAsErrors',flags),
         OffDiagCovariance = False,
@@ -52,7 +54,7 @@ def PerigeeAssociation (parent, associator, blockname, suffix='',
 
     perigeeCovarianceAssoc.defineBlock (flagTestLOD('%s>=3'%levelName,flags),
                                         blockname + 'OffDiagCovariance',
-                                        TrackD3PDMaker.CovarianceFillerTool,
+                                        D3PD.CovarianceFillerTool,
                                         Error = False,
                                         DiagCovariance = False,
                                         OffDiagCovariance = True,

@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: TrackParticlePerigeeAtBSAssociationTool.h 281348 2010-02-24 23:15:11Z zaidan $
 /**
  * @file TrackD3PDMaker/src/TrackParticlePerigeeAtBSAssociationTool.h
  * @author remi zaidan <remi.zaidan@cern.ch>
@@ -37,15 +34,7 @@ class TrackParticlePerigeeAtBSAssociationTool
 public:
   typedef SingleAssociationTool<Types<Rec::TrackParticle, xAOD::TrackParticle>, Trk::TrackParameters> Base;
 
-  /**
-   * @brief Standard Gaudi tool constructor.
-   * @param type The name of the tool type.
-   * @param name The tool name.
-   * @param parent The tool's Gaudi parent.
-   */
-  TrackParticlePerigeeAtBSAssociationTool (const std::string& type,
-					   const std::string& name,
-					   const IInterface* parent);
+  using Base::Base;
 
 
   virtual StatusCode initialize() override;
@@ -77,7 +66,8 @@ public:
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
   /* Track to vertex extrapolator **/
-  ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool;
+  ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool
+    { this, "TrackToVertexTool", "Reco::TrackToVertex", "" };
 
 };
 

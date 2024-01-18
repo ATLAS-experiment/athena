@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file TrackD3PDMaker/src/PerigeeBLPredictionFillerTool.cxx
  * @author remi zaidan <remi.zaidan@cern.ch>
@@ -29,13 +27,8 @@ PerigeeBLPredictionFillerTool::PerigeeBLPredictionFillerTool
     (const std::string& type,
      const std::string& name,
      const IInterface* parent)
-  : BlockFillerTool<Trk::Perigee> (type, name, parent),
-    m_inDetTestPixelLayerTool("InDet::InDetTestPixelLayerToolInner")
+  : BlockFillerTool<Trk::Perigee> (type, name, parent)
 {
-  declareProperty ("InDetTestPixelLayerTool", m_inDetTestPixelLayerTool,
-                   "Tool to test if the track crosses a dead module "
-                   "on the B-Layer.");
-
   book().ignore(); // Avoid coverity warnings.
 }
 

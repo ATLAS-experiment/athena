@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# $Id$
 #
 # @file TrackD3PDMaker/python/xAODTrackSummaryFiller.py
 # @author scott snyder <snyder@bnl.gov>
@@ -9,7 +8,9 @@
 #
 
 
-import D3PDMakerCoreComps
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 HitSum        = 'HitSum'
@@ -127,7 +128,7 @@ def xAODTrackSummaryFiller (obj, lod, blockName,
             varlist.append (v)
 
     obj.defineBlock (lod, blockName,
-                     D3PDMakerCoreComps.AuxDataFillerTool,
+                     D3PD.AuxDataFillerTool,
                      Vars = varlist,
                      **kw)
     return

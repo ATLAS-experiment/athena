@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file TrackD3PDMaker/python/TrackParticleImpactParameters.py
@@ -8,9 +8,11 @@
 #
 
 
-import TrackD3PDMaker
 from D3PDMakerCoreComps.SimpleAssociation   import SimpleAssociation
-from InDetRecExample.TrackingCommon import getInDetTrackToVertexTool
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 def TrackParticleImpactParameters (TPD3PDObject,
                                    prefix = 'track',
@@ -32,22 +34,28 @@ arguments."""
     #
     BSPerigeeAssoc = SimpleAssociation \
                      (TPD3PDObject,
-                      TrackD3PDMaker.TrackParticlePerigeeAtBSAssociationTool,
+                      D3PD.TrackParticlePerigeeAtBSAssociationTool,
                       blockname = prefix + 'BSPerigeeAssoc',
-                      prefix = prefix,
-                      TrackToVertexTool = getInDetTrackToVertexTool())
+                      prefix = prefix)
+    def _trackToVertexHook (c, flags, acc, prefix, *args, **kw):
+        from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+        acc.merge(BeamSpotCondAlgCfg(flags))
+        from TrackToVertex.TrackToVertexConfig import InDetTrackToVertexCfg
+        c.Associator.TrackToVertexTool = acc.popToolsAndMerge (InDetTrackToVertexCfg (flags))
+        return
+    BSPerigeeAssoc.defineHook (_trackToVertexHook)
     BSPerigeeAssoc.defineBlock (1, prefix + 'Impact' + beam_suffix,
-                                TrackD3PDMaker.PerigeeFillerTool,
+                                D3PD.PerigeeFillerTool,
                                 FillThetaAndQoverP = False,
                                 FillPhi = False,
                                 Suffix = beam_suffix,
                                 DefaultValue = -9999)
     BSCovarAssoc = SimpleAssociation \
                    (BSPerigeeAssoc,
-                    TrackD3PDMaker.PerigeeCovarianceAssociationTool,
+                    D3PD.PerigeeCovarianceAssociationTool,
                     blockname = prefix + 'BSPerigeeCovarAssoc')
     BSCovarAssoc.defineBlock (1, prefix + 'ImpactSig' + beam_suffix,
-                              TrackD3PDMaker.ImpactSigmaFillerTool,
+                              D3PD.ImpactSigmaFillerTool,
                               Suffix = beam_suffix)
 
     #
@@ -55,21 +63,21 @@ arguments."""
     #
     PVPerigeeAssoc = SimpleAssociation \
                      (TPD3PDObject,
-                      TrackD3PDMaker.TrackParticlePerigeeAtPVAssociationTool,
+                      D3PD.TrackParticlePerigeeAtPVAssociationTool,
                       blockname = prefix + 'PVPerigeeAssoc',
-                      prefix = prefix,
-                      TrackToVertexTool = getInDetTrackToVertexTool())
+                      prefix = prefix)
+    PVPerigeeAssoc.defineHook (_trackToVertexHook)
     PVPerigeeAssoc.defineBlock (1, prefix + 'Impact' + pv_suffix,
-                                TrackD3PDMaker.PerigeeFillerTool,
+                                D3PD.PerigeeFillerTool,
                                 FillThetaAndQoverP = False,
                                 FillPhi = False,
                                 Suffix = pv_suffix,
                                 DefaultValue = -9999)
     PVCovarAssoc = SimpleAssociation \
                    (PVPerigeeAssoc,
-                    TrackD3PDMaker.PerigeeCovarianceAssociationTool,
+                    D3PD.PerigeeCovarianceAssociationTool,
                     blockname = prefix + 'PVPerigeeCovarAssoc')
     PVCovarAssoc.defineBlock (1, prefix + 'ImpactSig' + pv_suffix,
-                              TrackD3PDMaker.ImpactSigmaFillerTool,
+                              D3PD.ImpactSigmaFillerTool,
                               Suffix = pv_suffix)
 

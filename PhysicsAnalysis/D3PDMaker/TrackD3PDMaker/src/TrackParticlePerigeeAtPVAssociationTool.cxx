@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: TrackParticlePerigeeAtPVAssociationTool.cxx 281348 2010-02-24 23:15:11Z zaidan $
 /**
  * @file TrackD3PDMaker/src/TrackParticlePerigeeAtPVAssociationTool.cxx
  * @author remi zaidan <remi.zaidan@cern.ch>
@@ -31,13 +29,11 @@ TrackParticlePerigeeAtPVAssociationTool::TrackParticlePerigeeAtPVAssociationTool
    const std::string& name,
    const IInterface* parent)
     : Base (type, name, parent),
-      m_trackToVertexTool("Reco::TrackToVertex"),
       m_resolver ("TrackParticlePerigeeAtPVAssociationTool",
                   evtStore(),
                   m_vxCandidate)
 {
   declareProperty ("SGKey", m_vxCandidate = "PrimaryVertices,VxPrimaryCandidate");
-  declareProperty ("TrackToVertexTool", m_trackToVertexTool);
 }
 
 StatusCode TrackParticlePerigeeAtPVAssociationTool::initialize(){

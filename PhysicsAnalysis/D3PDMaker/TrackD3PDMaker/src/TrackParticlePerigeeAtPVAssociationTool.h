@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: TrackParticlePerigeeAtPVAssociationTool.h 281348 2010-02-24 23:15:11Z zaidan $
 /**
  * @file TrackD3PDMaker/src/TrackParticlePerigeeAtPVAssociationTool.h
  * @author remi zaidan <remi.zaidan@cern.ch>
@@ -77,7 +74,8 @@ public:
   std::string m_vxCandidate;
 
   /* Track to vertex extrapolator **/
-  ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool;
+  ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool
+    { this, "TrackToVertexTool", "Reco::TrackToVertex", "" };
 
   /* Key resolver. */
   SGKeyResolver m_resolver;

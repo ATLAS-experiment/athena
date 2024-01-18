@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrackD3PDMaker/src/PerigeeBLPredictionFillerTool.h
@@ -59,7 +59,8 @@ private:
   void clearData();
 
   /// Parameter: Tool to test if the track crosses a dead module on the B-Layer.
-  ToolHandle< InDet::IInDetTestPixelLayerTool > m_inDetTestPixelLayerTool;
+  ToolHandle< InDet::IInDetTestPixelLayerTool > m_inDetTestPixelLayerTool
+    { this, "InDetTestPixelLayerTool", "", "Tool to test if the track crosses a dead module on the B-Layer." };
 
   const PixelID* m_pixId; 
 
