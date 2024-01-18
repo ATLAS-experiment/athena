@@ -106,7 +106,15 @@ const xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xT
 }
 
 //______________________________________________________________________________
-std::vector<const xAOD::TruthParticle*> TauTruthMatchingTool::getTruth(const std::vector<const xAOD::TauJet*>& vTaus)
+// FIXME: remove this method at the next occasion
+const xAOD::TruthParticle* TauTruthMatchingTool::applyTruthMatch(const xAOD::TauJet& xTau)
+{
+  // this function only exists for historical reasons
+  return getTruth(xTau);
+}
+
+//______________________________________________________________________________
+std::vector<const xAOD::TruthParticle*> TauTruthMatchingTool::applyTruthMatch(const std::vector<const xAOD::TauJet*>& vTaus)
 {
   std::vector<const xAOD::TruthParticle*> vTruths;
   for (auto xTau : vTaus)
@@ -148,6 +156,48 @@ TLorentzVector TauTruthMatchingTool::getTruthTauP4Vis(const xAOD::TruthParticle&
     m_accEtaVis(xTruthTau),
     m_accPhiVis(xTruthTau),
     m_accMVis(xTruthTau));
+  return vTLV;
+}
+
+//______________________________________________________________________________
+TLorentzVector TauTruthMatchingTool::getTruthTauP4Prompt(const xAOD::TauJet& xTau)
+{
+  const xAOD::TruthParticle* xTruthTau = getTruth(xTau);
+  TLorentzVector vTLV;
+  if (xTruthTau == nullptr)
+  {
+    ATH_MSG_INFO("no truth particle was found, returning TLorentzVector with all values equal to 0");
+    return vTLV;
+  }
+
+  static const SG::AuxElement::ConstAccessor<double> accPtPrompt("pt_prompt");
+  static const SG::AuxElement::ConstAccessor<double> accEtaPrompt("eta_prompt");
+  static const SG::AuxElement::ConstAccessor<double> accPhiPrompt("phi_prompt");
+  static const SG::AuxElement::ConstAccessor<double> accMPrompt("m_prompt");
+  vTLV.SetPtEtaPhiM(
+    accPtPrompt(*xTruthTau),
+    accEtaPrompt(*xTruthTau),
+    accPhiPrompt(*xTruthTau),
+    accMPrompt(*xTruthTau));
+  return vTLV;
+}
+
+//______________________________________________________________________________
+TLorentzVector TauTruthMatchingTool::getTruthTauP4Prompt(const xAOD::TruthParticle& xTruthTau) const
+{
+  TLorentzVector vTLV;
+  if (!xTruthTau.isAvailable<double>("pt_prompt"))
+    return vTLV;
+
+  static const SG::AuxElement::ConstAccessor<double> accPtPrompt("pt_prompt");
+  static const SG::AuxElement::ConstAccessor<double> accEtaPrompt("eta_prompt");
+  static const SG::AuxElement::ConstAccessor<double> accPhiPrompt("phi_prompt");
+  static const SG::AuxElement::ConstAccessor<double> accMPrompt("m_prompt");
+  vTLV.SetPtEtaPhiM(
+    accPtPrompt(xTruthTau),
+    accEtaPrompt(xTruthTau),
+    accPhiPrompt(xTruthTau),
+    accMPrompt(xTruthTau));
   return vTLV;
 }
 

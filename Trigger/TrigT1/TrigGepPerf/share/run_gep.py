@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__ == '__main__':
@@ -77,10 +77,6 @@ if __name__ == '__main__':
     else:
         flags.Input.Files = Input.get_input(args.input).paths
 
-    if not flags.Input.isMC:
-        from AthenaConfiguration.TestDefaults import defaultGeometryTags
-        flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
-
     info('Command line args: ' + str(args))
 
     flags.Output.AODFileName = 'AOD.pool.root'
@@ -94,6 +90,10 @@ if __name__ == '__main__':
     flags.Trigger.EDMVersion = 3
     flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    if not flags.Input.isMC and flags.GeoModel.Run is LHCPeriod.Run2:
+        flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
@@ -223,7 +223,7 @@ if __name__ == '__main__':
     
     acc.merge(calo_acc422)
 
-    from AthenaCommon.Constants import DEBUG
+    from AthenaCommon.Constants import DEBUG,INFO
     gepAlgs_output_level = DEBUG
 
     from TrigGepPerf.GepClusterTimingAlgConfig import GepClusterTimingAlgCfg
@@ -336,3 +336,5 @@ if __name__ == '__main__':
         sc = acc.run()
         if sc.isFailure():
             exit(1)
+
+    

@@ -183,7 +183,6 @@ private:
     BooleanProperty m_useGRL {this, "useGRL", false, "Apply GRL selection or not when running on data"};
     BooleanProperty m_doIDTIDEPlots{this, "doIDTIDEPlots", false, "do ID TIDE derivation plots"};
     BooleanProperty m_fillTechnicalEfficiency{this, "fillTechnicalEfficiency", false, "Fill the technical efficiency plot. Requires additional sihit information in input file"};
-    BooleanProperty m_doPRW{this,"doPRW",false,"apply pileup reweight"};
 
     FloatProperty m_maxTrkJetDR{this,"maxTrkJetDR",0.4,"the maximum dR to jets to allow for track-in-jet plots"}; 
     StringProperty m_dirName {this, "DirName", "SquirrelPlots/", "Top level directory to write histograms into"}; 
@@ -214,8 +213,6 @@ private:
     ToolHandle<InDet::IInDetTrackTruthOriginTool> m_trackTruthOriginTool{this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool","truth track origin tool"};
     ToolHandle<InDet::IInDetHardScatterSelectionTool> m_hardScatterSelectionTool{this, "hardScatterSelectionTool", "InDet::InDetHardScatterSelectionTool","tool to select the hard scatter reco vertex"};
     ToolHandle<IGoodRunsListSelectionTool> m_grlTool{this, "GoodRunsListSelectionTool", "GoodRunsListSelectionTool/GoodRunsListSelectionTool", "GRL selection tool"};
-
-    SG::ReadDecorHandleKey<xAOD::EventInfo> m_weight_pileup_key{this, "PileupWeight_NOSYS", "EventInfo.PileupWeight_NOSYS"};
 
     mutable std::mutex  m_mutex;
     mutable CutFlow     m_truthCutFlow ATLAS_THREAD_SAFE; // Guarded by m_mutex

@@ -18,8 +18,3 @@ atlas_add_dictionary( LArElecCalibDict
                       LArElecCalib/LArElecCalibDict.h
                       LArElecCalib/selection.xml
                       LINK_LIBRARIES LArElecCalib )
-
-atlas_add_test( LArProvenance_test
-                SOURCES test/testLArProvenance.cxx
-		POST_EXEC_SCRIPT nopost.sh 
-		)
