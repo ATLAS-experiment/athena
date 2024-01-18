@@ -629,7 +629,13 @@ StatusCode EgammaMonitoring::execute() {
 	if (!el)
 	  continue;
 
+	clusterAll->fill(*el,mu);
 	recoElectronAll->fill(*el);
+	showerShapesAll->fill(*el);
+	if (el->pt() > 10*Gaudi::Units::GeV) {
+	  cluster10GeV->fill(*el,mu);
+	  showerShapes10GeV->fill(*el);
+	}
 	bool toFill = false;
 
 	const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*el);
