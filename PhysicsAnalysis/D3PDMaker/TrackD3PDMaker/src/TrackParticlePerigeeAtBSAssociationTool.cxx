@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: TrackParticlePerigeeAtBSAssociationTool.cxx 281348 2010-02-24 23:15:11Z zaidan $
 /**
  * @file TrackD3PDMaker/src/TrackParticlePerigeeAtBSAssociationTool.cxx
  * @author remi zaidan <remi.zaidan@cern.ch>
@@ -17,21 +15,6 @@
 
 namespace D3PD {
 
-/**
- * @brief Standard Gaudi tool constructor.
- * @param type The name of the tool type.
- * @param name The tool name.
- * @param parent The tool's Gaudi parent.
- */
-TrackParticlePerigeeAtBSAssociationTool::TrackParticlePerigeeAtBSAssociationTool
-  (const std::string& type,
-   const std::string& name,
-   const IInterface* parent)
-    : Base (type, name, parent),
-      m_trackToVertexTool("Reco::TrackToVertex")
-{
-  declareProperty ("TrackToVertexTool", m_trackToVertexTool);
-}
 
 StatusCode TrackParticlePerigeeAtBSAssociationTool::initialize(){
 

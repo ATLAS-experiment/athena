@@ -1,13 +1,13 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import TrackD3PDMaker
-import D3PDMakerCoreComps
-from D3PDMakerCoreComps.flagTestLOD import flagTestLOD
-from D3PDMakerCoreComps.D3PDObject import make_SGDataVector_D3PDObject
-from D3PDMakerCoreComps.IndexAssociation import IndexAssociation
-from TrackD3PDMaker.PerigeeAssociation import PerigeeAssociation
-from TrackD3PDMaker.TrackD3PDMakerFlags import TrackD3PDFlags
-from InDetRecExample.TrackingCommon import getInDetTrackToVertexTool
+from D3PDMakerCoreComps.flagTestLOD       import flagTestLOD
+from D3PDMakerCoreComps.D3PDObject        import make_SGDataVector_D3PDObject
+from D3PDMakerCoreComps.IndexAssociation  import IndexAssociation
+from TrackD3PDMaker.PerigeeAssociation    import PerigeeAssociation
+from D3PDMakerConfig.D3PDMakerFlags       import D3PDMakerFlags
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 def xAODTrackD3PDObject(_label='trkTrack',
@@ -17,7 +17,7 @@ def xAODTrackD3PDObject(_label='trkTrack',
                         vertexTarget='vx',
                         vertexPrefix='vx_',
                         vertexSGKey='VxPrimaryCandidate',
-                        flags=TrackD3PDFlags):
+                        flags = D3PDMakerFlags.Track):
 
     object = make_SGDataVector_D3PDObject (
         'xAOD::TrackParticleContainer',
@@ -41,37 +41,44 @@ def xAODTrackD3PDObject(_label='trkTrack',
     ## default perigee (at (0,0,0))
     PerigeeAssoc = PerigeeAssociation\
                    (object,
-                    TrackD3PDMaker.TrackParticlePerigeeAtOOAssociationTool,
+                    D3PD.TrackParticlePerigeeAtOOAssociationTool,
                     "GlobalPerigee",
                     fillMomName = 'storeTrackMomentum',
                     levelName = 'trackParametersAtGlobalPerigeeLevelOfDetails')
 
-    from AthenaCommon.AppMgr import ToolSvc
-    if hasattr(ToolSvc, 'InDetTestPixelLayerToolInner'):
+    perigeeBLPrediction = \
         PerigeeAssoc.defineBlock (flagTestLOD('storeTrackPredictionAtBLayer', flags),
                                   _prefix+'BLayerInfo',
-                                  TrackD3PDMaker.PerigeeBLPredictionFillerTool,
-                                  InDetTestPixelLayerTool = ToolSvc.InDetTestPixelLayerToolInner)
+                                  D3PD.PerigeeBLPredictionFillerTool)
+    def _pixelLayerToolHook (c, flags, acc, *args, **kw):
+        from InDetConfig.InDetTestPixelLayerConfig import InDetTestPixelLayerToolInnerCfg
+        c.InDetTestPixelLayerTool = acc.popToolsAndMerge (InDetTestPixelLayerToolInnerCfg (flags))
+        return
+    perigeeBLPrediction.defineHook (_pixelLayerToolHook)
 
     # perigee at Primary Vertex
     PerigeeAtPVAssoc = PerigeeAssociation(object,  # noqa: F841
-                        TrackD3PDMaker.TrackParticlePerigeeAtPVAssociationTool,
+                        D3PD.TrackParticlePerigeeAtPVAssociationTool,
                         "PerigeeAtPV",
                         suffix='_wrtPV',
-                        levelName = 'trackParametersAtPrimaryVertexLevelOfDetails',
-                        TrackToVertexTool = getInDetTrackToVertexTool())
+                        levelName = 'trackParametersAtPrimaryVertexLevelOfDetails')
+    def _trackToVertexHook (c, flags, acc, *args, **kw):
+        from TrackToVertex.TrackToVertexConfig import InDetTrackToVertexCfg
+        c.Associator.TrackToVertexTool = acc.popToolsAndMerge (InDetTrackToVertexCfg (flags))
+        return
+    PerigeeAtPVAssoc.defineHook (_trackToVertexHook)
 
     # perigee at Beam Spot
     PerigeeAtBSAssoc = PerigeeAssociation(object,  # noqa: F841
-                        TrackD3PDMaker.TrackParticlePerigeeAtBSAssociationTool,
+                        D3PD.TrackParticlePerigeeAtBSAssociationTool,
                         "PerigeeAtBS",
                         suffix='_wrtBS', 
-                        levelName = 'trackParametersAtBeamSpotLevelOfDetails',
-                        TrackToVertexTool = getInDetTrackToVertexTool())
+                        levelName = 'trackParametersAtBeamSpotLevelOfDetails')
+    PerigeeAtBSAssoc.defineHook (_trackToVertexHook)
 
     object.defineBlock(flagTestLOD('storeTrackFitQuality', flags),
                        _prefix+'FitQuality',
-                        D3PDMakerCoreComps.AuxDataFillerTool,
+                        D3PD.AuxDataFillerTool,
                         Vars = ['chiSquared',
                                 'numberDoF'])
 
@@ -208,34 +215,34 @@ def xAODTrackD3PDObject(_label='trkTrack',
             
 
     sumvarlist = SumVars.varlist (
-        FullInfo = flags.storeTrackSummary.FullInfo,
-        IDHits = flags.storeTrackSummary.IDHits,
-        IDHoles = flags.storeTrackSummary.IDHoles,
-        IDSharedHits = flags.storeTrackSummary.IDSharedHits,
-        IDOutliers = flags.storeTrackSummary.IDOutliers,
-        PixelInfoPlus = flags.storeTrackSummary.PixelInfoPlus,
-        SCTInfoPlus = flags.storeTrackSummary.SCTInfoPlus,
-        TRTInfoPlus = flags.storeTrackSummary.TRTInfoPlus,
-        InfoPlus = flags.storeTrackSummary.InfoPlus,
-        ExpectBLayer = flags.storeTrackSummary.ExpectBLayer,
-        MuonHits = flags.storeTrackSummary.MuonHits,
-        DBMHits = flags.storeTrackSummary.DBMHits,
-        HitSum = flags.storeTrackSummary.HitSum,
-        HoleSum = flags.storeTrackSummary.HoleSum,
-        ElectronPID = flags.storeTrackSummary.ElectronPID,
-        PixeldEdx = flags.storeTrackSummary.PixeldEdx,
+        FullInfo = flags.storeTrackSummaryFlags.FullInfo,
+        IDHits = flags.storeTrackSummaryFlags.IDHits,
+        IDHoles = flags.storeTrackSummaryFlags.IDHoles,
+        IDSharedHits = flags.storeTrackSummaryFlags.IDSharedHits,
+        IDOutliers = flags.storeTrackSummaryFlags.IDOutliers,
+        PixelInfoPlus = flags.storeTrackSummaryFlags.PixelInfoPlus,
+        SCTInfoPlus = flags.storeTrackSummaryFlags.SCTInfoPlus,
+        TRTInfoPlus = flags.storeTrackSummaryFlags.TRTInfoPlus,
+        InfoPlus = flags.storeTrackSummaryFlags.InfoPlus,
+        ExpectBLayer = flags.storeTrackSummaryFlags.ExpectBLayer,
+        MuonHits = flags.storeTrackSummaryFlags.MuonHits,
+        DBMHits = flags.storeTrackSummaryFlags.DBMHits,
+        HitSum = flags.storeTrackSummaryFlags.HitSum,
+        HoleSum = flags.storeTrackSummaryFlags.HoleSum,
+        ElectronPID = flags.storeTrackSummaryFlags.ElectronPID,
+        PixeldEdx = flags.storeTrackSummaryFlags.PixeldEdx,
         )
 
     object.defineBlock (flagTestLOD('storeTrackSummary', flags),
                         _prefix + 'TrackSummary',
-                        D3PDMakerCoreComps.AuxDataFillerTool,
+                        D3PD.AuxDataFillerTool,
                         Vars = sumvarlist)
 
 
     # Track Info
     object.defineBlock (flagTestLOD('storeTrackInfo', flags),
                         _prefix + 'TrackInfo',
-                        D3PDMakerCoreComps.AuxDataFillerTool,
+                        D3PD.AuxDataFillerTool,
                         Vars = ['trackFitter',
                                 'particleHypothesis',
                                 'trackProperties',
@@ -243,7 +250,7 @@ def xAODTrackD3PDObject(_label='trkTrack',
 
     # Vertex association
     VertexAssoc = IndexAssociation(object,  # noqa: F841
-        TrackD3PDMaker.TrackParticleVertexAssociationTool,
+        D3PD.TrackParticleVertexAssociationTool,
         vertexTarget,
         prefix = vertexPrefix,
         VxSGKey = vertexSGKey,
