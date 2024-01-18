@@ -162,6 +162,11 @@ namespace MuonGM {
       if (pos!=std::string::npos) mappedStations.insert(i.first.substr(0,pos));
     }
 
+    // Boudreau Jan 2024 Keep track of instantiated readout geometries. This is
+    // needed because the muon geometry is rebuild multiple times in current 
+    // implementation. 
+    std::set<std::string> keyset; 
+
     for (const auto& i: mappedStations) {
       auto it= mysql->stationMap().find(i);
       if (it==mysql->stationMap().end()) {
@@ -180,6 +185,7 @@ namespace MuonGM {
 	isAssembly = true;
 
       MuonChamberLite l(*mysql, station,&mapFPV,&mapAXF); // here is where we start to create a MuonChamber with all readoutelements
+      l.setKeyset(&keyset);
 
       PositionIterator pit;
       AlignPos ap;

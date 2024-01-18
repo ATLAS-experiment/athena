@@ -11,6 +11,7 @@
 #include "AthenaBaseComps/AthMessaging.h"
 #include <map>
 #include <string> 
+#include <set>
 class GeoAlignableTransform;
 class GeoVFullPhysVol;
 
@@ -43,6 +44,7 @@ namespace MuonGM {
         GeoVPhysVol *addReadoutLayers(const MYSQL& mysql,
                            MuonDetectorManager *manager, int ieta, int iphi, bool is_mirrored, bool &isAssembly);
         virtual void print() const override;
+        void setKeyset(std::set<std::string> *keySet) {m_keySet=keySet;};
 
       private:
         void setCscReadoutGeom(const MYSQL& mysql,
@@ -57,8 +59,8 @@ namespace MuonGM {
         Station *m_station{nullptr};
 
         std::map<std::string, GeoFullPhysVol*>        * m_mapFPV{nullptr};
-	      std::map<std::string, GeoAlignableTransform*> * m_mapAXF{nullptr};
-     
+	std::map<std::string, GeoAlignableTransform*> * m_mapAXF{nullptr};
+	std::set<std::string>                         * m_keySet{nullptr};      
     };
 
 

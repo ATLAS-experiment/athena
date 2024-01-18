@@ -48,6 +48,14 @@
 // VMM Mapping
 #include "MM_Digitization/MM_StripVmmMappingTool.h"
 
+
+// Athena
+#include "GaudiKernel/ServiceHandle.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "RDBAccessSvc/IRDBRecord.h"
+#include "RDBAccessSvc/IRDBRecordset.h"
+
 // ROOT
 #include <fstream>
 #include <iostream>
@@ -58,6 +66,7 @@
 #include "TFile.h"
 #include "TString.h"
 #include "TTree.h"
+
 
 namespace {
     // thresholds for the shortest and longest strips
@@ -554,16 +563,55 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             //
             ////////////////////////////////////////////////////////////////////
 
- 
+	    // Check for the SQLite database:
+	    //
+	    ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc","MM_DigitizationTool");
+	    if (geoDbTag.retrieve().isFailure()) ATH_MSG_FATAL("Could not locate GeoDbTagSvc");
+
+	    GeoModelIO::ReadGeoModel* sqliteReader = geoDbTag->getSqliteReader();
+	    
             // Get MM_READOUT from MMDetectorDescription
             const std::string stName = m_idHelperSvc->mmIdHelper().stationNameString(m_idHelperSvc->mmIdHelper().stationName(layerID));
             char side = m_idHelperSvc->mmIdHelper().stationEta(layerID) < 0 ? 'C' : 'A';
-            MMDetectorHelper aHelper;
-            MMDetectorDescription* mm = aHelper.Get_MMDetector(stName[2], std::abs(m_idHelperSvc->mmIdHelper().stationEta(layerID)),
-                                                               m_idHelperSvc->mmIdHelper().stationPhi(layerID),
-                                                               m_idHelperSvc->mmIdHelper().multilayer(layerID), side);
-            MMReadoutParameters roParam = mm->GetReadoutParameters();
 
+	    std::vector<int> readoutSide;
+	    if (!sqliteReader) {
+	      MMDetectorHelper aHelper;
+	      MMDetectorDescription* mm = aHelper.Get_MMDetector(stName[2], std::abs(m_idHelperSvc->mmIdHelper().stationEta(layerID)),
+								 m_idHelperSvc->mmIdHelper().stationPhi(layerID),
+								 m_idHelperSvc->mmIdHelper().multilayer(layerID), side);
+	      MMReadoutParameters roParam = mm->GetReadoutParameters();
+	      readoutSide=roParam.readoutSide;
+	    }
+	    else {
+	      
+	      // JFB When this is finally working, this block of code should be migrated to the MMReadout element class
+	      // And any references to SvcLocators, AccessSvc's etc should disappear. So this is WIP. 
+	      
+	      
+	      ServiceHandle<IRDBAccessSvc> accessSvc(geoDbTag->getParamSvcName(), "MM_DigitizationTool");
+	      if (accessSvc.retrieve().isFailure()) ATH_MSG_FATAL("Could not locate " << geoDbTag->getParamSvcName() << endmsg);
+	      IRDBRecordset_ptr wmmRec = accessSvc->getRecordsetPtr("WMM","","");
+	      std::string name = m_idHelperSvc->mmIdHelper().stationNameString(m_idHelperSvc->mmIdHelper().stationName(layerID));
+	      char sectorL = name.substr(2, 1) == "L" ? 'L' : 'S';
+	      int  stEta   = m_idHelperSvc->mmIdHelper().stationEta(layerID);
+	      int  stML    = m_idHelperSvc->mmIdHelper().multilayer(layerID);
+	      
+	      for (unsigned int ind = 0; ind < wmmRec->size(); ind++) {
+		std::string WMM_TYPE       = (*wmmRec)[ind]->getString("WMM_TYPE");               
+		if (sectorL != WMM_TYPE[4])                                                              continue;
+		if (abs(stEta)   !=(int) (WMM_TYPE[6]-'0'))    continue;
+		if (stML != (int) (WMM_TYPE[12]-'0'))  continue;
+		std::string  roSide   = (*wmmRec)[ind]->getString("readoutSide");
+		std::replace(roSide.begin(),roSide.end(),';',' ');
+		std::istringstream stream(roSide);
+		int iSide;
+		while (stream>>iSide) readoutSide.push_back(iSide);
+		break;
+	      }
+	    }
+
+	    
             ////////////////////////////////////////////////////////////////////
             //
             // Angles, Geometry, and Coordinates. Oh my!
@@ -592,7 +640,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             float inAngle_YZ = 90. - inAngleCompliment_YZ;
 
             ATH_MSG_DEBUG("At eta: " << m_idHelperSvc->toString(layerID)
-                                     << " Readout Side: " << (roParam.readoutSide).at(m_muonHelper->GetLayer(simId) - 1)
+                                     << " Readout Side: " << (readoutSide).at(m_muonHelper->GetLayer(simId) - 1)
                                      << " Layer: " << m_muonHelper->GetLayer(simId) << "\n\t\t\t inAngle_XZ (degrees): " << inAngle_XZ
                                      << " inAngle_YZ (degrees): " << inAngle_YZ);
 
@@ -604,7 +652,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             Amg::Vector3D localDirectionTime(0., 0., 0.);
 
             // drift direction in backwards-chamber should be opposite to the incident direction.
-            if ((roParam.readoutSide).at(m_idHelperSvc->mmIdHelper().gasGap(layerID) - 1) == 1) {
+            if ((readoutSide).at(m_idHelperSvc->mmIdHelper().gasGap(layerID) - 1) == 1) {
                 localDirectionTime = localDirection;
                 inAngle_XZ = (-inAngle_XZ);
             } else
@@ -709,7 +757,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             // B-field in local cordinate, X ~ #strip, increasing to outer R, Z ~ global Z but positive to IP
             Amg::Vector3D localMagneticField =
                 surf.transform().linear().inverse() * magneticField;
-            if ((roParam.readoutSide).at(m_muonHelper->GetLayer(simId) - 1) == -1)
+            if ((readoutSide).at(m_muonHelper->GetLayer(simId) - 1) == -1)
                 localMagneticField[Amg::y] = -localMagneticField[Amg::y];
 
             //

@@ -53,6 +53,8 @@ SCT_FwdRing::SCT_FwdRing(const std::string & name,
 {
   getParameters();
   m_logVolume = SCT_FwdRing::preBuild();
+  m_identifier = m_iRing;
+
 }
 
 void 
