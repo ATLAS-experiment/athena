@@ -475,11 +475,12 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
             if (dobj->clID() != 1 || addr->par()[0] != "\n") {
                if (dobj->clID() != ClassID_traits<DataHeader>::ID()) {
                   m_dataHeader->insert(proxy, addr);
-                  if (m_store->storeID() != StoreID::EVENT_STORE) proxy->setAddress(addr);
                } else {
                   m_dataHeader->insert(proxy, addr, m_processTag);
                }
-               if (m_store->storeID() == StoreID::EVENT_STORE) {
+               if (proxy->address() == nullptr) {
+                  proxy->setAddress(addr);
+               } else {
                   addr->release();
                }
             }

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "LArNNRawChannelBuilder.h"
@@ -11,7 +11,6 @@
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArCOOLConditions/LArDSPThresholdsFlat.h"
-#include "LArElecCalib/LArProvenance.h"
 #include <cmath>
 
 #include "lwtnn/LightweightGraph.hh"
@@ -165,8 +164,8 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     float tau = 0;
 
 
-    uint16_t prov = LArProv::PEAKNN | LArProv::RAMPDB | LArProv::PEDDB;
-    if (saturated) prov |= LArProv::SATURATED;
+    uint16_t prov = 0xa5;     //Means all constants from DB
+    if (saturated) prov |= 0x0400;
 
 
     outputContainerLRPtr->emplace_back(id, static_cast<int>(std::floor(E+0.5)),

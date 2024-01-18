@@ -73,11 +73,9 @@ def createDigitizationCfgFlags():
     flags.addFlag("Digitization.InputBeamSigmaZ", -1)
 
     # Set the type of the radiation damage simulation type for pixel planar sensors
-    flags.addFlag("Digitization.PixelPlanarRadiationDamageSimulationType",
-                  PixelRadiationDamageSimulationType.NoRadiationDamage, type=PixelRadiationDamageSimulationType)
+    flags.addFlag("Digitization.PixelPlanarRadiationDamageSimulationType", PixelRadiationDamageSimulationType.NoRadiationDamage, enum=PixelRadiationDamageSimulationType)
     # Set the type of the radiation damage simulation type for 3D planar sensors
-    flags.addFlag("Digitization.Pixel3DRadiationDamageSimulationType",
-                  PixelRadiationDamageSimulationType.NoRadiationDamage, type=PixelRadiationDamageSimulationType)
+    flags.addFlag("Digitization.Pixel3DRadiationDamageSimulationType", PixelRadiationDamageSimulationType.NoRadiationDamage, enum=PixelRadiationDamageSimulationType)
 
     # for PileUp digitization
     # Bunch structure configuration

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETREADOUTGEOMETRY_STRIPSTEREOANNULUSDESIGN_H
@@ -61,8 +61,7 @@ public:
                    const std::vector<double> &stripEnd,
                    const double &stereoAngle,
                    const double &centreR,
-                   const bool &usePC,
-                   InDetDD::DetectorType detectorType = InDetDD::Undefined);
+                   const bool &usePC);
 
 StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
                    const SiDetectorDesign::Axis &thicknessDirection,
@@ -77,8 +76,7 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
                    const double &stereoAngle,
                    const double &centreR,//this is the centre radius for e.g. the local/global position
                    const double &waferCentreR,//this is the centre radius needed for calculating the bounds, It is common to all elements on the same wafer/module/sensor (i.e. with a common MotherDesign)
-                   const bool &usePC,
-                   InDetDD::DetectorType detectorType = InDetDD::Undefined);
+                   const bool &usePC);
 
     ~StripStereoAnnulusDesign() = default;
 
@@ -90,39 +88,39 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
     SiLocalPosition stripToBeamPC(const SiLocalPosition &pos) const;
     SiLocalPosition stripToBeamPCpolar(const SiLocalPosition &pos) const;
 
-    virtual Amg::Vector3D sensorCenter() const override;
+    Amg::Vector3D sensorCenter() const;
 
     // Copy constructor and assignment:
     StripStereoAnnulusDesign(const StripStereoAnnulusDesign &design);
     StripStereoAnnulusDesign &operator = (const StripStereoAnnulusDesign &design);
     std::pair<int,int> getStripRow(SiCellId cellId) const final;
-    virtual int strip1Dim(int strip, int row) const override;
+    int strip1Dim(int strip, int row) const;
     SiLocalPosition stripPosAtR(int strip, int row, double r) const;
-    virtual int diodesInRow(const int row) const override;
+    int diodesInRow(const int row) const;
 //
 //    Pure virtual methods in base class:
 //
     // Distance to nearest detector active edge (+ve = inside, -ve = outside)
-    virtual void distanceToDetectorEdge(const SiLocalPosition &localPosition, double &etaDist,
-                                        double &phiDist) const override;
+    void distanceToDetectorEdge(const SiLocalPosition &localPosition, double &etaDist,
+                                double &phiDist) const;
 
     // check if the position is in active area
-    virtual bool inActiveArea(const SiLocalPosition &chargePos, bool checkBondGap = true) const override;
+    bool inActiveArea(const SiLocalPosition &chargePos, bool checkBondGap = true) const;
 
     // Element boundary
-    virtual const Trk::SurfaceBounds &bounds() const override;
+    const Trk::SurfaceBounds &bounds() const;
 
     // Retrieve the two ends of a "strip"
-    virtual std::pair<SiLocalPosition, SiLocalPosition> endsOfStrip(
-        const SiLocalPosition &position) const override;
+    std::pair<SiLocalPosition, SiLocalPosition> endsOfStrip(
+        const SiLocalPosition &position) const;
 
     // Phi-pitch (strip-width). Two names for same thing
-    virtual double stripPitch(const SiLocalPosition &localPosition) const override;
+    double stripPitch(const SiLocalPosition &localPosition) const;
     double stripPitch(const SiCellId &cellId) const;
-    virtual double stripPitch() const override;
-    virtual double phiPitch(const SiLocalPosition &localPosition) const override;
+    double stripPitch() const;
+    double phiPitch(const SiLocalPosition &localPosition) const;
     double phiPitch(const SiCellId &cellId) const;
-    virtual double phiPitch() const override;
+    double phiPitch() const;
 
 
     // above methods return mm
@@ -136,12 +134,12 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
     // this method should be fast as it is called for every surface charge
     // in the SCT_SurfaceChargesGenerator
     // an active area check, done in the Generator anyway, is removed here
-    virtual double scaledDistanceToNearestDiode(const SiLocalPosition &chargePos) const override;
+    double scaledDistanceToNearestDiode(const SiLocalPosition &chargePos) const;
 
     // readout or diode id -> position, size
-    virtual SiDiodesParameters parameters(const SiCellId &cellId) const override;
-    virtual SiLocalPosition localPositionOfCell(const SiCellId &cellId) const override;
-    virtual SiLocalPosition localPositionOfCluster(const SiCellId &cellId, int clusterSize) const override;
+    SiDiodesParameters parameters(const SiCellId &cellId) const;
+    SiLocalPosition localPositionOfCell(const SiCellId &cellId) const;
+    SiLocalPosition localPositionOfCluster(const SiCellId &cellId, int clusterSize) const;
     
     // these return local position in STRIP PC
     // Use only if you work with the polar coordinates, in all other
@@ -150,23 +148,23 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
     SiLocalPosition localPositionOfClusterPC(const SiCellId &cellId, int clusterSize) const;
 
     // position -> id
-    virtual SiCellId cellIdOfPosition(const SiLocalPosition &localPos) const override;
+    SiCellId cellIdOfPosition(const SiLocalPosition &localPos) const;
     // id to position
     SiLocalPosition positionFromStrip(const SiCellId &cellId) const;
-    virtual SiLocalPosition positionFromStrip(const int stripNumber) const override;
+    SiLocalPosition positionFromStrip(const int stripNumber) const;
 
     // row and strip from 1-dim strip number
-    virtual int row(int stripId1Dim) const override;
-    virtual int strip(int stripId1Dim) const override;
+    int row(int stripId1Dim) const;
+    int strip(int stripId1Dim) const;
 
     // Find and fill a vector with all neighbour strips of a given cell
-    virtual void neighboursOfCell(const SiCellId &cellId,
-                                  std::vector<SiCellId> &neighbours) const override;
-    virtual SiCellId cellIdInRange(const SiCellId &) const override;
+    void neighboursOfCell(const SiCellId &cellId,
+                          std::vector<SiCellId> &neighbours) const;
+    SiCellId cellIdInRange(const SiCellId &) const;
 
     // For Strip sensors, readout cell == diode cell. Overload the SCT_ModuleSideDesign
     // member
-    virtual SiReadoutCellId readoutIdOfCell(const SiCellId &cellId) const override;
+    SiReadoutCellId readoutIdOfCell(const SiCellId &cellId) const;
 
     //Returns the wafer centre Radius (needed for annulus shape)
     double waferCentreR() const;
@@ -176,37 +174,35 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
     //different for elements where each row is its own element
     double centreR() const;
 
-    InDetDD::DetectorType type() const override final;
-
     // ---------------------------------------------------------------------------------------
     // DEPRECATED at least for Strips
-    virtual HepGeom::Vector3D<double> phiMeasureSegment(const SiLocalPosition &position) const override;
+    HepGeom::Vector3D<double> phiMeasureSegment(const SiLocalPosition &position) const;
 
     // Method to calculate length of a strip. Which strip??
-    virtual double length() const override;
+    double length() const;
 
     // Method to calculate average width of a module. What is it used for??
-    virtual double width() const override;
+    double width() const;
 
     // Method to calculate minimum width of a module
-    virtual double minWidth() const override;
+    double minWidth() const;
 
     // Method to calculate maximum width of a module
-    virtual double maxWidth() const override;
+    double maxWidth() const;
 
     // Pitch in eta direction Deprecated for strips: it varies in endcap
-    virtual double etaPitch() const override;
+    double etaPitch() const;
 
     // Return true if hit local direction is the same as readout direction.
-    virtual bool swapHitPhiReadoutDirection() const override;
-    virtual bool swapHitEtaReadoutDirection() const override;
+    bool swapHitPhiReadoutDirection() const;
+    bool swapHitEtaReadoutDirection() const;
 
-    virtual bool nearBondGap(const SiLocalPosition &, double) const override;
+    bool nearBondGap(const SiLocalPosition &, double) const;
 
     /** Shape of element */
-    virtual DetectorShape shape() const override;
+    virtual DetectorShape shape() const;
 
-    virtual double sinStripAngleReco(double phiCoord, double etaCoord) const override;
+   double sinStripAngleReco(double phiCoord, double etaCoord) const;
 
     // ------------------------------------------------------------------------------------------
 
@@ -222,9 +218,9 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
     double stereo() const;
 
     // Give upper and lower boundaries, and length, of dead area
-    virtual double deadAreaUpperBoundary() const override;
-    virtual double deadAreaLowerBoundary() const override;
-    virtual double deadAreaLength() const override;
+    double deadAreaUpperBoundary() const;
+    double deadAreaLowerBoundary() const;
+    double deadAreaLength() const;
 private:
     const int m_nRows;
     const std::vector<int> m_nStrips;
@@ -365,10 +361,6 @@ inline double StripStereoAnnulusDesign::waferCentreR() const {
 
 inline double StripStereoAnnulusDesign::centreR() const {
     return m_R;
-}
-
-inline InDetDD::DetectorType StripStereoAnnulusDesign::type() const{
-    return m_detectorType;
 }
 
 /// DEPRECATED for StripStereoAnnulusDesign; no dead area

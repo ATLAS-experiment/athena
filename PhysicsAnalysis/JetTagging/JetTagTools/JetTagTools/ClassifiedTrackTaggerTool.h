@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 //
 // ClassifiedTrackTaggerTool.h - Description
@@ -22,6 +22,7 @@
 #include <vector>
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODJet/JetContainer.h" 
 //Interface of InDetTrkInJetType (inside .h file of InDetTrkInJetType class)
 #include "InDetVKalVxInJetTool/InDetTrkInJetType.h"
@@ -57,7 +58,8 @@ namespace Analysis {
        /* Constructor */
       ClassifiedTrackTaggerTool(const std::string& type, const std::string& name, const IInterface* parent);
        /* Destructor */
-      virtual ~ClassifiedTrackTaggerTool() = default;
+      virtual ~ClassifiedTrackTaggerTool();
+
 
       virtual StatusCode initialize() override;
       virtual StatusCode finalize() override;
@@ -73,7 +75,9 @@ namespace Analysis {
 
    private:
     //debugging
-    IChronoStatSvc* m_timingProfile{};
+    IChronoStatSvc* m_timingProfile{}; 
+    //variable to check: before public method bJetWgts can be executed, check that initialize() has been run!
+    int m_initialised{};
 
     //variables for retrieving the CTT classification score given the TCT weights
     std::unique_ptr<MVAUtils::BDT> m_CTTBDT;

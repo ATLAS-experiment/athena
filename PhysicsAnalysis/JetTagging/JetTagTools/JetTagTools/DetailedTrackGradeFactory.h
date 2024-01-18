@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_DetailedTrackGradeFactory_H
@@ -27,6 +27,9 @@
 
 #include "JetTagInfo/TrackGradesDefinition.h"
 
+//namespace xAOD { class TrackParticle; }
+  
+
 namespace Analysis
 {
 
@@ -37,15 +40,17 @@ class DetailedTrackGradeFactory : public AthAlgTool, virtual public ITrackGradeF
  public:
 
   DetailedTrackGradeFactory(const std::string&,const std::string&,const IInterface*);
-  virtual ~DetailedTrackGradeFactory() = default;
+  virtual ~DetailedTrackGradeFactory();
 
-  /** AlgTool initialize method */
-  virtual StatusCode initialize() override;
+  /** AlgTool initailize method */
+  StatusCode initialize();
+  /** AlgTool finalize method */
+  StatusCode finalize();
 
-  virtual TrackGrade* getGrade(const xAOD::TrackParticle & track,
-	        	       const xAOD::IParticle::FourMom_t & jetMomentum) const override;
+  TrackGrade* getGrade(const xAOD::TrackParticle & track,
+		       const xAOD::IParticle::FourMom_t & jetMomentum) const;
 
-  virtual const TrackGradesDefinition & getTrackGradesDefinition() const override;
+  virtual const TrackGradesDefinition & getTrackGradesDefinition() const;
 
 private:
 

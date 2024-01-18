@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import MeV, deg
 from AthenaCommon.Logging import logging
@@ -518,12 +518,14 @@ def HICaloTowerCfg(flags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.Enums import LHCPeriod
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN3
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    #flags.Input.isMC=False
+    flags.GeoModel.Run=LHCPeriod.Run3
     flags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
     flags.Common.isOnline = True
     outputContainers = ["CaloCellContainer#SeedLessFS",

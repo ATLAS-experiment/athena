@@ -41,10 +41,10 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doAnalysis', False)
 
     # SpacePoint
-    actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy
+    actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, enum=SpacePointStrategy)  # Define SpacePoint Strategy
 
     # Seeding
-    actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, type=SeedingStrategy)  # Define Seeding Strategy
+    actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, enum=SeedingStrategy)  # Define Seeding Strategy
 
     # Track finding
     actscf.addFlag('Acts.doRotCorrection', True)
@@ -59,7 +59,7 @@ def createActsConfigFlags():
     # Track fitting
     actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections
     actscf.addFlag('Acts.fitFromPRD', False) # Acts.writeTrackCollection needs to be True for either cases. If Acts.fitFromPRD is False, fit from ROT; else, fit from PRD
-    actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, type=TrackFitterType) # Define Tracking algorithm for refitting
+    actscf.addFlag('Acts.trackFitterType', TrackFitterType.KalmanFitter, enum=TrackFitterType) # Define Tracking algorithm for refitting
 
     actscf.addFlag("Acts.useActsGsfInEgamma", False)
 
