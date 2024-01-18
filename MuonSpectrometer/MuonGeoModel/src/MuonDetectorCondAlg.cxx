@@ -67,6 +67,7 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     // =======================
     // Add NSW to the MuonDetectorManager by calling BuildReadoutGeometry from MuonAGDDToolHelper
     // =======================
+    
     if (MuonMgrData->mmIdHelper() && MuonMgrData->stgcIdHelper()) {
         BuildNSWReadoutGeometry theBuilder{};
         bool success=false;
@@ -164,6 +165,11 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
 StatusCode MuonDetectorCondAlg::copyInertMaterial(MuonGM::MuonDetectorManager& detMgr) const {
     const MuonGM::MuonDetectorManager *MuonDetMgrDS{nullptr};
     ATH_CHECK(detStore()->retrieve(MuonDetMgrDS));
+
+    // In the new geomodel, there is only one GeoModel tree and it is pre-built. In that
+    // case these pointers are the same and one should not copy to self. 
+    if (MuonDetMgrDS->getTreeTop(0)==detMgr.getTreeTop(0)) return StatusCode::SUCCESS;
+    // ---------------------------------------------------------------------------------
 
     PVLink condMgrWorld{detMgr.getTreeTop(0)};
        

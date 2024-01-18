@@ -54,10 +54,10 @@
 #include <iomanip>
 #include <vector>
 #include <stdexcept>
+#include <set> 
 
 #define RPCON true
 #define useAssemblies false
-
 namespace {
     // const maps holding the y/z translation for BIS RPCs (since they cannot be parsed by amdb)
     const std::map<std::string, float> rpcYTrans = {
@@ -73,6 +73,8 @@ namespace {
         std::make_pair<std::string, float>("RPC29", 3.11), // small RPC8
     };
 } // namespace
+
+
 
 namespace MuonGM {
 
@@ -103,7 +105,8 @@ namespace MuonGM {
     GeoVPhysVol *MuonChamberLite::addReadoutLayers(
                                     const MYSQL& mysql,
                                     MuonDetectorManager *manager, int zi, int fi, bool is_mirrored, bool &isAssembly) {
-      
+
+
         
         ATH_MSG_VERBOSE( " Building a MuonChamberLite for m_station " << m_station->GetName() << " at zi, fi " << zi << " " << fi + 1 << " is_mirrored " << is_mirrored
                         << " is assembly = " << isAssembly );
@@ -304,7 +307,7 @@ namespace MuonGM {
         // here the big loop over the components !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         for (int i = 0; i < m_station->GetNrOfComponents(); i++) {
             StandardComponent *c = (StandardComponent *)m_station->GetComponent(i);
-            ATH_MSG_VERBOSE( " Component index " << c->index << " in loop for " << stName << " " << stationType << " at zi, fi " << zi << " " << fi + 1 << "  cName "
+ 	     ATH_MSG_VERBOSE( " Component index " << c->index << " in loop for " << stName << " " << stationType << " at zi, fi " << zi << " " << fi + 1 << "  cName "
                               << c->name << " thickness " << c->GetThickness(mysql) << " length " << c->dy << " w, lw " << c->dx1 << " " << c->dx2 );
             ATH_MSG_VERBOSE( " Component local (amdb) coords " << c->posx << " " << c->posy << " " << c->posz );
            
@@ -335,7 +338,7 @@ namespace MuonGM {
             std::vector<Cutout *> vcutdef;
             std::vector<std::unique_ptr<Cutout>> vcutdef_todel;
             for (int ii = 0; ii < m_station->GetNrOfCutouts(); ii++) {
-                Cutout *cut = m_station->GetCutout(ii);
+               Cutout *cut = m_station->GetCutout(ii);
                 cut->setThickness(cthickness * 1.01); // extra thickness to be sure
 
                 if ((cut->subtype == mysql.allocPosFindSubtype(std::string(statType), fi, zi)) && (cut->icut == mysql.allocPosFindCutout(std::string(statType), fi, zi)) && (cut->ijob == c->index)) {
@@ -501,8 +504,13 @@ namespace MuonGM {
                 } else if (((manager->IncludeCutoutsFlag() && mdtCutoutFlag) || (manager->IncludeCutoutsBogFlag() && stName.compare(0, 3, "BOG")) == 0) && zi < 0) {
                     key += "m" + buildString(mysql.allocPosFindSubtype(statType, fi, zi), 0) + "_" + buildString(mysql.allocPosFindCutout(statType, fi, zi), 0);
                 }
-		std::unique_ptr<Mdt> r = std::make_unique<Mdt>(mysql, c, stName + techname);
-		r->processCutouts(vcutdef);
+		if (m_keySet->find(key)==m_keySet->end()) {
+		  std::unique_ptr<Mdt> r = std::make_unique<Mdt>(mysql, c, stName + techname);
+		  if ((manager->IncludeCutoutsFlag() && mdtCutoutFlag) || (manager->IncludeCutoutsBogFlag() && stName.compare(0, 3, "BOG") == 0)) {
+		    if (!vcutdef.empty()) r->processCutouts(vcutdef);
+		  }
+		  m_keySet->insert(key);
+		}
 		lvm = (*m_mapFPV)[key+"_"+std::to_string(zi)+"_"+std::to_string(fi)+"_"+std::to_string(md->index)];
 
             } else if (type == "RPC") {
@@ -876,7 +884,6 @@ namespace MuonGM {
 
     void MuonChamberLite::setMdtReadoutGeom(const MYSQL& mysql,
                                         MdtReadoutElement *re, const MdtComponent *cc, const Position &ip) {
-        
         re->m_Ssize = cc->dx1;
         re->m_LongSsize = cc->dx2;
 
