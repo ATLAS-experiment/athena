@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import CaloD3PDMaker
-import D3PDMakerCoreComps
-import EventCommonD3PDMaker
 from D3PDMakerCoreComps.D3PDObject import D3PDObject
 from CaloIdentifier import SUBCALO
-from CaloD3PDMaker.makeCaloCellFilterAlg import makeCaloCellFilterAlg 
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 prefix_to_det = {}
 prefix_to_det["cc_sel_"] = [SUBCALO.LAREM,SUBCALO.LARHEC,SUBCALO.LARFCAL,SUBCALO.TILE] 
@@ -25,7 +25,7 @@ def makeCellD3PDObject (name, prefix, object_name, getter = None,
     #print " makeCellD3PDObject: sgkey = ", sgkey 
 
     if not getter:
-        getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+        getter = D3PD.SGDataVectorGetterTool \
                  (name + '_Getter',
                   TypeName = 'CaloCellContainer',
                   SGKey = sgkey,
@@ -33,18 +33,16 @@ def makeCellD3PDObject (name, prefix, object_name, getter = None,
         
     # create the selected cells
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 # function to create the CaloCellContainer for selected 
-def hookForCaloCellFilterAlg(c, prefix, *args, **kw) :
-
-
+def hookForCaloCellFilterAlg(c, flags, acc, prefix, *args, **kw) :
     cellSigmaCut=-1. 
 
     if prefix in prefix_to_det.keys():
@@ -56,14 +54,12 @@ def hookForCaloCellFilterAlg(c, prefix, *args, **kw) :
 
         #print " in makeCellD3PDObject, subCalo, sgkey, cellSigmaCut = ", subCalo, sgkey, cellSigmaCut
 
-        filter = makeCaloCellFilterAlg( CaloNums=subCalo, OutputCellsName=sgkey, CellSigmaCut=cellSigmaCut  )
+        from .CaloCellFilterAlgConfig import CaloCellFilterAlgCfg
+        filter = CaloCellFilterAlgCfg( flags, CaloNums=subCalo, OutputCellsName=sgkey, CellSigmaCut=cellSigmaCut  )
 
-        from D3PDMakerConfig.D3PDMakerFlags           import D3PDMakerFlags
-        from AthenaCommon.AlgSequence import AlgSequence
-        preseq = AlgSequence (D3PDMakerFlags.PreD3PDAlgSeqName())
-        preseq +=filter 
+        acc.addEventAlgo (filter)
         
-    return 
+    return
 
 def makeCaloCellD3PDObject (maker, prefix, object_name) :
 
@@ -74,12 +70,12 @@ def makeCaloCellD3PDObject (maker, prefix, object_name) :
         cellD3PDObject.defineHook  ( hookForCaloCellFilterAlg )
 
     cellD3PDObject.defineBlock (0, 'Kinematics',
-                                EventCommonD3PDMaker.FourMomFillerTool,
+                                D3PD.FourMomFillerTool,
                                 WriteE  = True,  WriteM = False)
 
 
     cellD3PDObject.defineBlock (1, 'Detail1',
-                                CaloD3PDMaker.CaloCellDetailsFillerTool,
+                                D3PD.CaloCellDetailsFillerTool,
                                 SaveCellQuality=True,
                                 SaveTimeInfo=True,
                                 SaveDetInfo=True,
@@ -91,7 +87,7 @@ def makeCaloCellD3PDObject (maker, prefix, object_name) :
 
 
     cellD3PDObject.defineBlock (2, 'Detail2',
-                                CaloD3PDMaker.CaloCellDetailsFillerTool,
+                                D3PD.CaloCellDetailsFillerTool,
                                 SaveCellQuality=False,
                                 SaveTimeInfo=False,
                                 SaveDetInfo=False,
@@ -106,7 +102,7 @@ def makeCaloCellD3PDObject (maker, prefix, object_name) :
     CaloNoiseCondAlg(noisetype=noiseType)
 
     cellD3PDObject.defineBlock (3, 'Detail3',
-                                CaloD3PDMaker.CaloCellDetailsFillerTool,
+                                D3PD.CaloCellDetailsFillerTool,
                                 SaveCellQuality=False,
                                 SaveTimeInfo=False,
                                 SaveDetInfo=False,
@@ -120,7 +116,7 @@ def makeCaloCellD3PDObject (maker, prefix, object_name) :
 
     # Raw eta/phi --- off by default.
     cellD3PDObject.defineBlock (99, 'RawPosition',
-                                CaloD3PDMaker.CaloCellRawFillerTool)
+                                D3PD.CaloCellRawFillerTool)
 
     return cellD3PDObject 
 
@@ -155,7 +151,7 @@ def makeCaloCellSlimmedD3PDObject (maker, prefix, object_name) :
         cellD3PDObject.defineHook  ( hookForCaloCellFilterAlg )
 
     cellD3PDObject.defineBlock (0, 'Kinematics',
-                                EventCommonD3PDMaker.FourMomFillerTool,
+                                D3PD.FourMomFillerTool,
                                 WriteE  = True,  WriteM = False, WritePt = False)
 
 
@@ -164,7 +160,7 @@ def makeCaloCellSlimmedD3PDObject (maker, prefix, object_name) :
     CaloNoiseCondAlg(noisetype=noiseType)
 
     cellD3PDObject.defineBlock (1, 'Detail1',
-                                CaloD3PDMaker.CaloCellDetailsFillerTool,
+                                D3PD.CaloCellDetailsFillerTool,
                                 SaveCellQuality=True,
                                 SaveBadCellStatus=True,
                                 SaveSigma = True,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file CaloD3PDMaker/python/MBTSD3PDObject.py
@@ -7,23 +7,17 @@
 # @brief D3PD object for MBTS.
 #
 
-# We require TileID.
-# If identifiers have not yet been configured, request a minimal
-# setup (that doesn't use GeoModelSvc).
-from AthenaCommon.AppMgr import ServiceMgr 
-if not hasattr (ServiceMgr, 'DetDescrCnvSvc'):
-    import DetDescrCnvSvc.DetStoreConfig  # noqa: F401
-    ServiceMgr.DetDescrCnvSvc.DoInitNeighbours = False
-
-import CaloD3PDMaker
 from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-
 from D3PDMakerCoreComps.D3PDObject import make_SGDataVector_D3PDObject
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 MBTSD3PDObject = \
            make_SGDataVector_D3PDObject ('TileContainer<TileCell>',
-                                         D3PDMakerFlags.MBTSSGKey(),
+                                         D3PDMakerFlags.MBTSSGKey,
                                          'mb_', 'MBTSD3PDObject')
 
-MBTSD3PDObject.defineBlock (0, 'MBTS', CaloD3PDMaker.MBTSFillerTool)
+MBTSD3PDObject.defineBlock (0, 'MBTS', D3PD.MBTSFillerTool)
 

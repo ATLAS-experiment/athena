@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloD3PDMaker/src/CaloCellDetailsFillerTool.cxx
@@ -42,7 +42,6 @@ CaloCellDetailsFillerTool::CaloCellDetailsFillerTool
         m_saveCellGain(false), m_saveCellQuality(false), 
 	m_saveDetInfo(false),m_saveTimeInfo(false),m_saveCellStatus(false),
 	m_saveId(false),m_savePosition(false), m_saveSigma(false),
-    m_pb_tool("CaloBadChanTool"),
     m_useNoise(false)
 {
 
@@ -54,8 +53,6 @@ CaloCellDetailsFillerTool::CaloCellDetailsFillerTool
   declareProperty("SaveId",m_saveId);
   declareProperty("SavePositionInfo",m_savePosition);
   declareProperty("SaveSigma",m_saveSigma);
-
-  declareProperty("BadChannelTool",m_pb_tool);
 
   m_fitQCells = 0;
   m_gainCells = 0;
