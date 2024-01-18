@@ -17,7 +17,7 @@ namespace JiveXML {
    *
    * @author Sebastian Boeser
    */
-  class StreamToFileTool : virtual public IStreamTool, public AthAlgTool{
+  class StreamToFileTool : virtual public IStreamTool, public AthAlgTool {
 
     public:
       

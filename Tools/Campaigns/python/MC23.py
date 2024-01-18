@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import ProductionStep
 from Campaigns.Utils import Campaign
 
@@ -216,11 +216,26 @@ def MC23SimulationLowMuRun(flags):
     flags.Input.LumiBlockNumbers = [1] # dummy value
 
 
+def MC23cSimulationNoIoV(flags):
+    """MC23 base flags for simulation without specifying conditions IoVs"""
+    MC23SimulationNoIoV(flags)
+    flags.Input.MCCampaign = Campaign.MC23c
+
+
 def MC23SimulationSingleIoV(flags):
     """MC23 flags for simulation"""
     MC23SimulationNoIoV(flags)
 
     flags.Input.RunNumbers = [410000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumbers = [1] # dummy value
+
+
+def MC23cSimulationSingleIoV(flags):
+    """MC23 flags for simulation"""
+    MC23SimulationNoIoV(flags)
+
+    flags.Input.RunNumbers = [450000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumbers = [1] # dummy value
 
@@ -238,7 +253,7 @@ def MC23aSimulationMultipleIoV(flags):
 
 def MC23cSimulationMultipleIoV(flags):
     """MC23 flags for simulation"""
-    MC23SimulationNoIoV(flags)
+    MC23cSimulationNoIoV(flags)
 
     flags.Input.OverrideRunNumber = True
 

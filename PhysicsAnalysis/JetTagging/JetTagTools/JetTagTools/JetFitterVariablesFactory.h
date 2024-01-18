@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGTOOL_JETFITTERVARIABLESFACTORY_C
@@ -25,6 +25,10 @@
 
 namespace Analysis {
 
+
+  //static const InterfaceID IID_JetFitterVariablesFactory("Analysis::JetFitterVariablesFactory", 1, 0);
+
+
   class JetFitterVariablesFactory : public AthAlgTool , virtual public IJetFitterVariablesFactory  {
     
   public:
@@ -38,9 +42,15 @@ namespace Analysis {
     virtual StatusCode finalize();
     
     virtual StatusCode fillJetFitterVariables(const xAOD::Jet &, xAOD::BTagging* BTag, const Trk::VxJetFitterVertexInfo* myJetFitterInfo, std::string basename) const;
+
+ 
+    //  static const InterfaceID& interfaceID() { return IID_JetFitterVariablesFactory; };
+
    
   private:
 
+    std::string m_secVxFinderName; 
+    std::string m_jetFitterInstance;
     bool m_addNegativeTracksToPrimaryVertex;
     bool m_usePtCorrectedEnergy;
     bool m_useSingleTracksAlsoForMass;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGTOOL_MULTIVARIATETAGMANAGER_C
@@ -32,10 +32,12 @@ namespace Analysis {
                            const std::string&,
                            const IInterface*);
 
-    virtual ~MultivariateTagManager() = default;
+    virtual ~MultivariateTagManager(){};
 
     virtual StatusCode initialize() override;
-    virtual void finalizeHistos() override {};
+    virtual StatusCode finalize() override;
+    virtual void finalizeHistos()  override {};
+
 
     virtual StatusCode tagJet(const xAOD::Vertex& priVtx,
                               const xAOD::Jet& jetToTag,

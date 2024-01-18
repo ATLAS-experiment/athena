@@ -10,7 +10,7 @@ __author__  = "Eric Jansen <eric.jansen@cern.ch>"
 
 import os, grp, stat, random
 from ipc import IPCPartition
-from ispy import ISInfoDictionary
+from ispy import ISInfoDictionary, ISInfoAny, ISObject
 from AthenaPython import PyAthena
 from AthenaPython.PyAthena import StatusCode
 from PyAnalysisCore import PyEventTools
@@ -52,20 +52,20 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                         # If running on private machine, zp group might not exist. 
                         # Just set to the likely value
                         self.zpgid = 1307 
-
                 return StatusCode.Success
 
         def finalize(self):
                 return StatusCode.Success
 
         def getJobOptions(self):
-                self.StreamToFileTool = PyAthena.py_tool('JiveXML::StreamToFileTool', iface='IProperty')
+                #self.StreamToFileTool = PyAthena.py_tool('JiveXML::StreamToFileTool', iface='IProperty')
                 self.StreamToServerTool = PyAthena.py_tool('JiveXML::StreamToServerTool', iface='IProperty')
                 # Some casting magic is needed to access algorithm properties
                 from GaudiPython.Bindings import gbl, InterfaceCast
                 vp1alg = PyAthena.py_alg('VP1EventProd')
                 self.VP1EventProducer = InterfaceCast(gbl.IProperty).cast(vp1alg)
-
+                print(type(self.StreamToFileTool))
+                print(self.StreamToFileTool.MyTest)
                 self.msg.info("StreamToFileTool: %s", self.StreamToFileTool)
                 self.msg.info("StreamToServerTool: %s", self.StreamToServerTool)
                 self.msg.info("VP1EventProducer: %s", self.VP1EventProducer)

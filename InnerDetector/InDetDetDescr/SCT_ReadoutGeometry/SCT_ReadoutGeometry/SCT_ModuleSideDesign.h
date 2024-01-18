@@ -208,6 +208,7 @@ private:
     const SCT_ModuleSideDesign * m_motherDesign{nullptr};
     //if this design *is* a mother design, these are its children
     std::map<int, const SCT_ModuleSideDesign *>  m_childDesigns;
+
 };
 
 ///////////////////////////////////////////////////////////////////

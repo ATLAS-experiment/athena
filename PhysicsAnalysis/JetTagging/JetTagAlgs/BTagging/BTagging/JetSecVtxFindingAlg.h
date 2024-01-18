@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_JETSECVTXFINDINGALG_H
@@ -10,15 +10,17 @@
 
 #include <string>
 
-//general interface for secondary vertex finders
-#include "InDetRecToolInterfaces/ISecVertexInJetFinder.h"
-
 #include "xAODJet/JetContainer.h"
-#include "xAODTracking/VertexContainer.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+
+#include "xAODTracking/VertexContainer.h"
+
+namespace InDet {
+  class ISecVertexInJetFinder;
+}
 
 /** The namespace of all packages in PhysicsAnalysis/JetTagging */
 namespace Analysis
@@ -29,7 +31,7 @@ namespace Analysis
       public:
         /** Constructors and destructors */
         JetSecVtxFindingAlg(const std::string& name, ISvcLocator *pSvcLocator);
-        virtual ~JetSecVtxFindingAlg() = default;
+        virtual ~JetSecVtxFindingAlg();
     
         /** Main routines specific to an ATHENA algorithm */
         virtual StatusCode initialize() override final;
@@ -38,6 +40,8 @@ namespace Analysis
       private:
         
         ToolHandle< InDet::ISecVertexInJetFinder > m_secVertexFinderToolHandle;
+
+        std::string m_vxPrimaryName; //Input ReadHandle
 
         SG::ReadHandleKey<xAOD::JetContainer > m_JetCollectionName {this, "JetCollectionName", "", "Input jet container"};
         SG::ReadDecorHandleKey<xAOD::JetContainer> m_TracksToTag { this, "TracksToTag", "", "Element Link vector from jet to IParticleContainer"};

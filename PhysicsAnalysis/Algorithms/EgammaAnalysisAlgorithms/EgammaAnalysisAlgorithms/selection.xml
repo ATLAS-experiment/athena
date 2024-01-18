@@ -10,6 +10,5 @@
    <class name="CP::ElectronLRTMergingAlg" />
    <class name="CP::PhotonOriginCorrectionAlg" />
    <class name="CP::EgammaFSRForMuonsCollectorAlg" />
-   <class name="CP::ElectronSiHitDecAlg" />
    
 </lcgdict>
