@@ -1,7 +1,7 @@
 # setup for writing SCT+pixel alignment data to COOL or Lisbon CondDB
 # job option FRAGMENT to be run in conjunction with e.g. InDetRecExample
 #
-include("IOVDbSvc/IOVRecExCommon.py")
+
 # setup for COOL (write password deleted!)
 IOVDbSvc=Service("IOVDbSvc")
 IOVDbSvc.dbConnection = "impl=cool;techno=oracle;schema=ATLAS_COOL_INDET;ATLAS_COOLPROD:OFLPROD:ATLAS_COOL_INDET:xxxx"

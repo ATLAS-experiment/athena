@@ -50,7 +50,6 @@ DetFlags.detdescr.Calo_setOn()
 
 # set up all detector description description 
 include ("RecExCond/AllDet_detDescr.py")
-include( "IOVDbSvc/IOVRecExCommon.py" )
 
 #--------------------------------------------------------------
 # Define the output Db parameters (the default value are shown)

@@ -57,7 +57,6 @@ DetFlags.detdescr.Calo_setOn()
 
 # set up all detector description description 
 include ("RecExCond/AllDet_detDescr.py")
-include( "IOVDbSvc/IOVRecExCommon.py" )
 
 # THE FOLLOWING SHOULD ONLY BE NEEDED IN EventInfoWrite.py I.E. THE FIRST TIME WRITING
 #globalflags.ConditionsTag = 'OFLCOND-CSC-00-00-00'

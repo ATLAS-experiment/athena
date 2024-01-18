@@ -53,7 +53,6 @@ DetFlags.detdescr.Calo_setOn()
 
 # set up all detector description description 
 include ("RecExCond/AllDet_detDescr.py")
-include( "IOVDbSvc/IOVRecExCommon.py" )
 
 #globalflags.ConditionsTag = 'OFLCOND-CSC-00-00-00'
 globalflags.ConditionsTag = 'OFLCOND-SDR-BS7T-04-00'

@@ -21,7 +21,6 @@ DetFlags.detdescr.Calo_setOn()
 
 # set up all detector description 
 include ("RecExCond/AllDet_detDescr.py")
-include( "IOVDbSvc/IOVRecExCommon.py" )
 
 #globalflags.ConditionsTag = 'OFLCOND-SIM-00-00-03'
 if len(globalflags.ConditionsTag())!=0:
