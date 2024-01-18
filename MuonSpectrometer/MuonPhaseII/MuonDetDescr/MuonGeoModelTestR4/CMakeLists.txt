@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonReadoutGeometryR4
@@ -9,8 +9,7 @@ atlas_subdir( MuonGeoModelTestR4 )
 
 atlas_add_component( MuonGeoModelTestR4
                      src/components/*.cxx src/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
+                     LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
                                     GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities
                                     xAODTruth xAODMuonSimHit MuonStationGeoHelpersLib)
 

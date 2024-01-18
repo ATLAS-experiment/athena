@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 # Package: MuonReadoutGeometryR4
@@ -16,7 +16,6 @@ atlas_add_library( MuonStationGeoHelpersLib
 
 atlas_add_component( MuonStationGeoHelpers
                      src/components/*.cxx src/*.cxx
-                     INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                      LINK_LIBRARIES MuonStationGeoHelpersLib AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel  
                      ActsGeometryInterfacesLib  MuonReadoutGeometryR4 MuonIdHelpersLib 
                      GeoModelUtilities CxxUtils)
