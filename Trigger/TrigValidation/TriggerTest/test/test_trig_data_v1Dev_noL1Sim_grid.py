@@ -29,7 +29,7 @@ ex.input = 'data'
 ex.threads = 4
 ex.concurrent_events = 4
 ex.max_events = 2000
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doWriteBS=False;doL1Sim=False;doWriteRDOTrigger=True;doRuntimeNaviVal=True;"'
+ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doWriteBS=False;doL1Sim=False;forceEnableAllChains=True;doWriteRDOTrigger=True;doRuntimeNaviVal=True;"'
 
 test = Test.Test()
 test.art_type = 'grid'
