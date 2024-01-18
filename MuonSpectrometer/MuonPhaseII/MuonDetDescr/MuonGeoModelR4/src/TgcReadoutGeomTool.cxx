@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonGeoModelR4/TgcReadoutGeomTool.h>
@@ -17,6 +17,7 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
+#include "CxxUtils/starts_with.h"
 
 #include <RDBAccessSvc/IRDBRecord.h>
 
@@ -184,7 +185,7 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         /// where CHAMBERTYPE has to start with TGC
         std::vector<std::string> key_tokens = tokenize(key, "_");
         if (key_tokens.size() < 4 ||
-            key_tokens[0].find("TGC") != 0)
+            !CxxUtils::starts_with (key_tokens[0], "TGC"))
             continue;
         
         bool isValid{false};
