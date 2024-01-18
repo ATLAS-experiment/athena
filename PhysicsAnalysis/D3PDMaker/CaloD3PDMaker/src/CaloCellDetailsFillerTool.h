@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOD3PDMAKER_CALOCELLDETAILSFILLERTOOL_H
@@ -73,8 +73,10 @@ private:
     bool m_savePosition;
     bool m_saveSigma;
 
-    ToolHandle<ICaloBadChanTool> m_pb_tool;
-   /**
+    ToolHandle<ICaloBadChanTool> m_pb_tool
+      { this, "BadChannelTool", "CaloBadChanTool", "" };
+
+  /**
     * @brief Key of the CaloNoise Conditions data object.
     * Typical values are '"electronicNoise', 'pileupNoise', or '"totalNoise'
     */
