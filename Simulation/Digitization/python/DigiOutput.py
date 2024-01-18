@@ -130,7 +130,9 @@ def getStreamRDO_ItemList(log):
             StreamRDO_ItemList += ["LUCID_DigitContainer#Lucid_Digits"]
     if DetFlags.digitize.ZDC_on():
         if DetFlags.writeRDOPool.ZDC_on():
-            StreamRDO_ItemList += ["ZdcDigitsCollection#*"]
+            StreamRDO_ItemList += ["xAOD::ZdcModuleContainer#ZDC_SimModuleContainer"]
+            StreamRDO_ItemList += ["xAOD::ZdcModuleAuxContainer#ZDC_SimModuleContainerAux"]
+            StreamRDO_ItemList += ["CaloCalibrationHitContainer#ZDC_CalibrationHits"]
     if DetFlags.digitize.ALFA_on():
         if DetFlags.writeRDOPool.ALFA_on():
             StreamRDO_ItemList += ["ALFA_DigitCollection#*"]
