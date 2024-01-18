@@ -321,7 +321,7 @@ const Trk::PrepRawData* TrigInDetTrackFollowingTool::updateTrackState(const InDe
   double resid, invcov;
   double H[2];//linearized observation matrix
   
-  if(!pColl->empty()) {
+  if(pColl && !pColl->empty()) {
 
     double bestChi2Dist = m_maxChi2Dist_Strips;
 
