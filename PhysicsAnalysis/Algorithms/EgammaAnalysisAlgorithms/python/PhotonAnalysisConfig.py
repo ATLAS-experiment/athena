@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -26,6 +26,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         self.addOption ('ptSelectionOutput', False, type=bool)
         self.addOption ('recalibratePhyslite', True, type=bool)
         self.addOption ('minPt', 10e3, type=float)
+        self.addOption ('forceFullSimConfig', False, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -33,6 +34,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
+
+        if self.forceFullSimConfig:
+            print("WARNING! You are running PhotonCalibrationConfig forcing full sim config")
+            print("WARNING! This is only intended to be used for testing purposes")
 
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisPhotons")
@@ -107,7 +112,9 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                'CP::EgammaCalibrationAndSmearingTool' )
         alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
         alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        alg.calibrationAndSmearingTool.useFastSim = int( config.dataType() is DataType.FastSim )
+        alg.calibrationAndSmearingTool.useFastSim = (
+            0 if self.forceFullSimConfig
+            else int( config.dataType() is DataType.FastSim ))
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -131,7 +138,9 @@ class PhotonCalibrationConfig (ConfigBlock) :
         config.addPrivateTool( 'isolationCorrectionTool',
                                'CP::IsolationCorrectionTool' )
         alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
-        alg.isolationCorrectionTool.AFII_corr = config.dataType() is DataType.FastSim
+        alg.isolationCorrectionTool.AFII_corr = (
+                0 if self.forceFullSimConfig
+                else config.dataType() is DataType.FastSim)
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -157,12 +166,17 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('recomputeIsEM', False, type=bool)
         self.addOption ('doFSRSelection', False, type=bool)
         self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
+        self.addOption ('forceFullSimConfig', True, type=bool)
 
     def makeAlgs (self, config) :
 
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the PhotonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
+
+        if self.forceFullSimConfig:
+            print("WARNING! You are running PhotonWorkingPointConfig forcing full sim config")
+            print("WARNING! This is only intended to be used for testing purposes")
 
         postfix = self.postfix
         if postfix != '' and postfix[0] != '_' :
@@ -231,8 +245,9 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                                    'AsgPhotonEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'ph_id_effSF' + postfix + '_%SYS%'
             if config.dataType() is DataType.FastSim:
+                print("WARNING! No AFII ID SFs are available for now for photon efficiency")
                 alg.efficiencyCorrectionTool.ForceDataType = \
-                    PATCore.ParticleDataType.Full  # no AFII ID SFs for now
+                    PATCore.ParticleDataType.Full
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
@@ -252,8 +267,9 @@ class PhotonWorkingPointConfig (ConfigBlock) :
                                    'AsgPhotonEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'ph_isol_effSF' + postfix + '_%SYS%'
             if config.dataType() is DataType.FastSim:
+                print("WARNING! No AFII ID SFs are available for now for photon efficiency")
                 alg.efficiencyCorrectionTool.ForceDataType = \
-                    PATCore.ParticleDataType.Full  # no AFII ID SFs for now
+                    PATCore.ParticleDataType.Full
             elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
@@ -276,7 +292,8 @@ def makePhotonCalibrationConfig( seq, containerName,
                                  enableCleaning = None,
                                  cleaningAllowLate = None,
                                  recomputeIsEM = None,
-                                 ptSelectionOutput = None ):
+                                 ptSelectionOutput = None,
+                                 forceFullSimConfig = None):
     """Create photon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -294,6 +311,7 @@ def makePhotonCalibrationConfig( seq, containerName,
       recomputeIsEM -- Whether to rerun the cut-based selection. If not, use derivation flags
       ptSelectionOutput -- Whether or not to apply pt selection when creating
                            output containers.
+      forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
 
     config = PhotonCalibrationConfig (containerName)
@@ -303,13 +321,15 @@ def makePhotonCalibrationConfig( seq, containerName,
     config.setOptionValue ('cleaningAllowLate', cleaningAllowLate, noneAction='ignore')
     config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
     config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
+    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig, noneAction='ignore')
     seq.append (config)
 
 
 
 def makePhotonWorkingPointConfig( seq, containerName, workingPoint, selectionName,
                                   recomputeIsEM = None,
-                                  noEffSF = None ):
+                                  noEffSF = None,
+                                  forceFullSimConfig = None):
     """Create photon analysis algorithms for a single working point
 
     Keywrod arguments:
@@ -320,6 +340,7 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, selectionNam
                  names are unique.
       recomputeIsEM -- Whether to rerun the cut-based selection. If not, use derivation flags
       noEffSF -- Disables the calculation of efficiencies and scale factors
+      forceFullSimConfig -- imposes full-sim config for FastSim for testing
     """
 
     config = PhotonWorkingPointConfig (containerName, selectionName)
@@ -331,4 +352,5 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, selectionNam
         config.setOptionValue ('isolationWP',   splitWP[1])
     config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
     config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
+    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig, noneAction='ignore')
     seq.append (config)

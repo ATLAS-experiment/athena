@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 # @author Tadej Novak
@@ -6,6 +6,9 @@
 from AnaAlgorithm.AlgSequence import AlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, createService
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+
+# No R24 FastSim recommendations for EGamma yet
+forceEGammaFullSimConfig = True
 
 def makeOverlapSequence (dataType) :
     algSeq = AlgSequence()
@@ -37,8 +40,10 @@ def makeOverlapSequence (dataType) :
     # Include, and then set up the electron analysis sequence:
     from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import \
         makeElectronAnalysisSequence
-    electronSequence = makeElectronAnalysisSequence( dataType, 'LooseLHElectron.Loose_VarRad',
-                                                     recomputeLikelihood = True )
+    electronSequence = makeElectronAnalysisSequence(
+        dataType, 'LooseLHElectron.Loose_VarRad',
+        recomputeLikelihood = True,
+        forceFullSimConfig = forceEGammaFullSimConfig)
     electronSequence.configure( inputName = 'Electrons',
                                 outputName = 'AnalysisElectrons_%SYS%' )
     algSeq += electronSequence
@@ -46,7 +51,9 @@ def makeOverlapSequence (dataType) :
     # Include, and then set up the photon analysis sequence:
     from EgammaAnalysisAlgorithms.PhotonAnalysisSequence import \
         makePhotonAnalysisSequence
-    photonSequence = makePhotonAnalysisSequence( dataType, 'Tight.FixedCutTight')
+    photonSequence = makePhotonAnalysisSequence(
+        dataType, 'Tight.FixedCutTight',
+        forceFullSimConfig = forceEGammaFullSimConfig)
     photonSequence.configure( inputName = 'Photons',
                               outputName = 'AnalysisPhotons_%SYS%' )
     algSeq += photonSequence

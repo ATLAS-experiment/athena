@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -49,6 +49,9 @@ if not dataType in ["data", "mc", "afii"] :
 
 print("Running on data type: " + dataType)
 
+# No R24 FastSim recommendations for EGamma yet
+forceEGammaFullSimConfig = True
+
 if isPhyslite :
     inputfile = {"data": 'ASG_TEST_FILE_LITE_DATA',
                  "mc":   'ASG_TEST_FILE_LITE_MC',
@@ -76,7 +79,8 @@ from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
 algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = athArgs.no_systematics,
                        isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                       autoconfigFromFlags=flags, onlyNominalOR=athArgs.onlyNominalOR)
+                       autoconfigFromFlags=flags, onlyNominalOR=athArgs.onlyNominalOR,
+                       forceEGammaFullSimConfig=forceEGammaFullSimConfig)
 
 # Need to explicitly instantiate the CutFlowSvc in Athena to allow
 # the event filters to run.  In AnalysisBase that is (currently)

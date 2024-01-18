@@ -22,8 +22,10 @@ Jets:
 
 Electrons:
   - containerName: 'AnaElectrons'
+    forceFullSimConfig: True
     WorkingPoint:
       - selectionName: 'loose'
+        forceFullSimConfig: True
         noEffSF: True
         likelihoodWP: 'LooseBLayerLH'
         isolationWP: 'Loose_VarRad'
@@ -34,8 +36,10 @@ Electrons:
 Photons:
   - containerName: 'AnaPhotons'
     recomputeIsEM: False
+    forceFullSimConfig: True
     WorkingPoint:
       - selectionName: 'tight'
+        forceFullSimConfig: True
         noEffSF: True
         qualityWP: 'Tight'
         isolationWP: 'FixedCutTight'
