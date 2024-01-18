@@ -133,6 +133,14 @@ public:
     return m_symIds;
   }
 
+  /**
+   * @brief Return the hash-max as pair<onlHashMax,oflHashMax>
+   */
+  std::pair<size_t,size_t> hashMax() const {
+    return std::make_pair(m_onlHashtoSymOnl.size(),m_oflHashtoSymOnl.size());
+  }
+
+
 
  private:
   typedef std::pair<Identifier32::value_type, uint32_t> IdPair_t;

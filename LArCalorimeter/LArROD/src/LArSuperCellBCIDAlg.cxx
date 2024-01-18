@@ -70,7 +70,7 @@ LArSuperCellBCIDAlg::execute(const EventContext& context) const
                 float correction(0.0);
 		HWIdentifier hwid =  cabling->createSignalChannelID(sc->ID());
                 IdentifierHash hash_id = m_laronline_id->channel_Hash(hwid); 
-                correction=caloLumiBCID->average((int)hash_id); ;
+                correction=caloLumiBCID->average((size_t)hash_id); // Accesses the internal cache of CaloBCIDAverage directly, no phi-symmetry use. 
                 cell->setEnergy( sc->energy() - correction );
                 new_scell_cont->push_back( std::move(cell) );
         }
