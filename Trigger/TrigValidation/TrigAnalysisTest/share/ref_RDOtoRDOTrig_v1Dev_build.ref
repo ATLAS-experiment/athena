@@ -13134,6 +13134,14 @@ HLT_j20_calratio_roiftf_preselj20emf24_L1eTAU80HL:
   stepFeatures:
     0: 2
     1: 12
+HLT_j20_calratio_roiftf_preselj20emf24_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 1
+    1: 1
+  stepFeatures:
+    0: 1
+    1: 5
 HLT_j20_pf_ftf_presel4j85_PhysicsTLA_L13J50:
   eventCount: 1
   stepCounts:
