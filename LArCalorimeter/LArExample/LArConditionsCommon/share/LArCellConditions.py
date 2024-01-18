@@ -14,6 +14,7 @@
 
 
 import os,sys,getopt
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
 fhistory = os.path.expanduser("~/.LArCellConditionsHist")
 
 
@@ -43,7 +44,7 @@ run=None
 tag=None
 sv=True
 geo=False
-detdescrtag="ATLAS-R2-2016-01-00-01"
+detdescrtag=defaultGeometryTags.RUN2
 detdescrset=False
 sqlite=""
 
@@ -118,6 +119,7 @@ flags.Input.isMC=False
 flags.Input.RunNumbers=[run]
 flags.IOVDb.DatabaseInstance="CONDBR2" if run>222222 else "COMP200"
 flags.IOVDb.GlobalTag=tag
+flags.GeoModel.AtlasVersion = detdescrtag 
 flags.LAr.doAlign=False
 from AthenaCommon.Constants import FATAL
 flags.Exec.OutputLevel=FATAL
