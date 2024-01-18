@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: CaloClusterCorrection/test/config_t.py
@@ -9,7 +9,7 @@
 from PyUtils import coverage
 c = coverage.Coverage ('CaloClusterCorrection.common')
 
-
+import AthenaCommon.Logging  # noqa: F401 (setup default log format)
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from CaloClusterCorrection import common
