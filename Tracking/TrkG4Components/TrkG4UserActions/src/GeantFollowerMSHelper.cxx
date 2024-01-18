@@ -1022,7 +1022,7 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos,
   if (trkParameters && trkParameters->covariance()) {
     errord0 = (*trkParameters->covariance())(Trk::d0, Trk::d0);
     errorz0 = (*trkParameters->covariance())(Trk::z0, Trk::z0);
-    // errorphi = (*trkParameters->covariance())(Trk::phi, Trk::phi);
+    errorphi = (*trkParameters->covariance())(Trk::phi, Trk::phi);
     errortheta = (*trkParameters->covariance())(Trk::theta, Trk::theta);
     errorqoverp = (*trkParameters->covariance())(Trk::qOverP, Trk::qOverP);
     ATH_MSG_DEBUG(" Covariance found for m_treeData->m_trk_status "
