@@ -8,6 +8,7 @@
 CaloBCIDAverage::CaloBCIDAverage(const LArMCSym* mcSym,
                                  CxxUtils::vec_aligned_vector<float>&& data):
   m_mcSym(mcSym),
+  m_oflHashMax(mcSym ? mcSym->hashMax().second : 0),
   m_avg(std::move(data))
 {
 }

@@ -71,15 +71,15 @@ StatusCode CaloCellPedestalCorr::process( CaloCellContainer * theCellContainer, 
   
 
   for (CaloCell* theCell : *theCellContainer) {
+    const IdentifierHash cellHash=theCell->caloDDE()->calo_hash();
     float pedestal=0;
     if (!m_isMC) { 
-      const unsigned int cellHash=theCell->caloDDE()->calo_hash();
       const unsigned int dbGain = CaloCondUtils::getDbCaloGain(theCell->gain()); 
       pedestal = pedShifts->pedShift(cellHash,dbGain);
     }
 
     if (bcidavgshift) {
-      pedestal = pedestal + bcidavgshift->average(theCell->ID());
+      pedestal = pedestal + bcidavgshift->averageOflHash(cellHash);
     }
 
     theCell->addEnergy(-pedestal);

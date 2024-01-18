@@ -18,6 +18,12 @@ class CaloBCIDAverage {
   CaloBCIDAverage() = delete;
   CaloBCIDAverage(const LArMCSym* mcSym, CxxUtils::vec_aligned_vector<float>&& data);
   
+  float averageOflHash(const IdentifierHash h) const {
+    if (h>=m_oflHashMax) return 0.0; //Catches the tile-case
+    const size_t idx = m_mcSym->ZPhiSymOflIndex(h);
+    return m_avg[idx];
+  }
+
   float average(const Identifier& id) const {
     if (!id.is_valid()) return 0;
     const size_t idx = m_mcSym->ZPhiSymOflIndex(id);
@@ -41,6 +47,7 @@ class CaloBCIDAverage {
   
  private:
   const LArMCSym* m_mcSym;
+  const size_t m_oflHashMax;
   CxxUtils::vec_aligned_vector<float> m_avg;
 };
 
