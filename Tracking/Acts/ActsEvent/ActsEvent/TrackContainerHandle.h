@@ -57,7 +57,7 @@ class MutableTrackContainerHandle {
   // track and its backend
   SG::WriteHandleKey<xAOD::TrackSummaryContainer> m_xAODTrackSummaryKey;
   SG::WriteHandleKey<xAOD::TrackSurfaceContainer> m_surfacesKey;
-  SG::WriteHandleKey<ActsTrk::TrackSummaryContainer> m_trackBackendKey;
+  SG::WriteHandleKey<ActsTrk::TrackStorageContainer> m_trackBackendKey;
 };
 
 template <class C>
@@ -133,7 +133,7 @@ MutableTrackContainerHandle<C>::moveToConst(ActsTrk::MutableTrackContainer&& tc,
         "MutableTrackContainerHandle::moveToConst, can't record "
         "xAODTrackSurfaces");
   }
-  auto constTrackStorage = std::make_unique<ActsTrk::TrackSummaryContainer>(
+  auto constTrackStorage = std::make_unique<ActsTrk::TrackStorageContainer>(
       DataLink<xAOD::TrackSummaryContainer>(m_xAODTrackSummaryKey.key(),
                                             context));
   constTrackStorage->restoreDecorations();
@@ -147,7 +147,7 @@ MutableTrackContainerHandle<C>::moveToConst(ActsTrk::MutableTrackContainer&& tc,
         "xAODTrackStorage");
   }
   auto constTrack = std::make_unique<ActsTrk::TrackContainer>(
-      DataLink<ActsTrk::TrackSummaryContainer>(m_trackBackendKey.key(),
+      DataLink<ActsTrk::TrackStorageContainer>(m_trackBackendKey.key(),
                                                context),
       DataLink<ActsTrk::MultiTrajectory>(m_mtjKey.key(), context));
   return constTrack;

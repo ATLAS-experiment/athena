@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 # Define some handy strings for plot labels
@@ -25,30 +25,30 @@ selStr["onlofflEmismatch"] = "for unmasked SCs which pass #tau selection where o
 
 
 
-def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes=[]):
+def LArDigitalTriggMonConfig(inputFlags,larLATOMEBuilderAlg, nsamples=32, streamTypes=[]):
     '''Function to configures some algorithms in the monitoring system.'''
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
 
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'LArDigitalTriggMonAlgCfg')
+    helper = AthMonitorCfgHelper(inputFlags,'LArDigitalTriggMonAlgCfg')
 
     from LArMonitoring.GlobalVariables import lArDQGlobals
     
     from AthenaCommon.Logging import logging
     mlog = logging.getLogger( 'LArDigitalTriggMon' )
 
-    if not flags.DQ.enableLumiAccess:
+    if not inputFlags.DQ.enableLumiAccess:
        from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
-       helper.resobj.merge(LuminosityCondAlgCfg(flags))
+       helper.resobj.merge(LuminosityCondAlgCfg(inputFlags))
 
     #get SC onl-offl mapping from DB    
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
-    helper.resobj.merge(LArOnOffIdMappingSCCfg(flags))
+    helper.resobj.merge(LArOnOffIdMappingSCCfg(inputFlags))
     
     # and elec. calib. coeffs
     from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
-    helper.resobj.merge(LArElecCalibDBSCCfg(flags, condObjs=["Ramp","DAC2uA", "Pedestal", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
+    helper.resobj.merge(LArElecCalibDBSCCfg(inputFlags, condObjs=["Ramp","DAC2uA", "Pedestal", "uA2MeV", "MphysOverMcal", "OFC", "Shape", "HVScaleCorr"]))
 
 
 

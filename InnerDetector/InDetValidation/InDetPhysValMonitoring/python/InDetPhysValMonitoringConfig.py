@@ -240,8 +240,6 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault('JetPtMin', 100)
         kwargs.setdefault('JetPtMax', 5000)
 
-    kwargs.setdefault("doPRW", flags.PhysVal.IDPVM.doPRW)
-
     acc.setPrivateTools(CompFactory.InDetPhysValMonitoringTool(**kwargs))
     return acc
 

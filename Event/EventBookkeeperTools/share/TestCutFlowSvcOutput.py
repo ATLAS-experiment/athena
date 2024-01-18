@@ -81,7 +81,6 @@ Stream1.MetadataItemList += ['xAOD::CutBookkeeperContainer#IncompleteCutBookkeep
 
 # set debug logging
 ServiceMgr.MessageSvc.defaultLimit = 9999999
-ServiceMgr.MetaDataSvc.OutputLevel = DEBUG
 ServiceMgr.CutFlowSvc.OutputLevel = DEBUG
 ToolSvc.BookkeeperTool.OutputLevel = DEBUG
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -81,6 +81,8 @@ CommonEfficiencyTool::CommonEfficiencyTool(const std::string& sName)
   , m_eCheckTruth(TauAnalysisTools::Unknown)
   , m_bSFIsAvailable(false)
   , m_bSFIsAvailableChecked(false)
+  , m_bPtTauEtaCalibIsAvailable(false)
+  , m_bPtTauEtaCalibIsAvailableIsChecked(false)
 {
   declareProperty( "InputFilePath",       m_sInputFilePath       = "" );
   declareProperty( "VarName",             m_sVarName             = "" );
@@ -157,6 +159,21 @@ StatusCode CommonEfficiencyTool::initialize()
 CP::CorrectionCode CommonEfficiencyTool::getEfficiencyScaleFactor(const xAOD::TauJet& xTau,
     double& dEfficiencyScaleFactor, unsigned int iRunNumber, unsigned int iMu)
 {
+  // FIXME: remove this once R22 SF files are derived (they will all be parametrised vs MVA pt)
+  // save calo based TES if not available
+  if (not m_bPtTauEtaCalibIsAvailableIsChecked)
+  {
+    m_bPtTauEtaCalibIsAvailable = xTau.isAvailable<float>("ptTauEtaCalib");
+    m_bPtTauEtaCalibIsAvailableIsChecked = true;
+  }
+  if (not m_bPtTauEtaCalibIsAvailable) 
+  {
+    xTau.auxdecor<float>("ptTauEtaCalib") = xTau.pt();
+    xTau.auxdecor<float>("etaTauEtaCalib") = xTau.eta();
+    xTau.auxdecor<float>("phiTauEtaCalib") = xTau.phi();
+    xTau.auxdecor<float>("mTauEtaCalib") = xTau.m();
+  }
+
   // check which true state is requested
   if (!m_bSkipTruthMatchCheck and getTruthParticleType(xTau) != m_eCheckTruth)
   {
@@ -279,6 +296,21 @@ CP::CorrectionCode CommonEfficiencyTool::applyEfficiencyScaleFactor(const xAOD::
   unsigned int iRunNumber, unsigned int iMu)
 {
   double dSf = 0.;
+
+  // FIXME: remove this once R22 SF files are derived (they will all be parametrised vs MVA pt)
+  // save calo based TES if not available
+  if (not m_bPtTauEtaCalibIsAvailableIsChecked)
+  {
+    m_bPtTauEtaCalibIsAvailable = xTau.isAvailable<float>("ptTauEtaCalib");
+    m_bPtTauEtaCalibIsAvailableIsChecked = true;
+  }
+  if (not m_bPtTauEtaCalibIsAvailable) 
+  {
+    xTau.auxdecor<float>("ptTauEtaCalib") = xTau.pt();
+    xTau.auxdecor<float>("etaTauEtaCalib") = xTau.eta();
+    xTau.auxdecor<float>("phiTauEtaCalib") = xTau.phi();
+    xTau.auxdecor<float>("mTauEtaCalib") = xTau.m();
+  }
 
   if (!m_bSFIsAvailableChecked)
   {

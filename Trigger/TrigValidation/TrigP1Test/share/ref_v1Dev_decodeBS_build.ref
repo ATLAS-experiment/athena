@@ -265,25 +265,29 @@ HLT_2j20_2j20_pf_ftf_presel2c20XX2c20b85_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25:
 HLT_2j20_2j20_pf_ftf_presel2j25XX2j25b85_PhysicsTLA_L14J15p0ETA25:
   eventCount: 0
 HLT_2j20_ftf_mb_afprec_afpdz10_L1RD0_FILLED:
-  eventCount: 0
+  eventCount: 1
   stepCounts:
     0: 50
     1: 32
     2: 32
+    3: 1
   stepFeatures:
     0: 50
     1: 143
     2: 32
+    3: 1
 HLT_2j20_ftf_mb_afprec_afpdz5_L1RD0_FILLED:
-  eventCount: 0
+  eventCount: 1
   stepCounts:
     0: 50
     1: 32
     2: 32
+    3: 1
   stepFeatures:
     0: 50
     1: 143
     2: 32
+    3: 1
 HLT_2j20_mb_afprec_afpdijet_L1RD0_FILLED:
   eventCount: 0
   stepCounts:
@@ -5265,9 +5269,9 @@ HLT_j20_PhysicsTLA_L1jJ90_DETA20-jJ90J:
     0: 13
     1: 13
     2: 3
-HLT_j20_calratio_roiftf_preselj20emf24_L1J100:
+HLT_j20_calratio_roiftf_preselj20e24_L1J100:
   eventCount: 0
-HLT_j20_calratio_roiftf_preselj20emf24_L1TAU100:
+HLT_j20_calratio_roiftf_preselj20e24_L1TAU40_EMPTY:
   eventCount: 0
 HLT_j20_calratio_roiftf_preselj20emf24_L1TAU40_EMPTY:
   eventCount: 0

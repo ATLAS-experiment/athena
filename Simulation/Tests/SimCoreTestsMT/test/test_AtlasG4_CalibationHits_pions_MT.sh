@@ -8,7 +8,6 @@
 # art-athena-mt: 8
 # art-output: log.*
 # art-output: test.HITS.pool.root
-# art-output: test.CA.HITS.pool.root
 
 export ATHENA_CORE_NUMBER=8
 
@@ -93,7 +92,7 @@ if [ $rc -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --file=test.HITS.pool.root
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees
     rc4=$?
     if [ $status -eq 0 ]
     then

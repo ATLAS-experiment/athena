@@ -62,7 +62,7 @@ if not isOfflineTest:
 
 # Conditions tag
 if isOfflineTest:
-    flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-01'
+    flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-02'
 else:
     flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' # Online conditions tag
 
@@ -95,6 +95,7 @@ else:
 flags.Reco.EnableTrigger = False # TODO test True
 flags.LAr.doHVCorr = False # ATLASRECTS-6823
 flags.Exec.OutputLevel = INFO
+flags.Concurrency.NumThreads = 0
 
 if isOfflineTest:
     flags.Common.isOnline = False
@@ -108,7 +109,7 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
     from ispy import ISObject, IPCPartition
     RunParams = ISObject(IPCPartition(partitionName), 'RunParams.RunParams', 'RunParams')
     RunParams.checkout()
-    flags.Input.OverrideRunNumber = True
+    flags.Input.OverrideRunNumber =True
     flags.Input.RunNumbers = [RunParams.run_number]
     
     # Get the B field
@@ -119,8 +120,8 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
     flags.BField.endcapToroidOn = toroidOn
 
 # GM test partition needs to be given the below info
-if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9') or testWithoutPartition:
-    flags.Input.OverrideRunNumber = True
+if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9') and not testWithoutPartition:
+    flags.Input.OverrideRunNumber =True
     flags.Input.RunNumbers = [412343]
     flags.Input.LumiBlockNumbers = [1]
     flags.Input.ProjectName = projectName
@@ -179,13 +180,14 @@ if not testWithoutPartition:
         bytestreamInput.KeyValue = [ 'Test_emon_push' ]
         bytestreamInput.KeyCount = 1
 
-def StreamToFileToolCfg(flags,**kwargs):
+def StreamToFileToolCfg(flags, name='StreamToFileTool',**kwargs):
     result = ComponentAccumulator()
     prefixFileName = "%s/.Unknown/JiveXML" % outputDirectory
     kwargs.setdefault("FileNamePrefix", prefixFileName)
     the_tool = CompFactory.JiveXML.StreamToFileTool(**kwargs)
     result.setPrivateTools(the_tool)
     return result
+
 streamToFileTool = acc.popToolsAndMerge(StreamToFileToolCfg(flags))
 
 if not isOfflineTest:

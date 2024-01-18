@@ -146,7 +146,7 @@ JetChainParts = {
     'trkpresel'    : # Tracking preselection
       ['nopresel',
        # Single jet
-       'preselj20emf24',
+       'preselj20e24',
        'preselj20',
        'preselj50',
        'preselj80',

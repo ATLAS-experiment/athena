@@ -21,6 +21,5 @@ atlas_add_library( ActsToolInterfacesLib
                    InDetReadoutGeometry
 		   InDetIdentifier
                    xAODInDetMeasurement
-                   xAODMeasurementBase
                    TrkFitterUtils
                    )

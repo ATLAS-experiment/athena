@@ -34,7 +34,6 @@ atlas_add_component( ActsTrackReconstruction
 		       GeoPrimitives
 		       AthenaBaseComps
 		       AthenaKernel
-		       TrkTruthData
 		       CaloDetDescrLib
 		       EventInfo
 		       StoreGateLib
@@ -48,7 +47,6 @@ atlas_add_component( ActsTrackReconstruction
 		       xAODTracking
 		       TrkFitterInterfaces
 		       InDetRIO_OnTrack
-		       TruthUtils
                      )
 
 # Install files from the package:

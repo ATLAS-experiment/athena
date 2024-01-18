@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#
-
 # Script to construct the command that launches Athena on vp1.py, 
 # with all the appropriate options (in the -c flag).
 #
@@ -26,10 +22,9 @@
 #fixme/todo: option to start cruise mode (event/second)
 #fixme/todo: MULTINP_CPY should not be allowed to exist beforehand!
 
-# For DEBUG only 
 # Prefix all output from this script with '[vp1]'
-#exec > >(trap "" INT TERM; sed 's/^/[vp1] /')
-#exec 2> >(trap "" INT TERM; sed 's/^/[vp1\/stderr] /' >&2)
+exec > >(trap "" INT TERM; sed 's/^/[vp1] /')
+exec 2> >(trap "" INT TERM; sed 's/^/[vp1\/stderr] /' >&2)
 
 
 ### TERMINAL COLORS ###
