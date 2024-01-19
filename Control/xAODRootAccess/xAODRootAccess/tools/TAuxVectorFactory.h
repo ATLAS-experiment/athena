@@ -59,9 +59,11 @@ namespace xAOD {
       copyForOutput( void* dst,       size_t dst_index,
                      const void* src, size_t src_index ) const override;
 
-      /// Swap the payload of two elements in memory
-      virtual void swap( void* a, size_t aindex,
-                         void* b, size_t bindex ) const override;
+      /// Swap the payload of two ranges of elements in memory
+      virtual void swap( SG::auxid_t auxid,
+                         SG::AuxVectorData& a, size_t aindex,
+                         SG::AuxVectorData& b, size_t bindex,
+                         size_t n ) const override;
 
       /// Clear the payload of a given range inside a vector
       virtual void clear( void* dst, size_t dst_index ) const override;

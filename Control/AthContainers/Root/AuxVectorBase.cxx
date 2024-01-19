@@ -293,15 +293,11 @@ void AuxVectorBase::swapElementsAux (size_t aindex,
 
   SG::auxid_set_t a_ids = acont->getAuxIDs();
   for (SG::auxid_t auxid : a_ids) {
-    void* aptr = acont->getDataArray (auxid);
-    void* bptr = bcont->getDataArray (auxid);
-    r.swap (auxid, aptr, aindex, bptr, bindex);
+    r.swap (auxid, *acont, aindex, *bcont, bindex, 1);
   }
   for (SG::auxid_t auxid : bcont->getAuxIDs()) {
     if (!a_ids.test (auxid)) {
-      void* aptr = acont->getDataArray (auxid);
-      void* bptr = bcont->getDataArray (auxid);
-      r.swap (auxid, aptr, aindex, bptr, bindex);
+      r.swap (auxid, *acont, aindex, *bcont, bindex, 1);
     }
   }
 }
@@ -380,9 +376,9 @@ AuxVectorBase::ResortAuxHelper::resortElement (size_t idx, SG::AuxElement* elt)
     // swap between auxdata slots dx+index, ii1+index
     SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
     size_t naux = m_auxids.size();
+    SG::AuxVectorData& cont = *elt->container();
     for (size_t iid = 0; iid < naux; iid++) {
-      void* ptr = m_auxdata[iid];
-      r.swap (m_auxids[iid], ptr, idx+index, ptr, ii1+index);
+      r.swap (m_auxids[iid], cont, idx+index, cont, ii1+index, 1);
     }
     std::swap (m_rmap[idx], m_rmap[ii1]);
     std::swap (m_imap[m_rmap[idx]], m_imap[m_rmap[ii1]]);

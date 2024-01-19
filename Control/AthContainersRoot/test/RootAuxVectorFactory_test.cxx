@@ -11,6 +11,8 @@
 
 #undef NDEBUG
 #include "AthContainersRoot/RootAuxVectorFactory.h"
+#include "AthContainers/AuxVectorData.h"
+#include "AthContainers/AuxStoreInternal.h"
 #include "AthContainersRoot/test/Foo.h"
 #include "AthLinks/ElementLink.h"
 #include "SGTools/TestStore.h"
@@ -18,6 +20,37 @@
 #include "TClass.h"
 #include <iostream>
 #include <cassert>
+
+
+namespace SG {
+
+
+class AuxVectorData_test
+  : public AuxVectorData
+{
+public:
+  using AuxVectorData::setStore;
+
+  virtual size_t size_v() const { return 10; }
+  virtual size_t capacity_v() const { return 20; }
+};
+
+
+class AuxStoreInternal_test
+  : public AuxStoreInternal
+{
+public:
+  using AuxStoreInternal::addVector;
+};
+
+
+} // namespace SG
+
+
+
+using SG::AuxVectorData;
+using SG::AuxVectorData_test;
+using SG::AuxStoreInternal_test;
 
 
 std::string str (int x)
@@ -257,9 +290,24 @@ void test3()
   fac.clear (ptr, 1);
   assert (ptr[1] == 0);
 
-  fac.swap (ptr, 0, ptr, 5);
-  assert (ptr[0] == 2);
+  AuxVectorData_test avd1;
+  AuxStoreInternal_test store1;
+  avd1.setStore (&store1);
+  store1.addVector (std::move(vec), false);
+
+  ptr[0] = 1;
+  ptr[1] = 2;
+  ptr[2] = 3;
+  ptr[5] = 10;
+  ptr[6] = 11;
+  ptr[7] = 12;
+  fac.swap (1, avd1, 0, avd1, 5, 2);
+  assert (ptr[0] == 10);
+  assert (ptr[1] == 11);
+  assert (ptr[2] == 3);
   assert (ptr[5] == 1);
+  assert (ptr[6] == 2);
+  assert (ptr[7] == 12);
 }
 
 
@@ -285,7 +333,12 @@ void test4()
   fac.clear (ptr, 1);
   assert (ptr[1] == "");
 
-  fac.swap (ptr, 0, ptr, 5);
+  AuxVectorData_test avd1;
+  AuxStoreInternal_test store1;
+  avd1.setStore (&store1);
+  store1.addVector (std::move(vec), false);
+
+  fac.swap (1, avd1, 0, avd1, 5, 1);
   assert (ptr[0] == "2");
   assert (ptr[5] == "1");
 }

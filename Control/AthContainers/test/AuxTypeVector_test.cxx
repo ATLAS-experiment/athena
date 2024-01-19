@@ -106,12 +106,6 @@ void test_vector1()
   ptr2[0] = makeT<T>(10);
   ptr2[1] = makeT<T>(11);
 
-  SG::AuxTypeVector<T>::swap (ptr2, 0, ptr, 1);
-  assert (ptr[0] == makeT<T>(20));
-  assert (ptr[1] == makeT<T>(10));
-  assert (ptr2[0] == makeT<T>(2));
-  assert (ptr2[1] == makeT<T>(11));
-
   SG::AuxTypeVector<T>::clear (ptr2, 0);
   assert (ptr2[0] == makeT<T>());
   assert (ptr2[1] == makeT<T>(11));

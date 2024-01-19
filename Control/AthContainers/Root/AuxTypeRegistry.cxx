@@ -370,22 +370,25 @@ void AuxTypeRegistry::copyForOutput (SG::auxid_t auxid,
 
 
 /**
- * @brief Swap an element between vectors.
+ * @brief Swap elements between vectors.
  * @param auxid The aux data item being operated on.
- * @param a Pointer to the start of the first vector's data.
- * @param aindex Index of the element in the first vector.
- * @param b Pointer to the start of the second vector's data.
- * @param bindex Index of the element in the second vector.
+ * @param a Container for the first vector.
+ * @param aindex Index of the first element in the first vector.
+ * @param b Container for the second vector.
+ * @param bindex Index of the first element in the second vector.
+ * @param n Number of elements to swap.
  *
  * @c a and @ b can be either the same or different.
+ * However, the ranges should not overlap.
  */
 void AuxTypeRegistry::swap (SG::auxid_t auxid,
-                            void* a, size_t aindex,
-                            void* b, size_t bindex)
+                            AuxVectorData& a, size_t aindex,
+                            AuxVectorData& b, size_t bindex,
+                            size_t n) const
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   if (factory)
-    factory->swap (a, aindex, b, bindex);
+    factory->swap (auxid, a, aindex, b, bindex, n);
 }
 
 

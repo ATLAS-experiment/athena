@@ -13,6 +13,7 @@
 #include "xAODRootAccess/tools/TAuxVector.h"
 #include "xAODRootAccess/tools/Message.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "AthContainers/AuxVectorData.h"
 #include "CxxUtils/ClassName.h"
 #include "CxxUtils/as_const_ptr.h"
 
@@ -111,17 +112,19 @@ namespace xAOD {
                                "with pool converters." ) );
    }
 
-   void TAuxVectorFactory::swap( void* a, size_t aindex,
-                                 void* b, size_t bindex ) const {
+   void TAuxVectorFactory::swap( SG::auxid_t auxid,
+                                 SG::AuxVectorData& a, size_t aindex,
+                                 SG::AuxVectorData& b, size_t bindex,
+                                 size_t n ) const {
 
       // The size of one element in memory:
       const size_t eltsz = m_proxy->GetIncrement();
 
       // Get the location of the two elements in memory:
-      a = reinterpret_cast< void* >( reinterpret_cast< unsigned long >( a ) +
-                                     eltsz * aindex );
-      b = reinterpret_cast< void* >( reinterpret_cast< unsigned long >( b ) +
-                                     eltsz * bindex );
+      char* aptr = reinterpret_cast<char*>( a.getDataArray (auxid) );
+      char* bptr = &a == &b ? aptr : reinterpret_cast<char*>( b.getDataArray (auxid) );
+      aptr += eltsz * aindex;
+      bptr += eltsz * bindex;
 
       TMethodCall* mc = m_assign.call();
       if( mc ) {
@@ -130,18 +133,22 @@ namespace xAOD {
          TClass* eltClass = m_proxy->GetValueClass();
          void* tmp = eltClass->New();
 
-         // tmp = a
-         mc->ResetParam();
-         mc->SetParam( ( Long_t ) a );
-         mc->Execute( tmp );
-         // a = b
-         mc->ResetParam();
-         mc->SetParam( ( Long_t ) b );
-         mc->Execute( a );
-         // b = tmp
-         mc->ResetParam();
-         mc->SetParam( ( Long_t ) tmp );
-         mc->Execute( b );
+         for (size_t i = 0; i < n; ++i) {
+           // tmp = a
+           mc->ResetParam();
+           mc->SetParam( ( Long_t ) aptr );
+           mc->Execute( static_cast<void*>( tmp ) );
+           // a = b
+           mc->ResetParam();
+           mc->SetParam( ( Long_t ) bptr );
+           mc->Execute( static_cast<void*>( aptr ) );
+           // b = tmp
+           mc->ResetParam();
+           mc->SetParam( ( Long_t ) tmp );
+           mc->Execute( static_cast<void*>( bptr ) );
+           aptr += eltsz;
+           bptr += eltsz;
+         }
 
          // Delete the temporary object:
          eltClass->Destructor( tmp );
@@ -149,13 +156,13 @@ namespace xAOD {
       } else {
 
          // Allocate some temporary memory for the swap:
-         std::vector< char > tmp( eltsz );
+         std::vector< char > tmp( eltsz*n );
          // tmp = a
-         memcpy( tmp.data(), a, eltsz );
+         memcpy( tmp.data(), aptr, eltsz*n );
          // a = b
-         memcpy( a, b, eltsz );
+         memcpy( aptr, bptr, eltsz*n );
          // b = tmp
-         memcpy( b, tmp.data(), eltsz );
+         memcpy( bptr, tmp.data(), eltsz*n );
       }
 
       return;
