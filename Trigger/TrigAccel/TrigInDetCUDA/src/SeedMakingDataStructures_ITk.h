@@ -8,7 +8,7 @@
 #include "CommonStructures.h"
 
 static constexpr unsigned int MAX_MIDDLE_SP_ITk         = 300000;
-static constexpr unsigned int MAX_DOUBLET_ITk           = 25000000;
+static constexpr unsigned int MAX_DOUBLET_ITk           = 5000000;
 static constexpr unsigned int NUM_MIDDLE_THREADS_ITk        = 32;
 static constexpr unsigned int OUTER_THREADS_MULTIPLIER_ITk  = 4; // i.e thread block is 32 x 4*192/32
 static constexpr unsigned int MAX_NUMBER_DOUBLETS_ITk       = 1500;

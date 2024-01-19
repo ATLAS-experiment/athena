@@ -44,6 +44,8 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
     
     ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_",
                                             LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
+                                            TrigAccelerationTool     = acc.getPublicTool( "TrigITkAccelerationTool_FTF" ),
+                                            TrigAccelerationSvc      = acc.getService("TrigInDetAccelerationSvc"),
                                             SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool"),
                                             TrackSummaryTool         = ITkTrackSummaryTool,
                                             initialTrackMaker        = ITkSiTrackMakerTool,

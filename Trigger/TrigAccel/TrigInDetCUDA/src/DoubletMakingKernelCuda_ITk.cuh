@@ -91,7 +91,7 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 		float zm = dSpacepoints->m_z[spmIdx];
 		float rm = dSpacepoints->m_r[spmIdx];
 
-		if (!canBeMiddleSpacePoint(rm, zm)) continue;
+		if (!canBeMiddleSpacePoint(rm)) continue;
 
 		//2. loop over other phi-bins / layers
 
