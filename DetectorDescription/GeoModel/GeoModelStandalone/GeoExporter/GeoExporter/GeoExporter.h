@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 
 //NB: There should never be any Qt (or Athena of course) includes in this file!!!
 
+#include "CxxUtils/checker_macros.h"
 #include <string>
 #include <vector>
 
@@ -25,7 +26,8 @@ class StoreGateSvc;
 class IToolSvc;
 class ISvcLocator;
 
-class GeoExporter {
+// Marked not thread-safe because it uses VP1.
+class ATLAS_NOT_THREAD_SAFE GeoExporter {
 public:
 
   GeoExporter(StoreGateSvc* sg, StoreGateSvc* detstore,
