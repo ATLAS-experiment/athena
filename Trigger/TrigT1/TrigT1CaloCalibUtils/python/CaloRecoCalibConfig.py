@@ -8,8 +8,7 @@ def CaloRecoCalibCfg(configFlags):
     if configFlags.Input.Format is Format.BS:
         #Data-case: Schedule ByteStream reading for LAr & Tile
         from LArByteStream.LArRawCalibDataReadingConfig import LArRawCalibDataReadingCfg 
-        result.merge(LArRawCalibDataReadingCfg(configFlags))
-        result.getEventAlgo("LArRawCalibDataReadingAlg").LArDigitKey="FREE" 
+        result.merge(LArRawCalibDataReadingCfg(configFlags,gain="FREE",doDigit=True))
 
         from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
         result.merge( TileRawDataReadingCfg(configFlags) )

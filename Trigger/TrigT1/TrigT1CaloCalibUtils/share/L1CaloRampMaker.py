@@ -2,8 +2,8 @@
 
 import glob, sys
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 from AthenaConfiguration.ComponentFactory import CompFactory
-
 ###################################    
 ## Example for run TILE/LAr + L1Calo  calibration
 ##################################
@@ -25,14 +25,15 @@ def main():
     parser.add_option("-i","--InputFiles",        dest="InputFiles",                      help="Input raw data (default: %default)")
     parser.add_option("-l","--doLAr",            dest="doLAr",    action="store_true",  help="Do L1Calo+LAr calibration(default: %default)")
     parser.add_option("-t","--doTile",           dest="doTile",   action="store_true",  help="Do L1Calo+Tile calibration(default: %default)")
-    parser.set_defaults(InputFiles="/eos/atlas/atlastier0/rucio/data22_calib/calibration_L1CaloEnergyScan/00419051/data22_calib.00419051.calibration_L1CaloEnergyScan.daq.RAW/data22_calib.00419051.calibration_L1CaloEnergyScan.daq.RAW._lb0000._SFO-1._0001.data", doLAr=False, doTile=False)
+    parser.set_defaults(InputFiles="/eos/atlas/atlastier0/rucio/data22_calib/calibration_L1CaloEnergyScan/00429494/data22_calib.00429494.calibration_L1CaloEnergyScan.daq.RAW/*", doLAr=False, doTile=False)
     (options,args) = parser.parse_args()
     
     flags = initConfigFlags()
     flags.Input.Files = glob.glob(options.InputFiles)
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
-    
+
+
     flags.Exec.MaxEvents = -1
     flags.Detector.EnableCalo = True
     flags.Trigger.enableL1CaloLegacy = True
@@ -46,6 +47,9 @@ def main():
     flags.Tile.doOptATLAS=True
     flags.Tile.RunType='PHY'
     flags.Tile.BestPhaseFromCOOL=True
+    flags.Tile.useDCS=False
+    flags.Tile.TimeMaxForAmpCorrection=25
+    flags.Tile.TimeMinForAmpCorrection=-25
     flags.IOVDb.DBConnection = "sqlite://;schema=energyscanresults.sqlite;dbname=L1CALO"
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-02'
 
@@ -54,6 +58,7 @@ def main():
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
     from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
     
     acc = MainServicesCfg(flags)
@@ -63,8 +68,8 @@ def main():
     
     from TrigT1CaloCalibUtils.CaloRecoCalibConfig import CaloRecoCalibCfg
     acc.merge(CaloRecoCalibCfg(flags))
+    acc.getEventAlgo('CaloCellMaker').CaloCellMakerToolNames['TileCellBuilder'].mergeChannels=False
     
-
 
     from LArCabling.LArCablingConfig import LArFebRodMappingCfg, LArCalibIdMappingCfg 
     acc.merge(LArFebRodMappingCfg(flags))
@@ -74,25 +79,31 @@ def main():
 
     from CaloConditions.CaloConditionsConfig import CaloTriggerTowerCfg
     acc.merge(CaloTriggerTowerCfg(flags))
-
+    
+    
     LArADC2MeVCondAlg = CompFactory.LArADC2MeVCondAlg()
     LArADC2MeVCondAlg.LArHVScaleCorrKey=""
     acc.addCondAlgo(LArADC2MeVCondAlg, 'AthAlgSeq')
 
 
-    # To be inplemented: 
-    # PostConfigureLAr.py: postInclude script that configures LAr (calibration OFCs)
-    #conddb.blockFolder('/LAR/ElecCalibOfl/OFC/PhysWave/RTM/4samples1phase')
-    #conddb.addFolderWithTag('LAR_OFL','/LAR/ElecCalibOfl/OFC/CaliWave','LARElecCalibOflOFCCaliWave-RUN2-UPD3-00');
+    
+    
+    # OFC values  
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    acc.merge(addFolders(flags,"/LAR/ElecCalibOfl/OFC/CaliWave",detDb="LAR_OFL",className="LArOFCComplete",tag="LARElecCalibOflOFCCaliWave-RUN2-UPD3-00"))
+    iovdbsvc=acc.getService("IOVDbSvc")
+    for i in range(0,len(iovdbsvc.Folders)):
+          if (iovdbsvc.Folders[i].find("/LAR/ElecCalibOfl/OFC/PhysWave/RTM/4samples1phase")>=0):
+                 del iovdbsvc.Folders[i]
+                 break
     from IOVDbSvc.IOVDbSvcConfig import addOverride
     acc.merge(addOverride(flags, "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/4samples1phase","LARElecCalibOflOFCPhysWaveRTM4samples1phase-RUN2-UPD3-00"))
     acc.merge(addOverride(flags,"/LAR/ElecCalibOfl/Shape/RTM/4samples1phase","LARElecCalibOflShapeRTM4samples1phase-RUN2-UPD3-00"))
     acc.getService("PoolSvc").ReadCatalog+=['file:PoolCat_comcond_castor.xml', 'prfile:poolcond/PoolCat_comcond_castor.xml', 'apcfile:poolcond/PoolCat_comcond_castor.xml']
     
-
     
     from TrigT1CaloCondSvc.L1CaloCondConfig import L1CaloCondAlgCfg
-    acc.merge(L1CaloCondAlgCfg(flags, Physics=False, Calib1=True, Calib2=True))
+    acc.merge(L1CaloCondAlgCfg(flags))
 
     
     decorator = CompFactory.LVL1.L1CaloTriggerTowerDecoratorAlg()
@@ -101,6 +112,7 @@ def main():
     decorator.DecorName_caloCellET = "CaloCellET"
     acc.addEventAlgo(decorator, 'AthAlgSeq')
     
+    from AthenaCommon.Constants import DEBUG, INFO     
     RampMaker = CompFactory.L1CaloRampMaker()
     RampMaker.L1TriggerTowerToolRun3 = CompFactory.LVL1.L1TriggerTowerToolRun3()
     RampMaker.DoTile = options.doTile
@@ -110,6 +122,7 @@ def main():
     RampMaker.IsGain1 = True
     RampMaker.CheckProvenance = True
     RampMaker.TileSaturationCut = 255.
+    RampMaker.OutputLevel = INFO
     # special region 1.3 < |eta| < 1.5, saturation on tile side.
     RampMaker.SpecialChannelRange = { 0x6130f02 : 150, 0x7100003 : 150, 0x7180f03 : 150, 0x7180303 : 150, 0x7100200 : 150,
                                       0x6130601 : 150, 0x6130302 : 150, 0x61f0303 : 150, 0x71c0e00 : 150, 0x71c0a00 : 150, 0x7180501 : 150, 0x6130003 : 150, 0x7140d01 : 150,
@@ -186,5 +199,3 @@ def main():
 # ===============================================================
 if __name__ == '__main__':
     main()
-
-
