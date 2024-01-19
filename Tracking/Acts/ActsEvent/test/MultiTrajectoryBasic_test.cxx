@@ -99,6 +99,19 @@ struct TestTrackState {
   }
 };
 
+struct EmptyTrackStatesAux {
+  ActsTrk::MutableMultiTrajectory m;
+};
+
+BOOST_FIXTURE_TEST_CASE(AllMtjStaticxAODVaraiblesAreKnown, EmptyTrackStatesAux) {
+    for (auto id : m.trackStatesAux()->getStore()->getAuxIDs()) {
+        const std::string name = SG::AuxTypeRegistry::instance().getName(id);
+        BOOST_CHECK(ActsTrk::MutableMultiTrajectory::s_staticVariables.count(name) == 1);
+    }
+    BOOST_CHECK_MESSAGE( m.trackStatesAux()->getAuxIDs().size() == ActsTrk::MutableMultiTrajectory::s_staticVariables.size(),
+        "getAuxIDs.size() = " << m.trackStatesAux()->getAuxIDs().size() << "  staticVariables.size() = " << ActsTrk::MutableMultiTrajectory::s_staticVariables.size());
+}
+
 // Fill a TrackStateProxy with values from a TestTrackState.
 //
 // @param[in] pc TestTrackState with the input values
