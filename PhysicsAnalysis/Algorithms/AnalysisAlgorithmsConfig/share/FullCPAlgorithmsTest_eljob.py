@@ -4,7 +4,6 @@
 #
 # @author Nils Krumnack
 
-
 # Read the submission directory as a command line argument. You can
 # extend the list of arguments with your private ones later on.
 import optparse
@@ -24,6 +23,9 @@ parser.add_option( '-u', '--unit-test', dest='unit_test',
 parser.add_option( '--direct-driver', dest='direct_driver',
                    action = 'store_true', default = False,
                    help = 'Run the job with the direct driver' )
+parser.add_option( '--exec-driver', dest='exec_driver',
+                   action = 'store_true', default = False,
+                   help = 'Run the job with the exec driver' )
 parser.add_option( '--max-events', dest = 'max_events',
                    action = 'store', type = 'int', default = 500,
                    help = 'Number of events to run' )
@@ -154,6 +156,10 @@ if options.direct_driver :
     # this is for testing purposes, as only the direct driver respects
     # the limit on the number of events.
     driver = ROOT.EL.DirectDriver()
+if options.exec_driver :
+    # this is for limiting the memory usage, as it will end the current process
+    # releasing all memory before starting the event loop
+    driver = ROOT.EL.ExecDriver()
 
 print ("submitting job now", flush=True)
 driver.submit( job, submitDir )

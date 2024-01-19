@@ -9,6 +9,8 @@
 #define EVENT_LOOP__BATCH_INPUT_MODULE_H
 
 #include <EventLoop/Module.h>
+#include <cstdint>
+#include <optional>
 
 namespace EL
 {
@@ -28,6 +30,7 @@ namespace EL
 
       BatchSample *sample = nullptr;
       BatchSegment *segment = nullptr;
+      std::optional<uint64_t> maxEvents;
 
 
 
