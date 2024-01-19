@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPC_SimHitToPrdCBNTAlgo.h"
@@ -139,8 +139,10 @@ public:
 
 RPC_SimHitToPrdCBNTAlgo::~RPC_SimHitToPrdCBNTAlgo() = default;
 // Algorithm constructor
-RPC_SimHitToPrdCBNTAlgo::RPC_SimHitToPrdCBNTAlgo(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {
-    m_c = std::make_unique<Clockwork>();
+RPC_SimHitToPrdCBNTAlgo::RPC_SimHitToPrdCBNTAlgo(const std::string& name, ISvcLocator* pSvcLocator) :
+  AthAlgorithm(name, pSvcLocator),
+  m_c (std::make_unique<Clockwork>())
+{
 }
 
 // Initialize method
