@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -25,8 +25,9 @@
 
 class GeoExporter;
 
-class DumpGeo: public AthAlgorithm,
-	      public IIncidentListener
+// Marked not thread-safe because GeoExporter uses VP1.
+class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm,
+                                     public IIncidentListener
 {
  public:
   DumpGeo(const std::string& name, ISvcLocator* pSvcLocator) ATLAS_CTORDTOR_NOT_THREAD_SAFE;
