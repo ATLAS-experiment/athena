@@ -37,7 +37,7 @@ TrigJetHypoToolConfig_maxmultfilter::getHypoJetVectorFilter() const {
 }
 
 StatusCode TrigJetHypoToolConfig_maxmultfilter::checkVals() const {
-  if (m_end < 1) {ATH_MSG_ERROR("MaxMultFilter < 1");
+  if (m_end < 1u) {ATH_MSG_ERROR("MaxMultFilter < 1");
     return StatusCode::FAILURE;
   }  
   return StatusCode::SUCCESS;
