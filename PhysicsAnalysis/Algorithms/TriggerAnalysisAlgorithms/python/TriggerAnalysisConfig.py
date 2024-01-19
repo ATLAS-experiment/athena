@@ -68,6 +68,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         alg.noL1 = self.noL1
 
         for t in self.triggerChainsForSelection :
+            t = t.replace(".", "p").replace("-", "_")
             config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
 
         # Calculate trigger prescales
