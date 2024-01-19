@@ -9,7 +9,7 @@
 // Trk inlcude
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkDetDescrUtils/BinUtility.h"
-#include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
+//#include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/BinnedLayerMaterial.h"
@@ -57,7 +57,7 @@ std::unique_ptr<const std::vector<Trk::CylinderLayer*> > InDet::BeamPipeBuilderI
     const GeoTube* beamPipeTube = nullptr;
     if (beamPipeLogVolume) {
       // get the geoShape and translate
-      Trk::GeoShapeConverter geoShaper;
+      //Trk::GeoShapeConverter geoShaper;
       beamPipeTube = dynamic_cast<const GeoTube*>(beamPipeLogVolume->getShape());
       if (beamPipeTube) {
         for(unsigned int i=0;i<beamPipeTopVolume->getNChildVols();i++) {

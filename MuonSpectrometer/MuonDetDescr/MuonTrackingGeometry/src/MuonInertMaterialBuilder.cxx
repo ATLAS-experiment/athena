@@ -13,8 +13,7 @@ StatusCode Muon::MuonInertMaterialBuilder::initialize() {
   return sc;
 }
 
-std::pair<std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>,
-          std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>
+std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
 Muon::MuonInertMaterialBuilder::buildDetachedTrackingVolumes(bool blend) const {
   
   return Muon::MuonInertMaterialBuilderImpl::buildDetachedTrackingVolumesImpl(m_muonMgr, blend);

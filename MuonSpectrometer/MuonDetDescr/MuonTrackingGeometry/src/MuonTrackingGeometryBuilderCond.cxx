@@ -53,15 +53,11 @@ std::unique_ptr<Trk::TrackingGeometry> Muon::MuonTrackingGeometryBuilderCond::tr
   }
 
   std::unique_ptr<const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > > inertObjs;
-  std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float> > > > constituentsVector;
-
+ 
   if (m_muonInert && m_inertBuilder) {
-    auto [detVolInertObjs, constVec] = m_inertBuilder->buildDetachedTrackingVolumes(ctx, whandle, m_blendInertMaterial);
-    inertObjs = std::move(detVolInertObjs);
-    constituentsVector = std::move(constVec);
+    inertObjs = m_inertBuilder->buildDetachedTrackingVolumes(ctx, whandle, m_blendInertMaterial);
   }
 
-  return MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(std::move(stations), std::move(inertObjs),
-                                                               std::move(constituentsVector), tvol);
+  return MuonTrackingGeometryBuilderImpl::trackingGeometryImpl(std::move(stations), std::move(inertObjs), tvol);
 }
 

@@ -138,8 +138,8 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
   // the return vector
   std::vector<Trk::TrackingVolume*>* lArTrackingVolumes = new std::vector<Trk::TrackingVolume*>;
   // the converter helpers
-  Trk::GeoShapeConverter    geoShapeToVolumeBounds;
-  Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
+  //Trk::GeoShapeConverter    geoShapeToVolumeBounds;
+  //Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
   
   Trk::Material dummyMaterial;
 

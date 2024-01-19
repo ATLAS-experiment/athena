@@ -43,11 +43,10 @@ namespace Trk {
       
       public:
         /** Default constructor*/
-        GeoShapeConverter()
-       {}
+        GeoShapeConverter() = default;
 
         /** Destructor*/
-        virtual ~GeoShapeConverter(){}
+        ~GeoShapeConverter() = default;
     
         /** Convert a tubs */
         static CylinderVolumeBounds* convert(const GeoTubs* gtub) ;

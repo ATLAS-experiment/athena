@@ -19,8 +19,7 @@ StatusCode Muon::MuonInertMaterialBuilderCond::initialize() {
 }
 
 
-std::pair<std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>,
-          std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>
+std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
 Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventContext& ctx,
                                                                  SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
                                                                  bool blend) const {

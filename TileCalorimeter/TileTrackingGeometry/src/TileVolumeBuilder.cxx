@@ -131,8 +131,8 @@ Tile::TileVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) con
   // the return vector
   std::vector<Trk::TrackingVolume*>* tileTrackingVolumes = new std::vector<Trk::TrackingVolume*>;
   // the converter helpers
-  Trk::GeoShapeConverter    geoShapeToVolumeBounds;
-  Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
+  //Trk::GeoShapeConverter    geoShapeToVolumeBounds;
+  //Trk::GeoMaterialConverter geoMaterialToMaterialProperties;
   // dummy material 
   Trk::Material tileMaterial;
 
