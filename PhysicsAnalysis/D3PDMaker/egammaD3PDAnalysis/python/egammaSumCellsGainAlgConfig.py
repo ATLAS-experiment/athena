@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# $Id: egammaSumCellsGainAlgConfig.py 604352 2014-07-01 04:52:11Z ssnyder $
 #
 # @file egammaD3PDAnalysis/python/egamaSumCellsGainAlgConfig.py
 # @author Mike Hance
@@ -11,21 +10,19 @@
 
 from D3PDMakerConfig.D3PDMakerFlags          import D3PDMakerFlags
 from D3PDMakerCoreComps.resolveSGKey         import resolveSGKey
-from AthenaCommon.AlgSequence                import AlgSequence
-import D3PDMakerCoreComps
-import egammaD3PDAnalysis
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
-def egammaSumCellsGainAlgConfig \
-    (seq = AlgSequence(D3PDMakerFlags.PreD3PDAlgSeqName()),
-    prefix = '',
-    sgkey = D3PDMakerFlags.ElectronSGKey(),
-    typeName = 'ElectronContainer',
-    allowMissing = False):
+def egammaSumCellsGainAlgCfg \
+    (flags,
+     prefix = '',
+     sgkey = D3PDMakerFlags.ElectronSGKey,
+     typeName = 'ElectronContainer',
+     allowMissing = False):
     """Configure egammaSumCellsGainAlg for D3PD making.
-
-    SEQ is the Gaudi sequence to which the algorithm should be added.
-    Default is that given by PreD3PDAlgSeqName.
 
     PREFIX is a prefix to add to the name of the algorithm scheduled.
 
@@ -35,27 +32,28 @@ def egammaSumCellsGainAlgConfig \
     If ALLOWMISSING is true, don't fail if the SG key doesn't exist.
     """
 
-    if (not D3PDMakerFlags.MakeEgammaUserData() or
-        D3PDMakerFlags.HaveEgammaUserData()):
-        return
+    acc = ComponentAccumulator()
 
-    DVGetter = D3PDMakerCoreComps.SGDataVectorGetterTool
-    resolved_sgkey = resolveSGKey (typeName, sgkey)
-    auxprefix = (D3PDMakerFlags.EgammaUserDataPrefix() + '_' +
+    if (not D3PDMakerFlags.MakeEgammaUserData or
+        D3PDMakerFlags.HaveEgammaUserData):
+        return acc
+
+    DVGetter = D3PD.SGDataVectorGetterTool
+    resolved_sgkey = resolveSGKey (flags, sgkey)
+    auxprefix = (D3PDMakerFlags.EgammaUserDataPrefix + '_' +
                  resolved_sgkey + '_')
 
     algName = 'egammaSumCellsGainAlg' + resolved_sgkey
-    if not hasattr (seq, algName):
         
-        myAlg = egammaD3PDAnalysis.egammaSumCellsGainAlg \
-                (algName,
-                Getter = DVGetter
-                    (prefix + 'egammaSumCellsGainAlgGetter',
-                    TypeName = typeName,
-                    SGKey = sgkey),
-                AllowMissing = allowMissing,
-                AuxPrefix = auxprefix,)
+    myAlg = D3PD.egammaSumCellsGainAlg \
+        (algName,
+         Getter = DVGetter
+         (prefix + 'egammaSumCellsGainAlgGetter',
+          TypeName = typeName,
+          SGKey = sgkey),
+         AllowMissing = allowMissing,
+         AuxPrefix = auxprefix,)
 
-        seq += myAlg
+    acc.addEventAlgo (myAlg)
 
-    return
+    return acc
