@@ -109,7 +109,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		}
 		__syncthreads();
 
-		if (!canBeMiddleSpacePoint(rm, zm)) continue;    
+		if (!canBeMiddleSpacePoint(rm)) continue;    
 
 		
 		for(int innerIdx = threadIdx.x; innerIdx<nInner;innerIdx+=blockDim.x) {

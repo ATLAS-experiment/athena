@@ -454,6 +454,13 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   
   ftf.UseTrigSeedML = flags.Tracking.ActiveConfig.UseTrigSeedML
 
+  if flags.Trigger.InDetTracking.doGPU:
+    ftf.TrigAccelerationSvc      = acc.getService("TrigInDetAccelerationSvc")
+    if flags.Detector.GeometryITk:
+        ftf.TrigAccelerationTool     = acc.getPublicTool("TrigITkAccelerationTool_FTF")
+    else:
+        ftf.TrigAccelerationTool     = acc.getPublicTool("TrigInDetAccelerationTool_FTF")
+
   if isCosmicConfig:
     ftf.Doublet_FilterRZ = False
 

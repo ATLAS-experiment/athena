@@ -18,7 +18,7 @@ namespace ITk {
   static constexpr unsigned int MAX_NUMBER_SCT_MODULES       = 24600;
   static constexpr unsigned int MAX_NUMBER_SPACEPOINTS       = 300000;
   static constexpr unsigned int MAX_PHI_SLICES               = 100;
-  static constexpr unsigned int MAX_NUMBER_OUTPUT_SEEDS      = 100000;
+  static constexpr unsigned int MAX_NUMBER_OUTPUT_SEEDS      = 250000;
   
   typedef struct SiliconLayer {
   public:

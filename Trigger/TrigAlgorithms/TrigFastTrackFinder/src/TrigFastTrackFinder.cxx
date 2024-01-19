@@ -63,8 +63,6 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   m_trigZFinder("TrigZFinder/TrigZFinder", this ),
   m_trackSummaryTool("Trk::ITrackSummaryTool/ITrackSummaryTool"),
   m_disTrkFitter("Trk::GlobalChi2Fitter/InDetTrackFitter"),
-  m_accelTool("TrigInDetAccelerationTool"),
-  m_accelSvc("TrigInDetAccelerationSvc", name),
   m_useBeamSpot(true),
   m_doZFinder(false),
   m_doZFinderOnly(false),

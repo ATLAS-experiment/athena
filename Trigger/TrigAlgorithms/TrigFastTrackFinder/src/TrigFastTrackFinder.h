@@ -150,8 +150,8 @@ protected:
   ToolHandle< Trk::ITrackFitter >  m_disTrkFitter;
 
   //for GPU acceleration
-  ToolHandle<ITrigInDetAccelerationTool> m_accelTool;
-  ServiceHandle<ITrigInDetAccelerationSvc>     m_accelSvc;
+  ToolHandle<ITrigInDetAccelerationTool> m_accelTool {this, "TrigAccelerationTool", ""};
+  ServiceHandle<ITrigInDetAccelerationSvc> m_accelSvc {this, "TrigAccelerationSvc", ""};
 
   //DataHandles
   SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
