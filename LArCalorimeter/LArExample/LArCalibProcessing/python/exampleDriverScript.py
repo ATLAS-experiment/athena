@@ -36,6 +36,10 @@ flags.LArCalib.Input.SubDet="HEC"
 flags.LArCalib.BadChannelDB="BadChannelSnapshot.db"
 flags.LArCalib.BadChannelTag="-RUN2-UPD3-00"
 
+#Set a Geometry version (not really needed, but the job complains otherwise)
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+
 #Output of this job:
 #ROOT file:
 flags.LArCalib.Output.ROOTFile="ofccali.root"

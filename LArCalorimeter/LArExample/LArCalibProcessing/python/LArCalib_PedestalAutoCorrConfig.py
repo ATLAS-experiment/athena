@@ -223,6 +223,7 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
@@ -239,6 +240,7 @@ if __name__ == "__main__":
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-00"
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
+    ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
     ConfigFlags.fillFromArgs()
     ConfigFlags.lock()

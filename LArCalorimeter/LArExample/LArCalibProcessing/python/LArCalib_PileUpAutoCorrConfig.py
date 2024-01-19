@@ -168,7 +168,8 @@ if __name__ == "__main__":
     ConfigFlags=initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(ConfigFlags)
-
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    
     ConfigFlags.Input.Files=[]
     ConfigFlags.LArCalib.Input.RunNumbers=[400939,]
     ConfigFlags.LArCalib.Input.Database="/home/wlampl/calibTest/00400939_00400943_00400945_Barrel-EMB-EMEC_HIGH_40_21.0.20_1/poolFiles/myDB200_00400939_00400943_00400945_EB-EMBA_one.db_Delay"
@@ -179,6 +180,7 @@ if __name__ == "__main__":
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-02"
+    ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     #ConfigFlags.Exec.OutputLevel=1
     ConfigFlags.LArCalib.OFC.Ncoll=20
     ConfigFlags.LArCalib.OFC.Nsamples=5
