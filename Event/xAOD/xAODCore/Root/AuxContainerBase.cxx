@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: AuxContainerBase.cxx 793746 2017-01-24 21:23:52Z ssnyder $
 
 // System include(s):
 #include <iostream>
@@ -17,6 +15,10 @@
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 
+#ifndef XAOD_STANDALONE
+#   include "GaudiKernel/ThreadLocalContext.h"
+#endif // not XAOD_STANDALONE
+
 #include "CxxUtils/checker_macros.h"
 
 using namespace std;
@@ -24,11 +26,17 @@ using namespace std;
 namespace xAOD {
 
    AuxContainerBase::AuxContainerBase( bool allowDynamicVars )
+      : AuxContainerBase( nullptr, allowDynamicVars ) {
+   }
+
+   AuxContainerBase::AuxContainerBase( std::pmr::memory_resource* memResource,
+                                       bool allowDynamicVars )
       : SG::IAuxStore(),
         m_auxids(), m_vecs(), m_store( nullptr ), m_storeIO( nullptr ),
         m_ownsStore( true ),
         m_locked( false ),
-        m_name( "UNKNOWN" ) {
+        m_name( "UNKNOWN" ),
+        m_memResource( memResource ){
 
       if( allowDynamicVars ) {
          m_store = new SG::AuxStoreInternal();
@@ -48,7 +56,8 @@ namespace xAOD {
       : SG::IAuxStore(),
         m_auxids(), m_vecs(), m_store( nullptr ), m_storeIO( nullptr ),
         m_ownsStore( true ),
-        m_locked( false )
+        m_locked( false ),
+        m_memResource( parent.m_memResource )
    {
       // Keep the source unmutable during copy
       guard_t guard( parent.m_mutex );
@@ -69,13 +78,15 @@ namespace xAOD {
    ///
    /// @param store Another store that should be wrapped, but not owned
    ///
-   AuxContainerBase::AuxContainerBase( SG::IAuxStore* store )
+   AuxContainerBase::AuxContainerBase( SG::IAuxStore* store,
+                                       std::pmr::memory_resource* memResource )
       : SG::IAuxStore(),
         m_auxids(), m_vecs(),
         m_store( store ),
         m_storeIO( nullptr ), m_ownsStore( false ),
         m_locked( false),
-        m_name( "UNKNOWN" ) {
+        m_name( "UNKNOWN" ),
+        m_memResource( memResource ){
 
       m_storeIO = dynamic_cast< SG::IAuxStoreIO* >( m_store );
       if( m_store ) {
@@ -140,6 +151,28 @@ namespace xAOD {
    SG::IAuxStore* AuxContainerBase::getStore()
    {
       return m_store;
+   }
+
+   std::pmr::memory_resource* AuxContainerBase::memResource()
+   {
+      const std::pmr::memory_resource* cptr = m_memResource.get();
+      std::pmr::memory_resource* ptr ATLAS_THREAD_SAFE  = const_cast<std::pmr::memory_resource*>( cptr );
+      if( !ptr ) {
+#ifndef XAOD_STANDALONE
+         const EventContext& ctx = Gaudi::Hive::currentContext();
+         if( Atlas::hasExtendedEventContext( ctx ) ) {
+            ptr = Atlas::getExtendedEventContext( ctx ).memResource();
+         }
+         if( !ptr )
+#endif
+         {
+            ptr = std::pmr::get_default_resource();
+         }
+         if( ptr ) {
+           m_memResource.set( ptr );
+         }
+      }
+      return ptr;
    }
 
    const SG::IAuxStore* AuxContainerBase::getStore() const
