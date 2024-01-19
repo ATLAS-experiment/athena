@@ -16,6 +16,7 @@
 #include "TrkDetDescrInterfaces/ITrackingVolumeArrayCreator.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
+#include "TrkDetDescrGeoModelCnv/VolumeConverter.h"
 // Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -36,8 +37,6 @@ typedef std::pair<SharedObject<const TrackingVolume>, const Amg::Transform3D*> T
 }  // namespace Trk
 
 namespace Muon {
-
-typedef std::vector<double> Span;
 
 /** @class MuonTrackingGeometryBuilderImpl
 
@@ -62,8 +61,6 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
   std::unique_ptr<Trk::TrackingGeometry> trackingGeometryImpl(
       std::unique_ptr<const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > > stations,
       std::unique_ptr<const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > > inertObjs,
-      std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float> > > >
-          constituentsVector,
       Trk::TrackingVolume* tvol) const;
 
   /** The unique signature */
@@ -88,24 +85,24 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
     std::vector<int> m_zPartitionsType;
     std::vector<float> m_adjustedPhi;
     std::vector<int> m_adjustedPhiType;
-    std::vector<const Span*> m_spans;  // for clearing
+    std::vector<const Trk::VolumeSpan*> m_spans;  // for clearing
     std::vector<std::vector<std::vector<std::vector<std::pair<int, float> > > > > m_hPartitions;
     std::vector<double> m_shieldZPart;
     std::vector<std::vector<std::pair<int, float> > > m_shieldHPart;
     std::map<Trk::DetachedTrackingVolume*, std::vector<Trk::TrackingVolume*>*> m_blendMap;
     std::vector<Trk::DetachedTrackingVolume*> m_blendVols;
-    const std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* m_stationSpan = nullptr;
-    const std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* m_inertSpan = nullptr;
+    std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Trk::VolumeSpan*> > > m_stationSpan;
+    std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Trk::VolumeSpan*> > > m_inertSpan;
     RZPairVector m_msCutoutsIn;
     RZPairVector m_msCutoutsOut;
     Trk::Material m_muonMaterial;                     //!< the (empty) material
     Trk::TrackingVolume* m_standaloneTrackingVolume = nullptr;  // muon standalone tracking volume
   };
 
-  /** Private method to find z/phi span of detached volumes */
-  const Span* findVolumeSpan(const Trk::VolumeBounds* volBounds, const Amg::Transform3D& transf, double zTol,
-                             double phiTol, LocalVariablesContainer& aLVC) const;
-  std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* findVolumesSpan(
+  /** Volume helper to find geometrical span of enclosed volumes */
+  Trk::VolumeConverter m_volumeConverter;                     
+  /** Private method to filter detached volumes in z span */
+  std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Trk::VolumeSpan*> >> findVolumesSpan(
       const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> >* objs, double zTol, double phiTol,
       LocalVariablesContainer& aLVC) const;
   /** Private methods to define subvolumes and fill them with detached volumes
@@ -123,7 +120,7 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
                                                                 std::vector<Trk::DetachedTrackingVolume*>&,
                                                                 LocalVariablesContainer& aLVC, int mode = 0) const;
   /** Private method to check if constituent enclosed */
-  bool enclosed(const Trk::Volume*, const Muon::Span*, LocalVariablesContainer& aLVC) const;
+  bool enclosed(const Trk::Volume*, const Trk::VolumeSpan*, LocalVariablesContainer& aLVC) const;
   /** Private method to retrieve z partition */
   void getZParts(LocalVariablesContainer& aLVC) const;
   /** Private method to retrieve phi partition */
@@ -132,8 +129,6 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
   void getHParts(LocalVariablesContainer& aLVC) const;
   /** Private method to retrieve shield partition */
   void getShieldParts(LocalVariablesContainer& aLVC) const;
-  /** Private method to calculate volume */
-  double calculateVolume(const Trk::Volume*) const;
   /** Private method to blend the inert material */
   void blendMaterial(LocalVariablesContainer& aLVC) const;
 

@@ -39,6 +39,7 @@
 
 
 #include "TrkSurfaces/DiamondBounds.h"
+#include "TrkSurfaces/RotatedDiamondBounds.h"
 #include "TrkSurfaces/DiscBounds.h"
 #include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/RotatedTrapezoidBounds.h"
@@ -97,15 +98,35 @@ StatusCode Muon::MuonStationTypeBuilder::initialize() {
         return StatusCode::FAILURE;
     }
 
-    m_materialConverter = std::make_unique<Trk::GeoMaterialConverter>();
-    if (!m_materialConverter) {
-        ATH_MSG_FATAL("Could not create material converter in " << name() << " initialize()");
-        return StatusCode::FAILURE;
-    }
-
     ATH_MSG_INFO(name() << " initialize() successful");
 
     return StatusCode::SUCCESS;
+}
+
+std::vector< Trk::Layer* >* Muon::MuonStationTypeBuilder::processBoxComponentsArbitrary(const GeoVPhysVol* mv,
+                                                                                    Trk::CuboidVolumeBounds* envelope,
+											Cache& /*cache*/) const {
+    ATH_MSG_DEBUG(name() << " processing station components for " << mv->getLogVol()->getName());
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+    std::vector< Trk::Layer*> lays;
+
+    // initial solution : single layer collecting all material ; TODO : resolve sensitive layers and spacers
+    // use envelope to define layer bounds
+    Trk::RectangleBounds*  layBounds = new Trk::RectangleBounds(envelope->halflengthY(), envelope->halflengthZ());
+    // calculate layer area
+    double layArea = 0.;
+    if (layBounds) layArea = area( layBounds );  // TODO this should be a functionality of SurfaceBounds
+    // use area to blend station material
+    Trk::MaterialProperties box_mat;
+    m_volumeConverter.collectMaterial(mv,box_mat, layArea);
+    Trk::HomogeneousLayerMaterial boxMaterial(box_mat, 0.);  
+
+    Trk::PlaneLayer*  layer = new Trk::PlaneLayer(Amg::Transform3D::Identity(), layBounds, boxMaterial, 2*envelope->halflengthX());
+
+    lays.push_back(layer);
+
+    return new std::vector<Trk::Layer*>(lays);    
 }
 
 Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationComponents(const GeoVPhysVol* mv,
@@ -116,10 +137,44 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
 
     double tolerance = 0.001;
 
+    // loop over children volumes: check if compatible with binning in X ( detect overlap of sensitive volumes )
+    std::vector<std::pair<double,double>>  xVol;
+    double xpos, xh;
+    for (const GeoVolumeVec_t::value_type& p : geoGetVolumes(mv)) {
+        const GeoVPhysVol* cv = p.first;
+        const GeoLogVol* clv = cv->getLogVol();
+        const Amg::Transform3D& transf = p.second;
+	// consider sensitive volumes only
+	std::string name = clv->getName(); 
+	if ( name.find("MDT")==std::string::npos && name.find("RPC")==std::string::npos ) continue;
+	xpos = transf.translation().x();
+        if (clv->getShape()->type() == "Trd") {
+           const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
+           xh = std::max(trd->getXHalfLength1(), trd->getXHalfLength2());
+        } else if (clv->getShape()->type() == "Box") {
+	  const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
+	  xh = box->getXHalfLength();
+        } else {
+          xh = get_x_size(cv);
+        }
+	if (!xVol.size() || xpos>xVol.back().first) xVol.push_back(std::make_pair(xpos,xh));
+	else {
+	  std::vector<std::pair<double,double>>::iterator it=xVol.begin();
+	  while ( it != xVol.end() && xpos > (*it).first) {it++;} xVol.insert(it,std::make_pair(xpos,xh));
+	} 
+   }
+
+    double xl = xVol[0].second;
+    double xc = xVol[0].first;
+    for ( auto xb : xVol) {
+      if ( xb.first > xc && xb.first-xb.second < xc+xl) return nullptr;  //  overlap of sensitive volumes : not suitable for x-binned array
+     xc = xb.first;  xl = xb.second;
+    }
+    
     // loop over children volumes; ( make sure they do not exceed enveloping
     // volume boundaries ?) split into connected subvolumes ( assume ordering
     // along X unless otherwise )
-    std::vector<Trk::Volume*> compVol;
+    std::vector<std::unique_ptr<Trk::Volume> > compVol;
     std::vector<std::string> compName;
     std::vector<const GeoVPhysVol*> compGeo;
     std::vector<Amg::Transform3D> compTransf;
@@ -157,44 +212,36 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
             volBounds = new Trk::CuboidVolumeBounds(xSize, envelope->halflengthY(), envelope->halflengthZ());
         }
         vol = new Trk::Volume(new Amg::Transform3D(transf), volBounds);
-        ATH_MSG_VERBOSE("subvolume center:" << vol->center().x() << "," << vol->center().y() << "," << vol->center().z());
+        ATH_MSG_VERBOSE("subvolume center:" << vol->center().x() << "," << vol->center().y() << "," << vol->center().z() <<":halfX:" << halfX1);
         std::string cname = clv->getName();
         const std::string &vname = mv->getLogVol()->getName();
         int nameSize = vname.size() - 8;
         if (cname.compare(0, nameSize, vname, 0, nameSize) == 0) cname = cname.substr(nameSize, cname.size() - nameSize);
         // order in X
         if (compVol.empty() || vol->center()[0] >= compVol.back()->center()[0]) {
-            compVol.push_back(vol);
+	  compVol.push_back(std::make_unique<Trk::Volume>(*vol));
             compName.push_back(cname);
             compGeo.push_back(cv);
             compTransf.push_back(transf);
         } else {
-            std::vector<Trk::Volume*>::iterator volIter = compVol.begin();
+	  std::vector<std::unique_ptr<Trk::Volume> >::iterator volIter = compVol.begin();
             std::vector<std::string>::iterator nameIter = compName.begin();
             std::vector<const GeoVPhysVol*>::iterator geoIter = compGeo.begin();
             std::vector<Amg::Transform3D>::iterator transfIter = compTransf.begin();
-            while (vol->center()[0] >= (*volIter)->center()[0]) {
+            while (vol->center()[0] >= (*volIter).get()->center()[0]) {
                 ++volIter;
                 ++nameIter;
                 ++geoIter;
                 ++transfIter;
             }
-            compVol.insert(volIter, vol);
+            compVol.insert(volIter, std::make_unique<Trk::Volume>(*vol));
             compName.insert(nameIter, cname);
             compGeo.insert(geoIter, cv);
             compTransf.insert(transfIter, transf);
         }
     }  // loop over components
 
-    /*
-    // check components ordering
-    for (unsigned i=0; i<compVol.size();i++){
-      ATH_MSG_VERBOSE("list compononents:xcoord:name:"<<i<<":"<<
-    compVol[i]->center()[0]<<" "<<compName[i]);
-    }
-    */
-
-    // define enveloping volumes for each "technology"
+   // define enveloping volumes for each "technology"
     std::vector<Trk::TrackingVolume*> trkVols;
     double envX = envelope->halflengthX();
     double envY = envelope->halflengthY();
@@ -222,8 +269,8 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
             continue;
         }
         //
-        double lowX = compVol[i]->center()[0] - compBounds->halflengthX();
-        double uppX = compVol[i]->center()[0] + compBounds->halflengthX();
+        double lowX = compVol[i].get()->center()[0] - compBounds->halflengthX();
+        double uppX = compVol[i].get()->center()[0] + compBounds->halflengthX();
 
         if (lowX < currX)
             if (compName[i].compare("RPC28") != 0 && compName[i].compare("RPC29") != 0)  // exclude BIS RPCs from the check sice they overlap in x with other volumes
@@ -234,13 +281,12 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
         // close Rpc if no further components
         if (openRpc && compName[i].compare(0, 3, "RPC") != 0 && compName[i].compare(0, 3, "Ded") != 0) {
             // low edge of current volume
-            double Xcurr = compVol[i]->center()[0] - compBounds->halflengthX();
+	  double Xcurr = compVol[i].get()->center()[0] - compBounds->halflengthX();
             if (Xcurr >= currX + rpclowXsize + rpcuppXsize) {
                 Trk::CuboidVolumeBounds* rpcBounds = new Trk::CuboidVolumeBounds(0.5 * (Xcurr - currX), envY, envZ);
-                Trk::Volume* rpcVol =
-                    new Trk::Volume(new Amg::Transform3D(Amg::Translation3D(currX + rpcBounds->halflengthX(), 0., 0.)), rpcBounds);
-                Trk::TrackingVolume* rpcTrkVol = processRpc(rpcVol, geoRpc, transfRpc, cache);
-                delete rpcVol;
+		std::unique_ptr<Trk::Volume> rpcVol =
+		  std::make_unique<Trk::Volume>(new Amg::Transform3D(Amg::Translation3D(currX + rpcBounds->halflengthX(), 0., 0.)), rpcBounds);
+                Trk::TrackingVolume* rpcTrkVol = processRpc(rpcVol.get(), geoRpc, transfRpc, cache);
                 trkVols.push_back(rpcTrkVol);
                 volSteps.push_back(Xcurr);
                 currX = Xcurr;
@@ -252,7 +298,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
         // close spacer if no further components
         if (openSpacer && compName[i].compare(0, 1, "C") != 0 && compName[i].compare(0, 2, "LB") != 0) {
             // low edge of current volume
-            double Xcurr = compVol[i]->center()[0] - compBounds->halflengthX();
+	  double Xcurr = compVol[i].get()->center()[0] - compBounds->halflengthX();
             if (Xcurr - currX - (spacerlowXsize + spaceruppXsize) >= -tolerance) {
                 Trk::CuboidVolumeBounds* spacerBounds = new Trk::CuboidVolumeBounds(0.5 * (Xcurr - currX), envY, envZ);
                 Trk::Volume spacerVol(new Amg::Transform3D(Amg::Translation3D(currX + spacerBounds->halflengthX(), 0., 0.)), spacerBounds);
@@ -273,7 +319,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
                 transfRpc.clear();
                 transfRpc.push_back(compTransf[i]);
                 // establish temporary volume size
-                rpclowXsize = compVol[i]->center()[0] - currX;
+                rpclowXsize = compVol[i].get()->center()[0] - currX;
                 rpcuppXsize = compBounds->halflengthX();
                 // check clash at low edge
                 if (std::abs(rpclowXsize) < compBounds->halflengthX() - tolerance) ATH_MSG_WARNING("rpc low edge - not enough space");
@@ -281,10 +327,10 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
                 geoRpc.push_back(compGeo[i]);
                 transfRpc.push_back(compTransf[i]);
                 // check temporary volume size
-                if (std::abs(compVol[i]->center()[0] - currX) < compBounds->halflengthX() - tolerance)
+                if (std::abs(compVol[i].get()->center()[0] - currX) < compBounds->halflengthX() - tolerance)
                     ATH_MSG_WARNING("rpc low edge - not enough space");
-                if (compVol[i]->center()[0] + compBounds->halflengthX() > currX + rpclowXsize + rpcuppXsize)
-                    rpcuppXsize += (compVol[i]->center()[0] + compBounds->halflengthX()) - (currX + rpclowXsize + rpcuppXsize);
+                if (compVol[i].get()->center()[0] + compBounds->halflengthX() > currX + rpclowXsize + rpcuppXsize)
+		  rpcuppXsize += (compVol[i].get()->center()[0] + compBounds->halflengthX()) - (currX + rpclowXsize + rpcuppXsize);
             }
             comp_processed = true;
         }
@@ -296,45 +342,45 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
                 transfSpacer.clear();
                 transfSpacer.push_back(compTransf[i]);
                 // establish temporary volume size
-                spacerlowXsize = compVol[i]->center()[0] - currX;
+                spacerlowXsize = compVol[i].get()->center()[0] - currX;
                 spaceruppXsize = compBounds->halflengthX();
                 // check clash at low edge
                 if (std::abs(spacerlowXsize) < compBounds->halflengthX() - tolerance) {
-                    ATH_MSG_WARNING("spacer low edge - not enough space:current:center:halfSize:" << currX << "," << compVol[i]->center()[0]
+		  ATH_MSG_WARNING("spacer low edge - not enough space:current:center:halfSize:" << currX << "," << compVol[i].get()->center()[0]
                                                                                                   << "," << compBounds->halflengthX());
                 }
             } else {
                 geoSpacer.push_back(compGeo[i]);
                 transfSpacer.push_back(compTransf[i]);
                 // check temporary volume size
-                if (std::abs(compVol[i]->center()[0] - currX) < compBounds->halflengthX() - tolerance) {
-                    ATH_MSG_WARNING("spacer low edge - not enough space:current:center:halfSize:" << currX << "," << compVol[i]->center()[0]
+                if (std::abs(compVol[i].get()->center()[0] - currX) < compBounds->halflengthX() - tolerance) {
+		  ATH_MSG_WARNING("spacer low edge - not enough space:current:center:halfSize:" << currX << "," << compVol[i].get()->center()[0]
                                                                                                   << "," << compBounds->halflengthX());
                 }
-                if (compVol[i]->center()[0] + compBounds->halflengthX() > currX + spacerlowXsize + spaceruppXsize)
-                    spaceruppXsize += (compVol[i]->center()[0] + compBounds->halflengthX()) - (currX + spacerlowXsize + spaceruppXsize);
+                if (compVol[i].get()->center()[0] + compBounds->halflengthX() > currX + spacerlowXsize + spaceruppXsize)
+		  spaceruppXsize += (compVol[i].get()->center()[0] + compBounds->halflengthX()) - (currX + spacerlowXsize + spaceruppXsize);
             }
             comp_processed = true;
         }
         if (compName[i].compare(0, 3, "MDT") == 0) {
-            Trk::Volume* mdtVol;
-            Trk::CuboidVolumeBounds* mdtBounds = nullptr;
-            // remove z shift in transform !! bugfix !!
-            double zShift = compVol[i]->transform().translation()[2];
-            if (std::abs(zShift) > 0) { ATH_MSG_DEBUG("unusual z shift for subvolume:" << zShift); }
-            //                                 (HepGeom::TranslateZ3D(-zShift)*(*compTransf[i])).getTranslation()
-            //                                 <<std::endl;
-            if (lowX == currX) {
-                mdtBounds = new Trk::CuboidVolumeBounds(compBounds->halflengthX(), envY, envZ);
-                mdtVol = new Trk::Volume(new Amg::Transform3D(Amg::Translation3D(0., 0., -zShift) * compVol[i]->transform()), mdtBounds);
-            } else {
-                if (std::abs(lowX - currX) > 0.002) {
-                    ATH_MSG_DEBUG("Mdt volume size does not match the envelope:lowX,currX:" << lowX << "," << currX);
+	  std::unique_ptr<Trk::Volume> mdtVol;
+	  Trk::CuboidVolumeBounds* mdtBounds = nullptr;
+	  // remove z shift in transform !! bugfix !!
+	  double zShift = compVol[i].get()->transform().translation()[2];
+	  if (std::abs(zShift) > 0) { ATH_MSG_DEBUG("unusual z shift for subvolume:" << zShift); }
+	  //                                 (HepGeom::TranslateZ3D(-zShift)*(*compTransf[i])).getTranslation()
+	  //                                 <<std::endl;
+	  if (lowX == currX) {
+	    mdtBounds = new Trk::CuboidVolumeBounds(compBounds->halflengthX(), envY, envZ);
+	    mdtVol = std::make_unique<Trk::Volume>(new Amg::Transform3D(Amg::Translation3D(0., 0., -zShift) * compVol[i].get()->transform()), mdtBounds);
+	  } else {
+	    if (std::abs(lowX - currX) > 0.002) {
+	      ATH_MSG_DEBUG("Mdt volume size does not match the envelope:lowX,currX:" << lowX << "," << currX);
                     ATH_MSG_DEBUG("adjusting Mdt volume ");
                 }
                 mdtBounds = new Trk::CuboidVolumeBounds(compBounds->halflengthX() + 0.5 * (lowX - currX), envY, envZ);
-                mdtVol = new Trk::Volume(new Amg::Transform3D(Amg::Translation3D(0.5 * (currX - lowX), 0., 0.) *
-                                                              Amg::Translation3D(0., 0., -zShift) * compVol[i]->transform()),
+                mdtVol = std::make_unique<Trk::Volume>(new Amg::Transform3D(Amg::Translation3D(0.5 * (currX - lowX), 0., 0.) *
+									    Amg::Translation3D(0., 0., -zShift) * compVol[i].get()->transform()),
                                          mdtBounds);
             }
             double shiftSign = 1.;
@@ -345,16 +391,15 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
                     shiftSign = -1.;
             }
             Trk::TrackingVolume* mdtTrkVol =
-                processMdtBox(mdtVol, compGeo[i], new Amg::Transform3D(Amg::Translation3D(0., 0., -zShift) * compTransf[i]),
+	      processMdtBox(mdtVol.get(), compGeo[i], (std::make_unique< Amg::Transform3D>(Amg::Translation3D(0., 0., -zShift) * compTransf[i])).get(),
                               shiftSign * std::abs(zShift), cache);
             trkVols.push_back(mdtTrkVol);
             currX += 2. * mdtBounds->halflengthX();
             volSteps.push_back(currX);
-            delete mdtVol;
             comp_processed = true;
             zShift = 0.;
         }
-        if (!comp_processed) std::cout << "unknown technology:" << compName[i] << std::endl;
+        if (!comp_processed) ATH_MSG_DEBUG( "unknown technology:" << compName[i] );
     }  // end loop over station children
 
     // there may be a spacer still open
@@ -374,16 +419,15 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
     if (openRpc) {
         if (maxX >= currX + rpclowXsize + rpcuppXsize) {
             Trk::CuboidVolumeBounds* rpcBounds = new Trk::CuboidVolumeBounds(0.5 * (maxX - currX), envY, envZ);
-            Trk::Volume* rpcVol =
-                new Trk::Volume(new Amg::Transform3D(Amg::Translation3D(currX + rpcBounds->halflengthX(), 0., 0.)), rpcBounds);
-            Trk::TrackingVolume* rpcTrkVol = processRpc(rpcVol, geoRpc, transfRpc, cache);
-            delete rpcVol;
+	    std::unique_ptr<Trk::Volume> rpcVol = std::make_unique<Trk::Volume>
+                (new Amg::Transform3D(Amg::Translation3D(currX + rpcBounds->halflengthX(), 0., 0.)), rpcBounds);
+            Trk::TrackingVolume* rpcTrkVol = processRpc(rpcVol.get(), geoRpc, transfRpc, cache);
             trkVols.push_back(rpcTrkVol);
             currX = maxX;
             volSteps.push_back(currX);
             openRpc = false;
         } else {
-            std::cout << "clash in Rpc definition!(last volume)" << std::endl;
+	  ATH_MSG_WARNING( "clash in Rpc definition!(last volume)" );
         }
     }
     // create VolumeArray (1DX)
@@ -392,8 +436,6 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
         Trk::BinUtility* binUtility = new Trk::BinUtility(volSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
         components = m_trackingVolumeArrayCreator->cuboidVolumesArrayNav(trkVols, binUtility, false);
     }
-
-    for (auto & i : compVol) delete i;
 
     return components;
 }
@@ -409,7 +451,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
     // loop over children volumes; ( make sure they do not exceed enveloping
     // volume boundaries ?) split into connected subvolumes ( assume ordering
     // along X unless otherwise )
-    std::vector<Trk::Volume*> compVol;
+    std::vector<std::unique_ptr<Trk::Volume> > compVol;
     std::vector<std::string> compName;
     std::vector<const GeoVPhysVol*> compGeo;
     std::vector<Amg::Transform3D> compTransf;
@@ -439,7 +481,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
                 volBounds = new Trk::TrapezoidVolumeBounds(halfY1, halfY2, halfZ, halfX1);
             }
             if (halfX1 != halfX2 && halfY1 == halfY2) { volBounds = new Trk::TrapezoidVolumeBounds(halfX1, halfX2, halfY1, halfZ); }
-            if (!volBounds) std::cout << "volume shape for component not recognized" << std::endl;
+            if (!volBounds) ATH_MSG_WARNING( "volume shape for component not recognized" );
         } else if (clv->getShape()->type() == "Box") {
             const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
             halfX1 = box->getXHalfLength();
@@ -464,12 +506,12 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
         if (cname.compare(0, nameSize, vname, 0, nameSize) == 0) cname = cname.substr(nameSize, cname.size() - nameSize);
         // order in X
         if (compVol.empty() || vol->center()[0] >= compVol.back()->center()[0]) {
-            compVol.push_back(vol);
+	  compVol.push_back(std::make_unique<Trk::Volume>(*vol));
             compName.push_back(cname);
             compGeo.push_back(cv);
             compTransf.push_back(transf);
         } else {
-            std::vector<Trk::Volume*>::iterator volIter = compVol.begin();
+	  std::vector<std::unique_ptr<Trk::Volume> >::iterator volIter = compVol.begin();
             std::vector<std::string>::iterator nameIter = compName.begin();
             std::vector<const GeoVPhysVol*>::iterator geoIter = compGeo.begin();
             std::vector<Amg::Transform3D>::iterator transfIter = compTransf.begin();
@@ -479,7 +521,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
                 ++geoIter;
                 ++transfIter;
             }
-            compVol.insert(volIter, vol);
+            compVol.insert(volIter, std::make_unique<Trk::Volume>(*vol));
             compName.insert(nameIter, cname);
             compGeo.insert(geoIter, cv);
             compTransf.insert(transfIter, transf);
@@ -509,26 +551,26 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
     volSteps.push_back(-envelope->halflengthZ());
     for (unsigned i = 0; i < compVol.size(); i++) {
         bool comp_processed = false;
-        const Trk::CuboidVolumeBounds* compCubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(compVol[i]->volumeBounds()));
-        const Trk::TrapezoidVolumeBounds* compTrdBounds = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(compVol[i]->volumeBounds()));
+        const Trk::CuboidVolumeBounds* compCubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(compVol[i].get()->volumeBounds()));
+        const Trk::TrapezoidVolumeBounds* compTrdBounds = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(compVol[i].get()->volumeBounds()));
         if (compCubBounds) {
-            lowX = compVol[i]->center()[0] - compCubBounds->halflengthX();
-            uppX = compVol[i]->center()[0] + compCubBounds->halflengthX();
-            if (lowX < currX) std::cout << "Warning: we have a clash between components here!" << std::endl;
-            if (uppX > maxX) std::cout << "Warning: we have a clash between component and envelope!" << std::endl;
-            // low edge of current volume
-            Xcurr = compVol[i]->center()[0] - compCubBounds->halflengthX();
+	  lowX = compVol[i].get()->center()[0] - compCubBounds->halflengthX();
+	  uppX = compVol[i].get()->center()[0] + compCubBounds->halflengthX();
+	  if (lowX < currX) ATH_MSG_WARNING( "Warning: we have a clash between components here!" );
+	  if (uppX > maxX) ATH_MSG_WARNING( "Warning: we have a clash between component and envelope!" );
+	  // low edge of current volume
+	  Xcurr = compVol[i].get()->center()[0] - compCubBounds->halflengthX();
         }
         if (compTrdBounds) {
-            lowX = compVol[i]->center()[0] - compTrdBounds->halflengthZ();
-            uppX = compVol[i]->center()[0] + compTrdBounds->halflengthZ();
-            if (lowX < currX) std::cout << "Warning: we have a clash between components here!" << std::endl;
-            if (uppX > maxX) std::cout << "Warning: we have a clash between component and envelope!" << std::endl;
-            // low edge of current volume
-            Xcurr = compVol[i]->center()[0] - compTrdBounds->halflengthZ();
+	  lowX = compVol[i].get()->center()[0] - compTrdBounds->halflengthZ();
+	  uppX = compVol[i].get()->center()[0] + compTrdBounds->halflengthZ();
+	  if (lowX < currX) ATH_MSG_WARNING( "Warning: we have a clash between components here!" );
+	  if (uppX > maxX) ATH_MSG_WARNING( "Warning: we have a clash between component and envelope!" );
+	  // low edge of current volume
+	  Xcurr = compVol[i].get()->center()[0] - compTrdBounds->halflengthZ();
         }
         if (!compCubBounds && !compTrdBounds) {
-            std::cout << "unknown volume shape" << std::endl;
+	  ATH_MSG_WARNING( "unknown volume shape") ;
             return nullptr;
         }
         // close spacer if no further components
@@ -546,14 +588,11 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
                 volSteps.push_back(Xcurr);
                 openSpacer = false;
             } else {
-                std::cout << "currX,Xcurr,lowX,uppX" << currX << "," << Xcurr << "," << spacerlowXsize << "," << spaceruppXsize
-                          << std::endl;
-                std::cout << Xcurr - currX << "," << spacerlowXsize + spaceruppXsize << std::endl;
-                std::cout << "clash in spacer definition!" << std::endl;
+                 ATH_MSG_DEBUG( mv->getLogVol()->getName()<<" : clash in spacer definition " );
             }
         }
         if (compName[i].compare(0, 3, "RPC") == 0 || compName[i].compare(0, 3, "Ded") == 0) {
-            std::cout << " RPC components for endcaps not coded " << std::endl;
+	  ATH_MSG_DEBUG( mv->getLogVol()->getName() <<": RPC components in endcaps? ");
         }
         if (compName[i].compare(0, 1, "C") == 0 || compName[i].compare(0, 2, "LB") == 0) {
             if (!openSpacer) {
@@ -563,47 +602,47 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
                 transfSpacer.clear();
                 transfSpacer.push_back(compTransf[i]);
                 // establish temporary volume size
-                spacerlowXsize = compVol[i]->center()[0] - currX;
+                spacerlowXsize = compVol[i].get()->center()[0] - currX;
                 if (compCubBounds) {
                     spaceruppXsize = compCubBounds->halflengthX();
                     // check clash at low edge
                     if (spacerlowXsize < compCubBounds->halflengthX())
-                        std::cout << "WARNING at spacer low edge - not enough space" << std::endl;
+		      ATH_MSG_DEBUG( mv->getLogVol()->getName()<<",  spacer low edge - not enough space" );
                 }
                 if (compTrdBounds) {
                     spaceruppXsize = compTrdBounds->halflengthZ();
                     // check clash at low edge
                     if (spacerlowXsize < compTrdBounds->halflengthZ())
-                        std::cout << "WARNING at spacer low edge - not enough space" << std::endl;
+ 		      ATH_MSG_DEBUG( mv->getLogVol()->getName()<<",  spacer low edge - not enough space" );
                 }
             } else {
                 geoSpacer.push_back(compGeo[i]);
                 transfSpacer.push_back(compTransf[i]);
                 // check temporary volume size
                 if (compCubBounds) {
-                    if (compVol[i]->center()[0] - currX < compCubBounds->halflengthX())
-                        std::cout << "WARNING at spacer low edge - not enough space" << std::endl;
-                    if (compVol[i]->center()[0] + compCubBounds->halflengthX() > currX + spacerlowXsize + spaceruppXsize)
+		  if (compVol[i].get()->center()[0] - currX < compCubBounds->halflengthX())
+		      ATH_MSG_DEBUG( mv->getLogVol()->getName()<<",  spacer low edge - not enough space" );
+		  if (compVol[i].get()->center()[0] + compCubBounds->halflengthX() > currX + spacerlowXsize + spaceruppXsize)
                         spaceruppXsize +=
-                            (compVol[i]->center()[0] + compCubBounds->halflengthX()) - (currX + spacerlowXsize + spaceruppXsize);
+			  (compVol[i].get()->center()[0] + compCubBounds->halflengthX()) - (currX + spacerlowXsize + spaceruppXsize);
                 }
                 if (compTrdBounds) {
-                    if (compVol[i]->center()[0] - currX < compTrdBounds->halflengthZ())
-                        std::cout << "WARNING at spacer low edge - not enough space" << std::endl;
-                    if (compVol[i]->center()[0] + compTrdBounds->halflengthZ() > currX + spacerlowXsize + spaceruppXsize)
+		  if (compVol[i].get()->center()[0] - currX < compTrdBounds->halflengthZ())
+ 		      ATH_MSG_DEBUG( mv->getLogVol()->getName()<<",  spacer low edge - not enough space" );
+		  if (compVol[i].get()->center()[0] + compTrdBounds->halflengthZ() > currX + spacerlowXsize + spaceruppXsize)
                         spaceruppXsize +=
-                            (compVol[i]->center()[0] + compTrdBounds->halflengthZ()) - (currX + spacerlowXsize + spaceruppXsize);
+			  (compVol[i].get()->center()[0] + compTrdBounds->halflengthZ()) - (currX + spacerlowXsize + spaceruppXsize);
                 }
             }
             comp_processed = true;
         }
         if (compName[i].compare(0, 3, "MDT") == 0) {
-            Trk::Volume* mdtVol = nullptr;
+	  std::unique_ptr<Trk::Volume> mdtVol = nullptr;
             Trk::TrapezoidVolumeBounds* mdtBounds = nullptr;
             if (lowX == currX) {
                 mdtBounds = compTrdBounds ? new Trk::TrapezoidVolumeBounds(envX1, envX2, envY, compTrdBounds->halflengthZ())
                                           : new Trk::TrapezoidVolumeBounds(envX1, envX2, envY, compCubBounds->halflengthX());
-                mdtVol = new Trk::Volume(new Amg::Transform3D(compVol[i]->transform()), mdtBounds);
+                mdtVol = std::make_unique< Trk::Volume>(new Amg::Transform3D(compVol[i].get()->transform()), mdtBounds);
             } else {
                 if (std::abs(lowX - currX) > 0.002) {
                     ATH_MSG_DEBUG("Mdt volume size does not match the envelope:lowX,currX:" << lowX << "," << currX);
@@ -612,17 +651,16 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
                 mdtBounds = compTrdBounds
                                 ? new Trk::TrapezoidVolumeBounds(envX1, envX2, envY, compTrdBounds->halflengthZ() + 0.5 * (lowX - currX))
                                 : new Trk::TrapezoidVolumeBounds(envX1, envX2, envY, compCubBounds->halflengthX() + 0.5 * (lowX - currX));
-                mdtVol = new Trk::Volume(new Amg::Transform3D(Amg::Translation3D(0., 0., 0.5 * (currX - lowX)) * compVol[i]->transform()),
+                mdtVol = std::make_unique< Trk::Volume>(new Amg::Transform3D(Amg::Translation3D(0., 0., 0.5 * (currX - lowX)) * compVol[i].get()->transform()),
                                          mdtBounds);
             }
-            Trk::TrackingVolume* mdtTrkVol = processMdtTrd(mdtVol, compGeo[i], &compTransf[i], cache);
+            Trk::TrackingVolume* mdtTrkVol = processMdtTrd(mdtVol.get(), compGeo[i], &compTransf[i], cache);
             trkVols.push_back(mdtTrkVol);
             currX += 2. * mdtBounds->halflengthZ();
             volSteps.push_back(currX);
-            delete mdtVol;
             comp_processed = true;
         }
-        if (!comp_processed) std::cout << "unknown technology:" << compName[i] << std::endl;
+        if (!comp_processed) ATH_MSG_DEBUG(mv->getLogVol()->getName()<< ", unknown technology:" << compName[i] );
     }  // end loop over station children
 
     // there may be a spacer still open
@@ -640,20 +678,16 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
             volSteps.push_back(currX);
             openSpacer = false;
         } else {
-            std::cout << "currX,maxX,lowX,uppX:" << currX << "," << maxX << "," << spacerlowXsize << "," << spaceruppXsize << std::endl;
-            std::cout << "clash in spacer definition!(last volume)" << std::endl;
+	  ATH_MSG_DEBUG( mv->getLogVol()->getName()<<",  clash in spacer definition (last volume)" );
         }
     }
     // create VolumeArray (1DX)
     Trk::TrackingVolumeArray* components = nullptr;
-    // Trk::BinUtility* binUtility = new Trk::BinUtility1DX( -(
-    // envelope->halflengthZ() ), volSteps);
+    // Trk::BinUtility* binUtility = new Trk::BinUtility1DX( -envelope->halflengthZ() ), volSteps);
     if (m_trackingVolumeArrayCreator) {
         Trk::BinUtility* binUtility = new Trk::BinUtility(volSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
         components = m_trackingVolumeArrayCreator->trapezoidVolumesArrayNav(trkVols, binUtility, false);
     }
-
-    for (auto & i : compVol) delete i;
 
     return components;
 }
@@ -664,7 +698,7 @@ StatusCode Muon::MuonStationTypeBuilder::finalize() {
     return StatusCode::SUCCESS;
 }
 //
-Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtBox(Trk::Volume*& vol, const GeoVPhysVol*& gv, Amg::Transform3D* transf,
+Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtBox(Trk::Volume* vol, const GeoVPhysVol*& gv, Amg::Transform3D* transf,
                                                                        double zShift, Cache& cache) const {
     std::vector<Trk::PlaneLayer*> layers;
     std::vector<double> x_array;
@@ -811,11 +845,11 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtBox(Trk::Volume*& v
     mdtLayerArray = new Trk::NavBinnedArray1D<Trk::Layer>(layerOrder, binUtility, new Amg::Transform3D(Trk::s_idTransform));
     std::string name = "MDT";
     Trk::TrackingVolume* mdt = new Trk::TrackingVolume(*vol, *m_muonMaterial, mdtLayerArray, nullptr, name);
-    delete transf;
+
     return mdt;
 }
 //
-Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtTrd(Trk::Volume*& vol, const GeoVPhysVol*& gv, Amg::Transform3D* transf,
+Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtTrd(Trk::Volume* vol, const GeoVPhysVol*& gv, Amg::Transform3D* transf,
                                                                        Cache& cache) const {
     std::vector<Trk::PlaneLayer*> layers;
     std::vector<double> x_array;
@@ -947,7 +981,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtTrd(Trk::Volume*& v
     }
     return nullptr;
 }
-Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume*& vol, std::vector<const GeoVPhysVol*> gv,
+Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume* vol, std::vector<const GeoVPhysVol*> gv,
                                                                     std::vector<Amg::Transform3D> transfc, Cache& cache) const {
     // layers correspond to DedModules and RpcModules; all substructures averaged
     // in material properties
@@ -1160,7 +1194,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
     // translate into layers
     for (unsigned int ic = 0; ic < gv.size(); ++ic) {
         const GeoLogVol* clv = gv[ic]->getLogVol();
-        Trk::Material cmat = m_materialConverter->convert(clv->getMaterial());
+        Trk::Material cmat = m_materialConverter.convert(clv->getMaterial());
         ATH_MSG_VERBOSE(" spacer material all X0 " << cmat.X0 << " L0 " << cmat.L0 << " A " << cmat.A << " Z " << cmat.Z << " rho "
                                                    << cmat.rho);
         if (clv->getShape()->type() == "Box") {
@@ -1282,15 +1316,14 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                         Trk::Volume* cVol = new Trk::Volume(new Amg::Transform3D(Amg::Translation3D(-shift, 0., 0.)),
                                                             new Trk::CombinedVolumeBounds(v1, v2, false));
                         volExcl = new Trk::VolumeExcluder(cVol);
-                        Trk::SubtractedPlaneSurface* subPlane = new Trk::SubtractedPlaneSurface(
+			std::unique_ptr<Trk::SubtractedPlaneSurface> subPlane =std::make_unique<Trk::SubtractedPlaneSurface>(
                             Trk::PlaneSurface(Amg::Transform3D(transf[ic] * Amg::Translation3D(shift, 0., 0.) *
                                                                Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
                                                                Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.))),
-                                              bounds),
-                            volExcl, false);
+                                              bounds),  volExcl, false);
                         Trk::MaterialProperties material(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                         Trk::HomogeneousLayerMaterial spacerMaterial(material, 0.);
-                        Trk::SubtractedPlaneLayer* layx = new Trk::SubtractedPlaneLayer(subPlane, spacerMaterial, thickness, nullptr, 0);
+                        Trk::SubtractedPlaneLayer* layx = new Trk::SubtractedPlaneLayer(subPlane.get(), spacerMaterial, thickness, nullptr, 0);
                         layers.push_back(layx);
                         // Trk::SubtractedPlaneSurface* subPlaneX
                         //        = new
@@ -1299,20 +1332,17 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                             new Trk::SubtractedPlaneSurface(*subPlane, Amg::Transform3D(Amg::Translation3D(-2 * shift, 0., 0.))));
                         Trk::SubtractedPlaneLayer* layxx = new Trk::SubtractedPlaneLayer(subPlaneX.get(), spacerMaterial, thickness, nullptr, 0);
                         layers.push_back(layxx);
-                        delete subPlane;
 
                         bounds = std::make_shared<const Trk::RectangleBounds>(boxB->getXHalfLength(), box->getZHalfLength());
                         thickness = subVs[2].second.translation().mag();
                         Trk::VolumeExcluder* volEx =
                             new Trk::VolumeExcluder(new Trk::Volume(*cVol, Amg::Transform3D(Amg::Translation3D(2 * shift, 0., 0.))));
-                        subPlane = new Trk::SubtractedPlaneSurface(
+                        std::unique_ptr<Trk::SubtractedPlaneSurface> subPlaneBis =std::make_unique<Trk::SubtractedPlaneSurface>(
                             Trk::PlaneSurface(Amg::Transform3D(transf[ic] * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(1., 0., 0.))),
-                                              bounds),
-                            volEx, false);
+                                              bounds), volEx, false);
                         material = Trk::MaterialProperties(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                         spacerMaterial = Trk::HomogeneousLayerMaterial(material, 0.);
-                        Trk::SubtractedPlaneLayer* lay = new Trk::SubtractedPlaneLayer(subPlane, spacerMaterial, thickness, nullptr, 0);
-                        delete subPlane;
+                        Trk::SubtractedPlaneLayer* lay = new Trk::SubtractedPlaneLayer(subPlaneBis.get(), spacerMaterial, thickness, nullptr, 0);
                         layers.push_back(lay);
                     } else {
                         delete v1;
@@ -1320,10 +1350,10 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                     }
                 }
             } else {
-                std::cout << "unresolved spacer component " << clv->getName() << std::endl;
+	      ATH_MSG_DEBUG( clv->getName() << ", unresolved spacer component " << clv->getName());
             }
         } else {
-            std::cout << "unresolved spacer component " << clv->getName() << std::endl;
+	  ATH_MSG_DEBUG( clv->getName() << ", unresolved spacer component " << clv->getName());
         }
     }
 
@@ -1333,7 +1363,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
 
     std::vector<Trk::Layer*>* spacerLayers = new std::vector<Trk::Layer*>(layers);
     std::string name = "Spacer";
-    Trk::TrackingVolume* spacer = new Trk::TrackingVolume(vol, *m_muonMaterial, spacerLayers, name);
+    Trk::TrackingVolume* spacer =  new Trk::TrackingVolume(vol, *m_muonMaterial, spacerLayers, name);
 
     if (!m_resolveSpacer) {  // average into a single material layer
         ATH_MSG_VERBOSE(" !m_resolveSpacer createLayerRepresentation ");
@@ -1345,7 +1375,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
         std::vector<Trk::Layer*>* spacerLays = new std::vector<Trk::Layer*>(layers);
         spacer = new Trk::TrackingVolume(vol, *m_muonMaterial, spacerLays, name);
     }
-
+    
     return spacer;
 }
 
@@ -1452,7 +1482,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
                 const GeoShapeShift* sh = dynamic_cast<const GeoShapeShift*>(uni->getOpB());
                 const GeoTrd* trdB = dynamic_cast<const GeoTrd*>(sh->getOp());
                 if (trdB->getYHalfLength1() != xMed || trdB->getXHalfLength1() != z)
-                    std::cout << "Something is wrong: dimensions of 2 trapezoids do not match" << std::endl;
+		  ATH_MSG_DEBUG(mv->getLogVol()->getName() << ": something is wrong: dimensions of 2 trapezoids do not match" );
                 xMax = trdB->getYHalfLength2();
                 y2 = trdB->getZHalfLength();
             }
@@ -1530,7 +1560,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
     zShift = std::abs(((compTransf.front()).translation())[2]) + std::abs(((compTransf.back()).translation())[2]);
     // calculate displacement with respect to GeoModel station volume
     // one way or the other, the station envelope is double trapezoid
-    Trk::Volume* envelope;
+    std::unique_ptr<Trk::Volume> envelope;
     double envXMed = xMed;
     double envY1 = y1;
     double envY2 = y2;
@@ -1548,7 +1578,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
         Amg::Transform3D* cTr =
             new Amg::Transform3D(Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
                                  Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.)) * Amg::Translation3D(0., 0., xShift));
-        envelope = new Trk::Volume(cTr, cscBounds);
+        envelope = std::make_unique<Trk::Volume>(cTr, cscBounds);
         // components
         double xCurr = -xTotal;
         for (unsigned int ic = 0; ic < xSizes.size(); ic++) {
@@ -1559,9 +1589,8 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
                                      Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.)) * Amg::Translation3D(0., 0., xCurr + xShift));
             compBounds = new Trk::TrapezoidVolumeBounds(xMin, xMax, y1, xSizes[ic]);
             Trk::LayerArray* cscLayerArray = processCSCTrdComponent(compGeoVol[ic], compBounds, compTr, cache);
-            Trk::Volume* compVol = new Trk::Volume(compTr, compBounds);
+	    std::unique_ptr<Trk::Volume> compVol = std::make_unique<Trk::Volume>(compTr, compBounds);
             Trk::TrackingVolume* compTV = new Trk::TrackingVolume(*compVol, *m_muonMaterial, cscLayerArray, nullptr, compName[ic]);
-            delete compVol;
             components.push_back(compTV);
             xCurr += xSizes[ic];
             volSteps.push_back(xCurr + xShift);
@@ -1580,7 +1609,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
         Amg::Transform3D* cTr = new Amg::Transform3D(Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
                                                      Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.)) *
                                                      Amg::Translation3D(0., envY1 - envY2, 0.) * Amg::Translation3D(0., 0., xShift));
-        envelope = new Trk::Volume(cTr, cscBounds);
+        envelope = std::make_unique<Trk::Volume>(cTr, cscBounds);
         // components
         double xCurr = -xTotal;
         for (unsigned int ic = 0; ic < xSizes.size(); ic++) {
@@ -1591,9 +1620,8 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
                 Amg::Translation3D(0., envY1 - envY2, 0.) * Amg::Translation3D(0., 0., xCurr + xShift));
             compBounds = new Trk::DoubleTrapezoidVolumeBounds(xMin, envXMed, xMax, envY1, envY2, xSizes[ic]);
             Trk::LayerArray* cscLayerArray = processCSCDiamondComponent(compGeoVol[ic], compBounds, compTr, cache);
-            Trk::Volume* compVol = new Trk::Volume(compTr, compBounds);
+	    std::unique_ptr<Trk::Volume> compVol =std::make_unique<Trk::Volume>(compTr, compBounds);
             Trk::TrackingVolume* compTV = new Trk::TrackingVolume(*compVol, *m_muonMaterial, cscLayerArray, nullptr, compName[ic]);
-            delete compVol;
             components.push_back(compTV);
             xCurr += xSizes[ic];
             volSteps.push_back(xCurr + xShift);
@@ -1616,79 +1644,257 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
     }
     // ready to build the station prototype
     Trk::TrackingVolume* csc_station = new Trk::TrackingVolume(*envelope, *m_muonMaterial, nullptr, compArray, name);
-    delete envelope;
     return csc_station;
 }
 
-std::vector<Trk::TrackingVolume*> Muon::MuonStationTypeBuilder::processTgcStation(const GeoVPhysVol* mv, Cache& cache) const {
-    // TGC stations
-    std::vector<Trk::TrackingVolume*> tgc_stations;
-    //  printChildren(mv);
+Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processTgcStation(const GeoVPhysVol* cv, Cache& cache) const {
+ 
+  Trk::TrackingVolume* tgc_station = nullptr;
+  //  printChildren(mv);
     Trk::TrapezoidVolumeBounds* tgcBounds;
-    Trk::Volume* envelope;
-    for (const GeoVolumeVec_t::value_type& p : geoGetVolumes(mv)) {
-        const GeoVPhysVol* cv = p.first;
-        const GeoLogVol* clv = cv->getLogVol();
-        const Amg::Transform3D& transform = p.second;
-        const std::string& tgc_name = clv->getName();
-        const GeoShape* baseShape = clv->getShape();
-        if (baseShape->type() == "Subtraction") {
-            const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(baseShape);
-            if (sub) baseShape = sub->getOpA();
-        }
+    std::unique_ptr<Trk::Volume> envelope;
 
-        if (baseShape->type() == "Trd") {
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(baseShape);
-            double x1 = trd->getXHalfLength1();
-            double y1 = trd->getYHalfLength1();
-            double y2 = trd->getYHalfLength2();
-            double z = trd->getZHalfLength();
-            // define envelope
-            tgcBounds = new Trk::TrapezoidVolumeBounds(y1, y2, z, x1);
-            // xy -> yz  rotation
-            Amg::Transform3D* tTr = new Amg::Transform3D(transform * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
-                                                         Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.)));
-            envelope = new Trk::Volume(tTr, tgcBounds);
-            Trk::LayerArray* tgcLayerArray = processTGCComponent(cv, tgcBounds, tTr, cache);
-            // ready to build the station prototype
-            Trk::TrackingVolume* tgc_station = new Trk::TrackingVolume(*envelope, *m_muonMaterial, tgcLayerArray, nullptr, tgc_name);
-
-            delete envelope;
-            if (tgc_station) tgc_stations.push_back(tgc_station);
-
-        } else {
-            std::cout << "TGC component not trapezoid ?" << std::endl;
-        }
+    const GeoLogVol* clv = cv->getLogVol();
+    const std::string& tgc_name = clv->getName();
+    const GeoShape* baseShape = clv->getShape();
+    if (baseShape->type() == "Subtraction") {
+      const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(baseShape);
+      if (sub) baseShape = sub->getOpA();
     }
-    return tgc_stations;
+    
+    if (baseShape->type() == "Trd") {
+      const GeoTrd* trd = dynamic_cast<const GeoTrd*>(baseShape);
+      double x1 = trd->getXHalfLength1();
+      double y1 = trd->getYHalfLength1();
+      double y2 = trd->getYHalfLength2();
+      double z = trd->getZHalfLength();
+      // define envelope
+      tgcBounds = new Trk::TrapezoidVolumeBounds(y1, y2, z, x1);
+      // xy -> yz  rotation
+      Amg::Transform3D* tTr = new Amg::Transform3D(Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
+						   Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.)));
+      envelope = std::make_unique<Trk::Volume>(tTr, tgcBounds);
+      Trk::LayerArray* tgcLayerArray = processTGCComponent(cv, tgcBounds, tTr, cache);
+      // ready to build the station prototype
+      tgc_station = new Trk::TrackingVolume(*envelope, *m_muonMaterial, tgcLayerArray, nullptr, tgc_name);
+           
+    } else {
+      ATH_MSG_WARNING( tgc_name << ": TGC component not a trapezoid ?  no prototype built " );
+    }
+
+    printVolumeBounds("TGC envelope bounds:", *tgcBounds);
+    printTransform("TGC prototype transform", tgc_station->transform());
+    
+    return tgc_station;
 }
 
-void Muon::MuonStationTypeBuilder::printChildren(const GeoVPhysVol* pv) const {
+std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::process_sTGC(const MuonGM::MuonDetectorManager* muonMgr,
+											const MuonGM::sTgcReadoutElement* stgc,	Identifier nswId,
+											const GeoVPhysVol* gv, Amg::Transform3D transf) const {
+
+  std::string vName= gv->getLogVol()->getName();  
+  ATH_MSG_DEBUG( "processing sTGC prototype of " <<vName);
+  // printChildren(gv);
+  
+  std::unique_ptr<const Trk::Volume> envelope = std::unique_ptr<const Trk::Volume>(m_geoShapeConverter.translateGeoShape(gv->getLogVol()->getShape(), &transf));
+  if (!envelope.get())  {
+    ATH_MSG_WARNING("sTGC prototype for " << vName <<" not built ");
+    return nullptr;
+  }
+  double thickness = envelopeThickness( envelope->volumeBounds());    // half thickness
+  //printTransform("sTgc envelope trf", envelope->transform()); 
+  //printVolumeBounds("sTgc envelope bounds", envelope->volumeBounds());
+  
+  // use envelope to define layer bounds
+  Trk::SurfaceBounds*  layBounds = nullptr;
+  layBounds = getLayerBoundsFromEnvelope( envelope.get() );
+  // calculate layer area
+  double layArea = 0.;
+  if (layBounds) layArea = area( layBounds );  // TODO this should be a functionality of SurfaceBounds
+  // use area to blend station material
+  Trk::MaterialProperties sTgc_mat;
+  m_volumeConverter.collectMaterial(gv,sTgc_mat, layArea);
+  Trk::HomogeneousLayerMaterial stgcMaterial(sTgc_mat, 0.);
+  float scale =1./ gv->getNChildVols();
+  Trk::MaterialProperties sTgc_layerMat(sTgc_mat);
+  sTgc_layerMat *= scale;    // divide station material between layers
+  Trk::HomogeneousLayerMaterial stgcLayMaterial(sTgc_layerMat, 0.);   // TODO implement frame-like material binning and rotate to match readout geometry
+
+  // loop over child volumes, check transforms / align with readout geometry
+  Trk::SharedObject<const Trk::SurfaceBounds> bounds(layBounds);
+  std::vector<Trk::PlaneLayer*> layers;
+  unsigned int ic=0;
+  for (const GeoVolumeVec_t::value_type& p : geoGetVolumes(gv)) {
+    //const GeoVPhysVol* cv = p.first;
+    const Amg::Transform3D& trc = p.second;
+    Trk::PlaneLayer*  layer = new Trk::PlaneLayer(envelope.get()->transform()*trc, bounds, stgcLayMaterial, sTgc_layerMat.thickness());
+    
+    if (stgc) {
+      Identifier id = muonMgr->stgcIdHelper()->channelID(muonMgr->stgcIdHelper()->stationName(nswId),
+							 muonMgr->stgcIdHelper()->stationEta(nswId),
+							 muonMgr->stgcIdHelper()->stationPhi(nswId),
+							 muonMgr->stgcIdHelper()->multilayer(nswId),
+							 muonMgr->stgcIdHelper()->gasGap(nswId)+ic, 2, 1); 
+      //Amg::Transform3D layTransf = stgc->transform(id);
+      //printTransform("subcomponent " , trc ); 
+      //printTransform("layer  wire" , transf.inverse()*layTransf );
+      unsigned int layType = id.get_identifier32().get_compact();
+      layer->setLayerType(layType);
+    }
+    layers.push_back(layer);      
+    ic++;
+  }
+  // create the BinnedArray
+  std::vector<Trk::SharedObject<Trk::Layer>> layerOrder;
+  std::vector<float> binSteps;
+  binSteps.push_back(-thickness);
+  for (unsigned int il=0; il< layers.size(); il++) {
+    binSteps.push_back( binSteps.back()+sTgc_layerMat.thickness());
+    layerOrder.push_back(Trk::SharedObject<Trk::Layer>(layers[il]));
+  }
+  if (binSteps.back()>thickness+1.e-3) ATH_MSG_WARNING("rescale stgc binning:" <<binSteps.back() << ">" <<thickness );
+  binSteps.back()=thickness;
+  Trk::BinUtility* binUtility = new Trk::BinUtility(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+  Trk::LayerArray* stgcLayerArray = new Trk::NavBinnedArray1D<Trk::Layer>(layerOrder, binUtility, new Amg::Transform3D(Trk::s_idTransform));
+  // build tracking volume
+  Trk::TrackingVolume* sTgc = new Trk::TrackingVolume(*envelope, *m_muonMaterial, stgcLayerArray, nullptr, vName);
+  // create layer representation
+  Trk::PlaneLayer*  layerRepr = new Trk::PlaneLayer(transf, bounds, stgcMaterial, sTgc_mat.thickness());
+  // create prototype as detached tracking volume
+  std::unique_ptr<Trk::DetachedTrackingVolume> stgcType{sTgc ? new Trk::DetachedTrackingVolume( vName, sTgc, layerRepr, nullptr) : nullptr};
+  
+  return stgcType;
+}
+
+std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::process_MM(const MuonGM::MuonDetectorManager* muonMgr,
+										      const MuonGM::MMReadoutElement* mm, Identifier nswId,
+										      const GeoVPhysVol* gv, Amg::Transform3D transf) const {
+
+  std::string vName = gv->getLogVol()->getName();
+  
+  ATH_MSG_DEBUG( "processing MM:" << vName << ":" << gv->getLogVol()->getShape()->type());
+  //printChildren(gv); 
+
+  std::unique_ptr<const Trk::Volume> envelope = std::unique_ptr<const Trk::Volume>(m_geoShapeConverter.translateGeoShape(gv->getLogVol()->getShape(), &transf));
+  if (!envelope.get())  {
+    ATH_MSG_WARNING("MM prototype for " << vName <<" not built ");
+    return nullptr;
+  }
+  double thickness = envelopeThickness( envelope->volumeBounds());    // half thickness
+  printTransform("MM envelope trf", envelope->transform()); 
+  printVolumeBounds("MM envelope bounds", envelope->volumeBounds());
+  
+  // use envelope to define layer bounds
+  Trk::SurfaceBounds*  layBounds = nullptr;
+  layBounds = getLayerBoundsFromEnvelope( envelope.get());
+  // calculate layer area
+  double layArea = 0.;
+  if (layBounds) layArea = area( layBounds );  // TODO this should be a functionality of SurfaceBounds
+  // use area to blend station material
+  Trk::MaterialProperties mm_mat;
+  m_volumeConverter.collectMaterial(gv,mm_mat, layArea);
+  Trk::HomogeneousLayerMaterial mmMaterial(mm_mat, 0.);  
+  float scale =1./ gv->getNChildVols();
+  Trk::MaterialProperties mm_layerMat(mm_mat);
+  mm_layerMat *= scale;    // divide station material between layers
+  Trk::HomogeneousLayerMaterial mmLayMaterial(mm_layerMat, 0.);   // TODO implement frame-like material binning and rotate to match readout geometry
+
+  // loop over child volumes, check transforms / align with readout geometry
+  Trk::SharedObject<const Trk::SurfaceBounds> bounds(layBounds);
+  std::vector<Trk::PlaneLayer*> layers;
+  unsigned int ic=0;
+  for (const GeoVolumeVec_t::value_type& p : geoGetVolumes(gv)) {
+    //const GeoVPhysVol* cv = p.first;
+    const Amg::Transform3D& trc = p.second;
+    Trk::PlaneLayer*  layer = new Trk::PlaneLayer(transf*trc, bounds, mmLayMaterial, mm_layerMat.thickness());
+    
+    if (mm) {
+      Identifier id = muonMgr->mmIdHelper()->channelID(muonMgr->mmIdHelper()->stationName(nswId),
+							 muonMgr->mmIdHelper()->stationEta(nswId),
+							 muonMgr->mmIdHelper()->stationPhi(nswId),
+							 muonMgr->mmIdHelper()->multilayer(nswId),
+							 1+ic, 1); 
+      //Amg::Transform3D layTransf = mm->transform(id);
+      //printTransform("subcomponent " , trc ); 
+      //printTransform("layer  mm" , transf.inverse()*layTransf );
+      unsigned int layType = id.get_identifier32().get_compact();
+      layer->setLayerType(layType);
+    }
+    layers.push_back(layer);      
+    ic++;
+  }
+
+  // create the BinnedArray
+  std::vector<Trk::SharedObject<Trk::Layer>> layerOrder;
+  std::vector<float> binSteps;
+  binSteps.push_back(-thickness);
+  for (unsigned int il=0; il< layers.size(); il++) {
+    binSteps.push_back( binSteps.back()+mm_layerMat.thickness());
+    layerOrder.push_back(Trk::SharedObject<Trk::Layer>(layers[il]));
+  }
+  if (binSteps.back()>thickness+1.e-3) ATH_MSG_WARNING("rescale mm binning:" <<binSteps.back() << ">" <<thickness );
+  binSteps.back()=thickness;
+  Trk::BinUtility* binUtility = new Trk::BinUtility(binSteps, Trk::BinningOption::open, Trk::BinningValue::binX);
+  Trk::LayerArray* mmLayerArray = new Trk::NavBinnedArray1D<Trk::Layer>(layerOrder, binUtility, new Amg::Transform3D(Trk::s_idTransform));
+  // build tracking volume
+  Trk::TrackingVolume* mM = new Trk::TrackingVolume(*envelope, *m_muonMaterial, mmLayerArray, nullptr, vName); 
+  // create layer representation
+  Trk::PlaneLayer*  layerRepr = new Trk::PlaneLayer(transf, bounds, mmMaterial, mm_mat.thickness());
+  // create prototype as detached tracking volume
+  std::unique_ptr<Trk::DetachedTrackingVolume> mmType{mM ? new Trk::DetachedTrackingVolume( vName, mM, layerRepr, nullptr) : nullptr};
+  
+  return mmType;
+}
+
+void Muon::MuonStationTypeBuilder::printChildren(const GeoVPhysVol* pv, int level) const {
     // subcomponents
+    int ic=0;
     for (const GeoVolumeVec_t::value_type& p : geoGetVolumes(pv)) {
         const GeoVPhysVol* cv = p.first;
         const GeoLogVol* clv = cv->getLogVol();
         const Amg::Transform3D& transf = p.second;
-        std::cout << "  ";
-        std::cout << "subcomponent:" << clv->getName() << ", made of" << clv->getMaterial()->getName() << "," << clv->getShape()->type()
-                  << "," << transf.translation() << std::endl;
+        ATH_MSG_DEBUG( level<<":");
+        ATH_MSG_DEBUG( "subcomponent:" <<ic <<":"<< clv->getName() << ", made of" << clv->getMaterial()->getName() << "," << clv->getShape()->type()
+		       << ":" << transf.translation().x() <<"," << transf.translation().y() <<"," <<transf.translation().z() );
+
+        if (clv->getShape()->type() == "Shift") {
+            const GeoShapeShift * shift = dynamic_cast<const GeoShapeShift*>(clv->getShape());
+            //
+	    if (shift->getOp()->type()=="SimplePolygonBrep") {
+	      const GeoSimplePolygonBrep* spb = dynamic_cast<const GeoSimplePolygonBrep*> (shift->getOp());
+	      unsigned int nv = spb->getNVertices();
+	      std::vector<std::pair<double,double> > ivtx(nv);
+	      for (unsigned int iv = 0; iv < nv; iv++) {
+		ivtx[iv]=std::pair<double,double>(spb->getXVertex(iv),spb->getYVertex(iv));
+                ATH_MSG_DEBUG( " SimplePolygonBrep  x " << spb->getXVertex(iv) << " y " << spb->getYVertex(iv) << " z " << spb->getDZ() );		
+	      }   
+	      //return new Trk::Volume(new Amg::Transform3D(*transf),new Trk::SimplePolygonBrepVolumeBounds(ivtx,spb->getDZ()));
+	    } else {
+	      ATH_MSG_DEBUG("geoshape type:" <<  shift->getOp()->type() );
+	    }
+            ATH_MSG_DEBUG( "shift:" << shift->getX().translation().x() << "," << shift->getX().translation().y()  << ","  << shift->getX().translation().z() );
+	    ATH_MSG_DEBUG( ":rot:" << shift->getX().rotation()(0,0)<<"," << shift->getX().rotation()(0,1) <<"," << shift->getX().rotation()(0,2) );
+	    ATH_MSG_DEBUG(  "       " << shift->getX().rotation()(1,0)<<"," << shift->getX().rotation()(1,1) <<"," << shift->getX().rotation()(1,2) );
+	    ATH_MSG_DEBUG(  "       " << shift->getX().rotation()(2,0)<<"," << shift->getX().rotation()(2,1) <<"," << shift->getX().rotation()(2,2) );
+            //
+        }
 
         if (clv->getShape()->type() == "Trd") {
             const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
             //
-            std::cout << "dimensions:" << trd->getXHalfLength1() << "," << trd->getXHalfLength2() << "," << trd->getYHalfLength1() << ","
-                      << trd->getYHalfLength2() << "," << trd->getZHalfLength() << std::endl;
+            ATH_MSG_DEBUG(  "trd dimensions:" << trd->getXHalfLength1() << "," << trd->getXHalfLength2() << "," << trd->getYHalfLength1() << ","
+			    << trd->getYHalfLength2() << "," << trd->getZHalfLength() );
             //
         }
         if (clv->getShape()->type() == "Box") {
             const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
             //
-            std::cout << "dimensions:" << box->getXHalfLength() << "," << box->getYHalfLength() << "," << box->getZHalfLength()
-                      << std::endl;
+            ATH_MSG_DEBUG(  " box dimensions:" << box->getXHalfLength() << "," << box->getYHalfLength() << "," << box->getZHalfLength() );
             //
         }
 
-        printChildren(cv);
+        printChildren(cv, level+1);
+	ic++;
     }
 }
 
@@ -1749,9 +1955,10 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::getAveragedLayerMaterial(c
                                                                                double thickness) const {
     ATH_MSG_DEBUG(name() << "::getAveragedLayerMaterial:processing ");
     // loop through the whole hierarchy; collect material
-    Trk::MaterialProperties sumMat(0., 10.e10, 10.e10, 13., 26., 0.);
+    Trk::MaterialProperties sumMat;
     // protect nan
-    if (thickness > 0.) collectMaterial(pv, sumMat, volume / thickness);
+    if (thickness > 0.) m_volumeConverter.collectMaterial(pv, sumMat, volume / thickness);
+
     ATH_MSG_VERBOSE(name() << " combined material thickness: " << sumMat.thickness());
     ATH_MSG_VERBOSE(name() << " actual layer thickness: " << thickness);
 
@@ -1768,78 +1975,6 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::getAveragedLayerMaterial(c
         return sumMat;
     }
     return sumMat;
-}
-
-void Muon::MuonStationTypeBuilder::collectMaterial(const GeoVPhysVol* pv, Trk::MaterialProperties& layMat, double sf) const {
-    // sf is surface of the new layer used to calculate the average 'thickness' of
-    // components
-    GeoVolumeVec_t vols = geoGetVolumes(pv);
-    // add current volume
-    const GeoLogVol* lv = pv->getLogVol();
-
-    std::string nm = lv->getName();
-    if (nm.empty()) nm = "Spacer";
-
-    if (lv->getMaterial()->getName() != "Air" && nm.compare(0, 1,"T") != 0) {
-        // get material properties from GeoModel
-        Trk::Material newMP = m_materialConverter->convert(lv->getMaterial());
-        // current volume
-        double vol = getVolume(lv->getShape());
-        // subtract children volumes
-        for (const GeoVolumeVec_t::value_type& p : vols) {
-            const GeoVPhysVol* cv = p.first;
-            if (getVolume(cv->getLogVol()->getShape()) > vol) {
-            } else {
-                vol = vol - getVolume(cv->getLogVol()->getShape());
-            }
-        }
-        double d = vol / sf;
-
-        ATH_MSG_VERBOSE(" collectMaterial current material:" << lv->getMaterial()->getName() << " d " << d << " newMP.x0() " << newMP.x0()
-                                                             << " L0 " << newMP.L0 << " A " << newMP.A << " Z " << newMP.Z << " rho "
-                                                             << newMP.rho);
-
-        // protect nan
-        if (d > 0 && newMP.x0() > 0.) {
-            layMat.addMaterial(newMP, d / newMP.x0());
-            ATH_MSG_VERBOSE(" collectMaterial layMat thickness " << layMat.thickness() << " thickness in X0 " << layMat.thicknessInX0());
-        }
-    }
-    // subcomponents
-    // skip children volume if we deal with G10 ( not correctly described )
-    // if ( lv->getName() != "G10" ) {
-    for (const GeoVolumeVec_t::value_type& p : vols) {
-        const GeoVPhysVol* cv = p.first;
-        collectMaterial(cv, layMat, sf);
-    }
-}
-
-double Muon::MuonStationTypeBuilder::getVolume(const GeoShape* shape) const {
-    //
-    double volume = 0.;
-
-    if (shape->type() == "Shift") {
-        const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(shape);
-        volume = getVolume(shift->getOp());
-    } else if (shape->type() == "Subtraction") {
-        const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(shape);
-        double volA = getVolume(sub->getOpA());
-        double volB = getVolume(sub->getOpB());
-        // protection against subtraction of large volumes
-        if (volA > volB) {
-            volume = volA - volB;
-        } else {
-            volume = volA;
-        }
-    } else if (shape->type() == "Union") {
-        const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(shape);
-        double volA = getVolume(uni->getOpA());
-        double volB = getVolume(uni->getOpB());
-        volume = volA + volB;
-    } else {
-        volume = shape->volume();
-    }
-    return volume;
 }
 
 Trk::LayerArray* Muon::MuonStationTypeBuilder::processCSCTrdComponent(const GeoVPhysVol*& pv, Trk::TrapezoidVolumeBounds*& compBounds,
@@ -2121,7 +2256,7 @@ Trk::LayerArray* Muon::MuonStationTypeBuilder::processTGCComponent(const GeoVPhy
         }
         matTGC = Trk::MaterialProperties(*cache.m_matTGC06);
     } else {
-        std::cout << "unknown TGC material:" << tgcBounds->halflengthZ() << std::endl;
+      ATH_MSG_DEBUG( "unknown TGC material:" << tgcBounds->halflengthZ() );
     }
 
     for (const GeoVolumeVec_t::value_type& p : geoGetVolumes(pv)) {
@@ -2300,8 +2435,6 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         layer = new Trk::PlaneLayer(Amg::Transform3D(trVol->transform() * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
                                                      Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.))),
                                     bounds, mat, thickness, std::move(od), 1);
-        // for (size_t i=0; i<surfs->size(); i++) delete (*surfs)[i];
-        // delete surfs;
         // multilayers
         if (m_multilayerRepresentation && trVol->confinedVolumes()) {
             Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = trVol->confinedVolumes()->arrayObjects();
@@ -2415,8 +2548,8 @@ Identifier Muon::MuonStationTypeBuilder::identifyNSW(const MuonGM::MuonDetectorM
         std::istringstream istm(&vName[3]);
         int iMult;
         istm >> iMult;
-        if (vName[0] == 'Q' && vName[3] == 'P') iMult = 1;
-        if (vName[0] == 'Q' && vName[3] == 'C') iMult = 2;
+        if (vName[0] == 'Q' && vName[3] == 'P') iMult = (vName[1] == 'L') ? 1 : 2;
+	if (vName[0] == 'Q' && vName[3] == 'C') iMult = (vName[1] == 'L') ? 2 : 1;
         // layer
         std::string stl(&vName[vName.size() - 1]);
         std::istringstream istl(stl);
@@ -2426,7 +2559,7 @@ Identifier Muon::MuonStationTypeBuilder::identifyNSW(const MuonGM::MuonDetectorM
         if (vName[0] == 'Q') {
             std::string stName = (vName[1] == 'L') ? "STL" : "STS";
             // int stId = (vName[2]=='L') ? 0 : 1;
-            id = muonDetMgr->stgcIdHelper()->channelID(stName, iEta, iPhi, iMult, iLay, 1, 1);
+            id = muonDetMgr->stgcIdHelper()->channelID(stName, iEta, iPhi, iMult, iLay, 2, 1);   // wire position 
         } else {
             std::string stName = (vName[2] == 'L') ? "MML" : "MMS";
             // int stId = (vName[2]=='L') ? 0 : 1;
@@ -2478,7 +2611,7 @@ Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetector
             // 1,2,3 so stName would always be STS for stId, vName[2] was used, always
             // giving a 0 value
             std::string stName = (vName[1] == 'L') ? "STL" : "STS";
-            Identifier id = muonDetMgr->stgcIdHelper()->channelID(stName, iEta, iPhi, iMult, iLay, 1, 1);
+            Identifier id = muonDetMgr->stgcIdHelper()->channelID(stName, iEta, iPhi, iMult, iLay, 2, 1);    // wire position
             const MuonGM::sTgcReadoutElement* stgc = muonDetMgr->getsTgcReadoutElement(id);
             layType = id.get_identifier32().get_compact();
             if (stgc) {
@@ -2699,4 +2832,91 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     }
     ATH_MSG_VERBOSE(" collectStationMaterial " << layMat);
     return layMat;
+}
+
+void Muon::MuonStationTypeBuilder::printTransform(std::string comment, Amg::Transform3D transf) const {
+
+  ATH_MSG_DEBUG( comment );
+  ATH_MSG_DEBUG( "translation:" << transf.translation().x() <<"," <<  transf.translation().y() <<"," <<  transf.translation().z() );
+  ATH_MSG_DEBUG( "rotation:" << transf.rotation()(0,0) <<"," <<  transf.rotation()(0,1) <<"," <<  transf.rotation()(0,2) );
+  ATH_MSG_DEBUG( "               " << transf.rotation()(1,0) <<"," <<  transf.rotation()(1,1) <<"," <<  transf.rotation()(1,2) );
+  ATH_MSG_DEBUG( "               " << transf.rotation()(2,0) <<"," <<  transf.rotation()(2,1) <<"," <<  transf.rotation()(2,2) );
+  
+}
+
+void Muon::MuonStationTypeBuilder::printVolumeBounds(std::string comment, const Trk::VolumeBounds& volBounds) const {
+  
+  ATH_MSG_DEBUG( comment );
+  
+  const Trk::CuboidVolumeBounds* box = dynamic_cast< const Trk::CuboidVolumeBounds*> (&volBounds);
+  if (box) {
+    ATH_MSG_DEBUG("cuboid:" << box->halflengthX() <<"," << box->halflengthY() <<"," << box->halflengthZ() );
+    return;
+  }
+  const Trk::TrapezoidVolumeBounds* trd = dynamic_cast< const Trk::TrapezoidVolumeBounds*> (&volBounds);
+  if (trd) {
+    ATH_MSG_DEBUG("trapezoid:" << trd->minHalflengthX() <<"," << trd->maxHalflengthX() <<"," <<
+		  trd->halflengthY() <<"," << trd->halflengthZ() );
+    return;
+  }
+  const Trk::DoubleTrapezoidVolumeBounds* dtrd = dynamic_cast< const Trk::DoubleTrapezoidVolumeBounds*> (&volBounds);
+  if (dtrd) {
+    ATH_MSG_DEBUG("double trapezoid:" << dtrd->minHalflengthX() <<"," << dtrd->medHalflengthX() <<"," << dtrd->maxHalflengthX() <<"," <<
+		  dtrd->halflengthY1() <<"," <<dtrd->halflengthY2() <<"," << dtrd->halflengthZ() );
+    return;
+  }
+
+  const Trk::SimplePolygonBrepVolumeBounds* spb = dynamic_cast< const Trk::SimplePolygonBrepVolumeBounds*> (&volBounds);
+    ATH_MSG_DEBUG( "SimplePolygonBrep bounds: number of vertices:" << spb->xyVertices().size() );
+										     
+}
+
+double Muon::MuonStationTypeBuilder::envelopeThickness( const Trk::VolumeBounds& volBounds) const {
+  
+  const Trk::CuboidVolumeBounds* box = dynamic_cast< const Trk::CuboidVolumeBounds*> (&volBounds);
+  if (box)   return box->halflengthZ() ;
+ 
+  const Trk::TrapezoidVolumeBounds* trd = dynamic_cast< const Trk::TrapezoidVolumeBounds*> (&volBounds);
+  if (trd)  return trd->halflengthZ() ;
+
+  const Trk::DoubleTrapezoidVolumeBounds* dtrd = dynamic_cast< const Trk::DoubleTrapezoidVolumeBounds*> (&volBounds);
+  if (dtrd)  return dtrd->halflengthZ() ;
+
+  const Trk::SimplePolygonBrepVolumeBounds* spb = dynamic_cast< const Trk::SimplePolygonBrepVolumeBounds*> (&volBounds);
+  if (spb) return spb->halflengthZ() ;
+
+  return 0.;
+}
+
+Trk::SurfaceBounds*  Muon::MuonStationTypeBuilder::getLayerBoundsFromEnvelope( const Trk::Volume* envelope) const {
+    
+  const Trk::CuboidVolumeBounds* box = dynamic_cast< const Trk::CuboidVolumeBounds*> (&(envelope->volumeBounds()));
+  if (box)   return new Trk::RectangleBounds(box->halflengthX(), box->halflengthY() );
+ 
+  const Trk::TrapezoidVolumeBounds* trd = dynamic_cast< const Trk::TrapezoidVolumeBounds*> (&(envelope->volumeBounds()));
+	     
+  if (trd)  return new Trk::TrapezoidBounds( trd->minHalflengthX(), trd->maxHalflengthX(), trd->halflengthY() );
+
+  const Trk::DoubleTrapezoidVolumeBounds* dtrd = dynamic_cast< const Trk::DoubleTrapezoidVolumeBounds*> (&(envelope->volumeBounds()));
+
+  if (dtrd) return new Trk::DiamondBounds( dtrd->minHalflengthX(), dtrd->medHalflengthX(), dtrd->maxHalflengthX(), dtrd->halflengthY1(), dtrd->halflengthY2() );
+
+  return nullptr;
+										     
+}
+
+double  Muon::MuonStationTypeBuilder::area( const Trk::SurfaceBounds*  sb) const {
+    
+  const Trk::RectangleBounds* box = dynamic_cast< const Trk::RectangleBounds*> (sb);
+  if (box)   return 4*box->halflengthX()*box->halflengthY();
+ 
+  const Trk::TrapezoidBounds* trd = dynamic_cast< const Trk::TrapezoidBounds*> (sb);
+  if (trd)  return 2*(trd->minHalflengthX()+trd->maxHalflengthX()) * trd->halflengthY() ;
+
+  const Trk::DiamondBounds* dtrd = dynamic_cast< const Trk::DiamondBounds*> (sb);
+  if (dtrd)  return 2*(dtrd->minHalflengthX()+dtrd->medHalflengthX()) *dtrd->halflengthY1()
+	       + 2*(dtrd->medHalflengthX()+dtrd->maxHalflengthX()) * dtrd->halflengthY2() ;
+
+  return 0.;
+										     
 }

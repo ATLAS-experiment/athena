@@ -12,6 +12,7 @@
 #include "TrkVolumes/CylinderVolumeBounds.h"
 #include "TrkVolumes/CuboidVolumeBounds.h"
 #include "TrkVolumes/TrapezoidVolumeBounds.h"
+#include "TrkVolumes/DoubleTrapezoidVolumeBounds.h"
 #include "TrkVolumes/BoundarySurface.h"
 #include "TrkVolumes/SubtractedVolumeBounds.h"
 #include "TrkVolumes/CombinedVolumeBounds.h"
@@ -348,9 +349,8 @@ Trk::Volume* Trk::GeoShapeConverter::translateGeoShape(const GeoShape* sh, Amg::
     double aPhi =   tubs->getSPhi();
     double dPhi =   tubs->getDPhi();
     Trk::CylinderVolumeBounds* volBounds=new Trk::CylinderVolumeBounds(rMin,rMax,0.5*dPhi,z);
-    Amg::Transform3D totalTransform(*transf);
     const Amg::AngleAxis3D zRotation(aPhi + 0.5*dPhi, gZAxis);
-    totalTransform *=zRotation;
+    Amg::Transform3D totalTransform((*transf)*zRotation);
     vol = new Trk::Volume(new Amg::Transform3D(totalTransform), volBounds );
     return vol;
   }
@@ -371,9 +371,8 @@ Trk::Volume* Trk::GeoShapeConverter::translateGeoShape(const GeoShape* sh, Amg::
       return vol;
     } else {
       Trk::CylinderVolumeBounds* volBounds=new Trk::CylinderVolumeBounds(0.5*(rMin1+rMin2),0.5*(rMax1+rMax2),0.5*dPhi,z);
-      Amg::Transform3D totalTransform(*transf);
       const Amg::AngleAxis3D zRotation(aPhi + 0.5*dPhi, gZAxis);
-      totalTransform *= zRotation;
+      Amg::Transform3D totalTransform((*transf)*zRotation);
       vol = new Trk::Volume(new Amg::Transform3D(totalTransform), volBounds );
       return vol;
     }
@@ -431,19 +430,16 @@ Trk::Volume* Trk::GeoShapeConverter::translateGeoShape(const GeoShape* sh, Amg::
       // translate into tube sector
         if ( dPhi == 2*M_PI ) {
 	   volBounds=new Trk::CylinderVolumeBounds(rmin,rmax,hz);
-	   Amg::Transform3D totalTransform(*transf);
 	   Amg::Vector3D translationVector(0.0, 0.0, zshift);
 	   Amg::Translation3D zTranslation (translationVector);
-	   totalTransform *= zTranslation;
+	   Amg::Transform3D totalTransform(*transf*zTranslation);
 	   cyls.push_back(new Trk::Volume(new Amg::Transform3D(totalTransform), volBounds ));
         } else {
 	   volBounds=new Trk::CylinderVolumeBounds(rmin,rmax,0.5*dPhi,hz);
-	   Amg::Transform3D totalTransform(*transf);
 	   Amg::Vector3D translationVector(0.0, 0.0, zshift);
 	   Amg::Translation3D zTranslation (translationVector);
-	   totalTransform *= zTranslation;
-	   const Amg::AngleAxis3D zRotation(aPhi + 2.0*dPhi, gZAxis);
-	   totalTransform *=zRotation;
+	   const Amg::AngleAxis3D zRotation(aPhi + 0.5*dPhi, gZAxis);
+	   Amg::Transform3D totalTransform(*transf*zTranslation*zRotation);
 	   cyls.push_back(new Trk::Volume(new Amg::Transform3D(totalTransform), volBounds ));
         }
       } // end loop over steps
@@ -471,7 +467,43 @@ Trk::Volume* Trk::GeoShapeConverter::translateGeoShape(const GeoShape* sh, Amg::
     for (unsigned int iv = 0; iv < nv; iv++) {
      ivtx[iv]=std::pair<double,double>(spb->getXVertex(iv),spb->getYVertex(iv));
      DEBUG_TRACE( std::cout << " SimplePolygonBrep  x " << spb->getXVertex(iv) << " y " << spb->getYVertex(iv) << " z " << spb->getDZ() << std::endl; );
-    }   
+    }
+    // translate into trapezoid or double trapezoid if possible
+    if ( nv == 4 || nv ==6 ) {
+      std::vector<double> xstep;
+      std::vector<std::pair<double,double>> ystep;
+      bool trdlike = true;
+      for (unsigned int iv = 0; iv < nv; iv++) {
+	if (!ystep.size() || spb->getYVertex(iv) > ystep.back().first)
+	  ystep.push_back(std::pair<double,double>(spb->getYVertex(iv),std::abs(spb->getXVertex(iv))));
+	else { std::vector<std::pair<double,double>>::iterator iy = ystep.begin();
+	  while ( iy+1<ystep.end() && spb->getYVertex(iv)>(*iy).first+1.e-3 ) {iy++;}
+	  if (spb->getYVertex(iv)<(*iy).first-1.e-3 ) ystep.insert(iy,std::pair<double,double>(spb->getYVertex(iv),std::abs(spb->getXVertex(iv))));
+	  else if (spb->getYVertex(iv)==(*iy).first && std::abs(spb->getXVertex(iv))!=(*iy).second) trdlike=false;
+	}
+      }
+
+      if (trdlike) {
+	if ( nv == 4 ) {
+	  if ( ystep[1].second >= ystep[0].second )     {    // expected ordering
+	    Trk::TrapezoidVolumeBounds* volBounds=new Trk::TrapezoidVolumeBounds(ystep[0].second,ystep[1].second,
+										 0.5*(ystep[1].first-ystep[0].first),spb->getDZ());
+	    return new Trk::Volume(new Amg::Transform3D(*transf),volBounds);
+	  } 
+	} 
+
+	if ( nv == 6 ) {
+	  if ( ystep[1].second >= ystep[0].second && ystep[2].second >= ystep[1].second  )     {    // expected ordering
+	    Trk::DoubleTrapezoidVolumeBounds* volBounds=new Trk::DoubleTrapezoidVolumeBounds(ystep[0].second,ystep[1].second,ystep[2].second,
+											     0.5*(ystep[1].first-ystep[0].first), 0.5*(ystep[2].first-ystep[1].first),spb->getDZ());
+	    Amg::Vector3D ydiff(0., ystep[1].first,0.);
+	    return new Trk::Volume(new Amg::Transform3D(*transf*Amg::Translation3D(ydiff)),volBounds);
+	  } 
+	} 	  
+      } //  not trd-like 
+    }
+    
+    
     return new Trk::Volume(new Amg::Transform3D(*transf),new Trk::SimplePolygonBrepVolumeBounds(ivtx,spb->getDZ()));
   }
 

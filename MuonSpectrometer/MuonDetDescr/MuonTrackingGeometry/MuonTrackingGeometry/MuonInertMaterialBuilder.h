@@ -31,8 +31,7 @@ class MuonInertMaterialBuilder final : public Muon::MuonInertMaterialBuilderImpl
   virtual StatusCode initialize() override;
 
   /** Method returning cloned and positioned material objects */
-  std::pair<std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >,
-                    std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float> > > > >
+  std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >
   buildDetachedTrackingVolumes(bool blend = false) const;
 
  private:

@@ -32,9 +32,7 @@ class MuonInertMaterialBuilderCond final : public MuonInertMaterialBuilderImpl {
   virtual StatusCode initialize() override;
 
   /** Method returning cloned and positioned material objects */
-  std::pair<
-      std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >,
-      std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float> > > > >
+  std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >
   buildDetachedTrackingVolumes(const EventContext& ctx, SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
                                bool blend = false) const;
 

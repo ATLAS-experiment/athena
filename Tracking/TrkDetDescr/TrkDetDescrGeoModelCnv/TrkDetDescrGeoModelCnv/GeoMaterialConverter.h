@@ -31,23 +31,23 @@ namespace Trk {
       
       public:
         /** Default constructor*/
-        GeoMaterialConverter()
-       {}
+      GeoMaterialConverter() = default;
 
         /** Destructor*/
-        virtual ~GeoMaterialConverter(){}
+      ~GeoMaterialConverter() = default;
     
         /** Single conversion ,
         input type GeoMaterial - output type Trk::MaterialProperties */
         static Material convert(const GeoMaterial* gm) ;
 
+        /** hardcoded dummy materials : TODO : find generic criterium ( density ? radiation length ? )  */
+       static bool dummy_material(const GeoMaterial*) ;
+
       private:
         static const double s_densityCnvFactor; //!< the conversion factor from GeoUnits to Tracking
+
     };
  
-
-
-
 } // end of namespace Trk
 
 #endif

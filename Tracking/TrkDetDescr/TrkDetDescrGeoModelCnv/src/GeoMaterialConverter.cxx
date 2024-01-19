@@ -37,3 +37,17 @@ Trk::Material Trk::GeoMaterialConverter::convert(const GeoMaterial* gm) {
   return {x0,l0,A,Z,rho};
 
 }
+
+bool Trk::GeoMaterialConverter::dummy_material(const GeoMaterial* mat)  {
+
+   bool dummyMat = false;
+   
+   std::string matName = mat->getName();
+  
+   if ( matName=="special::Ether" ) dummyMat = true;    
+   if ( matName=="WorldLog:Air" ) dummyMat = true;    
+   if ( matName=="std::Air" ) dummyMat = true;    
+   if ( matName=="Air" ) dummyMat = true;    
+ 
+   return dummyMat; 
+}  

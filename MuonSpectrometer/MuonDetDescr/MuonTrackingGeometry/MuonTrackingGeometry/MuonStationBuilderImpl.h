@@ -18,6 +18,8 @@
 #include "MuonTrackingGeometry/MuonStationTypeBuilder.h"
 #include "TrkDetDescrGeoModelCnv/GeoMaterialConverter.h"
 #include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
+#include "TrkDetDescrGeoModelCnv/GMTreeBrowser.h"
+#include "TrkDetDescrGeoModelCnv/VolumeConverter.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkGeometry/DetachedTrackingVolume.h"
 #include "TrkGeometry/TrackingVolume.h"
@@ -28,6 +30,8 @@ class MaterialProperties;
 
 namespace Muon {
 
+  typedef  std::pair<Amg::Transform3D , int > GMInfo;   
+  
 /** @class MuonStationBuilderImpl
 
     The Muon::MuonStationBuilderImpl retrieves muon stations from Muon Geometry
@@ -51,18 +55,25 @@ class MuonStationBuilderImpl : public AthAlgTool {
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
       this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-  std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>
-  buildDetachedTrackingVolumeTypes(
-      bool blend, const MuonGM::MuonDetectorManager* muonMgr) const;
+  std::vector<std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo> > >  retrieveGMsensitive(const MuonGM::MuonDetectorManager*  muonMgr ) const;
+  
+  std::unique_ptr<Trk::DetachedTrackingVolume>
+  buildDetachedTrackingVolumeType( const MuonGM::MuonDetectorManager* muonMgr,
+				   const GeoVPhysVol* gv, GMInfo info) const;
 
   void glueComponents(Trk::DetachedTrackingVolume*) const;
   void encloseLayers(const Trk::DetachedTrackingVolume*) const;
-  void identifyLayers(Trk::DetachedTrackingVolume*, int, int,
+  void identifyLayers(Trk::DetachedTrackingVolume*, Identifier, int, int,
                       const MuonGM::MuonDetectorManager*) const;
+  void identifyNSWLayers(Trk::DetachedTrackingVolume* station, Identifier id,
+			 const MuonGM::MuonDetectorManager* muonMgr) const;
 
   void identifyPrototype(Trk::TrackingVolume*, int, int,
                          const Amg::Transform3D&,
                          const MuonGM::MuonDetectorManager*) const;
+
+  Identifier resolveId( std::string vname, GMInfo gm_info, int&  eta, int&  phi , const MuonGM::MuonDetectorManager* muonMgr ) const;
+  void checkLayerId( std::string  comment, const MuonGM::MuonDetectorManager* muonMgr, Identifier id,  const Trk::Layer* lay) const;
 
   void getNSWStationsForTranslation(
       const GeoVPhysVol* pv, const std::string& name, const Amg::Transform3D&,
@@ -86,9 +97,11 @@ class MuonStationBuilderImpl : public AthAlgTool {
 
   Trk::Material m_muonMaterial;  //!< the material
   //!< shape converter
-  std::unique_ptr<Trk::GeoShapeConverter> m_geoShapeConverter;
+  //Trk::GeoShapeConverter m_geoShapeConverter;
+  Trk::GMTreeBrowser m_gmBrowser;
+  Trk::VolumeConverter m_volumeConverter;
   //!< material converter
-  std::unique_ptr<Trk::GeoMaterialConverter> m_materialConverter;
+  Trk::GeoMaterialConverter m_materialConverter;
   Gaudi::Property<bool> m_buildBarrel{this, "BuildBarrelStations", true};
   Gaudi::Property<bool> m_buildEndcap{this, "BuildEndcapStations", true};
   Gaudi::Property<bool> m_buildCsc{this, "BuildCSCStations", true};
