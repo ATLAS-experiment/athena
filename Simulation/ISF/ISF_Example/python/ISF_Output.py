@@ -91,8 +91,9 @@ def getHITSStreamItemList():
 
     ## ZDC
     if DetFlags.ZDC_on():
-        hitsItemList += ["ZDC_SimPixelHit_Collection#*",
-                             "ZDC_SimStripHit_Collection#*"]
+        hitsItemList += ["ZDC_SimFiberHit_Collection#ZDC_SimFiberHit_Collection"]
+        if simFlags.CalibrationRun.get_Value() in ['ZDC', 'LAr+Tile+ZDC']:
+            hitsItemList += ["CaloCalibrationHitContainer#ZDC_CalibrationHits"]
     ## ALFA
     if DetFlags.ALFA_on():
         hitsItemList += ["ALFA_HitCollection#*","ALFA_ODHitCollection#*"]

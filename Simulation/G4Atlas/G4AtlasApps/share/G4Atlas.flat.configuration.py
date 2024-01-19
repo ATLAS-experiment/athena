@@ -231,8 +231,9 @@ if not simFlags.ISFRun:
 
         ## ZDC
         if DetFlags.ZDC_on():
-            stream1.ItemList += ["ZDC_SimPixelHit_Collection#*",
-                                 "ZDC_SimStripHit_Collection#*"]
+            stream1.ItemList += ["ZDC_SimFiberHit_Collection#ZDC_SimFiberHit_Collection"]
+            if simFlags.CalibrationRun.get_Value() in ['ZDC', 'LAr+Tile+ZDC']:
+                stream1.ItemList += ["CaloCalibrationHitContainer#ZDC_CalibrationHits"]
         ## ALFA
         if DetFlags.ALFA_on():
             stream1.ItemList += ["ALFA_HitCollection#*",

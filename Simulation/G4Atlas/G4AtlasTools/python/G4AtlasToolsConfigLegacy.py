@@ -58,7 +58,9 @@ def generateFwdSensitiveDetectorList():
         SensitiveDetectorList += [ 'LUCID_SensitiveDetector' ]
     if hasattr(simFlags, 'ForwardDetectors') and simFlags.ForwardDetectors.statusOn:
         if DetFlags.simulate.ZDC_on():
-            SensitiveDetectorList += [ 'ZDC_PixelSD', 'ZDC_StripSD' ]
+            SensitiveDetectorList += [ 'ZDC_FiberSD' ]
+            if simFlags.CalibrationRun.statusOn and (simFlags.CalibrationRun.get_Value() in ['ZDC', 'LAr+Tile+ZDC']):
+                SensitiveDetectorList += [ 'ZDC_G4CalibSD' ]
         if DetFlags.simulate.ALFA_on():
             SensitiveDetectorList += [ 'ALFA_SensitiveDetector' ]
         if DetFlags.simulate.AFP_on():

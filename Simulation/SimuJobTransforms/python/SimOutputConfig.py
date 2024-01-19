@@ -120,8 +120,10 @@ def getStreamHITS_ItemList(flags):
         ItemList += ["SimulationHitCollection#*"]
 
     if flags.Detector.EnableZDC:
-        ItemList += ["ZDC_SimPixelHit_Collection#*",
-                     "ZDC_SimStripHit_Collection#*"]
+        ItemList += ["ZDC_SimFiberHit_Collection#ZDC_SimFiberHit_Collection"]
+        from SimulationConfig.SimEnums import CalibrationRun
+        if flags.Sim.CalibrationRun in [CalibrationRun.ZDC, CalibrationRun.LArTileZDC]:
+            ItemList += ["CaloCalibrationHitContainer#ZDC_CalibrationHits"]
 
     if flags.Detector.EnableALFA:
         ItemList += ["ALFA_HitCollection#*",

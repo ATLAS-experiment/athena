@@ -284,8 +284,8 @@ if DetFlags.Lucid_on():
 
 ## ZDC
 if DetFlags.ZDC_on():
-    #AddressRemappingSvc.addInputRename("ZDC_SimPixelHit_Collection",)
-    #AddressRemappingSvc.addInputRename("ZDC_SimStripHit_Collection",)
+    #AddressRemappingSvc.addInputRename("ZDC_SimFiberHit_Collection",)
+    #AddressRemappingSvc.addInputRename("CaloCalibrationHitContainer",)
     pass
 
 ## ALFA

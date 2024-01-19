@@ -67,9 +67,11 @@ def FwdSensitiveDetectorListCfg(flags):
         tools += [ result.popToolsAndMerge(LUCID_SensitiveDetectorCfg(flags)) ]
     if flags.Detector.EnableForward:
         if flags.Detector.EnableZDC:
-            from ZDC_SD.ZDC_SDConfig import ZDC_PixelSDCfg, ZDC_StripSDCfg
-            tools += [ result.popToolsAndMerge(ZDC_PixelSDCfg(flags)) ]
-            tools += [ result.popToolsAndMerge(ZDC_StripSDCfg(flags)) ]
+            from ZDC_SD.ZDC_SDConfig import ZDC_FiberSDCfg
+            tools += [ result.popToolsAndMerge(ZDC_FiberSDCfg(flags)) ]
+            if flags.Sim.CalibrationRun in [CalibrationRun.ZDC, CalibrationRun.LArTileZDC]:
+                from ZDC_SD.ZDC_SDConfig import ZDC_G4CalibSDCfg
+                tools += [ result.popToolsAndMerge(ZDC_G4CalibSDCfg(flags)) ]
         if flags.Detector.EnableALFA:
             from ALFA_G4_SD.ALFA_G4_SDConfig import ALFA_SensitiveDetectorCfg
             tools += [ result.popToolsAndMerge(ALFA_SensitiveDetectorCfg(flags)) ]
