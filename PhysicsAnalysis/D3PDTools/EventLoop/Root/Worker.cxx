@@ -1,14 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-//
-// Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
-
-// Please feel free to contact me (krumnack@iastate.edu) for bug
-// reports, feature suggestions, praise and complaints.
+/// @author Nils Krumnack
 
 
 //
@@ -872,6 +866,9 @@ namespace EL
 
       {
         auto module = std::make_unique<Detail::BatchInputModule> ();
+        Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
+        if (maxEvents != -1)
+          module->maxEvents = maxEvents;
         module->sample = sample;
         module->segment = segment;
         addModule (std::move (module));

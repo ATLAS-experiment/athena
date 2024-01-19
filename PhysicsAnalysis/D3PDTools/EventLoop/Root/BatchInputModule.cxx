@@ -46,6 +46,16 @@ namespace EL
         eventRange.m_url = sample->files[file];
         eventRange.m_beginEvent = (file == beginFile ? beginEvent : 0);
         eventRange.m_endEvent = (file == lastFile ? endEvent : EventRange::eof);
+        if (maxEvents.has_value())
+        {
+          if (eventRange.m_endEvent == EventRange::eof)
+          {
+            ANA_CHECK (actions.openInputFile (eventRange.m_url));
+            eventRange.m_endEvent = actions.inputFileNumEntries();
+          }
+          eventRange.m_endEvent = std::min<std::uint64_t> (eventRange.m_endEvent, eventRange.m_beginEvent + maxEvents.value());
+        }
+          
         ANA_CHECK (actions.processEvents (eventRange));
       }
 
