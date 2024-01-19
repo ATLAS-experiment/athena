@@ -12,7 +12,7 @@ LArOnOffIdMapping::LArOnOffIdMapping(const LArOnlineID_Base* onlineId, const Cal
   unsigned nChan=m_onlineId->channelHashMax();
   m_onlHashToOffline.assign(nChan,m_idEmpty);
   m_oflHashToOnline.assign(nChan,m_hwidEmpty);
-
+  m_onlHashToOflHash.assign(nChan,1+caloId->calo_cell_hash_max());
 }
 
 

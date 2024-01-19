@@ -15,6 +15,7 @@
 #include "LArIdentifier/LArOnlineID_Base.h"
 
 #include <vector>
+#include <assert.h>
 
 class LArOnOffIdMapping {
 
@@ -45,6 +46,12 @@ class LArOnOffIdMapping {
   Identifier cnvToIdentifier(const HWIdentifier & sid) const;
 
   /**
+   * Offline identifier hash from online 
+   * 
+  */
+  IdentifierHash oflHashFromOnlHash(const IdentifierHash & onlHash) const;
+
+  /**
    * create an Identifier from a HWIdentifier (from hash) (inline) <br>
    */
   Identifier cnvToIdentifierFromHash(const IdentifierHash & sid_hash) const;
@@ -73,6 +80,7 @@ class LArOnOffIdMapping {
 
   std::vector<Identifier>  m_onlHashToOffline;
   std::vector<HWIdentifier> m_oflHashToOnline;
+  std::vector<IdentifierHash> m_onlHashToOflHash;
 
   ///Invalid default instance of Identifier
   const Identifier m_idEmpty;
@@ -128,6 +136,11 @@ inline std::vector<HWIdentifier>& LArOnOffIdMapping::getOflHash2OnId() {
   return m_oflHashToOnline;
 }
  
+inline IdentifierHash LArOnOffIdMapping::oflHashFromOnlHash(const IdentifierHash & onlHash) const {
+    assert(onlHash < m_onlHashToOflHash.size());
+    return m_onlHashToOflHash[onlHash];
+}
+
 
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( LArOnOffIdMapping,148608605 , 1)

@@ -28,6 +28,7 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 
 class CaloCell_ID;
+class LArOnlineID;
 class LArRawChannelContainer;
 
 class LArCellMerger
@@ -64,6 +65,8 @@ public:
 									     "SG key of rebuilt LArRawChannelContainer"};
 
   const CaloCell_ID* m_calo_id=nullptr;
+  const LArOnlineID* m_onlineID=nullptr;
+
 };
 
 #endif

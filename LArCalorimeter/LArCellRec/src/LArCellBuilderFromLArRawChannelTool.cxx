@@ -115,10 +115,11 @@ LArCellBuilderFromLArRawChannelTool::process (CaloCellContainer* theCellContaine
  
   for (const LArRawChannel& rawChan : *rawColl) {
     const HWIdentifier hwid=rawChan.channelID();
-    if ( cabling->isOnlineConnected(hwid)) {
-      const Identifier id=cabling->cnvToIdentifier(hwid);
-      const IdentifierHash hashid= m_caloCID->calo_cell_hash(id);
-      const CaloDetDescrElement * theDDE=caloDDM->get_element(hashid);
+    const IdentifierHash onlHash=m_onlineID->channel_Hash(hwid);
+    if( cabling->isOnlineConnectedFromHash(onlHash)) {
+      const IdentifierHash oflHash= cabling->oflHashFromOnlHash(onlHash);
+      const Identifier id=m_caloCID->cell_id(oflHash); 
+      const CaloDetDescrElement * theDDE=caloDDM->get_element(oflHash);
         
       LArCell *pCell   = pool.nextElementPtr();
 
@@ -130,15 +131,15 @@ LArCellBuilderFromLArRawChannelTool::process (CaloCellContainer* theCellContaine
 			rawChan.provenance(),
 			rawChan.gain());
 
-      if ((*theCellContainer)[hashid]) {
+      if ((*theCellContainer)[oflHash]) {
         ATH_MSG_WARNING("Channel added twice! Data corruption? hash="
-                        << hashid << " online ID=0x" << std::hex
+                        << oflHash << " online ID=0x" << std::hex
                         << hwid.get_identifier32().get_compact() << std::dec
                         << "  " << m_onlineID->channel_name(hwid));
       } else {
-        (*theCellContainer)[hashid] = pCell;
+        (*theCellContainer)[oflHash] = pCell;
         ++nCellsAdded;
-        includedSubcalos.set(m_caloCID->sub_calo(hashid));
+        includedSubcalos.set(m_caloCID->sub_calo(oflHash));
       }
     }//end if connected
   }//end loop over LArRawChannelContainer
