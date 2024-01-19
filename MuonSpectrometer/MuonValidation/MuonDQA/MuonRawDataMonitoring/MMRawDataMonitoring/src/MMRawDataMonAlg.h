@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -67,11 +67,11 @@ class MMRawDataMonAlg: public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{this,"MuonKey","Muons","muons"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_meTrkKey{this, "METrkContainer", "ExtrapolatedMuonTrackParticles"};
 
-  virtual StatusCode  fillMMOverviewVects(const Muon::MMPrepData*, MMOverviewHistogramStruct& vects, MMByPhiStruct (&occupancyPlots)[16][2]) const;
-  virtual void  fillMMOverviewHistograms(const MMOverviewHistogramStruct& vects, MMByPhiStruct (&occupancyPlots)[16][2], const int lb) const;
-  virtual StatusCode  fillMMSummaryVects( const Muon::MMPrepData*, MMSummaryHistogramStruct (&vects)[2][16][2][2][4]) const; //[side][stationPhi][stationEta][multiplet][gas_gap]
-  virtual StatusCode  fillMMHistograms( const Muon::MMPrepData* ) const;                                      
-  virtual StatusCode  fillMMSummaryHistograms( const MMSummaryHistogramStruct (&vects)[2][16][2][2][4]) const;
+  StatusCode  fillMMOverviewVects(const Muon::MMPrepData*, MMOverviewHistogramStruct& vects, MMByPhiStruct (&occupancyPlots)[16][2]) const;
+  void  fillMMOverviewHistograms(const MMOverviewHistogramStruct& vects, MMByPhiStruct (&occupancyPlots)[16][2], const int lb) const;
+  StatusCode  fillMMSummaryVects( const Muon::MMPrepData*, MMSummaryHistogramStruct (&vects)[2][16][2][2][4]) const; //[side][stationPhi][stationEta][multiplet][gas_gap]
+  StatusCode  fillMMHistograms( const Muon::MMPrepData* ) const;                                      
+  StatusCode  fillMMSummaryHistograms( const MMSummaryHistogramStruct (&vects)[2][16][2][2][4]) const;
 
   void clusterFromTrack(const xAOD::TrackParticleContainer*,const int lb) const;
   void clusterFromSegments(const Trk::SegmentCollection*, const int lb) const;
