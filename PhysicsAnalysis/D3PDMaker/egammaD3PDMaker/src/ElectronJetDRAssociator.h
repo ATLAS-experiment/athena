@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file egammaD3PDAnalysis/src/ElectronJetDRAssociator.h
  * @author Clemencia Mora <Clemencia.Mora.Herrera@cern.ch>
@@ -132,7 +129,8 @@ private:
   double m_drcut;
 
   /// Property: Tool for the estimation of the IPs to the vertex.
-  ToolHandle< Trk::ITrackToVertexIPEstimator > m_trackToVertexIPEstimator;
+  ToolHandle< Trk::ITrackToVertexIPEstimator > m_trackToVertexIPEstimator
+    { this, "TrackToVertexIPEstimator", "Trk::TrackToVertexIPEstimator", "" };
 
   /// Property: The ICollectionGetterRegistryTool instance.
   ToolHandle<ICollectionGetterRegistryTool> m_registry;

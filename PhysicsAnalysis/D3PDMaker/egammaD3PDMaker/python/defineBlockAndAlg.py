@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# $Id$
 #
 # @file egammaD3PDMaker/python/defineBlockAndAlg.py
 # @author scott snyder <snyder@bnl.gov>
@@ -8,37 +7,32 @@
 # @brief Helper to schedule an algorithm only if a block is included.
 #
 
-from AthenaCommon.AlgSequence                import AlgSequence
-from D3PDMakerConfig.D3PDMakerFlags          import D3PDMakerFlags
 
-def defineAlgLODFunc (level, algconfig,
-                      algpkg = 'egammaD3PDAnalysis'):
+def defineAlgLODFunc (level, alg):
     """Return a level-of-detail function that also schedules an algorithm.
 
     LEVEL is the level of detail.
 
-    ALGCONFIG is the name of a configuration file in egammaD3PDAnalysis
-    that schedules the needed algorithm.
-
-    ALGPKG is the name of the package containing ALGCONFIG.
+    ALG is the name of the algorithm.
 """
 
     def lodfunc (reqlev, blockargs, hookargs):
         if reqlev < level: return False
-        preseq = AlgSequence(D3PDMakerFlags.PreD3PDAlgSeqName())
-        algmod = __import__ ('egammaD3PDAnalysis.' + algconfig,
-                             fromlist = [algconfig])
-        algfunc = getattr (algmod, algconfig)
-        algfunc (seq = hookargs.get('seq', preseq),
-                 prefix = hookargs['prefix'],
-                 sgkey = hookargs['sgkey'],
-                 typeName = hookargs['typeName'],
-                 allowMissing = hookargs.get('allowMissing',False))
+        algmod = __import__ ('egammaD3PDAnalysis.' + alg + 'Config',
+                             fromlist = [alg + 'Config'])
+        algfunc = getattr (algmod, alg + 'Cfg')
+        def hookfn (c, flags, acc, *args, **kw):
+            acc.merge (algfunc (flags,
+                                prefix = hookargs['prefix'],
+                                sgkey = hookargs['sgkey'],
+                                typeName = hookargs['typeName'],
+                                allowMissing = hookargs.get('allowMissing',False)))
+            return
+        hookargs['d3pdo'].defineHook (hookfn)
         return True
     return lodfunc
 
-def defineBlockAndAlg (d3pdo, level, blockname, blockfunc, algconfig,
-                       algpkg = 'egammaD3PDAnalysis',
+def defineBlockAndAlg (d3pdo, level, blockname, blockfunc, alg,
                        **kw):
     """Define a block, and schedule an algorithm if the block is used.
 
@@ -50,12 +44,9 @@ def defineBlockAndAlg (d3pdo, level, blockname, blockfunc, algconfig,
 
     BLOCKFUNC is the function that creates the block.
 
-    ALGCONFIG is the name of a configuration file
-    that schedules the needed algorithm.
-
-    ALGPKG is the name of the package containing ALGCONFIG.
+    ALG is the name of the algorithm.
 """
 
-    lodfunc = defineAlgLODFunc (level, algconfig, algpkg)
+    lodfunc = defineAlgLODFunc (level, alg)
     d3pdo.defineBlock (lodfunc, blockname, blockfunc, **kw)
     return

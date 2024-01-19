@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file egammaD3PDAnalysis/src/ElectronJetDRAssociator.cxx
  * @author clemencia mora <clemencia.mora.herrera@cern.ch>
@@ -39,7 +37,6 @@ ElectronJetDRAssociator::ElectronJetDRAssociator (const std::string& type,
                                                   const std::string& name,
                                                   const IInterface* parent)
   : Base (type, name, parent),
-    m_trackToVertexIPEstimator ("Trk::TrackToVertexIPEstimator"),
     m_target(0),
     m_eg(0)
 {
@@ -54,10 +51,6 @@ ElectronJetDRAssociator::ElectronJetDRAssociator (const std::string& type,
   declareProperty ("DRCut",  m_drcut = 0.7,
                    "DR cut between electrons and jets");
 
-  declareProperty ("TrackToVertexIPEstimator",
-                   m_trackToVertexIPEstimator,
-                   "Tool for the estimation of the IPs to the vertex");
-    
   declareProperty ("CollectionGetterRegistry", m_registry,
                    "The ICollectionGetterRegistryTool instance.");
 
