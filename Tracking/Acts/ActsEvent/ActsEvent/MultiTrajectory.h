@@ -342,6 +342,7 @@ class MutableMultiTrajectory final
     return m_trackMeasurementsAux.get();
   }
 
+  static const std::set<std::string> s_staticVariables;
 
   template<typename X>
   friend class MutableMultiTrajectoryHandle;
@@ -370,7 +371,6 @@ class MutableMultiTrajectory final
 
   std::vector<StoredSurface> m_surfaces;
   ActsGeometryContext m_geoContext;
-  static const std::set<std::string> s_staticVariables;
   // addjust prealocated size to actualy used
   void trim();
 };
