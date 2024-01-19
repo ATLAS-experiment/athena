@@ -220,6 +220,7 @@ def LArRampCfg(flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
@@ -235,6 +236,7 @@ if __name__ == "__main__":
 
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-02"
+    ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     #ConfigFlags.Exec.OutputLevel=1
     ConfigFlags.fillFromArgs()
 

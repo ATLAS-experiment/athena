@@ -91,7 +91,7 @@ if __name__=="__main__":
 
     outputName=args.output
 
-
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     ConfigFlags=initConfigFlags()
                         
@@ -104,6 +104,7 @@ if __name__=="__main__":
     ConfigFlags.Input.Files=[]
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema="+outputName+".sqlite;dbname=CONDBR2"
+    ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
     #ConfigFlags.Exec.OutputLevel=1
     ConfigFlags.lock()
     cfg=MainEvgenServicesCfg(ConfigFlags)
