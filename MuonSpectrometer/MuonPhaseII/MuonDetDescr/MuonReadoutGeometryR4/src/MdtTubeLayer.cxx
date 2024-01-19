@@ -7,11 +7,13 @@
 
 namespace MuonGMR4{
 
-MdtTubeLayer::MdtTubeLayer(const PVConstLink layer):
-    m_layerNode{std::move(layer)} {}
+MdtTubeLayer::MdtTubeLayer(const PVConstLink layer,
+                           const Amg::Transform3D& layTrf):
+    m_layerNode{std::move(layer)},
+    m_layTrf{layTrf} {}
 
-const Amg::Transform3D MdtTubeLayer::layerTransform() const {
-    return m_layerNode->getX();
+const Amg::Transform3D& MdtTubeLayer::layerTransform() const {
+    return m_layTrf;
 }
 PVConstLink MdtTubeLayer::getTubeNode(unsigned int tube) const {
      if (tube >= nTubes()) {
