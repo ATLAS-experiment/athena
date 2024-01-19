@@ -10,7 +10,7 @@ import os
 
 flags = initConfigFlags()
 athArgsParser = flags.getArgumentParser()
-athArgsParser.add_argument("--force-input", action = "store", dest = "force_input",
+athArgsParser.add_argument("--force-input", action = "append", dest = "force_input",
                            default = None,
                            help = "Force the given input file")
 athArgsParser.add_argument("--force-output", action = "store", dest = "force_output",
@@ -64,11 +64,15 @@ else :
 
 # Set up the reading of the input file:
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-testFile = os.getenv ( inputfile[dataType] )
 if athArgs.force_input :
-    testFile = athArgs.force_input
+    flags.Input.Files = []
+    for file_idx in range(len(athArgs.force_input)):
+        testFile = athArgs.force_input[file_idx]
+        flags.Input.Files.append(testFile)
+else:
+    testFile = os.getenv ( inputfile[dataType] )
+    flags.Input.Files = [testFile]
 
-flags.Input.Files = [testFile]
 flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg

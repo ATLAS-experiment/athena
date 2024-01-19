@@ -6,7 +6,7 @@
 # athena FullCPAlgorithmsTest_jobOptions.py - --myOption ...
 from AthenaCommon.AthArgumentParser import AthArgumentParser
 athArgsParser = AthArgumentParser()
-athArgsParser.add_argument("--force-input", action = "store", dest = "force_input",
+athArgsParser.add_argument("--force-input", action = "append", dest = "force_input",
                            default = None,
                            help = "Force the given input file")
 athArgsParser.add_argument("--force-output", action = "store", dest = "force_output",
@@ -64,10 +64,15 @@ else :
 # Set up the reading of the input file:
 import AthenaPoolCnvSvc.ReadAthenaPool
 theApp.EvtMax = 500
-testFile = os.getenv ( inputfile[dataType] )
+
 if athArgs.force_input :
-    testFile = athArgs.force_input
-svcMgr.EventSelector.InputCollections = [testFile]
+    svcMgr.EventSelector.InputCollections = []
+    for file_idx in range(len(athArgs.force_input)):
+        testFile = athArgs.force_input[file_idx]
+        svcMgr.EventSelector.InputCollections.append(testFile)
+else: 
+    testFile = os.getenv ( inputfile[dataType] )
+    svcMgr.EventSelector.InputCollections = [testFile]
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()

@@ -14,7 +14,7 @@ parser.add_option( '-d', '--data-type', dest = 'data_type',
 parser.add_option( '-s', '--submission-dir', dest = 'submission_dir',
                    action = 'store', type = 'string', default = 'submitDir',
                    help = 'Submission directory for EventLoop' )
-parser.add_option("--force-input", action = "store", dest = "force_input",
+parser.add_option("--force-input", action = "append", dest = "force_input",
                   default = None,
                   help = "Force the given input file")
 parser.add_option( '-u', '--unit-test', dest='unit_test',
@@ -102,10 +102,13 @@ else :
     inputfile = {"data": 'ASG_TEST_FILE_DATA',
                  "mc":   'ASG_TEST_FILE_MC',
                  "afii": 'ASG_TEST_FILE_MC_AFII'}
-testFile = os.getenv (inputfile[dataType])
 if options.force_input :
-    testFile = options.force_input
-sample.add (testFile)
+    for file_idx in range(len(options.force_input)):
+        testFile = options.force_input[file_idx]
+        sample.add (testFile)
+else:
+    testFile = os.getenv (inputfile[dataType])
+    sample.add(testFile)
 sh.add (sample)
 sh.printContent()
 
