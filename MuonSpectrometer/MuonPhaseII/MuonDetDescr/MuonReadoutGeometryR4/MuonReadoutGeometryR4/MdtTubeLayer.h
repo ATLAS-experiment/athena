@@ -1,15 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_MDTTUBELAYER_H
 #define MUONREADOUTGEOMETRYR4_MDTTUBELAYER_H
 
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
-#include <GeoModelKernel/GeoVFullPhysVol.h>
-#include <GeoModelKernel/GeoTransform.h>
-#include <GeoModelKernel/GeoSerialTransformer.h>
-
-
+#include <GeoModelKernel/GeoVPhysVol.h>
 
 namespace MuonGMR4{
     /**
@@ -20,11 +16,15 @@ namespace MuonGMR4{
          * Constructor taking the GeoModel parent node of the tube nodes
         */
     public:
-        MdtTubeLayer(const PVConstLink layer);
+        /// @brief Standard constructor of a MdtTube layer. Taking a GeoVPhysVol
+        ///       which is usually shared across multiple layers & chambers
+        /// @param layer GeoVPhysVol representing this layer
+        /// @param toLayTrf Transformation to reach the layer
+        MdtTubeLayer(const PVConstLink layer, const Amg::Transform3D& toLayTrf);
         ///@brief Returns the number of tubes in the layer
         unsigned int nTubes() const;
         ///@brief: Returns the transformation from the layer to the muon station
-        const Amg::Transform3D layerTransform() const;
+        const Amg::Transform3D& layerTransform() const;
         ///@brief Returns the transformation of the tube to the muon station
         ///       Index counting [0 - nTubes()-1]
         const Amg::Transform3D tubeTransform(const unsigned int tube) const;
@@ -35,7 +35,8 @@ namespace MuonGMR4{
         ///@brief returns the PVConst link to the n-th tube [0 - nTubes() -1]
         PVConstLink getTubeNode(unsigned int tube) const;
     private:
-        PVConstLink m_layerNode{nullptr};       
+        PVConstLink m_layerNode{nullptr};
+        Amg::Transform3D m_layTrf{Amg::Transform3D::Identity()};      
     };
 }
 #endif

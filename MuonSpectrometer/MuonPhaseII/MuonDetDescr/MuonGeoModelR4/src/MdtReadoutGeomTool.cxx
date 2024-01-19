@@ -21,6 +21,9 @@ using namespace CxxUtils;
 using namespace ActsTrk;
 
 namespace MuonGMR4 {
+using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
+
+
 MdtReadoutGeomTool::MdtReadoutGeomTool(const std::string& type,
                                        const std::string& name,
                                        const IInterface* parent)
@@ -59,13 +62,15 @@ StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache,
     /// The particular tubes and their lengths can be directly extracted from GeoModel
     /// Loop over the child nodes of the multi layer to find the nodes containing 
     /// all the tubes per layer  
-    for (unsigned int child = 0; child < define.physVol->getNChildVols(); ++ child) {
-        const PVConstLink layerVol = define.physVol->getChildVol(child);
-        /// That's nothing that usually has tubes inside
-        if (layerVol->getNChildVols() <= 1) continue;
+    
+    
+    std::vector<physVolWithTrans> tubeLayers = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "TubeLayerLog");
+
+    for (const physVolWithTrans & layerVol : tubeLayers) {
         ATH_MSG_VERBOSE("Add new tube layer "<<m_idHelperSvc->toStringDetEl(define.detElId)<<
-                       std::endl<<std::endl<<m_geoUtilTool->dumpVolume(layerVol));
-        define.tubeLayers.emplace_back(layerVol);
+                       std::endl<<std::endl<<m_geoUtilTool->dumpVolume(layerVol.physVol));
+        define.tubeLayers.emplace_back(layerVol.physVol, layerVol.transform);
+
         const MdtTubeLayer& lay{define.tubeLayers.back()};
         /// Next check all tubes whether they're made up out of air or not. If yes, then there's no tube at this place 
         /// and add the corresponding has hto the list.
