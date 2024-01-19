@@ -22,6 +22,7 @@ PURPOSE:
 #include "Identifier/IdentifierHash.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArCabling/LArOnOffIdMapping.h"
+#include "LArIdentifier/LArOnlineID.h"
 
 
 /////////////////////////////////////////////////////////////////////
@@ -32,6 +33,7 @@ PURPOSE:
 StatusCode LArCellMerger::initialize() {
 
   ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
+  ATH_CHECK( detStore()->retrieve(m_onlineID, "LArOnlineID") );
   ATH_CHECK( m_cablingKey.initialize() );
 
   ATH_CHECK(m_rawChannelContainerName.initialize());
@@ -65,9 +67,10 @@ StatusCode LArCellMerger::process (CaloCellContainer* theCont,
   //   this could be a little slow if by mistake this container contains all cells (not what this tool is supposed to be used for)
   for ( const LArRawChannel& theRawChannel : *rawColl ) {
       const HWIdentifier hwid=theRawChannel.channelID();
-      if (cabling->isOnlineConnected(hwid)) {
-          Identifier id = cabling->cnvToIdentifier( hwid);
-          IdentifierHash theCellHashID = m_calo_id->calo_cell_hash(id);
+      const IdentifierHash onlHash=m_onlineID->channel_Hash(hwid);
+      if( cabling->isOnlineConnectedFromHash(onlHash)) {
+        const IdentifierHash theCellHashID= cabling->oflHashFromOnlHash(onlHash);
+        const Identifier id=m_calo_id->cell_id(theCellHashID); 
           int index = theCont->findIndex(theCellHashID);
           if (index<0) {
 	    ATH_MSG_WARNING( " cell " << hwid.get_compact() << " " << id.get_compact() << " is not in the container "  );

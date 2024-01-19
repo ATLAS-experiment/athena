@@ -95,6 +95,7 @@ StatusCode LArOnOffMappingAlg::execute() {
       ++nConnected;
       onOffMap->m_onlHashToOffline[i]=id;
       onOffMap->m_oflHashToOnline[oflHash]=hwid;
+      onOffMap->m_onlHashToOflHash[i]=oflHash;
     }
   }//end loop over channels
 
