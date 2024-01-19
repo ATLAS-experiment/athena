@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file egammaD3PDMaker/src/egammaTraversedMaterialFillerTool.cxx
  * @author Bruno Lenzi <Bruno.Lenzi@cern.ch>
@@ -38,7 +36,7 @@ namespace D3PD {
        const std::string& name,
        const IInterface* parent)
     : Base (type, name, parent),
-      m_extrapolator ("Trk::Extrapolator/AtlasExtrapolator"),
+      m_extrapolator (this, "Trk::Extrapolator/AtlasExtrapolator"),
       m_caloSurfaceBuilder ("CaloSurfaceBuilder")
   {  
     declareProperty ("Extrapolator", 
