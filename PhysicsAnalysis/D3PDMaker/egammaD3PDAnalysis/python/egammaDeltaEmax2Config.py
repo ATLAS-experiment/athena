@@ -1,7 +1,5 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# $Id$
-#
 # @file egammaD3PDAnalysis/python/egammaDeltaEmax2Config.py
 # @author scott snyder <snyder@bnl.gov>
 # @date Nov, 2011
@@ -9,23 +7,23 @@
 #
 
 
-from D3PDMakerConfig.D3PDMakerFlags          import D3PDMakerFlags
-from D3PDMakerCoreComps.resolveSGKey         import resolveSGKey
-from AthenaCommon.AlgSequence                import AlgSequence
-import D3PDMakerCoreComps
-import egammaD3PDAnalysis
+from D3PDMakerConfig.D3PDMakerFlags           import D3PDMakerFlags
+from D3PDMakerCoreComps.resolveSGKey          import resolveSGKey
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory     import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
-def egammaDeltaEmax2Config \
-        (seq = AlgSequence(D3PDMakerFlags.PreD3PDAlgSeqName()),
+def egammaDeltaEmax2Cfg \
+        (flags,
          prefix = '',
-         sgkey = D3PDMakerFlags.ElectronSGKey(),
+         sgkey = D3PDMakerFlags.ElectronSGKey,
          typeName = 'DataVector<xAOD::Electron_v1>',
          allowMissing = False):
     """Configure egammaDeltaEmax2Alg for D3PD making.
 
-    SEQ is the Gaudi sequence to which the algorithm should be added.
-    Default is that given by PreD3PDAlgSeqName.
+    FLAGS are the configuration flags.
 
     PREFIX is a prefix to add to the name of the algorithm scheduled.
 
@@ -35,31 +33,31 @@ def egammaDeltaEmax2Config \
     If ALLOWMISSING is true, don't fail if the SG key doesn't exist.
 """
 
-    if (not D3PDMakerFlags.MakeEgammaUserData() or
-        D3PDMakerFlags.HaveEgammaUserData()):
-        return
+    acc = ComponentAccumulator()
 
-    DVGetter = D3PDMakerCoreComps.SGDataVectorGetterTool
-    resolved_sgkey = resolveSGKey (typeName, sgkey)
-    auxprefix = (D3PDMakerFlags.EgammaUserDataPrefix() + '_' +
+    if (not D3PDMakerFlags.MakeEgammaUserData or
+        D3PDMakerFlags.HaveEgammaUserData):
+        return acc
+
+    DVGetter = D3PD.SGDataVectorGetterTool
+    resolved_sgkey = resolveSGKey (flags, sgkey)
+    auxprefix = (D3PDMakerFlags.EgammaUserDataPrefix + '_' +
                  resolved_sgkey + '_')
 
     emax2name = 'DeltaEmax2Alg_' + resolved_sgkey
-    if not hasattr (seq, emax2name):
-        highlum = False
-        if typeName == 'ElectronContainer':
-            from AthenaCommon.BeamFlags import jobproperties        
-            if jobproperties.Beam.numberOfCollisions() >= 20 :
-                highlum = True
+    highlum = False
+    if typeName == 'ElectronContainer':
+        if flags.Beam.numberOfCollisions >= 20 :
+            highlum = True
 
-        seq += egammaD3PDAnalysis.egammaDeltaEmax2Alg \
-               (emax2name,
-                Getter = DVGetter 
-                  (prefix + 'DeltaEmax2Getter',
-                   TypeName = typeName,
-                   SGKey = sgkey),
-                AllowMissing = allowMissing,
-                HighLum = highlum,
-                AuxPrefix = auxprefix)
+    acc.addEventAlgo (D3PD.egammaDeltaEmax2Alg \
+                      (emax2name,
+                       Getter = DVGetter 
+                       (prefix + 'DeltaEmax2Getter',
+                        TypeName = typeName,
+                        SGKey = sgkey),
+                       AllowMissing = allowMissing,
+                       HighLum = highlum,
+                       AuxPrefix = auxprefix))
 
-    return
+    return acc
