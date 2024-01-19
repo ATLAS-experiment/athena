@@ -119,8 +119,10 @@ class SimSkeleton(object):
 
         ## ZDC
         if DetFlags.ZDC_on():
-            stream1.ItemList += ["ZDC_SimPixelHit_Collection#*",
-                                 "ZDC_SimStripHit_Collection#*"]
+            stream1.ItemList += ["ZDC_SimFiberHit_Collection#ZDC_SimFiberHit_Collection"]
+            from SimulationConfig.SimEnums import CalibrationRun
+            if simFlags.CalibrationRun in [CalibrationRun.ZDC, CalibrationRun.LArTileZDC]:
+                stream1.ItemList += ["CaloCalibrationHitContainer#ZDC_CalibrationHits"]
         ## ALFA
         if DetFlags.ALFA_on():
             stream1.ItemList += ["ALFA_HitCollection#*",
