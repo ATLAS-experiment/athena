@@ -13,6 +13,8 @@
 
 
 #include "AthContainers/tools/AuxTypeVectorFactory.h"
+#include "AthContainers/AuxVectorData.h"
+#include "AthContainers/AuxStoreInternal.h"
 #include "TestTools/TestAlloc.h"
 #include <iostream>
 #include <cassert>
@@ -23,6 +25,37 @@
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF (std::vector<int*>, 28374627, 0)
 #endif
+
+
+namespace SG {
+
+
+class AuxVectorData_test
+  : public AuxVectorData
+{
+public:
+  using AuxVectorData::setStore;
+
+  virtual size_t size_v() const { return 10; }
+  virtual size_t capacity_v() const { return 20; }
+};
+
+
+class AuxStoreInternal_test
+  : public AuxStoreInternal
+{
+public:
+  using AuxStoreInternal::addVector;
+};
+
+
+} // namespace SG
+
+
+
+using SG::AuxVectorData;
+using SG::AuxVectorData_test;
+using SG::AuxStoreInternal_test;
 
 
 template <class T>
@@ -59,18 +92,33 @@ void test_vector()
   assert (ptr2[0] == makeT(2));
   assert (ptr2[1] == makeT(20));
 
+  AuxVectorData_test avd1;
+  AuxVectorData_test avd2;
+  AuxStoreInternal_test store1;
+  AuxStoreInternal_test store2;
+  avd1.setStore (&store1);
+  avd2.setStore (&store2);
+  store1.addVector (std::move(v), false);
+  store2.addVector (std::move(v2), false);
+
+  ptr[0] = makeT(1);
+  ptr[1] = makeT(2);
+  ptr[2] = makeT(3);
   ptr2[0] = makeT(10);
   ptr2[1] = makeT(11);
+  ptr2[2] = makeT(12);
 
-  fac.swap (ptr2, 0, ptr, 1);
-  assert (ptr[0] == makeT(20));
+  fac.swap (1, avd2, 0, avd1, 1, 2);
+  assert (ptr[0] == makeT(1));
   assert (ptr[1] == makeT(10));
+  assert (ptr[2] == makeT(11));
   assert (ptr2[0] == makeT(2));
-  assert (ptr2[1] == makeT(11));
+  assert (ptr2[1] == makeT(3));
+  assert (ptr2[2] == makeT(12));
 
   fac.clear (ptr2, 0);
   assert (ptr2[0] == makeT());
-  assert (ptr2[1] == makeT(11));
+  assert (ptr2[1] == makeT(3));
 
   using vector_type = typename SG::AuxDataTraits<T, ALLOC<T> >::vector_type;
   vector_type* vec3 = new vector_type;

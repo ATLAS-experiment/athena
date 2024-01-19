@@ -275,19 +275,6 @@ public:
 
 
   /**
-   * @brief Swap an element between vectors (static method).
-   * @param a Pointer to the start of the first vector's data.
-   * @param aindex Index of the element in the first vector.
-   * @param b Pointer to the start of the second vector's data.
-   * @param bindex Index of the element in the second vector.
-   *
-   * @c a and @ b can be either the same or different.
-   */
-  static void swap (void* a, size_t aindex,
-                    void* b, size_t bindex);
-
-
-  /**
    * @brief Clear an element within a vector (static method).
    * @param dst Pointer to the start of the vector's data.
    * @param dst_index Index of the element in the vector.

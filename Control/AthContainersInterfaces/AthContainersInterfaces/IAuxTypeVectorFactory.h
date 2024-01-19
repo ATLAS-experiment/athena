@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/IAuxTypeVectorFactory.h
@@ -26,6 +26,7 @@ namespace SG {
 
 
 class IAuxTypeVector;
+class AuxVectorData;
 
 
 /**
@@ -117,16 +118,21 @@ public:
 
 
   /**
-   * @brief Swap an element between vectors.
-   * @param a Pointer to the start of the first vector's data.
-   * @param aindex Index of the element in the first vector.
-   * @param b Pointer to the start of the second vector's data.
-   * @param bindex Index of the element in the second vector.
+   * @brief Swap elements between vectors.
+   * @param auxid The aux data item being operated on.
+   * @param a Container for the first vector.
+   * @param aindex Index of the first element in the first vector.
+   * @param b Container for the second vector.
+   * @param bindex Index of the first element in the second vector.
+   * @param n Number of elements to swap.
    *
    * @c a and @ b can be either the same or different.
+   * However, the ranges should not overlap.
    */
-  virtual void swap (void* a, size_t aindex,
-                     void* b, size_t bindex) const = 0;
+  virtual void swap (SG::auxid_t auxid,
+                     AuxVectorData& a, size_t aindex,
+                     AuxVectorData& b, size_t bindex,
+                     size_t n) const = 0;
 
 
   /**

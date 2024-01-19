@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxBaseRegistry_test.cxx
@@ -11,6 +11,8 @@
 
 #undef NDEBUG
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/AuxVectorData.h"
+#include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/exceptions.h"
 #include "AthLinks/ElementLink.h"
 #include "TestTools/expect_exception.h"
@@ -60,6 +62,37 @@ public:
   SG::StringPool m_pool;
 };
 #endif // not XAOD_STANDALONE
+
+
+namespace SG {
+
+
+class AuxVectorData_test
+  : public AuxVectorData
+{
+public:
+  using AuxVectorData::setStore;
+
+  virtual size_t size_v() const { return 10; }
+  virtual size_t capacity_v() const { return 20; }
+};
+
+
+class AuxStoreInternal_test
+  : public AuxStoreInternal
+{
+public:
+  using AuxStoreInternal::addVector;
+};
+
+
+} // namespace SG
+
+
+
+using SG::AuxVectorData;
+using SG::AuxVectorData_test;
+using SG::AuxStoreInternal_test;
 
 
 struct Payload
@@ -142,13 +175,29 @@ void test_type(const std::string& typname,
   assert (ptr2[0] == makeT());
   assert (ptr2[1] == makeT(0));
 
+  AuxVectorData_test avd1;
+  AuxVectorData_test avd2;
+  AuxStoreInternal_test store1;
+  AuxStoreInternal_test store2;
+  avd1.setStore (&store1);
+  avd2.setStore (&store2);
+  store1.addVector (std::move(v), false);
+  store2.addVector (std::move(v2), false);
+
+  ptr[0] = makeT(1);
+  ptr[1] = makeT(2);
+  ptr[2] = makeT(3);
   ptr2[0] = makeT(10);
   ptr2[1] = makeT(11);
-  r.swap (auxid, ptr, 0, ptr2, 1);
+  ptr2[2] = makeT(12);
+
+  r.swap (auxid, avd1, 0, avd2, 1, 2);
   assert (ptr[0] == makeT(11));
-  assert (ptr[1] == makeT(1));
+  assert (ptr[1] == makeT(12));
+  assert (ptr[2] == makeT(3));
   assert (ptr2[0] == makeT(10));
-  assert (ptr2[1] == makeT(0));
+  assert (ptr2[1] == makeT(1));
+  assert (ptr2[2] == makeT(2));
 
   std::unique_ptr<SG::IAuxTypeVector> v3 = r.makeVector (auxid, 10, 10);
   ptr = reinterpret_cast<T*> (v3->toPtr());
