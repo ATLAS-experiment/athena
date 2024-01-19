@@ -59,7 +59,6 @@ DetFlags.detdescr.Calo_setOn()
 
 # set up all detector description description 
 include ("RecExCond/AllDet_detDescr.py")
-include( "IOVDbSvc/IOVRecExCommon.py" )
 
 #--------------------------------------------------------------
 # Event related parameters
