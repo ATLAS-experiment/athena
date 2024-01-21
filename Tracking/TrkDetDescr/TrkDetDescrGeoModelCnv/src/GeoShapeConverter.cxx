@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -477,7 +477,7 @@ Trk::Volume* Trk::GeoShapeConverter::translateGeoShape(const GeoShape* sh, Amg::
 	if (!ystep.size() || spb->getYVertex(iv) > ystep.back().first)
 	  ystep.push_back(std::pair<double,double>(spb->getYVertex(iv),std::abs(spb->getXVertex(iv))));
 	else { std::vector<std::pair<double,double>>::iterator iy = ystep.begin();
-	  while ( iy+1<ystep.end() && spb->getYVertex(iv)>(*iy).first+1.e-3 ) {iy++;}
+	  while ( iy+1<ystep.end() && spb->getYVertex(iv)>(*iy).first+1.e-3 ) {++iy;}
 	  if (spb->getYVertex(iv)<(*iy).first-1.e-3 ) ystep.insert(iy,std::pair<double,double>(spb->getYVertex(iv),std::abs(spb->getXVertex(iv))));
 	  else if (spb->getYVertex(iv)==(*iy).first && std::abs(spb->getXVertex(iv))!=(*iy).second) trdlike=false;
 	}

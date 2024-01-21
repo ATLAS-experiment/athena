@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,8 +10,12 @@
 #define TRKDETDESCRGEOMODELCNV_VOLUMEINTERSECTION_H
 
 #include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
-#include "TrkGeometry/TrackingVolume.h"
-#include "TrkVolumes/VolumeBounds.h"
+#include <utility> //for std::pair
+#include <vector>
+
+namespace Trk{
+  class Volume;
+}
 
 namespace Trk {
 
@@ -45,12 +49,7 @@ namespace Trk {
      class VolumeIntersection {
 
        public:
-       /** Default constructor*/
-       VolumeIntersection() = default;
-
-       /** Destructor*/
-       ~VolumeIntersection() = default;
-
+      
        std::pair<bool, const Trk::Volume* >  intersect(const Volume*, const Volume*) const; 
        std::pair<bool, const Trk::Volume* >  intersectApproximative(const Volume*, const Volume*) const; 
     
