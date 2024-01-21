@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
 //Eigen
 #include "GeoPrimitives/GeoPrimitives.h"
 // STL
-#include <iostream>
 
 class GeoTubs;
 class GeoTube;
@@ -42,11 +41,6 @@ namespace Trk {
     class GeoShapeConverter {
       
       public:
-        /** Default constructor*/
-        GeoShapeConverter() = default;
-
-        /** Destructor*/
-        ~GeoShapeConverter() = default;
     
         /** Convert a tubs */
         static CylinderVolumeBounds* convert(const GeoTubs* gtub) ;

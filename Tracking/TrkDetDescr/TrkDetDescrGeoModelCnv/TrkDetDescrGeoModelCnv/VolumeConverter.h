@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,10 +12,18 @@
 #include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
 #include "TrkDetDescrGeoModelCnv/GeoMaterialConverter.h"
 #include "TrkDetDescrGeoModelCnv/VolumeIntersection.h"
-#include "TrkGeometry/TrackingVolume.h"
-#include "TrkGeometry/Material.h"
-#include "TrkGeometry/DetachedTrackingVolume.h"
-#include "TrkVolumes/VolumeBounds.h"
+
+#include "TrkGeometry/Material.h" //used in typedef
+#include <cmath> //for M_PI
+#include <utility> //for std::pair
+#include <vector>
+
+class GeoVPhysVol;
+
+namespace Trk{
+  class TrackingVolume;
+  class VolumeBounds;
+}
 
 namespace Trk {
 
@@ -36,15 +44,8 @@ namespace Trk {
 
    
    struct VolumePart{
-
      std::vector<const Volume*>  parts;
-     float    sign;
-     //VolumePart() {};
-     //VolumePart( const Volume* vol, float asign ): sign(asign) { parts.push_back(vol); } ;
-     //VolumePart( VolumePart& vp) : parts(vp.parts), sign(vp.sign) {} ;
-     //VolumePart( VolumePart& vp, const Volume* vol,  float asign, bool add) : parts(vp.parts), sign(vp.sign*asign)
-     //{ if (!add) parts[parts.size()-1]=vol;
-     //  else  parts.push_back(vol); } 
+     float    sign{};
    };
    
 
@@ -59,11 +60,6 @@ namespace Trk {
      class VolumeConverter {
 
        public:
-       /** Default constructor*/
-       VolumeConverter() = default;
-
-       /** Destructor*/
-       ~VolumeConverter() = default;
     
 	/** translation of GeoVPhysVol to Trk::TrackingVolume */
 	TrackingVolume* translate( const GeoVPhysVol* gv, bool simplify, bool blend, double blendMassLimit) const;

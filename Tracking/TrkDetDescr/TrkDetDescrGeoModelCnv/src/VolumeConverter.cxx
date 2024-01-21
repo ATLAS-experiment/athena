@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@
 #include "TrkVolumes/SubtractedVolumeBounds.h"
 #include "TrkVolumes/TrapezoidVolumeBounds.h"
 #include "TrkVolumes/DoubleTrapezoidVolumeBounds.h"
-
+#include "TrkGeometry/TrackingVolume.h"
 // GeoModel
 #include "GeoModelKernel/GeoShapeShift.h"
 #include "GeoModelKernel/GeoShapeUnion.h"
@@ -244,12 +244,12 @@ double Trk::VolumeConverter::resolveBooleanVolume(const Trk::Volume* trVol, doub
 	     } else {
 	       constituents.erase(sIter); noovrlp=true; break;        // no intersection 
 	     }
-	  } else tit++;
+	  } else ++tit;
 	} 
       }
       if (noovrlp) {}
       else if ((*sIter).parts.size()==1) { double volSingle = calculateVolume((*sIter).parts[0]); volume+= (*sIter).sign*volSingle; constituents.erase(sIter);  }
-      else { sIter++;}
+      else {++sIter;}
    }
     //std::cout << "constituents.size:" << constituents.size() << ":volume estimate so far:" << volume <<  std::endl;      
   }
@@ -631,7 +631,7 @@ Trk::VolumeConverter::splitComposedVolume(const Trk::Volume* trVol, std::vector<
 	  if (minR > closest.position.perp() )  minR = closest.position.perp() ;
       } 
       
-      if (vtxt.size() >2 ) {  // cylindrical section
+      if (vtxt.size() >10 ) {  // cylindrical section
 	// find spread of phi extent at section (-) boundary : vertices 4,5,8,9
         double phiSecLmin = std::min( std::min( vtxt[4].phi()+M_PI,vtxt[5].phi()+M_PI ),  std::min( vtxt[8].phi()+M_PI,vtxt[9].phi()+M_PI ) ); 
 	double phiSecLmax = std::max( std::max( vtxt[4].phi()+M_PI,vtxt[5].phi()+M_PI ),  std::max( vtxt[8].phi()+M_PI,vtxt[9].phi()+M_PI ) ); 
@@ -653,7 +653,7 @@ Trk::VolumeConverter::splitComposedVolume(const Trk::Volume* trVol, std::vector<
         }
       } else {
 	minPhi = 0.; maxPhi = 2*M_PI;
-	maxR += ro*std::abs(cos(dir.theta()));
+	maxR += ro*std::abs(std::cos(dir.theta()));
       }
       if (minPhi>=maxPhi && (minPhi-maxPhi) < M_PI) { minPhi=0.; maxPhi= 2*M_PI; }
     } 

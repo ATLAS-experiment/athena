@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(Trk::PolygonCache& pgA,
         if ((*it).edge_id.second==nlow) {
 	  if (itb==setVtx.end() || (*it).edge_pos.second>(*itb).edge_pos.second) itb=it;
 	}
-	it++;
+	++it;
       }
       setVtx.insert(itb,  Trk::EdgeCross(std::make_pair(ib,-2),std::make_pair(0.,-1.) ) );   // -2 indicates vertex coming from B
     }
