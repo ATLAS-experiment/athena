@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -598,7 +598,7 @@ uint32_t TileHid2RESrcID::getRodTileMuRcvID(int frag_id) const
 void TileHid2RESrcID::printSpecial (MsgStream & log)
 {
   const char * names[] = {"Legacy", "Demo", "DemoEB", "Unknown"};
-  for (auto it : m_frag2ROD) {
+  for (const auto& it : m_frag2ROD) {
     const std::vector<uint32_t> & v = it.second;
     if (v.size()>1) {
       if (it.first != static_cast<int>(v[1])) {
