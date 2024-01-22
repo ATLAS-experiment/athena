@@ -28,8 +28,6 @@ def defineMenu():
         # ATR-27782 - test eEM M/DR Topo
         'L1_2DR15-M70-2eEM9L',
         'L1_2DR15-M70-2eEM12L',
-        'L1_2DR15-0M30-2eEM12L',
-        'L1_13DR25-25M70-2eEM12L',
         'L1_2DR15-0M30-eEM12LeEM9L',
         'L1_13DR25-25M70-eEM12LeEM9L',
         

@@ -52,9 +52,8 @@ def defineInputsMenu():
                             group["algorithms"] += [
                                     TopoMenuDef( 'INVM_BOOSTDR_eEMsl6',                       outputbits = (10,11), outputlines = ['0INVM70-2DR15-eEM9sl1-eEM9sl6', 
                                                                                                                                    '0INVM70-2DR15-eEM12sl1-eEM12sl6']),   
-                                    TopoMenuDef( 'INVM_BOOSTDR_Ranges_eEM12sl6',                outputbits = (12,13), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM12sl6', 
-                                                                                                                                   '25INVM70-13DR25-eEM12sl1-eEM12sl6']),                                                                                   
-                                    TopoMenuDef( 'INVM_BOOSTDR_Ranges_Asymm_eEMsl6',                outputbits = (14,15), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM9sl6', 
+                                                                                                                     
+                                    TopoMenuDef( 'INVM_BOOSTDR_Ranges_Asymm_eEMsl6',                outputbits = (12,13), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM9sl6', 
                                                                                                                                    '25INVM70-13DR25-eEM12sl1-eEM9sl6']),   
                             ]
 

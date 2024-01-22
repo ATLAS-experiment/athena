@@ -313,6 +313,8 @@ def defineInputsMenu():
                     TopoMenuDef( '0INVM70-27DPHI32-eEM9s1-eEM9s6',       outputbits = 7 ),
                     TopoMenuDef( '0INVM70-27DPHI32-eEM9sl1-eEM9sl6',     outputbits = 8 ),
                     TopoMenuDef( '0INVM9-eEM9ab-eEMab',                  outputbits = 9 ),
+                    TopoMenuDef( 'INVM_BOOSTDR_Ranges_eEM12sl6',         outputbits = (10,11), outputlines = ['0INVM30-2DR15-2eEM12sl6', 
+                                                                                                              '25INVM70-13DR25-2eEM12sl6']),  
 
                 ]
             },
