@@ -1,5 +1,5 @@
 # 
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -36,8 +36,10 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     afpToFSiTAlgorithmFac = CompFactory.AFPToFSiTAlgorithm
     afpToFSiTAlgorithm = helper.addAlgorithm(afpToFSiTAlgorithmFac,'AFPToFSiTAlg')
 
-    # Add a generic monitoring tool (a "group" in old language). The returned 
-    # object here is the standard GenericMonitoringTool.
+
+
+    # Add a generic monitoring tool (a "group" in old language). 
+    # The returned object here is the standard GenericMonitoringTool.
     AFPSiGroup = helper.addGroup(afpSiLayerAlgorithm, 'AFPSiLayerTool', 'AFP/') 
     AFPToFGroup = helper.addGroup(afpToFAlgorithm, 'AFPToFTool', 'AFP/')
     AFPToFSiTGroup = helper.addGroup(afpToFSiTAlgorithm, 'AFPToFSiTTool', 'AFP/')
@@ -47,6 +49,8 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     xLabelsForEventsPerStation = [ 'fA', '-','-','-', 'nA', '-', '-', '-', 'nC', '-', '-', '-', 'fC', '-', '-', '-', ]
     xLabelsHitBarVsTrain = [ 'A', 'B', 'C', 'D']
     yLabelsHitBarVsTrain = [ '3', '2', '1', '0']
+    xLabelsToFEff = [ 'A', 'B', 'C', 'D', 'Tr']
+    yLabelsToFEff = [ '0', '1', '2', '3']
     #xLabelsStationsPlanesProposed = ['fC3', 'fC2', 'fC1', 'fC0', 'nC3', 'nC2', 'nC1', 'nC0', 'nA0', 'nA1', 'nA2', 'nA3', 'fA0', 'fA1' 'fA2','fA3']
 
     AFPSiGroup.defineHistogram('lb,nSiHits', title='Total number of hits divided by number of events;lumiblock;total number of hits', type='TProfile', path='SiT/', xbins=2000, xmin=0.5, xmax=2000.5)
@@ -158,6 +162,9 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     AFPToFSiTGroup.defineHistogram('tofHits_A,fsp0Hits_A;ToFSiTNumHitsA', title='TOF vs FSP0 num. hits Side A;#Hit bars;FSP0 multiplicity', type='TH2F', path='ToFSiTCorr/', xbins=17, xmin=0, xmax=16, ybins=150, ymin=-0.5, ymax=149.5)
     AFPToFSiTGroup.defineHistogram('tofHits_C,fsp0Hits_C;ToFSiTNumHitsC', title='TOF vs FSP0 num. hits Side C;#Hit bars;FSP0 multiplicity', type='TH2F', path='ToFSiTCorr/', xbins=17, xmin=0, xmax=16, ybins=150, ymin=-0.5, ymax=149.5)
 
+    AFPToFSiTGroup.defineHistogram('tof_eff_OFF_passed_A, tof_eff_OFF_bars_A, tof_eff_OFF_trains_A ;Efficiency_A', title='Efficiency ToF Side A;Bar;Train;Efficiency', type='TEfficiency', path='ToFSiT/Efficiency/', xbins=5, xmin=0, xmax=5, ybins=4, ymin=0, ymax=4, xlabels=xLabelsToFEff, ylabels=yLabelsToFEff)
+    AFPToFSiTGroup.defineHistogram('tof_eff_OFF_passed_C, tof_eff_OFF_bars_C, tof_eff_OFF_trains_C ;Efficiency_C', title='Efficiency ToF Side C;Bar;Train;Efficiency', type='TEfficiency', path='ToFSiT/Efficiency/', xbins=5, xmin=0, xmax=5, ybins=4, ymin=0, ymax=4, xlabels=xLabelsToFEff, ylabels=yLabelsToFEff)
+
     # Using a map of groups
     layerList = ['P0','P1', 'P2', 'P3'] ## TODO XXX adapt to the enum/xAOD namespace names
     stationList = ['farAside', 'nearAside', 'nearCside', 'farCside']
@@ -241,11 +248,7 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    #flags.Input.Files = ['/dsk1/AFPFiles/datasets/355754/user.ladamczy.23432842.EXT0._000001.xAOD.root']
-    flags.Input.Files = ['/eos/atlas/atlascerngroupdisk/det-afp/nikola/afs/public/backup_raw_337176/user.ladamczy.21473705.EXT0._000002.xAOD.root',
-                               '/eos/atlas/atlascerngroupdisk/det-afp/nikola/afs/public/backup_raw_337176/user.ladamczy.21473705.EXT0._000003.xAOD.root',
-                               '/eos/atlas/atlascerngroupdisk/det-afp/nikola/afs/public/backup_raw_337176/user.ladamczy.21473705.EXT0._000004.xAOD.root']
-    #flags.Input.Files = ['/afs/cern.ch/user/p/pbalek/public/AFP/testxAOD.root']
+    flags.Input.Files = ['/eos/user/v/vlysenko/AOD_data22_13p6TeV_DS_429142/data22_13p6TeV.00429142.physics_Main.merge.AOD.f1253_m2112._lb0521._0001.1']
     flags.Input.isMC = False
     flags.Output.HISTFileName = 'AFPTest-337176-10k-FMETrains-MU.root'
     

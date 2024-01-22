@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 *
 *
 *	AFPToFSiTAlgorithm
@@ -11,14 +11,17 @@
 #include "xAODForward/AFPSiHit.h"
 #include "xAODForward/AFPStationID.h"
 #include "xAODForward/AFPToFHit.h"
+#include "xAODForward/AFPTrack.h"
 
 #include <utility>
 #include <vector>
 
 AFPToFSiTAlgorithm::AFPToFSiTAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
-  : AthMonitorAlgorithm( name, pSvcLocator ), m_afpSiHitContainerKey( "AFPSiHitContainer" ), m_afpToFHitContainerKey( "AFPToFHitContainer" ) {
+  : AthMonitorAlgorithm( name, pSvcLocator ), m_afpSiHitContainerKey( "AFPSiHitContainer" ), m_afpToFHitContainerKey( "AFPToFHitContainer" ), m_afpTrackContainerKey( "AFPTrackContainer" ) {
     declareProperty( "AFPSiHitContainer", m_afpSiHitContainerKey );
     declareProperty( "AFPToFHitContainer", m_afpToFHitContainerKey );
+    declareProperty( "AFPTrackContainer", m_afpTrackContainerKey );
+    
 }
 
 AFPToFSiTAlgorithm::~AFPToFSiTAlgorithm() {}
@@ -29,6 +32,8 @@ StatusCode AFPToFSiTAlgorithm::initialize() {
     ATH_CHECK( m_afpSiHitContainerKey.initialize() );
     SG::ReadHandleKey<xAOD::AFPToFHitContainer> afpToFHitContainerKey( "AFPToFHits" );
     ATH_CHECK( m_afpToFHitContainerKey.initialize() );
+    SG::ReadHandleKey<xAOD::AFPTrackContainer> afpTrackContainerKey( "AFPTracks" );
+    ATH_CHECK( m_afpTrackContainerKey.initialize() );
 
     return AthMonitorAlgorithm::initialize();
 }
@@ -37,6 +42,13 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
     SG::ReadHandle<xAOD::AFPSiHitContainer> afpSiHitContainer( m_afpSiHitContainerKey, ctx );
     if ( !afpSiHitContainer.isValid() ) {
         ATH_MSG_WARNING( "evtStore() does not contain hits collection with name " << m_afpSiHitContainerKey );
+        return StatusCode::SUCCESS;
+    }
+    ATH_CHECK( afpSiHitContainer.initialize() );
+
+    SG::ReadHandle<xAOD::AFPTrackContainer> afpTrackContainer( m_afpTrackContainerKey, ctx );
+    if ( !afpTrackContainer.isValid() ) {
+        ATH_MSG_WARNING( "evtStore() does not contain hits collection with name " << m_afpTrackContainerKey );
         return StatusCode::SUCCESS;
     }
     ATH_CHECK( afpSiHitContainer.initialize() );
@@ -186,6 +198,82 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
 
         fsp0Hits[ side ] = fsp[ 0 ][ side ].size();
         fill( "AFPToFSiTTool", tofHits[ side ], fsp0Hits[ side ] );
+    }
+
+    return fillHistograms_eff(*afpTrackContainer, *afpToFHitContainer);
+}
+
+StatusCode AFPToFSiTAlgorithm::fillHistograms_eff(
+        const xAOD::AFPTrackContainer& afpTrackContainer,
+        const xAOD::AFPToFHitContainer& afpToFHitContainer) const {
+    // Initialize monitored variables for histogram filling
+    Monitored::Scalar<bool> tof_eff_OFF_passed[2] = {
+            Monitored::Scalar<bool>( "tof_eff_OFF_passed_A", false ),
+            Monitored::Scalar<bool>( "tof_eff_OFF_passed_C", false )
+        };
+    Monitored::Scalar<uint8_t> tof_eff_OFF_trains[2] = {
+            Monitored::Scalar<uint8_t>( "tof_eff_OFF_trains_A", 0 ),
+            Monitored::Scalar<uint8_t>( "tof_eff_OFF_trains_C", 0 )
+        };
+    Monitored::Scalar<uint8_t> tof_eff_OFF_bars[2] = {
+            Monitored::Scalar<uint8_t>( "tof_eff_OFF_bars_A", 0 ),
+            Monitored::Scalar<uint8_t>( "tof_eff_OFF_bars_C", 0 )
+        };
+
+    bool bar_hit[2][5] = {};
+    bool channel_present[2][16] = {};
+    bool multihit[2] = {};
+    uint8_t track_train[2] = {};
+    std::size_t track_count[2] = {};
+
+    // Load the necessary information
+    for (const xAOD::AFPTrack* tracksItr : afpTrackContainer) { 
+        const auto side = tracksItr->stationID() == 3;
+
+        // Ignore tracks that are not from FAR stations
+        if (tracksItr->stationID() != 0 && tracksItr->stationID() != 3) 
+            continue;
+
+        const auto xLocal = tracksItr->xLocal();
+        for (uint8_t train = 0; train < 4; ++train) {
+            bool matching = xLocal < m_tofTrainsCoordinates[side][train] - m_tofTrainGapSize
+                         && xLocal > m_tofTrainsCoordinates[side][train + 1];
+            if (matching)
+                track_train[side] = train;
+        }
+        ++track_count[side];
+    }
+
+    for (const xAOD::AFPToFHit* hitsItr : afpToFHitContainer) {
+        const auto side = hitsItr->stationID() == 3;
+        const auto train = hitsItr->trainID();
+        const auto bar = hitsItr->barInTrainID();
+        const auto channel = 4 * train + bar;
+
+        // Ignore hits with an impossible origin
+        if (hitsItr->stationID() != 0 && hitsItr->stationID() != 3)
+            continue;
+        if (channel >= 16) continue;
+
+        if (train == track_train[side]) 
+            bar_hit[side][bar] = bar_hit[side][4] = true;
+        if (channel_present[side][channel])
+            multihit[side] = true;
+        channel_present[side][channel] = true;
+    }
+
+    for (uint8_t side : {0, 1}) {
+        // Cut on only 1 SiT track in the monitored station
+        if (track_count[side] != 1) continue;
+        // Cut on maximum of 1 hit in each ToF channel
+        if (multihit[side]) continue;
+
+        tof_eff_OFF_trains[side] = track_train[side];
+        for (uint8_t bar = 0; bar <= 4; ++bar) { // 4 = train total
+            tof_eff_OFF_bars[side] = bar;
+            tof_eff_OFF_passed[side] = bar_hit[side][bar];
+            fill( "AFPToFSiTTool", tof_eff_OFF_passed[side], tof_eff_OFF_bars[side], tof_eff_OFF_trains[side] );
+        }
     }
 
     return StatusCode::SUCCESS;
