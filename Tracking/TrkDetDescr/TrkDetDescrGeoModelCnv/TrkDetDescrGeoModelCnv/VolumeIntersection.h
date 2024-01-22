@@ -54,9 +54,6 @@ namespace Trk {
        std::pair<bool, const Trk::Volume* >  intersectApproximative(const Volume*, const Volume*) const; 
     
       private:
-
-	GeoShapeConverter m_geoShapeConverter;               //!< shape converter
-
 	PolygonCache polygonXY(const Volume*, int swap = 0) const; 
 	Trk::PolygonCache intersectPgon(Trk::PolygonCache&, Trk::PolygonCache&) const; 
 	bool inside(std::pair<double,double> vtx, std::vector<std::pair<double,double>> pgon ) const;
