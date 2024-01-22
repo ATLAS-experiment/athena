@@ -344,6 +344,10 @@ def defineMenu():
 
         'L1_LATE-MU8F_jXE70', 'L1_LATE-MU8F_jJ90',
 
+        # INVM + DR, TLA 
+        'L1_2DR15-0M30-2eEM12L',
+        'L1_13DR25-25M70-2eEM12L',
+
         #ATR-18824
         'L1_ZAFB-04DPHI-eEM18M',
         'L1_ZAFB-25DPHI-eEM18M',

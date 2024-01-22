@@ -255,6 +255,8 @@ HLT_2g13_loose_PhysicsTLA_L113DR25-25M70-2eEM12L:
   eventCount: 0
 HLT_2g13_loose_PhysicsTLA_L12DR15-0M30-2eEM12L:
   eventCount: 0
+  stepFeatures:
+    0: 1
 HLT_2g13_loose_PhysicsTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
 HLT_2g13_medium_PhysicsTLA_L12DR15-M70-2eEM12L:
