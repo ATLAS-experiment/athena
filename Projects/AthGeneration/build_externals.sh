@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Script building all the externals necessary for AthGeneration.
 #
@@ -12,7 +12,9 @@ ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=104
                         -DLCG_VERSION_POSTFIX="c_ATLAS_5"
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v38r0.000/Gaudi-v38r0.000.tar.gz;URL_MD5;af374562de2c29151881f49b4d8b49cf"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/4.6.0/GeoModel-4.6.0.tar.bz2;URL_MD5;8e83806f2d6f63e58760cd18c489eeaf")
+                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/5.0.1/GeoModel-5.0.1.tar.bz2;URL_MD5;88d297f433ec15c26bd2dd120964813f"
+			-DATLAS_GEOMODEL_PATCH=""
+			-DATLAS_GEOMODEL_FORCEDOWNLOAD_MESSAGE="Forcing the re-download of GeoModel (2024.01.27.)")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
