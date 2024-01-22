@@ -177,7 +177,7 @@ private:
                                               "Use conditions data to get thresholds, overrules useThresholdScaling"};
     Gaudi::Property<bool> m_useThresholdScaling{this, "useThresholdScaling", true,
                                                 "Use a strip length dependent threshold in MM digitiation"};
-    Gaudi::Property<float> m_thresholdScaleFactor{this, "thresholdScaleFactor", 10.0,
+    Gaudi::Property<float> m_thresholdScaleFactor{this, "thresholdScaleFactor", 7.0,
                                                   "Use x times the strip length dependent noise as MM threshold"};
     Gaudi::Property<float> m_vmmDeadtime{
         this, "vmmDeadtime", 200, "Specifies how much before the lower time limit the VMM simulation should start evaluating the signal"};
