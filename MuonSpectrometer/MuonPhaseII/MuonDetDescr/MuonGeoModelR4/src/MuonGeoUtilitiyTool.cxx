@@ -49,16 +49,6 @@ const GeoShape* MuonGeoUtilityTool::extractShape(const GeoShape* inShape) const 
       ATH_MSG_INFO(__FILE__<<":"<<__LINE__<<" "<<__func__<<" nullptr given ");
       return nullptr;
     }
-    static const std::set<ShapeType> valid_types{
-        GeoTrd::getClassTypeID(),
-        GeoBox::getClassTypeID(),
-        GeoTube::getClassTypeID(),
-        GeoShapeUnion::getClassTypeID()
-    };
-    if (valid_types.count(inShape->typeID())) {
-        ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Found valid shape type "<<inShape->type());
-        return inShape;
-    }
     if (inShape->typeID() == GeoShapeShift::getClassTypeID()) {
         const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(inShape);
         ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<
@@ -67,10 +57,11 @@ const GeoShape* MuonGeoUtilityTool::extractShape(const GeoShape* inShape) const 
             return extractShape(shift->getOp());
     }
     if (inShape->typeID() == GeoShapeSubtraction::getClassTypeID()){
+      ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<
+                      "Shape is a subtraction. Extract the basic shape. Continue navigation "<<inShape);
       const GeoShapeSubtraction* subtract = static_cast<const GeoShapeSubtraction*>(inShape);
       return extractShape(subtract->getOpA());
-    }
-    ATH_MSG_WARNING(__func__<<"() shape "<<inShape->type()<<" is unknown to the method ");
+    }    
     return inShape;
 }   
 Amg::Transform3D MuonGeoUtilityTool::extractShifts(const PVConstLink& physVol) const { 
