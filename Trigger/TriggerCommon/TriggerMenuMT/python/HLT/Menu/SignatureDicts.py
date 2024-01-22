@@ -272,6 +272,7 @@ JetChainParts = {
                       #     djdeta sel (optional)
                       #
                       # pt threshold cuts
+                      'DJMASS300j35', # alias
                       'DJMASS500j35', # alias
                       'DJMASS700j35', # alias
                       'DJMASS1000j35', # alias
@@ -1209,9 +1210,9 @@ UnconventionalTrackingChainParts_Default = {
 #==========================================================
 AllowedTopos_comb = [
     'idZmumu','idJpsimumu',
-    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','02dRBC','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
+    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','02dRBC','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
     '90invmAB',# TEST
-    '1invmAB5','50invmAB130', # Jpsiee, Zee/Zeg
+    '1invmAB5','50invmAB130','50invmBC130', # Jpsiee, Zee/Zeg
     '25dphiAA','25dphiBB','25dphiCC','invmAA80', # Low-mass diphoton
     '10invmAA70', # Low-mass dimuon
     'invmAB10', '10invmAB70',
