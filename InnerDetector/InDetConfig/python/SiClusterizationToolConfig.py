@@ -222,7 +222,9 @@ def LWTNNCondAlgCfg(flags, name="LWTNNCondAlg", **kwargs):
 
 
 def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory", **kwargs):
-    acc = ComponentAccumulator()
+    from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
+        PixelReadoutManagerCfg)
+    acc = PixelReadoutManagerCfg(flags)
 
     from PixelConditionsAlgorithms.PixelConditionsConfig import (
         PixelChargeCalibCondCfg)
