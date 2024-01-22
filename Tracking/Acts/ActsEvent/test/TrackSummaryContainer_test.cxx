@@ -49,6 +49,7 @@ BOOST_FIXTURE_TEST_CASE(AllStaticxAODVaraiblesAreKnown, EmptyBackend) {
 }
 
 
+
 struct FilledBackend : public EmptyBackend {
   FilledBackend() 
   {
@@ -200,6 +201,30 @@ BOOST_AUTO_TEST_CASE(ConstSurfaceBackend_test){
   testSurface(surf, outSurf, gctx);
   
 };
+
+
+BOOST_FIXTURE_TEST_CASE(MoveAssignment, FilledBackend) {
+  using namespace Acts::HashedStringLiteral;
+
+  ActsTrk::MutableTrackSummaryContainer  mm;
+  mm = std::move(*m);
+  auto c = std::make_unique<ActsTrk::TrackSummaryContainer>(mm.trackBackend());
+  
+  c->restoreDecorations();
+  BOOST_CHECK_EQUAL(c->size_impl(), 2);
+  BOOST_CHECK(c->hasColumn_impl("author"_hash));
+  BOOST_CHECK(c->hasColumn_impl("z0"_hash) == false);
+
+  BOOST_CHECK_EQUAL(*std::any_cast<const float*>(c->component_impl("chi2"_hash, 0)), 2.5f);
+  BOOST_CHECK_EQUAL(*std::any_cast<const unsigned int*>(c->component_impl("nHoles"_hash, 0)), 2);
+
+  BOOST_CHECK_EQUAL(*std::any_cast<const short*>(c->component_impl("author"_hash, 0)), 77);
+
+  BOOST_CHECK_EQUAL(*std::any_cast<const float*>(c->component_impl("chi2"_hash, 1)), 0.0f);
+  BOOST_CHECK_EQUAL(*std::any_cast<const unsigned int*>(c->component_impl("nHoles"_hash, 1)), 0);
+  BOOST_CHECK_EQUAL(*std::any_cast<const short*>(c->component_impl("author"_hash, 1)), 0);
+
+}
 
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -147,6 +147,35 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
   m_decorations = std::move(other.m_decorations);
 }
 
+// move assignment operator
+ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::operator = (
+    ActsTrk::MutableTrackSummaryContainer&& other) noexcept {
+    
+  m_mutableTrackBackend = std::exchange(other.m_mutableTrackBackend, nullptr);
+  m_mutableTrackBackendAux = std::exchange(other.m_mutableTrackBackendAux, nullptr);
+  m_mutableTrackBackend->setStore(m_mutableTrackBackendAux.get());
+  TrackSummaryContainer::m_trackBackend = m_mutableTrackBackend.get();
+
+  m_mutableSurfBackend = std::exchange(other.m_mutableSurfBackend, nullptr);
+  m_mutableSurfBackendAux = std::exchange(other.m_mutableSurfBackendAux, nullptr);
+  m_mutableSurfBackend->setStore(m_mutableSurfBackendAux.get());
+  TrackSummaryContainer::m_surfBackendAux = m_mutableSurfBackendAux.get();
+
+  m_surfaces = std::move(other.m_surfaces);
+  m_particleHypothesis = std::move(other.m_particleHypothesis);
+  m_decorations = std::move(other.m_decorations);
+
+  //restore decorations
+  restoreDecorations();
+
+  // invalidate vector type components of 'other'
+  other.m_surfaces.clear();
+  other.m_particleHypothesis.clear();
+  other.m_decorations.clear();
+
+  return *this;
+}
+
 ActsTrk::IndexType ActsTrk::MutableTrackSummaryContainer::addTrack_impl() {
   m_mutableTrackBackend->push_back(std::make_unique<xAOD::TrackSummary>());
   m_mutableTrackBackend->back()->resize();
