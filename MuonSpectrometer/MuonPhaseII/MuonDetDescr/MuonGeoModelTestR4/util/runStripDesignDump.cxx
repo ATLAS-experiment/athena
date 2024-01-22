@@ -67,10 +67,18 @@ int main() {
     rotatedDesign.defineStripLayout(Amg::Vector2D{-halfHeight + 0.5*stripPitch,0},
                                         stripPitch, stripWidth, numStrips, 0);
     /// 
-    createGraph(rotatedDesign, *file, "StereoDesign");   
+    createGraph(rotatedDesign, *file, "StereoDesign");
+
+    StripDesign rotatedDesignNeg{};
+    rotatedDesignNeg.defineTrapezoid(shortEdge, longEdge, halfHeight, -stereoAngle);
+    rotatedDesignNeg.defineStripLayout(Amg::Vector2D{-halfHeight + 0.5*stripPitch,0},
+                                        stripPitch, stripWidth, numStrips, 0);
+    /// 
+    createGraph(rotatedDesignNeg, *file, "NegStereoDesign");
+    
     StripDesign flippedRotated{};
     flippedRotated.defineTrapezoid(shortEdge, longEdge, halfHeight, stereoAngle);
-    flippedRotated.defineStripLayout(Amg::Vector2D{-longEdge + + 0.5*stripPitch,0},
+    flippedRotated.defineStripLayout(Amg::Vector2D{-longEdge + 0.5*stripPitch,0},
                                         stripPitch, stripWidth, numStrips, 0);
     flippedRotated.flipTrapezoid();
     /// 

@@ -4,16 +4,29 @@
 #ifndef MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
 
+#define SET_DIRECTION(METHOD, DIRVEC, FROM, TO)                             \
+     inline const Amg::Vector2D& StripDesign::METHOD() const {              \
+        if (!DIRVEC) {                                                      \
+             DIRVEC.set(std::make_unique<Amg::Vector2D>((TO-FROM).unit())); \
+        }                                                                   \
+        return (*DIRVEC);                                                   \
+     }
+
 namespace MuonGMR4 {
     inline const Amg::Vector2D& StripDesign::cornerBotLeft() const { return m_bottomLeft; }
     inline const Amg::Vector2D& StripDesign::cornerBotRight() const { return m_bottomRight; }
     inline const Amg::Vector2D& StripDesign::cornerTopLeft() const { return m_topLeft; }
     inline const Amg::Vector2D& StripDesign::cornerTopRight() const { return m_topRight; }
-    
-    inline const Amg::Vector2D& StripDesign::edgeDirBottom() const { return m_dirBotEdge; }
-    inline const Amg::Vector2D& StripDesign::edgeDirTop() const { return m_dirTopEdge; }    
-    inline const Amg::Vector2D& StripDesign::edgeDirLeft() const { return m_dirLeftEdge; }
-    inline const Amg::Vector2D& StripDesign::edgeDirRight() const { return m_dirRightEdge; } 
+
+    SET_DIRECTION(edgeDirTop, m_dirTopEdge, m_topLeft, m_topRight)
+    SET_DIRECTION(edgeDirBottom, m_dirBotEdge, m_bottomLeft, m_bottomRight)
+    SET_DIRECTION(edgeDirLeft, m_dirLeftEdge, m_topLeft, m_bottomLeft)
+    SET_DIRECTION(edgeDirRight, m_dirRightEdge, m_topRight, m_bottomRight)
+
+    inline double StripDesign::lenTopEdge() const { return isFlipped() ? 2* longHalfHeight() :  m_lenSlopEdge; }
+    inline double StripDesign::lenLeftEdge() const {return isFlipped() ? m_lenSlopEdge : 2* shortHalfHeight();}
+    inline double StripDesign::lenBottomEdge() const { return isFlipped() ? 2* shortHalfHeight() : m_lenSlopEdge; }
+    inline double StripDesign::lenRightEdge() const{ return isFlipped() ? m_lenSlopEdge  : 2 * longHalfHeight(); }
 
     inline double StripDesign::stripPitch() const { return m_stripPitch; }
     inline double StripDesign::stripWidth() const { return m_stripWidth; }
@@ -34,61 +47,55 @@ namespace MuonGMR4 {
         return leftInterSect(stripPosition(stripCh), uncapped);       
     }
     inline Amg::Vector2D StripDesign::leftInterSect(const Amg::Vector2D& stripPos, bool uncapped) const {
-        if (m_isFlipped) return leftInterSectFlipped(stripPos, uncapped);
-        std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, m_bottomLeft, m_dirBotEdge);
+        /// We expect lambda to be positive
+        const std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, cornerTopLeft(), edgeDirTop());
         if (!lambda) {
-            ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos,2)
-                          <<" does not intersect the left edge "<<Amg::toString(m_bottomLeft, 2)
-                          <<" + lambda "<<Amg::toString(m_dirBotEdge, 2));
+            ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos, 2)
+                          <<" does not intersect the top edge "<<Amg::toString(cornerTopLeft(), 2)
+                          <<" + lambda "<<Amg::toString(edgeDirTop(), 2));
             return Amg::Vector2D::Zero();
         }
         /// If the channel is a stereo channel && lamda is either smaller 0 or longer
         /// then the bottom edge, then it's a routed strip
-        if (!uncapped && (m_hasStereo) && ( (*lambda) < 0. || (*lambda) > m_lenSlopEdge)) {
-            const bool posIncl =  m_stripDir.x() >  0.; 
-            const Amg::Vector2D& edgePos{posIncl ? m_bottomLeft : m_bottomRight};
-            const Amg::Vector2D& edgeDir{posIncl ? m_dirLeftEdge : m_dirRightEdge};
-            const std::optional<double> bottom_line = Amg::intersect<2>(edgePos, edgeDir, stripPos, m_stripDir);            
-            return stripPos + bottom_line.value_or(0.)* m_stripDir;            
-        }
-        return m_bottomLeft + (*lambda) * m_dirBotEdge;
+        if (!uncapped && ((*lambda) < 0  || (*lambda) > lenTopEdge())) {
+            const bool pickLeft =  (*lambda) < 0;
+            const Amg::Vector2D& edgePos{pickLeft ?  cornerTopLeft() : cornerTopRight()};
+            const Amg::Vector2D& edgeDir{pickLeft ?  edgeDirLeft() : edgeDirRight()};
+            const double edgeLen = pickLeft ? lenLeftEdge(): lenRightEdge();
+            const std::optional<double> top_line = Amg::intersect<2>(stripPos, m_stripDir, edgePos, edgeDir);
+            if (!top_line || (*top_line) <0. || (*top_line) > edgeLen) {
+                ATH_MSG_WARNING(__func__<<"() The strip "<<Amg::toString(stripPos, 2)
+                                <<" does not intersect with the edge "<<Amg::toString(edgePos));
+                return Amg::Vector2D::Zero();
+            }
+            return edgePos + (*top_line) * edgeDir;
+       }
+       return cornerTopLeft() + (*lambda) * edgeDirTop();
     }
-    inline Amg::Vector2D StripDesign::leftInterSectFlipped(const Amg::Vector2D& stripPos, bool uncapped) const {
-        std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, m_topLeft, m_dirTopEdge);
+    inline Amg::Vector2D StripDesign::rightInterSect(const Amg::Vector2D& stripPos, bool uncapped) const {
+        std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, cornerBotLeft(), edgeDirBottom());
         if (!lambda) {
             ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos,2)
-                          <<" does not intersect the left edge "<<Amg::toString(m_bottomLeft, 2)
-                          <<" + lambda "<<Amg::toString(m_dirBotEdge, 2));
+                          <<" does not intersect the left edge "<<Amg::toString(cornerBotLeft(), 2)
+                          <<" + lambda "<<Amg::toString(edgeDirBottom(), 2));
             return Amg::Vector2D::Zero();
         }
-        /// The top edge of the trapezoid is actually shorter --> intersect the strip with the side
-        if (!uncapped && ((*lambda)< 0. || (*lambda > 2.*longHalfHeight()))) {
-            const Amg::Vector2D& edgePos{(*lambda)< 0. ? m_topRight : m_topLeft};
-            const Amg::Vector2D& edgeDir{(*lambda)< 0. ? m_dirRightEdge : m_dirLeftEdge};
-            std::optional<double> bottom_line = Amg::intersect<2>(edgePos, edgeDir, stripPos, m_stripDir);
-            return stripPos + bottom_line.value_or(0) * m_stripDir;
+        /// If the channel is a stereo channel && lamda is either smaller 0 or longer
+        /// then the bottom edge, then it's a routed strip
+        if (!uncapped  && ( (*lambda) < 0 || (*lambda) > lenBottomEdge())) {
+            const bool selLeftEdge = (*lambda) < 0; 
+            const Amg::Vector2D& edgePos{selLeftEdge ? cornerBotLeft() : cornerBotRight()};
+            const Amg::Vector2D& edgeDir{selLeftEdge ? edgeDirLeft() : edgeDirRight()};
+            const double edgeLen{selLeftEdge ? lenLeftEdge() : lenRightEdge()};
+            std::optional<double> bottom_line = Amg::intersect<2>(stripPos, m_stripDir, edgePos, edgeDir);            
+            if (!bottom_line || (*bottom_line) > 0 || (*bottom_line) < -edgeLen) {
+                ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos, 2)<<" does not intersect with the left/right edges ");
+                return Amg::Vector2D::Zero();
+            }
+            return edgePos + (*bottom_line) * edgeDir;            
         }
-        return m_topLeft + lambda.value_or(0.) * m_dirTopEdge;
+        return cornerBotLeft() + (*lambda) * edgeDirBottom();
     }
-    inline Amg::Vector2D StripDesign::rightInterSectFlipped(const Amg::Vector2D& stripPos, bool uncapped) const {
-        std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, m_bottomLeft, m_dirBotEdge);
-        if (!lambda) {
-            ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos,2)
-                          <<" does not intersect the right edge "<<Amg::toString(m_bottomLeft, 2)
-                          <<" + lambda "<<Amg::toString(m_dirBotEdge, 2));
-            return Amg::Vector2D::Zero();
-        }
-        /// The bottom edge of the trapezoid is actually shorter --> intersect the strip with the side
-        if (!uncapped && ((*lambda)< 0. || (*lambda > 2.*shortHalfHeight()))) {
-            const Amg::Vector2D& edgePos{(*lambda)< 0. ? m_bottomLeft : m_bottomRight};
-            const Amg::Vector2D& edgeDir{(*lambda)< 0. ? m_dirLeftEdge : m_dirRightEdge};
-            std::optional<double> bottom_line = Amg::intersect<2>(edgePos, edgeDir, stripPos, m_stripDir);
-            return stripPos + bottom_line.value_or(0) * m_stripDir;
-        }
-        return m_bottomLeft + lambda.value_or(0.) * m_dirBotEdge;
-        
-    }
-
     //============================================================================
     inline double StripDesign::stripLength(int stripNumber) const {
         const int stripCh = (stripNumber - m_channelShift);
@@ -106,27 +113,7 @@ namespace MuonGMR4 {
     inline Amg::Vector2D StripDesign::rightInterSect(int stripCh, bool uncapped) const {
         return rightInterSect(stripPosition(stripCh), uncapped);
     }
-    inline Amg::Vector2D StripDesign::rightInterSect(const Amg::Vector2D& stripPos, bool uncapped) const {
-        if (m_isFlipped) return rightInterSectFlipped(stripPos, uncapped);
-        /// We expect lambda to be positive
-        const std::optional<double> lambda = Amg::intersect<2>(stripPos, m_stripDir, m_topLeft, m_dirTopEdge);
-        if (!lambda) {
-            ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos,2)
-                          <<" does not intersect the top edge "<<Amg::toString(m_topRight, 2)
-                          <<" + lambda "<<Amg::toString(m_dirTopEdge, 2));
-            return Amg::Vector2D::Zero();
-        }
-        /// If the channel is a stereo channel && lamda is either smaller 0 or longer
-        /// then the bottom edge, then it's a routed strip
-        if (!uncapped && m_hasStereo && ( (*lambda) < 0  || (*lambda) > m_lenSlopEdge)) {
-            const bool posIncl =  m_stripDir.x() >  0.;
-            const Amg::Vector2D& edgePos{posIncl ? m_topRight : m_topLeft};
-            const Amg::Vector2D& edgeDir{posIncl ? m_dirRightEdge : m_dirLeftEdge};
-            const std::optional<double> top_line = Amg::intersect<2>(edgePos, edgeDir, stripPos, m_stripDir);
-            return stripPos + top_line.value_or(0) * m_stripDir;            
-       }
-       return m_topLeft + (*lambda) * m_dirTopEdge;
-    }
+    
     inline Amg::Vector2D StripDesign::stripCenter(int stripCh) const {
        return 0.5 *(leftInterSect(stripCh) + rightInterSect(stripCh));      
     }
@@ -175,4 +162,5 @@ namespace MuonGMR4 {
         return chNum + m_channelShift;
     }
 }
+#undef SET_DIRECTION
 #endif
