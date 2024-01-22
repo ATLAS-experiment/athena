@@ -10,6 +10,7 @@ def InDetTestPixelLayerToolCfg(flags, name="InDetTestPixelLayerTool", **kwargs):
         return ITkTestPixelLayerToolCfg(flags, name, **kwargs)
 
     result = ComponentAccumulator()
+
     if 'PixelSummaryTool' not in kwargs:
         from PixelConditionsTools.PixelConditionsSummaryConfig import (
             PixelConditionsSummaryCfg)
@@ -17,6 +18,9 @@ def InDetTestPixelLayerToolCfg(flags, name="InDetTestPixelLayerTool", **kwargs):
             PixelConditionsSummaryCfg(flags)))
 
     if "PixelDetElStatus" not in kwargs and not flags.Common.isOnline:
+        from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
+            PixelReadoutManagerCfg)
+        result.merge(PixelReadoutManagerCfg(flags))
         from PixelConditionsAlgorithms.PixelConditionsConfig import (
             PixelDetectorElementStatusAlgCfg)
         result.merge(PixelDetectorElementStatusAlgCfg(flags))
