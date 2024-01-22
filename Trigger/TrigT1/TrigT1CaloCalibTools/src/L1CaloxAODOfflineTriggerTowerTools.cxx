@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  ***************************************************************************
 //  *   Author: John Morris (john.morris@cern.ch)                             *
@@ -16,7 +16,7 @@
 #include <utility> // for std::move
 
 namespace LVL1{
-  
+
   L1CaloxAODOfflineTriggerTowerTools::L1CaloxAODOfflineTriggerTowerTools( const std::string& name ) :
     asg::AsgTool( name ),
     m_l1CaloTTIdTools("LVL1::L1CaloTTIdTools/L1CaloTTIdTools"),
@@ -25,26 +25,26 @@ namespace LVL1{
     m_lvl1Helper(nullptr),
     m_ttSvc(nullptr),
     m_dbPpmChanCalib(nullptr)
-  {      
+  {
   }
-    
-  StatusCode 
+
+  StatusCode
   L1CaloxAODOfflineTriggerTowerTools::initialize()
   {
     ATH_MSG_INFO("initialize LVL1::L1CaloxAODOfflineTriggerTowerTools");
-    
-    // Get the L1CaloCells2TriggerTowers Tool 
-    CHECK( m_cells2tt.retrieve() );    
-    
+
+    // Get the L1CaloCells2TriggerTowers Tool
+    CHECK( m_cells2tt.retrieve() );
+
     // Get the L1CaloTTIdTools Tool
     CHECK( m_l1CaloTTIdTools.retrieve() );
-    
+
     // Get the Fcal23 mapping tool
     CHECK( m_rxMapTool.retrieve() );
-    
+
     CHECK( detStore()->retrieve ( m_caloMgr, "CaloIdManager") );
     m_lvl1Helper = m_caloMgr->getLVL1_ID();
-    
+
     //Retrieve cabling & tt services
     ISvcLocator* svcLoc = Gaudi::svcLocator( );
     IToolSvc* toolSvc;
@@ -54,35 +54,35 @@ namespace LVL1{
 
     CHECK( m_caloCellContainerKey.initialize() );
 
-    // Return gracefully:    
-    return StatusCode::SUCCESS; 
+    // Return gracefully:
+    return StatusCode::SUCCESS;
   }
-  
-  StatusCode 
+
+  StatusCode
   L1CaloxAODOfflineTriggerTowerTools::finalize()
   {
-    ATH_MSG_INFO("finalize LVL1::L1CaloxAODOfflineTriggerTowerTools");    
-    // Return gracefully:    
-    return StatusCode::SUCCESS;    
+    ATH_MSG_INFO("finalize LVL1::L1CaloxAODOfflineTriggerTowerTools");
+    // Return gracefully:
+    return StatusCode::SUCCESS;
   }
-  
+
   /// Calo Cells into maps for L1Calo use
-  StatusCode                                 
+  StatusCode
   L1CaloxAODOfflineTriggerTowerTools::initCaloCells()
   {
     SG::ReadHandle<CaloCellContainer> cells (m_caloCellContainerKey);
     m_cells2tt->initCaloCellsTriggerTowers( *cells );
-    
+
     // Return gracefully:
-    return StatusCode::SUCCESS;      
+    return StatusCode::SUCCESS;
   }
-  
-  std::vector<L1CaloRxCoolChannelId>         
+
+  std::vector<L1CaloRxCoolChannelId>
   L1CaloxAODOfflineTriggerTowerTools::receivers( const xAOD::TriggerTower& tt ) const
   {
     std::vector<L1CaloRxCoolChannelId> rx = m_ttSvc->cnvCoolChannelIdToRxId( tt.coolId() );
     std::vector<L1CaloRxCoolChannelId> output;
-    
+
     // EM
     if (tt.sampling() == 0) {
       // Sort EM Crack recievers. End cap first, barrel second
@@ -93,14 +93,14 @@ namespace LVL1{
         // 2 Rx have Crate 2 or 3  - correspond to the Rx we want:
         //      1 Rx has inputConn() == 0 - EMEC receiver
         //      1 Rx has inputConn() == 2 - Barrel receiver
-        
+
         std::vector<L1CaloRxCoolChannelId> rx2;
-        for (auto i : rx) {
+        for (const auto& i : rx) {
           if (i.crate() == 2 || i.crate() == 3) {
             rx2.push_back( i );
           }
         }
-        
+
         if (rx2.size() == 2) {
 
           unsigned int inputA = rx2.at(0).inputConn();
@@ -120,10 +120,10 @@ namespace LVL1{
 
       if (rx.size() == 1) {
         output.push_back( rx.at(0) );
-      }        
-      
+      }
+
     } // end EM
-    
+
     // Had
     if (tt.sampling() == 1) {
       // Sort FCAL 23 recievers. Always have -ve eta first and +ve eta second
@@ -143,29 +143,30 @@ namespace LVL1{
         if (!oddA && oddB) {
           output.push_back(rx.at(1));
           output.push_back(rx.at(0));
-        }        
+        }
       }
       if (rx.size() == 1) {
         output.push_back( rx.at(0) );
-      }      
+      }
     } // end Had
-    
+
     return output;
   }
-  
-  std::vector<unsigned int>                  
+
+  std::vector<unsigned int>
   L1CaloxAODOfflineTriggerTowerTools::receiversId( const xAOD::TriggerTower& tt ) const
   {
     std::vector<L1CaloRxCoolChannelId> rx = receivers( tt );
     std::vector<unsigned int> output;
-    for (auto i : rx) {
+    output.reserve(rx.size());
+    for (const auto& i : rx) {
       output.push_back( i.id() );
     }
     return output;
   }
-  
-  
-  unsigned int                               
+
+
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::isTile( const xAOD::TriggerTower& tt )  const
   {
     Identifier id = towerID( tt );
@@ -176,82 +177,85 @@ namespace LVL1{
   }
 
 
-  std::vector<const CaloCell*>               
+  std::vector<const CaloCell*>
   L1CaloxAODOfflineTriggerTowerTools::getCaloCells( const xAOD::TriggerTower& tt )  const
   {
     Identifier id = towerID( tt );
     return m_cells2tt->caloCells( id );
   }
 
-  unsigned int                               
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::nCaloCells( const xAOD::TriggerTower& tt )  const
   {
-    return getCaloCells( tt ).size();    
+    return getCaloCells( tt ).size();
   }
 
-  std::vector<unsigned int>                  
+  std::vector<unsigned int>
   L1CaloxAODOfflineTriggerTowerTools::nCaloCellsByLayer( const xAOD::TriggerTower& tt )  const
   {
     std::vector<unsigned int> output;
     Identifier id = towerID( tt );
     std::vector<std::vector<const CaloCell*>> cells = m_cells2tt->caloCellsByLayer( id );
-    for (auto i : cells) {
+    output.reserve(cells.size());
+    for (const auto& i : cells) {
       output.push_back( i.size() );
     }
-    return output;      
+    return output;
   }
 
-//   std::vector<unsigned int>                  
+//   std::vector<unsigned int>
 //   L1CaloxAODOfflineTriggerTowerTools::nCaloCellsByReceiver( const xAOD::TriggerTower& tt )  const
 //   {
 //     std::vector<unsigned int> output;
-//     return output;      
+//     return output;
 //   }
-//  
-//   std::vector<unsigned int>                  
+//
+//   std::vector<unsigned int>
 //   L1CaloxAODOfflineTriggerTowerTools::nCaloCellsByReceiverByLayer( const xAOD::TriggerTower& tt )  const
 //   {
 //     std::vector<unsigned int> output;
-//     return output;     
+//     return output;
 //   }
- 
 
-  float                                      
+
+  float
   L1CaloxAODOfflineTriggerTowerTools::caloCellsEnergy( const xAOD::TriggerTower& tt )  const
   {
     Identifier id = towerID( tt );
     return m_cells2tt->energy( id );
   }
-  
-  float                                      
+
+  float
   L1CaloxAODOfflineTriggerTowerTools::caloCellsET( const xAOD::TriggerTower& tt )  const
   {
     Identifier id = towerID( tt );
     return m_cells2tt->et( id );
-  }  
+  }
 
-  std::vector<float>                         
+  std::vector<float>
   L1CaloxAODOfflineTriggerTowerTools::caloCellsEnergyByLayer( const xAOD::TriggerTower& tt )  const
   {
     std::vector<float> output;
     Identifier id = towerID( tt );
     std::vector<std::vector<const CaloCell*>> cells = m_cells2tt->caloCellsByLayer( id );
-    for (auto i : cells) {
+    output.reserve(cells.size());
+    for (const auto& i : cells) {
       output.push_back( m_cells2tt->energy( i ) );
     }
-    return output;     
+    return output;
   }
-  
-  std::vector<float>                         
+
+  std::vector<float>
   L1CaloxAODOfflineTriggerTowerTools::caloCellsETByLayer( const xAOD::TriggerTower& tt )  const
   {
     std::vector<float> output;
     Identifier id = towerID( tt );
     std::vector<std::vector<const CaloCell*>> cells = m_cells2tt->caloCellsByLayer( id );
-    for (auto i : cells) {
+    output.reserve(cells.size());
+    for (const auto& i : cells) {
       output.push_back( m_cells2tt->et( i ) );
     }
-    return output;     
+    return output;
   }
 
   std::vector<std::vector<const CaloCell*>>
@@ -270,7 +274,7 @@ namespace LVL1{
     return output;
   }
 
-  std::vector<float>                         
+  std::vector<float>
   L1CaloxAODOfflineTriggerTowerTools::caloCellsEnergyByReceiver( const xAOD::TriggerTower& tt )  const
   {
     using std::begin;
@@ -285,10 +289,10 @@ namespace LVL1{
                      return m_cells2tt->energy( c );
                    });
 
-    return energyByReceiver;     
+    return energyByReceiver;
   }
 
-  std::vector<float>                         
+  std::vector<float>
   L1CaloxAODOfflineTriggerTowerTools::caloCellsETByReceiver( const xAOD::TriggerTower& tt )  const
   {
     using std::begin;
@@ -303,7 +307,7 @@ namespace LVL1{
                      return m_cells2tt->et( c );
                    });
 
-    return etByReceiver;     
+    return etByReceiver;
   }
 
   std::vector<std::vector<std::vector<const CaloCell*>>>
@@ -321,7 +325,7 @@ namespace LVL1{
       std::transform(begin(cellsByLayer), end(cellsByLayer),
                      back_inserter(output),
                      [](vector<const CaloCell*> C)->vector<vector<const CaloCell*>> {
-                       return {C};
+                       return {std::move(C)};
                      });
     } else if(rx.size() == 2) {
       Identifier id = towerID( tt );
@@ -347,6 +351,7 @@ namespace LVL1{
     std::vector<std::vector<float>> output;
     for(const auto& cellsByReceiver : caloCellsByLayerByReceiver(tt)) {
       std::vector<float> cellsEnergyByReceiver;
+      cellsEnergyByReceiver.reserve(cellsByReceiver.size());
       for(const auto& cells : cellsByReceiver) {
         cellsEnergyByReceiver.push_back(m_cells2tt->energy(cells));
       }
@@ -367,6 +372,7 @@ namespace LVL1{
     std::vector<std::vector<float>> output;
     for(const auto& cellsByReceiver : caloCellsByLayerByReceiver(tt)) {
       std::vector<float> cellsEnergyByReceiver;
+      cellsEnergyByReceiver.reserve(cellsByReceiver.size());
       for(const std::vector<const CaloCell*>& cells : cellsByReceiver) {
         cellsEnergyByReceiver.push_back(m_cells2tt->et(cells));
       }
@@ -377,16 +383,16 @@ namespace LVL1{
   }
 
 
-//   
-// 
-//   unsigned int                               
+//
+//
+//   unsigned int
 //   L1CaloxAODOfflineTriggerTowerTools::badCaloCells( const xAOD::TriggerTower& tt )  const
 //   {
-//     
-//     return 0;    
+//
+//     return 0;
 //   }
 
-  float                                      
+  float
   L1CaloxAODOfflineTriggerTowerTools::caloCellsQuality( const xAOD::TriggerTower& tt )  const
   {
     float output(-999.9);
@@ -399,8 +405,8 @@ namespace LVL1{
     }
     return output;
   }
-  
-  float 
+
+  float
   L1CaloxAODOfflineTriggerTowerTools::LArCaloQuality( const std::vector<const CaloCell*> &cells ) const
   {
     float nom(0.), denom(0.);
@@ -418,9 +424,9 @@ namespace LVL1{
       nom = -1e6; // error value
     }
     return nom;
-  }  
-  
-  float 
+  }
+
+  float
   L1CaloxAODOfflineTriggerTowerTools::TileCaloQuality( const std::vector<const CaloCell*> &cells ) const
   {
     float nom(0.), denom(0.);
@@ -440,59 +446,59 @@ namespace LVL1{
       nom = -1e6; // error value
     }
     return nom;
-  }  
-  
-  
-// 
-//   float                                      
+  }
+
+
+//
+//   float
 //   L1CaloxAODOfflineTriggerTowerTools::nCaloCellsNonNominal( const xAOD::TriggerTower& tt )  const
 //   {
-//     return 0;    
+//     return 0;
 //   }
-// 
-//   std::vector<float>                         
+//
+//   std::vector<float>
 //   L1CaloxAODOfflineTriggerTowerTools::nCaloCellsNonNominalByLayer( const xAOD::TriggerTower& tt )  const
 //   {
 //     std::vector<float> output;
-//     return output;    
+//     return output;
 //   }
-// 
-//   std::vector<std::vector<float>>            
+//
+//   std::vector<std::vector<float>>
 //   L1CaloxAODOfflineTriggerTowerTools::nCaloCellsNonNominalByReceiverByLayer( const xAOD::TriggerTower& tt )  const
 //   {
 //     std::vector<std::vector<float>> output;
-//     return output;    
+//     return output;
 //   }
-// 
-//   float                                      
+//
+//   float
 //   L1CaloxAODOfflineTriggerTowerTools::nonNominalMeanScale( const xAOD::TriggerTower& tt )  const
 //   {
-//     return 0;    
+//     return 0;
 //   }
-// 
-//   std::vector<float>                         
+//
+//   std::vector<float>
 //   L1CaloxAODOfflineTriggerTowerTools::nonNominalMeanScaleByLayer( const xAOD::TriggerTower& tt )  const
 //   {
 //     std::vector<float> output;
-//     return output;    
+//     return output;
 //   }
-// 
-//   std::vector<float>                         
+//
+//   std::vector<float>
 //   L1CaloxAODOfflineTriggerTowerTools::nonNominalMeanScaleByReceiver( const xAOD::TriggerTower& tt )  const
 //   {
 //     std::vector<float> output;
 //     return output;
 //   }
-// 
-//   std::vector<std::vector<float>>            
+//
+//   std::vector<std::vector<float>>
 //   L1CaloxAODOfflineTriggerTowerTools::nonNominalMeanScaleByReceiverByLayer( const xAOD::TriggerTower& tt )  const
 //   {
 //     std::vector<std::vector<float>> output;
 //     return output;
 //   }
-  
+
   // Sort Calo Cells
-  std::vector<std::vector<const CaloCell*>>              
+  std::vector<std::vector<const CaloCell*>>
   L1CaloxAODOfflineTriggerTowerTools::sortEMCrackCells(const std::vector<const CaloCell*> &cells) const
   {
     std::vector<std::vector<const CaloCell*>> output;
@@ -514,10 +520,10 @@ namespace LVL1{
 
     output.push_back(emec);
     output.push_back(emb);
-    return output;    
+    return output;
   }
-  
-  std::vector<std::vector<const CaloCell*>>              
+
+  std::vector<std::vector<const CaloCell*>>
   L1CaloxAODOfflineTriggerTowerTools::sortFCAL23Cells(const std::vector<const CaloCell*> &cells,const std::vector<L1CaloRxCoolChannelId>& rx) const
   {
     // vectors of calo cells for the different receivers
@@ -538,12 +544,12 @@ namespace LVL1{
     }
     output.push_back(cellsA);
     output.push_back(cellsB);
-    return output;    
+    return output;
   }
-   
+
 
   //  Database Attributes
-  const coral::AttributeList*                
+  const coral::AttributeList*
   L1CaloxAODOfflineTriggerTowerTools::DbAttributes( const xAOD::TriggerTower& tt , const CondAttrListCollection* dbAttrList )  const
   {
     typedef CondAttrListCollection::const_iterator Itr_db;
@@ -554,10 +560,10 @@ namespace LVL1{
         break;
       }
     }
-    return attrList;    
+    return attrList;
   }
-   
-  std::vector<const coral::AttributeList*>   
+
+  std::vector<const coral::AttributeList*>
   L1CaloxAODOfflineTriggerTowerTools::DbRxGainsAttributes( const xAOD::TriggerTower& tt , const CondAttrListCollection* dbAttrList )  const
   {
     typedef CondAttrListCollection::const_iterator Itr_db;
@@ -569,14 +575,14 @@ namespace LVL1{
           v_attr.push_back( &(i->second) );
           break;
         }
-      }     
+      }
     }
     return v_attr;
   }
 
 
   // Database access
-  unsigned int                               
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::ModuleId( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -590,7 +596,7 @@ namespace LVL1{
     return value;
   }
 
-  unsigned int                               
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::ErrorCode( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -601,10 +607,10 @@ namespace LVL1{
         break;
       }
     }
-    return value; 
+    return value;
   }
 
-  unsigned long long                         
+  unsigned long long
   L1CaloxAODOfflineTriggerTowerTools::PprDacScanResultsTimeStamp( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -615,10 +621,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;  
+    return value;
   }
 
-  unsigned long long                         
+  unsigned long long
   L1CaloxAODOfflineTriggerTowerTools::PprPedestalRunResultsTimeStamp( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -632,7 +638,7 @@ namespace LVL1{
     return value;
   }
 
-  unsigned long long                         
+  unsigned long long
   L1CaloxAODOfflineTriggerTowerTools::PprNoiseRunResultsTimeStamp( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -643,10 +649,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;  
+    return value;
   }
 
-  unsigned long long                         
+  unsigned long long
   L1CaloxAODOfflineTriggerTowerTools::PprTimingResultsTimeStamp( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -657,10 +663,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;  
+    return value;
   }
 
-  unsigned long long                         
+  unsigned long long
   L1CaloxAODOfflineTriggerTowerTools::PprSatBcidResultsTimeStamp( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -671,10 +677,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;    
+    return value;
   }
 
-  unsigned long long                         
+  unsigned long long
   L1CaloxAODOfflineTriggerTowerTools::PprFirFilterResultsTimeStamp( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -688,7 +694,7 @@ namespace LVL1{
     return value;
   }
 
-  unsigned long long                         
+  unsigned long long
   L1CaloxAODOfflineTriggerTowerTools::PprLutValuesResultsTimeStamp( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -699,10 +705,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  double                                     
+  double
   L1CaloxAODOfflineTriggerTowerTools::DacOffset( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -713,10 +719,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  double                                     
+  double
   L1CaloxAODOfflineTriggerTowerTools::DacSlope( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -727,10 +733,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  double                                     
+  double
   L1CaloxAODOfflineTriggerTowerTools::PedMean( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -741,10 +747,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned int                               
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::PedValue( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -755,10 +761,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned int                               
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::FullDelayData( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -769,10 +775,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::SyncDelayBcid( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -783,10 +789,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::InBcidNegedge( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -797,10 +803,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;  
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::ExtBcidThreshold( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -811,10 +817,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::SatBcidThreshLow( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -825,10 +831,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::SatBcidThreshHigh( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -839,10 +845,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;    
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::SatBcidLevel( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -853,10 +859,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::BcidEnergyRangeLow( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -867,10 +873,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::BcidEnergyRangeHigh( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -881,10 +887,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned short int                         
+  unsigned short int
   L1CaloxAODOfflineTriggerTowerTools::FirStartBit( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -895,10 +901,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  short                                      
+  short
   L1CaloxAODOfflineTriggerTowerTools::FirCoeff1( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -909,10 +915,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  short                                      
+  short
   L1CaloxAODOfflineTriggerTowerTools::FirCoeff2( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -923,10 +929,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  short                                      
+  short
   L1CaloxAODOfflineTriggerTowerTools::FirCoeff3( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -937,10 +943,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  short                                      
+  short
   L1CaloxAODOfflineTriggerTowerTools::FirCoeff4( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -951,10 +957,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  short                                      
+  short
   L1CaloxAODOfflineTriggerTowerTools::FirCoeff5( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -965,10 +971,10 @@ namespace LVL1{
         break;
       }
     }
-    return value; 
+    return value;
   }
 
-  unsigned short                             
+  unsigned short
   L1CaloxAODOfflineTriggerTowerTools::LutStrategy( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -979,10 +985,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;  
+    return value;
   }
 
-  unsigned short                             
+  unsigned short
   L1CaloxAODOfflineTriggerTowerTools::LutOffset( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -993,10 +999,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
-  unsigned short                             
+  unsigned short
   L1CaloxAODOfflineTriggerTowerTools::LutNoiseCut( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -1007,10 +1013,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;  
+    return value;
   }
 
-  unsigned short                             
+  unsigned short
   L1CaloxAODOfflineTriggerTowerTools::LutSlope( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -1021,11 +1027,11 @@ namespace LVL1{
         break;
       }
     }
-    return value;  
+    return value;
   }
 
 
-  unsigned int                               
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::DeadChannel( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -1036,10 +1042,10 @@ namespace LVL1{
         break;
       }
     }
-    return value;  
+    return value;
   }
 
-  unsigned int                               
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::DisabledTower( const xAOD::TriggerTower& tt ) const
   {
     const coral::AttributeList* attrList = DbAttributes( tt , m_dbPpmChanCalib );
@@ -1050,11 +1056,11 @@ namespace LVL1{
         break;
       }
     }
-    return value;   
+    return value;
   }
 
 
-  float                                      
+  float
   L1CaloxAODOfflineTriggerTowerTools::RxGain( const xAOD::TriggerTower& /* tt */ ) const
   {
     float value = 0;
@@ -1064,10 +1070,10 @@ namespace LVL1{
 //         break;
 //       }
 //     }
-    return value;   
+    return value;
   }
 
-  unsigned int                               
+  unsigned int
   L1CaloxAODOfflineTriggerTowerTools::RxStatus( const xAOD::TriggerTower& /* tt */ ) const
   {
     unsigned int value = 0;
@@ -1077,37 +1083,37 @@ namespace LVL1{
 //         break;
 //       }
 //     }
-    return value;  
+    return value;
   }
-  
-  Identifier                                 
+
+  Identifier
   L1CaloxAODOfflineTriggerTowerTools::towerID( const xAOD::TriggerTower& tt ) const
   {
-    return m_lvl1Helper->tower_id( pos_neg_z(tt) , tt.sampling() , region(tt) , ieta(tt) , iphi(tt) );  
+    return m_lvl1Helper->tower_id( pos_neg_z(tt) , tt.sampling() , region(tt) , ieta(tt) , iphi(tt) );
   }
-  
-  int                                        
+
+  int
   L1CaloxAODOfflineTriggerTowerTools::pos_neg_z( const xAOD::TriggerTower& tt ) const
   {
-    return m_l1CaloTTIdTools->pos_neg_z( tt.eta() );  
+    return m_l1CaloTTIdTools->pos_neg_z( tt.eta() );
   }
-  
-  int                                        
+
+  int
   L1CaloxAODOfflineTriggerTowerTools::region( const xAOD::TriggerTower& tt ) const
   {
-    return m_l1CaloTTIdTools->regionIndex( tt.eta() );  
+    return m_l1CaloTTIdTools->regionIndex( tt.eta() );
   }
-  
-  int                                        
+
+  int
   L1CaloxAODOfflineTriggerTowerTools::ieta( const xAOD::TriggerTower& tt ) const
   {
-    return m_l1CaloTTIdTools->etaIndex( tt.eta() );  
+    return m_l1CaloTTIdTools->etaIndex( tt.eta() );
   }
-  
-  int                                        
+
+  int
   L1CaloxAODOfflineTriggerTowerTools::iphi( const xAOD::TriggerTower& tt ) const
   {
-    return m_l1CaloTTIdTools->phiIndex( tt.eta() , tt.phi() );  
+    return m_l1CaloTTIdTools->phiIndex( tt.eta() , tt.phi() );
   }
-    
+
 }

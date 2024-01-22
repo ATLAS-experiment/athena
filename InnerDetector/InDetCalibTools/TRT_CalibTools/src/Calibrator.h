@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
 
-   NAME: Calibrator.h   
-PACKAGE: TRTCalibTools 
+   NAME: Calibrator.h
+PACKAGE: TRTCalibTools
 
-AUTHORS: Johan Lundquist  
-CREATED: 27-03-2009 
+AUTHORS: Johan Lundquist
+CREATED: 27-03-2009
 
 PURPOSE: Class for calibrating a TRT sub-level
-          
+
 ********************************************************************/
 
 #include "CxxUtils/checker_macros.h"
@@ -29,7 +29,7 @@ class TDirectory;
 class TGraphErrors;
 
 /**
-A class for generating a r-t and t-r graphs by binning the 2D histograms in Calibrator::rtHists in r ot t bins. 
+A class for generating a r-t and t-r graphs by binning the 2D histograms in Calibrator::rtHists in r ot t bins.
 */
 class RtGraph{
 public:
@@ -55,7 +55,7 @@ private:
   /***/ float *m_maxval;
   /***/ float *m_leftval;
   /***/ float *m_rightval;
-  /***/ float m_mean;  
+  /***/ float m_mean;
   /***/ float m_mindistance;
   /***/ int *m_maxbin;
   /***/ int m_ipoint;
@@ -330,10 +330,10 @@ public:
   */
   std::string GetSelString();
 
-  float oldt0(std::string key) {return data[key].sumt0/float(data[key].ntres);}
-  float xmean(std::string key) {return data[key].sumx/float(data.size());}
-  float ymean(std::string key) {return data[key].sumy/float(data.size());}
-  float zmean(std::string key) {return data[key].sumz/float(data.size());}
+  float oldt0(const std::string& key) {return data[key].sumt0/float(data[key].ntres);}
+  float xmean(const std::string& key) {return data[key].sumx/float(data.size());}
+  float ymean(const std::string& key) {return data[key].sumy/float(data.size());}
+  float zmean(const std::string& key) {return data[key].sumz/float(data.size());}
 
   /**A map between the sub-module identifier string and the calibration data structure (caldata)*/
   std::map<std::string,caldata> data;

@@ -124,10 +124,10 @@ bool VNetworkBase::isFile(std::string const &inputFile) {
 };
 
 namespace {
-int GetPrefixLength(const std::vector<std::string> strings) {
+int GetPrefixLength(const std::vector<std::string>& strings) {
   const std::string first = strings[0];
   int length = first.length();
-  for (std::string this_string : strings) {
+  for (const std::string& this_string : strings) {
     for (int i = 0; i < length; i++) {
       if (first[i] != this_string[i]) {
         length = i;
