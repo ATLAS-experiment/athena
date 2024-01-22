@@ -1,6 +1,6 @@
 """Geant4 tools config for ISF with ComponentAccumulator
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -16,7 +16,7 @@ from G4AtlasTools.G4AtlasToolsConfig import (
     SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 )
 from ISF_Services.ISF_ServicesConfig import (
-    InputConverterCfg, LongLivedInputConverterCfg
+    InputConverterCfg
 )
 
 
@@ -79,25 +79,9 @@ def PassBackGeant4ToolCfg(flags, name="ISF_PassBackGeant4Tool", **kwargs):
     return acc
 
 
-def AFIIGeant4ToolCfg(flags, name="ISF_AFIIGeant4Tool", **kwargs):
+def AFIIGeant4ToolCfg(flags, name="ISF_AFIIGeant4Tool", **kwargs): # TODO Rename
     acc = ComponentAccumulator()
     kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISF_AFIIUserActionSvcCfg(flags)).name)
     PassBackGeant4Tool = acc.popToolsAndMerge(Geant4ToolCfg(flags, name, **kwargs))
     acc.setPrivateTools(PassBackGeant4Tool)
-    return acc
-
-
-def LongLivedGeant4ToolCfg(flags, name="ISF_LongLivedGeant4Tool", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(LongLivedInputConverterCfg(flags)).name)
-    FullGeant4Tool = acc.popToolsAndMerge(FullGeant4ToolCfg(flags, name, **kwargs))
-    acc.setPrivateTools(FullGeant4Tool)
-    return acc
-
-
-def AFII_QS_Geant4ToolCfg(flags, name="AFII_QS_Geant4Tool", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(LongLivedInputConverterCfg(flags)).name)
-    AFIIGeant4Tool = acc.popToolsAndMerge(AFIIGeant4ToolCfg(flags, name, **kwargs))
-    acc.setPrivateTools(AFIIGeant4Tool)
     return acc

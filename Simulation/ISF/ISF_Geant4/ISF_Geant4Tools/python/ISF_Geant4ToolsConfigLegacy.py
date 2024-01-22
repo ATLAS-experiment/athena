@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## -----------------------------------------------------------------------------
 ### Base Version
@@ -103,16 +103,8 @@ def getPassBackGeant4Tool(name="ISF_PassBackGeant4Tool", **kwargs):
     kwargs.setdefault('UserActionSvc','G4UA::ISFPassBackUserActionSvc')
     return getGeant4Tool(name, **kwargs)
 
-def getAFIIGeant4Tool(name="ISF_AFIIGeant4Tool", **kwargs):
+def getAFIIGeant4Tool(name="ISF_AFIIGeant4Tool", **kwargs): # TODO rename
     kwargs.setdefault('UserActionSvc','G4UA::ISF_AFIIUserActionSvc')
     return getPassBackGeant4Tool(name, **kwargs)
-
-def getLongLivedGeant4Tool(name="ISF_LongLivedGeant4Tool", **kwargs):
-    kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
-    return getFullGeant4Tool(name, **kwargs)
-
-def getAFII_QS_Geant4Tool(name='AFII_QS_Geant4Tool', **kwargs):
-    kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
-    return getAFIIGeant4Tool(name, **kwargs)
 
 ## -----------------------------------------------------------------------------

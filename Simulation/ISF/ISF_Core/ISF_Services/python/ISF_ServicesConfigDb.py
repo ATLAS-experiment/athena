@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Configuration database for ISF_Services
@@ -17,7 +17,6 @@ addService("ISF_Services.ISF_ServicesConfigLegacy.getParticleBrokerSvcNoOrdering
 addService("ISF_Services.ISF_ServicesConfigLegacy.getAFIIParticleBrokerSvc", "ISF_AFIIParticleBrokerSvc")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getAFIIEnergyOrderedParticleBrokerSvc", "ISF_AFIIEnergyOrderedParticleBrokerSvc")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getInputConverter", "ISF_InputConverter")
-addService("ISF_Services.ISF_ServicesConfigLegacy.getLongLivedInputConverter", "ISF_LongLivedInputConverter")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getTruthService", "ISF_TruthService")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getMC12TruthService", "ISF_MC12TruthService")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getMC12PlusTruthService", "ISF_MC12PlusTruthService")

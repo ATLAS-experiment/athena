@@ -1,13 +1,13 @@
 """Geant4 services config for ISF with ComponentAccumulator
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from ISF_Geant4Tools.ISF_Geant4ToolsConfig import (
     Geant4ToolCfg, FullGeant4ToolCfg, PassBackGeant4ToolCfg,
-    AFIIGeant4ToolCfg, AFII_QS_Geant4ToolCfg
+    AFIIGeant4ToolCfg
 )
 
 
@@ -57,7 +57,7 @@ def AFIIGeant4SimCfg(flags, name="ISF_AFIIGeant4SimSvc", **kwargs):
 
 def AFII_QS_Geant4SimCfg(flags, name="ISF_AFII_QS_Geant4SimSvc", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("SimulatorTool", result.addPublicTool(result.popToolsAndMerge(AFII_QS_Geant4ToolCfg(flags))))
+    kwargs.setdefault("SimulatorTool", result.addPublicTool(result.popToolsAndMerge(AFIIGeant4ToolCfg(flags))))
     svc = result.getPrimaryAndMerge(PassBackGeant4SimCfg(flags, name, **kwargs))
     result.addService(svc, primary = True)
     return result

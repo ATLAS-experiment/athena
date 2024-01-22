@@ -40,7 +40,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
     --truthStrategy 'MC15aPlusLLP' \
     --simulator 'FullG4MT_QS' \
-    --postExec 'EVNTtoHITS:ServiceMgr.ISF_LongLivedInputConverter.GenParticleFilters["ISF_GenParticleInteractingFilter"].AdditionalNonInteractingParticleTypes=[51,52,-53,53]' \
+    --postExec 'EVNTtoHITS:ServiceMgr.ISF_InputConverter.GenParticleFilters["ISF_GenParticleInteractingFilter"].AdditionalNonInteractingParticleTypes=[51,52,-53,53]' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
@@ -54,7 +54,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
     --truthStrategy 'MC15aPlusLLP' \
     --simulator 'FullG4MT_QS' \
-    --postExec 'EVNTtoHITS:ServiceMgr.ISF_LongLivedInputConverter.GenParticleFilters["ISF_GenParticleInteractingFilter"].AdditionalNonInteractingParticleTypes=[51,52,-53,53]' \
+    --postExec 'EVNTtoHITS:ServiceMgr.ISF_InputConverter.GenParticleFilters["ISF_GenParticleInteractingFilter"].AdditionalNonInteractingParticleTypes=[51,52,-53,53]' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
