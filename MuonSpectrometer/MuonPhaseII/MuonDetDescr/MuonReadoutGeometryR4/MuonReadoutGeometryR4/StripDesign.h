@@ -8,6 +8,7 @@
 #include <GeoModelUtilities/TransientConstSharedPtr.h>
 #include <AthenaBaseComps/AthMessaging.h>
 #include <optional>
+#include <CxxUtils/CachedUniquePtr.h>
 
 namespace MuonGMR4 {
     /* 
@@ -122,6 +123,17 @@ namespace MuonGMR4 {
             const Amg::Vector2D& edgeDirLeft() const;
             /// Returns the unit vector pointing from the right bottom -> top corner
             const Amg::Vector2D& edgeDirRight() const;
+
+            /// Length of the the edge from top left -> top right
+            double lenTopEdge() const;
+            /// Length of the edge from bottom left -> top left
+            double lenLeftEdge() const ;
+            /// Length of the edge from bottom left -> bottom right
+            double lenBottomEdge() const;
+            /// Length of the dge from bottom right -> top right
+            double lenRightEdge() const;
+
+
         private:
             void setStereoAngle(double stereo);
             /// Shift between the 0-th readout channel and the first strip described by the panel
@@ -160,13 +172,13 @@ namespace MuonGMR4 {
             Amg::Vector2D m_bottomRight{Amg::Vector2D::Zero()};
             
             /// Vector describing the top edge of the trapzoid (top left -> top right)
-            Amg::Vector2D m_dirTopEdge{Amg::Vector2D::Zero()};
+            CxxUtils::CachedUniquePtr<Amg::Vector2D> m_dirTopEdge{};
             /// Vector describing the bottom edge of the trapezoid (bottom left -> bottom right)
-            Amg::Vector2D m_dirBotEdge{Amg::Vector2D::Zero()};
+            CxxUtils::CachedUniquePtr<Amg::Vector2D> m_dirBotEdge{};
             /// Vector describing the left adge of the trapezoid (bottom left -> top left)
-            Amg::Vector2D m_dirLeftEdge{Amg::Vector2D::UnitY()};
+            CxxUtils::CachedUniquePtr<Amg::Vector2D> m_dirLeftEdge{};
             /// Vector describing the right edge of the trapezoid (bottom right -> top right)
-            Amg::Vector2D m_dirRightEdge{Amg::Vector2D::UnitY()};
+            CxxUtils::CachedUniquePtr<Amg::Vector2D> m_dirRightEdge{};
             /// Length of the edge connecting the short with the long egde 
             double m_lenSlopEdge{0.};            
             /// Trapezoid dimensions
@@ -174,11 +186,6 @@ namespace MuonGMR4 {
             double m_longHalfY{0.};
             double m_halfX{0.};
 
-
-            /// Returns the intersection of a strip with the left edge of the trapezoid in case it's flipped
-            Amg::Vector2D leftInterSectFlipped(const Amg::Vector2D& stripPos, bool uncapped = false) const;
-            /// Returns the intersection of a strip with the right edge of the trapezoid in case it's flipped
-            Amg::Vector2D rightInterSectFlipped(const Amg::Vector2D& stripPos, bool uncapped = false) const;
     };
     
     struct StripDesignSorter{
