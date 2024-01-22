@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,6 +26,7 @@
 #include "GeoModelKernel/GeoPara.h"
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 int Trk::GMTreeBrowser::compareGeoVolumes( const GeoVPhysVol* gv1, const GeoVPhysVol* gv2, double tolerance, bool dumpInfo, int level  )  const {
 
@@ -110,8 +111,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
   if (sh1->typeID() != sh2->typeID()) return false;
 
   if ( sh1->type()=="Pgon") {
-    const GeoPgon* pgon1 = dynamic_cast<const GeoPgon*>(sh1);
-    const GeoPgon* pgon2 = dynamic_cast<const GeoPgon*>(sh2);
+    const GeoPgon* pgon1 = static_cast<const GeoPgon*>(sh1);
+    const GeoPgon* pgon2 = static_cast<const GeoPgon*>(sh2);
     if (!pgon1 || !pgon2)  return false;
 
     if (pgon1->getNPlanes() != pgon2->getNPlanes())  return false;
@@ -122,8 +123,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
 
   } else if (sh1->type()=="Trd") {
-    const GeoTrd* trd1 = dynamic_cast<const GeoTrd*> (sh1);
-    const GeoTrd* trd2 = dynamic_cast<const GeoTrd*> (sh2);
+    const GeoTrd* trd1 = static_cast<const GeoTrd*> (sh1);
+    const GeoTrd* trd2 = static_cast<const GeoTrd*> (sh2);
     
     if (std::abs(trd1->getXHalfLength1() - trd2->getXHalfLength1())>tol) return false;
     if (std::abs(trd1->getXHalfLength2() - trd2->getXHalfLength2())>tol) return false;
@@ -134,8 +135,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
 
   } else if ( sh1->type()=="Box") {
-    const GeoBox* box1 = dynamic_cast<const GeoBox*> (sh1);
-    const GeoBox* box2 = dynamic_cast<const GeoBox*> (sh2);
+    const GeoBox* box1 = static_cast<const GeoBox*> (sh1);
+    const GeoBox* box2 = static_cast<const GeoBox*> (sh2);
 
     if (std::abs(box1->getXHalfLength() - box2->getXHalfLength()) > tol) return false;
     if (std::abs(box1->getYHalfLength() - box2->getYHalfLength()) > tol) return false;
@@ -144,8 +145,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
    return true;  
 
   } else if ( sh1->type() == "Tube" ) {
-    const GeoTube* tube1=dynamic_cast<const GeoTube*> (sh1);
-    const GeoTube* tube2=dynamic_cast<const GeoTube*> (sh2);
+    const GeoTube* tube1=static_cast<const GeoTube*> (sh1);
+    const GeoTube* tube2=static_cast<const GeoTube*> (sh2);
     
     if ( std::abs(tube1->getRMin() - tube2->getRMin()) > tol) return false;
     if ( std::abs(tube1->getRMax() - tube2->getRMax()) > tol) return false;
@@ -154,8 +155,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
 
   } else   if ( sh1->type() == "Tubs" ) {
-    const GeoTubs* tubs1=dynamic_cast<const GeoTubs*> (sh1);
-    const GeoTubs* tubs2=dynamic_cast<const GeoTubs*> (sh2);
+    const GeoTubs* tubs1=static_cast<const GeoTubs*> (sh1);
+    const GeoTubs* tubs2=static_cast<const GeoTubs*> (sh2);
 
     if ( std::abs(tubs1->getRMin()  - tubs2->getRMin()) >tol) return false;
     if ( std::abs(tubs1->getRMax()  - tubs2->getRMax()) > tol) return false;
@@ -166,8 +167,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
 
   }  else if  ( sh1->type() == "Cons" ) {
-    const GeoCons* cons1=dynamic_cast<const GeoCons*> (sh1);
-    const GeoCons* cons2=dynamic_cast<const GeoCons*> (sh2);
+    const GeoCons* cons1=static_cast<const GeoCons*> (sh1);
+    const GeoCons* cons2=static_cast<const GeoCons*> (sh2);
 
     if ( std::abs(cons1->getRMin1()  - cons2->getRMin1())  > tol) return false;
     if ( std::abs(cons1->getRMin2()  - cons2->getRMin2()) >tol) return false;
@@ -180,8 +181,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
 
   } else  if ( sh1->type()=="SimplePolygonBrep") {
-    const GeoSimplePolygonBrep* spb1 = dynamic_cast<const GeoSimplePolygonBrep*> (sh1);
-    const GeoSimplePolygonBrep* spb2 = dynamic_cast<const GeoSimplePolygonBrep*> (sh2);
+    const GeoSimplePolygonBrep* spb1 = static_cast<const GeoSimplePolygonBrep*> (sh1);
+    const GeoSimplePolygonBrep* spb2 = static_cast<const GeoSimplePolygonBrep*> (sh2);
     if (!spb1 || !spb2) return false;
 
     unsigned int nv1 = spb1->getNVertices();
@@ -198,8 +199,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
 
   } else  if ( sh1->type()=="Pcon") {
-    const GeoPcon* pc1 = dynamic_cast<const GeoPcon*> (sh1);
-    const GeoPcon* pc2 = dynamic_cast<const GeoPcon*> (sh2);
+    const GeoPcon* pc1 = static_cast<const GeoPcon*> (sh1);
+    const GeoPcon* pc2 = static_cast<const GeoPcon*> (sh2);
     if (!pc1 || !pc2) return false;
 
     if ( std::abs(pc1->getSPhi()  - pc2->getSPhi()) > tol) return false;
@@ -219,8 +220,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
  
   } else   if ( sh1->type()=="Subtraction") {
-    const GeoShapeSubtraction* sub1 = dynamic_cast<const GeoShapeSubtraction*> (sh1);
-    const GeoShapeSubtraction* sub2 = dynamic_cast<const GeoShapeSubtraction*> (sh2);
+    const GeoShapeSubtraction* sub1 = static_cast<const GeoShapeSubtraction*> (sh1);
+    const GeoShapeSubtraction* sub2 = static_cast<const GeoShapeSubtraction*> (sh2);
 
     if (!sub1 || !sub2) return false;
   
@@ -230,8 +231,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
 
   } else  if ( sh1->type()=="Union") {
-    const GeoShapeUnion* sub1 = dynamic_cast<const GeoShapeUnion*> (sh1);
-    const GeoShapeUnion* sub2 = dynamic_cast<const GeoShapeUnion*> (sh2);
+    const GeoShapeUnion* sub1 = static_cast<const GeoShapeUnion*> (sh1);
+    const GeoShapeUnion* sub2 = static_cast<const GeoShapeUnion*> (sh2);
 
     if (!sub1 || !sub2) return false;
 
@@ -241,8 +242,8 @@ bool Trk::GMTreeBrowser::compareShapes( const GeoShape* sh1, const GeoShape* sh2
     return true;
 
   } else  if ( sh1->type()=="Shift") {
-    const GeoShapeShift* shift1 = dynamic_cast<const GeoShapeShift*> (sh1);
-    const GeoShapeShift* shift2 = dynamic_cast<const GeoShapeShift*> (sh2);
+    const GeoShapeShift* shift1 = static_cast<const GeoShapeShift*> (sh1);
+    const GeoShapeShift* shift2 = static_cast<const GeoShapeShift*> (sh2);
 
     if (!shift1 || !shift2) return false;
 
@@ -303,12 +304,14 @@ bool Trk::GMTreeBrowser::identity_check(GeoTrf::RotationMatrix3D rotation, doubl
 } 
 
 void Trk::GMTreeBrowser::printTranslationDiff(GeoTrf::Transform3D tr_test, GeoTrf::Transform3D tr_ref, double tolerance) const {
-
+  std::ios oldState(nullptr);
+  oldState.copyfmt(std::cout);
+  //
   std::cout << std::fixed << std::setprecision(4);
   std::cout << "test translation:x:y:z:" << tr_test.translation().x() <<":" << tr_test.translation().y() <<":" << tr_test.translation().z() <<std::endl; 
   std::cout << " ref  translation:x:y:z:" << tr_ref.translation().x() <<":" << tr_ref.translation().y() <<":" << tr_ref.translation().z() <<std::endl; 
   std::cout <<" absolute shift :" <<	(tr_test.translation()-tr_ref.translation()).norm()<<": to be compared with the tolerance limit:"<<tolerance<< std::endl;
-  
+  std::cout.copyfmt(oldState); //restore ostream state
 }
 
 void Trk::GMTreeBrowser::printRotationDiff(GeoTrf::Transform3D tr_test, GeoTrf::Transform3D tr_ref, double tolerance) const {
@@ -316,7 +319,9 @@ void Trk::GMTreeBrowser::printRotationDiff(GeoTrf::Transform3D tr_test, GeoTrf::
   GeoTrf::RotationMatrix3D rotest = tr_test.rotation();
   GeoTrf::RotationMatrix3D rotref = tr_ref.rotation();
   GeoTrf::RotationMatrix3D rotid = rotest*rotref.inverse();
-
+  std::ios oldState(nullptr);
+  oldState.copyfmt(std::cout);
+  
   std::cout << std::fixed << std::setprecision(4);
   std::cout << "test rotation:" << rotest(0,0) <<":" << rotest(0,1) <<":" << rotest(0,2) <<std::endl; 
   std::cout << "                   " << rotest(1,0) <<":" << rotest(1,1) <<":" << rotest(1,2) <<std::endl; 
@@ -328,5 +333,6 @@ void Trk::GMTreeBrowser::printRotationDiff(GeoTrf::Transform3D tr_test, GeoTrf::
   std::cout << "                   " << rotid(1,0) <<":" << rotid(1,1) <<":" << rotid(1,2) <<std::endl; 
   std::cout << "                   " << rotid(2,0) <<":" << rotid(2,1) <<":" << rotid(2,2) <<std::endl; 
   std::cout <<" identity check fails within the tolerance limit:"<<tolerance<< std::endl;
+  std::cout.copyfmt(oldState); //restore ostream state
   
 }
