@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -55,9 +55,6 @@ namespace Trk {
        std::pair<bool, const Trk::Volume* >  intersectApproximative(const Volume*, const Volume*) const; 
     
       private:
-
-	GeoShapeConverter m_geoShapeConverter;               //!< shape converter
-
 	PolygonCache polygonXY(const Volume*, int swap = 0) const; 
 	Trk::PolygonCache intersectPgon(Trk::PolygonCache&, Trk::PolygonCache&) const; 
 	bool inside(std::pair<double,double> vtx, std::vector<std::pair<double,double>> pgon ) const;

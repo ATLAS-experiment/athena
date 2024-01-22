@@ -1649,11 +1649,6 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
 
 Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processTgcStation(const GeoVPhysVol* cv, Cache& cache) const {
  
-  Trk::TrackingVolume* tgc_station = nullptr;
-  //  printChildren(mv);
-    Trk::TrapezoidVolumeBounds* tgcBounds;
-    std::unique_ptr<Trk::Volume> envelope;
-
     const GeoLogVol* clv = cv->getLogVol();
     const std::string& tgc_name = clv->getName();
     const GeoShape* baseShape = clv->getShape();
@@ -1669,23 +1664,22 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processTgcStation(const GeoVP
       double y2 = trd->getYHalfLength2();
       double z = trd->getZHalfLength();
       // define envelope
-      tgcBounds = new Trk::TrapezoidVolumeBounds(y1, y2, z, x1);
+      Trk::TrapezoidVolumeBounds* tgcBounds = new Trk::TrapezoidVolumeBounds(y1, y2, z, x1);
       // xy -> yz  rotation
       Amg::Transform3D* tTr = new Amg::Transform3D(Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
 						   Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.)));
-      envelope = std::make_unique<Trk::Volume>(tTr, tgcBounds);
+      std::unique_ptr<Trk::Volume> envelope = std::make_unique<Trk::Volume>(tTr, tgcBounds);
       Trk::LayerArray* tgcLayerArray = processTGCComponent(cv, tgcBounds, tTr, cache);
       // ready to build the station prototype
-      tgc_station = new Trk::TrackingVolume(*envelope, *m_muonMaterial, tgcLayerArray, nullptr, tgc_name);
+      Trk::TrackingVolume* tgc_station = new Trk::TrackingVolume(*envelope, *m_muonMaterial, tgcLayerArray, nullptr, tgc_name);
            
+      printVolumeBounds("TGC envelope bounds:", *tgcBounds);
+      printTransform("TGC prototype transform", tgc_station->transform());
+      return tgc_station;
     } else {
       ATH_MSG_WARNING( tgc_name << ": TGC component not a trapezoid ?  no prototype built " );
     }
-
-    printVolumeBounds("TGC envelope bounds:", *tgcBounds);
-    printTransform("TGC prototype transform", tgc_station->transform());
-    
-    return tgc_station;
+    return nullptr;
 }
 
 std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::process_sTGC(const MuonGM::MuonDetectorManager* muonMgr,

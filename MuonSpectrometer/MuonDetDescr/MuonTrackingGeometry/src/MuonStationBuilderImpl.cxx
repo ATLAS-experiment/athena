@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackingGeometry/MuonStationBuilderImpl.h"
@@ -1210,7 +1210,7 @@ Identifier Muon::MuonStationBuilderImpl::resolveId( std::string vname, Muon::GMI
   }
   if (vname.compare(0, 1, "T") == 0) {
     bool az = true;
-    std::string_view sub = vname.substr(7, 2);
+    std::string sub = vname.substr(7, 2);
     if (transf.translation().z() < 0)
       az = false;
     if (sub == "01")
