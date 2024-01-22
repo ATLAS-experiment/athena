@@ -39,6 +39,7 @@ logger.setLevel(DEBUG)
 aliasesDict = {
   'DJMASS200j20'                 : 'DIJET20j12ptXX200djmass',
   'DJMASS350j20'                 : 'DIJET20j12ptXX350djmass',
+  'DJMASS300j35'                 : 'DIJET35j12ptXX300djmass',
   'DJMASS500j35'                 : 'DIJET35j12ptXX500djmass',
   'DJMASS700j35'                 : 'DIJET35j12ptXX700djmass',
   'DJMASS1000j35'                : 'DIJET35j12ptXX1000djmass',

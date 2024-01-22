@@ -793,14 +793,11 @@ def getDevSignatures():
         # ChainProp(name='HLT_g35_tight_3j25_0eta290_boffperf_pf_ftf_L1EM22VHI', l1SeedThresholds=['EM22VHI','FSNOSEED'], groups=EgammaJetGroup),
 
         # ATR-28443, test H to yjj trigger
-        ChainProp(name='HLT_g20_tight_3j40_pf_ftf_L1eEM22M_3jJ40p0ETA25', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED'],stream=[PhysicsStream]),
-        ChainProp(name='HLT_g20_tight_j40_j20_j20_pf_ftf_L1eEM22M_3jJ40p0ETA25', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
-        ChainProp(name='HLT_g20_tight_4j30_pf_ftf_L1eEM22M_4jJ30p0ETA25', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED'],stream=[PhysicsStream]),
         ChainProp(name='HLT_g20_tight_j40_j25_pf_ftf_L1eEM22M_jMJJ-300', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),#for ggF test
-        ChainProp(name='HLT_g20_tight_j40_j25_pf_ftf_L1EM18VHI_MJJ-300', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['EM18VHI','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
         ChainProp(name='HLT_g20_tight_2j40_3j20_pf_ftf_L1eEM22M_jMJJ-300', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
-        ChainProp(name='HLT_g20_tight_icaloloose_j40_j40_3j20_03dRAB30_pf_ftf_L14jJ40', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
-        ChainProp(name='HLT_e20_lhmedium_g20_medium_j35_j20_pf_ftf_L12eEM18M', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM18M','eEM18M','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),#for qqW(to lv)H to yjj
+        ChainProp(name='HLT_g24_tight_icaloloose_j40c_020jvt_j30c_020jvt_j24c_020jvt_03dRAB30_03dRAC30_50invmBC130_pf_ftf_L1eEM26M', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),#test ggF
+        ChainProp(name='HLT_g20_tight_icaloloose_j40c_j35a_2j20c_j20a_j0_DJMASS300j35_03dRAB30_pf_ftf_L1eEM22M_jMJJ-300', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),#test VBF
+        ChainProp(name='HLT_g20_tight_icaloloose_j40c_j35a_2j20c_j0_DJMASS300j35_03dRAB30_pf_ftf_L1eEM22M_jMJJ-300', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),#test VBF
 
 
         # high-mu AFP
