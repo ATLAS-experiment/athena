@@ -46,7 +46,6 @@ def getG4AtlasAlg(name='G4AtlasAlg', **kwargs):
 
     from ISF_Config.ISF_jobProperties import ISF_Flags
     if ISF_Flags.Simulator.isQuasiStable():
-        kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
         kwargs.setdefault('QuasiStablePatcher', 'ZeroLifetimePositioner')
 
     ## G4AtlasAlg verbosities (available domains = Navigator, Propagator, Tracking, Stepping, Stacking, Event)

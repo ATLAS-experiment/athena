@@ -8,7 +8,7 @@ from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadat
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 from ISF_Services.ISF_ServicesConfig import (
     InputConverterCfg, TruthServiceCfg,
-    LongLivedInputConverterCfg, AFIIParticleBrokerSvcCfg
+    AFIIParticleBrokerSvcCfg
 )
 from ISF_Tools.ISF_ToolsConfig import (
     ParticleKillerToolCfg, EnergyParticleOrderingToolCfg,
@@ -39,9 +39,7 @@ from ISF_SimulationSelectors.ISF_SimulationSelectorsConfig import (
 )
 from ISF_Geant4Tools.ISF_Geant4ToolsConfig import (
     AFIIGeant4ToolCfg,
-    AFII_QS_Geant4ToolCfg,
     FullGeant4ToolCfg,
-    LongLivedGeant4ToolCfg,
     PassBackGeant4ToolCfg,
 )
 from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import (
@@ -90,9 +88,7 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
         if "QuasiStablePatcher" not in kwargs:
             from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
             kwargs.setdefault("QuasiStablePatcher", acc.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)))
-        if "InputConverter" not in kwargs:
-            kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(LongLivedInputConverterCfg(flags)).name)
-    elif "InputConverter" not in kwargs:
+    if "InputConverter" not in kwargs:
         kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)).name)
 
     if flags.Sim.ISF.ReSimulation:
@@ -146,8 +142,8 @@ def Kernel_FullG4MT_QSCfg(flags, name="ISF_Kernel_FullG4MT_QS", **kwargs):
 
     kwargs.setdefault("SimulationTools", [
         acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
-        acc.popToolsAndMerge(LongLivedGeant4ToolCfg(flags))
-    ])
+        acc.popToolsAndMerge(FullGeant4ToolCfg(flags))
+    ]) #private ToolHandleArray
 
     acc.merge(Kernel_GenericG4OnlyMTCfg(flags, name, **kwargs))
     return acc
@@ -257,7 +253,7 @@ def Kernel_ATLFAST3MT_QSCfg(flags, name="ISF_Kernel_ATLFAST3MT_QS", **kwargs):
     from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimV2ToolCfg
     kwargs.setdefault("SimulationTools", [ acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
                                                        acc.popToolsAndMerge(FastCaloSimV2ToolCfg(flags)),
-                                                       acc.popToolsAndMerge(AFII_QS_Geant4ToolCfg(flags)) ])
+                                                       acc.popToolsAndMerge(AFIIGeant4ToolCfg(flags)) ])
     acc.merge(Kernel_GenericSimulatorMTCfg(flags, name, **kwargs))
     return acc
 
@@ -282,9 +278,7 @@ def Kernel_GenericSimulatorCfg(flags, name="ISF_Kernel_GenericSimulator", **kwar
         if "QuasiStablePatcher" not in kwargs:
             from BeamEffects.BeamEffectsAlgConfig import ZeroLifetimePositionerCfg
             kwargs.setdefault("QuasiStablePatcher", acc.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)) )
-        if "InputConverter" not in kwargs:
-            kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(LongLivedInputConverterCfg(flags)).name)
-    elif "InputConverter" not in kwargs:
+    if "InputConverter" not in kwargs:
         kwargs.setdefault("InputConverter", acc.getPrimaryAndMerge(InputConverterCfg(flags)).name)
 
     kwargs.setdefault("InputHardScatterCollection", "BeamTruthEvent")

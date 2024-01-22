@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CfgGetter import addTool
 
@@ -13,7 +13,5 @@ addTool("ISF_Geant4Tools.ISF_Geant4ToolsConfigLegacy.getAFII_G4TrackProcessorUse
 
 addTool("ISF_Geant4Tools.ISF_Geant4ToolsConfigLegacy.getGeant4Tool",               "ISF_Geant4Tool")
 addTool("ISF_Geant4Tools.ISF_Geant4ToolsConfigLegacy.getFullGeant4Tool",           "ISF_FullGeant4Tool")
-addTool("ISF_Geant4Tools.ISF_Geant4ToolsConfigLegacy.getLongLivedGeant4Tool",      "ISF_LongLivedGeant4Tool")
 addTool("ISF_Geant4Tools.ISF_Geant4ToolsConfigLegacy.getPassBackGeant4Tool",       "ISF_PassBackGeant4Tool")
 addTool("ISF_Geant4Tools.ISF_Geant4ToolsConfigLegacy.getAFIIGeant4Tool",           "ISF_AFIIGeant4Tool")
-addTool("ISF_Geant4Tools.ISF_Geant4ToolsConfigLegacy.getAFII_QS_Geant4Tool",       "AFII_QS_Geant4Tool")

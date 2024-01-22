@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Service configurations for ISF
@@ -67,19 +67,11 @@ def getInputConverter(name="ISF_InputConverter", **kwargs):
     from G4AtlasApps.SimFlags import simFlags
     kwargs.setdefault("UseShadowEvent", simFlags.UseShadowEvent())
     kwargs.setdefault("UseGeneratedParticleMass", False)
+    from ISF_Config.ISF_jobProperties import ISF_Flags
     from ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy import getGenParticleFilters
-    kwargs.setdefault("GenParticleFilters", getGenParticleFilters())
+    kwargs.setdefault("GenParticleFilters", getGenParticleFilters(ISF_Flags.Simulator.isQuasiStable()))
+    kwargs.setdefault('QuasiStableParticlesIncluded', ISF_Flags.Simulator.isQuasiStable())
     return CfgMgr.ISF__InputConverter(name, **kwargs)
-
-
-def getLongLivedInputConverter(name="ISF_LongLivedInputConverter", **kwargs):
-    from G4AtlasApps.SimFlags import simFlags
-    kwargs.setdefault("GenParticleFilters"      , [ simFlags.ParticleSimAcceptList.get_Value(),
-                                                    'ISF_ParticlePositionFilterDynamic',
-                                                    'ISF_EtaPhiFilter',
-                                                    'ISF_GenParticleInteractingFilter', ] )
-    kwargs.setdefault('QuasiStableParticlesIncluded', True)
-    return getInputConverter(name, **kwargs)
 
 
 #

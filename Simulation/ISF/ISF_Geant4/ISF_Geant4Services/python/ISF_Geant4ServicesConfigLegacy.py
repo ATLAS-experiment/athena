@@ -43,7 +43,7 @@ def getFullGeant4SimSvc(name="ISF_FullGeant4SimSvc", **kwargs):
     return getGeant4SimSvc(name, **kwargs)
 
 def getLongLivedGeant4SimSvc(name="ISF_LongLivedGeant4SimSvc", **kwargs):
-    kwargs.setdefault('SimulatorTool'       , 'ISF_LongLivedGeant4Tool')
+    kwargs.setdefault('SimulatorTool'       , 'ISF_FullGeant4Tool')
     return getFullGeant4SimSvc(name, **kwargs)
 
 def getPassBackGeant4SimSvc(name="ISF_PassBackGeant4SimSvc", **kwargs):
@@ -56,5 +56,5 @@ def getAFIIGeant4SimSvc(name="ISF_AFIIGeant4SimSvc", **kwargs):
     return getPassBackGeant4SimSvc(name, **kwargs)
 
 def getAFII_QS_Geant4SimSvc(name="ISF_AFII_QS_Geant4SimSvc", **kwargs):
-    kwargs.setdefault('SimulatorTool'       , 'AFII_QS_Geant4Tool')
+    kwargs.setdefault('SimulatorTool'       , 'ISF_AFIIGeant4Tool')
     return getPassBackGeant4SimSvc(name, **kwargs)

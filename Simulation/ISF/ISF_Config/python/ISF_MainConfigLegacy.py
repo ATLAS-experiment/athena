@@ -181,7 +181,6 @@ def getKernel_GenericSimulator(name="ISF_Kernel_GenericSimulator", **kwargs):
     kwargs.setdefault("InputHardScatterCollection", "BeamTruthEvent")
     kwargs.setdefault("OutputHardScatterTruthCollection", "TruthEvent")
     if ISF_Flags.Simulator.isQuasiStable():
-        kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
         kwargs.setdefault('QuasiStablePatcher', 'ZeroLifetimePositioner')
     kwargs.setdefault('InputConverter', 'ISF_InputConverter')
     kwargs.setdefault("ParticleBroker", ISF_Flags.ParticleBroker())
@@ -205,7 +204,6 @@ def getKernel_GenericSimulatorMT(name="ISF_Kernel_GenericSimulatorMT", **kwargs)
     kwargs.setdefault("OutputTruthCollection", "TruthEvent" )
     kwargs.setdefault("GeoIDSvc", "ISF_GeoIDSvc" )
     if ISF_Flags.Simulator.isQuasiStable():
-        kwargs.setdefault('InputConverter', 'ISF_LongLivedInputConverter')
         kwargs.setdefault('QuasiStablePatcher', 'ZeroLifetimePositioner')
     kwargs.setdefault('InputConverter', 'ISF_InputConverter')
 
@@ -309,7 +307,7 @@ def getKernel_FullG4_LongLived(name="ISF_Kernel_FullG4_LongLived", **kwargs): # 
 ############## Simulator: FullG4MT_QS ###############
 def getKernel_FullG4MT_QS(name="ISF_Kernel_FullG4MT_QS", **kwargs):
     kwargs.setdefault("SimulationTools", ["ISF_ParticleKillerTool",
-                                          "ISF_LongLivedGeant4Tool"])
+                                          "ISF_FullGeant4Tool"])
     return getKernel_GenericG4OnlyMT(name, **kwargs)
 
 ############## Simulator: FullG4MT_longLived ###############
@@ -442,7 +440,7 @@ def getKernel_ATLFAST3MT_QS(name="ISF_Kernel_ATLFAST3MT_QS", **kwargs):
     kwargs.setdefault("CavernSimulationSelectors"  , [ 'ISF_DefaultParticleKillerSelector'  ]           )
     kwargs.setdefault("SimulationTools"            , [ 'ISF_ParticleKillerTool',
                                                        'ISF_FastCaloSimV2Tool',
-                                                       'AFII_QS_Geant4Tool'])
+                                                       'ISF_AFIIGeant4Tool'])
     kwargs.setdefault("ParticleOrderingTool"       , 'ISF_ParticleOrderingTool' )
     kwargs.setdefault('EntryLayerTool'             , 'ISF_AFIIEntryLayerToolMT')
     from G4AtlasApps.SimFlags import simFlags

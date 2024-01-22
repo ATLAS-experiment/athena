@@ -1,6 +1,6 @@
 """ComponentAccumulator service configuration for ISF
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -39,13 +39,6 @@ def InputConverterCfg(flags, name="ISF_InputConverter", **kwargs):
         from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import GenParticleFilterToolsCfg
         kwargs.setdefault("GenParticleFilters", result.popToolsAndMerge(GenParticleFilterToolsCfg(flags)) )
     result.addService(CompFactory.ISF.InputConverter(name, **kwargs), primary = True)
-    return result
-
-
-def LongLivedInputConverterCfg(flags, name="ISF_LongLivedInputConverter", **kwargs):
-    result = ComponentAccumulator()
-    inptCnv = result.getPrimaryAndMerge(InputConverterCfg(flags, name, **kwargs))
-    result.addService(inptCnv, primary = True)
     return result
 
 
