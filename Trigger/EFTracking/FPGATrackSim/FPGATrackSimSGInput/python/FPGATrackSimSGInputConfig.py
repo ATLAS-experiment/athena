@@ -9,13 +9,13 @@ def FPGATrackSimSGInputToolCfg(flags):
     acc = ComponentAccumulator()
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    MyExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    extrapolatorTool = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
 
     from TrkConfig.TrkTruthCreatorToolsConfig import TruthToTrackToolCfg
-    MyTruthToTrack = acc.merge(TruthToTrackToolCfg(flags))
+    truthToTrackTool = acc.popToolsAndMerge(TruthToTrackToolCfg(flags))
 
     FPGATrackSimSGInputTool = CompFactory.FPGATrackSimSGToRawHitsTool(maxEta=3.2, minPt=0.8 * GeV,
-        Extrapolator = MyExtrapolator, TruthToTrack = MyTruthToTrack)
+        Extrapolator = extrapolatorTool, TruthToTrackTool = truthToTrackTool)
     acc.setPrivateTools(FPGATrackSimSGInputTool)
 
     return acc
