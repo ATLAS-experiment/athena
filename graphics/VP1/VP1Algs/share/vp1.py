@@ -460,13 +460,13 @@ from VP1Algs.VP1AlgsConf import VP1Alg
 vp1Alg = VP1Alg()
 topSequence += vp1Alg
 
-vp1Alg.NoGui=vp1NoGui
+vp1Alg.noGUI=vp1NoGui
 
 if vp1CruiseTime > 0:
     vp1Alg.InitialCruiseMode = "EVENT"
     vp1Alg.InitialCruiseModePeriod = vp1CruiseTime
 
-vp1Alg.InitiallyLoadedVP1Files = vp1CfgFiles
+vp1Alg.InitialInputVP1Files = vp1CfgFiles
 if (vp1Multinp):
     vp1Alg.MultipleFilesON = True
     vp1Alg.MFSourceDir = vp1Multinpsrc

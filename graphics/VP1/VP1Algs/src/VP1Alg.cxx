@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Algs/VP1Alg.h"
@@ -29,6 +29,14 @@ VP1Alg::VP1Alg(const std::string& name, ISvcLocator* svcLocator):
   AthAlgorithm(name, svcLocator),
   m_toolSvc(0),m_vp1gui(0)
 {
+
+    
+  /*  
+  // This is Work In Progress
+  // Those properties are needed in VP1 configurations, which 
+  // still need to be migrated to CA.
+  // See the header file for details.
+  //
   declareProperty("InitiallyLoadedVP1Files",m_initialvp1files);
   declareProperty("InitialCruiseMode",m_initialCruiseMode="NONE");
   declareProperty("InitialCruiseModePeriod",m_initialCruiseSeconds=10);
@@ -41,7 +49,7 @@ VP1Alg::VP1Alg(const std::string& name, ISvcLocator* svcLocator):
   declareProperty("MFSourceDir",m_mfSourceDir="");
   declareProperty("MFLocalCopyDir",m_mfLocalCopyDir="");
   declareProperty("MFAvailableLocalInputDirectories",m_mfAvailableLocalInputDirectories);
-
+*/
 
   // Two ways of running in multiple files mode:
   //
@@ -107,11 +115,12 @@ StatusCode VP1Alg::initialize()
   //Create VP1 gui object and see if it considers settings to be valid.
   m_vp1gui = new VP1Gui(&(*evtStore()),&(*detStore()),serviceLocator(),m_toolSvc,
 			m_initialvp1files,
-			m_initialCruiseMode,m_initialCruiseSeconds,
+			m_cruiseInitialMode,
+			m_cruiseInitialUpdateSeconds,
 			(m_mfOn ? m_mfSourceDir : ""),
 			(m_mfOn ? m_mfLocalCopyDir : ""),
 			m_mfLimit,
-			( m_mfOn ? m_mfAvailableLocalInputDirectories : std::vector<std::string>() ) );
+			( m_mfOn ? m_mfAvailableLocalInputDirectories : Gaudi::Property<std::vector<std::string>>() ) );
   if (!m_vp1gui->argumentsAreValid()) {
     delete m_vp1gui;
     m_vp1gui = 0;
