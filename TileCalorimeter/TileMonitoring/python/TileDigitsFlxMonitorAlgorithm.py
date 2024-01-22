@@ -178,14 +178,14 @@ if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    tileTypeNames = [f'TileDigitsContainer/{args.digits}']
-    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    cfg.merge( TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=False, readMuRcv=False,
+                                     readDigitsFlx=(True if 'Flx' in args.digits else False)) )
 
     tileDigitsFlxMonitorAccumulator  = TileDigitsFlxMonitoringConfig(flags,
                                                                      fragIDs = fragIDs,
-                                                                     TileDigitsContainerLegacy=args.digits,
-                                                                     TileDigitsContainerFlx="TileDigitsCnt")
+                                                                     TileDigitsContainerLegacy="TileDigitsCnt",
+                                                                     TileDigitsContainerFlx=args.digits)
 
     cfg.merge(tileDigitsFlxMonitorAccumulator)
 

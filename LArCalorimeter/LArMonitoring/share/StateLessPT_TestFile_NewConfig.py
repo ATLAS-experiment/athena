@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -217,10 +217,9 @@ if __name__=='__main__':
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    acc = MainServicesCfg(flags)
  
-   from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-   acc.merge(ByteStreamReadCfg(flags,type_names=['TileDigitsContainer/TileDigitsCnt',
-                                                       'TileRawChannelContainer/TileRawChannelCnt',
-                                                       'TileMuonReceiverContainer/TileMuRcvCnt']))
+   from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+   acc.merge( TileRawDataReadingCfg(flags) )
+
 
    #from RecoPT_NewConfig import LArMonitoringConfig
    # include("RecoPT_NewConfig.py")

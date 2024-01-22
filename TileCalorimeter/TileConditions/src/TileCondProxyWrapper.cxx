@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileConditions/TileCondProxyWrapper.h"
@@ -9,6 +9,8 @@
 template class TileCondProxyCool< TileCalibDrawerFlt >;
 template class TileCondProxyCool< TileCalibDrawerBch >;
 template class TileCondProxyCool< TileCalibDrawerOfc >;
+template class TileCondProxyCool< TileCalibDrawerInt >;
 
 template class TileCondProxyFile< TileCalibDrawerFlt >;
 template class TileCondProxyFile< TileCalibDrawerBch >;
+template class TileCondProxyFile< TileCalibDrawerInt >;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDPROXYFILE_H
@@ -43,8 +43,9 @@ class TileCondProxyFile: public AthAlgTool, virtual public ITileCondProxy<T> {
 
   private:
 
+    typedef typename T::DefType::value_type DataVec;
     typedef std::tuple<unsigned int, unsigned int, unsigned int> DataKey;
-    typedef std::map<DataKey, std::vector<float> > DataMap;
+    typedef std::map<DataKey, DataVec> DataMap;
 
     /** Creates a calibDrawer of type T */
     std::unique_ptr<const T> createCalibDrawer(unsigned int drawerIdx, unsigned int nChannels

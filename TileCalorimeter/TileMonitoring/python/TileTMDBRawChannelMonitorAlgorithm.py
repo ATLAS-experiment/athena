@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''@file TileTMDBRawChannelMonitorAlgorithm.py
 @author
@@ -56,10 +56,9 @@ def TileTMDBRawChannelMonitoringConfig(flags, MuRcvRawChCnt = "MuRcvRawChCnt", F
 
     from AthenaConfiguration.Enums import Format
     if flags.Input.Format == Format.BS:
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-        result.merge(ByteStreamReadCfg(flags, type_names=['TileMuonReceiverContainer/TileMuRcvCnt',
-                                                          'TileRawChannelContainer/MuRcvRawChCnt',
-                                                          'TileDigitsContainer/MuRcvDigitsCnt']))
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        result.merge(TileRawDataReadingCfg(flags, readDigits=False, readRawChannel=False,
+                                           readMuRcv=True, readMuRcvDigits=True, readMuRcvRawCh=True))
 
     isDSP = (MuRcvRawChCnt == "MuRcvRawChCnt")
     if not isDSP:

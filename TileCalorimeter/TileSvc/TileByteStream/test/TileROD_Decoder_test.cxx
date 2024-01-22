@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -13,6 +13,7 @@
 #undef NDEBUG
 #include "TileByteStream/TileROD_Decoder.h"
 #include "TileByteStream/TileHid2RESrcID.h"
+#include "../src/TileHid2RESrcIDCondAlg.h"
 #include "TileByteStream/TileCellCont.h"
 #include "TileEvent/TileDigitsCollection.h"
 #include "CaloDetDescr/CaloDetectorElements.h"
@@ -317,12 +318,24 @@ int main ATLAS_NOT_THREAD_SAFE ()
   }
   TileCablingSvc cabling;
 
+  // TileHid2RESrcIDCondAlg
+  ServiceHandle<StoreGateSvc> conditionStore("ConditionStore", "");
+  assert(conditionStore.retrieve().isSuccess());
+
+  EventContext ctx;
+  ctx.setEventID(EventIDBase{100, 0, 0, 0, 1});
+  ctx.setExtension( Atlas::ExtendedEventContext(&*conditionStore) );
+  Gaudi::Hive::setCurrentContext(ctx);
+
+  std::unique_ptr<TileHid2RESrcIDCondAlg> alg = std::make_unique<TileHid2RESrcIDCondAlg>("TileHid2RESrcIDCondAlgTest", svcloc);
+  assert( (alg->initialize()).isSuccess() );
+  assert( (alg->execute(ctx)).isSuccess() );
+
   ToolHandle<TileROD_Decoder> decoder ("TileROD_Decoder");
   assert( decoder.retrieve().isSuccess() );
-  const TileHid2RESrcID * hid = decoder->getHid2re();
   const TileHid2RESrcID * hidHLT = decoder->getHid2reHLT();
 
-  if (hid && hidHLT) {
+  if (hidHLT) {
     test1 (decoder.get());
     test2 (decoder.get());
     test3 (decoder.get());

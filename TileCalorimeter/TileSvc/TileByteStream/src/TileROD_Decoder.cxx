@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of TileROD_Decoder class
@@ -113,6 +113,7 @@ StatusCode TileROD_Decoder::initialize() {
   
   // retrieve TileHWID helper from det store
   ATH_CHECK( detStore()->retrieve(m_tileHWID, "TileHWID") );
+  ATH_CHECK( m_hid2RESrcIDKey.initialize() );
   
   if (m_useFrag5Raw || m_useFrag5Reco) {
     //=== get TileCondToolOfcCool
@@ -127,8 +128,8 @@ StatusCode TileROD_Decoder::initialize() {
   }
   
   //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
- 
+  ATH_CHECK( m_tileToolEmscale.retrieve(DisableTool{m_tileToolEmscale.empty()}) );
+
   //=== get TileBadChanTool
   if ( m_tileBadChanTool.empty() ) {
     m_tileBadChanTool.disable();
@@ -169,12 +170,9 @@ StatusCode TileROD_Decoder::initialize() {
   m_Rw2Pmt[2].reserve(m_maxChannels * TileCalibUtils::MAX_DRAWER);
   m_Rw2Pmt[3].reserve(m_maxChannels * TileCalibUtils::MAX_DRAWER);
   
-  if (!m_L2Builder.empty()) {
-    ATH_CHECK( m_L2Builder.retrieve() );
-  } else {
-    m_L2Builder.disable();
-  }
-  
+
+  ATH_CHECK( m_L2Builder.retrieve(DisableTool{m_L2Builder.empty()}) );
+
   updateAmpThreshold();
 
   // Initialize
@@ -3104,6 +3102,8 @@ void TileROD_Decoder::fillCollectionL2(const ROBData * rob, TileL2Container & v)
     }
   }
 
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
+
   int DataType = 0;
   while (wc < size) { // iterator over all words in a ROD
     
@@ -3112,9 +3112,9 @@ void TileROD_Decoder::fillCollectionL2(const ROBData * rob, TileL2Container & v)
     // second word is frag ID and frag type
     uint32_t idAndType = *(p + 1);
     uint32_t bs_frag_id = idAndType & 0xFFFF;
-    int frag = m_hid2re->getOfflineFragID(bs_frag_id);
+    int frag = hid2re->getOfflineFragID(bs_frag_id);
     if (frag<0) frag = bs_frag_id;
-    const std::vector<uint32_t> & drawer_info = m_hid2re->getDrawerInfo(frag);
+    const std::vector<uint32_t> & drawer_info = hid2re->getDrawerInfo(frag);
     int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
     if (frag < fragmin) fragmin = frag;
     if (frag > fragmax) fragmax = frag;
@@ -3225,7 +3225,9 @@ void TileROD_Decoder::fillCollectionL2ROS(const ROBData * rob, TileL2Container &
     return;
   }
   p++; // Jump first word
-  
+
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
+
   std::vector<float> sumE(3, 0.0);
   uint32_t idAndType, bs_frag_id;
   int frag, hash, unit;
@@ -3235,7 +3237,7 @@ void TileROD_Decoder::fillCollectionL2ROS(const ROBData * rob, TileL2Container &
       
       idAndType = *(p++);
       bs_frag_id = idAndType & 0xFFF;
-      frag = m_hid2re->getOfflineFragID(bs_frag_id);
+      frag = hid2re->getOfflineFragID(bs_frag_id);
       if (frag<0) frag = bs_frag_id;
 
       hash = m_hashFunc(frag);
@@ -4527,6 +4529,8 @@ void TileROD_Decoder::fillCollection_FELIX_Digi(const ROBData* rob , TileDigitsC
   uint32_t version  = rob->rod_version() & 0xFFFF;
   uint32_t sizeOverhead = 3; // Sub fragment marker, size, and (id + type)
 
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
+
   // initialize meta data storage
   DigitsMetaData_t digitsMetaData(9);
   RawChannelMetaData_t rawchannelMetaData;
@@ -4540,7 +4544,7 @@ void TileROD_Decoder::fillCollection_FELIX_Digi(const ROBData* rob , TileDigitsC
   const uint32_t* const end_data = data + size;
 
   int frag_id = coll.identify();
-  const std::vector<uint32_t> & drawer_info = m_hid2re->getDrawerInfo(frag_id);
+  const std::vector<uint32_t> & drawer_info = hid2re->getDrawerInfo(frag_id);
   int bs_frag_id = drawer_info.size()>1 ? drawer_info[1] : frag_id;
   int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
 

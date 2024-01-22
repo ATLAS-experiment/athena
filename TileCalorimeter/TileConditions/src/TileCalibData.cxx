@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileConditions/TileCalibData.h"
@@ -50,3 +50,4 @@ void TileCalibData<T>::setCalibDrawer(unsigned int drawerIdx, const T* calibDraw
 template class TileCalibData<TileCalibDrawerFlt>;
 template class TileCalibData<TileCalibDrawerOfc>;
 template class TileCalibData<TileCalibDrawerBch>;
+template class TileCalibData<TileCalibDrawerInt>;

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,6 +9,7 @@
 #include "TileConditions/TileCondProxyFile.h"
 #include "TileCalibBlobObjs/TileCalibDrawerFlt.h"
 #include "TileCalibBlobObjs/TileCalibDrawerBch.h"
+#include "TileCalibBlobObjs/TileCalibDrawerInt.h"
 #include "TileCalibBlobObjs/TileBchDecoder.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 
@@ -118,8 +119,8 @@ StatusCode TileCondProxyFile<T>::fillCalibData(TileCalibData<T>& calibData,
     }
 
     //=== Loop through all data rows
-    std::vector<float> dataVec;
-    float value;
+    DataVec dataVec;
+    typename DataVec::value_type value;
     while (iss >> std::skipws >> value) {
       dataVec.push_back(value);
     }
@@ -200,18 +201,18 @@ StatusCode TileCondProxyFile<T>::fillCalibData(TileCalibData<T>& calibData,
 
 //
 //_____________________________________________________________________________
-template<>
-std::unique_ptr<const TileCalibDrawerFlt> TileCondProxyFile<TileCalibDrawerFlt>::createCalibDrawer(unsigned int drawerIdx,
-                                                                                                   unsigned int nChannels,
-                                                                                                   unsigned int objVers,
-                                                                                                   const DataMap& dataMap) const {
+template<typename T>
+std::unique_ptr<const T> TileCondProxyFile<T>::createCalibDrawer(unsigned int drawerIdx,
+                                                                 unsigned int nChannels,
+                                                                 unsigned int objVers,
+                                                                 const DataMap& dataMap) const {
   //=== Prepare vector with defaults
   //--- Low gain is always there
-  TileCalibDrawerFlt::DefType defaultVec;
+  typename T::DefType defaultVec;
 
   unsigned int gain(0);
 
-  TileCondProxyFile::DataMap::const_iterator iDataMap = dataMap.find(std::make_tuple(drawerIdx, 0, gain));
+  typename TileCondProxyFile::DataMap::const_iterator iDataMap = dataMap.find(std::make_tuple(drawerIdx, 0, gain));
   while (iDataMap != dataMap.end()) {
     defaultVec.push_back(iDataMap->second);
     ++gain;
@@ -222,12 +223,12 @@ std::unique_ptr<const TileCalibDrawerFlt> TileCondProxyFile<TileCalibDrawerFlt>:
 
   //=== create the calibDrawer
   std::unique_ptr<coral::Blob> blob = std::make_unique<coral::Blob>(0);
-  std::unique_ptr<TileCalibDrawerFlt> tmpCalibDrawer(TileCalibDrawerFlt::getInstance(*blob,
-                                                                                     defaultVec,
-                                                                                     nChannels,
-                                                                                     objVers));
+  std::unique_ptr<T> tmpCalibDrawer(T::getInstance(*blob,
+                                                   defaultVec,
+                                                   nChannels,
+                                                   objVers));
   // Trick to make calib drawer to own blob
-  std::unique_ptr<TileCalibDrawerFlt> calibDrawer = std::make_unique<TileCalibDrawerFlt>(*tmpCalibDrawer);
+  std::unique_ptr<T> calibDrawer = std::make_unique<T>(*tmpCalibDrawer);
 
   //=== fill calibDrawer with settings in dataMap
   for (unsigned int channel = 0; channel < nChannels; ++channel) {
@@ -275,7 +276,7 @@ std::unique_ptr<const TileCalibDrawerBch> TileCondProxyFile<TileCalibDrawerBch>:
   for (unsigned int channel = 0; channel < nChannels; ++channel) {
     TileCondProxyFile::DataMap::const_iterator iDataMap = dataMap.find( std::make_tuple(drawerIdx, channel, 0));
     if (iDataMap != dataMap.end()) {
-      const std::vector<float>& dataVec = iDataMap->second;
+      const DataVec& dataVec = iDataMap->second;
       for (unsigned int idx = 0; idx < dataVec.size(); ++idx) {
         float data = dataVec[idx];
         calibDrawer->setData(channel, idx, 0, static_cast<uint32_t>(data > 0. ? data + 0.5 : data - 0.5));

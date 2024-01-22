@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECALIBDDATA_H
@@ -59,17 +59,22 @@ class TileCalibData {
 
 #include "TileCalibBlobObjs/TileCalibDrawerFlt.h"
 typedef TileCalibData<TileCalibDrawerFlt> TileCalibDataFlt;
-CLASS_DEF(TileCalibData<TileCalibDrawerFlt>, 111225290, 0)
+CLASS_DEF(TileCalibData<TileCalibDrawerFlt>, 111225290, 0);
 CONDCONT_DEF(TileCalibData<TileCalibDrawerFlt>, 149264696);
 
 #include "TileCalibBlobObjs/TileCalibDrawerOfc.h"
 typedef TileCalibData<TileCalibDrawerOfc> TileCalibDataOfc;
-CLASS_DEF(TileCalibData<TileCalibDrawerOfc>, 141822674, 0)
+CLASS_DEF(TileCalibData<TileCalibDrawerOfc>, 141822674, 0);
 CONDCONT_DEF(TileCalibData<TileCalibDrawerOfc>, 262948840);
 
 #include "TileCalibBlobObjs/TileCalibDrawerBch.h"
 typedef TileCalibData<TileCalibDrawerBch> TileCalibDataBch;
-CLASS_DEF(TileCalibData<TileCalibDrawerBch>, 88425733, 0)
+CLASS_DEF(TileCalibData<TileCalibDrawerBch>, 88425733, 0);
 CONDCONT_DEF(TileCalibData<TileCalibDrawerBch>, 218165589);
 
+
+#include "TileCalibBlobObjs/TileCalibDrawerInt.h"
+typedef TileCalibData<TileCalibDrawerInt> TileCalibDataInt;
+CLASS_DEF(TileCalibData<TileCalibDrawerInt>, 253497269, 0);
+CONDCONT_DEF(TileCalibData<TileCalibDrawerInt>, 213286005);
 #endif // TILECONDITIONS_TILECALIBDDATA_H

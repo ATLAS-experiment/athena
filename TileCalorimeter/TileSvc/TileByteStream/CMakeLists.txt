@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileByteStream )
@@ -23,6 +23,7 @@ atlas_add_component( TileByteStream
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
    LINK_LIBRARIES TileByteStreamLib )
 
+atlas_install_runtime( share/TileDefault.* )
 
 set( extra_patterns "LArDetectorToolNV|is still valid|no data retrieved|Database being retired|Reading file|Unable to locate catalog|Resolved path|DigitizationFlags|^Domain|created CondCont|no dictionary for class|^ +[+]|Reading LArPedestalMC|IOV callback|^DetectorStore|TileDetectorTool|Creating TileCondProxyFile|Cache alignment|INFO opening|loading cache|start processing|done processing|WARNING ../MuRcvDigitsCnt|WARNING ../MuRcvRawChCnt|TileL2Builder initialization completed|Initializing TileMuRcvContByteStreamTool|filled inputFileSummary from file|Picked valid file|No SimFlags|MetaReader|AutoConfiguration|INFO Initializing|IOVDbSvc[0-9 ]+INFO|Found [0-9]* algorithms" )
 
@@ -69,6 +70,11 @@ atlas_add_test( TileROD_Decoder_test
 
 atlas_add_test( TileHid2RESrcIDConfig_test
                 SCRIPT python -m TileByteStream.TileHid2RESrcIDConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileByteStreamConfig_test
+                SCRIPT python -m TileByteStream.TileByteStreamConfig
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
 

@@ -52,6 +52,8 @@ if DetFlags.readRDOBS.Tile_on():
         "TileDigitsContainer/MuRcvDigitsCnt",
         "TileL2Container/TileL2Cnt"
       ]
+    from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlg
+    TileHid2RESrcIDCondAlg(ROD2ROBmap=["-1"])
 
 if DetFlags.readRDOBS.LVL1_on():
     svcMgr.ByteStreamAddressProviderSvc.TypeNames += [                

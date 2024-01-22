@@ -331,6 +331,9 @@ CaloLVL1_ID                                                       INFO initializ
 AtlasDetectorID                                                   INFO initialize_from_dictionary - OK
 TileCablingSvc                                                    INFO Cabling for RUN2 (2014-2017) ATLAS geometry is set via jobOptions 
 TileCablingSvc                                                    INFO Setting Cabling type to 4
+ROBDataProviderSvc                                           0    INFO  ---> Filter out empty ROB fragments                               =  'filterEmptyROB':False
+ROBDataProviderSvc                                           0    INFO  ---> Filter out specific ROBs by Status Code: # ROBs = 0
+ROBDataProviderSvc                                           0    INFO  ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
 CondInputLoader                                              0    INFO Adding base classes:
 CondInputLoader                                              0    INFO Will create WriteCondHandle dependencies for the following DataObjects:
 TileBadChannelsCondAlg.TileCondProxyCool_OnlBch              0    INFO Creating TileCondProxyCool(TileBadChannelsCondAlg.TileCondProxyCool_OnlBch) for folder: "/TILE/ONL01/STATUS/ADC"
@@ -354,11 +357,7 @@ TileTimingCondAlg.TileCondProxyCool_AdcOffset                0    INFO Creating 
 TileSamplingF...TileCondProxyCool_SamplingFraction           0    INFO Creating TileCondProxyCool(TileSamplingFractionCondAlg.TileCondProxyCool_SamplingFraction) for folder: "/TILE/OFL02/CALIB/SFR"
 ThreadPoolSvc                                                0    INFO no thread init tools attached
 AvalancheSchedulerSvc                                        0    INFO Activating scheduler in a separate thread
-AvalancheSchedulerSvc                                        0    INFO Will attribute the following unmet INPUT dependencies to "SGInputLoader/SGInputLoader" Algorithm
-AvalancheSchedulerSvc                                        0    INFO    o  ( 'TileDigitsContainer' , 'StoreGateSvc+MuRcvDigitsCnt' )     required by Algorithm: 
-AvalancheSchedulerSvc                                        0    INFO        * MuRcvDigitsCntDumper
-AvalancheSchedulerSvc                                        0    INFO    o  ( 'TileDigitsContainer' , 'StoreGateSvc+TileDigitsCnt' )     required by Algorithm: 
-AvalancheSchedulerSvc                                        0    INFO        * TileDigitsCntDumper
+AvalancheSchedulerSvc                                        0    INFO No unmet INPUT data dependencies were found
 PrecedenceSvc                                                0    INFO Assembling CF and DF task precedence rules
 PrecedenceRulesGraph                                         0    INFO CondSvc found. DF precedence rules will be augmented with 'Conditions'
 PrecedenceSvc                                                0    INFO PrecedenceSvc initialized successfully
@@ -369,9 +368,6 @@ AvalancheSchedulerSvc                                        0    INFO Task sche
 AvalancheSchedulerSvc                                        0    INFO  o Avalanche generation mode: disabled
 AvalancheSchedulerSvc                                        0    INFO  o Preemptive scheduling of CPU-blocking tasks: disabled
 AvalancheSchedulerSvc                                        0    INFO  o Scheduling of condition tasks: disabled
-ROBDataProviderSvc                                           0    INFO  ---> Filter out empty ROB fragments                               =  'filterEmptyROB':False
-ROBDataProviderSvc                                           0    INFO  ---> Filter out specific ROBs by Status Code: # ROBs = 0
-ROBDataProviderSvc                                           0    INFO  ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
 EventSelector                                                0    INFO reinitialization...
 AthenaHiveEventLoopMgr                                       0    INFO Setup EventSelector service EventSelector
 ApplicationMgr                                               0    INFO Application Manager Initialized successfully
