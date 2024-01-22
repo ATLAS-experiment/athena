@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile DQ status tool and algorithm"""
 
@@ -106,8 +106,8 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
 
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg(flags, ['TileDigitsContainer/TileDigitsCnt']) )
+    from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+    acc.merge( TileRawDataReadingCfg(flags) )
 
     acc.merge( TileDQstatusAlgCfg(flags) )
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileConditions/TileInfoLoader.h"
@@ -47,9 +47,11 @@ DECLARE_COMPONENT( TileCondToolNoiseRawChn )
 DECLARE_COMPONENT( TileCondToolTMDB )
 DECLARE_COMPONENT( TileCondToolDspThreshold )
 DECLARE_COMPONENT( TileCondProxyCoolFlt )
+DECLARE_COMPONENT( TileCondProxyCoolInt )
 DECLARE_COMPONENT( TileCondProxyCoolBch )
 DECLARE_COMPONENT( TileCondProxyCoolOfc )
 DECLARE_COMPONENT( TileCondProxyFileFlt )
+DECLARE_COMPONENT( TileCondProxyFileInt )
 DECLARE_COMPONENT( TileCondProxyFileBch )
 DECLARE_COMPONENT( TileCalibFltCondAlg )
 DECLARE_COMPONENT( TileCalibOfcCondAlg )

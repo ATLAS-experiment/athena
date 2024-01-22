@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #import CaloRecGPU.CaloRecGPUConfigurator
 
 from CaloRecGPU.CaloRecGPUConfigurator import SingleToolToPlot, ComparedToolsToPlot
@@ -25,12 +25,9 @@ def PrevAlgorithmsConfiguration(Configurator, clustersname = None):
         from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
         result.merge(LArRawDataReadingCfg(Configurator.ConfigFlags))
 
-        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+        from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
+        result.merge( TileRawDataReadingCfg(Configurator.ConfigFlags) )
 
-        result.merge(ByteStreamReadCfg(Configurator.ConfigFlags,type_names=['TileDigitsContainer/TileDigitsCnt',
-                                                               'TileRawChannelContainer/TileRawChannelCnt',
-                                                               'TileMuonReceiverContainer/TileMuRcvCnt']))
-        result.getService("ByteStreamCnvSvc").ROD2ROBmap=["-1"]
         if Configurator.ConfigFlags.Output.doWriteESD:
             from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterOutputCfg
             result.merge(TileDigitsFilterOutputCfg(Configurator.ConfigFlags))

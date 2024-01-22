@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILEROD_DECODER_H
@@ -42,6 +42,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ByteStreamData/RawEvent.h"
 #include "eformat/ROBFragment.h"
+#include "StoreGate/ReadCondHandle.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
@@ -535,6 +537,9 @@ class TileROD_Decoder: public AthAlgTool {
     Gaudi::Property<int> m_maxWarningPrint{this, "MaxWarningPrint", 1000, "Maximum warning messages to print"};
     Gaudi::Property<int> m_maxErrorPrint{this, "MaxErrorPrint", 1000, "Maximum error messages to print"};
 
+    SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey{this,
+        "TileHid2RESrcID", "TileHid2RESrcID", "TileHid2RESrcID key"};
+
     ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
         "TileCondToolTiming", "TileCondToolTiming", "Tile timing tool"};
     ToolHandle<TileCondToolOfcCool> m_tileCondToolOfcCool{this,
@@ -544,7 +549,7 @@ class TileROD_Decoder: public AthAlgTool {
     ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
         "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
     ToolHandle<TileL2Builder> m_L2Builder{this,
-        "TileL2Builder", "TileL2Builder", "Tile L2 builder tool"};
+        "TileL2Builder", "", "Tile L2 builder tool"};
 
     // thresholds for parabolic amplitude correction
     float m_ampMinThresh_pC; //!< correct amplitude if it's above amplitude threshold (in pC)
@@ -918,7 +923,8 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
   bool isBeamROD = false;
   // figure out which fragment we want to unpack
   TileRawChannelCollection::ID frag_id = v.identify();
-  const std::vector<uint32_t> & drawer_info = m_hid2re->getDrawerInfo(frag_id);
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
+  const std::vector<uint32_t> & drawer_info = hid2re->getDrawerInfo(frag_id);
   int bs_frag_id = drawer_info.size()>1 ? drawer_info[1] : frag_id;
   int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
 
@@ -1021,6 +1027,9 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
     // return;
   }
 
+  static const bool unpackDigits = std::is_same_v<COLLECTION, TileDigitsCollection>;
+  static const bool unpackChannels = std::is_same_v<COLLECTION, TileRawChannelCollection>;
+
   if (isBeamROD) {
 
     pBeamVec pBeam;
@@ -1076,19 +1085,19 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
 
       switch (type) {
         case 0:
-          if (m_useFrag0) unpack_frag0(version, sizeOverhead, digitsMetaData, p, pDigits, frag_id, drawer_type);
+          if (unpackDigits && m_useFrag0) unpack_frag0(version, sizeOverhead, digitsMetaData, p, pDigits, frag_id, drawer_type);
           break;
         case 1:
-          if (m_useFrag1) unpack_frag1(version, sizeOverhead, digitsMetaData, p, pDigits, frag_id, drawer_type);
+          if (unpackDigits && m_useFrag1) unpack_frag1(version, sizeOverhead, digitsMetaData, p, pDigits, frag_id, drawer_type);
           break;
         case 2:
-          if (m_useFrag4) unpack_frag2(version, sizeOverhead, p, pChannel, frag_id, drawer_type);
+          if (unpackChannels && m_useFrag4) unpack_frag2(version, sizeOverhead, p, pChannel, frag_id, drawer_type);
           break;
         case 3:
-          if (m_useFrag4) unpack_frag3(version, sizeOverhead, p, pChannel, frag_id, drawer_type);
+          if (unpackChannels && m_useFrag4) unpack_frag3(version, sizeOverhead, p, pChannel, frag_id, drawer_type);
           break;
         case 4:
-          if (m_useFrag4) {
+          if (unpackChannels && m_useFrag4) {
             bsflags = idAndType & 0xFFFF0000; // ignore frag num, keep all the rest
             int unit = (idAndType & 0xC0000000) >> 30;
 

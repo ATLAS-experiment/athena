@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileByteStream/TileMuRcvContByteStreamCnv_test.py
 # Author: scott snyder
@@ -66,10 +66,6 @@ svcMgr.EventSelector.Input = [input_fname]
 from AthenaCommon.GlobalFlags import globalflags
 globalflags.InputFormat.set_Value_and_Lock('bytestream')
 
-svcMgr.ByteStreamAddressProviderSvc.TypeNames += [
-    'TileMuonReceiverContainer/TileMuRcvCnt',
-    ]
-
 include('TileConditions/TileConditions_jobOptions.py')
 
 from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
@@ -86,6 +82,18 @@ topSequence = AlgSequence()
 
 theApp.EvtMax=100
 
+from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlg
+TileHid2RESrcIDCondAlg(FullTileMode=RunNumber)
+
+from TileByteStream.TileByteStreamConf import TileRawDataReadingAlg
+topSequence += TileRawDataReadingAlg(TileMuonReceiverContainer="TileMuRcvCnt",
+                                     TileDigitsContainer="",
+                                     TileRawChannelContainer="")
+topSequence.TileRawDataReadingAlg.TileROD_Decoder.TileL2Builder = ""
+topSequence.TileRawDataReadingAlg.TileROD_Decoder.TileBadChanTool = ""
+topSequence.TileRawDataReadingAlg.TileROD_Decoder.TileCondToolEmscale = ""
+
+
 from AthenaCommon.ConcurrencyFlags import jobproperties as jp
 dumpdir = 'TileMuRcvDumps-%d' % jp.ConcurrencyFlags.NumThreads()
 
@@ -93,13 +101,6 @@ from TileRecUtils.TileRecUtilsConf import TileMuonReceiverDumper
 topSequence += TileMuonReceiverDumper ('TileMuonReceiverDumper',
                                        TileMuonReceiverContainer = 'TileMuRcvCnt',
                                        Prefix = dumpdir + '/')
-
-from AthenaCommon import CfgMgr
-toolSvc = CfgMgr.ToolSvc()
-from TileByteStream.TileByteStreamConf import TileROD_Decoder
-toolSvc += TileROD_Decoder()
-toolSvc.TileROD_Decoder.fullTileMode=RunNumber
-
 
 os.system ('rm -rf ' + dumpdir)
 os.system ('mkdir -p ' + dumpdir)

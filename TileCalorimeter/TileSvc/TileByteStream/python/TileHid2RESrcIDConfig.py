@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured TileHid2ReSrcIDCondAlg conditions algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TileHid2RESrcIDCondAlg(ForHLT=False):
+def TileHid2RESrcIDCondAlg(ForHLT=False, **kwargs):
     """Configure TileHid2ReSrcIDCondAlg conditions algorithm"""
 
     hid2RESrcID = 'TileHid2RESrcIDHLT' if ForHLT else 'TileHid2RESrcID'
@@ -16,11 +16,11 @@ def TileHid2RESrcIDCondAlg(ForHLT=False):
         return #Already there....
 
     from TileByteStream.TileByteStreamConf import TileHid2RESrcIDCondAlg
-    condSequence += TileHid2RESrcIDCondAlg(name=hid2RESrcIDCondAlg, ForHLT=ForHLT, TileHid2RESrcID=hid2RESrcID)
+    condSequence += TileHid2RESrcIDCondAlg(name=hid2RESrcIDCondAlg, ForHLT=ForHLT, TileHid2RESrcID=hid2RESrcID, **kwargs)
     return
 
 
-def TileHid2RESrcIDCondAlgCfg(flags, **kwargs):
+def TileHid2RESrcIDCondAlgCfg(flags, source=None, **kwargs):
     """Return component accumulator with configured TileHid2ReSrcIDCondAlg conditions algorithm"""
 
     forHLT = kwargs.get('ForHLT', False)
@@ -32,6 +32,23 @@ def TileHid2RESrcIDCondAlgCfg(flags, **kwargs):
 
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge( TileGMCfg(flags) )
+
+    if source == 'COOL':
+        # Connect COOL Tile conditions proxies to the tool
+        from TileConditions.TileFolders import TileFolders
+        folders = TileFolders(isMC=flags.Input.isMC, isOnline=flags.Common.isOnline)
+        rodFolder = folders.addSplitOnline('/TILE/ONL01/STATUS/ROD', '/TILE/OFL02/STATUS/ROD')
+
+        TileCondProxyCoolInt = CompFactory.getComp("TileCondProxyCool<TileCalibDrawerInt>")
+        rodStatusProxy = TileCondProxyCoolInt('TileCondProxyCool_ROD', Source=rodFolder)
+        kwargs['RODStatusProxy'] = rodStatusProxy
+
+        from IOVDbSvc.IOVDbSvcConfig import addFolderList
+        acc.merge( addFolderList(flags, folders.get()) )
+    elif source == 'FILE':
+        TileCondProxyFileInt = CompFactory.getComp("TileCondProxyFile<TileCalibDrawerInt>")
+        rodStatusProxy = TileCondProxyFileInt('TileCondProxyFile_ROD', Source='TileDefault.fullrod')
+        kwargs['RODStatusProxy'] = rodStatusProxy
 
     TileHid2ReSrcIDCondAlg = CompFactory.TileHid2RESrcIDCondAlg
     acc.addCondAlgo( TileHid2ReSrcIDCondAlg(**kwargs) )

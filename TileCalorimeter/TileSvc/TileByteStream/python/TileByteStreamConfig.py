@@ -79,6 +79,9 @@ def TileLaserObjByteStreamToolCfg (flags,
                                    **kwargs):
     return _createTileContByteStreamToolCfg(flags, name, InitializeForWriting, **kwargs)
 
+def addTileReadAlg(cfg, name, **kwargs):
+    TileRawDataReadingAlg = CompFactory.TileRawDataReadingAlg
+    cfg.addEventAlgo(TileRawDataReadingAlg(name, **kwargs))
 
 def TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=True,
                           readMuRcv=None, readMuRcvDigits=False, readMuRcvRawCh=False,
@@ -103,38 +106,72 @@ def TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=True,
     readBeamElem = isCalibRun if readBeamElem is None else readBeamElem
     readLaserObj = isLaserRun if readLaserObj is None else readLaserObj
 
-    typeNames = kwargs.get('type_names', [])
+    typeNames = kwargs.pop('type_names', [])
 
     prefix = flags.Overlay.BkgPrefix if flags.Overlay.DataOverlay else ''
 
-    if readDigits:
-        typeNames += [f'TileDigitsContainer/{prefix}TileDigitsCnt']
-    if readRawChannel:
-        typeNames += [f'TileRawChannelContainer/{prefix}TileRawChannelCnt']
-    if readMuRcv:
-        typeNames += ['TileMuonReceiverContainer/TileMuRcvCnt']
-        typeNames += ['SG::AuxVectorBase/TileMuRcvCnt']
-    if readMuRcvDigits:
-        typeNames += [f'TileDigitsContainer/{prefix}MuRcvDigitsCnt']
-    if readMuRcvRawCh:
-        typeNames += ['TileRawChannelContainer/MuRcvRawChCnt']
-    if readLaserObj:
-        typeNames += ['TileLaserObject/TileLaserObj']
-    if readBeamElem:
-        typeNames += ['TileBeamElemContainer/TileBeamElemCnt']
-    if readDigitsFlx:
-        typeNames += ['TileDigitsContainer/TileDigitsFlxCnt']
-
     cfg = ComponentAccumulator()
+    from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
+    cfg.merge(TileCablingSvcCfg(flags))
+
     if stateless:
         from ByteStreamEmonSvc.EmonByteStreamConfig import EmonByteStreamCfg
         cfg.merge( EmonByteStreamCfg(flags, type_names=typeNames) )
     else:
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
         cfg.merge( ByteStreamReadCfg(flags, type_names=typeNames) )
-        cfg.getService("ByteStreamCnvSvc").ROD2ROBmap = ["-1"]
 
-    if not flags.Common.isOnline:
-        cfg.addPublicTool(CompFactory.TileROD_Decoder())
+    from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlgCfg
+    cfg.merge( TileHid2RESrcIDCondAlgCfg(flags, ROD2ROBmap=['-1']) )
+
+    if readDigits:
+        addTileReadAlg(cfg, 'TileDigitsReadAlg', TileDigitsContainer=f'{prefix}TileDigitsCnt')
+    if readRawChannel:
+        addTileReadAlg(cfg, 'TileRawChannelReadAlg', TileRawChannelContainer=f'{prefix}TileRawChannelCnt')
+    if readMuRcv:
+        addTileReadAlg(cfg, 'TileMuRcvReadAlg', TileMuonReceiverContainer='TileMuRcvCnt')
+    if readMuRcvDigits:
+        addTileReadAlg(cfg, 'MuRcvDigitsReadAlg', MuRcvDigitsContainer=f'{prefix}MuRcvDigitsCnt')
+    if readMuRcvRawCh:
+        addTileReadAlg(cfg, 'TileMuRcvRawChReadAlg', MuRcvRawChannelContainer='MuRcvRawChCnt')
+    if readLaserObj:
+        addTileReadAlg(cfg, 'TileLaserObjReadAlg', TileLaserObject='TileLaserObj')
+    if readBeamElem:
+        addTileReadAlg(cfg, 'TileBeamElemReadAlg', TileBeamElemContainer='TileBeamElemCnt')
+    if readDigitsFlx:
+        addTileReadAlg(cfg, 'TileDigitsFlxReadAlg', TileDigitsFlxContainer='TileDigitsFlxCnt')
 
     return cfg
+
+
+if __name__ == "__main__":
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
+    from AthenaCommon.Logging import log
+    from AthenaCommon.Constants import INFO
+
+    # Test setup
+    log.setLevel(INFO)
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
+
+    # Initialize configuration object, add accumulator, merge, and run.
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
+
+    cfg.merge( TileRawDataReadingCfg(flags) )
+
+    cfg.printConfig(withDetails = True, summariseProps = True)
+    cfg.store( open('TileRawChannelReadAlg.pkl','wb') )
+
+    sc = cfg.run()
+
+    import sys
+    # Success should be 0
+    sys.exit(not sc.isSuccess())
