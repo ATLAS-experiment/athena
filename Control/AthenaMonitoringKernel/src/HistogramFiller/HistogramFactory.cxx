@@ -161,11 +161,21 @@ TEfficiency* HistogramFactory::createEfficiency(const HistogramDef& def) {
   {
     std::scoped_lock<std::mutex> dirLock(globalROOTMutex());
     if (def.ybins==0 && def.zbins==0) { // 1D TEfficiency
-      e = new TEfficiency(def.alias.c_str(), def.title.c_str(),
-        def.xbins, def.xmin, def.xmax);
+      if (def.xarray.size()!=0) {
+        e = new TEfficiency(def.alias.c_str(), def.title.c_str(),
+          def.xbins, &(def.xarray)[0]);
+      } else {
+        e = new TEfficiency(def.alias.c_str(), def.title.c_str(),
+          def.xbins, def.xmin, def.xmax);
+      }
     } else if (def.ybins>0 && def.zbins==0) { // 2D TEfficiency
-      e = new TEfficiency(def.alias.c_str(), def.title.c_str(),
-        def.xbins, def.xmin, def.xmax, def.ybins, def.ymin, def.ymax);
+      if (def.xarray.size()!=0 && def.yarray.size()!=0) {
+        e = new TEfficiency(def.alias.c_str(), def.title.c_str(),
+          def.xbins, &(def.xarray)[0], def.ybins, &(def.yarray)[0]);
+      } else {
+        e = new TEfficiency(def.alias.c_str(), def.title.c_str(),
+          def.xbins, def.xmin, def.xmax, def.ybins, def.ymin, def.ymax);
+      }
     } else if (def.ybins>0 && def.zbins>0) { // 3D TEfficiency
       e = new TEfficiency(def.alias.c_str(), def.title.c_str(),
         def.xbins, def.xmin, def.xmax, def.ybins, def.ymin, def.ymax, def.zbins, def.zmin, def.zmax);
