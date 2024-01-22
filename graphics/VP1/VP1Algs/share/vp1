@@ -137,6 +137,7 @@ declare -a LOCALEVENTSRC_AVAILDIRS
 FLAG_HELP=0
 FLAG_DATA=0
 FLAG_TEST=0
+FLAG_CA=0
 ERRORS=""
 DETDESCRTAG=""
 MUONLAYOUT=""
@@ -281,6 +282,8 @@ while [ $i -le $# ]; do
 	FLAG_DATA=1
     elif [ "x${arg}" == "x-test" ]; then
 	FLAG_TEST=1
+    elif [ "x${arg}" == "x-ca" ]; then
+	FLAG_CA=1
     elif [ "x${arg}" == "x-trig" ]; then
         FLAG_TRIG=1
     elif [ "x${arg}" == "x-nocalo" ]; then
@@ -804,6 +807,8 @@ if [ "x$FLAG_HELP" != "x0" ]; then
     echo
     echo "  -test                       : Show the athena command instead of executing it."
     echo
+    echo "  -CA                         : Use the ComponentAccumulator configuration system (will become the default)."   
+    echo
     echo "Note that the order of specified files/options is not important, and that they can in general be mixed quite"
     echo "liberally (when it makes sense - of course dont put e.g. both -trigdec=file.xml and -trigdec=embedded)"
     echo
@@ -890,12 +895,16 @@ fi
 
 
 POOLROOTFILES=""
+CA_OPTIONS="" # Variables for CA, if -ca flag set.
+
 i=0
 while [ $i -le $((${#FILES_POOLROOT[@]}-1)) ]; do
     if [ "x$POOLROOTFILES" == "x" ]; then
 	POOLROOTFILES='vp1InputFiles=["'"${FILES_POOLROOT[$i]}"'"'
+    CA_OPTIONS='--filesInput='${FILES_POOLROOT[$i]}''
     else
 	POOLROOTFILES="${POOLROOTFILES}"',"'"${FILES_POOLROOT[$i]}"'"'
+	CA_OPTIONS="${CA_OPTIONS}"',"'"${FILES_POOLROOT[$i]}"'"'
     fi
     i=$((i+1))
 done
@@ -934,9 +943,11 @@ if [ -f vp1.py ]; then
 fi
 
 OPTS="$PYTHONFILES"
+CA_FLAGS="" # Variables for CA, if -ca flag set.
 if [ "x$POOLROOTFILES" != "x" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
     OPTS="${OPTS}$POOLROOTFILES"
+    --filesInput=$FILES_POOLROOT
 fi
 if [ "x$EXTRAINPUTDIRS" != "x" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
@@ -945,6 +956,7 @@ fi
 if [ "x$DETDESCRTAG" != "x" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
     OPTS="${OPTS}DetDescrVersion=\"$DETDESCRTAG\""
+    CA_FLAGS="${CA_FLAGS} GeoModel.AtlasVersion=\"$DETDESCRTAG\""
 fi
 if [ "x$MUONLAYOUT" != "x" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
@@ -961,10 +973,12 @@ fi
 if [ "x$GLOBCONDTAG" != "x" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
     OPTS="${OPTS}vp1GlobCond=\"$GLOBCONDTAG\""
+    CA_FLAGS="${CA_FLAGS} IOVDb.GlobalTag=\"$GLOBCONDTAG\""
 fi
 if [ "x$SKIPEVENTS" != "x" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
     OPTS="${OPTS}skipEvents=$SKIPEVENTS"
+    CA_OPTIONS="${CA_OPTIONS} --skipEvents = \"$SKIPEVENTS\""
 fi
 if [ "x$FILTEREVENTS" != "x" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
@@ -1025,6 +1039,7 @@ fi
 if [ "x$FLAG_ONLINE" != "x0" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
     OPTS="${OPTS}vp1Online=True"
+    CA_FLAGS="${CA_FLAGS} Common.isOnline=True"
 fi
 if [ "x$FLAG_LUCID" != "x0" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
@@ -1252,10 +1267,17 @@ elif [ "x$MULTINP_SRC" != "x" ]; then
     fi
 fi
 
-if [ "x$LOGFILE" != "x" ]; then
-    athena.py $ATHENAOPTS  -c "$OPTS" $JOBOPT $EXTRAJOBOPT 2>&1|tee $LOGFILE
+if [ "x$FLAG_CA" != "x0" ]; then
+    echo "Using ComponentAccumulator configuration system. Many options not yet supported!"
+    echo $CA_OPTIONS
+    echo $CA_FLAGS
+    python -m VP1Algs.VP1AlgConfig $CA_OPTIONS $CA_FLAGS
 else
-    athena.py $ATHENAOPTS  -c "$OPTS" $JOBOPT $EXTRAJOBOPT
+    if [ "x$LOGFILE" != "x" ]; then
+        athena.py $ATHENAOPTS  -c "$OPTS" $JOBOPT $EXTRAJOBOPT 2>&1|tee $LOGFILE
+    else
+        athena.py $ATHENAOPTS  -c "$OPTS" $JOBOPT $EXTRAJOBOPT
+    fi
 fi
 
 if [ "x$FLAG_DONTCLEANUPEVTCPY" != "x1" -a "x$MULTINP_CPY" != "x" ]; then
