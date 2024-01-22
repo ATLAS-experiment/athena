@@ -134,7 +134,8 @@ namespace MuonGM {
         const BLinePar* getBLinePar() const { return m_BLinePar; }
         void  clearALinePar();
         void  clearBLinePar() { m_BLinePar = nullptr; }
-        
+        const std::vector<int> & getReadoutSide() const { return m_readoutSide; }
+      
         // Amdb local (szt) to global coord
         virtual Amg::Vector3D AmdbLRSToGlobalCoords(const Amg::Vector3D& x) const override final { return AmdbLRSToGlobalTransform()*x; }
         virtual Amg::Transform3D AmdbLRSToGlobalTransform() const override final { return absTransform()*Amg::Translation3D(0, 0, m_offset)*getDelta(); }
@@ -169,7 +170,7 @@ namespace MuonGM {
         Amg::Transform3D m_delta{Amg::Transform3D::Identity()};
         const ALinePar*  m_ALinePar{nullptr};
         const BLinePar*  m_BLinePar{nullptr};
-
+        std::vector<int> m_readoutSide;
         // transforms (RE->layer)
         std::array<Amg::Transform3D, 4> m_Xlg{make_array<Amg::Transform3D,4>(Amg::Transform3D::Identity())};
     };

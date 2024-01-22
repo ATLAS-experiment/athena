@@ -199,7 +199,14 @@ namespace MuonGM {
         std::replace(stereoAngle.begin(),stereoAngle.end(), ';',' ');
         std::istringstream stereoStream(stereoAngle);
 
-
+	// Initialize the "m_readoutSide" vector
+	{
+	  std::replace(readoutSide.begin(),readoutSide.end(),';',' ');
+	  std::istringstream stream(readoutSide);
+	  int iSide;
+	  while (stream>>iSide) m_readoutSide.push_back(iSide);
+	}
+	
         for (int il = 0; il < m_nlayers; il++) {
           double stereoAngleIL{0};
           stereoStream >> stereoAngleIL;
@@ -262,6 +269,7 @@ namespace MuonGM {
       m_minHalfY      = roParam.activeBottomLength / 2; // 0.5*bottom length (active area)
       m_maxHalfY      = roParam.activeTopLength / 2;    // 0.5*top length (active area)
       m_offset        = -0.5*(ylFrame - ysFrame);       // radial dist. of active area center w.r.t. chamber center
+      m_readoutSide   = roParam.readoutSide;
       
       for (int il = 0; il < m_nlayers; il++) {
             // identifier of the first channel to retrieve max number of strips
