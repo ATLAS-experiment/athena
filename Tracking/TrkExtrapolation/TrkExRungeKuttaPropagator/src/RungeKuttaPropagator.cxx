@@ -909,7 +909,7 @@ propagateStraightLine(Cache& cache,
 
   AmgSymMatrix(5) e = Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, *Tp.covariance());
 
-  if (e(0, 0) <= 0. || e(1, 1) <= 0. || e(2, 2) <= 0. || e(3, 3) <= 0. || e(4, 4) <= 0.) {
+  if (!Amg::hasPositiveOrZeroDiagElems(e)) {
     return nullptr;
   }
 
@@ -1234,10 +1234,8 @@ propagateRungeKutta(Cache& cache,
 
   AmgSymMatrix(5) e =
     Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, *Tp.covariance());
-  AmgSymMatrix(5)& cv = e;
 
-  if (cv(0, 0) <= 0. || cv(1, 1) <= 0. || cv(2, 2) <= 0. || cv(3, 3) <= 0. ||
-      cv(4, 4) <= 0.) {
+  if (!Amg::hasPositiveOrZeroDiagElems(e)) {
     return nullptr;
   }
 
@@ -1323,8 +1321,7 @@ propagateRungeKutta(Cache& cache,
         Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, *Ta.covariance());
     Tb.setParametersWithCovariance(&Su, p, newCov);
     const AmgSymMatrix(5)& cv = *Tb.covariance();
-    if (cv(0, 0) <= 0. || cv(1, 1) <= 0. || cv(2, 2) <= 0. || cv(3, 3) <= 0. ||
-        cv(4, 4) <= 0.)
+    if (!Amg::hasPositiveOrZeroDiagElems(cv))
       return false;
   } else {
     Tb.setParameters(&Su, p);
