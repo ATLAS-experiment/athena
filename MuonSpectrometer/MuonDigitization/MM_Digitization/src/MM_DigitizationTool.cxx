@@ -42,19 +42,10 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
-#include "MuonAGDDDescription/MMDetectorDescription.h"
-#include "MuonAGDDDescription/MMDetectorHelper.h"
 
 // VMM Mapping
 #include "MM_Digitization/MM_StripVmmMappingTool.h"
 
-
-// Athena
-#include "GaudiKernel/ServiceHandle.h"
-#include "GeoModelInterfaces/IGeoDbTagSvc.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
-#include "RDBAccessSvc/IRDBRecord.h"
-#include "RDBAccessSvc/IRDBRecordset.h"
 
 // ROOT
 #include <fstream>
@@ -557,59 +548,14 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
                 ATH_MSG_WARNING("Failed to retrieve detector element for: " << m_idHelperSvc->toString(layerID));
                 continue;
             }
+	    const std::vector<int>& readoutSide=detectorReadoutElement->getReadoutSide();
 
             //
             // Sanity Checks
             //
             ////////////////////////////////////////////////////////////////////
 
-	    // Check for the SQLite database:
-	    //
-	    ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc","MM_DigitizationTool");
-	    if (geoDbTag.retrieve().isFailure()) ATH_MSG_FATAL("Could not locate GeoDbTagSvc");
-
-	    GeoModelIO::ReadGeoModel* sqliteReader = geoDbTag->getSqliteReader();
-	    
-            // Get MM_READOUT from MMDetectorDescription
             const std::string stName = m_idHelperSvc->mmIdHelper().stationNameString(m_idHelperSvc->mmIdHelper().stationName(layerID));
-            char side = m_idHelperSvc->mmIdHelper().stationEta(layerID) < 0 ? 'C' : 'A';
-
-	    std::vector<int> readoutSide;
-	    if (!sqliteReader) {
-	      MMDetectorHelper aHelper;
-	      MMDetectorDescription* mm = aHelper.Get_MMDetector(stName[2], std::abs(m_idHelperSvc->mmIdHelper().stationEta(layerID)),
-								 m_idHelperSvc->mmIdHelper().stationPhi(layerID),
-								 m_idHelperSvc->mmIdHelper().multilayer(layerID), side);
-	      MMReadoutParameters roParam = mm->GetReadoutParameters();
-	      readoutSide=roParam.readoutSide;
-	    }
-	    else {
-	      
-	      // JFB When this is finally working, this block of code should be migrated to the MMReadout element class
-	      // And any references to SvcLocators, AccessSvc's etc should disappear. So this is WIP. 
-	      
-	      
-	      ServiceHandle<IRDBAccessSvc> accessSvc(geoDbTag->getParamSvcName(), "MM_DigitizationTool");
-	      if (accessSvc.retrieve().isFailure()) ATH_MSG_FATAL("Could not locate " << geoDbTag->getParamSvcName() << endmsg);
-	      IRDBRecordset_ptr wmmRec = accessSvc->getRecordsetPtr("WMM","","");
-	      std::string name = m_idHelperSvc->mmIdHelper().stationNameString(m_idHelperSvc->mmIdHelper().stationName(layerID));
-	      char sectorL = name.substr(2, 1) == "L" ? 'L' : 'S';
-	      int  stEta   = m_idHelperSvc->mmIdHelper().stationEta(layerID);
-	      int  stML    = m_idHelperSvc->mmIdHelper().multilayer(layerID);
-	      
-	      for (unsigned int ind = 0; ind < wmmRec->size(); ind++) {
-		std::string WMM_TYPE       = (*wmmRec)[ind]->getString("WMM_TYPE");               
-		if (sectorL != WMM_TYPE[4])                                                              continue;
-		if (abs(stEta)   !=(int) (WMM_TYPE[6]-'0'))    continue;
-		if (stML != (int) (WMM_TYPE[12]-'0'))  continue;
-		std::string  roSide   = (*wmmRec)[ind]->getString("readoutSide");
-		std::replace(roSide.begin(),roSide.end(),';',' ');
-		std::istringstream stream(roSide);
-		int iSide;
-		while (stream>>iSide) readoutSide.push_back(iSide);
-		break;
-	      }
-	    }
 
 	    
             ////////////////////////////////////////////////////////////////////
