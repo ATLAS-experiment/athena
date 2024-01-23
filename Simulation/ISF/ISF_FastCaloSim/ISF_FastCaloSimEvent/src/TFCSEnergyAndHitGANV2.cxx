@@ -11,6 +11,7 @@
 
 #include "TFile.h"
 #include "TF1.h"
+#include "TH2D.h"
 
 #include "HepPDT/ParticleData.hh"
 #include "HepPDT/ParticleDataTable.hh"
@@ -116,10 +117,12 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
     const TFCSExtrapolationState *extrapol) const {
   if (!truth) {
     ATH_MSG_ERROR("Invalid truth pointer");
+    return false;
   }
 
   if (!extrapol) {
     ATH_MSG_ERROR("Invalid extrapolation pointer");
+    return false;
   }
 
   const int pdgId = truth->pdgid();
