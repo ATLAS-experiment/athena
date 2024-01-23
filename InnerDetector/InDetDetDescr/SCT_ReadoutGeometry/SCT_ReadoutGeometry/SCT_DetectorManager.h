@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,6 +15,8 @@
 
 #include "InDetReadoutGeometry/SiDetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "InDetReadoutGeometry/ExtendedAlignableTransform.h"
+#include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -33,8 +35,6 @@ class CondAttrListCollection;
 namespace InDetDD {
 
   class SiDetectorElement;
-  class ExtendedAlignableTransform;
-  class SCT_ModuleSideDesign;
 
   /**
    * @class SCT_DetectorManager
@@ -56,9 +56,6 @@ namespace InDetDD {
     /// Constructur with name
     SCT_DetectorManager( StoreGateSvc* detStore, const std::string& name );
      
-    /// Destructor
-    virtual ~SCT_DetectorManager();
-     
     /**
      * @name Access Raw Geometry
      */
@@ -67,7 +64,7 @@ namespace InDetDD {
     virtual PVConstLink  getTreeTop(unsigned int i) const override;
     //@}
     /// Add tree top
-    void addTreeTop(PVLink);
+    void addTreeTop(PVConstLink vol);
 
     
     /**
@@ -166,7 +163,7 @@ namespace InDetDD {
      * @name Private member data
      */
     //@{
-    std::vector<PVLink>                                         m_volume;
+    std::vector<PVConstLink>                                    m_volume;
     SiDetectorElementCollection                                 m_elementCollection;
     typedef std::map<Identifier, std::unique_ptr<ExtendedAlignableTransform>> AlignableTransformMap;
     std::vector<AlignableTransformMap>                          m_higherAlignableTransforms;

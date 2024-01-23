@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HGTD_READOUTGEOMETRY_HGTD_DETECTORMANAGER_H
@@ -44,7 +44,7 @@ public:
     virtual PVConstLink  getTreeTop(unsigned int i) const override;
 
     /** Add a Tree top: */
-    void addTreeTop (PVLink treeTop);
+    void addTreeTop (PVConstLink treeTop);
 
     //
     // Access Readout Elements
@@ -88,7 +88,7 @@ private:
     const HGTD_ID  * getIdHelper() const;
 
     // Private member data
-    std::vector<PVLink>              m_volume;
+    std::vector<PVConstLink>              m_volume;
     InDetDD::HGTD_DetectorElementCollection   m_elementCollection;
     const HGTD_ID*                   m_idHelper;
 

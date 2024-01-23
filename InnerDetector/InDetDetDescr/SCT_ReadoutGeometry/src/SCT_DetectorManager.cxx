@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
@@ -13,7 +13,6 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetReadoutGeometry/ExtendedAlignableTransform.h"
-#include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 #include "StoreGate/StoreGateSvc.h"
 
 #include <iostream>
@@ -48,14 +47,6 @@ namespace InDetDD {
     } 
   }
 
-  SCT_DetectorManager::~SCT_DetectorManager()
-  {
-    // Clean up
-    for (auto vol : m_volume) {
-      vol->unref();
-    }
-  }
-
   unsigned int SCT_DetectorManager::getNumTreeTops() const
   {
     return m_volume.size(); 
@@ -66,11 +57,9 @@ namespace InDetDD {
     return m_volume[i];
   }
 
-  void SCT_DetectorManager::addTreeTop(PVLink vol){
-    vol->ref();
+  void SCT_DetectorManager::addTreeTop(PVConstLink vol){
     m_volume.push_back(vol);
   }
-
 
   SiDetectorElement* SCT_DetectorManager::getDetectorElement(const Identifier & id) const
   {  
