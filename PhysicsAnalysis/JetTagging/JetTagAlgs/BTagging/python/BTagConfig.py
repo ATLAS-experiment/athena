@@ -26,67 +26,44 @@ from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
 from TrackHitAssignement.TrackHitAssignementAlgCfg import TrackHitAssignementAlg
 
-# this is where you add the new trainings!
-def GetTaggerTrainingMap(inputFlags, jet_collection_list):
-    if inputFlags.GeoModel.Run >= LHCPeriod.Run4 and "AntiKt10UFOCSSKSoftDropBeta100Zcut10" not in jet_collection_list:
-        derivationTrainingMap = {
-            "AntiKt4EMTopo": [
-                "BTagging/20221008/dipsrun4/antikt4emtopo/network.json",
-                "BTagging/20221017/dl1drun4/antikt4emtopo/network.json",
-                "BTagging/20221010/GN1run4/antikt4emtopo/network.onnx"
-            ]
-        }
-        if jet_collection_list in derivationTrainingMap.keys():
-            return derivationTrainingMap[jet_collection_list]
-        else: # Default to AntiKt4EMTopo trainings in case nothing else available
-            return derivationTrainingMap["AntiKt4EMTopo"]
 
-    derivationTrainingMap = {
+def GetTaggerTrainingMap(inputFlags, jet_col):
+    """This function defines the networks used for the different jet collections."""
+    if inputFlags.GeoModel.Run >= LHCPeriod.Run4 and "AntiKt10UFOCSSKSoftDropBeta100Zcut10" not in jet_col:
+        return [
+            "BTagging/20221008/dipsrun4/antikt4emtopo/network.json",
+            "BTagging/20221017/dl1drun4/antikt4emtopo/network.json",
+            "BTagging/20221010/GN1run4/antikt4emtopo/network.onnx",
+        ]
+    
+    networks_by_jet_col = {
         "AntiKt4EMPFlow": [
             "BTagging/201903/rnnip/antikt4empflow/network.json",
             "BTagging/201903/dl1r/antikt4empflow/network.json",
-            "BTagging/20210519r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20210729/dipsLoose/antikt4empflow/network.json",  # old r22 trainings
-            "BTagging/20210729/dips/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1dLoose/antikt4empflow/network.json",  # “recommended tagger” which is DL1dLoose20210824r22 named DL1dv00 in EDM
-            "BTagging/20210824r22/dl1d/antikt4empflow/network.json",
             "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
-            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM
-            "BTagging/20220509/gn1/antikt4empflow/network.onnx",
+            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # input to DL1dv01
+            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # 2023 pre-rec DL1dv01
             "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
         ],
-        # PFlow jet with custom vertex definition used in HIGG1D1 
-        "AntiKt4EMPFlowCustomVtx": [
+        "AntiKt4EMPFlowCustomVtx": [ # PFlow jet with custom vertex definition used in HIGG1D1 
             "BTagging/201903/rnnip/antikt4empflow/network.json",
             "BTagging/201903/dl1r/antikt4empflow/network.json",
-            "BTagging/20210729/dipsLoose/antikt4empflow/network.json",  # old r22 trainings
-            "BTagging/20210729/dips/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1dLoose/antikt4empflow/network.json",  # “recommended tagger” which is DL1dLoose20210824r22 named DL1dv00 in EDM
-            "BTagging/20210824r22/dl1d/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
-            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM    
-            "BTagging/20220509/gn1/antikt4empflow/network.onnx",
+            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # input to DL1dv01
+            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # 2023 pre-rec DL1dv01
             "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
         ],
         "AntiKt4EMTopo": [
             "BTagging/201903/rnnip/antikt4empflow/network.json",
             "BTagging/201903/dl1r/antikt4empflow/network.json",
-            "BTagging/20210519r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20210729/dipsLoose/antikt4empflow/network.json",  # old r22 trainings
-            "BTagging/20210729/dips/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1dLoose/antikt4empflow/network.json",  # “recommended tagger” which is DL1dLoose20210824r22 named DL1dv00 in EDM
-            "BTagging/20210824r22/dl1d/antikt4empflow/network.json",
             "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
-            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM
+            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # input to DL1dv01
+            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # 2023 pre-rec DL1dv01
         ],
         "AntiKtVR30Rmax4Rmin02Track": [
             "BTagging/201903/rnnip/antiktvr30rmax4rmin02track/network.json",
             "BTagging/201903/dl1r/antiktvr30rmax4rmin02track/network.json",
-            "BTagging/20230208/dipsLoose/antiktvr30rmax4rmin02track/network.json",  # new r22 training for VR track jets
-            "BTagging/20230307/DL1dv01/antiktvr30rmax4rmin02track/network.json",  # new "recommended tagger" for VR track jets named DL1dv01 in EDM
+            "BTagging/20230208/dipsLoose/antiktvr30rmax4rmin02track/network.json",  # r22 training for VR track jets
+            "BTagging/20230307/DL1dv01/antiktvr30rmax4rmin02track/network.json",  # 2023 pre-rec DL1dv01
             "BTagging/20230307/gn2v00/antiktvr30rmax4rmin02track/network.onnx",
         ],
         "AntiKt10UFOCSSKSoftDropBeta100Zcut10": [
@@ -94,23 +71,10 @@ def GetTaggerTrainingMap(inputFlags, jet_collection_list):
             "BTagging/20230413/gn2xwithmassv00/antikt10ufo/network.onnx",
             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
         ],
-        "AntiKt4HI": [
-            "BTagging/201903/rnnip/antikt4empflow/network.json",
-            "BTagging/201903/dl1r/antikt4empflow/network.json",
-            "BTagging/20210519r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20210729/dipsLoose/antikt4empflow/network.json",  # old r22 trainings
-            "BTagging/20210729/dips/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1dLoose/antikt4empflow/network.json",  # ?~@~\recommended tagger?~@~] which is DL1dLoose20210824r22 named DL1dv00 in EDM
-            "BTagging/20210824r22/dl1d/antikt4empflow/network.json",
-            "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
-            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
-            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM
-            "BTagging/20220509/gn1/antikt4empflow/network.onnx",
-            "BTagging/20230306/gn2v00/antikt4empflow/network.onnx",
-        ]
     }
 
-    return derivationTrainingMap[jet_collection_list]
+    networks_by_jet_col["AntiKt4HI"] = networks_by_jet_col["AntiKt4EMPFlow"]
+    return networks_by_jet_col[jet_col]
 
 
 def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTrackParticles', addRenameMaps=None):
@@ -153,6 +117,7 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
 
 def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow']):
 
+
     result=ComponentAccumulator()
  
     if inputFlags.Reco.EnableHI:   
@@ -169,6 +134,7 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
     #Track Augmenter
     result.merge(BTagTrackAugmenterAlgCfg(inputFlags))
 
+    # loop over jet collections and schedule btagging algorithms
     for jc in JetCollection:
         result.merge(
             BTagAlgsCfg(
@@ -232,7 +198,7 @@ def BTagAlgsCfg(
 ):
     """
     This is the main function in this module and does the heavy lifting of 
-    scheduling the tagging algorithms.
+    scheduling the tagging algorithms for a given jet collection.
     """
 
     # If things aren't specified in the arguments, we'll read them
