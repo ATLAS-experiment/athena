@@ -12,7 +12,6 @@
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "TrkEventPrimitives/ResidualPull.h"
 #include "TrkParameters/TrackParameters.h"
-#include "TrkToolInterfaces/IResidualPullCalculator.h"
 
 #include "InDetTestPixelLayer/TrackStateOnPixelLayerInfo.h"
 
@@ -33,7 +32,6 @@ namespace Trk {
 class Track;
 class IExtrapolator;
 class TrackParticleBase;
-class IResidualPullCalculator;
 }
 namespace Rec {
 class TrackParticle;
