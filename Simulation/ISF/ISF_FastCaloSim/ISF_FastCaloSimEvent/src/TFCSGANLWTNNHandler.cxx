@@ -49,7 +49,7 @@ void TFCSGANLWTNNHandler::setupNet() {
   for (auto node : config.outputs) {
     const std::string node_name = node.first;
     const lwt::OutputNodeConfig node_config = node.second;
-    for (std::string label : node_config.labels) {
+    for (const std::string & label : node_config.labels) {
       ATH_MSG_VERBOSE("Found output layer called " << node_name << "_"
                                                    << label);
       m_outputLayers.push_back(node_name + "_" + label);

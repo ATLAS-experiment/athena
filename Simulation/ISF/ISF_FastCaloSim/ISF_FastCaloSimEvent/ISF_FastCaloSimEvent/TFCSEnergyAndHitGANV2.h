@@ -10,7 +10,7 @@
 #include "ISF_FastCaloSimEvent/TFCSGANXMLParameters.h"
 #include "ISF_FastCaloSimEvent/TFCSGANEtaSlice.h"
 #include <string>
-#include "TH2D.h"
+
 
 // forward declare lwtnn dependencies
 namespace lwt {

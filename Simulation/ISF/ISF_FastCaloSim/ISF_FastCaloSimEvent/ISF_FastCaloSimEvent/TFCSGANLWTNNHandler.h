@@ -25,13 +25,14 @@
 #define TFCSGANLWTNNHANDLER_H
 
 #include "ISF_FastCaloSimEvent/VNetworkLWTNN.h"
-#include <iostream>
 
 // Becuase we have a field of type LightweightGraph
 #include "lwtnn/LightweightGraph.hh"
 
 // For writing to a tree
-#include "TTree.h"
+#include <vector>
+#include <memory>
+#include <string>
 
 class TFCSGANLWTNNHandler : public VNetworkLWTNN {
 public:
