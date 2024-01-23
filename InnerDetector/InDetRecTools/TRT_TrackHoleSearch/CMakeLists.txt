@@ -20,6 +20,4 @@ atlas_add_component( TRT_TrackHoleSearch
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} EventPrimitives GaudiKernel Identifier InDetConditionsSummaryService InDetIdentifier InDetRIO_OnTrack StoreGateLib TRT_ConditionsServicesLib TRT_TrackHoleSearchLib TrkEventPrimitives TrkEventUtils TrkExInterfaces TrkParameters TrkSurfaces TrkTrack TrkTrackSummary )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 
