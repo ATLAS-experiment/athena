@@ -17,6 +17,8 @@ atlas_add_component( ActsView
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES
-			ActsViewLib
+		        ActsViewLib
+			TrkCaloClusterROI
+			BeamSpotConditionsData
 		     )
 

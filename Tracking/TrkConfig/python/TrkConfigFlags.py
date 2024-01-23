@@ -434,6 +434,7 @@ def createTrackingConfigFlags():
     # Acts
     from ActsConfig.ActsTrackingPassFlags import (
         createActsTrackingPassFlags,
+        createActsConversionTrackingPassFlags,
         createValidateActsClustersTrackingPassFlags,
         createValidateActsSpacePointsTrackingPassFlags,
         createValidateActsSeedsTrackingPassFlags,
@@ -444,6 +445,8 @@ def createTrackingConfigFlags():
 
     icf.addFlagsCategory ("Tracking.ITkActsPass",
                           createActsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ('Tracking.ITkActsConversionPass',
+                          createActsConversionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkValidateActsClustersPass",
                           createValidateActsClustersTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkValidateActsSpacePointsPass",
