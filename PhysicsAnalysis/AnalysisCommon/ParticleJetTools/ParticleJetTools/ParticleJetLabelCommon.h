@@ -19,7 +19,6 @@ namespace ParticleJetTools {
     std::string singleint;
     std::string doubleint;
     std::string pt;
-    std::string pt_scaled;
     std::string Lxy;
     std::string dr;
     std::string pdgId;
@@ -35,7 +34,6 @@ namespace ParticleJetTools {
     SG::AuxElement::Decorator<int> singleint;
     SG::AuxElement::Decorator<int> doubleint;
     SG::AuxElement::Decorator<float> pt;
-    SG::AuxElement::Decorator<float> pt_scaled;
     SG::AuxElement::Decorator<float> Lxy;
     SG::AuxElement::Decorator<float> dr;
     SG::AuxElement::Decorator<int> pdgId;
@@ -84,7 +82,6 @@ namespace ParticleJetTools {
     tool.declareProperty("LabelName", n->singleint="", "Jet label attribute to be added.");
     tool.declareProperty("DoubleLabelName", n->doubleint="", "Jet label attribute to be added (with the possibility of up to 2 matched hadrons).");
     tool.declareProperty("LabelPtName", n->pt="", "Attribute for labelling particle pt");
-    tool.declareProperty("LabelPtScaledName", n->pt_scaled="", "Attribute for labelling particle pt divided by jet pt");
     tool.declareProperty("LabelLxyName", n->Lxy="", "Attribute for Lxy of labelling particle");
     tool.declareProperty("LabelDRName", n->dr="", "Attribute for dR(part, jet) for labelling particle");
     tool.declareProperty("LabelPdgIdName", n->pdgId="", "Attribute for pdgID of labelling particle");

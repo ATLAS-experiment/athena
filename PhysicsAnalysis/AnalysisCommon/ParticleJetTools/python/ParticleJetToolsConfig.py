@@ -110,7 +110,6 @@ def _getCommonLabelNames(prefix):
         LabelName=f"{prefix}TruthLabelID",
         DoubleLabelName=f"{prefix}ExtendedTruthLabelID",
         LabelPtName=f"{prefix}TruthLabelPt",
-        LabelPtScaledName=f"{prefix}TruthLabelPtScaled",
         LabelLxyName=f"{prefix}TruthLabelLxy",
         LabelDRName=f"{prefix}TruthLabelDR",
         LabelPdgIdName=f"{prefix}TruthLabelPdgId",
