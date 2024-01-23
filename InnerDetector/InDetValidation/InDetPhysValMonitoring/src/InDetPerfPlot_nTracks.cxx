@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,9 +10,7 @@
 #include "InDetPerfPlot_nTracks.h"
 
 
-InDetPerfPlot_nTracks::InDetPerfPlot_nTracks(InDetPlotBase* pParent, const std::string& sDir) : InDetPlotBase(pParent,
-                                                                                                              sDir),
-  m_counters{nullptr} {
+InDetPerfPlot_nTracks::InDetPerfPlot_nTracks(InDetPlotBase* pParent, const std::string& sDir) : InDetPlotBase(pParent, sDir) {
   // nop
 }
 
@@ -31,8 +29,9 @@ InDetPerfPlot_nTracks::initializePlots() {
   m_counters[MATCHEDRECO] =
     Book1D(hd.name, hd.allTitles, hd.nBinsX, hd.xAxis.first, hd.xAxis.second, prependDirectory);
 
-  book(m_ntracks_vs_mu,"ntracks_vs_mu");
-  book(m_ntracks_vs_nvertices,"ntracks_vs_nvertices");
+  book(m_ntracks_vs_truthMu, "ntracks_vs_truthMu");
+  book(m_ntracks_vs_actualMu, "ntracks_vs_actualMu");
+  book(m_ntracks_vs_nvertices, "ntracks_vs_nvertices");
 
 }
 
@@ -43,9 +42,12 @@ InDetPerfPlot_nTracks::fill(const unsigned int freq, const CounterCategory count
   }
 }
 
-void InDetPerfPlot_nTracks::fill(const unsigned int ntracks, const unsigned int muu, const unsigned int nvertices, const float weight) {
+void InDetPerfPlot_nTracks::fill
+(const unsigned int ntracks, const unsigned int truthMu,
+ const float actualMu, const unsigned int nvertices, const float weight) {
 
-  fillHisto(m_ntracks_vs_mu, muu, ntracks, weight);
+  fillHisto(m_ntracks_vs_truthMu, truthMu, ntracks, weight);
+  fillHisto(m_ntracks_vs_actualMu, actualMu, ntracks, weight);
   fillHisto(m_ntracks_vs_nvertices, nvertices, ntracks, weight);
 
 }

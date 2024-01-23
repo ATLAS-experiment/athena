@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETRTTPLOTS
@@ -34,7 +34,6 @@
 #include "InDetPerfPlot_VerticesVsMu.h"
 #include "InDetPerfPlot_TrkInJet.h"
 #include "InDetPerfPlot_TRTExtension.h"
-#include "InDetPerfPlot_ANTracking.h"
 
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/Vertex.h"
@@ -83,10 +82,6 @@ struct InDetRttPlotConfig{
   bool doVertexTruthMatchingPlots{true};
   bool doHardScatterVertexTruthMatchingPlots{true}; 
 
-  /// ANT (also known as LRT) tracking.
-  /// Off by default as only used for merged containers
-  bool doAnTrackingPlots{false}; 
-
   /// Plots for tracks in jets 
   bool doTrkInJetPlots{false}; 
   bool doTrkInJetPlots_bjets{false}; 
@@ -122,13 +117,12 @@ public:
   ///fill for things needing track only
   void fill(const xAOD::TrackParticle& particle, float weight=1.0);
   void fill(const xAOD::TrackParticle& particle, const float mu, const unsigned int nVtx, float weight=1.0); //mu dependent plots
-  void fill(const unsigned int nTrkANT, const unsigned int nTrkSTD, const unsigned int nTrkBAT, const float mu, const unsigned int nVtx,const float weight=1.0);
-  void fill(const unsigned int nTracks, const unsigned int mu, const unsigned nVtx, const float weight=1.0);
+  void fill(const unsigned int nTracks, const unsigned int truthMu, const float actualMu, const unsigned nVtx, const float weight=1.0);
   ///fill for things needing truth only
   void fill(const xAOD::TruthParticle& particle, float weight);
   ///Fill for efficiency plots
-  void fillEfficiency(const xAOD::TruthParticle& truth, const xAOD::TrackParticle* track, const bool isGood, const float mu, const unsigned int nVtx, float weight);
-  void fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, const float mu, float weight);
+  void fillEfficiency(const xAOD::TruthParticle& truth, const xAOD::TrackParticle* track, const bool isGood, const unsigned int truthMu, const float actualMu, float weight);
+  void fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, const unsigned int truthMu, const float actualMu, float weight);
 
   ///fill for things needing all truth - not just the ones from the reco tracks
   
@@ -144,7 +138,7 @@ public:
   ///fill for Counters
   void fillCounter(const unsigned int freq, const InDetPerfPlot_nTracks::CounterCategory counter, float weight);
   ///fill for fakes
-  void fillFakeRate(const xAOD::TrackParticle& particle, const bool isFake, const bool isAssociatedTruth, const float mu, const unsigned int nVtx, float weight);
+  void fillFakeRate(const xAOD::TrackParticle& particle, const bool isFake, const bool isAssociatedTruth, const float mu, float weight);
 
   // fill IDPVM Ntuple
   void fillNtuple(const xAOD::TrackParticle& track, const xAOD::Vertex* vtx);
@@ -180,7 +174,6 @@ private:
   std::unique_ptr<InDetPerfPlot_Vertex> m_hardScatterVertexPlots;
   std::unique_ptr<InDetPerfPlot_VertexTruthMatching> m_hardScatterVertexTruthMatchingPlots;
   std::unique_ptr<InDetPerfPlot_TRTExtension> m_trtExtensionPlots;
-  std::unique_ptr<InDetPerfPlot_ANTracking> m_anTrackingPlots;
   std::unique_ptr<InDetPerfNtuple_TruthToReco> m_ntupleTruthToReco;
   std::unique_ptr<InDetPerfPlot_Resolution> m_resolutionPlotSecd;
   std::unique_ptr<InDetPerfPlot_Hits> m_hitsMatchedTracksPlots;

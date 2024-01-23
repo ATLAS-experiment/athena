@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPerfPlot_Efficiency.h"
@@ -17,8 +17,9 @@ void
 InDetPerfPlot_Efficiency::initializePlots() {
 
   book(m_efficiency_vs_pteta, "efficiency_vs_pteta");
-  book(m_efficiency_vs_ptmu, "efficiency_vs_ptmu");
-
+  book(m_efficiency_vs_ptTruthMu, "efficiency_vs_ptTruthMu");
+  book(m_efficiency_vs_ptActualMu, "efficiency_vs_ptActualMu");
+ 
   book(m_efficiency_vs_eta, "efficiency_vs_eta");
   book(m_efficiency_vs_pt, "efficiency_vs_pt");
   book(m_efficiency_vs_pt_low, "efficiency_vs_pt_low");
@@ -31,14 +32,16 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_efficiency_vs_z0_abs, "efficiency_vs_z0_abs");
   book(m_efficiency_vs_R, "efficiency_vs_R");
   book(m_efficiency_vs_Z, "efficiency_vs_Z");
-  book(m_efficiency_vs_mu, "efficiency_vs_mu");
+  book(m_efficiency_vs_truthMu, "efficiency_vs_truthMu");
+  book(m_efficiency_vs_actualMu, "efficiency_vs_actualMu");
 
   book(m_technical_efficiency_vs_eta, "technical_efficiency_vs_eta");
   book(m_technical_efficiency_vs_pt, "technical_efficiency_vs_pt");
   book(m_technical_efficiency_vs_phi, "technical_efficiency_vs_phi");
   book(m_technical_efficiency_vs_d0, "technical_efficiency_vs_d0");
   book(m_technical_efficiency_vs_z0, "technical_efficiency_vs_z0");
-  book(m_technical_efficiency_vs_mu, "technical_efficiency_vs_mu");
+  book(m_technical_efficiency_vs_truthMu, "technical_efficiency_vs_truthMu");
+  book(m_technical_efficiency_vs_actualMu, "technical_efficiency_vs_actualMu");
 
   book(m_extended_efficiency_vs_d0, "extended_efficiency_vs_d0");
   book(m_extended_efficiency_vs_d0_abs, "extended_efficiency_vs_d0_abs");
@@ -53,7 +56,8 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_TrkRec_d0,        "TrkRec_d0");
   book(m_TrkRec_prodR,     "TrkRec_prodR");
   book(m_TrkRec_pT,        "TrkRec_pT");
-  book(m_TrkRec_mu,        "TrkRec_mu");
+  book(m_TrkRec_truthMu,   "TrkRec_truthMu");
+  book(m_TrkRec_actualMu,  "TrkRec_actualMu");
   book(m_TrkRec_eta_d0,    "TrkRec_eta_d0");
   book(m_TrkRec_eta_prodR, "TrkRec_eta_prodR");
   book(m_TrkRec_eta_pT,    "TrkRec_eta_pT");
@@ -66,13 +70,14 @@ InDetPerfPlot_Efficiency::initializePlots() {
 }
 
 void
-InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGood, float weight, float mu) {
+InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGood, unsigned int truthMu, float actualMu, float weight) {
   double eta = truth.eta();
   double pt = truth.pt() / Gaudi::Units::GeV; // convert MeV to GeV
   double phi = truth.phi();
 
   fillHisto(m_efficiency_vs_pteta, pt, eta, isGood, weight);
-  fillHisto(m_efficiency_vs_ptmu, pt, mu, isGood, weight);
+  fillHisto(m_efficiency_vs_ptTruthMu, pt, truthMu, isGood, weight);
+  fillHisto(m_efficiency_vs_ptActualMu, pt, actualMu, isGood, weight);
 
   fillHisto(m_efficiency_vs_eta, eta, isGood, weight);
   fillHisto(m_efficiency_vs_pt, pt, isGood, weight);
@@ -97,12 +102,14 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
   fillHisto(m_extended_efficiency_vs_d0_abs, std::abs(d0), isGood, weight);
   fillHisto(m_extended_efficiency_vs_z0, z0, isGood, weight);
   fillHisto(m_extended_efficiency_vs_z0_abs, std::abs(z0), isGood, weight);
-  fillHisto(m_efficiency_vs_mu, mu, isGood, weight);
+  fillHisto(m_efficiency_vs_truthMu, truthMu, isGood, weight);
+  fillHisto(m_efficiency_vs_actualMu, actualMu, isGood, weight);
 
   fillHisto(m_TrkRec_eta, eta, isGood, weight);
   fillHisto(m_TrkRec_d0,  d0,  isGood, weight);
   fillHisto(m_TrkRec_pT,  pt,  isGood, weight);
-  fillHisto(m_TrkRec_mu,  mu,  isGood, weight);
+  fillHisto(m_TrkRec_truthMu, truthMu, isGood, weight);
+  fillHisto(m_TrkRec_actualMu, actualMu, isGood, weight);
 
   fillHisto(m_TrkRec_eta_d0, eta, d0, isGood, weight);
   fillHisto(m_TrkRec_eta_pT, eta, pt, isGood, weight);
@@ -123,7 +130,7 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
 }
 
 void
-InDetPerfPlot_Efficiency::fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, float weight, float mu) {
+InDetPerfPlot_Efficiency::fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, unsigned int truthMu, float actualMu, float weight) {
   double eta = truth.eta();
   double pt = truth.pt() / Gaudi::Units::GeV; // convert MeV to GeV
   double phi = truth.phi();
@@ -135,7 +142,8 @@ InDetPerfPlot_Efficiency::fillTechnicalEfficiency(const xAOD::TruthParticle& tru
   double z0 = truth.auxdata<float>("z0");
   fillHisto(m_technical_efficiency_vs_d0, d0, isGood, weight);
   fillHisto(m_technical_efficiency_vs_z0, z0, isGood, weight);
-  fillHisto(m_technical_efficiency_vs_mu, mu, isGood, weight);
+  fillHisto(m_technical_efficiency_vs_truthMu, truthMu, isGood, weight);
+  fillHisto(m_technical_efficiency_vs_actualMu, actualMu, isGood, weight);
 }
 
 

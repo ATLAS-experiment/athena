@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -248,7 +248,6 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
     rttConfig.doHardScatterVertexPlots = false;
     rttConfig.doVertexTruthMatchingPlots = false;
     rttConfig.doHardScatterVertexTruthMatchingPlots = false;
-    rttConfig.doAnTrackingPlots = false;
     rttConfig.doTrkInJetPlots = false;
     rttConfig.doTrkInJetPlots_bjets = false;
     rttConfig.doTrkInJetPlots_matched = false;
@@ -338,9 +337,18 @@ InDetPhysValMonitoringTool::fillHistograms() {
     ATH_MSG_WARNING("Shouldn't happen - EventInfo is buggy, setting mu to 0");
   }
 
+  unsigned int truthMu = 0;
+  float actualMu = 0.;
+  if(not m_truthPileUpEventName.key().empty() and truthPileupEventContainer.isValid()){
+    truthMu = static_cast<int>( truthPileupEventContainer->size() );
+  }
+  if(pie.isValid()) actualMu = pie->actualInteractionsPerCrossing();
+
+  // This is questionable but kept for backward compatibility for now
+  float puEvents = truthMu>0 ? truthMu : actualMu;
+
   const xAOD::Vertex* primaryvertex = nullptr;
-  float puEvents = 0;
-  float nVertices = 0;
+  unsigned int nVertices = 0;
   float beamSpotWeight = 1;
 
   if(not m_vertexContainerName.key().empty()){
@@ -348,7 +356,6 @@ InDetPhysValMonitoringTool::fillHistograms() {
 
     ATH_MSG_DEBUG("Filling vertex plots");
     SG::ReadHandle<xAOD::VertexContainer>  vertices(m_vertexContainerName);
-    puEvents = !m_truthPileUpEventName.key().empty() and truthPileupEventContainer.isValid() ?  static_cast<int>( truthPileupEventContainer->size() ) : pie.isValid() ? pie->actualInteractionsPerCrossing() : 0;
     nVertices = not vertices->empty() ? vertices->size() : 0;
     beamSpotWeight = pie->beamSpotWeight();
     ATH_MSG_DEBUG("beamSpotWeight is equal to " <<  beamSpotWeight);
@@ -429,7 +436,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
   //
   std::vector<const xAOD::TrackParticle*> selectedTracks {};
   selectedTracks.reserve(tracks->size());
-  unsigned int nTrackBAT = 0, nTrackSTD = 0, nTrackANT = 0, nTrackTOT = 0;
+  unsigned int nTrackTOT = 0;
   for (const auto *const thisTrack: *tracks) {
     //FIXME: Why is this w.r.t the primary vertex?
     const asg::AcceptData& accept = m_trackSelectionTool->accept(*thisTrack, primaryvertex);
@@ -441,13 +448,6 @@ InDetPhysValMonitoringTool::fillHistograms() {
     nSelectedRecoTracks++;
 
     //Fill plots for selected reco tracks, hits / perigee / ???
-    std::bitset<xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo>  patternInfo = thisTrack->patternRecoInfo();
-    bool isBAT = patternInfo.test(xAOD::TrackPatternRecoInfo::TRTSeededTrackFinder);
-    bool isANT = patternInfo.test(xAOD::TrackPatternRecoInfo::SiSpacePointsSeedMaker_LargeD0);
-    bool isSTD = not isBAT and not isANT;
-    if(isBAT) nTrackBAT++;
-    if(isSTD) nTrackSTD++;
-    if(isANT) nTrackANT++;
     nTrackTOT++;
     m_monPlots->fill(*thisTrack, beamSpotWeight);                                      
     m_monPlots->fill(*thisTrack, puEvents, nVertices, beamSpotWeight);  //fill mu dependent plots
@@ -479,7 +479,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
     const bool isFake = not std::isnan(prob) ? (prob < m_lowProb) : true;
 
     if(!isAssociatedTruth) nMissingAssociatedTruth++;
-    m_monPlots->fillFakeRate(*thisTrack, isFake, isAssociatedTruth, puEvents, nVertices, beamSpotWeight);
+    m_monPlots->fillFakeRate(*thisTrack, isFake, isAssociatedTruth, puEvents, beamSpotWeight);
 
     if (m_fillTruthToRecoNtuple) {
       // Decorate track particle with extra flags
@@ -531,8 +531,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
       }
     }
   }
-  m_monPlots->fill(nTrackANT, nTrackSTD, nTrackBAT, puEvents, nVertices,beamSpotWeight);
-  m_monPlots->fill(nTrackTOT, puEvents, nVertices,beamSpotWeight);
+  m_monPlots->fill(nTrackTOT, truthMu, actualMu, nVertices, beamSpotWeight);
 
   //FIXME: I don't get why... this is here
   if (m_truthSelectionTool.get()) {
@@ -578,13 +577,15 @@ InDetPhysValMonitoringTool::fillHistograms() {
       }
       else{ 
         ATH_MSG_DEBUG("Filling efficiency plots info monitoring plots");
-        m_monPlots->fillEfficiency(*thisTruth, matchedTrack, isEfficient, puEvents, nVertices, beamSpotWeight);
+        m_monPlots->fillEfficiency(*thisTruth, matchedTrack, isEfficient, truthMu, actualMu, beamSpotWeight);
         if (m_fillTechnicalEfficiency) {
           ATH_MSG_DEBUG("Filling technical efficiency plots info monitoring plots");
           static const SG::AuxElement::ConstAccessor< float > nSilHitsAcc("nSilHits");
           if (nSilHitsAcc.isAvailable(*thisTruth)) {
-            if (nSilHitsAcc(*thisTruth) >= m_minHits.value().at(getIndexByEta(*thisTruth)))
-              m_monPlots->fillTechnicalEfficiency(*thisTruth, isEfficient, puEvents, beamSpotWeight);
+            if (nSilHitsAcc(*thisTruth) >= m_minHits.value().at(getIndexByEta(*thisTruth))){
+              m_monPlots->fillTechnicalEfficiency(*thisTruth, isEfficient,
+						  truthMu, actualMu, beamSpotWeight);
+	    }
           } else {
             ATH_MSG_DEBUG("Cannot fill technical efficiency. Missing si hit information for truth particle.");
           }
