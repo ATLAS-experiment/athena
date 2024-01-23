@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecTools/src/HGTD_IterativeExtensionTool.cxx
  * @author Noemi Calace <noemi.calace@cern.ch>
@@ -52,7 +52,7 @@ StatusCode HGTD_IterativeExtensionTool::initialize() {
 HGTD::ExtensionObject HGTD_IterativeExtensionTool::extendTrackToHGTD(
     const EventContext& ctx, const xAOD::TrackParticle& track_ptkl,
     const HGTD_ClusterContainer* container, const HepMC::GenEvent* hs_event,
-    const InDetSimDataCollection* sim_data) {
+    const InDetSimDataCollection* sim_data) const {
 
   ATH_MSG_DEBUG("Start extending");
 
@@ -413,7 +413,7 @@ HGTD_IterativeExtensionTool::getTruthMatchedCluster(
     const std::vector<const Trk::Surface*>& surfaces,
     const HGTD_ClusterContainer* container,
     const xAOD::TruthParticle* truth_ptkl, const HepMC::GenEvent* hs_event,
-    const InDetSimDataCollection* sim_data) {
+    const InDetSimDataCollection* sim_data) const {
 
   if (not truth_ptkl or not sim_data) {
     if (not truth_ptkl)

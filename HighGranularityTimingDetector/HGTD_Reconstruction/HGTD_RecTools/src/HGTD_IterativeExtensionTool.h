@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_IterativeExtensionTool.h
  *
@@ -62,7 +62,7 @@ public:
       const EventContext& ctx, const xAOD::TrackParticle& track_ptkl,
       const HGTD_ClusterContainer* container,
       const HepMC::GenEvent* hs_event = nullptr,
-      const InDetSimDataCollection* sim_data = nullptr) override final;
+      const InDetSimDataCollection* sim_data = nullptr) const override final;
 
 private:
   /**
@@ -143,7 +143,7 @@ private:
                          const HGTD_ClusterContainer* container,
                          const xAOD::TruthParticle* truth_ptkl,
                          const HepMC::GenEvent* hs_event,
-                         const InDetSimDataCollection* sim_data);
+                         const InDetSimDataCollection* sim_data) const;
 
   // extrapolation tool
   ToolHandle<Trk::IExtrapolator> m_extrapolator{

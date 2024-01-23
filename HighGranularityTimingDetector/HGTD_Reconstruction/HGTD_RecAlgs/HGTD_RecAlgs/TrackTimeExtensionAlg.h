@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/TrackTimeExtensionAlg.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -20,7 +20,7 @@
 #ifndef HGTD_RECALGS_TRACKTIMEEXTENSIONALG_H
 #define HGTD_RECALGS_TRACKTIMEEXTENSIONALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -38,17 +38,15 @@
 
 namespace HGTD {
 
-class TrackTimeExtensionAlg : public AthAlgorithm {
+class TrackTimeExtensionAlg : public AthReentrantAlgorithm {
 
 public:
   TrackTimeExtensionAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TrackTimeExtensionAlg() {}
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute() override final;
+  virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
-  StatusCode execute_r (const EventContext& ctx);
-
   struct DecorHandles
   {
     DecorHandles (const TrackTimeExtensionAlg& tool, const EventContext& ctx);

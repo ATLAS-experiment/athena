@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TrackTimeExtensionAlg.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -23,7 +23,7 @@ namespace HGTD {
 
 TrackTimeExtensionAlg::TrackTimeExtensionAlg(const std::string& name,
                                              ISvcLocator* pSvcLocator)
-    : AthAlgorithm(name, pSvcLocator) {}
+    : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode TrackTimeExtensionAlg::initialize() {
 
@@ -52,11 +52,7 @@ StatusCode TrackTimeExtensionAlg::initialize() {
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-StatusCode TrackTimeExtensionAlg::execute() {
-   return execute_r( Gaudi::Hive::currentContext() );
-}
-
-StatusCode TrackTimeExtensionAlg::execute_r(const EventContext& ctx) {
+StatusCode TrackTimeExtensionAlg::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("Start event");
 

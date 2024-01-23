@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecToolInterfaces/IHGTD_TrackTimeExtensionTool.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -64,7 +64,7 @@ public:
                     const xAOD::TrackParticle& track,
                     const HGTD_ClusterContainer* container,
                     const HepMC::GenEvent* hs_event = nullptr,
-                    const InDetSimDataCollection* sim_data = nullptr) = 0;
+                    const InDetSimDataCollection* sim_data = nullptr) const = 0;
 };
 
 #endif // IHGTD_TRACKTIMEEXTENSIONTOOL_H
