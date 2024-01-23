@@ -94,7 +94,7 @@ private:
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_time_dec_key{
       this, "time", "InDetTrackParticles.time", "Time assigned to this track"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_time_res_dec_key{
-      this, "timeres", "InDetTrackParticles.timeres",
+      this, "timeResolution", "InDetTrackParticles.timeResolution",
       "Time resolution assigned to this track"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>
       m_summarypattern_dec_key{this, "HGTD_summaryinfo",

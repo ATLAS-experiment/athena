@@ -165,6 +165,7 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER(TrackParticle_v1, float, qOverP)
 
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, float, time, setTime)
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, float, timeResolution, setTimeResolution)
 
   DefiningParameters_t TrackParticle_v1::definingParameters() const{
     DefiningParameters_t tmp;
