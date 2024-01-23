@@ -117,10 +117,12 @@ if __name__=='__main__':
     if flags.Input.Format is Format.BS:
         # Configure reading the Tile BS files
         from TileByteStream.TileByteStreamConfig import TileRawDataReadingCfg
-        cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False, readBeamElem=args.stat) )
+        cfg.merge( TileRawDataReadingCfg(flags, readMuRcv=False, readBeamElem=args.stat, readLaserObj=args.stat) )
 
         from AthenaCommon.Constants import VERBOSE
-        cfg.getPublicTool('TileROD_Decoder').VerboseOutput = flags.Exec.OutputLevel is VERBOSE
+        if flags.Exec.OutputLevel is VERBOSE:
+            for alg in ['TileDigitsReadAlg', 'TileRawChannelReadAlg']:
+                cfg.getEventAlgo(alg).TileROD_Decoder.VerboseOutput = True
 
         if args.dump_bs_fragments:
             cfg.getService('ByteStreamInputSvc').DumpFlag = True

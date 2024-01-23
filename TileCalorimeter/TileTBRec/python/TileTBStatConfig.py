@@ -24,6 +24,9 @@ def TileTBStatCfg(flags, **kwargs):
     from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
     acc.merge( TileDQstatusAlgCfg(flags, TileBeamElemContainer='TileBeamElemCnt') )
 
+    from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlgCfg
+    acc.merge( TileHid2RESrcIDCondAlgCfg(flags, ROD2ROBmap=['-1']) )
+
     acc.addService(CompFactory.ROBDataProviderSvc())
 
     TileTBStat = CompFactory.TileTBStat
