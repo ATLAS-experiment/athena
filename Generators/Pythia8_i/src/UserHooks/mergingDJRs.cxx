@@ -106,7 +106,10 @@ inline bool mergingDJRs::doVetoPartonLevel(const Event &event) {
   }
 
   // slowjet analyze the events
-  m_slowJet->setup(m_workEventJet);
+  if (not m_slowJet->setup(m_workEventJet)){
+    std::cout<< "setup failed in  mergingDJRs::doVetoPartonLevel\n";
+    return false;
+  }
 
   // Call getDJR and store the DJRs vector
   getDJR(m_workEventJet);
@@ -119,7 +122,10 @@ inline bool mergingDJRs::doVetoPartonLevel(const Event &event) {
 inline void mergingDJRs::getDJR(const Event &event) {
 
   // setup slowjet pointer
-  m_slowJet->setup(event);
+  if (not m_slowJet->setup(event)){
+    std::cout<< "setup failed in  mergingDJRs::getDJR\n";
+    return;
+  };
 
   // Clear members.
   m_DJR.clear();
