@@ -22,6 +22,7 @@ from TrigCompositeUtils.TrigCompositeUtils import legName
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
 
 from collections.abc import MutableSequence
 import collections.abc
@@ -177,7 +178,6 @@ class HypoAlgNode(AlgNode):
 
 
     def addHypoTool (self, flags, hypoToolConf):
-        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
         log.debug("Adding HypoTool %s for chain %s to %s", hypoToolConf.name, hypoToolConf.chainDict['chainName'], self.Alg.getName())        
         try:
             result = hypoToolConf.create(flags)
@@ -325,6 +325,12 @@ class ComboMaker(AlgNode):
 ##########################################################
 
 
+def getEmptyMenuSequence(name):
+    # to clean up
+    if isCAMenu():
+        return EmptyMenuSequenceCA(name)
+    else:
+        return EmptyMenuSequence(name)
              
 class EmptyMenuSequence(object):
     """ Class to emulate reco sequences with no Hypo"""
@@ -1144,7 +1150,6 @@ class SelectionCA(ComponentAccumulator):
         if self.isProbe:
             newname = algo.getName()+'_probe'
             algo.name=newname
-           #algo.name(algo.getName()+'_probe')
         self.hypoAcc.addEventAlgo(algo)
 
 

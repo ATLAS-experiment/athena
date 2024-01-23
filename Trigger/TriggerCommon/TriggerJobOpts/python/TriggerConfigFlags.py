@@ -371,6 +371,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableEndOfEventProcessing', True,
                   help='enable execution of extra algorithms for accepted events')
 
+    flags.addFlag('Trigger.doCFEmulationTest', False,
+                  help='enable run Control Flow Emulation test')
+
     # trigger reconstruction
     # Protection against import of packages not in the analysis release
     # Signature and other trigger reco flags should be handled here

@@ -7,7 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format, MetadataCategory
 from AthenaCommon.CFElements import seqAND, seqOR, parOR, flatAlgorithmSequences, getSequenceChildren, isSequence, hasProp, getProp
 from AthenaCommon.Logging import logging
-from .TriggerRecoConfig import TriggerMetadataWriterCfg
+
 __log = logging.getLogger('TriggerConfig')
 
 
@@ -460,6 +460,7 @@ def triggerPOOLOutputCfg(flags):
     acc.addEventAlgo( decmaker )
 
     # Export trigger metadata during the trigger execution when running with POOL output.
+    from .TriggerRecoConfig import TriggerMetadataWriterCfg
     metadataAcc, metadataOutputs = TriggerMetadataWriterCfg(flags)
     acc.merge( metadataAcc )
 
@@ -637,10 +638,14 @@ def triggerRunCfg( flags, menu=None ):
     acc.addSequence( parOR("HLTBeginSeq"), parentName="HLTTop" )
     # bit of a hack as for "legacy" type JO a seq name for cache creators has to be given,
     # in newJO realm the seqName will be removed as a comp fragment shoudl be unaware of where it will be attached
-    acc.merge( triggerIDCCacheCreatorsCfg( flags, seqName="AthAlgSeq" ), sequenceName="HLTBeginSeq" )
-
-    from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
-    hltSeedingAcc = HLTSeedingCfg( flags )
+ 
+    if flags.Trigger.doCFEmulationTest:
+        from TriggerMenuMT.CFtest.EmuStepProcessingConfig import emulateHLTSeedingCfg
+        hltSeedingAcc = emulateHLTSeedingCfg(flags)
+    else:
+        acc.merge( triggerIDCCacheCreatorsCfg( flags, seqName="AthAlgSeq" ), sequenceName="HLTBeginSeq" )
+        from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
+        hltSeedingAcc = HLTSeedingCfg( flags )
     # TODO, once moved to newJO the algorithm can be added to hltSeedingAcc and merging will be sufficient here
     acc.merge( hltSeedingAcc,  sequenceName="HLTBeginSeq" )
 
@@ -663,6 +668,8 @@ def triggerRunCfg( flags, menu=None ):
 
     summaryAcc, summaryAlg = triggerSummaryCfg( flags, hypos )
     acc.merge( summaryAcc, sequenceName="HLTFinalizeSeq" )
+    if flags.Trigger.doCFEmulationTest:
+        summaryAlg.Prescaler=CompFactory.PrescalingEmulationTool()
     acc.addEventAlgo( summaryAlg, sequenceName="HLTFinalizeSeq" )
     # TODO: Add end-of-event sequences here (port from HLTCFConfig.py)
 

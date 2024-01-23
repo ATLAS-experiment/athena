@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.AlgScheduler import AlgScheduler
 from AthenaCommon.Logging import logging
 from HLTSeeding.HLTSeedingConf import CTPUnpackingEmulationTool, RoIsUnpackingEmulationTool
-from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
+
 log = logging.getLogger('EmuStepProcessingConfig')
 
 ###########################################################################    
@@ -55,11 +54,9 @@ def generateEmuMenu(flags):
 
 
 ###########################################################################    
+
 def generateEmuEvents():
     log.info("generateEmuEvents")
-    AlgScheduler.ShowControlFlow( True )
-    AlgScheduler.ShowDataFlow( True )
-
     # 4 events
     data = {
         'noreco': [';', ';', ';',';'],
@@ -164,7 +161,8 @@ def generateChainsManually(flags, maskbit=0x7):
     maskbits used to enable signature-lke group of chains
     """
     log.info("generateChainsManually mask=0x%d",maskbit)
-    from DecisionHandling.TestUtils import makeChain, makeChainStep    
+    from DecisionHandling.TestUtils import makeChain, makeChainStep
+    from TriggerMenuMT.HLT.Config.MenuComponents import getEmptyMenuSequence   
     doMuon     = maskbit & 0x1
     doElectron = maskbit>>1 & 0x1
     doCombo    = maskbit>>2 & 0x1
@@ -234,8 +232,8 @@ def generateChainsManually(flags, maskbit=0x7):
 
     # combined chain
     if doCombo:
-        emptySeq1 = EmptyMenuSequence("step1EmptySeqence")
-        emptySeq2 = EmptyMenuSequence("step2EmptySeqence")
+        emptySeq1 = getEmptyMenuSequence("step1EmptySeqence")
+        emptySeq2 = getEmptyMenuSequence("step2EmptySeqence")
         
         if not doElectron:
             from DecisionHandling.HLTSignatureConfig import elMenuSequence        

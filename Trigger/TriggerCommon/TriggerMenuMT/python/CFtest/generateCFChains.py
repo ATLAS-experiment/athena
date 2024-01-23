@@ -12,18 +12,17 @@ import functools
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..HLT.Config.MenuComponents import menuSequenceCAToGlobalWrapper
 
-def generateCFChains(flags, opt):
+def generateCFChains(flags):
     from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
     from TriggerMenuMT.HLT.Menu.SignatureDicts import ChainStore
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
     from DecisionHandling.TestUtils import makeChain, makeChainStep
-
+    from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
     menu = GenerateMenuMT()
     menu.chainsInMenu = ChainStore()
     ##################################################################
     # egamma chains
     ##################################################################
-    if opt.doEgammaSlice is True:
+    if 'Egamma' in flags.Trigger.enabledSignatures:
         from TriggerMenuMT.HLT.Electron.ElectronChainConfiguration import electronFastCaloCfg, fastElectronSequenceCfg, precisionCaloSequenceCfg
         fastCaloSeq = RecoFragmentsPool.retrieve( electronFastCaloCfg, flags )
         electronSeq = RecoFragmentsPool.retrieve( fastElectronSequenceCfg, flags )
@@ -60,7 +59,7 @@ def generateCFChains(flags, opt):
     ##################################################################
     # muon chains
     ##################################################################
-    if opt.doMuonSlice is True:
+    if 'Muon' in flags.Trigger.enabledSignatures:
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence, muCombSequence, muEFSASequence, muEFCBSequence, muEFSAFSSequence, muEFCBFSSequence
 
         MuonChains  = []
@@ -150,7 +149,7 @@ def generateCFChains(flags, opt):
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetFSTrackingHypoMenuSequence
         return callGenerator(jetFSTrackingHypoMenuSequence,flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
 
-    if opt.doJetSlice is True:
+    if 'Jet' in flags.Trigger.enabledSignatures:
 
         # small-R jets
         jetSeq_a4_tc_em, jetDef = jetCaloHypoMenuSequenceFromString("a4_tc_em_subjesIS")
@@ -189,7 +188,7 @@ def generateCFChains(flags, opt):
     ##################################################################
     # bjet chains
     ##################################################################
-    if opt.doBjetSlice is True:
+    if 'Bjet' in flags.Trigger.enabledSignatures:
         from TriggerMenuMT.HLT.Bjet.BjetChainConfiguration import getBJetSequence
 
         jetSeq_a4_tc_em_presel, jetDef, emclusters = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
@@ -209,7 +208,7 @@ def generateCFChains(flags, opt):
     ##################################################################
     # tau chains
     ##################################################################
-    if opt.doTauSlice is True and False:  # not working at the moment
+    if 'Tau' in flags.Trigger.enabledSignatures and False:  # not working at the moment
         from TriggerMenuMT.HLT.Tau.TauMenuSequences import getTauSequence
 
         step1=makeChainStep("Step1_tau", [getTauSequence('calo')])
@@ -230,7 +229,7 @@ def generateCFChains(flags, opt):
     ##################################################################
     # B-physics and light states chains
     ##################################################################
-    if opt.doBphysicsSlice is True:
+    if 'Bphysics' in flags.Trigger.enabledSignatures:
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence, muCombSequence, muEFSASequence, muEFCBSequence
         from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerDimuL2ComboHypoCfg, DimuEFComboHypoCfg
         
@@ -269,7 +268,8 @@ def generateCFChains(flags, opt):
     ##################################################################
     # combined chains
     ##################################################################
-    if opt.doCombinedSlice is True:
+    doCombinedSlice = True
+    if doCombinedSlice:
         from TriggerMenuMT.HLT.Electron.ElectronChainConfiguration import electronFastCaloCfg
         fastCaloSeq = RecoFragmentsPool.retrieve( electronFastCaloCfg, flags )
         
@@ -279,7 +279,7 @@ def generateCFChains(flags, opt):
         else:
             muFast = menuSequenceCAToGlobalWrapper(muFastSequence,flags)
 
-        comboStep_et_mufast           = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFast], multiplicity=[1,1])
+        comboStep_et_mufast = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFast], multiplicity=[1,1])
 
         menu.chainsInMenu['Combined'] = [
             makeChain(flags, name='HLT_e3_etcut_mu6_L12eEM10L_MU8F', L1Thresholds=["eEM10L", "MU8F"],  ChainSteps=[comboStep_et_mufast ])
