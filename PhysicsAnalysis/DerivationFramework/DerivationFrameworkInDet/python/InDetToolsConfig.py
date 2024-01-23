@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # ==============================================================================
 # Provides configs for the tools used for building/thinning tracking related
@@ -71,17 +71,20 @@ def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
 
     if "TrackExtrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        AtlasExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-        acc.addPublicTool(AtlasExtrapolator)
-        kwargs.setdefault("TrackExtrapolator", AtlasExtrapolator)
+        kwargs.setdefault("TrackExtrapolator", acc.addPublicTool(
+            acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
 
     if "HoleSearch" not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
             InDetTrackHoleSearchToolCfg)
-        InDetHoleSearchTool = acc.popToolsAndMerge(
-            InDetTrackHoleSearchToolCfg(flags))
-        acc.addPublicTool(InDetHoleSearchTool)
-        kwargs.setdefault("HoleSearch", InDetHoleSearchTool)
+        kwargs.setdefault("HoleSearch", acc.addPublicTool(
+            acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags))))
+
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
+            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
 
     kwargs.setdefault("IsSimulation", flags.Input.isMC)
     kwargs.setdefault("StorePixel", flags.Tracking.writeExtendedSi_PRDInfo)
@@ -91,9 +94,7 @@ def TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
 
     if kwargs["StoreTRT"] and "TRT_ToT_dEdx" not in kwargs:
         from InDetConfig.TRT_ElectronPidToolsConfig import TRT_dEdxToolCfg
-        InDetTRT_dEdxTool = acc.popToolsAndMerge(TRT_dEdxToolCfg(flags))
-        acc.addPublicTool(InDetTRT_dEdxTool)
-        kwargs.setdefault("TRT_ToT_dEdx", InDetTRT_dEdxTool)
+        kwargs.setdefault("TRT_ToT_dEdx", acc.addPublicTool(acc.popToolsAndMerge(TRT_dEdxToolCfg(flags))))
 
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapCombinedInDetTracks")
@@ -249,16 +250,17 @@ def ITkTrackStateOnSurfaceDecoratorCfg(
     acc = ITkStripReadoutGeometryCfg(flags)
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    AtlasExtrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-    acc.addPublicTool(AtlasExtrapolator)
-    kwargs.setdefault("TrackExtrapolator", AtlasExtrapolator)
+    kwargs.setdefault("TrackExtrapolator", acc.addPublicTool(acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
 
     from InDetConfig.InDetTrackHoleSearchConfig import (
         ITkTrackHoleSearchToolCfg)
-    ITkHoleSearchTool = acc.popToolsAndMerge(ITkTrackHoleSearchToolCfg(flags))
-    acc.addPublicTool(ITkHoleSearchTool)
-    kwargs.setdefault("HoleSearch", ITkHoleSearchTool)
+    kwargs.setdefault("HoleSearch", acc.addPublicTool(acc.popToolsAndMerge(ITkTrackHoleSearchToolCfg(flags))))
 
+    from TrkConfig.TrkResidualPullCalculatorConfig import (
+        ResidualPullCalculatorCfg)
+    kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
+        acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+    
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PixelMapName", "ITkPixelClustersOffsets")
     kwargs.setdefault("SctMapName", "ITkStripClustersOffsets")

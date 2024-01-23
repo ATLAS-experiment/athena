@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -11,6 +11,12 @@ def MuonSegmentReaderCfg(configFlags, **kwargs):
     result=ComponentAccumulator()
     result.merge(MuonIdHelperSvcCfg(configFlags))
     result.merge(MuonEDMHelperSvcCfg(configFlags))
+
+    if "PullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("PullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
 
     alg = CompFactory.MuonCalib.MuonSegmentReader(**kwargs)
 

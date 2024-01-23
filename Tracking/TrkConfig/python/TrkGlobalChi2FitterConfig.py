@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkGlobalChi2Fitter package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -57,6 +57,10 @@ def InDetGlobalChi2FitterBaseCfg(
     from TrkConfig.TrkMeasurementUpdatorConfig import InDetUpdatorCfg
     kwargs.setdefault("MeasurementUpdateTool", acc.popToolsAndMerge(
         InDetUpdatorCfg(flags)))
+
+    from TrkConfig.TrkResidualPullCalculatorConfig import ResidualPullCalculatorCfg
+    kwargs.setdefault("ResidualPullCalculatorTool", acc.popToolsAndMerge(
+        ResidualPullCalculatorCfg(flags)))
 
     kwargs.setdefault("StraightLine", not flags.BField.solenoidOn)
     kwargs.setdefault("OutlierCut", 4)

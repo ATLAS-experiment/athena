@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Configuration of tools shared between Segment Finding and Track Building
 
@@ -12,7 +12,13 @@ def MuonEDMPrinterToolCfg(flags, name="MuonEDMPrinterTool", **kwargs):
     kwargs.setdefault('TgcPrdCollection', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
     #kwargs.setdefault('TgcPrdCollection', 'TGC_Measurements' )
     # We need to override TgcPrdCollection to match old config, so keep line above for ease of testing.
-    kwargs.setdefault('ResidualPullCalculator', CompFactory.Trk.ResidualPullCalculator('ResidualPullCalculator'))
+
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+
     the_tool = CompFactory.Muon.MuonEDMPrinterTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     result.merge(MuonEDMHelperSvcCfg(flags))
@@ -163,6 +169,12 @@ def MuonTrackCleanerCfg(flags, name="MuonTrackCleaner", seg=False, **kwargs):
     slfitter = result.popToolsAndMerge(MCTBSLFitterMaterialFromTrackCfg(flags))
     kwargs.setdefault("SLFitter", slfitter)
 
+    if "PullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("PullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+    
     if seg:
         # I might move this into its own function eventually
         # See ATLASRECTS-7325 for more discussion of this
@@ -209,6 +221,12 @@ def MuPatHitToolCfg(flags, name="MuPatHitTool",**kwargs):
     kwargs.setdefault("MdtRotCreator", 
         result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags, name = "MdtDriftCircleOnTrackCreatorPreFit", DoFixedError = True, CreateTubeHit = True, DoSegmentErrors = False)) )
 
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+    
     if flags.Detector.GeometryCSC:
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import CscClusterOnTrackCreatorCfg
         kwargs.setdefault("CscRotCreator", result.popToolsAndMerge(CscClusterOnTrackCreatorCfg(flags)))

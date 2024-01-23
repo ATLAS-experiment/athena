@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -119,7 +119,13 @@ def MooTrackBuilderCfg(flags, name="MooTrackBuilderTemplate", prefix="", doSegme
 
     from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(MuonTrackSummaryToolCfg(flags)))
-   
+
+    if "PullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("PullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+
     result.setPrivateTools(Muon__MooTrackBuilder(name, **kwargs))
     return result
 
@@ -131,6 +137,13 @@ def MuonSegmentInOverlapResolvingToolCfg(flags, name="MuonSegmentInOverlapResolv
     kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
     kwargs.setdefault("AtlasRungeKuttaPropagator", result.popToolsAndMerge(
         RungeKuttaPropagatorCfg(flags)))
+
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+    
     result.setPrivateTools(CompFactory.Muon.MuonSegmentInOverlapResolvingTool(name, **kwargs))
     return result
 
@@ -343,6 +356,12 @@ def MuonChamberHoleRecoveryToolCfg(flags, name="MuonChamberHoleRecoveryTool", **
     kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')    
     kwargs.setdefault("EDMPrinter", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ))
 
+    if "PullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("PullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+    
     result.setPrivateTools(CompFactory.Muon.MuonChamberHoleRecoveryTool(name, **kwargs))
     return result
 

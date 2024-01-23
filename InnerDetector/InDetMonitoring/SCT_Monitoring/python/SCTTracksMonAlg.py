@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''@file SCTTracksMonAlg.py
 @author Ken Kreul
@@ -28,7 +28,11 @@ def SCTTracksMonAlgConfig(flags):
     # base class configuration following the flags. The returned object 
     # is the algorithm.
     from AthenaConfiguration.ComponentFactory import CompFactory
-    myMonAlg = helper.addAlgorithm(CompFactory.SCTTracksMonAlg, 'SCTTracksMonAlg')
+    from TrkConfig.TrkResidualPullCalculatorConfig import (
+        ResidualPullCalculatorCfg)
+    myMonAlg = helper.addAlgorithm(CompFactory.SCTTracksMonAlg, 'SCTTracksMonAlg',
+                                   ResPullCalc = result.popToolsAndMerge(
+                                       ResidualPullCalculatorCfg(flags)))
 
     from AthenaConfiguration.Enums import BeamType
     if flags.Beam.Type is BeamType.Collisions:
