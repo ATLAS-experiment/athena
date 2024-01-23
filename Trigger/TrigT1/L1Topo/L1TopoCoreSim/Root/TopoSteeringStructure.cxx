@@ -528,6 +528,14 @@ TCS::TopoSteeringStructure::setIsolationFW_CTAU(const TrigConf::L1Menu& l1menu) 
    m_isolationFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = CTAU_iso_fw_loose;
    m_isolationFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = CTAU_iso_fw_medium;
    m_isolationFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = CTAU_iso_fw_tight;
+
+   int CTAU_iso_fw_jTAUCoreScale_loose  = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE, 0).isolation_jTAUCoreScale_fw());
+   int CTAU_iso_fw_jTAUCoreScale_medium = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM, 0).isolation_jTAUCoreScale_fw());
+   int CTAU_iso_fw_jTAUCoreScale_tight  = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT, 0).isolation_jTAUCoreScale_fw());
+   
+   m_isolationFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = CTAU_iso_fw_jTAUCoreScale_loose;
+   m_isolationFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = CTAU_iso_fw_jTAUCoreScale_medium;
+   m_isolationFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = CTAU_iso_fw_jTAUCoreScale_tight;
 }
 
 
@@ -549,7 +557,7 @@ TCS::TopoSteeringStructure::setIsolationFW_JTAU(const TrigConf::L1Menu& l1menu) 
 #ifndef TRIGCONF_STANDALONE
 
 void
-TCS::TopoSteeringStructure::setIsolationFW_CTAU(std::map<std::string, int>& isoFW_CTAU, const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) {
+TCS::TopoSteeringStructure::setIsolationFW_CTAU(std::map<std::string, int>& isoFW_CTAU, std::map<std::string, int>& isoFW_CTAU_jTAUCoreScale, const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) {
    const TrigConf::L1ThrExtraInfo_cTAU& cTauExtraInfo = dynamic_cast<const TrigConf::L1ThrExtraInfo_cTAU&>(menuExtraInfo);
 
    int CTAU_iso_fw_loose  = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE, 0).isolation_fw());
@@ -559,6 +567,14 @@ TCS::TopoSteeringStructure::setIsolationFW_CTAU(std::map<std::string, int>& isoF
    isoFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = CTAU_iso_fw_loose;
    isoFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = CTAU_iso_fw_medium;
    isoFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = CTAU_iso_fw_tight;   
+
+   int CTAU_iso_fw_jTAUCoreScale_loose  = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE, 0).isolation_jTAUCoreScale_fw());
+   int CTAU_iso_fw_jTAUCoreScale_medium = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM, 0).isolation_jTAUCoreScale_fw());
+   int CTAU_iso_fw_jTAUCoreScale_tight  = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT, 0).isolation_jTAUCoreScale_fw());
+
+   isoFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = CTAU_iso_fw_jTAUCoreScale_loose;
+   isoFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = CTAU_iso_fw_jTAUCoreScale_medium;
+   isoFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = CTAU_iso_fw_jTAUCoreScale_tight;   
 }
 
 #endif

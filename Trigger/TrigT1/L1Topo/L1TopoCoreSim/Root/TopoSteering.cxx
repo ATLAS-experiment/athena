@@ -100,7 +100,7 @@ TopoSteering::initializeAlgorithms() {
             alg->setL1TopoHistSvc(m_histSvc);
          }
 	 alg->setLegacyMode(m_isLegacyTopo);
-	 alg->setIsolationFW_CTAU(structure().isolationFW_CTAU());
+	 alg->setIsolationFW_CTAU(structure().isolationFW_CTAU(), structure().isolationFW_CTAU_jTAUCoreScale());
 	 alg->setIsolationFW_JTAU(structure().isolationFW_JTAU());
          alg->initialize();
       }

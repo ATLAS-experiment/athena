@@ -466,11 +466,13 @@ TrigConf::L1ThrExtraInfo_cTAU::WorkingPoints_cTAU::WorkingPoints_cTAU( const boo
    m_isDefined = true;
    m_isolation_d    = pt.get_optional<float>("isolation").get_value_or(0);
    m_isolation_fw   = pt.get_optional<float>("isolation_fw").get_value_or(0);
+   m_isolation_jTAUCoreScale_d    = pt.get_optional<float>("isolation_jTAUCoreScale").get_value_or(0);
+   m_isolation_jTAUCoreScale_fw   = pt.get_optional<float>("isolation_jTAUCoreScale_fw").get_value_or(0);
 }
 
 std::ostream &
 TrigConf::operator<<(std::ostream & os, const TrigConf::L1ThrExtraInfo_cTAU::WorkingPoints_cTAU & iso) {
-   os << "isolation_fw=" << iso.isolation_fw() ;
+   os << "isolation_fw=" << iso.isolation_fw() << ", isolation_jTAUCoreScale_fw=" << iso.isolation_jTAUCoreScale_fw();
    return os;
 }
 
