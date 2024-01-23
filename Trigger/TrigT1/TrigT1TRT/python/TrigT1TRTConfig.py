@@ -8,6 +8,8 @@ def L1TRTSimCfg(flags, name="TrigT1TRT"):
     acc = ComponentAccumulator()
     from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
     acc.merge(L1ConfigSvcCfg(flags))
+    from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTStrawStatusCondAlgCfg
+    acc.merge(TRTStrawStatusCondAlgCfg(flags))
     from AthenaConfiguration.ComponentFactory import CompFactory
     acc.addEventAlgo(CompFactory.LVL1.TrigT1TRT(name,
                                                 TTCMultiplicity = flags.Trigger.TRT.TTCMultiplicity

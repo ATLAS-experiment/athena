@@ -112,7 +112,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.doTRT', False)
 
     # Set TTC multiplicity required for the TRT fast-OR trigger
-    flags.addFlag('Trigger.TRT.TTCMultiplicity', 5)
+    flags.addFlag('Trigger.TRT.TTCMultiplicity', 4)
 
 
     flags.addFlag('Trigger.doValidationMonitoring', False,
