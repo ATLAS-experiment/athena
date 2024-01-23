@@ -39,7 +39,7 @@ class VP1Alg: public AthAlgorithm,
   virtual StatusCode execute() override;
   virtual StatusCode finalize() override;
 
-  void handle(const Incident& inc);
+  void handle(const Incident& inc) override;
 
  private:
 
