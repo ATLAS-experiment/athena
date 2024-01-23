@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -931,7 +931,7 @@ TDirectory* Calibrator::Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory* dir, std::s
 }
 
 
-int Calibrator::AddHit(const std::string& key, databundle d, int* binhist, bool makehist){
+int Calibrator::AddHit(const std::string& key, const databundle & d, int* binhist, bool makehist){
   
   int tresbin=Simple1dHist(m_mintres,m_maxtres,m_nbinstres,d.tres);
   int resbin=Simple1dHist(m_minres,m_maxres,m_nbinsres,d.res);
