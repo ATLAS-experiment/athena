@@ -27,7 +27,6 @@
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
-#include "TrkToolInterfaces/IResidualPullCalculator.h"
 #include "TrkTrack/Track.h"
 
 namespace Muon {

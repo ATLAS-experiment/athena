@@ -41,7 +41,6 @@
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkSegment/SegmentCollection.h"
 #include "TrkSurfaces/StraightLineSurface.h"
-#include "TrkToolInterfaces/IResidualPullCalculator.h"
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 
 namespace Muon {
