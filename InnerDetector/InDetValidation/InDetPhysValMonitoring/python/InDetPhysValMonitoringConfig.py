@@ -232,7 +232,6 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("doIDTIDEPlots", True)
         kwargs.setdefault("JetContainerName", 'AntiKt4EMPFlowJets')
         kwargs.setdefault("FillTrackInJetPlots", True)
-        kwargs.setdefault("FillTrackInJetPlots", True)
 
     kwargs.setdefault("doPRW", flags.PhysVal.IDPVM.doPRW)
 
