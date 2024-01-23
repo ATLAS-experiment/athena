@@ -37,6 +37,12 @@ def CombinedTrackingPassFlagSets(flags):
             "Tracking.ActiveConfig",
             "Tracking.ITkActsPass")]
 
+    # Acts Conversion Pass
+    if flags.Detector.EnableCalo and flags.Acts.doITkConversion:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsConversionPass")]
+        
     # Acts Validation Passes
     for [configuration, key] in validation_configurations.items():
         if configuration in flags.Tracking.recoChain:
@@ -143,12 +149,12 @@ def ITkTrackRecoPassCfg(flags, extension="",
             TrackContainer=TrackContainer,
             ClusterSplitProbContainer=ClusterSplitProbContainer))
     else:
-        ClusterSplitProbContainer = (
-            "ITkAmbiguityProcessorSplitProb" + extension)
-        if extension != 'Acts':
+        if extension not in ['Acts', 'ActsConversion']:
+            ClusterSplitProbContainer = (
+                "ITkAmbiguityProcessorSplitProb" + extension)
             InputCombinedITkTracks += [TrackContainer]
 
-    if extension != 'Acts':
+    if extension not in ['Acts', 'ActsConversion']:
         InputExtendedITkTracks += [TrackContainer]
         
     return result, ClusterSplitProbContainer
@@ -197,6 +203,7 @@ def ITkTrackFinalCfg(flags,
             TrackLocation=[TrackContainer]))
 
     splitProbName = ITkClusterSplitProbabilityContainerName(flags)
+
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
     result.merge(ITkTrackParticleCnvAlgCfg(
         flags,
@@ -208,6 +215,7 @@ def ITkTrackFinalCfg(flags,
             f"PRDtoTrackMap{TrackContainer}"),
         isActsAmbi = 'ValidateActsResolvedTracks' in splitProbName or \
         'ValidateActsAmbiguityResolution' in splitProbName or \
+        'ActsConversion' in splitProbName or \
         ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
 
     return result

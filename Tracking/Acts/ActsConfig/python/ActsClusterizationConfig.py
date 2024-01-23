@@ -88,6 +88,7 @@ def ActsITkStripClusterizationAlgCfg(flags,
 
 def ActsClusterizationCfg(flags):
     acc = ComponentAccumulator()
+
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsITkPixelClusterizationAlgCfg(flags))
     if flags.Detector.EnableITkStrip:

@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
 
-from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags
+from TrkConfig.TrackingPassFlags import createITkTrackingPassFlags, createITkConversionTrackingPassFlags
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -23,6 +23,16 @@ def createActsTrackingPassFlags():
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
     return icf
 
+def createActsConversionTrackingPassFlags():
+    icf = createITkConversionTrackingPassFlags()
+    icf.extension = "ActsConversion"
+    deactivateAthenaComponents(icf)
+    icf.doActsCluster = True
+
+    # Deactivate PRD association tool
+    icf.usePrdAssociationTool = False
+    return icf
+    
 def createValidateActsClustersTrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension = "ValidateActsClusters"

@@ -18,10 +18,13 @@ class TrackFitterType(FlagEnum):
 
 def createActsConfigFlags():
     actscf = AthConfigFlags()
-
+    
     # General Flags
     actscf.addFlag('Acts.EDM.PersistifyClusters', False)
     actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
+
+    # Scheduling
+    actscf.addFlag('Acts.doITkConversion', False)
     
     # Geometry Flags
 
