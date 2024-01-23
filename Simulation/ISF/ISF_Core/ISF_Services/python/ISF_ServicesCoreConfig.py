@@ -27,18 +27,18 @@ def GeoIDSvcCfg(flags, name="ISF_GeoIDSvc", **kwargs):
     return result
 
 
-def AFIIEnvelopeDefSvcCfg(flags, name="ISF_AFIIEnvelopeDefSvc", **kwargs):
+def ATLFAST_EnvelopeDefSvcCfg(flags, name="ISF_ATLFAST_EnvelopeDefSvc", **kwargs):
     result = ComponentAccumulator()
     # ATLAS common envlope definitions
     kwargs.setdefault("ISFEnvelopeDefSvc", result.getPrimaryAndMerge(ISFEnvelopeDefSvcCfg(flags)).name)
     kwargs.setdefault("InDetMaxExtentZ", 3549.5*mm)
-    result.addService(CompFactory.ISF.AFIIEnvelopeDefSvc(name, **kwargs), primary = True)
+    result.addService(CompFactory.ISF.ATLFAST_EnvelopeDefSvc(name, **kwargs), primary = True)
     return result
 
 
-def AFIIGeoIDSvcCfg(flags, name="ISF_AFIIGeoIDSvc", **kwargs):
+def ATLFAST_GeoIDSvcCfg(flags, name="ISF_ATLFAST_GeoIDSvc", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(AFIIEnvelopeDefSvcCfg(flags)).name)
+    kwargs.setdefault("EnvelopeDefSvc", result.getPrimaryAndMerge(ATLFAST_EnvelopeDefSvcCfg(flags)).name)
     result.addService(CompFactory.ISF.GeoIDSvc(name, **kwargs), primary = True)
     return result
 

@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// AFIIEnvelopeDefSvc.cxx, (c) ATLAS Detector software
+// ATLFAST_EnvelopeDefSvc.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
 // class header include
-#include "AFIIEnvelopeDefSvc.h"
+#include "ATLFAST_EnvelopeDefSvc.h"
 
 // AtlasDetDescr
 #include "AtlasDetDescr/AtlasRegionHelper.h"
@@ -16,7 +16,7 @@
 #include <limits>
 
 /** Constructor */
-ISF::AFIIEnvelopeDefSvc::AFIIEnvelopeDefSvc(const std::string& name, ISvcLocator* svc) :
+ISF::ATLFAST_EnvelopeDefSvc::ATLFAST_EnvelopeDefSvc(const std::string& name, ISvcLocator* svc) :
   base_class(name,svc),
   m_isfEnvDefSvc("ISF_ISFEnvelopeDefSvc", name),
   m_tolerance(1e-4),
@@ -40,7 +40,7 @@ ISF::AFIIEnvelopeDefSvc::AFIIEnvelopeDefSvc(const std::string& name, ISvcLocator
 }
 
 
-ISF::AFIIEnvelopeDefSvc::~AFIIEnvelopeDefSvc()
+ISF::ATLFAST_EnvelopeDefSvc::~ATLFAST_EnvelopeDefSvc()
 {
   // free memory
   // TODO :)
@@ -48,7 +48,7 @@ ISF::AFIIEnvelopeDefSvc::~AFIIEnvelopeDefSvc()
 
 
 /** Athena AthService initialize hook */
-StatusCode ISF::AFIIEnvelopeDefSvc::initialize()
+StatusCode ISF::ATLFAST_EnvelopeDefSvc::initialize()
 {
   ATH_MSG_INFO("Initializing ...");
 
@@ -111,14 +111,14 @@ StatusCode ISF::AFIIEnvelopeDefSvc::initialize()
 
 
 /** Athena AthService finalize hook */
-StatusCode ISF::AFIIEnvelopeDefSvc::finalize()
+StatusCode ISF::ATLFAST_EnvelopeDefSvc::finalize()
 {
   return StatusCode::SUCCESS;
 }
 
 
 /** return a vector of (r,z) pairs, defining the respective envelope */
-const RZPairVector &ISF::AFIIEnvelopeDefSvc::getRZBoundary( AtlasDetDescr::AtlasRegion region ) const {
+const RZPairVector &ISF::ATLFAST_EnvelopeDefSvc::getRZBoundary( AtlasDetDescr::AtlasRegion region ) const {
 
   // treat Forward/BeamPipe and InnerDetector regions separately
   if      ( region == AtlasDetDescr::fAtlasForward ) return m_rzBeamPipe;
@@ -130,7 +130,7 @@ const RZPairVector &ISF::AFIIEnvelopeDefSvc::getRZBoundary( AtlasDetDescr::Atlas
 
 
 /** return a vector of (r,z) pairs, defining the envelope on the z>0 region */
-const RZPairVector &ISF::AFIIEnvelopeDefSvc::getRPositiveZBoundary( AtlasDetDescr::AtlasRegion region ) const {
+const RZPairVector &ISF::ATLFAST_EnvelopeDefSvc::getRPositiveZBoundary( AtlasDetDescr::AtlasRegion region ) const {
 
   // treat Forward/BeamPipe and InnerDetector regions separately
   if      ( region == AtlasDetDescr::fAtlasForward ) return m_rposzBeamPipe;
@@ -141,7 +141,7 @@ const RZPairVector &ISF::AFIIEnvelopeDefSvc::getRPositiveZBoundary( AtlasDetDesc
 
 
 /** return boundary with shifted z values */
-RZPairVector ISF::AFIIEnvelopeDefSvc::getShiftedBoundary( AtlasDetDescr::AtlasRegion region,
+RZPairVector ISF::ATLFAST_EnvelopeDefSvc::getShiftedBoundary( AtlasDetDescr::AtlasRegion region,
                                                            double shiftFromZ,
                                                            double shiftToZ ) const {
 

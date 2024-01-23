@@ -2,4 +2,4 @@
 
 from AthenaCommon.CfgGetter import addService
 addService("ISF_Geant4CommonServices.ISF_Geant4CommonServicesConfigLegacy.getG4PolyconeGeoIDSvc",    "ISF_G4PolyconeGeoIDSvc"   )
-addService("ISF_Geant4CommonServices.ISF_Geant4CommonServicesConfigLegacy.getAFIIG4PolyconeGeoIDSvc","ISF_AFIIG4PolyconeGeoIDSvc")
+addService("ISF_Geant4CommonServices.ISF_Geant4CommonServicesConfigLegacy.getATLFAST_G4PolyconeGeoIDSvc","ISF_ATLFAST_G4PolyconeGeoIDSvc")

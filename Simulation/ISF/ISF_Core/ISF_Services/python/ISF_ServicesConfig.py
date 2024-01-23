@@ -21,7 +21,7 @@ from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import (
 )
 from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
 from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import (
-    EntryLayerToolCfg, AFIIEntryLayerToolCfg
+    EntryLayerToolCfg, ATLFAST_EntryLayerToolCfg
 )
 from ISF_Tools.ISF_ToolsConfig import ParticleOrderingToolCfg
 
@@ -67,10 +67,10 @@ def ParticleBrokerSvcCfg(flags, name="ISF_ParticleBrokerSvc", **kwargs):
     return result
 
 
-def AFIIParticleBrokerSvcCfg(flags, name="ISF_AFIIParticleBrokerSvc", **kwargs):
+def ATLFAST_ParticleBrokerSvcCfg(flags, name="ISF_ATLFAST_ParticleBrokerSvc", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("EntryLayerTool", result.addPublicTool(result.popToolsAndMerge(AFIIEntryLayerToolCfg(flags))))
-    kwargs.setdefault("GeoIDSvc", result.getService("ISF_AFIIGeoIDSvc").name) # FIXME
+    kwargs.setdefault("EntryLayerTool", result.addPublicTool(result.popToolsAndMerge(ATLFAST_EntryLayerToolCfg(flags))))
+    kwargs.setdefault("GeoIDSvc", result.getService("ISF_ATLFAST_GeoIDSvc").name) # FIXME
     pbsvc = result.getPrimaryAndMerge(ParticleBrokerSvcCfg(flags, name, **kwargs))
     result.addService(pbsvc, primary = True)
     return result

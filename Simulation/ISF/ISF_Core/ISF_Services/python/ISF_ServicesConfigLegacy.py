@@ -28,14 +28,14 @@ def getParticleBrokerSvc(name="ISF_ParticleBrokerSvc", **kwargs):
     return getParticleBrokerSvcNoOrdering(name, **kwargs)
 
 
-def getAFIIParticleBrokerSvc(name="ISF_AFIIParticleBrokerSvc", **kwargs):
-    kwargs.setdefault('EntryLayerTool', 'ISF_AFIIEntryLayerTool')
+def getATLFAST_ParticleBrokerSvc(name="ISF_ATLFAST_ParticleBrokerSvc", **kwargs):
+    kwargs.setdefault('EntryLayerTool', 'ISF_ATLFAST_EntryLayerTool')
     return getParticleBrokerSvc(name, **kwargs)
 
 
-def getAFIIEnergyOrderedParticleBrokerSvc(name="ISF_AFIIEnergyOrderedParticleBrokerSvc", **kwargs):
+def getATLFAST_EnergyOrderedParticleBrokerSvc(name="ISF_ATLFAST_EnergyOrderedParticleBrokerSvc", **kwargs):
     kwargs.setdefault('ParticleOrderingTool', 'ISF_EnergyParticleOrderingTool')
-    return getAFIIParticleBrokerSvc(name, **kwargs)
+    return getATLFAST_ParticleBrokerSvc(name, **kwargs)
 
 
 def getISFEnvelopeDefSvc(name="ISF_ISFEnvelopeDefSvc", **kwargs):
@@ -44,12 +44,12 @@ def getISFEnvelopeDefSvc(name="ISF_ISFEnvelopeDefSvc", **kwargs):
     return CfgMgr.ISF__ISFEnvelopeDefSvc(name, **kwargs)
 
 
-def getAFIIEnvelopeDefSvc(name="ISF_AFIIEnvelopeDefSvc", **kwargs):
+def getATLFAST_EnvelopeDefSvc(name="ISF_ATLFAST_EnvelopeDefSvc", **kwargs):
     from AthenaCommon.SystemOfUnits import mm
     # ATLAS common envlope definitions
     kwargs.setdefault("ISFEnvelopeDefSvc", "ISF_ISFEnvelopeDefSvc")
     kwargs.setdefault("InDetMaxExtentZ", 3549.5*mm)
-    return CfgMgr.ISF__AFIIEnvelopeDefSvc(name, **kwargs)
+    return CfgMgr.ISF__ATLFAST_EnvelopeDefSvc(name, **kwargs)
 
 
 def getGeoIDSvc(name="ISF_GeoIDSvc", **kwargs):
@@ -58,8 +58,8 @@ def getGeoIDSvc(name="ISF_GeoIDSvc", **kwargs):
     return CfgMgr.ISF__GeoIDSvc(name, **kwargs)
 
 
-def getAFIIGeoIDSvc(name="ISF_AFIIGeoIDSvc", **kwargs):
-    kwargs.setdefault("EnvelopeDefSvc", "ISF_AFIIEnvelopeDefSvc")
+def getATLFAST_GeoIDSvc(name="ISF_ATLFAST_GeoIDSvc", **kwargs):
+    kwargs.setdefault("EnvelopeDefSvc", "ISF_ATLFAST_EnvelopeDefSvc")
     return getGeoIDSvc(name, **kwargs)
 
 

@@ -13,9 +13,9 @@ from G4UserActions.G4UserActionsConfig import (
     LooperKillerToolCfg, StoppedParticleActionToolCfg
 )
 from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import EntryLayerToolCfg, EntryLayerToolMTCfg
-from ISF_Services.ISF_ServicesCoreConfig import AFIIGeoIDSvcCfg, GeoIDSvcCfg
+from ISF_Services.ISF_ServicesCoreConfig import ATLFAST_GeoIDSvcCfg, GeoIDSvcCfg
 from ISF_Services.ISF_ServicesConfig import (
-    AFIIParticleBrokerSvcCfg, ParticleBrokerSvcCfg, TruthServiceCfg
+    ATLFAST_ParticleBrokerSvcCfg, ParticleBrokerSvcCfg, TruthServiceCfg
 )
 from ISF_Tools.ISF_ToolsConfig import StoppedParticleFilterToolCfg
 from MCTruthBase.MCTruthBaseConfig import MCTruthSteppingActionToolCfg
@@ -88,13 +88,13 @@ def PassBackG4TrackProcessorUserActionToolCfg(flags, name="PassBackG4TrackProces
     return TrackProcessorUserActionToolCfg(flags, name, **kwargs)
 
 
-def AFII_G4TrackProcessorUserActionToolCfg(flags, name="AFII_G4TrackProcessorUserActionTool", **kwargs):
+def ATLFAST_G4TrackProcessorUserActionToolCfg(flags, name="ATLFAST_G4TrackProcessorUserActionTool", **kwargs):
     result = ComponentAccumulator()
     if flags.Sim.ISF.Simulator in [SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFASTIIMT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
         kwargs.setdefault("ParticleBroker", "")
     elif flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFAST3F_G4MS]:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(AFIIParticleBrokerSvcCfg(flags)).name)
-    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(AFIIGeoIDSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
+    kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)).name)
     kwargs.setdefault("PassBackEkinThreshold", 0.05*MeV)
     kwargs.setdefault("KillBoundaryParticlesBelowThreshold", True)
     tool = result.popToolsAndMerge(PassBackG4TrackProcessorUserActionToolCfg(flags, name, **kwargs))
@@ -231,12 +231,12 @@ def ISFPassBackUserActionSvcCfg(flags, name="G4UA::ISFPassBackUserActionSvc", **
     return result
 
 
-def ISF_AFIIUserActionSvcCfg(flags, name="G4UA::ISF_AFIIUserActionSvc", **kwargs):
+def ISF_ATLFAST_UserActionSvcCfg(flags, name="G4UA::ISF_ATLFAST_UserActionSvc", **kwargs):
     # this configuration needs ISFMCTruthUserAction and
-    # AFII_G4TrackProcessorUserAction
+    # ATLFAST_G4TrackProcessorUserAction
     tpAcc = ComponentAccumulator()
     kwargs.setdefault("TrackProcessorUserAction",
-                      [tpAcc.popToolsAndMerge(AFII_G4TrackProcessorUserActionToolCfg(flags))])
+                      [tpAcc.popToolsAndMerge(ATLFAST_G4TrackProcessorUserActionToolCfg(flags))])
     result = ISFUserActionSvcCfg(flags, name, **kwargs)
     result.merge(tpAcc)
     return result

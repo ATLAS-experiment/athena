@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// AFIIEnvelopeDefSvc.h, (c) ATLAS Detector software
+// ATLFAST_EnvelopeDefSvc.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
-#ifndef AFIIENVELOPEDEFSVC_H
-#define AFIIENVELOPEDEFSVC_H
+#ifndef ISF_SERVICES_ATLFAST_ENVELOPEDEFSVC_H
+#define ISF_SERVICES_ATLFAST_ENVELOPEDEFSVC_H
 
 // STL includes
 #include <string>
@@ -21,14 +21,14 @@
 
 namespace ISF {
 
-  class AFIIEnvelopeDefSvc : public extends<AthService, IEnvelopeDefSvc> {
+  class ATLFAST_EnvelopeDefSvc : public extends<AthService, IEnvelopeDefSvc> {
 
     public:
       /** public AthService constructor */
-      AFIIEnvelopeDefSvc(const std::string& name, ISvcLocator* svc);
+      ATLFAST_EnvelopeDefSvc(const std::string& name, ISvcLocator* svc);
 
       /** Destructor */
-      ~AFIIEnvelopeDefSvc();
+      ~ATLFAST_EnvelopeDefSvc();
 
       /** AthService initialize method.*/
       StatusCode initialize();
@@ -69,5 +69,5 @@ namespace ISF {
 
 } // namespace ISF
 
-#endif // AFIIENVELOPEDEFSVC_H
+#endif // ISF_SERVICES_ATLFAST_ENVELOPEDEFSVC_H
 

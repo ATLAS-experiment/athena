@@ -13,7 +13,7 @@ addService("G4AtlasServices.G4AtlasUserActionConfigLegacy.getUserActionSvc","G4U
 addService("G4AtlasServices.G4AtlasUserActionConfigLegacy.getISFUserActionSvc","G4UA::ISFUserActionSvc")
 addService("G4AtlasServices.G4AtlasUserActionConfigLegacy.getISFFullUserActionSvc","G4UA::ISFFullUserActionSvc")
 addService("G4AtlasServices.G4AtlasUserActionConfigLegacy.getISFPassBackUserActionSvc","G4UA::ISFPassBackUserActionSvc")
-addService("G4AtlasServices.G4AtlasUserActionConfigLegacy.getISF_AFIIUserActionSvc","G4UA::ISF_AFIIUserActionSvc")
+addService("G4AtlasServices.G4AtlasUserActionConfigLegacy.getISF_ATLFAST_UserActionSvc","G4UA::ISF_ATLFAST_UserActionSvc")
 addService("G4AtlasServices.G4AtlasUserActionConfigLegacy.getCTBUserActionSvc","G4UA::CTBUserActionSvc")
 
 addService("G4AtlasServices.G4AtlasServicesConfigLegacy.getStandardFieldSvc","StandardField")

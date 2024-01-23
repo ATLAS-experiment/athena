@@ -121,8 +121,8 @@ def getISFPassBackUserActionSvc(name="G4UA::ISFPassBackUserActionSvc", **kwargs)
     kwargs.setdefault('TrackProcessorUserAction', ['PassBackG4TrackProcessorUserActionTool'])
     return getISFUserActionSvc(name, **kwargs)
 
-def getISF_AFIIUserActionSvc(name="G4UA::ISF_AFIIUserActionSvc", **kwargs):
+def getISF_ATLFAST_UserActionSvc(name="G4UA::ISF_ATLFAST_UserActionSvc", **kwargs):
     # this configuration needs ISFMCTruthUserAction and
-    # AFII_G4TrackProcessorUserAction
-    kwargs.setdefault('TrackProcessorUserAction', ['AFII_G4TrackProcessorUserActionTool'])
+    # ATLFAST_G4TrackProcessorUserAction
+    kwargs.setdefault('TrackProcessorUserAction', ['ATLFAST_G4TrackProcessorUserActionTool'])
     return getISFUserActionSvc(name, **kwargs)

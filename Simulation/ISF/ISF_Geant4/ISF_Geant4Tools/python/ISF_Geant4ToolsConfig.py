@@ -10,7 +10,7 @@ from G4AtlasServices.G4AtlasServicesConfig import (
 )
 from G4AtlasServices.G4AtlasUserActionConfig import (
     ISFUserActionSvcCfg, ISFFullUserActionSvcCfg,
-    ISFPassBackUserActionSvcCfg, ISF_AFIIUserActionSvcCfg,
+    ISFPassBackUserActionSvcCfg, ISF_ATLFAST_UserActionSvcCfg,
 )
 from G4AtlasTools.G4AtlasToolsConfig import (
     SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
@@ -79,9 +79,9 @@ def PassBackGeant4ToolCfg(flags, name="ISF_PassBackGeant4Tool", **kwargs):
     return acc
 
 
-def AFIIGeant4ToolCfg(flags, name="ISF_AFIIGeant4Tool", **kwargs): # TODO Rename
+def ATLFAST_Geant4ToolCfg(flags, name="ISF_ATLFAST_Geant4Tool", **kwargs): # TODO Rename
     acc = ComponentAccumulator()
-    kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISF_AFIIUserActionSvcCfg(flags)).name)
+    kwargs.setdefault("UserActionSvc", acc.getPrimaryAndMerge(ISF_ATLFAST_UserActionSvcCfg(flags)).name)
     PassBackGeant4Tool = acc.popToolsAndMerge(Geant4ToolCfg(flags, name, **kwargs))
     acc.setPrivateTools(PassBackGeant4Tool)
     return acc

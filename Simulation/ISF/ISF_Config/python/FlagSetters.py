@@ -111,7 +111,7 @@ def configureFlagsATLFAST3():
     ISF_Flags.UsingGeant4 = True
     mergeDict = {'ID':False, 'CALO':True, 'MUON':False}
     ISF_Flags.HITSMergingRequired.get_Value().update(mergeDict)
-    ISF_Flags.ParticleBroker = "ISF_AFIIParticleBrokerSvc"
+    ISF_Flags.ParticleBroker = "ISF_ATLFAST_ParticleBrokerSvc"
     return
 
 def configureFlagsATLFAST3_QS():
@@ -147,7 +147,7 @@ def configureFlagsG4FastCalo():
 
 def configureFlagsATLFAST3EnergyOrdered():
     configureFlagsATLFAST3()
-    ISF_Flags.ParticleBroker = "ISF_AFIIEnergyOrderedParticleBrokerSvc"
+    ISF_Flags.ParticleBroker = "ISF_ATLFAST_EnergyOrderedParticleBrokerSvc"
     from G4AtlasApps.SimFlags import simFlags
     simFlags.SimulationFlavour = "G4FastCalo"
     return
@@ -195,7 +195,7 @@ def configureFlagsATLFAST3F_G4MS():
     simFlags.SimulationFlavour = "ATLFAST3F_G4MS"
     from ISF_Config.ISF_jobProperties import ISF_Flags
     ISF_Flags.UsingGeant4 = True
-    ISF_Flags.ParticleBroker = "ISF_AFIIParticleBrokerSvc"
+    ISF_Flags.ParticleBroker = "ISF_ATLFAST_ParticleBrokerSvc"
     return
 
 def configureFlagsATLFAST3F_ACTSMT():

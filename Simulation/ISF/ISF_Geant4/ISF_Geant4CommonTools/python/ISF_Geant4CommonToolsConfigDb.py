@@ -10,5 +10,5 @@ from AthenaCommon.CfgGetter import addTool
 # Common tools, services and algorithms used by jobs
 addTool("ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigLegacy.getEntryLayerToolMT",    "ISF_EntryLayerToolMT")
 addTool("ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigLegacy.getEntryLayerTool",      "ISF_EntryLayerTool")
-addTool("ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigLegacy.getAFIIEntryLayerTool",  "ISF_AFIIEntryLayerTool")
-addTool("ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigLegacy.getAFIIEntryLayerToolMT",  "ISF_AFIIEntryLayerToolMT")
+addTool("ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigLegacy.getATLFAST_EntryLayerTool",  "ISF_ATLFAST_EntryLayerTool")
+addTool("ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigLegacy.getATLFAST_EntryLayerToolMT",  "ISF_ATLFAST_EntryLayerToolMT")

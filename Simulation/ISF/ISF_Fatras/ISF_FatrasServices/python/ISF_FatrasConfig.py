@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
 from ISF_Tools.ISF_ToolsConfig import ParticleHelperCfg
 from ISF_Services.ISF_ServicesConfig import (
-    AFIIParticleBrokerSvcCfg, TruthServiceCfg
+    ATLFAST_ParticleBrokerSvcCfg, TruthServiceCfg
 )
 from ISF_Geant4Tools.ISF_Geant4ToolsConfig import G4RunManagerHelperCfg
 from RngComps.RandomServices import dSFMT, AthRNGSvcCfg
@@ -295,7 +295,7 @@ def fatrasParticleDecayHelperCfg(flags, name="ISF_FatrasParticleDecayHelper", **
     kwargs.setdefault("ValidationMode", flags.Sim.ISF.ValidationMode)
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(AFIIParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
 
     if "TruthRecordSvc" not in kwargs:
         kwargs.setdefault("ParticleTruthSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
@@ -341,7 +341,7 @@ def fatrasMaterialUpdatorCfg(flags, name="ISF_FatrasMaterialUpdator", **kwargs):
     kwargs.setdefault("RandomNumberService", result.getPrimaryAndMerge(FatrasRndSvcCfg(flags)).name)
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(AFIIParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
 
     if "TruthRecordSvc" not in kwargs:
         kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
@@ -455,7 +455,7 @@ def fatrasConversionCreatorCfg(flags, name="ISF_FatrasConversionCreator", **kwar
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(AFIIParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
 
     if "TruthRecordSvc" not in kwargs:
         kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
@@ -479,7 +479,7 @@ def fatrasG4HadIntProcessorCfg(flags, name="ISF_FatrasG4HadIntProcessor", **kwar
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(AFIIParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
 
     if "TruthRecordSvc" not in kwargs:
         kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
@@ -506,7 +506,7 @@ def fatrasParametricHadIntProcessorCfg(flags, name="ISF_FatrasParametricHadIntPr
     kwargs.setdefault("RandomStreamName", flags.Sim.Fatras.RandomStreamName)
 
     if "ParticleBroker" not in kwargs:
-        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(AFIIParticleBrokerSvcCfg(flags)).name)
+        kwargs.setdefault("ParticleBroker", result.getPrimaryAndMerge(ATLFAST_ParticleBrokerSvcCfg(flags)).name)
 
     if "TruthRecordSvc" not in kwargs:
         kwargs.setdefault("TruthRecordSvc", result.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
