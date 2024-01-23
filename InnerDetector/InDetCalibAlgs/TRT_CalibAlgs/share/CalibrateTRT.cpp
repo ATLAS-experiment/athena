@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <TNtuple.h>
 #include <TFile.h>
@@ -209,7 +209,7 @@ float Calibrator::FitRt(const string & key, const string & opt, TH2F* rtHist){
 }
 
 
-float Calibrator::FitTimeResidual(string key, TH1F* tresHist){
+float Calibrator::FitTimeResidual(const string & key, TH1F* tresHist){
   
   float mean = tresHist->GetMean();
   float rms = tresHist->GetRMS();
@@ -246,7 +246,7 @@ float Calibrator::FitTimeResidual(string key, TH1F* tresHist){
 }
 
 
-float Calibrator::FitResidual(string key, TH1F* resHist){
+float Calibrator::FitResidual(const string & key, TH1F* resHist){
 
   float mean = resHist->GetMean();
   float rms = resHist->GetRMS();
@@ -377,7 +377,7 @@ TDirectory* Calibrator::Calibrate(TDirectory* dir, const string & key, const str
 
 }
 
-int Calibrator::AddHit(string key, databundle d){
+int Calibrator::AddHit(const string & key, const databundle & d){
   
   int tresbin=Simple1dHist(mintres,maxtres,nbinstres,d.tres);
   int resbin=Simple1dHist(minres,maxres,nbinsres,d.res);

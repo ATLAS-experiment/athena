@@ -237,7 +237,7 @@ public:
      @param[in] binhist an integer arry containing the histogram data for a single straw
      @return 1 if the sub-module is seen for the first time and 0 if it has been seen before
   */
-  int AddHit(const std::string&,databundle,int*,bool);
+  int AddHit(const std::string&, const databundle &,int*,bool);
 
   /**
      Creates root histograms, performs the t0 and R-t calibration for a given sub-module and writes the resulting histograms to a root directory tree (if not told otherwise). The new t0 values are calculated here.
