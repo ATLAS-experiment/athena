@@ -1,21 +1,16 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+"""
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-#====================================================================
-# FtagBaseContent.py
-# This is to define common objects used by PHYSVAL, FTAG1 and FTAG2.
-#====================================================================
+FtagBaseContent.py
+This module contains common configuration used by PHYSVAL, FTAG1 and FTAG2.
+Most of the configuration of which variables to save is handled by the 
+smart slimming lists, whhich are defined in BTaggingContent.py. New variables
+should be added there, not here.
+"""
+
 
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary = {}
-
-def extended_label_list():
-    vals = ['Pt', 'PtScaled', 'Lxy', 'DR', 'PdgId', 'Barcode', 'ID']
-    algs = ['HadronConeExcl', 'HadronGhost']
-    base = [f'{a}TruthLabel{v}' for v in vals for a in algs]
-    extended = [f'{a}ExtendedTruthLabelID' for a in algs]
-    return base + extended
-
-fold_hashes = ['jetFoldHash', 'jetFoldHash_noHits']
 
 PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
     "AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
@@ -23,14 +18,8 @@ PHYSVAL_FTAG1_FTAG2_ExtraVariables = [
     "Muons.TruthLink.segmentDeltaPhi.segmentDeltaEta.ParamEnergyLoss.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.MeasEnergyLoss.MeasEnergyLossSigma",
     "Photons.TruthLink",
     "AntiKt2PV0TrackJets.pt.eta.phi.m",
-    "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.GhostBHadronsFinalPt.GhostBHadronsFinalCount.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-    "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.GhostBHadronsFinalCount.GhostCHadronsFinalCount.GhostCHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.TruthLabelDeltaR_B.TruthLabelDeltaR_C.TruthLabelDeltaR_T.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt",
-    "AntiKt4EMPFlowJets.PartonTruthLabelID.PartonTruthLabelPt.PartonTruthLabelPtScaled.PartonTruthLabelEnergy.PartonTruthLabelDR",
-    '.'.join(["AntiKt4EMPFlowJets"] + extended_label_list()),
-    '.'.join(["AntiKt4EMPFlowJets"] + fold_hashes),
-    "AntiKtVR30Rmax4Rmin02PV0TrackJets.PartonTruthLabelID.PartonTruthLabelPt.PartonTruthLabelPtScaled.PartonTruthLabelEnergy.PartonTruthLabelDR",
-    "AntiKtVR30Rmax4Rmin02PV0TrackJets.HadronConeExclTruthLabelPt.HadronConeExclTruthLabelPtScaled.HadronConeExclTruthLabelLxy.HadronConeExclTruthLabelDR.HadronConeExclTruthLabelPdgId",
-    "AntiKtVR30Rmax4Rmin02PV0TrackJets.HadronGhostTruthLabelPt.HadronGhostTruthLabelPtScaled.HadronGhostTruthLabelLxy.HadronGhostTruthLabelDR.HadronGhostTruthLabelPdgId",
+    "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.GhostBHadronsFinalPt",
+    "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.DFCommonJets_fJvt.GhostBHadronsFinalPt.SumPtChargedPFOPt1000.SumPtTrkPt1000.TrackSumMass.TrackSumPt.TrackWidthPt500.TracksForBTagging.TruthLabelDeltaR_B.TruthLabelDeltaR_C.TruthLabelDeltaR_T.JetEMScaleMomentum_pt.JetEMScaleMomentum_eta.HECQuality.GhostHBosonsPt",
     "TruthPrimaryVertices.t.x.y.z",
     "TauNeutralParticleFlowObjects.pt.eta.phi.m.bdtPi0Score.nPi0Proto",
     "TauChargedParticleFlowObjects.pt.eta.phi.m.bdtPi0Score",
