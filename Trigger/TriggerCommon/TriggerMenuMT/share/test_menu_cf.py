@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 ## This file runs runHLT_standalone with external menus
@@ -15,7 +15,7 @@ class testopt:
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('test_menu_cf')
-
+from AthenaCommon.Constants import DEBUG
 
 log.info('Setup options:')
 defaultOptions = [a for a in dir(testopt) if not a.startswith('__')]
@@ -39,22 +39,28 @@ createHLTMenuExternally=True # menu will be build up explicitly here
 doWriteRDOTrigger = False
 doWriteBS = False
 forceEnableAllChains=True
+# enable singatures separately
+flags.Trigger.enabledSignatures = ['Muon', 'Tau','MinBias','Bphysics','Egamma', 'Electron', 'Photon', 'MET', 'Jet','Bjet','Calib']
+
 
 # load all configuration as the real HLT
 include("TriggerJobOpts/runHLT_standalone.py")
 
 from MuonIdHelpers.MuonIdHelpersConfigLegacy import MuonIdHelperSvc
 svcMgr+=MuonIdHelperSvc()
+
 # make menu manually here:
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import makeHLTTree
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.CFtest.generateCFChains import generateCFChains
 from TriggerMenuMT.CFtest.EmuStepProcessingConfig import generateHLTSeedingAndChainsManually, generateHLTSeedingAndChainsByMenu
 
+
+from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()
 
 if testopt.menuType == 'menuManual':
-    generateCFChains(flags, opt)
+    generateCFChains(flags)
     from TriggerMenuMT.HLT.Config.Validation.CheckL1HLTConsistency import checkL1HLTConsistency
     checkL1HLTConsistency(flags)
 elif testopt.menuType == 'emuMenuTest':

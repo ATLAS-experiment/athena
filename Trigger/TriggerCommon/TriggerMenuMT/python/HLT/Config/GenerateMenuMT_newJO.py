@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 
 
 _isCAMenu = False
+
 def isCAMenu():
   return _isCAMenu
 

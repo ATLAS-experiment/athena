@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_group_ordering as getAlignmentGroupOrdering
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, EmptyMenuSequenceCA
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, getEmptyMenuSequence
 
 from AthenaCommon.Logging import logging
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
@@ -263,17 +263,7 @@ def getEmptySeqName(stepName, step_number, alignGroup):
     seqName = 'Empty'+ alignGroup +'Seq'+str(step_number)+ '_'+ stepName
     return seqName
 
-def EmptyMenuSequenceCfg(name):
-    # to clean up
-    if isCAMenu():
-        return EmptyMenuSequenceCA(name)
-    else:
-        return EmptyMenuSequence(name)
     
-
-def getEmptyMenuSequence(name):
-    return EmptyMenuSequenceCfg(name)
-
 
 def isFullScanRoI(inputL1Nav):
     fsRoIList = ['HLTNav_L1FSNOSEED','HLTNav_L1MET','HLTNav_L1J']

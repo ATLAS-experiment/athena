@@ -160,10 +160,7 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
         flatDecisions.extend (step)
 
     summary = makeSummary(flags, "Final", flatDecisions)
-    if isCAMenu():
-        acc.addEventAlgo([summary],sequenceName = hltEndSeq.getName())            
-    else:
-        hltEndSeq += summary
+    hltEndSeq += summary
 
     log.debug("[makeHLTTree] created the final summary tree")
     # TODO - check we are not running things twice. Once here and once in TriggerConfig.py
@@ -378,7 +375,7 @@ def sequenceScanner( HLTNode ):
 
 def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
     """ Creates the decision tree, given the starting node and the chains containing the sequences  """
-    log.info("[decisionTreeFromChains] Run decisionTreeFromChains on %s", HLTNode.getName())
+    log.info("[decisionTreeFromChains] Run decisionTreeFromChains on %s", HLTNode.getName())    
     HLTNodeName = HLTNode.getName()
     with ConfigurableCABehavior():
         acc = ComponentAccumulator()
@@ -523,7 +520,7 @@ def createDataFlow(flags, chains, allDicts):
     return (acc, finalDecisions, CFseqList)
 
 def createControlFlow(flags, HLTNode, CFseqList):
-    """ Creates Control Flow Tree starting from the CFSequences"""
+    """ Creates Control Flow Tree starting from the CFSequences"""    
     HLTNodeName = HLTNode.getName()    
     log.debug("[createControlFlow] on node %s with %d CFsequences",HLTNodeName, len(CFseqList))
     with ConfigurableCABehavior():

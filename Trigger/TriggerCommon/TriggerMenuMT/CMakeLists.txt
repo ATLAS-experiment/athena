@@ -26,8 +26,11 @@ atlas_install_scripts( scripts/generateL1MenuRun3.py
 # Shell scripts without flake8 checking:
 atlas_install_scripts( scripts/test_HLTmenu.sh
                        scripts/test_manual_menu_cf.sh
+                       scripts/test_manual_menu_cf_CA.sh
                        scripts/test_emu_step_menu_processing_cf.sh
                        scripts/test_emu_step_processing_cf.sh
+                       scripts/test_emu_step_processing_cf_CA.sh
+                       scripts/test_emu_step_menu_processing_cf_CA.sh
                      )
 
 atlas_install_joboptions( share/*.py
@@ -41,10 +44,20 @@ foreach(test emu_step_processing_cf emu_step_menu_processing_cf)
                    PRIVATE_WORKING_DIRECTORY )
 endforeach()
 
-atlas_add_test( manual_menu_cf
-                SCRIPT test_manual_menu_cf.sh
-                PRIVATE_WORKING_DIRECTORY
+foreach(test emu_step_processing_cf_CA emu_step_menu_processing_cf_CA)
+   atlas_add_test( ${test}
+                   SCRIPT test_${test}.sh
+                   LOG_SELECT_PATTERN "TrigSignatureMoni.*INFO HLT_.*|TrigSignatureMoni.*-- #[0-9]+ (Events|Features).*|TriggerSummaryStep.* chains passed:|TriggerSummaryStep.*+++ HLT_.*|TriggerSummaryStep.*+++ leg.*"
+                   PRIVATE_WORKING_DIRECTORY )
+endforeach()
+
+
+foreach( test manual_menu_cf manual_menu_cf_CA)
+   atlas_add_test( ${test}
+                SCRIPT test_${test}.sh
+                PRIVATE_WORKING_DIRECTORY 
                 POST_EXEC_SCRIPT noerror.sh )
+endforeach()
 
 # Unit tests:
 atlas_add_test( ViewCFTest

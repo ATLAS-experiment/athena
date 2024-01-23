@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # file to simulate the HypoTool configuration of the signatures
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -44,9 +44,8 @@ def getThreshold(chainDict):
 
 
 def dimuDrComboHypoTool(chainDict):
-    from DecisionHandling.DecisionHandlingConf import DeltaRRoIComboHypoTool
     name = chainDict['chainName']
-    tool= DeltaRRoIComboHypoTool(name)
+    tool= CompFactory.DeltaRRoIComboHypoTool(name)
     tool.DRcut=0.3
     return tool
 
