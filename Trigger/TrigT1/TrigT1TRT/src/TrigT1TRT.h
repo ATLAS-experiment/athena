@@ -15,13 +15,15 @@
 #include "TrigT1Interfaces/TrtCTP.h"
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
 
-// Input Containers
+// Input containers
 #include "StoreGate/ReadHandleKey.h"
 #include "InDetRawData/TRT_RDO_Container.h"
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
-// Service Handle
+// Handles
+#include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 #include "TRT_ConditionsServices/ITRT_StrawNeighbourSvc.h"
 
 namespace LVL1 {
@@ -43,6 +45,9 @@ namespace LVL1 {
     /* Input handles */
     SG::ReadHandleKey<TRT_RDO_Container> m_trtRDOKey{this, "TrtRDOLocation", "TRT_RDOs", "Read handle key for TRT_RDO_Container"};
 
+    /* Tool handles */
+    ToolHandle<ITRT_StrawStatusSummaryTool> m_ConditionsSummary;
+
     /* Service handles */
     ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc;
 
@@ -50,7 +55,7 @@ namespace LVL1 {
     const InDetDD::TRT_DetectorManager *m_mgr;
     const TRT_ID* m_pTRTHelper;
 
-    /* properties */
+    /* Gaudi Properties */
     Gaudi::Property<int> m_TTCMultiplicity{this, "TTCMultiplicity", 5, "TTC board multiplicity required to fire the trigger"};
 
     /* Variables and functions used in trigger logic */

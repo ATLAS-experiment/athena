@@ -14,7 +14,11 @@ namespace LVL1 {
 
   TrigT1TRT::TrigT1TRT(const std::string& name, ISvcLocator* pSvcLocator) :
     AthReentrantAlgorithm(name, pSvcLocator),
-    m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc", name) {}
+    m_ConditionsSummary("TRT_StrawStatusSummaryTool", this),
+    m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc", name)
+    {
+      declareProperty("ConditionsSummaryTool",m_ConditionsSummary);
+    }
 
   //---------------------------------
   // initialise()
@@ -31,6 +35,8 @@ namespace LVL1 {
 
     ATH_CHECK( detStore()->retrieve(m_pTRTHelper, "TRT_ID") );
     ATH_MSG_DEBUG( "Connected to TRT Helper"  );
+
+    ATH_CHECK( m_ConditionsSummary.retrieve() );
 
     ATH_CHECK( m_TRTStrawNeighbourSvc.retrieve() );
 
@@ -187,6 +193,10 @@ namespace LVL1 {
             int strawNumber = 0;
             int chip = 0;
             int board = 0;
+
+            // Require good straw status
+            if (m_ConditionsSummary->getStatus(TRT_Identifier,ctx) != TRTCond::StrawStatus::Good)
+              continue;
 
             if (barrel_ec == 1 || barrel_ec == -1) {
 
