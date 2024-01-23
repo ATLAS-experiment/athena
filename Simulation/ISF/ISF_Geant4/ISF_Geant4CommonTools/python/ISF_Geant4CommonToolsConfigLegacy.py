@@ -29,11 +29,11 @@ def getEntryLayerToolMT(name="ISF_EntryLayerToolMT", **kwargs):
     return CfgMgr.ISF__EntryLayerToolMT(name, **kwargs)
 
 
-def getAFIIEntryLayerTool(name="ISF_AFIIEntryLayerTool", **kwargs):
-    kwargs.setdefault('GeoIDSvc'        , 'ISF_AFIIGeoIDSvc')
+def getATLFAST_EntryLayerTool(name="ISF_ATLFAST_EntryLayerTool", **kwargs):
+    kwargs.setdefault('GeoIDSvc'        , 'ISF_ATLFAST_GeoIDSvc')
     return getEntryLayerTool(name, **kwargs)
 
 
-def getAFIIEntryLayerToolMT(name="ISF_AFIIEntryLayerToolMT", **kwargs):
-    kwargs.setdefault('GeoIDSvc'        , 'ISF_AFIIGeoIDSvc')
+def getATLFAST_EntryLayerToolMT(name="ISF_ATLFAST_EntryLayerToolMT", **kwargs):
+    kwargs.setdefault('GeoIDSvc'        , 'ISF_ATLFAST_GeoIDSvc')
     return getEntryLayerToolMT(name, **kwargs)

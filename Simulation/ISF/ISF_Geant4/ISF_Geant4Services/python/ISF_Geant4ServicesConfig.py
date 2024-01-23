@@ -7,7 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from ISF_Geant4Tools.ISF_Geant4ToolsConfig import (
     Geant4ToolCfg, FullGeant4ToolCfg, PassBackGeant4ToolCfg,
-    AFIIGeant4ToolCfg
+    ATLFAST_Geant4ToolCfg
 )
 
 
@@ -47,17 +47,9 @@ def PassBackGeant4SimCfg(flags, name="ISF_PassBackGeant4SimSvc", **kwargs):
     return result
 
 
-def AFIIGeant4SimCfg(flags, name="ISF_AFIIGeant4SimSvc", **kwargs):
+def ATLFAST_Geant4SimCfg(flags, name="ISF_ATLFAST_Geant4SimSvc", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("SimulatorTool", result.addPublicTool(result.popToolsAndMerge(AFIIGeant4ToolCfg(flags))))
-    svc = result.getPrimaryAndMerge(PassBackGeant4SimCfg(flags, name, **kwargs))
-    result.addService(svc, primary = True)
-    return result
-
-
-def AFII_QS_Geant4SimCfg(flags, name="ISF_AFII_QS_Geant4SimSvc", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("SimulatorTool", result.addPublicTool(result.popToolsAndMerge(AFIIGeant4ToolCfg(flags))))
+    kwargs.setdefault("SimulatorTool", result.addPublicTool(result.popToolsAndMerge(ATLFAST_Geant4ToolCfg(flags))))
     svc = result.getPrimaryAndMerge(PassBackGeant4SimCfg(flags, name, **kwargs))
     result.addService(svc, primary = True)
     return result

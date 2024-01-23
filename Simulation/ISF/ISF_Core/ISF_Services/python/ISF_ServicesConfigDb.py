@@ -9,13 +9,13 @@ from AthenaCommon.CfgGetter import addService
 
 # Common tools, services and algorithms used by jobs
 addService("ISF_Services.ISF_ServicesConfigLegacy.getISFEnvelopeDefSvc", "ISF_ISFEnvelopeDefSvc")
-addService("ISF_Services.ISF_ServicesConfigLegacy.getAFIIEnvelopeDefSvc", "ISF_AFIIEnvelopeDefSvc")
+addService("ISF_Services.ISF_ServicesConfigLegacy.getATLFAST_EnvelopeDefSvc", "ISF_ATLFAST_EnvelopeDefSvc")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getGeoIDSvc", "ISF_GeoIDSvc")
-addService("ISF_Services.ISF_ServicesConfigLegacy.getAFIIGeoIDSvc", "ISF_AFIIGeoIDSvc")
+addService("ISF_Services.ISF_ServicesConfigLegacy.getATLFAST_GeoIDSvc", "ISF_ATLFAST_GeoIDSvc")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getParticleBrokerSvc", "ISF_ParticleBrokerSvc")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getParticleBrokerSvcNoOrdering", "ISF_ParticleBrokerSvcNoOrdering")
-addService("ISF_Services.ISF_ServicesConfigLegacy.getAFIIParticleBrokerSvc", "ISF_AFIIParticleBrokerSvc")
-addService("ISF_Services.ISF_ServicesConfigLegacy.getAFIIEnergyOrderedParticleBrokerSvc", "ISF_AFIIEnergyOrderedParticleBrokerSvc")
+addService("ISF_Services.ISF_ServicesConfigLegacy.getATLFAST_ParticleBrokerSvc", "ISF_ATLFAST_ParticleBrokerSvc")
+addService("ISF_Services.ISF_ServicesConfigLegacy.getATLFAST_EnergyOrderedParticleBrokerSvc", "ISF_ATLFAST_EnergyOrderedParticleBrokerSvc")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getInputConverter", "ISF_InputConverter")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getTruthService", "ISF_TruthService")
 addService("ISF_Services.ISF_ServicesConfigLegacy.getMC12TruthService", "ISF_MC12TruthService")

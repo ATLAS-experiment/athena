@@ -1,4 +1,4 @@
-#include "../AFIIEnvelopeDefSvc.h"
+#include "../ATLFAST_EnvelopeDefSvc.h"
 #include "../GeoIDSvc.h"
 #include "../InputConverter.h"
 #include "../ISFEnvelopeDefSvc.h"
@@ -6,7 +6,7 @@
 #include "../ParticleBrokerDynamicOnReadIn.h"
 #include "../TruthSvc.h"
 
-DECLARE_COMPONENT( ISF::AFIIEnvelopeDefSvc )
+DECLARE_COMPONENT( ISF::ATLFAST_EnvelopeDefSvc )
 DECLARE_COMPONENT( ISF::GeoIDSvc )
 DECLARE_COMPONENT( ISF::InputConverter )
 DECLARE_COMPONENT( ISF::ISFEnvelopeDefSvc )

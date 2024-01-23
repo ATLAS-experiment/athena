@@ -12,8 +12,8 @@ def getG4PolyconeGeoIDSvc(name="ISF_G4PolyconeGeoIDSvc", **kwargs):
     kwargs.setdefault("EnvelopeDefSvc"          , "ISF_ISFEnvelopeDefSvc")
     return CfgMgr.ISF__G4PolyconeGeoIDSvc(name, **kwargs)
 
-def getAFIIG4PolyconeGeoIDSvc(name="ISF_AFIIG4PolyconeGeoIDSvc", **kwargs):
-    kwargs.setdefault("EnvelopeDefSvc"          , "ISF_AFIIEnvelopeDefSvc")
+def getATLFAST_G4PolyconeGeoIDSvc(name="ISF_ATLFAST_G4PolyconeGeoIDSvc", **kwargs):
+    kwargs.setdefault("EnvelopeDefSvc"          , "ISF_ATLFAST_EnvelopeDefSvc")
     return getG4PolyconeGeoIDSvc(name, **kwargs)
 
 ## def getG4PolyconeGeoIDSvc_G4(name="ISF_G4PolyconeGeoIDSvc_G4", **kwargs):

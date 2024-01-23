@@ -1,14 +1,14 @@
 """
 ISF_SimulationSelectors for ComponentAccumulator configuration
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ISF_SimulationSelectors import SimulationFlavor
 from ISF_Services.ISF_ServicesCoreConfig import ParticleKillerSvcCfg
 from ISF_Geant4Services.ISF_Geant4ServicesConfig import (
-    Geant4SimCfg, AFIIGeant4SimCfg, AFII_QS_Geant4SimCfg,
+    Geant4SimCfg, ATLFAST_Geant4SimCfg,
     FullGeant4SimCfg, PassBackGeant4SimCfg,
 )
 
@@ -32,21 +32,11 @@ def DefaultGeant4SelectorCfg(flags, name="ISF_DefaultGeant4Selector", **kwargs):
     return acc
 
 
-def DefaultAFIIGeant4SelectorCfg(flags, name="ISF_DefaultAFIIGeant4Selector", **kwargs):
+def DefaultATLFAST_Geant4SelectorCfg(flags, name="ISF_DefaultATLFAST_Geant4Selector", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        acc.merge(AFIIGeant4SimCfg(flags))
-        kwargs.setdefault("Simulator", acc.getService("ISF_AFIIGeant4SimSvc"))
-    tool = acc.popToolsAndMerge(DefaultGeant4SelectorCfg(flags, name, **kwargs))
-    acc.setPrivateTools(tool)
-    return acc
-
-
-def DefaultAFII_QS_Geant4SelectorCfg(flags, name="ISF_DefaultAFII_QS_Geant4Selector", **kwargs):
-    acc = ComponentAccumulator()
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        acc.merge(AFII_QS_Geant4SimCfg(flags))
-        kwargs.setdefault("Simulator", acc.getService("ISF_AFII_QS_Geant4SimSvc"))
+        acc.merge(ATLFAST_Geant4SimCfg(flags))
+        kwargs.setdefault("Simulator", acc.getService("ISF_ATLFAST_Geant4SimSvc"))
     tool = acc.popToolsAndMerge(DefaultGeant4SelectorCfg(flags, name, **kwargs))
     acc.setPrivateTools(tool)
     return acc
@@ -75,16 +65,6 @@ def DefaultFastCaloSimSelectorCfg(flags, name="ISF_DefaultFastCaloSimSelector", 
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
         from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimSvcCfg
         kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(FastCaloSimSvcCfg(flags)).name)
-    kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSim)
-    acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
-    return acc
-
-
-def DefaultLegacyAFIIFastCaloSimSelectorCfg(flags, name="ISF_DefaultLegacyAFIIFastCaloSimSelector", **kwargs):
-    acc = ComponentAccumulator()
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import LegacyAFIIFastCaloSimSvcCfg
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(LegacyAFIIFastCaloSimSvcCfg(flags)).name)
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.FastCaloSim)
     acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
     return acc
@@ -151,22 +131,12 @@ def BaseKinematicGeant4SelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
     return acc
 
 
-def BaseKinematicAFIIGeant4SelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
+def BaseKinematicATLFAST_Geant4SelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
     acc = ComponentAccumulator()
     if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(AFIIGeant4SimCfg(flags)).name)
+        kwargs.setdefault("Simulator", acc.getPrimaryAndMerge(ATLFAST_Geant4SimCfg(flags)).name)
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Geant4)
     acc.setPrivateTools(CompFactory.ISF.KinematicSimSelector(name, **kwargs))
-    return acc
-
-
-def BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name="DONOTUSEDIRECTLY", **kwargs):
-    acc = ComponentAccumulator()
-    if flags.Concurrency.NumThreads == 0 and not flags.Sim.ISF.Simulator.isMT():
-        acc.merge(AFII_QS_Geant4SimCfg(flags))
-        kwargs.setdefault("Simulator", acc.getService("ISF_AFII_QS_Geant4SimSvc"))
-    tool = acc.popToolsAndMerge(BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs))
-    acc.setPrivateTools(tool)
     return acc
 
 
@@ -200,79 +170,44 @@ def BaseKinematicParticleKillerSimSelectorCfg(flags, name="DONOTUSEDIRECTLY", **
 
 
 #Protons
-def ProtonATLFAST3Geant4SelectorCfg(flags, name="ISF_ProtonATLFAST3Geant4Selector", **kwargs):
+def ProtonATLFAST_Geant4SelectorCfg(flags, name="ISF_ProtonATLFAST_Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 400)
     kwargs.setdefault("ParticlePDG", 2212)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def ProtonATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_ProtonATLFAST3_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("MaxEkin", 400)
-    kwargs.setdefault("ParticlePDG", 2212)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
+    return BaseKinematicATLFAST_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 #Pions
-def PionATLFAST3Geant4SelectorCfg(flags, name="ISF_PionATLFAST3Geant4Selector", **kwargs):
+def PionATLFAST_Geant4SelectorCfg(flags, name="ISF_PionATLFAST_Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 200)
     kwargs.setdefault("ParticlePDG", 211)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def PionATLFAST3_QS_Geant4SelectorCfg (flags, name="ISF_PionATLFAST3_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("MaxEkin", 200)
-    kwargs.setdefault("ParticlePDG", 211)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
+    return BaseKinematicATLFAST_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 # Neutrons
-def NeutronATLFAST3Geant4SelectorCfg(flags, name="ISF_NeutronATLFAST3Geant4Selector", **kwargs):
+def NeutronATLFAST_Geant4SelectorCfg(flags, name="ISF_NeutronATLFAST_Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 400)
     kwargs.setdefault("ParticlePDG", 2112)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def NeutronATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_NeutronATLFAST3_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("MaxEkin", 400)
-    kwargs.setdefault("ParticlePDG", 2112)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
+    return BaseKinematicATLFAST_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 # Charged Kaons
-def ChargedKaonATLFAST3Geant4SelectorCfg(flags, name="ISF_ChargedKaonATLFAST3Geant4Selector", **kwargs):
+def ChargedKaonATLFAST_Geant4SelectorCfg(flags, name="ISF_ChargedKaonATLFAST_Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 400)
     kwargs.setdefault("ParticlePDG", 321)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def ChargedKaonATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_ChargedKaonATLFAST3_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("MaxEkin", 400)
-    kwargs.setdefault("ParticlePDG", 321)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
+    return BaseKinematicATLFAST_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 # KLongs
-def KLongATLFAST3Geant4SelectorCfg(flags, name="ISF_KLongATLFAST3Geant4Selector", **kwargs):
+def KLongATLFAST_Geant4SelectorCfg(flags, name="ISF_KLongATLFAST_Geant4Selector", **kwargs):
     kwargs.setdefault("MaxEkin", 400)
     kwargs.setdefault("ParticlePDG", 130)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def KLongATLFAST3_QS_Geant4SelectorCfg(flags, name="ISF_KLongATLFAST3_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault('MaxEkin'         , 400)
-    kwargs.setdefault('ParticlePDG'     , 130)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
+    return BaseKinematicATLFAST_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 #Muons
-def MuonAFIIGeant4SelectorCfg(flags, name="ISF_MuonAFIIGeant4Selector", **kwargs):
+def MuonATLFAST_Geant4SelectorCfg(flags, name="ISF_MuonATLFAST_Geant4Selector", **kwargs):
     kwargs.setdefault("ParticlePDG", 13)
-    return BaseKinematicAFIIGeant4SelectorCfg(flags, name, **kwargs)
-
-
-def MuonAFII_QS_Geant4SelectorCfg(flags, name="ISF_MuonAFII_QS_Geant4Selector", **kwargs):
-    kwargs.setdefault("ParticlePDG", 13)
-    return BaseKinematicAFII_QS_Geant4SelectorCfg(flags, name, **kwargs)
+    return BaseKinematicATLFAST_Geant4SelectorCfg(flags, name, **kwargs)
 
 
 # General Eta-based selectors

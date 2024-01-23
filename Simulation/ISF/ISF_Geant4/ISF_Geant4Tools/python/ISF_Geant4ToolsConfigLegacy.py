@@ -46,12 +46,12 @@ def getFullG4TrackProcessorUserActionTool(name='FullG4TrackProcessorUserActionTo
 def getPassBackG4TrackProcessorUserActionTool(name='PassBackG4TrackProcessorUserActionTool', **kwargs):
     return getTrackProcessorUserActionTool(name, **kwargs)
 
-def getAFII_G4TrackProcessorUserActionTool(name='AFII_G4TrackProcessorUserActionTool', **kwargs):
+def getATLFAST_G4TrackProcessorUserActionTool(name='ATLFAST_G4TrackProcessorUserActionTool', **kwargs):
     from ISF_Config.ISF_jobProperties import ISF_Flags
     if ISF_Flags.Simulator.get_Value() in ['PassBackG4MT', 'ATLFASTIIMT', 'ATLFAST3MT', 'ATLFAST3MT_QS', 'ATLFAST3MTEnergyOrdered', 'ATLFASTIIF_ACTS']:
         kwargs.setdefault('ParticleBroker', '')
     from AthenaCommon.SystemOfUnits import MeV
-    kwargs.setdefault('GeoIDSvc'                           , 'ISF_AFIIGeoIDSvc'         )
+    kwargs.setdefault('GeoIDSvc'                           , 'ISF_ATLFAST_GeoIDSvc'         )
     kwargs.setdefault('PassBackEkinThreshold'              , 0.05*MeV                   )
     kwargs.setdefault('KillBoundaryParticlesBelowThreshold', True                       )
     return getPassBackG4TrackProcessorUserActionTool(name, **kwargs)
@@ -103,8 +103,8 @@ def getPassBackGeant4Tool(name="ISF_PassBackGeant4Tool", **kwargs):
     kwargs.setdefault('UserActionSvc','G4UA::ISFPassBackUserActionSvc')
     return getGeant4Tool(name, **kwargs)
 
-def getAFIIGeant4Tool(name="ISF_AFIIGeant4Tool", **kwargs): # TODO rename
-    kwargs.setdefault('UserActionSvc','G4UA::ISF_AFIIUserActionSvc')
+def getATLFAST_Geant4Tool(name="ISF_ATLFAST_Geant4Tool", **kwargs): # TODO rename
+    kwargs.setdefault('UserActionSvc','G4UA::ISF_ATLFAST_UserActionSvc')
     return getPassBackGeant4Tool(name, **kwargs)
 
 ## -----------------------------------------------------------------------------
