@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPERFPLOT_NTRACKS
@@ -25,11 +25,13 @@ public:
     ALLRECO, SELECTEDRECO, ALLTRUTH, SELECTEDTRUTH, ALLASSOCIATEDTRUTH, MATCHEDRECO, N_COUNTERS
   };
   void fill(const unsigned int freq, const CounterCategory counter, float weight=1.0);
-  void fill(const unsigned int ntracks, const unsigned int mu, const unsigned int nvertices, float weight=1.0);
+  void fill(const unsigned int ntracks, const unsigned int truthMu,
+	    const float actualMu, const unsigned int nvertices, float weight=1.0);
 
 private:
-  TH1* m_counters[N_COUNTERS];
-  TH2* m_ntracks_vs_mu{};
+  TH1* m_counters[N_COUNTERS]{nullptr};
+  TH2* m_ntracks_vs_truthMu{};
+  TH2* m_ntracks_vs_actualMu{};
   TH2* m_ntracks_vs_nvertices{};
   void initializePlots();
 };

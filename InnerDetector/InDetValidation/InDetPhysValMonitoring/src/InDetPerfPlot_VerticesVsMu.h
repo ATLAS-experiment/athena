@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPERFPLOT_VERTEXCONTAINER
@@ -27,11 +27,12 @@ public:
   InDetPerfPlot_VerticesVsMu(InDetPlotBase* pParent, const std::string& dirName);
 
   // Fills vertex container information; also uses EventInfo
-  void fill(const xAOD::VertexContainer& vertices, unsigned int nPU, float weight=1.0);
+  void fill(const xAOD::VertexContainer& vertices, unsigned int truthMu, float actualMu, float weight=1.0);
 private:
   ///@name Number of vertices vs mu
   ///@{
-  TH2* m_vx_n_vs_mu;
+  TH2* m_vx_n_vs_truthMu{};
+  TH2* m_vx_n_vs_actualMu{};
   ///@}
 
   // plot base has nop default implementation of this; we use it to book the histos

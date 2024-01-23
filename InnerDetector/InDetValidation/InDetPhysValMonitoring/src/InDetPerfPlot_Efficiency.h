@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPERFPLOT_EFFICIENCY
@@ -28,13 +28,14 @@ class InDetPerfPlot_Efficiency: public InDetPlotBase {
 public:
   InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& dirName);
 
-  void fill(const xAOD::TruthParticle& truth, const bool isGood, float weight, float mu);
+  void fill(const xAOD::TruthParticle& truth, const bool isGood, unsigned int truthMu, float actualMu, float weight);
 
-  void fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, float weight, float mu);
+  void fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, unsigned int truthMu, float actualMu, float weight);
 
 private:
   TEfficiency* m_efficiency_vs_pteta{};
-  TEfficiency* m_efficiency_vs_ptmu{};
+  TEfficiency* m_efficiency_vs_ptTruthMu{};
+  TEfficiency* m_efficiency_vs_ptActualMu{};
 
   TEfficiency* m_efficiency_vs_eta{};
   TEfficiency* m_efficiency_vs_pt{};
@@ -49,14 +50,16 @@ private:
   TEfficiency* m_efficiency_vs_z0_abs{};
   TEfficiency* m_efficiency_vs_R{};
   TEfficiency* m_efficiency_vs_Z{};
-  TEfficiency* m_efficiency_vs_mu{};
+  TEfficiency* m_efficiency_vs_truthMu{};
+  TEfficiency* m_efficiency_vs_actualMu{};
 
   TEfficiency* m_technical_efficiency_vs_eta{};
   TEfficiency* m_technical_efficiency_vs_pt{};
   TEfficiency* m_technical_efficiency_vs_phi{};
   TEfficiency* m_technical_efficiency_vs_d0{};
   TEfficiency* m_technical_efficiency_vs_z0{};
-  TEfficiency* m_technical_efficiency_vs_mu{};
+  TEfficiency* m_technical_efficiency_vs_truthMu{};
+  TEfficiency* m_technical_efficiency_vs_actualMu{};
 
   TEfficiency* m_extended_efficiency_vs_d0{};
   TEfficiency* m_extended_efficiency_vs_d0_abs{};
@@ -71,7 +74,8 @@ private:
   TEfficiency* m_TrkRec_d0{};
   TEfficiency* m_TrkRec_prodR{};
   TEfficiency* m_TrkRec_pT{};
-  TEfficiency* m_TrkRec_mu{};
+  TEfficiency* m_TrkRec_truthMu{};
+  TEfficiency* m_TrkRec_actualMu{};
   TEfficiency* m_TrkRec_eta_d0{};
   TEfficiency* m_TrkRec_eta_prodR{};
   TEfficiency* m_TrkRec_eta_pT{};
