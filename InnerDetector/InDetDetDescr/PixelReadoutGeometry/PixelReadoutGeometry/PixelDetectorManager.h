@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 
 #include "InDetReadoutGeometry/SiDetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "InDetReadoutGeometry/ExtendedAlignableTransform.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 
 #include "InDetIdentifier/PixelID.h"
@@ -35,7 +36,6 @@ namespace InDetDD {
 
     class PixelModuleDesign;
     class SiDetectorElement;
-    class ExtendedAlignableTransform;
     
     /** @class PixelDetectorManager
     
@@ -55,15 +55,12 @@ namespace InDetDD {
       /** Constructor with name */
       PixelDetectorManager(StoreGateSvc* detStore, const std::string& name, const std::string& pixelIDName);
 
-      /** Destructor */
-      ~PixelDetectorManager();
-    
       /** Access to raw geometry: */
       virtual unsigned int getNumTreeTops() const override;
       virtual PVConstLink getTreeTop(unsigned int i) const override;
     
       /** Add a Tree top: */
-      void addTreeTop(PVLink);
+      void addTreeTop(PVConstLink vol);
     
       //
       // Access Readout Elements
@@ -162,7 +159,7 @@ namespace InDetDD {
       virtual const PixelID  * getIdHelper() const override;
 
       // data members
-      std::vector<PVLink>                                           m_volume;
+      std::vector<PVConstLink>                                      m_volume;
       SiDetectorElementCollection                                   m_elementCollection;
       typedef std::map<Identifier, std::unique_ptr<ExtendedAlignableTransform>> AlignableTransformMap;
       std::vector< AlignableTransformMap >                          m_higherAlignableTransforms;
