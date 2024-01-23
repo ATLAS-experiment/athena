@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -124,8 +124,6 @@ void StatInt::print(const char* s, bool minMaxOnly) {
 
 TileTBStat::TileTBStat(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_RobSvc("ROBDataProviderSvc", name)
-  , m_beamCnv(0)
   , m_evtNr(0)
   , m_lasStatus(0)
   , m_checkOn(0)
@@ -152,16 +150,7 @@ TileTBStat::TileTBStat(const std::string& name, ISvcLocator* pSvcLocator)
   , m_cisBeg()
   , m_cisEnd()
 {
-  declareProperty("TileDigitsContainer", m_digitsContainer = "TileDigitsCnt");    
-  declareProperty("TileBeamElemContainer", m_beamElemContainer = "TileBeamElemCnt");
-
-  declareProperty("PrintAllEvents", m_printAllEvents = false);
-  declareProperty("DetectDummyFragments", m_detectDummyFragments = false);
-  declareProperty("TileDQstatus", m_dqStatusKey = "TileDQstatus");
-
   m_runNo = m_evtMin =  m_evtMax = m_evtBegin = m_evtNo = 0;
-
-  
 }
 
 
@@ -195,7 +184,10 @@ StatusCode TileTBStat::initialize() {
   m_timeStart = time(0);
   ATH_MSG_INFO( "initialization completed" );
 
-  CHECK( m_dqStatusKey.initialize() );
+  ATH_CHECK( m_hid2RESrcIDKey.initialize() );
+  ATH_CHECK( m_dqStatusKey.initialize() );
+  ATH_CHECK( m_robSvc.retrieve() );
+  ATH_CHECK( m_laserObjectKey.initialize() );
 
   return StatusCode::SUCCESS;
 } 
@@ -208,24 +200,8 @@ StatusCode TileTBStat::execute() {
   static std::atomic<bool> first=true;
   static std::atomic<bool> firstORsecond=true;
   
-  if ( first ) {
-
-    ServiceHandle<IConversionSvc> cnvSvc("ByteStreamCnvSvc", name());
-    CHECK( cnvSvc.retrieve() );
-  
-    m_beamCnv = dynamic_cast<TileBeamElemContByteStreamCnv *> ( cnvSvc->converter( ClassID_traits<TileBeamElemContainer>::ID() ) );
-  
-    if (m_beamCnv == NULL ) {
-      ATH_MSG_ERROR( " Can't get TileBeamElemContByteStreamCnv " );
-      return StatusCode::FAILURE;
-    }
-
-    CHECK( m_RobSvc.retrieve() );
-
-  }
-  
   if ( firstORsecond ) {
-    const eformat::FullEventFragment<const uint32_t*> * event = m_RobSvc->getEvent();
+    const eformat::FullEventFragment<const uint32_t*> * event = m_robSvc->getEvent();
     if( true /* event->check_tree() */) { // valid event
       if ( ! first ) firstORsecond = m_printAllEvents;
       first=false;
@@ -310,7 +286,7 @@ StatusCode TileTBStat::execute() {
       }
 
       if (m_printAllEvents)
-        std::cout << "Fragments found in event " << m_beamCnv->eventFragment()->global_id();
+        std::cout << "Fragments found in event " << event->global_id();
       else if (firstORsecond)
         std::cout << "Fragments found in first event";
       else
@@ -348,7 +324,7 @@ StatusCode TileTBStat::execute() {
     m_cisCard.addValue(m_cisPar[8]);
   }
   
-  const eformat::FullEventFragment<const uint32_t*> * event = m_RobSvc->getEvent();
+  const eformat::FullEventFragment<const uint32_t*> * event = m_robSvc->getEvent();
 
   if (testsum!=0) {
     memcpy(m_cisEnd,m_cisPar,sizeof(m_cisPar));
@@ -381,11 +357,19 @@ StatusCode TileTBStat::execute() {
   if (m_evtNo > m_evtMax) m_evtMax = m_evtNo;
   
   if (m_evtNr == 0) {
-    if (m_beamCnv->robFragment()) 
-      m_runNo = m_beamCnv->robFragment()->rod_run_no();   // take it from beam ROD header
-    else
-      m_runNo = m_beamCnv->eventFragment()->run_no();  // run_no sometimes is not filled here
-
+    SG::ReadCondHandle<TileHid2RESrcID> hid2re(m_hid2RESrcIDKey, ctx);
+    ATH_CHECK(hid2re.isValid());
+    std::vector<uint32_t> robid;
+    robid.push_back( hid2re->getRobFromFragID(DIGI_PAR_FRAG) );
+    robid.push_back( hid2re->getRobFromFragID(LASER_OBJ_FRAG) );
+    std::vector<const ROBDataProviderSvc::ROBF*> robf;
+    m_robSvc->getROBData(robid, robf);
+    const ROBDataProviderSvc::ROBF* robFrag = (robf.size() > 0 ) ? robf[0] : 0;
+    if (robFrag) {
+      m_runNo = robFrag->rod_run_no();   // take it from beam ROD header
+    } else {
+      m_runNo = event->run_no();  // run_no sometimes is not filled here
+    }
     m_timeBegin = m_evTime;
     m_evtBegin  = m_evtNo;
     m_calibMode = dqStatus->calibMode();
@@ -485,10 +469,8 @@ StatusCode TileTBStat::execute() {
 
   ++m_evtNr;
 
-  
-  const TileLaserObject* pTileLasObj = 0;
-
-  if(evtStore()->retrieve(pTileLasObj, "TileLaserObj").isFailure()) {
+  SG::ReadHandle<TileLaserObject> pTileLasObj(m_laserObjectKey, ctx);
+  if(!pTileLasObj.isValid()) {
     ATH_MSG_ERROR( "There is a problem opening the LASER object" );
 
     //return sc;

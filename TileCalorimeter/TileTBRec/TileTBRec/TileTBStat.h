@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -38,13 +38,15 @@
 // Athena incldues
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
 #include "TileEvent/TileDQstatus.h"
+#include "TileEvent/TileLaserObject.h"
+#include "TileByteStream/TileHid2RESrcID.h"
 
-class IROBDataProviderSvc;
 class TileID;
 class TileHWID;
-class TileBeamElemContByteStreamCnv;
 
 #include <string>
 #include <vector>
@@ -86,17 +88,22 @@ class TileTBStat: public AthAlgorithm {
 
   private:
 
-    // Container Parameters
-    std::string m_digitsContainer;
-    std::string m_beamElemContainer;
+    Gaudi::Property<bool> m_printAllEvents{this,
+       "PrintAllEvents", false, "Print all events"};
+    Gaudi::Property<bool> m_detectDummyFragments{this,
+       "DetectDummyFragments", false, "Detect dummy fragments"};
+    SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey{this,
+       "TileHid2RESrcID", "TileHid2RESrcID", "TileHid2RESrcID key"};
+    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey{this,
+       "TileDQstatus", "TileDQstatus", "Tile DQ status key"};
+    SG::ReadHandleKey<TileLaserObject> m_laserObjectKey{this,
+       "TileLaserObject", "TileLaserObj", "Tile laser object key"};
 
-    bool m_printAllEvents;
-    bool m_detectDummyFragments;
-    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey;
-
-    ServiceHandle<IROBDataProviderSvc> m_RobSvc;
-
-    TileBeamElemContByteStreamCnv* m_beamCnv;
+   /**
+     * @brief Name of ROB data provider service
+     */
+    ServiceHandle<IROBDataProviderSvc> m_robSvc{this,
+       "ROBDataProviderSvc", "ROBDataProviderSvc", "The ROB data provider service"};
 
     int m_evtNr;
     StatDouble m_laserBoxTemp;
