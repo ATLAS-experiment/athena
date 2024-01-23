@@ -34,7 +34,6 @@ int JetPartonTruthLabel::modifyJet(xAOD::Jet &jet) const {
 
   jet.setAttribute("PartonTruthLabelID", label);
   jet.setAttribute("PartonTruthLabelPt", pt_max);
-  jet.setAttribute("PartonTruthLabelPtScaled", pt_max / jet.pt());
   jet.setAttribute("PartonTruthLabelEnergy", e_max);
   jet.setAttribute("PartonTruthLabelDR", dr_max);
 

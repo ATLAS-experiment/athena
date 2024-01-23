@@ -92,7 +92,6 @@ namespace ParticleJetTools {
     CHECK(singleint);
     CHECK(doubleint);
     CHECK(pt);
-    CHECK(pt_scaled);
     CHECK(Lxy);
     CHECK(dr);
     CHECK(pdgId);
@@ -107,7 +106,6 @@ namespace ParticleJetTools {
     singleint(n.singleint),
     doubleint(n.doubleint),
     pt(n.pt),
-    pt_scaled(n.pt_scaled),
     Lxy(n.Lxy),
     dr(n.dr),
     pdgId(n.pdgId),
@@ -181,7 +179,6 @@ namespace ParticleJetTools {
     decs.singleint(jet) = label;
     if (label == 0) {
       decs.pt(jet) = NAN;
-      decs.pt_scaled(jet) = NAN;
       decs.Lxy(jet) = NAN;
       decs.dr(jet) = NAN;
       decs.pdgId(jet) = 0;
@@ -191,7 +188,6 @@ namespace ParticleJetTools {
       decs.childPdgId(jet) = 0;
     } else {
       decs.pt(jet) = partPt(labelling_particle);
-      decs.pt_scaled(jet) = partPt(labelling_particle) / jet.pt();
       decs.Lxy(jet) = partLxy(labelling_particle);
       decs.dr(jet) = partDR(labelling_particle, jet);
       decs.pdgId(jet) = partPdgId(labelling_particle);
