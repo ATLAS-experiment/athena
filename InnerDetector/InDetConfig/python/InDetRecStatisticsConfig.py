@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetRecStatistics package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -20,6 +20,12 @@ def InDetRecStatisticsAlgCfg(flags, name='InDetRecStatistics', **kwargs):
         acc.addPublicTool(SummaryTool)
         kwargs.setdefault("SummaryTool", SummaryTool)
 
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
+            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+        
     kwargs.setdefault("PrintSecondary", True)
     kwargs.setdefault("UseTrackSummary", True)
     kwargs.setdefault("DoTruth", flags.Tracking.doTruth)
@@ -68,6 +74,12 @@ def ITkRecStatisticsAlgCfg(flags, name='ITkRecStatistics', **kwargs):
         acc.addPublicTool(SummaryTool)
         kwargs.setdefault("SummaryTool", SummaryTool)
 
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
+            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
+        
     kwargs.setdefault("PrintSecondary", True)
     kwargs.setdefault("UseTrackSummary", True)
     kwargs.setdefault("DoTruth", flags.Tracking.doTruth)

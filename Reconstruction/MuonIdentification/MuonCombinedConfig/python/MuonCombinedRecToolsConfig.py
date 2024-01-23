@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Defines the shared tools used in muon identification
 # Based on :
@@ -868,9 +868,15 @@ def MuonMatchQualityCfg(flags, name='MuonMatchQuality', **kwargs):
 def MuidMuonRecoveryCfg(flags, name='MuidMuonRecovery', **kwargs):
     result = AtlasExtrapolatorCfg(flags)
     kwargs.setdefault("Extrapolator", result.popPrivateTools())
-    acc = CombinedMuonTrackBuilderCfg(flags)
-    kwargs.setdefault("TrackBuilder", acc.popPrivateTools())
-    result.merge(acc)
+    kwargs.setdefault("TrackBuilder", result.popToolsAndMerge(
+        CombinedMuonTrackBuilderCfg(flags)))
+
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+    
     tool = CompFactory.Rec.MuidMuonRecovery(name, **kwargs)
     result.setPrivateTools(tool)
     return result
@@ -1195,6 +1201,12 @@ def MuTagMatchingToolCfg(flags, name='MuTagMatchingTool', **kwargs):
     kwargs.setdefault("MuonSegmentSelection", result.popToolsAndMerge(
         MuonSegmentSelectionToolCfg(flags)))
 
+    if "ResidualPullCalculator" not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags)))
+    
     from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import (
         TrackingGeometryCondAlgCfg)
     acc = TrackingGeometryCondAlgCfg(flags)

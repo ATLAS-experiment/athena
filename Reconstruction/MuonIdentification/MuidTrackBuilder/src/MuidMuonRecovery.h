@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ namespace Rec {
 
         ToolHandle<Trk::IResidualPullCalculator> m_residualCalculator{
             this,
-            "TrackBuilder",
+            "ResidualPullCalculator",
             "Trk::ResidualPullCalculator/ResidualPullCalculator",
             "Residual calculator tool",
         };

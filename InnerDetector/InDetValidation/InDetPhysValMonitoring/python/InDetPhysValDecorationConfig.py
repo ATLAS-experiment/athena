@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -39,22 +39,24 @@ def InDetPhysHitDecoratorAlgCfg(
     if 'InDetTrackHoleSearchTool' not in kwargs:
         from InDetConfig.InDetTrackHoleSearchConfig import (
             InDetTrackHoleSearchToolCfg)
-        InDetTrackHoleSearchTool = acc.popToolsAndMerge(
-            InDetTrackHoleSearchToolCfg(flags))
-        acc.addPublicTool(InDetTrackHoleSearchTool)
-        kwargs.setdefault("InDetTrackHoleSearchTool", InDetTrackHoleSearchTool)
+        kwargs.setdefault("InDetTrackHoleSearchTool", acc.addPublicTool(
+            acc.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags))))
 
     if 'Updator' not in kwargs:
         from TrkConfig.TrkMeasurementUpdatorConfig import InDetUpdatorCfg
-        Updator = acc.popToolsAndMerge(InDetUpdatorCfg(flags))
-        acc.addPublicTool(Updator)
-        kwargs.setdefault("Updator", Updator)
+        kwargs.setdefault("Updator", acc.addPublicTool(acc.popToolsAndMerge(InDetUpdatorCfg(flags))))
 
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.PixelLorentzAngleConfig import (
             PixelLorentzAngleToolCfg)
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
             PixelLorentzAngleToolCfg(flags)))
+
+    if 'ResidualPullCalculator' not in kwargs:
+        from TrkConfig.TrkResidualPullCalculatorConfig import (
+            ResidualPullCalculatorCfg)
+        kwargs.setdefault("ResidualPullCalculator", acc.addPublicTool(
+            acc.popToolsAndMerge(ResidualPullCalculatorCfg(flags))))
 
     acc.addEventAlgo(CompFactory.InDetPhysHitDecoratorAlg(name, **kwargs))
     return acc

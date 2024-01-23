@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''@file SCTHitEffMonAlg.py
 @author Ken Kreul
@@ -41,6 +41,8 @@ def SCTHitEffMonAlgConfig(flags):
         InDetTrackHoleSearchToolCfg)
     from InDetConfig.SiClusterOnTrackTool_SCTStripConfig import (
         InDetSCT_ClusterOnTrackToolCfg)
+    from TrkConfig.TrkResidualPullCalculatorConfig import (
+        ResidualPullCalculatorCfg)
 
     myMonAlg = helper.addAlgorithm(
         CompFactory.SCTHitEffMonAlg,
@@ -48,7 +50,10 @@ def SCTHitEffMonAlgConfig(flags):
         HoleSearch = result.popToolsAndMerge(
             InDetTrackHoleSearchToolCfg(flags)),
         ROTCreator = result.popToolsAndMerge(
-            InDetSCT_ClusterOnTrackToolCfg(flags)))
+            InDetSCT_ClusterOnTrackToolCfg(flags)),
+        ResPullCalc = result.popToolsAndMerge(
+            ResidualPullCalculatorCfg(flags))
+    )
 
     # # If for some really obscure reason you need to instantiate an algorithm
     # # yourself, the AddAlgorithm method will still configure the base 
