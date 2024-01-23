@@ -394,21 +394,31 @@ getConfig_eTAU = L1Config_eTAU()
 
 @dataclass
 class L1Config_cTAU():
+    # Isolation parameters (ATR-28621):
+    # (jTAU.EtIso + isolation_jTAUCoreScale_fw/1024 * jTAU.Et) / eTAU.Et < isolation_fw/1024
+
     isolation_fw_loose: int = 410
     isolation_fw_medium: int = 358
-    isolation_fw_tight: int = 307 # PLACEHOLDER
+    isolation_fw_tight: int = 307
+    isolation_jTAUCoreScale_fw_loose: int = 0
+    isolation_jTAUCoreScale_fw_medium: int = 0
+    isolation_jTAUCoreScale_fw_tight: int = 0
 
     def __call__(self) -> odict:
         confObj = odict()
         confObj["workingPoints"] = odict()
         confObj["workingPoints"]["Loose"] = [
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_loose)), ("isolation_fw", self.isolation_fw_loose)]),
+
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_loose)), ("isolation_fw", self.isolation_fw_loose),
+                   ("isolation_jTAUCoreScale", cTAUfwToFlowConversion(self.isolation_jTAUCoreScale_fw_loose)), ("isolation_jTAUCoreScale_fw", self.isolation_jTAUCoreScale_fw_loose)]),
         ]
         confObj["workingPoints"]["Medium"] = [
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_medium)), ("isolation_fw", self.isolation_fw_medium)]),
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_medium)), ("isolation_fw", self.isolation_fw_medium),
+                   ("isolation_jTAUCoreScale", cTAUfwToFlowConversion(self.isolation_jTAUCoreScale_fw_medium)), ("isolation_jTAUCoreScale_fw", self.isolation_jTAUCoreScale_fw_medium)]),
         ]
         confObj["workingPoints"]["Tight"] = [
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_tight)), ("isolation_fw", self.isolation_fw_tight)]),
+            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_tight)), ("isolation_fw", self.isolation_fw_tight),
+                   ("isolation_jTAUCoreScale", cTAUfwToFlowConversion(self.isolation_jTAUCoreScale_fw_tight)), ("isolation_jTAUCoreScale_fw", self.isolation_jTAUCoreScale_fw_tight)]),
         ]
         confObj["resolutionMeV"] = 100
 

@@ -52,14 +52,15 @@ uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
   if (matched) {
     const xAOD::jFexTauRoI* jTau = *jTauLink;
 
-    // isolation in units of 200 MeV
+    // core and isolation energy in units of 200 MeV
     unsigned int jFexIso{jTau->tobIso()};
+    unsigned int jFexCoreEt{jTau->tobEt()};
 
-    std::map<std::string, int> isoFW_CTAU;
-    TCS::TopoSteeringStructure::setIsolationFW_CTAU( isoFW_CTAU, menuExtraInfo );
+    std::map<std::string, int> isoFW_CTAU, isoFW_CTAU_jTAUCoreScale;
+    TCS::TopoSteeringStructure::setIsolationFW_CTAU( isoFW_CTAU, isoFW_CTAU_jTAUCoreScale, menuExtraInfo );
 
-    // The isolation value is multiplied by 2 to normalise to 100 MeV/counts units
-    isolation_score = TCS::cTauMultiplicity::convertIsoToBit( isoFW_CTAU, 2*float(jFexIso), float(eFexEt) );
+    // The core and isolation E_T values are multiplied by 2 to normalise to 100 MeV/counts units
+    isolation_score = TCS::cTauMultiplicity::convertIsoToBit( isoFW_CTAU, isoFW_CTAU_jTAUCoreScale, 2*static_cast<float>(jFexCoreEt), 2*static_cast<float>(jFexIso), static_cast<float>(eFexEt) );
 
     ATH_MSG_DEBUG("eFex tau eta,phi = " << eTau.iEta() << ", " << eTau.iPhi()
                   << ", jFex tau eta,phi = " << jTau->globalEta() << ", " << jTau->globalPhi()

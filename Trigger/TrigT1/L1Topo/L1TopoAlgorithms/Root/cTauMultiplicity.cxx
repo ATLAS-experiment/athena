@@ -18,7 +18,7 @@ REGISTER_ALG_TCS(cTauMultiplicity)
 
 // constructor
 TCS::cTauMultiplicity::cTauMultiplicity(const std::string & name) : CountingAlg(name) {
-  setNumberOutputBits(12); //To-Do: Make this flexible to addapt to the menu. Each counting requires more than one bit       
+  setNumberOutputBits(12); //To-Do: Make this flexible to adapt to the menu. Each counting requires more than one bit       
 }
 
 
@@ -31,6 +31,12 @@ TCS::cTauMultiplicity::initialize() {
 
   m_threshold = getThreshold(); 
   m_isoFW_CTAU = isolationFW_CTAU();
+  m_isoFW_CTAU_jTAUCoreScale = isolationFW_CTAU_jTAUCoreScale();
+  TRG_MSG_DEBUG("Initializing cTauMultiplicity L1Topo Algorithm");
+  for(const auto& [wp, iso] : m_isoFW_CTAU) {
+    TRG_MSG_DEBUG("WP \"" << wp << "\": R=" << iso << ", jTAUCoreScale=" << m_isoFW_CTAU_jTAUCoreScale[wp]);
+  }
+
  
   // book histograms
   std::string hname_accept = "cTauMultiplicity_accept_EtaPt_"+m_threshold->name();
@@ -43,7 +49,9 @@ TCS::cTauMultiplicity::initialize() {
   bookHistMult(m_histcTauEt, "cTauTOBEt", "Matched cTau TOB Et", "E_{t} [GeV]", 200, 0, 400);
   bookHistMult(m_histcTauPhiEta, "cTauTOBPhiEta", "Matched cTau TOB location", "#eta#times40", "#phi#times20", 200, -200, 200, 128, 0, 128);
   bookHistMult(m_histcTauEtEta, "cTauTOBEtEta", "Matched cTau TOB Et vs eta", "#eta#times40", "E_{t} [GeV]", 200, -200, 200, 200, 0, 400);
-  bookHistMult(m_histcTauIso, "cTauTOBIso", "Matched cTau isolation", "isolation", 200, 0, 10);
+  bookHistMult(m_histcTauPartialIsoLoose, "cTauTOBPartialIsoLoose", "Matched cTau Loose partial isolation", "Loose isolation", 200, 0, 10);
+  bookHistMult(m_histcTauPartialIsoMedium, "cTauTOBPartialIsoMedium", "Matched cTau Medium partial isolation", "Medium isolation", 200, 0, 10);
+  bookHistMult(m_histcTauPartialIsoTight, "cTauTOBPartialIsoTight", "Matched cTau Tight partial isolation", "Tight isolation", 200, 0, 10);
   bookHistMult(m_histcTauIsoScore, "cTauTOBIsoScore", "Matched cTau isolation score", "isolation score", 4, 0, 4);
 
   return StatusCode::SUCCESS;
@@ -74,11 +82,13 @@ TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input, Count & count 
 
     if((*etauCand)->tobType() != TCS::ETAU) continue;
     
-    bool accept = false;     // accept = true if (isMatched==true && isIsolated==true) || (isMatched==false)
-    bool isMatched  = false; // Is the eTau matched to a jTau?
-    bool isIsolated = false; // If matched: does the resulting cTau pass the isolation cut?
-    float isolation = 0;              // cTau isolation (0 if no match is found)
-    unsigned int isoScore = 0; // cTau isolation score (0 if no match is found)
+    bool accept = false;     	// accept = true if (isMatched==true && isIsolated==true) || (isMatched==false)
+    bool isMatched  = false;	// Is the eTau matched to a jTau?
+    bool isIsolated = false;    // If matched: does the resulting cTau pass the isolation cut?
+    float isolation_partial_loose = 0;  // cTau Loose partial isolation (0 if no match is found)
+    float isolation_partial_medium = 0; // cTau Medium partial isolation (0 if no match is found)
+    float isolation_partial_tight = 0;  // cTau Tight partial isolation (0 if no match is found)
+    unsigned int isoScore = 0;  // cTau isolation score (0 if no match is found)
 
     // Loop over jTau candidates
     for(cTauTOBArray::const_iterator jtauCand = cTaus.begin(); jtauCand != cTaus.end(); ++jtauCand ) {
@@ -88,8 +98,14 @@ TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input, Count & count 
       isMatched = cTauMatching( *etauCand, *jtauCand );
 
       if (isMatched) {
-        // Isolation condition coded as in firmware https://indico.cern.ch/event/1079697/contributions/4541419/attachments/2315137/3940824/cTAU_FirmwareAlgoProposal.pdf page 8
-        isolation = static_cast<float>((*jtauCand)->EtIso()) / static_cast<float>((*etauCand)->Et()); // Internal variable for checks
+	// Updated isolation condition, WP-dependent (ATR-28641)
+	// "Partial" isolation formula: I = (E_T^{jTAU Iso} + jTAUCoreScale * E_T^{jTAU Core}) / E_T^{eTAU}
+	// This formula is missing the eTAU Core substraction from the numerator, grouped with the isolation cut value
+	isolation_partial_loose = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Loose")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
+	isolation_partial_medium = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Medium")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
+	isolation_partial_tight = (static_cast<float>((*jtauCand)->EtIso()) + m_isoFW_CTAU_jTAUCoreScale.at("Tight")/1024.0 * static_cast<float>((*jtauCand)->Et())) / static_cast<float>((*etauCand)->Et()); // Internal variable for monitoring
+        // Old isolation condition coded as in firmware: https://indico.cern.ch/event/1079697/contributions/4541419/attachments/2315137/3940824/cTAU_FirmwareAlgoProposal.pdf page 8
+
         isoScore = convertIsoToBit( *etauCand, *jtauCand );
         isIsolated = isocut( TrigConf::Selection::wpToString(cTauThr.isolation()), isoScore );
         break; // Break loop when a match is found
@@ -102,7 +118,9 @@ TCS::cTauMultiplicity::process( const TCS::InputTOBArray & input, Count & count 
       fillHist1D( m_histcTauEt[0], (*etauCand)->EtDouble() );
       fillHist2D( m_histcTauPhiEta[0], (*etauCand)->eta(), (*etauCand)->phi() );
       fillHist2D( m_histcTauEtEta[0], (*etauCand)->eta(), (*etauCand)->EtDouble() );
-      fillHist1D( m_histcTauIso[0], isolation );
+      fillHist1D( m_histcTauPartialIsoLoose[0], isolation_partial_loose );
+      fillHist1D( m_histcTauPartialIsoMedium[0], isolation_partial_medium );
+      fillHist1D( m_histcTauPartialIsoTight[0], isolation_partial_tight );
       fillHist1D( m_histcTauIsoScore[0], isoScore );
     }
 
@@ -141,9 +159,9 @@ TCS::cTauMultiplicity::convertIsoToBit(const TCS::cTauTOB * etauCand, const TCS:
   unsigned int bit = 0;
 
   // Assign the tightest accept WP as default bit
-  if( jtauCand->EtIso()*1024 < etauCand->Et()*m_isoFW_CTAU.at("Loose") ) bit = 1;
-  if( jtauCand->EtIso()*1024 < etauCand->Et()*m_isoFW_CTAU.at("Medium") ) bit = 2;
-  if( jtauCand->EtIso()*1024 < etauCand->Et()*m_isoFW_CTAU.at("Tight") ) bit = 3;
+  if( jtauCand->EtIso()*1024 + jtauCand->Et()*m_isoFW_CTAU_jTAUCoreScale.at("Loose") < etauCand->Et()*m_isoFW_CTAU.at("Loose") ) bit = 1;
+  if( jtauCand->EtIso()*1024 + jtauCand->Et()*m_isoFW_CTAU_jTAUCoreScale.at("Medium") < etauCand->Et()*m_isoFW_CTAU.at("Medium") ) bit = 2;
+  if( jtauCand->EtIso()*1024 + jtauCand->Et()*m_isoFW_CTAU_jTAUCoreScale.at("Tight") < etauCand->Et()*m_isoFW_CTAU.at("Tight") ) bit = 3;
   
   return bit;
 }
@@ -238,12 +256,12 @@ TCS::cTauMultiplicity::cTauMatching(const xAOD::eFexTauRoI & eTau, const xAOD::j
 }
 
 unsigned int
-TCS::cTauMultiplicity::convertIsoToBit(const std::map<std::string, int> & isoFW_CTAU, const float jtauIso, const float etauEt){ 
+TCS::cTauMultiplicity::convertIsoToBit(const std::map<std::string, int>& isoFW_CTAU, const std::map<std::string, int>& isoFW_CTAU_jTAUCoreScale, const float jTauCore, const float jTauIso, const float eTauEt){ 
   unsigned int bit = 0;
   // Assign the tightest accept WP as default bit
-  if( jtauIso*1024 < etauEt*isoFW_CTAU.at("Loose") ) bit = 1;
-  if( jtauIso*1024 < etauEt*isoFW_CTAU.at("Medium") ) bit = 2;
-  if( jtauIso*1024 < etauEt*isoFW_CTAU.at("Tight") ) bit = 3;
+  if( jTauIso*1024 + jTauCore*isoFW_CTAU_jTAUCoreScale.at("Loose") < eTauEt*isoFW_CTAU.at("Loose") ) bit = 1;
+  if( jTauIso*1024 + jTauCore*isoFW_CTAU_jTAUCoreScale.at("Medium") < eTauEt*isoFW_CTAU.at("Medium") ) bit = 2;
+  if( jTauIso*1024 + jTauCore*isoFW_CTAU_jTAUCoreScale.at("Tight") < eTauEt*isoFW_CTAU.at("Tight") ) bit = 3;
   return bit;
 }
 

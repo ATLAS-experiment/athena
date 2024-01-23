@@ -44,8 +44,8 @@ namespace TCS {
       void setLegacyMode(bool isLegacyTopo) {m_isLegacyTopo=isLegacyTopo;}
 
       // l1menu  isolation info
-      void setIsolationFW_CTAU( const std::map<std::string, int> & isolationFW_CTAU ) { m_isolationFW_CTAU = isolationFW_CTAU; }
-      void setIsolationFW_JTAU( const std::map<std::string, int> & isolationFW_JTAU ) { m_isolationFW_JTAU = isolationFW_JTAU; }
+      void setIsolationFW_CTAU( const std::map<std::string, int>& isolationFW_CTAU, const std::map<std::string, int>& isolationFW_CTAU_jTAUCoreScale ) { m_isolationFW_CTAU = isolationFW_CTAU; m_isolationFW_CTAU_jTAUCoreScale = isolationFW_CTAU_jTAUCoreScale; }
+      void setIsolationFW_JTAU( const std::map<std::string, int>& isolationFW_JTAU ) { m_isolationFW_JTAU = isolationFW_JTAU; }
 
       // accessors
       const std::string & name() const { return m_name; }
@@ -69,8 +69,9 @@ namespace TCS {
       bool isLegacyTopo() const { return m_isLegacyTopo; }
 
       // l1menu isolation info
-      std::map<std::string, int> isolationFW_CTAU() const { return m_isolationFW_CTAU; }
-      std::map<std::string, int> isolationFW_JTAU() const { return m_isolationFW_JTAU; }
+      const std::map<std::string, int>& isolationFW_CTAU() const { return m_isolationFW_CTAU; }
+      const std::map<std::string, int>& isolationFW_CTAU_jTAUCoreScale() const { return m_isolationFW_CTAU_jTAUCoreScale; }
+      const std::map<std::string, int>& isolationFW_JTAU() const { return m_isolationFW_JTAU; }
 
       // Kinematic calculation
       unsigned int calcDeltaPhiBW(const TCS::GenericTOB* tob1, const TCS::GenericTOB* tob2);
@@ -151,6 +152,7 @@ namespace TCS {
       bool m_isLegacyTopo;
 
       std::map<std::string, int> m_isolationFW_CTAU; // FW isolation WPs for cTau
+      std::map<std::string, int> m_isolationFW_CTAU_jTAUCoreScale; // FW isolation WPs for cTau (jTAUCore factor)
       std::map<std::string, int> m_isolationFW_JTAU; // FW isolation WPs for jTau 
 
    };
