@@ -21,14 +21,7 @@ namespace JiveXML{
   AlgoJiveXML::AlgoJiveXML(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator) {
 
-    //Array of tools that retrieve the data, set public and createIf as default
-    declareProperty("DataRetrievers", m_DataRetrievers = ToolHandleArray<IDataRetriever>( NULL ,true));
-
-    //Generate XMLFormatTool as default privat format tool
-    declareProperty("FormatTool", m_FormatTool = ToolHandle<IFormatTool>("JiveXML::XMLFormatTool/XMLFormatTool",this));
-
-    //Array of tools for streaming events, set public and createIf as default
-    declareProperty("StreamTools", m_StreamTools = ToolHandleArray<IStreamTool>(NULL,true));
+    
   }
 
   /**
@@ -37,8 +30,7 @@ namespace JiveXML{
    * - Get GeometryWriters and write geometry if asked for
    * - Get the formatting tool
    * - Get the data retrievers
-   * - Get the streaming tools, including defaults if asked for
-   */
+   * - Get the streaming tools, including defaults if asked for   */
   StatusCode AlgoJiveXML::initialize(){
 
     //be verbose
@@ -91,22 +83,16 @@ namespace JiveXML{
      */
     ATH_MSG_DEBUG("Retrieving streaming tools");
     if (m_writeToFile){
-      ATH_MSG_INFO("Adding default file streaming tool");
-      m_StreamTools.push_back("JiveXML::StreamToFileTool/StreamToFileTool");
+      ATH_MSG_INFO("Retrieving default file streaming tool");
+      ATH_CHECK(m_StreamToFileTool.retrieve());
     }
     /// Get the streaming tools
     if (m_onlineMode == true){
-      m_StreamTools.push_back("JiveXML::StreamToServerTool/StreamToServerTool");
+      ATH_MSG_INFO("Retrieving default server streaming tool");
+      ATH_CHECK(m_StreamToFileTool.retrieve());
    }
 
-    if (m_StreamTools.size() == 0) {
-      ATH_MSG_WARNING("No streaming tools defined, events will be created but not stored!");
-    } else {
-      if (m_StreamTools.retrieve().isFailure()){
-        ATH_MSG_ERROR("Unable to retrieve streaming tools !");
-        return StatusCode::FAILURE;
-      }
-    }
+  
 
     /**
      * Get the IDataRetrievers requested in the m_dataTypes list from the toolSvc 
@@ -314,16 +300,17 @@ namespace JiveXML{
     /**
      * Now stream the events to all registered streaming tools
      */
-    ATH_MSG_DEBUG( "Starting loop over event streamers" );
-    //Loop over streaming tools
-    ToolHandleArray<IStreamTool>::iterator StreamToolsItr = m_StreamTools.begin();
-    for ( ; StreamToolsItr != m_StreamTools.end(); ++StreamToolsItr ){
-      ATH_MSG_INFO("Streaming event to " << (*StreamToolsItr)->name() );
-        if ( (*StreamToolsItr)->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() ){
-           ATH_MSG_WARNING( "Could not stream event to " << (*StreamToolsItr)->name() );
-        } 
+  
+    ATH_MSG_INFO("Streaming event to file");
+    if ( (m_StreamToFileTool->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() )){
+	  ATH_MSG_WARNING( "Could not stream event to file" );
     }
-    ATH_MSG_DEBUG( "Finished loop over event streamers" );
+    if(m_onlineMode==true){
+      ATH_MSG_INFO("Streaming event to server");
+      if ( (m_StreamToServerTool->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() )){
+	ATH_MSG_WARNING( "Could not stream event to server" );
+      }
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -339,8 +326,9 @@ namespace JiveXML{
     /// Release all the tools
     m_DataRetrievers.release().ignore();
     m_FormatTool.release().ignore();
-    m_StreamTools.release().ignore();
-
+    m_StreamToFileTool.release().ignore();
+    m_StreamToServerTool.release().ignore();
+    
     return StatusCode::SUCCESS;
   }
 
