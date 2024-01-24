@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBM_Telescope.h"
@@ -123,7 +123,14 @@ GeoVPhysVol* DBM_Telescope::Build() {
 
   const GeoShapeSubtraction& trapBack1 = trapBack->subtract(((*brWindow) << brWindowShift));
 
-  const GeoMaterial* dbmPeek4 = m_mat_mgr->getMaterialForVolume("pix::DBMPeek4",trapBack1.volume());
+  // Cache the volume calculation here.
+  // It's always the same, and finding the volume of a subtracted shape
+  // is very expensive --- GeoModel does it by doing a MC integration within
+  // the bounding box with a hardcoded number of sample points of 1e6.
+  // This is particularly slow in a debug build, as we have to do a bunch
+  // of eigen calculations for each MC point.
+  const static double vol = trapBack1.volume();
+  const GeoMaterial* dbmPeek4 = m_mat_mgr->getMaterialForVolume("pix::DBMPeek4",vol);
   const GeoLogVol* trapBackLog = new GeoLogVol("bracketLog", &trapBack1, dbmPeek4);
   GeoPhysVol* trapBackPhys = new GeoPhysVol(trapBackLog);
 
