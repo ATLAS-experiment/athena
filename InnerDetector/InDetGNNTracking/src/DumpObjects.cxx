@@ -878,6 +878,7 @@ StatusCode InDet::DumpObjects::execute() {
     ATH_MSG_ERROR(" SpacePointContainer not found: " << m_stripSpacePointContainerKey.key());
     return StatusCode::FAILURE;
   }
+  SCT_SpacePointContainer = stripSpacePointContainerHandle.cptr();
 
   int sp_index = 0;
 
