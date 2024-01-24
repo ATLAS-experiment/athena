@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AFP_Calibration )
@@ -21,5 +21,5 @@ atlas_install_joboptions( scripts/*.py )
 
 atlas_add_executable( run_AFP_PixelIdentifier
    scripts/run_AFP_PixelIdentifier.cxx
-    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES AFP_CalibrationLib ${Boost_LIBRARIES})
