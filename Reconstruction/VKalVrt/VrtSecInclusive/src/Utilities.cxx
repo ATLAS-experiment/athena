@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -371,7 +371,7 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  double VrtSecInclusive::findMinVerticesPair( std::vector<WrkVrt> *workVerticesContainer, std::pair<unsigned, unsigned>& indexPair, VrtSecInclusive::AlgForVerticesPair algorithm )
+  double VrtSecInclusive::findMinVerticesPair( std::vector<WrkVrt> *workVerticesContainer, std::pair<unsigned, unsigned>& indexPair, const VrtSecInclusive::AlgForVerticesPair& algorithm )
   {
     //
     //  Minimal normalized vertex-vertex distance

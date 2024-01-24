@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _VrtSecInclusive_NtupleVars_H
@@ -131,11 +131,11 @@ namespace VKalVrtAthena {
     void deleteNtupleVariables();
     
     
-    template<class T> void addNewVar(const std::string varname) {
+    template<class T> void addNewVar(const std::string& varname) {
       m_varHolder.insert( make_pair(std::string(varname), new varHolder<T>) );
     }
   
-    template<class T> bool isAvailable(const std::string varname) {
+    template<class T> bool isAvailable(const std::string& varname) {
       if( m_varHolder.find(varname) == m_varHolder.end() ) {
         std::cerr << "Warning<TImprovedTree::isAvailable>: "
           << "couldn't find the variable name " << varname
@@ -162,7 +162,7 @@ namespace VKalVrtAthena {
       }
     }
   
-    template<class T> T& get(const std::string varname) {
+    template<class T> T& get(const std::string& varname) {
       try{
         if( !isAvailable<T>(varname) ) {
           throw( varname );
