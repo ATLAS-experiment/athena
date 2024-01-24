@@ -4,20 +4,28 @@ from TriggerMenuMT.L1.Base.L1MenuFlags import L1MenuFlags
 import TriggerMenuMT.L1.Menu.Menu_Physics_pp_run3_v1 as physics_menu
 
 def defineMenu():
-
     physics_menu.defineMenu()
-
 
     # Add new items to the item list in the Physics menu
     l1items = L1MenuFlags.items()
     l1items += [
-
         'L1_MU14FCH_jJ80',
         'L1_MU14FCH_jXE70',
 
         # ATR-19376
         'L1_MU14FCH_XE30',
         'L1_MU14FCH_J40',
+
+        # Legacy TAU items (ATR-28677)
+        'L1_TAU8_EMPTY', 'L1_TAU8_FIRSTEMPTY', 'L1_TAU8_UNPAIRED_ISO',
+        'L1_TAU40_EMPTY', 'L1_TAU40_UNPAIRED_ISO',
+        'L1_TAU60', 
+        'L1_TAU60_2TAU40',
+        'L1_TAU100',
+        'L1_DR-TAU20ITAU12I',
+        'L1_DR-TAU20ITAU12I-J25',
+        'L1_TAU60_DR-TAU20ITAU12I',
+
         # ATR-24037 
         'L1_jXEPerf100',
         # ATR-22696
@@ -25,6 +33,7 @@ def defineMenu():
         'L1_eTAU60HM',
         'L1_eTAU60HL',
         'L1_eTAU80HL',
+
         # ATR-27782 - test eEM M/DR Topo
         'L1_2DR15-M70-2eEM9L',
         'L1_2DR15-M70-2eEM12L',
@@ -149,11 +158,6 @@ def defineMenu():
         # EM non-FILLED
         'L1_EM3_EMPTY':'', 
         'L1_EM7_FIRSTEMPTY':'',
-
-        # TAU non-FILLED
-        'L1_TAU8_EMPTY':'', 
-        'L1_TAU8_FIRSTEMPTY':'', 
-        'L1_TAU8_UNPAIRED_ISO':'', 
 
         # J non-FILLED
         'L1_J12_EMPTY':'',
@@ -297,8 +301,8 @@ def defineMenu():
     def remapItems():  
         itemsToRemove = []
         for itemIndex, itemName in enumerate(L1MenuFlags.items()):
-            if (itemName in L1MenuFlags.ItemMap()):
-                if (L1MenuFlags.ItemMap()[itemName] != ''):
+            if itemName in L1MenuFlags.ItemMap():
+                if L1MenuFlags.ItemMap()[itemName] != '':
                     L1MenuFlags.items()[itemIndex] = L1MenuFlags.ItemMap()[itemName]                                                
                 else: 
                     itemsToRemove.append(itemIndex)

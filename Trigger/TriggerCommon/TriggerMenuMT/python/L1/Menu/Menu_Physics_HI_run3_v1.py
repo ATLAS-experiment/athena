@@ -60,9 +60,7 @@ def defineMenu():
         'L1_MU3V_J30',
         'L1_MU3V_jJ40',
 
-        'L1_TAU8', 'L1_TAU60', 'L1_TAU12IM', 'L1_TAU20IM',
-        'L1_TAU8_EMPTY',
-
+        'L1_TAU8', 'L1_TAU12IM', 'L1_TAU20IM', 'L1_eTAU12_EMPTY', 'L1_eTAU80', 
 
         # single jet
         'L1_J12','L1_J15','L1_J20','L1_J25', 'L1_J30', 'L1_J40', 'L1_J50' ,'L1_J75','L1_J85', 'L1_J100',

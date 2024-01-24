@@ -490,6 +490,13 @@ class ItemDef:
         MenuItem('L1_eTAU60'  ).setLogic( d.eTAU60   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU80'  ).setLogic( d.eTAU80   & physcond).setTriggerType( TT.calo )
         MenuItem('L1_eTAU140' ).setLogic( d.eTAU140  & physcond).setTriggerType( TT.calo )
+
+        MenuItem('L1_eTAU12_EMPTY').setLogic(d.eTAU12 & cosmiccond).setTriggerType(TT.calo)
+        MenuItem('L1_eTAU12_FIRSTEMPTY').setLogic(d.eTAU12 & firstempty).setTriggerType(TT.calo)
+        MenuItem('L1_eTAU12_UNPAIRED_ISO').setLogic(d.eTAU12 & unpaired_isocond).setTriggerType(TT.calo)
+        MenuItem('L1_eTAU60_EMPTY').setLogic(d.eTAU60 & cosmiccond).setTriggerType(TT.calo)
+        MenuItem('L1_eTAU60_UNPAIRED_ISO').setLogic(d.eTAU60 & unpaired_isocond).setTriggerType(TT.calo)
+
         # Phase-I 2xTAU
         MenuItem('L1_cTAU30M_2cTAU20M').setLogic(d.cTAU30M & d.cTAU20M.x(2) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_cTAU35M_2cTAU30M').setLogic(d.cTAU35M & d.cTAU30M.x(2) & physcond).setTriggerType(TT.calo)

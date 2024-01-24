@@ -34,7 +34,7 @@ l1seeds = { 'low'  : \
                 'L1_BPH-8M15-0DR22-2MU5VF',\
                 'L1_BPH-8M15-0DR22-MU5VFMU3V-BO',\
                 'L1_BTAG-MU3VjJ40',\
-                'L1_DR-TAU20ITAU12I',\
+                'L1_cTAU30M_2cTAU20M_DR-eTAU30eTAU20',\
                 'L1_DY-BOX-2MU5VF',\
                 'L1_DY-BOX-2MU3VF',\
                 'L1_EM15VHI_2TAU12IM_J25_3J12',\

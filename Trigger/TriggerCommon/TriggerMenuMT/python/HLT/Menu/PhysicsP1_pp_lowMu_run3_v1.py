@@ -551,7 +551,7 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_noalg_L1eEM26M',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportPhIGroup),
 
         ChainProp(name='HLT_noalg_L1TAU8',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+TauStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1TAU60',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+TauStreamersGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1eTAU80',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+TauStreamersGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1TAU12IM',    l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+TauStreamersGroup+SupportLegGroup),        
         ChainProp(name='HLT_noalg_L1TAU20IM',    l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+TauStreamersGroup+SupportLegGroup),        
 

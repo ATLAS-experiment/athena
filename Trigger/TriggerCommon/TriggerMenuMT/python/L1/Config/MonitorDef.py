@@ -118,7 +118,7 @@ class MonitorDef:
                 ## Legacy L1 items
                 # L1Calo
                 "L1_EM3", "L1_EM15", 
-                "L1_TAU8", "L1_TAU20IM", "L1_TAU100",
+                "L1_TAU8", "L1_TAU20IM",
                 "L1_J30", "L1_J75", "L1_J100", "L1_J400",
                 "L1_J15p31ETA49", "L1_J30p31ETA49",
                 "L1_J45p0ETA21_3J15p0ETA25", "L1_4J15p0ETA25",
@@ -129,11 +129,9 @@ class MonitorDef:
                 "L1_BPH-0DR3-EM7J15_MU5VF", "L1_HT190-J15s5pETA21", "L1_LLP-RO", # Board 0 FPGA 0
                 "L1_MJJ-500-NFF",                                                # Board 0 FPGA 1
                 "L1_SC111-CJ15",                                                 # Board 1 FPGA 0
-                "L1_TAU60_DR-TAU20ITAU12I", "L1_DR-TAU20ITAU12I-J25",            # Board 1 FPGA 1
                 "L1_BPH-0M9-EM7-EM5_MU5VF", "L1_BPH-0DR3-EM7J15_2MU3V",
                 "L1_JPSI-1M5-EM7", "L1_JPSI-1M5-EM12",
                 "L1_MJJ-700", "L1_LLP-NOMATCH",
-                "L1_DR-TAU20ITAU12I",
                 "L1_LAR-ZEE",
 
                 ## Phase-I
