@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,7 +19,14 @@
 #include "SCT_ReadoutGeometry/SCT_ReadoutScheme.h"
 
 // Other includes
-#include "InDetIdentifier/SCT_ID.h"
+#include "ReadoutGeometryBase/InDetDD_Defs.h" //InDetDD::CarrierType enum
+#include <vector>
+#include <utility> //std::pair
+#include <map> //data member
+
+namespace InDetDD{
+  class SiCellId;
+}
 
 namespace InDetDD {
 /** @class SCT_ModuleSideDesign
@@ -187,7 +194,7 @@ private:
 
 protected:
     SCT_ReadoutScheme m_scheme; // !< connection between diodes and readout cells
-    InDetDD::DetectorType m_detectorType;
+    InDetDD::DetectorType m_detectorType{Undefined};
 
 
     ///////////////////////////////////////////////////////////////////
