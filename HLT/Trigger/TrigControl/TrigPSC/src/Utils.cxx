@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -32,7 +32,7 @@ bool psc::Utils::execPython (const std::string& pyCmd)
 }
 
 
-bool psc::Utils::execPython (const std::vector<std::string> pyCmds)
+bool psc::Utils::execPython (const std::vector<std::string>& pyCmds)
 {
   std::vector<std::string>::const_iterator iter;  
   for (iter = pyCmds.begin(); iter != pyCmds.end(); ++iter) {
@@ -65,10 +65,10 @@ bool psc::Utils::execFile (const std::string& pyFileName)
 
 psc::Utils::ScopeTimer::ScopeTimer (const std::string& descr) :
   m_descr(descr),
+  m_t1(std::chrono::system_clock::now()),
   m_running(true)
 {
   std::tm lt;
-  m_t1 = std::chrono::system_clock::now();
   auto t = std::chrono::system_clock::to_time_t(m_t1);
   localtime_r(&t, &lt);
   ERS_LOG( m_descr << " started at time: " << std::put_time(&lt, "%Y-%m-%d %H:%M:%S") );
