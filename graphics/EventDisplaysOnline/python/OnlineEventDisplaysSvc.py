@@ -27,8 +27,7 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
 
                 self.zpgid = None
                 self.partition = None
-
-                self.StreamToFileTool = kw.get('StreamToFileTool')
+                self.StreamToFileTool = None #kw.get('StreamToFileTool')
                 self.StreamToServerTool = None
                 self.VP1EventProducer = None
                 
@@ -58,14 +57,13 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                 return StatusCode.Success
 
         def getJobOptions(self):
-                #self.StreamToFileTool = PyAthena.py_tool('JiveXML::StreamToFileTool', iface='IProperty')
+                self.StreamToFileTool = PyAthena.py_tool('JiveXML::StreamToFileTool', iface='IProperty')
                 self.StreamToServerTool = PyAthena.py_tool('JiveXML::StreamToServerTool', iface='IProperty')
+                help(self.StreamToFileTool)
                 # Some casting magic is needed to access algorithm properties
                 from GaudiPython.Bindings import gbl, InterfaceCast
                 vp1alg = PyAthena.py_alg('VP1EventProd')
                 self.VP1EventProducer = InterfaceCast(gbl.IProperty).cast(vp1alg)
-                print(type(self.StreamToFileTool))
-                print(self.StreamToFileTool.MyTest)
                 self.msg.info("StreamToFileTool: %s", self.StreamToFileTool)
                 self.msg.info("StreamToServerTool: %s", self.StreamToServerTool)
                 self.msg.info("VP1EventProducer: %s", self.VP1EventProducer)
@@ -174,9 +172,10 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                         # Set output stream for JiveXML event streaming (file and server)
                         print('stream name and file name prefix:',"%s" % self.stream, "%s/JiveXML" % self.directory)
                         self.StreamToServerTool.getProperty('StreamName').setValue("%s" % self.stream)
+                        
+                        print('before changing my test in online svc:',self.StreamToFileTool.getProperty("MyTest").value())
                         self.StreamToFileTool.getProperty('FileNamePrefix').setValue("%s/JiveXML" % self.directory)
-                        print(self.StreamToFileTool.getProperty("MyTest").value())
-                        self.StreamToFileTool.getProperty("MyTest").setValue("updated")
+                        self.StreamToFileTool.getProperty("MyTest").setValue("updatedinOsvc")
                         print(self.StreamToFileTool.getProperty("MyTest").value())
                         self.msg.debug("Directory in try: %s", self.directory)
                 except Exception as err:
