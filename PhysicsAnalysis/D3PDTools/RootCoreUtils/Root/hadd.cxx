@@ -31,10 +31,8 @@ namespace RCU
   {
     if (input_files.size() == 1)
     {
-      // if there is only one input file I just create a hard link instead of
-      // bothering with the merging below.  that oughgt to save both disk space
-      // and time.
-      std::filesystem::create_hard_link (input_files.front(), output_file);
+      // if there is only one input file, create a symlink instead of merging
+      std::filesystem::create_symlink (input_files.front(), output_file);
       return;
     }
 
