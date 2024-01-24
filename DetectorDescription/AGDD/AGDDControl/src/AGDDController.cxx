@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDControl/AGDDController.h"
@@ -144,7 +144,7 @@ void AGDDController::UseGeoModelDetector ATLAS_NOT_THREAD_SAFE (const std::strin
 	{
 		const GeoVDetectorManager *theManager=theExpt->getManager(name);
 		if (theManager->getNumTreeTops()>1) std::cout<<"AGDDController: more than one treetop!!!"<<std::endl;
-		GeoPVConstLink pv=theManager->getTreeTop(0);
+		PVConstLink pv=theManager->getTreeTop(0);
 		GeoVPhysVol* ppv=const_cast<GeoVPhysVol*>(&(*pv));
 		((AGDD2GeoModelBuilder*)(m_theBuilder))->SetMotherVolume((GeoPhysVol*)ppv);
 	}
