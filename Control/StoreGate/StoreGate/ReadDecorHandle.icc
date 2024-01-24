@@ -156,11 +156,24 @@ ReadDecorHandle<T, D>::operator() (size_t i)
  *        for the referenced object.
  */
 template <class T, class D>
-typename ReadDecorHandle<T, D>::const_container_pointer_type
+template <class POINTER_TYPE /*= const_container_pointer_type*/,
+          typename /*= std::enable_if_t<!std::is_void_v<POINTER_TYPE> >*/ >
+POINTER_TYPE
 ReadDecorHandle<T, D>::getDataArray()
 {
-  return reinterpret_cast<const_container_pointer_type>
-    (this->vectorData()->getDataArray (m_acc.auxid()));
+  return m_acc.getDataArray (*this->vectorData());
+}
+
+
+/**
+ * @brief Get a span over the auxilary data array,
+ *        for the referenced object.
+ */
+template <class T, class D>
+auto
+ReadDecorHandle<T, D>::getDataSpan() -> const_span
+{
+  return m_acc.getDataSpan (*this->vectorData());
 }
 
 

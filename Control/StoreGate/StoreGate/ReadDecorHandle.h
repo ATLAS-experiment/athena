@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/ReadDecorHandle.h
@@ -94,18 +94,19 @@ class ReadDecorHandle
 {
 public:
   /// Base class.
-  typedef ReadHandle<T> Base;
+  using Base = ReadHandle<T>;
 
   /// Accessor type for aux data.
-  typedef SG::AuxElement::ConstAccessor<D> accessor_t;
+  using accessor_t = SG::AuxElement::ConstAccessor<D>;
 
   /// Type referencing an aux data item.
-  typedef typename accessor_t::const_reference_type
-    const_reference_type;
+  using const_reference_type = typename accessor_t::const_reference_type;
 
   /// Pointer into the vector holding an aux data item.
-  typedef typename accessor_t::const_container_pointer_type
-    const_container_pointer_type;
+  using const_container_pointer_type = typename accessor_t::const_container_pointer_type;
+
+  /// Span of aux data items.
+  using const_span = typename accessor_t::const_span;
 
 
   /**
@@ -189,8 +190,18 @@ public:
    * @brief Get a pointer to the start of the auxiliary data array,
    *        for the referenced object.
    */
-  const_container_pointer_type
+  template <class POINTER_TYPE = const_container_pointer_type,
+            typename = std::enable_if_t<!std::is_void_v<POINTER_TYPE> > >
+  POINTER_TYPE
   getDataArray();
+
+
+  /**
+   * @brief Get a span over the auxilary data array,
+   *        for the referenced object.
+   */
+  const_span
+  getDataSpan();
 
 
   /**

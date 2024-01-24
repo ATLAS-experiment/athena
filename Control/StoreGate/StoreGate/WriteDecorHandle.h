@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandle.h
@@ -99,18 +99,20 @@ class WriteDecorHandle
 {
 public:
   /// Base class.
-  typedef ReadHandle<T> Base;
+  using Base = ReadHandle<T>;
 
   /// Accessor type for aux data.
-  typedef SG::AuxElement::Decorator<D> accessor_t;
+  using accessor_t = SG::AuxElement::Decorator<D>;
 
   /// Type referencing an aux data item.
-  typedef typename accessor_t::reference_type
-    reference_type;
+  using reference_type = typename accessor_t::reference_type;
 
   /// Pointer into the vector holding an aux data item.
-  typedef typename accessor_t::container_pointer_type
-    container_pointer_type;
+  using container_pointer_type = typename accessor_t::container_pointer_type;
+
+  /// Span of aux data items.
+  using span = typename accessor_t::span;
+
 
   /**
    * @brief Constructor from a WriteDecorHandleKey.
@@ -210,8 +212,18 @@ public:
    * @brief Get a pointer to the start of the auxiliary data array,
    *        for the referenced object.
    */
-  container_pointer_type
+  template <class POINTER_TYPE = container_pointer_type,
+            typename = std::enable_if_t<!std::is_void_v<POINTER_TYPE> > >
+  POINTER_TYPE
   getDecorationArray();
+
+
+  /**
+   * @brief Get a span over the auxilary data array,
+   *        for the referenced object.
+   */
+  span
+  getDecorationSpan();
 
 
   /**
