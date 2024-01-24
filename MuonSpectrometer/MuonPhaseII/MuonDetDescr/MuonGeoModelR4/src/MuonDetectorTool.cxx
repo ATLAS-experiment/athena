@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonGeoModelR4/MuonDetectorTool.h"
 
@@ -52,7 +52,7 @@ StatusCode MuonDetectorTool::create() {
         ATH_MSG_VERBOSE("Check whether "<<volName<<" belongs to the muon world. ");
         if (std::find(m_treeTopNodes.value().begin(), 
                       m_treeTopNodes.value().end(),volName) != m_treeTopNodes.value().end()) {
-            m_manager->addTreeTop(GeoPVLink(cursor.getVolume().operator->()));
+            m_manager->addTreeTop(cursor.getVolume());
         }
         cursor.next();
     }
