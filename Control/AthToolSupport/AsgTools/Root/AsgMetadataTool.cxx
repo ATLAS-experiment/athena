@@ -159,6 +159,15 @@ namespace asg {
             ATH_MSG_FATAL( "Failed to call beginEvent()" );
             throw std::runtime_error( "Couldn't call beginEvent()" );
          }
+
+     #ifdef XAOD_STANDALONE
+      } else if( inc.type() == IncidentType::MetaDataStop ) {
+         if( metaDataStop().isFailure() ) {
+            ATH_MSG_FATAL( "Failed to call metaDataStop()" );
+            throw std::runtime_error( "Couldn't call metaDataStop()" );
+         }
+         
+     #endif // XAOD_STANDALONE
       } else {
          ATH_MSG_WARNING( "Unknown incident type received in AsgMetaDataTool: " << inc.type() );
       }
