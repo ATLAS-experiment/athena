@@ -2242,11 +2242,11 @@ def setupMenu(menu_name):
         #ATR-23732 Displaced Jet Trigger
         ChainProp(name='HLT_j180_2dispjet50_3d2p_L1J100', groups=SingleJetGroup+UnconvTrkGroup+PrimaryLegGroup, l1SeedThresholds=['FSNOSEED']*2),
         ChainProp(name='HLT_j180_dispjet50_3d2p_dispjet50_1p_L1J100', groups=SingleJetGroup+UnconvTrkGroup+PrimaryLegGroup, l1SeedThresholds=['FSNOSEED']*3),
-        ChainProp(name='HLT_j180_dispjet140_x3d1p_L1J100', groups=SingleJetGroup+UnconvTrkGroup+PrimaryLegGroup, l1SeedThresholds=['FSNOSEED']*2),
         #ATR-27257, Phase-I
         ChainProp(name='HLT_j180_2dispjet50_3d2p_L1jJ160', groups=SingleJetGroup+UnconvTrkGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2),
         ChainProp(name='HLT_j180_dispjet50_3d2p_dispjet50_1p_L1jJ160', groups=SingleJetGroup+UnconvTrkGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*3),
-        ChainProp(name='HLT_j180_dispjet140_x3d1p_L1jJ160', groups=SingleJetGroup+UnconvTrkGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2),
+        ChainProp(name='HLT_j180_dispjet90_x3d1p_L1jJ160', groups=SingleJetGroup+UnconvTrkGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2),
+        ChainProp(name='HLT_j180_dispjet100_x3d1p_L1jJ160', groups=SingleJetGroup+UnconvTrkGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2),
 
         #ATR-25456
         # Combined slice - Primary
