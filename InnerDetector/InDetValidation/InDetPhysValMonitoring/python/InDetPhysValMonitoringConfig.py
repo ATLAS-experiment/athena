@@ -233,6 +233,13 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("JetContainerName", 'AntiKt4EMPFlowJets')
         kwargs.setdefault("FillTrackInJetPlots", True)
 
+        # Set Jet cuts used for CTIDE studies
+        kwargs.setdefault('JetAbsEtaMin', 0)
+        kwargs.setdefault('JetAbsEtaMax', 2.5 if flags.Detector.GeometryID else 4.0)
+        # Pt cuts are in GeV
+        kwargs.setdefault('JetPtMin', 100)
+        kwargs.setdefault('JetPtMax', 5000)
+
     kwargs.setdefault("doPRW", flags.PhysVal.IDPVM.doPRW)
 
     acc.setPrivateTools(CompFactory.InDetPhysValMonitoringTool(**kwargs))

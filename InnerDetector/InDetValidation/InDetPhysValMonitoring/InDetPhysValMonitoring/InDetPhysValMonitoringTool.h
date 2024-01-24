@@ -82,8 +82,8 @@ private:
     void fillTrackCutFlow(const asg::AcceptData& accept);
     static void fillCutFlow(const asg::AcceptData& accept, std::vector<std::string> & names, std::vector<int> & cutFlow);
     // Get truth particles into a vector, possibly using the pileup from the event
-    const std::vector<const xAOD::TruthParticle *> getTruthParticles() const;
-    std::pair<const std::vector<const xAOD::TruthVertex*>, const std::vector<const xAOD::TruthVertex*>> getTruthVertices() const;
+    const std::vector<const xAOD::TruthParticle *> getTruthParticles(const EventContext& ctx) const;
+    std::pair<const std::vector<const xAOD::TruthVertex*>, const std::vector<const xAOD::TruthVertex*>> getTruthVertices(const EventContext& ctx) const;
     
     /// Generate an Rtt config struct based on the user-passed properties
     InDetRttPlotConfig getFilledPlotConfig() const;  
@@ -94,10 +94,12 @@ private:
     //
     const Trk::TrackParameters* getUnbiasedTrackParameters(const Trk::TrackParameters* trkParameters, const Trk::MeasurementBase* measurement );
     // Do Jet/TIDE plots (Tracking In Dense Environment)
-    StatusCode fillJetHistograms(const xAOD::TrackParticleContainer * pTracks, 
-                        IDPVM::CachedGetAssocTruth & association,
-                        const  xAOD::Vertex * primaryVtx,
-                        const std::vector<const xAOD::TruthParticle*> &truthParticles);
+    StatusCode fillHistogramsTrackingInDenseEnvironment(const EventContext& ctx,
+							IDPVM::CachedGetAssocTruth& getAsTruth,
+							const std::vector<const xAOD::TruthParticle*>& truthParticles,
+							const xAOD::TrackParticleContainer& tracks,
+							const xAOD::Vertex* primaryvertex,
+							float beamSpotWeight);
 
 	// accessors/decorators
     SG::AuxElement::Accessor<bool>  m_acc_hasTruthFilled{"hasTruthFilled"};
@@ -122,6 +124,10 @@ private:
     // set the "selectedByPileupSwitch" decoration for all particles in the passed vector
     void markSelectedByPileupSwitch(const std::vector<const xAOD::TruthParticle*> & truthParticles) const;
 
+
+    // Jet Selection for CTIDE
+    bool passJetCuts(const xAOD::Jet& jet) const;
+  
     ///TrackParticle container's name
     SG::ReadHandleKey<xAOD::TrackParticleContainer>  m_trkParticleName
         {this,"TrackParticleContainerName", "InDetTrackParticles"};
@@ -188,6 +194,20 @@ private:
     Gaudi::Property<std::vector<double> > m_etaBins{this, "EtaBins", {}};
     Gaudi::Property<std::vector<int> > m_minHits{this, "MinNumberClusters", {}};
 
+    Gaudi::Property<float> m_jetAbsEtaMin
+    {this, "JetAbsEtaMin", 0.f,
+     "Minimum Eta value for jet selection"}; 
+    Gaudi::Property<float> m_jetAbsEtaMax
+    {this, "JetAbsEtaMax", 2.5f,
+     "Maximum Eta value for jet selection"};
+    Gaudi::Property<float> m_jetPtMin
+    {this, "JetPtMin", 100.0f,
+     "Minimum Jet pT for jet selection in GeV"};
+    Gaudi::Property<float> m_jetPtMax
+    {this, "JetPtMax", 5000.0f,
+     "Maximum Jet pT for jet selection in GeV"};
+
+  
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectionTool{this, "TrackSelectionTool", "InDet::InDetTrackSelectionTool/TrackSelectionTool", "Track selection tool to use"};
     ToolHandle<IInDetVertexTruthMatchTool> m_vtxValidTool{this, "VertexTruthMatchTool", "InDetVertexTruthMatchTool/VtxTruthMatchTool", "Vertex truth matching tool to use"};
     ToolHandle<IAthSelectionTool> m_truthSelectionTool{this, "TruthSelectionTool","AthTruthSelectionTool", "Truth selection tool (for efficiencies and resolutions)"};
