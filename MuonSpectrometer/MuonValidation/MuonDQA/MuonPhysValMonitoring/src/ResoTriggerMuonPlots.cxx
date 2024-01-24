@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ResoTriggerMuonPlots.h"
@@ -12,12 +12,12 @@ using namespace xAOD::P4Helpers;
 
 ResoTriggerMuonPlots::ResoTriggerMuonPlots(PlotBase* pParent, const std::string& sDir, std::string sType) :
     PlotBase(pParent, sDir),
-    m_sType(std::move(sType)) {
-    m_pt_slices = {"0", "25", "55", "100"};
-    m_etaBins = {-3.,    -2.5,   -2.4,   -1.918, -1.623, -1.348, -1.2329, -1.1479, -1.05, -0.908, -0.791,
-                    -0.652, -0.476, -0.324, -0.132, 0,      0.132,  0.324,   0.476,   0.652, 0.791,  0.908,
-                    1.05,   1.1479, 1.2329, 1.348,  1.623,  1.918,  2.4,     2.5,     3.};
-
+    m_sType(std::move(sType)),
+    m_pt_slices {"0", "25", "55", "100"},
+    m_etaBins {-3.,    -2.5,   -2.4,   -1.918, -1.623, -1.348, -1.2329, -1.1479, -1.05, -0.908, -0.791,
+                  -0.652, -0.476, -0.324, -0.132, 0,      0.132,  0.324,   0.476,   0.652, 0.791,  0.908,
+                  1.05,   1.1479, 1.2329, 1.348,  1.623,  1.918,  2.4,     2.5,     3.}
+{
     Res_pT = Book1D("Res" + m_sType + "_pT", "Res" + m_sType + "_pT;(1/pT-1/RECOpT)/(1/RECOpT);Entries", 200, -0.25, 0.25);
     Res_eta = Book1D("Res" + m_sType + "_eta", "Res" + m_sType + "_eta;eta-RECOeta;Entries", 200, -0.02, 0.02);
     Res_phi = Book1D("Res" + m_sType + "_phi", "Res" + m_sType + "_phi;phi-RECOphi;Entries", 200, -0.005, 0.005);
