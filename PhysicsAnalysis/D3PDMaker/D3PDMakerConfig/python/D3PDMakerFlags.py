@@ -28,8 +28,7 @@ _string_prop ('EventInfoSGKey',              'EventInfo')
 _string_prop ('ElectronSGKey',               'AllElectrons')
 _string_prop ('GSFTrackAssocSGKey',          'GSFTrackAssociation')
 _string_prop ('PhotonSGKey',                 'Photons,PhotonCollection')
-_string_prop ('MuonSGKey',                   'StacoMuonCollection,Muons')
-_string_prop ('MuonSegmentSGKey',            'ConvertedMBoySegments')
+_string_prop ('MuonSGKey',                   'Muons')
 _string_prop ('JetSGKey',                    'AntiKt4EMTopoJets,' +
                                              'AntiKt4TopoEMJets,' +
                                              'AntiKt4LCTopoJets,' +

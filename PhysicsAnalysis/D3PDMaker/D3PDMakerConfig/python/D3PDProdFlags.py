@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerConfig/python/D3PDProdFlags.py
@@ -53,33 +53,3 @@ derive from JobProperty and add them to our list."""
                 jobproperties.OldD3PDProdFlags.add_JobProperty (v)
                 listAllKnownD3PD.append (getattr (oldProdFlags, k))
     return
-    
-
-
-class OutputDirectoryName(JobProperty):
-    """ Name of the directory where the output files are written. """
-    statusOn     = True
-    allowedTypes = ['str']
-    StoredValue  = ""
-    pass
-jobproperties.D3PDProdFlags.add_JobProperty(OutputDirectoryName)
-
-class OutputMiddleName(JobProperty):
-    """ Keyword added in the middle of the output files names. """
-    statusOn     = True
-    allowedTypes = ['str']
-    StoredValue  = ""
-    pass
-jobproperties.D3PDProdFlags.add_JobProperty(OutputMiddleName)
-
-class OutputPoolRootFileNamePrefix(JobProperty):
-    """ File name prefix for the pool.root output files."""
-    statusOn     = True
-    allowedTypes = ['str']
-    StoredValue  = ""
-    pass
-jobproperties.D3PDProdFlags.add_JobProperty(OutputPoolRootFileNamePrefix)
-
-
-# egamma D3PDs.
-_importFlagsFromModule ('egammaD3PDMaker.egammaD3PDProdFlags')
