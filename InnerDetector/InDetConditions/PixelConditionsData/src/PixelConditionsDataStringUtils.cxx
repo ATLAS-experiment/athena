@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelConditionsData/PixelConditionsDataStringUtils.h"
@@ -56,7 +56,7 @@ namespace PixelConditionsData{
       }
     }
     if (sParam.empty()) {
-      throw ("PixelConfigCondAlg::getParameterString() Input variable was not found. " );
+      throw std::runtime_error ("PixelConfigCondAlg::getParameterString() Input variable " + varName + " was not found. " );
     }
 
     std::vector<std::string> vParam;
