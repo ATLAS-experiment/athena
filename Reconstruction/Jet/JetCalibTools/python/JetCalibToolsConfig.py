@@ -62,6 +62,7 @@ fatjetcontexts = {
     "TrigUngroomed": ("JES_Full2012dataset_Rscan_June2014.config","00-04-77","JetArea_EtaJES"),
     "TrigTrimmed":   ("JES_MC15recommendation_FatJet_June2015_PtFrac4.config","00-04-82","EtaJES_JMS"),
     "TrigSoftDrop":  ("JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config","00-04-82","EtaJES_JMS"),
+    "TrigHLTSoftDrop":("JES_JMS_MC21_R10_PFlow_CSSK_SoftDrop_Dec2023_Trigger.config", "00-04-82","EtaJES_JMS"),
     "LargeRDNN":     ("JES_JMS_MC20dnnc_R10_UFO_CSSK_SoftDrop_Jun2023.config","00-04-83","LargeRDNN"),
 }
 
@@ -152,7 +153,7 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
             _pvname = pvname
         # HACK: For testing while we don't have finalised calibrations for trigger PF jets
         _jetcollection = jetcollection
-        if "PFlow" in jetcollection and context=="TrigSoftDrop":
+        if "PFlow" in jetcollection and (context=="TrigSoftDrop" or context=="TrigHLTSoftDrop"):
             _jetcollection = jetcollection.replace("EMPFlow","UFO")
 
         if "ByVertex" in jetcollection:
