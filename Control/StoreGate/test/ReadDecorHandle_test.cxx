@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ReadDecorHandle_test.cxx
@@ -228,6 +228,7 @@ void test3()
   assert (h1 (*(*pcont)[1]) == 11);
   assert (h1 (2) == 12);
   assert (h1.getDataArray()[0] == 10);
+  assert (h1.getDataSpan()[0] == 10);
 
   // Test case of no alias.
   SG::ReadDecorHandleKey<MyObjCont> k2 ("foo.bbb");

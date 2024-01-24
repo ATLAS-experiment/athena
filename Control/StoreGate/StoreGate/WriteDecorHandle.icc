@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandle.icc
@@ -216,11 +216,24 @@ WriteDecorHandle<T, D>::operator() (size_t i)
  *        for the referenced object.
  */
 template <class T, class D>
-typename WriteDecorHandle<T, D>::container_pointer_type
+template <class POINTER_TYPE /*= container_pointer_type*/,
+          typename /*= std::enable_if_t<!std::is_void_v<POINTER_TYPE> >*/ >
+POINTER_TYPE
 WriteDecorHandle<T, D>::getDecorationArray()
 {
-  return reinterpret_cast<container_pointer_type>
-    (this->vectorData()->getDecorationArray (m_acc.auxid()));
+  return m_acc.getDecorationArray (*this->vectorData());
+}
+
+
+/**
+ * @brief Get a span over the auxilary data array,
+ *        for the referenced object.
+ */
+template <class T, class D>
+auto
+WriteDecorHandle<T, D>::getDecorationSpan() -> span
+{
+  return m_acc.getDecorationSpan (*this->vectorData());
 }
 
 
@@ -341,7 +354,7 @@ void* WriteDecorHandle<T, D>::typeless_dataPointer_impl (bool quiet)
   // otherwise, we'll get an infinite recursion.
   // Also don't call getDecorationArray if the container is empty.
   if (this->m_ptr && this->vectorData()->size_v() > 0) {
-    m_acc.getDecorationArray (*this->vectorData());
+    m_acc.getDecorationSpan (*this->vectorData());
   }
   return this->m_ptr;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/WriteDecorHandle_test.cxx
@@ -220,6 +220,7 @@ void test3()
   assert (h1.isPresent());
 
   h1.getDecorationArray()[0] = 10;
+  h1.getDecorationSpan()[0] = 10;
   h1 (*(*pcont)[1]) = 11;
   h1 (2) = 12;
   assert (h1.isAvailable());
