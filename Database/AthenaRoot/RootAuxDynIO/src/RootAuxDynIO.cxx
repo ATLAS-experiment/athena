@@ -115,8 +115,8 @@ namespace RootAuxDynIO
    }
 
    std::unique_ptr<RootAuxDynIO::IRNTupleWriter>
-   getNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression) {
-      return std::make_unique<RNTupleAuxDynWriter>(file, ntupleName, compression); 
+   getNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics) {
+      return std::make_unique<RNTupleAuxDynWriter>(file, ntupleName, enableBufferedWrite, enableMetrics);
    }
 
 }

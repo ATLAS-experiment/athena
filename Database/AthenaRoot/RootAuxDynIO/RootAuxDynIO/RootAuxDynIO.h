@@ -73,7 +73,7 @@ namespace RootAuxDynIO
    
    std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(ROOT::Experimental::Detail::RFieldBase* field,
                                                               ROOT::Experimental::Detail::RPageSource* source);
-   std::unique_ptr<IRNTupleWriter>    getNTupleAuxDynWriter(TFile*,  const std::string& ntupleName, int compression);
+   std::unique_ptr<IRNTupleWriter>    getNTupleAuxDynWriter(TFile*,  const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
 
 
    class IRootAuxDynReader

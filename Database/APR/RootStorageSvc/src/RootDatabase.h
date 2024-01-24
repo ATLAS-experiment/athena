@@ -89,6 +89,12 @@ namespace pool  {
     std::string   m_treeNameWithCache;
     /// Default tree cache learn events
     int           m_defTreeCacheLearnEvents;
+    /// Flag to enable/disable buffered RNTuple writing
+    bool          m_rntBufferedWriteEnabled;
+    /// Flag to enable/disable RNTupleReader metrics
+    bool          m_rntReaderMetricsEnabled;
+    /// Flag to enable/disable RNTupleWriter metrics
+    bool          m_rntWriterMetricsEnabled;
 
     /// name of the container with master index ('*' means use the biggest)
     std::string   m_indexMaster;
