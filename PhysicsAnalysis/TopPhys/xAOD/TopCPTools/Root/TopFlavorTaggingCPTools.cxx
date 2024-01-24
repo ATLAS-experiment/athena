@@ -69,7 +69,13 @@ namespace top {
     // its the same as the eff used in the calibration
     // Pythia6;Herwigpp;Pythia8;Sherpa(2.2.1);Sherpa(2.1);aMC@NLO+Pythia8;Herwig7.1.3;Sherpa228;Sherpa2210;Herwigpp721;Sherpa2212;aMC@NLO+Herwig7
     // based of https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22
+
+    // Run2
     m_efficiency_maps = "default;default;410470;410250;default;410464;411233;default;700122;600666;700660;412116";
+    // Run3
+    if (m_config->isRun3()) {
+      m_efficiency_maps = "default;default;601229;doesnotexist;doesnotexist;doesnotexist;601414;doesnotexist;doesnotexist;doesnotexist;700660;doesnotexist";
+    }
 
     const std::string caloJets_collection = m_config->sgKeyJets();
     const std::string trackJets_collection = m_config->sgKeyTrackJets();
