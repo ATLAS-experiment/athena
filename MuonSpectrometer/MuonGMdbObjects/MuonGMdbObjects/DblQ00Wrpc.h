@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -13,6 +13,7 @@
 #ifndef DBLQ00_WRPC_H
 #define DBLQ00_WRPC_H
 #include <string>
+#include <vector>
 
 class IRDBAccessSvc;
 
@@ -48,14 +49,14 @@ public:
         float stroff[3]; // STRIP OFFSET S, FIRST Z, SECOND Z
     };
     
-    const WRPC* data() const { return m_d; };
+    const WRPC* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "WRPC"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "WRPC"; };
 
 private:
-    WRPC* m_d;
+    std::vector<WRPC> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Wrpc & operator=(const DblQ00Wrpc &right);
     DblQ00Wrpc(const DblQ00Wrpc&);

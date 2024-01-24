@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -13,6 +13,7 @@
 #ifndef DBLQ00_ACUT_H
 #define DBLQ00_ACUT_H
 #include <string>
+#include <vector>
 
 
 class IRDBAccessSvc;
@@ -35,14 +36,14 @@ public:
         int n; // NUMBER OF SUB-CUTS IN THE STATION
     };
     
-    const ACUT* data() const { return m_d; };
+    const ACUT* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "ACUT"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "ACUT"; };
     
 private:
-    ACUT* m_d;
+    std::vector<ACUT> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Acut & operator=(const DblQ00Acut &right);
     DblQ00Acut(const DblQ00Acut&);

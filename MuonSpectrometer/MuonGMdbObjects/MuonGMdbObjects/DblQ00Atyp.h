@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -13,6 +13,7 @@
 #ifndef DBLQ00_ATYP_H
 #define DBLQ00_ATYP_H
 #include <string>
+#include <vector>
 
 
 class IRDBAccessSvc;
@@ -33,7 +34,7 @@ public:
         int nsta; // NUMBER OF STATIONS OF THIS TYPE
     };
     
-    const ATYP* data() const { return m_d; };
+    const ATYP* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "ATYP"; };
     unsigned int getNObj() const { return m_nObj; };
@@ -41,7 +42,7 @@ public:
     const char* getObjName() const { return "ATYP"; };
 
 private:
-    ATYP* m_d;
+    std::vector<ATYP> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Atyp & operator=(const DblQ00Atyp &right);
     DblQ00Atyp(const DblQ00Atyp&);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -14,6 +14,7 @@
 #define DBLQ00_WCHV_H
 
 #include <string>
+#include <vector>
 
 class IRDBAccessSvc;
 
@@ -37,14 +38,14 @@ public:
         float thickness; // T-SHAPE THICKNESS
     };
     
-    const WCHV* data() const { return m_d; };
+    const WCHV* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "WCHV"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "WCHV"; };
 
 private:
-    WCHV* m_d;
+    std::vector<WCHV> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Wchv & operator=(const DblQ00Wchv &right);
     DblQ00Wchv(const DblQ00Wchv&);

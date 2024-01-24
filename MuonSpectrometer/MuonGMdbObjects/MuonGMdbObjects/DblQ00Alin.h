@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -13,6 +13,7 @@
 #ifndef DBLQ00_ALIN_H
 #define DBLQ00_ALIN_H
 #include <string>
+#include <vector>
 
 
 class IRDBAccessSvc;
@@ -43,14 +44,14 @@ public:
         int      icut;                // CUT-OUT INDEX
     };
     
-    const ALIN* data() const { return m_d; };
+    const ALIN* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "ALIN"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "ALIN"; };
 
 private:
-    ALIN* m_d;
+    std::vector<ALIN> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Alin & operator=(const DblQ00Alin &right);
     DblQ00Alin(const DblQ00Alin&);

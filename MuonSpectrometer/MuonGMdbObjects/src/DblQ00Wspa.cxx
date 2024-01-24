@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -26,7 +26,7 @@ namespace MuonGM
 
     if(wspa->size()>0) {
     m_nObj = wspa->size();
-    m_d = new WSPA[m_nObj];
+    m_d.resize (m_nObj);
     if (m_nObj == 0) std::cerr<<"NO Wspa banks in the MuonDD Database"<<std::endl;
 
     size_t i=0;
@@ -40,7 +40,6 @@ namespace MuonGM
     }
   }
   else {
-    m_d = new WSPA[0];
     std::cerr<<"NO Wspa banks in the MuonDD Database"<<std::endl;
   }
 }
@@ -51,7 +50,7 @@ DblQ00Wspa::DblQ00Wspa(AmdcDb* wspa) :
   std::vector<IRDBRecord*>::const_iterator it = pIRDBRecordset->begin();
 
   m_nObj = pIRDBRecordset->size();
-  m_d = new WSPA[m_nObj];
+  m_d.resize (m_nObj);
   if (m_nObj == 0) std::cerr<<"NO Wspa banks in the AmdcDbRecord"<<std::endl;
 
   const AmdcDbRecord* pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
@@ -87,7 +86,6 @@ DblQ00Wspa::DblQ00Wspa(AmdcDb* wspa) :
 
 DblQ00Wspa::~DblQ00Wspa()
 {
-    delete [] m_d;
 }
 
 } // end of namespace MuonGM

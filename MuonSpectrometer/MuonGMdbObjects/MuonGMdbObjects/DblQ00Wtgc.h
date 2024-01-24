@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -14,6 +14,7 @@
 #define DBLQ00_WTGC_H
 
 #include <string>
+#include <vector>
 
 class IRDBAccessSvc;
 
@@ -39,14 +40,14 @@ public:
         char allname[9][8]; // MATERIAL
     };
     
-    const WTGC* data() const { return m_d; };
+    const WTGC* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "WTGC"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "WTGC"; };
 
 private:
-    WTGC* m_d;
+    std::vector<WTGC> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Wtgc & operator=(const DblQ00Wtgc &right);
     DblQ00Wtgc(const DblQ00Wtgc&);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,7 +27,7 @@ namespace MuonGM
 
   if(atyp->size()!=0) {
     m_nObj = atyp->size();
-    m_d = new ATYP[m_nObj];
+    m_d.resize (m_nObj);
     if (m_nObj == 0) std::cerr<<"NO Atyp banks in the MuonDD Database"<<std::endl;
 
     size_t i=0;
@@ -40,7 +40,6 @@ namespace MuonGM
     }
   }
   else {
-    m_d = new ATYP[0];
     std::cerr<<"NO Atyp banks in the MuonDD Database"<<std::endl;
   }
 }
@@ -51,7 +50,7 @@ DblQ00Atyp::DblQ00Atyp(AmdcDb* atyp) :
   std::vector<IRDBRecord*>::const_iterator it = pIRDBRecordset->begin();
 
   m_nObj = pIRDBRecordset->size();
-  m_d = new ATYP[m_nObj];
+  m_d.resize (m_nObj);
   if (m_nObj == 0) std::cerr<<"NO Atyp banks in the AmdcDbRecord"<<std::endl;
 
   const AmdcDbRecord* pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
@@ -86,7 +85,6 @@ DblQ00Atyp::DblQ00Atyp(AmdcDb* atyp) :
 
 DblQ00Atyp::~DblQ00Atyp()
 {
-    delete [] m_d;
 }
 
 } // end of namespace MuonGM

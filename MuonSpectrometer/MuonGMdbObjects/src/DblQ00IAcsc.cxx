@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -23,7 +23,6 @@ namespace MuonGM
 DblQ00IAcsc::DblQ00IAcsc()
 {
     m_nObj = 0;
-    m_d = nullptr;    
 }
 
   DblQ00IAcsc::DblQ00IAcsc(IRDBAccessSvc *pAccessSvc, const std::string & GeoTag, const std::string & GeoNode):
@@ -34,7 +33,7 @@ DblQ00IAcsc::DblQ00IAcsc()
     if(iacsc->size()>0) {
     
     m_nObj = iacsc->size();
-    m_d = new IACSC[m_nObj];
+    m_d.resize (m_nObj);
     if (m_nObj == 0) std::cerr<<"NO IAcsc banks in the MuonDD Database"<<std::endl;
 
     size_t i=0;
@@ -57,7 +56,6 @@ DblQ00IAcsc::DblQ00IAcsc()
     }
   }
   else {
-    m_d = new IACSC[0];
     std::cerr<<"NO IAcsc banks in the MuonDD Database"<<std::endl;
   }
 }
@@ -68,7 +66,7 @@ DblQ00IAcsc::DblQ00IAcsc(AmdcDb* iacsc) :
   std::vector<IRDBRecord*>::const_iterator it = pIRDBRecordset->begin();
 
   m_nObj = pIRDBRecordset->size();
-  m_d = new IACSC[m_nObj];
+  m_d.resize (m_nObj);
   if (m_nObj == 0) std::cerr<<"NO IAcsc banks in the AmdcDbRecord"<<std::endl;
 
   const AmdcDbRecord* pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
@@ -124,7 +122,7 @@ DblQ00IAcsc::DblQ00IAcsc(const std::string& asciiFileName) {
   std::cout<<"Number of lines in the CSc Internal A-line file <"<<asciiFileName<<"> is "<< m_nObj <<std::endl;
   
   
-  m_d = new IACSC[m_nObj];
+  m_d.resize (m_nObj);
   if (m_nObj == 0) std::cerr<<"NO IAcsc banks in "<<asciiFileName<<std::endl;
   
   int j=0;
@@ -165,7 +163,6 @@ DblQ00IAcsc::DblQ00IAcsc(const std::string& asciiFileName) {
 
 DblQ00IAcsc::~DblQ00IAcsc()
 {
-    if  (m_nObj > 0) delete [] m_d;
 }
 
 void DblQ00IAcsc::WriteIAcscToAsciiFile(const std::string& filename)

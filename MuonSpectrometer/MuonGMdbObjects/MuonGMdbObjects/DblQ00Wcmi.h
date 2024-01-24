@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -14,6 +14,7 @@
 #define DBLQ00_WCMI_H
 
 #include <string>
+#include <vector>
 
 class IRDBAccessSvc;
 
@@ -37,14 +38,14 @@ public:
         float thickness; // T-SHAPE THICKNESS
     };
     
-    const WCMI* data() const { return m_d; };
+    const WCMI* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "WCMI"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "WCMI"; };
 
 private:
-    WCMI* m_d;
+    std::vector<WCMI> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Wcmi & operator=(const DblQ00Wcmi &right);
     DblQ00Wcmi(const DblQ00Wcmi&);

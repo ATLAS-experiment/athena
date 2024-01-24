@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -14,6 +14,7 @@
 #define DBLQ00_DBAM_H
 
 #include <string>
+#include <vector>
 
 class IRDBAccessSvc;
 
@@ -38,14 +39,14 @@ public:
         int numbox; // FILE INDEX
     };
     
-    const DBAM* data() const { return m_d; };
+    const DBAM* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "DBAM"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "DBAM"; };
     
 private:
-    DBAM* m_d;
+    std::vector<DBAM> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Dbam & operator=(const DblQ00Dbam &right);
     DblQ00Dbam(const DblQ00Dbam&);

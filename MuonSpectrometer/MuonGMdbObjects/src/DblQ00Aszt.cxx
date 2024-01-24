@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -20,7 +20,7 @@
 
 namespace MuonGM
 {
-DblQ00Aszt::DblQ00Aszt() : m_d(nullptr)
+DblQ00Aszt::DblQ00Aszt()
 {
     m_nObj = 0;
 }
@@ -32,7 +32,7 @@ DblQ00Aszt::DblQ00Aszt() : m_d(nullptr)
 
     if(aszt->size()>0) {
     m_nObj = aszt->size();
-    m_d = new ASZT[m_nObj];
+    m_d.resize (m_nObj);
     if (m_nObj == 0) std::cerr<<"NO Aszt banks in the MuonDD Database"<<std::endl;
 
     size_t i=0;
@@ -55,7 +55,6 @@ DblQ00Aszt::DblQ00Aszt() : m_d(nullptr)
     }
   }
   else {
-    m_d = new ASZT[0];
     std::cerr<<"NO Aszt banks in the MuonDD Database"<<std::endl;
   }
 }
@@ -66,7 +65,7 @@ DblQ00Aszt::DblQ00Aszt(AmdcDb* aszt) :
   std::vector<IRDBRecord*>::const_iterator it = pIRDBRecordset->begin();
 
   m_nObj = pIRDBRecordset->size();
-  m_d = new ASZT[m_nObj];
+  m_d.resize (m_nObj);
   if (m_nObj == 0) std::cerr<<"NO Aszt banks in the AmdcDbRecord"<<std::endl;
 
   const AmdcDbRecord* pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
@@ -123,7 +122,7 @@ DblQ00Aszt::DblQ00Aszt(const std::string& asciiFileName) {
   std::cout<<"Number of lines in the A-line file <"<<asciiFileName<<"> is "<< m_nObj <<std::endl;
   
   
-  m_d = new ASZT[m_nObj];
+  m_d.resize (m_nObj);
   if (m_nObj == 0) std::cerr<<"NO Aszt banks in "<<asciiFileName<<std::endl;
   
   int j=0;
@@ -162,7 +161,6 @@ DblQ00Aszt::DblQ00Aszt(const std::string& asciiFileName) {
 
 DblQ00Aszt::~DblQ00Aszt()
 {
-    if  (m_nObj > 0) delete [] m_d;
 }
 
 void DblQ00Aszt::WriteAsztToAsciiFile(const std::string& filename)

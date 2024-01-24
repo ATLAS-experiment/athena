@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -17,6 +17,7 @@
 
 class IRDBAccessSvc;
 #include <string>
+#include <vector>
 
 class AmdcDb;
 
@@ -48,14 +49,14 @@ public:
         int i; // STATION AMDB INDEX
     };
 
-    const ASZT* data() const { return m_d; };
+    const ASZT* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "ASZT"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "ASZT"; };
 
 private:
-    ASZT* m_d;
+    std::vector<ASZT> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Aszt & operator=(const DblQ00Aszt &right);
     DblQ00Aszt(const DblQ00Aszt&);
