@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,6 +15,8 @@
 #include "SCT_ReadoutGeometry/SCT_ModuleSideDesign.h"
 #include "Identifier/Identifier.h"
 #include "ReadoutGeometryBase/SiIntersect.h"
+#include <string>
+#include <stdexcept>
 
 namespace InDetDD {
 // Constructor with parameters:
