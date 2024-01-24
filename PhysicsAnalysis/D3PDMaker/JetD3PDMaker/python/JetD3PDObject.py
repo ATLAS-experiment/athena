@@ -1,36 +1,37 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import D3PDMakerCoreComps
-import EventCommonD3PDMaker
 from D3PDMakerCoreComps.D3PDObject import make_SGDataVector_D3PDObject
 from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
+from AthenaConfiguration.ComponentFactory   import CompFactory
 
-# #
-# # Useful options:
-# #  Specify ConstitIndex_Target to fill a list of indices of jet constituents.
-# #  Target should be target collection for the association.
-# #
-# #  Specify JetVertexFraction_FromUD=True to get JVF information
-# #  from UserData rather than from jet moments.
-# #
-# #  Specify JetVertexFraction_FillFullJVF=True to fill JVF info for
-# #  all vertices (and force taking JVF from UserData).
-# #
+D3PD = CompFactory.D3PD
+
+#
+# Useful options:
+#  Specify ConstitIndex_Target to fill a list of indices of jet constituents.
+#  Target should be target collection for the association.
+#
+#  Specify JetVertexFraction_FromUD=True to get JVF information
+#  from UserData rather than from jet moments.
+#
+#  Specify JetVertexFraction_FillFullJVF=True to fill JVF info for
+#  all vertices (and force taking JVF from UserData).
+#
 
 
 def getJetD3PDObject(objectname='JetD3PDObject', prefix='jet_', btagleveloffset=7):
 
     object = make_SGDataVector_D3PDObject ('DataVector<xAOD::Jet_v1>',
-                                           D3PDMakerFlags.JetSGKey(),
+                                           D3PDMakerFlags.JetSGKey,
                                            prefix, objectname)
 
     object.defineBlock(0, 'Kinematics',
-                       EventCommonD3PDMaker.FourMomFillerTool,
+                       D3PD.FourMomFillerTool,
                        WriteE  = True)
 
     object.defineBlock (
         1, 'DQMoments',
-        D3PDMakerCoreComps.AuxDataFillerTool,
+        D3PD.AuxDataFillerTool,
         Vars = ['n90 = N90Cells < int: 0',
                 'Timing < float: 0',
                 'LArQuality < float: 0',
@@ -51,7 +52,7 @@ def getJetD3PDObject(objectname='JetD3PDObject', prefix='jet_', btagleveloffset=
   
     object.defineBlock (
         1, 'JetQual',
-        D3PDMakerCoreComps.AuxDataFillerTool,
+        D3PD.AuxDataFillerTool,
         Vars = ['isBadLoose < int: 0',
                 'isBadMedium < int: 0',
                 'isBadTight < int: 0',
