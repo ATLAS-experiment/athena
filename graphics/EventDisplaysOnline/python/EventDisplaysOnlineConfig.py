@@ -182,12 +182,12 @@ if not testWithoutPartition:
 
 def StreamToFileToolCfg(flags, name='StreamToFileTool',**kwargs):
     result = ComponentAccumulator()
-    prefixFileName = "%s/.Unknown/JiveXML" % outputDirectory
+    prefixFileName = "%s/.Unknown/JiveXMLtest" % outputDirectory
     kwargs.setdefault("FileNamePrefix", prefixFileName)
+    kwargs.setdefault("MyTest", "EDOcofig")
     the_tool = CompFactory.JiveXML.StreamToFileTool(**kwargs)
     result.setPrivateTools(the_tool)
     return result
-
 streamToFileTool = acc.popToolsAndMerge(StreamToFileToolCfg(flags))
 
 if not isOfflineTest:

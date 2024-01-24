@@ -56,28 +56,26 @@ namespace JiveXML {
       Gaudi::Property<bool> m_onlineMode {this, "OnlineMode", false, "Whether an XMLRPC server shall be started"};
       Gaudi::Property<bool> m_writeGeometry {this, "WriteGeometry", false, "Whether Geometry-XML files shall be produced"};
       Gaudi::Property<std::string> m_geometryVersionIn {this, "GeometryVersion", "default", "Geometry version as read from Athena"};
-      Gaudi::Property<std::vector<std::string>> m_GeoWriterNames {this, "GeoWriterNames", {"JiveXML::GeometryWriter/GeometryWriter","JiveXML::MuonGeometryWriter/MuonGeometryWriter"}, "The names of the geometry-writer tools"};
+    Gaudi::Property<std::vector<std::string>> m_GeoWriterNames {this, "GeoWriterNames", {"JiveXML::GeometryWriter/GeometryWriter","JiveXML::MuonGeometryWriter/MuonGeometryWriter"}, "The names of the geometry-writer tools"};
+    /**
+     * The list of DataRetrievers. This is initialised using the list of names
+     * supplied by the jobOptions. DataRetrievers are AlgTools residing in the
+     * corresponding sub-detector packages (e.g. TrackRetriever in InDetJiveXML).
+     **/
+    ToolHandleArray<JiveXML::IDataRetriever> m_DataRetrievers; 
 
-    protected:
+    /** 
+     * Handle to the formatting tool, which is passed on to
+     * the data retrievers and converts the data into XML
+     **/
+    ToolHandle<JiveXML::IFormatTool> m_FormatTool {this, "FormatTool", "JiveXML::XMLFormatTool/XMLFormatTool", "Format tool"};
 
-      /** 
-       * The list of DataRetrievers. This is initialised using the list of names
-       * supplied by the jobOptions. DataRetrievers are AlgTools residing in the
-       * corresponding sub-detector packages (e.g. TrackRetriever in InDetJiveXML).
-       **/
-      ToolHandleArray<JiveXML::IDataRetriever> m_DataRetrievers;
-      
-      /** 
-       * Handle to the formatting tool, which is passed on to
-       * the data retrievers and converts the data into XML
-       **/
-      ToolHandle<JiveXML::IFormatTool> m_FormatTool;
-
-      /**
-       * List of streaming tools that pass the formatted XML text
-       * into a file, to a server, etc.
-       **/
-      ToolHandleArray<JiveXML::IStreamTool> m_StreamTools;
+    /**
+     * Streaming tools that pass the formatted XML text
+     * into a file, to a server, etc.
+     **/
+    ToolHandle<JiveXML::IStreamTool> m_StreamToFileTool {this, "StreamToFileTool", "JiveXML::StreamToFileTool/StreamToFileTool", "Stream to file tool"};
+    ToolHandle<JiveXML::IStreamTool> m_StreamToServerTool {this, "StreamToServerTool", "JiveXML::StreamToServerTool/StreamToServerTool", "Stream to server tool"};
 
   };
 
