@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDControl/AGDD2GeoModelBuilder.h"
@@ -51,7 +51,7 @@
 #include "GeoModelKernel/GeoShapeSubtraction.h"
 #include "GeoModelKernel/GeoShapeShift.h"
 #include "GeoModelKernel/GeoTransform.h"
-#include "GeoModelKernel/ConstLink.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -223,13 +223,13 @@ void AGDD2GeoModelBuilder::CreateTrd(AGDDTrd* v) const
 void AGDD2GeoModelBuilder::CreateSnake(AGDDSnake* v) const
 {
 // here begins a nasty piece of code
-	static const ConstLink<GeoBox> box1 = new GeoBox(1.*GeoModelKernelUnits::km,1*GeoModelKernelUnits::km,1*GeoModelKernelUnits::km);
-        static const ConstLink<GeoShape> s1 = [&] {
+	static const GeoIntrusivePtr<const GeoBox> box1 = new GeoBox(1.*GeoModelKernelUnits::km,1*GeoModelKernelUnits::km,1*GeoModelKernelUnits::km);
+        static const GeoIntrusivePtr<const GeoShape> s1 = [&] {
           GeoTrf::Vector3D v1(0,0,-1*GeoModelKernelUnits::km);
           GeoTrf::Transform3D ttt1 = GeoTrf::Transform3D::Identity()*GeoTrf::Translation3D(v1);
           return new GeoShapeShift (&*box1, ttt1);
         }();
-        static const ConstLink<GeoShape> s2 = [&] {
+        static const GeoIntrusivePtr<const GeoShape> s2 = [&] {
           GeoTrf::Vector3D v2(0,0,+1*GeoModelKernelUnits::km);
           GeoTrf::Transform3D ttt2 = GeoTrf::Transform3D::Identity()*GeoTrf::Translation3D(v2);
           return new GeoShapeShift (&*box1, ttt2);
@@ -469,7 +469,7 @@ void AGDD2GeoModelBuilder::CreatePgon(AGDDPgon* v) const
 void AGDD2GeoModelBuilder::CreateComposition(AGDDComposition *v)
 {
 	static const GeoMaterial * const ether = GetMMMaterial("special::Ether");
-        static const ConstLink<GeoShape> fakeVol = new GeoTubs(0.,500.,1000.,0.,2.0*M_PI);
+        static const GeoIntrusivePtr<const GeoShape> fakeVol = new GeoTubs(0.,500.,1000.,0.,2.0*M_PI);
 
 	if (!v->GetVolume())
 	{
