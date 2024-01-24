@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -14,6 +14,7 @@
 #define DBLQ00_APTP_H
 
 #include <string> 
+#include <vector> 
 
 class IRDBAccessSvc;
 
@@ -45,14 +46,14 @@ public:
         float gamma;      // GAMMA ANGLE DEFINING THE DEVIATION
     };
 
-    const APTP* data() const { return m_d; };
+    const APTP* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "APTP"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "APTP"; };
 
 private:
-    APTP* m_d;
+    std::vector<APTP> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Aptp & operator=(const DblQ00Aptp &right);
     DblQ00Aptp(const DblQ00Aptp&);

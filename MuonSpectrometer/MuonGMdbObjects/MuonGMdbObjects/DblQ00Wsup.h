@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -13,6 +13,7 @@
 #ifndef DBLQ00_WSUP_H
 #define DBLQ00_WSUP_H
 #include <string>
+#include <vector>
 
 
 class IRDBAccessSvc;
@@ -39,14 +40,14 @@ public:
         float zzsup[4]; // Z DIMENSION
     };
     
-    const WSUP* data() const { return m_d; };
+    const WSUP* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "WSUP"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "WSUP"; };
 
 private:
-    WSUP* m_d;
+    std::vector<WSUP> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Wsup & operator=(const DblQ00Wsup &right);
     DblQ00Wsup(const DblQ00Wsup&);

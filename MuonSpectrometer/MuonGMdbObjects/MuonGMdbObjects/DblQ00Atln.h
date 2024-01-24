@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -14,6 +14,7 @@
 #define DBLQ00_ATLN_H
 
 #include <string>
+#include <vector>
 
 class IRDBAccessSvc;
 
@@ -38,14 +39,14 @@ public:
         int jsta; // 
     };
 
-    const ATLN* data() const { return m_d; };
+    const ATLN* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "ATLN"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "ATLN"; };
 
 private:
-    ATLN* m_d;
+    std::vector<ATLN> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Atln & operator=(const DblQ00Atln &right);
     DblQ00Atln(const DblQ00Atln&);

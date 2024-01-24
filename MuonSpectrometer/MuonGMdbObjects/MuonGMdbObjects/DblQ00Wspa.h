@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -13,6 +13,7 @@
 #ifndef DBLQ00_WSPA_H
 #define DBLQ00_WSPA_H
 #include <string> 
+#include <vector> 
 
 class IRDBAccessSvc;
 
@@ -35,14 +36,14 @@ public:
         float tckspa; // THICKNESS OF SPACER
     };
     
-    const WSPA* data() const { return m_d; };
+    const WSPA* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "WSPA"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "WSPA"; };
 
 private:
-  WSPA* m_d;
+  std::vector<WSPA> m_d;
   unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
   DblQ00Wspa & operator=(const DblQ00Wspa &right);
   DblQ00Wspa(const DblQ00Wspa&);

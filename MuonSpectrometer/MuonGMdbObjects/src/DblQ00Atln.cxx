@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,7 +27,7 @@ namespace MuonGM
 
     if(atln->size()>0) {
     m_nObj = atln->size();
-    m_d = new ATLN[m_nObj];
+    m_d.resize (m_nObj);
     if (m_nObj == 0) std::cerr<<"NO Atln banks in the MuonDD Database"<<std::endl;
 
     size_t i=0;
@@ -43,7 +43,6 @@ namespace MuonGM
     }
   }
   else {
-    m_d = new ATLN[0];
     std::cerr<<"NO Atln banks in the MuonDD Database"<<std::endl;
   }
 }
@@ -54,7 +53,7 @@ DblQ00Atln::DblQ00Atln(AmdcDb* atln) :
   std::vector<IRDBRecord*>::const_iterator it = pIRDBRecordset->begin();
 
   m_nObj = pIRDBRecordset->size();
-  m_d = new ATLN[m_nObj];
+  m_d.resize (m_nObj);
   if (m_nObj == 0) std::cerr<<"NO Atln banks in the AmdcDbRecord"<<std::endl;
 
   const AmdcDbRecord* pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
@@ -92,7 +91,6 @@ DblQ00Atln::DblQ00Atln(AmdcDb* atln) :
 
 DblQ00Atln::~DblQ00Atln()
 {
-    delete [] m_d;
 }
 
 } // end of namespace MuonGM

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************
@@ -13,6 +13,7 @@
 #ifndef DBLQ00_AWLN_H
 #define DBLQ00_AWLN_H
 #include <string>
+#include <vector>
 
 
 class IRDBAccessSvc;
@@ -43,14 +44,14 @@ public:
         int nzrost; // NUMBER OF Z-ETA READOUT STRIPS
     };
     
-    const AWLN* data() const { return m_d; };
+    const AWLN* data() const { return m_d.data(); };
     unsigned int size() const { return m_nObj; };
     const char* getName() const { return "AWLN"; };
     const char* getDirName() const { return "DblQ00"; };
     const char* getObjName() const { return "AWLN"; };
 
 private:
-    AWLN* m_d;
+    std::vector<AWLN> m_d;
     unsigned int m_nObj; // > 1 if array; 0 if error in retrieve.
     DblQ00Awln & operator=(const DblQ00Awln &right);
     DblQ00Awln(const DblQ00Awln&);

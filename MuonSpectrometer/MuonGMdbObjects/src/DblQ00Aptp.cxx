@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,7 +27,7 @@ namespace MuonGM
 
     if(aptp->size()>0) {
     m_nObj = aptp->size();
-    m_d = new APTP[m_nObj];
+    m_d.resize (m_nObj);
     if (m_nObj == 0) std::cerr<<"NO Aptp banks in the MuonDD Database"<<std::endl;
 
     size_t i=0;
@@ -57,7 +57,6 @@ namespace MuonGM
     }
   }
   else {
-    m_d = new APTP[0];
     std::cerr<<"NO Aptp banks in the MuonDD Database"<<std::endl;
   }
 }
@@ -68,7 +67,7 @@ DblQ00Aptp::DblQ00Aptp(AmdcDb* aptp) :
   std::vector<IRDBRecord*>::const_iterator it = pIRDBRecordset->begin();
 
   m_nObj = pIRDBRecordset->size();
-  m_d = new APTP[m_nObj];
+  m_d.resize (m_nObj);
   if (m_nObj == 0) std::cerr<<"NO Aptp banks in the AmdcDbRecord"<<std::endl;
 
   const AmdcDbRecord* pAmdcDbRecord = dynamic_cast<const AmdcDbRecord*>((*it));
@@ -119,7 +118,6 @@ DblQ00Aptp::DblQ00Aptp(AmdcDb* aptp) :
 
 DblQ00Aptp::~DblQ00Aptp()
 {
-    delete [] m_d;
 }
 
 } // end of namespace MuonGM
