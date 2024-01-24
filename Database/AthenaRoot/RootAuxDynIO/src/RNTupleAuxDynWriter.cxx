@@ -19,17 +19,18 @@
 namespace RootAuxDynIO
 {
 
-   RNTupleAuxDynWriter::RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression) :
+   RNTupleAuxDynWriter::RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics) :
          AthMessaging(std::string("RNTupleAuxDynWriter[")+ntupleName+"]"),
          m_model( RNTupleModel::Create() ),
          m_ntupleName( ntupleName ),
-         m_tfile( file )
+         m_tfile( file ),
+         m_collectMetrics( enableMetrics )
       {
 #if ROOT_VERSION_CODE < ROOT_VERSION( 6, 27, 0 )
          m_entry = std::make_unique<REntry>();
 #endif
-         m_opts.SetCompression( compression );
-         m_opts.SetUseBufferedWrite( false );
+         m_opts.SetCompression( m_tfile->GetCompressionSettings() );
+         m_opts.SetUseBufferedWrite( enableBufferedWrite );
          m_model->SetDescription( ntupleName );
          addField("index_ref", "std::uint64_t");
       }
@@ -47,6 +48,7 @@ namespace RootAuxDynIO
             // write into existing file
             ATH_MSG_DEBUG("Creating RNTuple " << m_tfile->GetName() << "/" << m_ntupleName);
             m_ntupleWriter = RNTupleWriter::Append(std::move(m_model), m_ntupleName, *m_tfile, m_opts);
+            if( m_collectMetrics ) m_ntupleWriter->EnableMetrics();
          }
       }
       m_entry = m_ntupleWriter->GetModel()->CreateBareEntry();
@@ -195,6 +197,13 @@ namespace RootAuxDynIO
 
 
    void RNTupleAuxDynWriter::close() {
+      // Print metrics if enabled - this can become DEBUG/VERBOSE
+      if( m_ntupleWriter->GetMetrics().IsEnabled() ) {
+        auto& log = msg(MSG::INFO);
+        log << "Printing I/O Statistics\n";
+        m_ntupleWriter->GetMetrics().Print(log.stream());
+        log << endmsg;
+      }
       // delete the generated default fields (RField should delete the default data objest)
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
       m_generatedValues.clear();

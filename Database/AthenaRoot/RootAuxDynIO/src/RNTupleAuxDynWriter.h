@@ -49,13 +49,15 @@ namespace RootAuxDynIO
       int                  m_clients = 0;
       bool                 m_needsCommit = false;
 
+      /// Enable/Disable Metric Collection
+      bool                 m_collectMetrics;
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
       /// default-constructed objects to fill out blanks
       std::map<std::string, RFieldBase::RValue> m_generatedValues;
 #endif
 
-      RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression);
+      RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
 
       /// Create a new empty RNTuple row with the current model (fields)
       void  makeNewEntry();

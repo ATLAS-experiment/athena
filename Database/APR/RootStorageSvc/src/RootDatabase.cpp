@@ -19,6 +19,7 @@
 #include "RootAuxDynIO/RootAuxDynIO.h"
 
 #include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ConcurrencyFlags.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IFileMgr.h"
 
@@ -55,6 +56,9 @@ RootDatabase::RootDatabase() :
         m_defWritePolicy(TObject::kOverwrite),   // On write create new versions
         m_branchOffsetTabLen(0),
         m_defTreeCacheLearnEvents(-1),
+        m_rntBufferedWriteEnabled(false),
+        m_rntReaderMetricsEnabled(false),
+        m_rntWriterMetricsEnabled(false),
         m_indexMasterID(0),
         m_fileMgr(nullptr)
 {
@@ -339,6 +343,16 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
                err = 1;
             }
          }
+         if( byteCount(READ_COUNTER) > 0 ) {
+            for( const auto& reader : m_ntupleReaderMap ) {
+               if( reader.second->GetMetrics().IsEnabled() ) {
+                  DbPrint innerlog(reader.second->GetNTupleName());
+                  innerlog << DbPrintLvl::Info << "Printing I/O Statistics for " << nam << "\n";
+                  reader.second->GetMetrics().Print((innerlog << DbPrintLvl::Info).stream());
+                  innerlog << DbPrint::endmsg;
+               }
+            }
+         }
          log << DbPrintLvl::Debug
              << "I/O READ  Bytes: " << byteCount(READ_COUNTER)  << DbPrint::endmsg
              << "I/O WRITE Bytes: " << byteCount(WRITE_COUNTER) << DbPrint::endmsg
@@ -492,6 +506,12 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
         return Error;
       else if ( !strcasecmp(n,"READ_CALLS") )             // int
         return opt._setValue(int(m_file->GetReadCalls()));
+      else if ( !strcasecmp(n, "RNTUPLE_BUFFERED_WRITE_ENABLED") ) // bool
+        return opt._setValue(bool(m_rntBufferedWriteEnabled));
+      else if ( !strcasecmp(n, "RNTUPLE_READER_METRICS_ENABLED") ) // bool
+        return opt._setValue(bool(m_rntReaderMetricsEnabled));
+      else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // bool
+        return opt._setValue(bool(m_rntWriterMetricsEnabled));
       break;
     case 'T':
       if( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
@@ -634,6 +654,12 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
       // the options for the latter are controlled through RNTupleWriteOptions.
       // In the current implementation, these need to be set before calling the c-tor
       // of the underlying class, e.g., RNTupleReader etc.
+      else if ( !strcasecmp(n, "RNTUPLE_BUFFERED_WRITE_ENABLED") ) // bool
+          return opt._getValue(m_rntBufferedWriteEnabled);
+      else if ( !strcasecmp(n, "RNTUPLE_READER_METRICS_ENABLED") ) // bool
+          return opt._getValue(m_rntReaderMetricsEnabled);
+      else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // bool
+          return opt._getValue(m_rntWriterMetricsEnabled);
       break;
     case 'T':
        if ( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
@@ -1064,6 +1090,9 @@ RootDatabase::getNTupleReader(std::string ntuple_name)
    auto native_reader = RPageSource::Create(string("RNT:")+ntuple_name, file_name);
    RPageSource *ps = native_reader.get();
    ps->Attach();
+   if( m_rntReaderMetricsEnabled ) {
+      native_reader->GetMetrics().Enable();
+   }
    m_ntupleReaderMap.emplace(ntuple_name, std::move(native_reader));
    return ps;
 }
@@ -1074,7 +1103,11 @@ RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
 {
    auto& writer = m_ntupleWriterMap[ntuple_name];
    if( !writer and create ) {
-      writer = RootAuxDynIO::getNTupleAuxDynWriter(m_file, string("RNT:")+ntuple_name, m_file->GetCompressionSettings() );
+      if ( Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 0 and m_rntBufferedWriteEnabled ) {
+         DbPrint log("RootDatabase.getNTupleWriter");
+         log << DbPrintLvl::Warning << "Buffered writing doesn't work reliably in MT jobs yet, use at your own risk!" << DbPrint::endmsg;
+      }
+      writer = RootAuxDynIO::getNTupleAuxDynWriter(m_file, string("RNT:")+ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
    }
    if( writer and create ) {
       // treat the create flag as an indication of a new container client and count them
