@@ -74,16 +74,6 @@ namespace { // utility functions used here
   }
 
   // Cuts on various objects
-  bool
-  passJetCuts(const xAOD::Jet& jet) {
-    const float absEtaMax = 2.5;
-    const float jetPtMin = 100.0;  // in GeV
-    const float jetPtMax = 5000.0; // in GeV
-    const float jetPt = jet.pt() / Gaudi::Units::GeV; // GeV
-    const float jetEta = jet.eta();
-
-    return inRange(jetPt, jetPtMin, jetPtMax) and inRange(jetEta, absEtaMax);
-  }
 
   // general utility function to return bin index given a value and the upper endpoints of each bin
   template <class T>
@@ -131,7 +121,7 @@ InDetPhysValMonitoringTool::initialize() {
   ATH_CHECK(m_vtxValidTool.retrieve(EnableTool {m_useVertexTruthMatchTool}));
   ATH_CHECK(m_trackTruthOriginTool.retrieve( EnableTool {m_doTruthOriginPlots} ));
   ATH_CHECK(m_hardScatterSelectionTool.retrieve());
-  ATH_CHECK(m_grlTool.retrieve());
+  ATH_CHECK(m_grlTool.retrieve(EnableTool{m_useGRL}));
 
   ATH_MSG_DEBUG("m_useVertexTruthMatchTool ====== " <<m_useVertexTruthMatchTool);
   if (m_truthSelectionTool.get() ) {
@@ -150,7 +140,7 @@ InDetPhysValMonitoringTool::initialize() {
 
   ATH_CHECK( m_truthEventName.initialize( (m_pileupSwitch == "HardScatter" or m_pileupSwitch == "All") and not m_truthEventName.key().empty() ) );
   ATH_CHECK( m_truthPileUpEventName.initialize( (m_pileupSwitch == "PileUp" or m_pileupSwitch == "All") and not m_truthPileUpEventName.key().empty() ) );
-  ATH_CHECK( m_jetContainerName.initialize( not m_jetContainerName.key().empty()) );  
+  ATH_CHECK( m_jetContainerName.initialize( m_doTrackInJetPlots and not m_jetContainerName.key().empty()) );  
 
   std::vector<std::string> required_float_track_decorations {"d0","hitResiduals_residualLocX","d0err"};
   std::vector<std::string> required_int_track_decorations {};
@@ -305,37 +295,43 @@ InDetPhysValMonitoringTool::fillHistograms() {
   ATH_MSG_DEBUG("Filling hists " << name() << "...");
   // function object could be used to retrieve truth: IDPVM::CachedGetAssocTruth getTruth;
 
+  // Get the Event Context
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  
   // retrieve trackParticle container
-  SG::ReadHandle<xAOD::TrackParticleContainer> tracks(m_trkParticleName);
+  SG::ReadHandle<xAOD::TrackParticleContainer> trackHandle(m_trkParticleName, ctx);
+  if (not trackHandle.isValid()) {
+    ATH_MSG_ERROR("Invalid trackname = " << m_trkParticleName << "!");
+    return StatusCode::FAILURE;
+  }
+  const xAOD::TrackParticleContainer* tracks = trackHandle.cptr();
+  
   SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer;
   if( not m_truthPileUpEventName.key().empty()) {
-    truthPileupEventContainer = SG::ReadHandle<xAOD::TruthPileupEventContainer> (m_truthPileUpEventName);
+    truthPileupEventContainer = SG::ReadHandle<xAOD::TruthPileupEventContainer> (m_truthPileUpEventName, ctx);
   }
 
-  SG::ReadHandle<xAOD::EventInfo> pie = SG::ReadHandle<xAOD::EventInfo>(m_eventInfoContainerName);
-
-  if (m_useGRL and !pie->eventType(xAOD::EventInfo::IS_SIMULATION)) {
+  SG::ReadHandle<xAOD::EventInfo> pie = SG::ReadHandle<xAOD::EventInfo>(m_eventInfoContainerName, ctx);
+  if (not pie.isValid()){
+    ATH_MSG_WARNING("Shouldn't happen - EventInfo is buggy, setting mu to 0");
+  }
+  
+  // FIX-ME: I'm not sure if we should stop execution if EventInfo is not valid ...
+  // it is used after as if they assume it is valid
+  if (m_useGRL and pie.isValid() and !pie->eventType(xAOD::EventInfo::IS_SIMULATION)) {
       if (!m_grlTool->passRunLB(*pie)) {
 	  ATH_MSG_VERBOSE("GRL veto");
 	  return StatusCode::SUCCESS;
       }
   }
  
-  std::vector<const xAOD::TruthParticle*> truthParticlesVec = getTruthParticles();
+  std::vector<const xAOD::TruthParticle*> truthParticlesVec = getTruthParticles(ctx);
 
   // Mark the truth particles in our vector as "selected". 
   // This is needed because we later access the truth matching via xAOD decorations, where we do not 'know' about membership to this vector.
   if (m_usingSpecialPileupSwitch) markSelectedByPileupSwitch(truthParticlesVec);
 
   IDPVM::CachedGetAssocTruth getAsTruth; // only cache one way, track->truth, not truth->tracks 
-
-  if (not tracks.isValid()) {
-    ATH_MSG_ERROR("Invalid trackname = " << m_trkParticleName << "!");
-    return StatusCode::FAILURE;
-  }
-  if (not pie.isValid()){
-    ATH_MSG_WARNING("Shouldn't happen - EventInfo is buggy, setting mu to 0");
-  }
 
   unsigned int truthMu = 0;
   float actualMu = 0.;
@@ -355,13 +351,15 @@ InDetPhysValMonitoringTool::fillHistograms() {
     ATH_MSG_DEBUG("Getting number of pu interactings per event");
 
     ATH_MSG_DEBUG("Filling vertex plots");
-    SG::ReadHandle<xAOD::VertexContainer>  vertices(m_vertexContainerName);
+    SG::ReadHandle<xAOD::VertexContainer>  vertices(m_vertexContainerName, ctx);
+    ATH_CHECK(vertices.isValid());
+    
     nVertices = not vertices->empty() ? vertices->size() : 0;
     beamSpotWeight = pie->beamSpotWeight();
     ATH_MSG_DEBUG("beamSpotWeight is equal to " <<  beamSpotWeight);
     if(m_doPRW){
       float prwWeight = 1;
-      SG::ReadDecorHandle<xAOD::EventInfo,float> readDecorHandle (m_weight_pileup_key);
+      SG::ReadDecorHandle<xAOD::EventInfo,float> readDecorHandle (m_weight_pileup_key, ctx);
       if(readDecorHandle.isAvailable()) prwWeight = readDecorHandle(*pie);
       ATH_MSG_DEBUG("Applying pileup weight equal to " << prwWeight);
       beamSpotWeight *= prwWeight;
@@ -380,7 +378,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
       ATH_MSG_DEBUG("Filling vertices info monitoring plots");
 
       // Fill vectors of truth HS and PU vertices
-      std::pair<std::vector<const xAOD::TruthVertex*>, std::vector<const xAOD::TruthVertex*>> truthVertices = getTruthVertices();
+      std::pair<std::vector<const xAOD::TruthVertex*>, std::vector<const xAOD::TruthVertex*>> truthVertices = getTruthVertices(ctx);
       std::vector<const xAOD::TruthVertex*> truthHSVertices = truthVertices.first;
       std::vector<const xAOD::TruthVertex*> truthPUVertices = truthVertices.second;
 
@@ -403,7 +401,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
 
   if( not m_truthVertexContainerName.key().empty()){
     // get truth vertex container name - m_truthVertexContainerName
-    SG::ReadHandle<xAOD::TruthVertexContainer> truthVrt = SG::ReadHandle<xAOD::TruthVertexContainer>( m_truthVertexContainerName );
+    SG::ReadHandle<xAOD::TruthVertexContainer> truthVrt = SG::ReadHandle<xAOD::TruthVertexContainer>( m_truthVertexContainerName, ctx );
 
     //
     //Get the HS vertex position from the truthVertexContainer
@@ -621,97 +619,15 @@ InDetPhysValMonitoringTool::fillHistograms() {
   m_monPlots->fillCounter(nSelectedMatchedTracks, InDetPerfPlot_nTracks::MATCHEDRECO, beamSpotWeight);
   
   // Tracking In Dense Environment
-  if (!m_doTrackInJetPlots) return StatusCode::SUCCESS;
-
-  if (m_jetContainerName.key().empty()) {
-    ATH_MSG_WARNING("Not a valid key for the jetContainer, skipping TIDE plots");
-    return StatusCode::SUCCESS;
+  if (m_doTrackInJetPlots) {
+    ATH_CHECK( fillHistogramsTrackingInDenseEnvironment(ctx,
+							getAsTruth,
+							truthParticlesVec,
+							*tracks,
+							primaryvertex,
+							beamSpotWeight) );
   }
-
-  SG::ReadHandle<xAOD::JetContainer> jets(m_jetContainerName);
-  SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > > ghosttruth("GhostTruth");
-  SG::AuxElement::ConstAccessor<int> btagLabel("HadronConeExclTruthLabelID");
   
-  if (not jets.isValid() or truthParticlesVec.empty()) {
-    ATH_MSG_WARNING(
-      "Cannot open " << m_jetContainerName <<
-        " jet container or TruthParticles truth particle container. Skipping jet plots.");
-  } else {
-    for (const auto *const thisJet: *jets) {         // The big jets loop
-      if (not passJetCuts(*thisJet)) {
-        continue;
-      }
-      bool isBjet = false; 
-      if (!btagLabel.isAvailable(*thisJet)){
-           ATH_MSG_WARNING("Failed to extract b-tag truth label from jet");
-      }
-      else{
-        isBjet = (btagLabel(*thisJet) == 5); 
-      }
-      if(!ghosttruth.isAvailable(*thisJet)) {
-           ATH_MSG_WARNING("Failed to extract ghost truth particles from jet");
-      } else {
-        for(const auto& el : ghosttruth(*thisJet)){ 
-          if(el.isValid()) {
-            const xAOD::TruthParticle *truth = static_cast<const xAOD::TruthParticle*>(*el);
-            if (thisJet->p4().DeltaR(truth->p4()) > m_maxTrkJetDR) {
-                continue;
-            }
-
-            const IAthSelectionTool::CutResult accept = m_truthSelectionTool->accept(truth);
-              
-            if(!accept) continue;
-            bool isEfficient(false);
-
-            for (const auto *thisTrack: *tracks) {
-              if (m_useTrackSelection and not (m_trackSelectionTool->accept(*thisTrack, primaryvertex))) {
-                continue;
-              }
-
-              const xAOD::TruthParticle* associatedTruth = getAsTruth.getTruth(thisTrack);
-              if (associatedTruth and associatedTruth == truth) {
-                float prob = getMatchingProbability(*thisTrack);
-                if (not std::isnan(prob) && prob > m_lowProb) {
-                  isEfficient = true;
-                  break;
-                }
-              }
-            }
-
-            bool truthIsFromB = false;
-            if ( m_doTruthOriginPlots and m_trackTruthOriginTool->isFrom(truth, 5) ) {
-              truthIsFromB = true;
-            }
-            m_monPlots->fillEfficiency(*truth, *thisJet, isEfficient, isBjet, truthIsFromB, beamSpotWeight);
-          }
-        }
-      }
-
-      for (const auto *thisTrack: *tracks) {    // The beginning of the track loop
-        if (m_useTrackSelection and not (m_trackSelectionTool->accept(*thisTrack, primaryvertex))) {
-          continue;
-        }
-        if (thisJet->p4().DeltaR(thisTrack->p4()) > m_maxTrkJetDR) {
-          continue;
-        }
-        float prob = getMatchingProbability(*thisTrack);
-        if(std::isnan(prob)) prob = 0.0;
-      
-        const xAOD::TruthParticle* associatedTruth = getAsTruth.getTruth(thisTrack); 
-        const bool unlinked = (associatedTruth==nullptr);
-        const bool isFake = (associatedTruth && prob < m_lowProb);
-        bool truthIsFromB = false;
-        if ( m_doTruthOriginPlots and m_trackTruthOriginTool->isFrom(associatedTruth, 5) ) {
-          truthIsFromB = true;
-        }
-        m_monPlots->fill(*thisTrack, *thisJet, isBjet, isFake, unlinked, truthIsFromB, beamSpotWeight);                                   
-        if (associatedTruth){
-          m_monPlots->fillFakeRate(*thisTrack, *thisJet, isFake, isBjet, truthIsFromB, beamSpotWeight);
-       }
-      }
-    }
-  } // loop over jets
-
   return StatusCode::SUCCESS;
 }
 
@@ -802,7 +718,7 @@ InDetPhysValMonitoringTool::procHistograms() {
 }
 
 const std::vector<const xAOD::TruthParticle*>
-InDetPhysValMonitoringTool::getTruthParticles() const {
+InDetPhysValMonitoringTool::getTruthParticles(const EventContext& ctx) const {
   // truthParticles.clear();
   std::vector<const xAOD::TruthParticle*> tempVec {};
   if (m_pileupSwitch == "All") {
@@ -810,7 +726,7 @@ InDetPhysValMonitoringTool::getTruthParticles() const {
     if (m_truthParticleName.key().empty()) {
       return tempVec;
     }
-    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainer( m_truthParticleName);
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainer( m_truthParticleName, ctx);
     if (not truthParticleContainer.isValid()) {
       return tempVec;
     }
@@ -819,7 +735,7 @@ InDetPhysValMonitoringTool::getTruthParticles() const {
     if (m_pileupSwitch == "HardScatter") {
       // get truthevent container to separate out pileup and hardscatter truth particles
       if (not m_truthEventName.key().empty()) {
-      SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer( m_truthEventName);
+	SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer( m_truthEventName, ctx);
       const xAOD::TruthEvent* event = (truthEventContainer.isValid()) ? truthEventContainer->at(0) : nullptr;
       if (not event) {
         return tempVec;
@@ -836,7 +752,7 @@ InDetPhysValMonitoringTool::getTruthParticles() const {
       if (not m_truthPileUpEventName.key().empty()) {
       ATH_MSG_VERBOSE("getting TruthPileupEvents container");
       // get truth particles from all pileup events
-      SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName);
+      SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName, ctx);
       if (truthPileupEventContainer.isValid()) {
         const unsigned int nPileup = truthPileupEventContainer->size();
         tempVec.reserve(nPileup * 200); // quick initial guess, will still save some time
@@ -864,7 +780,7 @@ InDetPhysValMonitoringTool::getTruthParticles() const {
 }
 
 std::pair<const std::vector<const xAOD::TruthVertex*>, const std::vector<const xAOD::TruthVertex*>>
-InDetPhysValMonitoringTool::getTruthVertices() const {
+InDetPhysValMonitoringTool::getTruthVertices(const EventContext& ctx) const {
 
   std::vector<const xAOD::TruthVertex*> truthHSVertices = {};
   truthHSVertices.reserve(5);
@@ -891,7 +807,7 @@ InDetPhysValMonitoringTool::getTruthVertices() const {
   if (doHS) {
     if (not m_truthEventName.key().empty()) {
       ATH_MSG_VERBOSE("Getting HS TruthEvents container.");
-      SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer(m_truthEventName);
+      SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer(m_truthEventName, ctx);
       if (truthEventContainer.isValid()) {
         for (const auto *const evt : *truthEventContainer) {
           truthVtx = evt->signalProcessVertex();
@@ -909,7 +825,7 @@ InDetPhysValMonitoringTool::getTruthVertices() const {
   if (doPU) {
     if (not m_truthPileUpEventName.key().empty()) {
       ATH_MSG_VERBOSE("Getting PU TruthEvents container.");
-      SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName);
+      SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName, ctx);
       if (truthPileupEventContainer.isValid()) {
         for (const auto *const evt : *truthPileupEventContainer) {
           // Get the PU vertex
@@ -981,4 +897,122 @@ int InDetPhysValMonitoringTool::getIndexByEta(const xAOD::TruthParticle& truth) 
   const int bin = std::distance(m_etaBins.value().begin(), pVal) - 1;
   ATH_MSG_DEBUG("Checking (abs(eta)/bin) = (" << absEta << "," << bin << ")");
   return bin;
+}
+
+StatusCode InDetPhysValMonitoringTool::fillHistogramsTrackingInDenseEnvironment(const EventContext& ctx,
+										IDPVM::CachedGetAssocTruth& getAsTruth,
+										const std::vector<const xAOD::TruthParticle*>& truthParticles,
+										const xAOD::TrackParticleContainer& tracks,
+										const xAOD::Vertex* primaryvertex,
+										float beamSpotWeight) {
+  // Define accessors
+  static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::IParticleContainer> > > ghosttruth("GhostTruth");
+  static const SG::AuxElement::ConstAccessor<int> btagLabel("HadronConeExclTruthLabelID");
+
+  if (truthParticles.empty()) {
+    ATH_MSG_WARNING("No entries in TruthParticles truth particle container. Skipping jet plots.");
+    return StatusCode::SUCCESS;
+  }
+  
+  SG::ReadHandle<xAOD::JetContainer> jetHandle(m_jetContainerName, ctx);
+  if (not jetHandle.isValid()) {
+    ATH_MSG_WARNING("Cannot open jet container " << m_jetContainerName.key() << ". Skipping jet plots.");
+    return StatusCode::SUCCESS;
+  }
+  const xAOD::JetContainer* jets = jetHandle.cptr();
+
+  // loop on jets
+  for (const xAOD::Jet *const thisJet: *jets) {
+    // pass jet cuts
+    if (not passJetCuts(*thisJet)) continue;
+    // check if b-jet
+    bool isBjet = false;
+    if (not btagLabel.isAvailable(*thisJet)){
+      ATH_MSG_WARNING("Failed to extract b-tag truth label from jet");
+    } else {
+      isBjet = (btagLabel(*thisJet) == 5);
+    }
+
+    // Retrieve associated ghost truth particles
+    if(not ghosttruth.isAvailable(*thisJet)) {
+      ATH_MSG_WARNING("Failed to extract ghost truth particles from jet");
+    } else {
+      for(const ElementLink<xAOD::IParticleContainer>& el : ghosttruth(*thisJet)) {
+	if (not el.isValid()) continue;
+
+	const xAOD::TruthParticle *truth = static_cast<const xAOD::TruthParticle*>(*el);
+	// Check delta R between track and jet axis
+	if (thisJet->p4().DeltaR(truth->p4()) > m_maxTrkJetDR) {
+	  continue;
+	}
+	// Apply truth selection cuts
+	const IAthSelectionTool::CutResult accept = m_truthSelectionTool->accept(truth);	  
+	if(!accept) continue;
+	
+	bool isEfficient(false);
+	
+	for (const auto *thisTrack: tracks) {
+	  if (m_useTrackSelection and not (m_trackSelectionTool->accept(*thisTrack, primaryvertex))) {
+	    continue;
+	  }
+	  
+	  const xAOD::TruthParticle* associatedTruth = getAsTruth.getTruth(thisTrack);
+	  if (associatedTruth and associatedTruth == truth) {
+	    float prob = getMatchingProbability(*thisTrack);
+	    if (not std::isnan(prob) && prob > m_lowProb) {
+	      isEfficient = true;
+	      break;
+	    }
+	  }
+	}
+	
+	bool truthIsFromB = false;
+	if ( m_doTruthOriginPlots and m_trackTruthOriginTool->isFrom(truth, 5) ) {
+	  truthIsFromB = true;
+	}
+	m_monPlots->fillEfficiency(*truth, *thisJet, isEfficient, isBjet, truthIsFromB, beamSpotWeight);
+      }
+    } // ghost truth
+
+    // loop on tracks
+    for (const xAOD::TrackParticle *thisTrack: tracks) {
+      if (m_useTrackSelection and not (m_trackSelectionTool->accept(*thisTrack, primaryvertex))) {
+	continue;
+      }
+      
+      if (thisJet->p4().DeltaR(thisTrack->p4()) > m_maxTrkJetDR) {
+	continue;
+      }
+      
+      float prob = getMatchingProbability(*thisTrack);
+      if(std::isnan(prob)) prob = 0.0;
+      
+      const xAOD::TruthParticle* associatedTruth = getAsTruth.getTruth(thisTrack); 
+      const bool unlinked = (associatedTruth==nullptr);
+      const bool isFake = (associatedTruth && prob < m_lowProb);
+      bool truthIsFromB = false;
+      if ( m_doTruthOriginPlots and m_trackTruthOriginTool->isFrom(associatedTruth, 5) ) {
+	truthIsFromB = true;
+      }
+      m_monPlots->fill(*thisTrack, *thisJet, isBjet, isFake, unlinked, truthIsFromB, beamSpotWeight);                                   
+      if (associatedTruth){
+	m_monPlots->fillFakeRate(*thisTrack, *thisJet, isFake, isBjet, truthIsFromB, beamSpotWeight);
+      }
+    }
+    
+  } // loop on jets
+  
+  return StatusCode::SUCCESS;
+}
+
+bool
+InDetPhysValMonitoringTool::passJetCuts(const xAOD::Jet& jet) const {
+  const float jetPt = jet.pt() / Gaudi::Units::GeV;
+  const float jetEta = std::abs(jet.eta());
+  
+  if (jetEta < m_jetAbsEtaMin) return false;
+  if (jetEta > m_jetAbsEtaMax) return false;
+  if (jetPt < m_jetPtMin) return false;
+  if (jetPt > m_jetPtMax) return false;
+  return true;
 }
