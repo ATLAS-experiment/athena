@@ -25,7 +25,7 @@
 #ifndef CXXUTILS_VECTORIZE_H
 #define CXXUTILS_VECTORIZE_H
 
-#if defined(__GNUC__) && (__GNUC__ < 12) & !defined(__clang__) && \
+#if defined(__GNUC__) && (__GNUC__ < 14) & !defined(__clang__) && \
     !defined(__ICC) && !defined(__COVERITY__) && !defined(__CUDACC__)
 # define ATH_ENABLE_VECTORIZATION                     \
   _Pragma("GCC optimize (\"tree-vectorize\")") class ATH_ENABLE_VECTORIZATION_SWALLOW_SEMICOLON
