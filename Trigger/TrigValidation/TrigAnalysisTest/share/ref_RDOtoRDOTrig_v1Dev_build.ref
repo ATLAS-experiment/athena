@@ -12694,7 +12694,7 @@ HLT_j180_2dispjet50_3d2p_L1jJ160:
     1: 2
     2: 2
     3: 2
-HLT_j180_dispjet140_x3d1p_L1J100:
+HLT_j180_dispjet100_x3d1p_L1jJ160:
   eventCount: 0
   stepCounts:
     0: 2
@@ -12702,6 +12702,19 @@ HLT_j180_dispjet140_x3d1p_L1J100:
   stepFeatures:
     0: 5
     1: 2
+    2: 2
+HLT_j180_dispjet120_x3d1p_L1jJ160:
+  eventCount: 1
+  stepCounts:
+    0: 2
+    1: 2
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 5
+    1: 2
+    2: 1
+    3: 1
 HLT_j180_dispjet140_x3d1p_L1jJ160:
   eventCount: 0
   stepCounts:
@@ -12734,6 +12747,15 @@ HLT_j180_dispjet50_3d2p_dispjet50_1p_L1jJ160:
     1: 4
     2: 3
     3: 3
+HLT_j180_dispjet90_x3d1p_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+  stepFeatures:
+    0: 5
+    1: 2
+    2: 2
 HLT_j180_hitdvjet200_medium_L1XE50:
   eventCount: 0
   stepCounts:

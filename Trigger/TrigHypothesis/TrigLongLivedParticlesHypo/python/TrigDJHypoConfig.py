@@ -24,7 +24,7 @@ config_dict = {
     },
     "x3d1p":{
         "object_cuts": "set1",
-        "min_disp_trk": 0,
+        "min_disp_trk": 3,
         "max_prompt_trk": 1,
         "other_frac": 0.75,
         "prompt_stage_max_prompt_trk": 2,
