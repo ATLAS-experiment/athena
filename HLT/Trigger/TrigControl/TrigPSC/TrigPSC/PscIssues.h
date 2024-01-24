@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -37,6 +37,12 @@ ERS_DECLARE_ISSUE_BASE(
 // Declare a PSC Message Issue
 ERS_DECLARE_ISSUE( ers, PSCMessage, ERS_EMPTY, ERS_EMPTY)
 
+// The blank macro arguments confuse cppcheck.
+#ifdef __CPPCHECK__
+#define ERS_PSC_WARNING( message )
+#define ERS_PSC_ERROR( message )
+#define ERS_PSC_FATAL( message )
+#else
 #define ERS_PSC_WARNING( message ) \
 { \
     ERS_REPORT_IMPL( ers::warning, ers::PSCMessage, message, ); \
@@ -51,5 +57,6 @@ ERS_DECLARE_ISSUE( ers, PSCMessage, ERS_EMPTY, ERS_EMPTY)
 { \
     ERS_REPORT_IMPL( ers::fatal, ers::PSCMessage, message, ); \
 }
+#endif
   
 #endif /* PSC_ISSUES_H */

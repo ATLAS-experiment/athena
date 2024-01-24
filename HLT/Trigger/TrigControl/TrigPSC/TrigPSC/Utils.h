@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -32,7 +32,7 @@ namespace psc {
      * @param  pyCmds vector of python statements
      * @return Success/Failure
      */
-    bool execPython (const std::vector<std::string> pyCmds);
+    bool execPython (const std::vector<std::string>& pyCmds);
 
     /**
      * @brief  Include a python file via AthenaCommon.Include

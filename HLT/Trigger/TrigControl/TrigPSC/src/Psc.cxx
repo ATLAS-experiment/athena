@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -708,7 +708,7 @@ bool psc::Psc::finalizeWorker (const boost::property_tree::ptree& /*args*/)
   return doAppMgrFinalize();
 }
 
-bool psc::Psc::setDFProperties(std::map<std::string, std::string> name_tr_table)
+bool psc::Psc::setDFProperties(const std::map<std::string, std::string>& name_tr_table)
 {
   ServiceHandle<Gaudi::Interfaces::IOptionsSvc> jobOptionSvc("JobOptionsSvc","psc::Psc");
   for(const auto& prop : name_tr_table)

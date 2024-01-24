@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -112,7 +112,7 @@ namespace psc {
     virtual bool finalizeWorker (const boost::property_tree::ptree& args) override;
 
   private:
-    bool setDFProperties(std::map<std::string, std::string> name_tr_table);
+    bool setDFProperties(const std::map<std::string, std::string>& name_tr_table);
     bool setAthenaProperties();
 
     /// Initialize the application manager
