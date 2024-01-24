@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _VrtSecInclusive_IntersectionPos_H
@@ -35,6 +35,8 @@ namespace VKalVrtAthena {
   public:
     IntersectionPos_barrel(const char* name, const double& r);
     virtual ~IntersectionPos_barrel();
+    IntersectionPos_barrel(const IntersectionPos_barrel&) = delete;
+    IntersectionPos_barrel& operator= (const IntersectionPos_barrel&) = delete;
     void clear();
     void setBranchAddress( TTree*, const char* collectionName = "RecoTrk" );
     int bec();
@@ -57,6 +59,8 @@ namespace VKalVrtAthena {
   public:
     IntersectionPos_endcap(const char* name, const double& zpos, const double& rmin, const double& rmax);
     virtual ~IntersectionPos_endcap();
+    IntersectionPos_endcap(const IntersectionPos_endcap&) = delete;
+    IntersectionPos_endcap& operator= (const IntersectionPos_endcap&) = delete;
     void clear();
     void setBranchAddress( TTree*, const char* collectionName = "RecoTrk" );
     int bec();

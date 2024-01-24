@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // VKalVrt.h
@@ -336,20 +336,20 @@ namespace VKalVrtAthena {
     StatusCode fillAANT_SecondaryVertices( xAOD::VertexContainer* );
 
     //
-    struct WrkVrt {
-      bool isGood;                                    //! flaged true for good vertex candidates
+    struct WrkVrt { 
+      bool isGood = false;                            //! flagged true for good vertex candidates
       std::deque<long int> selectedTrackIndices;      //! list if indices in TrackParticleContainer for selectedBaseTracks
       std::deque<long int> associatedTrackIndices;    //! list if indices in TrackParticleContainer for associatedTracks
       Amg::Vector3D        vertex;                    //! VKalVrt fit vertex position
       TLorentzVector       vertexMom;                 //! VKalVrt fit vertex 4-momentum
       std::vector<double>  vertexCov;                 //! VKalVrt fit covariance
-      double               Chi2;                      //! VKalVrt fit chi2 result
-      double               Chi2_core;                 //! VKalVrt fit chi2 result
+      double               Chi2 = 0;                  //! VKalVrt fit chi2 result
+      double               Chi2_core = 0;             //! VKalVrt fit chi2 result
       std::vector<double>  Chi2PerTrk;                //! list of VKalVrt fit chi2 for each track
-      long int             Charge;                    //! total charge of the vertex
+      long int             Charge = 0;                //! total charge of the vertex
       std::vector< std::vector<double> > TrkAtVrt;    //! list of track parameters wrt the reconstructed vertex
-      unsigned long        closestWrkVrtIndex;        //! stores the index of the closest WrkVrt in std::vector<WrkVrt>
-      double               closestWrkVrtValue;        //! stores the value of some observable to the closest WrkVrt ( observable = e.g. significance )
+      unsigned long        closestWrkVrtIndex = 0;    //! stores the index of the closest WrkVrt in std::vector<WrkVrt>
+      double               closestWrkVrtValue = 0;    //! stores the value of some observable to the closest WrkVrt ( observable = e.g. significance )
 
       inline double ndof() const { return 2.0*( selectedTrackIndices.size() + associatedTrackIndices.size() ) - 3.0; }
       inline double ndof_core() const { return 2.0*( selectedTrackIndices.size() ) - 3.0; }
@@ -479,8 +479,8 @@ namespace VKalVrtAthena {
     using AlgForVerticesPair = double (VrtSecInclusive::*)( const WrkVrt&, const WrkVrt& ) const;
 
     /** returns the pair of vertices that give minimum in terms of some observable (e.g. distance, significance) */
-    double findMinVerticesPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>&, AlgForVerticesPair );
-
+    double findMinVerticesPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>&, const AlgForVerticesPair& );
+    
     /** returns the next pair of vertices that give next-to-minimum distance significance */
     static double findMinVerticesNextPair( std::vector<WrkVrt>*, std::pair<unsigned, unsigned>& );
 
