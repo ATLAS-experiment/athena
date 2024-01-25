@@ -96,10 +96,11 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG,INFO
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
     log.setLevel(DEBUG)
     flags = initConfigFlags()
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data",]
-
+    flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
 
     flags.Exec.OutputLevel=INFO
     flags.fillFromArgs()

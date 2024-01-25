@@ -45,6 +45,8 @@ def LArCellCorrectorCfg(configFlags):
         correctionTools.append(theNoiseMasker)
 
     if configFlags.LAr.doBadFebMasking:
+        from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
+        result.merge(LArFebErrorSummaryMakerCfg(configFlags))
         badFebMask=CompFactory.LArBadFebMaskingTool()
 
         correctionTools.append(badFebMask)
