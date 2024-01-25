@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDetectorFactoryLite.h"
@@ -191,7 +191,7 @@ void LArGeo::LArDetectorFactoryLite::create(GeoPhysVol* world)
   while(!cursor.atEnd()) {
     std::string volName = cursor.getName();
     if(volName.compare(0,3,"LAr")==0) {
-      m_detectorManager->addTreeTop(GeoPVLink(cursor.getVolume().operator->()));
+      m_detectorManager->addTreeTop(cursor.getVolume());
     }
     cursor.next();
   }
