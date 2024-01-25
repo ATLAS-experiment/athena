@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import parOR
@@ -344,8 +344,8 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
 
 if __name__=="__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    cfgFlags = initConfigFlags()
     #cfgFlags.Input.Files=["myESD.pool.root"]
     cfgFlags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
     #

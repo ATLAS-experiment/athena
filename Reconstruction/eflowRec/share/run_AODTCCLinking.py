@@ -1,5 +1,5 @@
 #Matt A's custom python accumulator for R22 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
     
@@ -71,9 +71,9 @@ def TauLinkerConfig(inputFlags, **kwargs):
 
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.Enums import Format
-    
+    cfgFlags = initConfigFlags()
     cfgFlags.Input.isMC=True
     cfgFlags.Input.Format=Format.POOL
 
