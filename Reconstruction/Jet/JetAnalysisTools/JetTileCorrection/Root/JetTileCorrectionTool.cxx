@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ROOT include(s):
@@ -24,11 +24,9 @@
 #include <fstream>
 #include <sstream>
 #include "stdlib.h"
+#include <cmath>
 
-
-
-const double pi=3.14159265358979323846;
-const double width=2.*pi/64.;
+const double width=2.*M_PI/64.;
 
 //Validity ranges
 const float iov_pt_min = 20000.;   //pt_min > 20GeV
@@ -37,7 +35,6 @@ const float iov_aeta_max = 2.8;    //|eta| < 2.8
 
 namespace CP {
   
-  using namespace std;
   using namespace JTC;
 
   static SG::AuxElement::Decorator<unsigned int> dec_status("TileStatus");
@@ -68,7 +65,7 @@ namespace CP {
 
 #ifdef XAOD_STANDALONE
     // Retrieve the event information (check if MC or data)
-    const xAOD::EventInfo* ei(0);
+    const xAOD::EventInfo* ei(nullptr);
     ATH_CHECK( evtStore()->retrieve( ei, "EventInfo" ) );
 
     m_isMC = ei->eventType( xAOD::EventInfo::IS_SIMULATION );
@@ -154,7 +151,7 @@ namespace CP {
     dec_status(jet) = (unsigned int) TS::UNKNOWN;
 
     //check validity range of the correction
-    if( fabs(jet.eta()) > iov_aeta_max ) return CorrectionCode::OutOfValidityRange;
+    if( std::abs(jet.eta()) > iov_aeta_max ) return CorrectionCode::OutOfValidityRange;
     if( jet.pt() < iov_pt_min || jet.pt() > iov_pt_max ) return CorrectionCode::OutOfValidityRange;    
 
     JTC::TS status = TS::GOOD;
@@ -278,7 +275,7 @@ namespace CP {
     // GOOD?
     if( region.eta2 < (jet_eta-m_RJET) ) return TS::GOOD;
     if( region.eta1 > (jet_eta+m_RJET) ) return TS::GOOD;
-    if( fabs(TVector2::Phi_mpi_pi(jet_phi-phicenter)) > m_RJET+phisize/2.) return TS::GOOD;
+    if( std::abs(TVector2::Phi_mpi_pi(jet_phi-phicenter)) > m_RJET+phisize/2.) return TS::GOOD;
     
     // CORE-BAD?
     if( inHole(jet_eta, jet_phi, region) ) return TS::CORE;
@@ -309,8 +306,8 @@ namespace CP {
       }
 
       int i_part = 0;
-      int i_mod  = atoi((tokens.at(1)).c_str());
-      if (tokens.at(0).find('B') != string::npos)
+      int i_mod  = std::atoi((tokens.at(1)).c_str());
+      if (tokens.at(0).find('B') != std::string::npos)
 	i_mod -= 1; // substract 1 from second coor if given in format "LBA 4"
 
       if(tokens.at(0)=="LBA" || tokens.at(0)== "0"){
@@ -389,7 +386,7 @@ namespace CP {
 	if (!(iss >> part >> mod >> irun >> erun >> modname)) { break; } // error
 	
 	Hole rdead = partModToHole(part, mod);
-	rdead.iov = make_pair(irun,erun);
+	rdead.iov = std::make_pair(irun,erun);
 	dbholes.push_back( rdead );  
 	
       }
@@ -397,7 +394,7 @@ namespace CP {
       
     int dbh=1;
     for(const auto& h : dbholes){
-      if(fabs(h.eta1)>1 || fabs(h.eta2)>1){
+      if(std::abs(h.eta1)>1 || std::abs(h.eta2)>1){
 	m_db_dead_EB[Form("DB%d",dbh)] = h;
       }
       else{
@@ -425,11 +422,11 @@ namespace CP {
 
     int inphi;
 
-    if(fabs(phi_dist)<0.05){ inphi=0; }
-    else if(fabs(phi_dist)<0.1){ inphi=1; }
-    else if(fabs(phi_dist)<0.2){ inphi=2; }
-    else if(fabs(phi_dist)<0.3){ inphi=3; } 
-    else if(fabs(phi_dist)<0.4){ inphi=4; }
+    if(std::abs(phi_dist)<0.05){ inphi=0; }
+    else if(std::abs(phi_dist)<0.1){ inphi=1; }
+    else if(std::abs(phi_dist)<0.2){ inphi=2; }
+    else if(std::abs(phi_dist)<0.3){ inphi=3; }
+    else if(std::abs(phi_dist)<0.4){ inphi=4; }
     else { inphi=5;}
 
     float ieta  = eta_dist/PIXWIDTH;
@@ -439,7 +436,7 @@ namespace CP {
     //get parametrization from positive side always!
     if(mod.eta1 < -0.1) ineta = -ineta;
 
-    return make_pair(ineta+8, inphi);
+    return std::make_pair(ineta+8, inphi);
   }
 
   void JetTileCorrectionTool :: loadModulesFromMap(const xAOD::Jet& jet, JTC::TS &status, const std::map<std::string,Hole>& hmap, PART part, TYPE type){
@@ -530,7 +527,7 @@ namespace CP {
     loadModulesFromMap(jet, status, m_user_dead_EB, PART::EB, TYPE::User);
 
     //sort modules by correction size (in decreasing order)
-    std::sort(m_position_masked.begin(), m_position_masked.end(), greater<Region>());
+    std::sort(m_position_masked.begin(), m_position_masked.end(), std::greater<Region>());
 
     return StatusCode::SUCCESS;
   }
@@ -622,7 +619,7 @@ namespace CP {
   Hole JetTileCorrectionTool::partModToHole(int part,int mod){
 
     Hole region;
-    region.iov = make_pair(0,1000000); //a dummy full IOV is set by default
+    region.iov = std::make_pair(0,1000000); //a dummy full IOV is set by default
 
     switch(part){
     case 0: //LBA                                                                                                                                               
@@ -642,7 +639,7 @@ namespace CP {
       region.eta2=-0.8;
       break;
     default:
-      cout<<"Bad partition value passed!\n";
+      std::cout<<"Bad partition value passed!\n";
       region.eta1=-999;
       region.eta2=-999;
       region.phi1=-999;
@@ -654,11 +651,11 @@ namespace CP {
       region.phi2=region.phi1+width;
     }
     else if(mod<64){
-      region.phi1=((double)mod)*width-2.*pi;
+      region.phi1=((double)mod)*width-2.*M_PI;
       region.phi2=region.phi1+width;
     }
     else{
-      cout<<"Bad module value passed!\n";
+      std::cout<<"Bad module value passed!\n";
       region.eta1=-999;
       region.eta2=-999;
       region.phi1=-999;
