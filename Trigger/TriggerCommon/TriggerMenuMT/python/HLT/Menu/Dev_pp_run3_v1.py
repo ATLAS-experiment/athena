@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # Dev_pp_run3_v1.py menu for the long shutdown development
@@ -29,6 +29,7 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  TauBJetGroup,
                                                                  TauMETGroup,                        
                                                                  BphysicsGroup,
+                                                                 BphysElectronGroup,
                                                                  EgammaMETGroup,
                                                                  EgammaMuonGroup,
                                                                  EgammaJetGroup,
@@ -50,6 +51,7 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  Topo3Group,
                                                                  EOFL1MuGroup,
                                                                  EOFBPhysL1MuGroup,
+                                                                 EOFBeeLegGroup,
                                                                  )
 
 DevGroup = ['Development']
@@ -156,6 +158,10 @@ def getDevSignatures():
         # Ranges + Asymmetric
         ChainProp(name='HLT_g13_loose_g10_loose_PhysicsTLA_L12DR15-0M30-eEM12LeEM9L',l1SeedThresholds=['eEM12L', 'eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
         ChainProp(name='HLT_g13_loose_g10_loose_PhysicsTLA_L113DR25-25M70-eEM12LeEM9L',l1SeedThresholds=['eEM12L','eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+
+        # ATR-19501, ATR-28162
+        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3','EM3'], stream=['BphysDelayed'], groups=SupportLegGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary']+DevGroup),
+        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['EM3','EM3'], stream=['BphysDelayed'], groups=EOFBeeLegGroup+BphysElectronGroup+DevGroup),
 
     ]
 
