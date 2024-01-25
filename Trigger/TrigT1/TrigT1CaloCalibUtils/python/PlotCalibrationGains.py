@@ -60,8 +60,8 @@ class L1CaloMap:
 class L1CaloGeometryConvertor:
 
      def __init__(self):
-#          input = open('/afs/cern.ch/user/l/l1ccalib/jb/COOLIdDump.txt')
-          input = open('COOLIdDump.txt')
+          self.coolIdPath=f"/{os.environ['ATLAS_RELEASE_BASE']}/Athena/{os.environ['AtlasVersion']}/InstallArea/{os.environ['CMTCONFIG']}/jobOptions/TrigT1CaloCalibUtils/COOLIdDump.txt"
+          input = open(self.coolIdPath)
           self.list_of_channels_em={}
           self.list_of_channels_had={}
 
