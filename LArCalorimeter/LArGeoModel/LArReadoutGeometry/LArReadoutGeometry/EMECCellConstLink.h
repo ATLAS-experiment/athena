@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARREADOUTGEOMETRY_EMECCELLCONSTLINK_H
 #define LARREADOUTGEOMETRY_EMECCELLCONSTLINK_H
 
 #include "LArReadoutGeometry/EMECCell.h"
-#include "GeoModelKernel/ConstLink.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 
 /**
  * @class EMECCellConstLink
@@ -16,6 +16,6 @@
  *	count and collects the garbage when nobody's looking.
  */
 
-typedef ConstLink<EMECCell> EMECCellConstLink;
+using EMECCellConstLink=GeoIntrusivePtr<const EMECCell>;
 
 #endif
