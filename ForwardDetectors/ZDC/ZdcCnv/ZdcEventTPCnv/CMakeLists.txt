@@ -36,26 +36,6 @@ atlas_add_test( ZdcRawChannelCollectionCnv_p1_test
                 test/ZdcRawChannelCollectionCnv_p1_test.cxx
                 LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
-                atlas_add_test( ZDC_SimPixelHitCnv_p1_test
-                SOURCES
-                test/ZDC_SimPixelHitCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
-
-atlas_add_test( ZDC_SimPixelHit_CollectionCnv_p1_test
-                SOURCES
-                test/ZDC_SimPixelHit_CollectionCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
-
-atlas_add_test( ZDC_SimStripHitCnv_p1_test
-                SOURCES
-                test/ZDC_SimStripHitCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
-
-atlas_add_test( ZDC_SimStripHit_CollectionCnv_p1_test
-                SOURCES
-                test/ZDC_SimStripHit_CollectionCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
-
 atlas_add_test( ZDC_SimFiberHitCnv_p1_test
                 SOURCES
                 test/ZDC_SimFiberHitCnv_p1_test.cxx
