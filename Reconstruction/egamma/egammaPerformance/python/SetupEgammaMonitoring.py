@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -938,36 +938,38 @@ if __name__=='__main__':
     log.setLevel(INFO)
     
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
 
-    ConfigFlags.Input.Files = [nightly+file]
-    # ConfigFlags.Input.Files = ['AOD.11038520._000001.pool.root.1']
-    ConfigFlags.Input.isMC = False
-    # ConfigFlags.Output.HISTFileName = 'MonitorEgammaOutput.root'
+    flags.Input.Files = [nightly+file]
+    # flags.Input.Files = ['AOD.11038520._000001.pool.root.1']
+    flags.Input.isMC = False
+    # flags.Output.HISTFileName = 'MonitorEgammaOutput.root'
 
 # To produce WebDisplay, filename must follow a certain format
-    ConfigFlags.Output.HISTFileName = 'data16_13TeV.00311321.physics_Main.merge.HIST.f1156_h347._0002.1.root'
+    flags.Output.HISTFileName = 'data16_13TeV.00311321.physics_Main.merge.HIST.f1156_h347._0002.1.root'
 
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    MonitorElectronAcc = MonitorElectronConfig(ConfigFlags)
+    MonitorElectronAcc = MonitorElectronConfig(flags)
     cfg.merge(MonitorElectronAcc)
 
-    MonitorPhotonAcc = MonitorPhotonConfig(ConfigFlags)
+    MonitorPhotonAcc = MonitorPhotonConfig(flags)
     cfg.merge(MonitorPhotonAcc)
 
-    MonitorTnPAcc = MonitorTnPConfig(ConfigFlags)
+    MonitorTnPAcc = MonitorTnPConfig(flags)
     cfg.merge(MonitorTnPAcc)
 
-    MonitorFwdElectronAcc = MonitorForwardElectronConfig(ConfigFlags)
+    MonitorFwdElectronAcc = MonitorForwardElectronConfig(flags)
     cfg.merge(MonitorFwdElectronAcc)
 
     # If you want to turn on more detailed messages ...
@@ -978,7 +980,7 @@ if __name__=='__main__':
     #MonitorTnPAcc.getEventAlgo('TnPJpsiMonAlg').OutputLevel = 2 # 2 = DEBUG
     #MonitorFwdElectronAcc.getEventAlgo('fwdelCBTightMonAlg').OutputLevel = 2 # 2 = DEBUG
 
-    MonitorFwdElectronAcc = MonitorForwardElectronConfig(ConfigFlags)
+    MonitorFwdElectronAcc = MonitorForwardElectronConfig(flags)
     cfg.merge(MonitorFwdElectronAcc)
 
     cfg.printConfig(withDetails=False) # set True for exhaustive info

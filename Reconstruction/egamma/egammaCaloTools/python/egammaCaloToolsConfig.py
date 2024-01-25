@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
 Tool configuration to instantiate
@@ -68,7 +68,7 @@ def egammaCaloClusterSelectorCfg(flags, name="caloClusterROISelector", **kwargs)
 
 
 def egammaHadCaloClusterSelectorCfg(
-    ConfigFlags, name="caloClusterHadROISelector", **kwargs
+    flags, name="caloClusterHadROISelector", **kwargs
 ):
     result = ComponentAccumulator()
     kwargs.setdefault("egammaCheckEnergyDepositTool", "")
@@ -78,36 +78,36 @@ def egammaHadCaloClusterSelectorCfg(
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import logging
-
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.fillFromArgs()
+    flags.lock()
+    flags.dump()
 
     cfg = ComponentAccumulator()
     mlog = logging.getLogger("egammaCaloToolsConfigTest")
     mlog.info("Configuring egammaCaloClusterSelector : ")
     printProperties(
         mlog,
-        cfg.popToolsAndMerge(egammaCaloClusterSelectorCfg(ConfigFlags)),
+        cfg.popToolsAndMerge(egammaCaloClusterSelectorCfg(flags)),
         nestLevel=1,
         printDefaults=True,
     )
     mlog.info("Configuring egammaCaloClusterSelectorGSF :")
     printProperties(
         mlog,
-        cfg.popToolsAndMerge(egammaCaloClusterSelectorGSFCfg(ConfigFlags)),
+        cfg.popToolsAndMerge(egammaCaloClusterSelectorGSFCfg(flags)),
         nestLevel=1,
         printDefaults=True,
     )
     mlog.info("Configuring egammaHadCaloClusterSelector :")
     printProperties(
         mlog,
-        cfg.popToolsAndMerge(egammaHadCaloClusterSelectorCfg(ConfigFlags)),
+        cfg.popToolsAndMerge(egammaHadCaloClusterSelectorCfg(flags)),
         nestLevel=1,
         printDefaults=True,
     )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Configuration for EMClusterTool"
 
@@ -31,20 +31,20 @@ def EMClusterToolCfg(flags, name='EMClusterTool', **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.fillFromArgs()
+    flags.lock()
+    flags.dump()
 
     cfg = ComponentAccumulator()
     mlog = logging.getLogger("EMClusterToolConfigTest")
     mlog.info("Configuring  EMClusterTool: ")
     printProperties(mlog, cfg.popToolsAndMerge(
-        EMClusterToolCfg(ConfigFlags)),
+        EMClusterToolCfg(flags)),
         nestLevel=1,
         printDefaults=True)
 
