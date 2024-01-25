@@ -1,26 +1,24 @@
  
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // HGTD_OverlapDescriptor.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-// Amg
-#include <utility>
-
-
+#include "HGTD_OverlapDescriptor.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 // HGTD
-#include "HGTD_TrackingGeometry/HGTD_OverlapDescriptor.h"
 #include "HGTD_Identifier/HGTD_ID.h"
 // Trk
 #include "TrkSurfaces/Surface.h"
 //
 #include "StoreGate/StoreGateSvc.h"
 #include "Identifier/Identifier.h"
+
+#include <utility>
 
 
 HGTD_OverlapDescriptor::HGTD_OverlapDescriptor(const Trk::BinnedArray<Trk::Surface>* bin_array,

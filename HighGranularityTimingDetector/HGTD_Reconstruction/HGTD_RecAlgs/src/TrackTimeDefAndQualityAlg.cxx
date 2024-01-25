@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TrackTimeDefAndQualityAlg.cxx
  * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -8,12 +8,11 @@
  * @brief
  */
 
-#include "HGTD_RecAlgs/TrackTimeDefAndQualityAlg.h"
+#include "TrackTimeDefAndQualityAlg.h"
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
-#include "xAODTruth/TruthParticleContainer.h"
 
 namespace HGTD {
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_FastDigitization/src/HGTD_SmearedDigitizationTool.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -8,17 +8,16 @@
  * @brief Implementation file for class HGTD_SmearedDigitizationTool
  */
 
-#include "HGTD_FastDigitization/HGTD_SmearedDigitizationTool.h"
+#include "HGTD_SmearedDigitizationTool.h"
 
 #include "AthenaKernel/RNGWrapper.h"
-#include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
 #include "InDetSimEvent/SiHit.h"
-#include "PileUpTools/PileUpMergeSvc.h"
+#include "InDetSimEvent/SiHitCollection.h"
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 
 #include "TFile.h"

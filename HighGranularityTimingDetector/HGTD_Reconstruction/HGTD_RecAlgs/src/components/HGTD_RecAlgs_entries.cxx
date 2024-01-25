@@ -1,6 +1,6 @@
-#include "HGTD_RecAlgs/PadClusterizationAlg.h"
-#include "HGTD_RecAlgs/TrackTimeExtensionAlg.h"
-#include "HGTD_RecAlgs/TrackTimeDefAndQualityAlg.h"
+#include "../PadClusterizationAlg.h"
+#include "../TrackTimeExtensionAlg.h"
+#include "../TrackTimeDefAndQualityAlg.h"
 
 DECLARE_COMPONENT(HGTD::PadClusterizationAlg)
 DECLARE_COMPONENT(HGTD::TrackTimeExtensionAlg)

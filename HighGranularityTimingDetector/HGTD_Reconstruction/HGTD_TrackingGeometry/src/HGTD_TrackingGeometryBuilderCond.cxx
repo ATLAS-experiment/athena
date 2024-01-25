@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////
@@ -7,36 +7,23 @@
 ///////////////////////////////////////////////////////////////////
 
 // HGTD
-#include "HGTD_TrackingGeometry/HGTD_TrackingGeometryBuilderCond.h"
+#include "HGTD_TrackingGeometryBuilderCond.h"
 // EnvelopeDefinitionService
 #include "SubDetectorEnvelopes/IEnvelopeDefSvc.h"
 // Trk interfaces
 #include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
 #include "TrkDetDescrInterfaces/ILayerArrayCreator.h"
-#include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/BinnedArray1D1D.h"
-#include "TrkDetDescrUtils/SharedObject.h"
-#include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/GlueVolumesDescriptor.h"
 #include "TrkGeometry/Material.h"
-#include "TrkGeometry/BinnedMaterial.h"
-#include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/DiscLayer.h"
-#include "TrkGeometry/HomogeneousLayerMaterial.h"
-#include "TrkGeometry/AlignableTrackingVolume.h"
 #include "TrkVolumes/VolumeBounds.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
-#include "TrkSurfaces/DiscBounds.h"
 #include "TrkSurfaces/DiscSurface.h"
-// Athena
-#include "AthenaKernel/IOVInfiniteRange.h"
-#include "CxxUtils/checker_macros.h"
 //Gaudi
-#include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/MsgStream.h"
 #include <algorithm>
 

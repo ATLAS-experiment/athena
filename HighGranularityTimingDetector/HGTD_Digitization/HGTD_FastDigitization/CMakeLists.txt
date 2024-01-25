@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( HGTD_FastDigitization )
@@ -9,7 +9,7 @@ find_package( ROOT COMPONENTS Core RIO )
 
 # Component(s) in the package.
 atlas_add_component( HGTD_FastDigitization
-   HGTS_FastDigitization/*.h src/*.cxx src/components/*.cxx
+   src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} GaudiKernel AthenaKernel

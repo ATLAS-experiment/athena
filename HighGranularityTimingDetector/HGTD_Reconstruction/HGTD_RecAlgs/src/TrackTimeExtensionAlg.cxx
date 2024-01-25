@@ -8,10 +8,9 @@
  * @brief
  */
 
-#include "HGTD_RecAlgs/TrackTimeExtensionAlg.h"
+#include "TrackTimeExtensionAlg.h"
 
 #include "HGTD_RIO_OnTrack/HGTD_ClusterOnTrack.h"
-#include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 

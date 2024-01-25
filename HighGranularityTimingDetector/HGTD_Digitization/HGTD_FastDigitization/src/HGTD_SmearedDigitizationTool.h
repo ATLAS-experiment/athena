@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_FastDigitization/HGTD_SmearedDigitizationTool.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -20,14 +20,12 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/AlgTool.h"
 #include "HGTD_PrepRawData/HGTD_Cluster.h"
 #include "HGTD_PrepRawData/HGTD_ClusterCollection.h"
 #include "HGTD_PrepRawData/HGTD_ClusterContainer.h"
 #include "HitManagement/TimedHitCollection.h"
 #include "HitManagement/TimedHitPtr.h"
 #include "InDetSimEvent/SiHit.h"
-#include "InDetSimEvent/SiHitCollection.h"
 #include "PileUpTools/PileUpToolBase.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 #include <string>

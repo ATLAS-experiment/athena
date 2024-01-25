@@ -1,6 +1,6 @@
  
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@
 #include "TrkGeometry/OverlapDescriptor.h"
 // Trk inlcude
 #include "TrkDetDescrUtils/BinnedArray.h"
-#include "TrkDetDescrUtils/Intersection.h"
 // STL include
 #include <atomic>
 

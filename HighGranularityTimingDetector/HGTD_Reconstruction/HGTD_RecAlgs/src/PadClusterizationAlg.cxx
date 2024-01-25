@@ -1,12 +1,12 @@
 /**
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/PadClusterizationAlg.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
  * @brief
  */
 
-#include "HGTD_RecAlgs/PadClusterizationAlg.h"
+#include "PadClusterizationAlg.h"
 
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "StoreGate/WriteHandle.h"
