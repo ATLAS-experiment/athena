@@ -7,8 +7,6 @@ atlas_subdir( ZdcEventAthenaPool )
 atlas_add_poolcnv_library( ZdcEventAthenaPoolPoolCnv
    src/*.h src/*.cxx
    FILES ZdcEvent/ZdcDigitsCollection.h ZdcEvent/ZdcRawChannelCollection.h
-         ZDC_SimEvent/ZDC_SimStripHit_Collection.h
-         ZDC_SimEvent/ZDC_SimPixelHit_Collection.h
          ZDC_SimEvent/ZDC_SimFiberHit_Collection.h
    LINK_LIBRARIES AthenaPoolCnvSvcLib AthenaPoolUtilities ZDC_SimEvent
                   ZdcEventTPCnv ZdcEvent GaudiKernel )
