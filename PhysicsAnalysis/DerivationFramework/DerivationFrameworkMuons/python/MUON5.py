@@ -36,7 +36,8 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     acc.merge(TrackIsolationCfg(ConfigFlags,TrackCollection="ExtrapolatedMuonTrackParticles"))
     ### Calo deposits 
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonCaloDepositAlgCfg
-    acc.merge(MuonCaloDepositAlgCfg(ConfigFlags)) ### Decorate directly the muons
+    acc.merge(MuonCaloDepositAlgCfg(ConfigFlags,
+                                    ContainerKey="Muons")) ### Decorate directly the muons
     acc.merge(MuonCaloDepositAlgCfg(ConfigFlags, 
                                     name = "IdTrkCaloDepsitDecorator",
                                     ContainerKey="InDetTrackParticles")) ### Decorate the ID tracks
