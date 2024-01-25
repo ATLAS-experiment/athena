@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -67,6 +67,9 @@ namespace xAOD {
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, x, setX )
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, y, setY )
    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, z, setZ )
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, time, setTime )
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, float, timeResolution, setTimeResolution )
+   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( Vertex_v1, uint8_t, hasValidTime, setHasValidTime )
 
    AUXSTORE_OBJECT_SETTER_AND_GETTER( Vertex_v1, std::vector< float >,
                                       covariance, setCovariance )
