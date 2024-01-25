@@ -7273,6 +7273,40 @@ HLT_e5_lhvloose_bBeeM6000_L1eEM26M:
     4: 4
     5: 4
     6: 3
+HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled:
+  eventCount: 0
+  stepCounts:
+    0: 10
+    1: 10
+    2: 10
+    3: 5
+    4: 5
+    5: 5
+  stepFeatures:
+    0: 73
+    1: 63
+    2: 108
+    3: 31
+    4: 22
+    5: 22
+    6: 10
+HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary:
+  eventCount: 0
+  stepCounts:
+    0: 11
+    1: 11
+    2: 11
+    3: 5
+    4: 5
+    5: 5
+  stepFeatures:
+    0: 77
+    1: 67
+    2: 118
+    3: 33
+    4: 22
+    5: 22
+    6: 10
 HLT_e5_lhvloose_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1MJJ-500-NFF:
   eventCount: 0
   stepCounts:
