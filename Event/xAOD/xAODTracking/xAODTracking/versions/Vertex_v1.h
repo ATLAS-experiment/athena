@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRACKING_VERSIONS_VERTEX_V1_H
@@ -66,6 +66,18 @@ namespace xAOD {
       float z() const;
       /// Sets the z position
       void setZ( float value );
+      /// Returns the time
+      float time() const;
+      /// Sets the time
+      void setTime( float value );
+      /// Returns the time resolution
+      float timeResolution() const;
+      /// Sets the time resolution
+      void setTimeResolution( float value );
+      /// Returns whether or not the vertex has a valid time
+      uint8_t hasValidTime() const;
+      /// Sets whether or not the vertex has a valid time
+      void setHasValidTime( uint8_t value );
 
       /// Returns the covariance matrix as a simple vector of values
       const std::vector< float >& covariance() const;
