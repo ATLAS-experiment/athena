@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -67,8 +67,6 @@ TileDetDescrManager::TileDetDescrManager(TileDddbManager_ptr dbManager)
 
 TileDetDescrManager::~TileDetDescrManager()
 {
-  for (unsigned int i=0; i<m_treeTops.size(); i++)
-    m_treeTops[i]->unref();
   clear();
 }
 
@@ -87,9 +85,8 @@ PVConstLink TileDetDescrManager::getTreeTop(unsigned int i) const
 }
 
 // -------------- Add a Tree top: ------------
-void TileDetDescrManager::addTreeTop(PVLink link)
+void TileDetDescrManager::addTreeTop(PVConstLink link)
 {
-  link->ref();
   m_treeTops.push_back(link);
 }
 

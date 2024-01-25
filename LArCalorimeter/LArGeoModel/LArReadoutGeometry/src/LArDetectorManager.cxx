@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/LArDetectorManager.h"
@@ -18,12 +18,6 @@ LArDetectorManager::LArDetectorManager (const EMBDetectorManager* emb
   setName("LArMgr");
 }
 
-LArDetectorManager::~LArDetectorManager()
-{
-  unsigned int ntree = LArDetectorManager::getNumTreeTops();
-  for (unsigned int i=0;i<ntree;i++) LArDetectorManager::getTreeTop(i)->unref();
-}
-
 PVConstLink LArDetectorManager::getTreeTop (unsigned int i) const
 {
   return m_treeTop[i];
@@ -34,10 +28,9 @@ unsigned int LArDetectorManager::getNumTreeTops () const
   return m_treeTop.size();
 }
 
-void LArDetectorManager::addTreeTop (PVLink treeTop)
+void LArDetectorManager::addTreeTop (PVConstLink treeTop)
 {
   if (std::find(m_treeTop.begin(),m_treeTop.end(),treeTop)!=m_treeTop.end())  return;
   m_treeTop.push_back(treeTop);
-  treeTop->ref();
 }
 
