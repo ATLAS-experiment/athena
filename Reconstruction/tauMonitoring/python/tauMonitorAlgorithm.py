@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file tauMonitorAlgorithm.py
@@ -617,25 +617,25 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = [nightly+file]
+    flags.Input.Files = [nightly+file]
 
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'tauRegions.root'
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'tauRegions.root'
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    exampleMonitorAcc = tauMonitoringConfig(ConfigFlags)   # calls the main function above
+    exampleMonitorAcc = tauMonitoringConfig(flags)   # calls the main function above
     cfg.merge(exampleMonitorAcc)
 
     # If you want to turn on more detailed messages ...
