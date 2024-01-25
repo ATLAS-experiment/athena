@@ -145,16 +145,6 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     // Make a truth particle and add it to the container
     xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
     part_cont->push_back( xTruthParticle );
-    // Make a link to this particle
-    int my_index = part_cont->size()-1;
-    ElementLink<xAOD::TruthParticleContainer> eltp(*part_cont, my_index);
-    // Decay vertex information
-    if (old_part.hasDecayVtx()) {
-        int vert_index = addTruthVertex( ctx, *old_part.decayVtx(), part_cont, vert_cont, seen_particles, generations);
-        ElementLink<xAOD::TruthVertexContainer> eltv( *vert_cont, vert_index );
-        xTruthParticle->setDecayVtxLink( eltv );
-        (*vert_cont)[vert_index]->addIncomingParticleLink( eltp );
-    }
     // Fill with numerical content
     xTruthParticle->setPdgId(old_part.pdgId());
     xTruthParticle->setBarcode(HepMC::uniqueID(&old_part));
@@ -168,6 +158,16 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     if (old_part.polarization().valid()){
         xTruthParticle->setPolarizationParameter( old_part.polarizationParameter( xAOD::TruthParticle::polarizationPhi ) , xAOD::TruthParticle::polarizationPhi );
         xTruthParticle->setPolarizationParameter( old_part.polarizationParameter( xAOD::TruthParticle::polarizationTheta ) , xAOD::TruthParticle::polarizationTheta );
+    }
+    // Make a link to this particle
+    int my_index = part_cont->size()-1;
+    ElementLink<xAOD::TruthParticleContainer> eltp(*part_cont, my_index);
+    // Decay vertex information
+    if (old_part.hasDecayVtx()) {
+        int vert_index = addTruthVertex( ctx, *old_part.decayVtx(), part_cont, vert_cont, seen_particles, generations);
+        ElementLink<xAOD::TruthVertexContainer> eltv( *vert_cont, vert_index );
+        xTruthParticle->setDecayVtxLink( eltv );
+        (*vert_cont)[vert_index]->addIncomingParticleLink( eltp );
     }
     // Copy over the decorations if they are available
     if (old_part.isAvailable<unsigned int>("classifierParticleType")) {
@@ -210,9 +210,9 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventC
     // Add all the outgoing particles
     for (size_t n=0;n<old_vert.nOutgoingParticles();++n){
         if (!old_vert.outgoingParticle(n)) continue; // Just in case we removed some truth particles, e.g. G4 decays
-	if (m_rejectHadronChildren && old_vert.outgoingParticle(n)->isHadron()) { // Option to skip hadrons outright{
-	  continue;
-	}
+        if (m_rejectHadronChildren && old_vert.outgoingParticle(n)->isHadron()) { // Option to skip hadrons outright{
+          continue;
+        }
         // Continue on the next generation; note that we only decrement the generation if this particle doesn't also pass our cuts
         int part_index = addTruthParticle( ctx, *old_vert.outgoingParticle(n), part_cont, vert_cont, seen_particles,
                                            generations-1+(id_ok(*old_vert.outgoingParticle(n))?1:0) );
