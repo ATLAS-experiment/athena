@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/TrackTimeDefAndQualityAlg.h
  * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -43,14 +43,10 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "GaudiKernel/ToolHandle.h"
-#include "GeneratorObjects/McEventCollection.h"
-#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
-// #include <string>
 
 namespace {
 static constexpr unsigned short n_hgtd_layers = 4; // two double sided layers

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -58,8 +58,6 @@ public AthAlgTool, virtual public Trk::ILayerBuilderCond {
 
     /** AlgTool initialize method */
     virtual StatusCode initialize() override;
-    /** AlgTool finalize method */
-    virtual StatusCode finalize() override;
 
     /** LayerBuilder interface method - returning Barrel-like layers */
     virtual std::unique_ptr<const std::vector<Trk::CylinderLayer*> >

@@ -1,14 +1,15 @@
  
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // HGTD_LayerBuilderCond.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-#include "HGTD_TrackingGeometry/HGTD_LayerBuilderCond.h"
-#include "HGTD_TrackingGeometry/HGTD_OverlapDescriptor.h"
+#include "HGTD_LayerBuilderCond.h"
+#include "HGTD_OverlapDescriptor.h"
+
 //HGTD include
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
@@ -18,26 +19,14 @@
 // Trk inlcude
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/BinnedArray1D1D.h"
-#include "TrkDetDescrUtils/GeometryStatics.h"
 #include "TrkGeometry/LayerMaterialProperties.h"
 #include "TrkGeometry/BinnedLayerMaterial.h"
 #include "TrkGeometry/HomogeneousLayerMaterial.h"
-#include "TrkGeometry/MaterialProperties.h"
 #include "TrkGeometry/CylinderLayer.h"
 #include "TrkGeometry/DiscLayer.h"
 #include "TrkGeometry/DiscLayer.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkSurfaces/DiscBounds.h"
-// GeoModel
-#include "GeoModelKernel/GeoLogVol.h"
-#include "GeoModelKernel/GeoVFullPhysVol.h"
-#include "GeoModelKernel/GeoMaterial.h"
-// Gaudi
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/SystemOfUnits.h"
-#include "GaudiKernel/SmartDataPtr.h"
-// Athena
-#include "AthenaKernel/IOVInfiniteRange.h"
 // STL
 #include <map>
 
@@ -87,12 +76,6 @@ StatusCode HGTD_LayerBuilderCond::initialize()
     return StatusCode::SUCCESS;
 }
 
-// finalize
-StatusCode HGTD_LayerBuilderCond::finalize()
-{
-    ATH_MSG_DEBUG( "finalize() successful" );
-    return StatusCode::SUCCESS;
-}
 
 SG::ReadCondHandle<InDetDD::HGTD_DetectorElementCollection> HGTD_LayerBuilderCond::retrieveHGTDdetElements(const EventContext& ctx) const
 {
