@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 if __name__=="__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    cfgFlags = initConfigFlags()
     cfgFlags.Concurrency.NumThreads=8
     cfgFlags.Exec.MaxEvents=100
     cfgFlags.Input.isMC=True
