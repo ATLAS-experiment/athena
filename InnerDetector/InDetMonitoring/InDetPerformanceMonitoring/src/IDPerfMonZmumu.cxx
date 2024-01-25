@@ -1388,18 +1388,22 @@ StatusCode IDPerfMonZmumu::execute()
 	ATH_MSG_WARNING ("Failed storing " << m_outputTracksName);
       }
       
-      sc = evtStore()->record(muonTrksRefit1, m_outputTracksName + "Refit1");
-      if (sc.isSuccess()) {
-	ATH_MSG_DEBUG ("Stored "<< muonTrksRefit1->size() << " " << m_outputTracksName  + "Refit1" <<" into StoreGate");
-      } else {
-	ATH_MSG_WARNING ("Failed storing " << m_outputTracksName + "Refit1");
+      if (muonTrksRefit1->size() > 1) { // keep track collection if at least 2 muons were found
+	sc = evtStore()->record(muonTrksRefit1, m_outputTracksName + "Refit1");
+	if (sc.isSuccess()) {
+	  ATH_MSG_DEBUG ("Stored "<< muonTrksRefit1->size() << " " << m_outputTracksName + "Refit1" << " into StoreGate");
+	} else {
+	  ATH_MSG_WARNING ("Failed storing " << m_outputTracksName + "Refit1");
+	}
       }
       
-      sc = evtStore()->record(muonTrksRefit2, m_outputTracksName + "Refit2");
-      if (sc.isSuccess()) {
-	ATH_MSG_DEBUG ("Stored "<< muonTrksRefit2->size() << " " << m_outputTracksName + "Refit2" <<" into StoreGate");
-      } else {
-	ATH_MSG_WARNING ("Failed storing " << m_outputTracksName +"Refit2");
+      if (muonTrksRefit2->size() > 1) { // keep track collection if at least 2 muons were found
+	sc = evtStore()->record(muonTrksRefit2, m_outputTracksName + "Refit2");
+	if (sc.isSuccess()) {
+	  ATH_MSG_DEBUG ("Stored "<< muonTrksRefit2->size() << " " << m_outputTracksName + "Refit2" << " into StoreGate");
+	} else {
+	  ATH_MSG_WARNING ("Failed storing " << m_outputTracksName + "Refit2");
+	}
       }
       
       
@@ -1609,9 +1613,9 @@ StatusCode IDPerfMonZmumu::execute()
 
   ATH_MSG_DEBUG(" --IDPerfMonZmumu::execute--  event completed -- Run: " << m_runNumber << "  event: " << m_evtNumber);
 
-  /* *********************************************************
+  /* ***********************************************************
    * after all, let's make the collection for ALL MUON ID Tracks
-   * *********************************************************/
+   * ***********************************************************/
  
   ATH_MSG_DEBUG("IDTracks monitoring..");
   int nTracks = 0;
@@ -1621,7 +1625,6 @@ StatusCode IDPerfMonZmumu::execute()
   const xAOD::MuonContainer* muons = PerfMonServices::getContainer<xAOD::MuonContainer>( PerfMonServices::MUON_COLLECTION );
   if(muons){   
     for (auto muon : *muons) {
-      ATH_MSG_DEBUG(" - track index = "<< nTracks); 
       const xAOD::TrackParticle* tp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);   
       if(!tp) {
 	ATH_MSG_DEBUG(" - tpb = "<< tp << " -> is null? " << (!tp));
