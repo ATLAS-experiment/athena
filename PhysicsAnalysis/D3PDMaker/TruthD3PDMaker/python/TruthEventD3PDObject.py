@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 ## @file TruthD3PDMaker/python/TruthD3PDObject.py
@@ -9,19 +9,21 @@
 
 
 from D3PDMakerCoreComps.D3PDObject          import make_SGDataVector_D3PDObject
-from D3PDMakerConfig.D3PDMakerFlags  import D3PDMakerFlags
-import D3PDMakerCoreComps
+from D3PDMakerConfig.D3PDMakerFlags         import D3PDMakerFlags
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 TruthEventD3PDObject = make_SGDataVector_D3PDObject \
                        ('DataVector<xAOD::TruthEvent_v1>',
-                        D3PDMakerFlags.TruthEventSGKey(),
+                        D3PDMakerFlags.TruthEventSGKey,
                                 'mcevt_',
                         'GenEventD3PDObject')
 
 TruthEventD3PDObject.defineBlock (
     0, 'mcevt',
-    D3PDMakerCoreComps.AuxDataFillerTool,
+    D3PD.AuxDataFillerTool,
     Vars = [
         #'signal_process_id = signalProcessId',
         #'event_number = eventNumber',
