@@ -70,8 +70,6 @@ class RpcReadoutGeomTool : public AthAlgTool,
     StatusCode readParameterBook(FactoryCache& cache);
     /// Loads the chamber dimensions from GeoModel
     StatusCode loadDimensions(RpcReadoutElement::defineArgs& args, FactoryCache& factory );
-    
-    IdentifierHash layerHash(const RpcReadoutElement::defineArgs& args, const int gasGap, const int doubPhi, const bool measPhi) const;
 
 };
 

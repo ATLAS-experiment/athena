@@ -101,7 +101,7 @@ class TgcReadoutElement : public MuonReadoutElement {
         Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
         /// Returns the local strip position w.r.t. to the chamber origin
         Amg::Vector3D chamberStripPos(const IdentifierHash& measHash) const;
-
+    public:
         /// Constructs the Hash out of the Identifier fields 
         /// (channel, gasGap, isStrip)
         static IdentifierHash constructHash(unsigned int measCh,
@@ -111,7 +111,7 @@ class TgcReadoutElement : public MuonReadoutElement {
         static unsigned int channelNumber(const IdentifierHash& measHash);
         static unsigned int gasGapNumber(const IdentifierHash& measHash);
         static bool isStrip(const IdentifierHash& measHash);
-
+    private:
         const StripLayerPtr& sensorLayout(unsigned int gasGap, const bool isStrip) const;
  };
 std::ostream& operator<<(std::ostream& ostr, const TgcReadoutElement::parameterBook& pars);

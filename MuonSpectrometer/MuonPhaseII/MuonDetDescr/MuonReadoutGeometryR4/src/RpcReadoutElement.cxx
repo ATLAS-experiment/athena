@@ -41,22 +41,22 @@ StatusCode RpcReadoutElement::initElement() {
 #endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
-      if (m_pars.layers[layer].hash() != layHash) {
-         ATH_MSG_FATAL("Layer "<<m_pars.layers[layer]<<" has a very strange hash. Expect "<<layer);
-         return StatusCode::FAILURE;
+      if (!m_pars.layers[layer]) {
+         ATH_MSG_VERBOSE("Layer "<<layer <<" has not sensor layout associated.");
+         continue;
       }
       ATH_CHECK(insertTransform(layHash, 
                                  [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
 #ifndef SIMULATIONBASE
-      const StripDesign& design{m_pars.layers[layer].design()};
+      const StripDesign& design{sensorLayout(layHash).design()};
       ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(design.halfWidth(),
                                                                              design.shortHalfHeight())));
 #endif
     }
-    m_gasThickness = (chamberStripPos(createHash(1, 2, 1, false)) - 
-                      chamberStripPos(createHash(1, 1, 1, false))).mag();
+    m_gasThickness = (chamberStripPos(createHash(1, 2, doubletPhi(), false)) - 
+                      chamberStripPos(createHash(1, 1, doubletPhi(), false))).mag();
 #ifndef SIMULATIONBASE
     m_pars.layerBounds.reset();
 #endif
@@ -64,53 +64,24 @@ StatusCode RpcReadoutElement::initElement() {
 }
 
 Amg::Transform3D RpcReadoutElement::fromGapToChamOrigin(const IdentifierHash& hash) const{
-   unsigned int layIdx = static_cast<unsigned int>(hash);
-   if (layIdx < m_pars.layers.size()) return m_pars.layers[layIdx].toOrigin();
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
-                 <<" is out of range. Maximum range "<<m_pars.layers.size());
-   return Amg::Transform3D::Identity();
+   return sensorLayout(hash).toOrigin();
 }
 
 Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
-   const IdentifierHash lHash = layerHash(measHash);
-   unsigned int layIdx = static_cast<unsigned int>(lHash);
-   if (layIdx < m_pars.layers.size()) {
-      return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripPos(stripNumber(measHash));
-   }
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
-                 <<" is out of range. Maximum range "<<m_pars.layers.size());
-   return Amg::Vector3D::Zero();
+   return localToGlobalTrans(ctx, layerHash(measHash)) * 
+           sensorLayout(measHash).localStripPos(stripNumber(measHash));
 }
 Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
-    const IdentifierHash lHash = layerHash(measHash);
-    unsigned int layIdx = static_cast<unsigned int>(lHash);
-    if (layIdx < m_pars.layers.size()) {
-       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripLeftEdge(stripNumber(measHash));
-    }
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
-                 <<" is out of range. Maximum range "<<m_pars.layers.size());
-    return Amg::Vector3D::Zero();
+      return localToGlobalTrans(ctx, layerHash(measHash)) * 
+              sensorLayout(measHash).localStripLeftEdge(stripNumber(measHash));
 }
 Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
-    const IdentifierHash lHash = layerHash(measHash);
-    unsigned int layIdx = static_cast<unsigned int>(lHash);
-    if (layIdx < m_pars.layers.size()) {
-       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripRightEdge(stripNumber(measHash));
-    }
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
-                 <<" is out of range. Maximum range "<<m_pars.layers.size());
-    return Amg::Vector3D::Zero();
+    return localToGlobalTrans(ctx, layerHash(measHash)) * 
+              sensorLayout(measHash).localStripRightEdge(stripNumber(measHash));
 }
 
 Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
-   const IdentifierHash lHash = layerHash(measHash);
-   unsigned int layIdx = static_cast<unsigned int>(lHash);
-   if (layIdx < m_pars.layers.size()) {
-      return  m_pars.layers[layIdx].stripPosition(stripNumber(measHash));
-   }
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
-                 <<" is out of range. Maximum range "<<m_pars.layers.size());
-   return Amg::Vector3D::Zero();
+   return sensorLayout(measHash).stripPosition(stripNumber(measHash));
 }
 
 }

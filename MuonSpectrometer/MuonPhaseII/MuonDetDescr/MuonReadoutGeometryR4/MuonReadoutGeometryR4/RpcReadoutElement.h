@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_H
@@ -14,7 +14,7 @@ namespace MuonGMR4 {
 class RpcReadoutElement : public MuonReadoutElement {
 
    public:
-    
+    using StripLayerPtr = GeoModel::TransientConstSharedPtr<StripLayer>;
     /// Set of parameters to describe a RPC chamber
     struct parameterBook {
         /// RPC panel dimensions
@@ -31,10 +31,7 @@ class RpcReadoutElement : public MuonReadoutElement {
         /// Each gas gap is usually subdivided into 2 phi panels
         /// which is actually the sector granularity of the Rpc trigger
         int nGapsInPhi{0};
-        /// A couple of gasgaps have been mounted upside-down into the muon station.
-        bool isUpsideDown{false};
-        bool hasPhiStrips{true};
-        std::vector<StripLayer> layers{};
+        std::vector<StripLayerPtr> layers{};
 
         StripDesignPtr phiDesign{nullptr};
         StripDesignPtr etaDesign{nullptr};
@@ -115,13 +112,22 @@ class RpcReadoutElement : public MuonReadoutElement {
 
     Identifier measurementId(const IdentifierHash& measHash) const override final;
 
-   private:
-        IdentifierHash createHash(const int strip, const int gasGap, const int doubPhi, const bool measPhi) const;
+    /// Constructs an Identifier hash from the Identifier fields controlled by this
+    /// readout element 
+    static IdentifierHash createHash(const unsigned int strip, 
+                                     const unsigned int gasGap, 
+                                     const unsigned int doubPhi, 
+                                     const bool measPhi);
 
-        unsigned int stripNumber(const IdentifierHash& measHash) const;
-        unsigned int gasGapNumber(const IdentifierHash& measHash) const;
-        unsigned int doubletPhiNumber(const IdentifierHash& measHash) const;
+   private:
+        /// Access to the StripLayer associated to a given measurement Hash
+        const StripLayer& sensorLayout(const IdentifierHash& measHash) const;
+
+        static unsigned int stripNumber(const IdentifierHash& measHash);
+        static unsigned int gasGapNumber(const IdentifierHash& measHash);
+        static unsigned int doubletPhiNumber(const IdentifierHash& measHash);
         static bool measuresPhi(const IdentifierHash& measHash);
+
 
         Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
         /// Returns the local strip position w.r.t. to the chamber origin
@@ -139,11 +145,6 @@ class RpcReadoutElement : public MuonReadoutElement {
         /// additionally split according to doublet Phi
         const int m_doubletZ{m_idHelper.doubletZ(identify())};
         const int m_doubletPhi{m_idHelper.doubletPhi(identify())};
-
-        /// Auxillary variables to translate the Identifier to a measurement hash and back
-        const unsigned int m_hashShiftDbl{m_pars.hasPhiStrips ? 1u :0u};
-        const unsigned int m_hashShiftGap{m_hashShiftDbl + (nPhiPanels() <= m_doubletPhi ? 0u : 1u)};
-        const unsigned int m_hashShiftStr{m_hashShiftGap + CxxUtils::maxSetBit(nGasGaps()) + 1};
 
         /// Distance between 2 gas gaps (Radial direction)
         double m_gasThickness{0.};
