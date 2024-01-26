@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -63,6 +63,7 @@ IDAlignMonGenericTracksAlg::IDAlignMonGenericTracksAlg( const std::string & name
   declareProperty("pTRange"              , m_pTRange);
   declareProperty("NTracksRange"         , m_NTracksRange);
   declareProperty("doIP"                 , m_doIP = false);
+  declareProperty("ApplyTrackSelection"  , m_applyTrkSel = true);
 }
 
 
@@ -203,7 +204,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     beamSpotZ = bpos.z();
     beamTiltX = beamSpotHandle->beamTilt(0);
     beamTiltY = beamSpotHandle->beamTilt(1);
-    ATH_MSG_DEBUG ("Beamspot from" << beamSpotHandle.retrieve() << ": x0 = " << beamSpotX << ", y0 = " << beamSpotY << ", z0 = " << beamSpotZ << ", tiltX = " << beamTiltX << ", tiltY = " << beamTiltY);
+    ATH_MSG_DEBUG ("Beamspot: x0 = " << beamSpotX << ", y0 = " << beamSpotY << ", z0 = " << beamSpotZ << ", tiltX = " << beamTiltX << ", tiltY = " << beamTiltY);
   }
   
   // Get EventInfo
@@ -227,6 +228,9 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, beamSpotX_m, beamSpotY_m);
     fill(genericTrackGroup, beamSpotZ_m, beamSpotY_m);
     fill(genericTrackGroup, beamSpotZ_m, beamSpotX_m);
+
+    // beam spot vs LB
+    fill(genericTrackGroup, lb_m, beamSpotY_m); 
   }
   
 
@@ -253,7 +257,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     }
   }
   
-  ATH_MSG_DEBUG ("IDAlignGenericTracks: Start loop on tracks. Number of tracks " << trks->size());
+  ATH_MSG_DEBUG ("Start loop on tracks. Number of tracks " << trks->size());
   for (const Trk::Track* trksItr: *trks) {
 
     // Found track?!
@@ -264,8 +268,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
       }
 
     // Select tracks
-    if ( !m_trackSelection->accept( *trksItr) )
-      continue;
+    if ( m_applyTrkSel and !m_trackSelection->accept( *trksItr) )
+      continue; // track selection applied and failed 
 
     nTracks++;  
     
@@ -284,7 +288,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     float trkd0c         = -999;
     float beamX          = 0;
     float beamY          = 0;
-    float d0bscorr   = -999;
+    float d0bscorr       = -999;
  
     // get fit quality and chi2 probability of track
     const Trk::FitQuality* fitQual = trksItr->fitQuality();
@@ -376,7 +380,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
               ATH_MSG_DEBUG("hit passed quality cuts");
             }
           } else {
-            ATH_MSG_DEBUG("hit quality cuts NOT APPLIED to Silicon hit.");
+            ATH_MSG_VERBOSE("hit quality cuts NOT APPLIED to Silicon hit.");
           }
         } // hit is Pixel or SCT
 	
@@ -423,14 +427,22 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, nscthits_per_track_m);
     auto ntrthits_per_track_m = Monitored::Scalar<float>( "m_ntrthits_per_track", nhtrt );
     fill(genericTrackGroup, ntrthits_per_track_m);
-
+    
     auto chi2oDoF_m = Monitored::Scalar<float>( "m_chi2oDoF", chi2oDoF );
     fill(genericTrackGroup, chi2oDoF_m);
     auto eta_m = Monitored::Scalar<float>( "m_eta", trketa );
     fill(genericTrackGroup, eta_m);
+
+    // pixel hits vs eta
+    fill(genericTrackGroup, eta_m, npixelhits_per_track_m);    
+    // sct hits vs eta
+    fill(genericTrackGroup, eta_m, nscthits_per_track_m);
+    // trt hits vs eta
+    fill(genericTrackGroup, eta_m, ntrthits_per_track_m);
+    
     if (charge>0){
-    auto eta_pos_m = Monitored::Scalar<float>( "m_eta_pos", trketa );
-    fill(genericTrackGroup, eta_pos_m);
+      auto eta_pos_m = Monitored::Scalar<float>( "m_eta_pos", trketa );
+      fill(genericTrackGroup, eta_pos_m);
     }
     else{
       auto eta_neg_m = Monitored::Scalar<float>( "m_eta_neg", trketa );
@@ -457,6 +469,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
 
   } // end of loop on trks
 
+  // histo with the count of used(good) tracks
+  auto ngTracks_m = Monitored::Scalar<float>( "m_ngTracks", ngTracks );
+  fill(genericTrackGroup, ngTracks_m);
+  
   ATH_MSG_DEBUG("Number of good tracks from TrackCollection: " << ngTracks);
 
   return StatusCode::SUCCESS;
