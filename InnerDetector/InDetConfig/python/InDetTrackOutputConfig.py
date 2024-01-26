@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -41,25 +41,13 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
     # exclude TTVA decorations
     excludedAuxData += '.-TTVA_AMVFVertices.-TTVA_AMVFWeights'
 
-    # exclude IDTIDE/IDTRKVALID decorations
-    excludedAuxData += ('.-TrkBLX.-TrkBLY.-TrkBLZ.-TrkIBLX.-TrkIBLY.-TrkIBLZ'
-                        '.-TrkL1X.-TrkL1Y.-TrkL1Z.-TrkL2X.-TrkL2Y.-TrkL2Z')
+    # exclude IDTIDE decorations
+    from DerivationFrameworkInDet.IDTIDE import IDTIDE_AOD_EXCLUDED_AUXDATA
+    excludedAuxData += '.-'.join([''] + IDTIDE_AOD_EXCLUDED_AUXDATA)
+
     if not (flags.Tracking.writeExtendedSi_PRDInfo or
             flags.Tracking.writeExtendedTRT_PRDInfo):
         excludedAuxData += '.-msosLink'
-
-    # exclude IDTIDE decorations
-    excludedAuxData += (
-        '.-IDTIDE1_biased_PVd0Sigma.-IDTIDE1_biased_PVz0Sigma'
-        '.-IDTIDE1_biased_PVz0SigmaSinTheta.-IDTIDE1_biased_d0'
-        '.-IDTIDE1_biased_d0Sigma'
-        '.-IDTIDE1_biased_z0.-IDTIDE1_biased_z0Sigma'
-        '.-IDTIDE1_biased_z0SigmaSinTheta.-IDTIDE1_biased_z0SinTheta'
-        '.-IDTIDE1_unbiased_PVd0Sigma.-IDTIDE1_unbiased_PVz0Sigma'
-        '.-IDTIDE1_unbiased_PVz0SigmaSinTheta'
-        '.-IDTIDE1_unbiased_d0.-IDTIDE1_unbiased_d0Sigma'
-        '.-IDTIDE1_unbiased_z0.-IDTIDE1_unbiased_z0Sigma'
-        '.-IDTIDE1_unbiased_z0SigmaSinTheta.-IDTIDE1_unbiased_z0SinTheta')
 
     ##### ESD #####
     # Save full and zero-suppressed BCM rdos

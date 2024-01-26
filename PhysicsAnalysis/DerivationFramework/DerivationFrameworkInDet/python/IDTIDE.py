@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 # ====================================================================
 # IDTIDE.py
@@ -16,6 +16,23 @@ from AthenaCommon.AlgSequence import AthSequencer as LegacyAthSequencer
 from AthenaConfiguration.Enums import MetadataCategory
 from AthenaCommon.CFElements import seqAND,_append
 from AthenaCommon.Constants import INFO
+
+# IDTIDE Variables to be excluded from AOD
+IDTIDE_AOD_EXCLUDED_AUXDATA = [
+    'TrkBLX', 'TrkBLY', 'TrkBLZ', 'TrkIBLX', 'TrkIBLY', 'TrkIBLZ',
+    'TrkL1X', 'TrkL1Y', 'TrkL1Z', 'TrkL2X', 'TrkL2Y', 'TrkL2Z',
+    'IDTIDE_biased_PVd0Sigma', 'IDTIDE_biased_PVz0Sigma',
+    'IDTIDE_biased_PVz0SigmaSinTheta',
+    'IDTIDE_biased_d0', 'IDTIDE_biased_d0Sigma',
+    'IDTIDE_biased_z0', 'IDTIDE_biased_z0Sigma',
+    'IDTIDE_biased_z0SigmaSinTheta', 'IDTIDE_biased_z0SinTheta',
+    'IDTIDE_unbiased_PVd0Sigma', 'IDTIDE_unbiased_PVz0Sigma',
+    'IDTIDE_unbiased_PVz0SigmaSinTheta',
+    'IDTIDE_unbiased_d0', 'IDTIDE_unbiased_d0Sigma',
+    'IDTIDE_unbiased_z0', 'IDTIDE_unbiased_z0Sigma',
+    'IDTIDE_unbiased_z0SigmaSinTheta', 'IDTIDE_unbiased_z0SinTheta'
+    ]
+
 
 # Main algorithm config
 def parSeq(name, subs=[]):

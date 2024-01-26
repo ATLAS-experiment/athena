@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from InDetConfig.InDetTrackOutputConfig import FTAG_AUXDATA
@@ -20,9 +20,10 @@ def ITkTrackRecoOutputCfg(flags, extensions_list=None):
     # exclude TTVA decorations
     excludedAuxData += '.-TTVA_AMVFVertices.-TTVA_AMVFWeights'
 
-    # exclude IDTIDE/IDTRKVALID decorations
-    excludedAuxData += ('.-TrkBLX.-TrkBLY.-TrkBLZ.-TrkIBLX.-TrkIBLY.-TrkIBLZ'
-                        '.-TrkL1X.-TrkL1Y.-TrkL1Z.-TrkL2X.-TrkL2Y.-TrkL2Z')
+    # exclude IDTIDE decorations
+    from DerivationFrameworkInDet.IDTIDE import IDTIDE_AOD_EXCLUDED_AUXDATA
+    excludedAuxData += '.-'.join([''] + IDTIDE_AOD_EXCLUDED_AUXDATA)
+
     if not flags.Tracking.writeExtendedSi_PRDInfo:
         excludedAuxData += '.-msosLink'
 
