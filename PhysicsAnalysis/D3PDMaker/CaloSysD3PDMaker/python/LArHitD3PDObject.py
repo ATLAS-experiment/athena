@@ -1,15 +1,14 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# $Id$
-
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
 from D3PDMakerCoreComps.D3PDObject import D3PDObject
 from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
 
 def makeD3PDObject (name, prefix, object_name, getter = None,
-                           sgkey = None,
-                           label = None):
+                    sgkey = None,
+                    label = None):
     if sgkey is None: sgkey = "LArHits"
     if label is None: label = prefix
 
@@ -23,39 +22,39 @@ def makeD3PDObject (name, prefix, object_name, getter = None,
         sgkey = "LArHitFCAL"
 
     if not getter:
-        getter = CaloSysD3PDMaker.LArHitContainerGetterTool \
+        getter = D3PD.LArHitContainerGetterTool \
                  (name + '_Getter',
                   TypeName = 'LArHitContainer',
                   SGKey = sgkey,
                   Label = label)
 
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 LArHitEMBD3PDObject = D3PDObject (makeD3PDObject, 'hitemb_', 'LArHitEMBD3PDObject')
 
 LArHitEMBD3PDObject.defineBlock (1, 'Hits',
-                               CaloSysD3PDMaker.LArHitFillerTool)
+                                 D3PD.LArHitFillerTool)
 
 
 LArHitEMECD3PDObject = D3PDObject (makeD3PDObject, 'hitemec_', 'LArHitEMECD3PDObject')
 
 LArHitEMECD3PDObject.defineBlock (1, 'Hits',
-                               CaloSysD3PDMaker.LArHitFillerTool)
+                                  D3PD.LArHitFillerTool)
 
 
 LArHitHECD3PDObject = D3PDObject (makeD3PDObject, 'hithec_', 'LArHitHECD3PDObject')
 
 LArHitHECD3PDObject.defineBlock (1, 'Hits',
-                               CaloSysD3PDMaker.LArHitFillerTool)
+                                 D3PD.LArHitFillerTool)
 
 
 LArHitFCALD3PDObject = D3PDObject (makeD3PDObject, 'hitfcal_', 'LArHitFCALD3PDObject')
 
 LArHitFCALD3PDObject.defineBlock (1, 'Hits',
-                               CaloSysD3PDMaker.LArHitFillerTool)
+                                  D3PD.LArHitFillerTool)
 

@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
-from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from D3PDMakerCoreComps.D3PDObject          import D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
 
 TileHitSGKey='TileHitVec'
 
@@ -13,7 +14,7 @@ def makeTileHitD3PDObject (name, prefix, object_name='TileHitD3PDObject', getter
     if label is None: label = prefix
 
     if not getter:
-        getter = CaloSysD3PDMaker.SGTileHitGetterTool \
+        getter = D3PD.SGTileHitGetterTool \
                  (name + '_Getter',
                   TypeName = 'TileHitVector',
                   SGKey = sgkey,
@@ -21,12 +22,12 @@ def makeTileHitD3PDObject (name, prefix, object_name='TileHitD3PDObject', getter
 
     # create the selected cells
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 
@@ -34,7 +35,6 @@ def makeTileHitD3PDObject (name, prefix, object_name='TileHitD3PDObject', getter
 TileHitD3PDObject = D3PDObject (makeTileHitD3PDObject, 'TileHit_', 'TileHitD3PDObject')
 
 TileHitD3PDObject.defineBlock (0, 'TileHitDetails',
-                                CaloSysD3PDMaker.TileHitFillerTool)
+                               D3PD.TileHitFillerTool)
 MBTSHitD3PDObject = D3PDObject (makeTileHitD3PDObject, 'MBTSHit_', 'MBTSHitD3PDObject', None, 'MBTSHits')
-MBTSHitD3PDObject.defineBlock (0, 'MBTSHitDetails',CaloSysD3PDMaker.TileHitFillerTool)
-
+MBTSHitD3PDObject.defineBlock (0, 'MBTSHitDetails',D3PD.TileHitFillerTool)

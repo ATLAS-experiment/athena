@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# $Id: TileDigitD3PDObject.py 470396 2011-11-24 16:42:13Z krasznaa $
+from D3PDMakerCoreComps.D3PDObject          import D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
 
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
-from D3PDMakerCoreComps.D3PDObject import D3PDObject
+D3PD = CompFactory.D3PD
 
 TileDigitSGKey='TileDigitsFlt'
 
@@ -15,7 +14,7 @@ def makeTileDigitD3PDObject (name, prefix, object_name='TileDigitD3PDObject', ge
     if label is None: label = prefix
 
     if not getter:
-        getter = CaloSysD3PDMaker.SGTileDigitsGetterTool \
+        getter = D3PD.SGTileDigitsGetterTool \
                  (name + '_Getter',
                   TypeName = 'TileDigitsContainer',
                   SGKey = sgkey,
@@ -23,12 +22,12 @@ def makeTileDigitD3PDObject (name, prefix, object_name='TileDigitD3PDObject', ge
 
     # create the selected cells
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 
@@ -41,19 +40,16 @@ def makeTileDigitD3PDObject (name, prefix, object_name='TileDigitD3PDObject', ge
 TileDigitD3PDObject = D3PDObject (makeTileDigitD3PDObject, 'tiledigit_', 'TileDigitD3PDObject')
 
 TileDigitD3PDObject.defineBlock (0, 'Digits',
-                                CaloSysD3PDMaker.TileDigitFillerTool,
-                                SaveOfflineInfo= False,
-                                SaveHardwareInfo=True,
-                                )
+                                 D3PD.TileDigitFillerTool,
+                                 SaveOfflineInfo= False,
+                                 SaveHardwareInfo=True,
+                                 )
 
 
 
 TileDigitD3PDObject.defineBlock (1, 'SST',
-                                CaloSysD3PDMaker.TileDigitFillerTool,
-                                SaveOfflineInfo= True,
-                                SaveHardwareInfo=False,
-                                )
-
-
-
+                                 D3PD.TileDigitFillerTool,
+                                 SaveOfflineInfo= True,
+                                 SaveHardwareInfo=False,
+                                 )
 

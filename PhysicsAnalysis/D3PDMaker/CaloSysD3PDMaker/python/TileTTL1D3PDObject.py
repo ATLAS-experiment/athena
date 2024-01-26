@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
 from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 def makeTileTTL1D3PDObject (name, prefix, object_name='TileTTL1D3PDObject', getter = None,
                            sgkey = None,
@@ -17,7 +19,7 @@ def makeTileTTL1D3PDObject (name, prefix, object_name='TileTTL1D3PDObject', gett
     print(" makeTileTTL1D3PDObject: sgkey = ", sgkey)
 
     if not getter:
-        getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+        getter = D3PD.SGDataVectorGetterTool \
                  (name + '_Getter',
                   TypeName = 'TileTTL1Container',
                   SGKey = sgkey,
@@ -25,17 +27,17 @@ def makeTileTTL1D3PDObject (name, prefix, object_name='TileTTL1D3PDObject', gett
         
 
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 
 TileTTL1D3PDObject=D3PDObject(makeTileTTL1D3PDObject,'TileTTL1_','TileTTL1D3PDObject')
     
 TileTTL1D3PDObject.defineBlock (0, 
-                              'TileTTL1',
-                              CaloSysD3PDMaker.TileTTL1FillerTool)
+                                'TileTTL1',
+                                D3PD.TileTTL1FillerTool)

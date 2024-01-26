@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
-from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from D3PDMakerCoreComps.D3PDObject          import D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 def makeTileMuD3PDObject (name, prefix, object_name='TileMuD3PDObject', getter = None,
                            sgkey = None,
@@ -17,7 +19,7 @@ def makeTileMuD3PDObject (name, prefix, object_name='TileMuD3PDObject', getter =
     print(" makeTileMuD3PDObject: sgkey = ", sgkey)
 
     if not getter:
-        getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+        getter = D3PD.SGDataVectorGetterTool \
                  (name + '_Getter',
                   TypeName = 'TileMuContainer',
                   SGKey = sgkey,
@@ -25,16 +27,16 @@ def makeTileMuD3PDObject (name, prefix, object_name='TileMuD3PDObject', getter =
         
 
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 
 TileMuD3PDObject=D3PDObject(makeTileMuD3PDObject,'TileMuId_','TileMuD3PDObject')
     
 TileMuD3PDObject.defineBlock (0, 'TileMus',
-                              CaloSysD3PDMaker.TileMuFillerTool)
+                              D3PD.TileMuFillerTool)

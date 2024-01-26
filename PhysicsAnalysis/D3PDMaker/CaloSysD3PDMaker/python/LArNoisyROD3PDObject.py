@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file CaloSysD3PDMaker/python/LArNoisROD3PDObject.py
@@ -8,12 +8,14 @@
 #
 
 
-import CaloSysD3PDMaker
-from D3PDMakerCoreComps.D3PDObject     import make_SG_D3PDObject
+from D3PDMakerCoreComps.D3PDObject          import make_SG_D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 LArNoisyROD3PDObject = \
            make_SG_D3PDObject ('LArNoisyROSummary',
-#                               D3PDMakerFlags.LArNoisyROSGKey(),
                                'LArNoisyROSummary',
                                'larnro_',
                                'LArNoisyROD3PDObject',
@@ -21,21 +23,21 @@ LArNoisyROD3PDObject = \
 
 LArNoisyROD3PDObject.defineBlock (0,
                                   'Basic',
-                                  CaloSysD3PDMaker.LArNoisyROFillerTool,
+                                  D3PD.LArNoisyROFillerTool,
                                   SaveNB    = True,
                                   SaveFEBID = False,
                                   SavePAID  = False)
 
 LArNoisyROD3PDObject.defineBlock (1,
                                   'FEBIDs',
-                                  CaloSysD3PDMaker.LArNoisyROFillerTool,
+                                  D3PD.LArNoisyROFillerTool,
                                   SaveNB    = False,
                                   SaveFEBID = True,
                                   SavePAID  = False)
 
 LArNoisyROD3PDObject.defineBlock (2,
                                   'PAIDs',
-                                  CaloSysD3PDMaker.LArNoisyROFillerTool,
+                                  D3PD.LArNoisyROFillerTool,
                                   SaveNB    = False,
                                   SaveFEBID = False,
                                   SavePAID  = True)

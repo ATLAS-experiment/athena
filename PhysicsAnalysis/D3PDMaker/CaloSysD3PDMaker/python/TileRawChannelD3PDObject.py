@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# $Id: TileRawChannelD3PDObject.py 470396 2011-11-24 16:42:13Z krasznaa $
-
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
 from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 TileRawChannelSGKey='TileRawChannelFlt'
 
@@ -15,7 +15,7 @@ def makeTileRawChannelD3PDObject (name, prefix, object_name='TileRawChannelD3PDO
     if label is None: label = prefix
 
     if not getter:
-        getter = CaloSysD3PDMaker.SGTileRawChannelGetterTool \
+        getter = D3PD.SGTileRawChannelGetterTool \
                  (name + '_Getter',
                   TypeName = 'TileRawChannelContainer',
                   SGKey = sgkey,
@@ -23,12 +23,12 @@ def makeTileRawChannelD3PDObject (name, prefix, object_name='TileRawChannelD3PDO
 
     # create the selected cells
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 
@@ -42,18 +42,18 @@ TileRawChannelD3PDObject = D3PDObject( makeTileRawChannelD3PDObject, 'tileraw_',
                                        'TileRawChannelD3PDObject' )
 
 TileRawChannelD3PDObject.defineBlock (0, 'RawChannel',
-                                CaloSysD3PDMaker.TileRawChannelFillerTool,
-                                SaveHardwareInfo=False,
-                                SaveRawChannel= True,
-                                )
+                                      D3PD.TileRawChannelFillerTool,
+                                      SaveHardwareInfo=False,
+                                      SaveRawChannel= True,
+                                      )
 
 
 
 TileRawChannelD3PDObject.defineBlock (1, 'Hardware',
-                                CaloSysD3PDMaker.TileRawChannelFillerTool,
-                                SaveHardwareInfo=True,
-                                SaveRawChannel= False,
-                                )
+                                      D3PD.TileRawChannelFillerTool,
+                                      SaveHardwareInfo=True,
+                                      SaveRawChannel= False,
+                                      )
 
 
 

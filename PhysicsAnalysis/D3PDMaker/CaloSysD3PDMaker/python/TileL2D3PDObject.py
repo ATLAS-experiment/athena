@@ -1,8 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
-from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from D3PDMakerCoreComps.D3PDObject          import D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 def makeTileL2D3PDObject (name, prefix, object_name='TileL2D3PDObject', getter = None,
                            sgkey = None,
@@ -17,7 +19,7 @@ def makeTileL2D3PDObject (name, prefix, object_name='TileL2D3PDObject', getter =
     print(" makeTileL2D3PDObject: sgkey = ", sgkey)
 
     if not getter:
-        getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+        getter = D3PD.SGDataVectorGetterTool \
                  (name + '_Getter',
                   TypeName = 'TileL2Container',
                   SGKey = sgkey,
@@ -25,12 +27,12 @@ def makeTileL2D3PDObject (name, prefix, object_name='TileL2D3PDObject', getter =
         
 
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 
@@ -38,13 +40,13 @@ TileL2D3PDObject=D3PDObject(makeTileL2D3PDObject,'TileL2Met_','TileL2D3PDObject'
     
 TileL2D3PDObject.defineBlock (0, 
                               'TileL2',
-                              CaloSysD3PDMaker.TileL2FillerTool,
+                              D3PD.TileL2FillerTool,
                               SaveL2Details=True,
                               SaveMuRODDetails=False)
     
 TileL2D3PDObject.defineBlock (2, 
                               'TileMuID_ROD',
-                              CaloSysD3PDMaker.TileL2FillerTool,
+                              D3PD.TileL2FillerTool,
                               SaveL2Details=False,
                               SaveMuRODDetails=True)
 
