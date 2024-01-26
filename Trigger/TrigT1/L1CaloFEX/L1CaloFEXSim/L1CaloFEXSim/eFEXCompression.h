@@ -46,7 +46,7 @@ public:
   /** Linearize LAr code to eFEX internal format */
   static unsigned int linearize(unsigned int code, int threshold = 0);
   /** Full sequence **/
-  static unsigned int decode(int EtVal, int layer, bool ignoreDisable = false);
+  static int decode(int EtVal, int layer, bool ignoreDisable = false);
 
   static std::atomic<bool> s_disableNoiseCuts;
  

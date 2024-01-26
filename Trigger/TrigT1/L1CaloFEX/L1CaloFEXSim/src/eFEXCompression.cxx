@@ -125,7 +125,7 @@ unsigned int eFEXCompression::linearize(unsigned int code, int threshold) {
   return eFexET;
 }
 
-unsigned int eFEXCompression::decode(int EtVal, int layer, bool ignoreDisable) {
+int eFEXCompression::decode(int EtVal, int layer, bool ignoreDisable) {
 
   // Calculate code
   unsigned int tcode = eFEXCompression::compress(EtVal);
@@ -140,9 +140,7 @@ unsigned int eFEXCompression::decode(int EtVal, int layer, bool ignoreDisable) {
   int Et = eFEXCompression::expand(code);
   
   /// Convert to eFEX digit scale: 25 MeV
-  unsigned int eFexET = Et/s_eFEXstep;
-
-  return eFexET;
+  return Et/s_eFEXstep;
 }
 
 } // end of namespace bracket
