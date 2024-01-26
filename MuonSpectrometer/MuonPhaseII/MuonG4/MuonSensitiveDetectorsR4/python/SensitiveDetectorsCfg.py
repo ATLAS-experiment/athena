@@ -18,7 +18,7 @@ def MdtSensitiveDetectorToolCfg(flags, name = "MdtSensitiveDetector", **kwargs):
 def MmSensitiveDetectorToolCfg(flags, name = "MmSensitiveDetector", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("OutputCollectionNames", [ "xRawMmSimHits"])
-    kwargs.setdefault("LogicalVolumeNames", ["MuonR4::MicroMegasGas"])
+    kwargs.setdefault("LogicalVolumeNames", ["MuonR4::actMicroMegaGas"])
     the_tool = CompFactory.MuonG4R4.MmSensitiveDetectorTool(name, **kwargs)
     from MuonSimHitSorting.MuonSimHitSortingCfg import MuonSimHitSortingAlgCfg
     result.merge(MuonSimHitSortingAlgCfg(flags,name="MmSimHitSorterAlg",

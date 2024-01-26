@@ -25,6 +25,7 @@ void createGraph(const StripDesign& design, TFile& outFile, const std::string& g
     addPoint(*graph, design.cornerBotLeft());
     for (int strip = design.firstStripNumber(); strip <= design.numStrips(); ++strip) {
         addPoint(*graph, rot * design.leftEdge(strip).value_or(Amg::Vector2D::Zero()));
+        addPoint(*graph, rot * design.center(strip).value_or(Amg::Vector2D::Zero()));      
         addPoint(*graph, rot * design.rightEdge(strip).value_or(Amg::Vector2D::Zero()));
         addPoint(*graph, rot * design.leftEdge(strip).value_or(Amg::Vector2D::Zero()));
     }

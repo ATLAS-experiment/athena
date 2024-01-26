@@ -38,13 +38,15 @@ class MmReadoutGeomTool : public AthAlgTool,
     
     /// Struct to cache the relevant parameters of from the WRPC tables
     struct wMMTable {
-       /// strip pitch
        double stripPitch{0.};
        double stripWidth{0.};
+       double distBotFrameStrip{0.};
        std::vector<double> stereoAngle{};
        std::vector<int> totalActiveStrips{};
-
-      std::vector<StripLayer> layers{};
+       int nMissedBottomEta{0};
+       int nMissedBottomStereo{0};
+       int nMissedTopEta{0};
+       std::vector<StripLayer> layers{};
     };
 
 

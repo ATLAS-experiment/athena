@@ -75,6 +75,12 @@ def GeoModelsTgcTestCfg(flags, name = "GeoModelsTgcTest", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def GeoModelMmTestCfg(flags, name = "GeoModelMmTest", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonGMR4.GeoModelMmTest(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
     result = ComponentAccumulator()
     from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
@@ -173,6 +179,9 @@ if __name__=="__main__":
 
     if flags.Detector.GeometryTGC: 
         cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"]))
+
+    if flags.Detector.GeometryMM: 
+        cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"]))
     
     if flags.Detector.GeometrysTGC: 
         cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"]))

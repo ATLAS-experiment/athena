@@ -103,9 +103,10 @@ namespace MuonGMR4 {
             
             Amg::Vector2D leftInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
             Amg::Vector2D rightInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
-        public:
             /// Returns the geometrical center of a given strip
             Amg::Vector2D stripCenter(int stripNum) const;
+        public:
+
             /// Returns the bottom left corner  of the trapezoid
             const Amg::Vector2D& cornerBotLeft() const;
             /// Returns the bottom right corner of the trapezoid

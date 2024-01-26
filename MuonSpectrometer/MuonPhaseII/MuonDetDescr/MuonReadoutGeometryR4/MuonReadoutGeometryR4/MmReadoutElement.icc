@@ -13,7 +13,31 @@ inline double MmReadoutElement::moduleHeight() const { return 2.*m_pars.halfHeig
 inline double MmReadoutElement::moduleWidthS() const { return 2.*m_pars.halfShortWidth; }
 inline double MmReadoutElement::moduleWidthL() const { return 2.*m_pars.halfLongWidth; }
 inline double MmReadoutElement::moduleThickness() const { return 2.*m_pars.halfThickness; }
+inline double MmReadoutElement::gapLengthS(const int layer) const { return 2.*m_pars.layers.at(layer-1).design().shortHalfHeight(); }
+inline double MmReadoutElement::gapLengthL(const int layer) const { return 2.*m_pars.layers.at(layer-1).design().longHalfHeight();}
+inline double MmReadoutElement::gapHeight(const int layer) const { return 2.*m_pars.layers.at(layer-1).design().halfWidth();}
 inline unsigned int MmReadoutElement::nGasGaps() const { return m_pars.layers.size(); }
+inline unsigned int MmReadoutElement::numStrips(const int layer) const { 
+    return m_pars.layers.at(layer-1).design().numStrips();
+  }
+inline unsigned int MmReadoutElement::firstStrip(const int layer) const { 
+    return m_pars.layers.at(layer-1).design().firstStripNumber();
+  }
+inline double MmReadoutElement::stripLength(const int stripNumb,const int layer) const { 
+    return m_pars.layers.at(layer-1).design().stripLength(stripNumb);
+}
+
+
+inline IdentifierHash MmReadoutElement::createHash(const int strip, const int gasGap) {
+    /*gasGap can be 1 to 4. So we make sure it contributes to the lower 4 bits. (Bit shifting begins from left to right).
+      Then we shift the bit position to the left by 4 positions and allocate the strip binary expression.
+      (gasGap-1) --> is the binary representation of the gasGap.
+      strip --> is the binary representation of the strip.
+    */
+    IdentifierHash hash = (gasGap - 1) | strip  << 4;
+    return hash;
+}
+
 inline IdentifierHash MmReadoutElement::measurementHash(const Identifier& measId) const {
     if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
         ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
@@ -23,16 +47,6 @@ inline IdentifierHash MmReadoutElement::measurementHash(const Identifier& measId
                       m_idHelper.gasGap(measId));
 }
 
-inline IdentifierHash MmReadoutElement::createHash(const int strip, const int gasGap) {
-    /*gasGap can be 1 to 4. So we make sure it contributes to the lower 4 bits. (Bit shifting begins from left to right).
-      Then we shift the bit position to the left by 4 positions and allocate the strip binary expression.
-      (gasGap-1) --> is the binary representation of the gasGap.
-      (strip-1) --> is the binary representation of the strip.
-    */
-    IdentifierHash hash = (gasGap - 1) | strip  << 4;
-    return hash;
-}
-
 inline IdentifierHash MmReadoutElement::layerHash(const Identifier& measId) const {
     if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
         ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
@@ -40,6 +54,14 @@ inline IdentifierHash MmReadoutElement::layerHash(const Identifier& measId) cons
     }
     return createHash(0, m_idHelper.gasGap(measId));
 }
+
+inline IdentifierHash MmReadoutElement::layerHash(const IdentifierHash& measHash) const {
+    //measHash & 0xF will extract the gasGap number from 0 to 3, which is what you need based on
+    // the fact that you createHash through :
+    //IdentifierHash hash = (gasGap - 1) | strip << 4;
+    return IdentifierHash{static_cast<unsigned int>((measHash & 0xF))};
+}
+
 
 inline Identifier MmReadoutElement::measurementId(const IdentifierHash& measHash) const {
     return m_idHelper.channelID(identify(),multilayer(), gasGapNumber(measHash), stripNumber(measHash));  
@@ -65,6 +87,19 @@ inline const StripLayer& MmReadoutElement::stripLayer(const Identifier& measId) 
    return stripLayer(measurementHash(measId));
 }
 
+
+
+inline Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+    return stripPosition(ctx, measurementHash(measId));
+} 
+
+inline Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const{
+    return leftStripEdge(ctx, measurementHash(measId));
+}
+
+inline Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const{
+    return rightStripEdge(ctx, measurementHash(measId));
+}
 
 
 }  // namespace MuonGMR4
