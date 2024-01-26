@@ -69,11 +69,15 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
                     <<", halfHeight : "<<define.halfHeight);
 
 
-    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "MicroMegasGas");
+    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "actMicroMegaGas");
     if (allGasGaps.empty()) {
-        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any children MicroMegasGas");
+        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any children actMicroMegaGas");
         return StatusCode::FAILURE;
     }
+
+    /// Filling in number of layers
+    define.nGasGaps = allGasGaps.size();
+    ATH_MSG_VERBOSE("The number of gasGaps are: " << define.nGasGaps);
 
     FactoryCache::ParamBookTable::const_iterator parBookItr = factoryCache.parameterBook.find(define.chambDesign);
     if (parBookItr == factoryCache.parameterBook.end()) {
@@ -95,35 +99,65 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
               [](const physVolWithTrans&gapI, const physVolWithTrans & gapJ) {
                 const Amg::Vector3D posGapI = gapI.transform.translation();
                 const Amg::Vector3D posGapJ = gapJ.transform.translation();                
-                return posGapI.x() < posGapJ.x();
-                       
+                return posGapI.x() < posGapJ.x();                      
               });
+        ATH_MSG_DEBUG("**************************************");
+    for (std::size_t gap = 0; gap < allGasGaps.size(); ++gap) {
 
-    for (unsigned int gap = 0; gap < allGasGaps.size(); ++gap) {
-        physVolWithTrans& gapVol = allGasGaps[gap];
+        auto& gapVol = allGasGaps[gap];
+        const Amg::Vector3D posGapI = gapVol.transform.translation();
+
+        //Check sorting of gasGaps. For Q1 --> Eta layers should be first. For Q2--> Stereo Layers should be first.
+        //Add ATH_MSG_INFO("**************************************"); before the gasGap loop.
+        ATH_MSG_DEBUG("quadruplet  " << define.chambDesign.substr(6,7) << "  stereoAngle : " << paramBook.stereoAngle.at(gap) << " totalStrips " << paramBook.totalActiveStrips.at(gap)  <<  "   GasGAP POS X : " << posGapI.x() );
+
         const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.physVol);
         if (gapShape->typeID() != GeoTrd::getClassTypeID()) {
             ATH_MSG_FATAL("Failed to extract a geo shape");
             return StatusCode::FAILURE;
         }
-        gapVol.transform = gapVol.transform *  Amg::getRotateY3D(-90. * Gaudi::Units::degree);
+
+        bool isStereo = static_cast<bool>(paramBook.stereoAngle.at(gap));
+
         const GeoTrd* gapTrd = static_cast<const GeoTrd*>(gapShape);
         ATH_MSG_DEBUG("MicroMegas Gas gap dimensions "<<m_geoUtilTool->dumpShape(gapTrd));
+        double gapHalfHeight = gapTrd->getZHalfLength();
+        double gapHalfShortY = std::min(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
+        double gapHalfLongY = std::max(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
+
+        double firstStripPos{0.};
+        int firstActiveStrip{0};
+        if (isStereo) {
+            firstActiveStrip = paramBook.nMissedBottomStereo + 1;
+            firstStripPos = -gapHalfHeight + (firstActiveStrip - paramBook.nMissedTopEta -1) * paramBook.stripPitch;
+        } else {
+            firstActiveStrip = paramBook.nMissedBottomEta + 1;
+            firstStripPos = -gapHalfHeight + 1.5 *paramBook.stripPitch;
+        }
+            
+
+        //Necessary strip layer rotation to match the alignment coordinate system
+        Amg::Transform3D stripLayerRotation{gapVol.transform
+                                    * Amg::getRotateY3D(-90.*Gaudi::Units::deg)
+                                    * Amg::getRotateX3D(180.* Gaudi::Units::deg)
+                                    * Amg::getRotateZ3D(-paramBook.stereoAngle.at(gap)* Gaudi::Units::rad)};             
 
         /*The origin of the chamber/gasGap axes system is located at the center of the chamber.
         We subtract the HalfLength across the Z axis to transform from the center to the origin of the trapezoid
         The we add the strip pitch to reach the position of the first strip.*/
         StripDesignPtr stripDesign = std::make_unique<StripDesign>();
 
-        stripDesign->defineStripLayout(Amg::Vector2D{-gapTrd->getZHalfLength() + paramBook.stripPitch, 0.},
+        stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
                                         paramBook.stripPitch,
                                         paramBook.stripWidth,
-                                        paramBook.totalActiveStrips.at(gap));       
+                                        paramBook.totalActiveStrips.at(gap),
+                                        firstActiveStrip);       
 
-        stripDesign->defineTrapezoid(define.halfShortWidth, define.halfLongWidth, define.halfHeight, paramBook.stereoAngle.at(gap));
+        /// The stereo angle is defined clock-wise from the y-axis. So we need to input it with a minus when defining the trapezoid
+        stripDesign->defineTrapezoid(gapHalfShortY, gapHalfLongY, gapHalfHeight, paramBook.stereoAngle.at(gap));
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
-        StripLayer stripLayer(gapVol.transform, stripDesign, 
-                              IdentifierHash{gap});
+        StripLayer stripLayer(stripLayerRotation, stripDesign, 
+                              IdentifierHash{static_cast<unsigned int>(gap)});
         define.layers.push_back(std::move(stripLayer));
     } //end of gas gap loop
     return StatusCode::SUCCESS;
@@ -218,7 +252,10 @@ StatusCode MmReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         parBook.stripWidth = record->getDouble("stripWidth") ; 
         parBook.stereoAngle = tokenizeDouble(record->getString("stereoAngle"), ";");
         parBook.totalActiveStrips = tokenizeInt(record->getString("totalActiveStrips"), ";");
-
+        parBook.nMissedBottomEta = record->getInt("nMissedBottomEta"); 
+        parBook.nMissedBottomStereo = record->getInt("nMissedBottomStereo"); 
+        parBook.nMissedTopEta = record->getInt("nMissedTopEta");
+        parBook.distBotFrameStrip = record->getDouble("dR_botFrame1stStrip");
         
         ATH_MSG_VERBOSE("Extracted parameters for chamber "<<chambType
                        <<", stripPitch (eta/phi): "<<parBook.stripPitch<<"/"

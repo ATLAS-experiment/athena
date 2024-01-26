@@ -44,10 +44,6 @@ if __name__=="__main__":
     #                                     TargetVolume="BIS7_RPC26_7_0_1_1_1"
     #                                    ))
     
-    ## xAOD TruthParticle conversion
-    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-    cfg.merge(EventInfoCnvAlgCfg(flags,inputKey="McEventInfo", disableBeamSpot=True))
-   
     from xAODTruthCnv.xAODTruthCnvConfig import GEN_EVNT2xAODCfg
     cfg.merge(GEN_EVNT2xAODCfg(flags,name="GEN_EVNT2xAOD",AODContainerName="TruthEvent"))
 

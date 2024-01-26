@@ -13,6 +13,8 @@
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
+#include "MuonTesterTree/TwoVectorBranch.h"
+#include "MuonTesterTree/CoordTransformBranch.h"
 
 namespace MuonGM {
 
@@ -34,33 +36,55 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{
         this, "DetectorManagerKey", "MuonDetectorManager",
         "Key of input MuonDetectorManager condition data"};
-    
-    /// Set of stations to be tested
-    std::set<Identifier> m_testStations{};
 
     // handling (like data access) for the service of related to handling muon identifiers (like MicroMegas)
      ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+
+    /// Set of stations to be tested
+    std::set<Identifier> m_testStations{};
+
+    /// String should be formated like
+    /// MM<L or S><1 or 2><A/C><layer>
+    /// Example string MML1A6 , MMS2C5
+    Gaudi::Property<std::vector<std::string>> m_selectStat{
+        this, "TestStations", {}, "Constrain the stations to be tested"};
    
     StatusCode dumpToTree(const EventContext& ctx, const MuonGM::MMReadoutElement* detEl);
 
     MuonVal::MuonTesterTree m_tree{"MmGeoModelTree", "GEOMODELTESTER"};
 
-    MuonVal::ScalarBranch<unsigned short>& m_stationEta{m_tree.newScalar<unsigned short>("stationEta")};
-    MuonVal::ScalarBranch<unsigned short>& m_stationPhi{m_tree.newScalar<unsigned short>("stationPhi")};
+    MuonVal::ScalarBranch<unsigned short>& m_stationIndex{m_tree.newScalar<unsigned short>("stationIndex")};
+    MuonVal::ScalarBranch<short>& m_stationEta{m_tree.newScalar<short>("stationEta")};
+    MuonVal::ScalarBranch<short>& m_stationPhi{m_tree.newScalar<short>("stationPhi")};
     MuonVal::ScalarBranch<int>& m_stationName{m_tree.newScalar<int>("stationName")};
-    MuonVal::ScalarBranch<int>& m_multilayer{m_tree.newScalar<int>("multilayer")};
-    MuonVal::VectorBranch<int>& m_gasGap{m_tree.newVector<int>("gasGap")};
-    MuonVal::VectorBranch<int>& m_channel{m_tree.newVector<int>("channel")};
+    MuonVal::ScalarBranch<short>& m_multilayer{m_tree.newScalar<short>("multilayer")};
+    
+    MuonVal::VectorBranch<bool>& m_isStereo{m_tree.newVector<bool>("isStereo")};
+    MuonVal::VectorBranch<short>& m_gasGap{m_tree.newVector<short>("gasGap")};
+    MuonVal::VectorBranch<uint>& m_channel{m_tree.newVector<uint>("channel")};
+    
     MuonVal::VectorBranch<float>& m_stripLength{m_tree.newVector<float>("stripLength")};
     MuonVal::VectorBranch<float>& m_stripActiveLength{m_tree.newVector<float>("stripActiveLength")};
     MuonVal::VectorBranch<float>& m_stripActiveLengthLeft{m_tree.newVector<float>("stripActiveLengthLeft")};
     MuonVal::VectorBranch<float>& m_stripActiveLengthRight{m_tree.newVector<float>("stripActiveLengthRight")};
+    
     MuonVal::ThreeVectorBranch m_stripCenter{m_tree, "stripCenter"};
     MuonVal::ThreeVectorBranch m_stripLeftEdge{m_tree, "stripLeftEdge"};
     MuonVal::ThreeVectorBranch m_stripRightEdge{m_tree, "stripRightEdge"};
+    MuonVal::TwoVectorBranch m_locStripCenter{m_tree, "locStripCenter"};
 
-     
+    MuonVal::ScalarBranch<float>& m_ActiveHeightR{m_tree.newScalar<float>("ActiveHeightR")}; //active area's Height
+    MuonVal::ScalarBranch<float>& m_ActiveWidthS{m_tree.newScalar<float>("ActiveWidthS")}; //active area's small width
+    MuonVal::ScalarBranch<float>& m_ActiveWidthL{m_tree.newScalar<float>("ActiveWidthL")};   //active area's large width 
+
+
+    /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
+    MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
+
+    /// Rotation matrix of the respective strip layers
+    MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};    
+    MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
 };
 
 }

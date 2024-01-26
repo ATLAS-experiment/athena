@@ -52,6 +52,7 @@ void MmSensitiveDetector::Initialize(G4HCofThisEvent*) {
 G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
 
 
+  
   G4Track* currentTrack = aStep->GetTrack();
 
   // MDTs sensitive to charged particle only
@@ -133,7 +134,7 @@ Identifier MmSensitiveDetector::getIdentifier(const MuonGMR4::MmReadoutElement* 
 }
 const MuonGMR4::MmReadoutElement* MmSensitiveDetector::getReadoutElement(const G4TouchableHistory* touchHist) const {
    /// The fourth volume is the envelope volume of the NSW station. It will tell us the sector and station eta
-   const std::string& stationVolume = touchHist->GetVolume(3)->GetName();
+   const std::string& stationVolume = touchHist->GetVolume(4)->GetName();
    ///      av_4375_impr_1_MuonR4::NSW_SM2_StationMuonStation_pv_9_NSW_SM2_Station_-2_1
    const std::vector<std::string> volumeTokens = tokenize(stationVolume.substr(stationVolume.rfind("NSW") + 4), "_");
    ATH_MSG_VERBOSE("Name of the station volume is "<<volumeTokens);

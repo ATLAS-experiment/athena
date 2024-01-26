@@ -21,10 +21,7 @@ class MmReadoutElement : public MuonReadoutElement {
     
     /// Set of parameters to describe a RPC chamber
     struct parameterBook {
-
-
-      ///Trapezoid dimensions of MicroMegas
-      
+      ///Trapezoid dimensions of MicroMegas envelope
       /// half-thickness along z-axis
       double halfThickness{0.};
       /// width of the lower edge 
@@ -37,6 +34,7 @@ class MmReadoutElement : public MuonReadoutElement {
       unsigned int nGasGaps{0};
 
       std::vector<StripLayer> layers{};
+
 #ifndef SIMULATIONBASE
         ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
 #endif
@@ -69,19 +67,51 @@ class MmReadoutElement : public MuonReadoutElement {
     double moduleWidthL() const;
     /// Returns the module thickness
     double moduleThickness() const;
+    /// Length of gas Gap on short side
+    double gapLengthS(const int layer) const;
+    /// Length of gas Gap on long side
+    double gapLengthL(const int layer) const;
+    /// Height of gas Gap
+    double gapHeight(const int layer) const;
     /// Returns the number of gas gaps
     unsigned int nGasGaps() const;
+    /// Returns the number of total active strips
+    unsigned int numStrips(const int layer) const;
+      /// Returns the first active strip
+    unsigned int firstStrip(const int layer) const;
+    /// Returns the strip length
+    double stripLength(const int stripNumb, const int layer) const;
+
 
     StatusCode initElement() override final;
 
     /// Constructs the identifier hash from the full measurement Identifier. The
     /// hash is always defined w.r.t the specific detector element and used to
     /// access the information in memory quickly
+
+    // measurementHash : Creates a channelHash based on channel's and gasGap's number, which are
+    // retrieved through the MmIdHelper by inputting the calculated channel Identifier.
     IdentifierHash measurementHash(const Identifier& measId) const override final;
+    // layerHash : Creates a layerHash based solely on gasGap's number, which is
+    // retrieved through the MmIdHelper by inputting the calculated channel Identifier.
     IdentifierHash layerHash(const Identifier& measId) const override final;
+    // layerHash : Creates a layerHash based on the first 4 bits of the channelHash,
+    // which retrieve the layer.
+    IdentifierHash layerHash(const IdentifierHash& measHash) const;
+    // measurementId : Retrieves the channel Identifier based on the above created channelHash (measurementHash)
     Identifier measurementId(const IdentifierHash& measHash) const override final;
 
     static IdentifierHash createHash(const int strip, const int gasGap);
+      /// Returns the position of the strip center
+    Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    /// Returns the global position of the strip edge
+    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const; 
+    /// Returns the global position of the strip edge
+    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+
     const StripLayer& stripLayer(const Identifier& measId) const;    
     const StripLayer& stripLayer(const IdentifierHash& measHash) const;    
    private:

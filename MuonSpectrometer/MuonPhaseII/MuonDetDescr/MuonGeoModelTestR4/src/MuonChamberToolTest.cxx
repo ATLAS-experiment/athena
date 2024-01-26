@@ -86,7 +86,7 @@ namespace MuonGMR4 {
                     ATH_CHECK(testTgc(**gctx, *tgc, boundNote)); 
                 } else {
                     ATH_MSG_FATAL("The readout element "<<m_idHelperSvc->toStringDetEl(readOut->identify())
-                                <<" is not an Mdt, Rpc or Tgc");
+                                <<" is not an Mdt, Rpc, Tgc or Mm");
                     return StatusCode::FAILURE;
                 }
             }
@@ -205,5 +205,7 @@ namespace MuonGMR4 {
         }
         return StatusCode::SUCCESS;
     }
+
  
 }
+

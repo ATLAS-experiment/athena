@@ -107,7 +107,7 @@ if __name__=="__main__":
                                             ReadoutXML="TgcStripStructure.xml"))
 
     if not args.noMM:
-        cfg.merge(GeoModelMmTestCfg(flags))    
+        cfg.merge(GeoModelMmTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "M"]))    
     
     if not args.noSTGC:
         cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"]))

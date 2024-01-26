@@ -68,4 +68,39 @@ Amg::Transform3D MmReadoutElement::fromGapToChamOrigin(const IdentifierHash& lay
       return m_pars.layers[layIdx].toOrigin();
 }
 
-} // namespace MuonGMR4
+
+Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+   const IdentifierHash lHash = layerHash(measHash);
+   unsigned int layIdx = static_cast<unsigned int>(lHash);
+   if (layIdx < m_pars.layers.size()) {
+      return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripPos(stripNumber(measHash));
+   }
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.layers.size());
+   return Amg::Vector3D::Zero();
+}
+
+
+Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+    const IdentifierHash lHash = layerHash(measHash);
+    unsigned int layIdx = static_cast<unsigned int>(lHash);
+    if (layIdx < m_pars.layers.size()) {
+       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripRightEdge(stripNumber(measHash));
+    }
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.layers.size());
+    return Amg::Vector3D::Zero();
+}
+
+Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
+    const IdentifierHash lHash = layerHash(measHash);
+    unsigned int layIdx = static_cast<unsigned int>(lHash);
+    if (layIdx < m_pars.layers.size()) {
+       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripLeftEdge(stripNumber(measHash));
+    }
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.layers.size());
+    return Amg::Vector3D::Zero();
+}
+
+}

@@ -40,7 +40,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         StatusCode testTgc(const ActsGeometryContext& gctx,
                            const TgcReadoutElement& readoutEle,
                            ChambBoundaryNote& chamber) const;
-                           
+
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
