@@ -131,17 +131,11 @@ StatusCode Pythia8_i::genInitialize() {
 
   // Add UserHooks first because these potentially add new settings that must exist prior to parsing commands
 
-  bool firstHook=true;
   for(const auto &hook: m_userHooks){
     ATH_MSG_INFO("Adding user hook " + hook + ".");
     m_userHooksPtrs.push_back(PYTHIA8_PTRWRAP(Pythia8_UserHooks::UserHooksFactory::create(hook)) );
     bool canSetHook = true;
-    if(firstHook){
-      canSetHook = m_pythia->setUserHooksPtr(m_userHooksPtrs.back());
-      firstHook = false;
-    }else{
-      canSetHook = m_pythia->addUserHooksPtr(m_userHooksPtrs.back());
-    }
+    canSetHook = m_pythia->addUserHooksPtr(m_userHooksPtrs.back());
 
     if(!canSetHook){
       ATH_MSG_ERROR("Unable to set requested user hook.");

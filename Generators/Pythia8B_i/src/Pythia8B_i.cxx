@@ -101,7 +101,7 @@ StatusCode Pythia8B_i::genInitialize() {
     bool canSetHook=true;
     if (m_doSuppressSmallPT) {
         m_SuppressSmallPT = new Pythia8::SuppressSmallPT(m_pt0timesMPI,m_numberAlphaS,m_sameAlphaSAsMPI);
-        canSetHook=Pythia8_i::m_pythia->setUserHooksPtr(PYTHIA8_PTRWRAP(m_SuppressSmallPT));
+        canSetHook=Pythia8_i::m_pythia->addUserHooksPtr(PYTHIA8_PTRWRAP(m_SuppressSmallPT));
     }
 
     if (!canSetHook) {
