@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PLRGmxInterface.h"
@@ -12,6 +12,7 @@
 #include <PixelReadoutGeometry/PixelModuleDesign.h>
 #include <ReadoutGeometryBase/PixelDiodeMatrix.h>
 #include <ReadoutGeometryBase/SiCommonItems.h>
+#include <InDetGeoModelUtils/WaferTree.h>
 
 
 namespace InDetDD
@@ -30,6 +31,10 @@ int PLRGmxInterface::sensorId(std::map<std::string, int> &index) const
   // Check if identifier is valid
   // TODO: drop this check in the future
   const PLR_ID *pixelIdHelper = dynamic_cast<const PLR_ID *>(m_commonItems->getIdHelper());
+  if (not pixelIdHelper){
+    ATH_MSG_ERROR("Failed dynamic_cast to PLR_ID in PLRGmxInterface::sensorId");
+    return -1;
+  }
   Identifier id = pixelIdHelper->wafer_id(index["barrel_endcap"],
                                           index["layer_wheel"],
                                           index["phi_module"],
@@ -81,6 +86,10 @@ void PLRGmxInterface::addSensor(const std::string& typeName,
   // Get the ATLAS "Offline" wafer identifier
   //
   const PLR_ID *pixelIdHelper = dynamic_cast<const PLR_ID *>(m_commonItems->getIdHelper());
+  if (not pixelIdHelper){
+    ATH_MSG_ERROR("Failed dynamic_cast to PLR_ID in PLRGmxInterface::addSensor");
+    return;
+  }
   Identifier id = pixelIdHelper->wafer_id(index["barrel_endcap"],
                                           index["layer_wheel"],
                                           index["phi_module"],
