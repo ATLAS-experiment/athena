@@ -13,7 +13,7 @@ find_package( GTest )
 atlas_add_library (MuonNSWCommonDecode
 		   src/*.cxx src/*.cpp
                    PUBLIC_HEADERS MuonNSWCommonDecode
-                   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${FMT_INCLUDE_DIRS}
+                   INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} CxxUtils)
 
 
