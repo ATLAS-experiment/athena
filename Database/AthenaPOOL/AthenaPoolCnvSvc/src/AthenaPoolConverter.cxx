@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolConverter.cxx
@@ -16,6 +16,7 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
+#include "POOLCore/APRDefaults.h"
 
 //__________________________________________________________________________
 AthenaPoolConverter::~AthenaPoolConverter() {
@@ -212,7 +213,7 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
             containerName = dhContainerPrefix + "(" + tname + ")";
          }
       } else if (tname.compare(0, 13, "AttributeList") == 0) {
-         containerName = "ROOTTREE:POOLCollectionTree(" + key + ")";
+         containerName = "ROOTTREE:" + std::string(APRDefaults::TTreeNames::EventTag) + "(" + key + ")";
       } else {
          const std::string typeTok = "<type>", keyTok = "<key>";
          containerName = containerPrefix + containerFriendPostfix + containerNameHint;

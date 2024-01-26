@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollection.h"
@@ -7,6 +7,7 @@
 
 #include "PersistentDataModel/Token.h"
 #include "POOLCore/Exception.h"
+#include "POOLCore/APRDefaults.h"
 
 #include "CollectionBase/ICollectionColumn.h"
 #include "CollectionBase/ICollectionFragment.h"
@@ -46,9 +47,6 @@ namespace pool {
 
     const char* const RootCollection::c_tokenBranchName = "Token";
     const char* const RootCollection::c_attributeListLayoutName = "Schema"; 
-    const char* const RootCollection::c_treeName = "POOLCollectionTree";
-    const char* const RootCollection::c_oldTreeName = "CollectionTree";
-
 
      RootCollection::RootCollection(
         const pool::ICollectionDescription* description,
@@ -100,13 +98,7 @@ namespace pool {
      {
         TTree *tree( NULL );
         if( m_file ) {
-           tree = dynamic_cast<TTree*>(m_file->Get(c_treeName));
-           if( !tree && m_file->Get(c_attributeListLayoutName) ) {
-              tree = dynamic_cast<TTree*>(m_file->Get(c_oldTreeName));
-              if( tree )
-                 m_poolOut << coral::Info << "Found old Collection TTree name: "
-                           << c_oldTreeName << coral::MessageStream::endmsg;
-           }
+           tree = dynamic_cast<TTree*>(m_file->Get(APRDefaults::TTreeNames::EventTag));
            if( tree )
               m_poolOut << coral::Debug << "Retrieved Collection TTree  \""
                         << tree->GetName() << "\" from file " << m_fileName
@@ -359,11 +351,11 @@ namespace pool {
         // create a new TTree
         if( 0 && m_mode == ICollection::CREATE_AND_OVERWRITE ) {
           m_poolOut << coral::Warning <<  "Cleaning previous collection object from the file..." << coral::MessageStream::endmsg;
-          std::string treeName(c_treeName); treeName += ";*";
+          std::string treeName = std::string(APRDefaults::TTreeNames::EventTag) + ";*";
           m_file->Delete(treeName.c_str());
           m_file->Delete("Schema;*");
         }
-        m_tree = new TTree(c_treeName, m_name.c_str());
+        m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
         m_poolOut << coral::Debug << "Created Collection TTree. Collection file will be " << m_fileName << coral::MessageStream::endmsg;
         m_schemaEditor = new RootCollectionSchemaEditor( *this, m_description, m_tree );
         m_schemaEditor->createTreeBranches();

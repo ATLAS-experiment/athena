@@ -4,6 +4,8 @@
   <class pattern="pool::DbHandleBase*"   rootmap="false"/>
   <class pattern="pool::IDb*"            rootmap="false"/>
   <class pattern="pool::IStorage*"       rootmap="false"/>
+  <class name="APRDefaults::TTreeNames" />
+  <class name="APRDefaults::RNTupleNames" />
 
   <!-- package: StorageSvc                   -->
   <class name="std::pair<long long,long long>"       rootmap="false"/>

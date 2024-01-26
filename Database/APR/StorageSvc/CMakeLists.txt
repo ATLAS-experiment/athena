@@ -18,7 +18,7 @@ atlas_add_library( StorageSvc src/*.cpp
 
 atlas_add_dictionary( StorageSvcDict
    StorageSvc/dict.h StorageSvc/dict.xml
-   LINK_LIBRARIES StorageSvc )
+   LINK_LIBRARIES POOLCore StorageSvc )
 
 # The test(s) of the package:
 atlas_add_test( StorageSvc_mtShape_test

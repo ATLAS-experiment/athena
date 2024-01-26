@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTCOLLECTION_ROOTCOLLECTION_H
@@ -168,11 +168,9 @@ namespace pool {
         
         static const unsigned int c_maxLengthOfStrings = 5000;
         static const char* const poolOptToRootOpt[];
-	static const Io::IoFlags poolOptToFileMgrOpt[];
+        static const Io::IoFlags poolOptToFileMgrOpt[];
         static const char* const c_tokenBranchName;// = "Token";
         static const char* const c_attributeListLayoutName;// = "Schema"; 
-        static const char* const c_oldTreeName;// = "CollectionTree";
-        static const char* const c_treeName;// = "POOLCollectionTree";
 
      private:
 
