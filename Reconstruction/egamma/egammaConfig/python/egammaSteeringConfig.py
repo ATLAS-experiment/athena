@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Instantiate the
@@ -54,9 +54,10 @@ def EGammaSteeringCfg(flags,
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RDO_RUN2
     flags.Output.doWriteESD = True  # To test the ESD parts
     flags.Output.doWriteAOD = True  # To test the AOD parts

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Tool configuration to instantiate all
  egammaCaloTools with default configuration"""
@@ -67,30 +67,30 @@ def CaloCluster_OnTrackBuilderCfg(flags,
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.fillFromArgs()
+    flags.lock()
+    flags.dump()
 
     cfg = ComponentAccumulator()
     mlog = logging.getLogger("egammaTrackToolsConfigTest")
     mlog.info("Configuring EMExtrapolationTools : ")
     printProperties(mlog, cfg.popToolsAndMerge(
-        EMExtrapolationToolsCfg(ConfigFlags)),
+        EMExtrapolationToolsCfg(flags)),
         nestLevel=1,
         printDefaults=True)
     mlog.info("Configuring egammaTrkRefitterTool :")
     printProperties(mlog, cfg.popToolsAndMerge(
-        egammaTrkRefitterToolCfg(ConfigFlags)),
+        egammaTrkRefitterToolCfg(flags)),
         nestLevel=1,
         printDefaults=True)
     mlog.info("Configuring CaloCluster_OnTrackBuilder :")
     printProperties(mlog, cfg.popToolsAndMerge(
-        CaloCluster_OnTrackBuilderCfg(ConfigFlags)),
+        CaloCluster_OnTrackBuilderCfg(flags)),
         nestLevel=1,
         printDefaults=True)
 

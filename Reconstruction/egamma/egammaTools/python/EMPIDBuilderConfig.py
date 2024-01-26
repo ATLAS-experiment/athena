@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Configure the electron and photon selectors."
 
@@ -97,25 +97,25 @@ def EMPIDBuilderPhotonCfg(flags, name='EMPIDBuilderPhoton', **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.fillFromArgs()
+    flags.lock()
+    flags.dump()
 
     cfg = ComponentAccumulator()
     mlog = logging.getLogger("EMPIDBuilderConfigTest")
     mlog.info("Configuring  EMPIDBuilderElectron: ")
     printProperties(mlog, cfg.popToolsAndMerge(
-        EMPIDBuilderElectronCfg(ConfigFlags)),
+        EMPIDBuilderElectronCfg(flags)),
         nestLevel=1,
         printDefaults=True)
     mlog.info("Configuring  EMPIDBuilderPhoton: ")
     printProperties(mlog, cfg.popToolsAndMerge(
-        EMPIDBuilderPhotonCfg(ConfigFlags)),
+        EMPIDBuilderPhotonCfg(flags)),
         nestLevel=1,
         printDefaults=True)
 
