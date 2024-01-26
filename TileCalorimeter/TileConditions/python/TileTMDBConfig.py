@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile TMDB conditions tool and algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileTMDBCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile TMDB conditions algorithms
@@ -40,16 +41,7 @@ def TileTMDBCondAlgCfg(flags, **kwargs):
         folders = TileFolders(isMC = flags.Input.isMC, isOnline = flags.Common.isOnline)
 
         runType = flags.Tile.RunType
-        runType = runType.upper()
-
-        if runType not in ['PHY', 'PED', 'CIS', 'MONOCIS', 'LAS', 'BILAS']:
-            raise(Exception("Invalid Tile run type: %s" % runType))
-
-        actualRunType = {'PHY' : 'PHY', 'PED' : 'PHY',
-                         'LAS' : 'LAS', 'BILAS' : 'LAS',
-                         'CIS' : 'CIS', 'MONOCIS' : 'CIS'}
-
-        run = actualRunType.get(runType, runType)
+        run = runType.getCommonType().value
 
         if flags.IOVDb.DatabaseInstance  == 'CONDBR2':
             thrFolder = folders.addSplitMC('/TILE/ONL01/TMDB/THRESHOLD/' + run, '/TILE/ONL01/TMDB/THRESHOLD/' + run)
@@ -130,7 +122,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.lock()
 
     acc = ComponentAccumulator()

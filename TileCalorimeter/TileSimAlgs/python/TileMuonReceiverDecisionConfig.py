@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile muon receiver decision algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
-
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileMuonReceiverDecisionCfg(flags, **kwargs):
     """Return component accumulator with configured Tile muon receiver decision algorithm
@@ -82,7 +82,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RDO_RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.Output.RDOFileName = 'myRDO->TileMuonReceiverDecision.pool.root'
     flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
 

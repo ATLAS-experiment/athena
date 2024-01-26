@@ -1,6 +1,9 @@
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
+
+from TileConfiguration.TileConfigFlags import TileRunType
+
 '''
 @file TileRawChannelTimeMonitorAlgorithm.py
 @brief Python configuration of TileRawChannelTimeMonitorAlgorithm algorithm for the Run III
@@ -41,11 +44,12 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
     partitionPairs = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]
     kwargs.setdefault('PartitionTimeDiffferncePairs', partitionPairs)
 
+    runType = flags.Tile.RunType
     partitionTimeCorrections = [0, 0, 0, 0]
     if flags.Input.RunNumbers[0] > 400000: # Update partition time corrections for Run 3
-        if 'LAS' in flags.Tile.RunType:
+        if runType is TileRunType.GAPLAS:
             partitionTimeCorrections = [-28.65, -45.2, 25.24, 24.94]
-        elif 'CIS' in flags.Tile.RunType:
+        elif runType is TileRunType.GAPCIS:
             partitionTimeCorrections = [0, 0, 0, 0]
     else:
         partitionTimeCorrections = [-15.18, -15.37, 47.65, 47.42]
@@ -66,7 +70,7 @@ def TileRawChannelTimeMonitoringConfig(flags, **kwargs):
         setattr(tileRawChanTimeMonAlg, k, v)
 
     run = str(flags.Input.RunNumbers[0])
-    eventsType = 'CIS' if 'CIS' in flags.Tile.RunType else 'Laser'
+    eventsType = 'CIS' if runType.getCommonType() is TileRunType.CIS else 'Laser'
 
     # 1) Configure histogram with TileRawChannelTimeMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileRawChanTimeMonAlg, 'TileRawChanTimeMonExecuteTime', 'Tile/')
@@ -171,8 +175,7 @@ if __name__=='__main__':
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
 
-    flags.Tile.RunType = 'LAS'
-    flags.Tile.TimingType = 'GAP/LAS'
+    flags.Tile.RunType = TileRunType.GAPLAS
     flags.Tile.doFit = True
     flags.Tile.correctTime = True
     flags.Tile.doOverflowFit = False

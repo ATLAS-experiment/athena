@@ -5,7 +5,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
-
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileDQstatusToolCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile DQ status tool
@@ -50,7 +50,7 @@ def TileDQstatusAlgCfg(flags, **kwargs):
     kwargs.setdefault('name', name)
 
     if not (flags.Input.isMC or flags.Overlay.DataOverlay or flags.Input.Format is Format.POOL):
-        if flags.Tile.RunType == 'PHY' or flags.Tile.TimingType == 'GAP/LAS':
+        if flags.Tile.RunType in [TileRunType.PHY, TileRunType.GAPLAS, TileRunType.GAPCIS]:
             beamElemContainer = ""
         else:
             beamElemContainer = 'TileBeamElemCnt'
@@ -100,7 +100,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

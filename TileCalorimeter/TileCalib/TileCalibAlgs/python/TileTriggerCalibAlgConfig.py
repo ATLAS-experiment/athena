@@ -8,6 +8,7 @@
 
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileTriggerDefaulCalibToolCfg(flags, **kwargs):
 
@@ -54,7 +55,7 @@ def TileTriggerCalibAlgCfg(flags, **kwargs):
     ''' Function to configure TileTriggerCalibAlg algorithm'''
 
     kwargs.setdefault('name', 'TileTriggerCalibAlg')
-    kwargs.setdefault('RunType', 8)
+    kwargs.setdefault('RunType', TileRunType.CIS.getIntValue())
     kwargs.setdefault('RunNumber', flags.Input.RunNumbers[0])
 
     acc = ComponentAccumulator()
@@ -84,7 +85,7 @@ if __name__=='__main__':
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Tile.doFit = True
-    flags.Tile.RunType = 'CIS'
+    flags.Tile.RunType = TileRunType.CIS
     flags.Exec.MaxEvents = 3
     flags.fillFromArgs()
     flags.lock()

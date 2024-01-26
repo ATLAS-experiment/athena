@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile timing conditions tool and algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileTimingCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile timing conditions algorithm
@@ -18,19 +19,12 @@ def TileTimingCondAlgCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
 
-    runType = flags.Tile.RunType
-    runType = runType.upper()
-    if runType not in ['PHY', 'PED', 'CIS', 'MONOCIS', 'LAS', 'BILAS']:
-        raise(Exception("Invalid Tile run type: %s" % runType))
-
     source = kwargs.get('Source', 'COOL')
     timing = kwargs.get('TileTiming', 'TileTiming')
     forceOnline = kwargs.get('ForceOnline', False)
 
-    timingType = flags.Tile.TimingType
-
-    if timingType not in ['PHY', 'LAS', 'GAP/LAS', 'CIS']:
-        raise(Exception("Invalid Tile timing type: %s" % timingType))
+    runType = flags.Tile.RunType
+    timingType = runType.getTimingType().value
 
     name = timing + 'CondAlg'
 
@@ -129,7 +123,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.lock()
 
     acc = ComponentAccumulator()

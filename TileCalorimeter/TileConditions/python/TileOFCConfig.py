@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile OFC conditions tool and algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileOFCCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile OFC conditions algorithm
@@ -19,15 +20,6 @@ def TileOFCCondAlgCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     runType = flags.Tile.RunType
-    runType = runType.upper()
-    if runType not in ['PHY', 'PED', 'CIS', 'MONOCIS', 'LAS', 'BILAS']:
-        raise(Exception("Invalid Tile run type: %s" % runType))
-
-    actualRunType = {'PHY' : 'PHY', 'PED' : 'PHY', 
-                     'LAS' : 'LAS', 'BILAS' : 'LAS',
-                     'CIS' : 'CIS', 'MONOCIS' : 'CIS'}
-
-    runType = actualRunType.get(runType, runType)
 
     source = kwargs.get('Source', 'COOL')
     ofc = kwargs.get('TileOfc', 'TileOfc')
@@ -45,11 +37,11 @@ def TileOFCCondAlgCfg(flags, **kwargs):
         from TileConditions.TileFolders import TileFolders
         folders = TileFolders(isMC = flags.Input.isMC, isOnline = flags.Common.isOnline)
 
-        ofcType = ofcType + '/' + runType
+        ofcType = ofcType + '/' + runType.getCommonType().value
         
         runNumber = flags.Input.RunNumbers[0]
         runSplitOnline = 314449 #Use OFC stored in online folder for all runs before 2017
-        if flags.IOVDb.DatabaseInstance  == 'CONDBR2' and runType == 'PHY' and runNumber > runSplitOnline:
+        if flags.IOVDb.DatabaseInstance  == 'CONDBR2' and runType is TileRunType.PHY and runNumber > runSplitOnline:
             ofcFolder = folders.addSplitOnline('/TILE/ONL01/FILTER/' + ofcType, '/TILE/OFL02/FILTER/' + ofcType)
         else:
             ofcFolder = folders.addSplitMC('/TILE/ONL01/FILTER/' + ofcType, '/TILE/ONL01/FILTER/' + ofcType)
@@ -163,7 +155,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.lock()
 
     acc = ComponentAccumulator()

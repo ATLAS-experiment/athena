@@ -1,10 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Author: William L. (william.axel.leight@cern.ch)
 # Author: FY T. (fang-ying.tsai@cern.ch)
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg, MessageSvcCfg
 from AthenaConfiguration.Enums import Format, BeamType
+from TileConfiguration.TileConfigFlags import TileRunType
 
 flags = initConfigFlags()
 flags.Input.Files = ['../RDO.31293587._000001.pool.root.1']
@@ -63,7 +64,7 @@ flags.Digitization.HighGainEMECIW = False #default is True, but the LArConfigRun
 flags.Digitization.HighGainFCal = False # default is False
 flags.Digitization.ReadParametersFromDB = False
 # Updates are  based on TileConfigFlags.py
-flags.Tile.RunType = 'PHY' # physics run type. # Tile run types: UNDEFINED, PHY, PED, LAS, BILAS, CIS, MONOCIS
+flags.Tile.RunType = TileRunType.PHY # physics run type. # Tile run types: UNDEFINED, PHY, PED, LAS, BILAS, CIS, MONOCIS
 flags.Tile.doOpt2 = False  # disable optimal filter with iterations
 flags.Tile.doOptATLAS = True # run optimal filter without iterations
 flags.Tile.correctAmplitude = True # apply parabolic correction

@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured base Tile raw channel builder tool"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-_runTypes = {'PHY' : 1, 'LAS' : 2, 'BILAS' : 2, 'PED' : 4, 'CIS' : 8, 'MONOCIS' : 8}
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileRawChannelBuilderCfg(flags, name, TileRawChannelBuilder, **kwargs):
     """Return component accumulator with configured private base Tile raw channel builder tool
@@ -19,10 +18,6 @@ def TileRawChannelBuilderCfg(flags, name, TileRawChannelBuilder, **kwargs):
     acc = ComponentAccumulator()
 
     runType = flags.Tile.RunType
-    runType = runType.upper()
-
-    if runType not in _runTypes.keys():
-        raise(Exception("Invalid Tile run type: %s" % runType))
 
     createContainer = ( kwargs.get('TileRawChannelContainer', "") != "" )
 
@@ -38,7 +33,7 @@ def TileRawChannelBuilderCfg(flags, name, TileRawChannelBuilder, **kwargs):
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge( TileCablingSvcCfg(flags) )
 
-    kwargs['RunType'] = _runTypes[runType]
+    kwargs['RunType'] = runType.getIntValue()
     kwargs['calibrateEnergy'] = False
 
     kwargs.setdefault('AmpMinForAmpCorrection', flags.Tile.AmpMinForAmpCorrection)
@@ -77,7 +72,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.Tile.NoiseFilter = 1
     flags.lock()
 

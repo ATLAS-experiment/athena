@@ -1,6 +1,9 @@
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
+
+from TileConfiguration.TileConfigFlags import TileRunType
+
 '''
 @file TileLaserCalibAlgConfig.py
 @brief Python configuration of TileLaserDefaultCalibTool tool for the Run III
@@ -84,7 +87,7 @@ if __name__=='__main__':
     flags = initConfigFlags()
     flags.Input.Files = [inputDirectory + '/' + inputFile]
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-    flags.Tile.RunType = 'LAS'
+    flags.Tile.RunType = TileRunType.LAS
     flags.Exec.MaxEvents = 3
     flags.fillFromArgs()
     flags.lock()

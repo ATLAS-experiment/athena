@@ -5,6 +5,7 @@
 from TileSimAlgs.TileHitVecToCntConfig import TileHitVecToCntCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileDigitsMakerCfg(flags, **kwargs):
     """Return component accumulator with configured Tile digits maker algorithm
@@ -168,7 +169,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.HITS_RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.Output.RDOFileName = 'myRDO-TileDigitsMaker.pool.root'
     flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
     flags.Digitization.PileUp = False

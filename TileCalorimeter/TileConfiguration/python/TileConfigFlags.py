@@ -1,7 +1,39 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType, Format
+from AthenaConfiguration.Enums import BeamType, Format, FlagEnum
+
+
+class TileRunType(FlagEnum):
+     PHY = 'PHY'
+     PED = 'PED'
+     CIS = 'CIS'
+     MONOCIS = 'MONOCIS'
+     GAPCIS = 'GAP/CIS'
+     LAS = 'LAS'
+     BILAS = 'BILAS'
+     GAPLAS = 'GAP/LAS'
+     UNDEFINED = 'UNDEFINED'
+
+     def getCommonType(self):
+          commonType = self
+          if self in [TileRunType.PHY, TileRunType.PED]:
+               commonType = TileRunType.PHY
+          elif self in [TileRunType.LAS, TileRunType.BILAS, TileRunType.GAPLAS]:
+               commonType = TileRunType.LAS
+          elif self in [TileRunType.CIS, TileRunType.MONOCIS, TileRunType.GAPCIS]:
+               commonType = TileRunType.CIS
+          return commonType
+
+     def getTimingType(self):
+          return self if self in [TileRunType.GAPLAS] else self.getCommonType()
+
+     def getIntValue(self):
+          _runTypeInt = {TileRunType.PHY: 1, TileRunType.LAS: 2,
+                         TileRunType.GAPLAS: 2, TileRunType.BILAS: 2,
+                         TileRunType.PED: 4, TileRunType.CIS: 8,
+                         TileRunType.GAPCIS: 8, TileRunType.MONOCIS: 9}
+          return _runTypeInt.get(self, 0)
 
 
 def createTileConfigFlags():
@@ -19,7 +51,7 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.doOpt2', _doOpt2)
      tcf.addFlag('Tile.doOptATLAS', _doOptATLAS)
      tcf.addFlag('Tile.NoiseFilter', lambda prevFlags : -1 if prevFlags.Input.isMC else 1)
-     tcf.addFlag('Tile.RunType', _getRunType)
+     tcf.addFlag('Tile.RunType', _getRunType, type=TileRunType)
      tcf.addFlag('Tile.correctTime', lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Beam.Type is BeamType.Collisions)
      tcf.addFlag('Tile.correctTimeNI', True)
      tcf.addFlag('Tile.correctAmplitude', True)
@@ -35,7 +67,6 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.correctTimeJumps', _correctTimeJumps)
      tcf.addFlag('Tile.RawChannelContainer', _getRawChannelContainer)
      tcf.addFlag('Tile.useDCS', _useDCS)
-     tcf.addFlag('Tile.TimingType', _getTimingType)
      tcf.addFlag('Tile.doTimingHistogramsForGain', -1) # Production of Tile timing histograms per channel (< 0: switched off)
      tcf.addFlag('Tile.useOnlineChannelStatus', True) # Use online DB with channel/adc status
 
@@ -130,9 +161,9 @@ def _getRunType(prevFlags):
      # Tile run types: UNDEFINED, PHY, PED, LAS, BILAS, CIS, MONOCIS
      from AthenaConfiguration.AutoConfigFlags import GetFileMD
      if not prevFlags.Input.isMC and 'calibration_Tile' in GetFileMD(prevFlags.Input.Files).get('triggerStreamOfFile', ''):
-          return 'UNDEFINED'
+          return TileRunType.UNDEFINED
      else:
-          return 'PHY'
+          return TileRunType.PHY
 
 
 def _useDCS(prevFlags):
@@ -174,14 +205,6 @@ def _getRawChannelContainer(prevFlags):
 
      return rawChannelContainer
 
-
-def _getTimingType(prevFlags):
-     # Tile timing types: PHY, LAS, GAP/LAS, CIS
-     timingType = {'PHY' : 'PHY', 'PED' : 'PHY',
-                   'LAS' : 'LAS', 'BILAS' : 'LAS', 'GAPLAS' : 'GAP/LAS',
-                   'CIS' : 'CIS', 'MONOCIS' : 'CIS'}
-
-     return timingType.get(prevFlags.Tile.RunType, 'UNDEFINED')
 
 if __name__=="__main__":
      import sys

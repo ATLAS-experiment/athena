@@ -1134,8 +1134,9 @@ if doTileMon:
         try:
             from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
             from AthenaConfiguration.AllConfigFlags import ConfigFlags
+            from TileConfiguration.TileConfigFlags import TileRunType as TileType
 
-            runTypes = {0 : 'PHY', 1 : 'PHY', 2 : 'LAS', 4 : 'PED', 8 : 'CIS'}
+            runTypes = {0 : TileType.PHY, 1 : TileType.PHY, 2 : TileType.LAS, 4 : TileType.PED, 8 : TileType.CIS}
             runTypeName = runTypes[jobproperties.TileRecFlags.TileRunType()]
 
             ConfigFlags.Input.Files = FileNameVec

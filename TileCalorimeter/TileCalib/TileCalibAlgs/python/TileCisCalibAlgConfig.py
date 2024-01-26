@@ -1,6 +1,9 @@
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
+
+from TileConfiguration.TileConfigFlags import TileRunType
+
 '''
 @file TileCisCalibAlgConfig.py
 @brief Python configuration of TileCisDefaultCalibTool tool for the Run III
@@ -42,7 +45,7 @@ def TileCisCalibAlgCfg(flags, **kwargs):
     ''' Function to configure TileCisCalibAlg algorithm'''
 
     kwargs.setdefault('name', 'TileCisCalibAlg')
-    kwargs.setdefault('RunType', 8)
+    kwargs.setdefault('RunType', TileRunType.CIS.getIntValue())
     kwargs.setdefault('RunNumber', flags.Input.RunNumbers[0])
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -73,7 +76,7 @@ if __name__=='__main__':
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Tile.doFit = True
-    flags.Tile.RunType = 'CIS'
+    flags.Tile.RunType = TileRunType.CIS
     flags.Exec.MaxEvents = 3
     flags.fillFromArgs()
     flags.lock()

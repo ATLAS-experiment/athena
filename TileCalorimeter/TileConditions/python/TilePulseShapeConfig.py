@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile pulse shape conditions tool and algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TilePulseShapeCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile pulse shape conditions algorithm
@@ -21,15 +22,12 @@ def TilePulseShapeCondAlgCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     runType = flags.Tile.RunType
-    runType = runType.upper()
-    if runType not in ['PHY', 'PED', 'CIS', 'MONOCIS', 'LAS', 'BILAS']:
-        raise(Exception("Invalid Tile run type: %s" % runType))
 
     source = kwargs.get('Source', 'COOL')
     pulseShape = kwargs.get('TilePulseShape', 'TilePulseShape')
-    pulseType = kwargs.get('PulseType', runType)
+    pulseType = kwargs.get('PulseType', runType.getCommonType().value)
 
-    actualPulseType = {'PHY' : 'PHY', 'PED' : 'PHY', 'LAS' : 'LAS', 'BILAS' : 'LAS', 'CIS' : 'CIS/PULSE100',
+    actualPulseType = {'CIS' : 'CIS/PULSE100',
                        'CISPULSE100' : 'CIS/PULSE100', 'CISPULSE5P2' : 'CIS/PULSE5P2',
                        'CISLEAK100' : 'CIS/LEAK100', 'CISLEAK5P2' : 'CIS/LEAK5P2'}
 
@@ -143,7 +141,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.lock()
 
     acc = ComponentAccumulator()
