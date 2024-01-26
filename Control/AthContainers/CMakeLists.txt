@@ -76,6 +76,7 @@ _add_test( AtomicDecorator_test )
 _add_test( AtomicConstAccessor_test )
 _add_test( supportsThinning_test )
 _add_test( AuxStoreConstMem_test )
+_add_test( AuxVectorInterface_test )
 
 
 if( NOT XAOD_STANDALONE )
