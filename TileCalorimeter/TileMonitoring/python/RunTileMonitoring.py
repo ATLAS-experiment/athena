@@ -8,6 +8,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, Format
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def _configFlagsFromPartition(flags, partition, log):
     """
@@ -50,11 +51,11 @@ def _configFlagsFromPartition(flags, partition, log):
         if partition == 'Tile':
             flags.Tile.NoiseFilter = 0
             if 'CIS' in runType:
-                flags.Tile.RunType = 'MONOCIS' if 'mono' in runType else 'CIS'
+                flags.Tile.RunType = TileRunType.MONOCIS if 'mono' in runType else TileRunType.CIS
             elif 'Laser' in runType:
-                flags.Tile.RunType = 'LAS'
+                flags.Tile.RunType = TileRunType.LAS
             elif 'Pedestals' in runType:
-                flags.Tile.RunType = 'PED'
+                flags.Tile.RunType = TileRunType.PED
 
     flags.Beam.Type = BeamType(beamType)
     flags.Input.ProjectName = projectName
@@ -182,7 +183,7 @@ if __name__=='__main__':
     # Set the Athena configuration flags to defaults (can be overriden via comand line)
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
 
     if args.mbts and args.useMbtsTrigger:
         flags.Trigger.triggerConfig = 'DB'
@@ -239,10 +240,9 @@ if __name__=='__main__':
 
     if any([args.laser, args.cis]):
         if args.laser:
-            flags.Tile.RunType = 'LAS'
-            flags.Tile.TimingType = 'GAP/LAS'
+            flags.Tile.RunType = TileRunType.GAPLAS
         elif args.cis:
-            flags.Tile.RunType = 'CIS'
+            flags.Tile.RunType = TileRunType.GAPCIS
         flags.Tile.doFit = True
         flags.Tile.correctTime = True
         flags.Tile.doOverflowFit = False

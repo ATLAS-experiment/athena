@@ -5,6 +5,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileRawChannelMakerCfg(flags, **kwargs):
     """Return component accumulator with configured Tile raw channel maker algorithm
@@ -168,7 +169,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.Tile.doFit = True
     flags.Tile.doOF1 = True
     flags.Tile.doWiener = True

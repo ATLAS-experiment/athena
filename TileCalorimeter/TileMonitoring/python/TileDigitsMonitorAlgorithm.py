@@ -1,6 +1,9 @@
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
+
+from TileConfiguration.TileConfigFlags import TileRunType
+
 '''
 @file TileDigitsMonitorAlgorithm.py
 @brief Python configuration of TileDigitsMonitorAlgorithm algorithm for the Run III
@@ -27,10 +30,9 @@ def TileDigitsMonitoringConfig(flags, **kwargs):
     result.merge(TileInfoLoaderCfg(flags))
 
     runType = flags.Tile.RunType
-    runType = runType.upper()
 
     kwargs.setdefault('name', 'TileDigitsMonAlg')
-    kwargs.setdefault('RunType', {'PHY' : 1, 'LAS' : 2, 'PED' : 4, 'CIS' : 8, 'MONOCIS' : 9}.get(runType, 0))
+    kwargs.setdefault('RunType', runType.getIntValue())
 
     kwargs.setdefault('fillErrorsHistograms', True)
     kwargs.setdefault('fillHighFrequencyNoiseHistograms', True)
@@ -38,7 +40,7 @@ def TileDigitsMonitoringConfig(flags, **kwargs):
     kwargs.setdefault('fillSamplesHistograms', True)
     kwargs.setdefault('fillProfileHistograms', True)
     kwargs.setdefault('fillPedestalHistograms', True)
-    kwargs.setdefault('fillCorrelationsHistograms', True if runType == 'PED' else False)
+    kwargs.setdefault('fillCorrelationsHistograms', runType is TileRunType.PED)
     kwargs.setdefault('TileRawChannelContainer', 'TileRawChannelCnt')
 
     kwargs.setdefault('fillPedestalDifference', True)

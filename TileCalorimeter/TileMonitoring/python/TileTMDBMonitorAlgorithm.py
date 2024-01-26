@@ -1,6 +1,9 @@
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
+
+from TileConfiguration.TileConfigFlags import TileRunType
+
 '''
 @file TileTMDBMonitorAlgorithm.py
 @brief Python configuration of TileTMDBMonitorAlgorithm algorithm for the Run III
@@ -9,27 +12,27 @@
 def TileTMDBMonitoringConfig(flags, **kwargs):
     ''' Function to configure TileTMDBMonitorAlgorithm algorithm in the monitoring system.'''
     histogram_limits = {
-        "PHY": {
+        TileRunType.PHY: {
             "Energy": [-100, 10000],
             "Error": [-1010, 1010]
         },
-        "LAS": {
+        TileRunType.LAS: {
             "Energy": [-5, 30],
             "Error": [-10, 10]
         },
-        "BILAS": {
+        TileRunType.BILAS: {
             "Energy": [-1010, 1010],
             "Error": [-1010, 1010]
         },
-        "CIS": {
+        TileRunType.CIS: {
             "Energy": [-1, 10],
             "Error": [-10, 10]
         },
-        "MONOCIS": {
+        TileRunType.MONOCIS: {
             "Energy": [-1, 10],
             "Error": [-10, 10]
         },
-        "PED": {
+        TileRunType.PED: {
             "Energy": [-700, 700],
             "Error": [-500, 500]
         }
@@ -49,7 +52,8 @@ def TileTMDBMonitoringConfig(flags, **kwargs):
 
     kwargs.setdefault('fillDetailedHistograms', False)
 
-    if flags.Tile.RunType == 'PHY':
+    runType = flags.Tile.RunType
+    if runType is TileRunType.PHY:
         kwargs.setdefault('PulseEnergyRange', [1000., 5000.])
 
     # The following class will make a sequence, configure algorithms, and link
@@ -83,8 +87,8 @@ def TileTMDBMonitoringConfig(flags, **kwargs):
                                   xvalue = 'energy', path = 'Tile/TMDB/NoiseAnalysis',
                                   title = 'Energy in TMDB;E_{TMDB} [MeV]', type = 'TH1D', run = run,
                                   xbins = 101, 
-                                  xmin = histogram_limits[flags.Tile.RunType]["Energy"][0], 
-                                  xmax = histogram_limits[flags.Tile.RunType]["Energy"][1], perModule = True)
+                                  xmin = histogram_limits[runType]["Energy"][0],
+                                  xmax = histogram_limits[runType]["Energy"][1], perModule = True)
 
     addTileTMDB_1DHistogramsArray(helper, tileTMDBMonAlg, name = 'TMDB_Peak',
                                     xvalue = 'peak', path = 'Tile/TMDB/PeakPosition',
@@ -103,8 +107,8 @@ def TileTMDBMonitoringConfig(flags, **kwargs):
                                   xvalue = 'error', path = 'Tile/TMDB/CalibError',
                                   title = errorTitle, type = 'TH1D', run = run,
                                   xbins = 101, 
-                                  xmin = histogram_limits[flags.Tile.RunType]["Error"][0], 
-                                  xmax = histogram_limits[flags.Tile.RunType]["Error"][1], 
+                                  xmin = histogram_limits[runType]["Error"][0],
+                                  xmax = histogram_limits[runType]["Error"][1],
                                   perModule = True)
 
     from TileMonitoring.TileMonitoringCfgHelper import addTileTMDB_2DHistogramsArray

@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def _createTileContByteStreamToolsConfig (name, TileContByteStreamTool, InitializeForWriting=False, stream=None, **kwargs):
 
@@ -96,8 +97,8 @@ def TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=True,
       stateless -- read online Tile data using emon BS service.
     """
 
-    isPhysicsRun = flags.Tile.RunType == 'PHY'
-    isLaserRun = flags.Tile.RunType == 'LAS'
+    isPhysicsRun = flags.Tile.RunType is TileRunType.PHY
+    isLaserRun = flags.Tile.RunType in [TileRunType.LAS, TileRunType.BILAS]
     isCalibRun = not isPhysicsRun
 
     # Set up default data

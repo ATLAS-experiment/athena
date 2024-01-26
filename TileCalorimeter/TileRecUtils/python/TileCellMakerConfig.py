@@ -4,7 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from TileConfiguration.TileConfigFlags import TileRunType
 from CaloCellCorrection.CaloCellCorrectionConfig import CaloCellNeighborsAverageCorrCfg
 
 
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.Tile.doOptATLAS = True
     flags.Tile.correctTimeJumps = True
     flags.Tile.NoiseFilter = 1

@@ -4,6 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileDigitsFilterCfg(flags, **kwargs):
     """Return component accumulator with configured Tile digits filter algorithm
@@ -72,7 +73,7 @@ if __name__ == "__main__":
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Output.ESDFileName = "myESD.pool.root"
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

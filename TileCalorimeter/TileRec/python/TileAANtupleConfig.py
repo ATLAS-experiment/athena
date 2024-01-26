@@ -6,6 +6,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
+from TileConfiguration.TileConfigFlags import TileRunType
 
 '''
 @file TileAANtupleConfig.py
@@ -14,10 +15,11 @@ from AthenaConfiguration.Enums import Format
 def TileAANtupleCfg(flags, outputFile='', saveTMDB=True, **kwargs):
     ''' Function to configure TileAANtuple algorithm.'''
 
-    cisRun      = flags.Tile.RunType == 'CIS'
-    laserRun    = flags.Tile.RunType == 'LAS'
-    pedestalRun = flags.Tile.RunType == 'PED'
-    physicsRun  = flags.Tile.RunType == 'PHY'
+
+    cisRun      = flags.Tile.RunType is TileRunType.CIS
+    laserRun    = flags.Tile.RunType is TileRunType.LAS
+    pedestalRun = flags.Tile.RunType is TileRunType.PED
+    physicsRun  = flags.Tile.RunType is TileRunType.PHY
 
     readDigits = flags.Tile.readDigits
 

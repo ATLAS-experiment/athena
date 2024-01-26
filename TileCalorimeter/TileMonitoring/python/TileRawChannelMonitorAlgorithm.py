@@ -1,6 +1,9 @@
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
+
+from TileConfiguration.TileConfigFlags import TileRunType
+
 '''
 @file TileRawChannelMonitorAlgorithm.py
 @brief Python configuration of TileRawChannelMonitorAlgorithm algorithm for the Run III
@@ -32,10 +35,9 @@ def TileRawChannelMonitoringConfig(flags, overlapHistograms=None, **kwargs):
     result.merge( TileEMScaleCondAlgCfg(flags) )
     
     runType = flags.Tile.RunType
-    runType = runType.upper()
 
     kwargs.setdefault('name', 'TileRawChannelMonAlg')
-    kwargs.setdefault('RunType', {'PHY' : 1, 'LAS' : 2, 'PED' : 4, 'CIS' : 8, 'MONOCIS' : 9}.get(runType, 0))
+    kwargs.setdefault('RunType', runType.getIntValue())
 
     if 'TileRawChannelContainer' not in kwargs:
         if flags.Tile.readDigits:
@@ -54,18 +56,18 @@ def TileRawChannelMonitoringConfig(flags, overlapHistograms=None, **kwargs):
         kwargs.setdefault('TileRawChannelContainer', rawChannelContainer)
 
     if overlapHistograms is None:
-        overlapHistograms = True if 'LAS' in runType else False
+        overlapHistograms = runType is TileRunType.LAS
 
     if 'fillHistogramsForDSP' not in kwargs:
         # Don't fill DSP histograms for bi gain runs by default
-        fillHistogramsForDSP = False if runType in ['CIS', 'PED'] else True
+        fillHistogramsForDSP = runType not in [TileRunType.CIS, TileRunType.PED]
         kwargs.setdefault('fillHistogramsForDSP', fillHistogramsForDSP)
         
     if 'CalibUnit' not in kwargs:
         # Put everything in PicoCoulomb (1) by default for all run types, but Physics
         # For Physcs calibrate in CesiumPicoCoulomb (2) for all channels, but MBTS channels,
         # for which we keep the calibration in PicoCoulombCesium pC for consistency (no Cs calibration is possible)
-        calibUnit = 2 if 'PHY' in runType else 1
+        calibUnit = 2 if runType is TileRunType.PHY else 1
         kwargs.setdefault('CalibUnit', calibUnit)
 
     if run3Period:
@@ -132,14 +134,14 @@ def TileRawChannelMonitoringConfig(flags, overlapHistograms=None, **kwargs):
                                       xvalue='dsp_amp', xbins=[200,150], xmin=[-45.1,-7.0], xmax=[855.1,12.0],
                                       yvalue='dsp_chi2', ybins=16, ymin=-0.5, ymax=15.5, run=run)
 
-    if 'CIS' not in runType:
+    if runType is not TileRunType.CIS:
 
         # Configure histograms with Tile raw channel amplitude per module, channel and gain
-        if 'PED' in runType:
+        if runType is TileRunType.PED:
             ampXbins = [101, 101]
             ampXmin = [-10.1, -0.404]
             ampXmax = [10.1, 0.404]
-        elif 'PHY' in runType:
+        elif runType is TileRunType.PHY:
             ampXbins = 206
             ampXmin = -0.55
             ampXmax = 20.05

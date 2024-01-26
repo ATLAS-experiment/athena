@@ -4,6 +4,7 @@ import glob, sys
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 ###################################    
 ## Example for run TILE/LAr + L1Calo  calibration
 ##################################
@@ -45,7 +46,7 @@ def main():
     flags.LAr.RawChannelSource = RawChannelSource.Calculated
     flags.Tile.doOverflowFit=True
     flags.Tile.doOptATLAS=True
-    flags.Tile.RunType='PHY'
+    flags.Tile.RunType=TileRunType.PHY
     flags.Tile.BestPhaseFromCOOL=True
     flags.Tile.useDCS=False
     flags.Tile.TimeMaxForAmpCorrection=25

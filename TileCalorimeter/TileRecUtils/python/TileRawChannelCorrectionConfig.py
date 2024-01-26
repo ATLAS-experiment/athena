@@ -4,6 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileRawChannelOF1CorrectorCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile OF1 raw channel correction tool
@@ -186,7 +187,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.Tile.correctPedestalDifference = True
     flags.Tile.zeroAmplitudeWithoutDigits = True
     flags.lock()

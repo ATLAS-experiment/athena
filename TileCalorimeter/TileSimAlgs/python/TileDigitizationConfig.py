@@ -1,10 +1,11 @@
 """Combined Tile Digitization functions
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.Enums import LHCPeriod
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def TileTriggerDigitizationCfg(flags):
     """Return ComponentAccumulator with standard Tile Trigger Digitization configuration"""
@@ -79,7 +80,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.HITS_RUN2
-    flags.Tile.RunType = 'PHY'
+    flags.Tile.RunType = TileRunType.PHY
     flags.Output.RDOFileName = 'myRDO-TileDigitization.pool.root'
     flags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
     flags.Digitization.PileUp = False
