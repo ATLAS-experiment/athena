@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* ***********************************************************************************\
@@ -888,11 +888,15 @@ double FFJetSmearingTool::Read3DHistogram(const TH3* histo, double x, double y, 
 
 double FFJetSmearingTool::Interpolate2D(const TH2* histo, double x, double y) const //The function in JetHelpers can not be used because it needs a TH1 and we use TH2 histograms. We define our own function.
 {
+    if (not histo){
+      ATH_MSG_ERROR("Histogram pointer is null in FFJetSmearingTool::Interpolate2D");
+      return 0.;
+    }
     Int_t bin_x = histo->GetXaxis()->FindFixBin(x);
     Int_t bin_y = histo->GetYaxis()->FindFixBin(y);
     if(bin_x<1 || bin_x>histo->GetNbinsX() || bin_y<1 || bin_y>histo->GetNbinsY()) {
        ATH_MSG_VERBOSE("The point is outside the histogram domain.");
-       return 0;
+       return 0.;
     }
     
     double interpolated_value = JetHelpers::Interpolate(histo, x, y);
