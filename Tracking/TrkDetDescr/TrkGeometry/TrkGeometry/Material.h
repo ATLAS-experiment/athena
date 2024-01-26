@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -145,8 +145,14 @@ class Material {
         Z(iZ),
         rho(iRho),
         dEdX(idEdX),
-        zOaTr(iA > 0 ? iZ / iA * iRho : 0.),
-        composition(mc) {}
+        composition(mc)
+  {
+    // Tell clang to optimize assuming that FP exceptions can trap.
+    // Otherwise, it can vectorize the division, which can lead to
+    // spurious division-by-zero traps from unused vector lanes.
+    CXXUTILS_TRAPPING_FP;
+    zOaTr = iA > 0 ? iZ / iA * iRho : 0.;
+  }
 
   /** Copy Constructor */
   Material(const Material& amc)
