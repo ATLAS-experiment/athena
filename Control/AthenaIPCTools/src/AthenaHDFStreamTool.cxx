@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* file contains the implementation for the AthenaHDFStreamTool class.
@@ -11,6 +11,8 @@
 #include "GaudiKernel/FileIncident.h"
 
 #include "StorageSvc/DbReflex.h"
+#include "POOLCore/APRDefaults.h"
+#include "CxxUtils/starts_with.h"
 
 #include "H5Cpp.h"
 #include "H5File.h"
@@ -191,7 +193,8 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
       H5::DataSpace filespace(1, ds_size, maxdim);
       H5::DSetCreatPropList ds_prop;
       hsize_t chunkdim[1] = {nbytes};
-      if (ds_name.substr(0, 14) == "CollectionTree" || ds_name.substr(0, 18) == "POOLCollectionTree") {
+      if( CxxUtils::starts_with(ds_name, APRDefaults::TTreeNames::EventData) ||
+          CxxUtils::starts_with(ds_name, APRDefaults::TTreeNames::EventTag) ) {
          if (nbytes < 512) {
             chunkdim[0] = 4096;
          } else if (nbytes < 16 * 512) {

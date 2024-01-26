@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @author: Sebastien Binet <binet@cern.ch>
 # @date:   March 2007
@@ -267,7 +267,7 @@ def extract_stream_names(fname):
 
 @forking
 def extract_streams_from_tag (fname,
-                              tree_name="POOLCollectionTree",
+                              tree_name=None,
                               nentries=-1,
                               stream_refs=None):
     """find the GUID(s) of a list of streams which are contained inside a TAG
@@ -276,7 +276,7 @@ def extract_streams_from_tag (fname,
        `fname`       the filename of the TAG file to inspect
                      (can be a LFN or FID)
        `tree_name`   the name of the TTree containing the stream-refs
-                     ('CollectionTree' is the usual default)
+                     (ROOT.APRDefaults.TTreeNames.EventTag is the default)
        `nentries`    the number of entries to inspect, among the ttree entries
                      (-1: all the entries)
        `stream_refs` a list of stream names
@@ -312,20 +312,8 @@ def extract_streams_from_tag (fname,
     assert not f.IsZombie() and f.IsOpen(), \
            "problem opening POOL file [%s]"%fname
 
-    # backward compat:
-    # in 15.2.0 TAG file got a new tree name 'POOLCollectionTree'
-    # it was named 'CollectionTree' before that...
-    keys = [k.GetName() for k in f.GetListOfKeys()]
-    if tree_name not in keys and "CollectionTree" not in keys:
-        err= "::: error: neither [%s] nor [CollectionTree] in file [%s]" % (
-            tree_name, fname)
-        print(err)
-        raise RuntimeError(err)
-    # try the backward compat. hack
-    if tree_name not in keys:
-        tree_name = "CollectionTree"
-        
-    t = f.Get(tree_name)
+    if tree_name is None: tree_name = ROOT.APRDefaults.TTreeNames.EventTag
+    t = f.Get( tree_name )
     assert isinstance(t, ROOT.TTree), \
            "could not retrieve tree [%s]" % tree_name
     
@@ -344,7 +332,7 @@ def extract_streams_from_tag (fname,
                 stream_refs.append (ref)
     if nentries <= 0: nentries = t.GetEntries()
     else:             nentries = min (nentries, t.GetEntries())
-    print("::: chasing streams: %s" % stream_refs)
+    print("::: chasing streams: %s in tree: [%s]" % (stream_refs, tree_name))
     print("::: ...over entries: %r" % nentries)
     
     # disable everything...
@@ -364,11 +352,11 @@ def extract_streams_from_tag (fname,
     #  [CLID=72FBBC6F-C8BE-4122-8790-DC627696C176]\
     #  [TECH=00000202]\
     #  [OID=0000008C-000002BA]'
-    token = re.compile (r'[[]DB=(?P<FID>.*?)[]]'
-                        r'[[]CNT=(?P<CNT>.*?)[]]'
-                        r'[[]CLID=(?P<CLID>.*?)[]]'
-                        r'[[]TECH=(?P<TECH>.*?)[]]'
-                        r'[[]OID=(?P<OID>.*?)[]]')
+    token = re.compile (r'\[DB=(?P<FID>.*?)\]'
+                        r'\[CNT=(?P<CNT>.*?)\]'
+                        r'\[CLID=(?P<CLID>.*?)\]'
+                        r'\[TECH=(?P<TECH>.*?)\]'
+                        r'\[OID=(?P<OID>.*?)\]')
     for i in range(nentries):
         t.GetEntry (i)
         for ref in stream_refs:
