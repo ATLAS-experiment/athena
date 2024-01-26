@@ -36,18 +36,6 @@ Sim_tf.py \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00_VALIDATION' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc15_13TeV.431004.ParticleGun_pid22_E65536_disj_eta_m25_m20_20_25_zv_0.evgen.EVNT.e6556.EVNT.13283012._000001.pool.root.1" \
     --outputHITSFile "Hits.CA.pool.root" \
-    --maxEvents=2
-
-Sim_tf.py \
-    --simulator 'FullG4MT'  \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --physicsList 'FTFP_BERT_ATL_VALIDATION' \
-    --truthStrategy 'MC15aPlus' \
-    --postInclude "all:PyJobTransforms/UseFrontier.py" "EVNTtoHITS:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_SimPostInclude_1mm.py" \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py,ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_SimPreInclude.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00_VALIDATION' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc15_13TeV.431004.ParticleGun_pid22_E65536_disj_eta_m25_m20_20_25_zv_0.evgen.EVNT.e6556.EVNT.13283012._000001.pool.root.1" \
-    --outputHITSFile "Hits.pool.root" \
     --maxEvents=2 \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
