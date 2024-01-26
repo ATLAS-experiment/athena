@@ -67,11 +67,12 @@ bool NswErrorCalibData::ErrorConstants::operator<(const ErrorConstants& other) c
 NswErrorCalibData::ErrorConstants::ErrorConstants(const std::string& funcName, uint8_t author,
                                              uint16_t minStrip, uint16_t maxStrip,
                                              std::vector<double>&& pars):
-        m_evalFunc{getParametrizer(funcName)} {
-        m_stripMax = maxStrip;
-        m_stripMin = minStrip;
-        m_clusAlgAuthor = author;
-        m_pars = std::move(pars);
+        m_evalFunc{getParametrizer(funcName)},
+        m_clusAlgAuthor (author),
+        m_stripMin (minStrip),
+        m_stripMax (maxStrip),
+        m_pars (std::move(pars))
+{
 }
 
 uint16_t NswErrorCalibData::ErrorConstants::minStrip() const { return m_stripMin; }
