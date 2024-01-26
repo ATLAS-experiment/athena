@@ -566,7 +566,7 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
   // If parent is tau, the muons is taulike
   // If parent is bhadron, the muons is bHadlike
   if (type == MCTruthPartClassifier::Unknown && origin == MCTruthPartClassifier::NonDefined){
-    if( truthParticle != nullptr && truthParticle->nParents() == 1 ){
+    if( truthParticle != nullptr && truthParticle->nParents() == 1 && truthParticle->parent(0) != nullptr){
       const xAOD::TruthParticle *parent = truthParticle->parent(0);
       int parent_pdgid = parent->pdgId(); 
       if(parent->isTop() || parent->isW() || parent->isZ() || parent->isHiggs()){
