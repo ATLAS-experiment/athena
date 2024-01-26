@@ -433,13 +433,13 @@ CAtoGlobalWrapper(L1ConfigSvcCfg,flags)
 # If no xAOD::EventInfo is found in a POOL file, schedule conversion from old EventInfo
 if flags.Input.Format is Format.POOL:
     if objKeyStore.isInInput("xAOD::EventInfo"):
-        topSequence.SGInputLoader.Load += [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
+        topSequence.SGInputLoader.Load.add(( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ))
     else:
         if not hasattr(hltBeginSeq, "xAODMaker::EventInfoCnvAlg"):
             from xAODEventInfoCnv.xAODEventInfoCnvAlgDefault import xAODEventInfoCnvAlgDefault
             xAODEventInfoCnvAlgDefault(sequence=hltBeginSeq)
 else:
-    topSequence.SGInputLoader.Load += [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
+    topSequence.SGInputLoader.Load.add(( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ))
 
 # ---------------------------------------------------------------
 # Luminosity
@@ -512,9 +512,9 @@ CAtoGlobalWrapper(HLTConfigSvcCfg,flags)
 # Tell the SGInputLoader about L1 and HLT menu in the DetectorStore
 # ---------------------------------------------------------------
 if hasattr(topSequence,"SGInputLoader"):
-    topSequence.SGInputLoader.Load += [
+    topSequence.SGInputLoader.Load |= {
         ('TrigConf::L1Menu','DetectorStore+L1TriggerMenu'),
-        ('TrigConf::HLTMenu','DetectorStore+HLTTriggerMenu')]
+        ('TrigConf::HLTMenu','DetectorStore+HLTTriggerMenu')}
 
 # ---------------------------------------------------------------
 # Monitoring

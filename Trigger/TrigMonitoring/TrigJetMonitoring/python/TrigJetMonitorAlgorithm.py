@@ -521,8 +521,8 @@ def TrigJetMonConfig(inputFlags):
       copiedhltColl = f'{hltColl}_{copySuffix}'
       CopiedJetCollections[monMode][copiedhltColl] = CopiedJetCollections[monMode].pop(hltColl)
       jetcopyalg = getJetCopyAlg(hltColl,copiedhltColl)
-      jetcopyalg.ExtraInputs += [('xAOD::TrigCompositeContainer',
-                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags))]
+      jetcopyalg.ExtraInputs.add(('xAOD::TrigCompositeContainer',
+                                  'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags)))
       cfg.addEventAlgo(jetcopyalg)
       for jetcalibscale in OnlineScaleMomenta:
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
@@ -532,8 +532,8 @@ def TrigJetMonConfig(inputFlags):
                                         JetContainerName2=collDict['MatchTo'],
                                         JetCalibScale=jetcalibscale)
         
-        alg.ExtraInputs += [('xAOD::TrigCompositeContainer',
-                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags))]
+        alg.ExtraInputs.add(('xAOD::TrigCompositeContainer',
+                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags)))
         cfg.addEventAlgo(alg)
 
   # Match offline to offline jets
@@ -552,8 +552,8 @@ def TrigJetMonConfig(inputFlags):
                                         JetContainerName2=collDict['MatchTo'],
                                         JetCalibScale=jetcalibscale)
         
-        alg.ExtraInputs += [('xAOD::TrigCompositeContainer',
-                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags))]
+        alg.ExtraInputs.add(('xAOD::TrigCompositeContainer',
+                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags)))
         cfg.addEventAlgo(alg)
 
   # Make copy of every L1 jet collection
@@ -563,8 +563,8 @@ def TrigJetMonConfig(inputFlags):
     copiedl1jetColl = f'{l1jetColl}_{copySuffix}'
     CopiedL1JetCollections[monMode][copiedl1jetColl] = CopiedL1JetCollections[monMode].pop(l1jetColl)
     l1jetcopyalg = getL1JetCopyAlg(l1jetColl,copiedl1jetColl)
-    l1jetcopyalg.ExtraInputs += [('xAOD::TrigCompositeContainer',
-                             'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags))]
+    l1jetcopyalg.ExtraInputs.add(('xAOD::TrigCompositeContainer',
+                                  'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags)))
     cfg.addEventAlgo(l1jetcopyalg)
     for matchjetcoll in collDict['MatchTo']:
 
@@ -575,8 +575,8 @@ def TrigJetMonConfig(inputFlags):
              }
               
       alg = CompFactory.JetMatcherAlg(**kwds)
-      alg.ExtraInputs += [('xAOD::TrigCompositeContainer',
-                           'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags))]
+      alg.ExtraInputs.add(('xAOD::TrigCompositeContainer',
+                           'StoreGateSvc+%s' % getRun3NavigationContainerFromInput(inputFlags)))
       cfg.addEventAlgo(alg)
 
   # The following class will make a sequence, configure algorithms, and link
@@ -1142,7 +1142,7 @@ if __name__=='__main__':
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
         name = 'Matching_{}{}_{}'.format(hltColl,scalestring,collDict['MatchTo'])
         alg = CompFactory.JetMatcherAlg(name, JetContainerName1=hltColl,JetContainerName2=collDict['MatchTo'],JetCalibScale=jetcalibscale)
-        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags))]
+        alg.ExtraInputs.add(('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags)))
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm') # Add matchers to monitoring alg sequence
 
   # Match offline to offline jets
@@ -1152,7 +1152,7 @@ if __name__=='__main__':
         scalestring = "_"+jetcalibscale if jetcalibscale != "" else ""
         name = 'Matching_{}{}_{}'.format(offjetColl,scalestring,collDict['MatchTo'])
         alg = CompFactory.JetMatcherAlg(name, JetContainerName1=offjetColl,JetContainerName2=collDict['MatchTo'],JetCalibScale=jetcalibscale)
-        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags))]
+        alg.ExtraInputs.add(('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags)))
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm')
 
   # Match L1 to offline as well as HLT jets
@@ -1161,7 +1161,7 @@ if __name__=='__main__':
       if matchjetcoll != 'NONE':
         name = 'Matching_{}_{}'.format(l1jetColl,matchjetcoll)
         alg = CompFactory.JetMatcherAlg(name, L1JetContainerName1=l1jetColl,JetContainerName2=matchjetcoll,MatchL1=True)
-        alg.ExtraInputs += [('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags))]
+        alg.ExtraInputs.add(('xAOD::TrigCompositeContainer','StoreGateSvc+%s' % getRun3NavigationContainerFromInput(flags)))
         cfg.addEventAlgo(alg,sequenceName='AthMonSeq_TrigJetMonitorAlgorithm')
   
   # Loop over L1 jet collectoins

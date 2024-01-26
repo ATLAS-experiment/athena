@@ -94,13 +94,13 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
   if in_view:
     acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
       name = viewname + "_" + flags.Tracking.ActiveConfig.input_name,
-      DataObjects = [
+      DataObjects = {
         ( 'TrigRoiDescriptorCollection' ,  f'StoreGateSvc+{roisKey}' ),
         ( 'TrackCollection' ,               'StoreGateSvc+HLT_IDTrkTrack_FS_FTF' ),
         ( 'SpacePointContainer' ,           'StoreGateSvc+SCT_TrigSpacePoints' ),
         ( 'InDet::PixelClusterContainer' ,  'StoreGateSvc+PixelTrigClusters' ),
         ( 'InDet::SCT_ClusterContainer' ,   'StoreGateSvc+SCT_TrigClusters' ),
-      ] + list(extra_view_inputs)
+      } | set(extra_view_inputs)
     ) )
 
     acc.merge(seq.viewDataVerifier(viewname))
@@ -129,10 +129,10 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   if in_view:
 
     verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetPrecision'+flags.Tracking.ActiveConfig.input_name,
-                                                      DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+                                                      DataObjects= {('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
                                                                     ('TrigRoiDescriptorCollection', flags.Tracking.ActiveConfig.roi),
                                                                     ( 'TagInfo', 'DetectorStore+ProcessingTags' ), 
-                                                                    ( 'TrackCollection', flags.Tracking.ActiveConfig.trkTracks_FTF )] )
+                                                                    ( 'TrackCollection', flags.Tracking.ActiveConfig.trkTracks_FTF )} )
 
     acc.addEventAlgo(verifier)
 

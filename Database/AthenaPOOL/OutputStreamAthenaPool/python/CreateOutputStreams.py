@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @file OutputStreamAthenaPool.py
 ## @brief Helper methods to create output streams
@@ -31,7 +31,7 @@ def createOutputStream( streamName, fileName = "", asAlg = False, noTag = False,
       WritingTool = writingTool,
       ItemList    = [ "EventInfo#*" ]
       )
-   outputStream.ExtraOutputs += [("DataHeader", "StoreGateSvc+" + streamName)]
+   outputStream.ExtraOutputs.add(("DataHeader", "StoreGateSvc+" + streamName))
    #outputStream.ItemList += [ "xAOD::EventInfo#*" ]
    outputStream.MetadataStore = svcMgr.MetaDataStore
    outputStream.MetadataItemList = [

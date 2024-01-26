@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -15,7 +14,7 @@ def _createTileContByteStreamToolsConfig (name, TileContByteStreamTool, Initiali
         TileHid2RESrcIDCondAlg(ForHLT=True)
 
         if stream:
-            stream.ExtraInputs += [('TileHid2RESrcID', 'ConditionStore+TileHid2RESrcIDHLT')]
+            stream.ExtraInputs |= {('TileHid2RESrcID', 'ConditionStore+TileHid2RESrcIDHLT')}
 
     return tool
 

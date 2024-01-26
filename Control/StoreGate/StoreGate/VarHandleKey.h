@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -215,8 +215,8 @@ private:
 
 
   /// Don't allow calling these.
-  virtual void setKey(DataObjID key) const override final;
-  virtual void updateKey(std::string key) const override final;
+  virtual void setKey(DataObjID key) override final;
+  virtual void updateKey(std::string key) override final;
 
 
   /**

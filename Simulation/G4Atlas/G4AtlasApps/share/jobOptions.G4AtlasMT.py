@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 #
@@ -90,7 +90,7 @@ from AthenaCommon.AppMgr import theApp
 StreamHITS = theApp.getOutputStream( "StreamHITS" )
 
 from AthenaCommon import CfgMgr
-CfgMgr.SGInputLoader().Load += [('McEventCollection', 'StoreGateSvc+GEN_EVENT')]
+CfgMgr.SGInputLoader().Load.add(('McEventCollection', 'StoreGateSvc+GEN_EVENT'))
 
 # Add the beam effects algorithm
 from AthenaCommon.CfgGetter import getAlgorithm
@@ -103,9 +103,9 @@ topSeq += getAlgorithm("G4AtlasAlg", tryDefaultConfigurable=True)
 # Explicitly specify the data-flow dependencies of G4AtlasAlg and StreamHITS.
 # This is done like this because currently our VarHandles do not live in the
 # algorithm but rather in Geant4 components.
-topSeq.G4AtlasAlg.ExtraInputs =  [('McEventCollection','StoreGateSvc+BeamTruthEvent')]
-topSeq.G4AtlasAlg.ExtraOutputs = [('SiHitCollection','StoreGateSvc+SCT_Hits')]
-StreamHITS.ExtraInputs += topSeq.G4AtlasAlg.ExtraOutputs
+topSeq.G4AtlasAlg.ExtraInputs =  {('McEventCollection','StoreGateSvc+BeamTruthEvent')}
+topSeq.G4AtlasAlg.ExtraOutputs = {('SiHitCollection','StoreGateSvc+SCT_Hits')}
+StreamHITS.ExtraInputs |= topSeq.G4AtlasAlg.ExtraOutputs
 
 # Increase verbosity of the output stream
 #StreamHITS.OutputLevel = DEBUG

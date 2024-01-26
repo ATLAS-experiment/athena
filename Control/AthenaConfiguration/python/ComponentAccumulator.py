@@ -47,7 +47,8 @@ def printProperties(msg, c, nestLevel = 0, printDefaults=False, onlyComponentsOn
         # Ignore empty lists
 
         if isinstance(propval,(GaudiConfig2.semantics._ListHelper,
-                               GaudiConfig2.semantics._DictHelper)) and propval.data is None:
+                               GaudiConfig2.semantics._DictHelper,
+                               GaudiConfig2.semantics._SetHelper)) and propval.data is None:
             continue
         # Printing EvtStore could be relevant for Views?
         if not c.is_property_set(propname) and propname in ["DetStore","EvtStore", "AuditFinalize", "AuditInitialize", "AuditReinitialize", "AuditRestart", "AuditStart", "AuditStop", "AuditTools", "ExtraInputs", "ExtraOutputs"]:

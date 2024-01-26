@@ -1,4 +1,3 @@
-#
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
@@ -72,7 +71,7 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
           condLoader=condSeq.CondInputLoader
 
        iovDbSvc.Folders.append(fld+dbString)
-       condLoader.Load.append((persClass,fld))
+       condLoader.Load.add((persClass,fld))
        larFEBMonAlg.Run2DSPThresholdsKey = fld
     else:
        fld='/LAR/Configuration/DSPThreshold/Thresholds'

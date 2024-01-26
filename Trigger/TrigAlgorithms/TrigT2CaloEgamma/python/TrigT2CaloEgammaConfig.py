@@ -11,14 +11,14 @@ from TrigT2CaloCalibration.EgammaCalibrationConfig import (EgammaHitsCalibration
                                                            EgammaSshapeCalibrationBarrelConfig,
                                                            EgammaSshapeCalibrationEndcapConfig)
 
-_T2CaloEgamma_ExtraInputs = [
+_T2CaloEgamma_ExtraInputs = {
     ('IRegSelLUTCondData', 'ConditionStore+RegSelLUTCondData_TTEM'),
     ('IRegSelLUTCondData', 'ConditionStore+RegSelLUTCondData_TTHEC'),
     ('IRegSelLUTCondData', 'ConditionStore+RegSelLUTCondData_TILE'),
     ('IRegSelLUTCondData', 'ConditionStore+RegSelLUTCondData_FCALEM'),
     ('IRegSelLUTCondData', 'ConditionStore+RegSelLUTCondData_FCALHAD'),
     ('LArBadChannelCont' , 'ConditionStore+LArBadChannel')
-]
+}
 
 #local variable
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
@@ -79,19 +79,19 @@ def AsymRingerReFexConfig(flags, name="AsymRingerReMaker"):
 
 #=======================================================================
 
-def t2CaloEgamma_AllCfg(flags, name="T2CaloEgamma_All",RoIs=inputEDM,ExtraInputs=[], ClustersName="HLT_FastCaloEMClusters"):
+def t2CaloEgamma_AllCfg(flags, name="T2CaloEgamma_All",RoIs=inputEDM,ExtraInputs=set(), ClustersName="HLT_FastCaloEMClusters"):
     acc = ComponentAccumulator()
     tool = CompFactory.EgammaAllFex("EgammaAllFex",
                                     IncludeHad=True,
-                                    ExtraInputs=[('TileEMScale','ConditionStore+TileEMScale'),
-                                                 ('TileBadChannels','ConditionStore+TileBadChannels')])
+                                    ExtraInputs={('TileEMScale','ConditionStore+TileEMScale'),
+                                                 ('TileBadChannels','ConditionStore+TileBadChannels')})
     alg = CompFactory.T2CaloEgammaReFastAlgo(name,
                                              IReAlgToolList= [tool],
                                              EtaWidth = 0.1,
                                              PhiWidth = 0.1,
                                              ExtraInputs = _T2CaloEgamma_ExtraInputs)
     alg.RoIs=RoIs
-    alg.ExtraInputs+=ExtraInputs
+    alg.ExtraInputs |= ExtraInputs
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
 
@@ -99,11 +99,11 @@ def t2CaloEgamma_AllCfg(flags, name="T2CaloEgamma_All",RoIs=inputEDM,ExtraInputs
 
 #=======================================================================
 
-def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, ExtraInputs=[], ClustersName="HLT_FastCaloEMClusters"):
+def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, ExtraInputs=set(), ClustersName="HLT_FastCaloEMClusters"):
     acc = ComponentAccumulator()
     tool = CompFactory.EgammaAllFex("EgammaAllEmFex",
-                                    ExtraInputs=[('TileEMScale','ConditionStore+TileEMScale'),
-                                                 ('TileBadChannels','ConditionStore+TileBadChannels')])
+                                    ExtraInputs={('TileEMScale','ConditionStore+TileEMScale'),
+                                                 ('TileBadChannels','ConditionStore+TileBadChannels')})
 
     alg = CompFactory.T2CaloEgammaReFastAlgo(name,
                                              IReAlgToolList= [tool],
@@ -111,7 +111,7 @@ def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, Extra
                                              PhiWidth = 0.1,
                                              ExtraInputs = _T2CaloEgamma_ExtraInputs)
     alg.RoIs=RoIs
-    alg.ExtraInputs+=ExtraInputs
+    alg.ExtraInputs |= ExtraInputs
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
     return acc
@@ -119,7 +119,7 @@ def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, Extra
 #=======================================================================
 
 def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersName="HLT_FastCaloEMClusters",
-                            doRinger=False, RingerKey="HLT_FastCaloRinger", RoIs=inputEDM, ExtraInputs=[]):
+                               doRinger=False, RingerKey="HLT_FastCaloRinger", RoIs=inputEDM, ExtraInputs=set()):
     acc = ComponentAccumulator()
 
     samp2 = CompFactory.EgammaReSamp2Fex("ReFaAlgoSamp2FexConfig",
@@ -127,8 +127,8 @@ def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersNa
     samp1 = CompFactory.EgammaReSamp1Fex("ReFaAlgoSamp1FexConfig")
     sampe = CompFactory.EgammaReEmEnFex("ReFaAlgoEmEnFexConfig")
     samph = CompFactory.EgammaReHadEnFex("ReFaAlgoHadEnFexConfig",
-                                         ExtraInputs=[('TileEMScale','ConditionStore+TileEMScale'),
-                                                      ('TileBadChannels','ConditionStore+TileBadChannels')])
+                                         ExtraInputs={('TileEMScale','ConditionStore+TileEMScale'),
+                                                      ('TileBadChannels','ConditionStore+TileBadChannels')})
     monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('TrigEMCluster_eT', path='EXPERT', type='TH1F', title="T2Calo Egamma E_T; E_T [ GeV ] ; Nclusters", xbins=80, xmin=0.0, xmax=80.0)
     monTool.defineHistogram('TrigEMCluster_had1', path='EXPERT', type='TH1F', title="T2Calo Egamma had E_T samp1; had E_T samp1 [ GeV ] ; Nclusters", xbins=80, xmin=0.0, xmax=8.0)
@@ -162,7 +162,7 @@ def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersNa
 
 
     alg.RoIs=RoIs
-    alg.ExtraInputs+=ExtraInputs
+    alg.ExtraInputs |= ExtraInputs
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
     return acc
@@ -170,8 +170,8 @@ def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersNa
 #=======================================================================
 
 def t2CaloEgamma_ReFastFWDAlgoCfg(flags,  name="T2CaloEgamma_ReFastFWDAlgo",
-                               ClustersName="HLT_FWDFastCaloEMClusters",
-                               doRinger=False, RingerKey="HLT_FWDFastCaloRinger", RoIs=inputEDM, ExtraInputs=[]):
+                                  ClustersName="HLT_FWDFastCaloEMClusters",
+                                  doRinger=False, RingerKey="HLT_FWDFastCaloRinger", RoIs=inputEDM, ExtraInputs=set()):
     acc = ComponentAccumulator()
 
     alg = CompFactory.T2CaloEgammaForwardReFastAlgo(name,
@@ -180,7 +180,7 @@ def t2CaloEgamma_ReFastFWDAlgoCfg(flags,  name="T2CaloEgamma_ReFastFWDAlgo",
                                                     EtaWidth = 0.2,
                                                     PhiWidth = 0.2)
     alg.RoIs=RoIs
-    alg.ExtraInputs+=ExtraInputs
+    alg.ExtraInputs |= ExtraInputs
     alg.ClustersName = recordable(ClustersName)
     acc.addEventAlgo(alg)
     return acc

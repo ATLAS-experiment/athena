@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -117,7 +117,7 @@ def LArElecCalibDBRun2Cfg(flags,condObjs):
             dbString=sqlite or "<db>COOLONL_LAR/CONDBR2</db>"            
 
         iovDbSvc.Folders.append(fldr+dbString)# (addFolder(flags,fldr,"LAR_ONL",'CondAttrListCollection'))
-        condLoader.Load.append((persClass,fldr))
+        condLoader.Load.add((persClass,fldr))
         if calg is not None:
             result.addCondAlgo(calg (ReadKey=fldr, WriteKey=outputKey))
 
@@ -162,7 +162,7 @@ def LArElecCalibDBSCCfg(flags,condObjs,sqlite=None):
         else:
             dbString=sqlite or "<db>COOLONL_LAR/CONDBR2</db>"
         iovDbSvc.Folders.append(fldr+dbString)# (addFolder(flags,fldr,"LAR_ONL",'CondAttrListCollection'))
-        condLoader.Load.append((persClass,fldr))
+        condLoader.Load.add((persClass,fldr))
         if calg is not None:
             result.addCondAlgo(calg (ReadKey=fldr, WriteKey=outputKey))
 

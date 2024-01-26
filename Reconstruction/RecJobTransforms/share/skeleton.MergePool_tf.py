@@ -92,13 +92,11 @@ if rec.doWriteESD:
         # See ATLASRECTS-6768.
         condSeq = AthSequencer("AthCondSeq")
         if hasattr (condSeq, 'PixelDetectorElementCondAlg'):
-            StreamESD.ExtraInputs += [
-                ("InDetDD::SiDetectorElementCollection", "ConditionStore+PixelDetectorElementCollection"),
-                ]
+            StreamESD.ExtraInputs.add(
+                ("InDetDD::SiDetectorElementCollection", "ConditionStore+PixelDetectorElementCollection"))
         if hasattr (condSeq, 'SCT_DetectorElementCondAlg'):
-            StreamESD.ExtraInputs += [
-                ("InDetDD::SiDetectorElementCollection", "ConditionStore+SCT_DetectorElementCollection"),
-                ]
+            StreamESD.ExtraInputs.add(
+                ("InDetDD::SiDetectorElementCollection", "ConditionStore+SCT_DetectorElementCollection"))
     else:
         print("StreamESD was not defined, cannot set ExtendProvenanceRecord = False. Check your flags.")
 

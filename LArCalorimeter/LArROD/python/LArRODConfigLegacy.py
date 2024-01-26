@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr, CfgGetter
 
@@ -41,7 +41,7 @@ def getLArRawChannelBuilder(name="LArRawChannelBuilder" , **kwargs):
        fld="/LAR/NoiseOfl/DSPThresholds"
        kwargs.setdefault('Run2DSPThresholdsKey', fld)
        iovDbSvc.Folders.append(fld+"<db>COOLOFL_LAR/OFLP200</db>")
-       condLoader.Load.append(("AthenaAttributeList",fld))
+       condLoader.Load.add(("AthenaAttributeList",fld))
     
     return CfgMgr.LArRawChannelBuilderAlg(name, **kwargs)
 
@@ -77,6 +77,6 @@ def getLArRawChannelBuilder_DigiHSTruth(name="LArRawChannelBuilder_DigiHSTruth" 
        fld="/LAR/NoiseOfl/DSPThresholds"
        kwargs.setdefault('Run2DSPThresholdsKey', fld)
        iovDbSvc.Folders.append(fld+"<db>COOLOFL_LAR/OFLP200</db>")
-       condLoader.Load.append(("AthenaAttributeList",fld))
+       condLoader.Load.add(("AthenaAttributeList",fld))
     
     return CfgMgr.LArRawChannelBuilderAlg(name, **kwargs)

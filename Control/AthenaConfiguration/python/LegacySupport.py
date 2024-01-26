@@ -26,14 +26,17 @@ def _isOldConfigurable(c):
 
 # Tuple of semantics helpers that need special treatment to retrieve their value
 _semanticsHelpers = (GaudiConfig2.semantics._ListHelper,
-                     GaudiConfig2.semantics._DictHelper)
+                     GaudiConfig2.semantics._DictHelper,
+                     GaudiConfig2.semantics._SetHelper)
 
 def _conf2HelperToBuiltin(value):
-    """Recursively convert GaudiConfig2 semantics helpers to builtin values"""
+    """Recursively convert GaudiConfig2 semantics helpers"""
     if isinstance(value, GaudiConfig2.semantics._ListHelper):
         return [_conf2HelperToBuiltin(item) for item in value.data]
     if isinstance(value, GaudiConfig2.semantics._DictHelper):
         return dict((k,_conf2HelperToBuiltin(v)) for k,v in value.data.items())
+    if isinstance(value, GaudiConfig2.semantics._SetHelper):
+        return set(_conf2HelperToBuiltin(item) for item in value.data)
     return value
 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/PropertyProxy.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -98,11 +98,11 @@ class PropertyProxy( object ):
       try:
          value = self.descr.__get__( obj, type )
       except AttributeError:
-       # special case for list: allow default to work with on +=;
+       # special case for list and set: allow default to work with on +=;
        # unfortunately, that means that direct access also succeeds, even
        # as the property wasn't set yet ... (TODO: ideas??)
-         if self.__default.__class__ == list:
-            self.descr.__set__( obj, list(self.__default) )
+         if self.__default.__class__ == list or self.__default.__class__ == set:
+            self.descr.__set__( obj, self.__default.__class__(self.__default) )
             value = self.descr.__get__( obj, type )     # no history
          else:
             raise

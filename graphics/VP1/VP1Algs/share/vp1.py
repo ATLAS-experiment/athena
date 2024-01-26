@@ -474,13 +474,13 @@ if (vp1Multinp):
     vp1Alg.MFAvailableLocalInputDirectories = vp1MultiAvailableSrcDirs
 
 if ( vp1LarHvData ):
-    vp1Alg.ExtraInputs += [('LArHVIdMapping', 'ConditionStore+LArHVIdMap'),
+    vp1Alg.ExtraInputs |= {('LArHVIdMapping', 'ConditionStore+LArHVIdMap'),
                            ('CondAttrListCollection', 'ConditionStore+/LAR/DCS/HV/BARREl/I16'),
                            ('CondAttrListCollection', 'ConditionStore+/LAR/DCS/HV/BARREL/I8'),
-                           ]
+                           }
 
 if (vp1Calo):
-    vp1Alg.ExtraInputs += [('LArOnOffIdMapping', 'ConditionStore+LArOnOffIdMap')]
+    vp1Alg.ExtraInputs |= {('LArOnOffIdMapping', 'ConditionStore+LArOnOffIdMap')}
 
 
 topSequence.TimeOut=0

@@ -40,7 +40,7 @@ def RpcMonitoringConfig(inputFlags):
     else:
         # LVL1MuonRoIs are only available after the HLTResultMTByteStreamDecoderAlg has executed
         from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
-        rpcTrackAnaAlg.ExtraInputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))]
+        rpcTrackAnaAlg.ExtraInputs.add(('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags)))
 
     ######################################################################################################
     ## Occupancy histograms

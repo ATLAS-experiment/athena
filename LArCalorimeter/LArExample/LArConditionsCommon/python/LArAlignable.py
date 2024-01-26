@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #Job options needed to enable LAr alignment
 
@@ -30,7 +30,7 @@ if activateCondAlgs:
     from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloAlignCondAlg
     condSeq += CaloAlignCondAlg("CaloAlignCondAlg")
 
-    AthReadAlg_ExtraInputs = []
+    AthReadAlg_ExtraInputs = set()
 
     # Configure Super Cell Alignment condition algorithm
     # Calo super cell building works only if both LAr and Tile are present
@@ -47,12 +47,12 @@ if activateCondAlgs:
         if key != 'AllCalo':
           sCellsInInput = True
 
-    AthReadAlg_ExtraInputs.append(('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'))
+    AthReadAlg_ExtraInputs.add(('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'))
     from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
     if commonGeoFlags.Run() == "RUN3" and DetFlags.detdescr.Tile_on() or sCellsInInput:
       from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloSuperCellAlignCondAlg
       condSeq += CaloSuperCellAlignCondAlg("CaloSuperCellAlignCondAlg")
-      AthReadAlg_ExtraInputs.append(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
+      AthReadAlg_ExtraInputs.add(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
 
     if caloCellsInInput:
       from AthenaConfiguration.ComponentFactory import CompFactory

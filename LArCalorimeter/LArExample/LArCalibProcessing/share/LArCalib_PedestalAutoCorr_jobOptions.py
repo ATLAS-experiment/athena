@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from future import standard_library
 standard_library.install_aliases()
@@ -679,7 +679,7 @@ if ( doMonitoring ) :
       from AthenaCommon.AlgSequence import AthSequencer
       condSeq = AthSequencer("AthCondSeq")
       condSeq+=LArPedestalCondAlg(ReadKey="/LAR/ElecCalibFlat/Pedestal",WriteKey="LArPedestal")
-      condSeq.CondInputLoader.Load.append(("CondAttrListCollection","/LAR/ElecCalibFlat/Pedestal"))
+      condSeq.CondInputLoader.Load.add(("CondAttrListCollection","/LAR/ElecCalibFlat/Pedestal"))
 
       ## Coherent noise plots
       include("LArMonTools/LArNoiseCorrelationMon_jobOptions.py")    
@@ -759,7 +759,7 @@ if ( WriteNtuple ) :
          LArAutoCorr2Ntuple.RealGeometry = True
          LArAutoCorr2Ntuple.OffId = True
 
-         LArAutoCorr2Ntuple.ExtraInputs = [('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')]
+         LArAutoCorr2Ntuple.ExtraInputs = {('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')}
       topSequence += LArAutoCorr2Ntuple
 
    theApp.HistogramPersistency = "ROOT"

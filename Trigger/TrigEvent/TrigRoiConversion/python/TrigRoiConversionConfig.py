@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -15,7 +15,7 @@ def RoiWriterCfg(flags):
    roiWriter = CompFactory.RoiWriter()
    if flags.Input.Format is Format.BS:
       # If TrigBSExtraction is running, enforce order via fictional data dependency
-      roiWriter.ExtraInputs = [("TrigBSExtractionOutput", "StoreGateSvc+TrigBSExtractionOutput")]
+      roiWriter.ExtraInputs = {("TrigBSExtractionOutput", "StoreGateSvc+TrigBSExtractionOutput")}
 
    acc.addEventAlgo( roiWriter )
    acc.merge( addToAOD(flags, TriggerRoiList) )
