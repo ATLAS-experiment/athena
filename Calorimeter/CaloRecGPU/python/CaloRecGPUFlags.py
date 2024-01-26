@@ -95,6 +95,8 @@ def configFlagsCaloRecGPU(flags,categoryFlags,cellsName="AllCalo",ClustersOutput
     categoryFlags.ClustersOutputName=ClustersOutputName
     if (flags.hasFlag('Concurrency.NumThreads')):
         categoryFlags.NumPreAllocatedDataHolders = flags.Concurrency.NumThreads
+    if ( categoryFlags.NumPreAllocatedDataHolders < 1 ):
+       categoryFlags.NumPreAllocatedDataHolders=1
     if (flags.hasFlag('Calo.TopoCluster.doTwoGaussianNoise')):
         categoryFlags.TwoGaussianNoise = flags.Calo.TopoCluster.doTwoGaussianNoise
     if (flags.hasCategory('flags.Calo.TopoCluster')):

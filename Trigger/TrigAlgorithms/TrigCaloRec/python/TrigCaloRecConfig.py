@@ -219,6 +219,8 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
 
     topoMaker = acc.popToolsAndMerge(CaloTopoClusterToolCfg(flags, cellsname=cells))
     topoMaker.RestrictPSNeighbors = False
+    if (flags.hasFlag('CaloRecGPU.UseOriginalCriteria')):
+       topoMaker.UseGPUCriteria=flags.CaloRecGPU.UseOriginalCriteria
     listClusterCorrectionTools = []
     if doLC :
        from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -339,6 +341,15 @@ TrigEgammaKeys = getTrigEgammaKeys()
 TrigEgammaKeys_LRT = getTrigEgammaKeys(name = '_LRT')
 TrigEgammaKeys_HI = getTrigEgammaKeys(ion = True)
 
+def prepareFlagsGPUHLT(flags):
+    from CaloRecGPU.CaloRecGPUFlags import createFlagsCaloRecGPU, configFlagsCaloRecGPU
+    flags.addFlagsCategory('CaloRecGPU',createFlagsCaloRecGPU,prefix=True)
+    flags.LAr.doHVCorr=True
+    configFlagsCaloRecGPU(flags,flags.CaloRecGPU,cellsName="CaloCellsFS",ClustersOutputName="HLT_TopoCaloClustersFS")
+    if ( flags.CaloRecGPU.NumPreAllocatedDataHolders < 1 ):
+       flags.CaloRecGPU.NumPreAllocatedDataHolders=1
+    return
+
 @AccumulatorCache
 def hltCaloTopoClusteringCfg(
     flags, namePrefix=None,nameSuffix=None, CellsName=None, monitorCells=False, roisKey="UNSPECIFIED",clustersKey=None, doLCFS=False, doTau = False):
@@ -354,10 +365,13 @@ def hltCaloTopoClusteringCfg(
     acc.merge(
         hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+nameSuffix, roisKey=roisKey, CellsName=CellsName, monitorCells=monitorCells, doTau = doTau)
     )
-    acc.merge(
-        hltTopoClusterMakerCfg(
-            flags, namePrefix + "HLTCaloClusterMaker"+nameSuffix,cellsKey=CellsName, clustersKey=clusters, doLC=doTau)
-        )
+    if flags.hasFlag('CaloRecGPU.CellsName') and (nameSuffix == "FS") and (not doTau): 
+       from CaloRecGPU.CaloRecGPUConfig import HybridClusterProcessorCfg
+       hyb = HybridClusterProcessorCfg(flags, namePrefix + "HLTCaloClusterMaker"+nameSuffix)
+       acc.merge(hyb)
+    else : 
+       calt=hltTopoClusterMakerCfg(flags, namePrefix + "HLTCaloClusterMaker"+nameSuffix,cellsKey=CellsName, clustersKey=clusters, doLC=doTau)
+       acc.merge(calt)
     if doLCFS:
         acc.merge( hltCaloTopoClusterCalibratorCfg(
                                                    flags,
