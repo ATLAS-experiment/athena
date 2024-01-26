@@ -639,8 +639,22 @@ protected:
    * @param ptr Pointer to which the cache entry should be set.
    *
    * For internal use; do not use from user code.
+   * This does _not_ acquire the lock --- it's mostly meant to be used
+   * from a constructor.
    */
   void setCache (SG::auxid_t auxid, void* ptr);
+
+
+  /**
+   * @brief Explicitly set a cache pointer.
+   * @param auxid Variable ID to set.
+   * @param ptr Pointer to which the cache entry should be set.
+   *
+   * For internal use; do not use from user code.
+   * This does _not_ acquire the lock --- it's mostly meant to be used
+   * from a constructor.
+   */
+  void setCache (SG::auxid_t auxid, const void* ptr);
 
 
   //@}

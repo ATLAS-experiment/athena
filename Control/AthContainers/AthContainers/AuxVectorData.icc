@@ -555,12 +555,31 @@ bool AuxVectorData::setOption (const std::string& name,
  * @param ptr Pointer to which the cache entry should be set.
  *
  * For internal use; do not use from user code.
+ * This does _not_ acquire the lock --- it's mostly meant to be used
+ * from a constructor.
  */
 inline
 void AuxVectorData::setCache (SG::auxid_t auxid, void* ptr)
 {
   m_cache.store (auxid, ptr);
-  m_constCache.store (auxid, ptr);
+}
+
+
+/**
+ * @brief Explicitly set a cache pointer.
+ * @param auxid Variable ID to set.
+ * @param ptr Pointer to which the cache entry should be set.
+ *
+ * For internal use; do not use from user code.
+ * This does _not_ acquire the lock --- it's mostly meant to be used
+ * from a constructor.
+ */
+inline
+void AuxVectorData::setCache (SG::auxid_t auxid, const void* ptr)
+{
+  // Ok; usage of ptr is still const.
+  void* ptr_nc ATLAS_THREAD_SAFE = const_cast<void*>(ptr);
+  m_constCache.store (auxid, ptr_nc);
 }
 
 

@@ -437,6 +437,40 @@ void test_storelink()
 }
 
 
+class TestSetCache : public SG::AuxVectorData
+{
+public:
+  TestSetCache (SG::auxid_t auxid, size_t size, void* ptr)
+    : m_size (size)
+  {
+    setCache (auxid, ptr);
+  }
+  TestSetCache (SG::auxid_t auxid, size_t size, const void* ptr)
+    : m_size (size)
+  {
+    setCache (auxid, ptr);
+  }
+  virtual size_t size_v() const { return m_size; }
+  virtual size_t capacity_v() const { return m_size; }
+  size_t m_size;
+};
+void test_setcache()
+{
+  std::cout << "test_setcache\n";
+  SG::auxid_t ityp = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
+
+  int iarr[3] = {10, 8, 9};
+  {
+    TestSetCache tc (ityp, 3, iarr);
+    assert (tc.getData<int> (ityp, 1) == 8);
+  }
+  {
+    const int* ciarr = iarr;
+    const TestSetCache tc (ityp, 3, ciarr);
+    assert (tc.getData<int> (ityp, 2) == 9);
+  }
+}
+
 void test_threading()
 {
   std::cout << "test_threading\n";
@@ -472,6 +506,7 @@ int main()
   test_move();
   test_setoption();
   test_storelink();
+  test_setcache();
   test_threading();
   return 0;
 }

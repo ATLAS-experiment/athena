@@ -1,0 +1,87 @@
+/*
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ */
+/**
+ * @file AthContainers/tools/AuxVectorInterface.icc
+ * @author scott snyder <snyder@bnl.gov>
+ * @date Jan, 2024
+ * @brief Make an AuxVectorData object from either a raw vector or an aux store.
+ */
+
+
+namespace SG {
+
+
+/**
+ * @brief Build from a (non-const) auxiliary store.
+ * @param store The auxiliary store to wrap.
+ */
+inline
+AuxVectorInterface::AuxVectorInterface (IAuxStore& store)
+  : m_size (store.size())
+{
+  setStore (&store);
+}
+
+
+/**
+ * @brief Build from a (const) auxiliary store.
+ * @param store The auxiliary store to wrap.
+ */
+inline
+AuxVectorInterface::AuxVectorInterface (const IConstAuxStore& store)
+  : m_size (store.size())
+{
+  setStore (&store);
+}
+
+
+/**
+ * @brief Build from a (non-const) raw array.
+ * @param auxid ID of the represented variable.
+ * @param size Length of the array.
+ * @param ptr Pointer to the array.
+ */
+inline
+AuxVectorInterface::AuxVectorInterface (SG::auxid_t auxid, size_t size, void* ptr)
+  : m_size (size)
+{
+  setCache (auxid, ptr);
+}
+
+
+/**
+ * @brief Build from a (const) raw array.
+ * @param auxid ID of the represented variable.
+ * @param size Length of the array.
+ * @param ptr Pointer to the array.
+ */
+inline
+AuxVectorInterface::AuxVectorInterface (SG::auxid_t auxid, size_t size, const void* ptr)
+  : m_size (size)
+{
+  setCache (auxid, ptr);
+}
+
+
+/**
+ * @brief Return the size of the container.
+ */
+inline
+size_t AuxVectorInterface::size_v() const
+{
+  return m_size;
+}
+
+
+/**
+ * @brief Return the capacity of the container.
+ */
+inline
+size_t AuxVectorInterface::capacity_v() const
+{
+  return m_size;
+}
+
+
+} // namespace SG
