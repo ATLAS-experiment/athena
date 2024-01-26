@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonGeoModelR4/RpcReadoutGeomTool.h>
@@ -30,6 +30,7 @@ namespace MuonGMR4 {
 
 using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
 using defineArgs = RpcReadoutElement::defineArgs;
+using StripLayerPtr = RpcReadoutElement::StripLayerPtr;
 
 /// Helper struct to attribute the Identifier fields with the
 /// gas gap volumes
@@ -64,14 +65,6 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
                      <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
-    ///  There're gasgaps that have been mounted upside-down into the station. For the sake of simplicity, 
-    ///  a rotation around the Y-axis is applied in GeoModel. Instead of pointing out of the detector, 
-    ///  the local x-axis points towards the beampipe. The scalar product of the chamber origin with the
-    ///  x-axis rotated into the global frame should be hence negative.
-    if (define.physVol->getAbsoluteTransform().translation().dot(define.physVol->getAbsoluteTransform().linear() * Amg::Vector3D::UnitX()) < 0.) {
-        define.isUpsideDown = true;
-        ATH_MSG_DEBUG(m_idHelperSvc->toStringDetEl(define.detElId)<<" is built-in upside-down.");
-    }
     
     const GeoShape* shape = m_geoUtilTool->extractShape(define.physVol);
     if (!shape) {
@@ -102,14 +95,15 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     std::stable_sort(allGasGaps.begin(), allGasGaps.end(), [&define](const physVolWithTrans&a, const physVolWithTrans & b){
          const Amg::Vector3D cA = a.transform.translation();
          const Amg::Vector3D cB = b.transform.translation();
-         if (std::abs(cA.x() - cB.x()) > tolerance) return (cA.x() < cB.x()) != define.isUpsideDown;
-         return (cA.y() < cB.y()) != define.isUpsideDown;
+         if (std::abs(cA.x() - cB.x()) > tolerance) return (cA.x() < cB.x());
+         return (cA.y() < cB.y());
     });
     /// Now we need to associate the gasGap volumes with the gas gap number &
     /// the doublet Phi
     Amg::Vector3D prevGap{allGasGaps[0].transform.translation()};
     unsigned int gasGap{1}, doubletPhi{0};
     
+    unsigned int modulePhi = m_idHelperSvc->rpcIdHelper().doubletPhi(define.detElId);
     std::vector<gapVolume> allGapsWithIdx{};
     for (physVolWithTrans& gapVol : allGasGaps) {
         Amg::Vector3D gCen = gapVol.transform.translation();
@@ -119,7 +113,10 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
             doubletPhi = 1;
         } else ++doubletPhi;
         ATH_MSG_DEBUG("Gas gap at "<<Amg::toString(gCen, 2)<<" is associated with gasGap: "<<gasGap<<", doubletPhi: "<<doubletPhi);
-        prevGap = std::move(gCen);        
+        prevGap = std::move(gCen);
+        /// Rpc volumes with doubletZ = 3 have two gas gaps along phi but they're split into two
+        /// distnict modules with doublePhi = 1, 2. 
+        doubletPhi = std::max (doubletPhi, modulePhi);
         allGapsWithIdx.emplace_back(std::move(gapVol), gasGap, doubletPhi);
     }
     /// We know now whether we had 2 or 3 gasgaps and also whether there 2 or 1 panels in phi
@@ -152,10 +149,14 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         gapVol.transform = gapVol.transform * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
         
         etaDesign = (*factoryCache.stripDesigns.emplace(etaDesign).first);
-        StripLayer etaLayer(gapVol.transform, etaDesign, 
-                            layerHash(define, gapVol.gasGap, gapVol.doubPhi, false));
-        ATH_MSG_VERBOSE("Added new eta gap at "<<etaLayer);
-        define.layers.push_back(std::move(etaLayer));
+        const IdentifierHash etaHash {RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)};
+        const unsigned int etaIdx = static_cast<unsigned int>(etaHash);
+        if (etaIdx >= define.layers.size()) {
+            define.layers.resize(etaIdx + 1);
+        }
+        define.layers[etaIdx] = std::make_unique<StripLayer>(gapVol.transform, etaDesign, etaHash);
+        
+        ATH_MSG_VERBOSE("Added new eta gap at "<<(*define.layers[etaIdx]));
         if (!define.etaDesign) define.etaDesign = etaDesign;
         StripDesignPtr phiDesign = std::make_unique<StripDesign>();
         phiDesign->defineStripLayout(Amg::Vector2D{-gapBox->getYHalfLength() + paramBook.firstOffSetPhi, 0.},
@@ -165,30 +166,19 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         phiDesign->defineTrapezoid(gapBox->getZHalfLength(), gapBox->getZHalfLength(), gapBox->getYHalfLength());
         /// Next build the phi layer
         phiDesign = (*factoryCache.stripDesigns.emplace(phiDesign).first);
-        StripLayer phiLayer(gapVol.transform  * Amg::getRotateZ3D( (define.isUpsideDown ? -1. : 1)*90. * Gaudi::Units::deg),
-                            phiDesign,
-                            layerHash(define, gapVol.gasGap, gapVol.doubPhi, true));
-        ATH_MSG_VERBOSE("Added new phi gap at "<<phiLayer);
-        define.layers.push_back(std::move(phiLayer));
+        
+        const IdentifierHash phiHash {RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, true)};
+        const unsigned int phiIdx = static_cast<unsigned int>(phiHash);
+        if (phiIdx >= define.layers.size()) {
+            define.layers.resize(phiIdx + 1);
+        }
+        define.layers[phiIdx] = std::make_unique<StripLayer>(gapVol.transform  * Amg::getRotateZ3D(90. * Gaudi::Units::deg),
+                                                             phiDesign, phiHash);
+        ATH_MSG_VERBOSE("Added new phi gap at "<<(*define.layers[phiIdx]));
         if (!define.phiDesign) define.phiDesign = phiDesign;
     }
-    std::sort(define.layers.begin(), define.layers.end(), 
-             [](const StripLayer&a ,const StripLayer& b) {
-                 return a.hash() < b.hash();
-             });
     return StatusCode::SUCCESS;
 }
-IdentifierHash RpcReadoutGeomTool::layerHash(const RpcReadoutElement::defineArgs& args, const int gasGap, const int doubPhi, const bool measPhi) const {
-    const unsigned int hashShiftDbl{args.hasPhiStrips ? 1u :0u};
-    const int readOutDoubPhi = m_idHelperSvc->rpcIdHelper().doubletPhi(args.detElId);
-    const unsigned int hashShiftGap{hashShiftDbl + (args.nGapsInPhi <= readOutDoubPhi ? 0u : 1u)};
-    IdentifierHash idHash{ (gasGap -1) << hashShiftGap | 
-                          1u * std::max(doubPhi - readOutDoubPhi,0) << hashShiftDbl | measPhi};
-    ATH_MSG_DEBUG("gasGap: "<<gasGap<<", doubletPhi: "<<doubPhi<<", measuresPhi: "<<measPhi
-                           <<" --> "<<static_cast<unsigned int>(idHash));
-    return idHash;
-}
-
 StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     GeoModelIO::ReadGeoModel* sqliteReader = m_geoDbTagSvc->getSqliteReader();
     if (!sqliteReader) {

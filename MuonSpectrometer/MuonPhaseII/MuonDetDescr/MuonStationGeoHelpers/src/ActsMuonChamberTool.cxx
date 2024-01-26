@@ -130,13 +130,8 @@ namespace MuonGMR4{
               xMaxL = xMaxS;
               yMax = std::max(center.y(), yMax);
               yMin = std::min(center.y() - 2.* parameters.halfLength, yMin);
-              if(parameters.isUpsideDown) {
-                zMin = std::min(center.z() - 2.*parameters.halfThickness, zMin);
-                zMax = std::max(center.z(), zMax);
-              } else {
-                zMin = std::min(center.z(), zMin);
-                zMax = std::max(center.z() + 2.*parameters.halfThickness, zMax);
-              }
+              zMin = std::min(center.z(), zMin);
+              zMax = std::max(center.z() + 2.*parameters.halfThickness, zMax);
           } else if (ele->detectorType() == ActsTrk::DetectorType::Tgc) {
               const TgcReadoutElement* tgcReadoutEle{static_cast<const TgcReadoutElement*>(ele)};              
               xMinL = std::min(center.x() - 0.5*tgcReadoutEle->moduleWidthL(), xMinL);
