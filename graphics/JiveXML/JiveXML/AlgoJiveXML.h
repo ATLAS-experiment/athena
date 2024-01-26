@@ -74,8 +74,8 @@ namespace JiveXML {
      * Streaming tools that pass the formatted XML text
      * into a file, to a server, etc.
      **/
-    ToolHandle<JiveXML::IStreamTool> m_StreamToFileTool {this, "StreamToFileTool", "JiveXML::StreamToFileTool/StreamToFileTool", "Stream to file tool"};
-    ToolHandle<JiveXML::IStreamTool> m_StreamToServerTool {this, "StreamToServerTool", "JiveXML::StreamToServerTool/StreamToServerTool", "Stream to server tool"};
+    ToolHandle<JiveXML::IStreamTool> m_StreamToFileTool {this, "StreamToFileTool", "JiveXML::StreamToFileTool", "Stream to file tool"};
+    ToolHandle<JiveXML::IStreamTool> m_StreamToServerTool {this, "StreamToServerTool", "JiveXML::StreamToServerTool", "Stream to server tool"};
 
   };
 

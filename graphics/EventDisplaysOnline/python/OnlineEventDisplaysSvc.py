@@ -27,9 +27,9 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
 
                 self.zpgid = None
                 self.partition = None
-                self.StreamToFileTool = None #kw.get('StreamToFileTool')
+                self.StreamToFileTool = kw.get('StreamToFileTool')
                 self.StreamToServerTool = None
-                self.VP1EventProducer = None
+                self.VP1EventProducer = None#kw.get('VP1EventProducer')
                 
                 self.run = 0
                 self.event = 0
@@ -57,17 +57,18 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                 return StatusCode.Success
 
         def getJobOptions(self):
-                self.StreamToFileTool = PyAthena.py_tool('JiveXML::StreamToFileTool', iface='IProperty')
+                self.StreamToFileTool = PyAthena.py_tool(self.StreamToFileTool.getFullName(), iface='IProperty')#createIf=False
                 self.StreamToServerTool = PyAthena.py_tool('JiveXML::StreamToServerTool', iface='IProperty')
-                help(self.StreamToFileTool)
+                
                 # Some casting magic is needed to access algorithm properties
                 from GaudiPython.Bindings import gbl, InterfaceCast
                 vp1alg = PyAthena.py_alg('VP1EventProd')
                 self.VP1EventProducer = InterfaceCast(gbl.IProperty).cast(vp1alg)
+
                 self.msg.info("StreamToFileTool: %s", self.StreamToFileTool)
                 self.msg.info("StreamToServerTool: %s", self.StreamToServerTool)
                 self.msg.info("VP1EventProducer: %s", self.VP1EventProducer)
-
+                                
         def beginEvent(self):
                 if not (self.StreamToFileTool and self.StreamToServerTool and self.VP1EventProducer):
                         self.getJobOptions()
@@ -172,11 +173,12 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                         # Set output stream for JiveXML event streaming (file and server)
                         print('stream name and file name prefix:',"%s" % self.stream, "%s/JiveXML" % self.directory)
                         self.StreamToServerTool.getProperty('StreamName').setValue("%s" % self.stream)
-                        
+                
                         print('before changing my test in online svc:',self.StreamToFileTool.getProperty("MyTest").value())
                         self.StreamToFileTool.getProperty('FileNamePrefix').setValue("%s/JiveXML" % self.directory)
                         self.StreamToFileTool.getProperty("MyTest").setValue("updatedinOsvc")
                         print(self.StreamToFileTool.getProperty("MyTest").value())
+                        
                         self.msg.debug("Directory in try: %s", self.directory)
                 except Exception as err:
                         self.msg.error("Exception occured while setting job options: %s", err)
@@ -190,6 +192,9 @@ class OnlineEventDisplaysSvc( PyAthena.Svc ):
                 # So we set the directory of the current event in endEvent to pass it to the next event.
                 if self.VP1EventProducer:
                         self.VP1EventProducer.getProperty('DestinationDirectory').setValue(self.directory)
+                        #print(getattr(self.VP1EventProducer,'DestinationDirectory'))
+                        #setattr(self.VP1EventProducer, 'DestinationDirectory', self.directory)
+                        #print(getattr(self.VP1EventProducer,'DestinationDirectory'))
 
                 # Prune events and make index file for atlas-live.cern.ch
                 if self.directory:
