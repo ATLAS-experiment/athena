@@ -94,23 +94,26 @@ const NswCalibDbTimeChargeData* Muon::NSWCalibTool::getCalibData(const EventCont
 
 StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const {
 
-  /// magnetic field
-  MagField::AtlasFieldCache fieldCache;
-  if (!loadMagneticField(ctx, fieldCache)) return StatusCode::FAILURE;
-  Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
-  fieldCache.getField(globalPos.data(), magneticField.data());
+  double lorentzAngle {0.};
+  if(m_applyMmBFieldCalib){
+    /// magnetic field
+    MagField::AtlasFieldCache fieldCache;
+    if (!loadMagneticField(ctx, fieldCache)) return StatusCode::FAILURE;
+    Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
+    fieldCache.getField(globalPos.data(), magneticField.data());
 
-  /// get the component parallel to to the eta strips (same used in digitization)
-  double phi    = globalPos.phi();
-  double bfield = (magneticField.x()*std::sin(phi)-magneticField.y()*std::cos(phi))*1000.;
+    /// get the component parallel to to the eta strips (same used in digitization)
+    double phi    = globalPos.phi();
+    double bfield = (magneticField.x()*std::sin(phi)-magneticField.y()*std::cos(phi))*1000.;
 
-  /// swap sign depending on the readout side
-  int gasGap = m_idHelperSvc->mmIdHelper().gasGap(prepData->identify());
-  bool changeSign = ( globalPos.z() < 0. ? (gasGap==1 || gasGap==3) : (gasGap==2 || gasGap==4) );
-  if (changeSign) bfield = -bfield;
+    /// swap sign depending on the readout side
+    int gasGap = m_idHelperSvc->mmIdHelper().gasGap(prepData->identify());
+    bool changeSign = ( globalPos.z() < 0. ? (gasGap==1 || gasGap==3) : (gasGap==2 || gasGap==4) );
+    if (changeSign) bfield = -bfield;
 
-  //// sign of the lorentz angle matches digitization - angle is in radians
-  double lorentzAngle = (bfield>0. ? 1. : -1.)*m_lorentzAngleFunction(std::abs(bfield)) * toRad;
+    //// sign of the lorentz angle matches digitization - angle is in radians
+    lorentzAngle = (bfield>0. ? 1. : -1.)*m_lorentzAngleFunction(std::abs(bfield)) * toRad;
+  }
 
   /// loop over prepData strips
   for (unsigned int i = 0; i < prepData->stripNumbers().size(); ++i){
