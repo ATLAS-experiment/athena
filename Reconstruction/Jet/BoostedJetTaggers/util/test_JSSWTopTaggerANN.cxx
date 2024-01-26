@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -174,8 +174,8 @@ int main( int argc, char* argv[] ) {
     std::vector<std::string> pulls = {"__1down", "__1up"};
     CP::SystematicSet jetUnc_sysSet = jetUncToolSF->recommendedSystematics();
     const std::set<std::string> sysNames = jetUnc_sysSet.getBaseNames();
-    for (std::string sysName: sysNames) {
-      for (std::string pull : pulls) {
+    for (const std::string & sysName: sysNames) {
+      for (const std::string & pull : pulls) {
 	std::string sysPulled = sysName + pull;
 	jetUnc_sysSets.push_back(CP::SystematicSet(sysPulled));
       }
