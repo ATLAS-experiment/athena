@@ -423,14 +423,14 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
 
                 fillGlobal(JWOJ_MHT, 3, gMHTComponentsJwojContainer);
                 fillGlobal(JWOJ_MST, 4, gMSTComponentsJwojContainer);
-                fillGlobal(JWOJ_MET, 2, gMETComponentsJwojContainer);
-                fillGlobal(JWOJ_SCALAR, 1, gScalarEJwojContainer);
+                int16_t scalar = fillGlobal(JWOJ_MET, 2, gMETComponentsJwojContainer);
+                fillGlobal(JWOJ_SCALAR, 1, gScalarEJwojContainer, scalar);
                                 
-                fillGlobal(NC_MET, 2, gMETComponentsNoiseCutContainer);
-                fillGlobal(NC_SCALAR, 1, gScalarENoiseCutContainer);
+                scalar = fillGlobal(NC_MET, 2, gMETComponentsNoiseCutContainer);
+                fillGlobal(NC_SCALAR, 1, gScalarENoiseCutContainer, scalar);
 
-                fillGlobal(RMS_MET, 2, gMETComponentsRmsContainer);
-                fillGlobal(RMS_SCALAR, 1, gScalarERmsContainer);
+                scalar = fillGlobal(RMS_MET, 2, gMETComponentsRmsContainer);
+                fillGlobal(RMS_SCALAR, 1, gScalarERmsContainer, scalar);
 
                 global_counter = 0;
             }
@@ -440,17 +440,25 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     return StatusCode::SUCCESS;
 }
 
-void gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const int type, SG::WriteHandle<xAOD::gFexGlobalRoIContainer> &container) const {
+// For MHT, MST, and MET, it sums the x and y components across FPGAs, and also returnes
+// the sum in quadrature (which is actually only used for MET, and discared for MHT and MST)
+// This function also accepts "scalar" as optional variable, which is used to fill the X
+// component of the SCALAR tob.
+int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const int type,
+                                       SG::WriteHandle<xAOD::gFexGlobalRoIContainer> &container,
+                                       int16_t scalar/* = -1*/) const {
     
     ATH_MSG_DEBUG("fillGlobal with type " << type);
 
     int16_t sum_x = 0;
     int16_t sum_y = 0;
-    
-    if (type == 1) {
-        sum_x = sum_y = 0;
 
-    } else{
+    if (type == 1) {
+        ATH_MSG_DEBUG("  scalar tob, saving " << scalar << " in X component");
+        sum_x = scalar;
+        sum_y = 0;
+
+    } else {
 
         // Extract the x and y components and sum them for the three FPGAs
         for (size_t fpga = 0; fpga < 3; fpga++) {
@@ -458,13 +466,13 @@ void gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const int 
             int16_t y = tob[fpga] >> gPos::GLOBAL_Y_BIT & gPos::GLOBAL_Y_MASK;
             sum_x += x;
             sum_y += y;
-            ATH_MSG_DEBUG("fillGlobal at fpga " << fpga << " sum_x " << sum_x << " sum_y " << sum_y);
         }
         // Apply truncation
         sum_x = sum_x >> gPos::GLOBAL_BIT_TRUNCATION;
         sum_y = sum_y >> gPos::GLOBAL_BIT_TRUNCATION;
     }
 
+    ATH_MSG_DEBUG("  fillGlobal type " << type << std::dec << " sum_x " << sum_x << " sum_y " << sum_y);
 
     // Save to the EDM
     std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
@@ -477,6 +485,8 @@ void gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const int 
     container->back()->setStatusTwo(1);
     container->back()->setSaturated(0);
     container->back()->setGlobalType(type);
+
+    return std::sqrt(sum_x * sum_x + sum_y * sum_y);
 
 }
 
