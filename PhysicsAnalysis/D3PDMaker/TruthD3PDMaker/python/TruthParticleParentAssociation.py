@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file TruthD3PDMaker/python/TruthParticleParentAssociation.py
@@ -9,8 +9,10 @@
 #
 
 
-import TruthD3PDMaker
 from D3PDMakerCoreComps.IndexMultiAssociation import IndexMultiAssociation
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
 
 
 def TruthParticleParentAssociation (parent,
@@ -26,7 +28,7 @@ parents by index.
         blockname = prefix + 'TruthParticleParentAssociation'
 
     return IndexMultiAssociation (parent,
-                                  TruthD3PDMaker.TruthParticleParentAssociationTool,
+                                  D3PD.TruthParticleParentAssociationTool,
                                   target,
                                   prefix,
                                   level,
