@@ -356,7 +356,7 @@ def LArTriggerDigitizationBasicCfg(flags, **kwargs):
         kwargs.setdefault("EmTTL1ContainerName", flags.Overlay.BkgPrefix + "LArTTL1EM")
         kwargs.setdefault("HadTTL1ContainerName", flags.Overlay.BkgPrefix + "LArTTL1HAD")
     acc.addEventAlgo(CompFactory.LArTTL1Maker(**kwargs))
-    if flags.GeoModel.Run in [LHCPeriod.Run3]:
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
         acc.merge(LArSCL1MakerCfg(flags))
         if flags.Common.ProductionStep is not ProductionStep.PileUpPresampling:
             from LArROD.LArSuperCellBuilderConfig import LArSuperCellBuilderAlgCfg, LArSuperCellBCIDAlgCfg
@@ -370,7 +370,7 @@ def LArTriggerDigitizationCfg(flags, **kwargs):
     acc = LArTriggerDigitizationBasicCfg(flags)
     acc.merge(LArOutputCfg(flags))
     acc.merge(OutputStreamCfg(flags, "RDO", ["LArTTL1Container#*"]))
-    if flags.GeoModel.Run in [LHCPeriod.Run3]:
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
         if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
             acc.merge(OutputStreamCfg(flags, "RDO", ["LArDigitContainer#" + flags.Overlay.BkgPrefix + "LArDigitSCL2"]))
         else:

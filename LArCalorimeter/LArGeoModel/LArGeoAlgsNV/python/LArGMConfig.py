@@ -45,7 +45,7 @@ def LArGMCfg(flags):
                         sCellsInInput = True
 
             AthReadAlg_ExtraInputs.append(('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'))            
-            if (flags.GeoModel.Run is LHCPeriod.Run3 and flags.Detector.GeometryTile) or sCellsInInput:
+            if (flags.GeoModel.Run >= LHCPeriod.Run3 and flags.Detector.GeometryTile) or sCellsInInput:
                 # TODO: avoid depending on Tile in SuperCell alignment
                 from TileGeoModel.TileGMConfig import TileGMCfg
                 result.merge(TileGMCfg(flags))
@@ -65,7 +65,7 @@ def LArGMCfg(flags):
         # Build unalinged CaloDetDescrManager instance in the Condition Store
         if activateCondAlgs:
             result.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
-            if flags.GeoModel.Run is LHCPeriod.Run3 and flags.Detector.GeometryTile and flags.Common.ProductionStep != ProductionStep.Overlay:
+            if flags.GeoModel.Run >= LHCPeriod.Run3 and flags.Detector.GeometryTile and flags.Common.ProductionStep != ProductionStep.Overlay:
                 # TODO: avoid depending on Tile in SuperCell alignment
                 from TileGeoModel.TileGMConfig import TileGMCfg
                 result.merge(TileGMCfg(flags))
