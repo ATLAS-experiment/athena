@@ -1,7 +1,7 @@
 --- run2
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['CondAttrListCollection', '/LAR/ElecCalibFlat/Ramp'], ['CondAttrListCollection', '/LAR/ElecCalibFlat/Pedestal']]
+Py:ComponentAccumulator    INFO      * Load: {('CondAttrListCollection', '/LAR/ElecCalibFlat/Pedestal'), ('CondAttrListCollection', '/LAR/ElecCalibFlat/Ramp')}
 Py:ComponentAccumulator    INFO  \__ LArFlatConditionsAlg<LArRampFlat> (cond alg)
 Py:ComponentAccumulator    INFO      * ReadKey: /LAR/ElecCalibFlat/Ramp
 Py:ComponentAccumulator    INFO      * WriteKey: LArRamp
@@ -11,11 +11,11 @@ Py:ComponentAccumulator    INFO      * WriteKey: LArPedestal
 --- run1
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['LArRampComplete', '/LAR/ElecCalibOnl/Ramp'], ['LArPedestalComplete', '/LAR/ElecCalibOnl/Pedestal']]
+Py:ComponentAccumulator    INFO      * Load: {('LArPedestalComplete', '/LAR/ElecCalibOnl/Pedestal'), ('LArRampComplete', '/LAR/ElecCalibOnl/Ramp')}
 --- mc
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'], ['LArRampMC', '/LAR/ElecCalibMC/Ramp'], ['LArPedestalMC', '/LAR/ElecCalibMC/Pedestal']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'), ('LArPedestalMC', '/LAR/ElecCalibMC/Pedestal'), ('LArRampMC', '/LAR/ElecCalibMC/Ramp')}
 Py:ComponentAccumulator    INFO  \__ LArOnOffMappingAlg (cond alg)
 Py:ComponentAccumulator    INFO      * ReadKey: /LAR/Identifier/OnOffIdMap
 Py:ComponentAccumulator    INFO  \__ LArMCSymCondAlg (cond alg)

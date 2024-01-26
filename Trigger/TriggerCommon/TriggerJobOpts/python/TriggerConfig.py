@@ -397,8 +397,8 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
         if flags.Input.Format is Format.BS:
             from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
             readBSAcc = ByteStreamReadCfg(flags)
-            readBSAcc.getEventAlgo('SGInputLoader').Load += [
-                ('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata')]
+            readBSAcc.getEventAlgo('SGInputLoader').Load.add(
+                ('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata'))
             acc.merge(readBSAcc)
         else:
             # No BS metadata (thus no DetectorMask) in POOL files, need to disable the checks using it
@@ -442,8 +442,8 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
         hltEventLoopMgr = onlineServicesAcc.getPrimary()
         hltEventLoopMgr.ResultMaker.StreamTagMaker = stmaker
         hltEventLoopMgr.ResultMaker.MakerTools = [serialiser, bitsmaker]
-        onlineServicesAcc.getEventAlgo('SGInputLoader').Load += [
-            ('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata')]
+        onlineServicesAcc.getEventAlgo('SGInputLoader').Load.add(
+            ('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata'))
         acc.merge(onlineServicesAcc)
     return acc
 
@@ -498,9 +498,9 @@ def triggerPOOLOutputCfg(flags):
 
         alg = acc.getEventAlgo("OutputStream"+outputType)
         # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriterMT
-        alg.ExtraInputs += [
+        alg.ExtraInputs |= {
             ("xAOD::TrigDecision", str(decmaker.TrigDecisionKey)),
-            ("xAOD::TrigConfKeys", metadataOutputs)] + xRoIBResultOutputs
+            ("xAOD::TrigConfKeys", metadataOutputs)} | set(xRoIBResultOutputs)
 
     return acc
 
@@ -569,8 +569,8 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInp
     tool = CompFactory.HLTEDMCreator(f"GapFiller_{'' if edmSet==['BS'] else '_'+'_'.join(edmSet)}")
     alg = CompFactory.HLTEDMCreatorAlg("EDMCreatorAlg",
                                        OutputTools = [tool])
-    alg.ExtraInputs = list(extraInputs)
-    alg.ExtraOutputs = list(extraOutputs)
+    alg.ExtraInputs = set(extraInputs)
+    alg.ExtraOutputs = set(extraOutputs)
 
     if len(edmSet) != 0:
         groupedByType = defaultdict( list )

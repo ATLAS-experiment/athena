@@ -53,4 +53,4 @@ topSeq = AlgSequence()
 # Instruct the input loader to populate the whiteboard with the GEN_EVENT
 # data from the input file.
 from AthenaCommon import CfgMgr
-CfgMgr.SGInputLoader().Load += [('McEventCollection', 'StoreGateSvc+GEN_EVENT')]
+CfgMgr.SGInputLoader().Load.add(('McEventCollection', 'StoreGateSvc+GEN_EVENT'))

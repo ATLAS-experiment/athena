@@ -6,7 +6,7 @@ Py:ComponentAccumulator    INFO \__ AthAlgSeq
 Py:ComponentAccumulator    INFO    \__ CaloBCIDAvgAlg
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['LArShape32MC', '/LAR/ElecCalibOfl/LArPileupShape'], ['LArMinBiasAverageMC', '/LAR/ElecCalibOfl/LArPileupAverage'], ['CondAttrListCollection', '/LAR/ElecCalibFlat/OFC'], ['CondAttrListCollection', '/TRIGGER/OFLLUMI/OflPrefLumi'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('CondAttrListCollection', '/LAR/ElecCalibFlat/OFC'), ('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/OFLLUMI/OflPrefLumi'), ('LArMinBiasAverageMC', '/LAR/ElecCalibOfl/LArPileupAverage'), ('LArShape32MC', '/LAR/ElecCalibOfl/LArPileupShape')}
 Py:ComponentAccumulator    INFO  \__ LArPileUpAvgSymCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * ReadKey: LArPileupAverage
 Py:ComponentAccumulator    INFO      * WriteKey: LArPileupAverageSym
@@ -43,7 +43,7 @@ Py:ComponentAccumulator    INFO \__ AthAlgSeq
 Py:ComponentAccumulator    INFO    \__ CaloBCIDAvgAlg
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'], ['DetCondKeyTrans', '/LAR/Align'], ['CaloRec::CaloCellPositionShift', '/LAR/LArCellPositionShift'], ['LArRampMC', '/LAR/ElecCalibMC/Ramp'], ['LArDAC2uAMC', '/LAR/ElecCalibMC/DAC2uA'], ['LAruA2MeVMC', '/LAR/ElecCalibMC/uA2MeV'], ['LArMphysOverMcalMC', '/LAR/ElecCalibMC/MphysOverMcal'], ['LArHVScaleCorrComplete', '/LAR/ElecCalibMC/HVScaleCorr'], ['LArShape32MC', '/LAR/ElecCalibMC/Shape'], ['LArNoiseMC', '/LAR/ElecCalibMC/Noise'], ['LArPedestalMC', '/LAR/ElecCalibMC/Pedestal'], ['LArAutoCorrMC', '/LAR/ElecCalibMC/AutoCorr'], ['LArfSamplMC', '/LAR/ElecCalibMC/fSampl'], ['LArMinBiasMC', '/LAR/ElecCalibMC/MinBias'], ['LArMinBiasAverageMC', '/LAR/ElecCalibMC/LArPileupAverage'], ['AthenaAttributeList', '/Digitization/Parameters']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/Digitization/Parameters'), ('AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'), ('CaloRec::CaloCellPositionShift', '/LAR/LArCellPositionShift'), ('DetCondKeyTrans', '/LAR/Align'), ('LArAutoCorrMC', '/LAR/ElecCalibMC/AutoCorr'), ('LArDAC2uAMC', '/LAR/ElecCalibMC/DAC2uA'), ('LArHVScaleCorrComplete', '/LAR/ElecCalibMC/HVScaleCorr'), ('LArMinBiasAverageMC', '/LAR/ElecCalibMC/LArPileupAverage'), ('LArMinBiasMC', '/LAR/ElecCalibMC/MinBias'), ('LArMphysOverMcalMC', '/LAR/ElecCalibMC/MphysOverMcal'), ('LArNoiseMC', '/LAR/ElecCalibMC/Noise'), ('LArPedestalMC', '/LAR/ElecCalibMC/Pedestal'), ('LArRampMC', '/LAR/ElecCalibMC/Ramp'), ('LArShape32MC', '/LAR/ElecCalibMC/Shape'), ('LArfSamplMC', '/LAR/ElecCalibMC/fSampl'), ('LAruA2MeVMC', '/LAR/ElecCalibMC/uA2MeV')}
 Py:ComponentAccumulator    INFO  \__ LArADC2MeVCondAlg (cond alg)
 Py:ComponentAccumulator    INFO  \__ LArAutoCorrTotalCondAlg (cond alg)
 Py:ComponentAccumulator    INFO  \__ LArOFCCondAlg (cond alg)
@@ -79,7 +79,7 @@ Py:ComponentAccumulator    INFO \__ AthAlgSeq
 Py:ComponentAccumulator    INFO    \__ CaloBCIDAvgAlg
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['LArShape32MC', '/LAR/LArPileup/LArPileupShape'], ['LArMinBiasAverageMC', '/LAR/LArPileup/LArPileupAverage'], ['CondAttrListCollection', '/LAR/ElecCalibFlat/OFC'], ['CondAttrListCollection', '/TRIGGER/LUMI/HLTPrefLumi'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('CondAttrListCollection', '/LAR/ElecCalibFlat/OFC'), ('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/LUMI/HLTPrefLumi'), ('LArMinBiasAverageMC', '/LAR/LArPileup/LArPileupAverage'), ('LArShape32MC', '/LAR/LArPileup/LArPileupShape')}
 Py:ComponentAccumulator    INFO  \__ LArPileUpAvgSymCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * ReadKey: LArPileupAverage
 Py:ComponentAccumulator    INFO      * WriteKey: LArPileupAverageSym

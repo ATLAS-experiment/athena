@@ -109,7 +109,7 @@ class InDetTrigSequence:
 
       ViewDataVerifier = \
         CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
-                                              DataObjects = [( 'InDet::PixelClusterContainerCache' , InDetCacheNames.Pixel_ClusterKey ),
+                                              DataObjects = {( 'InDet::PixelClusterContainerCache' , InDetCacheNames.Pixel_ClusterKey ),
                                                               ( 'PixelRDO_Cache' , InDetCacheNames.PixRDOCacheKey ),
                                                               ( 'InDet::SCT_ClusterContainerCache' , InDetCacheNames.SCT_ClusterKey ),
                                                               ( 'SCT_RDO_Cache' , InDetCacheNames.SCTRDOCacheKey ),
@@ -118,15 +118,15 @@ class InDetTrigSequence:
                                                               ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
                                                               ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
                                                               ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                                                              ( 'TagInfo' , 'DetectorStore+ProcessingTags' )]
+                                                              ( 'TagInfo' , 'DetectorStore+ProcessingTags' )}
                                             )
 
       isByteStream = self.__flags.Input.Format == Format.BS
       if not isByteStream:
-        ViewDataVerifier.DataObjects +=   [( 'PixelRDO_Container' , 'PixelRDOs' ),
-                                          ( 'SCT_RDO_Container' , 'SCT_RDOs' )]
+        ViewDataVerifier.DataObjects |= {( 'PixelRDO_Container' , 'PixelRDOs' ),
+                                         ( 'SCT_RDO_Container' , 'SCT_RDOs' )}
 
-      ViewDataVerifier.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % self.__rois )]
+      ViewDataVerifier.DataObjects.add(( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % self.__rois ))
 
       acc.addEventAlgo(ViewDataVerifier)
       return acc
@@ -138,7 +138,7 @@ class InDetTrigSequence:
       acc = ComponentAccumulator()
 
       ViewDataVerifier = CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
-                                                      DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+                                                      DataObjects= {('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
                                                                       ('InDet::PixelClusterContainerCache', 'PixelTrigClustersCache'),
                                                                       ('PixelRDO_Cache', 'PixRDOCache'),
                                                                       ('InDet::SCT_ClusterContainerCache', 'SCT_ClustersCache'),
@@ -150,12 +150,12 @@ class InDetTrigSequence:
                                                                       ('SpacePointCache', 'SctSpacePointCache'),
                                                                       ('xAOD::EventInfo', 'EventInfo'),
                                                                       ('TrigRoiDescriptorCollection', str(self.__rois)),
-                                                                      ( 'TagInfo' , 'DetectorStore+ProcessingTags' )] )
+                                                                      ( 'TagInfo' , 'DetectorStore+ProcessingTags' )} )
 
       if self.__flags.Input.isMC:
-          ViewDataVerifier.DataObjects += [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
-                                  ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
-                                  ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map') ]
+          ViewDataVerifier.DataObjects |= {( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
+                                           ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
+                                           ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map')}
           from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
           sgil_load = [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                       ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
@@ -173,16 +173,16 @@ class InDetTrigSequence:
     
       ViewDataVerifier = \
         CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
-                                               DataObjects = [
+                                               DataObjects = {
                                                  ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  ),
                                                  
-                                               ]
+                                               }
                                               )
       
       if self.__flags.Input.Format == Format.BS:
-        ViewDataVerifier.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+        ViewDataVerifier.DataObjects.add(( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' ))
       else:        
-        ViewDataVerifier.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+        ViewDataVerifier.DataObjects.add(( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' ))
 
       acc.addEventAlgo(ViewDataVerifier)
       return acc
@@ -194,21 +194,21 @@ class InDetTrigSequence:
       
       ViewDataVerifier = \
         CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
-                                               DataObjects = [
+                                               DataObjects = {
                                                  ( 'SpacePointContainer',           'StoreGateSvc+SCT_TrigSpacePoints' ),                                             
                                                  ( 'SpacePointContainer',           'StoreGateSvc+PixelTrigSpacePoints' ),
                                                  ( 'SpacePointOverlapCollection',   'StoreGateSvc+OverlapSpacePoints' ),
                                                  #( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+TrigPixelClusterAmbiguitiesMap' ),
                                                  ( 'InDet::SCT_ClusterContainer',   'StoreGateSvc+SCT_TrigClusters' ),
                                                  ( 'InDet::PixelClusterContainer',  'StoreGateSvc+PixelTrigClusters' ),
-                                               ]
+                                               }
                                               )
       
       if self.__flags.Input.Format == Format.BS:
-        ViewDataVerifier.DataObjects += [
+        ViewDataVerifier.DataObjects |= {
           ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
           ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-        ]
+        }
       
       acc.addEventAlgo(ViewDataVerifier)
       return acc
@@ -221,15 +221,15 @@ class InDetTrigSequence:
 
       ViewDataVerifier = \
         CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
-                                               DataObjects = [
+                                               DataObjects = {
                                                  ( 'InDet::PixelGangedClusterAmbiguities' , 'TrigPixelClusterAmbiguitiesMap'),
-                                                 ]
+                                                 }
                                               )
       if self.__flags.Input.Format == Format.BS:
-        ViewDataVerifier.DataObjects += [
+        ViewDataVerifier.DataObjects |= {
           ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
           ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
-        ]
+        }
       
       acc.addEventAlgo(ViewDataVerifier)
       return acc
@@ -242,10 +242,10 @@ class InDetTrigSequence:
 
       ViewDataVerifier = \
         CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
-                                               DataObjects = [
+                                               DataObjects = {
                                                  ( 'InDet::PixelGangedClusterAmbiguities' , 'ITkPixelClusterAmbiguitiesMap'),
                                                  ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map'),
-                                                 ]
+                                                 }
                                               )
       
       acc.addEventAlgo(ViewDataVerifier)

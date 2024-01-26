@@ -87,7 +87,7 @@ def TrigCaloMonConfig(inputFlags):
             L2CaloEMClustersMonAlg.HLTChainsT0 = EgammaChain[i][j]
             # Algorithm must be scheduled after the decoding of the trigger bytestream ROB
             from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
-            L2CaloEMClustersMonAlg.ExtraInputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))]
+            L2CaloEMClustersMonAlg.ExtraInputs |= {('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))}
    
             # Add group
             L2CaloEMClustersMonGroup[i][j] = helper.addGroup(L2CaloEMClustersMonAlg, 'TrigCaloMonitor','HLT/HLTCalo')
@@ -304,7 +304,7 @@ def TrigCaloMonConfig(inputFlags):
             # Add group
             TopoCaloClustersMonGroup[i][j] = helper.addGroup(configuredAlg, 'TrigCaloMonitor','HLT/HLTCalo')
             # Algorithm must be scheduled after the decoding of the trigger bytestream ROB
-            configuredAlg.ExtraInputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))]
+            configuredAlg.ExtraInputs |= {('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))}
 
             ########################
             #     HLT_Clusters     #

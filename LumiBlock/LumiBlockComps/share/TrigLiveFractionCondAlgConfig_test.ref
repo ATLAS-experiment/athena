@@ -5,7 +5,7 @@ Py:ComponentAccumulator    INFO      * TrigLiveFractionOutputKey: TrigLiveFracti
 --- run1
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['AthenaAttributeList', '/TRIGGER/LUMI/PerBcidDeadtime'], ['CondAttrListCollection', '/TRIGGER/OFLLUMI/LBLESTOFL'], ['AthenaAttributeList', '/TDAQ/OLC/LHC/FILLPARAMS'], ['CondAttrListCollection', '/TDAQ/OLC/BUNCHLUMIS'], ['AthenaAttributeList', '/TRIGGER/LVL1/BunchGroupContent'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/TDAQ/OLC/LHC/FILLPARAMS'), ('AthenaAttributeList', '/TRIGGER/LUMI/PerBcidDeadtime'), ('AthenaAttributeList', '/TRIGGER/LVL1/BunchGroupContent'), ('CondAttrListCollection', '/TDAQ/OLC/BUNCHLUMIS'), ('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/OFLLUMI/LBLESTOFL')}
 Py:ComponentAccumulator    INFO  \__ FillParamsCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * FillParamsFolderInputKey: /TDAQ/OLC/LHC/FILLPARAMS
 Py:ComponentAccumulator    INFO      * FillParamsOutputKey: FillParamsCondData

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -183,7 +183,7 @@ CLID VarHandleKey::clid() const
 /**
  * @brief Prevent this method from being called.
  */
-void VarHandleKey::setKey(DataObjID /*key*/) const
+void VarHandleKey::setKey(DataObjID /*key*/)
 {
   throw SG::ExcForbiddenMethod ("VarHandleKey::setKey");
 }
@@ -192,7 +192,7 @@ void VarHandleKey::setKey(DataObjID /*key*/) const
 /**
  * @brief Prevent this method from being called.
  */
-void VarHandleKey::updateKey(std::string /*key*/) const
+void VarHandleKey::updateKey(std::string /*key*/)
 {
   throw SG::ExcForbiddenMethod ("VarHandleKey::updateKey");
 }

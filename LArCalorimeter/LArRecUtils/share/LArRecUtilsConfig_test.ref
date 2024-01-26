@@ -12,7 +12,7 @@ Py:LArAutoCorrTotalCondAlgCfg    INFO DeltaBunch 1
 Py:LArAutoCorrTotalCondAlgCfg    INFO  no pileup noise in LArAutoCorrTotal 
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'], ['LArShape32MC', '/LAR/ElecCalibMC/Shape'], ['LArNoiseMC', '/LAR/ElecCalibMC/Noise'], ['LArPedestalMC', '/LAR/ElecCalibMC/Pedestal'], ['LArAutoCorrMC', '/LAR/ElecCalibMC/AutoCorr'], ['LArfSamplMC', '/LAR/ElecCalibMC/fSampl'], ['LArMinBiasMC', '/LAR/ElecCalibMC/MinBias']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'), ('LArAutoCorrMC', '/LAR/ElecCalibMC/AutoCorr'), ('LArMinBiasMC', '/LAR/ElecCalibMC/MinBias'), ('LArNoiseMC', '/LAR/ElecCalibMC/Noise'), ('LArPedestalMC', '/LAR/ElecCalibMC/Pedestal'), ('LArShape32MC', '/LAR/ElecCalibMC/Shape'), ('LArfSamplMC', '/LAR/ElecCalibMC/fSampl')}
 Py:ComponentAccumulator    INFO  \__ LArOnOffMappingAlg (cond alg)
 Py:ComponentAccumulator    INFO      * ReadKey: /LAR/Identifier/OnOffIdMap
 Py:ComponentAccumulator    INFO  \__ LArMCSymCondAlg (cond alg)
@@ -50,7 +50,7 @@ Py:LArAutoCorrTotalCondAlgCfg    INFO DeltaBunch 1
 Py:LArAutoCorrTotalCondAlgCfg    INFO  no pileup noise in LArAutoCorrTotal 
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'], ['LArShape32MC', '/LAR/ElecCalibMC/Shape'], ['LArAutoCorrMC', '/LAR/ElecCalibMC/AutoCorr'], ['LArNoiseMC', '/LAR/ElecCalibMC/Noise'], ['LArPedestalMC', '/LAR/ElecCalibMC/Pedestal'], ['LArfSamplMC', '/LAR/ElecCalibMC/fSampl'], ['LArMinBiasMC', '/LAR/ElecCalibMC/MinBias']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/LAR/Identifier/OnOffIdMap'), ('LArAutoCorrMC', '/LAR/ElecCalibMC/AutoCorr'), ('LArMinBiasMC', '/LAR/ElecCalibMC/MinBias'), ('LArNoiseMC', '/LAR/ElecCalibMC/Noise'), ('LArPedestalMC', '/LAR/ElecCalibMC/Pedestal'), ('LArShape32MC', '/LAR/ElecCalibMC/Shape'), ('LArfSamplMC', '/LAR/ElecCalibMC/fSampl')}
 Py:ComponentAccumulator    INFO  \__ LArOnOffMappingAlg (cond alg)
 Py:ComponentAccumulator    INFO      * ReadKey: /LAR/Identifier/OnOffIdMap
 Py:ComponentAccumulator    INFO  \__ LArMCSymCondAlg (cond alg)
@@ -78,7 +78,7 @@ Py:ComponentAccumulator    INFO      * firstSample: 0
 --- LArRoIMapCondAlg
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['AthenaAttributeList', '/LAR/Identifier/FebRodMap'], ['AthenaAttributeList', '/LAR/Identifier/OnOffIdMap']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/LAR/Identifier/FebRodMap'), ('AthenaAttributeList', '/LAR/Identifier/OnOffIdMap')}
 Py:ComponentAccumulator    INFO  \__ LArFebRodMappingAlg (cond alg)
 Py:ComponentAccumulator    INFO      * ReadKey: /LAR/Identifier/FebRodMap
 Py:ComponentAccumulator    INFO  \__ LArOnOffMappingAlg (cond alg)

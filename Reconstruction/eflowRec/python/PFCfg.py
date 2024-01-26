@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
@@ -24,16 +24,16 @@ def PFTrackSelectorAlgCfg(inputFlags,algName,useCaching=True):
 
     # P->T conversion extra dependencies
     if inputFlags.Detector.GeometryITk:
-        PFTrackSelector.ExtraInputs = [
+        PFTrackSelector.ExtraInputs = {
             ("InDetDD::SiDetectorElementCollection", "ConditionStore+ITkPixelDetectorElementCollection"),
             ("InDetDD::SiDetectorElementCollection", "ConditionStore+ITkStripDetectorElementCollection"),
-        ]
+        }
     else:
-        PFTrackSelector.ExtraInputs = [
+        PFTrackSelector.ExtraInputs = {
             ("InDetDD::SiDetectorElementCollection", "ConditionStore+PixelDetectorElementCollection"),
             ("InDetDD::SiDetectorElementCollection", "ConditionStore+SCT_DetectorElementCollection"),
             ("InDetDD::TRT_DetElementContainer", "ConditionStore+TRT_DetElementContainer"),
-        ]
+        }
 
     result.addEventAlgo (PFTrackSelector, primary=True)
 
@@ -352,7 +352,7 @@ def getMuonFlowElementAssocAlgorithm(inputFlags, algName="", **kwargs):
     if kwargs['LinkNeutralFEClusters'] and not useMuonTopoClusters:
        # We dereference links to cells, so make sure we have the
        # dependency.
-       PFMuonFlowElementLinkerAlgorithm.ExtraInputs += [('CaloCellContainer', inputFlags.Egamma.Keys.Input.CaloCells)]
+       PFMuonFlowElementLinkerAlgorithm.ExtraInputs.add(('CaloCellContainer', inputFlags.Egamma.Keys.Input.CaloCells))
 
     if kwargs['LinkNeutralFEClusters']:
         if kwargs['doTCC']:

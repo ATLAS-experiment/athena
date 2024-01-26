@@ -1,7 +1,7 @@
 --- run2
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['CondAttrListCollection', '/TRIGGER/OFLLUMI/OflPrefLumi'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/OFLLUMI/OflPrefLumi')}
 Py:ComponentAccumulator    INFO  \__ OnlineLumiCalibrationCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * CalibrationFolderInputKey: /TDAQ/OLC/CALIBRATIONS
 Py:ComponentAccumulator    INFO      * LumiCalibOutputKey: OnlineLumiCalibrationCondData
@@ -13,7 +13,7 @@ IOVDbSvc: ['/TagInfo<metaOnly/>', '<db>COOLOFL_TRIGGER/CONDBR2</db> /TRIGGER/OFL
 --- run2/express
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['CondAttrListCollection', '/TRIGGER/LUMI/OnlPrefLumi'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/LUMI/OnlPrefLumi')}
 Py:ComponentAccumulator    INFO  \__ OnlineLumiCalibrationCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * CalibrationFolderInputKey: /TDAQ/OLC/CALIBRATIONS
 Py:ComponentAccumulator    INFO      * LumiCalibOutputKey: OnlineLumiCalibrationCondData
@@ -25,7 +25,7 @@ IOVDbSvc: ['/TagInfo<metaOnly/>', '<db>COOLONL_TRIGGER/CONDBR2</db> /TRIGGER/LUM
 --- run1
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['CondAttrListCollection', '/TRIGGER/OFLLUMI/LBLESTOFL'], ['AthenaAttributeList', '/TDAQ/OLC/LHC/FILLPARAMS'], ['CondAttrListCollection', '/TDAQ/OLC/BUNCHLUMIS'], ['AthenaAttributeList', '/TRIGGER/LVL1/BunchGroupContent'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/TDAQ/OLC/LHC/FILLPARAMS'), ('AthenaAttributeList', '/TRIGGER/LVL1/BunchGroupContent'), ('CondAttrListCollection', '/TDAQ/OLC/BUNCHLUMIS'), ('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/OFLLUMI/LBLESTOFL')}
 Py:ComponentAccumulator    INFO  \__ FillParamsCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * FillParamsFolderInputKey: /TDAQ/OLC/LHC/FILLPARAMS
 Py:ComponentAccumulator    INFO      * FillParamsOutputKey: FillParamsCondData
@@ -50,7 +50,7 @@ IOVDbSvc: ['/TagInfo<metaOnly/>', '<db>COOLOFL_TRIGGER/COMP200</db> /TRIGGER/OFL
 --- run1/express
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['CondAttrListCollection', '/TRIGGER/LUMI/LBLESTONL'], ['AthenaAttributeList', '/TDAQ/OLC/LHC/FILLPARAMS'], ['CondAttrListCollection', '/TDAQ/OLC/BUNCHLUMIS'], ['AthenaAttributeList', '/TRIGGER/LVL1/BunchGroupContent'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/TDAQ/OLC/LHC/FILLPARAMS'), ('AthenaAttributeList', '/TRIGGER/LVL1/BunchGroupContent'), ('CondAttrListCollection', '/TDAQ/OLC/BUNCHLUMIS'), ('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/LUMI/LBLESTONL')}
 Py:ComponentAccumulator    INFO  \__ FillParamsCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * FillParamsFolderInputKey: /TDAQ/OLC/LHC/FILLPARAMS
 Py:ComponentAccumulator    INFO      * FillParamsOutputKey: FillParamsCondData
@@ -75,7 +75,7 @@ IOVDbSvc: ['/TagInfo<metaOnly/>', '<db>COOLONL_TRIGGER/COMP200</db> /TRIGGER/LUM
 --- mc
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['AthenaAttributeList', '/Digitization/Parameters']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/Digitization/Parameters')}
 Py:ComponentAccumulator    INFO  \__ LuminosityCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * DigitizationFolderInputKey: /Digitization/Parameters
 Py:ComponentAccumulator    INFO      * IsMC: True
@@ -83,7 +83,7 @@ Py:ComponentAccumulator    INFO      * LuminosityOutputKey: LuminosityCondData
 --- online
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['CondAttrListCollection', '/TRIGGER/LUMI/HLTPrefLumi'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/LUMI/HLTPrefLumi')}
 Py:ComponentAccumulator    INFO  \__ OnlineLumiCalibrationCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * CalibrationFolderInputKey: /TDAQ/OLC/CALIBRATIONS
 Py:ComponentAccumulator    INFO      * LumiCalibOutputKey: OnlineLumiCalibrationCondData
@@ -95,7 +95,7 @@ Py:ComponentAccumulator    INFO      * SkipInvalid: False
 --- forced online
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['CondAttrListCollection', '/TRIGGER/LUMI/HLTPrefLumi'], ['CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS']]
+Py:ComponentAccumulator    INFO      * Load: {('CondAttrListCollection', '/TDAQ/OLC/CALIBRATIONS'), ('CondAttrListCollection', '/TRIGGER/LUMI/HLTPrefLumi')}
 Py:ComponentAccumulator    INFO  \__ OnlineLumiCalibrationCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * CalibrationFolderInputKey: /TDAQ/OLC/CALIBRATIONS
 Py:ComponentAccumulator    INFO      * LumiCalibOutputKey: OnlineLumiCalibrationCondData

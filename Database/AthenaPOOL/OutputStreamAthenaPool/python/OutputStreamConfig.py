@@ -75,9 +75,9 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
       # conflicts.
       outputStream.TakeItemsFromInput = True
    outputStream.AcceptAlgs += AcceptAlgs
-   outputStream.ExtraOutputs += [("DataHeader", f"StoreGateSvc+{outputStreamName}")]
+   outputStream.ExtraOutputs.add(("DataHeader", f"StoreGateSvc+{outputStreamName}"))
    if flags.Scheduler.CheckOutputUsage and flags.Concurrency.NumThreads > 0:
-      outputStream.ExtraInputs = [tuple(l.split('#')) for l in finalItemList if '*' not in l and 'Aux' not in l]
+      outputStream.ExtraInputs = {tuple(l.split('#')) for l in finalItemList if '*' not in l and 'Aux' not in l}
       # Ignore dependencies
       from AthenaConfiguration.MainServicesConfig import OutputUsageIgnoreCfg
       result.merge(OutputUsageIgnoreCfg(flags, outputStream.name))

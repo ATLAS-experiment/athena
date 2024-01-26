@@ -1,5 +1,5 @@
 LArCalib_Delay_OFC_Cali_jobOptions.py
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
   
 # Modified version:
 # - doOFC=False switch off the OFC computation and storing
@@ -880,7 +880,7 @@ if (WriteNtuple):
       LArCaliWaves2Ntuple.CalibMapKey = "LArCalibIdMapSC"
       from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloSuperCellAlignCondAlg
       condSeq += CaloSuperCellAlignCondAlg("CaloSuperCellAlignCondAlg") 
-      LArCaliWaves2Ntuple.ExtraInputs += (('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
+      LArCaliWaves2Ntuple.ExtraInputs.add(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
    topSequence+=LArCaliWaves2Ntuple
    
    theApp.HistogramPersistency = "ROOT"

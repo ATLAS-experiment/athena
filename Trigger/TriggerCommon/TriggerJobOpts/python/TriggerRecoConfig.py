@@ -254,7 +254,7 @@ def Run1Run2BSExtractionCfg( flags ):
     robIDMap = {}   # map of result keys and their ROB ID
 
     # Add fictional output to ensure data dependency in AthenaMT
-    extr.ExtraOutputs += [("TrigBSExtractionOutput", "StoreGateSvc+TrigBSExtractionOutput")]
+    extr.ExtraOutputs.add(("TrigBSExtractionOutput", "StoreGateSvc+TrigBSExtractionOutput"))
 
     if flags.Trigger.decodeHLT:
         # Run-1: add xAOD conversion tool
@@ -420,7 +420,7 @@ def Run3TriggerBSUnpackingCfg(flags):
         )
         # Full HLT result also has slimmed navigation summary
         if dstype == '':
-            deserialiser.ExtraOutputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+DummyForGapFiller')]
+            deserialiser.ExtraOutputs.add(('xAOD::TrigCompositeContainer' , 'StoreGateSvc+DummyForGapFiller'))
         else:
             deserialiser.SkipDuplicateRecords = True
             deserialiser.PermitMissingModule = True

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // CondInputLoader.h 
@@ -52,8 +52,7 @@ class CondInputLoader
   RootType loadDict (const std::string& name);
 
   /// Containers
-  Gaudi::Property<DataObjIDColl> m_load{this,"Load",{},
-                                        "List of objects to be loaded","OrderedSet<std::vector<std::string> >"};
+  Gaudi::Property<DataObjIDColl> m_load{this,"Load",{},"List of objects to be loaded"};
   DataObjIDColl  m_handlesToCreate;
   std::vector< SG::VarHandleKey > m_vhk;
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,11 +19,9 @@ def LArRawDataContByteStreamToolConfig (name="LArRawDataContByteStreamTool",
             key = str(noisealg.OutputKey)
             if key.find ('+') < 0:
                key = 'ConditionStore+' + key
-            stream.ExtraInputs += [('CaloNoise', key)]
-
-            stream.ExtraInputs += [('LArOnOffIdMapping', 'ConditionStore+LArOnOffIdMap')]
-
-            stream.ExtraInputs += [('LArFebRodMapping', 'ConditionStore+LArFebRodMap')]
+            stream.ExtraInputs |= {('CaloNoise', key),
+                                   ('LArOnOffIdMapping', 'ConditionStore+LArOnOffIdMap'),
+                                   ('LArFebRodMapping', 'ConditionStore+LArFebRodMap')}
       tool.InitializeForWriting = InitializeForWriting
       return tool
 
@@ -52,11 +50,11 @@ def LArRawDataContByteStreamToolCfg (flags,
          acc.merge(LArOnOffIdMappingCfg(flags))
          acc.merge(LArFebRodMappingCfg(flags))
 
-         extraOutputs = [
+         extraOutputs = {
             ('CaloNoise', 'ConditionStore+totalNoise'),
             ('LArOnOffIdMapping', 'ConditionStore+LArOnOffIdMap'),
             ('LArFebRodMapping', 'ConditionStore+LArFebRodMap'),
             ('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager')
-         ]
+         }
 
       return acc, extraOutputs

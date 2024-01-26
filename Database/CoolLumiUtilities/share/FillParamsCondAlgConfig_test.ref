@@ -1,7 +1,7 @@
 --- data
 Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO      * Load: [['AthenaAttributeList', '/TDAQ/OLC/LHC/FILLPARAMS']]
+Py:ComponentAccumulator    INFO      * Load: {('AthenaAttributeList', '/TDAQ/OLC/LHC/FILLPARAMS')}
 Py:ComponentAccumulator    INFO  \__ FillParamsCondAlg (cond alg)
 Py:ComponentAccumulator    INFO      * FillParamsFolderInputKey: /TDAQ/OLC/LHC/FILLPARAMS
 Py:ComponentAccumulator    INFO      * FillParamsOutputKey: FillParamsCondData

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from future import standard_library
 standard_library.install_aliases()
@@ -866,7 +866,7 @@ if (WriteNtuple):
       LArRamps2Ntuple.CalibMapKey = "LArCalibIdMapSC"
       from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloSuperCellAlignCondAlg
       condSeq += CaloSuperCellAlignCondAlg("CaloSuperCellAlignCondAlg")
-      LArRamps2Ntuple.ExtraInputs += (('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
+      LArRamps2Ntuple.ExtraInputs.add(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
    
    topSequence+= LArRamps2Ntuple
       

@@ -337,7 +337,7 @@ def HLTSeedingCfg(flags, seqName = None):
     from AthenaConfiguration.Enums import Format
     if flags.Input.Format is Format.POOL:
         transTypeKey = ("TransientBSOutType","StoreGateSvc+TransientBSOutKey")
-        decoderAlg.ExtraInputs += [transTypeKey]
+        decoderAlg.ExtraInputs.add(transTypeKey)
 
     decoderAlg.RoIBRoIUnpackers += [
         CompFactory.FSRoIsUnpackingTool("FSRoIsUnpackingTool", Decisions=mapThresholdToL1DecisionCollection("FSNOSEED"),

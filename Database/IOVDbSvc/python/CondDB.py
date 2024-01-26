@@ -235,9 +235,9 @@ This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
         self.iovdbsvc.Folders+=[folderadd]
 
         if className:
-            key = [className, self.extractFolder(folder)]
+            key = (className, self.extractFolder(folder))
             if key not in condInputLoader.Load:
-                condInputLoader.Load += [ key ]
+                condInputLoader.Load.add(key)
 
     def addFolderWithTag(self,ident,folder,tag,force=False,forceMC=False,forceData=False,className=None):
         "Add access to the given folder/schema, using a specified tag"
@@ -276,9 +276,11 @@ This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
             if (self.iovdbsvc.Folders[i].find(folder)>=0):
                 del self.iovdbsvc.Folders[i]
                 break
-        for i in range(0, len(condInputLoader.Load)):
-            if (condInputLoader.Load[i][-1] == self.extractFolder(folder)):
-                del condInputLoader.Load[i]
+
+        folderName = self.extractFolder(folder)
+        for f in condInputLoader.Load:
+            if (f[-1] == folderName):
+                condInputLoader.Load.remove(f)  # OK since we break after this
                 break
 
     def folderRequested(self,folder):

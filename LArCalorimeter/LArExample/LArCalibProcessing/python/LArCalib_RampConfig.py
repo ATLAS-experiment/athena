@@ -135,7 +135,7 @@ def LArRampCfg(flags):
          rmpFlt=CompFactory.getComp("LArFlatConditionsAlg<LArRampFlat>")("RampFltVal")
        result.merge(addFolders(flags,fldr,"LAR_ONL"))
        condLoader=result.getCondAlgo("CondInputLoader")
-       condLoader.Load.append(("CondAttrListCollection",fldr))
+       condLoader.Load.add(("CondAttrListCollection",fldr))
 
        rmpFlt.ReadKey=fldr
        rmpFlt.WriteKey="LArRampRef"

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # TrigDB modifier
 # Usage: athenaHLT.py --postcommand 'include("TriggerJobOpts/dbmod_BFieldAutoConfig.py")' ...
 #
@@ -13,7 +13,7 @@ log.info('Configuring job to read field maps from COOL/DCS')
 # Add the DCS folder
 f = '<db>COOLOFL_DCS/CONDBR2</db> /EXT/DCS/MAGNETS/SENSORDATA'
 iProperty('IOVDbSvc').Folders += [f]
-iProperty('CondInputLoader').Load += [['CondAttrListCollection','/EXT/DCS/MAGNETS/SENSORDATA']]
+iProperty('CondInputLoader').Load.add(['CondAttrListCollection','/EXT/DCS/MAGNETS/SENSORDATA'])
 # Configure CondAlgs
 iProperty('AtlasFieldCacheCondAlg').UseDCS = True
 iProperty('AtlasFieldMapCondAlg').LoadMapOnStart = False

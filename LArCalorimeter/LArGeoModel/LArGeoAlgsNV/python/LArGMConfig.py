@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -31,7 +31,7 @@ def LArGMCfg(flags):
         if activateCondAlgs:
             result.addCondAlgo(CompFactory.LArAlignCondAlg())
             result.addCondAlgo(CompFactory.CaloAlignCondAlg())
-            AthReadAlg_ExtraInputs = []
+            AthReadAlg_ExtraInputs = set()
             caloCellsInInput = "CaloCellContainer" in [i.split('#')[0] for i in flags.Input.TypedCollections]
             sCellsInInput = False
             caloCellKeys = []
@@ -44,13 +44,13 @@ def LArGMCfg(flags):
                     if key != 'AllCalo':
                         sCellsInInput = True
 
-            AthReadAlg_ExtraInputs.append(('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'))            
+            AthReadAlg_ExtraInputs.add(('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'))
             if (flags.GeoModel.Run >= LHCPeriod.Run3 and flags.Detector.GeometryTile) or sCellsInInput:
                 # TODO: avoid depending on Tile in SuperCell alignment
                 from TileGeoModel.TileGMConfig import TileGMCfg
                 result.merge(TileGMCfg(flags))
                 result.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
-                AthReadAlg_ExtraInputs.append(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
+                AthReadAlg_ExtraInputs.add(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
 
 
             if caloCellsInInput:

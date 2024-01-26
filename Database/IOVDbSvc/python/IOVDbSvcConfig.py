@@ -90,7 +90,7 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     the end time for this range will be set to just past the current event.
     Subsequent accesses will update this end time for subsequent events.
     This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
-    loadFolders = []
+    loadFolders = set()
     folders = []
     sqliteFolders=getSqliteContent(flags.IOVDb.SqliteInput,
                                    flags.IOVDb.SqliteFolders,
@@ -100,8 +100,7 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
         fse= _extractFolder(fs)
         # Add class-name to CondInputLoader (if reqired)
         if className is not None:
-            loadFolders.append((className, fse))
-
+            loadFolders.add((className, fse))
 
         if fse in sqliteFolders:
             msg.warning(f'Reading folder {fs} from sqlite, bypassing production database')
@@ -134,7 +133,7 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     result = IOVDbSvcCfg(flags)
     result.getPrimary().Folders+=folders
     if loadFolders:
-        result.getCondAlgo('CondInputLoader').Load += loadFolders
+        result.getCondAlgo('CondInputLoader').Load |= loadFolders
 
     if flags.IOVDb.CleanerRingSize > 0:
         #HLT-jobs set IOVDb.CleanerRingSize to 0 to run without the cleaning-service, 
