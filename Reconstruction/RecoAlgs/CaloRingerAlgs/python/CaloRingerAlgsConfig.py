@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -375,12 +375,13 @@ def CaloRingerSteeringCfg(flags,name="CaloRingerSteering"):
 
 
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.Output.doWriteAOD = True
-    ConfigFlags.Output.ESDFileName = 'testing.ESD.root'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.Output.doWriteAOD = True
+    flags.Output.ESDFileName = 'testing.ESD.root'
+    flags.lock()
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(CaloRingerSteeringCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(CaloRingerSteeringCfg(flags))
