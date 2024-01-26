@@ -182,8 +182,8 @@ if not testWithoutPartition:
 
 def StreamToFileToolCfg(flags, name='StreamToFileTool',**kwargs):
     result = ComponentAccumulator()
-    prefixFileName = "%s/.Unknown/JiveXMLtest" % outputDirectory
-    kwargs.setdefault("FileNamePrefix", prefixFileName)
+    #prefixFileName = "%s/.Unknown/JiveXMLtest" % outputDirectory
+    #kwargs.setdefault("FileNamePrefix", prefixFileName)
     kwargs.setdefault("MyTest", "EDOcofig")
     the_tool = CompFactory.JiveXML.StreamToFileTool(**kwargs)
     result.setPrivateTools(the_tool)
@@ -201,9 +201,20 @@ if not isOfflineTest:
         result.addPublicTool(the_tool)
         return result
     acc.merge(StreamToServerToolCfg(flags))
-
+print('type in ED: ', type(streamToFileTool))
+print('StreamToFileTool in ED',getattr(streamToFileTool,'MyTest'))
 from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
-acc.merge(AlgoJiveXMLCfg(flags))
+acc.merge(AlgoJiveXMLCfg(flags,StreamToFileTool=streamToFileTool))
+
+# This creates an ESD file per event which is renamed and moved to the desired output
+# dir in the VP1 Event Prod alg
+from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerSvcCfg
+acc.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
+
+StreamESD = acc.getEventAlgo("OutputStreamESD")
+print('StreamESD',type(StreamESD))
+vp1Alg = CompFactory.VP1EventProd(name="VP1EventProd", InputPoolFile = StreamESD.OutputFile)
+acc.addEventAlgo(vp1Alg)
 
 from EventDisplaysOnline.OnlineEventDisplaysSvc import OnlineEventDisplaysSvc
 svc = OnlineEventDisplaysSvc(
@@ -214,6 +225,7 @@ svc = OnlineEventDisplaysSvc(
     ProjectTags = projectTags,         # Project tags that are allowed to be made public
     Public = publicStreams,            # These streams go into public stream when Ready4Physics
     StreamToFileTool = streamToFileTool,
+    VP1EventProducer = vp1Alg,
 )
 acc.addService(svc, create=True)
 

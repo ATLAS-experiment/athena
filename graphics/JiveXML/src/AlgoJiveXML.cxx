@@ -298,7 +298,7 @@ namespace JiveXML{
     /**
      * Now stream the events to all registered streaming tools
      */
-  
+
     ATH_MSG_INFO("Streaming event to file");
     if ( (m_StreamToFileTool->StreamEvent(eventNo, runNo, m_FormatTool->getFormattedEvent()).isFailure() )){
 	  ATH_MSG_WARNING( "Could not stream event to file" );
