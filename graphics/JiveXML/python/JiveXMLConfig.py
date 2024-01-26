@@ -35,6 +35,9 @@ def getDataTypes(flags, haveRDO=False, readAOD=False):
     if haveRDO and flags.Detector.EnableSCT:
         data_types += ["JiveXML::SCTRDORetriever/SCTRDORetriever"]
 
+    # TODO this datatype is not yet understood by Atlantis
+    data_types += ["JiveXML::BeamSpotRetriever/BeamSpotRetriever"]
+
     # Truth (from TruthJiveXML_DataTypes.py)
     if not readAOD:
         data_types += ["JiveXML::TruthTrackRetriever/TruthTrackRetriever"]
@@ -102,6 +105,9 @@ def InDetRetrieversCfg(flags):
 
     if flags.Detector.EnableTRT:
         result.merge(TRTRetrieverCfg(flags))
+
+    result.merge(BeamSpotRetrieverCfg(flags))
+
     return result
 
 
@@ -164,6 +170,13 @@ def TrackRetrieverCfg(flags, name="TrackRetriever", **kwargs):
     ### switch residual data off:
     kwargs.setdefault("DoWriteResiduals", False)
     the_tool = CompFactory.JiveXML.TrackRetriever(name, **kwargs)
+    result.addPublicTool(the_tool)
+    return result
+
+
+def BeamSpotRetrieverCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    the_tool = CompFactory.JiveXML.BeamSpotRetriever(name="BeamSpotRetriever", **kwargs)
     result.addPublicTool(the_tool)
     return result
 
