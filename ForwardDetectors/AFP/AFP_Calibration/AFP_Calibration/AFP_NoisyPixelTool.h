@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_CALIBRATION_AFP_NOISYPIXELTOOL_H
@@ -36,7 +36,7 @@ public:
 	void setSensitivity(double s) {m_sensitivity=s;}
 	double getSensitivity() const {return m_sensitivity;}
 	
-	void setMethods(std::vector<std::string> m) {m_methods=m;}
+	void setMethods(const std::vector<std::string>& m) {m_methods=m;}
 	std::vector<std::string> getMethods() const {return m_methods;}
 
 private:

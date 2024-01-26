@@ -18,22 +18,23 @@ int AFP_NoisyPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<
 	
 	TH2F tmp_output1(template_output);
 	tmp_output1.SetNameTitle(Form("leffpixels_found_%s",template_output.GetName()), Form("low efficiency pixels, found, %s", template_output.GetTitle()));
-	output.push_back(tmp_output1);
-	TH2F& leffpixels_found_output = output.at(1);
-	
+
 	TH2F tmp_output2(template_output);
 	tmp_output2.SetNameTitle(Form("noisypixels_eff_%s",template_output.GetName()), Form("noisy pixels, efficiency, %s", template_output.GetTitle()));
-	output.push_back(tmp_output2);
-	TH2F& noisypixels_eff_output = output.at(2);
-	
+
 	TH2F tmp_output3(template_output);
 	tmp_output3.SetNameTitle(Form("leffpixels_eff_%s",template_output.GetName()), Form("low efficiency pixels, efficiency, %s", template_output.GetTitle()));
-	output.push_back(tmp_output3);
-	TH2F& leffpixels_eff_output = output.at(3);
-		
 	TH2F& noisypixels_found_output = output.at(0);
 	noisypixels_found_output.SetNameTitle(Form("noisypixels_found_%s",template_output.GetName()), Form("noisy pixels, found, %s", template_output.GetTitle()));
 
+	output.push_back(tmp_output1);
+	output.push_back(tmp_output2);
+	output.push_back(tmp_output3);
+
+	TH2F& leffpixels_found_output = output.at(1);
+	TH2F& noisypixels_eff_output = output.at(2);
+	TH2F& leffpixels_eff_output = output.at(3);
+		
 	
 	if(input->GetMaximum()<0.5) return 0;
 

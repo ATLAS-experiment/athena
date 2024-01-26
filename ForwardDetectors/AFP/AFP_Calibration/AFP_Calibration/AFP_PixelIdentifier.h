@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef AFP_CALIBRATION_AFP_PIXELIDENTIFIER_H
 #define AFP_CALIBRATION_AFP_PIXELIDENTIFIER_H
@@ -21,7 +21,9 @@
 
 class AFP_PixelIdentifier {
 public:
-	AFP_PixelIdentifier(const std::string input_name="AFP_PixelHistoFiller.root", const std::string output_name="AFP_PixelIdentifier.root", std::vector<std::string> m_pixelTools_names={"AFP_DeadPixel", "AFP_NoisyPixel"});
+	AFP_PixelIdentifier(const std::string& input_name="AFP_PixelHistoFiller.root",
+                            const std::string& output_name="AFP_PixelIdentifier.root",
+                            const std::vector<std::string>& pixelTools={"AFP_DeadPixel", "AFP_NoisyPixel"});
 	~AFP_PixelIdentifier() = default;
 
 	int execute();
