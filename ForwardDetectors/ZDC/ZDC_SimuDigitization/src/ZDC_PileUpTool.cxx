@@ -162,7 +162,7 @@ StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx){
   for (int iside : {-1, 1}){
     xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
     sumsContainer->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
-    new_sum->setZdcSide((iside==0) ? -1 : 1);
+    new_sum->setZdcSide(iside);
     new_sum->auxdata<uint16_t>("LucrodTriggerSideAmp") = 42;
   }
 
@@ -321,7 +321,7 @@ TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZD
       //The module hasn't been seen yet, create a new hit with values modified by the efficiency factor
       //The ID is modified because we initially used channel to denote the position of the rods for these efficiency cuts
       //Now that that's done, we make sure the type is SINGLECHANNEL and the channel is 0
-      newHits[side][module] = new ZDC_SimFiberHit( m_ZdcID->channel_id(side, module, ZdcIDType::SINGLECHANNEL, 0), efficiency*hit.getNPhotons(), efficiency*hit.getEdep());
+      newHits[side][module] = new ZDC_SimFiberHit(m_ZdcID->channel_id(m_ZdcID->side(id), module, ZdcIDType::SINGLECHANNEL, 0), efficiency * hit.getNPhotons(), efficiency * hit.getEdep());
     }else{
       //The module has been seen, add the photons and energy from this new hit to it
       newHits[side][module]->Add( efficiency*hit.getNPhotons(), efficiency*hit.getEdep());
@@ -376,7 +376,7 @@ void ZDC_PileUpTool::createAndStoreWaveform(const ZDC_SimFiberHit &hit, CLHEP::H
   std::shared_ptr<ZDCWaveformSampler> wfSampler;
   
   if(module < 4){//It's a ZDC channel
-    amplitude = CLHEP::RandPoissonQ::shoot(rndEngine, hit.getNPhotons()*m_zdcAdcPerPhoton);
+    amplitude = CLHEP::RandPoissonQ::shoot(rndEngine, hit.getNPhotons())*m_zdcAdcPerPhoton;
 
     if(m_LTQuadStepFilt){ 
       waveformPtr = std::make_shared<ZDCWaveformLTLinStep>("zdc",m_qsfRiseTime,m_qsfFallTime,m_qsfFilter);
@@ -387,7 +387,7 @@ void ZDC_PileUpTool::createAndStoreWaveform(const ZDC_SimFiberHit &hit, CLHEP::H
     t0 = m_zdct0;
 
   }else{ //It's an RPD channel
-    amplitude = CLHEP::RandPoissonQ::shoot(rndEngine, hit.getNPhotons()*m_rpdAdcPerPhoton);
+    amplitude = CLHEP::RandPoissonQ::shoot(rndEngine, hit.getNPhotons())*m_rpdAdcPerPhoton;
     waveformPtr = std::make_shared<ZDCWaveformFermiExp>("rpd",m_rpdRiseTime,m_rpdFallTime);
     wfSampler = std::make_shared<ZDCWaveformSampler>(m_freqMHz, 0, m_numTimeBins, 12, m_Pedestal, waveformPtr);
     t0 = m_rpdt0;
