@@ -60,6 +60,23 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                   'xAOD::SpacePointContainer#ITkStripOverlapSpacePoints',
                   'xAOD::SpacePointAuxContainer#ITkStripOverlapSpacePointsAux.' + strip_spacepoint_variables]
 
+    if flags.Acts.EDM.PersistifyTracks:
+
+        toAOD +=  ["xAOD::TrackSummaryContainer#SiSPSeededActsTrackTrackSummary",
+                   "xAOD::TrackSummaryAuxContainer#SiSPSeededActsTrackTrackSummaryAux.",
+                   "xAOD::TrackStateContainer#SiSPSeededActsTrackStates",
+                   "xAOD::TrackStateAuxContainer#SiSPSeededActsTrackStatesAux.",                
+                   "xAOD::TrackParametersContainer#SiSPSeededActsTrackParameters",
+                   "xAOD::TrackParametersAuxContainer#SiSPSeededActsTrackParametersAux.",
+                   "xAOD::TrackJacobianContainer#SiSPSeededActsTrackJacobians",
+                   "xAOD::TrackJacobianAuxContainer#SiSPSeededActsTrackJacobiansAux.",
+                   "xAOD::TrackMeasurementContainer#SiSPSeededActsTrackMeasurements",
+                   "xAOD::TrackMeasurementAuxContainer#SiSPSeededActsTrackMeasurementsAux.",
+                   "xAOD::TrackSurfaceContainer#SiSPSeededActsTrackStateSurfaces",
+                   "xAOD::TrackSurfaceAuxContainer#SiSPSeededActsTrackStateSurfacesAux.",
+                   "xAOD::TrackSurfaceContainer#SiSPSeededActsTrackSurfaces",
+                   "xAOD::TrackSurfaceAuxContainer#SiSPSeededActsTrackSurfacesAux."]
+                
     # If there is nothing to persistify, returns an empty CA
     if len(toAOD) == 0:
         return acc
