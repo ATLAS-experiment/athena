@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
 from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
+
+D3PD = CompFactory.D3PD
 
 def makeTileTriggerD3PDObject (name, prefix, object_name='TileTriggerD3PDObject', getter = None,
                            sgkey = None,
@@ -17,7 +18,7 @@ def makeTileTriggerD3PDObject (name, prefix, object_name='TileTriggerD3PDObject'
     print(" makeTileTriggerD3PDObject: sgkey = ", sgkey)
 
     if not getter:
-        getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+        getter = D3PD.SGDataVectorGetterTool \
                  (name + '_Getter',
                   TypeName = 'TileTriggerContainer',
                   SGKey = sgkey,
@@ -25,17 +26,17 @@ def makeTileTriggerD3PDObject (name, prefix, object_name='TileTriggerD3PDObject'
         
 
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 
 TileTriggerD3PDObject=D3PDObject(makeTileTriggerD3PDObject,'TileTrigger_','TileTriggerD3PDObject')
     
 TileTriggerD3PDObject.defineBlock (0, 
-                              'TileTrigger',
-                              CaloSysD3PDMaker.TileTriggerFillerTool)
+                                   'TileTrigger',
+                                   D3PD.TileTriggerFillerTool)

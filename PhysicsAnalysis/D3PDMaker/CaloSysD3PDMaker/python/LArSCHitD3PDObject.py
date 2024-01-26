@@ -1,12 +1,14 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
-from D3PDMakerCoreComps.D3PDObject import D3PDObject
+from D3PDMakerCoreComps.D3PDObject          import D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
 
-def _hookForLArSCHitD3PDObject_(c, *arg, **kw ):
+D3PD = CompFactory.D3PD
 
-    basFiller = getattr(c, c.name() + '_Basic', None)
+
+def _hookForLArSCHitD3PDObject_(c, flags, acc, *args, **kw):
+
+    basFiller = c.BlockFillers[0]
     print("getattr(c, c.name()) / Type= ", type(basFiller))
     if "CaloEtaCut" in list(kw.keys()):
         basFiller.CaloEtaCut = kw["CaloEtaCut"]
@@ -17,10 +19,10 @@ def _hookForLArSCHitD3PDObject_(c, *arg, **kw ):
     if "CaloDetectors" in list(kw.keys()):
         basFiller.CaloDetectors = kw["CaloDetectors"]
 
-    print("%s - CaloEtaCut = " % (basFiller.name()), basFiller.CaloEtaCut)
-    print("%s - CaloPhiCut = " % (basFiller.name()), basFiller.CaloPhiCut)
-    print("%s - CaloLayersCut = " % (basFiller.name()), basFiller.CaloLayers)
-    print("%s - CaloDetectors = " % (basFiller.name()), basFiller.CaloDetectors)
+    print("%s - CaloEtaCut = " % (basFiller.name), basFiller.CaloEtaCut)
+    print("%s - CaloPhiCut = " % (basFiller.name), basFiller.CaloPhiCut)
+    print("%s - CaloLayersCut = " % (basFiller.name), basFiller.CaloLayers)
+    print("%s - CaloDetectors = " % (basFiller.name), basFiller.CaloDetectors)
 
     return 
 
@@ -36,19 +38,19 @@ def _makeLArSCHit_obj_(name, prefix, object_name,
     if not sgKey:
         sgKey="LArHitEMB"
     if not getter:
-        getter = D3PDMakerCoreComps.SGObjGetterTool(
+        getter = D3PD.SGObjGetterTool(
             name + '_Getter',
             TypeName = typeName,
             SGKey = sgKey)
 
 
-    return D3PDMakerCoreComps.ObjFillerTool( name,
-                                             Prefix = prefix,
-                                             Getter = getter,
-                                             ObjectName = object_name,
-                                             SaveMetadata = \
-                                             D3PDMakerFlags.SaveObjectMetadata()
-                                             )
+    return D3PD.ObjFillerTool( name,
+                               Prefix = prefix,
+                               Getter = getter,
+                               ObjectName = object_name,
+                               SaveMetadata = \
+                               D3PDMakerFlags.SaveObjectMetadata
+                              )
     
 def make_LArSCHitD3PDObject( typeName="LArHitContainer",
                              sgKey="LArHitEMB",
@@ -61,7 +63,7 @@ def make_LArSCHitD3PDObject( typeName="LArHitContainer",
                                  "CaloLayers","CaloDetectors"],
                      sgkey=sgKey,
                      typename=typeName)
-    obj.defineBlock( 0, 'Basic', CaloSysD3PDMaker.LArSCHitFillerTool)
+    obj.defineBlock( 0, 'Basic', D3PD.LArSCHitFillerTool)
     obj.defineHook( _hookForLArSCHitD3PDObject_ )
     return obj
 
@@ -72,28 +74,3 @@ LArSCHitD3PDObject = make_LArSCHitD3PDObject( typeName="LArHitContainer",
                                              CaloPhiCut=[],
                                              CaloLayers=[],
                                              CaloDetectors=[],)
-#
-#      The arguments to the hook function are the object filler tool,
-#      followed by the arguments that were passed to __call__.
-#
-
-
-"""
-THIS WORKS BUT NO SELECTION DYNAMICALLY....
-LArSCHitD3PDObject = make_SG_D3PDObject( "LArHitContainer",
-                                         "LArHitEMB",
-                                         "sch_","LArSCHitD3PDObject",
-                                         allow_args=["CaloEtaCut" "CaloPhiCut","CaloLayers","CaloDetectors"]                                         )
-LArSCHitD3PDObject.defineBlock( 0, 'Basic', CaloSysD3PDMaker.LArSCHitFillerTool,
-                                CaloEtaCut=[0.4,0.425],
-                                CaloPhiCut=[-pi,pi],
-                                CaloLayers=[0,1,2,3],
-                                CaloDetectors=[1]
-                                )
-
-
-"""
-
-
-
-

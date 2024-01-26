@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# $Id$
+from D3PDMakerCoreComps.D3PDObject          import make_SGDataVector_D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
 
-import CaloSysD3PDMaker
-from D3PDMakerCoreComps.D3PDObject import make_SGDataVector_D3PDObject
+D3PD = CompFactory.D3PD
 
 """ level of details:
 0: digits
@@ -18,21 +18,21 @@ LArDigitD3PDObject = make_SGDataVector_D3PDObject( "LArDigitContainer",
                                                    "lardigit_", "LArDigitD3PDObject" )
 
 LArDigitD3PDObject.defineBlock( 0, 'Digits',
-                                CaloSysD3PDMaker.LArDigitFillerTool,
+                                D3PD.LArDigitFillerTool,
                                 SaveDigit= True,
                                 SaveId = True,
                                 SaveSCAAddress= False,
                                 DumpIterResults= False )
 
 LArDigitD3PDObject.defineBlock( 1, 'SCA',
-                                CaloSysD3PDMaker.LArDigitFillerTool,
+                                D3PD.LArDigitFillerTool,
                                 SaveDigit= False,
                                 SaveId = False,
                                 SaveSCAAddress= True,
                                 DumpIterResults= False )
 
 LArDigitD3PDObject.defineBlock( 2, 'ITER',
-                                CaloSysD3PDMaker.LArDigitFillerTool,
+                                D3PD.LArDigitFillerTool,
                                 SaveDigit= False,
                                 SaveId = False,
                                 SaveSCAAddress= False,

@@ -1,12 +1,13 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
-import CaloSysD3PDMaker
-import D3PDMakerCoreComps
-import EventCommonD3PDMaker
-from D3PDMakerCoreComps.D3PDObject import D3PDObject
-from CaloD3PDMaker.makeTileCellFilterAlg import makeTileCellFilterAlg
+from D3PDMakerCoreComps.D3PDObject            import D3PDObject
+from CaloD3PDMaker.TileCellFilterAlgConfig    import TileCellFilterAlgCfg
 from D3PDMakerCoreComps.IndexMultiAssociation import IndexMultiAssociation
+from AthenaConfiguration.ComponentFactory     import CompFactory
+
+D3PD = CompFactory.D3PD
+
 
 BaseSGKey='holder'
 
@@ -25,7 +26,7 @@ def makeTileD3PDObject (name, prefix, object_name='TileDetailsD3PDObject', gette
     print(" makeTileD3PDObject: sgkey = ", sgkey)
 
     if not getter:
-        getter = D3PDMakerCoreComps.SGDataVectorGetterTool \
+        getter = D3PD.SGDataVectorGetterTool \
                  (name + '_Getter',
                   TypeName = 'CaloCellContainer',
                   SGKey = sgkey,
@@ -33,34 +34,30 @@ def makeTileD3PDObject (name, prefix, object_name='TileDetailsD3PDObject', gette
         
     # create the selected cells
     from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
-    return D3PDMakerCoreComps.VectorFillerTool (name,
-                                                Prefix = prefix,
-                                                Getter = getter,
-                                                ObjectName = object_name,
-                                                SaveMetadata = \
-                                                D3PDMakerFlags.SaveObjectMetadata())
+    return D3PD.VectorFillerTool (name,
+                                  Prefix = prefix,
+                                  Getter = getter,
+                                  ObjectName = object_name,
+                                  SaveMetadata = \
+                                  D3PDMakerFlags.SaveObjectMetadata)
 
 
 
 # function to create the CaloCellContainer for selected
-def hookForTileCellFilterAlg(c, prefix, *args, **kw) :
+def hookForTileCellFilterAlg(c, flags, acc, *args, **kw):
 
     cellSigmaCut=-1.
     global BaseSGKey
     if BaseSGKey is None or BaseSGKey=='holder' : BaseSGKey='AllCalo'
-    sgkey = prefix
+    print ('aaa', args, kw)
+    sgkey = kw['prefix']
 
     print(" in makeTileD3PDObject, sgkey, cellSigmaCut = ",  sgkey, cellSigmaCut)
 
-    filter = makeTileCellFilterAlg(OutputCellsName=sgkey, 
-                                   CellSigmaCut=cellSigmaCut, 
-                                   CellsName = BaseSGKey)
-
-    from D3PDMakerConfig.D3PDMakerFlags           import D3PDMakerFlags
-    from AthenaCommon.AlgSequence import AlgSequence
-    preseq = AlgSequence (D3PDMakerFlags.PreD3PDAlgSeqName())
-    preseq +=filter
-
+    acc.merge (TileCellFilterAlgCfg (flags,
+                                     OutputCellsName=sgkey, 
+                                     CellSigmaCut=cellSigmaCut, 
+                                     CellsName = BaseSGKey))
     return
 
 def TileCellRawAssoc(parent,prefix='',target='',level=0,blockname=None,*args,**kw):
@@ -69,7 +66,7 @@ def TileCellRawAssoc(parent,prefix='',target='',level=0,blockname=None,*args,**k
         blockname=prefix+'TileCellRawAssociation'
 
     return IndexMultiAssociation(parent,
-                                 CaloSysD3PDMaker.TileCellRawAssociationTool,
+                                 D3PD.TileCellRawAssociationTool,
                                  target,
                                  prefix,
                                  level,
@@ -81,7 +78,7 @@ def TileCellDigitAssoc(parent,prefix='',target='',level=0,blockname=None,*args,*
         blockname=prefix+'TileCellDigitAssociation'
 
     return IndexMultiAssociation(parent,
-                                 CaloSysD3PDMaker.TileCellDigitAssociationTool,
+                                 D3PD.TileCellDigitAssociationTool,
                                  target,
                                  prefix,
                                  level,
@@ -95,7 +92,7 @@ def makeTileCellD3PDObject (maker, prefix,object_name) :
     cellD3PDObject.defineHook(hookForTileCellFilterAlg)
 
     cellD3PDObject.defineBlock (0, 'Kinematics',
-                                EventCommonD3PDMaker.FourMomFillerTool,
+                                D3PD.FourMomFillerTool,
                                 WriteE=True,
                                 WritePt=True,
                                 WriteEtaPhi=True,
@@ -103,7 +100,7 @@ def makeTileCellD3PDObject (maker, prefix,object_name) :
                                 )
     
     cellD3PDObject.defineBlock (1, 'TileDetails',
-                                CaloSysD3PDMaker.TileCellDetailsFillerTool,
+                                D3PD.TileCellDetailsFillerTool,
                                 SaveCellDetails=True,
                                 SavePositionInfo=False,
                                 )

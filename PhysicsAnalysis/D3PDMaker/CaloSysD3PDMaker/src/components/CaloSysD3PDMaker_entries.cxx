@@ -26,8 +26,6 @@
 #include "../CaloInfoFillerTool.h"
 #include "../TowerFillerTool.h"
 #include "../CaloCalibHitFillerTool.h"
-#include "../ClusterMomentFillerTool.h"
-#include "../ClusterTimeFillerTool.h"
 
 DECLARE_COMPONENT( D3PD::TileTTL1FillerTool )
 DECLARE_COMPONENT( D3PD::TileTriggerFillerTool )
@@ -59,5 +57,3 @@ DECLARE_COMPONENT( D3PD::CaloInfoFillerTool )
 DECLARE_COMPONENT( D3PD::TowerFillerTool )
 DECLARE_COMPONENT( D3PD::CaloCalibHitFillerTool )
 DECLARE_COMPONENT( D3PD::CaloCalibrationHitContainerGetterTool )
-DECLARE_COMPONENT( D3PD::ClusterMomentFillerTool )
-DECLARE_COMPONENT( D3PD::ClusterTimeFillerTool )

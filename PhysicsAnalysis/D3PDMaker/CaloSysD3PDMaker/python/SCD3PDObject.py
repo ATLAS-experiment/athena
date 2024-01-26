@@ -1,24 +1,21 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-import D3PDMakerCoreComps
 from D3PDMakerCoreComps.D3PDObject import D3PDObject, make_SG_D3PDObject
+from AthenaConfiguration.ComponentFactory   import CompFactory
 
-import CaloSysD3PDMaker
-
-from LArCabling.LArCablingAccess import LArOnOffIdMapping
-LArOnOffIdMapping()
+D3PD = CompFactory.D3PD
 
 
 AllSCD3PDObject = make_SG_D3PDObject( "CaloCellContainer",
                                    "AllCalo",
                                    "sc_",
                                    "SCD3PDObject" )
-AllSCD3PDObject.defineBlock( 0, 'Basic', CaloSysD3PDMaker.SCFillerTool )
+AllSCD3PDObject.defineBlock( 0, 'Basic', D3PD.SCFillerTool )
 
 
-def _hookForSCD3PDObject_(c, *arg, **kw ):
+def _hookForSCD3PDObject_(c, flags, acc, *args, **kw):
 
-    basFiller = getattr(c, c.name() + '_Basic', None)
+    basFiller = c.BlockFillers[0]
     print("getattr(c, c.name()) / Type= ", type(basFiller))
     if "CaloEtaCut" in list(kw.keys()):
         basFiller.CaloEtaCut = kw["CaloEtaCut"]
@@ -31,11 +28,15 @@ def _hookForSCD3PDObject_(c, *arg, **kw ):
     if "TileDLayerOption" in list(kw.keys()):
         basFiller.TileDLayerOption = kw["TileDLayerOption"]
         
-    print("%s - CaloEtaCut = " % (basFiller.name()), basFiller.CaloEtaCut)
-    print("%s - CaloPhiCut = " % (basFiller.name()), basFiller.CaloPhiCut)
-    print("%s - CaloLayersCut = " % (basFiller.name()), basFiller.CaloLayers)
-    print("%s - CaloDetectors = " % (basFiller.name()), basFiller.CaloDetectors)
-    #print "%s - TileDLayerOption = " % (basFiller.name()), basFiller.TileDLayerOption
+    print("%s - CaloEtaCut = " % (basFiller.name), basFiller.CaloEtaCut)
+    print("%s - CaloPhiCut = " % (basFiller.name), basFiller.CaloPhiCut)
+    print("%s - CaloLayersCut = " % (basFiller.name), basFiller.CaloLayers)
+    print("%s - CaloDetectors = " % (basFiller.name), basFiller.CaloDetectors)
+    #print "%s - TileDLayerOption = " % (basFiller.name), basFiller.TileDLayerOption
+
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg, LArOnOffIdMappingSCCfg
+    acc.merge (LArOnOffIdMappingCfg (flags))
+    acc.merge (LArOnOffIdMappingSCCfg (flags))
     return 
 
 def _makeSC_obj_(name, prefix, object_name,
@@ -49,18 +50,18 @@ def _makeSC_obj_(name, prefix, object_name,
     if not sgKey:
         sgKey="AllCalo"
     if not getter:
-        getter = D3PDMakerCoreComps.SGObjGetterTool(
+        getter = D3PD.SGObjGetterTool(
             name + '_Getter',
             TypeName = typeName,
             SGKey = sgKey)
 
-    return D3PDMakerCoreComps.ObjFillerTool( name,
-                                             Prefix = prefix,
-                                             Getter = getter,
-                                             ObjectName = object_name,
-                                             SaveMetadata = \
-                                             D3PDMakerFlags.SaveObjectMetadata()
-                                             )
+    return D3PD.ObjFillerTool( name,
+                               Prefix = prefix,
+                               Getter = getter,
+                               ObjectName = object_name,
+                               SaveMetadata = \
+                               D3PDMakerFlags.SaveObjectMetadata
+                              )
     
 def make_SCD3PDObject( typeName="CaloCellContainer",
                              sgKey="AllCalo",
@@ -73,7 +74,7 @@ def make_SCD3PDObject( typeName="CaloCellContainer",
                                  "CaloLayers","CaloDetectors","TileDLayerOption"],
                      sgkey=sgKey,
                      typename=typeName)
-    obj.defineBlock( 0, 'Basic', CaloSysD3PDMaker.SCFillerTool)
+    obj.defineBlock( 0, 'Basic', D3PD.SCFillerTool)
     obj.defineHook( _hookForSCD3PDObject_ )
     return obj
 
