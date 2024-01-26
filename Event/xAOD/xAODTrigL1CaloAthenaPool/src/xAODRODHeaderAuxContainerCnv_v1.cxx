@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -108,22 +108,11 @@ persToTrans( const xAOD::RODHeaderAuxContainer_v1* oldObj,
 
          // Copy the variable:
          void* dst = newInt.getDataArray( auxid );
-         // With newer versions of AthContainers we'll be able to replace
-         // this with:
-         //
-         //    const void* src = oldInt.getDataArrayAllowMissing( auxid );
-         //
-         // , and we won't even need to use a private function for it. But
-         // in order to make the code work in 20.1.X.Y, this ugly hack needs
-         // to be done to make the code safe.
-         const void* src = nullptr;
-         try {
-            const xAOD::RODHeaderContainer_v1& helper = oldInt;
-            src = helper.getDataArray( auxid );
-         } catch( const SG::ExcBadAuxVar& ) {
+         const void* src = oldInt.getDataArrayAllowMissing( auxid );
+         if ( !src ) {
             // This can happen with corrupt input files. In this case just
             // fill dummy values into the new object:
-            r.clear( auxid, dst, nindex );
+            r.clear( auxid, newInt, nindex, 1 );
             continue;
          }
          r.copy( auxid, dst, nindex, src, oindex );
