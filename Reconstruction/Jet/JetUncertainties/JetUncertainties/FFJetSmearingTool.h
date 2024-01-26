@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -38,9 +38,10 @@
 #include <TH2.h>
 #include <TH3.h>
 #include "TEnv.h"
-#include "TMath.h"
 
 #include <memory> //to use make_unique
+#include <string>
+#include <map>
 
 /// Implementation of the Forward Folding (FF) Jet smearing tool interface
 ///
@@ -146,17 +147,17 @@ namespace CP {
 
 
             // Private members
-            bool m_isInit;
+            bool m_isInit{};
             std::string m_release;
             std::string m_truth_jetColl;
             std::string m_truthlabelaccessor;
-            float m_EtaRange;
-            float m_MaxMass;
-            float m_MaxPt;
+            float m_EtaRange{};
+            float m_MaxMass{};
+            float m_MaxPt{};
             std::string m_calibArea;
             std::string m_histFileName;
             std::string m_MassDef_string;
-            JetTools::FFJetAllowedMassDefEnum m_MassDef;
+            JetTools::FFJetAllowedMassDefEnum m_MassDef{};
             std::string m_configFile;
             std::string m_path;
             std::string m_HistogramsFilePath;

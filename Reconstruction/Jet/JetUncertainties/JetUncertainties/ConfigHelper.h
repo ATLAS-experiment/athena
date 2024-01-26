@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETUNCERTAINTIES_CONFIGHELPER_H
@@ -12,6 +12,9 @@
 #include "AsgMessaging/StatusCode.h"
 
 #include "TString.h"
+#include <string>
+#include <vector>
+
 class TEnv;
 
 namespace jet
@@ -39,8 +42,8 @@ class ComponentHelper
         TString uncNameList;
         TString validName;
         TString subCompList;
-        int     splitNum;
-        int     groupNum;
+        int     splitNum{};
+        int     groupNum{};
         TString combMassStr;
         TString caloMassTerm;
         TString TAMassTerm;
@@ -56,19 +59,20 @@ class ComponentHelper
         TString ResultName;
 
         // Derived values to parse from the raw values
-        CompParametrization::TypeEnum parametrization;
-        CompMassDef::TypeEnum massDef;
-        CompScaleVar::TypeEnum scaleVar;
-        JetTopology::TypeEnum topology;
-        bool isSpecial;
-        PileupComp::TypeEnum pileupType;
-        FlavourComp::TypeEnum flavourType;
-        CombMassComp::TypeEnum combMassType;
-        Interpolate::TypeEnum interpolate;
+        // defaults are zero, "UNKNOWN" in the enums
+        CompParametrization::TypeEnum parametrization{};
+        CompMassDef::TypeEnum massDef{};
+        CompScaleVar::TypeEnum scaleVar{};
+        JetTopology::TypeEnum topology{};
+        bool isSpecial{};
+        PileupComp::TypeEnum pileupType{};
+        FlavourComp::TypeEnum flavourType{};
+        CombMassComp::TypeEnum combMassType{};
+        Interpolate::TypeEnum interpolate{};
         std::vector<TString> uncNames;
         std::vector<TString> subComps;
         std::vector<int> truthLabels;
-        bool constrainZresponse;
+        bool constrainZresponse{};
         std::vector<TString> LargeRJetTruthLabelStrs;
         std::vector<LargeRJetTruthLabel::TypeEnum> LargeRJetTruthLabels;
         std::vector<TString> LargeRJetTruthLabelsForSFstrs;
@@ -89,13 +93,13 @@ class GroupHelper
         TString cat;
         TString corr;
         TString isRed;
-        int     groupNum;
-        int     subgroupNum;
+        int     groupNum{};
+        int     subgroupNum{};
 
         // Derived values to parse from the raw values
-        CompCategory::TypeEnum category;
-        CompCorrelation::TypeEnum correlation;
-        bool reducible;
+        CompCategory::TypeEnum category{};
+        CompCorrelation::TypeEnum correlation{};
+        bool reducible{};
 };
 
 class ConfigHelper : asg::AsgMessaging
@@ -125,16 +129,16 @@ class ConfigHelper : asg::AsgMessaging
     private: 
         ConfigHelper();
 
-        bool m_isInit;
+        bool m_isInit{};
         
         // Values fixed by arguments
         const TString m_confPrefix;
         const TString m_MCtype;
-        const float m_energyScale;
+        const float m_energyScale{};
         
         // Values filled through initialize
-        ComponentHelper* m_cInfo;
-        GroupHelper*     m_gInfo;
+        ComponentHelper* m_cInfo{};
+        GroupHelper*     m_gInfo{};
 };
 
 } // end jet namespace
