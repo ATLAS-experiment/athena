@@ -64,7 +64,7 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
                 noiseCutsMap[std::pair(itr->first, 1)] = itr->second["EmFR"].data<int>();
                 noiseCutsMap[std::pair(itr->first, 2)] = itr->second["EmMD"].data<int>();
                 noiseCutsMap[std::pair(itr->first, 3)] = itr->second["EmBK"].data<int>();
-                noiseCutsMap[std::pair(itr->first, 4)] = (itr->first >= 10 && itr->first < 35)
+                noiseCutsMap[std::pair(itr->first, 4)] = (itr->first >= 10 && itr->first < 40)
                                                         ? itr->second["Tile"].data<int>()
                                                         : itr->second["HEC"].data<int>();
             }

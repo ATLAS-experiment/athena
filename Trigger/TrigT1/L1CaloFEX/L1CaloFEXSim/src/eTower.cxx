@@ -102,8 +102,7 @@ namespace LVL1 {
     addET(et, cell);
     
     //multi linear digitisation encoding ... except in tile (indicated by passing layer=5) .. just convert to 25 MeV steps
-    unsigned int outET = (layer==5) ? std::round(m_et_float[cell]/25) : eFEXCompression::decode(std::round(m_et_float[cell]),layer, ignoreDisable);
-    m_et[cell] = outET;
+    m_et[cell] = (layer==5) ? std::round(m_et_float[cell]/25) : eFEXCompression::decode(std::round(m_et_float[cell]),layer, ignoreDisable);
   }
 
   /** Set supercell position ID and ET**/
@@ -120,7 +119,7 @@ namespace LVL1 {
       m_scID[cell] = ID;
     
       //multi linear digitisation encoding
-      unsigned int outET = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
+      int outET = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
       m_et[cell] = outET;
     }
     else{
@@ -145,11 +144,8 @@ namespace LVL1 {
       
       m_scID.push_back(ID);
 
-      unsigned int outET1 = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
-      unsigned int outET2 = eFEXCompression::decode(std::round(m_et_float[cell+1]),layer);
-      
-      m_et[cell] = outET1;
-      m_et[cell+1] = outET2;
+      m_et[cell] = eFEXCompression::decode(std::round(m_et_float[cell]),layer);
+      m_et[cell+1] = eFEXCompression::decode(std::round(m_et_float[cell+1]),layer);
     }
 
     return;
@@ -172,7 +168,7 @@ namespace LVL1 {
   }
   
   /** Return ET of specified supercell */
-  unsigned int eTower::getET(unsigned int layer,  int cell) const {
+  int eTower::getET(unsigned int layer,  int cell) const {
     
     /// Check cell index in range for layer
     if (layer >= s_nLayers || cell < 0 || cell >= s_cells[layer]) return 0;
@@ -194,9 +190,8 @@ namespace LVL1 {
   }
 
   /** Return ET of all supercells together*/
-  unsigned int eTower::getTotalET() const{
-    
-    unsigned int tmp = 0;
+  int eTower::getTotalET() const{
+    int tmp = 0;
     for (unsigned int i=0; i<m_et.size(); i++){
       tmp += m_et[i];
     }
@@ -219,10 +214,10 @@ namespace LVL1 {
 
   
   /** Return supercell ET values for specified layer */
-  std::vector<unsigned int> eTower::getLayerETvec(unsigned int layer) const {
+  std::vector<int> eTower::getLayerETvec(unsigned int layer) const {
     
     /// Create empty vector of data
-    std::vector<unsigned int> cells;
+    std::vector<int> cells;
     
     /// Check cell index in range for layer
     if (layer >= s_nLayers) return cells;
@@ -251,7 +246,7 @@ namespace LVL1 {
 
 
   /** Return supercell ET values for specified layer */
-  unsigned int eTower::getLayerTotalET(unsigned int layer) const {
+  int eTower::getLayerTotalET(unsigned int layer) const {
         
     if (layer == 0){
       return m_et[0];

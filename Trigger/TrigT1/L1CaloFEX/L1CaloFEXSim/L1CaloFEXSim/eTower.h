@@ -71,19 +71,19 @@ namespace LVL1 {
     float constid() const {return m_tower_id;};
 
     /** Get ET of a specified cell in MeV */
-    unsigned int getET(unsigned int layer, int cell = 0) const;
+    int getET(unsigned int layer, int cell = 0) const;
     
     /** Get ET sum of all cells in the eTower in MeV */
-    unsigned int getTotalET() const;
+    int getTotalET() const;
 
     /** Get total ET sum of all cells in a given layer in MeV */
-    unsigned int getLayerTotalET(unsigned int layer) const;
+    int getLayerTotalET(unsigned int layer) const;
 
     /** Get vector of ET values for a given layer in MeV */
-    std::vector<unsigned int> getLayerETvec(unsigned int layer) const;
+    std::vector<int> getLayerETvec(unsigned int layer) const;
     
     /** Get vector of all ET values in MeV */
-    std::vector<unsigned int> getETs() const {return m_et;};
+    const std::vector<int>& getETs() const {return m_et;};
 
     /** Get vector of INT which describe whether a slot shared split ET from two different supercells - required information for production of CSV input files */
     std::vector<unsigned int> getETSplits() const {return m_etSplits;};
@@ -126,7 +126,7 @@ namespace LVL1 {
     float m_phi;
     std::vector<Identifier> m_scID;
     std::vector<Identifier> m_scID_split;
-    std::vector<unsigned int> m_et;    
+    std::vector<int> m_et;
     std::vector<float> m_et_float;
     std::vector<unsigned int> m_etSplits;
     int m_tower_id;

@@ -90,8 +90,6 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         if flags.Input.isMC:
             # wont have eFexDataTowers available so remove that if it appears in input list
             eFexTowerInputs = [l for l in eFexTowerInputs if l != "L1_eFexDataTowers"]
-            # also no DM corrections for MC yet ...
-            deadMaterialCorrections = False
     else:
         from AthenaConfiguration.Enums import LHCPeriod
         if flags.GeoModel.Run is LHCPeriod.Run2:
@@ -141,12 +139,18 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool.DumpSuperCells = True
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo", BDTJsonConfigPath="bdt_config_v16.json")
         # load noise cuts and dm corrections when running on data
-        if not flags.Input.isMC:
-            from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
-            acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts","TRIGGER_ONL",className="CondAttrListCollection"))
-            eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
-            acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib","TRIGGER_ONL",className="CondAttrListCollection")) # dmCorr from DB!
-            eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool.DMCorrectionsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib"
+        from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
+
+        acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts",
+                                 "TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",
+                                 tag="EfexNoiseCuts-RUN3-MCDEFAULT-TEST-00" if flags.Input.isMC else None,
+                                 className="CondAttrListCollection"))
+        eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
+        acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib",
+                             "TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",
+                             tag="EfexEnergyCalib-RUN3-MCDEFAULT-TEST-00" if flags.Input.isMC else None,
+                             className="CondAttrListCollection")) # dmCorr from DB!
+        eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool.DMCorrectionsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib"
 
         acc.addEventAlgo(eFEXInputs)
         acc.addEventAlgo(eFEX)
