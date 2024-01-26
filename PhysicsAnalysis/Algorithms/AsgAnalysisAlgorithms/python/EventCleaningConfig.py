@@ -19,16 +19,13 @@ class EventCleaningBlock (ConfigBlock):
         # in AnalysisBase, but we can evade this with numerical values
         self.addOption ('invertFlags', [0], type=None)
 
-
     def makeAlgs (self, config) :
 
         if config.dataType() is DataType.Data:
-            grlFiles = self.userGRLFiles[:]
-
             # Set up the GRL selection:
             alg = config.createAlgorithm( 'GRLSelectorAlg', 'GRLSelectorAlg' )
             config.addPrivateTool( 'Tool', 'GoodRunsListSelectionTool' )
-            alg.Tool.GoodRunsListVec = grlFiles
+            alg.Tool.GoodRunsListVec = self.userGRLFiles
 
         # Skip events with no primary vertex:
         if self.runPrimaryVertexSelection:

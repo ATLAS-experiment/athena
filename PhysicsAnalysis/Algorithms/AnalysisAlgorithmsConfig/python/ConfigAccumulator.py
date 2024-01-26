@@ -21,6 +21,7 @@ class DataType(FlagEnum):
     FullSim = 'fullsim'
     FastSim = 'fastsim'
 
+
 class SelectionConfig :
     """all the data for a given selection that has been registered
 
@@ -143,6 +144,7 @@ class ConfigAccumulator :
         geometry = LHCPeriod(geometry)
         if geometry is LHCPeriod.Run1:
             raise ValueError ("invalid Run geometry: %s" % geometry.value)
+        # store also the data year for data
         self._dataType = dataType
         self._isPhyslite = isPhyslite
         self._geometry = geometry

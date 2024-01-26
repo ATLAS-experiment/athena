@@ -50,9 +50,11 @@ class PileupReweightingBlock (ConfigBlock):
         super (PileupReweightingBlock, self).__init__ ('Event')
         self.addOption ('campaign', None, type=None)
         self.addOption ('files', None, type=None)
-        self.addOption ('useDefaultConfig', False, type=bool)
+        self.addOption ('useDefaultConfig', True, type=bool)
         self.addOption ('userLumicalcFiles', None, type=None)
+        self.addOption ('userLumicalcFilesPerCampaign', None, type=None)
         self.addOption ('userPileupConfigs', None, type=None)
+        self.addOption ('userPileupConfigsPerCampaign', None, type=None)
 
 
     def makeAlgs (self, config) :
@@ -65,69 +67,93 @@ class PileupReweightingBlock (ConfigBlock):
             import logging
         log = logging.getLogger('makePileupAnalysisSequence')
 
-        # TODO: support per-campaign config
-
         if config.isPhyslite():
             log.info(f'Physlite does not need pileup reweighting. {config.isPhyslite}')
             return
 
-        if config.autoconfigFlags() is not None:
-            autoconfigFlags = config.autoconfigFlags()
-            
-            self.files = autoconfigFlags.Input.Files
-            log.info(f'Autoconfiguring files from flags: {self.files}')
-            self.campaign = autoconfigFlags.Input.MCCampaign
-            if self.campaign is None or self.campaign is Campaign.Unknown:
-                from Campaigns.Utils import getMCCampaign
-                self.campaign = getMCCampaign(self.files)
-            log.info(f'Autoconfiguring campaign from flags: {self.campaign}')
-            self.useDefaultConfig = True
-            log.info(f'Autoconfiguring useDefaultConfig from flags: {self.useDefaultConfig}')
+        # check files from autoconfig flags
+        if self.files is None and config.autoconfigFlags() is not None:
+            self.files = config.autoconfigFlags().Input.Files
+
+        campaign = self.campaign
+        # if user didn't explicitly configure campaign, let's try setting it from metadata
+        # only needed on MC
+        if config.dataType() is not DataType.Data and self.campaign is None:
+            # if we used autoconfigflags, campaign is auto-determined
+            if config.campaign() is not None and config.campaign() is not Campaign.Unknown:
+                campaign = config.campaign()
+                log.info(f'Auto-configuring campaign for PRW from flags: {campaign.value}')
+            else:
+                # we try to determine campaign from files if above failed
+                if self.files is not None:
+                    from Campaigns.Utils import getMCCampaign
+                    campaign = getMCCampaign(self.files)
+                    if campaign and campaign is not Campaign.Unknown:
+                        log.info(f'Auto-configuring campaign for PRW from files: {campaign.value}')
+                    else:
+                        log.info('Campaign could not be determined.')
 
 
         toolConfigFiles = []
         toolLumicalcFiles = []
-        campaign = self.campaign
-        if self.files is not None and (campaign is None or campaign is Campaign.Unknown or self.userPileupConfigs is None):
-            if campaign is None or campaign is Campaign.Unknown:
-                from Campaigns.Utils import getMCCampaign
-                campaign = getMCCampaign(self.files)
-                if campaign:
-                    log.info(f'Autoconfiguring PRW with campaign: {campaign}')
-                else:
-                    log.info('Campaign could not be determined.')
 
-        if self.files is None and campaign is None:
-            campaign = config.campaign()
+        # PRW config files should only be configured if we run on MC
+        if config.dataType() is not DataType.Data:
+            # check if user provides per-campaign pileup config list
+            if self.userPileupConfigs and self.userPileupConfigsPerCampaign:
+                raise ValueError('Both userPileupConfigs and userPileupConfigsPerCampaign specified, '
+                                 'use only one of the options!')
+            if self.userPileupConfigsPerCampaign:
+                if not campaign:
+                    raise Exception('userPileupConfigsPerCampaign requires campaign to be configured!')
+                if campaign is Campaign.Unknown:
+                    raise Exception('userPileupConfigsPerCampaign used, but campaign = Unknown!')
+                try:
+                    toolConfigFiles = self.userPileupConfigsPerCampaign[campaign.value][:]
+                    log.info('Using user provided per-campaign PRW configuration')
+                except KeyError as e:
+                    raise KeyError(f'Unconfigured campaign {e} for userPileupConfigsPerCampaign!')
 
-        if campaign:
-            if self.userPileupConfigs is None:
-                if config.dataType() is DataType.Data:
-                    log.info('Data needs no configuration files')
-                else:
-                    from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
-                    toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig,
-                                                            data_type=config.dataType())
-                    log.info('Setting PRW configuration based on input files')
-
-                    if toolConfigFiles:
-                        log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
-            else:
+            elif self.userPileupConfigs:
+                toolConfigFiles = self.userPileupConfigs[:]
                 log.info('Using user provided PRW configuration')
 
-        if self.userPileupConfigs is not None:
-            toolConfigFiles = self.userPileupConfigs[:]
+            if not toolConfigFiles:
+                from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
+                if campaign and campaign is not Campaign.Unknown:
+                    toolConfigFiles = getConfigurationFiles(campaign=campaign,
+                                                            files=self.files,
+                                                            useDefaultConfig=self.useDefaultConfig,
+                                                            data_type=config.dataType())
+                    if self.useDefaultConfig:
+                        log.info('Auto-configuring universal/default PRW config')
+                    else:
+                        log.info('Auto-configuring per-sample PRW config files based on input files')
+                else:
+                    log.info('No campaign specified, no PRW config files configured')
 
-        if self.userLumicalcFiles is not None:
-            toolLumicalcFiles = self.userLumicalcFiles[:]
-            log.info(f'Using user-provided lumicalc files: {", ".join(toolLumicalcFiles)}')
-        else:
-            if config.dataType() is DataType.Data:
-                log.info('Data needs no lumicalc files and none were provided, not configuring lumicalc')
+            # check if user provides per-campaign lumical config list
+            if self.userLumicalcFilesPerCampaign and self.userLumicalcFiles:
+                raise ValueError('Both userLumicalcFiles and userLumicalcFilesYear specified, '
+                                'use only one of the options!')
+            if self.userLumicalcFilesPerCampaign:
+                try:
+                    toolLumicalcFiles = self.userLumicalcFilesPerCampaign[campaign.value][:]
+                    log.info('Using user-provided per-campaign lumicalc files')
+                except KeyError as e:
+                    raise KeyError(f'Unconfigured campaign {e} for userLumicalcFilesPerCampaign!')
+            elif self.userLumicalcFiles:
+                toolLumicalcFiles = self.userLumicalcFiles[:]
+                log.info('Using user-provided lumicalc files')
             else:
-                from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
-                toolLumicalcFiles = getLumicalcFiles(campaign)
-                log.info(f'Using autoconfigured lumicalc files: {", ".join(toolLumicalcFiles)}')
+                if campaign and campaign is not Campaign.Unknown:
+                    from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
+                    toolLumicalcFiles = getLumicalcFiles(campaign)
+                    log.info('Using auto-configured lumicalc files')
+                else:
+                    log.info('No campaign specified, no lumicalc files configured for PRW')
+        else:
+            log.info('Data needs no lumicalc and PRW configuration files')
 
         # Set up the only algorithm of the sequence:
         alg = config.createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
