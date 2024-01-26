@@ -121,6 +121,7 @@ def createMuonConfigFlags():
     # do not apply NSW T0 calibration if we are running online or MC or a RUN4 geometry 
     mcf.addFlag("Muon.Calib.applyMmT0Correction",   lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False)
     mcf.addFlag("Muon.Calib.applysTgcT0Correction", lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False) 
+    mcf.addFlag("Muon.Calib.applyMmBFieldCalib", True) 
     
     # Muon Align flags
     

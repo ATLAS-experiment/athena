@@ -94,8 +94,11 @@ namespace Muon {
     Gaudi::Property<float> m_stgcLatencyData{this,"stgcLatencyData",-50}; //this is temporary, need to align with what we find in data
 
 
-  Gaudi::Property<bool> m_applyMmT0Calib {this, "applyMmT0Calib", false, "apply the MM t0 calibration"};
-  Gaudi::Property<bool> m_applysTgcT0Calib {this, "applysTgcT0Calib", false, "apply the sTGC t0 calibration"};
+    Gaudi::Property<bool> m_applyMmT0Calib {this, "applyMmT0Calib", false, "apply the MM t0 calibration"};
+    Gaudi::Property<bool> m_applysTgcT0Calib {this, "applysTgcT0Calib", false, "apply the sTGC t0 calibration"};
+
+    Gaudi::Property<bool> m_applyMmBFieldCalib {this, "applyMmBFieldCalib", true, "apply the MM BField correction in reconstruction"};
+
 
 	  Gaudi::Property<float> m_mmT0TargetValue {this,  "mmT0TargetValue", 50.0, "target mean value for the MM t0 calibration"};
 	  Gaudi::Property<float> m_stgcT0TargetValue {this,"stgcT0TargetValue", 0.0 ,"target mean value for the  sTGC t0 calibration"};
