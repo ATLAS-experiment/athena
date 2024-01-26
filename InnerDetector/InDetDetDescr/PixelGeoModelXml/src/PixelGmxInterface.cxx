@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelGeoModelXml/PixelGmxInterface.h"
 
+#include <InDetGeoModelUtils/WaferTree.h>
 #include <InDetReadoutGeometry/SiDetectorDesign.h>
 #include <InDetReadoutGeometry/SiDetectorElement.h>
 #include <InDetSimEvent/SiHitIdHelper.h>
@@ -47,6 +48,10 @@ int PixelGmxInterface::sensorId(std::map<std::string, int> &index) const
   // Check if identifier is valid
   // TODO: drop this check in the future
   const PixelID *pixelIdHelper = dynamic_cast<const PixelID *>(m_commonItems->getIdHelper());
+  if (not pixelIdHelper){
+    ATH_MSG_ERROR("Failed dynamic_cast to PixelID in PixelGmxInterface::sensorId");
+    return -1;
+  }
   Identifier id = pixelIdHelper->wafer_id(index["barrel_endcap"],
                                           index["layer_wheel"],
                                           index["phi_module"],
@@ -196,6 +201,10 @@ void PixelGmxInterface::addSensor(const std::string& typeName,
   // Get the ATLAS "Offline" wafer identifier
   //
   const PixelID *pixelIdHelper = dynamic_cast<const PixelID *>(m_commonItems->getIdHelper());
+  if (not pixelIdHelper){
+    ATH_MSG_ERROR("Failed dynamic_cast to PixelID in PixelGmxInterface::addSensor");
+    return;
+  }
   Identifier id = pixelIdHelper->wafer_id(index["barrel_endcap"],
                                           index["layer_wheel"],
                                           index["phi_module"],

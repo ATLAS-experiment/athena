@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODELXML_PIXELGMXINTERFACE_H
@@ -7,13 +7,12 @@
 
 #include <AthenaBaseComps/AthMessaging.h>
 #include <GeoModelXml/GmxInterface.h>
-#include <InDetGeoModelUtils/WaferTree.h>
 
 #include <map>
-#include <sstream>
 #include <string>
 
 class IRDBAccessSvc;
+class WaferTree;
 
 namespace GeoModelIO{
   class ReadGeoModel;

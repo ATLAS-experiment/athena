@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PLRGEOMODELXML_PLRGMXINTERFACE_H
@@ -8,12 +8,12 @@
 #include <PixelGeoModelXml/PixelGmxInterface.h>
 
 #include <map>
-#include <sstream>
 #include <string>
 
 // Most functions for this interface are derived from PixelGeoModelXml/PixelGmxInterface.h
 // The functions here are similar functions to that of Pixel, but have a few PLR specific differences
 // such as only loading the correct PLR sensor type and identifying the modules as InDetDD::PLR
+class WaferTree;
 
 namespace InDetDD
 {

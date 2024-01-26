@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripGmxInterface.h"
 
+#include <InDetGeoModelUtils/WaferTree.h>
 #include <GaudiKernel/GaudiException.h>
 #include <InDetReadoutGeometry/SiDetectorDesign.h>
 #include <InDetReadoutGeometry/SiDetectorElement.h>
@@ -18,6 +19,8 @@
 #include <RDBAccessSvc/IRDBRecordset.h>
 #include <GeoModelRead/ReadGeoModel.h>
 #include <GeoModelKernel/GeoFullPhysVol.h>
+
+
 
 namespace
 {
@@ -484,6 +487,10 @@ void StripGmxInterface::addSplitSensor(const std::string& typeName,
   // Get the ATLAS "Offline" wafer identifier
   //
   const SCT_ID *sctIdHelper = dynamic_cast<const SCT_ID *> (m_commonItems->getIdHelper());
+  if (not sctIdHelper){
+    ATH_MSG_ERROR("Failed dynamic cast to SCT_ID in StripGmxInterface::addSplitSensor");
+    return;
+  }
   Identifier id = sctIdHelper->wafer_id(updatedIndex["barrel_endcap"],
                                         updatedIndex["layer_wheel"],
                                         updatedIndex["phi_module"],
@@ -614,6 +621,10 @@ void StripGmxInterface::addAlignable(int level,
   // Get the offline-id appropriate to the level (0 = wafer, 1 = module, 2 = wheel/cylinder, 3 = part, i.e barrel or an endcap)
   //
   const SCT_ID *sctIdHelper = dynamic_cast<const SCT_ID *> (m_commonItems->getIdHelper());
+  if (not sctIdHelper){
+    ATH_MSG_ERROR("Failed dynamic_cast to SCT_ID in StripGmxInterface::addAlignable");
+    return;
+  }
   Identifier id;
   switch (level) {
     case 0:
@@ -700,15 +711,15 @@ void StripGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
         } 
         std::string typeName = fullPhysVolInfoString.substr(startRG);
         std::map<std::string, int> index;
-        for (std::string field:fields){
-        size_t first = fullPhysVolInfoString.find(field+"_");
-        size_t last = fullPhysVolInfoString.find("_",first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
-        if(first==std::string::npos || last==std::string::npos){
-            ATH_MSG_DEBUG("Could not extract "<<field<<" from "<<fullPhysVolInfoString<<". Skipping");
-            continue;
-        } 
-        std::string strNew = fullPhysVolInfoString.substr(first+field.size()+1,last-(first+field.size()+1));
-        index[field] = std::stoi(strNew);
+        for (const std::string & field:fields){
+          size_t first = fullPhysVolInfoString.find(field+"_");
+          size_t last = fullPhysVolInfoString.find("_",first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+          if(first==std::string::npos || last==std::string::npos){
+             ATH_MSG_DEBUG("Could not extract "<<field<<" from "<<fullPhysVolInfoString<<". Skipping");
+             continue;
+          } 
+          std::string strNew = fullPhysVolInfoString.substr(first+field.size()+1,last-(first+field.size()+1));
+          index[field] = std::stoi(strNew);
         }
         //now check if we need to split
         size_t splitPos = fullPhysVolInfoString.find("split_");
