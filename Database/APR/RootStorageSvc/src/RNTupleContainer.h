@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //====================================================================
 //    Root Database Container RNTuple implementation
@@ -28,13 +28,14 @@ namespace ROOT { namespace Experimental { namespace Detail {
    class RPageSource;
    class RFieldBase;
 } } }
-using ROOT::Experimental::Detail::RFieldBase;
-using ROOT::Experimental::Detail::RPageSource;
 
 /*
  * POOL namespace declaration
  */
 namespace pool {
+
+using ROOT::Experimental::Detail::RFieldBase;
+using ROOT::Experimental::Detail::RPageSource;
 
 // Forward declaration
 class DbColumn;
