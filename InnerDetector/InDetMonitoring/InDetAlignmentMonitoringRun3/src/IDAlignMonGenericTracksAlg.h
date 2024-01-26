@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDAlignMonGenericTracksAlg_H
@@ -85,6 +85,7 @@ private:
   int   m_NTracksRange{};
   bool  m_doIP{};
   bool  m_doHitQuality{false};
+  bool  m_applyTrkSel{};
   
   SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimContainerName{this,"vxPrimContainerName","PrimaryVertices","Primary Vertices for Alignment Monitoring"};
   SG::ReadHandleKey<TrackCollection> m_tracksKey  {this, "TrackName", "ExtendedTracks", "track data key"};
