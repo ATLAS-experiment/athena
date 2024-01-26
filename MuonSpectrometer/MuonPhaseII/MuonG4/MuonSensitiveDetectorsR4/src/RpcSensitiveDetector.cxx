@@ -135,8 +135,8 @@ Identifier RpcSensitiveDetector::getIdentifier(const MuonGMR4::RpcReadoutElement
                 <<" gap thickness "<<readOutEle->gasGapPitch()
                 <<" gap width: "<<gapHalfWidth
                 <<" gap length: "<<gapHalfLength);
-  const int doubletPhi = locHitPos.x() < - gapHalfWidth ? readOutEle->doubletPhiMax() :
-                                                          readOutEle->doubletPhi();
+  const int doubletPhi = std::abs(locHitPos.y()) > gapHalfWidth ? readOutEle->doubletPhiMax() :
+                                                                  readOutEle->doubletPhi();
   const int gasGap = std::round(std::abs(locHitPos.z()) /  readOutEle->gasGapPitch()) + 1;
 
   return idHelper.channelID(readOutEle->identify(),
