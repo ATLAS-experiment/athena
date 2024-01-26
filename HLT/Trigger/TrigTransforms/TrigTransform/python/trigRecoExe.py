@@ -120,6 +120,17 @@ class trigRecoExecutor(athenaExecutor):
             # get list of translated arguments to be used by athenaHLT
             optionList = getTranslated(self.conf.argdict, name=self._name, substep=self._substep, first=self.conf.firstExecutor, output = outputFiles)
             self._cmd.extend(optionList)
+            # updates for CA
+            if self._isCAEnabled():
+                msg.info("Running in CA mode")
+                # we don't use the runargs file with athenaHLT so add the JO and preExecs to the command line and remove the CA option
+                self._cmd.remove('--CA')
+                self._cmd.append(self._skeletonCA)
+                if 'preExec' in self.conf.argdict:
+                    self._cmd.extend(self.conf.argdict['preExec'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor))
+                    msg.info('Command adjusted for CA to %s', self._cmd)
+            else:
+                msg.info("Running in legacy mode")
 
             # Run preRun step debug stream analysis if output histogram are set
             if "outputHIST_DEBUGSTREAMMONFile" in self.conf.argdict:
@@ -175,6 +186,12 @@ class trigRecoExecutor(athenaExecutor):
             v = self.conf.argdict['athenaopts'].value
             if '--use-database' in v or '-b' in v:
                 removeSkeleton = True
+
+        if removeSkeleton and self._isCAEnabled():
+            msg.error('Do not specify --CA when reading from the DB, CA config will already be contained in the SMK')
+            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_ARG_ERROR'),
+                    'Do not specify --CA when reading from the DB, CA config will already be contained in the SMK')
+            return 1
 
         # Due to athenaExecutor code don't remove skeleton, otherwise lose runargs too
         # instead remove skeleton from _topOptionsFiles

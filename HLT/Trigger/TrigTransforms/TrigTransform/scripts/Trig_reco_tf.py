@@ -46,6 +46,7 @@ def getTransform():
     # runs primarily using athenaHLT
     # literalRunargs used for when running with athena
     executorSet.add(trigRecoExecutor(name = 'BSRDOtoRAW', skeletonFile = 'TriggerJobOpts/runHLT_standalone.py',
+                                     skeletonCA = 'TriggerJobOpts.runHLT',
                                      exe = 'setsid athenaHLT.py',
                                      # setsid is needed to fix the process-group id of child processes to be the same as mother process; discussed in https://its.cern.ch/jira/browse/ATR-20513
                                      substep = 'b2r', tryDropAndReload = False,
