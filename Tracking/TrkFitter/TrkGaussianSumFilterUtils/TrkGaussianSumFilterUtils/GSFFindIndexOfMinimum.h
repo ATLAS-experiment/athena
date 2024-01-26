@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -419,6 +419,9 @@ ATH_ALWAYS_INLINE int32_t impl(const float* distancesIn, int n) {
     return findIdxOfMinDetail::scalarC(distancesIn, n);
   } else if constexpr (I == STL) {
     return findIdxOfMinDetail::scalarSTL(distancesIn, n);
+  }
+  else {
+    return 0; // Avoid cppchcheck warning.
   }
 }
 }  // namespace findIdxOfMinimum
