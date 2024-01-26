@@ -154,6 +154,8 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   metTotal(A_MST_x, A_MST_y, B_MST_x, B_MST_y, C_MST_x, C_MST_y, MST_x, MST_y);
   metTotal(A_MET_x, A_MET_y, B_MET_x, B_MET_y, C_MET_x, C_MET_y, MET_x, MET_y);
       
+  //Calculate the scalar value of MET 
+  MET = std::sqrt(((MET_x)*(MET_x)) + ((MET_y)*(MET_y)));
 
   //Define a vector to be filled with all the TOBs of one event
   std::vector<std::unique_ptr<gFEXJwoJTOB>> tobs_v;

@@ -106,7 +106,7 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         
         void printError(const std::string& location, const std::string& title, MSG::Level type, const std::string& detail) const;
         
-        void fillGlobal(const std::vector<uint32_t> &tob, const int type, SG::WriteHandle<xAOD::gFexGlobalRoIContainer> &container) const;
+        int16_t fillGlobal(const std::vector<uint32_t> &tob, const int type, SG::WriteHandle<xAOD::gFexGlobalRoIContainer> &container, int16_t scalar = -1) const;
         
         static constexpr uint8_t m_DEBUG=0;
         static constexpr uint8_t m_WARNING=1;
