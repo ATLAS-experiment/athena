@@ -23,6 +23,9 @@ def commonRunArgsToFlags(runArgs,configFlags):
     if hasattr(runArgs,"geometryVersion"): 
         configFlags.GeoModel.AtlasVersion=runArgs.geometryVersion
 
+    if hasattr(runArgs,"geometrySQLite"):
+        configFlags.GeoModel.SQLiteDB=runArgs.geometrySQLite
+
     if hasattr(runArgs,"triggerConfig"): 
         configFlags.Trigger.triggerConfig=runArgs.triggerConfig
 

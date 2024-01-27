@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## Job options file for launching Geant4 ATLAS detector simulations
 ## on the Tile geometry built from a standalone SQLite file
@@ -109,8 +109,12 @@ include("G4AtlasApps/G4Atlas.flat.configuration.py")
 # Detector Description -- SQLite/Oracle switch
 # If those lines are commented, then the DD decriotion is taken from the Oracle-based 'GeometryDB' online DB
 # If those lines are uncommented, then the DD description is taken from the SQLite file provided (the '.db' file below)
-GeoModelSvc.SQLiteDB = "tile_V4.db" # Tile only
 #GeoModelSvc.SQLiteDB = "combinedGeo_beampipe_indetservmat_tile.db" # Tile and BeamPipe, plus the 'compulsory' InDetServMat (it cannot be switched OFF...)
+GeoModelSvc.SQLiteDB = True
+SQLiteDBFile = "tile_V4.db" # Tile only
+from AtlasGeoModel import CommonGeoDB
+CommonGeoDB.SetupLocalSqliteGeometryDb(SQLiteDBFile,simFlags.SimLayout)
+# Detector Description -- SQLite/Oracle switch
 
 
 

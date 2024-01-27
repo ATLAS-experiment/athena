@@ -234,6 +234,8 @@ def addDetectorArguments(parser):
                         help='Conditions tag to set')
     parser.add_argument('--geometryVersion', group='Detector', type=argFactory(trfArgClasses.argSubstep), metavar='substep:GeoVersion',  nargs='+',
                         help='ATLAS geometry version tag')
+    parser.add_argument('--geometrySQLite', group='Detector', type=argFactory(trfArgClasses.argBool),
+                        help='Switch to SQLite Geometry DB')
     parser.add_argument('--beamType', group='Detector', type=argFactory(trfArgClasses.argString), 
                         help='Manual beam type setting')
     parser.add_argument('--runNumber', '--RunNumber', group='Detector', type=argFactory(trfArgClasses.argInt), 

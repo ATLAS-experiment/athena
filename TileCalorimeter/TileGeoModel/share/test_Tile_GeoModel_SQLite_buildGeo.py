@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # job options to build geometry of the ATLAS detector
 # from a standalone GeoModel SQLite file,
@@ -57,7 +57,11 @@ GeoModelSvc = GeoModelSvc()
 
 # Build from standalone GeoModel SQLite files, if uncommented
 #GeoModelSvc.SQLiteDB = "geometry-ATLAS-R2-2016-01-00-01.db"
-GeoModelSvc.SQLiteDB = "tile.db"
+SQLiteDBFile = "tile.db"
+
+GeoModelSvc.SQLiteDB = True
+from AtlasGeoModel import CommonGeoDB
+CommonGeoDB.SetupLocalSqliteGeometryDb(SQLiteDBFile,GeoModelSvc.AtlasVersion)
 
 # add the VP1 algorithm for visualization
 from VP1Algs.VP1AlgsConf import VP1Alg

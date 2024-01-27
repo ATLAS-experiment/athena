@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelSvc.h"
@@ -13,14 +13,13 @@
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/GeoPerfUtils.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
-#include "GeoModelDBManager/GMDBManager.h"
-#include "GeoModelRead/ReadGeoModel.h"
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
+#include "PathResolver/PathResolver.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
@@ -29,58 +28,20 @@
 #include <fstream>
 
 GeoModelSvc::GeoModelSvc(const std::string& name,ISvcLocator* svc)
-  : AthService(name,svc),
-    m_detectorTools(this), 
-    m_pSvcLocator(svc),
-    m_toolSvc("ToolSvc",name),
-    m_detStore("DetectorStore",name),
-    m_tagInfoMgr("TagInfoMgr",name),
-    m_geoDbTagSvc("GeoDbTagSvc",name),
-    m_AtlasVersion("AUTO"),
-    m_callBackON(true),
-    m_ignoreTagDifference(false),
-    m_useTagInfo(true),
-    m_statisticsToFile(false),
-    m_supportedGeometry(0),
-    m_ignoreTagSupport(false)
+  : AthService(name,svc)
+  , m_pSvcLocator(svc)
 {
-  declareProperty( "DetectorTools",               m_detectorTools);
-  declareProperty( "AtlasVersion",                m_AtlasVersion);
-  declareProperty( "InDetVersionOverride",        m_InDetVersionOverride);
-  declareProperty( "PixelVersionOverride",        m_PixelVersionOverride);
-  declareProperty( "SCT_VersionOverride",         m_SCT_VersionOverride);
-  declareProperty( "TRT_VersionOverride",         m_TRT_VersionOverride);
-  declareProperty( "LAr_VersionOverride",         m_LAr_VersionOverride);
-  declareProperty( "TileVersionOverride",         m_TileVersionOverride);
-  declareProperty( "MuonVersionOverride",         m_MuonVersionOverride);
-  declareProperty( "CaloVersionOverride",         m_CaloVersionOverride);
-  declareProperty( "MagFieldVersionOverride",     m_MagFieldVersionOverride);
-  declareProperty( "CavernInfraVersionOverride",  m_CavernInfraVersionOverride);
-  declareProperty( "ForwardDetectorsVersionOverride",  m_ForwardDetectorsVersionOverride);
-  declareProperty( "AlignCallbacks",              m_callBackON);
-  declareProperty( "IgnoreTagDifference",         m_ignoreTagDifference);
-  declareProperty( "UseTagInfo",                  m_useTagInfo);
-  declareProperty( "StatisticsToFile",            m_statisticsToFile);
-  declareProperty( "SupportedGeometry",           m_supportedGeometry);
-  declareProperty( "IgnoreTagSupport",            m_ignoreTagSupport);
-}
-
-GeoModelSvc::~GeoModelSvc()
-{
-  delete m_sqliteDbManager;
-  delete m_sqliteReader;
 }
 
 StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
 //                                 ^ due to IGeoModelTool::registerCallback
 {
-  if(m_sqliteDb.empty() && m_supportedGeometry==0) {
+  if(!m_sqliteDb && m_supportedGeometry==0) {
     ATH_MSG_FATAL("The Supported Geometry flag was not set in Job Options! Exiting ...");
     return StatusCode::FAILURE;
   }
 
   ATH_CHECK( m_detStore.retrieve() );
-  ATH_CHECK( m_toolSvc.retrieve() );
 
   // --- Sebastien
   // clients (detector tools) are assuming the DetDescrCnvSvc has been
@@ -189,18 +150,26 @@ StatusCode GeoModelSvc::geoInit()
   }
 
   // Build geometry from the SQLiteDB file
-  if(!m_sqliteDb.empty()) {
-
+  if(m_sqliteDb) {
+    std::string sqliteDbName = "Geometry/" + m_atlasVersion + ".db";
+    std::string sqliteDbPath = PathResolver::find_file (sqliteDbName, "DATAPATH");
+    if(sqliteDbPath.empty()) {
+      ATH_MSG_FATAL("Filed to find SQLite database file " << sqliteDbName << " for reading in persistent GeoModel tree");
+      return StatusCode::FAILURE;
+    }
+    else {
+      ATH_MSG_INFO("Successfully located SQLite database file " << sqliteDbPath << " for reading in persistent GeoModel tree");
+    }
     // Read raw geometry description from the file
-    m_sqliteDbManager = new GMDBManager(m_sqliteDb);
+    m_sqliteDbManager = std::make_unique<GMDBManager>(sqliteDbPath);
     if(m_sqliteDbManager->checkIsDBOpen()) {
-      ATH_MSG_INFO("Successfully opened SQLite DB file " << m_sqliteDb << " for reading in persistent GeoModel tree");
+      ATH_MSG_INFO("Successfully opened SQLite DB file " << sqliteDbPath << " for reading in persistent GeoModel tree");
     }
     else {
       ATH_MSG_FATAL("Failed to open SQLite database for reading in persistent GeoModel tree");
       return StatusCode::FAILURE;
     }
-    m_sqliteReader = new GeoModelIO::ReadGeoModel(m_sqliteDbManager);
+    m_sqliteReader = std::make_unique<GeoModelIO::ReadGeoModel>(m_sqliteDbManager.get());
     GeoVPhysVol* vWorldPhys = m_sqliteReader->buildGeoModel();
     worldPhys = dynamic_cast<GeoPhysVol*>(vWorldPhys);
     if(!worldPhys) {
@@ -212,31 +181,31 @@ StatusCode GeoModelSvc::geoInit()
     // Initialize SqliteReadSvc and open the file for reading plain SQLite tables with DetDescr parameters
     ServiceHandle<IRDBAccessSvc> sqliteReadSvc("SqliteReadSvc",name());
     ATH_CHECK(sqliteReadSvc.retrieve());
-    if(!sqliteReadSvc->connect(m_sqliteDb)) {
-      ATH_MSG_FATAL("Failed to open SQLite database file " << m_sqliteDb << " for reading geometry parameters");
+    if(!sqliteReadSvc->connect(sqliteDbPath)) {
+      ATH_MSG_FATAL("Failed to open SQLite database file " << sqliteDbPath << " for reading geometry parameters");
       return StatusCode::FAILURE;
     }
     else {
-      ATH_MSG_INFO("Successfully opened SQLite DB file: " << m_sqliteDb << " for reading Det Descr parameters");
+      ATH_MSG_INFO("Successfully opened SQLite DB file: " << sqliteDbPath << " for reading Det Descr parameters");
     }
     dbTagSvc->setParamSvcName("SqliteReadSvc");
-    dbTagSvc->setSqliteReader(m_sqliteReader);
+    dbTagSvc->setSqliteReader(m_sqliteReader.get());
   }
   else {
     // Build geometry from the GeometryDB
     ATH_MSG_DEBUG("** Building geometry configuration: ");
-    ATH_MSG_DEBUG("* ATLAS tag: " << m_AtlasVersion);
-    ATH_MSG_DEBUG("* InDet tag: " << m_InDetVersionOverride);
-    ATH_MSG_DEBUG("* Pixel tag: " << m_PixelVersionOverride);
-    ATH_MSG_DEBUG("* SCT   tag: " << m_SCT_VersionOverride);
-    ATH_MSG_DEBUG("* TRT   tag: " << m_TRT_VersionOverride);
-    ATH_MSG_DEBUG("* LAr   tag: " << m_LAr_VersionOverride);
-    ATH_MSG_DEBUG("* Tile  tag: " << m_TileVersionOverride);
-    ATH_MSG_DEBUG("* Muon  tag: " << m_MuonVersionOverride);
-    ATH_MSG_DEBUG("* Calo  tag: " << m_CaloVersionOverride);
-    ATH_MSG_DEBUG("* MagField  tag: " << m_MagFieldVersionOverride);
-    ATH_MSG_DEBUG("* CavernInfra  tag: " << m_CavernInfraVersionOverride);
-    ATH_MSG_DEBUG("* ForwardDetectors  tag: " << m_ForwardDetectorsVersionOverride);
+    ATH_MSG_DEBUG("* ATLAS tag: " << m_atlasVersion);
+    ATH_MSG_DEBUG("* InDet tag: " << m_inDetVersionOverride);
+    ATH_MSG_DEBUG("* Pixel tag: " << m_pixelVersionOverride);
+    ATH_MSG_DEBUG("* SCT   tag: " << m_sctVersionOverride);
+    ATH_MSG_DEBUG("* TRT   tag: " << m_trtVersionOverride);
+    ATH_MSG_DEBUG("* LAr   tag: " << m_larVersionOverride);
+    ATH_MSG_DEBUG("* Tile  tag: " << m_tileVersionOverride);
+    ATH_MSG_DEBUG("* Muon  tag: " << m_muonVersionOverride);
+    ATH_MSG_DEBUG("* Calo  tag: " << m_caloVersionOverride);
+    ATH_MSG_DEBUG("* MagField  tag: " << m_bFieldVersionOverride);
+    ATH_MSG_DEBUG("* CavernInfra  tag: " << m_cavInfraVersionOverride);
+    ATH_MSG_DEBUG("* ForwardDetectors  tag: " << m_forDetVersionOverride);
     
     // Get RDBAccessSvc and open connection to DB
     ATH_CHECK( rdbAccess.retrieve() );
@@ -247,8 +216,8 @@ StatusCode GeoModelSvc::geoInit()
     }
 
     // Check the existence of ATLAS tag in the database
-    if(rdbAccess->getChildTag("ATLAS",m_AtlasVersion,"ATLAS")=="") {
-      ATH_MSG_FATAL(" *** *** Wrong ATLAS layout: " << m_AtlasVersion << " *** ***");
+    if(rdbAccess->getChildTag("ATLAS",m_atlasVersion,"ATLAS")=="") {
+      ATH_MSG_FATAL(" *** *** Wrong ATLAS layout: " << m_atlasVersion << " *** ***");
       ATH_MSG_FATAL(" Either ATLAS geometry tag has been misspelled, or the DB Release does not contain the geometry specified.");
       ATH_MSG_FATAL(" In latter case please update DB Release version");
       return StatusCode::FAILURE;
@@ -258,17 +227,17 @@ StatusCode GeoModelSvc::geoInit()
 
     if(!m_ignoreTagSupport) {
       RDBTagDetails atlasTagDetails;
-      rdbAccess->getTagDetails(atlasTagDetails, m_AtlasVersion);
+      rdbAccess->getTagDetails(atlasTagDetails, m_atlasVersion);
       const coral::AttributeSpecification& supportedSpec = atlasTagDetails["SUPPORTED"].specification();
       if(supportedSpec.type()==typeid(bool)) {
 	if(!atlasTagDetails["SUPPORTED"].data<bool>()) {
-	  ATH_MSG_FATAL(" *** *** ATLAS layout " << m_AtlasVersion << " is OBSOLETE and can NOT be supported any more! *** ***");
+	  ATH_MSG_FATAL(" *** *** ATLAS layout " << m_atlasVersion << " is OBSOLETE and can NOT be supported any more! *** ***");
 	  return StatusCode::FAILURE;
 	}
     }
       else if(supportedSpec.type()==typeid(int)) {
 	if(atlasTagDetails["SUPPORTED"].data<int>()<m_supportedGeometry) {
-	  ATH_MSG_FATAL(" *** *** ATLAS layout " << m_AtlasVersion 
+	  ATH_MSG_FATAL(" *** *** ATLAS layout " << m_atlasVersion 
 			<< " is OBSOLETE in rel " << m_supportedGeometry 
 			<< " and can NOT be supported any more! *** ***");
 	  return StatusCode::FAILURE;
@@ -276,18 +245,18 @@ StatusCode GeoModelSvc::geoInit()
       }
     }
   
-    dbTagSvc->setAtlasVersion(m_AtlasVersion);
-    dbTagSvc->setInDetVersionOverride(m_InDetVersionOverride);
-    dbTagSvc->setPixelVersionOverride(m_PixelVersionOverride);
-    dbTagSvc->setSCT_VersionOverride(m_SCT_VersionOverride);
-    dbTagSvc->setTRT_VersionOverride(m_TRT_VersionOverride);
-    dbTagSvc->setLAr_VersionOverride(m_LAr_VersionOverride);
-    dbTagSvc->setTileVersionOverride(m_TileVersionOverride);
-    dbTagSvc->setMuonVersionOverride(m_MuonVersionOverride);
-    dbTagSvc->setCaloVersionOverride(m_CaloVersionOverride);
-    dbTagSvc->setMagFieldVersionOverride(m_MagFieldVersionOverride);
-    dbTagSvc->setCavernInfraVersionOverride(m_CavernInfraVersionOverride);
-    dbTagSvc->setForwardDetectorsVersionOverride(m_ForwardDetectorsVersionOverride);
+    dbTagSvc->setAtlasVersion(m_atlasVersion);
+    dbTagSvc->setInDetVersionOverride(m_inDetVersionOverride);
+    dbTagSvc->setPixelVersionOverride(m_pixelVersionOverride);
+    dbTagSvc->setSCT_VersionOverride(m_sctVersionOverride);
+    dbTagSvc->setTRT_VersionOverride(m_trtVersionOverride);
+    dbTagSvc->setLAr_VersionOverride(m_larVersionOverride);
+    dbTagSvc->setTileVersionOverride(m_tileVersionOverride);
+    dbTagSvc->setMuonVersionOverride(m_muonVersionOverride);
+    dbTagSvc->setCaloVersionOverride(m_caloVersionOverride);
+    dbTagSvc->setMagFieldVersionOverride(m_bFieldVersionOverride);
+    dbTagSvc->setCavernInfraVersionOverride(m_cavInfraVersionOverride);
+    dbTagSvc->setForwardDetectorsVersionOverride(m_forDetVersionOverride);
     
     if(dbTagSvc->setupTags().isFailure()) {
       ATH_MSG_FATAL("Failed to setup subsystem tags");
@@ -320,7 +289,7 @@ StatusCode GeoModelSvc::geoInit()
   std::unique_ptr<std::ofstream> geoModelStats;
   if(m_statisticsToFile) {
     geoModelStats = std::make_unique<std::ofstream>("GeoModelStatistics");
-    *geoModelStats << "Detector Configuration flag = " << m_AtlasVersion << std::endl; 
+    *geoModelStats << "Detector Configuration flag = " << m_atlasVersion << std::endl; 
   }
     
   // Loop over all tools
@@ -352,7 +321,7 @@ StatusCode GeoModelSvc::geoInit()
     geoModelStats->close();
   }
 
-  if(m_sqliteDb.empty()) {	
+  if(!m_sqliteDb) {
     // Close connection to the GeometryDB
     rdbAccess->shutdown();
   }
@@ -407,7 +376,7 @@ StatusCode GeoModelSvc::compareTags()
       if(tagInfoFollowsTheScheme) {
 	// Parse Job Options tag
 	startpos = 0;
-	currStr = m_AtlasVersion;
+	currStr = m_atlasVersion;
 	for(std::string::size_type endpos=currStr.find('-'); endpos!=std::string::npos; endpos=currStr.find('-',startpos)) {
 	  tokensJobOpt.push_back(currStr.substr(startpos,endpos-startpos));
 	  startpos = endpos+1;
@@ -420,30 +389,31 @@ StatusCode GeoModelSvc::compareTags()
 				       && tokensJobOpt[tokensJobOptSize-2].size()==2
 				       && tokensJobOpt[tokensJobOptSize-3].size()==2);
 	if(jobOptFollowsTheScheme) {
-	  tagsMatch = (pair.second.substr(0,currStr.size()-6)==m_AtlasVersion.substr(0,m_AtlasVersion.size()-6));
+	  const std::string& atlasVersion = m_atlasVersion;
+	  tagsMatch = (pair.second.substr(0,currStr.size()-6)==atlasVersion.substr(0,atlasVersion.size()-6));
 	}
 	else {
 	  tagsMatch = false;
 	}
       }
       else {// Check for the exact match 
-	tagsMatch = m_AtlasVersion == pair.second;
+	tagsMatch = m_atlasVersion == pair.second;
       }
     }
     else if(tagPairName=="GeoInDet")
-      tagsMatch = m_InDetVersionOverride == pair.second;
+      tagsMatch = m_inDetVersionOverride == pair.second;
     else if(tagPairName=="GeoPixel")
-      tagsMatch = m_PixelVersionOverride == pair.second;
+      tagsMatch = m_pixelVersionOverride == pair.second;
     else if(tagPairName=="GeoSCT")
-      tagsMatch = m_SCT_VersionOverride == pair.second;
+      tagsMatch = m_sctVersionOverride == pair.second;
     else if(tagPairName=="GeoTRT")
-      tagsMatch = m_TRT_VersionOverride == pair.second;
+      tagsMatch = m_trtVersionOverride == pair.second;
     else if(tagPairName=="GeoLAr")
-      tagsMatch = m_LAr_VersionOverride == pair.second;
+      tagsMatch = m_larVersionOverride == pair.second;
     else if(tagPairName=="GeoTile")
-      tagsMatch = m_TileVersionOverride == pair.second;
+      tagsMatch = m_tileVersionOverride == pair.second;
     else if(tagPairName=="GeoMuon")
-      tagsMatch = m_MuonVersionOverride == pair.second;
+      tagsMatch = m_muonVersionOverride == pair.second;
     
     if(!tagsMatch) break;
   }
@@ -452,18 +422,18 @@ StatusCode GeoModelSvc::compareTags()
     msg((m_ignoreTagDifference? MSG::WARNING : MSG::ERROR)) 
       << "*** *** Geometry configured through jobOptions does not match TagInfo tags! *** ***" << endmsg;
     ATH_MSG_INFO("** Job Option configuration: ");
-    ATH_MSG_INFO("* ATLAS tag: " << m_AtlasVersion);
-    ATH_MSG_INFO("* InDet tag: " << m_InDetVersionOverride);
-    ATH_MSG_INFO("* Pixel tag: " << m_PixelVersionOverride);
-    ATH_MSG_INFO("* SCT   tag: " << m_SCT_VersionOverride);
-    ATH_MSG_INFO("* TRT   tag: " << m_TRT_VersionOverride);
-    ATH_MSG_INFO("* LAr   tag: " << m_LAr_VersionOverride);
-    ATH_MSG_INFO("* Tile  tag: " << m_TileVersionOverride);
-    ATH_MSG_INFO("* Muon  tag: " << m_MuonVersionOverride);
-    ATH_MSG_INFO("* Calo  tag: " << m_CaloVersionOverride);
-    ATH_MSG_INFO("* MagField  tag: " << m_MagFieldVersionOverride);
-    ATH_MSG_INFO("* CavernInfra  tag: " << m_CavernInfraVersionOverride);
-    ATH_MSG_INFO("* ForwardDetectors  tag: " << m_ForwardDetectorsVersionOverride);
+    ATH_MSG_INFO("* ATLAS tag: " << m_atlasVersion);
+    ATH_MSG_INFO("* InDet tag: " << m_inDetVersionOverride);
+    ATH_MSG_INFO("* Pixel tag: " << m_pixelVersionOverride);
+    ATH_MSG_INFO("* SCT   tag: " << m_sctVersionOverride);
+    ATH_MSG_INFO("* TRT   tag: " << m_trtVersionOverride);
+    ATH_MSG_INFO("* LAr   tag: " << m_larVersionOverride);
+    ATH_MSG_INFO("* Tile  tag: " << m_tileVersionOverride);
+    ATH_MSG_INFO("* Muon  tag: " << m_muonVersionOverride);
+    ATH_MSG_INFO("* Calo  tag: " << m_caloVersionOverride);
+    ATH_MSG_INFO("* MagField  tag: " << m_bFieldVersionOverride);
+    ATH_MSG_INFO("* CavernInfra  tag: " << m_cavInfraVersionOverride);
+    ATH_MSG_INFO("* ForwardDetectors  tag: " << m_forDetVersionOverride);
     ATH_MSG_INFO("** TAG INFO configuration: ");
     for (const auto& pair : pairs) {
       std::string tagPairName = pair.first;
@@ -509,89 +479,89 @@ StatusCode GeoModelSvc::compareTags()
  **********************************************************************************/
 StatusCode GeoModelSvc::fillTagInfo() const
 {
-  if(m_AtlasVersion == "") {
+  if(m_atlasVersion == "") {
     ATH_MSG_ERROR("ATLAS version is empty");
     return StatusCode::FAILURE; 
   }
   
-  if(m_tagInfoMgr->addTag("GeoAtlas",m_AtlasVersion).isFailure()) {
-    ATH_MSG_ERROR("GeoModelSvc Atlas tag: " << m_AtlasVersion	<< " not added to TagInfo ");
+  if(m_tagInfoMgr->addTag("GeoAtlas",m_atlasVersion).isFailure()) {
+    ATH_MSG_ERROR("GeoModelSvc Atlas tag: " << m_atlasVersion	<< " not added to TagInfo ");
     return StatusCode::FAILURE; 
   }
 
-  if(m_InDetVersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoInDet",m_InDetVersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc InDet tag: " << m_InDetVersionOverride << " not added to TagInfo ");
+  if(m_inDetVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoInDet",m_inDetVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc InDet tag: " << m_inDetVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   } 
 
-  if(m_PixelVersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoPixel",m_PixelVersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc Pixel tag: " << m_PixelVersionOverride << " not added to TagInfo ");
+  if(m_pixelVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoPixel",m_pixelVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc Pixel tag: " << m_pixelVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_SCT_VersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoSCT",m_SCT_VersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc SCT tag: " << m_SCT_VersionOverride << " not added to TagInfo ");
+  if(m_sctVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoSCT",m_sctVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc SCT tag: " << m_sctVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_TRT_VersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoTRT",m_TRT_VersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc TRT tag: " << m_TRT_VersionOverride << " not added to TagInfo ");
+  if(m_trtVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoTRT",m_trtVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc TRT tag: " << m_trtVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_LAr_VersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoLAr",m_LAr_VersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc LAr tag: " << m_LAr_VersionOverride << " not added to TagInfo ");
+  if(m_larVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoLAr",m_larVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc LAr tag: " << m_larVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_TileVersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoTile",m_TileVersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc Tile tag: " << m_TileVersionOverride << " not added to TagInfo ");
+  if(m_tileVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoTile",m_tileVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc Tile tag: " << m_tileVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_MuonVersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoMuon",m_MuonVersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc Muon tag: " << m_MuonVersionOverride << " not added to TagInfo ");
+  if(m_muonVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoMuon",m_muonVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc Muon tag: " << m_muonVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_CaloVersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoCalo",m_CaloVersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc Calo tag: " << m_CaloVersionOverride << " not added to TagInfo ");
+  if(m_caloVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoCalo",m_caloVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc Calo tag: " << m_caloVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_MagFieldVersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoMagField",m_MagFieldVersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc MagField tag: " << m_MagFieldVersionOverride << " not added to TagInfo ");
+  if(m_bFieldVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoMagField",m_bFieldVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc MagField tag: " << m_bFieldVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_CavernInfraVersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoCavernInfra",m_CavernInfraVersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc CavernInfra tag: " << m_CavernInfraVersionOverride << " not added to TagInfo ");
+  if(m_cavInfraVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoCavernInfra",m_cavInfraVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc CavernInfra tag: " << m_cavInfraVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }
 
-  if(m_ForwardDetectorsVersionOverride != "") {
-    if(m_tagInfoMgr->addTag("GeoForwardDetectors",m_ForwardDetectorsVersionOverride).isFailure()) {
-      ATH_MSG_ERROR("GeoModelSvc ForwardDetectors tag: " << m_ForwardDetectorsVersionOverride << " not added to TagInfo ");
+  if(m_forDetVersionOverride != "") {
+    if(m_tagInfoMgr->addTag("GeoForwardDetectors",m_forDetVersionOverride).isFailure()) {
+      ATH_MSG_ERROR("GeoModelSvc ForwardDetectors tag: " << m_forDetVersionOverride << " not added to TagInfo ");
       return StatusCode::FAILURE; 
     }
   }

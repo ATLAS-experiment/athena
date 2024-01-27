@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from PyUtils.MetaReader import read_metadata, lite_primary_keys_to_keep, lite_TagInfo_keys_to_keep
 from AthenaCommon.Logging import logging
@@ -67,30 +67,52 @@ def GetFileMD(filenames):
     msg.info("No file with events found, returning anyways metadata associated to the first file %s", filenames[0])
     return _fileMetaData[filenames[0]]
 
-def _initializeGeometryParameters(geoTag):
+def _initializeGeometryParameters(geoTag,sqliteDB):
     """Read geometry database for all detectors"""
 
     from AtlasGeoModel import CommonGeoDB
     from PixelGeoModel import PixelGeoDB
     from LArGeoAlgsNV import LArGeoDB
     from MuonGeoModel import MuonGeoDB
-    from AtlasGeoModel.AtlasGeoDBInterface import AtlasGeoDBInterface
 
-    dbGeomCursor = AtlasGeoDBInterface(geoTag)
-    dbGeomCursor.ConnectAndBrowseGeoDB()
+    if not sqliteDB:
+        # Read parameters from Oracle/Frontier
+        from AtlasGeoModel.AtlasGeoDBInterface import AtlasGeoDBInterface
+        dbGeomCursor = AtlasGeoDBInterface(geoTag)
+        dbGeomCursor.ConnectAndBrowseGeoDB()
 
-    params = { 'Common' : CommonGeoDB.InitializeGeometryParameters(dbGeomCursor),
-               'Pixel' : PixelGeoDB.InitializeGeometryParameters(dbGeomCursor),
-               'LAr' : LArGeoDB.InitializeGeometryParameters(dbGeomCursor),
-               'Muon' : MuonGeoDB.InitializeGeometryParameters(dbGeomCursor),
-               'Luminosity' : CommonGeoDB.InitializeLuminosityDetectorParameters(dbGeomCursor),
-             }
+        params = { 'Common' : CommonGeoDB.InitializeGeometryParameters(dbGeomCursor),
+                   'Pixel' : PixelGeoDB.InitializeGeometryParameters(dbGeomCursor),
+                   'LAr' : LArGeoDB.InitializeGeometryParameters(dbGeomCursor),
+                   'Muon' : MuonGeoDB.InitializeGeometryParameters(dbGeomCursor),
+                   'Luminosity' : CommonGeoDB.InitializeLuminosityDetectorParameters(dbGeomCursor),
+               }
+
+        msg.debug('Config parameters retrieved from Geometry DB (Frontier/Oracle):')
+        for key in params.keys():
+            msg.debug(f'{key} -> {params[key]}')
+    else:
+        # Read parameters from SQLite
+        from AtlasGeoModel.AtlasGeoDBInterface import AtlasGeoDBInterface_SQLite
+        sqliteReader = AtlasGeoDBInterface_SQLite(geoTag)
+        sqliteReader.ConnectToDB()
+
+        params = { 'Common' : CommonGeoDB.InitializeGeometryParameters_SQLite(sqliteReader),
+                   'Pixel' : PixelGeoDB.InitializeGeometryParameters_SQLite(sqliteReader),
+                   'LAr' : LArGeoDB.InitializeGeometryParameters_SQLite(sqliteReader),
+                   'Muon' : MuonGeoDB.InitializeGeometryParameters_SQLite(sqliteReader),
+                   'Luminosity' : CommonGeoDB.InitializeLuminosityDetectorParameters_SQLite(sqliteReader),
+               }
+
+        msg.debug('Config parameters retrieved from Geometry DB (SQLite):')
+        for key in params.keys():
+            msg.debug(f'{key} -> {params[key]}')
 
     return params
 
 
 @lru_cache(maxsize=4)  # maxsize=1 should be enough for most jobs
-def DetDescrInfo(geoTag):
+def DetDescrInfo(geoTag, sqliteDB):
     """Query geometry DB for detector description. Returns dictionary with
     detector description. Queries DB for each tag only once.
 
@@ -99,13 +121,13 @@ def DetDescrInfo(geoTag):
     if not geoTag:
         raise ValueError("No geometry tag specified")
 
-    detDescrInfo = _initializeGeometryParameters(geoTag)
+    detDescrInfo = _initializeGeometryParameters(geoTag,sqliteDB)
     detDescrInfo["geomTag"] = geoTag
     return detDescrInfo
 
 
 @lru_cache(maxsize=4)  # maxsize=1 should be enough for most jobs
-def getDefaultDetectors(geoTag, includeForward=False):
+def getDefaultDetectors(geoTag, sqliteDB, includeForward=False):
     """Query geometry DB for detector description.
     Returns a set of detectors used in a geometry tag.
 
@@ -114,12 +136,12 @@ def getDefaultDetectors(geoTag, includeForward=False):
     detectors = set()
     detectors.add('Bpipe')
 
-    if DetDescrInfo(geoTag)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
+    if DetDescrInfo(geoTag,sqliteDB)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
         detectors.add('ITkPixel')
         detectors.add('ITkStrip')
-        if DetDescrInfo(geoTag)['Luminosity']['BCMPrime']:
+        if DetDescrInfo(geoTag,sqliteDB)['Luminosity']['BCMPrime']:
             pass  # keep disabled for now
-        if DetDescrInfo(geoTag)['Luminosity']['PLR']:
+        if DetDescrInfo(geoTag,sqliteDB)['Luminosity']['PLR']:
             detectors.add('PLR')
     else:
         detectors.add('Pixel')
@@ -130,27 +152,27 @@ def getDefaultDetectors(geoTag, includeForward=False):
     # if DetDescrInfo(geoTag)['Common']['Run'] == 'RUN4':
     #     detectors.add('BCMPrime')
 
-    if DetDescrInfo(geoTag)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
+    if DetDescrInfo(geoTag,sqliteDB)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
         detectors.add('HGTD')
 
     detectors.add('LAr')
     detectors.add('Tile')
-    if DetDescrInfo(geoTag)['Common']['Run'] in ['RUN1', 'RUN2', 'RUN3']:
+    if DetDescrInfo(geoTag,sqliteDB)['Common']['Run'] in ['RUN1', 'RUN2', 'RUN3']:
         detectors.add('MBTS')
 
     detectors.add('MDT')
     detectors.add('RPC')
     detectors.add('TGC')
-    if DetDescrInfo(geoTag)['Muon']['HasCSC']:
+    if DetDescrInfo(geoTag,sqliteDB)['Muon']['HasCSC']:
         detectors.add('CSC')
-    if DetDescrInfo(geoTag)['Muon']['HasSTGC']:
+    if DetDescrInfo(geoTag,sqliteDB)['Muon']['HasSTGC']:
         detectors.add('sTGC')
-    if DetDescrInfo(geoTag)['Muon']['HasMM']:
+    if DetDescrInfo(geoTag,sqliteDB)['Muon']['HasMM']:
         detectors.add('MM')
 
     if includeForward:
         detectors.add('Lucid')
-        if DetDescrInfo(geoTag)['Common']['Run'] not in ['RUN1']:
+        if DetDescrInfo(geoTag,sqliteDB)['Common']['Run'] not in ['RUN1']:
             detectors.add('AFP')
         detectors.add('ZDC')
         detectors.add('ALFA')

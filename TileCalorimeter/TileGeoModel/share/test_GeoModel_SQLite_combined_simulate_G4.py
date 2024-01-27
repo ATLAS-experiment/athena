@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## Job options file for launching Geant4 ATLAS detector simulations
 ## on the Tile geometry built from a standalone SQLite file
@@ -113,9 +113,12 @@ include("G4AtlasApps/G4Atlas.flat.configuration.py")
 #GeoModelSvc.SQLiteDB = "tile_V4.db"
 #GeoModelSvc.SQLiteDB = "combinedGeo_beampipe_indetservmat.db"
 #GeoModelSvc.SQLiteDB = "combinedGeo_beampipe_indetservmat_tile.db"
-GeoModelSvc.SQLiteDB = "combinedGeo_beampipe_indetservmat_trt_lar_tile.db"
+SQLiteDBFile = "combinedGeo_beampipe_indetservmat_trt_lar_tile.db"
 
-
+GeoModelSvc.SQLiteDB = True
+from AtlasGeoModel import CommonGeoDB
+CommonGeoDB.SetupLocalSqliteGeometryDb(SQLiteDBFile,simFlags.SimLayout)
+# Detector Description -- SQLite/Oracle switch
 
 from AthenaCommon.CfgGetter import getAlgorithm
 topSeq += getAlgorithm("BeamEffectsAlg", tryDefaultConfigurable=True)

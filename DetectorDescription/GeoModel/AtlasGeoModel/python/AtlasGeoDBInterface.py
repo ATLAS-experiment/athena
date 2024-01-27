@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
 
@@ -226,4 +226,56 @@ class AtlasGeoDBInterface:
 
         return dbId,dbContent,paramName
 
+# -------------------------------------------------------------------------------------
+#  AtlasGeoDBInterface_SQLite : Interface with the SQLite geometry DB
+# -------------------------------------------------------------------------------------
 
+import sqlite3
+
+class AtlasGeoDBInterface_SQLite:
+
+    def __init__(self,geoTag,verbose=False):
+
+        self.db=None
+        self.bVerbose=verbose
+
+        from AthenaCommon.Utils.unixtools import find_datafile
+        fileName="Geometry/"+geoTag+".db"
+        self.dbFile=find_datafile(fileName)
+
+    def ConnectToDB(self):
+
+        try:
+            self.db=sqlite3.connect(self.dbFile)
+        except Exception as e:
+            Logging.log.fatal(f'Failed to open SQLite database {self.dbFile}. {e}')
+        Logging.log.debug(f'Connected to SQLite database {self.dbFile}')
+
+    def GetData(self,tableName):
+
+        # Check the existence of the table in the DB
+        cur = self.db.cursor()
+        querystring = "SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='"+tableName+"'"
+        cur.execute(querystring)
+        checkTable = cur.fetchall()
+        if len(checkTable)==0:
+            Logging.log.info(f'Table {tableName} not found in the SQLite DB. Falling back on the default config')
+            return []
+
+        # Fetch the data
+        cur = self.db.cursor()
+        querystring = "SELECT * FROM "+tableName+" order by "+tableName+"_data_id"
+        cur.execute(querystring)
+        rows = cur.fetchall()
+
+        ncols=len(cur.description)
+        dbData=[]
+        for row in rows:
+            dbDataRow={}
+            for i in range(1,ncols):
+                dbDataRow[cur.description[i][0]]=row[i]
+            Logging.log.debug(f'Fetched Data Row for {tableName}')
+            Logging.log.debug(f'{dbDataRow}')
+            dbData.append(dbDataRow)
+
+        return dbData
