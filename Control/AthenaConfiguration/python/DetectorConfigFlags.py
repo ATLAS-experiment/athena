@@ -58,49 +58,49 @@ def createDetectorConfigFlags():
     dcf.addFlag('Detector.GeometryBpipe', True)  # always enabled by default
 
     # Inner Detector
-    dcf.addFlag('Detector.GeometryBCM',   lambda prevFlags : 'BCM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryPixel', lambda prevFlags : 'Pixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometrySCT',   lambda prevFlags : 'SCT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryTRT',   lambda prevFlags : 'TRT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
+    dcf.addFlag('Detector.GeometryBCM',   lambda prevFlags : 'BCM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryPixel', lambda prevFlags : 'Pixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometrySCT',   lambda prevFlags : 'SCT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryTRT',   lambda prevFlags : 'TRT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
     dcf.addFlag('Detector.GeometryID',    lambda prevFlags : (prevFlags.Detector.GeometryBCM
                                                               or prevFlags.Detector.GeometryPixel or prevFlags.Detector.GeometrySCT
                                                               or prevFlags.Detector.GeometryTRT))
 
     # Upgrade ITk Inner Tracker is a separate and parallel detector
-    dcf.addFlag('Detector.GeometryPLR',   lambda prevFlags : 'PLR' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryBCMPrime', lambda prevFlags : 'BCMPrime' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryITkPixel', lambda prevFlags : 'ITkPixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryITkStrip', lambda prevFlags : 'ITkStrip' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
+    dcf.addFlag('Detector.GeometryPLR',   lambda prevFlags : 'PLR' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryBCMPrime', lambda prevFlags : 'BCMPrime' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryITkPixel', lambda prevFlags : 'ITkPixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryITkStrip', lambda prevFlags : 'ITkStrip' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
     dcf.addFlag('Detector.GeometryITk',      lambda prevFlags : (prevFlags.Detector.GeometryBCMPrime
                                                                  or prevFlags.Detector.GeometryITkPixel
                                                                  or prevFlags.Detector.GeometryITkStrip
                                                                  or prevFlags.Detector.GeometryPLR))
     # HGTD
-    dcf.addFlag('Detector.GeometryHGTD', lambda prevFlags : 'HGTD' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
+    dcf.addFlag('Detector.GeometryHGTD', lambda prevFlags : 'HGTD' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
 
     # Calorimeters
-    dcf.addFlag('Detector.GeometryLAr',  lambda prevFlags : 'LAr' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion)) # Add separate em HEC and FCAL flags?
-    dcf.addFlag('Detector.GeometryTile', lambda prevFlags : 'Tile' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryMBTS', lambda prevFlags : (prevFlags.Detector.GeometryLAr and 'MBTS' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion)))
+    dcf.addFlag('Detector.GeometryLAr',  lambda prevFlags : 'LAr' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)) # Add separate em HEC and FCAL flags?
+    dcf.addFlag('Detector.GeometryTile', lambda prevFlags : 'Tile' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryMBTS', lambda prevFlags : (prevFlags.Detector.GeometryLAr and 'MBTS' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)))
     dcf.addFlag('Detector.GeometryCalo', lambda prevFlags : (prevFlags.Detector.GeometryLAr or prevFlags.Detector.GeometryTile))
 
     # Muon Spectrometer
-    dcf.addFlag('Detector.GeometryCSC',  lambda prevFlags : 'CSC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryMDT',  lambda prevFlags : 'MDT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryRPC',  lambda prevFlags : 'RPC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryTGC',  lambda prevFlags : 'TGC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometrysTGC', lambda prevFlags : 'sTGC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryMM',   lambda prevFlags : 'MM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
+    dcf.addFlag('Detector.GeometryCSC',  lambda prevFlags : 'CSC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryMDT',  lambda prevFlags : 'MDT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryRPC',  lambda prevFlags : 'RPC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryTGC',  lambda prevFlags : 'TGC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometrysTGC', lambda prevFlags : 'sTGC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryMM',   lambda prevFlags : 'MM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
     dcf.addFlag('Detector.GeometryMuon', lambda prevFlags : (prevFlags.Detector.GeometryCSC or prevFlags.Detector.GeometryMDT
                                                              or prevFlags.Detector.GeometryRPC or prevFlags.Detector.GeometryTGC
                                                              or prevFlags.Detector.GeometrysTGC or prevFlags.Detector.GeometryMM))
 
     # Forward detectors (disabled by default)
-    dcf.addFlag('Detector.GeometryLucid',     lambda prevFlags : 'Lucid' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
-    dcf.addFlag('Detector.GeometryZDC',       lambda prevFlags : 'ZDC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
-    dcf.addFlag('Detector.GeometryALFA',      lambda prevFlags : 'ALFA' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
-    dcf.addFlag('Detector.GeometryAFP',       lambda prevFlags : 'AFP' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
-    dcf.addFlag('Detector.GeometryFwdRegion', lambda prevFlags : 'FwdRegion' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryLucid',     lambda prevFlags : 'Lucid' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryZDC',       lambda prevFlags : 'ZDC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryALFA',      lambda prevFlags : 'ALFA' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryAFP',       lambda prevFlags : 'AFP' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryFwdRegion', lambda prevFlags : 'FwdRegion' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
     dcf.addFlag('Detector.GeometryForward',   lambda prevFlags : (prevFlags.Detector.GeometryLucid or prevFlags.Detector.GeometryZDC
                                                                   or prevFlags.Detector.GeometryALFA or prevFlags.Detector.GeometryAFP
                                                                   or prevFlags.Detector.GeometryFwdRegion))
@@ -207,7 +207,7 @@ def _parseDetectorsList(flags, detectors):
         else:
             # in case of groups only enable defaults
             for d in allGroups[g]:
-                if d in getDefaultDetectors(flags.GeoModel.AtlasVersion):
+                if d in getDefaultDetectors(flags.GeoModel.AtlasVersion,flags.GeoModel.SQLiteDB):
                     log.debug("Appending detector '%s'", d)
                     detectors.add(d)
 

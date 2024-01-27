@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run PrintSiDetectorElements
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 from argparse import ArgumentParser
@@ -48,9 +48,11 @@ ConfigFlags.Input.Files = []
 if args.localgeo:
     ConfigFlags.ITk.Geometry.AllLocal = True
 
-elif args.sqlitefile != "":
+elif args.sqlitefile:
     print("Using SQLite input")
-    ConfigFlags.GeoModel.SQLiteDB = args.sqlitefile
+    ConfigFlags.GeoModel.SQLiteDB = True
+    from AtlasGeoModel import CommonGeoDB
+    CommonGeoDB.SetupLocalSqliteGeometryDb(args.sqlitefile,args.geometrytag)
 
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 setupDetectorFlags(ConfigFlags, args.detectors, toggle_geometry=True)

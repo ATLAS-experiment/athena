@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -102,7 +102,10 @@ def setupGeoR4TestCfg(args):
     
     flags.GeoModel.AtlasVersion = args.geoTag
     flags.IOVDb.GlobalTag = args.condTag
-    flags.GeoModel.SQLiteDB = args.geoModelFile
+    if args.geoModelFile:
+        flags.GeoModel.SQLiteDB = True
+        from AtlasGeoModel import CommonGeoDB
+        CommonGeoDB.SetupLocalSqliteGeometryDb(args.geoModelFile,args.geoTag)
     
     flags.Detector.GeometryBpipe = False
     ### Inner detector
