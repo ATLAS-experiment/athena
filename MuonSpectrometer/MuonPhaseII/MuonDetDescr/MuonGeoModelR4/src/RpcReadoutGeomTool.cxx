@@ -92,7 +92,7 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     }
     /// For one reason or another the x-axis points along the gasgap 
     /// and y along doublet phi
-    std::stable_sort(allGasGaps.begin(), allGasGaps.end(), [&define](const physVolWithTrans&a, const physVolWithTrans & b){
+    std::stable_sort(allGasGaps.begin(), allGasGaps.end(), [](const physVolWithTrans&a, const physVolWithTrans & b){
          const Amg::Vector3D cA = a.transform.translation();
          const Amg::Vector3D cB = b.transform.translation();
          if (std::abs(cA.x() - cB.x()) > tolerance) return (cA.x() < cB.x());
