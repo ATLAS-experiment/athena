@@ -51,6 +51,7 @@ class MutableTrackContainerHandle {
 
  private:
   ActsTrk::MutableMultiTrajectoryHandle<C> m_mtjBackendsHandle;
+  Gaudi::Property<std::string> m_prefixName;
   SG::WriteHandleKey<ActsTrk::MultiTrajectory> m_mtjKey;
 
   // track and its backend
@@ -63,19 +64,30 @@ template <class C>
 MutableTrackContainerHandle<C>::MutableTrackContainerHandle(
     C* algorithm, const std::string& propertyNamePrefix,
     const std::string& namePrefix)
-    : m_mtjBackendsHandle(algorithm, propertyNamePrefix, namePrefix),
-      m_mtjKey(algorithm, propertyNamePrefix + "MTJKey",
-               namePrefix + "MultiTrajectory"),
-      m_xAODTrackSummaryKey(algorithm, propertyNamePrefix + "xAODTrackSummary",
-                            namePrefix + "TrackSummary"),
-      m_surfacesKey(algorithm, propertyNamePrefix + "SurfacesKey",
-                    namePrefix + "Surfaces"),
-      m_trackBackendKey(algorithm, propertyNamePrefix + "TrackStorage",
-                        namePrefix + "TrackStorage") {}
-
+  : m_mtjBackendsHandle(algorithm, propertyNamePrefix, namePrefix),
+    m_prefixName(algorithm, propertyNamePrefix + "TrackBackEndPrefixName",
+                 namePrefix),
+    m_mtjKey(algorithm, propertyNamePrefix + "MTJKey",
+	     namePrefix + "MultiTrajectory"),
+    m_xAODTrackSummaryKey(algorithm, propertyNamePrefix + "xAODTrackSummary",
+			  namePrefix + "TrackSummary"),
+    m_surfacesKey(algorithm, propertyNamePrefix + "SurfacesKey",
+		  namePrefix + "Surfaces"),
+    m_trackBackendKey(algorithm, propertyNamePrefix + "TrackStorage",
+		      namePrefix + "TrackStorage") {}
+  
 template <class C>
 StatusCode MutableTrackContainerHandle<C>::initialize() {
   ATH_CHECK(m_mtjBackendsHandle.initialize());
+
+  // Here we overwrite the keys in case the user has modified the BackEndPrefixName
+  // in the JO. We only modify the value
+  m_mtjKey = m_prefixName + "MultiTrajectory";
+  m_xAODTrackSummaryKey = m_prefixName + "TrackSummary";
+  m_surfacesKey = m_prefixName + "Surfaces";
+  m_trackBackendKey = m_prefixName + "TrackStorage";
+
+  // And now we initialize the keys  
   ATH_CHECK(m_mtjKey.initialize());
   ATH_CHECK(m_xAODTrackSummaryKey.initialize());
   ATH_CHECK(m_surfacesKey.initialize());
