@@ -122,9 +122,9 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
     NLatomeBins=117
     NLatomeBins_side=59
 
-    BinLabel=[]
-    BinLabel_A=[]
-    BinLabel_C=[]
+    BinLabel_LATOME=[]
+    BinLabel_LATOME_A=[]
+    BinLabel_LATOME_C=[]
     phi=0
     for bb in range (0,NLatomeBins):
         Label=""
@@ -134,225 +134,22 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                 phi=1
                 break
         if bb < NLatomeBins_side:
-            BinLabel_C+=[Label+str(phi)]
+            BinLabel_LATOME_C+=[Label+str(phi)]
         else:
-            BinLabel_A+=[Label+str(phi)]
+            BinLabel_LATOME_A+=[Label+str(phi)]
 
-        BinLabel+=[Label+str(phi)]
+        BinLabel_LATOME+=[Label+str(phi)]
         phi+=1
         
     
-    #### Plots from Digi (ADC) loop
-    SCGroup.defineHistogram('Digi_maxpos,Digi_partition;Partition_maxSamplePosition', 
-                            title='Partition vs. position of max sample '+selStr["passDigiNom"],
-                            cutmask='passDigiNom',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
-                            ybins=lArDQGlobals.N_Partitions, ymin=-0.5, ymax=lArDQGlobals.N_Partitions-0.5,
-                            xlabels = [str(x) for x in range(1,nsamples+1)],      
-                            ylabels=lArDQGlobals.Partitions)
-
-    SCGroup.defineHistogram('Digi_sampos,Digi_ADC;ADCZoom_samplePosition',
-                            title='ADC (zoom) vs sample position '+selStr["passDigiNom"],
-                            cutmask='passDigiNom',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
-                            xlabels = [str(x) for x in range(1,nsamples+1)],
-                            ybins=750, ymin=0, ymax=1300) #start from 0 otherwise miss endcap pedestals
-    
-    SCGroup.defineHistogram('Digi_sampos,Digi_ADC;ADCFullRange_samplePosition', 
-                            title='ADC vs sample position '+selStr["passDigiNom"],
-                            cutmask='passDigiNom',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
-                            xlabels = [str(x) for x in range(1,nsamples+1)],
-                            ybins=500, ymin=0, ymax=5000) #raw ADC is 12 bit
-
-    SCGroup.defineHistogram('Digi_sampos,Pedestal;PedestalFullRange_samplePosition',
-                            title='Pedestal vs sample position '+selStr["passDigiNom"],
-                            cutmask='passDigiNom',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
-                            xlabels = [str(x) for x in range(1,nsamples+1)],
-                            ybins=500, ymin=0, ymax=5000) #raw ADC is 12 bit 
-
-
-    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Digi_ADC;ADCFullRange_LATOME',
-                            title='ADC vs LATOME name '+selStr["passDigiNom"]+'; ; ADC',
-                            cutmask='passDigiNom',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                            ybins=500, ymin=-2, ymax=2500, #raw ADC is 12 bit
-                            xlabels=BinLabel)
-
-    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Pedestal;Pedestal_LATOME',
-                            title='Pedestal vs LATOME name '+selStr["passDigiNom"]+'; ; Pedestal',
-                            cutmask='passDigiNom',
-                            type='TH2F',
-                            path=sc_hist_path,
-                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                            ybins=500, ymin=-2, ymax=2500, #raw ADC is 12 bit
-                            xlabels=BinLabel)
-
-    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Digi_maxpos;MaxSamplePosition_LATOME',
-                            title='Position of max sample vs. LATOME '+selStr["passDigiNom"],
-                            type='TH2F',
-                            cutmask='passDigiNom',
-                            path=sc_hist_path,
-                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                            ybins=nsamples,ymin=0.5,ymax=nsamples+0.5,
-                            xlabels=BinLabel,
-                            ylabels = [str(x) for x in range(1,nsamples+1)])  
-
-    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Digi_Diff_ADC_Ped;Diff_ADC_Ped_LATOME',
-                            title='ADC - Pedestal vs LATOME name '+selStr["passDigiNom"]+'; ; ADC - Pedestal',
-                            type='TH2F',
-                            cutmask='passDigiNom',
-                            path=sc_hist_path,
-                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                            ybins=64, ymin=-32, ymax=32,
-                            xlabels=BinLabel)
-
-    SCGroup.defineHistogram('Digi_Diff_ADC_Ped;Diff_ADC_Ped',
-                            title='LATOME (ADC-ped) '+selStr["passDigiNom"]+'; (ADC - pedestal)',
-                            type='TH1F',
-                            cutmask='passDigiNom',
-                            path=sc_hist_path,
-                            xbins=50,xmin=-25,xmax=25)
-
-    SCGroup.defineHistogram('Digi_sampos,Digi_Diff_ADC_Ped_Norm;Diff_ADC_Ped_Norm_SamplePos',
-                            title='(ADC-ped)/fabs(ADC_max-ped) '+selStr["passDigiNom"]+'; Sample position; (ADC - pedestal) / fabs(ADC_max - pedestal)',
-                            type='TH2F',
-                            cutmask='passDigiNom',
-                            path=sc_hist_path,
-                            ybins=40,ymin=-1,ymax=1,
-                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
-                            xlabels = [str(x) for x in range(1,nsamples+1)])
-
-    SCGroup.defineHistogram('Digi_latomeSourceIdBIN,Digi_Diff_ADC_Ped_Norm;Diff_ADC_Ped_Norm_LATOME',
-                            title='(ADC-ped)/fabs(ADC_max-ped) '+selStr["passDigiNom"]+'; LATOME Name; (ADC - pedestal) / fabs(ADC_max - pedestal)',
-                            type='TH2F',
-                            cutmask='passDigiNom',
-                            path=sc_hist_path,
-                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                            ybins=64, ymin=-32, ymax=32,
-                            xlabels=BinLabel)
-
-
-    # Plotting for SCs which are NOT masked but have bad quality bits
-    SCGroup.defineHistogram('Digi_eta,Digi_phi;Coverage_eta_phi_BadQualityBit',
-                            title='SC coverage '+selStr["badNotMasked"]+': #phi vs #eta;#eta;#phi',
-                            type='TH2F',
-                            cutmask='badNotMasked',
-                            path=sc_hist_path,
-                            xbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"],
-                            ybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"])    
 
 
 
 
-
-    #### Plots from the SC ET loop
-    for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "onlofflEmismatch", "saturNotMasked", "OFCbOFNotMasked" ]:        
-        SCGroup.defineHistogram('SC_eta,SC_phi;Coverage_eta_phi_'+thisSel, 
-                                title='SC coverage '+selStr[thisSel]+': #phi vs #eta;#eta;#phi',
-                                type='TH2F',
-                                cutmask=thisSel,
-                                path=sc_hist_path,
-                                xbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"],
-                                ybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"])    
-
-    SCGroup.defineHistogram('SC_ET_onl,SC_ET_ofl;OnlOfl_ET_2D',
-                            title='LATOME E_{T} vs Offline Computation '+selStr["passSCNom"]+'; E_{T} Onl;E_{T} Offl [GeV]',
-                            type='TH2F',
-                            cutmask='passSCNom',
-                            path=sc_hist_path,
-                            xbins=0,xmin=0,xmax=20,
-                            ybins=0,ymin=0,ymax=20)
-    
-    SCGroup.defineHistogram('SC_ET_diff;OnlOfl_Etdiff',
-                            title='LATOME E_{T} vs Offline Computation '+selStr["passSCNom"]+'; E_{T} Onl - E_{T} Offl [GeV]; Evts;',
-                            type='TH1F',
-                            cutmask='passSCNom',
-                            path=sc_hist_path,
-                            xbins=200,xmin=-10,xmax=10)
-
-
-    for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3" ]:
-        SCGroup.defineHistogram('SC_time;OfflineLATOMEtime_'+thisSel,
-                                title='LATOME #tau from Offline Computation '+selStr[thisSel]+';#tau [ns]; Evts;',
-                                type='TH1F',
-                                cutmask=thisSel,
-                                path=sc_hist_path,
-                                xbins=100,xmin=-25,xmax=25)
-
-        SCGroup.defineHistogram('SC_eta,SC_phi,SC_ET_onl;Coverage_Et_onl_'+thisSel,
-                                title='SC Energy '+selStr[thisSel]+': #phi vs #eta;#eta;#phi',
-                                type='TProfile2D',
-                                cutmask=thisSel,
-                                path=sc_hist_path,
-                                xbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"],
-                                ybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"])
-
-
-    SCGroup.defineHistogram('lumi_block,SC_time;MeanOfflineLATOMEtime_perLB',
-                            title='Average LATOME #tau from Offline computation per LB '+selStr["passSCNom"]+'; LumiBloc; #tau [ns]',
-                            type='TProfile',
-                            cutmask='passSCNom',
-                            path=sc_hist_path,
-                            xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max)
-
-    SCGroup.defineHistogram('SC_ET_onl;SCeT', 
-                            title='SC eT [GeV] '+selStr["passSCNom"],
-                            type='TH1F',
-                            cutmask='passSCNom',
-                            path=sc_hist_path,
-                            xbins=500, xmin=-100, xmax=400)
-
-    SCGroup.defineHistogram('SC_latomeSourceIdBIN,SC_ET_onl;SCeT_LATOME',
-                            title='SC ET [GeV] vs LATOME name '+selStr["passSCNom"]+'; ; E_{T}^{SC} [GeV]',
-                            type='TH2F',
-                            cutmask='passSCNom',
-                            path=sc_hist_path,
-                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                            ybins=200, ymin=-10, ymax=200,
-                            xlabels=BinLabel)
-
-
-    SCGroup.defineHistogram('SC_latomeSourceIdBIN,SC_time;MeanOfflineLATOMEtime_perLATOME', 
-                            title='Average LATOME #tau from Offline computation per LATOME'+selStr["passSCNom"]+'; LATOME ; #tau [ns]',
-                            type='TH2F',
-                            cutmask='passSCNom',
-                            path=sc_hist_path,
-                            xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
-                            ybins=200, ymin=-50, ymax=50,
-                            xlabels=BinLabel)
-    SCGroup.defineHistogram('lumi_block,SC_latomeSourceIdBIN,SC_time;MeanOfflineLATOMEtime_perLB_perLATOME',
-                            title='SC #tau '+selStr["passSCNom"]+': LATOME vs LB;LB;LATOME',
-                            type='TProfile2D',
-                            cutmask='passSCNom',
-                            path=sc_hist_path,                            
-                            xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
-                            ybins=NLatomeBins,ymin=1,ymax=NLatomeBins+1,
-                            ylabels=BinLabel)
-
-
-    SCGroup.defineHistogram('SC_eta,SC_phi,SC_time;Coverage_offlineLATOMEtime_passSCNom',
-                            title='LATOME #tau from Offline Computation '+selStr["passSCNom"]+': #phi vs #eta;#eta;#phi',
-                            type='TProfile2D',
-                            cutmask='passSCNom',
-                            path=sc_hist_path,
-                            xbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"],
-                            ybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"])
 
 
     #### Plots from LATOME header loop
-    SCGroup.defineHistogram('lumi_block,event_size;EventSizeLB',
+    SCGroup.defineHistogram('lumi_block,event_size;EventSize_vs_LB',
                             title='Digital trigger event size per LB; LumiBlock; Event size [MB]',
                             type='TProfile',
                             path=sc_hist_path,
@@ -361,9 +158,9 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 
 
     #### Per-subdetector/layer plots
-    partGroup_digi = helper.addArray([larDigitalTriggMonAlg.LayerNames], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_digi')
-    partGroup_sc = helper.addArray([larDigitalTriggMonAlg.LayerNames], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_sc')
-    
+    partGroup_digi = helper.addArray([larDigitalTriggMonAlg.LayerNames], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_digi', topPath='/LArDigitalTrigger/')
+    partGroup_sc = helper.addArray([larDigitalTriggMonAlg.LayerNames], larDigitalTriggMonAlg, 'LArDigitalTriggerMon_sc', topPath='/LArDigitalTrigger/')
+
     for part in larDigitalTriggMonAlg.LayerNames:
         selStrPart = {}
         for sel in selStr.keys():
@@ -372,9 +169,9 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
         if part == "ALL":
             partxbins=lArDQGlobals.SuperCell_Variables["etaRange"]["All"]["All"]
             partybins=lArDQGlobals.SuperCell_Variables["phiRange"]["All"]["All"]
-            topPath="/"
+            topPath=""
         else:
-            topPath="/LArDigitalTrigger/PerPartition/"
+            topPath="PerPartition/"
             Part = part[:-2]
             if Part == "FCAL": 
                 Part = "FCal"
@@ -388,127 +185,283 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
         
         
         #### Plots from Digi (ADC) loop
-        partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_eta_phi_digi',
-                                       title='SC coverage '+selStrPart["passDigiNom"]+': #phi vs #eta;#eta;#phi',
-                                       type='TH2F', 
-                                       path=topPath+'Coverage/passDigiNom',
-                                       cutmask='Digi_part_passDigiNom',
-                                       xbins=partxbins,
-                                       ybins=partybins,
-                                       pattern=[(part)])
+        for thisSel in [ "passDigiNom", "badNotMasked"]:
+            thisTopPath=f"/{thisSel}/{topPath}"
+            # Histos that we only want for all partitions/layers combined lalala
+            if part == "ALL":
+                partGroup_digi.defineHistogram('Digi_part_maxpos,Digi_part_partition;Partition_vs_maxSamplePosition_'+thisSel, 
+                                               title='Partition vs. position of max sample '+selStrPart[thisSel],
+                                               cutmask='Digi_part_'+thisSel,
+                                               type='TH2F',
+                                               path=thisTopPath,
+                                               xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
+                                               ybins=lArDQGlobals.N_Partitions, ymin=-0.5, ymax=lArDQGlobals.N_Partitions-0.5,
+                                               xlabels = [str(x) for x in range(1,nsamples+1)],      
+                                               ylabels=lArDQGlobals.Partitions,
+                                               pattern=[(part)])
 
-        partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_eta_phi_bad',
-                                       title='SC coverage '+selStrPart["badNotMasked"]+': #phi vs #eta;#eta;#phi',
-                                       type='TH2F', 
-                                       path=topPath+'Coverage/BadNotMasked',
-                                       cutmask='Digi_part_badNotMasked',
-                                       xbins=partxbins,
-                                       ybins=partybins,
-                                       pattern=[(part)])
+                partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_adc;ADCFullRange_vs_LATOME_'+thisSel,
+                                               title='ADC vs LATOME name '+selStrPart[thisSel]+'; ; ADC',
+                                               cutmask='Digi_part_'+thisSel,
+                                               type='TH2F',
+                                               path=thisTopPath,
+                                               xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                                               ybins=500, ymin=-2, ymax=2500, #raw ADC is 12 bit
+                                               xlabels=BinLabel_LATOME,
+                                               pattern=[(part)])
+                
+                partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_pedestal;Pedestal_vs_LATOME_'+thisSel,
+                                               title='Pedestal vs LATOME name '+selStrPart[thisSel]+'; ; Pedestal',
+                                               cutmask='Digi_part_'+thisSel,
+                                               type='TH2F',
+                                               path=thisTopPath,
+                                               xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                                               ybins=500, ymin=-2, ymax=2500, #raw ADC is 12 bit
+                                               xlabels=BinLabel_LATOME,
+                                               pattern=[(part)])
+                
+                partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_maxpos;MaxSamplePosition_vs_LATOME_'+thisSel,
+                                               title='Position of max sample vs. LATOME '+selStrPart[thisSel],
+                                               type='TH2F',
+                                               cutmask='Digi_part_'+thisSel,
+                                               path=thisTopPath,
+                                               xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                                               ybins=nsamples,ymin=0.5,ymax=nsamples+0.5,
+                                               xlabels=BinLabel_LATOME,
+                                               ylabels = [str(x) for x in range(1,nsamples+1)],
+                                               pattern=[(part)])
+                
+                partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_LATOME_'+thisSel,
+                                               title='ADC - Pedestal vs LATOME name '+selStrPart[thisSel]+'; ; ADC - Pedestal',
+                                               type='TH2F',
+                                               cutmask='Digi_part_'+thisSel,
+                                               path=thisTopPath,
+                                               xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                                               ybins=64, ymin=-32, ymax=32,
+                                               xlabels=BinLabel_LATOME,
+                                               pattern=[(part)])
+                
+                partGroup_digi.defineHistogram('Digi_part_latomesourceidbin,Digi_part_diff_adc_ped_norm;Diff_ADC_Ped_Norm_vs_LATOME_'+thisSel,
+                                               title='(ADC-ped)/fabs(ADC_max-ped) '+selStrPart[thisSel]+'; LATOME Name; (ADC - pedestal) / fabs(ADC_max - pedestal)',
+                                               type='TH2F',
+                                               cutmask='Digi_part_'+thisSel,
+                                               path=thisTopPath,
+                                               xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                                               ybins=64, ymin=-32, ymax=32,
+                                               xlabels=BinLabel_LATOME,
+                                               pattern=[(part)])
 
+            ####  End of plots only for ALL
+                      
+            partGroup_digi.defineHistogram('Digi_part_sampos,Digi_part_adc;ADCZoom_vs_SamplePosition_'+thisSel,
+                                           title='ADC (zoom) vs sample position '+selStrPart[thisSel],
+                                           cutmask='Digi_part_'+thisSel,
+                                           type='TH2F',
+                                           path=thisTopPath,
+                                           xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
+                                           xlabels = [str(x) for x in range(1,nsamples+1)],
+                                           ybins=750, ymin=0, ymax=1300, #start from 0 otherwise miss endcap pedestals
+                                           pattern=[(part)]) 
+        
+            partGroup_digi.defineHistogram('Digi_part_sampos,Digi_part_adc;ADCFullRange_vs_SamplePosition_'+thisSel, 
+                                           title='ADC vs sample position '+selStrPart[thisSel],
+                                           cutmask='Digi_part_'+thisSel,
+                                           type='TH2F',
+                                           path=thisTopPath,
+                                           xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
+                                           xlabels = [str(x) for x in range(1,nsamples+1)],
+                                           ybins=500, ymin=0, ymax=5000, #raw ADC is 12 bit
+                                           pattern=[(part)]) 
+            
+            partGroup_digi.defineHistogram('Digi_part_sampos,Digi_part_pedestal;Pedestal_vs_SamplePosition_'+thisSel,
+                                           title='Pedestal vs sample position '+selStrPart[thisSel],
+                                           cutmask='Digi_part_'+thisSel,
+                                           type='TH2F',
+                                           path=thisTopPath,
+                                           xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
+                                           xlabels = [str(x) for x in range(1,nsamples+1)],
+                                           ybins=500, ymin=0, ymax=5000, #raw ADC is 12 bit 
+                                           pattern=[(part)])
+            
+            partGroup_digi.defineHistogram('Digi_part_diff_adc_ped;Diff_ADC_Ped_'+thisSel,
+                                           title='LATOME (ADC-ped) '+selStrPart[thisSel]+'; (ADC - pedestal)',
+                                           type='TH1F',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=50,xmin=-25,xmax=25,
+                                           pattern=[(part)])
+            
+            partGroup_digi.defineHistogram('Digi_part_sampos,Digi_part_diff_adc_ped_norm;Diff_ADC_Ped_Norm_vs_SamplePosition_'+thisSel,
+                                           title='(ADC-ped)/fabs(ADC_max-ped) '+selStrPart[thisSel]+'; Sample position; (ADC - pedestal) / fabs(ADC_max - pedestal)',
+                                           type='TH2F',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           ybins=40,ymin=-1,ymax=1,
+                                           xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
+                                           xlabels = [str(x) for x in range(1,nsamples+1)],
+                                           pattern=[(part)])
+            
+            partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_Eta_Phi_'+thisSel,
+                                           title='SC coverage '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                           type='TH2F', 
+                                           path=thisTopPath+'/Coverage',
+                                           cutmask='Digi_part_'+thisSel,
+                                           xbins=partxbins,
+                                           ybins=partybins,
+                                           pattern=[(part)])
+            
+            partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi,Digi_part_diff_adc_ped;Coverage_Diff_ADC_Ped_'+thisSel,  
+                                           title='ADC - Pedestal'+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                           type='TProfile2D',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath+'/Coverage',
+                                           xbins=partxbins,
+                                           ybins=partybins,
+                                           pattern=[(part)])
+            
+            partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_adc;ADC_vs_BCID_'+thisSel, 
+                                           title='ADC value vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
+                                           type='TProfile',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=3564,xmin=-0.5,xmax=3563.5,
+                                           ybins=500, ymin=0, ymax=5000,
+                                           pattern=[(part)])
 
-        partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi,Digi_part_diff_adc_ped;Coverage_diff_adc_ped',
-                                       title='ADC - Pedestal'+selStrPart["passDigiNom"]+': #phi vs #eta;#eta;#phi',
-                                       type='TProfile2D',
-                                       cutmask='Digi_part_passDigiNom',
-                                       path=topPath+'Diff_ADC_Ped',
-                                       xbins=partxbins,
-                                       ybins=partybins,
-                                       pattern=[(part)])
-
-        partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_adc;ADCvsBCID', 
-                                       title='ADC value vs BCID '+selStrPart["passDigiNom"]+'; BCID; ADC Value',
-                                       type='TProfile',
-                                       cutmask='Digi_part_passDigiNom',
-                                       path=topPath+'BaselineCorrection/Raw_ADC',
-                                       xbins=3564,xmin=-0.5,xmax=3563.5,
-                                       ybins=500, ymin=0, ymax=5000,
-                                       pattern=[(part)])
-
-        partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_BCID', 
-                                       title='ADC - Ped value vs BCID '+selStrPart["passDigiNom"]+'; BCID; ADC Value',
-                                       type='TProfile',
-                                       cutmask='Digi_part_passDigiNom',
-                                       path=topPath+'BaselineCorrection/Diff_ADC_Ped',
-                                       xbins=3564,xmin=-0.5,xmax=3563.5,
-                                       ybins=500, ymin=-5, ymax=5,
-                                       pattern=[(part)])
+            partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_diff_adc_ped;Diff_ADC_Ped_vs_BCID_'+thisSel, 
+                                           title='ADC - Ped value vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
+                                           type='TProfile',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath,
+                                           xbins=3564,xmin=-0.5,xmax=3563.5,
+                                           ybins=500, ymin=-5, ymax=5,
+                                           pattern=[(part)])
 
 
         #### Plots from SC ET loop 
 
-        for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked" ]:
-            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi;Coverage_eta_phi_'+thisSel,
+        for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10", "passSCNom10tauGt3", "saturNotMasked", "OFCbOFNotMasked", "onlofflEmismatch" ]:
+            thisTopPath=f"/{thisSel}/{topPath}"
+            # Histos that we only want for all partitions/layers combined lalala
+            if part == "ALL":
+                partGroup_sc.defineHistogram('SC_part_latomeSourceidbin,SC_part_et_onl;SC_ET_Onl_vs_LATOME_'+thisSel,
+                                             title='SC ET [GeV] vs LATOME name '+selStrPart[thisSel]+'; ; ET SC [GeV]',
+                                             type='TH2F',
+                                             cutmask='SC_part_'+thisSel,
+                                             path=thisTopPath,
+                                             xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                                             ybins=200, ymin=-10, ymax=200,
+                                             xlabels=BinLabel_LATOME,
+                                             pattern=[(part)])
+            
+                partGroup_sc.defineHistogram('SC_part_latomesourceidbin,SC_part_time;MeanOfflineLATOMEtime_vs_LATOME_'+thisSel, 
+                                             title='Average LATOME #tau from Offline computation per LATOME'+selStrPart[thisSel]+'; LATOME ; #tau [ns]',
+                                             type='TH2F',
+                                             cutmask='SC_part_'+thisSel,
+                                             path=thisTopPath,
+                                             xbins=NLatomeBins,xmin=1,xmax=NLatomeBins+1,
+                                             ybins=200, ymin=-50, ymax=50,
+                                             xlabels=BinLabel_LATOME,
+                                             pattern=[(part)])
+
+                partGroup_sc.defineHistogram('SC_part_LB,SC_part_latomesourceidbin,SC_part_time;MeanOfflineLATOMEtime_perLB_perLATOME_'+thisSel,
+                                             title='SC #tau '+selStrPart[thisSel]+': LATOME vs LB;LB;LATOME',
+                                             type='TProfile2D',
+                                             cutmask='SC_part_'+thisSel,
+                                             path=thisTopPath,                            
+                                             xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                                             ybins=NLatomeBins,ymin=1,ymax=NLatomeBins+1,
+                                             ylabels=BinLabel_LATOME,
+                                             pattern=[(part)])
+
+                partGroup_sc.defineHistogram('SC_part_LB,SC_part_time;MeanOfflineLATOMEtime_vs_LB_'+thisSel,
+                                             title='Average LATOME #tau from Offline computation per LB '+selStrPart[thisSel]+'; LumiBloc; #tau [ns]',
+                                             type='TProfile',
+                                             cutmask='SC_part_'+thisSel,
+                                             path=thisTopPath,
+                                             xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                                             pattern=[(part)])
+
+
+            ####  End of plots only for ALL
+
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi;Coverage_Eta_Phi_'+thisSel, 
                                          title='SC coverage '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
-                                         type='TH2F', 
-                                         path=topPath+'Coverage/'+thisSel,
+                                         type='TH2F',
                                          cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath+'/Coverage',
                                          xbins=partxbins,
                                          ybins=partybins,
                                          pattern=[(part)])
-
-        for thisSel in [ "passSCNom", "passSCNom1", "passSCNom10" ]:
-            partGroup_sc.defineHistogram('SC_part_time;OfflineLATOMEtime_'+thisSel,
-                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+':#tau [ns]; Evts',
-                                         type='TH1F', 
-                                         path=topPath+'OfflineLATOMETime/'+thisSel,
+            
+            partGroup_sc.defineHistogram('SC_part_et_onl,SC_part_et_ofl;ET_Ofl_vs_ET_Onl_'+thisSel,
+                                         title='LATOME ET vs Offline Computation '+selStrPart[thisSel]+'; ET Onl;ET Offl [GeV]',
+                                         type='TH2F',
                                          cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath,
+                                         xbins=0,xmin=0,xmax=20,
+                                         ybins=0,ymin=0,ymax=20,
+                                         pattern=[(part)])
+            
+            partGroup_sc.defineHistogram('SC_part_et_diff;ET_Diff_OnlOfl_'+thisSel,
+                                         title='LATOME ET vs Offline Computation '+selStrPart[thisSel]+'; ET Onl - ET Offl [GeV]; Evts;',
+                                         type='TH1F',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath,
+                                         xbins=200,xmin=-10,xmax=10,
+                                         pattern=[(part)])
+
+            partGroup_sc.defineHistogram('SC_part_time;OfflineLATOMEtime_'+thisSel, 
+                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+';#tau [ns]; Evts;',
+                                         type='TH1F',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath,
                                          xbins=100,xmin=-25,xmax=25,
                                          pattern=[(part)])
-
-            partGroup_sc.defineHistogram('SC_part_BCID,SC_part_time;MeanOfflineLATOMEtime_perBCID_'+thisSel,
-                                         title='Average LATOME #tau from Offline computation per BCID '+selStrPart[thisSel]+'; BCID; #tau [ns]',
-                                         type='TProfile',
-                                         cutmask='SC_part_'+thisSel,
-                                         path=topPath+'OfflineLATOMETime_perBCID/'+thisSel,
-                                         xbins=3564,xmin=-0.5,xmax=3563.5, 
-                                         pattern=[(part)])
-
-            partGroup_sc.defineHistogram('SC_part_LB,SC_part_time;MeanOfflineLATOMEtime_perLB_'+thisSel,
-                                         title='Average LATOME #tau from Offline computation per LB '+selStrPart[thisSel]+'; LumiBlock; #tau [ns]',
-                                         type='TProfile',
-                                         cutmask='SC_part_'+thisSel,
-                                         path=topPath+'OfflineLATOMETime_perLB/'+thisSel,
-                                         xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
-                                         pattern=[(part)])
-
-            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_time;Coverage_offlineLATOMEtime_'+thisSel,
-                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
-                                         type='TProfile2D',
-                                         cutmask='SC_part_'+thisSel,
-                                         path=topPath+'OfflineLATOMETimeProfile/'+thisSel,
-                                         xbins=partxbins,
-                                         ybins=partybins,
-                                         pattern=[(part)])
-
-
-            partGroup_sc.defineHistogram('SC_part_ET_onl;SCeT_'+thisSel,
-                                         title='SC Energy '+selStrPart[thisSel]+';',
-                                         type='TH1F',
-                                         path=topPath+'ET_TH1/'+thisSel,
-                                         cutmask='SC_part_'+thisSel,
-                                         xbins=500, xmin=-100, xmax=400,
-                                         pattern=[(part)])
-
-            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_ET_onl;Coverage_Et_onl_'+thisSel,
+            
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_et_onl;Coverage_Et_Onl_'+thisSel,
                                          title='SC Energy '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
                                          type='TProfile2D',
                                          cutmask='SC_part_'+thisSel,
-                                         path=topPath+'ETProfile/'+thisSel,
+                                         path=thisTopPath+'/Coverage',
                                          xbins=partxbins,
                                          ybins=partybins,
                                          pattern=[(part)])
-
-
-        partGroup_sc.defineHistogram('SC_part_BCID,SC_part_ET_onl_muscaled;AvEnergyVsBCID',
-                                     title='Average Energy vs BCID '+selStrPart["passSCNom"]+'; BCID; Energy per SC [MeV]',
-                                     type='TProfile',
-                                     cutmask='SC_part_passSCNom',
-                                     path=topPath+'BaselineCorrection/AvEnergyVsBCID',
-                                     xbins=3564,xmin=-0.5,xmax=3563.5,
-                                     ybins=10, ymin=-20, ymax=20,
-                                     pattern=[(part)])
-
+            
+            partGroup_sc.defineHistogram('SC_part_et_onl;SC_ET_Onl_'+thisSel, 
+                                         title='SC eT [GeV] '+selStrPart[thisSel],
+                                         type='TH1F',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath,
+                                         xbins=500, xmin=-100, xmax=400,
+                                         pattern=[(part)])
+                     
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_time;Coverage_OfflineLATOMEtime_'+thisSel,
+                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                         type='TProfile2D',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath+'/Coverage',
+                                         xbins=partxbins,
+                                         ybins=partybins,
+                                         pattern=[(part)])
+            
+            partGroup_sc.defineHistogram('SC_part_BCID,SC_part_time;MeanOfflineLATOMEtime_vs_BCID_'+thisSel,
+                                         title='Average LATOME #tau from Offline computation per BCID '+selStrPart[thisSel]+'; BCID; #tau [ns]',
+                                         type='TProfile',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath,
+                                         xbins=3564,xmin=-0.5,xmax=3563.5, 
+                                         pattern=[(part)])
+            
+            partGroup_sc.defineHistogram('SC_part_BCID,SC_part_et_onl_muscaled;AvEnergyVsBCID_'+thisSel,
+                                         title='Average Energy vs BCID '+selStrPart[thisSel]+'; BCID; Energy per SC [MeV]',
+                                         type='TProfile',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath,
+                                         xbins=3564,xmin=-0.5,xmax=3563.5,
+                                         ybins=10, ymin=-20, ymax=20,
+                                         pattern=[(part)])
+            
 
     return helper.result()
 
