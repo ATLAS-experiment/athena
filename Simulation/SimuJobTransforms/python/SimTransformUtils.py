@@ -164,12 +164,13 @@ def addRDOValidArguments(parser):
 #  @param overlayTransform If @c True use the tweaked version of in/outData for an overlay job
 def addSimulationSubstep(executorSet, overlayTransform = False):
     TRExe = athenaExecutor(name = 'TRtoHITS', skeletonFile = 'SimuJobTransforms/skeleton.EVGENtoHIT_ISF.py',
+                           skeletonCA = 'SimuJobTransforms.ISF_Skeleton',
                            substep = 'simTRIn', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
                            inData=['EVNT_TR'],
                            outData=['HITS','NULL'] )
     executorSet.add(TRExe)
     SimExe = athenaExecutor(name = 'EVNTtoHITS', skeletonFile = 'SimuJobTransforms/skeleton.EVGENtoHIT_ISF.py',
-                            skeletonCA = 'SimuJobTransforms.ISF_Skeleton',
+                                   skeletonCA = 'SimuJobTransforms.ISF_Skeleton',
                                    substep = 'sim', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
                                    inData=['NULL','EVNT'],
                                    outData=['EVNT_TR','HITS','NULL'] )
