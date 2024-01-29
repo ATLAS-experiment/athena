@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_VERSIONS_TGCSTRIPAUXCONTAINER_V1_H
@@ -21,13 +21,16 @@ class TgcStripAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining Mdt Drift Circle parameters
     /// @{
-    std::vector<Identifier::value_type> m_identifier;
-    std::vector<IdentifierHash::value_type> m_identifierHash;
-    std::vector<PosAccessor<1>::element_type> m_localPosition;
-    std::vector<CovAccessor<1>::element_type> m_localCovariance;
+    std::vector<DetectorIdentType> identifier{};
+    std::vector<DetectorIDHashType> identifierHash{};
+    std::vector<PosAccessor<1>::element_type> localPosition{};
+    std::vector<CovAccessor<1>::element_type> localCovariance{};
 
-    std::vector<uint16_t> m_bcBitMap{};
- 
+    std::vector<uint16_t> bcBitMap{};
+    
+    std::vector<uint16_t> channelNumber{};
+    std::vector<uint8_t> gasGap{};
+    std::vector<uint8_t> measuresPhi{};
     /// @}
 };
 }  // namespace xAOD

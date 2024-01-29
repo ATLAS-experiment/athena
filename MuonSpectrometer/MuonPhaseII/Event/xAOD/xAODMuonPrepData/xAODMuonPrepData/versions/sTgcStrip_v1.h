@@ -1,16 +1,18 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_STGCSTRIP_V1_H
 #define XAODMUONPREPDATA_VERSION_STGCSTRIP_V1_H
 
 #include "GeoPrimitives/GeoPrimitives.h"
+#include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
+
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
 
 namespace xAOD {
-/// https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecEvent/MuonPrepRawData/MuonPrepRawData/MdtPrepData.h
+
 
 class sTgcStrip_v1 : public UncalibratedMeasurement_v1 {
 
@@ -42,6 +44,23 @@ class sTgcStrip_v1 : public UncalibratedMeasurement_v1 {
   void setBcBitMap(uint16_t);
   void setTime(uint16_t value);
   void setCharge(uint32_t value);
+
+  
+  /** @brief set the pointer to the MdtReadoutElement */
+  void setReadoutElement(const MuonGMR4::sTgcReadoutElement* readoutEle);
+  /** @brief Retrieve the associated MdtReadoutElement. 
+      If the element has not been set before, it's tried to load it on the fly. 
+      Exceptions are thrown if that fails as well */
+  const MuonGMR4::sTgcReadoutElement* readoutElement() const;
+
+    private:
+#ifdef __CLING__
+    /// Down cast the memory of the readoutElement cache if the object is stored to disk 
+    ///  to arrive at the same memory layout between Athena & CLING
+    char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::sTgcReadoutElement*>)]{};
+#else
+    CxxUtils::CachedValue<const MuonGMR4::sTgcReadoutElement*> m_readoutEle{};
+#endif
 };
 
 }  // namespace xAOD

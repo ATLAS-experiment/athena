@@ -8,9 +8,10 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
+#include "MuonReadoutGeometryR4/TgcReadoutElement.h"
+#include "CxxUtils/CachedValue.h"
 
 namespace xAOD {
-/// https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecEvent/MuonPrepRawData/MuonPrepRawData/MdtPrepData.h
 
 class TgcStrip_v1 : public UncalibratedMeasurement_v1 {
 
@@ -32,9 +33,45 @@ class TgcStrip_v1 : public UncalibratedMeasurement_v1 {
 
     void setBcBitMap(uint16_t);
 
+    /** @brief Strip or wire group number of the Tgc strip measurement*/
+    uint16_t channelNumber() const;
+    
+    void setChannelNumber(uint16_t chan);
+
+    /** @brief Associated gas gap number of the Tgc strip measurement 
+     *         Ranges [1-N]
+    */
+    uint8_t gasGap() const;
+    
+    void setGasGap(uint8_t gapNum);
+    
+    /**  @brief Does the object belong to an eta or a phi measurement (si /no) */
+    uint8_t measuresPhi() const;
+
+    void setMeasuresPhi(uint8_t measPhi);
 
     /** @brief Returns the hash of the measurement channel (tube (x) layer) */
     IdentifierHash measurementHash() const;
+    
+    
+    /** @brief set the pointer to the TgcReadoutElement */
+    void setReadoutElement(const MuonGMR4::TgcReadoutElement* readoutEle);
+    /** @brief Retrieve the associated TgcReadoutElement. 
+        If the element has not been set before, it's tried to load it on the fly. 
+        Exceptions are thrown if that fails as well */
+    const MuonGMR4::TgcReadoutElement* readoutElement() const;
+
+    private:
+#ifdef __CLING__
+    /// Down cast the memory of the readoutElement cache if the object is stored to disk 
+    ///  to arrive at the same memory layout between Athena & CLING
+    char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::TgcReadoutElement*>)]{};
+#else
+    CxxUtils::CachedValue<const MuonGMR4::TgcReadoutElement*> m_readoutEle{};
+#endif
+
+
+
 };
 
 }  // namespace xAOD

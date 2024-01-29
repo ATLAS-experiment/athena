@@ -9,6 +9,8 @@
 #include "Identifier/IdentifierHash.h"
 #include "MuonPrepRawData/MdtDriftCircleStatus.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
+#include "CxxUtils/CachedValue.h"
+#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 
 namespace xAOD {
 /// https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecEvent/MuonPrepRawData/MuonPrepRawData/MdtPrepData.h
@@ -69,6 +71,23 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     void setDriftRadCov(float cov);
     /** @brief Sets the position of the tube within a muon station*/
     void setTubePosInStation(const MeasVector<3>& pos);
+
+    /** @brief set the pointer to the MdtReadoutElement */
+    void setReadoutElement(const MuonGMR4::MdtReadoutElement* readoutEle);
+    /** @brief Retrieve the associated MdtReadoutElement. 
+        If the element has not been set before, it's tried to load it on the fly. 
+        Exceptions are thrown if that fails as well */
+    const MuonGMR4::MdtReadoutElement* readoutElement() const;
+
+    private:
+#ifdef __CLING__
+    /// Down cast the memory of the readoutElement cache if the object is stored to disk 
+    ///  to arrive at the same memory layout between Athena & CLING
+    char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::MdtReadoutElement *>)]{};
+#else
+    CxxUtils::CachedValue<const MuonGMR4::MdtReadoutElement *> m_readoutEle{};
+#endif
+
 };
 
 }  // namespace xAOD
