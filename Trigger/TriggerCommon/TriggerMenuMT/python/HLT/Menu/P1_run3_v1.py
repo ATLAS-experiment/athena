@@ -46,8 +46,6 @@ def addCommonP1Signatures(chains):
     
     chainsP1['Egamma'] = [
         # ATR-21355 - cannot be moved to the calibSlice because they need to configure the photon/ sequence
-        ChainProp(name='HLT_g12_loose_LArPEBHLT_L1EM10VH', stream=['LArCells'], groups=SinglePhotonGroup+SupportLegGroup),
-        ChainProp(name='HLT_g20_loose_LArPEBHLT_L1EM15', stream=['LArCells'], groups=SinglePhotonGroup+SupportLegGroup),
         #ATR-27253, Phase-I
         ChainProp(name='HLT_g12_loose_LArPEBHLT_L1eEM12L', stream=['LArCells'], groups=SinglePhotonGroup+SupportPhIGroup),
         ChainProp(name='HLT_g20_loose_LArPEBHLT_L1eEM18', stream=['LArCells'], groups=SinglePhotonGroup+SupportPhIGroup),
@@ -89,8 +87,6 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
         ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_BGRP7', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
 
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1EM10VH', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1EM15', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1J15', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1J15p31ETA49', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1J20', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
@@ -302,7 +298,6 @@ def addHighMuP1Signatures(chains):
 
     chainsP1['Egamma'] = [
         # ATR-21355 - cannot be moved to the calibSlice because they need to configure the photon/ sequence
-        ChainProp(name='HLT_g3_loose_LArPEBHLT_L1EM3', stream=['LArCells'], groups=SinglePhotonGroup+SupportLegGroup),
         #ATR-27153, Phase-I
         ChainProp(name='HLT_g3_loose_LArPEBHLT_L1eEM5', stream=['LArCells'], groups=SinglePhotonGroup+SupportPhIGroup),
     ]
@@ -336,18 +331,11 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_LumiPEB_L1RD0_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1MBTS_1_1_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=SupportGroup),
 
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1EM3', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_larpsallem_L1EM3_EMPTY', l1SeedThresholds=['EM3'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
-        #ChainProp(name='HLT_larpsallem_L1eEM5_EMPTY', l1SeedThresholds=['eEM5'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
+        ChainProp(name='HLT_larpsallem_L1eEM5_EMPTY', l1SeedThresholds=['eEM5'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportPhIGroup),
         #ATR-27253,Phase-I        
-        ChainProp(name='HLT_larpsallem_L1EM7_FIRSTEMPTY', l1SeedThresholds=['EM7'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        #ChainProp(name='HLT_larpsallem_L1eEM9_FIRSTEMPTY', l1SeedThresholds=['eEM9'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
-        ChainProp(name='HLT_larpsallem_L1EM7_EMPTY', l1SeedThresholds=['EM7'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM3_EMPTY',  l1SeedThresholds=['EM3'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        #ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM5_EMPTY',  l1SeedThresholds=['eEM5'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_EMPTY',  l1SeedThresholds=['EM7'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_FIRSTEMPTY',  l1SeedThresholds=['EM7'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        #ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM9_FIRSTEMPTY',  l1SeedThresholds=['eEM9'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_larpsallem_L1eEM9_FIRSTEMPTY', l1SeedThresholds=['eEM9'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM5_EMPTY',  l1SeedThresholds=['eEM5'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM9_FIRSTEMPTY',  l1SeedThresholds=['eEM9'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
 
         # End of event chains for MET
         ChainProp(name='HLT_acceptedevts_metcalo_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']),
@@ -356,8 +344,7 @@ def addHighMuP1Signatures(chains):
     ]
 
     chainsP1['Streaming'] = [
-        ChainProp(name='HLT_noalg_L1EM3_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1EM7_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1eEM5_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1TRT_EMPTY',  l1SeedThresholds=['FSNOSEED'], stream=['IDCosmic','express'],groups=['RATE:SeededStreamers','BW:Other']),
         ChainProp(name='HLT_noalg_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['IDCosmic'],groups=['RATE:SeededStreamers','BW:Other']),
     ]
@@ -584,7 +571,6 @@ def addCosmicP1Signatures(chains):
 
     chainsP1['Egamma'] = [
         # ATR-21355 - cannot be moved to the calibSlice because they need to configure the photon/ sequence
-        ChainProp(name='HLT_g3_loose_LArPEBHLT_L1EM3', stream=['LArCells'], groups=SinglePhotonGroup+SupportLegGroup),
         #ATR-27153, Phase-I
         ChainProp(name='HLT_g3_loose_LArPEBHLT_L1eEM5', stream=['LArCells'], groups=SinglePhotonGroup+SupportPhIGroup),
     ]
@@ -598,14 +584,6 @@ def addCosmicP1Signatures(chains):
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1XE35', stream=['IDCalib'], groups=SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
 
 
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1EM3', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_larpsallem_L1EM3_EMPTY', l1SeedThresholds=['EM3'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
-        
-        ChainProp(name='HLT_larpsallem_L1EM7_FIRSTEMPTY', l1SeedThresholds=['EM7'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_larpsallem_L1EM7_EMPTY', l1SeedThresholds=['EM7'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM3_EMPTY',  l1SeedThresholds=['EM3'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_EMPTY',  l1SeedThresholds=['EM7'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_FIRSTEMPTY',  l1SeedThresholds=['EM7'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
 
         # ZDC RPD LED streamers (ATR-26826)
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ0', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['RATE:Calibration', 'BW:Detector']),
@@ -619,8 +597,7 @@ def addCosmicP1Signatures(chains):
     ]
 
     chainsP1['Streaming'] = [
-        ChainProp(name='HLT_noalg_L1EM3_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1EM7_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1eEM5_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportPhIGroup),
     ]
 
     chainsP1['Jet'] = [

@@ -9,6 +9,17 @@ def defineMenu():
     # Add new items to the item list in the Physics menu
     l1items = L1MenuFlags.items()
     l1items += [
+
+
+        # ATR-28612 - legacy EM        
+        'L1_EM3',
+        'L1_EM18VHI',
+        'L1_EM10VH',
+        'L1_EM15',
+        'L1_EM7_EMPTY',
+        'L1_EM3_EMPTY', 
+        'L1_EM7_FIRSTEMPTY',
+
         'L1_MU14FCH_jJ80',
         'L1_MU14FCH_jXE70',
 
@@ -78,8 +89,6 @@ def defineMenu():
     # To replace items in the physics menu
     L1MenuFlags.ItemMap = {
 
-        # non-primary EM
-        'L1_EM18VHI':'',
 
         # non-primary eEM
         'L1_eEM7':'',
@@ -156,8 +165,6 @@ def defineMenu():
         'L1_MU14FCH_UNPAIRED_ISO':'',
 
         # EM non-FILLED
-        'L1_EM3_EMPTY':'', 
-        'L1_EM7_FIRSTEMPTY':'',
 
         # J non-FILLED
         'L1_J12_EMPTY':'',

@@ -117,7 +117,6 @@ class MonitorDef:
                 "L1_3MU3V", "L1_MU5VF_3MU3VF", "L1_4MU3V",
                 ## Legacy L1 items
                 # L1Calo
-                "L1_EM3", "L1_EM15", 
                 "L1_TAU8", "L1_TAU20IM",
                 "L1_J30", "L1_J75", "L1_J100", "L1_J400",
                 "L1_J15p31ETA49", "L1_J30p31ETA49",
