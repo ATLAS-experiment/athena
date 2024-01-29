@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -194,13 +194,13 @@ def TrackingGeometryCondAlgCfg(flags, name='AtlasTrackingGeometryCondAlg',
 
 
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.lock()
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
-    ConfigFlags.lock()
-
-    acc = TrackingGeometryCondAlgCfg(ConfigFlags)
+    acc = TrackingGeometryCondAlgCfg(flags)
 
     f = open('TrackingGeometryCondAlgCfg.pkl', 'wb')
     acc.store(f)

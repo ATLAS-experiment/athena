@@ -1,40 +1,41 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg    
 from AthenaCommon.Logging import log
 
 ## Just enable ID for the moment.
-ConfigFlags.Input.isMC             = True
+flags = initConfigFlags()
+flags.Input.isMC             = True
 
-ConfigFlags.Input.Files = []
+flags.Input.Files = []
 
-ConfigFlags.IOVDb.GlobalTag        = "OFLCOND-SIM-00-00-00"    
-ConfigFlags.GeoModel.AtlasVersion  = "ATLAS-R2-2016-01-00-01"
-ConfigFlags.Detector.GeometryBpipe = True
-ConfigFlags.Detector.GeometryID    = True
-ConfigFlags.Detector.GeometryPixel = True
-ConfigFlags.Detector.GeometrySCT   = True
+flags.IOVDb.GlobalTag        = "OFLCOND-SIM-00-00-00"    
+flags.GeoModel.AtlasVersion  = "ATLAS-R2-2016-01-00-01"
+flags.Detector.GeometryBpipe = True
+flags.Detector.GeometryID    = True
+flags.Detector.GeometryPixel = True
+flags.Detector.GeometrySCT   = True
 
-ConfigFlags.Detector.GeometryTRT   = False
-ConfigFlags.Detector.GeometryCalo  = False
-ConfigFlags.Detector.GeometryMuon  = False
+flags.Detector.GeometryTRT   = False
+flags.Detector.GeometryCalo  = False
+flags.Detector.GeometryMuon  = False
 
 # This should run serially for the moment.
-ConfigFlags.Concurrency.NumThreads = 1
-ConfigFlags.Concurrency.NumConcurrentEvents = 1
+flags.Concurrency.NumThreads = 1
+flags.Concurrency.NumConcurrentEvents = 1
 
 log.debug('Lock config flags now.')
-ConfigFlags.lock()
+flags.lock()
 
 log.debug('dumping config flags now.')
-ConfigFlags.dump()
+flags.dump()
 
-cfg=MainServicesCfg(ConfigFlags)    
+cfg=MainServicesCfg(flags)    
 
 from TrkExUnitTests.TrkExUnitTestsConfig import ExtrapolationEngineTestCfg
-topoAcc=ExtrapolationEngineTestCfg(ConfigFlags,
+topoAcc=ExtrapolationEngineTestCfg(flags,
                                    NumberOfTestsPerEvent   = 100,
                                    # parameters mode: 0 - neutral tracks, 1 - charged particles 
                                    ParametersMode          = 1,

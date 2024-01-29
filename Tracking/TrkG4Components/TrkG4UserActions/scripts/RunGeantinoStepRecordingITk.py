@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 Run geantino processing for material step creation
 """
 
 from argparse import ArgumentParser
 from AthenaCommon.Logging import log
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -52,28 +52,29 @@ else:
 print()
 
 # Configure
+flags = initConfigFlags()
 if args.localgeo:
-    ConfigFlags.ITk.Geometry.AllLocal = True
+    flags.ITk.Geometry.AllLocal = True
 
-ConfigFlags.Input.Files = [args.inputevntfile]
-ConfigFlags.Output.HITSFileName = args.outputhitsfile
+flags.Input.Files = [args.inputevntfile]
+flags.Output.HITSFileName = args.outputhitsfile
 
-ConfigFlags.GeoModel.AtlasVersion = args.geometrytag
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
-ConfigFlags.GeoModel.Align.Dynamic = False
+flags.GeoModel.AtlasVersion = args.geometrytag
+flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+flags.GeoModel.Align.Dynamic = False
 
-ConfigFlags.Exec.SkipEvents = args.skipEvents
+flags.Exec.SkipEvents = args.skipEvents
 
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
 detectors.append('Bpipe')  # always run with beam pipe
-setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+setupDetectorFlags(flags, detectors, toggle_geometry=True)
   
 log.debug('Lock config flags now.')
-ConfigFlags.lock()
+flags.lock()
 
 # Construct our accumulator to run
-acc = MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg(flags)
 
 ### setup dumping of additional information
 if args.verboseAccumulators:
@@ -82,14 +83,14 @@ if args.verboseStoreGate:
   acc.getService("StoreGateSvc").Dump = True
   
 log.debug('Dumping of ConfigFlags now.')
-ConfigFlags.dump()
+flags.dump()
 
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-acc.merge(PoolReadCfg(ConfigFlags))
+acc.merge(PoolReadCfg(flags))
 
 # add BeamEffectsAlg
 from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
-acc.merge(BeamEffectsAlgCfg(ConfigFlags))
+acc.merge(BeamEffectsAlgCfg(flags))
 
 beamcond = acc.getCondAlgo("BeamSpotCondAlg")
 
@@ -107,15 +108,15 @@ kwargs = {}
 
 svcName = "G4UA::MaterialStepRecorderUserActionSvc"
 from TrkG4UserActions.TrkG4UserActionsConfig import MaterialStepRecorderUserActionSvcCfg
-acc.merge(MaterialStepRecorderUserActionSvcCfg(ConfigFlags,svcName,**kwargs))
+acc.merge(MaterialStepRecorderUserActionSvcCfg(flags,svcName,**kwargs))
 kwargs.update(UserActionSvc=svcName)
 
 if args.simulate:
   from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
-  acc.merge(G4AtlasAlgCfg(ConfigFlags, "ITkG4AtlasAlg", **kwargs))
+  acc.merge(G4AtlasAlgCfg(flags, "ITkG4AtlasAlg", **kwargs))
   from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
   from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
-  acc.merge( OutputStreamCfg(ConfigFlags,"HITS", ItemList=getStreamHITS_ItemList(ConfigFlags), disableEventTag=True, AcceptAlgs=['ITkG4AtlasAlg']) )
+  acc.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=['ITkG4AtlasAlg']) )
 
 
 AthenaOutputStream=CompFactory.AthenaOutputStream
