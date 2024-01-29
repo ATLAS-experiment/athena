@@ -416,6 +416,7 @@ def ITkTruthClusterizationFactoryCfg(
 
     kwargs.setdefault("InputSDOMap", "ITkPixelSDO_Map")
     kwargs.setdefault("discardPUHits", flags.Digitization.PileUp)
+    kwargs.setdefault("truthClusterSplittingEff", flags.Tracking.TruthClusterSplittingEff)
     acc.setPrivateTools(
         CompFactory.InDet.TruthClusterizationFactory(name, **kwargs))
     return acc

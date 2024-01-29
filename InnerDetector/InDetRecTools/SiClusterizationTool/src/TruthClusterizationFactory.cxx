@@ -46,6 +46,8 @@ namespace InDet {
 
     ATH_MSG_INFO("initialize() successful in " << name());
 
+    ATH_MSG_DEBUG(m_truthClusterSplittingEff);
+
     // random svc
     CHECK(m_rndmSvc.retrieve());
   
@@ -114,14 +116,14 @@ namespace InDet {
     //If two unique truth particles found in cluster
     else if (nPartContributing==2) {
       //90% chance NN returns high probability of there being 2 particles
-      if (CLHEP::RandFlat::shoot( engine, 0, 1 ) < 0.9) probabilities[1] = 1.0;
+      if (CLHEP::RandFlat::shoot( engine, 0, 1 ) < m_truthClusterSplittingEff) probabilities[1] = 1.0;
       //Other 10% NN returns high probability of there being 1 particle
       else probabilities[0] = 1.0;
     }
     //If greater than 2 unique truth particles in cluster
     else if (nPartContributing>2) {
       //90% chance NN returns high probability of there being >2 particles
-      if (CLHEP::RandFlat::shoot( engine, 0, 1 ) < 0.9) probabilities[2] = 1.0;
+      if (CLHEP::RandFlat::shoot( engine, 0, 1 ) < m_truthClusterSplittingEff) probabilities[2] = 1.0;
       //Other 10% NN returns high probability of there being 1 particle
       else probabilities[0] = 1.0;
     }

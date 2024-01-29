@@ -74,6 +74,7 @@ namespace InDet {
     Gaudi::Property<std::string> m_rndmEngineName {this, "RndmEngine", "TruthClustering", "Random Engine Name"};
     ATHRNG::RNGWrapper*      m_rndmEngine{nullptr};
     Gaudi::Property<bool> m_discardPUHits{this, "discardPUHits", true, "Discard PU hits for NN emulation"};
+    Gaudi::Property<float> m_truthClusterSplittingEff{this, "truthClusterSplittingEff", 0.9, "Cluster splitting effeciency"};
 
    };
    
