@@ -53,17 +53,23 @@ StatusCode TileHid2RESrcIDCondAlg::execute(const EventContext& ctx) const {
     auto calibData = std::make_unique<TileCalibData<TileCalibDrawerInt>>();
     ATH_CHECK( m_rodStatusProxy->fillCalibData(*calibData, eventRange) );
 
-    std::vector<std::vector<uint32_t>> allMap(TileCalibUtils::MAX_DRAWERIDX);
+    std::vector<std::vector<uint32_t>> allMap;
+    allMap.reserve(TileCalibUtils::MAX_DRAWERIDX + TileCalibUtils::MAX_DRAWR0);
 
-    const unsigned int adc = 0u;
-    const unsigned int channel = 0u;
-    for (unsigned int drawerIdx = TileCalibUtils::MAX_DRAWR0; drawerIdx < TileCalibUtils::MAX_DRAWERIDX; ++ drawerIdx) {
+    for (unsigned int drawerIdx = 0; drawerIdx < TileCalibUtils::MAX_DRAWERIDX; ++drawerIdx) {
       const TileCalibDrawerInt* calibDrawer = calibData->getCalibDrawer(drawerIdx);
+      unsigned int nGains = calibDrawer->getNGains();
+      unsigned int nChannels = calibDrawer->getNChans();
       unsigned int nValues = calibDrawer->getObjSizeUint32();
-      std::vector<uint32_t>& drawerMap = allMap[drawerIdx];
-      drawerMap.reserve(nValues);
-      for (unsigned int i = 0; i < nValues; ++i) {
-        drawerMap.push_back( calibDrawer->getData(channel, adc, i) );
+      for (unsigned int channel = 0; channel < nChannels; ++channel) {
+        for (unsigned int adc = 0; adc < nGains; ++adc) {
+          std::vector<uint32_t> fragMap;
+          fragMap.reserve(nValues);
+          for (unsigned int i = 0; i < nValues; ++i) {
+            fragMap.push_back( calibDrawer->getData(channel, adc, i) );
+          }
+          allMap.emplace_back(std::move(fragMap));
+        }
       }
     }
 

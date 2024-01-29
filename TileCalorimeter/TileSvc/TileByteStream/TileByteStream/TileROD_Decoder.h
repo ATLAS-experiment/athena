@@ -161,7 +161,8 @@ class TileROD_Decoder: public AthAlgTool {
     uint32_t fillCollectionHLT(const ROBData * rob,
                                TileCellCollection & v,
                                D0CellsHLT & d0cells,
-                               TileCellCollection * MBTS) const;
+                               TileCellCollection * MBTS,
+                               const TileHid2RESrcID* hid2reHLT) const;
     void fillCollectionL2(const ROBData * rob, TileL2Container & v) const;
     void fillCollectionL2ROS(const ROBData * rob, TileL2Container & v) const;
     void fillTileLaserObj(const ROBData * rob, TileLaserObject & v) const;
@@ -1153,7 +1154,7 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
           break;
 
         case 0xA:
-          unpack_fragA(version, rawchannelMetaData, p, pChannel, frag_id, drawer_type);
+          if (unpackChannels) unpack_fragA(version, rawchannelMetaData, p, pChannel, frag_id, drawer_type);
           break;
 
         default:

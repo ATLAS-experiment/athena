@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECELLCONT_H
@@ -63,6 +63,9 @@ class TileCellCont : public std::vector<TileCellCollection*>
   StatusCode finalize( void ) ;
   void setHashIdToROD ( const TileHid2RESrcID* p )
        { m_src = p; }
+
+  const TileHid2RESrcID* getHashIdToROD () const
+       { return m_src; }
 
   void eventNumber ( const unsigned int eN) { m_event=eN; };
   unsigned int eventNumber ( ) const { return m_event; } ;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "TrigCaloDataAccessSvc.h"
@@ -551,6 +551,7 @@ unsigned int TrigCaloDataAccessSvc::convertROBs( const EventContext& context,
 						TileROD_Decoder::D0CellsHLT* d0cells) {
   unsigned int status(0);
   TileCellCollection* mbts = tilecell->MBTS_collection();
+  const TileHid2RESrcID* hid2re = tilecell->getHashIdToROD();
 
   size_t listIDsize = rIds.size();
   std::vector<unsigned int> tile; tile.push_back(0);
@@ -585,7 +586,7 @@ unsigned int TrigCaloDataAccessSvc::convertROBs( const EventContext& context,
             } else  {// End of if small size
               std::lock_guard<std::mutex> decoderLock { m_tiledecoderProtect };  
               if ( !tilecell->cached(rIds[i]))
-                m_tileDecoder->fillCollectionHLT(robFrags1[0],*col,*d0cells,mbts);
+                m_tileDecoder->fillCollectionHLT(robFrags1[0],*col,*d0cells,mbts,hid2re);
               m_tileDecoder->mergeD0cellsHLT(*d0cells,*col);
               // Accumulates superior byte from ROD Decoder
               //m_error|=m_tileDecoder->report_error();

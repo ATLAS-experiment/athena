@@ -3408,7 +3408,8 @@ void TileROD_Decoder::fillTileLaserObj(const ROBData * rob, TileLaserObject & v)
 uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
                                             TileCellCollection & v,
                                             D0CellsHLT & d0cells,
-                                            TileCellCollection * MBTS) const
+                                            TileCellCollection * MBTS,
+                                            const TileHid2RESrcID* hid2reHLT) const
 {
   uint32_t version = rob->rod_version() & 0xFFFF;
   // Resets error flag
@@ -3416,7 +3417,7 @@ uint32_t TileROD_Decoder::fillCollectionHLT(const ROBData * rob,
   
   // figure out which fragment we want to unpack
   TileRawChannelCollection::ID frag_id = v.identify();
-  const std::vector<uint32_t> & drawer_info = m_hid2reHLT->getDrawerInfo(frag_id);
+  const std::vector<uint32_t> & drawer_info = hid2reHLT->getDrawerInfo(frag_id);
   int bs_frag_id = drawer_info.size()>1 ? drawer_info[1] : frag_id;
   int drawer_type = drawer_info.size()>2 ? drawer_info[2] : -1;
 

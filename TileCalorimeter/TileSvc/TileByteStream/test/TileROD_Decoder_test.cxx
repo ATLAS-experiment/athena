@@ -25,6 +25,8 @@
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadCondHandle.h"
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -206,6 +208,13 @@ void test3 (TileROD_Decoder* decoder_nc)
 {
   std::cout << "test3 (fillCollectionHLT)\n";
 
+  SG::ReadCondHandleKey<TileHid2RESrcID> hid2reKey{"TileHid2RESrcID"};
+  assert(hid2reKey.initialize().isSuccess());
+
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{hid2reKey};
+  assert(hid2re.isValid());
+
+
   const TileCablingService* cabling = TileCablingService::getInstance();
   int maxChannels = cabling->getMaxChannels();
   std::vector<int> r2map (maxChannels, -1);
@@ -238,7 +247,7 @@ void test3 (TileROD_Decoder* decoder_nc)
     }
 
     TileROD_Decoder::D0CellsHLT d0cells;
-    uint32_t stat = decoder->fillCollectionHLT (&data01.rob(), coll, d0cells, NULL);
+    uint32_t stat = decoder->fillCollectionHLT (&data01.rob(), coll, d0cells, NULL, *hid2re);
     assert (stat == 0);
     std::cout << "TileCellCollection: " << coll.size() << "\n";
     std::cout << static_cast<std::string> (coll);
@@ -333,15 +342,12 @@ int main ATLAS_NOT_THREAD_SAFE ()
 
   ToolHandle<TileROD_Decoder> decoder ("TileROD_Decoder");
   assert( decoder.retrieve().isSuccess() );
-  const TileHid2RESrcID * hidHLT = decoder->getHid2reHLT();
 
-  if (hidHLT) {
-    test1 (decoder.get());
-    test2 (decoder.get());
-    test3 (decoder.get());
-    test4 (decoder.get());
-    test5 (decoder.get());
-  }
+  test1 (decoder.get());
+  test2 (decoder.get());
+  test3 (decoder.get());
+  test4 (decoder.get());
+  test5 (decoder.get());
 
   return 0;
 }
