@@ -214,6 +214,13 @@ for pileup in o_recoeff_fit:
     arr_rec_eff.append(o_recoeff_fit[pileup]/o_recoerr_fit[pileup])
     arr_rec_err.append(1/pow(o_recoerr_fit[pileup], 0.5))
 
+# If no pileup data is available, add dummy entry with all parameters set to 1
+
+if len(arr_mu) == 0:
+    arr_mu.append(1)
+    arr_rec_eff.append(1)
+    arr_rec_err.append(1)
+
 tg_fit = ROOT.TGraphErrors(len(arr_mu), arr_mu, arr_rec_eff, ROOT.nullptr, arr_rec_err)
 if len(o_recoeff_fit) == 1:
     fit_type = "pol0"
