@@ -464,7 +464,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
   if isCosmicConfig:
     ftf.Doublet_FilterRZ = False
 
-  from TrigEDMConfig.TriggerEDMRun3 import recordable
+  from TrigEDMConfig.TriggerEDM import recordable
   if flags.Tracking.ActiveConfig.dodEdxTrk:
     ftf.dEdxTrk = recordable("HLT_dEdxTrk")
     ftf.dEdxHit = recordable("HLT_dEdxHit")

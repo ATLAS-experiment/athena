@@ -4,7 +4,7 @@
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFMSonlyHypoToolFromDict
 from TrigMuonHypo.TrigMuonHypoMonitoring import TrigMuonTLAHypoMonitoring
 from .MuonRecoSequences import muonNames

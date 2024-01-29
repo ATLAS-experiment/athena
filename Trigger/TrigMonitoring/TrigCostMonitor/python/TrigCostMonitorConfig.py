@@ -39,7 +39,7 @@ def TrigCostMonitorFinalizeCfg(flags, seqName=""):
     """
     Component Accumulator based configuration of Trigger Cost Finalize Alg
     """
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from TrigEDMConfig.TriggerEDM import recordable
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaCommon.Logging import logging
     log = logging.getLogger('TrigCostMonitorSetup')

@@ -4,7 +4,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA,
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from AthenaCommon.Logging import logging

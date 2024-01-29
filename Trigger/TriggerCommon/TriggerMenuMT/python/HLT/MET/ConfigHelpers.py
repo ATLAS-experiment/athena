@@ -138,7 +138,7 @@ class AlgConfig(ABC):
     @property
     def outputKey(self) -> str:
         """The MET container object produced by this algorithm"""
-        from TrigEDMConfig.TriggerEDMRun3 import recordable
+        from TrigEDMConfig.TriggerEDM import recordable
 
         return recordable("HLT_MET_{}".format(self._suffix))
 

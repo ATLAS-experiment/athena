@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 from TrigT2CaloCalibration.EgammaCalibrationConfig import (EgammaHitsCalibrationBarrelConfig,
                                                            EgammaHitsCalibrationEndcapConfig,
                                                            EgammaGapCalibrationConfig,

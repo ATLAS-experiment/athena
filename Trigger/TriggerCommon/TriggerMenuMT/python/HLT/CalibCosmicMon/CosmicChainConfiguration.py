@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequence, EmptyMenuSequenceCA, menuSequenceCAToGlobalWrapper
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 import AthenaCommon.SystemOfUnits as Units
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase

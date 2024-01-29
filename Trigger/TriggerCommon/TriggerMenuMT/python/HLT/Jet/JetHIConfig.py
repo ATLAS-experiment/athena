@@ -9,7 +9,7 @@ from JetRecConfig import JetRecConfig
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
 
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 from . import JetRecoCommon
 from JetRecConfig.JetDefinition import JetModifier

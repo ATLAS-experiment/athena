@@ -11,7 +11,7 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 class CaloMenuDefs(object):
       """Static Class to collect all string manipulations in Calo sequences """
-      from TrigEDMConfig.TriggerEDMRun3 import recordable
+      from TrigEDMConfig.TriggerEDM import recordable
       L2CaloClusters= recordable("HLT_FastCaloEMClusters")
 
 

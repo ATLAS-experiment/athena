@@ -4,7 +4,7 @@ def trigTauRecMergedPrecisionMVACfg(flags, name='', inputRoIs='', tracks=''):
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from TrigEDMConfig.TriggerEDM import recordable
     acc = ComponentAccumulator()
 
     doLLP = False

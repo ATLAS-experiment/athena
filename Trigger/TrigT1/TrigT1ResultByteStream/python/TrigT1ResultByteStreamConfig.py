@@ -5,7 +5,7 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 from TrigEDMConfig.Utils import getEDMListFromWriteHandles
 from libpyeformat_helper import SourceIdentifier, SubDetector
 

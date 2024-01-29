@@ -6,7 +6,7 @@ __doc__    = "ConfigSettingsBase"
 
 
 
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 from AthenaCommon.SystemOfUnits import GeV
 
 class _ConfigSettingsBase() :

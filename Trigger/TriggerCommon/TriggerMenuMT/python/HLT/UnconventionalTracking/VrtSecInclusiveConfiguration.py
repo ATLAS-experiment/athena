@@ -28,7 +28,7 @@ def VrtSecInclusiveMenuSequence(flags):
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import TrigVSIHypoToolFromDict
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import createTrigVSIHypoAlgCfg
 
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from TrigEDMConfig.TriggerEDM import recordable
     theHypoAlg = createTrigVSIHypoAlgCfg(flags, "TrigVSIHypoAlg",
                                          verticesKey=recordable(vsivtxname),
                                          vtxCountKey = recordable("HLT_TrigVSI_VtxCount"),

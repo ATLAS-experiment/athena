@@ -36,7 +36,7 @@ from JetRecConfig.DependencyHelper import solveDependencies, solveGroomingDepend
 from JetRecTools import OnlineMon
 from JetRec import JetOnlineMon
 
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 

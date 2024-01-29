@@ -27,7 +27,7 @@ def FullScanLRTMenuSequence(flags):
     selAcc.mergeReco(reco)
 
     from TrigLongLivedParticlesHypo.TrigFullScanLRTHypoTool import TrigLRTHypoToolFromDict
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from TrigEDMConfig.TriggerEDM import recordable
     
     theHypoAlg = CompFactory.FastTrackFinderLRTHypoAlg("FullScanLRTHypoAlg",
                                                        trackCountKey = recordable("HLT_FSLRT_TrackCount"),

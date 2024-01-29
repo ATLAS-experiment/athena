@@ -9,6 +9,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA
 
+from TrigEDMConfig.TriggerEDM import recordable
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
@@ -26,7 +27,6 @@ def DVRecoFragment(flags):
 
     selAcc = SelectionCA("DVRecoSequence1")
     
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     inputMakerAlg = CompFactory.EventViewCreatorAlgorithm(
         "IMDVRoILRT",
         mergeUsingFeature = False,
@@ -58,7 +58,6 @@ def DVRecoFragment(flags):
         )
     )
 
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
     vertexingAlgs = TrigVrtSecInclusiveCfg( flags, "TrigVrtSecInclusive_TrigDV",
                                             FirstPassTracksName = fscfg.tracks_FTF(),
@@ -105,7 +104,6 @@ def DVTriggerEDSequence(flags):
 
     selAcc = SelectionCA("TrigDVEDEmptyStep")
 
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     theHypoAlg = createTrigVSIHypoAlgCfg(flags, "TrigDVHypoAlg",
                                          verticesKey = recordable(vtxOutName),
                                          vtxCountKey = recordable(vtxCountName))
