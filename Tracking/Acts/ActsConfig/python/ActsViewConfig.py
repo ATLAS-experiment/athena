@@ -19,7 +19,7 @@ def ConversionRoICreatorToolCfg(flags,
     return acc
 
 def GlobalEventViewCreatorAlgCfg(flags,
-                                 name: str,
+                                 name: str = "GlobalEventViewCreatorAlg",
                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     if 'RoICreatorTool' not in kwargs:
@@ -31,7 +31,7 @@ def GlobalEventViewCreatorAlgCfg(flags,
     return acc
 
 def CaloBasedEventViewCreatorAlgCfg(flags,
-                                    name: str,
+                                    name: str = "CaloBasedEventViewCreatorAlg",
                                     **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     if 'RoICreatorTool' not in kwargs:
