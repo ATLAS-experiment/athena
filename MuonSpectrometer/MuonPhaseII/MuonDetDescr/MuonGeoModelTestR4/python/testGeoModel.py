@@ -101,17 +101,19 @@ def setupGeoR4TestCfg(args):
     flags.Exec.FPE= 500
     from os import path, system
     if args.geoModelFile.startswith("root://"):
-        if not path.exists("MuonGeometryDB.db"):
+        if not path.exists("Geometry/{geoTag}.db".format(geoTag=args.geoTag)):
             print ("Copy geometry file from EOS {source}".format(source = args.geoModelFile))
-            system("xrdcp {source} MuonGeometryDB.db".format(source = args.geoModelFile))
-        args.geoModelFile = "MuonGeometryDB.db"
+            system("mkdir Geometry/")
+            system("xrdcp {source} Geometry/{geoTag}.db".format(source = args.geoModelFile,
+                                                                geoTag=args.geoTag))
+                                
+        args.geoModelFile = "Geometry/{geoTag}.db".format(geoTag=args.geoTag)
     
     flags.GeoModel.AtlasVersion = args.geoTag
     flags.IOVDb.GlobalTag = args.condTag
-    if args.geoModelFile:
-        flags.GeoModel.SQLiteDB = True
-        from AtlasGeoModel import CommonGeoDB
-        CommonGeoDB.SetupLocalSqliteGeometryDb(args.geoModelFile,args.geoTag)
+    flags.GeoModel.SQLiteDB = True
+    from AtlasGeoModel import CommonGeoDB
+    CommonGeoDB.SetupLocalSqliteGeometryDb(args.geoModelFile,args.geoTag)
     
     flags.Detector.GeometryBpipe = False
     ### Inner detector
