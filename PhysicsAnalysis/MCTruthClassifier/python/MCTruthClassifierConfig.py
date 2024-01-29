@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Tool configuration to instantiate MCTruthClassifier
@@ -85,16 +85,17 @@ def firstSimCreatedBarcode():
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import logging
 
     from AthenaConfiguration.ComponentAccumulator import (
         ComponentAccumulator, printProperties)
 
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.isMC = True
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.lock()
 
     mlog = logging.getLogger("MCTruthClassifierConfigTest")
 
@@ -103,14 +104,14 @@ if __name__ == "__main__":
     mlog.info("Configuring standard MCTruthClassifier")
     printProperties(mlog,
                     cfg.getPrimaryAndMerge(
-                        MCTruthClassifierCfg(ConfigFlags)),
+                        MCTruthClassifierCfg(flags)),
                     nestLevel=1,
                     printDefaults=True)
 
     mlog.info("Configuring MCTruthClassifier with calo truth matching")
     printProperties(mlog,
                     cfg.getPrimaryAndMerge(
-                        MCTruthClassifierCaloTruthMatchCfg(ConfigFlags)),
+                        MCTruthClassifierCaloTruthMatchCfg(flags)),
                     nestLevel=1,
                     printDefaults=True)
 
