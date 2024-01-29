@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauCalibrateLC.h"
@@ -18,7 +18,6 @@
 TauCalibrateLC::TauCalibrateLC(const std::string& name) :
   TauRecToolBase(name) {
   declareProperty("calibrationFile", m_calibrationFile = "");
-  declareProperty("doPtResponse", m_doPtResponse = true);
   declareProperty("VertexCorrection", m_doVertexCorrection = true);
 }
 
@@ -150,7 +149,7 @@ StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
   double offset = slopeNPV * (nVertex - m_averageNPV);
 
   // pt (energy) response parameterized as a function of pileup-corrected pt (energy)
-  double energyLC = m_doPtResponse ? tau_p4.Pt()/GeV : tau_p4.E()/GeV;
+  double energyLC = tau_p4.Pt()/GeV;
 
   if (energyLC <= 0.) {
     ATH_MSG_DEBUG("tau energy at LC scale is " << energyLC << "--> set energy=0.001");           
@@ -182,8 +181,6 @@ StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
     }
       
   double energyFinal = energyPileupCorr / calibConst;
-      
-  if (not m_doPtResponse) energyFinal /= std::cosh(tau_p4.Eta());
 
   // tau.m() is 0 by convention in tauRecTools
   // while mDetectorAxis and mIntermediateAxis are not forced to 0, mTauEnergyScale is
