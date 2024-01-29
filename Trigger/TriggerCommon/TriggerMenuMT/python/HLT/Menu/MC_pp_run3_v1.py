@@ -23,7 +23,9 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import ( SingleElectronGroup,
                                                         EOFBPhysL1MuGroup,
                                                         EOFL1MuGroup,
                                                         EgammaMETGroup,
+                                                        EgammaStreamersGroup,
                                                         MultiJetGroup,
+                                                        MultiPhotonGroup,
                                                         PrimaryLegGroup,
                                                         PrimaryPhIGroup,
                                                         PrimaryL1MuGroup,
@@ -253,7 +255,42 @@ def getMCSignatures():
         ChainProp(name='HLT_e60_lhmedium_nogsf_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM26M']), #Phase-1
         ChainProp(name='HLT_g25_tight_icalotight_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup+['RATE:CPS_eEM24L']), #Phase-1
         ChainProp(name='HLT_g25_tight_icalomedium_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup+['RATE:CPS_eEM24L']),#Phase-1
+       
+        #  ATR-28612 - Removal of legacy EM items to MC menu
+        # From Physics_pp_run3_v1
+        ChainProp(name='HLT_e5_etcut_L1EM3' , groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM3']+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e14_lhvloose_L1EM10VH', groups=SupportLegGroup+SingleElectronGroup+['RATE:CPS_EM10VH']),
+        ChainProp(name='HLT_g15_tight_L1EM10VH', groups=SupportLegGroup+SinglePhotonGroup+['RATE:CPS_EM10VH']),
+        ChainProp(name='HLT_g15_loose_L1EM10VH', monGroups=['egammaMon:shifter'], groups=SupportLegGroup+SinglePhotonGroup+['RATE:CPS_EM10VH']),
+        ChainProp(name='HLT_e5_idperf_tight_L1EM3', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM3'], monGroups=['idMon:t0']),
+        ChainProp(name='HLT_e5_idperf_tight_nogsf_L1EM3', groups=SingleElectronGroup+SupportLegGroup+['RATE:CPS_EM3']),
+        ChainProp(name='HLT_g35_medium_g25_medium_L1EM7_EMPTY', l1SeedThresholds=['EM7']*2, stream=['Late'], groups=PrimaryLegGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_2g22_tight_L1EM7_EMPTY', l1SeedThresholds=['EM7'], stream=['Late'], groups=PrimaryLegGroup+MultiPhotonGroup),
+        ChainProp(name='HLT_2g50_tight_L1EM7_EMPTY', l1SeedThresholds=['EM7'], stream=['Late'], groups=PrimaryLegGroup+MultiPhotonGroup),  
+        ChainProp(name='HLT_noalg_L1EM3',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM7',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM12',    l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1EM15',    l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1EM10VH',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM15VH',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM20VH',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM22VHI', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoBulkMCProd']+EgammaStreamersGroup+SupportLegGroup),
+
+        ChainProp(name='HLT_g12_loose_LArPEBHLT_L1EM10VH', stream=['LArCells'], groups=SinglePhotonGroup+SupportLegGroup),
+        ChainProp(name='HLT_g20_loose_LArPEBHLT_L1EM15', stream=['LArCells'], groups=SinglePhotonGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1EM10VH', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1EM15', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
+        ChainProp(name='HLT_g3_loose_LArPEBHLT_L1EM3', stream=['LArCells'], groups=SinglePhotonGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_LArPEBCalib_L1EM3', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM3_EMPTY',  l1SeedThresholds=['EM3'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_EMPTY',  l1SeedThresholds=['EM7'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_FIRSTEMPTY',  l1SeedThresholds=['EM7'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1EM3_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','BW:MinBias','RATE:Calibration']+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1EM7_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
         
+
+        # From Cosmic_run3_v1.py
+        ChainProp(name='HLT_g3_etcut_LArPEB_L1EM3', stream=['LArCells'], groups=['RATE:SinglePhoton', 'BW:Egamma']),
     ]
 
     chains['Tau'] = [
@@ -302,6 +339,13 @@ def getMCSignatures():
         ChainProp(name="HLT_tau25_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25", l1SeedThresholds=['TAU20IM','TAU12IM'], groups=MultiTauGroup+LegacyTopoGroup),
         ChainProp(name="HLT_tau30_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25", l1SeedThresholds=['TAU20IM','TAU12IM'], groups=MultiTauGroup+LegacyTopoGroup),
         ChainProp(name="HLT_tau30_idperf_tracktwoMVA_tau20_idperf_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25", l1SeedThresholds=['TAU20IM','TAU12IM'], groups=MultiTauGroup+LegacyTopoGroup),
+    ]
+
+    chains['Calib'] = [
+        ChainProp(name='HLT_larpsallem_L1EM3_EMPTY', l1SeedThresholds=['EM3'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
+        ChainProp(name='HLT_larpsallem_L1EM7_FIRSTEMPTY', l1SeedThresholds=['EM7'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
+        ChainProp(name='HLT_larpsallem_L1EM7_EMPTY', l1SeedThresholds=['EM7'], stream=['CosmicCalo'],groups=['RATE:Cosmic_Calo','RATE:Calibration','BW:Jet']+SupportLegGroup),
+
     ]
 
     chains['Bphysics'] = [

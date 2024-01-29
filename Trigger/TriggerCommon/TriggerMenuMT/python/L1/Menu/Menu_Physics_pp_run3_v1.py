@@ -14,15 +14,11 @@ def defineMenu():
         ##
         # single EM
         ##
-        'L1_EM3',
-        'L1_EM10VH', 'L1_EM15', 
-        'L1_EM3_EMPTY', 'L1_EM7_EMPTY', 
-        'L1_EM7_FIRSTEMPTY',
         # new calo
         'L1_eEM5', 'L1_eEM7', 'L1_eEM9', 'L1_eEM10L',
         'L1_eEM12L', 'L1_eEM15', 'L1_eEM18', 'L1_eEM18L', 'L1_eEM18M',
         'L1_eEM22M', 'L1_eEM24L', 'L1_eEM24VM',
-        'L1_eEM9_EMPTY', 'L1_2eEM9_EMPTY', 'L1_eEM9_UNPAIRED_ISO',
+        'L1_eEM5_EMPTY','L1_eEM9_EMPTY', 'L1_eEM9_FIRSTEMPTY','L1_2eEM9_EMPTY', 'L1_eEM9_UNPAIRED_ISO',
         'L1_eEM15_EMPTY',
         'L1_eEM26', 'L1_eEM26L', 'L1_eEM26M', 'L1_eEM26T', 'L1_eEM28M',
 

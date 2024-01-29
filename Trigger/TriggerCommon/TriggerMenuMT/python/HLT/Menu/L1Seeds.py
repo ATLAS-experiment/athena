@@ -139,7 +139,7 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         ],
         'FIRSTEMPTY':
         [
-            'L1_J12_FIRSTEMPTY', 'L1_eTAU12_FIRSTEMPTY', 'L1_EM7_FIRSTEMPTY'
+            'L1_J12_FIRSTEMPTY', 'L1_eTAU12_FIRSTEMPTY', 'L1_eEM9_FIRSTEMPTY'
         ],
         'UNPAIRED_ISO':
         [

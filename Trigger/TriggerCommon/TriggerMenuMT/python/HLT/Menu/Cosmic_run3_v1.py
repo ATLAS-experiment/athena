@@ -57,8 +57,6 @@ def getCosmicSignatures():
 
     chains['Egamma'] = [
         # ATR-21355 - cannot be moved to the calibSlice because they need to configure the photon/ sequence
-        ChainProp(name='HLT_g3_etcut_LArPEB_L1EM3', stream=['LArCells'], groups=['RATE:SinglePhoton', 'BW:Egamma']),
-        ChainProp(name='HLT_e5_etcut_L1EM3',stream=['Main'], groups=['RATE:SingleElectron', 'BW:Egamma']),
         # phase-I
         ChainProp(name='HLT_g3_etcut_LArPEB_L1eEM5', stream=['LArCells'], groups=['RATE:SinglePhoton', 'BW:Egamma']),
         ChainProp(name='HLT_e5_etcut_L1eEM5',stream=['Main'], groups=['RATE:SingleElectron', 'BW:Egamma']),
@@ -107,9 +105,6 @@ def getCosmicSignatures():
 
         ChainProp(name='HLT_noalg_L1MU3V',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup),
         ChainProp(name='HLT_noalg_L1MU8VF',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup),
-        ChainProp(name='HLT_noalg_L1EM3',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1EM15',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1EM10VH',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportLegGroup),
         #phase-I
         ChainProp(name='HLT_noalg_L1eEM5',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1eEM9',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportPhIGroup),
