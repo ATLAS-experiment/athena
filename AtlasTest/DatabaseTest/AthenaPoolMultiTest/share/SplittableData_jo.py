@@ -53,22 +53,16 @@ from AthenaPoolMultiTest.AthenaPoolMultiTestConf import *
 PassAllFilter       = PassAllFilter("PassAllFilter")
 PassNoneFilter      = PassNoneFilter("PassNoneFilter")
 AddTrigMap          = AddTrigMap("AddTrigMap")
-#EventTagWriter      = EventTagWriter("EventTagWriter")
-#TagEventTagWriter   = TagEventTagWriter("TagEventTagWriter")
 DummyLumirangeTool  = DummyLumirangeTool("DummyLumirangeTool")
 
 PassAllFilter.OutputLevel  = WARNING
 PassNoneFilter.OutputLevel = WARNING
 AddTrigMap.OutputLevel     = INFO
-#EventTagWriter.OutputLevel = INFO 
-#TagEventTagWriter.OutputLevel = DEBUG
 DummyLumirangeTool.OutputLevel = INFO
 
 topSequence        += PassAllFilter
 topSequence        += PassNoneFilter
 topSequence        += AddTrigMap
-#topSequence        += EventTagWriter
-#topSequence        += TagEventTagWriter
 topSequence        += DummyLumirangeTool
 
 from AthenaPoolExampleAlgorithms.AthenaPoolExampleAlgorithmsConf import AthPoolEx__WriteData
