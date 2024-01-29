@@ -377,9 +377,6 @@ if __name__=="__main__":
         flags.Scheduler.ShowControlFlow = True
         flags.Concurrency.NumConcurrentEvents = nThreads
 
-    flags.Scheduler.ShowControlFlow = True
-    flags.Scheduler.ShowDataDeps = True
-
     # Update once new jet flags are available
     # from JetRec.JetRecFlags import jetFlags
     # if not jetFlags.useTracks():
