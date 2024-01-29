@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
@@ -67,59 +67,60 @@ if __name__=="__main__":
     log.setLevel(DEBUG)
 
     # Config flags steer the job at various levels
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.isMC  = True
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc20e_13TeV/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.ESD.e4993_s3227_r12689/myESD.pool.root"]
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.isMC  = True
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc20e_13TeV/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.ESD.e4993_s3227_r12689/myESD.pool.root"]
 
     # Flags relating to multithreaded execution
     nthreads = 1
-    ConfigFlags.Concurrency.NumThreads = nthreads
+    flags.Concurrency.NumThreads = nthreads
     if nthreads > 0:
-        ConfigFlags.Concurrency.NumThreads = 1
-        ConfigFlags.Concurrency.NumConcurrentEvents = 1
-    ConfigFlags.MET.UseTracks = True
-    ConfigFlags.MET.DoPFlow = True
-    if ConfigFlags.Beam.Type in [BeamType.Cosmics, BeamType.SingleBeam]: # used to have " or not rec.doInDet()" on the end
-        ConfigFlags.MET.UseTracks = False
-        ConfigFlags.MET.DoPFlow = False
+        flags.Concurrency.NumThreads = 1
+        flags.Concurrency.NumConcurrentEvents = 1
+    flags.MET.UseTracks = True
+    flags.MET.DoPFlow = True
+    if flags.Beam.Type in [BeamType.Cosmics, BeamType.SingleBeam]: # used to have " or not rec.doInDet()" on the end
+        flags.MET.UseTracks = False
+        flags.MET.DoPFlow = False
         print("METReconstruction_jobOptions: detected cosmics/single-beam configuration -- switch off track-based MET reco")
 
-    ConfigFlags.lock()
+    flags.lock()
 
     # Get a ComponentAccumulator setting up the fundamental Athena job
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg=MainServicesCfg(ConfigFlags)
+    cfg=MainServicesCfg(flags)
 
     # Add the components for reading in pool files
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
     StoreGateSvc=CompFactory.StoreGateSvc
     cfg.addService(StoreGateSvc("DetectorStore"))
 
     #Setup up general geometry
     modelConfig=ComponentAccumulator()
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    modelConfig=GeoModelCfg(ConfigFlags)
+    modelConfig=GeoModelCfg(flags)
     cfg.merge(modelConfig)
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    cfg.merge(AtlasFieldCacheCondAlgCfg(ConfigFlags))
+    cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
 
     #Configure topocluster algorithmsm, and associated conditions
     from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
-    cfg.merge(CaloTopoClusterCfg(ConfigFlags))
+    cfg.merge(CaloTopoClusterCfg(flags))
 
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-    cfg.merge(CaloNoiseCondAlgCfg(ConfigFlags,"totalNoise"))
-    cfg.merge(CaloNoiseCondAlgCfg(ConfigFlags,"electronicNoise"))
+    cfg.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))
+    cfg.merge(CaloNoiseCondAlgCfg(flags,"electronicNoise"))
 
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    cfg.merge(MuonGeoModelCfg(ConfigFlags))
+    cfg.merge(MuonGeoModelCfg(flags))
 
     # Nowadays the jet calibration tool requires the EventInfo
     # to be decorated with lumi info, which is not in Run 2 AODs
     from LumiBlockComps.LuminosityCondAlgConfig import LuminosityCondAlgCfg
-    cfg.merge(LuminosityCondAlgCfg(ConfigFlags))
+    cfg.merge(LuminosityCondAlgCfg(flags))
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     muWriter = CompFactory.LumiBlockMuWriter("LumiBlockMuWriter",LumiDataKey="LuminosityCondData")
@@ -129,7 +130,7 @@ if __name__=="__main__":
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
     from JetRecConfig import JetRecConfig
     for jetdef in [cst.EMTopoOrigin,cst.LCTopoOrigin,cst.EMPFlow]:
-        cfg.merge(JetRecConfig.JetInputCfg(ConfigFlags,jetdef))
+        cfg.merge(JetRecConfig.JetInputCfg(flags,jetdef))
 
     # Need to rename the collections in the xAOD in order to avoid conflicts
     from SGComps.AddressRemappingConfig import InputRenameCfg
@@ -140,7 +141,7 @@ if __name__=="__main__":
     cfg.merge(InputRenameCfg('xAOD::MissingETContainer','MET_LocHadTopo','MET_LocHadTopo_Old'))
     cfg.merge(InputRenameCfg('xAOD::MissingETAuxContainer','MET_LocHadTopoAux.','MET_LocHadTopo_OldAux.'))
 
-    cfg.merge(METCfg(ConfigFlags))
+    cfg.merge(METCfg(flags))
 
     outputlist = ["EventInfo#*"]
     outputlist+=["xAOD::MissingETContainer#"+"MET_Track","xAOD::MissingETAuxContainer#"+"MET_Track"+"Aux."]
@@ -149,6 +150,6 @@ if __name__=="__main__":
     outputlist+=["xAOD::MissingETContainer#"+"MET_EMTopo_Old","xAOD::MissingETAuxContainer#"+"MET_EMTopo_Old"+"Aux."]
     outputlist+=["xAOD::MissingETContainer#"+"MET_AntiKt4EMPFlow","xAOD::MissingETAuxContainer#"+"MET_AntiKt4EMPFlow"+"Aux."]
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(ConfigFlags,"xAOD",ItemList=outputlist))
+    cfg.merge(OutputStreamCfg(flags,"xAOD",ItemList=outputlist))
 
     cfg.run(maxEvents=20)
