@@ -81,6 +81,21 @@ if DetFlags.overlay.Tile_on():
     include( "TileIdCnv/TileIdCnv_jobOptions.py" )
     include( "TileConditions/TileConditions_jobOptions.py" )
 
+    if overlayFlags.isDataOverlay():
+       theApp.Dlls += [ "TileByteStream"]
+
+       from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlg
+       from TileByteStream.TileByteStreamConf import TileRawDataReadingAlg
+       if not hasattr(job, 'TileRawDataReadingAlg'):
+          TileHid2RESrcIDCondAlg(ROD2ROBmap=["-1"])
+          job += TileRawDataReadingAlg()
+
+       prefix = overlayFlags.bkgPrefix() if overlayFlags.isOverlayMT() else ""
+       job.TileRawDataReadingAlg.TileDigitsContainer = f'{prefix}TileDigitsCnt'
+       job.TileRawDataReadingAlg.TileRawChannelContainer = f'{prefix}TileRawChannelCnt'
+       job.TileRawDataReadingAlg.MuRcvRawChannelContainer = f'{prefix}MuRcvRawChCnt'
+       job.TileRawDataReadingAlg.MuRcvDigitsContainer = f'{prefix}MuRcvDigitsCnt'
+
     include( "TileSimAlgs/TileDigitization_jobOptions.py" )
     include( "TileL2Algs/TileL2Algs_jobOptions.py" )
 
@@ -91,20 +106,6 @@ if DetFlags.overlay.Tile_on():
     if overlayFlags.isOverlayMT():
        theTileDigitsMaker.InputTileDigitContainer = overlayFlags.bkgPrefix() + "TileDigitsCnt"
        theTileDigitsMaker.OnlyUseContainerName = False
-    if overlayFlags.isDataOverlay():
-       theApp.Dlls += [ "TileByteStream"]
 
-       if overlayFlags.isOverlayMT():
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileRawChannelContainer/" + overlayFlags.bkgPrefix() + "TileRawChannelCnt"]
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileDigitsContainer/" + overlayFlags.bkgPrefix() + "TileDigitsCnt"]
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileL2Container/" + overlayFlags.bkgPrefix() + "TileL2Cnt"]
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileRawChannelContainer/" + overlayFlags.bkgPrefix() + "MuRcvRawChCnt"]
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileDigitsContainer/" + overlayFlags.bkgPrefix() + "MuRcvDigitsCnt"]
-       else:
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileRawChannelContainer/TileRawChannelCnt"]
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileDigitsContainer/TileDigitsCnt"]
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileL2Container/TileL2Cnt"]
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileRawChannelContainer/MuRcvRawChCnt"]
-          ServiceMgr.ByteStreamAddressProviderSvc.TypeNames += [ "TileDigitsContainer/MuRcvDigitsCnt"]
 
 #--------------------
