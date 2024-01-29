@@ -109,17 +109,6 @@ StatusCode RunEventMetaWriter::start()
   }
   ATH_MSG_DEBUG( "Finished adding Run,Event data to AthenaAttributeList." );
 
-  if ( !detStore()->contains<AthenaAttributeList>("RunEventTag") ) {
-     StatusCode sc = detStore()->record(attribList, "RunEventTag");
-     ATH_MSG_DEBUG( detStore()->dump()  );
-     if (sc.isFailure())
-     {
-        ATH_MSG_ERROR( "Could not record AthenaAttributeList object in DetectorStore."
-                      );
-        return (StatusCode::FAILURE);
-     }
-  }
-
   ATH_MSG_DEBUG( "Printing out attribute list:"  );
   std::ostringstream attribListStream;
   attribList->toOutputStream(attribListStream);
