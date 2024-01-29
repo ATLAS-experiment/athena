@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 Run material mapping for tracking geometry.
@@ -7,7 +8,7 @@ Uses as MaterialStepsCollections as input.
 """
 from AthenaCommon.Logging import log
 from argparse import ArgumentParser
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 # Argument parsing
 parser = ArgumentParser("RunMaterialMappingITk.py")
@@ -43,8 +44,8 @@ else:
     print("Running with: {}".format(", ".join(args.detectors)))
 print()
 
-LocalDataBaseName = ConfigFlags.ITk.trackingGeometry.localDatabaseName
-ConfigFlags.IOVDb.DBConnection='sqlite://;schema='+LocalDataBaseName+';dbname=OFLP200'
+flags = initConfigFlags()
+flags.IOVDb.DBConnection = f'sqlite://;schema={flags.ITk.trackingGeometry.localDatabaseName};dbname=OFLP200'
 
 # necessity to create a new PoolFileCatalog
 import os
@@ -53,39 +54,36 @@ if os.path.exists('./PoolFileCatalog.xml') :
   print('[>] Deleting it now !')
   os.remove('./PoolFileCatalog.xml')
 
-ConfigFlags.Input.isMC             = True
+flags.Input.isMC             = True
 
-ConfigFlags.Input.Files = []
+import glob
+flags.Input.Files = glob.glob(args.inputfile)
 
 if args.localgeo:
-  ConfigFlags.ITk.Geometry.AllLocal = True
+  flags.ITk.Geometry.AllLocal = True
   
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
 detectors.append('Bpipe')  # always run with beam pipe
-setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-ConfigFlags.GeoModel.AtlasVersion = args.geometrytag
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
-ConfigFlags.GeoModel.Align.Dynamic = False
-ConfigFlags.TrackingGeometry.MaterialSource = "None"
+flags.GeoModel.AtlasVersion = args.geometrytag
+flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+flags.GeoModel.Align.Dynamic = False
+flags.TrackingGeometry.MaterialSource = "None"
 
-ConfigFlags.Detector.GeometryCalo  = False
-ConfigFlags.Detector.GeometryMuon  = False
+flags.Detector.GeometryCalo  = False
+flags.Detector.GeometryMuon  = False
 
 # This should run serially for the moment.
-ConfigFlags.Concurrency.NumThreads = 1
-ConfigFlags.Concurrency.NumConcurrentEvents = 1
-
-import glob
-FileList = glob.glob(args.inputfile)
-ConfigFlags.Input.Files = FileList
+flags.Concurrency.NumThreads = 1
+flags.Concurrency.NumConcurrentEvents = 1
 
 log.debug('Lock config flags now.')
-ConfigFlags.lock()
+flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-cfg=MainServicesCfg(ConfigFlags)
+cfg=MainServicesCfg(flags)
 
 ### setup dumping of additional information
 if args.verboseAccumulators:
@@ -94,13 +92,13 @@ if args.verboseStoreGate:
   cfg.getService("StoreGateSvc").Dump = True
   
 log.debug('Dumping of ConfigFlags now.')
-ConfigFlags.dump()
+flags.dump()
 
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-cfg.merge(PoolReadCfg(ConfigFlags))
+cfg.merge(PoolReadCfg(flags))
 
 from TrkDetDescrAlgs.TrkDetDescrAlgsConfig import ITkMaterialMappingCfg
-cfg.merge(ITkMaterialMappingCfg(ConfigFlags, 
+cfg.merge(ITkMaterialMappingCfg(flags, 
                                 name="ITkMaterialMapping"))
   
 cfg.printConfig(withDetails = True, summariseProps = True)

@@ -6,7 +6,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 import sys
 from argparse import ArgumentParser
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 # Argument parsing
 parser = ArgumentParser("PrintSiDetectorElements.py")
@@ -33,41 +33,42 @@ else:
 print()
 
 # Configure
-ConfigFlags.Concurrency.NumThreads = 1
-if ConfigFlags.Concurrency.NumThreads > 0:
-    ConfigFlags.Scheduler.ShowDataDeps = True
-    ConfigFlags.Scheduler.ShowDataFlow = True
-    ConfigFlags.Scheduler.ShowControlFlow = True
+flags = initConfigFlags()
+flags.Concurrency.NumThreads = 1
+if flags.Concurrency.NumThreads > 0:
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
 
-ConfigFlags.GeoModel.Align.Dynamic = False
-ConfigFlags.GeoModel.AtlasVersion = args.geometrytag
-ConfigFlags.Input.isMC = True
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
-ConfigFlags.Input.Files = []
+flags.GeoModel.Align.Dynamic = False
+flags.GeoModel.AtlasVersion = args.geometrytag
+flags.Input.isMC = True
+flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
+flags.Input.Files = []
 
 if args.localgeo:
-    ConfigFlags.ITk.Geometry.AllLocal = True
+    flags.ITk.Geometry.AllLocal = True
 
 elif args.sqlitefile:
     print("Using SQLite input")
-    ConfigFlags.GeoModel.SQLiteDB = True
+    flags.GeoModel.SQLiteDB = True
     from AtlasGeoModel import CommonGeoDB
     CommonGeoDB.SetupLocalSqliteGeometryDb(args.sqlitefile,args.geometrytag)
 
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-setupDetectorFlags(ConfigFlags, args.detectors, toggle_geometry=True)
+setupDetectorFlags(flags, args.detectors, toggle_geometry=True)
 
-ConfigFlags.lock()
+flags.lock()
 
 # Construct our accumulator to run
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-acc = MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg(flags)
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # ITk Pixel
-if ConfigFlags.Detector.EnableITkPixel:
+if flags.Detector.EnableITkPixel:
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-    acc.merge(ITkPixelReadoutGeometryCfg(ConfigFlags))
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
     ReadPixelDetElements = CompFactory.ReadSiDetectorElements('ReadPixelDetElements')
     ReadPixelDetElements.ManagerName = "ITkPixel"
@@ -81,9 +82,9 @@ if ConfigFlags.Detector.EnableITkPixel:
     acc.addEventAlgo(PrintPixelDetElements)
 
 # ITk Strip
-if ConfigFlags.Detector.EnableITkStrip:
+if flags.Detector.EnableITkStrip:
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-    acc.merge(ITkStripReadoutGeometryCfg(ConfigFlags))
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
 
     ReadStripDetElements = CompFactory.ReadSiDetectorElements('ReadStripDetElements')
     ReadStripDetElements.ManagerName = "ITkStrip"
