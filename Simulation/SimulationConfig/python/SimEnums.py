@@ -54,9 +54,10 @@ class SimulationFlavour(FlagEnum):
     ATLFAST3F_ACTSMT = 'ATLFAST3F_ACTSMT'
     AtlasG4 = 'AtlasG4' # Outside ISF
     AtlasG4_QS = 'AtlasG4_QS' # Outside ISF
+    CosmicsG4 = 'CosmicsG4'
 
     def isFullSim(self):
-        return 'FullG4' in self.value or 'PassBackG4' in self.value or 'AtlasG4' in self.value
+        return 'FullG4' in self.value or 'PassBackG4' in self.value or 'AtlasG4' in self.value or 'CosmicsG4' in self.value
 
     def usesFastCaloSim(self):
         return 'ATLFAST' in self.value

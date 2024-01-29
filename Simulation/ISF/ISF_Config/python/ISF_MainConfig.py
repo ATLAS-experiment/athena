@@ -8,7 +8,7 @@ from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadat
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 from ISF_Services.ISF_ServicesConfig import (
     InputConverterCfg, TruthServiceCfg,
-    ATLFAST_ParticleBrokerSvcCfg
+    ATLFAST_ParticleBrokerSvcCfg, ParticleBrokerSvcNoOrderingCfg
 )
 from ISF_Tools.ISF_ToolsConfig import (
     ParticleKillerToolCfg, EnergyParticleOrderingToolCfg,
@@ -352,6 +352,22 @@ def Kernel_ATLFAST3F_ACTSMTCfg(flags, name="ISF_Kernel_ATLFAST3F_ACTSMT", **kwar
     ])
 
     acc.merge(Kernel_GenericSimulatorMTCfg(flags, name, **kwargs))
+
+
+def Kernel_CosmicsG4Cfg(flags, name="ISF_Kernel_CosmicsG4", **kwargs):
+    acc = ComponentAccumulator()
+    from ISF_Tools.ISF_ToolsConfigNew import CosmicEventFilterToolCfg
+    kwargs.setdefault("EventFilterTools"            , [ acc.addPublicTool(acc.popToolsAndMerge(CosmicEventFilterToolCfg(flags))) ]   )
+    kwargs.setdefault("ParticleBroker", acc.getPrimaryAndMerge(ParticleBrokerSvcNoOrderingCfg(flags)).name)
+    kwargs.setdefault("MaximumParticleVectorSize"   , 1000000)
+    pubTool = acc.addPublicTool(acc.popToolsAndMerge(FullGeant4SelectorCfg(flags)))
+    kwargs.setdefault("BeamPipeSimulationSelectors" , [ pubTool ] )
+    kwargs.setdefault("IDSimulationSelectors"       , [ pubTool ] )
+    kwargs.setdefault("CaloSimulationSelectors"     , [ pubTool ] )
+    kwargs.setdefault("MSSimulationSelectors"       , [ pubTool ] )
+    kwargs.setdefault("CavernSimulationSelectors"   , [ pubTool ] )
+    kwargs.setdefault("DoMemoryMonitoring", False)
+    acc.merge(Kernel_GenericSimulatorCfg(flags, name, **kwargs)) # Merge properly configured SimKernel here and let deduplication sort it out.
     return acc
 
 
@@ -377,6 +393,8 @@ def ISF_KernelCfg(flags):
         cfg.merge(Kernel_ATLFAST3F_G4MSCfg(flags))
     elif flags.Sim.ISF.Simulator is SimulationFlavour.ATLFAST3F_ACTSMT:
         cfg.merge(Kernel_ATLFAST3F_ACTSMTCfg(flags))
+    elif flags.Sim.ISF.Simulator is SimulationFlavour.CosmicsG4:
+        cfg.merge(Kernel_CosmicsG4Cfg(flags))
     else:
         raise ValueError('Unknown Simulator set, bailing out')
 
