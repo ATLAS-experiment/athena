@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -411,7 +411,7 @@ TauSelectionCutRNNEleScore::TauSelectionCutRNNEleScore(TauSelectionTool* tTST)
 void TauSelectionCutRNNEleScore::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
    if(m_tTST->m_iEleIDVersion!=0){  
-      hHist.Fill(xTau.auxdata<float>("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion)));
+      hHist.Fill(xTau.auxdataConst<float>("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion)));
    } else {
       hHist.Fill(xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans));
    }
@@ -429,7 +429,7 @@ bool TauSelectionCutRNNEleScore::accept(const xAOD::TauJet& xTau,
 {
   double fEleRNNScore = 0.;
   if(m_tTST->m_iEleIDVersion!=0){
-    fEleRNNScore = xTau.auxdata<float>("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
+    fEleRNNScore = xTau.auxdataConst<float>("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion));
   }else{
     fEleRNNScore = xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans);
   }
@@ -474,9 +474,9 @@ TauSelectionCutEleIDWP::TauSelectionCutEleIDWP(TauSelectionTool* tTST)
 void TauSelectionCutEleIDWP::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
   if (m_tTST->m_iEleIDVersion!=0){
-  hHist.Fill((xTau.auxdata<char>("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1));
-  hHist.Fill((xTau.auxdata<char>("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)+2);
-  hHist.Fill((xTau.auxdata<char>("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)+4);
+  hHist.Fill((xTau.auxdataConst<char>("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1));
+  hHist.Fill((xTau.auxdataConst<char>("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)+2);
+  hHist.Fill((xTau.auxdataConst<char>("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)+4);
   }
   else{
   hHist.Fill(xTau.isTau(xAOD::TauJetParameters::EleRNNLoose));
@@ -507,19 +507,19 @@ bool TauSelectionCutEleIDWP::accept(const xAOD::TauJet& xTau,
     break;
   case ELEIDRNNLOOSE:
     if (m_tTST->m_iEleIDVersion!=0){ 
-      if (xTau.auxdata<char>("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+      if (xTau.auxdataConst<char>("EleRNNLoose_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
     }
     else if (xTau.isTau(xAOD::TauJetParameters::EleRNNLoose)) bPass = true;
     break;
   case ELEIDRNNMEDIUM:
     if (m_tTST->m_iEleIDVersion!=0){ 
-      if (xTau.auxdata<char>("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+      if (xTau.auxdataConst<char>("EleRNNMedium_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
     }
     else if (xTau.isTau(xAOD::TauJetParameters::EleRNNMedium)) bPass = true;
     break;
   case ELEIDRNNTIGHT:
     if (m_tTST->m_iEleIDVersion!=0){ 
-      if (xTau.auxdata<char>("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
+      if (xTau.auxdataConst<char>("EleRNNTight_v"+std::to_string(m_tTST->m_iEleIDVersion)) == 1)bPass = true;
     }
     else if (xTau.isTau(xAOD::TauJetParameters::EleRNNTight)) bPass = true;
     break;
@@ -533,7 +533,7 @@ bool TauSelectionCutEleIDWP::accept(const xAOD::TauJet& xTau,
     acceptData.setCutResult( "EleIDWP", true );
     return true;
   }
-  m_tTST->msg() << MSG::VERBOSE << "Tau failed EleID WP requirement, tau EleRNNScore: " << xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans) << endmsg;
+  m_tTST->msg() << MSG::VERBOSE << "Tau failed EleID WP requirement" << endmsg;
   return false;
 }
 
