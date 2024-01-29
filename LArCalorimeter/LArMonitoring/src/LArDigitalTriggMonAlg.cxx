@@ -577,8 +577,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       auto sc_part_latomesourceidbin = Monitored::Collection("SC_part_latomesourceidbin",tool,[](const auto& v){return v.sc_latomesourceidbin;});
       auto sc_part_et_ofl = Monitored::Collection("SC_part_et_ofl",tool,[](const auto& v){return v.sc_et_ofl;});
       auto sc_part_et_diff = Monitored::Collection("SC_part_et_diff",tool,[](const auto& v){return v.sc_et_diff;});
-      auto sc_part_et_onl = Monitored::Collection("SC_part_ET_onl",tool,[](const auto& v){return v.sc_et_onl;});
-      auto sc_part_et_onl_muscaled = Monitored::Collection("SC_part_ET_onl_muscaled",tool,[](const auto& v){return v.sc_et_onl_muscaled;});
+      auto sc_part_et_onl = Monitored::Collection("SC_part_et_onl",tool,[](const auto& v){return v.sc_et_onl;});
+      auto sc_part_et_onl_muscaled = Monitored::Collection("SC_part_et_onl_muscaled",tool,[](const auto& v){return v.sc_et_onl_muscaled;});
       auto sc_part_time = Monitored::Collection("SC_part_time",tool,[](const auto& v){return v.sc_time;});
       auto sc_part_bcid = Monitored::Collection("SC_part_BCID",tool,[](const auto& v){return v.sc_bcid;});
       auto sc_part_lb = Monitored::Collection("SC_part_LB",tool,[](const auto& v){return v.sc_bcid;});
