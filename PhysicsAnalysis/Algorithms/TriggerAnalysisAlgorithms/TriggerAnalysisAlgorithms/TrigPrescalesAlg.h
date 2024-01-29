@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -49,6 +49,10 @@ namespace CP
     /// \brief list of all triggers or trigger chains
   private:
     std::vector<std::string> m_trigListAll;
+
+    /// \brief list of all triggers or trigger chains
+  private:
+    std::string m_trigFormula;
 
     /// \brief list of helper functions to compute the prescales
   private:
