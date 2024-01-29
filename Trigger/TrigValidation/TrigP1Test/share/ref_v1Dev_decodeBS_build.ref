@@ -272,7 +272,7 @@ HLT_2j20_ftf_mb_afprec_afpdz10_L1RD0_FILLED:
     2: 32
   stepFeatures:
     0: 50
-    1: 144
+    1: 143
     2: 32
 HLT_2j20_ftf_mb_afprec_afpdz5_L1RD0_FILLED:
   eventCount: 0
@@ -282,7 +282,7 @@ HLT_2j20_ftf_mb_afprec_afpdz5_L1RD0_FILLED:
     2: 32
   stepFeatures:
     0: 50
-    1: 144
+    1: 143
     2: 32
 HLT_2j20_mb_afprec_afpdijet_L1RD0_FILLED:
   eventCount: 0
@@ -5058,7 +5058,7 @@ HLT_j15_L1RD0_FILLED:
   stepCounts:
     0: 43
   stepFeatures:
-    0: 228
+    0: 230
 HLT_j15_pf_ftf_L1RD0_FILLED:
   eventCount: 40
   stepCounts:
@@ -5650,7 +5650,7 @@ HLT_j35_L1RD0_FILLED:
   stepCounts:
     0: 19
   stepFeatures:
-    0: 39
+    0: 40
 HLT_j35_pf_ftf_L1RD0_FILLED:
   eventCount: 16
   stepCounts:
