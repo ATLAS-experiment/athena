@@ -12,6 +12,7 @@
 #include <GeoModelKernel/GeoFullPhysVol.h>
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelKernel/GeoTrd.h>
+#include <GeoModelKernel/GeoTube.h>
 
 #include <GeoModelRead/ReadGeoModel.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
@@ -74,10 +75,27 @@ StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache,
         const MdtTubeLayer& lay{define.tubeLayers.back()};
         /// Next check all tubes whether they're made up out of air or not. If yes, then there's no tube at this place 
         /// and add the corresponding has hto the list.
+        bool chEndPlug{false};
         for (unsigned int tube = 0 ; tube < lay.nTubes(); ++tube) {
             constexpr std::string_view airTubeName{"airTube"};
-            if (lay.getTubeNode(tube)->getLogVol()->getName() == airTubeName) {
+            PVConstLink tubeVol{lay.getTubeNode(tube)};
+            if (tubeVol->getLogVol()->getName() == airTubeName) {
                 define.removedTubes.insert(MdtReadoutElement::measurementHash(define.tubeLayers.size(), tube+1));
+            } else if (!chEndPlug) {
+                /// Check for the endplug volumes
+                chEndPlug = true;
+                std::vector<physVolWithTrans> endPlugs = m_geoUtilTool->findAllLeafNodesByName(tubeVol, "Endplug");
+                if (endPlugs.empty()) {
+                    /// Either all tubes have an endplug or none
+                    continue;
+                }
+                const GeoShape* plugShape = m_geoUtilTool->extractShape(endPlugs[0].physVol);
+                if (plugShape->typeID() != GeoTube::getClassTypeID()){
+                    ATH_MSG_FATAL("The shape "<<m_geoUtilTool->dumpShape(plugShape)<<" is not a tube");
+                    return StatusCode::FAILURE;
+                }
+                const GeoTube* plugTube = static_cast<const GeoTube*>(plugShape);
+                define.endPlugLength = plugTube->getZHalfLength();
             }
         }
     }

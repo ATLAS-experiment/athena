@@ -317,7 +317,7 @@ int main( int argc, char** argv ) {
                     stagFailure = true;
                 }
                 
-                // TEST_TUBEPROP(tubeLength, "tube length");
+                TEST_TUBEPROP(tubeLength, "tube length");
                 // TEST_TUBEPROP(wireLength, "wire length");
                 TEST_TUBEPROP(activeLength, "active length");
                 /// In cases where the tube coordinate systems are not aligned, 
