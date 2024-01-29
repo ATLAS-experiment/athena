@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 class CaloMenuDefs_FWD(object):
       """Static Class to collect all string manipulations in Calo sequences """
-      from TrigEDMConfig.TriggerEDMRun3 import recordable
+      from TrigEDMConfig.TriggerEDM import recordable
       L2CaloClusters= recordable("HLT_FastCaloEMClusters_FWD")
 
 

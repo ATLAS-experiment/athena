@@ -7,7 +7,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from AthenaCommon.Logging import logging
 
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg

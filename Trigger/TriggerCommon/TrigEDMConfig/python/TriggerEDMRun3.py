@@ -2,11 +2,10 @@
 
 # ------------------------------------------------------------
 # Definition of trigger EDM for Run 3
-
+#
 # Concept of categories is kept similar to TriggerEDMRun2.py, categories are:
-# AllowedCategories = ['Bjet', 'Bphys', 'Egamma', 'ID', 'Jet', 'L1', 'MET', 'MinBias', 'Muon', 'Steer', 'Tau', 'Calo', 'UTT']
-# Bjet, Bphys, Egamma, ID, Jet, L1, MET, MinBias, Muon, Steer, Tau, Calo (new in Run 3), UTT (new in Run 3)
-
+# AllowedCategories = ['Bjet', 'Bphys', 'Egamma', 'ID', 'Jet', 'L1', 'MET', 'MinBias', 'Muon', 'Steer', 'Tau', 'Calo' (new in Run 3), 'UTT' (new in Run 3)]
+#
 # New additions in Run 3:
 #  * Dynamic varialbes/Container slimming: All dyn vars are removed unless explicitly specified to be kept!
 #    Please refer to ATR-20275 for discussion about policy/handling of dynamic variables
@@ -15,73 +14,13 @@
 #    removes the variables from the AODFULL EDM for the target EDM AODSLIM
 # ------------------------------------------------------------
 
-from collections import UserString
 from AthenaCommon.Logging import logging
 __log = logging.getLogger('TriggerEDMRun3Config')
-
-from TrigEDMConfig import DataScoutingInfo
-
-_allowedEDMPrefixes = ['HLT_', 'L1_', 'LVL1']
-
-# ------------------------------------------------------------
-# AllowedOutputFormats
-# ------------------------------------------------------------
-AllowedOutputFormats = ['BS', 'ESD', 'AODFULL', 'AODSLIM', 'AODCOMM', 'AODBLSSLIM' ]
-AllowedOutputFormats.extend(DataScoutingInfo.getAllDataScoutingIdentifiers())
 
 # ------------------------------------------------------------
 # Additional properties for EDM collections
 # ------------------------------------------------------------
-class Alias(UserString):
-    """EDM property to alias collection name"""
-    pass
-
-class InViews(UserString):
-    """EDM property to configure collections available in a given view"""
-    def __init__(self, value):
-        if ',' in value:
-            raise ValueError(f'Invalid view name: {value}')
-        super().__init__(value)
-
-# EDM property to allow truncation for a collection
-allowTruncation = object()
-
-
-def recordable( arg ):
-    """
-    Verify that the name is in the list of recorded objects and conform to the name convention
-
-    In Run 2 it was a delicate process to configure correctly what got recorded
-    as it had to be set in the algorithm that produced it as well in the TriggerEDM.py in a consistent manner.
-
-    For Run 3 every alg input/output key can be crosschecked against the list of objects to record which is defined here.
-    I.e. in the configuration alg developer would do this:
-    from TriggerEDM.TriggerEDMRun3 import recordable
-
-    alg.outputKey = recordable("SomeKey")
-    If the names are correct the outputKey is assigned with SomeKey, if there is a missmatch an exception is thrown.
-
-    """
-
-    # Allow passing DataHandle as argument - convert to string and remove store name
-    name = str(arg).replace('StoreGateSvc+','')
-
-    if "HLTNav_" in name:
-        __log.error( "Don't call recordable({0}), or add any \"HLTNav_\" collection manually to the EDM. See:collectDecisionObjects.".format( name ) )
-        pass
-    else: #negative filtering
-        if not any([name.startswith(p) for p in _allowedEDMPrefixes]):
-            raise RuntimeError( f"The collection name {name} does not start with any of the allowed prefixes: {_allowedEDMPrefixes}" )
-        if "Aux" in name and not name[-1] != ".":
-            raise RuntimeError( f"The collection name {name} is Aux but the name does not end with the '.'" )
-
-    for entry in TriggerHLTListRun3:
-        if entry[0].split( "#" )[1] == name:
-            return arg
-    msg = "The collection name {0} is not declared to be stored by HLT. Add it to TriggerEDMRun3.py".format( name )
-    __log.error("ERROR in recordable() - see following stack trace.")
-    raise RuntimeError( msg )
-
+from TrigEDMConfig.TriggerEDMDefs import Alias, InViews
 
 # ------------------------------------------------------------
 # Lists of variables to be kept in the collections 

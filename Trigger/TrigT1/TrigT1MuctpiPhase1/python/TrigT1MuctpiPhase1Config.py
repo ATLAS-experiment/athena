@@ -34,7 +34,7 @@ def MUCTPI_AthToolCfg(flags, name):
 
   if flags.Trigger.doHLT:
       # Check the RoI EDM containers are registered in HLT outputs
-      from TrigEDMConfig.TriggerEDMRun3 import recordable
+      from TrigEDMConfig.TriggerEDM import recordable
       for key in tool.MUCTPI_xAODLocation:
         logger.info( "Configuring MuCTPI simulation with configuration outputs: %s", key )
         assert key==recordable(key), f'recordable() check failed for {key}'

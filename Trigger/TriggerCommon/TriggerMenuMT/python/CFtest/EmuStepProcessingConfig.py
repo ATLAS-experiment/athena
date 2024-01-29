@@ -358,7 +358,7 @@ def emulateHLTSeedingCfg(flags, seqName = None):
     ## emulate CTP:
     decoderAlg.ctpUnpacker = CompFactory.CTPUnpackingEmulationTool( ForceEnableAllChains=False , InputFilename="ctp.dat" )
 
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from TrigEDMConfig.TriggerEDM import recordable
     from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection, mapThresholdToL1DecisionCollection, createKeyWriterTool
     decoderAlg.RoIBRoIUnpackers += [
         CompFactory.FSRoIsUnpackingTool("FSRoIsUnpackingTool", Decisions=mapThresholdToL1DecisionCollection("FSNOSEED"),

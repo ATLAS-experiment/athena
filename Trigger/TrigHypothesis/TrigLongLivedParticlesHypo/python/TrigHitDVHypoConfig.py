@@ -15,7 +15,7 @@ def TrigHitDVHypoAlgCfg(flags : AthConfigFlags, name : str) -> ComponentAccumula
     # Setup the hypothesis algorithm
     theHitDVHypo = CompFactory.TrigHitDVHypoAlg(name)
 
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from TrigEDMConfig.TriggerEDM import recordable
     theHitDVHypo.HitDV = recordable(hitDVName)
 
     theHitDVHypo.isMC = flags.Input.isMC

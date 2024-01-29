@@ -1,7 +1,7 @@
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 import AthenaCommon.SystemOfUnits as Units
 from TrigMinBias.TrigMinBiasMonitoring import MbtsHypoToolMonitoring
 

@@ -223,7 +223,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
 
     if flags.Trigger.doHLT:
         # Check the RoI EDM containers are registered in HLT outputs
-        from TrigEDMConfig.TriggerEDMRun3 import recordable
+        from TrigEDMConfig.TriggerEDM import recordable
         def check(key):
             assert key==recordable(key), f'recordable() check failed for {key}'
         if flags.Trigger.L1.doeFex:

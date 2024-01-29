@@ -16,7 +16,7 @@ from .MuonRecoSequences import muonNames
 muNames = muonNames().getNames('RoI')
 muNamesLRT = muonNames().getNames('LRT')
 muNamesFS = muonNames().getNames('FS')
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 #-----------------------------------------------------#
 ### ************* Step1  ************* ###

@@ -348,7 +348,7 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
     """
     from TrigEDMConfig import DataScoutingInfo
     from TrigEDMConfig.TriggerEDM import getRun3BSList
-    from TrigEDMConfig.TriggerEDMRun3 import allowTruncation
+    from TrigEDMConfig.TriggerEDMDefs import allowTruncation
     from TrigOutputHandling.TrigOutputHandlingConfig import TriggerEDMSerialiserToolCfg, StreamTagMakerToolCfg, TriggerBitsMakerToolCfg
 
     # Get list of all output collections for ByteStream (including DataScouting)

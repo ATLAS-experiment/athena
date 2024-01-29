@@ -9,7 +9,7 @@ __all__    = [ "getTrigEgammaKeys" ]
 #----------------------------------------------------------------
 
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 
 class TrigEgammaKeysBase(object):

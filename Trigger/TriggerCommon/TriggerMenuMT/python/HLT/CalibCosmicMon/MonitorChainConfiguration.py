@@ -9,7 +9,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA,
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen, L1CorrelationAlgCfg
 from TrigHypoCommonTools.TrigHypoCommonTools import TrigGenericHypoToolFromDict
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO, 

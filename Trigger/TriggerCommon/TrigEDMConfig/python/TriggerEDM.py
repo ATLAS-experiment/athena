@@ -9,10 +9,9 @@
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,AllowedOutputFormats,varToRemoveFromAODSLIM,addExtraCollectionsToEDMList
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,addExtraCollectionsToEDMList
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerEDM')
-
 
 #************************************************************
 #
@@ -20,10 +19,55 @@ log = logging.getLogger('TriggerEDM')
 #
 #************************************************************
 
+# ------------------------------------------------------------
+# AllowedOutputFormats
+# ------------------------------------------------------------
+AllowedOutputFormats = ['BS', 'ESD', 'AODFULL', 'AODSLIM', 'AODCOMM', 'AODBLSSLIM' ]
+from TrigEDMConfig import DataScoutingInfo
+AllowedOutputFormats.extend(DataScoutingInfo.getAllDataScoutingIdentifiers())
+
+_allowedEDMPrefixes = ['HLT_', 'L1_', 'LVL1']
+def recordable( arg, runVersion=3 ):
+    """
+    Verify that the name is in the list of recorded objects and conform to the name convention
+
+    In Run 2 it was a delicate process to configure correctly what got recorded
+    as it had to be set in the algorithm that produced it as well in the TriggerEDM.py in a consistent manner.
+
+    For Run 3 every alg input/output key can be crosschecked against the list of objects to record which is defined here.
+    I.e. in the configuration alg developer would do this:
+    from TriggerEDM.TriggerEDMRun3 import recordable
+
+    alg.outputKey = recordable("SomeKey")
+    If the names are correct the outputKey is assigned with SomeKey, if there is a missmatch an exception is thrown.
+
+    """
+
+    # Allow passing DataHandle as argument - convert to string and remove store name
+    name = str(arg).replace('StoreGateSvc+','')
+
+    if "HLTNav_" in name:
+        log.error( "Don't call recordable({0}), or add any \"HLTNav_\" collection manually to the EDM. See:collectDecisionObjects.".format( name ) )
+        pass
+    else: #negative filtering
+        if not any([name.startswith(p) for p in _allowedEDMPrefixes]):
+            raise RuntimeError( f"The collection name {name} does not start with any of the allowed prefixes: {_allowedEDMPrefixes}" )
+        if "Aux" in name and not name[-1] != ".":
+            raise RuntimeError( f"The collection name {name} is Aux but the name does not end with the '.'" )
+
+    if runVersion >= 3:
+        for entry in TriggerHLTListRun3:
+            if entry[0].split( "#" )[1] == name:
+                return arg
+        msg = "The collection name {0} is not declared to be stored by HLT. Add it to TriggerEDMRun3.py".format( name )
+        log.error("ERROR in recordable() - see following stack trace.")
+        raise RuntimeError( msg )
+
+
 def getTriggerEDMList(key, runVersion, extraEDMList=[]):
     """
     List (Literally Python dict) of trigger objects to be placed with flags:
-    key can be" 'ESD', 'AODSLIM', 'AODFULL', 'DS'
+    key can be" 'ESD', 'AODSLIM', 'AODFULL'
     run can be: '1 (Run1)', '2 (Run2)', '3' (Run 3), '4' (Run 4)
     """
     if runVersion == 1:
@@ -35,7 +79,7 @@ def getTriggerEDMList(key, runVersion, extraEDMList=[]):
         else:
             return getTriggerObjList(key,[TriggerHLTList, TriggerResultsList])
 
-    elif runVersion == 3 or runVersion == 4: 
+    elif runVersion >= 3: 
         if key in AllowedOutputFormats: # AllowedOutputFormats is the entire list of output formats including ESD
             # this keeps only the dynamic variables that have been specified in TriggerEDMRun3
             Run3TrigEDM = {}
@@ -103,7 +147,7 @@ def getTriggerEDMList(key, runVersion, extraEDMList=[]):
                         else:
                             raise RuntimeError("Value in Run3TrigEDM dictionary is not a list")
 
-            else:
+            else: # ESD
                 Run3TrigEDM.update(getRun3TrigEDMSlimList(key))
 
             log.debug('TriggerEDM for EDM set {} contains the following collections: {}'.format(key, Run3TrigEDM) )    

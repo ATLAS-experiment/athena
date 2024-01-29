@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 def MuonClusterConfig(flags, name="MuonClusterConfig"):
     from TrigLongLivedParticles.TrigLongLivedParticlesMonitoring import trigMuonClusterAlgorithmMonitoring

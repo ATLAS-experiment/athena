@@ -14,7 +14,7 @@ def TrigdEdxTrackHypoAlgCfg(flags : AthConfigFlags, name : str) -> ComponentAccu
     # Setup the hypothesis algorithm
     thedEdxTrackHypo = CompFactory.TrigdEdxTrackHypoAlg(name)
     
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from TrigEDMConfig.TriggerEDM import recordable
     thedEdxTrackHypo.HPtdEdxTrk = recordable("HLT_HPtdEdxTrk")
 
     # monitoring

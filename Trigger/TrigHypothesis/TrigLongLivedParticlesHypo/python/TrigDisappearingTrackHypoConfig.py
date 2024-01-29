@@ -14,7 +14,7 @@ def createTrigDisappearingTrackHypoAlgCfg(flags: AthConfigFlags, name : str) -> 
     # Setup the hypothesis algorithm
     theDisTrkHypo = CompFactory.TrigDisappearingTrackHypoAlg(name)
     
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from TrigEDMConfig.TriggerEDM import recordable
     theDisTrkHypo.DisTrkBDTSel = recordable("HLT_DisTrkBDTSel")
 
     # monioring

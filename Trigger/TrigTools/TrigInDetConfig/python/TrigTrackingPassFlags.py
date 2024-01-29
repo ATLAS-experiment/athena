@@ -2,7 +2,7 @@
 import AthenaCommon.SystemOfUnits as Units
 
 from TrkConfig.TrackingPassFlags import createTrackingPassFlags,createITkTrackingPassFlags
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 def signatureSpecificSettingOfFlags(flags,mode):
   

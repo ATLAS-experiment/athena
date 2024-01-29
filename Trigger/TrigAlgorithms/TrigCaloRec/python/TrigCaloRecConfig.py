@@ -8,7 +8,7 @@ from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import em_clusters, lc_clusters, fs_towers, fs_cells
 
-from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.TriggerEDM import recordable
 
 mlog = logging.getLogger ('TrigCaloRecConfig')
 

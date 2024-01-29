@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, EDMDetailsRun3, AllowedOutputFormats
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, EDMDetailsRun3
+from TrigEDMConfig.TriggerEDM import AllowedOutputFormats
 from AthenaCommon.Logging import logging
 log = logging.getLogger('testEDMRun3')
 
