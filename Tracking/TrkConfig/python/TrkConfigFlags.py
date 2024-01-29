@@ -472,5 +472,7 @@ def createTrackingConfigFlags():
                 lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     # Turn on the secondary vertex V0 finder
     icf.addFlag("Tracking.doV0Finder", False)
+    
+    icf.addFlag('Tracking.TruthClusterSplittingEff', 0.9)
 
     return icf
