@@ -45,15 +45,14 @@ if DetFlags.readRDOBS.LAr_on():
        topSequence+=LArRawDataReadingAlg() 
         
 if DetFlags.readRDOBS.Tile_on():
-    svcMgr.ByteStreamCnvSvc.ROD2ROBmap = [ "-1" ]
-    svcMgr.ByteStreamAddressProviderSvc.TypeNames += [
-        "TileRawChannelContainer/TileRawChannelCnt",
-        "TileRawChannelContainer/MuRcvRawChCnt",
-        "TileDigitsContainer/MuRcvDigitsCnt",
-        "TileL2Container/TileL2Cnt"
-      ]
     from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlg
     TileHid2RESrcIDCondAlg(ROD2ROBmap=["-1"])
+
+    from TileByteStream.TileByteStreamConf import TileRawDataReadingAlg
+    topSequence += TileRawDataReadingAlg(TileDigitsContainer='TileDigitsCnt',
+                                         TileRawChannelContainer='TileRawChannelCnt',
+                                         MuRcvRawChannelContainer='MuRcvRawChCnt',
+                                         MuRcvDigitsContainer='MuRcvDigitsCnt')
 
 if DetFlags.readRDOBS.LVL1_on():
     svcMgr.ByteStreamAddressProviderSvc.TypeNames += [                

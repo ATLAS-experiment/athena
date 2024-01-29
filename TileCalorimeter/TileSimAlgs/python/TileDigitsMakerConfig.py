@@ -71,8 +71,9 @@ def TileDigitsMakerCfg(flags, **kwargs):
         kwargs['InputTileDigitContainer'] = f'{flags.Overlay.BkgPrefix}TileDigitsCnt'
         kwargs['TileDQstatus'] = 'TileDQstatus'
 
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{kwargs["InputTileDigitContainer"]}']))
+        if not flags.Overlay.DataOverlay:
+            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+            acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{kwargs["InputTileDigitContainer"]}']))
 
     if tileNoise or tileCoherNoise or kwargs['RndmEvtOverlay']:
         if 'RndmSvc' not in kwargs:
@@ -93,7 +94,6 @@ def TileDigitsMakerCfg(flags, **kwargs):
         kwargs.setdefault('TileDigitsContainer', flags.Overlay.BkgPrefix + 'TileDigitsCnt')
     else:
         kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt')
-
 
     kwargs.setdefault('DoHSTruthReconstruction', flags.Digitization.EnableCaloHSTruthRecoInputs)
     if kwargs['DoHSTruthReconstruction']:
