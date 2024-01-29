@@ -3,24 +3,13 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/IParticlesLoader.h"
-#include "FlavorTagDiscriminants/FlipTagEnums.h"
-#include "FlavorTagDiscriminants/AssociationEnums.h"
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
-#include "xAODBase/ObjectType.h"
 #include "xAODPFlow/FlowElement.h"
 
-#include "FlavorTagDiscriminants/customGetter.h"
+#include "FlavorTagDiscriminants/SequenceGetter.h"
 #include <iostream>
-#include <cxxabi.h>
 
 namespace {
-
-  std::string demangled(std::string const& sym) {
-    std::unique_ptr<char, void(*)(void*)>
-        name{abi::__cxa_demangle(sym.c_str(), nullptr, nullptr, nullptr), std::free};
-    return {name.get()};
-}
-
 
   // define a regex literal operator
   std::regex operator "" _r(const char* c, size_t /* length */) {
@@ -79,8 +68,15 @@ namespace {
     config.order = ConstituentsSortOrder::PT_DESCENDING;
     for (const auto& varname: name_node.second) {
       FTagConstituentsInputConfig input;
-      input.name = varname;
-      input.type = match_first(type_regexes, varname,
+      size_t pos = varname.find("flow_");
+      if (pos != std::string::npos){
+        input.name = varname.substr(pos+5);
+      }
+      else{
+        input.name = varname;
+      }
+      // input.name = varname;
+      input.type = match_first(type_regexes, input.name,
                                 "track type matching");
       config.inputs.push_back(input);
     }
@@ -90,11 +86,11 @@ namespace {
 
 namespace FlavorTagDiscriminants {
     
-    FTagConstituentsSequenceConfig createIParticleLoaderConfig(
+    FTagConstituentsSequenceConfig createIParticlesLoaderConfig(
       std::pair<std::string, std::vector<std::string>> iparticle_names
     ){
         // build the track inputs
-        TypeRegexes trk_type_regexes {
+        TypeRegexes var_type_regexes {
           // Some innermost / next-to-innermost hit variables had a different
           // definition in 21p9, recomputed here with customGetter to reuse
           // existing training
@@ -105,14 +101,14 @@ namespace FlavorTagDiscriminants {
           {"(numberDoF|chiSquared|qOverP|theta)"_r, ConstituentsEDMType::FLOAT},
           {"(^.*[_])?(d|z)0.*"_r, ConstituentsEDMType::CUSTOM_GETTER},
           {"(log_)?(ptfrac|dr|pt).*"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"(deta|dphi)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(deta|dphi|energy)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           {"phi|theta|qOverP"_r, ConstituentsEDMType::FLOAT},
           {"(phi|theta|qOverP)Uncertainty"_r, ConstituentsEDMType::CUSTOM_GETTER},
           {"leptonID"_r, ConstituentsEDMType::CHAR}
         };
 
         auto trk_config = get_iparticle_input_config(
-          iparticle_names, trk_type_regexes);
+          iparticle_names, var_type_regexes);
 
         return trk_config;
     }
@@ -156,16 +152,13 @@ namespace FlavorTagDiscriminants {
           case ConstituentsEDMType::UCHAR: return {
               SequenceGetter<unsigned char, xAOD::IParticle>(cfg.name), {cfg.name}
             };
-        //   case ConstituentsEDMType::CUSTOM_GETTER: {
-        //     return internal::customNamedSeqGetterWithDeps(
-        //       cfg.name, options.track_prefix);
-        //   }
-        //   default: {
-        //     throw std::logic_error("Unknown EDM type for tracks");
-        //   }
-          default: return {
-              SequenceGetter<float, xAOD::IParticle>("phi"), {"phi"}
-            };
+          case ConstituentsEDMType::CUSTOM_GETTER: {
+            return sequence_getter::customNamedSeqGetterWithDeps(
+              cfg.name, options.track_prefix);
+          }
+          default: {
+            throw std::logic_error("Unknown EDM type for iparticles");
+          }
         }
     }
 
@@ -194,7 +187,6 @@ namespace FlavorTagDiscriminants {
         } else {
             m_isCharged = false;
         }
-        m_isCharged = true;
 
         std::map<std::string, std::string> remap = options.remap_scalar;
         std::set<std::string> used_remap;
@@ -211,7 +203,7 @@ namespace FlavorTagDiscriminants {
               used_remap.insert(h.key());
             }
         }
-        std::cout << "TEST IPARTICLE 3 " << std::endl;
+        std::cout << "TEST: IParticlesLoader loaded " << std::endl;
     }
 
     std::vector<const xAOD::IParticle*> IParticlesLoader::getIParticlesFromJet(
@@ -224,75 +216,50 @@ namespace FlavorTagDiscriminants {
         }
         std::sort(particles.begin(), particles.end(), std::greater<>());
         std::vector<const xAOD::IParticle*> only_particles;
-        only_particles.reserve(particles.size());
-        for (const auto& trk: particles) {
-            xAOD::Type::ObjectType objType = trk.second->type();
-            if (objType != xAOD::Type::ObjectType::FlowElement) {
-              std::cout << "objType: " << (int)objType << std::endl;
-              std::cout << "not FlowElement" << std::endl;
-              continue;
+        for (const auto& particle: particles) {
+          auto* flow = dynamic_cast<const xAOD::FlowElement*>(particle.second);
+          const xAOD::IParticle* obj = nullptr;
+          if (!flow) continue;
+          if ((flow->isCharged() != m_isCharged)) continue;
+          else {
+            if (m_isCharged){
+              obj = flow->chargedObject(0);
             }
             else{
-              auto* flow = dynamic_cast<const xAOD::FlowElement*>(trk.second);
-              if (!flow) continue;
-              if ((flow->isCharged() != m_isCharged)) continue;
-              else {
-                std::cout << "TEST isCharged: " << flow->isCharged() << std::endl;
-                if (m_isCharged){
-                  only_particles.push_back(flow->chargedObject(0));
-                }
-                else{
-                  size_t n_clusters = flow->nOtherObjects();
-                  if (n_clusters == 0) continue;
-                  if (n_clusters == 1)
-                    only_particles.push_back(flow->otherObject(0));
-                  else {
-                    // if we have a few clusters take the one with the highest weight
-                    auto ops = flow->otherObjectsAndWeights();
-                    auto obj = std::max_element(
-                      ops.begin(), ops.end(),
-                      [](const auto& x, const auto& y) { return x.second < y.second; }
-                      )->first;
-                    only_particles.push_back(obj);
-                  }
-                }
-              }
+              obj = dynamic_cast<const xAOD::IParticle*>(flow);
             }
+          }
+          if (!obj){
+            std::cout << "TEST: obj is nullptr" << std::endl;
+            continue;
+          }
+          only_particles.push_back(obj);
         }
+        std::cout << "TEST: SIZE OF only_particles: " << only_particles.size() << std::endl;
         return only_particles;
     }
 
     std::pair<std::string, input_pair> IParticlesLoader::getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
-        // std::vector<float> particle_feat(20); // (#tracks, #feats).flatten
         std::vector<float> particle_feat;
-
         int num_iparticle_vars = static_cast<int>(m_sequencesFromIParticles.size());
         int num_iparticles = 0;
-        SG::AuxElement::Accessor<float> m_getter("phi");
 
         IParticles sorted_particles = getIParticlesFromJet(jet);
-        for (auto el : sorted_particles){
-            xAOD::Type::ObjectType objType = el->type();
-            std::cout << "objType: " << (int)objType << " ";
-            std::cout << el->pt() / 1000 << " ";
-            std::cout << m_getter.isAvailable(*el) << " ";
-        }
         int iparticle_var_idx=0;
         for (const auto& seq_builder: m_sequencesFromIParticles) {
             auto double_vec = seq_builder(jet, sorted_particles).second;
-            std::cout << "double_vec.size(): " << double_vec.size() << std::endl;
             if (iparticle_var_idx == 0){
               num_iparticles = static_cast<int>(double_vec.size());
               particle_feat.resize(num_iparticles * num_iparticle_vars);
             }
-
             for (unsigned int particle_idx=0; particle_idx < double_vec.size(); particle_idx++){
                 particle_feat[iparticle_var_idx * num_iparticles + particle_idx] = double_vec[particle_idx];
             }
+            iparticle_var_idx++;
         }
-        // std::cout << std::endl;
+
         std::vector<int64_t> particle_feat_dim = {num_iparticles, num_iparticle_vars};
 
-        return std::make_pair("particle_features", std::make_pair(particle_feat, particle_feat_dim));
+        return std::make_pair("flow_features", std::make_pair(particle_feat, particle_feat_dim));
     }
 }

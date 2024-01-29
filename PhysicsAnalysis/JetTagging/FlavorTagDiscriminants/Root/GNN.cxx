@@ -192,6 +192,7 @@ namespace FlavorTagDiscriminants {
         //       std::cout << "DIFFERENCE " << i << std::endl;
         //   }
         // }
+        gnn_input.insert({"flow_features", loader_out.second});
       }
       // if (m_trackLoader){
       //   auto loader_out = m_trackLoader->getData(jet, btag);
@@ -206,7 +207,7 @@ namespace FlavorTagDiscriminants {
       // if (m_constituentsLoaders.size() > 0){
       //   auto flow_out = m_constituentsLoaders[0]->getData(jet, btag);
       // }
-      gnn_input.insert({"track_features", track_info});
+      // gnn_input.insert({"flow_features", track_info});
     }
 
     // run inference

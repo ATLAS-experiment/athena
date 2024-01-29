@@ -22,6 +22,10 @@
 #include <regex>
 
 namespace FlavorTagDiscriminants {
+
+    FTagConstituentsSequenceConfig createIParticlesLoaderConfig(
+      std::pair<std::string, std::vector<std::string>> iparticle_names
+    );
     // Subclass for Tracks loader inherited from abstract ConstituentsLoader class
     class IParticlesLoader : public ConstituentsLoader {
       public:

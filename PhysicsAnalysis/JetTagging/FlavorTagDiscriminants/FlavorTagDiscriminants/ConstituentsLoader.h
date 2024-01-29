@@ -82,10 +82,7 @@ namespace FlavorTagDiscriminants {
             ConstituentsLoader(FTagConstituentsSequenceConfig cfg) {
               config = cfg;
             };
-            // ConstituentsLoader(const ConstituentsLoader&) = delete;
-            // ConstituentsLoader(ConstituentsLoader&&) = default;
             virtual ~ConstituentsLoader() {
-              std::cout << "DELETED" << std::endl;
             };
             virtual std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const = 0;
 

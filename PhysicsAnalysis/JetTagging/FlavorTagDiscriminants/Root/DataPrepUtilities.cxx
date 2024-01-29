@@ -7,6 +7,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagDiscriminants/customGetter.h"
 #include "FlavorTagDiscriminants/StringUtils.h"
 #include "FlavorTagDiscriminants/TracksLoader.h"
+#include "FlavorTagDiscriminants/IParticlesLoader.h"
 
 #include "xAODBTagging/BTaggingUtilities.h"
 
@@ -728,8 +729,12 @@ namespace FlavorTagDiscriminants {
 
       std::vector<FTagConstituentsSequenceConfig> constituent_configs;
       for (auto el: constituent_names){
+        std::cout << "CONSTITUENT: " << el.first << std::endl;
         if (el.first.find("tracks") != std::string::npos){
           constituent_configs.push_back(createTracksLoaderConfig(el, flip_config));
+        }
+        else if (el.first.find("neutral_flows") != std::string::npos){
+          constituent_configs.push_back(createIParticlesLoaderConfig(el));
         }
       }
 
