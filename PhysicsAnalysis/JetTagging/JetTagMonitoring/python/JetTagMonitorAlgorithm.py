@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file JetTagMonitorAlgorithm.py
@@ -455,26 +455,26 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     #Select the input (data or MC) and output files
-    
-    ConfigFlags.Input.isMC = False
+    flags.Input.isMC = False
 
     #Heavy Ions UPC AOD. Change this to what needed for your test.
-    ConfigFlags.Input.Files = ["/afs/cern.ch/work/m/mtanasin/dq_devel/run/gridAOD/data23_hi.00461669.physics_UPC.merge.AOD.f1395_m2203._lb0036-lb0051._0001.1"] #AOD, data23_hi
+    flags.Input.Files = ["/afs/cern.ch/work/m/mtanasin/dq_devel/run/gridAOD/data23_hi.00461669.physics_UPC.merge.AOD.f1395_m2203._lb0036-lb0051._0001.1"] #AOD, data23_hi
 
     #Output file. Change the name with something meaningful related to the input file when testing.
-    ConfigFlags.Output.HISTFileName = 'data23_hi.00461669.physics_UPC.HIST.root'
-    ConfigFlags.lock()
+    flags.Output.HISTFileName = 'data23_hi.00461669.physics_UPC.HIST.root'
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    jetTagMonitorAcc = JetTagMonitorConfig(ConfigFlags)
+    jetTagMonitorAcc = JetTagMonitorConfig(flags)
     cfg.merge(jetTagMonitorAcc)
 
     # If you want to turn on more detailed messages ...

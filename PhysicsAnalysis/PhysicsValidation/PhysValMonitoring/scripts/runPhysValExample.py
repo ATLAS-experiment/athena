@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from glob import glob
 
@@ -13,21 +13,22 @@ def GetCustomAthArgs():
 # Parse the arguments
 MyArgs = GetCustomAthArgs()
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-ConfigFlags.Input.Files = []
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags.Input.Files = []
 for path in MyArgs.filesInput.split(','):
-    ConfigFlags.Input.Files += glob(path)
-ConfigFlags.PhysVal.OutputFileName = MyArgs.outputFile
+    flags.Input.Files += glob(path)
+flags.PhysVal.OutputFileName = MyArgs.outputFile
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-acc = MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-acc.merge(PoolReadCfg(ConfigFlags))
+acc.merge(PoolReadCfg(flags))
 
-ConfigFlags.lock()
+flags.lock()
 
 from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg, PhysValExampleCfg
-acc.merge(PhysValMonitoringCfg(ConfigFlags, tools=[acc.popToolsAndMerge(PhysValExampleCfg(ConfigFlags))]))
+acc.merge(PhysValMonitoringCfg(flags, tools=[acc.popToolsAndMerge(PhysValExampleCfg(flags))]))
 
 acc.printConfig(withDetails=True)
 
