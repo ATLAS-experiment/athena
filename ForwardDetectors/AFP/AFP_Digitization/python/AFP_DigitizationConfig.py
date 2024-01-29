@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_Digitization package
@@ -102,8 +102,8 @@ def AFP_OverlayDigitizationBasicCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags,Load=[('AFP_TDSimHitCollection','StoreGateSvc+AFP_TDSimHitCollection'),
-                                               ('AFP_SIDSimHitCollection','StoreGateSvc+AFP_SIDSimHitCollection')] ) )
+        acc.merge(SGInputLoaderCfg(flags,Load={('AFP_TDSimHitCollection','StoreGateSvc+AFP_TDSimHitCollection'),
+                                               ('AFP_SIDSimHitCollection','StoreGateSvc+AFP_SIDSimHitCollection')} ) )
     if "DigitizationTool" not in kwargs:
         kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(AFP_OverlayDigitizationToolCfg(flags)))
 

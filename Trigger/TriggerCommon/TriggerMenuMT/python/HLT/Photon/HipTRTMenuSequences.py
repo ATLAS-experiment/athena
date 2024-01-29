@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components
@@ -34,8 +34,8 @@ def TRTHitGeneratorSequenceCfg(flags, is_probe_leg = False):
    
     # view data verifier
     ViewVerify = CompFactory.AthViews.ViewDataVerifier("TRTHitGeneratorViewDataVerifier")
-    ViewVerify.DataObjects = [('TrigRoiDescriptorCollection' , 'StoreGateSvc+TRTHitGenerator'),
-                             ]
+    ViewVerify.DataObjects = {('TrigRoiDescriptorCollection' , 'StoreGateSvc+TRTHitGenerator'),
+                             }
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
     from TrigInDetConfig.utils import getFlagsForActiveConfig

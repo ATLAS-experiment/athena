@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_SiClusterTools package
@@ -45,7 +45,7 @@ def AFP_SiClusterTools_Cfg(flags, kwargs={}):
                         clusterTool.AFPSiHitsContainerName=""
                 else:
                         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-                        acc.merge(SGInputLoaderCfg(flags,Load=[('xAOD::AFPSiHitContainer','StoreGateSvc+AFPSiHitContainer')]))
+                        acc.merge(SGInputLoaderCfg(flags,Load={('xAOD::AFPSiHitContainer','StoreGateSvc+AFPSiHitContainer')}))
         
         acc.addEventAlgo(CompFactory.AFPSiCluster("AFPSiCluster", clusterRecoTool = clusterTool, **kwargs))
         

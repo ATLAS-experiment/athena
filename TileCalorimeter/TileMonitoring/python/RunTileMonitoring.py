@@ -402,7 +402,7 @@ if __name__=='__main__':
 
         ppa = TileMonPostProcessingAlg("TileMonPostProcessingAlg")
         ppa.OutputLevel = flags.Exec.OutputLevel
-        ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
+        ppa.ExtraInputs = {( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )}
         ppa.Interval = args.postProcessingInterval
         ppa.ConfigFiles = configurations
         ppa._ctr = 1 # Start postprocessing only after specified number of events (not during the first one)

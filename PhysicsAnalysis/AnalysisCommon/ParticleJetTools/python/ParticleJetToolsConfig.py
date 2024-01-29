@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #                                                                      #
@@ -79,7 +79,7 @@ def getCopyTruthJetParticles(modspec, cflags):
         truthpartcopy.IncludeNeutrinos=True
         truthpartcopy.DressingDecorationName='dressedPhoton'
         ### Declare the dependency on the photon dressing. Needed to run the tool with avalanche scheduler
-        truthpartcopy.ExtraInputs = [( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthParticles.dressedPhoton' )]
+        truthpartcopy.ExtraInputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthParticles.dressedPhoton' )}
     if modspec=="Charged":
         truthpartcopy.ChargedParticlesOnly=True
     return truthpartcopy

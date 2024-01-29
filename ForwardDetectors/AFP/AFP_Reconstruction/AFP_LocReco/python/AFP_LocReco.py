@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_LocReco package
@@ -81,7 +81,7 @@ def AFP_LocReco_TD_Cfg(flags, kwargs={}):
                         basicTool3.AFPToFHitContainerKey=""
                 else:
                         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-                        acc.merge(SGInputLoaderCfg(flags, Load=[('xAOD::AFPToFHitContainer' , 'StoreGateSvc+AFPToFHitContainer')]))
+                        acc.merge(SGInputLoaderCfg(flags, Load={('xAOD::AFPToFHitContainer' , 'StoreGateSvc+AFPToFHitContainer')}))
                         
         basicToolsList=[basicTool0, basicTool3]
 

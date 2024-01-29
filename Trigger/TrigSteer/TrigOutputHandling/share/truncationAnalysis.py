@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 # Set input file to new-style flags
@@ -20,7 +20,7 @@ from TrigOutputHandling.TrigOutputHandlingConf import TriggerEDMDeserialiserAlg,
 from AthenaCommon.CFElements import seqAND
 decoder = HLTResultMTByteStreamDecoderAlg()
 deserialiser = TriggerEDMDeserialiserAlg("TrigDeserialiser")
-deserialiser.ExtraOutputs = [('xAOD::TrigCompositeContainer', 'StoreGateSvc+TruncationDebugInfo')]
+deserialiser.ExtraOutputs = {('xAOD::TrigCompositeContainer', 'StoreGateSvc+TruncationDebugInfo')}
 truncationAna = TruncationAnalysisAlg("TruncationAnalysis")
 
 decodingSeq = seqAND("Decoding")

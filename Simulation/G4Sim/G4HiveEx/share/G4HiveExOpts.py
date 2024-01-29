@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 # 
@@ -131,7 +131,7 @@ include("G4AtlasApps/G4Atlas.flat.configuration.py")
 # It uses the same syntax as Algorithmic dependency declarations.
 from AthenaCommon import CfgMgr
 topSeq += CfgMgr.SGInputLoader(OutputLevel=INFO, ShowEventDump=False)
-topSeq.SGInputLoader.Load = [('McEventCollection','StoreGateSvc+GEN_EVENT')]
+topSeq.SGInputLoader.Load = {('McEventCollection','StoreGateSvc+GEN_EVENT')}
 
 # Add the beam effects algorithm
 from AthenaCommon.CfgGetter import getAlgorithm
@@ -145,9 +145,9 @@ topSeq += getAlgorithm("G4AtlasAlg",tryDefaultConfigurable=True)
 # This is done like this because currently our VarHandles do not live in the
 # algorithm but rather in Geant4 components.
 # TODO: make this declaration more automatic
-topSeq.G4AtlasAlg.ExtraInputs =  [('McEventCollection','StoreGateSvc+BeamTruthEvent')]
-topSeq.G4AtlasAlg.ExtraOutputs = [('SiHitCollection','StoreGateSvc+SCT_Hits')]
-StreamHITS.ExtraInputs += topSeq.G4AtlasAlg.ExtraOutputs
+topSeq.G4AtlasAlg.ExtraInputs =  {('McEventCollection','StoreGateSvc+BeamTruthEvent')}
+topSeq.G4AtlasAlg.ExtraOutputs = {('SiHitCollection','StoreGateSvc+SCT_Hits')}
+StreamHITS.ExtraInputs.add(topSeq.G4AtlasAlg.ExtraOutputs)
 
 # Increase verbosity of the output stream
 #StreamHITS.OutputLevel = DEBUG

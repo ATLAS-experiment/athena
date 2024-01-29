@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 import AthenaCommon.AtlasUnixGeneratorJob
@@ -10,7 +10,7 @@ job = AlgSequence()
 
 from SGComps.SGCompsConf import SGInputLoader
 job += SGInputLoader(OutputLevel=INFO, ShowEventDump=False)
-job.SGInputLoader.Load = [ ('EventInfo','McEventInfo') ]
+job.SGInputLoader.Load = { ('EventInfo','McEventInfo') }
 
 from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg
 job += xAODMaker__EventInfoCnvAlg()

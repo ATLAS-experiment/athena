@@ -280,12 +280,12 @@ topSeq += getAlgorithm("G4AtlasAlg", tryDefaultConfigurable=True)
 
 if doFastCaloSim and nThreads > 0:
     # Extra inputs to the G4AtlasAlg required to run FastCaloSim in MT
-    topSeq.G4AtlasAlg.ExtraInputs =[('CaloDetDescrManager',   'ConditionStore+CaloDetDescrManager'), 
+    topSeq.G4AtlasAlg.ExtraInputs ={('CaloDetDescrManager',   'ConditionStore+CaloDetDescrManager'),
                                     ('LArfSamplSym',          'ConditionStore+LArfSamplSym'),
-                                    ('TileSamplingFraction',  'ConditionStore+TileSamplingFraction')]
+                                    ('TileSamplingFraction',  'ConditionStore+TileSamplingFraction')}
 
     # Provide dummy hit container to make sure that in MT hit containers are registered as output containers (instead of input containers)
-    topSeq.G4AtlasAlg.ExtraOutputs = [('LArHitContainer','StoreGateSvc+LArHitEMB_G4')]
+    topSeq.G4AtlasAlg.ExtraOutputs = {('LArHitContainer','StoreGateSvc+LArHitEMB_G4')}
 
 if doFastCaloSim and ISF_Flags.HITSMergingRequired.anyOn():
     # Add the collection merger algorithm for FastCaloSim in G4 to the sequence

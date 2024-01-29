@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py --CA
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: DataModelRunTests/test/ByteStreamTestWrite.py
 # Author: snyder@bnl.gov
@@ -84,7 +84,7 @@ def WriteBSCfg (flags, itemList):
         EvtConversionSvc = bytestream_conversion.name,
         OutputFile = 'ByteStreamEventStorageOutputSvc',
         ItemList = itemList,
-        ExtraInputs = [event_info_input]
+        ExtraInputs = {event_info_input}
     )
     acc.addEventAlgo (output_stream, primary=True)
 

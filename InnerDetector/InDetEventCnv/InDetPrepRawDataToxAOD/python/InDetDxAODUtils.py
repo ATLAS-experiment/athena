@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from InDetPrepRawDataToxAOD.InDetDxAODJobProperties import InDetDxAODFlags
 from InDetRecExample.TrackingCommon  import setDefaults
 import InDetRecExample.TrackingCommon as TrackingCommon
@@ -37,14 +37,14 @@ def getPixelPrepDataToxAOD(name='xAOD_PixelPrepDataToxAOD', **kwargs) :
     if need_pix_ToTList and not hasattr(topSequence,the_PixelChargeToTConversion_name) :
         from PixelCalibAlgs.PixelCalibAlgsConf import PixelChargeToTConversion
         PixelChargeToTConversionSetter = PixelChargeToTConversion(name = the_PixelChargeToTConversion_name,
-                                                                  ExtraOutputs = ['PixelClusters_ToTList'])
+                                                                  ExtraOutputs = {'PixelClusters_ToTList'})
         topSequence += PixelChargeToTConversionSetter
 
     from InDetPrepRawDataToxAOD.InDetPrepRawDataToxAODConf import PixelPrepDataToxAOD
     return PixelPrepDataToxAOD( name = the_name,
                                 **setDefaults( kwargs,
                                                ClusterSplitProbabilityName = TrackingCommon.pixelClusterSplitProbName(),
-                                               ExtraInputs         = ['PixelClusters_ToTList'] if need_pix_ToTList  else [],
+                                               ExtraInputs         = {'PixelClusters_ToTList'} if need_pix_ToTList  else set(),
                                                LorentzAngleTool    = TrackingCommon.getPixelLorentzAngleTool(),
                                                OutputLevel         = INFO,
                                                UseTruthInfo        = (add_IDTIDE_content and isIdTrkDxAODSimulation),

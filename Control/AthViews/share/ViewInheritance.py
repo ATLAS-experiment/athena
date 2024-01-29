@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 ###############################################################
@@ -53,7 +53,7 @@ viewSequence += view_make_1
 
 # View 1 algorithm
 view_verify_1 = CfgMgr.AthViews__ViewDataVerifier("view_verify_1")
-view_verify_1.DataObjects = [ ('int','view_data_1') ]
+view_verify_1.DataObjects = { ('int','view_data_1') }
 view_1 += view_verify_1
 
 # Add the view node to the job
@@ -72,7 +72,7 @@ viewSequence += view_make_2
 
 # View 2 algorithm - should find both pieces of data
 view_verify_2 = CfgMgr.AthViews__ViewDataVerifier("view_verify_2")
-view_verify_2.DataObjects = [ ('int','view_data_1'), ('int', 'view_data_2') ]
+view_verify_2.DataObjects = { ('int','view_data_1'), ('int', 'view_data_2') }
 view_test = CfgMgr.AthViews__ViewTestAlg("view_test")
 view_2 += view_verify_2
 view_2 += view_test

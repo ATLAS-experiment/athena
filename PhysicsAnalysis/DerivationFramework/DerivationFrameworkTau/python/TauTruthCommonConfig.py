@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # TauTruthCommonConfig.py
@@ -84,7 +84,7 @@ def TauTruthToolsCfg(ConfigFlags):
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation    
     acc.addEventAlgo(CommonAugmentation( "TauTruthCommonKernel", AugmentationTools = DFCommonTauTruthWrapperTools,
-                                        ExtraOutputs = [( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' ),
-                                                        ( 'xAOD::IParticleContainer' , 'StoreGateSvc+TruthTaus' )] ))    
+                                        ExtraOutputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' ),
+                                                        ( 'xAOD::IParticleContainer' , 'StoreGateSvc+TruthTaus' )} ))
     
     return acc    

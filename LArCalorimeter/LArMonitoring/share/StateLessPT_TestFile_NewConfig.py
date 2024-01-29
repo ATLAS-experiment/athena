@@ -230,7 +230,7 @@ if __name__=='__main__':
    if DOPOSTPROC:
       from DataQualityUtils.DQPostProcessingAlg import DQPostProcessingAlg
       ppa = DQPostProcessingAlg("DQPostProcessingAlg")
-      ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
+      ppa.ExtraInputs = {( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )}
       ppa.Interval = POSTFREQ
       if flags.Common.isOnline:
          ppa.FileKey = ((flags.DQ.FileKey + '/') if not flags.DQ.FileKey.endswith('/') 

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 
@@ -70,7 +70,7 @@ topSequence = AlgSequence()
 
 from SGComps.SGCompsConf import SGInputLoader
 topSequence+=SGInputLoader(OutputLevel=INFO, ShowEventDump=False)
-topSequence.SGInputLoader.Load = [ ('EventInfo','McEventInfo') ]
+topSequence.SGInputLoader.Load = { ('EventInfo','McEventInfo') }
 
 from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg
 topSequence += xAODMaker__EventInfoCnvAlg()
