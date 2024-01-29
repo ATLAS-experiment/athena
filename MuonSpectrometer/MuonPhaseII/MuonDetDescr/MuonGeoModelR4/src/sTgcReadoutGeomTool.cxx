@@ -146,20 +146,12 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         ++gasGap;
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
         StripLayer stripLayer(gapVol.transform, stripDesign, 
-                              layerHash(define, gasGap, sTgcIdHelper::sTgcChannelTypes::Strip));
+                              sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0));
         ATH_MSG_VERBOSE("Added new strip layer at "<<stripLayer);
         define.stripLayers.push_back(std::move(stripLayer));
         if (!define.stripDesign) define.stripDesign = stripDesign;  
     }
     return StatusCode::SUCCESS;
-}
-IdentifierHash sTgcReadoutGeomTool::layerHash(const sTgcReadoutElement::defineArgs& args, const int gasGap, const int channelType) const {
-    const unsigned int hashShiftChType{2*CxxUtils::count_ones(args.numLayers)};
-    const unsigned int hashShiftChannel{2*hashShiftChType};
-    IdentifierHash idHash{ 0u << hashShiftChannel | channelType << hashShiftChType | (gasGap -1)};
-    ATH_MSG_VERBOSE("gasGap: "<<gasGap<<", channelType: "<<channelType << " gives hash: "
-                           <<static_cast<unsigned int>(idHash));                      
-    return idHash;
 }
 
 StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {

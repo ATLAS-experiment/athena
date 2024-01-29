@@ -81,8 +81,6 @@ class sTgcReadoutGeomTool : public AthAlgTool,
     StatusCode readParameterBook(FactoryCache& cache);
     /// Loads the chamber dimensions from GeoModel
     StatusCode loadDimensions(sTgcReadoutElement::defineArgs& args, FactoryCache& factory);
-    
-    IdentifierHash layerHash(const sTgcReadoutElement::defineArgs& args, const int gasGap, const int channelType) const;
 
 };
 

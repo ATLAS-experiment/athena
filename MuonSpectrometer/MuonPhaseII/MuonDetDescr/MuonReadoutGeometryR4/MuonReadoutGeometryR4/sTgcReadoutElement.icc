@@ -1,12 +1,22 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_STGCREADOUTELEMENT_ICC
 #define MUONREADOUTGEOMETRYR4_STGCREADOUTELEMENT_ICC
 
 
 namespace MuonGMR4 {
-    constexpr unsigned int minusOne = -1;
+    namespace sTgcIdMeasHashFields {
+        constexpr unsigned int minusOne = -1;
+        /// Hash field layout
+        //// (wireInGrp)  | (channel)  [1-1024]  |  (sTgcChannelType) [0-2] | (gasGap -1) [1-4]
+        constexpr unsigned int gasGapShift = 0;
+        constexpr unsigned int chTypeShift = 3;        
+        constexpr unsigned int wireInGrpBit = chTypeShift+ 2;
+        constexpr unsigned int chanShift = wireInGrpBit + 1;        
+        constexpr unsigned int wireInGrpShift = chanShift +9;
+    }
+    
 inline double sTgcReadoutElement::chamberHeight() const { return 2.* m_pars.halfChamberHeight; }
 inline double sTgcReadoutElement::sChamberLength() const { return 2.* m_pars.sHalfChamberLength; }
 inline double sTgcReadoutElement::lChamberLength() const { return 2.* m_pars.lHalfChamberLength; }
@@ -35,11 +45,45 @@ inline IdentifierHash sTgcReadoutElement::measurementHash(const Identifier& meas
                       m_idHelper.channelType(measId),
                       m_idHelper.channel(measId));
 }
-inline IdentifierHash sTgcReadoutElement::createHash(const int gasGap, const int channelType, const int channel) const {
+inline IdentifierHash sTgcReadoutElement::createHash(const unsigned int gasGap, 
+                                                     const unsigned int channelType, 
+                                                     const unsigned int channel,
+                                                     const unsigned int wireInGrp) {
+    using namespace sTgcIdMeasHashFields;
     /// Construct the Hash such that  (channel) | (channelType) | (gasGap -1) 
+    if (channelType == ReadoutChannelType::WireInGrp) {
+        const unsigned int readOutHash = static_cast<unsigned int>(createHash(gasGap, ReadoutChannelType::Wire, channel));
+        return IdentifierHash {wireInGrp << wireInGrpShift |  wireInGrpBit | readOutHash};
+    }
+    return IdentifierHash{ channel << chanShift | channelType << chTypeShift | (gasGap -1) };
+}
+
+inline IdentifierHash sTgcReadoutElement::layerHash(const IdentifierHash& measHash) {
+    using namespace sTgcIdMeasHashFields;
+    constexpr unsigned int mask = (minusOne << chanShift) | (1<<wireInGrpBit);
+    return IdentifierHash{static_cast<unsigned int>(measHash) & (~mask)};
+}
+
+inline  unsigned int sTgcReadoutElement::stripNumber(const IdentifierHash& measHash) {
+    using namespace sTgcIdMeasHashFields;
+    constexpr unsigned int mask = (minusOne << wireInGrpShift);
+    const unsigned int stripedHash = (~mask) & static_cast<unsigned int>(measHash);
+    return stripedHash >> chanShift;
+}
+inline unsigned int sTgcReadoutElement::chType(const IdentifierHash& measHash) {
+    using namespace sTgcIdMeasHashFields;
+    constexpr unsigned int mask = (minusOne << chanShift);
+    const unsigned int stripedHash = (~mask) & static_cast<unsigned int>(measHash);
+    return stripedHash >> chTypeShift;
     
-    const IdentifierHash hash{ channel << m_hashShiftChannel | channelType << m_hashShiftChType | 1u*(gasGap -1) };
-    return hash;
+}
+inline unsigned int sTgcReadoutElement::gasGapNumber(const IdentifierHash& measHash) {
+    using namespace sTgcIdMeasHashFields;
+    constexpr unsigned int mask = (minusOne << chTypeShift);
+    return (static_cast<unsigned int>(measHash) &(~mask) );
+}
+inline Identifier sTgcReadoutElement::measurementId(const IdentifierHash& measHash) const {
+    return m_idHelper.channelID(identify(), multilayer(), gasGapNumber(measHash) + 1, chType(measHash), stripNumber(measHash));  
 }
 inline IdentifierHash sTgcReadoutElement::layerHash(const Identifier& measId) const {
     if (m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
@@ -48,26 +92,8 @@ inline IdentifierHash sTgcReadoutElement::layerHash(const Identifier& measId) co
     }
     return createHash(m_idHelper.gasGap(measId), m_idHelper.channelType(measId), 0);
 }
-inline IdentifierHash sTgcReadoutElement::layerHash(const IdentifierHash& measHash) const {
-    unsigned int mask = minusOne <<m_hashShiftChannel;
-    return IdentifierHash{static_cast<unsigned int>(measHash) & (~mask)};
-}
-inline unsigned int sTgcReadoutElement::stripNumber(const IdentifierHash& measHash) const {
-    return static_cast<unsigned int>(measHash) >> m_hashShiftChannel;
-}
-inline unsigned int sTgcReadoutElement::chType(const IdentifierHash& measHash) const {
-    const unsigned int mask = minusOne << m_hashShiftChannel;
-    const unsigned int stripedHash = (~mask) & static_cast<unsigned int>(measHash);
-    return (stripedHash >> m_hashShiftChType);
-}
-inline unsigned int sTgcReadoutElement::gasGapNumber(const IdentifierHash& measHash) const {
-    const unsigned int mask = minusOne << m_hashShiftChType;
-    const unsigned int stripedHash = (~mask) & static_cast<unsigned int>(measHash);
-    return (stripedHash);
-}
-inline Identifier sTgcReadoutElement::measurementId(const IdentifierHash& measHash) const {
-    return m_idHelper.channelID(identify(), multilayer(), gasGapNumber(measHash) + 1, chType(measHash), stripNumber(measHash));  
- }
+
+
  inline Amg::Vector3D sTgcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
         return stripPosition(ctx, measurementHash(measId));
  }
