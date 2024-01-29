@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODSimHitToMdtMeasCnvAlg.h"
@@ -63,7 +63,7 @@ StatusCode xAODSimHitToMdtMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setTube(id_helper.tube(hitId));
         /// Define the identifier
         const MuonGMR4::MdtReadoutElement* readOutEle = m_DetMgr->getMdtReadoutElement(hitId);
-
+        prd->setReadoutElement(readOutEle);
 
         const Amg::Vector3D globTubePos = readOutEle->center(gctx, prd->measurementHash());
         prd->setTubePosInStation(xAOD::toStorage(m_surfaceProvTool->globalToChambCenter(gctx, hitId) * globTubePos));

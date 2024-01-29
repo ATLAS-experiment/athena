@@ -59,25 +59,31 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
 
         const MuonGMR4::MmReadoutElement* readOutEle = m_DetMgr->getMmReadoutElement(hitId);
         bool isValid{false};
-        Identifier simStripLayerIdentifier = id_helper.channelID(hitId, id_helper.multilayer(hitId), id_helper.gasGap(hitId),1, isValid);
-        if(!isValid) ATH_MSG_ERROR("Invalid layer identifier");
+
         const Amg::Vector3D lHitPos{xAOD::toEigen(simHit->localPosition())};
         const Amg::Vector2D lHitPos2D{lHitPos.x(), lHitPos.y()};
         
-        int channelNumber = readOutEle->stripLayer(simStripLayerIdentifier).design().stripNumber(lHitPos2D);
+        int channelNumber = readOutEle->stripLayer(hitId).design().stripNumber(lHitPos2D);
         if(channelNumber==-1){
             ATH_MSG_WARNING("hit is outside bounds, rejecting it");
             continue;
         }
-        Identifier simStripChannelIdentifier = id_helper.channelID(hitId, id_helper.multilayer(hitId), id_helper.gasGap(hitId), channelNumber, isValid);
-        if(!isValid) ATH_MSG_ERROR("Invalid strip identifier for layer " << m_idHelperSvc->toString(simStripLayerIdentifier) << " channel " << channelNumber << " lHitPos " << lHitPos.x() << " " << lHitPos.y());
-        
+        Identifier clusId = id_helper.channelID(hitId, id_helper.multilayer(hitId), 
+                                                       id_helper.gasGap(hitId), 
+                                                       channelNumber, isValid);
+        if(!isValid) {
+            ATH_MSG_WARNING("Invalid strip identifier for layer " << m_idHelperSvc->toString(hitId) << " channel " << channelNumber << " lHitPos " << lHitPos.x() << " " << lHitPos.y());
+            continue;
+        }
         xAOD::MMCluster* prd = new xAOD::MMCluster();
         prdContainer->push_back(prd);
-        prd->setIdentifier(simStripChannelIdentifier.get_compact());
+        
+        prd->setChannelNumber(channelNumber);
+        prd->setGasGap(id_helper.gasGap(clusId));
+        prd->setIdentifier(clusId.get_compact());
 
         NswErrorCalibData::Input errorCalibInput{};
-        errorCalibInput.stripId=simStripChannelIdentifier;
+        errorCalibInput.stripId = clusId;
         errorCalibInput.locTheta = M_PI- simHit->localDirection().theta();
         errorCalibInput.clusterAuthor=66; // cluster time projection method
         double uncert = errorCalibDB->clusterUncertainty(errorCalibInput);
@@ -86,8 +92,7 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
         double newLocalX = CLHEP::RandGaussZiggurat::shoot(rndEngine, lHitPos.x(), uncert);
         xAOD::MeasVector<1> lClusterPos{newLocalX};
         xAOD::MeasMatrix<1> lCov{uncert*uncert}; 
-        prd->setMeasurement(m_idHelperSvc->detElementHash(simStripChannelIdentifier) ,lClusterPos, lCov);
-
+        prd->setMeasurement(m_idHelperSvc->detElementHash(clusId) ,lClusterPos, lCov);
     }
 
     return StatusCode::SUCCESS;
