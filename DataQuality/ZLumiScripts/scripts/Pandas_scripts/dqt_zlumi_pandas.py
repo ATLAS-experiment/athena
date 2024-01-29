@@ -222,7 +222,7 @@ if len(arr_mu) == 0:
     arr_rec_err.append(1)
 
 tg_fit = ROOT.TGraphErrors(len(arr_mu), arr_mu, arr_rec_eff, ROOT.nullptr, arr_rec_err)
-if len(o_recoeff_fit) == 1:
+if len(o_recoeff_fit) == 0 or len(o_recoeff_fit) == 1:
     fit_type = "pol0"
 elif len(o_recoeff_fit) == 2:
     fit_type = "pol1"
