@@ -16,6 +16,7 @@
 from .SignatureDicts import ChainStore
 
 PhysicsStream='Main'
+ExpressStream='express'
 SingleMuonGroup = ['RATE:SingleMuon', 'BW:Muon']
 MultiMuonGroup = ['RATE:MultiMuon', 'BW:Muon']
 SingleElectronGroup = ['RATE:SingleElectron', 'BW:Electron']

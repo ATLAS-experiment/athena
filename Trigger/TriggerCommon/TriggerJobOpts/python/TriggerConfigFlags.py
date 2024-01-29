@@ -356,7 +356,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.triggerConfig', lambda flags: __triggerConfig(flags),
                   help='Trigger configuration source (https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag)')
 
-    flags.addFlag('Trigger.triggerMenuSetup', 'MC_pp_run3_v1_BulkMCProd_prescale',
+    flags.addFlag('Trigger.triggerMenuSetup', lambda flags: 'MC_pp_run3_v1_BulkMCProd_prescale' if flags.GeoModel.Run is LHCPeriod.Run3 else 'MC_pp_run4_v1_BulkMCProd_prescale',
                   help='name of the trigger menu')
 
     flags.addFlag('Trigger.generateMenuDiagnostics', False,
