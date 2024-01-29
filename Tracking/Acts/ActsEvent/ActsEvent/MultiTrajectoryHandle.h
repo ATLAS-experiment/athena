@@ -59,6 +59,8 @@ class MutableMultiTrajectoryHandle {
       ActsTrk::MutableMultiTrajectory&& mmtj, const EventContext& context) const;
 
  private:
+  Gaudi::Property<std::string> m_prefixName;
+  
   SG::WriteHandleKey<xAOD::TrackStateContainer> m_statesKey;
   SG::WriteHandleKey<xAOD::TrackParametersContainer> m_parametersKey;
   SG::WriteHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey;
@@ -95,6 +97,8 @@ class ConstMultiTrajectoryHandle {
       const EventContext& context) const;
 
  private:
+  Gaudi::Property<std::string> m_prefixName;
+  
   SG::ReadHandleKey<xAOD::TrackStateContainer> m_statesKey;
   SG::ReadHandleKey<xAOD::TrackParametersContainer> m_parametersKey;
   SG::ReadHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey;
@@ -107,26 +111,37 @@ template <class C>
 MutableMultiTrajectoryHandle<C>::MutableMultiTrajectoryHandle(
     C* algorithm, const std::string& propertyNamePrefix,
     const std::string& namePrefix)
-    : m_statesKey(algorithm, propertyNamePrefix + "StatesKey",
-                  namePrefix + "States"),
-      m_parametersKey(algorithm, propertyNamePrefix + "ParametersKey",
-                      namePrefix + "Parameters"),
-      m_jacobiansKey(algorithm, propertyNamePrefix + "JacobiansKey",
-                     namePrefix + "Jacobians"),
-      m_measurementsKey(algorithm, propertyNamePrefix + "MeasurementsKey",
-                        namePrefix + "Measurements"),
-      m_surfacesKey(algorithm, propertyNamePrefix + "StateSurfacesKey",
-                    namePrefix + "StateSurfaces") {}
+  : m_prefixName(algorithm, propertyNamePrefix + "MTJBackEndPrefixName",
+		 namePrefix),
+    m_statesKey(algorithm, propertyNamePrefix + "StatesKey",
+		namePrefix + "States"),
+    m_parametersKey(algorithm, propertyNamePrefix + "ParametersKey",
+		    namePrefix + "Parameters"),
+    m_jacobiansKey(algorithm, propertyNamePrefix + "JacobiansKey",
+		   namePrefix + "Jacobians"),
+    m_measurementsKey(algorithm, propertyNamePrefix + "MeasurementsKey",
+		      namePrefix + "Measurements"),
+    m_surfacesKey(algorithm, propertyNamePrefix + "StateSurfacesKey",
+		  namePrefix + "StateSurfaces") {}
+  
+  template <class C>
+  StatusCode MutableMultiTrajectoryHandle<C>::initialize() {
+    // Here we overwrite the keys in case the user has modified the BackEndPrefixName
+    // in the JO. We only modify the value
+    m_statesKey = m_prefixName + "States";
+    m_parametersKey = m_prefixName + "Parameters";
+    m_jacobiansKey = m_prefixName + "Jacobians";
+    m_measurementsKey = m_prefixName + "Measurements";
+    m_surfacesKey = m_prefixName + "StateSurfaces";
 
-template <class C>
-StatusCode MutableMultiTrajectoryHandle<C>::initialize() {
-  ATH_CHECK(m_statesKey.initialize());
-  ATH_CHECK(m_parametersKey.initialize());
-  ATH_CHECK(m_jacobiansKey.initialize());
-  ATH_CHECK(m_measurementsKey.initialize());
-  ATH_CHECK(m_surfacesKey.initialize());
-
-  return StatusCode::SUCCESS;
+    // And now we initialize the keys
+    ATH_CHECK(m_statesKey.initialize());
+    ATH_CHECK(m_parametersKey.initialize());
+    ATH_CHECK(m_jacobiansKey.initialize());
+    ATH_CHECK(m_measurementsKey.initialize());
+    ATH_CHECK(m_surfacesKey.initialize());
+    
+    return StatusCode::SUCCESS;
 }
 
 template <class C>
@@ -212,7 +227,9 @@ template <class C>
 ConstMultiTrajectoryHandle<C>::ConstMultiTrajectoryHandle(
     C* algorithm, const std::string& propertyNamePrefix,
     const std::string& namePrefix)
-    : m_statesKey(algorithm, propertyNamePrefix + "TrackStatesKey",
+    : m_prefixName(algorithm, propertyNamePrefix + "MTJBackEndPrefixName",
+                 namePrefix),
+      m_statesKey(algorithm, propertyNamePrefix + "TrackStatesKey",
                   namePrefix + "TrackStates"),
       m_parametersKey(algorithm, propertyNamePrefix + "TrackParametersKey",
                       namePrefix + "TrackParameters"),
@@ -223,6 +240,14 @@ ConstMultiTrajectoryHandle<C>::ConstMultiTrajectoryHandle(
 
 template <class C>
 StatusCode ConstMultiTrajectoryHandle<C>::initialize() {
+  // Here we overwrite the keys in case the user has modified the BackEndPrefixName
+  // in the JO. We only modify the value
+  m_statesKey = m_prefixName + "States";
+  m_parametersKey = m_prefixName + "Parameters";
+  m_jacobiansKey = m_prefixName + "Jacobians";
+  m_measurementsKey = m_prefixName + "Measurements";
+  
+  // And not we initialize the keys
   ATH_CHECK(m_statesKey.initialize());
   ATH_CHECK(m_parametersKey.initialize());
   ATH_CHECK(m_jacobiansKey.initialize());
