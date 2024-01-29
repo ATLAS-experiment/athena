@@ -19,6 +19,21 @@ class sTgcReadoutElement : public MuonReadoutElement {
 
    public:
     
+     /** @brief ReadoutChannelType to distinguish the available readout channels
+      *  Pad - pad readout channel
+      *  Strip - eta strip readout channel
+      *   Wire - phi wire group readout channel
+      *   WireIngrp - a particular wire in a given group
+     */
+     enum ReadoutChannelType  {
+        Pad = sTgcIdHelper::sTgcChannelTypes::Pad,
+        Strip = sTgcIdHelper::sTgcChannelTypes::Strip,
+        Wire  = sTgcIdHelper::sTgcChannelTypes::Wire,
+        WireInGrp,
+
+    };
+
+
     /// Set of parameters to describe an sTGC chamber
     struct parameterBook {
         /// sTGC Chamber Details
@@ -138,7 +153,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
     IdentifierHash measurementHash(const Identifier& measId) const override final;
     /// Transforms the Identifier into a layer hash
     IdentifierHash layerHash(const Identifier& measId) const override final;
-    IdentifierHash layerHash(const IdentifierHash& measHash) const;
+    static IdentifierHash layerHash(const IdentifierHash& measHash);
     /// Converts the measurement hash back to the full Identifier
     Identifier measurementId(const IdentifierHash& measHash) const override final;
 
@@ -146,13 +161,23 @@ class sTgcReadoutElement : public MuonReadoutElement {
     const StripLayer& stripLayer(const IdentifierHash& measId) const;
 
     
+    /** @brief Create a measurement hash from the Identifier fields
+     *  @param: gasGap in which the measurment sits
+     *  @param: channelType (strip / pad/ wire / wireInGrp)
+     *  @param: channel - electronics channel connected with the readout element
+     *  @param: wireInGrp - number of a specific wire in the group  (digi only)
+    */
+    
+    static IdentifierHash createHash(const unsigned int gasGap, 
+                                     const unsigned int channelType, 
+                                     const unsigned int channel,
+                                     const unsigned int wireInGrp = 0);
 
 
    private:
-        IdentifierHash createHash(const int gasGap, const int channelType, const int channel) const;
-        unsigned int stripNumber(const IdentifierHash& measHash) const;
-        unsigned int chType(const IdentifierHash& measHash) const;
-        unsigned int gasGapNumber(const IdentifierHash& measHash) const;
+        static unsigned int stripNumber(const IdentifierHash& measHash);
+        static unsigned int chType(const IdentifierHash& measHash);
+        static unsigned int gasGapNumber(const IdentifierHash& measHash);
         Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
         Amg::Vector3D chamberStripPos(const IdentifierHash& measHash) const;
 
