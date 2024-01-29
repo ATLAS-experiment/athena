@@ -222,6 +222,9 @@ def createTriggerFlags(doTriggerRecoFlags):
                   prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1,
                   help='enable eFEX ByteStream conversion/simulation')
 
+    flags.addFlag('Trigger.L1.doeFexBDTTau', True,
+                  help='use BDT tau algorithm as the active one for eFEX')
+
     flags.addFlag('Trigger.L1.dojFex', lambda prevFlags:
                   prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1,
                   help='enable jFEX ByteStream conversion/simulation')
