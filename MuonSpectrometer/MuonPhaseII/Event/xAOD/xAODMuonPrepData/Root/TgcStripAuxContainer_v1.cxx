@@ -1,33 +1,32 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
-#include "xAODCore/AuxStoreAccessorMacros.h"
+#include "xAODMuonPrepData/versions/AccessorMacros.h"
 // Local include(s):
 #include "xAODMuonPrepData/versions/TgcStripAuxContainer_v1.h"
 
 namespace {
-   static const std::string preFixStr{"TGC_"};
+   static const std::string preFixStr{"Tgc_"};
 }
-#define PRD_AUXVARIABLE(VAR) \
-   do { \
-      static const std::string varName =preFixStr+#VAR; \
-      static const auxid_t auxid = getAuxID(varName, VAR); \
-      regAuxVar(auxid, varName, VAR); \
-    } while (false);
+
 namespace xAOD {
 TgcStripAuxContainer_v1::TgcStripAuxContainer_v1()
     : AuxContainerBase() {
     /// Identifier variable hopefully unique
-    AUX_VARIABLE(m_identifier);
-    AUX_VARIABLE(m_identifierHash);
+    AUX_VARIABLE(identifier);
+    AUX_VARIABLE(identifierHash);
   
-    AUX_MEASUREMENTVAR(m_localPosition, 1)
-    AUX_MEASUREMENTVAR(m_localCovariance, 1)
+    AUX_MEASUREMENTVAR(localPosition, 1)
+    AUX_MEASUREMENTVAR(localCovariance, 1)
     
     /// Names may be shared across different subdetectors
-    PRD_AUXVARIABLE(m_bcBitMap);
+    PRD_AUXVARIABLE(bcBitMap);
+
+    PRD_AUXVARIABLE(channelNumber);
+    PRD_AUXVARIABLE(gasGap);
+    PRD_AUXVARIABLE(measuresPhi);
 }
 }  // namespace xAOD
 #undef PRD_AUXVARIABLE

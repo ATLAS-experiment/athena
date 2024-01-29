@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_MMCluster_V1_H
 #define XAODMUONPREPDATA_VERSION_MMCluster_V1_H
@@ -8,9 +8,10 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
-
+#include "CxxUtils/CachedValue.h"
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
+#include "MuonPrepRawData/MMPrepData.h"
 namespace xAOD {
-/// https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecEvent/MuonPrepRawData/MuonPrepRawData/MdtPrepData.h
 
 class MMCluster_v1 : public UncalibratedMeasurement_v1 {
 
@@ -24,8 +25,17 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     xAOD::UncalibMeasType type() const override final {
         return xAOD::UncalibMeasType::MMClusterType;
     }
-    unsigned int numDimensions() const override final { return 2; }
+    unsigned int numDimensions() const override final { return 1; }
 
+    /** @brief  Returns the gas gap number to which the clsuter*/
+    uint8_t gasGap() const;
+
+    void setGasGap(uint8_t gap);
+    /** @brief returns the number of the central strip*/
+    uint16_t channelNumber() const;
+
+    void setChannelNumber(uint16_t strip);
+    
     /** @brief Returns the hash of the measurement channel*/
     IdentifierHash measurementHash() const;
 
@@ -57,20 +67,13 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Sets the microTPC chisq probability*/
     void setChiSqProb(float value);
 
-    enum class Author : unsigned int {
-      RDOTOPRDConverter,
-      SimpleClusterBuilder,
-      ProjectionClusterBuilder,
-      ClusterTimeProjectionClusterBuilder,
-      ConstraintuTPCClusterBuilder,
-      uTPCClusterBuilder,
-    };
-
+    using Author = Muon::MMPrepData::Author;
     Author author() const;
     void setAuthor(Author author);
-
-    uint16_t quality() const;
-    void setQuality(uint16_t quality);
+    
+    using Quality = Muon::MMPrepData::Quality;
+    Quality quality() const;
+    void setQuality(Quality quality);
 
     /** @brief returns the list of strip numbers */
     const std::vector<uint16_t>& stripNumbers() const;
@@ -89,8 +92,29 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     void setStripDriftDist(const std::vector<float>& stripDriftDist);
 
     /** @brief returns the list of drift distances */
-    const std::vector<Amg::MatrixX>& stripDriftErrors() const;
+    using DriftCov_t = PosAccessor<2>::element_type;
+    const std::vector<DriftCov_t>& stripDriftErrors() const;
+
+    void setStripDriftErrors(const std::vector<DriftCov_t>& stripDriftErrors);
     void setStripDriftErrors(const std::vector<Amg::MatrixX>& stripDriftErrors);
+
+    /** @brief set the pointer to the MmReadoutElement */
+    void setReadoutElement(const MuonGMR4::MmReadoutElement* readoutEle);
+    /** @brief Retrieve the associated MmReadoutElement. 
+        If the element has not been set before, it's tried to load it on the fly. 
+        Exceptions are thrown if that fails as well */
+    const MuonGMR4::MmReadoutElement* readoutElement() const;
+
+    private:
+#ifdef __CLING__
+    /// Down cast the memory of the readoutElement cache if the object is stored to disk 
+    ///  to arrive at the same memory layout between Athena & CLING
+    char m_readoutEle[sizeof(CxxUtils::CachedValue<const MuonGMR4::MmReadoutElement *>)]{};
+#else
+    CxxUtils::CachedValue<const MuonGMR4::MmReadoutElement *> m_readoutEle{};
+#endif
+
+
 };
 
 }  // namespace xAOD

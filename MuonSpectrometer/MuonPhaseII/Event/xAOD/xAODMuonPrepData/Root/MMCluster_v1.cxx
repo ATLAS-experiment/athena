@@ -1,61 +1,57 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
-#include "xAODCore/AuxStoreAccessorMacros.h"
+#include "xAODMuonPrepData/versions/AccessorMacros.h"
 // Local include(s):
-// #include "MuonReadoutGeometryR4/MMReadoutElement.h"
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "xAODMuonPrepData/versions/MMCluster_v1.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "StoreGate/StoreGateSvc.h"
 
 namespace {
-    static const std::string preFixStr{"MM_"};
+    static const std::string preFixStr{"Mm_"};
+    template <class T>
+    using VectorAccesor = SG::AuxElement::Accessor<std::vector<T>>;  
 }
-#define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
-      DTYPE MMCluster_v1::GETTER() const {                                  \
-         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
-         return acc(*this);                                                      \
-      }                                                                          \
-                                                                                 \
-      void MMCluster_v1::SETTER(DTYPE value) {                        \
-         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
-         acc(*this) = value;                                                     \
-      }
 
-#define IMPLEMENT_VECTOR_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
-      const std::vector<DTYPE>& MMCluster_v1::GETTER() const {                                  \
-         static const SG::AuxElement::Accessor<std::vector<DTYPE>> acc{preFixStr + #GETTER}; \
-         return acc(*this);                                                      \
-      }                                                                          \
-                                                                                 \
-      void MMCluster_v1::SETTER(const std::vector<DTYPE>& value) {                        \
-         static const SG::AuxElement::Accessor<std::vector<DTYPE>> acc{preFixStr + #GETTER}; \
-         acc(*this) = value;                                                     \
-      }
+
 
 namespace xAOD {
-
-IMPLEMENT_SETTER_GETTER(uint16_t, time, setTime)
-IMPLEMENT_SETTER_GETTER(uint32_t, charge, setCharge)
-IMPLEMENT_SETTER_GETTER(float, driftDist, setDriftDist)
-IMPLEMENT_SETTER_GETTER(float, angle, setAngle)
-IMPLEMENT_SETTER_GETTER(float, chiSqProb, setChiSqProb)
-IMPLEMENT_SETTER_GETTER(uint16_t, quality, setQuality)
-IMPLEMENT_VECTOR_SETTER_GETTER(uint16_t, stripNumbers, setStripNumbers)
-IMPLEMENT_VECTOR_SETTER_GETTER(int16_t, stripTimes, setStripTimes)
-IMPLEMENT_VECTOR_SETTER_GETTER(int, stripCharges, setStripCharges)
-IMPLEMENT_VECTOR_SETTER_GETTER(float, stripDriftDist, setStripDriftDist)
-IMPLEMENT_VECTOR_SETTER_GETTER(Amg::MatrixX, stripDriftErrors, setStripDriftErrors)
-AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( MMCluster_v1, unsigned int, MMCluster_v1::Author, author)
-AUXSTORE_PRIMITIVE_SETTER_WITH_CAST( MMCluster_v1, unsigned int, MMCluster_v1::Author, author, setAuthor)
-
 IdentifierHash MMCluster_v1::measurementHash() const {
-    // return MuonGMR4::MMReadoutElement::measurementHash(Identifier(static_cast<Identifier::value_type>(identifier()))); 
-    //FIXME! Not optimal, but in any case it doesn't work since we need to have a RRE instantiated to get the hash
-    return IdentifierHash();
+    return MuonGMR4::MmReadoutElement::createHash(channelNumber(), gasGap());
+}
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint16_t, time, setTime)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint32_t, charge, setCharge)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, float, driftDist, setDriftDist)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, float, angle, setAngle)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, float, chiSqProb, setChiSqProb)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint8_t, gasGap, setGasGap)
+IMPLEMENT_SETTER_GETTER(MMCluster_v1, uint16_t, channelNumber, setChannelNumber)
+IMPLEMENT_SETTER_GETTER_WITH_CAST(MMCluster_v1, short, MMCluster_v1::Author, author, setAuthor)
+IMPLEMENT_SETTER_GETTER_WITH_CAST(MMCluster_v1, uint8_t, MMCluster_v1::Quality, quality, setQuality)
+
+IMPLEMENT_VECTOR_SETTER_GETTER(MMCluster_v1, uint16_t, stripNumbers, setStripNumbers)
+IMPLEMENT_VECTOR_SETTER_GETTER(MMCluster_v1, int16_t, stripTimes, setStripTimes)
+IMPLEMENT_VECTOR_SETTER_GETTER(MMCluster_v1, int, stripCharges, setStripCharges)
+IMPLEMENT_VECTOR_SETTER_GETTER(MMCluster_v1, float, stripDriftDist, setStripDriftDist)
+IMPLEMENT_VECTOR_SETTER_GETTER(MMCluster_v1, MMCluster_v1::DriftCov_t, stripDriftErrors, setStripDriftErrors)
+
+IMPLEMENT_READOUTELEMENT(MMCluster_v1, m_readoutEle, MmReadoutElement)
+
+void MMCluster_v1::setStripDriftErrors(const std::vector<Amg::MatrixX>& stripDriftErrors) {
+    std::vector<DriftCov_t> covariance{};
+    std::transform(stripDriftErrors.begin(), stripDriftErrors.end(), 
+                   std::back_inserter(covariance), 
+                   [](const Amg::MatrixX & cov) {
+            DriftCov_t toRet{};
+            toRet [0] = cov(0,0);
+            toRet [1] = cov(1,1);
+            return toRet;
+    });
+    setStripDriftErrors(covariance);
 }
 
 }  // namespace xAOD
-#undef IMPLEMENT_SETTER_GETTER
-#undef IMPLEMENT_VECTOR_SETTER_GETTER

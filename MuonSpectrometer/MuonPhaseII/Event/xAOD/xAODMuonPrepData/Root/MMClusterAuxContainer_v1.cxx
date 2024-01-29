@@ -1,44 +1,39 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
-#include "xAODCore/AuxStoreAccessorMacros.h"
+#include "xAODMuonPrepData/versions/AccessorMacros.h"
 // Local include(s):
 #include "xAODMuonPrepData/versions/MMClusterAuxContainer_v1.h"
 
 namespace {
-   static const std::string preFixStr{"MM_"};
+   static const std::string preFixStr{"Mm_"};
 }
-#define PRD_AUXVARIABLE(VAR) \
-   do { \
-      static const std::string varName =preFixStr+#VAR; \
-      static const auxid_t auxid = getAuxID(varName, VAR); \
-      regAuxVar(auxid, varName, VAR); \
-    } while (false);
 namespace xAOD {
 MMClusterAuxContainer_v1::MMClusterAuxContainer_v1()
    : AuxContainerBase() {
    /// Identifier variable hopefully unique
-   AUX_VARIABLE(m_identifier);
-   AUX_VARIABLE(m_identifierHash);
+   AUX_VARIABLE(identifier);
+   AUX_VARIABLE(identifierHash);
+   AUX_MEASUREMENTVAR(localPosition, 1);
+   AUX_MEASUREMENTVAR(localCovariance, 1 );
 
-   AUX_MEASUREMENTVAR(m_localPosition, 1)
-   AUX_MEASUREMENTVAR(m_localCovariance, 1)
-
+   PRD_AUXVARIABLE(gasGap);
+   PRD_AUXVARIABLE(channelNumber);
    /// Names may be shared across different subdetectors
-   PRD_AUXVARIABLE(m_time);
-   PRD_AUXVARIABLE(m_charge);
-   PRD_AUXVARIABLE(m_driftDist);
-   PRD_AUXVARIABLE(m_angle);
-   PRD_AUXVARIABLE(m_chiSqProb);
-   PRD_AUXVARIABLE(m_author);
-   PRD_AUXVARIABLE(m_quality);
-   PRD_AUXVARIABLE(m_stripNumbers);
-   PRD_AUXVARIABLE(m_stripTimes);
-   PRD_AUXVARIABLE(m_stripCharges);
-   PRD_AUXVARIABLE(m_stripDriftDist);
-   PRD_AUXVARIABLE(m_stripDriftErrors);
+   PRD_AUXVARIABLE(time);
+   PRD_AUXVARIABLE(charge);
+   PRD_AUXVARIABLE(driftDist);
+   PRD_AUXVARIABLE(angle);
+   PRD_AUXVARIABLE(chiSqProb);
+   PRD_AUXVARIABLE(author);
+   PRD_AUXVARIABLE(quality);
+   PRD_AUXVARIABLE(stripNumbers);
+   PRD_AUXVARIABLE(stripTimes);
+   PRD_AUXVARIABLE(stripCharges);
+   PRD_AUXVARIABLE(stripDriftDist);
+   PRD_AUXVARIABLE(stripDriftErrors);
 }
 }  // namespace xAOD
 #undef PRD_AUXVARIABLE

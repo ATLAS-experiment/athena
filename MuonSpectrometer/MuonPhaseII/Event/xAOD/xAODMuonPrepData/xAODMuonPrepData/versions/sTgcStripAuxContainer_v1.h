@@ -21,14 +21,14 @@ class sTgcStripAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining Mdt Drift Circle parameters
     /// @{
-    std::vector<Identifier::value_type> m_identifier;
-    std::vector<IdentifierHash::value_type> m_identifierHash;
-    std::vector<PosAccessor<1>::element_type> m_localPosition;
-    std::vector<CovAccessor<1>::element_type> m_localCovariance;
+    std::vector<DetectorIdentType> identifier{};
+    std::vector<DetectorIDHashType> identifierHash{};
+    std::vector<PosAccessor<1>::element_type> localPosition{};
+    std::vector<CovAccessor<1>::element_type> localCovariance{};
 
-    std::vector<uint16_t> m_bcBitMap{};
-    std::vector<uint16_t> m_time{};
-    std::vector<uint32_t> m_charge{}; 
+    std::vector<uint16_t> bcBitMap{};
+    std::vector<uint16_t> time{};
+    std::vector<uint32_t> charge{}; 
  
     /// @}
 };

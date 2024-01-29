@@ -1,21 +1,16 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
-#include "xAODCore/AuxStoreAccessorMacros.h"
+#include "xAODMuonPrepData/versions/AccessorMacros.h"
 // Local include(s):
 #include "xAODMuonPrepData/versions/MdtDriftCircleAuxContainer_v1.h"
 
 namespace {
    static const std::string preFixStr{"Mdt_"};
 }
-#define PRD_AUXVARIABLE(VAR) \
-   do { \
-      static const std::string varName =preFixStr+#VAR; \
-      static const auxid_t auxid = getAuxID(varName, VAR); \
-      regAuxVar(auxid, varName, VAR); \
-    } while (false);
+
 namespace xAOD {
 MdtDriftCircleAuxContainer_v1::MdtDriftCircleAuxContainer_v1()
     : AuxContainerBase() {

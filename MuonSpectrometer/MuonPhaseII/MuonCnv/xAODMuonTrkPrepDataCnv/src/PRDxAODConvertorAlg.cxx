@@ -85,13 +85,13 @@ template<> void Muon::PRDxAODConvertorAlg::fillxPRD(
     const Muon::MdtPrepData& prd, xAOD::MdtDriftCircle& xprd) const {
   const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
 
+  const Identifier prdId{prd.identify()};
   xprd.setIdentifier(prd.identify().get_identifier32().get_compact());
   
-  Eigen::Matrix<float,1,1> localPosition(prd.localPosition().x());
-  Eigen::Matrix<float,1,1> localCovariance;
-  localCovariance.setZero();
+  xAOD::MeasVector<1> localPosition(prd.localPosition().x());
+  xAOD::MeasMatrix<1> localCovariance{};
   localCovariance(0, 0) = prd.localCovariance()(0, 0);
-  xprd.setMeasurement((prd.detectorElement()? prd.detectorElement()->detectorElementHash():IdentifierHash()), localPosition, localCovariance);
+  xprd.setMeasurement(m_idHelperSvc->detElementHash(prdId), localPosition, localCovariance);
   
   xprd.setTdc(prd.tdc());
   xprd.setAdc(prd.adc());
@@ -103,29 +103,41 @@ template<> void Muon::PRDxAODConvertorAlg::fillxPRD(
 
 template<> void Muon::PRDxAODConvertorAlg::fillxPRD(
     const Muon::RpcPrepData& prd, xAOD::RpcStrip& xprd) const {
-  xprd.setIdentifier(prd.identify().get_identifier32().get_compact());
   
-  Eigen::Matrix<float,1,1> localPosition(prd.localPosition().x());
-  Eigen::Matrix<float,1,1> localCovariance;
-  localCovariance.setZero();
+  const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
+  const Identifier prdId{prd.identify()};
+  xprd.setIdentifier(prdId.get_identifier32().get_compact());
+  
+  xprd.setStripNumber(idHelper.strip(prdId));
+  xprd.setGasGap(idHelper.gasGap(prdId));
+  xprd.setMeasuresPhi(idHelper.measuresPhi(prdId));
+  xprd.setDoubletPhi(idHelper.doubletPhi(prdId));
+
+  xAOD::MeasVector<1> localPosition(prd.localPosition().x());
+  xAOD::MeasMatrix<1> localCovariance{};
   localCovariance(0, 0) = prd.localCovariance()(0, 0);
-  xprd.setMeasurement(prd.collectionHash(), localPosition, localCovariance);
+  xprd.setMeasurement(m_idHelperSvc->detElementHash(prdId), localPosition, localCovariance);
   
   xprd.setTime(prd.time());
   xprd.setTriggerInfo(prd.triggerInfo());
   xprd.setAmbiguityFlag(prd.ambiguityFlag());
   xprd.setTimeOverThreshold(prd.timeOverThreshold());
+
 }
 
 template<> void Muon::PRDxAODConvertorAlg::fillxPRD(
     const Muon::TgcPrepData& prd, xAOD::TgcStrip& xprd) const {
-  xprd.setIdentifier(prd.identify().get_identifier32().get_compact());
   
-  Eigen::Matrix<float,1,1> localPosition(prd.localPosition().x());
-  Eigen::Matrix<float,1,1> localCovariance;
-  localCovariance.setZero();
+  const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+  const Identifier prdId{prd.identify()};
+  xprd.setIdentifier(prdId.get_identifier32().get_compact());
+  xprd.setMeasuresPhi(idHelper.measuresPhi(prdId));
+  xprd.setGasGap(idHelper.gasGap(prdId));
+  xprd.setChannelNumber(idHelper.channel(prdId));
+  xAOD::MeasVector<1> localPosition(prd.localPosition().x());
+  xAOD::MeasMatrix<1> localCovariance{};
   localCovariance(0, 0) = prd.localCovariance()(0, 0);
-  xprd.setMeasurement(prd.collectionHash(), localPosition, localCovariance);
+  xprd.setMeasurement(m_idHelperSvc->detElementHash(prdId), localPosition, localCovariance);
   
   xprd.setBcBitMap(prd.getBcBitMap());
 
@@ -133,13 +145,16 @@ template<> void Muon::PRDxAODConvertorAlg::fillxPRD(
 
 template<> void Muon::PRDxAODConvertorAlg::fillxPRD(
     const Muon::MMPrepData& prd, xAOD::MMCluster& xprd) const {
-  xprd.setIdentifier(prd.identify().get_identifier32().get_compact());
   
-  Eigen::Matrix<float,1,1> localPosition(prd.localPosition().x());
-  Eigen::Matrix<float,1,1> localCovariance;
-  localCovariance.setZero();
+  const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+  const Identifier prdId{prd.identify()};
+  xprd.setIdentifier(prdId.get_identifier32().get_compact());
+  xprd.setGasGap(idHelper.gasGap(prdId));
+  xprd.setChannelNumber(idHelper.channel(prdId));
+  xAOD::MeasVector<1> localPosition(prd.localPosition().x());
+  xAOD::MeasMatrix<1> localCovariance{};
   localCovariance(0, 0) = prd.localCovariance()(0, 0);
-  xprd.setMeasurement(prd.collectionHash(), localPosition, localCovariance);
+  xprd.setMeasurement(m_idHelperSvc->detElementHash(prdId), localPosition, localCovariance);
   
   xprd.setTime(prd.time());
   xprd.setCharge(prd.charge());

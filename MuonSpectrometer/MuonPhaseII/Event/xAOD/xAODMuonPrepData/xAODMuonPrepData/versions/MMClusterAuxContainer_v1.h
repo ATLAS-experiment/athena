@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_VERSIONS_MMCLUSTERAUXCONTAINER_V1_H
@@ -21,24 +21,27 @@ class MMClusterAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining Mdt Drift Circle parameters
     /// @{
-    std::vector<Identifier::value_type> m_identifier;
-    std::vector<IdentifierHash::value_type> m_identifierHash;
-    std::vector<PosAccessor<1>::element_type> m_localPosition;
-    std::vector<CovAccessor<1>::element_type> m_localCovariance;
+    std::vector<DetectorIdentType> identifier{};
+    std::vector<DetectorIDHashType> identifierHash{};
+    std::vector<PosAccessor<1>::element_type> localPosition{};
+    std::vector<CovAccessor<1>::element_type> localCovariance{};
+    
+    std::vector<uint8_t>  gasGap{};
+    std::vector<uint16_t> channelNumber{};
+  
+    std::vector<uint16_t> time{};
+    std::vector<uint32_t> charge{}; 
+    std::vector<float>    driftDist{};
+    std::vector<float>    angle{};
+    std::vector<float>    chiSqProb{};
+    std::vector<short>    author{};
+    std::vector<uint8_t>  quality{};
 
-    std::vector<uint16_t> m_time{};
-    std::vector<uint32_t> m_charge{}; 
-    std::vector<float>    m_driftDist{};
-    std::vector<float>    m_angle{};
-    std::vector<float>    m_chiSqProb{};
-    std::vector<uint16_t> m_author{};
-    std::vector<uint16_t> m_quality{};
-
-    std::vector<std::vector<uint16_t>>      m_stripNumbers{{}};
-    std::vector<std::vector<int16_t>>       m_stripTimes{{}};
-    std::vector<std::vector<int>>           m_stripCharges{{}};
-    std::vector<std::vector<float>>         m_stripDriftDist{{}};
-    std::vector<std::vector<Amg::MatrixX>>  m_stripDriftErrors{{}};
+    std::vector<std::vector<uint16_t>>  stripNumbers{};
+    std::vector<std::vector<int16_t>>   stripTimes{};
+    std::vector<std::vector<int>>       stripCharges{};
+    std::vector<std::vector<float>>     stripDriftDist{};
+    std::vector<std::vector<PosAccessor<2>::element_type>> stripDriftErrors{};
     /// @}
 };
 }  // namespace xAOD
