@@ -743,9 +743,11 @@ def jetMonitoringConfig(inputFlags,jetcoll,jetCollDict,monMode):
            if "subresjesgscIS" in jetcoll:
                addFlavourTagVariables(conf,"fastDIPS20211215")
                addFlavourTagVariables(conf,"GN120230331")
+               addFlavourTagVariables(conf,"tlaGN220240122")
        if 'fastftag' in jetcoll:
            addFlavourTagVariables(conf,"fastDips")
            addFlavourTagVariables(conf, "fastGN120230327")
+           addFlavourTagVariables(conf,"fastGN220240122")
        if 'EMTopo' in jetcoll: #dedicated histograms for online EMTopo jets
            conf.appendHistos("Timing")
      else:
