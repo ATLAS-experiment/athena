@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_STGCREADOUTELEMENT_H
 #define MUONREADOUTGEOMETRYR4_STGCREADOUTELEMENT_H
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/StripDesign.h>
-//#include <MuonReadoutGeometryR4/DiamondStripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
 #ifndef SIMULATIONBASE
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
@@ -188,7 +187,6 @@ class sTgcReadoutElement : public MuonReadoutElement {
 
         /// Auxillary variables to translate the Identifier to a measurement hash and back
         const unsigned int m_hashShiftChType{2*CxxUtils::count_ones(static_cast<unsigned int>(numLayers()))};
-        const unsigned int m_hashShiftChannel{2*m_hashShiftChType};
 };
 
 std::ostream& operator<<(
