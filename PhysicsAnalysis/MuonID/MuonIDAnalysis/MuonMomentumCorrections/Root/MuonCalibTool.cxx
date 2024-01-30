@@ -75,6 +75,7 @@ namespace CP
             ATH_CHECK(m_MuonSelectionTool.setProperty("TurnOffMomCorr", true));
             ATH_CHECK(m_MuonSelectionTool.setProperty("IsRun3Geo", m_isRun3.value()));
             ATH_CHECK(m_MuonSelectionTool.setProperty("OutputLevel", msg().level()));
+	    ATH_CHECK(m_MuonSelectionTool.setProperty("ExcludeNSWFromPrecisionLayers", m_excludeNSWFromPrecisionLayers.value()));
         }
         ATH_CHECK(m_MuonSelectionTool.retrieve());
 
