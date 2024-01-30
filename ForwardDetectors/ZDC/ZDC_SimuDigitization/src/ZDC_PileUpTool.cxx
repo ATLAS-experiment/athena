@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -206,7 +206,7 @@ StatusCode ZDC_PileUpTool::processBunchXing(int bunchXing,
                                             SubEventIterator eSubEvents){
   ATH_MSG_DEBUG ( "ZDC_PileUpTool::processBunchXing() " << bunchXing );
   SubEventIterator iEvt = bSubEvents;
-  for (; iEvt!=eSubEvents; iEvt++) {
+  for (; iEvt!=eSubEvents; ++iEvt) {
     StoreGateSvc& seStore = *iEvt->ptr()->evtStore();
     ATH_MSG_VERBOSE("SubEvt StoreGate " << seStore.name() << " :"
                     << " bunch crossing : " << bunchXing
@@ -248,7 +248,7 @@ StatusCode ZDC_PileUpTool::mergeEvent(const EventContext& ctx){
 void ZDC_PileUpTool::fillContainer(TimedHitCollection<ZDC_SimFiberHit>& thpczdc, CLHEP::HepRandomEngine* rndEngine, xAOD::ZdcModuleContainer *zdcModuleContainer){
   TimedHitCollection<ZDC_SimFiberHit> thpc = thpczdc;
   TimedHitCollection<ZDC_SimFiberHit>::const_iterator i, e, it;
-  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; it++) {
+  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; ++it) {
     createAndStoreWaveform(*(*it), rndEngine, zdcModuleContainer);
   }
   addEmptyWaveforms(zdcModuleContainer, rndEngine);
@@ -259,7 +259,7 @@ void ZDC_PileUpTool::fillContainer(const ZDC_SimFiberHit_Collection* ZDC_SimFibe
   ZDC_SimFiberHit_ConstIterator it    = ZDC_SimFiberHit_Collection->begin();
   ZDC_SimFiberHit_ConstIterator itend = ZDC_SimFiberHit_Collection->end();
 
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
     createAndStoreWaveform(*it, rndEngine, zdcModuleContainer);
   }
   addEmptyWaveforms(zdcModuleContainer, rndEngine);
