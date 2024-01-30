@@ -11,7 +11,7 @@ atlas_add_component( MuonGeoModelTestR4
                      src/components/*.cxx src/*.cxx
                      LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
                                     GaudiKernel MuonReadoutGeometryR4 MuonGeoModelR4Lib AthenaPoolUtilities
-                                    xAODTruth xAODMuonSimHit MuonStationGeoHelpersLib)
+                                    xAODTruth xAODMuonSimHit MuonStationGeoHelpersLib CxxUtils)
 
 
 atlas_add_test( testR4Geometry

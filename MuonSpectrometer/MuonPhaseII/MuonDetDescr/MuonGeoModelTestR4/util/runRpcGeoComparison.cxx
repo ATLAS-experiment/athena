@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @brief Helper macro to compare the output from the readout geometry dumps:
@@ -14,6 +14,7 @@
 #include <MuonCablingData/NrpcCablingData.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GaudiKernel/SystemOfUnits.h>
+#include "CxxUtils/starts_with.h"
 
 using namespace MuonGMR4;
 using namespace ActsTrk;
@@ -291,8 +292,8 @@ int main( int argc, char** argv ) {
         return EXIT_FAILURE;
     }
     /// check whether the files are xroot d -> otherwise call path resovler
-    if (refFile.find("root://") != 0) refFile = PathResolver::FindCalibFile(refFile);
-    if (testFile.find("root://") != 0) testFile = PathResolver::FindCalibFile(testFile);
+    if (!CxxUtils::starts_with (refFile, "root://")) refFile = PathResolver::FindCalibFile(refFile);
+    if (!CxxUtils::starts_with (testFile, "root://")) testFile = PathResolver::FindCalibFile(testFile);
     /// Parse the tree dump
     std::set<RpcChamber> refChambers = readTreeDump(refFile);
     if (refChambers.empty()) {
