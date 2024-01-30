@@ -92,7 +92,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
 
         pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
         pattern_to_test += r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
-        pattern_to_test += r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
+        pattern_to_test += r'b(?P<btagger>\D*)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
         if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+)?)'
         matched = re.match(pattern_to_test, p)
@@ -131,6 +131,8 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         
         if btagger == 'g':
             btagger = 'gnone'
+        elif btagger =='gtwo':
+            btagger == 'gntwo'
         elif btagger == '':
             btagger = 'dips'
 
