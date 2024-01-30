@@ -484,9 +484,10 @@ class trigRecoExecutor(athenaExecutor):
         msg.info('Now run athenaExecutor:postExecute')
         super(trigRecoExecutor, self).postExecute()
 
-        # Do debug stream postRun step for BS file that contains events after the streamSelection
-        fileNameDbg = self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value
-        dbgStream.dbgPostRun(argInDict.value[0], fileNameDbg[0], self.conf.argdict, isSplitStream=True)
+        if "HIST_DEBUGSTREAMMON" in self.conf.dataDictionary:
+            # Do debug stream postRun step for BS file that contains events after the streamSelection
+            fileNameDbg = self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value
+            dbgStream.dbgPostRun(argInDict.value[0], fileNameDbg[0], self.conf.argdict, isSplitStream=True)
 
 
     def _postExecuteDebug(self, outputBSFile):
