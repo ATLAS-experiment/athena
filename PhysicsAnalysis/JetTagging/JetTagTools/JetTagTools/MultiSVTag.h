@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -13,9 +13,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "JetTagTools/ITagTool.h"
 #include "JetTagCalibration/JetTagCalibCondData.h"
-#include "GeoPrimitives/GeoPrimitives.h"
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/TrackParticleContainer.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -29,9 +26,8 @@ namespace Analysis
     {
     public:
       MultiSVTag(const std::string&,const std::string&,const IInterface*);
-      virtual ~MultiSVTag();
+      virtual ~MultiSVTag() = default;
       virtual StatusCode initialize() override;
-      virtual StatusCode finalize() override;
 
       virtual StatusCode tagJet(const xAOD::Vertex& priVtx,
                                 const xAOD::Jet& jetToTag,
@@ -41,30 +37,19 @@ namespace Analysis
       virtual void finalizeHistos() override;
       
     private:      
-      std::string m_taggerName; 
       std::string m_taggerNameBase;      
       //
-      std::string m_treeName;
       std::string m_varStrName;
 
       /** Key of calibration data: */
       SG::ReadCondHandleKey<JetTagCalibCondData> m_readKey{this, "HistosKey", "JetTagCalibHistosKey", "Key of input (derived) JetTag calibration data"};
-      std::string m_MultiSV;
       //
       std::string m_runModus; 
-      std::string m_refType;
-   
-      int  m_warnCounter;
     
-      std::vector<std::string> m_jetCollectionList;
-      std::vector<std::string> m_hypotheses;
       bool m_doForcedCalib;
       std::string m_ForcedCalibName;
       std::string m_secVxFinderName;
-      std::string m_xAODBaseName;
-      //...
-      //...
-      std::string m_sv0_infosource;
+
       std::string m_sv1_infosource;
 
       struct Vars

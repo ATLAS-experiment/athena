@@ -25,7 +25,8 @@ StripStereoAnnulusDesign::StripStereoAnnulusDesign(const SiDetectorDesign::Axis 
                                const double &stereoAngle,
                                const double &centreR,
                                const double &waferCentreR,
-                               const bool &usePC) :
+                               const bool &usePC,
+                               InDetDD::DetectorType detectorType) :
     SCT_ModuleSideDesign(thickness, false, false, true, 1, 0, 0, 0, false, carrier,
                          readoutSide, stripDirection, thicknessDirection),
   m_nRows(nRows),
@@ -43,6 +44,9 @@ StripStereoAnnulusDesign::StripStereoAnnulusDesign(const SiDetectorDesign::Axis 
   m_cosNegStereo(m_cosStereo),
   m_usePC(usePC)
 {
+    
+    m_detectorType = detectorType;
+
     if (nRows < 0) {
         throw std::runtime_error(
                   "ERROR: StripStereoAnnulusDesign called with negative number of rows");
@@ -114,9 +118,10 @@ StripStereoAnnulusDesign::StripStereoAnnulusDesign(const SiDetectorDesign::Axis 
                                const std::vector<double> &stripEndRadius,
                                const double &stereoAngle,
                                const double &centreR,
-                               const bool &usePC):
+                               const bool &usePC,
+                               InDetDD::DetectorType detectorType):
     StripStereoAnnulusDesign(stripDirection,thicknessDirection,thickness,readoutSide,carrier,nRows,nStrips,
-                             pitch,stripStartRadius,stripEndRadius,stereoAngle,centreR,centreR,usePC){
+                             pitch,stripStartRadius,stripEndRadius,stereoAngle,centreR,centreR,usePC,detectorType){
 //assuming here that centreR==waferCentreR
 }
 

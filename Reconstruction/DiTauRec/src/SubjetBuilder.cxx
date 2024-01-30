@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/SubjetBuilder.h"
@@ -25,12 +25,10 @@ SubjetBuilder::SubjetBuilder(const std::string& type,
 			     const IInterface * parent) :
   DiTauToolBase(type, name, parent),
   m_Rsubjet(0.2),
-  m_Nsubjet(4),
   m_ptmin(10000)
 {
   declareInterface<DiTauToolBase > (this);
   declareProperty("Rsubjet", m_Rsubjet);
-  declareProperty("Nsubjet", m_Nsubjet);
   declareProperty("ptminsubjet", m_ptmin);
 }
 
@@ -39,8 +37,6 @@ SubjetBuilder::~SubjetBuilder() = default;
 
 
 StatusCode SubjetBuilder::initialize() {
-
-  // m_SubjetFilter = fastjet::Filter(m_Rsubjet, fastjet::SelectorNHardest(m_Nsubjet));
 
   return StatusCode::SUCCESS;
 }
@@ -78,12 +74,10 @@ StatusCode SubjetBuilder::execute(DiTauCandidateData * data,
   std::vector<PseudoJet> vpjClusters;
 
   for (const auto *cl: vConst) {
-    double pt = cl->pt();
-    double px = pt*std::cos(cl->phi());  
-    double py = pt*std::sin(cl->phi());  
-    double pz = pt*std::sinh(cl->eta()); 
-    double e  = std::sqrt(px*px + py*py + pz*pz);
-    PseudoJet c( px, py, pz, e);
+
+    TLorentzVector temp_p4;
+    temp_p4.SetPtEtaPhiM(cl->pt(), cl->eta(), cl->phi(), cl->m());
+    PseudoJet c( temp_p4.Px(), temp_p4.Py(), temp_p4.Pz(), temp_p4.E());
 
     vpjClusters.push_back(c);
   }

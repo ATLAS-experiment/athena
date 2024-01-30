@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,16 +7,12 @@
 ***************************************************************************/
 #include "JetTagTools/SVTag.h"
 
-#include "GaudiKernel/IToolSvc.h"
-#include "Navigation/NavigationToken.h"
 #include "JetTagTools/NewLikelihoodTool.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "JetTagTools/HistoHelperRoot.h"
 #include "JetTagTools/LikelihoodComponents.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
 
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 
 #include <string>
@@ -39,9 +35,7 @@ namespace Analysis
     declareProperty("LikelihoodTool", m_likelihoodTool);
     declareProperty("checkOverflows", m_checkOverflows = false);
     declareProperty("purificationDeltaR", m_purificationDeltaR = 0.8);
-    declareProperty("UseBinInterpol", m_UseBinInterpol = false);
 
-    // declareProperty("originalTPCollectionName", m_originalTPCollectionName = "InDetTrackParticles");
     declareProperty("jetCollectionList", m_jetCollectionList);
     declareProperty("useForcedCalibration",  m_doForcedCalib   = false);
     declareProperty("ForcedCalibrationName", m_ForcedCalibName = "Cone4H1Tower");
@@ -102,19 +96,18 @@ namespace Analysis
       ATH_MSG_VERBOSE("#BTAG# Booking histos...");
       std::vector<double> xb;
       double xbi[10] = {1., 2., 3., 4., 5., 6., 8., 10., 20., 50.};
-      for(uint ijc=0;ijc<m_jetCollectionList.size();ijc++) {
-
+      for(const auto& jetColl : m_jetCollectionList) {
         for(uint ih=0;ih<m_hypotheses.size();ih++) {
           // SV1
           if (m_SVmode == "SV1") {
-            std::string hDir = "/RefFile/SV1/"+m_jetCollectionList[ijc]+"/"+m_hypotheses[ih]+"/";
+            std::string hDir = "/RefFile/SV1/"+jetColl+"/"+m_hypotheses[ih]+"/";
             m_histoHelper->bookHisto(hDir+"N2T", "Number of Good Two Track Vertices",9,xbi);
             m_histoHelper->bookHisto(hDir+"N2TEffSV1", "Number of Good Two Track Vertices",9,xbi);
             m_histoHelper->bookHisto(hDir+"N2TNormSV1", "Number of Good Two Track Vertices",30,0.,30.);
             m_histoHelper->bookHisto(hDir+"BidimME", "(E fraction)**0.7 vs Mass/(Mass+1)" ,50,0.218261406,1.,50,0.,1.);
             m_histoHelper->bookHisto(hDir+"DRJPVSV", "DeltaR between jet axis and (PV,SV) axis",100,0.,0.5);
           } else if (m_SVmode == "SV2") {
-            std::string hDir = "/RefFile/SV2/"+m_jetCollectionList[ijc]+"/"+m_hypotheses[ih]+"/";
+            std::string hDir = "/RefFile/SV2/"+jetColl+"/"+m_hypotheses[ih]+"/";
             // SV2
             m_histoHelper->bookHisto(hDir+"N2TEffSV2", "Number of Good Two Track Vertices",9,xbi);
             m_histoHelper->bookHisto(hDir+"N2TNormSV2", "Number of Good Two Track Vertices",30,0.,30.);
@@ -122,7 +115,7 @@ namespace Analysis
             else          m_histoHelper->bookHisto(hDir+"TridimMEN2T"," ln(N) vs (E fraction)**0.7 vs Mass/(Mass+1)",20,0.,1.,20,0.,1.,7,0.,3.8);
             if(ih==0) {
               // Control with SV2
-              hDir = "/RefFile/SV2/"+m_jetCollectionList[ijc]+"/controlSV/";
+              hDir = "/RefFile/SV2/"+jetColl+"/controlSV/";
               m_histoHelper->bookHisto(hDir+"eta","eta",60,-3.,3.);
               m_histoHelper->bookHisto(hDir+"phi","phi",64,-3.2,3.2);
               m_histoHelper->bookHisto(hDir+"pt","pt",50,0.,300.);
@@ -175,13 +168,14 @@ namespace Analysis
     ATH_MSG_VERBOSE("#BTAG# Using jet type " << author << " for calibrations.");
 
     /* The jet */
+    Amg::Vector3D jetDir(jetToTag.p4().Px(),jetToTag.p4().Py(),jetToTag.p4().Pz());
     double jeteta = jetToTag.eta(), jetphi = jetToTag.phi(), jetpt = jetToTag.pt();
     ATH_MSG_VERBOSE("#BTAG# Jet properties : eta = " << jeteta
                     << " phi = " << jetphi << " pT  = " <<jetpt/m_c_mom);
 
     // Fill control histograms
     if (m_runModus=="reference" && m_SVmode == "SV2") {
-      if (fabs(jeteta) <= 2.5) {
+      if (std::abs(jeteta) <= 2.5) {
         m_histoHelper->fillHisto("/RefFile/SV2/"+author+"/controlSV/eta",(double)jeteta);
         m_histoHelper->fillHisto("/RefFile/SV2/"+author+"/controlSV/phi",(double)jetphi);
         m_histoHelper->fillHisto("/RefFile/SV2/"+author+"/controlSV/pt",(double)jetpt/m_c_mom);
@@ -190,7 +184,7 @@ namespace Analysis
     //
     // Get the SV info
     //
-    float    ambtot = -1., xratio = -1., distnrm = 0., drJPVSV = 0., Lxy = -100., L3d = -100.;
+    float ambtot = -1., xratio = -1., distnrm = 0., drJPVSV = 0., Lxy = -100., L3d = -100.;
     int NSVPair = -1;
     float distnrmCorr=0.;
 
@@ -199,9 +193,8 @@ namespace Analysis
     std::vector< ElementLink< xAOD::VertexContainer > > myVertices;
     // don't check the following status
     BTag.variable<std::vector<ElementLink<xAOD::VertexContainer> > >(m_secVxFinderName, "vertices", myVertices);
-    // BTag.auxdata<std::vector<ElementLink<xAOD::VertexContainer> > >(m_secVxFinderName+"_vertices");
 
-    if (myVertices.size()>0) {
+    if (!myVertices.empty()) {
 
       status &= BTag.variable<float>(m_secVxFinderName, "masssvx", ambtot);// mass in MeV
       ambtot/=m_c_mom;
@@ -215,11 +208,9 @@ namespace Analysis
       // DR between Jet axis and PV-SV axis
       // For the time being computed only for Single Vertex...
       if (myVertices[0].isValid()) {
-        // if (myVertices[0]!=0) {
         const xAOD::Vertex* firstVertex = *(myVertices[0]);
 
         //FIXME ugly hack to get a Amg::Vector3D out of a CLHEP::HepLorentzVector
-        Amg::Vector3D jetDir(jetToTag.p4().Px(),jetToTag.p4().Py(),jetToTag.p4().Pz());
         const Amg::Vector3D PVposition = priVtx.position();
         const Amg::Vector3D position = firstVertex->position();
         Amg::Vector3D PvSvDir( position.x() - PVposition.x(),
@@ -232,30 +223,26 @@ namespace Analysis
         if ( m_isFlipped ) drJPVSV = drJPVSV_2; // for negative tags
         ATH_MSG_VERBOSE("#BTAG# DRJPVSV regular="<<drJPVSV_1<<" flipped="<<drJPVSV_2<<" chosen="<<drJPVSV);
 
-        Lxy=sqrt(pow(PvSvDir(0,0),2)+pow(PvSvDir(1,0),2));
-        L3d=sqrt(pow(PvSvDir(0,0),2)+pow(PvSvDir(1,0),2)+pow(PvSvDir(2,0),2));
+        Lxy = std::hypot(PvSvDir(0,0), PvSvDir(1,0));
+        L3d = std::hypot(PvSvDir(0,0), PvSvDir(1,0), PvSvDir(2,0));
       }else{
         ATH_MSG_VERBOSE("#BTAG# No secondary vertex.");
       }
 
       std::vector<const xAOD::Vertex*> vecVertices;
-      const std::vector<ElementLink<xAOD::VertexContainer> >::const_iterator verticesEnd = myVertices.end();
-      for (std::vector<ElementLink<xAOD::VertexContainer> >::const_iterator verticesIter = myVertices.begin();
-           verticesIter != verticesEnd; ++verticesIter) {
-        if (!verticesIter->isValid()) {
-          ATH_MSG_WARNING("#BTAG# Secondary vertex from InDetVKalVxInJetFinder has zero pointer. Skipping... ");
+      for (const auto& link : myVertices) {
+	if (!link.isValid()) {
+	  ATH_MSG_WARNING("#BTAG# Secondary vertex from InDetVKalVxInJetFinder has zero pointer. Skipping... ");
           continue;
-        }
-        vecVertices.push_back(**verticesIter);
+	}
+	vecVertices.push_back(*link);
       }
 
       if (myVertices[0].isValid()) {
         const xAOD::Vertex* myVert  = *myVertices[0];
-        distnrm=get3DSignificance(priVtx, vecVertices,
-                                  Amg::Vector3D(jetToTag.p4().Px(),jetToTag.p4().Py(),jetToTag.p4().Pz()));
+        distnrm = get3DSignificance(priVtx, vecVertices, jetDir);
         ATH_MSG_VERBOSE("#BTAG# SVX x = " << myVert->position().x() << " y = " << myVert->position().y() << " z = " << myVert->position().z());
-        distnrmCorr=get3DSignificanceCorr(priVtx, vecVertices,
-                                          Amg::Vector3D(jetToTag.p4().Px(),jetToTag.p4().Py(),jetToTag.p4().Pz()));
+        distnrmCorr = get3DSignificanceCorr(priVtx, vecVertices, jetDir);
       } else {
         ATH_MSG_VERBOSE("#BTAG# No vertex. Cannot calculate normalized distance.");
         distnrm=0.;
@@ -281,7 +268,8 @@ namespace Analysis
       instanceName = prefix;
       instanceName += posfix;
     }
-//AA: Move to filling xAOD::BTagging
+
+    //AA: Move to filling xAOD::BTagging
     // note that this block is filling things other than likelihood,
     // it should not be conditional on m_save_probabilities
     if (m_runModus=="analysis") {
@@ -319,12 +307,14 @@ namespace Analysis
     ATH_MSG_VERBOSE("#BTAG# SV mode = " << m_SVmode);
 
     if (m_SVmode != "SV0" ) {
-      float ambtotp = ambtot > 0. ? ambtot/(1.+ambtot): 0.;
+      float ambtotp = ambtot > 0. ? ambtot/(1.+ambtot) : 0.;
       float xratiop = xratio > 0. ? (float)pow(xratio,m_expos) : 0.;
-      float trfJetPt=log(jetToTag.pt()/20000.); if(trfJetPt<0.)trfJetPt=0.01; if(trfJetPt>4.8)trfJetPt=4.79;
+      float trfJetPt = log(jetToTag.pt()/20000.);
+      if(trfJetPt<0.) trfJetPt=0.01;
+      if(trfJetPt>4.8) trfJetPt=4.79;
       std::string pref = "";
       if (m_runModus=="reference") {
-        if (jetpt >= m_pTjetmin && fabs(jeteta) <= 2.5) {
+        if (jetpt >= m_pTjetmin && std::abs(jeteta) <= 2.5) {
           int label = xAOD::jetFlavourLabel(&jetToTag);
           double deltaRtoClosestB = 999.;//, deltaRtoClosestC = 999.;
           if (jetToTag.getAttribute("TruthLabelDeltaR_B",deltaRtoClosestB)) {
@@ -350,10 +340,9 @@ namespace Analysis
                 m_ncjet++;
               }
             }
+
             if (pref == "B" || pref == "C" || pref == "U") {
               std::string hDir = "/RefFile/"+m_SVmode+"/"+author+"/"+pref+"/";
-              //std::cout<<"SVTAG tag histohelper: " << m_histoHelper << std::endl;
-              //m_histoHelper->print();
               if (m_SVmode == "SV1") m_histoHelper->fillHisto(hDir+"N2TNormSV1",(float)NSVPair);
               if (m_SVmode == "SV2") m_histoHelper->fillHisto(hDir+"N2TNormSV2",(float)NSVPair);
               if (NSVPair > 0 && ambtot > 0.) {
@@ -366,8 +355,8 @@ namespace Analysis
                 }
                 if (m_SVmode == "SV2") {
                   m_histoHelper->fillHisto(hDir+"N2TEffSV2",(float)NSVPair);
-                  if(m_usePtSV2)m_histoHelper->fillHisto(hDir+"TridimMENPt",ambtotp,xratiop,trfJetPt);
-                  else          m_histoHelper->fillHisto(hDir+"TridimMEN2T",ambtotp,xratiop,log((float)NSVPair));
+                  if(m_usePtSV2) m_histoHelper->fillHisto(hDir+"TridimMENPt",ambtotp,xratiop,trfJetPt);
+                  else           m_histoHelper->fillHisto(hDir+"TridimMEN2T",ambtotp,xratiop,log((float)NSVPair));
                 }
               }
             }
@@ -474,9 +463,6 @@ namespace Analysis
     return StatusCode::SUCCESS;
   }
 
-  void SVTag::finalizeHistos() {
-  }
-
   void SVTag::printParameterSettings() {
     ATH_MSG_INFO("#BTAG# " << name() << "Parameter settings ");
     ATH_MSG_INFO("#BTAG# I am in " << m_runModus << " modus.");
@@ -487,65 +473,34 @@ namespace Analysis
   double SVTag::get3DSignificance(const xAOD::Vertex& priVertex,
           std::vector<const xAOD::Vertex*>& secVertex,
           const Amg::Vector3D jetDirection) const {
-  // double SVTag::get3DSignificance(const Trk::RecVertex & priVertex,
-  //                                 std::vector<const Trk::RecVertex* > & secVertex,
-  //                                 const Amg::Vector3D jetDirection) {
 
     std::vector<Amg::Vector3D> positions;
     std::vector<AmgSymMatrix(3)> weightMatrices;
-
-    std::vector<const xAOD::Vertex*>::const_iterator secEnd = secVertex.end();
-
-    for (std::vector<const xAOD::Vertex*>::const_iterator secIter = secVertex.begin();
-         secIter != secEnd; ++secIter)
-      {
-  // Amg::Vector3D position = (*secIter)->position();
-  // Amg::Vector3D position;
-  // position[0]=(*secIter)->position().x();
-  // position[1]=(*secIter)->position().y();
-  // position[2]=(*secIter)->position().z();
-  // positions.push_back(position);
-  positions.push_back((*secIter)->position());
-
-  weightMatrices.push_back((*secIter)->covariancePosition().inverse());
-      }
-
     // If multiple secondary vertices were reconstructed, then a common (weighted) position will be used
     // in the signed decay length significance calculation
-
     Amg::Vector3D weightTimesPosition(0.,0.,0.);
     AmgSymMatrix(3) sumWeights;
     sumWeights.setZero();
 
-    int count=0;
-    for (std::vector<const xAOD::Vertex*>::const_iterator secIter = secVertex.begin();
-         secIter != secEnd; ++secIter) {
-
-  weightTimesPosition+=(weightMatrices[count])*positions[count];
-  sumWeights+=(weightMatrices[count]);
-  ++count;
+    for (const auto& vtx : secVertex) {
+      positions.push_back(vtx->position());
+      weightMatrices.push_back(vtx->covariancePosition().inverse());
+      weightTimesPosition += weightMatrices.back()*positions.back();
+      sumWeights += weightMatrices.back();
     }
 
     // now we have the sum of the weights, let's invert this matrix to get the mean covariance matrix
-
-//    int failed(0);
-    // return value of m.inverse() on a non invertible matrix is undefined
-//    AmgSymMatrix(3) meanCovariance=sumWeights.inverse();
-//    if (failed!=0) {
-//      ATH_MSG_ERROR("#BTAG# Could not invert sum of sec vtx matrices");
-//      return 0.;
-//    }
     bool invertible;
     AmgSymMatrix(3) meanCovariance;
     meanCovariance.setZero();
     sumWeights.computeInverseWithCheck(meanCovariance, invertible);
-    if (! invertible) {
+    if (!invertible) {
        ATH_MSG_WARNING("#BTAG# Could not invert sum of sec vtx matrices");
     return 0.;
     }
 
     // calculate the weighted mean secondary vertex position
-    Amg::Vector3D meanPosition=meanCovariance*weightTimesPosition;
+    Amg::Vector3D meanPosition = meanCovariance*weightTimesPosition;
 
     // add the mean covariance matrix of the secondary vertices to that of the primary vertex
     // this is the covariance matrix for the decay length
@@ -560,19 +515,19 @@ namespace Analysis
     double Lz = meanPosition[2]-priVertex.position().z();
 
     const double decaylength = sqrt(Lx*Lx + Ly*Ly + Lz*Lz);
-    if(decaylength==0.)return 0.;  //Safety
+    if(decaylength==0.) return 0.;  //Safety
     const double inv_decaylength = 1. / decaylength;
 
     double dLdLx = Lx * inv_decaylength;
     double dLdLy = Ly * inv_decaylength;
     double dLdLz = Lz * inv_decaylength;
-    double decaylength_err2 =     dLdLx*dLdLx*covariance(0,0) +
-          dLdLy*dLdLy*covariance(1,1) +
-          dLdLz*dLdLz*covariance(2,2) +
-          2.*dLdLx*dLdLy*covariance(0,1) +
-          2.*dLdLx*dLdLz*covariance(0,2) +
-          2.*dLdLy*dLdLz*covariance(1,2);
-    if(decaylength_err2<=0.)return 0.;  //Something is wrong
+    double decaylength_err2 = (dLdLx*dLdLx*covariance(0,0) +
+			       dLdLy*dLdLy*covariance(1,1) +
+			       dLdLz*dLdLz*covariance(2,2) +
+			       2.*dLdLx*dLdLy*covariance(0,1) +
+			       2.*dLdLx*dLdLz*covariance(0,2) +
+			       2.*dLdLy*dLdLz*covariance(1,2));
+    if(decaylength_err2<=0.) return 0.;  //Something is wrong
     double decaylength_err = sqrt(decaylength_err2);
 
     double decaylength_significance = 0.;
@@ -593,26 +548,23 @@ namespace Analysis
     bool success=true;
     AmgSymMatrix(3) Wgt;
 
-    for (auto & svrt : secVertex)
+    for (const auto & svrt : secVertex)
       {
          Amg::Vector3D SVmPV = svrt->position()-priVertex.position();
-         AmgSymMatrix(3) SVmPVCov=svrt->covariancePosition()+priVertex.covariancePosition();
+         AmgSymMatrix(3) SVmPVCov = svrt->covariancePosition()+priVertex.covariancePosition();
          SVmPVCov.computeInverseWithCheck(Wgt, success);
          if( !success || Wgt(0,0)<=0. || Wgt(1,1)<=0. || Wgt(2,2)<=0. )continue;     //Inversion failure
-         double significance=SVmPV.transpose()*Wgt*SVmPV;
+         double significance = SVmPV.transpose()*Wgt*SVmPV;
          if(significance <= 0.) continue;                          //Something is still wrong!
-         significance=std::sqrt(significance);
-         if(SVmPV.dot(jetDirection)<0.)significance *= -1.;
+         significance = std::sqrt(significance);
+         if(SVmPV.dot(jetDirection)<0.) significance *= -1.;
          Sig3D.push_back(significance);
       }
 
-    if(Sig3D.size()==0)return 0.;
+    if(Sig3D.size()==0) return 0.;
 
     return *std::max_element(Sig3D.begin(),Sig3D.end());
-    //return std::accumulate(Sig3D.begin(),Sig3D.end(),0.);
   }
-
-
 
 }
 

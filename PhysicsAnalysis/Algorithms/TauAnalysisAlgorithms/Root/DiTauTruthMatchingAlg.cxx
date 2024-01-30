@@ -52,7 +52,7 @@ namespace CP
       {
         if (m_preselection.getBool (*tau, sys))
         {
-          m_matchingTool->applyTruthMatch (*tau);
+          m_matchingTool->getTruth (*tau);
         }
       }
     }

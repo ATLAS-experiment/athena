@@ -99,7 +99,7 @@ void writeBits(std::ostream& s, const std::vector< uint32_t >& input) {
       const size_t bits = CHAR_BIT * sizeof( entry ); // This is expected to be 32 bits per entry in the vector
       for (size_t bit = 0; bit < bits; ++bit) {
          // Examine a single bit and, if 1, print its numeric position within the vector of uint32's.
-         if (entry & (1 << bit)) s << ((bits * i) + bit) << " ";
+         if (entry & (1ul << bit)) s << ((bits * i) + bit) << " ";
       }
    }
    s << std::endl;

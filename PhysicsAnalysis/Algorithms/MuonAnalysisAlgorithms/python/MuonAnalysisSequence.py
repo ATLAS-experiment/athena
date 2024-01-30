@@ -11,6 +11,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
                               postfix = '',
                               ptSelectionOutput = False,
                               trackSelection = True,
+                              maxEta = 2.7,
                               qualitySelectionOutput = True,
                               enableCutflow = False,
                               enableKinematicHistograms = False,
@@ -54,7 +55,8 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
 
     makeMuonCalibrationSequence (seq, dataType, postfix=postfix,
                                  ptSelectionOutput = ptSelectionOutput, 
-                                 trackSelection = trackSelection)
+                                 trackSelection = trackSelection,
+                                 maxEta = maxEta)
     makeMuonWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,
                                   qualitySelectionOutput = qualitySelectionOutput, isRun3Geo = isRun3Geo)
     makeSharedObjectSequence (seq, deepCopyOutput = deepCopyOutput,
@@ -72,7 +74,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
 
 
 def makeMuonCalibrationSequence( seq, dataType,
-                                 postfix = '', ptSelectionOutput = False, trackSelection = False):
+                                 postfix = '', ptSelectionOutput = False, trackSelection = False, maxEta = 2.7):
     """Create muon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -102,7 +104,7 @@ def makeMuonCalibrationSequence( seq, dataType,
     alg = createAlgorithm( 'CP::AsgSelectionAlg',
                            'MuonEtaCutAlg' + postfix )
     addPrivateTool( alg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    alg.selectionTool.maxEta = 2.7
+    alg.selectionTool.maxEta = maxEta
     alg.selectionDecoration = 'selectEta' + postfix + ',as_bits'
     seq.append( alg, inputPropName = 'particles',
                 stageName = 'selection',

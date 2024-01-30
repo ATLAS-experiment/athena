@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_TRACK_AUGMENTER_ALG_HH
@@ -7,12 +7,8 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "AthContainers/AuxElement.h"
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/TrackParticleAuxContainer.h"
 #include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 #include "StoreGate/WriteDecorHandle.h"

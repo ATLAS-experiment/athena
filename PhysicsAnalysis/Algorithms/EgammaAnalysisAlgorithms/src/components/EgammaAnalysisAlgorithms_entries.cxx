@@ -10,7 +10,7 @@
 #include <EgammaAnalysisAlgorithms/ElectronLRTMergingAlg.h>
 #include <EgammaAnalysisAlgorithms/PhotonOriginCorrectionAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaFSRForMuonsCollectorAlg.h>
-
+#include <EgammaAnalysisAlgorithms/ElectronSiHitDecAlg.h>
 
 DECLARE_COMPONENT (CP::EgammaCalibrationAndSmearingAlg)
 DECLARE_COMPONENT (CP::EgammaIsGoodOQSelectionTool)
@@ -22,4 +22,5 @@ DECLARE_COMPONENT (CP::PhotonShowerShapeFudgeAlg)
 DECLARE_COMPONENT (CP::ElectronLRTMergingAlg)
 DECLARE_COMPONENT (CP::PhotonOriginCorrectionAlg)
 DECLARE_COMPONENT (CP::EgammaFSRForMuonsCollectorAlg)
+DECLARE_COMPONENT (CP::ElectronSiHitDecAlg)
 

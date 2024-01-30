@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''@file LArCoherentNoisefractionAlg
 @author P. Strizenec
@@ -7,27 +7,15 @@
 @brief Adapted from LArNoiseCorrelationMonAlg by M. Spalla 
 '''
 
-
-def LArCoherentNoisefractionConfigOld(inputFlags, febsToMonitor=[], groupsToMonitor=[], isCalib=True):
-
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArCoherentNoisefractionMonAlg
-
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArCoherentNoisefractionMonAlgCfg')
-    LArCoherentNoisefractionConfigCore(helper, LArCoherentNoisefractionMonAlg,inputFlags,febsToMonitor,groupsToMonitor,isCalib)
-    return helper.result()
-
-def LArCoherentNoisefractionConfig(inputFlags,febsToMonitor=[], groupsToMonitor=[], isCalib=True):
+def LArCoherentNoisefractionConfig(inputFlags, groupsToMonitor=[]):
     
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArCoherentNoisefractionMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArCoherentNoisefractionMonAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    return LArCoherentNoisefractionConfigCore(helper, CompFactory.LArCoherentNoisefractionMonAlg,inputFlags,febsToMonitor,groupsToMonitor,isCalib)
+    return LArCoherentNoisefractionConfigCore(helper, CompFactory.LArCoherentNoisefractionMonAlg,inputFlags,groupsToMonitor)
 
-def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, febsToMonitor, groupsToMonitor, isCalib):
-
-
+def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, groupsToMonitor):
     from LArMonitoring.GlobalVariables import lArDQGlobals
 
     larCoherentNoisefractionMonAlg = helper.addAlgorithm(algoinstance,'larCoherentNoisefractionMonAlg')
@@ -39,8 +27,14 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, febsToM
 
     #from AthenaCommon.Constants import DEBUG
     #larCoherentNoisefractionMonAlg.OutputLevel = DEBUG
-    larCoherentNoisefractionMonAlg.IsCalibrationRun = isCalib
-    larCoherentNoisefractionMonAlg.LArDigitContainerKey = "HIGH"
+    try:
+       larCoherentNoisefractionMonAlg.IsCalibrationRun = inputFlags.LArMon.calibRun
+    except AttributeError:
+       larCoherentNoisefractionMonAlg.IsCalibrationRun = False
+    try:   
+       larCoherentNoisefractionMonAlg.LArDigitContainerKey = inputFlags.LArMon.LArDigitKey
+    except AttributeError:
+       larCoherentNoisefractionMonAlg.LArDigitContainerKey = 'FREE'
     larCoherentNoisefractionMonAlg.ListOfGroupNames = allGroups
     larCoherentNoisefractionMonAlg.GroupNchan = groupsNChan
     if len(groupsToMonitor) == 0:
@@ -54,14 +48,10 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, febsToM
              customGroupstoMonitor = groupsToMonitor   
     larCoherentNoisefractionMonAlg.GroupsToMonitor = customGroupstoMonitor   
 
-    # if empty list passed,
-    #set custom list of FEBs to be monitored (if you want one): each FEB should be passed as a string of the form "BarrelAft01slot10"
-    FEBs_from_DQ_run_350440 = ["endcapAft19slot12","endcapAft19slot09","endcapAft20slot09"]
-
-    if len(febsToMonitor) == 0:
-       customFEBStoMonitor=FEBs_from_DQ_run_350440
-    else:   
-       customFEBStoMonitor=febsToMonitor
+    try:
+       customFEBStoMonitor = inputFlags.LArMon.customFEBsToMonitor
+    except AttributeError:
+       customFEBStoMonitor = ["endcapAft19slot12","endcapAft19slot09","endcapAft20slot09"] 
 
     #correct custom FEBs for upper-lower cases or single-digit ft and slot numbers (e.g. 3 instead of 03)
     from ROOT import LArStrHelper
@@ -179,36 +169,41 @@ def LArCoherentNoisefractionConfigCore(helper, algoinstance, inputFlags, febsToM
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
-
-   from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-   createLArMonConfigFlags()
+   flags = initConfigFlags()
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
+   from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+   addLArCalibFlags(flags)
 
    #from AthenaConfiguration.TestDefaults import defaultTestFiles
-   ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-5s-High-Emec-A-RawData/00393063/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW._lb0000._SFO-1._0001.data','/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-5s-High-Emec-A-RawData/00393063/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW._lb0000._SFO-2._0001.data','/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-5s-High-Emec-A-RawData/00393063/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW._lb0000._SFO-3._0001.data','/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-5s-High-Emec-A-RawData/00393063/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW._lb0000._SFO-4._0001.data']
 
-   ConfigFlags.Output.HISTFileName = 'LArCNFMonOutput.root'
-   ConfigFlags.DQ.enableLumiAccess = False
-   ConfigFlags.DQ.useTrigger = False
+   flags.Input.Files = ['/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-5s-High-Emec-A-RawData/00393063/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW._lb0000._SFO-1._0001.data','/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-5s-High-Emec-A-RawData/00393063/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW._lb0000._SFO-2._0001.data','/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-5s-High-Emec-A-RawData/00393063/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW._lb0000._SFO-3._0001.data','/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-5s-High-Emec-A-RawData/00393063/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW/data21_calib.00393063.calibration_LArElec-Pedestal-5s-High-Emec-A-RawData.daq.RAW._lb0000._SFO-4._0001.data']
+
+   flags.LArMon.calibRun = True
+   flags.Output.HISTFileName = 'LArCNFMonOutput.root'
+   flags.DQ.enableLumiAccess = False
+   flags.DQ.useTrigger = False
+
    from AthenaConfiguration.Enums import BeamType
-   ConfigFlags.Beam.Type = BeamType.Collisions
-   ConfigFlags.lock()
+   flags.Beam.Type = BeamType.Collisions
+   flags.lock()
 
    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
    cfg=ComponentAccumulator()
    from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-   cfg.merge(LArRawDataReadingCfg(ConfigFlags,LArDigitKey="HIGH",LArRawChannelKey=""))
+   cfg.merge(LArRawDataReadingCfg(flags,LArDigitKey="HIGH",LArRawChannelKey=""))
    # for calib digits:
    #from LArByteStream.LArRawCalibDataReadingConfig import LArRawCalibDataReadingCfg
-   #cfg.merge(LArRawCalibDataReadingCfg(ConfigFlags,gain="HIGH",doCalibDigit=True))
+   #cfg.merge(LArRawCalibDataReadingCfg(flags,gain="HIGH",doCalibDigit=True))
    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-   cfg.merge(LArOnOffIdMappingCfg(ConfigFlags))
+   cfg.merge(LArOnOffIdMappingCfg(flags))
    from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
-   cfg.merge(LArElecCalibDBCfg(ConfigFlags,["Pedestal"]))
+   cfg.merge(LArElecCalibDBCfg(flags,["Pedestal"]))
 
    feblist=[]
    for ft in [11,12,23,24]:
@@ -217,13 +212,13 @@ if __name__=='__main__':
              feblist += ['EndcapAft'+str(ft)+'slot0'+str(slot)]
          else:
              feblist += ['EndcapAft'+str(ft)+'slot'+str(slot)]
-   aff_acc = LArCoherentNoisefractionConfig(ConfigFlags,feblist)
+   aff_acc = LArCoherentNoisefractionConfig(flags,feblist)
 
    cfg.merge(aff_acc)
 
    cfg.printConfig()
    log.setLevel(DEBUG)
-   ConfigFlags.dump()
+   flags.dump()
    f=open("LArCNFMon.pkl","wb")
    cfg.store(f)
    f.close()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_IPTAG_H
@@ -15,22 +15,17 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "JetTagTools/ITagTool.h"
 
-#include "xAODTracking/TrackParticleContainerFwd.h"
-
 #include <vector>
 #include <atomic>
 
-namespace Reco { class ITrackToVertex; }
 namespace Trk  { class ITrackToVertexIPEstimator; }
 
 namespace Analysis { 
 
-  class IPInfo;
   class NewLikelihoodTool;
   class HistoHelperRoot;
   class TrackSelector;
   class TrackGrade;
-  class GradedTrack;
   class TrackGradePartition;
   class SVForIPTool;
   class ITrackGradeFactory;
@@ -86,8 +81,6 @@ namespace Analysis {
     bool m_sortZ0D0sig;         // sorting input tracks by z0d0sig
     bool m_RejectBadTracks;
     bool m_SignWithSvx;
-    //bool m_writeInfoBase;       // writes a basic info for each tagger with Pb, Pu (IPInfoBase)
-    //bool m_writeInfoPlus;       // writes a detailed info 
     bool m_checkOverflows;      // if true put the overflows in the first/last bins
     bool m_doForcedCalib;
     bool m_useCHypo;
@@ -101,25 +94,19 @@ namespace Analysis {
     //// VD: other (non-bool) configurables
     /** Name of the track-to-jet association in the BTagging object */
     std::string m_trackAssociationName;
-
-    /** List of the variables to be used in the likelihood */
-    std::vector<std::string> m_useVariables;
      
     /** specify the tag type (1D or 2D) */
     std::string m_impactParameterView;
     
     /** forcing the calibration folder of a given collection */
-    std::string m_ForcedCalibName;
+    std::string m_forcedCalibName;
 
    /** for reference mode: */
     std::string m_referenceType;     // label to use for reference mode
-    std::string m_truthMatchingName; // name of truthMatchingTool instance to get TruthInfo 
     double m_purificationDeltaR;     // skip light jets with heavy flavor in this cone
     double m_jetPtMinRef;            // min cut on jet pT for reference
 
     /** names of fools for getting the secondary vertex information */
-    std::string m_secVxFinderNameForV0Removal;
-    std::string m_secVxFinderNameForIPSign;
     std::string m_secVxFinderName;
 
     /** additional switch for smart track selection */
@@ -131,13 +118,10 @@ namespace Analysis {
 
     //// VD: auxiliary information to be stored
     std::vector<std::string> m_hypotheses; // hypotheses: b | u
-    /** information to persistify: */
-    std::string m_originalTPCollectionName;
-    //const xAOD::TrackParticleContainer* m_originalTPCollection;
     /** track classification. */
     std::vector<std::string>          m_trackGradePartitionsDefinition;
     std::vector<TrackGradePartition*> m_trackGradePartitions;
-    std::vector<std::string> m_jetCollectionList, m_jetWithInfoPlus; // 
+    std::vector<std::string> m_jetCollectionList;
     
     
     //// VD: list of tools below
