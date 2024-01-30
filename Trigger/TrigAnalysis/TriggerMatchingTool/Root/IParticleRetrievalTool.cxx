@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Package includes
 #include "TriggerMatchingTool/IParticleRetrievalTool.h"
+#include "CxxUtils/starts_with.h"
 #include <ostream>
 
 // Anonymous namespace contains helper functions
@@ -231,9 +232,9 @@ namespace Trig {
     if (teName.find("etcut") != std::string::npos &&
         teName.find("trkcut") == std::string::npos)
       return xAOD::Type::CaloCluster;
-    else if (teName.find("EF_e") == 0)
+    else if (CxxUtils::starts_with (teName, "EF_e"))
       return xAOD::Type::Electron;
-    else if (teName.find("EF_g") == 0)
+    else if (CxxUtils::starts_with (teName, "EF_g"))
       return xAOD::Type::Photon;
     else 
       return xAOD::Type::Other;

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,7 +37,7 @@ public:
   bool matchDistanceMatrix(const std::vector<std::vector<double> >& matrix, const Trig::MatchingStrategy::Strategy strategy = Trig::MatchingStrategy::MinimalSum, double threshold = 0.0) const ;
   inline void setThreshold(double in) { m_threshold=in; }
 private:
-  bool assocIsMatched(IAssociationStrategy::index_assignment_t association, const std::vector<std::vector<double> >& matrix, double threshold) const ;
+  bool assocIsMatched(const IAssociationStrategy::index_assignment_t& association, const std::vector<std::vector<double> >& matrix, double threshold) const ;
   MatchingTool& m_tool;
   std::map<Trig::MatchingStrategy::Strategy,std::unique_ptr<IAssociationStrategy> > m_strategies;
   double m_threshold; //the distance threshold for a match
