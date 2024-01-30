@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -99,10 +99,11 @@ def StaticPEBInfoWriterToolCfg(flags, name='StaticPEBInfoWriterTool',
 
 
 if __name__ == '__main__':
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN3
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.lock()
 
     cfg = ComponentAccumulator()
