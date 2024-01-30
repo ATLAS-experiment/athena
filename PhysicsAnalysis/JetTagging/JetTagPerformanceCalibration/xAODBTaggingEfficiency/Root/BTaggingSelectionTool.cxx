@@ -147,7 +147,7 @@ StatusCode BTaggingSelectionTool::initialize() {
       m_continuouscuts.push_back(-1.e4);
       // For GN2v01, we have different WPs than the default ones.
       if ( m_taggerName == "GN2v01" )
-        m_wps_raw="FixedCutBEff_90, FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_65";
+        m_wps_raw="FixedCutBEff_90,FixedCutBEff_85,FixedCutBEff_77,FixedCutBEff_70,FixedCutBEff_65";
       std::vector<std::string> workingpoints = split(m_wps_raw, ',');
       std::sort(workingpoints.begin(), workingpoints.end());
       std::reverse(workingpoints.begin(), workingpoints.end()); // put in descending order
