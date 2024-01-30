@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
- * @file TruthD3PDAnalysis/src/D3PDMCTruthClassifier.cxx
+ * @file TruthD3PDMaker/src/D3PDMCTruthClassifier.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Jan, 2012
  * @brief Work around MCTruthClassifier brain-damage.
