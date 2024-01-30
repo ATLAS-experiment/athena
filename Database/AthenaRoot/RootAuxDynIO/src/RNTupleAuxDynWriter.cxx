@@ -32,7 +32,7 @@ namespace RootAuxDynIO
          m_opts.SetCompression( m_tfile->GetCompressionSettings() );
          m_opts.SetUseBufferedWrite( enableBufferedWrite );
          m_model->SetDescription( ntupleName );
-         addField("index_ref", "std::uint64_t");
+         RNTupleAuxDynWriter::addField("index_ref", "std::uint64_t");
       }
 
 
