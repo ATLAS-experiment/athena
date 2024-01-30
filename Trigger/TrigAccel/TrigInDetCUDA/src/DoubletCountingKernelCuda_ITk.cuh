@@ -30,7 +30,10 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	const float maxOuterRadius = 550.0;
 	 
 	const int sliceIdx = blockIdx.x;
-	const int layerIdx = blockIdx.y;
+	const int layerIdx = dDetModel->m_middleSpacePointLayers[blockIdx.y];
+
+	const TrigAccel::ITk::SILICON_LAYER& layerGeo =  dDetModel->m_layers[layerIdx];
+	bool isBarrel = (layerGeo.m_type == 0);
 
 	if(threadIdx.x == 0 && threadIdx.y == 0) {
 		const TrigAccel::ITk::SPACEPOINT_LAYER_RANGE& slr = dSpacepoints->m_phiSlices[sliceIdx];
@@ -64,7 +67,14 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		float zm = dSpacepoints->m_z[spmIdx];
 		float rm = dSpacepoints->m_r[spmIdx];
 
-		if (!canBeMiddleSpacePoint(rm)) continue;
+		float minTau = 0;
+		float maxTau = 100;
+
+		if (isBarrel) {
+			float clusterWidth = dSpacepoints->m_clusterWidth[spmIdx];
+			minTau = 6.7*(clusterWidth - 0.2);
+			maxTau = 1.6 + 0.15/(clusterWidth + 0.2) + 6.1*(clusterWidth - 0.2);
+		}
 
 		if(threadIdx.y ==0) {
 			nInner[threadIdx.x] = 0;
@@ -92,16 +102,16 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 				if(next_spEnd == next_spBegin) continue;//no spacepoints in this layer
 
 				// Check if SPs from the nextLayer (currently processed layer) and the current SP would exceed the maximum doublet length
-				const TrigAccel::ITk::SILICON_LAYER& layerGeo =  dDetModel->m_layers[nextLayerIdx];
-				bool isBarrel = (layerGeo.m_type == 0);
-				float refCoord = layerGeo.m_refCoord; // Position of the layer in r (barrel) or z (end cap)
-				if(isBarrel && std::abs(refCoord-rm)>maxDoubletLength) continue;
+				const TrigAccel::ITk::SILICON_LAYER& layerGeoSp =  dDetModel->m_layers[nextLayerIdx];
+				bool isBarrelSp = (layerGeoSp.m_type == 0);
+				float refCoord = layerGeoSp.m_refCoord; // Position of the layer in r (barrel) or z (end cap)
+				if(isBarrelSp && std::abs(refCoord-rm)>maxDoubletLength) continue;
 
 				// Calculate the nextLayer boundaries by projecting the current spacepoint within the beamspot limits
 				float minCoord = 10000.0;
 				float maxCoord =-10000.0;
 
-				if(isBarrel) {
+				if(isBarrelSp) {
 					minCoord = zMinus + refCoord*(zm-zMinus)/rm;
 					maxCoord = zPlus + refCoord*(zm-zPlus)/rm;
 				}
@@ -114,7 +124,7 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 					float tmp = maxCoord;maxCoord = minCoord;minCoord = tmp;
 				}
 
-				if(layerGeo.m_maxBound<minCoord || layerGeo.m_minBound>maxCoord) continue;
+				if(layerGeoSp.m_maxBound<minCoord || layerGeoSp.m_minBound>maxCoord) continue;
 
 				//3. get a tile of inner/outer spacepoints
 
@@ -124,7 +134,7 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 					float rsp = dSpacepoints->m_r[spIdx];
 
 					// Check if SP is within the doublet boundaries
-					float spCoord = (isBarrel) ? zsp : rsp;
+					float spCoord = (isBarrelSp) ? zsp : rsp;
 					if(spCoord<minCoord || spCoord>maxCoord) continue;
 
 					float dr = rsp - rm;
@@ -132,12 +142,18 @@ __global__ static void doubletCountingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 					// Cut on doublet length
 					float dL = std::sqrt( dr*dr + dz*dz);
-					float maxDL = getMaxDeltaLEta(getEta(dr, dz, dL));
+					float maxDL = GPUTrackSeedingItkHelpers::getMaxDeltaLEta(GPUTrackSeedingItkHelpers::getEta(dr, dz, dL));
 					if(std::abs(dL)>maxDL || std::abs(dL)<minDoubletLength) continue;
 								
-					// Cut on tau
+					// Cut on tau = cot(theta)
 					float tau = dz/dr;
-					if(std::abs(tau)>maxCtg) continue;
+					float ftau = std::abs(tau);
+					if(ftau>maxCtg) continue;
+
+					// Cut on pixel width
+					if (isBarrelSp) {
+						if(ftau < minTau || ftau > maxTau) continue;
+					}
 
 					// Cut on Z
 					float z0 = zsp - rsp*tau;
