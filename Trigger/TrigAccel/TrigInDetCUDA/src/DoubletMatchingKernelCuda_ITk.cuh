@@ -38,21 +38,15 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	__shared__ float cosA;
 	__shared__ float sinA;
 
-	//  __shared__ float R2inv_array[MAX_NUMBER_DOUBLETS];
-	__shared__ float Rinv_array[MAX_NUMBER_DOUBLETS_ITk];
-	__shared__ float t_array[MAX_NUMBER_DOUBLETS_ITk];
+	__shared__ float Rinv_array[MAX_NUMBER_DOUBLETS_ITk]; // inverse radius (xy plane)
+	__shared__ float tau_array[MAX_NUMBER_DOUBLETS_ITk]; // tau = cot(theta) = dz/dr
 	__shared__ int spIdx_array[MAX_NUMBER_DOUBLETS_ITk];
 	__shared__ float u_array[MAX_NUMBER_DOUBLETS_ITk];
 	__shared__ float v_array[MAX_NUMBER_DOUBLETS_ITk];
-
-	//  __shared__ float covZ_array[MAX_NUMBER_DOUBLETS];
-	// __shared__ float covR_array[MAX_NUMBER_DOUBLETS];
-
-	__shared__ float tCov_array[MAX_NUMBER_DOUBLETS_ITk];
-
+	__shared__ float tauCov_array[MAX_NUMBER_DOUBLETS_ITk]; // covariance of tau
 
 	__shared__ int PairIdx_array[MAX_TRIPLETS_ITk];
-	__shared__ float Q_array[MAX_TRIPLETS_ITk];
+	__shared__ float Q_array[MAX_TRIPLETS_ITk]; // Quality score for a triplet Q=d0*d0
 	__shared__ int sortedIdx[MAX_TRIPLETS_ITk];
 
 
@@ -61,7 +55,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	__shared__ int nPairs;
 	__shared__ int nTriplets;
 
-	const double dtCut = 0.25;
+	const float dtCut = 0.3; // Cut on cot(theta) difference between two doublets
 	const float radLen = 0.036;
 	const float dp = 13.6/dSettings->m_tripletPtMin;
 	const float CovMS = dp*dp*radLen;
@@ -73,8 +67,8 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	const float maxD0 = dSettings->m_tripletD0Max;
 
 	const float phiPlus = dSettings->m_phiPlus;
-  const float phiMinus = dSettings->m_phiMinus;
-  const bool isFullscan = (dSettings->m_isFullScan == 1);
+	const float phiMinus = dSettings->m_phiMinus;
+	const bool isFullscan = (dSettings->m_isFullScan == 1);
 
 
 	for(int itemIdx = blockIdx.x;itemIdx<maxItem;itemIdx += gridDim.x) {
@@ -109,9 +103,6 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		}
 		__syncthreads();
 
-		if (!canBeMiddleSpacePoint(rm)) continue;    
-
-		
 		for(int innerIdx = threadIdx.x; innerIdx<nInner;innerIdx+=blockDim.x) {
 		 
 			int k = atomicAdd(&iDoublet,1);  
@@ -128,9 +119,9 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 				float R2inv = 1.0/(dx_inn*dx_inn+dy_inn*dy_inn); 
 				Rinv_array[k] = sqrt(R2inv);	
-				t_array[k] = Rinv_array[k]*dz_inn;
+				tau_array[k] = Rinv_array[k]*dz_inn;
 
-				tCov_array[k] = R2inv*(covZ + dSpacepoints->m_covZ[spiIdx] + t_array[k]*t_array[k]*(covR + dSpacepoints->m_covR[spiIdx]));
+				tauCov_array[k] = R2inv*(covZ + dSpacepoints->m_covZ[spiIdx] + tau_array[k]*tau_array[k]*(covR + dSpacepoints->m_covR[spiIdx]));
 				
 				float xn_inn = dx_inn*cosA + dy_inn*sinA; 
 				float yn_inn =-dx_inn*sinA + dy_inn*cosA;	
@@ -165,9 +156,9 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 				float R2inv = 1.0/(dx_out*dx_out+dy_out*dy_out);
 				Rinv_array[k] = sqrt(R2inv);
-				t_array[k] = Rinv_array[k]*dz_out;
+				tau_array[k] = Rinv_array[k]*dz_out;
 
-				tCov_array[k] = R2inv*(covZ + dSpacepoints->m_covZ[spoIdx] + t_array[k]*t_array[k]*(covR + dSpacepoints->m_covR[spoIdx]));
+				tauCov_array[k] = R2inv*(covZ + dSpacepoints->m_covZ[spoIdx] + tau_array[k]*tau_array[k]*(covR + dSpacepoints->m_covR[spoIdx]));
 
 				float xn_out = dx_out*cosA + dy_out*sinA; 
 				float yn_out =-dx_out*sinA + dy_out*cosA;	
@@ -192,23 +183,24 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		//retrieve shared data for doublets doublet_i and doublet_j and apply cut(s)	  
 		
 		//0. dt matching
-		float t_inn = t_array[doublet_i];
-		float t_out = t_array[doublet_j];
-		float dt = t_inn - t_out;	
-		if(std::abs(dt)>dtCut) continue;
+		float tau_inn = tau_array[doublet_i];
+		float tau_out = tau_array[doublet_j];
+		float dt = tau_inn - tau_out;	
+		if (std::abs(dt)>dtCut) continue;
 		
 		//1. rz matching
 
-		float t_inn2 = t_inn*t_inn;
-		float tCov_inn = tCov_array[doublet_i];
-		float tCov_out = tCov_array[doublet_j];
+		float tau_inn2 = tau_inn*tau_inn;
+		float tauCov_inn = tauCov_array[doublet_i];
+		float tauCov_out = tauCov_array[doublet_j];
 
-		double dCov = CovMS*(1+t_inn2);
+		double dCov = CovMS*(1+tau_inn2);
 		
-		float covdt = tCov_inn + tCov_out; 
-		covdt += 2*Rinv_array[doublet_i]*Rinv_array[doublet_j]*(t_inn*t_out*covR + covZ); 
+		float covdt = tauCov_inn + tauCov_out; 
+		covdt += 2*Rinv_array[doublet_i]*Rinv_array[doublet_j]*(tau_inn*tau_out*covR + covZ); 
 		float dt2 = dt*dt*(1/9.0);
 		if(dt2 > covdt+dCov) continue;//i.e. 3-sigma cut 
+		if (GPUTrackSeedingItkHelpers::getSignificanceCut(std::sqrt(dt2/(covdt+dCov))) < std::abs(dt)) continue;
 
 		//2. pT estimate 
 
@@ -253,7 +245,6 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		}
 
 		//Calculate Quality    
-
 		float Q = d0*d0;
 
 		int l = atomicAdd(&nTriplets, 1);

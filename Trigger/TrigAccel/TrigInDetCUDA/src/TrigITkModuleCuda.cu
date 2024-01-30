@@ -175,7 +175,7 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
     int deviceId = 0;//always using device 0 for the time being
 
     cudaSetDevice(deviceId);
-    cudaMalloc(&d_detmodel, sizeof(TrigAccel::DETECTOR_MODEL));
+    cudaMalloc(&d_detmodel, sizeof(TrigAccel::ITk::DETECTOR_MODEL));
     checkError();
 
     m_d_detmodel_ptrs[deviceId] = d_detmodel;

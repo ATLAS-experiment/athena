@@ -6,6 +6,7 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h" 
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "TrigAccelEvent/TrigITkAccelEDM.h"
+#include "InDetPrepRawData/PixelCluster.h"
 
 TrigITkAccelerationTool::TrigITkAccelerationTool(const std::string& t, 
 						     const std::string& n,
@@ -83,7 +84,9 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
   sfs.m_maxTripletBufferLength = tcs.m_maxTripletBufferLength;
   sfs.m_isFullScan = 1;
 
-  if(!(roi->isFullscan() || roi->composite() )){
+  // roi->isFullscan() check cannot be currently used for standalone ITk ROI configuration
+  bool isRoiFullscan = ((roi->etaPlus() >= 4) && (roi->etaMinus() <= -4));
+  if(!(isRoiFullscan || roi->composite() )){
     //roi suitable for gpu
     //composite rois are not supported at this point
     sfs.m_isFullScan = 0;
@@ -146,14 +149,21 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
   sps.m_nSpacepoints = nSP;
   sps.m_nPhiSlices = nSlices;
   sps.m_nLayers = nLayers;
+  sps.m_nMiddleLayers = m_accelSvc->getMiddleLayersSize();
 
   int spIdx=0;
   for(int slice = 0;slice<nSlices;slice++) {
     for(int layer = 0;layer<nLayers;layer++) {
       int layerStart = spIdx;
+      bool isBarrel = (layerTypes[layer] == 0);
       std::vector<std::pair<int, const TrigSiSpacePointBase*> >& v = phiLArray[layer + slice*nLayers];
       for(std::vector<std::pair<int, const TrigSiSpacePointBase*> >::iterator it = v.begin();it!=v.end();++it) {
         const TrigSiSpacePointBase* sp  = (*it).second;
+        const Trk::SpacePoint* osp = sp->offlineSpacePoint();
+        const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(osp->clusterList().first);
+        float clusterWidth = pCL->width().widthPhiRZ().y();
+        if (!isBarrel && clusterWidth > 0.2) continue;
+
         sps.m_index[spIdx] = (*it).first;
         sps.m_type[spIdx] = 1; // always Pixel
         sps.m_x[spIdx] = sp->x();
@@ -163,6 +173,7 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
         sps.m_phi[spIdx] = sp->phi();
         sps.m_covR[spIdx] = sp->dr()*sp->dr();
         sps.m_covZ[spIdx] = sp->dz()*sp->dz();
+        sps.m_clusterWidth[spIdx] = clusterWidth;
         spIdx++;
       }
       int layerEnd = spIdx;

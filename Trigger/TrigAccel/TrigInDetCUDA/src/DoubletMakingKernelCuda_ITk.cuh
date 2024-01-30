@@ -33,7 +33,10 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 	const float maxOuterRadius = 550.0;
 	
 	const int sliceIdx = blockIdx.x;
-	const int layerIdx = blockIdx.y;
+	const int layerIdx = dDetModel->m_middleSpacePointLayers[blockIdx.y];
+
+	const TrigAccel::ITk::SILICON_LAYER& layerGeo = dDetModel->m_layers[layerIdx];
+	bool isBarrel = (layerGeo.m_type == 0);
 
 	if(threadIdx.x == 0 && threadIdx.y == 0) {
 		const TrigAccel::ITk::SPACEPOINT_LAYER_RANGE& slr = dSpacepoints->m_phiSlices[sliceIdx];
@@ -67,7 +70,7 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 	for(int spmIdx=threadIdx.x+spBegin;spmIdx<spEnd;spmIdx+=blockDim.x) {
 
 		if(threadIdx.y ==0) {
-			 hasDoublets = d_Info->m_good[spmIdx] == 1;
+			hasDoublets = d_Info->m_good[spmIdx] == 1;
 		}
 		__syncthreads();
 
@@ -91,7 +94,14 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 		float zm = dSpacepoints->m_z[spmIdx];
 		float rm = dSpacepoints->m_r[spmIdx];
 
-		if (!canBeMiddleSpacePoint(rm)) continue;
+		float minTau = 0;
+		float maxTau = 100;
+
+		if (isBarrel) {
+			float clusterWidth = dSpacepoints->m_clusterWidth[spmIdx];
+			minTau = 6.7*(clusterWidth - 0.2);
+			maxTau = 1.6 + 0.15/(clusterWidth + 0.2) + 6.1*(clusterWidth - 0.2);
+		}
 
 		//2. loop over other phi-bins / layers
 
@@ -110,18 +120,18 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 
 				if(next_spEnd == next_spBegin) continue;//no spacepoints in this layer
 
-				const TrigAccel::ITk::SILICON_LAYER& layerGeo =  dDetModel->m_layers[nextLayerIdx];
-				bool isBarrel = (layerGeo.m_type == 0);
+				const TrigAccel::ITk::SILICON_LAYER& layerGeoSp =  dDetModel->m_layers[nextLayerIdx];
+				bool isBarrelSp = (layerGeoSp.m_type == 0);
 
-				float refCoord = layerGeo.m_refCoord;
-				if(isBarrel && std::abs(refCoord-rm)>maxDoubletLength) continue;
+				float refCoord = layerGeoSp.m_refCoord;
+				if(isBarrelSp && std::abs(refCoord-rm)>maxDoubletLength) continue;
 
 				//boundaries for nextLayer
 
 				float minCoord = 10000.0;
 				float maxCoord =-10000.0;
 
-				if(isBarrel) {
+				if(isBarrelSp) {
 					minCoord = zMinus + refCoord*(zm-zMinus)/rm;
 					maxCoord = zPlus + refCoord*(zm-zPlus)/rm;
 				}
@@ -134,7 +144,7 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 					float tmp = maxCoord;maxCoord = minCoord;minCoord = tmp;
 				}
 
-				if(layerGeo.m_maxBound<minCoord || layerGeo.m_minBound>maxCoord) continue;
+				if(layerGeoSp.m_maxBound<minCoord || layerGeoSp.m_minBound>maxCoord) continue;
 
 				//3. get a tile of inner/outer spacepoints
 
@@ -143,7 +153,7 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 					float zsp = dSpacepoints->m_z[spIdx];
 					float rsp = dSpacepoints->m_r[spIdx];
 
-					float spCoord = (isBarrel) ? zsp : rsp;
+					float spCoord = (isBarrelSp) ? zsp : rsp;
 
 					if(spCoord<minCoord || spCoord>maxCoord) continue;
 
@@ -152,12 +162,18 @@ __global__ static void doubletMakingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SETTI
 
 					// Cut on doublet length
 					float dL = std::sqrt( dr*dr + dz*dz);
-					float maxDL = getMaxDeltaLEta(getEta(dr, dz, dL));
+					float maxDL = GPUTrackSeedingItkHelpers::getMaxDeltaLEta(GPUTrackSeedingItkHelpers::getEta(dr, dz, dL));
 					if(std::abs(dL)>maxDL || std::abs(dL)<minDoubletLength) continue;
 								
 					// Cut on tau
 					float tau = dz/dr;
-					if(std::abs(tau)>maxCtg) continue;
+					float ftau = std::abs(tau);
+					if(ftau>maxCtg) continue;
+
+					// Cut on pixel width
+					if (isBarrelSp) {
+						if(ftau < minTau || ftau > maxTau) continue;
+					}
 
 					// Cut on Z
 					float z0 = zsp - rsp*tau;
