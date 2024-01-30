@@ -12,7 +12,7 @@ atlas_add_component( InDetAlignGenAlgs
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthContainers AthenaBaseComps GeoPrimitives Identifier EventPrimitives xAODEventInfo GaudiKernel StoreGateLib TRT_ConditionsServicesLib TrkParameters TrkFitterUtils AthenaKernel AtlasDetDescr DetDescrConditions IdDictDetDescr InDetIdentifier InDetReadoutGeometry TRT_ReadoutGeometry InDetPrepRawData InDetRIO_OnTrack TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack TrkTrackSummary TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces InDetAlignGenToolsLib RegistrationServicesLib )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthContainers AthenaBaseComps GeoPrimitives Identifier EventPrimitives xAODEventInfo GaudiKernel StoreGateLib TRT_ConditionsServicesLib TrkParameters TrkFitterUtils AthenaKernel AtlasDetDescr DetDescrConditions IdDictDetDescr SCT_ReadoutGeometry InDetIdentifier InDetReadoutGeometry TRT_ReadoutGeometry InDetPrepRawData InDetRIO_OnTrack TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack TrkTrackSummary TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces InDetAlignGenToolsLib RegistrationServicesLib )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

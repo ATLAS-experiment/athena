@@ -360,7 +360,7 @@ StatusCode EventSelectorAthenaPool::reinit() const {
 
    // Check if File is BS, for which Incident is thrown by SingleEventInputSvc
    if (tech != 0x00001000 && m_processMetadata.value() && !m_firedIncident) {
-      FileIncident firstInputFileIncident(name(), "FirstInputFile", "FID:" + fid, "FID:" + fid);
+      FileIncident firstInputFileIncident(name(), "FirstInputFile", "FID:" + fid, fid);
       m_incidentSvc->fireIncident(firstInputFileIncident);
       m_firedIncident = true;
    }
@@ -704,13 +704,13 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
                return(StatusCode::FAILURE);
          }
          if (m_processMetadata.value()) {
-            FileIncident beginInputFileIncident(name(), "BeginInputFile", *m_inputCollectionsIterator, "FID:" + m_guid.toString());
+            FileIncident beginInputFileIncident(name(), "BeginInputFile", *m_inputCollectionsIterator, m_guid.toString());
             m_incidentSvc->fireIncident(beginInputFileIncident);
          }
       } else {
          // Check if File is BS
          if (tech != 0x00001000 && m_processMetadata.value()) {
-            FileIncident beginInputFileIncident(name(), "BeginInputFile", "FID:" + m_guid.toString());
+            FileIncident beginInputFileIncident(name(), "BeginInputFile", "FID:" + m_guid.toString(), m_guid.toString());
             m_incidentSvc->fireIncident(beginInputFileIncident);
          }
       }

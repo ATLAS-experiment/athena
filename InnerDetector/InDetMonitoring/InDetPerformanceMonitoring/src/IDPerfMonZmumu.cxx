@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //==================================================================================
@@ -182,31 +182,32 @@ StatusCode IDPerfMonZmumu::initialize()
       }
   }
 
-  // Retrieve fitter
-  if (m_TrackRefitter1.retrieve().isSuccess()) {
-    ATH_MSG_INFO("Retrieved tool m_TrackRefitter1: " << m_TrackRefitter1 << " SUCCESS ");
-  } 
-  else {
-    ATH_MSG_FATAL("Unable to retrieve m_TrackRefitter1 " << m_TrackRefitter1 << " FAILURE ");
-    return StatusCode::FAILURE;
-  }
+  // Retrieve Track fitter and track to vertex
+  if (m_doRefit) { // only if track refit is requested
+    if (m_TrackRefitter1.retrieve().isSuccess()) {
+      ATH_MSG_INFO("Retrieved tool m_TrackRefitter1: " << m_TrackRefitter1 << " SUCCESS ");
+    } 
+    else {
+      ATH_MSG_FATAL("Unable to retrieve m_TrackRefitter1 " << m_TrackRefitter1 << " FAILURE ");
+      return StatusCode::FAILURE;
+    }
 
-  // Retrieve the second fitter
-  if (m_TrackRefitter2.retrieve().isSuccess()) {
-    ATH_MSG_INFO("Retrieved tool m_TrackRefitter2: " << m_TrackRefitter2 << " SUCCESS ");
-  } 
-  else {
-    ATH_MSG_FATAL("Unable to retrieve m_TrackRefitter2 " << m_TrackRefitter2 << " FAILURE ");
-    return StatusCode::FAILURE;
-  }
+    // Retrieve the second fitter
+    if (m_TrackRefitter2.retrieve().isSuccess()) {
+      ATH_MSG_INFO("Retrieved tool m_TrackRefitter2: " << m_TrackRefitter2 << " SUCCESS ");
+    } 
+    else {
+      ATH_MSG_FATAL("Unable to retrieve m_TrackRefitter2 " << m_TrackRefitter2 << " FAILURE ");
+      return StatusCode::FAILURE;
+    }
 
-
-  if (m_trackToVertexTool.retrieve().isSuccess()) {
-    ATH_MSG_INFO("Retrieved tool m_trackToVertexTool " << m_trackToVertexTool << " SUCCESS ");
-  } 
-  else {
-    ATH_MSG_FATAL("Unable to retrieve m_trackToVertexTool " << m_trackToVertexTool << " FAILURE ");
-    return StatusCode::FAILURE;
+    if (m_trackToVertexTool.retrieve().isSuccess()) {
+      ATH_MSG_INFO("Retrieved tool m_trackToVertexTool " << m_trackToVertexTool << " SUCCESS ");
+    } 
+    else {
+      ATH_MSG_FATAL("Unable to retrieve m_trackToVertexTool " << m_trackToVertexTool << " FAILURE ");
+      return StatusCode::FAILURE;
+    }
   }
 
   if(m_useTrackSelectionTool){
@@ -231,7 +232,7 @@ StatusCode IDPerfMonZmumu::initialize()
 
   ATH_CHECK (m_EventInfoKey.initialize());   // initializing the eventInfo "accessor"
 
-  ATH_CHECK (m_extrapolator.retrieve());
+  if (m_isMC) ATH_CHECK (m_extrapolator.retrieve()); // this is only used for the truth particles
   
   ATH_CHECK (m_vertexKey.initialize());
   

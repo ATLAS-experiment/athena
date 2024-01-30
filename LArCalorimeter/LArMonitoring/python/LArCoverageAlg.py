@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file LArCoverageAlg
@@ -7,14 +7,6 @@
 @date 2019-07-24
 @brief Adapted from ExampleLArMonitorAlgorithm.py by C. D. Burton and P. Onyisi 
 '''
-def LArCoverageConfigOld(flags):
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArCoverageAlg
-
-    helper = AthMonitorCfgHelperOld(flags, 'LArCoverageAlgOldCfg')
-    LArCoverageConfigCore(helper,LArCoverageAlg,flags)
-
-    return helper.result()
 
 def LArCoverageConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
@@ -513,25 +505,26 @@ def LArCoverageConfigCore(helper, algoinstance,flags):
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-    createLArMonConfigFlags()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+    flags.addFlagsCategory("LArMon", addLArMonFlags)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
-    ConfigFlags.DQ.useTrigger = False
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.DQ.useTrigger = False
 
-    ConfigFlags.Output.HISTFileName = 'LArCoverageOutput.root'
-    ConfigFlags.lock()
+    flags.Output.HISTFileName = 'LArCoverageOutput.root'
+    flags.lock()
 
     # Cell building
     from CaloRec.CaloRecoConfig import CaloRecoCfg
-    cfg=CaloRecoCfg(ConfigFlags)
+    cfg=CaloRecoCfg(flags)
 
-    larCoverageAcc = LArCoverageConfig(ConfigFlags)    
+    larCoverageAcc = LArCoverageConfig(flags)    
     cfg.merge(larCoverageAcc)
 
-    ConfigFlags.dump()
+    flags.dump()
     f=open("CoverageMaker.pkl","wb")
     cfg.store(f)
     f.close()

@@ -50,7 +50,7 @@ def initFlags():
 
     acf.addFlag('Common.MsgSuppression',True) # Enable suppression of printout in MessageSvc
     acf.addFlag('Common.MsgSourceLength',50) #Length of the source-field in the format str of MessageSvc
-    acf.addFlag('Common.ProductionStep', ProductionStep.Default, enum=ProductionStep, help=argparse.SUPPRESS)
+    acf.addFlag('Common.ProductionStep', ProductionStep.Default, type=ProductionStep, help=argparse.SUPPRESS)
     acf.addFlag('Common.isOverlay', False, help=argparse.SUPPRESS)
 
     #Flags describing the input data
@@ -59,7 +59,7 @@ def initFlags():
     acf.addFlag('Input.SecondaryFiles', [], help=argparse.SUPPRESS) # secondary input files for DoubleEventSelector
     acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []), help="expert flag, do not override" ) # list of names of streams written to this file
     acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", "data17_13TeV"), help="expert flag, do not override") # former global.ProjectName
-    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), enum=Campaign, help="expert flag, do not override")
+    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), type=Campaign, help="expert flag, do not override")
 
 
     acf.addFlag('Concurrency.NumProcs', 0, help="0 = disables MP, otherwise is # of processes to use in MP mode")

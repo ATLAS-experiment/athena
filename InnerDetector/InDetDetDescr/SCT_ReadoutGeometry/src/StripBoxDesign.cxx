@@ -20,7 +20,8 @@ StripBoxDesign::StripBoxDesign(const SiDetectorDesign::Axis stripDirection,
                                const int nStrips,
                                const double pitch,
                                const double length,
-			       const double zShift) : 
+                               InDetDD::DetectorType detectorType,
+                               const double zShift) : 
     SCT_ModuleSideDesign(thickness, true, true, true, 1, nRows * nStrips, nRows * nStrips, 0, false, carrier,readoutSide, stripDirection, thicknessDirection) {
     if (nRows <= 0) {
         throw std::runtime_error(
@@ -32,6 +33,7 @@ StripBoxDesign::StripBoxDesign(const SiDetectorDesign::Axis stripDirection,
     m_pitch = pitch;
     m_length = length;
     m_zShift = zShift;
+    m_detectorType = detectorType;
 
     double width = m_nStrips * m_pitch;
     double fullLength = m_nRows * m_length;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGTOOL_JETFITTERINPUTWRITER_H
@@ -53,8 +53,6 @@ namespace Analysis {
                                     float IP3dlike=-5000) const override;
 
   private:
-    Gaudi::Property<bool> m_useCombinedIPNN
-    { this, "useCombinedIPNN", true, "" };
     Gaudi::Property<bool> m_usePtCorrectedMass
     { this, "usePtCorrectedMass", false, "" };
 

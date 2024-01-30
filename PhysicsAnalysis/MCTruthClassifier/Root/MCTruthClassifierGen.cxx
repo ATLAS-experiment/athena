@@ -2073,7 +2073,7 @@ MCTruthClassifier::findEndVert(const xAOD::TruthParticle* thePart)
       for (unsigned int ipOut = 0; ipOut < EndVert->nOutgoingParticles(); ipOut++) {
         const xAOD::TruthParticle* itrDaug = EndVert->outgoingParticle(ipOut);
         if (!itrDaug) continue;
-        if (((itrDaug &&thePart && HepMC::is_same_generator_particle(itrDaug,thePart)) ||
+        if (((itrDaug && HepMC::is_same_generator_particle(itrDaug,thePart)) ||
              // brem on generator level for tau
              (EndVert->nOutgoingParticles() == 1 && EndVert->nIncomingParticles() == 1 &&
               !HepMC::is_simulation_particle(itrDaug) && !HepMC::is_simulation_particle(thePart))) &&

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGCALIBRATION_JETTAGCALIBCONDALG_H
@@ -75,7 +75,6 @@ class JetTagCalibCondAlg : public AthAlgorithm {
   void initializeSoftMu();
   void initializeMV2(const std::string&);
   void initializeRNNIP();
-  void initializeJetVertexCharge();
   void initializeMultiSV(const std::string&);
   void initializeDL1(const std::string&);
 

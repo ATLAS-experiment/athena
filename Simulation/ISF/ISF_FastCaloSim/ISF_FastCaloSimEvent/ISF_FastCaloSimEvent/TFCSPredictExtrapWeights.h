@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSPREDICTEXTRAPWEIGHTS_h
@@ -51,6 +51,10 @@ public:
                      const std::string &FastCaloTXTInputFolderName);
 
   // Test function
+  static void test_path(std::string &net_path, std::string const &norm_path,
+                        TFCSSimulationState *simulstate = nullptr,
+                        const TFCSTruthState *truth = nullptr,
+                        const TFCSExtrapolationState *extrapol = nullptr);
   static void unit_test(TFCSSimulationState *simulstate = nullptr,
                         const TFCSTruthState *truth = nullptr,
                         const TFCSExtrapolationState *extrapol = nullptr);

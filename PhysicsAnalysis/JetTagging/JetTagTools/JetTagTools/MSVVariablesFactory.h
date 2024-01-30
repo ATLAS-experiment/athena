@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGTOOL_MSVVARIABLESFACTORY_C
@@ -20,38 +20,33 @@ class StoreGateSvc;
 
 namespace Analysis {
 
-
-  //static const InterfaceID IID_JetFitterVariablesFactory("Analysis::JetFitterVariablesFactory", 1, 0);
-
-
   class MSVVariablesFactory : public AthAlgTool , virtual public IMSVVariablesFactory  {
     
   public:
     
-    
     MSVVariablesFactory(const std::string& name,
 			      const std::string& n, const IInterface* p);
-    virtual ~MSVVariablesFactory();
-    
+    virtual ~MSVVariablesFactory() = default;
+
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     
-    virtual StatusCode fillMSVVariables(const xAOD::Jet &, xAOD::BTagging* BTag, const Trk::VxSecVKalVertexInfo* myInfoVKal, xAOD::VertexContainer* btagVertex, const xAOD::Vertex& PV, std::string basename) const override ;
-    virtual StatusCode createMSVContainer(const xAOD::Jet &, const Trk::VxSecVKalVertexInfo* myInfoVKal, xAOD::VertexContainer* btagVertex, const xAOD::Vertex& PV) const override;
-
-    void setOrigin(const xAOD::Vertex* priVtx); 
-    //  static const InterfaceID& interfaceID() { return IID_JetFitterVariablesFactory; };
-
+    virtual StatusCode fillMSVVariables
+    (const xAOD::Jet &, xAOD::BTagging* BTag,
+     const Trk::VxSecVKalVertexInfo* myInfoVKal,
+     xAOD::VertexContainer* btagVertex, const xAOD::Vertex& PV,
+     std::string basename) const override ;
+    virtual StatusCode createMSVContainer
+    (const xAOD::Jet &, const Trk::VxSecVKalVertexInfo* myInfoVKal,
+     xAOD::VertexContainer* btagVertex, const xAOD::Vertex& PV) const override;
    
   private:
     double get3DSignificance(const xAOD::Vertex* priVertex,
                              std::vector<const xAOD::Vertex*>& secVertex,
                              const Amg::Vector3D jetDirection) const;
-    //const xAOD::Vertex* m_priVtx;
    
     
   };
-  //inline void MSVVariablesFactory::setOrigin(const xAOD::Vertex* priVtx) { m_priVtx = priVtx; }
   
 }//end Analysis namespace
 

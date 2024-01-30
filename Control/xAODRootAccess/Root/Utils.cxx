@@ -320,7 +320,7 @@ namespace xAOD {
          const TObjArray * pBranches = tree->GetListOfBranches();
          const std::regex pattern( ".*" + pre + ".*" );
 
-         for( int i = 0; i < pBranches->GetLast() ; ++i ) {
+         for( int i = 0, nLast = pBranches->GetLast(); i <= nLast; ++i ) {
             const std::string name = pBranches->At(i)->GetName();
 
             if( std::regex_match( name, pattern ) )

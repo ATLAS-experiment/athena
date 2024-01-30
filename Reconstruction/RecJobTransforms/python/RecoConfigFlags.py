@@ -115,7 +115,7 @@ def createRecoConfigFlags():
     flags.addFlag("Reco.EnableHI",
                   lambda prevFlags: prevFlags.Reco.HIMode is not HIMode.pp)
 
-    flags.addFlag("Reco.HIMode", _hiModeChoice, enum=HIMode)
+    flags.addFlag("Reco.HIMode", _hiModeChoice, type=HIMode)
 
     # Enable alg for decorating EventInfo with BeamSpot info
     # (maybe not always available for calibration runs, etc)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_BTAGLIGHTSECVERTEXING_H
@@ -17,9 +17,8 @@
 #include "xAODBTagging/BTagging.h"
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODBTagging/BTagVertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "JetTagTools/IJetFitterVariablesFactory.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadHandleKeyArray.h"
@@ -35,15 +34,12 @@ namespace Trk{
 /** The namespace of all packages in PhysicsAnalysis/JetTagging */
 namespace Analysis
 {
-  class IJetFitterVariablesFactory;
-  class IMSVVariablesFactory;
-
   class BTagLightSecVertexing : public AthAlgTool, virtual public IBTagLightSecVertexing
   {
       public:
           /** Constructors and destructors */
           BTagLightSecVertexing(const std::string&,const std::string&,const IInterface*);
-          virtual ~BTagLightSecVertexing();
+          virtual ~BTagLightSecVertexing() = default;
 
           virtual StatusCode initialize() override;
           virtual StatusCode BTagSecVertexing_exec(const xAOD::JetContainer * jetContainer, xAOD::BTaggingContainer * btaggingContainer) const override;
@@ -54,12 +50,10 @@ namespace Analysis
          StatusCode fillJFVariables(const xAOD::Jet&, xAOD::BTagging*, const Trk::VxJetFitterVertexInfo*, const xAOD::TrackParticleContainer*, const std::string&) const;
 
          ToolHandle<IJetFitterVariablesFactory> m_JFvarFactory;
-         //ToolHandle<IMSVVariablesFactory> m_MSVvarFactory;
 
          std::vector<std::string> m_secVertexFinderTrackNameList;
          std::vector<std::string> m_secVertexFinderBaseNameList;
 
-         std::string m_vxPrimaryName; //Input ReadHandle
          SG::ReadHandleKey<xAOD::VertexContainer> m_VertexCollectionName {this, "vxPrimaryCollectionName", "", "Input primary vertex container"};
          SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetSVLinkName{ this, "JetSecVtxLinkName", "", "Element Link vector form jet to SV container"};
 	 SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetSVFlipLinkName{ this, "JetSecVtxFlipLinkName", "", "Element Link vector form jet to SVFlip container"};

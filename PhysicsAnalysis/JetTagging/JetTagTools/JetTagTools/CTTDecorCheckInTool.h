@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //
 // CTTDecorCheck.h - Description
@@ -16,37 +16,26 @@
 
 #include <vector>
 #include "AthenaBaseComps/AthAlgorithm.h"
-//#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 
- 
 #include "xAODJet/JetContainer.h" 
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
 #include "JetTagTools/ClassifiedTrackTaggerTool.h"
 
-
-
-class TLorentzVector;
-
-
-
-  class CTTDecorCheckInTool : public AthAlgorithm
+class CTTDecorCheckInTool : public AthAlgorithm
   {
    public:
        /* Constructor */
       CTTDecorCheckInTool(const std::string& type, ISvcLocator* pSvcLocator);
        /* Destructor */
-      virtual ~CTTDecorCheckInTool();
-
+      virtual ~CTTDecorCheckInTool() = default;
 
       virtual StatusCode initialize() override;
       virtual StatusCode execute() override;
-      virtual StatusCode finalize() override;
 
 //------------------------------------------------------------------------------------------------------------------
 // Private data and functions
@@ -64,11 +53,7 @@ class TLorentzVector;
       SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey { this, "VertexContainer", "PrimaryVertices"};  
     
       SG::ReadDecorHandleKey<xAOD::JetContainer> m_jetReadDecorKey{this,"JetDecorKey","AntiKt4EMPFlowJets.CTTScore","ReadDecorHandleKey for adding CTT score to Jets"};
-    
 
- };
-
-
-
+};
 
 #endif

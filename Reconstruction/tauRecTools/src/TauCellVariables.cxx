@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
 
 #include "TauCellVariables.h"
-#include "tauRecTools/KineUtils.h"
 #include "tauRecTools/HelperFunctions.h"
 
 #include "xAODTau/TauJet.h"
@@ -45,8 +44,7 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
   TLorentzVector tauAxis = tauRecTools::getTauAxis(pTau, m_doVertexCorrection);
   
   // loop over cells in all the clusters and calculate the variables
-  std::vector<xAOD::CaloVertexedTopoCluster> vertexedClusterList = pTau.vertexedClusters();
-  for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : vertexedClusterList){
+  for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : pTau.vertexedClusters()){
     const xAOD::CaloCluster& cluster = vertexedCluster.clust();
     const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
     if (cellLinks == nullptr) {
@@ -79,14 +77,17 @@ StatusCode TauCellVariables::execute(xAOD::TauJet& pTau) const {
         cellEnergy = vxCell.energy();
       }
 
-      double dR = Tau1P3PKineUtils::deltaR(tauAxis.Eta(), tauAxis.Phi(), cellEta, cellPhi);
-      CaloSampling::CaloSample calo = cell->caloDDE()->getSampling();
-      
+      TLorentzVector temp_cc_p4;
+      temp_cc_p4.SetPtEtaPhiE(cellET, cellEta, cellPhi, cellEnergy);
+      double dR = tauAxis.DeltaR(temp_cc_p4);
+     
       if (dR < m_cellCone) {
         sumCellET += cellET;
-      
+       
         if (dR < 0.1) sumCellET01 += cellET;
         if (dR > 0.1 && dR < 0.2) sumCellET12 += cellET;
+
+        CaloSampling::CaloSample calo = cell->caloDDE()->getSampling();
 
         // EM layer: PreSamplerB, PreSamplerE, EMB1, EME1, EMB2, EME2
         // Most energy of neutral particles are deposited in the first two EM laywers

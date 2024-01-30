@@ -265,9 +265,9 @@ StatusCode MetaDataSvc::newMetadataSource(const Incident& inc)
    }
    StatusCode rc(StatusCode::SUCCESS);
    for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
-      ATH_MSG_DEBUG(" calling beginInputFile for " << (*it)->name());
+      ATH_MSG_DEBUG(" calling beginInputFile on " << (*it)->name() << " for GUID \"" << guid << "\"");
       if ( (*it)->beginInputFile(guid).isFailure() ) {
-         ATH_MSG_ERROR("Unable to call beginInputFile for " << it->name());
+         ATH_MSG_ERROR("Unable to call beginInputFile for " << (*it)->name());
          rc = StatusCode::FAILURE;
       }
    }
@@ -284,8 +284,9 @@ StatusCode MetaDataSvc::retireMetadataSource(const Incident& inc)
    const std::string guid = fileInc->fileGuid();
    ATH_MSG_DEBUG("retireMetadataSource: " << fileInc->fileName());
    for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
+      ATH_MSG_DEBUG(" calling endInputFile on " << (*it)->name() << " for GUID \"" << guid << "\"");
       if ( (*it)->endInputFile(guid).isFailure() ) {
-         ATH_MSG_ERROR("Unable to call endInputFile for " << it->name());
+         ATH_MSG_ERROR("Unable to call endInputFile for " << (*it)->name());
          return StatusCode::FAILURE;
       }
    }
@@ -301,7 +302,7 @@ StatusCode MetaDataSvc::prepareOutput()
       for (auto it = m_metaDataTools.begin(); it != m_metaDataTools.end(); ++it) {
          ATH_MSG_DEBUG(" calling metaDataStop for " << (*it)->name());
          if ( (*it)->metaDataStop().isFailure() ) {
-            ATH_MSG_ERROR("Unable to call metaDataStop for " << it->name());
+            ATH_MSG_ERROR("Unable to call metaDataStop for " << (*it)->name());
             rc = StatusCode::FAILURE;
          }
       }
@@ -325,7 +326,7 @@ StatusCode MetaDataSvc::prepareOutput(const std::string& outputName)
       ATH_MSG_DEBUG("  calling metaDataStop for " << (*it)->name());
       // planning to replace the call below with  (*it)->prepareOutput(outputName)
       if ( (*it)->metaDataStop().isFailure() ) {
-         ATH_MSG_ERROR("Unable to call metaDataStop for " << it->name());
+         ATH_MSG_ERROR("Unable to call metaDataStop for " << (*it)->name());
          rc = StatusCode::FAILURE;
       }
    }
