@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,7 +44,7 @@ class TrigInDetTrackTruth {
 
   /** initialized constructor: easier way to construct an instance 
       if there is just one true particle associated with a track */
-  TrigInDetTrackTruth(const HepMcParticleLink p_tru_part, TrigIDHitStats hits)  
+  TrigInDetTrackTruth(const HepMcParticleLink& p_tru_part, TrigIDHitStats hits)  
     {
       // add this particle to the vector
       m_true_part_vec.push_back(p_tru_part); 

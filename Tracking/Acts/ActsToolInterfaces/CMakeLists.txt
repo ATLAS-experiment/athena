@@ -12,6 +12,7 @@ atlas_add_library( ActsToolInterfacesLib
                    INTERFACE
                    PUBLIC_HEADERS ActsToolInterfaces
                    LINK_LIBRARIES
+<<<<<<< HEAD
 		     ActsCore
 		     ActsEventLib
 		     ActsGeometryLib
@@ -24,3 +25,17 @@ atlas_add_library( ActsToolInterfacesLib
 		     TrkTrack
 		     xAODInDetMeasurement
 		     xAODMeasurementBase )
+=======
+                   GaudiKernel
+                   BeamSpotConditionsData
+                   ActsCore
+                   ActsEventLib
+		   ActsGeometryLib
+                   SiSpacePointFormationLib
+                   InDetReadoutGeometry
+		   InDetIdentifier
+                   xAODInDetMeasurement
+                   xAODMeasurementBase
+                   TrkFitterUtils
+                   )
+>>>>>>> ceee5aad679 (reverting accidental changes...)

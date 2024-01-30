@@ -20,7 +20,22 @@ def defineInputsMenu():
                     conn["thresholds"] += [
                         ('jXEPerf100',1),
                     ]              
-
+                if conn["name"] == "Topo1Opt1":
+                    conn["thresholds"] += [
+                        ('eTAU40HT',2),
+                    ]
+                if conn["name"] == "Topo1Opt1":
+                    conn["thresholds"] += [
+                        ('eTAU60HM',2),
+                    ]
+                if conn["name"] == "Topo1Opt1":
+                    conn["thresholds"] += [
+                        ('eTAU60HL',2),
+                    ]
+                if conn["name"] == "Topo1Opt1":
+                    conn["thresholds"] += [
+                        ('eTAU80HL',2),
+                    ]
                 # Add more decision algorithms
                 if conn["name"] == "Topo2El":
                     for group in conn["algorithmGroups"]:

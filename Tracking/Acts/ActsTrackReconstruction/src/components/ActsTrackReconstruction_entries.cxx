@@ -6,7 +6,11 @@
 #include "src/AmbiguityResolutionAlg.h"
 #include "src/ReFitterAlg.h"
 #include "src/CompareTrackAlg.h"
+<<<<<<< HEAD
 #include "src/TrackToTrackParticleCnvAlg.h"
+=======
+
+>>>>>>> ceee5aad679 (reverting accidental changes...)
 // Tools
 #include "src/TrackStatePrinter.h"
 #include "src/KalmanFitter.h"
@@ -22,7 +26,10 @@ DECLARE_COMPONENT( ActsTrk::CompareTrackAlg )
 DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
+<<<<<<< HEAD
 DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
+=======
+>>>>>>> ceee5aad679 (reverting accidental changes...)
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinter )

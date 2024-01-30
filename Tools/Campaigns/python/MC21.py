@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import ProductionStep
 from Campaigns.Utils import Campaign
 
@@ -148,11 +148,6 @@ def MC21SimulationMultipleIoV(flags):
                               profile= 'RunDependentSimData.PileUpProfile_run410000_MC21a_MultiBeamspot')
 
 
-def MC21SimulationMultiBeamSpot(flags):
-    """MC21 flags for simulation (alias)"""
-    MC21SimulationMultipleIoV(flags)
-
-
 def MC21SimulationSingleIoVCalibrationHits(flags):
     """MC21 flags for simulation with CalibrationHits"""
     MC21SimulationSingleIoV(flags)
@@ -172,8 +167,3 @@ def MC21SimulationMultipleIoVCalibrationHits(flags):
     from SimuJobTransforms import CalHits, ParticleID
     CalHits(flags)
     ParticleID(flags)
-
-
-def MC21SimulationMultiBeamSpotCalibrationHits(flags):
-    """MC21 flags for simulation with CalibrationHits (alias)"""
-    MC21SimulationMultipleIoVCalibrationHits(flags)

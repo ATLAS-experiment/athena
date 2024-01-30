@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -463,6 +463,9 @@ if __name__ == '__main__':
             flags.Input.Files = defaultTestFiles.RAW_RUN2
         elif flags.Trigger.EDMVersion==3:
             flags.Input.Files = defaultTestFiles.RAW_RUN3
+
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
 
     flags.lock()
 

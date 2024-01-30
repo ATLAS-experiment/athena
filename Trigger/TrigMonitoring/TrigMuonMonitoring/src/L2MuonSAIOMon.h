@@ -31,8 +31,8 @@ class L2MuonSAIOMon : public TrigMuonMonitorAlgorithm{
   StatusCode L2OverlapRemover( std::vector< const xAOD::L2CombinedMuon* > matchSA_L2IOobjects, std::vector< bool > &isoverlap, std::vector< bool > &passOR ) const;
   bool isOverlap( const xAOD::L2CombinedMuon* matchSA_L2IOobject1, const xAOD::L2CombinedMuon* matchSA_L2IOobject2 ) const;
   StatusCode chooseBestMuon( std::vector< const xAOD::L2CombinedMuon* > matchSA_L2IOobjects, std::vector< bool > &passOR, std::vector< unsigned int > &mucombResult ) const;
-  bool muCombHypo_TDTworkaround( const std::string &chain, const std::vector< const xAOD::L2CombinedMuon* >& Trig_L2IOobjects, std::vector< bool > &pass_muCombHypo ) const;
-  bool isPassedmuCombHypo( const std::string &chain, const xAOD::L2CombinedMuon* Trig_L2IOobjects ) const;
+  StatusCode muCombHypo_TDTworkaround( const std::string &chain, const std::vector< const xAOD::L2CombinedMuon* >& Trig_L2IOobjects, std::vector< bool > &pass_muCombHypo ) const;
+  StatusCode isPassedmuCombHypo( const std::string &chain, const xAOD::L2CombinedMuon* Trig_L2IOobjects ,bool &pass_muCombHypo) const;
   StatusCode decision_ptthreshold( const std::string &chain, std::vector< float > &my_EtaBins, std::vector< float > &my_muCombThres,
                                    bool &my_pikCuts, float &my_maxPtToApplyPik, float &my_chi2MaxID ) const;
 

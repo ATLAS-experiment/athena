@@ -104,7 +104,16 @@ StatusCode L2MuonSAIOMon :: fillVariablesPerOfflineMuonPerChain(const EventConte
 
 
   if( chain.find("probe") != std::string::npos ){ // L2Inside-Out efficiency using Tag&Probe chain
-    if ( !getTrigDecisionTool()->isPassed(chain) ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
+    if(chain.find("L1MU14FCH")){
+      if ( !getTrigDecisionTool()->isPassed("HLT_mu24_ivarmedium_L1MU14FCH") ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
+    }
+    else if(chain.find("L1MU18VFCH")){
+      if ( !getTrigDecisionTool()->isPassed("HLT_mu24_ivarmedium_L1MU18VFCH") ) return StatusCode::SUCCESS; // impose trigger pass in order to eliminate bias
+    }
+    else
+    {
+      return StatusCode::SUCCESS;
+    }
 
     // search tag offline muon
     const xAOD::Muon* tag = searchTagOfflineMuon( ctx, mu );
@@ -123,35 +132,38 @@ StatusCode L2MuonSAIOMon :: fillVariablesPerOfflineMuonPerChain(const EventConte
     float tpext_dphi = xAOD::P4Helpers::deltaPhi((*tag_ms_track)->phi(), (*probe_ms_track)->phi());
     offdR = std::sqrt(tpext_deta*tpext_deta + tpext_dphi*tpext_dphi);
 
-    if( Trig_L2IOobject == nullptr ){
-      passL2InsideOut = false;
-      passL2SA = false;
+    passL2InsideOut = false;
+    passL2SA = false;
 
-      // retrieve probe l2SA objects
-      int legIndex_probe = 1; // probe
-      std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> > featureCont = getTrigDecisionTool()->features<xAOD::L2StandAloneMuonContainer>( chain,
-																				   TrigDefs::includeFailedDecisions,
-																				   "HLT_MuonL2SAInfo",
-																				   TrigDefs::lastFeatureOfType,
-																				   TrigCompositeUtils::featureString(),
-																				   legIndex_probe );
+    // retrieve probe l2SA objects
+    int legIndex_probe = 1; // probe
+    std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> > featureCont = getTrigDecisionTool()->features<xAOD::L2StandAloneMuonContainer>( chain,
+																			   TrigDefs::includeFailedDecisions,
+																			   "HLT_MuonL2SAInfo",
+																			   TrigDefs::lastFeatureOfType,
+																			   TrigCompositeUtils::featureString(),
+																			   legIndex_probe );
 
-      for(const TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>& probe_L2SALinkInfo : featureCont){
-	ATH_CHECK( probe_L2SALinkInfo.isValid() );
-	const ElementLink<xAOD::L2StandAloneMuonContainer> probe_L2SAobject = probe_L2SALinkInfo.link;
-	if( m_matchTool->isMatchedL2SA( (*probe_L2SAobject), mu ) ){
-	  if( probe_L2SALinkInfo.state == TrigCompositeUtils::ActiveState::ACTIVE ) passL2SA = true;
-	  ATH_MSG_WARNING(" There is at least one ACTIVE probe L2SA object but no L2IO objects." );
-	  return StatusCode::SUCCESS;
-	}
+    for(const TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>& probe_L2SALinkInfo : featureCont){
+	    ATH_CHECK( probe_L2SALinkInfo.isValid() );
+	    const ElementLink<xAOD::L2StandAloneMuonContainer> probe_L2SAobject = probe_L2SALinkInfo.link;
+	    if( m_matchTool->isMatchedL2SA( (*probe_L2SAobject), mu ) ){
+	      if( probe_L2SALinkInfo.state == TrigCompositeUtils::ActiveState::ACTIVE ) passL2SA = true;
+	    }
+    }
+
+    if(passL2SA == true){
+      if(m_matchTool->isMatchedL2InsideOut( Trig_L2IOobject, mu ))
+      {
+        bool isPass = false;
+        ATH_CHECK(isPassedmuCombHypo( chain, Trig_L2IOobject ,isPass));
+        passL2InsideOut = isPass;
       }
     }
     else{
-      if( !m_matchTool->isMatchedL2InsideOut( Trig_L2IOobject, mu ) ) return StatusCode::SUCCESS; // dR between L2Inside-Out object and offline muon is too large
-
-      passL2InsideOut = isPassedmuCombHypo( chain, Trig_L2IOobject );
-      passL2SA = true;
+      return StatusCode::SUCCESS;
     }
+   
 
     fill(m_group+"_"+chain, passL2InsideOut, passL2SA, offPt);
 
@@ -927,31 +939,29 @@ StatusCode L2MuonSAIOMon :: chooseBestMuon( std::vector< const xAOD::L2CombinedM
 }
 
 
-bool L2MuonSAIOMon :: muCombHypo_TDTworkaround( const std::string &chain, const std::vector< const xAOD::L2CombinedMuon* >& Trig_L2IOobjects, std::vector< bool > &pass_muCombHypo ) const{
+StatusCode L2MuonSAIOMon :: muCombHypo_TDTworkaround( const std::string &chain, const std::vector< const xAOD::L2CombinedMuon* >& Trig_L2IOobjects, std::vector< bool > &pass_muCombHypo ) const{
 
-  bool pass_muCombHypo_evt = false;
 
   int requireMuonNum = 1;
 
   int passHypo_MuonNum = 0;
   for(auto &Trig_L2IOobject : Trig_L2IOobjects){
-    bool pass_muCombHypo_obj = isPassedmuCombHypo( chain, Trig_L2IOobject );
+    bool isPass_muCombHypo = false;
+    ATH_CHECK(isPassedmuCombHypo( chain, Trig_L2IOobject ,isPass_muCombHypo));
+    bool pass_muCombHypo_obj = isPass_muCombHypo;
     pass_muCombHypo.push_back(pass_muCombHypo_obj);
     if( pass_muCombHypo_obj ) passHypo_MuonNum++; 
   }
 
   if( passHypo_MuonNum >= requireMuonNum ){
     ATH_MSG_DEBUG("this evt passed muCombhypo");
-    pass_muCombHypo_evt = true;
   }
-
-  return pass_muCombHypo_evt;
+  return StatusCode::SUCCESS;
 }
 
 
-bool L2MuonSAIOMon :: isPassedmuCombHypo( const std::string &chain, const xAOD::L2CombinedMuon* Trig_L2IOobject ) const{
-
-  bool pass_muCombHypo = false;
+StatusCode L2MuonSAIOMon :: isPassedmuCombHypo( const std::string &chain, const xAOD::L2CombinedMuon* Trig_L2IOobject , bool &pass_muCombHypo) const{
+  pass_muCombHypo = false;
 
   // config
   std::vector< float > my_EtaBins = {0, 1.05, 1.5, 2.0, 9.9};
@@ -959,8 +969,7 @@ bool L2MuonSAIOMon :: isPassedmuCombHypo( const std::string &chain, const xAOD::
   bool my_pikCuts = true;
   float my_maxPtToApplyPik = 25.;
   float my_chi2MaxID = 3.5;
-  ATH_MSG_DEBUG( "decision_ptthreshold:   " << decision_ptthreshold( chain, my_EtaBins, my_muCombThres, my_pikCuts, my_maxPtToApplyPik, my_chi2MaxID ) );
-
+  ATH_CHECK( decision_ptthreshold( chain, my_EtaBins, my_muCombThres, my_pikCuts, my_maxPtToApplyPik, my_chi2MaxID ) );
   bool pikCut = true;
   bool stdCut = true;
 
@@ -988,8 +997,7 @@ bool L2MuonSAIOMon :: isPassedmuCombHypo( const std::string &chain, const xAOD::
     ATH_MSG_DEBUG("this obj passed muCombhypo");
     pass_muCombHypo = true;
   }
-
-  return pass_muCombHypo;
+  return StatusCode::SUCCESS;
 }
 
 
@@ -998,6 +1006,7 @@ StatusCode L2MuonSAIOMon :: decision_ptthreshold( const std::string &chain, std:
 
   my_maxPtToApplyPik = 25.;
   my_chi2MaxID = 3.5;
+  ATH_MSG_DEBUG("this chain is" << chain);
   if(chain == "HLT_mu4_l2io_L1MU3V"){
     my_EtaBins = {0, 1.05, 1.5, 2.0, 9.9}; //4GeV_v15a
     my_muCombThres = {3.86, 3.77, 3.69, 3.70}; //4GeV_v15a
@@ -1006,10 +1015,13 @@ StatusCode L2MuonSAIOMon :: decision_ptthreshold( const std::string &chain, std:
     my_EtaBins = {0, 1.05, 1.5, 2.0, 9.9}; //6GeV_v15a
     my_muCombThres = {5.87, 5.79, 5.70, 5.62}; //6GeV_v15a
     my_pikCuts = false;
+  }else if(chain == "HLT_mu24_ivarmedium_mu6_l2io_probe_L1MU18VFCH"){
+    my_EtaBins = {0, 1.05, 1.5, 2.0, 9.9}; //6GeV_v15a
+    my_muCombThres = {5.87, 5.79, 5.70, 5.62}; //6GeV_v15a
+    my_pikCuts = false;
   }else{
     ATH_MSG_ERROR("muCombHypo config is NOT defined in this package:chain =   " << chain);
   }
-
   return StatusCode::SUCCESS;
 }
 
