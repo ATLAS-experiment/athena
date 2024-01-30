@@ -382,7 +382,7 @@ def MUON1Cfg(ConfigFlags):
     # Trigger content
     MUON1SlimmingHelper.IncludeTriggerNavigation = False
     MUON1SlimmingHelper.IncludeJetTriggerContent = False
-    MUON1SlimmingHelper.IncludeMuonTriggerContent = False
+    MUON1SlimmingHelper.IncludeMuonTriggerContent = True
     MUON1SlimmingHelper.IncludeEGammaTriggerContent = False
     MUON1SlimmingHelper.IncludeJetTauEtMissTriggerContent = False
     MUON1SlimmingHelper.IncludeTauTriggerContent = False
