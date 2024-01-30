@@ -198,11 +198,7 @@ QString VP1EvtsOnServerInfo::Imp::init(const QString& infofile)
   ///////////////////////////////
 
   for (int i = i_begin_checksums+1;i < i_end_checksums; ++i) {
-#if QTCORE_VERSION >= 0x050E00
     QStringList parts = lines.at(i).split ( ' ', Qt::SkipEmptyParts );
-#else
-    QStringList parts = lines.at(i).split ( ' ', QString::SkipEmptyParts );
-#endif
     if (parts.count()!=2)
       return "Invalid line in checksums section";
     QString filename(parts.at(0));

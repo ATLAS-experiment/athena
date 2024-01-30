@@ -44,11 +44,7 @@ VP1EventFile::VP1EventFile()
 //____________________________________________________________________
 VP1EventFile::Imp * VP1EventFile::Imp::initFromFilename(const QString& filename, const QString& md5sum)
 {
-#if QTCORE_VERSION >= 0x050E00
   QStringList filenameparts = filename.split('.', Qt::SkipEmptyParts );
-#else
-  QStringList filenameparts = filename.split('.', QString::SkipEmptyParts );
-#endif
   if (filenameparts.isEmpty())
     return new Imp;
 
@@ -65,11 +61,7 @@ VP1EventFile::Imp * VP1EventFile::Imp::initFromFilename(const QString& filename,
   if (ieventinfo==-1)
     return new Imp;
 
-#if QTCORE_VERSION >= 0x050E00
   QStringList eventinfoparts = filenameparts.at(ieventinfo).split('_', Qt::SkipEmptyParts );
-#else
-  QStringList eventinfoparts = filenameparts.at(ieventinfo).split('_', QString::SkipEmptyParts );
-#endif
   if (eventinfoparts.count()<3)
     return new Imp;
   bool ok;
