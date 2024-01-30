@@ -365,10 +365,11 @@ void ZDCDataAnalyzer::StartEvent(int lumiBlock)
     m_moduleSum[side] = 0;
     m_moduleSumErrSq[side] = 0;
     m_moduleSumPreSample[side] = 0;
+    m_moduleSumBkgdFrac[side] = 0;
 
     m_calibModuleSum[side] = 0;
     m_calibModuleSumErrSq[side] = 0;
-
+    m_calibModSumBkgdFrac[side] = 0; 
     m_averageTime[side] = 0;
     m_fail[side] = false;
   }
@@ -404,7 +405,7 @@ void ZDCDataAnalyzer::LoadAndAnalyzeData(size_t side, size_t module, const std::
 }
 
 void ZDCDataAnalyzer::LoadAndAnalyzeData(size_t side, size_t module, const std::vector<float>& HGSamples, const std::vector<float>& LGSamples,
-    const std::vector<float>& HGSamplesDelayed, const std::vector<float>& LGSamplesDelayed)
+					 const std::vector<float>& HGSamplesDelayed, const std::vector<float>& LGSamplesDelayed)
 {
   // We immediately return if this module is disabled
   //
@@ -479,6 +480,9 @@ bool ZDCDataAnalyzer::FinishEvent()
   //
   for (size_t side : {0, 1}) {
     float tempFraction = 1.0;
+    double sumAmpTimesBkgdFrac = 0.0;
+    double sumCalibAmpTimesBkgdFrac = 0.0;
+      
     for (size_t module : {0, 1, 2, 3}) {
       ZDCPulseAnalyzer* pulseAna_p = m_moduleAnalyzers[side][module].get();
 
@@ -488,7 +492,8 @@ bool ZDCDataAnalyzer::FinishEvent()
 
         float amplitude = pulseAna_p->GetAmplitude();
         float ampError = pulseAna_p->GetAmpError();
-
+        float bkgdFraction = pulseAna_p->GetBkgdMaxFraction();
+;
         m_calibAmplitude[side][module] = amplitude * m_currentECalibCoeff[side][module];
 
         float calibAmpError = ampError * m_currentECalibCoeff[side][module];
@@ -501,6 +506,7 @@ bool ZDCDataAnalyzer::FinishEvent()
 
         m_moduleSum[side] += amplitude;
         m_moduleSumErrSq[side] += ampError * ampError;
+	sumAmpTimesBkgdFrac += amplitude*bkgdFraction;
 
         m_moduleSumPreSample[side] += pulseAna_p->GetPreSampleAmp();
 
@@ -508,23 +514,25 @@ bool ZDCDataAnalyzer::FinishEvent()
         m_calibModuleSumErrSq[side] += calibAmpError * calibAmpError;
 
         m_averageTime[side] += m_calibTime[side][module] * m_calibAmplitude[side][module];
+	sumCalibAmpTimesBkgdFrac += amplitude*bkgdFraction;
       }
 
+      if (m_moduleSum[side] > 0) m_moduleSumBkgdFrac[side] = sumAmpTimesBkgdFrac/m_moduleSum[side];
+      else m_moduleSumBkgdFrac[side] = 0;
+      
+      if (m_calibModuleSum[side] > 1e-6) {
+	m_averageTime[side] /= m_calibModuleSum[side];
+	m_calibModSumBkgdFrac[side] = sumCalibAmpTimesBkgdFrac/m_calibModuleSum[side];
+      }
+      else {
+	m_averageTime[side] = 0;
+	m_calibModSumBkgdFrac[side] = 0;
+      }
+      
       // subtract the fraction of LGOverflow events if we have fraction available (<0 means unavailable)
       if (pulseAna_p->LGOverflow() && m_moduleAmpFractionLG[side][module] > 0) {tempFraction -= m_moduleAmpFractionLG[side][module];}
     }
     if (tempFraction < 1.0) {m_moduleSum[side] /= tempFraction;}
-  }
-
-  // Finish calculation of energy-weighted times
-  //
-  for (size_t side : {0, 1}) {
-    if (m_calibModuleSum[side] > 1e-6) {
-      m_averageTime[side] /= m_calibModuleSum[side];
-    }
-    else {
-      m_averageTime[side] = 0;
-    }
   }
 
   m_eventCount++;

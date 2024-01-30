@@ -69,9 +69,11 @@ private:
   std::array<float, 2> m_moduleSum{};
   std::array<float, 2> m_moduleSumErrSq{};
   std::array<float, 2> m_moduleSumPreSample{};
+  std::array<float, 2> m_moduleSumBkgdFrac{};
 
   std::array<float, 2> m_calibModuleSum{};
   std::array<float, 2> m_calibModuleSumErrSq{};
+  std::array<float, 2> m_calibModSumBkgdFrac{};
 
   std::array<float, 2> m_averageTime{};
   std::array<bool, 2> m_fail{};
@@ -100,9 +102,11 @@ public:
 
   float GetModuleSum(size_t side) const {return m_moduleSum.at(side);}
   float GetModuleSumErr(size_t side) const {return std::sqrt(m_moduleSumErrSq.at(side));}
-
+  float GetSideBkgdFrac(size_t side) const {return m_moduleSumBkgdFrac.at(side);}
+  
   float GetCalibModuleSum(size_t side) const {return m_calibModuleSum.at(side);}
   float GetCalibModuleSumErr(size_t side) const {return std::sqrt(m_calibModuleSumErrSq.at(side));}
+  float GetSideCalibBkgdFrac(size_t side) const {return m_calibModSumBkgdFrac.at(side);}
 
   float GetModuleSumPreSample(size_t side) const {return m_moduleSumPreSample.at(side);}
 
