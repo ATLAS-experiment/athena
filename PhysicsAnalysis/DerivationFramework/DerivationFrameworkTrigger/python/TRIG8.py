@@ -119,7 +119,14 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     additional_triggers = [
         "HLT_mu20_msonly",
         "HLT_j180_2dispjet_2p_L1J100",
-        "HLT_j45_pf_ftf_preselj20_L1J15"
+        "HLT_j45_pf_ftf_preselj20_L1J15",
+        "HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1XE55",
+        "HLT_xe80_tcpufit_isotrk140_medium_iaggrmedium_L1XE55",
+        "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE50",
+        "HLT_xe80_tcpufit_distrk20_medium_L1XE50",
+        "HLT_xe80_tcpufit_distrk20_tight_L1XE50",
+        "HLT_mu60_L1MU14FCH"
+
     ]    
     idtrig_keys += additional_triggers
 
@@ -189,7 +196,8 @@ def TRIG8Cfg(flags):
                                             "AntiKt4EMPFlowJets",
                                             "BTagging_AntiKt4EMTopo",
                                             "BTagging_AntiKt4EMPFlow",
-                                            "TauJets"]
+                                            "TauJets"
+                                            ]
 
     TRIG8SlimmingHelper.AllVariables = ["HLT_IDTrack_Electron_FTF", 
                                         "HLT_IDTrack_ElecLRT_FTF", 
@@ -226,7 +234,11 @@ def TRIG8Cfg(flags):
                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx",
                                         "HLT_IDVertex_FS",
                                         "HLT_IDVertex_JetSuper",
-                                        "HLT_IDVertex_Tau"]
+                                        "HLT_IDVertex_Tau",
+                                        "HLT_MET_tcpufit",
+                                        "HLT_DisTrkBDTSel",
+                                        "InDetDisappearingTrackParticles" ]
+                                        
 
 
     TRIG8SlimmingHelper.StaticContent = [ 
