@@ -53,9 +53,9 @@ public:
 
 
 private:
-  ToolHandle<Trk::ITruthToTrack> m_truthToTrack { this, "TruthToTrackTool", "Trk::TruthToTrack/InDetTruthToTrack" }; //!< tool to create track parameters from a gen particle
-  ToolHandle<Trk::IExtrapolator> m_extrapolator { this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator" };
-  /////  ServiceHandle<IBeamCondSvc>    m_beamSpotSvc;
+  ToolHandle<Trk::ITruthToTrack> m_truthToTrack {this, "TruthToTrackTool", "Trk::TruthToTrack/InDetTruthToTrack" }; //!< tool to create track parameters from a gen particle
+  ToolHandle<Trk::IExtrapolator> m_extrapolator {this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"}; //!< ToolHandle for Extrapolator
+
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey { this, "EventInfo", "EventInfo" };
   SG::ReadHandleKey<InDet::SiClusterContainer> m_pixelClusterContainerKey { this, "pixelClustersName", "ITkPixelClusters" };

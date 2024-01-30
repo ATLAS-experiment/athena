@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -147,11 +147,7 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
     return result
 
 
-if __name__=='__main__':
-    # Setup the Run III behavior
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = 1
-    
+if __name__=='__main__':    
     # Setup logs
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import INFO

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -29,8 +29,6 @@ def TrackCounterHypoAlgCfg(flags):
 
 
 if __name__ == '__main__':
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior=1
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 

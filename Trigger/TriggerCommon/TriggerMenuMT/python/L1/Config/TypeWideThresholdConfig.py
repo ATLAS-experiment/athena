@@ -341,9 +341,9 @@ class L1Config_eTAU():
     rCore_fw_loose = 2  # rCore = 1 - (3x2)/(9x2), rCore > threshold -> pass
     rCore_fw_medium = 12 # PLACEHOLDER
     rCore_fw_tight = 32
-    rHad_fw_loose = 10 # PLACEHOLDER
+    rHad_fw_loose = 32 # PLACEHOLDER
     rHad_fw_medium = 72 # Only for HM, does not affect L/M/T which cut only on rCore
-    rHad_fw_tight = 72
+    rHad_fw_tight = 152
 
 
     def __call__(self) -> odict:

@@ -63,10 +63,10 @@ def createTrackingConfigFlags():
 
     # control which fitter to be used
     icf.addFlag("Tracking.trackFitterType",
-                TrackFitterType.GlobalChi2Fitter, enum=TrackFitterType)
+                TrackFitterType.GlobalChi2Fitter, type=TrackFitterType)
     # control which measurement updator to load as InDetUpdator
     icf.addFlag("Tracking.kalmanUpdator",
-                KalmanUpdatorType.KalmanUpdatorSMatrix, enum=KalmanUpdatorType)
+                KalmanUpdatorType.KalmanUpdatorSMatrix, type=KalmanUpdatorType)
 
     icf.addFlag("Tracking.materialInteractions", lambda prevFlags:
                 prevFlags.Beam.Type is not BeamType.SingleBeam)
@@ -107,7 +107,7 @@ def createTrackingConfigFlags():
                 PixelClusterSplittingType.NeuralNet
                 if prevFlags.GeoModel.Run <= LHCPeriod.Run3
                 else PixelClusterSplittingType.Truth,
-                enum=PixelClusterSplittingType)
+                type=PixelClusterSplittingType)
     # Cut value for splitting clusters into two parts
     icf.addFlag("Tracking.pixelClusterSplitProb1",
                 lambda prevFlags: (
@@ -347,7 +347,7 @@ def createTrackingConfigFlags():
             return PrimaryPassConfig.Default
 
     icf.addFlag("Tracking.PrimaryPassConfig", lambda prevFlags:
-                primaryPass(prevFlags), enum=PrimaryPassConfig)
+                primaryPass(prevFlags), type=PrimaryPassConfig)
 
     # Set up for first tracking pass, updated for second passes
     icf.addFlagsCategory("Tracking.MainPass",
@@ -414,7 +414,7 @@ def createTrackingConfigFlags():
             return ITkPrimaryPassConfig.Default
 
     icf.addFlag("Tracking.ITkPrimaryPassConfig", lambda prevFlags:
-                itkPrimaryPass(prevFlags), enum=ITkPrimaryPassConfig)
+                itkPrimaryPass(prevFlags), type=ITkPrimaryPassConfig)
 
     icf.addFlagsCategory ("Tracking.ITkMainPass",
                           createITkTrackingPassFlags, prefix=True)

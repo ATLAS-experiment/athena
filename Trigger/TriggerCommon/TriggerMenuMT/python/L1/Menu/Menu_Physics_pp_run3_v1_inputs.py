@@ -123,7 +123,7 @@ def defineInputsMenu():
             'eTAU40HM', 
          
             # eTAU thresholds for production
-            'eTAUSPARE2', 'eTAUSPARE3', 'eTAUSPARE4', 'eTAUSPARE5', 'eTAUSPARE6', 'eTAUSPARE7',
+            'eTAUSPARE6', 'eTAUSPARE7',
 
             None, None, 
 

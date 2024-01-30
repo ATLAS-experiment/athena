@@ -173,10 +173,16 @@ class ThresholdDef:
         eTAU_cuts = [20]
         for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iM' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rCore = "Medium" )
+
         eTAU_cuts = [40]
         for thrV in eTAU_cuts:
+            eTauThreshold('eTAU%iHT' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rHad = "Tight" )
+        eTAU_cuts = [40,60]
+        for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iHM' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rHad = "Medium" )
-
+        eTAU_cuts = [60,80]
+        for thrV in eTAU_cuts:
+            eTauThreshold('eTAU%iHL' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rHad = "Loose" )
         # eTAU SPARES
         for thrV in range(1,11):
             eTauThreshold('eTAUSPARE%i' % thrV, 'eTAU').setEt(thrVal_SPARE)

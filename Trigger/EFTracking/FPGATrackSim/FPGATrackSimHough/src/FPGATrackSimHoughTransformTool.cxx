@@ -55,7 +55,7 @@ StatusCode FPGATrackSimHoughTransformTool::initialize()
   ATH_MSG_INFO("Convolution size: " << m_convSize_x << " x " << m_convSize_y);
   ATH_MSG_INFO("Convolution: " << to_string(const_cast<std::vector<int>&>(m_conv.value())));
   ATH_MSG_INFO("Hit Extend: " << to_string(const_cast<std::vector<unsigned>&>(m_hitExtend_x.value())));
-    
+
   // Retrieve info
   ATH_CHECK(m_FPGATrackSimBankSvc.retrieve());
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
@@ -167,6 +167,7 @@ FPGATrackSimHoughTransformTool::Image FPGATrackSimHoughTransformTool::createLaye
     {
       if (std::find(layers.begin(), layers.end(), hit->getLayer()) == layers.end()) continue;
       if (m_subRegion >= 0 && !m_FPGATrackSimMapping->SubRegionMap()->isInRegion(m_subRegion, *hit)) continue;
+
       // This scans over y (pT) because that is more efficient in memory, in C.
       // Unknown if firmware will want to scan over x instead.
       unsigned new_size_y  = m_imageSize_y / scale;

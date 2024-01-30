@@ -249,6 +249,11 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('regionID', path='EXPERT', type='TH1I', title='regionID', xbins=200, xmin=0, xmax=200)
+    monTool.defineHistogram('nHits_1st', path='EXPERT', type='TH1I', title='nHits_1st', xbins=100, xmin=-0.5, xmax=99.5)
+    monTool.defineHistogram('nHits_1st_unmapped', path='EXPERT', type='TH1I', title='nHits_1st_unmapped', xbins=100, xmin=-0.5, xmax=99.5)
+    monTool.defineHistogram('nroads_1st', path='EXPERT', type='TH1I', title='nroads_1st', xbins=100, xmin=-0.5, xmax=99.5)
+    monTool.defineHistogram('layerIDs_1st', path='EXPERT', type='TH1I', title='layerIDs_1st', xbins=100, xmin=-0.5, xmax=9.5)
+
     result.setPrivateTools(monTool)
 
     return result

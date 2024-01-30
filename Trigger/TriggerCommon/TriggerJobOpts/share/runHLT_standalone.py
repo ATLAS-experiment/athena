@@ -167,7 +167,18 @@ flags.Detector.GeometryLucid = False
 
 from MuonRecExample.MuonRecFlags import muonRecFlags
 flags.Muon.enableNRPC = muonRecFlags.doNRPCs()
-    
+
+# Propagate LAr flags (Control/AthenaConfiguration/python/OldFlags2NewFlags.py)
+from LArConditionsCommon.LArCondFlags import larCondFlags
+from LArROD.LArRODFlags import larRODFlags
+flags.LAr.OFCShapeFolder = larCondFlags.OFCShapeFolder()
+flags.LAr.ROD.NumberOfCollisions = larRODFlags.NumberOfCollisions() if larRODFlags.doOFCPileupOptimization() else 0
+flags.LAr.ROD.nSamples = larRODFlags.nSamples()
+flags.LAr.ROD.FirstSample = larRODFlags.firstSample()
+flags.LAr.ROD.UseHighestGainAutoCorr = larRODFlags.useHighestGainAutoCorr()
+flags.LAr.ROD.DoOFCMixedOptimization = larRODFlags.doOFCMixedOptimization()
+flags.LAr.ROD.UseDelta = larRODFlags.UseDelta()
+flags.LAr.ROD.forceIter = larRODFlags.forceIter()
 
 # Increase scheduler checks and verbosity
 flags.Scheduler.CheckDependencies = True

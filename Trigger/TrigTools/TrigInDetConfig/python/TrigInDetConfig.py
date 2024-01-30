@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -157,10 +157,11 @@ def trigInDetVertexingCfg(flags, inputTracks, outputVtx):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
     ComponentAccumulator.debugMode = "trackCA trackPublicTool trackEventAlgo trackCondAlgo trackPrivateTool"
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.lock()
     # this configuration is not runable, the test checks if there is no mistake in python scripts above
     # output can be used by experts to check actual configuration (e.g. here we configure to run on RAW and it should be reflected in settings)

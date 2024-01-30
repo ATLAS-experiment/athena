@@ -44,6 +44,7 @@ if "Art_type"  not in locals(): Art_type = 'grid'
 if "GridFiles" not in locals(): GridFiles=False
 if "Malloc" not in locals(): Malloc=False
 if "AbortDryRun" in locals(): abort_dry_run=AbortDryRun
+if "useCA_Reco" not in locals(): useCA_Reco=False
 
 for opt,arg in opts:
     if opt in ("-l", "--local"):
@@ -73,14 +74,14 @@ if vdry_run == '1':
 
 if 'postinclude_file' in dir() :
     if 'preinclude_file' in dir() :
-        rdo2aod = TrigInDetReco( postinclude_file=postinclude_file, preinclude_file=preinclude_file )
+        rdo2aod = TrigInDetReco( postinclude_file=postinclude_file, preinclude_file=preinclude_file, useCA_Reco=useCA_Reco )
     else :
-        rdo2aod = TrigInDetReco( postinclude_file=postinclude_file )
+        rdo2aod = TrigInDetReco( postinclude_file=postinclude_file, useCA_Reco=useCA_Reco )
 else :
     if 'preinclude_file' in dir() :
-        rdo2aod = TrigInDetReco( preinclude_file=preinclude_file )
+        rdo2aod = TrigInDetReco( preinclude_file=preinclude_file, useCA_Reco=useCA_Reco )
     else :
-        rdo2aod = TrigInDetReco()
+        rdo2aod = TrigInDetReco( useCA_Reco=useCA_Reco )
 
 # test specific variables ...
 

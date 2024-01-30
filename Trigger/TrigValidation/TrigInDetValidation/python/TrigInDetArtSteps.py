@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -23,7 +23,7 @@ from AthenaCommon.Utils.unixtools import FindFile
 
 class TrigInDetReco(ExecStep):
 
-    def __init__(self, name='TrigInDetReco', postinclude_file='', preinclude_file='' ):
+    def __init__(self, name='TrigInDetReco', postinclude_file='', preinclude_file='', useCA_Reco=False ):
         ExecStep.__init__(self, name)
 ##      super(TrigInDetReco, self).__init__(name)
         self.type = 'Reco_tf'
@@ -49,15 +49,23 @@ class TrigInDetReco(ExecStep):
             'flags.Reco.EnablePostProcessing=False',
         ])
 
+        self._isCA = useCA_Reco
+
         self.preexec_all = ';'.join([
             'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
         ])
-        self.postexec_trig = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.RDO_TRIG=100000000000']"
+        if self._isCA:
+            self.postexec_trig = ''
+        else:
+            self.postexec_trig = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.RDO_TRIG=100000000000']"
         # no longer needed if we don't write ESDs?
         #self.postexec_reco = "from AthenaCommon.AppMgr import ServiceMgr; ServiceMgr.AthenaPoolCnvSvc.MaxFileSizes=['tmp.ESD=100000000000']"
         self.postexec_reco = ''
         self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
-        self.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
+        self.args += ' --CA'
+        if not self._isCA:
+            self.args += ' "default:True" "RDOtoRDOTrigger:False"'
+
        
         if ( self.postinclude_trig != '' ) : 
             print( "postinclude_trig: ", self.postinclude_trig )
@@ -83,7 +91,7 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
                 chains += "'HLT_mu24_idperf_L1MU14FCH',"
                 chains += "'HLT_mu26_ivarperf_L1MU14FCH',"
-                flags += 'doMuonSlice=True;'
+                flags += "'Muon'," if self._isCA else 'doMuonSlice=True;'
             if (i=='muon-tnp') :
                 chains += "'HLT_mu14_mu14_idtp_idZmumu_L12MU8F'," 
                 chains += "'HLT_mu14_mu14_idperf_50invmAB130_L12MU8F',"
@@ -100,7 +108,7 @@ class TrigInDetReco(ExecStep):
                 # chains += "'HLT_e26_idperf_gsf_tight_L1EM22VHI',"
                 chains += "'HLT_e26_idperf_loose_L1eEM26M',"
                 chains += "'HLT_e5_idperf_tight_L1EM3',"
-                flags += 'doEgammaSlice=True;'
+                flags += "'Egamma'," if self._isCA else 'doEgammaSlice=True;'
             if (i=='electron-tnp') :
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M',"
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M',"
@@ -108,7 +116,7 @@ class TrigInDetReco(ExecStep):
             if (i=='tau') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
                 chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_03dRAB_L1MU14FCH',"
-                flags += 'doTauSlice=True;'
+                flags += "'Tau'," if self._isCA else 'doTauSlice=True;'
             if (i=='tauLRT') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_tracktwoLLP_L1TAU12IM',"
@@ -125,7 +133,7 @@ class TrigInDetReco(ExecStep):
                 flags  += 'doBjetSlice=True;'
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
                 chains += "'HLT_j45_pf_ftf_preselj20_L1J15',"
-                flags  += 'doJetSlice=True;'
+                flags  += "'Jet'," if self._isCA else 'doJetSlice=True;'
             if (i=='beamspot') :
                 chains += "'HLT_beamspot_allTE_trkfast_BeamSpotPEB_L1J15','HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J15',"
                 flags  += 'doBeamspotSlice=True;'
@@ -144,7 +152,10 @@ class TrigInDetReco(ExecStep):
             print( "ERROR: no chains configured" )
 
         chains += ']'
-        self.preexec_trig = 'doEmptyMenu=True;'+flags+'selectChains='+chains
+        if self._isCA:
+            self.preexec_trig = "flags.Trigger.disableCPS=True;flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
+        else:
+            self.preexec_trig = 'doEmptyMenu=True;'+flags+'selectChains='+chains
 
         AVERSION = ""
         ### # temporary hack until we get to the bottom of why the tests are really failing
@@ -328,6 +339,9 @@ class TrigInDetRdictStep(Step):
             os.system( 'get_files -data TIDAdata_cuts-offline.dat &> /dev/null' )
             os.system( 'get_files -data TIDAdata-chains-run3.dat &> /dev/null' )
             os.system( 'get_files -data TIDAdata-chains-run3-lrt.dat &> /dev/null' )
+            os.system( 'get_files -data TIDAdata-run4.dat &> /dev/null' )
+            os.system( 'get_files -data TIDAdata-run4-offline.dat &> /dev/null' )
+            os.system( 'get_files -data TIDAdata-run4-offline-vtx.dat &> /dev/null' )
         super(TrigInDetRdictStep, self).configure(test)
 
 

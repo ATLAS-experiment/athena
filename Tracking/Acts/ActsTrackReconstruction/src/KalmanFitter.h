@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSGEOMETRY_ACTSKALMANFITTER_H
-#define ACTSGEOMETRY_ACTSKALMANFITTER_H
+#ifndef ACTSGEOMETRY_KALMANFITTER_H
+#define ACTSGEOMETRY_KALMANFITTER_H
 
-#include "ActsFitterHelperFunctions.h"
+#include "FitterHelperFunctions.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -83,11 +83,11 @@ struct PRDSourceLinkSurfaceAccessor {
   const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
 };
 
-class ActsKalmanFitter : public extends2<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> { 
+class KalmanFitter : public extends2<AthAlgTool, Trk::ITrackFitter, ActsTrk::IFitterTool> { 
 public:
 
-  ActsKalmanFitter(const std::string&,const std::string&,const IInterface*);
-  virtual ~ActsKalmanFitter() = default;
+  KalmanFitter(const std::string&,const std::string&,const IInterface*);
+  virtual ~KalmanFitter() = default;
 
   // standard Athena methods
   virtual StatusCode initialize() override;
@@ -122,6 +122,19 @@ public:
     const Trk::PrepRawDataSet&,
     const Trk::RunOutlierRemoval runOutlier = false,
     const Trk::ParticleHypothesis matEffects = Trk::nonInteracting) const override;
+  
+  //! fit a set of xAOD uncalibrated Measurements
+  virtual  
+      std::unique_ptr< ActsTrk::MutableTrackContainer >
+      fit(const EventContext& ctx,
+	    const std::vector<ActsTrk::ATLASUncalibSourceLink> & clusterList,
+      const Acts::BoundTrackParameters& initialParams,
+      const Acts::GeometryContext& tgContext,
+      const Acts::MagneticFieldContext& mfContext,
+      const Acts::CalibrationContext& calContext,
+      const TrackingSurfaceHelper &tracking_surface_helper,
+      const Acts::Surface* targetSurface = nullptr  // optional target surface - defaults to perigee in global origin
+      ) const override;
 
   //! extend a track fit including a new set of MeasurementBase objects
   virtual std::unique_ptr<Trk::Track> fit(

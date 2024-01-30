@@ -79,7 +79,7 @@ class TopoAlgoDefMultiplicity(object):
             'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU35', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
  
             #spares
-            'eTAUSPARE2', 'eTAUSPARE3', 'eTAUSPARE4', 'eTAUSPARE5', 'eTAUSPARE6', 'eTAUSPARE7',
+            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', 'eTAUSPARE6', 'eTAUSPARE7',
         ]
         jtauThresholds_2bits = [ 
             'jTAU30', 'jTAU30M',
@@ -129,6 +129,7 @@ class TopoAlgoDefMultiplicity(object):
                                        threshold = tau, 
                                        nbits = 2, classtype='cTauMultiplicity')
             tm.registerTopoAlgo(alg)
+
 
         jJThresholds_3bits = [ 
             'jJ20', 'jJ30', 'jJ30p0ETA25', 'jJ40', 'jJ40p0ETA25', 'jJ50', 'jJ55', 'jJ55p0ETA23', 'jJ60',
@@ -252,11 +253,11 @@ class TopoAlgoDefMultiplicity(object):
            multLimits( thrtype='eEM',  conn='Topo1Opt0', nbit=2, startbit=24, endbit=43),
            multLimits( thrtype='eEMV', conn='Topo1Opt0', nbit=2, startbit=44, endbit=63),
            multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=3, startbit=0,  endbit=8 ),
-           multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=2, startbit=12, endbit=39),
-           multLimits( thrtype='gLJ',  conn='Topo1Opt1', nbit=2, startbit=44, endbit=59),
-           multLimits( thrtype='gJ',   conn='Topo1Opt1', nbit=3, startbit=62, endbit=70),
-           multLimits( thrtype='gJ',   conn='Topo1Opt1', nbit=2, startbit=74, endbit=79),
-
+           multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=2, startbit=12, endbit=31),
+           multLimits( thrtype='gLJ',  conn='Topo1Opt1', nbit=2, startbit=33, endbit=51),
+           multLimits( thrtype='gJ',   conn='Topo1Opt1', nbit=3, startbit=54, endbit=62),
+           multLimits( thrtype='gJ',   conn='Topo1Opt1', nbit=2, startbit=66, endbit=71),
+           multLimits( thrtype='eTAU',   conn='Topo1Opt1', nbit=2, startbit=72, endbit=80),
            multLimits( thrtype='jJ',   conn='Topo1Opt2', nbit=3, startbit=0,  endbit=32),
            multLimits( thrtype='jJ',   conn='Topo1Opt2', nbit=2, startbit=36, endbit=73),
            multLimits( thrtype='jLJ',  conn='Topo1Opt2', nbit=2, startbit=78, endbit=93),

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,12 +14,12 @@ def getNSubregions(filePath):
         return int(n)
 
 
-def FPGATrackSimEventSelectionCfg(flags, name="FPGATrackSimEventSelectionSvc", sampleType='skipTruth'):
+def FPGATrackSimEventSelectionCfg(flags):
     result=ComponentAccumulator()
     eventSelector = CompFactory.FPGATrackSimEventSelectionSvc()
     eventSelector.regions = "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
     eventSelector.regionID = 0
-    eventSelector.sampleType = sampleType
+    eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
     eventSelector.withPU = False
     result.addService(eventSelector, create=True, primary=True)
     return result
@@ -34,7 +34,7 @@ def FPGATrackSimMappingCfg(flags):
     mappingSvc.pmap = flags.Trigger.FPGATrackSim.mapsDir+"/pmap"
     mappingSvc.modulemap = flags.Trigger.FPGATrackSim.mapsDir+"/moduleidmap"
     mappingSvc.NNmap = ""
-    mappingSvc.layerOverride = {}
+    mappingSvc.layerOverride = []
     result.addService(mappingSvc, create=True, primary=True)
     return result
 
@@ -112,7 +112,7 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.qpT_min = yMin 
         HoughTransform.scale = flags.Trigger.FPGATrackSim.ActiveConfig.scale
         HoughTransform.subRegion = number
-        HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold 
+        HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
         HoughTransform.traceHits = False
         tools.append(HoughTransform)
 
@@ -304,7 +304,6 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
    
     result=ComponentAccumulator()
 
-   
     theFPGATrackSimLogicalHistProcessAlg=CompFactory.FPGATrackSimLogicalHitsProcessAlg()
     theFPGATrackSimLogicalHistProcessAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimLogicalHistProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
@@ -325,7 +324,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.RoadFinder = result.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
     theFPGATrackSimLogicalHistProcessAlg.RawToLogicalHitsTool = result.getPrimaryAndMerge(FPGATrackSimRawLogicCfg(flags))
 
-    if flags.Trigger.FPGATrackSim.wrapperFileName != []:
+    if flags.Trigger.FPGATrackSim.wrapperFileName != [] and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
     else:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = ""
@@ -392,9 +391,11 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+
     flags = initConfigFlags()
     flags.fillFromArgs()
-    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-03-00-00"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]

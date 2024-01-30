@@ -80,8 +80,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_writeOutputTool.retrieve());
 
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-    if ( m_doEvtSel )
+    if ( m_doEvtSel ) {
         ATH_CHECK(m_evtSel.retrieve());
+    }
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     m_logicEventHeader_1st   = m_writeOutputTool->getLogicalEventInputHeader_1st();
@@ -145,16 +146,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Map, cluster, and filter hits
     ATH_CHECK(processInputs());
-
     // Get reference to hits
     unsigned regionID = m_evtSel->getRegionID();
-
-
     // Recording Data
     auto mon_regionID = Monitored::Scalar<unsigned>("regionID", regionID);
     Monitored::Group(m_monTool, mon_regionID);
 
-    std::vector<FPGATrackSimHit> const & hits_1st = m_logicEventHeader_1st->towers().at(regionID).hits();
 
     TIME(m_tprocess);
 
@@ -162,9 +159,28 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     std::vector<FPGATrackSimRoad*> prefilter_roads;
     std::vector<FPGATrackSimRoad*>& roads_1st = prefilter_roads;
     std::vector<const FPGATrackSimHit*> phits_1st;
+    std::vector<FPGATrackSimHit> const & hits_1st = m_logicEventHeader_1st->towers().at(regionID).hits();
+
     for (FPGATrackSimHit const & h : hits_1st) phits_1st.push_back(&h);
+
+    auto mon_nhits_1st = Monitored::Scalar<unsigned>("nHits_1st", hits_1st.size());
+    auto mon_nhits_1st_unmapped = Monitored::Scalar<unsigned>("nHits_1st_unmapped", m_hits_1st_miss.size());
+    Monitored::Group(m_monTool, mon_nhits_1st, mon_nhits_1st_unmapped);
+
     ATH_CHECK(m_roadFinderTool->getRoads(phits_1st, roads_1st));
 
+    auto mon_nroads_1st = Monitored::Scalar<unsigned>("nroads_1st", roads_1st.size());
+    for (auto road : roads_1st) {
+      unsigned bitmask = road->getHitLayers();
+      for (size_t l = 0; l < m_FPGATrackSimMapping->PlaneMap_1st()->getNLogiLayers(); l++) {
+	if (bitmask & (1 << l)) {
+	  auto mon_layerIDs_1st = Monitored::Scalar<unsigned>("layerIDs_1st",l);
+	  Monitored::Group(m_monTool,mon_layerIDs_1st);
+	}
+      }
+    }
+    Monitored::Group(m_monTool, mon_nroads_1st);
+    
     TIME(m_troads);
 
     // Standard road Filter
@@ -383,6 +399,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::processInputs()
     m_logicEventHeader_1st->reset();
     ATH_CHECK(m_hitMapTool->convert(1, m_eventHeader, *m_logicEventHeader_1st));
     if (!m_runSecondStage) m_eventHeader.clearHits();
+
+    ATH_CHECK(m_hitMapTool->getUnmapped(m_hits_1st_miss));
+
+
+
     ATH_MSG_DEBUG("Hits conversion done");
     // Random removal of hits
     if (m_doHitFiltering) {

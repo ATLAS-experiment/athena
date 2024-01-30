@@ -5,8 +5,10 @@ def createFPGATrackSimConfigFlags():
     cf = AthConfigFlags()
     cf.addFlag('algoTag', 'Hough')
     cf.addFlag('wrapperFileName', [])
+    cf.addFlag('threshold', [])
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
     cf.addFlag('wrapperMetaData', "Default Meta Data")
+    cf.addFlag('sampleType', 'singleMuons')
 
     def __httHough1DFlags():
         """Additional function delays import"""

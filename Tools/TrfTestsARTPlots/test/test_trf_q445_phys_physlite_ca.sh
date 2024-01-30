@@ -17,7 +17,7 @@ Reco_tf.py --CA \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
   --preExec 'flags.Exec.FPE=10' \
-  --runNumber=410000 \
+  --runNumber=601229 \
   --DataRunNumber=410000 \
   --maxEvents 1000
 

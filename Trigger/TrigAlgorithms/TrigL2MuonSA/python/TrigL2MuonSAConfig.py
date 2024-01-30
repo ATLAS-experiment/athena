@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 #  This file configs the L2MuonSA reco alg in the newJO way, 
 #      but now is located here temporarily until newJO migrations are done in all trigger signatures.
@@ -368,10 +368,11 @@ def l2MuFastAlgCfg( flags, roisKey, setup="", **kwargs ):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.lock()
 
     cfg = l2MuFastAlgCfg(flags, roisKey="MURoIs")

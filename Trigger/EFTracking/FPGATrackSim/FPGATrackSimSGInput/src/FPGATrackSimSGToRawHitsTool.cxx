@@ -51,7 +51,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::initialize() {
 
   ATH_MSG_DEBUG("FPGATrackSimSGToRawHitsTool::initialize()");
 
-  if(!m_truthToTrack.empty() ) ATH_CHECK(m_truthToTrack.retrieve());
+  if(!m_truthToTrack.empty() ) ATH_CHECK(m_truthToTrack.retrieve());  
   if(!m_extrapolator.empty()) ATH_CHECK(m_extrapolator.retrieve());
   ATH_CHECK(m_beamSpotKey.initialize());
 
@@ -81,6 +81,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::initialize() {
   ATH_CHECK(m_sctClusterContainerKey.initialize(SG::AllowEmpty));
 
   ATH_CHECK(m_offlineTracksKey.initialize(SG::AllowEmpty));
+
   ATH_CHECK(m_mcCollectionKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_pixelSDOKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_stripSDOKey.initialize(SG::AllowEmpty));
@@ -112,25 +113,17 @@ StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* h
   event_info.setBCID(eventInfo->bcid());
   event_info.setaverageInteractionsPerCrossing(eventInfo->averageInteractionsPerCrossing());
   event_info.setactualInteractionsPerCrossing(eventInfo->actualInteractionsPerCrossing());
-
   event_info.setextendedLevel1ID(eventInfo->extendedLevel1ID());
   event_info.setlevel1TriggerType(eventInfo->level1TriggerType());
   //  event_info.setlevel1TriggerInfo(eventInfo->level1TriggerInfo ()); // unclear if needed, TODO come back to it
-
   m_eventHeader->newEvent(event_info);//this also reset all variables
-
   HitIndexMap hitIndexMap; // keep running index event-unique to each hit
   HitIndexMap pixelClusterIndexMap;
-
   // get pixel and sct cluster containers
-
   // dump raw silicon data
   ATH_MSG_DEBUG("Dump raw silicon data");
   ATH_CHECK(readRawSilicon(hitIndexMap,  eventContext));
-
-  ATH_MSG_DEBUG("Found list of hits, size =" << m_eventHeader->nHits());
   FPGATrackSimOptionalEventInfo optional;
-
   if (m_readOfflineClusters) {
     std::vector <FPGATrackSimCluster> clusters;
     ATH_CHECK(readOfflineClusters(clusters, eventContext));
@@ -138,22 +131,18 @@ StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* h
     ATH_MSG_DEBUG("Saved " << optional.nOfflineClusters() << " offline clusters");
     ATH_CHECK(dumpPixelClusters(pixelClusterIndexMap, eventContext));
   }
-
   if (m_readTruthTracks) {
     std::vector <FPGATrackSimTruthTrack> truth;
     ATH_CHECK(readTruthTracks(truth, eventContext));
     for (const FPGATrackSimTruthTrack& trk : truth) optional.addTruthTrack(trk);
     ATH_MSG_DEBUG("Saved " << optional.nTruthTracks() << " truth tracks");
   }
-
   std::vector <FPGATrackSimOfflineTrack> offline;
   if (m_readOfflineTracks) {
     ATH_CHECK(readOfflineTracks(offline, eventContext));
     for (const FPGATrackSimOfflineTrack& trk : offline) optional.addOfflineTrack(trk);
     ATH_MSG_DEBUG("Saved " << optional.nOfflineTracks() << " offline tracks");
   }
-
-
   m_eventHeader->setOptional(optional);
   ATH_MSG_DEBUG(*m_eventHeader);
   ATH_MSG_DEBUG("End of execute()");
@@ -627,7 +616,6 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
 
   // dump each truth track
   for (unsigned int ievt = 0; ievt < simTracksHandle->size(); ++ievt) {
-
     const HepMC::GenEvent* genEvent = simTracksHandle->at(ievt);
     // retrieve the primary interaction vertex here. for now, use the dummy origin.
     HepGeom::Point3D<double>  primaryVtx(0., 0., 0.);
@@ -641,9 +629,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       ATH_MSG_DEBUG("using signal process vertex for eventIndex " << ievt << ":"
         << primaryVtx.x() << "\t" << primaryVtx.y() << "\t" << primaryVtx.z());
     }
-
     for (const auto& particle: *genEvent) {
-
       const int pdgcode = particle->pdg_id();
       // reject generated particles without a production vertex.
       if (particle->production_vertex() == nullptr) {
@@ -656,19 +642,16 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       }
       float charge = pd->charge();
       if (pdgcode < 0) charge *= -1.; // since we took absolute value above
-
       if (std::abs(charge) < 0.5) {
         continue;
       }
       if (!MC::isStable(particle)) {
         continue;
       }
-
       // truth-to-track tool
       const Amg::Vector3D momentum(particle->momentum().px(), particle->momentum().py(), particle->momentum().pz());
       const Amg::Vector3D position(particle->production_vertex()->position().x(), particle->production_vertex()->position().y(), particle->production_vertex()->position().z());
       const Trk::CurvilinearParameters cParameters(position, momentum, charge);
-
       Trk::PerigeeSurface persf;
       if (m_UseNominalOrigin) {
         Amg::Vector3D    origin(0, 0, 0);
@@ -678,7 +661,6 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
         SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle{ m_beamSpotKey, eventContext };
         Trk::PerigeeSurface persf(beamSpotHandle->beamPos());
       }
-
       const Trk::TrackParameters* tP = m_extrapolator->extrapolate(eventContext, cParameters, persf, Trk::anyDirection, false).release();
       const double track_truth_d0 = tP ? tP->parameters()[Trk::d0] : 999.;
       const double track_truth_phi = tP ? tP->parameters()[Trk::phi] : 999.;
@@ -700,7 +682,6 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       if (std::abs(truth_d0corr) > 2.) { isPrimary = false; }
       const int bc = HepMC::barcode(particle);
       if (HepMC::is_simulation_particle(particle) || bc == 0) { isPrimary = false; }
-
       if (isPrimary && particle->production_vertex()) {
         const HepGeom::Point3D<double> startVertex(particle->production_vertex()->position().x(), particle->production_vertex()->position().y(), particle->production_vertex()->position().z());
         if (std::abs(startVertex.z() - truth_zvertex) > 100.) { isPrimary = false; }

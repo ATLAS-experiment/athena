@@ -80,7 +80,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
     preselCommonJetParts = dict(JetChainParts_Default)
 
     for ip,p in enumerate(presel_cut_str.split('XX')):
-        hascalSel= bool(re.match(r'.*e\w?\d+', p))
+        hascalSel= bool(re.match(r'.*emf\w?\d+', p))
         if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
             p = re.sub(r'b\w?\d+', '', p)
         hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
@@ -93,7 +93,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
         pattern_to_test += r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
         pattern_to_test += r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
-        pattern_to_test += r'e(?P<emf>\D?)(?P<emfc>\d+)' if hascalSel else ''
+        pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
         if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+)?)'
         matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)

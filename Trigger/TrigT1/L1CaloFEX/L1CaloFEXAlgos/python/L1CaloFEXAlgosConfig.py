@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -96,7 +96,11 @@ if __name__ == '__main__':
     flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
-  
+
+    if not flags.Input.isMC:
+        from AthenaConfiguration.TestDefaults import defaultGeometryTags
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
+
     if any(["data" in f for f in args.filesInput]):
         s=args.filesInput[0].replace('*','').replace('.data','')
         flags.Output.AODFileName = "AOD."+(s.split("/")[-1]).split('_SFO')[0]+"pool.root"
@@ -106,10 +110,6 @@ if __name__ == '__main__':
     flags.Trigger.EDMVersion = 3
     flags.Trigger.doLVL1 = True
     flags.Trigger.enableL1CaloPhase1 = True
-
-    from AthenaConfiguration.Enums import LHCPeriod
-    if not flags.Input.isMC and flags.GeoModel.Run is LHCPeriod.Run2:
-        flags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
     # Enable only calo for this test
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList

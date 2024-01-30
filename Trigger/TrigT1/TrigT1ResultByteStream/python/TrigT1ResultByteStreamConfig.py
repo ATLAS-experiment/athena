@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -410,21 +410,19 @@ if __name__ == '__main__':
   if any(["data23" in f for f in args.filesInput]):
     flags.IOVDb.GlobalTag = "CONDBR2-HLTP-2022-02"
     flags.Trigger.triggerConfig='DB'
-    from AthenaConfiguration.Enums import LHCPeriod
-    flags.GeoModel.Run = LHCPeriod.Run3 # needed for LArGMConfig
 
   elif any(["data22" in f for f in args.filesInput]):
-    flags.Trigger.triggerConfig='DB'
-    from AthenaConfiguration.Enums import LHCPeriod
-    flags.GeoModel.Run = LHCPeriod.Run3 # needed for LArGMConfig
     flags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
-  
-  
+    flags.Trigger.triggerConfig='DB'
+
+  flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
+
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
 
   flags.Exec.OutputLevel = algLogLevel
   flags.Exec.MaxEvents = args.evtMax
   flags.Exec.SkipEvents = args.skipEvents
-  flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
   flags.Concurrency.NumThreads = 1
   flags.Concurrency.NumConcurrentEvents = 1
   flags.Output.HISTFileName = args.outputHISTFile

@@ -1,7 +1,7 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-def L1CaloCTPMonitoringConfig(inputFlags):
+def L1CaloCTPMonitoringConfig(flags):
     '''Function to configure LVL1 L1CaloCTP algorithm in the monitoring system.'''
 
     #import math 
@@ -12,11 +12,11 @@ def L1CaloCTPMonitoringConfig(inputFlags):
 
     # any things that need setting up for job e.g.
     #from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
-    #result.merge(AtlasGeometryCfg(inputFlags))
+    #result.merge(AtlasGeometryCfg(flags))
 
     # make the athena monitoring helper
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'L1CaloCTPMonitoringCfg')
+    helper = AthMonitorCfgHelper(flags,'L1CaloCTPMonitoringCfg')
 
     # get any algorithms
     L1CaloCTPMonAlg = helper.addAlgorithm(CompFactory.L1CaloCTPMonitorAlgorithm,'L1CaloCTPMonAlg')
@@ -59,38 +59,31 @@ def L1CaloCTPMonitoringConfig(inputFlags):
 
 
 if __name__=='__main__':
-    # For direct tests
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = 1
-
     # set debug level for whole job
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import INFO #DEBUG
     log.setLevel(INFO)
 
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
 
     #inputs = glob.glob('/eos/atlas/atlastier0/rucio/data18_13TeV/physics_Main/00357750/data18_13TeV.00357750.physics_Main.recon.ESD.f1072/data18_13TeV.00357750.physics_Main.recon.ESD.f1072._lb0117._SFO-1._0201.1')
     inputs = glob.glob('/eos/atlas/atlastier0/rucio/data18_13TeV/physics_Main/00354311/data18_13TeV.00354311.physics_Main.recon.ESD.f1129/data18_13TeV.00354311.physics_Main.recon.ESD.f1129._lb0013._SFO-8._0001.1')
 
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
 
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
-
-    ConfigFlags.lock()
-    ConfigFlags.dump() # print all the configs
-
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
+    flags.lock()
+    flags.dump() # print all the configs
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    L1CaloCTPMonitorCfg = L1CaloCTPMonitoringConfig(ConfigFlags)
+    L1CaloCTPMonitorCfg = L1CaloCTPMonitoringConfig(flags)
     cfg.merge(L1CaloCTPMonitorCfg)
 
     # message level for algorithm
