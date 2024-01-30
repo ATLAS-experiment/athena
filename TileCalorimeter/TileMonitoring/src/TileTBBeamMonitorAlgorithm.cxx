@@ -64,8 +64,6 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
   uint32_t run = GetEventInfo(ctx)->runNumber();
 
-  using Tile = TileCalibUtils;
-
   // TDC/BEAM Items
   int muTag = 0;
   int muHalo = 0;
