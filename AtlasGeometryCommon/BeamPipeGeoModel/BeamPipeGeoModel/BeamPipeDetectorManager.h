@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BeamPipeDetectorManager_h
-#define BeamPipeDetectorManager_h 1
+#ifndef BEAMPIPEGEOMODEL_BEAMPIPEDETECTORMANAGER_H
+#define BEAMPIPEGEOMODEL_BEAMPIPEDETECTORMANAGER_H
 
 #include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoModelKernel/GeoVDetectorManager.h"
@@ -35,7 +35,6 @@ class BeamPipeDetectorManager : public GeoVDetectorManager
   BeamPipeDetectorManager(const BeamPipeDetectorManager &right);
   
   std::vector<PVConstLink> m_volume;  
-
 };
 
 #ifndef GAUDI_NEUTRAL
