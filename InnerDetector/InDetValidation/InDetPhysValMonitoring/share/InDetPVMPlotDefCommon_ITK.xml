@@ -130,6 +130,30 @@
   <x title="#mu" n="&NmuBINS;" lo="0.0" hi="&EXPMU;"/>
   <y title="Efficiency" lo="0.0" hi="1.2"/>
 </h>
+<h id="efficiency_vs_truthMu_absEta_2p5_3p0" type="TEfficiency" title="Fraction of reco-matched truth track">
+  <x title="Truth #mu" n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="efficiency_vs_truthMu_absEta_3p0_3p5" type="TEfficiency" title="Fraction of reco-matched truth track">
+  <x title="Truth #mu" n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="efficiency_vs_truthMu_absEta_3p5_4p0" type="TEfficiency" title="Fraction of reco-matched truth track">
+  <x title="Truth #mu" n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="efficiency_vs_actualMu_absEta_2p5_3p0" type="TEfficiency" title="Fraction of reco-matched truth track">
+  <x title="Actual #mu" n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="efficiency_vs_actualMu_absEta_3p0_3p5" type="TEfficiency" title="Fraction of reco-matched truth track">
+  <x title="Actual #mu" n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="efficiency_vs_actualMu_absEta_3p5_4p0" type="TEfficiency" title="Fraction of reco-matched truth track">
+  <x title="Actual #mu" n="&EXPMU;" lo="0" hi="&EXPMU;"/>
+  <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
 <!--
     =======================================================
     end of efficiency vs mu plots [InDetPerfPlot_Eff]
