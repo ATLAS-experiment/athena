@@ -176,7 +176,7 @@ def createTrigTrackingPassFlags(mode="InDet"):
 
   flags.addFlag(f'{category}.doGPU', False)
   #TODO: remove when decision made
-  flags.addFlag(f'{category}.fixSeedPhi', False)
+  flags.addFlag(f'{category}.fixSeedPhi', True)
 
   return flags
 
