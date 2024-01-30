@@ -11,7 +11,7 @@ atlas_add_component( TruthD3PDMaker
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS}
-                     LINK_LIBRARIES TruthUtils ${HEPPDT_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel Navigation EventInfo xAODTruth GaudiKernel GeneratorObjects TruthUtils D3PDMakerInterfaces D3PDMakerUtils TruthD3PDAnalysisLib MCTruthClassifierLib JetEvent TrkToolInterfaces )
+                     LINK_LIBRARIES TruthUtils ${HEPPDT_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel Navigation EventInfo xAODTruth GaudiKernel GeneratorObjects TruthUtils D3PDMakerInterfaces D3PDMakerUtils MCTruthClassifierLib JetEvent TrkToolInterfaces ParticleTruth )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
