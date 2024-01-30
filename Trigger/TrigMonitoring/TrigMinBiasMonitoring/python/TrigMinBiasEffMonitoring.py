@@ -146,7 +146,7 @@ def TrigMinBiasEff(flags):
             s = name.split("_")
             return "_".join(s[:3] + s[4:])
 
-        triggerAndRef += [_c(name, _dropsup(name), level, xmin=_trk(name) - 20, xmax=_trk(name) + 50) for name, level in pusupChains]
+        triggerAndRef += [_c(chain[0], _dropsup(chain[0]), chain[1], xmin=_trk(chain) - 20, xmax=_trk(chain) + 50) for chain in pusupChains]
 
     # monitor exclusivity cut
     exclChains = getMinBiasChains(monAccess, '(excl)')
