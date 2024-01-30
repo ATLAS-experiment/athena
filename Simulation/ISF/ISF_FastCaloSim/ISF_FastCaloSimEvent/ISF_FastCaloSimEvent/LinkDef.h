@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/DoubleArray.h"
@@ -50,6 +50,11 @@
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGAN.h"
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
 #include "ISF_FastCaloSimEvent/TFCSPredictExtrapWeights.h"
+#include "ISF_FastCaloSimEvent/VNetworkBase.h"
+#include "ISF_FastCaloSimEvent/VNetworkLWTNN.h"
+#include "ISF_FastCaloSimEvent/TFCSSimpleLWTNNHandler.h"
+#include "ISF_FastCaloSimEvent/TFCSONNXHandler.h"
+#include "ISF_FastCaloSimEvent/TFCSNetworkFactory.h"
 #endif
 
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrization.h"
@@ -606,6 +611,11 @@
 #pragma link C++ class TFCSEnergyAndHitGAN - ;
 #pragma link C++ class TFCSEnergyAndHitGANV2 + ;
 #pragma link C++ class TFCSPredictExtrapWeights - ;
+
+#pragma link C++ class VNetworkBase + ;
+#pragma link C++ class VNetworkLWTNN + ;
+#pragma link C++ class TFCSSimpleLWTNNHandler - ;
+#pragma link C++ class TFCSONNXHandler - ;
 #endif
 
 #pragma link C++ class TFCSLateralShapeParametrization + ;

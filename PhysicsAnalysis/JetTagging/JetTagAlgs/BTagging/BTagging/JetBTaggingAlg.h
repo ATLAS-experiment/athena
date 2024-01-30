@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_JETBTAGGINGALG_HH
@@ -35,7 +35,7 @@ class  JetBTaggingAlg:
   
     /** Constructors and destructors */
     JetBTaggingAlg(const std::string& name, ISvcLocator *pSvcLocator);
-    virtual ~JetBTaggingAlg();
+    virtual ~JetBTaggingAlg() = default;
     
     /** Main routines specific to an ATHENA algorithm */
     virtual StatusCode initialize() override;

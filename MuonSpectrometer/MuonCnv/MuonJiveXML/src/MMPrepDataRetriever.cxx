@@ -46,11 +46,6 @@ namespace JiveXML {
 
     SG::ReadHandle<Muon::MMPrepDataContainer> mmContainer(m_sgKey);
 
-    if (!mmContainer.isValid()) {
-      ATH_MSG_WARNING("Unable to retrieve: " << m_sgKey);
-      return(StatusCode::SUCCESS);
-    }
-
     int ndata = 0;
     for (const auto mmCollection : *mmContainer){
        ndata += mmCollection->size();

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from TriggerJobOpts import runHLT
@@ -18,8 +18,6 @@ def configureFlags(runArgs):
     flags = initConfigFlags()
     from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
     commonRunArgsToFlags(runArgs, flags)
-    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
-    recoRunArgsToFlags(runArgs, flags)
 
     # Set standard flags for HLT jobs
     runHLT.set_flags(flags)
@@ -32,6 +30,9 @@ def configureFlags(runArgs):
     if hasattr(runArgs, 'outputRDO_TRIGFile'):
         flags.Output.RDOFileName = runArgs.outputRDO_TRIGFile
         log.info("---------- Configured RDO_TRIG output")
+
+    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
+    recoRunArgsToFlags(runArgs, flags)
 
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep=ProductionStep.Reconstruction

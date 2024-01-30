@@ -18,5 +18,6 @@
 #include <EgammaAnalysisAlgorithms/ElectronLRTMergingAlg.h>
 #include <EgammaAnalysisAlgorithms/PhotonOriginCorrectionAlg.h>
 #include <EgammaAnalysisAlgorithms/EgammaFSRForMuonsCollectorAlg.h>
+#include <EgammaAnalysisAlgorithms/ElectronSiHitDecAlg.h>
 
 #endif

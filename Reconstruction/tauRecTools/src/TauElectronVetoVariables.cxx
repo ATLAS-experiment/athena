@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
 
 #include "TauElectronVetoVariables.h"
-#include "tauRecTools/KineUtils.h"
 
 #include "xAODTau/TauJet.h"
 #include "CaloUtils/CaloVertexedCell.h"
@@ -18,6 +17,8 @@
 #include <cmath>
 #include <unordered_map>
 #include <array>
+
+#include "TVector2.h"
 
 using Gaudi::Units::GeV;
 
@@ -187,7 +188,7 @@ StatusCode TauElectronVetoVariables::execute(xAOD::TauJet& pTau) const {
         int i = 2;
         if (sampling < 4) i = sampling;
         if (sampling == 12 || sampling == 13 || sampling == 14) i = 3;
-        detPhiTrk = Tau1P3PKineUtils::deltaPhi( cellPhi, extrapolatedPhi[i] );
+        detPhiTrk = TVector2::Phi_mpi_pi(cellPhi-extrapolatedPhi[i]);
         detEtaTrk = std::abs( cellEta - extrapolatedEta[i] );
         clEtaTrk = extrapolatedEta[i];
         distEtaTrk = cellEta - extrapolatedEta[i];

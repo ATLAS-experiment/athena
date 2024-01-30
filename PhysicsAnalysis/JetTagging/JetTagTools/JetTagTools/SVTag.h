@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -9,21 +9,14 @@
 #ifndef JETTAGTOOLS_SVTAG_H
 #define JETTAGTOOLS_SVTAG_H
 
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "JetTagTools/ITagTool.h"
 #include "xAODJet/Jet.h"
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/Vertex.h"
+
 #include <vector>
 #include <map>
-
-
-//namespace xAOD { class TrackParticle; class TrackParticleContainer; }
-//namespace Trk { class RecVertex;}
-//class Jet;
-class StoreGateSvc;
 
 namespace Analysis
 {  
@@ -43,7 +36,7 @@ namespace Analysis
                                 const xAOD::Jet& jetToTag,
                                 xAOD::BTagging& BTag,
                                 const std::string &jetName) const override;
-      virtual void finalizeHistos() override;
+      virtual void finalizeHistos() override {};
       
     private:      
       
@@ -51,9 +44,7 @@ namespace Analysis
       double get3DSignificance(const xAOD::Vertex& priVertex,
                                std::vector<const xAOD::Vertex*>& secVertex,
                                const Amg::Vector3D jetDirection) const;
-      // double get3DSignificance(const Trk::RecVertex & priVertex,
-      //                          std::vector<const Trk::RecVertex*> & secVertex,
-      //                          const Amg::Vector3D jetDirection);
+
       double get3DSignificanceCorr(const xAOD::Vertex& priVertex,
                                std::vector<const xAOD::Vertex*>& secVertex,
                                const Amg::Vector3D jetDirection) const;
@@ -71,11 +62,6 @@ namespace Analysis
       float m_pTjetmin;
       bool m_checkOverflows;
       double m_purificationDeltaR;
-      bool m_UseBinInterpol;
-
-      /** information to persistify: */
-      // std::string m_originalTPCollectionName;
-      // const xAOD::TrackParticleContainer* m_originalTPCollection;
      
       /** just print some info at the beginning */
       void printParameterSettings();
