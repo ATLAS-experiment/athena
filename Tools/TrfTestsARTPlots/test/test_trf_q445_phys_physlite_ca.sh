@@ -52,6 +52,15 @@ checkxAOD DAOD_PHYSLITE.art.pool.root
 rc2=$?
 echo "art-result: ${rc2} checkxAOD" 
 
+echo "============ xAODCheckerTRFPlots.py DAOD_PHYS.art.pool.root"
+xAODCheckerTRFPlots.py --inputFiles DAOD_PHYS.art.pool.root
+rcchecker1=$?
+echo "art-result: ${rcchecker1} xAODCheckerTRFPlots PHYS"
+echo "============ xAODCheckerTRFPlots.py DAOD_PHYSLITE.art.pool.root"
+xAODCheckerTRFPlots.py --inputFiles DAOD_PHYSLITE.art.pool.root
+rcchecker2=$?
+echo "art-result: ${rcchecker2} xAODCheckerTRFPlots PHYSLITE"
+
 echo "============ xAODHist DAOD_PHYSLITE.art.pool.root"
 xAODHist.py --analysis --outputHISTFile hist_physlite_latest.root DAOD_PHYSLITE.art.pool.root 
 rc3=$?
