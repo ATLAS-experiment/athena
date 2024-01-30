@@ -68,7 +68,7 @@
 #include <algorithm>
 
 using namespace std;
-TString jetType="VR";
+TString jetType="LR";
 
 //Legend names
 vector<TString> leg_entry = {"Reference","Test"};
@@ -78,7 +78,7 @@ const float EffMax=1.;
 
 
 //Some global variables for plotting:
-vector<TString> taggers = {"IP3D","DIPS","SV1","DL1dv00","DL1dv01","GN1", "GN2v00"};
+vector<TString> taggers = {"IP3D","DIPS","SV1","DL1dv00","DL1dv01","GN1", "GN2v00","GN2Xv01"};
 
 const float CWidth=800;
 const float CHeight=600;
@@ -132,6 +132,7 @@ void fill_WP_values(){
     WP_values.insert(make_pair<TString, vector<TString>>("DL1r", {"60", "70", "77", "85"}));
     WP_values.insert(make_pair<TString, vector<TString>>("GN1", {"60", "70", "77", "85"}));
     WP_values.insert(make_pair<TString, vector<TString>>("GN2v00", {"60", "70", "77", "85"}));
+    WP_values.insert(make_pair<TString, vector<TString>>("GN2Xv01", {"50","55","60","65","75","80","85"}));
   }
   else{
     WP_values.insert(make_pair<TString, vector<TString>>("IP3D", {"70"}));
@@ -143,6 +144,7 @@ void fill_WP_values(){
     WP_values.insert(make_pair<TString, vector<TString>>("DL1r", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("GN1", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("GN2v00", {"70"}));
+    WP_values.insert(make_pair<TString, vector<TString>>("GN2Xv01", {"60"}));
   }
 }
 
@@ -151,6 +153,7 @@ TString getRefHistoName(TString var, TString truth_label){
   TString jetCollection;
   if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
   else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
+  else if(jetType=="LR") jetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
   else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
   TString name;
@@ -594,6 +597,7 @@ void plotGraphs(const vector<TString>& InputFileNames,
       TString jetCollection;
       if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
       else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
+      else if(jetType=="LR") jetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
       else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
       TString hname_b = "BTag/" + jetCollection + "/" + folder1 + "/BTag_"
@@ -607,7 +611,7 @@ void plotGraphs(const vector<TString>& InputFileNames,
 
       TH1F *MVX_b = (TH1F*)f->Get(hname_b);
       TH1F *MVX_u = (TH1F*)f->Get(hname_u);
-
+      
       hb.push_back(MVX_b);
       hu.push_back(MVX_u);
       bool isSV1 = false;
@@ -871,9 +875,6 @@ void plotGraphs(const vector<TString>& InputFileNames,
       gSystem->Exec("mkdir "+HistoDir);
     } 
 
-    TString Histo = HistoDir+taggers[i]+".png";
-    if(drawCtag) {Histo = HistoDir+taggers[i]+"-cVSb.png";}
-    c1->SaveAs(Histo.Data(),"RECREATE");
     if(drawCtag) {Histo = HistoDir+taggers[i]+"-cVSb.pdf";}
     else {Histo = HistoDir+taggers[i]+".pdf";}
     //cout << "Saving Histo = " << Histo.Data() << endl;
@@ -944,7 +945,8 @@ void plotGraphsEffVsVar(TString var_name, const vector<TString>& InputFileNames,
 	  TString jetCollection;
 	  if(jetType=="EMTopo") jetCollection = "AntiKt4EMTopoJets";
 	  else if(jetType=="PFlow") jetCollection = "AntiKt4EMPFlowJets";
-	  else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
+	  else if(jetType=="LR") jetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
+          else if(jetType=="VR") jetCollection = "AntiKtVR30Rmax4Rmin02PV0TrackJets";
 
 	  TString hname_WPcuts = "BTag/" + jetCollection + "/" + folder1
 	    + "/BTag_" + jetCollection + "_" + folder2 + "_"
@@ -952,6 +954,7 @@ void plotGraphsEffVsVar(TString var_name, const vector<TString>& InputFileNames,
 	    + var_name;
 
           TH1F *histo_WPcuts = (TH1F*)f->Get(hname_WPcuts);
+          cout<<"hist_WPcuts name: " << hname_WPcuts << endl;
           cout<<"histo_WPcuts: "<<histo_WPcuts<<endl;
 
           // define the graph
@@ -1260,9 +1263,6 @@ void plotGraphsEffVsVar(TString var_name, const vector<TString>& InputFileNames,
           gSystem->Exec("mkdir "+HistoDir+"eff_vs_"+var_name);
         } 
     
-        //TString Histo = HistoDir+MC+taggers[i]+".png";
-        TString plot_name = HistoDir+"eff_vs_"+var_name+"/eff_vs_"+var_name+"_"+taggers[i]+"_"+truth_labels[i_truthlabel]+"-jets"+"_"+tagger_WPs[i_WP]+"_WP.png";
-        c2->SaveAs(plot_name.Data(),"RECREATE");
         plot_name = HistoDir+"eff_vs_"+var_name+"/eff_vs_"+var_name+"_"+taggers[i]+"_"+truth_labels[i_truthlabel]+"-jets"+"_"+tagger_WPs[i_WP]+"_WP.pdf";
         c2->SaveAs(plot_name.Data(),"RECREATE");
 
@@ -1276,11 +1276,11 @@ void plotGraphsEffVsVar(TString var_name, const vector<TString>& InputFileNames,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void Draw_PhysVal_btagROC(TString inputMC="ttbar",
-			  TString jet_type="VR",
+			  TString jet_type="PFlow",
 			  TString reffile="files_merged/merged_NTUP_PHYSVAL_ref.root",
 			  TString testfile="files_merged/merged_NTUP_PHYSVAL_test.root",
 			  TString outputName="MyHistos.root",
-			  const vector<TString>& def_taggers=vector<TString>{"IP3D","DIPS","SV1","DL1dv00","DL1dv01","GN1", "GN2v00"},
+			  const vector<TString>& def_taggers=vector<TString>{"IP3D","DIPS","SV1","DL1dv00","DL1dv01","GN1", "GN2v00","GN2Xv01"},
 			  bool writeHistos=true){
 
     jetType=jet_type;

@@ -432,6 +432,21 @@
             "forData": "true"
         },
 
+        "GN2Xv01": {
+            "_comment": "phbb, phcc, ptop and pqcd",
+            "title": "GN2Xv01",
+            "xtitle": "GN2Xv01 px",
+            "ytitle": "Jets",
+            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
+            "xbins": 100,
+            "xmin": 0,
+            "xmax": 1,
+            "forEach": ["phbb", "phcc", "ptop","pqcd"],
+            "forEachTruthType": ["HBB", "HCC", "TOP","QCD", "DATA"],
+            "type": "TH1D",
+            "forData": "true"
+        },
+
         "DL1r_LLR": {
             "_comment": "",
             "title": "DL1r",
