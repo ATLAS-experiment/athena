@@ -116,7 +116,7 @@ namespace top {
   StatusCode BTagScaleFactorCalculator::apply(const std::shared_ptr<std::unordered_map<std::size_t,
                                                                                        std::string> >& jet_syst_collections,
                                               bool use_trackjets) {
-
+    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!!");
     ///-- Loop over all jet collections --///
     ///-- Lets assume that we're not doing ElectronInJet subtraction --///
     for (auto currentSystematic : *jet_syst_collections) {
@@ -153,6 +153,8 @@ namespace top {
           // now loop over all available WPs
 
           for (auto& tagWP : (use_trackjets ? m_config->bTagWP_available_trkJet() : m_config->bTagWP_available())) {
+
+	    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 1 "+(TString)tagWP);
             // skip uncalibrated though available WPs
             if (use_trackjets &&
                 std::find(m_config->bTagWP_calibrated_trkJet().begin(),
@@ -222,7 +224,7 @@ namespace top {
 	      jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_nom") = btag_MCeff;
 	      
 	    } else if(!use_trackjets) { //it is an online tagger (not available for track jets)
-
+	      ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 2 "+(TString)tagWP);
 		jetPtr->getAttribute("HadronConeExclTruthLabelID",flavour_label); // get the jet truth flavour
 		vars_jet.jetPt = jetPtr->pt();
 		vars_jet.jetEta = jetPtr->eta();
@@ -238,17 +240,18 @@ namespace top {
 		  online_eta=-10; 
 		  online_phi=-10; 
 		  online_E=-10;
+		  ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 2.4 "+(TString)tagWP);
 		  onlinemv2[TriggerChain.c_str()] = getOnlineWeight(jetPtr,tagWP,TriggerChain,matchedtrigjets[tagWP][TriggerChain],online_pt,online_eta,online_phi,online_E);
-
+		  ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 2.4.5 "+(TString)tagWP);
 		  jetMatchesTrigger = (onlinemv2[TriggerChain.c_str()]>-1.5);
 		  isTagged = btagsel->accept(jetPtr->pt(),jetPtr->eta(),onlinemv2[TriggerChain.c_str()]);
-		  
+		  ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 2.5 "+(TString)tagWP);
 		  vars_jet.jetTagWeight = onlinemv2[TriggerChain.c_str()];
 		  
 		  if(std::fabs(jetPtr->eta()) <= 2.5 && abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger) { 
-		    top::check(btageff->getScaleFactor(*jetPtr, vars_jet, btag_SF),
+		    top::check(btageff->getScaleFactor(flavour_label, vars_jet, btag_SF), //is flavour_label the correct thing?
 			       "Failed to get nominal ONLINE b-tagging SF for trigger " + TriggerChain);
-		    top::check(btageff->getMCEfficiency(*jetPtr, vars_jet, btag_MCeff),
+		    top::check(btageff->getMCEfficiency(flavour_label, vars_jet, btag_MCeff), //is flavour_label the correct thing? 
 			       "Failed to get nominal ONLINE b-tagging MC efficiency for trigger " + TriggerChain);
 		  }
 		  		  
@@ -264,6 +267,7 @@ namespace top {
 
 		}
 
+	      ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 3 "+(TString)tagWP);
 	    }
 
 
@@ -297,7 +301,8 @@ namespace top {
 		  jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_" + variation.name()) = btag_MCeff;
 
 		} else if(!use_trackjets) { //it is an online tagger (not available for track jets)         
-		  for(std::string& TriggerChain : m_onlineJets[tagWP.c_str()]) {
+		  for(auto& trig_item : m_onlineJets[tagWP.c_str()]) {
+		    std::string TriggerChain = trig_item.first;
 
 		    btag_SF = 1.;
 		    btag_MCeff = -1.;
@@ -305,9 +310,9 @@ namespace top {
 		    
 		    if(std::fabs(jetPtr->eta()) <= 2.5 && abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger) { 
 		      vars_jet.jetTagWeight = onlinemv2[TriggerChain.c_str()];
-		      top::check(btageff->getScaleFactor(*jetPtr, vars_jet, btag_SF),
+		      top::check(btageff->getScaleFactor(flavour_label, vars_jet, btag_SF),//is flavour_label the correct thing? 
 				 "Failed to get ONLINE b-tagging SF for variation " + syst_set.name() + " and trigger " + TriggerChain);
-		      top::check(btageff->getMCEfficiency(*jetPtr, vars_jet, btag_MCeff),
+		      top::check(btageff->getMCEfficiency(flavour_label, vars_jet, btag_MCeff),//is flavour_label the correct thing? 
 				 "Failed to get ONLINE b-tagging MC efficiency for variation " + syst_set.name() + " and trigger " + TriggerChain);
 		    }
 		    jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_" + TriggerChain + "_" + variation.name()) = btag_SF;
@@ -322,7 +327,7 @@ namespace top {
       }
     }
        
-
+    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY END");
     return StatusCode::SUCCESS;
   }
 
@@ -385,6 +390,8 @@ namespace top {
 
   float BTagScaleFactorCalculator::getOnlineWeight(const xAOD::Jet *jet,std::string wp,std::string chain, std::vector<uint> & matchedtrigjets,float & online_pt,float & online_eta,float & online_phi,float & online_E) const
   {
+    ATH_MSG_INFO(Form("BTagScaleFactorCalculator::TMP getOnlineWeight - btagsize=%d, jetsize=%d",(int)(m_onlineBtagging.at(wp).at(chain).size()),(int)(m_onlineJets.at(wp).at(chain).size())));
+
     float jet_onlinemv2=-2;
     // geometrical matching between online and offline jets (from https://twiki.cern.ch/twiki/bin/view/Atlas/TrigBjetCalibration2016Rel21#Retrieving_online_btagging )
 
@@ -392,26 +399,34 @@ namespace top {
     vjet.SetPtEtaPhiE(jet->pt(), jet->eta(), jet->phi(), jet->e());
 
     int found_trigjet=-1;
-    for (uint itrigjet = 0; itrigjet<m_onlineJets[wp.c_str()][chain].size(); itrigjet++) {
+    for (uint itrigjet = 0; itrigjet<m_onlineJets.at(wp).at(chain).size(); itrigjet++) {
 
       bool isalreadymatched = false;
-      for (uint imtj : matchedtrigjets) if (itrigjet == imtj) isalreadymatched = true;
+      for (uint imtj : matchedtrigjets) {
+	if (itrigjet == imtj) {
+	  isalreadymatched = true;
+	  break;
+	}
+      }
+      ATH_MSG_INFO(Form("BTagScaleFactorCalculator::TMP getOnlineWeight 1-%d",(int)itrigjet));
       if (isalreadymatched) continue;
-      if (vjet.DeltaR(m_onlineJets[wp.c_str()][chain].at(itrigjet)) < 0.2) {
-	jet_onlinemv2=m_onlineBtagging[wp.c_str()][chain].at(itrigjet);
+      if (vjet.DeltaR(m_onlineJets.at(wp).at(chain).at(itrigjet)) < 0.2) {
+	ATH_MSG_INFO(Form("BTagScaleFactorCalculator::TMP getOnlineWeight 1.5-%d, %d, %d",(int)itrigjet,m_onlineBtagging.at(wp).size(),m_onlineBtagging.at(wp).at(chain).size()));
+	jet_onlinemv2=m_onlineBtagging.at(wp).at(chain).at(itrigjet);
 	  matchedtrigjets.push_back(itrigjet);
 	  found_trigjet=itrigjet;
 	  break;
       }
     }
-     
+    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP getOnlineWeight 2");
     if(found_trigjet>=0) {
-      TLorentzVector vtmp = m_onlineJets[wp.c_str()][chain].at(found_trigjet);
+      TLorentzVector vtmp = m_onlineJets.at(wp).at(chain).at(found_trigjet);
       online_pt=vtmp.Pt();
       online_eta=vtmp.Eta();
       online_phi=vtmp.Phi();
       online_E=vtmp.E();
     }
+    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP getOnlineWeight END");
     return jet_onlinemv2;
   }
 
