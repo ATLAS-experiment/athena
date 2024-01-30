@@ -94,8 +94,8 @@ StatusCode FPGATrackSimRawToLogicalHitsTool::convert(unsigned stage, const FPGAT
       // skip over hits in layers that are not included in the FPGATrackSim geometry, with plane = -1
       if (pmap->getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer()).layer == -1)
       {
-          // m_missing_hits.push_back(hit); // comment this out so hits in unused layers aren't considered "unmapped"
-          continue;
+	m_missing_hits.push_back(hit); 
+	continue;
       }
 
       bool mapped=false;

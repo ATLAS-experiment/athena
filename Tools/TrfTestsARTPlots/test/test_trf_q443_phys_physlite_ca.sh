@@ -16,7 +16,7 @@ Reco_tf.py --CA "all:True" "RDOtoRDOTrigger:False" \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
   --preExec 'HITtoRDO:flags.Exec.FPE=10' 'RAWtoALL:flags.Exec.FPE=10' \
   --postExec 'RDOtoRDOTrigger:from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10;' \
-  --runNumber=310000 \
+  --runNumber=410470 \
   --DataRunNumber=310000 \
   --maxEvents 2000
 
@@ -31,7 +31,7 @@ Reco_tf.py --CA \
   --outputAODFile myAOD.pool.root \
   --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
   --preExec 'flags.Exec.FPE=10' \
-  --runNumber=310000 \
+  --runNumber=410470 \
   --DataRunNumber=310000 \
   --maxEvents 2000
   rcfail=$?

@@ -18,7 +18,7 @@ timeout 64800 Reco_tf.py --CA\
   --preExec 'all:flags.DQ.Steering.doHLTMon=False; flags.Exec.FPE=10;' \
   --autoConfiguration='everything' \
   --conditionsTag 'all:CONDBR2-BLKPA-RUN2-11' --geometryVersion='default:ATLAS-R2-2016-01-00-01' \
-  --runNumber='357750' --maxEvents='-1'
+  --runNumber='304008' --maxEvents='-1'
 
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_data16_mt"
