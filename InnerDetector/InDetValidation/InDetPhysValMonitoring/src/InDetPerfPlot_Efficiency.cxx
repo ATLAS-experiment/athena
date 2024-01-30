@@ -19,6 +19,28 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_efficiency_vs_pteta, "efficiency_vs_pteta");
   book(m_efficiency_vs_ptTruthMu, "efficiency_vs_ptTruthMu");
   book(m_efficiency_vs_ptActualMu, "efficiency_vs_ptActualMu");
+
+  book(m_efficiency_vs_etaTruthMu, "efficiency_vs_absEtaTruthMu");
+  book(m_efficiency_vs_etaActualMu, "efficiency_vs_absEtaActualMu");
+
+  for(unsigned int i=0; i<m_eta_bins.size()-1; i++){
+    m_efficiency_vs_truthMu_eta_bin.emplace_back();
+    m_efficiency_vs_actualMu_eta_bin.emplace_back();
+
+    std::string bin_low = std::to_string(m_eta_bins[i]);
+    size_t dotPos = bin_low.find('.');
+    bin_low = bin_low.substr(0, dotPos+2);
+    bin_low.replace(dotPos, 1, 1, 'p');
+    std::string bin_up = std::to_string(m_eta_bins[i+1]);
+    dotPos = bin_up.find('.');
+    bin_up = bin_up.substr(0, dotPos+2);
+    bin_up.replace(dotPos, 1, 1, 'p');
+
+    book(m_efficiency_vs_truthMu_eta_bin.back(),
+	 "efficiency_vs_truthMu_absEta_"+bin_low+"_"+bin_up);
+    book(m_efficiency_vs_actualMu_eta_bin.back(),
+	 "efficiency_vs_actualMu_absEta_"+bin_low+"_"+bin_up);
+  }
  
   book(m_efficiency_vs_eta, "efficiency_vs_eta");
   book(m_efficiency_vs_pt, "efficiency_vs_pt");
@@ -78,6 +100,14 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
   fillHisto(m_efficiency_vs_pteta, pt, eta, isGood, weight);
   fillHisto(m_efficiency_vs_ptTruthMu, pt, truthMu, isGood, weight);
   fillHisto(m_efficiency_vs_ptActualMu, pt, actualMu, isGood, weight);
+
+  fillHisto(m_efficiency_vs_etaTruthMu, std::abs(eta), truthMu, isGood, weight);
+  fillHisto(m_efficiency_vs_etaActualMu, std::abs(eta), actualMu, isGood, weight);
+
+  const auto pVal =  std::lower_bound(m_eta_bins.begin(), m_eta_bins.end(), std::abs(eta));
+  const int bin = std::distance(m_eta_bins.begin(), pVal) - 1;
+  fillHisto(m_efficiency_vs_truthMu_eta_bin[bin], truthMu, isGood, weight);
+  fillHisto(m_efficiency_vs_actualMu_eta_bin[bin], truthMu, isGood, weight);
 
   fillHisto(m_efficiency_vs_eta, eta, isGood, weight);
   fillHisto(m_efficiency_vs_pt, pt, isGood, weight);
