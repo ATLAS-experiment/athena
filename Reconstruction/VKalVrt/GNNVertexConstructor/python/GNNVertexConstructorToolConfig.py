@@ -12,12 +12,12 @@ def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
     gnnTool = acc.getPrimaryAndMerge(
             GNNToolCfg(
                 flags,
-                NNFile           ="GNNVertexConstructor/network.onnx",
+                NNFile           ="GNNVertexConstructor/network_fold0.onnx",
                 trackLinkType    ="IPARTICLE",  #Either IPARTICLE or  TRACK_PARTICLE
                 variableRemapping={"BTagTrackToJetAssociator" : "GhostTrack"},
                 )
     ) 
-    
+  
     kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
     
     acc.setPrivateTools(CompFactory.Rec.GNNVertexConstructorTool(GNNTool=gnnTool, **kwargs))
