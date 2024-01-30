@@ -41,9 +41,10 @@ namespace JetTagDQA {
     ManagedMonitorToolBase( type, name, parent ),
     m_muonAugmenter("Muons"),
     m_isData(false),
-    m_antiKt4EMTopoPlots                     (0, "BTag/AntiKt4EMTopoJets/"                , "antiKt4EMTopoJets"),
-    m_antiKt4EMPFlowJetsPlots                (0, "BTag/AntiKt4EMPFlowJets/"               , "antiKt4EMPFlowJets"),
-    m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots (0, "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/", "antiKtVR30Rmax4Rmin02PV0TrackJets"),
+    m_antiKt4EMTopoPlots                       (0, "BTag/AntiKt4EMTopoJets/"                ,        "antiKt4EMTopoJets"),
+    m_antiKt4EMPFlowJetsPlots                  (0, "BTag/AntiKt4EMPFlowJets/"               , 	     "antiKt4EMPFlowJets"),
+    m_antiKt10UFOCSSKSoftDropBeta100Zcut10Jets (0, "BTag/AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets/", "antiKt10UFOCSSKSoftDropBeta100Zcut10Jets"),
+    m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots   (0, "BTag/AntiKtVR30Rmax4Rmin02PV0TrackJets/", "antiKtVR30Rmax4Rmin02PV0TrackJets"),
     m_nevents(0)
   {
  
@@ -51,6 +52,7 @@ namespace JetTagDQA {
 
     declareProperty( "JetContainerEMTopo", m_jetNameEMTopo = "AntiKt4EMTopoJets" );
     declareProperty( "JetContainerPFlow", m_jetNamePFlow = "AntiKt4EMPFlowJets");
+    declareProperty( "JetContainerR10", m_jetNameR10 = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets");
     declareProperty( "JetContainerTrackJets", m_jetNameTrackJet = "AntiKtVR30Rmax4Rmin02PV0TrackJets");
 
     declareProperty( "TrackContainerName", m_trackName = "InDetTrackParticles" );
@@ -58,6 +60,7 @@ namespace JetTagDQA {
 
     declareProperty( "JetPtCutTtbar", m_jetPtCutTtbar = 20000);
     declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 500000);
+    declareProperty( "JetPtCutR10", m_jetPtCutR10 = 450000);
     declareProperty( "JetEtaCut", m_jetEtaCut = 2.5);
     declareProperty( "JVTCutAntiKt4EMTopoJets", m_JVTCutAntiKt4EMTopoJets = 0.59);
     declareProperty( "JVTCutLargerEtaAntiKt4EMTopoJets", m_JVTCutLargerEtaAntiKt4EMTopoJets = 0.11);
@@ -69,6 +72,7 @@ namespace JetTagDQA {
     declareProperty( "DL1dv01TaggerName", m_DL1dv01Name = "DL1dv01");
     declareProperty( "GN1TaggerName", m_GN1Name = "GN120220509");
     declareProperty( "GN2v00TaggerName", m_GN2v00Name = "GN2v00");
+    declareProperty( "GN2Xv01TaggerName", m_GN2Xv01Name = "GN2Xv01");
 
   }
 
@@ -96,6 +100,7 @@ namespace JetTagDQA {
     m_btagplots.insert(std::make_pair(m_jetNameEMTopo, &m_antiKt4EMTopoPlots));
     }
     m_btagplots.insert(std::make_pair(m_jetNamePFlow, &m_antiKt4EMPFlowJetsPlots));
+    m_btagplots.insert(std::make_pair(m_jetNameR10, &m_antiKt10UFOCSSKSoftDropBeta100Zcut10Jets));
     m_btagplots.insert(std::make_pair(m_jetNameTrackJet, &m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots));
 
     for(const auto& [name, plot]: m_btagplots){
@@ -106,7 +111,7 @@ namespace JetTagDQA {
 				      m_JVTCutLargerEtaAntiKt4EMTopoJets,
 				      m_JVTCutAntiKt4EMPFlowJets,
 				      m_truthMatchProbabilityCut);
-      plot->setTaggerNames(m_dipsName, m_DL1dv00Name, m_DL1dv01Name, m_GN1Name, m_GN2v00Name);
+      plot->setTaggerNames(m_dipsName, m_DL1dv00Name, m_DL1dv01Name, m_GN1Name, m_GN2v00Name, m_GN2Xv01Name);
     }
    
     return StatusCode::SUCCESS;
@@ -158,10 +163,16 @@ namespace JetTagDQA {
       // check if it is a ttbar or Zprime sample
       if(dsid == 410000 || dsid == 601229){
         m_jetPtCut = m_jetPtCutTtbar;
+        if(!m_jetNameR10.empty()){
+          m_jetPtCut = m_jetPtCutR10;
+        } 
       }
       else if(dsid == 427080 || dsid == 427081 ||dsid == 801271 || dsid == 800030) {
         m_jetPtCut = m_jetPtCutZprime;
         m_onZprime = true;
+        if(!m_jetNameR10.empty()){
+          m_jetPtCut = m_jetPtCutR10;
+        }
       }
       // if none applies give a warning and use the default cut
       else {
@@ -257,7 +268,13 @@ namespace JetTagDQA {
         // get the jet truth label
         int truth_label(1000);
         if(!m_isData){
-          if(jet->isAvailable<int>("HadronConeExclTruthLabelID")) jet->getAttribute("HadronConeExclTruthLabelID", truth_label);
+          if(name==m_jetNameEMTopo || name==m_jetNamePFlow || name==m_jetNameTrackJet){
+             if(jet->isAvailable<int>("HadronConeExclTruthLabelID")) jet->getAttribute("HadronConeExclTruthLabelID", truth_label);
+	  }
+          else if(name==m_jetNameR10){
+             if(jet->isAvailable<int>("R10TruthLabel_R22v1")) jet->getAttribute("R10TruthLabel_R22v1", truth_label);
+          }
+          else if(jet->isAvailable<int>("HadronConeExclExtendedTruthLabelID")) jet->getAttribute("HadronConeExclExtendedTruthLabelID", truth_label);
           else jet->getAttribute("TruthLabelID",truth_label);    
         }
 
