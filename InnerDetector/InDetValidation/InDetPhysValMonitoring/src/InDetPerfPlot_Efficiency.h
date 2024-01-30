@@ -37,6 +37,15 @@ private:
   TEfficiency* m_efficiency_vs_ptTruthMu{};
   TEfficiency* m_efficiency_vs_ptActualMu{};
 
+  TEfficiency* m_efficiency_vs_etaTruthMu{};
+  TEfficiency* m_efficiency_vs_etaActualMu{};
+  std::vector<TEfficiency*> m_efficiency_vs_truthMu_eta_bin;
+  std::vector<TEfficiency*> m_efficiency_vs_actualMu_eta_bin;
+  std::vector<float> m_eta_bins = {
+    0., 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0
+  };
+
+
   TEfficiency* m_efficiency_vs_eta{};
   TEfficiency* m_efficiency_vs_pt{};
   TEfficiency* m_efficiency_vs_pt_low{};
