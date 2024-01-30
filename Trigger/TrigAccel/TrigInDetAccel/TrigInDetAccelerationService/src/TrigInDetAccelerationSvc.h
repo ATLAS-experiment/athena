@@ -44,6 +44,7 @@ class TrigInDetAccelerationSvc : public extends<AthService, ITrigInDetAccelerati
   
   virtual TrigAccel::Work* createWork(unsigned int, std::shared_ptr<TrigAccel::OffloadBuffer>) const override;
   virtual const std::vector<short>& getLayerInformation(int) const override;
+  virtual size_t getMiddleLayersSize() const override {return m_middleSpacePointLayers.size();};
 
  private:   
 
@@ -70,6 +71,7 @@ class TrigInDetAccelerationSvc : public extends<AthService, ITrigInDetAccelerati
   int m_nDCs;
   std::string m_moduleName;
   bool m_useITkGeometry;
+  std::vector<int> m_middleSpacePointLayers;
   void* m_libHandle; //for OffloadFactory
   TrigAccel::WorkFactory* m_pWF;
   TrigAccel::Module* m_module;

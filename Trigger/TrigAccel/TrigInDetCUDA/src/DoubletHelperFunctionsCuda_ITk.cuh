@@ -11,6 +11,8 @@
  */
 
 
+namespace GPUTrackSeedingItkHelpers {
+
 /**
  * @brief Calculate eta for a doublet
  * @param dr radius difference between doublet's space points
@@ -30,10 +32,14 @@ __device__ static float getMaxDeltaLEta (float eta) {
   else return eta*eta*eta*eta*1.7582417 + eta*eta*-129.67033 + 3324.61538;
 }
 
+/**
+ * @brief Calculate |dt| cut for a given significance
+ * @param s std::sqrt(dt2/(covdt+dCov))
+ */
+__device__ static float getSignificanceCut (float s) {
+  return -0.0598 * std::log(s - 0.0664) - 0.0121;
+}
 
-__device__ static float canBeMiddleSpacePoint (float r) {
-  if(std::abs(r - 100.0) > 20.0) return false;
-  return true;
 }
 
 #endif

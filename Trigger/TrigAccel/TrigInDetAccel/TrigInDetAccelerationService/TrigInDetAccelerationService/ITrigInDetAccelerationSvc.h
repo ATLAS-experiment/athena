@@ -31,6 +31,7 @@ class ITrigInDetAccelerationSvc : virtual public IService {
   //helper
 
   virtual const std::vector<short>& getLayerInformation(int) const = 0;
+  virtual size_t getMiddleLayersSize() const = 0;
 
 };
 

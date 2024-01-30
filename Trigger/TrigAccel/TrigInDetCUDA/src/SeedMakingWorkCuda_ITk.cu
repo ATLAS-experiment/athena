@@ -212,23 +212,15 @@ bool SeedMakingWorkCudaManagedITk::run() {
   TrigAccel::ITk::OUTPUT_SEED_STORAGE* ps = reinterpret_cast<TrigAccel::ITk::OUTPUT_SEED_STORAGE*>(p.m_outputseeds);
   
   cudaSetDevice(id);
-
   checkError();
   
-
-
   cudaMemPrefetchAsync(p.m_settings, sizeof(TrigAccel::ITk::SEED_FINDER_SETTINGS), id, p.m_stream);
-
   checkError();
 
-
-
   cudaMemPrefetchAsync(p.m_spacepoints, sizeof(TrigAccel::ITk::SPACEPOINT_STORAGE), id, p.m_stream);
-
   checkError();
 
   cudaStreamSynchronize(p.m_stream);
-    
   TrigAccel::ITk::SEED_FINDER_SETTINGS* dSettings  = reinterpret_cast<TrigAccel::ITk::SEED_FINDER_SETTINGS *>(p.m_settings);
   TrigAccel::ITk::SPACEPOINT_STORAGE* dSpacepoints = reinterpret_cast<TrigAccel::ITk::SPACEPOINT_STORAGE *>(p.m_spacepoints);
   TrigAccel::ITk::DETECTOR_MODEL* dDetModel        = reinterpret_cast<TrigAccel::ITk::DETECTOR_MODEL*>(p.d_detmodel);
@@ -238,21 +230,20 @@ bool SeedMakingWorkCudaManagedITk::run() {
   DOUBLET_STORAGE_ITk* dStorage                   = reinterpret_cast<DOUBLET_STORAGE_ITk*>(p.d_doubletstorage);
 
   cudaMemset(p.m_outputseeds,0,10*sizeof(int));
-
   checkError();
 
   cudaMemset(p.d_doubletstorage,0,3*sizeof(int));
-
   checkError();
   
   const TrigAccel::ITk::SPACEPOINT_STORAGE* pSPS = reinterpret_cast<const TrigAccel::ITk::SPACEPOINT_STORAGE *>(p.m_spacepoints);
   int nSlices = pSPS->m_nPhiSlices;
+  int nMiddleLayers = pSPS->m_nMiddleLayers; // The first two kernels are launched for middle spacepoints
   int nLayers = pSPS->m_nLayers;
   
   int nMiddleSp = NUM_MIDDLE_THREADS_ITk;//determines size of the doublet/triplet buffers
   int nOtherSp = OUTER_THREADS_MULTIPLIER_ITk*p.m_gpuParams.m_nNUM_SMX_CORES/NUM_MIDDLE_THREADS_ITk;//the size of the spacepoint buffer
 
-  dim3 gridDimensions(nSlices, nLayers);
+  dim3 gridDimensions(nSlices, nMiddleLayers);
   dim3 blockDimensions(nMiddleSp, nOtherSp);
 
   cudaMemset(p.d_doubletinfo,0,sizeof(DOUBLET_INFO_ITk));
@@ -264,14 +255,12 @@ bool SeedMakingWorkCudaManagedITk::run() {
   checkError();
 
   doubletCountingKernel_ITk<<<gridDimensions, blockDimensions, 0, p.m_stream>>>(dSettings, dSpacepoints, dDetModel, dInfo, nLayers, nSlices);
-
   cudaStreamSynchronize(p.m_stream);
 
   checkError();
 
   doubletMakingKernel_ITk<<<gridDimensions, blockDimensions, 0, p.m_stream>>>(dSettings, dSpacepoints, dDetModel, dOutput, 
     dInfo, dStorage, nLayers, nSlices);
-
   cudaStreamSynchronize(p.m_stream);
 
   checkError();
@@ -283,7 +272,6 @@ bool SeedMakingWorkCudaManagedITk::run() {
   
   doubletMatchingKernel_ITk<<<p.m_gpuParams.m_nNUM_TRIPLET_BLOCKS, NUM_TRIPLET_THREADS_ITk, 0, p.m_stream>>>(dSettings, dSpacepoints, dDetModel, dInfo, 
     dStorage,  dOutput, nStats[0]);
-
   cudaStreamSynchronize(p.m_stream);
 
   checkError();
