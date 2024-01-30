@@ -169,30 +169,52 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             # It is safe to do this before calibration, as the cluster E is used
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
             alg.selectionDecoration = 'selectLikelihood' + selectionPostfix + ',as_bits'
-            if 'SiHits' in self.likelihoodWP:
-                # Select from Derivation Framework IsEM bits
-                config.addPrivateTool( 'selectionTool', 'CP::AsgMaskSelectionTool' )
-                dfVar = "DFCommonElectronsLHLooseBLIsEMValue"
-                alg.selectionTool.selectionVars = [dfVar]
-                mask = int( 0 | 0x1 << 1 | 0x1 << 2)
-                alg.selectionTool.selectionMasks = [mask]
+            if self.recomputeLikelihood:
+                # Rerun the likelihood ID
+                config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
+                alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
+                # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
+                if config.geometry() >= LHCPeriod.Run3:
+                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
+                elif config.geometry() == LHCPeriod.Run2:
+                    alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron_Run2'
             else:
-                if self.recomputeLikelihood:
-                    # Rerun the likelihood ID
-                    config.addPrivateTool( 'selectionTool', 'AsgElectronLikelihoodTool' )
-                    alg.selectionTool.primaryVertexContainer = 'PrimaryVertices'
-                    # Here we have to match the naming convention of EGSelectorConfigurationMapping.h
-                    if config.geometry() >= LHCPeriod.Run3:
-                        alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
-                    elif config.geometry() == LHCPeriod.Run2:
-                        alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron_Run2'
-                else:
-                    # Select from Derivation Framework flags
-                    config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
-                    dfFlag = "DFCommonElectronsLH" + self.likelihoodWP.split('LH')[0]
-                    dfFlag = dfFlag.replace("BLayer","BL")
-                    alg.selectionTool.selectionFlags = [dfFlag]
-        else:
+                # Select from Derivation Framework flags
+                config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
+                dfFlag = "DFCommonElectronsLH" + self.likelihoodWP.split('LH')[0]
+                dfFlag = dfFlag.replace("BLayer","BL")
+                alg.selectionTool.selectionFlags = [dfFlag]
+        elif 'SiHit' in self.likelihoodWP:
+            # Only want SiHit electrons, so veto loose LH electrons
+            algVeto = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlgVeto' + postfix + 'Veto')
+            algVeto.selectionDecoration = 'selectLikelihoodVeto' + postfix + ',as_bits'  
+            config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
+            algVeto.selectionTool.selectionFlags = ["DFCommonElectronsLHLoose"]
+            algVeto.selectionTool.invertFlags    = [True]
+            algVeto.particles = config.readName (self.containerName)
+            algVeto.preselection = config.getPreselection (self.containerName, self.selectionName)
+            # add in as preselection a veto
+            config.addSelection (self.containerName, self.selectionName, algVeto.selectionDecoration)
+
+            # Select SiHit electrons using IsEM bits
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronLikelihoodAlg' + postfix )
+            alg.selectionDecoration = 'selectSiHit' + selectionPostfix + ',as_bits'
+            # Select from Derivation Framework IsEM bits
+            config.addPrivateTool( 'selectionTool', 'CP::AsgMaskSelectionTool' )
+            dfVar = "DFCommonElectronsLHLooseBLIsEMValue"
+            alg.selectionTool.selectionVars = [dfVar]
+            mask = int( 0 | 0x1 << 1 | 0x1 << 2)
+            alg.selectionTool.selectionMasks = [mask]
+
+            # Set up the ElectronSiHitDecAlg algorithm to decorate SiHit electrons with a minimal amount of information:
+            algDec = config.createAlgorithm( 'CP::ElectronSiHitDecAlg', 'ElectronSiHitDecAlg' + postfix )
+            selDec = 'siHitEvtHasLeptonPair' + selectionPostfix + ',as_bits'
+            algDec.selectionName     = selDec.split(",")[0]
+            algDec.ElectronContainer = config.readName (self.containerName)
+            # Set flag to only collect SiHit electrons for events with an electron or muon pair to minimize size increase from SiHit electrons
+            algDec.RequireTwoLeptons = True
+            config.addSelection (self.containerName, self.selectionName, selDec)
+        elif 'DNN' in self.likelihoodWP:
             # Set up the DNN ID selection algorithm
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )
             alg.selectionDecoration = 'selectDNN' + selectionPostfix + ',as_bits'
@@ -207,6 +229,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             else:
                 # Select from Derivation Framework flags
                 raise ValueError ( "DNN working points are not available in derivations yet.")
+
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
@@ -218,6 +241,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' + postfix )
             alg.selectionDecoration = wpFlag
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
+            # For SiHit electrons, set flag to remove FSR electrons. 
+            # For standard electrons, FSR electrons need to be added as they may be missed by the standard selection. 
+            # For SiHit electrons FSR electrons are generally always selected, so they should be removed since they will be in the standard electron container.
+            if 'SiHit' in self.likelihoodWP:
+                alg.vetoFSR = True
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :

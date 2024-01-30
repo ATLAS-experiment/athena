@@ -1,19 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-
 #include "BTagging/BTagTrackAugmenterAlg.h"
-#include "GaudiKernel/ServiceHandle.h"
-
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
-
-// slightly ugly that we include both of these: ideally we'd just
-// add the methods we need to the extrapolator
-#include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 
 #include "TrkSurfaces/PerigeeSurface.h"
 

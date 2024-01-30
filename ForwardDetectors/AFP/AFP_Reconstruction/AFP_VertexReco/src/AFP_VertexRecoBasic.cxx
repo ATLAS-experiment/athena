@@ -213,7 +213,7 @@ xAOD::AFPVertex * AFP_VertexRecoBasic::reco(const double distA, const double dis
 
   double timeC = tofTrackSideC->trainTime() - (TVP_C.timeOffset(trainID)+TVP_C.timeSlope(trainID)*protonYPositionFar);
 
-  double position = (timeC-timeA)/2.*0.299792458 - (TVP_C.timeGlobalOffset()-TVP_A.timeGlobalOffset()); 
+  double position = ( (timeC*1000.-TVP_C.timeGlobalOffset()) - (timeA*1000.-TVP_A.timeGlobalOffset()))/2.*0.299792458 ; 
 
   return createVertex(position, distA, distC, outputContainer);
 }

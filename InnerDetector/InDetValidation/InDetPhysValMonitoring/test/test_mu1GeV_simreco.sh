@@ -11,6 +11,7 @@
 # art-output: *Analysis*.root
 # art-output: *.xml 
 # art-output: dcube*
+# art-html: dcube_shifter_last
 
 # Fix ordering of output in logfile
 exec 2>&1

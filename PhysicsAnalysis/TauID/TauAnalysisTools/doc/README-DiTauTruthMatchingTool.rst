@@ -38,8 +38,8 @@ file or generates the TruthTau container if necessary. (For more information see
 
 The truth matching is done for either a single xAOD DiTauJet object or for a DiTauJets container with these functions::
 
-  void DiTauTruthMatchingTool::applyTruthMatch(const xAOD::DiTauJet& xDiTau);
-  void DiTauTruthMatchingTool::applyTruthMatch(const std::vector<const xAOD::DiTauJet*>& vDiTaus);
+  void DiTauTruthMatchingTool::getTruth(const xAOD::DiTauJet& xDiTau);
+  void DiTauTruthMatchingTool::getTruth(const std::vector<const xAOD::DiTauJet*>& vDiTaus);
 
 
 ------------------
@@ -92,7 +92,7 @@ Tool configuration
 Output
 ------
 
-Calling applyTruthMatch(xDiTau) adds a vector of element links to the truth lepton
+Calling getTruth(xDiTau) adds a vector of element links to the truth lepton
 particle as decoration: ``truthParticleLink``. Those can be accessed via::
 
   auto vElementLinks = xDiTau.auxdata<std::vector<ElementLink<xAOD::TruthParticleContainer>>>("truthParticleLinks");
@@ -102,7 +102,7 @@ In addition two variables of type char are decorated to the DiTauJet
 * ``IsTruthMatched`` indicating if two leading subjets match to truth leptons
 * ``IsTruthHadronic`` indicating if two leading subjets match to truth hadronic tau decays
 
-After calling applyTruthMatch(xDiTau) those information can be retrieved via::
+After calling getTruth(xDiTau) those information can be retrieved via::
 
   bool bMatched = (bool)xDiTau.auxdata<char>("IsTruthMatched")
   bool bHadronic = (bool)xDiTau.auxdata<char>("IsTruthHadronic")

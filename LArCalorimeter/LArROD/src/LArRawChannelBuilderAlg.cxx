@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawChannelBuilderAlg.h" 
@@ -8,6 +8,7 @@
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
+#include "LArElecCalib/LArProvenance.h"
 #include <cmath>
 #include <memory>
 
@@ -160,8 +161,8 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
     float tau=0;
 
 
-    uint16_t prov=0xa5; //Means all constants from DB
-    if (saturated) prov|=0x0400;
+    uint16_t prov=LArProv::DEFAULTRECO; //Means all constants from DB + OFC
+    if (saturated) prov|=LArProv::SATURATED;
 
     const float E1=m_absECutFortQ.value() ? std::fabs(E) : E;
     float ecut(0.);
@@ -182,7 +183,7 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
     }
     if (E1 > ecut) {
       ATH_MSG_VERBOSE("Channel " << m_onlineId->channel_name(id) << " gain " << gain << " above threshold for tQ computation");
-      prov|=0x2000; //  fill bit in provenance that time+quality information are available
+      prov|=LArProv::QTPRESENT; //  fill bit in provenance that time+quality information are available
 
       //Get time by applying OFC-b coefficients:
       const auto& ofcb=ofcs->OFC_b(id,gain);

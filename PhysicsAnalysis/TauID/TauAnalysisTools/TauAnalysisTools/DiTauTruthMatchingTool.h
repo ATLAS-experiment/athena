@@ -45,11 +45,7 @@ public:                         // Interface functions
    *  if no truth particle was found a null pointer is returned */
   virtual void getTruth(const xAOD::DiTauJet& xDiTau);
 
-  /** apply match to a single tau */
-  virtual void applyTruthMatch(const xAOD::DiTauJet& xDiTau);
-
-  /** apply match to all taus in a vector*/
-  virtual void applyTruthMatch(const std::vector<const xAOD::DiTauJet*>& vDiTaus);
+  virtual void getTruth(const std::vector<const xAOD::DiTauJet*>& vDiTaus);
 
 private:                        // private helper functions
 

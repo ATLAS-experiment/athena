@@ -1,12 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-//general interface for secondary vertex finders
-#include "InDetRecToolInterfaces/ISecVertexInJetFinder.h"
-#include "VxSecVertex/VxSecVKalVertexInfo.h"
-#include "VxSecVertex/VxJetFitterVertexInfo.h"
-#include "xAODTracking/TrackParticleContainer.h" 
 
 #include "BTagging/JetSecVtxFindingAlg.h"
 
@@ -17,15 +11,11 @@ namespace Analysis {
 
   JetSecVtxFindingAlg::JetSecVtxFindingAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm(name,pSvcLocator),
-    m_secVertexFinderToolHandle(this),
-    m_vxPrimaryName("PrimaryVertices")
+    m_secVertexFinderToolHandle(this)
   {
-    declareProperty("PrimaryVertexName",  m_vxPrimaryName);
     //List of the secondary vertex finders in jet to be run
     declareProperty("SecVtxFinder",          m_secVertexFinderToolHandle);
   }
-
-  JetSecVtxFindingAlg::~JetSecVtxFindingAlg() = default;
 
   StatusCode JetSecVtxFindingAlg::initialize()
   {

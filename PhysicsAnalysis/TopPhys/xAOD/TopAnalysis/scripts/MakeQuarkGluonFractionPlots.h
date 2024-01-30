@@ -75,9 +75,9 @@ class MakeQuarkGluonFractionPlots {
   void checkFile(std::string filename);
   
   //function to draw histograms from a map
-  void drawhistos(std::map<std::string, TH2D*> histos, const std::string& psfilename);
+  void drawhistos(const std::map<std::string, TH2D*> & histos, const std::string& psfilename);
   //function to draw histograms from a vector
-  void drawhistos(std::vector<TH2D*> histos, const std::string& psfilename);
+  void drawhistos(const std::vector<TH2D*> & histos, const std::string& psfilename);
 
   //function to extract the JetCollectionName
   std::string extractJetCollectionName(const std::string& histoname);
@@ -92,10 +92,10 @@ class MakeQuarkGluonFractionPlots {
   void createOutputFile(std::string filename,std::vector<TH2D*> histos, std::vector<TH2D*> histosUnc );
   
   //Subtract
-  std::vector<TH2D*> getDelta (std::vector<TH2D*> h_nom, std::vector<TH2D*> h_var, double scale, const std::string& prehistname);
+  std::vector<TH2D*> getDelta (const std::vector<TH2D*> & h_nom, std::vector<TH2D*> h_var, double scale, const std::string& prehistname);
   
   //function to compute the total systematic uncertainty
-  std::vector<TH2D*> evaluateQGFUncertaity(std::vector<std::vector<TH2D*> > f_1P, std::vector<std::vector<TH2D*> > f_2PUp, std::vector<std::vector<TH2D*> > f_2PDown, const std::string& channel);
+  std::vector<TH2D*> evaluateQGFUncertaity(const std::vector<std::vector<TH2D*> > & f_1P, const std::vector<std::vector<TH2D*> > & f_2PUp, const std::vector<std::vector<TH2D*> > & f_2PDown, const std::string& channel);
   
 
   
@@ -127,7 +127,7 @@ class MakeQuarkGluonFractionPlots {
 
   void DumpToMap(std::map<std::string, TH2D*> &h_map, const std::string& filename, const std::string& channel, const std::string& folder, const std::string& keyname, bool createMap);
   void DumpFileToMap(std::map<std::string, TH2D*> &h_map, std::string filename, std::string channel, std::string folder, std::string keyname, bool createMap);
-  void CreateQGFFile(const std::string& prename, const std::map<std::string, TH2D*>& h_input,std::vector< std::map<std::string, TH2D*> > h_input_1P,std::vector< std::map<std::string, TH2D*> > h_input_1PVar,std::vector< std::map<std::string, TH2D*> > h_input_2P,std::vector< std::map<std::string, TH2D*> > h_input_2PUp,std::vector< std::map<std::string, TH2D*> > h_input_2PDown);
+  void CreateQGFFile(const std::string& prename, const std::map<std::string, TH2D*>& h_input,const std::vector< std::map<std::string, TH2D*> > & h_input_1P,const std::vector< std::map<std::string, TH2D*> > & h_input_1PVar,const std::vector< std::map<std::string, TH2D*> > & h_input_2P,const std::vector< std::map<std::string, TH2D*> > & h_input_2PUp,const std::vector< std::map<std::string, TH2D*> > & h_input_2PDown);
 
 };
 

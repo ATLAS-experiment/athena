@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file EfieldInterpolator.h
@@ -51,8 +51,8 @@ public:
   bool initializeFromDirectory(const std::string& fpath);
   double estimateEfield(std::vector<double> vvol, const std::vector<double>& vflu, const std::vector<std::vector<double> >& vfluvvol,
                         double aimFlu, double aimVol, const std::string& prepend = "", bool debug = false);
-  double estimateEfieldInvDistance(std::vector<double> vvol, std::vector<double> vflu,
-                                   std::vector<std::vector<double> > vfluvvol, double aimFlu, double aimVol,
+  double estimateEfieldInvDistance(const std::vector<double> & vvol, const std::vector<double> & vflu,
+                                   const std::vector<std::vector<double> > & vfluvvol, double aimFlu, double aimVol,
                                    double measure = 1.);
 
   TH1D* createEfieldProfile(double aimFluence, double aimVoltage);
@@ -83,7 +83,7 @@ private:
   std::string m_fInter;  //path to .root file for saving interpolation TTree, i.e. ordered by pixeldepth z
   std::vector<std::vector<TString> > list_files(const TString& fileList_TCADsamples);
   static double extrapolateLinear(double x1, double y1, double x2, double y2, double xaim);
-  int fillXYvectors(std::vector<double> vLoop, int ifix, std::vector<std::vector<double> > v2vsv1,
+  int fillXYvectors(std::vector<double> vLoop, int ifix, const std::vector<std::vector<double> > & v2vsv1,
                     std::vector<double>& xx, std::vector<double>& yy, bool regularOrder = true);
   void fillEdgeValues(TH1D* hin);
   bool isInterpolation(const std::vector<double>& vval, double aimval)

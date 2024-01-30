@@ -23,11 +23,8 @@
 #include "JetTagTools/CombinerToolTag.h"
 #include "JetTagInfo/BaseTagInfo.h"
 #include "JetTagTools/ICombinerTool.h"
-//#include "JetEvent/Jet.h"
-
 
 namespace Analysis {
-
 
   CombinerToolTag::CombinerToolTag(const std::string& t, const std::string& n, const IInterface* p)
     : AthAlgTool(t,n,p),
@@ -37,15 +34,9 @@ namespace Analysis {
     declareInterface<ITagTool>(this);
     // global configuration:
     declareProperty("listTaggers",m_listTaggers);
-    //    declareProperty("useCharm",m_useCharm);
     declareProperty("combinedTagString",m_combinedTagString);
     declareProperty("CombinerTool",m_combinerTool);
   }
-
-  CombinerToolTag::~CombinerToolTag() {
-
-  }
-
 
   StatusCode CombinerToolTag::initialize() {
 
@@ -58,16 +49,6 @@ namespace Analysis {
     return StatusCode::SUCCESS;
   }
 
-
-  void CombinerToolTag::finalizeHistos() {
-  }
-
-
-
-  StatusCode CombinerToolTag::finalize() {
-    return StatusCode::SUCCESS;
-  }
-
   void CombinerToolTag::tagJet(xAOD::Jet& jetToTag) {
     
     std::vector<double> combination=m_combinerTool->simpleCombine(jetToTag,
@@ -77,7 +58,7 @@ namespace Analysis {
     newTagInfo->setTagLikelihood(combination);
     jetToTag.addInfo(newTagInfo);
     newTagInfo->makeValid();    
-    
+
   }
   
 }//end namespace

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_NEWLIKELIHOODMULTIDTOOL_H
@@ -11,7 +11,6 @@
 ********************************************************/
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "JetTagTools/LikelihoodComponents.h"
 #include "JetTagCalibration/JetTagCalibCondData.h"
 #include <string>
@@ -28,10 +27,9 @@ class NewLikelihoodTool : public AthAlgTool {
  public:
 
   NewLikelihoodTool(const std::string&,const std::string&,const IInterface*);
-  virtual ~NewLikelihoodTool();
+  virtual ~NewLikelihoodTool() = default;
   
   virtual StatusCode initialize() override;
-  virtual StatusCode finalize() override;
   
   static const InterfaceID& interfaceID() { return IID_NewLikelihoodTool; };
   

@@ -17,7 +17,7 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.doHVCorr",lambda prevFlags : not prevFlags.Input.isMC)
     lcf.addFlag("LAr.doCellEmMisCalib",lambda prevFlags : prevFlags.Input.isMC)
 
-    lcf.addFlag("LAr.RawChannelSource",_determineRawChannelSource,enum=RawChannelSource)
+    lcf.addFlag("LAr.RawChannelSource", _determineRawChannelSource, type=RawChannelSource)
 
     lcf.addFlag("LAr.doCellNoiseMasking",True)
     lcf.addFlag("LAr.doCellSporadicNoiseMasking",True)

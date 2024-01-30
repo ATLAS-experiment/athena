@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************
@@ -44,19 +44,14 @@ namespace Analysis {
       /**
 	 Implementations of the methods defined in the abstract base class
       */
-      virtual ~CombinerToolTag();
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual void finalizeHistos();
-      virtual void tagJet(xAOD::Jet& jetToTag);    
-    
-      void setOrigin(const Trk::VxCandidate*) { }
+      virtual ~CombinerToolTag() = default;
+      virtual StatusCode initialize() override;
+      virtual void tagJet(xAOD::Jet& jetToTag);
 
     private:      
 
       /** List of the variables to be used in the likelihood */
       std::vector<std::string> m_listTaggers;
-      //      std::vector<bool> m_useCharm;
       std::string m_combinedTagString;
 
       ToolHandle<ICombinerTool> m_combinerTool;

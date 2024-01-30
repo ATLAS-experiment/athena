@@ -1,6 +1,6 @@
 /**
  *
- * @copyright Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauEfficiencyCorrectionsTool.h
  * @author Guillermo Hamity (ghamity@cern.ch)
@@ -112,9 +112,7 @@ private:
 
   std::vector<int> m_vEfficiencyCorrectionTypes;
   std::vector< asg::AnaToolHandle<IDiTauEfficiencyCorrectionsTool>* > m_vCommonEfficiencyTools;
-  std::string m_sInputFilePathRecoHadTau;
   std::string m_sInputFilePathJetIDHadTau;
-  std::string m_sVarNameRecoHadTau;
   std::string m_sVarNameJetIDHadTau;
   std::string m_sRecommendationTag;
   bool m_bSkipTruthMatchCheck;

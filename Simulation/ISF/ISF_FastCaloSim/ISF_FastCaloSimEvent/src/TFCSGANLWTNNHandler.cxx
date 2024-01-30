@@ -1,66 +1,39 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TFCSGANLWTNNHandler.cxx, (c) ATLAS Detector software             //
-///////////////////////////////////////////////////////////////////
-
-// class header include
 #include "ISF_FastCaloSimEvent/TFCSGANLWTNNHandler.h"
 
-#include "TFile.h" //Needed for TBuffer
+// For writing to a tree
+#include "TBranch.h"
+#include "TTree.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <sstream>
+// LWTNN
+#include "lwtnn/LightweightGraph.hh"
+#include "lwtnn/parse_json.hh"
 
-TFCSGANLWTNNHandler::TFCSGANLWTNNHandler() { m_graph = nullptr; }
+TFCSGANLWTNNHandler::TFCSGANLWTNNHandler(const std::string &inputFile)
+    : VNetworkLWTNN(inputFile) {
+  ATH_MSG_DEBUG("Setting up from inputFile.");
+  setupPersistedVariables();
+  setupNet();
+};
 
-TFCSGANLWTNNHandler::~TFCSGANLWTNNHandler() {
-  if (m_input != nullptr) {
-    delete m_input;
-  }
-  if (m_graph != nullptr) {
-    delete m_graph;
-  }
-}
+TFCSGANLWTNNHandler::TFCSGANLWTNNHandler(const TFCSGANLWTNNHandler &copy_from)
+    : VNetworkLWTNN(copy_from) {
+  // Cannot take copies of lwt::LightweightGraph
+  // (copy constructor disabled)
+  ATH_MSG_DEBUG("Making a new m_lwtnn_graph for copied network");
+  std::stringstream json_stream(m_json);
+  const lwt::GraphConfig config = lwt::parse_json_graph(json_stream);
+  m_lwtnn_graph = std::make_unique<lwt::LightweightGraph>(config);
+  m_outputLayers = copy_from.m_outputLayers;
+};
 
-bool TFCSGANLWTNNHandler::LoadGAN(const std::string &inputFile) {
-  std::ifstream input(inputFile);
-  std::stringstream sin;
-  sin << input.rdbuf();
-  input.close();
-  // build the graph
-  auto config = lwt::parse_json_graph(sin);
-  m_graph = new lwt::LightweightGraph(config);
-  if (m_graph == nullptr) {
-    return false;
-  }
-  if (m_input != nullptr) {
-    delete m_input;
-  }
-  m_input = new std::string(sin.str());
-  return true;
-}
-
-void TFCSGANLWTNNHandler::Streamer(TBuffer &R__b) {
-  // Stream an object of class TFCSGANLWTNNHandler
-  if (R__b.IsReading()) {
-    R__b.ReadClassBuffer(TFCSGANLWTNNHandler::Class(), this);
-    if (m_graph != nullptr) {
-      delete m_graph;
-      m_graph = nullptr;
-    }
-    if (m_input != nullptr) {
-      std::stringstream sin;
-      sin.str(*m_input);
-      auto config = lwt::parse_json_graph(sin);
-      m_graph = new lwt::LightweightGraph(config);
-    }
-#ifndef __FastCaloSimStandAlone__
-    // When running inside Athena, delete config to free the memory
+void TFCSGANLWTNNHandler::setupNet() {
+  // Backcompatability, previous versions stored this in m_input
+  if (m_json.length() == 0 && m_input != nullptr) {
+    m_json = *m_input;
     delete m_input;
     m_input = nullptr;
   }
@@ -133,6 +106,13 @@ void TFCSGANLWTNNHandler::Streamer(TBuffer &buf) {
     this->deleteAllButNet();
 #endif
   } else {
-    R__b.WriteClassBuffer(TFCSGANLWTNNHandler::Class(), this);
-  }
-}
+    if (!m_json.empty()) {
+      ATH_MSG_DEBUG("Writing buffer in TFCSGANLWTNNHandler ");
+    } else {
+      ATH_MSG_WARNING(
+          "Writing buffer in TFCSGANLWTNNHandler, but m_json is empty");
+    };
+    // Persist variables
+    TFCSGANLWTNNHandler::Class()->WriteBuffer(buf, this);
+  };
+};

@@ -234,6 +234,13 @@ StatusCode BookkeeperTool::copyInputContainersToOutput(CutBookkeepersLocalCache 
 {
   CutBookkeepersLocalCache::prepareContainers(target, m_numberOfWeightVariations);
 
+  if (msgLvl(MSG::DEBUG)) {
+    ATH_MSG_DEBUG("Available sources:");
+    for (const auto &[sourceID, list] : m_inputContainers) {
+      ATH_MSG_DEBUG("  " << sourceID);
+    }
+  }
+
   if (!source.empty()) {
     auto it = m_inputContainers.find(source);
     if (it == m_inputContainers.end()) {

@@ -1,67 +1,40 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTagging/JetSecVertexingAlg.h"
 
-#include "xAODCore/ShallowCopy.h"
-#include "VxVertex/VxContainer.h"
-#include "VxVertex/RecVertex.h"
-#include "VxVertex/PrimaryVertexSelector.h" // new since rel 17.2
+#include "VxJetVertex/RecVertexPositions.h"
 
 //general interface for secondary vertex finders
-#include "VxSecVertex/VxSecVertexInfo.h"
 #include "VxSecVertex/VxSecVKalVertexInfo.h"
 #include "VxSecVertex/VxJetFitterVertexInfo.h"
- 
-#include "Particle/TrackParticle.h"
-#include "JetTagEvent/ISvxAssociation.h"
-#include "JetTagEvent/TrackAssociation.h"
 
 #include "VxJetVertex/VxJetCandidate.h"
 #include "VxJetVertex/VxVertexOnJetAxis.h"
-#include "VxJetVertex/SelectedTracksInJet.h"
-#include "VxJetVertex/TwoTrackVerticesInJet.h"
 #include "VxJetVertex/VxClusteringTable.h"
 #include "VxJetVertex/PairOfVxVertexOnJetAxis.h"
-#include "VxJetVertex/VxClusteringTable.h"
 
 #include "VxVertex/VxTrackAtVertex.h"
-#include "GeoPrimitives/GeoPrimitives.h"
 
 #include "TrkLinks/LinkToXAODTrackParticle.h"
 
-#include "JetTagTools/MSVVariablesFactory.h"
-
-#include "xAODBTagging/BTagging.h"
-
-#include "xAODBTagging/BTagVertex.h"
-#include "xAODBTagging/BTagVertexContainer.h"
 #include "xAODBTagging/BTagVertexAuxContainer.h"
-
-#include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/TrackParticleContainer.h"
+
 #include "xAODBase/IParticle.h"
 
-#include "StoreGate/ReadDecorHandle.h"
-#include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
 namespace Analysis {
 
   JetSecVertexingAlg::JetSecVertexingAlg(const std::string& name, ISvcLocator* pSvcLocator):
     AthReentrantAlgorithm(name,pSvcLocator),
-    m_MSVvarFactory("Analysis::MSVVariablesFactory",this),
-    m_vxPrimaryName("PrimaryVertices")
+    m_MSVvarFactory("Analysis::MSVVariablesFactory",this)
   {
-    declareProperty("PrimaryVertexName",  m_vxPrimaryName);
     declareProperty("SecVtxFinderxAODBaseName", m_secVertexFinderBaseName);
     declareProperty("MSVVariableFactory",          m_MSVvarFactory);
   }
-
-  JetSecVertexingAlg::~JetSecVertexingAlg() = default;
 
   StatusCode JetSecVertexingAlg::initialize()
   {

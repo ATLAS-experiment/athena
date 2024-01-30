@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxVectorData_test.cxx
@@ -50,13 +50,6 @@ using SG::AuxVectorData;
 using SG::AuxVectorData_test;
 
 
-template <class T>
-std::vector<typename T::value_type> make_vector (const T& c)
-{
-  return std::vector<typename T::value_type> (c.begin(), c.end());
-}
-
-
 void test_get_data()
 {
   std::cout << "test_get_data\n";
@@ -75,9 +68,6 @@ void test_get_data()
   assert (!b1.isAvailable (ityp));
   assert (!b1.isAvailableWritable (ityp));
   assert (!b1.isAvailableWritableAsDecoration (ityp));
-  assert (!b1.isAvailable<int> ("anInt"));
-  assert (!b1.isAvailableWritable<int> ("anInt"));
-  assert (!b1.isAvailableWritableAsDecoration<int> ("anInt"));
   assert (b1.getConstStore() == 0);
   assert (b1.getStore() == 0);
   b1.setStore (cstore);
@@ -88,9 +78,6 @@ void test_get_data()
   assert (!b1.isAvailable (ityp));
   assert (!b1.isAvailableWritable (ityp));
   assert (!b1.isAvailableWritableAsDecoration (ityp));
-  assert (!b1.isAvailable<int> ("anInt"));
-  assert (!b1.isAvailableWritable<int> ("anInt"));
-  assert (!b1.isAvailableWritableAsDecoration<int> ("anInt"));
   EXPECT_EXCEPTION (SG::ExcConstAuxData, b1.getData<int> (ityp, 0));
   EXPECT_EXCEPTION (SG::ExcBadAuxVar, cb1.getData<int> (ityp, 0));   
   EXPECT_EXCEPTION (SG::ExcBadAuxVar, cb1.getDataArray (ityp));
@@ -110,14 +97,8 @@ void test_get_data()
   assert (b1.isAvailable (ityp));
   assert (b1.isAvailableWritable (ityp));
   assert (b1.isAvailableWritableAsDecoration (ityp));
-  assert (b1.isAvailable<int> ("anInt"));
-  assert (b1.isAvailableWritable<int> ("anInt"));
-  assert (b1.isAvailableWritableAsDecoration<int> ("anInt"));
   assert (reinterpret_cast<const int*>(cb1.getDataArray (ityp))[1] == 2);
   assert (reinterpret_cast<const int*>(cb1.getDataArrayAllowMissing (ityp))[1] == 2);
-
-  std::vector<int> vexp {1, 2, 0, 0, 0, 0, 0, 0, 0, 0};
-  assert (make_vector (b1.getDataSpan<int> ("anInt")) == vexp);
 
   b1.setStore (cstore);
   assert (!b1.hasNonConstStore());
@@ -126,9 +107,6 @@ void test_get_data()
   assert (b1.isAvailable (ityp));
   assert (!b1.isAvailableWritable (ityp));
   assert (b1.isAvailableWritableAsDecoration (ityp));
-  assert (b1.isAvailable<int> ("anInt"));
-  assert (!b1.isAvailableWritable<int> ("anInt"));
-  assert (b1.isAvailableWritableAsDecoration<int> ("anInt"));
 
   SG::auxid_t ftyp = SG::AuxTypeRegistry::instance().getAuxID<float> ("aFloat");
   float* ff = reinterpret_cast<float*> (store.getData (ftyp, 10, 20));
@@ -136,11 +114,6 @@ void test_get_data()
   ff[1] = 2.5;
   assert (cb1.getData<float> (ftyp, 0) == 1.5);
   assert (cb1.getData<float> (ftyp, 1) == 2.5);
-
-  assert (b1.getConstDataSpan<int> ("anInt")[0] == 1);
-  assert (make_vector (b1.getConstDataSpan<int> ("anInt")) == vexp);
-  assert (make_vector (cb1.getDataSpan<int> ("anInt")) == vexp);
-  assert (make_vector (cb1.getDecorationSpan<int> ("anInt")) == vexp);
 }
 
 

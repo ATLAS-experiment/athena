@@ -8,6 +8,7 @@ def SetupArgParser():
     parser.add_argument("-o", "--output", dest="output", default='', help="Text file containing each cabling channel", metavar="FILE")
     parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"], 
                         help="Input file to run on ", nargs="+")
+    parser.add_argument("--geometry", default="ATLAS-R2-2016-01-00-01", help="Geometry tag")
     parser.add_argument("--mezzMap", default="", help="External JSON file containing the internal mapping of the mezzanine cards")
     parser.add_argument("--cablingMap", default="", help="External JSON file containing the cabling map of each channel")
     return parser
@@ -54,7 +55,8 @@ if __name__ == "__main__":
     flags.Concurrency.NumThreads = args.threads
     flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
     flags.Output.ESDFileName = args.output
-    flags.Input.Files = args.inputFile    
+    flags.Input.Files = args.inputFile
+    flags.GeoModel.AtlasVersion = args.geometry
     flags.lock()
     
     cfg = MdtCablingTestAlgCfg(flags,

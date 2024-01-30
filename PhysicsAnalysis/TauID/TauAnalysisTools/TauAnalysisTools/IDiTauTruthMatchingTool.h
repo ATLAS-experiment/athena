@@ -43,14 +43,10 @@ public:
   /** initialize the tool*/
   virtual StatusCode initialize() = 0;
 
-  /** apply match to a single ditau jet*/
-  virtual void applyTruthMatch(const xAOD::DiTauJet& xDiTau) = 0;
-
-  /** apply match to all ditaus in a vector*/
-  virtual void applyTruthMatch(const std::vector<const xAOD::DiTauJet*>& vDiTaus) = 0;
-
   /** get pointer to truth tau, if no truth tau was found a null pointer is returned*/
   virtual void getTruth(const xAOD::DiTauJet& xDiTau) = 0;
+  
+  virtual void getTruth(const std::vector<const xAOD::DiTauJet*>& vDiTaus) = 0;
 
 }; // class IDiTauTruthMatchingTool
 

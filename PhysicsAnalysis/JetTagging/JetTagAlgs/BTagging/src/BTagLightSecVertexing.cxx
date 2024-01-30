@@ -1,49 +1,27 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "BTagging/IBTagLightSecVertexing.h"
 #include "BTagging/BTagLightSecVertexing.h"
 
 #include "xAODCore/ShallowCopy.h"
-#include "VxVertex/VxContainer.h"
-#include "VxVertex/RecVertex.h"
-#include "VxVertex/PrimaryVertexSelector.h"
 
 //general interface for secondary vertex finders
 #include "VxSecVertex/VxSecVKalVertexInfo.h"
 #include "VxSecVertex/VxJetFitterVertexInfo.h"
- 
-#include "Particle/TrackParticle.h"
-#include "JetTagEvent/ISvxAssociation.h"
-#include "JetTagEvent/TrackAssociation.h"
 
 #include "VxJetVertex/VxJetCandidate.h"
 #include "VxJetVertex/VxVertexOnJetAxis.h"
-#include "VxJetVertex/SelectedTracksInJet.h"
 #include "VxJetVertex/TwoTrackVerticesInJet.h"
-#include "VxJetVertex/VxClusteringTable.h"
-#include "VxJetVertex/PairOfVxVertexOnJetAxis.h"
-#include "VxJetVertex/VxClusteringTable.h"
+#include "VxJetVertex/RecVertexPositions.h"
 
 #include "VxVertex/VxTrackAtVertex.h"
-#include "GeoPrimitives/GeoPrimitives.h"
 
 #include "TrkLinks/LinkToXAODTrackParticle.h"
 
-#include "JetTagTools/JetFitterVariablesFactory.h"
-//#include "JetTagTools/MSVVariablesFactory.h"
-
-#include "xAODBTagging/BTagging.h"
-
-#include "xAODBTagging/BTagVertex.h"
 #include "xAODBTagging/BTagVertexContainer.h"
-#include "xAODBTagging/BTagVertexAuxContainer.h"
 
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/Vertex.h"
-#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODBase/IParticle.h" 
 
 #include "StoreGate/ReadDecorHandle.h"
@@ -52,21 +30,15 @@ namespace Analysis {
 
   BTagLightSecVertexing::BTagLightSecVertexing(const std::string& t, const std::string& n, const IInterface* p) :
     AthAlgTool(t,n,p),
-    m_JFvarFactory("Analysis::JetFitterVariablesFactory",this),
-    //m_MSVvarFactory("Analysis::MSVVariablesFactory",this),
-    m_vxPrimaryName("PrimaryVertices")
+    m_JFvarFactory("Analysis::JetFitterVariablesFactory",this)
   {
     declareInterface<IBTagLightSecVertexing>(this);
 
-    declareProperty("PrimaryVertexName",  m_vxPrimaryName);
     //List of the secondary vertex finders in jet to be used
     declareProperty("SecVtxFinderTrackNameList", m_secVertexFinderTrackNameList);
     declareProperty("SecVtxFinderxAODBaseNameList", m_secVertexFinderBaseNameList);
-    declareProperty("JetFitterVariableFactory",          m_JFvarFactory);
-    //declareProperty("MSVVariableFactory",          m_MSVvarFactory);
+    declareProperty("JetFitterVariableFactory", m_JFvarFactory);
   }
-
-  BTagLightSecVertexing::~BTagLightSecVertexing() = default;
 
   StatusCode BTagLightSecVertexing::initialize()
   {
@@ -98,20 +70,15 @@ namespace Analysis {
     } else {
        ATH_MSG_DEBUG("#BTAG# Retrieved " << m_JFvarFactory);
     }
-    /*if ( m_MSVvarFactory.retrieve().isFailure() ) {
-       ATH_MSG_ERROR("#BTAG# Failed to retrieve " << m_MSVvarFactory);
-    } else {
-       ATH_MSG_DEBUG("#BTAG# Retrieved " << m_MSVvarFactory);
-    }*/
 
     return StatusCode::SUCCESS;
   }
 
   StatusCode BTagLightSecVertexing::fillVkalVariables(const xAOD::Jet& myJet,
-             xAOD::BTagging* newBTag,
-						 const Trk::VxSecVKalVertexInfo* myVertexInfoVKal,
-						 const xAOD::TrackParticleContainer* theTrackParticleContainer,
-						 const std::string& basename) const {
+						      xAOD::BTagging* newBTag,
+						      const Trk::VxSecVKalVertexInfo* myVertexInfoVKal,
+						      const xAOD::TrackParticleContainer* theTrackParticleContainer,
+						      const std::string& basename) const {
 
     const auto& key = basename.find("Flip")!=std::string::npos ? m_jetSVFlipLinkName : m_jetSVLinkName; 
     SG::ReadDecorHandle<xAOD::JetContainer, std::vector<ElementLink< xAOD::VertexContainer> > > h_jetSVLinkName (key);
@@ -204,10 +171,10 @@ namespace Analysis {
   }
 
   StatusCode BTagLightSecVertexing::fillJFVariables(const xAOD::Jet& myJet,
-					       xAOD::BTagging* newBTag,
-					       const Trk::VxJetFitterVertexInfo* myVertexInfoJetFitter,
-					       const xAOD::TrackParticleContainer* theTrackParticleContainer,
-					       const std::string& basename) const {
+						    xAOD::BTagging* newBTag,
+						    const Trk::VxJetFitterVertexInfo* myVertexInfoJetFitter,
+						    const xAOD::TrackParticleContainer* theTrackParticleContainer,
+						    const std::string& basename) const {
 
     //THIS is a nasty hack from VD but by it's more likely we get GNN to work than someone to re-organise JetFitter
     const auto& key = basename.find("Flip")!=std::string::npos ? m_jetJFFlipVtxLinkName : m_jetJFVtxLinkName;
@@ -352,8 +319,8 @@ namespace Analysis {
     }
     for (const auto *fz : *h_VertexCollectionName) {
       if (fz->vertexType() == xAOD::VxType::PriVtx) {
-	      primaryVertex = fz;
-	      break;
+	primaryVertex = fz;
+	break;
       }
     }
 
@@ -363,7 +330,7 @@ namespace Analysis {
       xAOD::VertexContainer::const_iterator fz = h_VertexCollectionName->begin();
       primaryVertex = *fz;
       if (primaryVertex->nTrackParticles() == 0) {
-	      ATH_MSG_DEBUG("#BTAG#  PV==BeamSpot: probably poor tagging");
+	ATH_MSG_DEBUG("#BTAG#  PV==BeamSpot: probably poor tagging");
       }
     }
 
@@ -406,15 +373,15 @@ namespace Analysis {
               (*btagIter)->setVariable<std::vector<ElementLink<xAOD::VertexContainer> > >(basename, "vertices", SVertexLinks);
               (*btagIter)->setDynVxELName(basename, "vertices");
             }
-	          else if("MSV" == basename){
+	    else if("MSV" == basename){
               std::vector<ElementLink<xAOD::TrackParticleContainer> > badtrackEL;
               (*btagIter)->setVariable<std::vector<ElementLink<xAOD::TrackParticleContainer> > >(basename, "badTracksIP", badtrackEL);
               (*btagIter)->setDynTPELName(basename, "badTracksIP");
               std::vector< ElementLink< xAOD::VertexContainer > > SVertexLinks;
               (*btagIter)->setVariable<std::vector<ElementLink<xAOD::VertexContainer> > >(basename, "vertices", SVertexLinks);
               (*btagIter)->setDynVxELName(basename, "vertices");
-	          }
-	          else if("JetFitter" == basename || "JetFitterFlip" == basename) {
+	    }
+	    else if("JetFitter" == basename || "JetFitterFlip" == basename) {
               std::vector< ElementLink< xAOD::TrackParticleContainer > > tracksAtPVlinks;
               (*btagIter)->setVariable<std::vector< ElementLink< xAOD::TrackParticleContainer > > >(basename, "tracksAtPVlinks", tracksAtPVlinks);
               (*btagIter)->setDynTPELName(basename, "tracksAtPVlinks");
@@ -429,12 +396,12 @@ namespace Analysis {
 
           if (basename == "SV1" || basename == "SV1Flip") {
             const Trk::VxSecVKalVertexInfo* myVertexInfoVKal = dynamic_cast<const Trk::VxSecVKalVertexInfo*>(myVertexInfo);
-	          ATH_MSG_DEBUG("#BTAG# Found valid VKalVertexInfo information: " << infoCont.key());
-	          StatusCode sc = fillVkalVariables(**jetIter, *btagIter, myVertexInfoVKal, theTrackParticleContainer, basename);
-	          if(sc.isFailure()){
-	            ATH_MSG_ERROR("#BTAG# error filling variables from VxSecVKalVertexInfo for " << basename);
-	            return sc;
-	          }
+	    ATH_MSG_DEBUG("#BTAG# Found valid VKalVertexInfo information: " << infoCont.key());
+	    StatusCode sc = fillVkalVariables(**jetIter, *btagIter, myVertexInfoVKal, theTrackParticleContainer, basename);
+	    if(sc.isFailure()){
+	      ATH_MSG_ERROR("#BTAG# error filling variables from VxSecVKalVertexInfo for " << basename);
+	      return sc;
+	    }
           } else if (basename == "JetFitter" || basename == "JetFitterFlip") {
             const Trk::VxJetFitterVertexInfo* myVertexInfoJetFitter = dynamic_cast<const Trk::VxJetFitterVertexInfo*>(myVertexInfo);
             ATH_MSG_DEBUG("#BTAG# Found valid VxJetFitterVertexInfo information: " << infoCont.key());

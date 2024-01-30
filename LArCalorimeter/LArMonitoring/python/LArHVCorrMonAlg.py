@@ -1,38 +1,25 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArHVCorrMonConfigOld(inputFlags):
-
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import  LArHVCorrectionMonAlg
-
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArHVCorrMonAlgOldCfg')
-    LArHVCorrMonConfigCore(helper, LArHVCorrectionMonAlg, inputFlags)
-
-    from LArConditionsCommon import LArHVDB # noqa: F401
-
-    return helper.result()
-    
-def LArHVCorrMonConfig(inputFlags):
-
+def LArHVCorrMonConfig(flags):
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArHVCorrMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArHVCorrMonAlgCfg')
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    acc = LArGMCfg(inputFlags)
+    acc = LArGMCfg(flags)
     from TileGeoModel.TileGMConfig import TileGMCfg
-    acc.merge(TileGMCfg(inputFlags))
+    acc.merge(TileGMCfg(flags))
     from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
-    acc.merge(LArHVScaleCfg(inputFlags))
+    acc.merge(LArHVScaleCfg(flags))
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    LArHVCorrMonConfigCore(helper, CompFactory.LArHVCorrectionMonAlg, inputFlags)
+    LArHVCorrMonConfigCore(helper, CompFactory.LArHVCorrectionMonAlg, flags)
 
     acc.merge(helper.result())
     return acc
 
-def LArHVCorrMonConfigCore(helper, algoinstance,inputFlags):
+def LArHVCorrMonConfigCore(helper, algoinstance,flags):
 
     larHVCorrAlg = helper.addAlgorithm(algoinstance,'larHVCorrMonAlg')
 
@@ -204,21 +191,23 @@ def LArHVCorrMonConfigCore(helper, algoinstance,inputFlags):
 if __name__=='__main__':
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = [nightly+file]
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'LArHVCorrMonOutput.root'
-    ConfigFlags.lock()
+    flags.Input.Files = [nightly+file]
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'LArHVCorrMonOutput.root'
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    cfg.merge(LArHVCorrMonConfig(ConfigFlags))
+    cfg.merge(LArHVCorrMonConfig(flags))
 
     Nevents=10
     cfg.run(Nevents) #use cfg.run() to run on all events

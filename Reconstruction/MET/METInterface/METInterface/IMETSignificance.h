@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // IMETSignificance.h
 // Header file for interface IMETSignificance
@@ -51,7 +51,7 @@ public:
 
   // Convenience methods that creates MET terms internally
   // Version with single soft term
-  virtual StatusCode varianceMET(xAOD::MissingETContainer* metCont, float avgmu, std::string jetTermName, std::string softTermName, std::string totalMETName) = 0;
+  virtual StatusCode varianceMET(xAOD::MissingETContainer* metCont, float avgmu, const std::string& jetTermName, const std::string& softTermName, const std::string& totalMETName) = 0;
     
   // Rotates the phi direction of the object resolutions & recomputes the MET significance
   virtual StatusCode RotateToPhi(float phi) = 0;
