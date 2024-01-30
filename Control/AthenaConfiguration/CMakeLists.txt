@@ -81,6 +81,10 @@ endif()
 
 # tests that should run only in Athena
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
+    atlas_add_test( AllConfigFlagsTest_BS
+                    SCRIPT test/testAllConfigFlags_BS.py
+                    POST_EXEC_SCRIPT nopost.sh )
+
     atlas_add_test( AllConfigFlagsTest_RDO
                     SCRIPT test/testAllConfigFlags_RDO.py
                     POST_EXEC_SCRIPT nopost.sh )

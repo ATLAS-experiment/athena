@@ -44,6 +44,10 @@
 
 
 
+
+#include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
+
+
 namespace{
   std::string commonAlignmentOutput(const HepGeom::Transform3D & initialAlignment){
   std::ostringstream os;
@@ -180,9 +184,12 @@ namespace InDetAlignment
 				ATH_CHECK(  nt->addItem("LayerDisc" ,m_AlignResults_Identifier_LayerDisc) );
 				ATH_CHECK(  nt->addItem("Phi"       ,m_AlignResults_Identifier_Phi) );
 				ATH_CHECK(  nt->addItem("Eta"       ,m_AlignResults_Identifier_Eta) );
-				ATH_CHECK(  nt->addItem("center_x"         ,m_AlignResults_center_x) );
-				ATH_CHECK(  nt->addItem("center_y"         ,m_AlignResults_center_y) );
-        ATH_CHECK(  nt->addItem("center_z"         ,m_AlignResults_center_z) );
+				ATH_CHECK(  nt->addItem("center_x"         ,m_Initial_center_x ) );
+				ATH_CHECK(  nt->addItem("center_y"         ,m_Initial_center_y ) );
+                                ATH_CHECK(  nt->addItem("center_z"         ,m_Initial_center_z ) );
+                                ATH_CHECK(  nt->addItem("misaligned_global_x"         ,m_Global_center_x ) );
+                                ATH_CHECK(  nt->addItem("misaligned_global_y"         ,m_Global_center_y ) );
+                                ATH_CHECK(  nt->addItem("misaligned_global_z"         ,m_Global_center_z ) );
 			} else {  // did not manage to book the N tuple....
 				msg(MSG::ERROR) << "Failed to book InitialAlignment ntuple." << endmsg;
 			}
@@ -622,7 +629,8 @@ namespace InDetAlignment
 			}
 			
 			else if (m_MisalignmentMode == 2) {
-				// randomly misalign modules at L3
+				
+                                // randomly misalign modules at L3
                 Rndm::Numbers RandMisX(randsvc, Rndm::Gauss(m_Misalign_x,m_RndmMisalignWidth_x*ScaleFactor));
                 Rndm::Numbers RandMisY(randsvc, Rndm::Gauss(m_Misalign_y,m_RndmMisalignWidth_y*ScaleFactor));
                 Rndm::Numbers RandMisZ(randsvc, Rndm::Gauss(m_Misalign_z,m_RndmMisalignWidth_z*ScaleFactor));
@@ -889,7 +897,7 @@ namespace InDetAlignment
 			
 			double alpha, beta, gamma;
 			m_IDAlignDBTool->extractAlphaBetaGamma(alignmentTrafoAmg, alpha, beta, gamma);
-			
+
 			m_AlignResults_x = alignmentTrafo.getTranslation().x();
 			m_AlignResults_y = alignmentTrafo.getTranslation().y();
 			m_AlignResults_z = alignmentTrafo.getTranslation().z();
@@ -897,11 +905,53 @@ namespace InDetAlignment
 			m_AlignResults_beta = beta;
 			m_AlignResults_gamma = gamma;
 			
-			m_AlignResults_center_x = center.x();
-			m_AlignResults_center_y = center.y();
-			m_AlignResults_center_z = center.z();
-			
-			if (m_idHelper->is_sct(ModuleID)) {
+
+                        HepGeom::Transform3D LocalaGlobal = HepGeom::Transform3D();
+                        LocalaGlobal = Amg::EigenTransformToCLHEP(SiModule->moduleTransform());
+                        HepGeom::Point3D<double> alignedPosLocal(m_AlignResults_x,m_AlignResults_y,m_AlignResults_z);
+
+
+
+              
+                        m_Initial_center_x = center.x() ;
+                        m_Initial_center_y = center.y() ;
+                        m_Initial_center_z = center.z() ;
+                        
+                        HepGeom::Point3D<double> alignedPosGlobal = LocalaGlobal * alignedPosLocal;
+                        
+                        // Global Misalignment HERE
+                        if (m_idHelper->is_sct(ModuleID)) {
+                              // non-zero local center position gives additional radial shift of SCT endcap
+                              const InDetDD::StripStereoAnnulusDesign *p_design_check = dynamic_cast<const InDetDD::StripStereoAnnulusDesign*>(&(SiModule->design()));
+                              if (p_design_check){
+                                     Amg::Vector3D SCT_Center = p_design_check->sensorCenter();
+                                     double radialShift_x = SCT_Center[0];     // in sensor frame, x direction
+                                     double radialShift_y = SCT_Center[1];     // in sensor frame, y direction
+                                     HepGeom::Transform3D radial_shift = HepGeom::Translate3D(radialShift_x,radialShift_y,0);       // the additional radial shift applied as translation
+                                     HepGeom::Transform3D LocalaaGlobal = LocalaGlobal * radial_shift;                              // apply additional radial shift
+                                     HepGeom::Point3D<double> SCT_endcap_alignedPosGlobal = LocalaaGlobal * alignedPosLocal;       // corrected global transformation 
+                                     m_Global_center_x = SCT_endcap_alignedPosGlobal.x();
+                                     m_Global_center_z = SCT_endcap_alignedPosGlobal.z();
+                                     m_Global_center_y = SCT_endcap_alignedPosGlobal.y();
+                              }
+
+                              else { // no additional radial shift for SCT barrel 
+                                     m_Global_center_x =  alignedPosGlobal.x();
+                                     m_Global_center_y =  alignedPosGlobal.y();
+                                     m_Global_center_z =  alignedPosGlobal.z();
+                                                                                                                                                                 
+                              }
+                              
+                        }
+
+                        else { // no additional radial shift for non-SCT elements
+                               m_Global_center_x =  alignedPosGlobal.x();
+                               m_Global_center_y =  alignedPosGlobal.y();
+                               m_Global_center_z =  alignedPosGlobal.z();
+                        }
+
+
+                         if (m_idHelper->is_sct(ModuleID)) {
 				m_AlignResults_Identifier_ID = 2;
 				m_AlignResults_Identifier_PixelSCT = 2;
 				m_AlignResults_Identifier_BarrelEC = m_sctIdHelper->barrel_ec(ModuleID);

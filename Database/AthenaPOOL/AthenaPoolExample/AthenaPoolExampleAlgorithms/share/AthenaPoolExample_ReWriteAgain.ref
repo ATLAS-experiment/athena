@@ -176,7 +176,7 @@ RootDatabase.se...  DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
 MetaDataSvc         DEBUG handle() BeginInputFile for SimplePoolReplica1.root
 MetaDataSvc         DEBUG initInputMetaDataStore: file name SimplePoolReplica1.root
 MetaDataSvc         DEBUG Loaded input meta data store proxies
-MetaDataSvc         DEBUG  calling beginInputFile for ToolSvc.IOVDbMetaDataTool
+MetaDataSvc         DEBUG  calling beginInputFile on ToolSvc.IOVDbMetaDataTool for GUID "095498FF-E805-B142-9948-BD2D4AC79975"
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 12
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=095498FF-E805-B142-9948-BD2D4AC79975][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000000].
@@ -1981,6 +1981,7 @@ Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #1 20 events processed so far  <<<===
 MetaDataSvc         DEBUG handle() EndInputFile for FID:095498FF-E805-B142-9948-BD2D4AC79975
 MetaDataSvc         DEBUG retireMetadataSource: FID:095498FF-E805-B142-9948-BD2D4AC79975
+MetaDataSvc         DEBUG  calling endInputFile on ToolSvc.IOVDbMetaDataTool for GUID "095498FF-E805-B142-9948-BD2D4AC79975"
 StorageSvc          DEBUG Disconnect request for database: FID=095498FF-E805-B142-9948-BD2D4AC79975 PFN=SimplePoolReplica1.root
 StorageSvc          DEBUG Closing database: FID=095498FF-E805-B142-9948-BD2D4AC79975
 RootDatabase.close  DEBUG Closing DB SimplePoolReplica1.root

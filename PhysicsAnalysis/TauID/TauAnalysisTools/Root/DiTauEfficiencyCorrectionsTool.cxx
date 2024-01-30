@@ -1,6 +1,6 @@
 /**
  *
- * @copyright Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauEfficiencyCorrectionsTool.cxx
  * @brief Class for ditau efficiency correction scale factors and uncertainties
@@ -29,9 +29,7 @@ DiTauEfficiencyCorrectionsTool::DiTauEfficiencyCorrectionsTool( const std::strin
   , m_bIsConfigured(false)
 {
   declareProperty( "EfficiencyCorrectionTypes",    m_vEfficiencyCorrectionTypes    = {} );
-  declareProperty( "InputFilePathRecoHadTau",      m_sInputFilePathRecoHadTau      = "" );
   declareProperty( "InputFilePathJetIDHadTau",     m_sInputFilePathJetIDHadTau     = "" );
-  declareProperty( "VarNameRecoHadTau",            m_sVarNameRecoHadTau            = "" );
   declareProperty( "VarNameJetIDHadTau",           m_sVarNameJetIDHadTau           = "" );
   declareProperty( "RecommendationTag",            m_sRecommendationTag            = "2017-moriond" );
   declareProperty( "JetIDLevel",                   m_iJetIDLevel                   = (int)JETIDBDTTIGHT );
@@ -111,8 +109,7 @@ void DiTauEfficiencyCorrectionsTool::printConfig() const
   for (auto iEfficiencyCorrectionType : m_vEfficiencyCorrectionTypes) {
     ATH_MSG_DEBUG( "  EfficiencyCorrectionTypes " << iEfficiencyCorrectionType );
   }
-  ATH_MSG_DEBUG( "  InputFilePathRecoHadTau " << m_sInputFilePathRecoHadTau );
-  ATH_MSG_DEBUG( "  VarNameRecoHadTau " << m_sVarNameRecoHadTau );
+  ATH_MSG_DEBUG( "  InputFilePathJetIDHadTau " << m_sInputFilePathJetIDHadTau );
   ATH_MSG_DEBUG( "  VarNameJetIDHadTau " << m_sVarNameJetIDHadTau );
   ATH_MSG_DEBUG( "  RecommendationTag " << m_sRecommendationTag );
 }

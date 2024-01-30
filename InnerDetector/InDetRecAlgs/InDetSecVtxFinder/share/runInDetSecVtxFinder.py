@@ -1,11 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Define method to construct configures Sec Vtx Finder alg
 # attempted by N Ribaric (@LancasterUNI) neza.ribaric@cern.ch
 
 if __name__ == "__main__":
-    
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = 1
     import AthenaCommon.Constants as Lvl
 
     # import the flags and set them

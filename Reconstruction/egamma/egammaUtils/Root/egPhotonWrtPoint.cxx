@@ -16,7 +16,7 @@ photonWrtPoint::PtEtaPhi photonWrtPoint::PtEtaPhiWrtZ(const xAOD::Egamma& ph,
   double rCalo = RZ1.first;
   double zCalo = RZ1.second;
   double correctedZ = zCalo - z;
-  double eta = std::asinh(correctedZ / rCalo);
+  double eta = rCalo>0. ? std::asinh(correctedZ / rCalo) : ph.eta();
   return {ph.e() / std::cosh(eta), eta, ph.phi()};
 }
 

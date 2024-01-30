@@ -7,6 +7,9 @@ from AthenaCommon import Logging
 
 
 def GeoModelCfg(flags):
+    if not flags.GeoModel.AtlasVersion:
+        raise ValueError('No geometry tag specified')
+
     from PyUtils.Helpers import release_metadata
     rel_metadata = release_metadata()
     relversion = rel_metadata['release'].split('.')

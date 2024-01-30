@@ -224,7 +224,7 @@ atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
 atlas_add_citest( ACTS_Workflow
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh
+   SCRIPT ActsWorkflow.sh
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
 
  atlas_add_citest( Acts_ConversionWorkflow
@@ -232,43 +232,46 @@ atlas_add_citest( ACTS_Workflow
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
  
 atlas_add_citest( ACTS_ValidateClusters
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateClusters.sh )
+   SCRIPT ActsValidateClusters.sh )
 
 atlas_add_citest( ACTS_ValidateActsCoreSpacePoints
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsCoreSpacePoints.sh )
+   SCRIPT ActsValidateActsCoreSpacePoints.sh )
 
 atlas_add_citest( ACTS_ValidateActsTrkSpacePoints
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateActsSpacePoints.sh )
+   SCRIPT ActsValidateActsSpacePoints.sh )
 
 atlas_add_citest( ACTS_ValidateSeeds
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateSeeds.sh )
+   SCRIPT ActsValidateSeeds.sh )
 
 atlas_add_citest( ACTS_ValidateOrthogonalSeeds 
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateOrthogonalSeeds.sh )
+   SCRIPT ActsValidateOrthogonalSeeds.sh )
 
 atlas_add_citest( ACTS_ActsPersistifyEDM 
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsPersistifyEDM.sh )
+   SCRIPT ActsPersistifyEDM.sh )
 
 atlas_add_citest( ACTS_ValidateTracks
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateTracks.sh )
+   SCRIPT ActsValidateTracks.sh )
 
 atlas_add_citest( ACTS_ValidateResolvedTracks
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateResolvedTracks.sh )
+   SCRIPT ActsValidateResolvedTracks.sh )
 
 atlas_add_citest( ACTS_ValidateAmbiguityResolution
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateAmbiguityResolution.sh )
+   SCRIPT ActsValidateAmbiguityResolution.sh )
 
 atlas_add_citest( ACTS_ActsKfRefitting
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsKfRefitting.sh )
+   SCRIPT ActsKfRefitting.sh )
+
+atlas_add_citest( ACTS_ActsEFTrackFit
+   SCRIPT ActsEFTrackFit.sh )
 
 atlas_add_citest( ACTS_ActsGSFRefitting
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh )
+   SCRIPT ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsGSFInEgamma
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFInEgamma.sh )
+   SCRIPT ActsGSFInEgamma.sh )
 
 atlas_add_citest( ACTS_ActsBenchmarkWithSpot
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsBenchmarkWithSpot.sh 8 100
+   SCRIPT ActsBenchmarkWithSpot.sh 8 100
    PROPERTIES PROCESSOR 8
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters|ActsTrackFindingAlg.Acts.*ERROR.*SurfaceError:1" )
 

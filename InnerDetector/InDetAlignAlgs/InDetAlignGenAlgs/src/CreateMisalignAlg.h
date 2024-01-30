@@ -125,9 +125,14 @@ private:
     NTuple::Item<long>   m_AlignResults_Identifier_Phi;       //!< ID information for this module
     NTuple::Item<long>   m_AlignResults_Identifier_Eta;       //!< ID information for this module
 
-    NTuple::Item<double> m_AlignResults_center_x;             //!< Initial global center of module
-    NTuple::Item<double> m_AlignResults_center_y;             //!< Initial global center of module
-    NTuple::Item<double> m_AlignResults_center_z;             //!< Initial global center of module
+    NTuple::Item<double> m_Initial_center_x;             //!< Initial global center of module
+    NTuple::Item<double> m_Initial_center_y;             //!< Initial global center of module
+    NTuple::Item<double> m_Initial_center_z;             //!< Initial global center of module
+
+
+    NTuple::Item<double> m_Global_center_x;             //!< Misaligned global center of module
+    NTuple::Item<double> m_Global_center_y;             //!< Misaligned global center of module
+    NTuple::Item<double> m_Global_center_z;             //!< Misaligned global center of module
 
     // Member Functions
 

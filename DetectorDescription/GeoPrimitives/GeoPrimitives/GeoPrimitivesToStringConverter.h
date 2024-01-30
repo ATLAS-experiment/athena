@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ namespace Amg {
   }
 
 
-  inline std::string toString( const Transform3D& transform, int precision = 4, const std::string rotOffSet = "") {
+  inline std::string toString( const Transform3D& transform, int precision = 4, const std::string& rotOffSet = "") {
     std::stringstream sstr{};
     bool printed{false};
     if (transform.translation().mag() > std::numeric_limits<float>::epsilon()) {

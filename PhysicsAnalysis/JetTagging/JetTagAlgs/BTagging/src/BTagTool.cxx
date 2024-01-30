@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -17,32 +17,17 @@
 
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
-#include "VxVertex/VxTrackAtVertex.h"
-
-#include "JetTagTools/ITagTool.h"
 
 namespace Analysis {
 
   BTagTool::BTagTool(const std::string& t, const std::string& n, const IInterface* p) :
     base_class(t,n,p),
     m_bTagToolHandleArray(this),
-    m_bTagTool(std::map<std::string, ITagTool*>()),
-    m_BaselineTagger("IP3D+SV1"),
-    m_vxPrimaryName("PrimaryVertices"),
-    m_runModus("analysis")
+    m_bTagTool(std::map<std::string, ITagTool*>())
   {
-    // Name of StoreGate collections
-    declareProperty("PrimaryVertexName",  m_vxPrimaryName);
-
     // List of the tagging tools to be used, HAS TO BE given by jobOptions
     declareProperty("TagToolList",                    m_bTagToolHandleArray);
-
-    declareProperty("BaselineTagger",                 m_BaselineTagger);
-
-    declareProperty("Runmodus"   ,                    m_runModus); // The run modus (reference/analysis)
   }
-
-  BTagTool::~BTagTool() = default;
 
   StatusCode BTagTool::initialize() {
     
@@ -92,40 +77,36 @@ namespace Analysis {
     /*               RETRIEVE PRIMARY VERTEX CONTAINER FROM STOREGATE                      */
     /* ----------------------------------------------------------------------------------- */
     const xAOD::Vertex* primaryVertex(nullptr);
-    StatusCode sc = StatusCode::SUCCESS;
+    SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName);
 
     if (vtx) {
       primaryVertex = vtx;
     } else {
-      const xAOD::VertexContainer* vxContainer(nullptr);
-      
-      sc = evtStore()->retrieve(vxContainer, m_vxPrimaryName);
-      
-      if (sc.isFailure()) {
-	ATH_MSG_WARNING("#BTAG# Primary vertex coll " << m_vxPrimaryName << " not found");
-	return StatusCode::SUCCESS;
+      if (!h_VertexCollectionName.isValid()) {
+	ATH_MSG_ERROR( " cannot retrieve primary vertex container with key " << m_VertexCollectionName.key()  );
+	return StatusCode::FAILURE;
       }
-    
-      if (vxContainer->empty()) {
+      unsigned int nVertexes = h_VertexCollectionName->size();
+      if (nVertexes == 0) {
 	ATH_MSG_DEBUG("#BTAG#  Vertex container is empty");
 	return StatusCode::SUCCESS;
       }
 
-      for (const auto *fz : *vxContainer) {
+      for (const auto *fz : *h_VertexCollectionName) {
 	if (fz->vertexType() == xAOD::VxType::PriVtx) {
 	  primaryVertex = fz;
 	  break;
 	}
       }
-      
+
       if (! primaryVertex) {
 	ATH_MSG_DEBUG("#BTAG#  No vertex labeled as VxType::PriVtx!");
-	xAOD::VertexContainer::const_iterator fz = vxContainer->begin();
-        primaryVertex = *fz;
+	xAOD::VertexContainer::const_iterator fz = h_VertexCollectionName->begin();
+	primaryVertex = *fz;
 	if (primaryVertex->nTrackParticles() == 0) {
 	  ATH_MSG_DEBUG("#BTAG#  PV==BeamSpot: probably poor tagging");
 	  m_nBeamSpotPvx++;
-        }
+	}
       }
     }
 
@@ -134,22 +115,12 @@ namespace Analysis {
     /* ----------------------------------------------------------------------------------- */
 
     for (const ToolHandle<ITagTool>& tool : m_bTagToolHandleArray) {
-      sc = tool->tagJet(*primaryVertex, *jetToTag, *BTag, jetName);
+      StatusCode sc = tool->tagJet(*primaryVertex, *jetToTag, *BTag, jetName);
       if (sc.isFailure()) {
         ATH_MSG_WARNING("#BTAG# failed tagger: " << tool.typeAndName() );
       }
 
     }
-/*    if (m_runModus == "analysis") {
-      double weight = -100.;
-      if (m_BaselineTagger == "IP3D+SV1")
-	weight = jetToTag.getFlavourTagWeight();
-      else 
-	weight = jetToTag.getFlavourTagWeight(m_BaselineTagger);
-      std::vector<double> w; w.reserve(1); w.push_back(weight);
-      jetToTag.setCombinedLikelihood(w);
-    }
-*/
 
     // ----------------------------------------------------------------------------------
 
@@ -164,8 +135,8 @@ namespace Analysis {
     /* ----------------------------------------------------------------------------------- */
     SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName);
     if (!h_VertexCollectionName.isValid()) {
-        ATH_MSG_ERROR( " cannot retrieve primary vertex container with key " << m_VertexCollectionName.key()  );
-        return StatusCode::FAILURE;
+      ATH_MSG_ERROR( " cannot retrieve primary vertex container with key " << m_VertexCollectionName.key()  );
+      return StatusCode::FAILURE;
     }
     unsigned int nVertexes = h_VertexCollectionName->size();
     if (nVertexes == 0) {

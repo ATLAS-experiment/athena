@@ -28,11 +28,7 @@ namespace JiveXML {
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() << endmsg; 
 
     SG::ReadHandle<LVL1_ROI> roi(m_sgKey);
-    
-    if (!roi.isValid()) {
-      ATH_MSG_WARNING("Unable to retrieve: " << m_sgKey);
-      return(StatusCode::SUCCESS);
-    }
+
     int nRoIs = roi->getMuonROIs().size();
 
     DataVect phi; phi.reserve(nRoIs);

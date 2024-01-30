@@ -214,7 +214,7 @@ bool MuonMDT_CablingAlg::extractStationInfo(const coral::AttributeList& atr, Cab
     map_data.stationIndex = m_idHelperSvc->mdtIdHelper().stationNameIndex(stationNameString);
     ATH_MSG_VERBOSE("station name: " << stationNameString << " index: " << static_cast<int>(map_data.stationIndex));
     // convert the subdetector id to integer
-    map_data.subdetectorId = CxxUtils::atoi(subdetector_id.c_str());
+    map_data.subdetectorId = CxxUtils::atoi(subdetector_id);
 
     ATH_MSG_VERBOSE("Data load is chamber_Name = " << chamber_name <<" translated to "<<map_data<<" FINISHED HERE ");
 

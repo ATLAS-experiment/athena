@@ -19,9 +19,9 @@ def createSimConfigFlags():
             return CalibrationRun.Off
         return CalibrationRun.DeadLAr
 
-    scf.addFlag("Sim.CalibrationRun", _checkCalibrationRun, enum=CalibrationRun)
+    scf.addFlag("Sim.CalibrationRun", _checkCalibrationRun, type=CalibrationRun)
 
-    scf.addFlag("Sim.CavernBackground", CavernBackground.Off, enum=CavernBackground)
+    scf.addFlag("Sim.CavernBackground", CavernBackground.Off, type=CavernBackground)
     scf.addFlag("Sim.ReadTR", False)
     scf.addFlag("Sim.WorldRRange", False)  # 12500. / int or float
     scf.addFlag("Sim.WorldZRange", False)  # 22031. / int or float
@@ -71,7 +71,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.ReleaseGeoModel", False)
     scf.addFlag("Sim.RecordFlux", False)
     scf.addFlag("Sim.TruthStrategy", lambda prevFlags : TruthStrategy.Validation if prevFlags.Sim.ISF.ValidationMode else TruthStrategy.MC12,
-                enum=TruthStrategy)
+                type=TruthStrategy)
     scf.addFlag("Sim.UseShadowEvent", False)
     scf.addFlag("Sim.G4Commands", ["/run/verbose 2"])
     scf.addFlag("Sim.FlagAbortedEvents", False)
@@ -121,14 +121,14 @@ def createSimConfigFlags():
     # G4AtlasToolsConfig
     scf.addFlag("Sim.RecordStepInfo", False)
     scf.addFlag("Sim.StoppedParticleFile", "")
-    scf.addFlag("Sim.BeamPipeSimMode", BeamPipeSimMode.Normal, enum=BeamPipeSimMode)
-    scf.addFlag("Sim.LArParameterization", LArParameterization.NoFrozenShowers, enum=LArParameterization)
+    scf.addFlag("Sim.BeamPipeSimMode", BeamPipeSimMode.Normal, type=BeamPipeSimMode)
+    scf.addFlag("Sim.LArParameterization", LArParameterization.NoFrozenShowers, type=LArParameterization)
     # TRT Range cut used in simulation in mm. Should be 0.05 or 30.
     scf.addFlag("Sim.TRTRangeCut",
                 lambda prevFlags: float(GetFileMD(prevFlags.Input.Files).get('TRTRangeCut', 30.0)))
 
     # BeameffectsAlg
-    scf.addFlag("Sim.VertexSource", VertexSource.CondDB, enum=VertexSource)
+    scf.addFlag("Sim.VertexSource", VertexSource.CondDB, type=VertexSource)
     scf.addFlag("Sim.VertexTimeSmearing", lambda prevFlags:
                 prevFlags.Beam.Type == BeamType.Collisions and prevFlags.GeoModel.Run >= LHCPeriod.Run4)
 
@@ -196,7 +196,7 @@ def createSimConfigFlags():
                     simulator = SimulationFlavour.Unknown
         return simulator
 
-    scf.addFlag("Sim.ISF.Simulator", _checkSimulationFlavour, enum=SimulationFlavour)
+    scf.addFlag("Sim.ISF.Simulator", _checkSimulationFlavour, type=SimulationFlavour)
     scf.addFlag("Sim.ISF.DoTimeMonitoring", True) # bool: run time monitoring
     scf.addFlag("Sim.ISF.DoMemoryMonitoring", True) # bool: run time monitoring
     scf.addFlag("Sim.ISF.ValidationMode", False) # bool: run ISF internal validation checks

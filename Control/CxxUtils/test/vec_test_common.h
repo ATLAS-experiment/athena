@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/vec_test_common.h
@@ -430,20 +430,37 @@ test_convert_to_int(const VEC& v1)
 
 template<class VEC>
 void
-test_any(const VEC& v1, const VEC& v2)
+test_any(const VEC& v1)
 {
-  CxxUtils::vec_mask_type_t<VEC> lt = v1<v2;
-  constexpr size_t N = CxxUtils::vec_size<VEC>();
+  VEC v2 = v1;
+  v2[0] += 1; //So v2 will be larger
+  CxxUtils::vec_mask_type_t<VEC> lt = v1 < v2;
   bool result = CxxUtils::vany(lt);
-  bool loopResult = false;
-  for (size_t i = 0; i < N; ++i) {
-    if (lt[i] != 0) {
-      loopResult = true;
-      break;
-    }
-  }
-  assert(result == loopResult);
+  assert(result == true);
 }
+
+template<class VEC>
+void
+test_none(const VEC& v1)
+{
+  VEC v2 = v1;
+  CxxUtils::vec_mask_type_t<VEC> neq = v1 != v2;
+  bool result = CxxUtils::vnone(neq);
+  assert(result == true);
+}
+
+
+template<class VEC>
+void
+test_all(const VEC& v1)
+{
+  VEC v2 = v1;
+  CxxUtils::vec_mask_type_t<VEC> eq = v1==v2;
+  bool result = CxxUtils::vall(eq);
+  assert(result == true);
+}
+
+
 
 /**
  * Helper to fill a vector with N
@@ -528,7 +545,9 @@ testInt1()
     test_permute(testVec1);                                                 \
     test_blend(testVec1);                                                   \
     test_convert_to_double(testVec1);                                       \
-    test_any(testVec2, testVec3);                                           \
+    test_any(testVec3);                                                     \
+    test_none(testVec3);                                                    \
+    test_all(testVec3);                                                     \
     test_int(testVec1);                                                     \
     test_logops(testVec3);                                                  \
   } while (0)

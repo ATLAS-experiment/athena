@@ -1,30 +1,20 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArRODMonConfigOld(inputFlags,cellDebug=False, dspDebug=False):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import  LArRODMonAlg
-
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArRODMonALgOldCfg')
-    LArRODMonConfigCore(helper, LArRODMonAlg,inputFlags,cellDebug, dspDebug)
-
-    return helper.result()
-
-def LArRODMonConfig(inputFlags,cellDebug=False, dspDebug=False):
-
+def LArRODMonConfig(flags,cellDebug=False, dspDebug=False):
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArRODMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArRODMonAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     
     
-    LArRODMonConfigCore(helper, CompFactory.LArRODMonAlg,inputFlags,cellDebug, dspDebug)
+    LArRODMonConfigCore(helper, CompFactory.LArRODMonAlg,flags,cellDebug, dspDebug)
 
     return helper.result()
 
 
-def LArRODMonConfigCore(helper, algoinstance,inputFlags, cellDebug=False, dspDebug=False):
+def LArRODMonConfigCore(helper, algoinstance,flags, cellDebug=False, dspDebug=False):
 
     larRODMonAlg = helper.addAlgorithm(algoinstance,'larRODMonAlg')
 
@@ -52,7 +42,7 @@ def LArRODMonConfigCore(helper, algoinstance,inputFlags, cellDebug=False, dspDeb
     if dspDebug:
        larRODMonAlg.DoDspTestDump=True
 
-    if inputFlags.Common.isOnline:
+    if flags.Common.isOnline:
        larRODMonAlg.MaxEvDump=100   
 
     #from AthenaCommon.Constants import VERBOSE
@@ -216,36 +206,37 @@ def LArRODMonConfigCore(helper, algoinstance,inputFlags, cellDebug=False, dspDeb
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
-
-   from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-   createLArMonConfigFlags()
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
 
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
+   flags.Input.Files = defaultTestFiles.RAW_RUN2
 
-   ConfigFlags.Output.HISTFileName = 'LArRODMonOutput.root'
-   ConfigFlags.DQ.enableLumiAccess = False
-   ConfigFlags.DQ.useTrigger = False
-   ConfigFlags.lock()
+   flags.Output.HISTFileName = 'LArRODMonOutput.root'
+   flags.DQ.enableLumiAccess = False
+   flags.DQ.useTrigger = False
+   flags.lock()
 
 
    from CaloRec.CaloRecoConfig import CaloRecoCfg
-   cfg=CaloRecoCfg(ConfigFlags)
+   cfg=CaloRecoCfg(flags)
 
    #from CaloD3PDMaker.CaloD3PDConfig import CaloD3PDCfg,CaloD3PDAlg
-   #cfg.merge(CaloD3PDCfg(ConfigFlags, filename=ConfigFlags.Output.HISTFileName, streamname='CombinedMonitoring'))
+   #cfg.merge(CaloD3PDCfg(flags, filename=flags.Output.HISTFileName, streamname='CombinedMonitoring'))
 
-   aff_acc = LArRODMonConfig(ConfigFlags)
+   aff_acc = LArRODMonConfig(flags)
    cfg.merge(aff_acc)
 
    cfg.printConfig()
 
-   ConfigFlags.dump()
+   flags.dump()
    f=open("LArRODMon.pkl","wb")
    cfg.store(f)
    f.close()

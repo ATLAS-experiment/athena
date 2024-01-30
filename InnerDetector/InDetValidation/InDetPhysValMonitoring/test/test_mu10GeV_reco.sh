@@ -12,7 +12,7 @@
 # art-output: *.xml 
 # art-output: art_core_0
 # art-output: dcube*
-# art-html: dcube_last
+# art-html: dcube_shifter_last
 
 #RDO is made at rel 22.0.73
 #reference plots are made at rel 22.0.73
@@ -48,7 +48,7 @@ case $ArtProcess in
       fi
       echo "compare with R23.0.23 or 24.0.1"
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-	   -p -x dcube \
+	   -p -x dcube_shifter \
 	   -c ${dcubeShifterXml} \
 	   -r ${dcubeRef} \
 	   physval.root
@@ -56,7 +56,7 @@ case $ArtProcess in
 
       echo "compare with last build"
       $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
-	   -p -x dcube_last \
+	   -p -x dcube_shifter_last \
 	   -c ${dcubeShifterXml} \
 	   -r last_results/physval.root \
 	   physval.root

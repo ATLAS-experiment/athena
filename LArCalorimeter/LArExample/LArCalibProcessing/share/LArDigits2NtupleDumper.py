@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 if __name__=='__main__':
 
   import os,sys
   import argparse
-  import subprocess
   from AthenaCommon import Logging
   log = Logging.logging.getLogger( 'LArDigits2Ntuple' )
   
@@ -41,82 +39,84 @@ if __name__=='__main__':
        log.debug(value)
 
   #Import the flag-container that is the arguemnt to the configuration methods
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+
   # add SCDump flags, here re-used for digitsdump
   from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
-  addSCDumpFlags(ConfigFlags)
+  addSCDumpFlags(flags)
 
 
   if len(args.infile) > 0:
-     ConfigFlags.Input.Files = [args.infile]
+     flags.Input.Files = [args.infile]
   elif len(args.inppatt) > 0:
      from LArCalibProcessing.GetInputFiles import GetInputFilesFromPattern
-     ConfigFlags.Input.Files = GetInputFilesFromPattern(args.indir,args.inppatt)
+     flags.Input.Files = GetInputFilesFromPattern(args.indir,args.inppatt)
   else:   
      from LArCalibProcessing.GetInputFiles import GetInputFilesFromPrefix
-     ConfigFlags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
+     flags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
 
   if args.run != 0:
-     ConfigFlags.Input.RunNumbers = [args.run]
+     flags.Input.RunNumbers = [args.run]
 
   # first autoconfig
   from LArConditionsCommon.LArRunFormat import getLArFormatForRun
   try:
-     runinfo=getLArFormatForRun(ConfigFlags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
+     runinfo=getLArFormatForRun(flags.Input.RunNumbers[0], connstring="COOLONL_LAR/CONDBR2")
   except Exception:
      log.warning("Could not get  run info, using defaults !")
      if args.nsamp > 0:
-        ConfigFlags.LArSCDump.nSamples=args.nsamp
+        flags.LArSCDump.nSamples=args.nsamp
      else:   
-        ConfigFlags.LArSCDump.nSamples=4
+        flags.LArSCDump.nSamples=4
   else:
-     ConfigFlags.LArSCDump.nSamples=runinfo.nSamples()
+     flags.LArSCDump.nSamples=runinfo.nSamples()
 
-  ConfigFlags.LArSCDump.digitsKey="FREE"
-  if  args.nsamp > 0 and args.nsamp < ConfigFlags.LArSCDump.nSamples:
-      ConfigFlags.LArSCDump.nSamples=args.nsamp
+  flags.LArSCDump.digitsKey="FREE"
+  if  args.nsamp > 0 and args.nsamp < flags.LArSCDump.nSamples:
+      flags.LArSCDump.nSamples=args.nsamp
   
   log.info("Autoconfigured: ")
-  log.info("nSamples: %d digitsKey %s",ConfigFlags.LArSCDump.nSamples, ConfigFlags.LArSCDump.digitsKey)
+  log.info("nSamples: %d digitsKey %s",flags.LArSCDump.nSamples, flags.LArSCDump.digitsKey)
 
   # now construct the job
-  ConfigFlags.LAr.doAlign=False
+  flags.LAr.doAlign=False
 
   if args.evtree: # should include trigger info
-     ConfigFlags.Trigger.triggerConfig = 'DB'
-     ConfigFlags.Trigger.L1.doCTP = True
-     ConfigFlags.Trigger.L1.doMuon = False
-     ConfigFlags.Trigger.L1.doCalo = False
-     ConfigFlags.Trigger.L1.doTopo = False
+     flags.Trigger.triggerConfig = 'DB'
+     flags.Trigger.L1.doCTP = True
+     flags.Trigger.L1.doMuon = False
+     flags.Trigger.L1.doCalo = False
+     flags.Trigger.L1.doTopo = False
 
-     ConfigFlags.Trigger.enableL1CaloLegacy = True
-     ConfigFlags.Trigger.enableL1CaloPhase1 = True
+     flags.Trigger.enableL1CaloLegacy = True
+     flags.Trigger.enableL1CaloPhase1 = True
 
-  ConfigFlags.lock()
+  flags.lock()
 
   #Import the MainServices (boilerplate)
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
   from LArGeoAlgsNV.LArGMConfig import LArGMCfg
 
-  acc = MainServicesCfg(ConfigFlags)
-  acc.merge(LArGMCfg(ConfigFlags))
+  acc = MainServicesCfg(flags)
+  acc.merge(LArGMCfg(flags))
 
   from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-  acc.merge(LArOnOffIdMappingCfg(ConfigFlags))
+  acc.merge(LArOnOffIdMappingCfg(flags))
 
   if args.evtree: # should include trigger info
      from LArCafJobs.LArSCDumperSkeleton import L1CaloMenuCfg
-     acc.merge(L1CaloMenuCfg(ConfigFlags))
+     acc.merge(L1CaloMenuCfg(flags))
      from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-     tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags))
+     tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
   else: 
      tdt = None
 
 
   if args.bc:
      from LArBadChannelTool.LArBadChannelConfig import  LArBadFebCfg, LArBadChannelCfg
-     acc.merge(LArBadChannelCfg(ConfigFlags))
-     acc.merge(LArBadFebCfg(ConfigFlags))
+     acc.merge(LArBadChannelCfg(flags))
+     acc.merge(LArBadFebCfg(flags))
 
   if args.geom:
       log.warning("Adding real geometry is not working yet")
@@ -127,9 +127,9 @@ if __name__=='__main__':
       #AthReadAlg_ExtraInputs.append(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')) 
 
   from LArCalibTools.LArDigits2NtupleConfig import LArDigits2NtupleCfg
-  acc.merge(LArDigits2NtupleCfg(ConfigFlags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=False, isFlat=True, 
+  acc.merge(LArDigits2NtupleCfg(flags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=False, isFlat=True, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, # from LArCond2NtupleBase 
-                            NSamples=ConfigFlags.LArSCDump.nSamples, FTlist={}, ContainerKey=ConfigFlags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
+                            NSamples=flags.LArSCDump.nSamples, FTlist={}, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             FillLB=args.evtree, 
                             OutputLevel=args.olevel
                            ))
@@ -141,7 +141,7 @@ if __name__=='__main__':
 
   # some logging
   log.info("Input files to be processed:")
-  for f in ConfigFlags.Input.Files:
+  for f in flags.Input.Files:
       log.info(f)
   log.info("Output file: ")
   log.info(args.outfile)
