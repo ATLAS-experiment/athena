@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 import ast
@@ -385,12 +385,12 @@ def _compareConfig(configRef, configChk, args, color):
                 )
 
 
-def _parseNumericalValues(v1, v2):
-    values = (v1, v2)
+def _parseNumericalValues(values):
+    """Ensure all numeric values are of the same type (int or float)"""
     if any(isinstance(val, float) for val in values):
-        return float(v1), float(v2)
+        return tuple(float(val) for val in values)
     elif all(isinstance(val, int) for val in values):
-        return int(v1), int(v2)
+        return tuple(int(val) for val in values)
     else:
         return values
 
@@ -429,7 +429,6 @@ def _handleComponentsReanaming( refVal ):
 def _compareComponent(compRef, compChk, prefix, args, component, color):
     countDifferent=0
     if isinstance(compRef, dict):
-
         allProps = list(set(compRef.keys()) | set(compChk.keys()))
         allProps.sort()
 
@@ -463,7 +462,7 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
 
             refVal = _handleComponentsReanaming( refVal )
 
-            refVal, chkVal = _parseNumericalValues(refVal, chkVal)
+            refVal, chkVal = _parseNumericalValues((refVal, chkVal))
             diffmarker = ""
             if str(chkVal) == str(refVal):
                 if not args.printIdenticalPerParameter:
@@ -489,10 +488,14 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
     elif isinstance(compRef, (list, tuple)) and len(compRef) > 1:
 
         if isinstance(compRef[0], list):  # to achieve hashability
-            compRef = [tuple(el) for el in compRef]
+            compRef = [tuple(_parseNumericalValues(el)) for el in compRef]
 
         if len(compChk) > 0 and isinstance(compChk[0], list):
-            compChk = [tuple(el) for el in compChk]
+            compChk = [tuple(_parseNumericalValues(el)) for el in compChk]
+
+        # return in case results after parsing are now identical
+        if compRef == compChk:
+            return countDifferent
 
         diffRef = list(set(compRef) - set(compChk))
         diffChk = list(set(compChk) - set(compRef))
