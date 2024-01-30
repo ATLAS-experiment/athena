@@ -13,8 +13,7 @@ def createGeoModelConfigFlags(analysis=False):
 
     gcf.addFlag("GeoModel.AtlasVersion", lambda flags :
                 (__getTrigTag(flags) if flags.Trigger.doLVL1 or flags.Trigger.doHLT else None) or
-                GetFileMD(flags.Input.Files).get("GeoAtlas", None) or
-                "ATLAS-R2-2016-01-00-01")
+                GetFileMD(flags.Input.Files).get("GeoAtlas", None))
 
     # Special handling of analysis releases where we only want AtlasVersion and Run
     if analysis:
@@ -22,6 +21,8 @@ def createGeoModelConfigFlags(analysis=False):
             import logging
             log = logging.getLogger("GeoModelConfigFlags")
             log.info('Deducing LHC Run period from the geometry tag name "%s" as database access is not available in analysis releases', prevFlags.GeoModel.AtlasVersion)
+            if not prevFlags.GeoModel.AtlasVersion:
+                raise ValueError('No geometry tag specified')
 
             if prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-R1"):
                 period = LHCPeriod.Run1
@@ -36,7 +37,7 @@ def createGeoModelConfigFlags(analysis=False):
             return period
 
         gcf.addFlag("GeoModel.Run",  # Run deducted from other metadata
-                    _deduct_LHCPeriod, enum=LHCPeriod)
+                    _deduct_LHCPeriod, type=LHCPeriod)
         return gcf
 
     def _deduct_LHCPeriod(prevFlags):

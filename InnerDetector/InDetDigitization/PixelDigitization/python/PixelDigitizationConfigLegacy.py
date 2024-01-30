@@ -199,12 +199,13 @@ def BasicPixelDigitizationTool(name="PixelDigitizationTool", **kwargs):
     ############################################################################################
     # Set up Conditions DB
     ############################################################################################
-    if not conddb.folderRequested("/PIXEL/PixelModuleFeMask"):
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
+    if  commonGeoFlags.Run() !=  "RUN1" and  not conddb.folderRequested("/PIXEL/PixelModuleFeMask"):
         conddb.addFolder("PIXEL_OFL", "/PIXEL/PixelModuleFeMask", className="CondAttrListCollection")
 
     if not hasattr(condSeq, "PixelDeadMapCondAlg"):
         from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelDeadMapCondAlg
-        condSeq += PixelDeadMapCondAlg(name="PixelDeadMapCondAlg")
+        condSeq += PixelDeadMapCondAlg(name="PixelDeadMapCondAlg", ReadKey="/PIXEL/PixelModuleFeMask" if commonGeoFlags.Run() != "RUN1" else "")
 
     if not hasattr(condSeq, "PixelDCSCondStateAlg"):
         from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelDCSCondStateAlg
@@ -233,7 +234,6 @@ def BasicPixelDigitizationTool(name="PixelDigitizationTool", **kwargs):
     #####################
     # Calibration Setup #
     #####################
-    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
     if commonGeoFlags.Run()=="RUN3" and 'UseOldIBLCond' not in digitizationFlags.experimentalDigi():
         if not conddb.folderRequested("/PIXEL/ChargeCalibration"):
             conddb.addFolder("PIXEL_OFL", "/PIXEL/ChargeCalibration", className="CondAttrListCollection")

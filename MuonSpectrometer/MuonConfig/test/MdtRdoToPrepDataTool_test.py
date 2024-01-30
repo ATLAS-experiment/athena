@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: MuonMDT_CnvTools/share/MdtRdoToPrepDataTool_test.py
 # Author: scott snyder
@@ -52,11 +52,13 @@ def testCfg (flags):
 
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.TestDefaults import defaultTestFiles
+from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
 
 flags = initConfigFlags()
 flags.Input.Files = defaultTestFiles.RAW_RUN2
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
 flags.lock()
+
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
 acc=MainServicesCfg(flags)
 

@@ -27,7 +27,9 @@ namespace xAOD {
                   XAOD_MESSAGE( "No collection proxy found for type %s" ),
                   cl->GetName() );
       }
-      m_proxy->PushProxy( m_vec );
+      else {
+         m_proxy->PushProxy( m_vec );
+      }
 
       // Make sure the object is of the right size:
       this->resize( size );

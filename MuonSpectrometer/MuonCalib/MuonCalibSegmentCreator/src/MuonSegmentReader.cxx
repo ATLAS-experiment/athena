@@ -130,7 +130,7 @@ StatusCode MuonSegmentReader::execute()
     m_trk_nOutliersHits.push_back(trkSummary->get(Trk::numberOfOutliersOnTrack));
     m_trk_nRpcPhiHits.push_back(trkSummary->get(Trk::numberOfRpcPhiHits));
     m_trk_nTgcPhiHits.push_back(trkSummary->get(Trk::numberOfTgcPhiHits));
-    m_trk_nRpcPhiHits.push_back(trkSummary->get(Trk::numberOfRpcPhiHits));
+    m_trk_nRpcEtaHits.push_back(trkSummary->get(Trk::numberOfRpcEtaHits));
     m_trk_nTgcEtaHits.push_back(trkSummary->get(Trk::numberOfTgcEtaHits));
     m_trk_nMdtHoles.push_back(trkSummary->get(Trk::numberOfMdtHoles));
     ATH_MSG_DEBUG("Mdt Hits " << trkSummary->get(Trk::numberOfMdtHits) << " Mdt Good Hits " << trkSummary->get(Trk::numberOfGoodMdtHits) 

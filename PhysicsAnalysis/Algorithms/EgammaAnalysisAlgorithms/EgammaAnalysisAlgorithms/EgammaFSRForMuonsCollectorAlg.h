@@ -43,11 +43,13 @@ namespace CP
         /// \brief the systematics list we run
         SysListHandle m_systematicsList {this};
 
-        SysReadHandle<xAOD::IParticleContainer> m_egammaContH{this, "ElectronOrPhotonContKey", "", "Electrons or photons for dR comparison"}; 
+        SysReadHandle<xAOD::IParticleContainer> m_egammaContKey{this, "ElectronOrPhotonContKey", "", "Electrons or photons for dR comparison"}; 
 
-        SysReadHandle<xAOD::MuonContainer> m_muonContH{this, "MuonContKey", "AnalysisMuons", "Muons to compare with for selecting FSR"}; 
+        SysReadHandle<xAOD::MuonContainer> m_muonContKey{this, "MuonContKey", "AnalysisMuons", "Muons to compare with for selecting FSR"}; 
 
         Gaudi::Property<std::string> m_selectionName {this, "selectionDecoration", "", "the decoration for the combined WP and FSR selection"};
+
+        Gaudi::Property<bool> m_vetoFSR {this, "vetoFSR", false, "boolean to revert FSR logic to rather veto FSR electrons or photons"};
 
         /// Decorator for electron or photon working point - used to add additional el/ph
         std::unique_ptr<SG::AuxElement::Decorator<uint32_t> > m_wpDec;

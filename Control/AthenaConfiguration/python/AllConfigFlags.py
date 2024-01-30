@@ -57,10 +57,10 @@ def initConfigFlags():
     acf.addFlag('Input.isMC', lambda prevFlags : "IS_SIMULATION" in GetFileMD(prevFlags.Input.Files).get("eventTypes", [])) # former global.isMC
     acf.addFlag('Input.OverrideRunNumber', False )
     acf.addFlag("Input.ConditionsRunNumber", -1) # Override the HITS file Run Number with one from a data run (TODO merge with Input.RunNumbers)
-    acf.addFlag('Input.RunNumbers', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("runNumbers", []))) # former global.RunNumber
+    acf.addFlag('Input.RunNumbers', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("runNumbers", [])), type=list) # former global.RunNumber
     acf.addFlag('Input.MCChannelNumber', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("mc_channel_number", 0))
-    acf.addFlag('Input.LumiBlockNumbers', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("lumiBlockNumbers", []))) # former global.RunNumber
-    acf.addFlag('Input.TimeStamps', lambda prevFlags : getInitialTimeStampsFromRunNumbers(prevFlags.Input.RunNumbers) if prevFlags.Input.OverrideRunNumber else [])
+    acf.addFlag('Input.LumiBlockNumbers', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("lumiBlockNumbers", [])), type=list) # former global.RunNumber
+    acf.addFlag('Input.TimeStamps', lambda prevFlags : getInitialTimeStampsFromRunNumbers(prevFlags.Input.RunNumbers) if prevFlags.Input.OverrideRunNumber else [], type=list)
     # Configure EvtIdModifierSvc with a list of dictionaries of the form:
     # {'run': 152166, 'lb': 202, 'starttstamp': 1269948352889940910, 'evts': 1, 'mu': 0.005}
     acf.addFlag("Input.RunAndLumiOverrideList", [])
@@ -78,10 +78,10 @@ def initConfigFlags():
 
     acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", "")) # former global.ProjectName
     acf.addFlag('Input.DataYear', _dataYearFromFlags)
-    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), enum=Campaign)
+    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), type=Campaign)
     acf.addFlag('Input.TriggerStream', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("stream", "") if prevFlags.Input.Format == Format.BS
                                                           else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", "")) # former global.TriggerStream
-    acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, enum=Format) # former global.InputFormat
+    acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, type=Format) # former global.InputFormat
     acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []) ) # list of names of streams written to this file
     from GeneratorConfig.Versioning import generatorsGetFromMetadata
     acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : generatorsGetFromMetadata( GetFileMD(prevFlags.Input.Files).get("generators", "") ))
@@ -153,12 +153,12 @@ def initConfigFlags():
                                                        (prevFlags.Common.ProductionStep == ProductionStep.FastChain and
                                                         prevFlags.Overlay.FastChain)))  # Enable Overlay
     acf.addFlag('Common.doExpressProcessing', False)
-    acf.addFlag('Common.ProductionStep', ProductionStep.Default, enum=ProductionStep)
-    acf.addFlag('Common.Project', Project.determine(), enum=Project)
+    acf.addFlag('Common.ProductionStep', ProductionStep.Default, type=ProductionStep)
+    acf.addFlag('Common.Project', Project.determine(), type=Project)
 
     # replace global.Beam*
     acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing
-    acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), enum=BeamType)# former global.BeamType
+    acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), type=BeamType)# former global.BeamType
     acf.addFlag("Beam.NumberOfCollisions", lambda prevFlags : 2. if prevFlags.Beam.Type is BeamType.Collisions else 0.) # former global.NumberOfCollisions
 
     def _configureBeamEnergy(prevFlags):
@@ -258,7 +258,7 @@ def initConfigFlags():
 
     acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
     acf.addFlag('Output.StorageTechnology.EventData', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology for event data
-    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology for metadata
+    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREE')  # Set the underlying POOL storage technology for metadata
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py

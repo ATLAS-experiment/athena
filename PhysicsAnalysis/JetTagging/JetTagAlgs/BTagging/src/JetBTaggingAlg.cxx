@@ -1,21 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTagging/JetBTaggingAlg.h"
 
-#include "xAODJet/Jet.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODJet/JetAuxContainer.h"
 #include "xAODMuon/MuonContainer.h"
-#include "xAODBTagging/BTagging.h"
-#include "xAODBTagging/BTaggingContainer.h"
 #include "xAODBTagging/BTaggingAuxContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
-#include "AthContainers/AuxElement.h"
-
-#include "JetTagTools/JetFitterVariablesFactory.h"
 
 #include <string>
 #include <optional>
@@ -33,12 +25,6 @@ namespace Analysis {
     declareProperty("BTagTool", m_bTagTool);
     declareProperty("BTagSecVertexing", m_bTagSecVtxTool);
   }
-
-  JetBTaggingAlg::~JetBTaggingAlg()
-  {
-    /////....
-  }
-
 
   StatusCode JetBTaggingAlg::initialize() {
 

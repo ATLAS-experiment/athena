@@ -9,7 +9,7 @@
 # art-output: physval*.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_idtide_last
+# art-html: dcube_lrt_last
 
 #RDO is made at rel 22.0.73
 #reference plots are made at rel 22.0.73
@@ -26,10 +26,8 @@ dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMoni
 if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
   dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r23.root"
 fi
-dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_idtide_r24.root"
 dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r24.root"
 if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
-  dcubeRef_idtide="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_idtide_r23.root"
   dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r23.root"
 fi
 

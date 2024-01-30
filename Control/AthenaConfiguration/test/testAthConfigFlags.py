@@ -117,26 +117,59 @@ class BasicTests(FlagsSetup):
 
     def test_enums(self):
         """Test that enums are properly validated"""
-        self.flags.addFlag("Format", Format.BS, enum=Format)
-        self.flags.addFlag("FormatFun", lambda flags : Format.POOL if flags.Atest else Format.BS, enum=Format)
-        self.flags.addFlag("FormatPOOL", Format.BS, enum=Format)
+        self.flags.addFlag("Format", Format.BS, type=Format)
+        self.flags.addFlag("FormatFun", lambda flags : Format.POOL if flags.Atest else Format.BS, type=Format)
+        self.flags.addFlag("FormatPOOL", Format.BS, type=Format)
         self.flags.FormatPOOL = Format.POOL
         self.flags.lock()
 
     def test_enums_incorrect_assign(self):
         """Test that enums are properly validated (incorrect flags)"""
-        self.flags.addFlag("FormatWrong", Format.BS, enum=Format)
-        with self.assertRaises(Exception) as _:
-            self.flags.FormatWrong == "BS"
+        self.flags.addFlag("FormatWrong", Format.BS, type=Format)
+        with self.assertRaises(TypeError) as _:
+            self.flags.FormatWrong = "BS"
 
-        with self.assertRaises(Exception) as _:
+        with self.assertRaises(TypeError) as _:
             self.flags.FormatWrong = "POOL"
 
     def test_enums_incorrect_lambda(self):
         """Test that enums are properly validated (incorrect flags)"""
-        self.flags.addFlag("FormatWrong", lambda flags : "ABC", enum=Format)
-        with self.assertRaises(RuntimeError) as _:
+        self.flags.addFlag("FormatWrong", lambda flags : "ABC", type=Format)
+        with self.assertRaises(TypeError) as _:
             x = self.flags.FormatWrong  # noqa: F841
+
+    def test_types(self):
+        """Test that types are properly validated"""
+        self.flags.addFlag("ListFlag", [123], type=list)
+        self.flags.addFlag("ListFlag2", lambda flags : [1] if flags.Atest else [0], type=list)
+        self.flags.addFlag("TupleFlag", (123456,), type=tuple)
+        self.flags.addFlag("IntFlag", 123, type=int)
+        self.flags.addFlag("FloatFlag", 123.45, type=float)
+        self.flags.TupleFlag = (123456, 1234567)
+        self.flags.lock()
+
+    def test_types_incorrect_assign(self):
+        """Test that types are properly validated (incorrect flags)"""
+        self.flags.addFlag("IntWrong", 123, type=int)
+        with self.assertRaises(TypeError) as _:
+            self.flags.IntWrong = 123.45
+
+        self.flags.addFlag("FloatWrong", 123.45, type=float)
+        with self.assertRaises(TypeError) as _:
+            self.flags.FloatWrong = 123
+
+        self.flags.addFlag("ListWrong", [], type=list)
+        with self.assertRaises(TypeError) as _:
+            self.flags.ListWrong = 123
+
+        with self.assertRaises(TypeError) as _:
+            self.flags.ListWrong = "123"
+
+    def test_types_incorrect_lambda(self):
+        """Test that types are properly validated (incorrect flags)"""
+        self.flags.addFlag("ListWrong", lambda flags : 123, type=list)
+        with self.assertRaises(TypeError) as _:
+            x = self.flags.ListWrong  # noqa: F841
 
     def test_copy(self):
         """Test that flags can be copied"""
@@ -287,11 +320,13 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.flags.addFlag('Input.Files',[])
         self.flags.addFlag('detA.flagB',0)
         self.flags.addFlag("detA.flagC","")
-        self.flags.addFlag("detA.flagD",[])
-        self.flags.addFlag("Format", Format.BS, enum=Format)
+        self.flags.addFlag("detA.flagD", [], type=list)
+        self.flags.addFlag("intE", 123, type=int)
+        self.flags.addFlag("floatF", 123.45, type=float)
+        self.flags.addFlag("Format", Format.BS, type=Format)
 
     def test(self):
-        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 Format=Format.BS detA.flagC=a.2 detA.flagD+=['val']"
+        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 Format=Format.BS detA.flagC=a.2 detA.flagD+=['val'] intE=42 floatF=42.42"
         if isGaudiEnv():
             argline += " --debug exec"
         print (f"Interpreting arguments: '{argline}'")
@@ -304,6 +339,8 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.assertEqual(self.flags.detA.flagB,7,"Failed to set arbitrary from args")
         self.assertEqual(self.flags.detA.flagC,"a.2","Failed to set arbitrary unquoted string from args")
         self.assertEqual(self.flags.detA.flagD,["val"],"Failed to append to list flag")
+        self.assertEqual(self.flags.intE, 42, "Failed to set integer flag")
+        self.assertEqual(self.flags.floatF, 42.42, "Failed to set floating point value flag")
         self.assertEqual(self.flags.Format, Format.BS,"Failed to set FlagEnum")
 
 

@@ -51,7 +51,7 @@ def createDQConfigFlags():
 
     # computed
     acf.addFlag('DQ.Environment', getEnvironment )
-    acf.addFlag('DQ.DataType', getDataType, enum=DQDataType )
+    acf.addFlag('DQ.DataType', getDataType, type=DQDataType )
 
     # for in-Athena histogram postprocessing
     acf.addFlag('DQ.doPostProcessing', False)

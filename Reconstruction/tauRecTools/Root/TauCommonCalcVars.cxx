@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -11,7 +11,6 @@
 // This class calculates tau variables after core seed reconstruction           
 //-----------------------------------------------------------------------------
 #include "tauRecTools/TauCommonCalcVars.h"
-#include "tauRecTools/KineUtils.h"
 #include <vector>
 
 //-----------------------------------------------------------------------------

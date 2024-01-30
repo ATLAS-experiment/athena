@@ -81,6 +81,26 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.noUniformSelection', True)
     configSeq += subConfig
 
+    # So SiHit electrons - should come after the standard selection in order to avoid keeping the same electrons twice
+    subConfig = makeConfig ('Electrons', containerName='AnalysisSiHitElectrons')
+    subConfig.setOptionValue ('.trackSelection', False)
+    subConfig.setOptionValue ('.isolationCorrection', True)
+    subConfig.setOptionValue ('.minPt', 0.)
+    subConfig.setOptionValue ('.postfix', 'SiHit')
+    configSeq += subConfig
+    subConfig = makeConfig ('Electrons.WorkingPoint', containerName='AnalysisSiHitElectrons', selectionName='SiHits')
+    subConfig.setOptionValue ('.likelihoodWP', 'SiHitElectron')
+    subConfig.setOptionValue ('.isolationWP', 'NonIso')
+    subConfig.setOptionValue ('.doFSRSelection', True) # needed to veto FSR electrons 
+    subConfig.setOptionValue ('.noEffSF', True)
+    subConfig.setOptionValue ('.postfix', 'SiHit')
+    configSeq += subConfig
+    subConfig = makeConfig ('Thinning', containerName='AnalysisSiHitElectrons')
+    subConfig.setOptionValue ('.selectionName', 'SiHits')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
     # set up the photon analysis config:                                       
 
     logPLCPAlgCfg.info('Do Photons')
@@ -92,7 +112,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = makeConfig ('Photons.WorkingPoint', containerName='AnalysisPhotons',
         selectionName='loose')
     subConfig.setOptionValue ('.qualityWP', 'Loose')
-    subConfig.setOptionValue ('.isolationWP', 'Undefined')
+    subConfig.setOptionValue ('.isolationWP', 'NonIso')
     subConfig.setOptionValue ('.doFSRSelection', True)
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.noEffSF', True)
@@ -347,6 +367,7 @@ def PHYSLITECfg(flags):
         'HardScatterVertices':'xAOD::TruthVertexContainer','HardScatterVerticesAux':'xAOD::TruthVertexAuxContainer',
         'TruthPrimaryVertices':'xAOD::TruthVertexContainer','TruthPrimaryVerticesAux':'xAOD::TruthVertexAuxContainer',
         'AnalysisElectrons':'xAOD::ElectronContainer', 'AnalysisElectronsAux':'xAOD::ElectronAuxContainer',
+        'AnalysisSiHitElectrons':'xAOD::ElectronContainer', 'AnalysisSiHitElectronsAux':'xAOD::ElectronAuxContainer',
         'AnalysisMuons':'xAOD::MuonContainer', 'AnalysisMuonsAux':'xAOD::MuonAuxContainer',
         'AnalysisJets':'xAOD::JetContainer','AnalysisJetsAux':'xAOD::AuxContainerBase',
         'AnalysisPhotons':'xAOD::PhotonContainer', 'AnalysisPhotonsAux':'xAOD::PhotonAuxContainer',
@@ -368,6 +389,7 @@ def PHYSLITECfg(flags):
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonVariablesCfg    
     PHYSLITESlimmingHelper.ExtraVariables = [ 
         'AnalysisElectrons.trackParticleLinks.f1.pt.eta.phi.m.charge.author.DFCommonElectronsLHVeryLoose.DFCommonElectronsLHLoose.DFCommonElectronsLHLooseBL.DFCommonElectronsLHMedium.DFCommonElectronsLHTight.DFCommonElectronsLHVeryLooseIsEMValue.DFCommonElectronsLHLooseIsEMValue.DFCommonElectronsLHLooseBLIsEMValue.DFCommonElectronsLHMediumIsEMValue.DFCommonElectronsLHTightIsEMValue.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult.topoetcone20.topoetcone20ptCorrection.neflowisol20.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.topoetcone20_CloseByCorr.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.caloClusterLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType.truthPdgId.firstEgMotherTruthType.firstEgMotherTruthOrigin.firstEgMotherTruthParticleLink.firstEgMotherPdgId.ambiguityType.OQ',
+        'AnalysisSiHitElectrons.pt.eta.phi.m.charge.author.topoetcone20_CloseByCorr.DFCommonElectronsLHVeryLoose.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr.OQ.truthOrigin.truthType.firstEgMotherTruthType.firstEgMotherTruthOrigin.z0stheta.d0Normalized.nInnerExpPix.clEta.clPhi',
         'AnalysisPhotons.f1.pt.eta.phi.m.author.OQ.DFCommonPhotonsIsEMLoose.DFCommonPhotonsIsEMTight.DFCommonPhotonsIsEMTightIsEMValue.DFCommonPhotonsCleaning.DFCommonPhotonsCleaningNoTime.ptcone20.topoetcone20.topoetcone40.topoetcone20ptCorrection.topoetcone40ptCorrection.topoetcone20_CloseByCorr.topoetcone40_CloseByCorr.ptcone20_CloseByCorr.caloClusterLinks.vertexLinks.ambiguityLink.TruthLink.truthParticleLink.truthOrigin.truthType',
         'GSFTrackParticles.chiSquared.phi.d0.theta.qOverP.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.z0.vz.charge.vertexLink.numberOfPixelHits.numberOfSCTHits.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits.originalTrackParticle',
         'GSFConversionVertices.trackParticleLinks.x.y.z.px.py.pz.pt1.pt2.neutralParticleLinks.minRfirstHit',
@@ -388,8 +410,7 @@ def PHYSLITECfg(flags):
         'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ',
         'Kt4EMPFlowEventShape.Density',
         'TauTracks.pt.eta.phi.flagSet.trackLinks',
-        'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R21Precision.GhostBHadronsFinalCount.GhostCHadronsFinalCount.Parent.GN2Xv01_phbb.GN2Xv01_phcc.GN2Xv01_ptop.GN2Xv01_pqcd',
-        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET'
+        'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R21Precision.GhostBHadronsFinalCount.GhostCHadronsFinalCount.Parent.GN2Xv01_phbb.GN2Xv01_phcc.GN2Xv01_ptop.GN2Xv01_pqcd'
     ]
 
     # Truth extra content

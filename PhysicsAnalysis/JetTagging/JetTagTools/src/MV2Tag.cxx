@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "GaudiKernel/IToolSvc.h"
-#include "xAODTracking/TrackParticle.h"
 
 #include "JetTagTools/MV2Tag.h"
 
 #include "xAODBTagging/BTagging.h"
-#include "xAODJet/Jet.h"
 
 #include <fstream>
 #include <sstream>
@@ -16,19 +12,13 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
-
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/VertexContainer.h"
-
-#include "AthenaKernel/Units.h"
-#include <fstream>
-#include <algorithm>
 #include <utility>
 #include <vector>
 #include <map>
 #include <list>
 #include <math.h>       /* hypot */
 
+#include "AthenaKernel/Units.h"
 
 using Athena::Units::GeV;
 
@@ -47,27 +37,19 @@ namespace Analysis {
 
     // force MV2 to always use a calibration derived from MV2CalibAlias jet collection
     declareProperty("forceMV2CalibrationAlias", m_forceMV2CalibrationAlias = true);
-    declareProperty("MV2CalibAlias", m_MV2CalibAlias = "AntiKt4TopoEM");
+    declareProperty("MV2CalibAlias", m_MV2CalibAlias = "AntiKt4EMTopo");
 
     // global configuration:
     declareProperty("Runmodus", m_runModus);
-    //declareProperty("DecorateMvaInputs", m_decorateBTaggingObj=false);
 
     declareProperty("xAODBaseName",      m_xAODBaseName);//"MV2c20" or etc.
 
     // which calibration folder to use
     declareProperty("taggerNameBase", m_taggerNameBase = "MV2");
-    declareProperty("taggerName", m_taggerName = "MV2");
-    declareProperty("decTagName", m_decTagName = "MV2_inputs");
 
     declareProperty("defaultvals", m_defaultvals );
     declareProperty("MVTMvariableNames", m_MVTM_name_translations );
 
-
-  }
-
-
-  MV2Tag::~MV2Tag() {
 
   }
 
@@ -77,7 +59,6 @@ namespace Analysis {
     m_disableAlgo=false;
     m_warnCounter=0;
 
-    m_treeName = "BDT";
     m_varStrName = "variables";
 
     // prepare readKey for calibration data:
@@ -87,15 +68,9 @@ namespace Analysis {
       m_MVTM_name_backtrans[p.second] = p.first;
     }
 
-    //m_egammaBDTs.clear();
     return StatusCode::SUCCESS;
   }
 
-
-  StatusCode MV2Tag::finalize() {
-    ATH_MSG_DEBUG("#BTAG# Finalizing MV2.");
-    return StatusCode::SUCCESS;
-  }
 
   void MV2Tag::assignProbability(xAOD::BTagging *BTag,
          const std::map<std::string, double> &inputs,

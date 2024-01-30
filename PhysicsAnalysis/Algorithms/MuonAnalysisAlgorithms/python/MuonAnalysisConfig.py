@@ -16,6 +16,7 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('ptSelectionOutput', False, type=bool)
         self.addOption ('trackSelection', True, type=bool)
         self.addOption ('recalibratePhyslite', True, type=bool)
+        self.addOption ('maxEta', 2.7, type=float)
 
     def makeAlgs (self, config) :
 
@@ -34,7 +35,7 @@ class MuonCalibrationConfig (ConfigBlock):
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
                                'MuonEtaCutAlg' + self.postfix )
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.selectionTool.maxEta = 2.7
+        alg.selectionTool.maxEta = self.maxEta
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')

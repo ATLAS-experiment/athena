@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/MLogging.h"
@@ -104,8 +104,8 @@ MLogging &MLogging::operator=(const MLogging &rhs) {
 
 void MLogging::setLevel(MSG::Level lvl) {
   lvl = (lvl >= MSG::NUM_LEVELS) ? MSG::ALWAYS
-          : (lvl < MSG::NIL)       ? MSG::NIL
-                                     : lvl;
+        : (lvl < MSG::NIL)       ? MSG::NIL
+                                 : lvl;
   msg().setLevel(lvl);
 }
 

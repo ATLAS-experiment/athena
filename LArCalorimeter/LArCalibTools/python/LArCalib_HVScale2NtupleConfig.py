@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
@@ -59,25 +59,26 @@ if __name__=="__main__":
         print("WARNING: Failed to convert time",TimeStamp_ns,"into a run/lumi number. Using 'infinite' run-number",rlb[0])
 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
-    addLArCalibFlags(ConfigFlags)
+    addLArCalibFlags(flags)
 
-    ConfigFlags.Input.RunNumbers=[rlb[0]]
-    ConfigFlags.Input.TimeStamps=[TimeStamp]
-    ConfigFlags.Input.Files=[]
-    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
+    flags.Input.RunNumbers=[rlb[0]]
+    flags.Input.TimeStamps=[TimeStamp]
+    flags.Input.Files=[]
+    flags.IOVDb.DatabaseInstance="CONDBR2"
 
     rootfile="hvcorr_read.root"
     if len(sys.argv)>2:
         rootFile=sys.argv[2]
 
     if len(sys.argv)>3:
-        ConfigFlags.IOVDb.GlobalTag=sys.argv[3]
+        flags.IOVDb.GlobalTag=sys.argv[3]
         
-    ConfigFlags.lock()
-    cfg=MainEvgenServicesCfg(ConfigFlags)
-    cfg.merge(LArHVScaleCorr2NtupleCfg(ConfigFlags))
+    flags.lock()
+    cfg=MainEvgenServicesCfg(flags)
+    cfg.merge(LArHVScaleCorr2NtupleCfg(flags))
     
     
     print("Start running...")

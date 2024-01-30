@@ -3,21 +3,21 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    ConfigFlags.Input.Files = ["myRDO.pool.root",]
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ["myRDO.pool.root",]
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
-    cfg=MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg=MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    cfg.merge(LArGMCfg(ConfigFlags))
+    cfg.merge(LArGMCfg(flags))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    cfg.merge(LArOnOffIdMappingCfg(ConfigFlags))
+    cfg.merge(LArOnOffIdMappingCfg(flags))
     cfg.addEventAlgo(CompFactory.DumpLArRawChannels(NtupStream="LARRC",OutputFileName="",ToLog=False))
 
     cfg.addService(CompFactory.THistSvc(Output = ["LARRC DATAFILE='LARRC.root', OPT='RECREATE'"]))

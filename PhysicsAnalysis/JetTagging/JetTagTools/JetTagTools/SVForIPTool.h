@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JetTagTools_SVForIPTool_H
@@ -15,10 +15,8 @@
    @author Giacinto Piacquadio (giacinto.piacquadio AT physik.uni-freiburg.de)
 ********************************************************/
 
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODTracking/Vertex.h"
-#include "xAODTracking/VertexContainer.h"
 #include "xAODBTagging/BTagging.h"
 
 #include <vector>
@@ -37,18 +35,14 @@ namespace Analysis {
 
     SVForIPTool(const std::string& name,
                     const std::string& n, const IInterface* p);
-    virtual ~SVForIPTool();
-    
-    virtual StatusCode initialize() override;
-    virtual StatusCode finalize() override;
+    virtual ~SVForIPTool() = default;
 
-      /**Method to get the B flight direction from the secondary vertex info */
+    /**Method to get the B flight direction from the secondary vertex info */
     void getDirectionFromSecondaryVertexInfo(Amg::Vector3D & SvxDirection,
                                              bool & canUseSvxDirection,
                                              xAOD::BTagging * BTag,
                                              const std::string & secVxFinderName,
                                              const xAOD::Vertex & priVtx) const;
-                                             // const Trk::RecVertex & priVtx);
     
 
     /**Method to get the tracks from V0 from the secondary vertex info */

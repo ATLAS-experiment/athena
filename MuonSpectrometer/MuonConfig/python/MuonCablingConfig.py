@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -182,9 +182,10 @@ def MuonCablingConfigCfg(flags):
 
 if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.lock()
 
     acc = ComponentAccumulator()
@@ -195,6 +196,3 @@ if __name__ == '__main__':
     f=open('MuonCabling.pkl','wb')
     acc.store(f)
     f.close()
-
-    
-

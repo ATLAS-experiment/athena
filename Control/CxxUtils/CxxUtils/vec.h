@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/vec.h
@@ -45,18 +45,21 @@
  *  - @c CxxUtils::vec_size<VEC>() is the number of elements in @c VEC.
  *  - @c CxxUtils::vec_size(const VEC&) is the number of elements in @c VEC.
  *
- * Additional Helpers for common SIMD operations:
+ * Initializing with a value :
  *
  *  - @c CxxUtils::vbroadcast (VEC& v, T x) initializes each element of
  *                                          @c v with @c x.
+ *
+ * Load from/store to array:
+ *
  *  - @c CxxUtils::vload (VEC& dst, const vec_type_t<VEC>* src)
  *                                          loads elements from @c src
  *                                          to @c dst
  *  - @c CxxUtils::vstore (vec_type_t<VEC>* dst, const VEC& src)
  *                                          stores elements from @c src
  *                                          to @c dst
- *  - @c CxxUtils::vany(const VEC& mask) check if any of the elements
- *                                       of a mask is true (not 0)
+ * Basic Algorithms :
+ *
  *  - @c CxxUtils::vselect (VEC& dst, const VEC& a, const VEC& b, const
  *                          vec_mask_type_t<VEC>& mask) copies elements
  *                          from @c a or @c b, depending
@@ -66,15 +69,28 @@
  *                         copies to @c dst[i]  the min(a[i],b[i])
  *  - @c CxxUtils::vmax    (VEC& dst, const VEC& a, const VEC& b)
  *                         copies to @c dst[i]  the max(a[i],b[i])
+ *
+ * Bool reductions :
+ *
+ *  - @c CxxUtils::vany(const VEC& mask)  Returns true if at least
+ *                                        one value in mask is true.
+ *  - @c CxxUtils::vnone(const VEC& mask) Returns true if
+ *                                        all values in k are false
+ *  - @c CxxUtils::vall(const VEC& mask)  Returns true if
+ *                                        all values in k are true
+ *
+ *  Conversions/Casting :
+ *
  *  - @c CxxUtils::vconvert (VEC1& dst, const VEC2& src)
  *                          Fills @c dst with the result  of a
  *                          static_cast of every element of @c src
  *                          to the element type of dst.
  *                          dst[i] = static_cast<vec_type_t<VEC1>>(src[i])
  *
- *  Functions that construct a permutation of elements from one or two vectors
- *  and return a vector of the same type as the input vector(s).
- *  The mask has the same element count  as the vectors.
+ *  Permutations :
+ *
+ *  The mask has the same element count  as the input vectors.
+ *  The functions return a vector of the same type as the input vector(s).
  *  Intentionally kept compatible with gcc's _builtin_shuffle.
  *  If we move to gcc>=12 we could unify with clang's _builtin_shuffle_vector
  *  and relax some of these requirements
@@ -100,12 +116,13 @@
  *                          from the second input vector should be placed
  *                          in the corresponding position in the result vector.
  *
- * In terms of expected performance it might be  advantageous to
+ * For good performance the user should
  * use vector types that fit the size of the ISA.
- * e.g 128 bit wide for SSE, 256 wide for AVX.
+ * e.g 128 bit wide for SSE, 256 wide for AVX etc.
  *
  * Specifying a combination that is not valid for the current architecture
  * causes the compiler to synthesize the instructions using a narrower mode.
+ * But this might not always produce optimal code for all operations.
  *
  * Consider using Function Multiversioning (CxxUtils/features.h)
  * if you really need to target efficiently multiple ISAs.
@@ -135,70 +152,75 @@
 
 namespace CxxUtils {
 
-
+namespace vecDetail {
 /**
  * @brief check the type and the size  of the vector.
  * Choose between the built-in (if available or
  * fallback type.
  */
 template <typename T, size_t N>
-struct vec_typedef{
-   static_assert((N & (N-1)) == 0, "N must be a power of 2.");
-   static_assert(std::is_arithmetic_v<T>, "T not an arithmetic type");
+struct vec_typedef {
+  static_assert((N & (N - 1)) == 0, "N must be a power of 2.");
+  static_assert(std::is_arithmetic_v<T>, "T not an arithmetic type");
 
 #if HAVE_VECTOR_SIZE_ATTRIBUTE
-
-   using type  __attribute__ ((vector_size(N*sizeof(T)))) = T;
-
+  using type __attribute__((vector_size(N * sizeof(T)))) = T;
 #else
-
-   using type vec_fb<T, N>;
-
+  using type vec_fb<T, N>;
 #endif
 };
-
-/**
- * @brief Define a nice alias for the vectorized type
- */
-template <typename T, size_t N>
-using vec = typename vec_typedef<T,N>::type;
 
 /**
  * @brief Deduce the element type from a vectorized type.
  */
 template <class VEC>
-struct vec_type
-{
+struct vec_type {
   // Works in c++17.
-  static auto elt (const VEC& v) -> decltype( v[0] );
-  typedef typename std::invoke_result< decltype(elt), const VEC& >::type type1;
-  typedef std::remove_cv_t<std::remove_reference_t<type1> > type;
+  static auto elt(const VEC& v) -> decltype(v[0]);
+  typedef typename std::invoke_result<decltype(elt), const VEC&>::type type1;
+  typedef std::remove_cv_t<std::remove_reference_t<type1>> type;
 };
-
-/**
- * @brief Define a nice alias for the element type of a vectorized type
- */
-template<class VEC>
-using vec_type_t = typename vec_type<VEC>::type;
 
 /**
  * @brief Deduce the type of the mask returned by relational operations,
  * for a vectorized type.
  */
-template<class VEC>
-struct vec_mask_type
-{
+template <class VEC>
+struct vec_mask_type {
   static auto maskt(const VEC& v1, const VEC& v2) -> decltype(v1 < v2);
-  typedef
-    typename std::invoke_result<decltype(maskt), const VEC&, const VEC&>::type type1;
+  typedef typename std::invoke_result<decltype(maskt), const VEC&, const VEC&>::type type1;
   typedef std::remove_cv_t<std::remove_reference_t<type1>> type;
 };
+
+/**
+ * @brief Helper for static asserts for argument packs
+ */
+namespace bool_pack_helper {
+template <bool...>
+struct bool_pack;
+template <bool... bs>
+using all_true = std::is_same<bool_pack<bs..., true>, bool_pack<true, bs...>>;
+}  // namespace bool_pack_helper
+
+}  // namespace vecDetail
+
+/**
+ * @brief Define a nice alias for the vectorized type
+ */
+template <typename T, size_t N>
+using vec = typename vecDetail::vec_typedef<T,N>::type;
+
+/**
+ * @brief Define a nice alias for the element type of a vectorized type
+ */
+template<class VEC>
+using vec_type_t = typename vecDetail::vec_type<VEC>::type;
 
 /**
  * @brief Define a nice alias for the mask type for a vectorized type.
  */
 template<class VEC>
-using vec_mask_type_t = typename vec_mask_type<VEC>::type;
+using vec_mask_type_t = typename vecDetail::vec_mask_type<VEC>::type;
 
 /**
  * @brief Return the number of elements in a vectorized type.
@@ -270,29 +292,13 @@ vstore(vec_type_t<VEC>* dst, const VEC& src)
 }
 
 /*
- * @brief return if any of the
- * elements of a mask is true (not 0)
- */
-template<typename VEC>
-ATH_ALWAYS_INLINE
-bool vany(const VEC& mask){
-  static_assert(std::is_integral<vec_type_t<VEC>>::value,
-  "vec must be integral (aka a mask)");
-  VEC zero;
-  vbroadcast(zero,vec_type_t<VEC>{0});
-  return std::memcmp(&mask, &zero, sizeof(VEC)) != 0;
-}
-
-/*
  * @brief select elements based on a mask
  * Fill dst according to
  * dst[i] = mask[i] ? a[i] : b[i]
  */
-template<typename VEC>
+template <typename VEC>
 ATH_ALWAYS_INLINE
-void
-vselect(VEC& dst, const VEC& a, const VEC& b, const vec_mask_type_t<VEC>& mask)
-{
+void vselect(VEC& dst, const VEC& a, const VEC& b, const vec_mask_type_t<VEC>& mask) {
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
   constexpr size_t N = vec_size<VEC>();
   for (size_t i = 0; i < N; ++i) {
@@ -305,7 +311,7 @@ vselect(VEC& dst, const VEC& a, const VEC& b, const vec_mask_type_t<VEC>& mask)
 
 /*
  * @brief vectorized min.
- * copies to @c dst[i]  the min(a[i],b[i])
+ * copies to @c dst[i] the min(a[i],b[i])
  */
 template<typename VEC>
 ATH_ALWAYS_INLINE
@@ -341,6 +347,61 @@ vmax(VEC& dst, const VEC& a, const VEC& b)
 #endif
 }
 
+/*
+ * @brief Returns true if at least
+ * one value in mask is true.
+ */
+template<typename VEC>
+ATH_ALWAYS_INLINE
+bool vany(const VEC& mask){
+  static_assert(std::is_integral<vec_type_t<VEC>>::value,
+                "vec elements must be of integral type. Aka vec must be "
+                "compatible with a mask");
+  VEC zero;
+  vbroadcast(zero,vec_type_t<VEC>{0});
+  return std::memcmp(&mask, &zero, sizeof(VEC)) != 0;
+}
+
+/*
+ * @brief Returns true if
+ * all values in k are false
+ */
+template<typename VEC>
+ATH_ALWAYS_INLINE
+bool vnone(const VEC& mask){
+  static_assert(std::is_integral<vec_type_t<VEC>>::value,
+                "vec elements must be of integral type. Aka vec must be "
+                "compatible with a mask");
+  VEC zero;
+  vbroadcast(zero,vec_type_t<VEC>{0});
+  return std::memcmp(&mask, &zero, sizeof(VEC)) == 0;
+}
+
+/*
+ * @brief Returns true if
+ * all values in k are false
+ */
+template<typename VEC>
+ATH_ALWAYS_INLINE
+bool vall(const VEC& mask){
+  static_assert(std::is_integral<vec_type_t<VEC>>::value,
+                "vec elements must be of integral type. Aka vec must be "
+                "compatible with a mask");
+  VEC alltrue;
+#if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
+  // fallback compares to 0 when false
+  // and 1 when is true
+  vbroadcast(alltrue, vec_type_t<VEC>{1});
+#else
+  // For the gnu vector extensions
+  // Vectors are compared element-wise producing 0 when comparison is false
+  // and -1 (constant of the appropriate type where all bits are set) otherwise.
+  vbroadcast(alltrue, vec_type_t<VEC>{-1});
+#endif
+  return std::memcmp(&mask, &alltrue, sizeof(VEC)) == 0;
+}
+
+
 template<typename VEC1, typename VEC2>
 ATH_ALWAYS_INLINE
 void
@@ -361,15 +422,6 @@ vconvert(VEC1& dst, const VEC2& src)
 }
 
 /**
- * @brief Helper for static asserts for argument packs
- */
-namespace bool_pack_helper {
-template<bool...>
-struct bool_pack;
-template<bool... bs>
-using all_true = std::is_same<bool_pack<bs..., true>, bool_pack<true, bs...>>;
-}
-/**
  * @brief vpermute function.
  * move any element of a vector src
  * into any or multiple position inside dst.
@@ -383,7 +435,7 @@ vpermute(VEC& dst, const VEC& src)
   static_assert((sizeof...(Indices) == N),
                 "vpermute number of indices different than vector size");
   static_assert(
-    bool_pack_helper::all_true<(Indices >= 0 && Indices < N)...>::value,
+    vecDetail::bool_pack_helper::all_true<(Indices >= 0 && Indices < N)...>::value,
     "vpermute value of a mask index is outside the allowed range");
 
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
@@ -409,7 +461,7 @@ vpermute2(VEC& dst, const VEC& src1, const VEC& src2)
     (sizeof...(Indices) == N),
     "vpermute2 number of indices different than vector size");
   static_assert(
-    bool_pack_helper::all_true<(Indices >= 0 && Indices < 2 * N)...>::value,
+    vecDetail::bool_pack_helper::all_true<(Indices >= 0 && Indices < 2 * N)...>::value,
     "vpermute2 value of a mask index is outside the allowed range");
 
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
@@ -430,7 +482,6 @@ vpermute2(VEC& dst, const VEC& src1, const VEC& src2)
   dst = __builtin_shuffle(src1, src2, vec_mask_type_t<VEC>{ Indices... });
 #endif
 }
-
 
 } // namespace CxxUtils
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 cached_instances = {}
 
@@ -41,7 +41,6 @@ def getSubjetBuilder():
     from DiTauRec.DiTauRecConf import SubjetBuilder
     SubjetBuilder = SubjetBuilder(name=_name,
                                   Rsubjet=0.2,
-                                  Nsubjet=4,
                                   ptminsubjet=10000)
 
     cached_instances[_name] = SubjetBuilder

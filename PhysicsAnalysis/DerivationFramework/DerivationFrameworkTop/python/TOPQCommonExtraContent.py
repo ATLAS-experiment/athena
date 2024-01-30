@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # Common file used by TOPQCommonSlimming.py
@@ -190,7 +190,6 @@ TOPQExtraVariablesBTagging_AntiKt4EMPFlow = ["BTagging_AntiKt4EMPFlow."
 TOPQExtraVariablesBTagging_AntiKt4EMTopo = ["BTagging_AntiKt4EMTopo."
                                            + "SV1_TrackParticleLinks."
                                            + "MV2cl100_discriminant."
-                                           + "JetVertexCharge_discriminant."
                                            + "MultiSVbb1_discriminant."
                                            + "MultiSVbb2_discriminant."
                                            + "MSV_N2Tpair."

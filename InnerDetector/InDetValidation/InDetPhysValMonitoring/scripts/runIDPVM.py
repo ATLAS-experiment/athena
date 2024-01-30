@@ -2,6 +2,8 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from glob import glob
+from AthenaConfiguration.ComponentFactory import CompFactory
+
 
 def GetCustomAthArgs():
     from argparse import ArgumentParser
@@ -39,6 +41,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--validateExtraTrackCollections", help='List of extra track collection names to be validated in addition to Tracks.', nargs='+', default=[])
     IDPVMparser.add_argument("--doIDTIDE", help='run the output from IDTIDE derivation', action='store_true', default=False)
     IDPVMparser.add_argument("--doTechnicalEfficiency", help='fill the technical efficiency plot (requires additional si hit information in the input file)', action='store_true', default=False)
+    IDPVMparser.add_argument("--doPRW", help='apply pileup reweight', action='store_true', default=False)
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -57,7 +60,7 @@ flags.PhysVal.OutputFileName = MyArgs.outputFile
 if MyArgs.truthMinPt is None:
     MyArgs.truthMinPt = 1000 if flags.GeoModel.Run >= LHCPeriod.Run4 \
                         else 500
-
+                                
 flags.PhysVal.IDPVM.setTruthStrategy = MyArgs.HSFlag
 flags.PhysVal.IDPVM.doExpertOutput   = MyArgs.doExpertPlots
 flags.PhysVal.IDPVM.doPhysValOutput  = not MyArgs.doExpertPlots
@@ -87,6 +90,7 @@ flags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt
 flags.PhysVal.IDPVM.GRL = MyArgs.GRL
 flags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
 flags.PhysVal.IDPVM.doTechnicalEfficiency = MyArgs.doTechnicalEfficiency
+flags.PhysVal.IDPVM.doPRW = MyArgs.doPRW
 flags.PhysVal.doActs = MyArgs.doActs
 
 flags.Exec.SkipEvents = MyArgs.skipEvents
@@ -98,6 +102,11 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
+
+if flags.PhysVal.IDPVM.doPRW:    
+    acc.addService(CompFactory.CP.SystematicsSvc("SystematicsSvc"))
+    from AsgAnalysisAlgorithms.PileupReweightingAlgConfig import PileupReweightingAlgCfg
+    acc.merge(PileupReweightingAlgCfg(flags))
 
 from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringCfg
 acc.merge(InDetPhysValMonitoringCfg(flags))

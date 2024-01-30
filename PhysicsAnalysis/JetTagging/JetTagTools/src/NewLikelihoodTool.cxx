@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/NewLikelihoodTool.h"
@@ -42,16 +42,8 @@ namespace Analysis {
     m_vetoSmoothingOf.push_back("/Sip3D");
   }
 
-  NewLikelihoodTool::~NewLikelihoodTool() {
-  }
-
   StatusCode NewLikelihoodTool::initialize() {
     ATH_CHECK(m_readKey.initialize());
-
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode NewLikelihoodTool::finalize() {
     return StatusCode::SUCCESS;
   }
 
@@ -61,10 +53,10 @@ namespace Analysis {
 
   void NewLikelihoodTool::printStatus() const {
     msg(MSG::INFO) << "#BTAG# - hypotheses : ";
-    for(unsigned int ih=0;ih<m_hypotheses.size();ih++) msg(MSG::INFO) << m_hypotheses[ih] << ", ";
+    for(const auto& hypo : m_hypotheses) msg(MSG::INFO) << hypo << ", ";
     msg(MSG::INFO) << endmsg;
     msg(MSG::INFO) << "#BTAG# - histograms : " << endmsg;
-    for(unsigned int ih=0;ih<m_histograms.size();ih++) msg(MSG::INFO) << m_histograms[ih] << endmsg;
+    for(const auto& histo : m_histograms) msg(MSG::INFO) << histo << endmsg;
   }
 
   std::vector<std::string> NewLikelihoodTool::gradeList(const std::string& histoName) const {
@@ -169,8 +161,8 @@ namespace Analysis {
       if(norm) {
         // check if smoothing of histogram is not vetoed:
         bool veto = false;
-        for(unsigned int iv=0; iv<m_vetoSmoothingOf.size(); iv++) {
-          if(hname.find(m_vetoSmoothingOf[iv])!=std::string::npos) {
+	for(const auto& v : m_vetoSmoothingOf) {
+          if(hname.find(v)!=std::string::npos) {
             veto = true;
             ATH_MSG_VERBOSE("#BTAG# Smoothing of " << hname << " is vetoed !");
             break;
@@ -208,10 +200,12 @@ namespace Analysis {
 	        for(int iz=1; iz<=Nz; iz++){
                   double content=dc_tmp->Integral(1,Nx,1,Ny,iz,iz,""); if(content==0.)content=Nz;
 		  double dnorm=total/content/Nz;
-	          for(int ix=1; ix<=Nx; ix++){for(int iy=1; iy<=Ny; iy++){
-		    double cbin=dc_tmp->GetBinContent(ix,iy,iz)*dnorm; cbin= cbin>0. ? cbin : 0.1; //Protection against empty bins
-		    dc_tmp->SetBinContent(ix,iy,iz, cbin);
-	          }}
+	          for(int ix=1; ix<=Nx; ix++){
+		    for(int iy=1; iy<=Ny; iy++){
+		      double cbin=dc_tmp->GetBinContent(ix,iy,iz)*dnorm; cbin= cbin>0. ? cbin : 0.1; //Protection against empty bins
+		      dc_tmp->SetBinContent(ix,iy,iz, cbin);
+		    }
+		  }
                 }
                 HistoHelperRoot::smoothASH3D(dc_tmp, m3d1, m3d1, m3d3, msgLvl(MSG::DEBUG));
               }
@@ -237,32 +231,30 @@ namespace Analysis {
     }
     ATH_MSG_VERBOSE("#BTAG# -- lhVarVal size= " << lhVariableValues.size());
     // loop on Tracks in the Jet (IP) / Vertices in the Jet (SV)
-    for (unsigned int iel = 0; iel<lhVariableValues.size(); iel++) {
-      ATH_MSG_VERBOSE( "#BTAG# -- element " << iel << " " 
-               << lhVariableValues[iel].name );
-      int ncompo = lhVariableValues[iel].composites.size();
-      ATH_MSG_VERBOSE( "#BTAG# -- element " << iel << " " 
-               << lhVariableValues[iel].name
+    for (const auto& value : lhVariableValues) {
+      ATH_MSG_VERBOSE( "#BTAG# -- element " << value.name );
+      int ncompo = value.composites.size();
+      ATH_MSG_VERBOSE( "#BTAG# -- element " << value.name
                << " has " << ncompo << " composites." );
       // loop on variables that make up the Tag, e.g. 
       // one 1D for IP2D, one 2D for IP3D, one 1D and one 2D for SV1, one 3D for SV2
-      for (int icompo = 0;icompo<ncompo;icompo++) {
+      for (const auto& compo : value.composites) {
         double sum(0.);
         std::vector<double> tmpVector; 
-        std::string histName = lhVariableValues[iel].composites[icompo].name;
-        int idim = lhVariableValues[iel].composites[icompo].atoms.size();
-        ATH_MSG_VERBOSE( "#BTAG#   -- composite " << icompo << " histo= "
+        std::string histName = compo.name;
+        int idim = compo.atoms.size();
+        ATH_MSG_VERBOSE( "#BTAG#   -- composite histo= "
              << histName << " dim= " << idim );
-        for (unsigned int ihyp = 0 ; ihyp < m_hypotheses.size(); ++ihyp) {
-          TH1* tmpHisto = this->prepareHistogram(m_hypotheses[ihyp],histName);
+	for (const auto& hypo : m_hypotheses) {
+          TH1* tmpHisto = this->prepareHistogram(hypo,histName);
           if(tmpHisto) {
             if(1==idim) {
-              double valuex = lhVariableValues[iel].composites[icompo].atoms[0].value;
+              double valuex = compo.atoms[0].value;
               int binx = (tmpHisto->GetXaxis())->FindBin(valuex);
               if(valuex >= tmpHisto->GetXaxis()->GetXmax()) binx = tmpHisto->GetXaxis()->GetNbins();
               if(valuex <= tmpHisto->GetXaxis()->GetXmin()) binx = 1;
               double tmp = tmpHisto->GetBinContent(binx);
-              if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << "#BTAG#       For hypothesis= " << m_hypotheses[ihyp] 
+              if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << "#BTAG#       For hypothesis= " << hypo
                                                            << " (1D) actual value= " << valuex
                                                            << " --> bin= " << binx << " f = " << tmp;
               if(m_interpolate) {
@@ -288,8 +280,8 @@ namespace Analysis {
               sum += tmp;
             }
             if(2==idim) {
-              double valuex = lhVariableValues[iel].composites[icompo].atoms[0].value;
-              double valuey = lhVariableValues[iel].composites[icompo].atoms[1].value;
+              double valuex = compo.atoms[0].value;
+              double valuey = compo.atoms[1].value;
               int binx = (tmpHisto->GetXaxis())->FindBin(valuex);
               int biny = (tmpHisto->GetYaxis())->FindBin(valuey);
               if(valuex >= tmpHisto->GetXaxis()->GetXmax()) binx = tmpHisto->GetXaxis()->GetNbins();
@@ -297,7 +289,7 @@ namespace Analysis {
               if(valuey >= tmpHisto->GetYaxis()->GetXmax()) biny = tmpHisto->GetYaxis()->GetNbins();
               if(valuey <= tmpHisto->GetYaxis()->GetXmin()) biny = 1;
               double tmp = tmpHisto->GetBinContent(binx, biny);
-              if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << "#BTAG#       For hypothesis= " << m_hypotheses[ihyp] 
+              if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << "#BTAG#       For hypothesis= " << hypo
                                                            << " (2D) actual value= " << valuex << " " << valuey
                                                            << " --> bin= " << binx << " " << biny << " f = " << tmp;
               if(m_interpolate) {
@@ -324,9 +316,9 @@ namespace Analysis {
               sum += tmp;
             }
             if(3==idim) {
-              double valuex = lhVariableValues[iel].composites[icompo].atoms[0].value;
-              double valuey = lhVariableValues[iel].composites[icompo].atoms[1].value;
-              double valuez = lhVariableValues[iel].composites[icompo].atoms[2].value;
+              double valuex = compo.atoms[0].value;
+              double valuey = compo.atoms[1].value;
+              double valuez = compo.atoms[2].value;
               int binx = (tmpHisto->GetXaxis())->FindBin(valuex);
               int biny = (tmpHisto->GetYaxis())->FindBin(valuey);
               int binz = (tmpHisto->GetZaxis())->FindBin(valuez);
@@ -337,7 +329,7 @@ namespace Analysis {
               if(valuez >= tmpHisto->GetZaxis()->GetXmax()) binz = tmpHisto->GetZaxis()->GetNbins();
               if(valuez <= tmpHisto->GetZaxis()->GetXmin()) binz = 1;
               double tmp = tmpHisto->GetBinContent(binx, biny, binz);
-              if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << "#BTAG#       For hypothesis= " << m_hypotheses[ihyp] 
+              if( msgLvl(MSG::VERBOSE) ) msg(MSG::VERBOSE) << "#BTAG#       For hypothesis= " << hypo
                                                            << " (3D) actual value= " << valuex 
                                                            << " " << valuey << " " << valuez
                                                            << " --> bin= " << binx << " " << biny 
@@ -372,11 +364,10 @@ namespace Analysis {
           }
         } // endloop on hypotheses (B,U,C..) 
         unsigned int classCount(0);
-        for( std::vector<double>::iterator itr3 = tmpVector.begin();  
-             itr3 != tmpVector.end(); ++itr3 ) {
+	for (const auto& f : tmpVector) {
           if(sum != 0.) {
             if( msgLvl(MSG::DEBUG) ) msg(MSG::DEBUG) << "#BTAG# sum of pX = " << sum << endmsg;
-            double p = (*itr3);
+            double p = f;
             if(m_normalizedProb) p /= sum;
             probDensityPerEventClassAllVariables[classCount] *= p;
           } else {

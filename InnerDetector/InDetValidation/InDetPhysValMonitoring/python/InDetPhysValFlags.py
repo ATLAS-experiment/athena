@@ -36,6 +36,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("GRL", [])
     icf.addFlag("doIDTIDE", False ) # for IDTIDE derivation
     icf.addFlag("doTechnicalEfficiency", False) # for enabling the filling of technical efficiency
+    icf.addFlag("doPRW", False)
 
     return icf
 

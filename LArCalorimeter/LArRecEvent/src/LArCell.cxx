@@ -8,7 +8,7 @@
 #include "FourMomUtils/P4Helpers.h"
 
 #include <iostream>
-
+#include "LArElecCalib/LArProvenance.h"
 
 LArCell::~LArCell () 
 {  }
@@ -44,6 +44,5 @@ std::unique_ptr<CaloCell> LArCell::clone() const
 
 bool LArCell::badcell() const
 {
-  if (this->provenance() & 0x0800) return true;
-  return false;
+  return LArProv::test(this->provenance(),LArProv::MASKED);  
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -14,13 +14,8 @@
 ///
 /////////////////////////////////////////////////////////////////////////////
 
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IToolSvc.h"
-
 #include "JetTagTools/MultivariateTagManager.h"
 #include "JetTagTools/BTagVariables.h"
-
-#include "TObjString.h"
 
 #include <fstream>
 #include <sstream>
@@ -61,8 +56,8 @@ namespace Analysis {
   {
 
     if (m_MultivariateTaggerHandleArray.empty()) {
-         ATH_MSG_ERROR("MVTagToolList is empty");
-         return StatusCode::FAILURE;
+      ATH_MSG_ERROR("MVTagToolList is empty");
+      return StatusCode::FAILURE;
     }
 
     if ( m_MultivariateTaggerHandleArray.retrieve().isFailure() ) {
@@ -85,12 +80,6 @@ namespace Analysis {
     ATH_MSG_INFO(" #BTAG# Initialization of MultivariateTagManager successfull" );
     return StatusCode::SUCCESS;
   }
-
-  StatusCode MultivariateTagManager::finalize() { // all taken care of in destructor
-    ATH_MSG_INFO(" #BTAG# Finalization of MultivariateTagManager successfull" );
-    return StatusCode::SUCCESS;
-  }
-
 
   // _______________________________________________________________________
   // MultivariateTagManager functions
@@ -153,16 +142,16 @@ namespace Analysis {
     float sm_mu_z0           = NAN;
     float sm_ID_qOverP       = NAN;
 
-    BTag.variable<float>(m_softmuon_infosource, "mu_pt"           , sm_mu_pt          );
+    BTag.variable<float>(m_softmuon_infosource,   "mu_pt"           , sm_mu_pt          );
     if(!std::isnan(sm_mu_pt) && sm_mu_pt>0){
-        BTag.variable<float>(m_softmuon_infosource, "dR"              , sm_dR             );
-        BTag.variable<float>(m_softmuon_infosource, "qOverPratio"     , sm_qOverPratio    );
-        BTag.variable<float>(m_softmuon_infosource, "mombalsignif"    , sm_mombalsignif   );
-        BTag.variable<float>(m_softmuon_infosource, "scatneighsignif" , sm_scatneighsignif);
-        BTag.variable<float>(m_softmuon_infosource, "pTrel"           , sm_pTrel          );
-        BTag.variable<float>(m_softmuon_infosource, "mu_d0"           , sm_mu_d0          );
-        BTag.variable<float>(m_softmuon_infosource, "mu_z0"           , sm_mu_z0          );
-        BTag.variable<float>(m_softmuon_infosource, "ID_qOverP"       , sm_ID_qOverP      );
+      BTag.variable<float>(m_softmuon_infosource, "dR"              , sm_dR             );
+      BTag.variable<float>(m_softmuon_infosource, "qOverPratio"     , sm_qOverPratio    );
+      BTag.variable<float>(m_softmuon_infosource, "mombalsignif"    , sm_mombalsignif   );
+      BTag.variable<float>(m_softmuon_infosource, "scatneighsignif" , sm_scatneighsignif);
+      BTag.variable<float>(m_softmuon_infosource, "pTrel"           , sm_pTrel          );
+      BTag.variable<float>(m_softmuon_infosource, "mu_d0"           , sm_mu_d0          );
+      BTag.variable<float>(m_softmuon_infosource, "mu_z0"           , sm_mu_z0          );
+      BTag.variable<float>(m_softmuon_infosource, "ID_qOverP"       , sm_ID_qOverP      );
     }else{
       sm_mu_pt= NAN;
     }
@@ -177,28 +166,26 @@ namespace Analysis {
     inputs[btagvar::SM_MU_Z0]     = sm_mu_z0;
     inputs[btagvar::SM_ID_QOVERP] = sm_ID_qOverP;
 
-
   }
+
   void MultivariateTagManager::fill_trkSum(var_map& inputs, xAOD::BTagging& BTag) const {
     float trkSum_ntrk = NAN;
     float trkSum_sPt = NAN;
     float trkSum_vPt = NAN;
     float trkSum_vAbsEta =NAN;
 
-
     trkSum_ntrk   = BTag.isAvailable<unsigned>("trkSum_ntrk") ? BTag.auxdata<unsigned>("trkSum_ntrk") : NAN;
     trkSum_sPt    = BTag.isAvailable<float   >("trkSum_SPt" ) ? BTag.auxdata<float   >("trkSum_SPt" ) : NAN;
 
     if (!std::isnan(trkSum_ntrk)){
       trkSum_vPt    = BTag.isAvailable<float>("trkSum_VPt" ) ?      BTag.auxdata<float>("trkSum_VPt" )  : NAN;
-      trkSum_vAbsEta= BTag.isAvailable<float>("trkSum_VEta") ? fabs(BTag.auxdata<float>("trkSum_VEta")) : NAN;
+      trkSum_vAbsEta= BTag.isAvailable<float>("trkSum_VEta") ? std::abs(BTag.auxdata<float>("trkSum_VEta")) : NAN;
     }
 
     inputs[btagvar::TRKSUM_NTRK]   = trkSum_ntrk;
     inputs[btagvar::TRKSUM_SPT]    = trkSum_sPt;
     inputs[btagvar::TRKSUM_VPT]    = trkSum_vPt;
     inputs[btagvar::TRKSUM_ABSETA] = trkSum_vAbsEta;
-
 
   }
 
@@ -218,7 +205,8 @@ namespace Analysis {
     float jf_sig3d   = NAN;
 
     // check if we have vertices
-    int jf_nvtx_tmp(INT_MISSING), jf_nvtx1t_tmp(INT_MISSING); bool jfitter_ok(false);
+    int jf_nvtx_tmp(INT_MISSING), jf_nvtx1t_tmp(INT_MISSING);
+    bool jfitter_ok(false);
     std::vector< ElementLink< xAOD::BTagVertexContainer > > jf_vertices;
     BTag.variable<std::vector<ElementLink<xAOD::BTagVertexContainer> > >(m_jftNN_infosource, "JFvertices", jf_vertices);
     if("JetFitter" == m_jftNN_infosource) {
@@ -229,32 +217,35 @@ namespace Analysis {
       BTag.variable<int>(m_jftNN_infosource, "nVTX", jf_nvtx_tmp  );
       BTag.variable<int>(m_jftNN_infosource, "nSingleTracks", jf_nvtx1t_tmp);
     }
-    if(jf_vertices.size()>0 && jf_vertices[0].isValid() && (jf_nvtx_tmp > 0 || jf_nvtx1t_tmp > 0)) jfitter_ok = true;
+
+    if(!jf_vertices.empty() && jf_vertices[0].isValid() &&
+       (jf_nvtx_tmp > 0 || jf_nvtx1t_tmp > 0)) jfitter_ok = true;
 
     if(jfitter_ok) {
       // Get values from the xAOD
       if("JetFitter" == m_jftNN_infosource) { // check if JetFitter is known by the xAOD?
-  BTag.taggerInfo(jf_nvtx,       xAOD::BTagInfo::JetFitter_nVTX);
-  BTag.taggerInfo(jf_nvtx1t,     xAOD::BTagInfo::JetFitter_nSingleTracks);
-  BTag.taggerInfo(jf_ntrkAtVx,   xAOD::BTagInfo::JetFitter_nTracksAtVtx);
-  BTag.taggerInfo(jf_n2tv,       xAOD::BTagInfo::JetFitter_N2Tpair);
-  BTag.taggerInfo(jf_efrc,     xAOD::BTagInfo::JetFitter_energyFraction);
-  BTag.taggerInfo(jf_mass,     xAOD::BTagInfo::JetFitter_mass);
-  BTag.taggerInfo(jf_sig3d,    xAOD::BTagInfo::JetFitter_significance3d);
-  BTag.taggerInfo(jf_dphi,     xAOD::BTagInfo::JetFitter_deltaphi);
-  BTag.taggerInfo(jf_deta,     xAOD::BTagInfo::JetFitter_deltaeta);
+	BTag.taggerInfo(jf_nvtx,     xAOD::BTagInfo::JetFitter_nVTX);
+	BTag.taggerInfo(jf_nvtx1t,   xAOD::BTagInfo::JetFitter_nSingleTracks);
+	BTag.taggerInfo(jf_ntrkAtVx, xAOD::BTagInfo::JetFitter_nTracksAtVtx);
+	BTag.taggerInfo(jf_n2tv,     xAOD::BTagInfo::JetFitter_N2Tpair);
+	BTag.taggerInfo(jf_efrc,     xAOD::BTagInfo::JetFitter_energyFraction);
+	BTag.taggerInfo(jf_mass,     xAOD::BTagInfo::JetFitter_mass);
+	BTag.taggerInfo(jf_sig3d,    xAOD::BTagInfo::JetFitter_significance3d);
+	BTag.taggerInfo(jf_dphi,     xAOD::BTagInfo::JetFitter_deltaphi);
+	BTag.taggerInfo(jf_deta,     xAOD::BTagInfo::JetFitter_deltaeta);
       }
       else { // get variables explicitely
-  BTag.variable<int>(m_jftNN_infosource,    "nVTX",           jf_nvtx);
-  BTag.variable<int>(m_jftNN_infosource,    "nSingleTracks",  jf_nvtx1t);
-  BTag.variable<int>(m_jftNN_infosource,    "nTracksAtVtx",   jf_ntrkAtVx);
-  BTag.variable<int>(m_jftNN_infosource,    "N2Tpair",        jf_n2tv);
-  BTag.variable<float>(m_jftNN_infosource,  "energyFraction", jf_efrc);
-  BTag.variable<float>(m_jftNN_infosource,  "mass",           jf_mass);
-  BTag.variable<float>(m_jftNN_infosource,  "significance3d", jf_sig3d);
-  BTag.variable<float>(m_jftNN_infosource,  "deltaphi",       jf_dphi);
-  BTag.variable<float>(m_jftNN_infosource,  "deltaeta",       jf_deta);
+	BTag.variable<int>(m_jftNN_infosource,    "nVTX",           jf_nvtx);
+	BTag.variable<int>(m_jftNN_infosource,    "nSingleTracks",  jf_nvtx1t);
+	BTag.variable<int>(m_jftNN_infosource,    "nTracksAtVtx",   jf_ntrkAtVx);
+	BTag.variable<int>(m_jftNN_infosource,    "N2Tpair",        jf_n2tv);
+	BTag.variable<float>(m_jftNN_infosource,  "energyFraction", jf_efrc);
+	BTag.variable<float>(m_jftNN_infosource,  "mass",           jf_mass);
+	BTag.variable<float>(m_jftNN_infosource,  "significance3d", jf_sig3d);
+	BTag.variable<float>(m_jftNN_infosource,  "deltaphi",       jf_dphi);
+	BTag.variable<float>(m_jftNN_infosource,  "deltaeta",       jf_deta);
       }
+
       // NOTE: no need to check for NAN here, it should do the right thing
       // http://en.cppreference.com/w/cpp/numeric/math/hypot#Error_handling
       jf_dR = std::hypot(jf_dphi,jf_deta);
@@ -295,9 +286,7 @@ namespace Analysis {
 
     std::vector<float> weightBofTracksIP2D;
     BTag.variable<std::vector<float> >(m_ip2d_infosource, "weightBofTracks", weightBofTracksIP2D);
-    int ntrk_ip2 = weightBofTracksIP2D.size();
-
-    if(ntrk_ip2>0) {
+    if(!weightBofTracksIP2D.empty()) {
 
       if( m_ip2d_infosource == "IP2D" ) {
 	ip2d_pb = BTag.IP2D_pb();
@@ -362,8 +351,7 @@ namespace Analysis {
 
     std::vector<float> weightBofTracksIP3D;
     BTag.variable<std::vector<float> >(m_ip3d_infosource, "weightBofTracks", weightBofTracksIP3D);
-    int ntrk_ip3= weightBofTracksIP3D.size();
-    if(ntrk_ip3>0) {
+    if(!weightBofTracksIP3D.empty()) {
       if( m_ip3d_infosource == "IP3D" ) {
 	ip3d_pb = BTag.IP3D_pb();
 	ip3d_pc = BTag.IP3D_pc();
@@ -429,25 +417,23 @@ namespace Analysis {
     std::vector< ElementLink< xAOD::VertexContainer > > myVertices_SV0;
     BTag.variable<std::vector<ElementLink<xAOD::VertexContainer> > >(m_sv1_infosource, "vertices", myVertices_SV0);
 
-    if ( myVertices_SV0.size() > 0 && myVertices_SV0[0].isValid() ) {
+    if ( !myVertices_SV0.empty() && myVertices_SV0[0].isValid() ) {
       // if we found a vertex, then sv0 is okay to use
       sv0_ok = true;
     }
 
     if (sv0_ok) {
       if (m_sv0_infosource == "SV0") {
-  BTag.taggerInfo(sv0_mass, xAOD::BTagInfo::SV0_masssvx);
-  BTag.taggerInfo(sv0_efrc, xAOD::BTagInfo::SV0_efracsvx);
-  BTag.taggerInfo(sv0_n2t,  xAOD::BTagInfo::SV0_N2Tpair);
-  BTag.taggerInfo(sv0_ntrkv, xAOD::BTagInfo::SV0_NGTinSvx);
-  //BTag.taggerInfo(sv0_sig3d, xAOD::BTagInfo::SV0_normdist);
+	BTag.taggerInfo(sv0_mass, xAOD::BTagInfo::SV0_masssvx);
+	BTag.taggerInfo(sv0_efrc, xAOD::BTagInfo::SV0_efracsvx);
+	BTag.taggerInfo(sv0_n2t,  xAOD::BTagInfo::SV0_N2Tpair);
+	BTag.taggerInfo(sv0_ntrkv, xAOD::BTagInfo::SV0_NGTinSvx);
       }
       else {
-  BTag.variable<float>(m_sv0_infosource,  "masssvx", sv0_mass);
-  BTag.variable<float>(m_sv0_infosource,  "efracsvx", sv0_efrc);
-  BTag.variable<int>(m_sv0_infosource,    "N2Tpair", sv0_n2t);
-  BTag.variable<int>(m_sv0_infosource,    "NGTinSvx", sv0_ntrkv);
-  //BTag.variable<float>(m_sv0_infosource, "significance3D", sv0_sig3d);
+	BTag.variable<float>(m_sv0_infosource,  "masssvx", sv0_mass);
+	BTag.variable<float>(m_sv0_infosource,  "efracsvx", sv0_efrc);
+	BTag.variable<int>(m_sv0_infosource,    "N2Tpair", sv0_n2t);
+	BTag.variable<int>(m_sv0_infosource,    "NGTinSvx", sv0_ntrkv);
       }
       BTag.variable<float>(m_sv0_infosource, "significance3D", sv0_sig3d);
 
@@ -486,7 +472,7 @@ namespace Analysis {
     bool sv1_ok(false);
     std::vector< ElementLink< xAOD::VertexContainer > > myVertices_SV1;
     BTag.variable<std::vector<ElementLink<xAOD::VertexContainer> > >(m_sv1_infosource, "vertices", myVertices_SV1);
-    if ( myVertices_SV1.size() > 0 && myVertices_SV1[0].isValid() ) {
+    if ( !myVertices_SV1.empty() && myVertices_SV1[0].isValid() ) {
       // if we found a vertex, then sv1 is okay to use
       sv1_ok = true;
     }
@@ -561,7 +547,7 @@ namespace Analysis {
     inputs[btagvar::SV1_L3D]   = sv1_L3d;
     inputs[btagvar::SV1_SIG3D] = sv1_sig3d;
     inputs[btagvar::SV1_DR]    = sv1_dR;
-    inputs[btagvar::SV1_DISTMATLAY]    = sv1_distmatlay;
+    inputs[btagvar::SV1_DISTMATLAY] = sv1_distmatlay;
   }
 
   void MultivariateTagManager::fill_arbitrary_aux_data(

@@ -127,7 +127,25 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
     // Create links back to the original clusters.
     std::vector<ElementLink<xAOD::CaloClusterContainer>> constituentLinks;
-    constituentLinks.emplace_back(*inputClusters, origClusterIndex, ctx);
+
+    // The constituent links should contain a CaloCal cluster. When not running 
+    // in ITk mode this is the default for the forward clusters used by egamma 
+    // so no sister link is needed to get the CaloCal. When running in ITk mode 
+    // the clusters used are CaloTopoClusters so need to access the sister 
+    // cluster to maintain consistency.
+    if (m_doTrackMatching) {
+      static const SG::AuxElement::Accessor<
+        ElementLink<xAOD::CaloClusterContainer>
+      > sisterCluster("SisterCluster");
+
+      if (sisterCluster.isAvailable(*cluster)) {
+        constituentLinks.push_back(sisterCluster(*cluster));
+      } else {
+        ATH_MSG_WARNING("No sister Link available");
+      }      
+    } else {
+      constituentLinks.emplace_back(*inputClusters, origClusterIndex, ctx);
+    }
 
     // Create the new cluster.
     std::unique_ptr<xAOD::CaloCluster> newCluster = std::make_unique<xAOD::CaloCluster>(*cluster);
