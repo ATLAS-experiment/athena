@@ -200,7 +200,9 @@ void ZDC_DetFactory::buildMaterials(StoredMaterialManager *materialManager){
 
     // Absorption length index of fused silica derrived from 
     // https://www.heraeus.com/media/media/hca/doc_hca/products_and_solutions_8/optics/Data_and_Properties_Optics_fused_silica_EN.pdf
-    double silica_ABSL[nEntries] = {302.163 * cm};
+    double silica_ABSL[nEntries];
+    for(int i=0; i<nEntries-2; ++i)
+        silica_ABSL[i] = 302.163 * cm;
     silica_ABSL[nEntries - 1] = silica_ABSL[nEntries - 2] = 204.542 * cm;
 
     GeoMaterialPropertiesTable *silicaCoreMPT = new GeoMaterialPropertiesTable();
