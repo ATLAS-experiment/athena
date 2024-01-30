@@ -86,6 +86,9 @@ namespace CP {
 
         Gaudi::Property<int> m_calibMode{this, "calibMode", -1, "Calib mode"};
 
+	//it should be used ONLY by releases>=24.2.24 and p-tag < p5834
+	//more infos here https://atlas-mcp.docs.cern.ch/guidelines/muonselectiontool/index.html
+	Gaudi::Property<bool> m_excludeNSWFromPrecisionLayers{this, "ExcludeNSWFromPrecisionLayers", false, "Cut on the number of precision layers ignores the NSW"};
 
         // Scale and Smear options
         // Do direct CB calibration 
