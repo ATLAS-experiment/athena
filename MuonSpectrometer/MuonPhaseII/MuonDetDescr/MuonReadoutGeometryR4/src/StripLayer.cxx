@@ -10,10 +10,10 @@ namespace MuonGMR4{
         return ostr;
     }
     StripLayer::StripLayer(const Amg::Transform3D& layerTransform,
-                           const StripDesignPtr design, 
+                           StripDesignPtr design,
                            const IdentifierHash hash):
          m_transform{layerTransform},
-         m_design{design},
+         m_design{std::move(design)},
          m_hash{hash} {
         
     }
