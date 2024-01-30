@@ -27,8 +27,8 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_minD0(0.1)
       {
   declareInterface<IGNNVertexConstructorInterface>(this);
-  declareProperty("JetTrackLinks",  m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.TrackLinks");
-  declareProperty("JetVertexLinks", m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.vertex_indices");
+  declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_TrackOrigin");
+  declareProperty("JetVertexLinks",m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_VertexIndex");
   declareProperty("GNNTool", m_gnn_Tool, "GNN Tool");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
   declareProperty("ExistIBL",   m_existIBL, "Inform whether 3-layer or 4-layer detector is used "  );
@@ -95,6 +95,12 @@ StatusCode GNNVertexConstructorTool::decorateJets(const xAOD::JetContainer *jetC
   for (auto jet : *jetCont) {
     m_gnn_Tool->decorate(*jet);
   }
+  
+  auto Vars =m_gnn_Tool->getDecoratorKeys();
+  for (auto v : Vars){
+    ATH_MSG_INFO(v);
+  }
+  
   return StatusCode::SUCCESS;
 }
 
