@@ -133,6 +133,9 @@ def getStreamHITS_ItemList(flags):
         ItemList += ["AFP_TDSimHitCollection#*",
                      "AFP_SIDSimHitCollection#*"]
 
+    if flags.Sim.RecordStepInfo:
+        ItemList += ["ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps"]
+
     if flags.Beam.Type is BeamType.Cosmics:
         ItemList += ["TrackRecordCollection#CosmicRecord",
                      "TrackRecordCollection#CosmicPerigee"]

@@ -1,4 +1,6 @@
-from AthenaCommon.CfgGetter import getPublicTool
+from AthenaCommon.CfgGetter import getPublicTool, getPrivateTool
+from AthenaCommon.SystemOfUnits import MeV
+
 stepInfoSDTool = getPublicTool("SensitiveDetectorMasterTool").SensitiveDetectors['FCS_StepInfoSensitiveDetector']
 stepInfoSDTool.shift_lar_subhit = True #default
 stepInfoSDTool.shorten_lar_step = True
@@ -10,9 +12,10 @@ stepInfoSDTool.maxTimeTile = 100. #default
 
 
 topSeq.BeamEffectsAlg.GenEventManipulators = [getPublicTool("GenEventValidityChecker")]
-validTruthStrat = getPublicTool("ISF_ValidationTruthStrategy")
+
+validTruthStrat = getPrivateTool("ISF_ValidationTruthStrategy")
 validTruthStrat.Regions = [3]
-validTruthStrat.ParentMinP = 150
+validTruthStrat.ParentMinP = 150.*MeV
 ServiceMgr.ISF_MC15aPlusTruthService.TruthStrategies = [ validTruthStrat ]
 from AthenaCommon.AppMgr import ToolSvc
 ToolSvc.ISF_EntryLayerToolMT.ParticleFilters = []
