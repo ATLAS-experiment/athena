@@ -55,10 +55,10 @@ def createPriVertexingFlags():
         else: # Default
             return VertexSetup.ActsGaussAMVF
 
-    flags.addFlag("setup", vertexSetup, enum=VertexSetup)
+    flags.addFlag("setup", vertexSetup, type=VertexSetup)
 
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
-    flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, enum=VertexSortingSetup)
+    flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, type=VertexSortingSetup)
     flags.addFlag("useBeamConstraint", lambda pcf:
                   not(pcf.Tracking.PrimaryPassConfig in [
                       PrimaryPassConfig.VtxLumi,

@@ -70,9 +70,9 @@ if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.lock()
 
     acc = TrackingGeometrySvcCfg(flags)

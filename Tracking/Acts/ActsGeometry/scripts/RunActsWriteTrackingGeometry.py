@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #!/usr/bin/env python
 """
@@ -6,12 +6,9 @@
 Dump ACTS tracking geometry.
 
 """
-from AthenaCommon.Configurable import Configurable
 from AthenaCommon.Logging import log
 from argparse import ArgumentParser
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
-
-Configurable.configurableRun3Behavior = True
 
 # Argument parsing
 parser = ArgumentParser("RunActsWriteTrackingGeometry.py")
@@ -97,5 +94,3 @@ cfg.merge(FPEAndCoreDumpCfg(flags))
 cfg.printConfig(withDetails = True, summariseProps = True)
 
 cfg.run(1)
-
-
