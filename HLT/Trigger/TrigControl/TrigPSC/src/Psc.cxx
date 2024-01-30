@@ -178,7 +178,20 @@ bool psc::Psc::configure(const ptree& config)
     if ( ! Py_IsInitialized() ) {
       ERS_DEBUG(1,"Initializing Python interpreter");
 
-      Py_Initialize();
+      PyConfig config;
+      PyConfig_InitPythonConfig (&config);
+      PyStatus status = PyConfig_SetBytesArgv (&config, System::argc(), System::argv());
+      if (PyStatus_Exception (status)) {
+        PyConfig_Clear (&config);
+        ERS_PSC_ERROR("Error: Python could not be initialized.");
+        return false;
+      }
+      status = Py_InitializeFromConfig (&config);
+      if (PyStatus_Exception (status)) {
+        PyConfig_Clear (&config);
+        ERS_PSC_ERROR("Error: Python could not be initialized.");
+        return false;
+      }
 
       /*
        * The GIL is initialized by Py_Initialize() since Python 3.7."
@@ -186,39 +199,10 @@ bool psc::Psc::configure(const ptree& config)
 
       // check
       if ( ! Py_IsInitialized() ) {
-        ERS_PSC_ERROR("Error: Python could not been intialized.");
+        ERS_PSC_ERROR("Error: Python could not be initialized.");
         return false;
       }
 
-      // init the sys.argv...
-      auto wargsinit =
-        []() { std::vector<std::wstring> wargs;
-        int argc = System::argc();
-        char** argv = System::argv();
-        wargs.reserve (argc);
-        using convert_t = std::codecvt_utf8<wchar_t>;
-        std::wstring_convert<convert_t, wchar_t> strconverter;
-        for (int i=0; i < argc; ++i) {
-          wargs.push_back (strconverter.from_bytes (argv[i]));
-        }
-        return wargs;
-        };
-      static const std::vector<std::wstring> wargs = wargsinit();
-
-      auto wargvinit =
-        [](const std::vector<std::wstring>& wargs)
-        { std::vector<const wchar_t*> wargv;
-          int argc = System::argc();
-          for (int i=0; i < argc; ++i) {
-            wargv.push_back (wargs[i].data());
-          }
-          return wargv;
-        };
-      static const std::vector<const wchar_t*> wargv = wargvinit (wargs);
-
-      // Bleh --- python takes non-const argv pointers.
-      wchar_t** wargv_nc ATLAS_THREAD_SAFE = const_cast<wchar_t**> (wargv.data());
-      PySys_SetArgv(System::argc(), wargv_nc);
     }
     else {
       ERS_DEBUG(1,"Python interpreter already initialized");
