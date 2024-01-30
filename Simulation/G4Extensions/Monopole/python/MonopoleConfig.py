@@ -218,7 +218,8 @@ def MonopoleCfg(flags):
     updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
-        physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
+        from GaudiKernel.GaudiHandles import PrivateToolHandleArray
+        physicsOptions = PrivateToolHandleArray([ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ])
         result.getService("PhysicsListSvc").PhysOption = physicsOptions + result.getService("PhysicsListSvc").PhysOption
     return result
 
