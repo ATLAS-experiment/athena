@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSPredictExtrapWeights.h"
@@ -185,7 +185,7 @@ TFCSPredictExtrapWeights::prepareInputs(TFCSSimulationState &simulstate,
     inputVariables["pdgId"] = 1; // one hot enconding
   } else if (is_match_pdgid(11) || is_match_pdgid(-11)) {
     inputVariables["pdgId"] = 0; // one hot enconding
-  } 
+  }
   return inputVariables;
 }
 
@@ -301,6 +301,7 @@ bool TFCSPredictExtrapWeights::initializeNetwork(
 
   ATH_MSG_INFO(
       "Using FastCaloNNInputFolderName: " << FastCaloNNInputFolderName);
+  set_pdgid(pid);
 
   std::string inputFileName =
       FastCaloNNInputFolderName + "NN_" + etaBin + ".json";
@@ -373,7 +374,28 @@ void TFCSPredictExtrapWeights::Streamer(TBuffer &R__b) {
 void TFCSPredictExtrapWeights::unit_test(
     TFCSSimulationState *simulstate, const TFCSTruthState *truth,
     const TFCSExtrapolationState *extrapol) {
+  const std::string this_file = __FILE__;
+  const std::string parent_dir = this_file.substr(0, this_file.find("/src/"));
+  const std::string norm_path = parent_dir + "/share/NormPredExtrapSample/";
+  std::string net_path = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/"
+                         "FastCaloSim/LWTNNPredExtrapSample/";
+  test_path(net_path, norm_path, simulstate, truth, extrapol);
+  //net_path = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/"
+  //           "ONNXPredExtrapSample/";
+  //test_path(net_path, norm_path, simulstate, truth, extrapol);
+}
+
+// test_path()
+// Function for testing
+void TFCSPredictExtrapWeights::test_path(
+    std::string &net_path, std::string const &norm_path,
+    TFCSSimulationState *simulstate, const TFCSTruthState *truth,
+    const TFCSExtrapolationState *extrapol) {
   ISF_FCS::MLogging logger;
+  ATH_MSG_NOCLASS(logger, "Testing net path ..."
+                              << net_path.substr(net_path.length() - 20)
+                              << " and norm path ..."
+                              << norm_path.substr(norm_path.length() - 20));
   if (!simulstate) {
     simulstate = new TFCSSimulationState();
 #if defined(__FastCaloSimStandAlone__)
@@ -430,7 +452,7 @@ void TFCSPredictExtrapWeights::unit_test(
                                          << " eta " << eta);
 
   // Find eta bin
-  int Eta = eta * 10;
+  const int Eta = eta * 10;
   std::string etaBin = "";
   for (int i = 0; i <= 25; ++i) {
     int etaTmp = i * 5;
@@ -442,13 +464,10 @@ void TFCSPredictExtrapWeights::unit_test(
   ATH_MSG_NOCLASS(logger, "etaBin = " << etaBin);
 
   TFCSPredictExtrapWeights NN("NN", "NN");
-  NN.setLevel(MSG::VERBOSE);
+  NN.setLevel(MSG::INFO);
   const int pid = truth->pdgid();
-  NN.initializeNetwork(pid, etaBin,
-                       "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/Jona/"
-                       "lwtnn_inputs/json/v23/");
-  NN.getNormInputs(etaBin, "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
-                           "Jona/lwtnn_inputs/txt/v23/");
+  NN.initializeNetwork(pid, etaBin, net_path);
+  NN.getNormInputs(etaBin, norm_path);
 
   // Get extrapWeights and save them as AuxInfo in simulstate
 
@@ -457,15 +476,16 @@ void TFCSPredictExtrapWeights::unit_test(
       NN.prepareInputs(*simulstate, truth->E() * 0.001);
 
   // Get predicted extrapolation weights
+  ATH_MSG_NOCLASS(logger, "computing with m_nn");
   auto outputs = NN.m_nn->compute(inputVariables);
-  std::vector<int> layers = {0, 1, 2, 3, 12};
+  const std::vector<int> layers = {0, 1, 2, 3, 12};
   for (int ilayer : layers) {
     simulstate->setAuxInfo<float>(
         ilayer, outputs["extrapWeight_" + std::to_string(ilayer)]);
   }
 
   // Simulate
-  int layer = 0;
+  const int layer = 0;
   NN.set_calosample(layer);
   TFCSLateralShapeParametrizationHitBase::Hit hit;
   NN.simulate_hit(hit, *simulstate, truth, extrapol);
@@ -481,9 +501,9 @@ void TFCSPredictExtrapWeights::unit_test(
   fNN = TFile::Open("FCSNNtest.root");
   TFCSPredictExtrapWeights *NN2 = (TFCSPredictExtrapWeights *)(fNN->Get("NN"));
 
-  NN2->setLevel(MSG::DEBUG);
+  NN2->setLevel(MSG::INFO);
   NN2->simulate_hit(hit, *simulstate, truth, extrapol);
-  simulstate->Print();
+  //simulstate->Print();
 
   return;
 }

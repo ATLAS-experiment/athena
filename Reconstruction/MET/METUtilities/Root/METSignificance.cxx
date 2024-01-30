@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // METSignificance.cxx
 // Implementation file for class METSignificance
@@ -48,8 +48,7 @@ namespace met {
   static const SG::AuxElement::ConstAccessor<float> acc_jvt("Jvt");
   static const SG::AuxElement::ConstAccessor<float> acc_fjvt("fJvt");
   static const SG::AuxElement::ConstAccessor<float> acc_fjvt_der("DFCommonJets_fJvt");
-
-  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > dec_constitObjLinks("ConstitObjectLinks");
+  static const SG::AuxElement::ConstAccessor< std::vector<iplink_t > > acc_constitObjLinks("ConstitObjectLinks");
   const static MissingETBase::Types::bitmask_t invisSource = 0x100000; // doesn't overlap with any other
 
   METSignificance::METSignificance(const std::string& name) :
@@ -119,6 +118,7 @@ namespace met {
     }
     else{
       ATH_MSG_ERROR("PU Jet Uncertainty TFile is not valid: " << configpath);
+      return StatusCode::FAILURE;
     }
 
     std::string toolName;
@@ -128,7 +128,7 @@ namespace met {
     if (m_jetCalibTool.empty()){
 
       asg::AsgToolConfig toolConfig (toolName);
-
+      // FIXME: it would be better to configure this via properties
       std::string config = "JES_data2017_2016_2015_Recommendation_Aug2018_rel21.config";
       std::string calibSeq = "JetArea_Residual_EtaJES_GSC_Smear";
       std::string calibArea = "00-04-81";
@@ -192,7 +192,7 @@ namespace met {
   }
 
   // **** Rebuild generic MET term ****
-  StatusCode METSignificance::varianceMET(xAOD::MissingETContainer* metCont, float avgmu, std::string jetTermName, std::string softTermName, std::string totalMETName){
+  StatusCode METSignificance::varianceMET(xAOD::MissingETContainer* metCont, float avgmu, const std::string& jetTermName, const std::string& softTermName, const std::string& totalMETName){
 
     // reset variables
     m_VarL = 0.0;
@@ -266,7 +266,7 @@ namespace met {
         continue;
       }
       ATH_MSG_VERBOSE("Add MET term " << met->name() );
-      for(const auto& el : dec_constitObjLinks(*met)) {
+      for(const auto& el : acc_constitObjLinks(*met)) {
         const xAOD::IParticle* obj(*el);
         float pt_reso=0.0, phi_reso=0.0;
         if(!obj){
@@ -335,8 +335,8 @@ namespace met {
         // should be done to reset the phi as well...
         if(m_softTermParam==met::TSTParam){
           Double_t Bias_TST = BiasPtSoftdir(m_metsoft);
-          Double_t MEx = m_met * cos(m_metphi) - Bias_TST * cos(m_metsoftphi);
-          Double_t MEy = m_met * sin(m_metphi) - Bias_TST * sin(m_metsoftphi);
+          Double_t MEx = m_met * std::cos(m_metphi) - Bias_TST * std::cos(m_metsoftphi);
+          Double_t MEy = m_met * std::sin(m_metphi) - Bias_TST * std::sin(m_metsoftphi);
           met_vect.SetXYZ(MEx,MEy,0.0);
         }
         else if(m_softTermParam==met::PthardParam){
@@ -344,19 +344,19 @@ namespace met {
           m_pthard_vect = m_soft_vect - m_met_vect;
           Double_t PtSoftparaPH = m_pthard_vect.Mag()>0.0 ? (m_soft_vect.Dot(m_pthard_vect))/m_pthard_vect.Mag() : 0.0;
           Double_t Bias_pthard = Bias_PtSoftParall(PtSoftparaPH);
-          Double_t MEx = m_met * cos(m_metphi) - Bias_pthard * cos(m_metsoftphi);
-          Double_t MEy = m_met * sin(m_metphi) - Bias_pthard * sin(m_metsoftphi);
+          Double_t MEx = m_met * std::cos(m_metphi) - Bias_pthard * std::cos(m_metsoftphi);
+          Double_t MEy = m_met * std::sin(m_metphi) - Bias_pthard * std::sin(m_metsoftphi);
           met_vect.SetXYZ(MEx,MEy,0.0);
         }
         // Rotate  & compute
         ATH_CHECK(RotateToPhi(met_vect.Phi()));
         m_significance = Significance_LT(met_vect.Pt(), m_VarL, m_VarT, m_CvLT);
-        m_rho = m_CvLT / sqrt( m_VarL * m_VarT ) ;
+        m_rho = m_CvLT / std::sqrt( m_VarL * m_VarT ) ;
       }
       else{
         // standard calculation
         m_significance = Significance_LT(m_met, m_VarL, m_VarT, m_CvLT);
-        m_rho = m_CvLT / sqrt( m_VarL * m_VarT ) ;
+        m_rho = m_CvLT / std::sqrt( m_VarL * m_VarT ) ;
       }
       m_ht-=softSumET;
       ATH_MSG_VERBOSE("     Significance (squared): " << m_significance << " rho: " << GetRho()
@@ -379,7 +379,7 @@ namespace met {
 
     if( m_VarL != 0 ){
       m_significance = Significance_LT(m_met,m_VarL,m_VarT,m_CvLT );
-      m_rho = m_CvLT  / sqrt( m_VarL * m_VarT ) ;
+      m_rho = m_CvLT  / std::sqrt( m_VarL * m_VarT ) ;
     }
     ATH_MSG_DEBUG("     Significance (squared) at new phi: " << m_significance
                 << " rho: " << GetRho()
@@ -403,7 +403,7 @@ namespace met {
 
     if( m_VarL != 0 ){
       m_significance = Significance_LT(met_m_lamda,m_VarL,m_VarT,m_CvLT );
-      m_rho = m_CvLT  / sqrt( m_VarL * m_VarT ) ;
+      m_rho = m_CvLT  / std::sqrt( m_VarL * m_VarT ) ;
     }
     ATH_MSG_DEBUG("     Significance (squared) at new phi: " << m_significance
                 << " rho: " << GetRho()
@@ -541,7 +541,7 @@ namespace met {
         ATH_MSG_ERROR("No fJVT decoration available - must have treat pileup jets set to off or provide fJVT!");
         return StatusCode::FAILURE;
       }
-      pt_reso = sqrt(jet_pu_unc*jet_pu_unc + pt_reso*pt_reso);
+      pt_reso = std::sqrt(jet_pu_unc*jet_pu_unc + pt_reso*pt_reso);
       ATH_MSG_VERBOSE("jet_pu_unc: " << jet_pu_unc);
     }
 
@@ -557,7 +557,7 @@ namespace met {
       SG::AuxElement::ConstAccessor<float> acc_extra(m_JetResoAux);
       if(acc_extra.isAvailable(*jet)){
         float extra_relative_pt_reso = acc_extra(*jet);
-        pt_reso = sqrt(pt_reso*pt_reso + extra_relative_pt_reso*extra_relative_pt_reso);
+        pt_reso = std::sqrt(pt_reso*pt_reso + extra_relative_pt_reso*extra_relative_pt_reso);
       }
     }
 
@@ -938,22 +938,22 @@ namespace met {
 
   std::tuple<double,double,double> METSignificance::CovMatrixRotation(double var_x, double var_y, double cv_xy, double Phi){
     // Covariance matrix parallel and transverse to the Phi direction
-    Double_t V11 = pow(cos(Phi),2)*var_x + 2*sin(Phi)*cos(Phi)*cv_xy + pow(sin(Phi),2)*var_y;
-    Double_t V22 = pow(sin(Phi),2)*var_x - 2*sin(Phi)*cos(Phi)*cv_xy + pow(cos(Phi),2)*var_y;
-    Double_t V12 = pow(cos(Phi),2)*cv_xy -sin(Phi)*cos(Phi)*var_x + sin(Phi)*cos(Phi)*var_y - pow(sin(Phi),2)*cv_xy;   // rho is equal to one for just one jet
+    Double_t V11 = std::pow(std::cos(Phi),2)*var_x + 2*std::sin(Phi)*std::cos(Phi)*cv_xy + std::pow(std::sin(Phi),2)*var_y;
+    Double_t V22 = std::pow(std::sin(Phi),2)*var_x - 2*std::sin(Phi)*std::cos(Phi)*cv_xy + std::pow(std::cos(Phi),2)*var_y;
+    Double_t V12 = std::pow(std::cos(Phi),2)*cv_xy -std::sin(Phi)*std::cos(Phi)*var_x + std::sin(Phi)*std::cos(Phi)*var_y - std::pow(std::sin(Phi),2)*cv_xy;   // rho is equal to one for just one jet
     return  std::make_tuple( V11, V22, V12);
   }
 
   double METSignificance::Significance_LT(double Numerator, double var_parall, double var_perpen, double cov){
 
-    Double_t rho = cov / sqrt( var_parall * var_perpen ) ;
+    Double_t rho = cov / std::sqrt( var_parall * var_perpen ) ;
     Double_t Significance = 0;
     if (std::abs( rho ) >= 0.9 ){  //Cov Max not invertible -> Significance diverges
       ATH_MSG_VERBOSE("rho is large: " << rho);
-      Significance = pow( Numerator - m_scalarBias , 2 ) / (  var_parall  ) ;
+      Significance = std::pow( Numerator - m_scalarBias , 2 ) / (  var_parall  ) ;
     }
     else
-      Significance = pow( Numerator - m_scalarBias , 2 ) / (  var_parall * ( 1 - pow(rho,2) ) ) ;
+      Significance = std::pow( Numerator - m_scalarBias , 2 ) / (  var_parall * ( 1 - std::pow(rho,2) ) ) ;
 
     if( std::abs(Significance) >= 10e+15)
       ATH_MSG_WARNING("warning -->"<< Significance);
@@ -988,8 +988,8 @@ namespace met {
 
   void METSignificance::RotateXY(const double (&mat)[2][2], double (&mat_new)[2][2], double phi){
 
-    double c = cos(phi);
-    double s = sin(phi);
+    double c = std::cos(phi);
+    double s = std::sin(phi);
     double cc = c*c;
     double ss = s*s;
     double cs = c*s;
@@ -1016,19 +1016,19 @@ namespace met {
   // Coefficients from Doug Schaefer <schae@cern.ch> and the MET subgroup
   double METSignificance::VarparPtSoftdir(const double PtSoft, const double SoftSumet){
     if (SoftSumet<25){
-      if (PtSoft<50.) return 41.9+3.8*PtSoft+0.1*pow(PtSoft,2)-12.7+ 1.39*SoftSumet-0.03*pow(SoftSumet,2);
-      else return 41.9+3.8*50.+0.1*pow(50.,2)-12.7+ 1.39*SoftSumet-0.03*pow(SoftSumet,2);
+      if (PtSoft<50.) return 41.9+3.8*PtSoft+0.1*std::pow(PtSoft,2)-12.7+ 1.39*SoftSumet-0.03*std::pow(SoftSumet,2);
+      else return 41.9+3.8*50.+0.1*std::pow(50.,2)-12.7+ 1.39*SoftSumet-0.03*std::pow(SoftSumet,2);
     }
     else{
-      if (PtSoft<50.) return 41.9+3.8*PtSoft+0.1*pow(PtSoft,2);
-      else return (40.5614)+(4.10965)*50.+(0.0955044)*pow(50.,2);
+      if (PtSoft<50.) return 41.9+3.8*PtSoft+0.1*std::pow(PtSoft,2);
+      else return (40.5614)+(4.10965)*50.+(0.0955044)*std::pow(50.,2);
     }
   }
 
   // Coefficients from Doug Schaefer <schae@cern.ch> and the MET subgroup
   double METSignificance::Var_Ptsoft(const double PtSoft){
-    if (PtSoft<45.) return 40. + 2*PtSoft + 0.1*pow(PtSoft,2);
-    else return 40. + 2*45 + 0.1*pow(45,2);
+    if (PtSoft<45.) return 40. + 2*PtSoft + 0.1*std::pow(PtSoft,2);
+    else return 40. + 2*45 + 0.1*std::pow(45,2);
   }
 
   // Coefficients from Doug Schaefer <schae@cern.ch> and the MET subgroup

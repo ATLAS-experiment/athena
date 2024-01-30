@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSParametrizationBase.h"
@@ -57,8 +57,7 @@ void TFCSParametrizationBase::Print(Option_t *option) const {
   optprint.ReplaceAll("short", "");
 
   if (longprint) {
-    ATH_MSG_INFO(optprint << GetTitle() << " (" << IsA()->GetName() << "*)"
-                          << this);
+    ATH_MSG_INFO(optprint << GetTitle() << " " << IsA()->GetName() );
     ATH_MSG(INFO) << optprint << "  PDGID: ";
     if (is_match_all_pdgid()) {
       ATH_MSG(INFO) << "all";

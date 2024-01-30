@@ -1,11 +1,11 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
 
-#ifndef EVENT_SELECTOR_NOBJECTPTELECTORALG_H
-#define EVENT_SELECTOR_NOBJECTPTELECTORALG_H
+#ifndef EVENT_SELECTOR_NOBJECTPTSELECTORALG_H
+#define EVENT_SELECTOR_NOBJECTPTSELECTORALG_H
 
 // Algorithm includes
 #include <AnaAlgorithm/AnaAlgorithm.h>
@@ -81,4 +81,4 @@ namespace CP {
   }; // class
 } // namespace CP
 
-#endif // EVENT_SELECTOR_NOBJECTPTELECTORALG_H
+#endif // EVENT_SELECTOR_NOBJECTPTSELECTORALG_H

@@ -1,4 +1,4 @@
-//  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //  ===============================================================================
 //   Macro to compute the gluon initiated jets fraction in your sample/selection
 //   To run the macro: .x MakeQuarkGluonFractionPlots.cxx+("config.txt")
@@ -165,7 +165,7 @@ MakeQuarkGluonFractionPlots::MakeQuarkGluonFractionPlots(const std::string& file
  * Drawing methods
  * *******************************************/
 // Draw histograms from a map
-void MakeQuarkGluonFractionPlots::drawhistos(std::map<std::string, TH2D*> histos, const std::string& psfilename){
+void MakeQuarkGluonFractionPlots::drawhistos(const std::map<std::string, TH2D*> & histos, const std::string& psfilename){
   TCanvas c1;
   c1.SetLogx();
   for (std::map<std::string, TH2D*>::iterator it = histos.begin() ; it != histos.end(); ++it){
@@ -177,7 +177,7 @@ void MakeQuarkGluonFractionPlots::drawhistos(std::map<std::string, TH2D*> histos
   }
 }
 // Draw histograms from a vector
-void MakeQuarkGluonFractionPlots::drawhistos(std::vector<TH2D*> histos, const std::string& psfilename){
+void MakeQuarkGluonFractionPlots::drawhistos(const std::vector<TH2D*> & histos, const std::string& psfilename){
   TCanvas c1;
   c1.SetLogx();
   for (std::vector<TH2D*>::iterator it = histos.begin() ; it != histos.end(); ++it){
@@ -257,11 +257,11 @@ void MakeQuarkGluonFractionPlots::DumpFileToMap(std::map<std::string, TH2D*> &h_
 //QGF File creation
 void MakeQuarkGluonFractionPlots::CreateQGFFile(const std::string& prename, 
                                                 const std::map<std::string, TH2D*>& h_input,
-                                                std::vector< std::map<std::string, TH2D*> > h_input_1P,
-                                                std::vector< std::map<std::string, TH2D*> > h_input_1PVar,
-                                                std::vector< std::map<std::string, TH2D*> > h_input_2P,
-                                                std::vector< std::map<std::string, TH2D*> > h_input_2PUp,
-                                                std::vector< std::map<std::string, TH2D*> > h_input_2PDown){
+                                                const std::vector< std::map<std::string, TH2D*> > & h_input_1P,
+                                                const std::vector< std::map<std::string, TH2D*> > & h_input_1PVar,
+                                                const std::vector< std::map<std::string, TH2D*> > & h_input_2P,
+                                                const std::vector< std::map<std::string, TH2D*> > & h_input_2PUp,
+                                                const std::vector< std::map<std::string, TH2D*> > & h_input_2PDown){
   //Since I am here, all histograms have already been retrieved!
   printf("\n %s\n Computing the gluon fraction in %s channel\n %s\n",std::string(75,'%').c_str(),prename.c_str(),std::string(75,'%').c_str());
   std::string outputName = prename + "_" + m_OutputFile;  
@@ -327,7 +327,7 @@ void MakeQuarkGluonFractionPlots::CreateQGFFile(const std::string& prename,
   c1.Print((psfilename+"]").c_str());
 }
 // Evaluate Delta
-std::vector<TH2D*> MakeQuarkGluonFractionPlots::getDelta (std::vector<TH2D*> h_nom, std::vector<TH2D*> h_var, double scale, const std::string& prehistname){
+std::vector<TH2D*> MakeQuarkGluonFractionPlots::getDelta (const std::vector<TH2D*> & h_nom, std::vector<TH2D*> h_var, double scale, const std::string& prehistname){
   std::vector<TH2D*> QuarkGluonDiffFractionhistos;
   if(h_nom.size() != h_var.size()) std::cout<<"ERROR: Systematic variation don't have the same number of histograms!\n";
   std::string JetCollection = extractJetCollectionName((h_nom.at(0))->GetName());
@@ -347,7 +347,7 @@ std::vector<TH2D*> MakeQuarkGluonFractionPlots::getDelta (std::vector<TH2D*> h_n
 }
 
 //Evaluate uncertainty
-std::vector<TH2D*>  MakeQuarkGluonFractionPlots::evaluateQGFUncertaity(std::vector<std::vector<TH2D*> > f_1P, std::vector<std::vector<TH2D*> > f_2PUp, std::vector<std::vector<TH2D*> > f_2PDown, const std::string& channel){
+std::vector<TH2D*>  MakeQuarkGluonFractionPlots::evaluateQGFUncertaity(const std::vector<std::vector<TH2D*> > & f_1P, const std::vector<std::vector<TH2D*> > & f_2PUp, const std::vector<std::vector<TH2D*> > &f_2PDown, const std::string& channel){
   std::vector<TH2D*> histUnc;
   TH2D *h_tmp;
   std::string h_tmp_name;

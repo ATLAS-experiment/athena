@@ -1,16 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/IPTag.h"
-#include "CLHEP/Vector/LorentzVector.h"
-#include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/IToolSvc.h"
-#include "JetTagInfo/TruthInfo.h"
-#include "JetTagInfo/SvxSummary.h"
 #include "JetTagTools/NewLikelihoodTool.h"
-#include "JetTagTools/LikelihoodComponents.h"
 #include "JetTagTools/HistoHelperRoot.h"
 #include "JetTagTools/TrackSelector.h"
 #include "JetTagTools/GradedTrack.h"
@@ -20,24 +14,15 @@
 #include "JetTagTools/ITrackGradeFactory.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include "Navigation/NavigationToken.h"
-#include "ITrackToVertex/ITrackToVertex.h"
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
-#include "TH1.h"
+
 #include <cmath>
 #include <sstream>
 #include <algorithm>
 #include <vector>
 #include <string>
 
-#include "TLorentzVector.h"
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//bool xaodTrackPtSorting(const xAOD::TrackParticle *track1, const xAOD::TrackParticle *track2) { 
-//  return track1->pt()>track2->pt(); 
-//}
 
 namespace Analysis {
 
@@ -109,17 +94,14 @@ namespace Analysis {
     declareProperty("unbiasIPEstimation"  , m_unbiasIPEstimation);
 
     declareProperty("trackAssociationName"    , m_trackAssociationName = "BTagTrackToJetAssociator");
-    declareProperty("originalTPCollectionName", m_originalTPCollectionName = "InDetTrackParticles");
     declareProperty("jetCollectionList"       , m_jetCollectionList);
-    declareProperty("useVariables"            , m_useVariables);
     declareProperty("impactParameterView"     , m_impactParameterView = "2D");
-    declareProperty("ForcedCalibrationName"   , m_ForcedCalibName = "Cone4H1Tower");
+    declareProperty("ForcedCalibrationName"   , m_forcedCalibName = "Cone4H1Tower");
     
     declareProperty("trackGradePartitions"    , m_trackGradePartitionsDefinition);
     m_trackGradePartitionsDefinition.push_back("Good");
 
     declareProperty("referenceType"           , m_referenceType = "ALL"); // B, UDSG, ALL
-    declareProperty("truthMatchingName"       , m_truthMatchingName = "TruthInfo");
     declareProperty("purificationDeltaR"      , m_purificationDeltaR = 0.8);
     declareProperty("jetPtMinRef"             , m_jetPtMinRef = 15.*Gaudi::Units::GeV);
 
@@ -296,9 +278,7 @@ namespace Analysis {
     /** book calibration histograms if needed */
     if( m_runModus == "reference" ) {
       ATH_MSG_DEBUG("#BTAG# running IPTag in reference mode");
-     for(uint j=0;j<m_jetCollectionList.size();j++) {
-
-        //int nbGrades=trackFactoryGradesDefinition.numberOfGrades();
+      for(uint j=0;j<m_jetCollectionList.size();j++) {
 
         for (std::vector<TrackGrade>::const_iterator listIter=listBegin ; listIter !=listEnd ; ++listIter ) {
           const TrackGrade & grd = (*listIter);
@@ -358,7 +338,7 @@ namespace Analysis {
     ATH_MSG_VERBOSE("#BTAG# m_impactParameterView = " << m_impactParameterView );
     /** author to know which jet algorithm: */
     std::string author = jetName;
-    if (m_doForcedCalib) author = m_ForcedCalibName;
+    if (m_doForcedCalib) author = m_forcedCalibName;
     ATH_MSG_VERBOSE("#BTAG# Using jet type " << author << " for calibrations.");
 
     /** for the reference mode we need the true label: */

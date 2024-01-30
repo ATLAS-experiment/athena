@@ -120,6 +120,7 @@ class MuonSegmentReader : public AthHistogramAlgorithm
         VectorBranch<int>& m_trk_nMdtHoles{m_tree.newVector<int>("trk_nMdtHoles")};  
         VectorBranch<int>& m_trk_nOutliersHits{m_tree.newVector<int>("trk_nOutliersHis")};  
         VectorBranch<int>& m_trk_nRpcPhiHits{m_tree.newVector<int>("trk_nRpcPhiHits")};  
+        VectorBranch<int>& m_trk_nRpcEtaHits{m_tree.newVector<int>("trk_nRpcEtaHits")};  
         VectorBranch<int>& m_trk_nTgcPhiHits{m_tree.newVector<int>("trk_nTgcPhiHits")};  
         VectorBranch<int>& m_trk_nTgcEtaHits{m_tree.newVector<int>("trk_nTgcEtaHits")}; 
 

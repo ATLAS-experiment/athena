@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/AuxVectorBase_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -522,6 +520,73 @@ void test_get_data()
 }
 
 
+void test_isAvailable()
+{
+  std::cout << "test_isAvailable\n";
+  SG::AuxVectorBase_test b1;
+  b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
+
+  // No store.
+  assert (!b1.isAvailable<int> ("anInt"));
+  assert (!b1.isAvailableWritable<int> ("anInt"));
+  assert (!b1.isAvailableWritableAsDecoration<int> ("anInt"));
+
+  // Empty const store.
+  SG::AuxStoreInternal store;
+  SG::IConstAuxStore* cstore = &store;
+  b1.setStore (cstore);
+  assert (!b1.isAvailable<int> ("anInt"));
+  assert (!b1.isAvailableWritable<int> ("anInt"));
+  assert (!b1.isAvailableWritableAsDecoration<int> ("anInt"));
+
+  // Mutable store with variable.
+  SG::auxid_t ityp = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
+  b1.setStore (&store);
+  b1.getData<int> (ityp, 0) = 1;
+  assert (b1.isAvailable<int> ("anInt"));
+  assert (b1.isAvailableWritable<int> ("anInt"));
+  assert (b1.isAvailableWritableAsDecoration<int> ("anInt"));
+
+  // Make store const.
+  b1.setStore (cstore);
+  assert (b1.isAvailable<int> ("anInt"));
+  assert (!b1.isAvailableWritable<int> ("anInt"));
+  assert (b1.isAvailableWritableAsDecoration<int> ("anInt"));
+}
+
+
+template <class T>
+std::vector<typename T::value_type> make_vector (const T& c)
+{
+  return std::vector<typename T::value_type> (c.begin(), c.end());
+}
+
+
+void test_get_span()
+{
+  std::cout << "test_get_span\n";
+  SG::AuxVectorBase_test b1;
+  b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
+  SG::AuxStoreInternal store;
+  b1.setStore (&store);
+
+  SG::auxid_t ityp = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
+  b1.getData<int> (ityp, 0) = 1;
+  b1.getData<int> (ityp, 1) = 2;
+
+  std::vector<int> vexp {1, 2, 0, 0, 0, 0, 0, 0, 0, 0};
+  assert (make_vector (b1.getDataSpan<int> ("anInt")) == vexp);
+
+  SG::IConstAuxStore* cstore = &store;
+  b1.setStore (cstore);
+  const SG::AuxVectorBase& cb1 = b1;
+  assert (b1.getConstDataSpan<int> ("anInt")[0] == 1);
+  assert (make_vector (b1.getConstDataSpan<int> ("anInt")) == vexp);
+  assert (make_vector (cb1.getDataSpan<int> ("anInt")) == vexp);
+  assert (make_vector (cb1.getDecorationSpan<int> ("anInt")) == vexp);
+}
+
+
 void test_reserve_resize()
 {
   std::cout << "test_reserve_resize\n";
@@ -993,6 +1058,8 @@ int main()
   test_clear_index();
   test_clear_indices();
   test_get_data();
+  test_isAvailable();
+  test_get_span();
   test_reserve_resize();
   test_shift();
   test_get_types();

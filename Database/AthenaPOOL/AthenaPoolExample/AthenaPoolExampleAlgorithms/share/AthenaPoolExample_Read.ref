@@ -230,9 +230,10 @@ MetaDataHdrForm...  DEBUG    attributes# = 1
 MetaDataHdrForm...  DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm...  DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
 MetaDataSvc         DEBUG Loaded input meta data store proxies
-MetaDataSvc         DEBUG  calling beginInputFile for ToolSvc.IOVDbMetaDataTool
+MetaDataSvc         DEBUG  calling beginInputFile on ToolSvc.IOVDbMetaDataTool for GUID ""
 MetaDataSvc         DEBUG handle() EndInputFile for eventless EmptyPoolFile.root
 MetaDataSvc         DEBUG retireMetadataSource: eventless EmptyPoolFile.root
+MetaDataSvc         DEBUG  calling endInputFile on ToolSvc.IOVDbMetaDataTool for GUID ""
 StorageSvc          DEBUG Disconnect request for database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030 PFN=EmptyPoolFile.root
 StorageSvc          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
 RootDatabase.close  DEBUG Closing DB EmptyPoolFile.root
@@ -251,7 +252,7 @@ RootDatabase.se...  DEBUG Using Tree cache. Size: 100000 Nevents to learn with: 
 MetaDataSvc         DEBUG handle() BeginInputFile for SimplePoolFile1.root
 MetaDataSvc         DEBUG initInputMetaDataStore: file name SimplePoolFile1.root
 MetaDataSvc         DEBUG Loaded input meta data store proxies
-MetaDataSvc         DEBUG  calling beginInputFile for ToolSvc.IOVDbMetaDataTool
+MetaDataSvc         DEBUG  calling beginInputFile on ToolSvc.IOVDbMetaDataTool for GUID "F2313678-C96A-964F-89E8-08BAB39F2DA7"
 EventSelector        INFO skipping event 1
 EventSelector        INFO skipping event 2
 EventSelector        INFO skipping event 3
@@ -630,6 +631,7 @@ ReadData             INFO Hit x = 2030.12 y = 46.5439 z = -1956.17 detector = Du
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #1 10 events processed so far  <<<===
 MetaDataSvc         DEBUG handle() EndInputFile for FID:F2313678-C96A-964F-89E8-08BAB39F2DA7
 MetaDataSvc         DEBUG retireMetadataSource: FID:F2313678-C96A-964F-89E8-08BAB39F2DA7
+MetaDataSvc         DEBUG  calling endInputFile on ToolSvc.IOVDbMetaDataTool for GUID "F2313678-C96A-964F-89E8-08BAB39F2DA7"
 StorageSvc          DEBUG Disconnect request for database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7 PFN=SimplePoolFile1.root
 StorageSvc          DEBUG Closing database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7
 RootDatabase.close  DEBUG Closing DB SimplePoolFile1.root
@@ -693,7 +695,7 @@ MetaDataHdr(Dat...  DEBUG    attributes# = 1
 MetaDataHdr(Dat...  DEBUG Branch container 'DataHeader'
 MetaDataHdr(Dat...  DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
 MetaDataSvc         DEBUG Loaded input meta data store proxies
-MetaDataSvc         DEBUG  calling beginInputFile for ToolSvc.IOVDbMetaDataTool
+MetaDataSvc         DEBUG  calling beginInputFile on ToolSvc.IOVDbMetaDataTool for GUID ""
 EmptyPoolFile.root  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(IOVMetaDataContainer_p1//TagInfo)
 MetaData(IOVMet...  DEBUG Opening
 MetaData(IOVMet...  DEBUG    attributes# = 1
@@ -701,6 +703,7 @@ MetaData(IOVMet...  DEBUG Branch container 'IOVMetaDataContainer_p1__TagInfo'
 MetaData(IOVMet...  DEBUG Opened container MetaData(IOVMetaDataContainer_p1//TagInfo) of type ROOT_Tree
 MetaDataSvc         DEBUG handle() EndInputFile for eventless EmptyPoolFile.root
 MetaDataSvc         DEBUG retireMetadataSource: eventless EmptyPoolFile.root
+MetaDataSvc         DEBUG  calling endInputFile on ToolSvc.IOVDbMetaDataTool for GUID ""
 StorageSvc          DEBUG Disconnect request for database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030 PFN=EmptyPoolFile.root
 StorageSvc          DEBUG Closing database: FID=C7040C30-3363-7D42-B1B7-E3F3B1881030
 RootDatabase.close  DEBUG Closing DB EmptyPoolFile.root
@@ -795,7 +798,7 @@ MetaDataHdrForm...  DEBUG    attributes# = 1
 MetaDataHdrForm...  DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm...  DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
 MetaDataSvc         DEBUG Loaded input meta data store proxies
-MetaDataSvc         DEBUG  calling beginInputFile for ToolSvc.IOVDbMetaDataTool
+MetaDataSvc         DEBUG  calling beginInputFile on ToolSvc.IOVDbMetaDataTool for GUID "73F77177-D136-9344-B64D-29693F68D6C2"
 SimplePoolFile2...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(IOVMetaDataContainer_p1//TagInfo)
 MetaData(IOVMet...  DEBUG Opening
 MetaData(IOVMet...  DEBUG    attributes# = 1
@@ -1263,6 +1266,7 @@ ReadData             INFO Could not find ExampleHitContainer/MyHits
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #1 30 events processed so far  <<<===
 MetaDataSvc         DEBUG handle() EndInputFile for FID:73F77177-D136-9344-B64D-29693F68D6C2
 MetaDataSvc         DEBUG retireMetadataSource: FID:73F77177-D136-9344-B64D-29693F68D6C2
+MetaDataSvc         DEBUG  calling endInputFile on ToolSvc.IOVDbMetaDataTool for GUID "73F77177-D136-9344-B64D-29693F68D6C2"
 StorageSvc          DEBUG Disconnect request for database: FID=73F77177-D136-9344-B64D-29693F68D6C2 PFN=SimplePoolFile2.root
 StorageSvc          DEBUG Closing database: FID=73F77177-D136-9344-B64D-29693F68D6C2
 RootDatabase.close  DEBUG Closing DB SimplePoolFile2.root
@@ -1361,7 +1365,7 @@ MetaDataHdrForm...  DEBUG    attributes# = 1
 MetaDataHdrForm...  DEBUG Branch container 'DataHeaderForm'
 MetaDataHdrForm...  DEBUG Opened container MetaDataHdrForm(DataHeaderForm) of type ROOT_Tree
 MetaDataSvc         DEBUG Loaded input meta data store proxies
-MetaDataSvc         DEBUG  calling beginInputFile for ToolSvc.IOVDbMetaDataTool
+MetaDataSvc         DEBUG  calling beginInputFile on ToolSvc.IOVDbMetaDataTool for GUID "A811B014-0297-AD47-AF4C-B75EF418982D"
 SimplePoolFile3...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(IOVMetaDataContainer_p1//TagInfo)
 MetaData(IOVMet...  DEBUG Opening
 MetaData(IOVMet...  DEBUG    attributes# = 1
@@ -1954,6 +1958,7 @@ ReadData             INFO Could not find ExampleHitContainer/MyHits
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #1 50 events processed so far  <<<===
 MetaDataSvc         DEBUG handle() EndInputFile for FID:A811B014-0297-AD47-AF4C-B75EF418982D
 MetaDataSvc         DEBUG retireMetadataSource: FID:A811B014-0297-AD47-AF4C-B75EF418982D
+MetaDataSvc         DEBUG  calling endInputFile on ToolSvc.IOVDbMetaDataTool for GUID "A811B014-0297-AD47-AF4C-B75EF418982D"
 StorageSvc          DEBUG Disconnect request for database: FID=A811B014-0297-AD47-AF4C-B75EF418982D PFN=SimplePoolFile3.root
 StorageSvc          DEBUG Closing database: FID=A811B014-0297-AD47-AF4C-B75EF418982D
 RootDatabase.close  DEBUG Closing DB SimplePoolFile3.root

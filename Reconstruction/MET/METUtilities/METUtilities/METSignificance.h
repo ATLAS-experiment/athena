@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // METSignificance.h
 // Header file for class METSignificance
@@ -62,7 +62,7 @@ namespace met {
     StatusCode  initialize();
     StatusCode  finalize();
 
-    StatusCode varianceMET(xAOD::MissingETContainer* metCont, float avgmu, std::string jetTermName, std::string softTermName, std::string totalMETName);
+    StatusCode varianceMET(xAOD::MissingETContainer* metCont, float avgmu, const std::string& jetTermName, const std::string& softTermName, const std::string& totalMETName);
 
     // Rotates the phi direction of the object resolutions & recomputes the MET significance
     StatusCode RotateToPhi(float phi);
@@ -70,10 +70,10 @@ namespace met {
     // Subtracts the vector lambda from the MET & recomputes the MET signficance in new MET - lambda direction
     StatusCode SetLambda(const float px, const float py, const bool GeV=true);
 
-    double GetMETOverSqrtSumET() const { if(m_sumet>0.0)        return (m_met/sqrt(m_sumet)); return -1.0; } 
-    double GetMETOverSqrtHT   () const { if(m_ht>0.0)           return (m_met/sqrt(m_ht));    return -1.0; } 
-    double GetSignificance()     const { if(m_significance>0.0) return sqrt(m_significance);  return -1.0; }
-    double GetSigDirectional()   const { if(m_VarL>0.0)         return m_met/sqrt(m_VarL);    return -1.0; }
+    double GetMETOverSqrtSumET() const { if(m_sumet>0.0)        return (m_met/std::sqrt(m_sumet)); return -1.0; }
+    double GetMETOverSqrtHT   () const { if(m_ht>0.0)           return (m_met/std::sqrt(m_ht));    return -1.0; }
+    double GetSignificance()     const { if(m_significance>0.0) return std::sqrt(m_significance);  return -1.0; }
+    double GetSigDirectional()   const { if(m_VarL>0.0)         return m_met/std::sqrt(m_VarL);    return -1.0; }
     double GetRho()              const { return m_rho;  }
     double GetVarL()             const { return m_VarL; }
     double GetVarT()             const { return m_VarT; }

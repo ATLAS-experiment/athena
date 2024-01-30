@@ -65,16 +65,7 @@ void DiTauTruthMatchingTool::getTruth(const xAOD::DiTauJet& xDiTau)
 }
 
 //______________________________________________________________________________
-void DiTauTruthMatchingTool::applyTruthMatch(const xAOD::DiTauJet& xDiTau)
-{
-  // this function only exists to have the same interface functions like 
-  // TauTruthMatchingTool
-  getTruth(xDiTau);
-  return;
-}
-
-//______________________________________________________________________________
-void DiTauTruthMatchingTool::applyTruthMatch(const std::vector<const xAOD::DiTauJet*>& vDiTaus)
+void DiTauTruthMatchingTool::getTruth(const std::vector<const xAOD::DiTauJet*>& vDiTaus)
 {
   for (auto xDiTau : vDiTaus)
     getTruth(*xDiTau);

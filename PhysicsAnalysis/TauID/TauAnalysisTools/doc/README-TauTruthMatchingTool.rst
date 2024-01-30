@@ -52,17 +52,16 @@ MCTruthClassifier). In this case it is necessary to have a sufficiently complete
 TruthParticle container available, i.e. one should not have slimmed the tau
 decay products from the container. Information on how to change the default container names can be found in the section `Tool configuration`_.
   
-The truth matching is done for a single xAOD tau object with one of these
-functions::
+The truth matching is done for a single xAOD tau object with one of this
+function::
 
-  xAOD::TruthParticle* TauTruthMatchingTool::applyTruthMatch(const xAOD::TauJet& xTau)
   xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xTau)
 
 which returns a pointer to the truth lepton particle the xAOD tau object was
 matched to. If there was no match found, the return value is ``NULL``. Similarly
 for a vector of xAOD tau objects one can use this function::
 
-  std::vector<xAOD::TruthParticle*> TauTruthMatchingTool::applyTruthMatch(const std::vector<const xAOD::TauJet*>& vTaus)
+  std::vector<xAOD::TruthParticle*> TauTruthMatchingTool::getTruth(const std::vector<const xAOD::TauJet*>& vTaus)
 
 which returns a vector of pointer to the matched truth lepton particle in the
 same order. Note, that again, if there is no truth particle found, the entry in
@@ -118,7 +117,7 @@ Tool configuration
 Output
 ------
 
-Calling applyTruthMatch(xTau) or getTruth(xTau) adds a link to the truth lepton
+Calling getTruth(xTau) adds a link to the truth lepton
 particle as decoration: ``truthParticleLink``. A link to the matched truth jet
 is decorated as well with name ``truthJetLink``. Please check the validity of
 this link before trying to access the linked truth jet or make use of the
@@ -171,10 +170,6 @@ MCTruthClassifier (i.e. branches particleType and particleOrigin).
      - double
      - The truth invisible 4 momentum components
 
-   * - pt_prompt, eta_prompt, phi_prompt, m_prompt
-     - double
-     - The 4 momentum components of the first occurrence of the tau
-
    * - DecayModeVector
      - std::vector<int>
      - pdg ID's of stable decay products of the tau decay stored as a vector
@@ -226,7 +221,7 @@ functions are available
   ``TauAnalysisTools::TruthMatchedParticleType`` can be found in `Enums.h
   <https://svnweb.cern.ch/trac/atlasoff/browser/PhysicsAnalysis/TauID/TauAnalysisTools/trunk/TauAnalysisTools/Enums.h>`_
   
-* functions returning the TLorentzVector of the visible, invisible and prompt
+* functions returning the TLorentzVector of the visible and invisible
   components::
 
     virtual TLorentzVector getTruthTauP4Vis(const xAOD::TauJet& xTau) const;
@@ -234,9 +229,6 @@ functions are available
 
     virtual TLorentzVector getTruthTauP4Invis(const xAOD::TauJet& xTau) const;
     virtual TLorentzVector getTruthTauP4Invis(const xAOD::TruthParticle& xTruthTau) const;
-
-    virtual TLorentzVector getTruthTauP4Prompt(const xAOD::TauJet& xTau) const;
-    virtual TLorentzVector getTruthTauP4Prompt(const xAOD::TruthParticle& xTruthTau) const;
 
 ---
 FAQ
@@ -257,12 +249,6 @@ following::
   {
     ...
   }
-
-**Question:** Is there any difference between applyTruthMatch and getTruth?
----------------------------------------------------------------------------
-
-**Answer:** No, it is basically the same function, applyTruthMatch is for
-backwards compatibility, so better call getTruth to reduce overhead.
 
 **Question:** How do I check if the truth matched particle is an electron, muon, tau?
 -------------------------------------------------------------------------------------

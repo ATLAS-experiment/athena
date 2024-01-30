@@ -29,7 +29,7 @@ checkstep () {
   fi
 }
 
-file=test_full_chain_mu0.sh
+file=test_FTAG_PHYSVAL.sh
 script="`basename \"$0\"`"
 number_of_events=4000
 

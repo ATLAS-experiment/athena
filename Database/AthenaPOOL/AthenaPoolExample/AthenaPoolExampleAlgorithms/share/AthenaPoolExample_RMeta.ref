@@ -147,8 +147,8 @@ RootDatabase.se...  DEBUG Using Tree cache. Size: -1 Nevents to learn with: -1
 MetaDataSvc         DEBUG handle() BeginInputFile for SimplePoolFile5.root
 MetaDataSvc         DEBUG initInputMetaDataStore: file name SimplePoolFile5.root
 MetaDataSvc         DEBUG Loaded input meta data store proxies
-MetaDataSvc         DEBUG  calling beginInputFile for ToolSvc.IOVDbMetaDataTool
-MetaDataSvc         DEBUG  calling beginInputFile for ToolSvc.AthPoolEx::ReadMeta
+MetaDataSvc         DEBUG  calling beginInputFile on ToolSvc.IOVDbMetaDataTool for GUID "C949FD2E-3B8E-9343-AAE0-0C43"
+MetaDataSvc         DEBUG  calling beginInputFile on ToolSvc.AthPoolEx::ReadMeta for GUID "C949FD2E-3B8E-9343-AAE0-0C43"
 SimplePoolFile5...  DEBUG --> Access   DbContainer  READ      [ROOT_Tree] MetaData(ExampleHitContainer_p1/PedestalWriteData)
 MetaData(Exampl...  DEBUG Opening
 MetaData(Exampl...  DEBUG    attributes# = 1
@@ -858,6 +858,8 @@ ReadData             INFO Hit x = 2030.12 y = -53.4561 z = -1956.17 detector = D
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 MetaDataSvc         DEBUG handle() EndInputFile for FID:C949FD2E-3B8E-9343-AAE0-0C43
 MetaDataSvc         DEBUG retireMetadataSource: FID:C949FD2E-3B8E-9343-AAE0-0C43
+MetaDataSvc         DEBUG  calling endInputFile on ToolSvc.IOVDbMetaDataTool for GUID "C949FD2E-3B8E-9343-AAE0-0C43"
+MetaDataSvc         DEBUG  calling endInputFile on ToolSvc.AthPoolEx::ReadMeta for GUID "C949FD2E-3B8E-9343-AAE0-0C43"
 StorageSvc          DEBUG Disconnect request for database: FID=C949FD2E-3B8E-9343-AAE0-0C43 PFN=SimplePoolFile5.root
 StorageSvc          DEBUG Closing database: FID=C949FD2E-3B8E-9343-AAE0-0C43
 RootDatabase.close  DEBUG Closing DB SimplePoolFile5.root

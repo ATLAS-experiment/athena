@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 // PixelDigitization includes
@@ -53,10 +53,10 @@ TVectorD CastStdVec(const std::vector<double>& vin) {
 }
 
 //Returns index at of std::vectorv where val is contained
-int isContainedAt(std::vector<double> v, double val) {
+int isContainedAt(const std::vector<double> & v, double val) {
   for (uint i = 0; i < v.size(); i++) {
     //Equality for decimals
-    if (v.at(i) - 0.00001 < val && val < v.at(i) + 0.00001) return i;
+    if (v[i] - 0.00001 < val && val < v[i] + 0.00001) return i;
   }
   return -1;
 }
@@ -484,13 +484,13 @@ const std::string EfieldInterpolator::createInterpolationFromTCADtree(const std:
 }
 
 // Retrieve fluence values corresponding to a fixed voltage or viceversa if regular order == false
-int EfieldInterpolator::fillXYvectors(std::vector<double> vLoop, int ifix, std::vector<std::vector<double> > v2vsv1, std::vector<double>& xx, std::vector<double>& yy, bool regularOrder) {
+int EfieldInterpolator::fillXYvectors(std::vector<double> vLoop, int ifix, const std::vector<std::vector<double> > & v2vsv1, std::vector<double>& xx, std::vector<double>& yy, bool regularOrder) {
   yy.clear();
   xx.clear();
   int nfills = 0;
   if (regularOrder) {
     for (uint ie = 0; ie < v2vsv1.size(); ie++) {
-      double ef = v2vsv1.at(ie).at(ifix); // different fluences for volatge ifix
+      double ef = v2vsv1.at(ie).at(ifix); // different fluences for voltage ifix
       if (ef > 0) {
         yy.push_back(ef);
         xx.push_back(vLoop.at(ie));
@@ -523,7 +523,7 @@ double EfieldInterpolator::estimateEfieldLinear(double aimVoltage) {
 }
 
 //Interpolate following inverse distance weighted Interpolation
-double EfieldInterpolator::estimateEfieldInvDistance(std::vector<double> vvol, std::vector<double> vflu, std::vector<std::vector<double> > vfluvvol, double aimFlu, double aimVol, double measure) {
+double EfieldInterpolator::estimateEfieldInvDistance(const std::vector<double> & vvol, const std::vector<double> & vflu, const std::vector<std::vector<double> > & vfluvvol, double aimFlu, double aimVol, double measure) {
   ATH_MSG_WARNING("Use interpolation method _Inverse distance weighted_ - guarantees positive E field but no reliable interpolation");
   double weight = 0.;
   double meanEf = 0.;

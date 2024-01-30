@@ -151,7 +151,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.writeSDOs", lambda prevFlags : prevFlags.Output.doWriteESD and prevFlags.Input.isMC)
 
     # configure the MM cluster reco method that is used in the cluster calibration step
-    mcf.addFlag("Muon.MMClusterCalibRecoTool",  lambda prevFlags : MMClusterBuilderEnum.ClusterTimeProjection if prevFlags.Input.isMC else MMClusterBuilderEnum.Centroid, enum =  MMClusterBuilderEnum)
+    mcf.addFlag("Muon.MMClusterCalibRecoTool",  lambda prevFlags : MMClusterBuilderEnum.ClusterTimeProjection if prevFlags.Input.isMC else MMClusterBuilderEnum.Centroid, type=MMClusterBuilderEnum)
 
 
 

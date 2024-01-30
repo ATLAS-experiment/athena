@@ -8,8 +8,8 @@
 
 using namespace NswAsBuilt;
 
-ElementModelSTGC::ElementModelSTGC(double /*lenX*/, double lenY, Amg::Vector3D defo0)
-  : m_lenY(lenY),
+ElementModelSTGC::ElementModelSTGC(double lenX, double lenY, Amg::Vector3D defo0)
+  : m_lenY(lenY),m_lenX(lenX),
   m_defo0(std::move(defo0))
 {
 }
@@ -103,7 +103,7 @@ Amg::Vector3D ElementModelSTGC::stgcScale(double scl, const Amg::Vector3D& d0) c
 
 Amg::Vector3D ElementModelSTGC::stgcNonPar(double npar, const Amg::Vector3D& d0) const {
 // Non-parallelism measured by CMM/Faro at construction sites
-  double delta = npar*d0[0]*d0[1]/(m_lenY*m_lenY);
+  double delta = npar*d0[0]*d0[1]/(m_lenX*m_lenY);
   return Amg::Vector3D(0., delta, 0.);
 }
 
@@ -130,7 +130,7 @@ void ElementModelSTGC::applyDeformation2(const ParameterVector& parvec, VectorSe
   double off = parvec[OFF];
   double rot = parvec[ROT];
   double scl = parvec[SCL]/m_lenY;
-  double npar = parvec[NPAR]/(m_lenY*m_lenY);
+  double npar = parvec[NPAR]/(m_lenX*m_lenY);
 
   // OFF:
   local.array().colwise() += Eigen::Array3d{0. ,off, 0.};

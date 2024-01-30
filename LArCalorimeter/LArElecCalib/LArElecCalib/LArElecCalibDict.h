@@ -47,5 +47,7 @@
 #include "LArElecCalib/ILArHVScaleCorr.h"
 #include "LArElecCalib/ILArFEBTempTool.h"
 #include "LArElecCalib/ILArOFCBin.h"
+#include "LArElecCalib/LArProvenance.h"
+
 
 #endif // LARELECCALIB_LARELECCALIBDICT_H

@@ -234,7 +234,7 @@ def BPHY18Cfg(ConfigFlags):
                               InDetTrackParticlesKey = "InDetTrackParticles")
 
     BPHY18TruthThinTool = CompFactory.DerivationFramework.GenericTruthThinning(name     = "BPHY18TruthThinTool",
-                                                                ParticleSelectionString = "abs(TruthParticles.pdgId) == 11 || abs(TruthParticles.pdgId) == 13 || abs(TruthParticles.pdgId) == 10311 || abs(TruthParticles.pdgId) == 521 || abs(TruthParticles.pdgId) == 523 || TruthParticles.pdgId == 511 || TruthParticles.pdgId == 513",
+                                                                ParticleSelectionString = "abs(TruthParticles.pdgId) == 11 || abs(TruthParticles.pdgId) == 13 || abs(TruthParticles.pdgId) == 10311 || abs(TruthParticles.pdgId) == 521 || abs(TruthParticles.pdgId) == 523 || abs(TruthParticles.pdgId) == 511 || abs(TruthParticles.pdgId) == 513",
                                                                 PreserveDescendants     = True,
                                                                 StreamName = streamName,
                                                                 PreserveAncestors       = True)

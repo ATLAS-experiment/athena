@@ -1,29 +1,18 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
                            MultiSVTag.cxx
 ***************************************************************************/
 #include "JetTagTools/MultiSVTag.h"
-#include "GaudiKernel/IToolSvc.h"
-#include "Navigation/NavigationToken.h"
-#include "GaudiKernel/ITHistSvc.h"
-#include "JetTagTools/HistoHelperRoot.h"
 
-#include "VxSecVertex/VxSecVertexInfo.h"
-#include "VxSecVertex/VxSecVKalVertexInfo.h"
-#include "TrkLinks/LinkToXAODTrackParticle.h"
 #include "xAODJet/Jet.h"
-#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODBTagging/SecVtxHelper.h"
-#include "GeoPrimitives/GeoPrimitivesHelpers.h"
-#include "CLHEP/Vector/LorentzVector.h"
 
-#include "VxVertex/RecVertex.h"
-#include "VxVertex/VxTrackAtVertex.h"
 #include <fstream>
 #include <algorithm>
 #include <utility>
@@ -45,34 +34,18 @@ namespace Analysis
     m_runModus("analysis")
   {
     declareProperty("Runmodus",       m_runModus= "analysis");
-    declareProperty("jetCollectionList", m_jetCollectionList);
     declareProperty("useForcedCalibration", m_doForcedCalib   = false);
     declareProperty("ForcedCalibrationName", m_ForcedCalibName = "AntiKt4TopoEM");//Cone4H1Tower
     declareProperty("SecVxFinderName",m_secVxFinderName);
     declareProperty("taggerNameBase",m_taggerNameBase = "MultiSVbb1");
-    declareProperty("taggerName", m_taggerName = "MultiSVbb1");
-    declareProperty("xAODBaseName",m_xAODBaseName);
-    declareProperty("inputSV0SourceName", m_sv0_infosource = "SV0");
     declareProperty("inputSV1SourceName", m_sv1_infosource = "SV1");
   }
 
-  MultiSVTag::~MultiSVTag() {
-  }
-
   StatusCode MultiSVTag::initialize() {
-    // define tagger name:
-
-    m_warnCounter=0;
-
-    m_treeName = "BDT";
     m_varStrName = "variables";
 
     // prepare readKey for calibration data:
     ATH_CHECK(m_readKey.initialize());
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode MultiSVTag::finalize(){
     return StatusCode::SUCCESS;
   }
 
@@ -150,24 +123,23 @@ namespace Analysis
     std::vector<float> v_vtxy  = std::vector<float>(10,0);
     std::vector<float> v_vtxz  = std::vector<float>(10,0);
     // loop in msv vertices
-    if(msvVertices.size()>0){
-      const std::vector<ElementLink<xAOD::VertexContainer> >::const_iterator verticesEnd = msvVertices.end();
-      for(std::vector<ElementLink<xAOD::VertexContainer> >::const_iterator vtxIter=msvVertices.begin(); vtxIter!=verticesEnd; ++vtxIter){
+    if(!msvVertices.empty()){
+      for(const auto& vtx : msvVertices){
         if(msvVertices.size()>=10) continue;
-        float mass = xAOD::SecVtxHelper::VertexMass(**vtxIter);
-        float efrc = xAOD::SecVtxHelper::EnergyFraction(**vtxIter);
-        int   ntrk = xAOD::SecVtxHelper::VtxNtrk(**vtxIter);
-        float pt   = xAOD::SecVtxHelper::Vtxpt(**vtxIter);
-        float eta  = xAOD::SecVtxHelper::Vtxeta(**vtxIter);
-        float phi  = xAOD::SecVtxHelper::Vtxphi(**vtxIter);
-        float dls  = xAOD::SecVtxHelper::VtxnormDist(**vtxIter);
-        float x = (**vtxIter)->x();
-        float y = (**vtxIter)->y();
-        float z = (**vtxIter)->z();
+        float mass = xAOD::SecVtxHelper::VertexMass(*vtx);
+        float efrc = xAOD::SecVtxHelper::EnergyFraction(*vtx);
+        int   ntrk = xAOD::SecVtxHelper::VtxNtrk(*vtx);
+        float pt   = xAOD::SecVtxHelper::Vtxpt(*vtx);
+        float eta  = xAOD::SecVtxHelper::Vtxeta(*vtx);
+        float phi  = xAOD::SecVtxHelper::Vtxphi(*vtx);
+        float dls  = xAOD::SecVtxHelper::VtxnormDist(*vtx);
+        float x = (*vtx)->x();
+        float y = (*vtx)->y();
+        float z = (*vtx)->z();
         TLorentzVector svp4; svp4.SetPtEtaPhiM(pt,eta,phi,mass);
         //if(jp4.DeltaR(svp4)>0.4) continue;
         vars.m_summass += mass;
-        const std::vector<ElementLink<xAOD::TrackParticleContainer> > svTrackLinks = (**vtxIter)->trackParticleLinks();
+        const std::vector<ElementLink<xAOD::TrackParticleContainer> > svTrackLinks = (*vtx)->trackParticleLinks();
         if(svTrackLinks.size()>1){ 
           nvtx2trk++;
         }
@@ -196,10 +168,11 @@ namespace Analysis
       int SV1ntrk  = 0;
       std::vector< ElementLink< xAOD::VertexContainer > > SV1Vertice;
       status &= BTag.variable<std::vector<ElementLink<xAOD::VertexContainer> > >(m_sv1_infosource, "vertices", SV1Vertice);
-      if (SV1Vertice.size()>0 && SV1Vertice[0].isValid()){
-         status &= BTag.taggerInfo(SV1ntrk, xAOD::BTagInfo::SV1_NGTinSvx);
-         vars.m_diffntrkSV1 = all_trks - SV1ntrk;
-      }else{ vars.m_diffntrkSV1 = all_trks;
+      if (!SV1Vertice.empty() && SV1Vertice[0].isValid()){
+	status &= BTag.taggerInfo(SV1ntrk, xAOD::BTagInfo::SV1_NGTinSvx);
+	vars.m_diffntrkSV1 = all_trks - SV1ntrk;
+      }else{
+	vars.m_diffntrkSV1 = all_trks;
       }
 
       vars.m_diffntrkSV0 = vars.m_diffntrkSV1;
@@ -261,8 +234,7 @@ namespace Analysis
       // distances: max mass vertex to PV, and mx2 to max vertex:
       if(ivm1>=0&&ivm2>=0) {
 
-        vars.m_mx12_2d12 = TMath::Sqrt(  (v_vtxx[ivm2] - v_vtxx[ivm1]) * (v_vtxx[ivm2] - v_vtxx[ivm1])
-                                         +  (v_vtxy[ivm2] - v_vtxy[ivm1]) * (v_vtxy[ivm2] - v_vtxy[ivm1]) );
+        vars.m_mx12_2d12 = std::hypot( v_vtxx[ivm2] - v_vtxx[ivm1], v_vtxy[ivm2] - v_vtxy[ivm1] );
         vars.m_mx12_DR    = sv1p3.DeltaR(sv2p3);
         
         vars.m_mx12_Angle = sv1p3.Angle(sv2p3);
@@ -313,28 +285,28 @@ namespace Analysis
                                          bool &badVariableFound,
                                          std::vector<float*> &inputPointers)
   {
-    for (unsigned ivar=0; ivar<inputVars.size(); ivar++) {
-      if      (inputVars.at(ivar)=="pt"               ) { inputPointers.push_back(&m_jetpt       ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="Nvtx"             ) { inputPointers.push_back(&m_nvtx        ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="MaxEfrc"          ) { inputPointers.push_back(&m_maxefrc     ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="sumMass"          ) { inputPointers.push_back(&m_summass     ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="totalntrk"        ) { inputPointers.push_back(&m_totalntrk   ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="diffntrkSV0"      ) { inputPointers.push_back(&m_diffntrkSV0 ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="diffntrkSV1"      ) { inputPointers.push_back(&m_diffntrkSV1 ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="normDist"         ) { inputPointers.push_back(&m_normDist    ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="maxVtxMass"       ) { inputPointers.push_back(&m_mmax_mass   ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="maxSecVtxMass"    ) { inputPointers.push_back(&m_mmx2_mass   ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="EfrcmaxVtxMass"   ) { inputPointers.push_back(&m_mmax_efrc   ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="EfrcmaxSecVtxMass") { inputPointers.push_back(&m_mmx2_efrc   ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="dlsmaxVtxMass"    ) { inputPointers.push_back(&m_mmax_dist   ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="dlsmaxSecVtxMass" ) { inputPointers.push_back(&m_mmx2_dist   ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="dRmaxVtxMassj"    ) { inputPointers.push_back(&m_mmax_DRjet  ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="dRmaxSecVtxMassj" ) { inputPointers.push_back(&m_mmx2_DRjet  ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="d2Mass12"         ) { inputPointers.push_back(&m_mx12_2d12   ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="DRMass12"         ) { inputPointers.push_back(&m_mx12_DR     ) ; nConfgVar++; }
-      else if (inputVars.at(ivar)=="AngleMass12"      ) { inputPointers.push_back(&m_mx12_Angle  ) ; nConfgVar++; }
+    for (const auto& var : inputVars) {
+      if      (var=="pt"               ) { inputPointers.push_back(&m_jetpt       ) ; nConfgVar++; }
+      else if (var=="Nvtx"             ) { inputPointers.push_back(&m_nvtx        ) ; nConfgVar++; }
+      else if (var=="MaxEfrc"          ) { inputPointers.push_back(&m_maxefrc     ) ; nConfgVar++; }
+      else if (var=="sumMass"          ) { inputPointers.push_back(&m_summass     ) ; nConfgVar++; }
+      else if (var=="totalntrk"        ) { inputPointers.push_back(&m_totalntrk   ) ; nConfgVar++; }
+      else if (var=="diffntrkSV0"      ) { inputPointers.push_back(&m_diffntrkSV0 ) ; nConfgVar++; }
+      else if (var=="diffntrkSV1"      ) { inputPointers.push_back(&m_diffntrkSV1 ) ; nConfgVar++; }
+      else if (var=="normDist"         ) { inputPointers.push_back(&m_normDist    ) ; nConfgVar++; }
+      else if (var=="maxVtxMass"       ) { inputPointers.push_back(&m_mmax_mass   ) ; nConfgVar++; }
+      else if (var=="maxSecVtxMass"    ) { inputPointers.push_back(&m_mmx2_mass   ) ; nConfgVar++; }
+      else if (var=="EfrcmaxVtxMass"   ) { inputPointers.push_back(&m_mmax_efrc   ) ; nConfgVar++; }
+      else if (var=="EfrcmaxSecVtxMass") { inputPointers.push_back(&m_mmx2_efrc   ) ; nConfgVar++; }
+      else if (var=="dlsmaxVtxMass"    ) { inputPointers.push_back(&m_mmax_dist   ) ; nConfgVar++; }
+      else if (var=="dlsmaxSecVtxMass" ) { inputPointers.push_back(&m_mmx2_dist   ) ; nConfgVar++; }
+      else if (var=="dRmaxVtxMassj"    ) { inputPointers.push_back(&m_mmax_DRjet  ) ; nConfgVar++; }
+      else if (var=="dRmaxSecVtxMassj" ) { inputPointers.push_back(&m_mmx2_DRjet  ) ; nConfgVar++; }
+      else if (var=="d2Mass12"         ) { inputPointers.push_back(&m_mx12_2d12   ) ; nConfgVar++; }
+      else if (var=="DRMass12"         ) { inputPointers.push_back(&m_mx12_DR     ) ; nConfgVar++; }
+      else if (var=="AngleMass12"      ) { inputPointers.push_back(&m_mx12_Angle  ) ; nConfgVar++; }
       else {
-        msg << MSG::WARNING << "#BTAG# \""<<inputVars.at(ivar)<<"\" <- This variable found in xml/calib-file does not match to any variable declared in MultiSV... the algorithm will be 'disabled'." << endmsg;
+        msg << MSG::WARNING << "#BTAG# \""<<var<<"\" <- This variable found in xml/calib-file does not match to any variable declared in MultiSV... the algorithm will be 'disabled'." << endmsg;
 	badVariableFound=true;
       }
     }
