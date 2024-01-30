@@ -116,9 +116,10 @@ void test_vector()
   assert (ptr2[1] == makeT(3));
   assert (ptr2[2] == makeT(12));
 
-  fac.clear (ptr2, 0);
+  fac.clear (1, avd2, 0, 2);
   assert (ptr2[0] == makeT());
-  assert (ptr2[1] == makeT(3));
+  assert (ptr2[1] == makeT());
+  assert (ptr2[2] == makeT(12));
 
   using vector_type = typename SG::AuxDataTraits<T, ALLOC<T> >::vector_type;
   vector_type* vec3 = new vector_type;

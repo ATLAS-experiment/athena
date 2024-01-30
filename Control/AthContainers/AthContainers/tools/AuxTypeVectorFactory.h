@@ -124,11 +124,15 @@ public:
 
 
   /**
-   * @brief Clear an element within a vector (static method).
-   * @param dst Pointer to the start of the vector's data.
-   * @param dst_index Index of the element in the vector.
+   * @brief Clear a range of elements within a vector.
+   * @param auxid The aux data item being operated on.
+   * @param dst Container holding the element
+   * @param dst_index Index of the first element in the vector.
+   * @param n Number of elements to clear.
    */
-  virtual void clear (void* dst, size_t dst_index) const override;
+  virtual void clear (SG::auxid_t auxid,
+                      AuxVectorData& dst, size_t dst_index,
+                      size_t n) const override;
 
 
   /**

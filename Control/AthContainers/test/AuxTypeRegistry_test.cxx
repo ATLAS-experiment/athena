@@ -171,10 +171,6 @@ void test_type(const std::string& typname,
   assert (ptr2[0] == makeT(1));
   assert (ptr2[1] == makeT(0));
 
-  r.clear (auxid, ptr2, 0);
-  assert (ptr2[0] == makeT());
-  assert (ptr2[1] == makeT(0));
-
   AuxVectorData_test avd1;
   AuxVectorData_test avd2;
   AuxStoreInternal_test store1;
@@ -183,6 +179,14 @@ void test_type(const std::string& typname,
   avd2.setStore (&store2);
   store1.addVector (std::move(v), false);
   store2.addVector (std::move(v2), false);
+
+  ptr2[0] = makeT(1);
+  ptr2[1] = makeT(2);
+  ptr2[2] = makeT(3);
+  r.clear (auxid, avd2, 0, 2);
+  assert (ptr2[0] == makeT());
+  assert (ptr2[1] == makeT());
+  assert (ptr2[2] == makeT(3));
 
   ptr[0] = makeT(1);
   ptr[1] = makeT(2);

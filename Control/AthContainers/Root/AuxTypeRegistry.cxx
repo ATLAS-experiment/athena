@@ -393,16 +393,19 @@ void AuxTypeRegistry::swap (SG::auxid_t auxid,
 
 
 /**
- * @brief Clear an element within a vector.
+ * @brief Clear a range of elements within a vector.
  * @param auxid The aux data item being operated on.
- * @param dst Pointer to the start of the vector's data.
- * @param dst_index Index of the element in the vector.
+ * @param dst Container holding the element
+ * @param dst_index Index of the first element in the vector.
+ * @param n Number of elements to clear.
  */
-void AuxTypeRegistry::clear (SG::auxid_t auxid, void* dst, size_t dst_index)
+void AuxTypeRegistry::clear (SG::auxid_t auxid,
+                             AuxVectorData& dst, size_t dst_index,
+                             size_t n) const
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   if (factory)
-    factory->clear (dst, dst_index);
+    factory->clear (auxid, dst, dst_index, n);
 }
 
 

@@ -590,19 +590,6 @@ void AuxTypeVectorHolder<T, CONT>::copyForOutput (void* dst,       size_t dst_in
 }
 
 
-/**
- * @brief Clear an element within a vector (static method).
- * @param dst Pointer to the start of the vector's data.
- * @param dst_index Index of the element in the vector.
- */
-template <class T, class CONT>
-inline
-void AuxTypeVectorHolder<T, CONT>::clear (void* dst, size_t dst_index)
-{
-  (reinterpret_cast<vector_value_type*>(dst))[dst_index] = SG::Zero<vector_value_type>::zero();
-}    
-
-
 //**********************************************************************
 
 
