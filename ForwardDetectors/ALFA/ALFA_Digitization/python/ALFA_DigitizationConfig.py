@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -92,8 +92,8 @@ def ALFA_OverlayDigitizationBasicCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags,Load=[('ALFA_HitCollection','ALFA_HitCollection'),
-                                               ('ALFA_ODHitCollection','ALFA_ODHitCollection')] ) )
+        acc.merge(SGInputLoaderCfg(flags,Load={('ALFA_HitCollection','ALFA_HitCollection'),
+                                               ('ALFA_ODHitCollection','ALFA_ODHitCollection')} ) )
     if "DigitizationTool" not in kwargs:
         kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(ALFA_OverlayPileUpToolCfg(flags)))
 

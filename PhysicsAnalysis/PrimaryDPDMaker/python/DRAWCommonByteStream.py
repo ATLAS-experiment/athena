@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -49,7 +49,7 @@ def DRAWCommonByteStreamCfg(flags,
         WritingTool=bsCopyTool,
         EvtConversionSvc=bsCnvSvc.name,
         RequireAlgs=[formatName+'Kernel'],
-        ExtraInputs=[('xAOD::EventInfo', 'StoreGateSvc+EventInfo')]),
+        ExtraInputs={('xAOD::EventInfo', 'StoreGateSvc+EventInfo')}),
         domain='IO', primary=True)
 
     from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg

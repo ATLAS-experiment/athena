@@ -90,7 +90,7 @@ print("flags.Trigger.Online.isPartition", flags.Trigger.Online.isPartition)
 
 # Load input collection list from POOL metadata
 from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-acc.merge(SGInputLoaderCfg( flags, Load=[( 'xAOD::EventInfo' , 'StoreGateSvc+Bkg_EventInfo' )]))
+acc.merge(SGInputLoaderCfg( flags, Load={( 'xAOD::EventInfo' , 'StoreGateSvc+Bkg_EventInfo' )}))
 
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))

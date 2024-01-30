@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 from TrigEDMConfig.TriggerEDM import recordable
 import AthenaCommon.SystemOfUnits as Units
@@ -116,8 +116,8 @@ def MinBiasSPSel(flags):
     
     # TODO, this is a dependancy of SPcounting
     vdv = CompFactory.AthViews.ViewDataVerifier( "VDVSPCountingInputs",
-                                                  DataObjects = [( 'PixelID' , 'DetectorStore+PixelID' ),
-                                                                 ( 'SCT_ID'  , 'DetectorStore+SCT_ID' )] )
+                                                  DataObjects = {( 'PixelID' , 'DetectorStore+PixelID' ),
+                                                                 ( 'SCT_ID'  , 'DetectorStore+SCT_ID' )} )
     reco.addRecoAlgo(vdv)
 
     from TrigMinBias.MinBiasCountersConfig import SPCounterRecoAlgCfg
@@ -136,8 +136,8 @@ def MinBiasSPSequenceCfg(flags):
 def MinBiasZVertexFinderSequenceCfg(flags):
     recoAcc = InViewRecoCA(name="ZVertFinderReco", InViewRoIs="InputRoI", RequireParentView=True)
     vdv = CompFactory.AthViews.ViewDataVerifier( "VDVZFinderInputs",
-                                                  DataObjects = [( 'SpacePointContainer' , 'StoreGateSvc+PixelTrigSpacePoints'),
-                                                                 ( 'PixelID' , 'DetectorStore+PixelID' ) ])
+                                                  DataObjects = {( 'SpacePointContainer' , 'StoreGateSvc+PixelTrigSpacePoints'),
+                                                                 ( 'PixelID' , 'DetectorStore+PixelID' ) })
 
     recoAcc.addRecoAlgo(vdv)
     from IDScanZFinder.ZFinderAlgConfig import  MinBiasZFinderCfg

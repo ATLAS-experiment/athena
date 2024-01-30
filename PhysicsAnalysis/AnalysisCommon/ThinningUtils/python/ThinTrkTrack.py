@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from RecExConfig.Configured import Configured
 from AthenaCommon.Logging import logging
@@ -24,11 +24,11 @@ class ThinTrkTrack(Configured):
                 CombinedMuonsTrackKey="CombinedMuonTracks",
                 GSFTrackKey="GSFTracks",
                 StreamName='StreamAOD',
-                ExtraInputs = [  # For P->T conversion
+                ExtraInputs = {  # For P->T conversion
                     ("InDetDD::SiDetectorElementCollection", "ConditionStore+PixelDetectorElementCollection"),
                     ("InDetDD::SiDetectorElementCollection", "ConditionStore+SCT_DetectorElementCollection"),
                     ("InDetDD::TRT_DetElementContainer", "ConditionStore+TRT_DetElementContainer"),
-                ])
+                })
             
             print (theTrkTrackThinner)
 

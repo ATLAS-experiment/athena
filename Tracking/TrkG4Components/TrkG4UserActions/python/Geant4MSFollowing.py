@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #==============================================================
 #
 #
@@ -251,8 +251,8 @@ if __name__ =="__main__":
 
     from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
     acc.merge(G4AtlasAlgCfg(flags,UserActionTools=[GeantFollowerMSTool],
-                                        ExtraInputs=[( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry'),
-                                                     ( 'AtlasFieldCacheCondObj' , 'ConditionStore+fieldCondObj' )]))
+                                        ExtraInputs={( 'Trk::TrackingGeometry' , 'ConditionStore+AtlasTrackingGeometry'),
+                                                     ( 'AtlasFieldCacheCondObj' , 'ConditionStore+fieldCondObj' )}))
 
     #from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     #from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList

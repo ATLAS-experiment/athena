@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -21,8 +21,8 @@ def secondStageBjetTrackingCfg(flags, inputRoI: str, inputVertex: str, inputJets
     acc.merge(seq.sequenceAfterPattern())
 
     verifier = CompFactory.AthViews.ViewDataVerifier(name = 'VDVsecondStageBjetTracking',
-                                                     DataObjects = [('xAOD::VertexContainer', f'StoreGateSvc+{inputVertex}'),
-                                                                    ('xAOD::JetContainer', f'StoreGateSvc+{inputJets}')] )
+                                                     DataObjects = {('xAOD::VertexContainer', f'StoreGateSvc+{inputVertex}'),
+                                                                    ('xAOD::JetContainer', f'StoreGateSvc+{inputJets}')} )
     acc.addEventAlgo(verifier)
 
     return acc

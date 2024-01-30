@@ -1,12 +1,12 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def SGInputLoaderCfg(flags, Load=None, **kwargs):
     if Load:
-        processed = []
+        processed = set()
         for item in Load:
             if isinstance(item, tuple):
                 type_name, key = item
@@ -24,7 +24,7 @@ def SGInputLoaderCfg(flags, Load=None, **kwargs):
             if '+' not in key:
                 key = f'StoreGateSvc+{key}'
 
-            processed.append((type_name, key))
+            processed.add((type_name, key))
 
         kwargs.setdefault('Load', processed)
 

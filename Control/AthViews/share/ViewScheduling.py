@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 ###############################################################
@@ -49,7 +49,7 @@ ViewTest = CfgMgr.AthViews__ViewTestAlg("view_test")
 allViewAlgorithms += ViewTest
 #
 ViewVerify = CfgMgr.AthViews__ViewDataVerifier("view_verify")
-ViewVerify.DataObjects = [ ('int','view_start') ]
+ViewVerify.DataObjects = { ('int','view_start') }
 allViewAlgorithms += ViewVerify
 #
 dflow_alg1 = CfgMgr.AthViews__DFlowAlg1("dflow_alg1")

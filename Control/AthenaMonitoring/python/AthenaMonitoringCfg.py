@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from .AthenaMonitoringAODRecoCfg import AthenaMonitoringAODRecoCfg
@@ -160,7 +160,7 @@ def AthenaMonitoringPostprocessingCfg(flags):
     result.addSequence(asq)
     from DataQualityUtils.DQPostProcessingAlg import DQPostProcessingAlg
     ppa = DQPostProcessingAlg("DQPostProcessingAlg")
-    ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
+    ppa.ExtraInputs = {( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )}
     ppa.Interval = flags.DQ.postProcessingInterval
     if flags.Common.isOnline:
         ppa.FileKey = ((flags.DQ.FileKey + '/') if not flags.DQ.FileKey.endswith('/')

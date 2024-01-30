@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -96,7 +96,7 @@ def LUCID_OverlayDigitizationBasicCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags,Load=[('LUCID_SimHitCollection','LucidSimHitsVector')] ) )
+        acc.merge(SGInputLoaderCfg(flags,Load={('LUCID_SimHitCollection','LucidSimHitsVector')} ) )
     if "DigitizationTool" not in kwargs:
         kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(LUCID_OverlayPileUpToolCfg(flags)))
 

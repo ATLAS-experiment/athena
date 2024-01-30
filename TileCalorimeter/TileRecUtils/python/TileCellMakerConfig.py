@@ -141,7 +141,7 @@ if __name__ == "__main__":
     acc.merge(OutputStreamCfg(flags, "ESD",
                               ItemList = [ 'CaloCellContainer#*', 'TileCellContainer#*']))
 
-    acc.getEventAlgo("OutputStreamESD").ExtraInputs = [('CaloCellContainer', 'StoreGateSvc+AllCalo')]
+    acc.getEventAlgo("OutputStreamESD").ExtraInputs = {('CaloCellContainer', 'StoreGateSvc+AllCalo')}
 
     flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)

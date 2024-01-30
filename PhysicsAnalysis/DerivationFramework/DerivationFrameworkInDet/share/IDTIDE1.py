@@ -1,5 +1,5 @@
 #====================================================================
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # IDTIDE1.py
 # Contact: atlas-cp-tracking-denseenvironments@cern.ch
@@ -295,7 +295,7 @@ if idDxAOD_doPix and not pix_from_InDetDxAOD:
   if need_pix_ToTList :
     from PixelCalibAlgs.PixelCalibAlgsConf import PixelChargeToTConversion 
     PixelChargeToTConversionSetter = PixelChargeToTConversion(name = "PixelChargeToTConversionSetter",
-                                                              ExtraOutputs = ['PixelClusters_ToTList'])
+                                                              ExtraOutputs = {'PixelClusters_ToTList'})
     # IDTIDESeqAfterPresel += PixelChargeToTConversionSetter 
     topSequence += PixelChargeToTConversionSetter
     _info("Add Pixel xAOD ToTConversionSetter: %s Properties: %s", PixelChargeToTConversionSetter, PixelChargeToTConversionSetter.properties())

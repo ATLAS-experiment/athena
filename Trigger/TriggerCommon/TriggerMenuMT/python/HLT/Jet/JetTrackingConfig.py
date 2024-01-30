@@ -1,6 +1,6 @@
 
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from JetRecTools import JetRecToolsConfig
@@ -123,9 +123,9 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
 
     acc.addEventAlgo(CompFactory.AthViews.ViewDataVerifier(
         name = "VDVInDetFTF_jetSuper",
-        DataObjects = [
+        DataObjects = {
             ('xAOD::JetContainer' , 'StoreGateSvc+HLT_AntiKt4EMTopoJets_subjesIS_fastftag'),
-        ]
+        }
     ))
 
     assert trkopt == "roiftf"

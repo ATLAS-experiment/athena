@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -11,7 +11,7 @@ def CaloCalibHitDecoratorCfg(flags, name = "CaloCalibClusterDecoratorAlgorithm",
     kwargs.setdefault("CaloClusterWriteDecorHandleKey_NLeadingTruthParticles", "CaloCalTopoClusters."+flags.Calo.TopoCluster.CalibrationHitDecorationName)
 
     #We use the cell links from topoclusters, so we also need to specify that the algorithm depends on the calorimeter cell container
-    CaloCalibClusterDecoratorAlgorithm = CompFactory.CaloCalibClusterDecoratorAlgorithm(name,**kwargs,ExtraInputs =  [('CaloCellContainer','StoreGateSvc+AllCalo')])
+    CaloCalibClusterDecoratorAlgorithm = CompFactory.CaloCalibClusterDecoratorAlgorithm(name,**kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
     CaloCalibClusterDecoratorAlgorithm.TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool()
     result.addEventAlgo(CaloCalibClusterDecoratorAlgorithm)
 

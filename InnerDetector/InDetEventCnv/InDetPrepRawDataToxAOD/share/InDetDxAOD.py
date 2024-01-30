@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #################
 ### Steering options
@@ -114,7 +114,7 @@ if dumpTrtInfo:
 if dumpPixInfo and need_pix_ToTList:
     from PixelCalibAlgs.PixelCalibAlgsConf import PixelChargeToTConversion
     PixelChargeToTConversionSetter = PixelChargeToTConversion(name = "PixelChargeToTConversionSetter",
-                                                              ExtraOutputs = ['PixelClusters_ToTList'])
+                                                              ExtraOutputs = {'PixelClusters_ToTList'})
     # @TODO should go to IDDerivationSequence
     IDDerivationSequenceAfterPresel += PixelChargeToTConversionSetter
     if (printIdTrkDxAODConf):

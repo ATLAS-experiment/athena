@@ -12,9 +12,9 @@ if (nThreads >= 1):
   AthReadAlg_RecExRecoTests = AthReadAlg ('TrackCollectionRead_CombinedInDetTracks',
                               Key = 'TrackCollection/CombinedInDetTracks',
                               Aliases = [],
-                              ExtraInputs = [('InDetDD::SiDetectorElementCollection', 'ConditionStore+PixelDetectorElementCollection'),
+                              ExtraInputs = {('InDetDD::SiDetectorElementCollection', 'ConditionStore+PixelDetectorElementCollection'),
                                              ('InDetDD::SiDetectorElementCollection', 'ConditionStore+SCT_DetectorElementCollection'),
-                                             ( 'InDetDD::TRT_DetElementContainer' , 'ConditionStore+TRT_DetElementContainer' ) ])
+                                             ( 'InDetDD::TRT_DetElementContainer' , 'ConditionStore+TRT_DetElementContainer' ) })
 
   topSequence += AthReadAlg_RecExRecoTests
 

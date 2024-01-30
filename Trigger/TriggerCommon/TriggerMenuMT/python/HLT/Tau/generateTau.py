@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -19,12 +19,12 @@ def _caloSeq(flags, is_probe_leg=False):
                            isProbe    = is_probe_leg)
 
     recoAcc.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(name=recoAcc.name+'RecoVDV',
-                                                                  DataObjects=[('TrigRoiDescriptorCollection', 'StoreGateSvc+'+recoAcc.inputMaker().InViewRoIs.Path),
-                                                                               #( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+HLT_TAURoI'),
-                                                                               ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage'),
-                                                                               ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                                                                               ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing'), 
-                                                                               ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing')]))
+                                                              DataObjects={('TrigRoiDescriptorCollection', 'StoreGateSvc+'+recoAcc.inputMaker().InViewRoIs.Path),
+                                                                           #( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+HLT_TAURoI'),
+                                                                           ('CaloBCIDAverage', 'StoreGateSvc+CaloBCIDAverage'),
+                                                                           ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
+                                                                           ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing'),
+                                                                           ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing')}))
 
     from TrigCaloRec.TrigCaloRecConfig import tauTopoClusteringCfg
     recoAcc.mergeReco(tauTopoClusteringCfg(flags,
@@ -101,9 +101,10 @@ def _ftfCoreSeq(flags,name,is_probe_leg=False):
 
     from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
     fastInDetReco.mergeReco(trigInDetFastTrackingCfg(flags, roisKey=fastInDetReco.inputMaker().InViewRoIs, signatureName='tau'+name))
-    fastInDetReco.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(name='VDVFastTau'+name,
-                                DataObjects=[( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(fastInDetReco.inputMaker().InViewRoIs) ),
-                               ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly')]) )
+    fastInDetReco.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name='VDVFastTau'+name,
+        DataObjects={( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(fastInDetReco.inputMaker().InViewRoIs) ),
+                     ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly')}) )
 
     RoIs = fastInDetReco.inputMaker().InViewRoIs
     TrackCollection = flags.Tracking.ActiveConfig.trkTracks_FTF
@@ -161,9 +162,10 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
     from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
     idTracking = trigInDetFastTrackingCfg(flags, roisKey=fastInDetReco.inputMaker().InViewRoIs, signatureName='tau'+name)
     fastInDetReco.mergeReco(idTracking)
-    fastInDetReco.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(name='VDVFastTau'+name,
-                                DataObjects=[( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(fastInDetReco.inputMaker().InViewRoIs) ),
-                               ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly')]) )
+    fastInDetReco.addRecoAlgo(CompFactory.AthViews.ViewDataVerifier(
+        name='VDVFastTau'+name,
+        DataObjects={( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(fastInDetReco.inputMaker().InViewRoIs) ),
+                     ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly')}) )
 
     selAcc.mergeReco(fastInDetReco, robPrefetchCA=robPrefetchAlg)
     hypoAlg = CompFactory.TrigTrackPreSelHypoAlg('TrackPreSelHypoAlg_PassBy'+name,
@@ -197,14 +199,15 @@ def _precTrackSeq(flags,name,is_probe_leg=False):
     precTracking = trigInDetPrecisionTrackingCfg(flags, rois=recoAcc.inputMaker().InViewRoIs, signatureName='tau'+name)
     recoAcc.mergeReco(precTracking)
 
-    ViewVerifyTrk =  CompFactory.AthViews.ViewDataVerifier(name='VDVPrecTrkTau'+name,
-                                DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
-                                 ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
-                                 ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(recoAcc.inputMaker().InViewRoIs) ),
-                                 ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
-                                 ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
-                                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
-                                 ])    
+    ViewVerifyTrk =  CompFactory.AthViews.ViewDataVerifier(
+        name='VDVPrecTrkTau'+name,
+        DataObjects = {( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
+                       ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
+                       ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(recoAcc.inputMaker().InViewRoIs) ),
+                       ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
+                       ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
+                       ( 'xAOD::IParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
+                       })
 
     recoAcc.addRecoAlgo(ViewVerifyTrk)
 
@@ -251,13 +254,14 @@ def _tauPrecSeq(flags,name,is_probe_leg=False):
                            ViewFallThrough   = True,                           
                            isProbe           = is_probe_leg)
 
-    ViewVerifyID =  CompFactory.AthViews.ViewDataVerifier(name='VDVPrecTau'+name,
-                                DataObjects = [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(recoAcc.inputMaker().InViewRoIs)),
-                                ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'   ),
-                                ( 'xAOD::VertexContainer', 'StoreGateSvc+'+flags.Tracking.ActiveConfig.vertex),
-                                ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
-                                ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
-                                ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_IDTrig )])
+    ViewVerifyID =  CompFactory.AthViews.ViewDataVerifier(
+        name='VDVPrecTau'+name,
+        DataObjects = {( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(recoAcc.inputMaker().InViewRoIs)),
+                       ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'   ),
+                       ( 'xAOD::VertexContainer', 'StoreGateSvc+'+flags.Tracking.ActiveConfig.vertex),
+                       ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
+                       ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
+                       ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_IDTrig )})
 
     recoAcc.addRecoAlgo(ViewVerifyID)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -99,8 +99,8 @@ def ZDC_OverlayDigitizationBasicCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags,Load=[
-            ('ZDC_SimFiberHit_Collection','ZDC_SimFiberHit_Collection')] ) )
+        acc.merge(SGInputLoaderCfg(flags,Load={
+            ('ZDC_SimFiberHit_Collection','ZDC_SimFiberHit_Collection')} ) )
     if "DigitizationTool" not in kwargs:
         kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(ZDC_OverlayPileUpToolCfg(flags)))
 

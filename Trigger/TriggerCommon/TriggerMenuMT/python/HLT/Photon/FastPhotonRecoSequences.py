@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # menu components   
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
@@ -13,9 +13,9 @@ log = logging.getLogger(__name__)
 def fastPhotonVDVCfg(name, InViewRoIs):
     acc = ComponentAccumulator()
     fastPhotonVDV = CompFactory.AthViews.ViewDataVerifier(name)
-    fastPhotonVDV.DataObjects = [( 'xAOD::TrigEMClusterContainer' , 'StoreGateSvc+%s' % CaloMenuDefs.L2CaloClusters ),
+    fastPhotonVDV.DataObjects = {( 'xAOD::TrigEMClusterContainer' , 'StoreGateSvc+%s' % CaloMenuDefs.L2CaloClusters ),
                                  ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs  ),
-                                 ]
+                                 }
     acc.addEventAlgo(fastPhotonVDV)
     return acc
 

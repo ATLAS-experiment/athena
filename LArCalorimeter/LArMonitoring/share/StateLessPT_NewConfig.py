@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -438,7 +438,7 @@ if __name__=='__main__':
    # somehow needs to add postprocessing
    from DataQualityUtils.DQPostProcessingAlg import DQPostProcessingAlg
    ppa = DQPostProcessingAlg("DQPostProcessingAlg")
-   ppa.ExtraInputs = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )]
+   ppa.ExtraInputs = {( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' )}
    ppa.Interval = 200
    ppa.OutputLevel = WARNING
    if flags.Common.isOnline:
