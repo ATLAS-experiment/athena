@@ -180,8 +180,8 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
        kwargs.setdefault("nTracks", [ 2 ])
        kwargs.setdefault("trackPtThresholds", [ [ -1., -1. ] ])
        kwargs.setdefault("massRange",   [ (100., 20000.) ])
-       kwargs.setdefault("mergedElectronChains", [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000' ])
-       kwargs.setdefault("caloClusterEtThreshold", -1.)
+       kwargs.setdefault("mergedElectronChains", [ 'BPH-0DR3-EM7J15', 'HLT_e5_lhvloose_bBeeM6000', 'HLT_e5_lhvloose_L1eEM5_bBeeM6000', 'HLT_e5_lhvloose_L1EM3_bBeeM6000' ])
+       kwargs.setdefault("caloClusterEtThreshold", 3.)
        alg = CompFactory.TrigMultiTrkComboHypo(
          name = baseName+'ComboHypo',
          VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),

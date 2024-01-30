@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
 # Physics_pp_run3_v1.py menu -- contains physics chains for MC and data
@@ -70,7 +70,7 @@ EOFL1MuGroup = ['EOF:L1Muon']
 EOFEgammaLegGroup = ['EOF:EgammaLegacy']
 EOFEgammaPhIGroup = ['EOF:EgammaPhaseI']
 EOFBPhysL1MuGroup = ['EOF:BPhysL1Muon']
-EOFBeeLegGroup = ['EOF:BeeLegacy']
+EOFBeePhIGroup = ['EOF:BeePhaseI']
 EOFTLALegGroup = ['EOF:TLALegacy']
 EOFTLAPhIGroup = ['EOF:TLAPhaseI']
 # For unconventional tracking chains (ATR-23797)
@@ -744,10 +744,10 @@ def setupMenu(menu_name):
 
         # ATR-24268
         # B->K*ee chains
-        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3'], stream=['BphysDelayed','express'], groups=SupportLegGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary'], monGroups=['bphysMon:online','bphysMon:shifter']),
-        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3'], stream=['BphysDelayed','express'], groups=SupportLegGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary'], monGroups=['bphysMon:online','bphysMon:shifter']),
-        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=EOFBeeLegGroup+BphysElectronGroup),
-        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['EM3'], stream=['BphysDelayed'], groups=EOFBeeLegGroup+BphysElectronGroup),
+        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5'], stream=['BphysDelayed','express'], groups=SupportPhIGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary'], monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5'], stream=['BphysDelayed','express'], groups=SupportPhIGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary'], monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5'], stream=['BphysDelayed'], groups=EOFBeePhIGroup+BphysElectronGroup),
+        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5'], stream=['BphysDelayed'], groups=EOFBeePhIGroup+BphysElectronGroup),
 
 
         ChainProp(name='HLT_g35_medium_g25_medium_L1eEM9_EMPTY', l1SeedThresholds=['eEM9']*2, stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
