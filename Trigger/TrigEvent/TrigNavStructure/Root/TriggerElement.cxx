@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include <stdexcept>
 #include <iterator>
 #include <functional>
+#include <algorithm>
 #include "TrigNavStructure/Types.h"
 #include "TrigNavStructure/TriggerElement.h"
 

@@ -87,11 +87,20 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
     
     for ip,p in enumerate(presel_cut_str.split('XX')):
         hascalSel= bool(re.match(r'.*emf\w?\d+', p))
+<<<<<<< HEAD
         # This appears to be very much a hack... we should just have separate
         # functions for with/without bjet or tau selections. -- Chris Pollard
         if not doTaggingSel:  # Removing b-jet and tau parts if b-jet presel is not requested
             p = re.sub(r'b\d\d|bg\d\d|bgtwo\d\d', '', p)
             p = re.sub(r'gntau\d\d', '', p)
+=======
+        if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
+            p = re.sub(r'b\w?\d+', '', p)
+        hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
+        hasDIPZsel = bool(re.match(r'.*Z', p))
+        if hasDIPZsel and not doBJetSel: continue # Skipping calopresel step when DIPZ is run
+        if usingDIPZ and not hasDIPZsel and not hasBjetSel and doBJetSel: continue # Skipping roiftf step only when running the calo selection leg (and if in the DIPZ scenario)
+>>>>>>> ceee5aad679 (reverting accidental changes...)
 
         hasBjetSel = bool(re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)', p))
         hasTauSel = bool(re.match(r'.*(gntau\d\d)', p))
@@ -104,10 +113,16 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
 
         pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
         pattern_to_test += r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
+<<<<<<< HEAD
         pattern_to_test += r'b(?P<btagger>\D*)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
         pattern_to_test += r'gntau(?P<tauwp>\d\d)' if hasTauSel else '' # tau preselection if needed
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
         if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+[jacf]?)?)'
+=======
+        pattern_to_test += r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
+        pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
+        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+)?)'
+>>>>>>> ceee5aad679 (reverting accidental changes...)
         matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
