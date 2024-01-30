@@ -27,7 +27,7 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_minD0(0.1)
       {
   declareInterface<IGNNVertexConstructorInterface>(this);
-  declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_TrackOrigin");
+  declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.TrackLinks");
   declareProperty("JetVertexLinks",m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_VertexIndex");
   declareProperty("GNNTool", m_gnn_Tool, "GNN Tool");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
@@ -159,7 +159,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 
   //Read Decor Handle for Track links and Vertex links
   SG::ReadDecorHandle<xAOD::JetContainer, TLC> trackLinksHandle(m_trackLinksKey, ctx);
-  SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char, std::allocator<char>>>
+  SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char>>
       vertexLinksHandle(m_vertexLinksKey, ctx);
   SG::WriteDecorHandle< xAOD::JetContainer, std::vector<ElementLink<xAOD::VertexContainer>>> 
       jetWriteDecorHandleVertexLink (m_jetWriteDecorKeyVertexLink, ctx);
