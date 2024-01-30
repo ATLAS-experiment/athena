@@ -195,7 +195,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     //Fill the map
     int i = 0;
     for (auto v : vertexCollection) {
-      if ((*trackCollection[i])->d0()<m_minD0) continue;
+      //if ((*trackCollection[i])->d0()<m_minD0) continue;
       vertexMap.insert(std::pair<int, TL>(v, (trackCollection[i])));
       i++;
       }
