@@ -153,6 +153,8 @@ def ZdcRecRun3Cfg(flags):
 
     if ( (flags.Input.isMC) or (flags.Trigger.doZDC) ): # if doZDC flag is true we are in a trigger reprocessing -> no TrigValidTool
         zdcTools = [anaTool] # expand list as needed
+    elif (flags.Common.isOnline): # running online, no trigger info
+        zdcTools = [anaTool,centroidTool] # expand list as needed
     else:
         trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))   
         zdcTools = [anaTool,trigTool,centroidTool] # expand list as needed

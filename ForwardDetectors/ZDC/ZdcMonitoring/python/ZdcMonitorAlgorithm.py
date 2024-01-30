@@ -35,7 +35,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
     # Edit properties of a algorithm
     zdcMonAlg.EnableTrigger = inputFlags.DQ.useTrigger
-    zdcMonAlg.CalInfoOn = inputFlags.Input.TriggerStream == 'physics_MinBias' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias
+    zdcMonAlg.CalInfoOn = inputFlags.Input.TriggerStream == 'physics_MinBias' or inputFlags.Input.TriggerStream == 'express_express' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias or express_express
 
     genZdcMonTool = helper.addGroup(
         zdcMonAlg,
@@ -51,6 +51,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     n_energy_bins_default = 200
     n_time_centroid_bins_default = 100
     n_module_amp_zoomin_bins = 100
+    n_mod_fraction_bins_default = 100
     module_chisq_min = 0.1
     module_chisq_max = 800000
     module_chisq_over_amp_min = 0.01
@@ -370,24 +371,24 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.)
     zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
                             path='ModuleFraction',
-                            xbins=50,xmin=0.0,xmax=1.)
+                            xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
     zdcModuleMonToolArr.defineHistogram('zdcModuleFract;zdcModuleFract_above20N',title=';Module Amplitude Fraction;Events',
                             path='ModuleFraction',
                             cutmask='zdcAbove20NCurrentSide',
-                            xbins=50,xmin=0.0,xmax=1.)
+                            xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
     zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleFract;zdcModuleFract_above20N_vs_lb', type='TH2F',title=';lumi block;Module Amplitude Fraction',
                             path='ModuleFractionLBdep',
                             cutmask='zdcAbove20NCurrentSide',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=50,ymin=0.0,ymax=1.)
+                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
     zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
                             path='ModuleFraction',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax / 2.,
-                            ybins=50,ymin=0.0,ymax=1.)
+                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
     zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract;zdcModuleFract_vs_zdcUncalibSumCurrentSide_zoomedin', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
                             path='ModuleFraction',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
-                            ybins=50,ymin=0.0,ymax=1.)
+                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleCalibAmp',title=';Module Calibrated Amplitude [GeV];Events',
                             path='ModuleCalibAmp',
