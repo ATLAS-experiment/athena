@@ -318,7 +318,7 @@ namespace top {
       }
       // 2015
       else if (runNumber > 0 && runNumber <= 284484) {
-        m_muon_trigger_sf_config = "HLT_mu20_iloose_L1MU15_OR_HLT_mu50";
+        m_muon_trigger_sf_config = "HLT_mu20_iloose_L1MU15_OR_HLT_mu40";
       }
       // 2016 (set to a large value but split as we may need to have strings for 2016 -> certain 2017 run)
       else if (runNumber > 284484 && runNumber < 324320) {
