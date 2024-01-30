@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -42,6 +42,146 @@ inline
 void AuxVectorBase::setNonConstStore (SG::IAuxStore* store)
 {
   setStore (store);
+}
+
+
+/**
+ * @brief Test to see if a variable exists in the store.
+ * @param name Name of the aux variable.
+ * @param clsname The name of the associated class.  May be blank.
+ */
+template <class T>
+inline
+bool AuxVectorBase::isAvailable (const std::string& name,
+                                 const std::string& clsname /*= ""*/) const
+{
+  auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name, clsname);
+  return AuxVectorData::isAvailable (id);
+}
+
+
+/**
+ * @brief Test to see if a variable is available for writing.
+ * @param name Name of the aux variable.
+ * @param clsname The name of the associated class.  May be blank.
+ */
+template <class T>
+inline
+bool
+AuxVectorBase::isAvailableWritable (const std::string& name,
+                                    const std::string& clsname /*= ""*/)
+{
+  auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name, clsname);
+  return AuxVectorData::isAvailableWritable (id);
+}
+
+
+/**
+ * @brief Test to see if a variable is available for writing as a decoration.
+ * @param name Name of the aux variable.
+ * @param clsname The name of the associated class.  May be blank.
+ */
+template <class T>
+inline
+bool
+AuxVectorBase::isAvailableWritableAsDecoration (const std::string& name,
+                                                const std::string& clsname /*= ""*/) const
+{
+  auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name, clsname);
+  return AuxVectorData::isAvailableWritableAsDecoration (id);
+}
+
+
+/**
+ * @brief Return a span over an aux data item.
+ * @param auxid The desired aux data item.
+ *
+ * This will return a span containing the value of the requested
+ * auxiliary variable for all elements in the container.
+ * If the item doesn't exist, it will be created.
+ * Errors are signaled by raising an exception.
+ * Note that the @c value_type of the span is not necessarily @c T;
+ * an example is @c bool for which we return a span of @c char.
+ */
+template <class T>
+AuxVectorBase::span<T> AuxVectorBase::getDataSpan (const std::string& name)
+{
+  using container_pointer_type = typename AuxDataTraits<T>::container_pointer_type;
+  auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name);
+  auto beg = reinterpret_cast<container_pointer_type> (AuxVectorData::getDataArray (id));
+  return span<T> (beg, size_v());
+}
+
+
+/**
+ * @brief Return a span over an aux data item.
+ * @param auxid The desired aux data item.
+ *
+ * This will return a span containing the value of the requested
+ * auxiliary variable for all elements in the container.
+ * If the item doesn't exist, it will be created.
+ * Errors are signaled by raising an exception.
+ * Note that the @c value_type of the span is not necessarily @c T;
+ * an example is @c bool for which we return a span of @c char.
+ */
+template <class T>
+AuxVectorBase::const_span<T>
+AuxVectorBase::getDataSpan (const std::string& name) const
+{
+  using const_container_pointer_type = typename AuxDataTraits<T>::const_container_pointer_type;
+  auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name);
+  auto beg = reinterpret_cast<const_container_pointer_type> (AuxVectorData::getDataArray (id));
+  return const_span<T> (beg, size_v());
+}
+
+
+/**
+ * @brief Return a span over an aux data item for a decoration.
+ * @param auxid The desired aux data item.
+ *
+ * This will return a span containing the value of the requested
+ * auxiliary variable for all elements in the container.
+ * If the item doesn't exist, it will be created.
+ * Errors are signaled by raising an exception.
+ * Note that the @c value_type of the span is not necessarily @c T;
+ * an example is @c bool for which we return a span of @c char.
+ *
+ * The difference between @c getDecorationSpan and @c getDataSpan is that
+ * @c getDecorationSpan takes a const container as input, but returns
+ * a span over non-const objects.  This will only succeed if either the
+ * container is not locked or the item was first accessed
+ * as a decoration.
+ */
+template <class T>
+AuxVectorBase::span<T>
+AuxVectorBase::getDecorationSpan (const std::string& name) const
+{
+  using container_pointer_type = typename AuxDataTraits<T>::container_pointer_type;
+  auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name);
+  auto beg = reinterpret_cast<container_pointer_type> (AuxVectorData::getDecorationArray (id));
+  return span<T> (beg, size_v());
+}
+
+
+/**
+ * @brief Return a span over an aux data item.
+ * @param auxid The desired aux data item.
+ *
+ * This will return a span containing the value of the requested
+ * auxiliary variable for all elements in the container.
+ * If the item doesn't exist, it will be created.
+ * Errors are signaled by raising an exception.
+ * Note that the @c value_type of the span is not necessarily @c T;
+ * an example is @c bool for which we return a span of @c char.
+ */
+template <class T>
+AuxVectorBase::const_span<T>
+AuxVectorBase::getConstDataSpan (const std::string& name) const
+{
+  using const_container_pointer_type = typename AuxDataTraits<T>::const_container_pointer_type;
+  auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name);
+  auto beg = reinterpret_cast<const_container_pointer_type> (AuxVectorData::getDataArray (id));
+  return const_span<T> (beg, size_v());
 }
 
 

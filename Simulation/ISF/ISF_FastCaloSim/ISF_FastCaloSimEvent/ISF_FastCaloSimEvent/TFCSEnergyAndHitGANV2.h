@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSEnergyAndHitGANV2_h
@@ -70,7 +70,7 @@ public:
     return m_slice->GetExtrapolatorWeights();
   };
 
-  bool initializeNetwork(int pid, int etaMin,
+  bool initializeNetwork(int const &pid, int const &etaMin,
                          const std::string &FastCaloGANInputFolderName);
 
   bool fillEnergy(TFCSSimulationState &simulstate, const TFCSTruthState *truth,
@@ -81,6 +81,12 @@ public:
 
   virtual void Print(Option_t *option = "") const override;
 
+  static void test_path(std::string path,
+                        TFCSSimulationState *simulstate = nullptr,
+                        const TFCSTruthState *truth = nullptr,
+                        const TFCSExtrapolationState *extrapol = nullptr,
+                        std::string outputname = "unnamed", int pid = 211);
+
   static void unit_test(TFCSSimulationState *simulstate = nullptr,
                         const TFCSTruthState *truth = nullptr,
                         const TFCSExtrapolationState *extrapol = nullptr);
@@ -90,7 +96,7 @@ protected:
                                 std::string FastCaloGANInputFolderName);
 
 private:
-  static int GetBinsInFours(double bins);
+  static int GetBinsInFours(double const &bins);
   int GetAlphaBinsForRBin(const TAxis *x, int ix, int yBinNum) const;
 
   std::vector<int> m_bin_ninit;
@@ -103,7 +109,7 @@ private:
   TFCSGANEtaSlice *m_slice = nullptr;
   TFCSGANXMLParameters m_param;
 
-  ClassDefOverride(TFCSEnergyAndHitGANV2, 1) // TFCSEnergyAndHitGANV2
+  ClassDefOverride(TFCSEnergyAndHitGANV2, 2) // TFCSEnergyAndHitGANV2
 };
 
 #endif

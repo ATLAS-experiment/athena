@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -11,7 +11,6 @@ def MV2TagCfg( flags, name = 'MV2c10', scheme = '', useBTagFlagsDefaults = True,
     The following options have BTaggingFlags defaults:
 
     Runmodus                            default: BTagging.RunModus
-    taggerName                          default: "MV2c10"
     taggerNameBase                      default: "MV2c10"
     forceMV2CalibrationAlias            default: BTaggingFlags.ForceMV2CalibrationAlias
     MV2CalibAlias                       default: BTaggingFlags.MV2CalibAlias
@@ -31,7 +30,6 @@ def MV2TagCfg( flags, name = 'MV2c10', scheme = '', useBTagFlagsDefaults = True,
 
     if useBTagFlagsDefaults:
         defaults = { 'Runmodus'                         : flags.BTagging.RunModus,
-                     'taggerName'                       : basename,
                      'taggerNameBase'                   : basename,
                      'forceMV2CalibrationAlias'         : ForceMV2CalibrationAlias,
                      'MV2CalibAlias'                    : MV2CalibAlias,

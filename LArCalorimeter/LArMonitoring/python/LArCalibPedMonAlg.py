@@ -1,32 +1,32 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def LArCalibPedMonConfig(inputFlags,gain="",doAccDigit=False,doCalibDigit=False,doAccCalibDigit=False):
+def LArCalibPedMonConfig(flags,gain="",doAccDigit=False,doCalibDigit=False,doAccCalibDigit=False):
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArCalibPedMonCfg')
+    helper = AthMonitorCfgHelper(flags,'LArCalibPedMonCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    LArCalibPedMonConfigCore(helper,CompFactory.LArCalibPedMonAlg,inputFlags,gain,doAccDigit,doCalibDigit,doAccCalibDigit)
+    LArCalibPedMonConfigCore(helper,CompFactory.LArCalibPedMonAlg,flags,gain,doAccDigit,doCalibDigit,doAccCalibDigit)
  
     rv = ComponentAccumulator()
 
     # adding LAr*Mapping algos
     from LArCabling.LArCablingConfig import LArFebRodMappingCfg, LArCalibIdMappingCfg
-    rv.merge(LArFebRodMappingCfg(inputFlags))
-    rv.merge(LArCalibIdMappingCfg(inputFlags))
+    rv.merge(LArFebRodMappingCfg(flags))
+    rv.merge(LArCalibIdMappingCfg(flags))
 
     # adding LArFebErrorSummary algo
     from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
-    rv.merge(LArFebErrorSummaryMakerCfg(inputFlags))
+    rv.merge(LArFebErrorSummaryMakerCfg(flags))
     
     rv.merge(helper.result())
 
     return rv
 
-def LArCalibPedMonConfigCore(helper,algoinstance,inputFlags,gain="",doAccDigit=False,doCalibDigit=False,doAccCalibDigit=False):
+def LArCalibPedMonConfigCore(helper,algoinstance,flags,gain="",doAccDigit=False,doCalibDigit=False,doAccCalibDigit=False):
 
     from LArMonitoring.GlobalVariables import lArDQGlobals
     
@@ -129,50 +129,55 @@ def LArCalibPedMonConfigCore(helper,algoinstance,inputFlags,gain="",doAccDigit=F
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
    from AthenaMonitoring.DQConfigFlags import DQDataType
-   from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-   createLArMonConfigFlags()
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
 
    run="00404637"
-   ConfigFlags.Input.Files = [
+
+   flags.Input.Files = [
        "/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-32s-High-All/00404637/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-1._0001.data",
        "/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-32s-High-All/00404637/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-2._0001.data",
        "/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-32s-High-All/00404637/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-3._0001.data",
        "/eos/atlas/atlastier0/rucio/data21_calib/calibration_LArElec-Pedestal-32s-High-All/00404637/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data21_calib.00404637.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-4._0001.data"]
-   ConfigFlags.Output.HISTFileName = 'LArCalibPedMonOutput_'+run+'.root'
+   flags.Output.HISTFileName = 'LArCalibPedMonOutput_'+run+'.root'
       
-   ConfigFlags.DQ.enableLumiAccess = False
-   ConfigFlags.Input.isMC = False
-   ConfigFlags.DQ.useTrigger = False
-   ConfigFlags.LAr.doAlign=False
+   flags.DQ.enableLumiAccess = False
+   flags.Input.isMC = False
+   flags.DQ.useTrigger = False
+   flags.LAr.doAlign=False
    from AthenaConfiguration.Enums import BeamType
-   ConfigFlags.Beam.Type = BeamType.Collisions
-   ConfigFlags.DQ.DataType = DQDataType.Collisions
+   flags.Beam.Type = BeamType.Collisions
+   flags.DQ.DataType = DQDataType.Collisions
    from AthenaConfiguration.TestDefaults import defaultGeometryTags
-   ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
-   ConfigFlags.Detector.GeometryCSC=False
-   ConfigFlags.Detector.GeometrysTGC=False
-   ConfigFlags.Detector.GeometryMM=False
-   ConfigFlags.Exec.OutputLevel=DEBUG
-   ConfigFlags.lock()
+   flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
+   flags.Detector.GeometryCSC=False
+   flags.Detector.GeometrysTGC=False
+   flags.Detector.GeometryMM=False
+   flags.Exec.OutputLevel=DEBUG
+   flags.lock()
 
 # Initialize configuration object, add accumulator, merge, and run.
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-   cfg = MainServicesCfg(ConfigFlags)
+   cfg = MainServicesCfg(flags)
 
    from LArByteStream.LArRawCalibDataReadingConfig import LArRawCalibDataReadingCfg
-   cfg.merge(LArRawCalibDataReadingCfg(ConfigFlags,gain="HIGH",doAccDigit=True))
+   cfg.merge(LArRawCalibDataReadingCfg(flags,gain="HIGH",doAccDigit=True))
 
-   cfg.merge(LArCalibPedMonConfig(ConfigFlags, gain="HIGH",doAccDigit=True))
+   cfg.merge(LArCalibPedMonConfig(flags, gain="HIGH",doAccDigit=True))
    
    cfg.printConfig(withDetails=False) #set True for exhaustive info
 
-   ConfigFlags.dump()
+   flags.dump()
    f=open("LArCalibPedMon_"+run+".pkl","wb")
    cfg.store(f)
    f.close()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -15,14 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "GaudiKernel/ITHistSvc.h"
 
-// #include <TMath.h>
-// #include <TH1.h>
-// #include <TH1F.h>
-// #include <TH2F.h>
 #include <vector>
 #include <string>
 #include <map>
-
 
 #include "JetTagTools/IJetFitterClassifierTool.h"
 #include "JetTagTools/JetFitterInputWriter.h"
@@ -42,9 +37,6 @@ namespace Analysis {
     ATH_MSG_DEBUG(" Finalization of JetFitterInputWriter succesfull");
     return StatusCode::SUCCESS;
   }
-
-
-
 
   StatusCode JetFitterInputWriter::fillLikelihoodValues(
     xAOD::BTagging* BTag,

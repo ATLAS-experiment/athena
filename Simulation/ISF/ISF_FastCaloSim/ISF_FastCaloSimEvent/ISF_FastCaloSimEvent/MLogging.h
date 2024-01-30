@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_MLogging_h
@@ -7,14 +7,6 @@
 
 #include <TNamed.h> //for ClassDef
 #include "CxxUtils/checker_macros.h"
-
-// One macro for use outside classes.
-// Use this in standalone functions or static methods.
-#define ATH_MSG_NOCLASS(logger_name, x)                                        \
-  do {                                                                         \
-    logger_name.msg() << logger_name.startMsg(MSG::ALWAYS, __FILE__, __LINE__) \
-                      << x << std::endl;                                       \
-  } while (0)
 
 #if defined(__FastCaloSimStandAlone__)
 #include <iomanip>
@@ -32,6 +24,14 @@ enum Level {
   NUM_LEVELS
 }; // enum Level
 } // end namespace MSG
+
+// Macro for use outside classes.
+// Use this in standalone functions or static methods.
+#define ATH_MSG_NOCLASS(logger_name, x)                                        \
+  do {                                                                         \
+    logger_name.msg() << logger_name.startMsg(MSG::ALWAYS, __FILE__, __LINE__) \
+                      << x << std::endl;                                       \
+  } while (0)
 #else // not __FastCaloSimStandAlone__ We get some things from AthenaKernal.
 // STL includes
 #include <iosfwd>
@@ -45,6 +45,15 @@ enum Level {
 #include "AthenaKernel/getMessageSvc.h"
 
 #include <boost/thread/tss.hpp>
+
+// Macro for use outside classes.
+// Use this in standalone functions or static methods.
+// Differs, becuase it must call doOutput
+#define ATH_MSG_NOCLASS(logger_name, x)                                        \
+  do {                                                                         \
+    logger_name.msg(MSG::ALWAYS) << x << std::endl;                            \
+    logger_name.msg().doOutput();                                              \
+  } while (0)
 #endif // end not __FastCaloSimStandAlone__
 
 // Declare the class accessories in a namespace
@@ -202,8 +211,8 @@ private:
   std::string m_nm; //! Do not persistify!
 
   /// MsgStream instance (a std::cout like with print-out levels)
-  inline static boost::thread_specific_ptr<MsgStream>
-      m_msg_tls ATLAS_THREAD_SAFE; //! Do not persistify!
+  inline static boost::thread_specific_ptr<MsgStream> m_msg_tls
+      ATLAS_THREAD_SAFE; //! Do not persistify!
 
   ClassDef(MLogging, 0)
 };

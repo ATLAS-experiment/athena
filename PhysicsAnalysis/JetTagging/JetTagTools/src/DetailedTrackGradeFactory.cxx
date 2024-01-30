@@ -1,15 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/DetailedTrackGradeFactory.h"
 #include "GaudiKernel/MsgStream.h"
 
 #include "JetTagInfo/TrackGrade.h"
-
-#include "JetTagInfo/TrackGradesDefinition.h"
-
-#include "xAODTracking/TrackParticle.h"
 
 namespace Analysis
 {
@@ -60,9 +56,6 @@ DetailedTrackGradeFactory::DetailedTrackGradeFactory( const std::string& t, cons
 
     declareInterface<ITrackGradeFactory>( this );
 }
-
-DetailedTrackGradeFactory::~DetailedTrackGradeFactory()
-{}
 
 StatusCode DetailedTrackGradeFactory::initialize()
 {
@@ -263,12 +256,6 @@ StatusCode DetailedTrackGradeFactory::initialize()
 
   return StatusCode::SUCCESS;
 }
-
-StatusCode DetailedTrackGradeFactory::finalize()
-{
-    return StatusCode::SUCCESS;
-}
-
 
 const TrackGradesDefinition & DetailedTrackGradeFactory::getTrackGradesDefinition() const
 {

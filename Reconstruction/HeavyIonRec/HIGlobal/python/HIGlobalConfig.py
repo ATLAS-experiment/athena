@@ -101,6 +101,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
     flags = initConfigFlags()
     flags.Input.Files = [defaultTestFiles.d + "/RecJobTransformTests/data18_hi.00367384.physics_HardProbes.daq.RAW._lb0145._SFO-8._0001.data"]
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Exec.MaxEvents=5
     flags.Concurrency.NumThreads=1
 

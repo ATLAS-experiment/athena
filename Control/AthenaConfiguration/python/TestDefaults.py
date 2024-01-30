@@ -46,3 +46,18 @@ class defaultGeometryTags:
     RUN2_BEST_KNOWLEDGE = "ATLAS-R2-2016-01-02-01"
     RUN3 = "ATLAS-R3S-2021-03-02-00"
     RUN4 = "ATLAS-P2-RUN4-03-00-00"
+
+    @staticmethod
+    def autoconfigure(flags):
+        if flags.GeoModel.AtlasVersion:
+            return flags.GeoModel.AtlasVersion
+
+        from AthenaConfiguration.Enums import LHCPeriod
+        if flags.GeoModel.Run is LHCPeriod.Run1:
+            return defaultGeometryTags.RUN1_2012
+        if flags.GeoModel.Run is LHCPeriod.Run2:
+            return defaultGeometryTags.RUN2
+        if flags.GeoModel.Run is LHCPeriod.Run3:
+            return defaultGeometryTags.RUN3
+        if flags.GeoModel.Run is LHCPeriod.Run4:
+            return defaultGeometryTags.RUN4

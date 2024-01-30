@@ -47,12 +47,12 @@ if __name__ == "__main__":
     ### input for Run2:
     # flags.Input.Files = [defaultTestFiles.d + "/RecJobTransformTests/data18_hi.00367384.physics_HardProbes.daq.RAW._lb0145._SFO-8._0001.data"]
     # flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-RUN2-09" 
-    # flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01" 
+    # flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
 
     ### input for Run3:
     flags.Input.Files = [defaultTestFiles.d + "/RecJobTransformTests/data22_hi/RAWFiles/data22_hi.00440101.physics_MinBias.daq.RAW/data22_hi.00440101.physics_MinBias.daq.RAW._lb0214._SFO-11._0001.data"]
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-09"
-    flags.GeoModel.AtlasVersion = "ATLAS-R3S-2021-03-01-00"
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
     ### ### ###
 

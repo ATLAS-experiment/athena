@@ -1,33 +1,24 @@
 
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-
-def LArCosmicsMonConfigOld(inputFlags):
-    from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelperOld
-    from LArMonitoring.LArMonitoringConf import LArCosmicsMonAlg
-
-    helper = AthMonitorCfgHelperOld(inputFlags, 'LArCosmicsMonAlgOldCfg')
-    LArCosmicsMonConfigCore(helper, LArCosmicsMonAlg,inputFlags)
-    return helper.result()
-
-def LArCosmicsMonConfig(inputFlags):
+def LArCosmicsMonConfig(flags):
     '''Function to configures some algorithms in the monitoring system.'''
 
     # The following class will make a sequence, configure algorithms, and link                                                                   
     # them to GenericMonitoringTools                                                                                                                                 
     
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'LArCosmicsMonAlgCfg')
+    helper = AthMonitorCfgHelper(flags,'LArCosmicsMonAlgCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    LArCosmicsMonConfigCore(helper, CompFactory.LArCosmicsMonAlg,inputFlags)
+    LArCosmicsMonConfigCore(helper, CompFactory.LArCosmicsMonAlg,flags)
 
     return helper.result()
 
 
-def LArCosmicsMonConfigCore(helper, algoinstance,inputFlags):
+def LArCosmicsMonConfigCore(helper, algoinstance,flags):
 
 
     from LArMonitoring.GlobalVariables import lArDQGlobals
@@ -81,33 +72,34 @@ def LArCosmicsMonConfigCore(helper, algoinstance,inputFlags):
 
 if __name__=='__main__':
 
-   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    from AthenaCommon.Logging import log
    from AthenaCommon.Constants import WARNING
    log.setLevel(WARNING)
 
-
-   from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
-   createLArMonConfigFlags()
+   from LArMonitoring.LArMonConfigFlags import addLArMonFlags
+   flags.addFlagsCategory("LArMon", addLArMonFlags)
 
    from AthenaConfiguration.TestDefaults import defaultTestFiles
-   ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
+   flags.Input.Files = defaultTestFiles.RAW_RUN2
 
-   ConfigFlags.Output.HISTFileName = 'LArCosmicsMonOutput.root'
-   ConfigFlags.DQ.enableLumiAccess = False
-   ConfigFlags.DQ.useTrigger = False
-   ConfigFlags.lock()
+   flags.Output.HISTFileName = 'LArCosmicsMonOutput.root'
+   flags.DQ.enableLumiAccess = False
+   flags.DQ.useTrigger = False
+   flags.lock()
 
    from CaloRec.CaloRecoConfig import CaloRecoCfg
-   cfg=CaloRecoCfg(ConfigFlags)
+   cfg=CaloRecoCfg(flags)
 
    from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
-   cfg.merge(LArNoisyROSummaryCfg(ConfigFlags))
+   cfg.merge(LArNoisyROSummaryCfg(flags))
 
-   cosm_acc = LArCosmicsMonConfig(ConfigFlags)
+   cosm_acc = LArCosmicsMonConfig(flags)
    cfg.merge(cosm_acc)
 
-   ConfigFlags.dump()
+   flags.dump()
    f=open("LArCosmicsMon.pkl","wb")
    cfg.store(f)
    f.close()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawDataReadingAlg.h"
@@ -18,7 +18,7 @@
 #include "LArByteStream/LArRodBlockPhysicsV6.h"
 
 #include "LArFebHeaderReader.h"
-
+#include "LArElecCalib/LArProvenance.h"
 
 LArRawDataReadingAlg::LArRawDataReadingAlg(const std::string& name, ISvcLocator* pSvcLocator) :  
   AthReentrantAlgorithm(name, pSvcLocator) {}
@@ -211,9 +211,9 @@ StatusCode LArRawDataReadingAlg::execute(const EventContext& ctx) const {
 
 	  HWIdentifier cId = m_onlineId->channel_Id(fId,fcNb);
 	  uint16_t iquality = 0;
-	  uint16_t iprovenance = 0x1000;
+	  uint16_t iprovenance = LArProv::DSPCALC; //0x1000
 	  if (quality>0) {
-            iprovenance |= 0x2000;
+            iprovenance |= LArProv::QTPRESENT; //0x2000
             iquality = (quality & 0xFFFF);
 	  } 
 	rawChannels->emplace_back(cId, energy, time, iquality, iprovenance, (CaloGain::CaloGain)gain);

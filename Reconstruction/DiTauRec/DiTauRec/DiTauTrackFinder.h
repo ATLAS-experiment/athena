@@ -67,7 +67,6 @@ class DiTauTrackFinder : public DiTauToolBase {
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackParticleContainerName
     { this, "TrackParticleContainer", "InDetTrackParticles", "" };
   ToolHandle<Trk::ITrackSelectorTool> m_TrackSelectorTool;
-  // ToolHandle< Trk::IParticleCaloExtensionTool > m_ParticleCaloExtensionTool;
 
 };
 

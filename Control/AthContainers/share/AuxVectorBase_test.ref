@@ -1,6 +1,8 @@
 test_set_store
 test_set_store2
 test_get_data
+test_isAvailable
+test_get_span
 test_reserve_resize
 test_shift
 test_get_types

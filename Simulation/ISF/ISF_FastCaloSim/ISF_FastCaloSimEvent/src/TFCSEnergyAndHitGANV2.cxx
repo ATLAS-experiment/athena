@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
@@ -70,7 +70,8 @@ void TFCSEnergyAndHitGANV2::set_nr_of_init(unsigned int bin,
 
 // initialize lwtnn network
 bool TFCSEnergyAndHitGANV2::initializeNetwork(
-    int pid, int etaMin, const std::string &FastCaloGANInputFolderName) {
+    int const &pid, int const &etaMin,
+    const std::string &FastCaloGANInputFolderName) {
 
   // initialize all necessary constants
   // FIXME eventually all these could be stored in the .json file
@@ -78,7 +79,7 @@ bool TFCSEnergyAndHitGANV2::initializeNetwork(
   ATH_MSG_INFO(
       "Using FastCaloGANInputFolderName: " << FastCaloGANInputFolderName);
   // get neural net JSON file as an std::istream object
-  int etaMax = etaMin + 5;
+  const int etaMax = etaMin + 5;
 
   reset_match_all_pdgid();
   set_pdgid(pid);
@@ -95,7 +96,7 @@ bool TFCSEnergyAndHitGANV2::initializeNetwork(
     pidForXml = 211;
   }
 
-  int etaMid = (etaMin + etaMax) / 2;
+  const int etaMid = (etaMin + etaMax) / 2;
   m_param.InitialiseFromXML(pidForXml, etaMid, FastCaloGANInputFolderName);
   m_param.Print();
   m_slice = new TFCSGANEtaSlice(pid, etaMin, etaMax, m_param);
@@ -150,16 +151,15 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
   const TFCSGANEtaSlice::FitResultsPerLayer &fitResults =
       m_slice->GetFitResults(); // used only if GAN version > 1
 
-  unsigned int energyBins = outputs.size();
-  ATH_MSG_VERBOSE("energy voxels size = " << energyBins);
+  ATH_MSG_DEBUG("energy voxels size = " << outputs.size());
 
   double totalEnergy = 0;
-  for (unsigned int i = 0; i < energyBins; ++i){
-    totalEnergy += outputs.at("out_" + std::to_string(i));
+  for (auto output : outputs) {
+    totalEnergy += output.second;
   }
-  if (totalEnergy < 0){
+  if (totalEnergy < 0) {
     ATH_MSG_WARNING("Energy from GAN is negative, skipping particle");
-    return false;   
+    return false;
   }
 
   ATH_MSG_VERBOSE("Get binning");
@@ -168,11 +168,11 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
 
   int vox = 0;
   for (const auto &element : binsInLayers) {
-    int layer = element.first;
+    const int layer = element.first;
     const TH2D *h = &element.second;
 
-    int xBinNum = h->GetNbinsX();
-    int yBinNum = h->GetNbinsY();
+    const int xBinNum = h->GetNbinsX();
+    const int yBinNum = h->GetNbinsY();
     const TAxis *x = h->GetXaxis();
 
     // If only one bin in r means layer is empty, no value should be added
@@ -192,7 +192,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
     for (int ix = 1; ix <= xBinNum; ++ix) {
       double binsInAlphaInRBin = GetAlphaBinsForRBin(x, ix, yBinNum);
       for (int iy = 1; iy <= binsInAlphaInRBin; ++iy) {
-        double energyInVoxel = outputs.at("out_" + std::to_string(vox));
+        const double energyInVoxel = outputs.at(std::to_string(vox));
         ATH_MSG_VERBOSE(" Vox " << vox << " energy " << energyInVoxel
                                 << " binx " << ix << " biny " << iy);
 
@@ -217,10 +217,10 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
 
   vox = 0;
   for (const auto &element : binsInLayers) {
-    int layer = element.first;
+    const int layer = element.first;
     const TH2D *h = &element.second;
-    int xBinNum = h->GetNbinsX();
-    int yBinNum = h->GetNbinsY();
+    const int xBinNum = h->GetNbinsX();
+    const int yBinNum = h->GetNbinsY();
     const TAxis *x = h->GetXaxis();
     const TAxis *y = h->GetYaxis();
 
@@ -300,13 +300,13 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
 
     // Now create hits
     for (int ix = 1; ix <= xBinNum; ++ix) {
-      int binsInAlphaInRBin = GetAlphaBinsForRBin(x, ix, yBinNum);
+      const int binsInAlphaInRBin = GetAlphaBinsForRBin(x, ix, yBinNum);
 
       // Horrible work around for variable # of bins along alpha direction
-      int binsToMerge = yBinNum == 32 ? 32 / binsInAlphaInRBin : 1;
+      const int binsToMerge = yBinNum == 32 ? 32 / binsInAlphaInRBin : 1;
       for (int iy = 1; iy <= binsInAlphaInRBin; ++iy) {
-        double energyInVoxel = outputs.at("out_" + std::to_string(vox));
-        int lowEdgeIndex = (iy - 1) * binsToMerge + 1;
+        const double energyInVoxel = outputs.at(std::to_string(vox));
+        const int lowEdgeIndex = (iy - 1) * binsToMerge + 1;
 
         ATH_MSG_VERBOSE(" Vox " << vox << " energy " << energyInVoxel
                                 << " binx " << ix << " biny " << iy);
@@ -328,15 +328,15 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
           nHitsR = x->GetBinUpEdge(ix) - x->GetBinLowEdge(ix);
           if (yBinNum == 1) {
             // nbins in alpha depend on circumference lenght
-            double r = x->GetBinUpEdge(ix);
+            const double r = x->GetBinUpEdge(ix);
             nHitsAlpha = ceil(2 * TMath::Pi() * r / binResolution);
           } else {
             // d = 2*r*sin (a/2r) this distance at the upper r must be 1mm for
             // layer 1 or 5, 5mm otherwise.
             const TAxis *y = h->GetYaxis();
-            double angle = y->GetBinUpEdge(iy) - y->GetBinLowEdge(iy);
-            double r = x->GetBinUpEdge(ix);
-            double d = 2 * r * sin(angle / 2 * r);
+            const double angle = y->GetBinUpEdge(iy) - y->GetBinLowEdge(iy);
+            const double r = x->GetBinUpEdge(ix);
+            const double d = 2 * r * sin(angle / 2 * r);
             nHitsAlpha = ceil(d / binResolution);
           }
 
@@ -344,7 +344,7 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
             // For layers that are not EMB1 or EMEC1 use a maximum of 10 hits
             // per direction, a higher granularity is needed for the other
             // layers
-            int maxNhits = 10;
+            const int maxNhits = 10;
             nHitsAlpha = std::min(maxNhits, std::max(1, nHitsAlpha));
             nHitsR = std::min(maxNhits, std::max(1, nHitsR));
           }
@@ -539,8 +539,9 @@ TFCSEnergyAndHitGANV2::simulate(TFCSSimulationState &simulstate,
 void TFCSEnergyAndHitGANV2::Print(Option_t *option) const {
   TFCSParametrization::Print(option);
   TString opt(option);
-  bool shortprint = opt.Index("short") >= 0;
-  bool longprint = msgLvl(MSG::DEBUG) || (msgLvl(MSG::INFO) && !shortprint);
+  const bool shortprint = opt.Index("short") >= 0;
+  const bool longprint =
+      msgLvl(MSG::DEBUG) || (msgLvl(MSG::INFO) && !shortprint);
   TString optprint = opt;
   optprint.ReplaceAll("short", "");
 
@@ -574,6 +575,25 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
                                       const TFCSTruthState *truth,
                                       const TFCSExtrapolationState *extrapol) {
   ISF_FCS::MLogging logger;
+  ATH_MSG_NOCLASS(logger, "Start lwtnn test" << std::endl);
+  std::string path = "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
+                     "InputsToBigParamFiles/FastCaloGANWeightsVer02/";
+  test_path(path, simulstate, truth, extrapol, "lwtnn");
+
+  ATH_MSG_NOCLASS(logger, "Start onnx test" << std::endl);
+  path = "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
+         "InputsToBigParamFiles/FastCaloGANWeightsONNXVer08/";
+  test_path(path, simulstate, truth, extrapol, "onnx");
+  ATH_MSG_NOCLASS(logger, "Finish all tests" << std::endl);
+}
+
+void TFCSEnergyAndHitGANV2::test_path(std::string path,
+                                      TFCSSimulationState *simulstate,
+                                      const TFCSTruthState *truth,
+                                      const TFCSExtrapolationState *extrapol,
+                                      std::string outputname, int pid) {
+  ISF_FCS::MLogging logger;
+  ATH_MSG_NOCLASS(logger, "Running test on " << path << std::endl);
   if (!simulstate) {
     simulstate = new TFCSSimulationState();
 #if defined(__FastCaloSimStandAlone__)
@@ -586,7 +606,7 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
     ATH_MSG_NOCLASS(logger, "New particle");
     TFCSTruthState *t = new TFCSTruthState();
     t->SetPtEtaPhiM(65536, 0, 0, 139.6);
-    t->set_pdgid(211);
+    t->set_pdgid(pid);
     truth = t;
   }
   if (!extrapol) {
@@ -610,21 +630,18 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
   }
 
   TFCSEnergyAndHitGANV2 GAN("GAN", "GAN");
-  GAN.setLevel(MSG::VERBOSE);
-  int pid = 211;
-  int etaMin = 20;
-  int etaMax = etaMin + 5;
+  GAN.setLevel(MSG::INFO);
+  const int etaMin = 20;
+  const int etaMax = etaMin + 5;
   ATH_MSG_NOCLASS(logger, "Initialize Networks");
-  GAN.initializeNetwork(pid, etaMin,
-                        "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
-                        "InputsToBigParamFiles/FastCaloGANWeightsVer02");
+  GAN.initializeNetwork(pid, etaMin, path);
   for (int i = 0; i < 24; ++i)
     if (GAN.is_match_calosample(i)) {
       TFCSCenterPositionCalculation *c = new TFCSCenterPositionCalculation(
           Form("center%d", i), Form("center layer %d", i));
       c->set_calosample(i);
       c->setExtrapWeight(0.5);
-      c->setLevel(MSG::VERBOSE);
+      c->setLevel(MSG::INFO);
       c->set_pdgid(pid);
       if (pid == 11)
         c->add_pdgid(-pid);
@@ -640,24 +657,28 @@ void TFCSEnergyAndHitGANV2::unit_test(TFCSSimulationState *simulstate,
 
   GAN.Print();
 
-  ATH_MSG_NOCLASS(logger, "Writing GAN to FCSGANtest.root");
-  TFile *fGAN = TFile::Open("FCSGANtest.root", "recreate");
-  GAN.Write();
+  ATH_MSG_NOCLASS(logger, "Writing GAN to " << outputname);
+  const std::string outname = "FCSGANtest_" + outputname + ".root";
+  TFile *fGAN = TFile::Open(outname.c_str(), "recreate");
+  fGAN->cd();
+  // GAN.Write();
+  fGAN->WriteObjectAny(&GAN, "TFCSEnergyAndHitGANV2", "GAN");
+
   fGAN->ls();
   fGAN->Close();
 
-  ATH_MSG_NOCLASS(logger, "Open FCSGANtest.root");
-  fGAN = TFile::Open("FCSGANtest.root");
+  ATH_MSG_NOCLASS(logger, "Open " << outname);
+  fGAN = TFile::Open(outname.c_str());
   TFCSEnergyAndHitGANV2 *GAN2 = (TFCSEnergyAndHitGANV2 *)(fGAN->Get("GAN"));
+  GAN2->setLevel(MSG::INFO);
   GAN2->Print();
 
-  GAN2->setLevel(MSG::DEBUG);
   ATH_MSG_NOCLASS(logger, "Before running GAN2->simulate()");
   GAN2->simulate(*simulstate, truth, extrapol);
   simulstate->Print();
 }
 
-int TFCSEnergyAndHitGANV2::GetBinsInFours(double bins) {
+int TFCSEnergyAndHitGANV2::GetBinsInFours(double const &bins) {
   if (bins < 4)
     return 4;
   else if (bins < 8)
@@ -672,14 +693,15 @@ int TFCSEnergyAndHitGANV2::GetAlphaBinsForRBin(const TAxis *x, int ix,
                                                int yBinNum) const {
   double binsInAlphaInRBin = yBinNum;
   if (yBinNum == 32) {
-    double widthX = x->GetBinWidth(ix);
-    double radious = x->GetBinCenter(ix);
+    ATH_MSG_DEBUG("yBinNum is special value 32");
+    const double widthX = x->GetBinWidth(ix);
+    const double radious = x->GetBinCenter(ix);
     double circumference = radious * 2 * TMath::Pi();
     if (m_param.IsSymmetrisedAlpha()) {
       circumference = radious * TMath::Pi();
     }
 
-    double bins = circumference / widthX;
+    const double bins = circumference / widthX;
     binsInAlphaInRBin = GetBinsInFours(bins);
     ATH_MSG_DEBUG("Bin in alpha: " << binsInAlphaInRBin << " for r bin: " << ix
                                    << " (" << x->GetBinLowEdge(ix) << "-"

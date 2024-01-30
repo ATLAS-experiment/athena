@@ -73,7 +73,7 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
 // Specialisation for TrackProxy
 // TODO understand why this is not matching: ActsTrk::TrackContainer::TrackProxy
 template <>
-nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::TrackStorageContainer, ActsTrk::MultiTrajectory, ActsTrk::DataLinkHolder, true> &track) {
+nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::TrackSummaryContainer, ActsTrk::MultiTrajectory, ActsTrk::DataLinkHolder, true> &track) {
   nlohmann::json data;
 
   Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(getContext()).context();

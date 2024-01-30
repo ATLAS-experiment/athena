@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeEventCutFlowConfig
@@ -28,6 +28,7 @@ class EventSelectionConfig(ConfigBlock):
         self.addOption('electrons', "", type=str)
         self.addOption('muons', "", type=str)
         self.addOption('jets', "", type=str)
+        self.addOption('largeRjets', "", type=str)
         self.addOption('photons', "", type=str)
         self.addOption('taus', "", type=str)
         self.addOption('met', "", type=str)
@@ -67,6 +68,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NEL_selector(text, cfg)
         elif "MU_N" in text.split():
             self.add_NMU_selector(text, cfg)
+        elif "SUM_EL_N_MU_N" in text.split():
+            self.add_SUMNELNMU_selector(text, cfg)
         elif "JET_N" in text.split():
             self.add_NJET_selector(text, cfg)
         elif "JET_N_BTAG" in text.split():
@@ -75,6 +78,8 @@ class EventSelectionConfig(ConfigBlock):
             self.add_NPH_selector(text, cfg)
         elif "TAU_N" in text.split():
             self.add_NTAU_selector(text, cfg)
+        elif "LJET_N" in text.split():
+            self.add_NLJET_selector(text, cfg)
         elif "MET" in text.split():
             self.add_MET_selector(text, cfg)
         elif "MWT" in text.split():
@@ -89,6 +94,12 @@ class EventSelectionConfig(ConfigBlock):
             self.add_OS_selector(text, cfg)
         elif "SS" in text.split():
             self.add_SS_selector(text, cfg)
+        elif "MLL_OSSF" in text.split():
+            self.add_MLL_OSSF_selector(text, cfg)
+        elif "LJETMASS_N" in text.split():
+            self.add_NLJETMASS_selector(text, cfg)
+        elif "LJETMASSWINDOW_N" in text.split():
+            self.add_NLJETMASSWINDOW_selector(text, cfg)
         elif "SAVE" in text.split():
             self.add_SAVE(text, cfg)
         elif "IMPORT" in text.split():
@@ -201,7 +212,7 @@ class EventSelectionConfig(ConfigBlock):
             if alg.objectSelection:
                 alg.objectSelection += "&&" + config.getFullSelection(self.electrons.split(".")[0], extraSel)
             else:
-                alg.objectSElection = config.getFullSelection(self.electrons.split(".")[0], extraSel)
+                alg.objectSelection = config.getFullSelection(self.electrons.split(".")[0], extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -229,8 +240,34 @@ class EventSelectionConfig(ConfigBlock):
             if alg.objectSelection:
                 alg.objectSelection += "&&" + config.getFullSelection(self.muons.split(".")[0], extraSel)
             else:
-                alg.objectSElection = config.getFullSelection(self.muons.split(".")[0], extraSel)
+                alg.objectSelection = config.getFullSelection(self.muons.split(".")[0], extraSel)
             alg.minPt = self.check_float(items[2])
+            alg.sign  = self.check_sign(items[3])
+            alg.count = self.check_int(items[4])
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_SUMNELNMU_selector(self, text, config):
+        items = text.split()
+        if items[0] != "SUM_EL_N_MU_N":
+            self.raise_misconfig(text, "SUM_EL_N_MU_N")
+        if len(items) != 4 and len(items) != 5:
+            self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
+        thisalg = f'{self.name}_SUMNELNMU_{self.step}'
+        alg = config.createAlgorithm('CP::SumNElNMuPtSelectorAlg', thisalg)
+        alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        alg.eventPreselection = f'{self.currentDecoration}'
+        if len(items) == 4:
+            alg.minPtEl = self.check_float(items[1])
+            alg.minPtMu = self.check_float(items[1])
+            alg.sign  = self.check_sign(items[2])
+            alg.count = self.check_int(items[3])
+        elif len(items) == 5:
+            alg.minPtEl = self.check_float(items[1])
+            alg.minPtMu = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
@@ -257,7 +294,7 @@ class EventSelectionConfig(ConfigBlock):
             if alg.objectSelection:
                 alg.objectSelection += "&&" + config.getFullSelection(self.jets.split(".")[0], extraSel)
             else:
-                alg.objectSElection = config.getFullSelection(self.jets.split(".")[0], extraSel)
+                alg.objectSelection = config.getFullSelection(self.jets.split(".")[0], extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -312,7 +349,7 @@ class EventSelectionConfig(ConfigBlock):
             if alg.objectSelection:
                 alg.objectSelection += "&&" + config.getFullSelection(self.photons.split(".")[0], extraSel)
             else:
-                alg.objectSElection = config.getFullSelection(self.photons.split(".")[0], extraSel)
+                alg.objectSelection = config.getFullSelection(self.photons.split(".")[0], extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
@@ -340,13 +377,95 @@ class EventSelectionConfig(ConfigBlock):
             if alg.objectSelection:
                 alg.objectSelection += "&&" + config.getFullSelection(self.taus.split(".")[0], extraSel)
             else:
-                alg.objectSElection = config.getFullSelection(self.taus.split(".")[0], extraSel)
+                alg.objectSelection = config.getFullSelection(self.taus.split(".")[0], extraSel)
             alg.minPt = self.check_float(items[2])
             alg.sign  = self.check_sign(items[3])
             alg.count = self.check_int(items[4])
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
     
+    def add_NLJET_selector(self, text, config):
+        items = text.split()
+        if items[0] != "LJET_N":
+            self.raise_misconfig(text, "LJET_N")
+        if len(items) != 4 and len(items) != 5:
+            self.raise_misconfig(text, "number of arguments")
+        thisalg = f'{self.name}_NLJET_{self.step}'
+        alg = config.createAlgorithm('CP::NObjectPtSelectorAlg', thisalg)
+        alg.particles, alg.objectSelection = config.readNameAndSelection(self.largeRjets)
+        alg.eventPreselection = f'{self.currentDecoration}'
+        if len(items) == 4:
+            alg.minPt = self.check_float(items[1])
+            alg.sign  = self.check_sign(items[2])
+            alg.count = self.check_int(items[3])
+        elif len(items) == 5:
+            extraSel  = self.check_string(items[1])
+            if alg.objectSelection:
+                alg.objectSelection += "&&" + config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            else:
+                alg.objectSelection = config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            alg.minPt = self.check_float(items[2])
+            alg.sign  = self.check_sign(items[3])
+            alg.count = self.check_int(items[4])
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_NLJETMASS_selector(self, text, config):
+        items = text.split()
+        if items[0] != "LJETMASS_N":
+            self.raise_misconfig(text, "LJETMASS_N")
+        if len(items) != 4 and len(items) != 5:
+            self.raise_misconfig(text, "number of arguments")
+        thisalg = f'{self.name}_NLJETMASS_{self.step}'
+        alg = config.createAlgorithm('CP::NObjectMassSelectorAlg', thisalg)
+        alg.particles, alg.objectSelection = config.readNameAndSelection(self.largeRjets)
+        alg.eventPreselection = f'{self.currentDecoration}'
+        if len(items) == 4:
+            alg.minMass = self.check_float(items[1])
+            alg.sign    = self.check_sign(items[2])
+            alg.count   = self.check_int(items[3])
+        elif len(items) == 5:
+            extraSel  = self.check_string(items[1])
+            if alg.objectSelection:
+                alg.objectSelection += "&&" + config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            else:
+                alg.objectSelection = config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            alg.minMass = self.check_float(items[2])
+            alg.sign    = self.check_sign(items[3])
+            alg.count   = self.check_int(items[4])
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
+    def add_NLJETMASSWINDOW_selector(self, text, config):
+        items = text.split()
+        if items[0] != "LJETMASSWINDOW_N":
+            self.raise_misconfig(text, "LJETMASSWINDOW_N")
+        if len(items) != 5 and len(items) != 6 and len(items) != 7:
+            self.raise_misconfig(text, "number of arguments")
+        thisalg = f'{self.name}_NLJETMASSWINDOW_{self.step}'
+        alg = config.createAlgorithm('CP::NLargeRJetMassWindowSelectorAlg', thisalg)
+        alg.ljets, alg.ljetSelection = config.readNameAndSelection(self.largeRjets)
+        if len(items) == 5 or (len(items) == 6 and "veto" in items):
+            alg.lowMass  = self.check_float(items[1])
+            alg.highMass = self.check_float(items[2])
+            alg.sign     = self.check_sign(items[3])
+            alg.count    = self.check_int(items[4])
+            alg.vetoMode = (len(items) == 6 and self.check_string(items[5]) == "veto")
+        elif (len(items) == 6 and "veto" not in items) or len(items) == 7:
+            extraSel = self.check_string(items[1])
+            if alg.ljetSelection:
+                alg.ljetSelection += "&&" + config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            else:
+                alg.ljetSelection = config.getFullSelection(self.largeRjets.split(".")[0], extraSel)
+            alg.lowMass  = self.check_float(items[2])
+            alg.highMass = self.check_float(items[3])
+            alg.sign     = self.check_sign(items[4])
+            alg.count    = self.check_int(items[5])
+            alg.vetoMode = (len(items) ==7 and self.check_string(items[6]) == "veto")
+        alg.eventPreselection = f'{self.currentDecoration}'
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
     def add_MET_selector(self, text, config):
         items = text.split()
         if items[0] != "MET":
@@ -428,7 +547,7 @@ class EventSelectionConfig(ConfigBlock):
         items = text.split()
         if items[0] != "MLLWINDOW":
             self.raise_misconfig(text, "MLLWINDOW")
-        if len(items) != 3:
+        if len(items) != 3 and len(items) != 4:
             self.raise_misconfig(text, "number of arguments")
         if not self.electrons and not self.muons:
             self.raise_missinginput("electrons or muons")
@@ -440,8 +559,7 @@ class EventSelectionConfig(ConfigBlock):
             alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
         alg.lowMLL = self.check_float(items[1])
         alg.highMLL = self.check_float(items[2])
-        # if high<low we are trying to veto events in that window; otherwise we select them
-        alg.vetoMode = alg.highMLL < alg.lowMLL
+        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
         alg.eventPreselection = f'{self.currentDecoration}'
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
@@ -480,6 +598,27 @@ class EventSelectionConfig(ConfigBlock):
         self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
         return
 
+    def add_MLL_OSSF_selector(self, text, config):
+        items = text.split()
+        if items[0] != "MLL_OSSF":
+            self.raise_misconfig(text, "MLL_OSSF")
+        if len(items) != 3 and len(items) != 4:
+            self.raise_misconfig(text, "number of arguments")
+        if not self.electrons and not self.muons:
+            self.raise_missinginput("electrons or muons")
+        thisalg = f'{self.name}_MLL_OSSF_{self.step}'
+        alg = config.createAlgorithm('CP::DileptonOSSFInvariantMassWindowSelectorAlg', thisalg)
+        if self.electrons:
+            alg.electrons, alg.electronSelection = config.readNameAndSelection(self.electrons)
+        if self.muons:
+            alg.muons, alg.muonSelection = config.readNameAndSelection(self.muons)
+        alg.lowMll = self.check_float(items[1])
+        alg.highMll = self.check_float(items[2])
+        alg.vetoMode = (len(items) == 4 and self.check_string(items[3]) == "veto")
+        alg.eventPreselection = f'{self.currentDecoration}'
+        self.setDecorationName(alg, config, f'{thisalg}_%SYS%')
+        return
+
     def add_SAVE(self, text, config):
         items = text.split()
         if items[0] != "SAVE":
@@ -500,6 +639,7 @@ class EventSelectionConfig(ConfigBlock):
 def makeEventSelectionConfig(seq,
                              name,
                              electrons=None, muons=None, jets=None,
+                             largeRjets=None,
                              photons=None, taus=None, met=None,
                              btagDecoration=None, preselection=None,
                              selectionCuts=None, noFilter=None,
@@ -511,6 +651,7 @@ def makeEventSelectionConfig(seq,
         electrons -- the electron container and selection
         muons -- the muon container and selection
         jets -- the jet container and selection
+        largeRjets -- the large-R jet container and selection
         photons -- the photon container and selection
         taus -- the tau-jet container and selection
         met -- the MET container
@@ -526,6 +667,7 @@ def makeEventSelectionConfig(seq,
     config.setOptionValue ('electrons', electrons, noneAction='ignore')
     config.setOptionValue ('muons', muons, noneAction='ignore')
     config.setOptionValue ('jets', jets, noneAction='ignore')
+    config.setOptionValue ('largeRjets', largeRjets, noneAction='ignore')
     config.setOptionValue ('photons', photons, noneAction='ignore')
     config.setOptionValue ('taus', taus, noneAction='ignore')
     config.setOptionValue ('met', met, noneAction='ignore')
@@ -543,6 +685,7 @@ def makeEventSelectionConfig(seq,
 
 def makeMultipleEventSelectionConfigs(seq,
                                       electrons=None, muons=None, jets=None,
+                                      largeRjets=None,
                                       photons=None, taus=None, met=None,
                                       btagDecoration=None, preselection=None,
                                       selectionCutsDict=None, noFilter=None,
@@ -553,6 +696,7 @@ def makeMultipleEventSelectionConfigs(seq,
         electrons -- the electron container and selection
         muons -- the muon container and selection
         jets -- the jet container and selection
+        largeRjets -- the large-R jet container and selection
         photons -- the photon container and selection
         taus -- the tau-jet container and selection
         met -- the MET container
@@ -567,13 +711,13 @@ def makeMultipleEventSelectionConfigs(seq,
     # handle the case where a user is only providing one selection
     if len(list(selectionCutsDict.keys())) == 1:
         name, selectionCuts = list(selectionCutsDict.items())[0]
-        makeEventSelectionConfig(seq, name, electrons, muons, jets, photons, taus, met, btagDecoration, preselection, selectionCuts, noFilter=noFilter, debugMode=debugMode, cutFlowHistograms=cutFlowHistograms)
+        makeEventSelectionConfig(seq, name, electrons, muons, jets, largeRjets, photons, taus, met, btagDecoration, preselection, selectionCuts, noFilter=noFilter, debugMode=debugMode, cutFlowHistograms=cutFlowHistograms)
         return
 
     # first, we generate all the individual event selections
     # !!! it's important to pass noFilter=True, to avoid applying the individual filters in series
     for name, selectionCuts in selectionCutsDict.items():
-        makeEventSelectionConfig(seq, name, electrons, muons, jets, photons, taus, met, btagDecoration, preselection, selectionCuts, noFilter=True, debugMode=debugMode, cutFlowHistograms=cutFlowHistograms)
+        makeEventSelectionConfig(seq, name, electrons, muons, jets, largeRjets, photons, taus, met, btagDecoration, preselection, selectionCuts, noFilter=True, debugMode=debugMode, cutFlowHistograms=cutFlowHistograms)
 
     # now we are ready to collect all the filters and apply their logical OR
     # !!! subregions (name starts with "SUB") are not used in the final filtering

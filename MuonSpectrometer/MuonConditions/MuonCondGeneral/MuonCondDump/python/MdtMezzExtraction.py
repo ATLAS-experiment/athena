@@ -24,6 +24,7 @@ if __name__ == "__main__":
     flags.Concurrency.NumConcurrentEvents = args.threads  # Might change this later, but good enough for the moment.
     flags.Output.ESDFileName = args.output
     flags.Input.Files = args.inputFile
+    flags.GeoModel.AtlasVersion = args.geometry
     flags.lock()   
     
     cfg = MdtCablMezzAlgCfg(flags,

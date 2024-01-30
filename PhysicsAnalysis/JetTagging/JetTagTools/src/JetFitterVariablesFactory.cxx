@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -20,16 +20,11 @@
 #include "VxJetVertex/SelectedTracksInJet.h"
 
 #include "TrkParameters/TrackParameters.h"
-//#include "TrkNeutralParameters/MeasuredNeutralPerigee.h"
-#include "VxSecVertex/VxSecVertexInfo.h"
 #include "VxSecVertex/VxJetFitterVertexInfo.h"
 
 #include "TrkTrackLink/ITrackLink.h"
 
-#include <TMath.h>
-
 #include "CLHEP/Vector/LorentzVector.h"
-#include "GeoPrimitives/GeoPrimitives.h"
 
 #include "JetTagTools/JetFitterVariablesFactory.h"
 
@@ -43,14 +38,10 @@ namespace Analysis {
   JetFitterVariablesFactory::JetFitterVariablesFactory(const std::string& name,
 						       const std::string& n, const IInterface* p):
     AthAlgTool(name, n,p),
-    m_secVxFinderName("InDetJetFitterVxFinder"), 
-    m_jetFitterInstance("JetFitterTag"),
     m_addNegativeTracksToPrimaryVertex(false),
     m_usePtCorrectedEnergy(false),
     m_useSingleTracksAlsoForMass(false)
   {
-    declareProperty("secVxFinderName",m_secVxFinderName);
-    declareProperty("JetFitterInstance",m_jetFitterInstance);
     declareProperty("addNegativeTracksToPrimaryVertex",m_addNegativeTracksToPrimaryVertex);
     declareProperty("usePtCorrectedEnergy",m_usePtCorrectedEnergy);
     declareProperty("useSingleTracksAlsoForMass",m_useSingleTracksAlsoForMass);
@@ -139,7 +130,7 @@ StatusCode JetFitterVariablesFactory::finalize() {
         const Trk::TrackParameters* myParameters=(*myPrimaryLinksIter)->parameters();
         if (myParameters)
         {
-          energyFromPrimary+=TMath::Sqrt(s_pion*s_pion+myParameters->momentum().mag2());
+          energyFromPrimary+=std::sqrt(s_pion*s_pion+myParameters->momentum().mag2());
         }
         else
         {
@@ -180,16 +171,9 @@ StatusCode JetFitterVariablesFactory::finalize() {
       {
         
         energyFromPrimary+=
-            TMath::Sqrt(s_pion*s_pion+
-                        (*TracksAtPrimaryIter)->perigeeAtVertex()->momentum().mag2());
+	  std::sqrt(s_pion*s_pion+
+		 (*TracksAtPrimaryIter)->perigeeAtVertex()->momentum().mag2());
       }
-//      else if (dynamic_cast<const Trk::MeasuredNeutralPerigee*>((*TracksAtPrimaryIter)->perigeeAtVertex())!=0)
-//      {
-//        ATH_MSG_VERBOSE(" Found KS pointing to primary vertex. Considering the correct mass. ");
-//        energyFromPrimary+=
-//            TMath::Sqrt(s_massks*s_massks+
-//                        (*TracksAtPrimaryIter)->perigeeAtVertex()->momentum().mag2());
-//      }
       else
       {
         ATH_MSG_ERROR(" FIXME: VERTEX DOESN'T SUPPORT NEUTRAL PERIGEE, commented out in line 163");
@@ -267,13 +251,13 @@ StatusCode JetFitterVariablesFactory::finalize() {
                clustersOfTrackIter!=clustersOfTrackEnd;++clustersOfTrackIter) {
             
             energyFromPrimary+=
-                TMath::Sqrt(s_pion*s_pion+pow((*clustersOfTrackIter)->perigeeAtVertex()->momentum().mag(),2));
+	      std::hypot(s_pion, (*clustersOfTrackIter)->perigeeAtVertex()->momentum().mag());
           }
         }
       } else {
 	
 	if ( (nVTX>0 && vertexSize>1) || nVTX==0 ) {
-	  dist+=fabs(vertexPosition[ntrack])/vertexCovMatrix(ntrack,ntrack);
+	  dist+=std::abs(vertexPosition[ntrack])/vertexCovMatrix(ntrack,ntrack);
           if (vertexCovMatrix(ntrack,ntrack)>0)
           {
             inverrordist+=1./vertexCovMatrix(ntrack,ntrack);
@@ -301,18 +285,8 @@ StatusCode JetFitterVariablesFactory::finalize() {
 	  sumP+=mytrack;
           if (dynamic_cast<const Trk::Perigee*>((*clustersOfTrackIter)->perigeeAtVertex())!=0)
           {
-            massThisCluster+=CLHEP::HepLorentzVector(mytrack.x(),mytrack.y(),mytrack.z(),TMath::Sqrt(s_pion*s_pion+mytrack.mag()*mytrack.mag()));
+            massThisCluster+=CLHEP::HepLorentzVector(mytrack.x(), mytrack.y(), mytrack.z(), std::hypot(s_pion, mytrack.mag()));
           }
-          //WARNING/TODO: commented out until after vertex has been rewritten
-//          else if (dynamic_cast<const Trk::NeutralPerigee*>((*clustersOfTrackIter)->perigeeAtVertex())!=0)
-//          {
-//            ATH_MSG_VERBOSE(" Found KS in one vertex. Adding the correct KS mass! ");
-//            massThisCluster+=CLHEP::HepLorentzVector(TMath::Sqrt(s_massks*s_massks+mytrack.mag()*mytrack.mag()),mytrack);
-//            if (nVTX>0)//if there is at least a vertex with already two tracks in the event
-//            {
-//              nTracksAtVtx+=1;
-//            }
-//          }
           else
           {
             ATH_MSG_ERROR("Neutral parameter has been taken out until Vertex has been rewritten to support neutral perigee again. ");
@@ -323,7 +297,7 @@ StatusCode JetFitterVariablesFactory::finalize() {
 	
 	sumPAllVertices+=sumP;
 	double ptadd=sumP.perp(flightAxis.unit());
-	double masswithneutrals=TMath::Sqrt(massThisCluster.mag2()+ptadd*ptadd)+ptadd;
+	double masswithneutrals=std::sqrt(massThisCluster.mag2()+ptadd*ptadd)+ptadd;
 
         if (m_useSingleTracksAlsoForMass)
         {
@@ -340,13 +314,11 @@ StatusCode JetFitterVariablesFactory::finalize() {
 	
         if (m_usePtCorrectedEnergy)
         {
-          energyFromSecondary+=TMath::Sqrt(masswithneutrals*masswithneutrals+
-                                           sumP.mag2());
+          energyFromSecondary+=std::sqrt(masswithneutrals*masswithneutrals+sumP.mag2());
         }
         else
         {
-          energyFromSecondary+=TMath::Sqrt(massThisCluster.mag2()+
-                                           sumP.mag2());
+          energyFromSecondary+=std::sqrt(massThisCluster.mag2()+sumP.mag2());
         }
         
 
@@ -360,29 +332,29 @@ StatusCode JetFitterVariablesFactory::finalize() {
     }
     
     if (massVector.mag()>0) {
-         mass=TMath::Sqrt(massVector.mag2()+sumPtAdd*sumPtAdd)+sumPtAdd;
-	 mass_uncorr=massVector.mag();
+      mass=std::sqrt(massVector.mag2()+sumPtAdd*sumPtAdd)+sumPtAdd;
+      mass_uncorr=massVector.mag();
       //port range of mass to maximum 10000.
       if (mass>5000.) {
 	mass = 
-	  5000.+(5000./M_PI)*2.*TMath::ATan((M_PI/2./5000.)*(mass-5000.));
+	  5000.+(5000./M_PI)*2.*std::atan((M_PI/2./5000.)*(mass-5000.));
       }
       if (mass_uncorr>5000.) {
 	mass_uncorr = 
-	  5000.+(5000./M_PI)*2.*TMath::ATan((M_PI/2./5000.)*(mass_uncorr-5000.));
+	  5000.+(5000./M_PI)*2.*std::atan((M_PI/2./5000.)*(mass_uncorr-5000.));
       }
     }
     
     if (inverrordist!=0) {
-      significance3d=dist/TMath::Sqrt(inverrordist);
+      significance3d=dist/std::sqrt(inverrordist);
       //port range of significance 3d to maximum 100.
-      significance3d=100./(M_PI/2.)*TMath::ATan((M_PI/2./100.)*significance3d);
+      significance3d=100./(M_PI/2.)*std::atan((M_PI/2./100.)*significance3d);
     }
     
-    if (fabs(sumPAllVertices.mag())>1e-7) {
+    if (std::abs(sumPAllVertices.mag())>1e-7) {
       deltaphi=sumPAllVertices.eta()-JetVector.Eta();
       deltaeta=sumPAllVertices.deltaPhi(Amg::Vector3D(JetVector.Px(), JetVector.Py(), JetVector.Pz()));
-      deltaRFlightDir = TMath::Sqrt(sumPAllVertices.deltaPhi(flightAxis)*sumPAllVertices.deltaPhi(flightAxis) + (sumPAllVertices.eta()-flightAxis.eta())*(sumPAllVertices.eta()-flightAxis.eta()));
+      deltaRFlightDir = std::hypot(sumPAllVertices.deltaPhi(flightAxis), sumPAllVertices.eta()-flightAxis.eta());
     } else {
       deltaphi=-10.;
       deltaeta=-10.;

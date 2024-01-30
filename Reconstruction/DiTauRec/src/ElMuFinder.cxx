@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DiTauRec/ElMuFinder.h"
@@ -9,8 +9,6 @@
 
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/MuonContainer.h"
-
-#include "tauRecTools/KineUtils.h"
 
 #include "StoreGate/ReadHandle.h"
 
@@ -62,7 +60,6 @@ StatusCode ElMuFinder::execute(DiTauCandidateData * data,
   SG::ReadHandle<xAOD::MuonContainer> pMuCont (m_muContName, ctx);
 
   // select electrons
-  float dR;
   data->electrons.clear();
   if (pElCont.isValid()) {
     for (const auto *const el : *pElCont ) {
@@ -77,8 +74,7 @@ StatusCode ElMuFinder::execute(DiTauCandidateData * data,
       ATH_MSG_DEBUG("Electron passes basic kinematic selection");
     
       // electron inside seed jet area?
-      dR = Tau1P3PKineUtils::deltaR(data->seed->eta(), data->seed->phi(), el->eta(), el->phi());
-      if (dR > data->Rjet)
+      if (data->seed->p4().DeltaR(el->p4()) > data->Rjet)
 	continue;
     
       data->electrons.push_back(el);
@@ -99,9 +95,9 @@ StatusCode ElMuFinder::execute(DiTauCandidateData * data,
       if (muonQuality >= m_muQual && std::abs(mu->eta()) >= m_muMaxEta) continue;
     
       // muon inside seed jet area?
-      dR = Tau1P3PKineUtils::deltaR(data->seed->eta(), data->seed->phi(), mu->eta(), mu->phi());
-      if (dR > data->Rjet)
+      if (data->seed->p4().DeltaR(mu->p4())  > data->Rjet)
 	continue;
+
       data->muons.push_back(mu);
     }
     ATH_MSG_DEBUG("Number of good muons found: " << data->muons.size() );

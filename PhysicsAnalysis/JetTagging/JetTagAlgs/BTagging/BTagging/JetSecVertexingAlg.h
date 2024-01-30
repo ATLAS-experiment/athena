@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_JETSECVERTEXINGALG_H
@@ -14,15 +14,14 @@ namespace InDet {
 
 #include <string>
 
-#include "xAODJet/Jet.h"
 #include "xAODJet/JetContainer.h"
 #include "VxSecVertex/VxSecVertexInfo.h"
-#include "xAODBTagging/BTagging.h"
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/Vertex.h"
 #include "xAODBTagging/BTagVertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
+
+#include "JetTagTools/IMSVVariablesFactory.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -38,14 +37,13 @@ namespace Trk{
 /** The namespace of all packages in PhysicsAnalysis/JetTagging */
 namespace Analysis
 {
-  class IMSVVariablesFactory;
 
   class JetSecVertexingAlg : public AthReentrantAlgorithm
   {
       public:
         /** Constructors and destructors */
         JetSecVertexingAlg(const std::string& name, ISvcLocator *pSvcLocator);
-        virtual ~JetSecVertexingAlg();
+        virtual ~JetSecVertexingAlg() = default;
     
         /** Main routines specific to an ATHENA algorithm */
         virtual StatusCode initialize() override;
@@ -59,7 +57,6 @@ namespace Analysis
         ToolHandle<IMSVVariablesFactory> m_MSVvarFactory;
 
         std::string m_secVertexFinderBaseName;
-        std::string m_vxPrimaryName; //Input ReadHandle
 
         SG::ReadHandleKey<xAOD::JetContainer > m_JetCollectionName {this, "JetCollectionName", "", "Input jet container"};
         SG::ReadHandleKey<xAOD::TrackParticleContainer > m_TrackCollectionName {this, "TrackCollectionName", "", "Input track container"};
