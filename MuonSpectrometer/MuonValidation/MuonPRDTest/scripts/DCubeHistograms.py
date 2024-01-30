@@ -20,7 +20,7 @@ class MyHistoFiller(object):
     rpcGlobalX = ROOT.TH1F("rpcGlobalX","rpcGlobalX;RPC_SIM_hitGlobalPositionX",100,-15000,15000)
     rpcGlobalY = ROOT.TH1F("rpcGlobalY","rpcGlobalY;RPC_SIM_hitGlobalPositionY",100,-15000,15000)
     rpcGlobalZ = ROOT.TH1F("rpcGlobalZ","rpcGlobalZ;RPC_SIM_hitGlobalPositionZ",100,-15000,15000)
-    rpcGasGap = ROOT.TH1F("rpcGasGap","rpcGasGap;RPC_SIM_gasGap",4,0,4)
+    rpcGasGap = ROOT.TH1F("rpcGasGap","rpcGasGap;RPC_SIM_GasGap",4,0,4)
     
     # RPC Digit Histograms (all stations)
     rpcDigitlocalX = ROOT.TH1F("rpcDigitlocalX","rpcDigitlocalX;Digits_RPC_localPosX [mm]",100,-1200,1200)
@@ -30,7 +30,7 @@ class MyHistoFiller(object):
     rpcDigitglobalX = ROOT.TH1F("rpcDigitglobalX","rpcDigitglobalX;Digits_RPC_globalPosX [mm]",100,-13000,12000)
     rpcDigitglobalY = ROOT.TH1F("rpcDigitglobalY","rpcDigitglobalY;Digits_RPC_globalPosY [mm]",100,-15000,15000)
     rpcDigitglobalZ = ROOT.TH1F("rpcDigitglobalZ","rpcDigitglobalZ;Digits_RPC_globalPosZ [mm]",100,-15000,15000)
-    rpcDigitGasGap = ROOT.TH1F("rpcDigitGasGap","rpcDigitGasGap;Digits_RPC_gas_gap",5,0,5)
+    rpcDigitGasGap = ROOT.TH1F("rpcDigitGasGap","rpcDigitGasGap;Digits_RPC_GasGap",5,0,5)
     rpcDigitdoubletR = ROOT.TH1F("rpcDigitdoubletR","rpcDigitdoubletR;Digits_RPC_doubletR",4,0,4)
     rpcDigitdoubletZ = ROOT.TH1F("rpcDigitdoubletZ","rpcDigitdoubletZ;Digits_RPC_doubletZ",4,0,4)
     rpcDigitdoubletPhi = ROOT.TH1F("rpcDigitdoubletPhi","rpcDigitdoubletPhi;Digits_RPC_doubletPhi",4,0,4)
@@ -54,7 +54,7 @@ class MyHistoFiller(object):
     bis_rpcDigitglobalX = ROOT.TH1F("bis_rpcDigitglobalX","bis_rpcDigitglobalX;Digits_bis_RPC_globalPosX [mm]",100,-5000,5000)
     bis_rpcDigitglobalY = ROOT.TH1F("bis_rpcDigitglobalY","bis_rpcDigitglobalY;Digits_bis_RPC_globalPosY [mm]",100,-5000,5000)
     bis_rpcDigitglobalZ = ROOT.TH1F("bis_rpcDigitglobalZ","bis_rpcDigitglobalZ;Digits_bis_RPC_globalPosZ [mm]",100,-10000,10000)
-    bis_rpcDigitGasGap = ROOT.TH1F("bis_rpcDigitGasGap","bis_rpcDigitGasGap;Digits_bis_RPC_gas_gap",5,0,5)
+    bis_rpcDigitGasGap = ROOT.TH1F("bis_rpcDigitGasGap","bis_rpcDigitGasGap;Digits_bis_RPC_GasGap",5,0,5)
     bis_rpcDigitdoubletR = ROOT.TH1F("bis_rpcDigitdoubletR","bis_rpcDigitdoubletR;Digits_bis_RPC_doubletR",4,0,4)
     bis_rpcDigitdoubletZ = ROOT.TH1F("bis_rpcDigitdoubletZ","bis_rpcDigitdoubletZ;Digits_bis_RPC_doubletZ",4,0,4)
     bis_rpcDigitdoubletPhi = ROOT.TH1F("bis_rpcDigitdoubletPhi","bis_rpcDigitdoubletPhi;Digits_bis_RPC_doubletPhi",4,0,4)
@@ -194,7 +194,7 @@ class MyHistoFiller(object):
     tgcGlobalX = ROOT.TH1F("tgcGlobalX","tgcGlobalX;TGC_Sim_hitGlobalPositionX",100,-12000,12000)
     tgcGlobalY = ROOT.TH1F("tgcGlobalY","tgcGlobalY;TGC_Sim_hitGlobalPositionY",100,-12000,12000)
     tgcGlobalZ = ROOT.TH1F("tgcGlobalZ","tgcGlobalZ;TGC_Sim_hitGlobalPositionZ",100,-20000,20000)
-    tgcGasGap = ROOT.TH1F("tgcGasGap","tgcGasGap;TGC_Sim_gasGap",4,0,4)
+    tgcGasGap = ROOT.TH1F("tgcGasGap","tgcGasGap;TGC_Sim_GasGap",4,0,4)
     tgcChannel = ROOT.TH1F("tgcChannel","tgcChannel;TGC_Sim_channel",3,0,3)
     tgcGlobalTime = ROOT.TH1F("tgcGlobalTime","tgcGlobalTime;TGC_sim_globalTime",100,0,500)
     tgcKineticEnergy = ROOT.TH1F("tgcKineticEnergy","tgcKineticEnergy;TGC_Sim_kineticEnergy",100,0,400000)
@@ -212,7 +212,7 @@ class MyHistoFiller(object):
     # TGC SDO Histograms
     TGCSDOStationEta = ROOT.TH1F("TGCSDOStationEta","TGCSDOStationEta;SDO_TGC_stationEta",12,-6,6)
     TGCSDOStationPhi = ROOT.TH1F("TGCSDOStationPhi","TGCSDOStationPhi;SDO_TGC_stationPhi",50,0,50)
-    TGCSDOGasgap = ROOT.TH1F("TGCSDOGasgap","TGCSDOGasgap;SDO_TGC_GasGap",4,0,4)
+    TGCSDOGasGap = ROOT.TH1F("TGCSDOGasGap","TGCSDOGasGap;SDO_TGC_GasGap",4,0,4)
     TGCSDOChannel = ROOT.TH1F("TGCSDOChannel","TGCSDOChannel;SDO_TGC_channel",100,0,150)
     TGCSDOWord = ROOT.TH1F("TGCSDOWord","TGCSDOWord;SDO_TGC_word",4,-2,2)
     TGCSDOBarcode = ROOT.TH1F("TGCSDOBarcode","TGCSDOBarcode;SDO_TGC_barcode",100,0,200000) 
@@ -225,7 +225,7 @@ class MyHistoFiller(object):
     # TGC RDO Histograms
     TGCRDOStationEta = ROOT.TH1F("TGCRDOStationEta","TGCRDOStationEta;RDO_TGC_stationEta",12,-6,6)
     TGCRDOStationPhi = ROOT.TH1F("TGCRDOStationPhi","TGCRDOStationPhi;RDO_TGC_stationPhi",50,0,50)
-    TGCRDOGasgap = ROOT.TH1F("TGCRDOGasgap","TGCRDOGasgap;RDO_TGC_GasGap",3,0,3)
+    TGCRDOGasGap = ROOT.TH1F("TGCRDOGasGap","TGCRDOGasGap;RDO_TGC_GasGap",3,0,3)
     TGCRDOChannel = ROOT.TH1F("TGCRDOChannel","TGCRDOChannel;RDO_TGC_channel",3,0,3)
     TGCRDOGlobalX = ROOT.TH1F("TGCRDOGlobalX","TGCRDOGlobalX;RDO_TGC_globalPosX",100,-10000,10000)
     TGCRDOGlobalY = ROOT.TH1F("TGCRDOGlobalY","TGCRDOGlobalY;RDO_TGC_globalPosY",100,-10000,10000)
@@ -234,7 +234,7 @@ class MyHistoFiller(object):
     # TGC PRD Histograms
     TGCPRDStationEta = ROOT.TH1F("TGCPRDStationEta","TGCPRDStationEta;PRD_TGC_stationEta",12,-6,6)
     TGCPRDStationPhi = ROOT.TH1F("TGCPRDStationPhi","TGCPRDStationPhi;PRD_TGC_stationPhi",50,0,50)
-    TGCPRDGasgap = ROOT.TH1F("TGCPRDGasgap","TGCPRDGasgap;PRD_TGC_gas_gap",4,0,4)
+    TGCPRDGasGap = ROOT.TH1F("TGCPRDGasGap","TGCPRDGasGap;PRD_TGC_GasGap",4,0,4)
     TGCPRDChannel = ROOT.TH1F("TGCPRDChannel","TGCPRDChannel;PRD_TGC_channel",100,0,150)
     TGCPRDisStrip = ROOT.TH1F("TGCPRDisStrip","TGCPRDisStrip;PRD_TGC_isStrip",2,0,2) 
     TGCPRDGlobalX = ROOT.TH1F("TGCPRDGlobalX","TGCPRDGlobalX;PRD_TGC_globalPosX",100,-15000,15000)
@@ -289,7 +289,7 @@ class MyHistoFiller(object):
                 MyHistoFiller.rpcGlobalX.Fill(TTree.RPC_SIM_GlobalPositionX[n])
                 MyHistoFiller.rpcGlobalY.Fill(TTree.RPC_SIM_GlobalPositionY[n])
                 MyHistoFiller.rpcGlobalZ.Fill(TTree.RPC_SIM_GlobalPositionZ[n])
-                MyHistoFiller.rpcGasGap.Fill(ord(TTree.RPC_SIM_gasGap[n]))
+                MyHistoFiller.rpcGasGap.Fill(ord(TTree.RPC_SIM_GasGap[n]))
                 
         if self.__chamber_name == "RPC_Digit":
             if not (self.__eta_sel(TTree) and self.__sector_sel(TTree)):
@@ -302,7 +302,7 @@ class MyHistoFiller(object):
                 MyHistoFiller.rpcDigitglobalX.Fill(TTree.Digits_RPC_globalPosX[n])
                 MyHistoFiller.rpcDigitglobalY.Fill(TTree.Digits_RPC_globalPosY[n])
                 MyHistoFiller.rpcDigitglobalZ.Fill(TTree.Digits_RPC_globalPosZ[n])
-                MyHistoFiller.rpcDigitGasGap.Fill(ord(TTree.Digits_RPC_gasGap[n]))
+                MyHistoFiller.rpcDigitGasGap.Fill(ord(TTree.Digits_RPC_GasGap[n]))
                 MyHistoFiller.rpcDigitdoubletR.Fill(ord(TTree.Digits_RPC_doubletR[n]))
                 MyHistoFiller.rpcDigitdoubletZ.Fill(ord(TTree.Digits_RPC_doubletZ[n]))
                 MyHistoFiller.rpcDigitdoubletPhi.Fill(ord(TTree.Digits_RPC_doubletPhi[n]))
@@ -343,7 +343,7 @@ class MyHistoFiller(object):
                     MyHistoFiller.bis_rpcDigitglobalX.Fill(TTree.Digits_RPC_globalPosX[n])
                     MyHistoFiller.bis_rpcDigitglobalY.Fill(TTree.Digits_RPC_globalPosY[n])
                     MyHistoFiller.bis_rpcDigitglobalZ.Fill(TTree.Digits_RPC_globalPosZ[n])
-                    MyHistoFiller.bis_rpcDigitGasGap.Fill(ord(TTree.Digits_RPC_gasGap[n]))
+                    MyHistoFiller.bis_rpcDigitGasGap.Fill(ord(TTree.Digits_RPC_GasGap[n]))
                     MyHistoFiller.bis_rpcDigitdoubletR.Fill(ord(TTree.Digits_RPC_doubletR[n]))
                     MyHistoFiller.bis_rpcDigitdoubletZ.Fill(ord(TTree.Digits_RPC_doubletZ[n]))
                     MyHistoFiller.bis_rpcDigitdoubletPhi.Fill(ord(TTree.Digits_RPC_doubletPhi[n]))
@@ -531,7 +531,7 @@ class MyHistoFiller(object):
             else:
                 MyHistoFiller.TGCSDOStationEta.Fill(MyHistoFiller.Eta(ord(TTree.SDO_TGC_stationEta[n])))
                 MyHistoFiller.TGCSDOStationPhi.Fill(ord(TTree.SDO_TGC_stationPhi[n]))
-                MyHistoFiller.TGCSDOGasgap.Fill(ord(TTree.SDO_TGC_GasGap[n]))
+                MyHistoFiller.TGCSDOGasGap.Fill(ord(TTree.SDO_TGC_GasGap[n]))
                 MyHistoFiller.TGCSDOChannel.Fill(ord(TTree.SDO_TGC_channel[n]))
                 MyHistoFiller.TGCSDOWord.Fill(TTree.SDO_TGC_word[n])
                 MyHistoFiller.TGCSDOBarcode.Fill(TTree.SDO_TGC_barcode[n])
@@ -548,7 +548,7 @@ class MyHistoFiller(object):
             else:
                 MyHistoFiller.TGCRDOStationEta.Fill(MyHistoFiller.Eta(ord(TTree.RDO_TGC_stationEta[n])))
                 MyHistoFiller.TGCRDOStationPhi.Fill(ord(TTree.RDO_TGC_stationPhi[n]))
-                MyHistoFiller.TGCRDOGasgap.Fill(ord(TTree.RDO_TGC_GasGap[n]))
+                MyHistoFiller.TGCRDOGasGap.Fill(ord(TTree.RDO_TGC_GasGap[n]))
                 MyHistoFiller.TGCRDOChannel.Fill(ord(TTree.RDO_TGC_channel[n]))
                 MyHistoFiller.TGCRDOGlobalX.Fill(TTree.RDO_TGC_globalPosX[n])
                 MyHistoFiller.TGCRDOGlobalY.Fill(TTree.RDO_TGC_globalPosY[n])
@@ -561,7 +561,7 @@ class MyHistoFiller(object):
             else:
                 MyHistoFiller.TGCPRDStationEta.Fill(MyHistoFiller.Eta(ord(TTree.PRD_TGC_stationEta[n])))
                 MyHistoFiller.TGCPRDStationPhi.Fill(ord(TTree.PRD_TGC_stationPhi[n]))
-                MyHistoFiller.TGCPRDGasgap.Fill(ord(TTree.PRD_TGC_gasGap[n]))
+                MyHistoFiller.TGCPRDGasGap.Fill(ord(TTree.PRD_TGC_GasGap[n]))
                 MyHistoFiller.TGCPRDChannel.Fill(ord(TTree.PRD_TGC_channel[n]))
                 MyHistoFiller.TGCPRDisStrip.Fill(TTree.PRD_TGC_isStrip[n])
                 MyHistoFiller.TGCPRDGlobalX.Fill(TTree.PRD_TGC_globalPosX[n])
@@ -795,7 +795,7 @@ class MyHistoFiller(object):
         if self.__chamber_name == "TGC_SDO":
             outdir.WriteTObject(MyHistoFiller.TGCSDOStationEta, MyHistoFiller.TGCSDOStationEta.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCSDOStationPhi, MyHistoFiller.TGCSDOStationPhi.GetName())
-            outdir.WriteTObject(MyHistoFiller.TGCSDOGasgap, MyHistoFiller.TGCSDOGasgap.GetName())
+            outdir.WriteTObject(MyHistoFiller.TGCSDOGasGap, MyHistoFiller.TGCSDOGasGap.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCSDOChannel, MyHistoFiller.TGCSDOChannel.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCSDOWord, MyHistoFiller.TGCSDOWord.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCSDOBarcode, MyHistoFiller.TGCSDOBarcode.GetName())
@@ -809,7 +809,7 @@ class MyHistoFiller(object):
         if self.__chamber_name == "TGC_RDO":
             outdir.WriteTObject(MyHistoFiller.TGCRDOStationEta, MyHistoFiller.TGCRDOStationEta.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCRDOStationPhi, MyHistoFiller.TGCRDOStationPhi.GetName())
-            outdir.WriteTObject(MyHistoFiller.TGCRDOGasgap, MyHistoFiller.TGCRDOGasgap.GetName())
+            outdir.WriteTObject(MyHistoFiller.TGCRDOGasGap, MyHistoFiller.TGCRDOGasGap.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCRDOChannel, MyHistoFiller.TGCRDOChannel.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCRDOGlobalX, MyHistoFiller.TGCRDOGlobalX.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCRDOGlobalY, MyHistoFiller.TGCRDOGlobalY.GetName())
@@ -819,7 +819,7 @@ class MyHistoFiller(object):
         if self.__chamber_name == "TGC_PRD":
             outdir.WriteTObject(MyHistoFiller.TGCPRDStationEta, MyHistoFiller.TGCPRDStationEta.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCPRDStationPhi, MyHistoFiller.TGCPRDStationPhi.GetName())
-            outdir.WriteTObject(MyHistoFiller.TGCPRDGasgap, MyHistoFiller.TGCPRDGasgap.GetName())
+            outdir.WriteTObject(MyHistoFiller.TGCPRDGasGap, MyHistoFiller.TGCPRDGasGap.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCPRDChannel, MyHistoFiller.TGCPRDChannel.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCPRDisStrip, MyHistoFiller.TGCPRDisStrip.GetName())
             outdir.WriteTObject(MyHistoFiller.TGCPRDGlobalX, MyHistoFiller.TGCPRDGlobalX.GetName())

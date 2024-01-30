@@ -60,7 +60,7 @@ if __name__ == "__main__":
     rpcGlobalZ = ROOT.TH1F("rpcGlobalZ","rpcGlobalZ;RPC_hitGlobalPositionZ",100,-15000,15000)
     rpcGlobalR = ROOT.TH1F("rpcGlobalR","rpcGlobalR;RPC_hitGlobalPositionR",100,4000,14000)
     rpcGlobalP = ROOT.TH1F("rpcGlobalP","rpcGlobalP;RPC_hitGlobalPositionP",100,-3.6,3.6)
-    rpcGasGap = ROOT.TH1F("rpcGasGap","rpcGasGap;RPC_Sim_gasGapLayer",3,0,3)
+    rpcGasGap = ROOT.TH1F("rpcGasGap","rpcGasGap;RPC_Sim_GasGapLayer",3,0,3)
     #############################################################################
     # MDTs
     mdtLocalX = ROOT.TH1F("mdtLocalX","mdtLocalX;MDT_hitLocalPositionX",100,-16,16)
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     tgcGlobalZ = ROOT.TH1F("tgcGlobalZ","tgcGlobalZ;TGC_hitGlobalPositionZ",100,-18000,18000)
     tgcGlobalR = ROOT.TH1F("tgcGlobalR","tgcGlobalR;TGC_hitGlobalPositionR",100,1000,13000)
     tgcGlobalP = ROOT.TH1F("tgcGlobalP","tgcGlobalP;TGC_hitGlobalPositionP",100,-3.6,3.6)
-    tgcGasGap = ROOT.TH1F("tgcGasGap","tgcGasGap;TGC_gasGap",4,0,4)
+    tgcGasGap = ROOT.TH1F("tgcGasGap","tgcGasGap;TGC_GasGap",4,0,4)
     tgcChannel = ROOT.TH1F("tgcChannel","tgcChannel;TGC_channel",3,0,3)
     tgcGlobalTime = ROOT.TH1F("tgcGlobalTime","tgcGlobalTime;TGC_globalTime",100,0,120)
     tgcKineticEnergy = ROOT.TH1F("tgcKineticEnergy","tgcKineticEnergy;TGC_kineticEnergy",100,0,400000)
@@ -146,7 +146,7 @@ if __name__ == "__main__":
             rpcGlobalZ.Fill(inputTree.RPC_hitGlobalPositionZ[nrpcHit])
             rpcGlobalR.Fill(inputTree.RPC_hitGlobalPositionR[nrpcHit])
             rpcGlobalP.Fill(inputTree.RPC_hitGlobalPositionP[nrpcHit])
-            rpcGasGap.Fill(inputTree.RPC_Sim_gasGapLayer[nrpcHit])
+            rpcGasGap.Fill(inputTree.RPC_Sim_GasGapLayer[nrpcHit])
 # MDT
         for nmdtHit in range(0,len(inputTree.MDT_hitLocalPositionX)):
             mdtLocalX.Fill(inputTree.MDT_hitLocalPositionX[nmdtHit])
@@ -190,7 +190,7 @@ if __name__ == "__main__":
             tgcGlobalZ.Fill(inputTree.TGC_hitGlobalPositionZ[ntgcHit])
             tgcGlobalR.Fill(inputTree.TGC_hitGlobalPositionR[ntgcHit])
             tgcGlobalP.Fill(inputTree.TGC_hitGlobalPositionP[ntgcHit])
-            tgcGasGap.Fill(inputTree.TGC_gasGap[ntgcHit])
+            tgcGasGap.Fill(inputTree.TGC_GasGap[ntgcHit])
             tgcChannel.Fill(inputTree.TGC_channel[ntgcHit])
             tgcGlobalTime.Fill(inputTree.TGC_globalTime[ntgcHit])
             tgcKineticEnergy.Fill(inputTree.TGC_kineticEnergy[ntgcHit])
