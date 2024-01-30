@@ -23,7 +23,7 @@ import TrigTransform.dbgAnalysis as dbgStream
 from TrigTransform.trigTranslate import getTranslated as getTranslated
 
 # Setup logging here
-import logging
+import logging, eformat
 msg = logging.getLogger("PyJobTransforms." + __name__)
 
 # Trig_reco_tf.py executor for BS-BS step (aka running the trigger)
@@ -310,6 +310,8 @@ class trigRecoExecutor(athenaExecutor):
        
         #Count the number of rejected events 
         rejected = 0 
+        #Count the number of accepted events
+        accepted = 0 
        
         try:
             myGen = lineByLine(log, substepName=self._substep)
@@ -346,10 +348,14 @@ class trigRecoExecutor(athenaExecutor):
                                 if 'rejected:' in line and int(line[14]) != 0:
                                     #Add the number of rejected events      
                                     rejected += int(line[14])
+                                # Check for accepted events in log file
+                                if 'accepted:' in line and int(line[14]) != 0:
+                                    #Add the number of accepted events      
+                                    accepted += int(line[14])
             
             if "HIST_DEBUGSTREAMMON" in self.conf.dataDictionary: 
-                # Add the HLT_rejected_events histogram to the output file 
-                dbgStream.getHltDecision(rejected, self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value[0])
+                # Add the HLT_accepted_events and HLT_rejected_events histograms to the output file 
+                dbgStream.getHltDecision(accepted, rejected, self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value[0])
 
         except OSError as e:
             raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
@@ -452,10 +458,21 @@ class trigRecoExecutor(athenaExecutor):
                     argInDict = self.conf.dataDictionary['BS']
                     # If a stream (not All) is selected, then slim the orignal (many stream) BS output to the particular stream
                     if 'streamSelection' in self.conf.argdict and self.conf.argdict['streamSelection'].value[0] != "All":
-                        splitFailed = self._splitBSfile(self.conf.argdict['streamSelection'].value, BSFile, argInDict.value[0])
-                        if(splitFailed):
-                            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
-                                'Did not produce any BS file when selecting stream with trigbs_extractStream.py in file')
+                        splitEmpty = self._splitBSfile(self.conf.argdict['streamSelection'].value, BSFile, argInDict.value[0])
+                        if(splitEmpty):
+                            msg.info('Did not produce any BS file when selecting stream with trigbs_extractStream.py in file')
+                            #If splitEmpty==1, the chosen streams contained no events 
+                            #then run the command to produce an empty BS file and rename it to RAW.pool.root 
+                            #this stops non-zero exit code for rejected events 
+                            cmd_splitFailed = 'trigbs_failedStreamSelection.py ' + BSFile   
+                            msg.info('running command for creating empty file: %s', cmd_splitFailed)
+                            subprocess.call(cmd_splitFailed, shell=True)
+                            #Rename the empty file to "RAW.pool.root" to prevent failure 
+                            #expected filename will be of form: T0debug.runnumber.unknown_debug.unknown.RAW._lb0000._TRF._0001.data
+                            runnumber = eformat.EventStorage.pickDataReader(BSFile).runNumber()
+                            expectedOutputFileName = 'T0debug.00'+str(runnumber)+'.unknown_debug.unknown.RAW._lb0000._TRF._0001.data'
+                            #rename the file to RAW.pool.root, this file will contain 0 events 
+                            self._renamefile(expectedOutputFileName, argInDict.value[0])                     
                     else:
                         msg.info('Stream "All" requested, so not splitting BS file')
                         self._renamefile(BSFile, argInDict.value[0])
@@ -466,6 +483,10 @@ class trigRecoExecutor(athenaExecutor):
 
         msg.info('Now run athenaExecutor:postExecute')
         super(trigRecoExecutor, self).postExecute()
+
+        # Do debug stream postRun step for BS file that contains events after the streamSelection
+        fileNameDbg = self.conf.argdict["outputHIST_DEBUGSTREAMMONFile"].value
+        dbgStream.dbgPostRun(argInDict.value[0], fileNameDbg[0], self.conf.argdict, isSplitStream=True)
 
 
     def _postExecuteDebug(self, outputBSFile):
@@ -484,3 +505,6 @@ class trigRecoExecutor(athenaExecutor):
         
         # Do debug stream postRun step
         dbgStream.dbgPostRun(outputBSFile, fileNameDbg[0], self.conf.argdict)
+
+        # Call Pre Pos histogram differenece function
+        dbgStream.getPrePosdiff(fileNameDbg[0])
