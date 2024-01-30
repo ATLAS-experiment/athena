@@ -199,7 +199,8 @@ public:
     double amp = theTF1->GetParameter(0);
     double constant = theTF1->GetParameter(4);
 
-    return constant / amp;
+    if (amp > 0) return constant / amp;
+    else return -1;
   }
 
   virtual double operator()(const double *x, const double *p)  override{
@@ -327,10 +328,9 @@ public:
   {
     const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
     double amp = theTF1->GetParameter(0);
-    double slope = theTF1->GetParameter(2);
+    double C = theTF1->GetParameter(2);
 
-    double background = slope * GetTime();
-    return background / amp;
+    return C / amp;
   }
 
   virtual double operator() (const double *x, const double *p) override
@@ -414,14 +414,15 @@ public:
     
     double preAmp = theTF1->GetParameter(2);
     double preT0 = theTF1->GetParameter(3);
-    double slope = theTF1->GetParameter(4);
+    double C = theTF1->GetParameter(4);
 
     double deltaTPre = maxTime - preT0;
+    double deltaPresamp = GetTMinAdjust() - preT0;
 
-    double background = slope * maxTime + preAmp * m_norm * (m_expFermiFunc->operator()(deltaTPre) -
-                        m_expFermiFunc->operator()(-preT0));
+    double offsetFit = preAmp * m_norm * m_expFermiFunc->operator()(deltaPresamp);
+    double background = preAmp * m_norm * m_expFermiFunc->operator()(deltaTPre);
 
-    return background / amp;
+    return background / (amp + background);
   }
 
   virtual double operator() (const double *x, const double *p) override
@@ -451,6 +452,89 @@ public:
                                         m_expFermiFunc->operator()(deltaPresamp));
 
     return C + pulse1 + pulse2;// + bckgd;
+  }
+};
+
+class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiPreExp : public ZDCPreExpFitWrapper
+{
+private:
+  float m_tau1;
+  float m_tau2;
+  float m_norm;
+  float m_timeCorr;
+  
+  std::shared_ptr<TF1> m_expFermiFunc = 0;
+
+public:
+  ZDCFitExpFermiPreExp(const std::string& tag, float tmin, float tmax, float tau1, float tau2,
+			   float defExpTau, float fixExpTau);
+  ~ZDCFitExpFermiPreExp() {}
+
+  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
+  virtual void SetT0FitLimits(float tMin, float tMax) override;
+
+  virtual void SetInitialExpPulse(float amp) override
+  {
+    GetWrapperTF1()->SetParameter(2, std::max(amp, (float) 0.5)); //0.5 here ensures that we're above lower limit (0)   
+  }
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
+
+  virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
+  virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
+
+  virtual float GetTau1() const override {return m_tau1;}
+  virtual float GetTau2() const override {return m_tau2;}
+
+  virtual float GetTime() const override {
+    return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
+  }
+
+  virtual float GetExpAmp() const override {return GetWrapperTF1()->GetParameter(2);}
+  virtual float GetExpTau() const override {return GetWrapperTF1()->GetParameter(3);}
+
+  virtual float GetShapeParameter(size_t index) const override
+  {
+    if (index == 0) return m_tau1;
+    else if (index == 1) return m_tau2;
+    else if (index < 5) return GetWrapperTF1()->GetParameter(index);
+    else throw std::runtime_error("Fit parameter does not exist.");
+  }
+
+  virtual float GetBkgdMaxFraction() const override
+  {
+    // const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
+    // double maxTime = GetTime();
+    // double amp = theTF1->GetParameter(0);
+
+    //    return background / amp;
+    return 0;
+  }
+
+  virtual double operator() (const double *x, const double *p) override
+  {
+    double t = x[0];
+
+    double amp = p[0];
+    double t0 = p[1];
+    double expAmp = p[2];
+    double expTau = p[3];
+    double expSqrtTau = p[4];
+    double C = p[5];
+
+    double deltaT = t - t0;
+    double pulse =  amp * m_norm * m_expFermiFunc->operator()(deltaT);
+
+    // We subtract off the value of the exponential pulse at the minimum time (nominally 0),
+    //   because it would have been included in the baseline subtraction
+    //
+    double tRef = GetTMinAdjust();
+    double expPre = 0;
+    if (t > 0 && std::abs(expSqrtTau)>1e-6) expPre = expAmp * (std::exp(-t/expTau-expSqrtTau*std::sqrt(t)) - std::exp(-tRef/expTau));
+    else expPre = expAmp * (std::exp(-t/expTau) - std::exp(-tRef/expTau));
+      
+    return C + pulse + expPre;
   }
 };
 
@@ -519,8 +603,9 @@ public:
     double t0 = p[1];
     double expAmp = p[2];
     double expTau = p[3];
-    double reflFrac = p[4];
-    double C = p[5];
+    double expSqrtTau = p[4];
+    double reflFrac = p[5];
+    double C = p[6];
 
     m_expFermiLHCfFunc->SetParameter(6, reflFrac);
       
@@ -531,8 +616,12 @@ public:
     //   because it would have been included in the baseline subtraction
     //
     double tRef = GetTMinAdjust();
-    double expPre =  expAmp * (std::exp(-t/expTau) - std::exp(-tRef/expTau));
+    double expPre = 0;
+    /* if (t > 0 && std::abs(expSqrtTau)>1e-6) expPre = expAmp * (std::exp(-t/expTau-expSqrtTau*std::sqrt(t)) - std::exp(-tRef/expTau)); */
+    /* else expPre = expAmp * (std::exp(-t/expTau) - std::exp(-tRef/expTau)); */
 
+    expPre = expAmp * (std::exp(-t/expTau-expSqrtTau*t*t) - std::exp(-tRef/expTau - -expSqrtTau*tRef*tRef));
+      
     return C + pulse + expPre;
   }
 };
