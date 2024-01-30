@@ -64,7 +64,11 @@ class TrigInDetReco(ExecStep):
         self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
         self.args += ' --CA'
         if not self._isCA:
+<<<<<<< HEAD
             self.args += ' "default:True"'
+=======
+            self.args += ' "default:True" "RDOtoRDOTrigger:False"'
+>>>>>>> ceee5aad679 (reverting accidental changes...)
 
        
         if ( self.postinclude_trig != '' ) : 
@@ -161,9 +165,15 @@ class TrigInDetReco(ExecStep):
 
         chains += ']'
         if self._isCA:
+<<<<<<< HEAD
             self.preexec_trig += "flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
         else:
             self.preexec_trig += 'doEmptyMenu=True;'+flags+'selectChains='+chains
+=======
+            self.preexec_trig = "flags.Trigger.disableCPS=True;flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
+        else:
+            self.preexec_trig = 'doEmptyMenu=True;'+flags+'selectChains='+chains
+>>>>>>> ceee5aad679 (reverting accidental changes...)
 
         AVERSION = ""
         ### # temporary hack until we get to the bottom of why the tests are really failing

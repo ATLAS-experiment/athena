@@ -80,7 +80,11 @@ class TopoAlgoDefMultiplicity(object):
             'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M', 'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
  
             #spares
+<<<<<<< HEAD
             'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', #'eTAUSPARE6', 'eTAUSPARE7',
+=======
+            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', 'eTAUSPARE6', 'eTAUSPARE7',
+>>>>>>> ceee5aad679 (reverting accidental changes...)
         ]
         jtauThresholds_2bits = [ 
             'jTAU30', 'jTAU30M',

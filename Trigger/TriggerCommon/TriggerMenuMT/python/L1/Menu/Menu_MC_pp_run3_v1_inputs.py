@@ -19,7 +19,11 @@ def defineInputsMenu():
                 if conn["name"] == "Topo1Opt3":
                     conn["thresholds"] += [
                         ('jXEPerf100',1),
+<<<<<<< HEAD
                     ]
+=======
+                    ]              
+>>>>>>> ceee5aad679 (reverting accidental changes...)
                 if conn["name"] == "Topo1Opt1":
                     conn["thresholds"] += [
                         ('eTAU40HT',2),

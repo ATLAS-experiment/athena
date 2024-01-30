@@ -114,7 +114,11 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.scale = flags.Trigger.FPGATrackSim.ActiveConfig.scale
         HoughTransform.subRegion = number
         HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
+<<<<<<< HEAD
         HoughTransform.traceHits = True
+=======
+        HoughTransform.traceHits = False
+>>>>>>> ceee5aad679 (reverting accidental changes...)
         tools.append(HoughTransform)
 
     RF.tools = tools
@@ -397,7 +401,10 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.fillFromArgs()
+<<<<<<< HEAD
     
+=======
+>>>>>>> ceee5aad679 (reverting accidental changes...)
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):

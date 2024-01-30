@@ -5,9 +5,11 @@ def createFPGATrackSimConfigFlags():
     cf = AthConfigFlags()
     cf.addFlag('algoTag', 'Hough')
     cf.addFlag('wrapperFileName', [])
+    cf.addFlag('threshold', [])
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
+<<<<<<< HEAD
     cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
     cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
@@ -20,6 +22,8 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('missHitsConsts', False)
     cf.addFlag('tracking', False)
     cf.addFlag('bankDir', '')
+=======
+>>>>>>> ceee5aad679 (reverting accidental changes...)
 
     def __httHough1DFlags():
         """Additional function delays import"""
