@@ -51,7 +51,7 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  Topo3Group,
                                                                  EOFL1MuGroup,
                                                                  EOFBPhysL1MuGroup,
-                                                                 EOFBeeLegGroup,
+                                                                 EOFBeePhIGroup,
                                                                  )
 
 DevGroup = ['Development']
@@ -160,8 +160,8 @@ def getDevSignatures():
         ChainProp(name='HLT_g13_loose_g10_loose_PhysicsTLA_L113DR25-25M70-eEM12LeEM9L',l1SeedThresholds=['eEM12L','eEM9'],stream=['TLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
 
         # ATR-19501, ATR-28162
-        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['EM3','EM3'], stream=['BphysDelayed'], groups=SupportLegGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary']+DevGroup),
-        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['EM3','EM3'], stream=['BphysDelayed'], groups=EOFBeeLegGroup+BphysElectronGroup+DevGroup),
+        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5','eEM5'], stream=['BphysDelayed'], groups=SupportPhIGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary']+DevGroup),
+        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5','eEM5'], stream=['BphysDelayed'], groups=EOFBeePhIGroup+BphysElectronGroup+DevGroup),
 
     ]
 
