@@ -9,7 +9,7 @@ namespace MuonGMR4{
     class StripLayer {
         public:
           StripLayer(const Amg::Transform3D& layerTransform,
-                     const StripDesignPtr design, 
+                     StripDesignPtr design,
                      const IdentifierHash hash);
       
           /// Returns the transformation to go from the strip layer center 
