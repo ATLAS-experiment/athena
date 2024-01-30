@@ -101,15 +101,16 @@ rc5=-9999
 if [ $rc2 -eq 0 ]
 then
     Reco_tf.py \
+        --CA False \
         --inputHITSFile "Hits.pool.root" \
         --outputRDOFile RDO.pool.root \
         --outputESDFile ESD.pool.root \
         --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-01" \
         --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
         --DataRunNumber='410000' \
-        --postExec 'all:CfgMgr.MessageSvc().setError+=["HepMcParticleLink"]' 'all:conddb.addOverride("/LAR/BadChannels/BadChannels", "LARBadChannelsBadChannels-MC-empty")' 'all:conddb.addOverride("/TILE/OFL02/STATUS/ADC", "TileOfl02StatusAdc-EmptyBCh")' 'RAWtoALL:StreamESD.ItemList+=["ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps","LArHitContainer#*","TileHitVector#*", "TrackRecordCollection#CaloEntryLayer", "TrackRecordCollection#MuonEntryLayer"]' \
-        --postInclude "all:PyJobTransforms/UseFrontier.py" "HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiTilePostInclude.py" "HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiPostInclude.py" \
-        --preExec "all:rec.Commissioning.set_Value_and_Lock(True);from AthenaCommon.BeamFlags import jobproperties;jobproperties.Beam.numberOfCollisions.set_Value_and_Lock(0.0);from LArROD.LArRODFlags import larRODFlags;larRODFlags.NumberOfCollisions.set_Value_and_Lock(20);larRODFlags.nSamples.set_Value_and_Lock(4);larRODFlags.doOFCPileupOptimization.set_Value_and_Lock(True);larRODFlags.firstSample.set_Value_and_Lock(0);larRODFlags.useHighestGainAutoCorr.set_Value_and_Lock(True)" "RAWtoALL:from CaloRec.CaloCellFlags import jobproperties;jobproperties.CaloCellFlags.doLArCellEmMisCalib=False;rec.runUnsupportedLegacyReco=True;rec.doTrigger=False" "HITtoRDO:from Digitization.DigitizationFlags import digitizationFlags;digitizationFlags.doCaloNoise=False" \
+        --preExec 'all:rec.Commissioning.set_Value_and_Lock(True);from AthenaCommon.BeamFlags import jobproperties;jobproperties.Beam.numberOfCollisions.set_Value_and_Lock(0.0);from LArROD.LArRODFlags import larRODFlags;larRODFlags.NumberOfCollisions.set_Value_and_Lock(20);larRODFlags.nSamples.set_Value_and_Lock(4);larRODFlags.doOFCPileupOptimization.set_Value_and_Lock(True);larRODFlags.firstSample.set_Value_and_Lock(0);larRODFlags.useHighestGainAutoCorr.set_Value_and_Lock(True)' 'HITtoRDO:from Digitization.DigitizationFlags import digitizationFlags;digitizationFlags.doCaloNoise=False' 'RAWtoALL:from CaloRec.CaloCellFlags import jobproperties;jobproperties.CaloCellFlags.doLArCellEmMisCalib=False;rec.runUnsupportedLegacyReco=True;rec.doTrigger=False' \
+        --postExec 'all:CfgMgr.MessageSvc().setError+=["HepMcParticleLink"];conddb.addOverride("/LAR/BadChannels/BadChannels", "LARBadChannelsBadChannels-MC-empty");conddb.addOverride("/TILE/OFL02/STATUS/ADC", "TileOfl02StatusAdc-EmptyBCh")' 'RAWtoALL:StreamESD.ItemList+=["ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps","LArHitContainer#*","TileHitVector#*", "TrackRecordCollection#CaloEntryLayer", "TrackRecordCollection#MuonEntryLayer"]' \
+        --postInclude 'all:PyJobTransforms/UseFrontier.py' 'HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiTilePostInclude.py,ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiPostInclude.py' \
         --maxEvents -1 \
         --autoConfiguration everything
     rc5=$?
