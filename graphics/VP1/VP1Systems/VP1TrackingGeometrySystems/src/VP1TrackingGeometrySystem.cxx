@@ -1024,21 +1024,20 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
   
   // loop over confined layers
   if (confinedLayers){
-    Trk::BinnedArraySpan<Trk::Layer const * const> layerVector =  confinedLayers->arrayObjects();
-    Trk::BinnedArraySpan<Trk::Layer const * const>::const_iterator layerIter = layerVector.begin();
+    Trk::BinnedArraySpan<Trk::Layer const* const> layerVector = confinedLayers->arrayObjects();
     // loop over layers
-    for ( ; layerIter != layerVector.end(); ++layerIter){
+    for (const auto *layerIter : layerVector) {
       // push_back the layer
-      if (*layerIter){
+      if (layerIter){
         
         // get the layerIndex
-        const Trk::LayerIndex& layIndex = (*layerIter)->layerIndex();
+        const Trk::LayerIndex& layIndex = layerIter->layerIndex();
         
         // skip navigaion layers for the moment
         if (!layIndex.value()) continue;
         
         /* check the surface array */
-        const Trk::SurfaceArray* layerSubSurfaces = (*layerIter)->surfaceArray();
+        const Trk::SurfaceArray* layerSubSurfaces = layerIter->surfaceArray();
 
         /** current separator helpers */
         VP1ExtraSepLayerHelper* layerSepHelper = 0;
@@ -1111,15 +1110,14 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
         std::cout << " VolumeName " << tvol->volumeName() << " / seperators : " << layerSepHelper << " / " << surfaceSepHelper << std::endl;
         
         // process the layer with the correct separator helper
-        if (layerSepHelper) processTrkLayer(*layerIter, layerSepHelper, tvol->colorCode());
+        if (layerSepHelper) processTrkLayer(layerIter, layerSepHelper, tvol->colorCode());
         // Surface
         if (layerSubSurfaces && surfaceSepHelper){
-          Trk::BinnedArraySpan<Trk::Surface const * const> surfaceVector = layerSubSurfaces->arrayObjects();
-          Trk::BinnedArraySpan<Trk::Surface const * const>::const_iterator surfaceIter = surfaceVector.begin();
-          for ( ; surfaceIter != surfaceVector.end(); ++surfaceIter ){
+          Trk::BinnedArraySpan<Trk::Surface const * const>  surfaceVector = layerSubSurfaces->arrayObjects(); 
+          for (const auto *surfaceIter : surfaceVector) {
             // push_back the surface
-            if (*surfaceIter)
-              processTrkSurface(*surfaceIter, surfaceSepHelper, tvol->colorCode());
+            if (surfaceIter)
+              processTrkSurface(surfaceIter, surfaceSepHelper, tvol->colorCode());
           } 
         }
       }
@@ -1130,10 +1128,9 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
   // get the confined volumes and loop over it -> call recursively
   if (confinedVolumes){
     Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIter = volumes.begin();
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIterEnd = volumes.end();
-    for ( ; volIter != volIterEnd; ++volIter)
-      if (*volIter) processTrkVolume(*volIter);
+    for (const auto *volIter : volumes) {
+      if (volIter) processTrkVolume(volIter);
+    }
   }
 }
   
@@ -1178,21 +1175,21 @@ void VP1TrackingGeometrySystem::processMsVolume(const Trk::TrackingVolume* tvol,
     const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol->confinedVolumes();
     // get the confined volumes and loop over it -> call recursively
     if (confinedVolumes){
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIter = volumes.begin();
-      Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volIterEnd = volumes.end();
-      for ( ; volIter != volIterEnd; ++volIter)
-	if (*volIter) processMsVolume(*volIter,sepHelper, layHelper);
+
+    Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
+
+      for (const auto *volIter : volumes) {
+	if ( volIter ) processMsVolume(volIter,sepHelper, layHelper);
+      }
     }
   }
 
   Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols = tvol->confinedDetachedVolumes();
-  if (!detVols.empty()) {
+  if ( !(detVols.empty()) ) {
     // identify separators
-    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator dIter = detVols.begin();
-    for ( ;dIter!=detVols.end(); ++dIter) {
-      if ( (tvol->inside((*dIter)->trackingVolume()->center(),0.) || (*dIter)->trackingVolume()->center().perp()<0.001) ) {
-	std::string name = (*dIter)->name();
+    for (const auto *dIter : detVols) {
+      if ( (tvol->inside(dIter->trackingVolume()->center(),0.) || dIter->trackingVolume()->center().perp()<0.001) ) {
+	std::string name = dIter->name();
         if ( name.substr(0,2) == "BI" ) { sepHelper = m_d->sephelper_msBI; layHelper =  m_d->sephelper_msBIlay; }
         else if ( name.substr(0,2) == "BM" ) { sepHelper = m_d->sephelper_msBM; layHelper =  m_d->sephelper_msBMlay; }
         else if ( name.substr(0,2) == "BO" ) { sepHelper = m_d->sephelper_msBO; layHelper =  m_d->sephelper_msBOlay; }
@@ -1223,15 +1220,15 @@ void VP1TrackingGeometrySystem::processMsVolume(const Trk::TrackingVolume* tvol,
         else   // display somehow
 	  { sepHelper = m_d->sephelper_msFeenv; layHelper =  m_d->sephelper_msFedl; }
       } else {
-	std::string name = (*dIter)->name();
+	std::string name = dIter->name();
 	//std::cout << "VP1 ignores volume:"<<name<< std::endl;
 	if ( name.substr(0,3) == "BAR" &&
 	     name.substr(0,18) == "BAR_ToroidBAR_Cold" )
 	  { sepHelper = m_d->sephelper_msBTenv; layHelper =  m_d->sephelper_msBTdl; }
       }
-      if (sepHelper) processMsVolume( (*dIter)->trackingVolume(), sepHelper, layHelper);
+      if (sepHelper) processMsVolume( dIter->trackingVolume(), sepHelper, layHelper);
       sepHelper = 0; layHelper = 0;
-    }
+    } // end loop over dIter
   }
 }
 
@@ -1266,35 +1263,32 @@ void VP1TrackingGeometrySystem::processMsLayDense(const Trk::TrackingVolume* tvo
   // ordered layers
   const Trk::BinnedArray< Trk::Layer >* confinedLayers = tvol->confinedLayers();
   if (confinedLayers){
-    Trk::BinnedArraySpan<Trk::Layer const * const> layerVector =  confinedLayers->arrayObjects();
-    Trk::BinnedArraySpan<Trk::Layer const * const>::const_iterator layerIter = layerVector.begin();
+    Trk::BinnedArraySpan<Trk::Layer const* const> layerVector = confinedLayers->arrayObjects();
     // loop over layers
-    for ( ; layerIter != layerVector.end(); ++layerIter){
+    for (const auto *layer : layerVector) {
       // push_back the layer
-      if (*layerIter){
-	SoNode * node = m_d->surface2sonode->translateSurface((*layerIter)->surfaceRepresentation());
+      if (layer){
+	SoNode * node = m_d->surface2sonode->translateSurface(layer->surfaceRepresentation());
 	if (node && layHelper ) {
-          if ((*layerIter)->layerType()>0)
+          if (layer->layerType()>0)
 	    layHelper->addNodeUnderMaterial(node,m_d->colorCodeConverter.getMaterialFromColorCode( color));
           else
 	    layHelper->addNodeUnderMaterial(node,m_d->colorCodeConverter.getMaterialFromColorCode( 1));
 	}
       }
-    }
+    } // end of loop over layers
   }
   // unordered layers
   Trk::ArraySpan<const Trk::Layer* const> confALays = tvol->confinedArbitraryLayers();
-  if (!confALays.empty()) {
+  if ( !(confALays.empty()) ){
     // loop over layers
-    for (const Trk::Layer* const layerIter : confALays) {
+    for (const auto *layer : confALays) {
       // push_back the layer
-      if (layerIter) {
-        SoNode* node = m_d->surface2sonode->translateSurface(
-          layerIter->surfaceRepresentation());
-        if (node && layHelper) {
-          if (layerIter->layerType() > 0)
-            layHelper->addNodeUnderMaterial(
-              node, m_d->colorCodeConverter.getMaterialFromColorCode(color));
+      if (layer){
+	SoNode * node = m_d->surface2sonode->translateSurface(layer->surfaceRepresentation());
+	if (node && layHelper ) {
+          if (layer->layerType()>0)
+	    layHelper->addNodeUnderMaterial(node,m_d->colorCodeConverter.getMaterialFromColorCode( color));
           else
             layHelper->addNodeUnderMaterial(
               node, m_d->colorCodeConverter.getMaterialFromColorCode(1));
@@ -1303,11 +1297,10 @@ void VP1TrackingGeometrySystem::processMsLayDense(const Trk::TrackingVolume* tvo
     }
   }
   // dense volumes
-  const auto confVols = tvol->confinedDenseVolumes();
-  if (!confVols.empty()){
-    const auto *volIter = confVols.begin();
-    for ( ; volIter != confVols.end(); ++volIter){
-      if (*volIter && sepHelper ) processMsVolume( *volIter, 0, layHelper );
+  Trk::ArraySpan<const Trk::TrackingVolume* const> confVols = tvol->confinedDenseVolumes();
+  if ( !(confVols.empty()) ){
+    for (const auto *vol : confVols) {
+      if (vol && sepHelper ) processMsVolume( vol, 0, layHelper );
     }
   }
 }
