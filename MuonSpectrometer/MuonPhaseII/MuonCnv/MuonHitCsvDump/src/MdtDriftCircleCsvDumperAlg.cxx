@@ -1,8 +1,8 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CsvMdtDriftCircleDumperMuonCnv.h"
+#include "MdtDriftCircleCsvDumperAlg.h"
 
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -11,17 +11,17 @@
 #include<TString.h>
 
 
-CsvMdtDriftCircleDumperMuonCnv::CsvMdtDriftCircleDumperMuonCnv(const std::string& name, ISvcLocator* pSvcLocator):
+MdtDriftCircleCsvDumperAlg::MdtDriftCircleCsvDumperAlg(const std::string& name, ISvcLocator* pSvcLocator):
  AthAlgorithm{name, pSvcLocator} {}
 
- StatusCode CsvMdtDriftCircleDumperMuonCnv::initialize(){
+ StatusCode MdtDriftCircleCsvDumperAlg::initialize(){
    ATH_CHECK(m_inDriftCircleKey.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
 
    return StatusCode::SUCCESS;
  }
 
- StatusCode CsvMdtDriftCircleDumperMuonCnv::execute(){
+ StatusCode MdtDriftCircleCsvDumperAlg::execute(){
 
    const EventContext & context = Gaudi::Hive::currentContext();
    const std::string delim = ",";
