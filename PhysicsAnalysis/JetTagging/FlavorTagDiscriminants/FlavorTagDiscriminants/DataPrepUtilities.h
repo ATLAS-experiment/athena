@@ -9,7 +9,7 @@
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
-#include "FlavorTagDiscriminants/GNNConfig.h"
+#include "FlavorTagDiscriminants/OnnxUtil.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -31,7 +31,7 @@ namespace FlavorTagDiscriminants {
 
   enum class EDMType {CHAR, UCHAR, INT, FLOAT, DOUBLE, CUSTOM_GETTER};
   enum class SortOrder {
-   ABS_D0_SIGNIFICANCE_DESCENDING,
+    ABS_D0_SIGNIFICANCE_DESCENDING,
     D0_SIGNIFICANCE_DESCENDING,
     PT_DESCENDING,
     ABS_D0_DESCENDING
@@ -299,7 +299,7 @@ namespace FlavorTagDiscriminants {
       internal::OutNodeChar, internal::OutNodeFloat,
       FTagDataDependencyNames, std::set<std::string>>
     createGNDecorators(
-      const GNNConfig::Config& config,
+      const OnnxUtil::OutputConfig& config,
       const FTagOptions& options);
 
     // return a function to check if IP is invalid

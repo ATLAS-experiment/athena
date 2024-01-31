@@ -28,6 +28,7 @@ set(FTDSource
   Root/DL2Tool.cxx
   Root/DataPrepUtilities.cxx
   Root/OnnxUtil.cxx
+  Root/OnnxOutput.cxx
   Root/GNN.cxx
   Root/GNNTool.cxx
   Root/GNNToolifiers.cxx
