@@ -1042,101 +1042,59 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
     }
   
 
-    if (m_preExpTail) m_prePulse = true;
-    
+    if (m_preExpTail) m_prePulse = true;    
     
     // -----------------------------------------------------
     // Post pulse detection
     //
-    //     if (m_fitFunction == "GeneralPulse") {
-      
-    //   for (int isampl = m_minDeriv2ndIndex + 2; isampl < (int) m_samplesDeriv2nd.size(); isampl++) {
-
-    // 	float deriv2ndTest = 0;
-    // 	// The place to apply the cut on samples depends on whether we have found a minimum or a maximum
-    // 	//   The +1 for the minimum accounts for the shift between 2nd derivative and the samples
-    // 	//   if we find a maximum we cut one sample lower
-    // 	//
-    // 	if (m_samplesDeriv2nd[isampl] > 0 && std::abs(deriv2ndTest) > 1.5) {  // the start of the post pulse, +3 to get at least 3 points into the fit
-    // 	  m_postPulse = true;
-    // 	  m_maxSampleEvt = std::min(isampl + 1, m_maxSampleEvt);
-    // 	  m_fitTMax = m_deltaTSample * (isampl + 3) + m_deltaTSample / 2;
-    // 	  m_adjTimeRangeEvent = true;
-    // 	  m_initialPostPulseT0 = m_deltaTSample * (isampl + 2);
-    // 	  break;
-    // 	}
-    // 	else if (m_samplesDeriv2nd[isampl] < 0 && std::abs(deriv2ndTest) > 0.5) { // the middle of the post pulse, +2 to get at least 3 points into the fit
-    // 	  m_postPulse = true;
-    // 	  m_maxSampleEvt = std::min(isampl, m_maxSampleEvt);
-    // 	  m_fitTMax = m_deltaTSample * (isampl + 2) + m_deltaTSample / 2;
-    // 	  m_adjTimeRangeEvent = true;
-    // 	  m_initialPostPulseT0 = m_deltaTSample * (isampl + 1);
-    // 	  break;
-    // 	}
-    //   }
-      
-    //   // Prevent the upper limit of fit range is set to be too low.
-    //   //
-    //   m_fitTMax = std::max((float) 105, m_fitTMax);
-      
-    //   // Then make sure it's below default TMax that was given at the beginning
-    //   //
-    //   m_fitTMax = std::min(m_defaultFitTMax, m_fitTMax);
-      
-    //   m_fitPostT0lo = m_fitTMax - 2 * m_deltaTSample;
-    //   if (m_fitPostT0lo <= m_deltaTSample * (m_minDeriv2ndIndex + 1)) m_fitPostT0lo = m_deltaTSample * (m_minDeriv2ndIndex + 1) + m_deltaTSample / 2;
-    // }
-    //    else {
 
     for (int isampl = m_minDeriv2ndIndex + 3; isampl < (int) m_samplesDeriv2nd.size() - 1; isampl++) {
 
-	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	// BAC 12-01-2024
-	//
-	// The following code is commented out as a temporary measure to deal with apparent reflections
-	//   associated with large out-of-time pulses that introduce a "kink" that triggers the derivative
-	//   test. A work-around that doesn't introduce specific code for the 2023 Pb+Pb run but allows
-	//   adaption for this specific issue is going to take some work. For now we leave the 2nd derivative
-	//   test, but will also need to introduce some configurability of the cut -- which we need anyway
-	//
-	// Calculate the forward derivative. the pulse should never increase on the tail. If it
-	//   does, we almost certainly have a post-pulse
-	//
-	// float deriv = m_samplesSub[isampl + 1] - m_samplesSub[isampl];
-	// if (deriv/(std::sqrt(2)*noiseSig) > 6) {
-	//   m_postPulse = true;
-	//   m_maxSampleEvt = isampl;
-	//   m_adjTimeRangeEvent = true;
-	//   break;
-	// }
-	// else {
-	//----------------------------------------------------------------------------------------------
-	  //
-	  // Now we check the second derivative which might also indicate a post pulse
-	  //   even if the derivative is not sufficiently large
-	  //
-	  // add small 1e-3 in division to avoid floating overflow
-	  //
-	  float deriv2ndTest = m_samplesDeriv2nd[isampl] / (m_minDeriv2nd + 1.0e-3);
+      // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      // BAC 12-01-2024
+      //
+      // The following code is commented out as a temporary measure to deal with apparent reflections
+      //   associated with large out-of-time pulses that introduce a "kink" that triggers the derivative
+      //   test. A work-around that doesn't introduce specific code for the 2023 Pb+Pb run but allows
+      //   adaption for this specific issue is going to take some work. For now we leave the 2nd derivative
+      //   test, but will also need to introduce some configurability of the cut -- which we need anyway
+      //
+      // Calculate the forward derivative. the pulse should never increase on the tail. If it
+      //   does, we almost certainly have a post-pulse
+      //
+      // float deriv = m_samplesSub[isampl + 1] - m_samplesSub[isampl];
+      // if (deriv/(std::sqrt(2)*noiseSig) > 6) {
+      //   m_postPulse = true;
+      //   m_maxSampleEvt = isampl;
+      //   m_adjTimeRangeEvent = true;
+      //   break;
+      // }
+      // else {
+      //----------------------------------------------------------------------------------------------
+      //
+      // Now we check the second derivative which might also indicate a post pulse
+      //   even if the derivative is not sufficiently large
+      //
+      // add small 1e-3 in division to avoid floating overflow
+      //
+      float deriv2ndTest = m_samplesDeriv2nd[isampl] / (m_minDeriv2nd + 1.0e-3);
 	  
-	  // The place to apply the cut on samples depends on whether we have found a "minimum" or a "maximum"
-	  //   The +1 for the minimum accounts for the shift between 2nd derivative and the samples
-	  //   if we find a maximum we cut one sample lower
-	  //
-	  if (m_samplesDeriv2nd[isampl] > 0 && std::abs(deriv2ndTest) > 1.5) {
-	    m_postPulse = true;
-	    m_maxSampleEvt = std::min(isampl, m_maxSampleEvt);
-	    m_adjTimeRangeEvent = true;
-	    break;
-	  }
-	  else if ((m_samplesDeriv2nd[isampl] < 0 && std::abs(deriv2ndTest) > 0.5)) {
-	    m_postPulse = true;
-	    m_maxSampleEvt = std::min(isampl - 1, m_maxSampleEvt);
-	    m_adjTimeRangeEvent = true;
-	    break;
-	  }
-	  //	}
-	  //}
+      // The place to apply the cut on samples depends on whether we have found a "minimum" or a "maximum"
+      //   The +1 for the minimum accounts for the shift between 2nd derivative and the samples
+      //   if we find a maximum we cut one sample lower
+      //
+      if (m_samplesDeriv2nd[isampl] > 0 && std::abs(deriv2ndTest) > 1.5) {
+	m_postPulse = true;
+	m_maxSampleEvt = std::min(isampl, m_maxSampleEvt);
+	m_adjTimeRangeEvent = true;
+	break;
+      }
+      else if ((m_samplesDeriv2nd[isampl] < 0 && std::abs(deriv2ndTest) > 0.5)) {
+	m_postPulse = true;
+	m_maxSampleEvt = std::min(isampl - 1, m_maxSampleEvt);
+	m_adjTimeRangeEvent = true;
+	break;
+      }
     }
   }
 
@@ -1213,7 +1171,6 @@ void ZDCPulseAnalyzer::DoFit(double maxChisqDivAmp)
 
   ZDCFitWrapper* fitWrapper = m_defaultFitWrapper.get();
   if (PrePulse()) {
-    //    fitWrapper = m_prePulseFitWrapper.get();
     fitWrapper = m_preExpFitWrapper.get();
   }
   
@@ -1230,18 +1187,9 @@ void ZDCPulseAnalyzer::DoFit(double maxChisqDivAmp)
   }
 
   if (PrePulse()) {
+    // Switch to use the new negative exponential handling of pre-pulses
     //
-    //
-    // (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetInitialPrePulse(m_initialPrePulseAmp, m_initialPrePulseT0, m_initialExpAmp, m_fixPrePulse);
-
     (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->SetInitialExpPulse(m_initialExpAmp);
-
-    // if (m_initialPrePulseT0 < 0) {
-    //   (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetPrePulseT0Range(-25, 0);
-    // }
-    // else {
-    //   (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->SetPrePulseT0Range(-m_deltaTSample / 2, (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance)*m_deltaTSample);
-    // }
   }
 
   // Now perform the fit
@@ -1252,6 +1200,7 @@ void ZDCPulseAnalyzer::DoFit(double maxChisqDivAmp)
   }
 
   m_fitFailed = false;
+  
   //
   //  Fit the data with the function provided by the fit wrapper
   //
@@ -1800,19 +1749,20 @@ std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetDelayedGraph() const {
 
 std::vector<float> ZDCPulseAnalyzer::CalculateDerivative(const std::vector <float>& inputData, unsigned int step)
 {
-  // Start with [step-1] entries for which we can't calculate the derivative
-  //
-  std::vector<float> results(step - 1, 0);
-  
   unsigned int nSamples = inputData.size();
 
+  // So we pad at the beginning and end based on step (i.e. with step - 1 zeros). Fill out the fill vector with zeros initially
+  //
+  unsigned int vecSize = 2*(step - 1) + nSamples - step - 1;
+  std::vector<float> results(vecSize, 0);
+ 
+  // Now fill out the values
+  //
+  unsigned int fillIdx = step - 1;
+  
   for (unsigned int sample = 0; sample < nSamples - step; sample++) {
     int deriv = inputData[sample + step] - inputData[sample];
-    results.push_back(deriv);
-  }
-
-  for (unsigned int i = 0; i < step - 1; i++) { 
-    results.push_back(0);
+    results.at(fillIdx++) = deriv;
   }
 
   return results;
@@ -1820,19 +1770,18 @@ std::vector<float> ZDCPulseAnalyzer::CalculateDerivative(const std::vector <floa
 
 std::vector<float> ZDCPulseAnalyzer::Calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step)
 {
-  // Start with two zero entries for which we can't calculate the double-step derivative
-  //
-  std::vector<float> results(step, 0);
-  
   unsigned int nSamples = inputData.size();
 
+  // We start with two zero entries for which we can't calculate the double-step derivative
+  //   and woud pad with two zero entries at the end. Start by initializing 
+  //
+  unsigned int vecSize = 2*step + nSamples - step - 1;
+  std::vector<float> results(vecSize, 0);
+
+  unsigned int fillIndex = step;
   for (unsigned int sample = step; sample < nSamples - step; sample++) {
     int deriv2nd = inputData[sample + step] + inputData[sample - step] - 2*inputData[sample];
-    results.push_back(deriv2nd);
-  }
-
-  for (unsigned int i = 0; i < step; i++) { 
-    results.push_back(0);
+    results.at(fillIndex++) = deriv2nd;
   }
 
   return results;
@@ -1894,12 +1843,10 @@ float ZDCPulseAnalyzer::obtainDelayedBaselineCorr(const std::vector<float>& samp
   float sample2 = samples[minIndex];
   float sample3 = samples[minIndex + 1];
 
-  float baselineCorr = 0;
-
   // Possibility -- implement logarithmic interpolation for large 2nd derivative?
   //
-  baselineCorr = (0.5 * (sample1 - sample0 + sample3 - sample2) -
-		  0.25 * (sample3 - sample1 + sample2 - sample0));
+  float baselineCorr = (0.5 * (sample1 - sample0 + sample3 - sample2) -
+			0.25 * (sample3 - sample1 + sample2 - sample0));
 
   if (minIndex % 2 != 0) baselineCorr =-baselineCorr;
 
