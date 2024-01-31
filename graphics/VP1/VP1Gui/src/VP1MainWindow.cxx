@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -152,6 +152,8 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
 	  pushButton_quicksetup_trackingstudies->setToolTip("Not available in VP1Light");
 	  pushButton_quicksetup_calostudies->setEnabled(false);
 	  pushButton_quicksetup_calostudies->setToolTip("Not available in VP1Light");
+	  pushButton_quicksetup_trackgeo->setEnabled(false);
+	  pushButton_quicksetup_trackgeo->setToolTip("Not available in VP1Light");
 	  action_quicklaunch_Tracking_studies->setEnabled(false);
 	  action_quicklaunch_Tracking_studies->setToolTip("Not available in VP1Light");
 	  action_quicklaunch_Calo_studies->setEnabled(false);
@@ -160,6 +162,8 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
 	  action_quicklaunch_Storegate_browser->setToolTip("Not available in VP1Light");
 	  action_quicklaunch_trackcalo_commis->setEnabled(false);
 	  action_quicklaunch_trackcalo_commis->setToolTip("Not available in VP1Light");
+	  action_quicklaunch_trackgeo_viz->setEnabled(false);
+	  action_quicklaunch_trackgeo_viz->setToolTip("Not available in VP1Light");
 	  m_action_addEventFile->setEnabled(false);
 	#endif
 
@@ -249,6 +253,7 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
 	#endif
 	connect(pushButton_quicksetup_trackingstudies,SIGNAL(clicked()),this,SLOT(quickSetupTriggered()));
 	connect(pushButton_quicksetup_calostudies,SIGNAL(clicked()),this,SLOT(quickSetupTriggered()));
+	connect(pushButton_quicksetup_trackgeo,SIGNAL(clicked()),this,SLOT(quickSetupTriggered()));
 	connect(pushButton_quicksetup_geometrystudies,SIGNAL(clicked()),this,SLOT(quickSetupTriggered()));
 	connect(pushButton_quicksetup_analysisstudies,SIGNAL(clicked()),this,SLOT(quickSetupTriggered()));
 
@@ -287,6 +292,7 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
 	connect(action_quicklaunch_Storegate_browser,SIGNAL(triggered(bool)),this,SLOT(quickSetupTriggered()));
 	connect(action_quicklaunch_3dcocktail,SIGNAL(triggered(bool)),this,SLOT(quickSetupTriggered()));
 	connect(action_quicklaunch_trackcalo_commis,SIGNAL(triggered(bool)),this,SLOT(quickSetupTriggered()));
+	connect(action_quicklaunch_trackgeo_viz,SIGNAL(triggered(bool)),this,SLOT(quickSetupTriggered()));
 	connect(action_exit_VP1,SIGNAL(triggered(bool)),this,SLOT(close()));
 
 	//Configuration
@@ -1715,11 +1721,11 @@ void VP1MainWindow::quickSetupTriggered()
     plugfile="libVP1TrackPlugin.so";
     channelname="Tracking";
     tabname = "Tracking";
-	} else if (sender()==pushButton_quicksetup_calostudies||sender()==action_quicklaunch_Calo_studies) {
+  } else if (sender()==pushButton_quicksetup_calostudies||sender()==action_quicklaunch_Calo_studies) {
 		plugfile="libVP1CaloPlugin.so";
 		channelname="Calo Cells";
 		tabname = "Calorimeter";
-	} else if (sender()==action_quicklaunch_Storegate_browser) {
+  } else if (sender()==action_quicklaunch_Storegate_browser) {
 		plugfile="libVP1BanksPlugin.so";
 		channelname="Banks";
 		tabname = "StoreGate";
@@ -1753,6 +1759,10 @@ void VP1MainWindow::quickSetupTriggered()
     plugfile="libVP13DCocktailPlugin.so";
     channelname="TrackCalo";
     tabname = "Track/Calo";
+  } else if (sender()==pushButton_quicksetup_trackgeo || sender()==action_quicklaunch_trackgeo_viz) {
+    plugfile="libVP1TrackingGeometryPlugin.so";
+    channelname="TrackGeo";
+    tabname = "TrackingGeometry";
   } else if (sender()==pushButton_quicksetup_analysisstudies||sender()==action_quicklaunch_analysisstudies) {
 
     //Open AOD file selection dialog for VP1Light

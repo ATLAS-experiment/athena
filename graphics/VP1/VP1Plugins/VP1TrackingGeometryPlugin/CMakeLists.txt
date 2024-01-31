@@ -12,9 +12,6 @@ set( CMAKE_AUTOMOC TRUE )
 # get the package name into the variable 'pkgName', to be used below
 atlas_get_package_name( pkgName )
 
-# Make the package target depend on this one:
-#add_dependencies( VP1PlugUtils VP1GuideLineSystems VP1UtilitySystems VP1TrackingGeometrySystems)
-
 # Build the library.
 atlas_add_library( VP1TrackingGeometryPlugin
    VP1TrackingGeometryPlugin/*.h src/*.cxx

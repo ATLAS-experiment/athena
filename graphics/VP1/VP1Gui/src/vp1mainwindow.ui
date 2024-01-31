@@ -637,6 +637,16 @@ p, li { white-space: pre-wrap; }
                        </property>
                       </widget>
                      </item>
+                     <item row="3" column="0" colspan="3">
+                      <widget class="QPushButton" name="pushButton_quicksetup_trackgeo">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Launch the Tracking Geometry plugin within a new tab.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Tracking Geometry only studies</string>
+                       </property>
+                      </widget>
+                     </item>
                     </layout>
                    </item>
                    <item>
@@ -784,6 +794,7 @@ p, li { white-space: pre-wrap; }
     <addaction name="action_quicklaunch_Calo_studies"/>
     <addaction name="action_quicklaunch_Geometry_studies"/>
     <addaction name="action_quicklaunch_trackcalo_commis"/>
+    <addaction name="action_quicklaunch_trackgeo_viz"/>
     <addaction name="action_quicklaunch_analysisstudies"/>
     <addaction name="action_quicklaunch_Storegate_browser"/>
     <addaction name="separator"/>
@@ -885,6 +896,11 @@ p, li { white-space: pre-wrap; }
   <action name="action_quicklaunch_trackcalo_commis">
    <property name="text">
     <string>T&amp;rack/Calo commis. studies</string>
+   </property>
+  </action>
+  <action name="action_quicklaunch_trackgeo_viz">
+   <property name="text">
+    <string>T&amp;racking Geometry visualization</string>
    </property>
   </action>
   <action name="action_file_Add_event_file">

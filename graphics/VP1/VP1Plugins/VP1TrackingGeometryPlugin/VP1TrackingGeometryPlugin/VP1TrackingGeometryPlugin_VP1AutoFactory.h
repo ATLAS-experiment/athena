@@ -19,7 +19,7 @@ class VP1TrackingGeometryPlugin_VP1AutoFactory : public QObject, public IVP1Chan
   #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     Q_PLUGIN_METADATA(IID "VP1TrackingGeometryPlugin" )
   # else
-    Q_EXPORT_PLUGIN2(pnp_vp1aodplugin_vp1autofactory, VP1TrackingGeometryPlugin_VP1AutoFactory)
+    Q_EXPORT_PLUGIN2(pnp_vp1trackinggeometryplugin_vp1autofactory, VP1TrackingGeometryPlugin_VP1AutoFactory)
   #endif
 
   Q_INTERFACES(IVP1ChannelWidgetFactory)
