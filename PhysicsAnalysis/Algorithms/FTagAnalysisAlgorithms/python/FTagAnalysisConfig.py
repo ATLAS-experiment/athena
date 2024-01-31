@@ -38,6 +38,24 @@ class FTagConfig (ConfigBlock):
         self.addOption ('minPt', None, type=float)
         self.addOption ('bTagCalibFile', None, type=str,
                         info='calibration file for CDI')
+        self.addOption ('systematicsStrategy', 'SFEigen', type=str,
+                        info="name of systematics model; presently choose between 'SFEigen' and 'Envelope'")
+        self.addOption ('eigenvectorReductionB', 'Loose', type=str,
+                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+        self.addOption ('eigenvectorReductionC', 'Loose', type=str,
+                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+        self.addOption ('eigenvectorReductionLight', 'Loose', type=str,
+                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+        self.addOption ('excludeFromEigenVectorTreatment', '', type=str,
+                        info="(semicolon-separated) names of uncertainties to be excluded from all eigenvector decompositions (if used)")
+        self.addOption ('excludeFromEigenVectorBTreatment', '', type=str,
+                        info="(semicolon-separated) names of uncertainties to be excluded from b-jet eigenvector decompositions (if used)")
+        self.addOption ('excludeFromEigenVectorCTreatment', '', type=str,
+                        info="(semicolon-separated) names of uncertainties to be excluded from c-jet eigenvector decompositions (if used)")
+        self.addOption ('excludeFromEigenVectorLightTreatment', '', type=str,
+                        info="(semicolon-separated) names of uncertainties to be excluded from light-flavour-jet eigenvector decompositions (if used)")
+        self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=str,
+                        info="whether or not to add recommended lists to the user specified eigenvector decomposition exclusion lists")
 
     def resolveMCMCgenerator(self, config, generatorDict):
         """use either the metadata (generatorDict) or TopDataPreparation
@@ -227,9 +245,19 @@ class FTagConfig (ConfigBlock):
             alg.efficiencyTool.TaggerName = self.btagger
             alg.efficiencyTool.OperatingPoint = self.btagWP
             alg.efficiencyTool.JetAuthor = jetCollection
-            alg.efficiencyTool.ScaleFactorFileName = bTagCalibFile
-            alg.efficiencyTool.SystematicsStrategy = "Envelope"
             alg.efficiencyTool.MinPt = minPt
+            alg.efficiencyTool.EfficiencyFileName = bTagCalibFile
+            alg.efficiencyTool.ScaleFactorFileName = bTagCalibFile
+            alg.efficiencyTool.SystematicsStrategy = self.systematicsStrategy
+            if self.systematicsStrategy == "SFEigen":
+                alg.efficiencyTool.EigenvectorReductionB = self.eigenvectorReductionB
+                alg.efficiencyTool.EigenvectorReductionC = self.eigenvectorReductionC
+                alg.efficiencyTool.EigenvectorReductionLight = self.eigenvectorReductionLight
+                alg.efficiencyTool.ExcludeFromEigenVectorTreatment = self.excludeFromEigenVectorTreatment
+                alg.efficiencyTool.ExcludeFromEigenVectorBTreatment = self.excludeFromEigenVectorBTreatment
+                alg.efficiencyTool.ExcludeFromEigenVectorCTreatment = self.excludeFromEigenVectorCTreatment
+                alg.efficiencyTool.ExcludeFromEigenVectorLightTreatment = self.excludeFromEigenVectorLightTreatment
+                alg.efficiencyTool.ExcludeRecommendedFromEigenVectorTreatment = self.excludeRecommendedFromEigenVectorTreatment
             if DSID != "default":
                 alg.efficiencyTool.EfficiencyBCalibrations = DSID
                 alg.efficiencyTool.EfficiencyTCalibrations = DSID
