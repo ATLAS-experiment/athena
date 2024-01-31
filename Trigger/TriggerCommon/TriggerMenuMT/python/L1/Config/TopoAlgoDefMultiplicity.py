@@ -76,10 +76,10 @@ class TopoAlgoDefMultiplicity(object):
             'cTAUSPARE1',
         ]
         etauThresholds_2bits = [ 
-            'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU35', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
+            'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M', 'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
  
             #spares
-            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', 'eTAUSPARE6', 'eTAUSPARE7',
+            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', #'eTAUSPARE6', 'eTAUSPARE7',
         ]
         jtauThresholds_2bits = [ 
             'jTAU30', 'jTAU30M',
@@ -208,7 +208,7 @@ class TopoAlgoDefMultiplicity(object):
             'gXERHO70', 'gXERHO100', 
             'gXENC70', 'gXENC100',
 
-            'jXE70', 'jXE80', 'jXE100', 'jXE110', 'jXE500',
+            'jXE70', 'jXE80', 'jXE90', 'jXE100', 'jXE110', 'jXE500',
 
             'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
             'gTE200',
@@ -227,8 +227,8 @@ class TopoAlgoDefMultiplicity(object):
             'jXESPARE1', 'jXESPARE2', 'jXESPARE3', 'jXESPARE4',
             'jXESPARE5', 'jXESPARE6', 'jXESPARE7', 'jXESPARE8', 'jXESPARE9',
             'jXESPARE10', 'jXESPARE11', 'jXESPARE12', 'jXESPARE13', 
-            'jXESPARE14',
-            'jXESPARE15',
+            #'jXESPARE14',
+            #'jXESPARE15',
 
         ]
 
