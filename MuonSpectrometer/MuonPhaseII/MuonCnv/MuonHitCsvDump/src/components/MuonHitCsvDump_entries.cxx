@@ -1,9 +1,11 @@
 
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include "../CsvMdtDriftCircleDumperMuonCnv.h"
-#include "../CsvMuonSimHitDumperMuonCnv.h"
+#include "../MdtDriftCircleCsvDumperAlg.h"
+#include "../MuonSimHitCsvDumperAlg.h"
+#include "../MuonStripCsvDumperAlg.h"
 
-DECLARE_COMPONENT(CsvMdtDriftCircleDumperMuonCnv)
-DECLARE_COMPONENT(CsvMuonSimHitDumperMuonCnv)
+DECLARE_COMPONENT(MdtDriftCircleCsvDumperAlg)
+DECLARE_COMPONENT(MuonSimHitCsvDumperAlg)
+DECLARE_COMPONENT(MuonStripCsvDumperAlg)
