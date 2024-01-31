@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: start/stop/start transition test with PhysicsP1_pp_run3_v1 menu
 # art-type: build
@@ -13,15 +13,14 @@ from TrigP1Test import TrigP1TestSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
-precommand = ''.join([
-  "setMenu='PhysicsP1_pp_run3_v1_HLTReprocessing_prescale';",
-  "forceEnableAllChains=True;",
-  "flags.Trigger.CostMonitoring.doCostMonitoring=False;",
-  "disableChains=['HLT_cosmic_id_L1MU3V_EMPTY','HLT_cosmic_id_L1MU8VF_EMPTY']", # Temporary workaround for ATR-25459
-])
-ex.args = f'-i -M -ul -c "{precommand}"'
+ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"',
+            'Trigger.forceEnableAllChains=True',
+            'Trigger.CostMonitoring.doCostMonitoring=False',
+            'Trigger.disableChains=\'["HLT_cosmic_id_L1MU3V_EMPTY","HLT_cosmic_id_L1MU8VF_EMPTY"]\'' # Temporary workaround for ATR-25459
+            ]
+ex.args = '-i -M -ul'
 ex.perfmon = False # perfmon currently not fully supported with athenaHLT -M
 
 # Pass the transitions file into athenaHLT -i

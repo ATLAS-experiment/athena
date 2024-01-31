@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Compare athenaHLT configuration with Dev_pp_run3_v1 menu and different threads/slots/forks settings
 # art-type: build
@@ -15,7 +15,7 @@ def make_exec_steps(nforks, nthreads, nslots):
     # Step dumping athenaHLT config
     ex = ExecStep.ExecStep('Config.'+id_str)
     ex.type = 'athenaHLT'
-    ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+    ex.job_options = 'TriggerJobOpts.runHLT'
     ex.input = 'data'
     ex.forks = nforks
     ex.threads = nthreads
@@ -23,7 +23,7 @@ def make_exec_steps(nforks, nthreads, nslots):
     ex.perfmon = False
     ex.prmon = False
     ex.args = '--dump-config-exit'
-    ex.args += ' -c "setMenu=\'Dev_pp_run3_v1\';"'  
+    ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"']
 
     # Step renaming the config dump
     rename = ExecStep.ExecStep('RenameConfigDump.'+id_str)
