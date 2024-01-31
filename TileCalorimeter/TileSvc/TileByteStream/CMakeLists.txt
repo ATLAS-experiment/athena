@@ -27,33 +27,33 @@ atlas_install_runtime( share/TileDefault.* )
 
 set( extra_patterns "LArDetectorToolNV|is still valid|no data retrieved|Database being retired|Reading file|Unable to locate catalog|Resolved path|DigitizationFlags|^Domain|created CondCont|no dictionary for class|^ +[+]|Reading LArPedestalMC|IOV callback|^DetectorStore|TileDetectorTool|Creating TileCondProxyFile|Cache alignment|INFO opening|loading cache|start processing|done processing|WARNING ../MuRcvDigitsCnt|WARNING ../MuRcvRawChCnt|TileL2Builder initialization completed|Initializing TileMuRcvContByteStreamTool|filled inputFileSummary from file|Picked valid file|No SimFlags|MetaReader|AutoConfiguration|INFO Initializing|IOVDbSvc[0-9 ]+INFO|Found [0-9]* algorithms" )
 
-atlas_add_test( TileDigitsContByteStreamCnv_test
-   SCRIPT test/TileDigitsContByteStreamCnv_test.sh
+atlas_add_test( TileDigitsContByteStreamRead_test
+   SCRIPT test/TileDigitsContByteStreamRead_test.sh
    PROPERTIES TIMEOUT 500
    LOG_IGNORE_PATTERN ${extra_patterns} )
 
-atlas_add_test( TileRawChannelContByteStreamCnv_test
-   SCRIPT test/TileRawChannelContByteStreamCnv_test.sh
+atlas_add_test( TileRawChannelContByteStreamRead_test
+   SCRIPT test/TileRawChannelContByteStreamRead_test.sh
    PROPERTIES TIMEOUT 500
    LOG_IGNORE_PATTERN ${extra_patterns} )
 
-atlas_add_test( TileBeamElemContByteStreamCnv_test
-   SCRIPT test/TileBeamElemContByteStreamCnv_test.sh
+atlas_add_test( TileBeamElemContByteStreamRead_test
+   SCRIPT test/TileBeamElemContByteStreamRead_test.sh
    PROPERTIES TIMEOUT 500
    LOG_IGNORE_PATTERN ${extra_patterns} )
 
-atlas_add_test( TileL2ContByteStreamCnv_test
-   SCRIPT test/TileL2ContByteStreamCnv_test.sh
+atlas_add_test( TileL2ContByteStreamRead_test
+   SCRIPT test/TileL2ContByteStreamRead_test.sh
    PROPERTIES TIMEOUT 500
    LOG_IGNORE_PATTERN ${extra_patterns} )
 
-atlas_add_test( TileLaserObjByteStreamCnv_test
-   SCRIPT test/TileLaserObjByteStreamCnv_test.sh
+atlas_add_test( TileLaserObjByteStreamRead_test
+   SCRIPT test/TileLaserObjByteStreamRead_test.sh
    PROPERTIES TIMEOUT 500
    LOG_IGNORE_PATTERN ${extra_patterns} )
 
-atlas_add_test( TileMuRcvContByteStreamCnv_test
-   SCRIPT test/TileMuRcvContByteStreamCnv_test.sh
+atlas_add_test( TileMuRcvContByteStreamRead_test
+   SCRIPT test/TileMuRcvContByteStreamRead_test.sh
    PROPERTIES TIMEOUT 500
    LOG_IGNORE_PATTERN ${extra_patterns} )
 
