@@ -78,6 +78,25 @@ def defineMenu():
         # ART-28443  test eEMX{} + {{3,4jJY{}}} L1 seeds
         'L1_eEM22M_3jJ40p0ETA25',
         'L1_eEM22M_4jJ30p0ETA25',
+
+        # ATR-28692
+        'L1_EM15VHI_2TAU12IM',
+        'L1_MU8F_TAU12IM',  
+        'L1_MU8F_TAU12IM_J25_2J12',
+        'L1_MU8F_TAU12IM_3J12',
+        'L1_EM15VHI_2TAU12IM_J25_3J12',
+        'L1_MU8F_TAU20IM',
+        #
+        'L1_TAU20IM_2TAU12IM_J25_2J20_3J12',
+        'L1_TAU25IM_2TAU20IM',
+        #
+        'L1_TAU20IM_2J20_XE45',
+        'L1_EM15VHI_2TAU12IM_XE35',
+        'L1_EM15VHI_2TAU12IM_4J12',
+        'L1_MU8F_TAU12IM_XE35',  
+        'L1_TAU20IM_2TAU12IM_XE35', 
+        'L1_TAU40_2TAU12IM_XE40',
+        
     ]
 
     # To replace thresholds in the physics menu
@@ -104,15 +123,13 @@ def defineMenu():
         'L1_eTAU35':'',
         'L1_eTAU40HM':'',
         'L1_2TAU8':'',
-        'L1_EM15VHI_2TAU12IM':'',
-        'L1_MU8F_TAU12IM':'',
-        'L1_MU8F_TAU12IM_J25_2J12':'',
-        'L1_EM15VHI_2TAU12IM_J25_3J12':'',
-        'L1_MU8F_TAU20IM_J25_2J20':'',
-        'L1_TAU20IM_2TAU12IM_J25_2J20_3J12':'',
-        'L1_TAU20IM_2J20_XE45':'',
-        'L1_TAU20IM_2J20_XE50':'',
-        'L1_TAU20IM_2TAU12IM_XE35':'',
+        'L1_eEM18M_2eTAU20M':'',
+        #'L1_MU8F_eTAU20M':'',
+        'L1_MU8F_eTAU20M_jJ55_2jJ30':'',
+        'L1_eEM18M_2eTAU20M_jJ55_3jJ30':'',
+        'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ3':'',
+        'L1_eTAU30M_2jJ50_jXE90':'',
+        'L1_eTAU30M_2eTAU20M_jXE70':'',
 
         # non-primary MU 
         #'L1_MU8VF':'',

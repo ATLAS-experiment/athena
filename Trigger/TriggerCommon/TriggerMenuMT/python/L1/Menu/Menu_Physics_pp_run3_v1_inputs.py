@@ -118,12 +118,12 @@ def defineInputsMenu():
 
             (None,3),
 
-            'eTAU20L', 'eTAU20M', 'eTAU30',
-            'eTAU35', 'eTAU60', 'eTAU80', 'eTAU140',
+            'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M',
+            'eTAU35', 'eTAU35M', 'eTAU60', 'eTAU80', 'eTAU140',
             'eTAU40HM', 
          
             # eTAU thresholds for production
-            'eTAUSPARE6', 'eTAUSPARE7',
+            #'eTAUSPARE6', 'eTAUSPARE7',
 
             None, None, 
 
@@ -222,7 +222,7 @@ def defineInputsMenu():
             # energy thresholds
             # commissioning
             # jXE
-            ('jXE70',1), ('jXE80',1), ('jXE100',1), ('jXE110',1), ('jXE500',1),
+            ('jXE70',1), ('jXE80',1), ('jXE90',1), ('jXE100',1), ('jXE110',1), ('jXE500',1),
             # gXE
             ('gXERHO70',1), ('gXERHO100',1),
             ('gXENC70',1), ('gXENC100',1),
@@ -247,7 +247,7 @@ def defineInputsMenu():
             # production
             # decrement jXESPARE for additional heavy ion jTE thresholds
             ('jXESPARE10',1), ('jXESPARE11',1), ('jXESPARE12',1), ('jXESPARE13',1), 
-            ('jXESPARE14',1),
+            #('jXESPARE14',1),
 
         ]
     })
