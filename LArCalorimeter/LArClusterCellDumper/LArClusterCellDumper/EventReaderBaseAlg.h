@@ -37,7 +37,7 @@ class ATLAS_NOT_THREAD_SAFE EventReaderBaseAlg: public ::AthAlgorithm
         virtual ~EventReaderBaseAlg() override;
 
         virtual StatusCode        initialize()  override;
-        virtual StatusCode        execute();
+        virtual StatusCode        execute()     override;
         virtual StatusCode        finalize()    override;
     
     private:
