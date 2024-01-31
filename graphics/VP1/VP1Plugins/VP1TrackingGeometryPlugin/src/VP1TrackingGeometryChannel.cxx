@@ -22,7 +22,7 @@
 #include "VP1GuideLineSystems/VP1GuideLineSystem.h"
 
 VP1TrackingGeometryChannel::VP1TrackingGeometryChannel()
-  : IVP13DStandardChannelWidget(VP1CHANNELNAMEINPLUGIN(VP1TrackingGeometryChannel,"Tracking Geometry"),
+  : IVP13DStandardChannelWidget(VP1CHANNELNAMEINPLUGIN(VP1TrackingGeometryChannel,"TrackingGeometry"),
                                 "This channel displays the tracking geometry system.",
                                 "Riccardo.Maria.Bianchi@cern.ch, Andreas Salzburger <Andreas.Salzburger@cern.ch>")
 {

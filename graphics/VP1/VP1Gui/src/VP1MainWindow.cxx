@@ -644,7 +644,7 @@ void VP1MainWindow::loadPluginFile(QString filename)
 
 	QString err = m_channelmanager->loadPluginFile(filename);
 	if (!err.isEmpty()) {
-		QMessageBox::critical(0, "Error - could not load plugin file: "+filename,
+		QMessageBox::critical(0, "Error [laodPluginFile] - could not load plugin file: "+filename,
 				"Could not load plugin file: "
 				+filename+"\n\nReason: "+err,QMessageBox::Ok,QMessageBox::Ok);
 		VP1Msg::message("Could not load plugin file: "+filename+"\n\nReason: "+err);
@@ -1761,7 +1761,7 @@ void VP1MainWindow::quickSetupTriggered()
     tabname = "Track/Calo";
   } else if (sender()==pushButton_quicksetup_trackgeo || sender()==action_quicklaunch_trackgeo_viz) {
     plugfile="libVP1TrackingGeometryPlugin.so";
-    channelname="TrackGeo";
+    channelname="TrackingGeometry"; // NOTE: this must match the string given in the *Channel.cxx source file inside the Plugin package (same string, same chars, same spaces, must match 100%)
     tabname = "TrackingGeometry";
   } else if (sender()==pushButton_quicksetup_analysisstudies||sender()==action_quicklaunch_analysisstudies) {
 
@@ -1798,7 +1798,7 @@ void VP1MainWindow::quickSetupTriggered()
 	}
 
 	if (!plugins2fullpath.contains(plugfile)) {
-		QMessageBox::critical(0, "Error - could not locate plugin file: "+plugfile,
+		QMessageBox::critical(0, "Error [QuickSetupTriggered] - could not locate plugin file: "+plugfile,
 				"could not locate plugin file: "
 				+plugfile,QMessageBox::Ok,QMessageBox::Ok);
 		return;
@@ -1810,7 +1810,7 @@ void VP1MainWindow::quickSetupTriggered()
 	if (!m_channelmanager->currentPluginFiles().contains(plugfile_fullpath)) {
 		QString err = m_channelmanager->loadPluginFile(plugfile_fullpath);
 		if (!err.isEmpty()||!m_channelmanager->currentPluginFiles().contains(plugfile_fullpath)) {
-			QMessageBox::critical(0, "Error - could not load plugin file: "+plugfile_fullpath,//Fixme: Error message here is hardcoded to be the same as in loadPluginFile method!!
+			QMessageBox::critical(0, "Error [QuickSetupTriggered] - could not load plugin file: "+plugfile_fullpath,//Fixme: Error message here is hardcoded to be the same as in loadPluginFile method!!
 					"Could not load plugin file: "
 					+plugfile_fullpath+"\n\nReason: "+err,QMessageBox::Ok,QMessageBox::Ok);
 			return;
@@ -1819,8 +1819,9 @@ void VP1MainWindow::quickSetupTriggered()
 
 
 	//Check that plugin contains necessary channel:
+        VP1Msg::message("Looking for channel: " + channelname + ", provided file: " + plugfile_fullpath + ", channels listed: " + m_channelmanager->channelsInPluginFile(plugfile_fullpath).join(", ") );
 	if (!m_channelmanager->channelsInPluginFile(plugfile_fullpath).contains(channelname)) {
-		QMessageBox::critical(0, "Error - did not find necessary channel: "+channelname,
+		QMessageBox::critical(0, "Error [QuickSetupTriggered] - did not find necessary channel: "+channelname,
 				"Could not find channel: "+channelname+" in loaded plugin "+plugfile_fullpath,
 				QMessageBox::Ok,QMessageBox::Ok);
 		return;
@@ -1834,7 +1835,7 @@ void VP1MainWindow::quickSetupTriggered()
 	QString newtabname = m_tabmanager->suggestNewTabName(tabname);
 	m_tabmanager->addNewTab(newtabname);
 	if (!m_tabmanager->hasTab(newtabname)) {
-		QMessageBox::critical(0, "Error - could not create tab: "+newtabname,
+		QMessageBox::critical(0, "Error [QuickSetupTriggered] - could not create tab: "+newtabname,
 				"Could not create tab: "+newtabname,
 				QMessageBox::Ok,QMessageBox::Ok);
 		setUpdatesEnabled(save);
@@ -1845,7 +1846,7 @@ void VP1MainWindow::quickSetupTriggered()
 	//Finally, add channel:
 
 	if (!m_tabmanager->addChannelToTab( channelname, newtabname )) {
-		QMessageBox::critical(0, "Error - problems launching channel: "+channelname,
+		QMessageBox::critical(0, "Error [QuickSetupTriggered] - problems launching channel: "+channelname,
 				"Problems launching channel: "+channelname,
 				QMessageBox::Ok,QMessageBox::Ok);
 		setUpdatesEnabled(save);
