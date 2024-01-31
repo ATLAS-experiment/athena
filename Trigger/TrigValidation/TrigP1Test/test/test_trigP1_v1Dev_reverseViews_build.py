@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: athenaHLT test of the Dev_pp_run3_v1 menu with with reversed order of views to check their independence
 # art-type: build                                                                  
@@ -10,17 +10,13 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
 ex.max_events = 50
-precommand = ''.join([
-  "setMenu='Dev_pp_run3_v1_TriggerValidation_prescale';",
-  "doL1Sim=True;",
-  "doRuntimeNaviVal=True;",
-  "reverseViews=True;",
-])
-ex.args = '-c "{:s}"'.format(precommand)
-ex.args += ' --dump-config-reload'
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
+            'Trigger.doLVL1=True',
+            'Trigger.doRuntimeNaviVal=True']
+ex.args = '-C "from TriggerJobOpts import PostExec; PostExec.reverseViews()"'
 
 test = Test.Test()
 test.art_type = 'build'
