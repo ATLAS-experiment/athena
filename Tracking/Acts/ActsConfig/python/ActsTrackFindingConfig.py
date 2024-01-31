@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -139,4 +139,27 @@ def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **k
 
     acc.addEventAlgo(
         CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
+    return acc
+
+def ActsTrackToTrackParticleCnvAlgCfg(flags, name: str = "ActsTrackToTrackParticleCnvAlg", **kwargs):
+    acc = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault('ExtrapolationTool',    acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
+
+    kwargs.setdefault('ACTSTracksLocation', 'ResolvedActsTracks')
+    kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
+    kwargs.setdefault('TrackParticlesOutKey','ResolvedActsTrackParticles')
+    kwargs.setdefault('FirstAndLastParameterOnly',True)
+    det_elements=[]
+    element_types=[]
+    if flags.Detector.EnableITkPixel:
+        det_elements += ['ITkPixelDetectorElementCollection']
+        element_types += [1]
+    if flags.Detector.EnableITkStrip:
+        det_elements += ['ITkStripDetectorElementCollection']
+        element_types += [2]
+    kwargs.setdefault('SiDetectorElementCollections',det_elements)
+    kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
     return acc

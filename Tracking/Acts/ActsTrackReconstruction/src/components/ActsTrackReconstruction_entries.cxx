@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackFindingAlg.h"
 #include "src/AmbiguityResolutionAlg.h"
 #include "src/ReFitterAlg.h"
 #include "src/CompareTrackAlg.h"
-
+#include "src/TrackToTrackParticleCnvAlg.h"
 // Tools
 #include "src/TrackStatePrinter.h"
 #include "src/KalmanFitter.h"
@@ -22,6 +22,7 @@ DECLARE_COMPONENT( ActsTrk::CompareTrackAlg )
 DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
 DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
+DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvAlg )
 
 // Tools
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinter )

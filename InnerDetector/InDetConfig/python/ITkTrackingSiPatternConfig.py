@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 # ------------------------------------------------------------
@@ -100,6 +100,13 @@ def ITkTrackingSiPatternCfg(flags,
             acc.merge(TrkToActsConvertorAlgCfg(flags,
                                                TrackContainerLocation="ActsTracks",
                                                TrackCollectionKeys=[SiSPSeededTrackCollectionKey]))
+
+        if flags.Tracking.ActiveConfig.doActsTrack and not flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
+            # create track particles from acts tracks
+            from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsTrackToAltTrackParticleCnvAlg",
+                                                        ACTSTracksLocation='ActsTracks',
+                                                        TrackParticlesOutKey='ActsTrackParticlesAlt'))
             
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
     if flags.Tracking.doTruth and runTruth:
@@ -153,9 +160,16 @@ def ITkTrackingSiPatternCfg(flags,
         if flags.Tracking.ActiveConfig.doActsToAthenaResolvedTrack:
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
-                                               TracksLocation=ResolvedTrackCollectionKey))                
+                                               TracksLocation=ResolvedTrackCollectionKey))
             runTruth = False
-        
+
+        if flags.Tracking.ActiveConfig.doActsTrack and flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
+            # create track particles from resolved acts tracks
+            from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
+            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ResolvedActsTrackToAltTrackParticleCnvAlg",
+                                                        ACTSTracksLocation='ResolvedActsTracks',
+                                                        TrackParticlesOutKey='ResolvedActsTrackParticlesAlt'))
+
 
     if flags.Tracking.doTruth and runTruth:
         acc.merge(ITkTrackTruthCfg(
