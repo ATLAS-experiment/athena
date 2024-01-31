@@ -149,12 +149,12 @@ fillPositionsInCalo(xAOD::CaloCluster* cluster, const CaloDetDescrManager& mgr)
  * and in the endcap. The computation is done separately for the
  * cells with phi < reference phi or >=. A cutoff value of 1 is used.
  */
-egammaSuperClusterBuilderBase::PhiSize
-findPhiSize(const egammaSuperClusterBuilderBase::CentralPosition& cp0,
+CookieCutterHelpers::PhiSize
+findPhiSize(const CookieCutterHelpers::CentralPosition& cp0,
             const xAOD::CaloCluster& cluster)
 {
 
-  egammaSuperClusterBuilderBase::PhiSize phiSize;
+  CookieCutterHelpers::PhiSize phiSize;
   auto cell_itr = cluster.cell_cbegin();
   auto cell_end = cluster.cell_cend();
   for (; cell_itr != cell_end; ++cell_itr) {
@@ -275,10 +275,10 @@ refineEta1Position(xAOD::CaloCluster* cluster, const CaloDetDescrManager& mgr)
 /** Find the reference position (eta, phi) relative to which cells are
    restricted.
 */
-egammaSuperClusterBuilderBase::CentralPosition
+CookieCutterHelpers::CentralPosition
 findCentralPositionEM2(const std::vector<const xAOD::CaloCluster*>& clusters)
 {
-  egammaSuperClusterBuilderBase::CentralPosition cp;
+  CookieCutterHelpers::CentralPosition cp;
   for (const auto* cluster : clusters) {
     if (cluster->hasSampling(CaloSampling::EMB2)) {
       const float thisEmax = cluster->energy_max(CaloSampling::EMB2);
@@ -583,10 +583,10 @@ egammaSuperClusterBuilderBase::createNewCluster(
   newCluster->setClusterSize(xAOD::CaloCluster::SuperCluster);
   // Let's try to find the eta and phi of the hottest cell in L2.
   // This will be used as the center for restricting the cluster size.
-  CentralPosition cpRef = findCentralPositionEM2(clusters);
+  CookieCutterHelpers::CentralPosition cpRef = findCentralPositionEM2(clusters);
   // these are the same as the reference but in calo frame
   // (after the processing below)
-  CentralPosition cp0 = cpRef;
+  CookieCutterHelpers::CentralPosition cp0 = cpRef;
   // Get the hotest in raw co-ordinates
   if (cp0.emaxB > 0) {
     const CaloDetDescrElement* dde =
@@ -722,7 +722,7 @@ StatusCode
 egammaSuperClusterBuilderBase::fillClusterConstrained(
   xAOD::CaloCluster& tofill,
   const std::vector<const xAOD::CaloCluster*>& clusters,
-  const egammaSuperClusterBuilderBase::CentralPosition& cp0) const
+  const CookieCutterHelpers::CentralPosition& cp0) const
 {
   const float addCellsWindowEtaBarrel = m_addCellsWindowEtaBarrel;
   const float addCellsWindowEtaEndcap = m_addCellsWindowEtaEndcap;
@@ -801,7 +801,7 @@ egammaSuperClusterBuilderBase::fillClusterConstrained(
   }
   // Now calculate the cluster size in 2nd layer
   // use that for constraining the L0/L1 cells we add
-  const PhiSize phiSize = findPhiSize(cp0, tofill);
+  const CookieCutterHelpers::PhiSize phiSize = findPhiSize(cp0, tofill);
   const float phiPlusB = cp0.phiB + phiSize.plusB + m_extraL0L1PhiSize;
   const float phiMinusB = cp0.phiB - phiSize.minusB - m_extraL0L1PhiSize;
   const float phiPlusEC = cp0.phiEC + phiSize.plusEC + m_extraL0L1PhiSize;

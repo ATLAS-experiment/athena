@@ -11,8 +11,8 @@ atlas_add_component( egammaAlgs
              INCLUDE_DIRS
 		     LINK_LIBRARIES AthenaBaseComps EventKernel xAODCaloEvent xAODEgamma xAODTruth GaudiKernel
 		     MCTruthClassifierLib CaloGeoHelpers CaloUtilsLib CaloDetDescrLib AthenaKernel  StoreGateLib
-		     xAODTracking InDetReadoutGeometry EgammaAnalysisInterfacesLib egammaRecEvent egammaUtils
-		     TrkToolInterfaces InDetRecToolInterfaces FourMomUtils RecoToolInterfaces TrkTrack
+		     xAODTracking InDetReadoutGeometry EgammaAnalysisInterfacesLib egammaRecEvent egammaCaloUtils 
+		     egammaUtils TrkToolInterfaces InDetRecToolInterfaces FourMomUtils RecoToolInterfaces TrkTrack
 		     TrkPseudoMeasurementOnTrack InDetConversionFinderToolsLib TrkCaloExtension egammaInterfacesLib )
 
 # Install files from the package:
