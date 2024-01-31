@@ -493,7 +493,7 @@ bool ZDCDataAnalyzer::FinishEvent()
         float amplitude = pulseAna_p->GetAmplitude();
         float ampError = pulseAna_p->GetAmpError();
         float bkgdFraction = pulseAna_p->GetBkgdMaxFraction();
-;
+
         m_calibAmplitude[side][module] = amplitude * m_currentECalibCoeff[side][module];
 
         float calibAmpError = ampError * m_currentECalibCoeff[side][module];
