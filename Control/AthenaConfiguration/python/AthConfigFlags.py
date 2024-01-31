@@ -797,12 +797,19 @@ class AthConfigFlags(object):
             self.loadAllDynamicFlags()
             for name in sorted(self._flagdict):
                 category,flagName = name.rsplit(".",1) if "." in name else ("",name)
+                flag = self._flagdict[name]
                 try:
-                    val = repr(self._flagdict[name].get(self))
+                    val = repr(flag.get(self))
                 except Exception:
                     val = None
-                if self._flagdict[name]._help != argparse.SUPPRESS:
-                    getParser(category)[0].add_argument(name,nargs='?',default=val,help=": " + (self._flagdict[name]._help if self._flagdict[name]._help is not None else ""))
+                if flag._help != argparse.SUPPRESS:
+                    helptext = ""
+                    if flag._help is not None:
+                        helptext = f": {flag._help}"
+                    if flag._type is not None:
+                        helptext += f' [type: {flag._type.__name__}]'
+
+                    getParser(category)[0].add_argument(name, nargs='?', default=val, help=helptext)
 
             parser._positionals.title = 'flags and positional arguments'
             parser.parse_known_args(argList + ["--help"])
