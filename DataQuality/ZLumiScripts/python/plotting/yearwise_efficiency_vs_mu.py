@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Plot trigger and reconstruction efficiencies over entire data-periods.
@@ -21,8 +21,8 @@ parser.add_argument('--outdir', type=str, help='Output directory for plots')
 parser.add_argument('--dir_2022', type=str, help='Input directory for 2022 data')
 parser.add_argument('--dir_2023', type=str, help='Input directory for 2023 data')
 
-args    = parser.parse_args()
-year    = args.year
+args = parser.parse_args()
+year = args.year
 channel = args.channel
 indir = args.indir
 outdir = args.outdir
@@ -82,26 +82,17 @@ def plot_efficiency_comb(channel, years):
         vec_mu = array('d')
 
         print("year = ", year)
+        grl = pt.get_grl(year)
 
         if year == "23":
 
-            grl = []
             maindir = args.indir + dir_2023
-
-            grl = pt.get_grl(year)
-
-            print("grl = ")
-            print(grl)
+            print("2023 grl = ", grl)
 
         elif year == "22":
 
-            grl = []
             maindir = args.indir + dir_2022
-
-            grl = pt.get_grl(year)
-
-            print("grl = ")
-            print(grl)
+            print("2022 grl = ", grl)
 
         for run in grl:
 
