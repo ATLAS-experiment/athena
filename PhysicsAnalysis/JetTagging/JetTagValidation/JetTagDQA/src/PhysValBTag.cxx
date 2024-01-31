@@ -163,16 +163,10 @@ namespace JetTagDQA {
       // check if it is a ttbar or Zprime sample
       if(dsid == 410000 || dsid == 601229){
         m_jetPtCut = m_jetPtCutTtbar;
-        if(!m_jetNameR10.empty()){
-          m_jetPtCut = m_jetPtCutR10;
-        } 
       }
       else if(dsid == 427080 || dsid == 427081 ||dsid == 801271 || dsid == 800030) {
         m_jetPtCut = m_jetPtCutZprime;
         m_onZprime = true;
-        if(!m_jetNameR10.empty()){
-          m_jetPtCut = m_jetPtCutR10;
-        }
       }
       // if none applies give a warning and use the default cut
       else {
@@ -245,11 +239,15 @@ namespace JetTagDQA {
         }
       }
 
+      float ptCut = (name==m_jetNameR10) ? m_jetPtCutR10 : m_jetPtCut;
+      std::string label_name = "HadronConeExclTruthLabelID";
+      if(name==m_jetNameR10) label_name = "R10TruthLabel_R22v1";
+
       // loop over the jets
       for (auto jet : *jets) {
 
         // apply the jet pT eta and jvt cuts
-        if(jet->pt() <= m_jetPtCut) continue;
+        if(jet->pt() <= ptCut) continue;
         if(std::abs(jet->eta()) >= m_jetEtaCut) continue;
         //Arnaud: JVT cut to remove horns in jet eta 
         if (plot->m_JVT_defined && jet->getAttribute<float>("Jvt") < plot->m_JVT_cut
@@ -268,14 +266,7 @@ namespace JetTagDQA {
         // get the jet truth label
         int truth_label(1000);
         if(!m_isData){
-          if(name==m_jetNameEMTopo || name==m_jetNamePFlow || name==m_jetNameTrackJet){
-             if(jet->isAvailable<int>("HadronConeExclTruthLabelID")) jet->getAttribute("HadronConeExclTruthLabelID", truth_label);
-	  }
-          else if(name==m_jetNameR10){
-             if(jet->isAvailable<int>("R10TruthLabel_R22v1")) jet->getAttribute("R10TruthLabel_R22v1", truth_label);
-          }
-          else if(jet->isAvailable<int>("HadronConeExclExtendedTruthLabelID")) jet->getAttribute("HadronConeExclExtendedTruthLabelID", truth_label);
-          else jet->getAttribute("TruthLabelID",truth_label);    
+	  if(jet->isAvailable<int>(label_name)) jet->getAttribute(label_name, truth_label);
         }
 
         // fill the jet related histograms
