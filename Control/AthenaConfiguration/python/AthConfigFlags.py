@@ -23,6 +23,10 @@ class CfgFlag(object):
 
     __slots__ = ['_value', '_setDef', '_type', '_help']
 
+    _compatibleTypes = {
+        (int, float),   # int can be assigned to float flag
+    }
+
     def __init__(self, default, type=None, help=None):
         """Initialise the flag with the default value.
 
@@ -46,9 +50,7 @@ class CfgFlag(object):
         else:
             self._value=value
             self._setDef=None
-
-            if not self._validateType(self._value):
-                raise TypeError("Flag is of type '{}', but '{}' set.".format(self._type, type(self._value)))
+            self._validateType(self._value)
         return
 
     def get(self, flagdict=None):
@@ -79,9 +81,7 @@ class CfgFlag(object):
             # use function for as long as the flags are not locked
             value = self._setDef(flagdict)
 
-        if not self._validateType(value):
-            raise TypeError("Flag is of type '{}', but '{}' set.".format(self._type, type(value)))
-
+        self._validateType(value)
         return deepcopy(value)
 
     def __repr__(self):
@@ -91,11 +91,13 @@ class CfgFlag(object):
             return "[function]"
 
     def _validateType(self, value):
-        if self._type is None:
-            return True
-
-        if value is not None:
-            return isinstance(value, self._type)
+        if (self._type is None or value is None or
+            isinstance(value, self._type) or
+            (type(value), self._type) in self._compatibleTypes):
+            return
+        # Type mismatch
+        raise TypeError(f"Flag is of type '{self._type.__name__}', "
+                        f"but value '{value}' of type '{type(value).__name__}' set.")
 
 
 def _asdict(iterator):
@@ -602,6 +604,7 @@ class AthConfigFlags(object):
 
     def fillFromString(self, flag_string):
         """Fill the flags from a string of type key=value"""
+        import ast
 
         try:
             key, value = flag_string.split("=")
@@ -626,22 +629,16 @@ class AthConfigFlags(object):
         if flag_type is None:
             # Regular flag
             try:
-                exec(f"type({value})")
-            except (NameError, SyntaxError): # Can't determine type, assume we got an un-quoted string
+                ast.literal_eval(value)
+            except Exception:  # Can't determine type, assume we got an un-quoted string
                 value=f"\"{value}\""
-        else:
-            # typed flag
-            if isinstance(flag_type, EnumMeta):
-                # Flag is an enum, so we need to import the module containing the enum
-                
-                # import the module containing the FlagEnum class
-                ENUM = importlib.import_module(flag_type.__module__)  # noqa: F841 (used in exec)
-                value=f"ENUM.{value}"
-            else:
-                # Flag is not an enum, so we can just use the type
-                value=f"{flag_type.__name__}({value})"
 
-        # Set the value
+        elif isinstance(flag_type, EnumMeta):
+            # Flag is an enum, so we need to import the module containing the enum
+            ENUM = importlib.import_module(flag_type.__module__)  # noqa: F841 (used in exec)
+            value=f"ENUM.{value}"
+
+        # Set the value (this also does the type checking if needed)
         exec(f"self.{key}{oper}{value}")
 
 
