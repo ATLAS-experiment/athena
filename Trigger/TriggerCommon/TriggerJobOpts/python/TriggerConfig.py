@@ -682,9 +682,9 @@ def triggerRunCfg( flags, menu=None ):
 
     decObj = collectDecisionObjects( hypos, filters, hltSeedingAlg, summaryAlg )
     decObjHypoOut = collectHypoDecisionObjects(hypos, inputs=False, outputs=True)
-    __log.info( "Number of decision objects found in HLT CF %d", len( decObj ) )
-    __log.info( "Of which, %d are the outputs of hypos", len( decObjHypoOut ) ) 
-    __log.info( decObj )
+    __log.info( "Number of decision objects found in HLT CF %d of which %d are the outputs of hypos",
+                len(decObj), len(decObjHypoOut) )
+    __log.debug( decObj )
 
     # configure components need to normalise output before writing out
     viewMakers = collectViewMakers( HLTSteps )
