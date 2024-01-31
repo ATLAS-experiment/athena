@@ -352,6 +352,7 @@ def Kernel_ATLFAST3F_ACTSMTCfg(flags, name="ISF_Kernel_ATLFAST3F_ACTSMT", **kwar
     ])
 
     acc.merge(Kernel_GenericSimulatorMTCfg(flags, name, **kwargs))
+    return acc
 
 
 def Kernel_CosmicsG4Cfg(flags, name="ISF_Kernel_CosmicsG4", **kwargs):
