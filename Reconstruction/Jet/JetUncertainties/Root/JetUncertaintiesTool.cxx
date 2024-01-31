@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // General package includes
@@ -2371,10 +2371,13 @@ double JetUncertaintiesTool::getSmearingFactor(const xAOD::Jet& jet, const CompS
             n,m are + for upward variations and - for downward variations
             x,y are + or - to differentiate regions of anticorrelations within a given NP
 
-        The source of sigma_nominal depends on what is being smeared
-            (nx+my+...) > 0  -->  smear MC, so use sigma_nominal^MC
-            (nx+my+...) < 0  -->  smear (pseudo-)data, so use sigma_nominal^data
-            (nx+my+...) = 0  -->  no smearing is required
+        As the MC has been smeared to the data in JetCalibTools and we have saved the histograms
+        before this smearing has been applied we need to take the maximum of the data and MC
+        resolutions to find the nominal resolution which to smear against. For cases when the data
+        resolution is better than that in simulation and we additionally are using data as 
+        pseudo-data (extremely rare in analyses) this might result in a slightly more conservative
+        uncertainty.
+            sigma_nominal = max(sigma_MC,sigma_data)
 
         In some cases, it is not desireable to smear (pseudo-)data
         Result: two correlation smearing options, "full" and "simple"
@@ -2474,11 +2477,10 @@ double JetUncertaintiesTool::getSmearingFactor(const xAOD::Jet& jet, const CompS
     else if (variation < 0 && !m_resHelper->smearOnlyMC())
         return 1; // No smearing if this is MC and the sign says to smear data and this is not the simple scenario
     
-    // Figure out which resolution is nominal (MC or data)
-    const bool nominalIsMC = (m_resHelper->smearOnlyMC() || variation > 0);
-
     // Get the relevant nominal resolution
-    const double sigmaNom = getNominalResolution(jet,smearType,m_currentUncSet->getTopology(),nominalIsMC);
+    const double sigmaMC = getNominalResolution(jet,smearType,m_currentUncSet->getTopology(),true);
+    const double sigmaData = getNominalResolution(jet,smearType,m_currentUncSet->getTopology(),false);
+    const double sigmaNom = std::max(sigmaMC,sigmaData);
 
     // If this is a relative uncertainty, get the relevant nominal data histogram
     // This is used to scale the input relative variation to get the absolute impact
@@ -2488,11 +2490,17 @@ double JetUncertaintiesTool::getSmearingFactor(const xAOD::Jet& jet, const CompS
     // Note that relativeFactor is 1 if this is an absolute uncertainty
     const double sigmaSmear = sqrt(pow(sigmaNom + fabs(variation)*relativeFactor,2) - pow(sigmaNom,2));
 
+    // Throw an error if the userSeed is set to 1 as this is the seed used in JetCalibTools so leads to correlated smearing
+    if (m_userSeed == 1){
+        ATH_MSG_ERROR("A seed of 1e5 times the jet phi is used in JetCalibTools so using it here leads to correlated smearing");
+        return StatusCode::FAILURE;       
+    }
+
     // We have the smearing factor, so prepare to smear
-    // If the user specified a seed, then use it
+    // If the user specified a seed, then use it times the jet's phi times 1*10^5
     // If not, then use the jet's phi times 1*10^5 in MC, 1.23*10^5 in (pseudo-)data
     // Difference in seed between allows for easy use of pseudo-data
-    long long int seed = m_userSeed != 0 ? m_userSeed : (m_isData ? 1.23e+5 : 1.00e+5)*fabs(jet.phi());
+    long long int seed = m_userSeed != 0 ? m_userSeed*1.00e+5*fabs(jet.phi()) : (m_isData ? 1.23e+5 : 2.00e+5)*fabs(jet.phi());
     // SetSeed(0) uses the clock, avoid this
     if(seed == 0) seed = m_isData ? 34545654 : 45583453; // arbitrary numbers which the seed couldn't otherwise be
     m_rand.SetSeed(seed);
