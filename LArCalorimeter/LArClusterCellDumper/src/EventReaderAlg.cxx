@@ -591,10 +591,8 @@ StatusCode EventReaderAlg::dumpClusterCells(const xAOD::CaloCluster *cl, int clu
       float   effSigma  = m_noiseCDO->getEffectiveSigma(cell->ID(), cell->gain(), cell->energy()); // effective sigma of cell related to its noise.
       float   cellNoise = m_noiseCDO->getNoise(cell->ID(), cell->gain()); // cell noise value
 
-      IdentifierHash subCaloHash = cell->caloDDE()->subcalo_hash(); // sub-calo hash. Value specific for sub-calo region.
-      IdentifierHash caloHash = cell->caloDDE()->calo_hash(); // calo-hash. Value relative to entire calo region.
-      IdentifierHash chidHash, adcidHash;
-      HWIdentifier chhwid, adchwid;
+      IdentifierHash chidHash;
+      HWIdentifier chhwid;
       size_t index;
 
       // ========= TileCal ==========
@@ -880,7 +878,6 @@ StatusCode EventReaderAlg::dumpClusterCells(const xAOD::CaloCluster *cl, int clu
 
       HWIdentifier    channelID   = LArChannel.channelID();
       IdentifierHash  chHwidHash  = m_onlineLArID->channel_Hash(channelID);
-      Identifier      softID      = m_larCabling->cnvToIdentifier(channelID);
 
       size_t index = static_cast<size_t>(chHwidHash);
 
@@ -927,7 +924,6 @@ StatusCode EventReaderAlg::dumpClusterCells(const xAOD::CaloCluster *cl, int clu
             if (m_printCellsClus){ //optional to help debugging
 
               HWIdentifier hardwareID = LArChannel.hardwareID();
-              HWIdentifier identifyID = LArChannel.identify();
 
               if (!m_isMC){
                 ATH_MSG_INFO ("(Cluster) In DumpLAr Raw "<< channelIndexMap[k] <<": hardwareID (B_EC/P_N/feedThr/slot/chn): " << hardwareID << "(" << barrelEc << "/" << posNeg << "/" << feedThr << "/" << slot << "/" << chn << ")" << ". Energy: " << rawEnergyConv << ". Time: " << rawTimeConv << ". Provenance: " << provenance << ". Quality: " << rawQualityConv <<" ecut (DSPThr) = " << m_run2DSPThresh->tQThr(channelID));
