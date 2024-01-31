@@ -170,7 +170,7 @@ class ThresholdDef:
         eTAU_cuts = [20]
         for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iL' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rCore = "Loose" )
-        eTAU_cuts = [20]
+        eTAU_cuts = [20, 30, 35]
         for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iM' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rCore = "Medium" )
 
@@ -282,7 +282,7 @@ class ThresholdDef:
             TEThreshold('gTE%i' % thrV, 'gTE').setTE(thrV)
 
         # jXE
-        jXE_cuts = [70, 80, 100, 110, 500]
+        jXE_cuts = [70, 80, 90, 100, 110, 500]
         for thrV in jXE_cuts:
             XEThreshold('jXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
 
