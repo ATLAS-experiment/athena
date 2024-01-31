@@ -11,7 +11,6 @@
 #include "xAODJet/JetContainer.h"
 
 #include "PathResolver/PathResolver.h"
-#include "lwtnn/parse_json.hh"
 
 #include <fstream>
 
@@ -42,47 +41,35 @@ namespace FlavorTagDiscriminants {
       }
     }
 
+    // Load and initialize the neural network model from the given file path.
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
     m_onnxUtil = std::make_shared<OnnxUtil>(fullPathToOnnxFile);
 
-    // get the configuration of the model outputs
-    GNNConfig::Config gnn_output_config = m_onnxUtil->getOutputConfig();
+    // Extract metadata from the ONNX file, primarily about the model's inputs.
+    auto lwt_config = m_onnxUtil->getLwtConfig();
 
-    // get metadata as a string from the onnx file, mostly containing input information
-    std::string gnn_config_str = m_onnxUtil->getMetadataString("gnn_config");
-
-    std::stringstream gnn_config_stream;
-
-    // for the new metadata format, the outputs are inferred from the model
-    // but we still need to add an empty "outputs" key to the config so that
-    // the lwt::parse_json_graph function doesn't throw an exception
-    if (m_onnxUtil->getOnnxModelVersion() != OnnxModelVersion::V0){
-      nlohmann::json j = nlohmann::json::parse(gnn_config_str);
-      j["outputs"] = nlohmann::json::object();
-      gnn_config_stream << j.dump();
-    } else {
-      gnn_config_stream << gnn_config_str;
-    }
-    auto config = lwt::parse_json_graph(gnn_config_stream);
-
+    // Create configuration objects for data preprocessing.
     auto [inputs, track_sequences, options] = dataprep::createGetterConfig(
-        config, o.flip_config, o.variable_remapping, o.track_link_type);
+        lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
 
-    // jet and b-tagging inputs
+    // Initialize jet and b-tagging input getters.
     auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromBTag = vb;
     m_varsFromJet = vj;
     m_dataDependencyNames = ds;
 
-    // track inputs
+    // Initialize track input getters.
     auto [tsb, td, rt] = dataprep::createTrackGetters(track_sequences, options);
     m_trackSequenceBuilders = tsb;
     m_dataDependencyNames += td;
 
+    // Initialize data dependencies and output decorators.
     FlavorTagDiscriminants::FTagDataDependencyNames dd;
     std::set<std::string> rd;
 
-    // get all the possible output decorators
+    // Retrieve the configuration for the model outputs.
+    OnnxUtil::OutputConfig gnn_output_config = m_onnxUtil->getOutputConfig();
+
     std::tie(
         m_decorators_float,
         m_decorators_vecchar,
@@ -279,4 +266,4 @@ namespace FlavorTagDiscriminants {
     return m_dataDependencyNames.trackInputs;
   }
 
-}
+} // end of namespace FlavorTagDiscriminants

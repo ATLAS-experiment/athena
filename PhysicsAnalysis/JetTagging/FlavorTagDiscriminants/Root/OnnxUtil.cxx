@@ -1,25 +1,25 @@
 /*
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
 
 
 #include "FlavorTagDiscriminants/OnnxUtil.h"
 #include "CxxUtils/checker_macros.h"
 #include <stdexcept>
 #include <tuple> //for std::make_tuple
+#include "lwtnn/parse_json.hh"
 
 namespace FlavorTagDiscriminants {
 
-  // Constructor
   OnnxUtil::OnnxUtil(const std::string& path_to_onnx)
     //load the onnx model to memory using the path m_path_to_onnx
     : m_env (std::make_unique< Ort::Env >(ORT_LOGGING_LEVEL_FATAL, ""))
   {
-
-    // initialize session options if needed
+    // initialize session options
+    Ort::AllocatorWithDefaultOptions allocator;
     Ort::SessionOptions session_options;
     session_options.SetIntraOpNumThreads(1);
+
     // Ignore all non-fatal errors. This isn't a good idea, but it's
     // what we get for uploading semi-working graphs.
     session_options.SetLogSeverityLevel(4);
@@ -30,128 +30,79 @@ namespace FlavorTagDiscriminants {
     m_session = std::make_unique< Ort::Session >(*m_env, path_to_onnx.c_str(),
                                                  session_options);
 
+    // get metadata from the onnx model
+    m_metadata = loadMetadata("gnn_config");
 
-    std::string metadata = getMetadataString("gnn_config");
-    nlohmann::json j = nlohmann::json::parse(metadata);
-
-    // metadata version is explicitly set
-    if (j.contains("onnx_model_version")){
-      m_onnx_model_version = j["onnx_model_version"].get<OnnxModelVersion>();
+    // get the onnx model version
+    if (m_metadata.contains("onnx_model_version")) { // metadata version is explicitly set
+      m_onnx_model_version = m_metadata["onnx_model_version"].get<OnnxModelVersion>();
       if (m_onnx_model_version == OnnxModelVersion::UNKNOWN){
         throw std::runtime_error("Unknown Onnx model version!");
       }
-    // metadata version is not set, infer from the presence of "outputs" key
-    } else {
-      if (j.contains("outputs")){
+    } else { // metadata version is not set, infer from the presence of "outputs" key
+      if (m_metadata.contains("outputs")){
         m_onnx_model_version = OnnxModelVersion::V0;
       } else {
         throw std::runtime_error("Onnx model version not found in metadata");
       }
     }
 
-    Ort::AllocatorWithDefaultOptions allocator;
-
-    // get the input nodes
+    // iterate over input nodes and get their names
     size_t num_input_nodes = m_session->GetInputCount();
-
-    // iterate over all input nodes
     for (std::size_t i = 0; i < num_input_nodes; i++) {
       auto input_name = m_session->GetInputNameAllocated(i, allocator);
       m_input_node_names.emplace_back(input_name.get());
      }
 
-    // get the output nodes
+    // iterate over output nodes and get their configuration
     size_t num_output_nodes = m_session->GetOutputCount();
-    std::vector<int64_t> output_node_dims;
-
-    // iterate over all output nodes
-    for(std::size_t i = 0; i < num_output_nodes; i++ ) {
-      auto output_name = m_session->GetOutputNameAllocated(i, allocator);
-      ONNXOutputNode output_node;
-      output_node.name = std::string(output_name.get());
-      output_node.name_in_model = output_node.name;
-      output_node.type = 
-        m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetElementType();
-      output_node.rank = 
-        m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetShape().size();
-
-      // needed for backward compatibility
+    for (std::size_t i = 0; i < num_output_nodes; i++) {
+      const auto name = std::string(m_session->GetOutputNameAllocated(i, allocator).get());
+      const auto type = m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetElementType();
+      const int rank = m_session->GetOutputTypeInfo(i).GetTensorTypeAndShapeInfo().GetShape().size();
       if (m_onnx_model_version == OnnxModelVersion::V0) {
-        output_node.name = j["outputs"].begin().key() + "_" + output_node.name;
-        output_node.rank = 0;
+        const OnnxOutput onnxOutput(name, type, m_metadata["outputs"].begin().key());
+        m_output_nodes.push_back(onnxOutput);
+      } else {
+        const OnnxOutput onnxOutput(name, type, rank);
+        m_output_nodes.push_back(onnxOutput);
       }
-      
-      m_output_nodes.push_back(output_node);
     }
   }
 
-  // Destructor
-  OnnxUtil::~OnnxUtil() = default;
-
-  std::string OnnxUtil::getMetadataString(const std::string& key) const {
-    /* retrieve metadata from the onnx model with the given key */
+  nlohmann::json OnnxUtil::loadMetadata(const std::string& key) const {
     Ort::AllocatorWithDefaultOptions allocator;
-    Ort::ModelMetadata metadata = m_session->GetModelMetadata();
-    std::string val(metadata.LookupCustomMetadataMapAllocated(key.c_str(), allocator).get());
-    return val; 
+    Ort::ModelMetadata modelMetadata = m_session->GetModelMetadata();
+    std::string metadataString(modelMetadata.LookupCustomMetadataMapAllocated(key.c_str(), allocator).get());
+    return nlohmann::json::parse(metadataString);
   }
 
-  std::vector<ONNXOutputNode> OnnxUtil::getOutputNodeInfo() const {
+  const lwt::GraphConfig OnnxUtil::getLwtConfig() const {
+    /* for the new metadata format (>V0), the outputs are inferred directly from
+    the model graph, rather than being configured as json metadata.
+    however we still need to add an empty "outputs" key to the config so that
+    lwt::parse_json_graph doesn't throw an exception */
+
+    // deep copy the metadata by round tripping through a string stream
+    nlohmann::json metadataCopy = nlohmann::json::parse(m_metadata.dump());
+    if (getOnnxModelVersion() != OnnxModelVersion::V0){
+      metadataCopy["outputs"] = nlohmann::json::object();
+    }
+    std::stringstream metadataStream;
+    metadataStream << metadataCopy.dump();
+    return lwt::parse_json_graph(metadataStream);
+  }
+
+  const nlohmann::json& OnnxUtil::getMetadata() const {
+    return m_metadata;
+  }
+
+  const OnnxUtil::OutputConfig& OnnxUtil::getOutputConfig() const {
     return m_output_nodes;
   }
 
   OnnxModelVersion OnnxUtil::getOnnxModelVersion() const {
     return m_onnx_model_version;
-  }
-
-  GNNConfig::OutputNodeType OnnxUtil::getOutputNodeType(
-    const ONNXTensorElementDataType& type, int rank) const {
-
-    if (type == ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT) {
-      if (rank == 0) {
-        return GNNConfig::OutputNodeType::FLOAT;
-      } else if (rank == 1) {
-        return GNNConfig::OutputNodeType::VECFLOAT;
-      }
-    } else if (type == ONNXTensorElementDataType::ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8) {
-      return GNNConfig::OutputNodeType::VECCHAR;
-    }
-    return GNNConfig::OutputNodeType::UNKNOWN;
-  }
-
-  GNNConfig::OutputNodeTarget OnnxUtil::getOutputNodeTarget(int rank) const {
-    
-    // Currently it decides the target based on the output data type and shape.
-    // It should be replaced with a better implementation in future, 
-    // where the `target` can be obtained from the model metadata.
-    if (rank == 0) {
-      return GNNConfig::OutputNodeTarget::JET;
-    }
-    else if (rank == 1) {
-      return GNNConfig::OutputNodeTarget::TRACK;
-    }
-    return GNNConfig::OutputNodeTarget::UNKNOWN;
-  }
-
-  GNNConfig::Config OnnxUtil::getOutputConfig() const {
-
-    GNNConfig::Config config;
-    std::vector<FlavorTagDiscriminants::ONNXOutputNode> out_nodes = getOutputNodeInfo();
-
-    for (const auto& out_node : out_nodes) {
-      GNNConfig::OutputNodeConfig output_config;
-      output_config.label = out_node.name;
-
-      GNNConfig::OutputNodeType type = getOutputNodeType(out_node.type, out_node.rank);
-      output_config.type = type;
-
-      GNNConfig::OutputNodeTarget target = getOutputNodeTarget(out_node.rank);
-      output_config.target = target;
-
-      config.outputs.push_back(output_config);
-    }
-
-    return config;
   }
 
   std::tuple<
@@ -178,13 +129,15 @@ namespace FlavorTagDiscriminants {
     }
 
     // casting vector<string> to vector<const char*>. this is what ORT expects
-    std::vector<const char*> input_node_names(m_input_node_names.size(),nullptr);
-    for (int i=0; i<static_cast<int>(m_input_node_names.size()); i++) {
-      input_node_names[i]= m_input_node_names.at(i).c_str();
+    std::vector<const char*> input_node_names;
+    input_node_names.reserve(m_input_node_names.size());
+    for (const auto& name : m_input_node_names) {
+      input_node_names.push_back(name.c_str());
     }
-    std::vector<const char*> output_node_names(m_output_nodes.size(),nullptr);
-    for (int i=0; i<static_cast<int>(m_output_nodes.size()); i++) {
-      output_node_names[i]= m_output_nodes.at(i).name_in_model.c_str();
+    std::vector<const char*> output_node_names;
+    output_node_names.reserve(m_output_nodes.size());
+    for (const auto& node : m_output_nodes) {
+      output_node_names.push_back(node.name_in_model.c_str());
     }
 
     // score model & input tensor, get back output tensor
@@ -196,7 +149,6 @@ namespace FlavorTagDiscriminants {
       input_node_names.data(), input_tensors.data(), input_node_names.size(),
       output_node_names.data(), output_node_names.size()
     );
-
 
     // extract outputs
     std::map<std::string, float> output_f;
