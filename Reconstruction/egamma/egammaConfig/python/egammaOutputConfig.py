@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Prepare EGamma output list"
 
@@ -104,14 +104,22 @@ def egammaOutputCfg(flags, name="EGOutputList"):
         if (flags.Tracking.writeExtendedSi_PRDInfo or
             flags.Tracking.writeExtendedTRT_PRDInfo):
             extension = "GSF_"
-            toAOD += [
-                f"xAOD::TrackStateValidationContainer#{extension}Pixel_MSOSs",
-                f"xAOD::TrackStateValidationAuxContainer#{extension}Pixel_MSOSsAux.",
-                f"xAOD::TrackStateValidationContainer#{extension}SCT_MSOSs",
-                f"xAOD::TrackStateValidationAuxContainer#{extension}SCT_MSOSsAux.",
-                f"xAOD::TrackStateValidationContainer#{extension}TRT_MSOSs",
-                f"xAOD::TrackStateValidationAuxContainer#{extension}TRT_MSOSsAux."
-            ]
+            if flags.Detector.GeometryITk:
+                toAOD += [
+                    f"xAOD::TrackStateValidationContainer#{extension}ITkPixel_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}ITkPixel_MSOSsAux.",
+                    f"xAOD::TrackStateValidationContainer#{extension}ITkStrip_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}ITkStrip_MSOSsAux."
+                ]
+            else:
+                toAOD += [
+                    f"xAOD::TrackStateValidationContainer#{extension}Pixel_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}Pixel_MSOSsAux.",
+                    f"xAOD::TrackStateValidationContainer#{extension}SCT_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}SCT_MSOSsAux.",
+                    f"xAOD::TrackStateValidationContainer#{extension}TRT_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#{extension}TRT_MSOSsAux."
+                ]
 
     if flags.Egamma.doConversionBuilding:
         toESD += [
