@@ -591,8 +591,6 @@ namespace JetTagDQA{
       enum position{histo_name, histo_title, histo_path, histo_xbins, histo_xmin, histo_xmax, histo_type, histo_ymin, histo_ymax};
       float m_truthMatchProbabilityCut = 0.0F;
       bool m_isData = false;
-      bool m_isR10 = false;
-      bool m_isVR = false;
       // some helper functions
       TH1* bookHistogram(std::string histo_name, const std::string& var_name, const std::string& part = "", const std::string& prefix = "");
       int getTrackHits(const xAOD::TrackParticle& part, xAOD::SummaryType info);
