@@ -958,7 +958,7 @@ namespace FlavorTagDiscriminants {
       internal::OutNodeChar, internal::OutNodeFloat,
       FTagDataDependencyNames, std::set<std::string>>
     createGNDecorators(
-      const GNNConfig::Config& config,
+      const OnnxUtil::OutputConfig& out_config,
       const FTagOptions& options)
     {
       FTagDataDependencyNames deps;
@@ -977,9 +977,9 @@ namespace FlavorTagDiscriminants {
       std::string context = "building negative tag b-btagger";
 
       // for each model output
-      for (const auto& out_node: config.outputs) {
+      for (const auto& out_node: out_config) {
 
-        std::string name = out_node.label;
+        std::string name = out_node.name;
         
         // modify the output name if we're using flip taggers
         if (options.flip != FlipTagConfig::STANDARD) {
@@ -995,33 +995,33 @@ namespace FlavorTagDiscriminants {
 
         // create a decorator for this output depending on the rank and type
         switch (out_node.type) {
-          case GNNConfig::OutputNodeType::FLOAT: {
+          case OnnxOutput::OutputType::FLOAT: {
             SG::AuxElement::Decorator<float> f(name);
-            decorators_f.emplace_back(out_node.label, f);
+            decorators_f.emplace_back(out_node.name, f);
             break;
           }
-          case GNNConfig::OutputNodeType::VECCHAR: {
-            if (out_node.target == GNNConfig::OutputNodeTarget::JET) {
+          case OnnxOutput::OutputType::VECCHAR: {
+            if (out_node.target == OnnxOutput::OutputTarget::JET) {
               SG::AuxElement::Decorator<std::vector<char>> vc(name);
-              decorators_vc.emplace_back(out_node.label, vc);
+              decorators_vc.emplace_back(out_node.name, vc);
             } 
-            else if (out_node.target == GNNConfig::OutputNodeTarget::TRACK) {
+            else if (out_node.target == OnnxOutput::OutputTarget::TRACK) {
               SG::AuxElement::Decorator<char> c(name);
-              decorators_track_c.emplace_back(out_node.label, c);
+              decorators_track_c.emplace_back(out_node.name, c);
             }
             else {
               throw std::logic_error("unknown outputnode target");
             }
             break;
           }
-          case GNNConfig::OutputNodeType::VECFLOAT: {
-            if (out_node.target == GNNConfig::OutputNodeTarget::JET) {
+          case OnnxOutput::OutputType::VECFLOAT: {
+            if (out_node.target == OnnxOutput::OutputTarget::JET) {
               SG::AuxElement::Decorator<std::vector<float>> vf(name);
-              decorators_vf.emplace_back(out_node.label, vf);
+              decorators_vf.emplace_back(out_node.name, vf);
             } 
-            else if (out_node.target == GNNConfig::OutputNodeTarget::TRACK) {
+            else if (out_node.target == OnnxOutput::OutputTarget::TRACK) {
               SG::AuxElement::Decorator<float> f(name);
-              decorators_track_f.emplace_back(out_node.label, f);
+              decorators_track_f.emplace_back(out_node.name, f);
             }
             else {
               throw std::logic_error("unknown outputnode target");
@@ -1034,6 +1034,8 @@ namespace FlavorTagDiscriminants {
       }
 
       // create a decorator for the track links
+      // TODO: use the tagger name in the decorator name so that we can
+      // decorate the tracks from multiple taggers with different selections
       if (decorators_vc.size() > 0 || decorators_vf.size() > 0){
         std::string name = "TrackLinks";
         if (auto h = remap.extract(name)){
