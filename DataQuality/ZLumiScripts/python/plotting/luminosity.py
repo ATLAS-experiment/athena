@@ -36,14 +36,18 @@ def main():
     zmumulumi, zmumulumierr = plot_channel('Zmumu')
     zeelumi, zeelumierr  = plot_channel('Zee')
     zlllumi, zlllumierr = plot_channel('Zll')
-    plot_ratio(zeelumi, zeelumierr, zmumulumi, zmumulumierr)
+    if zmumulumi == 1 and zmumulumierr == 1 and zeelumi == 1 and zeelumierr == 1:
+        print("No data available, cannot calculate ratio")
+
+    else:
+        plot_ratio(zeelumi, zeelumierr, zmumulumi, zmumulumierr)
     
 
 def plot_channel(channel):
     dfz = pd.read_csv(infilename, delimiter=',')
     if dfz.empty:
         print('No data available. Exiting')
-        return
+        return 1, 1
 
     run_number = str(int(dfz.RunNum[0]))
     lhc_fill   = str(int(dfz.FillNum[0]))
@@ -98,8 +102,9 @@ def plot_channel(channel):
         ratio = array('d', dfz[channel+'Lumi']/dfz['OffLumi'])
         print("mean for "+channel+": ", np.mean(ratio))
     else:
-        ratio = 1
-        print("No valid LBs found")
+        #ratio = 1
+        print("No valid LBs found. Exiting")
+        return 1, 1
 
     dfz['OffDelLumi'] = dfz['OffLumi']*dfz['LBFull']
 
@@ -306,6 +311,7 @@ def plot_channel(channel):
     hr.Draw('ap0')
 
     if len(dfz):
+        print("len(dfz) = ", len(dfz))
         hr.Fit('pol0')
         hr.GetFunction('pol0').SetLineColor(R.kRed)
 
@@ -336,8 +342,7 @@ def plot_channel(channel):
             pt.drawText(0.2, 0.80, "Data 20" + year + ", #sqrt{s} = 13 TeV")
     pt.drawText(0.2, 0.74, "LHC Fill " + lhc_fill)
     pt.drawText(0.2, 0.68,  channel_string + " counting")
-    
-    mean = hr.GetFunction("pol0").GetParameter(0)
+
     leg = R.TLegend(0.17, 0.2, 0.90, 0.3)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.05)
