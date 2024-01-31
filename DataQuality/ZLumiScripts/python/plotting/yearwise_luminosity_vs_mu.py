@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import numpy as np
 import pandas as pd
@@ -59,8 +59,7 @@ if year == "run2":
     grl.extend(pt.get_grl("17"))
     grl.extend(pt.get_grl("18"))
     outfile = "ZeeZmm_counting_data_ratio_v_mu_run2.pdf"
-elif year == "run3":            
-    grl = []
+elif year == "run3":  
     out_tag = "_run3"
 
     grl = pt.get_grl("22")
@@ -76,7 +75,6 @@ elif year == "22":
 elif year == "23":
     out_tag = year
     date_string = "Data 20"+year+", #sqrt{s} = 13.6 TeV"
-    grl = []
     grl = pt.get_grl(year)
 
     outfile = "ZeeZmm_counting_data_ratio_v_mu"+out_tag+".pdf"

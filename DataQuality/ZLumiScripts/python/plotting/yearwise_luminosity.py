@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Plot comparisons of Zee/Zmumu and Z/ATLAS over entire data-periods. 
@@ -109,15 +109,14 @@ def channel_comparison(years):
     for year in years:  
 
         print("year = ", year)
+        grl = pt.get_grl(year)
 
         if year == "23":
             maindir = args.indir + dir_2023
-            grl = pt.get_grl(year)
             print("2023 grl = ", grl)
 
         elif year == "22":
-            maindir = args.indir + dir_2022 
-            grl = pt.get_grl(year)
+            maindir = args.indir + dir_2022
             print("2022 grl = ", grl) 
                 
         else:

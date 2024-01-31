@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def correction(mu, runmode, campaign, run=None):
     if runmode == "Zee":
@@ -26,6 +26,4 @@ def correction(mu, runmode, campaign, run=None):
             return 0.987 - 6.11277e-05*mu - 2.59671e-06*mu*mu 
         elif campaign == "mc23a":
             return 0.9914 - 0.0001093*mu - 0.0000018*mu*mu
-        #elif campaign == "mc23a" and run >= 451896:
-        #    return 0.9913- 0.0001052*mu - 0.0000019*mu*mu
 
