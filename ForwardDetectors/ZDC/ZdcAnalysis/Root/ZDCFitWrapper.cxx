@@ -454,7 +454,7 @@ ZDCFitExpFermiLHCfPreExp::ZDCFitExpFermiLHCfPreExp(const std::string& tag, float
 {
   // Create the reference function that we use to evaluate ExpFermiFit more efficiently
   //
-  std::string funcNameRefFunc = "ExpFermiPreExpRefFunc" + tag;
+  std::string funcNameRefFunc = "ExpFermiLHCfPreExpRefFunc" + tag;
 
   m_expFermiLHCfFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFitRefl, tmin, tmax, 8);
 
@@ -546,7 +546,7 @@ void ZDCFitExpFermiLHCfPreExp::DoInitialize(float initialAmp, float initialT0, f
 
 void ZDCFitExpFermiLHCfPreExp::SetT0FitLimits(float t0Min, float t0Max)
 {
-   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
+  std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
   theTF1->SetParLimits(1, t0Min, t0Max);
 }
 

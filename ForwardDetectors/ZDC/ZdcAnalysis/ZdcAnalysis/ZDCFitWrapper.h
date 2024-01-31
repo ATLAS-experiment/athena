@@ -500,12 +500,19 @@ public:
 
   virtual float GetBkgdMaxFraction() const override
   {
-    // const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
-    // double maxTime = GetTime();
-    // double amp = theTF1->GetParameter(0);
+    const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
+    double maxTime = GetTime();
 
-    //    return background / amp;
-    return 0;
+    double amp = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
+    
+    double preAmp = theTF1->GetParameter(2);
+    double preT0 = theTF1->GetParameter(3);
+
+    double deltaTPre = maxTime - preT0;
+    double background = preAmp * m_norm * m_expFermiFunc->operator()(deltaTPre);
+
+    return background / (amp + background);
   }
 
   virtual double operator() (const double *x, const double *p) override
@@ -613,8 +620,6 @@ public:
     //
     double tRef = GetTMinAdjust();
     double expPre = 0;
-    /* if (t > 0 && std::abs(expSqrtTau)>1e-6) expPre = expAmp * (std::exp(-t/expTau-expSqrtTau*std::sqrt(t)) - std::exp(-tRef/expTau)); */
-    /* else expPre = expAmp * (std::exp(-t/expTau) - std::exp(-tRef/expTau)); */
 
     expPre = expAmp * (std::exp(-t/expTau-expSqrtTau*t*t) - std::exp(-tRef/expTau - -expSqrtTau*tRef*tRef));
       
