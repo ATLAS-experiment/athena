@@ -414,12 +414,10 @@ public:
     
     double preAmp = theTF1->GetParameter(2);
     double preT0 = theTF1->GetParameter(3);
-    double C = theTF1->GetParameter(4);
 
     double deltaTPre = maxTime - preT0;
     double deltaPresamp = GetTMinAdjust() - preT0;
 
-    double offsetFit = preAmp * m_norm * m_expFermiFunc->operator()(deltaPresamp);
     double background = preAmp * m_norm * m_expFermiFunc->operator()(deltaTPre);
 
     return background / (amp + background);
@@ -434,8 +432,6 @@ public:
     double preAmp = p[2];
     double preT0 = p[3];
     double C = p[4];
-
-    //    double linSlope = p[4];
 
     double deltaT = t - t0;
     double deltaTPre = t - preT0;
