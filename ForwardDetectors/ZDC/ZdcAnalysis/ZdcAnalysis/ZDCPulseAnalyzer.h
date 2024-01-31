@@ -145,8 +145,8 @@ private:
   std::vector<float> m_HGT0CorrParams; // Parameters used to correct the fit HG times
 
   bool m_haveNonlinCorr{false};
-  float m_nonLinCorrRefADC;
-  float m_nonLinCorrRefScale;
+  float m_nonLinCorrRefADC{500};
+  float m_nonLinCorrRefScale{100};
   std::vector<float> m_nonLinCorrParamsHG;
   std::vector<float> m_nonLinCorrParamsLG;
 
