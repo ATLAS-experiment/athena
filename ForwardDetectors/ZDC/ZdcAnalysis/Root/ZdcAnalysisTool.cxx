@@ -520,14 +520,14 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //
   std::array<std::array<std::vector<float>, 4>, 2> nonLinearCorrCoefficHG, nonLinearCorrCoefficLG;
   
-  nonLinearCorrCoefficHG[0][0] = {-0.039464, 0.013250, -0.003676};
-  nonLinearCorrCoefficHG[0][1] = {-0.050573, 0.019664, -0.004340};
-  nonLinearCorrCoefficHG[0][2] = {-0.052816, 0.016221, -0.003364};
-  nonLinearCorrCoefficHG[0][3] = {-0.014327, 0.000226, -0.000943};
-  nonLinearCorrCoefficHG[1][0] = {-0.059663, 0.019482, -0.004615};
-  nonLinearCorrCoefficHG[1][1] = {-0.036908, 0.008920, -0.002805};
-  nonLinearCorrCoefficHG[1][2] = {-0.046814, 0.019434, -0.004207};
-  nonLinearCorrCoefficHG[1][3] = {-0.060879, 0.026635, -0.004833};
+  nonLinearCorrCoefficHG = {{-0.039464, 0.013250, -0.003676},
+			    {-0.050573, 0.019664, -0.004340},
+			    {-0.052816, 0.016221, -0.003364},
+			    {-0.014327, 0.000226, -0.000943},
+			    {-0.059663, 0.019482, -0.004615},
+			    {-0.036908, 0.008920, -0.002805},
+			    {-0.046814, 0.019434, -0.004207},
+			    {-0.060879, 0.026635, -0.004833}};
 
   zdcDataAnalyzer->SetNonlinCorrParams(0, 1000, nonLinearCorrCoefficHG, nonLinearCorrCoefficLG);
 
