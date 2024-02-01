@@ -2,7 +2,6 @@
 
 import glob, sys
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
-from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TileConfiguration.TileConfigFlags import TileRunType
 ###################################    

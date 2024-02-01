@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 import eformat
@@ -215,16 +215,15 @@ if __name__=='__main__':
     parser.add_argument('flags', nargs='*', help='Config flag overrides')  
     args = parser.parse_args()
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.fillFromArgs(args.flags)
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.fillFromArgs(args.flags)
+    flags.lock()
     log.setLevel(args.loglevel)
 
-    from AthenaConfiguration.AutoConfigFlags import GetFileMD
-    runNumber = GetFileMD(ConfigFlags.Input.Files)['runNumbers'][0]
-
+    runNumber = flags.Input.RunNumbers[0]    
     lumiblocks = set()
-    for inputFile in ConfigFlags.Input.Files:
+    for inputFile in flags.Input.Files:
         log.debug("Processing file {0}".format(inputFile))
         bsfile = eformat.istream(inputFile)
         event = bsfile[0] # we just need to analyse one event - one file has one lumiblock of data
