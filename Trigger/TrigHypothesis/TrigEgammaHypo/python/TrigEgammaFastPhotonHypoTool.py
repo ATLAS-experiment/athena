@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -33,8 +33,8 @@ class TrigEgammaFastPhotonHypoToolConfig:
 
     self.__tool = tool
 
-    tool.EtaBins = [0, 0.6, 0.8, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37, 2.47]  
-    tool.ETthr = self.same( 0. )
+    tool.EtaBins = [0.0, 0.6, 0.8, 1.15, 1.37, 1.52, 1.81, 2.01, 2.37, 2.47]
+    tool.ETthr = self.same( 0.0 )
     tool.CARCOREthr = self.same( 0.0 )
     tool.CAERATIOthr = self.same( 0.0)
     tool.F1thr = self.same( 0.005 )
