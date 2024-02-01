@@ -130,7 +130,7 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20',"
 #               chains += "'HLT_j75_0eta290_020jvt_bdl1r60_3j75_pf_ftf_preselj50b85XX3j50_L14J20',"
                 chains += "'HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25',"
-                flags  += 'doBjetSlice=True;'
+                flags  += "'Bjet'," if self._isCA else 'doBjetSlice=True;'
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
                 chains += "'HLT_j45_pf_ftf_preselj20_L1J15',"
                 flags  += "'Jet'," if self._isCA else 'doJetSlice=True;'
@@ -153,7 +153,7 @@ class TrigInDetReco(ExecStep):
 
         chains += ']'
         if self._isCA:
-            self.preexec_trig = "flags.Trigger.disableCPS=True;flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
+            self.preexec_trig = "flags.Trigger.disableCPS=True;flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
         else:
             self.preexec_trig = 'doEmptyMenu=True;'+flags+'selectChains='+chains
 
