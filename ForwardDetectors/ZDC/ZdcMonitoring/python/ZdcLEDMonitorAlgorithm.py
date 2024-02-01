@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file ZdcLEDMonitorAlgorithm.py
@@ -146,34 +146,35 @@ if __name__=='__main__':
     log.setLevel(WARNING)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     directory = ''
     inputfile = 'myLEDAOD.pool.root'
-    ConfigFlags.Input.Files = [directory+inputfile]
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'ZdcLEDMonitorOutput_2018PbPb.root'
-    parser = ConfigFlags.getArgumentParser()
+    flags.Input.Files = [directory+inputfile]
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'ZdcLEDMonitorOutput_2018PbPb.root'
+    parser = flags.getArgumentParser()
     parser.add_argument('--runNumber',default=None,help="specify to select a run number")
     parser.add_argument('--outputHISTFile',default=None,help="specify output HIST file name")
-    args = ConfigFlags.fillFromArgs(parser=parser)
+    args = flags.fillFromArgs(parser=parser)
     if args.runNumber is not None: # streamTag has default but runNumber doesn't
-        ConfigFlags.Output.HISTFileName = f'ZdcLEDMonitorOutput_HI2023_{args.runNumber}.root'
+        flags.Output.HISTFileName = f'ZdcLEDMonitorOutput_HI2023_{args.runNumber}.root'
     else:
-        ConfigFlags.Output.HISTFileName = 'ZdcLEDMonitorOutput_HI2023.root'    
+        flags.Output.HISTFileName = 'ZdcLEDMonitorOutput_HI2023.root'    
 
     if args.outputHISTFile is not None: # overwrite the output HIST file name to be match the name set in the grid job
-        ConfigFlags.Output.HISTFileName = f'{args.outputHISTFile}'
-    ConfigFlags.lock()
+        flags.Output.HISTFileName = f'{args.outputHISTFile}'
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
     run_type = "pbpb"
 
-    zdcLEDMonitorAcc = ZdcLEDMonitoringConfig(ConfigFlags, run_type)
+    zdcLEDMonitorAcc = ZdcLEDMonitoringConfig(flags, run_type)
     cfg.merge(zdcLEDMonitorAcc)
 
     # If you want to turn on more detailed messages ...

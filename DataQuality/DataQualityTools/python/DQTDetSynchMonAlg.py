@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 def DQTDetSynchMonAlgConfig(flags):
     from AthenaMonitoring import AthMonitorCfgHelper
@@ -157,29 +157,29 @@ if __name__ == '__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
-    #ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    #flags.Input.isMC = False
+    flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     #from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(ByteStreamReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(ByteStreamReadCfg(flags))
     from TrigInDetConfig.InDetConfig import TrigInDetConfig
-    cfg.merge(TrigInDetConfig(ConfigFlags))
+    cfg.merge(TrigInDetConfig(flags))
 
-    cfg.merge(DQTDetSynchMonAlgConfig(ConfigFlags))
+    cfg.merge(DQTDetSynchMonAlgConfig(flags))
 
     # If you want to turn on more detailed messages ...
     #exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
     cfg.printConfig(withDetails=False) # set True for exhaustive info
 
     cfg.run() #use cfg.run(20) to only run on first 20 events
-
