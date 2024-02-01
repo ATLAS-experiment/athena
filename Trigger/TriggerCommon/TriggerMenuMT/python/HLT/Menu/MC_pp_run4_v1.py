@@ -71,6 +71,7 @@ def addMCSignatures(chains):
 
         # Support
         ChainProp(name='HLT_mu24_idperf_L1MU14FCH', stream=[PhysicsStream,ExpressStream], groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
+        ChainProp(name='HLT_mu6_idperf_L1MU5VF', stream=[PhysicsStream,ExpressStream], groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:t0']),
         ChainProp(name='HLT_mu26_ivarperf_L1MU14FCH', stream=[PhysicsStream,ExpressStream], groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']), # ATR-21905
 
         #From TDR studies 
@@ -129,8 +130,9 @@ def addMCSignatures(chains):
 
         # Support
         ChainProp(name='HLT_e26_idperf_loose_L1eEM26M', groups=SingleElectronGroup+SupportPhIGroup, monGroups=['idMon:t0']),
-        ChainProp(name='HLT_e5_idperf_tight_L1eEM5', groups=SingleElectronGroup+SupportLegGroup, monGroups=['idMon:t0']),
-
+        ChainProp(name='HLT_e5_idperf_tight_L1eEM5', groups=SingleElectronGroup+SupportPhIGroup, monGroups=['idMon:t0']),
+        # TEMP Support (remove once supercell RDOs are availble)
+        ChainProp(name='HLT_e5_idperf_tight_L1EM3', groups=SingleElectronGroup+SupportLegGroup, monGroups=['idMon:t0']),
 
         # From TDR studies
         ChainProp(name='HLT_e20_lhmedium_ivarloose_L1eEM12L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
