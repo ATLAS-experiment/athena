@@ -55,32 +55,22 @@ if __name__ == "__main__":
         histSvc = CompFactory.THistSvc(Output= ["{streamName} DATAFILE='{data_file}', OPT='RECREATE'".format(streamName=streamName, data_file = dataFile )])
         result.addService(histSvc, primary=True)
         return result
-
-    def SetupArgParser():
-        from argparse import ArgumentParser
-
-        parser = ArgumentParser()
-        parser.add_argument("--inputRDOFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"], help="RDO file to run", nargs="+")
-        parser.add_argument("--outputFile", "-o", default="refits.root", help="NTuple to write", type=str)
-        parser.add_argument("--ntupleTreeName",default="Refits",type=str, help="name of NTuple tree to write")
-        parser.add_argument("--evtMax",  default=-1,type=int, help = "Events to run (-1 for all)")
-        parser.add_argument("--skipEvents",  default=0,type=int, help = "Events to skip")
-        return parser
     
     # Key names for the different track containers
     ACTSProtoTrackChainTrackKey = "ACTSProtoTrackChainTestTracks"
     FinalProtoTrackChainTracksKey="TrkProtoTrackChainTestTracks"
     FinalProtoTrackChainxAODTracksKey="xAODProtoTrackChainTestTracks"
 
-    ap = SetupArgParser()
-    args = ap.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+
+    # this job specific flags
+    flags.addFlag("outputNTupleFile", "refits.root")
 
     # Disable calo for this test
     flags.Detector.EnableCalo = False
 
-    flags.Input.Files = args.inputRDOFile
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000016.pool.root.1"]
 
     # ensure that the xAOD SP and cluster containers are available
     flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
@@ -95,7 +85,7 @@ if __name__ == "__main__":
     flags.PhysVal.IDPVM.validateExtraTrackCollections = [f"{FinalProtoTrackChainxAODTracksKey}TrackParticles"]
     flags.PhysVal.IDPVM.doTechnicalEfficiency = True
     flags.PhysVal.OutputFileName = "IDPVM.root"
-
+    flags.fillFromArgs()
     flags.lock()
 
     # Main services
@@ -114,7 +104,7 @@ if __name__ == "__main__":
     top_acc.merge(ITkTrackRecoCfg(flags))
 
     # ProtoTrackChain Track algo
-    top_acc.merge(SetupHistSvc(flags,streamName="HmmRefits",dataFile=args.outputFile))
+    top_acc.merge(SetupHistSvc(flags,streamName="HmmRefits",dataFile=flags.outputNTupleFile))
     top_acc.merge(ActsProtoTackCreationAndFitCfg(flags,"ActsProtoTackCreationAndFitAlg",ACTSTracksLocation=ACTSProtoTrackChainTrackKey   ))
 
     ## Convert ACTs container to Trk converter
