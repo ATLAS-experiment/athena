@@ -574,7 +574,7 @@ class ItemDef:
         MenuItem('L1_MU8F_TAU12_J25_2J12'  ).setLogic( d.MU8F & d.HA12 & d.J25 & d.J12.x(2)     & physcond).setTriggerType( TT.calo )
         MenuItem('L1_MU8F_TAU12IM_J25_2J12').setLogic( d.MU8F & d.HA12IM & d.J25 & d.J12.x(2)    & physcond).setTriggerType( TT.calo )
         MenuItem('L1_MU8F_TAU12IM_3J12'    ).setLogic( d.MU8F & d.HA12IM & d.J12.x(3)    & physcond).setTriggerType( TT.calo )
-
+        MenuItem('L1_TAU25IM_2TAU20IM_2J25_3J20').setLogic( d.HA25IM & d.HA20IM.x(2)     & d.J25.x(2)  & d.J20.x(3) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TAU20_2TAU12I_J25_2J15_3J12'   ).setLogic( d.HA20 & d.HA12I.x(2)     & d.J25 & d.J15.x(2) & d.J12.x(3) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TAU20_2TAU12_J25_2J20_3J12'    ).setLogic( d.HA20 & d.HA12.x(2)     & d.J25 & d.J20.x(2) & d.J12.x(3) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TAU20IM_2TAU12IM_J25_2J20_3J12').setLogic( d.HA20IM & d.HA12IM.x(2)     & d.J25 & d.J20.x(2) & d.J12.x(3) & physcond).setTriggerType( TT.calo )
