@@ -8,6 +8,19 @@ and executes several chains testing various types of Partial Event Building and 
 '''
 
 from TrigEDMConfig import DataScoutingInfo, TriggerEDMRun3
+
+# Modify EDM list to add collections to DataScouting results
+# ATR-28536 - do this first, before the list gets imported into any other modules
+myTriggerHLTListRun3 = []
+for collectionConfig in TriggerEDMRun3.TriggerHLTListRun3:
+    if 'Electron' in collectionConfig[0]:
+        modConfig = list(collectionConfig)
+        modConfig[1] += ' ElectronDSTest ElectronDSPEBTest'
+        myTriggerHLTListRun3.append(tuple(modConfig))
+    else:
+        myTriggerHLTListRun3.append(collectionConfig)
+TriggerEDMRun3.TriggerHLTListRun3 = myTriggerHLTListRun3
+
 from TriggerMenuMT.HLT.Menu import Dev_pp_run3_v1, EventBuildingInfo, StreamInfo
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences
@@ -152,16 +165,7 @@ myAllStreams = [
 
 StreamInfo._all_streams = myAllStreams
 
-# Modify EDM list to add collections to DataScouting results
-myTriggerHLTListRun3 = []
-for collectionConfig in TriggerEDMRun3.TriggerHLTListRun3:
-    if 'Electron' in collectionConfig[0]:
-        modConfig = list(collectionConfig)
-        modConfig[1] += ' ElectronDSTest ElectronDSPEBTest'
-        myTriggerHLTListRun3.append(tuple(modConfig))
-    else:
-        myTriggerHLTListRun3.append(collectionConfig)
-TriggerEDMRun3.TriggerHLTListRun3 = myTriggerHLTListRun3
+
 
 
 def run(flags):
