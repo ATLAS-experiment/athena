@@ -256,6 +256,9 @@ if __name__ == '__main__':
   flags.PerfMon.doFullMonMT = args.perfmon
   flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
   flags.Trigger.enableL1TopoDump = args.enableL1TopoDump 
+  if not flags.Input.isMC:
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
   flags.lock()
 
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
