@@ -262,6 +262,8 @@ if __name__ == '__main__':
     flags.Output.AODFileName = 'AOD.pool.root'
     flags.Trigger.triggerMenuSetup = 'PhysicsP1_pp_run3_v1'
 
+    flags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-01-00"
+
     print (flags.dump())
 
     flags.lock()
