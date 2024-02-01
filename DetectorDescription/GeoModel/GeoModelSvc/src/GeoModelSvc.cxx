@@ -160,7 +160,7 @@ StatusCode GeoModelSvc::geoInit()
 	    ? PathResolver::find_file (sqliteDbName, "DATAPATH")
 	    : m_sqliteDbFullPath.value();
     if(sqliteDbPath.empty() && m_sqliteDbFullPath.empty()) {
-      ATH_MSG_FATAL("Filed to find SQLite database file " << sqliteDbName << " for reading in persistent GeoModel tree");
+      ATH_MSG_FATAL("Failed to find SQLite database file " << sqliteDbName << " for reading in persistent GeoModel tree");
       return StatusCode::FAILURE;
     }
     else {
