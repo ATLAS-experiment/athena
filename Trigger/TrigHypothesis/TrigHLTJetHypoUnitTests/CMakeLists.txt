@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigHLTJetHypoUnitTests )
@@ -42,7 +42,7 @@ atlas_add_test( TrigHLTJetHypoUnitTests
    tests/TreeTest.cxx
    tests/JetGroupProductFactoryTest.cxx	   
    INCLUDE_DIRS ${GMOCK_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} TrigHLTJetHypoLib TrigHLTJetHypoUnitTestsLib xAODJet
+   LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} TrigHLTJetHypoLib TrigHLTJetHypoUnitTestsLib xAODJet CxxUtils
    POST_EXEC_SCRIPT nopost.sh )
    
 # Install files from the package:
