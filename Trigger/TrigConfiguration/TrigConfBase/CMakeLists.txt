@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigConfBase )
@@ -13,8 +13,6 @@ atlas_add_library( TrigConfBase
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} )
 
-atlas_install_joboptions( share/*.py )
-
 # Tests:
 if( NOT XAOD_STANDALONE )
 
@@ -23,7 +21,8 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES TrigConfBase AthenaBaseComps )
 
    atlas_add_test( trigconf_msg_athena_test
-      SCRIPT athena.py TrigConfBase/test_TrigConfMsgAlg.py )
+      SCRIPT athena --CA ${CMAKE_CURRENT_SOURCE_DIR}/test/test_TrigConfMsgAlg.py
+      LOG_SELECT_PATTERN "TrigConfMsgAlg" )
 
 endif()
 
