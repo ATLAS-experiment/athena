@@ -30,11 +30,13 @@
 
 Slices  = ['muon']
 Events  = 20000 
-Threads = 8 
-Slots   = 8
+Threads = 1
+Slots   = 1
 Input   = 'Single_mu_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 useCA_Reco = True
+
+preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run4.dat                    -o data-hists.root -p 13",   "Test_bin.dat" ),
          ( "Offline",     " TIDAdata-run4-offline.dat -r Offline -o data-hists-offline.root", "Test_bin.dat" ) ]

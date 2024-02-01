@@ -36,6 +36,8 @@ Input   = 'Single_el_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 useCA_Reco = True
 
+preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;"
+
 Jobs = [ ( "Truth",       " TIDAdata-run4.dat                    -o data-hists.root -p 11" ),
          ( "Offline",     " TIDAdata-run4-offline.dat -r Offline -o data-hists-offline.root" ) ]
 
