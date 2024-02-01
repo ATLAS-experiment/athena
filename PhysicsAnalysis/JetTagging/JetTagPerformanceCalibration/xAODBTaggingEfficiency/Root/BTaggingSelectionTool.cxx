@@ -599,27 +599,30 @@ int BTaggingSelectionTool::getQuantile(double pT, double eta, double tag_weight 
   // Cheatsheet:
   // With n WPs,  (from highest to lowest) A1 , A2, A3, ..., An
   // return -1 if not in b-tagging acceptance
-  // return  1 if between 100% and A1
-  // return  2 if between A1   and A2
-  // return  3 if between A2   and A3
+  // return  1 if between 100% and A1 (untagged)
+  // return  2 if between A1   and A2 (tagged at the A1 WP)
+  // return  3 if between A2   and A3 (tagged at the A2 WP)
   // ...
-  // return n   if between An-1 and An
-  // return n+1 if between An   and 0%
+  // return n   if between An-1 and An (tagged at the An-1 WP)
+  // return n+1 if between An   and 0% (tagged at the An WP)
   //////////////////////
 
-  int bin_index(-1);
-  asg::AcceptData acceptData (&m_acceptinfo);
-  if (! checkRange(pT, eta,acceptData)) return bin_index;
+  int bin_index = -1;
 
-  // If in b-tagging acceptance, cont.tagging
-  int numBins = m_continuouscuts.size(); 
-  for (int i=1; i<=numBins; ++i) {
+  // First, check if the jet is in acceptance
+  asg::AcceptData acceptData (&m_acceptinfo);
+  if (! checkRange(pT, eta,acceptData)) {
+    return bin_index;
+  }
+
+  // Now we need to check each threshold in the PCBT vector
+  // and return the maximum WP bin index (1,2,...,n).
+  // Instead of checking low<tag_weight<high for each bin,
+  // we simply check tag_weight<high and therefore range
+  // from vector indices 1 to vector.size()
+  for (std::size_t i=1; i<m_continuouscuts.size(); i++) {
     if (tag_weight < m_continuouscuts[i]) {
       bin_index = i;
-      break;
-    }
-    else if (tag_weight >= m_continuouscuts[numBins]){
-      bin_index = numBins;
       break;
     }
   }
