@@ -167,7 +167,7 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("zdc_ZdcModuleAmpError", &t_ZdcModuleAmpError, "zdc_ZdcModuleAmpError[2][4]/F");
     m_outputTree->Branch("zdc_ZdcModuleMinDeriv2nd", &t_ZdcModuleMinDeriv2nd, "zdc_ZdcModuleMinDeriv2nd[2][4]/F");
     m_outputTree->Branch("zdc_ZdcModulePresample", &t_ZdcModulePresample, "zdc_ZdcModulePresample[2][4]/F");
-    m_outputTree->Branch("zdc_ZdcModulePreSampleAmp", &t_ZdcModulePreSampleAmp, "zdc_ZdcModulePreSamplemp[2][4]/F");
+    m_outputTree->Branch("zdc_ZdcModulePreSampleAmp", &t_ZdcModulePreSampleAmp, "zdc_ZdcModulePreSampleAmp[2][4]/F");
     m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
     m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
     
@@ -187,7 +187,7 @@ StatusCode ZdcNtuple :: initialize ()
       m_outputTree->Branch("zdc_RpdChannelMaxSample",&t_RpdChannelMaxSample,"zdc_RpdChannelMaxSample[2][16]/i");
       m_outputTree->Branch("zdc_RpdChannelStatus",&t_RpdChannelStatus,"zdc_RpdChannelStatus[2][16]/i");
       m_outputTree->Branch("zdc_RpdChannelPileupFrac",&t_RpdChannelPileupFrac,"zdc_RpdChannelPileupFrac[2][16]/F");
-      m_outputTree->Branch("zdc_RpdSideStatus",&t_RpdSideStatus,"zdc_t_RpdSideStatus[2]/i");
+      m_outputTree->Branch("zdc_RpdSideStatus",&t_RpdSideStatus,"zdc_RpdSideStatus[2]/i");
     }
     if (enableCentroid)
     {
