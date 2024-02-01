@@ -354,6 +354,13 @@ def SetupVP1():
     if args.live or args.livelocal:
         setup_live_mode(args, vp1config)
 
+    #TODO: This needs to be conditional: if RDOs are there, then add this algo...
+    _logger.verbose("+ About to setup Muon RDOs to Digits...")
+    # Add MDT RDO to digit config
+    from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
+    cfg.merge(MdtRdoToMdtDigitCfg(flags))
+    _logger.verbose("+ ...Done")
+
     # configure VP1
     cfg.merge(VP1AlgCfg(flags, **vp1config))
     cfg.run()
