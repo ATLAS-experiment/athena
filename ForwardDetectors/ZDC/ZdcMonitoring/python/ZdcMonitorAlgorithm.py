@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file ZdcMonitorAlgorithm.py
@@ -546,37 +546,38 @@ if __name__=='__main__':
     log.setLevel(WARNING)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     directory = ''
     inputfile = 'myAOD.pool.root'
-    ConfigFlags.Input.Files = [directory+inputfile]
-    # ConfigFlags.Input.isMC = False
-    parser = ConfigFlags.getArgumentParser()
+    flags.Input.Files = [directory+inputfile]
+    # flags.Input.isMC = False
+    parser = flags.getArgumentParser()
     parser.add_argument('--runNumber',default=None,help="specify to select a run number")
     parser.add_argument('--streamTag',default="ZDCCalib",help="ZDCCalib or MinBias")
     parser.add_argument('--outputHISTFile',default=None,help="specify output HIST file name")
-    args = ConfigFlags.fillFromArgs(parser=parser)
+    args = flags.fillFromArgs(parser=parser)
 
-    ConfigFlags.DQ.useTrigger = False if ConfigFlags.Input.isMC else True # isMC is autoconfigured from the input file; if MC: turn trigger off
+    flags.DQ.useTrigger = False if flags.Input.isMC else True # isMC is autoconfigured from the input file; if MC: turn trigger off
     if args.runNumber is not None: # streamTag has default but runNumber doesn't
-        ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}_{args.runNumber}.root'
+        flags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}_{args.runNumber}.root'
     else:
-        ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}.root'    
+        flags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}.root'    
     
     if args.outputHISTFile is not None: # overwrite the output HIST file name to be match the name set in the grid job
-        ConfigFlags.Output.HISTFileName = f'{args.outputHISTFile}'
-    ConfigFlags.lock()
+        flags.Output.HISTFileName = f'{args.outputHISTFile}'
+    flags.lock()
 
-    print('Output', ConfigFlags.Output.HISTFileName)
+    print('Output', flags.Output.HISTFileName)
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
     run_type = "PbPb2023"
 
-    zdcMonitorAcc = ZdcMonitoringConfig(ConfigFlags, run_type)
+    zdcMonitorAcc = ZdcMonitoringConfig(flags, run_type)
     cfg.merge(zdcMonitorAcc)
 
     # If you want to turn on more detailed messages ...
