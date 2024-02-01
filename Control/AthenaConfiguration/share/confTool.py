@@ -52,7 +52,7 @@ def parse_args():
     parser.add_argument("file", nargs="+", help="Files to work with")
     parser.add_argument(
         "--ignoreMissing",
-        help="Don't report components existing in only of the two configurations",
+        help="Don't report components existing in only one of the two configurations",
         action="store_true",
     )
     parser.add_argument(
@@ -433,7 +433,7 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
         allProps.sort()
 
         for prop in allProps:
-            if prop not in compRef.keys(): 
+            if prop not in compRef.keys():
                 if not _knownDifference(component, prop, compChk[prop], None):
                     print(f"{prefix}{color.property}{prop} = {color.second}{compChk[prop]} {color.reset} only in 2nd file {color.reset}")
                     countDifferent += 1
@@ -464,7 +464,7 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
 
             refVal, chkVal = _parseNumericalValues((refVal, chkVal))
             diffmarker = ""
-            if str(chkVal) == str(refVal):
+            if chkVal == refVal:
                 if not args.printIdenticalPerParameter:
                     continue
             elif _knownDifference(component, prop, chkVal, refVal):
@@ -485,7 +485,7 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
                         refVal, chkVal, "\t" + prefix + ">> ", args, component, color
                     )
 
-    elif isinstance(compRef, (list, tuple)) and len(compRef) > 1:
+    elif isinstance(compRef, (list, tuple, set)) and len(compRef) > 1:
 
         if isinstance(compRef[0], list):  # to achieve hashability
             compRef = [tuple(_parseNumericalValues(el)) for el in compRef]

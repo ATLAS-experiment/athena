@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import pickle
 import ast
@@ -268,7 +268,9 @@ def ignoreDefaults(allconf, args, known) -> Dict:
             else:    
                 default = str(comp_cls._descriptors[k].default)
                 sv = str(v)
-                if default == sv or default.replace("StoreGateSvc+", "") == sv.replace("StoreGateSvc+", ""): 
+                if (default == sv or
+                    default.replace("StoreGateSvc+", "") == sv.replace("StoreGateSvc+", "") or
+                    default.replace("ConditionStore+", "") == sv.replace("ConditionStore+", "")):
                     logger.debug("Dropped default value \'%s\' of property %s in %s because the default is \'%s\'", sv, k, component_name, str(default))
                 elif args.ignoreDefaultNamedComps and isinstance(v, str) and sv.endswith(f"/{default}"):
                     logger.debug("Dropped speculatively value %s of property %s in %s because the default it ends with %s", sv, k, component_name, str(default))
