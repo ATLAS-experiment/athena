@@ -96,6 +96,7 @@ def defineMenu():
         'L1_MU8F_TAU12IM_XE35',  
         'L1_TAU20IM_2TAU12IM_XE35', 
         'L1_TAU40_2TAU12IM_XE40',
+        'L1_TAU25IM_2TAU20IM_2J25_3J20',
         
     ]
 
@@ -161,7 +162,7 @@ def defineMenu():
         'L1_jJ55':'',
         'L1_jJ55p0ETA23':'',
         'L1_jJ70p0ETA23':'',
-        'L1_jJ80':'',
+        #'L1_jJ80':'',
         'L1_jJ80p0ETA25':'',
         'L1_jJ85p0ETA21':'',
         'L1_jJ140':'',
