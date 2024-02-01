@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_RDBMATERIALMANAGER_H
@@ -15,6 +15,8 @@
 //---------------------------------------------------------//
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+#include "GeoModelKernel/GeoElement.h"
 
 #include <string>
 #include <map>
@@ -90,7 +92,8 @@ class RDBMaterialManager final : public StoredMaterialManager {
   IRDBRecordset_ptr m_toromaterials;
   IRDBRecordset_ptr m_toromatcomponents;
 
-  std::vector < GeoElement *>        m_elementVector;
+  using GeoEleVec = std::vector<GeoIntrusivePtr<GeoElement>>;
+  GeoEleVec m_elementVector;
   StoredMaterialManager::MaterialMap m_materialMap;
 };
 
