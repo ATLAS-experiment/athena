@@ -1,5 +1,5 @@
 #Matt A's custom python accumulator for R22 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from pprint import pprint
@@ -87,8 +87,8 @@ def TauLinkerConfig(inputFlags, **kwargs):
 
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
-    
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    cfgFlags = initConfigFlags()
     cfgFlags.Input.isMC=True
     cfgFlags.Input.Format="AOD"
     #    cfgFlags.Input.Files=["/scratch/anthony/TEST_AOD/TCC/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3126_r10724/mc16_13TeV/AOD.14795494._007454.pool.root.1"]
