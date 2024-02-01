@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -72,8 +72,8 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   const SCT_ID*                         m_sctID{}; 
   const TRT_ID*                         m_trtID{}; 
 
-  SG::ReadHandleKey<TrackCollection> m_tracksKey {this,"TrackName", "CombinedInDetTracks", "track data key"};
-  SG::ReadHandleKey<TrackCollection> m_tracksName {this,"TrackName2","CombinedInDetTracks", "track data key"};
+  SG::ReadHandleKey<TrackCollection> m_tracksKey {this,"TrackName2", "CombinedInDetTracks", "track data key"};
+  SG::ReadHandleKey<TrackCollection> m_tracksName {this,"TrackName","CombinedInDetTracks", "track data key"};
 
   ToolHandle<ITRT_CalDbTool> m_trtcaldbTool;
   ToolHandle<Trk::IUpdator>             m_iUpdator;
@@ -84,10 +84,12 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
 
   std::string m_Pixel_Manager;
   std::string m_SCT_Manager;
-  bool  m_extendedPlots;
-  bool m_doHitQuality = false;
-  int m_checkrate {};
+  bool m_extendedPlots;
+  bool m_doHitQuality{false};
+  int  m_checkrate {};
   bool m_doPulls {};
+  bool m_applyTrkSel{};
+
   static const int m_nSiBlayers{4}; //
   static const int m_nPixEClayers{3}; //
   static const int m_nTRTBlayers{3}; //
