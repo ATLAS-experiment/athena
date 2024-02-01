@@ -5,7 +5,7 @@
 #include "xAODTracking/TrackSummary.h"
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 
-// this is list of xAOD container varaible names that are "hardcoded" in TrackStorage_v1
+// this is list of xAOD container varaible names that are "hardcoded" in TrackSummary_v1
 // their compatibility is maintain ed by the unit tests: AllStaticxAODVaraiblesAreKnown
 const std::set<std::string> ActsTrk::TrackSummaryContainer::staticVariables = {
     "params", "covParams", "nMeasurements", "nHoles",   "chi2f",

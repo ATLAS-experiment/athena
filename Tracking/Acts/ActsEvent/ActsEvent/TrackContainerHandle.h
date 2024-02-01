@@ -73,8 +73,8 @@ MutableTrackContainerHandle<C>::MutableTrackContainerHandle(
 			  namePrefix + "TrackSummary"),
     m_surfacesKey(algorithm, propertyNamePrefix + "SurfacesKey",
 		  namePrefix + "Surfaces"),
-    m_trackBackendKey(algorithm, propertyNamePrefix + "TrackStorage",
-		      namePrefix + "TrackStorage") {}
+    m_trackBackendKey(algorithm, propertyNamePrefix + "TrackSummary",
+		      namePrefix + "TrackSummary") {}
   
 template <class C>
 StatusCode MutableTrackContainerHandle<C>::initialize() {
@@ -85,7 +85,7 @@ StatusCode MutableTrackContainerHandle<C>::initialize() {
   m_mtjKey = m_prefixName + "MultiTrajectory";
   m_xAODTrackSummaryKey = m_prefixName + "TrackSummary";
   m_surfacesKey = m_prefixName + "Surfaces";
-  m_trackBackendKey = m_prefixName + "TrackStorage";
+  m_trackBackendKey = m_prefixName + "TrackSummary";
 
   // And now we initialize the keys  
   ATH_CHECK(m_mtjKey.initialize());
@@ -111,17 +111,17 @@ MutableTrackContainerHandle<C>::moveToConst(ActsTrk::MutableTrackContainer&& tc,
         "ConstMultiTrajectory");
   }
 
-  auto xAODTrackStorageHandle = SG::makeHandle(m_xAODTrackSummaryKey, context);
+  auto xAODTrackSummaryHandle = SG::makeHandle(m_xAODTrackSummaryKey, context);
   auto interfaceTrackSummaryContainer =
       ActsTrk::makeInterfaceContainer<xAOD::TrackSummaryContainer>(
           tc.container().m_mutableTrackBackendAux.get());
-  if (xAODTrackStorageHandle
+  if (xAODTrackSummaryHandle
           .record(std::move(interfaceTrackSummaryContainer),
                   std::move(tc.container().m_mutableTrackBackendAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableTrackContainerHandle::moveToConst, can't record "
-        "xAODTrackStorage");
+        "xAODTrackSummary");
   }
 
   auto surfacesHandle = SG::makeHandle(m_surfacesKey, context);
@@ -133,18 +133,18 @@ MutableTrackContainerHandle<C>::moveToConst(ActsTrk::MutableTrackContainer&& tc,
         "MutableTrackContainerHandle::moveToConst, can't record "
         "xAODTrackSurfaces");
   }
-  auto constTrackStorage = std::make_unique<ActsTrk::TrackSummaryContainer>(
+  auto constTrackSummary = std::make_unique<ActsTrk::TrackSummaryContainer>(
       DataLink<xAOD::TrackSummaryContainer>(m_xAODTrackSummaryKey.key(),
                                             context));
-  constTrackStorage->restoreDecorations();
-  constTrackStorage->fillFrom(tc.container());
+  constTrackSummary->restoreDecorations();
+  constTrackSummary->fillFrom(tc.container());
 
-  auto constTrackStorageHandle = SG::makeHandle(m_trackBackendKey, context);
-  if (constTrackStorageHandle.record(std::move(constTrackStorage))
+  auto constTrackSummaryHandle = SG::makeHandle(m_trackBackendKey, context);
+  if (constTrackSummaryHandle.record(std::move(constTrackSummary))
           .isFailure()) {
     throw std::runtime_error(
         "MutableTrackContainerHandle::moveToConst, can't record "
-        "xAODTrackStorage");
+        "xAODTrackSummary");
   }
   auto constTrack = std::make_unique<ActsTrk::TrackContainer>(
       DataLink<ActsTrk::TrackSummaryContainer>(m_trackBackendKey.key(),

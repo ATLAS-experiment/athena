@@ -14,10 +14,6 @@
 #include "xAODTracking/TrackSurfaceAuxContainer.h"
 #include "xAODTracking/TrackSurfaceContainer.h"
 #include "ActsEvent/SurfaceEncoding.h"
-// #include "xAODTracking/TrackSummaryContainer.h"
-// #include "xAODTracking/TrackStorageAuxContainer.h"
-
-
 
 namespace ActsTrk {
 class MutableTrackSummaryContainer;
