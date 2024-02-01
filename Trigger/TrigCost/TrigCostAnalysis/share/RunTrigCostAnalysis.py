@@ -5,7 +5,6 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaCommon.Logging import logging
 log = logging.getLogger('RunTrigCostAnalysis.py')
 
@@ -16,15 +15,12 @@ def trigCostAnalysisCfg(flags, args, isMC=False):
 
   acc = ComponentAccumulator()
 
-  # Retrieve run number
-  runNumbers = GetFileMD(ConfigFlags.Input.Files)['runNumbers']
-
-  if len(runNumbers) > 1:
+  if len(flags.Input.RunNumbers) > 1:
     log.error('Multiple run numbers from metadata! Only one expected per cost processing')
     return acc
 
   enhancedBiasWeighter = CompFactory.EnhancedBiasWeighter()
-  enhancedBiasWeighter.RunNumber = runNumbers[0]
+  enhancedBiasWeighter.RunNumber = flags.Input.RunNumbers[0]
   enhancedBiasWeighter.UseBunchCrossingData = False
   enhancedBiasWeighter.IsMC = isMC
   if isMC:
@@ -70,7 +66,7 @@ def readMCpayload(args):
     from RatesAnalysis.GetCrossSectionAMITool import GetCrossSectionAMI
     amiTool = GetCrossSectionAMI()
     if dset == '': # Can we get the dataset name from the input file path?
-      dset = amiTool.getDatasetNameFromPath(ConfigFlags.Input.Files[0])
+      dset = amiTool.getDatasetNameFromPath(flags.Input.Files[0])
     amiTool.queryAmi(dset)
     payload['MCCrossSection'] = amiTool.crossSection
     payload['MCFilterEfficiency'] = amiTool.filterEfficiency
@@ -157,11 +153,11 @@ def hltConfigSvcCfg(flags, smk, dbAlias):
   return acc
 
 
-def readConfigFromCool(smk, dbAlias):
+def readConfigFromCool(flags, smk, dbAlias):
   # Try to read keys from COOL (for P1 data)
   from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
   dbconn = TriggerCoolUtil.GetConnection("CONDBR2")
-  runNumber = GetFileMD(ConfigFlags.Input.Files)['runNumbers'][0]
+  runNumber = flags.Input.RunNumbers[0]
   configKeys = TriggerCoolUtil.getHLTConfigKeys(dbconn, [[runNumber, runNumber]])
 
   log.debug("Getting keys from COOL for run {0}".format(runNumber))
@@ -225,34 +221,35 @@ if __name__=='__main__':
   log.level = args.loglevel
 
   # Set the Athena configuration flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   # verbosity defined in Control/AthenaCommon/python/Constants.py
-  ConfigFlags.Exec.OutputLevel = args.loglevel
-  ConfigFlags.fillFromArgs(args.flags)
-  ConfigFlags.lock()
+  flags = initConfigFlags()
+  flags.Exec.OutputLevel = args.loglevel
+  flags.fillFromArgs(args.flags)
+  flags.lock()
 
   # Initialize configuration object, add accumulator, merge, and run.
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
-  if ConfigFlags.Input.isMC:
+  if flags.Input.isMC:
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
   else:
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    cfg.merge(ByteStreamReadCfg(ConfigFlags))
-    cfg.merge(decodingCfg(ConfigFlags))
+    cfg.merge(ByteStreamReadCfg(flags))
+    cfg.merge(decodingCfg(flags))
 
   histSvc = CompFactory.THistSvc()
   histSvc.Output += ["COSTSTREAM DATAFILE='" + args.outputHist + "' OPT='RECREATE'"]
   cfg.addService(histSvc)
 
   # Retrieve config from cool database
-  if not ConfigFlags.Input.isMC and (not args.smk or not args.dbAlias):
-    (args.smk, args.dbAlias) = readConfigFromCool(args.smk, args.dbAlias)
+  if not flags.Input.isMC and (not args.smk or not args.dbAlias):
+    (args.smk, args.dbAlias) = readConfigFromCool(flags, args.smk, args.dbAlias)
 
-  cfg.merge(hltConfigSvcCfg(ConfigFlags, args.smk, args.dbAlias))
-  cfg.merge(trigCostAnalysisCfg(ConfigFlags, args, ConfigFlags.Input.isMC))
+  cfg.merge(hltConfigSvcCfg(flags, args.smk, args.dbAlias))
+  cfg.merge(trigCostAnalysisCfg(flags, args, flags.Input.isMC))
 
   # If you want to turn on more detailed messages ...
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG

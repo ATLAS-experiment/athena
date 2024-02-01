@@ -36,20 +36,21 @@ if __name__=='__main__':
   args = parser.parse_args()
 
   # Set the Athena configuration flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
-  ConfigFlags.Exec.OutputLevel = args.loglevel
-  ConfigFlags.fillFromArgs(args.flags)
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+  flags.Exec.OutputLevel = args.loglevel
+  flags.fillFromArgs(args.flags)
   useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
 
-  ConfigFlags.lock()
+  flags.lock()
 
   # Initialize configuration object, add accumulator, merge, and run.
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
   from AthenaConfiguration.ComponentFactory import CompFactory
 
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-  cfg = MainServicesCfg(ConfigFlags)
-  cfg.merge(PoolReadCfg(ConfigFlags))
+  cfg = MainServicesCfg(flags)
+  cfg.merge(PoolReadCfg(flags))
 
   histSvc = CompFactory.THistSvc()
   histSvc.Output += ["RATESTREAM DATAFILE='" + args.outputHist + "' OPT='RECREATE'"]
@@ -57,7 +58,7 @@ if __name__=='__main__':
 
   # Minimal config needed to read metadata: MetaDataSvc & ProxyProviderSvc
   from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-  cfg.merge(MetaDataSvcCfg(ConfigFlags))
+  cfg.merge(MetaDataSvcCfg(flags))
 
   cfgsvc = CompFactory.TrigConf.xAODConfigSvc('xAODConfigSvc')
   cfg.addService(cfgsvc)
@@ -72,19 +73,19 @@ if __name__=='__main__':
   xsec = args.MCCrossSection
   fEff = args.MCFilterEfficiency
   dset = args.MCDatasetName
-  if ConfigFlags.Input.isMC and xsec == 0: # If the input file is MC then make sure we have the needed info
+  if flags.Input.isMC and xsec == 0: # If the input file is MC then make sure we have the needed info
     from RatesAnalysis.GetCrossSectionAMITool import GetCrossSectionAMI
     amiTool = GetCrossSectionAMI()
     if dset == "": # Can we get the dataset name from the input file path?
-      dset = amiTool.getDatasetNameFromPath(ConfigFlags.Input.Files[0])
+      dset = amiTool.getDatasetNameFromPath(flags.Input.Files[0])
     amiTool.queryAmi(dset)
     xsec = amiTool.crossSection
     fEff = amiTool.filterEfficiency
 
   ebw = CompFactory.EnhancedBiasWeighter('EnhancedBiasRatesTool')
-  ebw.RunNumber = ConfigFlags.Input.RunNumbers[0]
+  ebw.RunNumber = flags.Input.RunNumbers[0]
   ebw.UseBunchCrossingData = useBunchCrossingData
-  ebw.IsMC = ConfigFlags.Input.isMC
+  ebw.IsMC = flags.Input.isMC
   # The following three are only needed if isMC == true
   ebw.MCCrossSection = xsec
   ebw.MCFilterEfficiency = fEff
@@ -151,7 +152,7 @@ if __name__=='__main__':
   # Setup for accessing bunchgroup data from the DB
   if useBunchCrossingData:
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    cfg.merge(BunchCrossingCondAlgCfg(ConfigFlags))
+    cfg.merge(BunchCrossingCondAlgCfg(flags))
 
   eventLoop = CompFactory.AthenaEventLoopMgr()
   eventLoop.EventPrintoutInterval = 1000
