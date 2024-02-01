@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -102,9 +102,9 @@ class MTCalibPebHypoOptions:
         self.PEBROBList = []
         self.PEBSubDetList = []
         self.CreateRandomData = {}
-        self.EnableL1CaloPhase1 = False  # Sets ConfigFlags.Trigger.enableL1CaloPhase1
-        self.EnableL1MuonPhase1 = True  # Sets ConfigFlags.Trigger.enableL1MuonPhase1
-        self.EnableL1CaloLegacy = True  # Sets ConfigFlags.Trigger.enableL1CaloLegacy
+        self.EnableL1CaloPhase1 = False  # Sets flags.Trigger.enableL1CaloPhase1
+        self.EnableL1MuonPhase1 = True  # Sets flags.Trigger.enableL1MuonPhase1
+        self.EnableL1CaloLegacy = True  # Sets flags.Trigger.enableL1CaloLegacy
 
 
 default_options = MTCalibPebHypoOptions()
@@ -411,7 +411,8 @@ def write_dummy_menu_json(flags, chains, chain_to_streams):
 
 # unit test
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     set_flags(flags)
     flags.lock()
 

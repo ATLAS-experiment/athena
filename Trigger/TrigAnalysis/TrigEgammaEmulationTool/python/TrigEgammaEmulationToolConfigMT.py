@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -239,25 +239,23 @@ if __name__=='__main__':
     ROOT6Setup()
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     path = '/afs/cern.ch/work/j/jodafons/public/valid_sampleA/AOD_fixCalo.pool.root'
-    ConfigFlags.Input.Files = [path]
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Output.HISTFileName = 'TrigEgammaMonitorOutput.root'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = [path]
+    flags.Input.isMC = True
+    flags.Output.HISTFileName = 'TrigEgammaMonitorOutput.root'
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    testAcc = TrigEgammaEmulationToolTestConfig(ConfigFlags)
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+    testAcc = TrigEgammaEmulationToolTestConfig(flags)
     cfg.merge(testAcc)
   
     # If you want to turn on more detailed messages ...
     cfg.printConfig(withDetails=False) # set True for exhaustive info
     cfg.run(-1) #use cfg.run(20) to only run on first 20 events
-
-
-
