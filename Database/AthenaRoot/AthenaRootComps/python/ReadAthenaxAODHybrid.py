@@ -48,6 +48,7 @@ def _configure():
     theApp.ExtSvc += [ svcMgr.EventSelector.getFullName() ]
     theApp.EvtSel = "EventSelector"
     svcMgr.MetaDataSvc.MetaDataContainer = "MetaDataHdr" #this really should be the default for this property :-(
+    svcMgr.ProxyProviderSvc.ProviderNames += [ "MetaDataSvc" ]
     svcMgr.PoolSvc.OutputLevel = ERROR
     svcMgr.EventSelector.ReadMetaDataWithPool=True
     #default the input collections to the FilesInput from AthenaCommonFlags
