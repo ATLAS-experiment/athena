@@ -36,7 +36,7 @@ namespace {
    template <typename T, class T_SquareMatrix>
    inline void lowerTriangleToVector(const T_SquareMatrix& covMatrix,
                                      std::vector<T>& vec, unsigned int n_rows_max) {
-      assert( n_rows <= covMatrix.rows() && covMatrix.rows() == covMatrix.cols());
+      assert( covMatrix.rows() == covMatrix.cols());
       vec.clear();
       unsigned int n_rows = std::min(n_rows_max, static_cast<unsigned int>(covMatrix.rows()));
       vec.reserve((n_rows+1)*n_rows/2);
@@ -60,7 +60,7 @@ namespace {
    inline void lowerTriangleToVectorScaleLastRow(const T_SquareMatrix& covMatrix,
                                                  std::vector<T>& vec, unsigned int n_rows_max,
                                                  typename T_SquareMatrix::Scalar last_element_scale) {
-      assert( n_rows <= covMatrix.rows() && covMatrix.rows() == covMatrix.cols());
+      assert( covMatrix.rows() == covMatrix.cols());
       vec.clear();
       unsigned int n_rows = std::min(n_rows_max, static_cast<unsigned int>(covMatrix.rows()));
       vec.reserve((n_rows+1)*n_rows/2);
@@ -96,7 +96,7 @@ namespace {
       for (unsigned short &elm : ret) {
          elm = xAOD::numberOfTrackSummaryTypes;
       }
-      assert(ActsTrk::to_underlying(xAODUncalibMeasType::sTgcStripType)+1u == 8u );
+      assert(ActsTrk::to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u == 8u );
       ret.at(ActsTrk::to_underlying(xAOD::UncalibMeasType::PixelClusterType)) = xAOD::numberOfPixelHits;
       ret.at(ActsTrk::to_underlying(xAOD::UncalibMeasType::StripClusterType)) = xAOD::numberOfSCTHits;
       return ret;
