@@ -74,6 +74,7 @@ StatusCode IDAlignMonGenericTracksAlg::initialize()
 {
   StatusCode sc;  
 
+  ATH_MSG_DEBUG("Initialize -- START --");
   //ID Helper
   ATH_CHECK(detStore()->retrieve(m_idHelper, "AtlasID"));
   
@@ -122,6 +123,7 @@ StatusCode IDAlignMonGenericTracksAlg::initialize()
   ATH_CHECK(m_tracksName.initialize());
   ATH_CHECK(m_tracksKey.initialize());
 
+  ATH_MSG_DEBUG("Initialize -- completed --");
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -214,7 +216,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   auto run_m   = Monitored::Scalar<int>( "m_run", run );
   int event    = GetEventInfo(ctx)->eventNumber();
   auto event_m = Monitored::Scalar<int>( "m_event", event );
+  float mu     = lbAverageInteractionsPerCrossing(ctx);
+  auto mu_m    = Monitored::Scalar<float>("mu_m", mu);
 
+  // fill lb & beam spot histograms
   fill(genericTrackGroup, lb_m);
 	
   if (m_extendedPlots) {
@@ -230,7 +235,10 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, beamSpotZ_m, beamSpotX_m);
 
     // beam spot vs LB
-    fill(genericTrackGroup, lb_m, beamSpotY_m); 
+    fill(genericTrackGroup, lb_m, beamSpotY_m);
+
+    // interactions per beam crossing
+    fill(genericTrackGroup, mu_m);
   }
   
 
@@ -473,7 +481,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   auto ngTracks_m = Monitored::Scalar<float>( "m_ngTracks", ngTracks );
   fill(genericTrackGroup, ngTracks_m);
   
-  ATH_MSG_DEBUG("Number of good tracks from TrackCollection: " << ngTracks);
+  ATH_MSG_DEBUG("Histogram fillim completed for #good_tracks: " << ngTracks);
 
   return StatusCode::SUCCESS;
 }
