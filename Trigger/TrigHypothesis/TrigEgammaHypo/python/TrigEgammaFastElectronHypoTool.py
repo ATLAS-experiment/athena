@@ -1,33 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+from AthenaCommon.Logging import logging
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-
-#
-# For electrons only
-#
-def createTrigEgammaFastElectronHypoAlg(flags, name, sequenceOut):
-  
-  # make the Hypo
-  #rom TriggerMenuMT.HLT.Egamma.TrigEgammaDefs import createTrigEgammaFastCaloSelectors
-  from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaFastElectronHypoAlg
-  theFastElectronHypo = TrigEgammaFastElectronHypoAlg(name)
-  theFastElectronHypo.Electrons = sequenceOut
-  theFastElectronHypo.RunInView = True
-
-  # this should be uncommented when ringer is ready
-  #theFastElectronHypo.PidNames = ["tight", "medium", "loose", "vloose"]
-  #theFastElectronHypo.RingerNNSelectorTools = createTrigEgammaFastCaloSelectors()
-
-  monTool = GenericMonitoringTool(flags, "MonTool_"+name,
-                                  HistPath = 'FastElectronHypo/'+name)
-  monTool.defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
-  monTool.defineHistogram('TIME_NN_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo NN Algtime; time [ us ] ; Nruns", xbins=100, xmin=0.0, xmax=100)
-
-  theFastElectronHypo.MonTool=monTool
-  return theFastElectronHypo
-
-
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 #
 # For electrons
@@ -58,7 +34,6 @@ class TrigEgammaFastElectronHypoToolConfig:
 
   def __init__(self, name, monGroups, cpart, tool=None):
 
-    from AthenaCommon.Logging import logging
     self.__log = logging.getLogger('TrigEgammaFastElectronHypoTool')
     self.__name       = name
     self.__threshold  = float(cpart['threshold']) 
@@ -68,7 +43,6 @@ class TrigEgammaFastElectronHypoToolConfig:
     self.__monGroups       = monGroups
 
     if not tool:
-      from AthenaConfiguration.ComponentFactory import CompFactory
       tool = CompFactory.TrigEgammaFastElectronHypoTool(name)
     
     self.__tool = tool
