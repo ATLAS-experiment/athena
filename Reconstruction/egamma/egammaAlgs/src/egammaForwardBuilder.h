@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAALGS_EGAMMAFORWARDBUILDER_H
@@ -30,8 +30,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
-
-#include "CaloDetDescr/CaloDetDescrManager.h"
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
@@ -78,6 +76,9 @@ private:
     const std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> &match_parameters,
     const std::array<double, 4> &match_values
   ) const;
+
+  /** @brief Remove cells that are too far from the center of mass. */
+  void cookieCut(xAOD::CaloCluster& cluster) const;
 
   /** @brief Tool to perform object quality. */
   ToolHandle<IegammaOQFlagsBuilder> m_objectQualityTool{
@@ -136,6 +137,14 @@ private:
     "doTrackMatching",
     false,
     "Boolean to do track matching"
+  };
+
+  /** @brief Private member flag to do cookie cutting. */
+  Gaudi::Property<bool> m_doCookieCutting { 
+    this,
+    "doCookieCutting",
+    false,
+    "Boolean to do cookie cutting"
   };
 
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};

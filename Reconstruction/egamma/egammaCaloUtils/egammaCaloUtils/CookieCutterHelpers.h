@@ -5,6 +5,8 @@
 #ifndef COOKIECUTTERHELPERS_H
 #define COOKIECUTTERHELPERS_H
 
+#include "xAODCaloEvent/CaloCluster.h"
+
 #include "GaudiKernel/SystemOfUnits.h"
 
 namespace CookieCutterHelpers
@@ -26,6 +28,15 @@ struct PhiSize
   float plusEC = 0;
   float minusEC = 0;
 };
+
+/** Find the reference position (eta, phi) relative to which cells are
+   restricted.
+*/
+CentralPosition
+findCentralPositionEM2(const std::vector<const xAOD::CaloCluster*>& clusters);
+
+PhiSize
+findPhiSize(const CentralPosition& cp0, const xAOD::CaloCluster& cluster);
 }
 
 #endif

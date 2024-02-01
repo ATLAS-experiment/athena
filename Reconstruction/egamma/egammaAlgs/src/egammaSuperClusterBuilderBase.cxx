@@ -137,70 +137,6 @@ fillPositionsInCalo(xAOD::CaloCluster* cluster, const CaloDetDescrManager& mgr)
   cluster->insertMoment(xAOD::CaloCluster::ETA1CALOFRAME, eta);
   cluster->insertMoment(xAOD::CaloCluster::PHI1CALOFRAME, phi);
 }
-/** Find the size of the cluster in phi using L2 cells.
- *
- * @param cp0: the reference position in calo-coordinates
- * @param cluster: the cluster filled with L2 and L3 cells
- *
- * The window is computed using only cells in the second layer.
- * Asymmetric sizes are computed for barrel and endcap. The size
- * is the maximum difference in phi between the center of a cell
- * and the refence, considering separately cells in the barrel
- * and in the endcap. The computation is done separately for the
- * cells with phi < reference phi or >=. A cutoff value of 1 is used.
- */
-CookieCutterHelpers::PhiSize
-findPhiSize(const CookieCutterHelpers::CentralPosition& cp0,
-            const xAOD::CaloCluster& cluster)
-{
-
-  CookieCutterHelpers::PhiSize phiSize;
-  auto cell_itr = cluster.cell_cbegin();
-  auto cell_end = cluster.cell_cend();
-  for (; cell_itr != cell_end; ++cell_itr) {
-
-    const CaloCell* cell = *cell_itr;
-    if (!cell) {
-      continue;
-    }
-
-    const CaloDetDescrElement* dde = cell->caloDDE();
-    if (!dde) {
-      continue;
-    }
-
-    if (cp0.emaxB > 0 && CaloCell_ID::EMB2 == dde->getSampling()) {
-      const float phi0 = cp0.phiB;
-      double cell_phi = proxim(dde->phi_raw(), phi0);
-      if (cell_phi > phi0) {
-        auto diff = cell_phi - phi0;
-        if (diff > phiSize.plusB) {
-          phiSize.plusB = diff;
-        }
-      } else {
-        auto diff = phi0 - cell_phi;
-        if (diff > phiSize.minusB) {
-          phiSize.minusB = diff;
-        }
-      }
-    } else if (cp0.emaxEC > 0 && CaloCell_ID::EME2 == dde->getSampling()) {
-      const float phi0 = cp0.phiEC;
-      double cell_phi = proxim(dde->phi_raw(), phi0);
-      if (cell_phi > phi0) {
-        auto diff = cell_phi - phi0;
-        if (diff > phiSize.plusEC) {
-          phiSize.plusEC = diff;
-        }
-      } else {
-        auto diff = phi0 - cell_phi;
-        if (diff > phiSize.minusEC) {
-          phiSize.minusEC = diff;
-        }
-      }
-    }
-  }
-  return phiSize;
-}
 /** functions to make 1st sampling (strips) specific corrections*/
 void
 makeCorrection1(xAOD::CaloCluster* cluster,
@@ -271,33 +207,6 @@ refineEta1Position(xAOD::CaloCluster* cluster, const CaloDetDescrManager& mgr)
   if (aeta > 1.3 && cluster->hasSampling(CaloSampling::EME1)) {
     makeCorrection1(cluster, mgr, CaloSampling::EME1);
   }
-}
-/** Find the reference position (eta, phi) relative to which cells are
-   restricted.
-*/
-CookieCutterHelpers::CentralPosition
-findCentralPositionEM2(const std::vector<const xAOD::CaloCluster*>& clusters)
-{
-  CookieCutterHelpers::CentralPosition cp;
-  for (const auto* cluster : clusters) {
-    if (cluster->hasSampling(CaloSampling::EMB2)) {
-      const float thisEmax = cluster->energy_max(CaloSampling::EMB2);
-      if (thisEmax > cp.emaxB) {
-        cp.emaxB = thisEmax;
-        cp.etaB = cluster->etamax(CaloSampling::EMB2);
-        cp.phiB = cluster->phimax(CaloSampling::EMB2);
-      }
-    }
-    if (cluster->hasSampling(CaloSampling::EME2)) {
-      const float thisEmax = cluster->energy_max(CaloSampling::EME2);
-      if (thisEmax > cp.emaxEC) {
-        cp.emaxEC = thisEmax;
-        cp.etaEC = cluster->etamax(CaloSampling::EME2);
-        cp.phiEC = cluster->phimax(CaloSampling::EME2);
-      }
-    }
-  }
-  return cp;
 }
 
 } // end of anonymous namespace
@@ -583,7 +492,8 @@ egammaSuperClusterBuilderBase::createNewCluster(
   newCluster->setClusterSize(xAOD::CaloCluster::SuperCluster);
   // Let's try to find the eta and phi of the hottest cell in L2.
   // This will be used as the center for restricting the cluster size.
-  CookieCutterHelpers::CentralPosition cpRef = findCentralPositionEM2(clusters);
+  CookieCutterHelpers::CentralPosition cpRef = 
+    CookieCutterHelpers::findCentralPositionEM2(clusters);
   // these are the same as the reference but in calo frame
   // (after the processing below)
   CookieCutterHelpers::CentralPosition cp0 = cpRef;
@@ -801,7 +711,8 @@ egammaSuperClusterBuilderBase::fillClusterConstrained(
   }
   // Now calculate the cluster size in 2nd layer
   // use that for constraining the L0/L1 cells we add
-  const CookieCutterHelpers::PhiSize phiSize = findPhiSize(cp0, tofill);
+  const CookieCutterHelpers::PhiSize phiSize = 
+    CookieCutterHelpers::findPhiSize(cp0, tofill);
   const float phiPlusB = cp0.phiB + phiSize.plusB + m_extraL0L1PhiSize;
   const float phiMinusB = cp0.phiB - phiSize.minusB - m_extraL0L1PhiSize;
   const float phiPlusEC = cp0.phiEC + phiSize.plusEC + m_extraL0L1PhiSize;
