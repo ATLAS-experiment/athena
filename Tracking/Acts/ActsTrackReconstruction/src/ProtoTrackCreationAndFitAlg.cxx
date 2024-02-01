@@ -108,8 +108,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
 
   /// ----------------------------------------------------------
   /// and we are back to EF tracking! 
- 
-  std::unique_ptr<ActsTrk::MutableTrackContainer> trackContainer;
+  ActsTrk::MutableTrackContainer trackContainer;
 
   // now we fit each of the proto tracks
   for (auto & proto : myProtoTracks){
@@ -119,19 +118,11 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
 
     if(!res) continue;
     ATH_MSG_DEBUG(".......Done track with size "<< proto.measurements.size());
-    // Very stupid way of filling this
-    if(!trackContainer)
-    {
-      trackContainer = std::move(res);
-    }
-    else
-    { 
-      const auto trackProxy = res->getTrack(0);
-      auto destProxy = trackContainer->getTrack(trackContainer->addTrack());
-      destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
-    }
+    const auto trackProxy = res->getTrack(0);
+    auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
+    destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
   }
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandle.moveToConst(std::move(*trackContainer.release()), ctx);
+  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandle.moveToConst(std::move(trackContainer), ctx);  
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
 
