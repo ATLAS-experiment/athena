@@ -4,6 +4,7 @@
 
 #include "egammaForwardBuilder.h"
 #include "egammaInterfaces/IegammaBaseTool.h"
+#include "egammaCaloUtils/CookieCutterHelpers.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
@@ -149,6 +150,11 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
     // Create the new cluster.
     std::unique_ptr<xAOD::CaloCluster> newCluster = std::make_unique<xAOD::CaloCluster>(*cluster);
+
+    if (m_doCookieCutting) {
+      cookieCut(*newCluster);
+    }
+
     caloClusterLinks(*newCluster) = constituentLinks;
     outClusterContainer->push_back(std::move(newCluster));
 
@@ -263,5 +269,38 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
   }
 
   return StatusCode::SUCCESS;
+}
+
+void egammaForwardBuilder::cookieCut(xAOD::CaloCluster& cluster) const
+{
+  std::vector<const CaloCell*> toRemove;
+  toRemove.reserve(cluster.size());
+
+  if (!cluster.hasSampling(CaloSampling::EME2)) {
+    return;
+  }
+
+  CookieCutterHelpers::CentralPosition cp = 
+    CookieCutterHelpers::findCentralPositionEM2({&cluster});
+
+  auto cell_itr = cluster.cell_cbegin();
+  auto cell_end = cluster.cell_cend();
+  for (; cell_itr != cell_end; ++cell_itr) {
+    const CaloCell* cell = *cell_itr;
+    if (!cell) {
+      continue;
+    }
+    
+    if (
+      std::abs(cp.etaEC - cell->eta()) > 0.375 ||
+      std::abs(cp.phiEC - cell->phi()) > 0.375
+    ) {
+      toRemove.push_back(cell);
+    }
+  }
+
+  for (const CaloCell* cell : toRemove) {
+    cluster.removeCell(cell);
+  }
 }
 
