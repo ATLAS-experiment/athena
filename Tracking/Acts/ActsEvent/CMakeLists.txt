@@ -35,7 +35,12 @@ atlas_add_test( MultiTrajectoryBasic_test
 atlas_add_test( MultiTrajectorySE_test 
 				SOURCES test/MultiTrajectorySE_test.cxx
 				LINK_LIBRARIES TestTools ActsEventLib
-				POST_EXEC_SCRIPT nopost.sh)				
+				POST_EXEC_SCRIPT nopost.sh)		
+
+atlas_add_test( MultiTrajectoryACTS_test 
+				SOURCES test/MultiTrajectoryACTS_test.cxx
+				LINK_LIBRARIES TestTools ActsEventLib
+				POST_EXEC_SCRIPT nopost.sh)							
 
 atlas_add_test( TrackSummaryContainer_test
 				SOURCES test/TrackSummaryContainer_test.cxx
