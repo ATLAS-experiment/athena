@@ -166,7 +166,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('recomputeIsEM', False, type=bool)
         self.addOption ('doFSRSelection', False, type=bool)
         self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
-        self.addOption ('forceFullSimConfig', True, type=bool)
+        self.addOption ('forceFullSimConfig', False, type=bool)
 
     def makeAlgs (self, config) :
 
