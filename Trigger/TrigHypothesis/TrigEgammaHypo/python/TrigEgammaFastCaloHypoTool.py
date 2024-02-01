@@ -1,7 +1,13 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+from AthenaCommon.Logging import logging
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+import collections.abc
+
 
 def same( val , tool):
   return [val]*( len( tool.EtaBins ) - 1 )
@@ -12,7 +18,6 @@ def same( val , tool):
 #
 def electronRingerFastCaloHypoConfig(flags, name, sequenceOut):
   # make the Hypo
-  from AthenaConfiguration.ComponentFactory import CompFactory
   theFastCaloHypo = CompFactory.TrigEgammaFastCaloHypoAlg(name)
   theFastCaloHypo.CaloClusters = sequenceOut
   theFastCaloHypo.PidNames = ["tight", "medium", "loose", "vloose"]
@@ -30,7 +35,6 @@ def electronRingerFastCaloHypoConfig(flags, name, sequenceOut):
 #
 def photonRingerFastCaloHypoConfig(flags, name, sequenceOut):
     # make the Hypo
-  from AthenaConfiguration.ComponentFactory import CompFactory
   theFastCaloHypo = CompFactory.TrigEgammaFastCaloHypoAlg(name)
   theFastCaloHypo.CaloClusters = sequenceOut
   theFastCaloHypo.PidNames = ["tight", "medium", "loose"]
@@ -53,7 +57,6 @@ def createTrigEgammaFastCaloHypoAlg(flags, name, sequenceOut):
 
 
 def TrigEgammaFastCaloHypoAlgCfg(flags, name, CaloClusters):
-  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   acc = ComponentAccumulator()
   acc.addEventAlgo(createTrigEgammaFastCaloHypoAlg(flags, name=name, sequenceOut=CaloClusters))
   return acc
@@ -65,7 +68,6 @@ def TrigEgammaFastCaloHypoAlgCfg(flags, name, CaloClusters):
 def createTrigEgammaFastCaloHypoAlg_noringer(flags, name, sequenceOut):
   
   # make the Hypo
-  from AthenaConfiguration.ComponentFactory import CompFactory
   theFastCaloHypo = CompFactory.TrigEgammaFastCaloHypoAlg(name)
   theFastCaloHypo.CaloClusters = sequenceOut
 
@@ -117,7 +119,6 @@ class TrigEgammaFastCaloHypoToolConfig:
 
   def __init__(self, name, monGroups, cpart, tool=None):
 
-    from AthenaCommon.Logging import logging
     self.__log = logging.getLogger('TrigEgammaFastCaloHypoTool')
     self.__name = name
     self.__cand = cpart['trigType']
@@ -130,7 +131,6 @@ class TrigEgammaFastCaloHypoToolConfig:
     self.__monGroups = monGroups
 
     if not tool:
-      from AthenaConfiguration.ComponentFactory import CompFactory
       tool = CompFactory.TrigEgammaFastCaloHypoTool( name )
     
     tool.AcceptAll      = False
@@ -338,8 +338,6 @@ def TrigEgammaFastCaloHypoToolFromDict(flags, chainDict , tool=None):
 
 def createTrigEgammaFastCaloElectronSelectors(flags, ConfigFilePath=None):
 
-    import collections.abc
-
     if not ConfigFilePath:
       ConfigFilePath = flags.Trigger.egamma.ringerVersion
 
@@ -360,8 +358,6 @@ def createTrigEgammaFastCaloElectronSelectors(flags, ConfigFilePath=None):
           })
     
     selectors = []    
-    #from RingerSelectorTools.RingerSelectorToolsConf import Ringer__AsgRingerSelectorTool
-    from AthenaConfiguration.ComponentFactory import CompFactory
 
     for pidname , name in SelectorNames.items():
       SelectorTool=CompFactory.Ringer.AsgRingerSelectorTool(name)
@@ -372,8 +368,6 @@ def createTrigEgammaFastCaloElectronSelectors(flags, ConfigFilePath=None):
 
 
 def createTrigEgammaFastCaloPhotonSelectors(flags, ConfigFilePath=None):
-
-    import collections.abc
 
     if not ConfigFilePath:
       ConfigFilePath = flags.Trigger.egamma.ringerVersion
@@ -393,8 +387,6 @@ def createTrigEgammaFastCaloPhotonSelectors(flags, ConfigFilePath=None):
           })
     
     selectors = []    
-    #from RingerSelectorTools.RingerSelectorToolsConf import Ringer__AsgRingerSelectorTool
-    from AthenaConfiguration.ComponentFactory import CompFactory
 
     for pidname , name in SelectorNames.items():
       SelectorTool=CompFactory.Ringer.AsgRingerSelectorTool(name)
