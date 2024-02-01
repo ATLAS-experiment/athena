@@ -5,7 +5,7 @@
 #include "GeneratorFilters/DiPhotonFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include <vector>
-
+#include "TMath.h"
 
 // Pt High --> Low
 /// @todo Move to a sorting utils module
@@ -26,9 +26,11 @@ DiPhotonFilter::DiPhotonFilter(const std::string& name, ISvcLocator* pSvcLocator
   declareProperty("EtaCut1st",m_EtaRange_1st = 2.50);
   declareProperty("EtaCut2nd",m_EtaRange_2nd = 2.50);
   declareProperty("EtaCutOthers",m_EtaRange_others = 2.50);
+  declareProperty("DeltaRCutFrom",m_diphoton_deltaRmin = -1.);
+  declareProperty("DeltaRCutTo",m_diphoton_deltaRmax = -1.);
   declareProperty("MassCutFrom",m_diphoton_massmin = -1.);
   declareProperty("MassCutTo",m_diphoton_massmax = -1.);
-  declareProperty("Use1st2ndPhotons",m_use1st2ndPhotonsforMassCut = false);
+  declareProperty("Use1st2ndPhotons",m_use1st2ndPhotonsforMassAndDeltaRCuts = false);
 }
 
 
@@ -41,10 +43,12 @@ StatusCode DiPhotonFilter::filterInitialize() {
   ATH_MSG_INFO("EtaCut for the 1st photon = " << m_EtaRange_1st);
   ATH_MSG_INFO("EtaCut for the 2nd photon = " << m_EtaRange_2nd);
   ATH_MSG_INFO("EtaCut for other photons  = " << m_EtaRange_others);
+  ATH_MSG_INFO("DeltaRCut(min)            = " << m_diphoton_deltaRmin);
+  ATH_MSG_INFO("DeltaRCut(max)            = " << m_diphoton_deltaRmax);
   ATH_MSG_INFO("MassCut(min)              = " << m_diphoton_massmin << " (CLHEP::MeV)");
   ATH_MSG_INFO("MassCut(max)              = " << m_diphoton_massmax << " (CLHEP::MeV)");
   ATH_MSG_INFO("   negative value on MassCut(min,max) -> no limit in the cut");
-  ATH_MSG_INFO("Use only the 1st and the 2nd photons for mass cut, flag = " << m_use1st2ndPhotonsforMassCut);
+  ATH_MSG_INFO("Use only the 1st and the 2nd photons for mass and deltaR cuts, flag = " << m_use1st2ndPhotonsforMassAndDeltaRCuts);
   return StatusCode::SUCCESS;
 }
 
@@ -100,29 +104,45 @@ StatusCode DiPhotonFilter::filterEvent() {
     }
     ATH_MSG_DEBUG("# of truth photons after pT and eta cut = " << MCTruthPhotonList2.size());
 
-    // check mass
     if (MCTruthPhotonList2.size() < 2) {
       isOK = false;
     } else {
       int nGood = 0;
-      if (m_use1st2ndPhotonsforMassCut) {
+      if (m_use1st2ndPhotonsforMassAndDeltaRCuts) {
         double sumPx = MCTruthPhotonList2[0]->momentum().px()+MCTruthPhotonList2[1]->momentum().px();
         double sumPy = MCTruthPhotonList2[0]->momentum().py()+MCTruthPhotonList2[1]->momentum().py();
         double sumPz = MCTruthPhotonList2[0]->momentum().pz()+MCTruthPhotonList2[1]->momentum().pz();
         double sumE  = MCTruthPhotonList2[0]->momentum().e() +MCTruthPhotonList2[1]->momentum().e();
         double m2 = sumE*sumE-(sumPx*sumPx+sumPy*sumPy+sumPz*sumPz);
         double mGamGam = m2 >= 0. ? std::sqrt(m2) : -std::sqrt(-m2);
-
         ATH_MSG_DEBUG("mass(gamgam) = " << mGamGam << " (CLHEP::MeV)");
+        double deltaEta = MCTruthPhotonList2[0]->momentum().pseudoRapidity() - MCTruthPhotonList2[1]->momentum().pseudoRapidity();
+        double deltaPhi = MCTruthPhotonList2[0]->momentum().phi() - MCTruthPhotonList2[1]->momentum().phi();
+        double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+        ATH_MSG_DEBUG("deltaR(gamgam) = " << deltaR);
+        int testMassDeltaRCuts = 0;
+        //check mass
         if (m_diphoton_massmin >= 0. && m_diphoton_massmax >= 0.) {
-          if (mGamGam >= m_diphoton_massmin && mGamGam <= m_diphoton_massmax) ++nGood;
+          if (mGamGam >= m_diphoton_massmin && mGamGam <= m_diphoton_massmax) ++testMassDeltaRCuts;
         } else if (m_diphoton_massmin >= 0. && m_diphoton_massmax <  0.) {
-          if (mGamGam >= m_diphoton_massmin) ++nGood;
+          if (mGamGam >= m_diphoton_massmin) ++testMassDeltaRCuts;
         } else if (m_diphoton_massmin <  0. && m_diphoton_massmax >= 0.) {
-          if (mGamGam <= m_diphoton_massmax) ++nGood;
+          if (mGamGam <= m_diphoton_massmax) ++testMassDeltaRCuts;
         } else {
-          ++nGood;
+          ++testMassDeltaRCuts;
         }
+        // check deltaR
+        if (m_diphoton_deltaRmin >= 0. && m_diphoton_deltaRmax >= 0.) {
+          if (deltaR >= m_diphoton_deltaRmin && deltaR <= m_diphoton_deltaRmax) ++testMassDeltaRCuts;
+        } else if (m_diphoton_deltaRmin >= 0. && m_diphoton_deltaRmax < 0.) {
+          if (deltaR >= m_diphoton_deltaRmin) ++testMassDeltaRCuts;
+        } else if (m_diphoton_deltaRmin < 0. && m_diphoton_deltaRmax >= 0.) {
+          if (deltaR <= m_diphoton_deltaRmax) ++testMassDeltaRCuts;
+        } else {
+          ++testMassDeltaRCuts;
+        }
+        // count pairs
+        if (testMassDeltaRCuts == 2) ++nGood;
       } else {
         for (size_t i=0;i<MCTruthPhotonList2.size()-1;++i) {
           for (size_t j=i+1;j<MCTruthPhotonList2.size();++j) {
@@ -133,15 +153,33 @@ StatusCode DiPhotonFilter::filterEvent() {
             double m2 = sumE*sumE-(sumPx*sumPx+sumPy*sumPy+sumPz*sumPz);
             double mGamGam = m2 >= 0. ? std::sqrt(m2) : -std::sqrt(-m2);
             ATH_MSG_DEBUG("mass(gamgam) = " << mGamGam << " (CLHEP::MeV)");
+            double deltaEta = MCTruthPhotonList2[i]->momentum().pseudoRapidity() - MCTruthPhotonList2[j]->momentum().pseudoRapidity();
+            double deltaPhi = MCTruthPhotonList2[i]->momentum().phi() - MCTruthPhotonList2[j]->momentum().phi();
+            double deltaR = std::sqrt(deltaEta*deltaEta+deltaPhi*deltaPhi);
+            ATH_MSG_DEBUG("deltaR(gamgam) = " << deltaR);
+            int testMassDeltaRCuts = 0;
+            // check mass
             if (m_diphoton_massmin >= 0. && m_diphoton_massmax >= 0.) {
-              if (mGamGam >= m_diphoton_massmin && mGamGam <= m_diphoton_massmax) ++nGood;
+              if (mGamGam >= m_diphoton_massmin && mGamGam <= m_diphoton_massmax) ++testMassDeltaRCuts;
             } else if (m_diphoton_massmin >= 0. && m_diphoton_massmax <  0.) {
-              if (mGamGam >= m_diphoton_massmin) ++nGood;
+              if (mGamGam >= m_diphoton_massmin) ++testMassDeltaRCuts;
             } else if (m_diphoton_massmin <  0. && m_diphoton_massmax >= 0.) {
-              if (mGamGam <= m_diphoton_massmax) ++nGood;
+              if (mGamGam <= m_diphoton_massmax) ++testMassDeltaRCuts;
             } else {
-              ++nGood;
+              ++testMassDeltaRCuts;
             }
+            // check deltaR
+            if (m_diphoton_deltaRmin >= 0. && m_diphoton_deltaRmax >= 0.) {
+              if (deltaR >= m_diphoton_deltaRmin && deltaR <= m_diphoton_deltaRmax) ++testMassDeltaRCuts;
+            } else if (m_diphoton_deltaRmin >= 0. && m_diphoton_deltaRmax < 0.) {
+              if (deltaR >= m_diphoton_deltaRmin) ++testMassDeltaRCuts;
+            } else if (m_diphoton_deltaRmin < 0. && m_diphoton_deltaRmax >= 0.) {
+              if (deltaR <= m_diphoton_deltaRmax) ++testMassDeltaRCuts;
+            } else {
+              ++testMassDeltaRCuts;
+            }
+            // count pairs
+            if (testMassDeltaRCuts == 2) ++nGood;
           }
         }
       }

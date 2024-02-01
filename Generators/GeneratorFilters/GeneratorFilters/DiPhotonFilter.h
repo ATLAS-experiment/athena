@@ -24,9 +24,11 @@ private:
   double m_EtaRange_2nd;
   double m_Ptmin_others;
   double m_EtaRange_others;
+  double m_diphoton_deltaRmin;
+  double m_diphoton_deltaRmax;
   double m_diphoton_massmin;
   double m_diphoton_massmax;
-  bool m_use1st2ndPhotonsforMassCut;
+  bool m_use1st2ndPhotonsforMassAndDeltaRCuts;
 
 };
 
