@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetAlignMonResidualsAlgCfg.py
@@ -43,13 +43,18 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_TRTB_nSectorBins = 32
     m_TRTEC_nPhiBins = 8
      
+    # Set a folder name from the user options
+    folderName = "ExtendedTracks_NoTriggerSelection"
+    if "TrackName" in kwargs:
+        folderName = kwargs["TrackName"]
+    
     # this creates a "residualGroup" called "alg" which will put its histograms into the subdirectory "Residuals"
     residualGroup = helper.addGroup(alg, 'Residuals')
-    pathResiduals = '/IDAlignMon/ExtendedTracks_NoTriggerSelection/Residuals'
+    pathResiduals = '/IDAlignMon/'+folderName+'/Residuals'
 
     # Histograms for the Alignment Residual monitoring:    
     varName = 'm_mu;mu_perEvent'
-    title = 'mu_perEvent;<#mu> per event;Events'
+    title = 'mu_perEvent;#LT#mu#GT per event;Events'
     residualGroup.defineHistogram(varName, type='TH1F', path=pathResiduals, title=title, xbins=m_nBinsMuRange, xmin=m_muRangeMin, xmax=m_muRangeMax)
 
     varName = 'm_detType;sirescalcfailure'

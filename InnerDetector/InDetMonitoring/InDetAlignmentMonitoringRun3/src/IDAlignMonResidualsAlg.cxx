@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************************
@@ -65,6 +65,7 @@ IDAlignMonResidualsAlg::IDAlignMonResidualsAlg( const std::string & name, ISvcLo
   declareProperty("HitQualityTool"            , m_hitQualityTool);
   declareProperty("Pixel_Manager"             , m_Pixel_Manager);
   declareProperty("SCT_Manager"               , m_SCT_Manager);
+  declareProperty("ApplyTrackSelection"       , m_applyTrkSel = true);
 }
 
 //---------------------------------------------------------------------------------------
@@ -126,6 +127,7 @@ StatusCode IDAlignMonResidualsAlg::initialize()
   m_trtECResVsPhiSec= Monitored::buildToolMap<int>(m_tools, "TRTResVsPhiEC", m_nTRTEClayers);
   m_trtECLRVsPhiSec= Monitored::buildToolMap<int>(m_tools, "TRTLRVsPhiEC", m_nTRTEClayers);
 
+  ATH_MSG_DEBUG("initialize() -- completed --");
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -135,6 +137,8 @@ StatusCode IDAlignMonResidualsAlg::initialize()
 StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) const
 {
   using namespace Monitored;
+
+  ATH_MSG_DEBUG("fillHistograms() -- dealing with track collection: " << m_tracksName.key());
 
   // For histogram naming
   auto residualGroup = getGroup("Residuals");
@@ -177,7 +181,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       }
 
     // Select tracks
-    if ( !m_trackSelection->accept(*trksItr) )
+    if ( m_applyTrkSel and !m_trackSelection->accept(*trksItr) )
       continue;
 
     nTracks++;

@@ -88,8 +88,8 @@ private:
   bool  m_applyTrkSel{};
   
   SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimContainerName{this,"vxPrimContainerName","PrimaryVertices","Primary Vertices for Alignment Monitoring"};
-  SG::ReadHandleKey<TrackCollection> m_tracksKey  {this, "TrackName", "ExtendedTracks", "track data key"};
-  SG::ReadHandleKey<TrackCollection> m_tracksName {this, "TrackName2", "ExtendedTracks", "track data key"};
+  SG::ReadHandleKey<TrackCollection> m_tracksKey  {this, "TrackName2", "ExtendedTracks", "track data key"};
+  SG::ReadHandleKey<TrackCollection> m_tracksName {this, "TrackName",  "ExtendedTracks", "track data key"};
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
   ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelection; // baseline
