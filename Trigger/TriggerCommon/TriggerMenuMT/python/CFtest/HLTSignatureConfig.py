@@ -1,13 +1,10 @@
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.CFElements import seqAND
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
-from DecisionHandling.HLTSignatureHypoTools import MuTestHypoTool, ElTestHypoTool
-from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
-
+from AthenaConfiguration.ComponentAccumulator import CompFactory
+from TriggerMenuMT.CFtest.HLTSignatureHypoTools import MuTestHypoTool, ElTestHypoTool
 import sys
 
 HLTTest__TestHypoAlg=CompFactory.getComp("HLTTest::TestHypoAlg")
@@ -43,17 +40,13 @@ def makeSequence(flags, name,step, signature):
     Alg.Output = name+signature+"Alg"+step+"_out"
     Alg.Input  = IM.Output
     
-    if isComponentAccumulatorCfg():
-        accAlg = ComponentAccumulator()
-        accAlg.addEventAlgo(Alg)
-        InEventReco = InEventRecoCA(name+signature+"SeqStep"+step,inputMaker=IM)
-        InEventReco.mergeReco(accAlg)  
-            
-        return (InEventReco,IM, Alg.Output)
-    else:
-        Sequence   = seqAND(name+signature+"SeqStep"+step, [IM, Alg])
-        return (Sequence, IM, Alg.Output)
-
+    accAlg = ComponentAccumulator()
+    accAlg.addEventAlgo(Alg)
+    InEventReco = InEventRecoCA(name+signature+"SeqStep"+step,inputMaker=IM)
+    InEventReco.mergeReco(accAlg)  
+        
+    return (InEventReco,IM, Alg.Output)
+    
 
 
 
@@ -92,53 +85,46 @@ def makeElSequence(flags, name,step):
 
 
 def elMenuSequence(flags, step, reconame, hyponame):
-    (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,flags,name=reconame, step=step)
+    (Sequence, IM, seqOut) = makeElSequence (flags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Step"+step+"ElHypo")
     elHypo.Input = seqOut
-    if isComponentAccumulatorCfg():
-        selAcc=SelectionCA(hyponame+"elStep"+step)        
-        selAcc.mergeReco(Sequence) 
-        selAcc.addHypoAlgo(elHypo)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=ElTestHypoTool)
-    else:
-        return MenuSequence(flags, Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)
+    
+    selAcc=SelectionCA(hyponame+"elStep"+step)        
+    selAcc.mergeReco(Sequence) 
+    selAcc.addHypoAlgo(elHypo)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=ElTestHypoTool)
    
 
 def gamMenuSequence(flags, step, reconame, hyponame):
-    (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,flags,name=reconame, step=step)
+    (Sequence, IM, seqOut) = makeElSequence(flags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Step"+step+"GamHypo")
     elHypo.Input = seqOut
-    if isComponentAccumulatorCfg():
-        selAcc=SelectionCA(hyponame+"gamStep"+step+"Gam")        
-        selAcc.mergeReco(Sequence) 
-        selAcc.addHypoAlgo(elHypo)
-        return MenuSequenceCA(flags,selAcc, HypoToolGen=ElTestHypoTool)
-    else:
-        return MenuSequence(flags, Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)
+    
+    selAcc=SelectionCA(hyponame+"gamStep"+step+"Gam")        
+    selAcc.mergeReco(Sequence) 
+    selAcc.addHypoAlgo(elHypo)
+    return MenuSequenceCA(flags,selAcc, HypoToolGen=ElTestHypoTool)
     
 
 
 def muMenuSequence(flags, step, reconame, hyponame):
-    (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeMuSequence,flags,name=reconame, step=step)
+    (Sequence, IM, seqOut) = makeMuSequence(flags,name=reconame, step=step)
     muHypo = MuHypo(hyponame+"Step"+step+"MuHypo")
     muHypo.Input = seqOut
-    if isComponentAccumulatorCfg():
-        selAcc=SelectionCA(hyponame+"muStep"+step)        
-        selAcc.mergeReco(Sequence) 
-        selAcc.addHypoAlgo(muHypo)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=MuTestHypoTool)
-    else:
-        return MenuSequence(flags, Maker=IM, Sequence=Sequence, Hypo=muHypo, HypoToolGen=MuTestHypoTool)
+    
+    selAcc=SelectionCA(hyponame+"muStep"+step)        
+    selAcc.mergeReco(Sequence) 
+    selAcc.addHypoAlgo(muHypo)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=MuTestHypoTool)
     
         
 def genMenuSequence(flags, step, reconame, hyponame):
-    (Sequence, IM, seqOut) = RecoFragmentsPool.retrieve(makeElSequence,flags,name=reconame, step=step)
+    (Sequence, IM, seqOut) = makeElSequence (flags,name=reconame, step=step)
     elHypo = ElGamHypo(hyponame+"Hypo")
     elHypo.Input = seqOut
-    if isComponentAccumulatorCfg():
-        selAcc=SelectionCA(hyponame+"elStep"+step)        
-        selAcc.mergeReco(Sequence) 
-        selAcc.addHypoAlgo(elHypo)
-        return MenuSequenceCA(flags, selAcc, HypoToolGen=ElTestHypoTool)
-    else:
-        return MenuSequence(flags, Maker=IM, Sequence=Sequence, Hypo=elHypo, HypoToolGen=ElTestHypoTool)
+    
+    selAcc=SelectionCA(hyponame+"elStep"+step)        
+    selAcc.mergeReco(Sequence) 
+    selAcc.addHypoAlgo(elHypo)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=ElTestHypoTool)
+   

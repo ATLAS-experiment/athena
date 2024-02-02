@@ -7,8 +7,8 @@ log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 
-from DecisionHandling.HLTSignatureConfig import  muMenuSequence, elMenuSequence, gamMenuSequence
-from DecisionHandling.HLTSignatureHypoTools import dimuDrComboHypoTool
+from TriggerMenuMT.CFtest.HLTSignatureConfig import  muMenuSequence, elMenuSequence, gamMenuSequence
+from TriggerMenuMT.CFtest.HLTSignatureHypoTools import dimuDrComboHypoTool
 
 # Test function used in RecoFragmentsPoolTest
 def creator(flags, name):
