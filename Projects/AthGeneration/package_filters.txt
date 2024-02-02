@@ -155,7 +155,6 @@
 - Generators/CavernBkgGenerator
 - Generators/TrackRecordGenerator
 + Generators/.*
-+ InnerDetector/InDetExample/InDetRecExample
 #+ InnerDetector/InDetRecTools/InDetTrackSelectionTool
 + LArCalorimeter/LArCabling
 + LArCalorimeter/LArGeoModel/LArHV
