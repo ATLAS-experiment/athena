@@ -81,6 +81,8 @@ StatusCode JetClusterer::initialize()
   m_clusterSequence = name() + "ClusterSequence";
   ATH_CHECK(m_clusterSequence.initialize());
 
+  m_jetRankAccessor = SG::AuxElement::Accessor<int>(m_jetRank);
+
   return StatusCode::SUCCESS;
 }
 
@@ -237,6 +239,9 @@ std::pair<std::unique_ptr<xAOD::JetContainer>, std::unique_ptr<SG::IAuxStore>> J
     for (const fastjet::PseudoJet &pj : *pjVector)
     {
       processPseudoJet(pj, *pjContHandle, jets.get(), nullptr);
+      // we want the rank to start with zero, but this is after the
+      // jet has been added, thus the "size() - 1" here.
+      m_jetRankAccessor(*jets.get()->back()) = jets->size() - 1;
     }
 
     // -------------------------------------
