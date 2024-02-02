@@ -10,6 +10,6 @@
 
 export ATHENA_CORE_NUMBER=8 # set number of cores used in multithread to 8.
 
-python $Athena_DIR/python/eflowRec/PFRunESDtoAOD_mc20e_eOverP.py | tee temp.log
+python -m eflowRec.PFRunESDtoAOD_mc20e_eOverP | tee temp.log
 echo "art-result: ${PIPESTATUS[0]}"
 test_postProcessing_Errors.sh temp.log

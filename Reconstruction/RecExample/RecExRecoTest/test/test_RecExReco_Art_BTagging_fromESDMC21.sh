@@ -6,7 +6,7 @@
 # art-include: main/Athena
 # art-include: 23.0/Athena
 # art-output: *.log   
-python $Athena_DIR/python/BTagging/BTagESD.py | tee temp.log
+python -m BTagging.BTagESD | tee temp.log
 echo "art-result: ${PIPESTATUS[0]}"
 test_postProcessing_Errors.sh temp.log
 
