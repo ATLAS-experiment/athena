@@ -439,6 +439,7 @@ def getJetRecAlg( jetdef, monTool = None, ftf_suffix = ''):
         "VariableRMassScale": jetdef.VRMassScale
     }
 
+    jetname = jetdef.fullname()
     if jetdef.byVertex:
         jclust = CompFactory.JetClustererByVertex(
             "builder",
@@ -452,7 +453,6 @@ def getJetRecAlg( jetdef, monTool = None, ftf_suffix = ''):
 
     mods = getJetModifierTools(jetdef)
 
-    jetname = jetdef.fullname()
     jra = CompFactory.JetRecAlg(
         "jetrecalg_"+jetname+ftf_suffix,
         Provider = jclust,
