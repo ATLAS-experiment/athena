@@ -12,6 +12,15 @@ const std::set<std::string> ActsTrk::TrackSummaryContainer::staticVariables = {
     "ndf",    "nOutliers", "nSharedHits",   "tipIndex", "stemIndex",
     "particleHypothesis"};
 
+using namespace Acts::HashedStringLiteral;
+const std::set<Acts::HashedString> ActsTrk::TrackSummaryContainer::staticVariableHashes = [](){
+  std::set<Acts::HashedString> result;
+  for (const auto& s: ActsTrk::TrackSummaryContainer::staticVariables) {
+    result.insert(Acts::hashString(s));
+  }
+  return result;
+}();
+
 
 ActsTrk::TrackSummaryContainer::TrackSummaryContainer(
     const DataLink<xAOD::TrackSummaryContainer>& link,
@@ -70,10 +79,6 @@ std::any ActsTrk::TrackSummaryContainer::component_impl(
   if (result.has_value()) {
     return result;
   }
-  using namespace Acts::HashedStringLiteral;
-  if (key == "particleHypothesis"_hash) {
-    return &m_particleHypothesis[itrack];
-  }
   for (auto& d : m_decorations) {
     if (d.hash == key) {
       // TODO the dynamic case will be eliminated once we switch to use Aux containers directly
@@ -103,7 +108,6 @@ std::shared_ptr<const Acts::Surface>  ActsTrk::TrackSummaryContainer::surface(
 void ActsTrk::TrackSummaryContainer::fillFrom(
     ActsTrk::MutableTrackSummaryContainer& mtb) {
   m_surfaces = std::move(mtb.m_surfaces);
-  m_particleHypothesis = std::move(mtb.m_particleHypothesis);
 }
 
 
@@ -111,6 +115,18 @@ void ActsTrk::TrackSummaryContainer::fillFrom(
 void ActsTrk::TrackSummaryContainer::restoreDecorations() {
   m_decorations = ActsTrk::detail::restoreDecorations(m_trackBackend->getConstStore(), staticVariables);
 }
+
+std::vector<Acts::HashedString> ActsTrk::TrackSummaryContainer::dynamicKeys_impl() const {
+  std::vector<Acts::HashedString> result;
+  for ( const auto& d: m_decorations) {
+    if (staticVariableHashes.count(d.hash) == 1) {
+      continue;
+    }
+    result.push_back(d.hash);
+  }
+  return result;
+}
+
 
 
 ////////////////////////////////////////////////////////////////////
@@ -143,7 +159,6 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
   TrackSummaryContainer::m_surfBackendAux = m_mutableSurfBackendAux.get();
 
   m_surfaces = std::move(other.m_surfaces);
-  m_particleHypothesis = std::move(other.m_particleHypothesis);
   m_decorations = std::move(other.m_decorations);
 }
 
@@ -162,7 +177,6 @@ ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::op
   TrackSummaryContainer::m_surfBackendAux = m_mutableSurfBackendAux.get();
 
   m_surfaces = std::move(other.m_surfaces);
-  m_particleHypothesis = std::move(other.m_particleHypothesis);
   m_decorations = std::move(other.m_decorations);
 
   //restore decorations
@@ -170,7 +184,6 @@ ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::op
 
   // invalidate vector type components of 'other'
   other.m_surfaces.clear();
-  other.m_particleHypothesis.clear();
   other.m_decorations.clear();
 
   return *this;
@@ -179,8 +192,8 @@ ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::op
 ActsTrk::IndexType ActsTrk::MutableTrackSummaryContainer::addTrack_impl() {
   m_mutableTrackBackend->push_back(std::make_unique<xAOD::TrackSummary>());
   m_mutableTrackBackend->back()->resize();
-  m_particleHypothesis.resize(m_mutableTrackBackend->size(),
-                              Acts::ParticleHypothesis::pion());
+  // ACTS assumes default to be pion, xAOD::ParticleHypothesis == 0 is geantino
+  m_mutableTrackBackend->back()->setParticleHypothesis(xAOD::pion);
   return m_mutableTrackBackend->size() - 1;
 }
 
@@ -215,17 +228,15 @@ void ActsTrk::MutableTrackSummaryContainer::removeSurface_impl(
 
 
 
-// this in fact may be a copy from other MutableTrackSummaryContainer
+// this in fact may be a copy from other MutableTrackSymmaryContainer
 void ActsTrk::MutableTrackSummaryContainer::copyDynamicFrom_impl(
-    ActsTrk::IndexType itrack, const ActsTrk::TrackSummaryContainer& other,
-    ActsTrk::IndexType other_itrack) {
-  std::set<std::string> usedDecorations;
-  for ( const auto& other_decor: other.m_decorations) {
-    if ( staticVariables.count(other_decor.name) == 1)  { continue; }
-    // TODO dynamic cast will disappear 
-    other_decor.copier(m_mutableTrackBackendAux.get(), itrack, other_decor.auxid, other.trackBackend()->getStore(),
-                      other_itrack);
-    }
+    ActsTrk::IndexType itrack, Acts::HashedString key,
+    const std::any& src_ptr) {
+  if ( staticVariableHashes.count(key) == 1)  { return; }
+  for ( const auto& d: m_decorations) {
+    if (d.hash != key) { continue; }
+    d.copier(m_mutableTrackBackendAux.get(), itrack, d.auxid, src_ptr);
+  }
 }
 
 std::any ActsTrk::MutableTrackSummaryContainer::component_impl(
@@ -233,10 +244,6 @@ std::any ActsTrk::MutableTrackSummaryContainer::component_impl(
   std::any result = ::component_impl(*m_mutableTrackBackend, key, itrack);
   if (result.has_value()) {
     return result;
-  }
-  using namespace Acts::HashedStringLiteral;
-  if (key == "particleHypothesis"_hash) {
-    return &m_particleHypothesis[itrack];
   }
   for (auto& d : m_decorations) {
     if (d.hash == key) {

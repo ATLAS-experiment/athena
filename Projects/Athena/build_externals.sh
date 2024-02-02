@@ -12,7 +12,7 @@ ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=104
                         -DLCG_VERSION_POSTFIX="c_ATLAS_5"
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v38r0.000/Gaudi-v38r0.000.tar.gz;URL_MD5;af374562de2c29151881f49b4d8b49cf"
-                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v31.2.0.tar.gz;URL_MD5;40cd1dbbecf1fdcb38c302466700c596"
+                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v32.0.2.tar.gz;URL_HASH;SHA256=a817a9b6434ae206c36b1c25df6139ffcde95234944d09e718125e14da7996b8"
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/4.6.0/GeoModel-4.6.0.tar.bz2;URL_MD5;8e83806f2d6f63e58760cd18c489eeaf")
 ATLAS_EXTRA_MAKE_ARGS=()
 

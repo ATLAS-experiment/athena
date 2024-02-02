@@ -102,11 +102,11 @@ namespace ActsTrk {
     finderOpts.bFieldInZ = bField[2];
     finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
 
-    std::function<std::pair<Acts::Vector3, Acts::Vector2>(const xAOD::SpacePoint *sp)>
+    std::function<std::tuple<Acts::Vector3, Acts::Vector2, std::optional<Acts::ActsScalar>>(const xAOD::SpacePoint *sp)>
       create_coordinates = [](const xAOD::SpacePoint *sp) {
       Acts::Vector3 position(sp->x(), sp->y(), sp->z());
       Acts::Vector2 variance(sp->varianceR(), sp->varianceZ());
-      return std::make_pair(position, variance);
+      return std::make_tuple(position, variance, std::nullopt);
     };
     
     // Compute seeds

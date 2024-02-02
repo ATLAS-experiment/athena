@@ -58,6 +58,7 @@ class TrackSummaryContainer {
   TrackSummaryContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr,
                         const DataLink<xAOD::TrackSurfaceAuxContainer>& surfLink = nullptr);
   static const std::set<std::string> staticVariables;
+  static const std::set<Acts::HashedString> staticVariableHashes;
   /**
   * return true if the container has specific decoration
   */
@@ -111,6 +112,8 @@ class TrackSummaryContainer {
     return m_trackBackend.cptr();
   }
 
+  std::vector<Acts::HashedString> dynamicKeys_impl() const;
+
  protected:
 
   DataLink<xAOD::TrackSummaryContainer> m_trackBackend = nullptr;
@@ -119,7 +122,6 @@ class TrackSummaryContainer {
   std::vector<ActsTrk::detail::Decoration> m_decorations;
 
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;
-  std::vector<Acts::ParticleHypothesis> m_particleHypothesis; // TODO move the storage to the backend
 };
 
 class MutableTrackSummaryContainer : public TrackSummaryContainer {
@@ -161,8 +163,8 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
   * copies decorations from other container
   */
   void copyDynamicFrom_impl (ActsTrk::IndexType itrack,
-                             const ActsTrk::TrackSummaryContainer& other,
-                             ActsTrk::IndexType other_itrack);
+                             Acts::HashedString key,
+                             const std::any& src_ptr);
 
 
   /**
