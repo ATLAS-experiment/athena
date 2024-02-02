@@ -370,7 +370,7 @@ def createTrigEgammaFastCaloElectronSelectors(flags, ConfigFilePath=None):
 def createTrigEgammaFastCaloPhotonSelectors(flags, ConfigFilePath=None):
 
     if not ConfigFilePath:
-      ConfigFilePath = flags.Trigger.egamma.ringerVersion
+      ConfigFilePath = flags.Trigger.egamma.photonRingerVersion
 
   
     SelectorNames = collections.OrderedDict({
