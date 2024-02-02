@@ -183,12 +183,9 @@ def TrigSiSpacePointsSeedMakerCfg(flags, **kwargs):
     # elif flags.Tracking.ActiveConfig.isLowPt:
     #     return SiSpacePointsSeedMaker_LowMomentumCfg(flags, **kwargs)
     else:
-        from InDetRecExample.TrackingCommon  import setDefaults
-        kwargs = setDefaults( kwargs,      
-                              maxdImpact = flags.Tracking.ActiveConfig.maxRPhiImpact,
-                              maxZ = flags.Tracking.ActiveConfig.maxZImpact,
-                              minZ =-flags.Tracking.ActiveConfig.maxZImpact,
-                              )
+        kwargs.setdefault("maxdImpact", flags.Tracking.ActiveConfig.maxRPhiImpact)
+        kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
+        kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
                               
         return SiSpacePointsSeedMaker_ATLxkCfg(flags, 
                                                name = 'TrigSiSpacePointsSeedMaker_'+flags.Tracking.ActiveConfig.input_name,
