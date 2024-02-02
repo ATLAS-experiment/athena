@@ -309,7 +309,7 @@ class TopoAlgoDef:
         alg.addgeneric('NumRegisters', 1)
         tm.registerTopoAlgo(alg)
 
-        alg = AlgConf.jXESort( name = 'jXE', inputs = 'jXETobs', outputs = 'jXE' )
+        alg = AlgConf.jXESort( name = 'jXEs', inputs = 'jXETobs', outputs = 'jXEs' )
         alg.addgeneric('InputWidth', HW.jMetInputWidth)
         alg.addgeneric('OutputWidth', HW.metOutputWidth)
         tm.registerTopoAlgo(alg)
@@ -529,8 +529,8 @@ class TopoAlgoDef:
                 alg.addvariable('DeltaPhiMin', d.minDphi*_phi_conversion)
                 alg.addvariable('DeltaPhiMax', d.maxDphi*_phi_conversion)
             tm.registerTopoAlgo(alg)
-            
 
+            
         # (ATR-8194) L1Topo HT Trigger
         algoList = [
             {"minHT": 150, "otype" : "jJ", "ocut" : 50, "olist" : "s",   "nleading" : 5, "inputwidth": HW.jJetOutputWidthSort, "oeta" : 32}, #HT150-jJ50s5pETA32
@@ -1525,6 +1525,22 @@ class TopoAlgoDef:
             alg.addvariable('MinDeltaEta', d.minDeta*_eta_conversion, 0)
             alg.addvariable('MaxDeltaEta', d.maxDeta*_eta_conversion, 0)
             tm.registerTopoAlgo(alg)
+
+        #LLPDPHI - ATR-28563
+        toponame = "0DPHI15-jXE27delay-jJ27s"
+        alg = AlgConf.DeltaPhiIncl2( name = toponame, inputs = ['jXEs', 'jJs'], outputs = [ toponame ])
+        alg.addgeneric('NumResultBits', 1)            
+        alg.addgeneric('Delay1', 1)
+        alg.addgeneric('Delay2', 0)
+        alg.addgeneric('InputWidth1', HW.metOutputWidth)
+        alg.addgeneric('InputWidth2', HW.jJetOutputWidthSort)
+        alg.addgeneric('MaxTob1', 1)
+        alg.addgeneric('MaxTob2', 6)
+        alg.addvariable('MinET1', 27*_et_conversion)
+        alg.addvariable('MinET2', 27*_et_conversion)
+        alg.addvariable('MinDeltaPhi', 0*_phi_conversion)
+        alg.addvariable('MaxDeltaPhi', 15*_phi_conversion)
+        tm.registerTopoAlgo(alg)
 
         # DISAMB 3 lists with DR cut to 2nd and 3rd lists
         algolist=[
