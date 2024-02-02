@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_DIGITIZATION_IMDT_DIGITIZATIONTOOL_H
@@ -23,7 +23,10 @@ class MdtDigiToolInput;
 class IMDT_DigitizationTool : virtual public IAlgTool {
 public:
     virtual ~IMDT_DigitizationTool() = default;
-    virtual MdtDigiToolOutput digitize(const MdtDigiToolInput& input, CLHEP::HepRandomEngine* rndmEngine) = 0;
+    
+    virtual MdtDigiToolOutput digitize(const EventContext& ctx,
+                                       const MdtDigiToolInput& input, 
+                                       CLHEP::HepRandomEngine* rndmEngine) const = 0;
 
     DeclareInterfaceID(IMDT_DigitizationTool, 1, 0);
 };
