@@ -21,6 +21,8 @@
 #include "VP1Utils/VP1DetInfo.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
 
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+
 #include <Inventor/nodes/SoTransform.h>
 #include <Inventor/nodes/SoGroup.h>
 #include <Inventor/nodes/SoMaterial.h>
@@ -47,14 +49,23 @@ VP1RawDataHandle_MDT_RDO::~VP1RawDataHandle_MDT_RDO()
 QStringList VP1RawDataHandle_MDT_RDO::clicked(bool verbose) const
 {
   static const MdtIdHelper * idhelper = VP1DetInfo::mdtIDHelper();
+  const MuonGM::MdtReadoutElement * elem = element();
 
-  QStringList l;
-  l << " ===> MDT Raw Data";
-  l << "   Data word: "+unsignedToHex(m_data->getWord());
+  QStringList ll;
+  ll << " ===> MDT Digit data";
+  ll << "   is a valid digit: "+ m_data->is_valid(idhelper);
+  ll << "   adc: " + QString::number(m_data->adc());
+  ll << "   tdc: " + QString::number(m_data->tdc());
   if (verbose) {
     if (idhelper) {
       //Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
       Identifier id(m_data->identify());
+
+      ll << "Is Barrel: " << QString::number(elem->barrel());
+         /// Returns whether the chamber is in the endcap
+      ll << "Is Endcap: " << QString::number(elem->endcap());
+      // ll << "Tube position :" << elem->tubePos(id).position[Amg::x];
+      std::cout << "tubePos x: " << elem->tubePos(id)[Amg::x] << std::endl;
 
       // int barrel_ec = idhelper->barrel_ec(id);
       // bool barrel(barrel_ec==1||barrel_ec==-1);
@@ -68,7 +79,7 @@ QStringList VP1RawDataHandle_MDT_RDO::clicked(bool verbose) const
     // l << "  Time over Threshold (Gaudi::Units::ns): "+QString::number(m_data->timeOverThreshold());
     
   }
-  return l;
+  return ll;
 }
 
 //____________________________________________________________________
@@ -78,14 +89,15 @@ SoNode * VP1RawDataHandle_MDT_RDO::buildShape()
   // double strawlength = elem ? elem->strawLength() : 200.0;
 
   SoNode * node = common()->nodeManager()->getShapeNode_DriftTube(0.5,0.0/*0 radius for line*/);
-  if (highThreshold() && static_cast<VP1RawDataColl_MDT_RDO*>(coll())->useSpecialHTMat()) {
-    SoGroup * gr = new SoGroup;
-    gr->addChild(coll()->common()->controller()->trtHTMaterial());
-    gr->addChild(node);
-    return gr;
-  } else {
+  // if (highThreshold() && static_cast<VP1RawDataColl_MDT_RDO*>(coll())->useSpecialHTMat()) {
+  //   SoGroup * gr = new SoGroup;
+  //   gr->addChild(coll()->common()->controller()->trtHTMaterial());
+  //   gr->addChild(node);
+  //   return gr;
+  // } else {
+  //   return node;
+  // }
     return node;
-  }
 }
 
 //____________________________________________________________________
@@ -94,7 +106,8 @@ SoTransform * VP1RawDataHandle_MDT_RDO::buildTransform()
   const MuonGM::MdtReadoutElement * elem = element();
   if (!elem)
     return new SoTransform;//fixme
-  return VP1LinAlgUtils::toSoTransform(elem->getAbsoluteTransform());
+  Identifier id(m_data->identify());
+  return VP1LinAlgUtils::toSoTransform(elem->localToGlobalTransf(id));
 }
 
 // //____________________________________________________________________
@@ -110,10 +123,17 @@ SoTransform * VP1RawDataHandle_MDT_RDO::buildTransform()
 //____________________________________________________________________
 const MuonGM::MdtReadoutElement * VP1RawDataHandle_MDT_RDO::element() const
 {
-  const Muon::MuonDetectorManager * detmgr = VP1DetInfo::muonDetMgr();
+  
+  const MuonGM::MuonDetectorManager * detmgr = VP1DetInfo::muonDetMgr();
+
+//   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> detMgrKey{"MuonDetectorManager"};
+// detMgrKey.initialize().ignore();
+// SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{detMgrKey};
+
+
   if (!detmgr)
     return 0;
-  return detmgr->getElement(m_data->identify());
+  return detmgr->getMdtReadoutElement(m_data->identify());
 }
 
 // //____________________________________________________________________

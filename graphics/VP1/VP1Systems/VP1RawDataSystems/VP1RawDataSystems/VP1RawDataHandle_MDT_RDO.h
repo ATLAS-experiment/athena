@@ -19,6 +19,8 @@
 
 #include "VP1RawDataSystems/VP1RawDataHandleBase.h"
 
+#include "MuonReadoutGeometry/MdtReadoutElement.h"
+
 class MdtDigit;
 
 namespace InDetDD { class TRT_BaseElement; }
@@ -39,7 +41,7 @@ protected:
   SoNode * buildShape();
   SoTransform * buildTransform();
   const MdtDigit* m_data;
-  const Muon::MuonDetectorManager * element() const;//null in case of errors
+  const MuonGM::MdtReadoutElement * element() const;//null in case of errors
   // int strawID() const;//-1 in case of errors
 
 };
