@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -372,10 +372,15 @@ namespace Trk
  		    
  		    
  		   xAOD::Vertex* fittedVertex = fit( measuredPerigees, constraint ); 
- 		 
+ 		   // fit() may return nullptr, need to protect 
+		   if (fittedVertex == nullptr){
+				ATH_MSG_WARNING("Failed fit, returning null vertex"); 
+				return nullptr; 
+		   }
  		   //assigning the input tracks to the fitted vertex through VxTrackAtVertices
  		   { 
  		    if( fittedVertex->vxTrackAtVertexAvailable() ) // TODO: I don't think vxTrackAtVertexAvailable() does the same thing as a null pointer check!
+																							// Regretful Hindsight 8 years later: No, it doesn't! 
  		    { 
  		     if(!fittedVertex->vxTrackAtVertex().empty()) 
  		     { 
