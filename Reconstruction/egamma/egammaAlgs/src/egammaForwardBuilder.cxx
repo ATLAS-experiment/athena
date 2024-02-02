@@ -273,9 +273,6 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
 
 void egammaForwardBuilder::cookieCut(xAOD::CaloCluster& cluster) const
 {
-  std::vector<const CaloCell*> toRemove;
-  toRemove.reserve(cluster.size());
-
   if (!cluster.hasSampling(CaloSampling::EME2)) {
     return;
   }
@@ -283,24 +280,19 @@ void egammaForwardBuilder::cookieCut(xAOD::CaloCluster& cluster) const
   CookieCutterHelpers::CentralPosition cp = 
     CookieCutterHelpers::findCentralPositionEM2({&cluster});
 
-  auto cell_itr = cluster.cell_cbegin();
-  auto cell_end = cluster.cell_cend();
-  for (; cell_itr != cell_end; ++cell_itr) {
-    const CaloCell* cell = *cell_itr;
-    if (!cell) {
-      continue;
-    }
-    
+  CaloClusterCellLink* cell_links = cluster.getOwnCellLinks();
+  CaloClusterCellLink::iterator cell_itr = cell_links->begin();
+   
+  while (cell_itr != cell_links->end()) {
     if (
-      std::abs(cp.etaEC - cell->eta()) > 0.375 ||
-      std::abs(cp.phiEC - cell->phi()) > 0.375
+      std::abs(cp.etaEC - cell_itr->eta()) > 0.375 ||
+      std::abs(cp.phiEC - cell_itr->phi()) > 0.375
     ) {
-      toRemove.push_back(cell);
+      cell_itr = cell_links->removeCell(cell_itr);
     }
-  }
-
-  for (const CaloCell* cell : toRemove) {
-    cluster.removeCell(cell);
+    else {
+      ++cell_itr;
+    }
   }
 }
 
