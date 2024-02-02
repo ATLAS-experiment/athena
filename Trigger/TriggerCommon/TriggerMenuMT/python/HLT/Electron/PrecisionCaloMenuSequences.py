@@ -41,7 +41,7 @@ def precisionCaloMenuSequenceCfg(flags, name=None, ion=False, is_probe_leg=False
         selAcc.merge(egammaFSCaloRecoSequenceCfg(flags))
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+'_probe'+variant if is_probe_leg else InViewRoIs+variant)
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+hiInfo+'_probe'+variant if is_probe_leg else InViewRoIs+hiInfo+variant)
 
     selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
 
