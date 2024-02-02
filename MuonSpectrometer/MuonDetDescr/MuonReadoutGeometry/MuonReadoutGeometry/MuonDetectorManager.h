@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonDetectorManager_H
@@ -18,8 +18,6 @@
 #include "MuonAlignmentData/CorrContainer.h"
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonReadoutGeometry/GenericCSCCache.h"
-#include "MuonReadoutGeometry/GenericMDTCache.h"
 #include "MuonReadoutGeometry/GenericRPCCache.h"
 #include "MuonReadoutGeometry/GenericTGCCache.h"
 
@@ -124,12 +122,8 @@ namespace MuonGM {
         inline const MmIdHelper* mmIdHelper() const;
 
         // Generic Technology descriptors
-        void setGenericMdtDescriptor(const GenericMDTCache& mc);
-        inline const GenericMDTCache* getGenericMdtDescriptor() const;
         void setGenericRpcDescriptor(const GenericRPCCache& rc);
         inline const GenericRPCCache* getGenericRpcDescriptor() const;
-        void setGenericCscDescriptor(const GenericCSCCache& cc);
-        inline const GenericCSCCache* getGenericCscDescriptor() const;
         void setGenericTgcDescriptor(const GenericTGCCache& tc);
         inline const GenericTGCCache* getGenericTgcDescriptor() const;
 
@@ -275,8 +269,6 @@ namespace MuonGM {
 
         std::vector<PVLink> m_envelope;  // Tree-top...
 
-        GenericCSCCache m_genericCSC;
-        GenericMDTCache m_genericMDT;
         GenericRPCCache m_genericRPC;
         GenericTGCCache m_genericTGC;
 
@@ -349,9 +341,7 @@ namespace MuonGM {
     }
 
     const GenericRPCCache* MuonDetectorManager::getGenericRpcDescriptor() const { return &m_genericRPC; }
-    const GenericMDTCache* MuonDetectorManager::getGenericMdtDescriptor() const { return &m_genericMDT; }
 
-    const GenericCSCCache* MuonDetectorManager::getGenericCscDescriptor() const { return &m_genericCSC; }
     const GenericTGCCache* MuonDetectorManager::getGenericTgcDescriptor() const { return &m_genericTGC; }
 
     int MuonDetectorManager::MinimalGeoFlag() const { return m_minimalgeo; }

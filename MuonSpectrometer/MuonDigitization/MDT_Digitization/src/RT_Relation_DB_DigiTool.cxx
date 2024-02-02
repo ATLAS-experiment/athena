@@ -8,6 +8,7 @@
 
 #include "MDT_Digitization/MdtDigiToolInput.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonReadoutGeometry/MdtReadoutElement.h"
 
 using namespace MuonGM;
 
@@ -18,31 +19,37 @@ RT_Relation_DB_DigiTool::RT_Relation_DB_DigiTool(const std::string &type, const 
 
 StatusCode RT_Relation_DB_DigiTool::initialize() {
     ATH_MSG_INFO("Initializing RT_Relation_DB_DigiTool");
-
-    const MuonGM::MuonDetectorManager* detMgr{nullptr};
-    ATH_CHECK(detStore()->retrieve(detMgr));    
-    m_maxRadius = detMgr->getGenericMdtDescriptor()->innerRadius;
     ATH_CHECK(m_calibDbKey.initialize());
+    ATH_CHECK(m_detMgrKey.initialize());
     return StatusCode::SUCCESS;
 }
 
-MdtDigiToolOutput RT_Relation_DB_DigiTool::digitize(const MdtDigiToolInput &input, CLHEP::HepRandomEngine *rndmEngine) {
+MdtDigiToolOutput RT_Relation_DB_DigiTool::digitize(const EventContext& ctx,
+                                                    const MdtDigiToolInput &input, 
+                                                    CLHEP::HepRandomEngine *rndmEngine) const {
     ATH_MSG_DEBUG("Digitizing input ");
-
-    if (isTubeEfficient(input.radius(), rndmEngine)) {
-        Identifier DigitId = input.getHitID();
-        MdtDigiToolOutput output(true, getDriftTime(input.radius(), DigitId, rndmEngine), getAdcResponse(input.radius(), rndmEngine));
-
-        return output;
-    }
-    MdtDigiToolOutput output(false, 0., 0.);
-
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_detMgrKey, ctx};
+    const Identifier DigitId = input.getHitID();
+    const double maxTubeRadius{detMgr->getMdtReadoutElement(DigitId)->innerTubeRadius()};
+    const double radius{input.radius()};
+    const double eff = 1.0 - (m_effRadius - radius) / (m_effRadius - maxTubeRadius);
+    if ((radius < 0) || (radius > maxTubeRadius) || 
+        (radius >=m_effRadius  &&  CLHEP::RandFlat::shoot(rndmEngine, 0.0, 1.0) > eff)) {
+        return MdtDigiToolOutput{false, 0., 0.};
+    } 
+         
+    MdtDigiToolOutput output(true, getDriftTime(ctx, radius, maxTubeRadius, DigitId, rndmEngine), 
+                                   getAdcResponse(radius, rndmEngine));
     return output;
 }
 
-double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP::HepRandomEngine *rndmEngine) const {
+double RT_Relation_DB_DigiTool::getDriftTime(const EventContext& ctx, 
+                                             double measRadius, 
+                                             double innerTubeRadius, 
+                                             const Identifier& DigitId, 
+                                             CLHEP::HepRandomEngine *rndmEngine) const {
     // Get RT relation from DB
-    SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibConstants{m_calibDbKey};
+    SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibConstants{m_calibDbKey, ctx};
 
     if (!calibConstants.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve calib constants "<<m_calibDbKey.fullKey());
@@ -62,7 +69,7 @@ double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP
 
         // get inverse rt and calculate time resolution
         const MuonCalib::TrRelation *trRelation = data->tr();
-        time = trRelation->tFromR(std::abs(r), outOfBound);
+        time = trRelation->tFromR(std::abs(measRadius), outOfBound);
 
         if (time < 0.0) {
             time = 0.0;
@@ -72,11 +79,11 @@ double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP
 
         double radiusWidth = rtResolution->resolution(time);
         double velocity = rtRelation->driftvelocity(time);
-        // std::cout << "time = " << time << "  drift radius = " << r << "  outOfBound = "<< outOfBound << "  velocity = " << velocity <<
+        // std::cout << "time = " << time << "  drift radius = " << measRadius << "  outOfBound = "<< outOfBound << "  velocity = " << velocity <<
         // std::endl;
 
         if (velocity <= 0) {
-            ATH_MSG_WARNING("Drift velocity <=0 ! Time will not be smeared with resolution but will take the default r-t value");
+            ATH_MSG_WARNING("Drift velocity <=0 ! Time will not be smeared with resolution but will take the default measRadius-t value");
             return time;
         }
         double timeWidth = radiusWidth / velocity;
@@ -91,12 +98,11 @@ double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP
         bool outOfBound2 = false;
         if (tmin < 0.0) tmin = 0.0;
         if (tmax > tUp)
-            tmax =
-                trRelation->tFromR(m_maxRadius, outOfBound2);  // tmax = tUp+tLow; //means: tmax  = (tmax of rt relation) + (one binwidth )
+            tmax = trRelation->tFromR(innerTubeRadius, outOfBound2);  // tmax = tUp+tLow; //means: tmax  = (tmax of rt relation) + (one binwidth )
 
         double gaussian;
         constexpr double sqrt_one_over_two_pi = 0.39894228;
-        double p1r = 0.8480 * std::exp(-0.5879 * r);
+        double p1r = 0.8480 * std::exp(-0.5879 * measRadius);
         int flag = 0;
         int cutoff = 0;
 
