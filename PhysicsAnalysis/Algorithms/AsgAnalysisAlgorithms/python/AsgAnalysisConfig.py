@@ -182,7 +182,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         super (GeneratorAnalysisBlock, self).__init__ ('Generator')
         self.addOption ('saveCutBookkeepers', True, type=bool)
         self.addOption ('runNumber', None, type=int)
-        self.addOption ('cutBookkeepersSystematics', True, type=bool)
+        self.addOption ('cutBookkeepersSystematics', None, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -200,7 +200,10 @@ class GeneratorAnalysisBlock (ConfigBlock):
         if self.saveCutBookkeepers:
           alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
           alg.runNumber = self.runNumber
-          alg.enableSystematics = self.cutBookkeepersSystematics
+          if self.cutBookkeepersSystematics:
+              alg.enableSystematics = self.cutBookkeepersSystematics
+          else:
+              alg.enableSystematics = not config.noSystematics()
           config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
 
         # Set up the weights algorithm:
