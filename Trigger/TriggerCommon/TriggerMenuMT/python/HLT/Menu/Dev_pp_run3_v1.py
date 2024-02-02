@@ -411,26 +411,6 @@ def getDevSignatures():
         ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1SC111-CJ15', groups=DevGroup+MultiJetGroup+LegacyTopoGroup, l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1jLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
         
-        # Test chain for X to bb tagging
-        ChainProp(name='HLT_j260_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j360_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j420_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j460_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-
-        ChainProp(name='HLT_j260_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j360_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j420_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j460_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-
-        ChainProp(name='HLT_j260_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j360_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j420_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j460_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-
-        ChainProp(name='HLT_j260_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j360_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j420_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
-        ChainProp(name='HLT_j460_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleJetGroup, l1SeedThresholds=['FSNOSEED']),
 
 #        ChainProp(name='HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1gLJ140', groups=DevGroup+MultiJetGroup, l1SeedThresholds=['FSNOSEED']),
 
@@ -465,6 +445,27 @@ def getDevSignatures():
         ChainProp(name='HLT_j360_0eta290_bdl1d60_pf_ftf_L1J100', l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup + DevGroup),
         ChainProp(name='HLT_j360_0eta290_bdl1d70_pf_ftf_L1J100', l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup + DevGroup),
         ChainProp(name='HLT_j360_0eta290_bdl1d85_pf_ftf_L1J100', l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup + DevGroup),
+
+        # Test chain for X to bb tagging
+        ChainProp(name='HLT_j260_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j360_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j420_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j460_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+
+        ChainProp(name='HLT_j260_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j360_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j420_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j460_a10sd_cssk_70bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+
+        ChainProp(name='HLT_j260_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j360_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j420_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j460_a10sd_cssk_80bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+
+        ChainProp(name='HLT_j260_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J75', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j360_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j420_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_j460_a10sd_cssk_90bgntwox_pf_jes_ftf_L1J100', groups=DevGroup+SingleBjetGroup, l1SeedThresholds=['FSNOSEED']),
 
         # dl1d test chains
         ChainProp(name="HLT_j275_0eta290_020jvt_bdl1d60_pf_ftf_L1J100", l1SeedThresholds=['FSNOSEED'], groups=DevGroup+SingleBjetGroup),
