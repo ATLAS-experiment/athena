@@ -20,6 +20,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteHandleKey.h"
+#include "AthContainers/AuxElement.h"
 
 #include "JetInterface/IJetProvider.h"
 #include "AsgTools/AsgTool.h"
@@ -47,9 +48,11 @@ class JetClusterer
 public:
 
   // Can't use "using ctor" because of incompatiblity with pyroot in AnalysisBase
-  JetClusterer(const std::string &name): AsgTool(name){}
-  
-  
+  JetClusterer(const std::string &name)
+  : AsgTool(name),
+    m_jetRankAccessor("jetRank")
+  {}
+
   StatusCode initialize() override;
 
   /// Return the final jets with their aux store.
@@ -77,6 +80,7 @@ protected:
   /// used to build the key under which the final PJ will be stored in evtStore() 
   SG::WriteHandleKey<PseudoJetVector> m_finalPseudoJets {this, "FinalPseudoJets_DONOTSET", "", "output pseudojets -- autoconfigured name"};
   SG::WriteHandleKey<jet::ClusterSequence> m_clusterSequence {this, "ClusterSequence_DONOTSET", "", "output pseudojets -- autoconfigured name"};
+  Gaudi::Property<std::string> m_jetRank {this, "jetRankName", "jetRank", "name for accessor for jet rank"};
   
   // Job options.
   Gaudi::Property<std::string>  m_jetalg {this, "JetAlgorithm", "AntiKt", "alg type : AntiKt, Kt, CA..."};
@@ -96,7 +100,9 @@ protected:
   Gaudi::Property<float> m_massscale     {this, "VariableRMassScale", -1.0, "Variable-R mass scale" };
   bool m_isVariableR;  
   bool isVariableR() const { return m_isVariableR;}
-  
+
+  SG::AuxElement::Accessor<int> m_jetRankAccessor;
+
 };
 
 
