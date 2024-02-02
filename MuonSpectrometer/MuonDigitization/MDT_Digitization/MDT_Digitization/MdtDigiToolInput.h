@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_DIGITIZATION_MDTDIGITOOLINPUT_H
@@ -25,14 +25,6 @@ Class to store input needed for the MDT_Digitization tools:
 
 class MdtDigiToolInput {
 public:
- 
-    MdtDigiToolInput(double radius, double posx, double field, double temp, double electrcharge, double gammafact) :
-        m_radius(radius), 
-        m_xpos(posx), 
-        m_field(field), 
-        m_temperature(temp), 
-        m_electriccharge(electrcharge), 
-        m_gamma(gammafact) {}
 
     MdtDigiToolInput(double radius, double posx, double field, double temp, double electrcharge, double gammafact, Identifier hitID) :
         m_radius(radius),

@@ -23,6 +23,8 @@ Adopted from RT_Relation_DigiTool
 #include "MdtCalibData/MdtRtRelation.h"
 #include "MdtCalibData/TrRelation.h"
 #include "MdtCalibData/MdtCalibDataContainer.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 namespace MuonGM {
     class MuonDetectorManager;
@@ -35,28 +37,26 @@ public:
 
     // Methods
     virtual StatusCode initialize() override;
-    virtual MdtDigiToolOutput digitize(const MdtDigiToolInput& input, CLHEP::HepRandomEngine* rndmEngine) override final;
+    virtual MdtDigiToolOutput digitize(const EventContext& ctx,
+                                       const MdtDigiToolInput& input, 
+                                       CLHEP::HepRandomEngine* rndmEngine) const override final;
 
 private:
     // Methods
-    double getDriftTime(double radius, Identifier DigitId, CLHEP::HepRandomEngine* rndmEngine) const;
+    double getDriftTime(const EventContext& ctx,
+                        double measRadius,
+                        double innerTubeRadius, 
+                        const Identifier& DigitId, 
+                        CLHEP::HepRandomEngine* rndmEngine) const;
+
     static double getAdcResponse(double radius, CLHEP::HepRandomEngine* rndmEngine) ;
-    bool isTubeEfficient(double radius, CLHEP::HepRandomEngine* rndmEngine) const;
-
-    // Data members
-    double m_maxRadius{0.};
-
+ 
     SG::ReadCondHandleKey<MuonCalib::MdtCalibDataContainer> m_calibDbKey{this, "CalibDataKey", "MdtCalibConstants",
                                                                        "Conditions object containing the calibrations"};
+    
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{this, "DetMgr", "MuonDetectorManager", ""};
+
     Gaudi::Property<double> m_effRadius{this, "EffectiveRadius", 14.4275};
 };
 
-inline bool RT_Relation_DB_DigiTool::isTubeEfficient(double radius, CLHEP::HepRandomEngine* rndmEngine) const {
-    if ((radius < 0) || (radius > m_maxRadius)) return false;
-    if (radius < m_effRadius) return true;
-    double eff = 1.0 + (radius - m_effRadius) / (m_effRadius - m_maxRadius);
-    if (CLHEP::RandFlat::shoot(rndmEngine, 0.0, 1.0) <= eff) return true;
-
-    return false;
-}
 #endif

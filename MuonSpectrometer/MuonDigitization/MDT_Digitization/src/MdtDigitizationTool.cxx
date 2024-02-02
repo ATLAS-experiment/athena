@@ -420,35 +420,21 @@ bool MdtDigitizationTool::handleMDTSimhit(const EventContext& ctx,
     driftRadius *= trackingSign;
 
     //+Implementation for RT_Relation_DB_Tool
-    MdtDigiToolInput digiInput(std::abs(driftRadius), distRO, 0., 0., 0., 0.);
+    MdtDigiToolInput digiInput(std::abs(driftRadius), distRO, 0., 0., 0., 0., DigitId);
     double qcharge = 1.;
     double qgamma = -9999.;
 
-    if (m_DoQballCharge == true) {
+    if (m_DoQballCharge) {
         // chargeCalculator returns the value of electric charge for Qball particle.
         // particleGamma returns the value of gamma for Qball particle.
         qgamma = particleGamma(hit, phit.eventId());
         qcharge = chargeCalculator(hit, phit.eventId());
 
-        MdtDigiToolInput digiInput1(std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma);
-        digiInput = digiInput1;
-
-        if (m_digiTool.name() == "RT_Relation_DB_DigiTool") {
-            MdtDigiToolInput digiInput2(std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma, DigitId);
-            digiInput = digiInput2;
-        }
-    } else {
-        MdtDigiToolInput digiInput1(std::abs(driftRadius), distRO, 0., 0., 0., 0.);
-        digiInput = digiInput1;
-
-        if (m_digiTool.name() == "RT_Relation_DB_DigiTool") {
-            MdtDigiToolInput digiInput2(std::abs(driftRadius), distRO, 0., 0., 0., 0., DigitId);
-            digiInput = digiInput2;
-        }
-    }
+        digiInput = MdtDigiToolInput{std::abs(driftRadius), distRO, 0., 0., qcharge, qgamma, DigitId};
+    } 
 
     // digitize input
-    MdtDigiToolOutput digiOutput(m_digiTool->digitize(digiInput, toolRndmEngine));
+    MdtDigiToolOutput digiOutput(m_digiTool->digitize(ctx, digiInput, toolRndmEngine));
     //-Implementation for RT_Relation_DB_Tool
 
     // simulate tube response, check if tube fired

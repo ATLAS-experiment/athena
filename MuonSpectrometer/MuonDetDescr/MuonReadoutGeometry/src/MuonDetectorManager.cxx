@@ -802,14 +802,6 @@ namespace MuonGM {
             m_genericTGC.tck[i] = tc.tck[i];
         }
     }
-    void MuonDetectorManager::setGenericCscDescriptor(const GenericCSCCache& cc) {
-        m_genericCSC.dummy1 = cc.dummy1;
-        m_genericCSC.dummy2 = cc.dummy2;
-    }
-    void MuonDetectorManager::setGenericMdtDescriptor(const GenericMDTCache& mc) {
-        m_genericMDT.innerRadius = mc.innerRadius;
-        m_genericMDT.outerRadius = mc.outerRadius;
-    }
     void MuonDetectorManager::setGenericRpcDescriptor(const GenericRPCCache& rc) {
         m_genericRPC.stripSeparation = rc.stripSeparation;
         m_genericRPC.stripPanelThickness = rc.stripPanelThickness;

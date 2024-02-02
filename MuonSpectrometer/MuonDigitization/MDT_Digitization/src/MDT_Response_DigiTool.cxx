@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDT_Digitization/MDT_Response_DigiTool.h"
@@ -7,38 +7,47 @@
 #include <iostream>
 
 #include "MDT_Digitization/MdtDigiToolInput.h"
-#include "MuonIdHelpers/MdtIdHelper.h"
-#include "MuonReadoutGeometry/MuonDetectorManager.h"
-
+#include "MuonReadoutGeometry/MdtReadoutElement.h"
+#include "StoreGate/ReadCondHandle.h"
 using namespace MuonGM;
 
 MDT_Response_DigiTool::MDT_Response_DigiTool(const std::string& type, const std::string& name, const IInterface* parent) :
-    AthAlgTool(type, name, parent), m_idHelper(nullptr) {
+    AthAlgTool(type, name, parent) {
     declareInterface<IMDT_DigitizationTool>(this);
-
 }
 
-MdtDigiToolOutput MDT_Response_DigiTool::digitize(const MdtDigiToolInput& input, CLHEP::HepRandomEngine* rndmEngine) {
-    m_tube.SetSegment(input.radius(), input.positionAlongWire());
+MdtDigiToolOutput MDT_Response_DigiTool::digitize(const EventContext& ctx,
+                                                  const MdtDigiToolInput& input, 
+                                                  CLHEP::HepRandomEngine* rndmEngine) const {
+    
+    SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgr{m_detMgrKey, ctx};
+    MDT_Response responseTube{};
+    // initialize MDT_Response
+    responseTube.SetTubeRadius(detMgr->getMdtReadoutElement(input.getHitID())->innerTubeRadius());
+    responseTube.SetClusterDensity(m_clusterDensity);
+    responseTube.SetAttLength(m_attenuationLength);
+    responseTube.SetTriggerElectron(m_threshold);
+
+    responseTube.SetSegment(input.radius(), input.positionAlongWire());
     ATH_MSG_DEBUG("Digitizing input ");
     if (m_DoQballGamma) {
         double ParticleCharge = input.electriccharge();
         double ParticleGamma = input.gamma();
         if (ParticleGamma > 0.) {
-            if (m_tube.GetSignal(ParticleCharge, ParticleGamma, rndmEngine)) {
-                MdtDigiToolOutput output(true, m_tube.DriftTime(), m_tube.AdcResponse());
+            if (responseTube.GetSignal(ParticleCharge, ParticleGamma, rndmEngine)) {
+                MdtDigiToolOutput output(true, responseTube.DriftTime(), responseTube.AdcResponse());
                 return output;
             }
         } else {
-            if (m_tube.GetSignal(rndmEngine)) {
-                MdtDigiToolOutput output(true, m_tube.DriftTime(), m_tube.AdcResponse());
+            if (responseTube.GetSignal(rndmEngine)) {
+                MdtDigiToolOutput output(true, responseTube.DriftTime(), responseTube.AdcResponse());
                 return output;
             }
         }
 
     } else {
-        if (m_tube.GetSignal(rndmEngine)) {
-            MdtDigiToolOutput output(true, m_tube.DriftTime(), m_tube.AdcResponse());
+        if (responseTube.GetSignal(rndmEngine)) {
+            MdtDigiToolOutput output(true, responseTube.DriftTime(), responseTube.AdcResponse());
             return output;
         }
     }
@@ -47,32 +56,7 @@ MdtDigiToolOutput MDT_Response_DigiTool::digitize(const MdtDigiToolInput& input,
 }
 
 StatusCode MDT_Response_DigiTool::initialize() {
-    const MuonGM::MuonDetectorManager* muDetMgr = nullptr;
-    if (detStore()->contains<MuonDetectorManager>("Muon")) {
-        ATH_CHECK(detStore()->retrieve(muDetMgr));
-        ATH_MSG_DEBUG("MuonGeoModelDetectorManager retrieved from StoreGate.");
-        // initialize the MdtIdHelper
-        m_idHelper = muDetMgr->mdtIdHelper();
-        ATH_MSG_DEBUG("MdtIdHelper: " << m_idHelper);
-        if (!m_idHelper) {
-            ATH_MSG_ERROR("MdtIdHelper is nullptr");
-            return StatusCode::FAILURE;
-        }
-    }
-
-    initializeTube(muDetMgr);
-
+    ATH_CHECK(m_detMgrKey.initialize());
     return StatusCode::SUCCESS;
 }
 
-bool MDT_Response_DigiTool::initializeTube(const MuonGM::MuonDetectorManager* detMgr) {
-    // initialize MDT_Response
-    double innerR(detMgr->getGenericMdtDescriptor()->innerRadius);
-
-    ATH_MSG_DEBUG("INITIALIZED Inner tube radius to " << innerR);
-    m_tube.SetTubeRadius(innerR);
-    m_tube.SetClusterDensity(m_clusterDensity);
-    m_tube.SetAttLength(m_attenuationLength);
-    m_tube.SetTriggerElectron(m_threshold);
-    return true;
-}
