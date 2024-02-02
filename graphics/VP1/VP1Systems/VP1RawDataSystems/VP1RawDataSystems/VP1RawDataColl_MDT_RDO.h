@@ -22,9 +22,13 @@
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
+
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonDigitContainer/MdtDigitContainer.h"
+#include "MuonRDO/MdtCsmContainer.h"
+
 class VP1RawDataColl_MDT_RDO : public VP1RawDataCollBase {
+
 
   Q_OBJECT
 
