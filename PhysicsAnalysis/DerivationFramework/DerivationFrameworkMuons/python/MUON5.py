@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_MUON5.py
@@ -67,9 +67,15 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     
     MUON5SkimmingTools = []
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import xAODStringSkimmingToolCfg
+    # if we are running on upgrade MC (no trigger), we disable the TDT inside the skimming tool. 
+    # The TDT is not actually used as we skim only on offline objects. 
+    SkimArgs={}
+    if  not (ConfigFlags.Reco.EnableTrigger or ConfigFlags.Trigger.triggerConfig == 'INFILE'): 
+        SkimArgs["TrigDecisionTool"] = ""
     MUON5SkimmingTool1 = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(ConfigFlags,
                                                                           name       = "MUON5SkimmingTool1",
-                                                                          expression = lepSelection))
+                                                                          expression = lepSelection,
+                                                                          **SkimArgs))
     MUON5SkimmingTools.append(MUON5SkimmingTool1) 
 
     # --------
@@ -94,10 +100,15 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     from DerivationFrameworkCalo.CaloCellDFGetterConfig import thinCaloCellsForDFCfg
     from DerivationFrameworkMuons.MuonsToolsConfig import AnalysisMuonThinningAlgCfg
     
+    # protect against missing forward tracks in Upgrade 
+    fwdTracks = "InDetForwardTrackParticles"
+    if fwdTracks not in ConfigFlags.Input.Collections:
+        fwdTracks = "" 
     acc.merge(AnalysisMuonThinningAlgCfg(ConfigFlags,
                                          MuonPassFlags = muonThinFlags,
                                          TrkPassFlags = trkThinFlags,
-                                         StreamName = kwargs['StreamName']))
+                                         StreamName = kwargs['StreamName'], 
+                                         IdTrkFwdThinning=fwdTracks))
     
 
     # keep topoclusters around muons
