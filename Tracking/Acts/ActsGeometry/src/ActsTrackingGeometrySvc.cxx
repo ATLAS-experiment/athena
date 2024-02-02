@@ -197,7 +197,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
         cvbConfig.layerEnvelopeR = {3_mm, 3_mm};
         cvbConfig.layerEnvelopeZ = 1_mm;
         cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
-        cvbConfig.volumeSignature = 0;
         cvbConfig.volumeName = "Pixel";
         cvbConfig.layerBuilder = lb;
         cvbConfig.buildToRadiusZero = !m_buildBeamPipe;
@@ -224,7 +223,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
             cvbConfig.layerEnvelopeZ = 1_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
-            cvbConfig.volumeSignature = 0;
             cvbConfig.volumeName = "ITkPixelInner";
             cvbConfig.layerBuilder = lb;
             cvbConfig.buildToRadiusZero = !m_buildBeamPipe;
@@ -249,7 +247,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
             cvbConfig.layerEnvelopeZ = 1_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
-            cvbConfig.volumeSignature = 0;
             cvbConfig.volumeName = "ITkPixelOuter";
             cvbConfig.layerBuilder = lb;
             cvbConfig.buildToRadiusZero = false;
@@ -278,7 +275,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
             cvbConfig.layerEnvelopeZ = 1_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
-            cvbConfig.volumeSignature = 0;
             cvbConfig.volumeName = "ITkStrip";
             cvbConfig.layerBuilder = lb;
             cvbConfig.buildToRadiusZero = 
@@ -325,7 +321,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
             cvbConfig.layerEnvelopeZ = 2_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
-            cvbConfig.volumeSignature = 0;
             cvbConfig.volumeName = "SCT";
             cvbConfig.layerBuilder = lb;
             cvbConfig.buildToRadiusZero = false;
@@ -344,7 +339,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
             cvbConfig.layerEnvelopeZ = 2_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
-            cvbConfig.volumeSignature = 0;
             cvbConfig.volumeName = "TRT";
             cvbConfig.layerBuilder = lb;
             cvbConfig.buildToRadiusZero = false;
@@ -366,7 +360,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
             cvbConfig.layerEnvelopeR = {5_mm, 5_mm};
             cvbConfig.layerEnvelopeZ = 1_mm;
             cvbConfig.trackingVolumeHelper = cylinderVolumeHelper;
-            cvbConfig.volumeSignature = 1;
             cvbConfig.volumeName = "HGTD";
             cvbConfig.layerBuilder = lb;
             cvbConfig.buildToRadiusZero = false;
@@ -1109,7 +1102,6 @@ ActsTrackingGeometrySvc::makeBeamPipeConfig(
   cfg.layerBuilder = beamPipeBuilder;
   cfg.layerEnvelopeR = {1_mm, 1_mm};
   cfg.buildToRadiusZero = true;
-  cfg.volumeSignature = 0;
 
   return cfg;
 }

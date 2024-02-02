@@ -122,7 +122,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     finderConfig.addSingleTrackVertices = m_addSingleTrackVertices;
     finderConfig.do3dSplitting = m_do3dSplitting;
     finderConfig.maximumVertexContamination = m_maximumVertexContamination;
-    finderConfig.looseConstrValue = m_looseConstrValue;
+    finderConfig.initialVariances = Acts::Vector4::Constant(m_looseConstrValue);
     finderConfig.useVertexCovForIPEstimation = m_useVertexCovForIPEstimation;
     finderConfig.useSeedConstraint = m_useSeedConstraint;
     m_vertexFinder = std::make_shared<VertexFinder>(std::move(finderConfig), extractParameters);
