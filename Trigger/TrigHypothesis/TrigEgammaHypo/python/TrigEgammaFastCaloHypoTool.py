@@ -376,7 +376,7 @@ def createTrigEgammaFastCaloPhotonSelectors(flags, ConfigFilePath=None):
     import collections.abc
 
     if not ConfigFilePath:
-      ConfigFilePath = flags.Trigger.egamma.ringerVersion
+      ConfigFilePath = flags.Trigger.egamma.photonRingerVersion
 
   
     SelectorNames = collections.OrderedDict({
