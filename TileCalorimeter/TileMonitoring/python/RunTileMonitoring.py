@@ -101,7 +101,7 @@ if __name__=='__main__':
     parser.add_argument('--partition', default="", help='EMON, Partition name, default taken from $TDAQ_PARTITION if not set')
     parser.add_argument('--key', type=str, default="",
                         help='EMON, Selection key, e.g.: SFI, default: dcm (ATLAS), CompleteEvent (TileMon), ReadoutApplication (Tile)')
-    parser.add_argument('--keyValue', default="",
+    parser.add_argument('--keyValue', default=[],
                         help='EMON, Key values, e.g. [SFI-1, SFI-2]; if empty all SFIs; default: "" (*), TileREB-ROS (Tile)')
     parser.add_argument('--keyCount', type=int, default=50,
                         help='EMON, key count, e.g. 5 to get five random SFIs, default: 50 (physics), 1000 (laser:CIS)')
@@ -141,8 +141,8 @@ if __name__=='__main__':
         keys = {'ATLAS' : 'dcm', 'TileMon' : 'CompleteEvent', 'Tile' : 'ReadoutApplication'}
         key = args.key if args.key else keys.get(partition, 'dcm')
 
-        keyValues = {'Tile': 'TileREB-ROS'}
-        keyValue =  args.keyValue if  args.keyValue else keyValues.get(partition, "")
+        keyValues = {'Tile': ['TileREB-ROS']}
+        keyValue =  args.keyValue if  args.keyValue else keyValues.get(partition, [])
 
         # Given frequency, set up updatePeriod to 0, since updatePeriod has higher priority
         updatePeriod = 0 if args.frequency > 0 else args.updatePeriod
