@@ -18,13 +18,26 @@ public:
 
   struct Cache {
 
-    Cache(const Acts::MagneticFieldContext mctx) {
-      const auto* atlasField = mctx.get<const AtlasFieldCacheCondObj*>();
-      atlasField->getInitializedCache(fieldCache);
+    Cache(const Acts::MagneticFieldContext mctx)
+    : m_atlasField{mctx.get<const AtlasFieldCacheCondObj*>()} {
+      m_atlasField->getInitializedCache(fieldCache);
+    }
 
+    Cache(const Cache& other) : m_atlasField{other.m_atlasField} {
+      m_atlasField->getInitializedCache(fieldCache);
+    }
+
+    Cache& operator=(const Cache& other) {
+      m_atlasField = other.m_atlasField;
+      fieldCache = {};
+      m_atlasField->getInitializedCache(fieldCache);
+      return *this;
     }
 
     MagField::AtlasFieldCache fieldCache;
+
+    private:
+      const AtlasFieldCacheCondObj* m_atlasField;
   };
 
   ATLASMagneticFieldWrapper() = default;
@@ -32,12 +45,12 @@ public:
 
   MagneticFieldProvider::Cache 
   makeCache(const Acts::MagneticFieldContext& mctx) const override {
-    return Acts::MagneticFieldProvider::Cache::make<Cache>(mctx);
+    return Acts::MagneticFieldProvider::Cache(std::in_place_type<Cache>, mctx);
   }
 
   Acts::Result<Acts::Vector3>
   getField(const Acts::Vector3& position, Acts::MagneticFieldProvider::Cache& gcache) const override {
-    Cache& cache = gcache.get<Cache>();
+    Cache& cache = gcache.as<Cache>();
     double posXYZ[3];
     posXYZ[0] = position.x();
     posXYZ[1] = position.y();
@@ -59,7 +72,7 @@ public:
                    Acts::ActsMatrix<3, 3>& gradient,
                    Acts::MagneticFieldProvider::Cache& gcache) const override
   {
-    Cache& cache = gcache.get<Cache>();
+    Cache& cache = gcache.as<Cache>();
     double posXYZ[3];
     posXYZ[0] = position.x();
     posXYZ[1] = position.y();

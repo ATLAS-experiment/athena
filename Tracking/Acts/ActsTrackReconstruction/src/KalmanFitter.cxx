@@ -132,7 +132,7 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
         trackState.template calibrated<1>() = (*rot).localParameters().template head<1>(); 
         trackState.template calibratedCovariance<1>() = (*rot).localCovariance().template topLeftCorner<1, 1>(); 
         // Create a projection matrix onto 1D measurement 
-        Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 2> proj;
+        Acts::ActsMatrix<Acts::MultiTrajectoryTraits::MeasurementSizeMax, 2> proj;
         proj.setZero();
         if ((*rot).associatedSurface().bounds().type() == Trk::SurfaceBounds::Annulus) { 
           proj(Acts::eBoundLoc0, Acts::eBoundLoc1) = 1; // transforms predicted[1] -> calibrated[0] in Acts::MeasurementSelector::calculateChi2()
@@ -146,7 +146,7 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
           trackState.template calibrated<2>() = (*rot).localParameters().template head<2>();
           trackState.template calibratedCovariance<2>() = (*rot).localCovariance().template topLeftCorner<2, 2>();
           // Create a 2D projection matrix
-          Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 2> proj;
+          Acts::ActsMatrix<Acts::MultiTrajectoryTraits::MeasurementSizeMax, 2> proj;
           proj.setZero();
           proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
           proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;

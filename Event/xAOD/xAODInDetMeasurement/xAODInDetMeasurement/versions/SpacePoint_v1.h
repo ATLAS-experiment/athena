@@ -69,6 +69,10 @@ namespace xAOD {
     float y() const;
     float z() const;
 
+    // Needed for compliance with the external spacepoint contract
+    // See https://github.com/acts-project/acts/pull/2829
+    std::optional<float> t() const { return std::nullopt; }
+
     /// @}
 
     /// @name Functions to set space point properties

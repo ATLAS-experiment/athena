@@ -65,15 +65,16 @@ namespace ActsTrk {
       if (param.covariance().has_value()) {
 
          Acts::Vector3 direction(param.direction());
-         Acts::BoundMatrix
-            b2c = Acts::detail::boundToCurvilinearTransportJacobian(direction, // magnFieldVect.normalized(),
-                                                                    param.referenceSurface().boundToFreeJacobian(tgContext,
-                                                                                                                 param.parameters()),
-                                                                    Acts::FreeMatrix::Identity(),
-                                                                    computeFreeToPathDerivatives(direction,
-                                                                                                 param.parameters()[Acts::eBoundQOverP],
-                                                                                                 magnFieldVect,
-                                                                                                 particle_hypothesis));
+         Acts::BoundMatrix b2c; 
+         Acts::detail::boundToCurvilinearTransportJacobian(direction, // magnFieldVect.normalized(),
+                                                           param.referenceSurface().boundToFreeJacobian(tgContext,
+                                                                                                        param.parameters()),
+                                                           Acts::FreeMatrix::Identity(),
+                                                           computeFreeToPathDerivatives(direction,
+                                                                                        param.parameters()[Acts::eBoundQOverP],
+                                                                                        magnFieldVect,
+                                                                                        particle_hypothesis),
+                                                           b2c);
 
          return b2c * param.covariance().value() * b2c.transpose();
       }

@@ -423,7 +423,8 @@ namespace ActsTrk
 
   struct TrackFindingAlg::CkfBranchStopper
   {
-    bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState) const
+    bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState, 
+        ActsTrk::MutableMultiTrajectory::TrackStateProxy& /*trackState*/) const
     {
       if (!(tipState.nHoles > variableCut<std::size_t>(eta, alg->m_etaBins, alg->m_maxHoles, std::numeric_limits<std::size_t>::max())))
         return false;
