@@ -335,6 +335,7 @@ def defineInputsMenu():
                                                                                                                    '400INVM-0DPHI24-AjJ60s6-AjJ50s6',
                                                                                                                    '400INVM-0DPHI22-AjJ60s6-AjJ50s6',
                                                                                                                    '400INVM-0DPHI20-AjJ60s6-AjJ50s6'] ),
+                    TopoMenuDef( '0DPHI15-jXE27delay-jJ27s',        outputbits = 12),
                 ]
             }
         ]
