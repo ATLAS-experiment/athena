@@ -1061,14 +1061,14 @@ void ZdcAnalysisTool::initialize40MHz()
     moduleHGNonLinCorr[1][2] = { -7.82514e-02, -1.21218e-01};
     moduleHGNonLinCorr[1][3] = { -2.34354e-02, -2.52033e-01};
 
-    nonLinearCorrCoefficLG = {{ {{{0},
-				  {0},
-				  {0},
-				  {0}}},
-				{{{0},
-				  {0},
-				  {0},
-				  {0}}} }};
+    moduleLGNonLinCorr = {{ {{{0},
+			      {0},
+			      {0},
+			      {0}}},
+			    {{{0},
+			      {0},
+			      {0},
+			      {0}}} }};
 
     m_zdcDataAnalyzer_40MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
     m_zdcDataAnalyzer_40MHz->SetSaveFitFunc(false);
@@ -1181,14 +1181,14 @@ void ZdcAnalysisTool::initialize80MHz()
     moduleHGNonLinCorr[1][2] = { -7.82514e-02, -1.21218e-01};
     moduleHGNonLinCorr[1][3] = { -2.34354e-02, -2.52033e-01};
 
-    nonLinearCorrCoefficLG = {{ {{{0},
-				  {0},
-				  {0},
-				  {0}}},
-				{{{0},
-				  {0},
-				  {0},
-				  {0}}} }};
+    moduleLGNonLinCorr = {{ {{{0},
+			      {0},
+			      {0},
+			      {0}}},
+			    {{{0},
+			      {0},
+			      {0},
+			      {0}}} }};
 
     m_zdcDataAnalyzer_80MHz->SetNonlinCorrParams(500, 1000, moduleHGNonLinCorr, moduleLGNonLinCorr);
     m_zdcDataAnalyzer_80MHz->SetSaveFitFunc(false);
