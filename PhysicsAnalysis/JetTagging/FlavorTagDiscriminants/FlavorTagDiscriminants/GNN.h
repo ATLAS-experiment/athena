@@ -60,7 +60,6 @@ namespace FlavorTagDiscriminants {
     virtual std::set<std::string> getConstituentAuxInputKeys() const;
 
     std::shared_ptr<const OnnxUtil> m_onnxUtil;
-
   private:
     // type definitions for ONNX output decorators
     using TPC = xAOD::TrackParticleContainer;
@@ -90,9 +89,7 @@ namespace FlavorTagDiscriminants {
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
     std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
-    // std::vector<std::shared_ptr<ConstituentsLoader>> m_constituentsLoaders;
-    // std::shared_ptr<const TracksLoader> m_trackLoader;
-    std::shared_ptr<const IParticlesLoader> m_flowLoader;
+    std::vector<std::shared_ptr<ConstituentsLoader>> m_constituentsLoaders;
 
     Decorators m_decorators;
     float m_defaultValue;

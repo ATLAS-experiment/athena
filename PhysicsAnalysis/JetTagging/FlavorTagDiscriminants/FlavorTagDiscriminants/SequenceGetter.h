@@ -13,6 +13,9 @@
 #include "xAODBase/IParticle.h"
 #include "xAODTracking/TrackParticleFwd.h"
 #include "AthContainers/AuxElement.h"
+#include "FlavorTagDiscriminants/ConstituentsLoader.h"
+#include "FlavorTagDiscriminants/DataPrepUtilities.h"
+
 
 #include <functional>
 #include <string>
@@ -23,7 +26,7 @@
 
 namespace FlavorTagDiscriminants {
 
-  /// Factory function to produce TrackParticle -> vector<double> functions
+  /// Class to produce IParticle -> vector<double> functions
   ///
   /// DL2 configures the its inputs when the algorithm is initalized,
   /// meaning that the list of track and jet properties that are used
@@ -44,26 +47,51 @@ namespace FlavorTagDiscriminants {
   ///
 
   namespace sequence_getter {
-
-  using SequenceFromIParticles = std::function<std::vector<double>(
-    const xAOD::Jet&,
-    const std::vector<const xAOD::IParticle*>&)>;
-
-  std::pair<SequenceFromIParticles, std::set<std::string>>
-  customSequenceGetterWithDeps(
-    const std::string& name,   // name of the getter
-    const std::string& prefix  // prefix for track accessor
-    );
-  
     std::function<std::pair<std::string, double>(const xAOD::Jet&)>
     customGetterAndName(const std::string&);
 
-    std::pair<std::function<std::pair<std::string, std::vector<double>>(
-      const xAOD::Jet&,
-      const std::vector<const xAOD::IParticle*>&)>,
-      std::set<std::string>>
-    customNamedSeqGetterWithDeps(const std::string&, const std::string&);
-  }
+    class CustomSequenceGetter {
+        public:
+          using IParticles = std::vector<const xAOD::IParticle*>;
+          using SequenceFromConstituents = std::function<std::vector<double>(
+            const xAOD::Jet&,
+            const IParticles&)>;
+          
+          using NamedSequenceFromConstituents = std::function<std::pair<std::string, std::vector<double>>(
+            const xAOD::Jet&,
+            const IParticles&)>;
+
+          CustomSequenceGetter(std::vector<FTagConstituentsInputConfig> inputs,
+                              const FTagOptions& options);
+
+          std::pair<std::vector<float>, std::vector<int64_t>> getFeats(const xAOD::Jet& jet, const IParticles& constituents) const;
+
+          std::set<std::string> getDependencies() const;
+          std::set<std::string> getUsedRemap() const;
+          
+        private:
+
+          std::pair<NamedSequenceFromConstituents, std::set<std::string>>
+          customNamedSeqGetterWithDeps(const std::string& name, const std::string& prefix);
+
+          std::pair<SequenceFromConstituents, std::set<std::string>>
+          customSequenceGetterWithDeps(const std::string& name,
+                                      const std::string& prefix);
+
+          std::optional<SequenceFromConstituents> sequenceNoIpDep(const std::string& name);
+
+          std::optional<SequenceFromConstituents> sequenceWithIpDep(const std::string& name,
+                                                                  const std::string& prefix);
+
+          std::pair<NamedSequenceFromConstituents, std::set<std::string>> seqFromConsituents(
+          const FTagConstituentsInputConfig& cfg, 
+          const FTagOptions& options);
+
+          std::vector<NamedSequenceFromConstituents> sequencesFromConstituents;
+          std::set<std::string> deps;
+          std::set<std::string> used_remap;        
+        };
+    }
 }
 
 #endif

@@ -3,10 +3,9 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/IParticlesLoader.h"
-#include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
+// #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 #include "xAODPFlow/FlowElement.h"
 
-#include "FlavorTagDiscriminants/SequenceGetter.h"
 #include <iostream>
 
 namespace {
@@ -132,42 +131,14 @@ namespace FlavorTagDiscriminants {
       }
     } // end of iparticle sort getter
 
-    // factory for functions that build std::vector objects from
-    // iparticle sequences
-    std::pair<IParticlesLoader::SeqFromIParticles,std::set<std::string>> IParticlesLoader::seqFromIParticles(
-        const FTagConstituentsInputConfig& cfg, 
-        const FTagOptions& options)
-    {
-        const std::string prefix = options.track_prefix;
-        switch (cfg.type) {
-          case ConstituentsEDMType::INT: return {
-              SequenceGetter<int, xAOD::IParticle>(cfg.name), {cfg.name}
-            };
-          case ConstituentsEDMType::FLOAT: return {
-              SequenceGetter<float, xAOD::IParticle>(cfg.name), {cfg.name}
-            };
-          case ConstituentsEDMType::CHAR: return {
-              SequenceGetter<char, xAOD::IParticle>(cfg.name), {cfg.name}
-            };
-          case ConstituentsEDMType::UCHAR: return {
-              SequenceGetter<unsigned char, xAOD::IParticle>(cfg.name), {cfg.name}
-            };
-          case ConstituentsEDMType::CUSTOM_GETTER: {
-            return sequence_getter::customNamedSeqGetterWithDeps(
-              cfg.name, options.track_prefix);
-          }
-          default: {
-            throw std::logic_error("Unknown EDM type for iparticles");
-          }
-        }
-    }
-
     IParticlesLoader::IParticlesLoader(
         FTagConstituentsSequenceConfig cfg,
         const FTagOptions& options
     ):
         ConstituentsLoader(cfg),
-        m_iparticleSortVar(IParticlesLoader::iparticleSortVar(cfg.order, options))
+        m_iparticleSortVar(IParticlesLoader::iparticleSortVar(cfg.order, options)),
+        m_customSequenceGetter(sequence_getter::CustomSequenceGetter(
+          cfg.inputs, options))
     {
         SG::AuxElement::ConstAccessor<PartLinks> acc("constituentLinks");
         m_associator = [acc](const xAOD::Jet& jet) -> IPV {
@@ -187,22 +158,7 @@ namespace FlavorTagDiscriminants {
         } else {
             m_isCharged = false;
         }
-
-        std::map<std::string, std::string> remap = options.remap_scalar;
-        std::set<std::string> used_remap;
-        std::set<std::string> iparticle_data_deps;
-
-        for (const FTagConstituentsInputConfig& input_cfg: cfg.inputs) {
-            std::cout << input_cfg.name << std::endl;
-            auto [seqGetter, deps] = seqFromIParticles(
-            input_cfg, options);
-
-            m_sequencesFromIParticles.push_back(seqGetter);
-            iparticle_data_deps.merge(deps);
-            if (auto h = remap.extract(input_cfg.name)){
-              used_remap.insert(h.key());
-            }
-        }
+        used_remap = m_customSequenceGetter.getUsedRemap();
         std::cout << "TEST: IParticlesLoader loaded " << std::endl;
     }
 
@@ -235,31 +191,20 @@ namespace FlavorTagDiscriminants {
           }
           only_particles.push_back(obj);
         }
-        std::cout << "TEST: SIZE OF only_particles: " << only_particles.size() << std::endl;
         return only_particles;
     }
 
     std::pair<std::string, input_pair> IParticlesLoader::getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
-        std::vector<float> particle_feat;
-        int num_iparticle_vars = static_cast<int>(m_sequencesFromIParticles.size());
-        int num_iparticles = 0;
-
         IParticles sorted_particles = getIParticlesFromJet(jet);
-        int iparticle_var_idx=0;
-        for (const auto& seq_builder: m_sequencesFromIParticles) {
-            auto double_vec = seq_builder(jet, sorted_particles).second;
-            if (iparticle_var_idx == 0){
-              num_iparticles = static_cast<int>(double_vec.size());
-              particle_feat.resize(num_iparticles * num_iparticle_vars);
-            }
-            for (unsigned int particle_idx=0; particle_idx < double_vec.size(); particle_idx++){
-                particle_feat[iparticle_var_idx * num_iparticles + particle_idx] = double_vec[particle_idx];
-            }
-            iparticle_var_idx++;
-        }
 
-        std::vector<int64_t> particle_feat_dim = {num_iparticles, num_iparticle_vars};
-
-        return std::make_pair("flow_features", std::make_pair(particle_feat, particle_feat_dim));
+        return std::make_pair("flow_features", m_customSequenceGetter.getFeats(jet, sorted_particles));
     }
+
+    FTagDataDependencyNames IParticlesLoader::getDependencies() const {
+        return deps;
+    }
+    std::set<std::string> IParticlesLoader::getUsedRemap() const {
+        return used_remap;
+    }
+
 }

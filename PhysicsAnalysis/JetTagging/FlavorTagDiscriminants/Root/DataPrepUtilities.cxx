@@ -11,6 +11,8 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include "xAODBTagging/BTaggingUtilities.h"
 
+#include <iostream>
+
 namespace {
   using namespace FlavorTagDiscriminants;
 
@@ -645,10 +647,6 @@ namespace FlavorTagDiscriminants {
 
       // we rewrite the inputs if we're using flip taggers
       StringRegexes flip_converters = getFlipConverters(flip_config);
-
-      // some sequences also need to be sign-flipped. We apply this by
-      // changing the input scaling and normalizations
-      std::regex flip_sequences(".*signed_[dz]0.*");
 
       if (flip_config != FlipTagConfig::STANDARD) {
         rewriteFlipConfig(config, flip_converters);

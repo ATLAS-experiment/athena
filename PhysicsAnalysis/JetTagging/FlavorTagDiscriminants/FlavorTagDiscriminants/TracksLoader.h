@@ -8,11 +8,12 @@
 // local includes
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
-#include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
+// #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
+#include "FlavorTagDiscriminants/SequenceGetter.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -50,7 +51,9 @@ namespace FlavorTagDiscriminants {
       public:
         // TracksLoader();
         TracksLoader(FTagConstituentsSequenceConfig, const FTagOptions& options);
-        std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const override ;
+        std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const override;
+        FTagDataDependencyNames getDependencies() const override;
+        std::set<std::string> getUsedRemap() const override;
       private:
         // typedefs
         typedef std::pair<std::string, double> NamedVar;
@@ -65,9 +68,6 @@ namespace FlavorTagDiscriminants {
         typedef std::function<Tracks(const Tracks&,
                                     const Jet&)> TrackSequenceFilter;
 
-        // getter function
-        typedef std::function<NamedSeq(const Jet&, const Tracks&)> SeqFromTracks;
-
         // usings for track getter
         using AE = SG::AuxElement;
         using IPC = xAOD::IParticleContainer;
@@ -79,8 +79,6 @@ namespace FlavorTagDiscriminants {
         TrackSortVar trackSortVar(ConstituentsSortOrder, const FTagOptions&);
         std::pair<TrackFilter,std::set<std::string>> trackFilter(
           ConstituentsSelection, const FTagOptions&);
-        std::pair<SeqFromTracks,std::set<std::string>> seqFromTracks(
-          const FTagConstituentsInputConfig&, const FTagOptions&);
         std::pair<TrackSequenceFilter,std::set<std::string>> flipFilter(
           const FTagOptions&);
         
@@ -89,8 +87,8 @@ namespace FlavorTagDiscriminants {
         TrackSortVar m_trackSortVar;
         TrackFilter m_trackFilter;
         TrackSequenceFilter m_flipFilter;
-        std::vector<SeqFromTracks> m_sequencesFromTracks;
         std::function<TPV(const SG::AuxElement&)> m_associator;
+        sequence_getter::CustomSequenceGetter m_customSequenceGetter;
     };
 }
 

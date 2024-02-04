@@ -8,6 +8,7 @@
 // local includes
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
+#include "FlavorTagDiscriminants/SequenceGetter.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -32,6 +33,8 @@ namespace FlavorTagDiscriminants {
         // TracksLoader();
         IParticlesLoader(FTagConstituentsSequenceConfig, const FTagOptions& options);
         std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const override ;
+        FTagDataDependencyNames getDependencies() const override;
+        std::set<std::string> getUsedRemap() const override;
       protected:
         // typedefs
         typedef xAOD::Jet Jet;
@@ -54,13 +57,14 @@ namespace FlavorTagDiscriminants {
         IParticleSortVar iparticleSortVar(ConstituentsSortOrder, const FTagOptions&);
         
         std::vector<const xAOD::IParticle*> getIParticlesFromJet(const xAOD::Jet& jet) const;
-        std::pair<SeqFromIParticles,std::set<std::string>> seqFromIParticles(
-          const FTagConstituentsInputConfig&, const FTagOptions&);
 
         std::vector<SeqFromIParticles> m_sequencesFromIParticles;
+        sequence_getter::CustomSequenceGetter m_customSequenceGetter;
         IParticleSortVar m_iparticleSortVar;
         std::function<IPV(const Jet&)> m_associator;
         bool m_isCharged;
+
+        // FTagDataDependencyNames deps;
     };
 }
 

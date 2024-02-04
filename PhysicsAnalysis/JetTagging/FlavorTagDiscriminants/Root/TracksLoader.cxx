@@ -5,7 +5,6 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
 
-#include "FlavorTagDiscriminants/customGetter.h"
 #include "FlavorTagDiscriminants/TracksLoader.h"
 
 #include <iostream>
@@ -33,20 +32,6 @@ namespace {
   typedef std::vector<std::pair<std::regex, ConstituentsSortOrder> > SortRegexes;
   typedef std::vector<std::pair<std::regex, ConstituentsSelection> > TrkSelRegexes;
 
-  // Function to map the regex + list of inputs to variable config,
-  // this time for sequence inputs.
-  std::vector<FTagConstituentsSequenceConfig> get_track_input_config(
-    const std::vector<std::pair<std::string, std::vector<std::string>>>& names,
-    const TypeRegexes& type_regexes,
-    const SortRegexes& sort_regexes,
-    const TrkSelRegexes& select_regexes,
-    const std::regex& re,
-    const FlipTagConfig& flip_config);
-
-
-  //_______________________________________________________________________
-  // Implementation of the above functions
-  //
 
   template <typename T>
   T match_first(const std::vector<std::pair<std::regex, T> >& regexes,
@@ -137,7 +122,13 @@ namespace FlavorTagDiscriminants {
     ){
         // some sequences also need to be sign-flipped. We apply this by
         // changing the input scaling and normalizations
-        std::regex flip_sequences(".*signed_[dz]0.*");
+        std::regex flip_sequences;
+        if (flip_config == FlipTagConfig::FLIP_SIGN || flip_config == FlipTagConfig::NEGATIVE_IP_ONLY){
+          flip_sequences=std::regex(".*signed_[dz]0.*");
+        }
+        if (flip_config == FlipTagConfig::SIMPLE_FLIP){
+          flip_sequences=std::regex("(.*signed_[dz]0.*)|d0|z0SinTheta");
+        }
 
         // build the track inputs
         TypeRegexes trk_type_regexes {
@@ -383,37 +374,6 @@ namespace FlavorTagDiscriminants {
         }
     }
 
-    // factory for functions that build std::vector objects from
-    // track sequences
-    std::pair<TracksLoader::SeqFromTracks,std::set<std::string>> TracksLoader::seqFromTracks(
-        const FTagConstituentsInputConfig& cfg, 
-        const FTagOptions& options)
-    {
-        const std::string prefix = options.track_prefix;
-        switch (cfg.type) {
-          case ConstituentsEDMType::INT: return {
-              SequenceGetter<int, Track>(cfg.name), {cfg.name}
-            };
-          case ConstituentsEDMType::FLOAT: return {
-              SequenceGetter<float, Track>(cfg.name), {cfg.name}
-            };
-          case ConstituentsEDMType::CHAR: return {
-              SequenceGetter<char, Track>(cfg.name), {cfg.name}
-            };
-          case ConstituentsEDMType::UCHAR: return {
-              SequenceGetter<unsigned char, Track>(cfg.name), {cfg.name}
-            };
-          case ConstituentsEDMType::CUSTOM_GETTER: {
-            return internal::customNamedSeqGetterWithDeps(
-              cfg.name, options.track_prefix);
-
-          }
-          default: {
-            throw std::logic_error("Unknown EDM type for tracks");
-          }
-        }
-    }
-
     // here we define filters for the "flip" taggers
     //
     // start by defining the raw functions, there's a factory
@@ -463,7 +423,6 @@ namespace FlavorTagDiscriminants {
         }
     }
 
-    // TracksLoader::TracksLoader() : ConstituentsLoader() {};
     TracksLoader::TracksLoader(
         FTagConstituentsSequenceConfig cfg,
         const FTagOptions& options
@@ -471,7 +430,9 @@ namespace FlavorTagDiscriminants {
         ConstituentsLoader(cfg),
         m_trackSortVar(TracksLoader::trackSortVar(cfg.order, options)),
         m_trackFilter(TracksLoader::trackFilter(cfg.selection, options).first),
-        m_flipFilter(TracksLoader::flipFilter(options).first)
+        m_flipFilter(TracksLoader::flipFilter(options).first),
+        m_customSequenceGetter(sequence_getter::CustomSequenceGetter(
+          cfg.inputs, options))
     {
         // We have several ways to get tracks: either we retrieve an
         // IParticleContainer and cast the pointers to TrackParticle, or
@@ -479,7 +440,6 @@ namespace FlavorTagDiscriminants {
         // the way tracks are stored isn't consistent across the EDM, so
         // we allow configuration for both setups.
         //
-        std::cout << "TEST TRACK 1 " << std::endl;
         if (options.track_link_type == TrackLinkType::IPARTICLE) {
             SG::AuxElement::ConstAccessor<PartLinks> acc(options.track_link_name);
             m_associator = [acc](const SG::AuxElement& btag) -> TPV {
@@ -511,35 +471,12 @@ namespace FlavorTagDiscriminants {
         } else {
             throw std::logic_error("Unknown TrackLinkType");
         }
-        std::cout << "TEST TRACK 2 " << std::endl;
-        std::map<std::string, std::string> remap = options.remap_scalar;
-        std::set<std::string> used_remap;
-
         auto track_data_deps = trackFilter(cfg.selection, options).second;
         track_data_deps.merge(flipFilter(options).second);
-        for (const FTagConstituentsInputConfig& input_cfg: cfg.inputs) {
-            auto [seqGetter, deps] = seqFromTracks(
-            input_cfg, options);
-
-            if(input_cfg.flip_sign){
-            auto seqGetter_flip=[g=seqGetter](const xAOD::Jet&jet, const internal::Tracks& trks){
-                auto [n,v] = g(jet,trks);
-                std::for_each(v.begin(), v.end(), [](double &n){ n=-1.0*n; });
-                return std::make_pair(n,v);
-            };
-                m_sequencesFromTracks.push_back(seqGetter_flip);
-            }
-            else{
-                m_sequencesFromTracks.push_back(seqGetter);
-            }
-                track_data_deps.merge(deps);
-                if (auto h = remap.extract(input_cfg.name)){
-                used_remap.insert(h.key());
-            }
-        }
-        std::cout << "TEST TRACK 3 " << std::endl;
+        track_data_deps.merge(m_customSequenceGetter.getDependencies());
         deps.trackInputs.merge(track_data_deps);
         deps.bTagInputs.insert(options.track_link_name);
+        used_remap = m_customSequenceGetter.getUsedRemap();
     }
 
     std::vector<const xAOD::TrackParticle*> TracksLoader::getTracksFromJet(
@@ -563,32 +500,22 @@ namespace FlavorTagDiscriminants {
 
     std::pair<std::string, input_pair> TracksLoader::getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
         Tracks flipped_tracks;
-        std::vector<float> track_feat; // (#tracks, #feats).flatten
-
-        int num_track_vars = static_cast<int>(m_sequencesFromTracks.size());
-        int num_tracks = 0;
-
         Tracks sorted_tracks = getTracksFromJet(jet, btag);
+        std::vector<const xAOD::IParticle*> flipped_tracks_ip;
+
         flipped_tracks = m_flipFilter(sorted_tracks, jet);
-
-        int track_var_idx=0;
-        for (const auto& seq_builder: m_sequencesFromTracks) {
-            auto double_vec = seq_builder(jet, flipped_tracks).second;
-
-            if (track_var_idx==0){
-                num_tracks = static_cast<int>(double_vec.size());
-                track_feat.resize(num_tracks * num_track_vars);
-            }
-
-            // need to transpose + flatten
-            for (unsigned int track_idx=0; track_idx<double_vec.size(); track_idx++){
-            track_feat.at(track_idx*num_track_vars + track_var_idx)
-                = double_vec.at(track_idx);
-            }
-            track_var_idx++;
+        
+        for (const auto& trk: flipped_tracks) {
+            flipped_tracks_ip.push_back(dynamic_cast<const xAOD::IParticle*>(trk));
         }
-        std::vector<int64_t> track_feat_dim = {num_tracks, num_track_vars};
 
-        return std::make_pair("track_features", std::make_pair(track_feat, track_feat_dim));
+        return std::make_pair("track_features", m_customSequenceGetter.getFeats(jet, flipped_tracks_ip));
+    }
+
+    FTagDataDependencyNames TracksLoader::getDependencies() const {
+        return deps;
+    }
+    std::set<std::string> TracksLoader::getUsedRemap() const {
+        return used_remap;
     }
 }

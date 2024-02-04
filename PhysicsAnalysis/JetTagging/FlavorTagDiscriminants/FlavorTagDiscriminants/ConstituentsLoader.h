@@ -8,9 +8,8 @@
 // local includes
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
-#include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
-#include "FlavorTagDiscriminants/GNNConfig.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
+#include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -54,28 +53,6 @@ namespace FlavorTagDiscriminants {
         std::vector<FTagConstituentsInputConfig> inputs;
     };
 
-    // The sequence getter takes in constituents and calculates arrays of
-    // values which are better suited for inputs to the NNs
-    template <typename T, typename U>
-    class SequenceGetter{
-      private:
-        SG::AuxElement::ConstAccessor<T> m_getter;
-        std::string m_name;
-      public:
-        SequenceGetter(const std::string& name):
-          m_getter(name),
-          m_name(name)
-          {
-          }
-        std::pair<std::string, std::vector<double>> operator()(const xAOD::Jet&, const std::vector<const U*>& consts) const {
-          std::vector<double> seq;
-          for (const U* el: consts) {
-            seq.push_back(m_getter(*el));
-          }
-          return {m_name, seq};
-        }
-    };
-
     // Virtual class to represent loader of any type of constituents
     class ConstituentsLoader {
         public:
@@ -85,10 +62,13 @@ namespace FlavorTagDiscriminants {
             virtual ~ConstituentsLoader() {
             };
             virtual std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const = 0;
+            virtual FTagDataDependencyNames getDependencies() const = 0;
+            virtual std::set<std::string> getUsedRemap() const = 0;
 
+        protected:
             FTagDataDependencyNames deps;
-        private:
             FTagConstituentsSequenceConfig config;
+            std::set<std::string> used_remap;
     };
 }
 
