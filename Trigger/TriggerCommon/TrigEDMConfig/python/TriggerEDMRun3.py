@@ -150,7 +150,8 @@ three_output_taggers = [
     'DL1dv00',                  # first 'official' offline r22
     'dips20211116',             # DIPS input to the current online DL1d
     'DL1d20211216',             # current online r22
-    'GN120220813'
+    'GN120220813',
+    'GN220240122'
 ]
 
 b_vs_bb_taggers = [
