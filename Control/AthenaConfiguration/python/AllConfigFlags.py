@@ -246,7 +246,8 @@ def initConfigFlags():
     acf.addFlag('Output.ESDFileName',  '')
     acf.addFlag('Output.AODFileName',  '')
     acf.addFlag('Output.HISTFileName', '')
-
+    
+    acf.addFlag('Output.doWriteEVNT', lambda prevFlags: bool(prevFlags.Output.EVNTFileName)) # write out EVNT file
     acf.addFlag('Output.doWriteHITS', lambda prevFlags: bool(prevFlags.Output.HITSFileName)) # write out HITS file
     acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName)) # write out RDO file
     acf.addFlag('Output.doWriteRDO_SGNL', lambda prevFlags: bool(prevFlags.Output.RDO_SGNLFileName)) # write out RDO_SGNL file
@@ -307,6 +308,12 @@ def initConfigFlags():
         from RecJobTransforms.RecoConfigFlags import createRecoConfigFlags
         return createRecoConfigFlags()
     _addFlagsCategory(acf, "Reco", __reco, 'RecJobTransforms')
+
+#Generator Flags:
+    def __generators():
+        from GeneratorConfig.GeneratorConfigFlags import createGeneratorConfigFlags
+        return createGeneratorConfigFlags()
+    _addFlagsCategory(acf, "Generator", __generators, 'GeneratorConfig')
 
 #IOVDbSvc Flags:
     if isGaudiEnv():
