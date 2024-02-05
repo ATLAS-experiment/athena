@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #####
 # CI Reference Files Map
@@ -19,9 +19,9 @@ references_map = {
     "s4008": "v1",
     "a913": "v5",
     # Overlay
-    "d1590": "v5",
     "d1726": "v5",
     "d1759": "v11",
+    "d1912": "v1",
     # Reco
     "q442": "v43",
     "q443": "v34",
