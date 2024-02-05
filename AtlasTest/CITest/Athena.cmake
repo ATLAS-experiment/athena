@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # CI test definitions for the Athena project
 # --> README.md before you modify this file
@@ -45,7 +45,7 @@ atlas_add_citest( OverlayRun2MC_Legacy
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA False --conditionsTag OFLCOND-MC16-SDR-RUN2-11' )
 
 atlas_add_citest( OverlayRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay -e '--conditionsTag CONDBR2-BLKPA-RUN2-11' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay )
 
 atlas_add_citest( OverlayRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay -e '--CA True' )
