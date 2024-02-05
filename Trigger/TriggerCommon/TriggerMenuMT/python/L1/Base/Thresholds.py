@@ -64,7 +64,7 @@ class MenuThresholdsCollection( object ):
 
     def json(self):
         confObj = odict()
-        for ttype in (ThrType.Run3Types() + ThrType.NIMTypes() + [ThrType.TOPO, ThrType.MUTOPO] + [ThrType.LArSat, ThrType.NSWMon]):
+        for ttype in (ThrType.Run3Types() + ThrType.NIMTypes() + [ThrType.TOPO, ThrType.MUTOPO] + [ThrType.LArSat, ThrType.NSWMon] ):
             confObj[ttype.name] = odict()
             confObj[ttype.name]["type"] = ttype.name
             confObj[ttype.name]["thresholds"] = odict()
@@ -141,6 +141,7 @@ class Threshold( object ):
             confObj["seed"] = self.seed
             confObj["seed_multi"] = self.seed_multi
             confObj["bc_delay"] = self.mapping
+        
 
         return confObj
 
@@ -983,6 +984,45 @@ class LArSaturationThreshold( Threshold ):
         confObj = odict()
         confObj["mapping"] = self.mapping
         return confObj
+
+class ZeroBiasThresholdTopo( Threshold ):
+
+    def __init__(self, name, mapping = -1):
+        print("threshold name is", name)
+        super(ZeroBiasThresholdTopo,self).__init__(name = name, ttype = ThrType.ZBTopo, mapping = mapping, run = 3)
+        self.mask0       = 0
+        self.mask1       = 0
+        self.mask2       = 0
+        self.mask3       = 0
+        self.mask4       = 0
+        self.mask5       = 0
+        
+        self.bcdelay    = 0
+
+    def setSeedThreshold(self, seed=[], seed_multi = 1, bcdelay = 3564 ):
+        self.mask0      = seed[0]
+        self.mask1      = seed[1]
+        self.mask2      = seed[2]
+        self.mask3      = seed[3]
+        self.mask4      = seed[4]
+        self.mask5      = seed[5]
+        self.bcdelay    = int(bcdelay)
+        
+
+    def json(self):
+        confObj = odict()
+        confObj["mapping" ]         = self.mapping
+        confObj["delay"]            = self.bcdelay
+        confObj["mask0"]            = self.mask0
+        confObj["mask1"]            = self.mask1
+        confObj["mask2"]            = self.mask2
+        confObj["mask3"]            = self.mask3
+        confObj["mask4"]            = self.mask4
+        confObj["mask5"]            = self.mask5
+        
+        return confObj
+
+
 
 class TEThreshold( Threshold ):
 

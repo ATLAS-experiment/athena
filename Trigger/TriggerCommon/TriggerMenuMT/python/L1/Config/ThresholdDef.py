@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold
+from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold, ZeroBiasThresholdTopo
 from .L1CaloThresholdMapping import get_threshold_cut
 from .TypeWideThresholdConfig import getTypeWideThresholdConfig
 
@@ -319,6 +319,9 @@ class ThresholdDef:
 
         # ATR-22344
         LArSaturationThreshold('LArSaturation')
+
+        ZeroBiasThresholdTopo('ZeroBiasA')
+        ZeroBiasThresholdTopo('ZeroBiasB')
 
         # CALREQ
             

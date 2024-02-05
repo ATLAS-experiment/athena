@@ -116,6 +116,32 @@ namespace TrigConf {
       void load();
    };
 
+   class L1Threshold_ZBTopo final : public L1Threshold {
+      public:
+      L1Threshold_ZBTopo( const std::string & name, const std::string & type, std::weak_ptr<L1ThrExtraInfoBase> extraInfo, const ptree & data) :
+         L1Threshold(name, type, extraInfo, data) { load(); };
+      virtual ~L1Threshold_ZBTopo() override = default;
+      virtual std::string className() const override { return "L1Threshold_ZBTopo"; }
+      const std::string & mask0() const { return m_mask0; }
+      const std::string & mask1() const { return m_mask1; }
+      const std::string & mask2() const { return m_mask2; }
+      const std::string & mask3() const { return m_mask3; }
+      const std::string & mask4() const { return m_mask4; }
+      const std::string & mask5() const { return m_mask5; }
+      unsigned int seedBcdelay() const { return m_seedBcdelay; }
+   protected:
+      virtual void update() override { load(); }
+   private:
+      std::string m_mask0{""};
+      std::string m_mask1{""};
+      std::string m_mask2{""};
+      std::string m_mask3{""};
+      std::string m_mask4{""};
+      std::string m_mask5{""};
+      unsigned int m_seedBcdelay{0};
+      void load();
+   };
+
    class L1Threshold_NIM final : public L1Threshold {
    public:
       L1Threshold_NIM( const std::string & name, const std::string & type, std::weak_ptr<L1ThrExtraInfoBase> extraInfo, const ptree & data) :
