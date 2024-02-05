@@ -304,7 +304,7 @@ void Database::dropXmlComments(std::string& buffer)
 void Database::dropRootTag(std::string& buffer)
 {
   const std::vector<std::string> keys = {"<efficiencies>", "</efficiencies>"};
-  for(auto key : keys)
+  for(const auto& key : keys)
     {
         std::size_t ipos;
         while((ipos = buffer.find(key)) != std::string::npos)
@@ -711,7 +711,7 @@ void Database::resetAttributes(AttributesMap& attributes)
     attributes["syst/affects"];
 
     const std::vector<std::string> parts = {"electron", "muon", "tau"};
-    for(auto p : parts)
+    for(const auto& p : parts)
     {
         attributes[p + "/type"];
         attributes[p + "/input"];

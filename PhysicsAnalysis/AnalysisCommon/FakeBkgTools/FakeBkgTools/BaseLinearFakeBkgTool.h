@@ -44,7 +44,7 @@ class BaseLinearFakeBkgTool : public BaseFakeBkgTool, virtual public ILinearFake
 {
   public:
 
-    BaseLinearFakeBkgTool(const std::string toolname);
+    BaseLinearFakeBkgTool(const std::string& toolname);
     virtual ~BaseLinearFakeBkgTool();
 
     virtual StatusCode initialize() override;

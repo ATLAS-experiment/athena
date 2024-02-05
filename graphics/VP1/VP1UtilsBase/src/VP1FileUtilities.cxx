@@ -87,7 +87,7 @@ void VP1FileUtilities::produceNewFile(const std::string& sourceFile,
 
   // if input directory name is empty don't add / to the file name
   // also take into account a possibility of trailing slash in directory name
-  if(m_inputDirectory!="" && m_inputDirectory.rfind("/")!=m_inputDirectory.size()-1)
+  if(m_inputDirectory!="" && m_inputDirectory.rfind('/')!=m_inputDirectory.size()-1)
     newFileStr << "/";
 
   QString latestEventFileName = inpDirName + QString(newFileStr.str().c_str()) + QString("latest_vp1event");
@@ -199,7 +199,7 @@ void VP1FileUtilities::cleanUp()
 
   if(int(list.size()) > m_fileLimit)
   {
-    QFileInfo fileInfo = list.at(0);
+    const QFileInfo& fileInfo = list.at(0);
 
     if(!dir.remove(fileInfo.fileName()))
       throw std::runtime_error("VP1FileUtilities::cleanup() - WARNING: Unable to do the clean up!");

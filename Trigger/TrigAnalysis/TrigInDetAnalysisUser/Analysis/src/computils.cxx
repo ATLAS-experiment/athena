@@ -358,7 +358,7 @@ void contents( std::vector<std::string>&  keys, TDirectory* td,
 	
 	bool matched = true;
 	for ( size_t i=patterns.size() ; i-- ; ) { 
-	  std::string pattern = patterns[i];  
+	  const std::string& pattern = patterns[i];  
 	  if ( contains(std::string(tobj->GetName()), pattern ) )  matched &=true;
 	  else matched = false;
 	}

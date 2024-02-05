@@ -31,7 +31,7 @@ VP1BatchUtilities::VP1BatchUtilities(const std::vector<std::string>& files) :
 {
 	std::cout << "Got vector of " << files.size() << " items" << std::endl;
 	// Iterate and print values of vector
-	for(std::string n : m_files) {
+	for(const std::string& n : m_files) {
 	        std::cout << n << '\n';
 	}
 }
