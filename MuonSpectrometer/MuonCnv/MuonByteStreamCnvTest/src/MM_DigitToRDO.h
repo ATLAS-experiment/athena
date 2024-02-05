@@ -1,19 +1,18 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMDIGITTORDO_H
 #define MMDIGITTORDO_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "MuonDigitContainer/MmDigitContainer.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRDO/MM_RawDataContainer.h"
 #include "NSWCalibTools/INSWCalibTool.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
-#include "MuonCablingData/MicroMega_CablingMap.h"
+#include "MuonCablingData/Nsw_CablingMap.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -30,8 +29,8 @@ private:
                                                                  "WriteHandleKey for Output MM_RawDataContainer"};
     SG::ReadHandleKey<MmDigitContainer> m_digitContainer{this, "InputObjectName", "MM_DIGITS", "ReadHAndleKey for Input MmDigitContainer"};
     ToolHandle<Muon::INSWCalibTool> m_calibTool{this, "CalibrationTool", ""};
-    //The cabling map is only needed for studies of the mm connector misalignmen, but not it regular jobs. Therefore the key is left empty here.
-    SG::ReadCondHandleKey<MicroMega_CablingMap> m_cablingKey{this, "CablingMap", "","Key of MicroMega_CablingMap"};
+    //The cabling map is only needed for studies of the mm connector misalignment, but not it regular jobs. Therefore the key is left empty here.
+    SG::ReadCondHandleKey<Nsw_CablingMap> m_cablingKey{this, "CablingMap", "","Key of Nsw_CablingMap"};
 };
 
 #endif

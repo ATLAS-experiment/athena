@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONMDT_CABLING_MICROMEGA_ZEBRADATA_H
 #define MUONMDT_CABLING_MICROMEGA_ZEBRADATA_H
@@ -13,27 +13,28 @@
  */
 
 #include <set>
+#include <cstdint>
 
-struct MicroMegaZebraData {
+struct NswZebraData {
    public:
-    int firstChannel{0};
-    int lastChannel{0};
-    int shiftChannel{0};
+    int16_t firstChannel{0};
+    int16_t lastChannel{0};
+    int16_t shiftChannel{0};
 };
 
-// overriding operators for MicroMegaZebraData struct to allow finding them in
+// overriding operators for NswZebraData struct to allow finding them in
 // maps and to sort them.
-inline bool operator<(const MicroMegaZebraData& a,
-                      const MicroMegaZebraData& b) {
+inline bool operator<(const NswZebraData& a,
+                      const NswZebraData& b) {
     return a.lastChannel < b.firstChannel;
 }
-inline bool operator<(const MicroMegaZebraData& a, const int b) {
+inline bool operator<(const NswZebraData& a, const int b) {
     return a.lastChannel < b;
 }
-inline bool operator<(const int a, const MicroMegaZebraData& b) {
+inline bool operator<(const int a, const NswZebraData& b) {
     return a < b.firstChannel;
 }
 
-using MicroMegaZebraSet = std::set<MicroMegaZebraData, std::less<>>;
+using NswZebraSet = std::set<NswZebraData, std::less<>>;
 
 #endif
