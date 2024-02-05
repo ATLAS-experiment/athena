@@ -1,14 +1,15 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Simple test wrapper for PyUtils.Decorators
 # Specifically for the deprecate decorator
 
 from __future__ import annotations
 import copy
+import os
 
 import unittest
-from PyUtils.Decorators import deprecate, log
+from PyUtils.Decorators import deprecate, forking, log
 import logging
 import inspect
 from contextlib import contextmanager
@@ -140,6 +141,23 @@ class DeprecateTestCase(unittest.TestCase):
             context="            self.assertEqual(warn_with_context(), 4)\n",
         )
         self.assertEqual(testlog, expected)
+
+
+class Foo:
+    pass
+
+class ForkingTestCase(unittest.TestCase):
+    def test_pid(self) -> None:
+        @forking
+        def f() -> int:
+            return os.getpid()
+        self.assertNotEqual(os.getpid(), f())
+
+    def test_class(self) -> None:
+        @forking
+        def f() -> Foo:
+            return Foo()
+        self.assertIsInstance(f(), Foo)
 
 
 if __name__ == "__main__":
