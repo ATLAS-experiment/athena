@@ -76,7 +76,7 @@ StatusCode SimpleMMClusterBuilderTool::getClusters(const EventContext& ctx,
         DEFINE_VECTOR(short int, mergeStripsTime, clustSize);
         DEFINE_VECTOR(int, mergeStripsCharge, clustSize);
         DEFINE_VECTOR(float, mergeStripsDriftDists, clustSize);
-        DEFINE_VECTOR(Amg::MatrixX, mergeStripsDriftDistErrors, clustSize);
+        DEFINE_VECTOR(AmgVector(2), mergeStripsDriftDistErrors, clustSize);
         double totalCharge{0.0};
         /// Merge all information together
         for (unsigned int mergeMe = mergeI; mergeMe < mergeJ; ++mergeMe) {
@@ -87,7 +87,8 @@ StatusCode SimpleMMClusterBuilderTool::getClusters(const EventContext& ctx,
             mergeStripsTime.push_back(mergePrd.time());
             mergeStripsCharge.push_back(mergePrd.charge());
             mergeStripsDriftDists.push_back(mergePrd.driftDist());
-            mergeStripsDriftDistErrors.push_back(mergePrd.localCovariance());
+            const Amg::MatrixX& cov{mergePrd.localCovariance()};
+            mergeStripsDriftDistErrors.emplace_back(cov(0,0), cov(1,1));
 
             totalCharge += mergePrd.charge();
         }
