@@ -28,7 +28,7 @@ run.type = 'athena'
 run.args = '--CA'
 run.threads = 1
 run.input = 'Single_mu_Run4'
-run.job_options = 'TriggerJobOpts/runHLT.py'
+run.job_options = 'TriggerJobOpts.runHLT'
 run.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
