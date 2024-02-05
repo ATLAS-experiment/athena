@@ -17,6 +17,8 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('trackSelection', True, type=bool)
         self.addOption ('recalibratePhyslite', True, type=bool)
         self.addOption ('maxEta', 2.7, type=float)
+        self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
+                        info='only for testing purposes, turn on to ignore NSW hits and fix a crash with older derivations (p-tag <p5834)')
 
     def makeAlgs (self, config) :
 
@@ -58,6 +60,7 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addPrivateTool( 'calibrationAndSmearingTool',
                         'CP::MuonCalibTool' )
         alg.calibrationAndSmearingTool.calibMode = 2 # choose ID+MS with no sagitta bias
+        alg.calibrationAndSmearingTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() is LHCPeriod.Run3)
         alg.muons = config.readName (self.containerName)
         alg.muonsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -96,6 +99,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('systematicBreakdown', False, type=bool)
         self.addOption ('onlyRecoEffSF', False, type=bool)
         self.addOption ('noEffSF', False, type=bool)
+        self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
+                        info='only for testing purposes, turn on to ignore NSW hits and fix a crash with older derivations (p-tag <p5834)')
 
     def makeAlgs (self, config) :
         from xAODMuon.xAODMuonEnums import xAODMuonEnums
@@ -129,7 +134,8 @@ class MuonWorkingPointConfig (ConfigBlock) :
                                'MuonSelectionAlg' + postfix )
         config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
         alg.selectionTool.MuQuality = quality
-        alg.selectionTool.IsRun3Geo = config.geometry() == LHCPeriod.Run3
+        alg.selectionTool.IsRun3Geo = config.geometry() is LHCPeriod.Run3
+        alg.selectionTool.ExcludeNSWFromPrecisionLayers = self.excludeNSWFromPrecisionLayers and (config.geometry() is LHCPeriod.Run3)
         alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
         alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
         alg.muons = config.readName (self.containerName)
@@ -161,7 +167,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_reco_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
-            if config.geometry() == LHCPeriod.Run3:
+            if config.geometry() is LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230309_Preliminary_r22run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
@@ -178,7 +184,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_BadMuonVeto_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = 'BadMuonVeto_HighPt'
-            if config.geometry() == LHCPeriod.Run3:
+            if config.geometry() is LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3' # not available as part of '230123_Preliminary_r22run3'!
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
@@ -195,7 +201,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_isol_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.isolation + 'Iso'
-            if config.geometry() == LHCPeriod.Run3:
+            if config.geometry() is LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230123_Preliminary_r22run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
@@ -212,7 +218,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_TTVA_bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = 'TTVA'
-            if config.geometry() == LHCPeriod.Run3:
+            if config.geometry() is LHCPeriod.Run3:
                 alg.efficiencyScaleFactorTool.CalibrationRelease = '230123_Preliminary_r22run3'
             alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
             alg.muons = config.readName (self.containerName)
