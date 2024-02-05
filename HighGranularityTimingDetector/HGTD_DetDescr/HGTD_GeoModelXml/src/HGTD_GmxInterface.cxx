@@ -202,7 +202,7 @@ void HGTD_GmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
     if(LGAD_module->size() !=0){
        for (IRDBRecord* typeParams:*LGAD_module){
             std::map<std::string,std::string> LGAD_moduleMap;
-            for(std::string paramName:LGAD_moduleParamNames){
+            for(const std::string& paramName:LGAD_moduleParamNames){
                 std::string paramValue = typeParams->getString(paramName);
                 LGAD_moduleMap[paramName] = paramValue;
             }
@@ -226,9 +226,9 @@ void HGTD_GmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
         }
         std::string typeName = fullPhysVolInfoString.substr(startLGAD);
         std::map<std::string, int> index;
-        for (std::string field:fields){
+        for (const std::string& field:fields){
             size_t first = fullPhysVolInfoString.find(field+"_");
-            size_t last = fullPhysVolInfoString.find("_",first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
+            size_t last = fullPhysVolInfoString.find('_',first+field.size()+1);//start looking only after end of first delimiter (plus 1 for the "_" appended) ends
             if(first==std::string::npos || last==std::string::npos){
                 ATH_MSG_DEBUG("Could not extract "<<field<<" from "<<fullPhysVolInfoString<<". Skipping");
                 continue;

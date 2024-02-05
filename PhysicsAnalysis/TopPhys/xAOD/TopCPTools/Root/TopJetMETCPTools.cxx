@@ -821,7 +821,7 @@ namespace top {
   }
 
   ECUtils::IEventCleaningTool* JetMETCPTools::setupJetEventCleaningTool(const std::string& WP,
-                                                                        ToolHandle<IJetSelector> JetCleaningToolHandle)
+                                                                        const ToolHandle<IJetSelector>& JetCleaningToolHandle)
   {
     ECUtils::IEventCleaningTool* tool = nullptr;
     std::string name = "JetEventCleaningTool" + WP;

@@ -70,7 +70,7 @@ namespace top {
     std::string erasePV0fromJetsName(std::string jetCollectionName);
 
     // EV decomposition functions
-    StatusCode checkExcludedSysts(BTaggingEfficiencyTool*, std::string);
+    StatusCode checkExcludedSysts(BTaggingEfficiencyTool*, const std::string&);
   };
 }  // namespace top
 

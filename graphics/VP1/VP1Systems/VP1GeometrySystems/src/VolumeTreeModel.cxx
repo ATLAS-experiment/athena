@@ -3,9 +3,10 @@
 */
 
 #include "VP1GeometrySystems/VolumeTreeModel.h"
+#include <QColor>
 #include <cassert>
 #include <iostream>
-#include <QColor>
+#include <utility>
 
 //////////////////////////////////////////////////////////////////////
 //NB: Since the QModelIndices uses void pointers, the VolumeHandle,
@@ -95,7 +96,7 @@ std::map<VP1GeoFlags::SubSystemFlag,QString> VolumeTreeModel::Imp::subsysflag2st
 void VolumeTreeModel::Imp::defineSubSystem(VP1GeoFlags::SubSystemFlag subsysflag, QString subsysname, SECTION section)
 {
   Imp::subsysflag2section[subsysflag] = section;
-  Imp::subsysflag2string[subsysflag] = subsysname;
+  Imp::subsysflag2string[subsysflag] = std::move(subsysname);
 }
 
 //____________________________________________________________________

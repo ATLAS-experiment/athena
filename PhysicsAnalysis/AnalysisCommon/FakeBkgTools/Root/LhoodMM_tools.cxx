@@ -143,7 +143,7 @@ void LhoodMM_tools::reset() {
 
 }
 
-StatusCode LhoodMM_tools::setFitType(std::string ft) {
+StatusCode LhoodMM_tools::setFitType(const std::string& ft) {
   if (ft == "FF") {
     m_doFakeFactor = true;
     return StatusCode::SUCCESS;
