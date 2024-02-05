@@ -216,7 +216,7 @@ StatusCode ClusterTimeProjectionMMClusterBuilderTool::writeClusterPrd(const Even
     DEFINE_VECTOR(short int, stripTimes, constituents.size());
     DEFINE_VECTOR(uint16_t, stripNumbers, constituents.size());
     DEFINE_VECTOR(float, stripDriftDists, constituents.size());
-    DEFINE_VECTOR(Amg::MatrixX, stripDriftDistErrors, constituents.size());
+    DEFINE_VECTOR(AmgVector(2), stripDriftDistErrors, constituents.size());
 
     int totalCharge{0};
     for (const Muon::MMPrepData& clustFeat : constituents) {
@@ -225,7 +225,8 @@ StatusCode ClusterTimeProjectionMMClusterBuilderTool::writeClusterPrd(const Even
         stripTimes.push_back(clustFeat.time());
         stripCharges.push_back(clustFeat.charge());
         stripDriftDists.push_back(clustFeat.driftDist());
-        stripDriftDistErrors.push_back(clustFeat.localCovariance());
+        const Amg::MatrixX cov{clustFeat.localCovariance()};
+        stripDriftDistErrors.emplace_back(cov(0,0), cov(1,1));
         totalCharge += clustFeat.charge();
     }
     if (!m_writeStripProperties) { stripNumbers.clear(); }
