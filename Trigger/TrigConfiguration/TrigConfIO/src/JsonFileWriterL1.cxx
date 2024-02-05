@@ -163,6 +163,19 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
             jThr["seedMultiplicity"] = zbThr.seedMultiplicity();
          } catch(std::bad_cast&) {};
 
+         // ZBTopo
+         try {
+            auto zbTopoThr = dynamic_cast<const TrigConf::L1Threshold_ZBTopo &>(*thr);
+            jThr["mask0"] = zbTopoThr.mask0();
+            jThr["mask0"] = zbTopoThr.mask0();
+            jThr["mask0"] = zbTopoThr.mask0();
+            jThr["mask0"] = zbTopoThr.mask0();
+            jThr["mask0"] = zbTopoThr.mask0();
+            jThr["mask0"] = zbTopoThr.mask0();
+            jThr["seedBcdelay"] = zbTopoThr.seedBcdelay();
+            
+         } catch(std::bad_cast&) {};
+         
          // eEM
          try {
             auto eEMThr = dynamic_cast<const TrigConf::L1Threshold_eEM &>(*thr);

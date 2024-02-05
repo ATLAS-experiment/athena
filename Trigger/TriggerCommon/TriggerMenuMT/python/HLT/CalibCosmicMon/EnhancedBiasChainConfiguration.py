@@ -21,7 +21,8 @@ l1seeds = { 'low'  : \
                 'L1_JPSI-1M5-eEM9',\
                 'L1_MU8F',\
                 'L1_ZB',\
-                'L1_ZB_eEM18'],\
+              #  'L1_ZB_eEM18'
+                ],\
              'medium' : \
                [
                 'L1_2eEM18L',\
