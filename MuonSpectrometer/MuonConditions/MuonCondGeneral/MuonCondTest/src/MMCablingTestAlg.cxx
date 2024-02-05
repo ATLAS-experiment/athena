@@ -31,7 +31,7 @@ StatusCode MMCablingTestAlg::execute(){
       return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<MicroMega_CablingMap> cabling{m_cablingKey,ctx};
+  SG::ReadCondHandle<Nsw_CablingMap> cabling{m_cablingKey,ctx};
   if (!cabling.isValid()) {
      ATH_MSG_ERROR("Failed to retrieve the Mdt cabling "<<m_cablingKey.fullKey());
      return StatusCode::FAILURE;

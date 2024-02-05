@@ -9,6 +9,7 @@
 #include "MuonSTGC_CnvTools/ISTGC_ROD_Decoder.h"
 #include "MuonCondData/NswDcsDbData.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonCablingData/Nsw_CablingMap.h"
 
 class sTgcIdHelper;
 
@@ -34,6 +35,9 @@ class STGC_ROD_Decoder : virtual public ISTGC_ROD_Decoder, public AthAlgTool
                                                                             "Key of input MuonDetectorManager condition data"}; 
     SG::ReadCondHandleKey<NswDcsDbData> m_dscKey{this, "DcsKey", "NswDcsDbData",
         "Key of NswDcsDbData object containing DCS conditions data"};
+
+    SG::ReadCondHandleKey<Nsw_CablingMap> m_cablingKey{this, "CablingMap", "","Key of Nsw_CablingMap"};
+
 
 };
 

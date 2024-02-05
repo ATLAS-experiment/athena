@@ -25,9 +25,9 @@ StatusCode MM_DigitToRDO::execute(const EventContext& ctx) const {
     SG::ReadHandle<MmDigitContainer> digits(m_digitContainer, ctx);
     std::unique_ptr<MM_RawDataContainer> rdos = std::make_unique<MM_RawDataContainer>(m_idHelperSvc->mmIdHelper().module_hash_max());
 
-    const MicroMega_CablingMap* mmCablingMap{nullptr};
+    const Nsw_CablingMap* mmCablingMap{nullptr};
     if (!m_cablingKey.empty()) {
-        SG::ReadCondHandle<MicroMega_CablingMap>  readCondHandle{m_cablingKey, ctx};
+        SG::ReadCondHandle<Nsw_CablingMap> readCondHandle{m_cablingKey, ctx};
         if(!readCondHandle.isValid()){
           ATH_MSG_ERROR("Cannot find Micromegas cabling map!");
           return StatusCode::FAILURE;
