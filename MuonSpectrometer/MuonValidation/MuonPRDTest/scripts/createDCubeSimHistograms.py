@@ -105,7 +105,7 @@ if __name__ == "__main__":
         stgchists = []
     
         # truth information
-        for ntruth in range(0,len(inputTree.MuEntry_Particle_Pt)):
+        for ntruth in range(0,len(inputTree.MuEntry_ParticlePt)):
             truthhists += [MyHistoFiller( chamber_name = "TruthInfo", eta_sel = None, sector_sel = None )]
             truthhists[ntruth].fill(inputTree,ntruth)
         
