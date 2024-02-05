@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonReadoutGeometryR4/StripDesign.h>
@@ -10,6 +10,8 @@
 
 #include <TGraph.h>
 #include <TFile.h>
+#include <TH2I.h>
+#include <TRandom3.h>
 using namespace MuonGMR4;
 
 void addPoint(TGraph& graph, const Amg::Vector2D& point) {
@@ -34,6 +36,40 @@ void createGraph(const StripDesign& design, TFile& outFile, const std::string& g
     std::cout<<"################################################################"<<std::endl;
     outFile.WriteObject(graph.get(), graphName.c_str());
 }
+void testChannelNumber(const StripDesign& design, TFile& outFile, const std::string& histoName) {
+    auto edgePoint = [&design](unsigned int idx, bool min){
+        if (min) {
+            double minLeft  = std::min(design.cornerBotLeft()[idx], design.cornerBotRight()[idx]);
+            double minRight = std::min(design.cornerTopLeft()[idx], design.cornerTopRight()[idx]);
+            return std::min(minLeft, minRight) - 25.*Gaudi::Units::mm;
+        }
+        double maxLeft  = std::max(design.cornerBotLeft()[idx], design.cornerBotRight()[idx]);
+        double maxRight = std::max(design.cornerTopLeft()[idx], design.cornerTopRight()[idx]);
+        return std::max(maxLeft, maxRight) + 25.*Gaudi::Units::mm;
+        
+    };
+    const double lowX  = edgePoint(Amg::x, true);
+    const double highX = edgePoint(Amg::x, false);
+    const double lowY  = edgePoint(Amg::y, true);
+    const double highY = edgePoint(Amg::y, false);
+    const unsigned nBinX = (highX -lowX) / 0.5*Gaudi::Units::mm;
+    const unsigned nBinY = (highY -lowY) / 0.5*Gaudi::Units::mm;
+    
+    std::unique_ptr<TH2I> histo = std::make_unique<TH2I>(histoName.c_str(),
+                                                         "channels:x[mm];y[mm];channelNumber", 
+                                                          nBinX, lowX, highX,
+                                                          nBinY, lowY, highY);
+    
+    for (unsigned binX = 1; binX < nBinX; ++ binX) {
+        for (unsigned binY = 1; binY < nBinY; ++binY) {
+            const Amg::Vector2D pos{histo->GetXaxis()->GetBinCenter(binX),
+                                    histo->GetYaxis()->GetBinCenter(binY)};
+            histo->SetBinContent(binX, binY, design.stripNumber(pos));
+        }
+    }
+    outFile.WriteObject(histo.get(), histo->GetName());
+
+}
 
 int main() {
     constexpr double halfHeight = 200. * Gaudi::Units::mm;
@@ -52,6 +88,7 @@ int main() {
                                      stripPitch, stripWidth, numStrips, 0);
     /// 
     createGraph(nominalDesign, *file, "NominalDesign");
+    testChannelNumber(nominalDesign, *file, "NominalNumbers");
     
     /// Flip the strip design
     StripDesign flippedDesign{};
@@ -62,6 +99,7 @@ int main() {
                                      stripPitch, stripWidth, numStripsRot, 0);
    
     createGraph(flippedDesign,*file, "FlippedDesign");
+    testChannelNumber(flippedDesign, *file, "FlippedNumbers");
 
     StripDesign rotatedDesign{};
     rotatedDesign.defineTrapezoid(shortEdge, longEdge, halfHeight, stereoAngle);
@@ -69,6 +107,8 @@ int main() {
                                         stripPitch, stripWidth, numStrips, 0);
     /// 
     createGraph(rotatedDesign, *file, "StereoDesign");
+    testChannelNumber(rotatedDesign, *file, "StereoNumbers");
+
 
     StripDesign rotatedDesignNeg{};
     rotatedDesignNeg.defineTrapezoid(shortEdge, longEdge, halfHeight, -stereoAngle);
@@ -103,8 +143,10 @@ int main() {
         groupDesign.defineStripLayout(Amg::Vector2D{-halfHeight + 0.5*stripPitch,0},
                                                     stripPitch, stripWidth, nCycles, 0);
 
+
     }
     createGraph(groupDesign, *file, "WireGroups");
+    testChannelNumber(groupDesign, *file, "WireNumbers");
 
     WireGroupDesign flipedWireGroups{};
     flipedWireGroups.defineTrapezoid(shortEdge, longEdge, halfHeight);
@@ -133,18 +175,15 @@ int main() {
     flippedRadialDesign.defineTrapezoid(shortEdge, longEdge, halfHeight);
     flippedRadialDesign.flipTrapezoid();
     {
-        constexpr std::array<double, 15> bottomMountings{-0.95 * shortEdge, -0.76 * shortEdge, -0.63 *shortEdge, 
-                                                         -0.57 * shortEdge, -0.41 * shortEdge, -0.21 *shortEdge, 
-                                                                         0,  0.16 * shortEdge,  0.34 *shortEdge, 
-                                                         0.42 *  shortEdge,  0.53 * shortEdge,  0.66 *shortEdge,
-                                                         0.75 *  shortEdge,  0.86 * shortEdge,  0.99 *shortEdge};
-     
-        constexpr std::array<double, 15> topMountings{-0.99 *longEdge, -0.86 *longEdge, -0.75 *longEdge, 
-                                                      -0.66 *longEdge, -0.53 *longEdge, -0.42 *longEdge, 
-                                                                    0,  0.21 *longEdge,  0.34 *longEdge, 
-                                                       0.41 *longEdge,  0.57 *longEdge,  0.63 *longEdge,
-                                                       0.75 *longEdge,  0.86 *longEdge,  0.99 *longEdge};
-
+        TRandom3 rand{};        
+        std::array<double, 25> bottomMountings{}, topMountings{};
+        for (size_t i = 0 ; i < bottomMountings.size(); ++i){
+            bottomMountings[i] = rand.Uniform(-shortEdge, shortEdge);
+            topMountings[i] = rand.Uniform(-longEdge, longEdge);
+        }
+        std::sort(bottomMountings.begin(), bottomMountings.end());
+        std::sort(topMountings.begin(), topMountings.end());
+        
     
         for (size_t i =0; i < bottomMountings.size(); ++i) {
             flippedRadialDesign.addStrip(bottomMountings[i], topMountings[i]);
@@ -167,5 +206,6 @@ int main() {
         }
     }
     createGraph(RadialDesign, *file, "RadialDesign");
+    testChannelNumber(RadialDesign, *file, "RadialNumbers");
     return EXIT_SUCCESS;
 }

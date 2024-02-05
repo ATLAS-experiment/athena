@@ -1,0 +1,84 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRYR4_WIREGROUPDESIGN_ICC
+#define MUONREADOUTGEOMETRYR4_WIREGROUPDESIGN_ICC
+
+#include <MuonReadoutGeometryR4/WireGroupDesign.h>
+
+namespace MuonGMR4 {
+    using CheckVector2D = WireGroupDesign::CheckVector2D;
+    inline Amg::Vector2D WireGroupDesign::stripPosition(int groupNum) const {
+        if (groupNum >= static_cast<int>(m_groups.size())) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wire group number "<<groupNum
+                           <<" is out of range.");
+            return Amg::Vector2D::Zero();
+        }
+        const wireGroup& wireGrp = m_groups[groupNum];
+        return StripDesign::stripPosition(0) + 
+               (wireGrp.accumlWires + wireGrp.numWires/2)*stripPitch() * stripNormal();
+    }
+    inline CheckVector2D WireGroupDesign::wirePosition(unsigned int groupNum, 
+                                                unsigned int wireNum) const {
+       unsigned int grpIdx = groupNum - firstStripNumber();
+       if (grpIdx >= m_groups.size()) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wire group number "<<groupNum
+                           <<"is out of range.");
+            return std::nullopt;
+        }
+        const wireGroup& wireGrp = m_groups[grpIdx];
+        if (wireNum >= wireGrp.numWires){
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wire number "
+                        <<wireNum<<" is out of range. Expect in group "<<groupNum<<
+                        " [1-"<<wireGrp.numWires<<"] wires.");
+            return std::nullopt;
+        }
+        return std::make_optional<Amg::Vector2D>(StripDesign::stripPosition(0) +  
+                                                 (wireGrp.accumlWires + (wireNum - 1))*stripPitch() * stripNormal());
+    }
+    inline CheckVector2D WireGroupDesign::leftWireEdge(unsigned int groupNum,
+                                                unsigned int wireNum) const {
+        CheckVector2D wPos{wirePosition(groupNum, wireNum)};
+        if(!wPos) return std::nullopt;
+        return leftInterSect(*wPos);
+    }
+        
+    inline CheckVector2D WireGroupDesign::rightWireEdge(unsigned int groupNum,
+                                                 unsigned int wireNum) const {
+        CheckVector2D wPos{wirePosition(groupNum, wireNum)};
+        if(!wPos) return std::nullopt;
+        return rightInterSect(*wPos);
+    }
+    inline double WireGroupDesign::wireLength(unsigned int groupNum,
+                                       unsigned int wireNum) const{
+        CheckVector2D wirePos{}, lIsect{}, rIsect{};
+        if (!(wirePos = wirePosition(groupNum, wireNum)) ||
+            !(lIsect = leftInterSect(*wirePos)) ||
+            !(rIsect = rightInterSect(*wirePos))){
+             return 0;
+        }        
+        return ((*lIsect)- (*rIsect)).mag();
+    }
+
+    inline int WireGroupDesign::stripNumber(const Amg::Vector2D& extPos) const {
+        const double distFromFirst = stripNormal().dot(extPos - StripDesign::stripPosition(0));
+        /// The external position is waaay before the first wire position
+        if (distFromFirst < 0 || !insideTrapezoid(extPos)){
+            return -1;
+        }
+        /// Find the first group whose first last wire is encapsulating the distance
+        wireGrpVectorItr strip_itr = std::lower_bound(m_groups.begin(), m_groups.end(), 
+                                                      distFromFirst,
+                                        [this](const wireGroup& grp, const double dist) {
+                                            const double lastWire = stripPitch() *(grp.accumlWires + grp.numWires);
+                                            return lastWire < dist;
+                                        });
+        if (strip_itr == m_groups.end()) {
+            return -1;
+        }
+        return std::distance(m_groups.begin(), strip_itr) + firstStripNumber();
+    }
+
+
+}
+#endif

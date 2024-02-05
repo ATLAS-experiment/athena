@@ -37,6 +37,8 @@ class RadialStripDesign: public StripDesign {
           * @param: Strip number in the global scheme [1- nStrips()] 
         */
         Amg::Vector2D stripDir(int stripNumber) const;
+        /** @bief: Returns the vector perpendicular to the stripDir and pointing to the next strip*/
+        Amg::Vector2D stripNormal(int stripNumber) const;
         /** @brief: Returns the intersection of the left strip edge at the bottom panel's edge*/
         Amg::Vector2D stripLeftEdgeBottom(int stripNumber) const;
         /** @brief: Returns the intersecton of the strip right edge at the bottom panel's edge*/
@@ -48,12 +50,14 @@ class RadialStripDesign: public StripDesign {
 
         /// Returns the number of defined strips
         int numStrips() const override;
+        /// Returns the associated channel number of an external vector
+        int stripNumber(const Amg::Vector2D& extPos) const override final;
 
-    private:        
-        Amg::Vector2D panelEdgeCenter() const;
-        Amg::Vector2D leftInterSect(int stripNum, bool uncapped = false) const override final;
-        Amg::Vector2D rightInterSect(int stripNum, bool uncapped = false) const override final;        
-        /// Helper struct to 
+
+    private:
+        CheckVector2D leftInterSect(int stripNum, bool uncapped = false) const override final;
+        CheckVector2D rightInterSect(int stripNum, bool uncapped = false) const override final;
+        /// @brief Helper struct to cache the 
         struct stripEdges{
             stripEdges(double dBot, double dTop):
                 distOnBottom{dBot},
@@ -62,7 +66,9 @@ class RadialStripDesign: public StripDesign {
             double distOnBottom{0.};
             double distOnTop{0.};
         };
-        std::vector<stripEdges> m_strips{};
+        using stripEdgeVec = std::vector<stripEdges>;
+        using stripEdgeVecItr = stripEdgeVec::const_iterator;
+        stripEdgeVec m_strips{};
 };
 
 struct RadialDesignSorter{

@@ -34,22 +34,29 @@ class WireGroupDesign: public StripDesign {
         /// Returns the positition of the i-th wire in the g-th group
         /// groupNum    [1; numStrips()
         /// wire number [1; numWiresInGroup()
-        Amg::Vector2D wirePosition(unsigned int groupNum, 
+        CheckVector2D wirePosition(unsigned int groupNum, 
                                    unsigned int wireNum) const;
     
         /// @brief Returns the edge point at negative y
         /// @param groupNum [1; numStrips()]
         /// @param wireNum  [1; numWiresInGroup()]
         /// @return  
-        Amg::Vector2D leftWireEdge(unsigned int groupNum,
+        CheckVector2D leftWireEdge(unsigned int groupNum,
                                    unsigned int wireNum) const;
         
         /// @brief Returns the edge point at positive y
         /// @param groupNum [1; numStrips()]
         /// @param wireNum  [1; numWiresInGroup()]
         /// @return  
-        Amg::Vector2D rightWireEdge(unsigned int groupNum,
+        CheckVector2D rightWireEdge(unsigned int groupNum,
                                     unsigned int wireNum) const;
+    
+        int stripNumber(const Amg::Vector2D& pos) const override;
+
+        /// Returns the length of the i-th wire in group j
+        double wireLength(unsigned int groupNum,
+                          unsigned int wireNum) const;
+
     private:
         Amg::Vector2D stripPosition(int stripNum) const override final;
         /// @brief helper construct to cache the number of wires in each group as well
@@ -62,7 +69,9 @@ class WireGroupDesign: public StripDesign {
             /// Number of all wires in the previous groups
             unsigned int accumlWires{0};
         };
-        std::vector<wireGroup> m_groups{};
+        using wireGrpVector = std::vector<wireGroup>;
+        using wireGrpVectorItr = wireGrpVector::const_iterator;
+        wireGrpVector m_groups{};
 };
 
 struct WireDesignSorter{
@@ -77,4 +86,5 @@ struct WireDesignSorter{
 using WireGroupDesignSet = std::set<WireDesignPtr, WireDesignSorter>;
 
 }
+#include <MuonReadoutGeometryR4/WireGroupDesign.icc>
 #endif
