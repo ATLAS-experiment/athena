@@ -7,12 +7,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from TileConfiguration.TileConfigFlags import TileRunType
 
-def TileCellBuilderCfg(flags, **kwargs):
+def TileCellBuilderCfg(flags, mergeChannels=True, **kwargs):
     """Return component accumulator with configured private Tile Cell builder tool
 
     Arguments:
         flags  -- Athena configuration flags
         SkipGain - skip given gain. Defaults to -1 [use all gains]. Possible values: 0 [LG], 1 [HG].
+        mergeChannels -- merge DSP results with offline reco results. Defaults to True.
     """
 
     acc = ComponentAccumulator()
@@ -22,6 +23,8 @@ def TileCellBuilderCfg(flags, **kwargs):
 
     kwargs.setdefault('MBTSContainer', 'MBTSContainer' if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
     kwargs.setdefault('E4prContainer', 'E4prContainer' if flags.GeoModel.Run is LHCPeriod.Run2 else "")
+
+    kwargs['mergeChannels'] = mergeChannels
 
     if kwargs['SkipGain'] not in [-1, 0, 1]:
         raise(Exception("Invalid Tile gain requsted to be skipped: %s" % kwargs['SkipGain']))
@@ -55,15 +58,13 @@ def TileCellBuilderCfg(flags, **kwargs):
         from TileConditions.TileDCSConfig import TileDCSCondAlgCfg
         acc.merge( TileDCSCondAlgCfg(flags) )
 
-    if not (flags.Input.isMC or flags.Overlay.DataOverlay) and 'TileDSPRawChannelContainer' not in kwargs:
+    if not (flags.Input.isMC or flags.Overlay.DataOverlay) and mergeChannels and 'TileDSPRawChannelContainer' not in kwargs:
         from TileRecUtils.TileRawChannelCorrectionConfig import TileRawChannelCorrectionAlgCfg
         corrAlgAcc = TileRawChannelCorrectionAlgCfg(flags)
         tileRawChannelCorrectionAlg = corrAlgAcc.getPrimary()
         tileRawChannelContainerDSP = tileRawChannelCorrectionAlg.OutputRawChannelContainer
         kwargs['TileDSPRawChannelContainer'] = tileRawChannelContainerDSP
         acc.merge( corrAlgAcc )
-    else:
-        kwargs.setdefault('mergeChannels', False)
 
     TileCellBuilder=CompFactory.TileCellBuilder
     acc.setPrivateTools( TileCellBuilder(**kwargs) )
