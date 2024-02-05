@@ -274,9 +274,9 @@ class MyHistoFiller(object):
     def fill(self, TTree, n):
     
         if self.__chamber_name == "TruthInfo":   
-            MyHistoFiller.truthPtHist.Fill(TTree.MuEntry_Particle_Pt[n]*0.001)
-            MyHistoFiller.truthEtaHist.Fill(TTree.MuEntry_Particle_Eta[n])
-            MyHistoFiller.truthPhiHist.Fill(TTree.MuEntry_Particle_Phi[n])
+            MyHistoFiller.truthPtHist.Fill(TTree.MuEntry_ParticlePt[n]*0.001)
+            MyHistoFiller.truthEtaHist.Fill(TTree.MuEntry_ParticleEta[n])
+            MyHistoFiller.truthPhiHist.Fill(TTree.MuEntry_ParticlePhi[n])
 
         if self.__chamber_name == "RPC_Sim":
             if not (self.__eta_sel(TTree) and self.__sector_sel(TTree)):
@@ -289,7 +289,7 @@ class MyHistoFiller(object):
                 MyHistoFiller.rpcGlobalX.Fill(TTree.RPC_SIM_GlobalPositionX[n])
                 MyHistoFiller.rpcGlobalY.Fill(TTree.RPC_SIM_GlobalPositionY[n])
                 MyHistoFiller.rpcGlobalZ.Fill(TTree.RPC_SIM_GlobalPositionZ[n])
-                MyHistoFiller.rpcGasGap.Fill(ord(TTree.RPC_SIM_GasGap[n]))
+                MyHistoFiller.rpcGasGap.Fill(ord(TTree.RPC_SIM_gasGap[n]))
                 
         if self.__chamber_name == "RPC_Digit":
             if not (self.__eta_sel(TTree) and self.__sector_sel(TTree)):
@@ -302,7 +302,7 @@ class MyHistoFiller(object):
                 MyHistoFiller.rpcDigitglobalX.Fill(TTree.Digits_RPC_globalPosX[n])
                 MyHistoFiller.rpcDigitglobalY.Fill(TTree.Digits_RPC_globalPosY[n])
                 MyHistoFiller.rpcDigitglobalZ.Fill(TTree.Digits_RPC_globalPosZ[n])
-                MyHistoFiller.rpcDigitGasGap.Fill(ord(TTree.Digits_RPC_GasGap[n]))
+                MyHistoFiller.rpcDigitGasGap.Fill(ord(TTree.Digits_RPC_gasGap[n]))
                 MyHistoFiller.rpcDigitdoubletR.Fill(ord(TTree.Digits_RPC_doubletR[n]))
                 MyHistoFiller.rpcDigitdoubletZ.Fill(ord(TTree.Digits_RPC_doubletZ[n]))
                 MyHistoFiller.rpcDigitdoubletPhi.Fill(ord(TTree.Digits_RPC_doubletPhi[n]))
@@ -315,7 +315,7 @@ class MyHistoFiller(object):
                 MyHistoFiller.rpcDigitglobalZX.Fill(TTree.Digits_RPC_globalPosZ[n],TTree.Digits_RPC_globalPosX[n])
 
                 # Cut on BIS78 modules only -- remove stationEta condition to also plot BIS16 in the future 
-                if TTree.Digits_RPC_stationName[n]=="BIS" and MyHistoFiller.Eta(ord(TTree.Digits_RPC_stationEta[n]))>6: 
+                if TTree.Digits_RPC_stationIndex[n]=="BIS" and MyHistoFiller.Eta(ord(TTree.Digits_RPC_stationEta[n]))>6: 
                     #use measuresPhi=0 to extract local eta/Y coordinate from localX
                     if TTree.Digits_RPC_measuresPhi[n]==0:
                         MyHistoFiller.bis_rpcDigitlocalY.Fill(TTree.Digits_RPC_localPosX[n])
@@ -343,7 +343,7 @@ class MyHistoFiller(object):
                     MyHistoFiller.bis_rpcDigitglobalX.Fill(TTree.Digits_RPC_globalPosX[n])
                     MyHistoFiller.bis_rpcDigitglobalY.Fill(TTree.Digits_RPC_globalPosY[n])
                     MyHistoFiller.bis_rpcDigitglobalZ.Fill(TTree.Digits_RPC_globalPosZ[n])
-                    MyHistoFiller.bis_rpcDigitGasGap.Fill(ord(TTree.Digits_RPC_GasGap[n]))
+                    MyHistoFiller.bis_rpcDigitGasGap.Fill(ord(TTree.Digits_RPC_gasGap[n]))
                     MyHistoFiller.bis_rpcDigitdoubletR.Fill(ord(TTree.Digits_RPC_doubletR[n]))
                     MyHistoFiller.bis_rpcDigitdoubletZ.Fill(ord(TTree.Digits_RPC_doubletZ[n]))
                     MyHistoFiller.bis_rpcDigitdoubletPhi.Fill(ord(TTree.Digits_RPC_doubletPhi[n]))
@@ -392,7 +392,7 @@ class MyHistoFiller(object):
                 MyHistoFiller.mdtDigitglobalZY.Fill(TTree.Digits_MDT_globalPosZ[n],TTree.Digits_MDT_globalPosY[n])
                 MyHistoFiller.mdtDigitglobalZX.Fill(TTree.Digits_MDT_globalPosZ[n],TTree.Digits_MDT_globalPosX[n])
                 # Cut on BIS78 modules only
-                if TTree.Digits_MDT_stationName[n]=="BIS" and MyHistoFiller.Eta(ord(TTree.Digits_MDT_stationEta[n]))>6: 
+                if TTree.Digits_MDT_stationIndex[n]=="BIS" and MyHistoFiller.Eta(ord(TTree.Digits_MDT_stationEta[n]))>6: 
                    MyHistoFiller.bis_mdtDigitlocalTubePosX.Fill(TTree.Digits_MDT_localTubePosX[n])
                    MyHistoFiller.bis_mdtDigitlocalTubePosY.Fill(TTree.Digits_MDT_localTubePosY[n])
                    MyHistoFiller.bis_mdtDigitlocalTubePosZ.Fill(TTree.Digits_MDT_localTubePosZ[n])
@@ -505,7 +505,7 @@ class MyHistoFiller(object):
                 MyHistoFiller.tgcGlobalX.Fill(TTree.TGC_Sim_hitGlobalPositionX[n])
                 MyHistoFiller.tgcGlobalY.Fill(TTree.TGC_Sim_hitGlobalPositionY[n])
                 MyHistoFiller.tgcGlobalZ.Fill(TTree.TGC_Sim_hitGlobalPositionZ[n])
-                MyHistoFiller.tgcGasGap.Fill(ord(TTree.TGC_Sim_GasGap[n]))
+                MyHistoFiller.tgcGasGap.Fill(ord(TTree.TGC_Sim_gasGap[n]))
                 MyHistoFiller.tgcChannel.Fill(ord(TTree.TGC_Sim_channel[n]))
                 MyHistoFiller.tgcGlobalTime.Fill(TTree.TGC_Sim_globalTime[n])
                 MyHistoFiller.tgcKineticEnergy.Fill(TTree.TGC_Sim_kineticEnergy[n])
@@ -517,7 +517,7 @@ class MyHistoFiller(object):
             else:
                 MyHistoFiller.TGCDigitStationEta.Fill(MyHistoFiller.Eta(ord(TTree.Digits_TGC_stationEta[n])))
                 MyHistoFiller.TGCDigitStationPhi.Fill(ord(TTree.Digits_TGC_stationPhi[n]))
-                MyHistoFiller.TGCDigitGasGap.Fill(ord(TTree.Digits_TGC_GasGap[n]))
+                MyHistoFiller.TGCDigitGasGap.Fill(ord(TTree.Digits_TGC_gasGap[n]))
                 MyHistoFiller.TGCDigitChannel.Fill(ord(TTree.Digits_TGC_channel[n]))
                 MyHistoFiller.TGCDigitlocalX.Fill(TTree.Digits_TGC_localPosX[n])
                 MyHistoFiller.TGCDigitlocalY.Fill(TTree.Digits_TGC_localPosY[n])
@@ -531,7 +531,7 @@ class MyHistoFiller(object):
             else:
                 MyHistoFiller.TGCSDOStationEta.Fill(MyHistoFiller.Eta(ord(TTree.SDO_TGC_stationEta[n])))
                 MyHistoFiller.TGCSDOStationPhi.Fill(ord(TTree.SDO_TGC_stationPhi[n]))
-                MyHistoFiller.TGCSDOGasGap.Fill(ord(TTree.SDO_TGC_GasGap[n]))
+                MyHistoFiller.TGCSDOGasGap.Fill(ord(TTree.SDO_TGC_gasGap[n]))
                 MyHistoFiller.TGCSDOChannel.Fill(ord(TTree.SDO_TGC_channel[n]))
                 MyHistoFiller.TGCSDOWord.Fill(TTree.SDO_TGC_word[n])
                 MyHistoFiller.TGCSDOBarcode.Fill(TTree.SDO_TGC_barcode[n])
@@ -548,7 +548,7 @@ class MyHistoFiller(object):
             else:
                 MyHistoFiller.TGCRDOStationEta.Fill(MyHistoFiller.Eta(ord(TTree.RDO_TGC_stationEta[n])))
                 MyHistoFiller.TGCRDOStationPhi.Fill(ord(TTree.RDO_TGC_stationPhi[n]))
-                MyHistoFiller.TGCRDOGasGap.Fill(ord(TTree.RDO_TGC_GasGap[n]))
+                MyHistoFiller.TGCRDOGasGap.Fill(ord(TTree.RDO_TGC_gasGap[n]))
                 MyHistoFiller.TGCRDOChannel.Fill(ord(TTree.RDO_TGC_channel[n]))
                 MyHistoFiller.TGCRDOGlobalX.Fill(TTree.RDO_TGC_globalPosX[n])
                 MyHistoFiller.TGCRDOGlobalY.Fill(TTree.RDO_TGC_globalPosY[n])
@@ -561,7 +561,7 @@ class MyHistoFiller(object):
             else:
                 MyHistoFiller.TGCPRDStationEta.Fill(MyHistoFiller.Eta(ord(TTree.PRD_TGC_stationEta[n])))
                 MyHistoFiller.TGCPRDStationPhi.Fill(ord(TTree.PRD_TGC_stationPhi[n]))
-                MyHistoFiller.TGCPRDGasGap.Fill(ord(TTree.PRD_TGC_GasGap[n]))
+                MyHistoFiller.TGCPRDGasGap.Fill(ord(TTree.PRD_TGC_gasGap[n]))
                 MyHistoFiller.TGCPRDChannel.Fill(ord(TTree.PRD_TGC_channel[n]))
                 MyHistoFiller.TGCPRDisStrip.Fill(TTree.PRD_TGC_isStrip[n])
                 MyHistoFiller.TGCPRDGlobalX.Fill(TTree.PRD_TGC_globalPosX[n])
