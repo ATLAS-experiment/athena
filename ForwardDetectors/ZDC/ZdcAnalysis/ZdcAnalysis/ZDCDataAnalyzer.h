@@ -69,9 +69,11 @@ private:
   std::array<float, 2> m_moduleSum{};
   std::array<float, 2> m_moduleSumErrSq{};
   std::array<float, 2> m_moduleSumPreSample{};
+  std::array<float, 2> m_moduleSumBkgdFrac{};
 
   std::array<float, 2> m_calibModuleSum{};
   std::array<float, 2> m_calibModuleSumErrSq{};
+  std::array<float, 2> m_calibModSumBkgdFrac{};
 
   std::array<float, 2> m_averageTime{};
   std::array<bool, 2> m_fail{};
@@ -100,9 +102,11 @@ public:
 
   float GetModuleSum(size_t side) const {return m_moduleSum.at(side);}
   float GetModuleSumErr(size_t side) const {return std::sqrt(m_moduleSumErrSq.at(side));}
-
+  float GetSideBkgdFrac(size_t side) const {return m_moduleSumBkgdFrac.at(side);}
+  
   float GetCalibModuleSum(size_t side) const {return m_calibModuleSum.at(side);}
   float GetCalibModuleSumErr(size_t side) const {return std::sqrt(m_calibModuleSumErrSq.at(side));}
+  float GetSideCalibBkgdFrac(size_t side) const {return m_calibModSumBkgdFrac.at(side);}
 
   float GetModuleSumPreSample(size_t side) const {return m_moduleSumPreSample.at(side);}
 
@@ -154,10 +158,13 @@ public:
                     const ZDCModuleFloatArray&  deltaT0MinLG, const ZDCModuleFloatArray& deltaT0MaxLG);
 
 
-  void SetTimingCorrParams(const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
-                           const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr);
+  void SetTimingCorrParams(ZDCPulseAnalyzer::TimingCorrMode mode, float refADC, float refScale,
+			   const std::array<std::array<std::vector<float>, 4>, 2>& HGParamArr,
+			   const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr);
 
-  void SetNonlinCorrParams(float refADC, const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams);
+  void SetNonlinCorrParams(float refADC, float refScale,
+			   const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams,
+			   const std::array<std::array<std::vector<float>, 4>, 2>& LHGNonlinCorrParams);
 
   void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
 
