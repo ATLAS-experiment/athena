@@ -1,4 +1,3 @@
-#
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
@@ -252,7 +251,29 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                                pattern=[(part)])
 
             ####  End of plots only for ALL
-                      
+
+            partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_Eta_Phi_'+thisSel,
+                                           title='SC coverage '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                           type='TH2F', 
+                                           path=thisTopPath+'/Coverage',
+                                           cutmask='Digi_part_'+thisSel,
+                                           xbins=partxbins,
+                                           ybins=partybins,
+                                           pattern=[(part)])
+            
+
+
+            #### HERE - plots which should only be booked for the nominal selection
+            if thisSel != "passDigiNom": continue
+            partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi,Digi_part_diff_adc_ped;Coverage_Diff_ADC_Ped_'+thisSel,  
+                                           title='ADC - Pedestal'+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                           type='TProfile2D',
+                                           cutmask='Digi_part_'+thisSel,
+                                           path=thisTopPath+'/Coverage',
+                                           xbins=partxbins,
+                                           ybins=partybins,
+                                           pattern=[(part)])
+            
             partGroup_digi.defineHistogram('Digi_part_sampos,Digi_part_adc;ADCZoom_vs_SamplePosition_'+thisSel,
                                            title='ADC (zoom) vs sample position '+selStrPart[thisSel],
                                            cutmask='Digi_part_'+thisSel,
@@ -300,25 +321,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            xbins=nsamples,xmin=0.5,xmax=nsamples+0.5,
                                            xlabels = [str(x) for x in range(1,nsamples+1)],
                                            pattern=[(part)])
-            
-            partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_Eta_Phi_'+thisSel,
-                                           title='SC coverage '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
-                                           type='TH2F', 
-                                           path=thisTopPath+'/Coverage',
-                                           cutmask='Digi_part_'+thisSel,
-                                           xbins=partxbins,
-                                           ybins=partybins,
-                                           pattern=[(part)])
-            
-            partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi,Digi_part_diff_adc_ped;Coverage_Diff_ADC_Ped_'+thisSel,  
-                                           title='ADC - Pedestal'+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
-                                           type='TProfile2D',
-                                           cutmask='Digi_part_'+thisSel,
-                                           path=thisTopPath+'/Coverage',
-                                           xbins=partxbins,
-                                           ybins=partybins,
-                                           pattern=[(part)])
-            
+                       
             partGroup_digi.defineHistogram('Digi_part_BCID, Digi_part_adc;ADC_vs_BCID_'+thisSel, 
                                            title='ADC value vs BCID '+selStrPart[thisSel]+'; BCID; ADC Value',
                                            type='TProfile',
@@ -393,7 +396,29 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                          xbins=partxbins,
                                          ybins=partybins,
                                          pattern=[(part)])
-            
+
+
+            #### HERE - plots which should only be booked for the nominal selection
+            if thisSel !=  "passSCNom": continue
+
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_et_onl;Coverage_Et_Onl_'+thisSel,
+                                         title='SC Energy '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                         type='TProfile2D',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath+'/Coverage',
+                                         xbins=partxbins,
+                                         ybins=partybins,
+                                         pattern=[(part)])
+
+            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_time;Coverage_OfflineLATOMEtime_'+thisSel,
+                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
+                                         type='TProfile2D',
+                                         cutmask='SC_part_'+thisSel,
+                                         path=thisTopPath+'/Coverage',
+                                         xbins=partxbins,
+                                         ybins=partybins,
+                                         pattern=[(part)])
+
             partGroup_sc.defineHistogram('SC_part_et_onl,SC_part_et_ofl;ET_Ofl_vs_ET_Onl_'+thisSel,
                                          title='LATOME ET vs Offline Computation '+selStrPart[thisSel]+'; ET Onl;ET Offl [GeV]',
                                          type='TH2F',
@@ -418,16 +443,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                          path=thisTopPath,
                                          xbins=100,xmin=-25,xmax=25,
                                          pattern=[(part)])
-            
-            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_et_onl;Coverage_Et_Onl_'+thisSel,
-                                         title='SC Energy '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
-                                         type='TProfile2D',
-                                         cutmask='SC_part_'+thisSel,
-                                         path=thisTopPath+'/Coverage',
-                                         xbins=partxbins,
-                                         ybins=partybins,
-                                         pattern=[(part)])
-            
+                        
             partGroup_sc.defineHistogram('SC_part_et_onl;SC_ET_Onl_'+thisSel, 
                                          title='SC eT [GeV] '+selStrPart[thisSel],
                                          type='TH1F',
@@ -436,14 +452,6 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                          xbins=500, xmin=-100, xmax=400,
                                          pattern=[(part)])
                      
-            partGroup_sc.defineHistogram('SC_part_eta,SC_part_phi,SC_part_time;Coverage_OfflineLATOMEtime_'+thisSel,
-                                         title='LATOME #tau from Offline Computation '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
-                                         type='TProfile2D',
-                                         cutmask='SC_part_'+thisSel,
-                                         path=thisTopPath+'/Coverage',
-                                         xbins=partxbins,
-                                         ybins=partybins,
-                                         pattern=[(part)])
             
             partGroup_sc.defineHistogram('SC_part_BCID,SC_part_time;MeanOfflineLATOMEtime_vs_BCID_'+thisSel,
                                          title='Average LATOME #tau from Offline computation per BCID '+selStrPart[thisSel]+'; BCID; #tau [ns]',
