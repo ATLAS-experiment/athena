@@ -31,41 +31,4 @@ namespace MuonGMR4{
        }
        return m_groups[grpIdx].numWires;
     }
-    Amg::Vector2D WireGroupDesign::stripPosition(int groupNum) const {
-        if (groupNum >= static_cast<int>(m_groups.size())) {
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wire group number "<<groupNum
-                           <<" is out of range.");
-            return Amg::Vector2D::Zero();
-        }
-        const wireGroup& wireGrp = m_groups[groupNum];
-        return StripDesign::stripPosition(0) + 
-               (wireGrp.accumlWires + wireGrp.numWires/2)*stripPitch() * Amg::Vector2D::UnitX();
-    }
-    Amg::Vector2D WireGroupDesign::wirePosition(unsigned int groupNum, 
-                                                unsigned int wireNum) const {
-       unsigned int grpIdx = groupNum - firstStripNumber();
-       if (grpIdx >= m_groups.size()) {
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wire group number "<<groupNum
-                           <<"is out of range.");
-            return Amg::Vector2D::Zero();
-        }
-        const wireGroup& wireGrp = m_groups[grpIdx];
-        if (wireNum >= wireGrp.numWires){
-            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wire number "
-                        <<wireNum<<" is out of range. Expect in group "<<groupNum<<
-                        " [1-"<<wireGrp.numWires<<"] wires.");
-            return Amg::Vector2D::Zero();
-        }
-        return StripDesign::stripPosition(0) + 
-               (wireGrp.accumlWires + (wireNum - 1))*stripPitch() * Amg::Vector2D::UnitX();
-    }
-    Amg::Vector2D WireGroupDesign::leftWireEdge(unsigned int groupNum,
-                                                unsigned int wireNum) const {
-        return leftInterSect(wirePosition(groupNum, wireNum));
-    }
-        
-    Amg::Vector2D WireGroupDesign::rightWireEdge(unsigned int groupNum,
-                                                 unsigned int wireNum) const {
-        return rightInterSect(wirePosition(groupNum, wireNum));
-    }
 }
