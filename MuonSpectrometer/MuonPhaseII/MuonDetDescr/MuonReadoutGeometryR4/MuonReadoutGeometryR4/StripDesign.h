@@ -74,37 +74,39 @@ namespace MuonGMR4 {
 
             /// Calculates the number of the strip whose center is closest to the given point. 
             /// If the point is outside of the panel, -1 is returned
-            int stripNumber(const Amg::Vector2D& pos) const;
+            virtual int stripNumber(const Amg::Vector2D& pos) const;
 
             /// Returns the number of the first strip
             int firstStripNumber() const;
 
+            using CheckVector2D = std::optional<Amg::Vector2D>;
             /// Returns the left edge of the strip (Global numbering scheme)
-            std::optional<Amg::Vector2D> leftEdge(int stripNumb) const;
+            CheckVector2D leftEdge(int stripNumb) const;
             /// Returns the right edge of the strip (Global numbering scheme)
-            std::optional<Amg::Vector2D> rightEdge(int stripNumb) const;
+            CheckVector2D rightEdge(int stripNumb) const;
             /// Returns the bisector of the strip (Global numbering scheme)
-            std::optional<Amg::Vector2D> center(int stripNumb) const;
+            CheckVector2D center(int stripNumb) const;
             /// Odering operator
             bool operator<(const StripDesign& other) const;
             /// Returns length of the strip
             double stripLength(int stripNumb) const;
             /// Dump properties to the ostr
             virtual void print(std::ostream&ostr) const;
-
+            /// Checks whether an external point is inside the trapezoidal area
+            bool insideTrapezoid(const Amg::Vector2D& extPos) const;
         protected:
             /// Calculates the position of a given strip (Local numbering scheme)
             virtual Amg::Vector2D stripPosition(int stripNum) const;
             /// Returns the intersection of a given strip with the left or right edge of the trapezoid
             /// If uncapped is set to false and the strip is a routed strip, then the intersection onto
             /// the corresponding bottom / top edges are returned
-            virtual Amg::Vector2D leftInterSect(int stripNum, bool uncapped = false) const;
-            virtual Amg::Vector2D rightInterSect(int stripNum, bool uncapped = false) const;
+            virtual CheckVector2D leftInterSect(int stripNum, bool uncapped = false) const;
+            virtual CheckVector2D rightInterSect(int stripNum, bool uncapped = false) const;
             
-            Amg::Vector2D leftInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
-            Amg::Vector2D rightInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
+            CheckVector2D leftInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
+            CheckVector2D rightInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
             /// Returns the geometrical center of a given strip
-            Amg::Vector2D stripCenter(int stripNum) const;
+            CheckVector2D stripCenter(int stripNum) const;
         public:
 
             /// Returns the bottom left corner  of the trapezoid
@@ -134,7 +136,10 @@ namespace MuonGMR4 {
             /// Length of the dge from bottom right -> top right
             double lenRightEdge() const;
 
-
+            /// Vector pointing to the next strip
+            const Amg::Vector2D& stripNormal() const;
+            /// Vector pointing along the strip
+            const Amg::Vector2D& stripDir() const;
         private:
             void setStereoAngle(double stereo);
             /// Shift between the 0-th readout channel and the first strip described by the panel
