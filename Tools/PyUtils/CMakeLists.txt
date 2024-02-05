@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PyUtils )
@@ -25,7 +25,6 @@ if( XAOD_STANDALONE )
     atlas_add_alias( meta-diff   "meta-diff.py" )
 else()
     # External dependencies:
-    find_package( decorator )
     find_package( graphviz )
     find_package( pygraphviz )
     find_package( requests )

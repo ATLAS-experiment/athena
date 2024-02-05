@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils/python/AthFile/__init__.py
 # @purpose a simple abstraction of a file to retrieve informations out of it
 # @author Sebastien Binet <binet@cern.ch>
 # @date October 2008
-from __future__ import with_statement, print_function
 
 __doc__ = "a simple abstraction of a file to retrieve informations out of it"
 __author__  = "Sebastien Binet <binet@cern.ch>"
@@ -18,22 +17,24 @@ __pseudo_all__ = [
     'server',
     ]
 
+import functools
 import PyUtils.Decorators as _decos
 from . import impl as _impl
 from . import tests as _tests
 AthFile = _impl.AthFile
 
-from decorator import decorator as _dec
-@_dec
-def _update_cache(fct, *args):
-    res = fct(*args)
-    import PyUtils.AthFile as af
-    if af.server._do_pers_cache:
-        try:
-            af.server.load_cache()
-        except Exception:
-            pass
-    return res
+def _update_cache(fct):
+    @functools.wraps(fct)
+    def wrapper(*args):
+        res = fct(*args)
+        import PyUtils.AthFile as af
+        if af.server._do_pers_cache:
+            try:
+                af.server.load_cache()
+            except Exception:
+                pass
+        return res
+    return wrapper
 
 ### classes -------------------------------------------------------------------
 import types
