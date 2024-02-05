@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TriggerJobOpts )
@@ -33,11 +33,7 @@ if (NOT XAOD_ANALYSIS)
       PRIVATE_WORKING_DIRECTORY
       POST_EXEC_SCRIPT noerror.sh )
 
-   atlas_add_test( Run3ConfigFetchKeysTest
-      SCRIPT python -m TriggerJobOpts.TriggerConfigGetter
-      POST_EXEC_SCRIPT noerror.sh )
-
-   atlas_add_test( Run1TriggerRecoConfigTest 
+   atlas_add_test( Run1TriggerRecoConfigTest
       SCRIPT python -m TriggerJobOpts.TriggerRecoConfig --config-only -- Trigger.EDMVersion=1
       POST_EXEC_SCRIPT noerror.sh )
 
