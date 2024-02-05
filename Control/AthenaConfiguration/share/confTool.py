@@ -82,21 +82,6 @@ def parse_args():
         default=[],
         help="Print only a single component, in a structured manner (reflecting components parent children)")
 
-    parser.add_argument("--includeClasses",
-        action='append',
-        default=[],
-        help="Only list the components selected by the given classname (anchored regular expression)")
-
-    parser.add_argument("--excludeClasses",
-        action='append',
-        default=[],
-        help="Don't list the components excluded by the given classname (anchored regular expression)")
-
-    parser.add_argument("--excludeComponents",
-        action='append',
-        default=[],
-        help="Don't list these components (anchored regular expression)")
-
     parser.add_argument("--includeClassesSub",
         action='append',
         default=[],
@@ -113,6 +98,20 @@ def parse_args():
     parser.add_argument("--uniqueClasses",
         action="store_true",
         help="Only show unique classes")
+
+    parser.add_argument(
+        "--includeClasses",
+        action='append',
+        default=[],
+        help="Only list the components selected by the given classname (anchored regular expression)  - only used in class listing, for diff or similar use --includeComps"
+        )
+
+    parser.add_argument(
+        "--excludeClasses",
+        action='append',
+        default=[],
+        help="Don't list the components excluded by the given classname (anchored regular expression) - only used in class listing, for diff or similar use --excludeComps"
+    )
 
     parser.add_argument("--showComponentName",
         help="Show component name with --classes",
