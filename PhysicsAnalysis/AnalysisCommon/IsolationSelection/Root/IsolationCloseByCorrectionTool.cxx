@@ -263,10 +263,6 @@ namespace CP {
             ATH_MSG_DEBUG("added  " << p->type() << " " << p->pt() * MeVtoGeV << " GeV" << " eta: " << p->eta() << " phi: " << p->phi());
         }
 
-        if (cache.prim_parts.empty()) {
-            ATH_MSG_DEBUG("No considerably good objects found.");
-            return CorrectionCode::Ok;
-        }
         loadAssociatedObjects(ctx, cache);
         if (!cache.prim_vtx) { return CorrectionCode::OutOfValidityRange; }
 
