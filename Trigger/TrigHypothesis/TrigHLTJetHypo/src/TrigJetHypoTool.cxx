@@ -196,7 +196,13 @@ TrigJetHypoTool::decide(const xAOD::JetContainer* jets,
     auto mon_jetEta =  Monitored::Scalar("Eta",    j->eta());
     auto mon_jetPhi =  Monitored::Scalar("Phi",    j->phi());
     auto mon_jetMass = Monitored::Scalar("Mass",   j->m()*0.001);
-    auto monitor_group_passingjets = Monitored::Group( m_monTool, mon_jetEt, mon_jetEta, mon_jetPhi );       
+    float this_z = 999;
+    float this_negLogSigma2 = 999;
+    j->getAttribute("dipz20231122_z", this_z);
+    j->getAttribute("dipz20231122_negLogSigma2", this_negLogSigma2);
+    auto mon_dipz_z = Monitored::Scalar( "dipz_z", this_z);
+    auto mon_dipz_negLogSigma2 = Monitored::Scalar( "dipz_negLogSigma2", this_negLogSigma2);    
+    auto monitor_group_passingjets = Monitored::Group( m_monTool, mon_jetEt, mon_jetEta, mon_jetPhi , mon_dipz_z, mon_dipz_negLogSigma2);
   }
   //monitor the passing jets for each leg (there should only be one per chain!)
   auto legInds = jetCollector.legInds();
