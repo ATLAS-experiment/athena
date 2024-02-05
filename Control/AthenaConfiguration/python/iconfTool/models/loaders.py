@@ -26,13 +26,15 @@ baseParser = argparse.ArgumentParser()
 baseParser.add_argument(
     "--includeComps",
     nargs="*",
-    help="Report only component matching this string",
+    default=[],
+    help="Include only components matching (regex) this string",
     action="append",
 )
 baseParser.add_argument(
     "--excludeComps",
     nargs="*",
-    help="Exclude components matching this string",
+    default=[],
+    help="Exclude components matching (regex) this string",
     action="append",
 )
 baseParser.add_argument(
@@ -97,9 +99,9 @@ baseParser.add_argument(
 
 baseParser.add_argument(
     "--follow",
-    help="Follow to related components up to given recursion depth",
+    help="Follow to related components up to given recursion depth (3)",
     type=int,
-    default=0
+    default=3
 )
 
 baseParser.add_argument(
@@ -151,7 +153,7 @@ def excludeIncludeComps(dic, args, depth, compsToFollow=[]) -> Dict:
     conf = {}
     if depth == 0:
         return conf
-    compsToReport = __flatten_list(args.includeComps)
+    compsToInclude = __flatten_list(args.includeComps)
     compsToExclude = __flatten_list(args.excludeComps)
 
     def eligible(component):
@@ -159,7 +161,7 @@ def excludeIncludeComps(dic, args, depth, compsToFollow=[]) -> Dict:
         if (component in compsToFollow or component.lstrip("ToolSvc.") in compsToFollow) and not (exclude or component in args.ignore):
             logger.debug("Considering this component: %s because some other one depends on it", component)
             return True
-        include = any(re.match(s, component) for s in compsToReport)
+        include = any(re.match(s, component) for s in compsToInclude)
         if args.includeComps and args.excludeComps:
             return include and not exclude
         elif args.includeComps:
@@ -172,7 +174,7 @@ def excludeIncludeComps(dic, args, depth, compsToFollow=[]) -> Dict:
             conf[comp_name] = comp_attributes
             if depth > 0:
                 types = {}
-                types_in_properties(comp_attributes, types)
+                types_in_properties(comp_attributes, types, compsToFollow)
                 logger.debug("Following up for types included in here %s whole set of components to follow %s ", types, compsToFollow)
                 compsToFollow += types.keys()         
             logger.debug("Included component %s", comp_name)
@@ -464,8 +466,9 @@ def loadConfigFile(fname, args) -> Dict:
 
     known_types = collect_types(conf)
 
-    if args.includeComps or args.excludeComps:
-        conf = excludeIncludeComps(conf, args, depth=args.follow)
+    if args.includeComps or args.excludeComps or args.includeClasses or args.excludeClasses:
+        logger.info(f"include/exclude comps like {args.includeComps}/{args.excludeComps}")
+        conf = excludeIncludeComps(conf, args, args.follow)
 
     if args.ignoreIrrelevant:
         conf = ignoreIrrelevant(conf, args)
