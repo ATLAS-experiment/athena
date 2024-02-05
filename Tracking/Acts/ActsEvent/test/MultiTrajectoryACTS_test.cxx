@@ -60,8 +60,7 @@ BOOST_AUTO_TEST_CASE(ConstCorrectness) {
   // make mutable
   VectorMultiTrajectory t;
   auto i0 = t.addTrackState();
-  //Broken with ACTS v32.0.2 TODO fix later
-  //BOOST_CHECK(!t.ReadOnly);
+  BOOST_CHECK(!IsReadOnlyMultiTrajectory<decltype(t)>::value);
 
   {
     VectorMultiTrajectory::TrackStateProxy tsp = t.getTrackState(i0);
@@ -145,13 +144,12 @@ BOOST_AUTO_TEST_CASE(TrackStateProxyCopy) {
   CommonTests ct;
   ct.testTrackStateProxyCopy(rng);
 }
-//TODO: doesn't compile with the current Acts version
-/*
+
 BOOST_AUTO_TEST_CASE(TrackStateCopyDynamicColumns) {
   CommonTests ct;
   ct.testTrackStateCopyDynamicColumns();
 }
-*/
+
 BOOST_AUTO_TEST_CASE(TrackStateProxyCopyDiffMTJ) {
   CommonTests ct;
   ct.testTrackStateProxyCopyDiffMTJ();
