@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOL_COLLUTILITIES_COLLAPPENDBASE_H
@@ -15,7 +15,6 @@
 #include "PersistentDataModel/Token.h"
 
 #include "CollectionBase/ICollection.h"
-#include "CollectionBase/ICollectionFragment.h"
 #include "CollectionBase/CollectionService.h"
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/CollectionRowBuffer.h"

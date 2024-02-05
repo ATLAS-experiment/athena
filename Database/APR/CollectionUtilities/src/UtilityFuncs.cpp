@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -51,8 +51,8 @@ std::set<std::string> pool::findGroups(const pool::ICollectionDescription& desc)
 {
    set<string> groups;
    // Assume only one fragment for now
-   for (int col = 0; col<desc.numberOfAttributeColumns(0); ++col) {
-      const pool::ICollectionColumn& coldata = desc.attributeColumn(col,0);
+   for (int col = 0; col<desc.numberOfAttributeColumns(); ++col) {
+      const pool::ICollectionColumn& coldata = desc.attributeColumn(col);
       string groupdata = getGroup(coldata.annotation());
       set<string>::iterator it = groups.find(groupdata);
       if (it==groups.end()) groups.insert(groupdata);
@@ -65,26 +65,22 @@ pool::getColumnWidths(const pool::ICollectionDescription& description, bool toke
 {
    unsigned int maxNameSize=0,maxTypeNameSize=0;
    if (tokens) {
-      for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-         for( int c=0; c < description.numberOfTokenColumns( f ); c++ ) {
-            const pool::ICollectionColumn& column = description.tokenColumn(c, f);
+         for( int c=0; c < description.numberOfTokenColumns(); c++ ) {
+            const pool::ICollectionColumn& column = description.tokenColumn(c);
             if( maxNameSize < column.name().size() )
                 maxNameSize = column.name().size();
             if( maxTypeNameSize < column.type().size() )
                 maxTypeNameSize = column.type().size();
          }
-      }
    }
    else {
-      for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-         for( int c=0; c < description.numberOfAttributeColumns( f ); c++ ) {
-            const pool::ICollectionColumn& column = description.attributeColumn(c, f);
+         for( int c=0; c < description.numberOfAttributeColumns(); c++ ) {
+            const pool::ICollectionColumn& column = description.attributeColumn(c);
             if( maxNameSize < column.name().size() )
                 maxNameSize = column.name().size();
             if( maxTypeNameSize < column.type().size() )
                 maxTypeNameSize = column.type().size();
          }
-      }
    }
    return std::make_pair(maxNameSize,maxTypeNameSize);
 }
@@ -118,9 +114,8 @@ void pool::dumpTokens(const pool::ICollectionDescription& description)
    std::cout << "Number of " << spectype << "s is: " 
              << description.numberOfTokenColumns() << std::endl;
    std::cout << spectype << "s are: " << std::endl;
-   for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-      for( int c=0; c < description.numberOfTokenColumns( f ); c++ ) {
-         const pool::ICollectionColumn&	column = description.tokenColumn(c, f);
+   for( int c=0; c < description.numberOfTokenColumns(); c++ ) {
+         const pool::ICollectionColumn&	column = description.tokenColumn(c);
          std::cout.setf(std::ios::left);
          std::cout << " NAME: ";
          std::cout.width(maxNameSize+5);
@@ -131,7 +126,6 @@ void pool::dumpTokens(const pool::ICollectionDescription& description)
          std::cout << " INFO: ";
          std::cout << column.annotation();
          std::cout << std::endl;
-      }
    }
    std::cout << " DEFAULT REF = " << description.eventReferenceColumnName() << std::endl;
 }
@@ -146,9 +140,8 @@ void pool::dumpAttributes(const pool::ICollectionDescription& description)
    std::cout << "Number of " << spectype << "s is: " 
              << description.numberOfAttributeColumns() << std::endl;
    std::cout << spectype << "s are: " << std::endl;
-   for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-      for( int c=0; c < description.numberOfAttributeColumns( f ); c++ ) {
-         const pool::ICollectionColumn&	column = description.attributeColumn(c, f);
+   for( int c=0; c < description.numberOfAttributeColumns(); c++ ) {
+         const pool::ICollectionColumn&	column = description.attributeColumn(c);
          std::cout.setf(std::ios::left);
          std::cout << " NAME: ";
          std::cout.width(maxNameSize+5);
@@ -159,7 +152,6 @@ void pool::dumpAttributes(const pool::ICollectionDescription& description)
          std::cout << " INFO: ";
          std::cout << column.annotation();
          std::cout << std::endl;
-      }
    }
 }
 

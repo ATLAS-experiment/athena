@@ -10,7 +10,6 @@
 #include "POOLCore/APRDefaults.h"
 
 #include "CollectionBase/ICollectionColumn.h"
-#include "CollectionBase/ICollectionFragment.h"
 #include "CollectionBase/CollectionBaseNames.h"
 
 #include "GaudiKernel/Bootstrap.h"
@@ -41,9 +40,11 @@ namespace pool {
   namespace RootCollection { 
 
     // MN: recreate replaced by update to not overwrite the file
-    const char* const RootCollection::poolOptToRootOpt[] = {"CREATE","UPDATE","UPDATE","UPDATE","READ"};
+    const char* const RootCollection::poolOptToRootOpt[] = {
+      "CREATE", "UPDATE", "UPDATE", "READ"};
 
-    const Io::IoFlags RootCollection::poolOptToFileMgrOpt[] = { Io::WRITE|Io::CREATE, Io::WRITE|Io::APPEND, Io::WRITE|Io::APPEND, Io::WRITE|Io::APPEND, Io::READ };
+    const Io::IoFlags RootCollection::poolOptToFileMgrOpt[] = { 
+      Io::WRITE|Io::CREATE, Io::WRITE|Io::APPEND, Io::WRITE|Io::APPEND, Io::READ };
 
     const char* const RootCollection::c_tokenBranchName = "Token";
     const char* const RootCollection::c_attributeListLayoutName = "Schema"; 

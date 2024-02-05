@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionBase/CollectionBaseNames.h"
@@ -65,13 +65,12 @@ pool::RootCollection::RootCollectionSchemaEditor::
 insertColumn( const std::string& columnName, 
               const std::string& columnType,
               const std::string& annotation,
-              std::string fragmentName,
               int maxSize,
               bool sizeIsFixed)
 {
    addTreeBranch( columnName, columnType );
    const ICollectionColumn& column = m_description.insertColumn( columnName, columnType,
-                                                                 annotation,fragmentName,
+                                                                 annotation,
                                                                  maxSize, sizeIsFixed );
    m_collection.dataEditor().clearRowBuffers();
    return column;
@@ -84,11 +83,10 @@ pool::RootCollection::RootCollectionSchemaEditor::
 insertColumn( const std::string& columnName, 
               const std::type_info& columnType,
               const std::string& annotation,
-              std::string fragmentName,
               int maxSize,
               bool sizeIsFixed)
 {
-   return insertColumn( columnName, columnType.name(), annotation, fragmentName, maxSize, sizeIsFixed );
+   return insertColumn( columnName, columnType.name(), annotation, maxSize, sizeIsFixed );
 }
 
 
@@ -98,10 +96,9 @@ insertColumn( const std::string& columnName,
 const pool::ICollectionColumn&
 pool::RootCollection::RootCollectionSchemaEditor::
 insertTokenColumn( const std::string& columnName,
-                   const std::string& annotation,
-                   std::string /* fragmentName */)
+                   const std::string& annotation )
 {
-   return insertColumn( columnName, CollectionBaseNames::tokenTypeName(), annotation );
+   return insertColumn( columnName, CollectionBaseNames::tokenTypeName, annotation );
 }
 
 
@@ -250,15 +247,13 @@ pool::RootCollection::RootCollectionSchemaEditor::
 createTreeBranches()
 {
    m_schemaWritten = false;
-   for( int f_id = 0; f_id < m_description.numberOfCollectionFragments(); f_id++ ) {
-      for( int col_id = 0; col_id < m_description.numberOfTokenColumns( f_id ); col_id++ ) {
-         std::string columnName = m_description.tokenColumn(col_id, f_id).name();
-         addTreeBranch( columnName, CollectionBaseNames::tokenTypeName() );
-      }
-      for( int col_id = 0; col_id < m_description.numberOfAttributeColumns( f_id ); col_id++ ) {
-         const ICollectionColumn& column = m_description.attributeColumn(col_id, f_id);
-         addTreeBranch( column.name(), column.type() );
-      }
+   for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
+        std::string columnName = m_description.tokenColumn(col_id).name();
+        addTreeBranch( columnName, CollectionBaseNames::tokenTypeName );
+   }
+   for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
+        const ICollectionColumn& column = m_description.attributeColumn(col_id);
+        addTreeBranch( column.name(), column.type() );
    }
 }
          

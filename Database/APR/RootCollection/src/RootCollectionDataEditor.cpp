@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollection.h"
@@ -8,7 +8,6 @@
 #include "PersistentDataModel/Token.h"
 
 #include "CollectionBase/TokenList.h"
-#include "CollectionBase/ICollectionFragment.h"
 #include "CollectionBase/ICollectionColumn.h"
 
 
@@ -57,25 +56,18 @@ pool::RootCollection::RootCollectionDataEditor::emptyRowBuffer()
 }
 
 
-
 void
 pool::RootCollection::RootCollectionDataEditor::clearRowBuffers()
 {
    // Create empty collection and data table row buffers
    pool::TokenList                 tokenList;
    coral::AttributeList         attributeList;
-   for( int i = 0; i < m_description.numberOfCollectionFragments(); i++ )
-   {
-      std::string         fragmentName = m_description.collectionFragment( i ).name();
-      for( int j = 0; j < m_description.numberOfTokenColumns( fragmentName ); j++ ) {
-         const std::string& collectionColumnName = m_description.tokenColumn( j, fragmentName ).name();
-         tokenList.extend( collectionColumnName );
-      }
-      for( int j = 0; j < m_description.numberOfAttributeColumns( fragmentName ); j++ ) {
-         const std::string& collectionColumnName = m_description.attributeColumn( j, fragmentName ).name();
-         const std::string& columnType = m_description.attributeColumn( j, fragmentName ).type();
-         attributeList.extend( collectionColumnName, columnType );
-      }
+   for( int j = 0; j < m_description.numberOfTokenColumns(); j++ ) {
+         tokenList.extend( m_description.tokenColumn( j ).name() );
+   }
+   for( int j = 0; j < m_description.numberOfAttributeColumns(); j++ ) {
+         const auto& attrCol = m_description.attributeColumn( j );
+         attributeList.extend( attrCol.name(), attrCol.type() );
    }
    m_collectionRowBuffer.setTokenList( tokenList );
    m_collectionRowBuffer.setAttributeList( attributeList );
