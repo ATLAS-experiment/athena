@@ -151,10 +151,10 @@ if __name__ == "__main__":
         inputTree.GetEntry(i)
         
 # Truth
-        for ntruth in range(0,len(inputTree.MuEntry_Particle_Pt)):
-                truthPt.Fill(inputTree.MuEntry_Particle_Pt[ntruth])
-                truthEta.Fill(inputTree.MuEntry_Particle_Eta[ntruth])
-                truthPhi.Fill(inputTree.MuEntry_Particle_Phi[ntruth])
+        for ntruth in range(0,len(inputTree.MuEntry_ParticlePt)):
+                truthPt.Fill(inputTree.MuEntry_ParticlePt[ntruth])
+                truthEta.Fill(inputTree.MuEntry_ParticleEta[ntruth])
+                truthPhi.Fill(inputTree.MuEntry_ParticlePhi[ntruth])
 # RPC
         if Options.doRPC == True:
             for nrpcHit in range(0,inputTree.Digits_RPC):
