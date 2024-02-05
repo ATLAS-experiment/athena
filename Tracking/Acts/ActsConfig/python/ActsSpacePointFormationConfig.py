@@ -1,48 +1,55 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ActsConfig.ActsConfigFlags import SpacePointStrategy
 
-def ActsPixelSpacePointToolCfg(flags, name = "ActsPixelSpacePointTool", **kwargs):
+def ActsPixelSpacePointToolCfg(flags,
+                               name: str = "ActsPixelSpacePointTool",
+                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.ActsTrk.PixelSpacePointFormationTool(name, **kwargs))
     return acc
 
-def ActsStripSpacePointToolCfg(flags, name = "ActsStripSpacePointTool", **kwargs):
+def ActsStripSpacePointToolCfg(flags,
+                               name: str = "ActsStripSpacePointTool",
+                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
-    kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
-    kwargs.setdefault("AllClusters", False)
+    if 'LorentzAngleTool' not in kwargs:
+        from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
 
     acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
     return acc
 
-def ActsCoreStripSpacePointToolCfg(flags, name = "ActsCoreStripSpacePointTool", **kwargs):
+def ActsCoreStripSpacePointToolCfg(flags,
+                                   name: str = "ActsCoreStripSpacePointTool",
+                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
-    kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
-    kwargs.setdefault("AllClusters", False)
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault("ConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
+    if 'LorentzAngleTool' not in kwargs:
+        from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
+
+    if 'ConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault("ConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
     return acc
 
 def ActsPixelSpacePointFormationCfg(flags,
-                                    name = "ActsPixelSpacePointFormation",
-                                    **kwargs):
-
+                                    name: str = "ActsPixelSpacePointFormation",
+                                    **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-    acc = ITkPixelReadoutGeometryCfg(flags)
+    acc.merge(ITkPixelReadoutGeometryCfg(flags))
 
-    kwargs.setdefault("SpacePointFormationTool", acc.popToolsAndMerge(ActsPixelSpacePointToolCfg(flags)))
-    kwargs.setdefault("PixelClusters", "ITkPixelClusters")
-    kwargs.setdefault("PixelDetectorElements", "ITkPixelDetectorElementCollection")
-    kwargs.setdefault("PixelSpacePoints", "ITkPixelSpacePoints")
-
-    if flags.Acts.doMonitoring:
+    if 'SpacePointFormationTool' not in kwargs:
+        kwargs.setdefault("SpacePointFormationTool", acc.popToolsAndMerge(ActsPixelSpacePointToolCfg(flags)))
+        
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsPixelSpacePointFormationMonitoringToolCfg
         kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsPixelSpacePointFormationMonitoringToolCfg(flags)))
 
@@ -50,35 +57,30 @@ def ActsPixelSpacePointFormationCfg(flags,
     return acc
 
 def ActsStripSpacePointFormationCfg(flags,
-                                    name = "ActsStripSpacePointFormation",
-                                    **kwargs):
-
+                                    name: str = "ActsStripSpacePointFormation",
+                                    **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-    acc = ITkStripReadoutGeometryCfg(flags)
+    acc.merge(ITkStripReadoutGeometryCfg(flags))
 
-    actsStripSpacePointTool = None
-    if flags.Acts.SpacePointStrategy is SpacePointStrategy.ActsCore:
-        actsStripSpacePointTool = acc.popToolsAndMerge(ActsCoreStripSpacePointToolCfg(flags))
-    else:
-        actsStripSpacePointTool = acc.popToolsAndMerge(ActsStripSpacePointToolCfg(flags))
+    if 'SpacePointFormationTool' not in kwargs:
+        from ActsConfig.ActsConfigFlags import SpacePointStrategy
+        if flags.Acts.SpacePointStrategy is SpacePointStrategy.ActsCore:
+            kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsCoreStripSpacePointToolCfg(flags)))
+        else:
+            kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsStripSpacePointToolCfg(flags)))
 
-    kwargs.setdefault("SpacePointFormationTool", actsStripSpacePointTool)
-    kwargs.setdefault("StripClusters", "ITkStripClusters")
-    kwargs.setdefault("StripDetectorElements", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("StripElementPropertiesTable", "ITkStripElementPropertiesTable")
-    kwargs.setdefault("StripSpacePoints", "ITkStripSpacePoints")
-    kwargs.setdefault("StripOverlapSpacePoints", "ITkStripOverlapSpacePoints")
-    kwargs.setdefault("ProcessOverlapForStrip", True)
-
-    if flags.Acts.doMonitoring:
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsStripSpacePointFormationMonitoringToolCfg
         kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsStripSpacePointFormationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
     return acc
 
-def ActsSpacePointFormationCfg(flags):
+def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsPixelSpacePointFormationCfg(flags))
     if flags.Detector.EnableITkStrip:
@@ -97,8 +99,67 @@ def ActsSpacePointFormationCfg(flags):
         
         acc.merge(ActsStripSpacePointFormationCfg(flags))
 
+    # Analysis extensions
     if flags.Acts.doAnalysis:
-        from ActsConfig.ActsAnalysisConfig import ActsSpacePointAnalysisCfg
-        acc.merge(ActsSpacePointAnalysisCfg(flags))
+        if flags.Detector.EnableITkPixel:
+            from ActsConfig.ActsAnalysisConfig import ActsPixelSpacePointAnalysisAlgCfg
+            acc.merge(ActsPixelSpacePointAnalysisAlgCfg(flags))
+        if flags.Detector.EnableITkStrip:
+            from ActsConfig.ActsAnalysisConfig import ActsStripSpacePointAnalysisAlgCfg, ActsStripOverlapSpacePointAnalysisAlgCfg
+            acc.merge(ActsStripSpacePointAnalysisAlgCfg(flags))
+            acc.merge(ActsStripOverlapSpacePointAnalysisAlgCfg(flags))
+
+    return acc
+
+def ActsConversionSpacePointFormationCfg(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    if flags.Detector.EnableITkStrip:
+        # Need to schedule this here in case the Athena space point formation is not schedule
+        # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
+        # This may be because the current strip space point formation algorithm is not using Acts
+        # May be not necessary once the Acts-based strip space point maker is ready
+        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+        acc.merge(ITkStripReadoutGeometryCfg(flags))
         
+        from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+        acc.merge(BeamSpotCondAlgCfg(flags))
+        
+        from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
+        acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
+        
+        acc.merge(ActsStripSpacePointFormationCfg(flags,
+                                                  name="ActsConversionStripSpacePointFormation",
+                                                  StripClusters="ITkConversionStripClusters",
+                                                  StripSpacePoints="ITkConversionStripSpacePoints",
+                                                  StripOverlapSpacePoints="ITkConversionStripOverlapSpacePoints"))
+
+    # Analysis extensions
+    if flags.Acts.doAnalysis:
+        if flags.Detector.EnableITkStrip:
+            from ActsConfig.ActsAnalysisConfig import ActsStripSpacePointAnalysisAlgCfg, ActsStripOverlapSpacePointAnalysisAlgCfg
+            acc.merge(ActsStripSpacePointAnalysisAlgCfg(flags,
+                                                        name="ActsConversionStripSpacePointAnalysisAlg",
+                                                        extension="ActsConversion",
+                                                        SpacePointContainerKey="ITkConversionStripSpacePoints"))
+            acc.merge(ActsStripOverlapSpacePointAnalysisAlgCfg(flags,
+                                                               name="ActsConversionStripOverlapSpacePointAnalysisAlg",
+                                                               extension="ActsConversion",
+                                                               SpacePointContainerKey="ITkConversionStripOverlapSpacePoints"))
+        
+    return acc
+
+def ActsSpacePointFormationCfg(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # Acts Main pass
+    if flags.Tracking.ActiveConfig.extension == "Acts":
+        acc.merge(ActsMainSpacePointFormationCfg(flags))
+    # Acts Conversion pass
+    elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
+        acc.merge(ActsConversionSpacePointFormationCfg(flags))
+    # Any other pass -> Validation mainly
+    else:
+        acc.merge(ActsMainSpacePointFormationCfg(flags))
+
     return acc

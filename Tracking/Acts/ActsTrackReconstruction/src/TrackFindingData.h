@@ -195,19 +195,6 @@ namespace
     }
   };
 
-  bool checkHashOrder(const xAOD::UncalibratedMeasurementContainer &measurements)
-  {
-    xAOD::DetectorIDHashType max_hash = 0;
-    for (const auto &measurement : measurements)
-    {
-      xAOD::DetectorIDHashType id_hash = measurement->identifierHash();
-      if (id_hash < max_hash)
-        return false;
-      max_hash = id_hash;
-    }
-    return true;
-  }
-
   void gatherGeoIds(const ActsTrk::IActsToTrkConverterTool &converter_tool,
                     const InDetDD::SiDetectorElementCollection &detectorElements,
                     std::vector<Acts::GeometryIdentifier> &geo_ids,

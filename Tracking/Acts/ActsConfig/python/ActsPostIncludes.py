@@ -31,6 +31,10 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                   'xAOD::StripClusterContainer#ITkStripClusters',
                   'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
 
+        if flags.Acts.doITkConversion:
+            toAOD += ['xAOD::StripClusterContainer#ITkConversionStripClusters',
+                      'xAOD::StripClusterAuxContainer#ITkConversionStripClustersAux.' + strip_cluster_variables]
+        
     if flags.Acts.EDM.PersistifySpacePoints:
         acc.merge(decorateSpacePoints(flags,
                                       name='PixelSpacePointDecoration',

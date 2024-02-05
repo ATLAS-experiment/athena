@@ -23,6 +23,9 @@ namespace ActsTrk {
 
   private:
     SG::ReadHandleKey< ActsTrk::BoundTrackParametersContainer > m_inputTrackParamsColletionKey {this,  "InputTrackParamsCollection", "", ""}; 
+
+    Gaudi::Property< std::string > m_monGroupName
+      {this, "MonGroupName", "ActsEstimatedTrackParamsAnalysisAlg"};
   };
 
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripClusterAnalysisAlg.h"
@@ -16,6 +16,9 @@ namespace ActsTrk {
     
     ATH_CHECK( m_stripClusterContainerKey.initialize() );
     ATH_CHECK(detStore()->retrieve(m_stripID,"SCT_ID"));
+
+    ATH_MSG_DEBUG("Monitoring settings ...");
+    ATH_MSG_DEBUG(m_monGroupName);
 
     return AthMonitorAlgorithm::initialize();
   }
@@ -101,7 +104,7 @@ namespace ActsTrk {
 					       [] (const auto* cluster) -> int
 					       { return cluster->channelsInPhi(); });
     
-    fill("ActsClusterAnalysisAlg",
+    fill(m_monGroupName.value(),
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule, monitor_sideModule,
 	 monitor_eta, monitor_perp,

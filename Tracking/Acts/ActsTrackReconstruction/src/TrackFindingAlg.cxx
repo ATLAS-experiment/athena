@@ -271,12 +271,6 @@ namespace ActsTrk
       uncalibratedMeasurementContainers.push_back(uncalibratedMeasurementContainerHandle.cptr());
       ATH_MSG_DEBUG("Retrieved " << uncalibratedMeasurementContainers.back()->size() << " input elements from key " << uncalibratedMeasurementContainerKey.key());
 
-      if (!checkHashOrder(*uncalibratedMeasurementContainers.back()))
-      {
-        ATH_MSG_ERROR("Measurements " << uncalibratedMeasurementContainerKey.key() << " not ordered by identifier hash.");
-        return StatusCode::FAILURE;
-      }
-
       xAOD::UncalibMeasType typ = !uncalibratedMeasurementContainers.back()->empty()
                                       ? uncalibratedMeasurementContainers.back()->at(0)->type()
                                       : xAOD::UncalibMeasType::Other;
