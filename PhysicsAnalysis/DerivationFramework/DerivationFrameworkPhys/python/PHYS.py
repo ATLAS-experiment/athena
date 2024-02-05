@@ -180,12 +180,6 @@ def PHYSCfg(ConfigFlags):
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
     setupHiggsSlimmingVariables(ConfigFlags, PHYSSlimmingHelper)
-
-   
-    ## CloseByIsolation content - CloseBy isolation correction (for all analyses)
-    from IsolationSelection.IsolationSelectionConfig import  setupIsoCloseBySlimmingVariables
-    setupIsoCloseBySlimmingVariables(PHYSSlimmingHelper)
-
    
     # Trigger content
     PHYSSlimmingHelper.IncludeTriggerNavigation = False
