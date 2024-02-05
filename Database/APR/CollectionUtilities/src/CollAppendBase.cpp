@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -279,7 +279,7 @@ CollAppendBase::buildDstDesc(const pool::ICollectionDescription& sourceDesc
 	 if( name == "Token" ) {
 	    /* MN: hack - "Token" column name taken from RootCollection */
 	    // remap back the RootCollection default event ref name to the new default
-	    name = pool::CollectionBaseNames::defaultEventReferenceColumnName();
+	    name = CollectionBaseNames::defaultEventReferenceColumnName;
 	 } else {
 	    // source had user defined name, copy it
 	    destDescription.setEventReferenceColumnName( name );
@@ -288,8 +288,7 @@ CollAppendBase::buildDstDesc(const pool::ICollectionDescription& sourceDesc
       const ICollectionColumn& column = sourceDesc.column( name );
       // Do not copy PROV columns if adding a new PROV columns
       if( column.annotation().find("PROV") == string::npos || !m_extendProv ) {
-	 destDescription.insertTokenColumn( name, column.annotation(),
-					    column.collectionFragmentName() );
+         destDescription.insertTokenColumn( name, column.annotation() );
       } else {
 	 m_log << coral::Debug << "Ignoring source collection provenance Token attribute: "
 	     << name << corENDL;
@@ -298,8 +297,7 @@ CollAppendBase::buildDstDesc(const pool::ICollectionDescription& sourceDesc
    }
    // add the new provenance Token
    if( m_extendProv ) try {
-      destDescription.insertTokenColumn( m_provName, "PROV",
-					 destDescription.collectionFragment(0).name() );
+      destDescription.insertTokenColumn( m_provName, "PROV" );
       m_provCollExists = true;
    }catch( pool::Exception &e ) {
       m_log << coral::Error << "Failed to add provenance Token attribute " << m_provName
@@ -317,7 +315,6 @@ CollAppendBase::buildDstDesc(const pool::ICollectionDescription& sourceDesc
       const string& name = attrib->specification().name();
       const ICollectionColumn& column = sourceDesc.column( name );
       destDescription.insertColumn( name, column.type(), column.annotation(),
-				    column.collectionFragmentName(),
 				    column.maxSize(), column.sizeIsFixed() );
    }
    // add new attributes from the -addattrib option

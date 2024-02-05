@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Marcin Nowak"
 __doc__ = """
@@ -36,7 +36,7 @@ class SortedCollectionCreator:
       import ROOT
       # read attributes' names and types from the description and remember them
       for an in range(0, desc.numberOfAttributeColumns()):
-         attr = desc.attributeColumn(an,0)
+         attr = desc.attributeColumn(an)
          name = attr.name()
          self.attrNames.append(name)
          self.attrTypes[name] = attr.type()
