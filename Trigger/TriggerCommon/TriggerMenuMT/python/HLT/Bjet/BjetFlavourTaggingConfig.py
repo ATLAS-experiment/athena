@@ -41,6 +41,8 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
         'BTagging/20220813trig/gn1/antikt4empflow/network.onnx',
         # Trigger DL1dbb training
         'BTagging/20230314trig/dl1dbb/antikt4empflow/network.json',
+        #Trigger GN2 training
+        'BTagging/20240122trig/gn2/antikt4empflow/SmallPrec.onnx'
     ]
 
 
