@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONBASE_COLLECTIONDESCRIPTION_H
@@ -15,20 +15,14 @@ namespace pool {
 
   class CollectionColumn;
   class CollectionIndex;
-  class CollectionUniqueConstraint;
-  class CollectionFragment;
-
+  
   /** 
    * @class CollectionDescription CollectionDescription.h CollectionBase/CollectionDescription.h
    *
    * An implementation of the ICollectionDescription interface used to define the properties of
    * a collection to be constructed and to retrieve these properties after construction. The 
    * schema editor of the collection should be used for any modifications to these properties 
-   * after construction. Only the top level collection fragment can contain the event reference
-   * column. The collection may also be constructed without this column but in that case it will
-   * be defined as a collection fragment which means, for instance, that it cannot be registered 
-   * in a collection catalog. However, in that case another collection can add it to its 
-   * collecton fragment list.
+   * after construction. 
    */
   class CollectionDescription : virtual public ICollectionDescription,
                                 virtual public ICollectionSchemaEditor
@@ -106,9 +100,9 @@ namespace pool {
     virtual bool isSubsetOf( const ICollectionDescription& rhs ) const;
 
     /**
-     * Sets the name of the collection and the top level collection fragment.
+     * Sets the name of the collection.
      *
-     * @param name Name of collection fragment.
+     * @param name Name of collection.
      */
     virtual void setName( const std::string& name );
 
@@ -134,14 +128,10 @@ namespace pool {
     virtual void setEventReferenceColumnName( const std::string& columnName );
 
     /**
-     * Adds a new column to the collection fragment description object specified as input. If no collection 
-     * fragment is specified the column is added to the description object of the top level collection fragment. 
-     * Throws an exception if the specified collection fragment has not been declared to be part of the collection 
-     * via a call to the method `addCollectionFragment'.
+     * Adds a new column to the collection.
      *
      * @param columnName Name of new column.
      * @param columnType Data type of new column.
-     * @param fragmentName Name of collection fragment to contain new column.
      * @param maxSize Maximum size of column data type (useful for string or blob data types).
      * @param sizeIsFixed Flag indicating whether size of column data type is fixed (useful for string or blob data types).
      */
@@ -149,19 +139,14 @@ namespace pool {
        const std::string& columnName, 
        const std::string& columnType,
        const std::string& annotation = "",
-       std::string fragmentName = "",
        int maxSize = 0,
        bool sizeIsFixed = true );
 
     /**
-     * Adds a new column to the collection fragment description object specified as input. If no collection 
-     * fragment is specified the column is added to the description object of the top level collection fragment. 
-     * Throws an exception if the specified collection fragment has not been declared to be part of the collection 
-     * via a call to the method `addCollectionFragment'.
+     * Adds a new column to the collection.
      * 
      * @param columnName Name of new column.
      * @param columnType Data type of new column.
-     * @param fragmentName Name of collection fragment to contain new column.
      * @param maxSize Maximum size of column data type (useful for string or blob data types).
      * @param sizeIsFixed Flag indicating whether size of column data type is fixed (useful for string or blob data types).
      */
@@ -169,24 +154,17 @@ namespace pool {
        const std::string& columnName, 
        const std::type_info& columnType,
        const std::string& annotation = "",
-       std::string fragmentName = "",
        int maxSize = 0,
        bool sizeIsFixed = true );
 
     /**
-     * Adds a new column of type pool::Token to the collection fragment description object specified as input. 
-     * If no collection fragment is specified the column is added to the description object of the top level 
-     * collection fragment. Throws an exception if the specified collection fragment has not been declared to be 
-     * part of the collection via a call to the method `addCollectionFragment'. Throws an exception if an attempt 
-     * is made to add the event reference Token column to any other collection fragment than the top level fragment.
+     * Adds a new column of type pool::Token to the collection.
      *
      * @param columnName Name of new column.
-     * @param fragmentName Name of collection fragment to contain new column.
      */
     virtual const ICollectionColumn&    insertTokenColumn(
        const std::string& columnName,
-       const std::string& annotation = "",
-       std::string fragmentName = "" );
+       const std::string& annotation = "");
     
 
     /// add annotation to column
@@ -272,67 +250,6 @@ namespace pool {
      */
     virtual void dropIndex( const std::vector<std::string>& columnNames );
 
-    /**
-     * Sets a unique constraint on a column of the collection description. Automatically generates a unique
-     * name for the unique constraint.
-     *
-     * @param columnName Name of column for which constraint is applied.
-     */
-    virtual void setUniqueConstraint( const std::string& constraintName, const std::string& columnName );
-
-    /**
-     * Sets a unique constraint on one or more columns of the collection description. Automatically generates
-     * a unique name for the unique constraint.
-     *
-     * @param columnNames Names of columns for which constraint is applied.
-     */
-    virtual void setUniqueConstraint( const std::string& constraintName, const std::vector<std::string>& columnNames );
-
-    /**
-     * Unsets an existing unique constraint on a single column of the collection description, 
-     * given the name of the column.
-     *
-     * @param columnName Name of column used by unique constraint to be unset.
-     */
-    virtual void unsetUniqueConstraint( const std::string& columnName );
-
-    /**
-     * Unsets an existing unique constraint on one or more columns of the colleciton description, 
-     * given the names of the columns.
-     *
-     * @param columnNames Names of columns used by unique constraint to be unset.
-     */
-    virtual void unsetUniqueConstraint( const std::vector<std::string>& columnNames );
-
-    /**
-     * Adds a collection fragment to the collection description. If no parent collection fragment name is provided
-     * as input the last collection fragment in the fragment chain is assigned as the parent collection fragment of
-     * the new collection fragment.
-     *
-     * @param fragmentName Name of collection fragment to add to collection description.
-     * @param parentFragmentName Name of collection fragment to assign as parent of new collection fragment.
-     * @param usesForeignKey Flag indicating whether new fragment is to reference its parent fragment via a foreign key.
-     */
-    virtual void addCollectionFragment( const std::string& fragmentName,
-					std::string parentFragmentName = "",
-                                        bool usesForeignKey = true );
-
-    /**
-     * Drops a collection fragment from the collection description. After the fragment is dropped its parent
-     * collection fragment is assigned as the new parent of its child collection fragment.
-     * 
-     * @param fragmentName Name of collection fragment to drop from collection description.
-     */
-    virtual void dropCollectionFragment( const std::string& fragmentName );
-
-    /**
-     * Renames a collection fragment in the collection description. Regenerates unique names for all indices,
-     * unique constraints and foreign key constraints defined for the fragment.
-     * 
-     * @param oldName Old name of collection fragment.
-     * @param newName New name of collection fragment.
-     */
-    virtual void renameCollectionFragment( const std::string& oldName, const std::string& newName );
 
     /// Returns the name of the collection and the top level collection fragment.
     virtual const std::string& name() const;
@@ -357,12 +274,9 @@ namespace pool {
 
     /**
      * Returns the number of columns (including the event reference column if it is used) in 
-     * the collection fragment specified as input. If no collection fragment name is specified 
-     * then the total number of columns is returned.
-     *
-     * @param fragmentName Name of collection fragment for which to return column count.
+     * the collection.
      */
-    virtual int numberOfColumns( std::string fragmentName = "" ) const;
+    virtual int numberOfColumns() const;
 
     /**
      * Returns a description object for a column of the collection, given the name of
@@ -374,24 +288,11 @@ namespace pool {
 
     /// return pointer to Column or NULL if it's not found (will not throw exceptions)
     virtual const ICollectionColumn* columnPtr( const std::string& columnName ) const;
-
     
     /**
-     * Returns the number of Token columns (including the event reference column if it is used) in 
-     * the collection fragment specified as input. If no collection fragment name is specified 
-     * then the total number of Token columns in the collection is returned.
-     *
-     * @param fragmentName Name of collection fragment for which to return column count.
+     * Returns the number of Token columns (including the event reference column if it is used)
      */
-    virtual int numberOfTokenColumns( std::string fragmentName = "" ) const;
-
-    /**
-     * Returns the number of Token columns (including the event reference column if it is used) in 
-     * the collection fragment specified as input.
-     *
-     * @param fragmentId Position of collection fragment in collection fragment chain.
-     */
-    virtual int numberOfTokenColumns( int fragmentId ) const;
+    virtual int numberOfTokenColumns() const;
 
     /**
      * Returns a description object for a Token column of the collection, given the name of 
@@ -403,39 +304,16 @@ namespace pool {
 
     /**
      * Returns a description object for a Token column of the collection, given the position
-     * of the column in its associated collection fragment and given the position of the
-     * this fragment in the collection fragment chain.
+     * of the column.
      *
      * @param columnId Position of column in associated collection fragment.
-     * @param fragmentId Position of associated collection fragment in fragment chain.
      */
-    virtual const ICollectionColumn& tokenColumn( int columnId, int fragmentId ) const; 
-
-    /**
-     * Returns a description object for a Token column of the collection, given the position
-     * of the column in its associated collection fragment and given the name of the
-     * this fragment.
-     *
-     * @param columnId Position of column in associated collection fragment.
-     * @param fragmentName Name of associated collection fragment.
-     */
-    virtual const ICollectionColumn& tokenColumn( int columnId, const std::string& fragmentName ) const; 
+    virtual const ICollectionColumn& tokenColumn( int columnId ) const; 
 
     /** 
-     * Returns the number of Attribute columns in the collection fragment specified as input.
-     * If no collection fragment is specified then the total number of Attribute columns in 
-     * the collection is returned.
-     * 
-     * @param fragmentName Name of collection fragment.
+     * Returns the number of Attribute columns in the collection.
      */
-    virtual int numberOfAttributeColumns( std::string fragmentName = "" ) const;
-
-    /**
-     * Returns the number of Attribute columns in the collection fragment specified as input. 
-     *
-     * @param fragmentId Position of collection fragment in collection fragment chain.
-     */
-    virtual int numberOfAttributeColumns( int fragmentId ) const;
+    virtual int numberOfAttributeColumns() const;
 
     /**
      * Returns a description object for an Attribute column of the collection, given the name of 
@@ -447,22 +325,17 @@ namespace pool {
 
     /**
      * Returns a description object for an Attribute column of the collection, given the position
-     * of the column in its associated collection fragment and given the position of this 
-     * fragment in the collection fragment chain.
+     * of the column.
      *
      * @param columnId Position of column in associated collection fragment.
-     * @param fragmentId Position of associated collection fragment in fragment chain.
      */
-    virtual const ICollectionColumn& attributeColumn( int columnId, int fragmentId ) const; 
+    virtual const ICollectionColumn& attributeColumn( int columnId ) const;
 
-    /**
-     * Returns a description object for an Attribute column of the collection, given the position
-     * of the column in its associated collection fragment and given the name of the this fragment.
-     *
-     * @param columnId Position of column in associated collection fragment.
-     * @param fragmentName Name of associated collection fragment.
-     */
-    virtual const ICollectionColumn& attributeColumn( int columnId, const std::string& fragmentName ) const; 
+    /// Returns the Token column description objects.
+    const std::vector< pool::CollectionColumn* >& tokenColumns() const { return m_tokenColumns; }
+
+    /// Returns the Attribute column description objects.
+    const std::vector< pool::CollectionColumn* >& attributeColumns() const { return m_attributeColumns; }
 
     /**
      * Returns the number of indices used by the collection.
@@ -493,64 +366,6 @@ namespace pool {
      */
     virtual const ICollectionIndex& index( int indexId ) const;
 
-    /** 
-     * Returns the number of unique constraints used by the collection.
-     */
-    virtual int numberOfUniqueConstraints() const;
-
-    /**
-     * Returns a description object for a unique constraint on the collection, given the name 
-     * of the column on which the unique constraint is set.
-     *
-     * @param columnName Name of column on which unique constraint is set.
-     */
-    virtual const ICollectionUniqueConstraint& uniqueConstraint( const std::string& columnName ) const;
-
-    /**
-     * Returns a description object for a unique constraint on the collection, given the names 
-     * of the columns on which the unique constraint is set.
-     *
-     * @param constraintNames Names of columns on which unique constraint is set.
-     */
-    virtual const ICollectionUniqueConstraint& uniqueConstraint( const std::vector<std::string>& columnNames ) const;
-
-    /**
-     * Returns a description object for a unique constraint of the collection, given the 
-     * ID number of the unique constraint.
-     *
-     * @param constraintId ID number of unique constraint.
-     */
-    virtual const ICollectionUniqueConstraint& uniqueConstraint( int constraintId ) const;
-
-    /** 
-     * Returns the number of collection fragments in the collection.
-     */
-    virtual int numberOfCollectionFragments() const;
-
-    /**
-     * Returns a description object for a collection fragment of the collection,
-     * given the name of the collection fragment.
-     *
-     * @param fragmentName Name of collection fragment.
-     */ 
-    virtual const pool::ICollectionFragment& collectionFragment( const std::string& fragmentName ) const;
-
-    /**
-     * Returns a description object for a collection fragment of the collection,
-     * given the position of the collection fragment in the collection fragment chain.
-     *
-     * @param fragmentId Position of collection fragment in fragment chain.
-     */ 
-    virtual const pool::ICollectionFragment& collectionFragment( int fragmentId ) const;
-
-    /**
-     * Returns the name of a collection fragment of the collection, given the name of a column 
-     * contained by the fragment.
-     *
-     * @param columnName Name of a column in collection fragment.
-     */
-    virtual const std::string& collectionFragmentName( const std::string& columnName ) const;
-
     // set column ID, return the ID
     virtual int		setColumnId( const std::string& columnName, int id, const std::string& methodName );
     
@@ -577,20 +392,13 @@ namespace pool {
     virtual pool::CollectionColumn* column( const std::string& columnName, const std::string& methodName );
     virtual const pool::CollectionColumn* column( const std::string& columnName, const std::string& methodName ) const;
 
-    // returns non-const fragment pointer
-    virtual pool::CollectionFragment* collectionFragment( int fragmentId, const std::string& method  );
-    virtual const pool::CollectionFragment* collectionFragment( int fragmentId, const std::string& method  ) const;
-    // returns non-const fragment pointer
-    virtual pool::CollectionFragment* collectionFragment( const std::string& fragmentName, const std::string& method );
-    virtual const pool::CollectionFragment* collectionFragment( const std::string& fragmentName, const std::string& method ) const;
-
  public:
     /// print out the description (debugging)
     virtual void                printOut() const;
 
     
   private:
-    /// Name of collection or top level collection fragment.
+    /// Name of the collection
     std::string m_name;
 
     /// Storage technology type of collection.
@@ -601,6 +409,12 @@ namespace pool {
 
     /// Name of event reference column.
     std::string m_eventReferenceColumnName;
+
+    // Token column description objects
+    std::vector< pool::CollectionColumn* >	m_tokenColumns;
+
+    /// Attribute column description objects
+    std::vector< pool::CollectionColumn* >	m_attributeColumns;
 
     /// Map of column ID numbers for column names
     /// IDs are unique in the collection
@@ -615,21 +429,6 @@ namespace pool {
 
     /// Vector of CollectionIndex objects.
     std::vector< CollectionIndex* > m_indices;
-
-    /// Vector of CollectionUniqueConstraint object names.
-    std::vector< std::string > m_uniqueConstraintNames;
-
-    /// Vector of CollectionUniqueConstraint objects..
-    std::vector< CollectionUniqueConstraint* > m_uniqueConstraints;
-
-    /// Map of CollectionFragment objects using collection fragment names as keys.
-    std::map< std::string, CollectionFragment* > m_fragmentForFragmentName;
-
-    /// Map of CollectionFragment objects using collection fragment ID numbers as keys.
-    std::map< int, CollectionFragment* > m_fragmentForFragmentId;
-
-    /// Map of collection fragment names using column names as keys.
-    std::map< std::string, std::string > m_fragmentNameForColumnName;
   };
 }
 

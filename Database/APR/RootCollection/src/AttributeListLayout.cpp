@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollection.h"
 #include "RootCollection/AttributeListLayout.h"
 
 #include "CollectionBase/CollectionDescription.h"
-#include "CollectionBase/CollectionFragment.h"
 #include "CollectionBase/CollectionColumn.h"
 
 #include "CoralBase/MessageStream.h"
@@ -27,20 +26,16 @@ AttributeListLayout::~AttributeListLayout()
 
 AttributeListLayout::AttributeListLayout( const pool::ICollectionDescription& desc )
 {
-   for( int f_id = 0; f_id < desc.numberOfCollectionFragments(); f_id++ ) {
-
-      for( int col_id = 0; col_id < desc.numberOfTokenColumns( f_id ); col_id++ ) {
-         const ICollectionColumn&        column = desc.tokenColumn(col_id, f_id);
+   for( int col_id = 0; col_id < desc.numberOfTokenColumns(); col_id++ ) {
+         const ICollectionColumn&        column = desc.tokenColumn(col_id);
          m_layout.push_back( make_pair( column.name(), column.type() ) );
          m_annotations.push_back( column.annotation() );
-      }
+   }
 
-         
-      for( int col_id = 0; col_id < desc.numberOfAttributeColumns( f_id ); col_id++ ) {
-         const ICollectionColumn& column = desc.attributeColumn(col_id, f_id);
+   for( int col_id = 0; col_id < desc.numberOfAttributeColumns(); col_id++ ) {
+         const ICollectionColumn& column = desc.attributeColumn(col_id);
          m_layout.push_back( make_pair( column.name(), column.type() ) );
          m_annotations.push_back( column.annotation() );
-      }
    }
    m_eventRefColumnName = desc.eventReferenceColumnName();
 }

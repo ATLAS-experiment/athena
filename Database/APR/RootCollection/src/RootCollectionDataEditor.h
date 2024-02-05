@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTCOLLECTION_COLLECTIONDATAEDITOR_H
@@ -113,7 +113,7 @@ namespace pool {
         const ICollectionDescription&         m_description;
         
         /// Collection row buffer containing all Tokens and Attributes defined by collection.
-        CollectionRowBuffer                 m_collectionRowBuffer;
+        CollectionRowBuffer                   m_collectionRowBuffer;
 
         TTree                                *m_tree;
 

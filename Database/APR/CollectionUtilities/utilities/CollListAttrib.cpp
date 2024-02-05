@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -116,19 +116,15 @@ int main(int argc, const char *argv[])
 	 collMap[i] = collection;
 	 collCounter++;
 	 vector< pair<string,string> > spec;
-	 for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-	    for( int c=0; c < description.numberOfAttributeColumns( f ); c++ ) {
-	       const pool::ICollectionColumn&   column = description.attributeColumn(c, f);
+	 for( int c=0; c < description.numberOfAttributeColumns(); c++ ) {
+	       const pool::ICollectionColumn&   column = description.attributeColumn(c);
 	       spec.push_back(make_pair(column.name(),column.type()));
-	    }
 	 }
 	 attSpecs[i]=spec;
 	 spec.clear();
-	 for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-	    for( int c=0; c < description.numberOfTokenColumns( f ); c++ ) {
-	       const pool::ICollectionColumn&   column = description.tokenColumn(c, f);
+    for( int c=0; c < description.numberOfTokenColumns(); c++ ) {
+	       const pool::ICollectionColumn&   column = description.tokenColumn(c);
 	       spec.push_back(make_pair(column.name(),column.type()));
-	    }
 	 }
 	 tokSpecs[i]=spec;
       }
@@ -141,8 +137,6 @@ int main(int argc, const char *argv[])
 	 std::cout << collMap[i]->description().name();
 	 std::cout << "   TYPE: ";
 	 std::cout << collMap[i]->description().type();
-	 std::cout << "   NFRAG: ";
-	 std::cout << collMap[i]->description().numberOfCollectionFragments();
 	 std::cout << std::endl;
       }
 

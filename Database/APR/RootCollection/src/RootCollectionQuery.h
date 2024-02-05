@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTCOLLECTION_COLLECTIONQUERY_H
@@ -57,24 +57,6 @@ namespace pool {
 
         /// Adds all Token and Attribute columns to the query select list.
         virtual void selectAll();
-
-        /**
-         * Adds the data table associated with a collection fragment to the query table list.
-         *
-         * @param fragmentName Name of collection fragment to add.
-         */
-        virtual void addToCollectionFragmentList( const std::string& fragmentName );
-
-        /**
-         * Adds the data tables associated with one or more collection fragments to the query 
-         * table list.
-         *
-         * @param fragmentNames Names of collection fragments to add.
-         */
-        virtual void addToCollectionFragmentList( const std::vector< std::string >& fragmentNames );
-
-        /// Adds all collection fragments to the query table list.
-        virtual void addAllCollectionFragments();
 
         /**
          * Sets the query.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollectionQuery.h"
@@ -10,7 +10,6 @@
 #include "CollectionBase/CollectionRowBuffer.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/ICollectionColumn.h"
-#include "CollectionBase/ICollectionFragment.h"
 #include "CollectionBase/CollectionBaseNames.h"
 #include "CollectionBase/boost_tokenizer_headers.h"
 
@@ -60,7 +59,7 @@ pool::RootCollection::RootCollectionQuery::addToOutputList( const std::string& c
          return;
       }
       // Check if is a Token column.
-      if( m_description.column( *token ).type() == pool::CollectionBaseNames::tokenTypeName() ) {
+      if( m_description.column( *token ).type() == CollectionBaseNames::tokenTypeName ) {
          addToTokenOutputList( *token );
       } else {
          addToAttributeOutputList( *token );
@@ -83,10 +82,8 @@ pool::RootCollection::RootCollectionQuery::addToOutputList( const std::vector<st
 void
 pool::RootCollection::RootCollectionQuery::selectAllAttributes()
 {
-   for( int i = 0; i < m_description.numberOfCollectionFragments(); i++ )  {
-      for( int j = 0; j < m_description.numberOfAttributeColumns( i ); j++ )    {
-         addToAttributeOutputList( m_description.attributeColumn( j, i ).name() );
-      }
+   for( int j = 0; j < m_description.numberOfAttributeColumns(); j++ )    {
+      addToAttributeOutputList( m_description.attributeColumn( j ).name() );
    }
 }
 
@@ -94,10 +91,8 @@ pool::RootCollection::RootCollectionQuery::selectAllAttributes()
 void
 pool::RootCollection::RootCollectionQuery::selectAllTokens()
 {
-   for( int i = 0; i < m_description.numberOfCollectionFragments(); i++ )  {
-      for( int j = 0; j < m_description.numberOfTokenColumns( i ); j++ )    {
-         addToTokenOutputList( m_description.tokenColumn( j, i ).name() );
-      }
+   for( int j = 0; j < m_description.numberOfTokenColumns(); j++ )    {
+      addToTokenOutputList( m_description.tokenColumn( j ).name() );
    }
 }
 
@@ -107,45 +102,6 @@ pool::RootCollection::RootCollectionQuery::selectAll()
 {
    selectAllAttributes();
    selectAllTokens();
-}
-
-
-void
-pool::RootCollection::RootCollectionQuery::addToCollectionFragmentList( const std::string& fragmentName )
-{
-   if (m_collectionFragmentNames.insert (fragmentName).second) {
-      /*
-      // Add data table associated with collection fragment to query table list.
-      std::string dataTableName = ( m_dataTableNameForCollectionFragmentName.find( fragmentName ) )->second;
-      m_query->addToTableList( dataTableName );
-
-      // Add condition to match primary key of data table with that of top level collection fragment data table.
-      if ( dataTableName != m_dataTableName )    {
-         std::string condition = " " + dataTableName + "." + pool::RootCollection::RootCollectionNames::recordIdVariableInCollectionDataTable() + " = " + m_dataTableName + "." + pool::RootCollection::RootCollectionNames::recordIdVariableInCollectionDataTable() + " ";
-         m_primaryKeyMatchingConditions.push_back( condition );
-      }
-      */
-    
-   } 
-}
-
-
-void
-pool::RootCollection::RootCollectionQuery::
-addToCollectionFragmentList( const std::vector< std::string >& fragmentNames )
-{
-   for( std::vector< std::string >::const_iterator iName = fragmentNames.begin(); iName != fragmentNames.end(); ++iName )  {
-     addToCollectionFragmentList( *iName );
-  }
-}
-
-
-void
-pool::RootCollection::RootCollectionQuery::addAllCollectionFragments()
-{
-  for( int i = 0; i < m_description.numberOfCollectionFragments(); i++ )  {
-     addToCollectionFragmentList( m_description.collectionFragment( i ).name() );
-  }
 }
 
 
@@ -241,9 +197,6 @@ pool::RootCollection::RootCollectionQuery::addToTokenOutputList( const std::stri
       }
       m_outputTokenList.extend( columnName );
       m_selectedColumnNames.insert( columnName );
-      // keep track of fragments - not really used yet
-      addToCollectionFragmentList( m_description.collectionFragmentName( columnName ) );
-//      cout << "Adding token column to query output list:" << columnName << endl;
    }   
 }
 
@@ -263,9 +216,6 @@ pool::RootCollection::RootCollectionQuery::addToAttributeOutputList( const std::
                              "RootCollection" );
       }         
       m_selectedColumnNames.insert( columnName );
-      // keep track of fragments - not really used yet
-      addToCollectionFragmentList( m_description.collectionFragmentName( columnName ) );
-//      cout << "Adding attribute column to query output list:" << columnName << endl;
    }
 }
 
