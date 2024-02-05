@@ -188,6 +188,15 @@ namespace Prompt
     return false;
   }
 
+  /**
+   * @brief Adds a variable to the VarHolder.
+   *
+   * This function adds a variable to the VarHolder using the specified key and value.
+   *
+   * @param key The key of the variable.
+   * @param value The value of the variable.
+   * @return True if the variable was successfully added, false otherwise.
+   */
   inline bool VarHolder::addVar(const unsigned key, const double value)
   {
     using namespace asg::msgUserCode;
