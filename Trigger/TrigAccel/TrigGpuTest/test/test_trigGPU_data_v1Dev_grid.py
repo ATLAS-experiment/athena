@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger BS->RDO_TRIG athena test of the Dev_pp_run3_v1 menu
+# art-description: Trigger GPU test on data
 # art-type: grid
 # art-include: main/Athena
+# Skipping art-output which has no effect for build tests.
+# If you create a grid version, check art-output in existing grid tests.
 # art-architecture: '#&nvidia'
 # art-output: *.txt
 # art-output: *.log
@@ -23,12 +25,14 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.args = '--CA'
 ex.input = 'data'
 ex.threads = 1
-ex.concurrent_events = 1
-ex.max_events = 2000
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\';doWriteBS=False;doL1Sim=True;doWriteRDOTrigger=True;doRuntimeNaviVal=True;from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.InDetTracking.doGPU=True"'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
+            'Trigger.doLVL1=True',
+            'Trigger.doRuntimeNaviVal=True',
+            'Trigger.InDetTracking.doGPU=True' ]
 
 test = Test.Test()
 test.art_type = 'grid'
