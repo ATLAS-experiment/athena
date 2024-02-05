@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import ProductionStep
-from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
 
 
 @AccumulatorCache
@@ -62,6 +61,7 @@ def QuirkPhysicsToolCfg(flags, name="QuirkPhysicsTool", **kwargs):
 def QuirksCfg(flags):
     result = ComponentAccumulator()
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
         result.merge(PhysicsListSvcCfg(flags))
     load_files_for_quirks_scenario(flags)
     if flags.Common.ProductionStep == ProductionStep.Simulation:

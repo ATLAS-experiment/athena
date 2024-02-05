@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 import os
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import ProductionStep
-from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
 from ExtraParticles.PDGHelpers import getPDGTABLE
 
 
@@ -132,6 +131,7 @@ def fcpPreInclude(flags):
 def fcpCfg(flags):
     result = ComponentAccumulator()
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
         result.merge(PhysicsListSvcCfg(flags))
 
     simdict = flags.Input.SpecialConfiguration
@@ -169,6 +169,7 @@ def QballCfg(flags):
     result = ComponentAccumulator()
     simdict = flags.Input.SpecialConfiguration
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
         result.merge(PhysicsListSvcCfg(flags))
         if "InteractingPDGCodes" not in simdict:
             assert "CHARGE" in simdict
@@ -207,6 +208,7 @@ def MonopolePreInclude(flags):
 def MonopoleCfg(flags):
     result = ComponentAccumulator()
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
         result.merge(PhysicsListSvcCfg(flags))
 
     simdict = flags.Input.SpecialConfiguration
