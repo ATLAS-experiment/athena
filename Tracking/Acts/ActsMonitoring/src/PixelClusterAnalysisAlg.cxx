@@ -18,6 +18,9 @@ namespace ActsTrk {
 
     ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
 
+    ATH_MSG_DEBUG("Monitoring settings ...");
+    ATH_MSG_DEBUG(m_monGroupName);
+    
     return AthMonitorAlgorithm::initialize();
   }
 
@@ -126,7 +129,7 @@ namespace ActsTrk {
 						[] (const auto* cluster) -> float
 						{ return cluster->widthInEta(); });
 
-    fill("ActsClusterAnalysisAlg",
+    fill(m_monGroupName.value(),
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule,
 	 monitor_isInnermost, monitor_isNextToInnermost,

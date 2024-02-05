@@ -21,6 +21,9 @@ namespace ActsTrk {
 
     if (m_usePixel and m_useOverlap)
       ATH_MSG_INFO("No overlap collection when enabled for pixel space points! Check your configuration if needed.");
+
+    ATH_MSG_DEBUG("Monitoring settings ...");
+    ATH_MSG_DEBUG(m_monGroupName);
     
     return AthMonitorAlgorithm::initialize();
   }
@@ -43,7 +46,7 @@ namespace ActsTrk {
     }
 
     auto monitor_nsp = Monitored::Scalar<int>("Nsp", inputSpacePointContainer->size());
-    fill("ActsSpacePointAnalysisAlg", monitor_nsp);
+    fill(m_monGroupName.value(), monitor_nsp);
 
     const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
     // Check we can have access to clusters
@@ -164,7 +167,7 @@ namespace ActsTrk {
 					       [] (const auto* spacePoint) -> double
 					       { return spacePoint->varianceZ(); }); 
 
-    fill("ActsSpacePointAnalysisAlg",
+    fill(m_monGroupName.value(),
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule, monitor_sideModule,
 	 monitor_isInnermost, monitor_isNextToInnermost,

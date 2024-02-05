@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKANALYSIS_STRIPCLUSTERANALYSISALG_H
@@ -22,8 +22,13 @@ namespace ActsTrk {
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
   private:
-    SG::ReadHandleKey<xAOD::StripClusterContainer> m_stripClusterContainerKey{this, "ClusterContainerKey", "ITkStripClusters", "Key of input pixel clusters"};
+    SG::ReadHandleKey<xAOD::StripClusterContainer> m_stripClusterContainerKey
+    {this, "ClusterContainerKey", "ITkStripClusters",
+	"Key of input pixel clusters"};
 
+    Gaudi::Property< std::string > m_monGroupName
+      {this, "MonGroupName", "ActsClusterAnalysisAlg"};
+    
     const SCT_ID *m_stripID {};
   };
 
