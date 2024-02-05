@@ -92,7 +92,7 @@ namespace Muon {
 
     /** @brief set drift distances and uncertainties */
     void setDriftDist(std::vector<float>&& driftDist,
-                      std::vector<Amg::MatrixX>&& driftDistErrors);
+                      std::vector<AmgVector(2)>&& driftDistErrors);
 
     // setter functions for the EventTPConverters
     void setDriftDist(std::vector<float>&& driftDist,
@@ -140,7 +140,7 @@ namespace Muon {
     const std::vector<float>& stripDriftDist() const;
 
     /** @brief returns the list of drift distances */
-    const std::vector<Amg::MatrixX>& stripDriftErrors() const;
+    const std::vector<AmgVector(2)>& stripDriftErrors() const;
 
     // getter functions for the EventTPConverters
     std::vector<float> stripDriftErrors_0_0() const;
@@ -197,7 +197,7 @@ namespace Muon {
     std::vector<short int> m_stripTimes{};
     std::vector<int> m_stripCharges{};
     std::vector<float> m_stripDriftDist{};
-    std::vector<Amg::MatrixX>  m_stripDriftErrors{};
+    std::vector<AmgVector(2)>  m_stripDriftErrors{};
     Author m_author{Author::nAuthorsPRD};
     Quality m_quality{Quality::unKnown};
 
@@ -264,7 +264,7 @@ namespace Muon {
     return m_stripDriftDist;
   }
 
-  inline const std::vector<Amg::MatrixX>& MMPrepData::stripDriftErrors() const
+  inline const std::vector<AmgVector(2)>& MMPrepData::stripDriftErrors() const
   {
     return m_stripDriftErrors;
   }

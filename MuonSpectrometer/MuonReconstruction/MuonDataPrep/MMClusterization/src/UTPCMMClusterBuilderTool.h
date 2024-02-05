@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef UTPCMMClusterBuilderTool_h
 #define UTPCMMClusterBuilderTool_h
@@ -84,7 +84,7 @@ namespace Muon {
         StatusCode applyCrossTalkCut(std::vector<int>& idxSelected, const std::vector<MMPrepData>& MMPrdsOfLayer, std::vector<int>& flag,
                                      int& nStripsCut) const;
         StatusCode finalFit(const std::vector<Identifier>& ids, const std::vector<float>& stripsPos, const std::vector<float>& driftDists,
-                            const std::vector<Amg::MatrixX>& driftDistErrors, double& x0, double& sigmaX0, double& fitAngle,
+                            const std::vector<AmgVector(2)>& driftDistErrors, double& x0, double& sigmaX0, double& fitAngle,
                             double& chiSqProb) const;
     };
 

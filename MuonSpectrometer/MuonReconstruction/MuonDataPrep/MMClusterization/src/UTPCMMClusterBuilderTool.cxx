@@ -114,7 +114,7 @@ StatusCode UTPCMMClusterBuilderTool::getClusters(const EventContext& /*ctx*/,
             std::vector<short int> stripsOfClusterTimes;
             std::vector<int> stripsOfClusterCharges;
             std::vector<float> stripsOfClusterDriftDists;
-            std::vector<Amg::MatrixX> stripsOfClusterDriftDistErrors;
+            std::vector<AmgVector(2)> stripsOfClusterDriftDistErrors;
             std::vector<float> stripsOfClusterLocalPos;  // needed for the final fit function
             stripsOfCluster.reserve(idx_goodStrips.size());
             if (m_writeStripProperties) { stripsOfClusterChannels.reserve(idx_goodStrips.size()); }
@@ -137,7 +137,8 @@ StatusCode UTPCMMClusterBuilderTool::getClusters(const EventContext& /*ctx*/,
                     stripsOfClusterCharges.push_back(MMprdsOfLayer.at(idx).charge());
                 }
                 stripsOfClusterDriftDists.push_back(MMprdsOfLayer.at(idx).driftDist());
-                stripsOfClusterDriftDistErrors.push_back(MMprdsOfLayer.at(idx).localCovariance());
+                const Amg::MatrixX cov{MMprdsOfLayer.at(idx).localCovariance()};
+                stripsOfClusterDriftDistErrors.emplace_back(cov(0,0), cov(1,1));
                 stripsOfClusterLocalPos.push_back(MMprdsOfLayer.at(idx).localPosition().x());
             }
 
@@ -385,7 +386,7 @@ StatusCode UTPCMMClusterBuilderTool::applyCrossTalkCut(std::vector<int>& idxSele
 }
 
 StatusCode UTPCMMClusterBuilderTool::finalFit(const std::vector<Identifier>& ids, const std::vector<float>& stripsPos,
-                                                    const std::vector<float>& driftDists, const std::vector<Amg::MatrixX>& driftDistErrors,
+                                                    const std::vector<float>& driftDists, const std::vector<AmgVector(2)>& driftDistErrors,
                                                     double& x0, double& sigmaX0, double& fitAngle, double& chiSqProb) const {
     std::unique_ptr<TGraphErrors> fitGraph = std::make_unique<TGraphErrors>();
     std::unique_ptr<TF1> ffit = std::make_unique<TF1>("ffit", "pol1");
@@ -404,7 +405,7 @@ StatusCode UTPCMMClusterBuilderTool::finalFit(const std::vector<Identifier>& ids
             xmax = xpos;
         lf->AddPoint(&xpos, driftDists.at(idx));
         fitGraph->SetPoint(fitGraph->GetN(), xpos, driftDists.at(idx));
-        fitGraph->SetPointError(fitGraph->GetN() - 1, std::sqrt(driftDistErrors.at(idx)(0, 0)), std::sqrt(driftDistErrors.at(idx)(1, 1)));
+        fitGraph->SetPointError(fitGraph->GetN() - 1, std::sqrt(driftDistErrors.at(idx)[0]), std::sqrt(driftDistErrors.at(idx)[1]));
     }
     lf->Eval();
 
@@ -468,18 +469,13 @@ RIO_Author UTPCMMClusterBuilderTool::getCalibratedClusterPosition(const EventCon
     std::vector<Identifier> ids;
     std::vector<float> stripsPos;
     std::vector<float> driftDists;
-    std::vector<Amg::MatrixX> driftDistErrors;
+    std::vector<AmgVector(2)> driftDistErrors;
 
     for (const NSWCalib::CalibratedStrip& strip : calibratedStrips) {
         ids.push_back(strip.identifier);
         stripsPos.push_back(strip.locPos.x());
         driftDists.push_back(strip.distDrift);
-
-        Amg::MatrixX cov(2, 2);
-        cov.setIdentity();
-        cov(0, 0) = strip.resTransDistDrift;
-        cov(1, 1) = strip.resLongDistDrift;
-        driftDistErrors.push_back(cov);
+        driftDistErrors.emplace_back(strip.resTransDistDrift, strip.resLongDistDrift);
     }
 
     double localClusterPosition = -9999;

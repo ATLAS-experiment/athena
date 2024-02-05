@@ -161,6 +161,12 @@ template<> void Muon::PRDxAODConvertorAlg::fillxPRD(
   xprd.setDriftDist(prd.driftDist());
   xprd.setAngle(prd.angle());
   xprd.setChiSqProb(prd.chisqProb());
+  xprd.setStripDriftErrors(prd.stripDriftErrors());
+  xprd.setStripDriftDist(prd.stripDriftDist());
+  xprd.setStripDriftDist(prd.stripDriftDist());
+  xprd.setStripCharges(prd.stripCharges());
+  xprd.setStripTimes(prd.stripTimes());
+  xprd.setStripNumbers(prd.stripNumbers());
 }
 
 template<> void Muon::PRDxAODConvertorAlg::fillxPRD(

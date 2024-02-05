@@ -41,14 +41,14 @@ IMPLEMENT_VECTOR_SETTER_GETTER(MMCluster_v1, MMCluster_v1::DriftCov_t, stripDrif
 
 IMPLEMENT_READOUTELEMENT(MMCluster_v1, m_readoutEle, MmReadoutElement)
 
-void MMCluster_v1::setStripDriftErrors(const std::vector<Amg::MatrixX>& stripDriftErrors) {
+void MMCluster_v1::setStripDriftErrors(const std::vector<AmgVector(2)>& stripDriftErrors) {
     std::vector<DriftCov_t> covariance{};
     std::transform(stripDriftErrors.begin(), stripDriftErrors.end(), 
                    std::back_inserter(covariance), 
-                   [](const Amg::MatrixX & cov) {
+                   [](const AmgVector(2) & cov) {
             DriftCov_t toRet{};
-            toRet [0] = cov(0,0);
-            toRet [1] = cov(1,1);
+            toRet [0] = cov[0];
+            toRet [1] = cov[1];
             return toRet;
     });
     setStripDriftErrors(covariance);
