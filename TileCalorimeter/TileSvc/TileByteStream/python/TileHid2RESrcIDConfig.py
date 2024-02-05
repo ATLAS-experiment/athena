@@ -37,7 +37,10 @@ def TileHid2RESrcIDCondAlgCfg(flags, source='COOL', **kwargs):
     if source == 'COOL':
         rodFolder = None
         # Connect COOL Tile conditions proxies to the tool
-        if flags.Input.isMC:
+        if flags.IOVDb.DatabaseInstance == 'COMP200':
+            # In the COMP200 DB there is no conditions with ROD status
+            kwargs['FullTileMode'] = 1  # Configure predifined mapping for Run1
+        elif flags.Input.isMC:
             rodFolder = '/TILE/OFL02/STATUS/ROD'
             # Temporary tag is hardcoded until it is connected to the global tags
             acc.merge(addFolders(flags, rodFolder, 'TILE_OFL', tag='TileOfl02StatusRod-RUN3-00', className='CondAttrListCollection'))
@@ -45,9 +48,10 @@ def TileHid2RESrcIDCondAlgCfg(flags, source='COOL', **kwargs):
             rodFolder = '/TILE/ONL01/STATUS/ROD'
             acc.merge(addFolders(flags, rodFolder, 'TILE', className='CondAttrListCollection'))
 
-        TileCondProxyCoolInt = CompFactory.getComp("TileCondProxyCool<TileCalibDrawerInt>")
-        rodStatusProxy = TileCondProxyCoolInt('TileCondProxyCool_ROD', Source=rodFolder)
-        kwargs['RODStatusProxy'] = rodStatusProxy
+        if rodFolder:
+            TileCondProxyCoolInt = CompFactory.getComp("TileCondProxyCool<TileCalibDrawerInt>")
+            rodStatusProxy = TileCondProxyCoolInt('TileCondProxyCool_ROD', Source=rodFolder)
+            kwargs['RODStatusProxy'] = rodStatusProxy
 
     elif source == 'FILE':
         TileCondProxyFileInt = CompFactory.getComp("TileCondProxyFile<TileCalibDrawerInt>")
