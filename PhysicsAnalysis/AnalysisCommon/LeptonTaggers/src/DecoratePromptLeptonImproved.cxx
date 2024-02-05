@@ -303,7 +303,7 @@ void Prompt::DecoratePromptLeptonImproved::initializeConstAccessors()
   //
   m_accessCalIsolation30       = std::make_unique<AccessFloat> ("topoetcone30");
   m_accessTrackIsolation30     = std::make_unique<AccessFloat> ("ptvarcone30");
-  m_accessTrackIsolation30TTVA = std::make_unique<AccessFloat> ("ptvarcone30_TightTTVA_pt500");
+  m_accessTrackIsolation30TTVA = std::make_unique<AccessFloat> ("ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500");
 
   m_accessDeepSecondaryVertex  = std::make_unique<AccessVertex>(m_vertexLinkName);
 
@@ -459,7 +459,7 @@ void Prompt::DecoratePromptLeptonImproved::getElectronAnpVariables(
   //
   // Get lepton isolation variables
   //
-  const double Topoetcone30rel = accessIsolation(*m_accessCalIsolation30,   elec);
+  const double Topoetcone30rel = accessIsolation(*m_accessCalIsolation30, elec);
   const double Ptvarcone30rel  = accessIsolation(*m_accessTrackIsolation30, elec);
 
   vars.addVar(Prompt::Def::Topoetcone30rel, Topoetcone30rel);
@@ -543,7 +543,7 @@ void Prompt::DecoratePromptLeptonImproved::getMuonAnpVariables(
   //
   // Get lepton isolation variables
   //
-  const double Topoetcone30rel              = accessIsolation(*m_accessCalIsolation30,       muon);
+  const double Topoetcone30rel = accessIsolation(*m_accessCalIsolation30, muon);
   const double ptvarcone30TightTTVAPt500rel = accessIsolation(*m_accessTrackIsolation30TTVA, muon);
 
   vars.addVar(Prompt::Def::Topoetcone30rel,              Topoetcone30rel);
