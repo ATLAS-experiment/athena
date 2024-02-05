@@ -12,14 +12,11 @@
 #include "../CaloCellContainerCorrectorTool.h"
 #include "../CaloCellContainerCheckerTool.h"
 #include "../CaloCellContainerFinalizerTool.h"
-#include "../CaloCellContainerFromClusterTool.h"
 #include "../CaloCellMaker.h"
 #include "../CaloConstCellMaker.h"
 //#include "CaloRec/CaloClusterCellSlimmer.h" Really obsolete AFAIK (commissioning legacy)
 #include "../CaloClusterCorrDBWriter.h"
 #include "../CaloClusterCorrDumper.h"
-//#include "CaloRec/CaloClusterPrinter.h"
-//#include "CaloRec/CaloClusterLockVars.h"
 #include "../CaloTopoTowerAlg.h"
 #include "../Blob2ToolConstants.h"
 #include "../CaloCellFastCopyTool.h"
@@ -73,9 +70,7 @@ DECLARE_COMPONENT( CaloClusterMomentsMaker_DigiHSTruth )
 DECLARE_COMPONENT( CaloCellContainerCorrectorTool )
 DECLARE_COMPONENT( CaloCellContainerCheckerTool )
 DECLARE_COMPONENT( CaloCellContainerFinalizerTool )
-DECLARE_COMPONENT( CaloCellContainerFromClusterTool )
-//DECLARE_COMPONENT( CaloClusterPrinter )
-//DECLARE_COMPONENT( CaloClusterLockVars )
+
 DECLARE_COMPONENT( Blob2ToolConstants )
 DECLARE_COMPONENT( CaloCellFastCopyTool )
 DECLARE_COMPONENT( CaloCellContCopyTool )
