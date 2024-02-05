@@ -129,3 +129,8 @@ atlas_add_test( TileTBMonitorAlgorithm_test
                 SCRIPT python -m TileMonitoring.TileTBMonitorAlgorithm --use-sqlite ''
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileJiveXMLConfig_test
+                SCRIPT python -m TileMonitoring.TileJiveXMLConfig
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
