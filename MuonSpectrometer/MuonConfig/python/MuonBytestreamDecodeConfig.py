@@ -304,8 +304,8 @@ def MmRDODDecoderCfg(flags, name="MmROD_Decoder", **kwargs):
     if not flags.Muon.MuonTrigger and not flags.Input.isMC:        
         from MuonConfig.MuonCondAlgConfig import NswDcsDbAlgCfg
         if False: result.merge(NswDcsDbAlgCfg(flags))
-        from MuonConfig.MuonCablingConfig import MicroMegaCablingCfg
-        result.merge(MicroMegaCablingCfg(flags))
+        from MuonConfig.MuonCablingConfig import NswCablingCfg
+        result.merge(NswCablingCfg(flags))
     else:
         kwargs.setdefault("CablingMap", "")
     

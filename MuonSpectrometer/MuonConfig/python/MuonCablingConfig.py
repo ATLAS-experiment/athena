@@ -146,18 +146,18 @@ def CSCCablingConfigCfg(flags):
 
     return acc
 
-def MicroMegaCablingCfg(flags, name = "MuonMM_CablingAlg", **kwargs):
+def NswCablingCfg(flags, name = "MuonNSW_CablingAlg", **kwargs):
     result = ComponentAccumulator()
     #### Only setup the MM Cabling algorithm for data
-    if flags.Input.isMC or not flags.Detector.GeometryMM: 
+    if flags.Input.isMC or (not flags.Detector.GeometryMM and not flags.Detector.GeometrysTGC): 
         return result
 
     from IOVDbSvc.IOVDbSvcConfig import addFolders
-    cablingFolder = "/MDT/MM/CABLING" if not flags.Common.isOnline else  "/MDT/Onl/MM/CABLING"
+    cablingFolder = ["/MDT/MM/CABLING" if not flags.Common.isOnline else  "/MDT/Onl/MM/CABLING"]
     kwargs.setdefault("CablingFolder",cablingFolder)
-    result.merge(addFolders(flags,[kwargs["CablingFolder"]], detDb=("MDT_OFL" if not  flags.Common.isOnline else "MDT_ONL"), className="CondAttrListCollection", tag="MmCabling-FrontEndShifts-v1"))
+    result.merge(addFolders(flags,kwargs["CablingFolder"], detDb=("MDT_OFL" if not  flags.Common.isOnline else "MDT_ONL"), className="CondAttrListCollection", tag="MmCabling-FrontEndShifts-v1"))
 
-    the_alg = CompFactory.MuonMM_CablingAlg(name, **kwargs)
+    the_alg = CompFactory.MuonNSW_CablingAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result
 #All the cabling configs together (convenience function)
@@ -176,7 +176,7 @@ def MuonCablingConfigCfg(flags):
     result = CSCCablingConfigCfg(flags)
     acc.merge( result )
 
-    acc.merge(MicroMegaCablingCfg(flags))
+    acc.merge(NswCablingCfg(flags))
 
     return acc
 

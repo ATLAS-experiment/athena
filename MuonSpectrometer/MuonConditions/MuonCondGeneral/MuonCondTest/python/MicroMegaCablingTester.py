@@ -4,9 +4,9 @@ def MicroMegaCablingTestAlgCfg(flags, name = "MMCablingTestAlg"):
     from AthenaConfiguration.ComponentFactory import CompFactory
     from MuonCondTest.MdtCablingTester import setupServicesCfg
     result = setupServicesCfg(flags)
-    from MuonConfig.MuonCablingConfig import MicroMegaCablingCfg
+    from MuonConfig.MuonCablingConfig import NswCablingCfg
     from AthenaCommon.Constants import DEBUG
-    result.merge(MicroMegaCablingCfg(flags, JSONFile = "MMGZebraShift.json", OutputLevel = DEBUG ))
+    result.merge(NswCablingCfg(flags, JSONFile = "MMGZebraShift.json", OutputLevel = DEBUG ))
     event_algo = CompFactory.MMCablingTestAlg(name, OutputLevel = DEBUG)
     result.addEventAlgo(event_algo, primary = True)
     return result
