@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 import shutil, re
@@ -7,7 +7,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.SystemOfUnits import MeV, ns, GeV # noqa: F401
 from AthenaConfiguration.Enums import ProductionStep
 from ExtraParticles.PDGHelpers import getPDGTABLE
-from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
 
 
 @AccumulatorCache
@@ -152,6 +151,7 @@ def CharginoMinusToMuMinusNeutralinoCfg(flags, name="CharginoMinusToMuMinusNeutr
 def AMSB_Cfg(flags):
     result = ComponentAccumulator()
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
         result.merge(PhysicsListSvcCfg(flags))
     C1Mass = eval(flags.Input.SpecialConfiguration["AMSBC1Mass"])
     N1Mass = eval(flags.Input.SpecialConfiguration["AMSBN1Mass"])
