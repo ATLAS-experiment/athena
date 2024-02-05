@@ -96,6 +96,7 @@ if __name__=='__main__':
     _addBoolArgument(parser, 'tmdb-raw-channels', dest='tmdbRawChannels', help='TMDB raw channels monitoring')
     _addBoolArgument(parser, 'online', help='Online environment running')
 
+    parser.add_argument('--no-mon', action='store_false', dest='mon', help='Do not run Tile monitoring algorithms')
     parser.add_argument('--stateless', action="store_true", help='Run Online Tile monitoring in partition')
     parser.add_argument('--use-mbts-trigger', action="store_true", dest='useMbtsTrigger', help='Use L1 MBTS triggers')
     parser.add_argument('--partition', default="", help='EMON, Partition name, default taken from $TDAQ_PARTITION if not set')
@@ -127,7 +128,10 @@ if __name__=='__main__':
     args, _ = parser.parse_known_args()
 
     # Set up default arguments which can be overriden via command line
-    if not any([args.laser, args.cis, args.noise, args.mbts]):
+    if not args.mon:
+        parser.set_defaults(cells=False, towers=False, clusters=False, muid=False, muonfit=False, mbts=False,
+                            rod=False, tmdb=False, tmdbDigits=False, tmdbRawChannels=False)
+    elif not any([args.laser, args.cis, args.noise, args.mbts]):
         mbts = False if (args.stateless and args.useMbtsTrigger) else True
         parser.set_defaults(cells=True, towers=True, clusters=True, muid=True, muonfit=True, mbts=mbts,
                             rod=True, tmdb=True, tmdbDigits=True, tmdbRawChannels=True)
@@ -337,7 +341,7 @@ if __name__=='__main__':
         from TileMonitoring.TileTMDBMonitorAlgorithm import TileTMDBMonitoringConfig
         cfg.merge(TileTMDBMonitoringConfig(flags))
 
-    if any([args.cells, args.towers, args.clusters, args.mbts, args.muid, args.muonfit]):
+    if any([args.cells, args.towers, args.clusters, args.mbts, args.muid, args.muonfit, flags.Output.doJiveXML]):
         from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
         cfg.merge( TileCellMakerCfg(flags) )
 
@@ -413,6 +417,10 @@ if __name__=='__main__':
             ppa.FileKey = f'/{flags.DQ.FileKey}/run_{runNumber}/'
 
         cfg.addEventAlgo(ppa, sequenceName='AthEndSeq')
+
+    if flags.Output.doJiveXML:
+        from TileMonitoring.TileJiveXMLConfig import TileAlgoJiveXMLCfg
+        cfg.merge(TileAlgoJiveXMLCfg(flags, OnlineMode=args.stateless, WriteToFile=(not args.stateless)))
 
     # Any last things to do?
     if args.postExec:
