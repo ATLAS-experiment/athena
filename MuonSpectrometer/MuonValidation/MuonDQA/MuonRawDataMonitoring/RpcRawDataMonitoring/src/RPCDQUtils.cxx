@@ -250,12 +250,12 @@ GasGapData::GasGapData(const Muon::IMuonIdHelperSvc &idHelperSvc,
     NphiStrips = readoutEl->NphiStrips();
 
     // Determine gas gap span in eta
-    const Amg::Vector3D glbPos_etaStrip_1st =
-        readoutEl->stripPos(doubletR, doubletZ, doubletPhi, gasgap, false, 1);
+    const Identifier etaIdFirst{rpcIdHelper.channelID(gapid, doubletZ, doubletPhi, gasgap, false, 1)};
+    const Amg::Vector3D glbPos_etaStrip_1st = readoutEl->stripPos(etaIdFirst);
     double eta_etaStrip_1st = glbPos_etaStrip_1st.eta();
 
-    const Amg::Vector3D glbPos_etaStrip_last = readoutEl->stripPos(
-        doubletR, doubletZ, doubletPhi, gasgap, false, NetaStrips);
+    const Identifier etaIdLast{rpcIdHelper.channelID(gapid, doubletZ, doubletPhi, gasgap, false, NetaStrips)};
+    const Amg::Vector3D glbPos_etaStrip_last = readoutEl->stripPos(etaIdLast);
     double eta_etaStrip_last = glbPos_etaStrip_last.eta();
 
     if (eta_etaStrip_1st < eta_etaStrip_last) {
@@ -269,12 +269,12 @@ GasGapData::GasGapData(const Muon::IMuonIdHelperSvc &idHelperSvc,
     //
     // Determine gas gap span in phi
     //
-    const Amg::Vector3D glbPos_phiStrip_1st =
-        readoutEl->stripPos(doubletR, doubletZ, doubletPhi, gasgap, true, 1);
+    const Identifier phiIdFirst{rpcIdHelper.channelID(gapid, doubletZ, doubletPhi, gasgap, true, 1)};
+    const Amg::Vector3D glbPos_phiStrip_1st = readoutEl->stripPos(phiIdFirst);
     double phi_phiStrip_1st = glbPos_phiStrip_1st.phi();
 
-    const Amg::Vector3D glbPos_phiStrip_last = readoutEl->stripPos(
-        doubletR, doubletZ, doubletPhi, gasgap, true, NphiStrips);
+    const Identifier phiIdLast{rpcIdHelper.channelID(gapid, doubletZ, doubletPhi, gasgap, true, NphiStrips)};
+    const Amg::Vector3D glbPos_phiStrip_last = readoutEl->stripPos(phiIdLast);
     double phi_phiStrip_last = glbPos_phiStrip_last.phi();
 
     if (phi_phiStrip_1st < phi_phiStrip_last) {
