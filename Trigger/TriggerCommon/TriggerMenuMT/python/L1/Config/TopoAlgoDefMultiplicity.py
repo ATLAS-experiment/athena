@@ -3,7 +3,7 @@ from collections import namedtuple
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-from ..Base.TopoAlgos import EMMultiplicityAlgo, TauMultiplicityAlgo, JetMultiplicityAlgo, XEMultiplicityAlgo, LArSaturationAlgo
+from ..Base.TopoAlgos import EMMultiplicityAlgo, TauMultiplicityAlgo, JetMultiplicityAlgo, XEMultiplicityAlgo, LArSaturationAlgo, ZeroBiasAlgo
 from ..Base.TopoAlgorithms import AlgType, AlgCategory
 
 class TopoAlgoDefMultiplicity(object):
@@ -240,6 +240,9 @@ class TopoAlgoDefMultiplicity(object):
 
         tm.registerTopoAlgo(LArSaturationAlgo())
 
+        tm.registerTopoAlgo(ZeroBiasAlgo("ZeroBiasA"))
+        tm.registerTopoAlgo(ZeroBiasAlgo("ZeroBiasB"))
+
     @staticmethod
     def checkMultAlgoFWconstraints(l1menu):
         """
@@ -252,6 +255,7 @@ class TopoAlgoDefMultiplicity(object):
            multLimits( thrtype='eEM',  conn='Topo1Opt0', nbit=3, startbit=0,  endbit=11),
            multLimits( thrtype='eEM',  conn='Topo1Opt0', nbit=2, startbit=24, endbit=43),
            multLimits( thrtype='eEMV', conn='Topo1Opt0', nbit=2, startbit=44, endbit=63),
+           multLimits( thrtype='ZeroBiasA',   conn='Topo1Opt0', nbit=1, startbit=64, endbit=64),
            multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=3, startbit=0,  endbit=8 ),
            multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=2, startbit=12, endbit=31),
            multLimits( thrtype='gLJ',  conn='Topo1Opt1', nbit=2, startbit=33, endbit=51),
@@ -267,7 +271,9 @@ class TopoAlgoDefMultiplicity(object):
            multLimits( thrtype='cTAU', conn='Topo1Opt3', nbit=2, startbit=23, endbit=28),
            multLimits( thrtype='jEM',  conn='Topo1Opt3', nbit=2, startbit=31, endbit=36),
            multLimits( thrtype='LArSaturation', conn='Topo1Opt3', nbit=1, startbit=37, endbit=37),
+           multLimits( thrtype='ZeroBiasB',   conn='Topo1Opt3', nbit=1, startbit=38, endbit=38),
            multLimits( thrtype='EN',   conn='Topo1Opt3', nbit=1, startbit=39, endbit=86),
+           
         ]
 
         for conn in l1menu.connectors:

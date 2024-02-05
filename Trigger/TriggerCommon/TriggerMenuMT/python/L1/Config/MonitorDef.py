@@ -220,7 +220,6 @@ class MonitorDef:
                     "L1_AFP_A_AND_C_TOF_J20",
                     "L1_J400_LAR",
                     # Phase-I
-                    "L1_ZB_eEM18",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
                     "L1_jJ500_LAR",
 

@@ -74,7 +74,7 @@ def defineMenu():
         "L1_BCM_Wide":486,
         # "L1_BCM_Wide":487,
         #
-        "L1_ZB_eEM18": 508
+        "L1_ZeroBias": 508
     }
 
 

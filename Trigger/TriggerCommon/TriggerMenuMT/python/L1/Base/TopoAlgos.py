@@ -265,3 +265,8 @@ class LArSaturationAlgo(MultiplicityAlgo):
         name = 'LArSaturation'
         super(LArSaturationAlgo, self).__init__(name=name, classtype=name, input='jTE', output=name, threshold=name, nbits=1)
 
+class ZeroBiasAlgo(MultiplicityAlgo):
+    def __init__(self, name):
+        super(ZeroBiasAlgo, self).__init__(name=name, classtype='ZeroBias', input=name, threshold=name, output=name, nbits=1)
+
+

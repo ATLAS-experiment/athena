@@ -146,6 +146,9 @@ def defineMenu():
         # LAr saturation
         'L1_LArSaturation',
 
+        # ZeroBias
+        'L1_ZeroBias',
+
         # multi jet
         'L1_J45p0ETA21_3J15p0ETA25',
         'L1_J50_2J40p0ETA25_3J15p0ETA25',

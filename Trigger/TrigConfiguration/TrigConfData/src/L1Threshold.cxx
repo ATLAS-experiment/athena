@@ -106,6 +106,23 @@ TrigConf::L1Threshold_ZB::load()
    m_seedMultiplicity = getAttribute<unsigned int>("seedMultiplicity");
 }
 
+/**
+* ZBTopo
+*/
+void
+TrigConf::L1Threshold_ZBTopo::load()
+{
+   m_mask0 = getAttribute("mask0");
+   m_mask1 = getAttribute("mask1");
+   m_mask2 = getAttribute("mask2");
+   m_mask3 = getAttribute("mask3");
+   m_mask4 = getAttribute("mask4");
+   m_mask5 = getAttribute("mask5");
+
+   m_seedBcdelay = getAttribute<unsigned int>("delay");
+
+}
+
 /******************************************
  *
  *  New L1Calo thresholds

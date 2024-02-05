@@ -102,7 +102,10 @@ def defineInputsMenu():
 
             # eEM thresholds for production      
             'eEMSPARE1', 'eEMSPARE2', 'eEMSPARE3', 'eEMSPARE4',
+            
+            ('ZeroBiasA', 1)
         ],
+
     })
 
     topoBoards["Topo1"]["connectors"].append({ # second optical connector
@@ -217,7 +220,10 @@ def defineInputsMenu():
     
             # LAr saturation for Phase-I
             ('LArSaturation',1),
-            (None,1),
+            # ZeroBias Topo Algo
+            ('ZeroBiasB', 1),
+
+         #   (None,1),
 
             # energy thresholds
             # commissioning

@@ -800,10 +800,15 @@ class ItemDef:
         # Phase-I seeds
         # Unlike legacy ZeroBias, the delay logic is in the CTP firmware, so
         # we provide the seed rather than a dedicated threshold
-        MenuItem('L1_ZB_eEM18', ctpid=508).setLogic(d.eEM18 & physcond).setTriggerType(TT.zerobs)
+        
 
         # LAr Saturation
         MenuItem('L1_LArSaturation').setLogic( d.LArSaturation & physcond ).setTriggerType(TT.calo)
+        
+        if ('Physics_HI_run3_v' in menuName or 'MC_HI_run3_v' in menuName):
+            MenuItem('L1_ZeroBias').setLogic( d.ZeroBiasB & physcond ).setTriggerType(TT.zerobs)
+        else:
+            MenuItem('L1_ZeroBias').setLogic( d.ZeroBiasA & physcond ).setTriggerType(TT.zerobs)
 
         # combined jet - xe
         MenuItem('L1_J40_XE50').setLogic( d.J40 & d.XE50 & physcond).setTriggerType(TT.calo)

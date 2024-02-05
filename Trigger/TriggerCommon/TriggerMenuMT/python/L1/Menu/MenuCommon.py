@@ -67,7 +67,8 @@ RequiredL1Items = [
         'L1_RD3_FILLED',
 
          # ZB 
-        'L1_ZB', 'L1_ZB_eEM18',
+        'L1_ZB', 
+        
 
 ]
 
