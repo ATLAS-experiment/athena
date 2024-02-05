@@ -21,6 +21,11 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+  const float cellEtaSize = 0.25;
+  const float cellPhiSize = 0.25;
+}
+
 egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
                                            ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
@@ -30,6 +35,9 @@ egammaForwardBuilder::~egammaForwardBuilder() = default;
 
 StatusCode egammaForwardBuilder::initialize()
 {
+  m_maxDelPhi = m_maxDelPhiCells * cellPhiSize * 0.5;
+  m_maxDelEta = m_maxDelEtaCells * cellEtaSize * 0.5;
+
   // The data handle keys.
   ATH_CHECK(m_topoClusterKey.initialize());
   ATH_CHECK(m_electronOutputKey.initialize());
@@ -285,8 +293,8 @@ void egammaForwardBuilder::cookieCut(xAOD::CaloCluster& cluster) const
    
   while (cell_itr != cell_links->end()) {
     if (
-      std::abs(cp.etaEC - cell_itr->eta()) > 0.375 ||
-      std::abs(cp.phiEC - cell_itr->phi()) > 0.375
+      std::abs(cp.etaEC - cell_itr->eta()) > m_maxDelEta ||
+      std::abs(cp.phiEC - cell_itr->phi()) > m_maxDelPhi
     ) {
       cell_itr = cell_links->removeCell(cell_itr);
     }
