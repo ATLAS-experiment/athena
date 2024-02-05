@@ -294,7 +294,8 @@
     </TDirectory>
     <TDirectory name="Vertices">
      <TDirectory name="AllPrimaryVertices">
-      <hist2D name="vx_n_vs_mu" plotopts="" tests="KS" type="TH2F"/>
+      <hist2D name="vx_n_vs_truthMu" plotopts="" tests="KS" type="TH2F"/>
+      <hist2D name="vx_n_vs_actualMu" plotopts="" tests="KS" type="TH2F"/>
      </TDirectory>
      <TDirectory name="HardScatteringVertex">
       <hist1D name="vx_x" plotopts="" tests="KS" type="TH1F"/>
