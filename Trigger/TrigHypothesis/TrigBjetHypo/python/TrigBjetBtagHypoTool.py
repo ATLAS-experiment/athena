@@ -44,6 +44,24 @@ bTaggingWP = \
   , "gn190": -0.351
   , "gn195": -1.794
 
+  , "gn240": 7.718
+  , "gn245": 7.017
+  , "gn250": 6.241
+  , "gn255": 5.440
+  , "gn260": 4.640
+  , "gn265": 3.889
+  , "gn270": 3.163
+  , "gn272": 2.863
+  , "gn275": 2.412
+  , "gn277": 2.087
+  , "gn280": 1.5866
+  , "gn282": 1.186
+  , "gn285": 0.5355
+  , "gn290": -0.741
+  , "gn295": -2.242
+
+
+
   , "offperf" : -999
   }
 
@@ -85,7 +103,7 @@ def decodeThreshold( threshold_btag ):
 
     tagger = "offperf" if threshold_btag == "offperf" else re.findall("(.*)[0-9]{2}",threshold_btag)[0]
 
-    allowedTaggers = ["offperf", "dl1d", "gn182bb", "gn177bb", "gn175bb", "gn1"]
+    allowedTaggers = ["offperf", "dl1d", "gn182bb", "gn177bb", "gn175bb", "gn1","gn2"]
     if tagger not in allowedTaggers:
         log.debug("tagger = %s not amidst allowed taggers ",threshold_btag)
         assert False, "Can't recognize tagger during TrigBjetHypoTool configuration. Tagger = "+threshold_btag
@@ -104,6 +122,8 @@ def decodeThreshold( threshold_btag ):
     if "gn1" in threshold_btag:
         btagger = "GN120220813"
 
+    if "gn2" in threshold_btag:
+        btagger = "GN220240122"
     bcut = bTaggingWP[threshold_btag]
 
     return [btagger, bcut] , [bbtagger, bbcut]

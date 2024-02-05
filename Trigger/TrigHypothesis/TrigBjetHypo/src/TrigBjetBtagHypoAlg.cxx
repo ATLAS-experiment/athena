@@ -412,6 +412,7 @@ StatusCode TrigBjetBtagHypoAlg::monitor_btagging( const ElementLinkVector< xAOD:
   CHECK( monitor_flavor_probabilities(bTaggingEL, "DL1d20211216") );
   CHECK( monitor_flavor_probabilities(bTaggingEL, "dips20211116") );
   CHECK( monitor_flavor_probabilities(bTaggingEL, "GN120220813") );
+  CHECK( monitor_flavor_probabilities(bTaggingEL, "GN220240122") );
 
   // Monitor JetFitter
   MONITOR_BTAG_AUX_VAR(JetFitter_isDefaults, char, bTaggingEL);
