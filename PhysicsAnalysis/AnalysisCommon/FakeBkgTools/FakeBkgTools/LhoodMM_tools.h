@@ -56,7 +56,7 @@ class LhoodMM_tools : public BaseFakeBkgTool
   double nfakes_std(double *error);
   double nfakes_std_perEventWeight(double *error);
 
-  StatusCode setFitType(std::string ft);
+  StatusCode setFitType(const std::string& ft);
 
   Int_t getFitStatus() {return m_fitStatus;}
   

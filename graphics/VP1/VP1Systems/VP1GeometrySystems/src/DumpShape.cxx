@@ -168,7 +168,7 @@ QStringList DumpShape::shapeToStringList(const GeoShape* shape)
       out << "        angle = "+QString::number(rotangle_radians*180.0/M_PI)+" deg";
 
       out << "   Information about contained GeoShape:";
-      for(QString str : shapeToStringList(theShift->getOp())){
+      for(const QString& str : shapeToStringList(theShift->getOp())){
         out <<"  ==>  "+str;
       }
     }
@@ -178,10 +178,10 @@ QStringList DumpShape::shapeToStringList(const GeoShape* shape)
     if (theUnion){
       out << " =========> GeoShapeUnion:";
       out << "   First operand:";
-      for (QString s : shapeToStringList(theUnion->getOpA()))
+      for (const QString& s : shapeToStringList(theUnion->getOpA()))
         out << "  ==> "+s;
       out << "   Second operand:";
-      for (QString s : shapeToStringList(theUnion->getOpB()))
+      for (const QString& s : shapeToStringList(theUnion->getOpB()))
         out << "  ==> "+s;
     }
   } else if (shape->typeID() == GeoShapeIntersection::getClassTypeID() ) {
@@ -190,10 +190,10 @@ QStringList DumpShape::shapeToStringList(const GeoShape* shape)
     if (theIntersection){
       out << " =========> GeoShapeIntersection:";
       out << "   First operand:";
-      for (QString s : shapeToStringList(theIntersection->getOpA()))
+      for (const QString& s : shapeToStringList(theIntersection->getOpA()))
         out << "  ==> "+s;
       out << "   Second operand:";
-      for (QString s : shapeToStringList(theIntersection->getOpB()))
+      for (const QString& s : shapeToStringList(theIntersection->getOpB()))
         out << "  ==> "+s;
     }
   } else if (shape->typeID() == GeoShapeSubtraction::getClassTypeID() ) {
@@ -202,10 +202,10 @@ QStringList DumpShape::shapeToStringList(const GeoShape* shape)
     if (theSubtraction){
       out << " =========> GeoShapeSubtraction:";
       out << "   First operand:";
-      for (QString s : shapeToStringList(theSubtraction->getOpA()))
+      for (const QString& s : shapeToStringList(theSubtraction->getOpA()))
         out << "  ==> "+s;
       out << "   Second operand:";
-      for (QString s : shapeToStringList(theSubtraction->getOpB()))
+      for (const QString& s : shapeToStringList(theSubtraction->getOpB()))
         out << "  ==> "+s;
     }
   } else if (shape->typeID() == GeoGenericTrap::getClassTypeID() ) {

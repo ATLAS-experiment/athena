@@ -712,7 +712,7 @@ void VolumeHandle::updateLabels() {
     }
 
     unsigned int row=0;
-    for(QString str : text){
+    for(const QString& str : text){
       QByteArray array = str.toLatin1();
       labelText->string.set1Value(row++,array.data());
     }

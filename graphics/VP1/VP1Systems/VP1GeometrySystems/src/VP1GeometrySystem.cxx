@@ -215,7 +215,7 @@ public:
       std::cout<<"]"<<std::endl;
       std::cout<<"Matname = "<<matname<<std::endl;
       std::cout<<"Contains following TreetopInfo: [";
-      for (auto tt : treetopinfo) std::cout<<tt.volname<<",";
+      for (const auto& tt : treetopinfo) std::cout<<tt.volname<<",";
       std::cout<<"]"<<std::endl;
       
     }
@@ -297,7 +297,7 @@ public:
 };
 
 //_____________________________________________________________________________________
-VP1GeometrySystem::VP1GeometrySystem( const VP1GeoFlags::SubSystemFlags& SubSystemsTurnedOn, QString name )
+VP1GeometrySystem::VP1GeometrySystem( const VP1GeoFlags::SubSystemFlags& SubSystemsTurnedOn, const QString& name )
   : IVP13DSystemSimple(name,
 		   "This system displays the geometry as defined in the GeoModel tree.",
            "Riccardo.Maria.Bianchi@cern.ch"),
@@ -973,13 +973,13 @@ void VP1GeometrySystem::userPickedNode(SoNode* , SoPath *pickedPath)
   message("===> Selected Node: "+volhandle->getName());
   // std::cout<<"VolHandle = "<<volhandle<<std::endl;
   if (m_d->controller->printInfoOnClick_Shape()) {
-    for (QString str :  DumpShape::shapeToStringList(volhandle->geoPVConstLink()->getLogVol()->getShape()))
+    for (const QString& str :  DumpShape::shapeToStringList(volhandle->geoPVConstLink()->getLogVol()->getShape()))
       message(str);
   }
 
   if (m_d->controller->printInfoOnClick_Material()) {
     message("===> Material:");
-    for (QString line :  VP1GeomUtils::geoMaterialToStringList(volhandle->geoMaterial()))
+    for (const QString& line :  VP1GeomUtils::geoMaterialToStringList(volhandle->geoMaterial()))
       message("     "+line);
   }
 
@@ -1022,7 +1022,7 @@ void VP1GeometrySystem::userPickedNode(SoNode* , SoPath *pickedPath)
     GeoPrintGraphAction pg(str);
     volhandle->geoPVConstLink()->exec(&pg);
     message("===> Tree:");
-    for (QString line :  QString(str.str().c_str()).split("\n"))
+    for (const QString& line :  QString(str.str().c_str()).split("\n"))
       message("     "+line);
   }
 
@@ -2054,7 +2054,7 @@ void VP1GeometrySystem::actionOnAllNonStandardVolumes(bool zap)
 }
 
 //_____________________________________________________________________________________
-void VP1GeometrySystem::autoExpandByVolumeOrMaterialName(bool bymatname,QString targetname)
+void VP1GeometrySystem::autoExpandByVolumeOrMaterialName(bool bymatname,const QString& targetname)
 {
   if (targetname.isEmpty()) {
 	  VP1Msg::messageDebug("targetname is empty.");
@@ -2134,7 +2134,7 @@ void VP1GeometrySystem::Imp::iconifyVisibleVolumesRecursively(VolumeHandle* hand
 
 
 //_____________________________________________________________________________________
-void VP1GeometrySystem::autoIconifyByVolumeOrMaterialName(bool bymatname,QString targetname)
+void VP1GeometrySystem::autoIconifyByVolumeOrMaterialName(bool bymatname,const QString& targetname)
 {
   if (targetname.isEmpty()) {
 	  VP1Msg::messageDebug("targetname is empty.");
@@ -2593,7 +2593,7 @@ void VP1GeometrySystem::setShowVolumeOutLines(bool b)
 
 
 //_____________________________________________________________________________________
-void VP1GeometrySystem::saveMaterialsToFile(QString filename,bool onlyChangedMaterials)
+void VP1GeometrySystem::saveMaterialsToFile(const QString& filename,bool onlyChangedMaterials)
 {
   if (filename.isEmpty())
     return;
@@ -2632,7 +2632,7 @@ void VP1GeometrySystem::saveMaterialsToFile(QString filename,bool onlyChangedMat
 }
 
 //_____________________________________________________________________________________
-void VP1GeometrySystem::loadMaterialsFromFile(QString filename)
+void VP1GeometrySystem::loadMaterialsFromFile(const QString& filename)
 {
   if (filename.isEmpty())
     return;
@@ -2690,7 +2690,7 @@ void VP1GeometrySystem::loadMaterialsFromFile(QString filename)
 }
 
 //____________________________________________________________________
-void VP1GeometrySystem::setLabelPosOffsets( QList<int> /**offsets*/)
+void VP1GeometrySystem::setLabelPosOffsets( const QList<int>& /**offsets*/)
 {
   messageVerbose("setLabelPosOffsets called");
   setLabels(m_d->controller->labels());
