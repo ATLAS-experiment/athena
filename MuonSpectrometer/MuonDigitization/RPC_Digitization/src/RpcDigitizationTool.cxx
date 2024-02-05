@@ -1282,7 +1282,8 @@ int RpcDigitizationTool::findStripNumber(const EventContext& ctx,
 
     const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(digitId);
 
-    Amg::Vector3D posInElement = ele->SDtoModuleCoords(posInGap, digitId);
+    Amg::Vector3D posInElement = ele->absTransform().inverse() *
+                                 ele->localToGlobalCoords(posInGap, digitId);
 
     // extract from digit id the relevant info
 
