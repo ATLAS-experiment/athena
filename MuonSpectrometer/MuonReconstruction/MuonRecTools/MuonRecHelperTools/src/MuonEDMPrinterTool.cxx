@@ -775,7 +775,7 @@ MuonEDMPrinterTool::print(const MuonPatternChamberIntersect& intersect) const
                     dynamic_cast<const MuonGM::RpcReadoutElement*>(prd->detectorElement());
                 if (detEl) {
                     nchannelsPhi += detEl->NgasGaps(true)  * detEl->NphiStripPanels() * detEl->NphiStrips();
-                    nchannelsEta += detEl->NgasGaps(false) * detEl->NetaStripPanels() * detEl->NetaStrips();
+                    nchannelsEta += detEl->NgasGaps(false) * detEl->NetaStrips();
                 }
             }
         }
