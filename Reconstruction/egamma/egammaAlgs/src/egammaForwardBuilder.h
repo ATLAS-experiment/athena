@@ -147,8 +147,27 @@ private:
     "Boolean to do cookie cutting"
   };
 
+  /** @brief Size of maximum search window in eta. */
+  Gaudi::Property<int> m_maxDelEtaCells{
+    this,
+    "MaxWindowDelEtaCells",
+    3,
+    "Size of maximum search window in eta"
+  };
+
+  /** @brief Size of maximum search window in phi. */
+  Gaudi::Property<int> m_maxDelPhiCells{
+    this,
+    "MaxWindowDelPhiCells",
+    3,
+    "Size of maximum search window in phi"
+  };
+
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
   mutable Gaudi::Accumulators::Counter<> m_MatchedClusters {};
+
+  float m_maxDelEta {};
+  float m_maxDelPhi {};
 
 protected:
   /** Handle to the selectors. */
