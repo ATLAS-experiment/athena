@@ -528,10 +528,6 @@ def LLP1Cfg(flags):
         LLP1SlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
 
-    ## CloseByIsolation content - CloseBy isolation correction (for all analyses)
-    from IsolationSelection.IsolationSelectionConfig import  setupIsoCloseBySlimmingVariables
-    setupIsoCloseBySlimmingVariables(LLP1SlimmingHelper, isLLP1 = True)
-
     # Truth containers
     if flags.Input.isMC:
 
