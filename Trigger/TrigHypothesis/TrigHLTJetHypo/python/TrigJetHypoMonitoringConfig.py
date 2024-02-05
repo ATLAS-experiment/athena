@@ -8,6 +8,8 @@ def TrigJetHypoToolMonitoring(flags, histPath, histFlags):
     montool.defineHistogram('Et', title='Jet E_{T};E_{T} (GeV)', xbins=100, xmin=0, xmax=500, path='EXPERT', type='TH1F' )
     montool.defineHistogram('TIME_jetHypo,NJetsIn', title='JetHypo time vs input jets;time (ms) ;N(jets)', xbins=50, xmin=0, xmax=5000, ybins=60, ymin=0, ymax=120, path='EXPERT', type='TH2F' )
     montool.defineHistogram('TIME_jetHypo,NJetsOut', title='JetHypo time vs jets;time (ms) ;N(jets)', xbins=50, xmin=0, xmax=5000, ybins=30, ymin=-0.5, ymax=29.5, path='EXPERT', type='TH2F' )
+    montool.defineHistogram('NJetsIn', title='Jet multiplicity input;N(jets)', xbins=30, xmin=-0.5, xmax=29.5, path='EXPERT', type='TH1F' )   
+    montool.defineHistogram('NJetsOut', title='Jet multiplicity output;N(jets)', xbins=30, xmin=-0.5, xmax=29.5, path='EXPERT', type='TH1F' )       
     # Conditional histograms: monitor the mass for largeR jets (anything but a4), and etaphi for simple smallR
     if 'a4' not in histFlags:  montool.defineHistogram('Mass', title='Jet mass;m (GeV)', xbins=100, xmin=0, xmax=200, path='EXPERT', type='TH1F' )
     if ('simple' in histFlags) and ('a4' in histFlags) and all("HT" not in flag for flag in histFlags): 
@@ -15,7 +17,11 @@ def TrigJetHypoToolMonitoring(flags, histPath, histFlags):
     # Conditional histograms: hypoScenarios like HTXXXX will match.
     if any("HT" in flag for flag in histFlags) : 
         montool.defineHistogram('HT', title='Event H_{T};H_{T} (GeV)', xbins=100, xmin=0, xmax=3000, path='EXPERT', type='TH1F' )
-        montool.defineHistogram('NJet', title='Jet multiplicity;N(jets)', xbins=20, xmin=-0.5, xmax=19.5, path='EXPERT', type='TH1F' )   
+        montool.defineHistogram('NJets', title='Jet multiplicity;N(jets)', xbins=20, xmin=-0.5, xmax=19.5, path='EXPERT', type='TH1F' )   
+    if any("Z" in flag for flag in histFlags) : 
+        montool.defineHistogram('dipz_z', title='DIPZ z;z (mm)', xbins=100, xmin=-50, xmax=50, path='EXPERT', type='TH1F' )
+        montool.defineHistogram('dipz_negLogSigma2', title='DIPZ negLogSigma2;negLogSigma2', xbins=100, xmin=-20, xmax=5, path='EXPERT', type='TH1F' )
+        montool.defineHistogram('NJets', title='Jet multiplicity;N(jets)', xbins=30, xmin=-0.5, xmax=29.5, path='EXPERT', type='TH1F' )   
     return montool
 
 

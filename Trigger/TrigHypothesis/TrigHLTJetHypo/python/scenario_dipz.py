@@ -47,7 +47,7 @@ def get_mult_args_from_matchdict(groupdict):
 def get_dipz_mlpl_from_matchdict(groupdict, njets):
     """Get DIPz WP, capacity (njets) and decorator names"""
     
-    if groupdict['WP'] is None:  # scale factor of -1 applied by default
+    if groupdict['WP'] is None:  # scale factor of -0.1 applied by default
         groupdict['WP'] = '-inf'
 
     condargs = []
