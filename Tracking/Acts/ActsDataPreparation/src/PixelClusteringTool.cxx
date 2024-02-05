@@ -17,7 +17,7 @@ using ActsTrk::getCellLabel;
 #include <unordered_set>
 
 namespace ActsTrk {
-
+  
 void clusterAddCell(PixelClusteringTool::Cluster& cl, const PixelClusteringTool::Cell& cell)
 {
     cl.ids.push_back(cell.ID);

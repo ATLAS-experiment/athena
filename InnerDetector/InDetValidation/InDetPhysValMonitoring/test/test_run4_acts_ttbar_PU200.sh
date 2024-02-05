@@ -43,7 +43,7 @@ run "Reconstruction" \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --postInclude "ActsConfig.ActsViewConfig.GlobalEventViewCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsSpacePointFormationCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --postInclude "ActsConfig.ActsViewConfig.GlobalEventViewCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsMainClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsMainSpacePointFormationCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --ignorePatterns "${ignore_pattern}" \
     --maxEvents 20 \

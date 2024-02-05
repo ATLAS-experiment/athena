@@ -28,7 +28,14 @@ def createActsConversionTrackingPassFlags():
     icf.extension = "ActsConversion"
     deactivateAthenaComponents(icf)
     icf.doActsCluster = True
-
+    icf.doActsSpacePoint = True
+    icf.doActsSeed = True
+    icf.doActsTrack = True
+    # Ambiguity resolution can follow if ActsTrack is 
+    # enabled. Ambi. can be activated/deactivated with 
+    # the flag: Acts.doAmbiguityResolution
+    icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
+    
     # Deactivate PRD association tool
     icf.usePrdAssociationTool = False
     return icf

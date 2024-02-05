@@ -74,6 +74,8 @@ namespace ActsTrk {
     SG::ReadCondHandleKey< AtlasFieldCacheCondObj > m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
         "Name of the Magnetic Field conditions object key"};
 
+    Gaudi::Property< std::string > m_monGroupName
+      {this, "MonGroupName", "ActsSeedAnalysisAlg"};
 
     Gaudi::Property< bool > m_usePixel {this, "UsePixel", true, ""};
   };

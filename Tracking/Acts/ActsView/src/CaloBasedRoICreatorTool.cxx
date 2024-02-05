@@ -66,6 +66,8 @@ StatusCode CaloBasedRoICreatorTool::defineRegionsOfInterest(const EventContext& 
 							    phi, roiPhiMin ,roiPhiMax,
 							    z, roiZMin, roiZMax ) );
   }
+
+  ATH_MSG_DEBUG("Created composite RoI from Calo with " << collectionRoI->back()->size() << " RoIs");
   
   // Return element links to the created RoIs so that they can be used from the outside
   ELs.push_back( ElementLink< TrigRoiDescriptorCollection >( *collectionRoI, 0ul ) );

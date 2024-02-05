@@ -75,18 +75,11 @@ def ITkTrackingSiPatternCfg(flags,
                 ActsSeedingCfg)
             acc.merge(ActsSeedingCfg(flags))
 
-            if flags.Tracking.ActiveConfig.extension == "Conversion":
-                from AthenaCommon.Logging import logging
-                log = logging.getLogger('ITkTrackingSiPattern')
-                log.warning(
-                    'ROI-based track-finding is not available yet in ACTS, so the default one is used')
-
         # ACTS track
         if flags.Tracking.ActiveConfig.doActsTrack:
             from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
             acc.merge(ActsTrackFindingCfg(flags))
             runActsTrackTruth = flags.Tracking.doTruth
-
 
         # Convert Tracks Acts -> Athena (before ambi)
         if flags.Tracking.ActiveConfig.doActsToAthenaTrack:
