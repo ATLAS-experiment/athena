@@ -55,6 +55,9 @@ def getArgumentParser(flags):
 
     parser.add_argument('--calib', default=False, help='Calculate calibration constants and store them in ROOT file', action=argparse.BooleanOptionalAction)
     parser.add_argument('--tmdb', default=None, help='Enable TMDB', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--cells', default=False, help='Reconstruct Tile cells', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--pool', default=False, help='Create output POOL file', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--jivexml', default=False, help='Create output Jive XML files for Atlantis', action=argparse.BooleanOptionalAction)
 
     # Set up Tile h2000 ntuple
     ntuple = parser.add_argument_group('Tile h2000 ntuple')
@@ -76,7 +79,10 @@ def getArgumentParser(flags):
     run_type_group = parser.add_argument_group('Tile Run Type')
     run_type = run_type_group.add_mutually_exclusive_group()
     run_type.add_argument('--cis', action='store_true', help='Tile CIS run type')
+    run_type.add_argument('--mono-cis', action='store_true', dest='mono_cis', help='Tile mono CIS run type')
+    run_type.add_argument('--gap-cis', action='store_true', dest='gap_cis', help='Tile gap CIS run type')
     run_type.add_argument('--laser', action='store_true', help='Tile laser run type')
+    run_type.add_argument('--gap-laser', action='store_true', dest='gap_laser', help='Tile gap laser run type')
     run_type.add_argument('--pedestals', action='store_true', help='Tile pedestals run type')
     run_type.add_argument('--physics', action='store_true', help='Tile physics run type')
 
@@ -151,8 +157,14 @@ if __name__=='__main__':
     if flags.Tile.RunType is TileRunType.UNDEFINED:
         if args.cis:
             flags.Tile.RunType = TileRunType.CIS
+        elif args.mono_cis:
+            flags.Tile.RunType = TileRunType.MONOCIS
+        elif args.gap_cis:
+            flags.Tile.RunType = TileRunType.GAPCIS
         elif args.laser:
             flags.Tile.RunType = TileRunType.LAS
+        elif args.gap_laser:
+            flags.Tile.RunType = TileRunType.GAPLAS
         elif args.pedestals:
             flags.Tile.RunType = TileRunType.PED
         elif args.physics:
@@ -217,6 +229,12 @@ if __name__=='__main__':
     if args.channel_time_mon is None:
         args.channel_time_mon = flags.Tile.RunType in [TileRunType.GAPLAS, TileRunType.GAPCIS] and (args.run2 or args.run3) and flags.Tile.doFit
 
+    if args.pool:
+        flags.Output.ESDFileName = f'tile_{runNumber}_{args.version}.pool.root'
+
+    if args.jivexml:
+        flags.Output.doJiveXML = True
+
     # Override default configuration flags from command line arguments
     flags.fillFromArgs(parser=parser)
 
@@ -275,6 +293,15 @@ if __name__=='__main__':
             rawChMaker.Cardinality = args.threads
         for builderTool in rawChMaker.TileRawChannelBuilder:
             builderTool.UseDSPCorrection = not biGainRun
+
+    # =======>>> Set up the Tile cell maker
+    if args.cells:
+        from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
+        if biGainRun:
+            cfg.merge( TileCellMakerCfg(flags, SkipGain=0, mergeChannels=False) )
+            cfg.merge( TileCellMakerCfg(flags, SkipGain=1) )
+        else:
+            cfg.merge( TileCellMakerCfg(flags, mergeChannels=False) )
 
     # =======>>> Set up the Tile Ntuple
     if args.ntuple:
@@ -409,6 +436,24 @@ if __name__=='__main__':
                 digiNoiseCalibAlg = cfg.getEventAlgo('TileDigiNoiseCalibAlg')
                 digiNoiseCalibAlg.DoAvgCorr = False # False=> Full AutoCorr matrix calculation
                 rawChanNoiseCalibAlg.FileNamePrefix = f'{args.outputDirectory}/Digi_NoiseCalib{fileVersion}'
+
+
+    # =======>>> Set up the Tile output Jive XML files
+    if flags.Output.doJiveXML:
+        from TileMonitoring.TileJiveXMLConfig import TileAlgoJiveXMLCfg
+        cfg.merge(TileAlgoJiveXMLCfg(flags))
+
+
+    # =======>>> Set up the Tile output POOL file
+    if flags.Output.doWriteESD:
+        outputItemList = ["TileHitVector#*"]
+        outputItemList += ["TileDigitsContainer#*"]
+        outputItemList += ["TileBeamElemContainer#*"]
+        outputItemList += ["TileRawChannelContainer#*"]
+        outputItemList += ["TileCellContainer#*"]
+        outputItemList += ["CaloCellContainer#*"]
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        cfg.merge( OutputStreamCfg(flags, streamName='ESD', ItemList=outputItemList) )
 
     # =======>>> Any last things to do?
     if args.postExec:

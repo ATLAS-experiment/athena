@@ -29,7 +29,7 @@ def CaloCellContainerCheckerToolCfg(flags):
     return acc
 
 
-def TileCellMakerCfg(flags, **kwargs):
+def TileCellMakerCfg(flags, mergeChannels=True, **kwargs):
     """Return component accumulator with configured Tile Cell maker algorithm
 
     Arguments:
@@ -41,6 +41,7 @@ def TileCellMakerCfg(flags, **kwargs):
                                or AllCaloHG/AllCaloLG depending on only used gain.
         DoCaloNeighborsCorrection -- correct dead cells. Assign as energy the average energy of
                                      the surrounding cells. Defaults to False.
+        mergeChannels -- merge DSP results with offline reco results. Defaults to True.
     """
 
     acc = ComponentAccumulator()
@@ -67,7 +68,7 @@ def TileCellMakerCfg(flags, **kwargs):
 
     CaloCellMaker, CaloCellContainerFinalizerTool=CompFactory.getComps("CaloCellMaker","CaloCellContainerFinalizerTool",)
     from TileRecUtils.TileCellBuilderConfig import TileCellBuilderCfg
-    tileCellBuilder = acc.popToolsAndMerge( TileCellBuilderCfg(flags, SkipGain = skipGain) )
+    tileCellBuilder = acc.popToolsAndMerge( TileCellBuilderCfg(flags, SkipGain=skipGain, mergeChannels=mergeChannels) )
 
     cellMakerTools = [tileCellBuilder, CaloCellContainerFinalizerTool()]
 

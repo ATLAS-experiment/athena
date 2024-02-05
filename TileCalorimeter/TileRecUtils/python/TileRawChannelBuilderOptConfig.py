@@ -34,9 +34,11 @@ def TileRawChannelBuilderOpt2FilterCfg(flags, method = 'Opt2', **kwargs):
     outputContainer = flags.Tile.RawChannelContainer if method == 'OptATLAS' else 'TileRawChannel' + method
     kwargs.setdefault('TileRawChannelContainer', outputContainer)
 
+    maxIterations = 3 if flags.Tile.RunType is TileRunType.MONOCIS else 5
+
     kwargs['BestPhase'] = False if useIterations else flags.Tile.BestPhaseFromCOOL
     kwargs['OF2'] = True if method != 'OF1' else False
-    kwargs['MaxIterations'] = 5 if useIterations else 1
+    kwargs['MaxIterations'] = maxIterations if useIterations else 1
     kwargs['Minus1Iteration'] = True if useIterations else False
     kwargs['AmplitudeCorrection'] = False if useIterations else flags.Tile.correctAmplitude
     kwargs['TimeCorrection'] = False if method != 'OptATLAS' else flags.Tile.correctTimeNI
