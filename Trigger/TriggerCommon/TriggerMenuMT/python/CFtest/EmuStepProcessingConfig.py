@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
-from HLTSeeding.HLTSeedingConf import CTPUnpackingEmulationTool, RoIsUnpackingEmulationTool
 from AthenaConfiguration.ComponentAccumulator import CompFactory
 
 log = logging.getLogger('EmuStepProcessingConfig')
@@ -307,25 +306,6 @@ def generateChainsManually(flags, maskbit=0x7):
 
 
 ########################## L1 #################################################        
-def emulateHLTSeeding(topSequence):
-    log.info("emulateHLTSeeding")    
-    # modify hltSeeding already in the Tree
-    hltSeeding=topSequence.HLTTop.HLTBeginSeq.HLTSeeding    
-    
-    ctpUnpacker = CTPUnpackingEmulationTool( ForceEnableAllChains=False , InputFilename="ctp.dat" )
-    hltSeeding.ctpUnpacker = ctpUnpacker
-
-    ## hack to solve the PS crash:
-    from HLTSeeding.HLTSeedingConf import PrescalingEmulationTool
-    psEmulation = PrescalingEmulationTool()
-    hltSeeding.prescaler = psEmulation
-
-    from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection, mapThresholdToL1DecisionCollection
-    emUnpacker = RoIsUnpackingEmulationTool("EMRoIsUnpackingTool", InputFilename="l1emroi.dat", OutputTrigRoIs=mapThresholdToL1RoICollection("EM"), Decisions=mapThresholdToL1DecisionCollection("EM"), ThresholdPrefix="EM" )
-    muUnpacker = RoIsUnpackingEmulationTool("MURoIsUnpackingTool", InputFilename="l1muroi.dat",  OutputTrigRoIs=mapThresholdToL1RoICollection("MU"), Decisions=mapThresholdToL1DecisionCollection("MU"), ThresholdPrefix="MU" )
-
-    hltSeeding.RoIBRoIUnpackers = [emUnpacker, muUnpacker]
-
 
 def emulateHLTSeedingCfg(flags, seqName = None):
     """
