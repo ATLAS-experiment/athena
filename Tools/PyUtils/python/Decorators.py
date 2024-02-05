@@ -1,14 +1,15 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Some useful decorators.
 """
 
-import sys
 from decorator import decorator # type: ignore
 from typing import Any, Callable
+import functools
 import inspect
 import logging
+import sys
 
 log = logging.getLogger(__name__)
 
@@ -74,6 +75,7 @@ def forking(func, *args, **kwargs):
         os._exit(0)
     pass # forking
 
+
 def deprecate(
     reason: str, *, warn_once_per_call: bool = True, print_context: bool = False
 ) -> Callable[[TFunc], TFunc]:
@@ -92,25 +94,26 @@ def deprecate(
     # Record when we've warned about a function+filename+line combination
     warncache: set[tuple[int, str, int]] = set()
 
-    def call_deprecated(f, *args, **kwargs):
-        """Call a deprecated function"""
-        # Figure out where we're calling from. The stack indices are as follows
-        # 0: this inspect.stack call
-        # 1: the 'caller' call from the decorator module
-        # 2: the actual call site we want to mark
-        frame_info = inspect.stack()[2]
-        cache_value = id(f), frame_info.filename, frame_info.lineno
-        if not warn_once_per_call or cache_value not in warncache:
-            if warn_once_per_call:
-                warncache.add(cache_value)
-            log.warning(f"Calling deprecated function '{f.__qualname__}'")
-            log.warning(
-                f"in function {frame_info.function}, file {frame_info.filename}, line {frame_info.lineno}"
-            )
-            if print_context:
-                for idx, line in enumerate(frame_info.code_context):
-                    log.warning(f"{frame_info.lineno + idx - frame_info.index}\t{line}")
-            log.warning(reason)
-        return f(*args, **kwargs)
-
-    return decorator(call_deprecated)
+    def deprecate_decorator(f):
+        @functools.wraps(f)
+        def call_deprecated(*args, **kwargs):
+            """Call a deprecated function"""
+            # Figure out where we're calling from. The stack indices are as follows
+            # 0: this inspect.stack call
+            # 1: the actual call site we want to mark
+            frame_info = inspect.stack()[1]
+            cache_value = id(f), frame_info.filename, frame_info.lineno
+            if not warn_once_per_call or cache_value not in warncache:
+                if warn_once_per_call:
+                    warncache.add(cache_value)
+                log.warning(f"Calling deprecated function '{f.__qualname__}'")
+                log.warning(
+                    f"in function {frame_info.function}, file {frame_info.filename}, line {frame_info.lineno}"
+                )
+                if print_context:
+                    for idx, line in enumerate(frame_info.code_context):
+                        log.warning(f"{frame_info.lineno + idx - frame_info.index}\t{line}")
+                log.warning(reason)
+            return f(*args, **kwargs)
+        return call_deprecated
+    return deprecate_decorator
