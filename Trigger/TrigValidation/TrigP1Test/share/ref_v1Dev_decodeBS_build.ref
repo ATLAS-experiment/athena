@@ -2697,6 +2697,8 @@ HLT_g10_loose_L1eEM9:
     1: 8
     2: 9
     3: 4
+HLT_g10_tight_j30a_j25a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
 HLT_g120_loose_L1eEM26M:
   eventCount: 0
 HLT_g120_loose_L1eEM28M:
@@ -2717,6 +2719,8 @@ HLT_g12_loose_LArPEBHLT_L1EM10VH:
     2: 7
     3: 4
     4: 4
+HLT_g12_tight_j30a_j25a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
 HLT_g13_loose_g10_loose_PhysicsTLA_L113DR25-25M70-eEM12LeEM9L:
   eventCount: 0
 HLT_g13_loose_g10_loose_PhysicsTLA_L12DR15-0M30-eEM12LeEM9L:
@@ -2785,6 +2789,8 @@ HLT_g15_tight_L1eEM12L:
     1: 5
     2: 4
     3: 1
+HLT_g16_tight_j30a_j25a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
 HLT_g20_loose_L1eEM18L:
   eventCount: 2
   stepCounts:
@@ -2863,6 +2869,8 @@ HLT_g20_medium_ringer_L1eEM18M:
     3: 1
 HLT_g20_medium_xe35_cell_xe40_pfopufit_L1XE35:
   eventCount: 0
+HLT_g20_tight_2j35a_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 0
 HLT_g20_tight_2j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
 HLT_g20_tight_2j35a_j0_pf_ftf_L1eEM22M_jMJJ-300:
@@ -2881,7 +2889,11 @@ HLT_g20_tight_L1eEM18M:
     1: 1
     2: 1
     3: 1
+HLT_g20_tight_icaloloose_2j35a_j0_DJMASS300j35_pf_ftf_xe40_cell_xe50_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
 HLT_g20_tight_icaloloose_2j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_2j35a_j0_DJMASS500j35_pf_ftf_xe40_cell_xe50_pfopufit_L1eEM22M_jMJJ-300:
   eventCount: 0
 HLT_g20_tight_icaloloose_L1eEM18M:
   eventCount: 1
@@ -2897,6 +2909,54 @@ HLT_g20_tight_icaloloose_L1eEM18M:
     2: 1
     3: 1
     4: 1
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe10_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe20_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe25_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe30_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe35_cell_xe10_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe35_cell_xe20_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe35_cell_xe30_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe35_cell_xe50_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe35_cell_xe60_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe40_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe50_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_j18a_pf_ftf_xe60_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe10_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe20_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe25_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe30_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe35_cell_xe10_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe35_cell_xe20_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe35_cell_xe30_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe35_cell_xe50_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe35_cell_xe60_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe40_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe50_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j30a_pf_ftf_xe60_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
 HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS500j35_pf_ftf_L1EM18VHI_MJJ-300:
   eventCount: 0
   stepCounts:
@@ -2913,9 +2973,57 @@ HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_
     0: 1
 HLT_g20_tight_icaloloose_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
+HLT_g20_tight_icaloloose_j35_j20a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35_j25a_j0_DJMASS300j35_pf_ftf_xe25_cell_xe35_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j0_DJMASS300j35_pf_ftf_xe25_cell_xe35_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe10_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe20_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe25_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe30_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe35_cell_xe10_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe35_cell_xe20_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe35_cell_xe30_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe35_cell_xe50_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe35_cell_xe60_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe40_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe50_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS300j35_pf_ftf_xe60_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j20a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j25a_j0_DJMASS300j35_pf_ftf_xe25_cell_xe45_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j25a_j0_DJMASS300j35_pf_ftf_xe30_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j25a_j0_DJMASS300j35_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j25a_j0_DJMASS300j35_pf_ftf_xe40_cell_xe50_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_j25a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icaloloose_j35a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
+  eventCount: 0
 HLT_g20_tight_icaloloose_j40c_j35a_2j20c_j0_DJMASS300j35_03dRAB30_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
 HLT_g20_tight_icaloloose_j40c_j35a_2j20c_j20a_j0_DJMASS300j35_03dRAB30_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icalotight_j35a_j20a_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 0
+HLT_g20_tight_icalotight_j35a_j20a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
   eventCount: 0
 HLT_g20_tight_j30a_j25a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
   eventCount: 0
