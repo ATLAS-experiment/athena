@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDC_DetFactory.h"
 #include "ZDC_ZDCModule.h"
 #include "ZDC_RPDModule.h"
+#include "ZDC_BRANModule.h"
 
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoElement.h"
@@ -65,13 +66,15 @@ void ZDC_DetFactory::initializePbPb2015(){
 
 void ZDC_DetFactory::initializePbPb2023(){
     m_RPDs_On = true; //Flag for both RPD modules
+    m_BRANs_On = true; //Flag for both BRAN modules
     m_zdcOn = {{true, true, true, true}, //If the given ZDC is on
                {true, true, true, true}};
-    m_zdcPos = {{-397.0, -27.0, 153.0, 303.0}, //Positions of the ZDC modules
-                {-397.0, -27.0, 153.0, 303.0}};
+    m_zdcPos = {{-394.0,  -15.0, 170.0, 325.0}, //Positions of the ZDC modules
+                {-272.75,   6.0, 191.0, 346.0}};
     m_zdcPixelStart_Stop = {{{1,8}, {0,9}, {0,0}, {0,0}}, //Pixel start and stop layers for each ZDC
                             {{0,0}, {0,9}, {0,0}, {0,0}}};
-    m_rpdPos = {-190,-190}; //Positions of the RPD modules
+    m_rpdPos = {-204.625,-183.375}; //Positions of the RPD modules
+    m_branPos = {-142.5,-121.5};
 }
 
 void ZDC_DetFactory::create(GeoPhysVol *world)
@@ -125,6 +128,19 @@ void ZDC_DetFactory::create(GeoPhysVol *world)
             Envelope_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
             Envelope_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_rpdPos[side] * Gaudi::Units::mm)));
             Envelope_Physical->add(rpdMod->create());
+        }
+
+        /*************************************************
+         * Place BRAN
+         **************************************************/
+        if(m_BRANs_On){
+            id = m_zdcID->channel_id(sideSign, 5, ZdcIDType::INACTIVE,ZdcIDVolChannel::HOUSING);
+            ZDC_BRANModule *branMod = new ZDC_BRANModule(m_detectorStore, sideSign, 5, m_zdcID);
+            sprintf(volName, "Zdc::BRAN_Mod %s", id.getString().c_str());
+            Envelope_Physical->add(new GeoNameTag(volName));
+            Envelope_Physical->add(new GeoIdentifierTag(id.get_identifier32().get_compact()));
+            Envelope_Physical->add(new GeoAlignableTransform(GeoTrf::TranslateZ3D(m_branPos[side] * Gaudi::Units::mm)));
+            Envelope_Physical->add(branMod->create());
         }
 
         /*************************************************
