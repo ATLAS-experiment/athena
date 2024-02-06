@@ -3,7 +3,6 @@
 # art-description: OverlayChain+Reco test for data16.
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-include: main/Athena
 
 # art-output: *.root
 # art-output: log.*

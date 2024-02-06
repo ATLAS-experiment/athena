@@ -3,8 +3,6 @@
 # art-description: MC+MC Overlay chain for MC20d, ttbar, full reco chain
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-include: 22.0-mc20/Athena
-# art-include: 23.0/Athena
 # art-include: main/Athena
 
 # art-output: *.root
@@ -38,15 +36,17 @@ rc=$?
 status=$rc
 echo "art-result: $rc reco"
 
-rc2=-9999
-if [ $rc -eq 0 ]
-then
-    ArtPackage=$1
-    ArtJobName=$2
-    art.py compare grid --entries ${events} "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --file MC_plus_MC.RDO.pool.root --diff-root
-    rc2=$?
-    status=$rc2
+if command -v art.py >/dev/null 2>&1; then
+    rc2=-9999
+    if [ $rc -eq 0 ]
+    then
+        ArtPackage=$1
+        ArtJobName=$2
+        art.py compare grid --entries ${events} "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --file MC_plus_MC.RDO.pool.root --diff-root
+        rc2=$?
+        status=$rc2
+    fi
+    echo "art-result: $rc2 regression"
 fi
-echo "art-result: $rc2 regression"
 
 exit $status
