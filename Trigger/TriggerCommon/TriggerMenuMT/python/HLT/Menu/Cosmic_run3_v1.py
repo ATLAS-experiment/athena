@@ -69,8 +69,6 @@ def getCosmicSignatures():
     ]
 
     chains['Jet'] = [
-        ChainProp(name='HLT_j15_L1J12_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleJetGroup),
-        ChainProp(name='HLT_j0_HT0_L1J12_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleJetGroup),
         #phase-I
         ChainProp(name='HLT_j15_L1jJ60_EMPTY'   , l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+SingleJetGroup),
         ChainProp(name='HLT_j0_HT0_L1jJ60_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+SingleJetGroup),
@@ -79,7 +77,7 @@ def getCosmicSignatures():
     chains['Bjet'] = [
         ChainProp(name='HLT_j0_0eta290_boffperf_ftf_L1MU8F',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleBjetGroup,monGroups=['idMon:shifter']),
         ChainProp(name='HLT_j0_0eta290_boffperf_ftf_L1RD0_EMPTY',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleBjetGroup,monGroups=['idMon:shifter']),
-        ChainProp(name='HLT_j0_0eta290_boffperf_ftf_L1J12_EMPTY',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleBjetGroup,monGroups=['idMon:shifter']),
+        ChainProp(name='HLT_j0_0eta290_boffperf_ftf_L1jJ30_EMPTY',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryLegGroup+SingleBjetGroup,monGroups=['idMon:shifter']),
     ]
 
     chains['Combined'] = [
@@ -128,12 +126,7 @@ def getCosmicSignatures():
 
         ChainProp(name='HLT_noalg_L1J15',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1J20',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1J25',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1J30',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1J40',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1J50',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1J75',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1J85',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1J100',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
         #Jet, phase-I
         ChainProp(name='HLT_noalg_L1jJ40',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportPhIGroup),

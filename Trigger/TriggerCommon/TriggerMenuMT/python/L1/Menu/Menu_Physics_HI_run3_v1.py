@@ -341,6 +341,27 @@ def defineMenu():
         #ATR-17320
         # 'L1_CEP-CjJ100',
         # 'L1_CEP-CjJ90' ,
+        
+        #ATR-28678 Ph1 Items for Phisics_pp_Run3
+        "L1_jJ30_BRGP12",
+        "L1_jJ30_EMPTY",
+        "L1_jJ30_FIRSTEMPTY",
+        "L1_jJ30_UNPAIRED_ISO",
+        "L1_jJ30_UNPAIRED_NONISO",
+        "L1_jJ30_UNPAIREDB1",
+        "L1_jJ30_UNPAIREDB2",
+
+        "L1_jJ60_EMPTY",
+        "L1_jJ60_FIRSTEMPTY",
+        "L1_jJ60p30ETA49_EMPTY",
+
+        "L1_jJ90_UNPAIRED_ISO",
+        "L1_jJ90_UNPAIRED_NONISO",
+
+        "L1_jJ125",
+
+        "L1_jJ160",
+
     ]
 
 

@@ -118,9 +118,8 @@ class MonitorDef:
                 ## Legacy L1 items
                 # L1Calo
                 "L1_TAU8", "L1_TAU20IM",
-                "L1_J30", "L1_J75", "L1_J100", "L1_J400",
-                "L1_J15p31ETA49", "L1_J30p31ETA49",
-                "L1_J45p0ETA21_3J15p0ETA25", "L1_4J15p0ETA25",
+                "L1_J100",
+                "L1_J400",
                 "L1_XE35", "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
                 # Combined
                 "L1_MU3V_J12",
@@ -160,6 +159,7 @@ class MonitorDef:
                 "L1_jXEC100",
                 "L1_jTE200",
                 "L1_jTEC200", "L1_jTEFWD100", "L1_jTEFWDA100", "L1_jTEFWDC100",
+                "L1_jJ85p0ETA21_3jJ40p0ETA25",
                 "L1_gJ20p0ETA25", "L1_gJ20p25ETA49","L1_gJ20p0ETA25_EMPTY", "L1_gJ50p0ETA25",
                 "L1_gJ100p0ETA25", "L1_gJ400p0ETA25", "L1_gLJ80p0ETA25",
                 "L1_gXERHO70", "L1_gXERHO100",
@@ -218,7 +218,6 @@ class MonitorDef:
                     "L1_MBTS_1_1_EMPTY",
                     "L1_ZB",
                     "L1_AFP_A_AND_C_TOF_J20",
-                    "L1_J400_LAR",
                     # Phase-I
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
                     "L1_jJ500_LAR",
@@ -439,7 +438,7 @@ class MonitorDef:
         monItemsHF[TBP|TAP|TAV] = [
            "L1_BCM_2A_FIRSTINTRAIN",
            "L1_BCM_2C_FIRSTINTRAIN",
-           "L1_J12",
+           "L1_jJ30",
            "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
            "L1_BCM_Wide",
         ]
