@@ -90,7 +90,7 @@ def cTAUfwToFlowConversion(fw):
     decimal = fw/1024
     return float("{:.2f}".format(decimal))
 
-def getTypeWideThresholdConfig(ttype,do_HI_tob_thresholds=False):
+def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Tau=True):
     if isinstance(ttype, str):
         ttype = ThrType[ttype]
 
@@ -101,7 +101,7 @@ def getTypeWideThresholdConfig(ttype,do_HI_tob_thresholds=False):
     if ttype == ThrType.jEM:
         return getConfig_jEM()
     if ttype == ThrType.eTAU:
-        return getConfig_eTAU()
+        return getConfig_eTAU(do_eFex_BDT_Tau)
     if ttype == ThrType.cTAU:
         return getConfig_cTAU()
     if ttype == ThrType.jTAU:
@@ -335,42 +335,69 @@ def getConfig_jEM():
 
 
 @dataclass
-class L1Config_eTAU():
-    bitshift_rCore = 3
-    bitshift_rHad = 3
-    rCore_fw_loose = 2  # rCore = 1 - (3x2)/(9x2), rCore > threshold -> pass
-    rCore_fw_medium = 12 # PLACEHOLDER
+class L1Config_eTAU:
+    # Working points here translate to cuts on both RCore (or BDT) and RHad
+    # For individual thresholds, the RCore/BDT and RHad working points are
+    # set independently, so the two variables are not coupled
+
+    # The appropriate RCore or BDT cut values will be loaded into the RCore config variable,
+    # depending on if the Trigger.L1.doeFexBDTTau flag is enabled
+
+    # The eTAU TOB only has 2 WP bits, allowing None/Loose/Medium/Tight values
+
+    # Heuristic eTAU RCore cuts
+    # 8 bits (0 - 255), rCore > threshold -> pass
+    # rCore = 1 - (3x2)/(9x2)
+    rCore_fw_loose = 2
+    rCore_fw_medium = 12
     rCore_fw_tight = 32
-    rHad_fw_loose = 32 # PLACEHOLDER
-    rHad_fw_medium = 72 # Only for HM, does not affect L/M/T which cut only on rCore
+
+    # BDT eTAU score cuts
+    # 12 bits (0 - 4095), BDT > threshold -> pass
+    BDT_fw_loose = 2
+    BDT_fw_medium = 12
+    BDT_fw_tight = 32
+
+    # RHad isolation cuts
+    # 8 bits (0 - 255), rHad > threshold -> pass
+    # Only used on HL/HM/HT L1 items
+    # Independent of the rCore/BDT cut, available for both the heuristic (original) and BDT eTAU algorithm
+    rHad_fw_loose = 32
+    rHad_fw_medium = 72
     rHad_fw_tight = 152
 
+    # Bitshift parameter, see https://indico.cern.ch/event/1026972/contributions/4312070/attachments/2226175/3772176/Copy%20of%20Reta_Threshold_Setting.pdf
+    bitshift_rCore = 3
+    bitshift_rHad = 3
 
-    def __call__(self) -> odict:
+
+    def __call__(self, do_eFex_BDT_Tau=True) -> odict:
+        # Load either RCore or BDT cut thresholds
+        rCore_fw_loose = self.BDT_fw_loose if do_eFex_BDT_Tau else self.rCore_fw_loose
+        rCore_fw_medium = self.BDT_fw_medium if do_eFex_BDT_Tau else self.rCore_fw_medium
+        rCore_fw_tight = self.BDT_fw_tight if do_eFex_BDT_Tau else self.rCore_fw_tight
+
         confObj = odict()
         confObj["workingPoints"] = odict()
-        # Working points here translate to cuts on both rCore and rHad
-        # For individual thresholds, rCore and rHad working points are
-        # set independently, so the two variables are not coupled
-        # L1Topo firmware only has 2 bits, allowing None/Loose/Medium/Tight values
         confObj["workingPoints"]["Loose"] = [
-            odict([("rCore", eFEXfwToFloatConversion(self.rCore_fw_loose,self.bitshift_rCore)), ("rCore_fw", self.rCore_fw_loose), 
-                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_loose,self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_loose),
+            odict([("rCore", eFEXfwToFloatConversion(rCore_fw_loose, self.bitshift_rCore)), ("rCore_fw", rCore_fw_loose), 
+                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_loose, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_loose),
                   ]), 
         ]
         confObj["workingPoints"]["Medium"] = [
-            odict([("rCore", eFEXfwToFloatConversion(self.rCore_fw_medium,self.bitshift_rCore)), ("rCore_fw", self.rCore_fw_medium), 
-                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_medium,self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_medium), 
+            odict([("rCore", eFEXfwToFloatConversion(rCore_fw_medium, self.bitshift_rCore)), ("rCore_fw", rCore_fw_medium), 
+                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_medium, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_medium), 
                  ]),
         ]
         confObj["workingPoints"]["Tight"] = [
-            odict([("rCore", eFEXfwToFloatConversion(self.rCore_fw_tight,self.bitshift_rCore)), ("rCore_fw", self.rCore_fw_tight), 
-                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight,self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
+            odict([("rCore", eFEXfwToFloatConversion(rCore_fw_tight, self.bitshift_rCore)), ("rCore_fw", rCore_fw_tight), 
+                   ("rHad", eFEXfwToFloatConversion(self.rHad_fw_tight, self.bitshift_rHad)), ("rHad_fw", self.rHad_fw_tight), 
                  ]),
         ]
         confObj["ptMinToTopo"] = 5 # PLACEHOLDER
         confObj["resolutionMeV"] = 100
         confObj["maxEt"] = 50 # PLACEHOLDER
+        confObj["algoVersion"] = int(do_eFex_BDT_Tau)
 
         # Check that FW values are integers
         for wp in confObj["workingPoints"]:
@@ -394,15 +421,19 @@ getConfig_eTAU = L1Config_eTAU()
 
 @dataclass
 class L1Config_cTAU():
-    # Isolation parameters (ATR-28621):
-    # (jTAU.EtIso + isolation_jTAUCoreScale_fw/1024 * jTAU.Et) / eTAU.Et < isolation_fw/1024
+    # cTAU isolation parameters (ATR-28621):
+    # isolation: 12 bits (0 - 4095)
+    # jTAUCoreScale: 11 bits (0 - 2047)
+    # (jTAU.EtIso + isolation_jTAUCoreScale_fw/1024 * jTAU.Et) / eTAU.Et < isolation_fw/1024 -> pass
 
     isolation_fw_loose: int = 410
     isolation_fw_medium: int = 358
     isolation_fw_tight: int = 307
+
     isolation_jTAUCoreScale_fw_loose: int = 0
     isolation_jTAUCoreScale_fw_medium: int = 0
     isolation_jTAUCoreScale_fw_tight: int = 0
+
 
     def __call__(self) -> odict:
         confObj = odict()
@@ -444,9 +475,14 @@ getConfig_cTAU = L1Config_cTAU()
 
 @dataclass
 class L1Config_jTAU():
+    # jTAU isolation cut:
+    # 10 bits (0 - 1023)
+    # jTAU.EtIso / jTAU.Et < isolation_fw/1024 -> pass
+
     isolation_fw_loose: int = 410
-    isolation_fw_medium: int = 358 # PLACEHOLDER
-    isolation_fw_tight: int = 307 # PLACEHOLDER
+    isolation_fw_medium: int = 358
+    isolation_fw_tight: int = 307
+
 
     def __call__(self) -> odict:
         confObj = odict()
