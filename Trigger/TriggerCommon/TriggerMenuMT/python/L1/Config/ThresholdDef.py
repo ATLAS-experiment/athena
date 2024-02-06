@@ -2,7 +2,6 @@
 
 from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold, ZeroBiasThresholdTopo
 from .L1CaloThresholdMapping import get_threshold_cut
-from .TypeWideThresholdConfig import getTypeWideThresholdConfig
 
 # Max thresholds for SPARE triggers, corresponding to maximum value in L1Topo
 # The pass requirement is et >= cut, so these ensure no events can pass
@@ -119,7 +118,7 @@ class ThresholdDef:
         # eEM
         eEM_cuts = [1, 2, 5, 7, 9, 12, 15, 18, 26]
         # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value 
-        ttconfig = getTypeWideThresholdConfig("eEM", tc.l1menu.do_HI_tob_thresholds)
+        ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eEM')
         ptMin = ttconfig["ptMinToTopo"]
         for thrV in eEM_cuts:
             eEMThreshold('eEM%i' %thrV, 'eEM').addThrValue(max(get_threshold_cut('eEM', thrV), ptMin))

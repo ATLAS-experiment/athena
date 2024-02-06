@@ -26,10 +26,12 @@ class L1Menu(object):
 
         # items in menu
         self.items = MenuItemsCollection()
+
+        # store cached flags
+        self.flags = flags
         
         # all thresholds that are in menu (new and legacy)
-        self.do_HI_tob_thresholds = flags.Trigger.L1.doHeavyIonTobThresholds
-        self.thresholds = MenuThresholdsCollection(self.do_HI_tob_thresholds)
+        self.thresholds = MenuThresholdsCollection(flags)
 
         # all thresholds that are in menu (new and legacy)
         self.topoAlgos = MenuTopoAlgorithmsCollection()
@@ -375,7 +377,7 @@ class L1Menu(object):
         # collect the ptMinToTopo values
         ptMin = {}
         for thrtype in ThrType.Run3Types():
-            ttconfig = getTypeWideThresholdConfig(thrtype,self.do_HI_tob_thresholds)
+            ttconfig = getTypeWideThresholdConfig(thrtype, self.flags.Trigger.L1.doHeavyIonTobThresholds, self.flags.Trigger.L1.doeFexBDTTau)
             inputtype = thrtype.name
             if inputtype == 'cTAU':
                 inputtype = 'eTAU'
