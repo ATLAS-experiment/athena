@@ -30936,6 +30936,26 @@ HLT_xe30_trkmht_L1XE30:
   stepFeatures:
     0: 11
     1: 9
+HLT_xe50_nn_isotrk120_medium_iaggrmedium_L1gXEJWOJ100:
+  eventCount: 0
+HLT_xe50_nn_isotrk120_medium_iaggrmedium_L1jXE100:
+  eventCount: 0
+  stepCounts:
+    0: 9
+    1: 7
+  stepFeatures:
+    0: 9
+    1: 16
+HLT_xe50_tcpufit_isotrk120_medium_iaggrmedium_L1gXEJWOJ100:
+  eventCount: 0
+HLT_xe50_tcpufit_isotrk120_medium_iaggrmedium_L1jXE100:
+  eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+  stepFeatures:
+    0: 7
+    1: 7
 HLT_xe55_cell_xe105_nn_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe55_cell_xe105_nn_L1jXE100:
@@ -31046,6 +31066,26 @@ HLT_xe60_cell_xe95_pfsum_cssk_L1jXE100:
   stepFeatures:
     0: 14
     1: 3
+HLT_xe60_nn_isotrk120_medium_iaggrmedium_L1gXEJWOJ100:
+  eventCount: 0
+HLT_xe60_nn_isotrk120_medium_iaggrmedium_L1jXE100:
+  eventCount: 0
+  stepCounts:
+    0: 9
+    1: 5
+  stepFeatures:
+    0: 9
+    1: 14
+HLT_xe60_tcpufit_isotrk120_medium_iaggrmedium_L1gXEJWOJ100:
+  eventCount: 0
+HLT_xe60_tcpufit_isotrk120_medium_iaggrmedium_L1jXE100:
+  eventCount: 0
+  stepCounts:
+    0: 7
+    1: 7
+  stepFeatures:
+    0: 7
+    1: 7
 HLT_xe65_cell_xe100_mhtpufit_pf_L1XE50:
   eventCount: 3
   stepCounts:
