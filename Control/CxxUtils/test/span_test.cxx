@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/tests/span_test.cxx
@@ -12,6 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/span.h"
 #include "CxxUtils/reverse_wrapper.h"
+#include "TestTools/expect_exception.h"
 #include <vector>
 #include <cassert>
 #include <iostream>
@@ -26,6 +27,8 @@ void test1a(T& s2)
   assert (s2.front() == 0);
   assert (s2.back() == 7);
   assert (s2[3] == 3);
+  assert (s2.at(3) == 3);
+  EXPECT_EXCEPTION (std::out_of_range, s2.at(100));
   assert (s2.data()[4] == 4);
   assert (*s2.begin() == 0);
   assert (s2.end() - s2.begin() == 8);
