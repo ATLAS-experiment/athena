@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# art-description: MC+data Overlay with MT support, running with 8 threads, new config
+# art-description: MC+data Overlay with MT support, running with 8 threads
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
@@ -33,15 +33,17 @@ rc=$?
 status=$rc
 echo "art-result: $rc overlay"
 
-rc2=-9999
-if [ $rc -eq 0 ]
-then
-    ArtPackage=$1
-    ArtJobName=$2
-    art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --order-trees --diff-root
-    rc2=$?
-    status=$rc2
+if command -v art.py >/dev/null 2>&1; then
+    rc2=-9999
+    if [ $rc -eq 0 ]
+    then
+        ArtPackage=$1
+        ArtJobName=$2
+        art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --order-trees --diff-root
+        rc2=$?
+        status=$rc2
+    fi
+    echo  "art-result: $rc2 regression"
 fi
-echo  "art-result: $rc2 regression"
 
 exit $status
