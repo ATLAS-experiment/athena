@@ -38,7 +38,7 @@ public:
   //explicitly delete these, code to implement them would be horrible due to use of raw arrays
   /** copy constructor */ RtGraph(const RtGraph & other) =  delete;
   /** assignment */ RtGraph & operator=(const RtGraph & other) = delete;
-  /** array of the histograms for all bins*/ TH1D** hslizes;
+  /** array of the histograms for all bins*/ //TH1D** hslizes;
   /** the r values*/ std::vector<double> rval;
   /** the r values*/ std::vector<double> tval;
   /** the t(r) graph*/ TGraphErrors* trgr;
@@ -68,7 +68,7 @@ private:
   /***/ float *m_etv;
   /***/ float *m_edv;
 //  /***/ float width;
-  /***/ TF1* m_ff;
+//  /***/ TF1* m_ff;
 };
 
 /**

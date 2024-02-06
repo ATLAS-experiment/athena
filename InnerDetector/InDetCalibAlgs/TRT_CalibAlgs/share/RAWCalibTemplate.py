@@ -29,19 +29,19 @@ InDetStrawSummaryTool=TRT_StrawStatusSummaryTool(name = "TRT_StrawStatusSummaryT
 from TRT_CalibTools.TRT_CalibToolsConf import FitTool
 TRTCalFitTool = FitTool (name = 'TRTCalFitTool')
 ToolSvc += TRTCalFitTool
-print      TRTCalFitTool
+print(TRTCalFitTool)
 
 from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
 TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 
 ToolSvc += TRTCondStream
-print TRTCondStream
+print(TRTCondStream)
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTrkInfo 
 FillAlignTrkInfo = FillAlignTrkInfo ( name = 'FillAlignTrkInfo',
                                       TrackSummaryTool = InDetTrackSummaryTool)
 ToolSvc += FillAlignTrkInfo
-print      FillAlignTrkInfo
+print      (FillAlignTrkInfo)
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTRTHits 
 FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
@@ -50,7 +50,7 @@ FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
                                       TRTStrawSummaryTool = InDetStrawSummaryTool)
 
 ToolSvc += FillAlignTRTHits
-print      FillAlignTRTHits
+print      (FillAlignTRTHits)
 
 from TRT_CalibTools.TRT_CalibToolsConf import TRTCalibrator 
 TRTCalibrator = TRTCalibrator ( name = 'TRTCalibrator',
@@ -78,14 +78,15 @@ TRTCalibrator = TRTCalibrator ( name = 'TRTCalibrator',
     ostring+="""
                                 TrtManagerLocation  = InDetKeys.TRT_Manager(),
 				DoShortStrawCorrection = False,
+                                TRTStrawSummaryTool = InDetStrawSummaryTool,
                                 NeighbourSvc=TRTStrawNeighbourSvc,
 """	
     if config["DoArXe"]:
     	ostring+="""                                DoArXenonSep    = True,
 """
-    ostring+="""                                TRTCalDbTool=InDetCalibDbTool)
+    ostring+="""                                TRTCalDbTool=InDetCalDbTool)
 ToolSvc += TRTCalibrator
-print      TRTCalibrator
+print      (TRTCalibrator)
 
 # select good quality tracks
 
@@ -94,7 +95,7 @@ from InDetTrackSelectorTool.InDetTrackSelectorToolConf import InDet__InDetDetail
 TRTTrackSelectorTool = InDet__InDetDetailedTrackSelectorTool(name = "InDetDetailedTrackSelectorTool",
                                         pTMin              =    1000    ,
                                         fitChi2OnNdfMax         = 50.           ,
-                                        z0Max           = 30            ,
+                                        z0Max           = 30.            ,
                                         nHitBLayer      = 0,
                                         nHitPix         = 0,
                                         nHitBLayerPlusPix =     0,
@@ -104,13 +105,13 @@ TRTTrackSelectorTool = InDet__InDetDetailedTrackSelectorTool(name = "InDetDetail
                                         nHitTrtPlusOutliers             =0,
                                         nHitTrtHighE                    =0,
                                         nHitTrtPlusOutliersHighE        =0,
-                                        nHitTrtHighEFractionMax         =0,
-                                        nHitTrtHighEFractionWithOutliersMax=0
+                                        nHitTrtHighEFractionMax         =1,
+                                        nHitTrtHighEFractionWithOutliersMax=1
                                         )
 
 ToolSvc += TRTTrackSelectorTool
 if (InDetFlags.doPrintConfigurables()):
-        print TRTTrackSelectorTool
+        print (TRTTrackSelectorTool)
 
 
 
@@ -121,30 +122,28 @@ CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr
                                        StreamTool          = TRTCondStream,
                                        Max_ntrk            = 10000,
                                        TrackSelectorTool   = TRTTrackSelectorTool,
-                                       TrkCollections      = [ 'TRTCalibTracks' ],
                                        AlignTrkTools       = [ FillAlignTrkInfo, FillAlignTRTHits ],
                                        DoCalibrate         = True,
                                        TrackFitter         = InDetTrackFitter,
                                        FitTools            = [ TRTCalFitTool] )
 
 topSequence += CosmicsTRTCalibMgr
-print CosmicsTRTCalibMgr                                       
+print (CosmicsTRTCalibMgr)                                       
 
 
+conddb.addOverride('/TRT/Calib/DX','TRTCalibDX-RUN2-BLK-UPD4-03')
+#conddb.addOverride('/Indet/Beampos','IndetBeampos-RUN2-Repro2020')  
+#conddb.addOverride('/Indet/Onl/Beampos','IndetBeamposOnl-HLT-UPD1-001-00')
+#conddb.blockFolder("/PIXEL/PixelModuleFeMask")
+#conddb.addFolderWithTag("PIXEL_OFL","/PIXEL/PixelModuleFeMask","PixelModuleFeMask-RUN2-DATA-UPD1-05",force=True,forceData=True,className="CondAttrListCollection")
 
-
-
-
-from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTCondWrite
-TRTCondWrite = TRTCondWrite( name = "TRTCondWrite")
-topSequence+=TRTCondWrite 
 
 # DCS Data Folders
 if (globalflags.InputFormat() == 'bytestream' and globalflags.DataSource() == 'data'):
     if InDetFlags.useTrtDCS():
-        conddb.addFolder('DCS_OFL',"/TRT/DCS/HV/BARREL <cache>600</cache>",classname='CondAttrListCollection')
-        conddb.addFolder('DCS_OFL',"/TRT/DCS/HV/ENDCAPA <cache>600</cache>",classname='CondAttrListCollection')
-        conddb.addFolder('DCS_OFL',"/TRT/DCS/HV/ENDCAPC <cache>600</cache>",classname='CondAttrListCollection')
+        conddb.addFolder('DCS_OFL',"/TRT/DCS/HV/BARREL <cache>600</cache>")#,classname='CondAttrListCollection')
+        conddb.addFolder('DCS_OFL',"/TRT/DCS/HV/ENDCAPA <cache>600</cache>")#,classname='CondAttrListCollection')
+        conddb.addFolder('DCS_OFL',"/TRT/DCS/HV/ENDCAPC <cache>600</cache>")#,classname='CondAttrListCollection')
 
 
 #############################################conddb.addFolderWithTag('TRT_OFL','/TRT/Calib/errors','TrtCalibErrors-ErrorVal-00-00')
@@ -152,6 +151,7 @@ if (globalflags.InputFormat() == 'bytestream' and globalflags.DataSource() == 'd
     if config["DoArXe"]:
         ostring+="""
 #conddb.addOverride('/TRT/Cond/StatusHT','TrtStrawStatusHT-ArTest-00-00')
+conddb.addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00')
 """
 
 
@@ -159,11 +159,13 @@ if (globalflags.InputFormat() == 'bytestream' and globalflags.DataSource() == 'd
         ostring+="""
 conddb.blockFolder("/TRT/Calib/RT" )   
 conddb.blockFolder("/TRT/Calib/T0" )  
-conddb.addFolderWithTag('TRT_OFL','/TRT/Calib/errors','TrtCalibErrors-00') 
+from AthenaCommon.AlgSequence import AthSequencer
+condSequence=AthSequencer('AthCondSeq')
+from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTCondWrite
 """
-
-    if not calibconstants=="":
-        ostring+='TRTCondWrite.CalibInputFile="%s"\n' % (calibconstants)
+        ostring += """TRTCondWrite = TRTCondWrite( name = "TRTCondWrite",
+                                     CalibInputFile='%s')\n"""% calibconstants
+        ostring += """condSequence+=TRTCondWrite """
 
     return ostring
 

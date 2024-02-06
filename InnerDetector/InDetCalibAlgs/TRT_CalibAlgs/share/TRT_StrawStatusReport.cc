@@ -112,7 +112,7 @@ void initializeDeadStrawsList(){
   int tmp[6]; //old length: 3
   int count = 0;
   
-  std::string filename = "/afs/cern.ch/user/i/idcalib/w0/TRT_Calibration/tmp/Tier0/StrawStatusCode/TRT_StrawStatus_ExcludedStraws_2017.txt";
+  std::string filename = "/afs/cern.ch/user/i/idcalib/w0/TRT_Calibration/tmp/Tier0/StrawStatusCode/TRT_StrawStatus_ExcludedStraws_2023.txt";
   
   FILE *f = fopen(filename.c_str(), "r"); 
   if (!f) {
@@ -134,7 +134,7 @@ void initializeDeadStrawsList(){
   return;
 }
 
-void simpleAnalysis(const std::string & filename) {
+void simpleAnalysis(std::string filename) {
   // input format of straws.RUNNUMBER.txt: 	
   // bec, phi, strawID, # hits, # track hits, # HT hits, # HT track hits, # holes, # holes with hit (hit not assigned to track)
   std::cout<<"simpleAnalysis: reading file "<< filename<<std::endl;
@@ -331,7 +331,7 @@ void printAthenaBoardsOnly( int run ) { // print athena format
   
 }
 
-void reportResults(const std::string & filename, int run ) {
+void reportResults(std::string filename, int run ) {
   // creates TRT_StrawStatusReport.txt
   // this file used to make histograms via TRT_StrawStatusReport.C
 

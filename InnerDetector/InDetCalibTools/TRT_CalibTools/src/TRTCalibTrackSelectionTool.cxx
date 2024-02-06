@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -68,6 +68,7 @@ bool TRTCalibTrackSelectionTool::isAccepted(const Trk::Track* pTrack) const
   if (m_DeltaPhi>0 && std::abs(mesp->parameters()[Trk::phi]-m_PhiOffset) > m_DeltaPhi) return false;
 
   float theta=mesp->parameters()[Trk::theta];
+  if(theta==0) theta=1.0e-24;
   float ptinv = std::abs(mesp->parameters()[Trk::qOverP])/std::sin(theta);
   if(m_PtMin>0 && ptinv > 1/m_PtMin) return false;
   

@@ -19,7 +19,7 @@ olddbs=open(sys.argv[1]).readlines()
 newdbs=open(sys.argv[1]).readlines()
 olddicts=open(sys.argv[1]).readlines()
 
-print keeprt, keept0, shiftrt, shiftt0
+print (keeprt, keept0, shiftrt, shiftt0)
 
 oldrts=[]
 oldt0s=[]
@@ -78,7 +78,7 @@ for rt in rts:
 
     rtconsts[rtdbkey]=[]
     if shiftrt:
-        print '%16s ... original polynomial: r=%.1f mm @ %f ns, shifting %f ns in t, new polynomial: r(%.1f ns) = %f mm, t0 = %f'%(rtdbkey,rtfix[0],poly_orig.r[2],shiftval,rtfix[1],poly_new(rtfix[1]),shiftvaln)
+        print ('%16s ... original polynomial: r=%.1f mm @ %f ns, shifting %f ns in t, new polynomial: r(%.1f ns) = %f mm, t0 = %f'%(rtdbkey,rtfix[0],poly_orig.r[2],shiftval,rtfix[1],poly_new(rtfix[1]),shiftvaln))
         #print p0n,p1n,p2n,p3n
         #print p0nn,p1nn,p2nn,p3nn
         #rtconsts[rtdbkey].append(0.0)

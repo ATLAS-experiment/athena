@@ -1,12 +1,9 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <cstdlib>
-#include <cstdio>
-#include <cmath>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 #include <iostream>
 #include <exception>
 #include <TNtuple.h>
@@ -22,6 +19,7 @@
 #include <TLine.h>
 #include <TLegend.h>
 #include <TLegendEntry.h>
+#include <THStack.h>
 #include <TEventList.h>
 #include <TPad.h>
 #include <TPaveText.h>
@@ -64,13 +62,10 @@ void ResizePalette(TH2* hist){
 
 }
 
-string trim(const string & str){
-  size_t first = str.find_first_not_of(' ');
-  if (string::npos == first){
-    return str;
-  }
-  size_t last = str.find_last_not_of(' ');
-  return str.substr(first, (last - first + 1));
+string trim(string s){
+  while(s.find_first_of(" ")==0) s=s.substr(1,s.size());
+  while(s.find_last_of(" ")==s.size()-1) s=s.substr(0,(s.size())-1);
+  return s;
 }
 
 
@@ -79,7 +74,7 @@ public:
   TextPage(string);
 };
 
-TextPage::TextPage(const string & text){
+TextPage::TextPage(string text){
   this->cd();
   TPaveText* pt= new TPaveText(.1,.1,0.9,0.9);
   pt->SetTextAlign(22);
@@ -141,15 +136,15 @@ public:
 HitStatistics::HitStatistics(char* infile, bool isAr = false){
 
   TFile* file = new TFile(infile);
-  //cout << infile << endl;
+  cout << " In HitStatistics  infile: " << infile << endl;
   file->cd();
-  TNtuple* Strawtuple   =NULL;
-  TNtuple* Chiptuple    =NULL;
-  TNtuple* Boardtuple   =NULL;
-  TNtuple* Moduletuple  =NULL;
-  TNtuple* Layertuple   =NULL;
-  TNtuple* Detectortuple=NULL;
-  TNtuple* conftup      =NULL;
+  TNtuple* Strawtuple   =nullptr;
+  TNtuple* Chiptuple    =nullptr;
+  TNtuple* Boardtuple   =nullptr;
+  TNtuple* Moduletuple  =nullptr;
+  TNtuple* Layertuple   =nullptr;
+  TNtuple* Detectortuple=nullptr;
+  TNtuple* conftup      =nullptr;
  
  if(!isAr){
   Strawtuple=(TNtuple*)file->Get("Strawtuple");
@@ -176,7 +171,6 @@ HitStatistics::HitStatistics(char* infile, bool isAr = false){
     conftup->SetBranchAddress("minrt",&minrt);
     conftup->GetEntry(0);
   }
-  //minrt=(int)Detectortuple->GetMaximum("nt0");  
 
   this->SetName("c1");
   this->cd();
@@ -199,8 +193,6 @@ HitStatistics::HitStatistics(char* infile, bool isAr = false){
 
   TLegend* leg = new TLegend(0.95,0.6,0.35,0.35);
 
-  //TGaxis::SetMaxDigits(5);
-  //gStyle->SetStripDecimals(kTRUE);
 
   this->cd(1);
   this->SetLogx();
@@ -266,19 +258,20 @@ HitStatistics::HitStatistics(char* infile, bool isAr = false){
 
 class XYMaps: public TCanvas{
 public:
-  XYMaps(char*, char*, bool) throw(string);
+  XYMaps(char*, string, bool);
 };
 
-XYMaps::XYMaps(char* infile, char* variable, bool isAr = false) throw(string){
+XYMaps::XYMaps(char* infile, string variable, bool isAr = false){
 
-  char selectionA[500];  sprintf(selectionA,"%s*(det==1)",variable);
-  char selectionC[500];  sprintf(selectionC,"%s*(det==-1)",variable);
-  if (strcmp(variable,"nt0")==0) variable = "Nhits";
+  char selectionA[500];  sprintf(selectionA,"%s*(det==1)",variable.c_str());
+  char selectionC[500];  sprintf(selectionC,"%s*(det==-1)",variable.c_str());
+  if (variable=="nt0") variable = "Nhits";
   TFile* file = new TFile(infile);
+  cout << "In XYMaps  infile: " << infile << " variable " << variable << endl;
   file->cd();
-  TNtuple* Chiptuple    =       NULL;
-  TNtuple* Boardtuple   =       NULL;
-  TNtuple* Moduletuple  =       NULL;
+  TNtuple* Chiptuple    =       nullptr;
+  TNtuple* Boardtuple   =       nullptr;
+  TNtuple* Moduletuple  =       nullptr;
 
   if(!isAr){
     Chiptuple=(TNtuple*)        file->Get("Chiptuple");
@@ -307,25 +300,26 @@ XYMaps::XYMaps(char* infile, char* variable, bool isAr = false) throw(string){
   Moduletuple->Draw("y:x>>reshist10(40,-1200,1200,40,-1200,1200)",selectionA,"colz");
   TH2F *reshist10 = (TH2F*)gPad->GetPrimitive("reshist10");
   if (!reshist10) throw string("Variable not found!");
-  if (strcmp(variable ,"res")==0){
-    reshist10->GetZaxis()->SetRangeUser(0.135, 0.150);
+  if (variable == "res"){
+    reshist10->GetZaxis()->SetRangeUser(0.12, 0.19);
   }
-  else if (strcmp(variable ,"abs(resMean)")==0){
-    reshist10->GetZaxis()->SetRangeUser(0.0, 0.007);
+  else if (variable == "abs(resMean)"){
+    reshist10->GetZaxis()->SetRangeUser(0.0, 0.01);
   }
-  else if (strcmp(variable , "t0")==0){
-    reshist10->GetZaxis()->SetRangeUser(9.2, 10.8); 
+  else if (variable == "t0"){
+    reshist10->GetZaxis()->SetRangeUser(1.0, 7.0); 
   }
-  else if (strcmp(variable , "abs(t0-oldt0)")==0){
-    reshist10->GetZaxis()->SetRangeUser(0.0, 0.5);
+  else if (variable == "abs(t0-oldt0)"){
+    reshist10->GetZaxis()->SetRangeUser(0, .4);
   }
-  else if (strcmp(variable , "(tres)")==0){
-    reshist10->GetZaxis()->SetRangeUser(3.1, 3.5);
+  else if (variable == "(tres)"){
+    reshist10->GetZaxis()->SetRangeUser(2.0, 4.0);
   }
   this->Update();
   if(reshist10->GetEntries()>1)   ResizePalette(reshist10);
-  char title1[500];  sprintf(title1,"Module %s (barrel side A)",variable);
-  if (isAr) 	sprintf(title1,"Argon Module %s (barrel side A)",variable);
+  //SetZAxis(reshist10);
+  char title1[500];  sprintf(title1,"Module %s (barrel side A)",variable.c_str());
+  if (isAr) 	sprintf(title1,"Argon Module %s (barrel side A)",variable.c_str());
   reshist10->SetTitle(title1);
   reshist10->SetStats(0);
   reshist10->GetXaxis()->SetLabelOffset(1000);
@@ -336,25 +330,26 @@ XYMaps::XYMaps(char* infile, char* variable, bool isAr = false) throw(string){
   TH2F *reshist0 = (TH2F*)gPad->GetPrimitive("reshist0");
   if (!reshist0) throw string("Variable not found!");
 
-  if (strcmp(variable ,"res")==0){
-    reshist0->GetZaxis()->SetRangeUser(0.130, 0.160);
+ if (variable == "res"){
+    reshist0->GetZaxis()->SetRangeUser(0.12, 0.19);
   }
-  else if (strcmp(variable ,"abs(resMean)")==0){
-    reshist0->GetZaxis()->SetRangeUser(0.0, 0.010);
+  else if (variable == "abs(resMean)"){
+    reshist0->GetZaxis()->SetRangeUser(0.0, 0.01);
   }
-  else if (strcmp(variable , "t0")==0){
-    reshist0->GetZaxis()->SetRangeUser(9.0, 11); 
+  else if (variable == "t0"){
+    reshist0->GetZaxis()->SetRangeUser(1.0, 7.0); 
   }
-  else if (strcmp(variable , "abs(t0-oldt0)")==0){
-    reshist0->GetZaxis()->SetRangeUser(0.0, 0.7);
+  else if (variable == "abs(t0-oldt0)"){
+    reshist0->GetZaxis()->SetRangeUser(0, .4);
   }
-  else if (strcmp(variable , "(tres)")==0){
-    reshist0->GetZaxis()->SetRangeUser(2.9, 4);
+  else if (variable == "(tres)"){
+    reshist0->GetZaxis()->SetRangeUser(2.0, 4.0);
   }
   this->Update();
   if(reshist0->GetEntries()>1)   ResizePalette(reshist0);
-  char title2[500];  sprintf(title2,"Board %s (barrel side A)",variable);
-  if(isAr) sprintf(title2,"Argon Board %s (barrel side A)",variable);
+  //SetZAxis(reshist0);
+  char title2[500];  sprintf(title2,"Board %s (barrel side A)",variable.c_str());
+  if(isAr) sprintf(title2,"Argon Board %s (barrel side A)",variable.c_str());
   reshist0->SetTitle(title2);
   reshist0->SetStats(0);
   reshist0->GetXaxis()->SetLabelOffset(1000);
@@ -364,27 +359,28 @@ XYMaps::XYMaps(char* infile, char* variable, bool isAr = false) throw(string){
   Chiptuple->Draw("y:x>>t0hist0(300,-1200,1200,300,-1200,1200)",selectionA,"colz");
   TH2F *t0hist0 = (TH2F*)gPad->GetPrimitive("t0hist0");
   if (!t0hist0) throw string("Variable not found!");
-  char title3[500];  sprintf(title3,"Chip %s (barrel side A)",variable);
-  if(isAr) 	sprintf(title3,"Argon Chip %s (barrel side A)",variable);
+  char title3[500];  sprintf(title3,"Chip %s (barrel side A)",variable.c_str());
+  if(isAr) 	sprintf(title3,"Argon Chip %s (barrel side A)",variable.c_str());
   t0hist0->SetTitle(title3);
 
-  if (strcmp(variable ,"res")==0){
-    t0hist0->GetZaxis()->SetRangeUser(0.115, 0.190);
+ if (variable == "res"){
+    t0hist0->GetZaxis()->SetRangeUser(0.12, 0.19);
   }
-  else if (strcmp(variable ,"abs(resMean)")==0){
-    t0hist0->GetZaxis()->SetRangeUser(0.0, 0.02);
+  else if (variable == "abs(resMean)"){
+    t0hist0->GetZaxis()->SetRangeUser(0.0, 0.01);
   }
-  else if (strcmp(variable , "t0")==0){
-    t0hist0->GetZaxis()->SetRangeUser(5.0, 13); 
+  else if (variable == "t0"){
+    t0hist0->GetZaxis()->SetRangeUser(1.0, 7.0); 
   }
-  else if (strcmp(variable , "abs(t0-oldt0)")==0){
-    t0hist0->GetZaxis()->SetRangeUser(0.0, 1.5);
+  else if (variable == "abs(t0-oldt0)"){
+    t0hist0->GetZaxis()->SetRangeUser(0, .4);
   }
-  else if (strcmp(variable , "(tres)")==0){
-    t0hist0->GetZaxis()->SetRangeUser(2.5, 4.5);
+  else if (variable == "(tres)"){
+    t0hist0->GetZaxis()->SetRangeUser(2.0, 4.0);
   }
   this->Update();
   if(t0hist0->GetEntries()>1)   ResizePalette(t0hist0);
+  //SetZAxis(t0hist0);
   t0hist0->SetStats(0);
   t0hist0->GetXaxis()->SetLabelOffset(1000);
   t0hist0->GetYaxis()->SetLabelOffset(1000);
@@ -393,25 +389,26 @@ XYMaps::XYMaps(char* infile, char* variable, bool isAr = false) throw(string){
   Moduletuple->Draw("y:x>>reshist11(40,-1200,1200,40,-1200,1200)",selectionC,"colz");
   TH2F *reshist11 = (TH2F*)gPad->GetPrimitive("reshist11");
   if (!reshist11) throw string("Variable not found!");
-  if (strcmp(variable ,"res")==0){
-    reshist11->GetZaxis()->SetRangeUser(0.135, 0.150);
+  if (variable == "res"){
+    reshist11->GetZaxis()->SetRangeUser(0.12, 0.19);
   }
-  else if (strcmp(variable ,"abs(resMean)")==0){
-    reshist11->GetZaxis()->SetRangeUser(0.0, 0.007);
+  else if (variable == "abs(resMean)"){
+    reshist11->GetZaxis()->SetRangeUser(0.0, 0.01);
   }
-  else if (strcmp(variable , "t0")==0){
-    reshist11->GetZaxis()->SetRangeUser(9.2, 10.8); 
+  else if (variable == "t0"){
+    reshist11->GetZaxis()->SetRangeUser(1.0, 7.0); 
   }
-  else if (strcmp(variable , "abs(t0-oldt0)")==0){
-    reshist11->GetZaxis()->SetRangeUser(0.0, 0.5);
+  else if (variable == "abs(t0-oldt0)"){
+    reshist11->GetZaxis()->SetRangeUser(0, .4);
   }
-  else if (strcmp(variable , "(tres)")==0){
-    reshist11->GetZaxis()->SetRangeUser(3.1, 3.5);
+  else if (variable == "(tres)"){
+    reshist11->GetZaxis()->SetRangeUser(2.0, 4.0);
   }
   this->Update();
   if(reshist11->GetEntries()>1)   ResizePalette(reshist11);
-  char title4[500];  sprintf(title4,"Module %s (barrel side C)",variable);
-  if(isAr) sprintf(title4,"Argon Module %s (barrel side C)",variable);
+  //SetZAxis(reshist11);
+  char title4[500];  sprintf(title4,"Module %s (barrel side C)",variable.c_str());
+  if(isAr) sprintf(title4,"Argon Module %s (barrel side C)",variable.c_str());
   reshist11->SetTitle(title4);
   reshist11->SetStats(0);
   reshist11->GetXaxis()->SetLabelOffset(1000);
@@ -421,25 +418,26 @@ XYMaps::XYMaps(char* infile, char* variable, bool isAr = false) throw(string){
   Boardtuple->Draw("y:x>>reshist1(100,-1200,1200,100,-1200,1200)",selectionC,"colz");
   TH2F *reshist1 = (TH2F*)gPad->GetPrimitive("reshist1");
   if (!reshist1) throw string("Variable not found!");
- if (strcmp(variable , "res")==0){
-    reshist1->GetZaxis()->SetRangeUser(0.130, 0.160);
+ if (variable == "res"){
+    reshist1->GetZaxis()->SetRangeUser(0.12, 0.19);
   }
-  else if (strcmp(variable , "abs(resMean)")==0){
+  else if (variable == "abs(resMean)"){
     reshist1->GetZaxis()->SetRangeUser(0.0, 0.01);
   }
-  else if (strcmp(variable , "t0")==0){
-    reshist1->GetZaxis()->SetRangeUser(9.0, 11); 
+  else if (variable == "t0"){
+    reshist1->GetZaxis()->SetRangeUser(1.0, 7.0); 
   }
-  else if (strcmp(variable , "abs(t0-oldt0)")==0){
-    reshist1->GetZaxis()->SetRangeUser(0.0, 0.7);
+  else if (variable == "abs(t0-oldt0)"){
+    reshist1->GetZaxis()->SetRangeUser(0, .4);
   }
-  else if (strcmp(variable,"(tres)")==0){
-    reshist1->GetZaxis()->SetRangeUser(2.9, 4.0);
+  else if (variable == "(tres)"){
+    reshist1->GetZaxis()->SetRangeUser(2.0, 4.0);
   }
   this->Update();
   if(reshist1->GetEntries()>1)   ResizePalette(reshist1);
-  char title5[500];  sprintf(title5,"Board %s (barrel side C)",variable);
-  if(isAr)	sprintf(title5,"Argon Board %s (barrel side C)",variable);
+
+  char title5[500];  sprintf(title5,"Board %s (barrel side C)",variable.c_str());
+  if(isAr)	sprintf(title5,"Argon Board %s (barrel side C)",variable.c_str());
   reshist1->SetTitle(title5);
   reshist1->SetStats(0);
   reshist1->GetXaxis()->SetLabelOffset(1000);
@@ -449,25 +447,26 @@ XYMaps::XYMaps(char* infile, char* variable, bool isAr = false) throw(string){
   Chiptuple->Draw("y:x>>t0hist1(300,-1200,1200,300,-1200,1200)",selectionC,"colz");
   TH2F *t0hist1 = (TH2F*)gPad->GetPrimitive("t0hist1");
   if (!t0hist1) throw string("Variable not found!");
- if (strcmp(variable,"res")==0){
-    t0hist1->GetZaxis()->SetRangeUser(0.115, 0.190);
+ if (variable == "res"){
+    t0hist1->GetZaxis()->SetRangeUser(0.12, 0.19);
   }
-  else if (strcmp(variable,"abs(resMean)")==0){
-    t0hist1->GetZaxis()->SetRangeUser(0.0, 0.020);
+  else if (variable == "abs(resMean)"){
+    t0hist1->GetZaxis()->SetRangeUser(0.0, 0.01);
   }
-  else if (strcmp(variable,"t0")==0){
-    t0hist1->GetZaxis()->SetRangeUser(5.0, 13); 
+  else if (variable == "t0"){
+    t0hist1->GetZaxis()->SetRangeUser(1.0, 7.0); 
   }
-  else if (strcmp(variable,"abs(t0-oldt0)")==0){
-    t0hist1->GetZaxis()->SetRangeUser(0.0, 1.5);
+  else if (variable == "abs(t0-oldt0)"){
+    t0hist1->GetZaxis()->SetRangeUser(0, .4);
   }
-  else if (strcmp(variable ,"(tres)")==0){
-    t0hist1->GetZaxis()->SetRangeUser(2.5, 4.5);
+  else if (variable == "(tres)"){
+    t0hist1->GetZaxis()->SetRangeUser(2.0, 4.0);
   }
   this->Update();
   if(t0hist1->GetEntries()>1)   ResizePalette(t0hist1);
-  char title6[500];  sprintf(title6,"Chip %s (barrel side C)",variable);
-  if(isAr)	 sprintf(title6,"Argon Chip %s (barrel side C)",variable);
+
+  char title6[500];  sprintf(title6,"Chip %s (barrel side C)",variable.c_str());
+  if(isAr)	 sprintf(title6,"Argon Chip %s (barrel side C)",variable.c_str());
   t0hist1->SetTitle(title6);
   t0hist1->SetStats(0);
   t0hist1->GetXaxis()->SetLabelOffset(1000);
@@ -481,19 +480,16 @@ XYMaps::XYMaps(char* infile, char* variable, bool isAr = false) throw(string){
 class T0CalTypeXY{
 public:
   T0CalTypeXY(TNtuple*, int, float);
-  
-  void Draw(char*,bool);
+  void Draw(string,bool);
   TGraph** graph;  
   TEventList** elist;
 };
 
 T0CalTypeXY::T0CalTypeXY(TNtuple* Levtuple, int detector, float markersize){
-  T0CalTypeXY(const & T0CalTypeXY) = delete;
-  T0CalTypeXY & operator=(const T0CalTypeXY & ) = delete;
+  
   float x,y,nt0,chp,brd,lay,mod,det;
   int color[7]={0,46,38,8,16,1,2};
-  //cppcheck-suppress noCopyConstructor
-  //cppcheck-suppress noOperatorEq
+
   graph = new TGraph*[6];
   elist = new TEventList*[6];
 
@@ -530,7 +526,7 @@ T0CalTypeXY::T0CalTypeXY(TNtuple* Levtuple, int detector, float markersize){
     for (int ib=0;ib<elist[igr]->GetN();ib++){
       ipnt++;      
       Levtuple->GetEntry(elist[igr]->GetEntry(ib));
-      //if (igr==1) cout << "MEANSHIFT" << " " << chp << " " << brd << " " << mod << " " << lay << " " << det << endl;
+
       graph[igr]->SetPoint(ipnt,x,y);
     }
     graph[igr]->RemovePoint(0);   
@@ -539,7 +535,7 @@ T0CalTypeXY::T0CalTypeXY(TNtuple* Levtuple, int detector, float markersize){
 
 }
 
-void T0CalTypeXY::Draw(char* title, bool plotleg){
+void T0CalTypeXY::Draw(string title, bool plotleg){
   graph[0]->GetHistogram()->GetXaxis()->SetLabelOffset(1000);
   graph[0]->GetHistogram()->GetYaxis()->SetLabelOffset(1000);
   if (graph[0]->GetN()>0) graph[0]->Draw("ap");
@@ -549,9 +545,14 @@ void T0CalTypeXY::Draw(char* title, bool plotleg){
   if (graph[4]->GetN()>0) graph[4]->Draw("p");
   if (graph[5]->GetN()>0) graph[5]->Draw("p");
   if (graph[6]->GetN()>0) graph[6]->Draw("p");
-
+  cout << "In Draw   title: " << title << endl;
+  cout << " Events in graph[0]: " << graph[0]->GetN() << endl;
+  cout << " Events in graph[1]: " << graph[1]->GetN() << endl;
+  cout << " Events in graph[2]: " << graph[2]->GetN() << endl;
+  cout << " Events in graph[3]: " << graph[3]->GetN() << endl;
+  cout << " Events in graph[4]: " << graph[4]->GetN() << endl;
   graph[0]->Clear();
-  graph[0]->SetTitle(title);
+  graph[0]->SetTitle(title.c_str());
 
   if (plotleg) {
     TLegend* leg = new TLegend(0.99,0.35,0.55,0.01);
@@ -578,11 +579,11 @@ public:
 T0CalibTypeXY::T0CalibTypeXY(char* infile, bool isAr = false){
 
   TFile* file = new TFile(infile);
-  //cout << infile << endl;
+  cout << "In T0CalibTypeXY  infile: " << infile << endl;
   file->cd();
-  TNtuple* Chiptuple    =       NULL;
-  TNtuple* Boardtuple   =       NULL;
-  TNtuple* Moduletuple  =       NULL;
+  TNtuple* Chiptuple    =       nullptr;
+  TNtuple* Boardtuple   =       nullptr;
+  TNtuple* Moduletuple  =       nullptr;
 
   if(!isAr){
     Chiptuple=(TNtuple*)        file->Get("Chiptuple");
@@ -664,6 +665,7 @@ ChipVariations::ChipVariations(char* infile, int detector){
   this->SetName(Form("ChipT0Var_%i",detector));
 
   TFile* file = new TFile(infile);
+  cout << "In ChipVariations  infile: " << infile << " detector " << detector << endl;
   file->cd();
   TNtuple* Chiptuple=(TNtuple*)file->Get("Chiptuple");
 
@@ -686,7 +688,6 @@ ChipVariations::ChipVariations(char* infile, int detector){
       if (ibrd<2) mchip=(int)chip;
       if (ibrd>=2 && ibrd<5) mchip=(int)chip+21;
       if (ibrd>=5) mchip=(int)chip+21+33;
-   
       this->Fill(mchip,t0o);
     }
   }
@@ -748,55 +749,104 @@ public:
 
 BoardVariations::BoardVariations(char* infile, int det){
   
-  //cout << infile << endl;
+  cout << "In BoardVariations  infile: " << infile << " detector " << det << endl;
   
-  ofstream txtfile(Form("BoardVar_%i.txt",det),ios::out);
+  //ofstream txtfile(Form("BoardVar_%i.txt",det),ios::out);
 
   float t0,dt0,bindex;
 
   minx=0; maxx=289; miny=100; maxy=-25;
+  if(abs(det)==2) maxx=449;
 
   this->SetName(Form("BoardT0Var_%i",det));
 
-  TFile* file = new TFile(infile);
-  //cout << infile << endl;
-  file->cd();
-  TNtuple* Boardtuple=(TNtuple*)file->Get("Boardtuple");
+  unique_ptr<TFile> file(new TFile(infile));
 
+  file->cd();
+  TNtuple* Boardtuple=(TNtuple*)file->Get("Board_Artuple");
+  TNtuple* BoardtupleXe=(TNtuple*)file->Get("Boardtuple");
   Boardtuple->SetBranchAddress("t0",&t0);
   Boardtuple->SetBranchAddress("dt0",&dt0);
+  if(abs(det)==2) {
+    BoardtupleXe->SetBranchAddress("t0",&t0);
+    BoardtupleXe->SetBranchAddress("dt0",&dt0);
+  }
 
   int ipnt=0;
-  for (int imod=0;imod<32;imod++){
-    for (int ibrd=0;ibrd<9;ibrd++){
+  if(abs(det)==1){
+    for (int imod=0;imod<32;imod++){
+      for (int ibrd=0;ibrd<9;ibrd++){
 
-      bindex=9*imod+ibrd;
+        bindex=9*imod+ibrd;
 
-      Boardtuple->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
-      TEventList *elist = (TEventList*)gDirectory->Get("tmplist");      
-      for (int ib=0;ib<elist->GetN();ib++){
-	ipnt++;      
-	Boardtuple->GetEntry(elist->GetEntry(ib));
-	//cout << bindex+1 << " " << t0 << " " << dt0 << endl;
-	if (t0<miny) miny = t0;
-        if (t0>maxy) maxy = t0;
-	this->SetPoint(ipnt,bindex+1,t0);
-	this->SetPointError(ipnt,0,dt0);     
-	txtfile << det << " " << bindex << " " << t0 << endl;
+        Boardtuple->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist");      
+        for (int ib=0;ib<elist->GetN();ib++){
+	  ipnt++;      
+	  Boardtuple->GetEntry(elist->GetEntry(ib));
+	
+	  if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+	  this->SetPoint(ipnt,bindex+1,t0);
+	  this->SetPointError(ipnt,0,dt0);     
+	
+	  //txtfile << det << " " << bindex << " " << t0 << endl;
+	  //		txtfile << det << " " << bindex << " t0 " << t0 << " ibrd "<<ibrd<<" det "<<det<<" imod "<<imod<<endl;
+        }
       }
-      
+    }
+  } else if(abs(det)==2){
+    for (int imod=0;imod<32;imod++){
+      for (int ilay=0;ilay<14;ilay++){
+
+	bindex=14*imod+ilay;
+
+        Boardtuple->Draw(">>tmplist1",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist1");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          Boardtuple->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,t0);
+          this->SetPointError(ipnt,0,dt0);
+          if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+ 	  //txtfile << det << " " << bindex << " " << t0 << endl;
+        }
+
+        BoardtupleXe->Draw(">>tmplistXe",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        elist = (TEventList*)gDirectory->Get("tmplistXe");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleXe->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,t0);
+          this->SetPointError(ipnt,0,dt0);
+          if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+	  //txtfile << det << " " << bindex << " " << t0 << endl;
+        }
+      }
     }
   }
 
   this->fMaximum=maxy;
   this->fMinimum=miny;
-  this->SetTitle(Form("Board T0s (%c-side)",detlet[det+1]));
+  if(det==1){
+    this->SetTitle("Barrel Board T0s A side");
+  }else if (det==-1){
+    this->SetTitle("Barrel Board T0s C side");
+  } else if(det==2){
+    this->SetTitle("Endcap Board T0s A side");
+  }else if (det==-2){
+    this->SetTitle("Endcap Board T0s C side");
+  }
+
   this->SetLineColor(4);
   this->RemovePoint(0);
 
   file->Close();
-  delete file;
-  txtfile.close();
+  //txtfile.close();
+  cout <<  "      found " << ipnt << " board t0s " << endl;
+  //this->Print();
 }
 
 void BoardVariations::DrawLines(){
@@ -804,13 +854,16 @@ void BoardVariations::DrawLines(){
   this->GetYaxis()->SetTitle("T0_{board} / ns");
   this->GetXaxis()->SetTitle("board #");
   this->GetYaxis()->SetRangeUser(-0.1+miny,0.1+maxy);
-  this->GetYaxis()->SetRangeUser(9.0, 10.7);
-	miny = 9.0;
-	maxy = 10.7;
+  // Increased range from 7-14 to 0-20 (PH Sept 2022))
+  this->GetYaxis()->SetRangeUser(0.0, 20.0);
+	miny = 0.0;
+	maxy = 20.0;
   this->GetXaxis()->SetRangeUser(minx,maxx);
   this->Draw("AL");
-  for (int imod=1;imod<=32;imod++){
-    TLine* lin = new TLine((float)imod*9+0.5,miny,(float)imod*9+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
+  int nb=9;
+  if(maxx>14) nb=14;
+  for (int imod=1;imod<=(floor(int(maxx)/nb));imod++){ 
+    TLine* lin = new TLine((float)imod*nb+0.5,miny,(float)imod*nb+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
   }
 
 }
@@ -830,23 +883,24 @@ public:
 
 BoardVariationsDiff::BoardVariationsDiff(char* infile_data, char* infile_ref, int det){
   
-  //cout << infile << endl;
+  cout << "In BoardVariationsDiff infile_data: " << string(infile_data) << " infile_ref: " << string(infile_ref) << " detector " << det << endl;
   
-  ofstream txtfile(Form("BoardVarDiff_%i.txt",det),ios::out);
+  //ofstream txtfile(Form("BoardVarDiff_%i.txt",det),ios::out);
 
   float t0,dt0,oldt0,bindex;
 
   minx=0; maxx=289; miny=1000; maxy=-1000;
+  if(abs(det)==2) maxx=449;
 
   this->SetName(Form("BoardT0VarDiff_%i",det));
 
-  TFile* filedata = new TFile(infile_data);
-  TFile* fileref = new TFile(infile_ref);
-  //cout << infile << endl;
+  unique_ptr<TFile> filedata(new TFile(infile_data));
+  unique_ptr<TFile> fileref(new TFile(infile_ref));
+
   filedata->cd();
-  TNtuple* Boardtuple_data=(TNtuple*)filedata->Get("Boardtuple");
+  TNtuple* Boardtuple_data=(TNtuple*)filedata->Get("Board_Artuple");
   fileref->cd();
-  TNtuple* Boardtuple_ref=(TNtuple*)fileref->Get("Boardtuple");
+  TNtuple* Boardtuple_ref=(TNtuple*)fileref->Get("Board_Artuple");
 
   Boardtuple_data->SetBranchAddress("t0",&t0);
   Boardtuple_data->SetBranchAddress("dt0",&dt0);
@@ -864,38 +918,43 @@ BoardVariationsDiff::BoardVariationsDiff(char* infile_data, char* infile_ref, in
 	ipnt++;      
 	Boardtuple_data->GetEntry(elist->GetEntry(ib));
 	Boardtuple_ref->GetEntry(elist->GetEntry(ib));
-	//cout << bindex+1 << " " << t0-oldt0 << " " << miny << " " << maxy << endl;
 	if ((t0-oldt0)<miny) miny = t0-oldt0;
         if ((t0-oldt0)>maxy) maxy = t0-oldt0;
 	this->SetPoint(ipnt,bindex+1,t0-oldt0);
 	this->SetPointError(ipnt,0,dt0);     
-	txtfile << det << " " << bindex << " " << t0-oldt0 << endl;
+	//txtfile << det << " " << bindex << " " << t0-oldt0 << endl;
       }
       
     }
   }
 
-  this->fMaximum=maxy+0.1;
-  this->fMinimum=miny-0.1;
+
+  // Increased margin from 0.1 to 0.2 (PH Sept 2022)
+  this->fMaximum=maxy+0.2;
+  this->fMinimum=miny-0.2;
   this->SetTitle(Form("Board T0 - ref (%c-side)",detlet[det+1]));
   this->SetLineColor(4);
   this->RemovePoint(0);
 
   filedata->Close();
-  delete filedata;
-  txtfile.close();
+
+  cout <<  "      found " << ipnt << " board t0s " << endl;
+  //this->Print();
 }
 
 void BoardVariationsDiff::DrawLines(){
 
   this->GetYaxis()->SetTitle("T0_{board}-ref / ns");
   this->GetXaxis()->SetTitle("board #");
-  this->GetYaxis()->SetRangeUser(-0.1+miny,0.1+maxy);
+  // Increased margin from 0.1 to 0.2 (PH Sept 2022)
+  this->GetYaxis()->SetRangeUser(-0.2+miny,0.2+maxy);
   this->GetXaxis()->SetRangeUser(minx,maxx);
   this->Draw("AP");
+  int nb=9;
+  if(maxx>300) nb=14;
   TLine* lin = new TLine(minx,0,maxx,0); lin->SetLineColor(2); lin->Draw();
-  for (int imod=1;imod<=32;imod++){
-    TLine* lin = new TLine((float)imod*9+0.5,this->fMinimum,(float)imod*9+0.5,this->fMaximum); lin->SetLineStyle(2); lin->Draw();
+  for (int imod=1;imod<=(floor(int(maxx)/nb));imod++){ 
+    TLine* lin = new TLine((float)imod*nb+0.5,this->fMinimum,(float)imod*nb+0.5,this->fMaximum); lin->SetLineStyle(2); lin->Draw();
   }
 
 }
@@ -915,69 +974,111 @@ public:
 
 BoardVariationsOldT0::BoardVariationsOldT0(char* infile, int det){
   
-  //cout << infile << endl;
+  cout << "In BoardVariationsOldT0  infile: " << string(infile) << " detector " << det << endl;
   
-  ofstream txtfile(Form("BoardOldT0Var_%i.txt",det),ios::out);
+  //ofstream txtfile(Form("BoardOldT0Var_%i.txt",det),ios::out);
 
   float oldt0,bindex;
 
   minx=0; maxx=289; miny=100; maxy=-25;
+  if(abs(det)==2) maxx=449;
 
-  //this->fMaximum=maxy;
-  //this->fMinimum=miny;
   this->SetName(Form("BoardOldT0Var_%i",det));
 
-  TFile* file = new TFile(infile);
+  unique_ptr<TFile> file(new TFile(infile));
+
   file->cd();
-  TNtuple* Boardtuple=(TNtuple*)file->Get("Boardtuple");
+  TNtuple* Boardtuple=(TNtuple*)file->Get("Board_Artuple");
+  TNtuple* BoardtupleXe=(TNtuple*)file->Get("Boardtuple");
 
   Boardtuple->SetBranchAddress("oldt0",&oldt0);
-
+  if(abs(det)==2) BoardtupleXe->SetBranchAddress("oldt0",&oldt0);
 
   int ipnt=0;
-  for (int imod=0;imod<32;imod++){
-    for (int ibrd=0;ibrd<9;ibrd++){
+  if(abs(det)==1){
 
-      bindex=9*imod+ibrd;
+    for (int imod=0;imod<32;imod++){
+      for (int ibrd=0;ibrd<9;ibrd++){
 
-      Boardtuple->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
-      TEventList *elist = (TEventList*)gDirectory->Get("tmplist");      
-      for (int ib=0;ib<elist->GetN();ib++){
-	ipnt++;      
-	Boardtuple->GetEntry(elist->GetEntry(ib));
-	if (oldt0<miny) miny = oldt0;
-        if (oldt0>maxy) maxy = oldt0;
-	this->SetPoint(ipnt,bindex+1,oldt0);
-	txtfile << det << " " << bindex << " " << oldt0 << endl;
+        bindex=9*imod+ibrd;
+
+        Boardtuple->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist");      
+        for (int ib=0;ib<elist->GetN();ib++){
+	  ipnt++;      
+	  Boardtuple->GetEntry(elist->GetEntry(ib));
+	  if (oldt0<miny) miny = oldt0;
+          if (oldt0>maxy) maxy = oldt0;
+	  this->SetPoint(ipnt,bindex+1,oldt0);
+	  //txtfile << det << " " << bindex << " " << oldt0 << endl;
+        }
       }
-      
+    }
+  } else if(abs(det)==2){
+    for (int imod=0;imod<32;imod++){
+      for (int ilay=0;ilay<14;ilay++){
+
+	bindex=14*imod+ilay;
+
+        Boardtuple->Draw(">>tmplist1",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist1");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          Boardtuple->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,oldt0);
+          if (oldt0<miny) miny = oldt0;
+          if (oldt0>maxy) maxy = oldt0;
+ 	  //txtfile << det << " " << bindex << " " << t0 << endl;
+        }
+
+        BoardtupleXe->Draw(">>tmplistXe",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        elist = (TEventList*)gDirectory->Get("tmplistXe");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleXe->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,oldt0);
+          if (oldt0<miny) miny = oldt0;
+          if (oldt0>maxy) maxy = oldt0;
+	  //txtfile << det << " " << bindex << " " << t0 << endl;
+        }
+      }
     }
   }
 
   this->fMaximum=maxy;
   this->fMinimum=miny;
-  this->SetTitle(Form("Board T0s (%c-side)",detlet[det+1]));
+
+  if(abs(det)==1) {
+    this->SetTitle(Form("Barrel Board T0s (%c-side)",detlet[det+1]));
+  }else{
+    this->SetTitle(Form("Endcap Board T0s (%c-side)",detlet[det+1]));
+  }
   this->SetLineColor(4);
   this->RemovePoint(0);
   
   this->GetYaxis()->SetRangeUser(9,10.7);
 
   file->Close();
-  delete file;
-  txtfile.close();
+  //txtfile.close();
+  cout <<  "      found " << ipnt << " board t0s " << endl;
+  //this->Print();
+
 }
 
 void BoardVariationsOldT0::DrawLines(){
 
   this->GetYaxis()->SetTitle("T0_{board} / ns");
   this->GetXaxis()->SetTitle("board #");
-   miny = 9.0;
-   maxy = 10.6;
+  // Increased range from 9-10.6 to 5-15 (PH Sept 2022)
+   miny = 5.0;
+   maxy = 15.0;
   this->GetYaxis()->SetRangeUser( miny,maxy);
   this->GetXaxis()->SetRangeUser(minx,maxx);
   this->Draw("AL");
-  for (int imod=1;imod<=32;imod++){
-    TLine* lin = new TLine((float)imod*9+0.5,miny,(float)imod*9+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
+  int nb=9;
+  if(maxx>300) nb=14;
+  for (int imod=1;imod<=(floor(int(maxx)/nb));imod++){ 
+    TLine* lin = new TLine((float)imod*nb+0.5,miny,(float)imod*nb+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
   }
 
 }
@@ -998,68 +1099,119 @@ public:
 
 BoardVariationsRes::BoardVariationsRes(char* infile, int det){
 
-  ofstream txtfile(Form("BoardVarRes_%i.txt",det),ios::out);
+  //ofstream txtfile(Form("BoardVarRes_%i.txt",det),ios::out);
 
   float t0,dt0,bindex;
 
   minx=0; maxx=289; miny=100; maxy=-100;
+  if(abs(det)==2) maxx=449;
 
-  this->SetName(Form("BoardT0Var_%i",det));
+  this->SetName(Form("BoardResVar_%i",det));
 
-  TFile* file = new TFile(infile);
-  //cout << infile << endl;
+  unique_ptr<TFile> file(new TFile(infile));
+  cout << "In BoardVariationsRes   infile: " << string(infile) << " detector " << det << endl;
 
   file->cd();
-  TNtuple* BoardtupleRes=(TNtuple*)file->Get("Boardtuple");
+
+
+  TNtuple* BoardtupleRes=(TNtuple*)file->Get("Board_Artuple");
+  TNtuple* BoardtupleXe=(TNtuple*)file->Get("Boardtuple");
 
   BoardtupleRes->SetBranchAddress("res",&t0);
   BoardtupleRes->SetBranchAddress("dres",&dt0);
+  if(abs(det)==2) {
+    BoardtupleXe->SetBranchAddress("res",&t0);
+    BoardtupleXe->SetBranchAddress("dres",&dt0);
+  }
 
   int ipnt=0;
-  for (int imod=0;imod<32;imod++){
-    for (int ibrd=0;ibrd<9;ibrd++){
+  if(abs(det)==1){
+    for (int imod=0;imod<32;imod++){
+      for (int ibrd=0;ibrd<9;ibrd++){
 
-      bindex=9*imod+ibrd;
+        bindex=9*imod+ibrd;
 
-      BoardtupleRes->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
-      TEventList *elist = (TEventList*)gDirectory->Get("tmplist");
-      for (int ib=0;ib<elist->GetN();ib++){
-        ipnt++;
-        BoardtupleRes->GetEntry(elist->GetEntry(ib));
-        //cout << bindex+1 << " " << t0 << " " << dt0 << endl;
-        if (t0<miny) miny = t0;
-        if (t0>maxy) maxy = t0;
-        this->SetPoint(ipnt,bindex+1,t0);
-        this->SetPointError(ipnt,0,dt0);
-	txtfile << det << " " << bindex << " " << t0 << endl;
+        BoardtupleRes->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleRes->GetEntry(elist->GetEntry(ib));
+          //cout << bindex+1 << " " << t0 << " " << dt0 << endl;
+          if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+          this->SetPoint(ipnt,bindex+1,t0);
+          this->SetPointError(ipnt,0,dt0);
+	  //txtfile << det << " " << bindex << " " << t0 << endl;
+        }
       }
+    }
+  } else if(abs(det)==2){
+    for (int imod=0;imod<32;imod++){
+      for (int ilay=0;ilay<14;ilay++){
 
+	bindex=14*imod+ilay;
+
+        BoardtupleRes->Draw(">>tmplist1",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist1");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleRes->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,t0);
+          this->SetPointError(ipnt,0,dt0);
+          if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+	//txtfile << det << " " << bindex << " " << t0 << endl;
+        }
+
+        BoardtupleXe->Draw(">>tmplistXe",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        elist = (TEventList*)gDirectory->Get("tmplistXe");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleXe->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,t0);
+          this->SetPointError(ipnt,0,dt0);
+          if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+	  //txtfile << det << " " << bindex << " " << t0 << endl;
+        }
+      }
     }
   }
 
-  this->fMaximum=0.01+maxy;
-  this->fMinimum=-0.01+miny;
-  this->SetTitle(Form("Board Residuals (%c-side)",detlet[det+1]));
+  if(det==1){
+    this->SetTitle("Barrel Board Residuals A side");
+  }else if (det==-1){
+    this->SetTitle("Barrel Board Residuals C side");
+  } else if(det==2){
+    this->SetTitle("Endcap Board Residuals A side");
+  }else if (det==-2){
+    this->SetTitle("Endcap Board Residuals C side");
+  }
   this->SetLineColor(4);
   this->RemovePoint(0);
-  this->GetYaxis()->SetRangeUser(0.125, 0.165);
+  this->fMaximum=0.200;
+  this->fMinimum=0.100;
 
   file->Close();
-  delete file;
-  txtfile.close();
+  //txtfile.close();
+  cout <<  "      found " << ipnt << " board t0s " << endl;
+  //this->Print();
+
 }
 
 void BoardVariationsRes::DrawLines(){
 
   this->GetYaxis()->SetTitle("Residual{board} / um");
   this->GetXaxis()->SetTitle("board #");
-	miny = 0.124;
-	maxy = 0.166;
+	miny = 0.100;
+	maxy = 0.200;
   this->GetYaxis()->SetRangeUser( miny, maxy);
   this->GetXaxis()->SetRangeUser(minx,maxx);
   this->Draw("AL");
-  for (int imod=1;imod<=32;imod++){
-    TLine* lin = new TLine((float)imod*9+0.5,miny,(float)imod*9+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
+  int nb=9;
+  if(maxx>300) nb=14;
+  for (int imod=1;imod<=(floor(int(maxx)/nb));imod++){ 
+    TLine* lin = new TLine((float)imod*nb+0.5,miny,(float)imod*nb+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
   }
 
 }
@@ -1080,74 +1232,126 @@ public:
 
 BoardVariationsTRes1::BoardVariationsTRes1(char* infile, int det){
 
-  ofstream txtfile(Form("BoardVarTRes1_%i.txt",det),ios::out);
+  //ofstream txtfile(Form("BoardVarTRes1_%i.txt",det),ios::out);
+
+  cout << "In BoardVariationsTRes1   infile: " << string(infile) << " detector " << det << endl;
 
   float t0,oldt0,dt0,bindex,t0offset ;
 
   minx=0; maxx=289; miny=100; maxy=-100;
+  if(abs(det)==2) maxx=449;
 
   this->SetName(Form("BoardT0Var_%i",det));
 
-  TFile* file = new TFile(infile);
-  //cout << infile << endl;
+  unique_ptr<TFile> file(new TFile(infile));
+
   file->cd();
-  TNtuple* BoardtupleTRes=(TNtuple*)file->Get("Boardtuple");
+  TNtuple* BoardtupleTRes=(TNtuple*)file->Get("Board_Artuple");
+  TNtuple* BoardtupleXe=(TNtuple*)file->Get("Boardtuple");
 
   BoardtupleTRes->SetBranchAddress("t0",&t0);
   BoardtupleTRes->SetBranchAddress("oldt0",&oldt0);
   BoardtupleTRes->SetBranchAddress("dt0",&dt0);
   BoardtupleTRes->SetBranchAddress("t0offset",&t0offset);
+  if(abs(det)==2){
+    BoardtupleXe->SetBranchAddress("t0",&t0);
+    BoardtupleXe->SetBranchAddress("oldt0",&oldt0);
+    BoardtupleXe->SetBranchAddress("dt0",&dt0);
+    BoardtupleXe->SetBranchAddress("t0offset",&t0offset);
+  }
+
 
   int ipnt=0;
-  for (int imod=0;imod<32;imod++){
-    for (int ibrd=0;ibrd<9;ibrd++){
+  if(abs(det)==1) {
+    for (int imod=0;imod<32;imod++){
+      for (int ibrd=0;ibrd<9;ibrd++){
 
-      bindex=9*imod+ibrd;
+        bindex=9*imod+ibrd;
 
-      BoardtupleTRes->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
-      TEventList *elist = (TEventList*)gDirectory->Get("tmplist");
-      for (int ib=0;ib<elist->GetN();ib++){
-        ipnt++;
-        BoardtupleTRes->GetEntry(elist->GetEntry(ib));
-        if ((t0-oldt0)<miny) miny = t0-oldt0;
-        if ((t0-oldt0)>maxy) maxy = t0-oldt0;
-        //cout << bindex+1 << " " << t0 << " " << dt0 << endl;
-//        this->SetPoint(ipnt,bindex+1,t0-oldt0+t0offset);
-        this->SetPoint(ipnt,bindex+1,t0-oldt0);
-        this->SetPointError(ipnt,0,dt0);
-	txtfile << det << " " << bindex << " " << t0-oldt0 << endl;
+        BoardtupleTRes->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleTRes->GetEntry(elist->GetEntry(ib));
+          if ((t0-oldt0)<miny) miny = t0-oldt0;
+          if ((t0-oldt0)>maxy) maxy = t0-oldt0;
+          this->SetPoint(ipnt,bindex+1,t0-oldt0);
+          this->SetPointError(ipnt,0,dt0);
+	  //txtfile << det << " " << bindex << " " << t0-oldt0 << endl;
+        }
       }
+    }
+   } else if(abs(det)==2){
+     for (int imod=0;imod<32;imod++){
+       for (int ilay=0;ilay<14;ilay++){
 
+        bindex=14*imod+ilay;
+
+        BoardtupleTRes->Draw(">>tmplist1",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist1");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleTRes->GetEntry(elist->GetEntry(ib));
+          if ((t0-oldt0)<miny) miny = t0-oldt0;
+          if ((t0-oldt0)>maxy) maxy = t0-oldt0;
+          this->SetPoint(ipnt,bindex+1,t0-oldt0);
+          this->SetPointError(ipnt,0,dt0);
+	  //txtfile << det << " " << bindex << " " << t0-oldt0 << endl;
+        }
+
+        BoardtupleXe->Draw(">>tmplistXe",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        elist = (TEventList*)gDirectory->Get("tmplistXe");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleXe->GetEntry(elist->GetEntry(ib));
+          if ((t0-oldt0)<miny) miny = t0-oldt0;
+          if ((t0-oldt0)>maxy) maxy = t0-oldt0;
+          this->SetPoint(ipnt,bindex+1,t0-oldt0);
+          this->SetPointError(ipnt,0,dt0);
+  	  //txtfile << det << " " << bindex << " " << t0-oldt0 << endl;
+        }
+      }
     }
   }
 
-  this->fMaximum=0.1+maxy;
-  this->fMinimum=-0.1+miny;
-  this->SetTitle(Form("Board T0 Difference (%c-side)",detlet[det+1]));
+  if(det==1){
+    this->SetTitle("Barrel Board T0 Difference (A side)");
+  } else if (det==-1){
+    this->SetTitle("Barrel Board T0 Difference (C side)");
+  } else if(det==2){
+    this->SetTitle("Endcap Board T0 Difference (A side)");
+  } else if (det==-2){
+    this->SetTitle("Endcap Board T0 Difference (C side)");
+  }
   this->SetLineColor(4);
   this->RemovePoint(0);
   this->GetYaxis()->SetRangeUser(9,10.7);
 
   file->Close();
-  delete file;
-  txtfile.close();
+  //txtfile.close();
+  cout <<  "      found " << ipnt << " board t0s " << endl;
+  //this->Print();
+
 }
 
 void BoardVariationsTRes1::DrawLines(){
   
   this->GetYaxis()->SetTitle("Board T0 Difference / ns");
   this->GetXaxis()->SetTitle("board #");
-	miny = -0.5;
-	maxy = 0.5;
+  // Increased range from -0.5 - 0.5 to -1 - 1 (PH)
+	miny = -1.5;
+	maxy = 1.5;
   this->GetYaxis()->SetRangeUser( miny, maxy);
   this->GetXaxis()->SetRangeUser(minx,maxx);
   this->Draw("AL");
   TLine* lin = new TLine(minx,0,maxx,0); lin->Draw();
-  TLine* lin1 = new TLine(minx,0.1,maxx,0.1); lin1->SetLineStyle(2); lin1->Draw();
-  TLine* lin2 = new TLine(minx,-0.1,maxx,-0.1); lin2->SetLineStyle(2); lin2->Draw();
-  for (int imod=1;imod<=32;imod++){
+  TLine* lin1 = new TLine(minx,0.3,maxx,0.3); lin1->SetLineStyle(2); lin1->Draw();
+  TLine* lin2 = new TLine(minx,-0.3,maxx,-0.3); lin2->SetLineStyle(2); lin2->Draw();
+  int nb=9;
+  if(maxx>300) nb=14;
+  for (int imod=1;imod<=(floor(int(maxx)/9));imod++){ //need to change the upper limit for both board and
+                                         //barrel T0 differences
     TLine* lin = new TLine((float)imod*9+0.5,miny,(float)imod*9+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
-    //TLine* lin = new TLine((float)imod*9+0.5,this->fMinimum,(float)imod*9+0.5,this->fMaximum); lin->SetLineStyle(2); lin->Draw();
   }
 
 }
@@ -1168,70 +1372,117 @@ public:
 
 BoardVariationsTRes::BoardVariationsTRes(char* infile, int det){
 
-  ofstream txtfile(Form("BoardVarTRes_%i.txt",det),ios::out);
+  //ofstream txtfile(Form("BoardVarTRes_%i.txt",det),ios::out);
 
   float t0,dt0,bindex;
 
   minx=0; maxx=289; miny=100; maxy=-100;
+  if(abs(det)==2) maxx=449;
 
   this->SetName(Form("BoardT0Var_%i",det));
 
-  TFile* file = new TFile(infile);
-  //cout << infile << endl;
+  unique_ptr<TFile> file(new TFile(infile));
+
+  cout << "In BoardVariationsTRes   infile: " << string(infile) << " detector " << det << endl;
   file->cd();
-  TNtuple* BoardtupleTRes=(TNtuple*)file->Get("Boardtuple");
+  TNtuple* BoardtupleTRes=(TNtuple*)file->Get("Board_Artuple");
+  TNtuple* BoardtupleXe=(TNtuple*)file->Get("Boardtuple");
 
   BoardtupleTRes->SetBranchAddress("tres",&t0);
   BoardtupleTRes->SetBranchAddress("dres",&dt0);
+  if(abs(det)==2){
+    BoardtupleXe->SetBranchAddress("tres",&t0);
+    BoardtupleXe->SetBranchAddress("dres",&dt0);
+  }
 
   int ipnt=0;
-  for (int imod=0;imod<32;imod++){
-    for (int ibrd=0;ibrd<9;ibrd++){
+  if(abs(det)==1) {
+    for (int imod=0;imod<32;imod++){
+      for (int ibrd=0;ibrd<9;ibrd++){
 
-      bindex=9*imod+ibrd;
+        bindex=9*imod+ibrd;
 
-      BoardtupleTRes->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
-      TEventList *elist = (TEventList*)gDirectory->Get("tmplist");
-      for (int ib=0;ib<elist->GetN();ib++){
-        ipnt++;
-        BoardtupleTRes->GetEntry(elist->GetEntry(ib));
-        //cout << bindex+1 << " " << t0 << " " << dt0 << endl;
-        this->SetPoint(ipnt,bindex+1,t0);
-        this->SetPointError(ipnt,0,dt0);
-        if (t0<miny) miny = t0;
-        if (t0>maxy) maxy = t0;
-	txtfile << det << " " << bindex << " " << t0 << endl;
+        BoardtupleTRes->Draw(">>tmplist",Form("brd==%i && det==%i && mod==%i",ibrd,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleTRes->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,t0);
+          this->SetPointError(ipnt,0,dt0);
+          if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+	//txtfile << det << " " << bindex << " " << t0 << endl;
+        }
       }
+    }
+  } else if(abs(det)==2){
+    for (int imod=0;imod<32;imod++){
+      for (int ilay=0;ilay<14;ilay++){
 
+	bindex=14*imod+ilay;
+
+        BoardtupleTRes->Draw(">>tmplist1",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        TEventList *elist = (TEventList*)gDirectory->Get("tmplist1");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleTRes->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,t0);
+          this->SetPointError(ipnt,0,dt0);
+          if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+	//txtfile << det << " " << bindex << " " << t0 << endl;
+        }
+
+        BoardtupleXe->Draw(">>tmplistXe",Form("lay==%i && det==%i && mod==%i",ilay,det,imod));
+        elist = (TEventList*)gDirectory->Get("tmplistXe");
+        for (int ib=0;ib<elist->GetN();ib++){
+          ipnt++;
+          BoardtupleXe->GetEntry(elist->GetEntry(ib));
+          this->SetPoint(ipnt,bindex+1,t0);
+          this->SetPointError(ipnt,0,dt0);
+          if (t0<miny) miny = t0;
+          if (t0>maxy) maxy = t0;
+	  //txtfile << det << " " << bindex << " " << t0 << endl;
+        }
+      }
     }
   }
 
   this->fMaximum=maxy;
   this->fMinimum=miny;
-  this->SetTitle(Form("Board Sigma Time Residuals (%c-side)",detlet[det+1]));
+  if(abs(det)==1){
+//title set here, not sure why it doesnt work
+    this->SetTitle(Form("Barrel Board Sigma Time Residuals (%c-side)",detlet[det+1]));
+  }else{
+    this->SetTitle(Form("Endcap Board Sigma Time Residuals (%c-side)",detlet[det+10]));
+  }
   this->SetLineColor(4);
   this->RemovePoint(0);
 
   file->Close();
-  delete file;
-  txtfile.close();
+  //txtfile.close();
+  cout <<  "      found " << ipnt << " board t0s " << endl;
+  //this->Print();
+
 }
 
 void BoardVariationsTRes::DrawLines(){
 
   this->GetYaxis()->SetTitle("Board Sigma Time Residuals/ ns");
   this->GetXaxis()->SetTitle("board #");
-	miny = 3.0;
-	maxy = 3.7;
+  // Increased range from 3.0-3.7 to 1-5 (PH)
+	miny = 1.0;
+	maxy = 5.0;
   this->GetYaxis()->SetRangeUser(miny,maxy);
   this->GetXaxis()->SetRangeUser(minx,maxx);
   this->Draw("ALP");
   TLine* lin = new TLine(minx,0,maxx,0); lin->Draw();
-  TLine* lin1 = new TLine(minx,0.1,maxx,0.1); lin1->SetLineStyle(2); lin1->Draw();
-  TLine* lin2 = new TLine(minx,-0.1,maxx,-0.1); lin2->SetLineStyle(2); lin2->Draw();
-  for (int imod=1;imod<=32;imod++){
-    //TLine* lin = new TLine((float)imod*9+0.5,this->fMinimum,(float)imod*9+0.5,this->fMaximum); lin->SetLineStyle(2); lin->Draw();
-    TLine* lin = new TLine((float)imod*9+0.5,miny,(float)imod*9+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
+  TLine* lin1 = new TLine(minx,0.3,maxx,0.3); lin1->SetLineStyle(2); lin1->Draw();
+  TLine* lin2 = new TLine(minx,-0.3,maxx,-0.3); lin2->SetLineStyle(2); lin2->Draw();
+  int nb=9;
+  if(maxx>300) nb=14;
+  for (int imod=1;imod<=(floor(int(maxx)/nb));imod++){ 
+    TLine* lin = new TLine((float)imod*nb+0.5,miny,(float)imod*nb+0.5,maxy); lin->SetLineStyle(2); lin->Draw();
 
   }
 
@@ -1242,86 +1493,94 @@ void BoardVariationsTRes::DrawLines(){
 
 class DvGraph: public TGraph{
 public: 
-  DvGraph(char*,char*, char*,int,int,bool);
+  DvGraph(char*,string, string,int,int,bool);
   //TH1F* hist;
   TGraph* rtgraph;
 };
 
-DvGraph::DvGraph(char* infile, char* path, char* folder, int det, int lay, bool isinverted){
+
+DvGraph::DvGraph(char* infile, string path, string folder, int det, int lay, bool isinverted){
   
   this->SetName(Form("Dv_%i_%i",det,lay));
   
   vector<string> levels;
-  string dum=string(path);
+
   while (true){
-    //cppcheck-suppress stlIfStrFind
-    if((int)dum.find(",")<0) break;
-    levels.push_back(dum.substr(0,dum.find(",")));
-    dum=dum.substr(dum.find(",")+1,dum.size());
+    if((int)path.find(",")<0) break;
+    levels.push_back(path.substr(0,path.find(",")));
+    path=path.substr(path.find(",")+1,path.size());
   }
-  levels.push_back(dum.substr(0,dum.find(",")));
-  
+  levels.push_back(path.substr(0,path.find(",")));
+  cout << " In DvGraph   folder: " << folder << " det " << det << " lay " << lay << endl;
+  for (int i=0; i<levels.size(); i++) cout << " " << levels.at(i);
+  cout << endl;
   
   TFile* file = new TFile(infile);
+  cout << infile << endl;
   file->cd();
-  
+
   TDirectory* trt = (TDirectory*) file->FindKey("TRT_all")->ReadObj();
-  if (strcmp(folder,"")==0){
-    TDirectory* det = (TDirectory*) trt->FindKey(folder)->ReadObj();
+  if (folder!=""){
+    TDirectory* det = (TDirectory*) trt->FindKey(folder.c_str())->ReadObj();
+    cout << "PLOT FOR "<< folder <<endl;
     if (det->FindKey("rtgraph")){
       rtgraph= (TGraphErrors*) det  ->FindKey("rtgraph")->ReadObj();
+      cout << "found rtgraph " << folder <<endl;
+    } else {
+      rtgraph=nullptr;
+      cout << "did not find rtgraph " << folder <<endl;
     }
-    else
-      rtgraph=NULL;
-  }
   
-  else if (trt->FindKey("rtgraph")){
+  } else if (trt->FindKey("rtgraph")){
     rtgraph= (TGraphErrors*) trt  ->FindKey("rtgraph")->ReadObj();
-  }
-  else{
-    rtgraph=NULL;
+    cout << "no folder, but found rtgraph " << folder <<endl;
+  } else {
+    rtgraph=nullptr;
+    cout << "no folder, no rtgraph " << folder <<endl;
   }
   
   if(rtgraph){
     
     TF1* rtfunc;
-    rtfunc = (TF1*)rtgraph->GetListOfFunctions()->First();
+    if (rtgraph) rtfunc = (TF1*)rtgraph->GetListOfFunctions()->First();
     
     double p0=rtfunc->GetParameter(0);
     double p1=rtfunc->GetParameter(1);
     double p2=rtfunc->GetParameter(2);
     double p3=rtfunc->GetParameter(3);
     
+    cout << "  R-t PARAMETERS: " << p0 << " " << p1 << " " << p2 << " " << p3 << endl; 
     
     bool isdines=false;
-
-    
-    if(isdines){
-      char* vrrelation;
-      if (isinverted) vrrelation = "x*[2]/sqrt([0]*[0]+x*x)";
-      else vrrelation = "sqrt([0]*[0]+x*x)/(x*[2])";
       
-      TF1* vr1 = new TF1("vr-relation",vrrelation,0.0001,2.0);
-      vr1->SetParameters(p0,p1,p2);
+    if(isdines){
+        string vrrelation;
+      if (isinverted) vrrelation="x*[2]/sqrt([0]*[0]+x*x)";
+      else vrrelation="sqrt([0]*[0]+x*x)/(x*[2])";
+      
+      TF1* vr1 = new TF1("vr-relation",vrrelation.c_str(),0.0001,2.0);
+      vr1->SetParameters(p0,p1,p2); 
       
       for (int i=0; i<=100; i++) {
 	float r=0.1+(2.0-0.1)*(float)i/100;
 	float v1=vr1->Eval(r,0,0,0);
 	this->SetPoint(i,r,v1);
+	//cout << i << " " << r << " " << v1 << endl; 
       }
       
       vr1->Delete();
       
     } else {
+      cout << "  USING POLYNOMIAL R-t RELATION" << endl;  
       
-      char* rtrelation="[0]+x*([1]+x*([2]+x*[3]))";
-      char* vtrelation;
+      string rtrelation="[0]+x*([1]+x*([2]+x*[3]))";
+      string vtrelation;
       if (isinverted) vtrelation="1/([0]+2*x*[1]+3*x*x*[2])";
       else  vtrelation="[0]+2*x*[1]+3*x*x*[2]";
       
-      TF1* rt1 = new TF1("rt-relation",rtrelation,-10000,10000);
+      TF1* rt1 = new TF1("rt-relation",rtrelation.c_str(),-10000,10000);
       rt1->SetParameters(p0,p1,p2,p3);
-      TF1* vt1 = new TF1("vt-relation",vtrelation,-10000,10000);
+      TF1* vt1 = new TF1("vt-relation",vtrelation.c_str(),-10000,10000);
       vt1->SetParameters(p1,p2,p3);
       
       for (int i=0; i<=100; i++) {
@@ -1329,6 +1588,7 @@ DvGraph::DvGraph(char* infile, char* path, char* folder, int det, int lay, bool 
 	float t1=rt1->GetX(r,-10000,10000); 
 	float v1=vt1->Eval(t1,0,0,0);
 	this->SetPoint(i,r,v1);
+	//cout << i << " " << r << " " << t1 << " " << v1 << endl; 
       }
       
       rt1->Delete();  
@@ -1343,95 +1603,100 @@ DvGraph::DvGraph(char* infile, char* path, char* folder, int det, int lay, bool 
 
 class DGraph: public TGraph{
 public: 
-  DGraph(char*,char*, char*,int,int,bool);
+  DGraph(char*,string, string,int,int,bool);
   //TH1F* hist;
   TGraph* rtgraph;
 };
 
-//DvGraph::DvGraph(char* infile, char* path,int det, int lay, bool isinverted){
-DGraph::DGraph(char* infile, char* path, char* folder, int det, int lay, bool isinverted){
+
+DGraph::DGraph(char* infile, string path, string folder, int det, int lay, bool isinverted){
   
   this->SetName(Form("Dv_%i_%i",det,lay));
   
   vector<string> levels;
-  string dum=string(path);
   while (true){
-    // cppcheck-suppress stlIfStrFind
-    if((int)dum.find(",")<0) break;
-    levels.push_back(dum.substr(0,dum.find(",")));
-    dum=dum.substr(dum.find(",")+1,dum.size());
+    if((int)path.find(",")<0) break;
+    levels.push_back(path.substr(0,path.find(",")));
+    path=path.substr(path.find(",")+1,path.size());
   }
-  levels.push_back(dum.substr(0,dum.find(",")));
+  levels.push_back(path.substr(0,path.find(",")));
 
   TFile* file = new TFile(infile);
   file->cd();
 
+  cout << " In DGraph. Folder: " << folder << " det " << det << " lay " << lay << endl;
+  for (int i=0; i<levels.size(); i++) cout << " " << levels.at(i);
+  cout << endl;
+  cout << "            infile:" << string(infile) << endl;
+
 TDirectory* trt = (TDirectory*) file->FindKey("TRT_all")->ReadObj();
-if (strcmp(folder,"")==0){
-  TDirectory* det = (TDirectory*) trt->FindKey(folder)->ReadObj();
+if (folder!=""){
+  TDirectory* det = (TDirectory*) trt->FindKey(folder.c_str())->ReadObj();
+  cout << "PLOT FOR "<< folder << endl;
                         if (det->FindKey("rtgraph")){
                                 rtgraph= (TGraphErrors*) det  ->FindKey("rtgraph")->ReadObj();
+                                cout << " folder: " << folder << " found rtgraph " << endl;
+                        } else {
+                                rtgraph=nullptr;
+				cout << " folder: " << folder << " did not find rtgraph " << endl;
                         }
-                        else
-                                rtgraph=NULL;
-   }
-
-else if (trt->FindKey("rtgraph")){
+} else if (trt->FindKey("rtgraph")){
                                 rtgraph= (TGraphErrors*) trt  ->FindKey("rtgraph")->ReadObj();
- }
-else{
-    rtgraph=NULL;
+                                cout << " no folder, found rtgraph " << endl;
+} else {
+    rtgraph=nullptr;
+    cout << " no folder, no rtgraph " << endl;
 }
 
   if(rtgraph){
 
-    TF1* rtfunc = (TF1*)rtgraph->GetListOfFunctions()->First();
+    TF1* rtfunc;
+    if (rtgraph) rtfunc = (TF1*)rtgraph->GetListOfFunctions()->First();
     
     double p0=rtfunc->GetParameter(0);
     double p1=rtfunc->GetParameter(1);
     double p2=rtfunc->GetParameter(2);
     double p3=rtfunc->GetParameter(3);
     
+    cout << "  R-t PARAMETERS: " << p0 << " " << p1 << " " << p2 << " " << p3 << endl; 
     
     bool isdines=false;
-
     
     if(isdines){
+
+      string vrrelation;
+      if (isinverted) vrrelation="x*[2]/sqrt([0]*[0]+x*x)";
+      else vrrelation="sqrt([0]*[0]+x*x)/(x*[2])";
       
-      char* vrrelation;
-      if (isinverted) vrrelation = "x*[2]/sqrt([0]*[0]+x*x)";
-      else vrrelation = "sqrt([0]*[0]+x*x)/(x*[2])";
-      
-      TF1* vr1 = new TF1("vr-relation",vrrelation,0.0001,2.0);
+      TF1* vr1 = new TF1("vr-relation",vrrelation.c_str(),0.0001,2.0);
       vr1->SetParameters(p0,p1,p2);
       
       for (int i=0; i<=100; i++) {
 	float r=0.1+(2.0-0.1)*(float)i/100;
 	float v1=vr1->Eval(r,0,0,0);
 	this->SetPoint(i,r,v1);
+
       }
       
       vr1->Delete();
       
     } else {
-      //cout << "  USING POLYNOMIAL R-t RELATION" << endl;  
+      cout << "  USING POLYNOMIAL R-t RELATION" << endl;  
       
-      char* rtrelation="[0]+x*([1]+x*([2]+x*[3]))";
-      char* vtrelation;
+      string rtrelation="[0]+x*([1]+x*([2]+x*[3]))";
+      string vtrelation;
       if (isinverted) vtrelation="1/([0]+2*x*[1]+3*x*x*[2])";
       else  vtrelation="[0]+2*x*[1]+3*x*x*[2]";
       
-      TF1* rt1 = new TF1("rt-relation",rtrelation,-10000,10000);
+      TF1* rt1 = new TF1("rt-relation",rtrelation.c_str(),-10000,10000);
       rt1->SetParameters(p0,p1,p2,p3);
-      TF1* vt1 = new TF1("vt-relation",vtrelation,-10000,10000);
+      TF1* vt1 = new TF1("vt-relation",vtrelation.c_str(),-10000,10000);
       vt1->SetParameters(p1,p2,p3);
 
       for (int i=0; i<=1000; i++) {
        	float t1= -5+ i * 0.05 ; 
         float r1=rt1->Eval(t1,0,0,0);
         this->SetPoint(i,t1,r1);
-        //this->SetPoint(i,r,rt1);
-        //cout << i << " " <<  t1 << " " << r1 << endl; 
       }
       
       rt1->Delete();  
@@ -1447,99 +1712,120 @@ else{
 class RtGraphs: public TCanvas{
 public:
  // RtGraphs(char*,int,int);
-  RtGraphs(char*,char*,bool) throw(string);
+  RtGraphs(char*,string,bool);
   TH2F* rthist;
   TGraphErrors* rtgraph;
   TGraphErrors* trgraph;
   TF1* oldrtfunc;
-  //  map<double,double> rtmap;
+
 };
 
-RtGraphs::RtGraphs(char* infile, char* folder, bool isAr = false) throw(string){
+RtGraphs::RtGraphs(char* infile, string folder, bool isAr = false) {
 
 
-  //this->SetName(Form("Rt_%i_%i",det,lay));
-  this->SetName(Form("Rt_%is",folder));
+
+  this->SetName(Form("Rt_%is",folder.c_str()));
 
   TFile* file = new TFile(infile);
-  //cout << infile << endl;
+  cout << "in RtGraphs. Infile: " << string(infile) << endl;
   file->cd();
-  TDirectory* trt = NULL;
+  TDirectory* trt = nullptr;
 
   map<string,string> titlemap;
   if(!isAr){
+
           trt = (TDirectory*) file->FindKey("TRT_all")->ReadObj();
           titlemap["WholeBarrel_1"]="whole barrel";
           titlemap["Detector_-1"]="barrel C";
           titlemap["Detector_1"]="barrel A";
           titlemap["Detector_-2"]="end-cap C";
           titlemap["Detector_2"]="end-cap A";
+	  if(trt) cout << " Xenon. Found TRT_all " << endl;
+	  if(!trt) cout << " Xenon. Did not find TRT_all " << endl;
   }
 
   else{
+
           trt = (TDirectory*) file->FindKey("TRT_Ar_all")->ReadObj();
           titlemap["WholeBarrel_Ar_1"]  ="whole Ar barrel";
           titlemap["Detector_Ar_-1"]    ="barrel Ar C";
           titlemap["Detector_Ar_1"]     ="barrel Ar A";
           titlemap["Detector_Ar_-2"]    ="end-cap Ar C";
           titlemap["Detector_Ar_2"]     ="end-cap Ar A";
+	  if(trt) cout << " Argon. Found TRT_Ar_all " << endl;
+	  if(!trt) cout << " Argon. Did not find TRT_Ar_all " << endl;
+
   }
 
 
-  if (strcmp(folder,"")==0){
-    TDirectory* det = (TDirectory*) trt->FindKey(folder)->ReadObj();
+  if (folder!=""){
+    cout << "  PLOT FOR "<< folder <<endl;
+    TDirectory* det = (TDirectory*) trt->FindKey(folder.c_str())->ReadObj();
     if (det->FindKey("rt-relation")){
+      cout << "  found rt-relation " << endl; 
       rthist= (TH2F*) det->FindKey("rt-relation")->ReadObj();
       this->cd();
       rthist->GetXaxis()->SetRangeUser(0,40);
-      char name[500];  sprintf(name,"rt (%s)",titlemap[string(folder)].data());
+      char name[500];  sprintf(name,"rt (%s)",titlemap[folder].c_str());
       rthist->SetTitle(name);
       if (det->FindKey("rtgraph")){
 	rtgraph= (TGraphErrors*) det  ->FindKey("rtgraph")->ReadObj();
+        cout << "  found also rtgraph " << endl; 
       }
-      else 
-	rtgraph=NULL;
+      else {
+	rtgraph=nullptr;
+        cout << "  did not found rtgraph " << endl;} 
       if (det->FindKey("trgraph")){
 	trgraph= (TGraphErrors*) det  ->FindKey("trgraph")->ReadObj();
+        cout << "  found also trgraph " << endl; 
       }
-      else
-	trgraph=NULL;
+      else {
+	trgraph=nullptr;
+        cout << "  did not found trgraph " << endl;} 
       if (det->FindKey("oldrtfunc")){
 	oldrtfunc= (TF1*) det  ->FindKey("oldrtfunc")->ReadObj();
+        cout << "  found also oldrtfunc " << endl; 
       }
-      else
-	oldrtfunc=NULL;
+      else {
+	oldrtfunc=nullptr;
+        cout << "  did not find oldrtfunc " << endl; }
     }
     else {
       throw string("  NO RT OBJECTS FOUND");
     }
 
-  }
-  else if (trt->FindKey("rt-relation")){
+  } else if (trt->FindKey("rt-relation")){
+    cout << "   No folder. Found rt-relation. PLOT FOR TRT"<< endl;
     rthist= (TH2F*) trt->FindKey("rt-relation")->ReadObj();
     this->cd();
     rthist->GetXaxis()->SetRangeUser(0,40);
     rthist->SetTitle("r(t) for whole TRT");
     if (trt->FindKey("rtgraph")){
       rtgraph= (TGraphErrors*) trt  ->FindKey("rtgraph")->ReadObj();
+      cout << "  found also rtgraph " << endl; 
+    } else {
+      rtgraph = nullptr;
+      cout << "  did not find rtgraph " << endl;
     } 
-    else 
-      rtgraph = NULL;
     if (trt->FindKey("trgraph")){
       trgraph= (TGraphErrors*) trt  ->FindKey("trgraph")->ReadObj();
-    }
-    else
-      trgraph=NULL; 
+      cout << "  found also trgraph " << endl; 
+    } else {
+      trgraph=nullptr;
+      cout << "  did not find trgraph " << endl;
+    }  
     if (trt->FindKey("oldrtfunc")){
       oldrtfunc= (TF1*) trt  ->FindKey("oldrtfunc")->ReadObj();
-    }
-    else 
-      oldrtfunc=NULL;
-  }
-  else{
-    rthist=NULL;
-    rtgraph=NULL;
-    oldrtfunc=NULL;
+      cout << "  found also oldtrtfunc " << endl; 
+    } else { 
+      oldrtfunc=nullptr;
+      cout << "  did not find oldtrtfunc " << endl;
+    } 
+  } else {
+    cout << "   No folder. No rt-relation."<< endl;
+    rthist=nullptr;
+    rtgraph=nullptr;
+    oldrtfunc=nullptr;
   }
   
 
@@ -1556,40 +1842,50 @@ RtGraphs::RtGraphs(char* infile, char* folder, bool isAr = false) throw(string){
   c1_3->SetRightMargin(0.1);
   c1_3->SetFillStyle(0);
   c1_3->SetGrid();
-  
 
   if(rtgraph){
     
     double rgraph,tgraph;
-  
-    if (strcmp(folder,"")==0 )    rtgraph->SetTitle("r(t) fit (whole TRT)");
-    else{
-      char name[500];  sprintf(name,"r(t) (%s)",titlemap[string(folder)].data());
-      rtgraph->SetTitle(name);
+
+    if (folder == "" )    { 
+      cout << "  found rtgraph for entire TRT " << endl; 
+      rtgraph->SetTitle("r(t) fit (whole TRT)");
+    }else{
+      cout << "  found rtgraph for folder: " << folder << endl; 
+      rtgraph->SetTitle(titlemap[folder].c_str());
     }
+    cout << "  set rtgraph X title t-T0/ns and Y title |r|_{track}/mm" << endl; 
+
     rtgraph->GetXaxis()->SetTitle("t-T0/ns");
     rtgraph->GetYaxis()->SetTitle("|r|_{track}/mm");
+    //rtgraph->GetYaxis()->SetRangeUser(0,2.7);
     rtgraph->GetXaxis()->SetTitleSize(0.06);
     rtgraph->GetXaxis()->SetLabelSize(0.06);
     
-
-    oldrtfunc->SetLineColor(1);
-    oldrtfunc->SetLineWidth(1);
-    oldrtfunc->SetLineStyle(2);
     //Blue line too wide, extract and plot again:
-    TF1* newRT;
-    if(rtgraph->GetFunction("rtfunc")) newRT = rtgraph->GetFunction("rtfunc");
-    else newRT = rtgraph->GetFunction("rtfunc2");
-    newRT->SetLineWidth(1);
-    newRT->Draw();
     rtgraph->SetMarkerStyle(20);
     rtgraph->SetMarkerSize(0.5);
     rtgraph->GetYaxis()->SetRangeUser(-0.05,2.6);
+    cout << "    Draw rtgraph " << endl;
     rtgraph->Draw("ap");
-    oldrtfunc->Draw("same");
+    TF1* newRT;
+    if(rtgraph->GetFunction("rtfunc")) newRT = rtgraph->GetFunction("rtfunc");
+    else newRT = rtgraph->GetFunction("rtfunc2");
+    if(newRT) {
+      cout << "    Draw new fit " << endl;
+      newRT->SetLineWidth(1);
+      newRT->Draw("same");
+    }
+    if(oldrtfunc) {
+      oldrtfunc->SetLineColor(1);
+      oldrtfunc->SetLineWidth(1);
+      oldrtfunc->SetLineStyle(2);
+      cout << "    Draw old fit " << endl;
+      oldrtfunc->Draw("same");
+    }
     //Legend
 
-    TLegend *leg = new TLegend(0.7155172,0.1038136,0.8965517,0.2542373,NULL,"brNDC");
+    TLegend *leg = new TLegend(0.7155172,0.1038136,0.8965517,0.2542373,nullptr,"brNDC");
     leg->AddEntry(rtgraph,"Data","p");
     leg->AddEntry(newRT,"Fit","l");
     leg->AddEntry(oldrtfunc,"Fit old rt","l");
@@ -1599,7 +1895,7 @@ RtGraphs::RtGraphs(char* infile, char* folder, bool isAr = false) throw(string){
     
 
     //Plot the difference between old and new rt:
-    if(oldrtfunc){
+    if(oldrtfunc  && newRT){
       this->cd();
       this->cd(1);
       TPad*  c1_4 = new TPad("c1_4", "newpad",0.01,0,0.99,0.32);
@@ -1636,6 +1932,7 @@ RtGraphs::RtGraphs(char* infile, char* folder, bool isAr = false) throw(string){
       gr1->GetXaxis()->SetRangeUser(Xmin,Xmax);
       gr1->GetYaxis()->SetTitle("Old r(t) - New r(t) /mm");
       gr1->GetYaxis()->SetRangeUser(-0.1,0.1);
+      //gr1->GetYaxis()->SetRangeUser(1.1*Ymin,1.1*Ymax);
       gr1->GetYaxis()->SetNdivisions(5);
       gr1->GetXaxis()->SetTitleSize(0.06);
       gr1->GetXaxis()->SetLabelSize(0.06);
@@ -1655,6 +1952,7 @@ RtGraphs::RtGraphs(char* infile, char* folder, bool isAr = false) throw(string){
 	Y = 0;
 	rtgraph->GetPoint(i, X, Y) ;
 	x1[i] = X;
+	//y1[i] = newRT->Eval(X)  - Y;
 	y1[i] = Y - newRT->Eval(X);
 	ex1[i] = 0;
 	ey1[i] = rtgraph->GetErrorY(i);
@@ -1672,7 +1970,7 @@ RtGraphs::RtGraphs(char* infile, char* folder, bool isAr = false) throw(string){
 
       gr2->GetYaxis()->SetRangeUser(-0.2,0.2);
       gr2->GetXaxis()->SetRangeUser(-5,50);
-
+      cout << "    Draw difference " << endl;
       gr2->Draw("ap");
       gr1->Draw("l");
             
@@ -1680,51 +1978,58 @@ RtGraphs::RtGraphs(char* infile, char* folder, bool isAr = false) throw(string){
 
       
     }
-   
+
+  } else {
+    cout << " nullptr rtgraph " << endl;
   }
   
 
   this->cd(2);
   if(trgraph){
-    //gStyle->SetOptFit(0001);    
-    if (strcmp(folder,"")==0 )    trgraph->SetTitle("t(r) fit (whole TRT)");
+
+    if (folder == "" )    trgraph->SetTitle("t(r) fit (whole TRT)");
     else{
-      char name[500];  sprintf(name,"t(r) fit (%s)",titlemap[string(folder)].data());
+      char name[500];  sprintf(name,"t(r) fit (%s)",titlemap[string(folder)].c_str());
       trgraph->SetTitle(name);
     }
     
     
     trgraph->GetYaxis()->SetTitle("t-T0/ns");
     trgraph->GetXaxis()->SetTitle("|r|_{track}/mm");
+    //trgraph->GetYaxis()->SetRangeUser(0,32);
     trgraph->SetMarkerStyle(20);
     trgraph->SetMarkerSize(0.5);
+    cout << "    Draw trgraph " << endl;
     trgraph->Draw("ap");
-  
+    
+    
+  } else {
+    cout << " nullptr trgraph " << endl;
   }
-
+  
 
   gStyle->SetOptStat(1);
 
 }
 
-
 //=================================================================
 
 class XYMapsEC: public TCanvas{
 public:
-  XYMapsEC(char*, char*, bool);
+  XYMapsEC(char*, string, bool);
 };
 
-XYMapsEC::XYMapsEC(char* infile, char* variable,bool isAr = false){
+XYMapsEC::XYMapsEC(char* infile, string variable,bool isAr = false){
 
-  char selectionA[500];  sprintf(selectionA,"%s*(det==2)",variable);
-  char selectionC[500];  sprintf(selectionC,"%s*(det==-2)",variable);
-  if (strcmp(variable,"nt0")==0) variable = "n hits";
+  char selectionA[500];  sprintf(selectionA,"%s*(det==2)",variable.c_str());
+  char selectionC[500];  sprintf(selectionC,"%s*(det==-2)",variable.c_str());
+  if (variable=="nt0") variable = "n hits";
   TFile* file = new TFile(infile);
+  //cout << infile << endl;
   file->cd();
-  TNtuple* Chiptuple    =       NULL;
-  TNtuple* Boardtuple   =       NULL;
-  TNtuple* Moduletuple  =       NULL;
+  TNtuple* Chiptuple    =       nullptr;
+  TNtuple* Boardtuple   =       nullptr;
+  TNtuple* Moduletuple  =       nullptr;
 
   if(!isAr){
     Chiptuple=(TNtuple*)        file->Get("Chiptuple");
@@ -1748,48 +2053,47 @@ XYMapsEC::XYMapsEC(char* infile, char* variable,bool isAr = false){
   gStyle->SetPalette(1);
 
   this->cd(1);
+
   Moduletuple->Draw("mod:lay>>reshist10(14,0,14,32,0,32)",selectionA,"colz");
   TH2F *reshist10 = (TH2F*)gPad->GetPrimitive("reshist10");
   this->Update();
   if(reshist10->GetEntries()>1)   ResizePalette(reshist10);
   SetZAxis(reshist10);
-  char title1[500];  sprintf(title1,"Phi Sector VS Wheel %s (EC side A)",variable);
-  if(isAr)	sprintf(title1,"Argon Phi Sector VS Wheel %s (EC side A)",variable);
+  char title1[500];  sprintf(title1,"Phi Sector VS Wheel %s (EC side A)",variable.c_str());
+  if(isAr)	sprintf(title1,"Argon Phi Sector VS Wheel %s (EC side A)",variable.c_str());
   reshist10->SetTitle(title1);
   reshist10->SetStats(0);
   reshist10->GetXaxis()->SetLabelOffset(1000);
   reshist10->GetYaxis()->SetLabelOffset(1000);
   reshist10->GetXaxis()->SetTitle("Wheel (Z)");
   reshist10->GetYaxis()->SetTitle("Phi sector");
-  if (strcmp(variable,"ftype")==0){
+  if (variable == "ftype"){
     reshist10->GetZaxis()->SetRangeUser(1,6);
     reshist10->GetZaxis()->SetNdivisions(6);
   }
-  else if (strcmp(variable,"res")==0){
-    reshist10->GetZaxis()->SetRangeUser(0.125, 0.180);
+  else if (variable == "res"){
+    reshist10->GetZaxis()->SetRangeUser(0.10, 0.20);
   }
-  else if (strcmp(variable,"abs(resMean)")==0){
-    reshist10->GetZaxis()->SetRangeUser(0.0, 0.010);
+  else if (variable == "abs(resMean)"){
+    reshist10->GetZaxis()->SetRangeUser(0.0, 0.05);
   }
-  else if (strcmp(variable,"t0") ==0){
-    reshist10->GetZaxis()->SetRangeUser(9.0, 11.0); 
+  else if (variable == "t0"){
+    reshist10->GetZaxis()->SetRangeUser(2, 14); 
   }
-  else if (strcmp(variable,"abs(t0-oldt0)")==0){
+  else if (variable == "abs(t0-oldt0)"){
     reshist10->GetZaxis()->SetRangeUser(0.0, 0.6);
   }
-  else if (strcmp(variable,"tres")==0){
-    reshist10->GetZaxis()->SetRangeUser(2.9, 3.9);
+  else if (variable == "tres"){
+    reshist10->GetZaxis()->SetRangeUser(2.0, 4.5);
   }
 
   this->cd(2);
   
-  //cout << selectionA << endl;
-  //cout << selectionC << endl;
 
   Chiptuple->Draw("mod:chp>>histC(248,84,332,32,0,32)",selectionA,"colz");
   TH2F *histC = (TH2F*)gPad->GetPrimitive("histC");
-  char title3[500];  sprintf(title3,"Chip %s (EC side A)",variable);
-  if(isAr)	sprintf(title3,"Argon Chip %s (EC side A)",variable);
+  char title3[500];  sprintf(title3,"Chip %s (EC side A)",variable.c_str());
+  if(isAr)	sprintf(title3,"Argon Chip %s (EC side A)",variable.c_str());
   histC->SetTitle(title3);
   this->Update();
   if(histC->GetEntries()>1)   ResizePalette(histC);
@@ -1799,24 +2103,24 @@ XYMapsEC::XYMapsEC(char* infile, char* variable,bool isAr = false){
   histC->GetYaxis()->SetLabelOffset(1000);
   histC->GetXaxis()->SetTitle("Chip number");
   histC->GetYaxis()->SetTitle("Phi sector");
-    if (strcmp(variable,"ftype")==0){
+    if (variable == "ftype"){
     histC->GetZaxis()->SetRangeUser(1,6);
     histC->GetZaxis()->SetNdivisions(6);
   }
-  else if (strcmp(variable,"res")){
-    histC->GetZaxis()->SetRangeUser(0.120, 0.200);
+  else if (variable == "res"){
+    histC->GetZaxis()->SetRangeUser(0.10, 0.20);
   }
-  else if (strcmp(variable,"abs(resMean)")==0){
+  else if (variable == "abs(resMean)"){
     histC->GetZaxis()->SetRangeUser(0.0, 0.05);
   }
-  else if (strcmp(variable,"t0")==0){
-    histC->GetZaxis()->SetRangeUser(5, 18.0); 
+  else if (variable == "t0"){
+    histC->GetZaxis()->SetRangeUser(2, 14); 
   }
-  else if (strcmp(variable,"abs(t0-oldt0)")==0){
-    histC->GetZaxis()->SetRangeUser(0.0, 1.6);
+  else if (variable == "abs(t0-oldt0)"){
+    histC->GetZaxis()->SetRangeUser(0.0, 0.6);
   }
-  else if (strcmp(variable ,"(tres)")==0){
-    histC->GetZaxis()->SetRangeUser(2.5, 4.5);
+  else if (variable == "tres"){ //took out paranthesis
+    histC->GetZaxis()->SetRangeUser(2.0, 4.5);
   }
   
   float lowe      = 0;
@@ -1838,8 +2142,8 @@ XYMapsEC::XYMapsEC(char* infile, char* variable,bool isAr = false){
   this->Update();
   if(reshist11->GetEntries()>1)   ResizePalette(reshist11);
   SetZAxis(reshist11);
-  char title4[500];  sprintf(title4,"Phi Sector VS Wheel %s (EC side C)",variable);
-  if(isAr) 	sprintf(title4,"Argon Phi Sector VS Wheel %s (EC side C)",variable);
+  char title4[500];  sprintf(title4,"Phi Sector VS Wheel %s (EC side C)",variable.c_str());
+  if(isAr) 	sprintf(title4,"Argon Phi Sector VS Wheel %s (EC side C)",variable.c_str());
   reshist11->SetTitle(title4);
   reshist11->SetMarkerStyle(21);
   reshist11->SetStats(0);
@@ -1847,7 +2151,7 @@ XYMapsEC::XYMapsEC(char* infile, char* variable,bool isAr = false){
   reshist11->GetYaxis()->SetLabelOffset(1000);
   reshist11->GetXaxis()->SetTitle("Layer (Z)");
   reshist11->GetYaxis()->SetTitle("Phi sector");
-  if (strcmp(variable,"ftype")==0){
+  if (variable == "ftype"){
     reshist11->GetZaxis()->SetRangeUser(1,6);
     reshist11->GetZaxis()->SetNdivisions(6);
 
@@ -1888,28 +2192,28 @@ XYMapsEC::XYMapsEC(char* infile, char* variable,bool isAr = false){
     leg->SetTextSize(0.04);
     leg->Draw();
   }
-  else if (strcmp(variable,"res")==0){
-    reshist11->GetZaxis()->SetRangeUser(0.125, 0.180);
+  else if (variable == "res"){
+    reshist11->GetZaxis()->SetRangeUser(0.1, 0.20);
   }
-  else if (strcmp(variable,"abs(resMean)")==0){
-    reshist11->GetZaxis()->SetRangeUser(0.0, 0.010);
+  else if (variable == "abs(resMean)"){
+    reshist11->GetZaxis()->SetRangeUser(0.0, 0.05);
   }
-  else if (strcmp(variable, "t0")==0){
-    reshist11->GetZaxis()->SetRangeUser(9.0, 11.0); 
+  else if (variable == "t0"){
+    reshist11->GetZaxis()->SetRangeUser(2, 14); 
   }
-  else if (strcmp(variable,"abs(t0-oldt0)")==0){
+  else if (variable == "abs(t0-oldt0)"){
     reshist11->GetZaxis()->SetRangeUser(0.0, 0.6);
   }
-  else if (strcmp(variable,"tres")==0){
-    reshist11->GetZaxis()->SetRangeUser(2.9, 3.9);
+  else if (variable == "tres"){
+    reshist11->GetZaxis()->SetRangeUser(2.0, 4.5);
   }
 
 
   this->cd(4);
   Chiptuple->Draw("mod:chp>>histC1(248,84,332,32,0,32)",selectionC,"colz");
   TH2F *histC1 = (TH2F*)gPad->GetPrimitive("histC1");
-  char title5[500];  sprintf(title5,"Chip %s (EC side C)",variable);
-  if(isAr) 	sprintf(title5,"Argon Chip %s (EC side C)",variable);
+  char title5[500];  sprintf(title5,"Chip %s (EC side C)",variable.c_str());
+  if(isAr) 	sprintf(title5,"Argon Chip %s (EC side C)",variable.c_str());
   histC1->SetTitle(title5);
   this->Update();
   if(histC1->GetEntries()>1)   ResizePalette(histC1);
@@ -1919,24 +2223,24 @@ XYMapsEC::XYMapsEC(char* infile, char* variable,bool isAr = false){
   histC1->GetYaxis()->SetLabelOffset(1000);
   histC1->GetXaxis()->SetTitle("Chip number");
   histC1->GetYaxis()->SetTitle("Phi sector");
-  if (strcmp(variable, "ftype")==0){
+  if (variable == "ftype"){
     histC1->GetZaxis()->SetRangeUser(1,6);
     histC1->GetZaxis()->SetNdivisions(6);
   }
-  else if (strcmp(variable, "res") == 0){
-    histC1->GetZaxis()->SetRangeUser(0.120, 0.200);
+  else if (variable == "res"){
+    histC1->GetZaxis()->SetRangeUser(0.10, 0.20);
   }
-  else if (strcmp(variable, "abs(resMean)") == 0){
+  else if (variable == "abs(resMean)"){
     histC1->GetZaxis()->SetRangeUser(0.0, 0.05);
   }
-  else if (strcmp(variable, "t0") == 0){
-    histC1->GetZaxis()->SetRangeUser(5, 18.0); 
+  else if (variable == "t0"){
+    histC1->GetZaxis()->SetRangeUser(2, 14); 
   }
-  else if (strcmp(variable,"abs(t0-oldt0)") == 0){
-    histC1->GetZaxis()->SetRangeUser(0.0, 1.6);
+  else if (variable == "abs(t0-oldt0)"){
+    histC1->GetZaxis()->SetRangeUser(0.0, 0.6);
   }
-  else if (strcmp(variable, "(tres)") == 0){
-    histC1->GetZaxis()->SetRangeUser(2.5, 4.5);
+  else if (variable == "tres"){ //took out parenthesis
+    histC1->GetZaxis()->SetRangeUser(2.0, 4.5);
   }
 
   TLine* lin1 = new TLine(84,lowe,84,upe);   lin1->SetLineStyle(2); lin1->Draw();
@@ -1960,14 +2264,14 @@ XYMapsEC::XYMapsEC(char* infile, char* variable,bool isAr = false){
 
 class RtColor: public TCanvas{
 public:
-  RtColor(char*, char*, bool) throw(string);
+  RtColor(char*, string, bool);
   TH2F* hist;
   TGraphErrors* rtgraph;
   TF1* oldrtfunc;
   TF1* newRT;
 };
 
-RtColor::RtColor(char* infile, char* folder, bool isAr = false) throw(string){ 
+RtColor::RtColor(char* infile, string folder, bool isAr = false){ 
  
   map<string,string> titlemap;
   titlemap["WholeBarrel_1"]="whole barrel";
@@ -1983,6 +2287,7 @@ RtColor::RtColor(char* infile, char* folder, bool isAr = false) throw(string){
   titlemap["Detector_Ar-2"]="end-cap A";
 
   TFile* file = new TFile(infile);
+  //cout << infile << endl;
 
   TPad*  c1_3 = new TPad("c1_3", "newpad",0.01,0.33,0.99,0.99);
   c1_3->Draw();
@@ -1995,35 +2300,44 @@ RtColor::RtColor(char* infile, char* folder, bool isAr = false) throw(string){
 
   file->cd();
   
-  TDirectory* trt = NULL;
+
+  TDirectory* trt = nullptr;
   if (!isAr)    trt = (TDirectory*) file->FindKey("TRT_all")->ReadObj();
   else          trt = (TDirectory*) file->FindKey("TRT_Ar_all")->ReadObj();
   
-  if (strcmp(folder,"")==0){
-    TDirectory* det = (TDirectory*) trt->FindKey(folder)->ReadObj();
+  if (folder!=""){
+    TDirectory* det = (TDirectory*) trt->FindKey(folder.c_str())->ReadObj();
+    cout << "     RtColor plot for  folder"<< folder <<endl;
     if (det->FindKey("rt-relation")){
       hist= (TH2F*) det->FindKey("rt-relation")->ReadObj();
-      hist->GetXaxis()->SetRangeUser(0,40);
-      hist->GetYaxis()->SetRangeUser(0,2.4);
-      char name[500];  sprintf(name,"r(t) for %s",titlemap[(string)folder].data());
-      if(isAr) 	 sprintf(name,"Argon r(t) for %s",titlemap[(string)folder].data());
-      hist->SetTitle(name);
-      hist->GetXaxis()->SetRangeUser(0,50);
-      hist->Draw("colz");
-      if (det->FindKey("rtgraph")){
-	rtgraph= (TGraphErrors*) det  ->FindKey("rtgraph")->ReadObj();
-	rtgraph->SetMarkerStyle(20);
-	rtgraph->SetMarkerColor(1);
-	rtgraph->SetLineColor(1);
-	rtgraph->GetYaxis()->SetRangeUser(0,2.4);
-	rtgraph->Draw("p");
-    	if(rtgraph->GetFunction("rtfunc")) newRT = rtgraph->GetFunction("rtfunc");
-    	else newRT = rtgraph->GetFunction("rtfunc2");
-      }
-      if (det->FindKey("oldrtfunc")){
-	oldrtfunc= (TF1*) det  ->FindKey("oldrtfunc")->ReadObj();
-	oldrtfunc->SetRange(0,50);
-	oldrtfunc->Draw("same");
+//      this->cd();
+      if(hist) {
+        cout << "     found rt-relation " << endl;
+        hist->GetXaxis()->SetRangeUser(0,40);
+        hist->GetYaxis()->SetRangeUser(0,2.4);
+        char name[500];  sprintf(name,"r(t) for %s",folder.c_str());
+        if(isAr) 	 sprintf(name,"Argon r(t) for %s",folder.c_str());
+        hist->SetTitle(name);
+        hist->GetXaxis()->SetRangeUser(0,50);
+        hist->Draw("colz");
+
+        if (det->FindKey("rtgraph")){
+          cout << "     found rtgraph " << endl;
+  	  rtgraph= (TGraphErrors*) det  ->FindKey("rtgraph")->ReadObj();
+	  rtgraph->SetMarkerStyle(20);
+	  rtgraph->SetMarkerColor(1);
+	  rtgraph->SetLineColor(1);
+	  rtgraph->GetYaxis()->SetRangeUser(0,2.4);
+	  rtgraph->Draw("p");
+    	  if(rtgraph->GetFunction("rtfunc")) newRT = rtgraph->GetFunction("rtfunc");
+    	  else newRT = rtgraph->GetFunction("rtfunc2");
+        }
+        if (det->FindKey("oldrtfunc")){
+          cout << "     found oldrtfunc " << endl;
+	  oldrtfunc= (TF1*) det  ->FindKey("oldrtfunc")->ReadObj();
+	  oldrtfunc->SetRange(0,50);
+	  oldrtfunc->Draw("same");
+        }
       }
     }
     else {  
@@ -2031,7 +2345,9 @@ RtColor::RtColor(char* infile, char* folder, bool isAr = false) throw(string){
     }  
   }
   else if (trt->FindKey("rt-relation")){
+    cout << "  RtColor Plot entire TRT"<< endl;
     hist= (TH2F*) trt->FindKey("rt-relation")->ReadObj(); 
+    //this->cd();
     hist->GetXaxis()->SetRangeUser(0,40);
     hist->SetTitle("r(t) for whole TRT");
     if(isAr) hist->SetTitle("Argon r(t) for whole TRT");
@@ -2055,9 +2371,9 @@ RtColor::RtColor(char* infile, char* folder, bool isAr = false) throw(string){
     } 
   }
   else 
-    hist=NULL;
+    hist=nullptr;
 
-	// Draw the ration plots just below:
+	// Draw the ratio plots just below:
 
     //Plot the difference between old and new rt:
     if(oldrtfunc){
@@ -2159,64 +2475,65 @@ RtColor::RtColor(char* infile, char* folder, bool isAr = false) throw(string){
 
 class ResidualPlots: public TCanvas{
 public:
-  ResidualPlots(TFile*, bool) throw(string);
+  ResidualPlots(TFile*, bool);
 };
 
-ResidualPlots::ResidualPlots(TFile* file, bool isAr = false)  throw(string){
+ResidualPlots::ResidualPlots(TFile* file, bool isAr = false) {
 
   this->SetName("resplots");
 
   file->cd();
 
-  TDirectory* trt  =    NULL;
-  TDirectory* det1 =    NULL;
-  TDirectory* det2 =    NULL;
-  TDirectory* det3 =    NULL;
-  TDirectory* det4 =    NULL;
+  TDirectory* trt  =    nullptr;
+  TDirectory* det1 =    nullptr;
+  TDirectory* det2 =    nullptr;
+  TDirectory* det3 =    nullptr;
+  TDirectory* det4 =    nullptr;
+
 
   if(!isAr){
+   cout << " In ResidualPlots Xenon" << endl;
    trt = (TDirectory*) file->FindKey("TRT_all")->ReadObj();
-   if (trt){
-     det1 = (TDirectory*) trt->FindKey("Detector_-1")->ReadObj();
-     det2 = (TDirectory*) trt->FindKey("Detector_1")->ReadObj();
-     det3 = (TDirectory*) trt->FindKey("Detector_-2")->ReadObj();
-     det4 = (TDirectory*) trt->FindKey("Detector_2")->ReadObj();
-   }
-  } else {
+   det1 = (TDirectory*) trt->FindKey("Detector_-1")->ReadObj();
+   det2 = (TDirectory*) trt->FindKey("Detector_1")->ReadObj();
+   det3 = (TDirectory*) trt->FindKey("Detector_-2")->ReadObj();
+   det4 = (TDirectory*) trt->FindKey("Detector_2")->ReadObj();
+  }
+  else {
+   cout << " In ResidualPlots Argon" << endl;
    if (file->FindKey("TRT_Ar_all"))     trt  = (TDirectory*) file->FindKey("TRT_Ar_all")->ReadObj();
-   if (trt){
-     if (trt ->FindKey("Detector_Ar_-1")) det1 = (TDirectory*) trt->FindKey("Detector_Ar_-1")->ReadObj();
-     if (trt ->FindKey("Detector_Ar_1"))  det2 = (TDirectory*) trt->FindKey("Detector_Ar_1")->ReadObj();
-     if (trt ->FindKey("Detector_Ar_-2")) det3 = (TDirectory*) trt->FindKey("Detector_Ar_-2")->ReadObj();
-     if (trt ->FindKey("Detector_Ar_2"))  det4 = (TDirectory*) trt->FindKey("Detector_Ar_2")->ReadObj();
-   }
+   if (trt ->FindKey("Detector_Ar_-1")) det1 = (TDirectory*) trt->FindKey("Detector_Ar_-1")->ReadObj();
+   if (trt ->FindKey("Detector_Ar_1"))  det2 = (TDirectory*) trt->FindKey("Detector_Ar_1")->ReadObj();
+   if (trt ->FindKey("Detector_Ar_-2")) det3 = (TDirectory*) trt->FindKey("Detector_Ar_-2")->ReadObj();
+   if (trt ->FindKey("Detector_Ar_2"))  det4 = (TDirectory*) trt->FindKey("Detector_Ar_2")->ReadObj();
   }
 
-  TH2F* reshist1=NULL;
-  TH2F* reshist2=NULL;
-  TH2F* reshist3=NULL;
-  TH2F* reshist4=NULL;
-  TH2F* reshist5=NULL;
-  TH2F* treshist1=NULL;
-  TH2F* treshist2=NULL;
-  TH2F* treshist3=NULL;
-  TH2F* treshist4=NULL;
-  TH2F* treshist5=NULL;
+  TH2F* reshist1=nullptr;
+  TH2F* reshist2=nullptr;
+  TH2F* reshist3=nullptr;
+  TH2F* reshist4=nullptr;
+  TH2F* reshist5=nullptr;
+  TH2F* treshist1=nullptr;
+  TH2F* treshist2=nullptr;
+  TH2F* treshist3=nullptr;
+  TH2F* treshist4=nullptr;
+  TH2F* treshist5=nullptr;
 
-
- if (trt and trt->FindKey("residual")) reshist1 = (TH2F*) trt->FindKey("residual")->ReadObj();
+  cout << "    Find residual histograms " << endl;
+ if (trt->FindKey("residual")) reshist1 = (TH2F*) trt->FindKey("residual")->ReadObj();
  if(det1)  {if (det1->FindKey("residual")) reshist2 = (TH2F*) det1->FindKey("residual")->ReadObj();}
  if(det2)  {if (det2->FindKey("residual")) reshist3 = (TH2F*) det2->FindKey("residual")->ReadObj();}
  if(det3)  {if (det3->FindKey("residual")) reshist4 = (TH2F*) det3->FindKey("residual")->ReadObj();}
  if(det4)  {if (det4->FindKey("residual")) reshist5 = (TH2F*) det4->FindKey("residual")->ReadObj();}
 
-  if (trt and trt->FindKey("timeresidual")) treshist1 = (TH2F*) trt->FindKey("timeresidual")->ReadObj();
+ cout << "    Find time residual histograms" << endl;
+  if (trt->FindKey("timeresidual")) treshist1 = (TH2F*) trt->FindKey("timeresidual")->ReadObj();
   if(det1)   {if (det1->FindKey("timeresidual")) treshist2 = (TH2F*) det1->FindKey("timeresidual")->ReadObj();}
   if(det2)   {if (det2->FindKey("timeresidual")) treshist3 = (TH2F*) det2->FindKey("timeresidual")->ReadObj();}
   if(det3)   {if (det3->FindKey("timeresidual")) treshist4 = (TH2F*) det3->FindKey("timeresidual")->ReadObj();}
   if(det4)   {if (det4->FindKey("timeresidual")) treshist5 = (TH2F*) det4->FindKey("timeresidual")->ReadObj();}
 
-
+  cout << "    Configure residual histograms" << endl;
   if(reshist1)  reshist1->SetTitle(Form("residual whole TRT"));
   if(reshist2)  reshist2->SetTitle(Form("residual (barrel side C)"));
   if(reshist3)  reshist3->SetTitle(Form("residual (barrel side A)"));
@@ -2227,6 +2544,7 @@ ResidualPlots::ResidualPlots(TFile* file, bool isAr = false)  throw(string){
   if(reshist4)  reshist4->SetFillColor(46);
   if(reshist5)  reshist5->SetFillColor(46);
 
+  cout << "    Configure time residual histograms" << endl;
   if(treshist1)  treshist1->SetTitle(Form("time-residual whole TRT"));
   if(treshist2)  treshist2->SetTitle(Form("time-residual (barrel side C)"));
   if(treshist3)  treshist3->SetTitle(Form("time-residual (barrel side A)"));
@@ -2238,28 +2556,29 @@ ResidualPlots::ResidualPlots(TFile* file, bool isAr = false)  throw(string){
   if(treshist5)  treshist5->SetFillColor(38);
 
   if(isAr){
+   cout << "    Configure Argon residual histograms" << endl;
    if(reshist1)  reshist1->SetTitle(Form("residual Argon whole TRT"));
-   if(reshist2)  reshist2->SetTitle(Form("residual Argon (barrel side C)"));
+   if(reshist2)  reshist2->SetTitle(Form("residual Argon (endcap side C)"));
    if(reshist3)  reshist3->SetTitle(Form("residual Argon (barrel side A)"));
-   if(reshist4)  reshist4->SetTitle(Form("residual Argon (endcap side C)"));
+   if(reshist4)  reshist4->SetTitle(Form("residual Argon (barrel side C)"));
    if(reshist5)  reshist5->SetTitle(Form("residual Argon (endcap side A)"));
    if(treshist1) treshist1->SetTitle(Form("time-residual Argon whole TRT"));
-   if(treshist2) treshist2->SetTitle(Form("time-residual Argon (barrel side C)"));
+   if(treshist2) treshist2->SetTitle(Form("time-residual Argon (endcap side C)"));
    if(treshist3) treshist3->SetTitle(Form("time-residual Argon (barrel side A)"));
-   if(treshist4) treshist4->SetTitle(Form("time-residual Argon (endcap side C)"));
+   if(treshist4) treshist4->SetTitle(Form("time-residual Argon (barrel side C)"));
    if(treshist5) treshist5->SetTitle(Form("time-residual Argon (endcap side A)"));
   }
 
-  TF1* resfit1 =        NULL;
-  TF1* resfit2 =        NULL;
-  TF1* resfit3 =        NULL;
-  TF1* resfit4 =        NULL;
-  TF1* resfit5 =        NULL;
-  TF1* tresfit1 =       NULL;
-  TF1* tresfit2 =       NULL;
-  TF1* tresfit3 =       NULL;
-  TF1* tresfit4 =       NULL;
-  TF1* tresfit5 =       NULL;
+  TF1* resfit1 =        nullptr;
+  TF1* resfit2 =        nullptr;
+  TF1* resfit3 =        nullptr;
+  TF1* resfit4 =        nullptr;
+  TF1* resfit5 =        nullptr;
+  TF1* tresfit1 =       nullptr;
+  TF1* tresfit2 =       nullptr;
+  TF1* tresfit3 =       nullptr;
+  TF1* tresfit4 =       nullptr;
+  TF1* tresfit5 =       nullptr;
 
   if(reshist1) resfit1 = (TF1*)reshist1->GetListOfFunctions()->First();
   if(reshist2) resfit2 = (TF1*)reshist2->GetListOfFunctions()->First();
@@ -2277,53 +2596,63 @@ ResidualPlots::ResidualPlots(TFile* file, bool isAr = false)  throw(string){
   mintxt->SetNDC(kTRUE);
 
   this->Divide(4,2);
-  this->cd(1);
+
+  this->cd(3);
 if(reshist2){
+  cout << "    Draw residual barrel C" << endl;
   reshist2->Draw();
   mintxt->DrawText(0.15,0.85,Form("Mean: %.3f",resfit2->GetParameter(1)));
   mintxt->DrawText(0.15,0.80,Form("Sigma: %.3f",resfit2->GetParameter(2)));
 }
   this->cd(2);
-  if( !isAr &&  reshist3){
+  //  if( !isAr &&  reshist3){
+  if( reshist3){  //changed this (PH)
+    cout << "    Draw residual barrel A" << endl;
     reshist3->Draw();
     mintxt->DrawText(0.15,0.85,Form("Mean: %.3f",resfit3->GetParameter(1)));
     mintxt->DrawText(0.15,0.80,Form("Sigma: %.3f",resfit3->GetParameter(2)));
   }
-  this->cd(3);
+  this->cd(1);
 
 if(reshist4){
+  cout << "    Draw residual endcap C" << endl;
   reshist4->Draw();
   mintxt->DrawText(0.15,0.85,Form("Mean: %.3f",resfit4->GetParameter(1)));
   mintxt->DrawText(0.15,0.80,Form("Sigma: %.3f",resfit4->GetParameter(2)));
 }
   this->cd(4);
 if(reshist5){
+  cout << "    Draw residual endcap A" << endl;
   reshist5->Draw();
   mintxt->DrawText(0.15,0.85,Form("Mean: %.3f",resfit5->GetParameter(1)));
   mintxt->DrawText(0.15,0.80,Form("Sigma: %.3f",resfit5->GetParameter(2)));
 }
-  this->cd(5);
-cout << "5" << endl;
+  this->cd(7);
+
 if(treshist2){
-cout << "5" << endl;
+  cout << "    Draw time residual barrel C" << endl;
   treshist2->Draw();
   mintxt->DrawText(0.15,0.85,Form("Mean: %.3f",tresfit2->GetParameter(1)));
   mintxt->DrawText(0.15,0.80,Form("Sigma: %.3f",tresfit2->GetParameter(2)));
 }
   this->cd(6);
-  if(!isAr && treshist3){
+  //  if(!isAr && treshist3){ // Changed this (PH)
+if(treshist3){
+    cout << "    Draw time residual barrel A" << endl;
     treshist3->Draw();
     mintxt->DrawText(0.15,0.85,Form("Mean: %.3f",tresfit3->GetParameter(1)));
     mintxt->DrawText(0.15,0.80,Form("Sigma: %.3f",tresfit3->GetParameter(2)));
-  }
-  this->cd(7);
+}
+  this->cd(5);
 if(treshist4){
+  cout << "    Draw time residual endcap C" << endl;
   treshist4->Draw();
   mintxt->DrawText(0.15,0.85,Form("Mean: %.3f",tresfit4->GetParameter(1)));
   mintxt->DrawText(0.15,0.80,Form("Sigma: %.3f",tresfit4->GetParameter(2)));
 }
   this->cd(8);
 if(treshist5){
+  cout << "    Draw time residual endcap A" << endl;
   treshist5->Draw();
   mintxt->DrawText(0.15,0.85,Form("Mean: %.3f",tresfit5->GetParameter(1)));
   mintxt->DrawText(0.15,0.80,Form("Sigma: %.3f",tresfit5->GetParameter(2)));
@@ -2336,26 +2665,26 @@ if(treshist5){
 
 class TRTPlots: public TCanvas{
 public:
-  TRTPlots(TFile*,bool) throw(string);
+  TRTPlots(TFile*,bool);
 };
 
-TRTPlots::TRTPlots(TFile* file, bool isAr = false) throw(string){
+TRTPlots::TRTPlots(TFile* file, bool isAr = false) {
 
   this->SetName("resplots");
 
   file->cd();
 
-  TDirectory* trt =  NULL;
+  TDirectory* trt =  nullptr;
   if (!isAr) trt  = (TDirectory*)file->FindKey("TRT_all")->ReadObj();
   else       trt  = (TDirectory*)file->FindKey("TRT_Ar_all")->ReadObj();
     
-  TH2F* reshist1=NULL;
+  TH2F* reshist1=nullptr;
   if (trt->FindKey("residual")) reshist1 = (TH2F*) trt->FindKey("residual")->ReadObj();
-  else throw(string("residual histograms not found!"));
+  else throw(string("residual histograms for entire TRT not found!"));
 
-  TH2F* treshist1=NULL;
+  TH2F* treshist1=nullptr;
   if (trt->FindKey("timeresidual")) treshist1 = (TH2F*) trt->FindKey("timeresidual")->ReadObj();
-  else throw(string("timeresidual histograms not found!"));
+  else throw(string("timeresidual histograms for entire TRT not found!"));
 
   reshist1->SetTitle(Form("residual whole TRT"));
   if(isAr)	reshist1->SetTitle(Form("Argon residual whole TRT"));
@@ -2366,7 +2695,6 @@ TRTPlots::TRTPlots(TFile* file, bool isAr = false) throw(string){
 
   this->Divide(1,2,0.01,0.01);
   this->SetLogy();
- 
 
   this->cd(1);
   reshist1->Draw();
@@ -2382,19 +2710,23 @@ class TBinnedRes: public TCanvas{
 public: 
   TBinnedRes(TFile*,vector<TH1D*>);
 private:
-  TH1F* hist2{};
+  TH1F* hist2;
 };
 
 TBinnedRes::TBinnedRes(TFile* file, vector<TH1D*> reshists){
 
+  cout << "In TBinnedRes. Input is " << reshists.size() << " histograms to be drawn " << endl;
+
   this->Divide(((int)reshists.size())/5,5);
-  for (int ihist=0; ihist<(int)reshists.size(); ++ihist){
+  for (int ihist=0; ihist<(int)reshists.size(); ihist++){
     this->cd(ihist+1);
     reshists[ihist]->SetTitle("");
     reshists[ihist]->Draw();
     reshists[ihist]->GetYaxis()->SetRangeUser(0,1.1*reshists[ihist]->GetMaximum());
     TLine* zlin = new TLine(0,0,0,reshists[ihist]->GetMaximum()); zlin->SetLineStyle(2); zlin->SetLineColor(4); zlin->Draw();
   }
+
+   
   this->SetGrid();
 }
 
@@ -2403,25 +2735,27 @@ TBinnedRes::TBinnedRes(TFile* file, vector<TH1D*> reshists){
 
 class RtBinning: public TCanvas{
 public: 
-  RtBinning(TDirectory*,char*);
+  RtBinning(TDirectory*,string);
 private:
   TH1F* hist2;
 };
 
-RtBinning::RtBinning(TDirectory* file, char* detector){
+RtBinning::RtBinning(TDirectory* file, string detector){
 
-  TDirectory* binhist = (TDirectory*)(((TDirectory*)file->Get(detector))->Get("binhist"));
-  int nhists=binhist->GetListOfKeys()->GetEntries();
+  TDirectory* binhist = (TDirectory*)(((TDirectory*)file->Get(detector.c_str()))->Get("binhist"));
+  if(binhist) {
+    int nhists=binhist->GetListOfKeys()->GetEntries();
 
-  this->Divide(nhists/5,5);
-  for (int ihist=0; ihist<nhists; ihist++){
-    this->cd(ihist+1);
-    hist2=(TH1F*)(binhist->Get(binhist->GetListOfKeys()->At(ihist)->GetName()));
-    hist2->SetTitle("");
-    hist2->Draw();
+    this->Divide(nhists/5,5);
+    for (int ihist=0; ihist<nhists; ihist++){
+      this->cd(ihist+1);
+      hist2=(TH1F*)(binhist->Get(binhist->GetListOfKeys()->At(ihist)->GetName()));
+      hist2->SetTitle("");
+      hist2->Draw();
+    }
+
+    this->SetGrid();
   }
-
-  this->SetGrid();
 }
 
 
@@ -2429,7 +2763,7 @@ RtBinning::RtBinning(TDirectory* file, char* detector){
 
 class RresTbin: public TCanvas{
 public: 
-  RresTbin(TFile*, char*, int, bool);
+  RresTbin(TFile*, string, int);
   vector<TH1D*> reshists;
   map<double,double> resmap;
 private:
@@ -2440,26 +2774,82 @@ private:
   double* etdata;
 };
 
-RresTbin::RresTbin(TFile* file, char* detname, int det, bool isAr = false){ 
+RresTbin::RresTbin(TFile* file, string detname, int det){ 
  
 
   TF1 ff("fitfunc","gaus");
   TF1* ff2 = new TF1("fitfunc2","pol3");
 
-  TDirectory* trt = NULL;
+  TDirectory* trt = nullptr;
+  TDirectory* detdir = nullptr;
+  TDirectory* binhist = nullptr;
+  string resname;
+  bool isAr=false;
+  if(detname.find("Ar")!=string::npos) isAr=true;
+  bool allTRT=false;
+  if(detname=="WholeBarrel_1") {
+    resname="reshists5";
+  } else if(detname=="Detector_-1") {
+    resname="reshists2";
+  } else if(detname=="Detector_1") {
+    resname="reshists3";
+  } else if(detname=="Detector_-2") {
+    resname="reshists1";
+  } else if(detname=="Detector_2") {
+    resname="reshists4";
+  } else if (!isAr) {  
+    resname="reshists";
+    allTRT=true;
+  } else if(detname=="WholeBarrel_Ar_1") {
+    resname="reshists_Ar5";
+  } else if(detname=="Detector_Ar_-1") {
+    resname="reshists_Ar2";
+  } else if(detname=="Detector_Ar_1") {
+    resname="reshists_Ar3";
+  } else if(detname=="Detector_Ar_-2") {
+    resname="reshists_Ar1";
+  } else if(detname=="Detector_Ar_2") {
+    resname="reshists_Ar4";
+  } else {
+    resname="reshists_Ar";
+    allTRT=true;
+  }
 
   if (!isAr)    trt = (TDirectory*) file->FindKey("TRT_all")->ReadObj();
   else          trt = (TDirectory*) file->FindKey("TRT_Ar_all")->ReadObj();
-  
-TDirectory* detdir = (TDirectory*) trt->FindKey(detname)->ReadObj();
-  TDirectory* binhist = (TDirectory*) detdir->FindKey("reshists")->ReadObj();
+
+  if(! isAr) cout << "In RresTbin Xenon" << endl;
+  if( isAr) cout << "In RresTbin Argon" << endl;
+  if( trt ) {
+    cout << "   found TRT_all directory " << endl;
+    detdir = (TDirectory*) trt->FindKey(detname.c_str())->ReadObj();
+    if ( detdir ) {
+      cout << "   found binhist directory for detector name " <<  detname << endl;
+      if(!allTRT) {
+        binhist = (TDirectory*) detdir->FindKey(resname.c_str())->ReadObj();
+      }else{
+        binhist = (TDirectory*) trt->FindKey(resname.c_str())->ReadObj();
+      }
+
+      if ( binhist ) {
+        cout << "   found reshists directory for detector number: " <<  det << endl;
+      } else {
+        cout << "   did not find reshists directory for detector number " <<  det << endl;
+      }
+    } else {
+      cout << "   did not find binhist directory for detector name " <<  detname << endl;
+    }
+  } else {
+     cout << "   did not find TRT_all directory " << endl;
+  }
   
   if(binhist){
 
+    
     TVectorD* tbins = (TVectorD*)file->FindKey("tbins")->ReadObj();
     
     if(tbins){
-
+      cout << "   found tbins vector with length " << tbins->GetNoElements() << endl;
       rdata=new double[tbins->GetNoElements()];
       erdata=new double[tbins->GetNoElements()];
       tdata=new double[tbins->GetNoElements()];
@@ -2469,49 +2859,55 @@ TDirectory* detdir = (TDirectory*) trt->FindKey(detname)->ReadObj();
       int ipoint=0;
       for (int ihist=0; ihist<tbins->GetNoElements(); ihist++){
 	
-	TH1D* reshist;
+	TH1D* reshist=nullptr;
 
 	if (det==4) reshist = (TH1D*)binhist->Get(Form("res_tbin%i_bar",ihist));
 	else if (det==5) reshist = (TH1D*)binhist->Get(Form("res_tbin%i_trt",ihist));
 	else  reshist = (TH1D*)binhist->Get(Form("res_tbin%i_%i",ihist,det));
-	double lolim = -0.1;//reshist->GetBinCenter(reshist->GetMaximumBin()-10);
-	double hilim = 0.1;//reshist->GetBinCenter(reshist->GetMaximumBin()+10);
+
+        if(reshist!=nullptr) {
+	  double lolim = -0.1;//reshist->GetBinCenter(reshist->GetMaximumBin()-10);
+	  double hilim = 0.1;//reshist->GetBinCenter(reshist->GetMaximumBin()+10);
 	
-	if (reshist->Fit(&ff,"Q","",lolim,hilim)+1) {
-	  rdata[ipoint]=ff.GetParameter(1);
-	  erdata[ipoint]=ff.GetParError(1);
-	  tdata[ipoint]=(*tbins)[ihist];
+	  if (reshist->Fit(&ff,"Q","",lolim,hilim)+1) {
+	    rdata[ipoint]=ff.GetParameter(1);
+	    erdata[ipoint]=ff.GetParError(1);
+	    tdata[ipoint]=(*tbins)[ihist];
 
-	  etdata[ipoint]=0;
-	  ipoint++;
-
-
+	    etdata[ipoint]=0;
+	    //printf("%f %f\n",ff.GetParameter(1),ff.GetParError(1));
+	    ipoint++;
+	  }
+	
+	  reshists.push_back(reshist);
 	}
-	
-	reshists.push_back(reshist);
 
       }
-      
+      cout << "        succesfully fitted " << ipoint << " histograms " << endl;            
       for (int ip=0; ip<ipoint; ip++){
-	      resmap[tdata[ip]]=rdata[ip];
+	//cout << rdata[ip]  << " ";
+	resmap[tdata[ip]]=rdata[ip];
       }
+      //cout << endl;
 
-      thegraph = new TGraphErrors(ipoint,tdata,rdata,etdata,erdata);
+      if(ipoint>10) {
+        thegraph = new TGraphErrors(ipoint,tdata,rdata,etdata,erdata);
 
-      string detstr[8]={"endcap A","barrel A","","barrel C","endcap C","","whole barrel","whole TRT"};
+        cout << "       draw t-binned residual graph " << endl;
+        string detstr[8]={"endcap A","barrel A","","barrel C","endcap C","","whole barrel","whole TRT"};
 
-      thegraph->SetMarkerStyle(20);
-      thegraph->SetTitle(Form("t-binned absolute residual (%s)",detstr[det+2].data()));
-      thegraph->Draw("ap");
-      //thegraph->GetYaxis()->SetTitle("|r|-|r_{track}| /#mum");
-      thegraph->GetYaxis()->SetTitle("|r|-|r_{track}| /mm");
-      thegraph->GetYaxis()->SetRangeUser(-0.150,0.150);
-      thegraph->GetXaxis()->SetRangeUser(0,50);
-      thegraph->GetXaxis()->SetTitle("t-t0 /ns");
+        thegraph->SetMarkerStyle(20);
+        thegraph->SetTitle(Form("t-binned absolute residual (%s)",detstr[det+2].c_str()));
+        thegraph->Draw("ap");
+        thegraph->GetYaxis()->SetTitle("|r|-|r_{track}| /mm");
+        thegraph->GetYaxis()->SetRangeUser(-0.150,0.150);
+        thegraph->GetXaxis()->SetRangeUser(0,50);
+        thegraph->GetXaxis()->SetTitle("t-t0 /ns");
     
-      printf("RPOLDIFF %i %e %e %e %e\n",det,ff2->GetParameter(0),ff2->GetParameter(1),ff2->GetParameter(2),ff2->GetParameter(3));
+        printf("RPOLDIFF %i %e %e %e %e\n",det,ff2->GetParameter(0),ff2->GetParameter(1),ff2->GetParameter(2),ff2->GetParameter(3));
 
-      this->SetGrid();
+        this->SetGrid();
+      }
      
     }
   }
@@ -2522,19 +2918,30 @@ TDirectory* detdir = (TDirectory*) trt->FindKey(detname)->ReadObj();
 
 class FirstPage: public TCanvas{
 public: 
-  FirstPage(char*, TFile*) throw(string);
-  float runnumber{},t0offset{};
-  int iter{};
+  FirstPage(char*, TFile*);
+  float runnumber,t0offset;
+  int iter;
 private:
 };
 
-FirstPage::FirstPage(char* filename, TFile* file) throw(string){
+FirstPage::FirstPage(char* filename, TFile* file){
 
   this->cd();
 
   TNtuple* Tracktuple = (TNtuple*)file->Get("tracktuple");
-  TNtuple* TRTtuple      = (TNtuple*)file->Get("TRTtuple");
-  TNtuple* Detectortuple = (TNtuple*)file->Get("Detectortuple");
+  // we assign here index 0,1,2,3 to detectors -1, -2, 1, 2
+  TH1F* resAr0=(TH1F*)file->Get("TRT_Ar_all/Detector_Ar_-1/residual");
+  TH1F* tresAr0=(TH1F*)file->Get("TRT_Ar_all/Detector_Ar_-1/timeresidual");
+  TH1F* resAr1=(TH1F*)file->Get("TRT_Ar_all/Detector_Ar_-2/residual");
+  TH1F* tresAr1=(TH1F*)file->Get("TRT_Ar_all/Detector_Ar_-2/timeresidual");
+  TH1F* resXe1=(TH1F*)file->Get("TRT_all/Detector_-2/residual");
+  TH1F* tresXe1=(TH1F*)file->Get("TRT_all/Detector_-2/timeresidual");
+  TH1F* resAr2=(TH1F*)file->Get("TRT_Ar_all/Detector_Ar_1/residual");
+  TH1F* tresAr2=(TH1F*)file->Get("TRT_Ar_all/Detector_Ar_1/timeresidual");
+  TH1F* resAr3=(TH1F*)file->Get("TRT_Ar_all/Detector_Ar_2/residual");
+  TH1F* tresAr3=(TH1F*)file->Get("TRT_Ar_all/Detector_Ar_2/timeresidual");
+  TH1F* resXe3=(TH1F*)file->Get("TRT_all/Detector_2/residual");
+  TH1F* tresXe3=(TH1F*)file->Get("TRT_all/Detector_2/timeresidual");
 
   TDatime* dt= new TDatime();
 
@@ -2542,70 +2949,83 @@ FirstPage::FirstPage(char* filename, TFile* file) throw(string){
 
   if (!Tracktuple) throw(string("tracktuple not found!"));
 
+  cout << " tracktuple found " << endl;
   pt->AddText(" ");
 
-  if (string(filename).find("_histograms.root")!=string::npos) iter = atoi(string(filename).substr(string(filename).find("_histograms.root")-2,2).data());
-  else iter=99;
+  //if (string(filename).find("_histograms.root")!=string::npos) iter = atoi(string(filename).substr(string(filename).find("_histograms.root")-2,2).data());
+  iter=0;
 
   runnumber = 0;
-  pt->AddText(Form("Iteration number: %i", iter)); 
+  cout << " writing to header. iteration number " << iter << endl;
+  pt->AddText(Form("Iteration number: %i", iter));
+  cout << " writing to header. month " << dt->GetMonth() << endl;  
   pt->AddText(Form("Time: %02i/%02i/%i %02i:%02i",dt->GetDay(),dt->GetMonth(),dt->GetYear(),dt->GetHour(),dt->GetMinute()));
   Tracktuple->SetBranchAddress("run",&runnumber);
   Tracktuple->GetEntry(0);
+  cout << " writing to header. run number " << (int)runnumber << endl;  
   pt->AddText(Form("Run number: %i",(int)runnumber));
+  /*
   for(int i=1; i<Tracktuple->GetEntries();i++){
     float oldrun= runnumber;
     Tracktuple->GetEntry(i);
     if(oldrun!=runnumber )         pt->AddText(Form("Run number: %i",(int)runnumber));
   }
+  */
+  cout << " writing to header. number of tracks " << Tracktuple->GetEntries() << endl;    
   pt->AddText(Form("Total no. tracks: %i",Tracktuple->GetEntries()));
 	
-  if (!TRTtuple) throw(string("TRTtuple not found!"));
+  //Get residuals and time residuals per subdetector
+  // we assign here index 0,1,2,3 to detectors -1, -2, 1, 2
+  // the detectors +-1 have only Argon in Run3
 
-  float tothits,bhits,bhits1,bhits2,bhits3,bhits4;
-  float res, res1,res2,res3,res4;
-  float t0, oldt, tres1,tres2,tres3,tres4;
-  float tresw, tres1w, tres2w, tres3w, tres4w;
+  float bhitst[4];
+  float rest[4];
+  float trest[4];
+  float treswt[4];
 
-  TRTtuple->SetBranchAddress("nt0",&tothits);
-  Detectortuple->SetBranchAddress("nt0",&bhits);
-  Detectortuple->SetBranchAddress("res",&res);  
-  Detectortuple->SetBranchAddress("tres",&tresw);
-  Detectortuple->SetBranchAddress("t0",&t0);
-  Detectortuple->SetBranchAddress("oldt0",&oldt);
-
-  TRTtuple->GetEntry(0);
-  Detectortuple->GetEntry(0);
-  bhits1=bhits;
-  res1=res;
-  tres1w=tresw;
-  tres1=t0-oldt;
-
-  Detectortuple->GetEntry(1);
-  bhits2=bhits;
-  res2=res;
-  tres2w=tresw;
-  tres2=t0-oldt;
-
-  Detectortuple->GetEntry(2);  
-  res3=res;
-  bhits3=bhits;
-  tres3w=tresw;
-  tres3=t0-oldt;
-
-  Detectortuple->GetEntry(3);
-  res4=res;
-  bhits4=bhits;
-  tres4w=tresw;
-  tres4=t0-oldt;
+  cout << " debug 1 " << endl;
+  bhitst[0]=resAr0->GetEntries();
+  bhitst[2]=resAr2->GetEntries();
+  float nhAr1=resAr1->GetEntries();
+  float nhXe1=resXe1->GetEntries();
+  cout << " debug 2 " << endl;  
+  bhitst[1]=nhAr1+nhXe1;
+  float nhAr3=0;
+  float nhXe3=0;
+  if(resAr3) nhAr3=resAr3->GetEntries();
+  if(resXe3) nhXe3=resXe3->GetEntries();
+  bhitst[3]=nhAr3+nhXe3;
+  cout << " debug 3 " << endl;
+  rest[0]=resAr0->GetFunction("gaus")->GetParameter(2);
+  rest[2]=resAr2->GetFunction("gaus")->GetParameter(2);
+  rest[1]=(resAr1->GetFunction("gaus")->GetParameter(2)*nhAr1 + resXe1->GetFunction("gaus")->GetParameter(2)*nhXe1)/bhitst[1];
+  if(resAr3) rest[3]=(resAr3->GetFunction("gaus")->GetParameter(2)*nhAr3 + resXe3->GetFunction("gaus")->GetParameter(2)*nhXe3)/bhitst[3];
+  cout << " debug 4 " << endl;
+  trest[0]=tresAr0->GetFunction("gaus")->GetParameter(1);
+  trest[2]=tresAr2->GetFunction("gaus")->GetParameter(1);
+  trest[1]=(tresAr1->GetFunction("gaus")->GetParameter(1)*nhAr1 + tresXe1->GetFunction("gaus")->GetParameter(1)*nhXe1)/bhitst[1];
+  if(tresAr3) trest[3]=(tresAr3->GetFunction("gaus")->GetParameter(1)*nhAr3 + tresXe3->GetFunction("gaus")->GetParameter(1)*nhXe3)/bhitst[3];
+  cout << " debug 5 " << endl;
+  treswt[0]=tresAr0->GetFunction("gaus")->GetParameter(2);
+  treswt[2]=tresAr2->GetFunction("gaus")->GetParameter(2);
+  treswt[1]=(tresAr1->GetFunction("gaus")->GetParameter(2)*nhAr1 + tresXe1->GetFunction("gaus")->GetParameter(2)*nhXe1)/bhitst[1];
+  if(tresAr3) treswt[3]=(tresAr3->GetFunction("gaus")->GetParameter(2)*nhAr3 + tresXe3->GetFunction("gaus")->GetParameter(2)*nhXe3)/bhitst[3];
+  cout << " debug 6 " << endl;
+  
 
 // Get the precion hits vs tube hits:
 
-  TDirectory* errors=NULL  ;
+  TDirectory* errors=nullptr  ;
+  TDirectory* errorsAr=nullptr  ;
   bool iserrors = false;
+  bool iserrorsAr = false;
+  if (file->FindKey("ErrorsAr")) {
+        errorsAr = (TDirectory*) file->FindKey("ErrorsAr")->ReadObj();
+        if(errorsAr!=nullptr) iserrorsAr = true;
+  }
   if (file->FindKey("Errors")) {
         errors = (TDirectory*) file->FindKey("Errors")->ReadObj();
-        iserrors = true;
+        if(errors!=nullptr) iserrors = true;
   }
 
 	double ratiotrt = 0;
@@ -2613,39 +3033,74 @@ FirstPage::FirstPage(char* filename, TFile* file) throw(string){
 	double ratiobc  = 0;
 	double ratioea  = 0;
 	double ratioec  = 0;
+        TH2F*      residual_trt    	=  nullptr;
+        TH2F*      residual_ba  	=  nullptr;
+        TH2F*      residual_bc  	=  nullptr;
+        TH2F*      residual_ea  	=  nullptr;
+        TH2F*      residual_ec        	=  nullptr;
 
-  if (iserrors) {
-         TH2F*      residual_trt    	=  (TH2F*)errors->FindKey("tresidual_trt")->ReadObj();
-         TH2F*      residual_ba  	=  (TH2F*)errors->FindKey("tresidual_ba")->ReadObj();
-         TH2F*      residual_bc  	=  (TH2F*)errors->FindKey("tresidual_bc")->ReadObj();
-         TH2F*      residual_ea  	=  (TH2F*)errors->FindKey("tresidual_ea")->ReadObj();
-         TH2F*      residual_ec 	=  (TH2F*)errors->FindKey("tresidual_ec")->ReadObj();
+        TH2F*      residual_trtP        =  nullptr;
+        TH2F*      residual_baP         =  nullptr;
+        TH2F*      residual_bcP         =  nullptr;
+        TH2F*      residual_eaP         =  nullptr;
+        TH2F*      residual_ecP         =  nullptr;
 
-         TH2F*      residual_trtP        =  (TH2F*)errors->FindKey("tresidual_trtP")->ReadObj();
-         TH2F*      residual_baP         =  (TH2F*)errors->FindKey("tresidual_baP")->ReadObj();
-         TH2F*      residual_bcP         =  (TH2F*)errors->FindKey("tresidual_bcP")->ReadObj();
-         TH2F*      residual_eaP         =  (TH2F*)errors->FindKey("tresidual_eaP")->ReadObj();
-         TH2F*      residual_ecP         =  (TH2F*)errors->FindKey("tresidual_ecP")->ReadObj();
+        TH2F*      residualAr_trt    	=  nullptr;
+        TH2F*      residualAr_ba  	=  nullptr;
+        TH2F*      residualAr_bc  	=  nullptr;
+        TH2F*      residualAr_ea  	=  nullptr;
+        TH2F*      residualAr_ec        =  nullptr;
 
-	if (residual_trt->GetEntries() > 0 ){   ratiotrt = residual_trtP->GetEntries() /residual_trt->GetEntries() ;  	}
-	if (residual_ba->GetEntries() > 0 ){   ratioba = residual_baP->GetEntries() /residual_ba->GetEntries() ;  	}
-	if (residual_bc->GetEntries() > 0 ){   ratiobc = residual_bcP->GetEntries() /residual_bc->GetEntries() ;  	}
-	if (residual_ea->GetEntries() > 0 ){   ratioea = residual_eaP->GetEntries() /residual_ea->GetEntries() ;  	}
-	if (residual_ec->GetEntries() > 0 ){   ratioec = residual_ecP->GetEntries() /residual_ec->GetEntries() ;  	}
-//	cout << residual_eaP->GetEntries() /residual_ea->GetEntries()  << "  asdfasdfas" << endl;
-}
+        TH2F*      residualAr_trtP        =  nullptr;
+        TH2F*      residualAr_baP         =  nullptr;
+        TH2F*      residualAr_bcP         =  nullptr;
+        TH2F*      residualAr_eaP         =  nullptr;
+        TH2F*      residualAr_ecP         =  nullptr;
+
+  if (iserrors && errors->FindKey("tresidual_trt") && errors->FindKey("tresidual_trtP")) {
+         residual_trt    	=  (TH2F*)errors->FindKey("tresidual_trt")->ReadObj();
+         if(errors->FindKey("tresidual_ea")) residual_ea  	=  (TH2F*)errors->FindKey("tresidual_ea")->ReadObj();
+         if(errors->FindKey("tresidual_ec")) residual_ec 	=  (TH2F*)errors->FindKey("tresidual_ec")->ReadObj();
+
+         residual_trtP        =  (TH2F*)errors->FindKey("tresidual_trtP")->ReadObj();
+         if(errors->FindKey("tresidual_eaP")) residual_eaP         =  (TH2F*)errors->FindKey("tresidual_eaP")->ReadObj();
+         if(errors->FindKey("tresidual_ecP")) residual_ecP         =  (TH2F*)errors->FindKey("tresidual_ecP")->ReadObj();
+  } else {
+    cout << " No time residual histograms in endcaps: tresidual_trt and tresidual_trtP " << endl;
+  } 
+  if (iserrorsAr && errorsAr->FindKey("tresidualAr_trt") && errorsAr->FindKey("tresidualAr_trtP")) {
+         residualAr_trt    	=  (TH2F*)errorsAr->FindKey("tresidualAr_trt")->ReadObj();
+         if(errorsAr->FindKey("tresidualAr_ba")) residualAr_ba  	=  (TH2F*)errorsAr->FindKey("tresidualAr_ba")->ReadObj();
+         if(errorsAr->FindKey("tresidualAr_bc")) residualAr_bc  	=  (TH2F*)errorsAr->FindKey("tresidualAr_bc")->ReadObj();
+         if(errorsAr->FindKey("tresidualAr_ea")) residualAr_ea  	=  (TH2F*)errorsAr->FindKey("tresidualAr_ea")->ReadObj();
+         if(errorsAr->FindKey("tresidualAr_ec")) residualAr_ec 	=  (TH2F*)errorsAr->FindKey("tresidualAr_ec")->ReadObj();
+
+         residualAr_trtP        =  (TH2F*)errorsAr->FindKey("tresidualAr_trtP")->ReadObj();
+         if(errorsAr->FindKey("tresidualAr_baP")) residualAr_baP         =  (TH2F*)errorsAr->FindKey("tresidualAr_baP")->ReadObj();
+         if(errorsAr->FindKey("tresidualAr_bcP")) residualAr_bcP         =  (TH2F*)errorsAr->FindKey("tresidualAr_bcP")->ReadObj();
+         if(errorsAr->FindKey("tresidualAr_eaP")) residualAr_eaP         =  (TH2F*)errorsAr->FindKey("tresidualAr_eaP")->ReadObj();
+         if(errorsAr->FindKey("tresidualAr_ecP")) residualAr_ecP         =  (TH2F*)errorsAr->FindKey("tresidualAr_ecP")->ReadObj();
+  } else {
+    cout << " No time residual histograms for Argon layers : tresidualAr_trt and tresidualAr_trtP " << endl;
+  } 
+
+  if (residual_trt && residual_trtP && residual_trt->GetEntries() > 0 ){   ratiotrt = (residual_trtP->GetEntries()+residualAr_trtP->GetEntries()) /(residual_trt->GetEntries()+residualAr_trt->GetEntries()) ;  	}
+	if (residualAr_ba && residualAr_baP && residualAr_ba->GetEntries() > 0 ){   ratioba = residualAr_baP->GetEntries() /residualAr_ba->GetEntries() ;  	}
+	if (residualAr_bc && residualAr_bcP && residualAr_bc->GetEntries() > 0 ){   ratiobc = residualAr_bcP->GetEntries() /residualAr_bc->GetEntries() ;  	}
+	if (residual_ea && residual_eaP && residual_ea->GetEntries() > 0 ){   ratioea = (residual_eaP->GetEntries()+residualAr_eaP->GetEntries()) /(residual_ea->GetEntries()+residualAr_ea->GetEntries()) ;  	}
+	if (residual_ec && residual_ecP && residual_ec->GetEntries() > 0 ){   ratioec = (residual_ecP->GetEntries()+residualAr_ecP->GetEntries()) /(residual_ec->GetEntries()+residualAr_ec->GetEntries()) ;  	}
 
 
   pt->AddText("Barrels:");
-  pt->AddText(Form("  (side C) hits: %i  residual: %.4f  microns T0 diff: %.3f  ns  ",(int)bhits1,res1,tres1));
-  pt->AddText(Form("  (side C) Time res Width: %.2f   ns Ratio prec hits: %.3f  ",tres1w,ratioba));
-  pt->AddText(Form("  (side A) hits: %i  residual: %.4f  microns T0 diff: %.3f  ns ",(int)bhits3,res3,tres3));
-  pt->AddText(Form("  (side A) Time res Width: %.2f   ns Ratio prec hits: %.3f ",tres3w,ratiobc));
+  pt->AddText(Form("  (side C) hits: %i  residual: %.4f  mm Time res peak: %.3f  ns  ",(int)bhitst[0],rest[0],trest[0]));
+  pt->AddText(Form("  (side C) Time res width: %.2f   ns Ratio prec hits: %.3f  ",treswt[0],ratioba));
+  pt->AddText(Form("  (side A) hits: %i  residual: %.4f  mm Time res peak: %.3f  ns ",(int)bhitst[2],rest[2],trest[2]));
+  pt->AddText(Form("  (side A) Time res width: %.2f   ns Ratio prec hits: %.3f ",treswt[2],ratiobc));
   pt->AddText(" Endcaps:");
-  pt->AddText(Form(" (side C) hits: %i  residual: %.4f  microns T0 diff: %.3f ns",(int)bhits2,res2,tres2));
-  pt->AddText(Form(" (side C) Time res Width: %.2f   ns Ratio prec hits: %.3f ",tres2w,ratioea));
-  pt->AddText(Form(" (side A) hits: %i  residual: %.4f  microns T0 diff: %.3f ns",(int)bhits4,res4,tres4));
-  pt->AddText(Form(" (side A) Time res Width: %.2f   ns Ratio prec hits: %.3f ",tres4w,ratioec));
+  pt->AddText(Form(" (side C) hits: %i  residual: %.4f  mm Time res peak: %.3f ns",(int)bhitst[1],rest[1],trest[1]));
+  pt->AddText(Form(" (side C) Time res width: %.2f   ns Ratio prec hits: %.3f ",treswt[1],ratioea));
+  pt->AddText(Form(" (side A) hits: %i  residual: %.4f  mm Time res peak: %.3f ns",(int)bhitst[3],rest[3],trest[3]));
+  pt->AddText(Form(" (side A) Time res width: %.2f   ns Ratio prec hits: %.3f ",treswt[3],ratioec));
 
   pt->SetLabel(Form("TRT calibration iteration summary"));
   
@@ -2657,12 +3112,12 @@ FirstPage::FirstPage(char* filename, TFile* file) throw(string){
 
 class SettingsInfo: public TCanvas{
 public: 
-  SettingsInfo(char*) throw(string);
+  SettingsInfo(char*);
   map<string,string> set;
 private:
 };
 
-SettingsInfo::SettingsInfo(char* filename) throw(string){
+SettingsInfo::SettingsInfo(char* filename){
   
   this->cd();
   
@@ -2677,15 +3132,15 @@ SettingsInfo::SettingsInfo(char* filename) throw(string){
   if (myfile.is_open()){
     while (! myfile.eof() ){
       getline (myfile,line);
-      //cppcheck-suppress stlIfStrFind
       if (line.find("#") && line.find("Clean") && line.find("Submit") && line.find("Relink") && line.find("JobPrefix")  && line.find("Tag") && line.find("WWW")  )  {
 	int space = line.find_first_of(" ");
 	if (space!=-1){
+	  //pt->AddText(line.c_str());
 	  set[trim(line.substr(0,line.find("=")-1))]=trim(line.substr(line.find("=")+1,line.size()));
 	}
       }
     }
-    for (map<string,string>::iterator is = set.begin(); is != set.end(); ++is){
+    for (map<string,string>::iterator is = set.begin(); is != set.end(); is++){
       pt->AddText( (string(is->first + " . . . . . . . . . . . . " + is->second)).c_str() );
     }
     myfile.close();
@@ -2700,12 +3155,12 @@ SettingsInfo::SettingsInfo(char* filename) throw(string){
 
 class TrackTupleInfo: public TCanvas{
 public: 
-  TrackTupleInfo(TFile*) throw(string);
+  TrackTupleInfo(TFile*);
 private:
   TNtuple* Tracktuple;
 };
 
-TrackTupleInfo::TrackTupleInfo(TFile* file) throw(string){
+TrackTupleInfo::TrackTupleInfo(TFile* file){
 
   Tracktuple = (TNtuple*)file->Get("tracktuple");
   if (!Tracktuple) throw(string("tracktuple not found!"));
@@ -2740,7 +3195,7 @@ TrackTupleInfo::TrackTupleInfo(TFile* file) throw(string){
   trackhits2->Draw("same");
   trackhits3->Draw("same");
   trackhits4->Draw("same");
-  TLegend *leg1 = new TLegend(0.7155172,0.1038136,0.8965517,0.2542373,NULL,"brNDC");
+  TLegend *leg1 = new TLegend(0.7155172,0.1038136,0.8965517,0.2542373,nullptr,"brNDC");
   leg1->AddEntry(trackhits,"all tracks","l");
   leg1->AddEntry(trackhits1,"0 < eta < 1","l");
   leg1->AddEntry(trackhits2,"eta > 1","l");
@@ -2771,7 +3226,7 @@ TrackTupleInfo::TrackTupleInfo(TFile* file) throw(string){
   eventphase->GetXaxis()->SetTitle("eventphase");
   eventphase->GetYaxis()->SetTitle("No. tracks");
   
-  TLegend *leg2 = new TLegend(0.7155172,0.1038136,0.8965517,0.2542373,NULL,"brNDC");
+  TLegend *leg2 = new TLegend(0.7155172,0.1038136,0.8965517,0.2542373,nullptr,"brNDC");
   leg2->AddEntry(trackhits1,"0 < eta < 1","l");
   leg2->AddEntry(trackhits2,"eta > 1","l");
   leg2->AddEntry(trackhits3,"-1 < eta < 0","l");
@@ -2785,6 +3240,7 @@ TrackTupleInfo::TrackTupleInfo(TFile* file) throw(string){
 
 TGraphErrors * GetMean( TH2F* histo){
 
+  if(!histo) return nullptr;
 	int const nxbins = histo->GetNbinsX() ;
 	TGraphErrors * Means = new TGraphErrors(nxbins);
 	float mean  = 0;
@@ -2817,6 +3273,7 @@ TGraphErrors * GetMean( TH2F* histo){
 
 TGraphErrors * GetMeanE( TH2F* histo){
 
+  if(!histo) return nullptr;
 	int const nxbins = histo->GetNbinsX() ;
 	TGraphErrors * Means = new TGraphErrors(nxbins);
 	float mean  = 0;
@@ -2837,6 +3294,7 @@ TGraphErrors * GetMeanE( TH2F* histo){
 
 TGraphErrors * GetPn( TH2F* histo){
 
+  if(!histo) return nullptr;
 	int const nxbins = histo->GetNbinsX() ;
 	TGraphErrors * Means = new TGraphErrors(nxbins);
 	float mean  = 0;
@@ -2855,6 +3313,7 @@ TGraphErrors * GetPn( TH2F* histo){
 }
 
 TGraphErrors * GetWidth( TH2F* histo){
+  if(!histo) return nullptr;
 	int const nxbins = histo->GetNbinsX() ;
 	TGraphErrors * Means = new TGraphErrors(nxbins);
 	float mean  = 0;
@@ -2887,6 +3346,7 @@ TGraphErrors * GetWidth( TH2F* histo){
 
 
 TGraphErrors * GetEntries( TH2F* histo){
+  if(!histo) return nullptr;
         int const nxbins = histo->GetNbinsX() ;
         TGraphErrors * Means = new TGraphErrors(nxbins);
         float mean  = 0;
@@ -2907,6 +3367,7 @@ TGraphErrors * GetEntries( TH2F* histo){
 
 
 TGraphErrors * GetPWidth( TH2F* histo){
+  if(!histo) return nullptr;
 	int const nxbins = histo->GetNbinsX() ;
 	TGraphErrors * Means = new TGraphErrors(nxbins);
 	float mean  = 0;
@@ -2942,17 +3403,18 @@ TGraphErrors * GetPWidth( TH2F* histo){
 
 class PtDependence: public TCanvas{
 public: 
-  PtDependence(TFile*) throw(string);
+  PtDependence(TFile*);
 private:
   TDirectory* errors;
 };
 
-PtDependence::PtDependence(TFile* file) throw(string){
+PtDependence::PtDependence(TFile* file){
   errors = (TDirectory*) file->FindKey("Errors")->ReadObj();
-  if (!errors) throw(string("No errors folder!!!!!!!!!!!!!!!"));
+  if (errors==nullptr) throw(string("No errors folder!!!!!!!!!!!!!!!"));
+  if (errors->GetNkeys() > 29 ) {
   this->Divide(2,3,0.01,0.01);
         // Read the histos:
-         TH2F*      residual_trt    	=  (TH2F*)errors->FindKey("residual_trt")->ReadObj();
+         TH2F*      residual_trt    	=  (TH2F*)errors->FindKey("residual_allhits")->ReadObj();
          TH2F*      residual_ba  	=  (TH2F*)errors->FindKey("residual_ba")->ReadObj();
          TH2F*      residual_bc  	=  (TH2F*)errors->FindKey("residual_bc")->ReadObj();
          TH2F*      residual_ea  	=  (TH2F*)errors->FindKey("residual_ea")->ReadObj();
@@ -3094,6 +3556,9 @@ PtDependence::PtDependence(TFile* file) throw(string){
         presBCw  ->Draw("LP");
         presEAw  ->Draw("LP");
         presECw  ->Draw("LP");
+  } else {
+    cout << " Not enough keys in Errors directory for Pt dependence plots " << endl;
+  }
 }
 
 
@@ -3101,14 +3566,15 @@ PtDependence::PtDependence(TFile* file) throw(string){
 
 class TBDependence: public TCanvas{
 public: 
-  TBDependence(TFile*) throw(string);
+  TBDependence(TFile*);
 private:
   TDirectory* errors;
 };
 
-TBDependence::TBDependence(TFile* file) throw(string){
+TBDependence::TBDependence(TFile* file){
   errors = (TDirectory*) file->FindKey("Errors")->ReadObj();
   if (!errors) throw(string("No errors folder!!!!!!!!!!!!!!!"));
+  if (errors->GetNkeys() > 19 ) {
   this->Divide(2,3,0.01,0.01);
 
         // Read the histos:
@@ -3309,6 +3775,10 @@ TBDependence::TBDependence(TFile* file) throw(string){
 	ratioEA ->Draw("lp");
 	ratioEC ->Draw("lp");
 
+  } else {
+    cout << " Not enough keys in Errors directory for tb dependence plots " << endl;
+  }
+
 
 }
 
@@ -3326,15 +3796,16 @@ TBDependence::TBDependence(TFile* file) throw(string){
 
 class ToTDependence: public TCanvas{
 public: 
-  ToTDependence(TFile*, bool, bool, bool isAr) throw(string);
+  ToTDependence(TFile*, bool, bool, bool isAr);
 private:
   TDirectory* errors;
 };
 
 
-ToTDependence::ToTDependence(TFile* file, bool isba = true, bool isht = false, bool isAr = false) throw(string){
-  errors = NULL;
+ToTDependence::ToTDependence(TFile* file, bool isba = true, bool isht = false, bool isAr = false){
+  errors = nullptr;
   cout <<"READING CORRECTIONS: " << endl;
+
   if (!isAr)    errors = (TDirectory*) file->FindKey("Correction")->ReadObj();
   else          errors = (TDirectory*) file->FindKey("CorrectionAr")->ReadObj();
 
@@ -3342,11 +3813,11 @@ ToTDependence::ToTDependence(TFile* file, bool isba = true, bool isht = false, b
 
         // Read the histos:
 
-  	TH2F* tres_vs_ToT_ba = NULL;
-  	TH2F* tres_vs_ToT_bc = NULL;
+  	TH2F* tres_vs_ToT_ba = nullptr;
+  	TH2F* tres_vs_ToT_bc = nullptr;
 	// Residual:
-  	TH2F* res_vs_ToT_ba = NULL;
-	TH2F* res_vs_ToT_bc = NULL;
+  	TH2F* res_vs_ToT_ba = nullptr;
+	TH2F* res_vs_ToT_bc = nullptr;
 
 
       if(!isAr){
@@ -3523,7 +3994,7 @@ ToTDependence::ToTDependence(TFile* file, bool isba = true, bool isht = false, b
 	resBA->Draw("alp");
 	resBC->Draw("same");
 
-}
+    }
 
 
 
@@ -3538,13 +4009,13 @@ ToTDependence::ToTDependence(TFile* file, bool isba = true, bool isht = false, b
 
 class SinDependence: public TCanvas{
 public: 
-  SinDependence(TFile*, bool, bool, bool) throw(string);
+  SinDependence(TFile*, bool, bool, bool);
 private:
   TDirectory* errors;
 };
 
-SinDependence::SinDependence(TFile* file, bool isba = true, bool isht = false, bool isAr = false) throw(string){
-  errors = NULL;
+SinDependence::SinDependence(TFile* file, bool isba = true, bool isht = false, bool isAr = false){
+  errors = nullptr;
 
 
   if(!isAr)     errors = (TDirectory*) file->FindKey("Correction")->ReadObj();
@@ -3555,11 +4026,11 @@ SinDependence::SinDependence(TFile* file, bool isba = true, bool isht = false, b
 
         // Read the histos:
 
-  	TH2F* tres_vs_ToT_ba = NULL;
-  	TH2F* tres_vs_ToT_bc = NULL;
+  	TH2F* tres_vs_ToT_ba = nullptr;
+  	TH2F* tres_vs_ToT_bc = nullptr;
 	// Residual:
-  	TH2F* res_vs_ToT_ba = NULL;
-	TH2F* res_vs_ToT_bc = NULL;
+  	TH2F* res_vs_ToT_ba = nullptr;
+	TH2F* res_vs_ToT_bc = nullptr;
 
       if(!isAr){
         if (!isht){
@@ -3744,7 +4215,8 @@ SinDependence::SinDependence(TFile* file, bool isba = true, bool isht = false, b
 //================================================================
 
 int itersum(int argc, char* argv[]) {
-  //cppcheck-suppress ctuArrayIndex
+
+  string inputfile = string(argv[2]);
   TFile* datafile = new TFile(argv[2]);  
   if (datafile->IsZombie()){
     cout << "ERROR! INPUT FILE DOES NOT EXIST!" << endl;
@@ -3756,8 +4228,10 @@ int itersum(int argc, char* argv[]) {
                 isAr= true;
                 cout <<" This run contains straws with Argon" << endl;
         }
-
-
+  if (!datafile->FindKey("Chip_Artuple")){
+                isAr= false;
+                cout <<" This run contains does not have Argon ntuples" << endl;
+        }
 
 // Here we have to do the fix, because the trees are duplicated
 
@@ -3776,25 +4250,25 @@ int itersum(int argc, char* argv[]) {
 
   // First page on Shifter report, general information
   cout << "MAKING FirstPage" << endl; 
-  FirstPage* firstpage = NULL;
+  FirstPage* firstpage = nullptr;
   try { firstpage = new FirstPage(argv[2],datafile); } catch (string e) { cout << e << endl; }
   
   //Add a page with the settings:
   cout << "MAKING Settings" << endl; 
-  SettingsInfo* settings = NULL;
+  SettingsInfo* settings = nullptr;
   //if (argv[3]) try { settings = new SettingsInfo(argv[3]); } catch (string e) { cout << e << endl; }
 
   //Tracktuple info
   cout << "MAKING TracktupleInfo" << endl; 
-  TrackTupleInfo* tracktupleinfo = NULL;
+  TrackTupleInfo* tracktupleinfo = nullptr;
   try { tracktupleinfo = new TrackTupleInfo(datafile); } catch (string e) { cout << e << endl; }
 
   //Hit statistics
-  HitStatistics* hitstat=NULL;
+  HitStatistics* hitstat=nullptr;
   cout << "MAKING HitStatistics" << endl; 
   hitstat= new HitStatistics(argv[2]);
 
-  HitStatistics* hitstatAr=NULL;
+  HitStatistics* hitstatAr=nullptr;
   if(isAr){
           cout << "MAKING Ar HitStatistics" << endl;
           hitstatAr= new HitStatistics(argv[2], true);
@@ -3802,68 +4276,68 @@ int itersum(int argc, char* argv[]) {
 
   //TRT Global Results:
   cout << "MAKING TRTPlots" << endl; 
-  TRTPlots* TRTresplots=NULL;
+  TRTPlots* TRTresplots=nullptr;
   try { TRTresplots = new TRTPlots(datafile); } catch (string e) { cout << e << endl; }
-  TRTPlots* TRTresplotsAr=NULL;
+  TRTPlots* TRTresplotsAr=nullptr;
   if(isAr)  try { TRTresplotsAr = new TRTPlots(datafile, true); } catch (string e) { cout << e << endl; }
 
   //Residual and time residual (TRT and both barrels)
   cout << "MAKING ResidualPlots" << endl; 
-  ResidualPlots* resplots=NULL;
+  ResidualPlots* resplots=nullptr;
   try { resplots = new ResidualPlots(datafile); } catch (string e) { cout << e << endl; }
-  ResidualPlots* resplotsAr=NULL;
+  ResidualPlots* resplotsAr=nullptr;
   if(isAr) try { resplotsAr = new ResidualPlots(datafile, true); } catch (string e) { cout << e << endl; }
  
   //Do t0 calibration type:
   cout << "MAKING T0CalibTypeXY" << endl; 
   T0CalibTypeXY* hitstatxy= new T0CalibTypeXY(argv[2]);
-  T0CalibTypeXY* hitstatxyAr = NULL;
+  T0CalibTypeXY* hitstatxyAr = nullptr;
   if (isAr)     hitstatxyAr= new T0CalibTypeXY(argv[2], true);
 
   //Do hits plots:
   cout << "MAKING XYMaps(nt0)" << endl; 
   XYMaps* nhits= new XYMaps(argv[2],"nt0");
-  XYMaps* nhitsAr= NULL;
+  XYMaps* nhitsAr= nullptr;
   if (isAr) nhitsAr = new XYMaps(argv[2],"nt0",true);
   //Do res plot:
   cout << "MAKING XYMaps(res)" << endl; 
   XYMaps* resxy0= new XYMaps(argv[2],"res");
-  XYMaps* resxy0Ar= NULL;
+  XYMaps* resxy0Ar= nullptr;
   if (isAr) resxy0Ar  = new XYMaps(argv[2],"res",true);
   //Do residual center plot:
   cout << "MAKING XYMaps(resmean)" << endl; 
   XYMaps* resxy= new XYMaps(argv[2],"abs(resMean)");
-  XYMaps* resxyAr= NULL;
+  XYMaps* resxyAr= nullptr;
   if (isAr) resxyAr  = new XYMaps(argv[2],"abs(resMean)",true);
   //Do t0s plots:
   cout << "MAKING XYMaps(t0)" << endl; 
   XYMaps* xymap= new XYMaps(argv[2],"t0");
-  XYMaps* xymapAr= NULL;
+  XYMaps* xymapAr= nullptr;
   if (isAr) xymapAr  = new XYMaps(argv[2],"t0",true);
   //Do Oldt0plots:
   cout << "MAKING XYMaps(oldt0)" << endl; 
   XYMaps* oldt0= new XYMaps(argv[2],"oldt0");
-  XYMaps* oldt0Ar= NULL;
+  XYMaps* oldt0Ar= nullptr;
   if (isAr) oldt0Ar  = new XYMaps(argv[2],"oldt0",true);
   //Do t0 diff:
   cout << "MAKING XYMaps(t0-oldt0)" << endl; 
   XYMaps* oldt01= new XYMaps(argv[2],"abs(t0-oldt0)");
-  XYMaps* oldt01Ar= NULL;
-  if (isAr) oldt01Ar  = new XYMaps(argv[2],"t0-oldt0",true);
+  XYMaps* oldt01Ar= nullptr;
+  if (isAr) oldt01Ar  = new XYMaps(argv[2],"abs(t0-oldt0)",true); //changed from t0-old-t0
   //Do t0 diff mean:
   cout << "MAKING XYMaps(tresMean)" << endl;
   XYMaps* oldt0111= new XYMaps(argv[2],"abs(tresMean)");
-  XYMaps* oldt0111Ar= NULL;
+  XYMaps* oldt0111Ar= nullptr;
   if (isAr) oldt0111Ar  = new XYMaps(argv[2],"abs(tresMean)",true);
   //Do t0 width:
   cout << "MAKING XYMaps(tres)" << endl; 
   XYMaps* oldt011= new XYMaps(argv[2],"(tres)");
-  XYMaps* oldt011Ar= NULL;
+  XYMaps* oldt011Ar= nullptr;
   if (isAr) oldt011Ar = new XYMaps(argv[2],"(tres)",true);
   
   //Add the plot for Chip T0 (board offset) variations 
-  ChipVariations* chipgraphA=NULL;
-  ChipVariations* chipgraphC=NULL;
+  ChipVariations* chipgraphA=nullptr;
+  ChipVariations* chipgraphC=nullptr;
   if (datafile->FindKey("TRT_all")){
     cout << "MAKING ChipVariations" << endl; 
     chipgraphA= new ChipVariations(argv[2],1);
@@ -3871,10 +4345,10 @@ int itersum(int argc, char* argv[]) {
   }
   
   //Add the plot for Board T0 variations 
-  BoardVariationsOldT0* refboardgraphA=NULL;
-  BoardVariationsOldT0* refboardgraphC=NULL;
-  BoardVariationsDiff* boarddiffgraphA=NULL;
-  BoardVariationsDiff* boarddiffgraphC=NULL;
+  BoardVariationsOldT0* refboardgraphA=nullptr;
+  BoardVariationsOldT0* refboardgraphC=nullptr;
+  BoardVariationsDiff* boarddiffgraphA=nullptr;
+  BoardVariationsDiff* boarddiffgraphC=nullptr;
   if (useref){
     cout << "MAKING BoardVariationsOldT0" << endl; 
     refboardgraphA= new BoardVariationsOldT0(argv[4],1);
@@ -3902,24 +4376,21 @@ int itersum(int argc, char* argv[]) {
   BoardVariationsTRes1* boardgraphA3= new BoardVariationsTRes1(argv[2],1);
   BoardVariationsTRes1* boardgraphC3= new BoardVariationsTRes1(argv[2],-1);
 
-  //RtGraphs* rtrelation11=NULL;
-  RtGraphs* rtrelation_bar=NULL;
-  RtGraphs* rtrelation21=NULL;
-  RtGraphs* rtrelation31=NULL;
-  RtGraphs* rtrelation41=NULL;
-  RtGraphs* rtrelation51=NULL;
-  RtBinning* rtbinning_bar=NULL;
-  RtBinning* rtbinning1=NULL;
-  RtBinning* rtbinning2=NULL;
-  RtBinning* rtbinning3=NULL;
-  RtBinning* rtbinning4=NULL;
+  //RtGraphs* rtrelation11=nullptr;
+  RtGraphs* rtrelation_bar=nullptr;
+  RtGraphs* rtrelation21=nullptr;
+  RtGraphs* rtrelation31=nullptr;
+  RtGraphs* rtrelation41=nullptr;
+  RtGraphs* rtrelation51=nullptr;
+  RtBinning* rtbinning_bar=nullptr;
+  RtBinning* rtbinning1=nullptr;
+  RtBinning* rtbinning2=nullptr;
+  RtBinning* rtbinning3=nullptr;
+  RtBinning* rtbinning4=nullptr;
   if (datafile->FindKey("TRT_all")){
     cout << "MAKING RtGraphs" << endl;     
     TDirectory* trt = (TDirectory*) datafile->FindKey("TRT_all")->ReadObj();
-    //if (trt->FindKey("WholeBarrel_1")){
-    // try {rtrelation11= new RtGraphs(argv[2],"WholeBarrel_1");}
-    // catch (string e) {cout << e << endl;}  
-    //}
+
     if (trt->FindKey("WholeBarrel_1")){
       try {rtrelation_bar= new RtGraphs(argv[2],"WholeBarrel_1");}
       catch (string e) {cout << e << endl;}  
@@ -3941,189 +4412,261 @@ int itersum(int argc, char* argv[]) {
       catch (string e) {cout << e << endl;}  
     }
     //r plots for each t-bin
-    cout << "MAKING Rt binning" << endl; 
-    rtbinning_bar=new RtBinning(trt,"WholeBarrel_1");
-    rtbinning1=new RtBinning(trt,"Detector_-1");
-    rtbinning2=new RtBinning(trt,"Detector_1");
+    cout << "MAKING Rt binning" << endl;
+
+    // No Xenon for Barrel in Run3     
+    //rtbinning_bar=new RtBinning(trt,"WholeBarrel_1");
+    //cout << "MAKING Rt binning for Detector_-1" << endl;
+    //rtbinning1=new RtBinning(trt,"Detector_-1");
+    //cout << "MAKING Rt binning for Detector_1" << endl;
+    //rtbinning2=new RtBinning(trt,"Detector_1");
+    cout << "MAKING Rt binning for Detector_-2" << endl;
     rtbinning3=new RtBinning(trt,"Detector_-2");
+    cout << "MAKING Rt binning for Detector_2" << endl;
     rtbinning4=new RtBinning(trt,"Detector_2");
   }
 
   //Binned residual plots
-  RresTbin* binres_bar=NULL;
-  RresTbin* binres1=NULL;
-  RresTbin* binres2=NULL;
-  RresTbin* binres3=NULL;
-  RresTbin* binres4=NULL;
-  TBinnedRes* tbinnedres_bar=NULL;
-  TBinnedRes* tbinnedres1=NULL;
-  TBinnedRes* tbinnedres2=NULL;
-  TBinnedRes* tbinnedres3=NULL;
-  TBinnedRes* tbinnedres4=NULL;
+  RresTbin* binres_bar=nullptr;
+  RresTbin* binres1=nullptr;
+  RresTbin* binres2=nullptr;
+  RresTbin* binres3=nullptr;
+  RresTbin* binres4=nullptr;
+  TBinnedRes* tbinnedres_bar=nullptr;
+  TBinnedRes* tbinnedres1=nullptr;
+  TBinnedRes* tbinnedres2=nullptr;
+  TBinnedRes* tbinnedres3=nullptr;
+  TBinnedRes* tbinnedres4=nullptr;
+
   
-   cout << "MAKING Binned Residual" << endl; 
-  binres_bar=new RresTbin(datafile,"WholeBarrel_1",4);
-  if (binres_bar) tbinnedres_bar=new TBinnedRes(datafile,binres_bar->reshists);
-  binres1=new RresTbin(datafile,"Detector_-1",-1);
-  if (binres1 ) tbinnedres1=new TBinnedRes(datafile,binres1->reshists);
-  binres2=new RresTbin(datafile,"Detector_1",1);
-  if (binres2) tbinnedres2=new TBinnedRes(datafile,binres2->reshists);
-  binres3=new RresTbin(datafile,"Detector_-2",-2);
-  if (binres3) tbinnedres3=new TBinnedRes(datafile,binres3->reshists);
-  binres4=new RresTbin(datafile,"Detector_2",2);
-  if (binres4) tbinnedres4=new TBinnedRes(datafile,binres4->reshists);
-  
-  RtColor* rtcol=NULL;
-  RtColor* rtcol1=NULL;
-  RtColor* rtcol2=NULL;
-  RtColor* rtcol3=NULL;
-  RtColor* rtcol4=NULL;
-  RtColor* rtcol5=NULL;
+
+    cout << "MAKING Binned Residual" << endl;
+    // No Xenon hists for Barrel in Run3
+    //binres_bar=new RresTbin(datafile,"WholeBarrel_1",4);
+    //tbinnedres_bar=new TBinnedRes(datafile,binres_bar->reshists);
+    // cout << "MAKING Binned Residual for Detector_-1" << endl;
+    //binres1=new RresTbin(datafile,"Detector_-1",-1);
+    //tbinnedres1=new TBinnedRes(datafile,binres1->reshists);
+    //cout << "MAKING Binned Residual for Detector_1" << endl;
+    //binres2=new RresTbin(datafile,"Detector_1",1);
+    //tbinnedres2=new TBinnedRes(datafile,binres2->reshists);
+    cout << "MAKING Binned Residual for Detector_-2" << endl;
+    binres3=new RresTbin(datafile,"Detector_-2",-2);
+    tbinnedres3=new TBinnedRes(datafile,binres3->reshists);
+    cout << "MAKING Binned Residual for Detector_2" << endl;
+    binres4=new RresTbin(datafile,"Detector_2",2);
+    tbinnedres4=new TBinnedRes(datafile,binres4->reshists);
+
+ 
+
+  RtColor* rtcol=nullptr;
+  RtColor* rtcol1=nullptr;
+  RtColor* rtcol2=nullptr;
+  RtColor* rtcol3=nullptr;
+  RtColor* rtcol4=nullptr;
+  RtColor* rtcol5=nullptr;
   //Rt relation, default plot
+  cout << "MAKING RtColor" << endl; 
+  
   if (datafile->FindKey("TRT_all")){
-    cout << "MAKING RtColor" << endl; 
-    rtcol= new RtColor(argv[2],"");
+    cout << "    found TRT_all " << endl;
+
+    // no Xenon RtColor plot for entire TRT
+    //rtcol= new RtColor(argv[2],"");
+
     TDirectory* trt = (TDirectory*) datafile->FindKey("TRT_all")->ReadObj(); 
+
+    // No Xenon Rt plots for barrel in Run3
+    /*
     if (trt->FindKey("WholeBarrel_1")){
-      try {rtcol1= new RtColor(argv[2],"WholeBarrel_1");} 
-      catch (string e){cout << e << endl;}
+    cout << "    MAKING RtColor WholeBarrel" << endl; 
+    try {rtcol1= new RtColor(argv[2],"WholeBarrel_1");} 
+    catch (string e){cout << e << endl;}
     }
+    
+
     if (trt->FindKey("Detector_-1")){
+      cout << "    MAKING RtColor Detector_-1" << endl; 
       try {rtcol2= new RtColor(argv[2],"Detector_-1");} 
       catch (string e){cout << e << endl;}
     }
+
     if (trt->FindKey("Detector_1")){
+      cout << "    MAKING RtColor Detector_1" << endl; 
       try {rtcol3= new RtColor(argv[2],"Detector_1");} 
       catch (string e){cout << e << endl;}
     }
+    */
+
     if (trt->FindKey("Detector_-2")){
+      cout << "    MAKING RtColor Detector_-2" << endl; 
       try {rtcol4= new RtColor(argv[2],"Detector_-2");} 
       catch (string e){cout << e << endl;}
      }
+
     if (trt->FindKey("Detector_2")){
+      cout << "    MAKING RtColor Detector_2" << endl; 
       try {rtcol5= new RtColor(argv[2],"Detector_2");} 
       catch (string e){cout << e << endl;}
     }    
   }
-
                 //ARGON!!
-  RtGraphs* rtArrelation_bar=NULL;
-  RtGraphs* rtArrelation21=NULL;
-  RtGraphs* rtArrelation31=NULL;
-  RtGraphs* rtArrelation41=NULL;
-  RtGraphs* rtArrelation51=NULL;
-  RtBinning* rtArbinning_bar=NULL;
-  RtBinning* rtArbinning1=NULL;
-  RtBinning* rtArbinning2=NULL;
-  RtBinning* rtArbinning3=NULL;
-  RtBinning* rtArbinning4=NULL;
+  RtGraphs* rtArrelation_bar=nullptr;
+  RtGraphs* rtArrelation21=nullptr;
+  RtGraphs* rtArrelation31=nullptr;
+  RtGraphs* rtArrelation41=nullptr;
+  RtGraphs* rtArrelation51=nullptr;
+  RtBinning* rtArbinning_bar=nullptr;
+  RtBinning* rtArbinning1=nullptr;
+  RtBinning* rtArbinning2=nullptr;
+  RtBinning* rtArbinning3=nullptr;
+  RtBinning* rtArbinning4=nullptr;
   if (datafile->FindKey("TRT_Ar_all")){
     cout << "MAKING AR RtGraphs" << endl;
     TDirectory* trtAr = (TDirectory*) datafile->FindKey("TRT_Ar_all")->ReadObj();
-    cout << "MAKING AR RtGraphs0" << endl;
-    if (trtAr->FindKey("WholeBarrel_Ar_1")){
-      TDirectory* detAr = (TDirectory*) trtAr->FindKey("WholeBarrel_Ar_1")->ReadObj();
-        if(detAr->FindKey("binhist")){
-      rtArbinning_bar   =new RtBinning(trtAr,"WholeBarrel_Ar_1");
-      try {rtArrelation_bar= new RtGraphs(argv[2],"WholeBarrel_Ar_1", true);}
-      catch (string e) {cout << e << endl;}
-        }
-    }
-    cout << "MAKING AR RtGraphs" << endl;
-    if (trtAr->FindKey("Detector_Ar_-1")){
+
+
+    if (trtAr->FindKey("Detector_Ar_-1/binhist")){
+      cout << "    Found Detector_Ar_-1/binhist" << endl;
       rtArbinning1      =new RtBinning(trtAr,"Detector_Ar_-1");
       try {rtArrelation21= new RtGraphs(argv[2],"Detector_Ar_-1", true);}
       catch (string e) {cout << e << endl;}
     }
-    cout << "MAKING AR RtGraphs" << endl;
-    if (trtAr->FindKey("Detector_Ar_1")){
+
+    if (trtAr->FindKey("Detector_Ar_1/binhist")){
+      cout << "    Found Detector_Ar_1/binhist" << endl;
       rtArbinning2      =new RtBinning(trtAr,"Detector_Ar_1");
       try {rtArrelation31= new RtGraphs(argv[2],"Detector_Ar_1", true);}
       catch (string e) {cout << e << endl;}
     }
-    cout << "MAKING AR RtGraphs" << endl;
-    if (trtAr->FindKey("Detector_Ar_-2")){
-	cout << "trying trtArgon:!!! " << endl;
+
+    if (trtAr->FindKey("Detector_Ar_-2/binhist")){
+      cout << "    Found Detector_Ar_-2/binhist" << endl;
       rtArbinning3      =new RtBinning(trtAr,"Detector_Ar_-2");
       try {rtArrelation41= new RtGraphs(argv[2],"Detector_Ar_-2", true);}
       catch (string e) {cout << e << endl;}
     }
-    if (trtAr->FindKey("Detector_Ar_2")){
+    if (trtAr->FindKey("Detector_Ar_2/binhist")){
 
   	TDirectory* test = (TDirectory*)(((TDirectory*)trtAr->Get("Detector_Ar_2")));
 	if(test->FindKey("binhist")){
+              cout << "    Found Detector_Ar_2/binhist" << endl;
       	      rtArbinning4      =new RtBinning(trtAr,"Detector_Ar_2");
 	      try {rtArrelation51= new RtGraphs(argv[2],"Detector_Ar_2", true);}
 	      catch (string e) {cout << e << endl;}
 	}
     }
     //r plots for each t-bin
-    cout << "MAKING AR Rt binning" << endl;
+    cout << "       MAKING AR Rt binning" << endl;
   }
 
 
   //Binned residual plots
-  RresTbin* binresAr_bar_bar=NULL;
-  RresTbin* binresAr_bar1=NULL;
-  RresTbin* binresAr_bar2=NULL;
-  RresTbin* binresAr_bar3=NULL;
-  RresTbin* binresAr_bar4=NULL;
-  TBinnedRes* tbinnedArres_bar=NULL;
-  TBinnedRes* tbinnedArres1=NULL;
-  TBinnedRes* tbinnedArres2=NULL;
-  TBinnedRes* tbinnedArres3=NULL;
-  TBinnedRes* tbinnedArres4=NULL;
+  RresTbin* binresAr_bar_bar=nullptr;
+  RresTbin* binresAr_bar1=nullptr;
+  RresTbin* binresAr_bar2=nullptr;
+  RresTbin* binresAr_bar3=nullptr;
+  RresTbin* binresAr_bar4=nullptr;
+  TBinnedRes* tbinnedArres_bar=nullptr;
+  TBinnedRes* tbinnedArres1=nullptr;
+  TBinnedRes* tbinnedArres2=nullptr;
+  TBinnedRes* tbinnedArres3=nullptr;
+  TBinnedRes* tbinnedArres4=nullptr;
 
-   cout << "MAKING RT Binned Residual" << endl;
+  
+  
+   cout << "MAKING RT Binned Residual for Ar" << endl;
 
-  cout << "MAKING RT Binned Abs Residual" << endl;
+  TDirectory* trtAr = (TDirectory*) datafile->FindKey("TRT_Ar_all")->ReadObj();
+  //if (trtAr->FindKey("WholeBarrel_Ar_1"))       binresAr_bar_bar        =       new RresTbin(datafile,"WholeBarrel_Ar_1",4);
+  if (trtAr->FindKey("Detector_Ar_-1"))         binresAr_bar1           =       new RresTbin(datafile,"Detector_Ar_-1",-1);
+  if (trtAr->FindKey("Detector_Ar_1"))          binresAr_bar2           =       new RresTbin(datafile,"Detector_Ar_1",1);
+  if (trtAr->FindKey("Detector_Ar_-2"))         binresAr_bar3           =       new RresTbin(datafile,"Detector_Ar_-2",-2);
+  if (trtAr->FindKey("Detector_Ar_2"))          binresAr_bar4           =       new RresTbin(datafile,"Detector_Ar_2",2);
+
+  cout << "MAKING RT Binned Abs Residual for Ar" << endl;
+
+  //tbinnedArres_bar      =       new TBinnedRes(datafile,binresAr_bar_bar->reshists);
+  tbinnedArres1         =       new TBinnedRes(datafile,binresAr_bar1->reshists);
+  tbinnedArres2         =       new TBinnedRes(datafile,binresAr_bar2->reshists);
+  tbinnedArres3         =       new TBinnedRes(datafile,binresAr_bar3->reshists);
+  tbinnedArres4         =       new TBinnedRes(datafile,binresAr_bar4->reshists);
 
 
-  RtColor* rtArcol=NULL;
-  RtColor* rtArcol1=NULL;
-  RtColor* rtArcol2=NULL;
-  RtColor* rtArcol3=NULL;
-  RtColor* rtArcol4=NULL;
-  RtColor* rtArcol5=NULL;
+  RtColor* rtArcol=nullptr;
+  RtColor* rtArcol1=nullptr;
+  RtColor* rtArcol2=nullptr;
+  RtColor* rtArcol3=nullptr;
+  RtColor* rtArcol4=nullptr;
+  RtColor* rtArcol5=nullptr;
   //Rt relation, default plot
-  if (datafile->FindKey("TRT_Ar_all")){
-    cout << "MAKING AR RtColor" << endl;
-    rtArcol= new RtColor(argv[2],"", true);
-    TDirectory* trtAr = (TDirectory*) datafile->FindKey("TRT_Ar_all")->ReadObj();
-    if (trtAr->FindKey("WholeBarrel_Ar_1")){
-      cout << "MAKING AR RtColor whole barrel" << endl;
-      try {rtArcol1= new RtColor(argv[2],"WholeBarrel_Ar_1", true);}
-      catch (string e){cout << e << endl;}
-    }
+  if (datafile->FindKey("TRT_Ar_all/rt-relation")){
+    cout << "MAKING AR RtColor all TRT" << endl;
+    try{rtArcol= new RtColor(argv[2],"", true);}
+    catch (string e){cout << e << endl;}
+  }
+    
     if (trtAr->FindKey("Detector_Ar_-1")){
-      cout << "MAKING AR RtColor det -1" << endl;
+      cout << "    MAKING AR RtColor det -1" << endl;
       try {rtArcol2= new RtColor(argv[2],"Detector_Ar_-1", true);}
       catch (string e){cout << e << endl;}
     }
     if (trtAr->FindKey("Detector_Ar_1")){
-      cout << "MAKING AR RtColor det 1" << endl;
+      cout << "    MAKING AR RtColor det 1" << endl;
       try {rtArcol3= new RtColor(argv[2],"Detector_Ar_1", true);}
       catch (string e){cout << e << endl;}
     }
     if (trtAr->FindKey("Detector_Ar_-2")){
-      cout << "MAKING AR RtColor det -2" << endl;
+      cout << "    MAKING AR RtColor det -2" << endl;
       try {rtArcol4= new RtColor(argv[2],"Detector_Ar_-2", true);}
       catch (string e){cout << e << endl;}
      }
     if (trtAr->FindKey("Detector_Ar_2")){
-      cout << "MAKING AR RtColor det 2" << endl;
+      cout << "    MAKING AR RtColor det 2" << endl;
       try {rtArcol5= new RtColor(argv[2],"Detector_Ar_2", true);}
       catch (string e){cout << e << endl;}
     }
-  }
+  //Add the plot for Board T0 variations 
+  BoardVariationsOldT0* refboardECgraphA=nullptr;
+  BoardVariationsOldT0* refboardECgraphC=nullptr;
+  BoardVariationsDiff* boarddiffECgraphA=nullptr;
+  BoardVariationsDiff* boarddiffECgraphC=nullptr;
+  if (useref){
+    cout << "MAKING BoardVariationsOldT0 for Ar" << endl; 
+    refboardECgraphA= new BoardVariationsOldT0(argv[4],2);
+    refboardECgraphC= new BoardVariationsOldT0(argv[4],-2);
+    boarddiffECgraphA->SetLineColor(2);
+    boarddiffECgraphC->SetLineColor(2);
+    cout << "MAKING BoardVariationsDiff Ar" << endl; 
+    boarddiffECgraphA= new BoardVariationsDiff(argv[2],argv[4],2);
+    boarddiffECgraphC= new BoardVariationsDiff(argv[2],argv[4],-2);
+  } 
+  //Add the plot for Board T0 variations 
+  cout << "MAKING BoardVariations Ar" << endl; 
+  BoardVariations* boardECgraphA= new BoardVariations(argv[2],2);
+  BoardVariations* boardECgraphC= new BoardVariations(argv[2],-2);
+  //Add the plot for the residual
+  cout << "MAKING BoardVariationsRes Ar" << endl; 
+  BoardVariationsRes* boardECgraphA1= new BoardVariationsRes(argv[2],2);
+  BoardVariationsRes* boardECgraphC1= new BoardVariationsRes(argv[2],-2);
+  //Add the plot for the Time residual
+  cout << "MAKING BoardVariationsTRes Ar" << endl; 
+  BoardVariationsTRes* boardECgraphA2= new BoardVariationsTRes(argv[2],2);
+  BoardVariationsTRes* boardECgraphC2= new BoardVariationsTRes(argv[2],-2);
+  //Add the plot for the sigma Time residual
+  cout << "MAKING BoardVariationsTRes1" << endl; 
+  BoardVariationsTRes1* boardECgraphA3= new BoardVariationsTRes1(argv[2],2);
+  BoardVariationsTRes1* boardECgraphC3= new BoardVariationsTRes1(argv[2],-2);
+
+
+
+ 
 
 
 
 
 
-
-
-  
+  cout << " Start printing itersum.ps" << endl;  
   
   TCanvas* textpage;
 
@@ -4137,11 +4680,7 @@ int itersum(int argc, char* argv[]) {
   if (hitstat) hitstat->Print("itersum.ps");  c1->Clear();
   if (hitstatAr) hitstatAr->Print("itersum.ps");  c1->Clear();
 
-//  textpage = new TextPage("RESIDUAL PLOTS"); textpage->Print("itersum.ps"); c1->Clear();
 
-  gStyle->SetOptStat(1);
- // if (TRTresplots) TRTresplots->Print("itersum.ps");  c1->Clear();
- // if (TRTresplotsAr) TRTresplotsAr->Print("itersum.ps");  c1->Clear();
   gStyle->SetOptStat(0);
   if (resplots)   resplots->Print("itersum.ps");  c1->Clear();  
   if (resplotsAr) resplotsAr->Print("itersum.ps");  c1->Clear();
@@ -4212,11 +4751,7 @@ if(do_expert)  if (chipgraphA && chipgraphC){
     c1->cd(1);
     boarddiffgraphA->Draw("ap");
     boarddiffgraphA->DrawLines();
-    //TLegend* leg = new TLegend(0.8,0.8,0.98,0.95);
-    //leg->AddEntry(boardgraphA,"data","l");
-    //if (refboardgraphA) leg->AddEntry(refboardgraphA,"input to 1st it","l");
-    //leg->SetTextSize(0.03);
-    //leg->Draw();    
+
     c1->cd(2);
     boarddiffgraphC->Draw("ap");
     boarddiffgraphC->DrawLines();
@@ -4271,7 +4806,7 @@ if(do_expert)    c1->Print("itersum.ps");
 //Do hits fit type:
   XYMapsEC* ntypeEC= new XYMapsEC(argv[2],"ftype");
   ntypeEC->Print("itersum.ps");
-  XYMapsEC* ntypeECAr= NULL;
+  XYMapsEC* ntypeECAr= nullptr;
   if(isAr)      {
                 ntypeECAr = new XYMapsEC(argv[2],"ftype", true);
                 ntypeECAr->Print("itersum.ps");
@@ -4280,7 +4815,7 @@ if(do_expert)    c1->Print("itersum.ps");
 //Do hits plots:
   XYMapsEC* nhitsEC= new XYMapsEC(argv[2],"nt0");
   nhitsEC->Print("itersum.ps");
-  XYMapsEC* nhitsECAr= NULL;
+  XYMapsEC* nhitsECAr= nullptr;
   if(isAr)      {
                 nhitsECAr = new XYMapsEC(argv[2],"nt0", true);
                 nhitsECAr->Print("itersum.ps");
@@ -4288,7 +4823,7 @@ if(do_expert)    c1->Print("itersum.ps");
 //Do res plot:
   XYMapsEC* resxy0EC = new XYMapsEC(argv[2],"res");
   resxy0EC->Print("itersum.ps");
-  XYMapsEC* resxy0ECAr= NULL;
+  XYMapsEC* resxy0ECAr= nullptr;
   if(isAr)      {
                 resxy0ECAr = new XYMapsEC(argv[2],"res", true);
                 resxy0ECAr->Print("itersum.ps");
@@ -4296,7 +4831,7 @@ if(do_expert)    c1->Print("itersum.ps");
 
   XYMapsEC* resxyM0EC = new XYMapsEC(argv[2],"abs(resMean)");
   resxyM0EC->Print("itersum.ps");
-  XYMapsEC* resxyM0ECAr= NULL;
+  XYMapsEC* resxyM0ECAr= nullptr;
   if(isAr)      {
                 resxyM0ECAr = new XYMapsEC(argv[2],"abs(resMean)", true);
                 resxyM0ECAr->Print("itersum.ps");
@@ -4305,17 +4840,17 @@ if(do_expert)    c1->Print("itersum.ps");
 //Do t0s plots:
   XYMapsEC* xymapEC= new XYMapsEC(argv[2],"t0");
   xymapEC->Print("itersum.ps");
-  XYMapsEC* xymapECAr= NULL;
+  XYMapsEC* xymapECAr= nullptr;
   if(isAr)      {
                 xymapECAr = new XYMapsEC(argv[2],"t0", true);
                 xymapECAr->Print("itersum.ps");
   }
 
 //Do Oldt0plots
-XYMapsEC* oldt0EC = NULL;
+XYMapsEC* oldt0EC = nullptr;
 if(do_expert)   oldt0EC= new XYMapsEC(argv[2],"oldt0");
 if(do_expert)   oldt0EC->Print("itersum.ps");
-  XYMapsEC* oldt0ECAr= NULL;
+  XYMapsEC* oldt0ECAr= nullptr;
 if(do_expert) {
   if(isAr)      {
                 oldt0ECAr = new XYMapsEC(argv[2],"oldt0", true);
@@ -4326,37 +4861,105 @@ if(do_expert) {
 //Do t0 diff:
   XYMapsEC* oldt01EC= new XYMapsEC(argv[2],"abs(t0-oldt0)");
   oldt01EC->Print("itersum.ps");
-  XYMapsEC* oldt01ECAr= NULL;
+  XYMapsEC* oldt01ECAr= nullptr;
   if(isAr)      {
                 oldt01ECAr = new XYMapsEC(argv[2],"abs(t0-oldt0)", true);
                 oldt01ECAr->Print("itersum.ps");
   }
 
-//Do t0 widght:
+//Do t0 widht:
 
-XYMapsEC* oldt0111EC= NULL;
+XYMapsEC* oldt0111EC= nullptr;
 if(do_expert)  oldt0111EC= new XYMapsEC(argv[2],"abs(tresMean)");
 if(do_expert)  oldt0111EC->Print("itersum.ps");
-  XYMapsEC* oldt0111ECAr= NULL;
+  XYMapsEC* oldt0111ECAr= nullptr;
 if(do_expert){
   if(isAr)      {
                 oldt0111ECAr = new XYMapsEC(argv[2],"abs(tresMean)", true);
                 oldt0111ECAr->Print("itersum.ps");
   }
 }
-//Do t0 widght:
+//Do t0 widht:
   XYMapsEC* oldt011EC= new XYMapsEC(argv[2],"tres");
   oldt011EC->Print("itersum.ps");
-  XYMapsEC* oldt011ECAr= NULL;
+  XYMapsEC* oldt011ECAr= nullptr;
   if(isAr)      {
                 oldt011ECAr = new XYMapsEC(argv[2],"tres", true);
                 oldt011ECAr->Print("itersum.ps");
   }
 
+  //Do board variations for Ar
+  c1->cd();
+  c1->Divide(1,2,0.01,0.01);
+  c1->cd(1);
+  boardECgraphA->Draw("apl");
+  boardECgraphA->DrawLines();
+  if (refboardECgraphA) refboardECgraphA->Draw("pl");
+  TLegend* legAr = new TLegend(0.8,0.8,0.98,0.95);
+  legAr->AddEntry(boardECgraphA,"data","l");
+  if (refboardECgraphA) leg->AddEntry(refboardECgraphA,"ref (input to 1st it)","l");
+  legAr->SetTextSize(0.03);
+  legAr->Draw();    
+  c1->cd(2);
+  boardECgraphC->Draw("apl");
+  boardECgraphC->DrawLines();
+  if (refboardECgraphC) refboardECgraphC->Draw("pl");
+  c1->Print("itersum.ps");
+  c1->Clear();
+
+  //Add the plot for Board T0 variations differenses 
+  if (useref){
+    c1->cd();
+    c1->Divide(1,2,0.01,0.01);
+    c1->cd(1);
+    boarddiffECgraphA->Draw("ap");
+    boarddiffECgraphA->DrawLines();
+    c1->cd(2);
+    boarddiffECgraphC->Draw("ap");
+    boarddiffECgraphC->DrawLines();
+if(do_expert)    c1->Print("itersum.ps");
+    c1->Clear();
+  }
+
+  c1->cd();
+  c1->Divide(1,2,0.01,0.01);
+  c1->cd(1);
+  boardECgraphA1->Draw("apl");
+  boardECgraphA1->DrawLines();
+  c1->cd(2);
+  boardECgraphC1->Draw("apl");
+  boardECgraphC1->DrawLines();
+  c1->Print("itersum.ps");
+  c1->Clear();
+
+  c1->cd();
+  c1->Divide(1,2,0.01,0.01);
+  c1->cd(1);
+  boardECgraphA2->Draw("apl");
+  boardECgraphA2->DrawLines();
+  c1->cd(2);
+  boardECgraphC2->Draw("apl");
+  boardECgraphC2->DrawLines();
+  c1->Print("itersum.ps");
+  c1->Clear();
+
+  c1->cd();
+  c1->Divide(1,2,0.01,0.01);
+  c1->cd(1);
+  boardECgraphA3->Draw("apl");
+  boardECgraphA3->DrawLines();
+  c1->cd(2);
+  boardECgraphC3->Draw("apl");
+  boardECgraphC3->DrawLines();
+  c1->Print("itersum.ps");
+  c1->Clear();
+
    // ###################################      RT PLOTS: ########################################################
 
 
   textpage = new TextPage(" RT PLOTS "); textpage->Print("itersum.ps"); c1->Clear();	
+
+
 
   gStyle->SetOptStat(1);
   gStyle->SetOptFit(0);
@@ -4398,12 +5001,12 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
   
   // Plot all RTs together....
   
-  DGraph* dgraph0=NULL; //trt
-  DGraph* dgraph1=NULL; // -1
-  DGraph* dgraph2=NULL; // 1
-  DGraph* dgraph3=NULL; // -2
-  DGraph* dgraph4=NULL; // 2
-  DGraph* dgraph5=NULL; // whole barrel
+  DGraph* dgraph0=nullptr; //trt
+  DGraph* dgraph1=nullptr; // -1
+  DGraph* dgraph2=nullptr; // 1
+  DGraph* dgraph3=nullptr; // -2
+  DGraph* dgraph4=nullptr; // 2
+  DGraph* dgraph5=nullptr; // whole barrel
   bool isinverted=false;
   if (datafile->FindKey("TRT_all")){
     TDirectory* trt = (TDirectory*) datafile->FindKey("TRT_all")->ReadObj();
@@ -4411,56 +5014,62 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
     c1->cd();
     c1->SetGrid();
     dgraph0 = new DGraph(argv[2],"-2,-1","",-2,-1,isinverted);
-    if(trt->FindKey("WholeBarrel_1"))        dgraph5 = new DGraph(argv[2],"-2,-1","WholeBarrel_1",-1,-1,isinverted);
-    else {
+    if(trt->FindKey("WholeBarrel_1")) {       dgraph5 = new DGraph(argv[2],"-2,-1","WholeBarrel_1",-1,-1,isinverted);
+    } else {
+      cout << " did not find WholeBarrel_1" << endl;
       if(trt->FindKey("Detector_1"))        dgraph1 = new DGraph(argv[2],"-2,-1","Detector_1",1,-1,isinverted);
       if(trt->FindKey("Detector_-1"))        dgraph2 = new DGraph(argv[2],"-2,-1","Detector_-1",1,-1,isinverted);
     }
     if(trt->FindKey("Detector_2"))        dgraph3 = new DGraph(argv[2],"-2,-1","Detector_2",1,-1,isinverted);
     if(trt->FindKey("Detector_-2"))        dgraph4 = new DGraph(argv[2],"-2,-1","Detector_-2",1,-1,isinverted);
     
-    if (not dgraph0) throw string("dgraph pointer is null at this point");
     dgraph0->GetXaxis()->SetRangeUser(-5,45);
     TLegend* leg = new TLegend(0.8,0.8,0.98,0.95);
-    
-    dgraph0->SetLineWidth(3);
-    dgraph0->SetLineColor(1);
-    if (isinverted) dgraph0->SetTitle("r(t)");
-    else dgraph0->SetTitle("r(t)");
-    dgraph0->GetXaxis()->SetTitle("t/ns");
-    if (isinverted) dgraph0->GetYaxis()->SetTitle("R / (mm)");
-    else dgraph0->GetYaxis()->SetTitle("R / (mm)");
-    if (dgraph0->rtgraph) dgraph0->Draw("apl");
-    if (dgraph0->rtgraph) leg->AddEntry(dgraph0,"Whole TRT","l");
-  
-    if (dgraph1!=NULL){
+    if (dgraph0!=nullptr){
+      cout << " found TRT_all" << endl;
+      dgraph0->SetLineWidth(3);
+      dgraph0->SetLineColor(1);
+      if (isinverted) dgraph0->SetTitle("r(t)");
+      else dgraph0->SetTitle("r(t)");
+      dgraph0->GetXaxis()->SetTitle("t/ns");
+      if (isinverted) dgraph0->GetYaxis()->SetTitle("R / (mm)");
+      else dgraph0->GetYaxis()->SetTitle("R / (mm)");
+      if (dgraph0->rtgraph) dgraph0->Draw("apl");
+      if (dgraph0->rtgraph) leg->AddEntry(dgraph0,"Whole TRT","l");
+    }
+    if (dgraph1!=nullptr){
+      cout << " found Detector_1" << endl;
       dgraph1->SetLineWidth(3);
       dgraph1->SetLineColor(3);
       if (dgraph1->rtgraph) dgraph1->Draw("pl");
       if (dgraph1->rtgraph) leg->AddEntry(dgraph1,"Barrel C Side","l");
     }
     
-    if (dgraph2!=NULL){
+    if (dgraph2!=nullptr){
+      cout << " found Detector_-1" << endl;
       dgraph2->SetLineWidth(3);
       dgraph2->SetLineColor(2);
       if (dgraph2->rtgraph) dgraph2->Draw("pl");
       if (dgraph2->rtgraph) leg->AddEntry(dgraph2,"Barrel A Side","l");
     }
     
-    if (dgraph3!=NULL){
+    if (dgraph3!=nullptr){
       dgraph3->SetLineWidth(3);
+      cout << " found Detector_2" << endl;
       dgraph3->SetLineColor(6);
       if (dgraph3->rtgraph) dgraph3->Draw("pl");
       if (dgraph3->rtgraph) leg->AddEntry(dgraph3,"Endcap C side","l");
     }
     
-    if (dgraph4!=NULL){
+    if (dgraph4!=nullptr){
+      cout << " found Detector_-2" << endl;
       dgraph4->SetLineWidth(3);
       dgraph4->SetLineColor(7);
       if (dgraph4->rtgraph) dgraph4->Draw("pl");
       if (dgraph4->rtgraph) leg->AddEntry(dgraph4,"Endcap A side","l");
     }
-    if (dgraph5!=NULL){
+    if (dgraph5!=nullptr){
+      cout << " found WholeBarrel_1" << endl;
       dgraph5->SetLineWidth(3);
       dgraph5->SetLineColor(8);
       if (dgraph5->rtgraph) dgraph5->Draw("pl");
@@ -4475,15 +5084,16 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
   
   
   //Plot drift velocity:
-  DvGraph* dvgraph0=NULL; //trt
-  DvGraph* dvgraph1=NULL; // -1
-  DvGraph* dvgraph2=NULL; // 1
-  DvGraph* dvgraph3=NULL; // -2
-  DvGraph* dvgraph4=NULL; // 2
-  DvGraph* dvgraph5=NULL; // whole barrel
+  DvGraph* dvgraph0=nullptr; //trt
+  DvGraph* dvgraph1=nullptr; // -1
+  DvGraph* dvgraph2=nullptr; // 1
+  DvGraph* dvgraph3=nullptr; // -2
+  DvGraph* dvgraph4=nullptr; // 2
+  DvGraph* dvgraph5=nullptr; // whole barrel
  if(do_expert){
   //  bool isinverted=false;
   if (datafile->FindKey("TRT_all")){
+    cout << " do_expert: found TRT_all" << endl;
     TDirectory* trt = (TDirectory*) datafile->FindKey("TRT_all")->ReadObj();
     cout << "MAKING DvGraphs" << endl; 
     c1->cd();
@@ -4497,10 +5107,10 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
     if(trt->FindKey("Detector_2"))        dvgraph3 = new DvGraph(argv[2],"-2,-1","Detector_2",1,-1,isinverted);
     if(trt->FindKey("Detector_-2"))        dvgraph4 = new DvGraph(argv[2],"-2,-1","Detector_-2",1,-1,isinverted);
     
-    if (not dvgraph0) throw string("dvgraph0 ptr is null");
     dvgraph0->GetXaxis()->SetRangeUser(0,2);
     TLegend* leg = new TLegend(0.8,0.8,0.98,0.95);
-    if (dvgraph0!=NULL){
+    if (dvgraph0!=nullptr){
+      cout << " do_expert: found -2-1" << endl;
       dvgraph0->SetLineWidth(3);
       dvgraph0->SetLineColor(1);
       if (isinverted) dvgraph0->SetTitle("dt/dr");
@@ -4511,34 +5121,35 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
       if (dvgraph0->rtgraph) dvgraph0->Draw("apl");
       if (dvgraph0->rtgraph) leg->AddEntry(dvgraph0,"Whole TRT","l");
     }
-    if (dvgraph1!=NULL){
+    if (dvgraph1!=nullptr){
+      cout << " do_expert: found Detector_1" << endl;
       dvgraph1->SetLineWidth(3);
       dvgraph1->SetLineColor(3);
       if (dvgraph1->rtgraph) dvgraph1->Draw("pl");
       if (dvgraph1->rtgraph) leg->AddEntry(dvgraph1,"Barrel C Side","l");
     }
     
-    if (dvgraph2!=NULL){
+    if (dvgraph2!=nullptr){
       dvgraph2->SetLineWidth(3);
       dvgraph2->SetLineColor(2);
       if (dvgraph2->rtgraph) dvgraph2->Draw("pl");
       if (dvgraph2->rtgraph) leg->AddEntry(dvgraph2,"Barrel A Side","l");
     }
     
-    if (dvgraph3!=NULL){
+    if (dvgraph3!=nullptr){
       dvgraph3->SetLineWidth(3);
       dvgraph3->SetLineColor(6);
       if (dvgraph3->rtgraph) dvgraph3->Draw("pl");
       if (dvgraph3->rtgraph) leg->AddEntry(dvgraph3,"Endcap C side","l");
     }
     
-    if (dvgraph4!=NULL){
+    if (dvgraph4!=nullptr){
       dvgraph4->SetLineWidth(3);
       dvgraph4->SetLineColor(7);
       if (dvgraph4->rtgraph) dvgraph4->Draw("pl");
       if (dvgraph4->rtgraph) leg->AddEntry(dvgraph4,"Endcap A side","l");
     }
-    if (dvgraph5!=NULL){
+    if (dvgraph5!=nullptr){
       dvgraph5->SetLineWidth(3);
       dvgraph5->SetLineColor(8);
       if (dvgraph5->rtgraph) dvgraph5->Draw("pl");
@@ -4569,7 +5180,7 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
   c1->Clear();	
 
   bool istracktuple = false;
-  TNtuple* Tracktuple=NULL  ;
+  TNtuple* Tracktuple=nullptr  ;
   if (datafile->FindKey("tracktuple")) {
   	Tracktuple    = (TNtuple*)datafile->Get("tracktuple") ;
 	istracktuple=true;
@@ -4701,14 +5312,19 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
 
   // ###################################   ADD PLOTS FOR Pulls and Errors   #######################################33
 
+
+  //Skip all this for now (PH)
+  cout << " Skipping plots for Pulls and Errors " << endl;
+  
   bool iserrors = false;
-  TDirectory* errors=NULL  ;
+  TDirectory* errors=nullptr  ;
   if (datafile->FindKey("Errors")) {
 	errors = (TDirectory*) datafile->FindKey("Errors")->ReadObj();
-	iserrors = true;
+	if (errors!=nullptr) iserrors = true;
   }
 
   c1->Clear();
+  /*
   textpage = new TextPage(" Error Plots and Pt dependence. Only for Experts!!!");
   textpage->Print("itersum.ps");
   c1->Clear();	
@@ -4731,26 +5347,31 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
   }
 
 
-
+  */
 
 
 
   // ###################################   ADD PLOTS FOR ToT and HT   #######################################33
 
+  //Skip all this for now (PH)
+  cout << " Skipping plots for ToT and HT " << endl;
+
+
   bool iscorrections = false;
-  TDirectory* corrections=NULL  ;
+  TDirectory* corrections=nullptr  ;
   if (datafile->FindKey("Correction")) {
 	corrections = (TDirectory*) datafile->FindKey("Correction")->ReadObj();
-	iscorrections = true;
+	if(corrections!=nullptr) iscorrections = true;
   }
-
+  
   c1->Clear();
   textpage = new TextPage(" ToT Corrections and HT corrections: ");
-  textpage->Print("itersum.ps");
+  textpage->Print("itersum.pdf");
   c1->Clear();	
   
   cout << "Making ToT / HT Plots" << endl;
   c1->Clear();
+  /*
   if (iscorrections){
     //first Residuals:
 	cout << "Start with ToT plots:" << endl;
@@ -4790,19 +5411,20 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
   }
 
 
-
+  */
 
 
 
   // ###################################   ADD PLOTS FOR ToT and HT  ARGON  #######################################33
 
   bool iscorrectionsAr = false;
-  TDirectory* correctionsAr=NULL  ;
+  TDirectory* correctionsAr=nullptr  ;
   if (datafile->FindKey("CorrectionAr")) {
         correctionsAr = (TDirectory*) datafile->FindKey("CorrectionAr")->ReadObj();
-        iscorrectionsAr = true;
+        if(correctionsAr!=nullptr) iscorrectionsAr = true;
   }
 
+  /*
   if (iscorrectionsAr){
   	c1->Clear();
   	textpage = new TextPage(" ToT Corrections and HT corrections: ARGON");
@@ -4846,29 +5468,31 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
         cosstuff2->Print("itersum.ps");
 
 
-  }
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  datafile->Close();
-  if (useref) refdatafile->Close();
-  
   c1->Print("itersum.ps]");  
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ datafile->Close();
+ if (useref) refdatafile->Close();
+
+  
+
+
 
 //   cout << "RDIFF -1 ";
 //   for (map<double,double>::iterator rtpoint = rtrelation21->rtmap.begin(); rtpoint !=  rtrelation21->rtmap.end(); rtpoint++){
@@ -4919,11 +5543,8 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
                     string(Form("/Helvetica findfont 36 scalefont setfont 740 2190 moveto (%s) show ",settings->set["RtBinning"].data())) +
 
                     string("/Helvetica-Bold findfont 36 scalefont setfont 540 2150 moveto (Rt level:) show ") +
-      //string(Form("/Helvetica findfont 36 scalefont setfont 740 2050 moveto (%s) show ",settings->set["DoRt"].data())) +
 
                     string("/Helvetica-Bold findfont 36 scalefont setfont 540 2110 moveto (T0 level:) show ") +
-      //string(Form("/Helvetica findfont 36 scalefont setfont 740 2010 moveto (%s) show ",settings->set["DoT0"].data())) +
-
 
 
                     string("/Helvetica-Bold findfont 36 scalefont setfont 1040 2190 moveto (Solenoid:) show ") +
@@ -4943,7 +5564,7 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
                     string(Form("/Helvetica findfont 30 scalefont setfont 240 2020 moveto (%s) show ",settings->set["StartConst"].data()))
     ;
     system((string("sed -i 's?showpage?" + pmarking + "showpage?g' itersum.ps")).data());
-    //cout << ((string("sed -i 's?showpage?" + pmarking + "showpage?g' itersum.ps")).data()) << endl;
+
   }
 
 
@@ -4971,7 +5592,7 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
 }
 
 int tt_remove(int argc, char* argv[]){
-  //cppcheck-suppress ctuArrayIndex
+
   TFile* itersumfile = new TFile(argv[2],"UPDATE");
   if (itersumfile->FindKey("tracktuple")) {
         itersumfile->Delete("tracktuple;*");
@@ -4991,11 +5612,7 @@ int tt_remove(int argc, char* argv[]){
 }
 
 int main(int argc, char* argv[]){
-  if (argc < 3){
-    cout << "Command needs at least two arguments;\n";
-    cout << "The first argument is 'itersum' or 'restore'\n";
-    cout << "and the second argument is a ROOT filename."<<std::endl;
-  }
+
   gErrorIgnoreLevel = kFatal; // Explicitly remove all messages
 
   if ((string(argv[1])).find("itersum")!=std::string::npos) {
