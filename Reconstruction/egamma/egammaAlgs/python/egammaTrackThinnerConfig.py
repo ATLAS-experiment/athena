@@ -19,6 +19,9 @@ def egammaTrackThinnerCfg(
                       flags.Egamma.Keys.Output.Electrons)
     kwargs.setdefault("InputPhotonContainerName",
                       flags.Egamma.Keys.Output.Photons)
+    if flags.Detector.GeometryITk:
+        kwargs.setdefault("InputForwardElectronContainerName",
+                        flags.Egamma.Keys.Output.ForwardElectrons)
     kwargs.setdefault("TrackParticleContainerName",
                       flags.Egamma.Keys.Output.GSFTrackParticles)
     kwargs.setdefault("VertexContainerName",

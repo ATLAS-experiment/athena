@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAALGS_EGAMMATRACKTHINNER_H
@@ -51,6 +51,13 @@ class egammaTrackThinner : public AthReentrantAlgorithm
       "Photons",
       "Name of the input photon container"};
 		
+  /** @brief forward electron collection input name*/
+  SG::ReadHandleKey<xAOD::ElectronContainer> m_InputForwardElectronContainerKey
+    { this,
+      "InputForwardElectronContainerName",
+      "",
+      "Name of the input electron container" };
+
   /** @brief GSF Track Particle container to thin */
   SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_TrackParticlesKey {this,
       "TrackParticleContainerName", 
