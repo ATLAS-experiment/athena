@@ -73,7 +73,7 @@ namespace CP {
           if (year == 2015) fileName = "muontrigger_sf_2015_mc20a_v1.root";
           else if (year == 2016) fileName = "muontrigger_sf_2016_mc20a_v1.root";
           else if (year == 2017) fileName = "muontrigger_sf_2017_mc20d_v1.root";
-          else if (year == 2018) fileName = "muontrigger_sf_2018_mc20e_v1.root";
+          else if (year == 2018) fileName = "muontrigger_sf_2018_mc20e_v2.root";
           else if (year == 2022) fileName = "muontrigger_sf_2022_mc21_v05.root";
           else{
             ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
