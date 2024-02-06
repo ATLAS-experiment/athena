@@ -17,10 +17,10 @@ log = logging.getLogger(__name__)
 
 class MenuThresholdsCollection( object ):
 
-    def __init__(self, do_HI_tob_thresholds=False):
+    def __init__(self, flags):
         self.thresholds     = odict() # holds all thresholds
         self.thresholdNames = set()   # holds all threshold names
-        self.do_HI_tob_thresholds = do_HI_tob_thresholds
+        self.flags = flags
 
     def __iter__(self):
         return iter(self.thresholds.values())
@@ -60,7 +60,7 @@ class MenuThresholdsCollection( object ):
 
 
     def typeWideThresholdConfig(self, ttype):
-        return getTypeWideThresholdConfig(ttype, self.do_HI_tob_thresholds)
+        return getTypeWideThresholdConfig(ttype, self.flags.Trigger.L1.doHeavyIonTobThresholds, self.flags.Trigger.L1.doeFexBDTTau)
 
     def json(self):
         confObj = odict()
