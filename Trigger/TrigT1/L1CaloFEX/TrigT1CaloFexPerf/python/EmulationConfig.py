@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from TrigT1CaloFexPerf.L1PerfControlFlags import L1Phase1PerfFlags as perfFlags
-
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def emulateSC_Cfg(flags, CellsIn="SeedLessFS"):
 
@@ -24,10 +22,8 @@ def emulateSC_Cfg(flags, CellsIn="SeedLessFS"):
     larSCargs["SCellContainerIn"] = "EmulatedSCellNoBCID"
     larSCargs["SCellContainerOut"] = flags.Trigger.L1.L1CaloSuperCellContainerName
 
-    if(perfFlags.Calo.ApplyEmulatedPedestal()):
-        #Apply the pedestal correction. There may be cases we do not want this. 
-    #The default input to LARSuperCellBCIDEmAlg (which applies the BCID correction) is the same: SCellContainer
-        acc.merge(LArSuperCellBCIDEmAlgCfg(flags, **larSCargs))
+    # Apply the pedestal correction
+    acc.merge(LArSuperCellBCIDEmAlgCfg(flags, **larSCargs))
 
     # Given this function emulates supercells, we should also configure the supercell alignment Cond alg
     acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
