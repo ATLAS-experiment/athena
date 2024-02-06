@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCG4CALIBSD_H
@@ -33,6 +33,10 @@ public:
 
   // Destructor
   virtual ~ZDC_G4CalibSD();
+
+  ZDC_G4CalibSD(const ZDC_G4CalibSD&) = delete;
+  ZDC_G4CalibSD& operator=(const ZDC_G4CalibSD&) = delete;
+
   // Main processing method
   G4bool ProcessHits(G4Step* a_step,G4TouchableHistory*) override;
   // For other classes that need to call into us...
