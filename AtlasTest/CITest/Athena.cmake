@@ -41,17 +41,11 @@ atlas_add_citest( PileUpPresamplingRun3
 atlas_add_citest( OverlayRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA True --conditionsTag OFLCOND-MC16-SDR-RUN2-11' )
 
-atlas_add_citest( OverlayRun2MC_Legacy
-   SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA False --conditionsTag OFLCOND-MC16-SDR-RUN2-11' )
-
 atlas_add_citest( OverlayRun2Data
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay )
 
 atlas_add_citest( OverlayRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay -e '--CA True' )
-
-atlas_add_citest( OverlayRun3MC_Legacy
-   SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay -e '--CA False' )
 
 #################################################################################
 # Standard reconstruction workflows

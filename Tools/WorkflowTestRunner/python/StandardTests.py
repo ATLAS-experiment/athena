@@ -123,10 +123,9 @@ class OverlayTest(WorkflowTest):
         self.skip_performance_checks = True
 
         self.output_checks = [
-            FrozenTier0PolicyCheck(setup, "RDO", 10)
+            FrozenTier0PolicyCheck(setup, "RDO", 10),
+            MetadataCheck(setup, "RDO"),
         ]
-        if "CA" not in extra_args or "--CA True" in extra_args:
-            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
