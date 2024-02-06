@@ -17,13 +17,11 @@ from .Physics_pp_run3_v1 import (
     SingleMuonGroup,
     SingleJetGroup,
     MinBiasGroup,
-    JetStreamersGroup,
     JetPhaseIStreamersGroup,
     TauPhaseIStreamersGroup,
     EgammaPhaseIStreamersGroup,
     MuonXStreamersGroup,
     SupportGroup,
-    SupportLegGroup,
     SupportPhIGroup,
 )
 
@@ -49,7 +47,8 @@ def addPhysicsP1Chains(chains):
 
     chainsP1['Jet'] = [
         # L1 item is not in MC menu
-        ChainProp(name='HLT_j0_perf_L1J12_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportLegGroup, monGroups=['jetMon:online']),
+        ChainProp(name='HLT_j0_perf_L1jJ30_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:online']),
+
     ]
 
     # Streamers with L1 items removed from MC menu
@@ -68,9 +67,6 @@ def addPhysicsP1Chains(chains):
         ChainProp(name='HLT_noalg_L1MU15VFCH',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU15VFCHR', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU20VFC',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup+SupportGroup),
-
-        ChainProp(name='HLT_noalg_L1J25',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1J85',     l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportLegGroup),
 
         ChainProp(name='HLT_noalg_L1eTAU20L',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+TauPhaseIStreamersGroup),
         ChainProp(name='HLT_noalg_L1eTAU35',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+TauPhaseIStreamersGroup),

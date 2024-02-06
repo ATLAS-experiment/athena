@@ -82,7 +82,7 @@ FixedIDMap = {
         # ATR-23836
         "L1_BCM_2A_FIRSTEMPTY":480,
         "L1_BCM_2C_FIRSTEMPTY":481,
-        "L1_J12":482,
+        "L1_jJ30":482,
         "L1_MBTS_1":483,
         "L1_MBTS_2":484,
         "L1_MBTS_1_1":485,
