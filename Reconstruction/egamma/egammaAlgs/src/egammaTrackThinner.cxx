@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -34,6 +34,9 @@ StatusCode egammaTrackThinner::initialize()
   // initialize data handles
   ATH_CHECK(m_InputElectronContainerKey.initialize(m_doThinning));
   ATH_CHECK(m_InputPhotonContainerKey.initialize(m_doThinning));
+  bool includeFwdEl =
+    m_doThinning && !m_InputForwardElectronContainerKey.empty();
+  ATH_CHECK(m_InputForwardElectronContainerKey.initialize(includeFwdEl));
   ATH_CHECK(m_TrackParticlesKey.initialize(m_streamName, m_doThinning));
   ATH_CHECK(m_VertexKey.initialize(m_streamName, m_doThinning));
 
@@ -130,7 +133,7 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
       if(!vx){
         continue;
       }
-    
+
       auto trackParticleLinks = vx->trackParticleLinks();
       for ( const auto& link :  trackParticleLinks){
         if( ! link.isValid() ){
@@ -138,6 +141,28 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
         }
         ATH_MSG_DEBUG("Photons : Keeping GSF Track Particle with index : "<< link.index() );
         keptTrackParticles[link.index() ] = true;
+      }
+    }
+  }
+
+  if (!m_InputForwardElectronContainerKey.empty()) {
+    SG::ReadHandle<xAOD::ElectronContainer>
+      fwdelectrons(m_InputForwardElectronContainerKey, ctx);
+    // check is only used for serial running; remove when MT scheduler used
+    ATH_CHECK(fwdelectrons.isValid());
+
+    //Loop over forward electrons
+    for (const auto *el : *fwdelectrons) {
+
+      auto trackParticleLinks = el->trackParticleLinks();
+      for (const auto& link : trackParticleLinks){
+	if (!link.isValid()) {
+	  continue;
+	}
+	ATH_MSG_DEBUG("ForwardElectrons : "
+		      "Keeping GSF Track Particle with index : "
+		      << link.index());
+	keptTrackParticles[link.index()] = true;
       }
     }
   }
