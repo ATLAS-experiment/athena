@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: athenaHLT test of the Dev_pp_run3_v1 menu without monitoring (ATR-24655)
 # art-type: build
@@ -12,10 +12,11 @@ import json
 # 1) Dump JSON configuration
 ex1 = ExecStep.ExecStep('dumpConfig')
 ex1.type = 'athenaHLT'
-ex1.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex1.job_options = 'TriggerJobOpts.runHLT'
 ex1.input = 'data'
-ex1.args = '-c "setMenu=\'Dev_pp_run3_v1\';forceEnableAllChains=True;"'
-ex1.args += ' --dump-config-exit'
+ex1.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+             'Trigger.forceEnableAllChains=True']
+ex1.args = '--dump-config-exit'
 ex1.perfmon = False
 
 # 2) Remove all MonTools
