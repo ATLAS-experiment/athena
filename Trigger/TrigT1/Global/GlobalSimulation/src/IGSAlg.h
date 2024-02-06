@@ -6,6 +6,7 @@ namespace GlobalSim {
   // provide a run() method for all GlobalSim algorihms
   class IGSAlg {
   public:
+    virtual ~IGSAlg() = default;
     virtual void run() const = 0;
   };
 }

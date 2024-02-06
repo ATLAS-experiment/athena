@@ -145,8 +145,8 @@ namespace ActsTrk
         cfg.resolveMaterial = true;
         cfg.resolveSensitive = true;
         auto navigtor_logger = logger->cloneWithSuffix("Navigator");
-        m_propagator = std::make_unique<Propagator>(std::move(Stepper(std::move(std::make_shared<ATLASMagneticFieldWrapper>()))),
-                                                    std::move(Navigator(cfg,std::move(navigtor_logger))),
+        m_propagator = std::make_unique<Propagator>(Stepper(std::make_shared<ATLASMagneticFieldWrapper>()),
+                                                    Navigator(cfg,std::move(navigtor_logger)),
                                                     std::move(logger));
      }
 
@@ -211,7 +211,6 @@ namespace ActsTrk
 
     const ActsGeometryContext &gctx = m_extrapolationTool->trackingGeometryTool()->getNominalGeometryContext();
     std::shared_ptr<Acts::PerigeeSurface> perigee_surface = makePerigeeSurface(beamspot_data);
-    unsigned int track_i=0;
     track_particles->reserve( tracksContainer->size());
 
     std::array<const InDetDD::SiDetectorElementCollection *,to_underlying(xAOD::UncalibMeasType::sTgcStripType)+1u> siDetEleColl {};
@@ -236,9 +235,7 @@ namespace ActsTrk
     unsigned int converted_track_states=0;
     
     using namespace Acts::UnitLiterals;
-     --track_i; // to have track_i at the begining of the loop
     for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : *tracksContainer) {
-       ++track_i;
        track_particles->push_back( new xAOD::TrackParticle );
        xAOD::TrackParticle *track_particle=track_particles->back();
 
@@ -413,15 +410,12 @@ namespace ActsTrk
        // store track parameters and covariances for slected states
        parametersVec.clear();
        parametersVec.reserve(tmp_param_state_idx.size());
-       unsigned int state_i=0;
-       --state_i;
 
        for(std::vector<ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType>::const_reverse_iterator
               idx_iter = tmp_param_state_idx.rbegin();
            idx_iter != tmp_param_state_idx.rend();
            ++idx_iter) {
           //       for(ActsTrk::TrackStateBackend::ConstTrackStateProxy::IndexType idx : tmp_param_state_idx) {
-          ++state_i;
           ActsTrk::TrackStateBackend::ConstTrackStateProxy
              state = tracksContainer->trackStateContainer().getTrackState(*idx_iter);
           auto flag = state.typeFlags();
