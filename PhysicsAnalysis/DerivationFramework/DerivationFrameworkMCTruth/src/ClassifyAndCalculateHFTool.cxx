@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -110,7 +110,10 @@ namespace DerivationFramework {
   ---------------------------------------------------------------------------------------------------------------------------------------
   */
 
-  void ClassifyAndCalculateHFTool::flagJets(const xAOD::JetContainer* jets, std::map<const xAOD::Jet*, std::vector<xAOD::TruthParticleContainer::const_iterator>> particleMatch, std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>  hadronMap, const std::string hfDecorationName) const{
+  void ClassifyAndCalculateHFTool::flagJets(const xAOD::JetContainer* jets,
+                                            const std::map<const xAOD::Jet*, std::vector<xAOD::TruthParticleContainer::const_iterator>>& particleMatch,
+                                            const std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>&  hadronMap,
+                                            const std::string& hfDecorationName) const{
 
     for(const xAOD::Jet* jet : *jets){
 
@@ -146,79 +149,82 @@ namespace DerivationFramework {
 
       // Get the hadrons associated with the jet that is being considered.
 
-      std::vector<xAOD::TruthParticleContainer::const_iterator> hadrons = particleMatch[jet];
+      auto it = particleMatch.find (jet);
+      if (it != particleMatch.end()) {
 
-      for(xAOD::TruthParticleContainer::const_iterator hf : hadrons){
+        for(xAOD::TruthParticleContainer::const_iterator hf : it->second){
         
-        // Create two integer variables:
-        //  -hforigin: It will contain the origin of the hadron if it is a HF hadron. Otherwise, it will be 6.
-        //  -pdgId:    It will contain the value of the variable "pdgId" of the hadron.
+          // Create two integer variables:
+          //  -hforigin: It will contain the origin of the hadron if it is a HF hadron. Otherwise, it will be 6.
+          //  -pdgId:    It will contain the value of the variable "pdgId" of the hadron.
 
-        int hforigin = 6;
-        int pdgId    = (*hf)->pdgId(); 
+          int hforigin = 6;
+          int pdgId    = (*hf)->pdgId(); 
 
-        // Extract the origin of the hadron.
+          // Extract the origin of the hadron.
 
-        if(hadronMap.find((*hf))!=hadronMap.end()){
-          hforigin= static_cast<int>(hadronMap[(*hf)]);
-        }
-
-        // Check if hforigin is 6 and if it is the case, then hadron is not HF and it is skipped.
-
-        if(6==hforigin) continue;
-
-        // Compute the ratio between the pt of the hadron and the pt of its associated jet.
-
-        float ptratio = (*hf)->p4().Pt()/jet->p4().Pt();
-
-        // Determine if the hadron is a B-hadron or a C-hadron.
-
-        int hftype = 0;
-        
-        if(ClassifyAndCalculateHFTool::isCHadron(pdgId)) hftype=4; // B-hadron
-        if(ClassifyAndCalculateHFTool::isBHadron(pdgId)) hftype=5; // C-hadron.
-        
-        // Check if hftype is 4 or 5.
-
-        if(5==hftype){
-
-          // In this case, hftype is 5 so the hadron is a B-hadron.
-          // Save hforigin in bid if it is greater than the current bid.
-
-          if(bid<hforigin)bid=hforigin;
-          
-          // Add one to bcount and to bcountcut if hadron passes the cuts.
-          
-          ++bcount;
-
-          if((*hf)->p4().Pt()>m_leadingHadronPtCut && ptratio>m_leadingHadronPtRatioCut){
-            ++bcountcut;
+          auto h_it = hadronMap.find(*hf);
+          if(h_it!=hadronMap.end()){
+            hforigin= static_cast<int>(h_it->second);
           }
-        }
-        else if(4==hftype){
 
-          // In this case, hftype is 4 so the hadron is a C-hadron.
-          // Save hforigin in cid if it is greater than the current cid.
+          // Check if hforigin is 6 and if it is the case, then hadron is not HF and it is skipped.
 
-          if(cid>hforigin)cid=hforigin;
+          if(6==hforigin) continue;
 
-          // Add one to ccount and to ccountcut if hadron passes the cuts.
+          // Compute the ratio between the pt of the hadron and the pt of its associated jet.
 
-          ++ccount;
+          float ptratio = (*hf)->p4().Pt()/jet->p4().Pt();
 
-          if((*hf)->p4().Pt()>m_leadingHadronPtCut && ptratio>m_leadingHadronPtRatioCut){
-            ++ccountcut;
-          }
-          
-        }
-        else{
-          
-          // In this case, hftype is not 4 neither 5 so print an error.
+          // Determine if the hadron is a B-hadron or a C-hadron.
 
-          ATH_MSG_ERROR("Hadron type '" << hftype << "' is not 4 or 5");
-
-        }
+          int hftype = 0;
         
+          if(ClassifyAndCalculateHFTool::isCHadron(pdgId)) hftype=4; // B-hadron
+          if(ClassifyAndCalculateHFTool::isBHadron(pdgId)) hftype=5; // C-hadron.
+        
+          // Check if hftype is 4 or 5.
+
+          if(5==hftype){
+
+            // In this case, hftype is 5 so the hadron is a B-hadron.
+            // Save hforigin in bid if it is greater than the current bid.
+
+            if(bid<hforigin)bid=hforigin;
+          
+            // Add one to bcount and to bcountcut if hadron passes the cuts.
+          
+            ++bcount;
+
+            if((*hf)->p4().Pt()>m_leadingHadronPtCut && ptratio>m_leadingHadronPtRatioCut){
+              ++bcountcut;
+            }
+          }
+          else if(4==hftype){
+
+            // In this case, hftype is 4 so the hadron is a C-hadron.
+            // Save hforigin in cid if it is greater than the current cid.
+
+            if(cid>hforigin)cid=hforigin;
+
+            // Add one to ccount and to ccountcut if hadron passes the cuts.
+
+            ++ccount;
+
+            if((*hf)->p4().Pt()>m_leadingHadronPtCut && ptratio>m_leadingHadronPtRatioCut){
+              ++ccountcut;
+            }
+          
+          }
+          else{
+          
+            // In this case, hftype is not 4 neither 5 so print an error.
+
+            ATH_MSG_ERROR("Hadron type '" << hftype << "' is not 4 or 5");
+
+          }
+        
+        }
       }
 
       // Check if there is at least one B-hadron or a C-hadron that passes the cuts.
@@ -267,7 +273,7 @@ namespace DerivationFramework {
   ---------------------------------------------------------------------------------------------------------------------------------------
   */
 
-  int ClassifyAndCalculateHFTool::computeHFClassification(const xAOD::JetContainer* jets, const std::string hfDecorationName) const{
+  int ClassifyAndCalculateHFTool::computeHFClassification(const xAOD::JetContainer* jets, const std::string& hfDecorationName) const{
 
     // Create a set of integer variables to save information that is required to compute the HF classifier.:
     //  -b:           Number of jets that has just one B-hadron that passes the cuts.
