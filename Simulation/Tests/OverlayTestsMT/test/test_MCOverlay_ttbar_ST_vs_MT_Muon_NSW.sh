@@ -21,6 +21,7 @@ RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/m
 
 
 Overlay_tf.py \
+--CA \
 --detector Muon \
 --multithreaded \
 --runNumber 601229 \
@@ -30,7 +31,7 @@ Overlay_tf.py \
 --maxEvents 10 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
 --conditionsTag OFLCOND-MC21-SDR-RUN3-07  \
 --geometryVersion ATLAS-R3S-2021-03-00-00 \
---preInclude 'all:Campaigns/MC21a.py' \
+--preInclude 'all:Campaigns.MC21a' \
 --imf False
 
 rc=$?
@@ -42,6 +43,7 @@ rc2=-9999
 if [ $rc -eq 0 ]
 then
     Overlay_tf.py \
+    --CA \
     --detector Muon \
     --runNumber 601229 \
     --inputHITSFile ${HITS_File} \
@@ -50,7 +52,7 @@ then
     --maxEvents 10 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
     --conditionsTag OFLCOND-MC21-SDR-RUN3-07  \
     --geometryVersion ATLAS-R3S-2021-03-00-00 \
-    --preInclude 'all:Campaigns/MC21a.py' \
+    --preInclude 'all:Campaigns.MC21a' \
     --imf False
     rc2=$?
     status=$rc2
@@ -60,7 +62,7 @@ echo  "art-result: $rc2 overlayST"
 rc3=-9999
 if [ $rc2 -eq 0 ]
 then
-    acmd.py diff-root MC_plus_MC.ST.RDO.pool.root MC_plus_MC.MT.RDO.pool.root --error-mode resilient --mode=semi-detailed --order-trees --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings RecoTimingObj_p1_HITStoRDO_timings index_ref xAOD::JetAuxContainer_v1_InTimeAntiKt4TruthJetsAux xAOD::JetAuxContainer_v1_InTimeAntiKt4TruthJetsAuxDyn xAOD::JetAuxContainer_v1_OutOfTimeAntiKt4TruthJetsAux xAOD::JetAuxContainer_v1_OutOfTimeAntiKt4TruthJetsAuxDyn
+    acmd.py diff-root MC_plus_MC.ST.RDO.pool.root MC_plus_MC.MT.RDO.pool.root --error-mode resilient --mode=semi-detailed --order-trees
     rc3=$?
     status=$rc3
 fi
