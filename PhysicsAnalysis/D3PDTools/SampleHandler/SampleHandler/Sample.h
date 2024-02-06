@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SAMPLE_HANDLER_SAMPLE_HH
@@ -24,7 +24,6 @@
 
 class TChain;
 class TCollection;
-class TDSet;
 
 namespace SH
 {
@@ -214,19 +213,6 @@ namespace SH
     /// \post result != 0
   public:
     TChain *makeTChain () const;
-
-
-    /// \brief create a TDSet object, containing all these files
-    ///
-    /// \par Guarantee
-    ///   strong
-    /// \par Failures
-    ///   out of memory II\n
-    /// \par Failures
-    ///   dataset making not supported
-    /// \post result != 0
-  public:
-    TDSet *makeTDSet () const;
 
 
     /// \brief read an object from a histogram file
