@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -27,7 +27,6 @@
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/SamplePtr.h>
 #include <TChain.h>
-#include <TDSet.h>
 #include <TFile.h>
 #include <memory>
 #include <iostream>
@@ -217,33 +216,6 @@ namespace SH
     for (std::vector<std::string>::const_iterator file = files.begin(),
 	   end = files.end(); file != end; ++ file)
       result->AddFile (file->c_str());
-    return result.release();
-  }
-
-
-
-  TDSet *Sample ::
-  makeTDSet () const
-  {
-    // no invariant used
-
-    std::vector<std::string> files = makeFileList ();
-
-    std::string treeName (meta()->castString (MetaFields::treeName, MetaFields::treeName_default));
-    if (treeName.empty())
-      RCU_THROW_MSG ("sample " + name() + " does not have a tree name associated");
-
-    std::string dir = "/";
-    std::string::size_type split = treeName.rfind ("/");
-    if (split != std::string::npos)
-    {
-      dir += treeName.substr (0, split);
-      treeName = treeName.substr (split+1);
-    }
-    std::unique_ptr<TDSet> result (new TDSet ("TTree", treeName.c_str(), dir.c_str()));
-    for (std::vector<std::string>::const_iterator file = files.begin(),
-	   end = files.end(); file != end; ++ file)
-      result->Add (file->c_str());
     return result.release();
   }
 
