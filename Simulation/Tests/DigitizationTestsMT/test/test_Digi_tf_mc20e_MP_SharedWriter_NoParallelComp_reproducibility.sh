@@ -25,20 +25,21 @@ LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0Ch
 
 
 Digi_tf.py \
---inputHITSFile ${InputHitsFile} \
---conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
---digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion default:ATLAS-R2-2016-01-00-01 \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
---jobNumber 38 \
---maxEvents 25 \
---outputRDOFile ${DigiOutFileNameSP} \
---digiSteeringConf 'StandardSignalOnlyTruth' \
---postExec 'HITtoRDO:ServiceMgr.PileUpEventLoopMgr.AllowSerialAndMPToDiffer=False' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' 'all:PyJobTransforms/HepMcParticleLinkVerbosity.py' \
---preInclude 'all:Campaigns/MC20e.py' 'HITtoRDO:Campaigns/PileUpMC20e.py' \
---skipEvents 0
+    --CA \
+    --inputHITSFile ${InputHitsFile} \
+    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
+    --digiSeedOffset1 170 --digiSeedOffset2 170 \
+    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
+    --jobNumber 38 \
+    --maxEvents 25 \
+    --outputRDOFile ${DigiOutFileNameSP} \
+    --digiSteeringConf 'StandardSignalOnlyTruth' \
+    --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'all:Campaigns.MC20e' \
+    --skipEvents 0
 
 rc=$?
 status=$rc
@@ -46,23 +47,24 @@ echo "art-result: $rc Digi_tf.py SP"
 cp log.HITtoRDO log.HITtoRDO_SP
 
 Digi_tf.py \
---multiprocess --athenaMPEventsBeforeFork 0 \
---sharedWriter 'True' \
---parallelCompression 'False' \
---inputHITSFile ${InputHitsFile} \
---conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
---digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion default:ATLAS-R2-2016-01-00-01 \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
---jobNumber 38 \
---maxEvents 25 \
---outputRDOFile ${DigiOutFileNameMP0} \
---digiSteeringConf 'StandardSignalOnlyTruth' \
---postExec 'HITtoRDO:ServiceMgr.PileUpEventLoopMgr.AllowSerialAndMPToDiffer=False' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' 'all:PyJobTransforms/HepMcParticleLinkVerbosity.py' \
---preInclude 'all:Campaigns/MC20e.py' 'HITtoRDO:Campaigns/PileUpMC20e.py' \
---skipEvents 0
+    --CA \
+    --multiprocess --athenaMPEventsBeforeFork 0 \
+    --sharedWriter 'True' \
+    --parallelCompression 'False' \
+    --inputHITSFile ${InputHitsFile} \
+    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
+    --digiSeedOffset1 170 --digiSeedOffset2 170 \
+    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
+    --jobNumber 38 \
+    --maxEvents 25 \
+    --outputRDOFile ${DigiOutFileNameMP0} \
+    --digiSteeringConf 'StandardSignalOnlyTruth' \
+    --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'all:Campaigns.MC20e' \
+    --skipEvents 0
 
 rc2=$?
 if [ $status -eq 0 ]; then
@@ -72,23 +74,24 @@ echo "art-result: $rc2 Digi_tf.py MP fork after 0"
 cp log.HITtoRDO log.HITtoRDO_MPf0
 
 Digi_tf.py \
---multiprocess --athenaMPEventsBeforeFork 1 \
---sharedWriter 'True' \
---parallelCompression 'False' \
---inputHITSFile ${InputHitsFile} \
---conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
---digiSeedOffset1 170 --digiSeedOffset2 170 \
---geometryVersion default:ATLAS-R2-2016-01-00-01 \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
---jobNumber 38 \
---maxEvents 25 \
---outputRDOFile ${DigiOutFileNameMP1} \
---digiSteeringConf 'StandardSignalOnlyTruth' \
---postExec 'HITtoRDO:ServiceMgr.PileUpEventLoopMgr.AllowSerialAndMPToDiffer=False' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' 'all:PyJobTransforms/HepMcParticleLinkVerbosity.py' \
---preInclude 'all:Campaigns/MC20e.py' 'HITtoRDO:Campaigns/PileUpMC20e.py' \
---skipEvents 0
+    --CA \
+    --multiprocess --athenaMPEventsBeforeFork 1 \
+    --sharedWriter 'True' \
+    --parallelCompression 'False' \
+    --inputHITSFile ${InputHitsFile} \
+    --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
+    --digiSeedOffset1 170 --digiSeedOffset2 170 \
+    --geometryVersion default:ATLAS-R2-2016-01-00-01 \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
+    --jobNumber 38 \
+    --maxEvents 25 \
+    --outputRDOFile ${DigiOutFileNameMP1} \
+    --digiSteeringConf 'StandardSignalOnlyTruth' \
+    --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'all:Campaigns.MC20e' \
+    --skipEvents 0
 
 rc3=$?
 if [[ $status -eq 0 ]]; then
