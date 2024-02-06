@@ -2671,6 +2671,20 @@ HLT_4mu4_L14MU3V:
   eventCount: 0
 HLT_4mu4_bDimu6000_L14MU3V:
   eventCount: 0
+HLT_5j20_j20_pf_ftf_presel5c25XXc25b85_PhysicsTLA_L14jJ40:
+  eventCount: 5
+  stepCounts:
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+    4: 5
+  stepFeatures:
+    0: 10
+    1: 10
+    2: 114
+    3: 114
+    4: 10
 HLT_5j35c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_bdl1d60_pf_ftf_presel5c25XXc25b85_L14J15:
   eventCount: 1
   stepCounts:
@@ -2953,6 +2967,18 @@ HLT_5j85_pf_ftf_presel5j55_L14jJ40:
   stepFeatures:
     0: 3
     1: 5
+HLT_6j20_pf_ftf_presel6c25_PhysicsTLA_L14jJ40:
+  eventCount: 5
+  stepCounts:
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+  stepFeatures:
+    0: 5
+    1: 57
+    2: 57
+    3: 5
 HLT_6j25c_010jvt_ftf_L14J15:
   eventCount: 4
   stepCounts:
