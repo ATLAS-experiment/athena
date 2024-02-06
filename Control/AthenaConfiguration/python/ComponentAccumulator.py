@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
 import GaudiKernel.GaudiHandles as GaudiHandles
@@ -1103,7 +1103,7 @@ class ComponentAccumulator(AccumulatorCachable):
         for seqName, algoList in flatSequencers(self._sequence, algsCollection=self._algorithms).items():
             seq = self.getSequence(seqName)
             for k, v in seq._properties.items():
-                if k != "Members":  # This property his handled separately
+                if k != "Members":  # This property is handled separately
                     vstr = "" if v is None else str(v)
                     bshPropsToSet.append((seqName, k, vstr))
             bshPropsToSet.append(

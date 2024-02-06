@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # self test of ComponentAccumulator
 
@@ -169,34 +169,38 @@ class TestComponentAccumulator( unittest.TestCase ):
 
 
 
+class TestGatherProps( unittest.TestCase ):
+    def runTest( self ):
+        acc = ComponentAccumulator()
+        acc.addEventAlgo(TestAlgo("GPTest",
+                                  MyInt=123,
+                                  MyBool=True,
+                                  ExtraOutputs={'Z', 'A'}))
+        appPropsToSet, mspPropsToSet, bshPropsToSet = acc.gatherProps()
 
-def test_gatherProps(self):
-    self.acc.addEventAlgo(TestAlgo("GPTest", MyInt=123, MyBool=True))
-    appPropsToSet, mspPropsToSet, bshPropsToSet = self.acc.gatherProps()
+        self.assertIn(
+            "ExtSvc", appPropsToSet, "ExtSvc not present in appPropsToSet"
+        )
+        self.assertTrue(
+            all(len(element) == 3 for element in bshPropsToSet),
+            "bshPropsToSet element length not equal to 3. Should be: (component_name, property_name, property_value)",
+        )
+        self.assertIn(
+            ("GPTest", "MyInt", "123"),
+            bshPropsToSet,
+            "MyInt prop not gathered by gatherProps",
+        )
+        self.assertIn(
+            ("GPTest", "MyBool", "True"),
+            bshPropsToSet,
+            "MyBool prop not gathered by gatherProps",
+        )
+        self.assertIn(
+            ("GPTest", "ExtraOutputs", "{'A', 'Z'}"),  # set representation should be ordered
+            bshPropsToSet,
+            "ExtraOutputs property not in correct order",
+        )
 
-    self.assertIn(
-        "ExtSvc", appPropsToSet, "ExtSvc not present in appPropsToSet"
-    )
-    self.assertIn(
-        "OutputLevel",
-        mspPropsToSet,
-        "OutputLevel not present in mspPropsToSet",
-    )
-    # all bshPropsToSet elements should be should be tuples with 3 elements: (component_name, property_name, property_value)
-    self.assertTrue(
-        all(len(element) == 3 for element in bshPropsToSet),
-        "bshPropsToSet element length not equal to 3. Should be: (component_name, property_name, property_value)",
-    )
-    self.assertIn(
-        ("GPTest", "MyInt", "123"),
-        bshPropsToSet,
-        "MyInt prop not gathered by gatherProps",
-    )
-    self.assertIn(
-        ("GPTest", "MyBool", "True"),
-        bshPropsToSet,
-        "MyBool prop not gathered by gatherProps",
-    )
 
 class TestHLTCF( unittest.TestCase ):
     def runTest( self ):
