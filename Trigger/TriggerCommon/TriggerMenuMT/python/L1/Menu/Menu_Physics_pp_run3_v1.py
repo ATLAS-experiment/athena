@@ -106,29 +106,52 @@ def defineMenu():
         'L1_MU14FCH_EMPTY',
         'L1_MU14FCH_UNPAIRED_ISO',
 
-        # single jet
-        # L1_J12 must be kept in the menu for online monitoring of BIB (can be disabled via PS is necessary)
-        'L1_J12', 'L1_J15','L1_J20','L1_J25', 'L1_J30', 'L1_J40', 'L1_J50' ,'L1_J75','L1_J85', 'L1_J100', 'L1_J120', 'L1_J400',
-        'L1_J400_LAR',
-        'L1_J20p31ETA49', 'L1_J30p31ETA49', 'L1_J50p31ETA49', 'L1_J75p31ETA49', 'L1_J15p31ETA49',
-        'L1_J12_EMPTY','L1_J12_FIRSTEMPTY', 'L1_J12_UNPAIRED_ISO', 'L1_J12_UNPAIRED_NONISO', 'L1_J12_UNPAIREDB1', 'L1_J12_UNPAIREDB2',
-        'L1_J15p31ETA49_UNPAIRED_ISO',
-        'L1_J30_EMPTY', 'L1_J30_FIRSTEMPTY', 'L1_J30p31ETA49_EMPTY', 'L1_J30p31ETA49_UNPAIRED_ISO', 'L1_J30p31ETA49_UNPAIRED_NONISO',
-        'L1_J50_UNPAIRED_ISO', 'L1_J50_UNPAIRED_NONISO',
-        'L1_J100_FIRSTEMPTY',
-        'L1_J12_BGRP12',
+        # Single jet Legacy
+        'L1_J15','L1_J20','L1_J50','L1_J100','L1_J400','L1_J75p31ETA49',
 
-        # jJ 
-        'L1_jJ30', 'L1_jJ30_EMPTY', 'L1_jJ30p0ETA25', 'L1_jJ40', 'L1_jJ40p0ETA25', 'L1_jJ50', 'L1_jJ55',  'L1_jJ55p0ETA23',
-        'L1_jJ60', 'L1_jJ60_EMPTY', 'L1_jJ60_FIRSTEMPTY', 'L1_jJ70p0ETA23', 'L1_jJ80', 'L1_jJ80p0ETA25', 'L1_jJ85p0ETA21', 'L1_jJ90',
-        'L1_jJ125', 'L1_jJ140', 'L1_jJ160', 'L1_jJ180', 'L1_jJ500',
-        'L1_jJ500_LAR',
+        # jJ
+        'L1_jJ30', 'L1_jJ30_BRGP12','L1_jJ30_EMPTY','L1_jJ30_FIRSTEMPTY',
+        'L1_jJ30_UNPAIRED_ISO','L1_jJ30_UNPAIRED_NONISO','L1_jJ30_UNPAIREDB1','L1_jJ30_UNPAIREDB2',
+        'L1_jJ30p0ETA25',
+         
+        'L1_jJ40', 'L1_jJ40p0ETA25', 'L1_jJ40p30ETA49', 'L1_jJ40p30ETA49_UNPAIRED_ISO',
 
-        'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
+        'L1_jJ50', 'L1_jJ50p30ETA49',
 
-        'L1_4jJ40', 'L1_3jJ90', 'L1_4jJ50', 'L1_4jJ40p0ETA25', 'L1_5jJ40p0ETA25', 
-        'L1_3jJ70p0ETA23', 'L1_jJ140_3jJ60', 
-        'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49', 'L1_jJ55p0ETA23_2jJ40p30ETA49', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 
+        'L1_jJ55', 'L1_jJ55p0ETA23', 'L1_jJ55p0ETA23_2jJ40p30ETA49', 
+
+        'L1_jJ60', 'L1_jJ60_EMPTY', 'L1_jJ60_FIRSTEMPTY','L1_jJ60p30ETA49',  
+        'L1_jJ60p30ETA49_EMPTY', 'L1_jJ60p30ETA49_UNPAIRED_ISO', 'L1_jJ60p30ETA49_UNPAIRED_NONISO',
+
+        'L1_jJ70p0ETA23', 
+
+        'L1_jJ80', 
+        'L1_jJ80p0ETA25', 'L1_jJ80p0ETA25_2jJ40p30ETA49', 'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49', 
+
+        'L1_jJ85p0ETA21', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 
+
+        'L1_jJ90', 'L1_jJ90_UNPAIRED_ISO', 'L1_jJ90_UNPAIRED_NONISO',
+        'L1_jJ90p30ETA49', 
+        'L1_jJ90_2jJ80p0ETA25_3jJ40p0ETA25',
+
+        'L1_jJ125', 'L1_jJ125p30ETA49',
+
+        'L1_jJ140', 'L1_jJ140_3jJ60', 
+
+        'L1_jJ160', 'L1_jJ160_FIRSTEMPTY',
+
+        'L1_jJ180', 
+
+        'L1_jJ500', 'L1_jJ500_LAR',
+
+        'L1_3jJ55p0ETA23', 'L1_3jJ90',
+        'L1_3jJ70p0ETA23',
+        'L1_4jJ40',
+        'L1_4jJ50',
+        'L1_4jJ40p0ETA25',
+        'L1_5jJ40p0ETA25', 
+        'L1_6jJ40',
+
         'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ90',  #L1_MU3V_jJ30 added temporarily 
   
         # jLJ
@@ -150,23 +173,17 @@ def defineMenu():
         'L1_ZeroBias',
 
         # multi jet
-        'L1_J45p0ETA21_3J15p0ETA25',
         'L1_J50_2J40p0ETA25_3J15p0ETA25',
-        'L1_3J50', 'L1_4J15', 'L1_4J20',
+        'L1_3J50',
+        'L1_4J15', 
         'L1_3J15p0ETA25_XE40',
         'L1_6J15',
-        'L1_J85_3J30',
 
         # multi jet forward
-        'L1_J25p0ETA23_2J15p31ETA49',
         'L1_J40p0ETA25_2J15p31ETA49',
-        'L1_J40p0ETA25_2J25_J20p31ETA49',
         
         # multi jet central
         'L1_3J25p0ETA23',
-        'L1_3J35p0ETA23',
-        'L1_4J15p0ETA25',
-        'L1_5J15p0ETA25', 
 
         # combined jet
         'L1_2J15_XE55', 'L1_J40_XE50',

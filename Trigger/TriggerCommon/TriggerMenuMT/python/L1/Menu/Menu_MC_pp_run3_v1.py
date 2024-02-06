@@ -98,6 +98,31 @@ def defineMenu():
         'L1_TAU40_2TAU12IM_XE40',
         'L1_TAU25IM_2TAU20IM_2J25_3J20',
         
+        # ATR-28678
+        "L1_J12",
+        "L1_J25",
+        "L1_J30",
+        "L1_J40",
+        "L1_J75",
+        "L1_J85",
+        "L1_J120",
+        "L1_J400_LAR",
+        "L1_J20p31ETA49",
+        "L1_J30p31ETA49",
+        "L1_J50p31ETA49",
+        "L1_J15p31ETA49",
+        "L1_J12_EMPTY",
+        "L1_J30_EMPTY",
+        "L1_J30_FIRSTEMPTY",
+        "L1_J45p0ETA21_3J15p0ETA25",
+        "L1_4J20",
+        "L1_J85_3J30",
+        "L1_J25p0ETA23_2J15p31ETA49",
+        "L1_J40p0ETA25_2J25_J20p31ETA49",
+        "L1_3J35p0ETA23",
+        "L1_4J15p0ETA25",
+        "L1_5J15p0ETA25",
+        'L1_J30p31ETA49_EMPTY',
     ]
 
     # To replace thresholds in the physics menu
@@ -154,8 +179,8 @@ def defineMenu():
 
         # non-primary J
         'L1_J12':'',
-        'L1_J25':'',
-        'L1_J85':'',
+        # 'L1_J25':'',
+        # 'L1_J85':'',
         'L1_J12_BGRP12':'',
         'L1_jJ30p0ETA25':'',
         'L1_jJ40p0ETA25':'',
@@ -185,7 +210,7 @@ def defineMenu():
         # EM non-FILLED
 
         # J non-FILLED
-        'L1_J12_EMPTY':'',
+        # 'L1_J12_EMPTY':'',
         'L1_J12_FIRSTEMPTY':'', 
         'L1_J12_UNPAIRED_ISO':'', 
         'L1_J12_UNPAIRED_NONISO':'', 

@@ -14,9 +14,9 @@ l1seeds = { 'low'  : \
                ['L1_2eEM9',\
                 'L1_eEM12L',\
                 #'L1_EM12_XS20',\
-                'L1_J15p31ETA49',\
+                'L1_jJ40p30ETA49',\
                 'L1_JPSI-1M5-EM12',\
-                'L1_J30',\
+                'L1_jJ60',\
                 #'L1_J30p0ETA49_2J20p0ETA49',\
                 'L1_JPSI-1M5-eEM9',\
                 'L1_MU8F',\
@@ -43,8 +43,8 @@ l1seeds = { 'low'  : \
                 'L1_eEM18L',\
                 'L1_eEM24L',\
                 'L1_HT190-J15s5pETA21',\
-                'L1_J30p31ETA49',\
-                'L1_J40p0ETA25_2J15p31ETA49',\
+                'L1_jJ60p30ETA49',\
+                'L1_jJ80p0ETA25_2jJ40p30ETA49',\
                 'L1_J50',\
                 'L1_J50_DETA20-J50J',\
                 'L1_LFV-MU5VF',\
