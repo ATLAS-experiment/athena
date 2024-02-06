@@ -396,8 +396,7 @@ log = logging.getLogger('runHLT_standalone.py')
 # ---------------------------------------------------------------
 # Track Overlay
 # ---------------------------------------------------------------
-from OverlayCommonAlgs.OverlayFlags import overlayFlags
-if overlayFlags.doTrackOverlay():
+if flags.Overlay.doTrackOverlay:
     from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
     CAtoGlobalWrapper(TrkEventCnvSuperToolCfg, flags)
 
