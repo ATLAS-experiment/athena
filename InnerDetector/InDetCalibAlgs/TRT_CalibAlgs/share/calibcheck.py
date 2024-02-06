@@ -37,7 +37,7 @@ for board in boards:
     for oldt0 in boards[board]['oldt0arr']:
         sumoldt0=sumoldt0+oldt0
         #print oldt0
-    print '%10s %5i %8.3f %8.3f %5i %8.3f %4i'%(board,boards[board]['n'],sumoldt0/boards[board]['n'],boards[board]['oldt0'],len(boards[board]['oldt0arr']),boards[board]['t0']-boards[board]['oldt0'],boards[board]['iboard'])
+    print ('%10s %5i %8.3f %8.3f %5i %8.3f %4i'%(board,boards[board]['n'],sumoldt0/boards[board]['n'],boards[board]['oldt0'],len(boards[board]['oldt0arr']),boards[board]['t0']-boards[board]['oldt0'],boards[board]['iboard']))
         
 
     if board=='_-1_1_22_4':
@@ -45,7 +45,7 @@ for board in boards:
     #if board=='_1_1_5_4':
     #if board=='_1_1_1_4':
         for istraw,oldt0 in enumerate(boards[board]['oldt0arr']):
-            print (boards[board]['t0']-boards[board]['oldt0'])-(boards[board]['t0arr'][istraw]-boards[board]['oldt0arr'][istraw]),(boards[board]['t0arr'][istraw]-boards[board]['oldt0arr'][istraw]),boards[board]['slkey'][istraw],oldt0arr[istraw]
+            print ((boards[board]['t0']-boards[board]['oldt0'])-(boards[board]['t0arr'][istraw]-boards[board]['oldt0arr'][istraw]),(boards[board]['t0arr'][istraw]-boards[board]['oldt0arr'][istraw]),boards[board]['slkey'][istraw],oldt0arr[istraw])
             
         
 

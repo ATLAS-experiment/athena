@@ -70,7 +70,7 @@ if len(globalflags.ConditionsTag())!=0:
 from AthenaCommon.BeamFlags import jobproperties
 # --- default is zero luminosity
 jobproperties.Beam.numberOfCollisions = 2.0 # default in RecExCommon for 900 GeV
-jobproperties.Beam.energy             = 900.*Units.GeV
+jobproperties.Beam.energy             = 1360.*Units.GeV
 jobproperties.Beam.beamType           = 'collisions'
 
 
@@ -230,7 +230,7 @@ InDetTRT_DriftFunctionTool = TRT_DriftFunctionTool(name = "InDetTRT_DriftFunctio
                                                    IsMC=(globalflags.DataSource == 'geant4'))
 
 ToolSvc += InDetTRT_DriftFunctionTool
-print InDetTRT_DriftFunctionTool
+print(InDetTRT_DriftFunctionTool)
 
 from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawNeighbourSvc
 TRTStrawNeighbourSvc=TRT_StrawNeighbourSvc()
@@ -239,31 +239,30 @@ ServiceMgr += TRTStrawNeighbourSvc
 from TRT_CalibTools.TRT_CalibToolsConf import FitTool
 TRTCalFitTool = FitTool (name = 'TRTCalFitTool')
 ToolSvc += TRTCalFitTool
-print      TRTCalFitTool
+print(TRTCalFitTool)
 
 
 from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
 TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 
 ToolSvc += TRTCondStream
-print TRTCondStream
+print(TRTCondStream)
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTrkInfo 
 FillAlignTrkInfo = FillAlignTrkInfo ( name = 'FillAlignTrkInfo',
                                       TrackSummaryTool = InDetTrackSummaryTool)
 ToolSvc += FillAlignTrkInfo
-print      FillAlignTrkInfo
+print(FillAlignTrkInfo)
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTRTHits 
 FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
                                       minTimebinsOverThreshold=0, 
                                       NeighbourSvc=TRTStrawNeighbourSvc,
-                                      TRTDriftFunctionTool            = "InDetTRT_DriftFunctionTool",
                                       TRTCalDbTool = InDetCalDbTool,
                                       TRTStrawSummaryTool = InDetStrawSummaryTool)
 
 ToolSvc += FillAlignTRTHits
-print      FillAlignTRTHits
+print(FillAlignTRTHits)
 
 from TRT_DriftCircleTool.TRT_DriftCircleToolConf import InDet__TRT_DriftCircleTool
 
@@ -274,11 +273,12 @@ HighGate = 43.0*ns
 if globalflags.DataSource == 'data':
    MinTrailingEdge = 11.0*ns
    MaxDriftTime = 60.0*ns
-   LowGate = 18.0*ns
-   HighGate = 38.0*ns
+   LowGate = 17.1875*ns
+   HighGate = 43.3125*ns
 
 InDetTRT_DriftCircleTool = InDet__TRT_DriftCircleTool(name                            = "InDetTRT_DriftCircleTool",
-                                    TRTDriftFunctionTool            = InDetTRT_DriftFunctionTool,
+                                    TRTDriftFunctionTool            = InDetTRT_DriftFunctionTool(name="InDetTRT_DriftFunctionTool",
+                                                                                         TRTCalDbTool        = InDetCalDbTool),
                                     TrtDescrManageLocation          = InDetKeys.TRT_Manager(),
                                     #ConditionsSummaryTool           = InDetTRTConditionsSummaryService,
                                     ConditionsSummaryTool           = InDetTRTStrawSummaryTool,
@@ -290,19 +290,20 @@ InDetTRT_DriftCircleTool = InDet__TRT_DriftCircleTool(name                      
 				    #ValidityGateSuppressionArgon    = False,
 				    #UseConditionsHTStatus           = True,
                                     UseConditionsStatus             = True,
-                                    SimpleOutOfTimePileupSupression = True,
                                     RejectIfFirstBit                = False, # fixes 50 nsec issue 
                                     MinTrailingEdge                 = MinTrailingEdge,
                                     MaxDriftTime                    = MaxDriftTime,
                                     ValidityGateSuppression         = False,
                                     LowGate                         = LowGate,
                                     HighGate                        = HighGate,
+                                    LowGateArgon                         = LowGate,
+                                    HighGateArgon                        = HighGate,
                                     useDriftTimeHTCorrection        = True,
                                     useDriftTimeToTCorrection       = True
 ) # reenable ToT
 
 ToolSvc += InDetTRT_DriftCircleTool
-print ToolSvc.InDetTRT_DriftCircleTool
+print( ToolSvc.InDetTRT_DriftCircleTool)
 
 
 
@@ -314,10 +315,10 @@ TRT_RecalibrateRotCreator = InDet__TRT_DriftCircleOnTrackRecalibrateTool(
                         ScaleHitUncertainty     = 2.5, # fix from Thijs
                         useDriftTimeToTCorrection = False)#,
 ToolSvc += TRT_RecalibrateRotCreator
-print      TRT_RecalibrateRotCreator
+print      (TRT_RecalibrateRotCreator)
 
 InDetRefitRotCreator.ToolTRT_DriftCircle = TRT_RecalibrateRotCreator
-print InDetRefitRotCreator
+print(InDetRefitRotCreator)
 
 
 RecalibrationFitter = Trk__GlobalChi2Fitter(name = 'RecalibrationFitter',
@@ -338,7 +339,7 @@ RecalibrationFitter = Trk__GlobalChi2Fitter(name = 'RecalibrationFitter',
                                                  TrackChi2PerNDFCut    = 7)
 
 ToolSvc+=RecalibrationFitter
-print    RecalibrationFitter
+print (RecalibrationFitter)
 
 
 from InDetTrackSelectorTool.InDetTrackSelectorToolConf import InDet__InDetDetailedTrackSelectorTool
@@ -361,20 +362,19 @@ TRTTrackSelectorTool = InDet__InDetDetailedTrackSelectorTool(name = "InDetDetail
 
 ToolSvc += TRTTrackSelectorTool
 if (InDetFlags.doPrintConfigurables()):
-        print TRTTrackSelectorTool
+        print (TRTTrackSelectorTool)
 
 
 from TRT_CalibAlgs.TRT_CalibAlgsConf import TRTCalibrationMgr
 CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr',
                                        StreamTool          = TRTCondStream,
                                        TrackSelectorTool   = TRTTrackSelectorTool,
-                                       TrkCollections      = [ 'CombinedInDetTracks' ],
                                        AlignTrkTools       = [ FillAlignTrkInfo, FillAlignTRTHits ],
                                        TrackFitter         = RecalibrationFitter,
                                        FitTools            = [ TRTCalFitTool] )
 
 topSequence += CosmicsTRTCalibMgr
-print CosmicsTRTCalibMgr
+print (CosmicsTRTCalibMgr)
 
 
 
@@ -399,11 +399,14 @@ if (globalflags.InputFormat() == 'bytestream' and globalflags.DataSource() == 'd
         ostring+="""
 conddb.blockFolder("/TRT/Calib/RT" )
 conddb.blockFolder("/TRT/Calib/T0" )
-#conddb.addFolderWithTag('TRT_OFL','/TRT/Calib/errors','TrtCalibErrors-ErrorVal-00-00')
+from AthenaCommon.AlgSequence import AthSequencer
+condSequence=AthSequencer('AthCondSeq')
+from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTCondWrite
+TRTCondWrite = TRTCondWrite( name = "TRTCondWrite",
+                                     CalibInputFile=calibconstants)
+condSequence+=TRTCondWrite 
 """
 
-    if not calibconstants=="":
-        ostring+='TRTCondWrite.CalibInputFile="%s"\n' % (calibconstants)
 
     return ostring
 

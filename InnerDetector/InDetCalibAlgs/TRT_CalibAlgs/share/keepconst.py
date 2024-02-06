@@ -3,7 +3,7 @@
 import os,sys
 
 if len(sys.argv)<4:
-    print "usage: keepconst rt calibout_old.txt  calibout_new.txt"
+    print("usage: keepconst rt calibout_old.txt  calibout_new.txt")
     sys.exit(0)
     
 oldconsts=open(sys.argv[2]).readlines()
@@ -28,21 +28,21 @@ for newconst in newconsts:
             newt0s.append(newconst.strip())
 
 if sys.argv[1]=="t0":
-    print "# Fileformat=1"
-    print "# RtRelation"
+    print("# Fileformat=1")
+    print("# RtRelation")
     for newrt in newrts:
-        print newrt
-    print "# StrawT0"
+        print(newrt)
+    print("# StrawT0")
     for oldt0 in oldt0s:
-        print oldt0
-    print "#GLOBALOFFSET 0.0000"
+        print(oldt0)
+    print("#GLOBALOFFSET 0.0000")
 
 if sys.argv[1]=="rt":
-    print "# Fileformat=1"
-    print "# RtRelation"
+    print("# Fileformat=1")
+    print("# RtRelation")
     for oldrt in oldrts:
-        print oldrt
-    print "# StrawT0"
+        print(oldrt)
+    print("# StrawT0")
     for newt0 in newt0s:
-        print newt0
-    print "#GLOBALOFFSET 0.0000"
+        print(newt0)
+    print("#GLOBALOFFSET 0.0000")

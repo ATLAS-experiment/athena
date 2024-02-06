@@ -12,7 +12,7 @@
 #ifndef  __ATLASSTYLE_H
 #define __ATLASSTYLE_H
 
-#include "TStyle.h"
+#include <TStyle.h>
 
 void SetAtlasStyle();
 

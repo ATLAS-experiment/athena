@@ -360,7 +360,7 @@ def get_filelist():
 
 #    list=glob.glob("/afs/cern.ch/user/i/idcalib/w0/TRT_Calibration/batch/alextest/temp/*.root")
     for i in list:
-    	print "Reading module histograms from file %s" % i
+    	print("Reading module histograms from file %s" % i)
     return list
 
 def get_modulelist_perfile(calibfile):
@@ -398,7 +398,7 @@ def build_moduledict(filelist):
         list=get_modulelist_perfile(i)
         f=TFile(i)
 
-        print "Reading module histograms from file %s" % i
+        print("Reading module histograms from file %s" % i)
 
         for s in list:
             tokens=s.split('_')
@@ -457,7 +457,7 @@ def build_moduledict(filelist):
 
                 if abs(bec)==2:
                     board=-1
-                    #print "Creating Board-Chip combination : %d - %d" % (board,chip)
+                    #print("Creating Board-Chip combination : %d - %d" % (board,chip))
 
                 h=f.Get(hname)
                 h4=h.__class__(h)
@@ -498,8 +498,8 @@ def build_moduledict(filelist):
 
 
     #for k,v in TRT.subdet.iteritems():
-    #    print "Number of modules in subdet %d : %d" % (k,len(v.modules))
-    #print "Found %d modules" % len(TRT.modules)
+    #    print("Number of modules in subdet %d : %d" % (k,len(v.modules)))
+    #print("Found %d modules" % len(TRT.modules))
                 
 
 def get_rthist_comb():
@@ -581,9 +581,9 @@ def build_strawdict(chain):
                 
 
         except:
-            print "Problem: bec=%d mid=%s board=%d chip=%d" % (bec,mid,board,chip)
-            print repr(TRT.subdet[bec].modules[mid].boards.keys())
-            print repr(TRT.subdet[bec].modules[mid].boards[board].chips.keys())
+            print("Problem: bec=%d mid=%s board=%d chip=%d" % (bec,mid,board,chip))
+            print(repr(TRT.subdet[bec].modules[mid].boards.keys()))
+            print(repr(TRT.subdet[bec].modules[mid].boards[board].chips.keys()))
 
 def build_strawdict_old(chain):
     entries = chain.GetEntries()
@@ -610,8 +610,8 @@ def build_strawdict_old(chain):
         mid="%d:%d:%d" % (bec, mod, lay)
 
         if not mid in TRT.subdet[bec].modules:
-            print "Mismatch between Module hists and Strawtuple!!! : "+mid
-            print "Aborting ..."
+            print("Mismatch between Module hists and Strawtuple!!! : "+mid)
+            print("Aborting ...")
             sys.exit(-1)
 
         module=TRT.subdet[bec].modules[mid]
@@ -695,13 +695,13 @@ def setRTlevel(level):
             for mod in sub.modules.itervalues():
                 mod.performRT=True
     elif level=="BOARD":
-        print "Board level RT is not supported!!!"
+        print("Board level RT is not supported!!!")
     elif level=="CHIP":
-        print "Chip level RT is not supported!!!"
+        print("Chip level RT is not supported!!!")
     elif level=="STRAW":
-        print "STRAW level RT is not supported!!!"
+        print("STRAW level RT is not supported!!!")
     else:
-        print "Unknown RT level: "++level
+        print("Unknown RT level: "+level)
         
 
 def setT0level(level):
@@ -736,16 +736,16 @@ def setT0level(level):
                     for chip in board.chips.itervalues():
                         chip.performT0=True
     elif level=="STRAW":
-        print "Straw level t0 not yet suported"
+        print("Straw level t0 not yet suported")
     else:
-        print "Unknown T0 level: "++level
+        print("Unknown T0 level: "+level)
         
 
 def debug_straw(s):
-    print "\t\tStraw %d:%d:%d:%d:%d" % (s.bec, s.sector,s.layer, s.strawlayer, s.straw)
-    print "\t\tEntries: %d" % s.entries
-    print "\t\tsumtimeres=%f sumw=%f" % (s.sumtimeres,s.sumw)
-    print "\t\toldt0=%f" % s.oldt0
+    print("\t\tStraw %d:%d:%d:%d:%d" % (s.bec, s.sector,s.layer, s.strawlayer, s.straw))
+    print("\t\tEntries: %d" % s.entries)
+    print("\t\tsumtimeres=%f sumw=%f" % (s.sumtimeres,s.sumw))
+    print("\t\toldt0=%f" % s.oldt0)
 
 
 def debug_chip(c):
@@ -754,18 +754,18 @@ def debug_chip(c):
     print "\tsumtimeres=%f sumw=%f" % (c.sumtimeres,c.sumw)
     print "\toldt0=%f" % c.oldt0
     if len(c.straws)>0:
-        print "\tDumping straws:"
+        print("\tDumping straws:")
         for k,v in c.straws.iteritems():
             debug_straw(v)
 
 def debug_module(m):
-    print "Module %d:%d:%d" % (m.bec, m.sector, m.layer)
-    print "Entries in histo: %d " % m.hist.GetEntries()
-    print "Containing %d chips" % len(m.boards)
-    print "sumtimeres=%f sumw=%f" % (m.sumtimeres,m.sumw)
-    print "oldt0=%f" % m. oldt0
+    print("Module %d:%d:%d" % (m.bec, m.sector, m.layer))
+    print("Entries in histo: %d " % m.hist.GetEntries())
+    print("Containing %d chips" % len(m.boards))
+    print("sumtimeres=%f sumw=%f" % (m.sumtimeres,m.sumw))
+    print("oldt0=%f" % m. oldt0
     if len(m.boards)>0:
-        print "Dumping chips:"
+        print("Dumping chips:")
         for k,v in m.boards.iteritems():
             debug_chip(v)
 
@@ -788,21 +788,21 @@ def drdt(rtpars,time):
 def drifttime_debug(rtpars,r):
     t=-25
     while driftradius(rtpars,t)<r and t<75:
-        print "t=%f -> r=%f" % (t,driftradius(rtpars,t))
+        print("t=%f -> r=%f" % (t,driftradius(rtpars,t)))
         t+=1
     if t>=75:
-        print "Not able to invert r-t relation!!!"
+        print("Not able to invert r-t relation!!!")
         return 0
     oldt=t
     t-=1
     while driftradius(rtpars,t)<r and t<oldt:
-        print "t=%f -> r=%f" % (t,driftradius(rtpars,t))
+        print("t=%f -> r=%f" % (t,driftradius(rtpars,t)))
         t+=0.1
 
     oldt=t
     t-=0.1
     while driftradius(rtpars,t)<r and t<oldt:
-        print "t=%f -> r=%f" % (t,driftradius(rtpars,t))
+        print("t=%f -> r=%f" % (t,driftradius(rtpars,t)))
         t+=0.01
     
     return t
@@ -819,7 +819,7 @@ def drifttime(rtpars,r):
         residual = r - driftradius(rtpars,t) 
         ntries+=1
         if ntries>maxtries:
-            print "Not able to invert r-t relation!!!"
+            print("Not able to invert r-t relation!!!")
             t=drifttime_debug(rtpars,r)
             break
     return t 
@@ -839,7 +839,7 @@ def analyze_rt(hist,mode,polyorder):
     npoints=hist.GetNbinsY()
     dtgr = TGraphErrors(npoints)
 
-    #print "Analyzing hist %s" % hist.GetName()
+    #print("Analyzing hist %s" % hist.GetName())
 
     for i in range(npoints):
         hname="%s_timehist_%d" % (hist.GetName(),i)
@@ -859,8 +859,8 @@ def analyze_rt(hist,mode,polyorder):
         dtfitfunc.SetParameter(1,mean) 
         dtfitfunc.SetParameter(2,5)
 
-        #print "Bin %d with mean=%f range=%f --  %f" % (i, mean, mean-width, mean+width)
-        #print "\tParameters for fit: %f %f %f" % (htmp.GetMaximum(),mean,5)
+        #print("Bin %d with mean=%f range=%f --  %f" % (i, mean, mean-width, mean+width))
+        #print("\tParameters for fit: %f %f %f" % (htmp.GetMaximum(),mean,5))
 
         htmp.Fit(dtfitfunc,"Q0RI")
         htmp.GetListOfFunctions().Add(dtfitfunc.Clone())
@@ -896,19 +896,19 @@ def analyze_rt(hist,mode,polyorder):
         if not result==0:
             result=dtgr.Fit(rtfunc,"R")
             if not result==0:
-                print "Cannot fit! Help!!!"
+                print("Cannot fit! Help!!!")
         rtfunc.SetRange(-200,200)
         hist.GetListOfFunctions().Add(rtfunc) 
     
         # get the global time offset: t for r=0
         pars=[rtfunc.GetParameter(0),rtfunc.GetParameter(1),rtfunc.GetParameter(2),rtfunc.GetParameter(3)]
         t0=drifttime(pars,0.)
-        #print "Global t0 offset: %f " % t0
+        #print("Global t0 offset: %f " % t0)
         
         pars[0]=0.
 
 
-    print "Global t0 offset: %f" % t0
+    print("Global t0 offset: %f" % t0)
 
     return hist,dtgr,hlist,pars,t0
 
@@ -917,7 +917,7 @@ def analyze_rt(hist,mode,polyorder):
 
 def calibrate_rt(minentries,mode,polyorder,updatet0):
     if TRT.hist.GetEntries()>minentries and TRT.performRT:
-        print "Calibrating whole TRT"
+        print("Calibrating whole TRT")
         hist,dtgr,hlist,pars,t0 = analyze_rt(TRT.hist,mode,polyorder)
         TRT.hist=hist
         TRT.hlist=hlist
@@ -932,7 +932,7 @@ def calibrate_rt(minentries,mode,polyorder,updatet0):
 
         for l,sub in TRT.subdet.iteritems():
             if sub.hist.GetEntries()>minentries and sub.performRT:
-                print "Calibrating subdetector %d" % sub.bec
+                print("Calibrating subdetector %d" % sub.bec)
                 hist,dtgr,hlist,pars,t0 = analyze_rt(sub.hist,mode,polyorder)
                 sub.hist=hist
                 sub.hlist=hlist
@@ -947,7 +947,7 @@ def calibrate_rt(minentries,mode,polyorder,updatet0):
                 
                 for k,v in sub.modules.iteritems():
                     if v.hist.GetEntries()>minentries and v.performRT:
-                        print "Calibrating Module %d:%d:%d" % (v.bec,v.layer,v.sector)
+                        print("Calibrating Module %d:%d:%d" % (v.bec,v.layer,v.sector))
                         hist,dtgr,hlist,pars,t0 = analyze_rt(v.hist,mode,polyorder)
                         v.hist=hist
                         v.hlist=hlist
@@ -989,7 +989,7 @@ def calculate_tree():
 
     TRT.calculate()
     TRT.entries=tentries
-    #print "Total number of hits in tree: %d" % tentries
+    #print("Total number of hits in tree: %d" % tentries)
 
 def analyze_t0(hist,name=""):
     mean=hist.GetMean()
@@ -997,9 +997,9 @@ def analyze_t0(hist,name=""):
 
 
     if not name=="":
-        print "+++++++++++++++++++++++"
-        print
-        print "Analyzing %s" % name
+        print("+++++++++++++++++++++++")
+        print()
+        print("Analyzing %s" % name)
 
     maxbin=1
     maxval=0
@@ -1010,17 +1010,17 @@ def analyze_t0(hist,name=""):
             maxbin=j
 
     fitmean=hist.GetBinCenter(maxbin)
-    print "Bin with maximal content: %f" % fitmean
+    print("Bin with maximal content: %f" % fitmean)
     
 
     if abs(fitmean)>5:
-        print "Fitmean  = %f is too far away, using %f instead" % (fitmean,mean)
+        print("Fitmean  = %f is too far away, using %f instead" % (fitmean,mean))
         #too far away, fitting doesnt make sense
         return mean,rms
 
     fitrms=rms
     if fitrms>5:
-        print "Fitrms = %f >5 --> setting it to 5" % fitrms
+        print("Fitrms = %f >5 --> setting it to 5" % fitrms)
         fitrms=5.
 
     hist.Fit("gaus","Q0RI","",fitmean-fitrms,fitmean+fitrms)
@@ -1028,14 +1028,14 @@ def analyze_t0(hist,name=""):
     t0err=hist.GetFunction("gaus").GetParError(1)
 
     if abs(t0-mean)>rms:
-        print "Problematic fit?????"
+        print("Problematic fit?????")
         print hist.GetName()
-        print "t0=%f t0err=%f entries=%d underflow=%d overflow=%d mean=%f rms=%f" % (t0,t0err,hist.GetEntries(), hist.GetBinContent(0), hist.GetBinContent(101),mean,rms)
-        print "fitmean=%f  fitrms=%f" % (fitmean,fitrms)
-        print '------'
+        print("t0=%f t0err=%f entries=%d underflow=%d overflow=%d mean=%f rms=%f" % (t0,t0err,hist.GetEntries(), hist.GetBinContent(0), hist.GetBinContent(101),mean,rms))
+        print("fitmean=%f  fitrms=%f" % (fitmean,fitrms))
+        print('------')
         return mean,rms
 
-    print "Result from fit: t0=%02.2f +- %02.2f" % (t0,t0err)
+    print("Result from fit: t0=%02.2f +- %02.2f" % (t0,t0err))
 
 
     return t0,t0err
@@ -1050,7 +1050,7 @@ def calibratechip_t0(gt0,minentries):
          
          TRT.updatecalib=True
          TRT.t0=t0+gt0+TRT.oldt0
-         print "t0=%02.2f gt0=%02.2f oldt0=%02.2f" % (t0,gt0,TRT.oldt0)
+         print("t0=%02.2f gt0=%02.2f oldt0=%02.2f" % (t0,gt0,TRT.oldt0))
          TRT.t0err=t0err
          if t0<mint0:
              mint0=t0
@@ -1063,7 +1063,7 @@ def calibratechip_t0(gt0,minentries):
                      gt0=sub.t0_from_rt
                  sub.updatecalib=True
                  sub.t0=t0+gt0+sub.oldt0
-                 print "t0=%02.2f gt0=%02.2f oldt0=%02.2f" % (t0,gt0,sub.oldt0)
+                 print("t0=%02.2f gt0=%02.2f oldt0=%02.2f" % (t0,gt0,sub.oldt0))
                  sub.t0err=t0err
                  if t0<mint0:
                      mint0=t0
@@ -1076,7 +1076,7 @@ def calibratechip_t0(gt0,minentries):
                              gt0=mod.t0_from_rt
                          mod.updatecalib=True
                          mod.t0=t0+gt0+mod.oldt0
-                         print "t0=%02.2f gt0=%02.2f oldt0=%02.2f" % (t0,gt0,mod.oldt0)	
+                         print("t0=%02.2f gt0=%02.2f oldt0=%02.2f" % (t0,gt0,mod.oldt0)	)
                          mod.t0err=t0err
                          if t0<mint0:
                              mint0=t0
@@ -1130,7 +1130,7 @@ def calibrate_t0(gt0,minentries):
         if TRT.t0<mint0:
             mint0=TRT.t0
 
-        print "oldt0=%f  deltat0=%f print t0=%f gt0=%f" % (TRT.oldt0,deltat0,t0,gt0)
+        print("oldt0=%f  deltat0=%f print t0=%f gt0=%f" % (TRT.oldt0,deltat0,t0,gt0))
 
 
         for h,sub in TRT.subdet.iteritems():
@@ -1183,7 +1183,7 @@ def calibrate_t0(gt0,minentries):
                         if v.t0<mint0:
                             mint0=v.t0
 
-                        #print "Module %d %d %d : oldt0=%f  deltat0=%f print t0=%f gt0=%f" % (v.bec,v.layer,v.sector,v.oldt0,deltat0,t0,gt0)
+                        #print("Module %d %d %d : oldt0=%f  deltat0=%f print t0=%f gt0=%f" % (v.bec,v.layer,v.sector,v.oldt0,deltat0,t0,gt0))
 
                         for j,c in v.chips.iteritems():
                             if c.entries>minentries:
@@ -1203,8 +1203,8 @@ def calibrate_t0(gt0,minentries):
                                     mint0=c.t0
 
                                 #if c.t0<20:
-                                #    print "Chip %02d module %02d layer %02d bec %01d -> t0=%02.4f" % (c.chip,c.sector,c.layer,c.bec, c.t0)
-                                #    print "avtimeresidual=%02.4f gt0=%02.4f oldt0=%02.4f" % (c.avtimeresidual(),gt0,c.oldt0)
+                                #    print("Chip %02d module %02d layer %02d bec %01d -> t0=%02.4f" % (c.chip,c.sector,c.layer,c.bec, c.t0))
+                                #    print("avtimeresidual=%02.4f gt0=%02.4f oldt0=%02.4f" % (c.avtimeresidual(),gt0,c.oldt0))
 
                                 for l,s in c.straws.iteritems():
                                     if s.entries>minentries:
@@ -1224,10 +1224,10 @@ def calibrate_t0(gt0,minentries):
                                             mint0=s.t0
                                         
                                         #if abs(s.bec)==1 and s.layer==0 and s.strawlayer<9:
-                                        #    print "---"
-                                        #    print "Straw %d:%d:%d:%d:%d" % (s.bec, s.layer, s.sector, s.strawlayer, s.straw)
-                                        #    print "av=%f detla=%f old=%f -> new=%f" % (s.avtimeresidual(), deltat0, gt0, t0)
-                                        #    print "Entries: %d" % s.entries
+                                        #    print("---")
+                                        #    print("Straw %d:%d:%d:%d:%d" % (s.bec, s.layer, s.sector, s.strawlayer, s.straw))
+                                        #    print("av=%f detla=%f old=%f -> new=%f" % (s.avtimeresidual(), deltat0, gt0, t0))
+                                        #    print("Entries: %d" % s.entries)
                                             
     return mint0
 
@@ -1252,10 +1252,10 @@ def correct_global_offset(filename):
                 offset=float(tokens[1])
                 break
     except:
-        print "Cannot read global offset"
+        print("Cannot read global offset")
         return
 
-    print "Correcting oldt0 by %f" % offset
+    print("Correcting oldt0 by %f" % offset)
 
     #update oldt0
     TRT.oldt0-=offset
@@ -1777,7 +1777,7 @@ def display_t0():
             htmp.Fit(fitf,"Q")
             mean=fitf.GetParameter(0)
             error=fitf.GetParError(0)
-            #print "BEC=%d bin=%d :  mean=%f +- %f" % (i,x,mean,error)
+            #print("BEC=%d bin=%d :  mean=%f +- %f" % (i,x,mean,error))
             hnew.SetBinContent(x,mean)
             hnew.SetBinError(x,error)
         
@@ -1910,7 +1910,7 @@ def display_residuals():
             else:
                 binx=mod.layer+23
 
-            #print "%d:%d:%d" % (mod.bec,mod.sector,mod.layer)
+            #print("%d:%d:%d" % (mod.bec,mod.sector,mod.layer))
             if mod.updatecalib:
                 h.SetBinContent(binx,biny,mod.resmean)
                 h2.SetBinContent(binx,biny,mod.reswidth)
@@ -2067,9 +2067,9 @@ def missing_straws():
                    	if not name2 in found:
                        	      missing.append(name2)
 
-    print "%d straws are missing!!" % len(missing)
+    print("%d straws are missing!!" % len(missing))
     for i in missing:
-        print i
+        print() i
 
 
 def t0_vs_strawlayer_barrel():
@@ -2093,10 +2093,10 @@ def t0_vs_strawlayer_barrel():
                         sle[straw.strawlayer]=1
 
     for k,v in slt0.iteritems():
-        print "========="
-        print "sum t0: %f   entries=%d" % (v,sle[k])
+        print("=========")
+        print("sum t0: %f   entries=%d" % (v,sle[k]))
         av=v/sle[k]
-        print "Strawlayer %d has average t0 of %f" % (k,av)
+        print("Strawlayer %d has average t0 of %f" % (k,av))
 
 # ------ Write merged root-tuple --------                        
 
@@ -2196,11 +2196,11 @@ start2=time.time()
 
 if mint0<0:
     mint0=abs(mint0)+0.5
-    print
-    print '**********'
-    print "Correct t0 by %f" % mint0
-    print '**********'
-    print
+    print()
+    print('**********')
+    print("Correct t0 by %f" % mint0)
+    print('**********')
+    print()
 else:
     if mint0>0.5:
         mint0=-mint0+0.5
@@ -2231,14 +2231,14 @@ display_residuals()
 tdict['create_plots']=time.time()-start2
 
 
-print "Total number of straws seen: %d" % (TRT.getNStraws())
+print("Total number of straws seen: %d" % (TRT.getNStraws()))
 for i in TRT.subdet.itervalues():
-    print "Subdet %d : %d" % (i.bec, i.getNStraws())
+    print("Subdet %d : %d" % (i.bec, i.getNStraws()))
 
 
 endt=time.time()-start
 
-print "Process needed %d seconds" % endt
-print "Detailed listing:"
+print("Process needed %d seconds" % endt)
+print("Detailed listing:")
 for k,v in tdict.iteritems():
-    print "\t%s : %d" % (k,v)
+    print("\t%s : %d" % (k,v))

@@ -1,92 +1,60 @@
 ##########################################################################################################
 ##													##
 ##													##
-##     Script to read .db and .pool files and create .txt with the 					##
-##     calibration contants, to compare with the original ones, and check				##
-##     if the conversion has being done properly 							##
+##     Script to read any db or tag and create .txt with the 					##
+##     with the payload calibration contants                				##
 ##													##
-##     Poolfile should be inserted in the catalog:							##
-##                                                 -pool_insertFileToCatalog  pooloutputfile.root	##
+##     if db is mycool.db, its Pool file should be inserted in the catalog:				##
+##            -pool_insertFileToCatalog  pooloutputfile.root	                                        ##
 ##													##
-##     Output file:											##	
+##     Output file:											##
 ##						   -caliboutput.txt					##
 ##													##
-##     You have to set up the trt tag that you use to write mycool.db and pooloutputfile.root		## 
-##													##
+##     You need to set up the tag that you want to read and the DB it is read from (eg mycool.db)       ## 
 ##													##
 ##########################################################################################################
 
+# CHOOSE tag
+#T0Tag="TrtCalibT0-MC-run2-run3_00-01"
+#RtTag="TrtCalibRt-MC-run2-run3_00-01"
+T0Tag="TrtCalibT0-RUN2-Physics-BLK-UPD4-00-03"
+RtTag="TrtCalibRt-RUN2-Physics-BLK-UPD4-00-03"
 
-T0Tag="Textt0"
-RtTag="Textrt"
-contants= "calibout.267359.txt"
-calib="mycool.db"
-
-
-from AthenaCommon.GlobalFlags import globalflags
-globalflags.DetGeo.set_Value_and_Lock("atlas")
-globalflags.DataSource.set_Value_and_Lock("geant4")
-#globalflags.DetDescrVersion ="ATLAS-CSC-02-01-00"
+# CHOOSE MC or data
+isMC=False
 from IOVDbSvc.CondDB import conddb
+# folders to dump
+conddb.blockFolder("/TRT/Calib/T0")
+conddb.blockFolder("/TRT/Calib/RT")
+if not isMC:
+    conddb.addFolderWithTag('','<dbConnection>COOLOFL_TRT/CONDBR2</dbConnection>/TRT/Calib/T0',T0Tag,force=True,className='TRTCond::StrawT0MultChanContainer')
+    conddb.addFolderWithTag('','<dbConnection>COOLOFL_TRT/CONDBR2</dbConnection>/TRT/Calib/RT',RtTag,force=True,className='TRTCond::RtRelationMultChanContainer')
+    #conddb.addFolderWithTag('','<dbConnection>sqlite://;schema=mycool.db;dbname=CONDBR2</dbConnection>/TRT/Calib/T0',T0Tag,force=True,className='TRTCond::StrawT0MultChanContainer')
+    #conddb.addFolderWithTag('','<dbConnection>sqlite://;schema=mycool.db;dbname=CONDBR2</dbConnection>/TRT/Calib/RT',RtTag,force=True,className='TRTCond::RtRelationMultChanContainer')
+    conddb.blockFolder("/Indet/Onl/Beampos")
+    conddb.addFolderSplitOnline("INDET", "/Indet/Onl/Beampos", "/Indet/Beampos", className="AthenaAttributeList")
+else:
+    conddb.addFolderWithTag('','<dbConnection>COOLOFL_TRT/OFLP200</dbConnection>/TRT/Calib/T0',T0Tag,force=True,className='TRTCond::StrawT0MultChanContainer')
+    conddb.addFolderWithTag('','<dbConnection>COOLOFL_TRT/OFLP200</dbConnection>/TRT/Calib/RT',RtTag,force=True,className='TRTCond::RtRelationMultChanContainer')
+    #conddb.addFolderWithTag('','<dbConnection>sqlite://;schema=mycool.db;dbname=OFLP200</dbConnection>/TRT/Calib/T0',T0Tag,force=True,className='TRTCond::StrawT0MultChanContainer')
+    #conddb.addFolderWithTag('','<dbConnection>sqlite://;schema=mycool.db;dbname=OFLP200</dbConnection>/TRT/Calib/RT',RtTag,force=True,className='TRTCond::RtRelationMultChanContainer')
 
-include ( "DetDescrCondAthenaPool/DetDescrCondAthenaPool_joboptions.py" )
+# Set this if you have several run ranges in the chosen db
+svcMgr.IOVDbSvc.forceRunNumber=456346
 
-from AthenaCommon.DetFlags import DetFlags
-DetFlags.TRT_setOn()
-DetFlags.detdescr.TRT_setOn()
-
-from AtlasGeoModel import SetGeometryVersion
-from AtlasGeoModel import GeoModelInit
-
-
-include("AthenaPoolCnvSvc/WriteAthenaPool_jobOptions.py")
-include("RegistrationServices/RegistrationServices_jobOptions.py")
-#
-# --- Load necessary TRT conditions folders
-#
-
-if not conddb.folderRequested('/TRT/Calib/RT'):
-    conddb.addFolderSplitOnline("TRT","/TRT/Onl/Calib/RT","/TRT/Calib/RT",className='TRTCond::RtRelationMultChanContainer')
-
-if not conddb.folderRequested('/TRT/Calib/T0'):
-    conddb.addFolderSplitOnline("TRT","/TRT/Onl/Calib/T0","/TRT/Calib/T0",className='TRTCond::StrawT0MultChanContainer')
-
-if not conddb.folderRequested('/TRT/Calib/errors2d'):
-    TRTErrorsFolder = conddb.addFolderSplitOnline ("TRT","/TRT/Onl/Calib/errors2d","/TRT/Calib/errors2d",className='TRTCond::RtRelationMultChanContainer')
-
-if not conddb.folderRequested('/TRT/Calib/slopes'):
-    TRTSlopesFolder = conddb.addFolderSplitOnline ("TRT","/TRT/Onl/Calib/slopes","/TRT/Calib/slopes",className='TRTCond::RtRelationMultChanContainer')
-
-
+from AthenaCommon.AlgSequence import AthSequencer
+condSeq = AthSequencer("AthCondSeq")
 from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()
+
 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-#svcMgr.IOVDbSvc.dbConnection  = "sqlite://;schema="+calib+";dbname=COMP200"
-#svcMgr.dbConnection="sqlite://;schema=mycool.db;dbname=COMP200"
 
-conddb.setGlobalTag("OFLCOND-MC16-SDR-27")
-#conddb.setGlobalTag("CONDBR2-BLKPA-2018-14")
-#svcMgr.IOVDbSvc.forceRunNumber=227000
-
-# in case you want to read your own mycool.db
-#conddb.blockFolder("/TRT/Calib/T0")
-#conddb.blockFolder("/TRT/Calib/RT")
-#conddb.blockFolder("/TRT/Calib/errors")
+from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTCondRead
+TRTCondRead = TRTCondRead( name = "TRTCondRead",
+                          CalibOutputFile="caliboutput.txt")
+topSequence+=TRTCondRead
 
 
-#svcMgr.IOVDbSvc.Folders+= ["<db>sqlite://;schema=mycool.db;dbname=CONDBR2 </db> /TRT/Calib/T0  <tag>"+T0Tag+"</tag>"]
-#svcMgr.IOVDbSvc.Folders+= ["<db>sqlite://;schema=mycool.db;dbname=CONDBR2 </db> /TRT/Calib/RT  <tag>"+RtTag+"</tag>"]
-#svcMgr.IOVDbSvc.Folders+= ["<db>COOLOFL_TRT/OFLP200 </db> /TRT/Calib/errors  <tag>TrtCalibErrors-mc-01</tag>"]
 
 
-svcMgr.IOVSvc.preLoadData = True
-svcMgr.MessageSvc.OutputLevel      = INFO
-
-
-from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTCondWrite
-TRTCondWrite = TRTCondWrite( name = "TRTCondWrite",
-                             CalibOutputFile = "calibout_1.txt")
-topSequence+=TRTCondWrite
-
-theApp.EvtMax = 1
 
