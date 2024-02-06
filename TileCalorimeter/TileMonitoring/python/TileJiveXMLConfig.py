@@ -55,7 +55,7 @@ def getTileRawChannelContainer(flags):
 
 
 def TileAlgoJiveXMLCfg(flags, TileDigitsContainer=None, TileRawChannelContainer=None,
-                       CaloClusterContainer='TileTopoCluster', **kwargs):
+                       CaloClusterContainer='TileTopoCluster', stateless=False, **kwargs):
     """
     Function to configure AlgoJiveXML algorithm for Tile.
 
@@ -172,6 +172,13 @@ def TileAlgoJiveXMLCfg(flags, TileDigitsContainer=None, TileRawChannelContainer=
     ### Enable this to recreate the geometry XML files for Atlantis
     kwargs.setdefault("WriteGeometry", False)
     kwargs.setdefault("DataTypes", data_types)
+
+    if stateless:
+        StreamToServerTool = CompFactory.JiveXML.StreamToServerTool
+        tileStreamToServerTool = StreamToServerTool(StreamName='Tile')
+
+        acc.addPublicTool(tileStreamToServerTool)
+        kwargs['StreamTools'] = [ tileStreamToServerTool ]
 
     AlgoJiveXML = CompFactory.JiveXML.AlgoJiveXML
     acc.addEventAlgo(AlgoJiveXML(name="AlgoJiveXML", **kwargs), primary=True)

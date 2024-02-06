@@ -97,6 +97,7 @@ if __name__=='__main__':
     _addBoolArgument(parser, 'online', help='Online environment running')
 
     parser.add_argument('--no-mon', action='store_false', dest='mon', help='Do not run Tile monitoring algorithms')
+    parser.add_argument('--jivexml', action='store_true', help='Create Jive XML output')
     parser.add_argument('--stateless', action="store_true", help='Run Online Tile monitoring in partition')
     parser.add_argument('--use-mbts-trigger', action="store_true", dest='useMbtsTrigger', help='Use L1 MBTS triggers')
     parser.add_argument('--partition', default="", help='EMON, Partition name, default taken from $TDAQ_PARTITION if not set')
@@ -252,6 +253,9 @@ if __name__=='__main__':
         flags.Tile.doOverflowFit = False
         flags.Tile.BestPhaseFromCOOL = True
         flags.Tile.NoiseFilter = 1
+
+    if args.jivexml:
+        flags.Output.doJiveXML = True
 
     # Override default configuration flags from command line arguments
     flags.fillFromArgs(parser=parser)
@@ -420,7 +424,8 @@ if __name__=='__main__':
 
     if flags.Output.doJiveXML:
         from TileMonitoring.TileJiveXMLConfig import TileAlgoJiveXMLCfg
-        cfg.merge(TileAlgoJiveXMLCfg(flags, OnlineMode=args.stateless, WriteToFile=(not args.stateless)))
+        cfg.merge(TileAlgoJiveXMLCfg(flags, WriteToFile=(not args.stateless), stateless=args.stateless))
+
 
     # Any last things to do?
     if args.postExec:
