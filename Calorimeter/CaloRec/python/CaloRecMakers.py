@@ -11,7 +11,7 @@
 
 
 from CaloRec.CaloRecConf import CaloClusterCopier, CaloClusterMaker, \
-     CaloClusterCorrDBWriter, CaloClusterBuilderSW, CaloCell2ClusterMapper, \
+     CaloClusterCorrDBWriter, CaloCell2ClusterMapper, \
      CaloTopoClusterSplitter, CaloTopoClusterMaker 
 
 
@@ -35,35 +35,6 @@ def _process_tools (alg, tools):
     return [_process_tool(alg, t) for t in tools]
 
 
-def make_CaloClusterBuilderSW (name,
-                               tower_container,
-                               eta_size,
-                               phi_size,
-                               e_threshold,
-                               FillClusterCells,
-                               eta_sizep = 3,
-                               phi_sizep = 3,
-                               eta_SeedGrid = None,
-                               phi_SeedGrid = None,
-                               eta_Duplicate = None,
-                               phi_Duplicate = None,
-                               nextra = 0):
-    etadup = 2*eta_size - 1
-    phidup = 2*phi_size - 1
-    return _makeconf (CaloClusterBuilderSW,
-                      name,
-                      TowerContainer = tower_container,
-                      eta_size = eta_size,
-                      phi_size = phi_size,
-                      eta_sizep = eta_sizep,
-                      phi_sizep = phi_sizep,
-                      e_threshold = e_threshold,
-                      FillClusterCells = FillClusterCells,
-                      nextra = nextra,
-                      eta_SeedGrid = eta_SeedGrid or eta_size,
-                      phi_SeedGrid = phi_SeedGrid or phi_size,
-                      eta_Duplicate = eta_Duplicate or etadup,
-                      phi_Duplicate = phi_Duplicate or phidup)
 
 def make_CaloClusterCopier (name, output_name, copy_cells = False, use_ClusterPosition=False, etCut=-1.):
     return _makeconf (CaloClusterCopier,
