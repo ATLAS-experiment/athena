@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Main steering for the digitization jobs
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -10,27 +10,7 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from BCM_Digitization.BCM_DigitizationConfig import BCM_DigitizationCfg
 from Digitization.DigitizationParametersConfig import writeDigitizationMetadata
-from LArDigitization.LArDigitizationConfig import LArTriggerDigitizationCfg
-from MuonConfig.CSC_DigitizationConfig import CSC_DigitizationDigitToRDOCfg
-from MuonConfig.MDT_DigitizationConfig import MDT_DigitizationDigitToRDOCfg
-from MuonConfig.MM_DigitizationConfig import MM_DigitizationDigitToRDOCfg
-from MuonConfig.RPC_DigitizationConfig import RPC_DigitizationDigitToRDOCfg
-from MuonConfig.TGC_DigitizationConfig import TGC_DigitizationDigitToRDOCfg
-from MuonConfig.sTGC_DigitizationConfig import sTGC_DigitizationDigitToRDOCfg
-from PixelDigitization.PLR_DigitizationConfig import PLR_DigitizationCfg
-from PixelDigitization.ITkPixelDigitizationConfig import ITkPixelDigitizationCfg
-from PixelDigitization.PixelDigitizationConfig import PixelDigitizationCfg
-from SCT_Digitization.SCT_DigitizationConfig import SCT_DigitizationCfg
-from StripDigitization.StripDigitizationConfig import ITkStripDigitizationCfg
-from HGTD_Digitization.HGTD_DigitizationConfig import HGTD_DigitizationCfg
-from TileSimAlgs.TileDigitizationConfig import TileDigitizationCfg, TileTriggerDigitizationCfg
-from TRT_Digitization.TRT_DigitizationConfig import TRT_DigitizationCfg
-from ALFA_Digitization.ALFA_DigitizationConfig import ALFA_DigitizationCfg
-from AFP_Digitization.AFP_DigitizationConfig import AFP_DigitizationCfg
-from LUCID_Digitization.LUCID_DigitizationConfig import LUCID_DigitizationCfg
-from ZDC_SimuDigitization.ZDC_SimuDigitizationConfig import ZDC_DigitizationCfg
 from RunDependentSimComps.PileUpUtils import pileupInputCollections
 
 from AthenaCommon.Logging import logging
@@ -141,61 +121,81 @@ def DigitizationMainContentCfg(flags):
 
     # Inner Detector
     if flags.Detector.EnableBCM:
+        from BCM_Digitization.BCM_DigitizationConfig import BCM_DigitizationCfg
         acc.merge(BCM_DigitizationCfg(flags))
     if flags.Detector.EnablePixel:
+        from PixelDigitization.PixelDigitizationConfig import PixelDigitizationCfg
         acc.merge(PixelDigitizationCfg(flags))
     if flags.Detector.EnableSCT:
+        from SCT_Digitization.SCT_DigitizationConfig import SCT_DigitizationCfg
         acc.merge(SCT_DigitizationCfg(flags))
     if flags.Detector.EnableTRT:
+        from TRT_Digitization.TRT_DigitizationConfig import TRT_DigitizationCfg
         acc.merge(TRT_DigitizationCfg(flags))
 
     # ITk
     if flags.Detector.EnableITkPixel:
+        from PixelDigitization.ITkPixelDigitizationConfig import ITkPixelDigitizationCfg
         acc.merge(ITkPixelDigitizationCfg(flags))
     if flags.Detector.EnableITkStrip:
+        from StripDigitization.StripDigitizationConfig import ITkStripDigitizationCfg
         acc.merge(ITkStripDigitizationCfg(flags))
     if flags.Detector.EnablePLR:
+        from PixelDigitization.PLR_DigitizationConfig import PLR_DigitizationCfg
         acc.merge(PLR_DigitizationCfg(flags))
 
     # HGTD
     if flags.Detector.EnableHGTD:
+        from HGTD_Digitization.HGTD_DigitizationConfig import HGTD_DigitizationCfg
         acc.merge(HGTD_DigitizationCfg(flags))
 
     # Calorimeter
     if flags.Detector.EnableLAr:
+        from LArDigitization.LArDigitizationConfig import LArTriggerDigitizationCfg
         acc.merge(LArTriggerDigitizationCfg(flags))
     if flags.Detector.EnableTile:
+        from TileSimAlgs.TileDigitizationConfig import TileDigitizationCfg, TileTriggerDigitizationCfg
         acc.merge(TileDigitizationCfg(flags))
         acc.merge(TileTriggerDigitizationCfg(flags))
 
     # Muon Spectrometer
     if flags.Detector.EnableMDT:
+        from MuonConfig.MDT_DigitizationConfig import MDT_DigitizationDigitToRDOCfg
         acc.merge(MDT_DigitizationDigitToRDOCfg(flags))
     if flags.Detector.EnableTGC:
+        from MuonConfig.TGC_DigitizationConfig import TGC_DigitizationDigitToRDOCfg
         acc.merge(TGC_DigitizationDigitToRDOCfg(flags))
     if flags.Detector.EnableRPC:
+        from MuonConfig.RPC_DigitizationConfig import RPC_DigitizationDigitToRDOCfg
         acc.merge(RPC_DigitizationDigitToRDOCfg(flags))
     if flags.Detector.EnableCSC:
+        from MuonConfig.CSC_DigitizationConfig import CSC_DigitizationDigitToRDOCfg
         acc.merge(CSC_DigitizationDigitToRDOCfg(flags))
     if flags.Detector.EnablesTGC:
+        from MuonConfig.sTGC_DigitizationConfig import sTGC_DigitizationDigitToRDOCfg
         acc.merge(sTGC_DigitizationDigitToRDOCfg(flags))
     if flags.Detector.EnableMM:
+        from MuonConfig.MM_DigitizationConfig import MM_DigitizationDigitToRDOCfg
         acc.merge(MM_DigitizationDigitToRDOCfg(flags))
 
     # LUCID
     if flags.Detector.EnableLucid:
+        from LUCID_Digitization.LUCID_DigitizationConfig import LUCID_DigitizationCfg
         acc.merge(LUCID_DigitizationCfg(flags))
 
     # AFP
     if flags.Detector.EnableAFP:
+        from AFP_Digitization.AFP_DigitizationConfig import AFP_DigitizationCfg
         acc.merge(AFP_DigitizationCfg(flags))
 
     # ALFA
     if flags.Detector.EnableALFA:
+        from ALFA_Digitization.ALFA_DigitizationConfig import ALFA_DigitizationCfg
         acc.merge(ALFA_DigitizationCfg(flags))
 
     # ZDC
     if flags.Detector.EnableZDC:
+        from ZDC_SimuDigitization.ZDC_SimuDigitizationConfig import ZDC_DigitizationCfg
         acc.merge(ZDC_DigitizationCfg(flags))
 
     # Add MT-safe PerfMon
