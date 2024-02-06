@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: PhysicsP1_pp_run3_v1 menu test only dumping options for SMK generation and running RuleBook to create prescales
 # art-type: build
@@ -13,10 +13,10 @@ from TrigValTools.TrigValSteering import Step, Test, ExecStep, CheckSteps
 
 menu = ExecStep.ExecStep('RunPhysMenu')
 menu.type = 'athenaHLT'
-menu.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+menu.job_options = 'TriggerJobOpts.runHLT'
 menu.input = 'data'
-menu.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1\';"'
-menu.args += ' -M --dump-config-exit'
+menu.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1"']
+menu.args = '-M --dump-config-exit'
 menu.perfmon = False  # Cannot use PerfMon with -M
 
 #====================================================================================================
