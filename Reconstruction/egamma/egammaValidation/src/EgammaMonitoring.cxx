@@ -341,6 +341,11 @@ StatusCode EgammaMonitoring::initialize() {
     ATH_CHECK(m_TightLH.retrieve());
 
     ATH_CHECK(m_FwdElectronsKey.initialize(!m_FwdElectronsKey.empty()));
+
+    m_dR1 = new TH1D("dR1",";#Delta R;Events",1000,0,0.1);
+    ATH_CHECK(rootHistSvc->regHist("/MONITORING/Check/dR1",m_dR1));
+    m_dR2 = new TH1D("dR2",";#Delta R;Events",1000,0,0.1);
+    ATH_CHECK(rootHistSvc->regHist("/MONITORING/Check/dR2",m_dR2));
   }
 
   if ("gamma" == m_sampleType) {
@@ -413,7 +418,7 @@ StatusCode EgammaMonitoring::execute() {
     }
 
     ATH_MSG_DEBUG( "------------ Truth Particles Container ---------------" );
-    unsigned int promptElectronTruthIndex = - 9;
+    unsigned int promptElectronTruthIndex = std::numeric_limits<unsigned int>::max();
     for (const auto *truth : *truthParticles) {
 
       if (!truth) continue;
@@ -583,7 +588,7 @@ StatusCode EgammaMonitoring::execute() {
       }
 
       const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*elrec);
-      if (!truth ) continue;
+      if (!truth) continue;
       truthElectronRecoElectronAll->fill(truth, elrec);
       if (std::abs(truth->pdgId()) != 11 || foundPromptElectron)
 	continue;
@@ -639,8 +644,22 @@ StatusCode EgammaMonitoring::execute() {
 	bool toFill = false;
 
 	const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(*el);
-	if (!truth ) continue;
+
+	if (!truth) continue;
 	//truthElectronRecoFwdElectronAll->fill(truth, elrec); // to be done
+
+	// if the prompt electron is not too far from the reco candidate, which might be matched to a photon
+	// use this prompt as the matched particle instead
+	if (std::abs(truth->pdgId()) != 11 && promptElectronTruthIndex < truthParticles->size()) {
+	  const xAOD::TruthParticle *vtruth = truthParticles->at(promptElectronTruthIndex);
+	  double dR1 = vtruth->p4().DeltaR(el->caloCluster()->p4());
+	  double dR2 = truth->p4().DeltaR(el->caloCluster()->p4());
+	  m_dR1->Fill(dR1);
+	  m_dR2->Fill(dR2);
+	  if (dR1 < 0.05) // threshold to optimize
+	    truth = vtruth;
+	}
+
 	if (std::abs(truth->pdgId()) != 11)
 	  continue;
 	const xAOD::TruthParticle *elTruth(nullptr);
