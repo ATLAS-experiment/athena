@@ -1,6 +1,6 @@
 """Configure Truth output for digitization with ComponentAccumulator style
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.Enums import ProductionStep
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
@@ -21,6 +21,11 @@ def TruthDigitizationOutputCfg(flags):
            f"TrackRecordCollection#{prefix}CaloEntryLayer",
            f"TrackRecordCollection#{prefix}MuonExitLayer",
         ]
+        # Extra TrackRecordCollections to copy for cosmics Digitization
+        if 'TrackRecordCollection#CosmicPerigee' in flags.Input.TypedCollections:
+            ItemList += ["TrackRecordCollection#CosmicPerigee"]
+        if 'TrackRecordCollection#CosmicRecord' in flags.Input.TypedCollections:
+            ItemList += ["TrackRecordCollection#CosmicRecord"]
 
     from RunDependentSimComps.PileUpUtils import pileupInputCollections
     puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
