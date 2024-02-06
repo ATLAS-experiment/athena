@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/span.h
@@ -19,6 +19,11 @@
 #include <type_traits>
 #include <iterator>
 #include <cassert>
+
+#include "CxxUtils/features.h"
+#if HAVE_STD_RANGES
+# include <ranges>
+#endif
 
 
 namespace CxxUtils {
@@ -50,6 +55,9 @@ inline constexpr size_t dynamic_extent = static_cast<size_t>(-1);
  */
 template <class T>
 class span
+#if HAVE_STD_RANGES
+  : public std::ranges::view_base
+#endif
 {
 public:
   /// Required typedefs.
@@ -151,6 +159,20 @@ public:
   constexpr const_reference operator[] (size_type i) const noexcept;
 
   
+  /**
+   * @brief Return a reference to the i-th element in the span (bounds-checked)./
+   * @param i Index of the element to return.
+   */
+  constexpr reference at (size_type i);
+
+
+  /**
+   * @brief Return a reference to the i-th element in the span (bounds-checked)./
+   * @param i Index of the element to return.
+   */
+  constexpr const_reference at (size_type i) const;
+
+
   /**
    * @brief Return a pointer to the start of the span.
    */
