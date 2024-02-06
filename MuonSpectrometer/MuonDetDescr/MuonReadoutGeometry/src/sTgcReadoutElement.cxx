@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -155,9 +155,14 @@ namespace MuonGM {
     if (abs(getStationEta())!=(int) (WSTGC_TYPE[7]-'0')) continue;
     if (m_ml != (int) (pVName[7]-'0'))                   continue;
     const IRDBRecord *nswdim{nullptr};
-    for (size_t w=0;w<nswdimRec->size();w++) {
+    std::string logVolSubName=getMaterialGeom()->getLogVol()->getName().substr(7,4);
+    size_t w{0};
+    for (w=0;w<nswdimRec->size();w++) {
       nswdim = (*nswdimRec)[w];
-      break;
+      const std::string & type = nswdim->getString("NSW_TYPE").substr(5,4);
+      if (type==logVolSubName) {
+        break;
+      }
     }
     
     m_sWidthChamber = nswdim->getDouble("BASE_WIDTH");;         // bottom base length (full chamber)
