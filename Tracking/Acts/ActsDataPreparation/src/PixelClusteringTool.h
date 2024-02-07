@@ -14,9 +14,11 @@
 #include "SiClusterizationTool/PixelRDOTool.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 
-namespace ActsTrk {
+namespace InDet {
 
 // Helper functions for use with ACTS clusterization
+// Put these in the InDet namespace so that ACTS can find them
+// via ADL.
 //
 inline int getCellRow(const InDet::UnpackedPixelRDO& cell)
 {
@@ -32,6 +34,12 @@ inline int& getCellLabel(InDet::UnpackedPixelRDO& cell)
 {
     return cell.NCL;
 }
+
+
+} // namespace InDet
+
+
+namespace ActsTrk {
 
 
 class PixelClusteringTool : public extends<AthAlgTool,IPixelClusteringTool> {

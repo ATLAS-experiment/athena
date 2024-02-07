@@ -3,9 +3,6 @@
 */
 
 #include "PixelClusteringTool.h"
-using ActsTrk::getCellRow;
-using ActsTrk::getCellColumn;
-using ActsTrk::getCellLabel;
 
 #include <Acts/Clusterization/Clusterization.hpp>
 
