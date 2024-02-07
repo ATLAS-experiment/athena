@@ -69,6 +69,8 @@ HITSMerge_tf.py \
 echo "art-result: $? dummy-merge"
 
 # Compare the merged outputs
-acmd.py diff-root hitsFullMerged.ttbar.pool.root hitsMerged.ttbar.pool.root --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+acmd.py diff-root hitsFullMerged.ttbar.pool.root hitsMerged.ttbar.pool.root --order-trees --error-mode resilient
+rc=$?
+echo "art-result: $rc comparison"
 
-echo "art-result: $? comparison"
+exit $rc

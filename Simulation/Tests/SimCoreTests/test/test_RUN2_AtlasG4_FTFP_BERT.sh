@@ -20,7 +20,7 @@ AtlasG4_tf.py \
     --DataRunNumber '284500' \
     --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/J2_jetjet-pythia6-7000.evgen.pool.root' \
-    --outputHITSFile "test.CA.HITS.pool.root" \
+    --outputHITSFile "test.HITS.pool.root" \
     --maxEvents '10' \
     --skipEvents '0' \
     --randomSeed '10' \
@@ -32,61 +32,15 @@ mv log.AtlasG4Tf log.AtlasG4Tf_CA
 echo  "art-result: $rc simCA"
 status=$rc
 
-AtlasG4_tf.py \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
-    --physicsList 'FTFP_BERT' \
-    --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationNoIoV.py' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --DataRunNumber '284500' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
-    --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/J2_jetjet-pythia6-7000.evgen.pool.root' \
-    --outputHITSFile "test.HITS.pool.root" \
-    --maxEvents '10' \
-    --skipEvents '0' \
-    --randomSeed '10' \
-    --imf False \
-    --athenaopts '"--config-only=ConfigSimCG.pkl"'
-
-AtlasG4_tf.py \
-    --conditionsTag 'OFLCOND-MC23-SDR-RUN3-01' \
-    --physicsList 'FTFP_BERT' \
-    --preInclude 'AtlasG4Tf:Campaigns/MC23SimulationNoIoV.py' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --DataRunNumber '284500' \
-    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
-    --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/J2_jetjet-pythia6-7000.evgen.pool.root' \
-    --outputHITSFile "test.HITS.pool.root" \
-    --maxEvents '10' \
-    --skipEvents '0' \
-    --randomSeed '10' \
-    --imf False
-
-rc2=$?
-mv log.AtlasG4Tf log.AtlasG4Tf_OLD
-echo  "art-result: $rc2 simOLD"
-if [ $status -eq 0 ]
-then
-    status=$rc2
-fi
-
-rc3=-9999
-if [ $status -eq 0 ]
-then
-    acmd.py diff-root test.HITS.pool.root test.CA.HITS.pool.root --error-mode resilient --mode=semi-detailed
-    rc3=$?
-    status=$rc3
-fi
-echo  "art-result: $rc3 OLDvsCA"
-
-rc4=-9999
-if [ $rc2 -eq 0 ]
+rc2=-9999
+if [ $rc -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
     art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --file=test.HITS.pool.root
-    rc4=$?
-    status=$rc4
+    rc2=$?
+    status=$rc2
 fi
-echo  "art-result: $rc4 regression"
+echo  "art-result: $rc2 regression"
 
 exit $status
