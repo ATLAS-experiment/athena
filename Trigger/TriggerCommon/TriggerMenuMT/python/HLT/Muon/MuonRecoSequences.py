@@ -12,6 +12,7 @@ from MuonConfig.MuonRdoDecodeConfig import RpcRDODecodeCfg, TgcRDODecodeCfg, Mdt
 from MuonConfig.MuonRdoDecodeConfig import MuonPrdCacheNames
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TrigInDetConfig.utils import getFlagsForActiveConfig
 
 CBTPname = recordable("HLT_CBCombinedMuon_RoITrackParticles")
 CBTPnameFS = recordable("HLT_CBCombinedMuon_FSTrackParticles")
@@ -259,7 +260,6 @@ def muonIDCosmicTrackingSequenceCfg( flags, RoIs, name, extraLoads=None, extraLo
 
   acc.merge(muonIDtrackVDVCfg(flags, 'cosmics', RoIs, extraLoads, extraLoadsForl2mtmode))
 
-  from TrigInDetConfig.utils import getFlagsForActiveConfig
   flagsWithTrk = getFlagsForActiveConfig(flags, "cosmics", log)
 
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
@@ -429,15 +429,15 @@ def muEFCBRecoSequenceCfg( flags, RoIs, name ):
   if isCosmic(flags) and 'LRT' not in name:
     trackParticles = getIDTracks(flags)
   elif 'LRT' in name:
-    muLrtFlags = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muonLRT")
+    muLrtFlags = getFlagsForActiveConfig(flags, "muonLRT", log)
     acc.merge(trigInDetPrecisionTrackingCfg(muLrtFlags, rois= RoIs, signatureName="muonLRT"))
     trackParticles = muLrtFlags.Tracking.ActiveConfig.tracks_IDTrig
   elif 'FS' in name:
-    muFsFlags = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muonFS")
+    muFsFlags = getFlagsForActiveConfig(flags, "muonFS", log)
     acc.merge(trigInDetPrecisionTrackingCfg(muFsFlags, rois= RoIs, signatureName="muonFS", in_view=False))
     trackParticles = muFsFlags.Tracking.ActiveConfig.tracks_IDTrig
   else:
-    muFlags = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
+    muFlags = getFlagsForActiveConfig(flags, "muon", log)
     acc.merge(trigInDetPrecisionTrackingCfg(muFlags, rois= RoIs, signatureName="muon"))
     trackParticles = muFlags.Tracking.ActiveConfig.tracks_IDTrig
 
@@ -516,7 +516,7 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name):
 
     # need to run precisions tracking for late muons, since we don't run it anywhere else
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
-    muLateFlags = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muonLate")
+    muLateFlags = getFlagsForActiveConfig(flags, "muonLate", log)
     acc.merge(trigInDetPrecisionTrackingCfg(muLateFlags, rois= RoIs, signatureName="muonLate"))
     trackParticles = muLateFlags.Tracking.ActiveConfig.tracks_IDTrig
 
@@ -571,7 +571,7 @@ def efmuisoRecoSequenceCfg( flags, RoIs, Muons, doMSiso=False ):
   acc.merge(muonIDFastTrackingSequenceCfg(flags, RoIs, "muonIso"+name ))
 
   from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
-  muIsoFlags = flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muonIso"+name)
+  muIsoFlags = getFlagsForActiveConfig(flags, "muonIso"+name, log)
   acc.merge(trigInDetPrecisionTrackingCfg(muIsoFlags, rois= RoIs, signatureName="muonIso"+name, in_view=False))
   trackParticles = muIsoFlags.Tracking.ActiveConfig.tracks_IDTrig
 
