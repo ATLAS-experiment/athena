@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @Package PyJobTransforms.trfArgs
 #  @brief Standard arguments supported by trf infrastructure
@@ -236,6 +236,8 @@ def addDetectorArguments(parser):
                         help='ATLAS geometry version tag')
     parser.add_argument('--geometrySQLite', group='Detector', type=argFactory(trfArgClasses.argBool),
                         help='Switch to SQLite Geometry DB')
+    parser.add_argument('--geometrySQLiteFullPath', group='Detector', type=argFactory(trfArgClasses.argString),
+                        help='Manual setting of SQLite Geometry DB path. For testing purposes only')
     parser.add_argument('--beamType', group='Detector', type=argFactory(trfArgClasses.argString), 
                         help='Manual beam type setting')
     parser.add_argument('--runNumber', '--RunNumber', group='Detector', type=argFactory(trfArgClasses.argInt), 
