@@ -165,6 +165,7 @@ Trk::Surface::measurementFrame(const Amg::Vector3D&, const Amg::Vector3D&) const
   return transform().rotation();
 }
 
+
 // overload dump for MsgStream operator
 MsgStream&
 Trk::Surface::dump(MsgStream& sl) const
@@ -172,6 +173,9 @@ Trk::Surface::dump(MsgStream& sl) const
   sl << std::setiosflags(std::ios::fixed);
   sl << std::setprecision(4);
   sl << name() << std::endl;
+  if (associatedDetectorElement()!=nullptr){
+    sl<<"     Detector Type              = "<<associatedDetectorElement()->detectorTypeString()<<std::endl;
+  }
   sl << "     Center position  (x, y, z) = (" << center().x() << ", " << center().y() << ", " << center().z() << ")"
      << std::endl;
   Amg::RotationMatrix3D rot(transform().rotation());
@@ -194,6 +198,9 @@ Trk::Surface::dump(std::ostream& sl) const
   sl << std::setiosflags(std::ios::fixed);
   sl << std::setprecision(4);
   sl << name() << std::endl;
+  if (associatedDetectorElement()!=nullptr){
+    sl<<"     Detector Type              = "<<associatedDetectorElement()->detectorTypeString()<<std::endl;
+  }
   sl << "     Center position  (x, y, z) = (" << center().x() << ", " << center().y() << ", " << center().z() << ")"
      << std::endl;
   Amg::RotationMatrix3D rot(transform().rotation());

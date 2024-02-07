@@ -106,6 +106,9 @@ public:
 
   /**Return the Detector element type*/
   virtual DetectorElemType detectorType() const = 0;
+
+  /**Returns a string of the Detector element type*/
+  std::string detectorTypeString() const;
 };
 
 } // end of ns
