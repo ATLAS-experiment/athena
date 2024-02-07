@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir(ActsEventCnv)
@@ -9,35 +9,45 @@ find_package(Acts COMPONENTS Core)
 # Component(s) in the package:
 atlas_add_library(ActsEventCnvLib
     ActsEventCnv/*.h
-    src/*.cxx
     PUBLIC_HEADERS ActsEventCnv
     INTERFACE
     LINK_LIBRARIES
     ActsCore
-    ActsGeometryLib
+    ActsEventLib
     GaudiKernel
     StoreGateLib
-    TrkTrack
     TrkParameters
+    TrkTrack
     xAODMeasurementBase
     xAODTracking
-    ActsEventLib
-    TrkToolInterfaces
-    InDetPrepRawData
-    InDetRIO_OnTrack
 )
 
 atlas_add_component(ActsEventCnv
-    src/ActsToTrkConverterTool.cxx
+    src/*.h src/*.cxx
     src/components/*.cxx
     LINK_LIBRARIES
     ActsEventCnvLib
+    ActsCore
+    ActsEventLib
+    ActsGeometryLib
+    ActsGeometryInterfacesLib
+    ActsInteropLib
     AthenaBaseComps
-    AthenaKernel
-    TrkGeometry
-    TrkSurfaces
-    TrkTrackSummary
+    GaudiKernel
+    InDetPrepRawData
+    InDetReadoutGeometry
+    InDetRIO_OnTrack
+    StoreGateLib
+    TrkEventPrimitives
     TrkExUtils
+    TrkMeasurementBase
+    TrkParameters
+    TrkSurfaces
+    TrkToolInterfaces
+    TrkTrack
+    xAODInDetMeasurement
+    xAODMeasurementBase
+    xAODTracking
 )
 
 atlas_add_test(ActsEventCnvTest
