@@ -37,6 +37,7 @@ StatusCode egammaForwardBuilder::initialize()
 {
   m_maxDelPhi = m_maxDelPhiCells * cellPhiSize * 0.5;
   m_maxDelEta = m_maxDelEtaCells * cellEtaSize * 0.5;
+  m_maxDelR2 = m_maxDelR * m_maxDelR; // Square now to avoid a slow sqrt later.
 
   // The data handle keys.
   ATH_CHECK(m_topoClusterKey.initialize());
@@ -281,7 +282,8 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
 
 void egammaForwardBuilder::cookieCut(xAOD::CaloCluster& cluster) const
 {
-  if (!cluster.hasSampling(CaloSampling::EME2)) {
+  if (!cluster.hasSampling(CaloSampling::EME2) &&
+      !cluster.hasSampling(CaloSampling::FCAL0)) {
     return;
   }
 
@@ -290,12 +292,23 @@ void egammaForwardBuilder::cookieCut(xAOD::CaloCluster& cluster) const
 
   CaloClusterCellLink* cell_links = cluster.getOwnCellLinks();
   CaloClusterCellLink::iterator cell_itr = cell_links->begin();
+
+  const bool isEC = cp.emaxEC >= cp.emaxF;
+  const float eta = isEC ? cp.etaEC : cp.etaF;
+  const float phi = isEC ? cp.phiEC : cp.phiF;
    
   while (cell_itr != cell_links->end()) {
-    if (
-      std::abs(cp.etaEC - cell_itr->eta()) > m_maxDelEta ||
-      std::abs(cp.phiEC - cell_itr->phi()) > m_maxDelPhi
-    ) {
+    const float deltaEta = std::abs(eta - cell_itr->eta());
+    const float deltaPhi = std::abs(phi - cell_itr->phi());
+
+    const float deltaEta2 = deltaEta * deltaEta; 
+    const float deltaPhi2 = deltaPhi * deltaPhi; 
+
+    const bool removeCell = isEC ?
+      (deltaEta >= m_maxDelEta || deltaPhi >= m_maxDelPhi) :
+      (deltaEta2 + deltaPhi2 >= m_maxDelR2);
+
+    if (removeCell) {
       cell_itr = cell_links->removeCell(cell_itr);
     }
     else {
