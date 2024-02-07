@@ -121,9 +121,6 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
             const int eta{m_pSCTHelper->eta_module(sct_id)};
             const int phi{m_pSCTHelper->phi_module(sct_id)};
 
-            if (bec != 0) {
-              continue; // We only care about the barrel
-            }
             // Check if the silicon surface is 100.
             SiliconSurface surface{surface111};
             for (unsigned int i{0}; i < layer100_n; i++) {
@@ -151,6 +148,7 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
               pTrack[0] = trkp->momentum().x();
               pTrack[1] = trkp->momentum().y();
               pTrack[2] = trkp->momentum().z();
+	      float etaTrack = trkp->eta();
               int iflag{findAnglesToWaferSurface(pTrack, sinAlpha, clus->identify(), elements, thetaToWafer, phiToWafer)};
               if (iflag < 0) {
                 ATH_MSG_WARNING("Error in finding track angles to wafer surface");
@@ -158,6 +156,7 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
               }
 
               bool passesCuts{true};
+	      // The cuts for the physics runs follow ATL-COM-INDET-2021-011.
               if ((dataType() == AthMonitorAlgorithm::DataType_t::cosmics) and
                   (trkp->momentum().perp() > 500.) and  // Pt > 500MeV
                   (summary->get(Trk::numberOfSCTHits) > 6) // #SCTHits >6
@@ -165,7 +164,6 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
                 passesCuts = true;
               } else if ((track->perigeeParameters()->parameters()[Trk::qOverP] < 0.) and // use negative track only
                          (std::abs(perigee->parameters()[Trk::d0]) < 1.) and // d0 < 1mm
-                         // (std::abs(perigee->parameters()[Trk::z0] * sin(perigee->parameters()[Trk::theta])) < 1.) and // z0*sin(theta) < 1mm
                          (trkp->momentum().perp() > 500.) and  // Pt > 500MeV
                          (summary->get(Trk::numberOfSCTHits) > 6)// and // #SCTHits >6
                          ) {
@@ -176,27 +174,53 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
 
               if (passesCuts) {
                 // Fill profile
-                std::string xVar{"phiToWafer_"+std::to_string(layer)};
-                std::string yVar{"nStrip_"+std::to_string(layer)};
-                if(surface == surface100){
+                std::string xVar{"phiToWafer"};
+                std::string yVar{"nStrip"};
+                if(bec == 0){ // Barrel
+		  xVar += "_" + std::to_string(layer);
+		  yVar += "_" + std::to_string(layer);
+		  if(surface == surface100){
                     xVar += "_100";
                     yVar += "_100";
-                }
-                if(surface == surface111){
+		  }
+		  if(surface == surface111){
                     xVar += "_111";
                     yVar += "_111";
-                }
-                if(side == side0){
-                    xVar += "_0";
-                    yVar += "_0";
-                }
-                if(side == side1){
-                    xVar += "_1";
-                    yVar += "_1";
-                }
+		  }
+		} else { // Endcaps
+		  if (bec == -2) {
+		    xVar += "_ECC";
+		    yVar += "_ECC";
+		  } else {
+		    xVar += "_ECA";
+		    yVar += "_ECA";
+		  }
+		  xVar += std::to_string(layer);
+		  yVar += std::to_string(layer);
+		  if (eta == 0) {
+		    xVar += "_outer";
+		    yVar += "_outer";
+		  } else if (eta == 1) {
+		    xVar += "_middle";
+		    yVar += "_middle";
+		  } else {
+		    xVar += "_inner";
+		    yVar += "_inner";
+		  }
+		} // Common for barrel and endcaps
+		if(side == side0){
+		  xVar += "_0";
+		  yVar += "_0";
+		}
+		if(side == side1){
+		  xVar += "_1";
+		  yVar += "_1";
+		}
+
                 auto phiToWaferAcc{Monitored::Scalar<float>(xVar, phiToWafer)};
                 auto nStripAcc{Monitored::Scalar<int>(yVar, nStrip)};
-                fill("SCTLorentzMonitor", phiToWaferAcc, nStripAcc);
+		auto isCentralAcc{Monitored::Scalar<bool>("isCentral", (etaTrack < 0.5))};
+                fill("SCTLorentzMonitor", phiToWaferAcc, nStripAcc, isCentralAcc);
               }// end if passesCuts
             }// end if mtrkp
           } // end if SCT..
