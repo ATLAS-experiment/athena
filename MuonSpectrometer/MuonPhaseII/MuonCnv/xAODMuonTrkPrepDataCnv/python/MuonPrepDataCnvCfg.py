@@ -1,12 +1,12 @@
 
-#Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MdtConvAlgCfg(flags,name="MdtPrepDataToxAODCnvAlg", **kwargs):
+def MuonPrepDataToxAODCnvAlg(flags,name="MuonPrepDataToxAODCnvAlg", **kwargs):
     result = ComponentAccumulator()
-    the_alg = CompFactory.MdtPrepDataToxAODCnvAlg(name=name, **kwargs)
+    the_alg = CompFactory.Muon.PRDxAODConvertorAlg(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
@@ -30,8 +30,14 @@ def setupTestOutputCfg(flags,**kwargs):
     # =============================
     # Define contents of the format
     # =============================
-    container_items = ["xAOD::MdtDriftCircleContainer#",
-                       "xAOD::MdtDriftCircleAuxContainer#"]
+    container_items = ["xAOD::MdtDriftCircleContainer#", "xAOD::MdtDriftCircleAuxContainer#",
+                        "xAOD::RpcStripContainer#",  "xAOD::RpcStripAuxContainer#",
+                        "xAOD::TgcStripContainer#",  "xAOD::TgcStripAuxContainer#",
+                        "xAOD::MMClusterContainer#", "xAOD::MMClusterAuxContainer#",
+                        "xAOD::sTgcStripContainer#", "xAOD::sTgcStripAuxContaine#",
+                        "xAOD::sTgcWireContainer#",  "xAOD::sTgcWireAuxContainer#",
+                        "xAOD::sTgcPadContainer#",   "xAOD::sTgcPadAuxContainer#",
+                       ]
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))
@@ -53,7 +59,9 @@ if __name__ == "__main__":
     flags.lock()
     
     cfg = setupServicesCfg(flags)
-    cfg.merge(MdtConvAlgCfg(flags))
+    from MuonConfig.MuonPrepDataConvConfig import MuonPrepDataConvCfg
+    cfg.merge(MuonPrepDataConvCfg(flags))
+    cfg.merge(MuonPrepDataToxAODCnvAlg(flags))
     cfg.merge(setupTestOutputCfg(flags))
 
     cfg.printConfig(withDetails=True, summariseProps=True)
