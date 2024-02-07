@@ -347,11 +347,11 @@ class trigRecoExecutor(athenaExecutor):
                                 # Check for rejected events in log file
                                 if 'rejected:' in line and int(line[14]) != 0:
                                     #Add the number of rejected events      
-                                    rejected += int(line[14])
+                                    rejected += int(line[14:])
                                 # Check for accepted events in log file
                                 if 'accepted:' in line and int(line[14]) != 0:
                                     #Add the number of accepted events      
-                                    accepted += int(line[14])
+                                    accepted += int(line[14:])
             
             if "HIST_DEBUGSTREAMMON" in self.conf.dataDictionary: 
                 # Add the HLT_accepted_events and HLT_rejected_events histograms to the output file 
