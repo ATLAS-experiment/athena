@@ -1,5 +1,5 @@
 /*                                                                             
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration                              
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration                              
 */
 
 ///////////////////////////////////////////////////////////////////////////                          
@@ -122,5 +122,64 @@ std::optional<std::tuple<int, int, std::string, std::string, int>> sTgcRawDataMo
   std::string sideName = (side == 1) ? "A" : "C";
   std::string sizeName = (decoder::offlineStationName(sec) == "STS") ? "S" : "L";
     
-  return std::make_tuple(padPhiTotal, padEtaTotal, sideName, sizeName, layer + 1);
+  return std::make_optional(std::make_tuple(padPhiTotal, padEtaTotal, sideName, sizeName, layer + 1));
+}
+
+std::optional<double> sTgcRawDataMonAlg::band2theta(double rPosAtNSW, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
+  const auto& help = m_idHelperSvc -> stgcIdHelper();
+  bool isValid = false;
+  
+  const Identifier maxNSWZid = m_idHelperSvc -> stgcIdHelper().channelID("STL", 1, help.stationPhiMin(), help.multilayerMax(), help.gasGapMax(), sTgcIdHelper::sTgcChannelTypes::Pad, 1, isValid);
+
+  if (!isValid) {
+		ATH_MSG_WARNING("Identifier for maximum value of NSW global Z-coordinate is invalid!");
+		return std::nullopt;
+  }
+
+  Amg::Vector3D posNSW{Amg::Vector3D::Zero()};
+  (muonDetectorManagerObject -> getsTgcReadoutElement(maxNSWZid)) -> stripGlobalPosition(maxNSWZid, posNSW);
+  float posNSWZ = posNSW.z();
+  
+  double theta = std::atan(rPosAtNSW/posNSWZ);
+  return std::make_optional(theta);
+}
+
+std::optional<double> sTgcRawDataMonAlg::band2eta(double rPosAtNSW, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
+  std::optional<double> status = band2theta(rPosAtNSW, muonDetectorManagerObject);
+  if (!status.has_value()) return std::nullopt;
+  double theta = status.value();
+  double eta = -std::log(std::tan(theta/2.));
+  return std::make_optional(eta);
+}
+
+std::optional<double> sTgcRawDataMonAlg::rPosAtNsw2eta(double rPosAtNSW, bool isA, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
+  std::optional<double> status = band2eta(rPosAtNSW, muonDetectorManagerObject);
+  if (!status.has_value()) return std::nullopt;
+  double band2eta = status.value();
+  if (isA) {
+    return  std::make_optional(band2eta);
+  }
+  else {
+    return std::make_optional(-band2eta);
+  }
+}
+
+std::optional<double> sTgcRawDataMonAlg::bandId2eta(int bandid, bool isLarge, bool isA, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
+  double rPosAtNSW = MuonGM::sTgcReadoutElement::triggerBandIdToRadius(isLarge,bandid);
+  std::optional<double> status = rPosAtNsw2eta(rPosAtNSW, isA, muonDetectorManagerObject);
+  if (!status.has_value()) return std::nullopt;
+  double rPosAtNsw2eta = status.value();
+  
+  return std::make_optional(rPosAtNsw2eta);
+}
+
+double sTgcRawDataMonAlg::triggersectorphiid2phi(uint32_t sourceid, int trigger_phiid) const {
+  MuonSectorMapping sectorMapping;
+  double trigger_sector_phicenter = sectorMapping.sectorPhi((sourceid & 0xf) + 1);
+  double trigger_phi = trigger_sector_phicenter + (trigger_phiid*9.)/1000.;
+  /// Sector 8 (A09/C09) is a special case, is where the phi changes sign (-pi to +pi) 
+  if((sourceid & 0xf) == 8 && trigger_phiid < 0) {
+    trigger_phi = -trigger_sector_phicenter + (trigger_phiid*9./1000.);
+  }
+  return trigger_phi;
 }

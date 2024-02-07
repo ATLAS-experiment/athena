@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +62,7 @@ StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {
       return StatusCode::FAILURE;
     }
     fillsTgcPadTriggerDataHistograms(muonContainer.cptr(), NSWpadTriggerContainer.cptr(), lumiblock);
+    fillsTgcPadTriggerEfficiencyHistograms(muonContainer.cptr(), NSWpadTriggerContainer.cptr(), detectorManagerKey.cptr());
   }
 
   fillsTgcClusterFromTrackHistograms(meTPContainer.cptr());
@@ -328,9 +329,8 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
 void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const xAOD::MuonContainer*  muonContainer, const Muon::NSW_PadTriggerDataContainer* NSWpadTriggerObject, int lb) const {
   for (const xAOD::Muon* mu : *muonContainer) {
     if(mu -> pt() < m_cutPt) continue;
-    int author = mu -> author();
-    if(!(author == xAOD::Muon_v1::Author::MuidCo || author == xAOD::Muon_v1::Author::MuidSA)) continue;
-
+    if(!(mu -> author() == xAOD::Muon::Author::MuidCo || mu -> author() == xAOD::Muon::Author::MuidSA)) continue;
+        
     const xAOD::TrackParticle* meTP = mu -> trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
     if(meTP == nullptr) continue;
 
@@ -436,8 +436,7 @@ void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const xAOD::MuonContain
 void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer*  muonContainer, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
   for (const xAOD::Muon* mu : *muonContainer) {
     if(mu -> pt() < m_cutPt) continue;
-    int author = mu -> author();
-    if(!(author == xAOD::Muon_v1::Author::MuidCo || author == xAOD::Muon_v1::Author::MuidSA)) continue;
+    if(!(mu -> author() == xAOD::Muon::Author::MuidCo || mu -> author() == xAOD::Muon::Author::MuidSA)) continue;
 
     const xAOD::TrackParticle* meTP = mu -> trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
     if(meTP == nullptr) continue;
@@ -674,3 +673,92 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
     } // isideIndex loop end
   } // End muon container loop
 } // end stgc strip function
+
+void sTgcRawDataMonAlg::fillsTgcPadTriggerEfficiencyHistograms(const xAOD::MuonContainer*  muonContainer, const Muon::NSW_PadTriggerDataContainer* NSWpadTriggerObject, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
+  for (const xAOD::Muon* mu : *muonContainer) {
+    if (!(mu -> author() == xAOD::Muon::Author::MuidCo || mu -> author() == xAOD::Muon::Author::MuidSA)) continue;
+    if (mu -> pt() < m_cutPt) continue;
+    if (std::abs(mu -> eta()) < m_cutEtaDown || std::abs(mu -> eta()) > m_cutEtaUp) continue; 
+
+    double recoMuonEta = mu -> eta();
+    double recoMuonPhi = mu -> phi();
+
+    std::string sideRecoMuon = GeometricSectors::sTgcSide[recoMuonEta > 0];
+
+    std::string minSideRecoMuon = "", minSideTrigger = "";
+    
+    double minTriggerEta = 999., minTriggerPhi = 999.,
+      minRecoEta = 999., minRecoPhi = 999., minDeltaR = 999.;
+    
+    auto minDeltaRtrigIt = -1;
+  
+    for (const Muon::NSW_PadTriggerData* rdo : *NSWpadTriggerObject) {
+      bool sideA = rdo -> sideA();
+      bool largeSector = rdo -> largeSector();     
+      std::string sideTrigger = GeometricSectors::sTgcSide[sideA];
+      size_t numberOfTriggers = rdo -> getNumberOfTriggers();
+      
+      for (size_t trigger = 0; trigger < numberOfTriggers; ++trigger) {
+        int triggerPhiIdsUnsigned = rdo -> getTriggerPhiIds().at(trigger);	  
+        int triggerBandIds = rdo -> getTriggerBandIds().at(trigger);
+        int sourceId = rdo -> getSourceid();
+        
+        if (triggerPhiIdsUnsigned == m_cutTriggerPhiId || triggerBandIds == m_cutTriggerBandId) continue;
+        
+        int triggerPhiIds = getSignedPhiId(triggerPhiIdsUnsigned);
+        std::optional<double> status = bandId2eta(triggerBandIds, largeSector, sideA, muonDetectorManagerObject);
+        if (!status.has_value()) continue;
+        double triggerBandIdToEta = status.value();
+        double triggerPhiIDtoPhi = triggersectorphiid2phi(sourceId, triggerPhiIds);
+        double deltaR =  xAOD::P4Helpers::deltaR(recoMuonEta, recoMuonPhi, triggerBandIdToEta, triggerPhiIDtoPhi); 
+
+        if (std::abs(triggerBandIdToEta) < m_cutEtaDown || std::abs(triggerBandIdToEta) > m_cutEtaUp) continue;
+	
+        if (sideRecoMuon == sideTrigger) { 
+          if (deltaR < minDeltaR) {
+            minSideRecoMuon = sideRecoMuon;
+            minSideTrigger = sideTrigger;
+            minTriggerEta = triggerBandIdToEta;
+            minTriggerPhi = triggerPhiIDtoPhi;
+            minRecoEta = recoMuonEta;
+            minRecoPhi = recoMuonPhi;
+            minDeltaR = deltaR;
+            minDeltaRtrigIt = trigger;
+          }
+        }
+      } // end number of triggers loop
+    } // end pad trigger data container loop
+    
+    bool muonRecoTriggerMatch = false;
+    
+    if (minDeltaRtrigIt != -1) {
+      if (minDeltaR < 0.1) {
+        muonRecoTriggerMatch = true;
+      }
+    }
+        
+    auto deltaRmon = Monitored::Scalar<double>("deltaR", minDeltaR);
+    fill("sTgcOverview", deltaRmon);
+    
+    auto etaRecoMuonMon = Monitored::Scalar<double>("etaRecoMuon", minRecoEta);
+    auto phiRecoMuonMon = Monitored::Scalar<double>("phiRecoMuon", minRecoPhi);
+    fill("sTgcOverview", etaRecoMuonMon, phiRecoMuonMon);
+    
+    auto etaPadTriggerMon = Monitored::Scalar<double>("etaPadTrigger", minTriggerEta);
+    auto phiPadTriggerMon = Monitored::Scalar<double>("phiPadTrigger", minTriggerPhi);
+    fill("sTgcOverview", etaPadTriggerMon, phiPadTriggerMon);
+
+    auto phiRecoMuonSidedMon = Monitored::Scalar<double>("phiRecoMuon_" + minSideRecoMuon, minRecoPhi);
+    auto phiPadTriggerSidedMon = Monitored::Scalar<double>("phiPadTrigger_" + minSideTrigger, minTriggerPhi);
+    fill("sTgcOverview", phiRecoMuonSidedMon, phiPadTriggerSidedMon);
+    
+    auto muonRecoTriggerMatchMon = Monitored::Scalar<bool>("muonRecoTriggerMatch", muonRecoTriggerMatch);
+    auto etaRecoMuonEffMon = Monitored::Scalar<double>("etaRecoMuonEff", minRecoEta);
+    auto phiRecoMuonEffMon = Monitored::Scalar<double>("phiRecoMuonEff", minRecoPhi);
+    fill("sTgcOverview", muonRecoTriggerMatchMon, etaRecoMuonEffMon, phiRecoMuonEffMon);
+
+    auto muonRecoTriggerMatchSidedMon = Monitored::Scalar<bool>("muonRecoTriggerMatch", muonRecoTriggerMatch);
+    auto phiRecoMuonEffSidedMon = Monitored::Scalar<double>("phiRecoMuonEff_" + minSideRecoMuon, minRecoPhi);
+    fill("sTgcOverview", muonRecoTriggerMatchSidedMon, phiRecoMuonEffSidedMon);
+  } // end muon container loop
+}
