@@ -2044,25 +2044,37 @@ namespace top {
     void setCalibBoostedJetTagger(const std::string& WP, const std::string& SFname);
     void setBoostedTaggersSFSysNames(const std::unordered_map<std::string, std::vector<std::string>>& sysNames) {m_boostedTaggersSFSysNames=sysNames;}
     // B-tagging WPs requested by user (updated to pair of strings to hold algorithm and WP)
+    const std::vector<std::pair<std::pair<std::string, std::string>,
+				std::pair<std::pair<std::string, std::string>,
+				          std::pair<std::string, std::string>>>> bTagWP_offl_onl_cond() const {return m_chosen_btaggingWP_offl_onl_cond;}
+    const std::vector<std::pair<std::string, std::string> > bTagWP_onlCond() const {return m_chosen_btaggingWP_onlCond;}
     const std::vector<std::pair<std::string, std::string> > bTagWP() const {return m_chosen_btaggingWP_caloJet;}
     const std::vector<std::pair<std::string, std::string> > bTagWP_trkJet() const {return m_chosen_btaggingWP_trkJet;}
     // parse b-tagging configuration from config file into a vector of pair <algorithm, WP>
     void parse_bTagWPs(const std::string& btagWPsettingString,
         std::vector<std::pair<std::string, std::string>>& btagWPlist,
         const std::string& jetCollectionName);
+    // parse b-tagging configuration from config file into a vector of pair <pair<algo, WP>,pair<pair<algo,WP>,pair<algo,WP>>>
+    void parse_bTagWPs_triplet(const std::string& btagWPsettingString,
+			       std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>>& btagWPlist,
+        const std::string& jetCollectionName);
     // B-tagging systematics requested by user to be excluded from EV treatment, separated by semi-colons
     const std::string bTagSystsExcludedFromEV() const {return m_bTagSystsExcludedFromEV;}
 
     // B-tagging WPs actually available, according to CDI file
     // will be set in TopCPTools
+    void setBTagWP_available_onlCond(std::string btagging_WP);
     void setBTagWP_available(std::string btagging_WP);
     void setBTagWP_available_trkJet(std::string btagging_WP);
+    const std::vector<std::string>& bTagWP_available_onlCond() const {return m_available_btaggingWP_onlCond;}
     const std::vector<std::string>& bTagWP_available() const {return m_available_btaggingWP;}
     const std::vector<std::string>& bTagWP_available_trkJet() const {return m_available_btaggingWP_trkJet;}
     // B-tagging WPs actually calibrated, according to CDI file
     // will be set in TopCPTools
+    void setBTagWP_calibrated_onlCond(std::string btagging_WP);
     void setBTagWP_calibrated(std::string btagging_WP);
     void setBTagWP_calibrated_trkJet(std::string btagging_WP);
+    const std::vector<std::string>& bTagWP_calibrated_onlCond() const {return m_calibrated_btaggingWP_onlCond;}
     const std::vector<std::string>& bTagWP_calibrated() const {return m_calibrated_btaggingWP;}
     const std::vector<std::string>& bTagWP_calibrated_trkJet() const {return m_calibrated_btaggingWP_trkJet;}
     // B-tagging algorithms, e.g. DL1, DL1r, DL1rmu
@@ -2865,16 +2877,23 @@ namespace top {
     std::unordered_map<std::string, std::vector<std::string>> m_boostedTaggersSFSysNames;
 
     // B-tagging WPs requested by the user (updated to pair of string to hold algorithm and WP)
+    std::vector<std::pair<std::string, std::string> > m_chosen_btaggingWP_onlCond;
     std::vector<std::pair<std::string, std::string> > m_chosen_btaggingWP;
     std::vector<std::pair<std::string, std::string> > m_chosen_btaggingWP_caloJet;
     std::vector<std::pair<std::string, std::string> > m_chosen_btaggingWP_trkJet;
     // B-tagging systematics requested by user to be excluded from EV treatment, separated by semi-colons
+    // vector of pairs of offl WP, pairs of onl and cond WP: <offl,<onl,cond>>
+    std::vector<std::pair<std::pair<std::string,std::string>,
+			  std::pair<std::pair<std::string,std::string>,
+				    std::pair<std::string,std::string>>>> m_chosen_btaggingWP_offl_onl_cond;
     std::string m_bTagSystsExcludedFromEV = "";
 
     // list of B-tagging WP actualy available
+    std::vector<std::string> m_available_btaggingWP_onlCond;
     std::vector<std::string> m_available_btaggingWP;
     std::vector<std::string> m_available_btaggingWP_trkJet;
     // list of B-tagging WP actualy calibrated
+    std::vector<std::string> m_calibrated_btaggingWP_onlCond;
     std::vector<std::string> m_calibrated_btaggingWP;
     std::vector<std::string> m_calibrated_btaggingWP_trkJet;
     // list of B-tagging algorithms requested

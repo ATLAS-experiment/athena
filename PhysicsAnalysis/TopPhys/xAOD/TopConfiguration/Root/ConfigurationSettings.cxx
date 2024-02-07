@@ -636,6 +636,20 @@ namespace top {
                       " By default, no WP is used.",
                       " ");
 
+    registerParameter("BTaggingOnlineConditionalWP",
+                      "b-tagging WPs to use for online and conditional efficiency scale factors for calorimeter jet collection (e.g. EMTopo, EMPFlow) in the analysis, separated by blanks."
+                      " The format should follow the convention of the b-tagging CP group, e.g. OnlineMV20:FixedCutBEff_60"
+                      " For fixed-cut WPs, the simpler format 60%, instead of FixedCutBEff_60, is also tolerated."
+                      " The specified WPs which are calibrated will have scale-factors computed."
+                      " By default, no WP is used.",
+                      " ");
+
+    registerParameter("BTaggingOfflOnlCondWP",
+                      "b-tagging triplets consisting of offline, online and conditoinal b-tagging algo:WP pairs, separated by semicolon."
+                      " The format should follow the convention of the b-tagging CP group, e.g. DL1r:FixedCutBEff_60;OnlineMV2:FixedCutBEff_60;ConditionalOnlineMV2GivenOfflineDL1r60:FixedCutBEff_60."
+                      " By default, no triplet is used.",
+                      " ");
+
     registerParameter("UseXbbTagger", "Save LargeRjet Xbb Tagger probabilities as branches.", "False");
 
     registerParameter("BTaggingSystExcludedFromEV",

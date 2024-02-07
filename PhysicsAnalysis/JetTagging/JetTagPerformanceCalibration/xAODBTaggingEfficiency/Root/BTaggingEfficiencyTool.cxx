@@ -476,7 +476,8 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 
   // Finally, also initialise the selection tool, if needed (for now this is the case only for DL1 tag weight computations,
   // so we do this only when DL1 is specified)
-  if (m_taggerName.find("DL1") != std::string::npos) {
+  // but not for online taggers
+  if (m_taggerName.find("DL1") != std::string::npos && m_taggerName.find("Online") == std::string::npos) {
     m_selectionTool.setTypeAndName("BTaggingSelectionTool/" + name() + "_selection");
     ATH_CHECK( m_selectionTool.setProperty("FlvTagCutDefinitionsFileName", m_SFFile) );
     ATH_CHECK( m_selectionTool.setProperty("TaggerName",                   m_taggerName) );
@@ -1051,7 +1052,8 @@ BTaggingEfficiencyTool::fillVariables( const xAOD::Jet & jet, CalibrationDataVar
     const xAOD::BTagging* tagInfo = jet.btagging();
     if (!tagInfo) return false;
     // For now, we defer the tag weight computation to the selection tool only in the case of DL1* (this is likely to be revisited)
-    if (m_taggerName.find("DL1") != std::string::npos) {
+    // but don't do this for online tools
+    if (m_taggerName.find("DL1") != std::string::npos && m_taggerName.find("Online") == std::string::npos) {
       return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight, m_useCTag) == CP::CorrectionCode::Ok);
     } else {
       return tagInfo->MVx_discriminant(m_taggerName, x.jetTagWeight);

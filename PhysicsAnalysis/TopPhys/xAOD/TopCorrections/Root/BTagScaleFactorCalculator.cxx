@@ -24,8 +24,8 @@ namespace top {
   BTagScaleFactorCalculator::BTagScaleFactorCalculator(const std::string& name) :
     asg::AsgTool(name),
     m_config(nullptr),
-    m_trigDecisionTool("Trig::TrigDecisionTool"),
-    m_nominal(CP::SystematicSet()) {
+    m_nominal(CP::SystematicSet()),
+    m_trigDecisionTool("Trig::TrigDecisionTool"){
     declareProperty("config", m_config);
   }
 
@@ -38,7 +38,7 @@ namespace top {
       m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_" + m_config->sgKeyJets();
       top::check(m_btagSelTools[WP].retrieve(), "Failed to retrieve b-tagging Selection tool");
       if (std::find(m_config->bTagWP_calibrated().begin(),
-                    m_config->bTagWP_calibrated().end(), WP) != m_config->bTagWP_calibrated().end()) {// need
+		    m_config->bTagWP_calibrated().end(), WP) != m_config->bTagWP_calibrated().end()) {// need
                                                                                                       // scale-factors
                                                                                                       // only for
                                                                                                       // calibrated WPs
@@ -47,39 +47,59 @@ namespace top {
         m_systs[WP] = m_btagEffTools[WP]->affectingSystematics();
         std::set<std::string> base_names = m_systs[WP].getBaseNames();
         m_config->setBTaggingSFSysts(WP, base_names);
-
-	if(WP.find("Online") != std::string::npos) m_onlineJets[WP]=std::map<std::string,std::vector<TLorentzVector>>();
       }
     }
-    if(m_onlineJets.size()>0)
-      {   
-	//check for b-jet triggers
-	std::shared_ptr<std::vector<std::string> > selectors = m_config->allSelectionNames();
-	for (std::string selPtr : *selectors) {
-	  for (auto& trigger : m_config->allTriggers_Tight(selPtr)) {
-	    std::string trigger_name=trigger.first;
-	    if(trigger_name.find("bmv2c") != std::string::npos) {
-
-	      std::string sub = "bmv2c";
-	      uint pos=trigger_name.find(sub)+sub.length()+2;
-	      std::string the_wp = ((std::string)"FixedCutBEff_")+trigger_name.substr(pos,2);
-	      for(auto& a_wp : m_onlineJets) {
-		if(a_wp.first.find(the_wp)!=std::string::npos) {
-		  m_onlineJets[a_wp.first][trigger_name] = std::vector<TLorentzVector>(0);
-		  break;
-		}
+    // for calo jets -- online and conditional WP (these have no btagsel tool)
+    availableWPs = m_config->bTagWP_available_onlCond();
+    for (auto& WP : availableWPs) {
+      if(WP.find("Conditional") == std::string::npos) {
+	m_btagSelTools[WP] = "BTaggingSelectionTool_" + WP + "_" + m_config->sgKeyJets();
+	top::check(m_btagSelTools[WP].retrieve(), "Failed to retrieve ONLINE b-tagging Selection tool");
+      }
+      if (std::find(m_config->bTagWP_calibrated_onlCond().begin(),
+		    m_config->bTagWP_calibrated_onlCond().end(), WP) != m_config->bTagWP_calibrated_onlCond().end()) {// need
+                                                                                                      // scale-factors
+                                                                                                      // only for
+                                                                                                      // calibrated WPs
+        m_btagEffTools[WP] = "BTaggingEfficiencyTool_" + WP + "_" + m_config->sgKeyJets();
+        top::check(m_btagEffTools[WP].retrieve(), "Failed to retrieve b-tagging Efficiency tool");
+        m_systs[WP] = m_btagEffTools[WP]->affectingSystematics();
+        std::set<std::string> base_names = m_systs[WP].getBaseNames();
+        m_config->setBTaggingSFSysts(WP, base_names);
+	// prepare for onlineJets - but not for Conditional tools
+	if(WP.find("Conditional") == std::string::npos) {
+	  m_onlineJets[WP]=std::map<std::string,std::vector<TLorentzVector>>();
+	  m_onlineBtagging[WP]=std::map<std::string,std::vector<float>>();
+	}
+      }
+    }
+    if(m_onlineJets.size()>0) {   
+      //check for b-jet triggers
+      std::shared_ptr<std::vector<std::string> > selectors = m_config->allSelectionNames();
+      for (std::string selPtr : *selectors) {
+	for (auto& trigger : m_config->allTriggers_Tight(selPtr)) {
+	  std::string trigger_name=trigger.first;
+	  if(trigger_name.find("bmv2c") != std::string::npos) {
+	    
+	    std::string sub = "bmv2c";
+	    uint pos=trigger_name.find(sub)+sub.length()+2;
+	    std::string the_wp = ((std::string)"FixedCutBEff_")+trigger_name.substr(pos,2);
+	    for(auto& a_wp : m_onlineJets) {
+	      if(a_wp.first.find(the_wp)!=std::string::npos) {
+		m_onlineJets[a_wp.first][trigger_name] = std::vector<TLorentzVector>(0);
+		m_onlineBtagging[a_wp.first][trigger_name]=std::vector<float>(0);
+		break;
 	      }
 	    }
 	  }
 	}
-
-	for(auto& a_wp : m_onlineJets) {
-	  if(a_wp.second.size()==0) ATH_MSG_WARNING("No b-jet triggers triggers match the Online WP" + a_wp.first);
-	}
-	//get the tool
-	top::check(m_trigDecisionTool.retrieve(), "Failed to retrieve TrigDecisionTool");	
       }
-      
+      for(auto& a_wp : m_onlineJets) {
+	if(a_wp.second.size()==0) ATH_MSG_WARNING("No b-jet triggers triggers match the Online WP" + a_wp.first);
+      }
+      //get the tool
+      top::check(m_trigDecisionTool.retrieve(), "Failed to retrieve TrigDecisionTool");	
+    }
     
     // for track jets
     availableWPs = m_config->bTagWP_available_trkJet();
@@ -116,7 +136,6 @@ namespace top {
   StatusCode BTagScaleFactorCalculator::apply(const std::shared_ptr<std::unordered_map<std::size_t,
                                                                                        std::string> >& jet_syst_collections,
                                               bool use_trackjets) {
-    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!!");
     ///-- Loop over all jet collections --///
     ///-- Lets assume that we're not doing ElectronInJet subtraction --///
     for (auto currentSystematic : *jet_syst_collections) {
@@ -127,13 +146,13 @@ namespace top {
       /// -- Loop over all jets in each collection --///
 
       std::map<std::string,std::map<std::string,std::vector<uint>>> matchedtrigjets; //unused if no online tagger is requested
-    ///-- If needed, prepare the trigger information --//
+      ///-- If needed, prepare the trigger information --//
       if(m_onlineJets.size()!=0) {
-	top::check(retrieveTriggerJets(),"Failed to retrieve trigger jets");
-	for(auto& a_wp : m_onlineJets) {
-	  matchedtrigjets[a_wp.first]=std::map<std::string,std::vector<uint>>();
-	  for(auto& trig : a_wp.second) matchedtrigjets[a_wp.first][trig.first]=std::vector<uint>(0);
-	}
+      	top::check(retrieveTriggerJets(),"Failed to retrieve trigger jets");
+      	for(auto& a_wp : m_onlineJets) {
+      	  matchedtrigjets[a_wp.first]=std::map<std::string,std::vector<uint>>();
+      	  for(auto& trig : a_wp.second) matchedtrigjets[a_wp.first][trig.first]=std::vector<uint>(0);
+      	}
       }
 
       for (auto jetPtr : *jets) {
@@ -154,7 +173,6 @@ namespace top {
 
           for (auto& tagWP : (use_trackjets ? m_config->bTagWP_available_trkJet() : m_config->bTagWP_available())) {
 
-	    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 1 "+(TString)tagWP);
             // skip uncalibrated though available WPs
             if (use_trackjets &&
                 std::find(m_config->bTagWP_calibrated_trkJet().begin(),
@@ -195,79 +213,165 @@ namespace top {
 
             float btag_SF(1.0);
             float btag_MCeff(-1.0);
+	    float btag_SF_onl(1.0);
+	    float btag_MCeff_onl(-1.0);
+	    float btag_SF_cond(1.0);
+	    float btag_MCeff_cond(-1.0);
             bool isTagged = false;//unused in case of Continuous
 	    int flavour_label=-1;
 	    bool jetMatchesTrigger=false;
+	    bool isTaggedOnline=false;
 	    float online_pt(-10), online_eta(-10), online_phi(-10), online_E(-10);
 	    std::map<std::string,float> onlinemv2;
 	    Analysis::CalibrationDataVariables vars_jet;
 	      
-	    if(tagWP.find("Online") == std::string::npos) {
+	    if (std::fabs(jetPtr->eta()) <= 2.5) {
 
-	      if (std::fabs(jetPtr->eta()) <= 2.5) {
-
-		top::check(btageff->getMCEfficiency(*jetPtr, btag_MCeff),
-			   "Failed to get nominal b-tagging MC efficiency");
-	
-		if (tagWP.find("Continuous") == std::string::npos) {
-		  isTagged = btagsel->accept(*jetPtr);
-		  if (isTagged) top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
-					   "Failed to get nominal b-tagging SF");
-		  else top::check(btageff->getInefficiencyScaleFactor(*jetPtr, btag_SF),
-				  "Failed to get nominal b-tagging SF");
-		} else {
-		  top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
-			     "Failed to get nominal Continuous b-tagging SF");
-		}
-	      }
-	      jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_nom") = btag_SF;
-	      jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_nom") = btag_MCeff;
+	      top::check(btageff->getMCEfficiency(*jetPtr, btag_MCeff),
+			 "Failed to get nominal b-tagging MC efficiency");
 	      
-	    } else if(!use_trackjets) { //it is an online tagger (not available for track jets)
-	      ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 2 "+(TString)tagWP);
+	      if (tagWP.find("Continuous") == std::string::npos) {
+		isTagged = btagsel->accept(*jetPtr);
+		if (isTagged) top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
+					 "Failed to get nominal b-tagging SF");
+		else top::check(btageff->getInefficiencyScaleFactor(*jetPtr, btag_SF),
+				"Failed to get nominal b-tagging SF");
+	      } else {
+		top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
+			   "Failed to get nominal Continuous b-tagging SF");
+	      }
+	    }
+	    jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_nom") = btag_SF;
+	    jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_nom") = btag_MCeff;
+	    jetPtr->auxdecor<char>("btag_isTagged_" + tagWP + "_nom") = isTagged;
+
+	    for (auto OfflOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	      // check if this offline WP has a triplet (offl_onl_cond)
+	      std::string offlWP = OfflOnlCondBtagWP.first.first + "_" + OfflOnlCondBtagWP.first.second; 
+	      if(tagWP == offlWP) {
+		std::string onlWP = OfflOnlCondBtagWP.second.first.first + "_" + OfflOnlCondBtagWP.second.first.second;
+		std::string condWP = OfflOnlCondBtagWP.second.second.first + "_" + OfflOnlCondBtagWP.second.second.second;
+
+		// get onl selection tool
+		ToolHandle<IBTaggingSelectionTool>& btagsel_onl =
+		  m_btagSelTools[onlWP];
+		// get onl and cond efficiency tools
+		ToolHandle<IBTaggingEfficiencyTool>& btageff_onl = m_btagEffTools[onlWP];
+		ToolHandle<IBTaggingEfficiencyTool>& btageff_cond = m_btagEffTools[condWP];
+
+		// If this string is not empty, we need to search and find the appropriate systematic set to apply
+		bool didSetSyst = false;
+		if (bTagSystName != "") {
+		  CP::SystematicSet bTagSyst;
+		  bTagSyst.insert(sysSet.getSystematicByBaseName(bTagSystName));
+
+		  // check if variation is available for onl and cond tools
+		  if ( m_systs[onlWP].find(sysSet.getSystematicByBaseName(bTagSystName)) != m_systs[onlWP].end() &&
+		       m_systs[condWP].find(sysSet.getSystematicByBaseName(bTagSystName)) != m_systs[condWP].end() ) {
+		    top::check(btageff_onl->applySystematicVariation(bTagSyst),
+			       "Failed to set new ONLINE b-tagging SF to a shifted systematic set : " + bTagSystName);
+		    top::check(btageff_cond->applySystematicVariation(bTagSyst),
+			       "Failed to set new Conditional b-tagging SF to a shifted systematic set : " + bTagSystName);
+		    didSetSyst = true;
+		  }
+		}
+		if (!didSetSyst) {
+		  top::check(btageff_onl->applySystematicVariation(m_nominal),
+			     "Failed to set new ONLINE b-tagging SF to nominal");
+		  top::check(btageff_cond->applySystematicVariation(m_nominal),
+			     "Failed to set new Conditional b-tagging SF to nominal");
+		}
+
 		jetPtr->getAttribute("HadronConeExclTruthLabelID",flavour_label); // get the jet truth flavour
 		vars_jet.jetPt = jetPtr->pt();
 		vars_jet.jetEta = jetPtr->eta();
 
 		onlinemv2.clear();
 
-		for(auto& trig_item : m_onlineJets[tagWP.c_str()]) {
+		for(auto& trig_item : m_onlineJets[onlWP]) {
 		  std::string TriggerChain = trig_item.first;
 
-		  btag_SF = 1.0;
-		  btag_MCeff = -1.0;
+		  btag_SF_onl = 1.0;
+		  btag_MCeff_onl = -1.0;
+		  btag_SF_cond = 1.0;
+		  btag_MCeff_cond = -1.0;
 		  online_pt=-10;
 		  online_eta=-10; 
 		  online_phi=-10; 
 		  online_E=-10;
-		  ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 2.4 "+(TString)tagWP);
-		  onlinemv2[TriggerChain.c_str()] = getOnlineWeight(jetPtr,tagWP,TriggerChain,matchedtrigjets[tagWP][TriggerChain],online_pt,online_eta,online_phi,online_E);
-		  ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 2.4.5 "+(TString)tagWP);
-		  jetMatchesTrigger = (onlinemv2[TriggerChain.c_str()]>-1.5);
-		  isTagged = btagsel->accept(jetPtr->pt(),jetPtr->eta(),onlinemv2[TriggerChain.c_str()]);
-		  ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 2.5 "+(TString)tagWP);
-		  vars_jet.jetTagWeight = onlinemv2[TriggerChain.c_str()];
+		  onlinemv2[onlWP] = getOnlineWeight(jetPtr,onlWP,TriggerChain,matchedtrigjets[onlWP][TriggerChain],online_pt,online_eta,online_phi,online_E);
+		  isTaggedOnline = btagsel_onl->accept(online_pt,online_eta,onlinemv2[onlWP]);
+		  jetMatchesTrigger = (onlinemv2[onlWP]>-1.5);
+		  vars_jet.jetTagWeight = onlinemv2[onlWP];
 		  
 		  if(std::fabs(jetPtr->eta()) <= 2.5 && abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger) { 
-		    top::check(btageff->getScaleFactor(flavour_label, vars_jet, btag_SF), //is flavour_label the correct thing?
+		    top::check(btageff_onl->getScaleFactor(flavour_label, vars_jet, btag_SF_onl), //is flavour_label the correct thing?
 			       "Failed to get nominal ONLINE b-tagging SF for trigger " + TriggerChain);
-		    top::check(btageff->getMCEfficiency(flavour_label, vars_jet, btag_MCeff), //is flavour_label the correct thing? 
+		    top::check(btageff_onl->getMCEfficiency(flavour_label, vars_jet, btag_MCeff_onl), //is flavour_label the correct thing? 
 			       "Failed to get nominal ONLINE b-tagging MC efficiency for trigger " + TriggerChain);
+		    top::check(btageff_cond->getScaleFactor(flavour_label, vars_jet, btag_SF_cond), //is flavour_label the correct thing?
+			       "Failed to get nominal Conditional b-tagging SF for trigger " + TriggerChain);
+		    top::check(btageff_cond->getMCEfficiency(flavour_label, vars_jet, btag_MCeff_cond), //is flavour_label the correct thing? 
+			       "Failed to get nominal Conditional b-tagging MC efficiency for trigger " + TriggerChain);
 		  }
-		  		  
-		  jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_" + TriggerChain + "_nom") = btag_SF;
-		  jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_" + TriggerChain + "_nom") = btag_MCeff;
-		  
-		  jetPtr->auxdecor<char>("trigMatch_isbtagged_" + tagWP + "_nom") = isTagged;
-		  jetPtr->auxdecor<float>("trigMatch_taggerWeight_" + tagWP + "_nom") = onlinemv2[TriggerChain.c_str()];
-		  jetPtr->auxdecor<float>("trigMatch_pt_" + tagWP + "_nom") =  online_pt;
-		  jetPtr->auxdecor<float>("trigMatch_eta_" + tagWP + "_nom") =  online_eta;
-		  jetPtr->auxdecor<float>("trigMatch_phi_" + tagWP + "_nom") =  online_phi;
-		  jetPtr->auxdecor<float>("trigMatch_e_" + tagWP + "_nom") =  online_E;
-
+		  if (jetMatchesTrigger) {
+		    // stop loop over online jets in case a match has been found.
+		    break;
+		  }
 		}
-
-	      ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY!! 3 "+(TString)tagWP);
+		jetPtr->auxdecor<char>("btag_isTagged_" + tagWP + "_onl_" + "_nom") = isTaggedOnline;
+		jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_onl_" + "_nom") = btag_SF_onl;
+		jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_onl_" + "_nom") = btag_MCeff_onl;
+		jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_cond_" + "_nom") = btag_SF_cond;
+		jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_cond_" + "_nom") = btag_MCeff_cond;
+		  
+		jetPtr->auxdecor<float>("trigMatch_taggerWeight_" + tagWP + "_nom") = onlinemv2[onlWP];
+		jetPtr->auxdecor<float>("trigMatch_pt_" + tagWP + "_nom") =  online_pt;
+		jetPtr->auxdecor<float>("trigMatch_eta_" + tagWP + "_nom") =  online_eta;
+		jetPtr->auxdecor<float>("trigMatch_phi_" + tagWP + "_nom") =  online_phi;
+		jetPtr->auxdecor<float>("trigMatch_e_" + tagWP + "_nom") =  online_E;
+		
+		///-- For nominal calibration, vary the SF systematics --///
+		if (currentSystematic.first == m_config->nominalHashValue()) {
+		  for (const auto& variation : sysSet) {
+		    btag_SF_onl = 1.;
+		    btag_MCeff_onl = -1.;
+		    btag_SF_cond = 1.;
+		    btag_MCeff_cond = -1.;
+		    if ( std::fabs(jetPtr->eta()) <= 2.5 && abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger ) { // can be applied to matched b-jets only
+		      // check if variation is available for onl and cond tools
+		      if ( m_systs[onlWP].find(variation) != m_systs[onlWP].end() &&
+			   m_systs[condWP].find(variation) != m_systs[condWP].end() ) {
+			CP::SystematicSet syst_set;
+			syst_set.insert(variation);
+			top::check(btageff_onl->applySystematicVariation(syst_set),
+				   "Failed to set new ONLINE b-tagging systematic variation " + syst_set.name());
+			top::check(btageff_cond->applySystematicVariation(syst_set),
+				   "Failed to set new Conditonal b-tagging systematic variation " + syst_set.name());
+			top::check(btageff_onl->getScaleFactor(flavour_label, vars_jet, btag_SF_onl), //is flavour_label the correct thing?
+				   "Failed to get ONLINE b-tagging SF for variation " + syst_set.name());
+			top::check(btageff_cond->getScaleFactor(flavour_label, vars_jet, btag_SF_cond), //is flavour_label the correct thing?
+				   "Failed to get Conditional b-tagging SF for variation " + syst_set.name());
+			
+			// don't apply the systematic variation to the MC efficiency! -> will give 0 for down variations and the nominal value for up variations
+			top::check(btageff_onl->applySystematicVariation(m_nominal),
+				   "Failed to set nominal ONLINE b-tagging set for variation " + syst_set.name());
+			top::check(btageff_cond->applySystematicVariation(m_nominal),
+				   "Failed to set nominal Conditional b-tagging set for variation " + syst_set.name());
+			
+			top::check(btageff_onl->getMCEfficiency(flavour_label, vars_jet, btag_MCeff_onl),
+				   "Failed to get nominal ONLINE b-tagging MC efficiency for variation " + syst_set.name());
+			top::check(btageff_cond->getMCEfficiency(flavour_label, vars_jet, btag_MCeff_cond),
+				   "Failed to get nominal Conditional b-tagging MC efficiency for variation " + syst_set.name());
+		      }
+		    }
+		    jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_onl_" + variation.name()) = btag_SF_onl;
+		    jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_onl_" + variation.name()) = btag_MCeff_onl;
+		    jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_cond_" + variation.name()) = btag_SF_cond;
+		    jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_cond_" + variation.name()) = btag_MCeff_cond;
+		  }
+		}		  
+	      }
 	    }
 
 
@@ -280,46 +384,23 @@ namespace top {
                 syst_set.insert(variation);
                 top::check(btageff->applySystematicVariation(syst_set),
                            "Failed to set new b-tagging systematic variation " + syst_set.name());
-
-		if(tagWP.find("Online") == std::string::npos) {
-		  if (std::fabs(jetPtr->eta()) <= 2.5) {
-
-		    top::check(btageff->getMCEfficiency(*jetPtr, btag_MCeff),
-			       "Failed to get b-tagging MC efficiency for variation " + syst_set.name());
+		if (std::fabs(jetPtr->eta()) <= 2.5) {
+		  
+		  top::check(btageff->getMCEfficiency(*jetPtr, btag_MCeff),
+			     "Failed to get b-tagging MC efficiency for variation " + syst_set.name());
 		    
-		    if (tagWP.find("Continuous") == std::string::npos) {
-		      if (isTagged) top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
-					       "Failed to get b-tagging SF for variation " + syst_set.name());
-		      else top::check(btageff->getInefficiencyScaleFactor(*jetPtr, btag_SF),
-				      "Failed to get b-tagging SF for variation " + syst_set.name());
-		    } else {
-		      top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
-				 "Failed to get Continuous b-tagging SF for variation " + syst_set.name());
-		    }
+		  if (tagWP.find("Continuous") == std::string::npos) {
+		    if (isTagged) top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
+					     "Failed to get b-tagging SF for variation " + syst_set.name());
+		    else top::check(btageff->getInefficiencyScaleFactor(*jetPtr, btag_SF),
+				    "Failed to get b-tagging SF for variation " + syst_set.name());
+		  } else {
+		    top::check(btageff->getScaleFactor(*jetPtr, btag_SF),
+			       "Failed to get Continuous b-tagging SF for variation " + syst_set.name());
 		  }
-		  jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_" + variation.name()) = btag_SF;
-		  jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_" + variation.name()) = btag_MCeff;
-
-		} else if(!use_trackjets) { //it is an online tagger (not available for track jets)         
-		  for(auto& trig_item : m_onlineJets[tagWP.c_str()]) {
-		    std::string TriggerChain = trig_item.first;
-
-		    btag_SF = 1.;
-		    btag_MCeff = -1.;
-		    jetMatchesTrigger = (onlinemv2[TriggerChain.c_str()]>-1.5);
-		    
-		    if(std::fabs(jetPtr->eta()) <= 2.5 && abs(flavour_label)==5 && jetPtr->pt()>35000 && jetMatchesTrigger) { 
-		      vars_jet.jetTagWeight = onlinemv2[TriggerChain.c_str()];
-		      top::check(btageff->getScaleFactor(flavour_label, vars_jet, btag_SF),//is flavour_label the correct thing? 
-				 "Failed to get ONLINE b-tagging SF for variation " + syst_set.name() + " and trigger " + TriggerChain);
-		      top::check(btageff->getMCEfficiency(flavour_label, vars_jet, btag_MCeff),//is flavour_label the correct thing? 
-				 "Failed to get ONLINE b-tagging MC efficiency for variation " + syst_set.name() + " and trigger " + TriggerChain);
-		    }
-		    jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_" + TriggerChain + "_" + variation.name()) = btag_SF;
-		    jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_" + TriggerChain + "_" + variation.name()) = btag_MCeff;
-		  }
-		}	
-	
+		}
+		jetPtr->auxdecor<float>("btag_SF_" + tagWP + "_" + variation.name()) = btag_SF;
+		jetPtr->auxdecor<float>("btag_MCeff_" + tagWP + "_" + variation.name()) = btag_MCeff;
 	      } // loop through b-tagging systematic variations
 	    } // Calibration systematic is nominal, so calculate SF systematics
           }
@@ -327,7 +408,6 @@ namespace top {
       }
     }
        
-    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP APPLY END");
     return StatusCode::SUCCESS;
   }
 
@@ -351,12 +431,10 @@ namespace top {
   StatusCode BTagScaleFactorCalculator::retrieveTriggerJets() {
 
     for(auto& a_wp : m_onlineJets) {
-      m_onlineBtagging[a_wp.first.c_str()]=std::map<std::string,std::vector<float>>();
-
       for(auto& trig_item : a_wp.second) {
 	std::string TriggerChain = trig_item.first;
 	// retrive online jets and btagging (from https://twiki.cern.ch/twiki/bin/view/Atlas/TrigBjetCalibration2016Rel21#Retrieving_online_btagging )
-
+	m_onlineJets[a_wp.first][TriggerChain] = std::vector<TLorentzVector>(0);
 	m_onlineBtagging[a_wp.first][TriggerChain]=std::vector<float>(0);
 	Trig::FeatureContainer fc = m_trigDecisionTool->features(TriggerChain);
 	Trig::FeatureContainer::combination_const_iterator comb   (fc.getCombinations().begin());
@@ -390,8 +468,6 @@ namespace top {
 
   float BTagScaleFactorCalculator::getOnlineWeight(const xAOD::Jet *jet,std::string wp,std::string chain, std::vector<uint> & matchedtrigjets,float & online_pt,float & online_eta,float & online_phi,float & online_E) const
   {
-    ATH_MSG_INFO(Form("BTagScaleFactorCalculator::TMP getOnlineWeight - btagsize=%d, jetsize=%d",(int)(m_onlineBtagging.at(wp).at(chain).size()),(int)(m_onlineJets.at(wp).at(chain).size())));
-
     float jet_onlinemv2=-2;
     // geometrical matching between online and offline jets (from https://twiki.cern.ch/twiki/bin/view/Atlas/TrigBjetCalibration2016Rel21#Retrieving_online_btagging )
 
@@ -408,17 +484,14 @@ namespace top {
 	  break;
 	}
       }
-      ATH_MSG_INFO(Form("BTagScaleFactorCalculator::TMP getOnlineWeight 1-%d",(int)itrigjet));
       if (isalreadymatched) continue;
       if (vjet.DeltaR(m_onlineJets.at(wp).at(chain).at(itrigjet)) < 0.2) {
-	ATH_MSG_INFO(Form("BTagScaleFactorCalculator::TMP getOnlineWeight 1.5-%d, %d, %d",(int)itrigjet,m_onlineBtagging.at(wp).size(),m_onlineBtagging.at(wp).at(chain).size()));
 	jet_onlinemv2=m_onlineBtagging.at(wp).at(chain).at(itrigjet);
 	  matchedtrigjets.push_back(itrigjet);
 	  found_trigjet=itrigjet;
 	  break;
       }
     }
-    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP getOnlineWeight 2");
     if(found_trigjet>=0) {
       TLorentzVector vtmp = m_onlineJets.at(wp).at(chain).at(found_trigjet);
       online_pt=vtmp.Pt();
@@ -426,7 +499,6 @@ namespace top {
       online_phi=vtmp.Phi();
       online_E=vtmp.E();
     }
-    ATH_MSG_INFO("BTagScaleFactorCalculator::TMP getOnlineWeight END");
     return jet_onlinemv2;
   }
 

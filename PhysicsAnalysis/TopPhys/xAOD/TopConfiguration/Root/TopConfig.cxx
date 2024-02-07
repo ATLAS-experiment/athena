@@ -1733,13 +1733,15 @@ namespace top {
     // now get all Btagging WP from the config file, and store them properly in a map.
     // Need function to compare the cut value with the WP and vice versa
     parse_bTagWPs(settings->value("BTaggingWP"), m_chosen_btaggingWP, m_sgKeyJets + ", " + m_sgKeyTrackJets);
+    parse_bTagWPs(settings->value("BTaggingOnlineConditionalWP"), m_chosen_btaggingWP_onlCond, m_sgKeyJets);
     parse_bTagWPs(settings->value("BTaggingCaloJetWP"), m_chosen_btaggingWP_caloJet, m_sgKeyJets);
     parse_bTagWPs(settings->value("BTaggingTrackJetWP"), m_chosen_btaggingWP_trkJet, m_sgKeyTrackJets);
+    parse_bTagWPs_triplet(settings->value("BTaggingOfflOnlCondWP"), m_chosen_btaggingWP_offl_onl_cond, m_sgKeyJets);
     if (settings->value("UseXbbTagger") == "True") this->m_useXbbTagger = true;
 
     // check whether user is using the deprecated BTaggingWP option
     if (m_chosen_btaggingWP.size() > 0) {
-      ATH_MSG_WARNING("You specified b-tagging WPs via BTaggingWP which is obsolete. Please switch to options BTaggingCaloJetWP for specifying EMTopo/EMPFlow b-tagging, and BTaggingTrackJetWP for track-jet b-tagging.");
+      ATH_MSG_WARNING("You specified b-tagging WPs via BTaggingWP which is obsolete. Please switch to options BTaggingCaloJetWP for specifying EMTopo/EMPFlow b-tagging, BTaggingTrackJetWP for track-jet b-tagging, and BTaggingOnlineConditionalWP for online and conditional b-tagging.");
       if (m_chosen_btaggingWP_caloJet.size() > 0 || m_chosen_btaggingWP_trkJet.size() > 0) {
         ATH_MSG_ERROR("You specified b-tagging WPs both via BTaggingWP as well as BTaggingCaloJetWP or BTaggingTrackJetWP. The BTaggingWP option is deprecated and conflicts with the other two options!");
         throw std::runtime_error("TopConfig: Failed to determine what b-tagging WPs to configure.");
@@ -2366,12 +2368,74 @@ namespace top {
     }
   }
 
+  void TopConfig::parse_bTagWPs_triplet(const std::string& btagWPsettingString,
+					std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>>& btagWPlist,
+      const std::string& jetCollectionName) {
+    std::istringstream str_btagging_WP(btagWPsettingString);
+    std::vector<std::string> all_btagging_WP;
+    std::copy(std::istream_iterator<std::string>(str_btagging_WP),
+              std::istream_iterator<std::string>(),
+              std::back_inserter(all_btagging_WP));
+    // loop through all btagging triplets requested
+    for (const auto& OfflOnlCond : all_btagging_WP) {
+      std::vector<std::string> btagOffl_btagOnl_btagCond;
+      tokenize(OfflOnlCond, btagOffl_btagOnl_btagCond, ";");
+      std::string alg_tag[3][2] = {{"",""},{"",""},{"",""}};
+      if (btagOffl_btagOnl_btagCond.size() == 3) {
+	for(unsigned int i=0;i<btagOffl_btagOnl_btagCond.size();++i) {
+	  std::vector<std::string> btagAlgo_btagTag;
+	  tokenize(btagOffl_btagOnl_btagCond.at(i), btagAlgo_btagTag, ":");
+	  if (btagAlgo_btagTag.size() == 2) {
+	    for(unsigned int j=0;j<btagAlgo_btagTag.size();++j) {
+	      alg_tag[i][j] = btagAlgo_btagTag.at(j);
+	    }
+	  } else {
+	    ATH_MSG_ERROR("Cannot parse b-tagging ALGORITHM_NAME:WP. Incorrect format.");
+	    continue;
+	  }
+	}
+      } else {
+        ATH_MSG_ERROR("Cannot parse b-tagging Offl;Onl;Cond. Incorrect format.");
+        continue;
+      }
+
+      ATH_MSG_INFO("BTagging triplet:"
+		   << " Offl: " << alg_tag[0][0] << "_" << alg_tag[0][1]
+		   << " Onl: "  << alg_tag[1][0] << "_" << alg_tag[1][1]
+		   << " Cond: " << alg_tag[2][0] << "_" << alg_tag[2][1]
+		   << " for collection: " << jetCollectionName);
+      std::string formatedWP[3];
+      for(unsigned int j=0;j<3;++j) {
+	formatedWP[j] = FormatedWP(alg_tag[j][1]);
+      }
+      std::pair<std::pair<std::string, std::string>,
+	        std::pair<std::pair<std::string, std::string>,
+			  std::pair<std::string, std::string>>> offl_onl_cond = std::make_pair(std::make_pair(alg_tag[0][0],alg_tag[0][1]),
+											       std::make_pair(std::make_pair(alg_tag[1][0],alg_tag[1][1]),
+													      std::make_pair(alg_tag[2][0],alg_tag[2][1])));
+      // take care that no b-tagging triplet is taken twice
+      if (std::find(btagWPlist.begin(), btagWPlist.end(), offl_onl_cond) == btagWPlist.end()) {
+        btagWPlist.push_back(offl_onl_cond);
+      } else {
+        ATH_MSG_INFO("This b-tag triplet was already added!");
+      }
+    }
+  }
+
+  void TopConfig::setBTagWP_available_onlCond(std::string btagging_WP) {
+    m_available_btaggingWP_onlCond.push_back(btagging_WP);
+  }
+
   void TopConfig::setBTagWP_available(std::string btagging_WP) {
     m_available_btaggingWP.push_back(btagging_WP);
   }
 
   void TopConfig::setBTagWP_available_trkJet(std::string btagging_WP) {
     m_available_btaggingWP_trkJet.push_back(btagging_WP);
+  }
+
+  void TopConfig::setBTagWP_calibrated_onlCond(std::string btagging_WP) {
+    m_calibrated_btaggingWP_onlCond.push_back(btagging_WP);
   }
 
   void TopConfig::setBTagWP_calibrated(std::string btagging_WP) {
