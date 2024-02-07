@@ -28,6 +28,27 @@ def ActsITkFastPixelSeedingToolCfg(flags,
     acc = ComponentAccumulator()
 
     ## Additional cuts for fast seed configuration
+    kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
+    kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
+    kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
+    kwargs.setdefault("maxPhiBins", 200)
+    kwargs.setdefault("gridRMax", 250 * UnitConstants.mm)
+    kwargs.setdefault("deltaRMax", 200 * UnitConstants.mm)
+    kwargs.setdefault("zBinsCustomLooping" , [2, 10, 3, 9, 6, 4, 8, 5, 7])
+    kwargs.setdefault("rRangeMiddleSP", [
+             [40.0, 80.0],
+             [40.0, 200.0],
+             [70.0, 200.0],
+             [70.0, 200.0],
+             [70.0, 250.0],
+             [70.0, 250.0],
+             [70.0, 250.0],
+             [70.0, 200.0],
+             [70.0, 200.0],
+             [40.0, 200.0],
+             [40.0, 80.0],])
+    kwargs.setdefault("useVariableMiddleSPRange", False)
+
 
     acc.merge(ActsITkPixelSeedingToolCfg(flags, name=name))
     return acc
@@ -77,6 +98,19 @@ def ActsITkPixelOrthogonalSeedingToolCfg(flags,
     acc = ComponentAccumulator()    
     ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
+    return acc
+
+def ActsITkFastPixelOrthogonalSeedingToolCfg(flags,
+                                         **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
+
+    ## Additional cuts for fast seed configuration
+    kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
+    kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
+    kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkPixel", **kwargs))
     return acc
 
 def ActsITkStripOrthogonalSeedingToolCfg(flags,
