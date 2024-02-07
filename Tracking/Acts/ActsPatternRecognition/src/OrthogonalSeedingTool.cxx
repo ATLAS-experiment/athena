@@ -186,6 +186,33 @@ namespace ActsTrk {
     m_finderCfg.centralSeedConfirmationRange = filterCfg.centralSeedConfirmationRange;
     m_finderCfg.forwardSeedConfirmationRange = filterCfg.forwardSeedConfirmationRange;
     m_finderCfg.radLengthPerSeed = m_radLengthPerSeed;
+
+    // Fast tracking
+    // manually convert the two types
+    for (const auto& vec : m_rRangeMiddleSP) {
+        std::vector<float> convertedVec;
+
+        for (const auto& val : vec) {
+            convertedVec.push_back(static_cast<float>(val));
+        }
+
+        m_finderCfg.rRangeMiddleSP.push_back(convertedVec);
+    }
+    // define cuts used for fast tracking configuration
+    m_finderCfg.experimentCuts.connect(
+	[](const void*, float bottomRadius, float cotTheta) -> bool {
+
+        float fastTrackingRMin = 50.;
+        float fastTrackingCotThetaMax = 1.5;
+
+        if (bottomRadius < fastTrackingRMin and
+               (cotTheta > fastTrackingCotThetaMax or
+                cotTheta < -fastTrackingCotThetaMax)) {
+             return false;
+        }
+        return true;
+    });
+
     m_finderCfg = m_finderCfg.toInternalUnits();
 
     m_finder = Acts::SeedFinderOrthogonal<value_type>(m_finderCfg);
