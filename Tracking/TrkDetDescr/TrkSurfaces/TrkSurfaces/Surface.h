@@ -385,7 +385,7 @@ public:
    * detector element (and returns false otherwise*/
   bool isFree() const;
 
-  /** Return 'true' if this surface is own by the detector element */
+  /** Return 'true' if this surface is owned by the detector element */
   bool isActive() const;
 
   /** Set the transform updates center and normal*/
