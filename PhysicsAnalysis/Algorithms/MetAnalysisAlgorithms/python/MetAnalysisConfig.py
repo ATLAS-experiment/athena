@@ -57,13 +57,13 @@ class MetAnalysisConfig (ConfigBlock):
         alg.metAssociation = 'METAssoc_' + metSuffix
         alg.jets = config.readName (self.jets)
         if self.muons != "" :
-            alg.muons, alg.muonsSelection = config.readNameAndSelection (self.muons)
+            alg.muons, alg.muonsSelection = config.readNameAndSelection (self.muons, excludeFrom={'or'})
         if self.electrons != "" :
-            alg.electrons, alg.electronsSelection = config.readNameAndSelection (self.electrons)
+            alg.electrons, alg.electronsSelection = config.readNameAndSelection (self.electrons, excludeFrom={'or'})
         if self.photons != "" :
-            alg.photons, alg.photonsSelection = config.readNameAndSelection (self.photons)
+            alg.photons, alg.photonsSelection = config.readNameAndSelection (self.photons, excludeFrom={'or'})
         if self.taus != "" :
-            alg.taus, alg.tausSelection = config.readNameAndSelection (self.taus)
+            alg.taus, alg.tausSelection = config.readNameAndSelection (self.taus, excludeFrom={'or'})
         if self.invisible != "" :
             alg.invisible = config.readName (self.invisible)
         alg.met = config.writeName (self.containerName, isMet = True)
