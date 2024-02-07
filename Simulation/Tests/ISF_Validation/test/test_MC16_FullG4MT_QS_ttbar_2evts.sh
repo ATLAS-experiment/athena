@@ -11,7 +11,7 @@
 # ATLAS-R2-2016-01-00-01 and OFLCOND-MC23-SDR-RUN3-01
 export TRF_ECHO=1
 Sim_tf.py \
-    --CA True \
+    --CA \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
@@ -22,4 +22,6 @@ Sim_tf.py \
     --outputHITSFile "Hits.pool.root" \
     --maxEvents 2
 
-echo  "art-result: $? simulation"
+rc=$?
+echo  "art-result: $rc simulation"
+exit  $rc

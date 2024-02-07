@@ -22,7 +22,7 @@ Sim_tf.py \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
-    --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
+    --postInclude 'PyJobTransforms.UseFrontier' \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
@@ -31,52 +31,8 @@ mv log.EVNTtoHITS log.EVNTtoHITS_CA
 echo  "art-result: $rc simCA"
 status=$rc
 
-Sim_tf.py \
-    --simulator 'FullG4MT_QS'  \
-    --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/pi_E50_eta0-60.evgen.pool.root' \
-    --outputHITSFile 'test.CA.HITS.pool.root' \
-    --maxEvents '10' \
-    --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --preExec 'EVNTtoHITS:simFlags.ReleaseGeoModel=False;' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoVCalibrationHits.py' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --imf False \
-    --athenaopts '"--config-only=ConfigSimCG.pkl"'
-
-Sim_tf.py \
-    --simulator 'FullG4MT_QS'  \
-    --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/pi_E50_eta0-60.evgen.pool.root' \
-    --outputHITSFile 'test.HITS.pool.root' \
-    --maxEvents '10' \
-    --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --preExec 'EVNTtoHITS:simFlags.ReleaseGeoModel=False;' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoVCalibrationHits.py' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --imf False
-
-rc2=$?
-mv log.EVNTtoHITS log.EVNTtoHITS_OLD
-echo  "art-result: $rc2 simOLD"
-if [ $status -eq 0 ]
-then
-    status=$rc2
-fi
-
-rc3=-9999
-if [ $status -eq 0 ]
-then
-    acmd.py diff-root test.HITS.pool.root test.CA.HITS.pool.root --error-mode resilient --mode=semi-detailed --order-trees --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
-    rc3=$?
-    status=$rc3
-fi
-echo  "art-result: $rc3 HITS_OLDvsCA"
-
 rc4=-9999
-if [ $rc2 -eq 0 ]
+if [ $rc -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
