@@ -28,6 +28,7 @@ def GeoModelCfg(flags):
 
     gms=CompFactory.GeoModelSvc(AtlasVersion=flags.GeoModel.AtlasVersion,
                                 SQLiteDB=flags.GeoModel.SQLiteDB,
+                                SQLiteDBFullPath=flags.GeoModel.SQLiteDBFullPath,
                                 IgnoreTagDifference=flags.GeoModel.IgnoreTagDifference,
                                 SupportedGeometry=int(relversion[0]))
     if flags.Common.ProductionStep == ProductionStep.Simulation:

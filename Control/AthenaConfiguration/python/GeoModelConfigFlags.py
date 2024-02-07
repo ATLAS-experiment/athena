@@ -42,7 +42,7 @@ def createGeoModelConfigFlags(analysis=False):
 
     def _deduct_LHCPeriod(prevFlags):
         if prevFlags.GeoModel.AtlasVersion:
-            return LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)['Common']['Run'])
+            return LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Common']['Run'])
 
         if prevFlags.Input.isMC:
             raise ValueError('No geometry tag specified')
@@ -70,15 +70,18 @@ def createGeoModelConfigFlags(analysis=False):
                 # Mainly for G4 which still loads alignment on initialize
 
     gcf.addFlag("GeoModel.Type",
-                lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)['Common']['GeoType'])
+                lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Common']['GeoType'])
                 # Geometry type in {ITKLoI, ITkLoI-VF, etc...}
 
     gcf.addFlag("GeoModel.IBLLayout",
-                lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)['Pixel']['IBLlayout'])
+                lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Pixel']['IBLlayout'])
                 # IBL layer layout  in {"planar", "3D", "noIBL"}
 
     gcf.addFlag('GeoModel.SQLiteDB',False)
                 # Switch for activating GeoModel initialization from an SQLite Geometry DB
+
+    gcf.addFlag('GeoModel.SQLiteDBFullPath','')
+                # Override full path to the SQLite Geometry DB. For testing purposes only
 
     gcf.addFlag('GeoModel.IgnoreTagDifference',False)
 

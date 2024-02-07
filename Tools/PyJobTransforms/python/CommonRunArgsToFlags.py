@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Reset preload libs for proper execution of child-processes (ATR-26769).
 # We only put this here because this is executed by all CA transform skeletons:
@@ -25,6 +25,10 @@ def commonRunArgsToFlags(runArgs,configFlags):
 
     if hasattr(runArgs,"geometrySQLite"):
         configFlags.GeoModel.SQLiteDB=runArgs.geometrySQLite
+
+    if hasattr(runArgs,"geometrySQLiteFullPath"):
+        configFlags.GeoModel.SQLiteDBFullPath=runArgs.geometrySQLiteFullPath
+        configFlags.GeoModel.SQLiteDB=True
 
     if hasattr(runArgs,"triggerConfig"): 
         configFlags.Trigger.triggerConfig=runArgs.triggerConfig
