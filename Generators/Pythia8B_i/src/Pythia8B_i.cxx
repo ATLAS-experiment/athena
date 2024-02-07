@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ======================================================================
@@ -51,9 +51,6 @@ Pythia8B_i::Pythia8B_i
     declareProperty("UserSelection", m_userString="NONE");
     declareProperty("UserSelectionVariables", m_userVar);
     declareProperty("SuppressSmallPT", m_doSuppressSmallPT=false);
-    declareProperty("pT0timesMPI", m_pt0timesMPI=1.0);
-    declareProperty("numberAlphaS", m_numberAlphaS=3.0);
-    declareProperty("useSameAlphaSasMPI", m_sameAlphaSAsMPI=false);
 
     m_totalBQuark = 0;
     m_totalBBarQuark = 0;
@@ -100,8 +97,7 @@ StatusCode Pythia8B_i::genInitialize() {
 
     bool canSetHook=true;
     if (m_doSuppressSmallPT) {
-        m_SuppressSmallPT = new Pythia8::SuppressSmallPT(m_pt0timesMPI,m_numberAlphaS,m_sameAlphaSAsMPI);
-        canSetHook=Pythia8_i::m_pythia->addUserHooksPtr(PYTHIA8_PTRWRAP(m_SuppressSmallPT));
+        Pythia8_i::m_userHooks=std::vector<std::string>(1, "SuppressSmallPT");
     }
 
     if (!canSetHook) {

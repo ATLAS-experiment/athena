@@ -77,6 +77,15 @@ Pythia8_i::Pythia8_i(const std::string &name, ISvcLocator *pSvcLocator)
   m_particleIDs["MUON"]        = MUON;
   m_particleIDs["ANTIMUON"]    = ANTIMUON;
   m_particleIDs["LEAD"]        = LEAD;
+
+  ATH_MSG_INFO("XML Path is " + xmlpath());
+  m_pythia = std::make_unique<Pythia8::Pythia> (xmlpath());
+#ifdef HEPMC3
+  m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
+  /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
+  struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Pythia8"),py8version(),std::string("Used generator")};
+  m_runinfo->tools().push_back(generator);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,15 +104,6 @@ Pythia8_i::~Pythia8_i() {
 StatusCode Pythia8_i::genInitialize() {
 
   ATH_MSG_DEBUG("Pythia8_i from genInitialize()");
-
-  ATH_MSG_INFO("XML Path is " + xmlpath());
-  m_pythia = std::make_unique<Pythia8::Pythia> (xmlpath());
-#ifdef HEPMC3
-  m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
-  /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
-  struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Pythia8"),py8version(),std::string("Used generator")};
-  m_runinfo->tools().push_back(generator);
-#endif
 
   bool canInit = true;
 
@@ -133,10 +133,15 @@ StatusCode Pythia8_i::genInitialize() {
 
   for(const auto &hook: m_userHooks){
     ATH_MSG_INFO("Adding user hook " + hook + ".");
-    m_userHooksPtrs.push_back(PYTHIA8_PTRWRAP(Pythia8_UserHooks::UserHooksFactory::create(hook)) );
     bool canSetHook = true;
-    canSetHook = m_pythia->addUserHooksPtr(m_userHooksPtrs.back());
-
+    if (hook == "SuppressSmallPT") {
+        m_SuppressSmallPT = new Pythia8::SuppressSmallPT(m_pt0timesMPI,m_numberAlphaS,m_sameAlphaSAsMPI);
+        canSetHook=m_pythia->setUserHooksPtr(PYTHIA8_PTRWRAP(m_SuppressSmallPT));
+}
+    else {
+      m_userHooksPtrs.push_back(PYTHIA8_PTRWRAP(Pythia8_UserHooks::UserHooksFactory::create(hook)) );
+      canSetHook = m_pythia->addUserHooksPtr(m_userHooksPtrs.back());
+}
     if(!canSetHook){
       ATH_MSG_ERROR("Unable to set requested user hook.");
       ATH_MSG_ERROR("Pythia 8 initialisation will FAIL!");

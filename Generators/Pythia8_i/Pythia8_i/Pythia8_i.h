@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
   Author: James Monk
 */
 
@@ -94,6 +94,11 @@ protected:
   std::shared_ptr<customRndm> m_atlasRndmEngine{};
 
   IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
+  StringArrayProperty m_userHooks{this, "UserHooks", {} };
+//for Py8B
+  DoubleProperty m_pt0timesMPI{this,"pT0timesMPI", 1.0};
+  DoubleProperty m_numberAlphaS{this,"numberAlphaS", 3.0};
+  BooleanProperty m_sameAlphaSAsMPI{this,"useSameAlphaSasMPI", false};
 
 private:
 
@@ -138,8 +143,6 @@ private:
   // ptr to possible user process
   std::shared_ptr<Pythia8::Sigma2Process> m_procPtr{};
 
-  StringArrayProperty m_userHooks{this, "UserHooks", {} };
-
   std::vector<UserHooksPtrType> m_userHooksPtrs{};
 
   StringProperty m_userResonances{this, "UserResonances", ""};
@@ -164,6 +167,7 @@ private:
 
   static int s_allowedTunes(double version);
 
+  Pythia8::SuppressSmallPT *m_SuppressSmallPT;
 
 };
 
