@@ -199,6 +199,8 @@ namespace MuonGM {
         // Global to Amdb local (szt) coord
         virtual Amg::Vector3D GlobalToAmdbLRSCoords(const Amg::Vector3D& x) const override final { return GlobalToAmdbLRSTransform()*x; }
         virtual Amg::Transform3D GlobalToAmdbLRSTransform() const override final { return AmdbLRSToGlobalTransform().inverse(); }
+
+        static double triggerBandIdToRadius(bool isLarge, int triggerBand); 
         
     private:
         std::vector<MuonChannelDesign> m_phiDesign;
@@ -235,6 +237,32 @@ namespace MuonGM {
 
         // transforms (RE->layer)
         Amg::Transform3D m_Xlg[4];
+
+
+        // The radial positions of the trigger bands cannot be derived from the readout geometry, therefore hard-coding them for now
+        //Position of Band IDs for Large sectors
+        static constexpr std::array<double, 94>  LBANDIDSP = {
+          10, 10, 10, 10, 10, 10, 1156.72, 1187.98, 1231.87, 1271.34, 1312.87, 1354.56, 1396.38, 1438.07,
+          1479.73, 1521.44, 1563.11, 1604.8, 1646.48, 1688.02, 1729.84, 1771.51, 1813.2, 1854.89, 1896.57, 1938.26, 1979.93, 2021.61,
+          2063.14, 2104.98, 2146.55, 2181.64, 2209.01, 2251.65, 2282.54, 2313.27, 2356.24, 2396.73, 2438.29, 2480.09, 2521.75, 2563.46,
+          2605.11, 2646.85, 2688.48, 2730.19, 2771.86, 2813.41, 2855.21, 2896.93, 2938.61, 2980.26, 3021.95, 3063.63, 3105.31, 3146.98,
+          3188.85, 3230.37, 3272.05, 3313.77, 3353.77, 3376.19, 3426.09, 3464.49, 3506.78, 3563.91, 3589.03, 3626.17, 3667.84, 3709.56,
+          3751.33, 3792.92, 3834.58, 3876.27, 3917.9, 3959.62, 4001.29, 4043.03, 4084.66, 4126.39, 4168.05, 4209.74, 4251.38, 4293.16,
+          4334.72, 4376.47, 4417.54, 4459.75, 4496.31, 4543.27, 4584.77, 4626.47, 4668.25, 4701.14
+        };
+
+        //Position of Band IDs for Small Sector
+        static constexpr std::array<double, 92> SBANDIDSP  = {
+          10.0, 10.0, 958.077, 998.248, 1037.405, 1076.535, 1115.69, 1154.82, 1193.97, 1233.135, 1272.265, 1311.395,
+          1350.59, 1389.705, 1428.865, 1468.01, 1507.175, 1546.305, 1585.435, 1624.58, 1663.71, 1702.895, 1742.055,
+          1781.165, 1820.315, 1859.44, 1898.575, 1937.75, 1976.885, 2016.04, 2055.15, 2094.345, 2136.125, 2172.61,
+          2217.68, 2255.125, 2316.115, 2348.91, 2388.06, 2427.245, 2466.385, 2505.515, 2544.69, 2583.8, 2622.99,
+          2662.115, 2701.31, 2740.395, 2779.55, 2818.715, 2857.905, 2897.0, 2936.185, 2975.315, 3014.47, 3053.615,
+          3092.775, 3131.895, 3171.075, 3210.225, 3249.375, 3288.485, 3317.74, 3347.075, 3396.65, 3440.175, 3475.575,
+          3540.81, 3581.97, 3621.13, 3660.285, 3699.41, 3738.535, 3777.73, 3816.89, 3856.055, 3895.105, 3934.3, 3974.34,
+          4012.565, 4051.71, 4090.865, 4130.04, 4169.145, 4208.285, 4247.55, 4286.65, 4320.075, 4364.84, 4404.12, 4443.14, 4482.29
+        };
+
     };
 
     inline int sTgcReadoutElement::surfaceHash(const Identifier& id) const {
@@ -426,6 +454,15 @@ namespace MuonGM {
         pos[0] = phiPos.x();
         pos[1] = etaPos.x();
     }
+
+
+    inline double sTgcReadoutElement::triggerBandIdToRadius(bool isLarge, int triggerBand) {
+        if(isLarge){
+            return LBANDIDSP[triggerBand];
+        } else {
+            return SBANDIDSP[triggerBand]; 
+        }
+    }; 
 
 }  // namespace MuonGM
 
