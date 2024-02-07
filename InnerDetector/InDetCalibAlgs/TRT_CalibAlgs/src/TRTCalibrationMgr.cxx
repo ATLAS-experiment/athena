@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /* *******************************************************************
@@ -15,7 +15,6 @@
 #include "TRT_CalibData/TrackInfo.h"
 #include "TRT_ConditionsData/FloatArrayStore.h"
 #include "TRT_CalibTools/IFillAlignTrkInfo.h"
-//#include "TRT_CalibTools/IAccumulator.h"
 #include "TRT_CalibTools/IFitTool.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
@@ -142,7 +141,7 @@ StatusCode TRTCalibrationMgr::execute() {
 
 	SG::ReadHandle<xAOD::VertexContainer> vertices(m_verticesKey);
 	if (not vertices.isValid()) {
-	  ATH_MSG_WARNING ("Couldn't retrieve VertexContainer with key: PrimaryVertices");
+	  ATH_MSG_DEBUG("Couldn't retrieve VertexContainer with key: PrimaryVertices");
 	  return StatusCode::SUCCESS;   // just skip to next event in case of no vertexcontainer
 	}
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -329,10 +329,12 @@ int TRTCalibrator::GetSubLevels(const std::string& key, int lev, std::set<int>* 
   if(sl.find('t')!=std::string::npos){
     int min,max;
     sscanf(sl.substr(0,sl.find('t')).data(),"%i",&min);
-    std::cout << "min=" << min << std::endl;
+    ATH_MSG_INFO("min=" << min);
+    // std::cout << "min=" << min << std::endl;
     sl=sl.substr(sl.find('t')+1);
     sscanf(sl.data(),"%i",&max);
-    std::cout << "max=" << max << std::endl;
+    ATH_MSG_INFO("max=" << max);
+    // std::cout << "max=" << max << std::endl;
     for (int imod=min; imod<=max; imod++){
       levels->insert(imod);
     }
@@ -558,11 +560,16 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
   if(myFile.is_open()){
     myFile.read ((char*)filetype, 4); filetype[4]=0;
     if (strcmp(filetype,"root")==0) isntuple=true;
-    std::cout << " TRTCalibrator determined type of input file " << infile.data() << " to be " << filetype << std::endl;
+    ATH_MSG_INFO(" TRTCalibrator determined type of input file " << infile.data() << " to be " << filetype);
+    // std::cout << " TRTCalibrator determined type of input file " << infile.data() << " to be " << filetype << std::endl;
     myFile.close();
   }
-  else
-    std::cout << "INPUT FILE NOT FOUND!  " << infile << std::endl;
+  else{
+    ATH_MSG_INFO("INPUT FILE NOT FOUND!  " << infile);
+    // std::cout << "INPUT FILE NOT FOUND!  " << infile << std::endl;
+  }
+
+    
 
   // open the output histogram file
    std::unique_ptr<TFile> histfile(TFile::Open("calibout.root","RECREATE"));
