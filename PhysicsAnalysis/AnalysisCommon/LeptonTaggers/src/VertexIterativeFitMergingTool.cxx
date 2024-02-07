@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -349,7 +349,7 @@ bool Prompt::VertexIterativeFitMergingTool::mergeIteratively2TrackVtxs(
       //
       // This vertex could not be merged - try next one
       //
-      currVit++;
+      ++currVit;
 
       ATH_MSG_DEBUG(name() << "::mergeIteratively2TrackVtxs - could not merge 2-track vertex:\n" << vtxAsStr(seedVtx, false));
     }
@@ -394,7 +394,7 @@ void Prompt::VertexIterativeFitMergingTool::getNewMergedVertex(
   // Generate a list of 2-track vertices other than the seed vertex
   std::vector<TwoTrackVtx> others;
 
-  for(std::vector<TwoTrackVtx>::iterator vit = vtxs2Track.begin(); vit != vtxs2Track.end(); vit++) {
+  for(std::vector<TwoTrackVtx>::iterator vit = vtxs2Track.begin(); vit != vtxs2Track.end(); ++vit) {
     if(vit != currVit) {
       others.push_back(*vit);
     }
@@ -585,7 +585,7 @@ unsigned Prompt::VertexIterativeFitMergingTool::removeMerged2TrackVertexes(
       ATH_MSG_DEBUG("removeMerged2TrackVertexes - removed merged 2-track vertex");
     }
     else {
-      vit++;
+      ++vit;
 
       ATH_MSG_DEBUG("removeMerged2TrackVertexes - skip unmerged 2-track vertex");
     }
@@ -603,8 +603,8 @@ unsigned Prompt::VertexIterativeFitMergingTool::removeMerged2TrackVertexes(
 void Prompt::VertexIterativeFitMergingTool::plotVertexDistances(
   const std::vector<TwoTrackVtx> &others
 ) {
-  for(std::vector<TwoTrackVtx>::const_iterator fit = others.begin(); fit != others.end(); fit++) {
-    for(std::vector<TwoTrackVtx>::const_iterator sit = fit+1; sit != others.end(); sit++) {
+  for(std::vector<TwoTrackVtx>::const_iterator fit = others.begin(); fit != others.end(); ++fit) {
+    for(std::vector<TwoTrackVtx>::const_iterator sit = fit+1; sit != others.end(); ++sit) {
       const double dist = Prompt::getDistance(fit->vertex, sit->vertex);
       const double sig1 = Prompt::getNormDist(fit->vertex->position(), sit->vertex->position(), fit->vertex->covariance(), msg(MSG::WARNING));
       const double sig2 = Prompt::getNormDist(fit->vertex->position(), sit->vertex->position(), sit->vertex->covariance(), msg(MSG::WARNING));
