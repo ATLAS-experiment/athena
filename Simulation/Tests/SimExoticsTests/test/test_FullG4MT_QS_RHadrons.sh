@@ -3,8 +3,8 @@
 # art-description: MC23-style simulation of decaying Rhadrons using FullG4MT_QS (tests RHadrons package)
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-include: 23.0/Athena
-# art-include: 23.0/AthSimulation
+# art-include: 24.0/Athena
+# art-include: 24.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-output: *.root
@@ -12,27 +12,6 @@
 # art-output: *.HITS.pool.root
 # art-output: log.*
 # art-output: Config*.pkl
-
-mkdir -p OLD && cd OLD
-Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23cSimulationMultipleIoV.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/Rhadrons.EVNT.34227998._000001.pool.root.1" \
-    --outputHITSFile 'test.CG.HITS.pool.root' \
-    --maxEvents '50' \
-    --jobNumber 1 \
-    --imf False
-
-rc2=$?
-status=$rc2
-mv PDGTABLE.MeV ../PDGTABLE.MeV.CG
-mv log.EVNTtoHITS ../log.EVNTtoHITS.CG
-mv test.CG.HITS.pool.root ../test.CG.HITS.pool.root
-cd ../
-echo  "art-result: $rc2 simOLD"
 
 mkdir -p CA && cd CA
 Sim_tf.py \
@@ -58,24 +37,15 @@ cd ../
 echo  "art-result: $rc simCA"
 status=$rc
 
-rc3=-9999
-if [ $rc -eq 0 ] && [ $rc2 -eq 0 ]
-then
-    acmd.py diff-root test.CG.HITS.pool.root test.CA.HITS.pool.root --error-mode resilient --mode=semi-detailed --order-trees
-    rc3=$?
-    status=$rc3
-fi
-echo  "art-result: $rc3 OLDvsCA"
-
-rc4=-9999
-if [ $rc2 -eq 0 ]
+rc2=-9999
+if [ $rc -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 50 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --file=test.CG.HITS.pool.root
-    rc4=$?
-    status=$rc4
+    art.py compare grid --entries 50 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --file=test.CA.HITS.pool.root
+    rc2=$?
+    status=$rc2
 fi
-echo  "art-result: $rc4 regression"
+echo  "art-result: $rc2 regression"
 
 exit $status
