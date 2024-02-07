@@ -20,4 +20,6 @@ Sim_tf.py \
     --maxEvents 2 \
     --jobNumber 1
 
-echo  "art-result: $? simulation"
+rc=$?
+echo  "art-result: $rc simulation"
+exit $rc

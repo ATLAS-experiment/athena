@@ -13,7 +13,7 @@
 # MC16 setup
 # ATLAS-R2-2016-01-00-01 and OFLCOND-MC23-SDR-RUN3-01
 Sim_tf.py \
-    --CA True \
+    --CA \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
@@ -27,8 +27,9 @@ Sim_tf.py \
 
 rc=$?
 status=$rc
-rc2=-9999
 echo  "art-result: $rc simCA"
+
+rc2=-9999
 if [ $rc -eq 0 ]
 then
     ArtPackage=$1
@@ -37,6 +38,6 @@ then
     rc2=$?
     status=$rc2
 fi
-
 echo  "art-result: $rc2 regression"
+
 exit $status

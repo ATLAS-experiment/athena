@@ -24,8 +24,9 @@ Sim_tf.py \
 
 rc=$?
 status=$rc
-rc2=-9999
 echo  "art-result: $rc simCA"
+
+rc2=-9999
 if [ $rc -eq 0 ]
 then
     ArtPackage=$1

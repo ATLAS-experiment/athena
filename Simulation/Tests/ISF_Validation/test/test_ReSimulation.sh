@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # art-description: ReSimulation Workflow running with MC16 conditions/geometry
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
@@ -14,15 +14,16 @@ INPUTEVNTFILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/va
 MAXEVENTS=10
 
 Sim_tf.py \
---conditionsTag 'default:OFLCOND-MC16-SDR-14' \
---simulator 'FullG4' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'EVNTtoHITS:Campaigns/MC16SimulationSingleIoV.py' \
---geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
---inputEVNTFile $INPUTEVNTFILE \
---outputHITSFile "original.HITS.pool.root" \
---maxEvents $MAXEVENTS \
---imf False
+    --CA \
+    --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
+    --simulator 'FullG4MT' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC16SimulationSingleIoV' \
+    --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
+    --inputEVNTFile $INPUTEVNTFILE \
+    --outputHITSFile "original.HITS.pool.root" \
+    --maxEvents $MAXEVENTS \
+    --imf False
 
 rc=$?
 echo "art-result: $rc initial-sim"
@@ -32,10 +33,11 @@ cp log.EVNTtoHITS log.EVNTtoHITS.initial
 rc2=-9999
 if [ $status -eq 0 ]; then
     ReSim_tf.py \
+        --CA \
         --conditionsTag 'ReSim:OFLCOND-MC16-SDR-14' \
-        --simulator 'FullG4_QS' \
-        --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'ReSim:Campaigns/MC16SimulationNoIoV.py' \
+        --simulator 'FullG4MT_QS' \
+        --postInclude 'ReSim:PyJobTransforms.UseFrontier' \
+        --preInclude 'ReSim:Campaigns.MC16SimulationNoIoV' \
         --geometryVersion 'ReSim:ATLAS-R2-2016-01-00-01' \
         --inputHITSFile "original.HITS.pool.root" \
         --outputHITS_RSMFile "resim.HITS.pool.root" \
@@ -50,7 +52,7 @@ rc3=-9999
 if [ $status -eq 0 ]; then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --diff-root --mode=semi-detailed --ignore-leave RecoTimingObj_p1_EVNTtoHITS_timingsOLD
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --diff-root --mode=semi-detailed
     rc3=$?
     status=$rc3
 fi
