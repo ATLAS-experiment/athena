@@ -211,7 +211,6 @@ InDetNewTrackingCuts._ConfiguredNewTrackingCuts__minPT            =470    #1000.
 #InDetNewTrackingCuts._ConfiguredNewTrackingCuts__nHolesGapMax     =2      #2
 #InDetNewTrackingCuts._ConfiguredNewTrackingCuts__Xi2max           =4.     #6.
 #InDetNewTrackingCuts._ConfiguredNewTrackingCuts__Xi2maxNoAdd      =10.    #10
-#InDetNewTrackingCuts._ConfiguredNewTrackingCuts__seedFilterLevel  =1      #1
 #InDetNewTrackingCuts._ConfiguredNewTrackingCuts__radMax           =600    #600 old 330
 #InDetNewTrackingCuts._ConfiguredNewTrackingCuts__RoadWidth        =20     #20
 #InDetNewTrackingCuts._ConfiguredNewTrackingCuts__maxPrimaryImpact =10     #10

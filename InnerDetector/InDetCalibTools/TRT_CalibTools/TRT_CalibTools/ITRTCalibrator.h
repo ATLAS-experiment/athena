@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CALIBTOOLS__ITRTCALIBRATOR_H
@@ -12,7 +12,7 @@ PACKAGE:  TRT_CalibTools
 AUTHORS:  Johan Lundquist
 CREATED:  March 2009
 
-PURPOSE:  Fit R-t relation constants using histograms produced by a previous accumulation job
+PURPOSE:  
 
 ********************************************************************/
 
@@ -25,7 +25,7 @@ namespace Trk{
 namespace TRT{
 class TrackInfo;
 }
-// This tool is only called once in a job reconstructing only one event
+
 class ATLAS_NOT_THREAD_SAFE ITRTCalibrator : virtual public IAlgTool {
 public:
   DeclareInterfaceID( ITRTCalibrator, 1, 0 );

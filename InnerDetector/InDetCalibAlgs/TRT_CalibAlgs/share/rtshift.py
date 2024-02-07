@@ -34,7 +34,7 @@ for part in ps:
     maxtries = 500
     drdt = 0
     t0=20
-#    print(ps[part])
+#    print ps[part]
 
     driftradius = ps[part][0]+t0*(ps[part][1]+t0*(ps[part][2]));
 #    print driftradius
@@ -76,14 +76,14 @@ for straw in t0s:
 
 newrts.sort()
 newt0s.sort()
-print ("# Fileformat=1")
-print ("# RtRelation")
+print "# Fileformat=1"
+print "# RtRelation"
 for newrt in newrts:
-    print (newrt)
-print ("# StrawT0")
+    print newrt
+print "# StrawT0"
 for newt0 in newt0s:
-    print (newt0)
-print ("#GLOBALOFFSET 0.0000")
+    print newt0
+print "#GLOBALOFFSET 0.0000"
 
 oldconsts=open(sys.argv[1]).readlines()
 

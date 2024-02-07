@@ -1,5 +1,5 @@
- /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+/*
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 #include <fstream>
 #include <sstream>
@@ -252,7 +252,7 @@ int dump_tracktuple(map<string,trackdata> *trackmap){
   ttfile->Write();
   ttfile->Close();
   //tracktup->Delete();
-  return 0;
+
 }
 
 int dump_hists(map<int,CalHist*> *histmap,int ntbins, int nrbins, int ntres, char* fname, int fileno){
@@ -363,7 +363,7 @@ int main(int argc, char *argv[]){
   TH2F* pull_ec =  new TH2F("pull_ec" ,"pull_EndcapC_allhits",	16, 0, 16, 200,-4,4);
   
   // Residual All hits:
-  TH2F* residual_trt = new TH2F("residual_allhits","residual_TRT_allhits",    16, 0, 16 ,200,-2,2);
+  TH2F* residual_trt = new TH2F("residual_trt","residual_TRT_allhits",    16, 0, 16 ,200,-2,2);
   TH2F* residual_ba =  new TH2F("residual_ba" ,"residual_BarrelA_allhits",16, 0, 16 ,200,-2,2);
   TH2F* residual_bc =  new TH2F("residual_bc" ,"residual_BarrelC_allhits",16, 0, 16 ,200,-2,2);
   TH2F* residual_ea =  new TH2F("residual_ea" ,"residual_EndcapA_allhits",16, 0, 16 ,200,-2,2);
@@ -527,7 +527,7 @@ int main(int argc, char *argv[]){
   TH2F* pullAr_ec =  new TH2F("pullAr_ec" ,"pullAr_EndcapC_allhits",    16, 0, 16, 200,-4,4);
 
   // Residual All hits:
-  TH2F* residualAr_trt = new TH2F("residualAr_allhits","residualAr_TRT_allhits",    16, 0, 16 ,200,-2,2);
+  TH2F* residualAr_trt = new TH2F("residualAr_trt","residualAr_TRT_allhits",    16, 0, 16 ,200,-2,2);
   TH2F* residualAr_ba =  new TH2F("residualAr_ba" ,"residualAr_BarrelA_allhits",16, 0, 16 ,200,-2,2);
   TH2F* residualAr_bc =  new TH2F("residualAr_bc" ,"residualAr_BarrelC_allhits",16, 0, 16 ,200,-2,2);
   TH2F* residualAr_ea =  new TH2F("residualAr_ea" ,"residualAr_EndcapA_allhits",16, 0, 16 ,200,-2,2);
@@ -1199,15 +1199,15 @@ int main(int argc, char *argv[]){
 	TDirectory* trtdir = ttfile->mkdir("TRT_all");
 	TDirectory* binhist =trtdir->mkdir("reshists");
 	TDirectory* detdir1 =trtdir->mkdir("Detector_-2");
-	TDirectory* binhist1 =detdir1->mkdir("reshists1"); //NB! changed reshist to reshist1 for safety
+	TDirectory* binhist1 =detdir1->mkdir("reshists");
 	TDirectory* detdir2 =trtdir->mkdir("Detector_-1");
-	TDirectory* binhist2 =detdir2->mkdir("reshists2");
+	TDirectory* binhist2 =detdir2->mkdir("reshists");
 	TDirectory* detdir3 =trtdir->mkdir("Detector_1");
-	TDirectory* binhist3 =detdir3->mkdir("reshists3");
+	TDirectory* binhist3 =detdir3->mkdir("reshists");
 	TDirectory* detdir4 =trtdir->mkdir("Detector_2");
-	TDirectory* binhist4 =detdir4->mkdir("reshists4");
+	TDirectory* binhist4 =detdir4->mkdir("reshists");
 	TDirectory* detdir5 =trtdir->mkdir("WholeBarrel_1");
-	TDirectory* binhist5 =detdir5->mkdir("reshists5");
+	TDirectory* binhist5 =detdir5->mkdir("reshists");
 
 	TDirectory* errordir = ttfile->mkdir("Errors");
 	TDirectory* corrdir = ttfile->mkdir("Correction");
@@ -1421,17 +1421,17 @@ int main(int argc, char *argv[]){
 
    if(existAr){
         TDirectory* trtArdir = ttfile->mkdir("TRT_Ar_all");
-        TDirectory* binArhist =trtArdir->mkdir("reshists_Ar");   //NB! changed directory names from reshists
+        TDirectory* binArhist =trtArdir->mkdir("reshists");
         TDirectory* detArdir1 =trtArdir->mkdir("Detector_Ar_-2");
-        TDirectory* binArhist1 =detArdir1->mkdir("reshists_Ar1");
+        TDirectory* binArhist1 =detArdir1->mkdir("reshists");
         TDirectory* detArdir2 =trtArdir->mkdir("Detector_Ar_-1");
-        TDirectory* binArhist2 =detArdir2->mkdir("reshists_Ar2");
+        TDirectory* binArhist2 =detArdir2->mkdir("reshists");
         TDirectory* detArdir3 =trtArdir->mkdir("Detector_Ar_1");
-        TDirectory* binArhist3 =detArdir3->mkdir("reshists_Ar3");
+        TDirectory* binArhist3 =detArdir3->mkdir("reshists");
         TDirectory* detArdir4 =trtArdir->mkdir("Detector_Ar_2");
-        TDirectory* binArhist4 =detArdir4->mkdir("reshists_Ar4");
+        TDirectory* binArhist4 =detArdir4->mkdir("reshists");
         TDirectory* detArdir5 =trtArdir->mkdir("WholeBarrel_Ar_1");
-        TDirectory* binArhist5 =detArdir5->mkdir("reshists_Ar5");
+        TDirectory* binArhist5 =detArdir5->mkdir("reshists");
 
         TDirectory* errordirAr = ttfile->mkdir("ErrorsAr");
         TDirectory* corrdirAr  = ttfile->mkdir("CorrectionAr");

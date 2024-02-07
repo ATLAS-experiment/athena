@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTToTCondAlg.h"
@@ -57,36 +57,26 @@ StatusCode TRTToTCondAlg::execute()
 
 
 
-  //  // ____________ Construct new Write Cond Object  ____________
-  //  std::unique_ptr<TRTDedxcorrection> Dedxcorrection{std::make_unique<TRTDedxcorrection>()};
-  TRTDedxcorrection* Dedxcorrection = new TRTDedxcorrection; 
-
   // ____________ Compute the Write Cond Object (Dedxcorrections)  ____________
   SG::ReadCondHandle<CondAttrListVec> readVecHandle{m_VecReadKey};
   const CondAttrListVec* channel_values{*readVecHandle};
   if(channel_values==nullptr) {
       ATH_MSG_ERROR(" Problem reading TRT/Calib/ToT/ToTVectors cond object");
-      delete Dedxcorrection;
       return StatusCode::FAILURE;
   }
-  if(StatusCode::SUCCESS != update1( *Dedxcorrection, channel_values  )) {
-     ATH_MSG_ERROR ("Problem filling Dedxcorrection.");
-     delete Dedxcorrection;
-     return StatusCode::FAILURE;     
-  }
+
+  // ____________ Construct new Write Cond Object  ____________
+  auto Dedxcorrection = std::make_unique<TRTDedxcorrection>();
+
+  ATH_CHECK( update1( *Dedxcorrection, channel_values  ) );
 
   SG::ReadCondHandle<CondAttrListCollection> readValHandle{m_ValReadKey};
   const CondAttrListCollection* attrListColl{*readValHandle};
   if(attrListColl==nullptr) {
       ATH_MSG_ERROR(" Problem reading TRT/Calib/ToT/ToTValue cond object");
-      delete Dedxcorrection;
       return StatusCode::FAILURE;
   }
-  if(StatusCode::SUCCESS != update2( *Dedxcorrection, attrListColl  )) {
-     ATH_MSG_ERROR ("Problem filling Dedxcorrection.");
-     delete Dedxcorrection;
-     return StatusCode::FAILURE;     
-  }
+  ATH_CHECK( update2( *Dedxcorrection, attrListColl  ) );
 
  
   //__________ Assign range of Dedxcorrection to that of the ReadHandle___________ 
@@ -94,16 +84,14 @@ StatusCode TRTToTCondAlg::execute()
 
   if(!readVecHandle.range(rangeW)) {
         ATH_MSG_ERROR("Failed to retrieve validity range for " << readVecHandle.key());
-        delete Dedxcorrection;
         return StatusCode::FAILURE;
   }
 
   // Record  CDO
-  if(writeHandle.record(rangeW,Dedxcorrection).isFailure()) {
+  if(writeHandle.record(rangeW,std::move(Dedxcorrection)).isFailure()) {
     ATH_MSG_ERROR("Could not record " << writeHandle.key() 
 		  << " with EventRange " << rangeW
 		  << " into Conditions Store");
-    delete Dedxcorrection;
     return StatusCode::FAILURE;
   }
 

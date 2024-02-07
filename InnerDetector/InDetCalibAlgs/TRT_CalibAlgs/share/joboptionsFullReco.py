@@ -220,20 +220,20 @@ ServiceMgr += TRTStrawNeighbourSvc
 from TRT_CalibTools.TRT_CalibToolsConf import FitTool
 TRTCalFitTool = FitTool (name = 'TRTCalFitTool')
 ToolSvc += TRTCalFitTool
-print(TRTCalFitTool)
+print      TRTCalFitTool
 
 
 from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
 TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 
 ToolSvc += TRTCondStream
-print(TRTCondStream)
+print TRTCondStream
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTrkInfo 
 FillAlignTrkInfo = FillAlignTrkInfo ( name = 'FillAlignTrkInfo',
                                       TrackSummaryTool = InDetTrackSummaryTool)
 ToolSvc += FillAlignTrkInfo
-print(FillAlignTrkInfo)
+print      FillAlignTrkInfo
 
 from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_CalDbTool
 InDetCalDbTool=TRT_CalDbTool(name = "TRT_CalDbTool")
@@ -250,7 +250,7 @@ InDetTRT_DriftFunctionTool = TRT_DriftFunctionTool(name = "InDetTRT_DriftFunctio
                                                    IsMC=(globalflags.DataSource == 'geant4'))
 
 ToolSvc += InDetTRT_DriftFunctionTool
-print(InDetTRT_DriftFunctionTool)
+print InDetTRT_DriftFunctionTool
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTRTHits 
 FillAlignTRTHits = FillAlignTRTHits (   name = 'FillAlignTRTHits',
@@ -260,11 +260,11 @@ FillAlignTRTHits = FillAlignTRTHits (   name = 'FillAlignTRTHits',
                                       TRTStrawSummaryTool = InDetStrawSummaryTool)
 
 ToolSvc += FillAlignTRTHits
-print(FillAlignTRTHits)
+print      FillAlignTRTHits
 
 ToolSvc.InDetTRT_DriftCircleTool.useDriftTimeToTCorrection      = True
 ToolSvc.InDetTRT_DriftCircleTool.useDriftTimeHTCorrection       = True
-print(ToolSvc.InDetTRT_DriftCircleTool)
+print ToolSvc.InDetTRT_DriftCircleTool
 
 
 
@@ -289,7 +289,7 @@ TRTTrackSelectorTool = InDet__InDetDetailedTrackSelectorTool(name = "InDetDetail
 
 ToolSvc += TRTTrackSelectorTool
 if (InDetFlags.doPrintConfigurables()):
-        print(TRTTrackSelectorTool)
+        print TRTTrackSelectorTool
 
 
 
@@ -304,7 +304,7 @@ CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr
                                        FitTools            = [ TRTCalFitTool] )
 
 topSequence += CosmicsTRTCalibMgr
-print(CosmicsTRTCalibMgr)
+print CosmicsTRTCalibMgr
 
 #from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTCondWrite
 #TRTCondWrite = TRTCondWrite( name = "TRTCondWrite")
@@ -320,5 +320,5 @@ TRT_StrawStatus = InDet__TRT_StrawStatus(       name                    = "TRT_S
                                                 tracksCollection        = "CombinedInDetTracks"                                          
                                                )
 topSequence += TRT_StrawStatus
-print(TRT_StrawStatus)
+print TRT_StrawStatus
 
