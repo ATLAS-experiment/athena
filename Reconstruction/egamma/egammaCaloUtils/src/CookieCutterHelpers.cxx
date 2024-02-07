@@ -28,6 +28,14 @@ findCentralPositionEM2(const std::vector<const xAOD::CaloCluster*>& clusters)
         cp.phiEC = cluster->phimax(CaloSampling::EME2);
       }
     }
+    if (cluster->hasSampling(CaloSampling::FCAL0)) {
+      const float thisEmax = cluster->energy_max(CaloSampling::FCAL0);
+      if (thisEmax > cp.emaxF) {
+        cp.emaxF = thisEmax;
+        cp.etaF = cluster->etamax(CaloSampling::FCAL0);
+        cp.phiF = cluster->phimax(CaloSampling::FCAL0);
+      }
+    }
   }
   return cp;
 }
