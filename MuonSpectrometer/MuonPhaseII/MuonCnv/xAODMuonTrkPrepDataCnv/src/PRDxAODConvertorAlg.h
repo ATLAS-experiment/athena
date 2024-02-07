@@ -21,6 +21,8 @@
 #include "xAODMuonPrepData/TgcStripContainer.h"
 #include "xAODMuonPrepData/MMClusterContainer.h"
 #include "xAODMuonPrepData/sTgcStripContainer.h"
+#include "xAODMuonPrepData/sTgcWireContainer.h"
+#include "xAODMuonPrepData/sTgcPadContainer.h"
 
 
 namespace Muon {
@@ -50,7 +52,9 @@ class PRDxAODConvertorAlg : public AthReentrantAlgorithm {
   SG::WriteHandleKey<xAOD::RpcStripContainer>         m_rpcxAODKey  {this, "RpcxAODKey", "RPC_PrepData"};
   SG::WriteHandleKey<xAOD::TgcStripContainer>         m_tgcxAODKey  {this, "TgcxAODKey", "TGC_PrepData"};
   SG::WriteHandleKey<xAOD::MMClusterContainer>        m_mmxAODKey   {this, "MMxAODKey", "MM_PrepData"};
-  SG::WriteHandleKey<xAOD::sTgcStripContainer>        m_stgcxAODKey {this, "sTgcxAODKey", "sTGC_PrepData"};
+  SG::WriteHandleKey<xAOD::sTgcStripContainer>        m_stgcStripxAODKey {this, "sTgcStripxAODKey", "sTGC_StripPrepData"};
+  SG::WriteHandleKey<xAOD::sTgcWireContainer>         m_stgcWirexAODKey {this, "sTgcWirexAODKey", "sTGC_WirePrepData"};
+  SG::WriteHandleKey<xAOD::sTgcPadContainer>          m_stgcPadxAODKey {this, "sTgcPadxAODKey", "sTGC_PadPrepData"};
 
   private:
 
@@ -61,7 +65,7 @@ class PRDxAODConvertorAlg : public AthReentrantAlgorithm {
                                  const SG::WriteHandleKey<OUTTYPE> &outKey, const EventContext&) const;
 
   template<class PRD, class xPRD>
-  void fillxPRD(const PRD& prd, xPRD& xprd) const;
+  bool fillxPRD(const PRD& prd, xPRD& xprd) const;
 };
 }  // namespace ActsTrk
 
