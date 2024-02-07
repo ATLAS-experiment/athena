@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "CxxUtils/checker_macros.h"
 
@@ -16,7 +16,7 @@
 using namespace Monitored;
 
 HistogramFactory::HistogramFactory(const ServiceHandle<ITHistSvc>& histSvc,
-                                   std::string histoPath)
+                                   const std::string& histoPath)
 : m_histSvc(histSvc)
 {
   size_t whereToStart = 0;

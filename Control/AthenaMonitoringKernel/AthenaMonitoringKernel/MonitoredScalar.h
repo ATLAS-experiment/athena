@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_MonitoredScalar_h
@@ -88,6 +88,7 @@ namespace Monitored {
     Scalar(Scalar const&) = delete;
 
     Scalar& operator=(Scalar const&) = delete;
+    // cppcheck-suppress passedByValue
     T operator=(T value)
     {
       m_value = value;
