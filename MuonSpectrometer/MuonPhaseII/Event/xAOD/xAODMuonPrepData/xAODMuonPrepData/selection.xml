@@ -1,4 +1,4 @@
-<!-- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration -->
+<!-- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
     <!-- Mdt Drift Circle -->
     <class name="xAOD::MdtDriftCircle_v1" />
@@ -22,7 +22,7 @@
            id="BF3DD4C7-A81D-44B1-91FB-1FE5C06908D2" />
     <typedef name = "xAOD::RpcStripAuxContainer" />
 
-        <!-- Tgc Strip -->
+    <!-- Tgc Strip -->
     <class name="xAOD::TgcStrip_v1" />
     <class name="xAOD::TgcStripContainer_v1"
            id="B5AC3FAC-DA4B-4F18-BC47-13B7731016E8" />
@@ -33,15 +33,42 @@
            id="D815081F-936D-4D4B-BC61-D060886C9725" />
     <typedef name = "xAOD::TgcStripAuxContainer" />
 
-            <!-- MM Cluster -->
+     <!-- MM Cluster -->
     <class name="xAOD::MMCluster_v1" />
     <class name="xAOD::MMClusterContainer_v1"
            id="C8ED2C42-FE97-4C67-BFBC-69A272A9A6D6" />
     <typedef name="xAOD::MMCluster" />
-    <typedef name="xAOD::MMClusterContainer" />
-    
+    <typedef name="xAOD::MMClusterContainer" />    
     <class name="xAOD::MMClusterAuxContainer_v1"
            id="E7DDF5FA-9999-4497-A1F1-DAFC7D4D7A32" />
     <typedef name = "xAOD::MMClusterAuxContainer" />
+    <!-- Stgc strip-->
+    <class name="xAOD::sTgcStripCluster_v1" />
+    <class name="xAOD::sTgcStripContainer_v1"
+            id="B6801F5D-1E96-4B6D-A36E-3EEC436AFAFF" />
+     <typedef name="xAOD::sTgcStripCluster" />
+     <typedef name="xAOD::sTgcStripContainer" />
+     <class name="xAOD::sTgcStripAuxContainer_v1" 
+            id="FD61C981-1F7B-4C29-92CA-0AB756A38E61" />
+     <typedef name="xAOD::sTgcStripAuxContainer" />
+     <!-- Stgc wire -->
+     <class name="xAOD::sTgcWireHit_v1" />
+     <class name="xAOD::sTgcWireContainer_v1" 
+              id="22668EAD-FFC5-4DB0-8A30-DBE64EF1C1E7" />
+      <typedef name="xAOD::sTgcWireHit" />
+      <typedef name="xAOD::sTgcWireContainer" />
+      <class name="xAOD::sTgcWireAuxContainer_v1"
+              id="B464162B-971D-4D0E-A439-D14FFC14A85C" />
+      <typedef name="xAOD::sTgcWireAuxContainer" />
+      <!-- Stgc pad -->
+     <class name="xAOD::sTgcPadHit_v1" />
+     <class name="xAOD::sTgcPadContainer_v1" 
+              id="2691143C-4EA0-4B28-AB01-2E62B3D09DB3" />
+      <typedef name="xAOD::sTgcPadHit" />
+      <typedef name="xAOD::sTgcPadContainer" />
+      <class name="xAOD::sTgcPadAuxContainer_v1"
+              id="7F62C588-0EF3-4E4B-BEC5-4881D7E24D72" />
+      <typedef name="xAOD::sTgcPadAuxContainer" />
+      
 
 </lcgdict>
