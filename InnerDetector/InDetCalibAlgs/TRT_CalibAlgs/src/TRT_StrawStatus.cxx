@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -25,7 +25,6 @@
 #include "TRT_ConditionsServices/ITRT_DCS_ConditionsSvc.h"
 
 #include "VxVertex/VxContainer.h"
-
 #include "TRT_TrackHoleSearch/TRTTrackHoleSearchTool.h"
 #include "TrkParameters/TrackParameters.h"
 
@@ -139,16 +138,21 @@ StatusCode InDet::TRT_StrawStatus::execute(){
 
     //================ Event selection
 
-    SG::ReadHandle<VxContainer> vxContainer(m_vxContainerKey);
-    if (not vxContainer.isValid()) {
-      ATH_MSG_ERROR( "vertex container missing!" );
-      sc = StatusCode::FAILURE;
-    } else {
-        int countVertices(0);
-        for (VxContainer::const_iterator it = vxContainer->begin() ; it != vxContainer->end() ; ++it ) {
-            if ( (*it)->vxTrackAtVertex()->size() >= 3 ) countVertices++;
+    SG::ReadHandle<xAOD::VertexContainer> vertices(m_vxContainerKey);
+    if (not vertices.isValid()) {
+       ATH_MSG_WARNING ("Couldn't retrieve VertexContainer with key: PrimaryVertices");
+       return StatusCode::SUCCESS;   // just skip to next event in case of no vertexcontainer
+    }
+
+    int countVertices(0);
+    for (const xAOD::Vertex* vx : *(vertices.cptr()) ) {
+        if (vx->vertexType() == xAOD::VxType::PriVtx) {
+           if ( vx-> nTrackParticles() >= 3) countVertices++;
         }
-        if (countVertices < 1)  return StatusCode::FAILURE;
+    }
+    if (countVertices < 1) {
+       ATH_MSG_INFO( "no vertices with at least 3 tracks found" );
+       return StatusCode::SUCCESS;
     }
 
     if (m_skipBusyEvents) { // cosmic running
@@ -184,11 +188,11 @@ StatusCode InDet::TRT_StrawStatus::execute(){
         if ( not perigee  ) { ATH_MSG_ERROR( "Trk::Perigee missing" ); continue; }
         if ( std::abs(perigee->pT())/CLHEP::GeV < 1. ) continue; // 1 GeV pT cut
 
-        const Trk::TrackStates* trackStates = (**trackIt).trackStateOnSurfaces();
+        const DataVector<const Trk::TrackStateOnSurface>* trackStates = (**trackIt).trackStateOnSurfaces();
         if ( not trackStates  ) { ATH_MSG_ERROR( "Trk::TrackStateOnSurface empty" ); continue; }
 
         int n_pixel_hits(0), n_sct_hits(0), n_trt_hits(0);  // count hits, require minimal number of all hits
-        for ( Trk::TrackStates::const_iterator trackStatesIt = trackStates->begin(); trackStatesIt != trackStates->end(); ++trackStatesIt ) {
+        for ( DataVector<const Trk::TrackStateOnSurface>::const_iterator trackStatesIt = trackStates->begin(); trackStatesIt != trackStates->end(); ++trackStatesIt ) {
             if ( *trackStatesIt == nullptr ) { ATH_MSG_ERROR( "*trackStatesIt == 0" ); continue; }
 
             if ( !((*trackStatesIt)->type(Trk::TrackStateOnSurface::Measurement)) ) continue; // this skips outliers
@@ -203,7 +207,7 @@ StatusCode InDet::TRT_StrawStatus::execute(){
 
         //=== loop over all hits on track, accumulate them
 
-        for ( Trk::TrackStates::const_iterator trackStatesIt = trackStates->begin(); trackStatesIt != trackStates->end(); ++trackStatesIt ) {
+        for ( DataVector<const Trk::TrackStateOnSurface>::const_iterator trackStatesIt = trackStates->begin(); trackStatesIt != trackStates->end(); ++trackStatesIt ) {
 
             if ( *trackStatesIt == nullptr ) { ATH_MSG_ERROR( "*trackStatesIt == 0" ); continue; }
 
@@ -290,6 +294,8 @@ StatusCode InDet::TRT_StrawStatus::execute(){
     //================ End loop over all hits
 
     //===== searching for HV lines with voltage < 1490 V
+    /*
+    // FIX ME The DCS folders need to be loaded for this code to work.
     if (lumiBlock0 != last_lumiBlock0){
         float theValue;
         int chanNum;
@@ -314,6 +320,7 @@ StatusCode InDet::TRT_StrawStatus::execute(){
         //~scc;//for compatibility with Rel 17
         fclose(fmapping);
     }
+    */
 
     m_nEvents++;
     last_lumiBlock0 = lumiBlock0;
