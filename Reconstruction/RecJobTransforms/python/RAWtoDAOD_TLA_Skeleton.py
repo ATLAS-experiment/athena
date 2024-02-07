@@ -13,8 +13,6 @@ def configureFlags(runArgs):
     flags = initConfigFlags()
     from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
     commonRunArgsToFlags(runArgs, flags)
-    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
-    recoRunArgsToFlags(runArgs, flags)
 
     # Input
     if hasattr(runArgs, 'inputBSFile'):
@@ -39,6 +37,9 @@ def configureFlags(runArgs):
             'sTGC', 'MM',
             'Lucid', 'ZDC', 'ALFA', 'AFP',
         ]
+
+    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
+    recoRunArgsToFlags(runArgs, flags)
 
     # Set non-default flags 
     flags.Trigger.doLVL1=False
