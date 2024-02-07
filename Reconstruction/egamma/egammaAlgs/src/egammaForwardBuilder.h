@@ -163,11 +163,20 @@ private:
     "Size of maximum search window in phi"
   };
 
+  /** @brief Size of cone to cookie cut on FCal. */
+  Gaudi::Property<float> m_maxDelR{
+    this,
+    "MaxWindowDelR",
+    0.3,
+    "Cone size to collect cells around hottest-cell FCAL"
+  };
+
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
   mutable Gaudi::Accumulators::Counter<> m_MatchedClusters {};
 
   float m_maxDelEta {};
   float m_maxDelPhi {};
+  float m_maxDelR2 {};
 
 protected:
   /** Handle to the selectors. */

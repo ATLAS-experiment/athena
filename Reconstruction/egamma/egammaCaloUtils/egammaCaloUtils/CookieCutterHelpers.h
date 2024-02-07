@@ -19,6 +19,9 @@ struct CentralPosition
   float etaEC = 999;
   float phiEC = 999;
   float emaxEC = -999 * Gaudi::Units::GeV;
+  float etaF = 999;
+  float phiF = 999;
+  float emaxF = -999 * Gaudi::Units::GeV;
 };
 
 struct PhiSize
