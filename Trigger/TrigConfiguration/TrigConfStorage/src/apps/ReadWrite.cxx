@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////
@@ -328,11 +328,11 @@ JobConfig::PrintSetup(std::ostream & log, std::ostream& (*lineend) ( std::ostrea
    log << lineend;
    log << "----------" << lineend;
    log << "   Input               : ";
-   for(string s: inpar) log << s << ", ";
+   for(const string& s: inpar) log << s << ", ";
    log << lineend;
    if( input2 != UNDEF ) {
       log << "   Input for comparison: ";
-      for(string s: inpar2) log << s << ", ";
+      for(const string& s: inpar2) log << s << ", ";
       log << lineend;
    }
    if( output != UNDEF ) {
