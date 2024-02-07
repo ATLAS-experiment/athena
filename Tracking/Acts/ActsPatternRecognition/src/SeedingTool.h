@@ -111,6 +111,7 @@ namespace ActsTrk {
       "phi max for space point grid formation"};
     Gaudi::Property< int > m_phiBinDeflectionCoverage {this, "phiBinDeflectionCoverage", 3,
       "sets of consecutive phi bins to cover full deflection of minimum pT particle"};
+    Gaudi::Property< int > m_maxPhiBins {this, "maxPhiBins", 200, "max number of bins"};
 
     // Properties to set SeedfinderConfig
     Gaudi::Property< float > m_rMax {this, "rMax", 320. * Acts::UnitConstants::mm,
