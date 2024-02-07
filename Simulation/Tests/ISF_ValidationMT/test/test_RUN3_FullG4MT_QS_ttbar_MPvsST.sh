@@ -18,6 +18,7 @@
 export ATHENA_CORE_NUMBER=8
 
 Sim_tf.py \
+    --CA \
     --multiprocess \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.MP.HITS.pool.root" \
@@ -25,21 +26,9 @@ Sim_tf.py \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
-    --imf False \
-    --athenaopts '"--config-only=ConfigSimMP.pkl"'
-
-Sim_tf.py \
-    --multiprocess \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
-    --outputHITSFile "test.MP.HITS.pool.root" \
-    --maxEvents 50 \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
+    --postExec 'with open("ConfigSimMP.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
 rc=$?
@@ -50,26 +39,16 @@ status=$rc
 rc2=-9999
 unset ATHENA_CORE_NUMBER
 Sim_tf.py \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
-    --outputHITSFile "test.MP.HITS.pool.root" \
-    --maxEvents 50 \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
-    --imf False \
-    --athenaopts '"--config-only=ConfigSimST.pkl"'
-
-Sim_tf.py \
+    --CA \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "temp.ST.HITS.pool.root" \
     --maxEvents 50 \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
+    --postExec 'with open("ConfigSimST.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
 mv log.EVNTtoHITS log.EVNTtoHITS.ST
@@ -85,7 +64,7 @@ if [ $rc2 -eq 0 ]
 then
     rm PoolFileCatalog.xml
     # Run a dummy merge on the full hits file to deal with lossy compression:
-    HITSMerge_tf.py --inputHITSFile 'temp.ST.HITS.pool.root' --outputHITS_MRGFile 'test.ST.HITS.pool.root'
+    HITSMerge_tf.py --CA --inputHITSFile 'temp.ST.HITS.pool.root' --outputHITS_MRGFile 'test.ST.HITS.pool.root'
     rc3=$?
     status=$rc3
 fi

@@ -19,10 +19,11 @@ then
     echo "skipping initial-simOLD step"
 else
     Sim_tf.py \
+        --CA \
         --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
         --simulator 'FullG4MT' \
-        --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'EVNTtoHITS:Campaigns/MC21SimulationMultipleIoV.py' \
+        --postInclude 'default:PyJobTransforms.UseFrontier' \
+        --preInclude 'EVNTtoHITS:Campaigns.MC21SimulationMultipleIoV' \
         --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
         --inputEVNTFile $INPUTEVNTFILE \
         --outputHITSFile "original.HITS.pool.root" \
@@ -59,63 +60,17 @@ fi
 echo "art-result: $rc1 resimCA"
 
 rc2=-9999
-if [ $rc -eq 0 ]
-then
-    ReSim_tf.py \
-        --conditionsTag 'ReSim:OFLCOND-MC21-SDR-RUN3-05' \
-        --simulator 'FullG4MT_QS' \
-        --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'ReSim:Campaigns/MC21SimulationNoIoV.py' \
-        --geometryVersion 'ReSim:ATLAS-R3S-2021-03-00-00' \
-        --inputHITSFile "original.HITS.pool.root" \
-        --outputHITS_RSMFile "resim.CA.HITS.pool.root" \
-        --maxEvents $MAXEVENTS \
-        --imf False \
-        --athenaopts '"--config-only=ConfigReSimCG.pkl"'
-
-    ReSim_tf.py \
-        --conditionsTag 'ReSim:OFLCOND-MC21-SDR-RUN3-05' \
-        --simulator 'FullG4MT_QS' \
-        --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'ReSim:Campaigns/MC21SimulationNoIoV.py' \
-        --geometryVersion 'ReSim:ATLAS-R3S-2021-03-00-00' \
-        --inputHITSFile "original.HITS.pool.root" \
-        --outputHITS_RSMFile "resim.CG.HITS.pool.root" \
-        --maxEvents $MAXEVENTS \
-        --imf False
-
-    rc2=$?
-    status=$rc2
-    mv log.ReSim log.ReSim.CG
-fi
-echo "art-result: $rc2 resimOLD"
-
-rc3=-9999
-if [ $status -eq 0 ]
-then
-  # Compare the outputs
-  acmd.py diff-root resim.CG.HITS.pool.root resim.CA.HITS.pool.root \
-    --error-mode resilient \
-    --mode semi-detailed \
-    --order-trees
-  rc3=$?
-  status=$rc3
-fi
-
-echo "art-result: $rc3 OLDvsCA"
-
-rc4=-9999
-if [ $rc2 -eq 0 ]
+if [ $rc1 -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --mode=semi-detailed --diff-root --file=resim.CG.HITS.pool.root
-    rc4=$?
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --mode=semi-detailed --diff-root --file=resim.CA.HITS.pool.root
+    rc2=$?
     if [ $status -eq 0 ]
     then
-        status=$rc4
+        status=$rc2
     fi
 fi
-echo  "art-result: $rc4 regression"
+echo  "art-result: $rc2 regression"
 
 exit $status

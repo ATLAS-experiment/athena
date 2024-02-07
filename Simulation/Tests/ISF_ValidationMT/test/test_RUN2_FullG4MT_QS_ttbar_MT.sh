@@ -37,66 +37,17 @@ echo  "art-result: $rc simCA"
 status=$rc
 
 rc2=-9999
-Sim_tf.py \
-    --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \
-    --DataRunNumber 284500 \
-    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/EVNT/mc15_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e6337/EVNT.12458444._006026.pool.root.1" \
-    --outputHITSFile "test.CA.HITS.pool.root" \
-    --maxEvents 50 \
-    --imf False \
-    --athenaopts '"--config-only=ConfigSimCG.pkl"'
-
-Sim_tf.py \
-    --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \
-    --DataRunNumber 284500 \
-    --geometryVersion 'default:ATLAS-R2-2016-01-02-01' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc20/EVNT/mc15_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.evgen.EVNT.e6337/EVNT.12458444._006026.pool.root.1" \
-    --outputHITSFile "test.CG.HITS.pool.root" \
-    --maxEvents 50 \
-    --imf False
-
-rc2=$?
-mv log.EVNTtoHITS log.EVNTtoHITS.CG
-echo "art-result: $rc2 simOLD"
-if [ $status -eq 0 ]
-then
-    status=$rc2
-fi
-
-rc3=-9999
-if [ $status -eq 0 ]
-then
-    # Compare the outputs
-    acmd.py diff-root test.CG.HITS.pool.root test.CA.HITS.pool.root \
-        --error-mode resilient \
-        --mode semi-detailed \
-        --order-trees
-    rc3=$?
-    status=$rc3
-fi
-echo "art-result: $rc3 OLDvsCA"
-
-rc4=-9999
-if [ $rc2 -eq 0 ]
+if [ $rc -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --mode=semi-detailed --diff-root --file=test.CG.HITS.pool.root
-    rc4=$?
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --mode=semi-detailed --diff-root --file=test.CA.HITS.pool.root
+    rc2=$?
     if [ $status -eq 0 ]
     then
-        status=$rc4
+        status=$rc2
     fi
 fi
-echo  "art-result: $rc4 regression"
+echo  "art-result: $rc2 regression"
 
 exit $status
