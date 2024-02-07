@@ -95,6 +95,43 @@ def SCTLorentzMonAlgConfig(flags):
                                            path="lorentz", # path cannot be "".
                                            xbins=360, xmin=-90., xmax=90.)
 
+                myMonGroup.defineHistogram(varname=xVar+","+yVar+";"+histName + "_e0p5", # ; means alias
+                                           type="TProfile",
+                                           title=histTitle+"(|#eta| < 0.5);#phi to Wafer;Num of Strips",
+                                           path="lorentz", # path cannot be "".
+                                           xbins=360, xmin=-90., xmax=90.,
+                                           cutmask="isCentral")
+    nEndcaps = 2
+    nDisks = 9
+    nSides = 2 # 0: Side 0, 1: Side 1
+    nEta = 3 # outer, middle, inner
+    endcapNames = ["ECA", "ECC"]
+    etaNames = ["outer", "middle", "inner"]
+    sideNames = ["_0", "_1"]
+    for e in range(nEndcaps):
+        for d in range(nDisks):
+            for iEta in range(nEta):
+                sensorType = "HPK"
+                if ((d == 1 and iEta == 1) or 
+                    (d == 3 and iEta == 1) or
+                    (d == 4 and iEta >= 1) or
+                    (d == 5 and iEta == 2) or
+                    (d == 7 and iEta == 1)):
+                    sensorType = "CiS"
+                elif (d == 2 and iEta == 1):
+                    sensorType = "Both"
+                    
+                for side in range(nSides):
+                    xVar = "phiToWafer_"+endcapNames[e]+str(d)+"_"+etaNames[iEta]+sideNames[side]
+                    yVar = "nStrip_"+endcapNames[e]+str(d)+"_"+etaNames[iEta]+sideNames[side]
+                    histTitle = "111 (" + sensorType + ") - Inc. Angle vs nStrips for " + endcapNames[e] + " Disk Eta Side"+str(d)+str(iEta)+str(side)
+                    histName = "h_phiVsNstrips_"+endcapNames[e]+str(d)+"_"+etaNames[iEta]+"_Side"+str(side)
+                    myMonGroup.defineHistogram(varname=xVar+","+yVar+";"+histName, # ; means alias
+                                               type="TProfile",
+                                               title=histTitle+";#phi to Wafer;Num of Strips",
+                                               path="lorentz", # path cannot be "".
+                                               xbins=360, xmin=-90., xmax=90.)
+
     ### STEP 6 ###
     # Finalize. The return value should be a tuple of the ComponentAccumulator
     # and the sequence containing the created algorithms. If we haven't called
