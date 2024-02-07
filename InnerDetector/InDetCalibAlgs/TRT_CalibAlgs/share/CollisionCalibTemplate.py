@@ -232,27 +232,27 @@ InDetStrawSummaryTool=TRT_StrawStatusSummaryTool(name = "TRT_StrawStatusSummaryT
 from TRT_CalibTools.TRT_CalibToolsConf import FitTool
 TRTCalFitTool = FitTool (name = 'TRTCalFitTool')
 ToolSvc += TRTCalFitTool
-print      (TRTCalFitTool)
+print      TRTCalFitTool
 
 from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
 TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 
 ToolSvc += TRTCondStream
-print (TRTCondStream)
+print TRTCondStream
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTrkInfo 
 FillAlignTrkInfo = FillAlignTrkInfo ( name = 'FillAlignTrkInfo',
                                       TrackSummaryTool = InDetTrackSummaryTool)
 
 ToolSvc += FillAlignTrkInfo
-print      (FillAlignTrkInfo)
+print      FillAlignTrkInfo
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTRTHits 
 FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
                                       TRTCalDbTool = InDetCalDbTool,
                                       TRTStrawSummaryTool = InDetStrawSummaryTool)
 ToolSvc += FillAlignTRTHits
-print      (FillAlignTRTHits)
+print      FillAlignTRTHits
 
 from TRT_CalibTools.TRT_CalibToolsConf import TRTCalibrator 
 TRTCalibrator = TRTCalibrator ( name = 'TRTCalibrator',
@@ -285,7 +285,33 @@ TRTCalibrator = TRTCalibrator ( name = 'TRTCalibrator',
                                 TRTStrawSummaryTool = InDetStrawSummaryTool)
 
 ToolSvc += TRTCalibrator
-print     (TRTCalibrator)
+print      TRTCalibrator
+
+# select good quality tracks
+#from TRT_AlignAlgs.TRT_AlignAlgsConf import TRTTrackSelectionAlg
+#SelectTRTAlignTracks = TRTTrackSelectionAlg( name = "SelectTRTAlignTracks",
+#                                             DoPtCut = False,
+#                                             D0Max = 10000,
+#                                             D0Min = -10000,
+#                                            # PtMin = 2000,
+#                                            # PtMax = 'inf',
+#                                             inputTrackList = "StandaloneTRTTracks",
+#                                             UseCosmicTrackSelection = True,
+#                                             MinEventPhase = -1000,
+#                                             MaxEventPhase = 1000,
+#                                             outputTrackList = "TRTCalibTracks",
+#                                             SummaryTool = InDetTrackSummaryTool,
+#                                             MaxChisqPerDof = 3, #50.,
+#                                             MinPixelHits = -1000,
+#                                             MinSCTHits = -1000,
+#                                             MinTRTHits = 45,
+#                                             EtaMin    = -1000,
+#                                             PhiMin    = -1000,
+#                                             EtaMax   = 1000,
+#                                             PhiMax   = 1000)
+
+#topSequence += SelectTRTAlignTracks
+#print          SelectTRTAlignTracks
 
 
 
@@ -309,23 +335,34 @@ TRTTrackSelectorTool = InDet__InDetDetailedTrackSelectorTool(name = "InDetDetail
 
 ToolSvc += TRTTrackSelectorTool
 if (InDetFlags.doPrintConfigurables()):
-        print (TRTTrackSelectorTool)
+        print TRTTrackSelectorTool
 
 
-#conddb.addFolderWithTag('TRT_OFL','/TRT/Calib/errors','TrtCalibErrors-ErrorVal-00-00')
+
+
+
+
+
+
+conddb.addFolderWithTag('TRT_OFL','/TRT/Calib/errors','TrtCalibErrors-ErrorVal-00-00')
                                         
 from TRT_CalibAlgs.TRT_CalibAlgsConf import TRTCalibrationMgr
 CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr',
                                        StreamTool          = TRTCondStream,
+				       Max_ntrk		   = 10000,
                                        TrackSelectorTool   = TRTTrackSelectorTool,
-                                        AlignTrkTools       = [ FillAlignTrkInfo, FillAlignTRTHits ],
+                                       TrkCollections      = [ 'TRTCalibTracks' ],
+                                       AlignTrkTools       = [ FillAlignTrkInfo, FillAlignTRTHits ],
                                        DoCalibrate         = True,
                                        TrackFitter         = InDetTrackFitter,
                                        FitTools            = [ TRTCalFitTool] )
 
 topSequence += CosmicsTRTCalibMgr
-print (CosmicsTRTCalibMgr)
+print CosmicsTRTCalibMgr
 
+from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTCondWrite
+TRTCondWrite = TRTCondWrite( name = "TRTCondWrite")
+topSequence+=TRTCondWrite 
 
 # DCS Data Folders
 if (globalflags.InputFormat() == 'bytestream' and globalflags.DataSource() == 'data'):
@@ -339,15 +376,13 @@ if (globalflags.InputFormat() == 'bytestream' and globalflags.DataSource() == 'd
 
     if not calibconstants=="":
         ostring+="""
-conddb.blockFolder("/TRT/Calib/RT" )
-conddb.blockFolder("/TRT/Calib/T0" )
-from AthenaCommon.AlgSequence import AthSequencer
-condSequence=AthSequencer('AthCondSeq')
-from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTCondWrite
-TRTCondWrite = TRTCondWrite( name = "TRTCondWrite",
-                                     CalibInputFile=calibconstants)
-condSequence+=TRTCondWrite 
+conddb.blockFolder("/TRT/Calib/RT" )   
+conddb.blockFolder("/TRT/Calib/T0" )  
+conddb.addFolderWithTag('TRT_OFL','/TRT/Calib/errors','TrtCalibErrors-00') 
 """
+
+    if not calibconstants=="":
+        ostring+='TRTCondWrite.CalibInputFile="%s"\n' % (calibconstants)
 
     return ostring
 

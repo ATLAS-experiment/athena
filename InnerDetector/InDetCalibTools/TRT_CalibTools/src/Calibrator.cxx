@@ -21,14 +21,13 @@ PURPOSE: Class for calibrating a TRT sub-level
 #include <TH1D.h>
 #include <TDirectory.h>
 #include <TF1.h>
-#include <TStyle.h>
 #include <TNtuple.h>
 #include <TGraphErrors.h>
+#include <TStyle.h>
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <cmath>
-
 
 caldata::caldata(){
   res = -999; 
@@ -126,10 +125,10 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
   m_d = -20.0;
   m_et = -20.0;
   m_ed = -20.0;
-  //  m_ff =  nullptr ;
+  m_ff =  nullptr ;
 
   
-  TH1D** hslizes = new TH1D*[npoints];
+  hslizes = new TH1D*[npoints];
   m_btype = new bintype[npoints];
   m_tv = new float[npoints];
   m_dv = new float[npoints];
@@ -149,10 +148,8 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
   if (pflag){
     TDirectory* binhistdir = dir->mkdir("binhist");
     binhistdir->cd();
-    std::cout << " Calibrator::RtGraph: " << " Directory " << std::string(binhistdir->GetPath()) << " binlabel " << std::string(binlabel) << std::endl;
   }
 
-  std::cout << " Calibrator::RtGraph: " << " number of points " << npoints << " binvar " << binvar << std::endl;
   // check and classify the bin-histograms
   for (int i=0;i<npoints;i++) {
     
@@ -177,7 +174,6 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
       }
     }
     
-    if(m_maxval[i]==0) m_maxval[i]=1.0e-4;
     m_rightsig[i] = m_rightval[i]==0 ? 100 : std::sqrt(m_maxval[i])/m_maxval[i] + std::sqrt(m_rightval[i])/m_rightval[i];
     m_leftsig[i]  = m_leftval[i]==0 ? 100 : std::sqrt(m_maxval[i])/m_maxval[i] + std::sqrt(m_leftval[i])/m_leftval[i];
     
@@ -192,9 +188,7 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
         else m_btype[i]=HIGH;
       }
     }
-    int rtEntries = rtHist->GetEntries();
-    if(rtEntries==0) rtEntries=1;
-    printf("%s ... %8f %8i %4i %8f %8f %4i\n", m_chtit.data(), (float)hslizes[i]->GetEntries()/(float)rtEntries, (int)hslizes[i]->GetEntries(), m_maxbin[i], m_leftsig[i], m_rightsig[i], m_btype[i]);
+    printf("%s ... %8f %8i %4i %8f %8f %4i\n", m_chtit.data(), (float)hslizes[i]->GetEntries()/(float)rtHist->GetEntries(), (int)hslizes[i]->GetEntries(), m_maxbin[i], m_leftsig[i], m_rightsig[i], m_btype[i]);
   }
   
   float frmin=0,frmax=0;
@@ -206,9 +200,9 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
     if (m_btype[i]==GOOD) {frmin = hslizes[i]->GetBinCenter(m_maxbin[i]-3); frmax = hslizes[i]->GetBinCenter(m_maxbin[i]+3);}
     if (m_btype[i]==HIGH) {frmin = hslizes[i]->GetBinCenter(m_maxbin[i]-3); frmax = hslizes[i]->GetBinCenter(m_maxbin[i]+4);}
     
-    std::unique_ptr<TF1> ff(new  TF1("dtfitfunc","gaus"));
+    m_ff = new TF1("dtfitfunc","gaus");
     
-    ff->SetRange(frmin,frmax);
+    m_ff->SetRange(frmin,frmax);
 
     m_t = binvar==0 ? rtHist->GetXaxis()->GetBinCenter(i+1) : rtHist->GetYaxis()->GetBinCenter(i+1);
     m_et = binvar==0 ? rtHist->GetXaxis()->GetBinWidth(1)/std::sqrt(12.0) : rtHist->GetYaxis()->GetBinWidth(1)/std::sqrt(12.0);
@@ -227,13 +221,13 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
       m_d =  0;
       m_ed = 0;
     }
-    if (m_btype[i]==GOOD && hslizes[i]->GetEntries()>3){
+    if (m_btype[i]==GOOD){
       if (m_btype[i-1]==GOOD){
         fitresult=hslizes[i]->Fit("dtfitfunc","QR");
-        ff->SetRange(m_mean-1.0*ff->GetParameter(2), m_mean+1.0*ff->GetParameter(2));
+        m_ff->SetRange(m_mean-1.0*m_ff->GetParameter(2), m_mean+1.0*m_ff->GetParameter(2));
         fitresult=hslizes[i]->Fit("dtfitfunc","QR");
-        m_d =  ff->GetParameter(1);
-        m_ed = ff->GetParError(1);
+        m_d =  m_ff->GetParameter(1);
+        m_ed = m_ff->GetParError(1);
         std::cout << fitresult << " " << m_ed << std::endl;
       }
       else{
@@ -261,7 +255,6 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
 
     
     if(m_d>=m_mindistance && m_t<mintime) mintime = m_t; 
-
   }  
 
   rtgr = binvar==0 ? new TGraphErrors(m_ipoint,m_tv,m_dv,m_etv,m_edv) :  new TGraphErrors(m_ipoint,m_dv,m_tv,m_edv,m_etv);
@@ -280,12 +273,16 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
 
   dir->cd();
 
+
+
+
 }
 
 
 
 RtGraph::~RtGraph(){  
 
+ delete [] hslizes   ;
  delete [] m_btype     ;
  delete [] m_tv        ;
  delete [] m_dv        ;
@@ -431,22 +428,19 @@ Calibrator::~Calibrator(){
 
 int Calibrator::Simple1dHist(float min, float max, int nbins, float value){
   if ( (value<min) || (value>max) ) return -1;
-  if ( max-min == 0 ) return -1;
   int binno=(int)(nbins*((value-min)/(max-min)));
   return binno;
 }
 
 int Calibrator::Simple2dHist(float minx, float maxx, int nbinsx, float miny, float maxy, int nbinsy, float valuex, float valuey){
   if ( (valuex<minx) || (valuex>maxx) ||  (valuey<miny) || (valuey>maxy) ) return -1;
-  if(maxx-minx == 0 || maxy-miny==0) return -1;
   int binnox=(int)(nbinsx*((valuex-minx)/(maxx-minx)));
   int binnoy=(int)(nbinsy*((valuey-miny)/(maxy-miny)));
   return binnoy*nbinsx+binnox;
 }
 
 float Calibrator::AccumulativeMean(float n, float oldmean, float newvalue){
-  if((int)n==0) return oldmean;
-  return oldmean*((n-1)/n)+newvalue/n;
+    return oldmean*((n-1)/n)+newvalue/n;
 }
 
 bool Calibrator::HasKey(const std::string &key) const {
@@ -476,9 +470,7 @@ std::string Calibrator::PrintInfo(){
 }
 
 std::string Calibrator::PrintStat(){
-  int units = (int)data.size();
-  if(units==0) units++;
-  std::string info = std::string(Form("STATISTICS %16s: nunits=%8i, nhits=%9i, hits/unit=%11.1f", m_name.data(), units, m_nhits, (float)m_nhits/(float)units ));
+  std::string info = std::string(Form("STATISTICS %16s: nunits=%8i, nhits=%9i, hits/unit=%11.1f", m_name.data(), (int)data.size(), m_nhits, (float)m_nhits/(float)data.size() ));
   return info;
 }
 
@@ -605,15 +597,11 @@ float Calibrator::FitRt ATLAS_NOT_THREAD_SAFE (const std::string& key, const std
   }
   else { // else do a fit
     rtfunc->SetParameters(0.000000e+00, 6.269950e-02, -3.370054e-04, -1.244642e-07);
-    if(rtg->rtgr != nullptr) {
-      rtg->rtgr->Fit(rtfunc,"QR"); //fit Rt first time
-      for (int ipnt=0; ipnt<rtg->rtgr->GetN(); ipnt++){ //calculate m_t-error
-        float deriv = rtfunc->Derivative(rtg->rtgr->GetX()[ipnt]);
-        if(fabs(deriv)<1.0e-24) deriv=0.05;
-        rtg->rtgr->SetPointError(ipnt , rtg->rtgr->GetEY()[ipnt]/deriv , rtg->rtgr->GetEY()[ipnt]);
-      }
-      rtg->rtgr->Fit(rtfunc,"R"); //fit again
-      }
+    rtg->rtgr->Fit(rtfunc,"QR"); //fit Rt first time
+    for (int ipnt=0; ipnt<rtg->rtgr->GetN(); ipnt++){ //calculate m_t-errors
+      rtg->rtgr->SetPointError(ipnt , rtg->rtgr->GetEY()[ipnt]/rtfunc->Derivative(rtg->rtgr->GetX()[ipnt]) , rtg->rtgr->GetEY()[ipnt]);
+    }
+    rtg->rtgr->Fit(rtfunc,"QR"); //fit again
 
   }
   if (!bequiet)  rtg->rtgr->Write();
@@ -646,7 +634,6 @@ float Calibrator::FitRt ATLAS_NOT_THREAD_SAFE (const std::string& key, const std
     while (std::abs(residual) > precision) {
       
       drdt = rtpars[1]+tdrift*(2*rtpars[2]);
-      if(fabs(drdt)<1.0e-24) drdt=0.05;
       tdrift = tdrift + residual/drdt;
       
       driftradius = rtpars[0]+tdrift*(rtpars[1]+tdrift*(rtpars[2]));
@@ -779,6 +766,7 @@ float Calibrator::FitTimeResidual ATLAS_NOT_THREAD_SAFE (const std::string& key,
 float Calibrator::FitResidual ATLAS_NOT_THREAD_SAFE (const std::string& key, TH1F* resHist){ // Global gStyle is used.
 
   float mean = resHist->GetMean();
+  //float rms = resHist->GetRMS();
 
   resHist->Fit("gaus","QRI","",mean-0.3,mean+0.3);
   resHist->Fit("gaus","QRI","",resHist->GetFunction("gaus")->GetParameter(1) - 1.5*resHist->GetFunction("gaus")->GetParameter(2),resHist->GetFunction("gaus")->GetParameter(1) + 1.5*resHist->GetFunction("gaus")->GetParameter(2));
@@ -812,44 +800,34 @@ TDirectory* Calibrator::Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory* dir, std::s
   bool enough_t0 = data[key].ntres>=m_mint0stat;
   bool enough_rt = data[key].nrt>=m_minrtstat;
 
+  // TDirectory* newdir;
   if ((enough_rt && calrt) || (enough_t0 && calt0)) {   
     m_hdirs[key] = dir->mkdir(Form("%s%s",m_name.data(),key.data()));
     m_hdirs[key]->cd();
-    if(level<2) {
-      std::cout << " Calibrator::Calibrate Parent Directory: " << std::string(dir->GetPath()) << std::endl;
-      std::cout << " Calibrator::Calibrate key " << key << " name " << m_name << " entries for rt " << data[key].nrt << " min req " << m_minrtstat << std::endl;
-      std::cout << " Calibrator::Calibrate key " << key << " entries for t0 " << data[key].ntres << " min req " << m_mint0stat << std::endl; 
-      std::cout << " Calibrator::Calibrate Directory: " << std::string(m_hdirs[key]->GetPath()) << std::endl;
-    }
   }
   else m_hdirs[key]=dir;
+  
       
   //Fit also the residual if an rt or t0 calibration is made
-  if ((enough_rt && calrt) || (enough_t0 && calt0)) {    
+  if ((int)data[key].nres>50 && ((enough_rt && calrt) || (enough_t0 && calt0))) {    
 
     m_resHists[key] = new TH1F("residual","residual",m_nbinsres,m_minres,m_maxres);
-    int ncont=0;
     for (int i=0;i<100;i++) {
       m_resHists[key]->SetBinContent(i+1,data[key].reshist[i]);
-      ncont+=data[key].reshist[i];
     }
     m_resHists[key]->SetEntries((int)data[key].nres);
     if (bequiet) m_resHists[key]->SetDirectory(nullptr);                                 
-    if(ncont==0) { 
-      std::cout << "     No bin content   " << std::endl;
-    } else {
-      FitResidual(key,m_resHists[key]);
-    }
+    
+    FitResidual(key,m_resHists[key]);
 
   }
   
 
-  if (prnt) printf("Calibrator::calibrate %8s %-14s: \n",m_name.data(),key.data()); 
+  if (prnt) printf("TRTCalibrator: %8s %-14s: ",m_name.data(),key.data()); 
 
   //Calibrate r-m_t
   if (nort){
     //use old data
-    //std::cout << "     use old data " << std::endl;
     data[key].rtflag=true;
     data[key].rtt0=caldata_above->rtt0;
     data[key].rtgraph=caldata_above->rtgraph;
@@ -867,10 +845,8 @@ TDirectory* Calibrator::Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory* dir, std::s
         }
       }
       m_rtHists[key]->SetEntries(data[key].nrt);
-      if(level<2) std::cout << "   Calibrator::calibrate do rt fit for key " << key << " with number of entries " << m_rtHists[key]->GetEntries() << std::endl;
       if (bequiet) {
         m_rtHists[key]->SetDirectory(nullptr);
-	if(level<2) std::cout << " remove this level from calout.root file " << std::endl; 
       }
       data[key].rtt0=FitRt(key,opt,m_rtHists[key],m_hdirs[key]); //do the fit
       if (prnt) printf("RT    %7i (%8.1e) %8.1e %8.1e %8.1e, %3.2f  : ", data[key].nrt, data[key].rtpar[0], data[key].rtpar[1], data[key].rtpar[2], data[key]. rtpar[3], data[key].rtt0);     
@@ -888,24 +864,22 @@ TDirectory* Calibrator::Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory* dir, std::s
   //Calibrate t0
   if (not0){ 
     //use old data
-    //std::cout << "     use old data for T0 " std::endl;
     data[key].t0flag=true;
     data[key].t0=data[key].oldt02 + data[key].rtt0;
     data[key].t0err=0;
     data[key].t0off=0;
     data[key].t0fittype = 5;
-    if (prnt) printf("T0 << %7i  %05.2f%+05.2f%+05.2f=%05.2f \n", data[key].ntres, data[key].oldt02, 0.0, data[key].rtt0, data[key].t0);       
+    if (prnt) printf("T0 << %7i  %05.2f%+05.2f%+05.2f=%05.2f", data[key].ntres, data[key].oldt02, 0.0, data[key].rtt0, data[key].t0);       
   }
   else{
     if (useref && level==5){
       //use chip reference values 
-      //std::cout << "     use chip reference for T0 " << std::endl;
       data[key].t0flag=true;
       data[key].t0=caldata_above->t0 + data[key].reft0 + data[key].rtt0;
       data[key].t0err=caldata_above->t0err;
       data[key].t0off=data[key].t0-caldata_above->t0;
       data[key].t0fittype = 3;
-      if (prnt) printf("T0 ** %7i  %05.2f%+05.2f%+05.2f=%05.2f \n", data[key].ntres, caldata_above->t0, data[key].reft0, data[key].rtt0, data[key].t0); 
+      if (prnt) printf("T0 ** %7i  %05.2f%+05.2f%+05.2f=%05.2f", data[key].ntres, caldata_above->t0, data[key].reft0, data[key].rtt0, data[key].t0); 
     }
     else {
       //do fit
@@ -917,34 +891,31 @@ TDirectory* Calibrator::Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory* dir, std::s
           m_tresHists[key]->SetBinContent(i+1,data[key].m_treshist[i]);
         }
         m_tresHists[key]->SetEntries(data[key].ntres);
-	if(level<2) std::cout << " Calibrator::calibrate do t0 fit for key " << key << "  Numb. entries " << m_rtHists[key]->GetEntries() << std::endl; 
         if (bequiet) {
-          if(level<2) std::cout << " Calibrator::calibrate:  remove this level from calibout.root " << std::endl; 
           m_tresHists[key]->SetDirectory(nullptr);
         }      
 
         data[key].t0=data[key].oldt02 + FitTimeResidual(key,m_tresHists[key]) + data[key].rtt0 + m_t0shift; //do the fit and modify t0
         data[key].t0off=data[key].t0-caldata_above->t0; //calculate t0 offset from level above
         if (data[key].t0<0) data[key].t0=0;
-
-        if (prnt) printf("T0    %7i  %05.2f%+05.2f%+05.2f%+05.2f=%05.2f \n", data[key].ntres, data[key].oldt02, data[key].t0-data[key].oldt02-data[key].rtt0, data[key].rtt0, m_t0shift, data[key].t0); 
+        if (prnt) printf("T0    %7i  %05.2f%+05.2f%+05.2f%+05.2f=%05.2f", data[key].ntres, data[key].oldt02, data[key].t0-data[key].oldt02-data[key].rtt0, data[key].rtt0, m_t0shift, data[key].t0); 
 
 
       }
       //use data from level above
       else { 
-	//std::cout << "     use data from the level above " << std::endl;
-        //TEMP FIX to not destroy right T0s
+        //TEMP FIX to dont destroy right T0s
         if (data[key].oldt02 + (caldata_above->t0 - caldata_above->oldt02)  >0)    data[key].t0=data[key].oldt02 + (caldata_above->t0 - caldata_above->oldt02);
         else data[key].t0= 0;
-        //TEMP FIX to not destroy right T0s
+        //TEMP FIX to dont destroy right T0s
        
       //add the short straw correction here. In this way, the shift is only done when contants at STRAW level come from level above.
         if ((level == 6 && useshortstw) && std::abs(data[key].det)<2  && (data[key].lay==0 && data[key].stl<9) )         data[key].t0=caldata_above->t0-0.75; 
         data[key].t0err=caldata_above->t0err;
         data[key].t0off=data[key].t0-caldata_above->t0 + data[key].rtt0;
         data[key].t0fittype = 4;
-      if (prnt) printf("T0 /\\ %7i  %05.2f%+05.2f%+05.2f=%05.2f \n", data[key].ntres, caldata_above->t0, caldata_above->oldt02, data[key].oldt02 ,  data[key].t0); 
+//      if (prnt) printf("T0 /\\ %7i  %05.2f%+05.2f%+05.2f=%05.2f", data[key].ntres, caldata_above->t0, 0.0, 0.0, data[key].t0); 
+      if (prnt) printf("T0 /\\ %7i  %05.2f%+05.2f%+05.2f=%05.2f", data[key].ntres, caldata_above->t0, caldata_above->oldt02, data[key].oldt02 ,  data[key].t0); 
       }
     }
   }
@@ -953,6 +924,7 @@ TDirectory* Calibrator::Calibrate ATLAS_NOT_THREAD_SAFE (TDirectory* dir, std::s
   if (prnt && !bequiet) std::cout << " H";
 
   if (prnt) std::cout << std::endl;
+
 
   return m_hdirs[key];
 
@@ -1015,7 +987,6 @@ int Calibrator::AddHit(const std::string& key, const databundle & d, int* binhis
     else { //if it is a histogram
 
       npop=binhist[0]; //the number of populated (non-zero) bins
-      if(level<2) std::cout << " Calibrator::AddHit called for key " << key << " add histogram with "<< npop << " non-zero bins " << std::endl;
       
       for(int ipop=2;ipop<2*npop+2;ipop=ipop+2) { //loop over the data
 
@@ -1082,7 +1053,6 @@ int Calibrator::AddHit(const std::string& key, const databundle & d, int* binhis
     hist->t0flag=false;
     hist->calflag=false;
 
-    
 
     for (unsigned int i =0; i < 4; i++){
       hist->rtpar[i]=-10.0;
@@ -1090,18 +1060,14 @@ int Calibrator::AddHit(const std::string& key, const databundle & d, int* binhis
 
     data[key]=*hist; //save the histogram in the map 
 
-
+    delete hist;
 
     data[key].oldt02 = AccumulativeMean(data[key].nhits, data[key].oldt02, d.t0); //update old t0 m_mean value
 
     data[key].nhits++; // increment m_nhits
 
-    if(level<2) std::cout << "   First hit for det " << data[key].det << " lay " << data[key].lay << " t0 " << data[key].t0 << " upd t0 " << data[key].oldt02 << " nhits: " << data[key].nhits << std::endl;    
-
-    delete hist;
-
     return 1;
-}
+  }
   else { //if not the first hit or histogram
 
     //increment histogram bins
@@ -1170,7 +1136,7 @@ int Calibrator::AddHit(const std::string& key, const databundle & d, int* binhis
     data[key].z = AccumulativeMean(data[key].nhits, data[key].z, d.z);
 
     data[key].nhits++; //increment hit counts
-    
+
     return 0;
   }    
 
@@ -1182,7 +1148,6 @@ void Calibrator::WriteStat(TDirectory* dir){
   TNtuple* stattup = new TNtuple(Form("%stuple",m_name.data()),"statistics","det:lay:mod:brd:chp:sid:stl:stw:rtflag:t0flag:t0:oldt0:rt0:dt0:t0offset:ftype:nhits:nt0:nrt:res:resMean:dres:tres:tresMean:x:y:z");
   for(std::map<std::string,caldata>::iterator ihist=data.begin(); ihist!=data.end(); ++ihist){
     if ((ihist->second).calflag) {
-      //std::cout << " Writing TNtuple for name: " << m_name << " det: " << (ihist->second).det << " lay " << (ihist->second).lay << " mod: " << (ihist->second).mod << " brd " << (ihist->second).brd << " res width " << (ihist->second).res << " tres mean " << (ihist->second).tresMean << std::endl;
       float const ntvar[27]={
         float((ihist->second).det),
         float((ihist->second).lay),
@@ -1219,7 +1184,7 @@ void Calibrator::WriteStat(TDirectory* dir){
   }
 
   stattup->Write();
-
+  stattup->Delete();
 }
 
 void Calibrator::DumpConstants(){

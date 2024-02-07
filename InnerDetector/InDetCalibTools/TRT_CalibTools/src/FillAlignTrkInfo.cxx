@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -38,10 +38,12 @@ StatusCode FillAlignTrkInfo::initialize()
   return StatusCode::SUCCESS ;
 }
 
+//extern std::map<const Trk::Track*, double> gTrkToTrkT0Map ;
 
-bool FillAlignTrkInfo::fill(const Trk::Track* aTrack, TRT::TrackInfo* output, const xAOD::EventInfo& /* eventInfo */,
+bool FillAlignTrkInfo::fill(const Trk::Track* aTrack, TRT::TrackInfo* output,
+                            const ComTime* /* theComTime */, const xAOD::EventInfo& /* eventInfo */,
                             const xAOD::VertexContainer& /* vertices */) {
-
+//bool FillAlignTrkInfo::fill(const Trk::Track* aTrack, TRT::TrackInfo* output) const {
   // track parameters
   const Trk::Perigee* mesp=(aTrack->perigeeParameters());
   if (mesp!=nullptr) {
@@ -49,10 +51,10 @@ bool FillAlignTrkInfo::fill(const Trk::Track* aTrack, TRT::TrackInfo* output, co
     (*output)[TRT::Track::z0]=mesp->parameters()[Trk::z0];
     (*output)[TRT::Track::phi]=mesp->parameters()[Trk::phi];
     // transform back to cot(theta), q/pt representation for alignment ntuple
-    float theta = mesp->parameters()[Trk::theta];
-    if(fabs(theta)==0) theta=1e-24;
-    (*output)[TRT::Track::cotTheta]=1/tan(theta);
-    (*output)[TRT::Track::qOverPT]=(mesp->parameters()[Trk::qOverP])/sin(theta);
+    (*output)[TRT::Track::cotTheta]=1/tan(mesp->parameters()[Trk::theta]);
+    (*output)[TRT::Track::qOverPT]=(mesp->parameters()[Trk::qOverP])/sin(mesp->parameters()[Trk::theta]);
+//    std::map<const Trk::Track*, double>::const_iterator it = gTrkToTrkT0Map.find(aTrack) ;
+//    (*output)[TRT::Track::t0] = it!=gTrkToTrkT0Map.end() ? it->second : 0 ;
     (*output)[TRT::Track::t0] = 0.0 ;
   } else {
     msg(MSG::FATAL) << " Could not get Trk::Perigee " << endmsg;
@@ -61,6 +63,7 @@ bool FillAlignTrkInfo::fill(const Trk::Track* aTrack, TRT::TrackInfo* output, co
     (*output)[TRT::Track::phi]=0.0;
     (*output)[TRT::Track::cotTheta]=0.0;
     (*output)[TRT::Track::qOverPT]=0.0;
+//    (*output)[TRT::Track::t0] = gTrkToTrkT0Map[aTrack]  ;
     (*output)[TRT::Track::t0] = 0.0  ;
   }
   (*output)[TRT::Track::chiSquare]=aTrack->fitQuality()->chiSquared();

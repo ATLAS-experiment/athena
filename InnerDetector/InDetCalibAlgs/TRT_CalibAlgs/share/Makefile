@@ -1,5 +1,4 @@
-LFLAGS = -g -O2 -m64 -Wno-deprecated -L${ROOTSYS}/lib  -I${ROOTSYS}/include -lCore -lHist -lGraf -lGraf3d -lGpad -lTree -lRIO -lPostscript -lMatrix -lPhysics -pthread -lm -ldl -rdynamic -lThread
-#LFLAGS = -g -O2 -m32 -Wno-deprecated -L${ROOTSYS}/lib  -I${ROOTSYS}/include -lCore -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -pthread -lm -ldl -rdynamic  -lProof -lThread
+LFLAGS = -g -O2 -m32 -Wno-deprecated -L${ROOTSYS}/lib  -I${ROOTSYS}/include -lCore -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -pthread -lm -ldl -rdynamic  -lProof -lThread
 #LFLAGS = -g -O2 -Wno-deprecated -L${ROOTSYS}/lib  -I${ROOTSYS}/include -lCore -lCint -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -pthread -lm -ldl -rdynamic  -lProof -lThread
 
 TRT_StrawStatusReport: TRT_StrawStatusReport.o

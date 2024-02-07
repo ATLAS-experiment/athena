@@ -157,7 +157,6 @@ PoolSvc.WriteCatalog="file:PFC_2102519.xml"
 #    We use a separate stream2 for writing out conditions data
 #--------------------------------------------------------------
 theApp.OutStream     =["Stream2"]; 
-theApp.OutStreamType ="AthenaOutputStream"; 
 Stream2 = Algorithm( "Stream2" )
 #Stream2 = Service( "Stream2" )
 Stream2.EvtConversionSvc     ="AthenaPoolCnvSvc"; 

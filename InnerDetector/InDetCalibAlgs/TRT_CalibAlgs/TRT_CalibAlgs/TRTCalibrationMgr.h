@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CALIBALGS_TRTCALIBRATIONMGR_H
@@ -17,8 +17,8 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
 #include "TrkTrack/TrackCollection.h"
-#include "TrkTrack/Track.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "CommissionEvent/ComTime.h"
 #include "TRT_ConditionsData/RtRelationMultChanContainer.h"
 #include "TRT_ConditionsData/StrawT0MultChanContainer.h"
 #include "CxxUtils/checker_macros.h"
@@ -59,8 +59,7 @@ made and Dt0 is set to the mean of that. The new t0 is then the old t0
 
 */
 
-// TRTCalibrator is called by TRTCalibrationMgr and is not thread-safe.
-// But the job calling TRTCalibrator reconstructs only one event, in order to get access to Athena tools. This job never run multi-threaded.
+// TRTCalibrator is not thread-safe.
 class ATLAS_NOT_THREAD_SAFE TRTCalibrationMgr: public AthAlgorithm
 {
 
@@ -82,6 +81,7 @@ private:
   ToolHandleArray<IFillAlignTrkInfo>  m_TrackInfoTools;
   PublicToolHandleArray<ITRTCalibrator>     m_TRTCalibTools
      {this,"TRTCalibrator",{ /* "TRTCalibrator"*/ },"" };
+  ToolHandleArray<IAccumulator>       m_AccumulatorTools;
   ToolHandleArray<IFitTool>           m_FitTools;
   ToolHandle<Trk::ITrackFitter>       m_trackFitter;
 
@@ -100,7 +100,10 @@ private:
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey{this,"VerticesKey","PrimaryVertices","RHK for primary veritces"};
   SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{this,"EventInfoKey","EventInfo","RHK for xAOD::EventInfo"};
-  SG::ReadHandleKey<TrackCollection> m_TrkCollection{this,"TrkCollectionKey","CombinedInDetTracks","RHKs for track collections"};
+  SG::ReadHandleKeyArray<TrackCollection> m_TrkCollections{this,"TrkCollections",{"Tracks", "ConvertedIParTracks"},"RHKs for track collections"};
+  SG::ReadHandleKey<ComTime> m_comTimeKey{this, "ComTimeKey", "TRT_Phase", "Name of TRT Com time object"};
+
+
 
 
 };

@@ -1,22 +1,17 @@
-import os, sys, time, glob, fnmatch
+import os,sys,time,glob,fnmatch
 
-
-def cosmicMC(config, inputfiles, calibconstants):
-
-    print ("Loading from CosmicMCTemplate.py")
-    ostring = (
-        """
+def cosmicMC(config,inputfiles,calibconstants):
+    
+    print "Loading from CosmicMCTemplate.py"
+    ostring = """
 
 
 #--------------------------------------------------------------
 # Control
 #--------------------------------------------------------------
 # --- Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
-OutputLevel     = %s"""
-        % config["OutputLevel"]
-    )
-    ostring += (
-        """
+OutputLevel     = %s""" % config["OutputLevel"]
+    ostring+="""
 # --- produce an atlantis data file
 doJiveXML       = False
 # --- run the Virtual Point 1 event visualisation
@@ -43,11 +38,8 @@ else:
 # detector description version: both RDO and BS default use this
 #--------------------------------------------------------------
 #DetDescrVersion = os.environ['DETECTOR_DESCRIPTION']
-DetDescrVersion = '%s'"""
-        % config["DetDescVer"]
-    )
-    ostring += (
-        """
+DetDescrVersion = '%s'""" % config["DetDescVer"]
+    ostring+="""
 
 #--------------------------------------------------------------
 # load Global Flags and set defaults (import the new jobProperty globalflags)
@@ -118,10 +110,8 @@ from RecExConfig.RecFlags import rec
 rec.Commissioning = True
 rec.doMonitoring = True
 from AthenaCommon.BFieldFlags import jobproperties
-jobproperties.BField.solenoidOn=%s"""
-        % config["MagnetOn"]
-    )
-    ostring += """
+jobproperties.BField.solenoidOn=%s""" % config["MagnetOn"]
+    ostring+="""
 
 # --- setup InDetJobProperties
 from InDetRecExample.InDetJobProperties import InDetFlags
@@ -135,8 +125,6 @@ InDetFlags.doTruth       = (globalflags.DataSource == 'geant4' and globalflags.I
 #InDetFlags.doLowPt        = True
 #InDetFlags.doBeamGas      = True
 #InDetFlags.doBeamHalo     = True
-#InDetFlags.doxKalman      = False
-#InDetFlags.doiPatRec      = False
 #InDetFlags.doBackTracking = False
 #InDetFlags.doTRTStandalone = False
 #InDetFlags.doVertexFinding = False
@@ -172,7 +160,7 @@ InDetFlags.doMonitoringAlignment = False
 
 
 # --- activate creation of standard plots
-#InDetFlags.doStandardPlots  = True
+#InDetFlags.doPhysValMon  = True
 
 # --- produce various ntuples (all in one root file)
 #InDetFlags.doTrkNtuple      = True
@@ -212,13 +200,13 @@ if not doReadBS:
   # cosmic MC without field
   #ServiceMgr.EventSelector.InputCollections = ["castor:/castor/cern.ch/grid/atlas/caf/atlcal/perm/id/cosmics/ESDs/InDetESD_91900_lb3.root" ]
   ServiceMgr.EventSelector.InputCollections = ["""
-    for i in range(len(inputfiles) - 1):
-        ostring += '"%s", ' % inputfiles[i]
-    ostring += '"%s"]' % inputfiles[len(inputfiles) - 1]
-    ostring += """
+    for i in range(len(inputfiles)-1):
+        ostring+='"%s", ' % inputfiles[i]
+    ostring+='"%s"]' % inputfiles[len(inputfiles)-1]
+    ostring+="""
 
 if doReadBS:
-  ServiceMgr.ByteStreamInputSvc.FullFileName = [ "some file" ]
+  ServiceMgr.EventSelector.Input = [ "some file" ]
 
 #--------------------------------------------------------------
 # Calibration stuff
@@ -227,53 +215,39 @@ if doReadBS:
 from AthenaCommon.AppMgr import ToolSvc
 from AthenaCommon.AppMgr import ServiceMgr
 
-#from TRT_ConditionsTools.TRT_ConditionsToolsConf import TRTCalDbTool
-#TRTCalibDBTool=TRTCalDbTool()
-#ToolSvc+=TRTCalibDBTool
+from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_CalDbTool
+InDetCalDbTool=TRT_CalDbTool(name = "TRT_CalDbTool")
 
-from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_CalDbSvc
-TRTCalibDBSvc=TRT_CalDbSvc()
-ServiceMgr += TRTCalibDBSvc
-
+from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawStatusSummaryTool
+InDetStrawSummaryTool=TRT_StrawStatusSummaryTool(name = "TRT_StrawStatusSummaryTool",
+                             isGEANT4=(globalflags.DataSource == 'geant4'))
 
 from TRT_CalibTools.TRT_CalibToolsConf import FitTool
 TRTCalFitTool = FitTool (name = 'TRTCalFitTool')
 ToolSvc += TRTCalFitTool
-print      (TRTCalFitTool)
+print      TRTCalFitTool
 
-from OutputStreamAthenaPool.OutputStreamAthenaPoolConf import AthenaPoolOutputStreamTool
-TRTCondStream=AthenaPoolOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
+from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
+TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 
 ToolSvc += TRTCondStream
-print (TRTCondStream)
+print TRTCondStream
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTrkInfo 
 FillAlignTrkInfo = FillAlignTrkInfo ( name = 'FillAlignTrkInfo',
                                       TrackSummaryTool = InDetTrackSummaryTool)
 ToolSvc += FillAlignTrkInfo
-print      (FillAlignTrkInfo)
+print      FillAlignTrkInfo
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTRTHits 
 FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
                                       NeighbourSvc='TRT_StrawNeighbourSvc',
-                                      TRTCalDbSvc=TRTCalibDBSvc)
+                                      TRTCalDbTool = InDetCalDbTool,
+                                      TRTStrawSummaryTool = InDetStrawSummaryTool)
+
 ToolSvc += FillAlignTRTHits
-print      (FillAlignTRTHits)
+print      FillAlignTRTHits
 
-#from TRT_CalibTools.TRT_CalibToolsConf import TRTCalAccumulator
-#TRTCalAccumulator = TRTCalAccumulator ( name = "TRTCalAccumulator",
-#                                        TRTCalDBTool=TRTCalibDBTool,
-#                                        storeAllWires = True,
-#                                        calibrateRt = False,
-#                                        createStrawTuple = True,
-#                                        rtParameterizationType = 1,
-#                                        rtPolyOrder = 0,
-#                                        minEntriesPerStraw = 0, #2'
-#                                        maxTrackChisquarePerDof = 3, #10.,
-#                                        minTimebinsOverThreshold = 2)
-
-#ToolSvc += TRTCalAccumulator
-#print      (TRTCalAccumulator)
 
 # select good quality tracks
 from TRT_AlignAlgs.TRT_AlignAlgsConf import TRTTrackSelectionAlg
@@ -294,10 +268,11 @@ SelectTRTAlignTracks = TRTTrackSelectionAlg( name = "SelectTRTAlignTracks",
                                                        #      OutputLevel = INFO)
 
 topSequence += SelectTRTAlignTracks
-print          (SelectTRTAlignTracks)
+print          SelectTRTAlignTracks
                                         
 from TRT_CalibAlgs.TRT_CalibAlgsConf import TRTCalibrationMgr
 CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr',
+                                       StreamTool          = TRTCondStream,
                                        TrkCollections      = [ 'TRTCalibTracks' ],
                                        AlignTrkTools       = [ FillAlignTrkInfo, FillAlignTRTHits ],
                                        #AccumulatorTools    = [ TRTCalAccumulator ],
@@ -305,12 +280,12 @@ CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr
                                        FitTools            = [ TRTCalFitTool] )
 
 topSequence += CosmicsTRTCalibMgr
-print (CosmicsTRTCalibMgr)
+print CosmicsTRTCalibMgr
 
 """
 
-    if calibconstants == "":
-        ostring += """
+    if calibconstants=="":
+        ostring+="""
 
 #from IOVDbSvc.CondDB import conddb
 #conddb.blockFolder("TRT/Calib/RT")
@@ -323,12 +298,10 @@ print (CosmicsTRTCalibMgr)
 
 """
 
-    if not calibconstants == "":
+    if not calibconstants=="":
 
-        ostring += 'conddb.blockFolder("/TRT/Calib/RT" )\n'
-        ostring += 'conddb.blockFolder("/TRT/Calib/T0" ) \n'
-        ostring += 'TRTCalibDBSvc.calibTextFile="%s"\n' % (calibconstants)
-
-    ostring += "TRTCalibDBSvc.StreamTool=TRTCondStream"
+	ostring+='conddb.blockFolder("/TRT/Calib/RT" )\n'
+	ostring+='conddb.blockFolder("/TRT/Calib/T0" ) \n'
+        ostring+='TRTCondWrite.CalibInputFile="%s"\n' % (calibconstants)
 
     return ostring

@@ -1,7 +1,7 @@
 import os,sys,time,glob,fnmatch
 
 def txt2pooloptionsDATA(calibconstants,outputfile,rttag,t0tag,IOV): 
-    print ("Reading from txt2pooloptionsDATA")
+    print "Reading from txt2pooloptionsDATA"
     ostring="""
 
 #New way to create cool and pool file, easier and more stable:
@@ -37,7 +37,7 @@ svcMgr.IOVDbSvc.forceRunNumber=%d
 from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
 TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 ToolSvc += TRTCondStream
-print (TRTCondStream)
+print TRTCondStream
 
 conddb.blockFolder("/TRT/Calib/RT" )
 conddb.blockFolder("/TRT/Calib/T0" )
@@ -73,7 +73,7 @@ topSequence+=myOCA
 
 
 def txt2pooloptionsMC(calibconstants,outputfile,rttag,t0tag,IOV):
-    print ("Reading from txt2pooloptionsRAW")
+    print "Reading from txt2pooloptionsRAW"
     ostring="""
 
 #New way to create cool and pool file, easier and more stable:
@@ -109,7 +109,7 @@ svcMgr.IOVDbSvc.forceRunNumber=%d
 from OutputStreamAthenaPool.OutputStreamAthenaPoolConf import AthenaOutputStreamTool
 TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 ToolSvc += TRTCondStream
-print (TRTCondStream)
+print TRTCondStream
 
 conddb.blockFolder("/TRT/Calib/RT" )
 conddb.blockFolder("/TRT/Calib/T0" )

@@ -1,20 +1,15 @@
-import os, sys, time, glob, fnmatch
+import os,sys,time,glob,fnmatch
 
-
-def cosmiccalib(config, inputfiles, calibconstants, calpart):
-
+def cosmiccalib(config,inputfiles,calibconstants,calpart):
+    
     print "Loading from CosmicCalibTemplate.py"
-    ostring = (
-        """
+    ostring = """
 #--------------------------------------------------------------
 # Control
 #--------------------------------------------------------------
 # --- Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
-OutputLevel     = %s"""
-        % config["OutputLevel"]
-    )
-    ostring += (
-        """
+OutputLevel     = %s""" % config["OutputLevel"]
+    ostring+="""
 # --- produce an atlantis data file
 doJiveXML       = False
 # --- run the Virtual Point 1 event visualisation
@@ -59,11 +54,8 @@ globalflags.DetGeo      = 'atlas'
 
 
 
-DetDescrVersion = '%s'"""
-        % config["DetDescVer"]
-    )
-    ostring += (
-        """
+DetDescrVersion = '%s'""" % config["DetDescVer"]
+    ostring+="""
 globalflags.DetDescrVersion = DetDescrVersion
 
 # --- printout
@@ -109,10 +101,8 @@ from RecExConfig.RecFlags import rec
 rec.Commissioning = True
 rec.doMonitoring = True
 from AthenaCommon.BFieldFlags import jobproperties
-jobproperties.BField.solenoidOn=%s"""
-        % config["MagnetOn"]
-    )
-    ostring += """
+jobproperties.BField.solenoidOn=%s""" % config["MagnetOn"]
+    ostring+="""
 jobproperties.BField.solenoidOn=True
 
 # --- setup InDetJobProperties
@@ -127,8 +117,6 @@ InDetFlags.doTruth       = (globalflags.DataSource == 'geant4' and globalflags.I
 #InDetFlags.doLowPt        = True
 #InDetFlags.doBeamGas      = True
 #InDetFlags.doBeamHalo     = True
-#InDetFlags.doxKalman      = False
-#InDetFlags.doiPatRec      = False
 #InDetFlags.doBackTracking = False
 #InDetFlags.doTRTStandalone = False
 #InDetFlags.doVertexFinding = False
@@ -164,7 +152,7 @@ InDetFlags.doMonitoringAlignment = False
 
 
 # --- activate creation of standard plots
-#InDetFlags.doStandardPlots  = True
+#InDetFlags.doPhysValMon  = True
 
 # --- produce various ntuples (all in one root file)
 #InDetFlags.doTrkNtuple      = True
@@ -204,14 +192,13 @@ if not doReadBS:
   # cosmic MC without field
   #ServiceMgr.EventSelector.InputCollections = ["castor:/castor/cern.ch/grid/atlas/caf/atlcal/perm/id/cosmics/ESDs/InDetESD_91900_lb3.root" ]
   ServiceMgr.EventSelector.InputCollections = ["""
-    for i in range(len(inputfiles) - 1):
-        ostring += '"%s", ' % inputfiles[i]
-    ostring += '"%s"]' % inputfiles[len(inputfiles) - 1]
-    ostring += (
-        """
+    for i in range(len(inputfiles)-1):
+        ostring+='"%s", ' % inputfiles[i]
+    ostring+='"%s"]' % inputfiles[len(inputfiles)-1]
+    ostring+="""
 
 if doReadBS:
-  ServiceMgr.ByteStreamInputSvc.FullFileName = [ "some file" ]
+  ServiceMgr.EventSelector.Input = [ "some file" ]
 
 #--------------------------------------------------------------
 # Calibration stuff
@@ -221,28 +208,29 @@ from AthenaCommon.AppMgr import ToolSvc
 
 from AthenaCommon.AppMgr import ServiceMgr
 
-from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_CalDbSvc
-TRTCalibDBSvc=TRT_CalDbSvc()
-ServiceMgr += TRTCalibDBSvc
 
 from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawNeighbourSvc
 TRTStrawNeighbourSvc=TRT_StrawNeighbourSvc()
 ServiceMgr += TRTStrawNeighbourSvc
-
-#from TRT_ConditionsTools.TRT_ConditionsToolsConf import TRTCalDbTool
-#TRTCalibDBTool=TRTCalDbTool()
-#ToolSvc+=TRTCalibDBTool
 
 from TRT_CalibTools.TRT_CalibToolsConf import FitTool
 TRTCalFitTool = FitTool (name = 'TRTCalFitTool')
 ToolSvc += TRTCalFitTool
 print      TRTCalFitTool
 
-from OutputStreamAthenaPool.OutputStreamAthenaPoolConf import AthenaPoolOutputStreamTool
-TRTCondStream=AthenaPoolOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
+from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
+TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 
 ToolSvc += TRTCondStream
 print TRTCondStream
+
+from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_CalDbTool
+InDetCalDbTool=TRT_CalDbTool(name = "TRT_CalDbTool")
+
+from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawStatusSummaryTool
+InDetStrawSummaryTool=TRT_StrawStatusSummaryTool(name = "TRT_StrawStatusSummaryTool",
+                             isGEANT4=(globalflags.DataSource == 'geant4'))
+
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTrkInfo 
 FillAlignTrkInfo = FillAlignTrkInfo ( name = 'FillAlignTrkInfo',
@@ -253,52 +241,37 @@ print      FillAlignTrkInfo
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTRTHits 
 FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
                                       NeighbourSvc=TRTStrawNeighbourSvc,
-                                      TRTCalDbSvc=TRTCalibDBSvc)
+                                      TRTCalDbTool = InDetCalDbTool,
+                                      TRTStrawSummaryTool = InDetStrawSummaryTool)
+
 ToolSvc += FillAlignTRTHits
 print      FillAlignTRTHits
 
 from TRT_CalibTools.TRT_CalibToolsConf import TRTCalibrator 
 TRTCalibrator = TRTCalibrator ( name = 'TRTCalibrator',
-                                MinRt               = %s,"""
-        % config["MinRT"]
-    )
-    ostring += (
-        """
-                                MinT0               = %s,"""
-        % config["MinT0"]
-    )
-    ostring += """
+                                MinRt               = %s,""" % config["MinRT"]
+    ostring+="""
+                                MinT0               = %s,""" % config["MinT0"]
+    ostring+="""
                                 Nevents             = -1,\n"""
-    selstring = config["CalibArgs"]
-    ostring += "%32sSelstring =  '%s'," % (" ", selstring["_" + calpart]["sel"])
-    for setting in selstring["_" + calpart]["user"]:
-        if len(selstring["_" + calpart]["user"][setting]) > 0:
-            ostring += "\n%32s%s =  %s," % (
-                " ",
-                setting,
-                selstring["_" + calpart]["user"][setting],
-            )
+    selstring=config["CalibArgs"]
+    ostring+="%32sSelstring =  '%s'," % (" ",selstring['_'+calpart]['sel'])
+    for setting in selstring['_'+calpart]['user']:
+        if len(selstring['_'+calpart]['user'][setting])>0: ostring+= '\n%32s%s =  %s,'%(" ",setting,selstring['_'+calpart]['user'][setting])
 
-    ostring += (
-        """
+    ostring+="""
                                 Hittuple            = 'merged.root',
-                                RtRel               = '%s',"""
-        % config["RtRelation"]
-    )
-    ostring += (
-        """
-                                UseP0               = %s,"""
-        % config["UsePol0"]
-    )
-    ostring += (
-        """
-                                FloatP3             = %s,"""
-        % config["FloatPol3"]
-    )
-    ostring += """
+                                RtRel               = '%s',""" % config["RtRelation"]
+    ostring+="""
+                                UseP0               = %s,""" % config["UsePol0"]
+    ostring+="""
+                                FloatP3             = %s,""" % config["FloatPol3"]
+    ostring+="""
                                 TrtManagerLocation  = InDetKeys.TRT_Manager(),
                                 NeighbourSvc=TRTStrawNeighbourSvc,
-                                TRTCalDbSvc=TRTCalibDBSvc)
+                                TRTCalDbTool = InDetCalDbTool,
+                                TRTStrawSummaryTool = InDetStrawSummaryTool)
+
 ToolSvc += TRTCalibrator
 print      TRTCalibrator
 
@@ -330,6 +303,7 @@ print          SelectTRTAlignTracks
                                         
 from TRT_CalibAlgs.TRT_CalibAlgsConf import TRTCalibrationMgr
 CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr',
+                                       StreamTool          = TRTCondStream,
                                        TrkCollections      = [ 'TRTCalibTracks' ],
                                        AlignTrkTools       = [ FillAlignTrkInfo, FillAlignTRTHits ],
                                        DoCalibrate         = True,
@@ -341,17 +315,15 @@ print CosmicsTRTCalibMgr
 
 """
 
-    if not calibconstants == "":
-        ostring += """
+    if not calibconstants=="":
+        ostring+="""
 conddb.blockFolder("/TRT/Calib/RT" )   
 conddb.blockFolder("/TRT/Calib/T0" )   
 #InDetTRT_DriftFunctionTool.UniversalError=0.17
 #InDetTRT_DriftFunctionTool.ForceUniversalErrors=True
 """
 
-    if not calibconstants == "":
-        ostring += 'TRTCalibDBSvc.calibTextFile="%s"\n' % (calibconstants)
-
-    ostring += "TRTCalibDBSvc.StreamTool=TRTCondStream"
+    if not calibconstants=="":
+        ostring+='TRTCondWrite.CalibInputFile="%s"\n' % (calibconstants)
 
     return ostring

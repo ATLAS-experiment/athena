@@ -1,60 +1,81 @@
 ##########################################################################################################
 ##													##
 ##													##
-##     Script to read any db or tag and create .txt with the 					##
-##     with the payload calibration contants                				##
-##													##
-##     if db is mycool.db, its Pool file should be inserted in the catalog:				##
-##            -pool_insertFileToCatalog  pooloutputfile.root	                                        ##
-##													##
-##     Output file:											##
-##						   -caliboutput.txt					##
-##													##
-##     You need to set up the tag that you want to read and the DB it is read from (eg mycool.db)       ## 
+##     Script to read .db and .pool files and create .txt with the StatusHT contants                    ##
 ##													##
 ##########################################################################################################
 
-# CHOOSE tag
-StatusTag="TRTCondStatus-RUN2-BLK-UPD2-01-01"
-StatPermTag="TRTStrawStatusPermanent-RUN2-BLK-UPD4-02-00"
-StatHTTag="TrtStrawStatusHT-RUN2-BLK-UPD4-02-00"
 
-# CHOOSE MC or data (remember also to change the RAW input file to be either data or MC)
-isMC=False
+from AthenaCommon.GlobalFlags import globalflags
+globalflags.DetGeo.set_Value_and_Lock("atlas")
+globalflags.DataSource.set_Value_and_Lock("geant4")
+#globalflags.DataSource.set_Value_and_Lock("data")
+
+
+from AthenaCommon.DetFlags import DetFlags
+DetFlags.TRT_setOn()
+DetFlags.detdescr.TRT_setOn()
+
+include ( "DetDescrCondAthenaPool/DetDescrCondAthenaPool_joboptions.py" )
+
 from IOVDbSvc.CondDB import conddb
-# CHOOSE db and folder to dump
-conddb.blockFolder("/TRT/Cond/Status")
-#conddb.blockFolder("/TRT/Cond/StatusPermanent")
-#conddb.blockFolder("/TRT/Cond/StatusHT")
-if not isMC:
-    conddb.addFolderWithTag('','<dbConnection>COOLOFL_TRT/CONDBR2</dbConnection>/TRT/Cond/Status',StatusTag,force=True,className='TRTCond::StrawStatusMultChanContainer')
-    #conddb.addFolderWithTag('','<dbConnection>COOLOFL_TRT/CONDBR2</dbConnection>/TRT/Cond/StatusPermanent',StatPermTag,force=True,className='TRTCond::StrawStatusMultChanContainer')
-    #conddb.addFolderWithTag('','<dbConnection>COOLOFL_TRT/CONDBR2</dbConnection>/TRT/Cond/StatusHT',StatHTTag,force=True,className='TRTCond::StrawStatusMultChanContainer')
-    #conddb.addFolderWithTag('','<dbConnection>sqlite://;schema=mycool.db;dbname=CONDBR2</dbConnection>/TRT/Cond/Status',tag,force=True,className='TRTCond::StrawStatusMultChanContainer');
-    conddb.blockFolder("/Indet/Onl/Beampos")
-    conddb.addFolderSplitOnline("INDET", "/Indet/Onl/Beampos", "/Indet/Beampos", className="AthenaAttributeList")
+
+# These addFolder lines need to be outcommented if you want to dump your own sqlite db to text file.
+# Dead/Noisy Straw Lists
+if not conddb.folderRequested('/TRT/Cond/Status'):
+    conddb.addFolderSplitOnline("TRT","/TRT/Onl/Cond/Status","/TRT/Cond/Status",className='TRTCond::StrawStatusMultChanContainer')
+if not conddb.folderRequested('/TRT/Cond/StatusPermanent'):
+    conddb.addFolderSplitOnline("TRT","/TRT/Onl/Cond/StatusPermanent","/TRT/Cond/StatusPermanent",className='TRTCond::StrawStatusMultChanContainer')
+# Argon straw list
+if not conddb.folderRequested('/TRT/Cond/StatusHT'):
+    conddb.addFolderSplitOnline("TRT","/TRT/Onl/Cond/StatusHT","/TRT/Cond/StatusHT",className='TRTCond::StrawStatusMultChanContainer')
+
+# Alignment folders (not dynamic)
+if ((not DetFlags.simulate.SCT_on()) or (not DetFlags.simulate.pixel_on())) or (DetFlags.overlay.SCT_on() or DetFlags.overlay.pixel_on()):
+    conddb.addFolderSplitOnline("INDET","/Indet/Onl/Align","/Indet/Align",className="AlignableTransformContainer")
 else:
-    conddb.addFolderWithTag('','<dbConnection>COOLOFL_TRT/OFLP200</dbConnection>/TRT/Cond/Status',T0Tag,force=True,className='TRTCond::StrawStatusMultChanContainer')
+    conddb.addFolderSplitOnline("INDET","/Indet/Onl/Align","/Indet/Align")
 
-# Set this to CHOOSE a certain IoV in the chosen db
-svcMgr.IOVDbSvc.forceRunNumber=456346
+    if (not DetFlags.simulate.TRT_on()) or DetFlags.overlay.TRT_on():
+       conddb.addFolderSplitOnline("TRT","/TRT/Onl/Align","/TRT/Align",className="AlignableTransformContainer")
+    else:
+       conddb.addFolderSplitOnline("TRT","/TRT/Onl/Align","/TRT/Align")
+# TRT Lvl 3 alignment
+conddb.addFolderSplitOnline("TRT","/TRT/Onl/Calib/DX","/TRT/Calib/DX")
 
-from AthenaCommon.AlgSequence import AthSequencer
-condSeq = AthSequencer("AthCondSeq")
+
+
+from AtlasGeoModel import SetGeometryVersion
+from AtlasGeoModel import GeoModelInit
+
+
+include("RegistrationServices/RegistrationServices_jobOptions.py")
+
 from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()
-
 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
 
-from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTStrawStatusRead
-TSR = TRTStrawStatusRead( name = "TRTStrawStatusRead")
+#conddb.setGlobalTag("CONDBR2-BLKPA-2018-14")
+conddb.setGlobalTag("OFLCOND-MC16-SDR-27")   # choose here a global tag
+#svcMgr.IOVDbSvc.forceRunNumber=300000       # choose here a number within the IoV of interest
 
-#CHOOSE again
-TSR.FolderToPrint = "Status" 
-#TSR.FolderToPrint = "StatusPermanent" 
-#TSR.FolderToPrint = "StatusHT" 
-topSequence +=TSR
+svcMgr.IOVSvc.preLoadData 	   = True
+svcMgr.MessageSvc.OutputLevel      = INFO
 
+
+from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTStrawStatusWrite
+TSW=TRTStrawStatusWrite(name="TSW")
+TSW.StatusInputFileHT		=""
+topSequence +=TSW
+
+theApp.EvtMax = 1
+
+# These addFolder lines need to be uncommented if you want to dump your own sqlite db to text file.
+#conddb.blockFolder("/TRT/Cond/StatusHT")
+#conddb.addFolder("","<dbConnection>sqlite://;schema=TRT_StrawStatusHT_RUN2.db;dbname=CONDBR2</dbConnection>/TRT/Cond/StatusHT<tag>TrtStrawStatusHT-RUN2-UPD4-03-00</tag>",force=True)
+#conddb.addFolder("","<dbConnection>sqlite://;schema=TRT_Cond_StatusHT.db;dbname=OFLP200</dbConnection>/TRT/Cond/StatusHT<tag>TrtStrawStatusHT-MC-run2-scenario5_00-03</tag>",force=True)
+# or in case you have a sqLite file
+#conddb.addFolder("","<dbConnection>sqlite://;schema=mycool.db;dbname=CONDBR2</dbConnection>/TRT/Cond/StatusHT<tag>TrtStrawStatusHT-MC-run2-scenario5_00-03</tag>",force=True)
 
 
 

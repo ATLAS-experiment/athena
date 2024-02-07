@@ -216,7 +216,7 @@ InDetTRT_DriftFunctionTool = TRT_DriftFunctionTool(name = "InDetTRT_DriftFunctio
                                                    IsMC=(globalflags.DataSource == 'geant4'))
 
 ToolSvc += InDetTRT_DriftFunctionTool
-print(InDetTRT_DriftFunctionTool)
+print InDetTRT_DriftFunctionTool
 
 from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawNeighbourSvc
 TRTStrawNeighbourSvc=TRT_StrawNeighbourSvc()
@@ -225,20 +225,20 @@ ServiceMgr += TRTStrawNeighbourSvc
 from TRT_CalibTools.TRT_CalibToolsConf import FitTool
 TRTCalFitTool = FitTool (name = 'TRTCalFitTool')
 ToolSvc += TRTCalFitTool
-print(TRTCalFitTool)
+print      TRTCalFitTool
 
 
 from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
 TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 
 ToolSvc += TRTCondStream
-print(TRTCondStream)
+print TRTCondStream
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTrkInfo 
 FillAlignTrkInfo = FillAlignTrkInfo ( name = 'FillAlignTrkInfo',
                                       TrackSummaryTool = InDetTrackSummaryTool)
 ToolSvc += FillAlignTrkInfo
-print(FillAlignTrkInfo)
+print      FillAlignTrkInfo
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTRTHits 
 FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
@@ -248,7 +248,7 @@ FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
                                       TRTStrawSummaryTool = InDetStrawSummaryTool)
 
 ToolSvc += FillAlignTRTHits
-print(FillAlignTRTHits)
+print      FillAlignTRTHits
 
 from TRT_DriftCircleTool.TRT_DriftCircleToolConf import InDet__TRT_DriftCircleTool
 
@@ -287,7 +287,7 @@ InDetTRT_DriftCircleTool = InDet__TRT_DriftCircleTool(name                      
 ) # reenable ToT
 
 ToolSvc += InDetTRT_DriftCircleTool
-print(ToolSvc.InDetTRT_DriftCircleTool)
+print ToolSvc.InDetTRT_DriftCircleTool
 
 
 
@@ -300,10 +300,10 @@ TRT_RecalibrateRotCreator = InDet__TRT_DriftCircleOnTrackRecalibrateTool(
                         useDriftTimeToTCorrection = False)#,
                         #doPtThetaCorr           = False)
 ToolSvc += TRT_RecalibrateRotCreator
-print(TRT_RecalibrateRotCreator)
+print      TRT_RecalibrateRotCreator
 
 InDetRefitRotCreator.ToolTRT_DriftCircle = TRT_RecalibrateRotCreator
-print(InDetRefitRotCreator)
+print InDetRefitRotCreator
 
 
 RecalibrationFitter = Trk__GlobalChi2Fitter(name = 'RecalibrationFitter',
@@ -325,7 +325,7 @@ RecalibrationFitter = Trk__GlobalChi2Fitter(name = 'RecalibrationFitter',
                                                  TrackChi2PerNDFCut    = 7)
 
 ToolSvc+=RecalibrationFitter
-print(RecalibrationFitter)
+print    RecalibrationFitter
 
 
 from InDetTrackSelectorTool.InDetTrackSelectorToolConf import InDet__InDetDetailedTrackSelectorTool
@@ -348,7 +348,7 @@ TRTTrackSelectorTool = InDet__InDetDetailedTrackSelectorTool(name = "InDetDetail
 
 ToolSvc += TRTTrackSelectorTool
 if (InDetFlags.doPrintConfigurables()):
-        print(TRTTrackSelectorTool)
+        print TRTTrackSelectorTool
 
 
 from TRT_CalibAlgs.TRT_CalibAlgsConf import TRTCalibrationMgr
@@ -362,7 +362,7 @@ CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr
                                        FitTools            = [ TRTCalFitTool] )
 
 topSequence += CosmicsTRTCalibMgr
-print(CosmicsTRTCalibMgr)
+print CosmicsTRTCalibMgr
 
 
 

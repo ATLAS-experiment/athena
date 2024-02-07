@@ -1,7 +1,7 @@
 import os,sys,time,glob,fnmatch
 
 def ESDCalib(config,inputfiles,calibconstants,calpart):
-    print("Reading from ESDCalibTemplate.py")
+    print "Reading from ESDCalibTemplate.py"
     ostring="""
 #--------------------------------------------------------------
 # control input/output   MIERDA
@@ -45,22 +45,22 @@ doNameAuditor   = False
  
 # safety section ... redoing vertexing is a tricky business to stay consistent ...
 if not (readESD or readAOD):
-  print("You have to turn on reading of ESD or AOD! Thats the purpose of this jobO!")
+  print "You have to turn on reading of ESD or AOD! Thats the purpose of this jobO!"
 if readESD and readAOD:
-  print("I can either read ESD or AOD but not both at the same time! Turn on or the other off!")
+  print "I can either read ESD or AOD but not both at the same time! Turn on or the other off!"
 if readESD and reDoPrimaryVertexing and not reDoParticleCreation:
-  print("INFO! You are running on ESD, redoing the vertexing but not recreating the TrackParticles!")
-  print("INFO! To avoid inconsistencies do not use the old track particles in conjunction with the new vertex!")
+  print "INFO! You are running on ESD, redoing the vertexing but not recreating the TrackParticles!"
+  print "INFO! To avoid inconsistencies do not use the old track particles in conjunction with the new vertex!"
   if doWriteESD or doWriteAOD:
-    print("INFO! To avoid inconsistencies the old track particle (truth) container will not be in the new ESD/AOD!")
+    print "INFO! To avoid inconsistencies the old track particle (truth) container will not be in the new ESD/AOD!"
 if readAOD and reDoPrimaryVertexing:
-  print("INFO! You are running on AOD, and redoing the vertexing. At the moment new track particles cannot be made from old ones.")
-  print("INFO! To avoid inconsistencies do not use the old track particles in conjunction with the new vertex!")
+  print "INFO! You are running on AOD, and redoing the vertexing. At the moment new track particles cannot be made from old ones."
+  print "INFO! To avoid inconsistencies do not use the old track particles in conjunction with the new vertex!"
   if doWriteAOD:
-    print("INFO! To avoid inconsistencies the old track particle (truth) container will not be in the new AOD!")
+    print "INFO! To avoid inconsistencies the old track particle (truth) container will not be in the new AOD!"
 if doRefitTracks and (reDoPrimaryVertexing or reDoParticleCreation):
-  print("INFO! You are refitting tracks and also revertex and/or recreate track particles")
-  print("INFO! The input for that will be the refitted tracks!")
+  print "INFO! You are refitting tracks and also revertex and/or recreate track particles"
+  print "INFO! The input for that will be the refitted tracks!"
 
 #--------------------------------------------------------------
 # detector description version
@@ -162,23 +162,23 @@ InDetFlags.doPrintConfigurables = True
 # DO NOT SET JOBPROPERTIES AFTER THIS LINE! The change will be ignored!
 
 # next section assures that keys are ok and nothing inconsistent is written out ...
-print("InDetRec_jobOptions: InDetKeys not set - setting to defaults")
+print "InDetRec_jobOptions: InDetKeys not set - setting to defaults"
 from InDetRecExample.InDetKeys import InDetKeys
 if InDetFlags.doVertexFinding():
-  print("reDoPrimaryVertexing enabled: adjusting some StoreGate keys:")
+  print "reDoPrimaryVertexing enabled: adjusting some StoreGate keys:"
   
   InDetKeys.PrimaryVertices = "New"+InDetKeys.PrimaryVertices()
-  print("InDetKeys.PrimaryVertices = "+InDetKeys.PrimaryVertices())
+  print "InDetKeys.PrimaryVertices = "+InDetKeys.PrimaryVertices()
   
   if readAOD: # this one is mutally exclusive with useRefittedTrack.. and the doParticleCreation flag
     InDetKeys.Tracks = InDetKeys.TrackParticles()
-    print("InDetKeys.Tracks = "+InDetKeys.Tracks())
+    print "InDetKeys.Tracks = "+InDetKeys.Tracks()
   
   if InDetFlags.doParticleCreation():
     InDetKeys.TrackParticles      = "New"+InDetKeys.TrackParticles()
     InDetKeys.TrackParticlesTruth = "New"+InDetKeys.TrackParticlesTruth()
-    print("InDetKeys.TrackParticles      = "+InDetKeys.TrackParticles())
-    print("InDetKeys.TrackParticlesTruth = "+InDetKeys.TrackParticlesTruth())
+    print "InDetKeys.TrackParticles      = "+InDetKeys.TrackParticles()
+    print "InDetKeys.TrackParticlesTruth = "+InDetKeys.TrackParticlesTruth()
   else:
     InDetKeys.TrackParticles      = "Dummy"
     InDetKeys.TrackParticlesTruth = "Dummy"
@@ -187,7 +187,7 @@ if InDetFlags.doConversions():
   InDetKeys.Conversions = "New"+InDetKeys.Conversions()
   InDetKeys.SecVertices = "New"+InDetKeys.SecVertices()
   
-print("Printing InDetKeys. Be aware that some might be adjusted lateron!")
+print "Printing InDetKeys. Be aware that some might be adjusted lateron!"
 InDetKeys.print_JobProperties()
 
 #--------------------------------------------------------------
@@ -225,7 +225,7 @@ ServiceMgr.EventSelector.InputCollections = [ """
 from AthenaServices.AthenaServicesConf import AthenaOutputStreamTool
 TRTCondStream=AthenaOutputStreamTool(name="CondStream1",OutputFile="trtcalibout.pool.root")
 ToolSvc += TRTCondStream
-print(TRTCondStream)
+print TRTCondStream
 
 
 from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawNeighbourSvc
@@ -243,25 +243,23 @@ InDetStrawSummaryTool=TRT_StrawStatusSummaryTool(name = "TRT_StrawStatusSummaryT
 
 from TRT_DriftFunctionTool.TRT_DriftFunctionToolConf import TRT_DriftFunctionTool
 InDetTRT_DriftFunctionTool = TRT_DriftFunctionTool(name = "InDetTRT_DriftFunctionTool",
-                                                   AllowDataMCOverride = True,
                                                    TRTCalDbTool=InDetCalDbTool,
-                                                   ForceData = True,
                                                    IsMC=(globalflags.DataSource == 'geant4'))
 
 ToolSvc += InDetTRT_DriftFunctionTool
-print(InDetTRT_DriftFunctionTool)
+print InDetTRT_DriftFunctionTool
 
 
 from TRT_CalibTools.TRT_CalibToolsConf import FitTool
 TRTCalFitTool = FitTool (name = 'TRTCalFitTool')
 ToolSvc += TRTCalFitTool
-print(TRTCalFitTool)
+print      TRTCalFitTool
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTrkInfo 
 FillAlignTrkInfo = FillAlignTrkInfo ( name = 'FillAlignTrkInfo',
                                       TrackSummaryTool = InDetTrackSummaryTool)
 ToolSvc += FillAlignTrkInfo
-print(FillAlignTrkInfo)
+print      FillAlignTrkInfo
 
 from TRT_CalibTools.TRT_CalibToolsConf import FillAlignTRTHits 
 FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits', 
@@ -271,7 +269,7 @@ FillAlignTRTHits = FillAlignTRTHits ( name = 'FillAlignTRTHits',
                                       TRTStrawSummaryTool = InDetStrawSummaryTool)
 
 ToolSvc += FillAlignTRTHits
-print(FillAlignTRTHits)
+print      FillAlignTRTHits
 
 from TRT_DriftCircleOnTrackTool.TRT_DriftCircleOnTrackToolConf import InDet__TRT_DriftCircleOnTrackRecalibrateTool
 TRT_RecalibrateRotCreator = InDet__TRT_DriftCircleOnTrackRecalibrateTool(name                = 'TRT_RecalibrateRotCreator',
@@ -279,7 +277,7 @@ TRT_RecalibrateRotCreator = InDet__TRT_DriftCircleOnTrackRecalibrateTool(name   
                         ScaleHitUncertainty = 2.5) # fix from Thijs
 
 ToolSvc += TRT_RecalibrateRotCreator
-print(TRT_RecalibrateRotCreator)
+print      TRT_RecalibrateRotCreator
 
 InDetRefitRotCreator.ToolTRT_DriftCircle = TRT_RecalibrateRotCreator
 
@@ -302,7 +300,7 @@ RecalibrationFitter = Trk__GlobalChi2Fitter(name = 'RecalibrationFitter',
                                                  TrackChi2PerNDFCut    = 10.)
 
 ToolSvc+=RecalibrationFitter
-print(RecalibrationFitter)
+print    RecalibrationFitter
 
 from TRT_CalibTools.TRT_CalibToolsConf import TRTCalibrator
 TRTCalibrator = TRTCalibrator ( name = 'TRTCalibrator',
@@ -331,7 +329,7 @@ TRTCalibrator = TRTCalibrator ( name = 'TRTCalibrator',
                                 TRTStrawSummaryTool = InDetStrawSummaryTool)
 
 ToolSvc += TRTCalibrator
-print(TRTCalibrator)
+print      TRTCalibrator
 
 
 
@@ -349,7 +347,7 @@ SelectTRTAlignTracks = TRTTrackSelectionAlg( name = "SelectTRTAlignTracks",
                                              MinTRTHits = 21) #15)
 
 topSequence += SelectTRTAlignTracks
-print(SelectTRTAlignTracks)
+print          SelectTRTAlignTracks
 
                                      
 from TRT_CalibAlgs.TRT_CalibAlgsConf import TRTCalibrationMgr
@@ -363,7 +361,7 @@ CosmicsTRTCalibMgr = TRTCalibrationMgr(name                = 'CosmicsTRTCalibMgr
                                        TRTCalDBTool        = TRTCalTool )
 
 topSequence += CosmicsTRTCalibMgr
-print(CosmicsTRTCalibMgr)
+print CosmicsTRTCalibMgr
 
 # DCS Data Folders
 if (globalflags.InputFormat() == 'bytestream' and globalflags.DataSource() == 'data'):
