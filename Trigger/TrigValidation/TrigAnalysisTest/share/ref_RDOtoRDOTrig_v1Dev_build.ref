@@ -14419,6 +14419,16 @@ HLT_j20_calratio_roiftf_preselj20emf24_L1J100:
   stepFeatures:
     0: 1
     1: 5
+HLT_j20_calratio_roiftf_preselj20emf24_L1LLPDPHI-jXE27-jJ27:
+  eventCount: 1
+  stepCounts:
+    0: 5
+    1: 5
+    2: 1
+  stepFeatures:
+    0: 5
+    1: 37
+    2: 1
 HLT_j20_calratio_roiftf_preselj20emf24_L1TAU100:
   eventCount: 0
   stepCounts:
@@ -25268,6 +25278,8 @@ HLT_noalg_L1J75:
   eventCount: 9
 HLT_noalg_L1J85:
   eventCount: 5
+HLT_noalg_L1LLPDPHI-jXE27-jJ27:
+  eventCount: 12
 HLT_noalg_L1MU10BO:
   eventCount: 7
 HLT_noalg_L1MU10BOM:
