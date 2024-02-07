@@ -18,6 +18,7 @@
 export ATHENA_CORE_NUMBER=8
 
 Sim_tf.py \
+    --CA \
     --multithreaded \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.MT.HITS.pool.root" \
@@ -25,23 +26,10 @@ Sim_tf.py \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
     --jobNumber 1 \
-    --imf False \
-    --athenaopts '"--config-only=ConfigSimMT.pkl"'
-
-Sim_tf.py \
-    --multithreaded \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
-    --outputHITSFile "test.MT.HITS.pool.root" \
-    --maxEvents 50 \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
-    --jobNumber 1 \
+    --postExec 'with open("ConfigSimMT.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
 rc=$?
@@ -52,28 +40,17 @@ status=$rc
 rc2=-9999
 unset ATHENA_CORE_NUMBER
 Sim_tf.py \
+    --CA \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.ST.HITS.pool.root" \
     --maxEvents 50 \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
     --jobNumber 1 \
-    --imf False \
-    --athenaopts '"--config-only=ConfigSimST.pkl"'
-
-Sim_tf.py \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
-    --outputHITSFile "test.ST.HITS.pool.root" \
-    --maxEvents 50 \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
-    --jobNumber 1 \
+    --postExec 'with open("ConfigSimST.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
 mv log.EVNTtoHITS log.EVNTtoHITS.ST
