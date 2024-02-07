@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOR_PYTHIA8B_H
@@ -58,9 +58,6 @@ private:
     std::vector<Pythia8::Event> m_BEventBuffer;
     std::vector<int> m_internalEventNumbers;
     bool m_doSuppressSmallPT;
-    double m_pt0timesMPI;
-    double m_numberAlphaS;
-    bool m_sameAlphaSAsMPI;
     Pythia8::SuppressSmallPT *m_SuppressSmallPT;
     unsigned int m_failureCount;
 
