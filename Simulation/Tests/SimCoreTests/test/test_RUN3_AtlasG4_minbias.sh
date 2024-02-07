@@ -21,17 +21,20 @@ AtlasG4_tf.py \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --imf False
 # TODO would be good to test applying beam rotations in this job
-
-
 rc=$?
-rc2=-9999
+status=$rc
 echo  "art-result: $rc simulation"
+
+rc2=-9999
 if [ $rc -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
     art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --mode=semi-detailed
     rc2=$?
+    status=$rc2
 fi
 
 echo  "art-result: $rc2 regression"
+
+exit $status
