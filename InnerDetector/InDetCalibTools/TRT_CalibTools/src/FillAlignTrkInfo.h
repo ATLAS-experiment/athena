@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CALIBTOOLS__FILLALIGNTRKINFO_H
@@ -33,11 +33,8 @@ class FillAlignTrkInfo :  virtual public IFillAlignTrkInfo, public AthAlgTool {
 
   virtual ~FillAlignTrkInfo() {}
 
-  virtual bool fill(const Trk::Track* aTrack, TRT::TrackInfo* output,
-                    const ComTime* theComTime, const xAOD::EventInfo& eventInfo,
+  virtual bool fill(const Trk::Track* aTrack, TRT::TrackInfo* output, const xAOD::EventInfo& eventInfo,
                     const xAOD::VertexContainer& vertices);
-  //virtual bool fill(const Trk::Track* aTrack, TRT::TrackInfo* output) const;
-//  virtual double mygetEventPhase(const Trk::Track *aTrack);
 
   virtual StatusCode initialize();
  private:
