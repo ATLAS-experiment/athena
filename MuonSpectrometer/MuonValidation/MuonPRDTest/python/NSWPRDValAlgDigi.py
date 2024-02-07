@@ -27,7 +27,7 @@ def NSWPRDValAlgDigiCfg(flags, name = "NSWPRDValAlg", **kwargs):
     kwargs.setdefault("doSTGCHit", flags.Detector.EnablesTGC)
     kwargs.setdefault("doSTGCDigit", flags.Detector.EnablesTGC) 
     kwargs.setdefault("doSTGCRDO", flags.Detector.EnablesTGC)
-    kwargs.setdefault("doSTGCSDO", flags.detector.EnablesTGC)
+    kwargs.setdefault("doSTGCSDO", flags.Detector.EnablesTGC)
     kwargs.setdefault("doSTGCPRD", False)
     kwargs.setdefault("doSTGCFastDigit", False)
 
