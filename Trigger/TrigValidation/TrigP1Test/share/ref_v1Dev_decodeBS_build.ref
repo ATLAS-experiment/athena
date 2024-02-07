@@ -5554,6 +5554,8 @@ HLT_j20_PhysicsTLA_L1jJ90_DETA20-jJ90J:
     2: 3
 HLT_j20_calratio_roiftf_preselj20emf24_L1J100:
   eventCount: 0
+HLT_j20_calratio_roiftf_preselj20emf24_L1LLPDPHI-jXE27-jJ27:
+  eventCount: 0
 HLT_j20_calratio_roiftf_preselj20emf24_L1TAU100:
   eventCount: 0
 HLT_j20_calratio_roiftf_preselj20emf24_L1TAU40_EMPTY:
@@ -8820,6 +8822,8 @@ HLT_noalg_L1J75:
   eventCount: 0
 HLT_noalg_L1J85:
   eventCount: 0
+HLT_noalg_L1LLPDPHI-jXE27-jJ27:
+  eventCount: 4
 HLT_noalg_L1MU10BO:
   eventCount: 0
 HLT_noalg_L1MU10BOM:
