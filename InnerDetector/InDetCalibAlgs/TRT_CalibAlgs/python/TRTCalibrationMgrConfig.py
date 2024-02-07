@@ -104,11 +104,7 @@ def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool
     return acc
     
 # Steering algorithm. Either it fills track and hit ntuples, or it calls TRTCalibrator
-<<<<<<< HEAD:InnerDetector/InDetCalibAlgs/TRT_CalibAlgs/python/TRTCalibrationMgrConfig.py
-def TRTCalibrationMgrCfg(flags,name='TRTCalibrationMgr',calibconstants,**kwargs) :
-=======
 def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kwargs) :
->>>>>>> trt_migration:InnerDetector/InDetCalibAlgs/TRT_CalibAlgs/python/TRT_CalibrationMgrConfig.py
     acc = ComponentAccumulator()
     
     # Is this an accumulatiuon or a calibration job?

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ StatusCode InDet::TRT_StrawStatus::execute(){
 
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_vxContainerKey);
     if (not vertices.isValid()) {
-       ATH_MSG_WARNING ("Couldn't retrieve VertexContainer with key: PrimaryVertices");
+       ATH_MSG_DEBUG ("Couldn't retrieve VertexContainer with key: PrimaryVertices");
        return StatusCode::SUCCESS;   // just skip to next event in case of no vertexcontainer
     }
 
