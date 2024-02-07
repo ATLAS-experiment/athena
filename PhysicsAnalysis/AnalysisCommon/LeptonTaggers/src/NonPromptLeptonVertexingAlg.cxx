@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local
@@ -585,7 +585,7 @@ void Prompt::NonPromptLeptonVertexingAlg::makeVertexCluster(
     bool pass = false;
 
     for(std::vector<std::unique_ptr<xAOD::Vertex>>::const_iterator cit = clusterVtxs.begin(); cit != clusterVtxs.end(); ++cit) {
-      if((*vit).get() == (*cit).get()) {
+      if(vit->get() == cit->get()) {
         ATH_MSG_DEBUG("makeVertexCluster - logic error - found the same vertex twice: " << ((*vit).get()));
         continue;
       }
@@ -607,7 +607,7 @@ void Prompt::NonPromptLeptonVertexingAlg::makeVertexCluster(
       vit = inputVtxs.begin();
     }
     else {
-      vit++;
+      ++vit;
     }
   }
 
