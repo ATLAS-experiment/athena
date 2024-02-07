@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Geo2G4Builder.h"
@@ -36,29 +36,32 @@ Geo2G4Builder::Geo2G4Builder(const std::string& detectorName)
   : AthMessaging("Geo2G4Builder")
   , m_detectorName(detectorName)
   , m_motherTransform(GeoTrf::Transform3D::Identity())
-  , m_matAir(nullptr)
-  , m_pDetStore(nullptr)
 {
   ISvcLocator* svcLocator = Gaudi::svcLocator(); // from Bootstrap
   StatusCode sc=svcLocator->service("DetectorStore",m_pDetStore);
   if (sc.isFailure()) {
-    ATH_MSG_FATAL("Geo2G4Builder for detector "<<detectorName<<"could not access the detector store - PANIC!!!!");
-    abort();
+    std::string errorMessage{"ERROR: Geo2G4Builder for detector " + detectorName + " could not access the detector store."};
+    ATH_MSG_FATAL(errorMessage);
+    throw std::runtime_error(errorMessage);
   }
 
-  const GeoModelExperiment* theExpt = nullptr;
-  sc = m_pDetStore->retrieve( theExpt, "ATLAS" );
+  sc = m_pDetStore->retrieve( m_theExpt, "ATLAS" );
   if(sc.isFailure()){
-    ATH_MSG_ERROR("Detector "<< detectorName << "could not get GeoModelExperiment!");
-  } else {
-    const GeoVDetectorManager *theManager = theExpt->getManager(detectorName);
+    std::string errorMessage{"ERROR: " + detectorName + " could not get GeoModelExperiment"};
+    ATH_MSG_FATAL(errorMessage);
+    throw std::runtime_error(errorMessage);
+  }
+  else {
+    const GeoVDetectorManager *theManager = m_theExpt->getManager(detectorName);
 
-    for(unsigned int i=0; i<theManager->getNumTreeTops(); i++)
+    for(unsigned int i=0; i<theManager->getNumTreeTops(); ++i) {
       m_treeTops.push_back(theManager->getTreeTop(i));
+    }
 
     ATH_MSG_INFO("Found detector: top volume(s)");
-    for(unsigned int i=0; i<m_treeTops.size();i++)
+    for(unsigned int i=0; i<m_treeTops.size();++i) {
       ATH_MSG_INFO( "   Tree Top " << i << " " << m_treeTops[i]->getLogVol()->getName() );
+    }
 
     if(m_treeTops.size()>1) {
         // -------- -------- MATERIAL MANAGER -------- ----------
@@ -86,35 +89,36 @@ Geo2G4Builder::Geo2G4Builder(const std::string& detectorName)
 G4LogicalVolume* Geo2G4Builder::BuildTree()
 {
   ATH_MSG_DEBUG("Entering Geo2G4Builder::BuildTree()...");
-  G4LogicalVolume* result = 0;
-  OpticalVolumesMap* optical_volumes = 0;
-  const GeoBorderSurfaceContainer* surface_container = 0;
+  G4LogicalVolume* result = nullptr;
+  OpticalVolumesMap* optical_volumes = nullptr;
+  const GeoBorderSurfaceContainer* surface_container = nullptr;
 
   // Check whether we have to deal with optical surfaces
-  if(m_pDetStore->contains<GeoBorderSurfaceContainer>(m_detectorName))
-    {
-      StatusCode sc = m_pDetStore->retrieve(surface_container,m_detectorName);
-      if(sc.isSuccess() && surface_container!=0 && surface_container->size()>0)
-        optical_volumes = new OpticalVolumesMap();
+  if(m_pDetStore->contains<GeoBorderSurfaceContainer>(m_detectorName)) {
+    StatusCode sc = m_pDetStore->retrieve(surface_container,m_detectorName);
+    if(sc.isSuccess() && surface_container->size()>0) {
+      optical_volumes = new OpticalVolumesMap();
     }
+  }
 
   if(m_theBuilder) {
     if(m_treeTops.size()==1) {
       m_motherTransform = m_treeTops[0]->getX();
       result = m_theBuilder->Build(m_treeTops[0],optical_volumes);
-    } else {
+    }
+    else {
       // Create temporary GeoModel physical volume
       // The shape is composed by TreeTop shapes + their transforms
       const GeoShape& shFirst = (*(m_treeTops[0]->getLogVol()->getShape()))<<(m_treeTops[0]->getX());
       const GeoShape* shResult = &shFirst;
 
-      for(unsigned int i=1; i<m_treeTops.size(); i++){
+      for(unsigned int i=1; i<m_treeTops.size(); i++) {
         shResult = & shResult->add((*(m_treeTops[i]->getLogVol()->getShape()))<<(m_treeTops[i]->getX()));
       }
 
       GeoLogVol* lvEnvelope = new GeoLogVol(m_detectorName,shResult,m_matAir);
       GeoPhysVol* pvEnvelope = new GeoPhysVol(lvEnvelope);
-
+      m_theExpt->addTmpVolume(pvEnvelope);
       result = m_theBuilder->Build(pvEnvelope);
 
       // Get pointer to the World
@@ -147,24 +151,19 @@ G4LogicalVolume* Geo2G4Builder::BuildTree()
                                                false,
                                                id);
       }
-
-      // Add the temporary physical volume to the GeoModelExperiment
-      GeoModelExperiment * theExpt = nullptr;
-      StatusCode sc = m_pDetStore->retrieve(theExpt,"ATLAS");
-      if(sc.isFailure())
-        ATH_MSG_WARNING("Unable to retrieve GeoModelExperiment. Temporary volume cannot be released");
-      else
-        theExpt->addTmpVolume(pvEnvelope);
     }
   }
 
   // build optical surfaces if necessary
-  if(optical_volumes!=0 && optical_volumes->size()>0){
-    BuildOpticalSurfaces(surface_container,optical_volumes);
-  } else if (optical_volumes!=0){
-    ATH_MSG_WARNING("Optical volumes apparently requested, but none found!  Deleting temps");
+  if(optical_volumes) {
+    if(optical_volumes->size()>0) {
+      BuildOpticalSurfaces(surface_container,optical_volumes);
+    }
+    else {
+      ATH_MSG_WARNING("Optical volumes apparently requested, but none found!  Deleting temps");
+    }
+    delete optical_volumes;
   }
-  if (optical_volumes!=0) delete optical_volumes;
 
   return result;
 }

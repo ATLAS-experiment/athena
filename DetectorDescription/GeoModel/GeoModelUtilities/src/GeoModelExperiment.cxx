@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -21,11 +21,6 @@ GeoModelExperiment::GeoModelExperiment( GeoPhysVol * physVol )
  ** Destructor
  **/
 GeoModelExperiment::~GeoModelExperiment()  {
-  // Unref all temporary volumes
-  std::vector<GeoPhysVol*>::iterator it = m_tmpVolumes.begin();
-  for(; it!=m_tmpVolumes.end(); ++it) 
-    (*it)->unref();
-
   m_physVol->unref();
 }
 
@@ -92,7 +87,7 @@ bool GeoModelExperiment::LexigraphicalOrder::operator () (const value_type & a, 
   return a->getName()< b->getName();
 }
 
-void GeoModelExperiment::addTmpVolume(GeoPhysVol* volume)
+void GeoModelExperiment::addTmpVolume(PVConstLink volume)
 {
   m_tmpVolumes.push_back(volume);
 }
