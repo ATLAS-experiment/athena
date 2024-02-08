@@ -8,17 +8,19 @@ atlas_add_library( ActsViewLib
                    INTERFACE
                    PUBLIC_HEADERS ActsView
                    LINK_LIBRARIES
-                   GaudiKernel
-		   TrigSteeringEvent
-		   AthViews
-                   )
+		     AthLinks
+		     GaudiKernel
+		     TrigSteeringEvent )
 
 atlas_add_component( ActsView
-                     src/*.cxx
+                     src/*.h src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES
-		        ActsViewLib
-			TrkCaloClusterROI
-			BeamSpotConditionsData
-		     )
-
+		       ActsViewLib
+		       AthContainers
+		       AthViews
+		       AthenaBaseComps
+		       BeamSpotConditionsData
+		       StoreGateLib
+		       TrigSteeringEvent
+		       TrkCaloClusterROI )
