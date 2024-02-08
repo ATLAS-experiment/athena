@@ -57,8 +57,9 @@ if __name__ == "__main__":
     acc.merge(ActsITkStripClusterizationAlgCfg(flags,
                                                RoIs='TestCompositeRoI'))
 
-    from ActsConfig.ActsAnalysisConfig import ActsClusterAnalysisCfg
-    acc.merge(ActsClusterAnalysisCfg(flags))
+    from ActsConfig.ActsAnalysisConfig import ActsPixelClusterAnalysisAlgCfg, ActsStripClusterAnalysisAlgCfg
+    acc.merge(ActsPixelClusterAnalysisAlgCfg(flags))
+    acc.merge(ActsStripClusterAnalysisAlgCfg(flags))
 
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.run()
