@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Post-processing script to be used with atlas_add_test to
 # check for common error patterns in the log file.
@@ -71,6 +71,7 @@ fi
 # if test itself failed, we return with that failure code:
 if [ ${ATLAS_CTEST_TESTSTATUS} != 0 ]; then
     echo "$RED noerror.sh> ERROR: Test ${ATLAS_CTEST_TESTNAME} failed with exit code: ${ATLAS_CTEST_TESTSTATUS}$RESET"
+    tail $joblog
     echo  " noerror.sh> Please check ${PWD}/${joblog}"
     exit ${ATLAS_CTEST_TESTSTATUS}
 else
