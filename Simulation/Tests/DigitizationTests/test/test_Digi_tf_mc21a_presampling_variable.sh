@@ -15,7 +15,7 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 Events=50
-DigiOutFileNameCG="mc21a_presampling.VarBS.CG.RDO.pool.root"
+DigiOutFileName="mc21a_presampling.VarBS.CG.RDO.pool.root"
 HSHitsFile="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900149.PG_single_nu_Pt50.simul.HITS.e8453_s3864/HITS.29241942._001453.pool.root.1"
 HighPtMinbiasHitsFiles1="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8453_e8455_s3876_s3880/*"
 HighPtMinbiasHitsFiles2="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8453_e8455_s3877_s3880/*"
@@ -45,7 +45,7 @@ Digi_tf.py \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
     --jobNumber 568 \
     --maxEvents ${Events} \
-    --outputRDOFile ${DigiOutFileNameCG} \
+    --outputRDOFile ${DigiOutFileName} \
     --postInclude 'PyJobTransforms.UseFrontier' 'HITtoRDO:Digitization.DigitizationSteering.DigitizationTestingPostInclude' \
     --preInclude 'HITtoRDO:Campaigns.MC21a' \
     --skipEvents 0
@@ -62,7 +62,7 @@ rc4=-9999
 if [[ $rc -eq 0 ]]
 then
     # Do reference comparisons
-    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileNameCG" "${ATLAS_REFERENCE_DATA}/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileNameCG"
+    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileName" "${ATLAS_REFERENCE_DATA}/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileName"
     rc4=$?
     status=$rc4
 fi
@@ -71,7 +71,7 @@ echo "art-result: $rc4 OLDvsFixedRef"
 rc6=-9999
 if [[ $rc -eq 0 ]]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileNameCG"
+    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileName"
     rc6=$?
     status=$rc6
 fi

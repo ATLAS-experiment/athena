@@ -33,6 +33,27 @@ rc2=$?
 status=$rc2
 echo "art-result: $rc2 digiCA"
 
-# TODO Add regression tests after renaming script
+# get reference directory
+source DigitizationCheckReferenceLocation.sh
+echo "Reference set being used: ${DigitizationTestsVersion}"
+
+rc4=-9999
+if [[ $rc -eq 0 ]]
+then
+    # Do reference comparisons
+    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileName" "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileName"
+    rc4=$?
+    status=$rc4
+fi
+echo "art-result: $rc4 OLDvsFixedRef"
+
+rc5=-9999
+if [[ $rc -eq 0 ]]
+then
+    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed
+    rc5=$?
+    status=$rc5
+fi
+echo "art-result: $rc5 regression"
 
 exit $status
