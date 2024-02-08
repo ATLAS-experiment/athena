@@ -117,12 +117,12 @@ class MonitorDef:
                 "L1_3MU3V", "L1_MU5VF_3MU3VF", "L1_4MU3V",
                 ## Legacy L1 items
                 # L1Calo
-                "L1_TAU8", "L1_TAU20IM",
-                "L1_J100",
-                "L1_J400",
-                "L1_XE35", "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
+                #"L1_TAU8", "L1_TAU20IM",
+                #"L1_J100",
+                #"L1_J400",
+                #"L1_XE35", "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
                 # Combined
-                "L1_MU3V_J12",
+                #"L1_MU3V_J12",
                 # L1Topo
                 "L1_BPH-0DR3-EM7J15_MU5VF", "L1_HT190-J15s5pETA21", "L1_LLP-RO", # Board 0 FPGA 0
                 "L1_MJJ-500-NFF",                                                # Board 0 FPGA 1
@@ -217,7 +217,7 @@ class MonitorDef:
                     "L1_MBTS_1_A", "L1_MBTS_1_C", "L1_MBTS_4_A", "L1_MBTS_4_C",
                     "L1_MBTS_1_1_EMPTY",
                     "L1_ZB",
-                    "L1_AFP_A_AND_C_TOF_J20",
+                    "L1_AFP_A_AND_C_TOF_jJ50",
                     # Phase-I
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
                     "L1_jJ500_LAR",

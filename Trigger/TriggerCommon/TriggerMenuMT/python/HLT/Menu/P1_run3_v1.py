@@ -101,8 +101,8 @@ def addCommonP1Signatures(chains):
         #ChainProp(name='HLT_larnoiseburst_L1jXE120', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_larnoiseburst_L1jJ125', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_larnoiseburst_L1J100', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_larnoiseburst_L1J40_XE50', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
-        ChainProp(name='HLT_larnoiseburst_L1J40_XE60', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
+        #ChainProp(name='HLT_larnoiseburst_L1jJ80_jXE100', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        #ChainProp(name='HLT_larnoiseburst_L1jJ80_jXE120', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_larnoiseburst_L1All', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['PS:NoHLTRepro','RATE:Calibration','BW:Detector']), # Temporary for testing, high CPU cost
         ChainProp(name='HLT_acceptedevts_larnoiseburst_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD','BW:DISCARD']),
 

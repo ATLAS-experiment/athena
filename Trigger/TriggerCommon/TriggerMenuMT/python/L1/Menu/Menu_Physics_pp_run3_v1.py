@@ -92,17 +92,18 @@ def defineMenu():
         'L1_eTAU60_2eTAU20M_jXE80',
 
 
-        # combined em - jet
-        'L1_EM18VHI_3J20',
-        'L1_EM20VH_3J20',
+        # ATR-28761 Phase1 combined em - jet
+        'L1_eEM22M_3jJ50',
+        'L1_eEM24L_3jJ50',
 
         # combined mu - jet 
-        'L1_MU3V_J12', 'L1_MU3V_J15', 'L1_MU5VF_J40', 'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ50', 
+        'L1_MU3V_J15', 'L1_MU5VF_J40', 'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ50',  
+        # L1_MU3V_J12 moved to MC ATR-28761
 
         #ATR-13743 J,XE thershold change for ATR-19376 
-        'L1_MU8F_2J20','L1_MU8F_3J20', 'L1_MU8F_2J15_J20',
-        'L1_MU14FCH_J50',
-        'L1_MU14FCH_XE40',
+        'L1_MU8F_2jJ50','L1_MU8F_3jJ50', 'L1_MU8F_2jJ40_jJ50',
+        'L1_MU14FCH_jJ90',
+        'L1_MU14FCH_jXE80',
         'L1_MU14FCH_EMPTY',
         'L1_MU14FCH_UNPAIRED_ISO',
 
@@ -136,7 +137,7 @@ def defineMenu():
 
         'L1_jJ125', 'L1_jJ125p30ETA49',
 
-        'L1_jJ140', 'L1_jJ140_3jJ60', 
+        'L1_jJ140',  
 
         'L1_jJ160', 'L1_jJ160_FIRSTEMPTY',
 
@@ -144,15 +145,13 @@ def defineMenu():
 
         'L1_jJ500', 'L1_jJ500_LAR',
 
-        'L1_3jJ55p0ETA23', 'L1_3jJ90',
-        'L1_3jJ70p0ETA23',
-        'L1_4jJ40',
-        'L1_4jJ50',
-        'L1_4jJ40p0ETA25',
-        'L1_5jJ40p0ETA25', 
+        'L1_3jJ55p0ETA23',
         'L1_6jJ40',
 
-        'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ90',  #L1_MU3V_jJ30 added temporarily 
+        'L1_4jJ40', 'L1_3jJ90', 'L1_4jJ50', 'L1_4jJ40p0ETA25', 'L1_5jJ40p0ETA25', 
+        'L1_3jJ70p0ETA23', 'L1_jJ140_3jJ60', 
+        'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ90',  
+        #Kept as Phase-1 ATR-28761 
   
         # jLJ
         'L1_jLJ80', 'L1_jLJ120', 'L1_jLJ140', 'L1_jLJ180',
@@ -174,9 +173,9 @@ def defineMenu():
 
         # multi jet
         'L1_J50_2J40p0ETA25_3J15p0ETA25',
-        'L1_3J50',
-        'L1_4J15', 
-        'L1_3J15p0ETA25_XE40',
+        
+        'L1_3J50', 'L1_4J15', 
+
         'L1_6J15',
 
         # multi jet forward
@@ -186,11 +185,12 @@ def defineMenu():
         'L1_3J25p0ETA23',
 
         # combined jet
-        'L1_2J15_XE55', 'L1_J40_XE50',
-        'L1_2J50_XE40', 'L1_J40_XE60',
+        'L1_jJ80_jXE100',
+        #'L1_jJ80_jXE120',
         # ATR-27250 Duplicate multijet-seeded triggers to jFEX
-        #'L1_2jJ90_jXE80', 'L1_2jJ40_jXE110',
-        #'L1_3jJ40p0ETA25_jXE80',
+        'L1_2jJ90_jXE80', 
+        'L1_2jJ40_jXE110',
+        'L1_3jJ40p0ETA25_jXE80',
         
         # XE
         'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50', 
@@ -222,7 +222,6 @@ def defineMenu():
         # low-priority (all mu)
         'L1_AFP_FSA_TOF_T2_BGRP12', 'L1_AFP_FSA_TOF_T3_BGRP12','L1_AFP_FSC_TOF_T2_BGRP12', 'L1_AFP_FSC_TOF_T3_BGRP12',
         'L1_AFP_A_OR_C_UNPAIRED_ISO', 'L1_AFP_A_OR_C_UNPAIRED_NONISO', 'L1_AFP_A_OR_C_EMPTY', 'L1_AFP_A_OR_C_FIRSTEMPTY',
-        'L1_AFP_A_AND_C_TOF_J20', 'L1_AFP_A_AND_C_TOF_T0T1_J20', 'L1_AFP_A_AND_C_TOF_J30', 'L1_AFP_A_AND_C_TOF_T0T1_J30', 'L1_AFP_A_AND_C_TOF_J50', 'L1_AFP_A_AND_C_TOF_T0T1_J50', 'L1_AFP_A_AND_C_TOF_J75', 'L1_AFP_A_AND_C_TOF_T0T1_J75', 
 
         'L1_AFP_A_AND_C_TOF_jJ50', 'L1_AFP_A_AND_C_TOF_T0T1_jJ50', 'L1_AFP_A_AND_C_TOF_jJ60', 'L1_AFP_A_AND_C_TOF_T0T1_jJ60', 'L1_AFP_A_AND_C_TOF_jJ90', 'L1_AFP_A_AND_C_TOF_T0T1_jJ90', 'L1_AFP_A_AND_C_TOF_jJ125', 'L1_AFP_A_AND_C_TOF_T0T1_jJ125',
 
@@ -230,12 +229,12 @@ def defineMenu():
         'L1_AFP_NSA_BGRP12', 'L1_AFP_NSC_BGRP12', 
         'L1_AFP_A','L1_AFP_C', 'L1_AFP_A_AND_C',
         #'L1_AFP_A_OR_C_J5','L1_AFP_A_AND_C_J5', # J5 not available in legacy menu. Need to update to jJ threshold for low-mu
-        'L1_AFP_A_OR_C_J12','L1_AFP_A_AND_C_J12',
-        'L1_MU5VF_AFP_A_OR_C','L1_MU5VF_AFP_A_AND_C',
+        'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
+        'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
         # 'L1_EM7_AFP_A_OR_C','L1_EM7_AFP_A_AND_C',# ATR-27654
-        'L1_eEM9_AFP_A_OR_C','L1_eEM9_AFP_A_AND_C',
+        'L1_eEM9_AFP_A_OR_C', 'L1_eEM9_AFP_A_AND_C',
         # med-priority (low mu)
-        'L1_AFP_A_OR_C','L1_AFP_A_OR_C_MBTS_2', 'L1_AFP_A_AND_C_MBTS_2',
+        'L1_AFP_A_OR_C', 'L1_AFP_A_OR_C_MBTS_2', 'L1_AFP_A_AND_C_MBTS_2',
           
 
         # MBTS
