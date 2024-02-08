@@ -10,7 +10,6 @@ def defineMenu():
     l1items = L1MenuFlags.items()
     l1items += [
 
-
         # ATR-28612 - legacy EM        
         'L1_EM3',
         'L1_EM18VHI',
@@ -20,8 +19,11 @@ def defineMenu():
         'L1_EM3_EMPTY', 
         'L1_EM7_FIRSTEMPTY',
 
+        # ATR-28761 - Phase 1 Muon + jet
         'L1_MU14FCH_jJ80',
         'L1_MU14FCH_jXE70',
+        'L1_MU14FCH_J50',
+        'L1_MU14FCH_XE40',
 
         # ATR-19376
         'L1_MU14FCH_XE30',
@@ -97,6 +99,22 @@ def defineMenu():
         'L1_TAU20IM_2TAU12IM_XE35', 
         'L1_TAU40_2TAU12IM_XE40',
         'L1_TAU25IM_2TAU20IM_2J25_3J20',
+
+        # Legacy combined em - jet moved by ATR-28761
+        'L1_EM18VHI_3J20',
+        'L1_EM20VH_3J20',
+
+        # Legacy combined mu - jet moved by ATR-28761
+        'L1_MU3V_J12',
+        # Legacy ATR-13743 J,XE thershold change for ATR-19376  moved by ATR-28761
+        'L1_MU8F_2J20','L1_MU8F_3J20', 'L1_MU8F_2J15_J20',
+        'L1_3J15p0ETA25_XE40',
+        'L1_2J15_XE55',
+        'L1_J40_XE50',
+        'L1_2J50_XE40',
+        'L1_J40_XE60',
+        'L1_AFP_A_AND_C_TOF_J20', 'L1_AFP_A_AND_C_TOF_T0T1_J20', 'L1_AFP_A_AND_C_TOF_J30', 'L1_AFP_A_AND_C_TOF_T0T1_J30', 'L1_AFP_A_AND_C_TOF_J50', 'L1_AFP_A_AND_C_TOF_T0T1_J50', 'L1_AFP_A_AND_C_TOF_J75', 'L1_AFP_A_AND_C_TOF_T0T1_J75',
+        'L1_AFP_A_OR_C_J12', 'L1_AFP_A_AND_C_J12',
         
         # ATR-28678
         "L1_J12",
