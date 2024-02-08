@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SGTools/DataStore.h"
@@ -118,22 +118,18 @@ void DataStore::clearStore(bool force, bool hard, MsgStream* /*pmlog*/)
 void DataStore::keys(const CLID& id, std::vector<std::string>& vkeys,
 		     bool includeAlias, bool onlyValid)
 {
-  vector<string> tkeys;
-  ProxyMap& pmap = m_storeMap[id];
-  ConstProxyIterator p_iter = pmap.begin();
-  for (; p_iter != pmap.end(); p_iter++) {
+  vkeys.clear();
+  for (const ProxyMap::value_type& p : m_storeMap[id]) {
     bool includeProxy(true);
-    if (onlyValid) includeProxy=p_iter->second->isValid();
+    if (onlyValid) includeProxy=p.second->isValid();
     if (includeAlias) {
-      if (includeProxy) tkeys.push_back(p_iter->first);
+      if (includeProxy) vkeys.push_back(p.first);
     }
     else {
-      if (p_iter->first == p_iter->second->name() && includeProxy) 
-	tkeys.push_back(p_iter->first);
+      if (p.first == p.second->name() && includeProxy) 
+	vkeys.push_back(p.first);
     }
   }
-  vkeys.swap(tkeys);
-  return;
 }
 
 //////////////////////////////////////////////////////////////
