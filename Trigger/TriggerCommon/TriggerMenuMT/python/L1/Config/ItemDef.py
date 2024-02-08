@@ -829,6 +829,7 @@ class ItemDef:
 
         # combined jet - xe
         MenuItem('L1_J40_XE50').setLogic( d.J40 & d.XE50 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jJ80_jXE100').setLogic( d.jJ80 & d.jXE100 & physcond).setTriggerType(TT.calo)        
         MenuItem('L1_J40p0ETA25_XE50').setLogic( d.J400ETA25 & d.XE50 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_J75_XE40' ).setLogic( d.J75 & d.XE40 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_J75_XE50' ).setLogic( d.J75 & d.XE50 & physcond).setTriggerType(TT.calo)
@@ -836,16 +837,21 @@ class ItemDef:
         MenuItem('L1_2J40_XE45').setLogic( d.J40.x(2) & d.XE45 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2J50_XE40').setLogic( d.J50.x(2) & d.XE40 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_J40_XE60' ).setLogic( d.J40 & d.XE60 & physcond).setTriggerType(TT.calo)
+        #MenuItem('L1_jJ80_jXE120').setLogic( d.jJ80 & d.jXE120 & physcond).setTriggerType(TT.calo)        
         MenuItem('L1_J30p0ETA49_XE50').setLogic( d.J300ETA49 & d.XE50 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_3J15p0ETA25_XE40').setLogic( d.J150ETA25.x(3) & d.XE40 & physcond).setTriggerType(TT.calo)
         # ATR-27250 Duplicate multijet-seeded triggers to jFEX
-        #MenuItem('L1_3jJ40p0ETA25_jXE80').setLogic( d.jJ400ETA25.x(3) & d.jXE80 & physcond).setTriggerType(TT.calo)
-        #MenuItem('L1_2jJ90_jXE80').setLogic( d.jJ90.x(2) & d.jXE80 & physcond).setTriggerType(TT.calo)
-        #MenuItem('L1_2jJ40_jXE110').setLogic( d.jJ40.x(2) & d.jXE110 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_3jJ40p0ETA25_jXE80').setLogic( d.jJ400ETA25.x(3) & d.jXE80 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2jJ90_jXE80').setLogic( d.jJ90.x(2) & d.jXE80 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2jJ40_jXE110').setLogic( d.jJ40.x(2) & d.jXE110 & physcond).setTriggerType(TT.calo)
 
         # combined em - jet
         MenuItem('L1_EM18VHI_3J20' ).setLogic( d.EM18VHI  & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_EM20VH_3J20' ).setLogic( d.EM20VH  & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
+        # combined em - jet Phase-1 ATR-28761
+        MenuItem('L1_eEM22M_3jJ50' ).setLogic( d.eEM22M  & d.jJ50.x(3)  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_eEM24L_3jJ50' ).setLogic( d.eEM24L  & d.jJ50.x(3)  & physcond).setTriggerType(TT.calo)
+
         #MenuItem('L1_EM13VH_3J20' ).setLogic( d.EM13VH  & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
         ### ATR-15524
         #MenuItem('L1_EM18VH_3J20' ).setLogic( d.EM18VH  & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
@@ -853,6 +859,8 @@ class ItemDef:
         MenuItem('L1_eEM22M_3jJ40p0ETA25' ).setLogic( d.eEM22M & d.jJ400ETA25.x(3)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_eEM22M_4jJ30p0ETA25' ).setLogic( d.eEM22M & d.jJ300ETA25.x(4)  & physcond).setTriggerType(TT.calo)
 
+
+         
 
         # combined mu - jet
         MenuItem('L1_MU3V_J12'   ).setLogic( d.MU3V & d.J12    & physcond).setTriggerType(TT.calo)
@@ -869,6 +877,11 @@ class ItemDef:
         MenuItem('L1_MU8F_3J20'    ).setLogic( d.MU8F & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU8F_2J20'    ).setLogic( d.MU8F & d.J20.x(2)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU8F_2J15_J20').setLogic( d.MU8F & d.J15.x(2) & d.J20  & physcond).setTriggerType(TT.calo)
+
+        MenuItem('L1_MU8F_3jJ50'    ).setLogic( d.MU8F & d.jJ50.x(3)  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_MU8F_2jJ50'    ).setLogic( d.MU8F & d.jJ50.x(2)  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_MU8F_2jJ40_jJ50').setLogic( d.MU8F & d.jJ40.x(2) & d.jJ50  & physcond).setTriggerType(TT.calo)
+        
         MenuItem('L1_MU14FCH_J50'  ).setLogic( d.MU14FCH & d.J50  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU3V_XE60'      ).setLogic( d.MU3V & d.XE60  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2MU3V_XE60'     ).setLogic( d.MU3V.x(2) & d.XE60  & physcond).setTriggerType(TT.calo)
@@ -880,7 +893,8 @@ class ItemDef:
         MenuItem('L1_MU14FCH_XE40').setLogic( d.MU14FCH & d.XE40 & physcond).setTriggerType(TT.calo) ## ATR-19376
         MenuItem('L1_MU14FCH_jJ80' ).setLogic( d.MU14FCH & d.jJ80 & physcond).setTriggerType(TT.calo) 
         MenuItem('L1_MU14FCH_jXE70').setLogic( d.MU14FCH & d.jXE70 & physcond).setTriggerType(TT.calo) 
-
+        MenuItem('L1_MU14FCH_jJ90' ).setLogic( d.MU14FCH & d.jJ90 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_MU14FCH_jXE80').setLogic( d.MU14FCH & d.jXE80 & physcond).setTriggerType(TT.calo)        
         # HI
         MenuItem('L1_J15_NZ' ).setLogic( d.J15      & Not(ZDC_AND) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2J15_NZ').setLogic( d.J15.x(2) & Not(ZDC_AND) & physcond).setTriggerType(TT.calo)
@@ -911,6 +925,7 @@ class ItemDef:
         MenuItem('L1_jXE80' ).setLogic( d.jXE80  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE100').setLogic( d.jXE100 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE110').setLogic( d.jXE110 & physcond).setTriggerType(TT.calo)
+        #MenuItem('L1_jXE120').setLogic( d.jXE120 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE500').setLogic( d.jXE500 & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jXEC100'    ).setLogic( d.jXEC100 & physcond).setTriggerType(TT.calo)
