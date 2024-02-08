@@ -78,6 +78,9 @@ namespace EL
       /// at
       uint64_t m_inputTreeEntry {0};
 
+      /// \brief whether we are skipping the current event
+      bool m_skipEvent = false;
+
       /// \brief the meta-data we use
       const SH::MetaObject *m_metaData {nullptr};
 

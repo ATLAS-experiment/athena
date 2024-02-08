@@ -380,16 +380,6 @@ namespace EL
                                   Detail::OutputStreamData output);
 
 
-    /// effects: tell all algorithms that they should process the next
-    ///   event
-    /// guarantee: basic
-    /// failures: algorithm dependent
-    /// requires: file pointers are set properly
-    /// requires: algorithms are initialized
-  private:
-    ::StatusCode algsExecute ();
-
-
     /// \brief the number of events in the input file
     /// \par Guarantee
     ///   no-fail
@@ -426,11 +416,6 @@ namespace EL
     typedef std::map<std::pair<std::string,std::string>,TTree*>::const_iterator
        OutputTreeMapIter;
     std::map<std::pair<std::string,std::string>,TTree*> m_outputTreeMap;
-
-
-    /// description: whether we are skipping the event
-  private:
-    bool m_skipEvent;
 
 
     /// \brief the list of modules we hold

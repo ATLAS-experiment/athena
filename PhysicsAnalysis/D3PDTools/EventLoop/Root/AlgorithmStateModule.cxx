@@ -134,5 +134,63 @@ namespace EL
       return forAllAlgorithms (data, "fileExecute", [&] (AlgorithmData& alg) {
           return alg->fileExecute ();});
     }
+
+
+
+    ::StatusCode AlgorithmStateModule ::
+    onExecute (ModuleData& data)
+    {
+      using namespace msgEventLoop;
+      RCU_CHANGE_INVARIANT (this);
+
+      data.m_skipEvent = false;
+      auto iter = data.m_algs.begin();
+      try
+      {
+        for (auto end = data.m_algs.end();
+            iter != end; ++ iter)
+        {
+          iter->m_executeCount += 1;
+          if (iter->m_algorithm->execute() == StatusCode::FAILURE)
+          {
+            ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
+            return ::StatusCode::FAILURE;
+          }
+
+          if (data.m_skipEvent)
+          {
+            iter->m_skipCount += 1;
+            return ::StatusCode::SUCCESS;
+          }
+        }
+      } catch (...)
+      {
+        Detail::report_exception (std::current_exception());
+        ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
+        return ::StatusCode::FAILURE;
+      }
+
+      /// rationale: this will make sure that the post-processing runs
+      ///   for all algorithms for which the regular processing was run
+      try
+      {
+        for (auto jter = data.m_algs.begin(), end = iter;
+            jter != end && !data.m_skipEvent; ++ jter)
+        {
+          if (jter->m_algorithm->postExecute() == StatusCode::FAILURE)
+          {
+            ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
+            return ::StatusCode::FAILURE;
+          }
+        }
+      } catch (...)
+      {
+        Detail::report_exception (std::current_exception());
+        ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
+        return ::StatusCode::FAILURE;
+      }
+
+      return ::StatusCode::SUCCESS;
+    }
   }
 }

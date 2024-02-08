@@ -12,6 +12,7 @@
 #include <EventLoop/Worker.h>
 
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
+#include <EventLoop/AlgorithmMemoryModule.h>
 #include <EventLoop/AlgorithmStateModule.h>
 #include <EventLoop/AlgorithmTimerModule.h>
 #include <EventLoop/BatchInputModule.h>
@@ -26,6 +27,7 @@
 #include <EventLoop/GridReportingModule.h>
 #include <EventLoop/Job.h>
 #include <EventLoop/LeakCheckModule.h>
+#include <EventLoop/MemoryMonitorModule.h>
 #include <EventLoop/MessageCheck.h>
 #include <EventLoop/OutputStream.h>
 #include <EventLoop/OutputStreamData.h>
@@ -379,6 +381,8 @@ namespace EL
     const bool xAODInput = m_metaData->castBool (Job::optXAODInput, false);
 
     ANA_MSG_INFO ("xAODInput = " << xAODInput);
+    if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
+      m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("EarlyMemoryMonitor"));
     if (xAODInput)
       m_modules.push_back (std::make_unique<Detail::TEventModule> ());
     m_modules.push_back (std::make_unique<Detail::LeakCheckModule> ());
@@ -387,11 +391,15 @@ namespace EL
       m_modules.push_back (std::make_unique<Detail::GridReportingModule>());
     if (metaData()->castBool (Job::optAlgorithmTimer, false))
       m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ());
+    if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
+      m_modules.push_back (std::make_unique<Detail::AlgorithmMemoryModule> ());
     m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ());
     m_modules.push_back (std::make_unique<Detail::EventCountModule> ());
     m_modules.push_back (std::make_unique<Detail::WorkerConfigModule> ());
     m_modules.push_back (std::make_unique<Detail::AlgorithmStateModule> ());
     m_modules.push_back (std::make_unique<Detail::PostClosedOutputsModule> ());
+    if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
+      m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("LateMemoryMonitor"));
 
     if (m_outputs.find (Job::histogramStreamName) == m_outputs.end())
     {
@@ -541,11 +549,18 @@ namespace EL
     {
       m_inputTreeEntry = event;
       for (auto& module : m_modules)
-        ANA_CHECK (module->onExecute (*this));
-      if (algsExecute().isFailure())
       {
-        ANA_MSG_ERROR ("processing event " << treeEntry() << " on file " << inputFileName());
-        return ::StatusCode::FAILURE;
+        if (module->onExecute (*this).isFailure())
+        {
+          ANA_MSG_ERROR ("processing event " << treeEntry() << " on file " << inputFileName());
+          return ::StatusCode::FAILURE;
+        }
+      }
+      if (m_firstEvent)
+      {
+        m_firstEvent = false;
+        for (auto& module : m_modules)
+          ANA_CHECK (module->postFirstEvent (*this));
       }
       m_eventsProcessed += 1;
       if (m_eventsProcessed % 10000 == 0)
@@ -666,71 +681,6 @@ namespace EL
       return ::StatusCode::FAILURE;
     }
     m_outputs.insert (std::make_pair (label, std::move (data)));
-    return ::StatusCode::SUCCESS;
-  }
-
-
-
-  ::StatusCode Worker ::
-  algsExecute ()
-  {
-    using namespace msgEventLoop;
-    RCU_CHANGE_INVARIANT (this);
-
-    m_skipEvent = false;
-    auto iter = m_algs.begin();
-    try
-    {
-      for (auto end = m_algs.end();
-           iter != end; ++ iter)
-      {
-        iter->m_executeCount += 1;
-        if (iter->m_algorithm->execute() == StatusCode::FAILURE)
-        {
-          ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
-          return ::StatusCode::FAILURE;
-        }
-
-        if (m_skipEvent)
-        {
-          iter->m_skipCount += 1;
-          return ::StatusCode::SUCCESS;
-        }
-      }
-    } catch (...)
-    {
-      Detail::report_exception (std::current_exception());
-      ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
-      return ::StatusCode::FAILURE;
-    }
-
-    /// rationale: this will make sure that the post-processing runs
-    ///   for all algorithms for which the regular processing was run
-    try
-    {
-      for (auto jter = m_algs.begin(), end = iter;
-           jter != end && !m_skipEvent; ++ jter)
-      {
-        if (jter->m_algorithm->postExecute() == StatusCode::FAILURE)
-        {
-          ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
-          return ::StatusCode::FAILURE;
-        }
-      }
-    } catch (...)
-    {
-      Detail::report_exception (std::current_exception());
-      ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
-      return ::StatusCode::FAILURE;
-    }
-
-    if (m_firstEvent)
-    {
-      m_firstEvent = false;
-      for (auto& module : m_modules)
-        ANA_CHECK (module->postFirstEvent (*this));
-    }
-
     return ::StatusCode::SUCCESS;
   }
 

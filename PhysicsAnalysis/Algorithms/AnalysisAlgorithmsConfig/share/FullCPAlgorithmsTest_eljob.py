@@ -32,6 +32,9 @@ parser.add_option( '--max-events', dest = 'max_events',
 parser.add_option( '--algorithm-timer', dest='algorithm_timer',
                    action = 'store_true', default = False,
                    help = 'Run the job with a timer for each algorithm' )
+parser.add_option( '--algorithm-memory', dest='algorithm_memory',
+                   action = 'store_true', default = False,
+                   help = 'Run the job with a memory monitor for each algorithm' )
 parser.add_option( '--no-systematics', dest='no_systematics',
                    action = 'store_true', default = False,
                    help = 'Configure the job to with no systematics' )
@@ -126,6 +129,8 @@ if options.max_events > 0:
     job.options().setDouble( ROOT.EL.Job.optMaxEvents, options.max_events )
 if options.algorithm_timer :
     job.options().setBool( ROOT.EL.Job.optAlgorithmTimer, True )
+if options.algorithm_memory :
+    job.options().setBool( ROOT.EL.Job.optAlgorithmMemoryMonitor, True )
 
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSequenceAlgs
