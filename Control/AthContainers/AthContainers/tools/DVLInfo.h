@@ -1,11 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: DVLInfo.h,v 1.2 2008-06-17 00:44:17 ssnyder Exp $
-
 /**
  * @file  AthContainers/tools/DVLInfo.h
  * @author scott snyder
@@ -190,6 +186,45 @@ private:
 };
 
 
+/**
+ * @brief Implementation for iterator helper.
+ *
+ * Should be declared before DVLInfo to avoid a (false-positive) [missingReturn]
+ * warning from cppcheck.
+ */
+template <class T>
+class DVLIterator
+  : public DVLIteratorBase
+{
+public:
+  typedef typename T::const_iterator base_iterator;
+
+
+  /**
+   * @brief Constructor.
+   * @param beg Start of the container.
+   * @param end End of the container.
+   */
+  DVLIterator (const base_iterator& beg, const base_iterator& end);
+
+
+  /**
+   * @brief Return the next element from the container.
+   *
+   * This is the next pointer from the container (it's a pointer to the
+   * element itself, not a pointer to the pointer).  It will be properly
+   * cast to the type described by elt_tinfo().  Null pointers are skipped;
+   * this function signals the end of iteration by returning 0.
+   */
+   virtual const void* next();
+
+
+private:
+  typename T::const_iterator m_it;
+  typename T::const_iterator m_end;
+};
+
+
 /*
  * @brief Per-container @c DVLInfo.
  *
@@ -283,39 +318,6 @@ public:
    * a class static variable.
    */
   static const std::type_info* initHelper();
-};
-
-
-template <class T>
-class DVLIterator
-  : public DVLIteratorBase
-{
-public:
-  typedef typename T::const_iterator base_iterator;
-
-
-  /**
-   * @brief Constructor.
-   * @param beg Start of the container.
-   * @param end End of the container.
-   */
-  DVLIterator (const base_iterator& beg, const base_iterator& end);
-
-
-  /**
-   * @brief Return the next element from the container.
-   *
-   * This is the next pointer from the container (it's a pointer to the
-   * element itself, not a pointer to the pointer).  It will be properly
-   * cast to the type described by elt_tinfo().  Null pointers are skipped;
-   * this function signals the end of iteration by returning 0.
-   */
-   virtual const void* next();
-
-
-private:
-  typename T::const_iterator m_it;
-  typename T::const_iterator m_end;
 };
 
 
