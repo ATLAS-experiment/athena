@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileRecAlgs )
@@ -27,6 +27,11 @@ atlas_add_test( MBTSTimeDiffEventInfoAlgConfig_test
 
 atlas_add_test( TileDigitsFilterConfig_test
                 SCRIPT python -m TileRecAlgs.TileDigitsFilterConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileRawChannelToHitConfig_test
+                SCRIPT python -m TileRecAlgs.TileRawChannelToHitConfig
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
 
