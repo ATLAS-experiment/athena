@@ -27,7 +27,6 @@ jFEXFormTOBs::~jFEXFormTOBs() {}
 
 StatusCode jFEXFormTOBs::initialize()
 {
-    ATH_CHECK( m_BDToolKey.initialize() );
     return StatusCode::SUCCESS;
 }
 
@@ -70,8 +69,9 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
 
 }    
 
-int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex, int res){
-    
+int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int res, const std::vector<int>& calibFactors){
+    // This is for data taken before the end of 2023
+    // ET binned calibration factors (in practice all set to the same value)
     int Et_edge[8] = {20,30,40,50,65,80,110,150};
     int et_range = -1;
     
@@ -88,13 +88,29 @@ int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex, int res){
         et_range = 8;
     }
     
-    SG::ReadCondHandle<jFEXDBCondData> myDBTool = SG::ReadCondHandle<jFEXDBCondData>( m_BDToolKey/*, ctx*/ );
-    if (!myDBTool.isValid()){
-        ATH_MSG_ERROR("Not able to read " << m_BDToolKey );
+    int calib = calibFactors[et_range]; 
+    
+    //Converting into 200MeV scale
+    int et_200Mev = std::floor(1.0*Energy/res);
+    
+    //Applying the calibration
+    int et = std::floor( (1.0*et_200Mev*calib)/(1<<7) );
+    
+    return et;
+}
+
+int jFEXFormTOBs::Get_eta_calibrated_SRj_ET(int Energy, int jfex, unsigned int coreEta, int res, const std::vector<int>& calibFactors){
+    // This is for data taken starting from 2024
+    // eta binned calibration factors for improved calibration w.r.t. offline jets
+    
+    //checking upper threshold for SRjet energy
+    if (jfex != 0 && jfex != 5) {
+      coreEta = std::min(coreEta,7u); // 8 core eta bins for central modules
+    } else {
+      coreEta = std::min(coreEta,24u); // 25 core eta bins for forward modules
     }
     
-    
-    int calib = myDBTool->get_jJCalibParam(jfex,et_range);
+    int calib = calibFactors[coreEta]; 
     
     //Converting into 200MeV scale
     int et_200Mev = std::floor(1.0*Energy/res);
@@ -106,8 +122,7 @@ int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex, int res){
 }
 
 
-
-uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bool sat, int Resolution, int ptMinToTopo ) {
+uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bool sat, int Resolution, int ptMinToTopo, const std::pair<unsigned int, const std::vector<int>&>& calibParameters ) {
     uint32_t tobWord = 0;
     unsigned int eta = 0;
     unsigned int phi = 0;
@@ -152,8 +167,12 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bo
         } 
     }
     
-    // COMENTED FOR NOW, Appliying jet calibration
-    jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus,jFEX, Resolution);
+    //  Appliying jet calibration
+    if (calibParameters.first > m_jetEtaCalibrationBeginTimestamp) {
+        jFEXSmallRJetTOBEt = Get_eta_calibrated_SRj_ET(EtClus, jFEX, eta, Resolution, calibParameters.second);
+    } else {
+        jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus, Resolution, calibParameters.second);
+    }
     
     if(jFEXSmallRJetTOBEt > 0x7ff) {
         jFEXSmallRJetTOBEt = 0x7ff;

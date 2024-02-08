@@ -67,7 +67,7 @@ namespace LVL1 {
 
     virtual StatusCode init(int id, int efexid) override ;
 
-    virtual StatusCode execute(jFEXOutputCollection* inputOutputCollection) override ;
+    virtual StatusCode execute(jFEXOutputCollection* inputOutputCollection, const std::pair<unsigned int, const std::vector<int>&> & jetCalibrationParameters) override ;
 
     virtual void reset() override ;
 

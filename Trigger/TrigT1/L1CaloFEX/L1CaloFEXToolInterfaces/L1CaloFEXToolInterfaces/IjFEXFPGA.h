@@ -37,7 +37,7 @@ Interface definition for jFEXFPGA
 
     virtual StatusCode init(int id, int efexid) = 0;
 
-    virtual StatusCode execute(jFEXOutputCollection* inputOutputCollection) = 0;
+    virtual StatusCode execute(jFEXOutputCollection* inputOutputCollection, const std::pair<unsigned int, const std::vector<int>&> & jetCalibrationParameters) = 0;
 
     virtual void reset() = 0;
 

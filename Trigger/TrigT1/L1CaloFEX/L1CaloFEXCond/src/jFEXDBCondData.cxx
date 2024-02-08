@@ -16,6 +16,10 @@ int jFEXDBCondData::get_jJCalibParam(int module, int range) const {
     return m_jJCalibParams[module][range];
 }
 
+const std::vector<int>& jFEXDBCondData::get_jJCalibParams(int module) const {
+    return m_jJCalibParams[module];
+}
+
 bool jFEXDBCondData::get_doPileUpJet() const {
     return m_PileUpCorrectionJet;
 }
@@ -107,8 +111,8 @@ std::array<uint16_t,4> jFEXDBCondData::get_PileUpValues(uint16_t onlineID) const
     }
 } 
 
-void jFEXDBCondData::set_jJCalibParam(int jJCalibParams[6][9]){
-    std::copy(&jJCalibParams[0][0], &jJCalibParams[0][0]+6*9, &m_jJCalibParams[0][0]);
+void jFEXDBCondData::set_jJCalibParam(const std::vector<std::vector<int>>& params){
+    m_jJCalibParams = params;
 }
 
 void jFEXDBCondData::set_doPileUpJet(bool PileUpCorrectionJet){

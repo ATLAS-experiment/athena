@@ -66,7 +66,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     /*    Jet calibration Parameters       */
     /*                                     */
     /***************************************/
-    int jJCalibParams[6][9]={{0}};
+    std::vector<std::vector<int>> jJCalibParams(6, std::vector<int>(25, 0)); //6 modules, up to 25 calib factors
     
     if(!m_JfexModuleSettingsKey.empty() && useDBparams){
         SG::ReadCondHandle <CondAttrListCollection> load_jFexModuleSet{m_JfexModuleSettingsKey, ctx };
@@ -84,16 +84,18 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
                 const std::string s((char*)blob.startingAddress(),blob.size());       
                 nlohmann::json attrList = nlohmann::json::parse(s);
                 
-                if(attrList["JetCalib"].size() != 9 || attrList["JetCalib"] == nullptr){
+                if(attrList["JetCalib"] == nullptr) {
                     ATH_MSG_ERROR("Not loaded jFEX JetCalib from "<<m_JfexModuleSettingsKey);
+                    return StatusCode::FAILURE;
+                } 
+                
+                const std::vector<int> v_tmp(attrList["JetCalib"]);
+                if ( not(v_tmp.size() == 9 || v_tmp.size() == 8 || v_tmp.size() == 25 ) ){ //9 ET bins (before 2024), 8 (ctrl) / 25 (fwd) eta bins (from 2024 on)
+                    ATH_MSG_ERROR("Not loaded jFEX JetCalib from "<<m_JfexModuleSettingsKey<<" (unexpected size: "<<v_tmp.size()<<")");
                     return StatusCode::FAILURE;
                 }
                 
-                const std::vector<int> v_tmp(attrList["JetCalib"]);
-                
-                for(unsigned int range=0; range<v_tmp.size();range++){
-                    jJCalibParams[mod][range] = v_tmp.at(range);
-                }
+                jJCalibParams[mod] = v_tmp;
                 mod++;
             }
             
@@ -107,7 +109,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
         
         // LOADING default values!
         for(unsigned int fex=0; fex<6; fex++){
-            for(unsigned int range=0; range<9; range++){
+            for(unsigned int range=0; range<25; range++){
                 jJCalibParams[fex][range] = jDBdefaults::jJCalibParams[fex][range];
             }
         }
