@@ -12,15 +12,15 @@ atlas_add_library( ActsToolInterfacesLib
                    INTERFACE
                    PUBLIC_HEADERS ActsToolInterfaces
                    LINK_LIBRARIES
-                   GaudiKernel
-                   BeamSpotConditionsData
-                   ActsCore
-                   ActsEventLib
-		   ActsGeometryLib
-                   SiSpacePointFormationLib
-                   InDetReadoutGeometry
-		   InDetIdentifier
-                   xAODInDetMeasurement
-                   xAODMeasurementBase
-                   TrkFitterUtils
-                   )
+		     ActsCore
+		     ActsEventLib
+		     ActsGeometryLib
+		     BeamSpotConditionsData
+		     GaudiKernel
+		     InDetIdentifier
+		     InDetRawData
+		     InDetReadoutGeometry
+		     SiSpacePointFormationLib
+		     TrkTrack
+		     xAODInDetMeasurement
+		     xAODMeasurementBase )

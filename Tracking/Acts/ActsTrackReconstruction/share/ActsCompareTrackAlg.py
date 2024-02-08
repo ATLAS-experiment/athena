@@ -4,7 +4,7 @@ Read an xAOD with track Particle
 """
 
 # Set input AOD files
-if not "inputFiles" in dir():
+if "inputFiles" not in dir():
     inputFiles = ["myESD.q221.pool.root"]
 
 import AthenaPoolCnvSvc.ReadAthenaPool
