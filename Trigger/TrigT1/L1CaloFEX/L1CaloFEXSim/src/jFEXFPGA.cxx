@@ -88,7 +88,7 @@ void jFEXFPGA::reset() {
     m_FwdEl_tobwords.clear();
 }
 
-StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
+StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const std::pair<unsigned int, const std::vector<int>&> & jetCalibrationParameters) {
     
     // Retrieve the L1 menu configuration
     SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
@@ -311,7 +311,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     int mphi_LM = mphi;
 
                     //Creating SR TOB
-                    uint32_t SRJet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, mphi_LM, meta_LM, SRj_Et, SRj_Sat, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
+                    uint32_t SRJet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, mphi_LM, meta_LM, SRj_Et, SRj_Sat, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]), jetCalibrationParameters);
                     
                     std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
                     jJ_tob->initialize(m_id,m_jfexid,SRJet_tobword,thr_jJ.resolutionMeV(),m_jTowersIDs_Thin[mphi_LM][meta_LM]);              
@@ -375,7 +375,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             
             bool SRJ_sat = FCALJets.getSRjetSat();
             
-            uint32_t SRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, iphi, ieta, m_SRJetET, SRJ_sat, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
+            uint32_t SRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, iphi, ieta, m_SRJetET, SRJ_sat, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]), jetCalibrationParameters);
             
             std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
             jJ_tob->initialize(m_id,m_jfexid,SRFCAL_Jet_tobword,thr_jJ.resolutionMeV(),TTID);   

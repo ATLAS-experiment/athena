@@ -28,6 +28,7 @@ class jFEXDBCondData
 
         /** Getters **/
         int  get_jJCalibParam(int module, int range) const;
+        const std::vector<int> &  get_jJCalibParams(int module) const;
         bool get_doPileUpJet() const;
         bool get_doPileUpMet() const;
         int  get_PUThrLowEm() const;
@@ -44,7 +45,7 @@ class jFEXDBCondData
         std::array<uint16_t,4>  get_PileUpValues(uint16_t onlineID) const;
 
         /** Setters **/
-        void set_jJCalibParam(int jJCalibParams[6][9]);
+        void set_jJCalibParam(const std::vector<std::vector<int>>& params);
         void set_doPileUpJet(bool PileUpCorrectionJet);
         void set_doPileUpMet(bool PileUpCorrectionMET);
         void set_PUThrLowEm(int PileUpThresholdLowEm);
@@ -67,14 +68,15 @@ class jFEXDBCondData
         bool m_sendDefaults = true;
         
         // Values for jJ Calibration
-        int m_jJCalibParams[6][9] =
-        {   //<20  <30  <40  <50  <65  <80 <110 <150 <inf  GeV
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },// jFEX 0  FCal
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },// jFEX 1  Central
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },// jFEX 2  Central
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },// jFEX 3  Central
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 },// jFEX 4  Central
-            { 0, 0, 0, 0, 0, 0, 0, 0, 0 } // jFEX 5  FCal
+        std::vector<std::vector<int>> m_jJCalibParams =
+        {   //for ET based calibration : <20  <30  <40  <50  <65  <80 <110 <150 <inf  GeV (9 bins)
+            //for eta based calibration: based on per-FPGA local eta indices (up to 25 bins)
+            std::vector<int>(25,0),// jFEX 0  FCal
+            std::vector<int>(25,0),// jFEX 1  Central
+            std::vector<int>(25,0),// jFEX 2  Central
+            std::vector<int>(25,0),// jFEX 3  Central
+            std::vector<int>(25,0),// jFEX 4  Central
+            std::vector<int>(25,0) // jFEX 5  FCal
         };
 
         // Apply pileup on met or jet?

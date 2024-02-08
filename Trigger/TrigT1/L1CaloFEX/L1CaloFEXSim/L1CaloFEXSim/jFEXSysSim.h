@@ -14,6 +14,11 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXSysSim.h"
 #include "AthenaKernel/CLASS_DEF.h"
+
+#include "L1CaloFEXCond/jFEXDBCondData.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+
 #include "L1CaloFEXSim/jFEXSim.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
@@ -75,6 +80,8 @@ namespace LVL1 {
   /** Internal data */
   private:
     std::vector<jFEXSim*>  m_jFEXCollection;
+    
+    SG::ReadCondHandleKey<jFEXDBCondData> m_DBToolKey {this, "DBToolKey", "jFEXDBParams", "DB tool key"};
     
     ToolHandle<IjFEXSim> m_jFEXSimTool       {this, "jFEXSimTool",    "LVL1::jFEXSim",    "Tool that creates the jFEX Simulation"};
 
