@@ -84,16 +84,23 @@ namespace CP {
             }
         }
 
+        ATH_MSG_DEBUG("execute: apply selections " );
+
         /// Apply selection to muons, electrons and photons - setting selection decorator
         ATH_CHECK(selectLeptonsAndPhotons(ctx, muons));
         ATH_CHECK(selectLeptonsAndPhotons(ctx, electrons));
         ATH_CHECK(selectLeptonsAndPhotons(ctx, photons));
+
+        ATH_MSG_DEBUG("execute: apply closeBy correction " );
 
         /// Now apply correction to close by leptons and photons
         if (m_closeByCorrTool->getCloseByIsoCorrection(ctx, electrons.asDataVector(), muons.asDataVector(), photons.asDataVector()) == CorrectionCode::Error) {
             ATH_MSG_FATAL("Failed to do close by iso correction ");
             return StatusCode::FAILURE;
         }
+
+        ATH_MSG_DEBUG("execute: after closeBy correction " );
+
         return StatusCode::SUCCESS;
     }
 
