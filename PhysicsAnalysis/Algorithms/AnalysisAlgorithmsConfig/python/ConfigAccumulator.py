@@ -29,13 +29,14 @@ class SelectionConfig :
     removed in the future."""
 
     def __init__ (self, selectionName, decoration,
-                  *, bits=0, preselection=None) :
+                  *, bits=0, preselection=None, comesFrom = '') :
         self.name = selectionName
         self.decoration = decoration
         if preselection is not None :
             self.preselection = preselection
         else :
             self.preselection = (selectionName == '')
+        self.comesFrom = comesFrom
 
 
 
@@ -388,7 +389,7 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].isMet
 
 
-    def readNameAndSelection (self, containerName) :
+    def readNameAndSelection (self, containerName, *, excludeFrom = None) :
         """get the name of the "current copy" of the given container, and the
         selection string
 
@@ -405,7 +406,7 @@ class ConfigAccumulator :
             selectionName = split[1]
         else :
             raise Exception ('invalid object selection name: ' + containerName)
-        return self.readName (objectName), self.getFullSelection (objectName, selectionName)
+        return self.readName (objectName), self.getFullSelection (objectName, selectionName, excludeFrom=excludeFrom)
 
 
     def nextPass (self) :
@@ -445,7 +446,7 @@ class ConfigAccumulator :
 
 
     def getFullSelection (self, containerName, selectionName,
-                          *, skipBase = False) :
+                          *, skipBase = False, excludeFrom = None) :
 
         """get the selection string for the given selection on the given
         container
@@ -460,10 +461,16 @@ class ConfigAccumulator :
                           expression based on multiple named selections
         skipBase --- will avoid the base selection, and should normally
                      not be used by the end-user.
-
+        excludeFrom --- a set of string names of selection sources to exclude
+                        e.g. to exclude OR selections from MET
         """
         if containerName not in self._containerConfig :
             return ""
+        
+        if excludeFrom is None :
+            excludeFrom = {}
+        elif not isinstance(excludeFrom, set) :
+            raise ValueError ('invalid excludeFrom argument (need set of strings): ' + str(excludeFrom))
 
         # Check if this is actually a selection expression,
         # e.g. `A||B` and if so translate it into a complex expression
@@ -480,13 +487,13 @@ class ConfigAccumulator :
                     selectionName = selectionName[1:]
                 else :
                     subname = match.group(0)
-                    subresult = self.getFullSelection (containerName, subname, skipBase = True)
+                    subresult = self.getFullSelection (containerName, subname, skipBase = True, excludeFrom=excludeFrom)
                     if subresult != '' :
                         result += '(' + subresult + ')'
                     else :
                         result += 'true'
                     selectionName = selectionName[len(subname):]
-            subresult = self.getFullSelection (containerName, '')
+            subresult = self.getFullSelection (containerName, '', excludeFrom=excludeFrom)
             if subresult != '' :
                 result = subresult + '&&(' + result + ')'
             return result
@@ -494,8 +501,7 @@ class ConfigAccumulator :
         config = self._containerConfig[containerName]
         decorations = []
         for selection in config.selections :
-            if ((selection.name == '' and not skipBase) or
-                selection.name == selectionName) :
+            if ((selection.name == '' and not skipBase) or selection.name == selectionName) and (selection.comesFrom not in excludeFrom) :
                 decorations += [selection.decoration]
         return '&&'.join (decorations)
 
