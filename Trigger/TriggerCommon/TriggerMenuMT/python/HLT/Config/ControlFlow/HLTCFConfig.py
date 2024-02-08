@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
     ------ Documentation on HLT Tree creation -----
@@ -33,16 +33,15 @@ from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaCommon.Logging import logging
 
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 from DecisionHandling.DecisionHandlingConfig import TriggerSummaryAlg
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TriggerJobOpts.TriggerConfig import collectHypos, collectFilters, collectViewMakers, collectDecisionObjects, \
      triggerMonitoringCfg, triggerSummaryCfg, collectHypoDecisionObjects
 from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import getTrigNavSlimmingMTOnlineConfig
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
-
 
 from builtins import map, range, str, zip
 from collections import OrderedDict, defaultdict
@@ -344,7 +343,7 @@ def sequenceScanner( HLTNode ):
                 _seqMapInStep[compName(c)].add((stepIndex,inView))
                 log.verbose("sequenceScanner: Child %s of sequence %s is in view? %s --> '%s'", compName(c), name, inView, inViewSequence)
             else:
-                if isinstance(c,EventViewCreatorAlgorithm):
+                if isinstance(c, CompFactory.EventViewCreatorAlgorithm):
                     inViewSequence = c.ViewNodeName
                     log.verbose("sequenceScanner: EventViewCreatorAlg %s is child of sequence %s with ViewNodeName %s", compName(c), name, c.ViewNodeName)
         log.debug("sequenceScanner: Sequence %s is in view? %s --> '%s'", name, inView, inViewSequence)
