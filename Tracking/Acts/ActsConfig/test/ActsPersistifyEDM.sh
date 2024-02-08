@@ -14,11 +14,21 @@ Reco_tf.py --CA \
   --outputAODFile AOD.pool.root \
   --maxEvents ${n_events}
 
+rc=$?
+if [ $rc != 0 ]; then
+    exit $rc
+fi
+
 # Check we can retrieve the EDM, and related quantities, with our analysis algorithms
 ActsReadEDM.py \
    --filesInput AOD.pool.root -- \
    readClusters=True \
    readSpacePoints=True
+
+rc=$?
+if [ $rc != 0 ]; then
+    exit $rc
+fi
 
 # Check we can run IDPVM
 runIDPVM.py \
