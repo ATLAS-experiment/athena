@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/DiffStruct.h"
@@ -78,7 +78,7 @@ TrigConf::DiffStruct::writeXML(ofstream & xmlfile, const std::string& prefix) co
    xmlfile << prefix << "<" << tagname;
    if(name!="")
       xmlfile << " name=\"" << name << "\"";
-   for(AttDiff d : attdiffs)
+   for(const AttDiff& d : attdiffs)
       xmlfile << " " << d.attname << "_l=\"" << d.lval << "\" " << d.attname << "_r=\"" << d.rval << "\"";
    if(subs.size()==0 && rightonly.size()==0 && leftonly.size()==0) {
       xmlfile << "/>" << endl;

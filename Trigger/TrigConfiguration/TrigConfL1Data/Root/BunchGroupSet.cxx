@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/BunchGroupSet.h"
@@ -18,7 +18,7 @@ BunchGroupSet::BunchGroupSet(const std::vector<BunchGroup>& bgv) :
    m_BunchGroups(bgv),
    m_BGpattern(3564)
 {
-   for(BunchGroup bg: m_BunchGroups)
+   for(const BunchGroup& bg: m_BunchGroups)
       fillPattern(bg.internalNumber(), bg);
 }
   
@@ -55,7 +55,7 @@ BunchGroupSet::print(const std::string& indent, unsigned int detail) const {
       cout  << endl;
       cout << indent << "Number of bunch groups: " << m_BunchGroups.size() << endl;
       if(detail>=2) {
-         for(BunchGroup bg: m_BunchGroups)
+         for(const BunchGroup& bg: m_BunchGroups)
             bg.print(indent + indent, detail);
       }
    }
@@ -65,7 +65,7 @@ void
 BunchGroupSet::writeXML(std::ostream & xmlfile, int indentLevel, int indentWidth) const {
    indent(xmlfile,indentLevel, indentWidth) 
       << "<BunchGroupSet name=\"" << name() << "\" menuPartition=\"" << m_MenuPartition << "\">" << endl;
-   for(BunchGroup bg: m_BunchGroups)
+   for(const BunchGroup& bg: m_BunchGroups)
       bg.writeXML(xmlfile, indentLevel+1, indentWidth);
    indent(xmlfile,indentLevel, indentWidth)
       << "</BunchGroupSet>" << endl;   
