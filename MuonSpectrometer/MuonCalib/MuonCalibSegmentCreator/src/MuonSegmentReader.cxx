@@ -63,7 +63,8 @@ StatusCode MuonSegmentReader::execute()
 
   // fill the rawMdt Hit branches
   SG::ReadHandle<Muon::MdtPrepDataContainer> mdtPrepRawData(m_MdtPrepData, ctx);
-  ATH_MSG_INFO("Number of MDT raw Hits : "<<mdtPrepRawData->size());
+  ATH_MSG_DEBUG("Size of MdtPrepDataContainer : "<<mdtPrepRawData->size());
+
 
   Muon::MdtPrepDataContainer::const_iterator mdtColl = mdtPrepRawData->begin();
   Muon::MdtPrepDataContainer::const_iterator last_mdtColl = mdtPrepRawData->end();
@@ -83,6 +84,8 @@ StatusCode MuonSegmentReader::execute()
   }  // end of MdtPrepDataCollection                             
   } // end of MdtPrepDataContainer
   m_rawMdt_nRMdt = m_rawMdt_adc.size() ;
+  ATH_MSG_DEBUG("Number of MDT raw Hits : "<<m_rawMdt_nRMdt);
+
 
   // fill the muon standalone tracks 
   SG::ReadHandle<TrackCollection> muTrks(m_TrkKey, ctx);
@@ -100,7 +103,6 @@ StatusCode MuonSegmentReader::execute()
   m_timeStamp = eventInfo->timeStamp();
   m_pt = eventInfo->timeStampNSOffset();
   //m_eventTag = eventInfo->eventTag();
-
 
   // if tracks were found, print MDT track hits
   for (unsigned int itrk = 0; itrk < muTrks->size(); ++itrk) {

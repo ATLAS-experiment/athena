@@ -95,6 +95,8 @@ StatusCode RpcCalibRawDataProvider::decodeImpl(const EventContext& ctx,  RpcPadC
 
         // std::vector<RpcPad*>* m_rpcpads;
         // Iterate on the readout PADS
+        std::vector<std::unique_ptr<RpcPad>> rpcPadCollections{};
+
         ATH_MSG_DEBUG("Iterate on the readout PADS");
         int max_pad = 1;
         for (int j = 0; j < max_pad; ++j) {
@@ -125,7 +127,8 @@ StatusCode RpcCalibRawDataProvider::decodeImpl(const EventContext& ctx,  RpcPadC
             // Build the pad offline identifier
             Identifier id = m_muonIdHelper->rpcIdHelper().padID(name, eta, phi, doublet_r, doublet_z, doublet_phi);
 
-            RpcPad *newpad = new RpcPad(id, index.hash(), pad_id, status, errorCode, sector);
+            std::unique_ptr<RpcPad> newpad = std::make_unique<RpcPad>(id, index.hash(), pad_id, status, errorCode, sector);
+
             // iterate on the matrices
             ATH_MSG_DEBUG("Iterate on the matrices");
             for (RpcCalibData &calib_matrix : calib_pad) {
@@ -134,39 +137,49 @@ StatusCode RpcCalibRawDataProvider::decodeImpl(const EventContext& ctx,  RpcPadC
                 unsigned int fel1id = calib_matrix.fel1Id();
                 unsigned int febcid = calib_matrix.febcId();
                 ATH_MSG_DEBUG("fillCollections: matrix no= " << cmid << " crc= " << crc << " fel1id= " << fel1id << " febcid= " << febcid);
-                RpcCoinMatrix *matrix = new RpcCoinMatrix(id, cmid, crc, fel1id, febcid);
+                std::unique_ptr<RpcCoinMatrix> matrix = std::make_unique<RpcCoinMatrix>(id, cmid, crc, fel1id, febcid);
+
                 // iterate on the fired channels
                 ATH_MSG_DEBUG("Iterate on the fired channels");
                 for (short unsigned int i = 0; i < calib_matrix.hitNum(); ++i) {
-                    RpcFiredChannel *rpcfiredchannel = nullptr;
+                    std::unique_ptr<RpcFiredChannel> rpcfiredchannel = nullptr ;
                     uint16_t bcid{0}, time{0}, ijk{0}, channel{0}, ovl{0}, thr{0};
                     calib_matrix.giveHit(i, bcid, time, ijk, channel, ovl, thr);
 
                     ATH_MSG_DEBUG("Check BIS78 updates? " << __FILE__ << " " << __LINE__);
                     if (ijk < 7) {
-                        rpcfiredchannel = new RpcFiredChannel(bcid, time, ijk, channel);
+                        rpcfiredchannel = std::make_unique<RpcFiredChannel>(bcid, time, ijk, channel);
+
                     } else if (ijk == 7) {
-                        rpcfiredchannel = new RpcFiredChannel(bcid, time, ijk, thr, ovl);
+                        rpcfiredchannel = std::make_unique<RpcFiredChannel>(bcid, time, ijk, thr, ovl);
+
                     }
                     ATH_MSG_DEBUG("fillCollections: hit no= " << i << " bcid= " << bcid << " time= " << time << " ijk= " << ijk
                                                               << " channel=" << channel << " ovl= " << ovl << " thr= " << thr);
-                    matrix->push_back(rpcfiredchannel);
+                    matrix->push_back(std::move(rpcfiredchannel));
                     ATH_MSG_DEBUG("fillCollections: hit added to the matrix");
                 }  // end iterate on the fired channels
                 // add the matrix to the pad
-                newpad->push_back(matrix);
+                newpad->push_back(std::move(matrix));
                 ATH_MSG_DEBUG("fillCollections: matrix added to the pad");
             }  // end iterate on the matrices
 
             // Push back the decoded pad in the vector
-            const Identifier padId = newpad->identify();
-            IdentifierHash elementHash;
-            m_muonIdHelper->rpcIdHelper().get_detectorElement_hash(padId, elementHash);
 
-            ATH_CHECK( padContainer->addCollection(newpad,elementHash ) );
+            rpcPadCollections.push_back(std::move(newpad));            
 
             //      m_rpcpads->push_back(newpad);
             ATH_MSG_DEBUG("fillCollections: pad added to the pad vector");
         }  // end iterate on the readout PADS
+
+        for (auto& coll : rpcPadCollections) {
+            if (!coll) continue;
+            const Identifier padId = coll->identify();
+            IdentifierHash elementHash = m_muonIdHelper->moduleHash(padId);
+            RpcPadContainer::IDC_WriteHandle lock = padContainer->getWriteHandle(elementHash);
+            ATH_CHECK(lock.addOrDelete(std::move(coll)));
+        }
+        ATH_MSG_DEBUG("Wrote " << rpcPadCollections.size() << " RPC PAD");
+
         return StatusCode::SUCCESS;
     }
