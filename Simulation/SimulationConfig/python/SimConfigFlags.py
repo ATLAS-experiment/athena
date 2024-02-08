@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
@@ -205,7 +205,7 @@ def createSimConfigFlags():
 
     def _decideHITSMerging(prevFlags):
         # Further specialization possible in future
-        if prevFlags.Sim.ISF.Simulator.isFullSim():
+        if prevFlags.Sim.ISF.Simulator.isFullSim() and prevFlags.Sim.LArParameterization!=LArParameterization.FastCaloSim:
             doID = False
             doITk = False
             doCALO = False
@@ -215,7 +215,7 @@ def createSimConfigFlags():
             doITk = True
             doCALO = True
             doMUON = True
-        elif prevFlags.Sim.ISF.Simulator.usesFastCaloSim():
+        elif prevFlags.Sim.ISF.Simulator.usesFastCaloSim() or prevFlags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             doID = False
             doITk = False
             doCALO = True

@@ -102,7 +102,11 @@ def BeamEffectsAlgCfg(flags, name="BeamEffectsAlg", **kwargs):
     """Return an accumulator and algorithm for beam effects, wihout output"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("ISFRun", flags.Sim.ISFRun)
+    from SimulationConfig.SimEnums import LArParameterization
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        kwargs.setdefault("ISFRun", True)
+    else:
+        kwargs.setdefault("ISFRun", flags.Sim.ISFRun)
 
     # Set default properties
     if flags.Sim.DoFullChain and flags.Digitization.PileUp:

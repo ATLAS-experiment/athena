@@ -119,6 +119,14 @@ def CommonSimulationCfg(flags, log):
         #add the G4AtlasAlg
         from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
         cfg.merge(G4AtlasAlgCfg(flags))
+        from SimulationConfig.SimEnums import LArParameterization
+        if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+            cfg.getEventAlgo("ISF_CollectionMerger").InputLArEMBHits.data.sort() # temporary workaround
+            cfg.getEventAlgo("ISF_CollectionMerger").InputLArEMECHits.data.sort() # temporary workaround
+            cfg.getEventAlgo("ISF_CollectionMerger").InputLArFCALHits.data.sort() # temporary workaround
+            cfg.getEventAlgo("ISF_CollectionMerger").InputLArHECHits.data.sort() # temporary workaround
+            cfg.getEventAlgo("ISF_CollectionMerger").InputTileHits.data.sort() # temporary workaround
+            cfg.getEventAlgo("ISF_CollectionMerger").InputMBTSHits.data.sort() # temporary workaround
 
     from SimulationConfig.SimEnums import CalibrationRun
     if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile, CalibrationRun.LArTileZDC]:
