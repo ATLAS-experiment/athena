@@ -7,21 +7,29 @@ atlas_subdir( ActsPatternRecognition )
 find_package( Acts COMPONENTS Core )
 
 atlas_add_component( ActsPatternRecognition
-                     src/*.cxx
+                     src/*.h src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES
-                       GaudiKernel
-		       StoreGateLib
-		       AthenaBaseComps
-		       AthenaMonitoringKernelLib
 		       ActsCore
+		       ActsEventLib
+		       ActsEventCnvLib
+		       ActsGeometryInterfacesLib
 		       ActsInteropLib
 		       ActsToolInterfacesLib
-		       ActsGeometryInterfacesLib
-		       ActsEventLib
-		       ActsEventCnvLib		     
-                       BeamSpotConditionsData
-		       MagFieldConditions
-		       SiSPSeededTrackFinderData
+		       AthenaBaseComps
+		       AthenaMonitoringKernelLib
+		       BeamSpotConditionsData
+		       CxxUtils
+		       GaudiKernel
+		       InDetPrepRawData
+		       InDetReadoutGeometry
 		       InDetRecToolInterfaces
-		       )
+		       MagFieldConditions
+		       MagFieldElements
+		       SiSPSeededTrackFinderData
+		       SiSpacePoint
+		       StoreGateLib
+		       TrkEventUtils
+		       TrkParameters
+		       TrkSpacePoint
+		       xAODInDetMeasurement )

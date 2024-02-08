@@ -10,17 +10,17 @@ if( NOT SIMULATIONBASE )
     set( extra_libs ActsCore TrkGeometry)
 endif()
 
-
-
-
 # Component(s) in the package:
 atlas_add_library( ActsGeometryInterfacesLib
                    ActsGeometryInterfaces/*.h
                    INTERFACE
                    PUBLIC_HEADERS ActsGeometryInterfaces
                    LINK_LIBRARIES
-                   AthenaBaseComps
-                   AthenaKernel
-                   GeoModelUtilities
-                   ${extra_libs}
-                   GaudiKernel)
+		      ${extra_libs}
+                      AthenaBaseComps
+                      AthenaKernel
+		      GaudiKernel
+		      GeoModelUtilities
+		      GeoPrimitives
+		      Identifier
+		      TrkEventPrimitives )

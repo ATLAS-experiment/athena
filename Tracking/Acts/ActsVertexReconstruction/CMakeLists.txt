@@ -8,20 +8,19 @@ find_package( Acts COMPONENTS Core )
 
 # Component(s) in the package:
 atlas_add_component( ActsVertexReconstruction
-                     src/*.cxx
+                     src/*.h src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES 
-                     ActsCore
-                     ActsGeometryInterfacesLib
-                     ActsGeometryLib
-                     ActsInteropLib
-                     AthenaBaseComps
-                     BeamSpotConditionsData
-                     GaudiKernel
-                     InDetRecToolInterfaces
-                     InDetTrackSelectionToolLib
-                     TrkLinks
-                     TrkParticleBase
-                     TrkTrack
-                     TrkTrackLink
-                     xAODTracking )
+                       ActsCore
+		       ActsGeometryLib
+		       ActsGeometryInterfacesLib
+		       AthenaBaseComps
+		       BeamSpotConditionsData
+		       GaudiKernel
+		       InDetRecToolInterfaces
+		       InDetTrackSelectionToolLib
+		       TrkLinks
+		       TrkParticleBase
+		       TrkTrack
+		       TrkTrackLink
+		       xAODTracking )
