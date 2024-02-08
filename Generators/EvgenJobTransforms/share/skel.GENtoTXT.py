@@ -97,7 +97,7 @@ evgenLog.info("****************** CONFIGURING MATRIX ELEMENT GENERATION ********
 ## Functions for operating on generator names
 ## NOTE: evgenConfig, topSeq, svcMgr, theApp, etc. should NOT be explicitly re-imported in JOs
 from EvgenJobTransforms.EvgenConfig import evgenConfig
-from EvgenJobTransforms.EvgenConfig import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
+from GeneratorConfig.GenConfigHelpers import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
 
 ## Configure the event counting (AFTER all filters)
 # TODO: Rewrite in Python?
