@@ -29,13 +29,22 @@ if __name__ == "__main__":
     acc.merge(PoolReadCfg(flags))
     
     if flags.readClusters:
-        from ActsConfig.ActsAnalysisConfig import ActsClusterAnalysisCfg
-        acc.merge(ActsClusterAnalysisCfg(flags))
+        if flags.Detector.EnableITkPixel:
+            from ActsConfig.ActsAnalysisConfig import ActsPixelClusterAnalysisAlgCfg
+            acc.merge(ActsPixelClusterAnalysisAlgCfg(flags))
+        if flags.Detector.EnableITkStrip:
+            from ActsConfig.ActsAnalysisConfig import ActsStripClusterAnalysisAlgCfg
+            acc.merge(ActsStripClusterAnalysisAlgCfg(flags))
 
     if flags.readSpacePoints:
-        from ActsConfig.ActsAnalysisConfig import ActsSpacePointAnalysisCfg
-        acc.merge(ActsSpacePointAnalysisCfg(flags))
-
+        if flags.Detector.EnableITkPixel:             
+            from ActsConfig.ActsAnalysisConfig import ActsPixelSpacePointAnalysisAlgCfg
+            acc.merge(ActsPixelSpacePointAnalysisAlgCfg(flags))
+        if flags.Detector.EnableITkStrip:
+            from ActsConfig.ActsAnalysisConfig import ActsStripSpacePointAnalysisAlgCfg, ActsStripOverlapSpacePointAnalysisAlgCfg
+            acc.merge(ActsStripSpacePointAnalysisAlgCfg(flags))
+            acc.merge(ActsStripOverlapSpacePointAnalysisAlgCfg(flags))
+             
     acc.printConfig()
     status = acc.run()
     if status.isFailure():
