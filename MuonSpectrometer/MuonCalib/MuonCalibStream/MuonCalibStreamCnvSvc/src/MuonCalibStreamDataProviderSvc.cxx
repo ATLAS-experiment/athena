@@ -15,7 +15,7 @@ MuonCalibStreamDataProviderSvc::MuonCalibStreamDataProviderSvc(const std::string
     m_runN(0),
     m_fake_evtN(0),
     m_fake_runN(-1),
-    m_fake_lumiB(0),
+    m_fake_lumiB(200),
     m_pt(0),
     m_timeStamp(0) {
     declareProperty("RunNumber", m_fake_runN, "run number to be used for DB access");
@@ -61,7 +61,7 @@ void MuonCalibStreamDataProviderSvc::setNextEvent(const LVL2_MUON_CALIBRATION::C
             else
                 runN = m_runN;
         }
-        int lb_nr;
+        int lb_nr = 200;
         if (!m_lumiBlockCoolSvc->GetRunEventNumber(m_timeStamp, runN, lb_nr).isSuccess()) {
             ATH_MSG_FATAL("Failed to get run event number!");
             return;
