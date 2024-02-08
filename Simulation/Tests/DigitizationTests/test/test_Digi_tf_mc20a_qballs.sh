@@ -11,7 +11,7 @@
 # art-output: DigiPUConfig*
 
 Events=10
-DigiOutFileNameCG="mc20a_qball.CG.RDO.pool.root"
+DigiOutFileName="mc20a_qball.CG.RDO.pool.root"
 HSHitsFile=" /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/QBALLS.HITS.17587614._000019.pool.root.1"
 HighPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc16_13TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.simul.HITS_FILT.e8341_s3687_s3704/*"
 LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc16_13TeV.900311.Epos_minbias_inelastic_lowjetphoton.simul.HITS_FILT.e8341_s3687_s3704/*"
@@ -27,17 +27,14 @@ Digi_tf.py \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
     --jobNumber 1 \
     --maxEvents ${Events} \
-    --outputRDOFile ${DigiOutFileNameCG} \
+    --outputRDOFile ${DigiOutFileName} \
     --postInclude 'PyJobTransforms.UseFrontier' 'HITtoRDO:Digitization.DigitizationSteering.DigitizationTestingPostInclude' \
     --preInclude 'HITtoRDO:Campaigns.MC20a' \
     --skipEvents 0
 
 rc=$?
-if [[ $status -eq 0 ]]
-then
-    status=$rc
-fi
-echo "art-result: $rc2 digiCA"
+status=$rc
+echo "art-result: $rc digiCA"
 
 # get reference directory
 source DigitizationCheckReferenceLocation.sh
@@ -46,7 +43,7 @@ echo "Reference set being used: ${DigitizationTestsVersion}"
 if [[ $rc -eq 0 ]]
 then
     # Do reference comparisons
-    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileNameCG" "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileNameCG"
+    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileName" "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileName"
     rc4=$?
     if [[ $status -eq 0 ]]
     then
@@ -57,7 +54,7 @@ echo "art-result: $rc4 OLDvsFixedRef"
 
 if [[ $rc -eq 0 ]]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileNameCG"
+    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileName"
     rc5=$?
     if [[ $status -eq 0 ]]
     then
