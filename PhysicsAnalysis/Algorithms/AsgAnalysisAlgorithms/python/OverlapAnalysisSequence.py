@@ -292,10 +292,10 @@ def makeOverlapAnalysisSequence( dataType,
                                        'OverlapRemovalCutFlowDumperAlg_%s' % container[ 0 ] + postfix )
                 alg.histPattern = container[ 0 ] + postfix + '_OR_cflow_%SYS%'
                 if inputLabel:
-                    alg.selections = [ '%s,as_char' % inputLabel,
+                    alg.selection = [ '%s,as_char' % inputLabel,
                                       '%s,as_char' % outputLabel ]
                 else:
-                    alg.selections = [ '%s,as_char' % outputLabel ]
+                    alg.selection = [ '%s,as_char' % outputLabel ]
                 seq.append( alg, inputPropName = { container[ 0 ] : 'input' } )
 
             # Set up a view container for the type.
