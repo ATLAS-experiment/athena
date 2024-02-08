@@ -54,14 +54,14 @@ void testgFexJetRoI() {
    SIMPLE_ASSERT( obj->isgJet() == 1 );
    SIMPLE_ASSERT( obj->gFexType() == 3 );
    
-
+    
    SIMPLE_ASSERT( obj->et() == 688800 );
    SIMPLE_ASSERT( obj->eta() == static_cast<float>(-3.4) );
    SIMPLE_ASSERT( obj->etaMin() == static_cast<float>(-3.5) );
    SIMPLE_ASSERT( obj->etaMax() == static_cast<float>(-3.3) );
-   SIMPLE_ASSERT( Athena_test::isEqual (obj->phi_gFex(), static_cast<float>(3*(2*M_PI/16)+(2*M_PI/(16*2))) ));
-   SIMPLE_ASSERT( obj->phiMin_gFex() == static_cast<float>(3*(2*M_PI/16)) );
-   SIMPLE_ASSERT( obj->phiMax_gFex() == static_cast<float>(3*(2*M_PI/16)+(2*M_PI/16)) );
+   SIMPLE_ASSERT( Athena_test::isEqual (obj->phi_gFex(), static_cast<float>(3*(2*M_PI/32)+(2*M_PI/(32*2))) ));
+   SIMPLE_ASSERT( obj->phiMin_gFex() == static_cast<float>(3*(2*M_PI/32)) );
+   SIMPLE_ASSERT( obj->phiMax_gFex() == static_cast<float>(3*(2*M_PI/32)+(2*M_PI/32)) );
 
    std::cout << "Test jet TOB completed!" << std::endl;
 
