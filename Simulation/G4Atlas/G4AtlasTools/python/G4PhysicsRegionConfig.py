@@ -196,8 +196,15 @@ def TRT_KrPhysicsRegionToolCfg(flags, name='TRT_KrPhysicsRegionTool', **kwargs):
     result.setPrivateTools(RegionCreator(name, **kwargs))
     return result
 
+def CALOPhysicsRegionToolCfg(flags, name='CALOPhysicsRegionTool', **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("RegionName", 'CALO')
+    volumeList = ['CALO::CALO', 'LArMgr::LAr::Endcap::Cryostat::Cylinder::Mixed','LArMgr::LAr::Barrel::Cryostat::MotherVolume','LArMgr::ModeratorTube']
+    kwargs.setdefault("VolumeList",  volumeList)
+    result.setPrivateTools(RegionCreator(name, **kwargs))
+    return result
 
-# Calo Regions
+
 def EMBPhysicsRegionToolCfg(flags, name='EMBPhysicsRegionTool', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("RegionName", 'EMB')
