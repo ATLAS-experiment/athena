@@ -35,6 +35,9 @@ class TileRunType(FlagEnum):
                          TileRunType.GAPCIS: 8, TileRunType.MONOCIS: 9}
           return _runTypeInt.get(self, 0)
 
+     def isBiGain(self):
+          return True if self in [TileRunType.CIS, TileRunType.PED] else False
+
 
 def createTileConfigFlags():
 
