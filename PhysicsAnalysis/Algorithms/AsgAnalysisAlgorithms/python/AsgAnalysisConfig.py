@@ -271,7 +271,7 @@ class ObjectCutFlowBlock (ConfigBlock):
 
         alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName + postfix )
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
-        alg.selection = config.getSelectionCutFlow (self.containerName, self.selectionName)
+        alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
         alg.histTitle = "Object Cutflow: " + self.containerName + "." + self.selectionName
 
