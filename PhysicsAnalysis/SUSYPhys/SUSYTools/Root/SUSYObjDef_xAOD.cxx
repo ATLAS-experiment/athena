@@ -1045,7 +1045,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
       return StatusCode::FAILURE;
 #else
 
-      if ( m_mcCampaign == "mc20a" || m_mcCampaign == "mc20d" || m_mcCampaign == "mc20e" || m_mcCampaign == "mc21a" || m_mcCampaign == "mc23a") {
+      if ( m_mcCampaign == "mc20a" || m_mcCampaign == "mc20d" || m_mcCampaign == "mc20e" || m_mcCampaign == "mc21a" || m_mcCampaign == "mc23a" || m_mcCampaign == "mc23c" || m_mcCampaign == "mc23d") {
 	// First see if the user set the mcCampaign/run number by property (hopefully temporary workaround)
 	if ( m_mcChannel > 0) {
 	  ATH_MSG_WARNING( "autoconfigurePileupRWTool(): access to FileMetaData failed -> getting the mc channel number (DSID) and campaign from configuration." );
