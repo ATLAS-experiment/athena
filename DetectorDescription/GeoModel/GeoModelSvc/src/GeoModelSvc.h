@@ -83,6 +83,7 @@ private:
     Gaudi::Property<bool> m_ignoreTagSupport{this,"IgnoreTagSupport",false,"Skip checking if the geometry tag is supported/obsolete"};
 
     Gaudi::Property<bool> m_sqliteDb{this,"SQLiteDB",false,"Activate GeoModel initialization from SQLite"};
+    Gaudi::Property<std::string> m_sqliteDbFullPath{this,"SQLiteDBFullPath","","Explicit setting of full path to SQLiteDB. For testing purposes only"};
 
     std::unique_ptr<GeoModelIO::ReadGeoModel> m_sqliteReader{};
     std::unique_ptr<GMDBManager>              m_sqliteDbManager{};
