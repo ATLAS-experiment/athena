@@ -129,9 +129,15 @@ std::vector<int> LVL1::jFEXPileupAndNoise::CalculatePileup(){
             } 
             
             const LVL1::jTower *tmpTower = m_jTowerContainer->findTower(TTID);
+            
+            int tmp_eta = getTTowerEta(tmpTower);
+            // energies used below are in MeV, but to reproduce firmware behavior we need to truncate at the same position,
+            // i.e., temporarily go back to the granularity used in firmware!
+            int em_granularity  = 25;
+            int had_granularity = tmp_eta < 15 ? 500 : 25; //For Tile inputs granularity is 500MeV, for LAr 25MeV
             //storing the energies
-            int tmp_energy_EM  = getET_EM(tmpTower);
-            int tmp_energy_HAD = getET_HAD(tmpTower);
+            int tmp_energy_EM  = getET_EM(tmpTower)/em_granularity;
+            int tmp_energy_HAD = getET_HAD(tmpTower)/had_granularity;
             int tmp_EM_AreaINV  = getTTAreaINV_EM(tmpTower);
             int tmp_HD_AreaINV  = getTTAreaINV_HAD(tmpTower);
             m_FPGA_ET_EM[TTID]  = getET_EM(tmpTower); 
@@ -143,7 +149,6 @@ std::vector<int> LVL1::jFEXPileupAndNoise::CalculatePileup(){
             //calculating rho's
             
             // EM layer ( not EM FCAL!! )
-            int tmp_eta = getTTowerEta(tmpTower);
             
             if(tmp_eta < 32 ){
                 if(tmp_energy_EM > myDBTool->get_PUThrLowEm() and tmp_energy_EM < myDBTool->get_PUThrHighEm()) {
@@ -201,7 +206,10 @@ std::vector<int> LVL1::jFEXPileupAndNoise::CalculatePileup(){
     m_rho_HAD3  = m_count_rho_HAD3 > 0 ? ((m_rho_HAD3*rhoDivLUT(m_count_rho_HAD3))/(1<<FEXAlgoSpaceDefs::pu_rhoLUT)) : 0;
     m_rho_FCAL  = m_count_rho_FCAL > 0 ? ((m_rho_FCAL*rhoDivLUT(m_count_rho_FCAL))/(1<<FEXAlgoSpaceDefs::pu_rhoLUT)) : 0;
     
-    std::vector<int> rho_values {m_rho_EM,m_rho_HAD1,m_rho_HAD2,m_rho_HAD3,m_rho_FCAL};
+    //return values in MeV -> m_rho_HAD1 corresponds to TileCal, so 500MeV/count, rest is 25MeV/count
+    //note: do not convert the internal values yet, this needs to happen after the PU correction is applied
+    //      to fully reproduce FW behavior!
+    std::vector<int> rho_values {m_rho_EM*25,m_rho_HAD1*500,m_rho_HAD2*25,m_rho_HAD3*25,m_rho_FCAL*25};
     
     SubtractPileup();
     
@@ -237,26 +245,26 @@ void LVL1::jFEXPileupAndNoise::SubtractPileup(){
             int tmp_HD_Area = getTTArea_HAD(tmpTower);
 
             if(tmp_eta < 32) {
-                m_FPGA_ET_EM[TTID] =m_FPGA_ET_EM[TTID] -(m_rho_EM * tmp_EM_Area)/(1<<FEXAlgoSpaceDefs::pu_Area);
+                m_FPGA_ET_EM[TTID] =m_FPGA_ET_EM[TTID] - ((m_rho_EM * tmp_EM_Area)/(1<<FEXAlgoSpaceDefs::pu_Area)) * 25; //factor 25: jFEX internal counts -> MeV (LAr)
             }
 
             if(tmp_eta < 15) {
-                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD1 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area);
+                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID] - ((m_rho_HAD1 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area)) * 500; //factor 500: jFEX internal counts -> MeV (Tile)
             }
             else if(tmp_eta < 16 ) {
-                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD2 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area);
+                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID] - ((m_rho_HAD2 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area)) * 25; //factor 25: jFEX internal counts -> MeV (LAr)
             }
             else if(tmp_eta < 32 ) {
-                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD3 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area);
+                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID] - ((m_rho_HAD3 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area)) * 25; //factor 25: jFEX internal counts -> MeV (LAr)
             }
             else if(tmp_eta >= 32) {
                 // Contributes the HAD layer (FCAL2 and FCAL3)
                 if( TTID >= FEXAlgoSpaceDefs::jFEX_FCAL2_start){
-                    m_FPGA_ET_HAD[TTID] = m_FPGA_ET_HAD[TTID]- (m_rho_FCAL * (tmp_HD_Area))/(1<<FEXAlgoSpaceDefs::pu_Area);
+                    m_FPGA_ET_HAD[TTID] = m_FPGA_ET_HAD[TTID] - ((m_rho_FCAL * (tmp_HD_Area))/(1<<FEXAlgoSpaceDefs::pu_Area)) * 25; //factor 25: jFEX internal counts -> MeV (LAr)
                 }
                 // FCAL1 is EM layer so the energy is suposed to be in the EM layer
                 else{
-                    m_FPGA_ET_EM[TTID]  = m_FPGA_ET_EM[TTID] - (m_rho_FCAL * (tmp_EM_Area))/(1<<FEXAlgoSpaceDefs::pu_Area);        
+                    m_FPGA_ET_EM[TTID]  = m_FPGA_ET_EM[TTID] - ((m_rho_FCAL * (tmp_EM_Area))/(1<<FEXAlgoSpaceDefs::pu_Area)) * 25; //factor 25: jFEX internal counts -> MeV (LAr)
                 }
             }            
         }
