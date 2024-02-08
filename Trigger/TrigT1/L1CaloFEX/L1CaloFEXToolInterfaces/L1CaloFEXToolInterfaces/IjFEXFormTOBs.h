@@ -12,6 +12,7 @@
 #ifndef IjFEXFormTOBs_H
 #define IjFEXFormTOBs_H
 
+#include <utility>
 #include "GaudiKernel/IAlgTool.h"
 
 namespace LVL1 {
@@ -27,7 +28,7 @@ Interface definition for eFEXFormTOBs
     static const InterfaceID& interfaceID( ) ;
 
     virtual uint32_t formTauTOB  (int, int, int, int, int, bool, int, int) = 0;
-    virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int) = 0;
+    virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int, const std::pair<unsigned int, const std::vector<int>&>&) = 0;
     virtual uint32_t formLRJetTOB(int, int, int, int, bool, int, int) = 0;
     virtual uint32_t formSumETTOB(std::tuple<int,bool>&, std::tuple<int,bool>&, int ) = 0;
     virtual uint32_t formMetTOB  (int, int, bool, int ) = 0;

@@ -68,6 +68,7 @@ namespace LVL1 {
     
     ATH_CHECK(m_jTowerContainerSGKey.initialize());
 
+    ATH_CHECK( m_DBToolKey.initialize() );
     ATH_CHECK(m_jFEXSimTool.retrieve() );
 
     // TOBs Key
@@ -169,11 +170,18 @@ namespace LVL1 {
     int embEta = 13; int embPhi = 0; int embMod = 100000;
     int initialEMB = calcTowerID(embEta,embPhi,embMod); //100832
 
+    SG::ReadCondHandle<jFEXDBCondData> myDBTool = SG::ReadCondHandle<jFEXDBCondData>( m_DBToolKey/*, ctx*/ );
+    if (!myDBTool.isValid()){
+        ATH_MSG_ERROR("Not able to read " << m_DBToolKey );
+        return StatusCode::FAILURE;
+    }
+    
+    unsigned int evtTimeStamp = Gaudi::Hive::currentContext().eventID().time_stamp();
+    
     uint8_t thisJFEX = 0;
     // jFEX 0
     thisJFEX = 0;
     
-
     // let's work fully out to in (sort of)
     // Let's go with FCAL2 first
     // decide which subset of towers (and therefore supercells) should go to the jFEX
@@ -294,7 +302,7 @@ namespace LVL1 {
       }
     }
     m_jFEXSimTool->init(thisJFEX);
-    ATH_CHECK(m_jFEXSimTool->ExecuteForwardASide(tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL, inputOutputCollection));
+    ATH_CHECK(m_jFEXSimTool->ExecuteForwardASide(tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL, inputOutputCollection, { evtTimeStamp, myDBTool->get_jJCalibParams(thisJFEX) } ));
     
     m_allSmallRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getSmallRJetTOBs() ) ));
     m_allLargeRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getLargeRJetTOBs() ) ));
@@ -322,6 +330,7 @@ namespace LVL1 {
     
     // jFEX 1
     thisJFEX = 1;
+    
     // decide which subset of towers (and therefore supercells) should go to the jFEX
     std::unordered_map<int,jTower> tmp_jTowersColl_subset_1;
     
@@ -391,7 +400,7 @@ namespace LVL1 {
       }
     }
     m_jFEXSimTool->init(thisJFEX);
-    ATH_CHECK(m_jFEXSimTool->ExecuteBarrel(tmp_jTowersIDs_subset_1, inputOutputCollection));
+    ATH_CHECK(m_jFEXSimTool->ExecuteBarrel(tmp_jTowersIDs_subset_1, inputOutputCollection, { evtTimeStamp, myDBTool->get_jJCalibParams(thisJFEX) } ));
     
     m_allSmallRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getSmallRJetTOBs() ) ));
     m_allLargeRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getLargeRJetTOBs() ) ));
@@ -418,6 +427,7 @@ namespace LVL1 {
 
     // jFEX 2
     thisJFEX = 2;
+    
     // decide which subset of towers (and therefore supercells) should go to the jFEX
     std::unordered_map<int,jTower> tmp_jTowersColl_subset_2;
     
@@ -509,7 +519,7 @@ namespace LVL1 {
 
     //tool use instead
     m_jFEXSimTool->init(thisJFEX);
-    ATH_CHECK(m_jFEXSimTool->ExecuteBarrel(tmp_jTowersIDs_subset_2, inputOutputCollection));
+    ATH_CHECK(m_jFEXSimTool->ExecuteBarrel(tmp_jTowersIDs_subset_2, inputOutputCollection, { evtTimeStamp, myDBTool->get_jJCalibParams(thisJFEX) } ));
     
     m_allSmallRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getSmallRJetTOBs() ) )); 
     m_allLargeRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getLargeRJetTOBs() ) ));
@@ -536,6 +546,7 @@ namespace LVL1 {
 
     // jFEX 3
     thisJFEX = 3;
+    
     // decide which subset of towers (and therefore supercells) should go to the jFEX
     std::unordered_map<int,jTower> tmp_jTowersColl_subset_3;
     
@@ -626,7 +637,7 @@ namespace LVL1 {
     
     //tool use instead
     m_jFEXSimTool->init(thisJFEX);
-    ATH_CHECK(m_jFEXSimTool->ExecuteBarrel(tmp_jTowersIDs_subset_3, inputOutputCollection));
+    ATH_CHECK(m_jFEXSimTool->ExecuteBarrel(tmp_jTowersIDs_subset_3, inputOutputCollection, { evtTimeStamp, myDBTool->get_jJCalibParams(thisJFEX) } ));
     
     m_allSmallRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getSmallRJetTOBs() ) ));
     m_allLargeRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getLargeRJetTOBs() ) ));
@@ -652,6 +663,7 @@ namespace LVL1 {
 
     // jFEX 4
     thisJFEX = 4;
+    
     // decide which subset of towers (and therefore supercells) should go to the jFEX
     std::unordered_map<int,jTower> tmp_jTowersColl_subset_4;
     
@@ -718,7 +730,7 @@ namespace LVL1 {
     
     //tool use instead
     m_jFEXSimTool->init(thisJFEX);
-    ATH_CHECK(m_jFEXSimTool->ExecuteBarrel(tmp_jTowersIDs_subset_4, inputOutputCollection));
+    ATH_CHECK(m_jFEXSimTool->ExecuteBarrel(tmp_jTowersIDs_subset_4, inputOutputCollection, { evtTimeStamp, myDBTool->get_jJCalibParams(thisJFEX) } ));
     
     m_allSmallRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getSmallRJetTOBs() ) ));
     m_allLargeRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getLargeRJetTOBs() ) ));
@@ -750,7 +762,6 @@ namespace LVL1 {
 
     // jFEX 5
     thisJFEX = 5;
-    
     
     // decide which subset of towers (and therefore supercells) should go to the jFEX
     std::unordered_map<int,jTower> tmp_jTowersColl_subset_ENDCAP_AND_EMB_AND_FCAL_2;
@@ -875,7 +886,7 @@ namespace LVL1 {
     }
 
     m_jFEXSimTool->init(thisJFEX);
-    ATH_CHECK(m_jFEXSimTool->ExecuteForwardCSide(tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL_2, inputOutputCollection));
+    ATH_CHECK(m_jFEXSimTool->ExecuteForwardCSide(tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL_2, inputOutputCollection, { evtTimeStamp, myDBTool->get_jJCalibParams(thisJFEX) } ));
     
     m_allSmallRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getSmallRJetTOBs() ) ));
     m_allLargeRJetTobs.insert(std::unordered_map<uint8_t, std::vector< std::vector<std::unique_ptr<jFEXTOB>> > >::value_type(thisJFEX,(m_jFEXSimTool->getLargeRJetTOBs() ) ));
