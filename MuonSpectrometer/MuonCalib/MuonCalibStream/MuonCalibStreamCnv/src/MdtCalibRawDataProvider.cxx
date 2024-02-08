@@ -58,7 +58,7 @@ StatusCode MdtCalibRawDataProvider::execute(const EventContext& ctx) const {
 
     ATH_MSG_DEBUG("Event Pt : "<<event->pt());
 
-    // // setup output write handle for RpcPadContainer
+    // // setup output write handle for MdtPrepDataContainer
     SG::WriteHandle<Muon::MdtPrepDataContainer> handle{m_mdtPrepDataContainerKey, ctx};
     
     ATH_CHECK(handle.record(std::make_unique<Muon::MdtPrepDataContainer>(m_muonIdHelper->mdtIdHelper().module_hash_max())));
@@ -132,10 +132,11 @@ StatusCode MdtCalibRawDataProvider::decodeImpl(Muon::MdtPrepDataContainer *mdtPr
             mdtCollection->setIdentifier(idHelper.elementID(channelId));
         }
 
-        Muon::MdtPrepData *newPrepData = new Muon::MdtPrepData(channelId, mdtHashId, driftRadius, std::move(errorMatrix), detEl, tdc_counts, adc_counts, digitStatus);
+        std::unique_ptr<Muon::MdtPrepData> newPrepData = std::make_unique<Muon::MdtPrepData>(channelId, mdtHashId, driftRadius, std::move(errorMatrix), detEl, tdc_counts, adc_counts, digitStatus);
+
         ATH_MSG_DEBUG(" "<<m_muonIdHelper->toString(channelId)<<" ADC="<<adc_counts<<" TDC="<<tdc_counts<<" mdtHashId : "<<mdtHashId );
         // add the MdtPrepData to the collection
-        mdtCollection->push_back(newPrepData);
+        mdtCollection->push_back(std::move(newPrepData));
 
     }  // end loop over tubes
 
@@ -143,7 +144,6 @@ StatusCode MdtCalibRawDataProvider::decodeImpl(Muon::MdtPrepDataContainer *mdtPr
         if (!coll) continue;
         Muon::MdtPrepDataContainer::IDC_WriteHandle lock = mdtPrepDataContainer->getWriteHandle(coll->identifyHash());
         ATH_CHECK(lock.addOrDelete(std::move(coll)));
-
     }
     ATH_MSG_DEBUG("Wrote " << mdt_hits << " MDT PRD hits for " << mdt_chambers << " chambers");
 

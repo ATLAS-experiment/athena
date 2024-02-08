@@ -14,6 +14,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <memory>
 
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -117,7 +118,8 @@ StatusCode TgcCalibRawDataProvider::decodeImpl(TgcRdoContainer *padContainer, co
                   // <<" sectorId "<< tgc_sectorId
                   << " rodId " << tgc_rodId << " rdoId " << std::hex << rdoId << " idHash " << idHash);
 
-    TgcRdo *newrdo = new TgcRdo(tgc_subsystemId, tgc_rodId, bcId, l1Id);
+    std::unique_ptr<TgcRdo> newrdo = std::make_unique<TgcRdo>(tgc_subsystemId, tgc_rodId, bcId, l1Id);
+
     // TgcRdo* newrdo = new TgcRdo(rdoId, idHash);
 
     // std::list<TgcCalibData> tgcdata = (event->tgc())->data();
@@ -149,19 +151,22 @@ StatusCode TgcCalibRawDataProvider::decodeImpl(TgcRdoContainer *padContainer, co
             TGC_BYTESTREAM_READOUTHIT roh = *(itOfBsReadoutHit);
 
             // printf("raw data %08x \n",roh);
+            unsigned int ldbId = roh.ldbId; 
+            unsigned int sbId = roh.sbId; 
+            unsigned int tracklet = roh.tracklet;
             ATH_MSG_DEBUG(std::hex << "TgcRawData READOUT FORMATTED HIT " << std::endl
                                    << " bcTag " << bcTagCnv(roh.bcBitmap) << " subDetectorId " << newrdo->subDetectorId() << " rodId "
-                                   << newrdo->rodId() << " sswId " << roh.ldbId << " sbId " << roh.sbId << " l1Id " << newrdo->l1Id()
+                                   << newrdo->rodId() << " sswId " << ldbId << " sbId " << sbId << " l1Id " << newrdo->l1Id()
                                    << " bcId " << newrdo->bcId() << " sbType " << (TgcRawData::SlbType)roh.sbType << " adjucent "
                                    << (bool)roh.adj << " associate tracklet " << roh.tracklet << " bitPos "
                                    << roh.channel + 40  // is it fixed or not ? (yasuyuki)
             );
-
-            TgcRawData *raw = new TgcRawData(bcTagCnv(roh.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), roh.ldbId, roh.sbId,
-                                             newrdo->l1Id(), newrdo->bcId(), (TgcRawData::SlbType)roh.sbType, (bool)roh.adj, roh.tracklet,
+            std::unique_ptr<TgcRawData> raw = std::make_unique<TgcRawData>(bcTagCnv(roh.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), ldbId, sbId,
+                                             newrdo->l1Id(), newrdo->bcId(), (TgcRawData::SlbType)roh.sbType, (bool)roh.adj, tracklet,
                                              roh.channel + 40  // is it fixed or not ? (yasuyuki)
-            );
-            newrdo->push_back(raw);
+                                            );
+            newrdo->push_back(std::move(raw));
+
         }  // end loop over itOfBsReadoutHit
 
         // Filling Readout Format Triplet Strip Hit
@@ -170,20 +175,27 @@ StatusCode TgcCalibRawDataProvider::decodeImpl(TgcRdoContainer *padContainer, co
             TGC_BYTESTREAM_READOUTTRIPLETSTRIP rostrip = *(itOfBsReadoutTripletStrip);
 
             // printf("raw data %08x \n",rostrip);
+            unsigned int ldbId = rostrip.ldbId; 
+            unsigned int sbId = rostrip.sbId; 
+            unsigned int seg = rostrip.seg;
+            unsigned int l1Id = newrdo->l1Id();
+            unsigned int bcId = newrdo->bcId();
+            unsigned int subc = rostrip.subc;
+            unsigned int phi = rostrip.phi;
             ATH_MSG_DEBUG(std::hex
                           //<<"raw data :: "<<(unsigned long)(*rostrip)<<std::endl
                           << "TgcRawData READOUT TRIPLET STRIP " << std::endl
                           << " bcTag " << bcTagCnv(rostrip.bcBitmap) << " subDetectorId " << newrdo->subDetectorId() << " rodId "
-                          << newrdo->rodId() << " sswId " << rostrip.ldbId << " sbId " << rostrip.sbId << " l1Id " << newrdo->l1Id()
+                          << newrdo->rodId() << " sswId " << ldbId << " sbId " << sbId << " l1Id " << newrdo->l1Id()
                           << " bcId " << newrdo->bcId() << " sbType " << TgcRawData::SLB_TYPE_TRIPLET_STRIP << " adjucent "
                           << "0"
                           << " seg " << rostrip.seg << " subc " << rostrip.subc << " phi " << rostrip.phi);
 
-            TgcRawData *raw = new TgcRawData(bcTagCnv(rostrip.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), rostrip.ldbId,
-                                             rostrip.sbId, newrdo->l1Id(), newrdo->bcId(), TgcRawData::SLB_TYPE_TRIPLET_STRIP, 0,
-                                             rostrip.seg, rostrip.subc, rostrip.phi);
+            std::unique_ptr<TgcRawData> raw = std::make_unique<TgcRawData>(bcTagCnv(rostrip.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), ldbId,
+                                             sbId, l1Id, bcId, TgcRawData::SLB_TYPE_TRIPLET_STRIP, 0,
+                                             seg, subc, phi);
 
-            newrdo->push_back(raw);
+            newrdo->push_back(std::move(raw));
         }  // end loop over itOfBsReadoutTripletStrip
 
         // Filling Readout Format Tracklet Data
@@ -192,20 +204,25 @@ StatusCode TgcCalibRawDataProvider::decodeImpl(TgcRdoContainer *padContainer, co
             TGC_BYTESTREAM_READOUTTRACKLET rotrk = *(itOfBsReadoutTracklet);
 
             // printf("raw data %08x \n",rotrk);
+            unsigned int sbId = rotrk.sbId; 
+            unsigned int ldbId = rotrk.ldbId; 
+            unsigned int delta = rotrk.delta; 
+            unsigned int seg = rotrk.seg; 
+            unsigned int rphi = rotrk.rphi; 
             ATH_MSG_DEBUG(std::hex
                           //<<"raw data :: "<<(unsigned long)(*rotrk)<<std::endl
                           << "TgcRawData READOUT TRACKLET " << std::endl
                           << " bcTag " << bcTagCnv(rotrk.bcBitmap) << " subDetectorId " << newrdo->subDetectorId() << " rodId "
-                          << newrdo->rodId() << " sswId " << rotrk.ldbId << " sbId " << rotrk.sbId << " l1Id " << newrdo->l1Id() << " bcId "
+                          << newrdo->rodId() << " sswId " << ldbId << " sbId " << sbId << " l1Id " << newrdo->l1Id() << " bcId "
                           << newrdo->bcId() << " sbType "
                           << ((rotrk.slbType == 4) ? TgcRawData::SLB_TYPE_INNER_STRIP : (TgcRawData::SlbType)rotrk.slbType) << " adjacent "
                           << "0" << " seg " << rotrk.seg << " zero " << "0" << " r phi " << rotrk.rphi);
 
-            TgcRawData *raw =
-                new TgcRawData(bcTagCnv(rotrk.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), rotrk.ldbId, rotrk.sbId, newrdo->l1Id(),
+            std::unique_ptr<TgcRawData> raw = std::make_unique<TgcRawData>(bcTagCnv(rotrk.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), ldbId, sbId, newrdo->l1Id(),
                                newrdo->bcId(), (rotrk.slbType == 4) ? TgcRawData::SLB_TYPE_INNER_STRIP : (TgcRawData::SlbType)rotrk.slbType,
-                               rotrk.delta, rotrk.seg, 0, rotrk.rphi);
-            newrdo->push_back(raw);
+                               delta, seg, 0, rphi);
+            newrdo->push_back(std::move(raw));
+
         }  // end loop over itOfBsReadoutTracklet
 
         // Filling Hipt Data
@@ -214,18 +231,28 @@ StatusCode TgcCalibRawDataProvider::decodeImpl(TgcRdoContainer *padContainer, co
             TGC_BYTESTREAM_HIPT hpt = *(itOfBsHipt);
 
             // printf("raw data %08x \n",hpt);
+            unsigned int strip = hpt.strip;
+            unsigned int fwd = hpt.fwd;
+            unsigned int sector = hpt.sector;
+            unsigned int chip = hpt.chip;
+            unsigned int cand = hpt.cand;
+            unsigned int hipt = hpt.hipt;
+            unsigned int hitId = hpt.hitId;
+            unsigned int sub = hpt.sub;
+            unsigned int delta = hpt.delta;
+
             ATH_MSG_DEBUG(std::hex
                           //<<"raw data :: "<<(unsigned long)(*hpt)<<std::endl
                           << "TgcRawData HPT " << std::endl
                           << " bcTag " << bcTagCnv(hpt.bcBitmap) << " subDetectorId " << newrdo->subDetectorId() << " rodId "
-                          << newrdo->rodId() << " l1Id " << newrdo->l1Id() << " bcId " << newrdo->bcId() << " strip " << hpt.strip
-                          << " forward " << hpt.fwd << " sector " << hpt.sector << " chip " << hpt.chip << " cand " << hpt.cand << " hipt "
+                          << newrdo->rodId() << " l1Id " << newrdo->l1Id() << " bcId " << newrdo->bcId() << " strip " << strip
+                          << " forward " << fwd << " sector " << hpt.sector << " chip " << hpt.chip << " cand " << hpt.cand << " hipt "
                           << hpt.hipt << " hitId " << hpt.hitId << " sub " << hpt.sub << " delta " << hpt.delta);
 
-            TgcRawData *raw =
-                new TgcRawData(bcTagCnv(hpt.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), newrdo->l1Id(), newrdo->bcId(), hpt.strip,
-                               hpt.fwd, hpt.sector, hpt.chip, hpt.cand, hpt.hipt, hpt.hitId, hpt.sub, hpt.delta, 0);
-            newrdo->push_back(raw);
+            std::unique_ptr<TgcRawData> raw = std::make_unique<TgcRawData>(bcTagCnv(hpt.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), newrdo->l1Id(), newrdo->bcId(), strip,
+                               fwd, sector, chip, cand, hipt, hitId, sub, delta, 0);
+            newrdo->push_back(std::move(raw));
+
         }  // end loop over itOfBsHipt
         // ---------------------
 
@@ -235,20 +262,31 @@ StatusCode TgcCalibRawDataProvider::decodeImpl(TgcRdoContainer *padContainer, co
             TGC_BYTESTREAM_SL sl = *(itOfBsSL);
 
             // printf("raw data %08x \n",sl);
+            unsigned int cand2plus = sl.cand2plus;
+            unsigned int fwd = sl.fwd;
+            unsigned int sector = sl.sector;
+            unsigned int cand = sl.cand;
+            unsigned int sign = sl.sign;
+            unsigned int threshold = sl.threshold;
+            unsigned int overlap = sl.overlap;
+            unsigned int roi = sl.roi;
+
             ATH_MSG_DEBUG(std::hex << "TgcRawData SL "
                                    //<<"raw data :: "<<(unsigned long)(*sl)
                                    << " bcTag " << bcTagCnv(sl.bcBitmap) << " subDetectorId " << newrdo->subDetectorId() << " rodId "
                                    << newrdo->rodId() << " l1Id " << newrdo->l1Id() << " bcId " << newrdo->bcId() << " cand2pluse "
-                                   << sl.cand2plus << " fwd " << sl.fwd << " sector " << sl.sector << " cand " << sl.cand << " sign "
+                                   << cand2plus << " fwd " << sl.fwd << " sector " << sl.sector << " cand " << sl.cand << " sign "
                                    << sl.sign << " thereshold " << sl.threshold << " overlap " << sl.overlap << " roi " << sl.roi);
 
-            TgcRawData *raw = new TgcRawData(bcTagCnv(sl.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), newrdo->l1Id(), newrdo->bcId(),
-					     sl.cand2plus, sl.fwd, sl.sector, sl.cand, sl.sign, sl.threshold, sl.overlap, false, sl.roi);
+            std::unique_ptr<TgcRawData> raw = std::make_unique<TgcRawData>(bcTagCnv(sl.bcBitmap), newrdo->subDetectorId(), newrdo->rodId(), newrdo->l1Id(), newrdo->bcId(),
+					         cand2plus, fwd, sector, cand, sign, threshold, overlap, false, roi);
 
-            newrdo->push_back(raw);
+            newrdo->push_back(std::move(raw));
         }  // end loop over itOfBsSL
 
-        ATH_CHECK(padContainer->addCollection(newrdo, idHash));
+
+        TgcRdoContainer::IDC_WriteHandle lock = padContainer->getWriteHandle(idHash);
+        ATH_CHECK(lock.addOrDelete(std::move(newrdo)));
     }  // end loop over itOfTGCCalibData
 
     return StatusCode::SUCCESS;
