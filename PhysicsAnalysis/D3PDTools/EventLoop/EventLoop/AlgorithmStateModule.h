@@ -54,6 +54,8 @@ namespace EL
     public:
       virtual ::StatusCode onFileExecute (ModuleData& data) override;
 
+      virtual ::StatusCode onExecute (ModuleData& data) override;
+
 
 
       //

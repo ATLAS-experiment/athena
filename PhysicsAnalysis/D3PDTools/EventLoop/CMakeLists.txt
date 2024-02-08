@@ -56,6 +56,11 @@ atlas_add_test (EventLoop_gt_DirectInputModule
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib
       POST_EXEC_SCRIPT nopost.sh)
 
+atlas_add_test (EventLoop_gt_MemoryMonitorModule
+      SOURCES test/gt_MemoryMonitorModule.cxx
+      LINK_LIBRARIES EventLoop AsgTestingLib
+      POST_EXEC_SCRIPT nopost.sh)
+
 # Install files from the package:
 atlas_install_scripts( scripts/el_retrieve scripts/el_resubmit scripts/el_wait scripts/el_build_docker )
 atlas_install_data( data/*.root data/Dockerfile data/docker_analysis_setup.sh data/*.yml )
