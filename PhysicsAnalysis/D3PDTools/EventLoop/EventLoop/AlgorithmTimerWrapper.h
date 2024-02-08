@@ -18,6 +18,10 @@ namespace EL
 {
   /// \brief an \ref IAlgorithmWrapper that adds a timer to an
   /// algorithm
+  ///
+  /// @note There is a dedicated test in AnalysisAlgorithms config that runs a
+  /// test job with this module enabled to ensure it runs and doesn't break
+  /// the output.
 
   class AlgorithmTimerWrapper final : public IAlgorithmWrapper
   {
