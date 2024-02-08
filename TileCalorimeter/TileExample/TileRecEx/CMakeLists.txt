@@ -28,3 +28,8 @@ atlas_add_test( RunTileCalibRec_test
                 SCRIPT RunTileCalibRec.py -r 239908 --evtMax 3 --physics --inputDirectory /eos/atlas/atlascerngroupdisk/det-tile/test/
                 PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileD3PDConfig_test
+                SCRIPT python -m TileRecEx.TileD3PDConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
