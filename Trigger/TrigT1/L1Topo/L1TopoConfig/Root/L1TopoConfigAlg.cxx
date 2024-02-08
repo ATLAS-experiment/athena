@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoConfig/L1TopoConfigAlg.h"
@@ -80,13 +80,13 @@ L1TopoConfigAlg::getOutputNames() const {
 void
 TXC::L1TopoConfigAlg::addInput(const string &name, const string &value, unsigned int position) {
    m_inputElements.push_back( InputElement( name, value, position) );
-   std::sort( m_inputElements.begin(), m_inputElements.end(),[](TXC::InputElement i, TXC::InputElement i2){ return (i.position < i2.position);});
+   std::sort( m_inputElements.begin(), m_inputElements.end(),[](const TXC::InputElement& i, const TXC::InputElement& i2){ return (i.position < i2.position);});
 }
 
 
 void TXC::L1TopoConfigAlg::addOutput(const string &name, const string &value, unsigned int bits, const string & outname, unsigned int position) {
   m_outputElements.push_back(OutputElement( name, value, bits, outname, position));
-  std::sort( m_outputElements.begin(), m_outputElements.end(),[](TXC::OutputElement o, TXC::OutputElement o2){ return (o.position < o2.position);});
+  std::sort( m_outputElements.begin(), m_outputElements.end(),[](const TXC::OutputElement& o, const TXC::OutputElement& o2){ return (o.position < o2.position);});
 }
 
 void TXC::L1TopoConfigAlg::addFixedParameter(const std::string &name, const std::string &value) {
@@ -95,7 +95,7 @@ void TXC::L1TopoConfigAlg::addFixedParameter(const std::string &name, const std:
 
 void TXC::L1TopoConfigAlg::addParameter(const std::string &name, const std::string &value, unsigned int position, unsigned int selection) {
   m_variableParameters.push_back( RegisterParameter( name, value, position, selection));
-  std::sort(m_variableParameters.begin(),m_variableParameters.end(),[](TXC::RegisterParameter r, TXC::RegisterParameter r2){ return (r.position < r2.position);});
+  std::sort(m_variableParameters.begin(),m_variableParameters.end(),[](const TXC::RegisterParameter& r, const TXC::RegisterParameter& r2){ return (r.position < r2.position);});
 }
 
 
@@ -109,16 +109,16 @@ std::ostream & operator<<(std::ostream &o, const L1TopoConfigAlg &alg) {
      o << "  Output : " << alg.m_outputElements[0].value << endl;
   } else {
      o << "Decision algorithm " << alg.algoID() << " : " << alg.type() << "/" << alg.name() << endl;
-     for(TXC::InputElement ie: alg.m_inputElements)
+     for(const TXC::InputElement& ie: alg.m_inputElements)
         o << "  Input " << ie.position << " : " << ie.value << endl;
-     for(TXC::OutputElement oe: alg.m_outputElements)
+     for(const TXC::OutputElement& oe: alg.m_outputElements)
         o << "  Output " << oe.position << " : " << oe.outname << endl;
   }
   o << "  Fixed paramters: " << alg.getFixedParameters().size() << endl;
-  for(TXC::FixedParameter ge: alg.m_fixedParameters)
+  for(const TXC::FixedParameter& ge: alg.m_fixedParameters)
      o << "     " << setw(15) << left << ge.name << " : " << ge.value << endl;
   o << "  Parameters: " << alg.getParameters().size() << endl;
-  for(TXC::RegisterParameter pe: alg.m_variableParameters)
+  for(const TXC::RegisterParameter& pe: alg.m_variableParameters)
      o << "     " << setw(15) << left << pe.name << " : " << pe.value << endl;
   return o;
 }

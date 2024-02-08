@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __TopoCore__L1TopoConfigAlg__
-#define __TopoCore__L1TopoConfigAlg__
+#ifndef L1TOPOCONFIG_L1TOPOCONFIGALG_H
+#define L1TOPOCONFIG_L1TOPOCONFIGALG_H
 
 #include <iostream>
 #include <vector>
@@ -135,4 +135,4 @@ std::ostream & operator<<(std::ostream &, const RegisterParameter&);
 }
 
 
-#endif /* defined(__TopoCore__TopoAlg__) */
+#endif /* defined(L1TOPOCONFIG_L1TOPOCONFIGALG_H) */
