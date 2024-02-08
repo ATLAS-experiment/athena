@@ -13,6 +13,11 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     """Return ComponentAccumulator configured for Atlas G4 simulation, without output"""
     # wihout output
     result = ComponentAccumulator()
+    from SimulationConfig.SimEnums import LArParameterization
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        # Add a dummy version of the SimKernel to the CA before adding the properly configured version
+        # Presently necessary for FastCaloSim to ensure the proper order of ISF_CollectionMerger
+        result.addEventAlgo(CompFactory.G4AtlasAlg(name, **kwargs))
     kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
     if flags.Sim.UseShadowEvent and "TruthPreselectionTool" not in kwargs:
         from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import TruthPreselectionToolCfg
@@ -26,8 +31,13 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
 
     ## Don"t drop the GeoModel
     kwargs.setdefault("ReleaseGeoModel", flags.Sim.ReleaseGeoModel)
+    from SimulationConfig.SimEnums import LArParameterization
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        kwargs.setdefault("ExtraInputs",
+                          {('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'),
+                           ('LArfSamplSym', 'ConditionStore+LArfSamplSym'),
+                           ('TileSamplingFraction', 'ConditionStore+TileSamplingFraction')})
     kwargs.setdefault("ExtraOutputs", SimHitContainerListCfg(flags))
-
     ## Record the particle flux during the simulation
     kwargs.setdefault("RecordFlux", flags.Sim.RecordFlux)
 

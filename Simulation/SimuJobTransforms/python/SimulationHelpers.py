@@ -1,5 +1,5 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization, SimulationFlavour
 
 
 def getDetectorsFromRunArgs(flags, runArgs):
@@ -76,7 +76,6 @@ def enableCalHitsZDC(flags):
     flags.Sim.PRRThreshold = False
     flags.Sim.PRRWeight = False
 
-
 def enableCalHitsAll(flags):
     """Turns on calibration hits for LAr, Tile and ZDC"""
     flags.Sim.CalibrationRun = CalibrationRun.LArTileZDC
@@ -96,3 +95,11 @@ def enableParticleID(flags):
 def enableVerboseSelector(flags):
     """ """
     flags.Sim.OptionalUserActionList += ['G4DebuggingTools.G4DebuggingToolsConfig.VerboseSelectorToolCfg']
+
+def enableFastCaloSim(flags):
+    # Set LArParametrization to FastCaloSim
+    flags.Sim.LArParameterization = LArParameterization.FastCaloSim
+    # Deacticate dead material hits for calibration run
+    flags.Sim.CalibrationRun = CalibrationRun.Off
+    # Set simulator name as metadata
+    flags.Sim.ISF.Simulator = SimulationFlavour.ATLFAST3MT

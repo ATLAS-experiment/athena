@@ -10,6 +10,10 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 def FastSimulationToolListCfg(flags):
     result = ComponentAccumulator()
     tools = []
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        from G4FastSimulation.G4FastSimulationConfig import FastCaloSimCfg
+        tools += [ result.popToolsAndMerge(FastCaloSimCfg(flags)) ]
+
     if flags.Detector.GeometryBpipe:
         if  not flags.Detector.GeometryFwdRegion and (flags.Detector.GeometryAFP or flags.Detector.GeometryALFA or flags.Detector.GeometryZDC):
             # equivalent of simFlags.ForwardDetectors() == 2:
@@ -31,9 +35,13 @@ def FastSimulationToolListCfg(flags):
                 tools += [ result.popToolsAndMerge(EMECFastShowerCfg(flags)) ]
             tools += [ result.popToolsAndMerge(FCALFastShowerCfg(flags)) ]
             tools += [ result.popToolsAndMerge(FCAL2FastShowerCfg(flags)) ]
-            if flags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly]:
+            if flags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly, LArParameterization.FastCaloSim]: # TODO Check this makes sense.
                 from G4FastSimulation.G4FastSimulationConfig import DeadMaterialShowerCfg
                 tools += [ result.popToolsAndMerge(DeadMaterialShowerCfg(flags)) ]
+            # Enable fast simulation of the calorimeter with FastCaloSim
+            if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+                from G4FastSimulation.G4FastSimulationConfig import FastCaloSimCfg
+                tools += [ result.popToolsAndMerge(FastCaloSimCfg(flags)) ]
     if flags.Detector.GeometryMuon:
         if flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read] and not flags.Sim.RecordFlux:
             from TrackWriteFastSim.TrackWriteFastSimConfig import NeutronFastSimCfg
@@ -95,6 +103,14 @@ def TrackFastSimSensitiveDetectorListCfg(flags):
     result.setPrivateTools(tools)
     return result
 
+def CaloCellContainerSensitiveDetectorListCfg(flags):
+    result = ComponentAccumulator()
+    tools = []
+    if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+        from ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig import CaloCellContainerSDCfg
+        tools += [ result.popToolsAndMerge(CaloCellContainerSDCfg(flags)) ]
+    result.setPrivateTools(tools)
+    return result
 
 def ITkSensitiveDetectorListCfg(flags):
     result = ComponentAccumulator()
@@ -208,6 +224,7 @@ def EnvelopeSensitiveDetectorListCfg(flags):
 
 
 def SimHitContainerListCfg(flags):
+    from SimulationConfig.SimEnums import LArParameterization
     writtenContainers =[]
     if flags.Detector.GeometryMuon:
         if flags.Muon.setupGeoModelXML:
@@ -217,13 +234,23 @@ def SimHitContainerListCfg(flags):
             from MuonG4SD.MuonG4SDConfig import SimHitContainerListCfg
             writtenContainers += SimHitContainerListCfg(flags)
     if flags.Detector.GeometryLAr:
-        writtenContainers += [("LArHitContainer", "LArHitEMB")]
-        writtenContainers += [("LArHitContainer", "LArHitEMEC")]
-        writtenContainers += [("LArHitContainer", "LArHitFCAL")]
-        writtenContainers += [("LArHitContainer", "LArHitHEC")]
+        if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+            writtenContainers += [("LArHitContainer", "LArHitEMB_G4")]
+            writtenContainers += [("LArHitContainer", "LArHitEMEC_G4")]
+            writtenContainers += [("LArHitContainer", "LArHitFCAL_G4")]
+            writtenContainers += [("LArHitContainer", "LArHitHEC_G4")]
+        else:
+            writtenContainers += [("LArHitContainer", "LArHitEMB")]
+            writtenContainers += [("LArHitContainer", "LArHitEMEC")]
+            writtenContainers += [("LArHitContainer", "LArHitFCAL")]
+            writtenContainers += [("LArHitContainer", "LArHitHEC")]
     if flags.Detector.GeometryTile:
-        writtenContainers += [("TileHitVector", "MBTSHits")]
-        writtenContainers += [("TileHitVector", "TileHitVec")]        
+        if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+            writtenContainers += [("TileHitVector", "MBTSHits_G4")]
+            writtenContainers += [("TileHitVector", "TileHitVec_G4")]
+        else:
+            writtenContainers += [("TileHitVector", "MBTSHits")]
+            writtenContainers += [("TileHitVector", "TileHitVec")]
     if flags.Detector.GeometryTRT:
          writtenContainers += [("TRTUncompressedHitCollection", "TRTUncompressedHits")]
     if flags.Detector.EnableBCM:
@@ -256,6 +283,7 @@ def SensitiveDetectorListCfg(flags):
     tools += result.popToolsAndMerge(MuonSensitiveDetectorListCfg(flags))
     tools += result.popToolsAndMerge(TrackFastSimSensitiveDetectorListCfg(flags))
     tools += result.popToolsAndMerge(FwdSensitiveDetectorListCfg(flags))
+    tools += result.popToolsAndMerge(CaloCellContainerSensitiveDetectorListCfg(flags))
 
     result.setPrivateTools(tools)
     return result
