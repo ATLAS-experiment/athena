@@ -259,35 +259,35 @@ namespace CP {
         loadPrimaryParticles(muons, cache);
         loadPrimaryParticles(photons, cache);
 
-        for ( auto p : cache.prim_parts) {
-            ATH_MSG_DEBUG("added  " << p->type() << " " << p->pt() * MeVtoGeV << " GeV" << " eta: " << p->eta() << " phi: " << p->phi());
-        }
-
         loadAssociatedObjects(ctx, cache);
-        if (!cache.prim_vtx) { return CorrectionCode::OutOfValidityRange; }
-
         return performCloseByCorrection(ctx, cache);
     }
     CorrectionCode IsolationCloseByCorrectionTool::performCloseByCorrection (const EventContext& ctx, ObjectCache& cache) const {
-        for (const xAOD::IParticle* particle : cache.prim_parts) {
-            ATH_MSG_DEBUG("Correct the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
+        if (cache.prim_vtx) {
+            // require a primary vertex for isolation correction - expect that if there is not primary vertex, then we only need to assure that the cache.not_sel_parts are treated correctly below
+            for (const xAOD::IParticle* particle : cache.prim_parts) {
+                ATH_MSG_DEBUG("Correct the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
+                                                                            << " eta: " << particle->eta()
+                                                                            << " phi: " << particle->phi());
+
+                if (subtractCloseByContribution(ctx, particle, cache) == CorrectionCode::Error) {
+                    ATH_MSG_ERROR("Failed to correct the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
+                                                                                        << " eta: " << particle->eta()
+                                                                                        << " phi: " << particle->phi());
+                    return CorrectionCode::Error;
+                }
+                if (m_dec_isoselection) (*m_dec_isoselection)(*particle) = bool(m_selectorTool->accept(*particle));
+                ATH_MSG_DEBUG("Corrected the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
+                                                                            << " eta: " << particle->eta()
+                                                                            << " phi: " << particle->phi());
+
+            }
+        }
+        // Only need to copy the uncorrected iso values
+        for (const xAOD::IParticle* particle : cache.not_sel_parts) {
+            ATH_MSG_DEBUG("Copy isolation values of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
                                                                         << " eta: " << particle->eta()
                                                                         << " phi: " << particle->phi());
-
-            if (subtractCloseByContribution(ctx, particle, cache) == CorrectionCode::Error) {
-                ATH_MSG_ERROR("Failed to correct the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
-                                                                                      << " eta: " << particle->eta()
-                                                                                      << " phi: " << particle->phi());
-                return CorrectionCode::Error;
-            }
-            if (m_dec_isoselection) (*m_dec_isoselection)(*particle) = bool(m_selectorTool->accept(*particle));
-            ATH_MSG_DEBUG("Corrected the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
-                                                                          << " eta: " << particle->eta()
-                                                                          << " phi: " << particle->phi());
-
-        }
-        // Only need to 
-        for (const xAOD::IParticle* particle : cache.not_sel_parts) {
             if (copyIsoValuesForPartsNotSelected(particle) == CorrectionCode::Error) {
                 ATH_MSG_ERROR("Failed to copy the isolation of particle with pt: " << particle->pt() * MeVtoGeV << " GeV"
                                                                                    << " eta: " << particle->eta()
@@ -346,6 +346,9 @@ namespace CP {
 
     CorrectionCode IsolationCloseByCorrectionTool::copyIsoValuesForPartsNotSelected(const xAOD::IParticle* part) const {
         const IsoVector& types = getIsolationTypes(part);
+
+        ATH_MSG_DEBUG("copyIsoValuesForPartsNotSelected  " << part->type() << " " << part->pt() * MeVtoGeV << " GeV" << " eta: " << part->eta() << " phi: " << part->phi());      
+
         if (types.empty()) {
             ATH_MSG_WARNING("No isolation types are defiend for " << particleName(part));
             return CorrectionCode::OutOfValidityRange;
