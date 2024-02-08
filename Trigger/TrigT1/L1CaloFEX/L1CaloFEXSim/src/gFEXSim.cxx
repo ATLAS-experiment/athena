@@ -241,17 +241,17 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    m_gBlockTobWords[6] = BTOB1_dat[2];//subleading gBlock in FPGA B, eta bins (0--5)
    m_gBlockTobWords[7] = BTOB2_dat[2];//subleading gBlock in FPGA B, eta bins (6--11)
 
-   m_gBlockTobWords[8] = CTOB1_dat[1];//leading gBlock in FPGA C, eta positive
-   m_gBlockTobWords[9] = CTOB2_dat[1];//leading gBlock in FPGA C, eta negative
-   m_gBlockTobWords[10] = CTOB1_dat[2];//sub-leading gBlock in FPGA C, eta positive
-   m_gBlockTobWords[11] = CTOB2_dat[2];//sub-leading gBlock in FPGA C, eta negative
+   m_gBlockTobWords[8] = CTOB1_dat[1];//leading gBlock in FPGA C, eta negative
+   m_gBlockTobWords[9] = CTOB2_dat[1];//leading gBlock in FPGA C, eta positive
+   m_gBlockTobWords[10] = CTOB1_dat[2];//sub-leading gBlock in FPGA C, eta negative
+   m_gBlockTobWords[11] = CTOB2_dat[2];//sub-leading gBlock in FPGA C, eta positive
 
    //Placing the gJet TOBs into a dedicated array
    m_gJetTobWords[0] = ATOB1_dat[3];//leading gJet in FPGA A, eta bins (0--5)
    m_gJetTobWords[1] = ATOB2_dat[3];//leading gJet in FPGA A, eta bins (6--11)
    m_gJetTobWords[2] = BTOB1_dat[3];//leading gJet in FPGA B, eta bins (0--5)
    m_gJetTobWords[3] = BTOB2_dat[3];//leading gJet in FPGA B, eta bins (6--11)
-   m_gJetTobWords[4] = CTOB1_dat[3];//leading gJet in FPGA C positive
+   m_gJetTobWords[4] = CTOB1_dat[3];//leading gJet in FPGA C negative
    m_gJetTobWords[5] = CTOB2_dat[3];//leading gJet in FPGA C positive
 
 
