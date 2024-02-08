@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -76,7 +76,7 @@ namespace pool   {
   static const DbStatus Success      (DbStatus::Success);
   static const DbStatus Warning      (DbStatus::Warning);
   static const DbStatus Error        (DbStatus::Error);
-  static const DbStatus ConnTimeout  (DbStatus::Error+2);
+  static const DbStatus ConnTimeout  (static_cast<unsigned int>(DbStatus::Error)+2);
 
   /// Issue a debug break
   void      debugBreak();
