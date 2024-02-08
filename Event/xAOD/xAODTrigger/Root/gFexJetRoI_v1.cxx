@@ -16,8 +16,7 @@
 namespace xAOD {
 
   /// Constants used in converting to ATLAS units
-  const float gFexJetRoI_v1::s_centralPhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
-  const float gFexJetRoI_v1::s_forwardPhiWidth = (2*M_PI)/16; //In forward region, gFex has 16 bins in phi
+  const float gFexJetRoI_v1::s_PhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
   const std::vector<float> gFexJetRoI_v1::s_EtaEdge     = { -4.9, -4.45, -4.0, -3.5, -3.3, -3.1, 
                                                             -2.9, -2.7, -2.5, -2.2, -2.0, -1.8, -1.6, -1.4, -1.2, -1.0,  
                                                             -0.8, -0.6, -0.4, -0.2, 0.0, 0.2, 0.4, 0.6, 0.8, 1.0,                                                 
@@ -192,18 +191,13 @@ namespace xAOD {
   }
 
 
+
   // Floating point coordinates using gFex convention [0, 2pi].
   // Returns the centre phi coordinate.
   float gFexJetRoI_v1::phi_gFex() const {
     float phi_out = 0;
     if (gFexType() != gRho){
-      if (( iEta() <= 3 ) || ( (iEta() >= 36) )){
-        phi_out = (iPhi() * s_forwardPhiWidth) + (s_forwardPhiWidth/2);
-      }
-      else if ( iEta() > 3  && iEta() < 36 ){
-        phi_out = (iPhi() * s_centralPhiWidth) + s_centralPhiWidth/2;
-      } 
-      else return -999; 
+        phi_out = (iPhi() * s_PhiWidth) + (s_PhiWidth/2);
     } 
     return phi_out; 
   }
@@ -214,13 +208,7 @@ namespace xAOD {
   float gFexJetRoI_v1::phiMin_gFex() const {
     float phi_out = 0;
     if (gFexType() != gRho){
-      if (( iEta() <= 3 ) || ( (iEta() >= 36) )){
-        phi_out = iPhi() * s_forwardPhiWidth;
-      }
-      else if ( iEta() > 3 && iEta() < 36 ){
-        phi_out = iPhi() * s_centralPhiWidth;
-      } 
-      else return -999; 
+        phi_out = iPhi() * s_PhiWidth;
     } 
     return phi_out; 
   }
@@ -230,13 +218,7 @@ namespace xAOD {
   float gFexJetRoI_v1::phiMax_gFex() const {
     float phi_out = 0;
     if (gFexType() != gRho){
-      if (( iEta() <= 3 ) || ( iEta() >= 36  )){//&& iEta() <= 37
-        phi_out = iPhi() * s_forwardPhiWidth + s_forwardPhiWidth;
-      }
-      else if ( iEta() > 3 && iEta() < 36 ){
-        phi_out = iPhi() * s_centralPhiWidth + s_centralPhiWidth;
-      } 
-      else return -999; 
+        phi_out = iPhi() * s_PhiWidth + s_PhiWidth;
     } 
     return phi_out; 
   }
