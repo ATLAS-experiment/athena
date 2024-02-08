@@ -87,6 +87,14 @@ float DipzMLPLCondition::calcLogTerm(float acml, const pHypoJet &ip,
 bool DipzMLPLCondition::isSatisfied(const HypoJetVector& ips,
 				      const std::unique_ptr<ITrigJetHypoInfoCollector>& collector) const {
   
+  if(collector){
+    std::stringstream ss0;
+    const void* address = static_cast<const void*>(this);
+    ss0 << "DipzMLPLCondition: (" << address << ") starts\n";
+    collector -> collect(ss0.str(), "");
+  }
+
+
   auto zhat = std::accumulate(ips.begin(),
         ips.end(),
         0.0,
