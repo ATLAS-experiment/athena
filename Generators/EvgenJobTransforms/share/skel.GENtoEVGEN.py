@@ -76,14 +76,6 @@ evgenLog = logging.getLogger('Gen_tf')
 evgenLog.debug("****************** CHECKING EVENT GENERATION ARGS *****************")
 evgenLog.debug(str(runArgs))
 
-if hasattr(runArgs, "runNumber"):
-   evgenLog.warning("##########################################################################" )
-   evgenLog.warning("runNumber - no longer a valid argument, do not use it ! " )
-   evgenLog.warning("##########################################################################")
-
-if hasattr(runArgs, "inputGenConfFile"):
-   raise RuntimeError("inputGenConfFile is invalid !! Gridpacks and config. files/links to be put into DSID directory ")
-
 if hasattr(runArgs, "inputGeneratorFile"):
    evgenLog.info("inputGeneratorFile = " + runArgs.inputGeneratorFile)
  

@@ -22,8 +22,10 @@ ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--argJSON', '--asetup',
 
 class EvgenExecutor(athenaExecutor):
   "Specialised trf executor class for event generation jobs"
-  def __init__(self, name="generate", skeleton=None, substep=None, inData=set(), outData=set()):
-        athenaExecutor.__init__(self, name=name, skeletonFile=skeleton, substep=substep, inputEventTest=False, tryDropAndReload=False, inData=inData, outData=outData)
+  def __init__(self, name="generate", skeleton=None, skeletonCA=None, substep=None, inData=set(), outData=set()):
+        athenaExecutor.__init__(self, name=name, skeletonFile=skeleton, skeletonCA=skeletonCA, 
+                                substep=substep, inputEventTest=False, tryDropAndReload=False, 
+				inData=inData, outData=outData)
 
   def preExecute(self, input=set(), output=set()):
         "Get input tarball, unpack and set up env if an evgenJobOpts arg was provided."
@@ -129,10 +131,10 @@ class EvgenExecutor(athenaExecutor):
         elif len(configFiles) >1:
             msg.info("more then one gridpack ! ")
             if "--ecmEnergy" in str(sys.argv[1:]):
-               split_args=str(sys.argv[1:]).split("ecmEnergy=",1)[1]
-               ener_GeV=split_args.split(",")[0].strip("\'")
-               energy=str(float(ener_GeV)/1000.0).replace('.','p').strip(" =0\p']")
-               msg.info("Should be used gridpack for energy "+energy)
+                split_args=str(sys.argv[1:]).split("ecmEnergy=",1)[1]
+                ener_GeV=split_args.split(",")[0].strip("\'")
+                energy=str(float(ener_GeV)/1000.0).replace('.','p').strip(" =0\p']")
+                msg.info("Should be used gridpack for energy "+energy)
             else:
                energy="13"
             for x in configFiles:
@@ -181,7 +183,7 @@ def getTransform():
     exeSet = set()
     msg.info("Transform arguments %s" % sys.argv[1:])
     if "--outputEVNTFile" in str(sys.argv[1:]):
-       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", inData=["inNULL"], outData=["YODA", "EVNT", "EVNT_Pre", "TXT"]))
+       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", skeletonCA="EvgenJobTransforms.GENtoEVGEN_Skeleton", inData=["inNULL"], outData=["YODA", "EVNT", "EVNT_Pre", "TXT"]))
        msg.info("Output EVNT file")
     elif "--outputYODAFile" in str(sys.argv[1:]):
        exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", inData=["inNULL"], outData=["YODA", "TXT"]))
