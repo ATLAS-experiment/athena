@@ -1,112 +1,11 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#
-## Generators providing input events via the LHEF format (MC@NLO produces LHEF
-## when used in connection with Herwig++, which is fine since this variable is
-## just used to determine the input file dummy-naming strategy for C++ generators)
-lhefGenerators = ["Lhef", # generic name: prefer to use the names below
-                  "aMcAtNlo", "McAtNlo", "Powheg", "PowHel", "MadGraph", "CompHep", "CalcHep","Geneva",
-                  "Whizard", "MCFM", "JHU", "MEtop", "Charybdis", "Charybdis2", "BCVEGPY", "Dire4Pythia8", 
-                  "BlackMax", "QBH", "gg2ww", "gg2zz", "gg2vv", "HvyN", "VBFNLO", "FPMC", "ProtosLHEF",
-                  "BCVEGPY", "STRINGS", "Phantom"]
-
-## A more general list of generators which provide partonic input, including non-LHEF ones
-inputGenerators = lhefGenerators + ["Alpgen", "Protos"]
-
-## "Main" generators which typically model QCD showers, hadronisation, decays, etc.
-## Herwig family, including Herwig++
-mainGenerators = ["Herwig", "Herwigpp", "Jimmy", "Herwig7", "Matchig", "Pomwig"]
-## Pythia family, including Pythia8
-mainGenerators += ["Pythia", "PythiaB"]
-mainGenerators += ["PythiaRhad", "PythiaChL", "PythiaGS", "PythiaResMod", "PythiaTopMdiff"]
-mainGenerators += ["Pythia8", "Pythia8B"]
-## Sherpa family
-mainGenerators += ["Sherpa", "Sherpa22"]
-## Soft QCD generators
-mainGenerators += ["Exhume", "Phojet", "Epos", "QGSJet"]
-## ATLAS-specific generators
-mainGenerators += ["ParticleGenerator", "ParticleGun"]
-mainGenerators += ["CosmicGenerator", "BeamHaloGenerator"]
-## Heavy ion generators
-mainGenerators += ["AMPT","Superchic","Starlight", "Hijing", "Hydjet", "Reldis", "Pyquen"]
-## Misc generators
-mainGenerators += ["AcerMC", "TopRex", "LPair"]
-## Reading in fully-formed events
-mainGenerators += ["HepMCAscii", "ReadMcAscii"]
-
-## Special QED and decay afterburners
-afterburnerGenerators = ["Photos", "Photospp", "Tauola", "TauolaPP", "Tauolapp", "EvtGen", "ParticleDecayer"]
-# note: we have to use TauolaPP, because Tauolapp is used as a namespace in the external Tauolapp code
-
-## Set up list of allowed generators. The evgenConfig.generators list will be used
-## to set random seeds, determine input config and event files, and report used generators to AMI.
-knownGenerators = inputGenerators + mainGenerators + afterburnerGenerators
-
-## Note which generators should NOT be sanity tested by the TestHepMC alg
-notesthepmcGenerators = ["Superchic","ParticleDecayer", "ParticleGun", "CosmicGenerator", "BeamHaloGenerator", "FPMC",
-                         "Hijing", "Hydjet", "Starlight", "PythiaRhad"]
-
-## Generators with no flexibility/concept of a tune or PDF choice
-notuneGenerators = ["ParticleGenerator", "ParticleGun", "CosmicGenerator", "BeamHaloGenerator", "HepMCAscii"]
-
-
-def gen_require_steering(gennames):
-    "Return a boolean of whether this set of generators requires the steering command line flag"
-    if "EvtGen" not in gennames: return False
-    if any(("Pythia" in gen and "Pythia8" not in gen) for gen in gennames): return True
-    if any(("Herwig" in gen and "Herwigpp" not in gen and "Herwig7" not in gen) for gen in gennames): return True
-    return False
-
-def gen_known(genname):
-    "Return whether a generator name is known"
-    return genname in knownGenerators
-
-def gens_known(gennames):
-    "Return whether all generator names are known"
-    return all(gen_known(g) for g in gennames)
-
-def gen_lhef(genname):
-    "Return whether a generator uses LHEF input files"
-    return genname in lhefGenerators
-
-def gens_lhef(gennames):
-    "Return whether any of the generators uses LHEF input files"
-    return any(gen_lhef(g) for g in gennames)
-
-def gen_testhepmc(genname):
-    "Return whether a generator should be sanity tested with TestHepMC"
-    return genname not in notesthepmcGenerators
-
-def gens_testhepmc(gennames):
-    "Return whether all of the generators should be sanity tested with TestHepMC"
-    return all(gen_testhepmc(g) for g in gennames)
-
-def gen_notune(genname):
-    "Return whether a generator is allowed to not provide PDF and tune information"
-    return genname not in notuneGenerators
-
-def gens_notune(gennames):
-    "Return whether all of the generators are allowed to not provide PDF and tune information"
-    return all(gen_notune(g) for g in gennames)
-
-def gen_sortkey(genname):
-    "Return a key suitable for sorting a generator name by stage, then alphabetically"
-    ## Sort mainly in order of generator stage
-    genstage = None
-    for istage, gens in enumerate([inputGenerators, mainGenerators, afterburnerGenerators]):
-        if genname in gens:
-            genstage = istage
-            break
-    ## Make sure JIMMY sorts after HERWIG
-    isjimmy = (genname == "Jimmy")
-    ## Any special treatment for Photos, Tauola, EvtGen?
-    ## Return a tuple
-    return (genstage, isjimmy, genname)
-
 
 from PyJobTransformsCore.TransformConfig import TransformConfig, String, ListOfStrings, Boolean, Integer, AllowedExpression, TransformConfigError
+from GeneratorConfig.GenConfigHelpers import KnownGenerators
+
 class EvgenConfig(TransformConfig):
     __slots__ = ()
-    generators = ListOfStrings("List of used generators", allowedValues=knownGenerators)
+    generators = ListOfStrings("List of used generators", allowedValues=KnownGenerators)
     description = String("Human readable description of the dataset content")
     process = String("Specific information about the physics process being generated")
     notes = String("Extra information about this process e.g. known current problems")
