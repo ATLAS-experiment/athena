@@ -187,29 +187,7 @@ operator << (std::ostream &out, const PixelModuleData &c){
   out<<c.m_cablingMapToFile<<LF;
   out<<"#cablingMapFileName"<<LF;
   out<<c.m_cablingMapFileName;
-  //
-  out<<"#distortionInputSource"<<LF;
-  out<<c.m_distortionInputSource<<LF;
-  out<<"#distortionVersion"<<LF;
-  out<<c.m_distortionVersion<<LF;
-  out<<"#distortionR1"<<LF;
-  out<<c.m_distortionR1<<LF;
-  out<<"#distortionR2"<<LF;
-  out<<c.m_distortionR2<<LF;
-  out<<"#distortionTwist"<<LF;
-  out<<c.m_distortionTwist<<LF;
-  out<<"#distortionMeanR"<<LF;
-  out<<c.m_distortionMeanR<<LF;
-  out<<"#distortionRMSR"<<LF;
-  out<<c.m_distortionRMSR<<LF;
-  out<<"#distortionMeanTwist"<<LF;
-  out<<c.m_distortionMeanTwist<<LF;
-  out<<"#distortionRMSTwist"<<LF;
-  out<<c.m_distortionRMSTwist<<LF;
-  out<<"#distortionWriteToFile"<<LF;
-  out<<c.m_distortionWriteToFile<<LF;
-  out<<"#distortionFileName"<<LF;
-  out<<c.m_distortionFileName;
+  
   return out;
 }
 
@@ -223,6 +201,8 @@ operator >> (std::istream &in, PixelModuleData &c){
   [[maybe_unused]] float ignoreFloat{};
   [[maybe_unused]] bool ignoreBool{};
   [[maybe_unused]] double ignoreDouble{};
+  [[maybe_unused]] int ignoreInt{};
+  [[maybe_unused]] std::string ignoreString{};
   std::istream::sentry s(in);
   if (s){
     //this is rather unforgiving, and should only be used with the format given by the ostream
@@ -398,27 +378,27 @@ operator >> (std::istream &in, PixelModuleData &c){
     in>>c.m_cablingMapFileName;
     //
     in>>label;
-    in>>c.m_distortionInputSource;
+    in>>ignoreInt;
     in>>label;
-    in>>c.m_distortionVersion;
+    in>>ignoreInt;
     in>>label;
-    in>>c.m_distortionR1;
+    in>>ignoreDouble;
     in>>label;
-    in>>c.m_distortionR2;
+    in>>ignoreDouble;
     in>>label;
-    in>>c.m_distortionTwist;
+    in>>ignoreDouble;
     in>>label;
-    in>>c.m_distortionMeanR;
+    in>>ignoreDouble;
     in>>label;
-    in>>c.m_distortionRMSR;
+    in>>ignoreDouble;
     in>>label;
-    in>>c.m_distortionMeanTwist;
+    in>>ignoreDouble;
     in>>label;
-    in>>c.m_distortionRMSTwist;
+    in>>ignoreDouble;
     in>>label;
-    in>>c.m_distortionWriteToFile;
+    in>>ignoreBool;
     in>>label;
-    in>>c.m_distortionFileName;
+    in>>ignoreString;
   }
   return in;
 }
