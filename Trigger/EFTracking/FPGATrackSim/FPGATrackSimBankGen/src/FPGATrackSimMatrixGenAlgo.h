@@ -86,7 +86,8 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
 	Gaudi::Property<bool> m_doClustering {this, "Clustering", true, "Do cluster?"};
 	Gaudi::Property<int> m_ideal_geom {this, "IdealiseGeometry", 0, "Ideal geo flag, 0 is non, 1 is 1st order, 2 is 2nd order"};
 	Gaudi::Property<bool> m_single {this, "SingleSector", false, "Run single sector"};
-	Gaudi::Property<bool> m_doHoughConstants {this, "HoughConstants", false, "If true will do the matrix for the delta global phis method"};
+	Gaudi::Property<bool> m_doHoughConstants {this, "HoughConstants", true, "If true will run Hough Transform to set q/pt and phi0"};
+	Gaudi::Property<bool> m_doDeltaPhiConsts {this, "DeltaPhiConstants", false, "If true will generate delta phi constants"};
 	Gaudi::Property<int> m_MaxWC {this, "WCmax", 0, "Max number of WCs"};
 	Gaudi::Property<float> m_PT_THRESHOLD {this, "PT_THRESHOLD", 0., "Min pt"};
 	Gaudi::Property<float> m_D0_THRESHOLD {this, "D0_THRESHOLD", 1., "Max d0"};

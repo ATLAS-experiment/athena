@@ -17,7 +17,7 @@ def getNSubregions(filePath):
 def FPGATrackSimEventSelectionCfg(flags):
     result=ComponentAccumulator()
     eventSelector = CompFactory.FPGATrackSimEventSelectionSvc()
-    eventSelector.regions = "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
+    eventSelector.regions = "HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
     eventSelector.regionID = 0
     eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
     eventSelector.withPU = False
@@ -41,7 +41,7 @@ def FPGATrackSimMappingCfg(flags):
 def FPGATrackSimBankSvcCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimBankSvc = CompFactory.FPGATrackSimBankSvc()
-    pathBankSvc = f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/eta0103phi0305/SectorBanks/'
+    pathBankSvc = flags.Trigger.FPGATrackSim.bankDir if flags.Trigger.FPGATrackSim.bankDir != '' else f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/eta0103phi0305/SectorBanks/'
     FPGATrackSimBankSvc.constantsNoGuess_1st = [
         f'{pathBankSvc}corrgen_raw_8L_skipPlane0.gcon', 
         f'{pathBankSvc}corrgen_raw_8L_skipPlane1.gcon', 
@@ -113,7 +113,7 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.scale = flags.Trigger.FPGATrackSim.ActiveConfig.scale
         HoughTransform.subRegion = number
         HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
-        HoughTransform.traceHits = False
+        HoughTransform.traceHits = True
         tools.append(HoughTransform)
 
     RF.tools = tools
@@ -202,8 +202,8 @@ def NNTrackToolCfg(flags):
 def FPGATrackSimWriteOutputCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutput")
-    FPGATrackSimWriteOutput.InFileName = ["test"]
-    FPGATrackSimWriteOutput.RWstatus = "HEADER" # do not open file, use THistSvc
+    FPGATrackSimWriteOutput.InFileName = ["test.root"]
+    FPGATrackSimWriteOutput.RWstatus = "RECREATE" # do not open file, use THistSvc
     FPGATrackSimWriteOutput.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage
     result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
     return result
@@ -308,7 +308,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimLogicalHistProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
     theFPGATrackSimLogicalHistProcessAlg.Clustering = True
-    theFPGATrackSimLogicalHistProcessAlg.tracking = flags.Trigger.FPGATrackSim.ActiveConfig.doTracking
+    theFPGATrackSimLogicalHistProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
     theFPGATrackSimLogicalHistProcessAlg.outputHitTxt = flags.Trigger.FPGATrackSim.ActiveConfig.outputHitTxt
     theFPGATrackSimLogicalHistProcessAlg.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage
     theFPGATrackSimLogicalHistProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
@@ -326,6 +326,8 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
 
     if flags.Trigger.FPGATrackSim.wrapperFileName != [] and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
+        theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
+        theFPGATrackSimLogicalHistProcessAlg.SGInputTool = ""
     else:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = ""
         theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
@@ -405,6 +407,8 @@ if __name__ == "__main__":
     acc=MainServicesCfg(flags)
 
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = ["MONITOROUT DATAFILE='dataflow.root', OPT='RECREATE'"]))
+
     acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))
     

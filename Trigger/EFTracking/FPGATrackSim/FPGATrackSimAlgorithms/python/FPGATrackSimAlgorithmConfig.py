@@ -248,11 +248,18 @@ def FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags):
     result = ComponentAccumulator()
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')
-    monTool.defineHistogram('regionID', path='EXPERT', type='TH1I', title='regionID', xbins=200, xmin=0, xmax=200)
-    monTool.defineHistogram('nHits_1st', path='EXPERT', type='TH1I', title='nHits_1st', xbins=100, xmin=-0.5, xmax=99.5)
-    monTool.defineHistogram('nHits_1st_unmapped', path='EXPERT', type='TH1I', title='nHits_1st_unmapped', xbins=100, xmin=-0.5, xmax=99.5)
-    monTool.defineHistogram('nroads_1st', path='EXPERT', type='TH1I', title='nroads_1st', xbins=100, xmin=-0.5, xmax=99.5)
-    monTool.defineHistogram('layerIDs_1st', path='EXPERT', type='TH1I', title='layerIDs_1st', xbins=100, xmin=-0.5, xmax=9.5)
+    nbin=100
+    low=-0.5
+    high=99.5
+    monTool.defineHistogram('regionID', path='EXPERT', type='TH1I', title='regionID', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nHits_1st', path='EXPERT', type='TH1I', title='nHits_1st', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nHits_1st_unmapped', path='EXPERT', type='TH1I', title='nHits_1st_unmapped', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('nroads_1st', path='EXPERT', type='TH1I', title='nroads_1st', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('layerIDs_1st', path='EXPERT', type='TH1I', title='layerIDs_1st', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('chi2_1st_all', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('best_chi2_1st', path='EXPERT', type='TH1F', title='chi2_1st_all', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('ntrack_1st', path='EXPERT', type='TH1F', title='ntrack_1st', xbins=nbin, xmin=low, xmax=high)
+    monTool.defineHistogram('ntrack_1st_afterOLR', path='EXPERT', type='TH1F', title='ntrack_1st_afterOLR', xbins=nbin, xmin=low, xmax=high)
 
     result.setPrivateTools(monTool)
 

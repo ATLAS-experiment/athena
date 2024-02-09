@@ -17,7 +17,7 @@ StatusCode FPGATrackSimOutputHeaderTool::openFile(std::string const & path)
   if (m_infile && m_infile->IsOpen()) m_infile->Close();
 
   // open new file
-  ATH_MSG_DEBUG ("Opening file " << path << " in " << m_rwoption.value() << " mode.");
+  ATH_MSG_DEBUG ("Opening file " << path.c_str() << " in " << m_rwoption.value() << " mode.");
   m_infile = TFile::Open(path.c_str(), m_rwoption.value().c_str());
 
   if (!m_infile) {
@@ -61,8 +61,8 @@ StatusCode FPGATrackSimOutputHeaderTool::openFile(std::string const & path)
     TBranch *branchOut = m_EventTree->GetBranch(m_branchNameOut.c_str());
     branchOut->SetAddress(&m_eventOutputHeader);
     m_EventTree->SetBranchStatus(m_branchNameOut.c_str(),1);
-  }  
-
+  }
+  m_infile->cd();
   m_event = 0;
   return StatusCode::SUCCESS;
 }
@@ -83,7 +83,7 @@ StatusCode FPGATrackSimOutputHeaderTool::initialize()
   if( m_rwoption.value()!=std::string("HEADER"))
   {
     if (m_inpath.value().empty())
-    {
+    {      
         ATH_MSG_ERROR("Empty input file list");
         return StatusCode::FAILURE;
     }
@@ -95,6 +95,7 @@ StatusCode FPGATrackSimOutputHeaderTool::initialize()
   }
   else if (m_rwoption.value()==std::string("RECREATE") || m_rwoption.value()==std::string("HEADER")) {
     ATH_MSG_INFO ("Creating empty branches in output file");   
+    ATH_CHECK(openFile(m_inpath.value().front())); 
     m_EventTree = new TTree("FPGATrackSimLogicalEventTree","data");
     
     m_EventTree->Branch(m_branchNameIn_1st.c_str(),
@@ -116,7 +117,6 @@ StatusCode FPGATrackSimOutputHeaderTool::initialize()
 
   m_event    = 0; // in file
   m_totevent = 0; // total counter
-
   return StatusCode::SUCCESS;
 }
 
@@ -146,6 +146,7 @@ StatusCode FPGATrackSimOutputHeaderTool::finalize()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 StatusCode FPGATrackSimOutputHeaderTool::writeData(FPGATrackSimLogicalEventInputHeader* INheader_1st, FPGATrackSimLogicalEventInputHeader* INheader_2nd, FPGATrackSimLogicalEventOutputHeader* OUTheader)
 {
+
   if (m_rwoption.value() == std::string("READ")) {
     ATH_MSG_WARNING ("Asked to write file in READ  mode");
     return StatusCode::SUCCESS;

@@ -54,8 +54,8 @@ inline double eucangle(double x, double y, double z, double u, double v, double 
   return acos((x * u + y * v + z * w) / (eucnorm(x, y, z) * eucnorm(u, v, w)));
 }
 
-constexpr std::array< double, 8 >  TARGET_R_1STAGE = { 290.516, 396.066, 558.552, 564.953, 758.321, 764.665, 996.384, 1002.72 };
-constexpr std::array< double, 13 > TARGET_R_2STAGE = { 33.3024, 99.1959, 159.543, 227.638, 290.516, 396.066, 402.463, 558.552, 564.953, 758.321, 764.665, 996.384, 1002.72 };
 
+constexpr std::array< double, 8 > TARGET_R_1STAGE = { 291.3, 396.9, 559.5, 565.5, 759.3, 765.3, 996.9, 1003};
+constexpr std::array< double, 13 > TARGET_R_2STAGE = { 33.9, 99.7, 160.4, 228.5, 291.3, 396.9, 403.2, 559.5, 565.5, 759.3, 765.3, 996.9, 1003};
 
 #endif

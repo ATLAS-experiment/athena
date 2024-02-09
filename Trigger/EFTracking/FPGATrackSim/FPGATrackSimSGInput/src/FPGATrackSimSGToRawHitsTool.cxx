@@ -701,6 +701,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       tmpSGTrack.setVtxY(track_truth_y0);
       tmpSGTrack.setVtxZ(track_truth_z0);
       tmpSGTrack.setD0(track_truth_d0);
+      tmpSGTrack.setZ0(track_truth_z0);
       tmpSGTrack.setVtxZ(primaryVtx.z());
       tmpSGTrack.setQ(track_truth_q);
       tmpSGTrack.setPX(track_truth_p * (track_truth_cosphi * track_truth_sintheta));
