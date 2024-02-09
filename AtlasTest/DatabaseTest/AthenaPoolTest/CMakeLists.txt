@@ -92,16 +92,17 @@ athenapooltest_run_test( ReadCombinedRDO ReadCombinedRDO
                          DEPENDS ReadRDODoubleSelector )
 
 # Test basic overlay algorithms with DoubleEventSelector
-athenapooltest_run_test( DoubleEventSelectorOverlayTest DoubleEventSelectorOverlayTest
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolAddr|^Stream1|Found HelperTools"
-                         PRIVATE_WORKING_DIRECTORY )
+# TODO: migrate to CA
+# athenapooltest_run_test( DoubleEventSelectorOverlayTest DoubleEventSelectorOverlayTest
+#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolAddr|^Stream1|Found HelperTools"
+#                          PRIVATE_WORKING_DIRECTORY )
 
-# AthenaMT test for DoubleEventSelector
-atlas_add_test( DoubleEventSelectorOverlayTestMT
-                SCRIPT athena.py --threads=4 -c \"outputFile=\'OverlayRDOMT.root\'\" AthenaPoolTest/DoubleEventSelectorOverlayTest.py
-                PRIVATE_WORKING_DIRECTORY
-                LOG_SELECT_PATTERN "^DoubleEvent.*WARNING|ERROR|Terminated successfully"
-                PROPERTIES TIMEOUT 900 PROCESSORS 4)
+# # AthenaMT test for DoubleEventSelector
+# atlas_add_test( DoubleEventSelectorOverlayTestMT
+#                 SCRIPT athena.py --threads=4 -c \"outputFile=\'OverlayRDOMT.root\'\" AthenaPoolTest/DoubleEventSelectorOverlayTest.py
+#                 PRIVATE_WORKING_DIRECTORY
+#                 LOG_SELECT_PATTERN "^DoubleEvent.*WARNING|ERROR|Terminated successfully"
+#                 PROPERTIES TIMEOUT 900 PROCESSORS 4)
 
 # Check for adding DetDescr tags to event info object:
 athenapooltest_run_test( EventInfoWrite EventInfoWrite
