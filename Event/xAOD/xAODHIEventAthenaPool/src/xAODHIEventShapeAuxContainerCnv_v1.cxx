@@ -112,15 +112,7 @@ persToTrans( const xAOD::HIEventShapeAuxContainer_v1* oldObj,
          }
 
          // Copy the variable:
-         void* dst = newInt.getDataArray( auxid );
-         const void* src = oldInt.getDataArrayAllowMissing( auxid );
-         if (!src) {
-            // This can happen with corrupt input files. In this case just
-            // fill dummy values into the new object:
-            r.clear( auxid, newInt, nindex, 1 );
-            continue;
-         }
-         r.copy( auxid, dst, nindex, src, oindex );
+         r.copy( auxid, newInt, nindex, oldInt, oindex, 1 );
       }
    }
 

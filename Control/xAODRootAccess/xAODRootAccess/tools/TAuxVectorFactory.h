@@ -50,14 +50,19 @@ namespace xAOD {
       createFromData( SG::auxid_t auxid, void* data, bool isPacked,
                       bool ownFlag ) const override;
 
-      /// Copy one element from one location to another
-      virtual void copy( void* dst,       size_t dst_index,
-                         const void* src, size_t src_index ) const override;
+      /// Copy elements from one location to another
+      virtual void
+      copy( SG::auxid_t auxid,
+            SG::AuxVectorData& dst,        size_t dst_index,
+            const SG::AuxVectorData& src,  size_t src_index,
+            size_t n) const override;
 
       /// Copy one element from one location to another
       virtual void
-      copyForOutput( void* dst,       size_t dst_index,
-                     const void* src, size_t src_index ) const override;
+      copyForOutput( SG::auxid_t auxid,
+                     SG::AuxVectorData& dst,       size_t dst_index,
+                     const SG::AuxVectorData& src, size_t src_index,
+                     size_t n ) const override;
 
       /// Swap the payload of two ranges of elements in memory
       virtual void swap( SG::auxid_t auxid,

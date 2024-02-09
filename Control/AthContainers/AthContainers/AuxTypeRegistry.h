@@ -293,34 +293,57 @@ public:
 
 
   /**
-   * @brief Copy an element between vectors.
+   * @brief Copy elements between vectors.
    * @param auxid The aux data item being operated on.
-   * @param dst Pointer to the start of the destination vector's data.
-   * @param dst_index Index of destination element in the vector.
-   * @param src Pointer to the start of the source vector's data.
-   * @param src_index Index of source element in the vector.
+   * @param dst Container for the destination vector.
+   * @param dst_index Index of the first destination element in the vector.
+   * @param src Container for the source vector.
+   * @param src_index Index of the first source element in the vector.
+   * @param n Number of elements to copy.
    *
    * @c dst and @ src can be either the same or different.
    */
   void copy (SG::auxid_t auxid,
-             void* dst,       size_t dst_index,
-             const void* src, size_t src_index);
+             AuxVectorData& dst,       size_t dst_index,
+             const AuxVectorData& src, size_t src_index,
+             size_t n) const;
 
 
   /**
-   * @brief Copy an element between vectors.
+   * @brief Copy elements between vectors.
+   * @param auxid The aux data item being operated on.
+   * @param dst Container for the destination vector.
+   *            Declared as a rvalue reference to allow passing a temporary
+   *            here (such as from AuvVectorInterface).
+   * @param dst_index Index of the first destination element in the vector.
+   * @param src Container for the source vector.
+   * @param src_index Index of the first source element in the vector.
+   * @param n Number of elements to copy.
+   *
+   * @c dst and @ src can be either the same or different.
+   */
+  void copy (SG::auxid_t auxid,
+             AuxVectorData&& dst,      size_t dst_index,
+             const AuxVectorData& src, size_t src_index,
+             size_t n) const;
+
+
+  /**
+   * @brief Copy elements between vectors.
    *        Apply any transformations needed for output.
    * @param auxid The aux data item being operated on.
-   * @param dst Pointer to the start of the destination vector's data.
-   * @param dst_index Index of destination element in the vector.
-   * @param src Pointer to the start of the source vector's data.
-   * @param src_index Index of source element in the vector.
+   * @param dst Container for the destination vector.
+   * @param dst_index Index of the first destination element in the vector.
+   * @param src Container for the source vector.
+   * @param src_index Index of the first source element in the vector.
+   * @param n Number of elements to copy.
    *
    * @c dst and @ src can be either the same or different.
    */
   void copyForOutput (SG::auxid_t auxid,
-                      void* dst,       size_t dst_index,
-                      const void* src, size_t src_index);
+                      AuxVectorData& dst,       size_t dst_index,
+                      const AuxVectorData& src, size_t src_index,
+                      size_t n) const;
 
 
   /**

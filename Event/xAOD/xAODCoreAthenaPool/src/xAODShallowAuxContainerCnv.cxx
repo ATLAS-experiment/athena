@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODShallowAuxContainerCnv.h"
 #include "AthContainers/tools/copyThinned.h"
 #include "AthenaKernel/getThinningCache.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/tools/AuxVectorInterface.h"
+
 
 xAODShallowAuxContainerCnv::xAODShallowAuxContainerCnv( ISvcLocator* svcLoc ) :
    xAODShallowAuxContainerCnvBase( svcLoc ) {
@@ -66,6 +68,9 @@ xAODShallowAuxContainerCnv::createPersistentWithKey( xAOD::ShallowAuxContainer* 
 
          newcont->getStore()->resize(nremaining); //had to access underlying store directly, can't call 'resize' on container
 
+         SG::AuxVectorInterface dstIface (*newcont->getStore());
+         SG::AuxVectorInterface srcIface (orig);
+
          // Loop over all the variables of the original container:
          for (SG::auxid_t auxid : auxids) {
             // Skip null auxids (happens if we don't have the dictionary)
@@ -74,20 +79,26 @@ xAODShallowAuxContainerCnv::createPersistentWithKey( xAOD::ShallowAuxContainer* 
             if (info && info->vetoed (auxid)) continue;
             if (sel_auxids.count(auxid) == 0) continue;
             // Create the target variable:
-            void* dst = newcont->getStore()->getData (auxid, nremaining, nremaining); //use store's getData directly, not the container's getData ... saves on a copy!
+            (void)newcont->getStore()->getData (auxid, nremaining, nremaining); //use store's getData directly, not the container's getData ... saves on a copy!
          
             // Access the source variable:
             const void* src = orig.getData (auxid);
          
             if (!src) continue;
          
-            // Copy over all elements, with thinning.
-            for (std::size_t isrc = 0, idst = 0; isrc < size; ++isrc) {
-              if ( ! (dec && dec->thinned(isrc)) )
-              {
-                r.copyForOutput (auxid, dst, idst, src, isrc);
-                ++idst;
-              }
+            // Copy over all elements.
+            if (nremaining == size) {
+               // No thinning.
+              r.copyForOutput (auxid, dstIface, 0, srcIface, 0, size);
+            }
+            else {
+               // Thinning
+               for (std::size_t isrc = 0, idst = 0; isrc < size; ++isrc) {
+                  if ( ! (dec && dec->thinned(isrc)) ) {
+                     r.copyForOutput (auxid, dstIface, idst, srcIface, isrc, 1);
+                     ++idst;
+                  }
+               }
             }
          }
 ///End of specialized thinning

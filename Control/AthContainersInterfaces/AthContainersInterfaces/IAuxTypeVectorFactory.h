@@ -92,29 +92,60 @@ public:
 
 
   /**
-   * @brief Copy an element between vectors.
-   * @param dst Pointer to the start of the destination vector's data.
-   * @param dst_index Index of destination element in the vector.
-   * @param src Pointer to the start of the source vector's data.
-   * @param src_index Index of source element in the vector.
+   * @brief Copy elements between vectors.
+   * @param auxid The aux data item being operated on.
+   * @param dst Container for the destination vector.
+   * @param dst_index Index of the first destination element in the vector.
+   * @param src Container for the source vector.
+   * @param src_index Index of the first source element in the vector.
+   * @param n Number of elements to copy.
    *
    * @c dst and @ src can be either the same or different.
    */
-  virtual void copy (void* dst,        size_t dst_index,
-                     const void* src,  size_t src_index) const = 0;
+  virtual void copy (SG::auxid_t auxid,
+                     AuxVectorData& dst,        size_t dst_index,
+                     const AuxVectorData& src,  size_t src_index,
+                     size_t n) const = 0;
 
 
   /**
-   * @brief Copy an element between vectors, possibly applying thinning.
-   * @param dst Pointer to the start of the destination vector's data.
-   * @param dst_index Index of destination element in the vector.
-   * @param src Pointer to the start of the source vector's data.
-   * @param src_index Index of source element in the vector.
+   * @brief Copy elements between vectors.
+   * @param auxid The aux data item being operated on.
+   * @param dst Container for the destination vector.
+   *            Declared as a rvalue reference to allow passing a temporary
+   *            here (such as from AuvVectorInterface).
+   * @param dst_index Index of the first destination element in the vector.
+   * @param src Container for the source vector.
+   * @param src_index Index of the first source element in the vector.
+   * @param n Number of elements to copy.
    *
    * @c dst and @ src can be either the same or different.
    */
-  virtual void copyForOutput (void* dst,        size_t dst_index,
-                              const void* src,  size_t src_index) const = 0;
+  void copy (SG::auxid_t auxid,
+             AuxVectorData&& dst,       size_t dst_index,
+             const AuxVectorData& src,  size_t src_index,
+             size_t n) const
+  {
+    copy (auxid, dst, dst_index, src, src_index, n);
+  }
+
+
+  /**
+   * @brief Copy elements between vectors, possibly applying thinning.
+   * @param auxid The aux data item being operated on.
+   * @param dst Container for the destination vector.
+   * @param dst_index Index of the first destination element in the vector.
+   * @param src Container for the source vector.
+   * @param src_index Index of source element in the vector.
+   * @param src_index Index of the first source element in the vector.
+   * @param n Number of elements to copy.
+   *
+   * @c dst and @ src can be either the same or different.
+   */
+  virtual void copyForOutput (SG::auxid_t auxid,
+                              AuxVectorData& dst,        size_t dst_index,
+                              const AuxVectorData& src,  size_t src_index,
+                              size_t n) const = 0;
 
 
   /**
