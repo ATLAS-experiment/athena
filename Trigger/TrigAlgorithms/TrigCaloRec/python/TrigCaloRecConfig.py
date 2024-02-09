@@ -49,13 +49,6 @@ def trigCaloClusterMakerMonTool(flags, doMonCells = False):
     return monTool
 
 
-def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False):
-    """Wrapper for legacy job options"""
-    from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
-    cellmaker = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags, name, roisKey, CellsName, monitorCells)[0]
-    return cellmaker
-
-
 @AccumulatorCache
 def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False):
     acc = ComponentAccumulator()
@@ -467,13 +460,27 @@ def hltHICaloTowerMakerCfg(flags, name, towersKey, cellsKey="CaloCellsFS", RoIs=
     return acc
 
 @AccumulatorCache
+def hltHICaloClusterMakerCfg(flags, name, towersKey, cellsKey, clustersKey) :
+    """Function to equip HLT HI cluster builder from towers and cells, adds to output AOD stream"""
+    acc = ComponentAccumulator()
+
+    
+    alg=CompFactory.HIClusterMaker(name,
+                          InputTowerKey=towersKey,
+                          CaloCellContainerKey=cellsKey,
+                          OutputContainerKey=clustersKey
+                          )
+    acc.addEventAlgo(alg, primary=True)
+    return acc
+
+@AccumulatorCache
 def HICaloTowerCfg(flags):
     """ Create the towers for heavy ion """
     acc = ComponentAccumulator()
     acc.merge(
               hltCaloCellMakerCfg(flags, "HLTCaloCellMakerFS", roisKey='')
              )
-    # Then build the clusters
+    # Then build the towers
     acc.merge(
               hltHICaloTowerMakerCfg(
               flags,
@@ -482,6 +489,17 @@ def HICaloTowerCfg(flags):
               cellsKey=fs_cells,
               )
     )
+    # Then build the clusters
+    acc.merge(
+              hltHICaloClusterMakerCfg(
+              flags,
+              "HLTHICaloClusterMakerFS",
+              towersKey=fs_towers,
+              cellsKey=fs_cells,
+              clustersKey = "HLT_HICaloClustersFS"
+              )
+    )
+
     return acc
 
 

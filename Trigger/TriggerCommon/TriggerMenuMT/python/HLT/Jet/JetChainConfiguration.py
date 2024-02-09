@@ -226,23 +226,13 @@ class JetChainConfiguration(ChainConfigurationBase):
         if self.isPerf:
             stepName += '_perf'
 
-        if isComponentAccumulatorCfg():
-            # This CA config still needs improvement
-            # In principle runnable if ATR-28041 is fixed
-            from .JetMenuSequencesConfig import jetHICaloHypoMenuSequence
-            jetSeq, jetDef = callGenerator(
-                jetHICaloHypoMenuSequence,
-                flags, isPerf=self.isPerf, **self.recoDict
-            )
-            # A full hypo selecting only on heavy ion calo jets (step 1)
-        else:
-            # Temporarily restore legacy HI configuration, while HI jet CA
-            # is still under development
-            from .JetHISequences import jetHICaloHypoMenuSequence
-            jetSeq, jetDef = RecoFragmentsPool.retrieve(
-                jetHICaloHypoMenuSequence,
-                flags, isPerf=self.isPerf, **self.recoDict,
-            )
+
+        from .JetMenuSequencesConfig import jetHICaloHypoMenuSequence
+        jetSeq, jetDef = callGenerator(
+            jetHICaloHypoMenuSequence,
+            flags, isPerf=self.isPerf, **self.recoDict
+        )
+
 
         jetCollectionName = jetDef.fullname()
 
