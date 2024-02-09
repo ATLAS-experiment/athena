@@ -13,8 +13,9 @@
 
 #include <AthenaKernel/CLASS_DEF.h>
 #include <AthenaKernel/CondCont.h>
-#include "CLHEP/Units/SystemOfUnits.h"
 #include <iosfwd>
+#include <vector>
+#include <string>
 
 
 class PixelModuleData 
@@ -130,40 +131,6 @@ class PixelModuleData
     void setCablingMapFileName(const std::string &cablingMapFileName);
     const std::string &getCablingMapFileName() const;
 
-    // Distortion parameters
-    void setDistortionInputSource(int distortionInputSource);
-    int getDistortionInputSource() const;
-
-    void setDistortionVersion(int distortionVersion);
-    int getDistortionVersion() const;
-
-    void setDistortionR1(double distortionR1);
-    double getDistortionR1() const;
-
-    void setDistortionR2(double distortionR2);
-    double getDistortionR2() const;
-
-    void setDistortionTwist(double distortionTwist);
-    double getDistortionTwist() const;
-
-    void setDistortionMeanR(double distortionMeanR);
-    double getDistortionMeanR() const;
-
-    void setDistortionRMSR(double distortionRMSR);
-    double getDistortionRMSR() const;
-
-    void setDistortionMeanTwist(double distortionMeanTwist);
-    double getDistortionMeanTwist() const;
-
-    void setDistortionRMSTwist(double distortionRMSTwist);
-    double getDistortionRMSTwist() const;
-
-    void setDistortionWriteToFile(bool distortionWriteToFile);
-    bool getDistortionWriteToFile() const;
-
-    void setDistortionFileName(const std::string &distortionFileName);
-    const std::string &getDistortionFileName() const;
-
 
   private:
     //defaults are for RUN2 2015/2016
@@ -254,18 +221,6 @@ class PixelModuleData
 
     bool        m_cablingMapToFile{false};
     std::string m_cablingMapFileName{"PixelCabling/Pixels_Atlas_IdMapping_2016.dat"};
-
-    int    m_distortionInputSource{4};//database
-    int    m_distortionVersion{-1};
-    double m_distortionR1{0.1/CLHEP::meter};
-    double m_distortionR2{  0.1/CLHEP::meter};
-    double m_distortionTwist{ 0.0005};
-    double m_distortionMeanR{0.12/CLHEP::meter,};
-    double m_distortionRMSR{0.08/CLHEP::meter};
-    double m_distortionMeanTwist{-0.0005};
-    double m_distortionRMSTwist{0.0008};
-    bool   m_distortionWriteToFile{false};
-    std::string m_distortionFileName{ "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/TrackingCP/PixelDistortions/PixelDistortionsData_v2_BB.txt"};
 
 };
 

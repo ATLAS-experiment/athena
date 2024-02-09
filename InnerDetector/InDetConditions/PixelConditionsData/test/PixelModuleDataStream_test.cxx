@@ -134,28 +134,7 @@ PixelDigitization/TCAD_IBL_3Dsensors_efields/phi_5e15_160V.root
 #cablingMapToFile
 0
 #cablingMapFileName
-PixelCabling/Pixels_Atlas_IdMapping_2016.dat#distortionInputSource
-4
-#distortionVersion
--1
-#distortionR1
-0.0001
-#distortionR2
-0.0001
-#distortionTwist
-0.0005
-#distortionMeanR
-0.00012
-#distortionRMSR
-8e-05
-#distortionMeanTwist
--0.0005
-#distortionRMSTwist
-0.0008
-#distortionWriteToFile
-0
-#distortionFileName
-/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/TrackingCP/PixelDistortions/PixelDistortionsData_v2_BB.txt)";
+PixelCabling/Pixels_Atlas_IdMapping_2016.dat)";
     std::stringstream s;
     s << pmd;
     BOOST_TEST (s.str() == expected);
@@ -190,9 +169,7 @@ PixelCabling/Pixels_Atlas_IdMapping_2016.dat#distortionInputSource
     BOOST_TEST(pmd.getPIXLinearExtrapolation() == false);
     //
     BOOST_TEST(pmd.getFluenceLayer()[0] == 7e+13);
-    //
-    BOOST_TEST(pmd.getDistortionFileName() == "sroe.txt");
-     
+    //     
   }
 BOOST_AUTO_TEST_SUITE_END();
 

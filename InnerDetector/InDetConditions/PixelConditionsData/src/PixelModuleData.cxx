@@ -355,36 +355,3 @@ bool PixelModuleData::getCablingMapToFile() const { return m_cablingMapToFile; }
 void PixelModuleData::setCablingMapFileName(const std::string &cablingMapFileName) { m_cablingMapFileName = cablingMapFileName; }
 const std::string &PixelModuleData::getCablingMapFileName() const { return m_cablingMapFileName; }
 
-// Distortion parameters
-void PixelModuleData::setDistortionInputSource(int distortionInputSource) { m_distortionInputSource = distortionInputSource; }
-int PixelModuleData::getDistortionInputSource() const { return m_distortionInputSource; }
-
-void PixelModuleData::setDistortionVersion(int distortionVersion) { m_distortionVersion = distortionVersion; }
-int PixelModuleData::getDistortionVersion() const { return m_distortionVersion; }
-
-void PixelModuleData::setDistortionR1(double distortionR1) { m_distortionR1 = distortionR1; }
-double PixelModuleData::getDistortionR1() const { return m_distortionR1; }
-
-void PixelModuleData::setDistortionR2(double distortionR2) { m_distortionR2 = distortionR2; }
-double PixelModuleData::getDistortionR2() const { return m_distortionR2; }
-
-void PixelModuleData::setDistortionTwist(double distortionTwist) { m_distortionTwist = distortionTwist; }
-double PixelModuleData::getDistortionTwist() const { return m_distortionTwist; }
-
-void PixelModuleData::setDistortionMeanR(double distortionMeanR) { m_distortionMeanR = distortionMeanR; }
-double PixelModuleData::getDistortionMeanR() const { return m_distortionMeanR; }
-
-void PixelModuleData::setDistortionRMSR(double distortionRMSR) { m_distortionRMSR = distortionRMSR; }
-double PixelModuleData::getDistortionRMSR() const { return m_distortionRMSR; }
-
-void PixelModuleData::setDistortionMeanTwist(double distortionMeanTwist) { m_distortionMeanTwist = distortionMeanTwist; }
-double PixelModuleData::getDistortionMeanTwist() const { return m_distortionMeanTwist; }
-
-void PixelModuleData::setDistortionRMSTwist(double distortionRMSTwist) { m_distortionRMSTwist = distortionRMSTwist; }
-double PixelModuleData::getDistortionRMSTwist() const { return m_distortionRMSTwist; }
-
-void PixelModuleData::setDistortionWriteToFile(bool distortionWriteToFile) { m_distortionWriteToFile = distortionWriteToFile; }
-bool PixelModuleData::getDistortionWriteToFile() const { return m_distortionWriteToFile; }
-
-void PixelModuleData::setDistortionFileName(const std::string &distortionFileName) { m_distortionFileName = distortionFileName; }
-const std::string &PixelModuleData::getDistortionFileName() const { return m_distortionFileName; }
