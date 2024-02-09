@@ -31,7 +31,7 @@ def iov_keygen(iov):
 def DumpFolderSummary(db_string, folder, tag, run=None):
 	
 	try:
-		db=AtlCoolLib.indirectOpen(db_string, oracle=True, readOnly=True, debug=True)
+		db=AtlCoolLib.indirectOpen(db_string, readOnly=True, debug=True)
 	except Exception as e:
 		print ('Problem opening database',e)
 		sys.exit(-1)
@@ -70,7 +70,7 @@ def DumpFolderSummary(db_string, folder, tag, run=None):
 def ReadRtCool(db_string, folder, tag, run_number):
 
 	try:
-		db=AtlCoolLib.indirectOpen(db_string, oracle=True, readOnly=True, debug=True)
+		db=AtlCoolLib.indirectOpen(db_string, readOnly=True, debug=True)
 	except Exception as e:
 		print ('Problem opening database',e)
 		sys.exit(-1)
@@ -123,7 +123,7 @@ def ReadRtCool(db_string, folder, tag, run_number):
 def ReadT0Cool(db_string, folder, tag, run_number):
 	
 	try:
-		db=AtlCoolLib.indirectOpen(db_string, oracle=True, readOnly=True, debug=True)
+		db=AtlCoolLib.indirectOpen(db_string, readOnly=True, debug=True)
 	except Exception as e:
 		print ('Problem opening database',e)
 		sys.exit(-1)

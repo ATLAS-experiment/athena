@@ -46,7 +46,7 @@ class MuonCalib__CalibrationTargetConfig:
 			print ("INFO Not resolving global tag")
 			return
 		try:
-			db=AtlCoolLib.indirectOpen(dbstring, oracle=True, readOnly=True, debug=True)
+			db=AtlCoolLib.indirectOpen(dbstring, readOnly=True, debug=True)
 		except Exception as e:
 			print ('Problem opening database',e)
 			sys.exit(-1)	

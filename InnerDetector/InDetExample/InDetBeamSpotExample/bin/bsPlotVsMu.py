@@ -86,8 +86,8 @@ def main():
     #Open up required databases
     from PyCool import cool
     from CoolConvUtilities import AtlCoolLib
-    cooldbBS = AtlCoolLib.indirectOpen(db1, True, True, False)
-    cooldbLumi = AtlCoolLib.indirectOpen(db2, True, True, False)
+    cooldbBS = AtlCoolLib.indirectOpen(db1, True, False)
+    cooldbLumi = AtlCoolLib.indirectOpen(db2, True, False)
 
     folderBS = cooldbBS.getFolder(options.folderBS)
     folderLumi = cooldbLumi.getFolder(options.folderLumi)

@@ -43,7 +43,7 @@ class TriggerCoolUtil:
         else:
             raise RuntimeError ("Can't connect to COOL db %s" % dbconn)
         try:
-            openConn = indirectOpen(connection,readOnly=True,oracle=True,debug=(verbosity>0))
+            openConn = indirectOpen(connection,readOnly=True,debug=(verbosity>0))
         except Exception:
             import traceback
             traceback.print_exc()
