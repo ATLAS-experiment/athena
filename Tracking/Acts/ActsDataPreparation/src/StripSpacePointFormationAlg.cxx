@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripSpacePointFormationAlg.h"
@@ -45,12 +45,45 @@ namespace ActsTrk {
     auto nReceivedSPsStripOverlap = Monitored::Scalar<int>( "numStripOverlapSpacePoints" , 0 );
     auto mon = Monitored::Group( m_monTool, timer, nReceivedSPsStrip, nReceivedSPsStripOverlap );
 
+    SG::ReadHandle<xAOD::StripClusterContainer> inputStripClusterContainer( m_stripClusterContainerKey, ctx );
+    if (!inputStripClusterContainer.isValid()){
+        ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
+        return StatusCode::FAILURE;
+    }
+    const xAOD::StripClusterContainer* inputClusters = inputStripClusterContainer.cptr();
+    ATH_MSG_DEBUG("Retrieved " << inputClusters->size() << " clusters from container " << m_stripClusterContainerKey.key());
+
+    
+    auto stripSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_stripSpacePointContainerKey, ctx );
+    ATH_MSG_DEBUG( "--- Strip Space Point Container `" << m_stripSpacePointContainerKey.key() << "` created ..." );
+    ATH_CHECK( stripSpacePointContainer.record( std::make_unique<xAOD::SpacePointContainer>(),
+						std::make_unique<xAOD::SpacePointAuxContainer>() ));
+    xAOD::SpacePointContainer* spacePoints = stripSpacePointContainer.ptr();
+
+    
+    xAOD::SpacePointContainer* overlapSpacePoints = nullptr;
+    SG::WriteHandle<xAOD::SpacePointContainer> stripOverlapSpacePointContainer;
+    if (m_processOverlapForStrip) {
+      stripOverlapSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_stripOverlapSpacePointContainerKey, ctx );
+      ATH_MSG_DEBUG( "--- Strip Overlap Space Point Container `" << m_stripOverlapSpacePointContainerKey.key() << "` created ..." );
+      ATH_CHECK( stripOverlapSpacePointContainer.record( std::make_unique<xAOD::SpacePointContainer>(),
+							 std::make_unique<xAOD::SpacePointAuxContainer>() ));
+      overlapSpacePoints = stripOverlapSpacePointContainer.ptr();     
+    }
+
+
+    // Early exit in case we have no clusters
+    // We still are saving an empty space point container in SG
+    if (inputClusters->empty()) {
+      ATH_MSG_DEBUG("No input clusters found, we stop space point formation");
+      return StatusCode::SUCCESS;
+    }
+
+    
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
     const InDet::BeamSpotData* beamSpot = *beamSpotHandle;
     auto vertex = beamSpot->beamVtx().position();
 
-    auto stripSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_stripSpacePointContainerKey, ctx );
-    ATH_MSG_DEBUG( "--- Strip Space Point Container `" << m_stripSpacePointContainerKey.key() << "` created ..." );
 
 
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle(m_stripDetEleCollKey, ctx);
@@ -68,13 +101,7 @@ namespace ActsTrk {
     }
 
 
-    SG::ReadHandle<xAOD::StripClusterContainer> inputStripClusterContainer( m_stripClusterContainerKey, ctx );
-    if (!inputStripClusterContainer.isValid()){
-        ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
-        return StatusCode::FAILURE;
-    }
-    const xAOD::StripClusterContainer* inputClusters = inputStripClusterContainer.cptr();
-
+    // Produce space points
     std::vector<StripSP> sps;
     std::vector<StripSP> osps;
     sps.reserve(inputStripClusterContainer->size() * 0.5);
@@ -90,14 +117,7 @@ namespace ActsTrk {
 							 m_processOverlapForStrip) );
 
     // using trick for fast insertion
-    std::unique_ptr<xAOD::SpacePointContainer> spacePoints =
-        std::make_unique<xAOD::SpacePointContainer>();
-    std::unique_ptr<xAOD::SpacePointAuxContainer> spacePointsAux =
-      std::make_unique<xAOD::SpacePointAuxContainer>();
-    spacePoints->setStore(spacePointsAux.get());
-
     spacePoints->reserve(sps.size());
-    spacePointsAux->reserve(sps.size());
 
     std::vector<xAOD::SpacePoint*> sp_collection;
     sp_collection.reserve(sps.size());
@@ -127,55 +147,41 @@ namespace ActsTrk {
 					toAdd.topStripCenter);
     }
 
-
-
-    std::unique_ptr<xAOD::SpacePointContainer> overlapSpacePoints =
-        std::make_unique<xAOD::SpacePointContainer>();
-    std::unique_ptr<xAOD::SpacePointAuxContainer> overlapSpacePointsAux =
-      std::make_unique<xAOD::SpacePointAuxContainer>();
-    overlapSpacePoints->setStore(overlapSpacePointsAux.get());
-
+    nReceivedSPsStrip = stripSpacePointContainer->size();
+    
+    // overlap space points now
+    if (not m_processOverlapForStrip or not overlapSpacePoints) {
+      return StatusCode::SUCCESS;
+    }
+    
     overlapSpacePoints->reserve(osps.size());
-    overlapSpacePointsAux->reserve(osps.size());
 
     std::vector<xAOD::SpacePoint*> sp_overlap_collection;
     sp_overlap_collection.reserve(osps.size());
-    if (m_processOverlapForStrip) {
-      for (std::size_t i(0); i<osps.size(); ++i)
-	sp_overlap_collection.push_back(new xAOD::SpacePoint());
-      overlapSpacePoints->insert(overlapSpacePoints->end(), sp_overlap_collection.begin(), sp_overlap_collection.end());
+    for (std::size_t i(0); i<osps.size(); ++i)
+      sp_overlap_collection.push_back(new xAOD::SpacePoint());
+    overlapSpacePoints->insert(overlapSpacePoints->end(), sp_overlap_collection.begin(), sp_overlap_collection.end());
       
-      for (std::size_t i(0); i<osps.size(); ++i) {
-	auto& toAdd = osps.at(i);
-	std::vector< const xAOD::UncalibratedMeasurement* > oels(
-								 {inputClusters->at(toAdd.measurementIndexes[0]),
-								  inputClusters->at(toAdd.measurementIndexes[1])}
-								 );
-	overlapSpacePoints->at(i)->setSpacePoint(toAdd.idHashes, 
-						 toAdd.globPos,
-						 toAdd.cov_r,
-						 toAdd.cov_z,
-						 oels,
-						 toAdd.topHalfStripLength,
-						 toAdd.bottomHalfStripLength,
-						 toAdd.topStripDirection,
-						 toAdd.bottomStripDirection,
-						 toAdd.stripCenterDistance,
-						 toAdd.topStripCenter);
-      }
+    for (std::size_t i(0); i<osps.size(); ++i) {
+      auto& toAdd = osps.at(i);
+      std::vector< const xAOD::UncalibratedMeasurement* > oels(
+							       {inputClusters->at(toAdd.measurementIndexes[0]),
+								inputClusters->at(toAdd.measurementIndexes[1])}
+							       );
+      overlapSpacePoints->at(i)->setSpacePoint(toAdd.idHashes, 
+					       toAdd.globPos,
+					       toAdd.cov_r,
+					       toAdd.cov_z,
+					       oels,
+					       toAdd.topHalfStripLength,
+					       toAdd.bottomHalfStripLength,
+					       toAdd.topStripDirection,
+					       toAdd.bottomStripDirection,
+					       toAdd.stripCenterDistance,
+					       toAdd.topStripCenter);
     }
     
-    ATH_CHECK( stripSpacePointContainer.record( std::move( spacePoints ), std::move( spacePointsAux ) ) );
-
-    nReceivedSPsStrip = stripSpacePointContainer->size();
-
-    if (m_processOverlapForStrip) {
-      auto stripOverlapSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_stripOverlapSpacePointContainerKey, ctx );
-      ATH_MSG_DEBUG( "--- Strip Overlap Space Point Container `" << m_stripOverlapSpacePointContainerKey.key() << "` created ..." );
-      ATH_CHECK( stripOverlapSpacePointContainer.record( std::move( overlapSpacePoints ), std::move( overlapSpacePointsAux ) ) );
-
-      nReceivedSPsStripOverlap = stripOverlapSpacePointContainer->size();
-    }
+    nReceivedSPsStripOverlap = overlapSpacePoints->size();
 
     return StatusCode::SUCCESS;
   }
