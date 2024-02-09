@@ -165,11 +165,6 @@ void test_type(const std::string& typname,
 
   std::unique_ptr<SG::IAuxTypeVector> v2 = r.makeVector (auxid, 10, 20);
   T* ptr2 = reinterpret_cast<T*> (v2->toPtr());
-  r.copy (auxid, ptr2, 0, ptr, 1);
-  r.copyForOutput (auxid, ptr2, 1, ptr, 0);
-
-  assert (ptr2[0] == makeT(1));
-  assert (ptr2[1] == makeT(0));
 
   AuxVectorData_test avd1;
   AuxVectorData_test avd2;
@@ -187,6 +182,11 @@ void test_type(const std::string& typname,
   assert (ptr2[0] == makeT());
   assert (ptr2[1] == makeT());
   assert (ptr2[2] == makeT(3));
+
+  r.copy (auxid, avd2, 0, avd1, 1, 1);
+  r.copyForOutput (auxid, avd2, 1, avd1, 0, 1);
+  assert (ptr2[0] == makeT(1));
+  assert (ptr2[1] == makeT(0));
 
   ptr[0] = makeT(1);
   ptr[1] = makeT(2);
@@ -378,22 +378,44 @@ void test_copyForOutput()
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
 
   typedef ElementLink<std::vector<int*> > EL;
-  EL el1 (123, 10);
-  EL el2;
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid = r.getAuxID<EL> ("EL");
   SG::auxid_t auxid_v = r.getAuxID<std::vector<EL> > ("ELV");
 
-  r.copyForOutput (auxid, &el2, 0, &el1, 0);
+  auto vel1 = r.makeVector (auxid, 10, 10);
+  EL& el1 = *reinterpret_cast<EL*> (vel1->toPtr());
+  el1 = EL (123, 10);
+
+  auto vel2 = r.makeVector (auxid, 10, 10);
+  EL& el2 = *reinterpret_cast<EL*> (vel2->toPtr());
+
+  AuxVectorData_test avd1;
+  AuxStoreInternal_test store1;
+  avd1.setStore (&store1);
+  store1.addVector (std::move(vel1), false);
+
+  AuxVectorData_test avd2;
+  AuxStoreInternal_test store2;
+  avd2.setStore (&store2);
+  store2.addVector (std::move(vel2), false);
+
+  r.copyForOutput (auxid, avd2, 0, avd1, 0, 1);
   assert (el2.key() == 123);
   assert (el2.index() == 10);
 
-  std::vector<EL> v1;
+  auto vvel1 = r.makeVector (auxid_v, 10, 10);
+  std::vector<EL>& v1 = *reinterpret_cast<std::vector<EL>*> (vvel1->toPtr());
   v1.push_back (EL (123, 5));
   v1.push_back (EL (123, 6));
-  std::vector<EL> v2;
-  r.copyForOutput (auxid_v, &v2, 0, &v1, 0);
+
+  auto vvel2 = r.makeVector (auxid_v, 10, 10);
+  std::vector<EL>& v2 = *reinterpret_cast<std::vector<EL>*> (vvel2->toPtr());
+
+  store1.addVector (std::move(vvel1), false);
+  store2.addVector (std::move(vvel2), false);
+
+  r.copyForOutput (auxid_v, avd2, 0, avd1, 0, 1);
   assert (v2[0].key() == 123);
   assert (v2[0].index() == 5);
   assert (v2[1].key() == 123);
@@ -401,12 +423,12 @@ void test_copyForOutput()
 
   store->remap (123, 456, 10, 20);
 
-  r.copyForOutput (auxid, &el2, 0, &el1, 0);
+  r.copyForOutput (auxid, avd2, 0, avd1, 0, 1);
   assert (el2.key() == 456);
   assert (el2.index() == 20);
 
   store->remap (123, 456, 6, 12);
-  r.copyForOutput (auxid_v, &v2, 0, &v1, 0);
+  r.copyForOutput (auxid_v, avd2, 0, avd1, 0, 1);
   assert (v2[0].key() == 123);
   assert (v2[0].index() == 5);
   assert (v2[1].key() == 456);

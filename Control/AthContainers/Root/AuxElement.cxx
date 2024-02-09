@@ -577,20 +577,14 @@ void AuxElement::copyAux (const ConstAuxElement& other)
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
+  SG::AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
-    const void* src = ocont->getDataArrayAllowMissing (auxid);
-    if (src) {
-      void* dst = container()->getDataArray (auxid);
-      r.copy (auxid, dst, index(), src, oindex);
-    }
-    else {
-      r.clear (auxid, *container(), index(), 1);
-    }
+    r.copy (auxid, cont, index(), *ocont, oindex, 1);
   }
 
   for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {
     if (!other_ids.test (auxid)) {
-      r.clear (auxid, *container(), index(), 1);
+      r.clear (auxid, cont, index(), 1);
     }
   }
 }
@@ -628,20 +622,14 @@ void AuxElement::copyAux (const AuxElement& other)
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
+  AuxVectorData& cont = *container();
   for (SG::auxid_t auxid : other_ids) {
-    const void* src = ocont->getDataArrayAllowMissing (auxid);
-    if (src) {
-      void* dst = container()->getDataArray (auxid);
-      r.copy (auxid, dst, index(), src, oindex);
-    }
-    else {
-      r.clear (auxid, *container(), index(), 1);
-    }
+    r.copy (auxid, cont, index(), *ocont, oindex, 1);
   }
 
   for (SG::auxid_t auxid : m_container->getWritableAuxIDs()) {
     if (!other_ids.test (auxid)) {
-      r.clear (auxid, *container(), index(), 1);
+      r.clear (auxid, cont, index(), 1);
     }
   }
 }

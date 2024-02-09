@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -10,11 +10,18 @@
 // EDM include(s):
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/tools/AuxVectorInterface.h"
 #include "AthContainers/exceptions.h"
 #include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
 
 // Local include(s):
 #include "xAODCore/ShallowAuxContainer.h"
+
+namespace {
+
+
+} // anonymous namespace
+
 
 namespace xAOD {
 
@@ -305,9 +312,9 @@ namespace xAOD {
       }
 
       // Copy each element of the parent's decoration.
-      for( size_t i = 0; i < size; ++i ) {
-         factory->copy( result, i, pptr, i );
-      }
+      factory->copy( auxid,
+                     SG::AuxVectorInterface( *this ), 0,
+                     SG::AuxVectorInterface( *m_parentLink ), 0, size );
 
       // Now we're done.
       return result;
@@ -423,9 +430,9 @@ namespace xAOD {
       }
 
       // Copy each element of the parent's decoration:
-      for( size_t i = 0; i < size; ++i ) {
-         factory->copy( ptr, i, pptr, i );
-      }
+      factory->copy( auxid,
+                     SG::AuxVectorInterface( *this ), 0,
+                     SG::AuxVectorInterface( *m_parentLink ), 0, size );
 
       // Now we're done:
       return ptr;

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -143,7 +143,7 @@ StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepPar
       ATH_MSG_VERBOSE("This auxID=" << auxid << " is part of the ShallowCopyAuxStore...");
 
       // Create the variable in the dynamic store of the new ShallowCopyContainer
-      void* outContAuxDataVec = outContShallowCopy.second->getData( auxid, outContSize, outContSize );
+      (void)outContShallowCopy.second->getData( auxid, outContSize, outContSize );
 
 
       // Then, loop over these, get the index of the corresponding object in the
@@ -153,7 +153,7 @@ StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepPar
       for ( std::size_t i=0; i<outContSize; ++i ) {
         // Get the original shallow copy particle
         const std::size_t inIdx = inPartIdxList.at(i);
-        factory->copy( outContAuxDataVec, i, originalShallowAuxDataVector, inIdx );
+        factory->copy( auxid, *outContShallowCopy.first, i, *originalShallowCopyCont, inIdx, 1 );
       }
 
     } // End: Loop over all aux-ids

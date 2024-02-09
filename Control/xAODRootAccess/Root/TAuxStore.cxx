@@ -22,6 +22,7 @@
 // Athena include(s):
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainers/tools/AuxVectorInterface.h"
 #include "AthContainers/exceptions.h"
 #include "CxxUtils/checker_macros.h"
 #include "xAODCore/tools/IOStats.h"
@@ -1170,9 +1171,10 @@ namespace xAOD {
          }
 
          // Finally, do the copy:
-         for( std::size_t i = 0; i < m_size; ++i ) {
-            factory->copy( ptr, i, pptr, i );
-         }
+         factory->copy( auxid,
+                        SG::AuxVectorInterface( *this ), 0,
+                        SG::AuxVectorInterface( *m_transientStore ), 0,
+                        m_size );
 
          // And now remember that this is a decoration:
          if( m_isDecoration.size() <= auxid ) {
