@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETSIMEVENT_SIHITIDHELPER
@@ -53,9 +53,9 @@ class SiHitIdHelper : HitIdHelper {
   // Info packing:
   int buildHitId(const int, const int, const int, const int, const int, const int) const;
 
-  int buildHitIdFromStringITk(int part, std::string) const;
+  int buildHitIdFromStringITk(int part, const std::string&) const;
 
-  int buildHitIdFromStringHGTD(int part, std::string) const;
+  int buildHitIdFromStringHGTD(int part, const std::string&) const;
 
  private:
   //
