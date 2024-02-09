@@ -26,9 +26,6 @@ namespace RootAuxDynIO
          m_tfile( file ),
          m_collectMetrics( enableMetrics )
       {
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 27, 0 )
-         m_entry = std::make_unique<REntry>();
-#endif
          m_opts.SetCompression( m_tfile->GetCompressionSettings() );
          m_opts.SetUseBufferedWrite( enableBufferedWrite );
          m_model->SetDescription( ntupleName );
@@ -37,9 +34,6 @@ namespace RootAuxDynIO
 
 
    void  RNTupleAuxDynWriter::makeNewEntry() {
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 27, 0 )
-      m_entry = std::make_unique<REntry>();
-#else
       if( m_model ) {
          // prepare for writing of the first row
          if( !m_tfile ) {
@@ -51,6 +45,9 @@ namespace RootAuxDynIO
             if( m_collectMetrics ) m_ntupleWriter->EnableMetrics();
          }
       }
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+      m_entry = m_ntupleWriter->GetModel().CreateBareEntry();
+#else
       m_entry = m_ntupleWriter->GetModel()->CreateBareEntry();
 #endif
    }
@@ -76,26 +73,10 @@ namespace RootAuxDynIO
 
    void RNTupleAuxDynWriter::addAttribute( const std::string& field_name, const std::string& attr_type, void* attr_data )
    {
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 27, 0 )
-      if( !m_entry ) makeNewEntry();
-      if( m_model ) {
-         // first event - create Fields and update NTuple Model
-         auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
-         m_entry->CaptureValue( field->CaptureValue( attr_data ) );
-         m_ntupleFieldMap[ field_name ] = field.get();
-         m_model->AddField( std::move(field) );
-      }
-      else {
-         // NTupleWriter and Fields already created
-         RFieldBase* field = m_ntupleFieldMap[ field_name ];
-         m_entry->CaptureValue( field->CaptureValue( attr_data ) );
-      }
-#else
       if( m_attrDataMap.find(field_name) == m_attrDataMap.end() ) {
          addField(field_name, attr_type);
       }
       addFieldValue(field_name, attr_data);
-#endif
    }
 
    /// Add a new field to the RNTuple
@@ -109,7 +90,7 @@ namespace RootAuxDynIO
       ATH_MSG_DEBUG("Adding new object column, name="<< field_name << " of type " << attr_type);
       auto field = RFieldBase::Create(field_name, attr_type).Unwrap();
       if( !m_model ) {
-#if ROOT_VERSION_CODE > ROOT_VERSION( 6, 29, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          // first write was already done, need to update the model
          ATH_MSG_DEBUG("Adding late attribute " << field_name);
          auto updater = m_ntupleWriter->CreateModelUpdater();
@@ -133,15 +114,7 @@ namespace RootAuxDynIO
          msg <<"Attempt to write unknown Field with name: '" << field_name << std::ends;
          throw std::runtime_error( msg.str() );
       }
-         // already started writing
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 27, 0 )
-      if( !m_model ) {
-         // MN: ROOT 6.26 version not tested
-         if( !m_entry ) makeNewEntry();
-         RFieldBase* field = m_ntupleFieldMap[ field_name ];
-         m_entry->CaptureValue( field->CaptureValue( attr_data ) );
-      }
-#endif
+      // already started writing
       field_iter->second = attr_data;
       m_needsCommit = true;
    }   
@@ -149,7 +122,7 @@ namespace RootAuxDynIO
 
    int RNTupleAuxDynWriter::commit()
 {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
       // write only if there was data added, ignore empty commits
       if( !needsCommit() ) {
          ATH_MSG_DEBUG("Empty Commit");
@@ -168,16 +141,19 @@ namespace RootAuxDynIO
             if( m_generatedValues.find(attr.first) == m_generatedValues.end() ) {
                ATH_MSG_DEBUG("Generating default object for field: " << attr.first );
                for( auto val_i = m_entry->begin(); val_i != m_entry->end(); ++val_i ) {
-                  if( val_i->GetField()->GetName() == attr.first ) {
-                     m_generatedValues.insert( std::make_pair(attr.first, val_i->GetField()->GenerateValue()) );
+                  if( val_i->GetField().GetFieldName() == attr.first ) {
+                     // One could call RValue::EmplaceNew() (i.e., val_i->EmplaceNew()) but that violates const-ness
+                     // So for now we clone the field and create the default value from the clone
+                     auto valPtr = std::make_shared<RFieldBase::RValue>(val_i->GetField().Clone(attr.first)->CreateValue());
+                     m_generatedValues.insert( std::make_pair(attr.first, std::move(valPtr)) );
                      break;
                   }
                }
             }
-            attr.second = m_generatedValues.find(attr.first)->second.GetRawPtr();
+            attr.second = m_generatedValues.find(attr.first)->second->GetPtr<void>().get();
          }
          // attach the attribute values rememberd internally
-         m_entry->CaptureValueUnsafe( attr.first, attr.second );
+         m_entry->BindRawPtr( attr.first, attr.second );
       }
       num_bytes += m_ntupleWriter->Fill( *m_entry );
       ATH_MSG_DEBUG("Filled RNTuple Row, bytes written: " << num_bytes);
@@ -205,7 +181,7 @@ namespace RootAuxDynIO
         log << endmsg;
       }
       // delete the generated default fields (RField should delete the default data objest)
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
       m_generatedValues.clear();
 #endif
       m_ntupleWriter.reset(); m_entry.reset(); m_model.reset(); m_rowN=0;
