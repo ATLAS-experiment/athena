@@ -281,11 +281,9 @@ namespace MuonGM {
 
         // Add/subtract cylinders at ends of layers 2 and 4 to accommodate the last MDT
 
-        const GeoShape *stube = nullptr;
         double tL = longWidth / 2.0 - (tubePitch / 2.) * TrdDwoverL;
-        stube = new GeoTube(0.0, tubePitch / 2., tL);
+        GeoIntrusivePtr<const GeoShape> stube{new GeoTube(0.0, tubePitch / 2., tL)};
         stube = &((*stube) << GeoTrf::RotateX3D(90. * Gaudi::Units::deg));
-        stube->ref();
         const GeoShape *stubewithcut = nullptr;
         if (cutoutNsteps > 1 && m_nonCutoutXSteps.empty()) { // adaption of tube cuts only needed for cutouts along amdb-y
             double toptubelength = cutoutTubeLength[cutoutNsteps - 1];
@@ -324,7 +322,6 @@ namespace MuonGM {
             }
         } // Loop over layers
 
-        stube->unref();
 
         const GeoMaterial *mlay = matManager.getMaterial("std::Air");
         GeoLogVol *llay = new GeoLogVol(logVolName, slay, mlay);
