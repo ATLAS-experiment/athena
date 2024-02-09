@@ -60,7 +60,7 @@ class MenuThresholdsCollection( object ):
 
 
     def typeWideThresholdConfig(self, ttype):
-        return getTypeWideThresholdConfig(ttype, self.flags.Trigger.L1.doHeavyIonTobThresholds, self.flags.Trigger.L1.doeFexBDTTau)
+        return getTypeWideThresholdConfig(ttype, self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, self.flags.Trigger.L1.Menu.doeFexBDTTau)
 
     def json(self):
         confObj = odict()
