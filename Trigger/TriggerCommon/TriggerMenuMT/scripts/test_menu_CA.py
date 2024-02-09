@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Standalone menu generation in CA mode"""
 
@@ -39,4 +39,10 @@ with open(flags.Trigger.triggerMenuSetup+".pkl", "wb") as f:
     acc.store(f)
 AccumulatorDecorator.printStats()
 
-
+# Run menu verification
+import os, sys, subprocess
+sys.stdout.flush()
+rc = subprocess.call("verify_menu_config.py --folder " + os.getcwd(), shell=True)
+if rc != 0:
+    log.error("Menu verification failed")
+sys.exit(rc)
