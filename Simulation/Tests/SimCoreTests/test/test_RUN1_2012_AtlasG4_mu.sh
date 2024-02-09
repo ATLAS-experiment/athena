@@ -15,8 +15,7 @@ AtlasG4_tf.py \
     --CA \
     --conditionsTag 'OFLCOND-RUN12-SDR-19' \
     --postInclude 'PyJobTransforms.UseFrontier' \
-    --preInclude 'AtlasG4Tf:Campaigns.MC23SimulationNoIoV' \
-    --DataRunNumber '212272' \
+    --preInclude 'AtlasG4Tf:Campaigns.Run1_2012_SimulationSingleIoV' \
     --geometryVersion 'ATLAS-R1-2012-03-02-00' \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
     --outputHITSFile 'test.HITS.pool.root' \
