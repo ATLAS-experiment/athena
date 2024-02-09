@@ -104,18 +104,7 @@ BOOST_AUTO_TEST_SUITE(PixelModuleConfigCondAlgTest )
     //getFluenceLayer() , getRadSimFluenceMapList(), getRadSimFluenceMapList3D()
     BOOST_TEST(data->getCablingMapToFile() == false);
     BOOST_TEST(data->getCablingMapFileName() == "PixelCabling/Pixels_Atlas_IdMapping_2016.dat");//why?
-    //
-    BOOST_TEST(data->getDistortionInputSource() == 4);//corresponds to 'no distortions'
-    BOOST_TEST(data->getDistortionVersion() == -1);
-    BOOST_TEST(data->getDistortionR1() == 0.1_m);
-    BOOST_TEST(data->getDistortionR2() == 0.1_m);
-    BOOST_TEST(data->getDistortionTwist() == 0.0005);
-    BOOST_TEST(data->getDistortionMeanR() == 0.12_m);
-    BOOST_TEST(data->getDistortionRMSR() == 0.08_m);
-    BOOST_TEST(data->getDistortionMeanTwist() == -0.0005);
-    BOOST_TEST(data->getDistortionRMSTwist() == 0.0008);
-    BOOST_TEST(data->getDistortionWriteToFile() == false);
-    BOOST_TEST(data->getDistortionFileName() == "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/TrackingCP/PixelDistortions/PixelDistortionsData_v2_BB.txt");
+   
   }
 
 BOOST_AUTO_TEST_SUITE_END()
