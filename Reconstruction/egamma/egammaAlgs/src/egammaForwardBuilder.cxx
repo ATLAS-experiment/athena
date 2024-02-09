@@ -287,9 +287,7 @@ void egammaForwardBuilder::cookieCut(xAOD::CaloCluster& cluster) const
     return;
   }
 
-  CookieCutterHelpers::CentralPosition cp = 
-    CookieCutterHelpers::findCentralPositionEM2({&cluster});
-
+  CookieCutterHelpers::CentralPosition cp({&cluster});
   CaloClusterCellLink* cell_links = cluster.getOwnCellLinks();
   CaloClusterCellLink::iterator cell_itr = cell_links->begin();
 

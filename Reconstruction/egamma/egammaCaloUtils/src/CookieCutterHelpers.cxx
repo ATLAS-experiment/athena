@@ -7,55 +7,38 @@
 
 namespace CookieCutterHelpers
 {
-CentralPosition
-findCentralPositionEM2(const std::vector<const xAOD::CaloCluster*>& clusters)
+CentralPosition::CentralPosition(const std::vector<const xAOD::CaloCluster*>& clusters)
 {
-  CentralPosition cp;
   for (const auto* cluster : clusters) {
     if (cluster->hasSampling(CaloSampling::EMB2)) {
       const float thisEmax = cluster->energy_max(CaloSampling::EMB2);
-      if (thisEmax > cp.emaxB) {
-        cp.emaxB = thisEmax;
-        cp.etaB = cluster->etamax(CaloSampling::EMB2);
-        cp.phiB = cluster->phimax(CaloSampling::EMB2);
+      if (thisEmax > emaxB) {
+        emaxB = thisEmax;
+        etaB = cluster->etamax(CaloSampling::EMB2);
+        phiB = cluster->phimax(CaloSampling::EMB2);
       }
     }
     if (cluster->hasSampling(CaloSampling::EME2)) {
       const float thisEmax = cluster->energy_max(CaloSampling::EME2);
-      if (thisEmax > cp.emaxEC) {
-        cp.emaxEC = thisEmax;
-        cp.etaEC = cluster->etamax(CaloSampling::EME2);
-        cp.phiEC = cluster->phimax(CaloSampling::EME2);
+      if (thisEmax > emaxEC) {
+        emaxEC = thisEmax;
+        etaEC = cluster->etamax(CaloSampling::EME2);
+        phiEC = cluster->phimax(CaloSampling::EME2);
       }
     }
     if (cluster->hasSampling(CaloSampling::FCAL0)) {
       const float thisEmax = cluster->energy_max(CaloSampling::FCAL0);
-      if (thisEmax > cp.emaxF) {
-        cp.emaxF = thisEmax;
-        cp.etaF = cluster->etamax(CaloSampling::FCAL0);
-        cp.phiF = cluster->phimax(CaloSampling::FCAL0);
+      if (thisEmax > emaxF) {
+        emaxF = thisEmax;
+        etaF = cluster->etamax(CaloSampling::FCAL0);
+        phiF = cluster->phimax(CaloSampling::FCAL0);
       }
     }
   }
-  return cp;
 }
 
-/** Find the size of the cluster in phi using L2 cells.
- *
- * @param cp0: the reference position in calo-coordinates
- * @param cluster: the cluster filled with L2 and L3 cells
- *
- * The window is computed using only cells in the second layer.
- * Asymmetric sizes are computed for barrel and endcap. The size
- * is the maximum difference in phi between the center of a cell
- * and the refence, considering separately cells in the barrel
- * and in the endcap. The computation is done separately for the
- * cells with phi < reference phi or >=. A cutoff value of 1 is used.
- */
-PhiSize
-findPhiSize(const CentralPosition& cp0, const xAOD::CaloCluster& cluster) {
-
-  PhiSize phiSize;
+PhiSize::PhiSize(const CentralPosition& cp0, const xAOD::CaloCluster& cluster)
+{
   auto cell_itr = cluster.cell_cbegin();
   auto cell_end = cluster.cell_cend();
   for (; cell_itr != cell_end; ++cell_itr) {
@@ -75,13 +58,13 @@ findPhiSize(const CentralPosition& cp0, const xAOD::CaloCluster& cluster) {
       double cell_phi = proxim(dde->phi_raw(), phi0);
       if (cell_phi > phi0) {
         auto diff = cell_phi - phi0;
-        if (diff > phiSize.plusB) {
-          phiSize.plusB = diff;
+        if (diff > plusB) {
+          plusB = diff;
         }
       } else {
         auto diff = phi0 - cell_phi;
-        if (diff > phiSize.minusB) {
-          phiSize.minusB = diff;
+        if (diff > minusB) {
+          minusB = diff;
         }
       }
     } else if (cp0.emaxEC > 0 && CaloCell_ID::EME2 == dde->getSampling()) {
@@ -89,18 +72,17 @@ findPhiSize(const CentralPosition& cp0, const xAOD::CaloCluster& cluster) {
       double cell_phi = proxim(dde->phi_raw(), phi0);
       if (cell_phi > phi0) {
         auto diff = cell_phi - phi0;
-        if (diff > phiSize.plusEC) {
-          phiSize.plusEC = diff;
+        if (diff > plusEC) {
+          plusEC = diff;
         }
       } else {
         auto diff = phi0 - cell_phi;
-        if (diff > phiSize.minusEC) {
-          phiSize.minusEC = diff;
+        if (diff > minusEC) {
+          minusEC = diff;
         }
       }
     }
   }
-  return phiSize;
 }
 }
 
