@@ -24,7 +24,6 @@ atlas_add_component( MuonPRDTest
                                     AthAnalysisBaseCompsLib xAODCutFlow PileupReweightingLib EventBookkeeperMetaData xAODMetaData MuonPattern)
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_scripts( scripts/*.py )
 atlas_install_xmls( data/*.xml )
 atlas_install_python_modules( python/*.py )
