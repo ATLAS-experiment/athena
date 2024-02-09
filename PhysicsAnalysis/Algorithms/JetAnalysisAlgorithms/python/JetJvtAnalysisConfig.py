@@ -14,8 +14,6 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('enableFJvt', False, type=bool)
-        self.addOption ('globalSF', True, type=bool)
-        self.addOption ('runSelection', True, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -24,13 +22,10 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        if self.runSelection and not self.globalSF :
-            raise ValueError ("per-event scale factors needs to be computed when doing a JVT selection")
-
         # Set up the per-event jet efficiency scale factor calculation algorithm
-        if config.dataType() is not DataType.Data and self.globalSF:
+        if config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'JvtEventScaleFactorAlg' + postfix )
-            preselection = config.getPreselection (self.containerName, '')
+            preselection = config.getFullSelection (self.containerName, '')
             alg.preselection = preselection + '&&no_jvt' if preselection else 'no_jvt'
             alg.scaleFactorInputDecoration = 'jvt_effSF_%SYS%'
             alg.scaleFactorOutputDecoration = 'jvt_effSF_%SYS%'
@@ -40,7 +35,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
 
             if self.enableFJvt:
                 alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'ForwardJvtEventScaleFactorAlg' )
-                preselection = config.getPreselection (self.containerName, '')
+                preselection = config.getFullSelection (self.containerName, '')
                 alg.preselection = preselection + '&&no_fjvt' if preselection else 'no_fjvt'
                 alg.scaleFactorInputDecoration = 'fjvt_effSF_%SYS%'
                 alg.scaleFactorOutputDecoration = 'fjvt_effSF_%SYS%'
@@ -51,15 +46,11 @@ class JetJvtAnalysisConfig (ConfigBlock) :
 
 def makeJetJvtAnalysisConfig( seq, containerName,
                               postfix = None,
-                              enableFJvt = None,
-                              globalSF = None,
-                              runSelection = None ):
+                              enableFJvt = None ):
     """Create a jet JVT analysis algorithm config
 
     Keyword arguments:
       enableFJvt -- Whether to enable forward JVT calculations
-      globalSF -- Whether to calculate per event scale factors
-      runSelection -- Whether to run selection
     """
 
     config = JetJvtAnalysisConfig (containerName)
@@ -67,9 +58,5 @@ def makeJetJvtAnalysisConfig( seq, containerName,
         config.setOptionValue ('postfix', postfix)
     if enableFJvt is not None :
         config.setOptionValue ('enableFJvt', enableFJvt)
-    if globalSF is not None :
-        config.setOptionValue ('globalSF', globalSF)
-    if runSelection is not None :
-        config.setOptionValue ('runSelection', runSelection)
 
     seq.append (config)
