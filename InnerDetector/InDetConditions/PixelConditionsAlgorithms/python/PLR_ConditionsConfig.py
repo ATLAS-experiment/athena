@@ -93,7 +93,6 @@ def PLR_DistortionAlgCfg(flags, name="PLR_DistortionAlg", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(PLR_ConfigCondAlgCfg(flags))
     acc.merge(addFoldersSplitOnline(flags,"INDET", "/Indet/Onl/PixelDist", "/Indet/PixelDist", className="DetCondCFloat"))
-    kwargs.setdefault("PixelModuleData", "PLR_ModuleData")
     kwargs.setdefault("ReadKey", "/Indet/PixelDist")
     kwargs.setdefault("WriteKey", "PLR_DistortionData")
     acc.addCondAlgo(CompFactory.PixelDistortionAlg(name, **kwargs))
