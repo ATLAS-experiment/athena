@@ -4286,6 +4286,7 @@ StatusCode TrigEDMChecker::TrigCompositeNavigationToDot(std::string& returnValue
       const ElementLink<DecisionContainer> selfEL = ElementLink<DecisionContainer>(*container, tc->index());
       std::vector<ElementLink<DecisionContainer>> seedELs = tc->objectCollectionLinks<DecisionContainer>("seed");
       const bool isHypoAlgNode = tc->name() == "H";
+      const bool isComboHypoAlgNode = tc->name() == "CH";
       const std::vector<DecisionID>& decisions = tc->decisions();
       const uint32_t selfKey = selfEL.key();
       const uint32_t selfIndex = selfEL.index();
@@ -4299,7 +4300,7 @@ StatusCode TrigEDMChecker::TrigCompositeNavigationToDot(std::string& returnValue
           }
         }
         // Check my seeds
-        if (!doDump and isHypoAlgNode and not m_excludeFailedHypoNodes) {
+        if (!doDump and (isHypoAlgNode or isComboHypoAlgNode) and not m_excludeFailedHypoNodes) {
           for (const ElementLink<DecisionContainer>& s : seedELs) {
             const std::vector<DecisionID>& seedDecisions = (*s)->decisions();
             for (DecisionID id : seedDecisions) {
