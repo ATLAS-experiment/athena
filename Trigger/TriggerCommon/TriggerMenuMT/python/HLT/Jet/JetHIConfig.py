@@ -2,12 +2,11 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaCommon.CFElements import parOR
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
 
 from JetRecConfig import JetRecConfig
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from TrigEDMConfig.TriggerEDM import recordable
 
@@ -36,26 +35,20 @@ def jetHIClusterSequence(configFlags, ionopt, RoIs):
     return [HICaloTowerSequence,HIClusterSequence], clusterskey, towerKey
 ###############################################################################################
 
-def jetHIEventShapeSequence(configFlags, clustersKey, towerKey):
+def jetHIEventShapeSequenceCA(configFlags, clustersKey, towerKey):
+    acc = ComponentAccumulator()
+    
     #Import the map tool - it will have to harvest configuration along the path
     eventShapeMapToolKey="HLTHIEventShapeMapTool"
     theMapTool=CompFactory.HIEventShapeMapTool(eventShapeMapToolKey)
 
-
     #Make new event shape at tower level
     EventShapeKey='HLTHIEventShapeWeighted'
-    
     ESAlg_W=CompFactory.HIEventShapeMaker("ESAlg_W")
     ESAlg_W.OutputContainerKey=EventShapeKey
     ESAlg_W.InputTowerKey=clustersKey
     ESAlg_W.NaviTowerKey=towerKey
-    
-    #Hack needed because ES algorithm requires a summary tool, this disables it
-    SummaryTool=CompFactory.HIEventShapeSummaryTool("SummaryTool2")
-    SummaryTool.SubCalos=['FCal','EMCal','HCal','ALL']
-    ESAlg_W.SummaryTool=SummaryTool
-    ESAlg_W.SummaryContainerKey=""
-    
+        
     #Add filler tool
     ESFiller=CompFactory.HIEventShapeFillerTool("WeightedFiller")
     ESFiller.UseClusters=True
@@ -67,18 +60,15 @@ def jetHIEventShapeSequence(configFlags, clustersKey, towerKey):
     from HIJetRec.HIJetRecUtilsCA import getHIClusterGeoWeightFile
     TWTool.InputFile=getHIClusterGeoWeightFile(configFlags)
 
-    from AthenaCommon.AppMgr import ToolSvc
-    ToolSvc += CompFactory.HITowerWeightTool()
     ESFiller.TowerWeightTool=TWTool
     ESFiller.EventShapeMapTool=theMapTool
-    
     #Add to top sequence
     ESAlg_W.HIEventShapeFillerTool=ESFiller
-    JetHIEvtSeq = parOR( "HLTHIEventShapeSeq", [])
-    JetHIEvtSeq += conf2toConfigurable(ESAlg_W)
+    acc.addEventAlgo(ESAlg_W)
 
-    return JetHIEvtSeq, EventShapeKey, theMapTool
+    return acc, EventShapeKey, theMapTool
 ###############################################################################################
+
 
 from JetRecConfig.StandardJetMods import stdJetModifiers
 
@@ -103,7 +93,7 @@ stdJetModifiers.update(
                                 IsData=lambda _, modspec: modspec.split('___')[1] == 'True'),
     )
 
-def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
+def jetHIRecoSequenceCA(configFlags, clustersKey, towerKey, **jetRecoDict):
     """This build the standard heavy ion style jet.
 
     This is similar to JetRecConfig.getJetDefAlgs(). However due to how the alg flow is organized in the
@@ -113,34 +103,15 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
       - use lower-level function in JetRecConfig with this JetDefinition to get the necessary algs and build our sequence manually.
 
     """
+    acc = ComponentAccumulator()
+
     if jetRecoDict["ionopt"] == "noion":
          raise ValueError("Jet reco for heavy ion called without a ion option!")
 
     dataSource = "mc" if configFlags.Input.isMC else "data"
 
-    strtemp = "HI_{recoAlg}_{jetCalib}"
-    jetDefString = strtemp.format(**jetRecoDict)
-    jetHIRecSeq = parOR( "JetHIRecSeq_"+jetDefString, [])
-
-    jetHIEvtShapeSequence, eventShapeKey, eventShapeMapTool = jetHIEventShapeSequence(configFlags, clustersKey=clustersKey, towerKey=towerKey)
-    jetHIRecSeq += jetHIEvtShapeSequence
-
-    from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
-    from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
-    cellMaker = HLTCaloCellMaker(configFlags,
-                                 name = 'HLTCaloCellMakerEGFS',
-                                 roisKey = mapThresholdToL1RoICollection('FSNOSEED'),
-                                 CellsName = 'CaloCellsEGFS',
-                                 monitorCells = False)
-    jetHIRecSeq += cellMaker 
-    from TrigT2CaloCommon.CaloDef import _algoHLTHIEventShape
-    eventShapeMaker = _algoHLTHIEventShape(
-             configFlags,
-             name='HLTEventShapeMakerEG',
-             inputEDM=cellMaker.CellsName,
-             outputEDM="HLT_HIEventShapeEG" # needs to be in sync with the one setup in HIMenuSequences (for Fgap triggers)
-    )
-    jetHIRecSeq += eventShapeMaker 
+    jetHIEvtShapeSequence, eventShapeKey, eventShapeMapTool = jetHIEventShapeSequenceCA(configFlags, clustersKey=clustersKey, towerKey=towerKey)
+    acc.merge(jetHIEvtShapeSequence)
 
     jetNamePrefix = "HLT_"
     jetDef = JetRecoCommon.defineHIJets(jetRecoDict,clustersKey=clustersKey,prefix=jetNamePrefix,suffix="_Unsubtracted")
@@ -155,7 +126,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
         SkipNegativeEnergy = False,
         TreatNegativeEnergyAsGhost=True
         )
-    jetHIRecSeq += conf2toConfigurable( pjgalg)
+    acc.addEventAlgo(pjgalg)
     finalpjs = str(pjgalg.OutputContainer)
 
     # Set the name of the final PseudoJetContainer to be used as input :
@@ -167,7 +138,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     # Reconstruction 
     jetRecAlg = getHIJetRecAlg(jetDef, jetsFullName_Unsub, monTool=monTool)
-    jetHIRecSeq += conf2toConfigurable( jetRecAlg )
+    acc.addEventAlgo(jetRecAlg)
 
     associationName = "%s_DR8Assoc" % (clustersKey)
 
@@ -192,11 +163,11 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     )
     jetDef_seed0.modifiers=["HLTHIJetAssoc", "HLTHIJetMaxOverMean", "HLTHIJetDiscrim", "Filter:5000"]
     copySeed0Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed0,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
-    jetHIRecSeq += copySeed0Alg
+    acc.addEventAlgo(copySeed0Alg)
 
     # First iteration!
     iter0=HLTAddIteration(configFlags, jetsFullName_seed0, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, suffix="iter0") # subtract UE from jets
-    jetHIRecSeq += HLTRunTools([iter0], "jetalgHI_iter0") 
+    acc.addEventAlgo(HLTRunTools([iter0], "jetalgHI_iter0"))
     modulator0=iter0.Modulator
     subtractor0=iter0.Subtractor
 
@@ -204,7 +175,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     cluster_key_iter0_deep=clustersKey+"_iter0_temp"
     happy_iter0_Tool = ApplySubtractionToClustersHLT(configFlags, EventShapeKey="HLTHIEventShapeWeighted_iter0", ClusterKey=clustersKey, OutClusterKey=cluster_key_iter0_deep, Modulator=modulator0, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor0, SetMoments=False, ApplyOriginCorrection=False)
-    jetHIRecSeq += HLTRunTools([happy_iter0_Tool], "jetalgHI_clusterSub_iter0") 
+    acc.addEventAlgo(HLTRunTools([happy_iter0_Tool], "jetalgHI_clusterSub_iter0"))
 
     GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_iter0_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter0")
 
@@ -215,7 +186,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
     jetsFullName_seed1 = jetDef_seed1.fullname()
     copySeed1Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed1,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
-    jetHIRecSeq += copySeed1Alg
+    acc.addEventAlgo(copySeed1Alg)
 
     iter1=HLTAddIteration(configFlags, jetsFullName_seed1, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, sub_tool=subtractor0, suffix="iter1")
     iter1.OutputEventShapeKey="HLTHIEventShape_iter1"
@@ -224,12 +195,12 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     HLTMakeSubtractionTool(configFlags, iter1.OutputEventShapeKey, Modulator=modulator1, EventShapeMapTool=eventShapeMapTool, label="HLTHIJetConstSub_iter1")
 
-    jetHIRecSeq += HLTRunTools([iter1], "jetalgHI_clusterSub_egamma") 
+    acc.addEventAlgo(HLTRunTools([iter1], "jetalgHI_clusterSub_egamma")) 
 
     # 
     cluster_key_final_deep=clustersKey+"_final"
     subToClusterTool = ApplySubtractionToClustersHLT(configFlags, EventShapeKey="HLTHIEventShape_iter1", ClusterKey=clustersKey, OutClusterKey=cluster_key_final_deep, Modulator=modulator1, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor1, SetMoments=False, ApplyOriginCorrection=False)
-    jetHIRecSeq += HLTRunTools([subToClusterTool], "jetalgHI_clusterSub") 
+    acc.addEventAlgo(HLTRunTools([subToClusterTool], "jetalgHI_clusterSub"))
 
     GetConstituentsModifierToolHLT(configFlags, name="HIJetConstituentModifierTool", ClusterKey=cluster_key_final_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter1")
 
@@ -237,12 +208,12 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetDef_final.suffix = jetDef.suffix.replace("_Unsubtracted","")
     jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Sort", "Filter:20000"]
     copyAlg_final= getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
-    jetHIRecSeq += copyAlg_final
+    acc.addEventAlgo(copyAlg_final)
 
     jetsFinal = recordable(jetDef_final.fullname())
 
     jetsOut = jetsFinal
-    return jetHIRecSeq, jetsOut, jetDef_final
+    return acc, jetsOut, jetDef_final
 
 def HLTRunTools(toollist, algoName):
     
@@ -426,36 +397,6 @@ def HLTMakeSubtractionTool(configFlags, shapeKey, moment_name='', momentOnly=Fal
         ApplyOriginCorrection=True)
 
     return subtr
-
-def JetHICfg(flags, clustersKey, **jetRecoDict):
-    acc = ComponentAccumulator()
-
-    if jetRecoDict["ionopt"] == "noion":
-        raise ValueError("JetHICfg is called for ion option")
-
-    _jetNamePrefix = "HLT_"
-    jetDef = JetRecoCommon.defineHIJets(
-        jetRecoDict,
-        clustersKey=clustersKey,
-        prefix=_jetNamePrefix,
-    )
-    jetDef._internalAtt['finalPJContainer'] = "PseudoJet"+clustersKey
-    jetsOut = recordable(jetDef.fullname())
-
-    pj_alg = JetRecConfig.getConstitPJGAlg(jetDef.inputdef)
-    pj_alg.name = pj_alg.name+"HI" # poormans fix conflict of teh config, TODO make jet config to create HI specific cell maker
-    acc.addEventAlgo(pj_alg)
-    
-
-    from JetRec import JetOnlineMon
-    acc.addEventAlgo(
-        JetRecConfig.getJetRecAlg(
-            jetDef, JetOnlineMon.getMonTool_TrigJetAlgorithm(flags, f"HLTJets/{jetsOut}/")
-        ),
-        primary=True,
-    )
-
-    return acc, jetsOut, jetDef
 
 def HLTHIClusterGetter(dummyFlags, tower_key="CombinedTower", cell_key="AllCalo", cluster_key="HLT_HIClusters") :
     """Function to equip HLT HI cluster builder from towers and cells, adds to output AOD stream"""
