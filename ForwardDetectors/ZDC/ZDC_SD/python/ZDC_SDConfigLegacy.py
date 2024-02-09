@@ -8,7 +8,8 @@ def getZDC_FiberSD(name="ZDC_FiberSD", **kwargs):
                                             ,"ZDC::RPD_Buff_Active_Logical*"
                                             ,"ZDC::RPD_Core_Readout_Logical"
                                             ,"ZDC::RPD_Clad_Readout_Logical"
-                                            ,"ZDC::RPD_Buff_Readout_Logical"])
+                                            ,"ZDC::RPD_Buff_Readout_Logical"
+                                            ,"ZDC::BRAN_Rod_Logical"])
     kwargs.setdefault("OutputCollectionNames", ["ZDC_SimFiberHit_Collection"])
     return CfgMgr.ZDC_FiberSDTool(name, **kwargs)
 
@@ -28,6 +29,7 @@ def getZDC_G4CalibSD(name="ZDC_G4CalibSD", **kwargs):
                                             ,"ZDC::RPD_Buff_Active_Logical*"
                                             ,"ZDC::RPD_Core_Readout_Logical"
                                             ,"ZDC::RPD_Clad_Readout_Logical"
-                                            ,"ZDC::RPD_Buff_Readout_Logical"])
+                                            ,"ZDC::RPD_Buff_Readout_Logical"
+                                            ,"ZDC::BRAN*"])
     kwargs.setdefault("OutputCollectionNames", ["ZDC_CalibrationHits"])
     return CfgMgr.ZDC_G4CalibSDTool(name, **kwargs)
