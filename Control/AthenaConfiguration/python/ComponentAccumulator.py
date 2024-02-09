@@ -330,12 +330,12 @@ class ComponentAccumulator(AccumulatorCachable):
 
     def addSequence(self, newseq, primary=False, parentName = None ):
         """ Adds new sequence. If second argument is present then it is added under another sequence  """
-        from AthenaCommon.AlgSequence import AthSequencer as LegacySequence
-        if isinstance( newseq, LegacySequence ):
-            raise ConfigurationError('{} is not the Conf2 Sequence, ComponentAccumulator handles only the former'.format(newseq.name))
 
         if not isSequence(newseq):
             raise TypeError('{} is not a sequence'.format(newseq.name))
+
+        if not isinstance(newseq, GaudiConfig2._configurables.Configurable):
+            raise ConfigurationError('{} is not the Conf2 Sequence, ComponentAccumulator handles only the former'.format(newseq.name))
 
         algorithmsInside = findAllAlgorithmsByName(newseq)
         if len(algorithmsInside) != 0:
@@ -1241,12 +1241,6 @@ class ComponentAccumulator(AccumulatorCachable):
         return PropSetterProxy(self, path)
 
 
-# Legacy support
-from AthenaConfiguration.LegacySupport import (conf2toConfigurable,  # noqa: F401 (for client use)
-                                               CAtoGlobalWrapper,
-                                               appendCAtoAthena)
-
-
 def startInteractive(localVarDic):
     """Setup and start a useful interactive session including auto-completion and history"""
     import code
@@ -1292,3 +1286,18 @@ def printInteractiveMsg_run():
     print("\tStoreGate is accessible as 'sg'") 
     print("\t^D will exit the interactive mode and athena will finalize")
     return 
+
+
+# Make legacy support available in legacy jobs
+if not isComponentAccumulatorCfg():
+    from AthenaConfiguration.LegacySupport import (conf2toConfigurable,  # noqa: F401 (for client use)
+                                                   CAtoGlobalWrapper,
+                                                   appendCAtoAthena)
+# and the same names in CA (to support migration) but bomb on calling them
+else:
+    def conf2toConfigurable(*args, **kwargs):
+        raise RuntimeError("conf2toConfigurable cannot be called in a CA job")
+    def CAtoGlobalWrapper(*args, **kwargs):
+        raise RuntimeError("CAtoGlobalWrapper cannot be called in a CA job")
+    def appendCAtoAthena(*args, **kwargs):
+        raise RuntimeError("appendCAtoAthena cannot be called in a CA job")
