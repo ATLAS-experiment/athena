@@ -42,32 +42,35 @@ namespace ActsTrk {
     auto nReceivedSPsPixel = Monitored::Scalar<int>( "numPixSpacePoints" , 0 );
     auto mon = Monitored::Group( m_monTool, timer, nReceivedSPsPixel );
 
+    SG::ReadHandle<xAOD::PixelClusterContainer> inputPixelClusterContainer( m_pixelClusterContainerKey, ctx );
+    if (!inputPixelClusterContainer.isValid()){
+      ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
+      return StatusCode::FAILURE;
+    }
+    const xAOD::PixelClusterContainer *pixelClusters = inputPixelClusterContainer.cptr();
+    ATH_MSG_DEBUG("Retrieved " << pixelClusters->size() << " clusters from container " << m_pixelClusterContainerKey.key());
+    
     auto pixelSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_pixelSpacePointContainerKey, ctx );
     ATH_MSG_DEBUG( "--- Pixel Space Point Container `" << m_pixelSpacePointContainerKey.key() << "` created ..." );
+    ATH_CHECK(pixelSpacePointContainer.record( std::make_unique<xAOD::SpacePointContainer>(),
+					       std::make_unique<xAOD::SpacePointAuxContainer>() ));
+    xAOD::SpacePointContainer *pixelSpacePoints = pixelSpacePointContainer.ptr();
+    // Reserve space
+    pixelSpacePoints->reserve(pixelClusters->size());
 
+    // Early exit in case we have no clusters
+    // We still are saving an empty space point container in SG
+    if (pixelClusters->empty()) {
+      ATH_MSG_DEBUG("No input clusters found, we stop space point formation");
+      return StatusCode::SUCCESS;
+    }
+    
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
     const InDetDD::SiDetectorElementCollection* pixelElements(*pixelDetEleHandle);
     if (not pixelDetEleHandle.isValid() or pixelElements==nullptr) {
       ATH_MSG_FATAL(m_pixelDetEleCollKey.fullKey() << " is not available.");
       return StatusCode::FAILURE;
     }
-
-    std::unique_ptr<xAOD::SpacePointContainer> pixelSpacePoints = std::make_unique<xAOD::SpacePointContainer>();
-    std::unique_ptr<xAOD::SpacePointAuxContainer> pixelSpacePointsAux = std::make_unique<xAOD::SpacePointAuxContainer>();
-    pixelSpacePoints->setStore( pixelSpacePointsAux.get() );
-
-
-
-    SG::ReadHandle<xAOD::PixelClusterContainer> inputPixelClusterContainer( m_pixelClusterContainerKey, ctx );
-    if (!inputPixelClusterContainer.isValid()){
-        ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
-        return StatusCode::FAILURE;
-    }
-    const xAOD::PixelClusterContainer *pixelClusters = inputPixelClusterContainer.cptr();
-
-    // Reserve space
-    pixelSpacePoints->reserve(pixelClusters->size());
-    pixelSpacePointsAux->reserve(pixelClusters->size());
 
     // using trick for fast insertion
     std::vector< xAOD::SpacePoint* > preCollection;
@@ -91,7 +94,6 @@ namespace ActsTrk {
       							       *pixelElement ) );
     }
 
-    ATH_CHECK( pixelSpacePointContainer.record( std::move( pixelSpacePoints ), std::move(pixelSpacePointsAux) ) );
     nReceivedSPsPixel = pixelSpacePointContainer->size();
 
     return StatusCode::SUCCESS;
