@@ -151,7 +151,7 @@ def _find_version_from_cool_tag (flags, coolTag, corrclass):
         connstring = 'COOLONL_CALO/' + flags.IOVDb.DatabaseInstance
 
     from CoolConvUtilities import AtlCoolLib
-    db = AtlCoolLib.indirectOpen (connstring, readOnly=True, oracle=True)
+    db = AtlCoolLib.indirectOpen (connstring, readOnly=True)
     ff = db.getFolderSet (folderset)
     t = ff.resolveTag (coolTag)
     #  CaloOflSwClusterCorrections.00-02-12-calhits-v9

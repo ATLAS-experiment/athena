@@ -34,7 +34,7 @@ def scrub (dbfile, folder):
     else:
         connstring = dbfile
 
-    db = AtlCoolLib.indirectOpen(connstring,False,False,True)
+    db = AtlCoolLib.indirectOpen(connstring,False,True)
     if not db.existsFolderSet (folder):
         print ("Can't find folder", folder)
         sys.exit(1)

@@ -34,7 +34,7 @@ class coolLumiResultsGetter(coolLumiCalc):
         #also need the online database
         try:
             print ("Now trying to open", self.lumidbname)
-            self.cooldblumi=indirectOpen(self.lumidbname,True,kw.get('readoracle',False),kw.get('loglevel',1)>1)
+            self.cooldblumi=indirectOpen(self.lumidbname,debug=kw.get('loglevel',1)>1)
         except Exception as e:
             print (e)
             sys.exit(-1)

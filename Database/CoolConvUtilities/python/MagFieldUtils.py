@@ -9,11 +9,10 @@ from __future__ import print_function
 
 from PyCool import cool
 from CoolConvUtilities.AtlCoolLib import indirectOpen
-from os import environ
 
-#Cache for run/LB time stamp (avoid multiple DB lookup)
-global _timeForLB
+#Cache per run/LB  (avoid multiple DB lookup)
 _timeForLB=dict()
+_fieldForLB=dict()
 
 class MagFieldDCSInfo:
     "Wrapper class to hold magnetic field current info from DCS data and the filename tag for the SOR"
@@ -46,18 +45,18 @@ class MagFieldDCSInfo:
         return self._fileNameTag
 
 
-def getFieldForRun(run,readOracle=True,quiet=False,lumiblock=None):
+def getFieldForRun(run,quiet=False,lumiblock=None):
     "Get the magnetic field currents (MagFieldDCSInfo) for a given run"
     # access the TDAQ schema to translate run number into timestamp
     # and get the filename tag
 
-    if "DBRELEASE" in environ:
-        print ("Running in DBRelease, forcing readOracle to False")
-        readOracle=False
-    
+    runiov=(run << 32)+(lumiblock or 0)
+    if runiov in _fieldForLB:
+        return _fieldForLB[runiov]
+
     newdb=(run>=236107)
     if not quiet:
-        print ("Reading magnetic field for run %i, forceOracle %s CONDBR2 %s" % (run,readOracle,newdb))
+        print ("Reading magnetic field for run %i, CONDBR2 %s" % (run,newdb))
     # setup appropriate connection and folder parameters
     if newdb:
         dbname='CONDBR2'
@@ -68,7 +67,7 @@ def getFieldForRun(run,readOracle=True,quiet=False,lumiblock=None):
         sorfolder='/TDAQ/RunCtrl/SOR_Params'
         fntname='FilenameTag'
 
-    tdaqDB=indirectOpen('COOLONL_TDAQ/%s' % dbname,oracle=readOracle)
+    tdaqDB=indirectOpen('COOLONL_TDAQ/%s' % dbname)
     if (tdaqDB is None):
         print ("MagFieldUtils.getFieldForRun ERROR: Cannot connect to COOLONL_TDAQ/%s" % dbname)
         return None
@@ -90,11 +89,11 @@ def getFieldForRun(run,readOracle=True,quiet=False,lumiblock=None):
         if not quiet:
             print ("Reading specific timestamp for lumiblock %i" % lumiblock)
         
-        lbtime=getTimeForLB(run,lumiblock,readOracle)
+        lbtime=getTimeForLB(run,lumiblock)
         if (lbtime==0 and lumiblock>1):
             # sometimes fails as last LB is missing in LBLB - try previous
             print ("MagFieldUtils.getFieldForRun WARNING: Cannot find LB %i, trying %i" % (lumiblock,lumiblock-1))
-            lbtime=getTimeForLB(run,lumiblock-1,readOracle)
+            lbtime=getTimeForLB(run,lumiblock-1)
         if (lbtime==0):
             print ("MagFieldUtils.getFieldForRun WARNING: Cannot find LB %i, fall back on SOR time" % lumiblock)
         if (lbtime>0):
@@ -111,7 +110,7 @@ def getFieldForRun(run,readOracle=True,quiet=False,lumiblock=None):
     if (sortime==0): return None
     
     # now having got the start of run timestamp, lookup the field info in DCS
-    dcsDB=indirectOpen('COOLOFL_DCS/%s' % dbname,oracle=readOracle)
+    dcsDB=indirectOpen('COOLOFL_DCS/%s' % dbname)
     if (dcsDB is None):
         print ("MagFieldUtils.getFieldForRun ERROR: Cannot connect to COOLOFL_DCS/%s" % dbname)
         return None
@@ -138,9 +137,11 @@ def getFieldForRun(run,readOracle=True,quiet=False,lumiblock=None):
     if data is None:
         return None
     # return a MagFIeldDCSInfo object containing the result
-    return MagFieldDCSInfo(data[0],data[1],data[2],data[3],fnt)
+    retval=MagFieldDCSInfo(data[0],data[1],data[2],data[3],fnt)
+    _fieldForLB[runiov]=retval
+    return retval
 
-def getTimeForLB(run,LB,readOracle=False):
+def getTimeForLB(run,LB):
     "Return the time a specific run/LB, given the folder, or 0 for bad/no data"
     if LB is None: 
         LB=0
@@ -159,7 +160,7 @@ def getTimeForLB(run,LB,readOracle=False):
     #print ("Querying DB for time of run %i LB %i" % (run,LB))
 
     try:
-        trigDB=indirectOpen('COOLONL_TRIGGER/%s' % dbname,oracle=readOracle)
+        trigDB=indirectOpen('COOLONL_TRIGGER/%s' % dbname)
         if (trigDB is None):
             print ("MagFieldUtils.getTimeForLB ERROR: Cannot connect to COOLONL_TDAQ/%s" % dbname)
             return 0

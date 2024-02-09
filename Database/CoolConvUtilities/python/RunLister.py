@@ -167,14 +167,14 @@ class coolRunLister:
                  oracle=False,loglevel=1):
         debug=(loglevel>1)
         try:
-            self.cooldb=indirectOpen(cooltdaqdbconn,True,oracle,debug)
+            self.cooldb=indirectOpen(cooltdaqdbconn,True,debug)
             if (loglevel>=1):print ("Connected to",cooltdaqdbconn,"for RunControl data")
         except Exception as e:
             print (e)
             sys.exit(-1)
         if (len(cooltrigdbconn)>0):
             try:
-                self.cooltrigdb=indirectOpen(cooltrigdbconn,True,oracle,debug)
+                self.cooltrigdb=indirectOpen(cooltrigdbconn,True,debug)
                 if (loglevel>=1): print ("Connected to",cooltrigdbconn,"for CTP data")
                 self.usetrig=True
             except Exception as e:
@@ -184,7 +184,7 @@ class coolRunLister:
             self.usetrig=False
         if (len(coolstatusdbconn)>0):
             try:
-                self.coolstatusdb=indirectOpen(coolstatusdbconn,True,oracle,debug)
+                self.coolstatusdb=indirectOpen(coolstatusdbconn,True,debug)
                 if (loglevel>=1): print ("Connected to",coolstatusdbconn,"for detector status data")
             except Exception as e:
                 print (e)

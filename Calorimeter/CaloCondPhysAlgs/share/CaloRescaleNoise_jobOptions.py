@@ -14,7 +14,7 @@ Geometry = 'ATLAS-GEO-01-00-00'
 
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 
-trigDB=indirectOpen('COOLONL_TRIGGER/COMP200',oracle=True)
+trigDB=indirectOpen('COOLONL_TRIGGER/COMP200')
 trigfolder=trigDB.getFolder('/TRIGGER/LUMI/LBLB')
 runiov=(RunNumber << 32)+ LumiBlock
 obj=trigfolder.findObject(runiov,0)

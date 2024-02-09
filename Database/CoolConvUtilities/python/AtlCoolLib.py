@@ -124,13 +124,12 @@ def timeString(iovkey):
         stime=int(iovkey/1000000000)
         return time.asctime(time.gmtime(stime))+" UTC"
 
-def indirectOpen(coolstr,readOnly=True,oracle=False,debug=False):
+def indirectOpen(coolstr,readOnly=True,debug=False):
     """Obtain a connection to the database coolstr (e.g.
        COOLONL_INDET/OFLP200) using Oracle servers only, bypassing SQLite files
        and simulating the action of DBReplicaSvc to choose the correct one.
        Returns None in case a connection cannot be established.
        debug=True produces debug printout to show servers being tried"""
-
     dbSvc=cool.DatabaseSvcFactory.databaseService()
     connstr=transConn(coolstr)
     
@@ -139,7 +138,7 @@ def indirectOpen(coolstr,readOnly=True,oracle=False,debug=False):
     forceSQLite='ATLAS_COOL_FORCESQLITE' in os.environ
     if (debug and forceSQLite):
         print ("ATLAS_COOL_FORCESQLITE: Force consideration of SQLite replicas")
-    if (len(splitname)!=2 or readOnly is False or oracle is False or forceSQLite):
+    if (len(splitname)!=2 or readOnly is False):
         try:
             db=dbSvc.openDatabase(connstr,readOnly)
         except Exception as e:
@@ -308,11 +307,10 @@ class coolTool:
         self.tsmax=cool.ValidityKeyMax
         self.since=cool.ValidityKeyMin
         self.until=cool.ValidityKeyMax
-        self.oracle=False
         self.debug=False
         # get and process options - note only use long options format
         try:
-            fullopts=longopts+['r=','rs=','ru=','l=','ls=','lu=','ts=','tu=','readoracle','debug']
+            fullopts=longopts+['r=','rs=','ru=','l=','ls=','lu=','ts=','tu=','debug']
             opts,args=getopt.getopt(sys.argv[1:],'',fullopts)
         except getopt.GetoptError as e:
             print (e)
@@ -330,7 +328,7 @@ class coolTool:
         self.procopts(opts)
         # open database connection and execute command
         if self.readonly:
-            self.db=indirectOpen(self.conn,oracle=self.oracle,debug=self.debug)
+            self.db=indirectOpen(self.conn,debug=self.debug)
         else:
             self.db=forceOpen(self.conn)
         self.execute()
@@ -350,7 +348,6 @@ class coolTool:
         print ('--lu=<lumi block until> (inclusive)')
         print ('--ts=<initial timestamp> (in seconds)')
         print ('--tu=<final timestamp> (in seconds)')
-        print ('--readoracle: Force read-only queries to use Oracle replica')
         print ('--debug: Enable debugging information')
 
     def _procopts(self,opts):
@@ -372,7 +369,6 @@ class coolTool:
             if (o=='--tu'):
                 self.tsmax=timeVal(a)*1000000000
                 self.runLumi=False
-            if (o=='--readoracle'): self.oracle=True
             if (o=='--debug'): self.debug=True
         # now set the real interval of validity
         if (self.runLumi):

@@ -100,7 +100,7 @@ class BunchgroupHandler(object):
     def openDB(self):
         # Open the trigger COOL database
         try:
-            self.trigProdDb = indirectOpen(self.trigProdDbName, True, False, False)
+            self.trigProdDb = indirectOpen(self.trigProdDbName, True, False)
             if self.verbose: print('Connected to', self.trigProdDbName, 'for Trigger data')
         except Exception as e:
             print(e)
