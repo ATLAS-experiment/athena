@@ -29,9 +29,8 @@ namespace MuonGM {
         loadStationIndices();
     }
 
-    MuonDetectorManager::~MuonDetectorManager() {
-        for (unsigned int p = 0; p < m_envelope.size(); ++p) { m_envelope[p]->unref(); }
-    }
+    MuonDetectorManager::~MuonDetectorManager()  = default;
+    
     template <typename read_out, size_t N> void MuonDetectorManager::clearCache(std::array<std::unique_ptr<read_out>, N>& array) {
         for (std::unique_ptr<read_out>& ele : array) {
             if (ele) ele->clearCache();
@@ -116,7 +115,6 @@ namespace MuonGM {
     PVConstLink MuonDetectorManager::getTreeTop(unsigned int i) const { return m_envelope[i]; }
     PVLink MuonDetectorManager::getTreeTop(unsigned int i) { return m_envelope[i]; }
     void MuonDetectorManager::addTreeTop(PVLink pV) {
-        pV->ref();
         m_envelope.push_back(pV);
     }
 
