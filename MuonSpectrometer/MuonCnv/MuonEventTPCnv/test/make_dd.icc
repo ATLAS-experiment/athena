@@ -159,24 +159,15 @@ public:
   ~Deleter();
   void add (RCBase* b);
   void add (AGDDPositioner* b);
-  std::vector<RCBase*> m_rcpointers;
-  std::vector<AGDDPositioner*> m_pospointers;
+  std::vector<GeoIntrusivePtr<RCBase>> m_rcpointers{};
+  std::vector<std::unique_ptr<AGDDPositioner>> m_pospointers{};
 };
-Deleter::~Deleter()
-{
-  for (RCBase* b : m_rcpointers)
-    b->unref();
-  for (AGDDPositioner* b : m_pospointers)
-    delete b;
+Deleter::~Deleter() = default;
+void Deleter::add (RCBase* b) {
+  m_rcpointers.emplace_back (b);
 }
-void Deleter::add (RCBase* b)
-{
-  b->ref();
-  m_rcpointers.push_back (b);
-}
-void Deleter::add (AGDDPositioner* b)
-{
-  m_pospointers.push_back (b);
+void Deleter::add (AGDDPositioner* b) {
+  m_pospointers.emplace_back(b);
 }
 Deleter deleter;
 
