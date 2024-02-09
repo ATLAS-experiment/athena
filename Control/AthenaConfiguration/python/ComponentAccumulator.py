@@ -1015,13 +1015,6 @@ class ComponentAccumulator(AccumulatorCachable):
         return app
 
     def gatherProps(self):
-        from GaudiConfig2._configurables import Configurable
-
-        # Convenice hack
-        Configurable.getFullName = lambda self: "{}/{}".format(
-            self.__cpp_type__, self.name
-        )
-
         appPropsToSet = {k: str(v) for k, v in self._theAppProps.items()}
         mspPropsToSet = {}
         bshPropsToSet = []
@@ -1049,16 +1042,16 @@ class ComponentAccumulator(AccumulatorCachable):
             for k, v in comp._properties.items():
                 # Handle special cases of properties:
                 # 1.PrivateToolHandles
-                if isinstance(v, Configurable):
+                if isinstance(v, GaudiConfig2._configurables.Configurable):
                     # Add the name of the tool as property to the parent
-                    bshPropsToSet.append((name, k, v.getFullName()))
+                    bshPropsToSet.append((name, k, v.getFullJobOptName()))
                     # Recursively add properties of this tool to the JobOptionSvc
                     getCompsToBeAdded(v, namePrefix=name + ".")
                 # 2. PrivateToolHandleArray
                 elif isinstance(v, GaudiHandles.PrivateToolHandleArray):
                     # Add names of tools as properties to the parent
                     bshPropsToSet.append(
-                        (name, k, str([v1.getFullName() for v1 in v]),)
+                        (name, k, str([v1.getFullJobOptName() for v1 in v]),)
                     )
                     # Recursively add properties of tools to JobOptionsSvc
                     for v1 in v:
@@ -1107,7 +1100,7 @@ class ComponentAccumulator(AccumulatorCachable):
                     vstr = "" if v is None else str(v)
                     bshPropsToSet.append((seqName, k, vstr))
             bshPropsToSet.append(
-                (seqName, "Members", str([alg.getFullName() for alg in algoList]),)
+                (seqName, "Members", str([alg.getFullJobOptName() for alg in algoList]),)
             )
             for alg in algoList:
                 if isinstance(
@@ -1123,7 +1116,7 @@ class ComponentAccumulator(AccumulatorCachable):
         condalgseq = []
         for alg in self._conditionsAlgs:
             getCompsToBeAdded(alg)
-            condalgseq.append(alg.getFullName())
+            condalgseq.append(alg.getFullJobOptName())
             if isinstance(alg, PyAlg):
                 alg.setup2()
         bshPropsToSet.append(("AthCondSeq", "Members", str(condalgseq)))
