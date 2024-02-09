@@ -20,6 +20,7 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
 #include "PathResolver/PathResolver.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
@@ -159,7 +160,7 @@ StatusCode GeoModelSvc::geoInit()
 	    ? PathResolver::find_file (sqliteDbName, "DATAPATH")
 	    : m_sqliteDbFullPath.value();
     if(sqliteDbPath.empty() && m_sqliteDbFullPath.empty()) {
-      ATH_MSG_FATAL("Filed to find SQLite database file " << sqliteDbName << " for reading in persistent GeoModel tree");
+      ATH_MSG_FATAL("Failed to find SQLite database file " << sqliteDbName << " for reading in persistent GeoModel tree");
       return StatusCode::FAILURE;
     }
     else {
@@ -175,7 +176,7 @@ StatusCode GeoModelSvc::geoInit()
       return StatusCode::FAILURE;
     }
     m_sqliteReader = std::make_unique<GeoModelIO::ReadGeoModel>(m_sqliteDbManager.get());
-    GeoVPhysVol* vWorldPhys = m_sqliteReader->buildGeoModel();
+    GeoVPhysVol* vWorldPhys ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(m_sqliteReader->buildGeoModel());
     worldPhys = dynamic_cast<GeoPhysVol*>(vWorldPhys);
     if(!worldPhys) {
       ATH_MSG_FATAL("Having Full Physical Volumes as World Volumes not supported!");

@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARREADOUTGEOMETRY_EMBHVPATHOLOGIES_H
 #define LARREADOUTGEOMETRY_EMBHVPATHOLOGIES_H
 #include "GeoModelKernel/RCBase.h"
-#include "GeoModelKernel/ConstLink.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 // --------------------------------------------------------
 // This class describes ugly things that can happen to an
 // EMB Electrode. We foresee extending it as we learn of
@@ -46,9 +46,6 @@ class EMBHVPathologies: public RCBase {
 
 };
 
-
-typedef ConstLink< EMBHVPathologies  > EMBHVPathologiesConstLink;
-
-
+using EMBHVPathologiesConstLink=GeoIntrusivePtr<const EMBHVPathologies>;
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //-------------------------------------------------------------------------------------------//
@@ -12,8 +12,8 @@
 //                                                                                           //
 //-------------------------------------------------------------------------------------------//
 
-#ifndef GEOMODELSVC_GEOMODELEXPERIMENT_H
-#define GEOMODELSVC_GEOMODELEXPERIMENT_H
+#ifndef GEOMODELUTILITIES_GEOMODELEXPERIMENT_H
+#define GEOMODELUTILITIES_GEOMODELEXPERIMENT_H
 
 /// Ensure that the extensions for the Vector3D are properly loaded
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -89,7 +89,7 @@ public:
   ConstIterator beginManager() const;                                                        //
   ConstIterator endManager()   const;                                                        //
   // Add temporary volumes created during Geo2G4 translation                                 //
-  void addTmpVolume(GeoPhysVol* volume);                                                     //
+  void addTmpVolume(PVConstLink volume);                                                     //
   //                                                                                         //
   //-----------------------------------------------------------------------------------------//
   
@@ -97,7 +97,7 @@ public:
   
   GeoPhysVol                                           *m_physVol;
   collection_type                                       m_managers;
-  std::vector<GeoPhysVol*>                              m_tmpVolumes;
+  std::vector<PVConstLink>                              m_tmpVolumes;
 
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARREADOUTGEOMETRY_LARDETECTORMANAGER_H
@@ -31,11 +31,6 @@ class LArDetectorManager : public GeoVDetectorManager
   LArDetectorManager (const EMBDetectorManager* emb, const EMECDetectorManager* emec, const HECDetectorManager* hec, const FCALDetectorManager* fcal);
 
   /**
-   * @brief Destructor
-   */
-  ~LArDetectorManager();
-      
-  /**
    * @brief	Gets the ith tree top.
    */
   virtual PVConstLink getTreeTop (unsigned int i) const override;
@@ -48,7 +43,7 @@ class LArDetectorManager : public GeoVDetectorManager
   /**
    * @brief	Add a Tree Top
    */
-  void addTreeTop (PVLink treeTop);
+  void addTreeTop (PVConstLink treeTop);
       
   /**
    * @brief	Pointer to the manager for the Electromagnetic Barrel. May be NULL.
@@ -94,7 +89,7 @@ class LArDetectorManager : public GeoVDetectorManager
   const EMECDetectorManager* m_emecManager{nullptr};
   const HECDetectorManager* m_hecManager{nullptr};
   const FCALDetectorManager* m_fcalManager{nullptr};
-  std::vector<PVLink> m_treeTop;
+  std::vector<PVConstLink> m_treeTop;
   bool m_isTestBeam{false};
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -175,8 +175,6 @@ bool VP1JobConfigInfo::Imp::actualInit( StoreGateSvc* detStore )
 
   hasGeoModelExperiment = true;
   PVConstLink world(worldPhysVol);
-  VP1Msg::messageDebug("VP1JobConfigInfo: called world(worldPhysVol)");
-    std::cout << "world :" << world << std::endl;
 
   GeoVolumeCursor av(world);
 

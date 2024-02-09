@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DetDescrConditions/AlignableTransformContainer.h"
@@ -13,7 +13,6 @@
 #include "Identifier/IdentifierHash.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "InDetReadoutGeometry/ExtendedAlignableTransform.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "StoreGate/StoreGateSvc.h"
 
@@ -68,17 +67,6 @@ namespace InDetDD {
   PixelDetectorManager::PixelDetectorManager(StoreGateSvc* detStore)
      : PixelDetectorManager(detStore, "Pixel", "PixelID"){ }
 
-
-  PixelDetectorManager::~PixelDetectorManager()
-  {
-    // Clean up
-    for (auto & i : m_volume) {
-      i->unref();
-    }
-  }
-
-
-
   unsigned int PixelDetectorManager::getNumTreeTops() const
   {
     return m_volume.size();
@@ -89,11 +77,9 @@ namespace InDetDD {
     return m_volume[i];
   }
 
-  void PixelDetectorManager::addTreeTop(PVLink vol){
-    vol->ref();
+  void PixelDetectorManager::addTreeTop(PVConstLink vol){
     m_volume.push_back(vol);
   }
-
 
   SiDetectorElement* PixelDetectorManager::getDetectorElement(const Identifier & id) const
   {

@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARREADOUTGEOMETRY_HECCELLCONSTLINK_H
 #define LARREADOUTGEOMETRY_HECCELLCONSTLINK_H
 
 #include "LArReadoutGeometry/HECCell.h"
-#include "GeoModelKernel/ConstLink.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 
 /**
  * @Class: HECCellConstLink 
@@ -16,6 +16,6 @@
  *	and collects the garbage when nobody's looking.
  */
 
-typedef ConstLink<HECCell> HECCellConstLink;
+using HECCellConstLink=GeoIntrusivePtr<const HECCell>;
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEDETDESCR_TILEDETDESCRMANAGER_H
@@ -67,10 +67,10 @@ public:
   ~TileDetDescrManager();
 
   // Access to raw geometry:
-  virtual unsigned int getNumTreeTops() const;
-  virtual PVConstLink getTreeTop(unsigned int i) const;
+  virtual unsigned int getNumTreeTops() const override;
+  virtual PVConstLink getTreeTop(unsigned int i) const override;
 
-  void addTreeTop(PVLink);      // Add a Tree top:
+  void addTreeTop(PVConstLink);      // Add a Tree top:
 
   // ----------------  Access to raw geometry:
 
@@ -201,7 +201,7 @@ private:
   // ----------- Data members -------------
 
   // Tree Tops
-  std::vector<PVLink> m_treeTops;
+  std::vector<PVConstLink> m_treeTops;
 
   // DB Manager
   TileDddbManager_ptr m_dbManager;

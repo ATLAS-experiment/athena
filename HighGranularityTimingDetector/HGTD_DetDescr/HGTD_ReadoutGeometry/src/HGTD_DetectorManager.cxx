@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
@@ -38,10 +38,6 @@ HGTD_DetectorManager::~HGTD_DetectorManager()
     for (iter = m_elementCollection.begin(); iter != m_elementCollection.end(); ++iter){
         delete *iter;
     }
-
-    for (size_t i=0; i < m_volume.size(); i++) {
-        m_volume[i]->unref();
-    }
 }
 
 unsigned int HGTD_DetectorManager::getNumTreeTops() const
@@ -54,8 +50,7 @@ PVConstLink HGTD_DetectorManager::getTreeTop(unsigned int i) const
     return m_volume[i];
 }
 
-void HGTD_DetectorManager::addTreeTop(PVLink vol){
-    vol->ref();
+void HGTD_DetectorManager::addTreeTop(PVConstLink vol){
     m_volume.push_back(vol);
 }
 
