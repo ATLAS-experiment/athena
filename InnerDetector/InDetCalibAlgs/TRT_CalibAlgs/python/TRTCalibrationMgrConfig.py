@@ -171,6 +171,27 @@ def TRT_StrawStatusCfg(flags,name='InDet__TRT_StrawStatus',**kwargs) :
 
 
 
+# Sergi's new function
+def TRT_CalibrationCfg(flags, name="TRT_CalibrationCfg"):
+    acc = ComponentAccumulator()
+    
+    TRTCalibAlgo = CompFactory.TRTCalibrationMgr(name)
+    
+    if flags.Input.Format is not Format.POOL:
+        acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/BARREL <cache>600</cache>"))
+        acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/ENDCAPA <cache>600</cache>"))                          
+        acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/ENDCAPC <cache>600</cache>"))
+    
+    # Defaults
+    # TRTCalibAlgo.DoRefit = True
+    # TRTCalibAlgo.DoCalibrate = False
+    # TRTCalibAlgo.WriteConstants = False
+    
+    acc.addEventAlgo(TRTCalibAlgo)
+
+    return acc
+
+
 if __name__ == '__main__':
     print("start running")
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -206,7 +227,8 @@ if __name__ == '__main__':
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
     acc.merge(InDetTrackRecoCfg(flags))
     
-    # acc.merge(TRT_CalibrationMgrCfg(flags))
+    acc.merge(TRT_CalibrationMgrCfg(flags))
+    # acc.merge(TRT_CalibrationCfg(flags))
 
     
     import sys
