@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODEL_MUONDETECTORTOOL_H
@@ -33,6 +33,7 @@ class MuonDetectorTool final : public GeoModelTool {
 
   private:
 
+    Gaudi::Property<bool> m_runFromCondAlg{this,"runFromCondAlg", false};
     Gaudi::Property<std::string> m_layout{this, "LayoutName", "R.08" };
     Gaudi::Property<bool> m_accessCondDb{this,"UseConditionDb", true};
     Gaudi::Property<bool> m_asciiCondData{this,"UseAsciiConditionData", false};

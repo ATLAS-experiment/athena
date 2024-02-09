@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MuonDetectorTool.h"
@@ -143,10 +143,10 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
     std::string tempLayout = m_layout;
     std::map<std::string, std::string> altAsciiDBMap{};
 
+    
     GeoModelExperiment *theExpt = nullptr;
     ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
-    GeoPhysVol *world = &*theExpt->getPhysVol();
-
+    GeoIntrusivePtr<GeoPhysVol> world{theExpt->getPhysVol()};
     // Get the detector configuration.
     ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc",name());
     ATH_CHECK(geoDbTag.retrieve());
@@ -159,7 +159,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
       ATH_MSG_INFO("New DD Activated; Muon detector description input from SQLITE fie");
 
       MuonDetectorFactoryLite theFactory(detStore().operator->(),sqliteReader);
-      theFactory.setRDBAccess(&*accessSvc);
+      theFactory.setRDBAccess(accessSvc.get());
       theFactory.create(world);  
 
 
@@ -170,16 +170,20 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
       if (m_fillCache_initTime) {
         mgr->fillCache();
       } else {
-	// cache for RPC / TGC / CSC must be filled once forever
-	mgr->fillRpcCache();
-	mgr->fillTgcCache();
-	mgr->fillCscCache();
-	mgr->fillMMCache();
-	mgr->fillsTgcCache();
+        // cache for RPC / TGC / CSC must be filled once forever
+        mgr->fillRpcCache();
+        mgr->fillTgcCache();
+        mgr->fillCscCache();
+        mgr->fillMMCache();
+        mgr->fillsTgcCache();
       }
     
       return StatusCode::SUCCESS;
     }
+    if (m_runFromCondAlg) {
+        world.reset(new GeoPhysVol(world->getLogVol()));
+    }
+
     //
     // New DD:  action ends here!!
     // 
