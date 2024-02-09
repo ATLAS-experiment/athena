@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASTOOLS_G4FieldManagerToolBase_H
@@ -49,7 +49,7 @@ class G4FieldManagerToolBase : public extends<AthAlgTool, IFieldManagerTool>
 #if G4VERSION_NUMBER >= 1040
     /// Common method to construct a driver with a stepper of requested type.
     G4VIntegrationDriver*
-    createDriverAndStepper(std::string stepperType, G4MagneticField* field) const;
+    createDriverAndStepper(const std::string& stepperType, G4MagneticField* field) const;
 #endif
 
 #if G4VERSION_NUMBER < 1040

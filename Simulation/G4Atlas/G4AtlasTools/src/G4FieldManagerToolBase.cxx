@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Primary include
@@ -79,7 +79,7 @@ StatusCode G4FieldManagerToolBase::initialize( )
 // Create the driver with a stepper (Geant4 >= 10.4)
 //=============================================================================
 G4VIntegrationDriver*
-G4FieldManagerToolBase::createDriverAndStepper(std::string name, G4MagneticField* field) const
+G4FieldManagerToolBase::createDriverAndStepper(const std::string& name, G4MagneticField* field) const
 {
   ATH_MSG_DEBUG("createDriverAndStepper");
   G4Mag_EqRhs* eqRhs(nullptr);
