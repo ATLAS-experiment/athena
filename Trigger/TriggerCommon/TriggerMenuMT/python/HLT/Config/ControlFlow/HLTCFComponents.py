@@ -246,8 +246,7 @@ class CFSequenceCA(CFSequence):
     def createHypoTools(self, flags, chain, newstep):
         """ set and create HypoTools accumulated on the self.step from an input step configuration
         """
-        with ConfigurableCABehavior(): 
-            acc = ComponentAccumulator()
+        
         if self.step.combo is None:
             return
 
@@ -266,10 +265,9 @@ class CFSequenceCA(CFSequence):
                 hypoToolConf.setConf( onePartChainDict )
                 hypo = HypoAlgNode(Alg = self.ca.getEventAlgo(myseq.hypo.Alg.getName()))
                 hypoToolAcc = hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
-                if isinstance(hypoToolAcc, ComponentAccumulator):
-                    acc.merge(hypoToolAcc)
+                if isinstance(hypoToolAcc, ComponentAccumulator):                   
+                    self.ca.merge(hypoToolAcc)
                    
 
         chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
-        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)
-        return acc
+        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)      
