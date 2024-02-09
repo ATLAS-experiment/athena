@@ -68,7 +68,7 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   getData(m_SpacePointsSCTKey);
 
   std::vector<std::vector<uint32_t> > TT;
-  m_gnnTrackFinder->getTracks(spacePoints, TT);
+  ATH_CHECK(m_gnnTrackFinder->getTracks(spacePoints, TT));
 
 
   ATH_MSG_DEBUG("Obtained " << TT.size() << " Tracks");

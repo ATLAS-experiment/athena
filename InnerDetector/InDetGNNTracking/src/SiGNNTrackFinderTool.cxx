@@ -7,7 +7,7 @@
 
 // Framework include(s).
 #include "PathResolver/PathResolver.h"
-#include "AthOnnxruntimeUtils/OnnxUtils.h"
+#include "AthOnnxUtils/OnnxUtils.h"
 #include <cmath>
 
 InDet::SiGNNTrackFinderTool::SiGNNTrackFinderTool(
@@ -18,18 +18,10 @@ InDet::SiGNNTrackFinderTool::SiGNNTrackFinderTool(
   }
 
 StatusCode InDet::SiGNNTrackFinderTool::initialize() {
-  initTrainedModels();
+  ATH_CHECK( m_embedSessionTool.retrieve() );
+  ATH_CHECK( m_filterSessionTool.retrieve() );
+  ATH_CHECK( m_gnnSessionTool.retrieve() );
   return StatusCode::SUCCESS;
-}
-
-void InDet::SiGNNTrackFinderTool::initTrainedModels() {
-  std::string embedModelPath(m_inputMLModuleDir + "/torchscript/embedding.onnx");
-  std::string filterModelPath(m_inputMLModuleDir + "/torchscript/filtering.onnx");
-  std::string gnnModelPath(m_inputMLModuleDir + "/torchscript/gnn.onnx");
-
-  m_embedSession = AthONNX::CreateORTSession(embedModelPath, m_useCUDA);
-  m_filterSession = AthONNX::CreateORTSession(filterModelPath, m_useCUDA);
-  m_gnnSession = AthONNX::CreateORTSession(gnnModelPath, m_useCUDA);
 }
 
 StatusCode InDet::SiGNNTrackFinderTool::finalize() {
@@ -59,7 +51,7 @@ MsgStream& InDet::SiGNNTrackFinderTool::dumpevent( MsgStream& out ) const
   return out;
 }
 
-void InDet::SiGNNTrackFinderTool::getTracks (
+StatusCode InDet::SiGNNTrackFinderTool::getTracks(
   const std::vector<const Trk::SpacePoint*>& spacepoints,
   std::vector<std::vector<uint32_t> >& tracks) const
 {
@@ -84,34 +76,19 @@ void InDet::SiGNNTrackFinderTool::getTracks (
     spacepointIDs.push_back(sp_idx++);
   }
 
-    Ort::AllocatorWithDefaultOptions allocator;
-    auto memoryInfo = Ort::MemoryInfo::CreateCpu(
-        OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
-
     // ************
     // Embedding
     // ************
 
     std::vector<int64_t> eInputShape{numSpacepoints, spacepointFeatures};
-
-    std::vector<const char*> eInputNames{"sp_features"};
     std::vector<Ort::Value> eInputTensor;
-    eInputTensor.push_back(
-        Ort::Value::CreateTensor<float>(
-            memoryInfo, inputValues.data(), inputValues.size(),
-            eInputShape.data(), eInputShape.size())
-    );
+    ATH_CHECK( m_embedSessionTool->addInput(eInputTensor, inputValues, 0, numSpacepoints) );
 
-    std::vector<float> eOutputData(numSpacepoints * m_embeddingDim);
-    std::vector<const char*> eOutputNames{"embedding_output"};
-    std::vector<int64_t> eOutputShape{numSpacepoints, m_embeddingDim};
     std::vector<Ort::Value> eOutputTensor;
-    eOutputTensor.push_back(
-        Ort::Value::CreateTensor<float>(
-            memoryInfo, eOutputData.data(), eOutputData.size(),
-            eOutputShape.data(), eOutputShape.size())
-    );
-    AthONNX::InferenceWithIOBinding(m_embedSession, eInputNames, eInputTensor, eOutputNames, eOutputTensor);
+    std::vector<float> eOutputData;
+    ATH_CHECK( m_embedSessionTool->addOutput(eOutputTensor, eOutputData, 0, numSpacepoints) );
+
+    ATH_CHECK( m_embedSessionTool->inference(eInputTensor, eOutputTensor) );
 
     // ************
     // Building Edges
@@ -123,29 +100,18 @@ void InDet::SiGNNTrackFinderTool::getTracks (
     // ************
     // Filtering
     // ************
-    std::vector<const char*> fInputNames{"f_nodes", "f_edges"};
     std::vector<Ort::Value> fInputTensor;
     fInputTensor.push_back(
         std::move(eInputTensor[0])
     );
+    ATH_CHECK( m_filterSessionTool->addInput(fInputTensor, edgeList, 1, numEdges) );
     std::vector<int64_t> fEdgeShape{2, numEdges};
-    fInputTensor.push_back(
-        Ort::Value::CreateTensor<int64_t>(
-            memoryInfo, edgeList.data(), edgeList.size(),
-            fEdgeShape.data(), fEdgeShape.size())
-    );
 
-    // filtering outputs
-    std::vector<const char*> fOutputNames{"f_edge_score"};
-    std::vector<float> fOutputData(numEdges);
-    std::vector<int64_t> fOutputShape{numEdges, 1};
+    std::vector<float> fOutputData;
     std::vector<Ort::Value> fOutputTensor;
-    fOutputTensor.push_back(
-        Ort::Value::CreateTensor<float>(
-            memoryInfo, fOutputData.data(), fOutputData.size(), 
-            fOutputShape.data(), fOutputShape.size())
-    );
-    AthONNX::InferenceWithIOBinding(m_filterSession, fInputNames, fInputTensor, fOutputNames, fOutputTensor);
+    ATH_CHECK( m_filterSessionTool->addOutput(fOutputTensor, fOutputData, 0, numEdges) );
+
+    ATH_CHECK( m_filterSessionTool->inference(fInputTensor, fOutputTensor) );
 
     // apply sigmoid to the filtering output data
     // and remove edges with score < filterCut
@@ -167,28 +133,18 @@ void InDet::SiGNNTrackFinderTool::getTracks (
     // ************
     // GNN
     // ************
-    std::vector<const char*> gInputNames{"g_nodes", "g_edges"};
     std::vector<Ort::Value> gInputTensor;
     gInputTensor.push_back(
         std::move(fInputTensor[0])
     );
-    std::vector<int64_t> gEdgeShape{2, numEdgesAfterF};
-    gInputTensor.push_back(
-        Ort::Value::CreateTensor<int64_t>(
-            memoryInfo, edgesAfterFiltering.data(), edgesAfterFiltering.size(),
-            gEdgeShape.data(), gEdgeShape.size())
-    );
+    ATH_CHECK( m_gnnSessionTool->addInput(gInputTensor, edgesAfterFiltering, 1, numEdgesAfterF) );
+    
     // gnn outputs
-    std::vector<const char*> gOutputNames{"gnn_edge_score"};
-    std::vector<float> gOutputData(numEdgesAfterF);
-    std::vector<int64_t> gOutputShape{numEdgesAfterF};
+    std::vector<float> gOutputData;
     std::vector<Ort::Value> gOutputTensor;
-    gOutputTensor.push_back(
-        Ort::Value::CreateTensor<float>(
-            memoryInfo, gOutputData.data(), gOutputData.size(), 
-            gOutputShape.data(), gOutputShape.size())
-    );
-    AthONNX::InferenceWithIOBinding(m_gnnSession, gInputNames, gInputTensor, gOutputNames, gOutputTensor);
+    ATH_CHECK( m_gnnSessionTool->addOutput(gOutputTensor, gOutputData, 0, numEdgesAfterF) );
+
+    ATH_CHECK( m_gnnSessionTool->inference(gInputTensor, gOutputTensor) );
     // apply sigmoid to the gnn output data
     for(auto& v : gOutputData){
         v = 1.f / (1.f + std::exp(-v));
@@ -200,7 +156,7 @@ void InDet::SiGNNTrackFinderTool::getTracks (
     std::vector<int32_t> trackLabels(numSpacepoints);
     weaklyConnectedComponents<int64_t,float,int32_t>(numSpacepoints, rowIndices, colIndices, gOutputData, trackLabels);
 
-    if (trackLabels.size() == 0)  return;
+    if (trackLabels.size() == 0)  return StatusCode::SUCCESS;
 
     tracks.clear();
 
@@ -225,5 +181,6 @@ void InDet::SiGNNTrackFinderTool::getTracks (
             existTrkIdx++;
         }
     }
+    return StatusCode::SUCCESS;
 }
 

@@ -1,28 +1,31 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package's name.
 atlas_subdir( AthExOnnxRuntime )
 
-# Component(s) in the package.
-atlas_add_library( AthExOnnxRuntimeLib
-   INTERFACE
-   PUBLIC_HEADERS AthExOnnxRuntime
-   INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} GaudiKernel )
+find_package( onnxruntime )
 
+# Component(s) in the package.
 atlas_add_component( AthExOnnxRuntime
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthExOnnxRuntimeLib AthenaBaseComps GaudiKernel PathResolver AthOnnxruntimeServiceLib AthOnnxruntimeUtilsLib)
+   LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthenaBaseComps GaudiKernel PathResolver 
+   AthOnnxInterfaces AthOnnxUtilsLib AsgServicesLib
+)
 
-# Install files from the package.
-atlas_install_joboptions( share/*.py )
+# Install files from the package:
+atlas_install_python_modules( python/*.py
+                              POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-# Set up tests for the package.
-atlas_add_test( AthExOnnxRuntimeJob_serial
-   SCRIPT athena.py AthExOnnxRuntime/AthExOnnxRuntime_jobOptions.py
-   POST_EXEC_SCRIPT nopost.sh )
+# Test the packages
+atlas_add_test( AthExOnnxRuntimeTest
+   SCRIPT python -m AthExOnnxRuntime.AthExOnnxRuntime_test
+   PROPERTIES TIMEOUT 100
+   POST_EXEC_SCRIPT noerror.sh 
+   )
 
-atlas_add_test( AthExOnnxRuntimeJob_mt
-   SCRIPT athena.py --threads=2 AthExOnnxRuntime/AthExOnnxRuntime_jobOptions.py
-   POST_EXEC_SCRIPT nopost.sh )
+atlas_add_test( AthExOnnxRuntimeTest_pkl
+   SCRIPT athena --evtMax 2 --CA test_AthExOnnxRuntimeExampleCfg.pkl
+   DEPENDS AthExOnnxRuntimeTest
+   PROPERTIES TIMEOUT 100
+   POST_EXEC_SCRIPT noerror.sh )

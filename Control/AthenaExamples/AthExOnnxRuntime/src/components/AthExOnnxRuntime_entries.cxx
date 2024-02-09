@@ -3,4 +3,4 @@
 // Local include(s).
 #include "../EvaluateModel.h"
 // Declare the package's components.
-DECLARE_COMPONENT( AthONNX::EvaluateModel )
+DECLARE_COMPONENT( AthOnnx::EvaluateModel )
