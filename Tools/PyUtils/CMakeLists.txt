@@ -17,6 +17,7 @@ if( XAOD_STANDALONE )
                                   python/moduleExists.py
                                   python/RootUtils.py
                                   python/Helpers.py
+                                  python/Decorators.py
                                   POST_BUILD_CMD ${ATLAS_FLAKE8} )
     atlas_install_scripts( bin/meta-reader.py bin/meta-diff.py
                            POST_BUILD_CMD ${ATLAS_FLAKE8} )
