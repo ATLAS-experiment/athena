@@ -2,6 +2,7 @@
 
 #include "FPGATrackSimMappingSvc.h"
 #include "FPGATrackSimConfTools/IFPGATrackSimEventSelectionSvc.h"
+#include "PathResolver/PathResolver.h"
 
 FPGATrackSimMappingSvc::FPGATrackSimMappingSvc(const std::string& name, ISvcLocator*svc) :
     AthService(name, svc),
@@ -64,30 +65,30 @@ StatusCode FPGATrackSimMappingSvc::initialize()
     if (m_mappingType.value() == "FILE")
     {
         ATH_MSG_DEBUG("Creating the 1st stage plane map");
-        m_pmap_1st = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(m_pmap_path.value(), m_EvtSel->getRegionID(), 1, m_layerOverrides));
+        m_pmap_1st = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(PathResolverFindCalibFile(m_pmap_path.value()), m_EvtSel->getRegionID(), 1, m_layerOverrides));
 
         ATH_MSG_DEBUG("Creating the 2nd stage plane map");
-        m_pmap_2nd = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(m_pmap_path.value(), m_EvtSel->getRegionID(), 2));
+        m_pmap_2nd = std::unique_ptr<FPGATrackSimPlaneMap>(new FPGATrackSimPlaneMap(PathResolverFindCalibFile(m_pmap_path.value()), m_EvtSel->getRegionID(), 2));
 
         ATH_MSG_DEBUG("Creating the 1st stage region map");
-        m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), m_rmap_path.value()));
+        m_rmap_1st = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), PathResolverFindCalibFile(m_rmap_path.value())));
 
         ATH_MSG_DEBUG("Creating the 2nd stage region map");
-        m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_2nd.get(), m_rmap_path.value()));
+        m_rmap_2nd = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_2nd.get(), PathResolverFindCalibFile(m_rmap_path.value())));
 
         ATH_MSG_DEBUG("Creating the sub-region map");
-        m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), m_subrmap_path.value()));
+        m_subrmap = std::unique_ptr<FPGATrackSimRegionMap>(new FPGATrackSimRegionMap(m_pmap_1st.get(), PathResolverFindCalibFile(m_subrmap_path.value())));
 
         ATH_MSG_DEBUG("Setting the Modules LUT for Region Maps");
-        m_rmap_1st->loadModuleIDLUT(m_modulelut_path.value().c_str());
-        m_rmap_2nd->loadModuleIDLUT(m_modulelut_path.value().c_str());
-
+        m_rmap_1st->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
+        m_rmap_2nd->loadModuleIDLUT(PathResolverFindCalibFile(m_modulelut_path.value()));
+	
 	ATH_MSG_DEBUG("Creating NN weighting map");
-    if ( ! m_NNmap_path.empty() ) {
-    	m_NNmap = std::make_unique<FPGATrackSimNNMap>(m_NNmap_path.value());
-    } else {
-        m_NNmap = nullptr;
-    }
+	if ( ! m_NNmap_path.empty() ) {
+	  m_NNmap = std::make_unique<FPGATrackSimNNMap>(PathResolverFindCalibFile(m_NNmap_path.value()));
+	} else {
+	  m_NNmap = nullptr;
+	}
     }
 
     ATH_CHECK(checkAllocs());

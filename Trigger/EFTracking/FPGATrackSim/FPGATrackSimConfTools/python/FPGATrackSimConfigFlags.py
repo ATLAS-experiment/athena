@@ -5,10 +5,21 @@ def createFPGATrackSimConfigFlags():
     cf = AthConfigFlags()
     cf.addFlag('algoTag', 'Hough')
     cf.addFlag('wrapperFileName', [])
-    cf.addFlag('threshold', [])
     cf.addFlag('mapsDir', '__MUST_BE_SET__')
     cf.addFlag('wrapperMetaData', "Default Meta Data")
     cf.addFlag('sampleType', 'singleMuons')
+    cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
+    cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
+    cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
+    cf.addFlag('FPGATrackSimNBanks', 1)
+    cf.addFlag('FPGATrackSimallBanks', False)
+    cf.addFlag('FPGATrackSimBankRegion', 0)
+    cf.addFlag('CheckGood2ndStage', True)
+    cf.addFlag('Is2ndStage', False)
+    cf.addFlag('UseHitScaleFactor', False)
+    cf.addFlag('missHitsConsts', False)
+    cf.addFlag('tracking', False)
+    cf.addFlag('bankDir', '')
 
     def __httHough1DFlags():
         """Additional function delays import"""
@@ -93,7 +104,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('nHitsNoRecovery', -1)
     cf.addFlag('guessHits', True)
     cf.addFlag('doMissingHitsChecks', False)
-    cf.addFlag('idealCoordFitType', 0)
+    cf.addFlag('idealCoordFitType', 2)
     cf.addFlag('doDeltaGPhis', False)
 
     # second stage fitting

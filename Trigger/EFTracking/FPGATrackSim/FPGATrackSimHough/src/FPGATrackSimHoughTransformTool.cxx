@@ -411,14 +411,20 @@ void FPGATrackSimHoughTransformTool::addRoad(std::vector<std::vector<const FPGAT
   r.setRoadID(m_roads.size() - 1);
   r.setPID(y * m_imageSize_y + x);
   r.setHits(hits);
-  if (m_useSectors) r.setSector(m_FPGATrackSimBankSvc->SectorBank_1st()->findSector(hits));
-  else if (m_idealGeoRoads) matchIdealGeoSector(r);
-  r.setHitLayers(hitLayers);
+
+  // We use the y coordinate in matchIdealGeoSectors
+  // and so it needs to be available before setting the sector.
+
   r.setSubRegion(m_subRegion);
   r.setX(m_bins_x[x] + m_step_x/2);
   r.setY(m_bins_y[y] + m_step_y/2);
   r.setXBin(x);
   r.setYBin(y);
+  r.setHitLayers(hitLayers);
+  r.setSubRegion(m_subRegion);
+
+  if (m_useSectors) r.setSector(m_FPGATrackSimBankSvc->SectorBank_1st()->findSector(hits));
+  else if (m_idealGeoRoads) matchIdealGeoSector(r);
 }
 
 

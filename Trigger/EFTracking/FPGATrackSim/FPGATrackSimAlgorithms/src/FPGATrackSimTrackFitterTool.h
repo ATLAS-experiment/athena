@@ -49,7 +49,7 @@ private:
   ServiceHandle<IFPGATrackSimBankSvc>   m_FPGATrackSimBank{this,"FPGATrackSimBankSvc","FPGATrackSimBankSvc"};
 
   Gaudi::Property <int> m_chi2dof_recovery_min {this, "chi2DofRecoveryMin", 40, "min chi^2 cut for attempting recovery fits"};
-  Gaudi::Property <int> m_chi2dof_recovery_max {this, "chi2DofRecoveryMax", 1e30, "max chi^2 cut for attempting recovery fits"};
+  Gaudi::Property <int> m_chi2dof_recovery_max {this, "chi2DofRecoveryMax", 1e8, "max chi^2 cut for attempting recovery fits"};
   Gaudi::Property <bool> m_do2ndStage {this, "Do2ndStageTrackFit", false, "Do 2nd stage track fit"};
   Gaudi::Property <int> m_doMajority {this, "doMajority", 1, "Do Majority fits"};
   Gaudi::Property <int> m_maxNhitsPerPlane { this, "maxHitsPerPlane", -1, "if >0, max hits per plane to consider"};
@@ -57,7 +57,7 @@ private:
   Gaudi::Property <bool> m_guessHits { this, "GuessHits", true,  "If True then we Guess hits, if False then we use separate banks and don't guess"};
   Gaudi::Property <bool> m_doDeltaGPhis { this, "DoDeltaGPhis", false, "If True will do the fit by the delta global phis method"};
   Gaudi::Property <bool> m_doMissingHitsChecks {this, "DoMissingHitsChecks", false, "If True and we guess hits, when we have 8/8 we also drop hits and guess them to compare to true positions"};
-  Gaudi::Property <int> m_idealCoordFitType {this, "IdealCoordFitType", 0, "Fit type for idealized coordinates, 0 if off"};
+  Gaudi::Property <int> m_idealCoordFitType {this, "IdealCoordFitType", 2, "Fit type for idealized coordinates, 0 if off"};
 };
 
 #endif // FPGATrackSimTrackFitterTool_h
