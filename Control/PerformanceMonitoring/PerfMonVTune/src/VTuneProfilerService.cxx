@@ -174,20 +174,26 @@ void VTuneProfilerService::handle( const Incident& inc ) {
   if( inc.type() == BEGINEVENT_INCIDENT_NAME ) {
      if( m_resumeEvent == m_processedEvents &&
          !m_runner ) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (!m_runner) {
         if( resumeProfiling().isFailure() ) {
            REPORT_MESSAGE( MSG::ERROR )
               << "Could not resume the profiling";
+        }
         }
      }
      ++m_processedEvents;
      return;
   }
   else if( inc.type() == ENDEVENT_INCIDENT_NAME ) {
-     if( m_pauseEvent == m_processedEvents ) {
+     if( m_pauseEvent == m_processedEvents && m_runner) {
+        std::lock_guard<std::mutex> lock(m_mutex);
+        if (m_runner) {
         if( pauseProfiling().isFailure() &&
             m_runner ) {
            REPORT_MESSAGE( MSG::ERROR )
               << "Could not pause the profiling";
+        }
         }
      }
      return;

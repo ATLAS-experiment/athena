@@ -75,6 +75,8 @@ class VTuneProfilerService : public AthService,
       /// Number of events processed so far
       std::atomic<int> m_processedEvents;
 
+      std::mutex m_mutex;
+
 }; // class IVTuneProfilerSvc
 
 #endif // VTUNE_PROFILERSERVICE.H
