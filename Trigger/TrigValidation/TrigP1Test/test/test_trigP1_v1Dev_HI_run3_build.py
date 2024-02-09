@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of HI data 2023 workflow, runs athenaHLT with HI menu followed by filtering of HP stream and offline reco
 # art-type: build
@@ -16,18 +16,19 @@ triggermenu = 'Dev_HI_run3_v1_TriggerValidation_prescale'
 
 hlt = ExecStep.ExecStep()
 hlt.type = 'athenaHLT'
-hlt.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.input = 'data_hi_2023'
-hlt.args = f'-c "setMenu=\'{triggermenu}\';doL1Sim=True;'
-hlt.args += ';'.join(['flags.Trigger.doZDC=True',
-                     'flags.Input.ProjectName=\'data23_hi\'',
-                     'flags.Trigger.L1MuonSim.NSWVetoMode=False',
-                     'flags.Trigger.L1MuonSim.doMMTrigger=False',
-                     'flags.Trigger.L1MuonSim.doPadTrigger=False',
-                     'flags.Trigger.L1MuonSim.doStripTrigger=False']) + '"'
+hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
+             'Trigger.doLVL1=True',
+             'Trigger.doZDC=True',
+             'Input.ProjectName="data23_hi"',
+             'Trigger.L1MuonSim.NSWVetoMode=False',
+             'Trigger.L1MuonSim.doMMTrigger=False',
+             'Trigger.L1MuonSim.doPadTrigger=False',
+             'Trigger.L1MuonSim.doStripTrigger=False']
 hlt.fpe_auditor = True
 hlt.max_events = -1
-hlt.args += ' -o output'
+hlt.args = '-o output'
 
 #====================================================================================================
 

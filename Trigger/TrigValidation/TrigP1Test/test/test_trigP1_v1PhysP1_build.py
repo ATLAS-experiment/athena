@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu, then running BS decoding follows the athenaHLT process
 # art-type: build
@@ -19,15 +19,15 @@ from TrigP1Test.TrigP1TestSteps import filterBS, decodeBS, check_hlt_properties
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
-ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;'
-ex.args += ';'.join(['flags.Trigger.L1MuonSim.NSWVetoMode=False',
-                     'flags.Trigger.L1MuonSim.doMMTrigger=False',
-                     'flags.Trigger.L1MuonSim.doPadTrigger=False',
-                     'flags.Trigger.L1MuonSim.doStripTrigger=False']) + '"'
-ex.args += ' -o output'
-ex.args += ' --dump-config-reload'
+ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"',
+            'Trigger.doLVL1=True',
+            'Trigger.L1MuonSim.NSWVetoMode=False',
+            'Trigger.L1MuonSim.doMMTrigger=False',
+            'Trigger.L1MuonSim.doPadTrigger=False',
+            'Trigger.L1MuonSim.doStripTrigger=False']
+ex.args = '-o output'
 
 # Extract and decode physics_Main
 filterMain = filterBS("Main")
