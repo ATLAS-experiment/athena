@@ -56,8 +56,9 @@ l1seeds = { 'low'  : \
                 'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30',\
                 'L1_eTAU30M_2eTAU20M_jXE70',\
                 'L1_eTAU60',\
-                'L1_XE35',
-            ] 
+                #'L1_XE35',
+                'L1_jXE70',
+            ]
 }
 
 

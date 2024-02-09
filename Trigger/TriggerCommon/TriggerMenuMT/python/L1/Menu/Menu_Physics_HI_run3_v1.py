@@ -83,10 +83,15 @@ def defineMenu():
         "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25","L1_gTE200","L1_gXEJWOJ100",
 
         # XE
-        'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50', 
-        'L1_XE55', 'L1_XE60', 'L1_XE30', 'L1_XE300',
+        'L1_XE50', 'L1_XE55', 
+        'L1_XE30', 'L1_XE300',
        
-        'L1_J40_XE50', 'L1_J40_XE60', 
+        'L1_J40_XE50', 'L1_J40_XE60',
+
+        #ATR-28679
+        'L1_jXE60', 'L1_jXE110', 'L1_jXE120', 
+        'L1_gXEJWOJ60', 'L1_gXEJWOJ110', 'L1_gXEJWOJ120', 'L1_gXEJWOJ500',
+        'L1_jJ80_jXE120',
  
          # calo
         'L1_TE3', 'L1_TE4', 'L1_TE5', # also for HMT triggers

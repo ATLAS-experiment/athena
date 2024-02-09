@@ -228,11 +228,11 @@ def defineInputsMenu():
             # energy thresholds
             # commissioning
             # jXE
-            ('jXE70',1), ('jXE80',1), ('jXE90',1), ('jXE100',1), ('jXE110',1), ('jXE500',1),
+            ('jXE60',1), ('jXE70',1), ('jXE80',1), ('jXE90',1), ('jXE100',1), ('jXE110',1), ('jXE120',1), ('jXE500',1),
             # gXE
-            ('gXERHO70',1), ('gXERHO100',1),
+            #('gXERHO70',1), ('gXERHO100',1),
             ('gXENC70',1), ('gXENC100',1),
-            ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1),
+            ('gXEJWOJ60',1), ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1), ('gXEJWOJ110',1), ('gXEJWOJ120',1), ('gXEJWOJ500',1),
             # gTE
             ('gTE200',1),
 
@@ -252,7 +252,7 @@ def defineInputsMenu():
 
             # production
             # decrement jXESPARE for additional heavy ion jTE thresholds
-            ('jXESPARE10',1), ('jXESPARE11',1), ('jXESPARE12',1), ('jXESPARE13',1), 
+            #('jXESPARE10',1), ('jXESPARE11',1), ('jXESPARE12',1), ('jXESPARE13',1), 
             #('jXESPARE14',1),
 
         ]
