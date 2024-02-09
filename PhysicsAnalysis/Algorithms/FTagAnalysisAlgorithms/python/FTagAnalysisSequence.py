@@ -151,7 +151,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
     if enableCutflow:
         alg = createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'FTagCutFlowDumperAlg' + btagger + btagWP + postfix )
         alg.histPattern = 'ftag_cflow_' + btagger + '_' + btagWP + '_%SYS%'
-        alg.selection = ['ftag_select_' + btagger + '_' + btagWP + ',as_char']
+        alg.selections = ['ftag_select_' + btagger + '_' + btagWP + ',as_char']
         seq.append( alg, inputPropName = 'input',
                     stageName = 'selection' )
 
