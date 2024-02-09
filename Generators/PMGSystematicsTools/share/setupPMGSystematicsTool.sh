@@ -1,4 +1,4 @@
-source setupRivet.sh
+source setupRivet
 source setupLHAPDF.sh
 linkpath=`which systematicsTool.py`
 toolpath=`readlink -f $linkpath`
