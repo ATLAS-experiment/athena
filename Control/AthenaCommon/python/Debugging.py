@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @file AthenaCommon/python/Debugging.py
 ## @brief py-module to hold a few tools and utilities to help debugging
 ##        configurables and/or Athena application
 ## @author Sebastien Binet <binet@cern.ch>
-## $Id: Debugging.py,v 1.1 2008-04-05 03:11:49 binet Exp $
 ###############################################################
 
 __doc__ = """py-module to hold a few tools and utilities to help debugging
@@ -78,8 +77,9 @@ See https://www.kernel.org/doc/Documentation/security/Yama.txt and prctl(2).
     if not os.path.exists ('/proc/sys/kernel/yama/ptrace_scope'): return
 
     # Return if ptrace restrictions are disabled.
-    if open('/proc/sys/kernel/yama/ptrace_scope').readline().strip() == '0':
-        return
+    with open('/proc/sys/kernel/yama/ptrace_scope') as f:
+        if f.readline().strip() == '0':
+            return
 
     # Use prctl to try to enable ptrace.
     from ctypes import CDLL
