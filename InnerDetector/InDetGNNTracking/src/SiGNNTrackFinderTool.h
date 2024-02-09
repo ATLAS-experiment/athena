@@ -14,7 +14,7 @@
 #include "InDetRecToolInterfaces/IGNNTrackFinder.h"
 
 // ONNX Runtime include(s).
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
 #include <core/session/onnxruntime_cxx_api.h>
 
 class MsgStream;
@@ -46,7 +46,7 @@ namespace InDet{
      * 
      * @return 
      */
-    virtual void getTracks(
+    virtual StatusCode getTracks(
       const std::vector<const Trk::SpacePoint*>& spacepoints,
       std::vector<std::vector<uint32_t> >& tracks) const override;
 
@@ -74,9 +74,15 @@ namespace InDet{
     MsgStream&    dumpevent     (MsgStream&    out) const;
 
     private:
-    std::unique_ptr< Ort::Session > m_embedSession;
-    std::unique_ptr< Ort::Session > m_filterSession;
-    std::unique_ptr< Ort::Session > m_gnnSession;
+    ToolHandle< AthOnnx::IOnnxRuntimeInferenceTool > m_embedSessionTool {
+      this, "Embedding", "AthOnnx::OnnxRuntimeInferenceTool"
+    };
+    ToolHandle< AthOnnx::IOnnxRuntimeInferenceTool > m_filterSessionTool {
+      this, "Filtering", "AthOnnx::OnnxRuntimeInferenceTool"
+    };
+    ToolHandle< AthOnnx::IOnnxRuntimeInferenceTool > m_gnnSessionTool {
+      this, "GNN", "AthOnnx::OnnxRuntimeInferenceTool"
+    };
 
   };
 

@@ -18,6 +18,7 @@ atlas_add_component( InDetGNNTracking
     PixelReadoutGeometryLib SCT_ReadoutGeometry InDetSimData
     InDetPrepRawData TrkTrack TrkRIO_OnTrack InDetSimEvent
     AtlasHepMCLib InDetRIO_OnTrack InDetRawData TrkTruthData
+    AthOnnxInterfaces AthOnnxUtilsLib 
 )
 
 atlas_install_python_modules( python/*.py )
