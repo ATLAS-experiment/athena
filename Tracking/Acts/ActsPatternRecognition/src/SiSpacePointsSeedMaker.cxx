@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/SiSpacePointsSeedMaker.h"
@@ -735,18 +735,21 @@ namespace ActsTrk {
 	std::pair<std::size_t, std::size_t> key_m = std::make_pair(strip_cluster[2]->index(), strip_cluster[3]->index());
 	std::pair<std::size_t, std::size_t> key_t = std::make_pair(strip_cluster[4]->index(), strip_cluster[5]->index());
 
-	if (data.v_StripSpacePointForSeed.find(key_b) == data.v_StripSpacePointForSeed.end()) {
-	  data.v_StripSpacePointForSeed[key_b] = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()),
+        std::unique_ptr<InDet::SCT_SpacePoint>& ptr_b = data.v_StripSpacePointForSeed[key_b];
+	if (!ptr_b) {
+	  ptr_b = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()),
 											 Amg::Vector3D(seed->sp()[0]->x(), seed->sp()[0]->y(), seed->sp()[0]->z()),
 											 std::make_pair<const Trk::PrepRawData*, const Trk::PrepRawData*>(*(stripLinkAcc(*strip_cluster[0])), *(stripLinkAcc(*strip_cluster[1]))));
 	}
-	if (data.v_StripSpacePointForSeed.find(key_m) == data.v_StripSpacePointForSeed.end()) {
-	  data.v_StripSpacePointForSeed[key_m] = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[2]->identifierHash(), strip_cluster[3]->identifierHash()),
+        std::unique_ptr<InDet::SCT_SpacePoint>& ptr_m = data.v_StripSpacePointForSeed[key_m];
+	if (!ptr_m) {
+	  ptr_m = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[2]->identifierHash(), strip_cluster[3]->identifierHash()),
 											 Amg::Vector3D(seed->sp()[1]->x(), seed->sp()[1]->y(), seed->sp()[1]->z()),
 											 std::make_pair<const Trk::PrepRawData*, const Trk::PrepRawData*>(*(stripLinkAcc(*strip_cluster[2])), *(stripLinkAcc(*strip_cluster[3]))));
 	}
-	if (data.v_StripSpacePointForSeed.find(key_t) == data.v_StripSpacePointForSeed.end()) {
-	  data.v_StripSpacePointForSeed[key_t] = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[4]->identifierHash(), strip_cluster[5]->identifierHash()),
+        std::unique_ptr<InDet::SCT_SpacePoint>& ptr_t = data.v_StripSpacePointForSeed[key_t];
+	if (!ptr_t) {
+	  ptr_t = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[4]->identifierHash(), strip_cluster[5]->identifierHash()),
 											 Amg::Vector3D(seed->sp()[2]->x(), seed->sp()[2]->y(), seed->sp()[2]->z()),
 											 std::make_pair<const Trk::PrepRawData*, const Trk::PrepRawData*>(*(stripLinkAcc(*strip_cluster[4])), *(stripLinkAcc(*strip_cluster[5]))));
 	}
