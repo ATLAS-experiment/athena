@@ -167,10 +167,8 @@ namespace MuonGM {
                     break;
                 }
             }
-            GeoShape *box = new GeoBox(cthick / 2., longWidth / 2., (length - clen) / 2.);
-            box->ref();
+            GeoIntrusivePtr<GeoShape> box{new GeoBox(cthick / 2., longWidth / 2., (length - clen) / 2.)};
             strd = &(strd->subtract((*box) << GeoTrf::Translate3D(cxpos, 0., cypos)));
-            box->unref();
         }
 
         if (m_enableFineClashFixing > 0) {
@@ -191,10 +189,8 @@ namespace MuonGM {
                         break;
                     }
                 }
-                GeoShape *box1 = new GeoBox(cutthick / 2., (longWidth + 2.) / 2., cutlen);
-                box1->ref();
+                GeoIntrusivePtr<GeoShape> box1{new GeoBox(cutthick / 2., (longWidth + 2.) / 2., cutlen)};
                 strd = &(strd->subtract((*box1) << GeoTrf::Translate3D((totthick - cutthick) / 2., 0., length / 2.)));
-                box1->unref();
             }
         }
 
@@ -221,14 +217,11 @@ namespace MuonGM {
                 }
 
                 // Prepare boxes and cylinders for chamber volume mods
-                GeoShape *box = new GeoBox((totthick + 2.) / 2., (longWidth + 2.) / 2., halfpitch);
-                box->ref();
-                const GeoShape *frontcyl = new GeoTube(0.0, halfpitch + 0.001, longWidth / 2.);
+                GeoIntrusivePtr<GeoShape> box{new GeoBox((totthick + 2.) / 2., (longWidth + 2.) / 2., halfpitch)};
+                GeoIntrusivePtr<const GeoShape> frontcyl{new GeoTube(0.0, halfpitch + 0.001, longWidth / 2.)};
                 frontcyl = &((*frontcyl) << GeoTrf::RotateX3D(90. * Gaudi::Units::deg));
-                frontcyl->ref();
-                const GeoShape *backcyl = new GeoTube(0.0, halfpitch - 0.001, (longWidth + 2.) / 2.);
+                GeoIntrusivePtr<const GeoShape> backcyl{new GeoTube(0.0, halfpitch - 0.001, (longWidth + 2.) / 2.)};
                 backcyl = &((*backcyl) << GeoTrf::RotateX3D(90. * Gaudi::Units::deg));
-                backcyl->ref();
 
                 if (index > 0) {
                     // If chamber has MDTs, shorten length by halfpitch (remove what was added in DBReader.h)
@@ -257,9 +250,6 @@ namespace MuonGM {
                         strd = &((*strd) << GeoTrf::RotateX3D(180. * Gaudi::Units::deg));
                 }
 
-                box->unref();
-                frontcyl->unref();
-                backcyl->unref();
             } // fine clash fixing
         }     // !isAssembly
 

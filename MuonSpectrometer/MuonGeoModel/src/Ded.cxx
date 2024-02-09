@@ -72,11 +72,10 @@ namespace MuonGM {
                 cutoutShape = new GeoTrd(thickness / 2. + 1., thickness / 2. + 1., cut->widthXs / 2., cut->widthXl / 2., cut->lengthY / 2.);
                 cutTrans = GeoTrf::Translate3D(0.0, cut->dx, -length / 2 + cut->dy + cut->lengthY / 2.);
 
+                GeoIntrusivePtr<GeoVPhysVol> toCut{pded};
                 GeoCutVolAction cutAction(*cutoutShape, cutTrans);
-                pded->apply(&cutAction);
+                toCut->apply(&cutAction);
                 tempPhys = cutAction.getPV();
-                pded->ref();
-                pded->unref();
                 pded = tempPhys;
             }
         }
