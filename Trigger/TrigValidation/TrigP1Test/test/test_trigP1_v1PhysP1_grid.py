@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu
 # art-type: grid
@@ -24,12 +24,12 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
 ex.threads = 4
 ex.concurrent_events = 4
-ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;"'
-ex.args += ' --dump-config-reload'
+ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_run3_v1_HLTReprocessing_prescale"',
+            'Trigger.doLVL1=True']
 
 test = Test.Test()
 test.art_type = 'grid'
