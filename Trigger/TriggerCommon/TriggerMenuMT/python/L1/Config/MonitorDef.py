@@ -118,9 +118,13 @@ class MonitorDef:
                 ## Legacy L1 items
                 # L1Calo
                 #"L1_TAU8", "L1_TAU20IM",
-                #"L1_J100",
+                #"L1_J100", 
                 #"L1_J400",
-                #"L1_XE35", "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
+                #"L1_XE35",
+                # "L1_XE45",
+                #"L1_XE50", 
+                "L1_XE55", "L1_XE300",
+                # "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
                 # Combined
                 #"L1_MU3V_J12",
                 # L1Topo
@@ -154,17 +158,17 @@ class MonitorDef:
                 "L1_3jJ70p0ETA23", "L1_4jJ40p0ETA25", "L1_5jJ40p0ETA25",
                 "L1_jJ140_3jJ60",
                 "L1_jLJ80", "L1_jLJ120", "L1_jLJ140",
-                "L1_jXE70", "L1_jXE80", "L1_jXE100",
-                "L1_jXE110", "L1_jXE500",
+                "L1_jXE60", "L1_jXE70", "L1_jXE80", "L1_jXE90", "L1_jXE100",
+                "L1_jXE110", "L1_jXE120", "L1_jXE500",
                 "L1_jXEC100",
                 "L1_jTE200",
                 "L1_jTEC200", "L1_jTEFWD100", "L1_jTEFWDA100", "L1_jTEFWDC100",
                 "L1_jJ85p0ETA21_3jJ40p0ETA25",
                 "L1_gJ20p0ETA25", "L1_gJ20p25ETA49","L1_gJ20p0ETA25_EMPTY", "L1_gJ50p0ETA25",
                 "L1_gJ100p0ETA25", "L1_gJ400p0ETA25", "L1_gLJ80p0ETA25",
-                "L1_gXERHO70", "L1_gXERHO100",
+                #"L1_gXERHO70", "L1_gXERHO100",
                 "L1_gXENC70", "L1_gXENC100",
-                "L1_gXEJWOJ70", "L1_gXEJWOJ80", "L1_gXEJWOJ100",
+                "L1_gXEJWOJ60", "L1_gXEJWOJ70", "L1_gXEJWOJ80", "L1_gXEJWOJ100", "L1_gXEJWOJ110", "L1_gXEJWOJ120", "L1_gXEJWOJ500",
                 "L1_gTE200",
                 "L1_gMHT500",
                 # Combined
@@ -405,7 +409,7 @@ class MonitorDef:
                 # TRT
                 "L1_TRT_VTE50", "L1_TRT_VTE200", "L1_TRT_VTE20",
                 # XE
-                "L1_XE30", "L1_XE35", "L1_XE50", "L1_XE60",
+                "L1_XE30", "L1_XE50",
                 # Phase-I L1Calo
                 "L1_eEM5", "L1_eEM9", "L1_eEM12", "L1_eEM15",
                 "L1_eEM18", "L1_eEM18L",

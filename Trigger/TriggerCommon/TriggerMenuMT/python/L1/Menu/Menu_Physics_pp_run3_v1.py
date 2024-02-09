@@ -193,21 +193,23 @@ def defineMenu():
         'L1_3jJ40p0ETA25_jXE80',
         
         # XE
-        'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50', 
-        'L1_XE55', 'L1_XE60', 'L1_XE30', 'L1_XE300',
+        'L1_XE50', 'L1_XE55', 'L1_XE30', 'L1_XE300',
         # new calo
-        'L1_gXERHO70', 'L1_gXERHO100',
+        #'L1_gXERHO70', 'L1_gXERHO100',
         'L1_gXENC70', 'L1_gXENC100',
-        'L1_gXEJWOJ70', 'L1_gXEJWOJ80', 'L1_gXEJWOJ100',
+        'L1_gXEJWOJ60', 'L1_gXEJWOJ70', 'L1_gXEJWOJ80', 'L1_gXEJWOJ100', 'L1_gXEJWOJ110', 'L1_gXEJWOJ120', 'L1_gXEJWOJ500',
         'L1_gTE200',
         'L1_gMHT500',
 
-        'L1_jXE70', 'L1_jXE80', 'L1_jXE100', 'L1_jXE110', 'L1_jXE500', 
+        'L1_jXE60', 'L1_jXE70', 'L1_jXE80', 'L1_jXE90', 'L1_jXE100', 'L1_jXE110', 'L1_jXE120', 'L1_jXE500', 
         'L1_jXEC100', 'L1_jTE200', 'L1_jTEC200', 'L1_jTEFWD100', 'L1_jTEFWDA100', 'L1_jTEFWDC100',
     
         #LUCID
         'L1_LUCID_A', 'L1_LUCID_C',
         'L1_LUCID_A_BGRP11', 'L1_LUCID_C_BGRP11',
+
+        #combined jet xe
+        'L1_jJ80_jXE120',
 
         # VDM
 
