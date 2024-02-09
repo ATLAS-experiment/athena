@@ -222,8 +222,8 @@ def createTriggerFlags(doTriggerRecoFlags):
                   prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1,
                   help='enable eFEX ByteStream conversion/simulation')
 
-    flags.addFlag('Trigger.L1.doeFexBDTTau', True,
-                  help='use BDT tau algorithm as the active one for eFEX')
+    flags.addFlag('Trigger.L1.Menu.doeFexBDTTau', True,
+                  help='set BDT tau algorithm as the active one for eFEX when constructing L1 menus')
 
     flags.addFlag('Trigger.L1.dojFex', lambda prevFlags:
                   prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1,
@@ -247,7 +247,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1.doCTP', True,
                   help='enable CTP ByteStream conversion/simulation')
 
-    flags.addFlag('Trigger.L1.doHeavyIonTobThresholds', lambda prevFlags:
+    flags.addFlag('Trigger.L1.Menu.doHeavyIonTobThresholds', lambda prevFlags:
                   'HI' in prevFlags.Trigger.triggerMenuSetup,
                   help='modify min-pt-to-Topo threshold for TOBs to HI values')
 
