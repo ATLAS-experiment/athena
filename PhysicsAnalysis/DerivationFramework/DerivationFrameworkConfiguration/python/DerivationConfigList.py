@@ -40,6 +40,9 @@ from DerivationFrameworkHiggs.HIGG1D1 import HIGG1D1Cfg
 # LLP derivations
 from DerivationFrameworkLLP.LLP1 import LLP1Cfg
 
+### LLJ derivations
+from DerivationFrameworkLLJ.LLJ1 import LLJ1Cfg
+
 # InDet derivations
 from DerivationFrameworkInDet.IDTR2 import IDTR2Cfg
 
@@ -139,7 +142,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'PHYSVALCfg',
            'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg',
            'HIGG1D1Cfg',
-           'LLP1Cfg',
+           'LLP1Cfg', 'LLJ1Cfg',
            'IDTR2Cfg',
            'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY4Cfg', 'BPHY5Cfg',
            'BPHY6Cfg',
