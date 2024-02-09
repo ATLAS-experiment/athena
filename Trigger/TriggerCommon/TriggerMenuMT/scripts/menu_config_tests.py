@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 '''
 Tests to verify generated menus are valid.
@@ -14,8 +14,8 @@ from enum import Enum
 from collections import Counter
 
 from AthenaCommon.Logging import logging
-log = logging.getLogger( 'TriggerMenuMT.HLT.Combined' )
-logging.getLogger().info("Importing %s",__name__)
+log = logging.getLogger( 'TriggerMenuConfigTest' )
+log.info("Importing %s", __name__)
 
 class TriggerLevel(Enum):
     HLT = "HLT"
