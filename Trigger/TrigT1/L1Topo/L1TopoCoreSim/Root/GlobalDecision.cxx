@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iomanip>
@@ -27,7 +27,7 @@ GlobalDecision::setTriggerLines(const vector<TrigConf::TriggerLine> & triggers) 
 }
   
 uint32_t
-GlobalDecision::decision_field(string connName, unsigned int clock) const {
+GlobalDecision::decision_field(const string& connName, unsigned int clock) const {
    try {
       if(clock==0) {
          // lower 32 bit
