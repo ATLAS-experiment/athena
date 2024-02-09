@@ -385,8 +385,7 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
             acc.addSequence(HLTNode)
         return ([], acc)
     
-    (dfAcc, finalDecisions, CFseq_list) = createDataFlow(flags, chains, allDicts)
-    acc.merge(dfAcc)
+    ( finalDecisions, CFseq_list) = createDataFlow(flags, chains, allDicts)    
     cfAcc = createControlFlow(flags, HLTNode, CFseq_list)
     acc.merge(cfAcc)
 
@@ -405,9 +404,7 @@ def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
 
 def createDataFlow(flags, chains, allDicts):
     """ Creates the filters and connect them to the menu sequences"""
-    with ConfigurableCABehavior():
-        acc = ComponentAccumulator()
-
+   
     # find tot nsteps
     chainWithMaxSteps = max(chains, key = lambda chain: len(chain.steps))
     NSTEPS = len(chainWithMaxSteps.steps)
@@ -500,10 +497,7 @@ def createDataFlow(flags, chains, allDicts):
                 log.debug("Combo not implemented if it's empty step")
 
             # add HypoTools to this step (cumulating all same steps)
-            hyposAcc = lastCFseq.createHypoTools(flags,chain.name,chainStep)
-            if hyposAcc:
-                assert len(hyposAcc.getEventAlgos()) == 0, 'Hypo CA contains algorithms'
-                acc.merge(hyposAcc)
+            lastCFseq.createHypoTools(flags,chain.name,chainStep)            
 
             if len(chain.steps) == nstep+1:
                 log.debug("Adding finalDecisions for chain %s at step %d:", chain.name, nstep+1)
@@ -516,7 +510,8 @@ def createDataFlow(flags, chains, allDicts):
     #end of loop over chains
 
     log.debug("End of createDataFlow for %d chains and total %d steps", len(chains), NSTEPS)
-    return (acc, finalDecisions, CFseqList)
+    return (finalDecisions, CFseqList)
+
 
 def createControlFlow(flags, HLTNode, CFseqList):
     """ Creates Control Flow Tree starting from the CFSequences"""    
