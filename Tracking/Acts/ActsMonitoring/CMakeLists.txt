@@ -39,3 +39,7 @@ atlas_add_component( ActsMonitoring
 			xAODMeasurementBase )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_add_test( ActsSeedingToolComparison
+  SCRIPT test/ActsSeedingAlgorithmTest.py
+  POST_EXEC_SCRIPT nopost.sh )
