@@ -5,12 +5,6 @@
 @brief This file declares functions to configure FPGATrackSimConfig components
 '''
 
-import os
-
-from PyJobTransforms.trfUtils import findFile
-#import FPGATrackSimConfTools.FPGATrackSimConfToolsConf as Config
-
-
 def getRegionIndex(map_tag):
     '''
     Note the region member of the tag is a string
@@ -42,7 +36,7 @@ def addEvtSelSvc(map_tag,name=""):
     else :
         ES = Config.FPGATrackSimEventSelectionSvc()
     ES.regionID = getRegionIndex(map_tag)
-    ES.regions = findFile(os.environ['DATAPATH'], map_tag['slices'])
+    ES.regions = map_tag['slices']
     ES.sampleType = getSampleType(map_tag)
     ES.withPU = getWithPU(map_tag)
     ES.OutputLevel=INFO

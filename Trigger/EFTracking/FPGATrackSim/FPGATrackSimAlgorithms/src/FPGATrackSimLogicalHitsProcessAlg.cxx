@@ -57,7 +57,9 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
         }
     }
 
+
     ATH_CHECK(m_hitSGInputTool.retrieve(EnableTool{!m_hitSGInputTool.empty()}));
+
     ATH_CHECK(m_hitInputTool.retrieve(EnableTool{!m_hitInputTool.empty()}));
     ATH_CHECK(m_hitInputTool2.retrieve(EnableTool{m_secondInputToolN > 0 && !m_hitInputTool2.empty()}));
     ATH_CHECK(m_hitMapTool.retrieve());
@@ -66,6 +68,7 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_spacepointsTool.retrieve(EnableTool{m_doSpacepoints}));
     ATH_CHECK(m_roadFinderTool.retrieve());
     
+
     ATH_CHECK(m_LRTRoadFilterTool.retrieve(EnableTool{m_doLRT}));
     ATH_CHECK(m_LRTRoadFinderTool.retrieve(EnableTool{m_doLRT}));
     ATH_CHECK(m_houghRootOutputTool.retrieve(EnableTool{m_doHoughRootOutput}));
@@ -78,7 +81,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
     ATH_CHECK(m_overlapRemovalTool_2nd.retrieve(EnableTool{m_runSecondStage}));
     ATH_CHECK(m_dataFlowTool.retrieve());
     ATH_CHECK(m_writeOutputTool.retrieve());
-
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     if ( m_doEvtSel ) {
         ATH_CHECK(m_evtSel.retrieve());
@@ -86,22 +88,21 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
 
     ATH_MSG_DEBUG("initialize() Instantiating root objects");
     m_logicEventHeader_1st   = m_writeOutputTool->getLogicalEventInputHeader_1st();
+    
+
     m_logicEventOutputHeader = m_writeOutputTool->getLogicalEventOutputHeader();
     if (m_runSecondStage) m_logicEventHeader_2nd = m_writeOutputTool->getLogicalEventInputHeader_2nd();
 
     ATH_MSG_DEBUG("initialize() Setting branch");
-
     if (m_outputHitTxt) {
       ATH_MSG_INFO("writing road hits to " << m_outputHitTxtName);
       m_outputHitTxtStream.open(m_outputHitTxtName);
     }
 
-
     if (!m_monTool.empty())
         ATH_CHECK(m_monTool.retrieve());
-
-
     ATH_MSG_DEBUG("initialize() Finished");
+
     return StatusCode::SUCCESS;
 }
 
@@ -211,14 +212,32 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
             ATH_CHECK(m_NNTrackTool->getTracks(roads_1st, tracks_1st, nnMap));
         }
         else {
-            ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
+	  ATH_CHECK(m_trackFitterTool_1st->getTracks(roads_1st, tracks_1st));
+	  float bestchi2 = 1.e15;
+	  for (auto track : tracks_1st) {
+	    float chi2 = track.getChi2ndof();
+	    if (chi2 < bestchi2) bestchi2 = chi2;
+	    auto mon_chi2_1st = Monitored::Scalar<float>("chi2_1st_all",chi2);
+	    Monitored::Group(m_monTool,mon_chi2_1st);	    
+	  }
+	  auto mon_best_chi2_1st = Monitored::Scalar<float>("best_chi2_1st",bestchi2);
+	  Monitored::Group(m_monTool,mon_best_chi2_1st);
         }
     }
+
+    auto mon_ntracks_1st = Monitored::Scalar<unsigned>("ntrack_1st", tracks_1st.size());
+    Monitored::Group(m_monTool,mon_ntracks_1st);
+
 
     TIME(m_ttracks);
 
     // Overlap removal
     ATH_CHECK(m_overlapRemovalTool_1st->runOverlapRemoval(tracks_1st));
+    unsigned ntrackOLR = 0;
+    for (auto track : tracks_1st) { if (track.passedOR()) ntrackOLR++;}
+    auto mon_ntracks_1st_olr = Monitored::Scalar<unsigned>("ntrack_1st_afterOLR", ntrackOLR);
+    Monitored::Group(m_monTool,mon_ntracks_1st_olr);
+
 
     TIME(m_tOR);
 
@@ -493,10 +512,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::writeOutputData(std::vector<FPGATr
   if (!m_writeOutputData) return StatusCode::SUCCESS;
   
   m_logicEventOutputHeader->reserveFPGATrackSimRoads_1st(roads_1st.size());
-  m_logicEventOutputHeader->reserveFPGATrackSimTracks_1st(tracks_1st.size());
-  
   m_logicEventOutputHeader->addFPGATrackSimRoads_1st(roads_1st);
-  m_logicEventOutputHeader->addFPGATrackSimTracks_1st(tracks_1st);
+  if (m_doTracking) {
+    m_logicEventOutputHeader->reserveFPGATrackSimTracks_1st(tracks_1st.size());
+    m_logicEventOutputHeader->addFPGATrackSimTracks_1st(tracks_1st);
+  }
   
   if (m_runSecondStage) {
     m_logicEventOutputHeader->reserveFPGATrackSimRoads_2nd(roads_2nd.size());

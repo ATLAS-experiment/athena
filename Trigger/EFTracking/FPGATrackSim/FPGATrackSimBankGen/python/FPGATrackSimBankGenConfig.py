@@ -61,6 +61,7 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
     theFPGATrackSimMatrixGenAlg.IdealiseGeometry = 2
     theFPGATrackSimMatrixGenAlg.SingleSector = False
     theFPGATrackSimMatrixGenAlg.HoughConstants = True
+    theFPGATrackSimMatrixGenAlg.DeltaPhiConstants = False
     theFPGATrackSimMatrixGenAlg.PT_THRESHOLD = 1.0 # GeV
     theFPGATrackSimMatrixGenAlg.D0_THRESHOLD = 2.0 # mm
     theFPGATrackSimMatrixGenAlg.TRAIN_PDG = 13

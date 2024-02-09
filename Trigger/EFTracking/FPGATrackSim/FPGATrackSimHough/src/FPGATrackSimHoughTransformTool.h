@@ -165,7 +165,7 @@ class FPGATrackSimHoughTransformTool : public extends <AthAlgTool, IFPGATrackSim
 	Gaudi::Property <bool> m_localMaxWindowSize { this, "localMaxWindowSize", 0, "Only create roads that are a local maximum within this window size. Set this to 0 to turn off local max filtering"};
 	Gaudi::Property <bool> m_fieldCorrection { this, "fieldCorrection", true, "Apply corrections to hough equation due to field nonuniformity"};
 	Gaudi::Property <bool> m_useSectors { this, "useSectors", false, "Will reverse calculate the sector for track-fitting purposes"};
-	Gaudi::Property <bool> m_idealGeoRoads { this, "IdealGeoRoads", false, "Set sectors to use ideal geometry fit constants"};
+	Gaudi::Property <bool> m_idealGeoRoads { this, "IdealGeoRoads", true, "Set sectors to use ideal geometry fit constants"};
 
         std::vector<std::vector<unsigned>> m_combineLayer2D; // 2d array of combined layers i.e. [[1,2,3],[0,4,5],[6,7]] will combine (L1, L2, L3), (L0, L4, L5), (L6, L7)
 

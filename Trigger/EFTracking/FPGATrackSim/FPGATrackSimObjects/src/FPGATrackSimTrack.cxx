@@ -44,12 +44,11 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
   // and then 2*rho =  0.33 m * (pT / GeV)
   // but distances for us are in mm, so 2*rho = 330 * (pT / GeV)
   // and 1/(2*rho) = (1 / (pT in GeV)) / 330
-  double const trackTwoRhoInv = getQOverPt() / (330);
   double target_r = (m_trackStage == TrackStage::SECOND) ? htt::TARGET_R_2STAGE[ilayer] : htt::TARGET_R_1STAGE[ilayer];
   double hitGPhi = m_hits[ilayer].getGPhi();
+  double houghRho = 0.0003 * getHoughY(); //A*q/pT
 
   if (m_doDeltaGPhis) {
-    double houghRho = 0.0003 * getHoughY(); //A*q/pT
     double expectedGPhi = getHoughX();
 
     hitGPhi += (m_hits[ilayer].getR() - target_r) * houghRho; //first order
@@ -71,15 +70,18 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
     coords.push_back(hitGPhi - expectedGPhi);
   }
   else {
-    hitGPhi += (m_hits[ilayer].getR() - target_r) * trackTwoRhoInv; //first order
-    if (m_trackCorrType == TrackCorrType::Second)
-      hitGPhi += (pow(m_hits[ilayer].getR() * trackTwoRhoInv, 3.0) / 6.0); //higher order
+    double houghRho = 0.0003 * getHoughY(); //A*q/pT
+
+    hitGPhi += (m_hits[ilayer].getR() - target_r) * houghRho; //first order
+    if (m_trackCorrType == TrackCorrType::Second) {
+      hitGPhi += (pow(m_hits[ilayer].getR() * houghRho, 3.0) / 6.0); //higher order
+    }
 
     double z = m_hits[ilayer].getZ();
     if (m_hits[ilayer].getR() > 1e-8) {
       z -= m_hits[ilayer].getGCotTheta() * (m_hits[ilayer].getR() - target_r); //first order
       if (m_trackCorrType == TrackCorrType::Second)
-        z -= m_hits[ilayer].getGCotTheta() * (std::pow(m_hits[ilayer].getR(), 3.0) * trackTwoRhoInv * trackTwoRhoInv) / 6.0; //higher order
+        z -= m_hits[ilayer].getGCotTheta() * (std::pow(m_hits[ilayer].getR(), 3.0) * houghRho * houghRho) / 6.0; //higher order
     }
 
     coords.push_back(z);

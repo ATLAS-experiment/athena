@@ -15,6 +15,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimTypes.h"
 #include <AsgMessaging/MessageCheck.h>
 #include "TruthUtils/MagicNumbers.h"
+#include "PathResolver/PathResolver.h"
 
 using namespace asg::msgUserCode;
 
@@ -302,7 +303,7 @@ void FPGATrackSimEventSelectionSvc::createRegions()
       ATH_MSG_INFO("Creating the slices object");
       MsgStream cmsg(msgSvc(), "FPGATrackSimRegionSlices");
       cmsg.setLevel(msg().level()); // cause AthMessaging is stupid and doesn't have this function
-      m_regions = new FPGATrackSimRegionSlices(m_regions_path.value());
+      m_regions = new FPGATrackSimRegionSlices(PathResolverFindCalibFile(m_regions_path.value()));
     }
 }
 

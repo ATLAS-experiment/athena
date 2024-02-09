@@ -17,6 +17,7 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetPrepRawData/SiClusterContainer.h"
+#include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetReadoutGeometry/SiDetectorManager.h"
 #include "xAODTracking/TrackParticleContainer.h"
 

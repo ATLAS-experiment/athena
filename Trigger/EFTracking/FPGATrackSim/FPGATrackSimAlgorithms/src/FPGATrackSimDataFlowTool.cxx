@@ -435,7 +435,6 @@ StatusCode FPGATrackSimDataFlowTool::printDataFlow(std::string const & key, int 
         str_key.erase(key.find("_2nd"), std::string("_2nd").length());
     }
     else {
-      ATH_MSG_WARNING("Did not find \"_1st\" or \"_2nd\" in the key!");
       str_stage = "UNKNOWN";
     }
 
