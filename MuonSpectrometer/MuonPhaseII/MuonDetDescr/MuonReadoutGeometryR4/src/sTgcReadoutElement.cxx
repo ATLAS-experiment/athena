@@ -26,6 +26,11 @@ const parameterBook& sTgcReadoutElement::getParameters() const {return m_pars;}
 
 StatusCode sTgcReadoutElement::initElement() {
    ATH_MSG_DEBUG("Parameter book "<<parameterBook());
+       /// Check that the alignable node has been assigned
+   if(!alignableTransform()) {
+      ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
+      return StatusCode::FAILURE;
+   } 
    if (m_pars.stripLayers.empty()) {
       ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
       return StatusCode::FAILURE;

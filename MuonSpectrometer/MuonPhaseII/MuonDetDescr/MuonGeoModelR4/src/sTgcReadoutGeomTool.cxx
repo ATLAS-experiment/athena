@@ -165,16 +165,9 @@ StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     ATH_CHECK(readParameterBook(facCache));
 
     const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
-    // Get the list of full phys volumes from SQLite, and create detector
-    // elements
+    // Get the list of full phys volumes from SQLite, and create detector elements
     
-    using alignNodeMap = IMuonGeoUtilityTool::alignNodeMap;    
-    using physNodeMap = IMuonGeoUtilityTool::physNodeMap;
-    using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
-    alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
-    alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
-
 #ifndef SIMULATIONBASE
     SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
 #endif
@@ -210,7 +203,7 @@ StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         /// Skip the endcap chambers
         define.physVol = pv;
         define.chambDesign = "sTGC_" + key_tokens[1];
-        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);           
+        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol);           
         ATH_MSG_VERBOSE("Key "<<key<<" lead to the identifier "<<m_idHelperSvc->toStringDetEl(define.detElId));  
         ATH_CHECK(loadDimensions(define, facCache));
         std::unique_ptr<sTgcReadoutElement> readoutEle = std::make_unique<sTgcReadoutElement>(std::move(define));

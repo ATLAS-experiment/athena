@@ -175,15 +175,9 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
 
 
     const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
-    // Get the list of full phys volumes from SQLite, and create detector
-    // elements
-    using alignNodeMap = IMuonGeoUtilityTool::alignNodeMap;    
-    using physNodeMap = IMuonGeoUtilityTool::physNodeMap;
-    using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
+    // Get the list of full phys volumes from SQLite, and create detector elements
     /// Retrieve the list of full physical volumes & alignable nodes and connect them together afterwards
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
-    alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
-    alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
 #ifndef SIMULATIONBASE
     SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds= std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
 #endif 
@@ -217,7 +211,7 @@ StatusCode MmReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         ATH_MSG_DEBUG("Key "<<key<<" brought us "<<m_idHelperSvc->toStringDetEl(define.detElId));
         define.physVol = pv;
         define.chambDesign = key_tokens[0]+"_"+key_tokens[1]; // Recover the string denoted in WMM tables. e.g. chambDesign = "MM_SM1Q2"
-        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);  
+        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol);  
         ATH_CHECK(loadDimensions(define, facCache));
 #ifndef SIMULATIONBASE
         define.layerBounds = layerBounds;
