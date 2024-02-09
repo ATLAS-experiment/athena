@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcConditions/ZdcGeometryDB.h"
@@ -23,7 +23,7 @@ ZdcGeometryDB::ZdcGeometryDB() : asg::AsgMessaging("ZdcGeometryDB")
 
 }
 
-void ZdcGeometryDB::loadJSONFile(std::string geoStr)
+void ZdcGeometryDB::loadJSONFile(const std::string& geoStr)
 {
 
   std::string filePath = PathResolver::find_file(geoStr,"DATAPATH", PathResolver::RecursiveSearch);
