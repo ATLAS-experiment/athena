@@ -36,3 +36,16 @@ atlas_add_component( ActsDataPreparation
    xAODInDetMeasurement
    xAODMeasurementBase
 )
+
+# Unit tests
+atlas_add_test( ActsRegionalDataPrep_CompositeRoI
+  SCRIPT test/runCompositeRoICode.py
+  POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( ActsRegionalDataPrep_FullScanRoI
+  SCRIPT test/runFullScanRoICode.py
+  POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( ActsRegionalDataPrep_SingleRoI
+  SCRIPT test/runSingleRoICode.py
+  POST_EXEC_SCRIPT nopost.sh )
