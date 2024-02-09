@@ -224,8 +224,8 @@ def checkL1HLTConsistency(flags):
             log.error(f'  {i}')
         raise Exception("Please fix the menu or the chains.")
 
-    if len(chainsWithWrongLabel) and ('Physics' in lvl1name) and not ('HI' in lvl1name): # apply this check only for the Physics menu, for now; don't apply for HI menu
-        log.error('These chains have the wrong groups:')
+    if len(chainsWithWrongLabel) and ('Physics' in lvl1name) and not ('HI' in lvl1name) and not ('lowMu' in lvl1name): # apply this check only for the Physics menu, for now; don't apply for HI menu
+        log.error('These chains have the wrong groups for l1menu %s:',lvl1name)
         for key, (groups, errormsg) in chainsWithWrongLabel.items():
             log.error('%s: %s\n  --> %s', key, ",".join(groups), errormsg)
         raise Exception("Please fix these chains.")
