@@ -64,14 +64,15 @@ condSeq = AthSequencer("AthCondSeq")
 
 from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelConfigCondAlg
 alg = PixelConfigCondAlg(name="PixelConfigCondAlg")
-PixelConfigCondAlg.DistortionInputSource = 0 
-alg.DistortionWriteToFile = False
 condSeq += alg
 
 print(alg)
 
 from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelDistortionAlg
-condSeq += PixelDistortionAlg(name="PixelDistortionAlg")
+distortionAlg = PixelDistortionAlg(name="PixelDistortionAlg")
+PixelDistortionAlg.DistortionInputSource = 0 
+alg.DistortionWriteToFile = False
+condSeq += distortionAlg
 #------------------------------------------
 # GlobalFlags
 #------------------------------------------

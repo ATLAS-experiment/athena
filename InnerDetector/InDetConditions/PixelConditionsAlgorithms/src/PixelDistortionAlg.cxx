@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelDistortionAlg.h"
@@ -31,7 +31,6 @@ StatusCode PixelDistortionAlg::initialize() {
   ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
 
   ATH_CHECK(m_rndmSvc.retrieve());
-  ATH_CHECK(m_moduleDataKey.initialize());
   ATH_CHECK(m_readKey.initialize());
   ATH_CHECK(m_writeKey.initialize());
 
@@ -50,39 +49,38 @@ StatusCode PixelDistortionAlg::execute() {
   // Construct the output Cond Object and fill it in
   std::unique_ptr<PixelDistortionData> writeCdo(std::make_unique<PixelDistortionData>());
 
-  SG::ReadCondHandle<PixelModuleData> moduleDataHandle(m_moduleDataKey);
-  const PixelModuleData *moduleData = *moduleDataHandle;
+
 
   constexpr int nmodule_max = 2048;
   std::unordered_map<uint32_t,std::vector<float>> distortionMap;
   std::unordered_map<uint32_t,unsigned long long> ids;
-  if (moduleData->getDistortionInputSource()==0) { // no bow correction
+  if (m_distortionInputSource==0) { // no bow correction
     ATH_MSG_DEBUG("No bow correction");
-    writeCdo -> setVersion(moduleData->getDistortionVersion());
+    writeCdo -> setVersion(m_distortionVersion);
     for (int i=0; i<nmodule_max; i++) {
       distortionMap[i].push_back(0.0);
       distortionMap[i].push_back(0.0);
       distortionMap[i].push_back(0.0);
     }
   }
-  else if (moduleData->getDistortionInputSource()==1) { // constant bow
+  else if (m_distortionInputSource==1) { // constant bow
     ATH_MSG_DEBUG("Using constant pixel distortions ");
-    writeCdo -> setVersion(moduleData->getDistortionVersion());
+    writeCdo -> setVersion(m_distortionVersion);
     for (int i=0; i<nmodule_max; i++) {
-      distortionMap[i].push_back(moduleData->getDistortionR1()*CLHEP::meter); // convert to 1/mm
-      distortionMap[i].push_back(moduleData->getDistortionR2()*CLHEP::meter); // convert to 1/mm
-      distortionMap[i].push_back(2.0*atan(moduleData->getDistortionTwist())/CLHEP::degree); // convert to degree
+      distortionMap[i].push_back(0.1); //  1/mm
+      distortionMap[i].push_back(0.1); //  1/mm
+      distortionMap[i].push_back(2.0*std::atan(0.0005)/CLHEP::degree); // convert to degree
     }
   }
-  else if (moduleData->getDistortionInputSource()==2) { // read from file
-    const std::string &file_name = moduleData->getDistortionFileName();
+  else if (m_distortionInputSource==2) { // read from file
+    const std::string &file_name = m_inputFileName;
     if (file_name.empty()) {
       ATH_MSG_ERROR("Distortion filename is empty  not found! No pixel distortion will be applied.");
       return StatusCode::FAILURE;
     }
 
     ATH_MSG_DEBUG("Reading pixel distortions from file: " << file_name);
-    writeCdo -> setVersion(moduleData->getDistortionVersion());
+    writeCdo -> setVersion(m_distortionVersion);
 
     if (file_name[0] != '/') {
       PathResolver::find_file(file_name, "DATAPATH");
@@ -94,7 +92,7 @@ StatusCode PixelDistortionAlg::execute() {
     }
 
     int distosize;
-    if (moduleData->getDistortionVersion() < 2) distosize = 3;
+    if (m_distortionVersion < 2) distosize = 3;
     else distosize = 441;
 
     while (!input.eof()) {
@@ -102,7 +100,7 @@ StatusCode PixelDistortionAlg::execute() {
       unsigned int hashID = 0;
       float data;
 
-      if (moduleData->getDistortionVersion() == 1) {
+      if (m_distortionVersion == 1) {
         input >> idmod;
         hashID = idmod;
       } else {
@@ -123,24 +121,28 @@ StatusCode PixelDistortionAlg::execute() {
     }
     input.close();
   }
-  else if (moduleData->getDistortionInputSource()==3) { // random generation
+  else if (m_distortionInputSource==3) { // random generation
     ATH_MSG_DEBUG("Using random pixel distortions");
-    writeCdo -> setVersion(moduleData->getDistortionVersion());
+    writeCdo -> setVersion(m_distortionVersion);
 
     ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this);
     rngWrapper->setSeed(name(),Gaudi::Hive::currentContext());
     CLHEP::HepRandomEngine *rndmEngine = *rngWrapper;
-
+    //these numbers could become properties, but seems unnecessary now (they are the same in all cases):
+    constexpr double distortionMeanR{0.12/CLHEP::meter};
+    constexpr double distortionRMSR{0.08};
+    constexpr double distortionMeanTwist{-0.0005};
+    
     for (int i=0; i<nmodule_max; i++) {
-      float r1    = CLHEP::RandGaussZiggurat::shoot(rndmEngine,moduleData->getDistortionMeanR(),moduleData->getDistortionRMSR());
-      float r2    = CLHEP::RandGaussZiggurat::shoot(rndmEngine,r1,moduleData->getDistortionRMSR()/10.);//to implement a correlation between distortions on 2 sides of the module
-      float twist = CLHEP::RandGaussZiggurat::shoot(rndmEngine,moduleData->getDistortionMeanTwist(),moduleData->getDistortionMeanTwist());
+      float r1    = CLHEP::RandGaussZiggurat::shoot(rndmEngine,distortionMeanR,distortionRMSR);
+      float r2    = CLHEP::RandGaussZiggurat::shoot(rndmEngine,r1,distortionRMSR/10.);//to implement a correlation between distortions on 2 sides of the module
+      float twist = CLHEP::RandGaussZiggurat::shoot(rndmEngine,distortionMeanTwist,distortionMeanTwist);
       distortionMap[i].push_back(r1*CLHEP::meter); // convert to 1/mm
       distortionMap[i].push_back(r2*CLHEP::meter); // convert to 1/mm
       distortionMap[i].push_back(2.0*std::atan(twist)/CLHEP::degree); // convert to degree
     }
   }
-  else if (moduleData->getDistortionInputSource()==4) { // read from database here 
+  else if (m_distortionInputSource==4) { // read from database here 
     ATH_MSG_DEBUG("Using pixel distortions from database");
     SG::ReadCondHandle<DetCondCFloat> readHandle(m_readKey);
     const DetCondCFloat* readCdo = *readHandle; 
@@ -198,14 +200,14 @@ StatusCode PixelDistortionAlg::execute() {
   writeCdo -> setDistortionMap(distortionMap);
   writeCdo -> setIds(ids);
 
-  if (moduleData->getDistortionWriteToFile()) {
+  if (m_writeToFile) {
     std::ofstream* outfile = new std::ofstream("output_distortion.txt"); 
     for (int i=0; i<nmodule_max; i++) {
       if (!distortionMap[i].empty()) {
-        if (moduleData->getDistortionVersion()==0) {
+        if (m_distortionVersion==0) {
           *outfile << m_pixelID->wafer_id(IdentifierHash(i)) << " " << distortionMap[i].at(0) << " " << distortionMap[i].at(1) << " " << distortionMap[i].at(2) << std::endl;
         }
-        else if (moduleData->getDistortionVersion()>0) {
+        else if (m_distortionVersion>0) {
           *outfile << i << " " << distortionMap[i].at(0) << " " << distortionMap[i].at(1) << " " << distortionMap[i].at(2) << std::endl;
         }
       }
