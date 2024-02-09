@@ -125,7 +125,7 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
         alg = createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'JetCutFlowDumperAlg'+postfix )
         alg.histPattern = 'jet_cflow_%SYS%'+postfix
         seq.append( alg, inputPropName = 'input', stageName = 'selection',
-                    dynConfig = {'selection' : lambda meta : meta["selectionDecorNames"][:]} )
+                    dynConfig = {'selections' : lambda meta : meta["selectionDecorNames"][:]} )
 
     # Set up an algorithm dumping the kinematic properties of the jets:
     if enableKinematicHistograms:

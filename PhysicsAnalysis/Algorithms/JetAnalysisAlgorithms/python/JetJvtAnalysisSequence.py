@@ -69,7 +69,7 @@ def makeJetJvtAnalysisSequence( dataType, jetCollection,
             alg = createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'JetJvtCutFlowDumperAlg' )
             alg.histPattern = 'jet_cflow_jvt_%SYS%'
             seq.append( alg, inputPropName = { 'jets' : 'input' },
-                        dynConfig = {'selection' : lambda meta : meta["selectionDecorNames"][:]})
+                        dynConfig = {'selections' : lambda meta : meta["selectionDecorNames"][:]})
 
         # Set up an algorithm that makes a view container using the selections
         # performed previously:
