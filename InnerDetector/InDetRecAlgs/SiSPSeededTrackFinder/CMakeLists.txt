@@ -8,19 +8,3 @@ atlas_add_component( SiSPSeededTrackFinder
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps StoreGateLib GaudiKernel BeamSpotConditionsData InDetRecToolInterfaces IRegionSelector RoiDescriptor TrkCaloClusterROI TrkGeometry TrkSurfaces TrkSpacePoint TrkTrack TrkExInterfaces xAODEventInfo SiSPSeededTrackFinderData TrkPatternParameters TrkRIO_OnTrack TrkEventUtils TrkToolInterfaces xAODTracking)
-
-# Run tests:
-atlas_add_test( SiSPSeededTracksStandalone
-                SCRIPT athena.py --threads=5 SiSPSeededTrackFinder/SiSPSeededTracksStandalone.py
-                POST_EXEC_SCRIPT nopost.sh
-                PROPERTIES TIMEOUT 600
-                ENVIRONMENT THREADS=5 )
-
-atlas_add_test( SiSPSeededTracksStandaloneFromESD
-                SCRIPT athena.py --threads=1 SiSPSeededTrackFinder/SiSPSeededTracksStandaloneFromESD.py
-                POST_EXEC_SCRIPT nopost.sh
-                PROPERTIES TIMEOUT 600
-                ENVIRONMENT THREADS=5 )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
