@@ -94,7 +94,7 @@ double TrigL2MuonSA::AlignmentBarrelLUT::GetDeltaZ(int&    saddress,
 {
   if (saddress == 1) {
 
-    int innerR = (sp1R > 600)? 1: 0;
+    int innerR = (sp1R > 5800)? 1: 0;
     
     std::pair<int, int> bins = GetBinNumber(saddress, innerR, etaMap, phiMap);
     int iEta = bins.first;
