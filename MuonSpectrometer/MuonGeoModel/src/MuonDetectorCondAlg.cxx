@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MuonDetectorCondAlg.h"
@@ -10,7 +10,6 @@
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonDetDescrUtils/BuildNSWReadoutGeometry.h"
-#include "MuonGeoModel/MuonDetectorFactory001.h"
 #include "MuonGeoModel/MuonDetectorTool.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "GeoModelKernel/GeoVolumeCursor.h"
@@ -56,7 +55,6 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     // =======================
     // Create the MuonDetectorManager by calling the MuonDetectorFactory001
     // =======================
-    MuonGM::MuonDetectorFactory001 theFactory(detStore().operator->());
     MuonGM::MuonDetectorManager *mgr{nullptr};
     if (m_iGeoModelTool->createFactory(mgr).isFailure()) {
         ATH_MSG_FATAL("unable to create MuonDetectorFactory001 ");
@@ -182,7 +180,7 @@ StatusCode MuonDetectorCondAlg::copyInertMaterial(MuonGM::MuonDetectorManager& d
         detStoreCursor.next();
         if (vname.find("Station") != std::string::npos) continue;
         /// All operations are atomic. So it's safe to cast constness away
-        GeoVPhysVol* physVol ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(worldNode.operator->()) ;
+        GeoVPhysVol* physVol ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(worldNode.get()) ;
         const GeoVPhysVol& pvConstLink = *worldNode;
         ATH_MSG_DEBUG("Volume in the static world "<<vname<<" "<<typeid(pvConstLink).name()
                         <<"children: "<<worldNode->getNChildNodes()

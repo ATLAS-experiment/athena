@@ -200,7 +200,8 @@ def CscILineCondAlgCfg(flags, name="CscILinesCondAlg", **kwargs):
 def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
     result = ComponentAccumulator()
 
-    kwargs.setdefault("MuonDetectorTool", result.popToolsAndMerge(MuonDetectorToolCfg(flags)))
+    kwargs.setdefault("MuonDetectorTool", result.popToolsAndMerge(MuonDetectorToolCfg(flags,
+                                                                                      runFromCondAlg = True)))
     kwargs.setdefault("applyMmPassivation", flags.Muon.applyMMPassivation)
 
     if kwargs["applyMmPassivation"]:
