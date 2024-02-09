@@ -5,6 +5,7 @@ from difflib import get_close_matches
 import importlib
 from AthenaCommon.Logging import logging
 from PyUtils.moduleExists import moduleExists
+from PyUtils.Decorators import deprecate
 
 _msg = logging.getLogger('AthConfigFlags')
 
@@ -412,6 +413,7 @@ class AthConfigFlags(object):
             raise KeyError(f"No flag with name '{name}' found" +
                            (f". Did you mean '{closestMatch[0]}'?" if closestMatch else ""))
 
+    @deprecate("Use '[...]' rather than '(...)' to access flags", print_context=True)
     def __call__(self,name):
         return self._get(name)
 

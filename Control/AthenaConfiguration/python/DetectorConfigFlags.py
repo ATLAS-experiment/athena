@@ -176,7 +176,7 @@ def getEnabledDetectors(flags, geometry=False):
         # test whether each detector is on
         name = f'Detector.Geometry{d}' if geometry else f'Detector.Enable{d}'
         if flags.hasFlag(name):
-            if flags(name) is not False:
+            if flags[name] is not False:
                 values.append(d)
     return values
 
@@ -254,7 +254,7 @@ def _getDetectorFlagStatus(flags, list=None, geometry=False):
                 else:
                     values.append('--')
             else:
-                if flags(name) is not False:
+                if flags[name] is not False:
                     values.append('ON')
                 else:
                     values.append('--')
@@ -395,7 +395,7 @@ def setupDetectorsFromList(flags, detectors, toggle_geometry=False, validate_onl
         status = d in detectors
         name = f'Detector.Enable{d}'
         if flags.hasFlag(name):
-            if flags(name) != status:
+            if flags[name] != status:
                 changed = True
                 if validate_only:
                     log.warning("Flag '%s' should be %s but is set to %s", name, status, not status)
@@ -405,7 +405,7 @@ def setupDetectorsFromList(flags, detectors, toggle_geometry=False, validate_onl
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
-                if flags(name) != status:
+                if flags[name] != status:
                     changed = True
                     if validate_only:
                         log.warning("Flag '%s' should be %s but is set to %s", name, status, not status)

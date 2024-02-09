@@ -174,7 +174,7 @@ def printRecoFlags(flags):
         else:
             raise RuntimeError(f'Unknown reconstruction domain {d}')
 
-        if flags(name) is not False:
+        if flags[name] is not False:
             enabled.append('ON')
         else:
             enabled.append('--')
