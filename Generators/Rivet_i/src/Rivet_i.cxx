@@ -285,7 +285,6 @@ inline std::vector<std::string> split(const std::string& input, const std::strin
 }
 
 const HepMC::GenEvent* Rivet_i::checkEvent(const HepMC::GenEvent& event, const EventContext& ctx) {
-  std::vector<HepMC::GenParticlePtr> beams;
   HepMC::GenEvent* modEvent = new HepMC::GenEvent(event);
 
   if (!m_needsConversion) {
@@ -406,20 +405,24 @@ const HepMC::GenEvent* Rivet_i::checkEvent(const HepMC::GenEvent& event, const E
     // add dummy beam particles
     modEvent->set_beam_particles(b1, b2);
   }
+  if (modEvent->beams().front()->momentum().e() > 50000.0) {
+    MeV2GeV(modEvent);
+  }
 #else
   modEvent->use_units(HepMC::Units::GEV, HepMC::Units::MM);
   if (modEvent->particles_size() == 1)  modEvent->set_beam_particles(*modEvent->particles_begin(), *modEvent->particles_begin());
   if (modEvent->beam_particles().first->momentum().e() > 50000.0) {
-    for (HepMC::GenEvent::particle_iterator p = modEvent->particles_begin(); p != modEvent->particles_end(); ++p) {
-      const HepMC::FourVector fv((*p)->momentum().px() * 0.001,
-                                 (*p)->momentum().py() * 0.001,
-                                 (*p)->momentum().pz() * 0.001,
-                                 (*p)->momentum().e()  * 0.001);
-      (*p)->set_momentum(fv);
-      (*p)->set_generated_mass((*p)->generated_mass() * 0.001);
-    }
+    MeV2GeV(modEvent);
   }
 #endif
 
   return modEvent;
 }
+
+void Rivet_i::MeV2GeV(HepMC::GenEvent* evt) {
+  for (auto& p: evt->particles()) {
+    p->set_momentum(p->momentum()*0.001);
+    p->set_generated_mass(p->generated_mass()*0.001);
+  }
+}
+
