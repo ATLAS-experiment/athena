@@ -31,6 +31,10 @@ const parameterBook& MmReadoutElement::getParameters() const { return m_pars; }
 
 StatusCode MmReadoutElement::initElement() {    
     ATH_MSG_DEBUG("Parameter book "<<parameterBook());
+    if(!alignableTransform()) {
+       ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
+       return StatusCode::FAILURE;
+    } 
     if (m_pars.layers.empty()) {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
        return StatusCode::FAILURE;
