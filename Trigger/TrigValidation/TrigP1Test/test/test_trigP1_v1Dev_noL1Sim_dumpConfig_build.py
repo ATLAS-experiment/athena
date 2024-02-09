@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: athenaHLT test of the Dev_pp_run3_v1 menu only dumping options for SMK generation
 # art-type: build
@@ -10,10 +10,11 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = ''  # No input file needed to generate config
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=False;forceEnableAllChains=True;"'
-ex.args += ' -M --dump-config-exit'
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_HLTReprocessing_prescale"',
+            'Trigger.forceEnableAllChains=True']
+ex.args = '-M --dump-config-exit'
 ex.perfmon = False  # Cannot use PerfMon with -M
 ex.fpe_auditor = False  # Don't want FPEAuditor in SMK for P1
 

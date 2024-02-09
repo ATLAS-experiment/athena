@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: athenaHLT test of the Dev_pp_run3_v1 TriggerValidation menu only dumping options for SMK generation for HLT reprocessings, with Run2 geometry and conditions
 # art-type: build
@@ -10,10 +10,13 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = ''  # No input file needed to generate config
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;flags.GeoModel.AtlasVersion=\'ATLAS-R2-2016-01-00-01\';flags.IOVDb.GlobalTag=\'CONDBR2-HLTP-2018-04\'"'
-ex.args += ' -M --dump-config-exit'
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_HLTReprocessing_prescale"',
+            'Trigger.doLVL1=True',
+            'GeoModel.AtlasVersion="ATLAS-R2-2016-01-00-01"',
+            'IOVDb.GlobalTag="CONDBR2-HLTP-2018-04"']
+ex.args = '-M --dump-config-exit'
 ex.perfmon = False  # Don't want PerfMon in SMK for HLT reprocessing
 ex.fpe_auditor = False  # Don't want FPEAuditor in SMK for HLT reprocessing
 

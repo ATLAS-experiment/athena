@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of cosmic P1+Tier0 workflow, runs athenaHLT with Cosmic_run3_v1 menu followed by offline reco and monitoring
 # art-type: build
@@ -12,19 +12,16 @@ from TrigValTools.TrigValSteering.Common import find_file
 # HLT step (BS->BS)
 hlt = ExecStep.ExecStep()
 hlt.type = 'athenaHLT'
-hlt.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data_cos'
 hlt.max_events = 50
-hltPrecommand = ''.join([
-  "setMenu='Cosmic_run3_v1';",
-  "doCosmics=True;",
-  "doL1Sim=True;",
-])
-hlt.args = f'-c "{hltPrecommand}"'
-hlt.args += ' -o output'
+hlt.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
+             'Trigger.doLVL1=True',
+             'Beam.Type=BeamType.Cosmics']
+hlt.args = '-o output'
 
 # Extract the physics_Main stream out of the BS file with many streams
 filter_bs = ExecStep.ExecStep('FilterBS')
