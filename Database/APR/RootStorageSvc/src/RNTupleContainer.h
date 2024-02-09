@@ -24,17 +24,28 @@ class TClass;
 class IRootAuxDynWriter;
 namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO { class IRNTupleWriter; }
-namespace ROOT { namespace Experimental { namespace Detail {
-   class RPageSource;
-   class RFieldBase;
-} } }
+namespace ROOT { namespace Experimental {
+  namespace Detail {
+    class RPageSource;
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
+    class RFieldBase;
+  }
+#else
+  }
+  class RFieldBase;
+#endif
+} }
 
 /*
  * POOL namespace declaration
  */
 namespace pool {
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+using ROOT::Experimental::RFieldBase;
+#else
 using ROOT::Experimental::Detail::RFieldBase;
+#endif
 using ROOT::Experimental::Detail::RPageSource;
 
 // Forward declaration

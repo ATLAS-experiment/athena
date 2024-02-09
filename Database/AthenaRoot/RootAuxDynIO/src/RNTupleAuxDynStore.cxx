@@ -39,23 +39,24 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
   
       // get memory location where to write data from the branch entry
       // const_cast because Field::CaptureValue() requires void*
-      void* data ATLAS_THREAD_SAFE = const_cast<void*>(SG::AuxStoreInternal::getIOData(auxid));
+      [[maybe_unused]] void* data ATLAS_THREAD_SAFE = const_cast<void*>(SG::AuxStoreInternal::getIOData(auxid));
       
       // if have mutex, lock to prevent potential concurrent I/O from elsewhere
       auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
          : std::unique_lock<std::recursive_mutex>();
 
-#if ROOT_VERSION_CODE > ROOT_VERSION( 6, 29, 0 )
-      auto rfv = fieldInfo.field->BindValue(data);
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+      auto rfv = fieldInfo.field->BindValue(std::shared_ptr<void>(data, [](void *) {}));
       rfv.Read(m_entry);
-#else
-      auto rfv = fieldInfo.field->CaptureValue( data );
-      fieldInfo.field->Read(m_entry, &rfv);
 #endif
 
       int  nbytes = 1;   // MN: TODO how to get this?
       if( nbytes <= 0 ) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+         throw std::string("Error reading field ") + fieldInfo.field->GetFieldName();
+#else
          throw std::string("Error reading field ") + fieldInfo.field->GetName();
+#endif
       }
       // read OK
       m_reader.addBytes(nbytes);

@@ -19,7 +19,11 @@ namespace SG { class IAuxStoreIO; }
 
 namespace RootAuxDynIO
 {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+   using RFieldBase    = ROOT::Experimental::RFieldBase;
+#else
    using RFieldBase    = ROOT::Experimental::Detail::RFieldBase;
+#endif
    using RNTupleWriter = ROOT::Experimental::RNTupleWriter;
    using RNTupleModel  = ROOT::Experimental::RNTupleModel;
    using REntry        = ROOT::Experimental::REntry;
@@ -30,9 +34,6 @@ namespace RootAuxDynIO
    {
    public:
 
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 27, 0 )
-      std::map<std::string, RFieldBase*>  m_ntupleFieldMap;
-#endif
       // store data ptr for the first row, when only creating the model
       std::map<std::string, void*>        m_attrDataMap;
 
@@ -52,9 +53,9 @@ namespace RootAuxDynIO
       /// Enable/Disable Metric Collection
       bool                 m_collectMetrics;
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
       /// default-constructed objects to fill out blanks
-      std::map<std::string, RFieldBase::RValue> m_generatedValues;
+      std::map<std::string, std::shared_ptr<RFieldBase::RValue>> m_generatedValues;
 #endif
 
       RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
