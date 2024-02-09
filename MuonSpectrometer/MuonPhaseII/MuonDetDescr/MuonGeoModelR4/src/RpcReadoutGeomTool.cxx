@@ -190,15 +190,10 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     ATH_CHECK(readParameterBook(facCache));
 
     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
-    // Get the list of full phys volumes from SQLite, and create detector
-    // elements
-    using alignNodeMap = IMuonGeoUtilityTool::alignNodeMap;    
-    using physNodeMap = IMuonGeoUtilityTool::physNodeMap;
-    using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
+    // Get the list of full phys volumes from SQLite, and create detector elements
+
     /// Retrieve the list of full physical volumes & alignable nodes and connect them together afterwards
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
-    alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
-    alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
 #ifndef SIMULATIONBASE
     SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::RectangleBounds>>();
 #endif
@@ -231,7 +226,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         defineArgs define{};        
         define.physVol = pv;
         define.chambDesign = key_tokens[1];
-        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);
+        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol);
         define.detElId = elementID;
         ATH_MSG_VERBOSE("Key  "<<key<<" lead to Identifier "<<m_idHelperSvc->toStringDetEl(elementID));
         ATH_CHECK(loadDimensions(define, facCache));

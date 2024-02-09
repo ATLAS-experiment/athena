@@ -37,6 +37,11 @@ Identifier MdtReadoutElement::measurementId(const IdentifierHash& measHash) cons
                                 tubeNumber(measHash) + 1);
 }
 StatusCode MdtReadoutElement::initElement() {
+  /// Check that the alignable node has been assigned
+  if(!alignableTransform()) {
+     ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
+     return StatusCode::FAILURE;
+  }
   /// First check whether we're having tubes
   if (!numLayers() || !numTubesInLay()) {
      ATH_MSG_FATAL("The readout element "<< idHelperSvc()->toStringDetEl(identify())<<" has no tubes. Please check "<<std::endl<<m_pars);

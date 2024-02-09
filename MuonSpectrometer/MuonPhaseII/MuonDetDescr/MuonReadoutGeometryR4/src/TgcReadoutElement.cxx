@@ -26,6 +26,12 @@ TgcReadoutElement::TgcReadoutElement(defineArgs&& args)
 
 const parameterBook& TgcReadoutElement::getParameters() const { return m_pars; }
 StatusCode TgcReadoutElement::initElement() {
+    
+   if(!alignableTransform()) {
+      ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
+      return StatusCode::FAILURE;
+   } 
+
     /// Check that the readoutelement has sensor layouts
     bool hasSensor{false};
     for (size_t s = 0; s < m_pars.sensorLayouts.size(); ++s) {
