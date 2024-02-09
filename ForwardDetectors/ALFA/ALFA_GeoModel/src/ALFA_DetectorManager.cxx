@@ -10,11 +10,7 @@ ALFA_DetectorManager::ALFA_DetectorManager()
 }
 
 
-ALFA_DetectorManager::~ALFA_DetectorManager()
-{
-  for (unsigned int i = 0; i < m_volume.size(); i++)
-    m_volume[i]->unref();
-}
+ALFA_DetectorManager::~ALFA_DetectorManager() = default;
 
 
 unsigned int ALFA_DetectorManager::getNumTreeTops() const
@@ -29,7 +25,6 @@ PVConstLink ALFA_DetectorManager::getTreeTop(unsigned int i) const
 
 void  ALFA_DetectorManager::addTreeTop(PVLink vol)
 {
-  vol->ref();
   m_volume.push_back(vol);
 }
 

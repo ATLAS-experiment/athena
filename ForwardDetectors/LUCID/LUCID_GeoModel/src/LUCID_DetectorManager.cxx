@@ -9,10 +9,7 @@ LUCID_DetectorManager::LUCID_DetectorManager() {
   setName("LUCID");
 }
 
-LUCID_DetectorManager::~LUCID_DetectorManager() {
-
-  for (unsigned int i=0; i<m_volume.size(); i++) m_volume[i]->unref();
-}
+LUCID_DetectorManager::~LUCID_DetectorManager() = default;
 
 unsigned int LUCID_DetectorManager::getNumTreeTops() const {
 
@@ -26,6 +23,5 @@ PVConstLink LUCID_DetectorManager::getTreeTop(unsigned int i) const {
 
 void  LUCID_DetectorManager::addTreeTop(PVLink vol) {
 
-  vol->ref();
   m_volume.push_back(vol);
 }
