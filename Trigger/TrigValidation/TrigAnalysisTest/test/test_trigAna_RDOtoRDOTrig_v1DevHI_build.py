@@ -16,7 +16,7 @@ preExec = ';'.join([
   'doWriteRDOTrigger=True',
   'flags.Trigger.AODEDMSet=\'AODFULL\'',
   'flags.Trigger.enableL1CaloPhase1=False',
-  'flags.Trigger.L1.doHeavyIonTobThresholds=True',
+  'flags.Trigger.L1.Menu.doHeavyIonTobThresholds=True',
 ])
 
 ex = ExecStep.ExecStep()

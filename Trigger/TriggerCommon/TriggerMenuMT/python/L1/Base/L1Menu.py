@@ -377,7 +377,7 @@ class L1Menu(object):
         # collect the ptMinToTopo values
         ptMin = {}
         for thrtype in ThrType.Run3Types():
-            ttconfig = getTypeWideThresholdConfig(thrtype, self.flags.Trigger.L1.doHeavyIonTobThresholds, self.flags.Trigger.L1.doeFexBDTTau)
+            ttconfig = getTypeWideThresholdConfig(thrtype, self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, self.flags.Trigger.L1.Menu.doeFexBDTTau)
             inputtype = thrtype.name
             if inputtype == 'cTAU':
                 inputtype = 'eTAU'

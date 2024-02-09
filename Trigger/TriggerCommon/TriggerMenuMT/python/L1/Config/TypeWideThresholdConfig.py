@@ -341,7 +341,7 @@ class L1Config_eTAU:
     # set independently, so the two variables are not coupled
 
     # The appropriate RCore or BDT cut values will be loaded into the RCore config variable,
-    # depending on if the Trigger.L1.doeFexBDTTau flag is enabled
+    # depending on if the Trigger.L1.Menu.doeFexBDTTau flag is enabled
 
     # The eTAU TOB only has 2 WP bits, allowing None/Loose/Medium/Tight values
 
