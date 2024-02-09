@@ -913,23 +913,32 @@ class ItemDef:
         MenuItem('L1_XE70').setLogic( d.XE70 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_XE80').setLogic( d.XE80 & physcond).setTriggerType(TT.calo)
         # phase1
-        MenuItem('L1_gXERHO70'  ).setLogic( d.gXERHO70   & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_gXERHO100' ).setLogic( d.gXERHO100  & physcond).setTriggerType(TT.calo)
+        #MenuItem('L1_gXERHO70'  ).setLogic( d.gXERHO70   & physcond).setTriggerType(TT.calo)
+        #MenuItem('L1_gXERHO100' ).setLogic( d.gXERHO100  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXENC70'   ).setLogic( d.gXENC70    & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXENC100'  ).setLogic( d.gXENC100   & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gXEJWOJ60' ).setLogic( d.gXEJWOJ60  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXEJWOJ70' ).setLogic( d.gXEJWOJ70  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXEJWOJ80' ).setLogic( d.gXEJWOJ80  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXEJWOJ100').setLogic( d.gXEJWOJ100 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gXEJWOJ110').setLogic( d.gXEJWOJ110 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gXEJWOJ120').setLogic( d.gXEJWOJ120 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gXEJWOJ500').setLogic( d.gXEJWOJ500 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gMHT500').setLogic( d.gMHT500 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jXE60' ).setLogic( d.jXE60  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE70' ).setLogic( d.jXE70  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE80' ).setLogic( d.jXE80  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jXE90' ).setLogic( d.jXE90  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE100').setLogic( d.jXE100 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE110').setLogic( d.jXE110 & physcond).setTriggerType(TT.calo)
-        #MenuItem('L1_jXE120').setLogic( d.jXE120 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jXE120').setLogic( d.jXE120 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE500').setLogic( d.jXE500 & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jXEC100'    ).setLogic( d.jXEC100 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXEPerf100' ).setLogic( d.jXEPerf100 & physcond).setTriggerType(TT.calo)
+
+        #ATR-28670- Combined jet - xe
+        MenuItem('L1_jJ80_jXE120' ).setLogic( d.jJ80 & d.jXE120 & physcond).setTriggerType(TT.calo)
 
         # phase1 TE
         MenuItem('L1_gTE200'     ).setLogic( d.gTE200 & physcond).setTriggerType(TT.calo)

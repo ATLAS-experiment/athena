@@ -204,11 +204,11 @@ class TopoAlgoDefMultiplicity(object):
             tm.registerTopoAlgo(alg)
 
         XEThresholds = [ 
-            'gXEJWOJ70', 'gXEJWOJ80', 'gXEJWOJ100',
-            'gXERHO70', 'gXERHO100', 
+            'gXEJWOJ60', 'gXEJWOJ70', 'gXEJWOJ80', 'gXEJWOJ100', 'gXEJWOJ110', 'gXEJWOJ120', 'gXEJWOJ500',
+            #'gXERHO70', 'gXERHO100', 
             'gXENC70', 'gXENC100',
 
-            'jXE70', 'jXE80', 'jXE90', 'jXE100', 'jXE110', 'jXE500',
+            'jXE60', 'jXE70', 'jXE80', 'jXE90', 'jXE100', 'jXE110', 'jXE120', 'jXE500',
 
             'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
             'gTE200',
@@ -226,7 +226,7 @@ class TopoAlgoDefMultiplicity(object):
             #replace jXESPARE16 - jXESPARE27 with heavy ion jTE threhsolds
             'jXESPARE1', 'jXESPARE2', 'jXESPARE3', 'jXESPARE4',
             'jXESPARE5', 'jXESPARE6', 'jXESPARE7', 'jXESPARE8', 'jXESPARE9',
-            'jXESPARE10', 'jXESPARE11', 'jXESPARE12', 'jXESPARE13', 
+            #'jXESPARE10', 'jXESPARE11', 'jXESPARE12', 'jXESPARE13', 
             #'jXESPARE14',
             #'jXESPARE15',
 

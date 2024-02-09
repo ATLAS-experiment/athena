@@ -140,10 +140,13 @@ def getCosmicSignatures():
         ChainProp(name='HLT_noalg_L1jJ160',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=JetStreamersGroup+SupportPhIGroup),
         
         ChainProp(name='HLT_noalg_L1XE55',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=METStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1XE60',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=METStreamersGroup+SupportLegGroup),
+        
         #XE, phase-I
         ChainProp(name='HLT_noalg_L1jXE110',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=METStreamersGroup+SupportPhIGroup),
-
+        #ATR-27986
+        ChainProp(name='HLT_noalg_L1jXE120',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=METStreamersGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1gXEJWOJ110',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=METStreamersGroup+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_L1gXEJWOJ120',   l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=METStreamersGroup+SupportPhIGroup),
     ]
 
     return chains
