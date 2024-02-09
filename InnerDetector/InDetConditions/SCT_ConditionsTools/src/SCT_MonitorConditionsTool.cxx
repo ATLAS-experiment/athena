@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -177,7 +177,7 @@ void SCT_MonitorConditionsTool::getDetectorElementStatus(const EventContext& ctx
         tmp_bad_strips.clear();
         tmp_bad_strips.reserve(bad_module_strips_in.size()*SCT_ConditionsData::STRIPS_PER_CHIP);
 
-        for (auto chip_i : bad_module_strips_in) {
+        for (const auto& chip_i : bad_module_strips_in) {
            unsigned int geoemtrical_chip_id = SCT::getGeometricalChipID(strip_i);
 
            for (unsigned int strip_per_chip_i=0; strip_per_chip_i<chip_i.size(); ++strip_per_chip_i) {
