@@ -495,6 +495,12 @@ def initConfigFlags():
         return createLLPDFConfigFlags()
     _addFlagsCategory(acf, "Derivation.LLP", __llpDerivation, 'DerivationFrameworkLLP' )
 
+    # onnxruntime flags
+    def __onnxruntime():
+        from AthOnnxComps.OnnxRuntimeFlags import createOnnxRuntimeFlags
+        return createOnnxRuntimeFlags()
+    _addFlagsCategory(acf, "AthOnnx", __onnxruntime, 'AthOnnxComps')
+
     # For AnalysisBase, pick up things grabbed in Athena by the functions above
     if not isGaudiEnv():
         def EDMVersion(flags):

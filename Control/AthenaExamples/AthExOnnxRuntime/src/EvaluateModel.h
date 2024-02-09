@@ -4,24 +4,21 @@
 #define ATHEXONNXRUNTIME_EVALUATEMODEL_H
 
 // Local include(s).
-#include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
+#include "AthOnnxInterfaces/IOnnxRuntimeInferenceTool.h"
+
 // Framework include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 
-// ONNX Runtime include(s).
+// Onnx Runtime include(s).
 #include <core/session/onnxruntime_cxx_api.h>
 
 // System include(s).
 #include <memory>
 #include <string>
-#include <iostream> 
-#include <fstream>
-#include <arpa/inet.h>
 #include <vector>
-#include <iterator>
 
-namespace AthONNX {
+namespace AthOnnx {
 
    /// Algorithm demonstrating the usage of the ONNX Runtime C++ API
    ///
@@ -53,31 +50,22 @@ namespace AthONNX {
       /// @{
 
       /// Name of the model file to load
-      Gaudi::Property< std::string > m_modelFileName{ this, "ModelFileName",
-         "dev/MLTest/2020-03-02/MNIST_testModel.onnx",
-         "Name of the model file to load" };
       Gaudi::Property< std::string > m_pixelFileName{ this, "InputDataPixel",
          "dev/MLTest/2020-03-31/t10k-images-idx3-ubyte",
          "Name of the input pixel file to load" };
-      Gaudi::Property< std::string > m_labelFileName{ this, "InputDataLabel",
-         "dev/MLTest/2020-03-31/t10k-labels-idx1-ubyte",
-         "Name of the label file to load" };
-      Gaudi::Property<int> m_testSample {this, "TestSample", 0, "A Random Test Sample"};
 
       /// Following properties needed to be consdered if the .onnx model is evaluated in batch mode
-      Gaudi::Property<bool> m_doBatches {this, "DoBatches", false, "Processing events by batches"};
-      Gaudi::Property<int> m_numberOfBatches {this, "NumberOfBatches", 1, "No. of batches to be passed"};
-      Gaudi::Property<int> m_sizeOfBatch {this, "SizeOfBatch", 1, "No. of elements/example in a batch"};
+      Gaudi::Property<int> m_batchSize {this, "BatchSize", 1, "No. of elements/example in a batch"};
 
-      // If runs on CUDA
-      Gaudi::Property<bool> m_useCUDA {this, "UseCUDA", false, "Use CUDA"};
+      /// Tool handler for onnx inference session
+      ToolHandle< IOnnxRuntimeInferenceTool >  m_onnxTool{
+         this, "ORTInferenceTool", "AthOnnx::OnnxRuntimeInferenceTool"
+      };
       
-      std::unique_ptr< Ort::Session > m_session;
       std::vector<std::vector<std::vector<float>>> m_input_tensor_values_notFlat;
-      std::vector<int> m_output_tensor_values;
 
    }; // class EvaluateModel
 
-} // namespace AthONNX
+} // namespace AthOnnx
 
 #endif // ATHEXONNXRUNTIME_EVALUATEMODEL_H

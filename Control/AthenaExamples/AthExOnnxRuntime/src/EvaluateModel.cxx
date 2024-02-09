@@ -1,14 +1,16 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "EvaluateModel.h"
 #include <tuple>
+#include <fstream>
+#include <chrono>
+#include <arpa/inet.h>
 
 // Framework include(s).
-#include "PathResolver/PathResolver.h"
-#include "AthOnnxruntimeUtils/OnnxUtils.h"
+#include "AthOnnxUtils/OnnxUtils.h"
 
-namespace AthONNX {
+namespace AthOnnx {
 
    //*******************************************************************
    // for reading MNIST images
@@ -66,195 +68,74 @@ namespace AthONNX {
     }
 
    StatusCode EvaluateModel::initialize() {
-
-      // Access the service.
-      //ATH_CHECK( m_svc.retrieve() );
+    // Fetch tools
+    ATH_CHECK( m_onnxTool.retrieve() );
+    m_onnxTool->printModelInfo();
 
       /*****
        The combination of no. of batches and batch size shouldn't cross 
        the total smple size which is 10000 for this example
       *****/         
-      if(m_doBatches && (m_numberOfBatches*m_sizeOfBatch)>10000){
+      if(m_batchSize > 10000){
         ATH_MSG_INFO("The total no. of sample crossed the no. of available sample ....");
 	return StatusCode::FAILURE;
-      }
-      // Find the model file.
-      const std::string modelFileName =
-         PathResolverFindCalibFile( m_modelFileName );
-      const std::string pixelFileName =
-         PathResolverFindCalibFile( m_pixelFileName );
-      const std::string labelFileName =
-         PathResolverFindCalibFile( m_labelFileName );
-      ATH_MSG_INFO( "Using model file: " << modelFileName );
-      ATH_MSG_INFO( "Using pixel file: " << pixelFileName );
-      ATH_MSG_INFO( "Using pixel file: " << labelFileName );
-      // Set up the ONNX Runtime session.
+       }
+     // read input file, and the target file for comparison.
+      ATH_MSG_INFO( "Using pixel file: " << m_pixelFileName.value() );
   
-      m_session = AthONNX::CreateORTSession(modelFileName, m_useCUDA);
-
-      if (m_useCUDA) {
-         ATH_MSG_INFO( "Created the ONNX Runtime session on CUDA" );
-      } else {
-         ATH_MSG_INFO( "Created the ONNX Runtime session on CPUs" );
-      }
-      
-      m_input_tensor_values_notFlat = read_mnist_pixel_notFlat(pixelFileName);
-      std::vector<std::vector<float>> c = m_input_tensor_values_notFlat[0];
-      m_output_tensor_values = read_mnist_label(labelFileName);    
-      // Return gracefully.
+      m_input_tensor_values_notFlat = read_mnist_pixel_notFlat(m_pixelFileName);
+      ATH_MSG_INFO("Total no. of samples: "<<m_input_tensor_values_notFlat.size());
+    
       return StatusCode::SUCCESS;
-   }
+}
 
    StatusCode EvaluateModel::execute( const EventContext& /*ctx*/ ) const {
-     
-     Ort::AllocatorWithDefaultOptions allocator;
-  
-     /************************** Input Nodes *****************************/
-     /*********************************************************************/
-     
-     std::tuple<std::vector<int64_t>, std::vector<const char*> > inputInfo = AthONNX::GetInputNodeInfo(m_session);
-     std::vector<int64_t> input_node_dims = std::get<0>(inputInfo);
-     std::vector<const char*> input_node_names = std::get<1>(inputInfo);
-     
-     for( std::size_t i = 0; i < input_node_names.size(); i++ ) {
-        // print input node names
-        ATH_MSG_DEBUG("Input "<<i<<" : "<<" name= "<<input_node_names[i]);
    
-        // print input shapes/dims
-        ATH_MSG_DEBUG("Input "<<i<<" : num_dims= "<<input_node_dims.size());
-        for (std::size_t j = 0; j < input_node_dims.size(); j++){
-           ATH_MSG_DEBUG("Input "<<i<<" : dim "<<j<<"= "<<input_node_dims[j]);
-          }
-       }
+   // prepare inputs
+   std::vector<float> inputData;
+   for (int ibatch = 0; ibatch < m_batchSize; ibatch++){
+      const std::vector<std::vector<float> >& imageData = m_input_tensor_values_notFlat[ibatch];
+      std::vector<float> flatten = AthOnnx::flattenNestedVectors(imageData);
+      inputData.insert(inputData.end(), flatten.begin(), flatten.end());
+   }
 
-     /************************** Output Nodes *****************************/
-     /*********************************************************************/
-     
-     std::tuple<std::vector<int64_t>, std::vector<const char*> > outputInfo = AthONNX::GetOutputNodeInfo(m_session);
-     std::vector<int64_t> output_node_dims = std::get<0>(outputInfo);
-     std::vector<const char*> output_node_names = std::get<1>(outputInfo);
+   int64_t batchSize = m_onnxTool->getBatchSize(inputData.size());
+   ATH_MSG_INFO("Batch size is " << batchSize << ".");
+   assert(batchSize == m_batchSize);
 
-     for( std::size_t i = 0; i < output_node_names.size(); i++ ) {
-        // print input node names
-        ATH_MSG_DEBUG("Output "<<i<<" : "<<" name= "<<output_node_names[i]);
+   // bind the input data to the input tensor
+   std::vector<Ort::Value> inputTensors;
+   ATH_CHECK( m_onnxTool->addInput(inputTensors, inputData, 0, batchSize) );
 
-        // print input shapes/dims
-        ATH_MSG_DEBUG("Output "<<i<<" : num_dims= "<<output_node_dims.size());
-        for (std::size_t j = 0; j < output_node_dims.size(); j++){
-           ATH_MSG_DEBUG("Output "<<i<<" : dim "<<j<<"= "<<output_node_dims[j]);
-          }
-       }
-    /************************* Score if input is not a batch ********************/
-    /****************************************************************************/
-     if(m_doBatches == false){
+   // reserve space for output data and bind it to the output tensor
+   std::vector<float> outputScores;
+   std::vector<Ort::Value> outputTensors;
+   ATH_CHECK( m_onnxTool->addOutput(outputTensors, outputScores, 0, batchSize) );
 
-        /**************************************************************************************
-         * input_node_dims[0] = -1; -1 needs to be replaced by the batch size; for no batch is 1 
-         * input_node_dims[1] = 28
-         * input_node_dims[2] = 28
-        ****************************************************************************************/
+   // run the inference
+   // the output will be filled to the outputScores.
+   ATH_CHECK( m_onnxTool->inference(inputTensors, outputTensors) );
 
-     	input_node_dims[0] = 1;
-     	output_node_dims[0] = 1;
- 
-       /***************** Choose an example sample randomly ****************************/  
-     	std::vector<std::vector<float>> input_tensor_values = m_input_tensor_values_notFlat[m_testSample];
-        std::vector<float> flatten = AthONNX::FlattenInput_multiD_1D(input_tensor_values);
-        // Output label of corresponding m_input_tensor_values[m_testSample]; e.g 0, 1, 2, 3 etc
-        int output_tensor_values = m_output_tensor_values[m_testSample];
-       
-        // For a check that the sample dimension is fully flatten (1x28x28 = 784)
-        ATH_MSG_DEBUG("Size of Flatten Input tensor: "<<flatten.size());
-
-     	/************** Create input tensor object from input data values to feed into your model *********************/
-        
-        Ort::Value input_tensor = AthONNX::TensorCreator(flatten, input_node_dims );
-
-        /********* Convert 784 elements long flattened 1D array to 3D (1, 28, 28) onnx compatible tensor ************/
-        ATH_MSG_DEBUG("Input tensor size after converted to Ort tensor: "<<input_tensor.GetTensorTypeAndShapeInfo().GetShape());     	
-        // Makes sure input tensor has same dimensions as input layer of the model
-        assert(input_tensor.IsTensor()&&
-     		input_tensor.GetTensorTypeAndShapeInfo().GetShape() == input_node_dims);
-
-     	/********* Score model by feeding input tensor and get output tensor in return *****************************/
-
-        float* floatarr = AthONNX::Inference(m_session, input_node_names, input_tensor, output_node_names); 
-
-     	// show  true label for the test input
-     	ATH_MSG_INFO("Label for the input test data  = "<<output_tensor_values);
+     	ATH_MSG_INFO("Label for the input test data: ");
+   for(int ibatch = 0; ibatch < m_batchSize; ibatch++){
      	float max = -999;
      	int max_index;
      	for (int i = 0; i < 10; i++){
-       		ATH_MSG_DEBUG("Score for class "<<i<<" = "<<floatarr[i]);
-       		if (max<floatarr[i]){
-          		max = floatarr[i];
-          		max_index = i;
+       		ATH_MSG_DEBUG("Score for class "<< i <<" = "<<outputScores[i] << " in batch " << ibatch);
+            int index = i + ibatch * 10;
+       		if (max < outputScores[index]){
+          		max = outputScores[index];
+          		max_index = index;
        		}
      	}
-     	ATH_MSG_INFO("Class: "<<max_index<<" has the highest score: "<<floatarr[max_index]);
-     
-     } // m_doBatches == false codition ends   
-    /************************* Score if input is a batch ********************/
-    /****************************************************************************/
-    else {
-        /**************************************************************************************
-         Similar scoring structure like non batch execution but 1st demention needs to be replaced by batch size
-         for this example lets take 3 batches with batch size 5
-         * input_node_dims[0] = 5
-         * input_node_dims[1] = 28
-         * input_node_dims[2] = 28
-        ****************************************************************************************/
-        
-     	input_node_dims[0] = m_sizeOfBatch;
-     	output_node_dims[0] = m_sizeOfBatch;   
-     
-	/************************** process multiple batches ********************************/
-        int l =0; /****** variable for distributing rows in m_input_tensor_values_notFlat equally into batches*****/ 
-     	for (int i = 0; i < m_numberOfBatches; i++) {
-     		ATH_MSG_DEBUG("Processing batch #" << i);
-      		std::vector<float> batch_input_tensor_values;
-      		for (int j = l; j < l+m_sizeOfBatch; j++) {
-                         
-                        std::vector<float> flattened_input = AthONNX::FlattenInput_multiD_1D(m_input_tensor_values_notFlat[j]);
-                        /******************For each batch we need a flattened (5 x 28 x 28 = 3920) 1D array******************************/
-        		batch_input_tensor_values.insert(batch_input_tensor_values.end(), flattened_input.begin(), flattened_input.end());
-        	}   
+      ATH_MSG_INFO("Class: "<<max_index<<" has the highest score: "<<outputScores[max_index] << " in batch " << ibatch);
+   }
 
-                Ort::Value batch_input_tensors = AthONNX::TensorCreator(batch_input_tensor_values, input_node_dims );
-
-		// Get pointer to output tensor float values
-
-                float* floatarr = AthONNX::Inference(m_session, input_node_names, batch_input_tensors, output_node_names);
-     		// show  true label for the test input
-		for(int i = l; i<l+m_sizeOfBatch; i++){
-     			ATH_MSG_INFO("Label for the input test data  = "<<m_output_tensor_values[i]);
-                	int k = (i-l)*10;
-                	float max = -999;
-                	int max_index = 0;
-     			for (int j =k ; j < k+10; j++){
-       				ATH_MSG_INFO("Score for class "<<j-k<<" = "<<floatarr[j]);
-       				if (max<floatarr[j]){
-          				max = floatarr[j];
-          				max_index = j;
-       				}
-     			}
-    	       	ATH_MSG_INFO("Class: "<<max_index-k<<" has the highest score: "<<floatarr[max_index]);
-       		} 
-           l = l+m_sizeOfBatch;
-          }
-     } // else/m_doBatches == True codition ends
-    // Return gracefully.
       return StatusCode::SUCCESS;
    }
    StatusCode EvaluateModel::finalize() {
 
-      // Delete the session object.
-      m_session.reset();
-
-      // Return gracefully.
       return StatusCode::SUCCESS;
    }
 
-} // namespace AthONNX
-
-
+} // namespace AthOnnx
