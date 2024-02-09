@@ -7,7 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-from ..CommonSequences.FullScanDefs import  trkFSRoI, em_clusters, lc_clusters
+from ..CommonSequences.FullScanDefs import  trkFSRoI, em_clusters, lc_clusters, fs_towers
 from ..Config.MenuComponents import parOR
 from .JetRecoCommon import isPFlow
 from TrigEDMConfig.TriggerEDM import recordable
@@ -245,8 +245,8 @@ def jetHICaloSelCfg(flags, isPerf, **jetRecoDict):
 
     reco.mergeReco( HICaloTowerCfg(flags) )
 
-    from .JetHIConfig import JetHICfg
-    jetreco, jetsOut, jetDef = JetHICfg(flags, clustersKey=em_clusters, **jetRecoDict)
+    from .JetHIConfig import jetHIRecoSequenceCA
+    jetreco, jetsOut, jetDef = jetHIRecoSequenceCA(flags, clustersKey="HLT_HICaloClustersFS",towerKey = fs_towers, **jetRecoDict)
     reco.mergeReco(jetreco)        
     log.debug("Generating jet HI calo hypo menu sequence for reco %s",jetDef.fullname())
     hypoType = JetHypoAlgType.PASSTHROUGH if isPerf else JetHypoAlgType.STANDARD
