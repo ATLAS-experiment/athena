@@ -31,10 +31,8 @@ namespace MuonGM {
         */
         // This is the proper way to do it, but not sure if complicated working...
         if (widthXl == widthXs && dead1 == 0.) {
-            GeoBox *cutoutbox = new GeoBox(thickness / 2., widthXs / 2., lengthY / 2.);
+            GeoIntrusivePtr<GeoBox> cutoutbox{new GeoBox(thickness / 2., widthXs / 2., lengthY / 2.)};
             sCutout = &((*cutoutbox) << xfTemp);
-            cutoutbox->ref();
-            cutoutbox->unref();
         } else if (dead1 == 0.) {
             GeoTrd *cutouttrd = new GeoTrd(thickness / 2., thickness / 2., widthXs / 2., widthXl / 2., lengthY / 2.);
             sCutout = &((*cutouttrd) << xfTemp);
@@ -47,24 +45,20 @@ namespace MuonGM {
             double phi = -90. * Gaudi::Units::degree;
             // GeoPara requires the +/- z faces be parallel to the x-y plane,
             //   so choose x = width, y=length, z=thickness:
-            GeoPara *cutoutpara = new GeoPara(widthXs / 2., lengthY / 2., thickness / 2., alpha, theta, phi);
+            GeoIntrusivePtr<GeoPara> cutoutpara{new GeoPara(widthXs / 2., lengthY / 2., thickness / 2., alpha, theta, phi)};
             // now rotate it so thickness is x-axis, width is y-axis, length z-axis:
             GeoTrf::Transform3D xRot = GeoTrf::RotateX3D(-90. * Gaudi::Units::degree) * GeoTrf::RotateY3D(-90. * Gaudi::Units::degree);
             xfTemp = xfTemp * xRot;
             sCutout = &((*cutoutpara) << xfTemp);
-            cutoutpara->ref();
-            cutoutpara->unref();
         } else {
-            GeoTrap *cutouttrap =
+            GeoIntrusivePtr<GeoTrap> cutouttrap{
                 new GeoTrap(thickness / 2., dead1 * Gaudi::Units::degree, 90. * Gaudi::Units::degree, excent, widthXs / 2., widthXl / 2.,
-                            atan((2. * excent + (widthXl - widthXs) / 2.) / lengthY), excent, widthXs / 2., widthXl / 2., atan((2. * excent + (widthXl - widthXs) / 2.) / lengthY));
+                            atan((2. * excent + (widthXl - widthXs) / 2.) / lengthY), excent, widthXs / 2., widthXl / 2., atan((2. * excent + (widthXl - widthXs) / 2.) / lengthY))};
 
             // now rotate it so thickness is x-axis, width is y-axis, length z-axis:
             GeoTrf::Transform3D xRot = GeoTrf::RotateX3D(-90. * Gaudi::Units::degree) * GeoTrf::RotateY3D(-90. * Gaudi::Units::degree);
             xfTemp = xfTemp * xRot;
             sCutout = &((*cutouttrap) << xfTemp);
-            cutouttrap->ref();
-            cutouttrap->unref();
         }
 
         return sCutout;
