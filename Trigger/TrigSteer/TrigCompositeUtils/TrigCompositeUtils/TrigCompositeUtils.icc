@@ -187,6 +187,7 @@ namespace TrigCompositeUtils {
 
  
     const Decision* decisionObj = navGraphNode->node();
+    const Decision* decisionObjChild = (navGraphNode->children().size() == 1 ? navGraphNode->children().at(0)->node() : nullptr);
     const std::vector<DecisionID> &ids = decisionIDs(decisionObj);
     std::vector<ElementLink<CONTAINER>> featureLinks;
 
@@ -246,6 +247,17 @@ namespace TrigCompositeUtils {
           break;
         }
       }
+      // But consider also the ComboHypo, this will have run immidiately after the Hypo and could have failed this chain due to combinatorics.
+      // This statement will only activate for the case that we are looking for "feature" edges (which is the default).
+      if (state == ActiveState::ACTIVE && decisionObjChild && decisionObjChild->name() == comboHypoAlgNodeName()) {
+        state = ActiveState::INACTIVE;
+        for (DecisionID id : chainIDs) {
+          if (std::count(decisionObjChild->decisions().begin(), decisionObjChild->decisions().end(), id) == 1) {
+            state = ActiveState::ACTIVE;
+            break;
+          }
+        }
+      } 
     }
     
     // Copy the fetched links into the return vector
