@@ -14,36 +14,12 @@ atlas_add_component( SCT_ConditionsAlgorithms
                      LINK_LIBRARIES AthenaBaseComps AthenaKernel StoreGateLib Identifier DetDescrConditions GeoModelUtilities GeoPrimitives GaudiKernel SCT_ConditionsData SCT_CablingLib AthenaPoolUtilities InDetConditionsSummaryService InDetIdentifier InDetReadoutGeometry SCT_ReadoutGeometry TrkGeometry TrkSurfaces SCT_ConditionsToolsLib MuonReadoutGeometry TRT_ReadoutGeometry)
 
 # Helper functions for test definitions:
-function( _add_athena_test name )
-   atlas_add_test( ${name}
-      SCRIPT athena.py --threads=5 SCT_ConditionsAlgorithms/${name}.py
-      POST_EXEC_SCRIPT noerror.sh
-      PROPERTIES TIMEOUT 600
-      ENVIRONMENT THREADS=5 )
-endfunction()
-
 function( _add_test name )
    atlas_add_test( ${name}
       SCRIPT python -m SCT_ConditionsAlgorithms.${name}
       POST_EXEC_SCRIPT noerror.sh
       PROPERTIES TIMEOUT 600 )
 endfunction()
-
-_add_athena_test( testCalibChipRead )
-_add_athena_test( testCalibRead )
-_add_athena_test( testConfig )
-_add_athena_test( testDCSConditions )
-_add_athena_test( testMajority )
-_add_athena_test( testModuleVeto )
-_add_athena_test( testMonRead )
-_add_athena_test( testParameters )
-_add_athena_test( testReadout )
-_add_athena_test( testRodVeto )
-_add_athena_test( testSensors )
-_add_athena_test( testSilicon )
-_add_athena_test( testStripVeto )
-_add_athena_test( testSummary )
-_add_athena_test( testTdaqEnabled )
 
 _add_test( SCT_ReadCalibChipDataTestAlgConfig )
 _add_test( SCT_ReadCalibDataTestAlgConfig )
@@ -60,13 +36,6 @@ _add_test( SCT_StripVetoTestAlgConfig )
 _add_test( SCT_ConditionsSummaryTestAlgConfig )
 _add_test( SCT_TdaqEnabledTestAlgConfig )
 
-atlas_add_test( TestLinkMasking
-                SCRIPT share/TestLinkMasking.sh
-                POST_EXEC_SCRIPT noerror.sh
-                PRIVATE_WORKING_DIRECTORY
-                PROPERTIES TIMEOUT 600
-                ENVIRONMENT THREADS=5 )
-
 atlas_add_test( TestLinkMaskingNewConf
                 SCRIPT share/TestLinkMaskingNewConf.sh
                 POST_EXEC_SCRIPT noerror.sh
@@ -74,6 +43,5 @@ atlas_add_test( TestLinkMaskingNewConf
                 PROPERTIES TIMEOUT 600 )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py )
 atlas_install_scripts( share/*.sh )
