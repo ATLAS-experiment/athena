@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: SafeDeepCopy.cxx 676241 2015-06-18 06:15:44Z krasznaa $
@@ -53,22 +53,7 @@ namespace xAOD {
 
       // Copy the variables that exist on the input object:
       for( SG::auxid_t auxid : other_ids ) {
-         void* dst = copy_container.getDataArray( auxid );
-         // This is the tricky part. In certain cases an input object/container
-         // can claim that it has a certain variable, but still not be able to
-         // provide it. Most usually this happens when reading a container from
-         // a file, in which not all elements were decorated consistently.
-         // This has to be caught here:
-         const void* src = nullptr;
-         try {
-            src = ocont->getDataArray( auxid );
-         } catch( const SG::ExcBadAuxVar& ) {
-            // In this case just fill dummy values into the output:
-            r.clear( auxid, copy_container, oindex, 1 );
-            continue;
-         }
-         // Apparently the copy *can* be done:
-         r.copy( auxid, dst, oindex, src, iindex );
+         r.copy( auxid, copy_container, oindex, *ocont, iindex, 1 );
       }
       // Clear out the variables that only exist on the output object:
       for( SG::auxid_t auxid : copy.container()->getWritableAuxIDs() ) {

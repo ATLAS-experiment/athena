@@ -23,6 +23,34 @@
 #include <functional>
 #include <sstream>
 
+
+namespace {
+
+
+class TempInterface
+  : public SG::AuxVectorData
+{
+public:
+  TempInterface (size_t size) : m_size (size) {}
+  TempInterface (size_t size, SG::auxid_t auxid, void* ptr) :
+    m_size (size)
+  {
+    setCache (auxid, ptr);
+  }
+
+  using AuxVectorData::setStore;
+
+  virtual size_t size_v() const { return m_size; }
+  virtual size_t capacity_v() const { return m_size; }
+
+private:
+  size_t m_size;
+};
+
+
+} // anonymous namespace
+
+
 namespace {
 
 #ifdef XAOD_STANDALONE
@@ -809,10 +837,12 @@ namespace CP {
       }
 
       // Get the data out of the xAOD object.
-      const void* auxData = ( *m_acc )( element );
+      //const void* auxData = ( *m_acc )( element );
 
       // Copy it into the output variable.
-      m_factory->copy( m_data->toPtr(), 0, auxData, 0 );
+      TempInterface dstiface (m_data->size(), m_acc->auxid(), m_data->toPtr());
+      m_factory->copy( m_acc->auxid(), dstiface, 0,
+                       *element.container(), element.index(), 1 );
 
       // Return gracefully.
       return StatusCode::SUCCESS;
@@ -1034,10 +1064,12 @@ namespace CP {
       }
 
       // Get the data out of the xAOD object.
-      const void* auxData = ( *m_acc )( element );
+      //const void* auxData = ( *m_acc )( element );
 
       // Copy it into the output variable.
-      m_factory->copy( m_data->toPtr(), index, auxData, 0 );
+      TempInterface dstiface (m_data->size(), m_acc->auxid(), m_data->toPtr());
+      m_factory->copy( m_acc->auxid(), dstiface, index,
+                       *element.container(), element.index(), 1 );
 
       // Return gracefully.
       return StatusCode::SUCCESS;

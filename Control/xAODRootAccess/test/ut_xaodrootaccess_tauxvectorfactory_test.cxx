@@ -106,6 +106,39 @@ void test1()
   assert (ptr[0] == 0);
   assert (ptr[1] == 0);
   assert (ptr[2] == 12);
+
+  // Copy
+
+  for (size_t i = 0; i < 10; i++) {
+    ptr[i] = i;
+  }
+ 
+  auto checkvec = [] (const int* p, const std::vector<int>& exp)
+    {
+      for (size_t i = 0; i < exp.size(); i++) {
+        assert (p[i] == exp[i]);
+      }
+    };
+
+  fac.copy (1, avd1, 3, avd1, 4, 0);
+  checkvec (ptr, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+
+  fac.copy (1, avd1, 1, avd1, 2, 3);
+  checkvec (ptr, {0, 2, 3, 4, 4, 5, 6, 7, 8, 9});
+
+  fac.copy (1, avd1, 6, avd1, 5, 3);
+  checkvec (ptr, {0, 2, 3, 4, 4, 5, 5, 6, 7, 9});
+
+  fac.copy (1, avd1, 2, avd1, 5, 3);
+  checkvec (ptr, {0, 2, 5, 5, 6, 5, 5, 6, 7, 9});
+
+  for (size_t i = 0; i < 10; i++) {
+    ptr2[i] = i+10;
+  }
+
+  fac.copy (1, avd2, 2, avd1, 6, 3);
+  checkvec (ptr, {0, 2, 5, 5, 6, 5, 5, 6, 7, 9});
+  checkvec (ptr2, {10, 11, 5, 6, 7, 15, 16, 17, 18, 19});
 }
 
 
@@ -163,6 +196,42 @@ void test2()
   assert (ptr[0] == "");
   assert (ptr[1] == "");
   assert (ptr[2] == "12");
+
+  // Copy
+
+  for (size_t i = 0; i < 10; i++) {
+    ptr[i] = std::to_string(i);
+  }
+ 
+  auto checkvec = [] (const std::string* p, const std::vector<int>& exp)
+    {
+      for (size_t i = 0; i < exp.size(); i++) {
+        if (exp[i] >= 0)
+          assert (p[i] == std::to_string(exp[i]));
+        else
+          assert (p[i] == "");
+      }
+    };
+
+  fac.copy (1, avd1, 3, avd1, 4, 0);
+  checkvec (ptr, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+
+  fac.copy (1, avd1, 1, avd1, 2, 3);
+  checkvec (ptr, {0, 2, 3, 4, 4, 5, 6, 7, 8, 9});
+
+  fac.copy (1, avd1, 6, avd1, 5, 3);
+  checkvec (ptr, {0, 2, 3, 4, 4, 5, 5, 6, 7, 9});
+
+  fac.copy (1, avd1, 2, avd1, 5, 3);
+  checkvec (ptr, {0, 2, 5, 5, 6, 5, 5, 6, 7, 9});
+
+  for (size_t i = 0; i < 10; i++) {
+    ptr2[i] = std::to_string(i+10);
+  }
+
+  fac.copy (1, avd2, 2, avd1, 6, 3);
+  checkvec (ptr, {0, 2, 5, 5, 6, 5, 5, 6, 7, 9});
+  checkvec (ptr2, {10, 11, 5, 6, 7, 15, 16, 17, 18, 19});
 }
 
 

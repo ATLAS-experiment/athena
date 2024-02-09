@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017, 2019-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,6 +19,27 @@
 #include "CxxUtils/no_sanitize_undefined.h"
 #include "CxxUtils/FloatCompressor.h"
 #include <vector>
+
+
+namespace {
+
+
+class TempInterface
+  : public SG::AuxVectorData
+{
+public:
+  TempInterface (size_t size) : m_size (size) {}
+  using AuxVectorData::setStore;
+
+  virtual size_t size_v() const { return m_size; }
+  virtual size_t capacity_v() const { return m_size; }
+
+private:
+  size_t m_size;
+};
+
+
+} // anonymous namespace
 
 
 namespace SG {
@@ -128,31 +149,46 @@ void copyAuxStoreThinned NO_SANITIZE_UNDEFINED
     // Create the target variable:
     void* dst = copy.getData (auxid, nremaining, nremaining);
 
-    // Copy over all elements, with thinning.
-    for (std::size_t isrc = 0, idst = 0; isrc < size; ++isrc) {
-      if (!dec || !dec->thinned(isrc)) {
-        r.copyForOutput (auxid, dst, idst, src, isrc);
-        // Apply lossy float compression here (in-place)
-        // Maybe it would be better to do this via the registry during copy
-        lossyFloatCompress(dst, idst, eltSize, typeName, nmantissa);
-        ++idst;
+    TempInterface srciface (orig.size());
+    srciface.setStore (&orig);
+    TempInterface dstiface (copy.size());
+    dstiface.setStore (&copy);
+
+    // Copy over all elements.
+    if (nremaining == size) {
+      // No thinning.
+      r.copyForOutput (auxid, dstiface, 0, srciface, 0, size);
+    }
+    else {
+      // Some elements are thinned.
+      for (std::size_t isrc = 0, idst = 0; isrc < size; ++isrc) {
+        if (!dec || !dec->thinned(isrc)) {
+          r.copyForOutput (auxid, dstiface, idst, srciface, isrc, 1);
+          ++idst;
+        }
       }
     }
+    // Apply lossy float compression here (in-place).
+    // Maybe it would be better to do this via the registry during copy.
+    lossyFloatCompress(dst, 0, nremaining, eltSize, typeName, nmantissa);
   }
 }
 
 /**
  * @brief Helper method to apply lossy float compression
  * @param dst Pointer to the start of the vector's data
- * @param idst Index of element in vector
+ * @param idst Index of first element in vector
+ * @param n Number of elements to process.
  * @param eltSize Element size for the auxid
  * @param typeName Type name for the auxid
  * @param nmantissa Compression level to be used for the auxid
  */
-void lossyFloatCompress (void* dst, std::size_t idst,
-                         const std::size_t& eltSize,
+void lossyFloatCompress (void* dst,
+                         const std::size_t idst,
+                         const std::size_t n,
+                         const std::size_t eltSize,
                          const std::string& typeName,
-                         const unsigned int& nmantissa)
+                         const unsigned int nmantissa)
 {
   // Check if there is anything to be done
   // Total number of explicit mantissa bits for a 32 bit float is 23
@@ -170,15 +206,21 @@ void lossyFloatCompress (void* dst, std::size_t idst,
   }();
 
   // Get the pointer to the memory
-  void* eltPtr = reinterpret_cast<char*>(dst) + idst*eltSize;
+  char* eltPtr = reinterpret_cast<char*>(dst) + idst*eltSize;
 
   // This is where we apply in-place lossy float compression
   if(typeName == "float") {
-    *(float*) eltPtr = compressors[nmantissa].reduceFloatPrecision(*(float*) eltPtr);
+    for (size_t i = 0; i < n; i++) {
+      *(float*) eltPtr = compressors[nmantissa].reduceFloatPrecision(*(float*) eltPtr);
+      eltPtr += eltSize;
+    }
   } else if (typeName == "std::vector<float>"){
-    std::vector<float> &vals = *(reinterpret_cast<std::vector<float>*>(eltPtr));
-    for(auto &val: vals) {
-      val = compressors[nmantissa].reduceFloatPrecision(val);
+    for (size_t i = 0; i < n; i++) {
+      std::vector<float> &vals = *(reinterpret_cast<std::vector<float>*>(eltPtr));
+      for(auto &val: vals) {
+        val = compressors[nmantissa].reduceFloatPrecision(val);
+      }
+      eltPtr += eltSize;
     }
   }
 }
