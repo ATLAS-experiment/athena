@@ -106,17 +106,30 @@ namespace RootAuxDynIO
 {
 // New RNTupleReader for attributes of an AuxContainer stored in Field 'field_name'
    RNTupleAuxDynReader::RNTupleAuxDynReader(RFieldBase* field, RPageSource* page_source) :
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+      AthMessaging( std::string("RNTupleAuxDynReader[")+field->GetFieldName()+"]" ),
+      m_storeFieldName( field->GetFieldName() ),
+#else
       AthMessaging( std::string("RNTupleAuxDynReader[")+field->GetName()+"]" ),
       m_storeFieldName( field->GetName() ),
+#endif
       m_pageSource( page_source )
    {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+      const std::string field_type = field->GetTypeName();
+#else
       const std::string field_type = field->GetType();
+#endif
       const std::string field_prefix = field_type + "_";
       if( m_storeFieldName.rfind( field_type, 0 ) != std::string::npos ) {
          m_key = m_storeFieldName.substr( field_type.size()+1 );
       }
       ATH_MSG_VERBOSE("field name=" << m_storeFieldName << "  field_prefix=" << field_prefix << "  key=" << m_key);
-      TClass *tc = TClass::GetClass( field->GetType().c_str() );
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+      TClass *tc = TClass::GetClass( field->GetTypeName().c_str() );
+#else
+      TClass *tc = TClass::GetClass( field->GetName().c_str() );
+#endif
       if( tc ) {
          TClass *storeTC = tc->GetBaseClass("SG::IAuxStoreHolder");
          if( storeTC ) {
@@ -191,7 +204,11 @@ namespace RootAuxDynIO
 
          if( fieldInfo.field ) {
             const string field_prefix = m_storeFieldName + ':';
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+            const string fieldName  = fieldInfo.field->GetFieldName();
+#else
             const string fieldName  = fieldInfo.field->GetName();
+#endif
             const string attr_infile = fieldName.substr(field_prefix.size());
             isFieldFound = (attr_infile == fieldInfo.attribName);
          }
@@ -202,10 +219,14 @@ namespace RootAuxDynIO
             return fieldInfo;
          }
 
-         if( !store.standalone() and fieldInfo.field->GetType().rfind("SG::PackedContainer<", 0) == 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+         if( !store.standalone() and fieldInfo.field->GetTypeName().rfind("SG::PackedContainer<", 0) == 0 )
+#else
+         if( !store.standalone() and fieldInfo.field->GetName().rfind("SG::PackedContainer<", 0) == 0 )
+#endif
             fieldInfo.isPackedContainer = true;
 
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 30, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          // connect the field (with subfields) to the pageSource
          if( fieldInfo.field->GetState() != RFieldBase::EState::kConnectedToSource ) {
             fieldInfo.field->ConnectPageSource(*m_pageSource);

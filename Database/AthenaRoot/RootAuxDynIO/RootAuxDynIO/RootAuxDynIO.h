@@ -5,7 +5,10 @@
 #ifndef ROOTAUXDYN_IO_H
 #define ROOTAUXDYN_IO_H
 
+#include "RVersion.h"
+
 #include <string>
+#include <memory>
 #include <mutex>
 
 class TBranch;
@@ -13,15 +16,28 @@ class TTree;
 class TFile;
 class TClass;
 
-namespace ROOT { namespace Experimental { namespace Detail {
-   class RPageSource;
-   class RFieldBase;
-} } }
+namespace ROOT { namespace Experimental {
+  namespace Detail {
+    class RPageSource;
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
+    class RFieldBase;
+  }
+#else
+  }
+  class RFieldBase;
+#endif
+} }
 namespace SG { class IAuxStoreIO;  class auxid_set_t; }
 
 
 namespace RootAuxDynIO
 {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+   using ROOT::Experimental::RFieldBase;
+#else
+   using ROOT::Experimental::Detail::RFieldBase;
+#endif
+   using ROOT::Experimental::Detail::RPageSource;
    class IRootAuxDynReader;
    class IRootAuxDynWriter;
    class IRNTupleWriter;
@@ -71,8 +87,7 @@ namespace RootAuxDynIO
    std::unique_ptr<IRootAuxDynWriter> getBranchAuxDynWriter(TTree*, int bufferSize, int splitLevel,
                                                               int offsettab_len, bool do_branch_fill);
    
-   std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(ROOT::Experimental::Detail::RFieldBase* field,
-                                                              ROOT::Experimental::Detail::RPageSource* source);
+   std::unique_ptr<IRootAuxDynReader> getNTupleAuxDynReader(RFieldBase* field, RPageSource* source);
    std::unique_ptr<IRNTupleWriter>    getNTupleAuxDynWriter(TFile*,  const std::string& ntupleName, bool enableBufferedWrite, bool enableMetrics);
 
 
