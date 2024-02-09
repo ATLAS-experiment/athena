@@ -15,7 +15,7 @@ import os
 
 def get_htags (folder):
     connstring = 'COOLOFL_CALO/OFLP200'
-    db = AtlCoolLib.indirectOpen (connstring, True, True, True)
+    db = AtlCoolLib.indirectOpen (connstring, True, True)
     parent = os.path.dirname (folder)
     fs = db.getFolderSet (parent)
     tags = fs.listTags()
@@ -54,7 +54,7 @@ def linkDummy (dbfile, folder):
         connstring = "sqlite://;schema=%s;dbname=OFLP200" % dbfile
     else:
         connstring = dbfile
-    db = AtlCoolLib.indirectOpen(connstring,False,False,True)
+    db = AtlCoolLib.indirectOpen(connstring,False,True)
     f = db.getFolder (folder)
     for h in htags:
         link_tag (f, h, dtag)

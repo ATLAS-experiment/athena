@@ -1134,7 +1134,7 @@ class BeamSpotCOOL(BeamSpotContainer):
         self.tag = tag
         self.folder = folder
         from CoolConvUtilities import AtlCoolLib
-        self.cooldb = AtlCoolLib.indirectOpen(database, True, True, True)
+        self.cooldb = AtlCoolLib.indirectOpen(database, True, True)
 
     def __del__(self):
         self.cooldb.closeDatabase()

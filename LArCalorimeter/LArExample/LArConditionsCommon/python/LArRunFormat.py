@@ -3,7 +3,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from CoolConvUtilities.AtlCoolLib import indirectOpen
-from os import environ
 
 class LArRunInfo:
     "Wrapper class to hold LAr run configuration information"
@@ -56,7 +55,7 @@ class LArRunInfo:
            return 'Result'
 
 
-def getLArFormatForRun(run,readOracle=True,quiet=False,connstring=None):
+def getLArFormatForRun(run,quiet=False,connstring=None):
     from AthenaCommon.Logging import logging
     mlog_LRF = logging.getLogger( 'getLArRunFormatForRun' )
     if connstring is None:
@@ -65,12 +64,8 @@ def getLArFormatForRun(run,readOracle=True,quiet=False,connstring=None):
     
     mlog_LRF.info("Connecting to database %s", connstring)
 
-    if "DBRELEASE" in environ:
-        mlog_LRF.info ("Running in DBRelease, forcing readOracle to False")
-        readOracle=False
-
     mlog_LRF.info("Found LAr info for run %i",run)
-    runDB=indirectOpen(connstring,oracle=readOracle)
+    runDB=indirectOpen(connstring)
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
         raise RuntimeError("getLArFormatForRun ERROR: Cannot connect to database %s",connstring)
@@ -119,21 +114,17 @@ class LArDTRunInfo:
     def ADCCalib(self):
            return self._adcc
 
-def getLArDTInfoForRun(run,readOracle=True,quiet=False,connstring=None):
+def getLArDTInfoForRun(run,quiet=False,connstring=None):
     from AthenaCommon.Logging import logging
-    mlog_LRF = logging.getLogger( 'getLArDTRunIngoForRun' )
+    mlog_LRF = logging.getLogger( 'getLArDTRunInfoForRun' )
     if connstring is None:
         from IOVDbSvc.CondDB import conddb
         connstring = "COOLONL_LAR/"+conddb.dbdata
     
     mlog_LRF.info("Connecting to database %s", connstring)
 
-    if "DBRELEASE" in environ:
-        mlog_LRF.info("Running in DBRelease, forcing readOracle to False")
-        readOracle=False
-
     mlog_LRF.info("Found DT info for run %i",run)
-    runDB=indirectOpen(connstring,oracle=readOracle)
+    runDB=indirectOpen(connstring)
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
         raise RuntimeError("getLArFormatForRun ERROR: Cannot connect to database %s",connstring)

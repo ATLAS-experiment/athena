@@ -68,7 +68,6 @@ def connect( connectString, verbose = False):
     Set verbose to True to obtain an error print out.
     """
     connectString = expandConnectString( connectString )
-    forceoracle=True
     debug=False
     if (';readoracle' in connectString):
         # new default is forceOracle - but giving keyword explicitly
@@ -78,13 +77,12 @@ def connect( connectString, verbose = False):
     if (';readsqlite' in connectString):
         connectString=connectString.replace(';readsqlite','')
         debug=True
-        forceoracle=False
     try:
         dbSvc = cool.DatabaseSvcFactory.databaseService()
         readonly=True
         # frontier/logical cannot do update connections - only real dbs
         if ('oracle' in connectString or 'mysql' in connectString or 'sqlite' in connectString): readonly=False
-        db=AtlCoolLib.indirectOpen(connectString,readonly,forceoracle,debug)
+        db=AtlCoolLib.indirectOpen(connectString,readonly,debug)
     except Exception as e:
         if 'The database does not exist' in str(e):
             print ("Creating new database")
