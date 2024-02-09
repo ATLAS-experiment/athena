@@ -51,7 +51,7 @@ def makeSharedObjectSequence( seq,
         alg = createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg' + postfix )
         alg.histPattern = 'cflow' + postfix + '_%SYS%'
         seq.append( alg, inputPropName = 'input', stageName = 'selection',
-                    dynConfig = {'selection' : lambda meta : meta["selectionDecorNames"][:]} )
+                    dynConfig = {'selections' : lambda meta : meta["selectionDecorNames"][:]} )
 
     # Set up an algorithm that makes a view container using the selections
     # performed previously:
