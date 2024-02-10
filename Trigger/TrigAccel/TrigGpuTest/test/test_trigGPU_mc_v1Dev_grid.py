@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger GPU test on MC
 # art-type: grid
@@ -26,7 +26,7 @@ ex.type = 'athena'
 ex.args = '--CA'
 ex.input = 'ttbar'
 ex.threads = 1
-ex.job_options = 'TriggerJobOpts.runHLT'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
             'Trigger.doLVL1=True',
             'Trigger.doRuntimeNaviVal=True',
