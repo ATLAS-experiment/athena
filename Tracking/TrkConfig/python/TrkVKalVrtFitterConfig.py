@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkVKalVrtFitter package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -62,7 +62,7 @@ def JpsiV0VertexFitCfg(flags, name="JpsiV0VertexFit", **kwargs):
     kwargs.setdefault("CascadeCnstPrecision", 1e-6)
     return BPHY_TrkVKalVrtFitterCfg(flags, name, **kwargs)
 
-def BTAG_TrkVKalVrtFitterCfg(flags, name="BTAG_TrkVKalVrtFitter",**kwargs):
+def BTAG_TrkVKalVrtFitterCfg(flags, name="BTAG_TrkVKalVrtFitter", **kwargs):
     from MagFieldServices.MagFieldServicesConfig import (
         AtlasFieldCacheCondAlgCfg)
     acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
@@ -72,3 +72,28 @@ def BTAG_TrkVKalVrtFitterCfg(flags, name="BTAG_TrkVKalVrtFitter",**kwargs):
     acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **kwargs))
     return acc
 
+def TrkVKalVrtFitterTestAlgCfg(flags, name="TrkVKalVrtFitterTestAlg", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("Tool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
+    acc.addEventAlgo(CompFactory.Trk.TrkVKalVrtFitterTestAlg(name, **kwargs))
+    return acc
+
+
+if __name__ == "__main__":
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+
+    flags.lock()
+    flags.dump()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg=MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+
+    cfg.merge(TrkVKalVrtFitterTestAlgCfg(flags))
+    cfg.run(2)

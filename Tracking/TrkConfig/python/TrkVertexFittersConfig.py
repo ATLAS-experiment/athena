@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkVertexFitters package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def AdaptiveMultiVertexFitterCfg(flags, name="AdaptiveMultiVertexFitter", **kwargs):
+def BaseAdaptiveMultiVertexFitterCfg(
+        flags, name="BaseAdaptiveMultiVertexFitter", **kwargs):
     acc = ComponentAccumulator()
 
     if "LinearizedTrackFactory" not in kwargs:
@@ -18,6 +19,12 @@ def AdaptiveMultiVertexFitterCfg(flags, name="AdaptiveMultiVertexFitter", **kwar
         kwargs.setdefault("ImpactPoint3dEstimator", acc.popToolsAndMerge(
             ImpactPoint3dEstimatorCfg(flags)))
 
+    acc.setPrivateTools(CompFactory.Trk.AdaptiveMultiVertexFitter(name, **kwargs))
+    return acc
+
+def AdaptiveMultiVertexFitterCfg(flags, name="AdaptiveMultiVertexFitter", **kwargs):
+    acc = ComponentAccumulator()
+
     if "AnnealingMaker" not in kwargs:
         from TrkConfig.TrkVertexFitterUtilsConfig import DetAnnealingMakerCfg
         kwargs.setdefault("AnnealingMaker", acc.popToolsAndMerge(
@@ -25,12 +32,31 @@ def AdaptiveMultiVertexFitterCfg(flags, name="AdaptiveMultiVertexFitter", **kwar
 
     kwargs.setdefault("DoSmoothing", True)
 
-    acc.setPrivateTools(CompFactory.Trk.AdaptiveMultiVertexFitter(name, **kwargs))
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        BaseAdaptiveMultiVertexFitterCfg(flags, name, **kwargs)))
     return acc
 
 def SequentialVertexSmootherCfg(flags, name="SequentialVertexSmoother", **kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.Trk.SequentialVertexSmoother(name, **kwargs))
+    return acc
+
+def BaseAdaptiveVertexFitterCfg(flags, name="BaseAdaptiveVertexFitter", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "LinearizedTrackFactory" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import (
+            FullLinearizedTrackFactoryCfg)
+        kwargs.setdefault("LinearizedTrackFactory", acc.popToolsAndMerge(
+            FullLinearizedTrackFactoryCfg(flags)))
+
+    if "ImpactPoint3dEstimator" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import (
+            ImpactPoint3dEstimatorCfg)
+        kwargs.setdefault("ImpactPoint3dEstimator", acc.popToolsAndMerge(
+            ImpactPoint3dEstimatorCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.Trk.AdaptiveVertexFitter(name, **kwargs))
     return acc
 
 def AdaptiveVertexFitterCfg(flags, name="AdaptiveVertexFitter", **kwargs):
@@ -41,18 +67,6 @@ def AdaptiveVertexFitterCfg(flags, name="AdaptiveVertexFitter", **kwargs):
         kwargs.setdefault("SeedFinder", acc.popToolsAndMerge(
             ZScanSeedFinderCfg(flags)))
 
-    if "LinearizedTrackFactory" not in kwargs:
-        from TrkConfig.TrkVertexFitterUtilsConfig import (
-            FullLinearizedTrackFactoryCfg)
-        kwargs.setdefault("LinearizedTrackFactory", acc.popToolsAndMerge(
-            FullLinearizedTrackFactoryCfg(flags)))
-
-    if "ImpactPoint3dEstimator" not in kwargs:
-        from TrkConfig.TrkVertexFitterUtilsConfig import (
-            ImpactPoint3dEstimatorCfg)
-        kwargs.setdefault("ImpactPoint3dEstimator", acc.popToolsAndMerge(
-            ImpactPoint3dEstimatorCfg(flags)))
-
     if "AnnealingMaker" not in kwargs:
         from TrkConfig.TrkVertexFitterUtilsConfig import DetAnnealingMakerCfg
         kwargs.setdefault("AnnealingMaker", acc.popToolsAndMerge(
@@ -62,7 +76,8 @@ def AdaptiveVertexFitterCfg(flags, name="AdaptiveVertexFitter", **kwargs):
         kwargs.setdefault("VertexSmoother", acc.popToolsAndMerge(
             SequentialVertexSmootherCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.Trk.AdaptiveVertexFitter(name, **kwargs))
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        BaseAdaptiveVertexFitterCfg(flags, name, **kwargs)))
     return acc
 
 def TauAdaptiveVertexFitterCfg(flags, name="TauAdaptiveVertexFitter", **kwargs):
@@ -105,3 +120,47 @@ def AdaptiveVxFitterToolIncSecVtxCfg(flags, name='AdaptiveVxFitterToolIncSecVtx'
     kwargs.setdefault("InitialError", 0.2)
     
     return AdaptiveVertexFitterCfg(flags, name, **kwargs)
+
+def AdaptiveVertexFitterTestAlgCfg(
+        flags, name="AdaptiveVertexFitterTestAlg", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("Tool", acc.popToolsAndMerge(BaseAdaptiveVertexFitterCfg(flags)))
+    acc.addEventAlgo(CompFactory.Trk.AdaptiveVertexFitterTestAlg(name, **kwargs))
+    return acc
+
+def AdaptiveMultiVertexFitterTestAlgCfg(
+        flags, name="AdaptiveMultiVertexFitterTestAlg", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("Tool", acc.popToolsAndMerge(
+        BaseAdaptiveMultiVertexFitterCfg(flags)))
+    acc.addEventAlgo(
+        CompFactory.Trk.AdaptiveMultiVertexFitterTestAlg(name, **kwargs))
+    return acc
+
+if __name__ == "__main__":
+
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument("--test")
+    args = parser.parse_args()
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+
+    flags.lock()
+    flags.dump()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg=MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+
+    if args.test=="AVF":
+        cfg.merge(AdaptiveVertexFitterTestAlgCfg(flags))
+    elif args.test=="AVMF":
+        cfg.merge(AdaptiveMultiVertexFitterTestAlgCfg(flags))
+
+    cfg.run(2)
