@@ -1,13 +1,12 @@
+from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("TrigInDetValidation")
 
 log.info( "preinclude: TIDAwithpid.py" ) 
 
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+flags.Trigger.InDetTracking.electron.electronPID = True
 
-getInDetTrigConfig("electron")._electronPID = True
-
-log.info( "Setting electronPID in the TrackSumaryTool: "+str(getInDetTrigConfig("electron").electronPID) )
+log.info( f"Setting electronPID in the TrackSumaryTool: {flags.Trigger.InDetTracking.electron.electronPID}")
 
 

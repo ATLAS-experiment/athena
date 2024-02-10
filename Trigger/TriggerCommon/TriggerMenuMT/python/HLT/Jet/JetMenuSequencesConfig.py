@@ -278,7 +278,7 @@ def jetFSTrackingSelCfg(flags, clustersKey, isPerf, **jetRecoDict):
     log.debug("Generating jet tracking hypo menu sequence for reco %s",jetDef.fullname())
 
     if isPFlow(jetRecoDict) and jetRecoDict['recoAlg'] == 'a4' and 'sub' in jetRecoDict['jetCalib']:
-        pvKey = getInDetTrigConfig('fullScan').vertex_jet
+        pvKey = flags.Trigger.InDetTracking.fullScan.vertex_jet
         trig_evt_info_key = recordable("HLT_TCEventInfo_jet")
 
         # Can encapsulate in another CA if necessary but only this instance

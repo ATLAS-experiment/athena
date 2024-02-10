@@ -1,6 +1,5 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigEDMConfig.TriggerEDM import recordable
 
 from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
@@ -13,11 +12,8 @@ def getBJetSequenceCfg(flags, jc_name=None):
     if not jc_name:
         raise ValueError("jet collection name is empty - pass the full HLT jet collection name to getBJetSequenceCfg().")
 
-    config=getInDetTrigConfig('fullScan')
-    prmVtxKey = config.vertex
-
-    bjetconfig    = getInDetTrigConfig('bjet')
-    outputRoIName = bjetconfig.roi
+    prmVtxKey = flags.Trigger.InDetTracking.fullScan.vertex
+    outputRoIName = flags.Trigger.InDetTracking.bjet.roi
 
     jc_key = f'{jc_name}_'
     # Output container names as defined in TriggerEDMRun3
@@ -27,9 +23,9 @@ def getBJetSequenceCfg(flags, jc_name=None):
         RoisWriteHandleKey  = recordable( outputRoIName ),
         VertexReadHandleKey = prmVtxKey,
         PrmVtxLink  = prmVtxKey.replace( "HLT_","" ),
-        RoIEtaWidth = bjetconfig.etaHalfWidth,
-        RoIPhiWidth = bjetconfig.phiHalfWidth,
-        RoIZWidth   = bjetconfig.zedHalfWidth,
+        RoIEtaWidth = flags.Trigger.InDetTracking.bjet.etaHalfWidth,
+        RoIPhiWidth = flags.Trigger.InDetTracking.bjet.phiHalfWidth,
+        RoIZWidth   = flags.Trigger.InDetTracking.bjet.zedHalfWidth,
     )
 
     # Second stage of Fast Tracking and Precision Tracking
@@ -49,7 +45,7 @@ def getBJetSequenceCfg(flags, jc_name=None):
                                                  inputVertex=prmVtxKey,
                                                  inputJets=InputMakerAlg.InViewJets)
 
-    PTTrackParticles = bjetconfig.tracks_IDTrig() # Final output xAOD::TrackParticle collection
+    PTTrackParticles = flags.Trigger.InDetTracking.bjet.tracks_IDTrig # Final output xAOD::TrackParticle collection
 
     from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfig import flavourTaggingCfg
     flavourTaggingAlgs = flavourTaggingCfg(flags,

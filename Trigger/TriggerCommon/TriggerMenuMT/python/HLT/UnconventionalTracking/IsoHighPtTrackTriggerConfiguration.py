@@ -10,12 +10,11 @@ log = logging.getLogger(__name__)
 def IsoHPtTrackTriggerHypoSequence(flags):
         from TrigLongLivedParticlesHypo.TrigIsoHPtTrackTriggerHypoTool import TrigIsoHPtTrackTriggerHypoToolFromDict
 
-        # Get sequence name
-        from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-
         # Setup the hypothesis algorithm
-        theIsoHPtTrackTriggerHypo = CompFactory.TrigIsoHPtTrackTriggerHypoAlg("L2IsoHPtTrack")
-        theIsoHPtTrackTriggerHypo.trackKey = getInDetTrigConfig('fullScan').tracks_FTF()
+        theIsoHPtTrackTriggerHypo = CompFactory.TrigIsoHPtTrackTriggerHypoAlg(
+                "L2IsoHPtTrack",
+                trackKey = flags.Tracking.ActiveConfig.tracks_FTF
+        )
 
         selAcc = SelectionCA('UncTrkEmptySeq')
 

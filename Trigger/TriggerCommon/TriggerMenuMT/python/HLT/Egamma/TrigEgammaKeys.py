@@ -8,8 +8,9 @@ __all__    = [ "getTrigEgammaKeys" ]
 # Configuration of Electron and Photon chains
 #----------------------------------------------------------------
 
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+
 from TrigEDMConfig.TriggerEDM import recordable
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 
 class TrigEgammaKeysBase(object):
@@ -51,29 +52,21 @@ class TrigEgammaKeysBase(object):
         self.precisionEgammaSuperClusterRecCollection    = 'HLT_EgammaSuperRecCollection'
 
         #
-        # Track configuration
-        #
-        self._IDTrigConfig                              = getInDetTrigConfig( 'electron' )
-
-        #
         # Special sequences
         #
         self.TrigTRTHTCountsContainer                   = recordable("HLT_TrigTRTHTCounts")
         self.egEventShape                               = recordable('HLT_HIEventShapeEG')
+        self._flags = initConfigFlags()
 
 
 
       @property
       def precisionTrackingContainer(self):
-          return self._IDTrigConfig.tracks_IDTrig()
-
-      @property
-      def IDTrigConfig(self):
-          return self._IDTrigConfig
+          return self._flags.Trigger.InDetTracking.electron.tracks_IDTrig
 
       @property
       def fastTrackParticleContainer(self):
-          return self._IDTrigConfig.tracks_FTF()
+          return self._flags.Trigger.InDetTracking.electron.tracks_FTF
 
 
 
@@ -88,8 +81,14 @@ class TrigEgammaKeys_LRT(TrigEgammaKeysBase):
         self.precisionElectronCaloClusterContainer  = recordable("HLT_CaloEMClusters_LRT")
         self.precisionElectronContainer             = recordable('HLT_egamma_Electrons_LRT')
         self.precisionTopoClusterContainer          = recordable("HLT_TopoCaloClustersRoI_LRT")
-        self._IDTrigConfig                          = getInDetTrigConfig('electronLRT')
 
+    @property
+    def precisionTrackingContainer(self):
+          return self._flags.Trigger.InDetTracking.electronLRT.tracks_IDTrig
+
+    @property
+    def fastTrackParticleContainer(self):
+          return self._flags.Trigger.InDetTracking.electronLRT.tracks_FTF
 
 
 class TrigEgammaKeys_GSF(TrigEgammaKeysBase):
@@ -102,6 +101,14 @@ class TrigEgammaKeys_GSF(TrigEgammaKeysBase):
         self.precisionElectronTrkCollectionGSF          = 'HLT_IDTrkTrack_Electron_GSF'
         self.precisionElectronTrackParticleContainerGSF = recordable('HLT_IDTrack_Electron_GSF')
         self.precisionElectronContainer                 = recordable('HLT_egamma_Electrons_GSF')
+    @property
+    def precisionTrackingContainer(self):
+          return self._flags.Trigger.InDetTracking.electron.tracks_IDTrig
+
+    @property
+    def fastTrackParticleContainer(self):
+          return self._flags.Trigger.InDetTracking.electron.tracks_FTF
+
 
 class TrigEgammaKeys_LRTGSF(TrigEgammaKeysBase):
     # This class contians modified base configuration class for LRT_GSF electron trigger chains
@@ -114,8 +121,14 @@ class TrigEgammaKeys_LRTGSF(TrigEgammaKeysBase):
         self.precisionElectronTrackParticleContainerGSF = recordable('HLT_IDTrack_Electron_LRTGSF')
         self.precisionElectronCaloClusterContainer      = recordable("HLT_CaloEMClusters_LRT")
         self.precisionElectronContainer                 = recordable('HLT_egamma_Electrons_LRTGSF')
-        self._IDTrigConfig                              = getInDetTrigConfig('electronLRT')
 
+    @property
+    def precisionTrackingContainer(self):
+          return self._flags.Trigger.InDetTracking.electronLRT.tracks_IDTrig
+    
+    @property
+    def fastTrackParticleContainer(self):
+          return self._flags.Trigger.InDetTracking.electronLRT.tracks_FTF
 
 #
 # Get keys from variant name

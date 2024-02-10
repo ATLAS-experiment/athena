@@ -12,7 +12,6 @@ from ..Menu.SignatureDicts import JetRecoKeys as recoKeys
 from JetRecConfig import StandardJetContext
 # this is to define trigger specific JetModifiers (ex: ConstitFourMom_copy) : 
 from . import TriggerJetMods
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
 import copy
 
@@ -209,8 +208,6 @@ def getPrefilterCleaningString(prefilters_list):
 # the calibration config helper
 def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
 
-    config = getInDetTrigConfig( 'fullScan' )
-
     # Minimum modifier set for calibration w/o track GSC
     # Should eventually build in more mods, depend on track info etc
     jetalg = jetRecoDict["recoAlg"]
@@ -241,7 +238,7 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
             gscDepth = "EM3"
             if "gsc" in jetRecoDict["jetCalib"]:
                 gscDepth = "trackWIDTH"
-                pvname = config.vertex_jet
+                pvname = flags.Trigger.InDetTracking.fullScan.vertex_jet
 
         elif jetRecoDict["constitType"] == "pf":
             gscDepth = "auto"
@@ -260,7 +257,7 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
                   ("a4","subjesgscIS"): (calibKey,"JetArea_EtaJES_GSC"),             # w/o pu residual  + calo+trk GSC
                   ("a4","subresjesgscIS"): (calibKey,"JetArea_Residual_EtaJES_GSC"), # pu residual + calo+trk GSC
                   }[(jetRecoDict["recoAlg"],jetRecoDict["jetCalib"])]
-            pvname = config.vertex_jet
+            pvname = flags.Trigger.InDetTracking.fullScan.vertex_jet
 
         if jetRecoDict["jetCalib"].endswith("IS") and (dataSource=="data"):
             calibSeq += "_Insitu"
