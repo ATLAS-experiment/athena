@@ -10,7 +10,7 @@
 # art-output: legacy.*
 # art-output: DigiPUConfig*
 
-Events=3
+Events=25
 DigiOutFileName="mc20a_ttbar.RDO.pool.root"
 HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e4993_s3091/HITS.10504490._000425.pool.root.1"
 
@@ -50,7 +50,7 @@ echo "art-result: $rc4 OLDvsFixedRef"
 rc5=-9999
 if [[ $rc -eq 0 ]]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed
+    art.py compare grid --entries "$Events" "$1" "$2" --mode=semi-detailed
     rc5=$?
     status=$rc5
 fi

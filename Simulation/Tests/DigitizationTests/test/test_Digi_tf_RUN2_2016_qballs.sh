@@ -54,7 +54,7 @@ echo "art-result: $rc4 OLDvsFixedRef"
 
 if [[ $rc -eq 0 ]]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileName"
+    art.py compare grid --entries "$Events" "$1" "$2" --mode=semi-detailed --file="$DigiOutFileName"
     rc5=$?
     if [[ $status -eq 0 ]]
     then
