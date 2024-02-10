@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -35,6 +35,7 @@ class FTagConfig (ConfigBlock):
         self.addOption ('generator', "autoconfig", type=str)
         self.addOption ('kinematicSelection', True, type=bool)
         self.addOption ('noEffSF', False, type=bool)
+        self.addOption ('globalSF', True, type=bool)
         self.addOption ('minPt', None, type=float)
         self.addOption ('bTagCalibFile', None, type=str,
                         info='calibration file for CDI')
@@ -272,6 +273,19 @@ class FTagConfig (ConfigBlock):
             alg.jets = config.readName (self.containerName)
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, selectionName + '_eff')
 
+            if self.globalSF:
+                alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg',
+                                             'FTagEventScaleFactorAlg' + postfix)
+                preselection = config.getFullSelection(self.containerName, '')
+                alg.preselection = ((preselection + '&&' if preselection else '')
+                                    + 'ftag_kin_select_' + selectionName + ',as_char')
+                alg.scaleFactorInputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
+                alg.scaleFactorOutputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
+                alg.particles = config.readName(self.containerName)
+
+                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
+                                    'weight_ftag_effSF_' + selectionName)
+
 
 def makeFTagAnalysisConfig( seq, containerName,
                             selectionName,
@@ -280,6 +294,7 @@ def makeFTagAnalysisConfig( seq, containerName,
                             generator = None,
                             kinematicSelection = None,
                             noEffSF = None,
+                            globalSF = None,
                             minPt = None ):
     """Create a ftag analysis algorithm config
 
@@ -289,6 +304,7 @@ def makeFTagAnalysisConfig( seq, containerName,
       generator -- Generator for MC/MC scale factors
       kinematicSelection -- Wether to run kinematic selection
       noEffSF -- Disables efficiency and scale factor calculations
+      globalSF -- Compute event level FTAG scale factor
       minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
 
@@ -303,6 +319,8 @@ def makeFTagAnalysisConfig( seq, containerName,
         config.setOptionValue ('kinematicSelection', kinematicSelection)
     if noEffSF is not None :
         config.setOptionValue ('noEffSF', noEffSF)
+    if globalSF is not None :
+        config.setOptionValue ('globalSF', globalSF)
     if minPt is not None :
         config.setOptionValue ('minPt', minPt)
     seq.append (config)
