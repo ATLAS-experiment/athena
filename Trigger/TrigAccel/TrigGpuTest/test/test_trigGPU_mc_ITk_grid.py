@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger AthenaMT test running new-style job options
 # art-type: grid
@@ -28,7 +28,7 @@ run.type = 'athena'
 run.args = '--CA'
 run.threads = 1
 run.input = 'Single_mu_Run4'
-run.job_options = 'TriggerJobOpts.runHLT'
+run.job_options = 'TriggerJobOpts/runHLT.py'
 run.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
