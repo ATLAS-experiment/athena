@@ -33,19 +33,19 @@ if None == trt:
 
 # Units are CLHEP: MeV, ns, mm
 # Xenon threshold tunes
-trt.Override_highThresholdBarShort  = 0.005195/3.841
-trt.Override_highThresholdBarLong   = 0.004751/3.841
-trt.Override_highThresholdECAwheels = 0.005513/3.841
-trt.Override_highThresholdECBwheels = 0.005326/3.841
+trt.Override_highThresholdBarShort  = 0.00129875
+trt.Override_highThresholdBarLong   = 0.00118775
+trt.Override_highThresholdECAwheels = 0.001185591
+trt.Override_highThresholdECBwheels = 0.001145376
 
 # Argon thresholds (July 2014 tuning from Artem) TRT_Digitization-01-00-09  
-trt.Override_highThresholdBarShortArgon  = 0.002607/3.841
-trt.Override_highThresholdBarLongArgon   = 0.002540/3.841
-trt.Override_highThresholdECAwheelsArgon = 0.002414/3.841
-trt.Override_highThresholdECBwheelsArgon = 0.002295/3.841
+trt.Override_highThresholdBarShortArgon  = 0.000457368
+trt.Override_highThresholdBarLongArgon   = 0.000445614
+trt.Override_highThresholdECAwheelsArgon = 0.0006035
+trt.Override_highThresholdECBwheelsArgon = 0.00057375
 
 # Krypton thresholds
-trt.Override_highThresholdBarShortKrypton  = 0.003070/3.841
-trt.Override_highThresholdBarLongKrypton   = 0.002900/3.841
-trt.Override_highThresholdECAwheelsKrypton = 0.003150/3.841
-trt.Override_highThresholdECBwheelsKrypton = 0.003020/3.841
+trt.Override_highThresholdBarShortKrypton  = 0.003070
+trt.Override_highThresholdBarLongKrypton   = 0.002900
+trt.Override_highThresholdECAwheelsKrypton = 0.003150
+trt.Override_highThresholdECBwheelsKrypton = 0.003020
