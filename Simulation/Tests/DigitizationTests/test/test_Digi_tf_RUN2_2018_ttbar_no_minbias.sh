@@ -51,7 +51,7 @@ echo "art-result: $rc4 OLDvsFixedRef"
 rc5=-9999
 if [[ $rc -eq 0 ]]
 then
-    art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed
+    art.py compare grid --entries "$Events" "$1" "$2" --mode=semi-detailed
     rc5=$?
     status=$rc5
 fi
