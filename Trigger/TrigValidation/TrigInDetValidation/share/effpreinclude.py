@@ -1,20 +1,17 @@
+from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("TrigInDetValidation")
 
 log.info( "preinclude: effpreinclude.py" ) 
 
-
-from TrigInDetConfig.ConfigSettingsBase import _ConfigSettingsBase 
-
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from AthenaCommon.SystemOfUnits import GeV
 
-getInDetTrigConfig("bjet")._pTmin   = 0.8*GeV
-getInDetTrigConfig("tauIso")._pTmin = 0.8*GeV
+flags.Trigger.InDetTracking.bjet.pTmin   = 0.8*GeV
+flags.Trigger.InDetTracking.tauIso.pTmin = 0.8*GeV
 
-log.info( "ID Trigger pTmin: "+str(getInDetTrigConfig("bjet").pTmin) )
-log.info( "ID Trigger pTmin: "+str(getInDetTrigConfig("tauIso").pTmin) )
+log.info( f"ID Trigger bjet   pTmin: {flags.Trigger.InDetTracking.bjet.pTmin}" )
+log.info( f"ID Trigger tauIso pTmin: {flags.Trigger.InDetTracking.tauIso.pTmin}" )
 
 
 

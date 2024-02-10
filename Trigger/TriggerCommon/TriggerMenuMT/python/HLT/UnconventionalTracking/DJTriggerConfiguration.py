@@ -9,7 +9,6 @@ from AthenaCommon.Logging import logging
 
 from TrigEDMConfig.TriggerEDM import recordable
 from TrigInDetConfig.utils import getFlagsForActiveConfig
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
 
 logging.getLogger().info("Importing %s",__name__)
@@ -19,16 +18,14 @@ def DJPromptStep(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoPromptToolFromDict
 
 
-    hypo_alg = CompFactory.DisplacedJetPromptHypoAlg("DJTrigPromptHypoAlg")
-
-    #get the jet tracking config to get the track collection name
-    fscfg = getInDetTrigConfig("fullScan")
-
-    hypo_alg.min_trk_pt = 1.0
-    hypo_alg.stdTracksKey = fscfg.tracks_FTF()
-    hypo_alg.jetContainerKey = recordable("HLT_AntiKt4EMTopoJets_subjesIS")
-    hypo_alg.vtxKey = fscfg.vertex_jet
-    hypo_alg.countsKey = "DispJetTrigger_Counts"
+    hypo_alg = CompFactory.DisplacedJetPromptHypoAlg(
+        "DJTrigPromptHypoAlg",
+        min_trk_pt = 1.0,
+        stdTracksKey = flags.Tracking.ActiveConfig.tracks_FTF,   #fullScan
+        vtxKey = flags.Tracking.ActiveConfig.vertex_jet,         
+        jetContainerKey = recordable("HLT_AntiKt4EMTopoJets_subjesIS"),
+        countsKey = "DispJetTrigger_Counts",
+    )
 
     #run at the event level
     im_alg = CompFactory.InputMakerForRoI( "IM_DJTRIG_Prompt" )
@@ -46,24 +43,27 @@ def DJPromptStep(flags):
 
 def DJDispFragment(flags):
 
-    lrtcfg = getInDetTrigConfig( 'DJetLRT' )
-    roiTool = CompFactory.ViewCreatorCentredOnIParticleROITool('ViewCreatorDJRoI', RoisWriteHandleKey = recordable(lrtcfg.roi), RoIEtaWidth = lrtcfg.etaHalfWidth, RoIPhiWidth = lrtcfg.phiHalfWidth, RoIZedWidth=lrtcfg.zedHalfWidth, UseZedPosition=False)
+    roiTool = CompFactory.ViewCreatorCentredOnIParticleROITool(
+        'ViewCreatorDJRoI', 
+        RoisWriteHandleKey = recordable(flags.Trigger.InDetTracking.DJetLRT.roi), 
+        RoIEtaWidth        = flags.Trigger.InDetTracking.DJetLRT.etaHalfWidth, 
+        RoIPhiWidth        = flags.Trigger.InDetTracking.DJetLRT.phiHalfWidth, 
+        RoIZedWidth        = flags.Trigger.InDetTracking.DJetLRT.zedHalfWidth,
+        UseZedPosition     = False)
 
     InViewRoIs = "InViewRoIs"
     reco = InViewRecoCA("IMDJRoIFTF", RoITool = roiTool, mergeUsingFeature = True, 
                         InViewRoIs = InViewRoIs,
                         RequireParentView = False,ViewFallThrough = True)
     
-    fscfg = getInDetTrigConfig("fullScan")
-
     acc = ComponentAccumulator()
     reco_seq = parOR('UncTrkrecoSeqDJTrigDispRecoSeq')
     acc.addSequence(reco_seq)
 
-    flagsWithTrk = getFlagsForActiveConfig(flags, lrtcfg.name, log)
+    flagsWithTrk = getFlagsForActiveConfig(flags, flags.Trigger.InDetTracking.DJetLRT.name, log)
 
     lrt_algs = trigInDetLRTCfg(flagsWithTrk,
-                               fscfg.trkTracks_FTF(),
+                               flags.Tracking.ActiveConfig.trkTracks_FTF,
                                InViewRoIs,
                                in_view=True,
                                )
@@ -82,13 +82,9 @@ def DJDispFragment(flags):
 def DJDispStep(flags):
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoDispToolFromDict
 
-    hypo_alg = CompFactory.DisplacedJetDispHypoAlg("DJTrigDispHypoAlg")
-
-    lrtcfg = getInDetTrigConfig( 'DJetLRT' )
-    fscfg = getInDetTrigConfig("fullScan")
-
-    hypo_alg.lrtTracksKey = lrtcfg.tracks_FTF()
-    hypo_alg.vtxKey = fscfg.vertex_jet
+    hypo_alg = CompFactory.DisplacedJetDispHypoAlg("DJTrigDispHypoAlg",
+                                                   lrtTracksKey = flags.Trigger.InDetTracking.DJetLRT.tracks_FTF,
+                                                   vtxKey = flags.Tracking.ActiveConfig.vertex_jet)
 
     selAcc = DJDispFragment(flags)
 

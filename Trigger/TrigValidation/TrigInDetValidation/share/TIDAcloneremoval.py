@@ -1,16 +1,13 @@
-# leave this here for comparison ...
-# ftf = findAlgorithm(topSequence, "TrigFastTrackFinder__electron")
-# ftf.doCloneRemoval = True
+from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
 
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("TrigInDetValidation")
 
 log.info( "preinclude: TIDAcloneremoval.py" ) 
 
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 
-getInDetTrigConfig("electron")._doCloneRemoval = False
+flags.Trigger.InDetTracking.electron.doCloneRemoval = False
 
-log.info( "Setting clone removal: "+str(getInDetTrigConfig("electron").doCloneRemoval) )
+log.info( f"Setting clone removal: {flags.Trigger.InDetTracking.electron.doCloneRemoval}") )
 
 

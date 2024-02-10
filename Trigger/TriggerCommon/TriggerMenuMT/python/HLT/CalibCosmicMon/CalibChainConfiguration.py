@@ -12,7 +12,6 @@ from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoT
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from TrigTrackingHypo.IDCalibHypoConfig import IDCalibHypoToolFromDict, createIDCalibHypoAlg
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from ..CommonSequences.FullScanInDetConfig import commonInDetFullScanCfg
 from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
 
@@ -164,7 +163,7 @@ def IDCalibTriggerCfg(flags):
     reco = InEventRecoCA('IDCalibEmptySeq_reco',inputMaker=DummyInputMakerAlg)
 
     theHypoAlg = createIDCalibHypoAlg(flags, "IDCalibHypo")
-    theHypoAlg.tracksKey = getInDetTrigConfig('fullScan').tracks_FTF()
+    theHypoAlg.tracksKey = flags.Trigger.InDetTracking.fullScan.tracks_FTF
 
     selAcc = SelectionCA('IDCalibEmptySeq_sel')
     selAcc.mergeReco(reco)

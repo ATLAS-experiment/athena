@@ -1,3 +1,4 @@
 # Turn on NN tracking
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-getInDetTrigConfig("bjet")._usePixelNN = True
+
+from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+flags.Trigger.InDetTracking.bjet.usePixelNN = True

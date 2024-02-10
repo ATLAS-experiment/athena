@@ -69,14 +69,12 @@ def isLRT(name):
 #Returns relevant track collection name
 def getIDTracks(flags, name=''):
 
-  from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-
   if isLRT(name):
-    return getInDetTrigConfig("muonLRT").tracks_FTF()
+    return flags.Trigger.InDetTracking.muonLRT.tracks_FTF
   elif isCosmic(flags):
-    return getInDetTrigConfig("cosmics" ).tracks_IDTrig()
+    return flags.Trigger.InDetTracking.cosmics.tracks_IDTrig
   else:
-    return getInDetTrigConfig("muon").tracks_FTF()
+    return flags.Trigger.InDetTracking.muon.tracks_FTF
 
 
 def MuDataPrepViewDataVerifierCfg(flags):

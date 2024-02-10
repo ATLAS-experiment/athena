@@ -12,16 +12,13 @@ from TrigEDMConfig.TriggerEDM import recordable
 @AccumulatorCache
 def bmumuxSequence(flags):
 
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    IDConfig = getInDetTrigConfig('bmumux')
-
-    RoIToolCreator = CompFactory.ViewCreatorMuonSuperROITool if IDConfig.SuperRoI else CompFactory.ViewCreatorCentredOnIParticleROITool
+    RoIToolCreator = CompFactory.ViewCreatorMuonSuperROITool if flags.Trigger.InDetTracking.bmumux.SuperRoI else CompFactory.ViewCreatorCentredOnIParticleROITool
 
     roiToolOptions = {
-        'RoIEtaWidth' : IDConfig.etaHalfWidth,
-        'RoIPhiWidth' : IDConfig.phiHalfWidth,
-        'RoIZedWidth' : IDConfig.zedHalfWidth,
-        'RoisWriteHandleKey' : recordable(IDConfig.roi) }
+        'RoIEtaWidth' : flags.Trigger.InDetTracking.bmumux.etaHalfWidth,
+        'RoIPhiWidth' : flags.Trigger.InDetTracking.bmumux.phiHalfWidth,
+        'RoIZedWidth' : flags.Trigger.InDetTracking.bmumux.zedHalfWidth,
+        'RoisWriteHandleKey' : recordable(flags.Trigger.InDetTracking.bmumux.roi) }
 
     viewMakerOptions = {
         'RoITool' : RoIToolCreator(**roiToolOptions),
