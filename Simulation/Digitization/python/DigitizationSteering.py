@@ -92,6 +92,7 @@ def DigitizationMainContentCfg(flags):
             MergeTruthParticlesCfg,
             MergeMuonEntryLayerCfg,
             MergeCalibHitsCfg,
+            MergeHijingParsCfg,
         )
         if flags.Common.ProductionStep is not ProductionStep.FastChain and getEnabledDetectors(flags):
             if flags.Digitization.DigiSteeringConf=="StandardPileUpToolsAlg":
@@ -110,6 +111,9 @@ def DigitizationMainContentCfg(flags):
                 acc.merge(MergeTruthParticlesCfg(flags))
             acc.merge(MergeMuonEntryLayerCfg(flags))
             acc.merge(MergeCalibHitsCfg(flags))
+            if 'Hijing_event_params' in pileupInputCollections(flags.Digitization.PU.CavernInputCols):
+                acc.merge(MergeHijingParsCfg(flags))
+
 
     from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
     acc.merge(TruthDigitizationOutputCfg(flags))
