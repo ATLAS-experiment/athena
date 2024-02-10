@@ -414,7 +414,18 @@ def PixelChargeCalibCondCfg(flags, **kwargs):
     elif flags.GeoModel.Run == LHCPeriod.Run3:
         return PixelChargeLUTCalibCondAlgCfg(flags, **kwargs)
     return PixelChargeCalibCondAlgCfg(flags, **kwargs)
-    
+
+def PostInclude_UsePixelModuleLevelMask(flags, cfg):
+    """Force the job to use the Pixel Module-level mask implemented via the
+    FE-level masking code. See https://gitlab.cern.ch/atlas/athena/-/merge_requests/45356"""
+    from IOVDbSvc.IOVDbSvcConfig import addOverride
+    if (not flags.Input.isMC  and flags.IOVDb.DatabaseInstance == 'CONDBR2'):  # for data overlay
+        cfg.merge(addOverride(flags, '/PIXEL/PixelModuleFeMask', 'PixelModuleFeMask-RUN2-DATA-UPD4-05'))
+    else:
+        cfg.merge(addOverride(flags, '/PIXEL/PixelModuleFeMask', 'PixelModuleFeMask-SIM-MC16-000-03'))
+    return cfg
+
+
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

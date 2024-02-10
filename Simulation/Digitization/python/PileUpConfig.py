@@ -166,7 +166,7 @@ def CavernCacheCfg(flags, name="CavernCache", **kwargs):
     kwargs.setdefault("CollPerXing", flags.Digitization.PU.NumberOfCavern)
     kwargs.setdefault("CollDistribution", "Fixed")
     kwargs.setdefault("PileUpEventType", PileUpEventType.Cavern)
-    if flags.Digitization.PU.DoXingByXingPileUp or flags.Digitization.PU.SignalPatternForSteppingCache:
+    if flags.Digitization.DoXingByXingPileUp or flags.Digitization.PU.SignalPatternForSteppingCache:
         kwargs.setdefault("ReadDownscaleFactor", 1)
     # Cavern Background Cache Should Ignore Bunch Structure
     OccupationFraction = (float(flags.Digitization.PU.BunchSpacing)/

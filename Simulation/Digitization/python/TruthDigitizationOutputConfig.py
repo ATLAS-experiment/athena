@@ -28,7 +28,9 @@ def TruthDigitizationOutputCfg(flags):
             ItemList += ["TrackRecordCollection#CosmicRecord"]
 
     from RunDependentSimComps.PileUpUtils import pileupInputCollections
-    puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
+    # Heavy Ion MC
+    if 'Hijing_event_params' in pileupInputCollections(flags.Digitization.PU.CavernInputCols):
+        ItemList += ['HijingEventParams#Hijing_event_params']
 
     dropped_jet_vars = ['constituentLinks',
                         'constituentWeights',
@@ -41,6 +43,18 @@ def TruthDigitizationOutputCfg(flags):
                         'GhostTausFinal']
     jet_var_str = '.-'.join ([''] + dropped_jet_vars)
 
+    dropped_jet_vars = ['constituentLinks',
+                        'constituentWeights',
+                        'ConeExclBHadronsFinal',
+                        'ConeExclCHadronsFinal',
+                        'ConeExclTausFinal',
+                        'GhostPartons',
+                        'GhostBHadronsFinal',
+                        'GhostCHadronsFinal',
+                        'GhostTausFinal']
+    jet_var_str = '.-'.join ([''] + dropped_jet_vars)
+
+    puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
     if "AntiKt4TruthJets" in puCollections:
         ItemList += [
             f"xAOD::JetContainer#{prefix}InTimeAntiKt4TruthJets",
