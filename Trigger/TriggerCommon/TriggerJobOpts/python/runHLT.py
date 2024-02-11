@@ -23,6 +23,14 @@ def lock_and_restrict(flags):
    flags.Concurrency.NumProcs = bomb
    flags.Concurrency.NumThreads = bomb
    flags.Concurrency.NumConcurrentEvents = bomb
+
+   #-------------------------------------------------------------
+   # Switch off CPS mechanism if we only run selected
+   # signatures or chains, to avoid single-chain sets
+   #-------------------------------------------------------------
+   if flags.Trigger.selectChains or len(flags.Trigger.enabledSignatures) == 1:
+      flags.Trigger.disableCPS = True
+
    flags.lock()
 
 
@@ -50,14 +58,7 @@ def set_flags(flags):
    flags.Input.FailOnUnknownCollections = True
    flags.Scheduler.AutoLoadUnmetDependencies = False
 
-   #-------------------------------------------------------------
-   # Switch off CPS mechanism if we only run selected
-   # signatures or chains, to avoid single-chain sets
-   #-------------------------------------------------------------
-   if flags.Trigger.selectChains or len(flags.Trigger.enabledSignatures) == 1:
-       flags.Trigger.disableCPS = True
-  
-  
+
 def runHLTCfg(flags):
    """Main function to configure the HLT in athena and athenaHLT"""
    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
