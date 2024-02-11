@@ -16,7 +16,7 @@ def MuonSegmentReaderCfg(configFlags, **kwargs):
         from TrkConfig.TrkResidualPullCalculatorConfig import (
             ResidualPullCalculatorCfg)
         kwargs.setdefault("PullCalculator", result.popToolsAndMerge(
-            ResidualPullCalculatorCfg(flags)))
+            ResidualPullCalculatorCfg(configFlags)))
 
     alg = CompFactory.MuonCalib.MuonSegmentReader(**kwargs)
 
