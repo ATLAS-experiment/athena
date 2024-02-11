@@ -17,38 +17,38 @@ class GeoMaterial;
 
 namespace Trk {
 
-  /**
-    @class GeoMaterialConverter
-    
-    A Simple Helper Class that convertes the GeoMaterial object
-    used in GeoModel full detector description to an appropriate
-    Trk::ExtendedMaterialProperties object.
-        
-    @author Andreas.Salzburger@cern.ch
-    */
-    
-    class GeoMaterialConverter {
-      
-      public:
-        /** Default constructor*/
-      GeoMaterialConverter() = default;
+/**
+  @class GeoMaterialConverter
 
-        /** Destructor*/
-      ~GeoMaterialConverter() = default;
-    
-        /** Single conversion ,
-        input type GeoMaterial - output type Trk::MaterialProperties */
-        static Material convert(const GeoMaterial* gm) ;
+  A Simple Helper Class that convertes the GeoMaterial object
+  used in GeoModel full detector description to an appropriate
+  Trk::ExtendedMaterialProperties object.
 
-        /** hardcoded dummy materials : TODO : find generic criterium ( density ? radiation length ? )  */
-       static bool dummy_material(const GeoMaterial*) ;
+  @author Andreas.Salzburger@cern.ch
+  */
 
-      private:
-        static const double s_densityCnvFactor; //!< the conversion factor from GeoUnits to Tracking
+class GeoMaterialConverter {
 
-    };
- 
-} // end of namespace Trk
+   public:
+    /** Default constructor*/
+    GeoMaterialConverter() = default;
+
+    /** Destructor*/
+    ~GeoMaterialConverter() = default;
+
+    /** Single conversion ,
+    input type GeoMaterial - output type Trk::MaterialProperties */
+    static Material convert(const GeoMaterial* gm);
+
+    /** hardcoded dummy materials : TODO : find generic criterium ( density ?
+     * radiation length ? )  */
+    static bool dummy_material(const GeoMaterial*);
+
+   private:
+    static const double s_densityCnvFactor;  //!< the conversion factor from
+                                             //!< GeoUnits to Tracking
+};
+
+}  // end of namespace Trk
 
 #endif
-

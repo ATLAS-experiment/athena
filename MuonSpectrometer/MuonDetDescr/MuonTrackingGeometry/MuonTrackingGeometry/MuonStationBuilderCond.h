@@ -6,8 +6,8 @@
 #define MUONTRACKINGGEOMETRY_MUONSTATIONBUILDERCOND_H
 
 #include "MuonTrackingGeometry/MuonStationBuilderImpl.h"
-#include "TrkGeometry/TrackingGeometry.h"
 #include "TrkDetDescrInterfaces/IDetachedTrackingVolumeBuilderCond.h"
+#include "TrkGeometry/TrackingGeometry.h"
 //
 #include "StoreGate/ReadCondHandleKey.h"
 namespace Muon {
@@ -21,22 +21,22 @@ namespace Muon {
 class MuonStationBuilderCond final
     : public MuonStationBuilderImpl,
       virtual public Trk::IDetachedTrackingVolumeBuilderCond {
- public:
-  MuonStationBuilderCond(const std::string&, const std::string&,
-                         const IInterface*);
-  virtual ~MuonStationBuilderCond() = default;
-  virtual StatusCode initialize() override;
+   public:
+    MuonStationBuilderCond(const std::string&, const std::string&,
+                           const IInterface*);
+    virtual ~MuonStationBuilderCond() = default;
+    virtual StatusCode initialize() override;
 
-  virtual std::unique_ptr<
-      std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-  buildDetachedTrackingVolumes(
-      const EventContext& ctx,
-      SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
-      bool blend = false) const override;
+    virtual std::unique_ptr<
+        std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
+    buildDetachedTrackingVolumes(
+        const EventContext& ctx,
+        SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
+        bool blend = false) const override;
 
- private:
-  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrReadKey{
-      this, "MuonMgrReadKey", "MuonDetectorManager", "Key of input MuonMgr"};
+   private:
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muonMgrReadKey{
+        this, "MuonMgrReadKey", "MuonDetectorManager", "Key of input MuonMgr"};
 };
 
 }  // namespace Muon

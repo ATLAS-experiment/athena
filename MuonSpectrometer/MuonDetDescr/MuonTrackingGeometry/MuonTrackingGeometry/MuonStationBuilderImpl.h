@@ -16,9 +16,9 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonTrackingGeometry/MuonStationTypeBuilder.h"
+#include "TrkDetDescrGeoModelCnv/GMTreeBrowser.h"
 #include "TrkDetDescrGeoModelCnv/GeoMaterialConverter.h"
 #include "TrkDetDescrGeoModelCnv/GeoShapeConverter.h"
-#include "TrkDetDescrGeoModelCnv/GMTreeBrowser.h"
 #include "TrkDetDescrGeoModelCnv/VolumeConverter.h"
 #include "TrkDetDescrInterfaces/ITrackingVolumeHelper.h"
 #include "TrkGeometry/DetachedTrackingVolume.h"
@@ -30,8 +30,8 @@ class MaterialProperties;
 
 namespace Muon {
 
-  typedef  std::pair<Amg::Transform3D , int > GMInfo;   
-  
+typedef std::pair<Amg::Transform3D, int> GMInfo;
+
 /** @class MuonStationBuilderImpl
 
     The Muon::MuonStationBuilderImpl retrieves muon stations from Muon Geometry
@@ -40,72 +40,76 @@ namespace Muon {
   */
 
 class MuonStationBuilderImpl : public AthAlgTool {
- public:
-  virtual ~MuonStationBuilderImpl() = default;
-  virtual StatusCode initialize() override;
+   public:
+    virtual ~MuonStationBuilderImpl() = default;
+    virtual StatusCode initialize() override;
 
-  std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-  buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr,
-                                   bool blend = false) const;
+    std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
+    buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr,
+                                     bool blend = false) const;
 
- protected:
-  MuonStationBuilderImpl(const std::string&, const std::string&,
-                         const IInterface*);
+   protected:
+    MuonStationBuilderImpl(const std::string&, const std::string&,
+                           const IInterface*);
 
-  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
-      this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
+        this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-  std::vector<std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo> > >  retrieveGMsensitive(const MuonGM::MuonDetectorManager*  muonMgr ) const;
-  
-  std::unique_ptr<Trk::DetachedTrackingVolume>
-  buildDetachedTrackingVolumeType( const MuonGM::MuonDetectorManager* muonMgr,
-				   const GeoVPhysVol* gv, GMInfo info) const;
+    std::vector<std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>>
+    retrieveGMsensitive(const MuonGM::MuonDetectorManager* muonMgr) const;
 
-  void glueComponents(Trk::DetachedTrackingVolume*) const;
-  void encloseLayers(const Trk::DetachedTrackingVolume*) const;
-  void identifyLayers(Trk::DetachedTrackingVolume*, Identifier, int, int,
-                      const MuonGM::MuonDetectorManager*) const;
-  void identifyNSWLayers(Trk::DetachedTrackingVolume* station, Identifier id,
-			 const MuonGM::MuonDetectorManager* muonMgr) const;
+    std::unique_ptr<Trk::DetachedTrackingVolume>
+    buildDetachedTrackingVolumeType(const MuonGM::MuonDetectorManager* muonMgr,
+                                    const GeoVPhysVol* gv, GMInfo info) const;
 
-  void identifyPrototype(Trk::TrackingVolume*, int, int,
-                         const Amg::Transform3D&,
-                         const MuonGM::MuonDetectorManager*) const;
+    void glueComponents(Trk::DetachedTrackingVolume*) const;
+    void encloseLayers(const Trk::DetachedTrackingVolume*) const;
+    void identifyLayers(Trk::DetachedTrackingVolume*, Identifier, int, int,
+                        const MuonGM::MuonDetectorManager*) const;
+    void identifyNSWLayers(Trk::DetachedTrackingVolume* station, Identifier id,
+                           const MuonGM::MuonDetectorManager* muonMgr) const;
 
-  Identifier resolveId( std::string vname, GMInfo gm_info, int&  eta, int&  phi , const MuonGM::MuonDetectorManager* muonMgr ) const;
-  void checkLayerId( std::string  comment, const MuonGM::MuonDetectorManager* muonMgr, Identifier id,  const Trk::Layer* lay) const;
+    void identifyPrototype(Trk::TrackingVolume*, int, int,
+                           const Amg::Transform3D&,
+                           const MuonGM::MuonDetectorManager*) const;
 
-  void getNSWStationsForTranslation(
-      const GeoVPhysVol* pv, const std::string& name, const Amg::Transform3D&,
-      std::vector<
-          std::pair<std::pair<const GeoLogVol*, Trk::MaterialProperties*>,
-                    std::vector<Amg::Transform3D>>>& vols,
-      std::vector<std::string>& volNames) const;
+    Identifier resolveId(std::string vname, GMInfo gm_info, int& eta, int& phi,
+                         const MuonGM::MuonDetectorManager* muonMgr) const;
+    void checkLayerId(std::string comment,
+                      const MuonGM::MuonDetectorManager* muonMgr, Identifier id,
+                      const Trk::Layer* lay) const;
 
-  ToolHandle<Muon::MuonStationTypeBuilder> m_muonStationTypeBuilder{
-      this, "StationTypeBuilder",
-      "Muon::MuonStationTypeBuilder/"
-      "MuonStationTypeBuilder"};  //!< Helper Tool
-                                  //!< to create
-                                  //!< TrackingVolume
-                                  //!< Arrays
-  ToolHandle<Trk::ITrackingVolumeHelper> m_trackingVolumeHelper{
-      this, "TrackingVolumeHelper",
-      "Trk::TrackingVolumeHelper/TrackingVolumeHelper"};  //!< Helper Tool to
-                                                          //!< create
-                                                          //!< TrackingVolumes
+    void getNSWStationsForTranslation(
+        const GeoVPhysVol* pv, const std::string& name, const Amg::Transform3D&,
+        std::vector<
+            std::pair<std::pair<const GeoLogVol*, Trk::MaterialProperties*>,
+                      std::vector<Amg::Transform3D>>>& vols,
+        std::vector<std::string>& volNames) const;
 
-  Trk::Material m_muonMaterial;  //!< the material
-  //!< shape converter
-  //Trk::GeoShapeConverter m_geoShapeConverter;
-  Trk::GMTreeBrowser m_gmBrowser;
-  Trk::VolumeConverter m_volumeConverter;
-  //!< material converter
-  Trk::GeoMaterialConverter m_materialConverter;
-  Gaudi::Property<bool> m_buildBarrel{this, "BuildBarrelStations", true};
-  Gaudi::Property<bool> m_buildEndcap{this, "BuildEndcapStations", true};
-  Gaudi::Property<bool> m_buildCsc{this, "BuildCSCStations", true};
-  Gaudi::Property<bool> m_buildTgc{this, "BuildTGCStations", true};
+    ToolHandle<Muon::MuonStationTypeBuilder> m_muonStationTypeBuilder{
+        this, "StationTypeBuilder",
+        "Muon::MuonStationTypeBuilder/"
+        "MuonStationTypeBuilder"};  //!< Helper Tool
+                                    //!< to create
+                                    //!< TrackingVolume
+                                    //!< Arrays
+    ToolHandle<Trk::ITrackingVolumeHelper> m_trackingVolumeHelper{
+        this, "TrackingVolumeHelper",
+        "Trk::TrackingVolumeHelper/TrackingVolumeHelper"};  //!< Helper Tool to
+                                                            //!< create
+                                                            //!< TrackingVolumes
+
+    Trk::Material m_muonMaterial;  //!< the material
+    //!< shape converter
+    // Trk::GeoShapeConverter m_geoShapeConverter;
+    Trk::GMTreeBrowser m_gmBrowser;
+    Trk::VolumeConverter m_volumeConverter;
+    //!< material converter
+    Trk::GeoMaterialConverter m_materialConverter;
+    Gaudi::Property<bool> m_buildBarrel{this, "BuildBarrelStations", true};
+    Gaudi::Property<bool> m_buildEndcap{this, "BuildEndcapStations", true};
+    Gaudi::Property<bool> m_buildCsc{this, "BuildCSCStations", true};
+    Gaudi::Property<bool> m_buildTgc{this, "BuildTGCStations", true};
 };
 
 }  // namespace Muon
