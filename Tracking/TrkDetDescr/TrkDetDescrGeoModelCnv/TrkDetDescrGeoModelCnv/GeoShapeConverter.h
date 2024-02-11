@@ -10,7 +10,7 @@
 #define TRKDETDESCRGEOMODELCNV_GEOSHAPRECONVERTER_H
 // Trk
 #include "TrkGeometry/MaterialProperties.h"
-//Eigen
+// Eigen
 #include "GeoPrimitives/GeoPrimitives.h"
 // STL
 
@@ -20,51 +20,48 @@ class GeoPcon;
 class GeoBox;
 class GeoShape;
 
-
 namespace Trk {
 
-  class CylinderVolumeBounds;
-  class CuboidVolumeBounds;
-  class Volume;
+class CylinderVolumeBounds;
+class CuboidVolumeBounds;
+class Volume;
 
-  /**
-    @class GeoShapeConverter
-    
-    A Simple Helper Class that convertes the GeoShape object
-    used in GeoModel full detector description to an appropriate
-    Trk::VolumeBounds (factory type) object.
-        
-    @author Andreas.Salzburger@cern.ch
-    generalization by Sarka.Todorova@cern.ch
-    */
-    
-    class GeoShapeConverter {
-      
-      public:
-    
-        /** Convert a tubs */
-        static CylinderVolumeBounds* convert(const GeoTubs* gtub) ;
+/**
+  @class GeoShapeConverter
 
-        /** Convert a tube */
-        static CylinderVolumeBounds* convert(const GeoTube* gtub) ;
+  A Simple Helper Class that convertes the GeoShape object
+  used in GeoModel full detector description to an appropriate
+  Trk::VolumeBounds (factory type) object.
 
-        /** Convert a Polygon into a CylinderVolume -> smooth it*/
-        static CylinderVolumeBounds* convert(const GeoPcon* gtub,  std::vector<double>& zbounds) ;
+  @author Andreas.Salzburger@cern.ch
+  generalization by Sarka.Todorova@cern.ch
+  */
 
-        /** Convert a Box */
-        static CuboidVolumeBounds* convert(const GeoBox* gbox) ;
+class GeoShapeConverter {
 
-        /** Convert an arbitrary GeoShape into Trk::Volume */
-        Volume* translateGeoShape( const GeoShape*, Amg::Transform3D* ) const;
+   public:
+    /** Convert a tubs */
+    static CylinderVolumeBounds* convert(const GeoTubs* gtub);
 
-        /** Decode and dump arbitrary GeoShape for visual inspection */
-        void decodeShape( const GeoShape* ) const;
+    /** Convert a tube */
+    static CylinderVolumeBounds* convert(const GeoTube* gtub);
 
-      private:
-    };
- 
+    /** Convert a Polygon into a CylinderVolume -> smooth it*/
+    static CylinderVolumeBounds* convert(const GeoPcon* gtub,
+                                         std::vector<double>& zbounds);
 
-} // end of namespace Trk
+    /** Convert a Box */
+    static CuboidVolumeBounds* convert(const GeoBox* gbox);
+
+    /** Convert an arbitrary GeoShape into Trk::Volume */
+    Volume* translateGeoShape(const GeoShape*, Amg::Transform3D*) const;
+
+    /** Decode and dump arbitrary GeoShape for visual inspection */
+    void decodeShape(const GeoShape*) const;
+
+   private:
+};
+
+}  // end of namespace Trk
 
 #endif
-

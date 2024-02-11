@@ -21,15 +21,17 @@ class MuonStationBuilder final
     : public MuonStationBuilderImpl,
       virtual public Trk::IDetachedTrackingVolumeBuilder {
 
- public:
-  MuonStationBuilder(const std::string&, const std::string&, const IInterface*);
-  virtual ~MuonStationBuilder() = default;
-  virtual  StatusCode initialize() override;
-  virtual std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >
-  buildDetachedTrackingVolumes(bool blend = false) const override;
+   public:
+    MuonStationBuilder(const std::string&, const std::string&,
+                       const IInterface*);
+    virtual ~MuonStationBuilder() = default;
+    virtual StatusCode initialize() override;
+    virtual std::unique_ptr<
+        std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >
+    buildDetachedTrackingVolumes(bool blend = false) const override;
 
- private:
-  const MuonGM::MuonDetectorManager* m_muonMgr = nullptr;
+   private:
+    const MuonGM::MuonDetectorManager* m_muonMgr = nullptr;
 };
 
 }  // namespace Muon
