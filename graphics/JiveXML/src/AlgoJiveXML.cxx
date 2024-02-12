@@ -19,10 +19,7 @@
 namespace JiveXML{
 
   AlgoJiveXML::AlgoJiveXML(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator) {
-
-    
-  }
+    AthAlgorithm(name, pSvcLocator) {}
 
   /**
    * Initialize - called once in the beginning
@@ -92,8 +89,6 @@ namespace JiveXML{
       ATH_CHECK(m_StreamToFileTool.retrieve());
    }
 
-  
-
     /**
      * Get the IDataRetrievers requested in the m_dataTypes list from the toolSvc 
      * and store them in the ToolHandleArray
@@ -123,10 +118,6 @@ namespace JiveXML{
     ATH_MSG_INFO("Retrieving data from " << m_DataRetrievers.size() << " tools" );
 
     ATH_MSG_INFO("List property settings: ");
-    ATH_MSG_INFO("WantPublicStreams: " << m_wantPublicStreams);
-    ATH_MSG_INFO("WantCalibrationStreams: " << m_wantCalibrationStreams);
-    ATH_MSG_INFO("WantMonitoringStreams: " << m_wantMonitoringStreams);
-    ATH_MSG_INFO("WantPhysicsStreams: " << m_wantPhysicsStreams);
     ATH_MSG_INFO("AtlasRelease: " << m_AtlasRelease);
     ATH_MSG_INFO("DataTypes: " << m_dataTypes );
     ATH_MSG_INFO("WriteToFile: " << m_writeToFile);
@@ -329,29 +320,6 @@ namespace JiveXML{
     m_StreamToFileTool.release().ignore();
     m_StreamToServerTool.release().ignore();
     
-    return StatusCode::SUCCESS;
-  }
-
-  StatusCode AlgoJiveXML::chooseStream(const std::vector< xAOD::EventInfo::StreamTag > evtStreamTags){
-    std::vector<std::string> wantedStreamTypes;
-    if (m_wantPublicStreams){
-      wantedStreamTypes.emplace_back("Public");
-    }
-    if (m_wantCalibrationStreams){
-      wantedStreamTypes.emplace_back("calibration");
-    }
-    if (m_wantMonitoringStreams){
-      wantedStreamTypes.emplace_back("monitoring");
-    }
-    if (m_wantPhysicsStreams){
-      wantedStreamTypes.emplace_back("physics");
-    }
-      std::vector< xAOD::EventInfo::StreamTag > goodStreams;
-    for (const auto& evtStreamTag : evtStreamTags) {
-      ATH_MSG_INFO( "Stream Tag in function: " << evtStreamTag.type() << "_" << evtStreamTag.name());
-      // if evtStreamTag.type() is in wantedStreamTypes add to goodStreams
-    }
-    //randomize goodStreams and return first value as choosen Stream
     return StatusCode::SUCCESS;
   }
 } //namespace

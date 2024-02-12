@@ -42,14 +42,6 @@ namespace JiveXML {
       StatusCode finalize();
     private:
 
-      StatusCode chooseStream(const std::vector< xAOD::EventInfo::StreamTag >);
-
-      //Configurable properties
-      Gaudi::Property<bool> m_wantPublicStreams {this, "WantPublicStreams", false, "If running online, is the Public stream wanted."};
-      Gaudi::Property<bool> m_wantCalibrationStreams {this, "WantCalibrationStreams", false, "If running online, are the calibration streams wanted."};
-      Gaudi::Property<bool> m_wantMonitoringStreams {this, "WantMonitoringStreams", false, "If running online, are the monitoring streams wanted."};
-      Gaudi::Property<bool> m_wantPhysicsStreams {this, "WantPhysicsStreams", true, "If running online, are the physics streams wanted."};
-
       Gaudi::Property<std::string> m_AtlasRelease {this, "AtlasRelease", "unknown", "The Athena release number"};
       Gaudi::Property<std::vector<std::string>> m_dataTypes {this, "DataTypes", {}, "List of data retriever names to be run"}; 
       Gaudi::Property<bool> m_writeToFile {this, "WriteToFile", true, "Whether XML files shall be produced"};
