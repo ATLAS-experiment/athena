@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for el_Jpsiee_pu40
+# art-description: art job for el_jpsiee_pu40
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
@@ -29,6 +29,8 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
+
+useCA_Reco = True
 Slices  = ['electron']
 Events  = 8000
 Threads = 8 

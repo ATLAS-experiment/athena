@@ -30,6 +30,8 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True
 Slices  = ['muon','electron','tau','bjet','fsjet']
 Events  = 4000
 Threads = 8

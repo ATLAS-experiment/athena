@@ -29,6 +29,8 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
+
+useCA_Reco = True
 Slices  = ['electron']
 Events  = 16000
 Threads = 8 

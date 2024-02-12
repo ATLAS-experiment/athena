@@ -29,6 +29,8 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
+
+useCA_Reco = True
 Slices = ['bjet']
 Events  = 4000
 Threads = 8
@@ -37,7 +39,10 @@ Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAseedRedundancy.py'
+# legacy 
+# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAseedRedundancy.py'
+# CA
+preexec_trig = "flags.Trigger.InDetTracking.fullScan.doSeedRedundancyCheck=True;flags.Trigger.InDetTracking.jetSuper.doSeedRedundancyCheck=True;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]
