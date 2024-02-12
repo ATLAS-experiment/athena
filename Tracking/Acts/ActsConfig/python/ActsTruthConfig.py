@@ -63,6 +63,20 @@ def TrackToTruthAssociationCfg(flags,
     acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
+def TruthParticleHitCountAlgCfg(flags,
+                                name: str = 'TruthParticleHitCountAlg',
+                                **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
+    kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
+    kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
+    kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')
+    kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
+    kwargs.setdefault('NHitsMin',4)
+    acc.addEventAlgo( CompFactory.ActsTrk.TruthParticleHitCountAlg(name=name, **kwargs) )
+    return acc
+
+
 def ITkTruthAssociationCfg(flags,
                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
