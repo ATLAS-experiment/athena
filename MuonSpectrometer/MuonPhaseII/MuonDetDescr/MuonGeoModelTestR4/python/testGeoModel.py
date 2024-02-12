@@ -135,13 +135,16 @@ def setupGeoR4TestCfg(args):
     flags.Detector.GeometryCalo = False
     ### Muon spectrometer
     flags.Detector.GeometryCSC = False
-    flags.Detector.GeometrysTGC = not args.noSTGC
-    flags.Detector.GeometryMM = not args.noMM
-    flags.Detector.GeometryTGC = not args.noTgc
-    flags.Detector.GeometryRPC = not args.noRpc
-    flags.Detector.GeometryMDT = not args.noMdt
-
-    flags.Muon.setupGeoModelXML = True
+    if args.noSTGC:
+        flags.Detector.GeometrysTGC = False
+    if args.noMM:
+        flags.Detector.GeometryMM = False
+    if args.noTgc:
+        flags.Detector.GeometryTGC = False
+    if args.noRpc:
+        flags.Detector.GeometryRPC = False    
+    if args.noMdt:
+        flags.Detector.GeometryMDT = False
 
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True
@@ -153,11 +156,16 @@ def setupGeoR4TestCfg(args):
 
     flags.lock()
     flags.dump(evaluate = True)
-
+    if not flags.Muon.usePhaseIIGeoSetup:
+        print ("Please make sure that the file you're testing contains the Muon R4 geometry")
+        exit(1)
 
     cfg = setupServicesCfg(flags)
+
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     cfg.merge(MuonGeoModelCfg(flags))
+
+
     return flags, cfg
 
 def executeTest(cfg, num_events = 1):
