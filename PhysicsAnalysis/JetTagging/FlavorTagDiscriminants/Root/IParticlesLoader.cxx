@@ -144,6 +144,7 @@ namespace FlavorTagDiscriminants {
             m_isCharged = false;
         }
         used_remap = m_customSequenceGetter.getUsedRemap();
+        name = cfg.name;
     }
 
     std::vector<const xAOD::IParticle*> IParticlesLoader::getIParticlesFromJet(
@@ -177,10 +178,12 @@ namespace FlavorTagDiscriminants {
         return only_particles;
     }
 
-    std::pair<std::string, input_pair> IParticlesLoader::getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
+    std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> IParticlesLoader::getData(
+      const xAOD::Jet& jet, 
+      const SG::AuxElement& btag) const {
         IParticles sorted_particles = getIParticlesFromJet(jet);
 
-        return std::make_pair("flow_features", m_customSequenceGetter.getFeats(jet, sorted_particles));
+        return std::make_tuple("flow_features", m_customSequenceGetter.getFeats(jet, sorted_particles), sorted_particles);
     }
 
     FTagDataDependencyNames IParticlesLoader::getDependencies() const {
@@ -188,6 +191,9 @@ namespace FlavorTagDiscriminants {
     }
     std::set<std::string> IParticlesLoader::getUsedRemap() const {
         return used_remap;
+    }
+    std::string IParticlesLoader::getName() const {
+        return name;
     }
 
 }

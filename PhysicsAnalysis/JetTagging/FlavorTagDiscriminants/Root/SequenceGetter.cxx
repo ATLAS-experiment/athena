@@ -413,24 +413,24 @@ namespace {
   {
       std::map<std::string, std::string> remap = options.remap_scalar;
       for (const FTagConstituentsInputConfig& input_cfg: inputs) {
-          auto [seqGetter, seq_deps] = seqFromConsituents(
-          input_cfg, options);
+        auto [seqGetter, seq_deps] = seqFromConsituents(
+        input_cfg, options);
 
-          if(input_cfg.flip_sign){
+        if(input_cfg.flip_sign){
           auto seqGetter_flip=[g=seqGetter](const xAOD::Jet&jet, const IParticles& constituents){
-              auto [n,v] = g(jet,constituents);
-              std::for_each(v.begin(), v.end(), [](double &n){ n=-1.0*n; });
-              return std::make_pair(n,v);
+            auto [n,v] = g(jet,constituents);
+            std::for_each(v.begin(), v.end(), [](double &n){ n=-1.0*n; });
+            return std::make_pair(n,v);
           };
-              sequencesFromConstituents.push_back(seqGetter_flip);
-          }
-          else{
-              sequencesFromConstituents.push_back(seqGetter);
-          }
-              deps.merge(seq_deps);
-              if (auto h = remap.extract(input_cfg.name)){
-              used_remap.insert(h.key());
-          }
+          sequencesFromConstituents.push_back(seqGetter_flip);
+        }
+        else{
+          sequencesFromConstituents.push_back(seqGetter);
+        }
+        deps.merge(seq_deps);
+        if (auto h = remap.extract(input_cfg.name)){
+          used_remap.insert(h.key());
+        }
       }
   }
 
@@ -460,6 +460,16 @@ namespace {
     }
     std::vector<int64_t> cnsts_feat_dim = {num_cnsts, num_vars};
     return {cnsts_feats, cnsts_feat_dim};
+  }
+
+  std::map<std::string, std::vector<double>> CustomSequenceGetter::getDL2Feats(
+    const xAOD::Jet& jet, const IParticles& constituents) const
+  {
+    std::map<std::string, std::vector<double>> feats;
+    for (const auto& seq_builder: sequencesFromConstituents){
+      feats.insert(seq_builder(jet, constituents));
+    }
+    return feats;
   }
 
   std::set<std::string> CustomSequenceGetter::getDependencies() const {

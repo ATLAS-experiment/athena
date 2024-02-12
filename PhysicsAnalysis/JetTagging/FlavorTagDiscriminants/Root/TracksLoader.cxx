@@ -75,26 +75,6 @@ namespace {
 
 namespace FlavorTagDiscriminants {
 
-    std::vector<FTagTrackSequenceConfig> convertTracksConfigBack(
-      FTagConstituentsSequenceConfig config
-    ){
-      std::vector<FTagTrackSequenceConfig> cfgs;
-      FTagTrackSequenceConfig cfg;
-      cfg.name = config.name;
-      cfg.order = static_cast<SortOrder>(config.order);
-      cfg.selection = static_cast<TrackSelection>(config.selection);
-
-      for (auto input_config : config.inputs){
-        FTagTrackInputConfig input_cfg;
-        input_cfg.name = input_config.name;
-        input_cfg.type = static_cast<EDMType>(input_config.type);
-        input_cfg.flip_sign = input_config.flip_sign;
-        cfg.inputs.push_back(input_cfg);
-      }
-      cfgs.push_back(cfg);
-      return cfgs;
-    }
-    
     FTagConstituentsSequenceConfig createTracksLoaderConfig(
       std::pair<std::string, std::vector<std::string>> trk_names,
       FlipTagConfig flip_config
@@ -394,6 +374,14 @@ namespace FlavorTagDiscriminants {
               return Tracks(tr.crbegin(), tr.crend());},
             {}
           };
+        case FlipTagConfig::SIMPLE_FLIP:
+          // Just flips the order
+          return {
+            [](const Tracks& tr, const xAOD::Jet& ) {
+              return Tracks(tr.crbegin(), tr.crend());},
+            {}
+          };
+
         case FlipTagConfig::STANDARD:
           return {[](const Tracks& tr, const xAOD::Jet& ) { return tr; }, {}};
         default: {
@@ -456,6 +444,7 @@ namespace FlavorTagDiscriminants {
         deps.trackInputs.merge(track_data_deps);
         deps.bTagInputs.insert(options.track_link_name);
         used_remap = m_customSequenceGetter.getUsedRemap();
+        name = cfg.name;
     }
 
     std::vector<const xAOD::TrackParticle*> TracksLoader::getTracksFromJet(
@@ -477,7 +466,9 @@ namespace FlavorTagDiscriminants {
         return only_tracks;
     }
 
-    std::pair<std::string, input_pair> TracksLoader::getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const {
+    std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> TracksLoader::getData(
+      const xAOD::Jet& jet, 
+      const SG::AuxElement& btag) const {
         Tracks flipped_tracks;
         Tracks sorted_tracks = getTracksFromJet(jet, btag);
         std::vector<const xAOD::IParticle*> flipped_tracks_ip;
@@ -488,13 +479,36 @@ namespace FlavorTagDiscriminants {
             flipped_tracks_ip.push_back(dynamic_cast<const xAOD::IParticle*>(trk));
         }
 
-        return std::make_pair("track_features", m_customSequenceGetter.getFeats(jet, flipped_tracks_ip));
+        return std::make_tuple("track_features", m_customSequenceGetter.getFeats(jet, flipped_tracks_ip), flipped_tracks_ip);
     }
+
+    std::tuple<char, std::map<std::string, std::vector<double>>> TracksLoader::getDL2Data(
+      const xAOD::Jet& jet, 
+      const SG::AuxElement& btag, 
+      std::function<char(const Tracks&)> ip_checker) const{
+      char invalid = 0;
+      Tracks flipped_tracks;
+      std::vector<const xAOD::IParticle*> flipped_tracks_ip;
+
+      Tracks sorted_tracks = getTracksFromJet(jet, btag);
+      if (ip_checker(sorted_tracks)) invalid = 1;
+      flipped_tracks = m_flipFilter(sorted_tracks, jet);
+      
+      for (const auto& trk: flipped_tracks) {
+          flipped_tracks_ip.push_back(dynamic_cast<const xAOD::IParticle*>(trk));
+      }
+      auto feats = m_customSequenceGetter.getDL2Feats(jet, flipped_tracks_ip);
+      return std::make_tuple(invalid, feats);
+    };
 
     FTagDataDependencyNames TracksLoader::getDependencies() const {
         return deps;
     }
     std::set<std::string> TracksLoader::getUsedRemap() const {
         return used_remap;
+    }
+
+    std::string TracksLoader::getName() const {
+        return name;
     }
 }

@@ -33,9 +33,6 @@
 namespace FlavorTagDiscriminants {
 
     // tracksConfig 
-    std::vector<FTagTrackSequenceConfig> convertTracksConfigBack(
-      FTagConstituentsSequenceConfig config
-    );
     FTagConstituentsSequenceConfig createTracksLoaderConfig(
       std::pair<std::string, std::vector<std::string>> trk_names,
       FlipTagConfig flip_config
@@ -45,11 +42,19 @@ namespace FlavorTagDiscriminants {
     // Subclass for Tracks loader inherited from abstract ConstituentsLoader class
     class TracksLoader : public ConstituentsLoader {
       public:
-        // TracksLoader();
+        typedef std::vector<const xAOD::TrackParticle*> Tracks;
+
         TracksLoader(FTagConstituentsSequenceConfig, const FTagOptions& options);
-        std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const override;
+        std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
+          const xAOD::Jet& jet, 
+          const SG::AuxElement& btag) const override;
+        std::tuple<char, std::map<std::string, std::vector<double>>>  getDL2Data(
+          const xAOD::Jet& jet, 
+          const SG::AuxElement& btag, 
+          std::function<char(const Tracks&)> ip_checker) const;
         FTagDataDependencyNames getDependencies() const override;
         std::set<std::string> getUsedRemap() const override;
+        std::string getName() const override;
       private:
         // typedefs
         typedef std::pair<std::string, double> NamedVar;
@@ -57,7 +62,6 @@ namespace FlavorTagDiscriminants {
         typedef xAOD::Jet Jet;
         typedef xAOD::TrackParticle Track;
         // tracks typedefs
-        typedef std::vector<const Track*> Tracks;
         typedef std::function<double(const Track*,
                                     const Jet&)> TrackSortVar;
         typedef std::function<bool(const Track*)> TrackFilter;

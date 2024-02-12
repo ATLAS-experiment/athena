@@ -65,6 +65,7 @@ namespace FlavorTagDiscriminants {
                               const FTagOptions& options);
 
           std::pair<std::vector<float>, std::vector<int64_t>> getFeats(const xAOD::Jet& jet, const IParticles& constituents) const;
+          std::map<std::string, std::vector<double>> getDL2Feats(const xAOD::Jet& jet, const IParticles& constituents) const;
 
           std::set<std::string> getDependencies() const;
           std::set<std::string> getUsedRemap() const;

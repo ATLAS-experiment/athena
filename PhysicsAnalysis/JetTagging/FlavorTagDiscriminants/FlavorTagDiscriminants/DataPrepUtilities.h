@@ -94,16 +94,10 @@ namespace FlavorTagDiscriminants {
     typedef xAOD::Jet Jet;
     typedef xAOD::BTagging BTagging;
     typedef std::vector<const xAOD::TrackParticle*> Tracks;
-    typedef std::function<double(const xAOD::TrackParticle*,
-                                 const xAOD::Jet&)> TrackSortVar;
-    typedef std::function<bool(const xAOD::TrackParticle*)> TrackFilter;
-    typedef std::function<Tracks(const Tracks&,
-                                 const xAOD::Jet&)> TrackSequenceFilter;
 
     // getter functions
     typedef std::function<NamedVar(const SG::AuxElement&)> VarFromBTag;
     typedef std::function<NamedVar(const Jet&)> VarFromJet;
-    typedef std::function<NamedSeq(const Jet&, const Tracks&)> SeqFromTracks;
 
     // ___________________________________________________________________
     // Getter functions
@@ -165,26 +159,6 @@ namespace FlavorTagDiscriminants {
         }
     };
 
-    // The track getter is responsible for getting the tracks from the
-    // jet applying a selection, and then sorting the tracks.
-    class TracksFromJet{
-      public:
-        TracksFromJet(SortOrder, TrackSelection, const FTagOptions&);
-        Tracks operator()(const xAOD::Jet& jet,
-                          const SG::AuxElement& btag) const;
-      private:
-        using AE = SG::AuxElement;
-        using IPC = xAOD::IParticleContainer;
-        using TPC = xAOD::TrackParticleContainer;
-        using TrackLinks = std::vector<ElementLink<TPC>>;
-        using PartLinks = std::vector<ElementLink<IPC>>;
-        using TPV = std::vector<const xAOD::TrackParticle*>;
-        std::function<TPV(const SG::AuxElement&)> m_associator;
-
-        TrackSortVar m_trackSortVar;
-        TrackFilter m_trackFilter;
-    };
-
     // The sequence getter takes in tracks and calculates arrays of
     // values which are better suited for inputs to the NNs
     template <typename T>
@@ -215,28 +189,24 @@ namespace FlavorTagDiscriminants {
       VarFromBTag varFromBTag(const std::string& name,
                               EDMType,
                               const std::string& defaultflag);
-      TrackSortVar trackSortVar(SortOrder, const FTagOptions&);
-      std::pair<TrackFilter,std::set<std::string>> trackFilter(
-        TrackSelection, const FTagOptions&);
-      std::pair<SeqFromTracks,std::set<std::string>> seqFromTracks(
-        const FTagTrackInputConfig&, const FTagOptions&);
-      std::pair<TrackSequenceFilter,std::set<std::string>> flipFilter(
-        const FTagOptions&);
     }
 
 
     typedef SG::AuxElement::Decorator<float> OutputSetterFloat;
     typedef std::vector<std::pair<std::string, OutputSetterFloat > > OutNodeFloat;
 
-    struct TrackSequenceBuilder {
-      TrackSequenceBuilder(SortOrder,
-                           TrackSelection,
-                           const FTagOptions&);
-      std::string name;
-      internal::TracksFromJet tracksFromJet;
-      internal::TrackSequenceFilter flipFilter;
-      std::vector<internal::SeqFromTracks> sequencesFromTracks;
-    };
+    typedef SG::AuxElement::Decorator<char> OutputSetterChar;
+    typedef std::vector<std::pair<std::string, OutputSetterChar > > OutNodeChar;
+
+    typedef SG::AuxElement::Decorator<std::vector<char>> OutputSetterVecChar;
+    typedef std::vector<std::pair<std::string, OutputSetterVecChar > > OutNodeVecChar;
+ 
+    typedef SG::AuxElement::Decorator<std::vector<float>> OutputSetterVecFloat;
+    typedef std::vector<std::pair<std::string, OutputSetterVecFloat > > OutNodeVecFloat;
+
+    typedef std::vector<ElementLink<xAOD::TrackParticleContainer>> TrackLinks;
+    typedef SG::AuxElement::Decorator<internal::TrackLinks> OutputSetterTrackLinks;
+    typedef std::vector<std::pair<std::string, OutputSetterTrackLinks > > OutNodeTrackLinks;
 
   }
 
@@ -252,17 +222,6 @@ namespace FlavorTagDiscriminants {
       std::vector<FTagInputConfig>,
       std::vector<FTagConstituentsSequenceConfig>,
       FTagOptions>
-    createGetterConfigNew( lwt::GraphConfig& graph_config,
-      FlipTagConfig flip_config,
-      std::map<std::string, std::string> remap_scalar,
-      TrackLinkType track_link_type);
-    
-    // Get the configuration structures based on the lwtnn NN
-    // structure.
-    std::tuple<
-      std::vector<FTagInputConfig>,
-      std::vector<FTagTrackSequenceConfig>,
-      FTagOptions>
     createGetterConfig( lwt::GraphConfig& graph_config,
       FlipTagConfig flip_config,
       std::map<std::string, std::string> remap_scalar,
@@ -275,15 +234,6 @@ namespace FlavorTagDiscriminants {
       FTagDataDependencyNames>
     createBvarGetters(
       const std::vector<FTagInputConfig>& inputs);
-
-    // return the track getter functions for the NNs
-    std::tuple<
-      std::vector<internal::TrackSequenceBuilder>,
-      FTagDataDependencyNames,
-      std::set<std::string>>
-    createTrackGetters(
-      const std::vector<FTagTrackSequenceConfig>& track_sequences,
-      const FTagOptions& options);
 
     // return the decorators for the NNs
     std::tuple<

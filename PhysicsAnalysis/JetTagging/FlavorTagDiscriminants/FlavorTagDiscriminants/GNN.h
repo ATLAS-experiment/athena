@@ -88,7 +88,6 @@ namespace FlavorTagDiscriminants {
     std::string m_input_node_name;
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
-    std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
     std::vector<std::shared_ptr<ConstituentsLoader>> m_constituentsLoaders;
 
     Decorators m_decorators;

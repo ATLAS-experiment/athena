@@ -60,14 +60,16 @@ namespace FlavorTagDiscriminants {
             };
             virtual ~ConstituentsLoader() {
             };
-            virtual std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const = 0;
+            virtual std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const = 0;
             virtual FTagDataDependencyNames getDependencies() const = 0;
             virtual std::set<std::string> getUsedRemap() const = 0;
+            virtual std::string getName() const = 0;
 
         protected:
             FTagDataDependencyNames deps;
             FTagConstituentsSequenceConfig config;
             std::set<std::string> used_remap;
+            std::string name;
     };
 }
 

@@ -31,9 +31,12 @@ namespace FlavorTagDiscriminants {
       public:
         // TracksLoader();
         IParticlesLoader(FTagConstituentsSequenceConfig, const FTagOptions& options);
-        std::pair<std::string, input_pair> getData(const xAOD::Jet& jet, const SG::AuxElement& btag) const override ;
+        std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
+          const xAOD::Jet& jet, 
+          const SG::AuxElement& btag) const override ;
         FTagDataDependencyNames getDependencies() const override;
         std::set<std::string> getUsedRemap() const override;
+        std::string getName() const override;
       protected:
         // typedefs
         typedef xAOD::Jet Jet;

@@ -14,7 +14,6 @@
 #include "PathResolver/PathResolver.h"
 
 #include <fstream>
-#include <iostream>
 
 namespace {
   const std::string jetLinkName = "jetLink";
@@ -51,14 +50,12 @@ namespace FlavorTagDiscriminants {
     auto lwt_config = m_onnxUtil->getLwtConfig();
 
     // Create configuration objects for data preprocessing.
-    auto [inputs, constituents_configs, options] = dataprep::createGetterConfigNew(
+    auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
     std::vector<FTagTrackSequenceConfig> track_sequences;
     for (auto config : constituents_configs){
-      std::cout << "Config name: " << config.name << std::endl;
       if (config.name.find("tracks") != std::string::npos){
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
-        track_sequences = convertTracksConfigBack(config);
       }
       else if (config.name.find("flow") != std::string::npos){
         m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
@@ -73,10 +70,9 @@ namespace FlavorTagDiscriminants {
     m_varsFromJet = vj;
     m_dataDependencyNames = ds;
 
-    // Initialize track input getters.
-    auto [tsb, td, rt] = dataprep::createTrackGetters(track_sequences, options);
-    m_trackSequenceBuilders = tsb;
-    m_dataDependencyNames += td;
+    // Initialize data dependencies and output decorators.
+    FlavorTagDiscriminants::FTagDataDependencyNames dd;
+    std::set<std::string> rd;
 
     // Retrieve the configuration for the model outputs.
     OnnxUtil::OutputConfig gnn_output_config = m_onnxUtil->getOutputConfig();
@@ -147,21 +143,16 @@ namespace FlavorTagDiscriminants {
     input_pair jet_info (jet_feat, jet_feat_dim);
     gnn_input.insert({"jet_features", jet_info});
 
-    // Only one track sequence is allowed because the tracks are declared
-    // outside the loop over sequences.
-    // Having more than one sequence would overwrite them.
-    // These are only used outside the loop to write the track links.
-    if (m_trackSequenceBuilders.size() > 1) {
-      throw std::runtime_error("Only one track sequence is supported");
-    }
     Tracks input_tracks;
-    for (const auto& builder: m_trackSequenceBuilders) {
-      Tracks sorted_tracks = builder.tracksFromJet(jet, btag);
-      input_tracks = builder.flipFilter(sorted_tracks, jet);
-    }
+
     for (auto loader : m_constituentsLoaders){
-      auto loader_out = loader->getData(jet, btag);
-      gnn_input.insert({loader_out.first, loader_out.second});
+      auto [sequence_name, sequence_data, sequence_iparticles] = loader->getData(jet, btag);
+      gnn_input.insert({sequence_name, sequence_data});
+      if (sequence_name.find("track") != std::string::npos){
+        for (auto iparticle : sequence_iparticles){
+          input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(iparticle));
+        }
+      }
     }
 
     // run inference

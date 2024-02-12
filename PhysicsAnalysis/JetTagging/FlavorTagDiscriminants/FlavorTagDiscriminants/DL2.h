@@ -7,6 +7,7 @@
 
 // local includes
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
+#include "FlavorTagDiscriminants/TracksLoader.h"
 
 // forward declarations
 namespace lwt {
@@ -20,7 +21,7 @@ namespace FlavorTagDiscriminants {
   public:
     DL2(const lwt::GraphConfig&,
         const std::vector<FTagInputConfig>&,
-        const std::vector<FTagTrackSequenceConfig>& = {},
+        const std::vector<FTagConstituentsSequenceConfig>& = {},
         const FTagOptions& = FTagOptions());
     void decorate(const xAOD::BTagging& btag) const;
     void decorate(const xAOD::Jet& jet) const;
@@ -37,7 +38,7 @@ namespace FlavorTagDiscriminants {
     std::unique_ptr<lwt::NanReplacer> m_variable_cleaner;
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
-    std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
+    std::vector<std::shared_ptr<TracksLoader>> m_tracksLoaders;
     std::map<std::string, internal::OutNodeFloat> m_decorators;
     float m_defaultValue;
     std::function<char(const internal::Tracks&)> m_invalid_track_checker;
