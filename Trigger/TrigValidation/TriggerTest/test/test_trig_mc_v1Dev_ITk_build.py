@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger AthenaMT test running new-style job options
+# art-description: Trigger test for Run4 with single muon
 # art-type: build
 # art-include: main/Athena
 # art-include: 23.0/Athena
@@ -22,7 +22,7 @@ run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
              'Trigger.enableL1CaloPhase1=False',
-             'Trigger.enabledSignatures=["Muon"]']
+             'Trigger.enabledSignatures=[\\\"Muon\\\"]']
 
 # The full test configuration
 test = Test.Test()

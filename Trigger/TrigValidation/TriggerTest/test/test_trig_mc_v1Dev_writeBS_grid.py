@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->BS athena test of the Dev_pp_run3_v1 menu
 # art-type: grid
@@ -25,11 +25,14 @@ from TrigValTools.TrigValSteering.Common import find_file
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar'
 ex.threads = 4
 ex.concurrent_events = 4
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\';doWriteBS=True;doWriteRDOTrigger=False;doRuntimeNaviVal=True"'
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
+            'Trigger.writeBS=True',
+            'Trigger.doRuntimeNaviVal=True']
+ex.args = '--CA'
 
 checkBS = Step.Step("CheckBS")
 checkBS.executable = 'trigbs_dumpHLTContentInBS_run3.py'
