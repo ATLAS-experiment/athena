@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -54,7 +54,8 @@ class TrigMultiTrkComboHypoTool: public ComboHypoToolBase {
   Gaudi::Property<std::pair<double, double>> m_massRange {this, "massRange", {-99., -9.}, "range for the fitted mass, no selection applied if negative"};
   Gaudi::Property<float> m_chi2 {this, "chi2", -99. , "Chi2 cut for vertex (0 < chi2 < cut), no selection applied if negative" };
   Gaudi::Property<bool> m_acceptAll {this, "AcceptAll", false, "if AcceptAll flag is set to true, no selection will be applied for xAOD::TrigBphys object"};
-  Gaudi::Property<float> m_LxyCut {this, "LxyCut", -999., "Applies an Lxy Cut if set > -999"};
+  Gaudi::Property<float> m_LxyCut {this, "LxyCut", -99., "Applies an Lxy Cut if set >= 0"};
+  Gaudi::Property<float> m_sigmaLxyCut {this, "sigmaLxyCut", -99., "Applies an Lxy/LxyError Cut if set >= 0"};
   Gaudi::Property<float> m_deltaRMax {this, "deltaRMax", std::numeric_limits<float>::max(),
     "maximum deltaR between tracks in a candidate"};
   Gaudi::Property<float> m_deltaRMin {this, "deltaRMin", std::numeric_limits<float>::lowest(),
