@@ -4,8 +4,7 @@
 # 
 # art-type: grid
 # art-include: main/Athena
-# art-include: 22.0/Athena
-# art-include: 21.9/Athena
+# art-include: 23.0/Athena
 # art-output: trkPerformance_MuonSpectrometerTracks.txt
 # art-output: trkPerformance_ExtrapolatedMuonTracks.txt
 # art-output: trkPerformance_MSOnlyExtrapolatedMuonTracks.txt
@@ -19,13 +18,15 @@
 #####################################################################
 # run reconstruction on 2000 di-muon events (0.9<|eta|<2.8) using the best knowledge symmetric Run3 layout (ATLAS-R3S-2021-01-00-02)
 # the input RDO was produced from /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/EVNT_DiMuon_10k__AbsEta_09_28__Pt_10_1000GeV.root
-# simulation/digitisation was executed in Athena,22.0.34
-Reco_tf.py --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run3/RDO/RDO_DiMuon_Endcap_R3LatestLayout_sym_v1.root \
-           --preExec "from MuonRecExample.MuonRecFlags import muonRecFlags;muonRecFlags.setDefaults();muonRecFlags.useLooseErrorTuning.set_Value_and_Lock(True);muonRecFlags.doTrackPerformance=True;muonRecFlags.TrackPerfSummaryLevel=2;muonRecFlags.TrackPerfDebugLevel=5;from RecExConfig.RecFlags import rec;rec.doTrigger=False;rec.doEgamma=True;rec.doLucid=True;rec.doZdc=False;rec.doJetMissingETTag=True;from MuonRecExample.MuonStandaloneFlags import muonStandaloneFlags;muonStandaloneFlags.printSummary=True;" \
+# simulation/digitisation was executed in Athena,22.0.34 
+
+Reco_tf.py --CA True \
+           --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run3/RDO/RDO_DiMuon_Endcap_R3LatestLayout_sym_v1.root \
            --autoConfiguration everything \
+           --preExec "flags.Detector.GeometryMM = True;flags.Detector.EnableMM = True" \
            --imf False \
-           --postInclude MuonPRDTest/NSWPRDValAlg.reco.py \
-           --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-09' \
+           --postInclude MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg \
+           --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-11' \
            --outputESDFile OUT_ESD.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf.py"
@@ -34,7 +35,7 @@ then
     exit ${exit_code}
 fi
 # check the log file for WARNING/ERROR/FATAL
-LOG_RECO="log.RAWtoESD"
+LOG_RECO="log.RAWtoALL"
 NWARNING="$(cat ${LOG_RECO} | grep WARNING | wc -l)"
 NERROR="$(cat ${LOG_RECO} | grep ERROR | wc -l)"
 NFATAL="$(cat ${LOG_RECO} | grep FATAL | wc -l)"
