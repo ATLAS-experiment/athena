@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger BS->RDO_TRIG athena test without any HLT chains and without L1Sim (only tests L1 decoding)
 # art-type: build
@@ -12,20 +12,15 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'data'
 ex.max_events = 80
 ex.threads = 4
 ex.concurrent_events = 4
-precommand = ''.join([
-  "setMenu='Dev_pp_run3_v1';",  
-  "doL1Sim=False;",
-  "doEmptyMenu=True;",
-  "doWriteBS=False;",
-  "doWriteRDOTrigger=True;",
-  "forceEnableAllChains=True;",
-])
-ex.args = '-c "{:s}"'.format(precommand)
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+            'Trigger.enabledSignatures=[]',
+            'Trigger.forceEnableAllChains=True']
+ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'
