@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi/Athena include(s):
@@ -175,6 +175,9 @@ void VTuneProfilerService::handle( const Incident& inc ) {
      if( m_resumeEvent == m_processedEvents &&
          !m_runner ) {
         std::lock_guard<std::mutex> lock(m_mutex);
+        //double checked locking pattern 
+        //https://www.aristeia.com/Papers/DDJ_Jul_Aug_2004_revised.pdf
+        //cppcheck-suppress identicalInnerCondition
         if (!m_runner) {
         if( resumeProfiling().isFailure() ) {
            REPORT_MESSAGE( MSG::ERROR )
@@ -188,6 +191,9 @@ void VTuneProfilerService::handle( const Incident& inc ) {
   else if( inc.type() == ENDEVENT_INCIDENT_NAME ) {
      if( m_pauseEvent == m_processedEvents && m_runner) {
         std::lock_guard<std::mutex> lock(m_mutex);
+        //double checked locking pattern 
+        //https://www.aristeia.com/Papers/DDJ_Jul_Aug_2004_revised.pdf
+        //cppcheck-suppress identicalInnerCondition
         if (m_runner) {
         if( pauseProfiling().isFailure() &&
             m_runner ) {
