@@ -8,13 +8,14 @@
 # art-output: mc15_2010_ttbar_no_pileup.RDO.pool.root
 # art-output: ConfigDigi*.pkl
 
+Events=25
 DigiOutFileName="mc15_2010_ttbar_no_pileup.RDO.pool.root"
 
 Digi_tf.py \
     --CA True \
     --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ttbar.ATLAS-R1-2010-02-00-00.HITS.pool.root \
     --outputRDOFile ${DigiOutFileName} \
-    --maxEvents 25 \
+    --maxEvents ${Events} \
     --skipEvents 0  \
     --digiSeedOffset1=11 \
     --digiSeedOffset2=22 \
