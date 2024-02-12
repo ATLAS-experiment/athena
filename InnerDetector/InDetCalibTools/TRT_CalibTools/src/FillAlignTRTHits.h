@@ -64,7 +64,7 @@ private:
 
   ToolHandle< ITRT_DriftFunctionTool > m_driftFunctionTool{this, "TRTDriftFunctionTool", "TRT_DriftFunctionTool", "Drift function tool name"};
   ToolHandle<Trk::IUpdator> m_updatorHandle{this, "UpdatorTool", "Trk::KalmanUpdator/TrkKalmanUpdator", "Measurement updator to calculate unbiased track states"};
-  ToolHandle<ITRT_CalDbTool> m_trtcaldbTool ;
+  ToolHandle<ITRT_CalDbTool> m_trtcaldbTool {this, "TRTCalDbTool", "ITRT_CalDbTool", "Access to the folder of the calibration constants"}; 
   ServiceHandle<ITRT_StrawNeighbourSvc> m_neighbourSvc ;
   ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool; //!< The ConditionsSummaryTool
 
