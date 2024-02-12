@@ -480,32 +480,41 @@ namespace TableUtils {
                                     const std::size_t sub_categories,
                                     const std::vector< std::size_t> &counter);
 
-   inline std::string makeEtaBinLabel(const std::vector<float> &eta_bins,
-                               std::size_t eta_bin_i,
-                               bool abs_eta=false) {
-     std::stringstream eta_range_label;
-     eta_range_label << std::fixed << std::setprecision(1);
-     if (eta_bin_i==eta_bins.size()+1) {
-         eta_range_label << " All eta";
+   inline std::string makeBinLabel(const std::string &variable_name,
+                                   const std::vector<float> &bins,
+                                   std::size_t bin_i,
+                                   bool abs_value=false,
+                                   int precision=1) {
+     std::stringstream range_label;
+     range_label << std::fixed << std::setprecision(precision);
+     if (bin_i==bins.size()+1) {
+         range_label << " All " << variable_name;
      }
      else {
-         if (eta_bin_i==0) {
-           eta_range_label << std::setw(4) <<  (abs_eta ? "0.0" : "-inf") << "-";
+         if (bin_i==0) {
+            std::stringstream value_str;
+            value_str << std::fixed << std::setprecision(precision) << 0.;
+            range_label << std::setw(4) <<  (abs_value ? value_str.str().c_str() : "-inf") << "-";
          }
          else {
-           eta_range_label << std::setw(4) << eta_bins.at(eta_bin_i-1) <<"-";
+           range_label << std::setw(4) << bins.at(bin_i-1) <<"-";
          }
-         if (eta_bin_i>=eta_bins.size()) {
-           eta_range_label << std::setw(4) << "+inf";
+         if (bin_i>=bins.size()) {
+           range_label << std::setw(4) << "+inf";
          }
          else {
-           eta_range_label << std::setw(4) << eta_bins.at(eta_bin_i);
+           range_label << std::setw(4) << bins.at(bin_i);
          }
      }
-     return eta_range_label.str();
+     return range_label.str();
+   }
+
+   inline std::string makeEtaBinLabel(const std::vector<float> &eta_bins,
+                                   std::size_t eta_bin_i,
+                                   bool abs_eta=false) {
+      return TableUtils::makeBinLabel("eta",eta_bins, eta_bin_i,abs_eta, 1);
    }
 }
-
 // Helper method to wrap data that should be dumped in table form to an output stream
 // Usage:   out << makeTable( array, labels);
 template <typename T, std::size_t N>
