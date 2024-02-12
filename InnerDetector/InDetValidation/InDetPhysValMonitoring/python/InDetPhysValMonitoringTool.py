@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from __future__ import print_function
 
 from InDetPhysValMonitoring.ConfigUtils import serviceFactory, toolFactory
@@ -188,6 +188,22 @@ def getInDetPhysValMonitoringToolTightPrimary(**kwargs):
         useTrackSelection=True)
 
     return getInDetPhysValMonitoringTool(**kwargs)
+
+
+def getInDetPhysValMonitoringToolHILoose(**kwargs):
+    if 'TrackSelectionTool' not in kwargs:
+        from InDetPhysValMonitoring.TrackSelectionTool import getInDetTrackSelectionToolHILoose
+        kwargs = setDefaults(kwargs, TrackSelectionTool=toolFactory(
+            getInDetTrackSelectionToolHILoose))
+
+    kwargs = setDefaults(
+        kwargs,
+        name='InDetPhysValMonitoringToolHILoose',
+        SubFolder='HILoose/',
+        useTrackSelection=True)
+
+    return getInDetPhysValMonitoringTool(**kwargs)
+
 
 
 def getInDetPhysValMonitoringToolGSF(**kwargs):
