@@ -44,7 +44,7 @@ run "Reconstruction" \
     --outputAODFile AOD.pool.root \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
-    --postInclude "InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsSeedingConfig.ActsSeedingCfg" \
+    --postInclude "InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsSeedingConfig.ActsMainSeedingCfg" \
     --preExec "flags.Tracking.doTruth=False;flags.DQ.useTrigger=False;flags.Acts.doAnalysis=True;flags.Output.HISTFileName=\"ActsMonitoringOutput.root\"" \
     --perfmon fullmonmt \
     --maxEvents 5
