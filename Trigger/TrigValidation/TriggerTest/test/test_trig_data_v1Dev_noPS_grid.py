@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger BS->RDO_TRIG athena test of the full Dev_pp_run3_v1 menu without the TriggerValidation prescale set
 # art-type: grid
@@ -24,12 +24,15 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'data'
 ex.threads = 4
 ex.concurrent_events = 4
 ex.max_events = 500
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doWriteBS=False;doL1Sim=True;doWriteRDOTrigger=True;doRuntimeNaviVal=True;"'
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+            'Trigger.doLVL1=True',
+            'Trigger.doRuntimeNaviVal=True']
+ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'
