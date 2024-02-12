@@ -4,7 +4,7 @@
 #
 # art-type: grid
 # art-include: main/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 # art-output: OUT_ESD.root
 # art-output: OUT_ESD_1thread.root
@@ -13,15 +13,21 @@
 # art-output: diff_1_vs_serial.txt
 # art-output: diff_5_vs_1.txt
 # art-output: diff_8_vs_1.txt
-# art-output: log.RAWtoESD_serial
-# art-output: log.RAWtoESD_1thread
-# art-output: log.RAWtoESD_5thread
-# art-output: log.RAWtoESD_8thread
+# art-output: log.RAWtoALL_serial
+# art-output: log.RAWtoALL_1thread
+# art-output: log.RAWtoALL_5thread
+# art-output: log.RAWtoALL_8thread
+# art-output: NSWPRDValAlg.reco.ntuple.root
+# art-output: NSWPRDValAlg.reco.dcube.root
 
 #####################################################################
-Reco_tf.py --AMI q442 \
+Reco_tf.py \
+           --CA 'True' \
+           --AMI q442 \
+           --preExec "all:flags.DQ.Steering.doHLTMon=False" \
+           --postInclude "MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
+           --postExec 'cfg.getEventAlgo("NSWPRDValAlg").doCSCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doMuEntry=False;cfg.getEventAlgo("NSWPRDValAlg").doMDTSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doRPCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doTGCSDO=False;cfg.getEventAlgo("NSWPRDValAlg").doTruth=False' \
            --imf False \
-           --conditionsTag = "default:CONDBR2-BLKPA-RUN2-09" \
            --outputESDFile OUT_ESD.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf.py"
@@ -29,14 +35,15 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoESD_serial
+mv log.RAWtoALL log.RAWtoALL_serial
 #####################################################################
 
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
-Reco_tf.py --AMI q442 \
+Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+           --AMI q442 \
+           --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --imf False \
-           --conditionsTag = "default:CONDBR2-BLKPA-RUN2-09" \
            --athenaopts="--threads=1" \
            --outputESDFile OUT_ESD_1thread.root
 exit_code=$?
@@ -45,14 +52,15 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoESD_1thread
+mv log.RAWtoALL log.RAWtoALL_1thread
 #####################################################################
 
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
-Reco_tf.py --AMI q442 \
+Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+           --AMI q442 \
+           --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --imf False \
-           --conditionsTag = "default:CONDBR2-BLKPA-RUN2-09" \
            --athenaopts="--threads=5" \
            --outputESDFile OUT_ESD_5thread.root
 exit_code=$?
@@ -61,14 +69,15 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoESD_5thread
+mv log.RAWtoALL log.RAWtoALL_5thread
 #####################################################################
 
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
-Reco_tf.py --AMI q442 \
+Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+           --AMI q442 \
+           --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --imf False \
-           --conditionsTag = "default:CONDBR2-BLKPA-RUN2-09" \
            --athenaopts="--threads=8" \
            --outputESDFile OUT_ESD_8thread.root
 exit_code=$?
@@ -77,7 +86,18 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoESD_8thread
+mv log.RAWtoALL log.RAWtoALL_8thread
+#####################################################################
+
+#####################################################################
+# create histograms for dcube
+python $Athena_DIR/bin/createDCubeRecoHistograms_withSel.py
+exit_code=$?
+echo  "art-result: ${exit_code} DCubeRecoHist"
+if [ ${exit_code} -ne 0 ]
+then
+    exit ${exit_code}
+fi
 #####################################################################
 
 #####################################################################
