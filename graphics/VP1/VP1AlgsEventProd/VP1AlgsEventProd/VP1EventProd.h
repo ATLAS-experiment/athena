@@ -24,6 +24,9 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/IIncidentListener.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "EventDisplaysOnline/IOnlineEventDisplaysSvc.h"
+
 #include <string>
 
 class VP1EventProd: public AthAlgorithm,
@@ -40,6 +43,10 @@ class VP1EventProd: public AthAlgorithm,
   void handle(const Incident& inc);
 
  private:
+  
+  Gaudi::Property<bool> m_isOnline {this, "IsOnline", false, "If running at point 1"};
+  ServiceHandle<IOnlineEventDisplaysSvc> m_onlineEDsvc{this, "OnlineEventDisplaysSvc", "Online Event Displays Service"};
+  
   // run/event number to be used in the vp1 event file name
   unsigned long m_runNumber;
   unsigned long long  m_eventNumber;

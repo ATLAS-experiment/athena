@@ -11,6 +11,7 @@
 #include "JiveXML/EventStream.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "EventDisplaysOnline/IOnlineEventDisplaysSvc.h"
 
 namespace JiveXML {
   
@@ -25,27 +26,27 @@ namespace JiveXML {
 
     public:
       
-      /// Constructor
-      StreamToServerTool( const std::string&, const std::string&, const IInterface*);
+    /// Constructor
+    StreamToServerTool( const std::string&, const std::string&, const IInterface*);
 
-      /// Initialize
-      virtual StatusCode initialize();
+    /// Initialize
+    virtual StatusCode initialize();
       
-      /// Finalize
-      virtual StatusCode finalize();
+    /// Finalize
+    virtual StatusCode finalize();
 
-      /// Stream one event
-      virtual StatusCode StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* const EventBuffer ) ;
+    /// Stream one event
+    virtual StatusCode StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* const EventBuffer ) ;
 
     protected:
 
       /// Handle to the server that this tools shall stream events to
-      ServiceHandle<IServerSvc> m_ServerSvc;
-
+    ServiceHandle<IServerSvc> m_ServerSvc;
+    ServiceHandle<IOnlineEventDisplaysSvc> m_onlineEDsvc{this, "OnlineEventDisplaysSvc", "Online Event Displays Service"};
     private:
 
-      /** Stream name under which these events shall appear */
-      std::string m_StreamName;
+    /** Stream name under which these events shall appear */
+    std::string m_StreamName;
 
   };
 

@@ -462,8 +462,6 @@ def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
     # JiveXML_RecEx_config.py
     # JiveXML_jobOptionBase.py
     result = ComponentAccumulator()
-    stft=kwargs.get('StreamToFileTool')
-    print('StreamToFileTool',type(stft), getattr(stft,'MyTest'))
     kwargs.setdefault("AtlasRelease", getATLASVersion())
     kwargs.setdefault("WriteToFile", True)
     kwargs.setdefault("OnlineMode", False)
