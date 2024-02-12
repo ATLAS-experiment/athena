@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TriggerMenuMT )
@@ -19,17 +19,17 @@ atlas_install_scripts( scripts/generateL1MenuRun3.py
                        scripts/runTriggerAPIExample.py
                        scripts/generateUnprescaledLists.py
                        scripts/test_menu_dump.py
-		                 scripts/test_menu_CA.py
+                       scripts/test_HLTmenu.py
                        python/HLT/Config/Utility/DictFromChainName.py
                        POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Shell scripts without flake8 checking:
-atlas_install_scripts( scripts/test_HLTmenu.sh
-                       scripts/test_manual_menu_cf_CA.sh
+atlas_install_scripts( scripts/test_manual_menu_cf_CA.sh
                        scripts/test_emu_step_processing_cf_CA.sh
                        scripts/test_emu_step_menu_processing_cf_CA.sh
                      )
 
+# Unit tests:
 foreach(test emu_step_processing_cf_CA emu_step_menu_processing_cf_CA)
    atlas_add_test( ${test}
                    SCRIPT test_${test}.sh
@@ -37,14 +37,11 @@ foreach(test emu_step_processing_cf_CA emu_step_menu_processing_cf_CA)
                    PRIVATE_WORKING_DIRECTORY )
 endforeach()
 
-
-
 atlas_add_test( manual_menu_cf_CA
                SCRIPT test_manual_menu_cf_CA.sh
                PRIVATE_WORKING_DIRECTORY 
                POST_EXEC_SCRIPT noerror.sh )
 
-# Unit tests:
 atlas_add_test( ViewCFTest
                 SCRIPT python -m unittest -v TriggerMenuMT.CFtest.ViewCFTest
                 POST_EXEC_SCRIPT noerror.sh )
@@ -72,10 +69,10 @@ endfunction()
 function( atlas_test_hlt_trigger_menu menu )
    set (extra_args ${ARGN})
    atlas_add_test( "HLT_${menu}"
-                   SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_HLTmenu.sh ${menu} "${extra_args}"
-                   PROPERTIES TIMEOUT 800
-                   PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_HLT_${menu}/HLT_${menu}.log" )
+      SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_HLTmenu.py Trigger.triggerMenuSetup=${menu} ${extra_args}
+      PRIVATE_WORKING_DIRECTORY
+      PROPERTIES TIMEOUT 1200
+      POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_HLT_${menu}/HLT_${menu}.log" )
 endfunction()
 
 # For other menus, fast check that HLT does not include non-existent L1
@@ -102,24 +99,10 @@ atlas_test_hlt_trigger_menu( Dev_pp_run3_v1_BulkMCProd_prescale )
 atlas_test_hlt_trigger_menu( Cosmic_run3_v1 )
 atlas_test_hlt_trigger_menu( Dev_HI_run3_v1 )
 atlas_test_hlt_trigger_menu( PhysicsP1_pp_run3_v1_HLTReprocessing_prescale )
+atlas_test_hlt_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 )
 
 # Test other HLT menus not included above
-atlas_test_l1defined_menu( PhysicsP1_pp_lowMu_run3_v1 )
 atlas_test_l1defined_menu( Dev_pp_run4_v1 )
-
-function( atlas_test_ca_trigger_menu menu )
-   set (extra_args ${ARGN})
-   atlas_add_test( "menu_CA_${menu}"
-   SCRIPT ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_menu_CA.py Trigger.triggerMenuSetup=${menu} ${extra_args}
-   PRIVATE_WORKING_DIRECTORY
-   PROPERTIES TIMEOUT 1200   
-   POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_menu_CA_${menu}/menu_CA_${menu}.log" )
-endfunction()
-
-# test for CA menu
-atlas_test_ca_trigger_menu( Dev_pp_run3_v1 )
-atlas_test_ca_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 Trigger.disabledSignatures=["Cosmics"] )
-atlas_test_ca_trigger_menu( Dev_HI_run3_v1 )
 
 # test for menu name consistency
 atlas_add_test( test_menu_dump
