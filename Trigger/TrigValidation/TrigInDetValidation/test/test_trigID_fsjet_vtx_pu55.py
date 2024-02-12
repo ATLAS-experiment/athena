@@ -30,6 +30,8 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True
 Slices  = ['fsjet']
 Events  = 2000
 Threads = 8
@@ -38,7 +40,12 @@ Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-preinclude_file = "RDOtoRDOTrigger:TrigInDetValidation/TIDAvtx_preinclude.py"
+# legacy 
+# preinclude_file = "RDOtoRDOTrigger:TrigInDetValidation/TIDAvtx_preinclude.py"
+
+# CA
+preexec_tris = "flags.Trigger.InDetTracking.fullScan.addSingleTrackVertices=True;flags.Trigger.InDetTracking.fullScan.minNSiHits_vtx=8;flags.Trigger.InDetTracking.fullScan.TracksMaxZinterval=3;"
+
 
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                        -o data-hists.root" ), 

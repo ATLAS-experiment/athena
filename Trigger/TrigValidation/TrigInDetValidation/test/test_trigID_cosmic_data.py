@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for cosmic data
+# art-description: art job for cosmic_data
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
@@ -27,6 +27,10 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
+
+
+# not yet - need to establish how to postinclude in the RAWtoALL
+# useCA_Reco = True      
 
 Slices  = ['cosmic']
 Events  = 4000

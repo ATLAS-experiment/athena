@@ -28,6 +28,9 @@
 # art-output: *.dat 
 
 
+# not yet, need yo sort out the replacement of the preinclude / preexecs
+# useCA_Reco = True
+
 Slices  = ['cosmic']
 Events  = 4000
 Threads = 8 
