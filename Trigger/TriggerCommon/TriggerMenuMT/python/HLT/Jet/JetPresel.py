@@ -78,7 +78,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. Please investigate."
 
     preselCommonJetParts = dict(JetChainParts_Default)
-
+    
     for ip,p in enumerate(presel_cut_str.split('XX')):
         hascalSel= bool(re.match(r'.*emf\w?\d+', p))
         if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
@@ -110,6 +110,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         if 'prefilt' not in cut_dict.keys(): cut_dict['prefilt'] = ''
 
         mult,region,scenario,cut,btagger,bwp,dipzwp,emfc=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'],cut_dict['bwp'],cut_dict['dipzwp'],cut_dict['emfc']
+        prefilters = []
 
         if mult=='': mult='1'
         etarange = etaRangeAbbrev[region]
@@ -118,10 +119,9 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
         elif scenario == "Z":
-            #hyposcenario=f'Z{dipzwp}j{nCentralJets}'
             hyposcenario=f'Z{dipzwp}XX{nCentralJets}c'
-            prefilt = cut_dict['prefilt']            
-            if prefilt != '': hyposcenario += f'_{prefilt}'
+            prefilt = cut_dict['prefilt']   
+            if prefilt != '': prefilters.append(prefilt)
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
         else:
@@ -148,6 +148,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             'bsel': '' if bwp == '' else f'{bwp}b{btagger}',
             'chainPartIndex': ip,
             'hypoScenario': hyposcenario,
+            'prefilters': prefilters,
             }
         )
         preselChainDict['chainParts'] += [tmpChainDict]
