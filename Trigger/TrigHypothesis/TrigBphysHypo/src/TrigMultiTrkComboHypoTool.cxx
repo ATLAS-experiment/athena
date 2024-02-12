@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -36,7 +36,8 @@ StatusCode TrigMultiTrkComboHypoTool::initialize() {
                  "   mass range: ( " <<  m_massRange.value().first << ", " << m_massRange.value().second << " )" << endmsg <<
                  "   chi2 cut: " << m_chi2 << endmsg <<
                  "   " << (m_totalCharge < 0 ? "total charge cut is disabled" : "total charge cut: only right charge combinations") << endmsg <<
-                 "   LxyCut: > " << m_LxyCut.value() );
+                 "   LxyCut: > " << m_LxyCut.value() << endmsg <<
+                 "   sigmaLxyCut: > " << m_sigmaLxyCut.value() );
 
   ATH_CHECK( m_nTrk >= 2 );
   ATH_CHECK( !(m_isMergedElectronChain && m_legMultiplicities[0] != 1) );
@@ -91,7 +92,8 @@ bool TrigMultiTrkComboHypoTool::passed(const xAOD::TrigBphys* trigBphys) const {
                       isInMassRange(trigBphys->mass()) &&
                       passedChi2Cut(trigBphys->fitchi2()) &&
                       passedChargeCut(totalCharge(trigBphys)) &&
-                      trigBphys->lxy() > m_LxyCut &&
+                      (m_LxyCut < 0. || trigBphys->lxy() > m_LxyCut) &&
+                      (m_sigmaLxyCut < 0. || (trigBphys->lxyError() != 0. && trigBphys->lxy() / trigBphys->lxyError() > m_sigmaLxyCut)) &&
                       passedDeltaRcut(trigBphys) &&
                       passedPtCut(trigBphys))) {
     mon_Lxy = trigBphys->lxy();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -136,6 +136,7 @@ StatusCode TrigMultiTrkComboHypo::initialize() {
 
   ATH_CHECK( m_vertexFitter.retrieve() );
   ATH_CHECK( m_vertexPointEstimator.retrieve() );
+  ATH_CHECK( m_v0Tools.retrieve() );
 
   // allowed IDs to filter out incoming decisions at L2 level
   for (const auto& item : triggerMultiplicityMap()) {
@@ -665,7 +666,7 @@ StatusCode TrigMultiTrkComboHypo::findMultiLeptonCandidates(TrigMultiTrkState<T>
       auto fitterState = m_vertexFitter->makeState(state.context());
       auto vertex = fit(tracklist, m_trkMass[iTrk], *fitterState);
       if (!vertex) continue;
-      xAOD::TrigBphys* trigBphys = makeTrigBPhys(*vertex, m_trkMass[iTrk], state.beamSpotPosition(), *fitterState);
+      xAOD::TrigBphys* trigBphys = makeTrigBPhys(*vertex, m_trkMass[iTrk], state.beamSpot(), *fitterState);
       if (m_useLeptonMomentum) trigBphys->setMass(mass);
       state.addTrigBphysObject(trigBphys, leptonIndices);
 
@@ -735,7 +736,7 @@ StatusCode TrigMultiTrkComboHypo::processMergedElectrons(TrigMultiTrkState<xAOD:
       auto fitterState = m_vertexFitter->makeState(state.context());
       auto vertex = fit(tracklist, particleMasses, *fitterState);
       if (!vertex) continue;
-      xAOD::TrigBphys* trigBphys = makeTrigBPhys(*vertex, particleMasses, state.beamSpotPosition(), *fitterState);
+      xAOD::TrigBphys* trigBphys = makeTrigBPhys(*vertex, particleMasses, state.beamSpot(), *fitterState);
       trigBphys->setRoiId(initialRoI->roiWord());
       state.addTrigBphysObject(trigBphys, std::vector<size_t>(1, leptons.size() - 1));
     }
@@ -803,7 +804,7 @@ StatusCode TrigMultiTrkComboHypo::findMuTrkCandidates(TrigMultiTrkState<xAOD::Mu
       auto fitterState = m_vertexFitter->makeState(state.context());
       auto vertex = fit(tracklist, particleMasses, *fitterState);
       if (!vertex) continue;
-      xAOD::TrigBphys* trigBphys = makeTrigBPhys(*vertex, particleMasses, state.beamSpotPosition(), *fitterState);
+      xAOD::TrigBphys* trigBphys = makeTrigBPhys(*vertex, particleMasses, state.beamSpot(), *fitterState);
       // trigBphys->setRoiId(initialRoI->roiWord());
       state.addTrigBphysObject(trigBphys, std::vector<size_t>(1, muons.size() - 1));
     }
@@ -945,7 +946,7 @@ std::unique_ptr<xAOD::Vertex> TrigMultiTrkComboHypo::fit(
 xAOD::TrigBphys* TrigMultiTrkComboHypo::makeTrigBPhys(
     const xAOD::Vertex& vertex,
     const std::vector<double>& particleMasses,
-    const Amg::Vector3D& beamSpot,
+    const xAOD::Vertex& beamSpot,
     const Trk::IVKalState& fitterState) const {
 
   double invariantMass = 0.;
@@ -974,7 +975,8 @@ xAOD::TrigBphys* TrigMultiTrkComboHypo::makeTrigBPhys(
   result->setFity(vertex.y());
   result->setFitz(vertex.z());
   result->setTrackParticleLinks(vertex.trackParticleLinks());
-  result->setLxy(Lxy(*result, beamSpot));
+  result->setLxy(m_v0Tools->lxy(&vertex, &beamSpot));
+  result->setLxyError(m_v0Tools->lxyError(&vertex, &beamSpot));
 
   ATH_MSG_DEBUG(
     "TrigBphys objects:\n\t  " <<
@@ -987,7 +989,7 @@ xAOD::TrigBphys* TrigMultiTrkComboHypo::makeTrigBPhys(
     "fitmass:       " << result->fitmass() << "\n\t  " <<
     "chi2/NDF:      " << result->fitchi2() << " / " << result->fitndof() << "\n\t  " <<
     "vertex:        (" << result->fitx() << ", " << result->fity() << ", " << result->fitz() << ")\n\t  " <<
-    "Lxy:           " << result->lxy() );
+    "Lxy/LxyError:  " << result->lxy() << " / " << result->lxyError() );
 
   return result;
 }
@@ -1008,16 +1010,6 @@ bool TrigMultiTrkComboHypo::isIdenticalTracks(const xAOD::Muon* lhs, const xAOD:
 bool TrigMultiTrkComboHypo::isIdenticalTracks(const xAOD::Electron* lhs, const xAOD::Electron* rhs) const {
 
   return isIdenticalTracks(*lhs->trackParticleLink(), *rhs->trackParticleLink());
-}
-
-
-float TrigMultiTrkComboHypo::Lxy(const xAOD::TrigBphys& vertex, const Amg::Vector3D& beamSpot) const {
-
-  XYVector R(vertex.fitx() - beamSpot.x(), vertex.fity() - beamSpot.y());
-  const auto& trackParticleLinks = vertex.trackParticleLinks();
-  auto pT = std::accumulate(trackParticleLinks.begin(), trackParticleLinks.end(), XYVector(),
-                            [](const auto& pT, const auto& trackEL){ const auto& p = (*trackEL)->genvecP4(); return pT + XYVector(p.x(), p.y()); });
-  return R.Dot(pT.unit());
 }
 
 
