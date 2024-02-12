@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML__STREAMTOFILETOOL_H
@@ -8,6 +8,8 @@
 //IAlgTool interface
 #include "JiveXML/IStreamTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "EventDisplaysOnline/IOnlineEventDisplaysSvc.h"
 
 namespace JiveXML {
   
@@ -35,21 +37,24 @@ namespace JiveXML {
 
     private:
 
-      Gaudi::Property<std::string> m_mytest {this, "MyTest", "fail", "My test"};
-      /** Prefix put in front of file name */
-      std::string m_FileNamePrefix;
-      
-      /** Suffix put at the end of the file name (including type)*/
-      std::string m_FileNameSuffix;
-      
-      /** Generate a file name */
-      std::string MakeFileName( const unsigned long EventNumber, const unsigned int RunNumber ) const;
-      
-      /** Creates a new output stream to write XML to */
-      StatusCode NewFile( const unsigned long EventNumber, const unsigned  int RunNumber, std::ofstream *& outFile ) const ;
+    ServiceHandle<IOnlineEventDisplaysSvc> m_onlineEDsvc{this, "OnlineEventDisplaysSvc", "Online Event Displays Service"};
 
-      /** Closes output stream */
-      StatusCode CloseFile( std::ofstream *& outFile ) const ;
+    Gaudi::Property<bool> m_isOnline {this, "IsOnline", false, "If running at point 1"};
+
+    /** Prefix put in front of JiveXML file name */
+    std::string m_FileNamePrefix;
+      
+    /** Suffix put at the end of the file name (including type)*/
+    std::string m_FileNameSuffix;
+      
+    /** Generate a file name */
+    std::string MakeFileName( const unsigned long EventNumber, const unsigned int RunNumber ) const;
+      
+    /** Creates a new output stream to write XML to */
+    StatusCode NewFile( const unsigned long EventNumber, const unsigned  int RunNumber, std::ofstream *& outFile ) const ;
+
+    /** Closes output stream */
+    StatusCode CloseFile( std::ofstream *& outFile ) const ;
       
   };
 

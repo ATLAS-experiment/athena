@@ -16,20 +16,20 @@ if ( RPC_FOUND )
    JiveXML/*.h src/*.cxx
    PUBLIC_HEADERS JiveXML
    INCLUDE_DIRS ${RPC_INCLUDE_DIRS}
-   LINK_LIBRARIES ${RPC_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel
+   LINK_LIBRARIES ${RPC_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel EventDisplaysOnlineLib
    PRIVATE_LINK_LIBRARIES xAODEventInfo )
 else()
   atlas_add_library( JiveXMLLib
    JiveXML/*.h src/*.cxx
    PUBLIC_HEADERS JiveXML
    INCLUDE_DIRS ${RPC_INCLUDE_DIRS}
-   LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel
+   LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel EventDisplaysOnlineLib
    PRIVATE_LINK_LIBRARIES xAODEventInfo ) 
 endif() 
 
 atlas_add_component( JiveXML
                      src/components/*.cxx
-                     LINK_LIBRARIES JiveXMLLib )
+                     LINK_LIBRARIES JiveXMLLib)
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

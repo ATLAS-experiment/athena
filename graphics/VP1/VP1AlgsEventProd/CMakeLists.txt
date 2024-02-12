@@ -7,4 +7,4 @@ atlas_subdir( VP1AlgsEventProd )
 atlas_add_component( VP1AlgsEventProd
    VP1AlgsEventProd/*.h src/*.cxx src/components/*.cxx
    LINK_LIBRARIES AthenaBaseComps GaudiKernel PathResolver
-   VP1UtilsBase )
+   VP1UtilsBase EventDisplaysOnlineLib)
