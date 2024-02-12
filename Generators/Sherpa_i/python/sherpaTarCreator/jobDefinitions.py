@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os,glob,shutil,re
 
@@ -72,7 +72,7 @@ def mkCreateLibsJob(options, prevJob):
     else:
       job.cmds += ["rm -rf Process/Amegic.zip Process/Comix.zip Process/Sherpa.zip Process/Amegic"]
       job.cmds += ["echo 'genSeq.Sherpa_i.BaseFragment += \"\"\"\nINIT_ONLY: 1\nEVENTS: 0\nFRAGMENTATION: Off\nMI_HANDLER: None\n\"\"\"' > events.py"]
-      
+
     job.cmds += ["outputEVNTFile=$(mktemp -u /tmp/XXXXXXXX.pool.root)"]
     job.cmds += ["returncode=0"]
     job.cmds += ["Gen_tf.py --ecmEnergy="+str(options.ecm[0]*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+options.jobOptionDir[0]+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} || returncode=$?"]
@@ -199,12 +199,6 @@ def mkIntegrateJob(options, ecm, prevJob):
     sftlayer = "/cvmfs/sft.cern.ch/lcg/releases/" + lcglayer
     lcgbase = "_".join(lcglayer.split('_')[:2]) # without postfix
     sftbase = "/cvmfs/sft.cern.ch/lcg/releases/" + lcgbase
-    gccver = "8.3.0"
-    with open(sftlayer + "/LCG_externals_" + (os.environ['LCG_PLATFORM']) + '.txt') as f:
-      for line in f:
-        if line.startswith('COMPILER'):
-          gccver = line.strip().split(';')[-1]
-          break
 
     if not options.sherpaInstallPath:
         options.sherpaInstallPath = sftlayer+"/MCGenerators/sherpa/${SHERPAVER}.openmpi3/${LCG_PLATFORM}"
@@ -215,8 +209,9 @@ def mkIntegrateJob(options, ecm, prevJob):
     openmpi_path    = ":".join(glob.glob(sftbase+"/openmpi/*/"+LCG_PLATFORM+"/bin"))
     opal_prefix     =  ":".join(glob.glob(sftbase+"/openmpi/*/"+LCG_PLATFORM))
     ld_library_path = ":".join(glob.glob(sftbase+"/openmpi/*/"+LCG_PLATFORM+"/lib"))
+    gccpath = str(os.environ['COMPILER_PATH'])
 
-    job.cmds += ["source /cvmfs/sft.cern.ch/lcg/releases/gcc/"+gccver+"/x86_64-centos7/setup.sh" ]
+    job.cmds += ["source "+gccpath+"/setup.sh" ]
     job.cmds += ["export PATH="+openmpi_path+":$PATH"]
     job.cmds += ["export LHAPATH=/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current:/cvmfs/atlas.cern.ch/repo/sw/Generators/lhapdfsets/current/"]
     job.cmds += ["export OPAL_PREFIX="+opal_prefix]

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import os, stat
 
@@ -24,12 +24,15 @@ class batchJobBase:
   def write(self, useSingularity=True, extraDirs=[]):
     executable =  "#!/bin/sh -\n"
 
+    # COMPILER_PATH
     if useSingularity:
+      platform = str(os.environ['COMPILERPATH']).split('/')[-1].replace('el9', 'almalinux9')
       executable += 'if [ "$1" != "--really" ]; then \n'
       executable += '  exec singularity exec -e --no-home'
       for dir in ["/cvmfs", "/var", self.basedir, "$(pwd | cut -d '/' -f 1-2)"] + extraDirs:
         executable += ' -B '+dir
-      executable += ' /cvmfs/atlas.cern.ch/repo/containers/fs/singularity/x86_64-centos7 /bin/bash -- "$0" --really "$@";\n'
+      executable += ' /cvmfs/atlas.cern.ch/repo/containers/fs/singularity/'
+      executable += platform + ' /bin/bash -- "$0" --really "$@";\n'
       executable += 'fi\n'
       executable += "shift;\n\n"
       executable += "export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase\n"
