@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import GeV, TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
@@ -22,51 +22,51 @@ def initConfigFlags():
 
     #Flags steering the job execution:
     from AthenaCommon.Constants import INFO
-    acf.addFlag('Exec.OutputLevel',INFO) #Global Output Level
-    acf.addFlag('Exec.PrintAlgsSequence', False) # Allows AppMgr to print the algorithm sequence
-    acf.addFlag('Exec.MaxEvents',-1)
-    acf.addFlag('Exec.SkipEvents',0)
-    acf.addFlag('Exec.DebugStage','')
-    acf.addFlag('Exec.Interactive',"")
-    acf.addFlag('Exec.FPE',0) #-2: No FPE check at all, -1: Abort with core-dump, 0: FPE Auditor w/o stack-tace (default) , >0: number of stack-trace printed by the job
+    acf.addFlag('Exec.OutputLevel', INFO, help='Global OutputLevel')
+    acf.addFlag('Exec.PrintAlgsSequence', False, help='print algorithm sequence in ApplicationMgr')
+    acf.addFlag('Exec.MaxEvents', -1, help='number of events to proceess (-1 for all)')
+    acf.addFlag('Exec.SkipEvents', 0, help='number of events to skip')
+    acf.addFlag('Exec.DebugStage', '', help='attach debugger at stage: conf, init, exec, fini')
+    acf.addFlag('Exec.Interactive', "", help='interactive prompt at stage: init, exec')
+    acf.addFlag('Exec.FPE', 0, help='FPE check mode: -2 (no FPE check), -1 (abort with core-dump), 0 (FPE Auditor w/o stack-tace) , >0 (number of stack-traces printed by the job)')
 
     #Custom messaging for components, see Utils.setupLoggingLevels
-    acf.addFlag('Exec.VerboseMessageComponents',[])
-    acf.addFlag('Exec.DebugMessageComponents',[])
-    acf.addFlag('Exec.InfoMessageComponents',[])
-    acf.addFlag('Exec.WarningMessageComponents',[])
-    acf.addFlag('Exec.ErrorMessageComponents',[])
+    acf.addFlag('Exec.VerboseMessageComponents', [], help='verbose output for listed components (wildcards)')
+    acf.addFlag('Exec.DebugMessageComponents', [], help='debug output for listed components (wildcards)')
+    acf.addFlag('Exec.InfoMessageComponents', [], help='info output for listed components (wildcards)')
+    acf.addFlag('Exec.WarningMessageComponents', [], help='warning output for listed components (wildcards)')
+    acf.addFlag('Exec.ErrorMessageComponents', [], help='error output for listed components (wildcards)')
 
     #Multi-threaded event service mode
-    acf.addFlag('Exec.MTEventService',False)
-    acf.addFlag('Exec.MTEventServiceChannel','EventService_EventRanges') # The name of YAMPL communication channel between AthenaMT and Pilot
+    acf.addFlag('Exec.MTEventService', False, help='use multi-threaded event service')
+    acf.addFlag('Exec.MTEventServiceChannel', 'EventService_EventRanges', help='name of YAMPL communication channel between AthenaMT and pilot')
 
     #Activate per-event log-output of StoreGate content
-    acf.addFlag('Debug.DumpEvtStore',False)
-    acf.addFlag('Debug.DumpDetStore',False)
-    acf.addFlag('Debug.DumpCondStore',False)
+    acf.addFlag('Debug.DumpEvtStore', False, help='dump event store on each event')
+    acf.addFlag('Debug.DumpDetStore', False, help='dump detector store on each event')
+    acf.addFlag('Debug.DumpCondStore', False, help='dump conditions store on each event')
 
-    acf.addFlag('ExecutorSplitting.TotalSteps', 0)
-    acf.addFlag('ExecutorSplitting.Step', -1)
-    acf.addFlag('ExecutorSplitting.TotalEvents', -1)
+    acf.addFlag('ExecutorSplitting.TotalSteps', 0, help='number of steps for pileup overlay')
+    acf.addFlag('ExecutorSplitting.Step', -1, help='step number of current pileup overlay job')
+    acf.addFlag('ExecutorSplitting.TotalEvents', -1, help='events per pileup overlay step')
 
     #Flags describing the input data
-    acf.addFlag('Input.Files', ["_ATHENA_GENERIC_INPUTFILE_NAME_",]) # former global.InputFiles
-    acf.addFlag("Input.FileNentries", -1) # will be filled if available in the runArgs
-    acf.addFlag('Input.SecondaryFiles', []) # secondary input files for DoubleEventSelector
-    acf.addFlag('Input.isMC', lambda prevFlags : "IS_SIMULATION" in GetFileMD(prevFlags.Input.Files).get("eventTypes", [])) # former global.isMC
-    acf.addFlag('Input.OverrideRunNumber', False )
-    acf.addFlag("Input.ConditionsRunNumber", -1) # Override the HITS file Run Number with one from a data run (TODO merge with Input.RunNumbers)
-    acf.addFlag('Input.RunNumbers', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("runNumbers", [])), type=list) # former global.RunNumber
-    acf.addFlag('Input.MCChannelNumber', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("mc_channel_number", 0))
-    acf.addFlag('Input.LumiBlockNumbers', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("lumiBlockNumbers", [])), type=list) # former global.RunNumber
-    acf.addFlag('Input.TimeStamps', lambda prevFlags : getInitialTimeStampsFromRunNumbers(prevFlags.Input.RunNumbers) if prevFlags.Input.OverrideRunNumber else [], type=list)
+    acf.addFlag('Input.Files', ["_ATHENA_GENERIC_INPUTFILE_NAME_",], help='input files')
+    acf.addFlag("Input.FileNentries", -1, help='actual number of events in file (filled from runArgs')
+    acf.addFlag('Input.SecondaryFiles', [], help='secondary input files for DoubleEventSelector')
+    acf.addFlag('Input.isMC', lambda prevFlags : "IS_SIMULATION" in GetFileMD(prevFlags.Input.Files).get("eventTypes", []), help='Monte Carlo input')
+    acf.addFlag('Input.OverrideRunNumber', False, help='override run number' )
+    acf.addFlag("Input.ConditionsRunNumber", -1, help='override HITS file run number with one from a data') # TODO merge with Input.RunNumbers
+    acf.addFlag('Input.RunNumbers', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("runNumbers", [])), type=list, help='run numbers of input files')
+    acf.addFlag('Input.MCChannelNumber', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("mc_channel_number", 0), help='Monte Carlo channel number')
+    acf.addFlag('Input.LumiBlockNumbers', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("lumiBlockNumbers", [])), type=list, help='lumi block numbers of input files')
+    acf.addFlag('Input.TimeStamps', lambda prevFlags : getInitialTimeStampsFromRunNumbers(prevFlags.Input.RunNumbers) if prevFlags.Input.OverrideRunNumber else [], type=list, help='timestamps of inputs files')
     # Configure EvtIdModifierSvc with a list of dictionaries of the form:
     # {'run': 152166, 'lb': 202, 'starttstamp': 1269948352889940910, 'evts': 1, 'mu': 0.005}
-    acf.addFlag("Input.RunAndLumiOverrideList", [])
+    acf.addFlag("Input.RunAndLumiOverrideList", [], help='list of dictionaries to configure EvtIdModifierSvc')
     # Job number
-    acf.addFlag("Input.JobNumber", 1)
-    acf.addFlag('Input.FailOnUnknownCollections', False)
+    acf.addFlag("Input.JobNumber", 1, help='job number for pileup overlay')
+    acf.addFlag('Input.FailOnUnknownCollections', False, help='fail on unknown collections in input load')
 
     def _dataYearFromFlags(prevFlags):
         dataYear = GetFileMD(prevFlags.Input.Files).get("data_year", "")
@@ -76,16 +76,16 @@ def initConfigFlags():
             return 2000 + int(prevFlags.Input.ProjectName[4:6])
         return 0
 
-    acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", "")) # former global.ProjectName
-    acf.addFlag('Input.DataYear', _dataYearFromFlags)
-    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), type=Campaign)
+    acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", ""), help='project name')
+    acf.addFlag('Input.DataYear', _dataYearFromFlags, help='year of input data')
+    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), type=Campaign, help='Monte Carlo campaign')
     acf.addFlag('Input.TriggerStream', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("stream", "") if prevFlags.Input.Format == Format.BS
-                                                          else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", "")) # former global.TriggerStream
-    acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, type=Format) # former global.InputFormat
-    acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []) ) # list of names of streams written to this file
+                                                          else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", ""), help='trigger stream name')
+    acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, type=Format, help='input format type')
+    acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []), help='list of stream names in this file')
     from GeneratorConfig.Versioning import generatorsGetFromMetadata
-    acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : generatorsGetFromMetadata( GetFileMD(prevFlags.Input.Files).get("generators", "") ))
-    acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags.Input.Files, prevFlags.Input.SecondaryFiles))  # special Configuration options read from input file metadata
+    acf.addFlag('Input.GeneratorsInfo', lambda prevFlags : generatorsGetFromMetadata( GetFileMD(prevFlags.Input.Files).get("generators", "") ), help='generator version')
+    acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags.Input.Files, prevFlags.Input.SecondaryFiles), help='special configuration options read from input file metadata')
 
     def _inputCollections(inputFile):
         rawCollections = [type_key[1] for type_key in GetFileMD(inputFile).get("itemList", [])]
@@ -96,70 +96,65 @@ def initConfigFlags():
         collections = ['%s#%s' % type_key for type_key in GetFileMD(inputFile).get("itemList", [])]
         return collections
 
-    acf.addFlag('Input.Collections', lambda prevFlags : _inputCollections(prevFlags.Input.Files) )
-    acf.addFlag('Input.SecondaryCollections', lambda prevFlags : _inputCollections(prevFlags.Input.SecondaryFiles) )
-    acf.addFlag('Input.TypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.Files) )
-    acf.addFlag('Input.SecondaryTypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.SecondaryFiles) )
+    acf.addFlag('Input.Collections', lambda prevFlags : _inputCollections(prevFlags.Input.Files), help='input collections')
+    acf.addFlag('Input.SecondaryCollections', lambda prevFlags : _inputCollections(prevFlags.Input.SecondaryFiles), help='secondary input collections for overlay')
+    acf.addFlag('Input.TypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.Files), help='input collections key#type')
+    acf.addFlag('Input.SecondaryTypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.SecondaryFiles), help='secondary input collections key#type')
 
     def _metadataItems(inputFile):
         return GetFileMD(inputFile).get("metadata_items", {})
 
-    acf.addFlag('Input.MetadataItems', lambda prevFlags : _metadataItems(prevFlags.Input.Files) )
-    acf.addFlag('Input.Release',  lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AtlasRelease", ""))
-    acf.addFlag('Input.AODFixesDone', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AODFixVersion", ""))
+    acf.addFlag('Input.MetadataItems', lambda prevFlags : _metadataItems(prevFlags.Input.Files), help='metadata items in input' )
+    acf.addFlag('Input.Release',  lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AtlasRelease", ""), help='release of input file')
+    acf.addFlag('Input.AODFixesDone', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("AODFixVersion", ""), help='set of already applied AODFixes')
 
-    acf.addFlag('Concurrency.NumProcs', 0)
-    acf.addFlag('Concurrency.NumThreads', 0 )
-    acf.addFlag('Concurrency.NumConcurrentEvents', lambda prevFlags : prevFlags.Concurrency.NumThreads)
-    acf.addFlag('Concurrency.DebugWorkers', False )
+    acf.addFlag('Concurrency.NumProcs', 0, help='number of concurrent processes')
+    acf.addFlag('Concurrency.NumThreads', 0, help='number of threads' )
+    acf.addFlag('Concurrency.NumConcurrentEvents', lambda prevFlags : prevFlags.Concurrency.NumThreads, help='number of concurrent events')
+    acf.addFlag('Concurrency.DebugWorkers', False, help='stops the worker in bootstrap until SIGUSR1 is received')
 
-    acf.addFlag('Scheduler.CheckDependencies', True)
-    acf.addFlag('Scheduler.CheckOutputUsage', False)
-    acf.addFlag('Scheduler.ShowDataDeps', False)
-    acf.addFlag('Scheduler.ShowDataFlow', False)
-    acf.addFlag('Scheduler.ShowControlFlow', False)
-    acf.addFlag('Scheduler.EnableVerboseViews', True)
-    acf.addFlag('Scheduler.AutoLoadUnmetDependencies', True)
+    acf.addFlag('Scheduler.CheckDependencies', True, help='runtime check of algorithm input dependencies')
+    acf.addFlag('Scheduler.CheckOutputUsage', False, help='runtime check of algorithm output usage')
+    acf.addFlag('Scheduler.ShowDataDeps', False, help='show data dependencies')
+    acf.addFlag('Scheduler.ShowDataFlow', False, help='show data flow')
+    acf.addFlag('Scheduler.ShowControlFlow', False, help='show data flow')
+    acf.addFlag('Scheduler.EnableVerboseViews', True, help='enable verbose view output')
+    acf.addFlag('Scheduler.AutoLoadUnmetDependencies', True, help='auto-load unmet data dependencies')
 
-    acf.addFlag('MP.WorkerTopDir', 'athenaMP_workers')
-    acf.addFlag('MP.OutputReportFile', 'AthenaMPOutputs')
-    acf.addFlag('MP.Strategy', 'SharedQueue')
-    acf.addFlag('MP.CollectSubprocessLogs', False)
-    acf.addFlag('MP.PollingInterval', 100)
-    acf.addFlag('MP.EventsBeforeFork', 0)
-    acf.addFlag('MP.EventRangeChannel', 'EventService_EventRanges')
-    acf.addFlag('MP.EvtRangeScattererCaching', False)
-    acf.addFlag('MP.MemSamplingInterval', 0)
-    """ Size of event chunks in the shared queue
-        if chunk_size==-1, chunk size is set to auto_flush for files compressed with LZMA
-        if chunk_size==-2, chunk size is set to auto_flush for files compressed with LZMA or ZLIB
-        if chunk_size==-3, chunk size is set to auto_flush for files compressed with LZMA, ZLIB, or LZ4
-        if chunk_size<=-4, chunk size is set to auto_flush
-    """
-    acf.addFlag('MP.ChunkSize', -1)
-    acf.addFlag('MP.ReadEventOrders', False)
-    acf.addFlag('MP.EventOrdersFile', 'athenamp_eventorders.txt')
-    acf.addFlag('MP.UseSharedReader', False)
-    acf.addFlag('MP.UseSharedWriter', False)
-    acf.addFlag('MP.UseParallelCompression', True)
+    acf.addFlag('MP.WorkerTopDir', 'athenaMP_workers', help='work directory for MP workers')
+    acf.addFlag('MP.OutputReportFile', 'AthenaMPOutputs', help='name of MP report file')
+    acf.addFlag('MP.Strategy', 'SharedQueue', help='event assignment strategy')
+    acf.addFlag('MP.CollectSubprocessLogs', False, help='collects log of sub-processes')
+    acf.addFlag('MP.PollingInterval', 100, help='time interval in milliseconds between subsequent polling of subproceses')
+    acf.addFlag('MP.EventsBeforeFork', 0, help='number of events to process before forking')
+    acf.addFlag('MP.EventRangeChannel', 'EventService_EventRanges', help='channel name for communicating event ranges with the pilot')
+    acf.addFlag('MP.EvtRangeScattererCaching', False, help='activate extra event caching by the EvtRangeScatterer')
+    acf.addFlag('MP.MemSamplingInterval', 0, help='time interval in seconds between taking memory samples')
+    acf.addFlag('MP.ChunkSize', -1, help='size of event chunks in shared queue (-1: auto_flush for LZMA-compressed files, -2: auto_flush for LZMA or ZLIB, -3: auto_flush for LZMA, ZLIB or LZ4, -4: auto_flush)')
+    acf.addFlag('MP.ReadEventOrders', False, help='read event order from ASCII file for reproducibility')
+    acf.addFlag('MP.EventOrdersFile', 'athenamp_eventorders.txt', help='file name for event order')
+    acf.addFlag('MP.UseSharedReader', False, help='use shared reader')
+    acf.addFlag('MP.UseSharedWriter', False, help='use shared writer')
+    acf.addFlag('MP.UseParallelCompression', True, help='enable event compression in workers')
 
-    acf.addFlag('Common.MsgSuppression', True) # Enable suppression of printout in MessageSvc
-    acf.addFlag('Common.MsgSourceLength',50) #Length of the source-field in the format str of MessageSvc
-    acf.addFlag('Common.ShowMsgStats',False) #Print stats about WARNINGs, etc at the end of the job
+    acf.addFlag('Common.MsgSuppression', True, help='enable log message suppression')
+    acf.addFlag('Common.MsgSourceLength', 50, help='length of the source-field in the log message format')
+    acf.addFlag('Common.ShowMsgStats', False ,help='print message statistics at the end of the job')
 
-    acf.addFlag('Common.isOnline', False ) #  Job runs in an online environment (access only to resources available at P1) # former global.isOnline
-    acf.addFlag('Common.useOnlineLumi', lambda prevFlags : prevFlags.Common.isOnline ) #  Use online version of luminosity. ??? Should just use isOnline?
+    acf.addFlag('Common.isOnline', False, help='job runs in an online environment')
+    acf.addFlag('Common.useOnlineLumi', lambda prevFlags : prevFlags.Common.isOnline, help='use online version of luminosity')
     acf.addFlag('Common.isOverlay', lambda prevFlags: (prevFlags.Common.ProductionStep == ProductionStep.Overlay or
                                                        (prevFlags.Common.ProductionStep == ProductionStep.FastChain and
-                                                        prevFlags.Overlay.FastChain)))  # Enable Overlay
-    acf.addFlag('Common.doExpressProcessing', False)
-    acf.addFlag('Common.ProductionStep', ProductionStep.Default, type=ProductionStep)
-    acf.addFlag('Common.Project', Project.determine(), type=Project)
+                                                        prevFlags.Overlay.FastChain)),
+                help='enable overlay')
+    acf.addFlag('Common.doExpressProcessing', False, help='do express stream processing')
+    acf.addFlag('Common.ProductionStep', ProductionStep.Default, type=ProductionStep, help='production step')
+    acf.addFlag('Common.Project', Project.determine(), type=Project, help='current athena software project')
 
     # replace global.Beam*
-    acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing
-    acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), type=BeamType)# former global.BeamType
-    acf.addFlag("Beam.NumberOfCollisions", lambda prevFlags : 2. if prevFlags.Beam.Type is BeamType.Collisions else 0.) # former global.NumberOfCollisions
+    acf.addFlag('Beam.BunchSpacing', 25, help='bunch spacing in nanoseconds')
+    acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), type=BeamType, help='beam type')
+    acf.addFlag("Beam.NumberOfCollisions", lambda prevFlags : 2. if prevFlags.Beam.Type is BeamType.Collisions else 0., help='number of pileup collisions')
 
     def _configureBeamEnergy(prevFlags):
         metadata = GetFileMD(prevFlags.Input.Files)
@@ -232,40 +227,40 @@ def initConfigFlags():
         return default
 
 
-    acf.addFlag('Beam.Energy', lambda prevFlags : _configureBeamEnergy(prevFlags)) # former global.BeamEnergy
+    acf.addFlag('Beam.Energy', lambda prevFlags : _configureBeamEnergy(prevFlags), help='beam energy in MeV')
     acf.addFlag('Beam.estimatedLuminosity', lambda prevFlags : ( 1E33*(prevFlags.Beam.NumberOfCollisions)/2.3 ) *\
-        (25./prevFlags.Beam.BunchSpacing)) # former flobal.estimatedLuminosity
-    acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf)
+                (25./prevFlags.Beam.BunchSpacing), help='luminosity estimated from pileup')
+    acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf, help='source of bunch structure')
 
     # output
-    acf.addFlag('Output.EVNTFileName', '')
-    acf.addFlag('Output.EVNT_TRFileName', '')
-    acf.addFlag('Output.HITSFileName', '')
-    acf.addFlag('Output.RDOFileName',  '')
-    acf.addFlag('Output.RDO_SGNLFileName', '')
-    acf.addFlag('Output.ESDFileName',  '')
-    acf.addFlag('Output.AODFileName',  '')
-    acf.addFlag('Output.HISTFileName', '')
+    acf.addFlag('Output.EVNTFileName', '', help='EVNT output file name')
+    acf.addFlag('Output.EVNT_TRFileName', '', help='EVNT_TR output file name')
+    acf.addFlag('Output.HITSFileName', '', help='HITS output file name')
+    acf.addFlag('Output.RDOFileName',  '', help='RDO output file name')
+    acf.addFlag('Output.RDO_SGNLFileName', '', help='RDO_SGNL output file name')
+    acf.addFlag('Output.ESDFileName',  '', help='ESD output file name')
+    acf.addFlag('Output.AODFileName',  '', help='AOD output file name')
+    acf.addFlag('Output.HISTFileName', '', help='HIST output file name')
     
-    acf.addFlag('Output.doWriteEVNT', lambda prevFlags: bool(prevFlags.Output.EVNTFileName)) # write out EVNT file
-    acf.addFlag('Output.doWriteHITS', lambda prevFlags: bool(prevFlags.Output.HITSFileName)) # write out HITS file
-    acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName)) # write out RDO file
-    acf.addFlag('Output.doWriteRDO_SGNL', lambda prevFlags: bool(prevFlags.Output.RDO_SGNLFileName)) # write out RDO_SGNL file
-    acf.addFlag('Output.doWriteESD', lambda prevFlags: bool(prevFlags.Output.ESDFileName)) # write out ESD file
-    acf.addFlag('Output.doWriteAOD', lambda prevFlags: bool(prevFlags.Output.AODFileName)) # write out AOD file
-    acf.addFlag('Output.doWriteBS',  False) # write out RDO ByteStream file
-    acf.addFlag('Output.doWriteDAOD',  False) # write out at least one DAOD file
-    acf.addFlag('Output.doJiveXML',  False) # write out a JiveXML file
+    acf.addFlag('Output.doWriteEVNT', lambda prevFlags: bool(prevFlags.Output.EVNTFileName), help='write EVNT file')
+    acf.addFlag('Output.doWriteHITS', lambda prevFlags: bool(prevFlags.Output.HITSFileName), help='write HITS file')
+    acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName), help='write RDO file')
+    acf.addFlag('Output.doWriteRDO_SGNL', lambda prevFlags: bool(prevFlags.Output.RDO_SGNLFileName), help='write RDO_SGNL file')
+    acf.addFlag('Output.doWriteESD', lambda prevFlags: bool(prevFlags.Output.ESDFileName), help='write ESD file')
+    acf.addFlag('Output.doWriteAOD', lambda prevFlags: bool(prevFlags.Output.AODFileName), help='write AOD file')
+    acf.addFlag('Output.doWriteBS', False,  help='write bytestream file')
+    acf.addFlag('Output.doWriteDAOD', False, help='write at least one DAOD file')
+    acf.addFlag('Output.doJiveXML', False, help='write JiveXML file')
 
-    acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
-    acf.addFlag('Output.StorageTechnology.EventData', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology for event data
-    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREE')  # Set the underlying POOL storage technology for metadata
+    acf.addFlag('Output.TreeAutoFlush', {}, help="dict with auto-flush settings for stream e.g. {'STREAM': 123}")
+    acf.addFlag('Output.StorageTechnology.EventData', 'ROOTTREEINDEX', help='set the underlying POOL storage technology for event data')
+    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREE', help='set the underlying POOL storage technology for metadata')
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py
     # (many, e.g. those that set properties of one tool are not needed)
-    acf.addFlag('TrackingGeometry.MagneticFileMode', 6)
-    acf.addFlag('TrackingGeometry.MaterialSource', 'COOL') # Can be COOL, Input or None
+    acf.addFlag('TrackingGeometry.MagneticFileMode', 6) # TODO: unused?
+    acf.addFlag('TrackingGeometry.MaterialSource', 'COOL', help='material source (COOL, Input or None)')
 
 #Detector Flags:
     def __detector():
@@ -325,20 +320,19 @@ def initConfigFlags():
 
         acf.addFlag("IOVDb.GlobalTag", lambda flags :
                     (__getTrigTag(flags) if flags.Trigger.doLVL1 or flags.Trigger.doHLT else None) or
-                    getLastGlobalTag(flags))
+                    getLastGlobalTag(flags), help='global conditions tag')
 
-        acf.addFlag("IOVDb.DatabaseInstance",getDatabaseInstanceDefault)
+        acf.addFlag("IOVDb.DatabaseInstance", getDatabaseInstanceDefault, help='conditions DB instance')
 
         # Run dependent simulation
-        # map from runNumber to timestamp; migrated from RunDMCFlags.py
-        acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict())
-        acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance)
+        acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict(), help='runNumber to timestamp map')
+        acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance, help='default DB connection string')
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
-        acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents))
+        acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents), help='size of ring-buffer for conditions cleaner')
         acf.addFlag("IOVDb.SqliteInput","",help="Folders found in this file will be used instead of the production db")
         acf.addFlag("IOVDb.SqliteFolders",(),help="Folders listed here will be taken from the IOVDb.SqliteInput file instead of the production db. If empty, all folders found in the file are used.")
 #PoolSvc Flags:
-    acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0)
+    acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0, help='maximum number of open files')
 
 
     def __bfield():
@@ -363,8 +357,8 @@ def initConfigFlags():
     _addFlagsCategory(acf, 'Calo', __calo, 'CaloRec' )
 
 #Random engine Flags:
-    acf.addFlag("Random.Engine", "dSFMT") # Random service used in {"dSFMT", "Ranlux64", "Ranecu"}
-    acf.addFlag("Random.SeedOffset", 0) # TODO replace usage of Digitization.RandomSeedOffset with this flag
+    acf.addFlag("Random.Engine", "dSFMT", help='random number service ("dSFMT", "Ranlux64", "Ranecu")')
+    acf.addFlag("Random.SeedOffset", 0, help='seed offset') # TODO replace usage of Digitization.RandomSeedOffset with this flag
 
     def __trigger():
         from TriggerJobOpts.TriggerConfigFlags import createTriggerFlags
@@ -374,8 +368,8 @@ def initConfigFlags():
     if not added:
         # If TriggerJobOpts is not available, we add at least these basic flags
         # to indicate Trigger is not available:
-        acf.addFlag('Trigger.doLVL1', False)
-        acf.addFlag('Trigger.doHLT', False)
+        acf.addFlag('Trigger.doLVL1', False, help='enable L1 simulation')
+        acf.addFlag('Trigger.doHLT', False, help='run HLT selection algorithms')
 
     def __indet():
         from InDetConfig.InDetConfigFlags import createInDetConfigFlags
@@ -519,7 +513,8 @@ def initConfigFlags():
                 return 3
 
             return default_version
-        acf.addFlag('Trigger.EDMVersion', lambda prevFlags: EDMVersion(prevFlags))
+        acf.addFlag('Trigger.EDMVersion', lambda prevFlags: EDMVersion(prevFlags),
+                    help='Trigger EDM version (determined by input file or set to the version to be produced)')
 
     return acf
 
