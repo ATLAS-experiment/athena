@@ -293,35 +293,6 @@ StatusCode InDet::TRT_StrawStatus::execute(){
 
     //================ End loop over all hits
 
-    //===== searching for HV lines with voltage < 1490 V
-    /*
-    // FIX ME The DCS folders need to be loaded for this code to work.
-    if (lumiBlock0 != last_lumiBlock0){
-        float theValue;
-        int chanNum;
-        char fileName_mapping[300];
-        snprintf(fileName_mapping, 299,"%s.%07d_Voltage_trips.txt", m_fileName.c_str(), m_runNumber);
-        FILE *fmapping = fopen(fileName_mapping, "a");
-        //StatusCode
-        sc = StatusCode::SUCCESS;//for compatibility with Rel 17
-
-        //===== Loop over all HV lines
-        for (chanNum=1;chanNum<1281;chanNum++){
-            theValue = 9999.;
-            std::string folderName = (chanNum <= 640)?"/TRT/DCS/HV/ENDCAPA":"/TRT/DCS/HV/ENDCAPC";
-            short int old_chanNum = (chanNum<=640)?chanNum:(chanNum-640);
-            sc = m_DCSSvc->getValue(folderName,old_chanNum,theValue);
-            if (theValue<1490.){
-                fprintf(fmapping,"Low voltage on line %i\n",chanNum);
-            } else if (theValue == 9999.){ //if was not updated with last mDCSSvc->getValue(...)
-                fprintf(fmapping,"Unknown voltage on line %i\n",chanNum);
-            }
-        }
-        //~scc;//for compatibility with Rel 17
-        fclose(fmapping);
-    }
-    */
-
     m_nEvents++;
     last_lumiBlock0 = lumiBlock0;
     if (m_nEvents%1000==0 && msgLvl(MSG::DEBUG)) reportResults();
