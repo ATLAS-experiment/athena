@@ -10,7 +10,7 @@
 
 using namespace std;
 
-RPCbytestream::RPCbytestream(CMAdata& data,std::string filename,MsgStream& log,
+RPCbytestream::RPCbytestream(CMAdata& data,const std::string& filename,MsgStream& log,
                              debu cma_debug,debu pad_debug,debu rx_debug,
                              debu sl_debug,debu cma_struc_debug,
                              debu pad_struc_debug,debu rx_struc_debug,
