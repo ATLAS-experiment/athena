@@ -14,6 +14,8 @@ do
     case "$a" in
 	--config-only*)  export PICKLECAFILE=${a#*=};;
 	--tracelevel*) tracelevel=${a#*=};;
+	--help) helpreq=1
+		scriptargs+=("$a");;
 	*.py) topscriptfile=$a;;
 	*.pkl) picklefile=$a;;
 	*) scriptargs+=("$a");;
@@ -22,8 +24,12 @@ done
 
 #Check if we got a pickle-file or top-level script
 if [ -z "${picklefile}" ] && [ -z "${topscriptfile}" ] ;then
-	echo "ERROR: No top-level python script or pickle file given"
-	exit 1
+        if [ -n "${helpreq}" ]; then
+	    topscriptfile="AthenaConfiguration/AthNoop.py" #Dummy script to print help-text
+	else   
+	    echo "ERROR: No top-level python script or pickle file given"
+	    exit 1
+	fi
 fi
 
 #If script, try to find it locally or in PYTHONPATH
