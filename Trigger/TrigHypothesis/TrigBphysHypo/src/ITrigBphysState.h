@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_ITrigBphysState_H
@@ -30,7 +30,13 @@ class ITrigBphysState {
         m_previousDecisions(&previousDecisions),
         m_decisions(&decisions),
         m_trigBphysCollection(trigBphysCollection),
-        m_beamSpotData(beamSpotData) {}
+        m_beamSpotData(beamSpotData) {
+    m_beamSpotVertex.makePrivateStore();
+    if (m_beamSpotData) {
+      m_beamSpotVertex.setPosition(beamSpotData->beamVtx().position());
+      m_beamSpotVertex.setCovariancePosition(beamSpotData->beamVtx().covariancePosition());
+    }
+  }
   virtual ~ITrigBphysState() = default;
 
   inline const EventContext& context() const { return *m_context; }
@@ -39,6 +45,7 @@ class ITrigBphysState {
   inline xAOD::TrigBphysContainer& trigBphysCollection() { return *m_trigBphysCollection; }
   void setTrigBphysCollection(xAOD::TrigBphysContainer* trigBphysCollection) { m_trigBphysCollection = trigBphysCollection; }
   Amg::Vector3D beamSpotPosition() const { return (m_beamSpotData ? m_beamSpotData->beamPos() : Amg::Vector3D::Zero(3)); }
+  const xAOD::Vertex& beamSpot() const { return m_beamSpotVertex; }
 
  private:
   const EventContext* m_context;
@@ -46,6 +53,7 @@ class ITrigBphysState {
   TrigCompositeUtils::DecisionContainer* m_decisions;
   xAOD::TrigBphysContainer* m_trigBphysCollection;
   const InDet::BeamSpotData* m_beamSpotData;
+  xAOD::Vertex m_beamSpotVertex;
 };
 
 #endif  // TRIG_ITrigBphysState_H

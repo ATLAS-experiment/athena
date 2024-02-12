@@ -508,7 +508,7 @@ AllowedTopos_Bphysics = [
     'Bidperf','BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
     'BpmuD0X','BdmuDpX','BdmuDstarX','BsmuDsX','LbmuLcX',
     # topoExtras
-    'Lxy0','noos','nocut','lowpt'
+    'Lxy0','sigmaLxy3','sigmaLxy5','noos','nocut','lowpt'
     #########Remove until here############
 
 ]

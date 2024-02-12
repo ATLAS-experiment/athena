@@ -176,6 +176,7 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
 
    from TrigBphysHypo.TrigBPhyCommonConfig import TrigBPHY_TrkVKalVrtFitterCfg
    from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
+   from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsCfg
    if kwargs["doElectrons"]:
        kwargs.setdefault("nTracks", [ 2 ])
        kwargs.setdefault("trackPtThresholds", [ [ -1., -1. ] ])
@@ -186,6 +187,7 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
          name = baseName+'ComboHypo',
          VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),
          VertexPointEstimator = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, 'VertexPointEstimator_'+baseName)),
+         V0Tools = acc.popToolsAndMerge(V0ToolsCfg(flags, 'V0Tools_'+baseName)),
          MonTool = TrigMultiTrkComboHypoMonitoring(flags, 'TrigMultiTrkComboHypoMonitoring_'+baseName),
          **kwargs)
        acc.addEventAlgo(alg, primary=True)
@@ -198,6 +200,7 @@ def ConfigurationComboHypo(flags, trigSequenceName = 'Dimu', **kwargs):
            name = baseName+'ComboHypo',
            VertexFitter = acc.popToolsAndMerge(TrigBPHY_TrkVKalVrtFitterCfg(flags, baseName)),
            VertexPointEstimator = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, 'VertexPointEstimator_'+baseName)),
+           V0Tools = acc.popToolsAndMerge(V0ToolsCfg(flags, 'V0Tools_'+baseName)),
            MonTool = TrigMultiTrkComboHypoMonitoring(flags, 'TrigMultiTrkComboHypoMonitoring_'+baseName),
            **kwargs)
 
@@ -230,6 +233,12 @@ def ConfigurationComboHypoTool(flags, chainDict):
 
    if 'Lxy0' in chainDict['topo']:
        tool.LxyCut = 0.0
+
+   if 'sigmaLxy3' in chainDict['topo']:
+       tool.sigmaLxyCut = 3.
+
+   if 'sigmaLxy5' in chainDict['topo']:
+       tool.sigmaLxyCut = 5.
 
    electronMultiplicity = [int(chainPart['multiplicity']) for chainPart in chainDict['chainParts'] if chainPart['signature']=='Electron']
    if len(electronMultiplicity) == 1 and electronMultiplicity[0] == 1:
