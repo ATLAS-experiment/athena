@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger BS->RDO_TRIG athena test of the Dev_pp_run3_v1 menu
 # art-type: build
@@ -12,18 +12,13 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'data'
 ex.threads = 1
-precommand = ''.join([
-  "setMenu='Dev_pp_run3_v1';",  
-  "doL1Sim=False;",
-  "doWriteBS=False;",
-  "doWriteRDOTrigger=True;",
-  "forceEnableAllChains=True;",
-  'doRuntimeNaviVal=True', # Perform runtime graph vaidation in this test
-])
-ex.args = '-c "{:s}"'.format(precommand)
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+            'Trigger.forceEnableAllChains=True',
+            'Trigger.doRuntimeNaviVal=True'] # Perform runtime graph vaidation in this test
+ex.args = '--CA'
 ex.max_events = 15 # nominal is 20, reduce to avoid occasional timeout
 
 test = Test.Test()
