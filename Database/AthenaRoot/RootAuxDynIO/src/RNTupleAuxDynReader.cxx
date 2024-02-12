@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
@@ -229,11 +229,11 @@ namespace RootAuxDynIO
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          // connect the field (with subfields) to the pageSource
          if( fieldInfo.field->GetState() != RFieldBase::EState::kConnectedToSource ) {
-            fieldInfo.field->ConnectPageSource(*m_pageSource);
+            ROOT::Experimental::Internal::CallConnectPageSourceOnField(*fieldInfo.field, *m_pageSource);
          }
          for( auto& subfield : *fieldInfo.field ) {
             if( subfield.GetState() != RFieldBase::EState::kConnectedToSource ) {
-               subfield.ConnectPageSource(*m_pageSource);
+               ROOT::Experimental::Internal::CallConnectPageSourceOnField(subfield, *m_pageSource);
             }
          }
 #endif

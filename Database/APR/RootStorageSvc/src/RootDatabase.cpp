@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -1136,7 +1136,7 @@ uint64_t RootDatabase::indexLookup([[maybe_unused]] RPageSource* page_source, ui
          uint64_t idx;
          auto idx_field = descGuard->GetFieldDescriptor(fieldId).CreateField( descGuard.GetRef() );
          if( idx_field->GetState() != RFieldBase::EState::kConnectedToSource ) {
-            idx_field->ConnectPageSource(*page_source);
+            ROOT::Experimental::Internal::CallConnectPageSourceOnField(*idx_field, *page_source);
          }
          auto rfv = idx_field->BindValue( std::shared_ptr<void>(&idx, [](void *) {}) );
          for(unsigned row=0; row < size; row++) {

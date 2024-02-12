@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -397,10 +397,10 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          // connect the field (with subfields) to the pageSource
          if( dsc.field->GetState() != RFieldBase::EState::kConnectedToSource ) {
-            dsc.field->ConnectPageSource(*m_pageSource);
+            ROOT::Experimental::Internal::CallConnectPageSourceOnField(*dsc.field, *m_pageSource);
             for( auto& subfield : *dsc.field ) {
                if( subfield.GetState() != RFieldBase::EState::kConnectedToSource ) {
-                  subfield.ConnectPageSource(*m_pageSource);
+                  ROOT::Experimental::Internal::CallConnectPageSourceOnField(subfield, *m_pageSource);
                }
             }
          }
