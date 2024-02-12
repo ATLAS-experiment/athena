@@ -4,11 +4,7 @@
 #include "FlavorTagDiscriminants/SequenceGetter.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 
-#include "xAODJet/JetContainer.h"
-#include "xAODTracking/TrackParticle.h"
-
 #include <optional>
-#include <iostream>
 
 namespace {
   // ______________________________________________________________________

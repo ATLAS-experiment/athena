@@ -17,7 +17,6 @@
 
 // STL includes
 #include <string>
-#include <iostream>
 #include <vector>
 
 namespace FlavorTagDiscriminants {

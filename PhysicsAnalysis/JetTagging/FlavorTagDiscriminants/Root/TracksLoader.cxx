@@ -4,10 +4,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
-
 #include "FlavorTagDiscriminants/TracksLoader.h"
-
-#include <iostream>
 
 namespace {
 
@@ -78,37 +75,19 @@ namespace {
 
 namespace FlavorTagDiscriminants {
 
-    FTagConstituentsSequenceConfig convertTracksConfig(
-      FTagTrackSequenceConfig config
-    ){
-      FTagConstituentsSequenceConfig cfg;
-      cfg.name = config.name;
-      cfg.order = (ConstituentsSortOrder) config.order;
-      cfg.selection = (ConstituentsSelection) config.selection;
-
-      for (auto input_config : config.inputs){
-        FTagConstituentsInputConfig input_cfg;
-        input_cfg.name = input_config.name;
-        input_cfg.type = (ConstituentsEDMType)input_config.type;
-        input_cfg.flip_sign = input_config.flip_sign;
-        cfg.inputs.push_back(input_cfg);
-      }
-      return cfg;
-    }
-
     std::vector<FTagTrackSequenceConfig> convertTracksConfigBack(
       FTagConstituentsSequenceConfig config
     ){
       std::vector<FTagTrackSequenceConfig> cfgs;
       FTagTrackSequenceConfig cfg;
       cfg.name = config.name;
-      cfg.order = (SortOrder) config.order;
-      cfg.selection = (TrackSelection) config.selection;
+      cfg.order = static_cast<SortOrder>(config.order);
+      cfg.selection = static_cast<TrackSelection>(config.selection);
 
       for (auto input_config : config.inputs){
         FTagTrackInputConfig input_cfg;
         input_cfg.name = input_config.name;
-        input_cfg.type = (EDMType)input_config.type;
+        input_cfg.type = static_cast<EDMType>(input_config.type);
         input_cfg.flip_sign = input_config.flip_sign;
         cfg.inputs.push_back(input_cfg);
       }

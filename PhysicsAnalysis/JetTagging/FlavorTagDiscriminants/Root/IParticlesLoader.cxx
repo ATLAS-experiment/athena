@@ -3,10 +3,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/IParticlesLoader.h"
-// #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 #include "xAODPFlow/FlowElement.h"
-
-#include <iostream>
 
 namespace {
 
@@ -20,7 +17,7 @@ namespace {
   using FlavorTagDiscriminants::ConstituentsSelection;
   using FlavorTagDiscriminants::FTagConstituentsSequenceConfig;
   using FlavorTagDiscriminants::FTagConstituentsInputConfig;
-  using FlavorTagDiscriminants::FlipTagConfig;
+  using FlavorTagDiscriminants::FTagOptions;
   // ____________________________________________________________________
   // High level adapter stuff
   //
@@ -28,18 +25,6 @@ namespace {
   // value, etc. These are only used by the high level interface.
   //
   typedef std::vector<std::pair<std::regex, ConstituentsEDMType> > TypeRegexes;
-  typedef std::vector<std::pair<std::regex, ConstituentsSortOrder> > SortRegexes;
-  typedef std::vector<std::pair<std::regex, ConstituentsSelection> > SelRegexes;
-
-  // Function to map the regex + list of inputs to variable config,
-  // this time for sequence inputs.
-  std::vector<FTagConstituentsSequenceConfig> get_iparticle_input_config(
-    const std::vector<std::pair<std::string, std::vector<std::string>>>& names,
-    const TypeRegexes& type_regexes,
-    const SortRegexes& sort_regexes,
-    const SelRegexes& select_regexes,
-    const std::regex& re);
-
 
   //_______________________________________________________________________
   // Implementation of the above functions
@@ -159,7 +144,6 @@ namespace FlavorTagDiscriminants {
             m_isCharged = false;
         }
         used_remap = m_customSequenceGetter.getUsedRemap();
-        std::cout << "TEST: IParticlesLoader loaded " << std::endl;
     }
 
     std::vector<const xAOD::IParticle*> IParticlesLoader::getIParticlesFromJet(
@@ -186,7 +170,6 @@ namespace FlavorTagDiscriminants {
             }
           }
           if (!obj){
-            std::cout << "TEST: obj is nullptr" << std::endl;
             continue;
           }
           only_particles.push_back(obj);

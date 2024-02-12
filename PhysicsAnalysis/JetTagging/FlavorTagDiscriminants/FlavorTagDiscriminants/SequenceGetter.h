@@ -10,10 +10,9 @@
 
 // EDM includes
 #include "xAODJet/JetFwd.h"
-#include "xAODBase/IParticle.h"
 #include "xAODTracking/TrackParticleFwd.h"
+#include "xAODBase/IParticle.h"
 #include "AthContainers/AuxElement.h"
-#include "FlavorTagDiscriminants/ConstituentsLoader.h"
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 
 
@@ -47,6 +46,7 @@ namespace FlavorTagDiscriminants {
   ///
 
   namespace sequence_getter {
+
     std::function<std::pair<std::string, double>(const xAOD::Jet&)>
     customGetterAndName(const std::string&);
 

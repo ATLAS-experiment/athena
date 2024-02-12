@@ -32,11 +32,7 @@
 
 namespace FlavorTagDiscriminants {
 
-    // tracksConfig getter
-
-    FTagConstituentsSequenceConfig convertTracksConfig(
-      FTagTrackSequenceConfig config
-    );
+    // tracksConfig 
     std::vector<FTagTrackSequenceConfig> convertTracksConfigBack(
       FTagConstituentsSequenceConfig config
     );
