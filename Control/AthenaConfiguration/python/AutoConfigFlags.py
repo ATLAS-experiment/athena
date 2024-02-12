@@ -160,9 +160,12 @@ def getDefaultDetectors(geoTag, sqliteDB, sqliteDBFullPath, includeForward=False
     if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Common']['Run'] in ['RUN1', 'RUN2', 'RUN3']:
         detectors.add('MBTS')
 
-    detectors.add('MDT')
-    detectors.add('RPC')
-    detectors.add('TGC')
+    if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Muon']['HasMDT']:
+        detectors.add('MDT')
+    if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Muon']['HasRPC']:
+         detectors.add('RPC')
+    if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Muon']['HasTGC']:
+        detectors.add('TGC')
     if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Muon']['HasCSC']:
         detectors.add('CSC')
     if DetDescrInfo(geoTag,sqliteDB,sqliteDBFullPath)['Muon']['HasSTGC']:
