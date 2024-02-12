@@ -5,48 +5,73 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from IOVDbSvc.IOVDbSvcConfig import addFolders, addOverride
+from IOVDbSvc.IOVDbSvcConfig import addFolders
 from AthenaConfiguration.Enums import Format
 
 
 # Tool to write a track-tuple with TRT hit info
 def FillAlignTrkInfoCfg(flags,name='FillAlignTrkInfo',**kwargs) :
     acc = ComponentAccumulator()
-    if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        InDetTrackSummaryTool = acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
-        acc.addPublicTool(InDetTrackSummaryTool)
+    
+    AlignTrkInfo = CompFactory.FillAlignTrkInfo()
+    
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+    AlignTrkInfo.TrackSummaryTool = acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
+    
+    # if "TrackSummaryTool" not in kwargs:
+    #     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+    #     InDetTrackSummaryTool = acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
+    #     acc.addPublicTool(InDetTrackSummaryTool)
     # acc.setPrivateTools(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags, name, **kwargs)))
     
-    acc.setPrivateTools(CompFactory.FillAlignTrkInfo(TrackSummaryTool=InDetTrackSummaryTool))
+    acc.setPrivateTools(AlignTrkInfo)
     return acc
 
+
+# SERGI - This function should be in the correct athena pkg.. not here
 # Tool to write a hit-tuple with R-t info  
 def FillAlignTRTHitsCfg(flags,name='FillAlignTRTHits',**kwargs) :
     acc = ComponentAccumulator()
+    
+    AlignTRTHits = CompFactory.FillAlignTRTHits(name, **kwargs)
+    
+    AlignTRTHits.minTimebinsOverThreshold = 0
+    
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
+    AlignTRTHits.TRTCalDbTool = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
+    
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+    AlignTRTHits.TRTStrawSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
+    
+    acc.setPrivateTools(AlignTRTHits)
+    
     # if "NeighbourSvc" not in kwargs:
-    #     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawNeighbourSvcCfg
-    #     TRT_StrawNeighbourSvc = acc.popToolsAndMerge(TRT_StrawNeighbourSvcCfg(flags))
-    #     kwargs.setdefault("NeighbourSvc" , TRT_StrawNeighbourSvc)
-    #     acc.addPublicTool(TRT_StrawNeighbourSvc)
-    if "TRTCaldbTool" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
-        TRT_CalDbTool = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
-        kwargs.setdefault("TRTCalDbTool", TRT_CalDbTool)
-        acc.addPublicTool(TRT_CalDbTool)
-    if "TRTStrawSummaryTool" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-        InDetStrawSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
-        kwargs.setdefault("TRTStrawSummaryTool", InDetStrawSummaryTool)
-        acc.addPublicTool(InDetStrawSummaryTool)
-    kwargs.setdefault("minTimebinsOverThreshold",0)
-    acc.setPrivateTools(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags, name, **kwargs)))
+        # from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawNeighbourSvcCfg
+        # TRT_StrawNeighbourSvc = acc.popToolsAndMerge(CompFactory.TRT_StrawNeighbourSvc("TRT_StrawNeighbourSvc"))
+        # kwargs.setdefault("NeighbourSvc" , TRT_StrawNeighbourSvc)
+        # acc.addPublicTool(TRT_StrawNeighbourSvc)
+    # if "TRTCaldbTool" not in kwargs:
+        # from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
+        # TRT_CalDbTool = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
+        # kwargs.setdefault("TRTCalDbTool", TRT_CalDbTool)
+        # acc.addPublicTool(TRT_CalDbTool)
+    # if "TRTStrawSummaryTool" not in kwargs:
+        # from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+        # InDetStrawSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
+        # kwargs.setdefault("TRTStrawSummaryTool", InDetStrawSummaryTool)
+        # acc.addPublicTool(InDetStrawSummaryTool)
+    # kwargs.setdefault("minTimebinsOverThreshold",0)
+    
+    
     return acc
 
 # Tool to refit tracks
-def FitToolCfg(flags,**kwargs):
-    acc = ComponentAccumulator()    
-    acc.setPrivateTools(acc.popToolsAndMerge(FitToolCfg(flags, **kwargs)))
+def FitToolCfg(flags, name = "FitToolCfg" ,**kwargs):
+    acc = ComponentAccumulator()  
+    
+    FittingTool = acc.popToolsAndMerge(CompFactory.FitTool(name, **kwargs))
+    
+    acc.setPrivateTools(FittingTool)
     return acc
 
 # Tool to process R-t ntuple. Produces histograms and calibration text files.
@@ -108,30 +133,42 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     acc = ComponentAccumulator()
     
     # Is this an accumulatiuon or a calibration job?
-    kwargs.setdefault("DoCalibration",False)
+    kwargs.setdefault("DoCalibrate",False)
 
+    # NOTE 'TRTCalibrationMgr' object has no attribute 'TRT_CalDbTool' - it should be romeved
     # Needed tools (in addition to TRTCalibrator)
-    if "TRT_CalDbTool" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
-        kwargs.setdefault("TRT_CalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
+    # if "TRT_CalDbTool" not in kwargs:
+    #     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
+    #     kwargs.setdefault("TRTCalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
 
-    if "InDetDetailedTrackSelectorTool" not in kwargs:    
-        kwargs.setdefault("TRTTrackSelectorTool", acc.popToolsAndMerge(InDetDetailedTrackSelectorToolCfg(flags)))        
+    # NOTE 'TRTCalibrationMgr' object has no attribute 'TRTTrackSelectorTool'
+    # if "InDetDetailedTrackSelectorTool" not in kwargs:    
+    #     kwargs.setdefault("TRTTrackSelectorTool", acc.popToolsAndMerge(InDetDetailedTrackSelectorToolCfg(flags)))        
 
     if "AlignTrackTools" not in kwargs:
-        kwargs.setdefault("AlignTrkTools", [acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags)), acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags))])      
+        kwargs.setdefault("AlignTrkTools", [acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags)), acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags))] )      
            
-    if "FitTools" not in kwargs:
-        kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
+    # SERGI - FitTool.cxx is empty?? why it is actually used? 
+    # if "FitTools" not in kwargs:
+    #     kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
 
     # Include analysis of DCS information                          
-    if flags.Input.Format is not Format.POOL :
-        acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/BARREL <cache>600</cache>"))
-        acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/ENDCAPA <cache>600</cache>"))                          
-        acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/ENDCAPC <cache>600</cache>"))
+    # if flags.Input.Format is not Format.POOL :
+        # acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/BARREL <cache>600</cache>"))
+        # acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/ENDCAPA <cache>600</cache>"))                          
+        # acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/ENDCAPC <cache>600</cache>"))
+        # acc.merge(addFolders(flags, "/TRT/DCS/HV/BARREL" , "DCS_OFL", className="CondAttrListCollection"))
+        # acc.merge(addFolders(flags, "/TRT/DCS/HV/ENDCAPA", "DCS_OFL", className="CondAttrListCollection"))                          
+        # acc.merge(addFolders(flags, "/TRT/DCS/HV/ENDCAPC", "DCS_OFL", className="CondAttrListCollection"))
+        # acc.merge(addFolders(flags, "/TRT/DCS/HV/BARREL" , "DCS_OFL"))
+        # acc.merge(addFolders(flags, "/TRT/DCS/HV/ENDCAPA", "DCS_OFL"))                          
+        # acc.merge(addFolders(flags, "/TRT/DCS/HV/ENDCAPC", "DCS_OFL"))
 
-    # Let all straws participate in trackfinding as default                          
-    acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
+    # FIXME! Let all straws participate in trackfinding as default - SERGI This is wrong and needs to be UPDATED @peter    
+        # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
+        # TypeError: addOverride() missing 1 required positional argument: 'tag'  
+                         
+    # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
                           
     # if a text file is in the arguments, use the constants in that instead of the DB
     if not calibconstants=="":
@@ -176,6 +213,11 @@ def TRT_CalibrationCfg(flags, name="TRT_CalibrationCfg"):
     acc = ComponentAccumulator()
     
     TRTCalibAlgo = CompFactory.TRTCalibrationMgr(name)
+    
+    # SERGI: IS this tool actually used in the TRTCalibrationMgr algo?
+    # from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
+    # CalDbTool = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
+    
     
     if flags.Input.Format is not Format.POOL:
         acc.merge(addFolders('DCS_OFL',"/TRT/DCS/HV/BARREL <cache>600</cache>"))

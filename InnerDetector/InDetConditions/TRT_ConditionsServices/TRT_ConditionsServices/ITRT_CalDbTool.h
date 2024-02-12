@@ -30,8 +30,9 @@ class ITRT_CalDbTool: virtual public IAlgTool
  public:
   typedef TRTCond::RtRelationMultChanContainer RtRelationContainer ;
   typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
-
-  DeclareInterfaceID(ITRT_CalDbTool, 1, 0);
+  
+  static const InterfaceID& interfaceID();
+//   DeclareInterfaceID(ITRT_CalDbTool, 1, 0);
 
   virtual float getT0( const Identifier& ,  int level = TRTCond::ExpandedIdentifier::STRAW ) const = 0;
   virtual const TRTCond::RtRelation* getRtRelation( const Identifier& , int level = TRTCond::ExpandedIdentifier::STRAW ) const  = 0;
@@ -47,5 +48,10 @@ class ITRT_CalDbTool: virtual public IAlgTool
   virtual const StrawT0Container* getT0Container() const = 0 ;
 
 };
+
+inline const InterfaceID& ITRT_CalDbTool::interfaceID() {
+  static const InterfaceID IID("ITRT_CalDbTool",1,0);
+  return IID;
+}
 
 #endif //  ITRT_CALDBTOOL_H

@@ -1001,6 +1001,8 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
   //caldata startdata(true,tbins,rbins);
   caldata startdata(true,55,100);
   //caldata startdata(true,64,64);
+
+  // This is the start if the timing histogram (lower edge). 
   startdata.t0=5.0;
   std::map<std::string,TDirectory*> dirmap;
   TDirectory* trtdir=gDirectory;

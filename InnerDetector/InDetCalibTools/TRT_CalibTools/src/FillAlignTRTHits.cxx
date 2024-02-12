@@ -40,7 +40,7 @@ PURPOSE: Tool
 FillAlignTRTHits::FillAlignTRTHits(const std::string& type, const std::string& name, const IInterface* parent) :
 	AthAlgTool(type, name, parent),
 	m_DetID(nullptr), m_TRTID(nullptr),
-	m_trtcaldbTool("ITRT_CalDbTool", this),
+	// m_trtcaldbTool("ITRT_CalDbTool", this),
 	m_neighbourSvc("ITRT_StrawNeighbourSvc", name),
 	m_TRTStrawSummaryTool("InDetTRTStrawStatusSummaryTool",this),
 	m_updator(nullptr),
@@ -55,7 +55,7 @@ FillAlignTRTHits::FillAlignTRTHits(const std::string& type, const std::string& n
 	m_f(nullptr), m_ntuple(nullptr)
 {
 	declareInterface<IFillAlignTrkInfo>(this);
-	declareProperty("TRTCalDbTool",m_trtcaldbTool);
+	// declareProperty("TRTCalDbTool",m_trtcaldbTool);
 	declareProperty("NeighbourSvc",m_neighbourSvc);
 	declareProperty("maxDistance",m_maxDistance) ;
 	declareProperty("maxTimeResidual",m_maxTimeResidual) ;

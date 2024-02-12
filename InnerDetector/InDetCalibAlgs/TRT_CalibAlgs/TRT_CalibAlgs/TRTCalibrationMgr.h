@@ -97,7 +97,7 @@ private:
     std::string m_par_t0containerkey; //"/TRT/Calib/T0"
 
     // ReadHandleKeys
-    SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey   {this, "VerticesKey"     , "PrimaryVertices"    , "RHK for primary veritces"  };
+    SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey   {this, "VerticesKey"     , "PrimaryVertices"    , "RHK for primary vertices"  };
     SG::ReadHandleKey<xAOD::EventInfo>       m_EventInfoKey  {this, "EventInfoKey"    , "EventInfo"          , "RHK for xAOD::EventInfo"   };
     SG::ReadHandleKey<TrackCollection>       m_TrkCollection {this, "TrkCollectionKey", "CombinedInDetTracks", "RHKs for track collections"};
 };
