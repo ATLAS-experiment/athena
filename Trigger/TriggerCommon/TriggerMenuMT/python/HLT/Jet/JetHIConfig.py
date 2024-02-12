@@ -1,8 +1,6 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-
-from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
 
 from JetRecConfig import JetRecConfig
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,22 +16,6 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("JetHIConfig LOG: Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-# Calo tower unpacking and HI-style cluster reconstruction
-###############################################################################################
-def jetHIClusterSequence(configFlags, ionopt, RoIs):
-
-    # Start by adding the HI calo tower sequence
-    from TriggerMenuMT.HLT.CommonSequences.CaloSequences import caloTowerHIRecoSequence
-    HICaloTowerSequence, towerKey, cellKey = RecoFragmentsPool.retrieve(
-                caloTowerHIRecoSequence, flags=configFlags, RoIs=RoIs)
-    clusterskey="HLT_HIClusters"
-
-    # HI cluster sequence
-    HIClusterSequence = RecoFragmentsPool.retrieve(
-                HLTHIClusterGetter, flags=configFlags, tower_key=towerKey, cell_key=cellKey, cluster_key=clusterskey)
-
-    return [HICaloTowerSequence,HIClusterSequence], clusterskey, towerKey
-###############################################################################################
 
 def jetHIEventShapeSequenceCA(configFlags, clustersKey, towerKey):
     acc = ComponentAccumulator()
@@ -67,12 +49,10 @@ def jetHIEventShapeSequenceCA(configFlags, clustersKey, towerKey):
     acc.addEventAlgo(ESAlg_W)
 
     return acc, EventShapeKey, theMapTool
-###############################################################################################
 
-
-from JetRecConfig.StandardJetMods import stdJetModifiers
 
 # JetModifier dictionary
+from JetRecConfig.StandardJetMods import stdJetModifiers
 stdJetModifiers.update(
     HLTHIJetCalib = JetModifier("JetCalibrationTool",
                                 "HLTHICalibTool_{modspec}",
