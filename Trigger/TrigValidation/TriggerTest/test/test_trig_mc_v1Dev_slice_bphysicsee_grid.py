@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the electron/b-physics slice in Dev_pp_run3_v1 menu (input: mix of dielectron samples)
 # art-type: grid
@@ -24,11 +24,13 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'bphysics_ee'
 ex.threads = 4
 ex.concurrent_events = 4
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doEmptyMenu=True;doEgammaSlice=True;doWriteBS=False;doWriteRDOTrigger=True;"'
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+            'Trigger.enabledSignatures=[\\\"Egamma\\\"]']
+ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'
