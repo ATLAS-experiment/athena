@@ -30,6 +30,8 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True
 Slices  = ['minbias']
 Events  = 8000 
 Threads = 8 

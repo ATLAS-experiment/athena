@@ -30,6 +30,9 @@
 # art-output: *.dat 
 
 
+# not yet - need to establish how to postinclude in the RAWtoALL
+# useCA_Reco = True
+
 Slices  = ['muon','electron','tau','bjet','fsjet']
 Events  = 4000
 Threads = 8 

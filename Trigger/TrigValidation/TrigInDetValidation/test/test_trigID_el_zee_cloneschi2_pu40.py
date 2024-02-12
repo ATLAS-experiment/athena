@@ -29,6 +29,8 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
+
+useCA_Reco = True
 Slices  = ['electron']
 Events  = 16000
 Threads = 8
@@ -37,7 +39,11 @@ Input   = 'Zee'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAcloneremovalchi2.py'
+# legacy
+# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAcloneremovalchi2.py'
+# CA
+preexec_trig = "flags.Trigger.InDetTracking.electron.doCloneRemoval=False;flags.Trigger.InDetTracking.electron.Xi2max=12.;"
+
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 11" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]

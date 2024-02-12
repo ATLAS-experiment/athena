@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for fsjet_pu55_redundancy
+# art-description: art job for fsjet_redundancy_pu55
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
@@ -30,6 +30,8 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True
 Slices  = ['fsjet']
 Events  = 2000
 Threads = 8
@@ -38,7 +40,12 @@ Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAseedRedundancy.py' 
+# legacy 
+# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAseedRedundancy.py'
+# CA
+preexec_trig = "flags.Trigger.InDetTracking.fullScan.doSeedRedundancyCheck=True;flags.Trigger.InDetTracking.jetSuper.doSeedRedundancyCheck=True;"
+
+
 
 Jobs = [ ( "Truth",         " TIDAdata-run3.dat                             -o data-hists.root" ), 
          ( "Offline",       " TIDAdata-run3-offline.dat          -r Offline -o data-hists-offline.root" ),

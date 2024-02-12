@@ -30,6 +30,8 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True
 Slices  = ['tau']
 Events  = 6000
 Threads = 8
