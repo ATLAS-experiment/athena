@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.Enums import LHCPeriod
 
@@ -9,6 +9,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("doValidateGSFTracks", False )
     icf.addFlag("doValidateLooseTracks", False )
     icf.addFlag("doValidateTightPrimaryTracks", False )
+    icf.addFlag("doValidateHILoose", False )
     icf.addFlag("doValidateTracksInJets", False )
     icf.addFlag("doValidateTracksInBJets", False )
     icf.addFlag("doValidateTruthToRecoNtuple", False )

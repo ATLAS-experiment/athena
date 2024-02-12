@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetPhysValMonitoringConfig.py
@@ -280,6 +280,23 @@ def InDetPhysValMonitoringToolTightPrimaryCfg(flags, **kwargs):
     return acc
 
 
+def InDetPhysValMonitoringToolHILooseCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+
+    if 'TrackSelectionTool' not in kwargs:
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            InDetTrackSelectionTool_HILoose_Cfg)
+        kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
+            InDetTrackSelectionTool_HILoose_Cfg(flags)))
+
+    kwargs.setdefault("SubFolder", 'HILoose/')
+    kwargs.setdefault("useTrackSelection", True)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+        flags, name="InDetPhysValMonitoringToolHILoose", **kwargs)))
+    return acc
+
+
 def InDetPhysValMonitoringToolGSFCfg(flags, **kwargs):
     kwargs.setdefault("SubFolder", 'GSF/')
     kwargs.setdefault("TrackParticleContainerName", 'GSFTrackParticles')
@@ -391,6 +408,8 @@ def InDetPhysValMonitoringCfg(flags):
              InDetPhysValMonitoringToolLooseCfg),
             (flags.PhysVal.IDPVM.doValidateTightPrimaryTracks,
              InDetPhysValMonitoringToolTightPrimaryCfg),
+            (flags.PhysVal.IDPVM.doValidateHILoose,
+             InDetPhysValMonitoringToolHILooseCfg),
             (flags.PhysVal.IDPVM.doValidateGSFTracks,
              InDetPhysValMonitoringToolGSFCfg)
             ]
