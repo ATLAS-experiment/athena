@@ -31,6 +31,8 @@ StatusCode LArSC2Ntuple::initialize() {
   ATH_CHECK( m_eventInfoKey.initialize() );
   ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
+  ATH_CHECK(m_LArLatomeHeaderContainerKey.initialize() );
+
   StatusCode sc=m_nt->addItem("latomeChannel",m_latomeChannel);
   if (sc.isFailure()) {
     ATH_MSG_ERROR( "addItem 'latomeChannel' failed" );
@@ -87,13 +89,6 @@ StatusCode LArSC2Ntuple::initialize() {
 	return sc;
       }
       
-    }else if ( ck == "SC_LATOME_HEADER" ){	// SC LATOME HEADER
-      sc	   = m_nt->addItem("bcidLATOMEHEAD",m_bcidLATOMEHEAD);
-      if (sc.isFailure()) {
-	ATH_MSG_ERROR( "addItem 'bcidLATOMEHEAD' failed" );
-	return sc;
-      }
-      
     }else if ( ck == "SC_ET" ){ // SC_ET RawSCContainer
       sc = m_nt->addItem("energyVec_ET", m_Net, m_energyVec_ET);
       if (sc.isFailure()) {
@@ -131,6 +126,12 @@ StatusCode LArSC2Ntuple::initialize() {
     }
     
   }// end container key loop
+
+  sc      = m_nt->addItem("bcidLATOMEHEAD",m_bcidLATOMEHEAD);
+  if (sc.isFailure()) {
+    ATH_MSG_ERROR( "addItem 'bcidLATOMEHEAD' failed" );
+    return sc;
+  }
 
   if(m_fillTType) {
      sc = m_evt_nt->addItem("TType",  m_TType);
@@ -208,6 +209,7 @@ StatusCode LArSC2Ntuple::execute()
 
   // This should be used for main readout later, once TDAQ fill event headers also in calib. runs properly
   unsigned long thisbcid	  = evt->bcid();
+  unsigned long thisELVL1Id;
   unsigned long  thisttype = evt->level1TriggerType();
   //
   /// set it here once and no need to set at each SC/cell
@@ -268,13 +270,14 @@ StatusCode LArSC2Ntuple::execute()
       ATH_MSG_DEBUG( "Got LArRawSCContainer with key SC_ET_ID" );
   }
   
-  if ((std::find(m_contKeys.begin(), m_contKeys.end(), "SC_LATOME_HEADER")	  != m_contKeys.end()) ){
-    sc	   = evtStore()->retrieve(headcontainer,"SC_LATOME_HEADER");  
-    if (sc.isFailure()) {
-      ATH_MSG_WARNING( "Unable to retrieve LArLATOMEHeaderContainer with key SC_LATOME_HEADER from DetectorStore. " );
-    } 
-    else
-      ATH_MSG_DEBUG( "Got LArLATOMEHeaderContainer with key SC_LATOME_HEADER " ); 
+  SG::ReadHandle<LArLATOMEHeaderContainer> hdrCont(m_LArLatomeHeaderContainerKey);
+  if (! hdrCont.isValid()) {
+     ATH_MSG_WARNING( "No LArLATOME container found in TDS" );
+  } else {
+     ATH_MSG_DEBUG( "LArLATOME container found");
+     headcontainer=&*hdrCont;
+     thisELVL1Id   = (*hdrCont->begin())->L1Id();
+     ATH_MSG_DEBUG( " ELVL1I FROM LATOME HEADER " << thisELVL1Id );
   }
   
   if (headcontainer){// loop through header container and fill map
@@ -344,6 +347,7 @@ StatusCode LArSC2Ntuple::execute()
   for( int c    = 0;c<cellsno;++c ){
     if(m_fillBCID) m_bcid	   = thisbcid; 
 
+    m_ELVL1Id = thisELVL1Id;
     m_IEvent	   = thisevent;
     if(m_overwriteEventNumber) m_IEvent   = ctx.evt();
 
@@ -382,6 +386,7 @@ StatusCode LArSC2Ntuple::execute()
 	    const LArLATOMEHeader*headmap   = LATOMEHeadMap[scdigi->SourceId()];
 	    if(headmap){
 	      m_bcidLATOMEHEAD   = headmap->BCId();
+              m_ELVL1Id = headmap->L1Id();
 	    }
 	  }   
 	  m_latomeChannel	   = scdigi->Channel();
@@ -433,6 +438,7 @@ StatusCode LArSC2Ntuple::execute()
 	    const LArLATOMEHeader*headmap   = LATOMEHeadMap[scdigi->SourceId()];
 	    if(headmap){
 	      m_bcidLATOMEHEAD   = headmap->BCId();
+              m_ELVL1Id = headmap->L1Id();
 	    }
 	  }   
 	  m_latomeChannel	   = scdigi->Channel();
@@ -484,6 +490,7 @@ StatusCode LArSC2Ntuple::execute()
            const LArLATOMEHeader*headmap   = LATOMEHeadMap[scdigi->SourceId()];
            if(headmap){
              m_bcidLATOMEHEAD	   = headmap->BCId();
+             m_ELVL1Id = headmap->L1Id();
            }
          }
          m_latomeChannel	   = scdigi->Channel();
@@ -507,6 +514,7 @@ StatusCode LArSC2Ntuple::execute()
 	  const LArLATOMEHeader*headmap   = LATOMEHeadMap[rawSC->SourceId()];
 	  if(headmap){
 	    m_bcidLATOMEHEAD	   = headmap->BCId();
+            m_ELVL1Id = headmap->L1Id();
 	  }
 	}
         if( m_fillRawChan && RawChannelContainer ){
@@ -541,6 +549,7 @@ StatusCode LArSC2Ntuple::execute()
 	  const LArLATOMEHeader*headmap   = LATOMEHeadMap[rawSC->SourceId()];
 	  if(headmap){
 	    m_bcidLATOMEHEAD	   = headmap->BCId();
+            m_ELVL1Id = headmap->L1Id();
 	  }
 	}
         if( m_fillRawChan && RawChannelContainer ){

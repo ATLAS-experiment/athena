@@ -6,7 +6,6 @@
 #include "LArRawEvent/LArDigitContainer.h"
 #include "Identifier/HWIdentifier.h"
 #include "LArRawEvent/LArSCDigit.h"
-#include "LArRawEvent/LArLATOMEHeaderContainer.h"
 
 LArDigits2Ntuple::LArDigits2Ntuple(const std::string& name, ISvcLocator* pSvcLocator):
   LArCond2NtupleBase(name, pSvcLocator),
@@ -35,10 +34,12 @@ StatusCode LArDigits2Ntuple::initialize()
     return sc;
   }
   
-  sc = m_nt->addItem("samples",m_Nsamples,m_samples);
-  if (sc!=StatusCode::SUCCESS) {
-    ATH_MSG_ERROR( "addItem 'samples' failed" );
-    return sc;
+  if(m_contKey.key().size()) {
+     sc = m_nt->addItem("samples",m_Nsamples,m_samples);
+     if (sc!=StatusCode::SUCCESS) {
+       ATH_MSG_ERROR( "addItem 'samples' failed" );
+       return sc;
+     }
   }
    
   sc = m_nt->addItem("Nsamples",m_ntNsamples,0,32);
@@ -55,19 +56,13 @@ StatusCode LArDigits2Ntuple::initialize()
     }
   }
 
-  if(!m_isSC){
-    sc = m_nt->addItem("ELVL1Id",m_ELVL1Id);
-    if (sc!=StatusCode::SUCCESS) {
-       ATH_MSG_ERROR( "addItem 'ELVL1Id' failed" );
-       return sc;
-    }
-  }else{
-    sc   = m_nt->addItem("ELVL1Id",m_ELVL1Id);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'ELVL1Id' failed" );
-      return sc;
-    }
+  sc = m_nt->addItem("ELVL1Id",m_ELVL1Id);
+  if (sc!=StatusCode::SUCCESS) {
+     ATH_MSG_ERROR( "addItem 'ELVL1Id' failed" );
+     return sc;
+  }
 
+  if(!m_isSC){
     sc	   = m_nt->addItem("Gain",m_gain,-1,3);
     if (sc!=StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "addItem 'Gain' failed" );
@@ -160,13 +155,13 @@ StatusCode LArDigits2Ntuple::execute()
   for( const LArDigit *digi : DigitContainer ){
 
     if(m_fillBCID) m_bcid	= thisbcid; 
+    m_ELVL1Id	   = thisELVL1Id; 
     m_IEvent	   = thisevent;
 
     unsigned int trueMaxSample	   = digi->nsamples();
 
     if (!m_isSC){
       m_gain	   = digi->gain();
-      m_ELVL1Id	   = thisELVL1Id; 
       if(m_gain < CaloGain::INVALIDGAIN || m_gain > CaloGain::LARNGAIN) m_gain  = CaloGain::LARNGAIN;
     }
     if(trueMaxSample>m_Nsamples){

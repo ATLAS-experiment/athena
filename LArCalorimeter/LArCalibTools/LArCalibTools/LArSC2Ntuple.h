@@ -11,6 +11,7 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "TrigT1CaloEvent/TriggerTower.h"
+#include "LArRawEvent/LArLATOMEHeaderContainer.h"
 
 class LArSC2Ntuple : public LArDigits2Ntuple
 {
@@ -45,6 +46,7 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "EventInfoDecorKey", "EventInfo.larFlags"};
 
   Gaudi::Property< std::string > m_triggerTowerKey{this, "TriggerTowerKey", "TriggerTowers", "Trigger Tower container"};
+  SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LArLatomeHeaderContainerKey { this, "LArLatomeHeaderKey", "SC_LATOME_HEADER" };
 
   NTuple::Item<short> m_latomeChannel;
 
