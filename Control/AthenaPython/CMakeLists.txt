@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPython )
@@ -38,10 +38,10 @@ atlas_add_test( pyathena
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( pyCA
-   SCRIPT python -m AthenaPython.tests.test_CA
-   POST_EXEC_SCRIPT noerror.sh )
+   SCRIPT python -m unittest AthenaPython.tests.test_CA
+   LOG_SELECT_PATTERN "Py:My" )
 
 atlas_add_test( pyCA_pkl
    SCRIPT athena --evtMax 2 --CA test_CA.pkl
-   DEPENDS pyCA
-   POST_EXEC_SCRIPT noerror.sh )
+   LOG_SELECT_PATTERN "Py:My"
+   DEPENDS pyCA )

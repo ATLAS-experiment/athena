@@ -2,9 +2,13 @@
 
 # @file: Configurables.py
 # @purpose: a set of Configurables for the PyAthena components
-# @author: Sebastien Binet <binet@cern.ch>
+# @author: Sebastien Binet <binet@cern.ch>, Frank Winklmeier
+# @author: Frank Winklmeier (rewrite for GaudiConfig2)
 
-from AthenaCommon.Configurable import (ConfigurableAlgorithm,
+import GaudiConfig2
+from AthenaConfiguration.ComponentAccumulator import isComponentAccumulatorCfg
+from AthenaCommon.Configurable import (Configurable as LegacyConfigurable,
+                                       ConfigurableAlgorithm,
                                        ConfigurableService,
                                        ConfigurableAlgTool,
                                        ConfigurableAuditor)
@@ -41,16 +45,9 @@ def _get_prop_value(pycomp, propname):
 ### Configurable base class for all Py compmonents ----------------------------
 class CfgPyComponent:
     def __init__(self, name, **kw):
+        self.__dict__['__cpp_type__'] = self.getType()
         for n,v in kw.items():
             setattr(self, n, v)
-
-    # pickling support
-    def __getstate__( self ):
-        dic = super().__getstate__()
-        dic.update(self.__dict__)
-        if 'msg' in dic:
-            del dic['msg'] # logger cannot be pickled
-        return dic
 
     def getDlls(self):
         return 'AthenaPython'
@@ -58,105 +55,154 @@ class CfgPyComponent:
     @property
     def msg(self):
         import AthenaCommon.Logging as _L
-        return _L.logging.getLogger( self.getJobOptName() )
+        return _L.logging.getLogger( self.getName() )
 
     def getHandle(self):
         return None
 
-    def _register(self):
+    def __getstate__(self):
+        state = super().__getstate__()
+        state.update(self.__dict__)
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        super().__setstate__(state)
+
+    def setup(self):
+        if isinstance(self, LegacyConfigurable):
+            from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+            if not hasattr( svcMgr, 'PyComponentMgr' ):
+                from AthenaPython.AthenaPythonCompsConf import PyAthena__PyComponentMgr
+                svcMgr += PyAthena__PyComponentMgr('PyComponentMgr')
+
+            ## special case of the OutputLevel: take the value from the
+            ## svcMgr.MessageSvc if none already set by user
+            setattr(self, 'OutputLevel', _get_prop_value (self, 'OutputLevel') )
+
         ## populate the PyComponents instances repository
-        name = self.getJobOptName()
-        o = PyComponents.instances.get(name, None)
+        o = PyComponents.instances.get(self.getName(), None)
         if not (o is None) and not (o is self):
             err = "A python component [%r] has already been "\
                   "registered with the PyComponents registry !" % o
             raise RuntimeError(err)
-        PyComponents.instances[name] = self
+        PyComponents.instances[self.getName()] = self
 
-    def setup(self):
-        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        if not hasattr( svcMgr, 'PyComponentMgr' ):
-            from AthenaPython.AthenaPythonCompsConf import PyAthena__PyComponentMgr
-            svcMgr += PyAthena__PyComponentMgr('PyComponentMgr')
+    def merge(self, other):
+        """Basic merge for Python components.
+        Checks that all attributes/properties are identical.
+        """
+        if self is other:
+            return self
 
-        ## special case of the OutputLevel: take the value from the
-        ## svcMgr.MessageSvc if none already set by user
-        setattr(self, 'OutputLevel', _get_prop_value (self, 'OutputLevel') )
+        if type(self) is not type(other):
+            raise TypeError(f"cannot merge instance of {type(other).__name__} into "
+                            f"an instance of { type(self).__name__}")
 
-        self._register()
+        if self.name != other.name:
+            raise ValueError(f"cannot merge configurables with different names ({self.name} and {other.name})")
 
-    def setup2(self): # for CA-based configurations
-        self._register()
+        for prop in other.__dict__:
+            if (hasattr(self, prop) and getattr(self, prop) == getattr(other, prop)):
+                continue
+            else:
+                raise ValueError(f"conflicting settings for property {prop} of {self.name}: "
+                                 f"{getattr(self,prop)} vs {getattr(other,prop)}")
+        return self
+
+
+### Variable base classes to support legacy and GaudiConfig2
+# Note that this only works for jobs that are either legacy or CA. Mixing both
+# configuration types for Python components is not supported.
+#
+# Once the legacy classes are no longer needed all this can be greatly simplified.
+#
+if isComponentAccumulatorCfg():
+    _alg_base = _svc_base = _tool_base = _aud_base = GaudiConfig2.Configurable
+else:
+    _alg_base = ConfigurableAlgorithm
+    _svc_base = ConfigurableService
+    _tool_base = ConfigurableAlgTool
+    _aud_base = ConfigurableAuditor
 
 
 ### Configurable base class for PyAlgorithms ----------------------------------
-class CfgPyAlgorithm( ConfigurableAlgorithm, CfgPyComponent ):
+class CfgPyAlgorithm( CfgPyComponent, _alg_base ):
     def __init__( self, name, **kw ):
-        ConfigurableAlgorithm.__init__(self, name)
+        if isinstance(self, LegacyConfigurable):
+            _alg_base.__init__(self, name)
+        else:
+            _alg_base.__init__(self, name, **kw)
         CfgPyComponent.__init__(self, name, **kw)
 
     def getGaudiType( self ): return 'Algorithm'
     def getType(self):        return 'PyAthena::Alg'
 
     def setup(self):
+        ## store in registry
         from AthenaPython import PyAthena
-        setattr(PyAthena.algs, self.getJobOptName(), self)
-        ConfigurableAlgorithm.setup(self)
-        CfgPyComponent.setup(self)
+        setattr(PyAthena.algs, self.getName(), self)
 
-    def setup2(self):
-        from AthenaPython import PyAthena
-        setattr(PyAthena.algs, self.getJobOptName(), self)
-        CfgPyComponent.setup2(self)
+        ## base class setup
+        CfgPyComponent.setup(self)
+        if isinstance(self, LegacyConfigurable):
+            ConfigurableAlgorithm.setup(self)
 
 
 ### Configurable base class for PyServices ------------------------------------
-class CfgPyService( ConfigurableService, CfgPyComponent ):
+class CfgPyService( CfgPyComponent, _svc_base ):
     def __init__( self, name, **kw ):
-        ConfigurableService.__init__(self, name)
+        if isinstance(self, LegacyConfigurable):
+            _svc_base.__init__(self, name)
+        else:
+            _svc_base.__init__(self, name, **kw)
         CfgPyComponent.__init__(self, name, **kw)
 
     def getGaudiType( self ): return 'Service'
     def getType(self):        return 'PyAthena::Svc'
 
     def setup(self):
+        ## store in registry
         from AthenaPython import PyAthena
-        setattr(PyAthena.services, self.getJobOptName(), self)
-        ConfigurableService.setup(self)
-        CfgPyComponent.setup(self)
+        setattr(PyAthena.services, self.getName(), self)
 
-    def setup2(self):
-        from AthenaPython import PyAthena
-        setattr(PyAthena.services, self.getJobOptName(), self)
-        CfgPyComponent.setup2(self)
+        ## base class setup
+        CfgPyComponent.setup(self)
+        if isinstance(self, LegacyConfigurable):
+            _svc_base.setup(self)
 
 
 ### Configurable base class for PyAlgTools ------------------------------------
-class CfgPyAlgTool( ConfigurableAlgTool, CfgPyComponent ):
+class CfgPyAlgTool( CfgPyComponent, _tool_base ):
     def __init__( self, name, **kw ):
-        ConfigurableAlgTool.__init__(self, name)
+        if isinstance(self, LegacyConfigurable):
+            _tool_base.__init__(self, name)
+        else:
+            _tool_base.__init__(self, name, **kw)
         CfgPyComponent.__init__(self, name, **kw)
 
     def getGaudiType( self ): return 'AlgTool'
     def getType(self):        return 'PyAthena::Tool'
 
     def setup(self):
-        ConfigurableAlgTool.setup(self)
         CfgPyComponent.setup(self)
+        if isinstance(self, LegacyConfigurable):
+            _tool_base.setup(self)
 
 
 ### Configurable base class for PyAud -----------------------------------------
-class CfgPyAud( ConfigurableAuditor, CfgPyComponent ):
+class CfgPyAud( CfgPyComponent, _aud_base ):
     def __init__( self, name, **kw ):
-        ConfigurableAuditor.__init__(self, name)
+        _aud_base.__init__(self, name)
         CfgPyComponent.__init__(self, name, **kw)
 
     def getGaudiType( self ): return 'Auditor'
     def getType(self):        return 'PyAthena::Aud'
 
     def setup(self):
-        ConfigurableAuditor.setup(self)
         CfgPyComponent.setup(self)
+        if isinstance(self, LegacyConfigurable):
+            _aud_base.setup(self)
 
 
 ### -----
