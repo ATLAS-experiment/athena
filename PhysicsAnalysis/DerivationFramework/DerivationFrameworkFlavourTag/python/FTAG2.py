@@ -34,14 +34,11 @@ def FTAG2KernelCfg(ConfigFlags, name='FTAG2Kernel', **kwargs):
 
 
     # TrackParticles associated with small-R jets
-    track_selection_string = "InDetTrackParticles.numberOfSCTHits + InDetTrackParticles.numberOfPixelHits > 1"
-    
     FTAG2Akt4PFlowJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(ConfigFlags,
         name            = "FTAG2Akt4PFlowJetTPThinningTool",
         StreamName      = kwargs['StreamName'],
         JetKey   = "AntiKt4EMPFlowJets",
         SelectionString = 'AntiKt4EMPFlowJets.pt > 15*GeV',
-        TrackSelectionString = track_selection_string,
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     FTAG2AktVRJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(ConfigFlags,
@@ -49,7 +46,6 @@ def FTAG2KernelCfg(ConfigFlags, name='FTAG2Kernel', **kwargs):
         StreamName      = kwargs['StreamName'],
         JetKey  = "AntiKtVR30Rmax4Rmin02PV0TrackJets",
         SelectionString = 'AntiKtVR30Rmax4Rmin02PV0TrackJets.pt > 7*GeV',
-        TrackSelectionString = track_selection_string,
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     # Include inner detector tracks associated with muons
