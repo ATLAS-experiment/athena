@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file: PyAthenaComps.py
 # @purpose: a set of Python classes for PyAthena
@@ -21,7 +21,6 @@ __all__ = [ 'StatusCode',
             ]
 
 ### imports
-from AthenaCommon.Logging import logging
 from AthenaCommon.Configurable  import *  # noqa: F401, F403
 from AthenaPython.Configurables import (CfgPyAlgorithm,
                                         CfgPyService,
@@ -81,7 +80,6 @@ class Alg( CfgPyAlgorithm ):
         self._pyath_condstore = None # handle to the cond store
         self._ctx = None
         self.__component_type__="Algorithm"
-        self.__cpp_type__=self.__class__.__name__
         self.name=name
         return
 
@@ -188,9 +186,7 @@ class Svc( CfgPyService ):
         if name is None: name = kw.get('name', self.__class__.__name__)
         ## init base class
         super(Svc, self).__init__(name, **kw)
-        self.__dict__['msg']  = logging.getLogger( self.getJobOptName() )
         self.__component_type__ = "Service"
-        self.__cpp_type__=self.__class__.__name__
         return
 
     def sysInitialize(self):
@@ -247,12 +243,10 @@ class AlgTool( CfgPyAlgTool ):
             else:                       name = "%s.%s" % (parent.name(),name)
         ## init base class
         super(AlgTool, self).__init__(name, **kw)
-        self.__dict__['msg']  = logging.getLogger( self.getJobOptName() )
         self._pyath_evtstore = None # handle to the evt store
         self._pyath_detstore = None # handle to the det store
         self._pyath_condstore = None # handle to the cond store
         self.__component_type__ = "AlgTool"
-        self.__cpp_type__=self.__class__.__name__
         return
 
     @property
@@ -319,9 +313,6 @@ class Aud( CfgPyAud ):
         if name is None: name = kw.get('name', self.__class__.__name__)
         ## init base class
         super(Aud, self).__init__(name, **kw)
-        from AthenaCommon.Logging import logging
-        self.__dict__['msg'] = logging.getLogger( self.getJobOptName() )
-
         return
 
     def sysInitialize(self):
