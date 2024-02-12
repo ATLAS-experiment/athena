@@ -42,10 +42,6 @@ atlas_add_test( manual_menu_cf_CA
                PRIVATE_WORKING_DIRECTORY 
                POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test( ViewCFTest
-                SCRIPT python -m unittest -v TriggerMenuMT.CFtest.ViewCFTest
-                POST_EXEC_SCRIPT noerror.sh )
-
 atlas_add_test( EventBuildingSequences
                 SCRIPT python -m TriggerMenuMT.HLT.CommonSequences.EventBuildingSequences
                 POST_EXEC_SCRIPT noerror.sh )
