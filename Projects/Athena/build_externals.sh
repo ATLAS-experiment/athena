@@ -15,7 +15,7 @@ ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=104
                         -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/archive/refs/tags/v32.0.2.tar.gz;URL_HASH;SHA256=a817a9b6434ae206c36b1c25df6139ffcde95234944d09e718125e14da7996b8"
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/5.0.1/GeoModel-5.0.1.tar.bz2;URL_MD5;88d297f433ec15c26bd2dd120964813f"
 			-DATLAS_GEOMODEL_PATCH=""
-                        -DATLAS_GEOMODEL_FORCEDOWNLOAD_MESSAGE="Forcing the re-download of GeoModel (2024.01.27.)")
+                        -DATLAS_GEOMODEL_FORCEDOWNLOAD_MESSAGE="Forcing_the_re-download_of_GeoModel_(2024.01.27.)")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
