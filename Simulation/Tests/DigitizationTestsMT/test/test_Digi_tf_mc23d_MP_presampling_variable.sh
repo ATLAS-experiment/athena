@@ -8,7 +8,6 @@
 # art-include: main/Athena
 # art-output: mc23d_presampling.VarBS.RDO.pool.root
 # art-output: log.*
-# art-output: legacy.*
 # art-output: DigiPUConfig*
 
 export ATHENA_CORE_NUMBER=8
@@ -59,12 +58,28 @@ rc=$?
 status=$rc
 echo "art-result: $rc digiCA"
 
+rc1=-9999
+if [ $status -eq 0 ]; then
+    mv ${DigiOutFileName} backup_${DigiOutFileName}
+    rm PoolFileCatalog.xml
+    RDOMerge_tf.py \
+        --CA \
+        --PileUpPresampling True \
+        --inputRDOFile backup_${DigiOutFileName} \
+        --outputRDO_MRGFile ${DigiOutFileName} \
+        --postExec "default:PyJobTransforms.UseFrontier" "all:PyJobTransforms.SortInput"
+    rc1=$?
+    rm backup_${DigiOutFileName}
+    status=$rc1
+fi
+echo "art-result: $rc1 RDOMerge_tf.py"
+
 # get reference directory
 source DigitizationCheckReferenceLocation.sh
 echo "Reference set being used: ${DigitizationTestsVersion}"
 
 rc4=-9999
-if [[ $rc -eq 0 ]]
+if [[ $rc1 -eq 0 ]]
 then
     # Do reference comparisons
     art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileName" "${ATLAS_REFERENCE_DATA}/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileName"
@@ -74,7 +89,7 @@ fi
 echo "art-result: $rc4 OLDvsFixedRef"
 
 rc6=-9999
-if [[ $rc -eq 0 ]]
+if [[ $rc1 -eq 0 ]]
 then
     art.py compare grid --entries 10 "$1" "$2" --mode=semi-detailed --file="$DigiOutFileName"
     rc6=$?

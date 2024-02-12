@@ -6,6 +6,7 @@
 # art-architecture:  '#x86_64-intel'
 # art-output: mc15_2015_cosmics.RDO.pool.root
 
+Events=54
 CosmicsHITSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/testCosmics.ATLAS-R2-2015-03-01-00_VALIDATION.HITS.pool.root"
 DigiOutFileName="mc15_2015_cosmics.RDO.pool.root"
 
@@ -13,7 +14,7 @@ Digi_tf.py \
     --CA \
     --inputHITSFile ${CosmicsHITSFile}  \
     --outputRDOFile ${DigiOutFileName}  \
-    --maxEvents 100  \
+    --maxEvents ${Events}  \
     --skipEvents 0  \
     --digiSeedOffset1 11 \
     --digiSeedOffset2 22  \
