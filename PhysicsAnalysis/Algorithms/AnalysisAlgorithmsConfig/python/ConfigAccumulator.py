@@ -468,7 +468,7 @@ class ConfigAccumulator :
             return ""
         
         if excludeFrom is None :
-            excludeFrom = {}
+            excludeFrom = set()
         elif not isinstance(excludeFrom, set) :
             raise ValueError ('invalid excludeFrom argument (need set of strings): ' + str(excludeFrom))
 
