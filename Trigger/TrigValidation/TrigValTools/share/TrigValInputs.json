@@ -188,7 +188,7 @@
         "source": "mc",
         "format": "RDO",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/mc16_13TeV.310772.CosmicRays_CollisionSetup.recon.RDO.s3513_s3519_r11737_tid20237005_00/RDO.20237005.merge250"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/mc23_13p6TeV.310772.CosmicRays_CollisionSetup.recon.RDO.s4261_s4260_r15236_tid36836491_00/RDO.36836491._001912.pool.root.1"
         ]
     },
     "Zmumu": {
