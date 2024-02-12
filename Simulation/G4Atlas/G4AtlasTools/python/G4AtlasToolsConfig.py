@@ -207,7 +207,7 @@ def CaloSensitiveDetectorListCfg(flags):
 
 
 def MuonSensitiveDetectorListCfg(flags):
-    if flags.Muon.setupGeoModelXML:
+    if flags.Muon.usePhaseIIGeoSetup:
         from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import SetupSensitiveDetectorsCfg
         return SetupSensitiveDetectorsCfg(flags)
     from MuonG4SD.MuonG4SDConfig import SetupSensitiveDetectorsCfg
@@ -227,7 +227,7 @@ def SimHitContainerListCfg(flags):
     from SimulationConfig.SimEnums import LArParameterization
     writtenContainers =[]
     if flags.Detector.GeometryMuon:
-        if flags.Muon.setupGeoModelXML:
+        if flags.Muon.usePhaseIIGeoSetup:
             from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import SimHitContainerListCfg
             writtenContainers+= SimHitContainerListCfg(flags)
         else:

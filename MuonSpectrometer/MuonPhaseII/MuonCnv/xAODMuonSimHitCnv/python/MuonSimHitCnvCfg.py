@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MdtToxAODConvAlgCfg(flags,name="MdtSimHitToxAODConvAlg", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("UseR4DetMgr", flags.Muon.setupGeoModelXML)
+    kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
     the_alg = CompFactory.MdtSimHitToxAODCnvAlg(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

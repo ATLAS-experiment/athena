@@ -43,9 +43,12 @@ def createMuonConfigFlags():
     # stages of processing
     # 0. Geometry
 
-    ### Load the GeoModel XML detector factory & MuonReaoudGeometryR4
-    mcf.addFlag("Muon.setupGeoModelXML", False)
-
+    ### Load the GeoModel XML detector factory & MuonReaoudGeometryR4    
+    from AthenaConfiguration.AutoConfigFlags import DetDescrInfo
+    
+    mcf.addFlag("Muon.usePhaseIIGeoSetup",lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion, 
+                                                                          prevFlags.GeoModel.SQLiteDB ,
+                                                                          prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     # 1. Digitization
     mcf.addFlag("Muon.doDigitization",True)
     # 2. Reco MuonRecFlags    
