@@ -82,8 +82,8 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
     for ip,p in enumerate(presel_cut_str.split('XX')):
         hascalSel= bool(re.match(r'.*emf\w?\d+', p))
         if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
-            p = re.sub(r'b\w?\d+', '', p)
-        hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
+            p = re.sub(r'b\d\d|bg\d\d|bgtwo\d\d', '', p)
+        hasBjetSel = bool(re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)', p))
         hasDIPZsel = bool(re.match(r'.*Z', p))
         if hasDIPZsel and not doBJetSel: continue # Skipping calopresel step when DIPZ is run
         if usingDIPZ and not hasDIPZsel and not hasBjetSel and doBJetSel: continue # Skipping roiftf step only when running the calo selection leg (and if in the DIPZ scenario)
@@ -132,7 +132,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         if btagger == 'g':
             btagger = 'gnone'
         elif btagger =='gtwo':
-            btagger == 'gntwo'
+            btagger = 'gntwo'
         elif btagger == '':
             btagger = 'dips'
 
