@@ -35,17 +35,25 @@ if __name__ == '__main__':
     #Sim flags
     #flags.Sim.WorldRRange = 15000
     #flags.Sim.WorldZRange = 27000 #change defaults?
-    from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground
+    from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, SimulationFlavour, TruthStrategy
     flags.Sim.CalibrationRun = CalibrationRun.Off
     flags.Sim.RecordStepInfo = False
-    flags.Sim.CavernBackground = CavernBackground.Signal
+    flags.Sim.CavernBackground = CavernBackground.Off
     flags.Sim.ISFRun = False
-    flags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
+    flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
+    flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
+    flags.Sim.TightMuonStepping=True
+    from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill, enableFrozenShowersFCalOnly
+    enableBeamPipeKill(flags)
+    enableFrozenShowersFCalOnly(flags)
 
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.GeoModel.Align.Dynamic = False
     flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"
+
+    # To respect --athenaopts
+    flags.fillFromArgs()
 
     # Finalize
     flags.lock()
@@ -59,29 +67,35 @@ if __name__ == '__main__':
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     cfg.merge(BeamEffectsAlgCfg(flags))
 
+    if flags.Input.Files:
+        if "xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections:
+            from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+            cfg.merge(EventInfoCnvAlgCfg(flags))
+        else:
+            from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
+            cfg.merge(EventInfoUpdateFromContextAlgCfg(flags))
+
     #add the G4AtlasAlg
     from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
     cfg.merge(G4AtlasAlgCfg(flags))
+    AcceptAlgNames = ['G4AtlasAlg']
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
-    cfg.merge(OutputStreamCfg(flags, "HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=['G4AtlasAlg']))
+    cfg.merge(OutputStreamCfg(flags, "HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=AcceptAlgNames))
 
-    # FIXME hack to match to buggy behaviour in old style configuration
-    OutputStreamHITS = cfg.getEventAlgo("OutputStreamHITS")
-    OutputStreamHITS.ItemList.remove("xAOD::EventInfo#EventInfo")
-    OutputStreamHITS.ItemList.remove("xAOD::EventAuxInfo#EventInfoAux.")
+   # Add MT-safe PerfMon
+    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
+        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+        cfg.merge(PerfMonMTSvcCfg(flags))
 
-    # FIXME hack because deduplication is broken
-    PoolAttributes = ["TREE_BRANCH_OFFSETTAB_LEN = '100'"]
-    PoolAttributes += [f"DatabaseName = '{flags.Output.HITSFileName}'; ContainerName = 'TTree=CollectionTree'; TREE_AUTO_FLUSH = '1'"]
-    cfg.getService("AthenaPoolCnvSvc").PoolAttributes += PoolAttributes
+    # Add in-file MetaData
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    cfg.merge(SetupMetaDataForStreamCfg(flags, "HITS", AcceptAlgs=AcceptAlgNames))
 
     # Dump config
     from AthenaConfiguration.ComponentFactory import CompFactory
     cfg.addEventAlgo(CompFactory.JobOptsDumperAlg(FileName="G4AtlasTestConfig.txt"))
-    cfg.getService("StoreGateSvc").Dump = True
-    cfg.getService("ConditionStore").Dump = True
     cfg.printConfig(withDetails=True, summariseProps = True)
 
     flags.dump()

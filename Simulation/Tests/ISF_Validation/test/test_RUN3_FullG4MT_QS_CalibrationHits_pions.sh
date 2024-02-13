@@ -16,7 +16,7 @@ Sim_tf.py \
     --CA \
     --simulator 'FullG4MT_QS'  \
     --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/pi_E50_eta0-60.evgen.pool.root' \
-    --outputHITSFile 'test.CA.HITS.pool.root' \
+    --outputHITSFile 'test.HITS.pool.root' \
     --maxEvents '10' \
     --skipEvents '0' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
