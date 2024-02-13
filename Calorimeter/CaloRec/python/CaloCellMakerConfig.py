@@ -76,9 +76,10 @@ if __name__=="__main__":
     log.setLevel(DEBUG)
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles,defaultGeometryTags
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
