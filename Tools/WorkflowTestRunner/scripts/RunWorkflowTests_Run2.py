@@ -39,16 +39,16 @@ def main():
             log.error("Parallel execution not supported for pile-up workflow")
             exit(1)
         if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
-            tests_to_run.append(PileUpTest("d1730", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, options.extra_args))
+            tests_to_run.append(PileUpTest("d1918", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
-            tests_to_run.append(QTest("q444", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
+            tests_to_run.append(QTest("q453", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"
         tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if not options.workflow or options.workflow is WorkflowType.MCReco:
-            tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
+            tests_to_run.append(QTest("q452", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataReco:
             tests_to_run.append(QTest("q442", run, WorkflowType.DataReco, ["RAWtoALL", "DQHistogramMerge"], setup, options.extra_args))
 

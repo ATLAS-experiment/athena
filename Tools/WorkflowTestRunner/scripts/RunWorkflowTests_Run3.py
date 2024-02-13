@@ -45,17 +45,17 @@ def main():
             log.error("Parallel execution not supported for pile-up workflow")
             exit(1)
         if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
-            ami_tag = "d1760" if not options.ami_tag else options.ami_tag
+            ami_tag = "d1919" if not options.ami_tag else options.ami_tag
             tests_to_run.append(PileUpTest(ami_tag, run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
-            tests_to_run.append(QTest("q446", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
+            tests_to_run.append(QTest("q455", run, WorkflowType.MCPileUpReco, ["Overlay", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"
         tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if not options.workflow or options.workflow is WorkflowType.MCReco:
-            ami_tag = "q445" if not options.ami_tag else options.ami_tag
+            ami_tag = "q454" if not options.ami_tag else options.ami_tag
             tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataReco:
             ami_tag = "q449" if not options.ami_tag else options.ami_tag
