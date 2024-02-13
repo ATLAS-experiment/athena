@@ -555,7 +555,7 @@ public:
    * or @c ConstAccessor classes above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name) const;
 
 
@@ -570,7 +570,7 @@ public:
    * or @c ConstAccessor classes above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name,
            const std::string& clsname) const;
 
@@ -585,7 +585,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name) const;
 
 
@@ -600,7 +600,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name,
                 const std::string& clsname) const;
 
@@ -649,7 +649,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name) const;
 
 
@@ -668,7 +668,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name,
             const std::string& clsname) const;
 
@@ -1168,7 +1168,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Accessor<T, ALLOC>::reference_type
   auxdata (const std::string& name);
 
 
@@ -1183,7 +1183,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Accessor<T, ALLOC>::reference_type
   auxdata (const std::string& name,
            const std::string& clsname);
 
@@ -1198,7 +1198,7 @@ public:
    * or @c ConstAccessor classes above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename Accessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name) const;
 
 
@@ -1213,7 +1213,7 @@ public:
    * or @c ConstAccessor classes above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename Accessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name,
            const std::string& clsname) const;
 
@@ -1228,7 +1228,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename Accessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name) const;
 
 
@@ -1243,7 +1243,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename Accessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name,
                 const std::string& clsname) const;
 
@@ -1307,7 +1307,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name) const;
 
 
@@ -1326,7 +1326,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name,
             const std::string& clsname) const;
 
