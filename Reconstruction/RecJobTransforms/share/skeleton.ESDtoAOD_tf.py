@@ -116,13 +116,6 @@ if hasattr(runArgs,"outputNTUP_MINBIASFile"):
     include( prodFlags.WriteMinBiasD3PD.DPDMakerScript )
     pass
 
-if hasattr(runArgs,"outputDESDM_BEAMSPOTFile"):
-    #needs to be used with: preInclude=InDetBeamSpotFinder/BeamSpotRecoPreInclude_standard.py
-    from InDetBeamSpotFinder import BeamSpotDPDFlags 
-    primDPD.WriteDESDM_BEAMSPOTStream.FileName=runArgs.outputDESDM_BEAMSPOTFile
-    primDPD.WriteDESDM_BEAMSPOTStream.set_Value_and_Lock( True )
-    include("InDetBeamSpotFinder/DESDM_BEAMSPOTFragment.py")
-
 #==========================================================
 # Use ZLIB for compression of all temporary outputs
 #==========================================================
