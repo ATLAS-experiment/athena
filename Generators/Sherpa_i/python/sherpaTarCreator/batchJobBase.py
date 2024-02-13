@@ -26,7 +26,7 @@ class batchJobBase:
 
     # COMPILER_PATH
     if useSingularity:
-      platform = str(os.environ['COMPILERPATH']).split('/')[-1].replace('el9', 'almalinux9')
+      platform = str(os.environ['COMPILER_PATH']).split('/')[-1].replace('el9', 'almalinux9')
       executable += 'if [ "$1" != "--really" ]; then \n'
       executable += '  exec singularity exec -e --no-home'
       for dir in ["/cvmfs", "/var", self.basedir, "$(pwd | cut -d '/' -f 1-2)"] + extraDirs:
