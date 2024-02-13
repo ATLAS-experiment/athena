@@ -154,8 +154,12 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   metTotal(A_MST_x, A_MST_y, B_MST_x, B_MST_y, C_MST_x, C_MST_y, MST_x, MST_y);
   metTotal(A_MET_x, A_MET_y, B_MET_x, B_MET_y, C_MET_x, C_MET_y, MET_x, MET_y);
       
-  //Calculate the scalar value of MET 
-  MET = std::sqrt(((MET_x)*(MET_x)) + ((MET_y)*(MET_y)));
+
+  int MET2 = MET_x * MET_x + MET_y * MET_y;
+
+  if (MET2 > 0x000FFF) MET = 0x000FFF;
+  else if (MET2 < 0) MET = 0x000FFF;
+  else MET = std::sqrt(MET2);
 
   //Define a vector to be filled with all the TOBs of one event
   std::vector<std::unique_ptr<gFEXJwoJTOB>> tobs_v;
@@ -420,6 +424,13 @@ void gFEXJwoJAlgo::metTotal(int A_MET_x, int A_MET_y,
   // Truncation of the result, as the individual quantities are 16 bits, while the TOB field is 12 bits
   MET_x = MET_x >> 4;
   MET_y = MET_y >> 4;
+
+  if (MET_x < -0x0007FF) MET_x = -0x0007FF;
+  if (MET_y < -0x0007FF) MET_y = -0x0007FF;
+
+  if (MET_x > 0x0007FF) MET_x  = 0x0007FF;
+  if (MET_y > 0x0007FF) MET_y  = 0x0007FF;
+
 }
 
 
