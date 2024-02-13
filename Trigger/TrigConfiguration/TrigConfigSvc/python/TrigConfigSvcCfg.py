@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-from collections import OrderedDict as odict
 from functools import cache
 import json
 
@@ -135,21 +134,15 @@ def _getMenuFileName(flags):
 
 # L1 Json file name 
 def getL1MenuFileName(flags):
-    l1MenuFileName = 'L1Menu'+_getMenuFileName(flags)+'.json'
-    l1MenuFileName = l1MenuFileName.replace("_newJO","")
-    return l1MenuFileName
+    return 'L1Menu'+_getMenuFileName(flags)+'.json'
 
 # HLT Json file name 
 def getHLTMenuFileName( flags ):
-    hltMenuFileName = 'HLTMenu'+_getMenuFileName(flags)+'.json'
-    hltMenuFileName = hltMenuFileName.replace("_newJO","")
-    return hltMenuFileName
+    return 'HLTMenu'+_getMenuFileName(flags)+'.json'
 
 # HLT Monitoring set json file name
 def getHLTMonitoringFileName( flags ):
-    hltMonitoringFileName = 'HLTMonitoring'+_getMenuFileName(flags)+'.json'
-    hltMonitoringFileName = hltMonitoringFileName.replace("_newJO","")
-    return hltMonitoringFileName
+    return 'HLTMonitoring'+_getMenuFileName(flags)+'.json'
 
 # L1 Prescales set json file name
 def getL1PrescalesSetFileName( flags ):
@@ -173,17 +166,15 @@ def createL1PrescalesFileFromMenu( flags ):
     menuFN = getL1MenuFileName(flags)
     with open(menuFN,'r') as fh:
         data = json.load(fh)
-        pso = odict()
-        pso['filetype'] = 'l1prescale'
-        pso['name'] = data['name']
-        pso['cutValues'] = odict()
+        pso = { 'filetype': 'l1prescale',
+                'name': data['name'],
+                'cutValues': {} }
         ps = pso['cutValues']
         for name, item in sorted(data['items'].items()):
-            ps[name] = odict([
-                ("cut", 1),
-                ("enabled", True),
-                ("info", "prescale: 1")
-            ])
+            ps[name] = {"cut": 1,
+                        "enabled": True,
+                        "info": "prescale: 1"}
+
     psFN = getL1PrescalesSetFileName( flags )
     with open(psFN, 'w') as outfile:
         json.dump(pso, outfile, indent = 4)
@@ -270,7 +261,6 @@ def HLTConfigSvcCfg( flags ):
 
 # provide both services in new JO
 def TrigConfigSvcCfg( flags ):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
     acc.merge( BunchGroupCondAlgCfg( flags ) )
     acc.merge( L1ConfigSvcCfg( flags ) )
@@ -281,7 +271,6 @@ def TrigConfigSvcCfg( flags ):
 
 def L1PrescaleCondAlgCfg( flags ):
     log.info("Setting up L1PrescaleCondAlg")
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
     TrigConf__L1PrescaleCondAlg = CompFactory.getComp("TrigConf::L1PrescaleCondAlg")
     l1PrescaleCondAlg = TrigConf__L1PrescaleCondAlg("L1PrescaleCondAlg")
@@ -311,7 +300,6 @@ def L1PrescaleCondAlgCfg( flags ):
 
 def BunchGroupCondAlgCfg( flags ):
     log.info("Setting up BunchGroupCondAlg")
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
     TrigConf__BunchGroupCondAlg = CompFactory.getComp("TrigConf::BunchGroupCondAlg")
     bunchGroupCondAlg = TrigConf__BunchGroupCondAlg("TrigConf__BunchGroupCondAlg")
@@ -338,7 +326,6 @@ def BunchGroupCondAlgCfg( flags ):
 
 def HLTPrescaleCondAlgCfg( flags ):
     log.info("Setting up HLTPrescaleCondAlg")
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     acc = ComponentAccumulator()
     hltPrescaleCondAlg = CompFactory.getComp("TrigConf::HLTPrescaleCondAlg")("HLTPrescaleCondAlg")
 
