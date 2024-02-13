@@ -357,7 +357,7 @@ def Kernel_ATLFAST3F_ACTSMTCfg(flags, name="ISF_Kernel_ATLFAST3F_ACTSMT", **kwar
 
 def Kernel_CosmicsG4Cfg(flags, name="ISF_Kernel_CosmicsG4", **kwargs):
     acc = ComponentAccumulator()
-    from ISF_Tools.ISF_ToolsConfigNew import CosmicEventFilterToolCfg
+    from ISF_Tools.ISF_ToolsConfig import CosmicEventFilterToolCfg
     kwargs.setdefault("EventFilterTools"            , [ acc.addPublicTool(acc.popToolsAndMerge(CosmicEventFilterToolCfg(flags))) ]   )
     kwargs.setdefault("ParticleBroker", acc.getPrimaryAndMerge(ParticleBrokerSvcNoOrderingCfg(flags)).name)
     kwargs.setdefault("MaximumParticleVectorSize"   , 1000000)

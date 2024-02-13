@@ -6,7 +6,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-include: master/Athena
-# art-output: test.*.HITS.pool.root
+# art-output: test.HITS.pool.root
 # art-output: log.*
 # art-output: Config*.pkl
 
