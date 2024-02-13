@@ -31,12 +31,13 @@ def CaloThinCellsBySamplingAlgCfg (flags, streamName,
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultTestFiles,defaultGeometryTags
 
     only = ['CaloThinCellsBySamplingAlg_TileGap3_StreamAOD']
 
     flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW_RUN2
+    flags1.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags1.lock()
     acc1 = CaloThinCellsBySamplingAlgCfg (flags1, 'StreamAOD',
                                           ['TileGap3'])
