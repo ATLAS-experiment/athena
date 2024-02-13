@@ -56,7 +56,7 @@ namespace asg
       event = std::make_unique<POOL::TEvent>();
 #endif
       ASSERT_SUCCESS (event->readFrom (file.get()));
-      ASSERT_TRUE (event->getEntry (0) >= 0);
+      ASSERT_TRUE (event->getEntry (1) >= 0);
     }
 
     static void TearDownTestCase ()

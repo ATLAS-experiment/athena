@@ -237,19 +237,30 @@ def makeGeneratorAlgorithmsSequence (dataType) :
 
 def pileupConfigFiles(dataType):
     """Return the PRW config files and lumicalc files for tests"""
+    if isinstance(dataType, str):
+        if dataType == "mc":
+            dataType = DataType.FullSim
+        elif dataType == "afii":
+            dataType = DataType.FastSim
+        else:
+            dataType = DataType(dataType)
+
     if dataType is DataType.Data:
         prwfiles = []
         lumicalcfiles = []
     else:
-        lumicalcfiles = [
-            "GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root",
-            "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root",
-        ]
         if dataType is DataType.FullSim:
+            lumicalcfiles = [
+                "GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root",
+                "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root",
+            ]
             prwfiles = [
                 "PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root"
             ]
         else:
+            lumicalcfiles = [
+                "GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root",
+            ]
             # use fast sim case to test running without PRW
             prwfiles = []
     return prwfiles, lumicalcfiles
