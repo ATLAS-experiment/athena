@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: CA-based config Track-overlay for MC21a ttbar
+# art-description: CA vs Legacy code diff (ATLFAST3MT with MC-overlay) for MC21a ttbar
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
@@ -11,30 +11,34 @@
 # art-architecture: '#x86_64-intel'
 
 events=50
-HITS_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/HITS.29625925._010619_100evts.pool.root.1"
-RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO_TrackOverlay_Run3.pool.root"
+EVNT_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1'
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/RDO_BKG/mc21_13p6TeV.900149.PG_single_nu_Pt50.digit.RDO.e8453_e8455_s3864_d1761/50events.RDO.pool.root"
 RDO_File="RDO.pool.root"
 AOD_File="AOD.pool.root"
 NTUP_File="NTUP.pool.root"
 
-Overlay_tf.py \
+FastChain_tf.py \
   --CA \
-  --inputHITSFile ${HITS_File} \
+  --runNumber 601229 \
+  --simulator ATLFAST3MT \
+  --physicsList FTFP_BERT_ATL \
+  --useISF True \
+  --randomSeed 123 \
+  --inputEVNTFile ${EVNT_File} \
   --inputRDO_BKGFile ${RDO_BKG_File} \
   --outputRDOFile ${RDO_File} \
   --maxEvents ${events} \
   --skipEvents 0 \
   --digiSeedOffset1 511 \
   --digiSeedOffset2 727 \
-  --preInclude 'Campaigns.MC21a' \
+  --preInclude 'Campaigns.MC21a' 'Campaigns.MC21SimulationNoIoV' \
   --postInclude 'PyJobTransforms.UseFrontier' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
   --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
   --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
-  --preExec 'ConfigFlags.Overlay.doTrackOverlay=True;' \
   --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
   --imf False
 ca=$?
-echo  "art-result: $ca HITStoRDO_CA"
+echo  "art-result: $ca EVNTtoRDO_CA"
 status=$ca
 
 reg=-9999
@@ -56,13 +60,12 @@ then
                --inputRDOFile ${RDO_File} \
                --outputAODFile ${AOD_File} \
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \
-	       --maxEvents '-1' \
+               --maxEvents '-1' \
                --autoConfiguration=everything \
-    	       --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
+               --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
                --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
                --athenaopts "all:--threads=1" \
                --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
-               --preExec 'RAWtoALL:ConfigFlags.Overlay.doTrackOverlay=True;' 'RDOtoRDOTrigger:from OverlayCommonAlgs.OverlayFlags import overlayFlags; overlayFlags.doTrackOverlay=True; ConfigFlags.Overlay.doTrackOverlay=True;'\
                --imf False
 
      rec=$?
@@ -74,7 +77,7 @@ then
                     --maxEvents '-1' \
                     --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
                     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
-		    --asetup 'Athena,23.0.53' \
+                    --asetup 'Athena,23.0.53' \
                     --ignoreErrors True \
                     --validationFlags 'doInDet' \
                     --valid 'True'
