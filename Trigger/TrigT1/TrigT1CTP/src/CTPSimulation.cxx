@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./CTPSimulation.h"
@@ -1113,7 +1113,7 @@ LVL1CTP::CTPSimulation::simulateItems(const std::map<std::string, unsigned int> 
 
 
 StatusCode
-LVL1CTP::CTPSimulation::finalize() {
+LVL1CTP::CTPSimulation::stop() {
 
    const TrigConf::L1Menu * l1menu = nullptr;
    ATH_CHECK( detStore()->retrieve(l1menu) );
