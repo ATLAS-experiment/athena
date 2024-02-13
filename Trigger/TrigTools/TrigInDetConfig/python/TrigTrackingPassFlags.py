@@ -53,6 +53,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.doDisappearingTrk   = False # Not working yet for ITk
     flags.doCaloSeededBremSi  = False
     flags.doCaloSeededAmbiSi  = False
+    flags.DoubletDR_Max       = 150.0
   
   flags.useSeedFilter         = False
 
