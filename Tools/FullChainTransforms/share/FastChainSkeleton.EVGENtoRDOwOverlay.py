@@ -580,6 +580,8 @@ if DetFlags.overlay.LAr_on() or DetFlags.overlay.Tile_on():
 if (MuonGeometryFlags.hasCSC() and DetFlags.overlay.CSC_on()) or DetFlags.overlay.MDT_on() or DetFlags.overlay.RPC_on() or DetFlags.overlay.TGC_on() or (MuonGeometryFlags.hasSTGC() and DetFlags.overlay.sTGC_on()) or (MuonGeometryFlags.hasMM() and DetFlags.overlay.MM_on()):
     from AthenaConfiguration.OldFlags2NewFlags import getNewConfigFlags
     ConfigFlags = getNewConfigFlags()
+    ConfigFlags.Common.isOverlay = True
+    ConfigFlags.lock()
     from MuonConfig.MuonOverlayConfig import MuonOverlayCfg
     from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
     CAtoGlobalWrapper(MuonOverlayCfg, ConfigFlags)
