@@ -114,39 +114,40 @@ def InDetCosmicsTrackRecoPreProcessingCfg(flags):
         ResolvedTrackCollectionKey="ResolvedTracks",
         SiSPSeededTrackCollectionKey="SiSPSeededTracks"))
 
-    from InDetConfig.TRTExtensionConfig import NewTrackingTRTExtensionPhaseCfg
-    result.merge(NewTrackingTRTExtensionPhaseCfg(
-        flags,
-        SiTrackCollection="ResolvedTracks",
-        ExtendedTrackCollection="ExtendedTracksPhase",
-        ExtendedTracksMap="ExtendedTracksMapPhase"))
+    if flags.Detector.EnableTRT:
+        from InDetConfig.TRTExtensionConfig import NewTrackingTRTExtensionPhaseCfg
+        result.merge(NewTrackingTRTExtensionPhaseCfg(
+            flags,
+            SiTrackCollection="ResolvedTracks",
+            ExtendedTrackCollection="ExtendedTracksPhase",
+            ExtendedTracksMap="ExtendedTracksMapPhase"))
 
-    from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFinding_Phase_Cfg
-    result.merge(TRTSegmentFinding_Phase_Cfg(flags))
+        from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFinding_Phase_Cfg
+        result.merge(TRTSegmentFinding_Phase_Cfg(flags))
 
-    from InDetConfig.InDetTrackPRD_AssociationConfig import (
-        InDetTrackPRD_AssociationCfg)
-    result.merge(InDetTrackPRD_AssociationCfg(
-        flags, name='InDetTRTonly_TrackPRD_AssociationPhase',
-        AssociationMapName='InDetTRTonly_PRDtoTrackMapPhase',
-        TracksName=[]))
+        from InDetConfig.InDetTrackPRD_AssociationConfig import (
+            InDetTrackPRD_AssociationCfg)
+        result.merge(InDetTrackPRD_AssociationCfg(
+            flags, name='InDetTRTonly_TrackPRD_AssociationPhase',
+            AssociationMapName='InDetTRTonly_PRDtoTrackMapPhase',
+            TracksName=[]))
 
-    from InDetConfig.TRT_SegmentsToTrackConfig import (
-        TRT_Cosmics_SegmentsToTrackCfg)
-    result.merge(TRT_Cosmics_SegmentsToTrackCfg(
-        flags, name='InDetTRT_Cosmics_SegmentsToTrack_Phase',
-        InputSegmentsCollection="TRTSegments_Phase",
-        OutputTrackCollection="TRT_Tracks_Phase"))
+        from InDetConfig.TRT_SegmentsToTrackConfig import (
+            TRT_Cosmics_SegmentsToTrackCfg)
+        result.merge(TRT_Cosmics_SegmentsToTrackCfg(
+            flags, name='InDetTRT_Cosmics_SegmentsToTrack_Phase',
+            InputSegmentsCollection="TRTSegments_Phase",
+            OutputTrackCollection="TRT_Tracks_Phase"))
 
-    from InDetConfig.InDetCosmicsEventPhaseConfig import (
-        InDetCosmicsEventPhaseCfg)
-    result.merge(InDetCosmicsEventPhaseCfg(
-        flags,
-        InputTracksNames=["TRT_Tracks_Phase"]))
+        from InDetConfig.InDetCosmicsEventPhaseConfig import (
+            InDetCosmicsEventPhaseCfg)
+        result.merge(InDetCosmicsEventPhaseCfg(
+            flags,
+            InputTracksNames=["TRT_Tracks_Phase"]))
 
-    from InDetConfig.InDetPrepRawDataFormationConfig import (
-        InDetTRT_Phase_RIO_MakerCfg)
-    result.merge(InDetTRT_Phase_RIO_MakerCfg(flags))
+        from InDetConfig.InDetPrepRawDataFormationConfig import (
+            InDetTRT_Phase_RIO_MakerCfg)
+        result.merge(InDetTRT_Phase_RIO_MakerCfg(flags))
 
     return result
 
@@ -156,23 +157,28 @@ def InDetPreProcessingCfg(flags):
 
     # Detector ByteStream pre-processing
     if flags.Input.Format is Format.BS:
-        from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import (
-            PixelRawDataProviderAlgCfg)
-        result.merge(PixelRawDataProviderAlgCfg(flags))
+        if flags.Detector.EnablePixel:
+            from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import (
+                PixelRawDataProviderAlgCfg)
+            result.merge(PixelRawDataProviderAlgCfg(flags))
 
-        from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import (
-            SCTRawDataProviderCfg, SCTEventFlagWriterCfg)
-        result.merge(SCTRawDataProviderCfg(flags))
-        result.merge(SCTEventFlagWriterCfg(flags))
+        if flags.Detector.EnableSCT:
+            from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import (
+                SCTRawDataProviderCfg, SCTEventFlagWriterCfg)
+            result.merge(SCTRawDataProviderCfg(flags))
+            result.merge(SCTEventFlagWriterCfg(flags))
 
-        from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import (
-            TRTRawDataProviderCfg)
-        result.merge(TRTRawDataProviderCfg(flags))
+        if flags.Detector.EnableTRT:
+            from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import (
+                TRTRawDataProviderCfg)
+            result.merge(TRTRawDataProviderCfg(flags))
 
-    from InDetConfig.SiliconPreProcessing import InDetRecPreProcessingSiliconCfg
-    result.merge(InDetRecPreProcessingSiliconCfg(flags))
-    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
-    result.merge(TRTPreProcessingCfg(flags))
+    if flags.Detector.EnablePixel or flags.Detector.EnableSCT:
+        from InDetConfig.SiliconPreProcessing import InDetRecPreProcessingSiliconCfg
+        result.merge(InDetRecPreProcessingSiliconCfg(flags))
+    if flags.Detector.EnableTRT:
+        from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
+        result.merge(TRTPreProcessingCfg(flags))
 
     return result
 
