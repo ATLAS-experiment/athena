@@ -5,7 +5,7 @@ from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import DerivationTest, GenerationTest, QTest, SimulationTest
+from WorkflowTestRunner.StandardTests import DerivationTest, GenerationTest, PileUpTest, QTest, SimulationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -30,8 +30,13 @@ def main():
         log.error("Overlay not supported yet")
         exit(1)
     elif options.pileup:
-        log.error("Pile-up not supported yet")
-        exit(1)
+        if setup.parallel_execution:
+            log.error("Parallel execution not supported for pile-up workflow")
+            exit(1)
+        if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
+            tests_to_run.append(PileUpTest("d1920", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, options.extra_args))
+        if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
+            tests_to_run.append(QTest("q456", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args))
     elif options.reco:
         tests_to_run.append(QTest("q447", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, f"{options.extra_args} --geometryVersion ATLAS-P2-RUN4-03-00-00"))
     elif options.derivation:
