@@ -201,7 +201,7 @@ def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
     result = ComponentAccumulator()
 
     kwargs.setdefault("MuonDetectorTool", result.popToolsAndMerge(MuonDetectorToolCfg(flags,
-                                                                                      runFromCondAlg = True)))
+                                                                                      runFromCondAlg = False)))
     kwargs.setdefault("applyMmPassivation", flags.Muon.applyMMPassivation)
 
     if kwargs["applyMmPassivation"]:
