@@ -111,6 +111,6 @@ atlas_add_test( CaloCellMakerTest
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( CaloTowerStore_test
-   SCRIPT athena.py CaloRec/CaloTowerStore_test.py
+   SCRIPT python -m CaloRec.CaloTowerStore_test
    LOG_IGNORE_PATTERN "Reading file|Unable to locate catalog|Cache alignment|MetaReader|AutoConfiguration|IOVDbSvc +INFO"
    PROPERTIES TIMEOUT 500 )
