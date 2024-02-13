@@ -18,9 +18,11 @@ def egammaFSHIEventShapeMakerCfg(flags):
     eventShapeFiller = CompFactory.HIEventShapeFillerTool( 
                 EventShapeMapTool = CompFactory.HIEventShapeMapTool())
 
-    eventShapeMakerAlg = CompFactory.HIEventShapeMaker('HLTEventShapeMakerEG',
+    eventShapeMakerAlg = CompFactory.HIEventShapeMaker('HLTEventShapeMakerEG',        
         HIEventShapeFillerTool = eventShapeFiller,
         InputCellKey=cellMakerAcc.getPrimary().CellsName,
+        NaviTowerKey="",
+        InputTowerKey="",
         OutputContainerKey=getTrigEgammaKeys(ion=True).egEventShape) 
 
     acc.addEventAlgo(eventShapeMakerAlg)
