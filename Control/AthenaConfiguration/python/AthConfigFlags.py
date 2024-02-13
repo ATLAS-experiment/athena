@@ -810,7 +810,8 @@ class AthConfigFlags(object):
                         helptext = f": {flag._help}"
                     if flag._type is not None:
                         helptext += f' [type: {flag._type.__name__}]'
-
+                    if val is not None and helptext == "":
+                        helptext = ": " # ensures default values are displayed even if there's no help text
                     getParser(category)[0].add_argument(name, nargs='?', default=val, help=helptext)
 
             parser._positionals.title = 'flags and positional arguments'
