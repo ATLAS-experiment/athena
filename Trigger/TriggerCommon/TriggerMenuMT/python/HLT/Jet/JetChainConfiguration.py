@@ -182,7 +182,7 @@ class JetChainConfiguration(ChainConfigurationBase):
             else:
                 clustersKey, preselJetDef, jetPreselStep = self.getJetCaloPreselChainStep(flags)
                 chainSteps.append( jetPreselStep )
-                if re.match(r'.*b(g[a-zA-Z]*)?\d+|.*Z', self.trkpresel):
+                if re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)|.*Z', self.trkpresel):
                     roitrkPreselStep = self.getJetRoITrackJetTagPreselChainStep(flags, preselJetDef.fullname())
                 else:
                     roitrkPreselStep=self.getEmptyStep(2, 'RoIFTFEmptyStep')
