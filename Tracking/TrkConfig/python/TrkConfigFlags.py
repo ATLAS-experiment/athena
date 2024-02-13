@@ -170,6 +170,7 @@ def createTrackingConfigFlags():
                      [BeamType.SingleBeam, BeamType.Cosmics] or
                      prevFlags.Tracking.PrimaryPassConfig in [
                          PrimaryPassConfig.VtxLumi,
+                         PrimaryPassConfig.VtxBeamSpot,
                          PrimaryPassConfig.HighPileup]))
 
     ####################################################################
