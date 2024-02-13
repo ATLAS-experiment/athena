@@ -137,7 +137,9 @@ StatusCode TileROD_Decoder::initialize() {
     ATH_CHECK( m_tileBadChanTool.retrieve() );
   }
 
-  const TileCablingService *cablingService = TileCablingService::getInstance();
+  // Tile cabling service
+  ATH_CHECK( m_cablingSvc.retrieve() );
+  const TileCablingService *cablingService = m_cablingSvc->cablingService();
   m_maxChannels    = cablingService->getMaxChannels();
   m_runPeriod      = cablingService->runPeriod();
   std::ostringstream os;
