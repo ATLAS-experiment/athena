@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: BeamSpot update test using athenaHLT
 # art-type: build
@@ -44,7 +44,7 @@ ex.input = ''
 ex.explicit_input = True
 ex.args = '-f ./beamspot._0001.data'
 # We need to execute this pre-command in order to initialize the PyAlg:
-ex.args += ' -c "from TrigP1Test.BeamSpotUpdate import BeamSpotWriteAlg; BeamSpotWriteAlg().setup2()"'
+ex.args += ' -c "from TrigP1Test.BeamSpotUpdate import BeamSpotWriteAlg; BeamSpotWriteAlg().setup()"'
 
 test = Test.Test()
 test.art_type = 'build'
