@@ -50,6 +50,7 @@ span<T>::span (T* beg, T* end)
   : m_ptr(beg),
     m_size (end-beg)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
