@@ -37,6 +37,10 @@ def lock_and_restrict(flags):
 def set_flags(flags):
    """Set default flags for running HLT"""
 
+   # Make sure nobody uses deprecated global ConfigFlags
+   import AthenaConfiguration.AllConfigFlags
+   del AthenaConfiguration.AllConfigFlags.ConfigFlags
+
    from AthenaConfiguration.Enums import BeamType
 
    flags.Trigger.doHLT = True    # needs to be set early as other flags depend on it
@@ -118,6 +122,7 @@ def runHLTCfg(flags):
 
 def athenaHLTCfg(flags):
    """Top-level cfg function when running in athenaHLT"""
+
    # Set default flags for running HLT
    set_flags(flags)
 
@@ -136,13 +141,11 @@ def athenaHLTCfg(flags):
    return cfg
 
 
-def athenaCfg():
+def athenaCfg(flags):
    """Top-level cfg function when running in athena"""
-   from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from AthenaConfiguration.Enums import Format
 
    # Set default flags for running HLT
-   flags = initConfigFlags()
    set_flags(flags)
 
    # To allow running from MC
@@ -197,17 +200,15 @@ def athenaCfg():
    return cfg
 
 
-def main(flags=None):
-   """This method is called by athena (no flags) and athenaHLT (with pre-populated flags)"""
-
-   # Make sure nobody uses deprecated global ConfigFlags
-   import AthenaConfiguration.AllConfigFlags
-   del AthenaConfiguration.AllConfigFlags.ConfigFlags
-
-   return athenaCfg() if flags is None else athenaHLTCfg(flags)
+def main(flags):
+   """This method is called by athenaHLT (with pre-populated flags)"""
+   return athenaHLTCfg(flags)
 
 
 # This entry point is only used when running in athena
 if __name__ == "__main__":
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    import sys
-   sys.exit(main().run().isFailure())
+   sys.exit(athenaCfg(flags).run().isFailure())
