@@ -661,6 +661,15 @@ def getMCSignatures():
         ChainProp(name='HLT_mu14_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1MU8F_TAU12IM_XE35', l1SeedThresholds=['MU8F','TAU12IM','FSNOSEED'], groups=PrimaryLegGroup+TauMETGroup),
         ChainProp(name='HLT_tau60_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dRAB_L1TAU40_2TAU12IM_XE40', l1SeedThresholds=['TAU40','TAU12IM','FSNOSEED'], groups=PrimaryLegGroup+TauMETGroup),  # ATR-22966
 
+        #ATR-28784
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j45_pf_ftf_preselj20_03dRAB_L1J15', l1SeedThresholds=['PROBETAU8', 'FSNOSEED'], groups=SupportLegGroup+TauJetGroup+['RATE:CPS_J15']),
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j60_pf_ftf_preselj50_03dRAB_L1J20', l1SeedThresholds=['PROBETAU8', 'FSNOSEED'], groups=SupportLegGroup+TauJetGroup+['RATE:CPS_J20']),
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j85_pf_ftf_preselj50_03dRAB_L1J20', l1SeedThresholds=['PROBETAU8', 'FSNOSEED'], groups=SupportLegGroup+TauJetGroup+['RATE:CPS_J20']),
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j175_pf_ftf_preselj140_03dRAB_L1J50', l1SeedThresholds=['PROBETAU8', 'FSNOSEED'], groups=SupportLegGroup+TauJetGroup+['RATE:CPS_J50']),
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j360_pf_ftf_preselj225_03dRAB_L1J100', l1SeedThresholds=['PROBETAU8', 'FSNOSEED'], groups=SupportLegGroup+TauJetGroup+['RATE:CPS_J100']),
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j420_pf_ftf_preselj225_03dRAB_L1J100', l1SeedThresholds=['PROBETAU8', 'FSNOSEED'], groups=TagAndProbeLegGroup+TauJetGroup),
+        ChainProp(name='HLT_tau20_mediumRNN_tracktwoMVA_probe_j440_pf_ftf_preselj225_03dRAB_L1J100', l1SeedThresholds=['PROBETAU8', 'FSNOSEED'], groups=TagAndProbeLegGroup+TauJetGroup),         
+        
         #ATR-28761 Legacy mu + jet moved
         ChainProp(name='HLT_mu4_j35_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU3V_J15',   l1SeedThresholds=['MU3V' ,'FSNOSEED'], groups=SupportLegGroup+MuonBjetGroup, monGroups=['muonMon:online','bJetMon:online'], stream=['Main',         ]),
         ChainProp(name='HLT_mu4_j45_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU3V_J15',   l1SeedThresholds=['MU3V' ,'FSNOSEED'], groups=SupportLegGroup+MuonBjetGroup, monGroups=['bJetMon:shifter','muonMon:online','bJetMon:online'], stream=['Main','express']),
