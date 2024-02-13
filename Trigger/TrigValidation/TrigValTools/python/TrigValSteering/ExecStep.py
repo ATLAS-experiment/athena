@@ -106,7 +106,7 @@ class ExecStep(Step):
             del_env('ATHENA_CORE_NUMBER')
 
         # Note that Reco_tf is not considered "CA" as flags are set via the usual preExec
-        self._isCA = (self.type=='athena' and '--CA' in self.args or
+        self._isCA = (self.type in ['athena', 'Reco_tf'] and '--CA' in self.args or
                       self.type=='athenaHLT' and not self.job_options.endswith('.py'))
 
     def configure_input(self):
