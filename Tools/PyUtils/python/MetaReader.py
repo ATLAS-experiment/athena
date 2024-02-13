@@ -630,7 +630,7 @@ def _get_pfn(filename):
     if pfx == 'LFN:':
         import subprocess, os
         os.environ['POOL_OUTMSG_LEVEL'] = 'Error'
-        output = subprocess.check_output(['FClistPFN','-l',filename[4:]]).split('\n')
+        output = subprocess.check_output(['FClistPFN','-l',filename[4:]],text=True).split('\n')
         if len(output) == 2:
             return output[0]
         msg.error( 'FClistPFN({0}) returned unexpected number of lines:'.format(filename) )
