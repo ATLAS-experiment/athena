@@ -78,3 +78,20 @@ def reverseViews():
    viewMakers = collectViewMakers( __globals['cfg'].getSequence() )
    for alg in viewMakers:
       alg.ReverseViewsDebug = True
+
+
+def dbmod_BFieldAutoConfig():  # DB modifier for debug recovery when using an online SMK
+   """Use DCS currents to configure magnetic field"""
+
+   log.info(dbmod_BFieldAutoConfig.__doc__)
+
+   from GaudiPython.Bindings import iProperty
+   # Add the DCS folder
+   f = '<db>COOLOFL_DCS/CONDBR2</db> /EXT/DCS/MAGNETS/SENSORDATA'
+   iProperty('IOVDbSvc').Folders += [f]
+   iProperty('CondInputLoader').Load.add(('CondAttrListCollection','/EXT/DCS/MAGNETS/SENSORDATA'))
+   # Configure CondAlgs
+   iProperty('AtlasFieldCacheCondAlg').UseDCS = True
+   iProperty('AtlasFieldMapCondAlg').LoadMapOnStart = False
+   iProperty('AtlasFieldMapCondAlg').UseMapsFromCOOL = True
+   iProperty('HltEventLoopMgr').setMagFieldFromPtree = False
