@@ -160,7 +160,18 @@ inline void gFEXaltMetAlgo::metTotal(const int A_MET_x, const int A_MET_y,
 
   MET_x = A_MET_x + B_MET_x;
   MET_y = A_MET_y + B_MET_y;
-  MET   = std::sqrt((MET_x * MET_x) + (MET_y * MET_y));
+
+  if (MET_x < -0x0007FF) MET_x = -0x0007FF;
+  if (MET_y < -0x0007FF) MET_y = -0x0007FF;
+
+  if (MET_x > 0x0007FF) MET_x  = 0x0007FF;
+  if (MET_y > 0x0007FF) MET_y  = 0x0007FF;
+
+  int MET2 = MET_x * MET_x + MET_y * MET_y;
+
+  if (MET2 > 0x000FFF) MET = 0x000FFF;
+  else if (MET2 < 0) MET = 0x000FFF;
+  else MET = std::sqrt(MET2);
 
 }
 
