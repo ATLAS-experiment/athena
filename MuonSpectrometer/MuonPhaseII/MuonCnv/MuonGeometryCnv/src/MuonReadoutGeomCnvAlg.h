@@ -1,9 +1,10 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMETRYCNV_MUONREADOUTGEOMCNVALG_H
 #define MUONGEOMETRYCNV_MUONREADOUTGEOMCNVALG_H
 
+#include "TrkSurfaces/Surface.h" // Work around cppcheck false positive
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <StoreGate/WriteCondHandleKey.h>
 #include <StoreGate/ReadCondHandleKey.h>
