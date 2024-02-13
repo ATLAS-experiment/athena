@@ -89,7 +89,7 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     MUON5TrackThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(ConfigFlags,
                                                                         name                    = "MUON5TrackThinningTool",
                                                                         StreamName              = kwargs['StreamName'],
-                                                                        SelectionString         = "abs(DFCommonInDetTrackZ0AtPV) < 10.0",
+                                                                        SelectionString         = "abs(DFCommonInDetTrackZ0AtPV) < 35.0 && abs(InDetTrackParticles.eta) < 3.2",
                                                                         InDetTrackParticlesKey  = "InDetTrackParticles")
                                                     )
     
@@ -216,19 +216,12 @@ def MUON5Cfg(ConfigFlags):
                                             "Electrons",
                                             "Photons",
                                             "Muons",
-                                            "AntiKt4EMPFlowJets",
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
-                                            "MET_Baseline_AntiKt4EMPFlow",
-                                            "TauJets",
-                                            "TauJets_MuonRM",
-                                            "DiTauJets",
-                                            "DiTauJetsLowPt",
                                           ]
     
 
-    MUON5SlimmingHelper.AllVariables = ["egammaClusters",
+    MUON5SlimmingHelper.AllVariables = [
+                                        "egammaClusters",
                                         "CaloCalTopoClusters",
                                         "MuonClusterCollection",
                                         "TopoClusterIsoCentralEventShape",
@@ -298,7 +291,7 @@ def MUON5Cfg(ConfigFlags):
     InDetTrackParticlesExtraContent = [
         ".".join(
             [
-                "InDetTrackParticles",
+                "InDetTrackParticles","TTVA_AMVFVertices.TTVA_AMVFWeights",
                 "btagIp_d0.btagIp_z0SinTheta.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty",
                 "numberOfNextToInnermostPixelLayerHits.numberOfInnermostPixelLayerSharedHits",
                 "numberOfInnermostPixelLayerSplitHits.numberOfPixelSplitHits.leptonID"

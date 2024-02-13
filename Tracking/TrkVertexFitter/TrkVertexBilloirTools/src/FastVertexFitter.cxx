@@ -245,7 +245,7 @@ namespace Trk
 				( *BTIter ).chi2 = diff.dot(( *BTIter ).DtWD* diff );
 				if ( ( *BTIter ).chi2 < 0 )
 				{
-					std::cout << "VxFastFit::calculate: error in chi2_per_track\n";
+					std::cout << "VxFastFit::calculate: error in chi2_per_track: "<<( *BTIter ).chi2<<"\n";
 					return nullptr;
 				}
 				chi2New += ( *BTIter ).chi2;
