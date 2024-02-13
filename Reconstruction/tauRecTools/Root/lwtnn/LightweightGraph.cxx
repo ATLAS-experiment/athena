@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/lwtnn/LightweightGraph.h"
@@ -66,7 +66,7 @@ namespace lwtDev {
 
   typedef LightweightGraph::NodeMap NodeMap;
   LightweightGraph::LightweightGraph(const GraphConfig& config,
-                                     std::string default_output):
+                                     const std::string& default_output):
     m_graph(new Graph(config.nodes, config.layers))
   {
     for (const auto& node: config.inputs) {

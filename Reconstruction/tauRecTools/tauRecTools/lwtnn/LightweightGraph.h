@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LIGHTWEIGHT_GRAPH_HH_TAURECTOOLS
@@ -72,7 +72,7 @@ namespace lwtDev {
     // define a "default" output, so that calling "compute" with no
     // output specified doesn't lead to ambiguity.
     LightweightGraph(const GraphConfig& config,
-                     std::string default_output = "");
+                     const std::string& default_output = "");
 
     ~LightweightGraph();
     LightweightGraph(LightweightGraph&) = delete;
