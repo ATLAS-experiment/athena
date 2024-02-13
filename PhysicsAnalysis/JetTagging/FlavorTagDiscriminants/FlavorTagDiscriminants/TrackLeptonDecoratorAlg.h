@@ -17,6 +17,7 @@
 #include "ElectronPhotonSelectorTools/AsgElectronLikelihoodTool.h"
 
 
+
 namespace FlavorTagDiscriminants {
 
 
@@ -50,6 +51,14 @@ namespace FlavorTagDiscriminants {
     // Decorators for tracks
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_lepton_id {
       this, "leptonID", "leptonID", "pdgID of reconstruction lepton "};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_muon_quality {
+      this, "muon_quality", "muon_quality", "Quality of the reconstructed muon: (0=Tight, 1=Medium, 2=Loose, 3=Veryloose, 4=HighPt, 5=LowPtEfficiency)"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_muon_qOverPratio {
+      this, "muon_qOverPratio", "muon_qOverPratio", "Ratio between q/p reconstructed by the ID and the MS"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_muon_momentumBalanceSignificance {
+      this, "muon_momentumBalanceSignificance", "muon_momentumBalanceSignificance", "Significance of the momentum balance between ID and MS"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_muon_scatteringNeighbourSignificance {
+      this, "muon_scatteringNeighbourSignificance", "muon_scatteringNeighbourSignificance", "Significance of the azimuthal angular difference between the two half tracks ending/starting at each of adjacent hist along the track"};
 
   };
 
