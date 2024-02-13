@@ -8,10 +8,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
 from TriggerJobOpts import runHLT
 
-# Make sure nobody uses deprecated global ConfigFlags
-import AthenaConfiguration.AllConfigFlags
-del AthenaConfiguration.AllConfigFlags.ConfigFlags
-
 # Prevent usage of legacy job properties
 from AthenaCommon import JobProperties
 JobProperties.jobPropertiesDisallowed = True
