@@ -751,15 +751,12 @@ def setupMenu(menu_name):
 
 
         ChainProp(name='HLT_g35_medium_g25_medium_L1eEM9_EMPTY', l1SeedThresholds=['eEM9']*2, stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
-        ChainProp(name='HLT_g35_medium_g25_medium_L12eEM9_EMPTY', l1SeedThresholds=['eEM9']*2, stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_g35_medium_g25_medium_L1eEM15_EMPTY', l1SeedThresholds=['eEM15']*2, stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_g35_medium_g25_medium_L1eEM9_UNPAIRED_ISO', l1SeedThresholds=['eEM9']*2, stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g22_tight_L1eEM9_EMPTY', l1SeedThresholds=['eEM9'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
-        ChainProp(name='HLT_2g22_tight_L12eEM9_EMPTY', l1SeedThresholds=['eEM9'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g22_tight_L1eEM15_EMPTY', l1SeedThresholds=['eEM15'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g22_tight_L1eEM9_UNPAIRED_ISO', l1SeedThresholds=['eEM9'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g50_tight_L1eEM9_EMPTY', l1SeedThresholds=['eEM9'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
-        ChainProp(name='HLT_2g50_tight_L12eEM9_EMPTY', l1SeedThresholds=['eEM9'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g50_tight_L1eEM15_EMPTY', l1SeedThresholds=['eEM15'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='HLT_2g50_tight_L1eEM9_UNPAIRED_ISO', l1SeedThresholds=['eEM9'], stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),
 
