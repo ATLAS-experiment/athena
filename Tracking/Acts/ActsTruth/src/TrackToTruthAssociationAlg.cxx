@@ -132,7 +132,7 @@ namespace ActsTrk
        measurement_to_truth_association_maps{};
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
     measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();
-    ATH_MSG_INFO("Measurement association entries: "  << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]->size()
+    ATH_MSG_DEBUG("Measurement association entries: "  << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::PixelClusterType)]->size()
                  << " + " << measurement_to_truth_association_maps[to_underlying(xAOD::UncalibMeasType::StripClusterType)]->size()
                  );
     unsigned int track_i=0;
