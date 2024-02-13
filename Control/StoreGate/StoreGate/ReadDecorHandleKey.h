@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/ReadDecorHandleKey.h
@@ -112,6 +112,7 @@ public:
    * The decoration @decorKey will be read from the container referenced
    * by @contKey.
    */
+  explicit
   ReadDecorHandleKey (const VarHandleKey& contKey,
                       const std::string& decorKey = "",
                       const std::string& storeName = StoreID::storeName(StoreID::EVENT_STORE));
