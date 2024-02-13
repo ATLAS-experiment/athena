@@ -24,21 +24,18 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
-ex.input = 'pbpb'
+ex.args = '--CA'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex.input = 'ttbar' # TODO restore to 'pbpb' once it has supercells 
 ex.threads = 4
 ex.concurrent_events = 4
 ex.max_events = 500
-precommand = ''.join([
-  "setMenu='Dev_HI_run3_v1_TriggerValidation_prescale';",
-  "doWriteBS=False;",
-  "doWriteRDOTrigger=True;",
-  "doHeavyIonTobThresholds=True;",
-  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
-  "ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC16-SDR-RUN2-11';",
-  "ConfigFlags.Trigger.enableL1CaloPhase1=False;"
-])
-ex.args = '-c "{:s}"'.format(precommand)
+ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
+            'Trigger.doLVL1=True',
+            'Output.RDOFileName="RDO_TRIG.pool.root"',
+            'Trigger.doRuntimeNaviVal=True',
+            'Trigger.L1.Menu.doHeavyIonTobThresholds=True'            
+            ]
 
 test = Test.Test()
 test.art_type = 'grid'

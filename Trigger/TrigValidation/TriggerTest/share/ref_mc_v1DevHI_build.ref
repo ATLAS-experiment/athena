@@ -10,7 +10,7 @@ HLT_2e20_loose_nogsf_ion_L12EM15:
   stepFeatures:
     0: 29
     1: 27
-    2: 114
+    2: 112
     3: 23
     4: 23
     5: 4
@@ -26,7 +26,7 @@ HLT_2e20_loose_nogsf_ion_L12eEM18:
   stepFeatures:
     0: 30
     1: 30
-    2: 129
+    2: 126
     3: 24
     4: 24
     5: 4
@@ -93,7 +93,7 @@ HLT_e10_lhloose_L1eEM9_VTE200:
   stepFeatures:
     0: 1
     1: 1
-    2: 5
+    2: 4
 HLT_e10_lhmedium_L1eEM9_VTE200:
   eventCount: 0
   stepCounts:
@@ -103,7 +103,7 @@ HLT_e10_lhmedium_L1eEM9_VTE200:
   stepFeatures:
     0: 1
     1: 1
-    2: 5
+    2: 4
 HLT_e10_loose_L1eEM9_VTE200:
   eventCount: 0
   stepCounts:
@@ -113,7 +113,7 @@ HLT_e10_loose_L1eEM9_VTE200:
   stepFeatures:
     0: 1
     1: 1
-    2: 5
+    2: 4
 HLT_e10_medium_L1eEM9_VTE200:
   eventCount: 0
   stepCounts:
@@ -123,19 +123,19 @@ HLT_e10_medium_L1eEM9_VTE200:
   stepFeatures:
     0: 1
     1: 1
-    2: 5
+    2: 4
 HLT_e15_etcut_ion_L1EM12:
-  eventCount: 17
+  eventCount: 16
   stepCounts:
     0: 19
     1: 19
-    2: 19
-    3: 17
+    2: 18
+    3: 16
   stepFeatures:
     0: 50
     1: 50
-    2: 234
-    3: 33
+    2: 223
+    3: 32
 HLT_e15_etcut_ion_L1eEM15:
   eventCount: 16
   stepCounts:
@@ -146,23 +146,23 @@ HLT_e15_etcut_ion_L1eEM15:
   stepFeatures:
     0: 44
     1: 44
-    2: 197
+    2: 192
     3: 37
 HLT_e15_lhloose_nogsf_ion_L1EM12:
   eventCount: 5
   stepCounts:
     0: 19
     1: 19
-    2: 19
-    3: 17
-    4: 17
+    2: 18
+    3: 16
+    4: 16
     5: 5
   stepFeatures:
     0: 50
     1: 50
-    2: 234
-    3: 33
-    4: 33
+    2: 223
+    3: 32
+    4: 32
     5: 5
 HLT_e15_lhloose_nogsf_ion_L1eEM15:
   eventCount: 5
@@ -176,7 +176,7 @@ HLT_e15_lhloose_nogsf_ion_L1eEM15:
   stepFeatures:
     0: 44
     1: 44
-    2: 197
+    2: 192
     3: 37
     4: 37
     5: 5
@@ -185,16 +185,16 @@ HLT_e15_lhmedium_nogsf_ion_L1EM12:
   stepCounts:
     0: 19
     1: 19
-    2: 19
-    3: 17
-    4: 17
+    2: 18
+    3: 16
+    4: 16
     5: 5
   stepFeatures:
     0: 50
     1: 50
-    2: 234
-    3: 33
-    4: 33
+    2: 223
+    3: 32
+    4: 32
     5: 5
 HLT_e15_lhmedium_nogsf_ion_L1eEM15:
   eventCount: 5
@@ -208,7 +208,7 @@ HLT_e15_lhmedium_nogsf_ion_L1eEM15:
   stepFeatures:
     0: 44
     1: 44
-    2: 197
+    2: 192
     3: 37
     4: 37
     5: 5
@@ -217,16 +217,16 @@ HLT_e15_loose_nogsf_ion_L1EM12:
   stepCounts:
     0: 19
     1: 19
-    2: 19
-    3: 17
-    4: 17
+    2: 18
+    3: 16
+    4: 16
     5: 6
   stepFeatures:
     0: 50
     1: 50
-    2: 234
-    3: 33
-    4: 33
+    2: 223
+    3: 32
+    4: 32
     5: 7
 HLT_e15_loose_nogsf_ion_L1eEM15:
   eventCount: 6
@@ -240,7 +240,7 @@ HLT_e15_loose_nogsf_ion_L1eEM15:
   stepFeatures:
     0: 44
     1: 44
-    2: 197
+    2: 192
     3: 37
     4: 37
     5: 7
@@ -249,16 +249,16 @@ HLT_e15_medium_nogsf_ion_L1EM12:
   stepCounts:
     0: 19
     1: 19
-    2: 19
-    3: 17
-    4: 17
+    2: 18
+    3: 16
+    4: 16
     5: 6
   stepFeatures:
     0: 50
     1: 50
-    2: 234
-    3: 33
-    4: 33
+    2: 223
+    3: 32
+    4: 32
     5: 6
 HLT_e15_medium_nogsf_ion_L1eEM15:
   eventCount: 6
@@ -272,7 +272,7 @@ HLT_e15_medium_nogsf_ion_L1eEM15:
   stepFeatures:
     0: 44
     1: 44
-    2: 197
+    2: 192
     3: 37
     4: 37
     5: 6
@@ -286,7 +286,7 @@ HLT_e18_etcut_ion_L1EM15:
   stepFeatures:
     0: 35
     1: 35
-    2: 153
+    2: 151
     3: 27
 HLT_e18_lhloose_nogsf_ion_L1EM15:
   eventCount: 4
@@ -300,7 +300,7 @@ HLT_e18_lhloose_nogsf_ion_L1EM15:
   stepFeatures:
     0: 35
     1: 35
-    2: 153
+    2: 151
     3: 27
     4: 27
     5: 4
@@ -316,7 +316,7 @@ HLT_e18_lhmedium_nogsf_ion_L1EM15:
   stepFeatures:
     0: 35
     1: 35
-    2: 153
+    2: 151
     3: 27
     4: 27
     5: 4
@@ -332,7 +332,7 @@ HLT_e18_loose_nogsf_ion_L1EM15:
   stepFeatures:
     0: 35
     1: 35
-    2: 153
+    2: 151
     3: 27
     4: 27
     5: 6
@@ -348,7 +348,7 @@ HLT_e18_medium_nogsf_ion_L1EM15:
   stepFeatures:
     0: 35
     1: 35
-    2: 153
+    2: 151
     3: 27
     4: 27
     5: 5
@@ -362,7 +362,7 @@ HLT_e20_etcut_ion_L1EM15:
   stepFeatures:
     0: 33
     1: 33
-    2: 145
+    2: 143
     3: 27
 HLT_e20_etcut_ion_L1eEM18:
   eventCount: 14
@@ -374,7 +374,7 @@ HLT_e20_etcut_ion_L1eEM18:
   stepFeatures:
     0: 35
     1: 35
-    2: 155
+    2: 153
     3: 28
 HLT_e20_idperf_loose_nogsf_ion_L1EM15:
   eventCount: 14
@@ -412,7 +412,7 @@ HLT_e20_lhloose_nogsf_ion_L1EM15:
   stepFeatures:
     0: 33
     1: 33
-    2: 145
+    2: 143
     3: 27
     4: 27
     5: 4
@@ -428,7 +428,7 @@ HLT_e20_lhloose_nogsf_ion_L1eEM18:
   stepFeatures:
     0: 35
     1: 35
-    2: 155
+    2: 153
     3: 28
     4: 28
     5: 4
@@ -444,7 +444,7 @@ HLT_e20_lhmedium_nogsf_ion_L1EM15:
   stepFeatures:
     0: 33
     1: 33
-    2: 145
+    2: 143
     3: 27
     4: 27
     5: 4
@@ -460,7 +460,7 @@ HLT_e20_lhmedium_nogsf_ion_L1eEM18:
   stepFeatures:
     0: 35
     1: 35
-    2: 155
+    2: 153
     3: 28
     4: 28
     5: 4
@@ -476,7 +476,7 @@ HLT_e20_loose_nogsf_ion_L1EM15:
   stepFeatures:
     0: 33
     1: 33
-    2: 145
+    2: 143
     3: 27
     4: 27
     5: 6
@@ -492,7 +492,7 @@ HLT_e20_loose_nogsf_ion_L1eEM18:
   stepFeatures:
     0: 35
     1: 35
-    2: 155
+    2: 153
     3: 28
     4: 28
     5: 6
@@ -508,7 +508,7 @@ HLT_e20_loose_nogsf_ion_L1eEM18L:
   stepFeatures:
     0: 5
     1: 5
-    2: 16
+    2: 17
     3: 5
     4: 5
     5: 4
@@ -524,7 +524,7 @@ HLT_e20_medium_nogsf_ion_L1EM15:
   stepFeatures:
     0: 33
     1: 33
-    2: 145
+    2: 143
     3: 27
     4: 27
     5: 5
@@ -540,7 +540,7 @@ HLT_e20_medium_nogsf_ion_L1eEM18:
   stepFeatures:
     0: 35
     1: 35
-    2: 155
+    2: 153
     3: 28
     4: 28
     5: 5
@@ -554,7 +554,7 @@ HLT_e30_etcut_ion_L1EM15:
   stepFeatures:
     0: 23
     1: 23
-    2: 94
+    2: 92
     3: 12
 HLT_e30_etcut_ion_L1eEM26:
   eventCount: 9
@@ -578,7 +578,7 @@ HLT_e50_etcut_ion_L1EM15:
   stepFeatures:
     0: 5
     1: 5
-    2: 19
+    2: 20
     3: 4
 HLT_e50_etcut_ion_L1eEM26:
   eventCount: 4
@@ -590,7 +590,7 @@ HLT_e50_etcut_ion_L1eEM26:
   stepFeatures:
     0: 5
     1: 5
-    2: 19
+    2: 20
     3: 4
 HLT_g10_loose_L1eEM9_VTE200:
   eventCount: 0
@@ -1414,7 +1414,7 @@ HLT_j50f_ion_L1J15p31ETA49:
   eventCount: 0
 HLT_j50f_ion_L1TE50:
   eventCount: 0
-HLT_j50f_ion_L1jJ40p31ETA49:
+HLT_j50f_ion_L1jJ40p30ETA49:
   eventCount: 0
 HLT_j60_ion_L1J15:
   eventCount: 18
@@ -1436,11 +1436,11 @@ HLT_j60_ion_L1jJ40:
     0: 46
 HLT_j60f_ion_L1J15p31ETA49:
   eventCount: 0
-HLT_j60f_ion_L1jJ40p31ETA49:
+HLT_j60f_ion_L1jJ40p30ETA49:
   eventCount: 0
 HLT_j70f_ion_L1J30p31ETA49:
   eventCount: 0
-HLT_j70f_ion_L1jJ60p31ETA49:
+HLT_j70f_ion_L1jJ60p30ETA49:
   eventCount: 0
 HLT_j75_ion_L1J20:
   eventCount: 17
@@ -1498,30 +1498,18 @@ HLT_mb_excl_1trk5_pt1_L11ZDC_A_1ZDC_C_VTE200:
   eventCount: 0
 HLT_mb_excl_1trk5_pt1_L12TAU1_VTE200:
   eventCount: 0
-  stepCounts:
-    0: 5
-  stepFeatures: {}
 HLT_mb_excl_1trk5_pt1_L12eEM1_VTE200:
   eventCount: 0
 HLT_mb_excl_1trk5_pt1_L1TAU1_TE4_VTE200:
   eventCount: 0
-  stepCounts:
-    0: 5
-  stepFeatures: {}
 HLT_mb_excl_1trk5_pt1_L1TAU1_TE4_VTE200_EMPTY:
   eventCount: 0
 HLT_mb_excl_1trk5_pt1_L1TAU1_TRT_VTE50:
   eventCount: 0
 HLT_mb_excl_1trk5_pt1_L1TAU2_TE4_VTE200:
   eventCount: 0
-  stepCounts:
-    0: 5
-  stepFeatures: {}
 HLT_mb_excl_1trk5_pt1_L1TAU8_VTE200:
   eventCount: 0
-  stepCounts:
-    0: 5
-  stepFeatures: {}
 HLT_mb_excl_1trk5_pt1_L1TRT_VTE20:
   eventCount: 0
 HLT_mb_excl_1trk5_pt1_L1TRT_VTE200:
@@ -1534,9 +1522,6 @@ HLT_mb_excl_1trk5_pt1_L1TRT_VZDC_A_VZDC_C_VTE50:
   eventCount: 0
 HLT_mb_excl_1trk5_pt1_L1VZDC_A_VZDC_C_VTE200:
   eventCount: 0
-  stepCounts:
-    0: 5
-  stepFeatures: {}
 HLT_mb_excl_1trk5_pt1_L1ZDC_XOR4_VTE200:
   eventCount: 0
 HLT_mb_excl_1trk5_pt1_L1eEM1_TE4_VTE200:
@@ -2658,7 +2643,7 @@ HLT_noalg_L1EM12:
 HLT_noalg_L1EM15:
   eventCount: 17
 HLT_noalg_L1J12:
-  eventCount: 0
+  eventCount: 20
 HLT_noalg_L1J15:
   eventCount: 19
 HLT_noalg_L1J30:
@@ -2678,7 +2663,7 @@ HLT_noalg_L1MU5VF:
 HLT_noalg_L1RD0_EMPTY:
   eventCount: 0
 HLT_noalg_L1RD0_FILLED:
-  eventCount: 0
+  eventCount: 20
 HLT_noalg_L1TAU1_TE4_VTE200:
   eventCount: 5
 HLT_noalg_L1TAU1_TE5_VTE200:
@@ -2770,15 +2755,15 @@ HLT_noalg_L1eEM5_VjTE200:
 HLT_noalg_L1eEM9:
   eventCount: 20
 HLT_noalg_L1gJ20p0ETA25:
-  eventCount: 0
+  eventCount: 20
 HLT_noalg_L1gJ400p0ETA25:
   eventCount: 0
 HLT_noalg_L1gLJ80p0ETA25:
-  eventCount: 0
+  eventCount: 13
 HLT_noalg_L1gTE200:
   eventCount: 0
 HLT_noalg_L1gXEJWOJ100:
-  eventCount: 10
+  eventCount: 0
 HLT_noalg_L1jJ40:
   eventCount: 20
 HLT_noalg_L1jJ50:
