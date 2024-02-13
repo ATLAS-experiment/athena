@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TMath.h"
@@ -311,7 +311,7 @@ bool FPGATrackSimEventSelectionSvc::checkTruthTracks(const std::vector<FPGATrack
 {  
 // find at least one track in the region
   bool good=false;
-  for (auto track : truthTracks){
+  for (const FPGATrackSimTruthTrack& track : truthTracks){
     if(m_regions->inRegion(m_regionID, track)){      
       good=true;
       if (std::abs(track.getPDGCode()) != static_cast<int>(m_st)) {
