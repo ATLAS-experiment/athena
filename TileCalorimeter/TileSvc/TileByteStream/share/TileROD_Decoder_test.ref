@@ -10,6 +10,19 @@ ApplicationMgr Ready
 TileHWID             INFO initialize_from_dictionary 
 TileTBID             INFO initialize_from_dictionary 
 ClassIDSvc           INFO getRegistryEntries: read 568 CLIDRegistry entries for module ALL
+DetDescrCnvSvc       INFO  initializing
+DetDescrCnvSvc       INFO Found DetectorStore service
+DetDescrCnvSvc       INFO  filling proxies for detector managers
+GeoModelSvc::RD...WARNING  Getting PixTBMatComponents with default tag
+GeoModelSvc::RD...WARNING  Getting PixTBMaterials with default tag
+GeoModelSvc::RD...WARNING  Getting InDetMatComponents with default tag
+GeoModelSvc::RD...WARNING  Getting InDetMaterials with default tag
+TileCablingSvc       INFO Setting RUN2 (2014-2017) cabling
+TileCablingSvc       INFO Setting Cabling type to 4
+DetectorStore     WARNING retrieve(default): No valid proxy for default object
+ of type TileDetDescrManager(CLID 2941)
+TileCablingSvc    WARNING Unable to retrieve TileDetDescrManager from DetectorStore
+TileCablingSvc    WARNING Will not set Tile online hash ID in CaloDetDescrElements
 test1 (fillCollection)
 TileDigitsCollection: 16
 TileRawDataCollection of TileDigits Id = 0x100 size = 16

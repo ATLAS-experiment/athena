@@ -17,6 +17,7 @@
 #include "TileByteStream/TileCellCont.h"
 #include "TileEvent/TileDigitsCollection.h"
 #include "CaloDetDescr/CaloDetectorElements.h"
+#include "CaloIdentifier/CaloLVL1_ID.h"
 #include "PathResolver/PathResolver.h"
 #include "TileIdentifier/TileHWID.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -33,12 +34,12 @@
 
 
 
-class TileCablingSvc
+class TileCablingSvcMock
 {
 public:
   IdDictParser parser;
 
-  TileCablingSvc() ATLAS_CTORDTOR_NOT_THREAD_SAFE
+  TileCablingSvcMock() ATLAS_CTORDTOR_NOT_THREAD_SAFE
   {
     ServiceHandle<StoreGateSvc> detStore ("DetectorStore", "test");
     assert( detStore.retrieve().isSuccess() );
@@ -46,6 +47,7 @@ public:
     auto tileid = std::make_unique<TileID>();
     auto hwid = std::make_unique<TileHWID>();
     auto tbid = std::make_unique<TileTBID>();
+    auto caloLVL1_ID = std::make_unique<CaloLVL1_ID>();
 
     tileid->set_do_neighbours (false);
     parser.register_external_entity("TileCalorimeter", "IdDictTileCalorimeter.xml");
@@ -60,10 +62,12 @@ public:
     svc->setTileHWID (hwid.get());
     svc->setTileTBID (tbid.get());
     svc->setTileID (tileid.get());
+    svc->setCaloLVL1 (caloLVL1_ID.get());
 
     assert( detStore->record(std::move(tileid), "TileID").isSuccess() );
     assert( detStore->record(std::move(hwid), "TileHWID").isSuccess() );
     assert( detStore->record(std::move(tbid), "TileTBID").isSuccess() );
+    assert( detStore->record(std::move(caloLVL1_ID), "CaloLVL1_ID").isSuccess() );
   }
 };
 
@@ -325,7 +329,7 @@ int main ATLAS_NOT_THREAD_SAFE ()
   if (!Athena_test::initGaudi("TileROD_Decoder_test.txt", svcloc)) {
     return 1;
   }
-  TileCablingSvc cabling;
+  TileCablingSvcMock cabling;
 
   // TileHid2RESrcIDCondAlg
   ServiceHandle<StoreGateSvc> conditionStore("ConditionStore", "");
