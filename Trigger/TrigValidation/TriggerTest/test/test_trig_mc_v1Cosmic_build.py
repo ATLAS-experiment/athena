@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the Cosmic_run3_v1 menu
 # art-type: build
@@ -12,17 +12,12 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'mc_cosmics'
 ex.threads = 1
-precommand = ''.join([
-  "setMenu='Cosmic_run3_v1';", 
-  "doCosmics=True;",
-  "doWriteBS=False;",
-  "doWriteRDOTrigger=True;",
-  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.enableL1CaloPhase1=False;",
-])
-ex.args = '-c "{:s}"'.format(precommand)
+ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
+            'Beam.Type=BeamType.Cosmics']
+ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'
