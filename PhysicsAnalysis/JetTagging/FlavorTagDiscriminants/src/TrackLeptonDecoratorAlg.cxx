@@ -40,12 +40,24 @@ namespace FlavorTagDiscriminants {
 
     // Prepare decorators
     m_dec_lepton_id = m_TrackContainerKey.key() + "." + m_dec_lepton_id.key();
+    m_dec_muon_quality = m_TrackContainerKey.key() + "." + m_dec_muon_quality.key();
+    m_dec_muon_qOverPratio = m_TrackContainerKey.key() + "." + m_dec_muon_qOverPratio.key();
+    m_dec_muon_momentumBalanceSignificance = m_TrackContainerKey.key() + "." + m_dec_muon_momentumBalanceSignificance.key();
+    m_dec_muon_scatteringNeighbourSignificance = m_TrackContainerKey.key() + "." + m_dec_muon_scatteringNeighbourSignificance.key();
 
     // Initialize decorators
     ATH_MSG_DEBUG( "Inizializing decorators:"  );
     ATH_MSG_DEBUG( "    ** " << m_dec_lepton_id );
+    ATH_MSG_DEBUG( "    ** " << m_dec_muon_quality );
+    ATH_MSG_DEBUG( "    ** " << m_dec_muon_qOverPratio );
+    ATH_MSG_DEBUG( "    ** " << m_dec_muon_momentumBalanceSignificance );
+    ATH_MSG_DEBUG( "    ** " << m_dec_muon_scatteringNeighbourSignificance );
 
     ATH_CHECK( m_dec_lepton_id.initialize() );
+    ATH_CHECK( m_dec_muon_quality.initialize() );
+    ATH_CHECK( m_dec_muon_qOverPratio.initialize() );
+    ATH_CHECK( m_dec_muon_momentumBalanceSignificance.initialize() );
+    ATH_CHECK( m_dec_muon_scatteringNeighbourSignificance.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -69,10 +81,18 @@ namespace FlavorTagDiscriminants {
 
     using TPC = xAOD::TrackParticleContainer;
     SG::WriteDecorHandle<TPC, char> decor_lepton_id(m_dec_lepton_id, ctx);
+    SG::WriteDecorHandle<TPC, char> decor_muon_quality(m_dec_muon_quality, ctx);
+    SG::WriteDecorHandle<TPC, float> decor_muon_qOverPratio(m_dec_muon_qOverPratio, ctx);
+    SG::WriteDecorHandle<TPC, float> decor_muon_momentumBalanceSignificance(m_dec_muon_momentumBalanceSignificance, ctx);
+    SG::WriteDecorHandle<TPC, float> decor_muon_scatteringNeighbourSignificance(m_dec_muon_scatteringNeighbourSignificance, ctx);
 
     // give all tracks a default starting value
     for ( const xAOD::TrackParticle* track : *tracks ) {
       decor_lepton_id(*track) = 0;
+      decor_muon_quality(*track) = -1;
+      decor_muon_qOverPratio(*track) = -99.;
+      decor_muon_momentumBalanceSignificance(*track) = -99.;
+      decor_muon_scatteringNeighbourSignificance(*track) = -99.;
     }
 
     // loop over electrons
@@ -103,8 +123,22 @@ namespace FlavorTagDiscriminants {
       if ( !track_link.isValid() ) { continue; }
       auto track = *track_link;
 
+      // get associated muon spectrometer track
+      auto ms_track_link = muon->extrapolatedMuonSpectrometerTrackParticleLink();
+      if ( !ms_track_link.isValid() ) { continue; }
+      auto ms_track = *ms_track_link;
+
+      float momBalSig = 0.;
+      float scatNeighSig = 0.;
+      muon->parameter(momBalSig, xAOD::Muon::momentumBalanceSignificance);
+      muon->parameter(scatNeighSig, xAOD::Muon::scatteringNeighbourSignificance);
+
       // decorate the track
       decor_lepton_id(*track) = -13 * muon->charge();
+      decor_muon_quality(*track) = muon->quality();
+      decor_muon_qOverPratio(*track) = track->qOverP() / ms_track->qOverP();
+      decor_muon_momentumBalanceSignificance(*track) = momBalSig;
+      decor_muon_scatteringNeighbourSignificance(*track) = scatNeighSig;
     }
 
     return StatusCode::SUCCESS;
