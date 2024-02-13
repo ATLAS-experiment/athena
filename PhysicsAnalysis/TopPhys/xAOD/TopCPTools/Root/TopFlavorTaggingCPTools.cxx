@@ -88,6 +88,10 @@ namespace top {
     top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r60", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP");
     
 
+    //Conditional tagging for EMPflow jets
+    top::check(setTaggerWorkingPoints("AntiKt4EMPFlowJets", true, "ConditionalOnlineMV2GivenOfflineDL1r85", {"FixedCutBEff_40", "FixedCutBEff_50", "FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85"}), "Error setting AntiKt4EMPFlowJets Conditional WP");
+    
+
     // Calibrated and uncalibrated working points for R=0.2 track jets for all algorithms
     top::check(setTaggerWorkingPoints("AntiKt2PV0TrackJets", true, "MV2c10", {"FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85", "Continuous"}), "Error setting AntiKt2PV0TrackJets WP");
     top::check(setTaggerWorkingPoints("AntiKt2PV0TrackJets", true, "DL1", {"FixedCutBEff_60", "FixedCutBEff_70", "FixedCutBEff_77", "FixedCutBEff_85", "Continuous"}), "Error setting AntiKt2PV0TrackJets WP");
