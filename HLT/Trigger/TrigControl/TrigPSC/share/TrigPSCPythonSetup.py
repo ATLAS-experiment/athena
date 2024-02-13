@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ###############################################################
 ## @file   TrigPSCPythonSetup.py
@@ -98,12 +98,6 @@ else:
       print(" | Execute command before jobOptions script END.  | ")
       print(" +------------------------------------------------+ ")
       print("\n")
-
-   ## Hack: To avoid merge conflicts we need to set the following flag
-   ## already here as TrigServicesCfg depends on it.
-   ## This can be removed together with the legacy runHLT_standalone.py.
-   if 'doL1Sim' in globals():
-      flags.Trigger.doLVL1 = globals()['doL1Sim']
 
    ## Now clone and use locked flags for services configuration
    flags = flags.clone()
