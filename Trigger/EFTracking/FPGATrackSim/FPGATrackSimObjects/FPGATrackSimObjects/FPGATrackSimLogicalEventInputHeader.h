@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef TRIGFPGATrackSimOBJECTS_FPGATrackSimLOGICALEVENTINPUTHEADER_H
 #define TRIGFPGATrackSimOBJECTS_FPGATrackSimLOGICALEVENTINPUTHEADER_H
@@ -30,7 +30,7 @@ public:
     FPGATrackSimEventInfo const& event() const { return m_event; }
 
     FPGATrackSimOptionalEventInfo const& optional() const { return m_optional; }
-    void setOptional(FPGATrackSimOptionalEventInfo o) { m_optional = o; }
+    void setOptional(const FPGATrackSimOptionalEventInfo& o) { m_optional = o; }
 
     //  handling towers
     const std::vector<FPGATrackSimTowerInputHeader>& towers() const { return m_towers; }
