@@ -42,6 +42,10 @@ def CrossDistancesSeedFinderCfg(flags, name="CrossDistancesSeedFinder", **kwargs
     acc.setPrivateTools(CompFactory.Trk.CrossDistancesSeedFinder(name, **kwargs))
     return acc
 
+def IVF_CrossDistancesSeedFinderCfg(flags, name="IVF_CrossDistancesSeedFinder",
+ **kwargs):
+    kwargs.setdefault("trackdistcutoff", 1.0)
+    return CrossDistancesSeedFinderCfg(flags, name, **kwargs)
 
 def IndexedCrossDistancesSeedFinderCfg(
         flags, name='IndexedCrossDistancesSeedFinder', **kwargs):
