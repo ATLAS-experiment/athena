@@ -35,6 +35,7 @@
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileCondToolEmscale.h"
 #include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileCablingSvc.h"
 #include "TileL2Algs/TileL2Builder.h"
 #include "TileByteStream/TileHid2RESrcID.h"
 
@@ -551,6 +552,12 @@ class TileROD_Decoder: public AthAlgTool {
         "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
     ToolHandle<TileL2Builder> m_L2Builder{this,
         "TileL2Builder", "", "Tile L2 builder tool"};
+
+    /*
+     * @brief Name of Tile cabling service
+     */
+    ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
+        "TileCablingSvc", "TileCablingSvc", "The Tile cabling service"};
 
     // thresholds for parabolic amplitude correction
     float m_ampMinThresh_pC; //!< correct amplitude if it's above amplitude threshold (in pC)

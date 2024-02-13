@@ -2,3 +2,5 @@
 ApplicationMgr.ExtSvc = {"StoreGateSvc/DetectorStore", "StoreGateSvc/ConditionStore"};
 ToolSvc.TileROD_Decoder.TileL2Builder = "";
 ToolSvc.TileROD_Decoder.TileBadChanTool = "";
+GeoModelSvc.SupportedGeometry = 21;
+GeoModelSvc.AtlasVersion = "ATLAS-R2-2016-01-00-01";
