@@ -281,9 +281,6 @@ atlas_add_citest( TriggerMC
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
 
-atlas_add_citest( TriggerDataCAConfig
-   SCRIPT test_trig_data_v1Dev_newJO_build.py )
-
 atlas_add_citest( Trigger_athenaHLT_v1Dev
    SCRIPT test_trigP1_v1Dev_decodeBS_build.py )
 
