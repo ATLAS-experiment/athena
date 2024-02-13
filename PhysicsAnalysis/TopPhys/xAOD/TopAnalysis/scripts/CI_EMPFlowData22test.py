@@ -16,8 +16,7 @@ cutfilepath = ROOT.PathResolver.find_file(cutfilename,
 returnCode = CITest("DAOD_PHYS DATA",
                     cutfilename,
                     cutfilepath,
-                    "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22-Run3/Data/p5279_special/"
-                    "DAOD_PHYS.data22.p5279_special.pool.root.1",
+                    "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22-Run3/Data/p5858/DAOD_PHYS.34860568._000319.pool.root.1",
                     [("#NEvents.*", "NEvents 5000")])
 
 if returnCode != 0:
