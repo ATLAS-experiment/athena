@@ -20,9 +20,9 @@ Ort::Value AthOnnx::IOnnxRuntimeInferenceTool::createTensor(std::vector<T>& data
 }
 
 template <typename T>
-StatusCode AthOnnx::IOnnxRuntimeInferenceTool::addInput(std::vector<Ort::Value>& inputTensors, std::vector<T>& data, int idx, int64_t batchSize) const
+StatusCode AthOnnx::IOnnxRuntimeInferenceTool::addInput(std::vector<Ort::Value>& inputTensors, std::vector<T>& data, unsigned idx, int64_t batchSize) const
 {
-    if (idx >= m_numInputs || idx < 0) {
+    if (idx >= m_numInputs ) {
         return StatusCode::FAILURE;
     }
 
@@ -31,9 +31,9 @@ StatusCode AthOnnx::IOnnxRuntimeInferenceTool::addInput(std::vector<Ort::Value>&
 }
 
 template <typename T>
-StatusCode AthOnnx::IOnnxRuntimeInferenceTool::addOutput(std::vector<Ort::Value>& outputTensors, std::vector<T>& data, int idx, int64_t batchSize) const
+StatusCode AthOnnx::IOnnxRuntimeInferenceTool::addOutput(std::vector<Ort::Value>& outputTensors, std::vector<T>& data, unsigned idx, int64_t batchSize) const
 {
-    if (idx >= m_numOutputs || idx < 0) {
+    if (idx >= m_numOutputs ) {
         return StatusCode::FAILURE;
     }
     auto tensorSize = std::accumulate(m_outputShapes[idx].begin(), m_outputShapes[idx].end(), 1, std::multiplies<int64_t>());

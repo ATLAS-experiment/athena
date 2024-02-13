@@ -75,7 +75,7 @@ namespace AthOnnx {
          * @return StatusCode::SUCCESS if the input data is added successfully
          */
         template <typename T>
-        StatusCode addInput(std::vector<Ort::Value>& inputTensors, std::vector<T>& data, int idx = 0, int64_t batchSize = -1) const;
+        StatusCode addInput(std::vector<Ort::Value>& inputTensors, std::vector<T>& data, unsigned idx = 0, int64_t batchSize = -1) const;
 
         /**
          * @brief add the output data to the output tensors
@@ -86,7 +86,8 @@ namespace AthOnnx {
          * @return StatusCode::SUCCESS if the output data is added successfully
          */
         template <typename T>
-        StatusCode addOutput(std::vector<Ort::Value>& outputTensors, std::vector<T>& data, int idx = 0, int64_t batchSize = -1) const;
+        StatusCode addOutput(std::vector<Ort::Value>& outputTensors, std::vector<T>& data, unsigned idx = 0, int64_t batchSize = -1) const;
+
 
         /**
          * @brief perform inference
@@ -99,8 +100,8 @@ namespace AthOnnx {
         virtual void printModelInfo() const = 0;
 
         protected:
-        int m_numInputs;
-        int m_numOutputs;
+        unsigned m_numInputs;
+        unsigned m_numOutputs;
         std::vector<std::vector<int64_t> > m_inputShapes;
         std::vector<std::vector<int64_t> > m_outputShapes;
 
