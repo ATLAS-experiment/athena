@@ -366,9 +366,12 @@ class DCSC_Subdetector(object):
             iov_state = calc_dead_frac(since, until, output_channel, 
                                        states, state_iovs)
                                        
-            dead_frac_iovs.add(since, until, output_channel, *iov_state)
+            #dead_frac_iovs.add(since, until, output_channel, *iov_state)
+            result_iov = DCSOFL_IOV(since, until, output_channel, *iov_state)
+            result_iov._orig_iovs = state_iovs
+            dead_frac_iovs.append(result_iov)
             
-        return dead_frac_iovs.solidify(DCSOFL_IOV)
+        return dead_frac_iovs#.solidify(DCSOFL_IOV)
     
     def dq_worst(self, states):
         """

@@ -27,7 +27,8 @@ if [[ ! $TdaqVersion = tdaq-* ]]; then
     TdaqVersion=tdaq-$TdaqVersion
 fi
 # Add auth-get-sso-cookie to the path - required by pBeast's ServerProxy
-export PATH="$(echo $LCG_RELEASE_BASE/auth_get_sso_cookie/*/$BINARY_TAG/bin):$PATH"
+AUTH_GET_SSO_COOKIE="$(ls -d $LCG_RELEASE_BASE/auth_get_sso_cookie/*/$BINARY_TAG | sort -rV | head -n1)"
+export PATH="$AUTH_GET_SSO_COOKIE/bin:$PATH"
 # Add LCG packages at the end of the Python path - auth-get-sso-cookie dependencies
 for package in $LCG_RELEASE_BASE/*/*/$BINARY_TAG/lib/python$PyVersion/site-packages; do
     export PYTHONPATH="$PYTHONPATH:$package"
