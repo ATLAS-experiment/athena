@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( G4HiveEx )
@@ -15,6 +15,3 @@ atlas_add_library( G4HiveEx
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} AthenaKernel AthenaBaseComps CxxUtils GeneratorObjects )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
