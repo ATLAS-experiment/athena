@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -140,7 +140,7 @@ namespace MuonGM {
         Trk::DetectorElemType detectorType() const override final { return m_type; }
 
     protected:
-        MuonReadoutElement(GeoPVLink pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType);
+        MuonReadoutElement(GeoVFullPhysVol* pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType);
         
         double m_Ssize{-9999.};
         double m_Rsize{-9999.};
@@ -163,7 +163,6 @@ namespace MuonGM {
         void setIndexOfREinMuonStation();
        
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonDetectorManager"};
-        PVLink m_physVol{nullptr};
         Trk::DetectorElemType m_type{Trk::DetectorElemType::SolidState};
         Identifier m_id{0};                    //!< extended data-collection identifier
         IdentifierHash m_idhash{0};            //!< data-collection hash identifier
