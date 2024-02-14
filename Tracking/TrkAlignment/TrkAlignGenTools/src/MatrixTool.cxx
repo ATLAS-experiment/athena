@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // MatrixTool.cxx
@@ -1372,10 +1372,9 @@ namespace Trk {
       }    
     } else {
       // Method when using the sparse matrix
-      const_mapiterator pos = m_bigmatrix->ptrMap()->begin();
-      for( ; pos!=m_bigmatrix->ptrMap()->end(); pos++){
-        int i = pos->first.first;
-        int j = pos->first.second;
+      for (const datamap::value_type& p : *m_bigmatrix->ptrMap()) {
+        int i = p.first.first;
+        int j = p.first.second;
   
         // Scale matrix
         double sigma_i = (*alignParList)[i]->sigma();
