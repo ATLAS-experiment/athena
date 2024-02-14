@@ -10,13 +10,14 @@ if __name__=="__main__":
     PlotterConfig = PlotterConfigurator(["CPU_splitting", "GPU_splitting"], ["splitting"])
 
     flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
-    flags.CaloRecGPU.DoMonitoring = True
+    flags.CaloRecGPU.Default.DoMonitoring = True
 
-    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.CaloRecGPU.Default.ClustersOutputName="CaloCalTopoClustersNew"
     flags.lock()
+    flagsActive = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "CaloRecGPU.Default")
 
-    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flagsActive,perfmon)
 
-    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestSplit = True, PlotterConfigurator = PlotterConfig))
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flagsActive, TestSplit = True, PlotterConfigurator = PlotterConfig))
 
     topoAcc.run(numevents)

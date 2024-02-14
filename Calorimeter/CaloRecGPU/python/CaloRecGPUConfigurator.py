@@ -39,6 +39,9 @@ class CaloRecGPUConfigurator:
         self.AlsoRestrictPSOnGPUSplitter = False
         #This is to override vanilla behaviour with the possibility of also
         #restricting neighbours in out GPU splitter.
+
+        if configFlags is not None:
+            configFlags.lock()
         
         if configFlags is not None:
             self.SeedCutsInT = configFlags.Calo.TopoCluster.doTimeCut
