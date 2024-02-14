@@ -36,6 +36,20 @@ def AdaptiveMultiVertexFitterCfg(flags, name="AdaptiveMultiVertexFitter", **kwar
         BaseAdaptiveMultiVertexFitterCfg(flags, name, **kwargs)))
     return acc
 
+def AdaptiveMultiSecVertexFitterCfg(flags, name="AdaptiveMultiSecVertexFitter", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "AnnealingMaker" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import SecVtxDetAnnealingMakerCfg
+        kwargs.setdefault("AnnealingMaker", acc.popToolsAndMerge(
+            SecVtxDetAnnealingMakerCfg(flags)))
+
+    kwargs.setdefault("DoSmoothing", True)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        BaseAdaptiveMultiVertexFitterCfg(flags, name, **kwargs)))
+    return acc
+
 def SequentialVertexSmootherCfg(flags, name="SequentialVertexSmoother", **kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.Trk.SequentialVertexSmoother(name, **kwargs))
