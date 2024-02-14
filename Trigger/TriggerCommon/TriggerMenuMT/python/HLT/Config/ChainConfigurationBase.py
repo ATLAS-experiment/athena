@@ -10,6 +10,7 @@ import functools
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, RecoFragmentsPool
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
+from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 
 
 #----------------------------------------------------------------
@@ -99,9 +100,10 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         else:
             log.error("ChainConfigurationBase.buildChain(): chainPart is not a list or dict, not sure what to do here! %s	", self.chainPart)
               
+        L1decision = mapThresholdToL1DecisionCollection(self.L1Threshold) 
         myChain = Chain(name = self.chainName,
                         ChainSteps = chainSteps,
-                        L1Thresholds = [self.L1Threshold],
+                        L1decisions = [L1decision],
                         nSteps = [len(chainSteps)], # not true for combined chains
                         alignmentGroups = alignmentGroups
                          )
