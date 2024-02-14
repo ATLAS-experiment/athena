@@ -70,6 +70,7 @@ def main(args):
         os.makedirs(pkg_path+"/"+pkg_name+"/data")
         with open(pkg_path+"/"+pkg_name+"/data/ExampleData",'w') as f: f.write("this file will be accessible through PathResolverFindDataFile(\""+pkg_name+"/ExampleData\")")
         os.makedirs(pkg_path+"/"+pkg_name+"/util")
+        os.makedirs(pkg_path+"/"+pkg_name+"/scripts")
     except OSError:
         print("ERROR while making directories for " % (pkg_path+"/"+pkg_name+"/src"))
         return -1

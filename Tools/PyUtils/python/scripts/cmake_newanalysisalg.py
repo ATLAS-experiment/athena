@@ -43,6 +43,71 @@ include("AthAnalysisBaseComps/SuppressLogging.py")              #Optional includ
 
 """
 
+    script_template = """\
+#!/usr/bin/env python
+
+# Run this application/script like this:
+# run%(klass)s.py --filesInput file.root --evtMax 100
+# See --help for more arguments and flag options
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
+flags._parser = flags.getArgumentParser(description=\"\"\"My Demo Application\"\"\") # an argparse.ArgumentParser
+flags.parser().add_argument('--accessMode',default="POOLAccess",               # can add arguments to the parser as usual
+                            choices={"POOLAccess","ClassAccess"},help="Input file reading mode (ClassAccess can be faster but is less supported)")
+# changes to default flag values (done before fillFromArgs so appears in the --help flag system
+flags.Exec.PrintAlgsSequence = True # displays algsequence at start of job
+
+
+args = flags.fillFromArgs() # parse command line arguments
+flags.lock() # lock the flags
+
+
+# configure main services and input file reading
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from AthenaConfiguration.Enums import Format
+cfg = MainServicesCfg(flags)
+if flags.Input.Format is Format.BS:
+    # read RAW (bytestream)
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    cfg.merge(ByteStreamReadCfg(flags))
+else:
+    # reading POOL, use argument to decide which read mode
+    if flags.args().accessMode == "POOLAccess":
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        cfg.merge(PoolReadCfg(flags))
+    else:
+        from AthenaRootComps.xAODEventSelectorConfig import xAODReadCfg,xAODAccessMode
+        cfg.merge(xAODReadCfg(flags, AccessMode = xAODAccessMode.CLASS_ACCESS))
+
+# configure output ROOT files from Output.HISTOutputs flag (should be of form: "STREAMNAME:file.root")
+from AthenaConfiguration.ComponentFactory import CompFactory
+if flags.Output.HISTFileName != "":
+    outputs = []
+    for file in (flags.Output.HISTFileName if type(flags.Output.HISTFileName)==list else flags.Output.HISTFileName.split(",")):
+        streamName = file.split(":")[0] if ":" in file else "ANALYSIS"
+        fileName = file.split(":")[1] if ":" in file else file
+        outputs += ["{} DATAFILE='{}' OPT='RECREATE'".format(streamName,fileName)]
+    cfg.addService(CompFactory.THistSvc(Output = outputs))
+
+# add our algorithm
+cfg.addEventAlgo(CompFactory.%(klass)s(),sequenceName="AthAlgSeq")
+
+
+# final cfg tweaks before launching:
+cfg.getService("AthenaEventLoopMgr").IntervalInSeconds = 5 # enable processing rate reporting every 5s
+# suppress logging from some core services that we usually don't care about hearing from
+cfg.getService("MessageSvc").setWarning += ["ClassIDSvc","PoolSvc","AthDictLoaderSvc","AthenaPoolAddressProviderSvc",
+                                            "ProxyProviderSvc","DBReplicaSvc","MetaDataSvc","MetaDataStore","AthenaPoolCnvSvc",
+                                            "TagMetaDataStore","EventSelector","CoreDumpSvc","AthMasterSeq","EventPersistencySvc",
+                                            "ActiveStoreSvc","AthOutSeq","AthRegSeq","FPEAuditor"]
+
+# run the job
+if cfg.run().isFailure():
+    import sys
+    sys.exit(1)
+"""
+
     alg_hdr_template = """\
 #ifndef %(guard)s
 #define %(guard)s 1
@@ -345,10 +410,11 @@ DECLARE_COMPONENT( %(klass)s )
     if args.newJobo:
       #make the joboptions file too
       full_jobo_name = namespace_klass + "JobOptions"
+      full_script_name = "run" + namespace_klass
       full_alg_name = namespace_klass
    
       print(textwrap.dedent("""\
-      ::: create jobo [%(full_jobo_name)s] for alg [%(full_alg_name)s]""" %locals()))
+      ::: create jobo [%(full_jobo_name)s] and script [%(full_script_name)s] for alg [%(full_alg_name)s]""" %locals()))
    
       #following code borrowed from gen_klass
       jobo = getattr(Templates, 'jobo_template')
@@ -365,6 +431,22 @@ DECLARE_COMPONENT( %(klass)s )
          o_hdr.writelines(jobo%e)
          o_hdr.flush()
          o_hdr.close()
+
+    scripto = getattr(Templates, 'script_template')
+
+    e = dict( klass=full_alg_name,
+              inFile=os.environ['ASG_TEST_FILE_MC'],
+              )
+    fname = 'scripts/%s.py' % full_script_name
+    #first check doesn't exist
+    if os.path.isfile(fname):
+        print(":::  WARNING %s already exists .. will not overwrite" % fname)
+    else:
+        o_hdr = open(fname, 'w')
+        o_hdr.writelines(scripto%e)
+        o_hdr.flush()
+        o_hdr.close()
+        os.chmod(fname, 0o755)
 
     #need to reconfigure cmake so it knows about the new files
     #rely on the WorkDir_DIR env var for this
