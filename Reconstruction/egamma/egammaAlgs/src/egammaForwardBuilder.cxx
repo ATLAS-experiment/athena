@@ -41,6 +41,7 @@ StatusCode egammaForwardBuilder::initialize()
 
   // The data handle keys.
   ATH_CHECK(m_topoClusterKey.initialize());
+  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
   ATH_CHECK(m_electronOutputKey.initialize());
   ATH_CHECK(m_outClusterContainerKey.initialize());
   m_outClusterContainerCellLinkKey = m_outClusterContainerKey.key() + "_links";
@@ -124,6 +125,13 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
   // Check is only used for serial running, remove when MT scheduler used.
   ATH_CHECK(inputClusters.isValid());
 
+  // Calorimeter description.
+  SG::ReadCondHandle<CaloDetDescrManager> caloDetDescrMgrHandle{
+    m_caloDetDescrMgrKey, ctx
+  };
+  ATH_CHECK(caloDetDescrMgrHandle.isValid());
+  const CaloDetDescrManager* calodetdescrmgr = *caloDetDescrMgrHandle;
+
   static const SG::AuxElement::Accessor<
     std::vector<ElementLink<xAOD::CaloClusterContainer>>
   > caloClusterLinks("constituentClusterLinks");
@@ -161,7 +169,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     std::unique_ptr<xAOD::CaloCluster> newCluster = std::make_unique<xAOD::CaloCluster>(*cluster);
 
     if (m_doCookieCutting) {
-      cookieCut(*newCluster);
+      cookieCut(*newCluster, *calodetdescrmgr);
     }
 
     caloClusterLinks(*newCluster) = constituentLinks;
@@ -280,20 +288,47 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
   return StatusCode::SUCCESS;
 }
 
-void egammaForwardBuilder::cookieCut(xAOD::CaloCluster& cluster) const
-{
+void egammaForwardBuilder::cookieCut(
+  xAOD::CaloCluster& cluster,
+  const CaloDetDescrManager& mgr
+) const {
   if (!cluster.hasSampling(CaloSampling::EME2) &&
       !cluster.hasSampling(CaloSampling::FCAL0)) {
     return;
   }
 
-  CookieCutterHelpers::CentralPosition cp({&cluster});
+  CookieCutterHelpers::CentralPosition cp0({&cluster});
+  CookieCutterHelpers::CentralPosition cpRef = cp0;
+
+  if (cp0.emaxEC > 0) {
+    const CaloDetDescrElement* dde =
+      mgr.get_element(CaloCell_ID::EME2, cpRef.etaEC, cpRef.phiEC);
+    if (dde) {
+      cp0.etaEC = dde->eta_raw();
+      cp0.phiEC = dde->phi_raw();
+    } else {
+      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
+                      << cpRef.etaEC << ", phi = " << cpRef.phiEC);
+    }
+  }
+  if (cp0.emaxF > 0) {
+    const CaloDetDescrElement* dde =
+      mgr.get_element(CaloCell_ID::FCAL0, cpRef.etaF, cpRef.phiF);
+    if (dde) {
+      cp0.etaF = dde->eta_raw();
+      cp0.phiF = dde->phi_raw();
+    } else {
+      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
+                      << cpRef.etaF << ", phi = " << cpRef.phiF);
+    }
+  }
+
   CaloClusterCellLink* cell_links = cluster.getOwnCellLinks();
   CaloClusterCellLink::iterator cell_itr = cell_links->begin();
 
-  const bool isEC = cp.emaxEC >= cp.emaxF;
-  const float eta = isEC ? cp.etaEC : cp.etaF;
-  const float phi = isEC ? cp.phiEC : cp.phiF;
+  const bool isEC = cp0.emaxEC >= cp0.emaxF;
+  const float eta = isEC ? cp0.etaEC : cp0.etaF;
+  const float phi = isEC ? cp0.phiEC : cp0.phiF;
    
   while (cell_itr != cell_links->end()) {
     const float deltaEta = std::abs(eta - cell_itr->eta());
