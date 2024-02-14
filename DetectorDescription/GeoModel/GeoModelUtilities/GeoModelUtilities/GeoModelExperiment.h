@@ -18,7 +18,7 @@
 /// Ensure that the extensions for the Vector3D are properly loaded
 #include "GeoPrimitives/GeoPrimitives.h"
 
-#include "GeoModelKernel/GeoVPhysVol.h"
+#include "GeoModelKernel/GeoPhysVol.h"
 #ifndef BUILDVP1LIGHT
     #include "AthenaKernel/CLASS_DEF.h"
 #endif
@@ -26,7 +26,6 @@
 #include <string>
 #include <vector>
 
-class GeoPhysVol;
 class GeoVDetectorManager;
 
 class GeoModelExperiment {
@@ -72,7 +71,7 @@ public:
   GeoModelExperiment(GeoPhysVol* physVol);                                                   //
   //                                                                                         //
   // Standard Destructor                                                                     //
-  virtual ~GeoModelExperiment();                                                             //
+  virtual ~GeoModelExperiment() = default;                                                             //
   //                                                                                         //
   // Return the World physical volume:                                                       //
   GeoPhysVol *getPhysVol();                                                                  //
@@ -95,7 +94,7 @@ public:
   
  private:
   
-  GeoPhysVol                                           *m_physVol;
+  GeoIntrusivePtr<GeoPhysVol>                           m_physVol{};
   collection_type                                       m_managers;
   std::vector<PVConstLink>                              m_tmpVolumes;
 

@@ -12,17 +12,11 @@
  ** Constructor(s)
  **/
 GeoModelExperiment::GeoModelExperiment( GeoPhysVol * physVol )
-  : m_physVol(physVol)
-{
-  physVol->ref();
-}
+  : m_physVol(physVol) {}
 
 /**
  ** Destructor
  **/
-GeoModelExperiment::~GeoModelExperiment()  {
-  m_physVol->unref();
-}
 
 GeoPhysVol * GeoModelExperiment::getPhysVol() {
   return m_physVol;
