@@ -37,7 +37,7 @@ class FillAlignTrkInfo :  virtual public IFillAlignTrkInfo, public AthAlgTool {
 
   virtual StatusCode initialize();
  private:
-  ToolHandle<Trk::ITrackSummaryTool> m_TrackSummaryTool;
+  ToolHandle<Trk::ITrackSummaryTool> m_TrackSummaryTool {this, "TrackSummaryTool", "Trk::TrackSummaryTool/TrackSummaryTool", ""};
 };
 
 #endif //  TRT_CALIBTOOLS__FILLALIGNTRKINFO_H

@@ -39,15 +39,10 @@ def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", forc
     acc.setPrivateTools(CompFactory.TRT_StrawStatusSummaryTool(name, **kwargs))
     return acc
 
-def TRT_StrawNeighbourSvcCfg(flags, name="TRT_StrawNeighbourSvc"):
+def TRT_StrawNeighbourSvcCfg(flags, name="TRT_StrawNeighbourSvc", **kwargs):
     acc = ComponentAccumulator()
-    
-    svc = CompFactory.TRT_StrawNeighbourSvc(name)
-    
-    acc.addService(svc)
+    acc.addService(CompFactory.TRT_StrawNeighbourSvc(name, **kwargs), primary=True)
     return acc
-    
-
 
 
 def TRT_MCCalDbToolCfg(flags, name="TRT_CalDbTool2", **kwargs):
