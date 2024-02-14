@@ -3,6 +3,8 @@
 // Headers to Read & Write Decorations
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "ranges"
+#include <boost/iterator/zip_iterator.hpp>
 
 namespace Rec {
 
@@ -24,10 +26,11 @@ GNNVertexConstructorTool::GNNVertexConstructorTool(const std::string &type, cons
       m_Rlayer1   (0.),
       m_Rlayer2   (0.),
       m_MultiWithPrimary(false),
-      m_minD0(0.1)
+      m_minD0(0.0)
       {
   declareInterface<IGNNVertexConstructorInterface>(this);
   declareProperty("JetTrackLinks", m_trackLinksKey = "AntiKt4EMPFlowJetsAuxDyn.TrackLinks");
+  declareProperty("JetTrackLinks", m_trackOriginsKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_TrackOrigin");
   declareProperty("JetVertexLinks",m_vertexLinksKey = "AntiKt4EMPFlowJetsAuxDyn.GN2v01_VertexIndex");
   declareProperty("GNNTool", m_gnn_Tool, "GNN Tool");
   declareProperty("VertexFitterTool", m_vertexFitterTool, "Vertex fitting tool");
@@ -73,6 +76,7 @@ StatusCode GNNVertexConstructorTool::initialize() {
   
   // Initialize keys
   ATH_CHECK(m_trackLinksKey.initialize());
+  ATH_CHECK(m_trackOriginsKey.initialize());
   ATH_CHECK(m_vertexLinksKey.initialize());
 
   m_jetWriteDecorKeyVertexLink = m_jetCollection + ".GNNVerticesLink";
@@ -96,10 +100,10 @@ StatusCode GNNVertexConstructorTool::decorateJets(const xAOD::JetContainer *jetC
     m_gnn_Tool->decorate(*jet);
   }
   
-  auto Vars =m_gnn_Tool->getDecoratorKeys();
-  for (auto v : Vars){
-    ATH_MSG_INFO(v);
-  }
+//  auto Vars =m_gnn_Tool->getDecoratorKeys();
+//  for (auto v : Vars){
+//    ATH_MSG_INFO(v);
+//  }
   
   return StatusCode::SUCCESS;
 }
@@ -159,6 +163,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 
   //Read Decor Handle for Track links and Vertex links
   SG::ReadDecorHandle<xAOD::JetContainer, TLC> trackLinksHandle(m_trackLinksKey, ctx);
+  SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char>> trackOriginsHandle(m_trackOriginsKey, ctx);
   SG::ReadDecorHandle<xAOD::JetContainer, std::vector<char>>
       vertexLinksHandle(m_vertexLinksKey, ctx);
   SG::WriteDecorHandle< xAOD::JetContainer, std::vector<ElementLink<xAOD::VertexContainer>>> 
@@ -191,16 +196,75 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     //Retrieve the Vertex and Track Collections
     auto vertexCollection = vertexLinksHandle(*jet);
     auto trackCollection = trackLinksHandle(*jet);
+    auto trackOriginCollection = trackOriginsHandle(*jet);
 
-    //Fill the map
-    int i = 0;
-    for (auto v : vertexCollection) {
-      //if ((*trackCollection[i])->d0()<m_minD0) continue;
-      vertexMap.insert(std::pair<int, TL>(v, (trackCollection[i])));
-      i++;
-      }
+//    ATH_MSG_DEBUG(" TO Size " <<trackOriginCollection.size());
+//    ATH_MSG_DEBUG(" T size "<<trackCollection.size());
+//    ATH_MSG_DEBUG(" Vertex size " << vertexCollection.size());
     
-    std::multimap<int, TL>::iterator itr;
+       
+    using indexList            = std::vector< int >;
+    using trackCountMap        = std::map< char, std::set<TL> >;
+    using vertex2trackCountMap = std::map< char, trackCountMap >;
+       
+    indexList iList(vertexCollection.size());
+    
+    vertex2trackCountMap v2tcMap;
+    trackCountMap FittingMap;
+    FittingMap.clear();
+    
+    std::for_each(boost::make_zip_iterator(boost::make_tuple(vertexCollection.cbegin(), trackOriginCollection.cbegin(), trackCollection.cbegin())),
+		boost::make_zip_iterator(boost::make_tuple(vertexCollection.cend(), trackOriginCollection.cend(), trackCollection.cend())),
+		[&v2tcMap, &FittingMap, &minD0=m_minD0](const boost::tuple<const char &, const char &, const TL &> &e)
+		{
+		  auto v  = e.get<0>();
+		  auto to = e.get<1>();
+      auto tl = e.get<2>();
+      
+      //d0 cut on tracks 
+      if ((*tl)->d0()>minD0)
+      {
+      
+		  v2tcMap[v][to].insert(tl);
+		  }
+    });
+
+    
+    auto mapComp= [](const auto &LHS, const auto &RHS)
+    {
+      return LHS.second.size() < RHS.second.size();
+    };
+    
+       
+    auto vertex2trackOrigin = [&mapComp, &FittingMap](const auto &e){
+      const auto &[v, tcm] = e;
+      const auto &[to, n] = *(std::max_element(tcm.cbegin(), tcm.cend(), mapComp));
+      {
+           FittingMap.insert(std::pair<char, std::set<TL>>(v, n));
+           //std::cout << "Test " << (int)v << "  " << n.size() << std::endl;
+      
+      };
+    //std::cout << (int)v << ", " << (int)to << ", " << n.size() << std::endl;
+    };
+    
+    
+    std::for_each(v2tcMap.cbegin(), v2tcMap.cend(), vertex2trackOrigin);    
+    
+    //Fill the map
+//    int i = 0;
+//    for (auto v : vertexCollection) {
+//      
+//      int a = trackOriginCollection[i];
+//      
+//      int b = v;
+//      ATH_MSG_DEBUG("  Vertex  " << b << " Track Origin " << a << "  Track Links " << *trackCollection[i] );
+//         
+//      
+//      vertexMap.insert(std::pair<int, TL>(v, (trackCollection[i])));
+//      i++;
+//      }
+//
+//    std::multimap<int, TL>::iterator itr;
 
     //Working xAOD
     workVectorArrxAOD *xAODwrk = new workVectorArrxAOD();
@@ -220,19 +284,22 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     std::vector<const xAOD::NeutralParticle *> neutralPartDummy(0);
     Amg::Vector3D IniVrt(0.,0.,0.);
 
-//    xAODwrk->listSelTracks.clear();
-
     // returns next value after last key - easier for "for loop"
-    auto lastKey = (vertexMap.end())->first;
-    
-    for (int k = 0; k < lastKey; ++k) {
-      if (vertexMap.count(k) >= 2) {
+    //auto lastKey = (FittingMap.end())->first;
+    //ATH_MSG_DEBUG("BAFFLED");
+    //for (int k = 0; k < lastKey; ++k) {
+      //ATH_MSG_DEBUG("FUCK");
+      //ATH_MSG_DEBUG(FittingMap.count(k));
+    for(const auto& pair : FittingMap){
+          
+      if (pair.second.size() >= 2) {
         // Need at least 2 tracks to perform a fit
-        auto elements = vertexMap.equal_range(k);
+        //auto elements = FittingMap.equal_range(k);
               
-        int NTRKS =vertexMap.count(k);
+        //int NTRKS =FittingMap.count(k);
+        int NTRKS =pair.second.size();
         
-        
+        //ATH_MSG_DEBUG("FECKING TEST");
         std::vector<double> InpMass(NTRKS,m_massPi);
         m_vertexFitterTool->setMassInputParticles( InpMass, *state);
 
@@ -242,10 +309,10 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
 //        //newvrt.selTrk.clear();
               
         //Retrieve the tracks and push to working xAOD
-        for (auto i = elements.first; i != elements.second; ++i) {
-          xAODwrk->listSelTracks.push_back(*(i->second));
-          //ATH_MSG_DEBUG((*(i->second))->d0());
-          }
+//        for (auto i = elements.first; i != elements.second; ++i) {
+//          xAODwrk->listSelTracks.push_back(*(i->second));
+//          //ATH_MSG_DEBUG((*(i->second))->d0());
+//          }
        
        ATH_MSG_DEBUG("#Tracks test " << xAODwrk->listSelTracks.size());
         
@@ -317,6 +384,8 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         ATH_MSG_DEBUG("Sum Tracks " << MomentumJet.E());
         ATH_MSG_DEBUG("Vertex " << newvrt.vertexMom.E());
         ATH_MSG_DEBUG("Jets " << jet->p4().E());
+        ATH_MSG_DEBUG("Vertex R " << newvrt.vertex.perp());
+        
         
         double eRatio = newvrt.vertexMom.E()/jet->p4().E(); 
 
@@ -325,6 +394,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         
         if(newvrt.vertex.perp()>m_Rbeampipe && Signif3D<20.)  continue; 
         
+        if(newvrt.vertex.perp()<0.5) continue;
         //Make New Container        
         xAOD::Vertex *GNNvertex = new xAOD::Vertex;
         outVertexContainer->emplace_back(GNNvertex);

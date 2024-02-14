@@ -28,6 +28,12 @@
 #include "iostream"
 #include "iterator"
 #include "map"
+#include "set"
+#include "algorithm"
+#include "ranges"
+#include "vector"
+#include <numeric>
+#include <vector>
 
 class TH2D;
 class TH1F;
@@ -131,6 +137,8 @@ public:
                                       xAOD::VertexContainer*, 
                                       const xAOD::Vertex & primaryVertex, 
                                       const EventContext&) const;
+                                      
+ 
 
   // Tools
   ToolHandle<FlavorTagDiscriminants::GNNTool> m_gnn_Tool{this, "gnn_Tool", "",
@@ -140,6 +148,8 @@ public:
   // Read handles
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackLinksKey{
       this, "trackLinksKey", "", "Jet GNN Deco Read Key for track link"};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_trackOriginsKey{
+      this, "trackLinksKey", "", "Jet GNN Deco Read Key for track origin"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_vertexLinksKey{
       this, "vertexLinksKey", "", "Jet GNN Deco Read Key for vertex link"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "eventInfoKey", "EventInfo",
