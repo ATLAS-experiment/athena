@@ -161,7 +161,7 @@ class TrigInDetReco(ExecStep):
 
         chains += ']'
         if self._isCA:
-            self.preexec_trig += "flags.Trigger.disableCPS=True;flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
+            self.preexec_trig += "flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
         else:
             self.preexec_trig += 'doEmptyMenu=True;'+flags+'selectChains='+chains
 
