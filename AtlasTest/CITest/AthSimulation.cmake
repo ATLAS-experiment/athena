@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # CI test definitions for the AthSimulation project
 # --> README.md before you modify this file
@@ -37,14 +37,6 @@ atlas_add_citest( SimulationRun4FullSimChecks
    SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim --checks-only --output-path ../SimulationRun4FullSim
    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
    DEPENDS_SUCCESS SimulationRun4FullSim )
-
-atlas_add_citest( SimulationRun2FullSimLegacy
-   SCRIPT RunWorkflowTests_Run2.py --CI -s -w FullSim -e '--maxEvents 10 --CA False'
-   LOG_IGNORE_PATTERN "WARNING FPE" )  # ignore FPEs from Geant4
-
-atlas_add_citest( SimulationRun3FullSimLegacy
-   SCRIPT RunWorkflowTests_Run3.py --CI -s -w FullSim -e '--maxEvents 10 --CA False --preExec overrideMaxEvents=50'
-   LOG_IGNORE_PATTERN "WARNING FPE" )  # ignore FPEs from Geant4
 
 atlas_add_citest( SimulationRun3HitsMergeWithSort
    SCRIPT RunWorkflowTests_Run3.py --CI -s -w HitsMerge -e '--inputHITSFile ../../SimulationRun3FullSim/run_s4006/myHITS.pool.root'  # go two levels up as the test runs in a subfolder
