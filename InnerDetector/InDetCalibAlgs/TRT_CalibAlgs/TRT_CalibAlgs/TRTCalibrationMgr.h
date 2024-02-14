@@ -22,6 +22,8 @@
 #include "TRT_ConditionsData/StrawT0MultChanContainer.h"
 #include "CxxUtils/checker_macros.h"
 
+#include "TRT_CalibTools/IFillAlignTrkInfo.h"
+
 
 namespace TRT{
   class TrackInfo;
@@ -31,7 +33,6 @@ namespace Trk{
  class ITrackSelectorTool;
  class ITrackFitter;
 }
-class IFillAlignTrkInfo;
 class IAccumulator;
 class IFitTool;
 
@@ -78,7 +79,7 @@ public:
 private:
 
     // Tools for the algorithm
-    ToolHandleArray<IFillAlignTrkInfo> m_TrackInfoTools ;
+    ToolHandleArray<IFillAlignTrkInfo> m_TrackInfoTools {this, "AlignTrkTools", {}, ""};
     PublicToolHandleArray<ITRTCalibrator> m_TRTCalibTools {this, "TRTCalibrator", {}, ""};
     ToolHandleArray<IFitTool> m_FitTools;
     ToolHandle<Trk::ITrackFitter> m_trackFitter;
