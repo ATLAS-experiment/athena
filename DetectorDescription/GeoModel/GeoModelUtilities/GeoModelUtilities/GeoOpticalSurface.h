@@ -10,6 +10,7 @@
 
 
 #include "GeoModelKernel/RCBase.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "GeoModelUtilities/GeoMaterialPropertiesTable.h"
 #include <string>
 
@@ -49,7 +50,7 @@ class GeoOpticalSurface : public RCBase
 		    GeoSurfaceType type = dielectric_dielectric,
 		    double parameter = 1.0);
 
-  ~GeoOpticalSurface();
+  ~GeoOpticalSurface() = default;
 
   // accessor methods
   std::string GetName() const {return m_name;}
@@ -59,7 +60,7 @@ class GeoOpticalSurface : public RCBase
   double GetParameter() const {return m_parameter;}
 
   void SetMaterialPropertiesTable(GeoMaterialPropertiesTable *mpt)
-  { m_materialPropertiesTable = mpt; if(mpt) m_materialPropertiesTable->ref(); };
+  { m_materialPropertiesTable = mpt; };
 
   GeoMaterialPropertiesTable* GetMaterialPropertiesTable()
     { return m_materialPropertiesTable;};
@@ -72,7 +73,7 @@ class GeoOpticalSurface : public RCBase
   GeoOpticalSurfaceFinish m_finish;
   GeoSurfaceType m_type; 
   double m_parameter;
-  GeoMaterialPropertiesTable* m_materialPropertiesTable;
+  GeoIntrusivePtr<GeoMaterialPropertiesTable> m_materialPropertiesTable{};
 };
 
 #endif 
