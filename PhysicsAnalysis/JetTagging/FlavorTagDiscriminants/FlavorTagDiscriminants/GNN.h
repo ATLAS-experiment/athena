@@ -1,5 +1,11 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+  This class is used in conjunction with OnnxUtil to run inference on a GNN model.
+  Whereas OnnxUtil handles the interfacing with the ONNX runtime, this class handles
+  the interfacing with the ATLAS EDM. It is responsible for collecting all the inputs
+  needed for inference, running inference (via OnnxUtil), and decorating the results
+  back to ATLAS EDM.
 */
 
 #ifndef GNN_H
@@ -54,22 +60,39 @@ namespace FlavorTagDiscriminants {
     std::shared_ptr<const OnnxUtil> m_onnxUtil;
 
   private:
+    // type definitions for ONNX output decorators
+    using TPC = xAOD::TrackParticleContainer;
+    using TrackLinks = std::vector<ElementLink<TPC>>;
 
+    template<typename T>
+    using Dec = SG::AuxElement::Decorator<T>;
+
+    template<typename T>
+    using Decs = std::vector<std::pair<std::string, Dec<T>>>;
+
+    struct Decorators {
+      Decs<float> jetFloat;
+      Decs<std::vector<char>> jetVecChar;
+      Decs<std::vector<float>> jetVecFloat;
+      Decs<TrackLinks> jetTrackLinks;
+      Decs<char> trackChar;
+      Decs<float> trackFloat;
+    };
+
+    /* create all decorators */
+    std::tuple<FTagDataDependencyNames, std::set<std::string>>
+    createDecorators(const OnnxUtil::OutputConfig& outConfig, const FTagOptions& options);
+    
     SG::AuxElement::ConstAccessor<ElementLink<xAOD::JetContainer>> m_jetLink;
     std::string m_input_node_name;
     std::vector<internal::VarFromBTag> m_varsFromBTag;
     std::vector<internal::VarFromJet> m_varsFromJet;
     std::vector<internal::TrackSequenceBuilder> m_trackSequenceBuilders;
-    internal::OutNodeFloat m_decorators_float;
-    internal::OutNodeVecChar m_decorators_vecchar;
-    internal::OutNodeVecFloat m_decorators_vecfloat;
-    internal::OutNodeTrackLinks m_decorators_tracklinks;
-    internal::OutNodeChar m_decorators_track_char;
-    internal::OutNodeFloat m_decorators_track_float;
+
+    Decorators m_decorators;
     float m_defaultValue;
     bool m_decorate_tracks;
-
     FTagDataDependencyNames m_dataDependencyNames;
   };
-}
-#endif
+} // end namespace FlavorTagDiscriminants
+#endif //GNN_H

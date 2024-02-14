@@ -37,6 +37,7 @@ class OnnxOutput {
   private:
     OutputType getOutputType(ONNXTensorElementDataType type, int rank) const;
     OutputTarget getOutputTarget(int rank) const;
+    const std::string getName(const std::string& name, const std::string& model_name) const;
 
 }; // class OnnxOutput
 

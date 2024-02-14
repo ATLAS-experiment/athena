@@ -5,10 +5,12 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/customGetter.h"
+#include "FlavorTagDiscriminants/StringUtils.h"
 
 #include "xAODBTagging/BTaggingUtilities.h"
 
 namespace {
+  using namespace FlavorTagDiscriminants;
 
   // define a regex literal operator
   std::regex operator "" _r(const char* c, size_t /* length */) {
@@ -65,35 +67,6 @@ namespace {
   // Implementation of the above functions
   //
 
-  template <typename T>
-  T match_first(const std::vector<std::pair<std::regex, T> >& regexes,
-                const std::string& var_name,
-                const std::string& context) {
-    for (const auto& pair: regexes) {
-      if (std::regex_match(var_name, pair.first)) {
-        return pair.second;
-      }
-    }
-    throw std::logic_error(
-      "no regex match found for input variable '" + var_name + "' in "
-      + context);
-  }
-
-
-  // functions to rewrite input names
-  std::string sub_first(const StringRegexes& res,
-                        const std::string& var_name,
-                        const std::string& context) {
-    for (const auto& pair: res) {
-      const std::regex& re = pair.first;
-      const std::string& fmt = pair.second;
-      if (std::regex_match(var_name, re)) {
-        return std::regex_replace(var_name, re, fmt);
-      }
-    }
-    throw std::logic_error(
-      "no regex match found for variable '" + var_name + "' while " + context);
-  }
 
   std::vector<FTagInputConfig> get_input_config(
     const std::vector<std::string>& variable_names,
@@ -104,10 +77,9 @@ namespace {
     for (const auto& var: variable_names) {
       FTagInputConfig input;
       input.name = var;
-      input.type = match_first(type_regexes, var, "type matching");
-      input.default_flag = sub_first(default_flag_regexes, var,
+      input.type = str::match_first(type_regexes, var, "type matching");
+      input.default_flag = str::sub_first(default_flag_regexes, var,
                                      "default matching");
-
       inputs.push_back(input);
     }
     return inputs;
@@ -159,14 +131,14 @@ namespace {
     for (const auto& name_node: names) {
       FTagTrackSequenceConfig node;
       node.name = name_node.first;
-      node.order = match_first(sort_regexes, name_node.first,
+      node.order = str::match_first(sort_regexes, name_node.first,
                                "track order matching");
-      node.selection = match_first(select_regexes, name_node.first,
+      node.selection = str::match_first(select_regexes, name_node.first,
                                    "track selection matching");
       for (const auto& varname: name_node.second) {
         FTagTrackInputConfig input;
         input.name = varname;
-        input.type = match_first(type_regexes, varname,
+        input.type = str::match_first(type_regexes, varname,
                                  "track type matching");
 
         input.flip_sign=false;
@@ -187,57 +159,24 @@ namespace {
     std::string context = "building negative tag b-btagger";
     for (auto& node: config.inputs) {
       for (auto& var: node.variables) {
-        var.name = sub_first(res, var.name, context);
+        var.name = str::sub_first(res, var.name, context);
       }
       std::map<std::string, double> new_defaults;
       for (auto& pair: node.defaults) {
-        new_defaults[sub_first(res, pair.first, context)] = pair.second;
+        new_defaults[str::sub_first(res, pair.first, context)] = pair.second;
       }
       node.defaults = new_defaults;
     }
     std::map<std::string, lwt::OutputNodeConfig> new_outputs;
     for (auto& pair: config.outputs) {
-      new_outputs[sub_first(res, pair.first, context)] = pair.second;
+      new_outputs[str::sub_first(res, pair.first, context)] = pair.second;
     }
     config.outputs = new_outputs;
   }
 
-
-  StringRegexes getFlipConverters(const FlipTagConfig& flip_config) {
-
-    // determine name based on flip config
-    std::string flip_name = "";
-    if (flip_config == FlipTagConfig::FLIP_SIGN) {
-      flip_name = "Flip";
-    }
-    if (flip_config == FlipTagConfig::NEGATIVE_IP_ONLY) {
-      flip_name = "Neg";
-    }
-    if (flip_config == FlipTagConfig::SIMPLE_FLIP) {
-      flip_name = "Simple";
-    }
-
-    // we rewrite the inputs if we're using flip taggers
-    StringRegexes flip_converters {
-      {"(GN1[^_]*|GN2[^_]*)"_r, "$1" + flip_name},
-      {"(GN1[^_]*|GN2[^_]*)_(.*)"_r, "$1" + flip_name + "_$2"},
-      {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
-      {"(rnnip|dips[^_]*)_(.*)"_r, "$1flip_$2"},
-      {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
-      {"(rnnip|dips[^_]*)"_r, "$1flip"},
-      {"^(DL1|DL1r[^_]*|DL1rmu|DL1d[^_]*)$"_r, "$1" + flip_name},
-      {"pt|abs_eta|eta"_r, "$&"},
-      {"softMuon.*|smt.*"_r, "$&"}
-    };
-
-    return flip_converters;
-  }
-
 }
-
 // __________________________________________________________________________
-// Start of functions that are used outside this file
-
+// Start of functions accessible in the FlavorTagDiscriminants namespace
 
 namespace FlavorTagDiscriminants {
 
@@ -657,7 +596,35 @@ namespace FlavorTagDiscriminants {
 
   namespace dataprep {
 
+    // Get the regex which remap the names if we're using flip taggers
+    StringRegexes getNameFlippers(const FlipTagConfig& flip_config) {
 
+      std::string flip_name = "";
+      if (flip_config == FlipTagConfig::FLIP_SIGN) {
+        flip_name = "Flip";
+      }
+      else if (flip_config == FlipTagConfig::NEGATIVE_IP_ONLY) {
+        flip_name = "Neg";
+      }
+      else if (flip_config == FlipTagConfig::SIMPLE_FLIP) {
+        flip_name = "Simple";
+      }
+
+      StringRegexes flip_converters {
+        {"(GN1[^_]*|GN2[^_]*)"_r, "$1" + flip_name},
+        {"(GN1[^_]*|GN2[^_]*)_(.*)"_r, "$1" + flip_name + "_$2"},
+        {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
+        {"(rnnip|dips[^_]*)_(.*)"_r, "$1flip_$2"},
+        {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
+        {"(rnnip|dips[^_]*)"_r, "$1flip"},
+        {"^(DL1|DL1r[^_]*|DL1rmu|DL1d[^_]*)$"_r, "$1" + flip_name},
+        {"pt|abs_eta|eta"_r, "$&"},
+        {"softMuon.*|smt.*"_r, "$&"}
+      };
+
+      return flip_converters;
+    }
+    
     // Translate string config to config objects
     //
     // This parses the saved NN configuration structure and translates
@@ -675,7 +642,7 @@ namespace FlavorTagDiscriminants {
     ){
 
       // get the regex to rewrite the inputs if we're using flip taggers
-      StringRegexes flip_converters = getFlipConverters(flip_config);
+      StringRegexes flip_converters = getNameFlippers(flip_config);
 
       // some sequences also need to be sign-flipped. We apply this by
       // changing the input scaling and normalizations
@@ -950,104 +917,6 @@ namespace FlavorTagDiscriminants {
       }
 
       return std::make_tuple(decorators, deps, used_remap);
-    }
-
-    std::tuple<
-      internal::OutNodeFloat, internal::OutNodeVecChar,
-      internal::OutNodeVecFloat, internal::OutNodeTrackLinks,
-      internal::OutNodeChar, internal::OutNodeFloat,
-      FTagDataDependencyNames, std::set<std::string>>
-    createGNDecorators(
-      const OnnxUtil::OutputConfig& out_config,
-      const FTagOptions& options)
-    {
-      FTagDataDependencyNames deps;
-      internal::OutNodeFloat decorators_f;
-      internal::OutNodeVecChar decorators_vc;
-      internal::OutNodeVecFloat decorators_vf;
-      internal::OutNodeTrackLinks decorators_tl;
-      internal::OutNodeChar decorators_track_c;
-      internal::OutNodeFloat decorators_track_f;
-
-      std::map<std::string, std::string> remap = options.remap_scalar;
-      std::set<std::string> used_remap;
-
-      // get the regex to rewrite the outputs if we're using flip taggers
-      StringRegexes flip_converters = getFlipConverters(options.flip);
-      std::string context = "building negative tag b-btagger";
-
-      // for each model output
-      for (const auto& out_node: out_config) {
-
-        std::string name = out_node.name;
-        
-        // modify the output name if we're using flip taggers
-        if (options.flip != FlipTagConfig::STANDARD) {
-          name = sub_first(flip_converters, name, context);  
-        }
-
-        // let user rename the output
-        if (auto h = remap.extract(name)){
-          name = h.mapped();
-          used_remap.insert(h.key());
-        }
-        deps.bTagOutputs.insert(name);
-
-        // create a decorator for this output depending on the rank and type
-        switch (out_node.type) {
-          case OnnxOutput::OutputType::FLOAT: {
-            SG::AuxElement::Decorator<float> f(name);
-            decorators_f.emplace_back(out_node.name, f);
-            break;
-          }
-          case OnnxOutput::OutputType::VECCHAR: {
-            if (out_node.target == OnnxOutput::OutputTarget::JET) {
-              SG::AuxElement::Decorator<std::vector<char>> vc(name);
-              decorators_vc.emplace_back(out_node.name, vc);
-            } 
-            else if (out_node.target == OnnxOutput::OutputTarget::TRACK) {
-              SG::AuxElement::Decorator<char> c(name);
-              decorators_track_c.emplace_back(out_node.name, c);
-            }
-            else {
-              throw std::logic_error("unknown outputnode target");
-            }
-            break;
-          }
-          case OnnxOutput::OutputType::VECFLOAT: {
-            if (out_node.target == OnnxOutput::OutputTarget::JET) {
-              SG::AuxElement::Decorator<std::vector<float>> vf(name);
-              decorators_vf.emplace_back(out_node.name, vf);
-            } 
-            else if (out_node.target == OnnxOutput::OutputTarget::TRACK) {
-              SG::AuxElement::Decorator<float> f(name);
-              decorators_track_f.emplace_back(out_node.name, f);
-            }
-            else {
-              throw std::logic_error("unknown outputnode target");
-            }
-            break;
-          }
-          default:
-            throw std::logic_error("unknown outputnode type");
-        }
-      }
-
-      // create a decorator for the track links
-      // TODO: use the tagger name in the decorator name so that we can
-      // decorate the tracks from multiple taggers with different selections
-      if (decorators_vc.size() > 0 || decorators_vf.size() > 0){
-        std::string name = "TrackLinks";
-        if (auto h = remap.extract(name)){
-          name = h.mapped();
-          used_remap.insert(h.key());
-        }
-        deps.bTagOutputs.insert(name);
-        SG::AuxElement::Decorator<internal::TrackLinks> tl(name);
-        decorators_tl.emplace_back("TrackLinks", tl);
-      }
-
-      return std::make_tuple(decorators_f, decorators_vc, decorators_vf, decorators_tl, decorators_track_c, decorators_track_f, deps, used_remap);
     }
 
     // return a function to check IP validity
