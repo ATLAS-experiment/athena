@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -353,7 +353,7 @@ bool TrackCollHandleBase::cut(TrackHandleBase* handle)
       if (!m_cut_phi_allowall) {
         double phi = VP1LinAlgUtils::phiFromXY(mom.x(), mom.y() );
         bool ok(false);
-        for (VP1Interval phirange : m_cut_allowedPhi) {
+        for (const VP1Interval& phirange : m_cut_allowedPhi) {
           if (phirange.contains(phi)||phirange.contains(phi+2*M_PI)||phirange.contains(phi-2*M_PI)) {
             ok = true;
             break;
