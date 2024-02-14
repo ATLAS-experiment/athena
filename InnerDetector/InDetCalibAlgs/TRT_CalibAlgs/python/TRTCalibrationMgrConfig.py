@@ -37,11 +37,10 @@ def FillAlignTRTHitsCfg(flags,name='FillAlignTRTHits',**kwargs) :
     
     AlignTRTHits.minTimebinsOverThreshold = 0
     
-    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
-    AlignTRTHits.TRTCalDbTool = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
-    
-    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg, TRT_StrawStatusSummaryToolCfg, TRT_StrawNeighbourSvcCfg
+    AlignTRTHits.TRTCalDbTool        = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
     AlignTRTHits.TRTStrawSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
+    AlignTRTHits.NeighbourSvc        = acc.popToolsAndMerge(TRT_StrawNeighbourSvcCfg(flags))
     
     acc.setPrivateTools(AlignTRTHits)
     

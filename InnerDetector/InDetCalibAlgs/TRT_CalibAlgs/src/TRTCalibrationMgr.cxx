@@ -27,7 +27,7 @@
 
 TRTCalibrationMgr::TRTCalibrationMgr(const std::string& name, ISvcLocator* pSvcLocator) :
 	AthAlgorithm   (name, pSvcLocator),
-	m_TrackInfoTools(),
+	// m_TrackInfoTools(),
 	m_FitTools(),
 	m_trackFitter("Trk::KalmanFitter/TrkKalmanFitter"),
     m_trackSelector("InDet::InDetTrackSelectorTool/InDetTrackSelectorTool"),
@@ -36,12 +36,12 @@ TRTCalibrationMgr::TRTCalibrationMgr(const std::string& name, ISvcLocator* pSvcL
     m_par_rtcontainerkey("/TRT/Calib/RT"),
     m_par_t0containerkey("/TRT/Calib/T0")
 {
-	m_TrackInfoTools.push_back("FillAlignTrkInfo");
+	// m_TrackInfoTools.push_back("FillAlignTrkInfo");
 	m_TRTCalibTools.push_back("TRTCalibrator");
 	m_FitTools.push_back("FitTool");
 	// declare algorithm parameters
 	declareProperty("StreamTool", m_streamer);
-	declareProperty("AlignTrkTools",m_TrackInfoTools);
+	// declareProperty("AlignTrkTools",m_TrackInfoTools);
 	declareProperty("FitTools",m_FitTools);
 	declareProperty("Max_ntrk",m_max_ntrk);
 	declareProperty("TrackFitter", m_trackFitter);
