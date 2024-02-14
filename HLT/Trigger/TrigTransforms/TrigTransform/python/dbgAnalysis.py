@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @brief: Pre and Post debug_stream analysis operations for trigger transform
 # @details: Code to carry out operations that are needed for running
@@ -14,7 +14,7 @@ from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
 from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess
 from TrigConfIO.HLTTriggerConfigAccess import HLTMenuAccess
 
-from ROOT import TFile, TH1F, TTree, vector
+from ROOT import TFile, TH1F
 
 import logging
 msg = logging.getLogger("PyJobTransforms." + __name__)
@@ -290,138 +290,4 @@ def getHltDecision(accepted, rejected, outputFile):
     hfile.Write("", TFile.kOverwrite)
     hfile.Close()
     return msg.info("Added HLT_accepted_events and HLT_rejeceted_events to %s", outputFile)
-
-
-
-
-def getPrePosdif_branch(outputFile, hist_name, isVector):
-
-    '''
-       Add Differences_in_Pre_Pos tree to outputFile and Branches Differences_in_Pre_Pos+hist_name 
-    '''
-
-    # Open root output file
-    hfile = TFile(outputFile, 'UPDATE')
-
-    #check Pre/Pos Tree exist
-    if (hfile.Get("Event_Info_Pos") is not None) and (hfile.Get("Event_Info_Pos") is not None):
-
-        #Retrieve Pre Trees - before the Recovery Job has run 
-        tree_Pre = hfile.Get("Event_Info_Pre")
-
-        #Retrieve Post Trees - after the Recovery Job has run 
-        tree_Pos = hfile.Get("Event_Info_Pos")
-
-        #Store the Pre/Pos hist_name values
-        preValues = []
-        posValues = []
-
-        #loop through entries in pre tree 
-        for preEntry in tree_Pre:
-            #retrieve the branch : hist_name 
-            vals_pre = getattr(preEntry, hist_name)
-            # If the branch contains a vector append multiple values per event 
-            if isVector:
-                for i in range(len(vals_pre)):
-                    preValues.append(vals_pre[i])
-            # If the branch is not a vector then append single values
-            else: preValues.append(vals_pre)
-
-        #loop through entries in pos tree 
-        for posEntry in tree_Pos:
-            #retrieve the branch : hist_name 
-            vals_pos = getattr(posEntry, hist_name)
-            # If the branch contains a vector append multiple values per event 
-            if isVector:
-                for i in range(len(vals_pos)):
-                    posValues.append(vals_pos[i])
-            # If the branch is not a vector then append single values
-            else: posValues.append(vals_pos) 
-
-        #store any Values in Pre and not Pos lists
-        differences = []
-        #check if variable is stored as a Vector in outputFile 
-        for value in preValues:
-            #check if the posValues is not empty & is missing values that are in preValues
-            if (len(posValues) != 0) and (value not in posValues):
-                differences.append(value)
-
-        # Check if the Differences_in_Pre_Pos tree already exists in the outputFile
-        if hfile.GetListOfKeys().Contains("Differences_in_Pre_Pos"):
-            #if Differences_in_Pre_Pos tree exists then use this to update with the defined branches 
-            tree_Differences = hfile.Get("Differences_in_Pre_Pos")
-            #Check if the branch "Diff_PrePos_"+hist_name exits 
-            if tree_Differences.GetListOfBranches().Contains("Diff_PrePos_"+hist_name):
-                #if the branch exists then don't proceed with adding it again 
-                msg.info("%s histogram already exists exiting", "Diff_PrePos_"+hist_name)
-                # Close output TFile
-                hfile.Close()
-                return 0 
-            else:
-                msg.info("Difference histogram does not already exists, proceeding with adding %s to the tree : Differences_in_Pre_Pos", "Diff_PrePos_"+hist_name)
-        else: 
-            # If the Differences_in_Pre_Pos tree does not exist then create the tree 
-            tree_Differences = TTree("Differences_in_Pre_Pos", "Differences_in_Pre_Pos")
-
-        # Define the data type depending on the branch type
-        if hist_name=='Stream_Tag_Name' or hist_name=='Stream_Tag_Type' or hist_name=='EventStatusNames' or hist_name=='HLT_Triggered_Names' or hist_name=='L1_Triggered_AV':
-            vec = vector[str]()
-        else: 
-            vec = vector[int]()
-
-        # Define the branch to be added to Differences_in_Pre_Pos tree
-        diffbranch = tree_Differences.Branch("Diff_PrePos_"+hist_name, vec)
-
-        # Fill the branch with the difference values between the Pre and Pos histograms 
-        for val in differences:
-            vec.clear()
-            vec.push_back(val)
-            diffbranch.Fill()
-
-        #Only write out the latest form of the outputFile
-        hfile.Write("Diff_PrePos_"+hist_name, TFile.kOverwrite)
-
-    else:
-        #If a crash has occured and one of the trees does not exist then  
-        #Close output TFile
-        hfile.Close()
-        return msg.info("One of Pre or Post tree's are missing so cannot compare.")
-
-    # Close output TFile
-    hfile.Close()
-
-    return msg.info("Added Diff_PrePos_{0} to {1}".format(hist_name, outputFile))
-
-
-def getPrePosdiff(outputFile):
-    '''
-       Call on getPrePosdif_branch to add Differences_in_Pre_Pos tree and all branches to outputFile 
-    '''
-
-    #create a dictionary that contains info on the branches : stored as vector or not 
-    isVector_Dict = {
-        'L1_Triggered_BP' : True,
-        'L1_Triggered_AV' : True,
-        'L1_Triggered_IDs' : True,
-        'HLT_Triggered_Names' : True,
-        'HLT_Triggered_IDs' : True,
-        'Run_Number' : False,
-        'Stream_Tag_Name' : False,
-        'Stream_Tag_Type' : False,
-        'Lvl1_ID' : False,
-        'Global_ID' : False,
-        'Lumiblock' : False,
-        'Node_ID' : False,
-        'SuperMasterKey' : False,
-        'HLTPrescaleKey' : False,
-        'HLT_Decision' : False,
-        'EventStatusNames' : False,
-    }
-
-    # Add the difference in the pre/pos histograms for each of the branches in the dictionary to the outputFile
-    for branch in isVector_Dict:
-        getPrePosdif_branch(outputFile, branch, isVector_Dict[branch])
-
-    return msg.info("Finished adding Differences_in_Pre_Pos tree to {0}".format(outputFile))
-
 
