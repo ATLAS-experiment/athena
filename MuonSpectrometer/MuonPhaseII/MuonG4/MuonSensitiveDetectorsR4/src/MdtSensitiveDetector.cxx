@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSensitiveDetectorsR4/Utils.h"
@@ -138,33 +138,29 @@ Identifier MdtSensitiveDetector::getIdentifier(const MuonGMR4::MdtReadoutElement
    const Amg::Transform3D localToGlobal{getTransform(touchHist, 0)};
    /// The Geant transform takes a hit global -> local --> inverse goes back to the global system
    /// Compose this one with the global to local transformation of the first tube in the layer -->
-   const Amg::Vector3D refTubePos = (readOutEle->globalToLocalTrans(m_gctx, readOutEle->measurementHash(1,1)) * localToGlobal).translation();
+   Amg::Vector3D refTubePos = (readOutEle->globalToLocalTrans(m_gctx, readOutEle->measurementHash(1,1)) * localToGlobal).translation();
    ATH_MSG_VERBOSE("Position of the tube wire w.r.t. the first tube in the multi layer "<<Amg::toString(refTubePos, 2));
    /// equilateral triangle
    static const double layerPitch = 1./ std::sin(60*Gaudi::Units::deg);
    const int layer = std::round(refTubePos.x() * layerPitch / readOutEle->tubePitch()) +1;
-   unsigned int tube = std::round(refTubePos.y() / readOutEle->tubePitch()) + 1;
-   tube = std::min(readOutEle->numTubesInLay(), tube);
-   /// It can happen that the tube is assigned to zero by numerical precision
-   /// Catch these cases if the layer is fine
-   if (tube == 0 && layer >= 1) {
-      const Amg::Vector3D tubeInLay = (readOutEle->globalToLocalTrans(m_gctx, readOutEle->measurementHash(layer,1)) * localToGlobal).translation();
-      if (tubeInLay.perp() <= readOutEle->tubeRadius()) tube = 1;
-   }
-   if (layer <= 0 || tube <= 0) {
+   if (layer <= 0) {
       ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" It seems that the tube position "
-                             <<Amg::toString(refTubePos, 2)<<", perp: "<<refTubePos.perp()
-                             <<" is outside of the volume envelope "
-                             <<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify())<<". "
-                             <<"Layer: "<<layer<<", tube: "<<tube<<","
-                             <<touchHist->GetVolume(2)->GetName());
+                            <<Amg::toString(refTubePos, 2)<<", perp: "<<refTubePos.perp()
+                            <<" is outside of the volume envelope "
+                            <<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify())<<". ");
       throw std::runtime_error("Tube hit in Nirvana");
    }
-   
-    const Amg::Transform3D closureCheck{readOutEle->globalToLocalTrans(m_gctx, 
-                                    readOutEle->measurementHash(layer, tube))*localToGlobal};
+   /// Update the reference tube position to be in the proper layer
+   refTubePos  = (readOutEle->globalToLocalTrans(m_gctx, readOutEle->measurementHash(layer,1)) * localToGlobal).translation();
+   const double tubePitches = refTubePos.y() / readOutEle->tubePitch();
+   unsigned int tube = std::round(tubePitches) + 1;
+   tube = std::max(1u, std::min(readOutEle->numTubesInLay(), tube));
+   /// It can happen that the tube is assigned to zero by numerical precision
+   /// Catch these cases if the layer is fine
+  const Amg::Transform3D closureCheck{readOutEle->globalToLocalTrans(m_gctx, 
+                                      readOutEle->measurementHash(layer, tube))*localToGlobal};
     if (!Amg::isIdentity(closureCheck)) {
-        ATH_MSG_VERBOSE("Correction needed "<<layer<<","<<tube<<" "<<Amg::toString(closureCheck));
+        ATH_MSG_WARNING("Correction needed "<<layer<<","<<tube<<" "<<Amg::toString(closureCheck));
         if (closureCheck.translation().y() > 0) ++tube;
         else --tube;
     }
@@ -178,8 +174,10 @@ Identifier MdtSensitiveDetector::getIdentifier(const MuonGMR4::MdtReadoutElement
                              <<Amg::toString(refTubePos, 2)<<", perp: "<<refTubePos.perp()
                              <<" is outside of the volume envelope "
                              <<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify())<<". "
-                             <<"Layer: "<<layer<<", tube: "<<tube
-                             <<Amg::toString(closureCheck));
+                             <<"Layer: "<<layer<<", tube: "<<tube<<" "
+                             <<Amg::toString(closureCheck)
+                             <<"tube volume : "<<touchHist->GetVolume(0)->GetName()
+                             <<" mdt chamber: "<<touchHist->GetVolume(2)->GetName());
             throw std::runtime_error("Tube hit in Nirvana");
         }
    }
