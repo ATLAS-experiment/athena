@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by prescaling
 # art-type: build
@@ -98,10 +98,11 @@ def generate_config_steps():
     ex = ExecStep.ExecStep('ConfigOnly')
     ex.config_only = True
     ex.type = 'athena'
-    ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+    ex.job_options = 'TriggerJobOpts/runHLT.py'
     ex.input = 'ttbar'
     ex.threads = 1
-    ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doWriteBS=False;doWriteRDOTrigger=False;"'
+    ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"']
+    ex.args = '--CA'
     ex.perfmon = False
     # Make a copy of the default prescales file
     copy_ps = CopyStep('CopyPrescales.Default', 'HLTPrescalesSet*.json', 'prescales_Default.json')
