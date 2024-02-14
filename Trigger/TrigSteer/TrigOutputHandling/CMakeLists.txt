@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigOutputHandling )
@@ -22,29 +22,25 @@ atlas_add_component( TrigOutputHandling
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
 
 # Tests:
 atlas_add_test( void_record_test
       SOURCES test/void_record_test.cxx
       LINK_LIBRARIES TrigOutputHandlingLib TestTools
       ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 300
+      POST_EXEC_SCRIPT noerror.sh
       )
 
 atlas_add_test( serial_deserial_test
       SOURCES test/serial_deserial_test.cxx
       LINK_LIBRARIES TrigOutputHandlingLib CxxUtils TestTools
       ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 300
+      POST_EXEC_SCRIPT noerror.sh
       )
 
 atlas_add_test( schema_evolution_test
       SOURCES test/schema_evolution_test.cxx
       LINK_LIBRARIES TrigOutputHandlingLib CxxUtils TestTools
       ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
-      POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 300
+      POST_EXEC_SCRIPT noerror.sh
       )
