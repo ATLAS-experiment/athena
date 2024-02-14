@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -57,7 +57,7 @@ public:
   ElementLink<xAOD::TrackParticleContainer> getTrackElemLink() const { return m_trackElemLink; }
   void addClusterMatch(eflowTrackClusterLink* clusterMatch) { m_clusterMatches.push_back(clusterMatch); }
   void addDeltaRPrime(const float& dRPrime){ m_deltaRPrimes.push_back(dRPrime);}
-  void addAlternativeClusterMatch(eflowTrackClusterLink* clusterMatch, std::string key) { m_alternativeClusterMatches[key].push_back(clusterMatch); }
+  void addAlternativeClusterMatch(eflowTrackClusterLink* clusterMatch, const std::string& key) { m_alternativeClusterMatches[key].push_back(clusterMatch); }
 
   eflowRingSubtractionManager& getCellSubtractionManager() { return m_ringSubtractionManager; }
 
@@ -103,13 +103,13 @@ public:
   int getLayerHED() const { return m_layerHED; }
   void setLayerHED(int layerHED) { m_layerHED = layerHED; }
   
-  std::vector<int> getLayerCellOrderVector() const { return m_layerCellOrderVector; }
+  const std::vector<int>& getLayerCellOrderVector() const { return m_layerCellOrderVector; }
   void setLayerCellOrderVector(const std::vector<int>& layerToStoreVector) { m_layerCellOrderVector = layerToStoreVector; }
   
-  std::vector<float> getRadiusCellOrderVector() const { return m_radiusCellOrderVector; }
+  const std::vector<float>& getRadiusCellOrderVector() const { return m_radiusCellOrderVector; }
   void setRadiusCellOrderVector(const std::vector<float>& radiusToStoreVector) { m_radiusCellOrderVector = radiusToStoreVector; }
   
-  std::vector<float> getAvgEDensityCellOrderVector() const { return m_avgEdensityCellOrderVector; }
+  const std::vector<float>& getAvgEDensityCellOrderVector() const { return m_avgEdensityCellOrderVector; }
   void setAvgEDensityCellOrderVector(const std::vector<float>& avgEdensityToStoreVector) { m_avgEdensityCellOrderVector = avgEdensityToStoreVector; }
   
   

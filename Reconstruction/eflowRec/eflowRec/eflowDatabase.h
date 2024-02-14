@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EFLOWDATABASE_H
@@ -40,8 +40,8 @@ class eflowDatabase  {
     else return 0.0;
   }
 
-  std::vector<double> getCellEtaWidth() {return m_cellEtaWidth;}
-  std::vector<double> getCellPhiWidth() {return m_cellPhiWidth;}
+  const std::vector<double>& getCellEtaWidth() {return m_cellEtaWidth;}
+  const std::vector<double>& getCellPhiWidth() {return m_cellPhiWidth;}
 
  private:
   
