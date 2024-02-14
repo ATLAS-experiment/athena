@@ -25,6 +25,7 @@ RpcStripAuxContainer_v1::RpcStripAuxContainer_v1()
     PRD_AUXVARIABLE(triggerInfo);
     PRD_AUXVARIABLE(ambiguityFlag);
     PRD_AUXVARIABLE(timeOverThreshold);
+    PRD_AUXVARIABLE(stripPosInStation);
 
     PRD_AUXVARIABLE(stripNumber);
     PRD_AUXVARIABLE(gasGap);

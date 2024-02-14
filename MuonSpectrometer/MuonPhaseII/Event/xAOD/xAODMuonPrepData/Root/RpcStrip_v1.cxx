@@ -14,6 +14,7 @@
 
 namespace {
     static const std::string preFixStr{"Rpc_"};
+    static const xAOD::PosAccessor<3> accStripPos{preFixStr + "stripPosInStation"};
 }
 namespace xAOD {
 
@@ -32,6 +33,13 @@ IdentifierHash RpcStrip_v1::measurementHash() const {
                                                    gasGap(),
                                                    doubletPhi(),
                                                    measuresPhi());
+}
+void RpcStrip_v1::setStripPosInStation(const MeasVector<3>& pos){
+    VectorMap<3> v{accStripPos(*this).data()};
+    v = pos;
+}
+ConstVectorMap<3> RpcStrip_v1::stripPosInStation() const {
+    return ConstVectorMap<3>{accStripPos(*this).data()};
 }
 
 }  // namespace xAOD
