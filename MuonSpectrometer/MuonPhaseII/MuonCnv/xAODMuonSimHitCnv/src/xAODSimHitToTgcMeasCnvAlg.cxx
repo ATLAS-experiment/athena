@@ -55,7 +55,7 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
         const Amg::Vector2D smearedEtaPos{CLHEP::RandGaussZiggurat::shoot(rndEngine, locSimHitPos.x(), etaUncert), 0.};
         const unsigned int etaStripNum = etaDesign.stripNumber(smearedEtaPos.block<2,1>(0,0));
         
-        ATH_MSG_ALWAYS("Convert simulated hit "<<m_idHelperSvc->toStringGasGap(hitId)<<" located in gas gap at "
+        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toStringGasGap(hitId)<<" located in gas gap at "
                         <<Amg::toString(locSimHitPos, 2)<<" eta strip number: "<<etaStripNum
                         <<" strip position "<<Amg::toString(etaDesign.center(etaStripNum).value_or(Amg::Vector2D::Zero()), 2));
         
