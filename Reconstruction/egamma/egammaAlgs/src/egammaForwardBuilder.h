@@ -33,6 +33,7 @@
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
 
 #include "xAODEgamma/Egamma.h"
@@ -78,7 +79,10 @@ private:
   ) const;
 
   /** @brief Remove cells that are too far from the center of mass. */
-  void cookieCut(xAOD::CaloCluster& cluster) const;
+  void cookieCut(
+    xAOD::CaloCluster& cluster,
+    const CaloDetDescrManager& mgr
+  ) const;
 
   /** @brief Tool to perform object quality. */
   ToolHandle<IegammaOQFlagsBuilder> m_objectQualityTool{
@@ -110,6 +114,14 @@ private:
     "TopoClusterName",
     "",
     "Name of the input cluster collection"
+  };
+
+  /** @brief Calorimeter description. */
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey {
+    this,
+    "CaloDetDescrManager",
+    "CaloDetDescrManager",
+    "SG Key for CaloDetDescrManager in the Condition Store"
   };
 
   /** @brief Output electron container. */
