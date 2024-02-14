@@ -154,7 +154,8 @@ for o, a in opts:
 
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobPython.TileCalibTools import MAXRUN, MAXLBK
-from TileCalibBlobObjs.Classes import TileCalibUtils
+from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibType
+
 
 from TileCalibBlobPython.TileCalibLogger import getLogger
 log = getLogger("ReadCalibFrCool")
@@ -473,6 +474,7 @@ for iovs in iovList:
                     good+=1
                     if blob:
                         print ("%s  Blob type: %d  Version: %d  Nchannels: %d  Ngains: %d  Nval: %d" % (modName, flt.getObjType(), flt.getObjVersion(), flt.getNChans(), flt.getNGains(), flt.getObjSizeUint32()))
+                    typeName = TileCalibType.getClassName(flt.getObjType())[-3:]
                     mval0 = 0
                     mval = flt.getObjSizeUint32()
                     if nval<0 and -nval<=mval:
@@ -498,7 +500,16 @@ for iovs in iovList:
                                     or ("%sch%ig%i"% (modName,chn,adc)) in keep or ("%sch%ig%i"% (modSpec,chn,adc)) in keep or ("%sch%ig%i"% (modName[:3],chn,adc)) in keep or ("%sch%ig%i"% (modName[:2],chn,adc)) in keep:
                                     msg += "   keep   "
                                 else:
-                                    msg += "  %f" % flt.getData(chn, adc, val)
+                                    if typeName=='Int':
+                                        v = flt.getData(chn, adc, val)
+                                        if v>0xff:
+                                            msg += "  0x%x" % v
+                                        else:
+                                            msg += "  %3d" % v
+                                    elif typeName=='Bch':
+                                        msg += "  %d" % flt.getData(chn, adc, val)
+                                    else:
+                                        msg += "  %f" % flt.getData(chn, adc, val)
                             print (pref+msg)
             except Exception as e:
                 print (e)
