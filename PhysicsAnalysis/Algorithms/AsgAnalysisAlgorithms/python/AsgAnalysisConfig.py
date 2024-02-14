@@ -389,9 +389,9 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
-    def __init__ (self, name):
+    def __init__ (self, algoName):
         super(PerEventSFBlock, self).__init__()
-        self.algName = name
+        self.algoName = algoName
         self.addOption('particles', '', type=str)
         self.addOption('objectSF', '', type=str)
         self.addOption('eventSF', '', type=str)
@@ -400,7 +400,7 @@ class PerEventSFBlock (ConfigBlock):
         if config.dataType() is DataType.Data:
             return
         particles, selection = config.readNameAndSelection(self.particles)
-        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algName)
+        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algoName)
         alg.particles = particles
         alg.preselection = selection
         alg.scaleFactorInputDecoration = self.objectSF
