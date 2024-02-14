@@ -33,9 +33,13 @@ def AtlasFullLinearizedTrackFactoryCfg(flags, name='AtlasFullLinearizedTrkFactor
 
 def DetAnnealingMakerCfg(flags, name='DetAnnealingMaker', **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("SetOfTemperatures", [1.0])
+    kwargs.setdefault("SetOfTemperatures", [ 64., 16., 4., 2., 1.5, 1. ])
     acc.setPrivateTools(CompFactory.Trk.DetAnnealingMaker(name, **kwargs))
     return acc
+
+def SecVtxDetAnnealingMakerCfg(flags, name='SecVtxDetAnnealingMaker', **kwargs):
+    kwargs.setdefault("SetOfTemperatures", [ 1.0 ])
+    return DetAnnealingMakerCfg(flags, name, **kwargs)
 
 def TauDetAnnealingMakerCfg(flags, name='tauRec_TauDetAnnealingMaker', **kwargs):
     kwargs.setdefault("SetOfTemperatures", [ 64, 32, 16, 8, 4, 2, 1 ])
