@@ -31,10 +31,6 @@ atlas_add_test( CollectionMerger_test
    POST_EXEC_SCRIPT nopost.sh
    ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
-atlas_add_test(collection_merger_helpers_tests
-               SCRIPT python/test/test_collection_merger_helpers.py
-               POST_EXEC_SCRIPT nopost.sh)
-
 atlas_add_test(collection_merger_helpers_CA_tests
                SCRIPT python/test/test_CollectionMergerConfig.py
                POST_EXEC_SCRIPT nopost.sh)

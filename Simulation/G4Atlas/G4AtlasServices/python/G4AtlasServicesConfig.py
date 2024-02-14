@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -30,8 +30,8 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
     if flags.Detector.GeometryTRT:
         PhysOptionList +=[ result.popToolsAndMerge(TRTPhysicsToolCfg(flags)) ]
     if flags.Detector.GeometryLucid or flags.Detector.GeometryAFP or flags.Detector.GeometryZDC:
-        LucidPhysicsTool = CompFactory.LucidPhysicsTool
-        PhysOptionList +=[LucidPhysicsTool("LucidPhysicsTool")]
+        from LUCID_OpProcess.LUCID_OpProcessConfig import LucidPhysicsToolCfg
+        PhysOptionList +=[result.popToolsAndMerge(LucidPhysicsToolCfg(flags))]
     kwargs.setdefault("PhysOption", PhysOptionList)
     PhysDecaysList = []
     kwargs.setdefault("PhysicsDecay", PhysDecaysList)
