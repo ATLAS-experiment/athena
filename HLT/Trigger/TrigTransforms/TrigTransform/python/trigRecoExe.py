@@ -507,5 +507,3 @@ class trigRecoExecutor(athenaExecutor):
         # Do debug stream postRun step
         dbgStream.dbgPostRun(outputBSFile, fileNameDbg[0], self.conf.argdict)
 
-        # Call Pre Pos histogram differenece function
-        dbgStream.getPrePosdiff(fileNameDbg[0])

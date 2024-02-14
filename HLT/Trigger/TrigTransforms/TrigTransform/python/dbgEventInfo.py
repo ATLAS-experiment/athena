@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @brief: This is the dbgEventInfo class for the Debug Stream event analysis
 
@@ -169,28 +169,33 @@ class dbgEventInfo:
 
             return statusList
 
-        # Check second word of first status element with Full Event specific status
-        statusList = checkBits(event.status()[0], 16, 32, self.EventSpecificStatus)
+        # Check if the number of status words is >= 1
+        if event.status():
+            # Check second word of first status element with Full Event specific status
+            statusList = checkBits(event.status()[0], 16, 32, self.EventSpecificStatus)
         
-        # Check if PSC_PROBLEM bit was on and retrieve Online Error Codes
-        # stored in following event status words
-        if getBit(event.status()[0], 28):
-            statusLen = len(event.status())
-            if statusLen > 1:
-                # Skip first event - already analyzed
-                for i in range(1, statusLen):
-                    #To protect against the repetition of the first event status element
-                    #If the integer value of the current event status element is greater than the length of the onlineErrorCode list
-                    #then skip over this element to the next
-                    if int(event.status()[i]) >= len(self.onlineErrorCode):
-                         continue 
-                    statusList.append(self.onlineErrorCode[int(event.status()[i])])
-            else:
-                msg.warn("Cannot find additional words for PSC_PROBLEM")
+            # Check if PSC_PROBLEM bit was on and retrieve Online Error Codes
+            # stored in following event status words
+            if getBit(event.status()[0], 28):
+                statusLen = len(event.status())
+                if statusLen > 1:
+                    # Skip first event - already analyzed
+                    for i in range(1, statusLen):
+                        #To protect against the repetition of the first event status element
+                        #If the integer value of the current event status element is greater than the length of the onlineErrorCode list
+                        #then skip over this element to the next
+                        if int(event.status()[i]) >= len(self.onlineErrorCode):
+                            continue 
+                        statusList.append(self.onlineErrorCode[int(event.status()[i])])
+                else:
+                    msg.warn("Cannot find additional words for PSC_PROBLEM")
         
+        #If the number of status words is 0, set the statusList to an empty list
+        else:
+            statusList = []
         
         #ensure EventStatusNames are None if statusList is empty
-        if len(statusList) != 0:  
+        if statusList:  
            self.EventStatusNames = ','.join(str(name) for name in statusList)
 
         msg.info('Event Status :%s', self.EventStatusNames)
