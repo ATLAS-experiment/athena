@@ -67,7 +67,7 @@ if [ $status -eq 0 ]; then
         --PileUpPresampling True \
         --inputRDOFile backup_${DigiOutFileName} \
         --outputRDO_MRGFile ${DigiOutFileName} \
-        --postExec "default:PyJobTransforms.UseFrontier" "all:PyJobTransforms.SortInput"
+        --postInclude "default:PyJobTransforms.UseFrontier" "all:PyJobTransforms.SortInput"
     rc1=$?
     rm backup_${DigiOutFileName}
     status=$rc1
