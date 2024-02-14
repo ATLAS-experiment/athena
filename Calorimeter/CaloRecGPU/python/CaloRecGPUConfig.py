@@ -15,7 +15,7 @@ def MatchingOptions(min_similarity = 0.50, terminal_weight = 250., grow_weight =
 def BasicConstantDataExporterToolCfg(flags, name = "ConstantDataExporter"):
     result=ComponentAccumulator()
     ConstantDataExporter = CompFactory.BasicConstantGPUDataExporter(name)
-    ConstantDataExporter.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    ConstantDataExporter.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     ConstantDataExporter.TimeFileOutput = "ConstantDataExporterTimes.txt"
     result.setPrivateTools(ConstantDataExporter)
     return result
@@ -23,23 +23,23 @@ def BasicConstantDataExporterToolCfg(flags, name = "ConstantDataExporter"):
 def BasicEventDataExporterToolCfg(flags, name = "EventDataExporter"):
     result=ComponentAccumulator()
     EventDataExporter = CompFactory.BasicEventDataGPUExporter(name)
-    EventDataExporter.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    EventDataExporter.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     EventDataExporter.TimeFileOutput = "EventDataExporterTimes.txt"
-    EventDataExporter.CellsName = flags.CaloRecGPU.CellsName
-    if flags.CaloRecGPU.FillMissingCells:
-        EventDataExporter.MissingCellsToFill = flags.CaloRecGPU.MissingCellsToFill
+    EventDataExporter.CellsName = flags.CaloRecGPU.ActiveConfig.CellsName
+    if flags.CaloRecGPU.ActiveConfig.FillMissingCells:
+        EventDataExporter.MissingCellsToFill = flags.CaloRecGPU.ActiveConfig.MissingCellsToFill
     result.setPrivateTools(EventDataExporter)
     return result
 
 def BasicAthenaClusterImporterToolCfg(flags, name = "AthenaClusterImporter"):
     result=ComponentAccumulator()
     AthenaClusterImporter = CompFactory.BasicGPUToAthenaImporter(name)
-    AthenaClusterImporter.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    AthenaClusterImporter.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     AthenaClusterImporter.TimeFileOutput = "ClusterImporterTimes.txt"
-    AthenaClusterImporter.CellsName = flags.CaloRecGPU.CellsName
-    AthenaClusterImporter.ClusterSize = flags.CaloRecGPU.ClusterSize
-    if flags.CaloRecGPU.FillMissingCells:
-        AthenaClusterImporter.MissingCellsToFill = flags.CaloRecGPU.MissingCellsToFill
+    AthenaClusterImporter.CellsName = flags.CaloRecGPU.ActiveConfig.CellsName
+    AthenaClusterImporter.ClusterSize = flags.CaloRecGPU.ActiveConfig.ClusterSize
+    if flags.CaloRecGPU.ActiveConfig.FillMissingCells:
+        AthenaClusterImporter.MissingCellsToFill = flags.CaloRecGPU.ActiveConfig.MissingCellsToFill
     result.setPrivateTools(AthenaClusterImporter)
     return result
 
@@ -55,7 +55,7 @@ def CPUOutputToolCfg(flags, name = "CPUOutput",  folder = "output", prefix = "",
     CPUOutput.SavePath = folder
     CPUOutput.FilePrefix = prefix
     CPUOutput.FileSuffix = suffix
-    CPUOutput.CellsName = flags.CaloRecGPU.CellsName
+    CPUOutput.CellsName = flags.CaloRecGPU.ActiveConfig.CellsName
     result.setPrivateTools(CPUOutput)
     return result
 
@@ -74,14 +74,14 @@ def GPUOutputToolCfg(flags, name = "GPUOutput",  folder = "output", prefix = "",
 def ClusterInfoCalcToolCfg(flags, name = "GPUClusterInfoCalculator", do_cut = True):
     result=ComponentAccumulator()
     CalcTool = CompFactory.BasicGPUClusterInfoCalculator(name)
-    CalcTool.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    CalcTool.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     CalcTool.TimeFileOutput = name + "Times.txt"
     if do_cut:
-        if not flags.hasFlag('CaloRecGPU.CutClustersInAbsEt') :
-            CalcTool.ClusterCutsInAbsEt = flags.CaloRecGPU.TopoClusterSeedCutsInAbsE
+        if not flags.hasFlag('CaloRecGPU.ActiveConfig.CutClustersInAbsEt') :
+            CalcTool.ClusterCutsInAbsEt = flags.CaloRecGPU.ActiveConfig.TopoClusterSeedCutsInAbsE
         else:
-            CalcTool.ClusterCutsInAbsEt = flags.CaloRecGPU.CutClustersInAbsEt
-        CalcTool.ClusterEtorAbsEtCut = flags.CaloRecGPU.ClusterEtorAbsEtCut
+            CalcTool.ClusterCutsInAbsEt = flags.CaloRecGPU.ActiveConfig.CutClustersInAbsEt
+        CalcTool.ClusterEtorAbsEtCut = flags.CaloRecGPU.ActiveConfig.ClusterEtorAbsEtCut
     else:
         CalcTool.ClusterCutsInAbsEt = True
         CalcTool.ClusterEtorAbsEtCut = -1
@@ -95,37 +95,37 @@ def TopoAutomatonClusteringToolCfg(flags, name = "TAClusterMaker"):
     # maker tools
     TAClusterMaker = CompFactory.TopoAutomatonClustering(name)
 
-    TAClusterMaker.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    TAClusterMaker.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     TAClusterMaker.TimeFileOutput = "TopoAutomatonClusteringTimes.txt"
 
-    TAClusterMaker.CalorimeterNames= flags.CaloRecGPU.CalorimeterNames
+    TAClusterMaker.CalorimeterNames= flags.CaloRecGPU.ActiveConfig.CalorimeterNames
 
-    TAClusterMaker.SeedSamplingNames = flags.CaloRecGPU.TopoClusterSeedSamplingNames
+    TAClusterMaker.SeedSamplingNames = flags.CaloRecGPU.ActiveConfig.TopoClusterSeedSamplingNames
 
-    TAClusterMaker.CellThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRCellThreshold
-    TAClusterMaker.NeighborThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRGrowThreshold
-    TAClusterMaker.SeedThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRSeedThreshold
+    TAClusterMaker.CellThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRCellThreshold
+    TAClusterMaker.NeighborThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRGrowThreshold
+    TAClusterMaker.SeedThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRSeedThreshold
 
-    TAClusterMaker.SeedCutsInAbsE = flags.CaloRecGPU.TopoClusterSeedCutsInAbsE
-    TAClusterMaker.NeighborCutsInAbsE = flags.CaloRecGPU.TopoClusterNeighborCutsInAbsE
-    TAClusterMaker.CellCutsInAbsE = flags.CaloRecGPU.TopoClusterCellCutsInAbsE
+    TAClusterMaker.SeedCutsInAbsE = flags.CaloRecGPU.ActiveConfig.TopoClusterSeedCutsInAbsE
+    TAClusterMaker.NeighborCutsInAbsE = flags.CaloRecGPU.ActiveConfig.TopoClusterNeighborCutsInAbsE
+    TAClusterMaker.CellCutsInAbsE = flags.CaloRecGPU.ActiveConfig.TopoClusterCellCutsInAbsE
 
-    TAClusterMaker.TwoGaussianNoise = flags.CaloRecGPU.TwoGaussianNoise
+    TAClusterMaker.TwoGaussianNoise = flags.CaloRecGPU.ActiveConfig.TwoGaussianNoise
 
 
-    TAClusterMaker.SeedCutsInT = flags.CaloRecGPU.SeedCutsInT
-    TAClusterMaker.CutOOTseed = flags.CaloRecGPU.CutOOTseed
-    TAClusterMaker.UseTimeCutUpperLimit = flags.CaloRecGPU.UseTimeCutUpperLimit
-    TAClusterMaker.TimeCutUpperLimit = flags.CaloRecGPU.TimeCutUpperLimit
-    TAClusterMaker.SeedThresholdOnTAbs = flags.CaloRecGPU.SeedThresholdOnTAbs
-    TAClusterMaker.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.TreatL1PredictedCellsAsGood
+    TAClusterMaker.SeedCutsInT = flags.CaloRecGPU.ActiveConfig.SeedCutsInT
+    TAClusterMaker.CutOOTseed = flags.CaloRecGPU.ActiveConfig.CutOOTseed
+    TAClusterMaker.UseTimeCutUpperLimit = flags.CaloRecGPU.ActiveConfig.UseTimeCutUpperLimit
+    TAClusterMaker.TimeCutUpperLimit = flags.CaloRecGPU.ActiveConfig.TimeCutUpperLimit
+    TAClusterMaker.SeedThresholdOnTAbs = flags.CaloRecGPU.ActiveConfig.SeedThresholdOnTAbs
+    TAClusterMaker.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.ActiveConfig.TreatL1PredictedCellsAsGood
 
-    TAClusterMaker.XTalkEM2 = flags.CaloRecGPU.UseEM2CrossTalk
-    TAClusterMaker.XTalkDeltaT = flags.CaloRecGPU.CrossTalkDeltaT
+    TAClusterMaker.XTalkEM2 = flags.CaloRecGPU.ActiveConfig.UseEM2CrossTalk
+    TAClusterMaker.XTalkDeltaT = flags.CaloRecGPU.ActiveConfig.CrossTalkDeltaT
 
-    TAClusterMaker.NeighborOption = flags.CaloRecGPU.NeighborOption
-    TAClusterMaker.RestrictHECIWandFCalNeighbors  = flags.CaloRecGPU.RestrictHECIWandFCalNeighbors
-    TAClusterMaker.RestrictPSNeighbors  = flags.CaloRecGPU.RestrictPSNeighbors
+    TAClusterMaker.NeighborOption = flags.CaloRecGPU.ActiveConfig.NeighborOption
+    TAClusterMaker.RestrictHECIWandFCalNeighbors  = flags.CaloRecGPU.ActiveConfig.RestrictHECIWandFCalNeighbors
+    TAClusterMaker.RestrictPSNeighbors  = flags.CaloRecGPU.ActiveConfig.RestrictPSNeighbors
 
     result.setPrivateTools(TAClusterMaker)
     return result
@@ -135,34 +135,34 @@ def DefaultTopologicalClusteringToolCfg(flags, name = "TopoMaker"):
     # maker tools
     TopoMaker = CompFactory.CaloTopoClusterMaker(name)
 
-    TopoMaker.CellsName = flags.CaloRecGPU.CellsName
-    TopoMaker.CalorimeterNames= flags.CaloRecGPU.CalorimeterNames
-    TopoMaker.SeedSamplingNames = flags.CaloRecGPU.TopoClusterSeedSamplingNames
-    TopoMaker.NeighborOption = flags.CaloRecGPU.NeighborOption
-    TopoMaker.RestrictHECIWandFCalNeighbors  = flags.CaloRecGPU.RestrictHECIWandFCalNeighbors
-    TopoMaker.RestrictPSNeighbors  = flags.CaloRecGPU.RestrictPSNeighbors
-    TopoMaker.CellThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRCellThreshold
-    TopoMaker.NeighborThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRGrowThreshold
-    TopoMaker.SeedThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRSeedThreshold
+    TopoMaker.CellsName = flags.CaloRecGPU.ActiveConfig.CellsName
+    TopoMaker.CalorimeterNames= flags.CaloRecGPU.ActiveConfig.CalorimeterNames
+    TopoMaker.SeedSamplingNames = flags.CaloRecGPU.ActiveConfig.TopoClusterSeedSamplingNames
+    TopoMaker.NeighborOption = flags.CaloRecGPU.ActiveConfig.NeighborOption
+    TopoMaker.RestrictHECIWandFCalNeighbors  = flags.CaloRecGPU.ActiveConfig.RestrictHECIWandFCalNeighbors
+    TopoMaker.RestrictPSNeighbors  = flags.CaloRecGPU.ActiveConfig.RestrictPSNeighbors
+    TopoMaker.CellThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRCellThreshold
+    TopoMaker.NeighborThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRGrowThreshold
+    TopoMaker.SeedThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRSeedThreshold
 
-    TopoMaker.SeedCutsInT = flags.CaloRecGPU.SeedCutsInT
-    TopoMaker.CutOOTseed = flags.CaloRecGPU.CutOOTseed
-    TopoMaker.UseTimeCutUpperLimit = flags.CaloRecGPU.UseTimeCutUpperLimit
-    TopoMaker.TimeCutUpperLimit = flags.CaloRecGPU.TimeCutUpperLimit
+    TopoMaker.SeedCutsInT = flags.CaloRecGPU.ActiveConfig.SeedCutsInT
+    TopoMaker.CutOOTseed = flags.CaloRecGPU.ActiveConfig.CutOOTseed
+    TopoMaker.UseTimeCutUpperLimit = flags.CaloRecGPU.ActiveConfig.UseTimeCutUpperLimit
+    TopoMaker.TimeCutUpperLimit = flags.CaloRecGPU.ActiveConfig.TimeCutUpperLimit
 
-    TopoMaker.ClusterEtorAbsEtCut  = flags.CaloRecGPU.ClusterEtorAbsEtCut
-    TopoMaker.TwoGaussianNoise = flags.CaloRecGPU.TwoGaussianNoise
-    TopoMaker.SeedCutsInAbsE = flags.CaloRecGPU.TopoClusterSeedCutsInAbsE
-    TopoMaker.NeighborCutsInAbsE = flags.CaloRecGPU.TopoClusterNeighborCutsInAbsE
-    TopoMaker.CellCutsInAbsE = flags.CaloRecGPU.TopoClusterCellCutsInAbsE
-    TopoMaker.SeedThresholdOnTAbs = flags.CaloRecGPU.SeedThresholdOnTAbs
+    TopoMaker.ClusterEtorAbsEtCut  = flags.CaloRecGPU.ActiveConfig.ClusterEtorAbsEtCut
+    TopoMaker.TwoGaussianNoise = flags.CaloRecGPU.ActiveConfig.TwoGaussianNoise
+    TopoMaker.SeedCutsInAbsE = flags.CaloRecGPU.ActiveConfig.TopoClusterSeedCutsInAbsE
+    TopoMaker.NeighborCutsInAbsE = flags.CaloRecGPU.ActiveConfig.TopoClusterNeighborCutsInAbsE
+    TopoMaker.CellCutsInAbsE = flags.CaloRecGPU.ActiveConfig.TopoClusterCellCutsInAbsE
+    TopoMaker.SeedThresholdOnTAbs = flags.CaloRecGPU.ActiveConfig.SeedThresholdOnTAbs
 
-    TopoMaker.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.TreatL1PredictedCellsAsGood
+    TopoMaker.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.ActiveConfig.TreatL1PredictedCellsAsGood
 
-    TopoMaker.UseGPUCriteria = not flags.CaloRecGPU.UseOriginalCriteria
+    TopoMaker.UseGPUCriteria = not flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria
 
-    TopoMaker.XTalkEM2 = flags.CaloRecGPU.UseEM2CrossTalk
-    TopoMaker.XTalkDeltaT = flags.CaloRecGPU.CrossTalkDeltaT
+    TopoMaker.XTalkEM2 = flags.CaloRecGPU.ActiveConfig.UseEM2CrossTalk
+    TopoMaker.XTalkDeltaT = flags.CaloRecGPU.ActiveConfig.CrossTalkDeltaT
 
     result.setPrivateTools(TopoMaker)
     return result
@@ -172,22 +172,22 @@ def TopoAutomatonSplitterToolCfg(flags, name = "TopoAutomatonSplitter"):
     # maker tools
     Splitter = CompFactory.TopoAutomatonSplitting(name)
 
-    Splitter.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    Splitter.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     Splitter.TimeFileOutput = "ClusterSplitterTimes.txt"
 
-    Splitter.NumberOfCellsCut = flags.CaloRecGPU.SplitterNumberOfCellsCut
-    Splitter.EnergyCut = flags.CaloRecGPU.SplitterEnergyCut
-    Splitter.SamplingNames = flags.CaloRecGPU.SplitterSamplingNames
-    Splitter.SecondarySamplingNames = flags.CaloRecGPU.SplitterSecondarySamplingNames
-    Splitter.ShareBorderCells = flags.CaloRecGPU.SplitterShareBorderCells
-    Splitter.EMShowerScale = flags.CaloRecGPU.EMShowerScale
-    Splitter.WeightingOfNegClusters = flags.CaloRecGPU.SplitterUseNegativeClusters
+    Splitter.NumberOfCellsCut = flags.CaloRecGPU.ActiveConfig.SplitterNumberOfCellsCut
+    Splitter.EnergyCut = flags.CaloRecGPU.ActiveConfig.SplitterEnergyCut
+    Splitter.SamplingNames = flags.CaloRecGPU.ActiveConfig.SplitterSamplingNames
+    Splitter.SecondarySamplingNames = flags.CaloRecGPU.ActiveConfig.SplitterSecondarySamplingNames
+    Splitter.ShareBorderCells = flags.CaloRecGPU.ActiveConfig.SplitterShareBorderCells
+    Splitter.EMShowerScale = flags.CaloRecGPU.ActiveConfig.EMShowerScale
+    Splitter.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.SplitterUseNegativeClusters
 
-    Splitter.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.TreatL1PredictedCellsAsGood
+    Splitter.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.ActiveConfig.TreatL1PredictedCellsAsGood
 
-    Splitter.NeighborOption = flags.CaloRecGPU.NeighborOption
-    Splitter.RestrictHECIWandFCalNeighbors  = flags.CaloRecGPU.RestrictHECIWandFCalNeighbors
-    Splitter.RestrictPSNeighbors = flags.CaloRecGPU.RestrictPSNeighbors and flags.CaloRecGPU.AlsoRestrictPSOnGPUSplitter
+    Splitter.NeighborOption = flags.CaloRecGPU.ActiveConfig.NeighborOption
+    Splitter.RestrictHECIWandFCalNeighbors  = flags.CaloRecGPU.ActiveConfig.RestrictHECIWandFCalNeighbors
+    Splitter.RestrictPSNeighbors = flags.CaloRecGPU.ActiveConfig.RestrictPSNeighbors and flags.CaloRecGPU.ActiveConfig.AlsoRestrictPSOnGPUSplitter
     #Since the CPU version does not restrict this!
 
     result.setPrivateTools(Splitter)
@@ -198,18 +198,18 @@ def GPUClusterSplitterToolCfg(flags, name = "GPUClusterSplitter"):
     # maker tools
     Splitter = CompFactory.CaloTopoClusterSplitterGPU(name)
 
-    Splitter.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    Splitter.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     Splitter.TimeFileOutput = "ClusterSplitterTimes.txt"
 
-    Splitter.NumberOfCellsCut = flags.CaloRecGPU.SplitterNumberOfCellsCut
-    Splitter.EnergyCut = flags.CaloRecGPU.SplitterEnergyCut
-    Splitter.SamplingNames = flags.CaloRecGPU.SplitterSamplingNames
-    Splitter.SecondarySamplingNames = flags.CaloRecGPU.SplitterSecondarySamplingNames
-    Splitter.ShareBorderCells = flags.CaloRecGPU.SplitterShareBorderCells
-    Splitter.EMShowerScale = flags.CaloRecGPU.EMShowerScale
-    Splitter.WeightingOfNegClusters = flags.CaloRecGPU.SplitterUseNegativeClusters
+    Splitter.NumberOfCellsCut = flags.CaloRecGPU.ActiveConfig.SplitterNumberOfCellsCut
+    Splitter.EnergyCut = flags.CaloRecGPU.ActiveConfig.SplitterEnergyCut
+    Splitter.SamplingNames = flags.CaloRecGPU.ActiveConfig.SplitterSamplingNames
+    Splitter.SecondarySamplingNames = flags.CaloRecGPU.ActiveConfig.SplitterSecondarySamplingNames
+    Splitter.ShareBorderCells = flags.CaloRecGPU.ActiveConfig.SplitterShareBorderCells
+    Splitter.EMShowerScale = flags.CaloRecGPU.ActiveConfig.EMShowerScale
+    Splitter.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.SplitterUseNegativeClusters
 
-    Splitter.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.TreatL1PredictedCellsAsGood
+    Splitter.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.ActiveConfig.TreatL1PredictedCellsAsGood
 
     result.setPrivateTools(Splitter)
     return result
@@ -220,23 +220,23 @@ def DefaultClusterSplittingToolCfg(flags, name = "TopoSplitter"):
     TopoSplitter = CompFactory.CaloTopoClusterSplitter(name)
 
 
-    TopoSplitter.NeighborOption = flags.CaloRecGPU.NeighborOption
-    TopoSplitter.RestrictHECIWandFCalNeighbors  = flags.CaloRecGPU.RestrictHECIWandFCalNeighbors
+    TopoSplitter.NeighborOption = flags.CaloRecGPU.ActiveConfig.NeighborOption
+    TopoSplitter.RestrictHECIWandFCalNeighbors  = flags.CaloRecGPU.ActiveConfig.RestrictHECIWandFCalNeighbors
 
-    TopoSplitter.NumberOfCellsCut = flags.CaloRecGPU.SplitterNumberOfCellsCut
-    TopoSplitter.EnergyCut = flags.CaloRecGPU.SplitterEnergyCut
+    TopoSplitter.NumberOfCellsCut = flags.CaloRecGPU.ActiveConfig.SplitterNumberOfCellsCut
+    TopoSplitter.EnergyCut = flags.CaloRecGPU.ActiveConfig.SplitterEnergyCut
 
-    TopoSplitter.SamplingNames = flags.CaloRecGPU.SplitterSamplingNames
-    TopoSplitter.SecondarySamplingNames = flags.CaloRecGPU.SplitterSecondarySamplingNames
+    TopoSplitter.SamplingNames = flags.CaloRecGPU.ActiveConfig.SplitterSamplingNames
+    TopoSplitter.SecondarySamplingNames = flags.CaloRecGPU.ActiveConfig.SplitterSecondarySamplingNames
 
-    TopoSplitter.ShareBorderCells = flags.CaloRecGPU.SplitterShareBorderCells
-    TopoSplitter.EMShowerScale = flags.CaloRecGPU.EMShowerScale
+    TopoSplitter.ShareBorderCells = flags.CaloRecGPU.ActiveConfig.SplitterShareBorderCells
+    TopoSplitter.EMShowerScale = flags.CaloRecGPU.ActiveConfig.EMShowerScale
 
-    TopoSplitter.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.TreatL1PredictedCellsAsGood
+    TopoSplitter.TreatL1PredictedCellsAsGood = flags.CaloRecGPU.ActiveConfig.TreatL1PredictedCellsAsGood
 
-    TopoSplitter.WeightingOfNegClusters = flags.CaloRecGPU.SplitterUseNegativeClusters
+    TopoSplitter.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.SplitterUseNegativeClusters
 
-    TopoSplitter.UseGPUCriteria = not flags.CaloRecGPU.UseOriginalCriteria
+    TopoSplitter.UseGPUCriteria = not flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria
 
     result.setPrivateTools(TopoSplitter)
     return result
@@ -246,21 +246,21 @@ def GPUClusterMomentsCalculatorToolCfg(flags, name = "GPUTopoMoments"):
     result=ComponentAccumulator()
     GPUTopoMoments = CompFactory.GPUClusterInfoAndMomentsCalculator(name)
 
-    GPUTopoMoments.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    GPUTopoMoments.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
 
-    if flags.CaloRecGPU.UseAbsEnergyMoments is None:
-        GPUTopoMoments.WeightingOfNegClusters = flags.CaloRecGPU.TopoClusterSeedCutsInAbsE
+    if flags.CaloRecGPU.ActiveConfig.UseAbsEnergyMoments is None:
+        GPUTopoMoments.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.TopoClusterSeedCutsInAbsE
     else:
-        GPUTopoMoments.WeightingOfNegClusters = flags.CaloRecGPU.UseAbsEnergyMoments
+        GPUTopoMoments.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.UseAbsEnergyMoments
 
-    GPUTopoMoments.MaxAxisAngle = flags.CaloRecGPU.MomentsMaxAxisAngle
+    GPUTopoMoments.MaxAxisAngle = flags.CaloRecGPU.ActiveConfig.MomentsMaxAxisAngle
 
-    GPUTopoMoments.TwoGaussianNoise = flags.CaloRecGPU.TwoGaussianNoise
+    GPUTopoMoments.TwoGaussianNoise = flags.CaloRecGPU.ActiveConfig.TwoGaussianNoise
 
-    GPUTopoMoments.MinBadLArQuality = flags.CaloRecGPU.MomentsMinBadLArQuality
+    GPUTopoMoments.MinBadLArQuality = flags.CaloRecGPU.ActiveConfig.MomentsMinBadLArQuality
 
-    GPUTopoMoments.MinRLateral = flags.CaloRecGPU.MomentsMinRLateral
-    GPUTopoMoments.MinLLongitudinal = flags.CaloRecGPU.MomentsMinLLongitudinal
+    GPUTopoMoments.MinRLateral = flags.CaloRecGPU.ActiveConfig.MomentsMinRLateral
+    GPUTopoMoments.MinLLongitudinal = flags.CaloRecGPU.ActiveConfig.MomentsMinLLongitudinal
 
     result.setPrivateTools(GPUTopoMoments)
     return result
@@ -269,21 +269,21 @@ def DefaultClusterMomentsCalculatorToolCfg(flags, name = "TopoMoments"):
     result=ComponentAccumulator()
     TopoMoments = CompFactory.CaloClusterMomentsMaker(name)
 
-    if flags.CaloRecGPU.UseAbsEnergyMoments is None:
-        TopoMoments.WeightingOfNegClusters = flags.CaloRecGPU.TopoClusterSeedCutsInAbsE
+    if flags.CaloRecGPU.ActiveConfig.UseAbsEnergyMoments is None:
+        TopoMoments.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.TopoClusterSeedCutsInAbsE
     else:
-        TopoMoments.WeightingOfNegClusters = flags.CaloRecGPU.UseAbsEnergyMoments
+        TopoMoments.WeightingOfNegClusters = flags.CaloRecGPU.ActiveConfig.UseAbsEnergyMoments
 
-    TopoMoments.MaxAxisAngle = flags.CaloRecGPU.MomentsMaxAxisAngle
+    TopoMoments.MaxAxisAngle = flags.CaloRecGPU.ActiveConfig.MomentsMaxAxisAngle
 
-    TopoMoments.TwoGaussianNoise = flags.CaloRecGPU.TwoGaussianNoise
+    TopoMoments.TwoGaussianNoise = flags.CaloRecGPU.ActiveConfig.TwoGaussianNoise
 
-    TopoMoments.MinBadLArQuality = flags.CaloRecGPU.MomentsMinBadLArQuality
+    TopoMoments.MinBadLArQuality = flags.CaloRecGPU.ActiveConfig.MomentsMinBadLArQuality
 
-    TopoMoments.MomentsNames = flags.CaloRecGPU.MomentsToCalculate
+    TopoMoments.MomentsNames = flags.CaloRecGPU.ActiveConfig.MomentsToCalculate
 
-    TopoMoments.MinRLateral = flags.CaloRecGPU.MomentsMinRLateral
-    TopoMoments.MinLLongitudinal = flags.CaloRecGPU.MomentsMinLLongitudinal
+    TopoMoments.MinRLateral = flags.CaloRecGPU.ActiveConfig.MomentsMinRLateral
+    TopoMoments.MinLLongitudinal = flags.CaloRecGPU.ActiveConfig.MomentsMinLLongitudinal
 
     if not flags.Common.isOnline:
         if flags.Input.isMC:
@@ -291,7 +291,7 @@ def DefaultClusterMomentsCalculatorToolCfg(flags, name = "TopoMoments"):
         else:
             TopoMoments.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorrRecomputed")
 
-    TopoMoments.UseGPUCriteria = not flags.CaloRecGPU.UseOriginalCriteria
+    TopoMoments.UseGPUCriteria = not flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria
 
     result.setPrivateTools(TopoMoments)
     return result
@@ -299,10 +299,10 @@ def DefaultClusterMomentsCalculatorToolCfg(flags, name = "TopoMoments"):
 def AthenaClusterAndMomentsImporterToolCfg(flags, name = "AthenaClusterImporter"):
     result=ComponentAccumulator()
     AthenaClusterImporter = CompFactory.GPUToAthenaImporterWithMoments(name)
-    AthenaClusterImporter.CellsName = flags.CaloRecGPU.CellsName
-    AthenaClusterImporter.ClusterSize = flags.CaloRecGPU.ClusterSize
+    AthenaClusterImporter.CellsName = flags.CaloRecGPU.ActiveConfig.CellsName
+    AthenaClusterImporter.ClusterSize = flags.CaloRecGPU.ActiveConfig.ClusterSize
 
-    AthenaClusterImporter.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    AthenaClusterImporter.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     AthenaClusterImporter.TimeFileOutput = "ClusterAndMomentsImporterTimes.txt"
 
     #from LArCellRec.LArCellBuilderConfig import LArHVCellContCorrCfg
@@ -319,10 +319,10 @@ def AthenaClusterAndMomentsImporterToolCfg(flags, name = "AthenaClusterImporter"
         else:
             AthenaClusterImporter.HVScaleCorrKey = "LArHVScaleCorrRecomputed"
 
-    AthenaClusterImporter.MomentsNames = flags.CaloRecGPU.MomentsToCalculate
+    AthenaClusterImporter.MomentsNames = flags.CaloRecGPU.ActiveConfig.MomentsToCalculate
 
-    if flags.CaloRecGPU.FillMissingCells:
-        AthenaClusterImporter.MissingCellsToFill = flags.CaloRecGPU.MissingCellsToFill
+    if flags.CaloRecGPU.ActiveConfig.FillMissingCells:
+        AthenaClusterImporter.MissingCellsToFill = flags.CaloRecGPU.ActiveConfig.MissingCellsToFill
 
     result.setPrivateTools(AthenaClusterImporter)
     return result
@@ -333,11 +333,11 @@ def CellsCounterCPUToolCfg(flags, name = "CPUCounts", folder = "counts", prefix 
     CPUCount.SavePath = folder
     CPUCount.FilePrefix = prefix
     CPUCount.FileSuffix = suffix
-    CPUCount.CellsName = flags.CaloRecGPU.CellsName
+    CPUCount.CellsName = flags.CaloRecGPU.ActiveConfig.CellsName
 
-    CPUCount.CellThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRCellThreshold
-    CPUCount.NeighborThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRGrowThreshold
-    CPUCount.SeedThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRSeedThreshold
+    CPUCount.CellThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRCellThreshold
+    CPUCount.NeighborThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRGrowThreshold
+    CPUCount.SeedThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRSeedThreshold
 
     result.setPrivateTools(CPUCount)
     return result
@@ -349,9 +349,9 @@ def CellsCounterGPUToolCfg(flags, name = "GPUCounts", folder = "counts", prefix 
     GPUCount.FilePrefix = prefix
     GPUCount.FileSuffix = suffix
 
-    GPUCount.CellThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRCellThreshold
-    GPUCount.NeighborThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRGrowThreshold
-    GPUCount.SeedThresholdOnEorAbsEinSigma = flags.CaloRecGPU.TopoClusterSNRSeedThreshold
+    GPUCount.CellThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRCellThreshold
+    GPUCount.NeighborThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRGrowThreshold
+    GPUCount.SeedThresholdOnEorAbsEinSigma = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRSeedThreshold
 
     result.setPrivateTools(GPUCount)
     return result
@@ -370,11 +370,11 @@ def PlotterMonitoringToolCfg(flags, name = "PlotterMonitoring"):
     result=ComponentAccumulator()
     PloTool = CompFactory.CaloGPUClusterAndCellDataMonitor(name)
 
-    PloTool.CellThreshold = flags.CaloRecGPU.TopoClusterSNRCellThreshold
-    PloTool.NeighborThreshold = flags.CaloRecGPU.TopoClusterSNRGrowThreshold
-    PloTool.SeedThreshold = flags.CaloRecGPU.TopoClusterSNRSeedThreshold
+    PloTool.CellThreshold = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRCellThreshold
+    PloTool.NeighborThreshold = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRGrowThreshold
+    PloTool.SeedThreshold = flags.CaloRecGPU.ActiveConfig.TopoClusterSNRSeedThreshold
 
-    PloTool.CellsName = flags.CaloRecGPU.CellsName
+    PloTool.CellsName = flags.CaloRecGPU.ActiveConfig.CellsName
 
     PloTool.ClusterMatchingParameters = MatchingOptions()
 
@@ -416,20 +416,20 @@ def HybridClusterProcessorCfg(flags, name="HybridClusterProcessor"):
     result = ComponentAccumulator()
 
     HybridClusterProcessor = CompFactory.CaloGPUHybridClusterProcessor(name)
-    HybridClusterProcessor.ClustersOutputName = flags.CaloRecGPU.ClustersOutputName
-    HybridClusterProcessor.MeasureTimes = flags.CaloRecGPU.MeasureTimes
+    HybridClusterProcessor.ClustersOutputName = flags.CaloRecGPU.ActiveConfig.ClustersOutputName
+    HybridClusterProcessor.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
     HybridClusterProcessor.TimeFileOutput = "GlobalTimes.txt"
     HybridClusterProcessor.DeferConstantDataPreparationToFirstEvent = True
     HybridClusterProcessor.DoPlots = False
     HybridClusterProcessor.PlotterTool = None
-    HybridClusterProcessor.DoMonitoring = flags.CaloRecGPU.DoMonitoring
+    HybridClusterProcessor.DoMonitoring = flags.CaloRecGPU.ActiveConfig.DoMonitoring
 
-    if flags.CaloRecGPU.DoMonitoring:
+    if flags.CaloRecGPU.ActiveConfig.DoMonitoring:
         histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='expert-monitoring.root', OPT='RECREATE'"])
         result.addService(histSvc)
         HybridClusterProcessor.MonitoringTool = MonitorizationTool(flags)
 
-    HybridClusterProcessor.NumPreAllocatedDataHolders = flags.CaloRecGPU.NumPreAllocatedDataHolders
+    HybridClusterProcessor.NumPreAllocatedDataHolders = flags.CaloRecGPU.ActiveConfig.NumPreAllocatedDataHolders
 
 
     HybridClusterProcessor.ConstantDataToGPUTool = result.popToolsAndMerge( BasicConstantDataExporterToolCfg(flags) )
@@ -488,7 +488,7 @@ def DefaultCaloCellMakerCfg(flags):
         tileCellBuilder = result.popToolsAndMerge(TileCellBuilderCfg(flags))
         cellFinalizer  = CompFactory.CaloCellContainerFinalizerTool()
 
-        if flags.CaloRecGPU.FillMissingCells:
+        if flags.CaloRecGPU.ActiveConfig.FillMissingCells:
             tileCellBuilder.fakeCrackCells = True
 
         cellMakerTools=[larCellBuilder,tileCellBuilder,cellFinalizer]+larCellCorrectors
@@ -513,7 +513,7 @@ def DefaultCaloCellMakerCfg(flags):
             cellMakerTools.append(result.popToolsAndMerge(CaloCellTimeCorrCfg(flags)))
 
         cellAlgo=CompFactory.CaloCellMaker(CaloCellMakerToolNames = cellMakerTools,
-                                           CaloCellsOutputName = flags.CaloRecGPU.CellsName)
+                                           CaloCellsOutputName = flags.CaloRecGPU.ActiveConfig.CellsName)
         result.addEventAlgo(cellAlgo)
         return result
 

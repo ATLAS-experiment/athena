@@ -40,7 +40,7 @@ def PrevAlgorithmsConfigurationCfg(flags):
         
     if flags.Input.Format is Format.BS or 'StreamRDO' in flags.Input.ProcessingTags:
         result.merge(DefaultCaloCellMakerCfg(flags))
-    elif flags.CaloRecGPU.FillMissingCells:
+    elif flags.CaloRecGPU.ActiveConfig.FillMissingCells:
         from AthenaCommon.Logging import log
         log.warning("Asked to fill missing cells but will not run cell maker! Slow path might be taken!")
 
@@ -318,8 +318,6 @@ def PrepareTest(clustersname=None,default_files = ["/cvmfs/atlas-nightlies.cern.
                 parse_command_arguments = True,
                 allocate_as_many_as_threads = True):
 
-    from CaloRecGPU.CaloRecGPUFlags import createFlagsCaloRecGPU, configFlagsCaloRecGPU
-
     import argparse
     
     args = None
@@ -365,7 +363,7 @@ def PrepareTest(clustersname=None,default_files = ["/cvmfs/atlas-nightlies.cern.
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     #from AthenaConfiguration.TestDefaults import defaultTestFiles
                     
-    flags = initConfigFlags() #ConfigFlags.clone()
+    flags = initConfigFlags()
     
     if parse_command_arguments:
         flags.fillFromArgs(listOfArgs=rest)
@@ -389,40 +387,32 @@ def PrepareTest(clustersname=None,default_files = ["/cvmfs/atlas-nightlies.cern.
             flags.Input.Files = args.files
     else:
         flags.Input.Files = args.files
-           
+
+    perfmon=False
+    if parse_command_arguments:
+        if args.perfmon or args.fullmon:
+           perfmon=True
+
     if parse_command_arguments:
         flags.Concurrency.NumThreads = int(args.numthreads)
         flags.Concurrency.NumConcurrentEvents = int(args.numthreads)
         #This is to ensure the measurments are multi-threaded in the way we expect, I guess?
         flags.PerfMon.doFastMonMT = args.perfmon
         flags.PerfMon.doFullMonMT = args.fullmon
-            
-    # configure GPU
-    flags.addFlagsCategory('CaloRecGPU',createFlagsCaloRecGPU,prefix=True)
-    if parse_command_arguments:
-        flags.CaloRecGPU.MeasureTimes = args.measuretimes
-        flags.CaloRecGPU.OutputClustersToFile = args.outputclusters
-        flags.CaloRecGPU.OutputCountsToFile = args.outputcounts
-        flags.CaloRecGPU.FillMissingCells = not args.notfillcells
-        flags.CaloRecGPU.UseOriginalCriteria = args.useoriginalcriteria
-        flags.CaloRecGPU.TwoGaussianNoise = not args.nodoublegaussiannoise
+        # configure GPU
+        flags.CaloRecGPU.Default.MeasureTimes = args.measuretimes
+        flags.CaloRecGPU.Default.OutputClustersToFile = args.outputclusters
+        flags.CaloRecGPU.Default.OutputCountsToFile = args.outputcounts
+        flags.CaloRecGPU.Default.FillMissingCells = not args.notfillcells
+        flags.CaloRecGPU.Default.UseOriginalCriteria = args.useoriginalcriteria
+        flags.CaloRecGPU.Default.TwoGaussianNoise = not args.nodoublegaussiannoise
         if allocate_as_many_as_threads:
-            flags.CaloRecGPU.NumPreAllocatedDataHolders = int(args.numthreads)
-    flags.CaloRecGPU.MissingCellsToFill = [186986, 187352]
-    configFlagsCaloRecGPU(flags,flags.CaloRecGPU)
+            flags.CaloRecGPU.Default.NumPreAllocatedDataHolders = int(args.numthreads)
 
-    doLCCalib = flags.Calo.TopoCluster.doTopoClusterLocalCalib
+    flags.CaloRecGPU.Default.MissingCellsToFill = [186986, 187352]
 
-    if clustersname is None:
-        clustersname = "CaloCalTopoClusters" if doLCCalib else "CaloTopoClusters"
-
-    if clustersname=="CaloTopoClusters" and doLCCalib is True:
-        raise RuntimeError("Inconsistent arguments: Name must not be 'CaloTopoClusters' if doLCCalib is True")
-    flags.CaloRecGPU.ClustersOutputName = clustersname
-    perfmon=False
-    if parse_command_arguments:
-        if args.perfmon or args.fullmon:
-           perfmon=True
+    if clustersname is not None:
+        flags.CaloRecGPU.Default.ClustersOutputName = clustersname
     
     if parse_command_arguments:
         return (flags, perfmon,int(args.numevents))

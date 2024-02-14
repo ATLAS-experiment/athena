@@ -477,6 +477,12 @@ def initConfigFlags():
         return createCaloRingerConfigFlags()
     _addFlagsCategory(acf, "CaloRinger", __caloRinger, 'CaloRingerAlgs' )
 
+    def __caloGPU():
+        from CaloRecGPU.CaloRecGPUFlags import createFlagsCaloRecGPU
+        return createFlagsCaloRecGPU()
+    _addFlagsCategory(acf, "CaloRecGPU", __caloGPU, 'CaloRecGPU' )
+
+
 #egamma derivation Flags:
     def __egammaDerivation():
         from DerivationFrameworkEGamma.EGammaDFConfigFlags import createEGammaDFConfigFlags

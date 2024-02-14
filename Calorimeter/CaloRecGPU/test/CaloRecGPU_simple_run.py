@@ -8,12 +8,13 @@ if __name__=="__main__":
 
     flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
 
-    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.CaloRecGPU.Default.ClustersOutputName="CaloCalTopoClustersNew"
     flags.lock()
+    flagsActive = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "CaloRecGPU.Default")
 
-    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flagsActive,perfmon)
     
-    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags))
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flagsActive))
 
     topoAcc.run(numevents)
 
