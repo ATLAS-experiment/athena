@@ -7,7 +7,7 @@ from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDictInLegs
 from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
-
+from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 
 def writeEmulationFiles(data):
     """Writes emulation files. key in the dict is a file name (+.dat), list which is value of each dict el is enetered into the file, one el. per line"""
@@ -35,10 +35,7 @@ def makeChain( flags, name, L1Thresholds, ChainSteps, Streams="physics:Main", Gr
     """
     In addition to making the chain object fills the flags that are used to generate MnuCOnfig JSON file
     """
-
-
     prop = ChainProp( name=name,  l1SeedThresholds=L1Thresholds, groups=Groups )
-
     chainDict = dictFromChainName( flags, prop )
     global chainsCounter
     chainDict["chainCounter"] = chainsCounter
@@ -48,7 +45,7 @@ def makeChain( flags, name, L1Thresholds, ChainSteps, Streams="physics:Main", Gr
     chainDict['prescale'] = 1
 
     listOfChainDicts = splitChainDictInLegs(chainDict)
-
+    L1decisions = [ mapThresholdToL1DecisionCollection(stri) for stri in L1Thresholds]
     # create the ChainSteps, with the chaindict
     StepConfig = []
     for step in ChainSteps:        
@@ -59,8 +56,7 @@ def makeChain( flags, name, L1Thresholds, ChainSteps, Streams="physics:Main", Gr
                                 comboHypoCfg=step.comboHypoCfg, 
                                 comboToolConfs=step.comboToolConfs)]
 
-    chainConfig = Chain( name=name, L1Thresholds=L1Thresholds, ChainSteps=StepConfig )
-
+    chainConfig = Chain( name=name, L1decisions=L1decisions, ChainSteps=StepConfig )
     HLTMenuConfig.registerChain( chainDict, chainConfig )
 
     return chainConfig

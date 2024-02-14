@@ -143,7 +143,7 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
     allStepsMult = []
     nSteps = []
     chainName = ''
-    l1Thresholds = []
+    l1Decisions = []
     alignmentGroups = []
     vertical_alignment_groups = []
 
@@ -208,7 +208,7 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
         allSteps.append(cConfig.steps)
         allStepsMult.append(len(cConfig.steps[0].multiplicity))
         nSteps.append(len(cConfig.steps))
-        l1Thresholds.extend(cConfig.vseeds)
+        l1Decisions.extend(cConfig.L1decisions)
             
     # Use zip_longest_parallel so that we get None in case one chain has more steps than the other
     orderedSteps = list(zip_longest_parallel(allSteps, allStepsMult))
@@ -243,7 +243,7 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
         combStep = makeCombinedStep(mySteps, step_index+1, chainDefList, orderedSteps, combChainSteps, leg_numbering, step_ag)
         combChainSteps.append(combStep)
                                   
-    combinedChainDef = Chain(chainName, ChainSteps=combChainSteps, L1Thresholds=l1Thresholds, 
+    combinedChainDef = Chain(chainName, ChainSteps=combChainSteps, L1decisions=l1Decisions, 
                                 nSteps = nSteps, alignmentGroups = alignmentGroups)
 
     log.debug("[mergeParallel] Parallel merged chain %s with these steps:", chainName)
@@ -418,7 +418,7 @@ def mergeSerial(chainDefList, chainDefListOrdering):
     legOrdering = []
     nSteps = []
     chainName = ''
-    l1Thresholds = []
+    l1Decisions = []
     alignmentGroups = []
     log.debug('[mergeSerial] Merge chainDefList:')
     log.debug(chainDefList)
@@ -440,7 +440,7 @@ def mergeSerial(chainDefList, chainDefListOrdering):
         allSteps.append(cConfig.steps)
         legOrdering.append(leg_order)
         nSteps.extend(cConfig.nSteps)
-        l1Thresholds.extend(cConfig.vseeds)
+        l1Decisions.extend(chainDefList[ic].L1decisions) # do not invert L1Decisions because they follow the order of the sequences inside teh steps
         alignmentGroups.extend(cConfig.alignmentGroups)
 
     serialSteps = serial_zip(allSteps, chainName, chainDefList, legOrdering)
@@ -452,7 +452,7 @@ def mergeSerial(chainDefList, chainDefListOrdering):
         combStep = makeCombinedStep(mySteps, step_index+1, chainDefList)
         combChainSteps.append(combStep)
                         
-    combinedChainDef = Chain(chainName, ChainSteps=combChainSteps, L1Thresholds=l1Thresholds,
+    combinedChainDef = Chain(chainName, ChainSteps=combChainSteps, L1decisions=l1Decisions, 
                                nSteps = nSteps, alignmentGroups = alignmentGroups)
 
     log.debug("[mergeSerial] Serial merged chain %s with number of steps/leg %s with these steps:", chainName, combinedChainDef.nSteps)
@@ -495,7 +495,7 @@ def makeCombinedStep(parallel_steps, stepNumber, chainDefList, allSteps = [], cu
             # would be to make sure that these cases don't happen upstream, but I am not confident enough with this
             # code to make such a large (and dangerous) change. But it would be nice to do that in future if possible..
             parallel_steps=parallel_steps[:len(chainDefList)]
-            log.debug("[makeCombinedStep] removed empty steps exceeding chainDefList size. The new steps are now %s ", parallel_steps)
+            log.debug("[makeCombinedStep] removing empty steps exceeding chainDefList size. The new steps are now %s ", parallel_steps)
 
         for chain_index, step in enumerate(parallel_steps):
             # every step is empty but some might have empty sequences and some might not
