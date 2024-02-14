@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCALIBTEST_LARREADHADDMCOEFFFILE
@@ -21,7 +21,7 @@ class LArReadHadDMCoeffFile : public AthAlgorithm
   StatusCode initialize(); 
   StatusCode execute();
   StatusCode finalize();
-  StatusCode initDataFromFile(std::string hadDMCoeffFileName);
+  StatusCode initDataFromFile(const std::string& hadDMCoeffFileName);
 
  private:
   std::string m_key;
