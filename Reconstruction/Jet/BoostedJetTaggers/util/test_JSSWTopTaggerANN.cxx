@@ -260,7 +260,7 @@ int main( int argc, char* argv[] ) {
 	    validForUncTool &= ( std::abs(eta) < 2 );
 	    std::cout << "Nominal SF=" << sf << " truthLabel=" << truthLabel << " (1: t->qqb)" << std::endl;
 	    if( validForUncTool ){
-	      for ( CP::SystematicSet sysSet : jetUnc_sysSets ){
+	      for ( const CP::SystematicSet& sysSet : jetUnc_sysSets ){
 		ANA_CHECK( m_Tagger->tag( *jetSC ) );
 		ANA_CHECK( jetUncToolSF->applySystematicVariation(sysSet) );
 		ANA_CHECK( jetUncToolSF->applyCorrection(*jetSC) );
