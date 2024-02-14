@@ -435,21 +435,24 @@ namespace ActsTrk {
 	
 	m_finderCfg.rRangeMiddleSP.push_back(convertedVec);
     }
+    
     // define cuts used for fast tracking configuration
-    m_finderCfg.experimentCuts.connect(
-        [](const void*, float bottomRadius, float cotTheta) -> bool {
-
-        float fastTrackingRMin = 50.;
-        float fastTrackingCotThetaMax = 1.5;
-
-        if (bottomRadius < fastTrackingRMin and
-               (cotTheta > fastTrackingCotThetaMax or
-                cotTheta < -fastTrackingCotThetaMax)) {
-             return false;
-        }
-        return true;
-    });
-
+    if (m_useExperimentCuts) {
+      m_finderCfg.experimentCuts.connect(
+					 [](const void*, float bottomRadius, float cotTheta) -> bool {
+					   
+					   float fastTrackingRMin = 50.;
+					   float fastTrackingCotThetaMax = 1.5;
+					   
+					   if (bottomRadius < fastTrackingRMin and
+					       (cotTheta > fastTrackingCotThetaMax or
+						cotTheta < -fastTrackingCotThetaMax)) {
+					     return false;
+					   }
+					   return true;
+					 });
+    }
+    
     // Configuration for Acts::SeedFilter (used by FinderCfg)
     Acts::SeedFilterConfig filterCfg;
     filterCfg.deltaRMin = m_deltaRMin;
