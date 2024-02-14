@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsHanOutputFile_h
@@ -59,9 +59,9 @@ namespace dqutils
      */
     static void printDQGroupJSON(nlohmann::json j, const std::string& location, const char* path_to_file);
 
-    static std::string getStringName(std::string location, int file_version);
-    static std::string getInfo(std::string location, int file_version);
-    static std::string getInfo(std::string JSON_str);
+    static std::string getStringName(const std::string& location, int file_version);
+    static std::string getInfo(const std::string& location, int file_version);
+    static std::string getInfo(const std::string& JSON_str);
     static std::string processJSON_ingetInfo(nlohmann::ordered_json j);
 
     static std::string getIndentation(const std::string& pathName, const std::string& leadingSpace = "");

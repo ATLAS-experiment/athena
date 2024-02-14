@@ -154,7 +154,7 @@ namespace dqutils {
     static void   fitZmumuHistograms(TH1F* hmass, TH1F* hwidth, std::vector<TH1F*> hvec);
     static void   processModule(TFile* f, const std::string & run_dir, TKey* key_module, const std::string & moduleName);
     static void   fitMergedFile_DiMuMonAll(TFile* f, const std::string & run_dir, const std::string & resonName, const std::string & triggerName);
-    static void   fitHistos(TH2F* hin, std::vector<TH1F*> hout, int mode, const std::string & triggerName, const std::string & resonName, TH1F* m_chi2);
+    static void   fitHistos(TH2F* hin, const std::vector<TH1F*>& hout, int mode, const std::string & triggerName, const std::string & resonName, TH1F* m_chi2);
     static void   fillGaussianMeanOrWidth(TH2F* h2d, TH1F* h, float fitMin, float fitMax, int iopt);
     static void   fillMeanOrWidth(TH2F* h2d, TH1F* h, int iopt);
     static void   fillDetPaperMeanRMS(TH2F* h2d, TH1F* h, int iopt);
