@@ -48,7 +48,7 @@ def ActsITkFastPixelSeedingToolCfg(flags,
              [40.0, 200.0],
              [40.0, 80.0],])
     kwargs.setdefault("useVariableMiddleSPRange", False)
-
+    kwargs.setdefault("useExperimentCuts", True)
 
     acc.merge(ActsITkPixelSeedingToolCfg(flags, name=name, **kwargs))
     return acc
@@ -110,7 +110,8 @@ def ActsITkFastPixelOrthogonalSeedingToolCfg(flags,
     kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
     kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
     kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
-
+    kwargs.setdefault("useExperimentCuts", True)
+    
     acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name=name, **kwargs))
     return acc
 

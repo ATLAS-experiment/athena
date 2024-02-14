@@ -199,6 +199,7 @@ namespace ActsTrk {
         m_finderCfg.rRangeMiddleSP.push_back(convertedVec);
     }
     // define cuts used for fast tracking configuration
+    if (m_useExperimentCuts) {
     m_finderCfg.experimentCuts.connect(
 	[](const void*, float bottomRadius, float cotTheta) -> bool {
 
@@ -212,7 +213,8 @@ namespace ActsTrk {
         }
         return true;
     });
-
+    }
+    
     m_finderCfg = m_finderCfg.toInternalUnits();
 
     m_finder = Acts::SeedFinderOrthogonal<value_type>(m_finderCfg);

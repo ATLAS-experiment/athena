@@ -252,6 +252,8 @@ namespace ActsTrk {
     Gaudi::Property< int > m_numPhiNeighbors {this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};
 
+    Gaudi::Property< bool > m_useExperimentCuts {this, "useExperimentCuts", false, ""};
+    
   private:
     std::unique_ptr< Acts::GridBinFinder< 2ul > > m_bottomBinFinder{nullptr};
     std::unique_ptr< Acts::GridBinFinder< 2ul > > m_topBinFinder{nullptr};
