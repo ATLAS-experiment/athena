@@ -6,18 +6,6 @@ from AthenaConfiguration.ComponentAccumulator import CompFactory
 log = logging.getLogger('EmuStepProcessingConfig')
 
 ###########################################################################    
-def thresholdToChains( chains ):
-    """
-    Produces list "threshod : chain" for all chains passed. Uses the L1Thresholds/vseeds Chain property
-    """
-    ret = []
-    for c in chains:
-        for t in c.vseeds:
-            ret.append(t+ " : " + c.name)
-    return ret
-
-
-###########################################################################    
 def generateEmuMenu(flags):
     """ 
      set Emu menu and reproduce generateMT
@@ -33,7 +21,6 @@ def generateEmuMenu(flags):
     # Generate the menu
     menu = GenerateMenuMT()
     menu.generateAllChainConfigs(flags)
-    #menu.generateMT()
 
 
 

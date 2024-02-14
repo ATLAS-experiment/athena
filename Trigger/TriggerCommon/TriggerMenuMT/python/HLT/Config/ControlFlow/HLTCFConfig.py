@@ -36,7 +36,6 @@ from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, append
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from DecisionHandling.DecisionHandlingConfig import TriggerSummaryAlg
-from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TriggerJobOpts.TriggerConfig import collectHypos, collectFilters, collectViewMakers, collectDecisionObjects, \
      triggerMonitoringCfg, triggerSummaryCfg, collectHypoDecisionObjects
 from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import getTrigNavSlimmingMTOnlineConfig
@@ -422,11 +421,8 @@ def createDataFlow(flags, chains, allDicts):
         lastDecisions = []
         for nstep, chainStep in enumerate( chain.steps ):
             log.debug("\n************* Start connecting step %d %s for chain %s", nstep+1, chainStep.name, chain.name)           
-            if nstep == 0:
-                if chainStep.stepDicts:
-                    filterInput = [ mapThresholdToL1DecisionCollection(p["chainParts"][0]["L1threshold"]) for p in chainStep.stepDicts]
-                else:
-                    filterInput = chain.L1decisions
+            if nstep == 0:             
+                filterInput = chain.L1decisions
             else:
                 filterInput = lastDecisions
             if len(filterInput) == 0 :

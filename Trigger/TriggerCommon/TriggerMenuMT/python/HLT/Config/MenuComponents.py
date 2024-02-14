@@ -17,7 +17,6 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 import GaudiConfig2
 from GaudiKernel.DataHandle import DataHandle
-from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
@@ -344,7 +343,6 @@ class EmptyMenuSequence(object):
         Maker.isEmptyStep = True 
         Maker.RoIsLink = 'initialRoI' #(this is the default property, just making it explicit)
         self._maker       = InputMakerNode( Alg = Maker )
-        self._seed        = ''
         self._sequence    = Node( Alg = seqAND(the_name, [Maker]))
         log.debug("Made EmptySequence %s",the_name)
 
@@ -355,10 +353,6 @@ class EmptyMenuSequence(object):
     @property
     def maker(self):
         return self._maker
-
-    @property
-    def seed(self):
-        return self._seed
 
     @property
     def name(self):
@@ -387,9 +381,6 @@ class EmptyMenuSequence(object):
         file.write("    %s[fillcolor=%s]\n"%(self.sequence.Alg.getName(), algColor(self.sequence.Alg)))
         return cfseq_algs, all_hypos, last_step_hypo_nodes
 
-    def setSeed( self, seed ):
-        self._seed = seed
-
     def __repr__(self):
         return "MenuSequence::%s \n Hypo::%s \n Maker::%s \n Sequence::%s \n HypoTool::%s\n"\
             %(self.name, "Empty", self.maker.Alg.getName(), self.sequence.Alg.getName(), "None")
@@ -405,7 +396,7 @@ class MenuSequence(object):
         if IsProbe: 
             #CA based config should have probe IM set up already, so use existing IM/Hypo if it's already probe
             if 'probe' in Maker.getName():
-                _Maker=Maker
+                _Maker= Maker
                 _Hypo = Hypo
             else:
                 _Hypo = RecoFragmentsPool.retrieve(MenuSequence.getProbeHypo,flags,basehypo=Hypo)
@@ -418,7 +409,6 @@ class MenuSequence(object):
             _Maker = Maker
             _Sequence = Sequence
         self._maker = InputMakerNode( Alg = _Maker )
-        self._seed =''
         input_maker_output= self.maker.readOutputList()[0] # only one since it's merged       
 
         self._name = CFNaming.menuSequenceName(compName(_Hypo))
@@ -486,9 +476,6 @@ class MenuSequence(object):
         HypoAlg::%s.HypoOutputDecisions=%s",\
                       compName(self.hypo.Alg), self.hypo.readInputList()[0], compName(self.hypo.Alg), self.hypo.readOutputList()[0])
 
-    @property
-    def seed(self):
-        return self._seed
 
     @property
     def name(self):
@@ -584,9 +571,6 @@ class MenuSequence(object):
         all_hypos.append(self._hypo)
         return cfseq_algs, all_hypos, last_step_hypo_nodes
 
-    def setSeed( self, seed ):
-        self._seed = seed
-
     def __repr__(self):    
         hyponame = self._hypo.Alg.getName()
         hypotool = self._hypoToolConf.name
@@ -664,8 +648,9 @@ class EmptyMenuSequenceCA(EmptyMenuSequence):
 
 class Chain(object):
     """Basic class to define the trigger menu """
-    __slots__ ='name','steps','nSteps','alignmentGroups','vseeds','L1decisions', 'topoMap'
-    def __init__(self, name, ChainSteps, L1Thresholds, nSteps = [], alignmentGroups = [], topoMap=None):
+    __slots__ ='name','steps','nSteps','alignmentGroups','L1decisions', 'topoMap'
+    def __init__(self, name, ChainSteps, L1decisions, nSteps = [], alignmentGroups = [], topoMap=None):
+ 
         """
         Construct the Chain from the steps
         Out of all arguments the ChainSteps & L1Thresholds are most relevant, the chain name is used in debug messages
@@ -674,7 +659,6 @@ class Chain(object):
         self.steps  = ChainSteps
         self.nSteps = nSteps
         self.alignmentGroups = alignmentGroups
-        self.vseeds = L1Thresholds
 
         # The chain holds a map of topo ComboHypoTool configurators
         # This is needed to allow placement of the ComboHypoTool in the right position
@@ -688,8 +672,7 @@ class Chain(object):
 
         # L1decisions are used to set the seed type (EM, MU,JET), removing the actual threshold
         # in practice it is the HLTSeeding Decision output
-        self.L1decisions = [ mapThresholdToL1DecisionCollection(stri) for stri in L1Thresholds]
-        self.setSeedsToSequences()
+        self.L1decisions = L1decisions 
         log.debug("[Chain.__init__] Made Chain %s with seeds: %s ", name, self.L1decisions)
 
     def append_bjet_steps(self,new_steps):
@@ -776,20 +759,10 @@ class Chain(object):
             log.error("checkMultiplicity: Chain %s has steps with differnt multiplicities: %s", self.name, ' '.join(mult))
             return 0
 
-        if not_empty_mult[0] != len(self.vseeds):
-            log.error("checkMultiplicity: Chain %s has %d multiplicity per step, and %d L1Decisions", self.name, mult, len(self.vseeds))
+        if not_empty_mult[0] != len(self.L1decisions):
+            log.error("checkMultiplicity: Chain %s has %d multiplicity per step, and %d L1Decisions", self.name, mult, len(self.L1decisions))            
             return 0
         return not_empty_mult[0]
-
-
-
-    def setSeedsToSequences(self):
-        """ Set the L1 seeds (L1Decisions) to the menu sequences """
-        if len(self.steps) == 0:
-            return
-
-        for step in self.steps:
-            step.setSeedsToSequences()
     
     def createHypoTools(self, flags):
         """ This is extrapolating the hypotool configuration from the chain name"""
@@ -819,7 +792,6 @@ class Chain(object):
     def __repr__(self):
         return "-*- Chain %s -*- \n + Seeds: %s, Steps: %s, AlignmentGroups: %s \n + Steps: \n %s \n"%(\
                     self.name, ' '.join(map(str, self.L1decisions)), self.nSteps, self.alignmentGroups, '\n '.join(map(str, self.steps)))
-
 
 
 # next:  can we remove multiplicity array, if it can be retrieved from the ChainDict?
@@ -914,8 +886,7 @@ class ChainStep(object):
         return
     
     #Heather updated for full jet chain dicts
-    def setChainPartIndices(self):
-    
+    def setChainPartIndices(self):    
         leg_counter = 0
         lists_of_chainPartNames = []
         for step_dict in self.stepDicts:
@@ -971,12 +942,6 @@ class ChainStep(object):
         if self.combo is not None:   
             return list(self.combo.getChains())
         return self.getChainLegs()
-
-    def setSeedsToSequences(self):
-        for seed, seq in zip( [d["chainParts"][0]["L1threshold"] for d in self.stepDicts], self.sequences):
-            l1Collection = mapThresholdToL1DecisionCollection(seed)
-            seq.setSeed( l1Collection )
-            log.debug( "setSeedsToSequences: ChainStep %s adding seed %s to sequence %s", self.name, l1Collection, seq.name )
 
     def __repr__(self):
         if len(self.sequences) == 0:

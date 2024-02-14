@@ -136,7 +136,7 @@ class CFSequence(object):
             nseq=0
             for seq in self.step.sequences:
                 filter_out = connections[nseq]
-                log.debug("CFSequence: Found input %s to sequence::%s from Filter::%s (from seed %s)", filter_out, seq.name, compName(self.filter.Alg), seq.seed)
+                log.debug("CFSequence: Found input %s to sequence::%s from Filter::%s", filter_out, seq.name, compName(self.filter.Alg))
                 seq.connectToFilter( filter_out )
                 nseq+=1
         else:
