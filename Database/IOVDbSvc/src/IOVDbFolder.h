@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.h
@@ -46,7 +46,7 @@ public:
               IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
               const bool checklock, const bool outputToFile=false,
               const std::string & source="COOL_DATABASE", const bool crestToFile=false,
-              const std::string & crestServer="");
+              const std::string & crestServer="",const std::string & crestTag="");
   ~IOVDbFolder();
   
 
@@ -121,7 +121,7 @@ public:
   std::unique_ptr<SG::TransientAddress>
   preLoadFolder(ITagInfoMgr *tagInfoMgr,
                 const unsigned int cacheRun,
-                const unsigned int cacheTime,const std::string& globalTag="");
+                const unsigned int cacheTime);
 
   // print out cache
   void printCache();
@@ -291,8 +291,7 @@ private:
   const bool m_crestToFile{false};
   const std::string m_source;
   const std::string m_crestServer;
-  std::string m_globaltag = "";
-  std::map<std::string, std::string> m_cresttagmap; // pairs: COOL folder - CREST tag name
+  const std::string m_crestTag;
   std::string m_crest_tag = "";
   nlohmann::json m_tag_info = nullptr;
 };
