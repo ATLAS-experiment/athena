@@ -177,6 +177,8 @@ namespace ActsTrk {
         "Minimum impact parameter for seed confirmation"};
 
     // Fast Track
+    Gaudi::Property< bool > m_useExperimentCuts {this, "useExperimentCuts", false, ""};
+
     Gaudi::Property< std::vector<std::vector<double>> > m_rRangeMiddleSP {this, "rRangeMiddleSP",  
        {{40.0, 90.0}, {40.0, 200.0}, {46.0, 200.0}, {46.0, 200.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 250.0}, {46.0, 200.0}, {46.0, 200.0}, {40.0, 200.0}, {40.0, 90.0}},
        "radial range for middle SP"};
