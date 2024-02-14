@@ -84,9 +84,8 @@ def TRTCalibratorCfg(flags,**kwargs) :
         InDetStrawSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
         kwargs.setdefault("TRTStrawSummaryTool", InDetStrawSummaryTool)
     if "NeighbourSvc" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-        TRT_StrawNeighbourSvc = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
-        kwargs.setdefault("NeighbourSvc" , TRT_StrawNeighbourSvc)
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawNeighbourSvcCfg
+        kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
     if "TRTCaldbTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
         TRT_CalDbTool = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
