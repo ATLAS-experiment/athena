@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -64,7 +64,7 @@ StatusCode TrigEgammaMatchingToolMT::initialize()
 
 //!=======================================================================
 
-std::string TrigEgammaMatchingToolMT::key( std::string key) const
+std::string TrigEgammaMatchingToolMT::key( const std::string& key) const
 {
   return m_keys.at(key); 
 }
