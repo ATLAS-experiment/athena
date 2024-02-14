@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 import time
@@ -47,7 +47,6 @@ def replacebindvars(query, bindvars):
     """Replaces the bound variables with the specified values,
     disables variable binding
     """
-    from builtins import int
     for var,val in list(bindvars.items()):
         if query.find(":%s" % var)<0:
             raise NameError("variable '%s' is not a bound variable in this query: %s" % (var, query) )
