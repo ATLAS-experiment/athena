@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -175,7 +175,7 @@ bool VP1RawDataCollBase::Imp::commonCuts(VP1RawDataHandleBase*handle)
   }
   if (!allPhiAllowed) {
     double phi(p.phi());
-    for(VP1Interval i : allowedPhi) {
+    for(const VP1Interval& i : allowedPhi) {
       if (i.contains(phi)||i.contains(phi+2*M_PI)||i.contains(phi-2*M_PI))
 	return true;
     }
