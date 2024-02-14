@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #### Auxiliary Methods
 def add_modifier(run_nbr=None, evt_nbr=None, time_stamp=None, lbk_nbr=None,
@@ -39,14 +39,17 @@ def add_modifier(run_nbr=None, evt_nbr=None, time_stamp=None, lbk_nbr=None,
 def buildListOfModifiers():
     Modifiers = []
     # Check if we are in a simulation job first
-    from G4AtlasApps.SimFlags import simFlags
-    if simFlags.RunAndLumiOverrideList.statusOn:
-        pDicts = simFlags.RunAndLumiOverrideList.get_Value()
-        for el in pDicts:
-            if 'evt_nbr' in el:
-                Modifiers += add_modifier(run_nbr=el['run'], lbk_nbr=el['lb'], time_stamp=el['starttstamp'], nevts=el['evts'], evt_nbr=el['evt_nbr'])
-            else:
-                Modifiers += add_modifier(run_nbr=el['run'], lbk_nbr=el['lb'], time_stamp=el['starttstamp'], nevts=el['evts'])
+    try:
+        from G4AtlasApps.SimFlags import simFlags
+        if simFlags.RunAndLumiOverrideList.statusOn:
+            pDicts = simFlags.RunAndLumiOverrideList.get_Value()
+            for el in pDicts:
+                if 'evt_nbr' in el:
+                    Modifiers += add_modifier(run_nbr=el['run'], lbk_nbr=el['lb'], time_stamp=el['starttstamp'], nevts=el['evts'], evt_nbr=el['evt_nbr'])
+                else:
+                    Modifiers += add_modifier(run_nbr=el['run'], lbk_nbr=el['lb'], time_stamp=el['starttstamp'], nevts=el['evts'])
+    except ModuleNotFoundError:
+        pass
     if not len(Modifiers):
         from Digitization.DigitizationFlags import digitizationFlags
         if digitizationFlags.RunAndLumiOverrideList.get_Value():
