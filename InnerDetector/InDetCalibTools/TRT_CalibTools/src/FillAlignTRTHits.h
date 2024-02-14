@@ -66,7 +66,7 @@ private:
   ToolHandle<Trk::IUpdator> m_updatorHandle {this, "UpdatorTool" , "Trk::KalmanUpdator/TrkKalmanUpdator", "Measurement updator to calculate unbiased track states"};
   ToolHandle<ITRT_CalDbTool> m_trtcaldbTool {this, "TRTCalDbTool", "CalDbTool", "Access to the folder of the calibration constants"}; 
   ServiceHandle<ITRT_StrawNeighbourSvc> m_neighbourSvc {this, "NeighbourSvc", "NeighbourSvc", ""};
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool  {this, "TRTStrawSummaryTool", "TRTStrawSummary", ""};
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool  {this, "TRTStrawSummaryTool", "InDetTRTStrawStatusSummaryTool", ""};
 
   Trk::IUpdator* m_updator; //!< updator for unbiased states
 
