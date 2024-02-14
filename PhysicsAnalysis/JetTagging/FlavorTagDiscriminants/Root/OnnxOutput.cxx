@@ -21,11 +21,19 @@ OnnxOutput::OnnxOutput(const std::string& name,
 OnnxOutput::OnnxOutput(const std::string& name,
                        const ONNXTensorElementDataType type,
                        const std::string& model_name) 
-                       : name(model_name + "_" + name),
+                       : name(getName(name, model_name)),
                          name_in_model(name),
                          type(getOutputType(type, 0)),
                          target(getOutputTarget(0)) {}
 
+const std::string OnnxOutput::getName(const std::string& name, const std::string& model_name) const {
+  // unfortunately, this is block is needed to support some taggers that we schedule that don't have
+  // a well defined model name and rely on output remapping.
+  if (model_name == "UnknownModelName") {
+    return name;
+  }
+  return model_name + "_" + name;
+}
 
 OnnxOutput::OutputType OnnxOutput::getOutputType(ONNXTensorElementDataType type, int rank) const {
   // Determine the output node type based on the type and shape of the output tensor.
