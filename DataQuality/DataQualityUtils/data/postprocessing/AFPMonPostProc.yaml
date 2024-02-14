@@ -100,3 +100,16 @@ Input: [ 'AFP/ToF/ToFHitsVsLb/side(?P<side>A|C)/(?P<fme>Front|Middle|End)/lb(?P=
 Output: [ 'AFP/ToF/PP/ToFHitsVsLbByEvents/side{side}/{fme}/lb{side}ToF_{train}_Vs_Events_{fme}' ]
 Function: histgrinder.example.transform_function_divide_ROOT
 Description: lbAToF_train_Vs_Events_FME
+
+---
+
+##############################################################################
+############################### ToF SiT histograms ###############################
+##############################################################################
+
+###### ToF efficiency ######
+
+Input: [ 'AFP/ToFSiT/Efficiency/Efficiency_(?P<side>A|C)']
+Output: [ 'AFP/ToFSiT/Efficiency/Efficiency_TH_{side}' ]
+Function: Run3AFPMonitoring.AFPPostProcessing.tefficiency2th
+Description: TEfficiency_to_TH2
