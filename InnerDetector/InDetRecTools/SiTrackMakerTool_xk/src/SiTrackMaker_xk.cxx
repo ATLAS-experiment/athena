@@ -64,6 +64,18 @@ StatusCode InDet::SiTrackMaker_xk::initialize()
   }
   ATH_MSG_DEBUG( "Retrieved tool " << m_tracksfinder );
 
+  /// Get trigger track following tool
+  ///
+  if ( m_useTrigTrackFollowingTool) {
+    if ( m_trigInDetTrackFollowingTool.retrieve().isFailure() ) {
+      ATH_MSG_FATAL( "Failed to retrieve tool " << m_trigInDetTrackFollowingTool );
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG( "Retrieved tool " << m_trigInDetTrackFollowingTool );
+  } else {
+    m_trigInDetTrackFollowingTool.disable();
+  }
+  
   /// Get seed to track conversion tool
   /// This is used if we want to write out the seeds for
   /// performance studies
@@ -699,7 +711,13 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   /// Find possible list of tracks using space points space points information
   ///
   if (!m_useBremModel) {
-    tracks = m_tracksfinder->getTracks        (data.combinatorialData(), *Tp, Sp, Gp, DE, data.clusterTrack(),ctx);
+    if(m_useTrigTrackFollowingTool) {
+      Trk::Track* newTrack = m_trigInDetTrackFollowingTool->getTrack(Sp, DE, ctx);
+      if(newTrack != nullptr) tracks.push_back(newTrack);
+    }
+    else {
+      tracks = m_tracksfinder->getTracks(data.combinatorialData(), *Tp, Sp, Gp, DE, data.clusterTrack(),ctx);
+    }
   } else if (!m_useCaloSeeds) {
     ++data.summaryStatAll()[kTotalBremSeeds][K];
     tracks = m_tracksfinder->getTracksWithBrem(data.combinatorialData(), *Tp, Sp, Gp, DE, data.clusterTrack(), false,ctx);
