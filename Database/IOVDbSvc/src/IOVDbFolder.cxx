@@ -74,7 +74,7 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
                          IClassIDSvc* clidsvc, IIOVDbMetaDataTool* metadatatool,
                          const bool checklock, const bool outputToFile,
                          const std::string & source, const bool crestToFile,
-                         const std::string & crestServer):
+                         const std::string & crestServer, const std::string & crestTag):
   AthMessaging("IOVDbFolder"),
   p_clidSvc(clidsvc),
   p_metaDataTool(metadatatool),
@@ -85,7 +85,8 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   m_outputToFile{outputToFile},
   m_crestToFile{crestToFile},
   m_source{source},
-  m_crestServer{crestServer}
+  m_crestServer{crestServer},
+  m_crestTag{crestTag}
 {
   // set message same message level as our parent (IOVDbSvc)
   setLevel(msg.level());
@@ -150,8 +151,6 @@ IOVDbFolder::IOVDbFolder(IOVDbConn* conn,
   if (m_extensible) {
     ATH_MSG_INFO( "Extensible folder " << m_foldername );
   }
-
-
   
 }
 
@@ -236,17 +235,11 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     //const std::string  jsonFolderName=sanitiseCrestTag(m_foldername);
 
     CrestFunctions cfunctions(m_crestServer);
-
-    if (m_globaltag != globalTag){
-      m_globaltag = globalTag;
-      m_cresttagmap.clear();
-      m_cresttagmap = cfunctions.getGlobalTagMap(globalTag);
-    }
-    const std::string completeTag = m_cresttagmap[m_foldername];
-    ATH_MSG_INFO("Download tag would be: "<<completeTag);
+    
+    ATH_MSG_INFO("Download tag would be: "<<m_crestTag);
 
     std::string crestPayloadType="crest-json-single-iov";
-    nlohmann::json tagProperties = cfunctions.getTagProperties(completeTag);
+    nlohmann::json tagProperties = cfunctions.getTagProperties(m_crestTag);
     if(tagProperties!=nullptr){
       if(tagProperties.contains("payloadSpec"))
         crestPayloadType=tagProperties["payloadSpec"].get<std::string>();
@@ -257,7 +250,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     
     // Get a vector of pairs retrieved from crest
     //  <IOV_SINCE(string),HASH(string)>
-    auto crestIOVs = cfunctions.getIovsForTag(completeTag);
+    auto crestIOVs = cfunctions.getIovsForTag(m_crestTag);
     if(crestIOVs.empty()){
       ATH_MSG_WARNING("Load cache failed for " << m_foldername << ". No IOVs retrieved from the DB");
     }
@@ -369,31 +362,31 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
 
       nlohmann::json js =
       {
-        {"name", completeTag}
+        {"name", m_crestTag}
       };
 
       try{
         crestFSClient.createTag(js);
-        ATH_MSG_INFO("Tag " << completeTag << " saved to disk.");
+        ATH_MSG_INFO("Tag " << m_crestTag << " saved to disk.");
         ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
       }
       catch (const std::exception& e) {
-        ATH_MSG_WARNING("Data saving for tag " << completeTag << " failed: " << e.what());
+        ATH_MSG_WARNING("Data saving for tag " << m_crestTag << " failed: " << e.what());
       }
 
       try{
-        crestFSClient.storePayloadDump(completeTag, sinceT, reply);
-        ATH_MSG_INFO("Data (payload and IOV) saved for tag " << completeTag << ".");
+        crestFSClient.storePayloadDump(m_crestTag, sinceT, reply);
+        ATH_MSG_INFO("Data (payload and IOV) saved for tag " << m_crestTag << ".");
       }
       catch (const std::exception& e) {
-        ATH_MSG_WARNING("Data (payload and IOV) saving for tag " << completeTag<<" failed; " << e.what());
+        ATH_MSG_WARNING("Data (payload and IOV) saving for tag " << m_crestTag<<" failed; " << e.what());
       }
     }
 
     //
-    if (m_crest_tag != completeTag){
-      m_crest_tag = completeTag;
-      m_tag_info = cfunctions.getTagInfo(completeTag);
+    if (m_crest_tag != m_crestTag){
+      m_crest_tag = m_crestTag;
+      m_tag_info = cfunctions.getTagInfo(m_crestTag);
     }
 
     const std::string& nodeDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
@@ -1063,7 +1056,7 @@ IOVDbFolder::createTransientAddress(const std::vector<std::string> & symlinks){
 }
 
 std::unique_ptr<SG::TransientAddress>
-IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun, const unsigned int cacheTime, const std::string& globalTag) {
+IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun, const unsigned int cacheTime) {
   // preload Address from SG - does folder setup including COOL access
   // also set detector store location - cannot be done in constructor
   // as detector store does not exist yet in IOVDbSvc initialisation
@@ -1073,16 +1066,10 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
       CrestFunctions cfunctions(m_crestServer);
-      if (m_globaltag != globalTag){
-        m_globaltag = globalTag;
-        m_cresttagmap.clear();
-        m_cresttagmap = cfunctions.getGlobalTagMap(globalTag);
-      }
-      const std::string  & tagName=m_cresttagmap[m_foldername];
 
-      if (m_crest_tag != tagName){
-        m_crest_tag = tagName;
-        m_tag_info = cfunctions.getTagInfo(tagName);
+      if (m_crest_tag != m_crestTag){
+        m_crest_tag = m_crestTag;
+        m_tag_info = cfunctions.getTagInfo(m_crestTag);
       }
       m_folderDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
     } else {
@@ -1107,19 +1094,8 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   // setup channel list and folder type
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
-        CrestFunctions cfunctions(m_crestServer);
-        if (m_globaltag != globalTag){
-          m_globaltag = globalTag;
-          m_cresttagmap.clear();
-          m_cresttagmap = cfunctions.getGlobalTagMap(globalTag);
-        }       
-        const std::string  & crestTag=m_cresttagmap[m_foldername];
+        CrestFunctions cfunctions(m_crestServer); 
 
-        if (m_crest_tag != crestTag){
-          m_crest_tag = crestTag;
-          m_tag_info = cfunctions.getTagInfo(crestTag);
-        }
- 
         const std::string & payloadSpec = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");  
         std::string chanList = cfunctions.getTagInfoElement(m_tag_info,"channel_list");
         std::tie(m_channums, m_channames) = cfunctions.extractChannelListFromString(chanList);
@@ -1142,7 +1118,7 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
           int colsize = std::count(payloadSpec.begin(), payloadSpec.end(), ch);
 
 	  nlohmann::json tag_meta;
-          tag_meta["tagName"] = crestTag;
+          tag_meta["tagName"] = m_crestTag;
           tag_meta["description"] = "";
           tag_meta["chansize"] = n_size;
           tag_meta["colsize"] = colsize;
@@ -1161,11 +1137,11 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
 
           try{
             crestFSClient.createTagMetaInfo(tag_meta);;
-            ATH_MSG_INFO("Tag meta info for " << crestTag << " saved to disk.");
+            ATH_MSG_INFO("Tag meta info for " << m_crestTag << " saved to disk.");
             ATH_MSG_INFO("CREST Dump dir = " << crest_work_dir);
           }
           catch (const std::exception& e) {
-            ATH_MSG_WARNING("Tag meta info saving for tag " << crestTag << " failed: " << e.what());
+            ATH_MSG_WARNING("Tag meta info saving for tag " << m_crestTag << " failed: " << e.what());
           }
 	} // m_crestToFile
 
@@ -1248,13 +1224,9 @@ IOVDbFolder::resolveTag(const cool::IFolderPtr& fptr,const std::string& globalTa
     return false;
   }
   if(m_source=="CREST"){
-    if (m_globaltag != globalTag){
-      m_globaltag = globalTag;
-      m_cresttagmap.clear();
-      CrestFunctions cfunctions(m_crestServer);
-      m_cresttagmap = cfunctions.getGlobalTagMap(globalTag);
-    }
-    m_tag = m_cresttagmap[m_foldername];
+
+    m_tag = m_crestTag;
+
     ATH_MSG_DEBUG( "resolveTag returns " << m_tag );
     return true;
   }

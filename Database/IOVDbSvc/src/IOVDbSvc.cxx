@@ -399,7 +399,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
         if (folder->conn()==pThisConnection || (folder->conn()==nullptr && doMeta)) {
           std::unique_ptr<SG::TransientAddress> tad =
             folder->preLoadFolder( &(*m_h_tagInfoMgr), m_par_cacheRun.value(),
-                                   m_par_cacheTime.value(),m_globalTag);
+                                   m_par_cacheTime.value());
           if (oldconn!=pThisConnection) {
             // close old connection if appropriate
             if (m_par_manageConnections && oldconn!=nullptr) oldconn->setInactive();
@@ -946,6 +946,13 @@ StatusCode IOVDbSvc::setupFolders() {
   // read the Folders joboptions and setup the folder list
   // no wildcards are allowed
 
+  // getting the pairs: folder name - CREST tag name:
+  if (m_par_source == "CREST"){
+    IOVDbNamespace::CrestFunctions cfunctions(m_par_crestServer);
+    m_cresttagmap.clear();
+    m_cresttagmap = cfunctions.getGlobalTagMap(m_par_globalTag);
+  }
+  
   //1. Loop through folders
   std::list<IOVDbParser> allFolderdata;
   for (const auto & thisFolder : m_par_folders.value()) {
@@ -1043,10 +1050,17 @@ StatusCode IOVDbSvc::setupFolders() {
         return StatusCode::FAILURE;
       }
     }
+    
     // create the new folder, but only if a folder for this SG key has not
     // already been requested
+
+    std::string crestTag = "";
+    if (m_par_source == "CREST"){
+      crestTag = m_cresttagmap[folderdata.folderName()];
+    }
+    
     IOVDbFolder* folder=new IOVDbFolder(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
-                                        m_par_checklock, m_outputToFile.value(), m_par_source, m_crestToFile.value(), m_par_crestServer);
+                                        m_par_checklock, m_outputToFile.value(), m_par_source, m_crestToFile.value(), m_par_crestServer, crestTag);
     const std::string& key=folder->key();
     if (m_foldermap.find(key)==m_foldermap.end()) {  //This check is too weak. For POOL-based folders, the SG key is in the folder description (not known at this point).
       m_foldermap[key]=folder;
