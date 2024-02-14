@@ -20,12 +20,8 @@
 #include <map>
 
 FillAlignTrkInfo::FillAlignTrkInfo(const std::string& type, const std::string& name, const IInterface* parent) :
-  AthAlgTool(type, name, parent),
-  m_TrackSummaryTool("Trk::TrackSummaryTool/TrackSummaryTool")
-{
-  declareInterface<IFillAlignTrkInfo>(this);
-  declareProperty("TrackSummaryTool",m_TrackSummaryTool);
-}
+  AthAlgTool(type, name, parent)
+  {}
 
 StatusCode FillAlignTrkInfo::initialize()
 {

@@ -37,7 +37,7 @@ def FillAlignTRTHitsCfg(flags,name='FillAlignTRTHits',**kwargs) :
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg, TRT_StrawStatusSummaryToolCfg, TRT_StrawNeighbourSvcCfg
     kwargs.setdefault("TRTCalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
     kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
-    kwargs.setdefault("NeighbourSvc", acc.popToolsAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
+    kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
     
     acc.setPrivateTools(CompFactory.FillAlignTRTHits(name, **kwargs))
     
@@ -64,10 +64,7 @@ def FillAlignTRTHitsCfg(flags,name='FillAlignTRTHits',**kwargs) :
 # Tool to refit tracks
 def FitToolCfg(flags, name = "FitToolCfg" ,**kwargs):
     acc = ComponentAccumulator()  
-    
-    FittingTool = acc.popToolsAndMerge(CompFactory.FitTool(name, **kwargs))
-    
-    acc.setPrivateTools(FittingTool)
+    acc.setPrivateTools(CompFactory.FitTool(name, **kwargs))
     return acc
 
 # Tool to process R-t ntuple. Produces histograms and calibration text files.
@@ -143,7 +140,8 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
 
 
     # FIXME - FillAlignTRTHitsCfg and FillAlignTrkInfoCfg functions should be moved to TRT_CalibTools (where the .cxx/.h are stored)
-    kwargs.setdefault("AlignTrkTools", [acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags)), acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags))] )      
+    kwargs.setdefault("AlignTrkTools", [acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))), 
+                                        acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags)))] )      
            
     # SERGI - FitTool.cxx is empty?? why it is actually used? 
     # if "FitTools" not in kwargs:
