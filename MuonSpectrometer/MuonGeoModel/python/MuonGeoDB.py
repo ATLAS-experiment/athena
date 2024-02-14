@@ -46,18 +46,18 @@ def InitializeGeometryParameters_SQLite(sqliteDbReader):
     if dbData:
         if "LAYOUTNAME" in dbData[0].keys():
             params["Layout"] = dbData[0]["LAYOUTNAME"]
-        if "HASCSC" in dbData[0].keys():
-            params["HasCSC"] = (dbData[0]["HASCSC"] != 0)
-        if "HASSTGC" in dbData[0].keys():
-            params["HasSTGC"] = (dbData[0]["HASSTGC"] !=0)
-        if "HASMM" in dbData[0].keys():
-            params["HasMM"] = (dbData[0]["HASMM"] != 0)
-        if "HASMDT" in dbData[0].keys():
-            params["HasMDT"] = (dbData[0]["HASMDT"] != 0)
-        if "HASRPC" in dbData[0].keys():
-            params["HasRPC"] = (dbData[0]["HASRPC"] != 0)
-        if "HASTGC" in dbData[0].keys():
-            params["HasTGC"] = (dbData[0]["HASTGC"] != 0)
+        if "hasCsc" in dbData[0].keys():
+            params["HasCSC"] = (dbData[0]["hasCsc"] != 0)
+        if "hasSTGC" in dbData[0].keys():
+            params["HasSTGC"] = (dbData[0]["hasSTGC"] !=0)
+        if "hasMM" in dbData[0].keys():
+            params["HasMM"] = (dbData[0]["hasMM"] != 0)
+        if "hasMdt" in dbData[0].keys():
+            params["HasMDT"] = (dbData[0]["hasMdt"] != 0)
+        if "hasRpc" in dbData[0].keys():
+            params["HasRPC"] = (dbData[0]["hasRpc"] != 0)
+        if "hasTgc" in dbData[0].keys():
+            params["HasTGC"] = (dbData[0]["hasTgc"] != 0)
         if "isMuonR4Plugin" in dbData[0].keys():
             params["useR4Plugin"] = (dbData[0]["isMuonR4Plugin"] != 0)
     return params
