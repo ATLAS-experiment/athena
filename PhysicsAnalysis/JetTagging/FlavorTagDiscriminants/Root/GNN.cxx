@@ -6,6 +6,7 @@
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
 #include "FlavorTagDiscriminants/GNNOptions.h"
+#include "FlavorTagDiscriminants/StringUtils.h"
 
 #include "xAODBTagging/BTagging.h"
 #include "xAODJet/JetContainer.h"
@@ -63,26 +64,14 @@ namespace FlavorTagDiscriminants {
     m_trackSequenceBuilders = tsb;
     m_dataDependencyNames += td;
 
-    // Initialize data dependencies and output decorators.
-    FlavorTagDiscriminants::FTagDataDependencyNames dd;
-    std::set<std::string> rd;
-
     // Retrieve the configuration for the model outputs.
     OnnxUtil::OutputConfig gnn_output_config = m_onnxUtil->getOutputConfig();
 
-    std::tie(
-        m_decorators_float,
-        m_decorators_vecchar,
-        m_decorators_vecfloat,
-        m_decorators_tracklinks,
-        m_decorators_track_char,
-        m_decorators_track_float,
-        dd,
-        rd
-    ) = dataprep::createGNDecorators(gnn_output_config, options);
-
+    // Create the output decorators.
+    auto [dd, rd] = createDecorators(gnn_output_config, options);
     m_dataDependencyNames += dd;
 
+    // Check that all remaps have been used.
     rd.merge(rt);
     dataprep::checkForUnusedRemaps(options.remap_scalar, rd);
   }
@@ -116,7 +105,7 @@ namespace FlavorTagDiscriminants {
   }
 
   void GNN::decorateWithDefaults(const xAOD::Jet& jet) const {
-    for (const auto& dec: m_decorators_float) {
+    for (const auto& dec: m_decorators.jetFloat) {
       dec.second(jet) = m_defaultValue;
     }
   }
@@ -187,8 +176,8 @@ namespace FlavorTagDiscriminants {
     // ----------------
 
     // with old metadata, doesn't support writing aux tasks
-    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V0){
-      for (const auto& dec: m_decorators_float) {
+    if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V0) {
+      for (const auto& dec: m_decorators.jetFloat) {
         if (out_vf.at(dec.first).size() != 1){
           throw std::logic_error("expected vectors of length 1 for float decorators");
         }
@@ -198,23 +187,22 @@ namespace FlavorTagDiscriminants {
     // the new metadata format supports writing aux tasks
     else if (m_onnxUtil->getOnnxModelVersion() == OnnxModelVersion::V1) {
       // float outputs, e.g. jet probabilities
-      for (const auto& dec: m_decorators_float) {
+      for (const auto& dec: m_decorators.jetFloat) {
         dec.second(btag) = out_f.at(dec.first);
       }
       // vector outputs, e.g. track predictions
-      for (const auto& dec: m_decorators_vecchar) {
+      for (const auto& dec: m_decorators.jetVecChar) {
         dec.second(btag) = out_vc.at(dec.first);
       }
-      for (const auto& dec: m_decorators_vecfloat) {
+      for (const auto& dec: m_decorators.jetVecFloat) {
         dec.second(btag) = out_vf.at(dec.first);
       }
 
       // decorate links to the input tracks to the b-tagging object
-      for (const auto& dec: m_decorators_tracklinks) {
-        internal::TrackLinks links;
+      for (const auto& dec: m_decorators.jetTrackLinks) {
+        TrackLinks links;
         for (const xAOD::TrackParticle* it: input_tracks) {
           TrackLinks::value_type link;
-
           const auto* itc = dynamic_cast<const xAOD::TrackParticleContainer*>(
             it->container());
           link.toIndexedElement(*itc, it->index());
@@ -225,7 +213,7 @@ namespace FlavorTagDiscriminants {
 
       // decorate tracks directly
       if (m_decorate_tracks) {
-        for (const auto& dec: m_decorators_track_char) {
+        for (const auto& dec: m_decorators.trackChar) {
           std::vector<char>& values = out_vc.at(dec.first);
           if (values.size() != input_tracks.size()) {
             throw std::logic_error("Track aux task output size doesn't match the size of track list");
@@ -237,7 +225,7 @@ namespace FlavorTagDiscriminants {
           }
         }
 
-        for (const auto& dec: m_decorators_track_float) {
+        for (const auto& dec: m_decorators.trackFloat) {
           std::vector<float>& values = out_vf.at(dec.first);
           if (values.size() != input_tracks.size()) {
             throw std::logic_error("Track aux task output size doesn't match the size of track list");
@@ -264,6 +252,72 @@ namespace FlavorTagDiscriminants {
   }
   std::set<std::string> GNN::getConstituentAuxInputKeys() const {
     return m_dataDependencyNames.trackInputs;
+  }
+
+  std::tuple<FTagDataDependencyNames, std::set<std::string>>
+  GNN::createDecorators(const OnnxUtil::OutputConfig& outConfig, const FTagOptions& options) {
+    FTagDataDependencyNames deps;
+    Decorators decs;
+
+    std::map<std::string, std::string> remap = options.remap_scalar;
+    std::set<std::string> usedRemap;
+
+    // get the regex to rewrite the outputs if we're using flip taggers
+    auto flip_converters = dataprep::getNameFlippers(options.flip);
+    std::string context = "building negative tag b-btagger";
+
+    for (const auto& outNode : outConfig) {
+      // the node's output name will be used to define the decoration name
+      std::string dec_name = outNode.name;
+
+      // modify the deco name if we're using flip taggers
+      if (options.flip != FlipTagConfig::STANDARD) {
+        dec_name = str::sub_first(flip_converters, dec_name, context);
+      }
+
+      // remap the deco name if necessary
+      dec_name = str::remapName(dec_name, remap, usedRemap);
+
+      // keep track of dependencies for EDM bookkeeping
+      deps.bTagOutputs.insert(dec_name);
+
+      // Create decorators based on output type and target
+      switch (outNode.type) {
+        case OnnxOutput::OutputType::FLOAT:
+          m_decorators.jetFloat.emplace_back(outNode.name, Dec<float>(dec_name));
+          break;
+        case OnnxOutput::OutputType::VECCHAR:
+          if (!m_decorate_tracks or outNode.target == OnnxOutput::OutputTarget::JET) {
+            m_decorators.jetVecChar.emplace_back(outNode.name, Dec<std::vector<char>>(dec_name));
+          } else if (outNode.target == OnnxOutput::OutputTarget::TRACK) {
+            m_decorators.trackChar.emplace_back(outNode.name, Dec<char>(dec_name));
+          } else {
+            throw std::logic_error("Unknown VECCHAR output node target");
+          }
+          break;
+        case OnnxOutput::OutputType::VECFLOAT:
+          if (!m_decorate_tracks or outNode.target == OnnxOutput::OutputTarget::JET) {
+            m_decorators.jetVecFloat.emplace_back(outNode.name, Dec<std::vector<float>>(dec_name));
+          } else if (outNode.target == OnnxOutput::OutputTarget::TRACK) {
+            m_decorators.trackFloat.emplace_back(outNode.name, Dec<float>(dec_name));
+          } else {
+            throw std::logic_error("Unknown VECFLOAT output node target");
+          }
+          break;
+        default:
+          throw std::logic_error("Unknown output node type");
+      }
+    }
+
+    // Create decorators for links to the input tracks
+    if (!m_decorators.jetVecChar.empty() || !m_decorators.jetVecFloat.empty()) {
+      std::string name = m_onnxUtil->getModelName() + "_TrackLinks";
+      name = str::remapName(name, remap, usedRemap);
+      deps.bTagOutputs.insert(name);
+      m_decorators.jetTrackLinks.emplace_back(name, Dec<TrackLinks>(name));
+    }
+
+    return std::make_tuple(deps, usedRemap);
   }
 
 } // end of namespace FlavorTagDiscriminants

@@ -47,27 +47,33 @@ namespace FlavorTagDiscriminants {
 
       void initialize();
 
-      std::tuple<
-        std::map<std::string, float>,
-        std::map<std::string, std::vector<char>>,
-        std::map<std::string, std::vector<float>> >
-      runInference(
-        std::map<std::string, input_pair> & gnn_inputs) const;
+      struct InferenceOutput {
+        std::map<std::string, float> singleFloat;
+        std::map<std::string, std::vector<char>> vecChar;
+        std::map<std::string, std::vector<float>> vecFloat;
+      };
+
+      InferenceOutput runInference(std::map<std::string, input_pair>& gnn_inputs) const;
 
       const lwt::GraphConfig getLwtConfig() const;
       const nlohmann::json& getMetadata() const;
       const OutputConfig& getOutputConfig() const;
       OnnxModelVersion getOnnxModelVersion() const;
+      const std::string& getModelName() const;
 
     private:
-      nlohmann::json loadMetadata(const std::string& key) const;
+      const nlohmann::json loadMetadata(const std::string& key) const;
+      const std::string determineModelName() const;
+      
       nlohmann::json m_metadata;
-
       std::string m_path_to_onnx;
 
       std::unique_ptr< Ort::Session > m_session;
       std::unique_ptr< Ort::Env > m_env;
 
+      size_t m_num_inputs;
+      size_t m_num_outputs;
+      std::string m_model_name;
       std::vector<std::string> m_input_node_names;
       OutputConfig m_output_nodes;
 
@@ -75,5 +81,4 @@ namespace FlavorTagDiscriminants {
 
   }; // Class OnnxUtil
 } // end of FlavorTagDiscriminants namespace
-
 #endif //ONNXUTIL_H
