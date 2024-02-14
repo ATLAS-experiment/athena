@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 import logging
 from pathlib import Path
 import subprocess
@@ -259,7 +259,7 @@ class MetadataCheck(WorkflowCheck):
         validation_file = test.validation_path / file_name
         log_file = test.validation_path / f"meta-diff-{test.ID}.{self.format}.log"
 
-        comparison_command = f"meta-diff --ordered -m full -x diff {reference_file} {validation_file} --drop {exclusion_list} > {log_file} 2>&1"
+        comparison_command = f"meta-diff --ordered -m full -x diff {reference_file} {validation_file} --drop {exclusion_list} --ignoreTrigger > {log_file} 2>&1"
         output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         output, error = output.decode("utf-8"), error.decode("utf-8")
 

@@ -39,6 +39,16 @@ lite_TagInfo_keys_to_keep = [
     'beam_energy', 'beam_type', 'GeoAtlas', 'IOVDbGlobalTag',
     'AODFixVersion', 'project_name', 'mc_campaign']
 
+trigger_keys = [
+    'TriggerConfigInfo',
+    'TriggerMenu', 'TriggerMenuJson_BG', 'TriggerMenuJson_HLT', 'TriggerMenuJson_HLTMonitoring', 'TriggerMenuJson_HLTPS', 'TriggerMenuJson_L1', 'TriggerMenuJson_L1PS',
+    '/TRIGGER/HLT/Groups', '/TRIGGER/HLT/HltConfigKeys', '/TRIGGER/HLT/Menu', '/TRIGGER/HLT/PrescaleKey', '/TRIGGER/HLT/Prescales',
+    '/TRIGGER/LVL1/ItemDef', '/TRIGGER/LVL1/Lvl1ConfigKey', '/TRIGGER/LVL1/Menu', '/TRIGGER/LVL1/Prescales', '/TRIGGER/LVL1/Thresholds',
+    'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenu', 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_BG', 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT',
+    'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTMonitoring', 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLTPS',
+    'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1', 'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1PS',
+]
+
 
 def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = [],
                   unique_tag_info_values = True, ignoreNonExistingLocalFiles=False):
