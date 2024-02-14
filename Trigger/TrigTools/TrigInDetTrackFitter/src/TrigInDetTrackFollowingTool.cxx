@@ -172,8 +172,8 @@ TrigInDetTrackFollowingTool::TrigInDetTrackFollowingTool(const std::string& t,
 StatusCode TrigInDetTrackFollowingTool::initialize() {
 
   ATH_CHECK( m_fieldCondObjInputKey.initialize());
-  ATH_CHECK( m_pixcontainerkey.initialize() );
-  ATH_CHECK( m_sctcontainerkey.initialize() );
+  ATH_CHECK( m_pixcontainerkey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_sctcontainerkey.initialize(SG::AllowEmpty) );
 
   return StatusCode::SUCCESS;
 }
