@@ -11,13 +11,14 @@ if __name__=="__main__":
     PlotterConfig = PlotterConfigurator(["CPU_growing", "GPU_growing"], ["growing"])
     
     flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
-    flags.CaloRecGPU.DoMonitoring = True
-    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.CaloRecGPU.Default.DoMonitoring = True
+    flags.CaloRecGPU.Default.ClustersOutputName="CaloCalTopoClustersNew"
     flags.lock()
+    flagsActive = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "CaloRecGPU.Default")
 
-    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flagsActive,perfmon)
 
-    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestGrow = True, PlotterConfigurator = PlotterConfig))
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flagsActive, TestGrow = True, PlotterConfigurator = PlotterConfig))
 
 
     topoAcc.run(numevents)

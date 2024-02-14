@@ -4,10 +4,52 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaCommon.SystemOfUnits import MeV, ns, cm, deg
 
 def createFlagsCaloRecGPU():
+    """
+    Top level flag generator for CaloRecGPU
+ 
+    The list of available CaloRecGPU flag subdomains is populated below the first time flags.CaloRecGPU is called to either set or get any sub-flag.
+
+    The central hook to this comes from Control/AthenaConfiguration/python/AllConfigFlags.py
+
+    The CaloRecGPU package must be compiled otherwise this will silently fail.
+
+    All CaloRecGPU flag subdomains should be listed below. They will be similarly be populated only on-demand.
+    """
+
+    flags = AthConfigFlags()
+    flags.addFlagsCategory('CaloRecGPU.Default', _createDefaultSubFlagsCaloRecGPU, prefix=True)
+    flags.addFlagsCategory('CaloRecGPU.LocalCalibration', _createLCSubFlagsCaloRec, prefix=True)
+    flags.addFlagsCategory('CaloRecGPU.HLT', _createHLTSubFlagsCaloRec, prefix=True)
+    return flags
+
+def _createLCSubFlagsCaloRec():
+    """
+    Generate CaloRecGPU flags for a particular flag subdomain
+ 
+    Calls the function to generate a new set of default CaloRecGPU flags, and then updates the defaults as required for this specific subdomain "LocalCalibration".
+    This _createLCSubFlagsCaloRec is provided as an example of a subdomain with an updated default value for the ClustersOutputName flag. 
+    """
+    flags = _createDefaultSubFlagsCaloRecGPU()
+    flags.ClustersOutputName = "CaloTopoClusters"
+    return flags 
+
+def _createHLTSubFlagsCaloRec():
+    flags = _createDefaultSubFlagsCaloRecGPU()
+    flags.CellsName = "CaloCellsFS"
+    flags.ClustersOutputName = "HLT_TopoCaloClustersFS"
+    return flags
+
+def _createDefaultSubFlagsCaloRecGPU():
+    """
+    Generate a new default CaloRecGPU flags domain
+ 
+    Generates a full suite of CaloRecGPU flags for a specific subdomain, the prefixing of the subdomain is handled by the caller.
+    Sets the most generic default parameters or default parameter lambda function logic for each flag, this can be overridden if needed by specific subdomains. 
+    """
     flags = AthConfigFlags()
     flags.addFlag('MeasureTimes', True)
     flags.addFlag('CellsName', "AllCalo")
-    flags.addFlag('ClustersOutputName',"ClustersOut")
+    flags.addFlag('ClustersOutputName', "CaloCalTopoClusters")
     flags.addFlag('FillMissingCells', False)
     flags.addFlag('MissingCellsToFill', [])
     flags.addFlag('ClusterSize', 'Topo_420')
@@ -24,10 +66,10 @@ def createFlagsCaloRecGPU():
     flags.addFlag('RestrictHECIWandFCalNeighbors',False)
     flags.addFlag('RestrictPSNeighbors',True)
     flags.addFlag('AlsoRestrictPSOnGPUSplitter',False)
-    flags.addFlag('TwoGaussianNoise',True)
-    flags.addFlag('SeedCutsInT',False)
-    flags.addFlag('CutOOTseed',False)
-    flags.addFlag('UseTimeCutUpperLimit',False)
+    flags.addFlag('TwoGaussianNoise', lambda prevFlags: prevFlags.Calo.TopoCluster.doTwoGaussianNoise)
+    flags.addFlag('SeedCutsInT', lambda prevFlags: prevFlags.Calo.TopoCluster.doTimeCut)
+    flags.addFlag('CutOOTseed', lambda prevFlags: prevFlags.Calo.TopoCluster.extendTimeCut and prevFlags.Calo.TopoCluster.doTimeCut)
+    flags.addFlag('UseTimeCutUpperLimit', lambda prevFlags: prevFlags.Calo.TopoCluster.useUpperLimitForTimeCut)
     flags.addFlag('TimeCutUpperLimit',20.0)
     flags.addFlag('TreatL1PredictedCellsAsGood',True)
     flags.addFlag('UseEM2CrossTalk',False)
@@ -39,11 +81,11 @@ def createFlagsCaloRecGPU():
     flags.addFlag('SplitterSecondarySamplingNames',["EMB1","EME1", "TileBar0","TileBar1","TileBar2", "TileExt0","TileExt1","TileExt2", "HEC0","HEC1","HEC2","HEC3", "FCAL1","FCAL2"])
     flags.addFlag('SplitterShareBorderCells',True)
     flags.addFlag('EMShowerScale',5.0*cm)
-    flags.addFlag('SplitterUseNegativeClusters',True)
-    flags.addFlag('UseAbsEnergyMoments',True)
+    flags.addFlag('SplitterUseNegativeClusters', lambda prevFlags: prevFlags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute)
+    flags.addFlag('UseAbsEnergyMoments', lambda prevFlags: prevFlags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute)
     flags.addFlag('MomentsMaxAxisAngle',20*deg)
     flags.addFlag('MomentsMinBadLArQuality',4000)
-    MomentsToCalculate=[ "FIRST_PHI",
+    MomentsToCalculateOnline=[ "FIRST_PHI",
                                     "FIRST_ETA",
                                     "SECOND_R",
                                     "SECOND_LAMBDA",
@@ -78,34 +120,15 @@ def createFlagsCaloRecGPU():
                                     "MASS",
                                     "SECOND_TIME",
                                     "NCELL_SAMPLING" ]
-    flags.addFlag('MomentsToCalculate',MomentsToCalculate)
+    MomentsToCalculateOffline = MomentsToCalculateOnline + ["ENG_BAD_HV_CELLS","N_BAD_HV_CELLS"]
+    flags.addFlag('MomentsToCalculate', lambda prevFlags: MomentsToCalculateOnline if prevFlags.Common.isOnline else MomentsToCalculateOffline )
     flags.addFlag('MomentsMinRLateral',4*cm)
     flags.addFlag('MomentsMinLLongitudinal',10*cm)
     flags.addFlag('OutputCountsToFile',False)
     flags.addFlag('OutputClustersToFile',True)
     flags.addFlag('DoMonitoring',False)
-    flags.addFlag('NumPreAllocatedDataHolders',1) # to avoid crashes
+    flags.addFlag('NumPreAllocatedDataHolders', lambda prevFlags: max(prevFlags.Concurrency.NumThreads, 1)) # Avoids 0 when running serial athena
     #If True, use the original criteria
     #(which disagree with the GPU implementation)
     flags.addFlag('UseOriginalCriteria',False)
     return flags
-
-def configFlagsCaloRecGPU(flags,categoryFlags,cellsName="AllCalo",ClustersOutputName="Clusters"):
-    categoryFlags.CellsName=cellsName
-    categoryFlags.ClustersOutputName=ClustersOutputName
-    if (flags.hasFlag('Concurrency.NumThreads')):
-        categoryFlags.NumPreAllocatedDataHolders = flags.Concurrency.NumThreads
-    if ( categoryFlags.NumPreAllocatedDataHolders < 1 ):
-       categoryFlags.NumPreAllocatedDataHolders=1
-    if (flags.hasFlag('Calo.TopoCluster.doTwoGaussianNoise')):
-        categoryFlags.TwoGaussianNoise = flags.Calo.TopoCluster.doTwoGaussianNoise
-    if (flags.hasCategory('flags.Calo.TopoCluster')):
-        categoryFlags.SeedCutsInT = flags.Calo.TopoCluster.doTimeCut
-        categoryFlags.CutOOTseed = flags.Calo.TopoCluster.extendTimeCut and flags.Calo.TopoCluster.doTimeCut
-        categoryFlags.UseTimeCutUpperLimit = flags.Calo.TopoCluster.useUpperLimitForTimeCut
-    if (flags.hasCategory('flags.Calo.TopoCluster')):
-         categoryFlags.SplitterUseNegativeClusters = flags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute
-         categoryFlags.UseAbsEnergyMoments = flags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute
-    if (flags.hasCategory('flags.Common')):
-        if not flags.Common.isOnline:
-            categoryFlags.MomentsToCalculate += ["ENG_BAD_HV_CELLS","N_BAD_HV_CELLS"]

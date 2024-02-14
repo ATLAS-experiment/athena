@@ -11,12 +11,13 @@ if __name__=="__main__":
 
     flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
 
-    flags.CaloRecGPU.OutputCountsToFile = True
-    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.CaloRecGPU.Default.OutputCountsToFile = True
+    flags.CaloRecGPU.Default.ClustersOutputName="CaloCalTopoClustersNew"
     flags.lock()
+    flagsActive = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "CaloRecGPU.Default")
     
-    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
-    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestGrow = True, TestSplit = True, DoCrossTests = True))
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flagsActive,perfmon)
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flagsActive, TestGrow = True, TestSplit = True, DoCrossTests = True))
 
     topoAcc.run(numevents)
 

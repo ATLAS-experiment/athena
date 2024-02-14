@@ -136,7 +136,6 @@ def CaloL0RingerPreCfg(flags):
     flags.Trigger.ExtraEDMList=[('xAOD::TrigRingerRingsContainer#RingerGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo')]
 
 def CaloL0RingerCfg(flags):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD,addToAOD
     extraContent=['xAOD::TrigRingerRingsContainer#RingerGlobal','xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.','xAOD::TrigEMClusterContainer#CaloClustersGlobal','xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.']
     acc = ComponentAccumulator()
@@ -212,8 +211,9 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
 
     topoMaker = acc.popToolsAndMerge(CaloTopoClusterToolCfg(flags, cellsname=cells))
     topoMaker.RestrictPSNeighbors = False
-    if (flags.hasFlag('CaloRecGPU.UseOriginalCriteria')):
-       topoMaker.UseGPUCriteria=flags.CaloRecGPU.UseOriginalCriteria
+    # TODO - Don't use hasFlag here, use another concrete flag instead
+    if flags.hasFlag("CaloRecGPU.ActiveConfig"):
+       topoMaker.UseGPUCriteria=flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria
     listClusterCorrectionTools = []
     if doLC :
        from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -335,12 +335,8 @@ TrigEgammaKeys_LRT = getTrigEgammaKeys(name = '_LRT')
 TrigEgammaKeys_HI = getTrigEgammaKeys(ion = True)
 
 def prepareFlagsGPUHLT(flags):
-    from CaloRecGPU.CaloRecGPUFlags import createFlagsCaloRecGPU, configFlagsCaloRecGPU
-    flags.addFlagsCategory('CaloRecGPU',createFlagsCaloRecGPU,prefix=True)
     flags.LAr.doHVCorr=True
-    configFlagsCaloRecGPU(flags,flags.CaloRecGPU,cellsName="CaloCellsFS",ClustersOutputName="HLT_TopoCaloClustersFS")
-    if ( flags.CaloRecGPU.NumPreAllocatedDataHolders < 1 ):
-       flags.CaloRecGPU.NumPreAllocatedDataHolders=1
+    # NOTE: "HLT" flag subdomain defaults moved to CaloRecGPUFlags
     return
 
 @AccumulatorCache
@@ -358,7 +354,8 @@ def hltCaloTopoClusteringCfg(
     acc.merge(
         hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+nameSuffix, roisKey=roisKey, CellsName=CellsName, monitorCells=monitorCells, doTau = doTau)
     )
-    if flags.hasFlag('CaloRecGPU.CellsName') and (nameSuffix == "FS") and (not doTau): 
+    # TODO - Don't use hasFlag here, use another concrete flag instead
+    if flags.hasFlag("CaloRecGPU.ActiveConfig") and (nameSuffix == "FS") and (not doTau):
        from CaloRecGPU.CaloRecGPUConfig import HybridClusterProcessorCfg
        hyb = HybridClusterProcessorCfg(flags, namePrefix + "HLTCaloClusterMaker"+nameSuffix)
        acc.merge(hyb)
