@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation file for Athena-Rivet interface
@@ -420,8 +420,17 @@ const HepMC::GenEvent* Rivet_i::checkEvent(const HepMC::GenEvent& event, const E
 }
 
 void Rivet_i::MeV2GeV(HepMC::GenEvent* evt) {
+#ifdef HEPMC3
   for (auto& p: evt->particles()) {
     p->set_momentum(p->momentum()*0.001);
+#else
+  for (HepMC::GenParticlePtr p: *evt) {
+    const HepMC::FourVector& mom = p->momentum();
+    p->set_momentum(HepMC::FourVector (mom.px()*0.001,
+                                       mom.py()*0.001,
+                                       mom.pz()*0.001,
+                                       mom.e()*0.001));
+#endif
     p->set_generated_mass(p->generated_mass()*0.001);
   }
 }
