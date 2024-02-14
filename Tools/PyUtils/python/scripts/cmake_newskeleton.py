@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2014 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.scripts.cmt_newanalysisalg
 # @purpose streamline and ease the creation of new athena algs
@@ -95,6 +95,7 @@ def main(args):
         atlas_install_python_modules( python/*.py )
         atlas_install_joboptions( share/*.py )
         atlas_install_data( data/* )
+        atlas_install_scripts( scripts/* )
         # You can access your data from code using path resolver, e.g.
         # PathResolverFindCalibFile("%(pkg_name)s/file.txt")
 
