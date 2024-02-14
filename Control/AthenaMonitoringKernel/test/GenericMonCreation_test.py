@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 import copy
 import unittest
 import json
 import pickle
-import sys
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -169,41 +168,9 @@ class TestGMT(unittest.TestCase):
         self.assertEqual(d['y_vs_x_0']['weight'], 'z')
         self.assertEqual(d['y_vs_x_1']['weight'], 'z')
 
-    def test_configurableTypeWithoutFlags(self):
-        with self.assertRaises(RuntimeError):
-            _ = GenericMonitoringTool('gmt')
 
-
-class TestLegacy(TestGMT):
-    """All the same tests as above but now with legacy Configurables"""
-
-    @classmethod
-    def setUpClass(cls):
-        # force Run-2 config in CompFactory
-        sys.modules['AthenaCommon.Include'] = 'dummy'
-
-    @classmethod
-    def tearTownClass(cls):
-        sys.modules.pop('AthenaCommon.Include')
-
-    def test_legacy(self):
-        from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-        self.assertFalse(isComponentAccumulatorCfg())
-
-    def test_configurableTypeWithFlags(self):
-        flags = initConfigFlags()
-        gmt = GenericMonitoringTool(flags, 'gmt')
-        self.assertCheckName(gmt, 'gmt')
-        self.assertFalse(hasattr(gmt,'__cpp_type__'))
-
-    def test_configurableTypeWithNoneFlags(self):
-        gmt = GenericMonitoringTool(None, 'gmt')
-        self.assertCheckName(gmt, 'gmt')
-        self.assertFalse(hasattr(gmt,'__cpp_type__'))
-
-
-class TestGaudiConfig2(unittest.TestCase):
-    """Tests specific to GaudiConfig2"""
+class TestCA(unittest.TestCase):
+    """ComponentAccumulator related tests"""
 
     @classmethod
     def setUpClass(cls):
