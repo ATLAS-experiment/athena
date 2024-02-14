@@ -24,13 +24,6 @@ def lock_and_restrict(flags):
    flags.Concurrency.NumThreads = bomb
    flags.Concurrency.NumConcurrentEvents = bomb
 
-   #-------------------------------------------------------------
-   # Switch off CPS mechanism if we only run selected
-   # signatures or chains, to avoid single-chain sets
-   #-------------------------------------------------------------
-   if flags.Trigger.selectChains or len(flags.Trigger.enabledSignatures) == 1:
-      flags.Trigger.disableCPS = True
-
    flags.lock()
 
 

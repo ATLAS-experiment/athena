@@ -383,6 +383,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     if doTriggerRecoFlags:
         flags.join( createTriggerRecoFlags() )
 
+        # Disable the CPS system if the restricted menu flags are active
+        flags.Trigger.disableCPS = lambda prevFlags: prevFlags.Trigger.selectChains or len(prevFlags.Trigger.enabledSignatures)==1
+
     return flags
 
 
