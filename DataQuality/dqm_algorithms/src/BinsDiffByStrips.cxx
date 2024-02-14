@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinsDiffByStrips.cxx calculates average bin value for a strip of bins and finds bins that are outliers from that strip. DQ decision based on worst bin only, not number of bad bins.
@@ -981,7 +981,7 @@ dqm_algorithms::BinsDiffByStrips::printDescription(std::ostream& out)
   out<<"Optional Parameter: TestConsistencyWithErrors : Switch on FindOutliersUsingErrors, UseMeanErrorForScale, and DoChiSquaredTest and base the DQ decision on the Chi-Squared result"<<std::endl;
 }
 void
-dqm_algorithms::BinsDiffByStrips::find_n(std::string name_tmp,int& name_flag){
+dqm_algorithms::BinsDiffByStrips::find_n(const std::string& name_tmp,int& name_flag){
   int where = name_tmp.find_last_of("_");
   std::string name;
   name = name_tmp.substr(where+1);

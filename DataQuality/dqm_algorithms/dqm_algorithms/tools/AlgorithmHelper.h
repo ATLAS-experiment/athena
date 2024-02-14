@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file AlgorithmHelper.cpp does basic functions to get dqm_core::Results from algorithms 
@@ -168,10 +168,10 @@ namespace dqm_algorithms
     dqm_core::Result::Status
       BestCaseAddStatus(dqm_core::Result::Status baseStatus, dqm_core::Result::Status addedStatus, float weight = 1.0); 
     
-    std::pair<double,double> CalcBinsProbChisq(std::vector<double> inputval,std::vector<double> inputerr,
+    std::pair<double,double> CalcBinsProbChisq(const std::vector<double>& inputval,const std::vector<double>& inputerr,
 					       double x0, double x0_err);
-    std::pair<double,double> CalcBinsProbChisq(std::vector<double> inputval,std::vector<double> inputerr,
-					       std::vector<double> x0,std::vector<double> x0_err);
+    std::pair<double,double> CalcBinsProbChisq(const std::vector<double>& inputval,const std::vector<double>& inputerr,
+					       const std::vector<double>& x0,const std::vector<double>& x0_err);
  
     void MergePastMinStat(std::vector<std::vector<tools::binContainer> >& strips, int minStat);
 

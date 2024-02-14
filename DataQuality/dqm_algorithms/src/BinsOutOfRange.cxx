@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  BinsOutOfRange.cxx is to pick out the problematic bins beyond [RANGE_D,RANGE_U]. 
@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-bool mySortfunc(bin3 i,bin3 j){return ((i.m_value) > (j.m_value));}
+bool mySortfunc(const bin3& i,const bin3& j){return ((i.m_value) > (j.m_value));}
 static dqm_algorithms::BinsOutOfRange myInstance;
 
 dqm_algorithms::BinsOutOfRange::BinsOutOfRange( )

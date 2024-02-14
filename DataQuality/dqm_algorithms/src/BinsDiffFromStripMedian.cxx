@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  BinsDiffFromStripMedian.cxx is to pick out the problematic bins in 2D histogram assuming that y-axis(the phi direction) be symmetric. 
@@ -20,8 +20,8 @@
 #include <iostream>
 #include <string>
 
-bool mySortfunc(bin i,bin j){return (i.m_value > j.m_value);}
-bool mySortfunc_ratio(bin i, bin j){return (i.m_outstandingRatio> j.m_outstandingRatio);}
+bool mySortfunc(const bin& i,const bin& j){return (i.m_value > j.m_value);}
+bool mySortfunc_ratio(const bin& i, const bin& j){return (i.m_outstandingRatio> j.m_outstandingRatio);}
 static dqm_algorithms::BinsDiffFromStripMedian myInstance;
 
 dqm_algorithms::BinsDiffFromStripMedian::BinsDiffFromStripMedian( )

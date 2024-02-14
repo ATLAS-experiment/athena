@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  KillBinsByStrip.cxx
@@ -21,8 +21,8 @@
 #include <cmath>
 
 
-bool mySortfunc(bin2 i,bin2 j){return (i.m_value > j.m_value);}
-bool mySortfunc_ratio(bin2 i, bin2 j){return (i.m_deviation> j.m_deviation);}
+bool mySortfunc(const bin2& i,const bin2& j){return (i.m_value > j.m_value);}
+bool mySortfunc_ratio(const bin2& i, const bin2& j){return (i.m_deviation> j.m_deviation);}
 static dqm_algorithms::KillBinsByStrip myInstance;
 
 //_________________________________________________________________________________________
