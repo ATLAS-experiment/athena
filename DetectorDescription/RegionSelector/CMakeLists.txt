@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RegionSelector )
@@ -26,9 +26,11 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 foreach(det Pixel SCT TRT LAr Tile RPC TGC MDT STGC MM)  # CSC disabled since Run-3
    atlas_add_test( RegSelTool_${det}
                    SCRIPT python -m RegionSelector.RegSelToolConfig ${det}
+                   PRIVATE_WORKING_DIRECTORY
                    POST_EXEC_SCRIPT noerror.sh )
 endforeach()
 
 atlas_add_test( RegSelTool_All
                 SCRIPT python -m RegionSelector.RegSelToolConfig Pixel SCT TRT LAr Tile RPC TGC MDT STGC MM
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh )
