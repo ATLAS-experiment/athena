@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 import itertools
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -101,7 +101,7 @@ def generateMenuMT(flags):
     log.info("Applying HLT prescales")
     (menu.L1Prescales, menu.HLTPrescales, menu.chainsInMenu) = MenuPrescaleConfig(HLTMenuConfig, flags)
     applyHLTPrescale(HLTMenuConfig, menu.HLTPrescales, menu.signaturesOverwritten)
- 
+
     # make sure that we didn't generate any steps that are fully empty in all chains
     # if there are empty steps, remove them
     finalListOfChainConfigs = menu.resolveEmptySteps(finalListOfChainConfigs)
@@ -115,6 +115,14 @@ def generateMenuMT(flags):
     if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
         from TrigGenericAlgs.TrigGenericAlgsConfig import prefetchingInitialRoIConfig
         menuAcc.merge( prefetchingInitialRoIConfig(flags, HLTMenuConfig.configsList()), 'HLTBeginSeq')
+
+    log.info("Checking the L1HLTConsistency...")
+    from TriggerMenuMT.HLT.Config.Validation.CheckL1HLTConsistency import checkL1HLTConsistency
+    checkL1HLTConsistency(flags)
+
+    log.info("Checking the Coherent Prescale assignments...")
+    from TriggerMenuMT.HLT.Config.Validation.CheckCPSGroups import checkCPSGroups
+    checkCPSGroups(HLTMenuConfig.dictsList())
 
     return menuAcc
     
