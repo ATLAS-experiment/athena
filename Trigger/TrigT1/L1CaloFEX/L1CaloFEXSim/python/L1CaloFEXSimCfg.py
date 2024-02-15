@@ -74,7 +74,7 @@ def TriggerTowersInputCfg(flags):
         return LVL1CaloRun2ReadBSCfg(flags)
 
 
-def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, outputSuffix=""):
+def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulatedTowers"],deadMaterialCorrections=True, outputSuffix="", simulateAltTau=False):
     from AthenaConfiguration.Enums import Format
 
     acc = ComponentAccumulator()
@@ -155,6 +155,11 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         acc.addEventAlgo(eFEXInputs)
         acc.addEventAlgo(eFEX)
 
+        if simulateAltTau:
+            eFEX.eFEXSysSimTool.Key_eFexAltTauOutputContainer="L1_eTauRoIAlt"
+            eFEX.eFEXSysSimTool.Key_eFexAltTauxTOBOutputContainer="L1_eTauxRoIAlt"
+
+
     if flags.Trigger.L1.dojFex:
         
         if flags.Input.Format is not Format.POOL:
@@ -229,7 +234,8 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         if flags.Trigger.L1.doeFex:
             check(eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer)
             check(eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer)
-            check(eFEX.eFEXSysSimTool.Key_eFexTauBDTOutputContainer)
+            if (simulateAltTau):
+                check(eFEX.eFEXSysSimTool.Key_eFexAltTauOutputContainer)
         if flags.Trigger.L1.dojFex:
             check(jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
             check(jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
@@ -262,10 +268,12 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         if flags.Trigger.L1.doeFex:
             eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer=getSimHandle("L1_eEMRoI")
             eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer=getSimHandle("L1_eTauRoI")
-            eFEX.eFEXSysSimTool.Key_eFexTauBDTOutputContainer=getSimHandle("L1_eTauBDTRoI")
             eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer=getSimHandle("L1_eEMxRoI")
             eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer=getSimHandle("L1_eTauxRoI")
-            eFEX.eFEXSysSimTool.Key_eFexTauBDTxTOBOutputContainer=getSimHandle("L1_eTauBDTxRoI")
+            if simulateAltTau:
+                eFEX.eFEXSysSimTool.Key_eFexAltTauOutputContainer=getSimHandle("L1_eTauRoIAlt")
+                eFEX.eFEXSysSimTool.Key_eFexAltTauxTOBOutputContainer=getSimHandle("L1_eTauxRoIAlt")
+
         if flags.Trigger.L1.dojFex:
             jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer=getSimHandle("L1_jFexSRJetRoI")
             jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer=getSimHandle("L1_jFexLRJetRoI")

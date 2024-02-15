@@ -165,15 +165,6 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   # Run-3 L1Calo decoding
   ########################################
   if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1:
-    # Add a temporary flag _decodeTOBsOfflineDuringCommissioning to enable decoding TOBs in reco/monitoring jobs
-    # during commissioning of the phase-1 L1Calo system. Once the online decoding of TOBs in HLT is fully commissioned
-    # and running, the reco/monitoring jobs should always read the TOBs from HLT result instead of decoding them again,
-    # as the TOBs in HLT result are the objects linked to Trigger Decisions in the HLT Navigation and can be used for
-    # analysis and studies. The duplicated TOBs decoded offline are only needed as long as TOBs in HLT result may be
-    # missing because the decoding is not yet enabled in HLT. See ATR-26025 and ATR-26026.
-    _decodeTOBsOfflineDuringCommissioning = True  # TODO: Remove this and relevant code below once no longer needed
-    _extraOfflineTOBSuffix = '_OfflineCopy'
-
     #--------------------
     # eFex
     #--------------------
@@ -188,19 +179,6 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
           xTOBs=False,
           multiSlice=False
         ))
-      # Reco/monitoring case with temporarily added decoding of TOBs
-      elif _decodeTOBsOfflineDuringCommissioning:
-        eFexByteStreamTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
-          flags,
-          'eFexBSDecoderTool',
-          writeBS=False,
-          TOBs=True,
-          xTOBs=True,
-          multiSlice=True,
-          decodeInputs=flags.Trigger.L1.doCaloInputs
-        ))
-        eFexByteStreamTool.eEMContainerWriteKey.Path += _extraOfflineTOBSuffix
-        eFexByteStreamTool.eTAUContainerWriteKey.Path += _extraOfflineTOBSuffix
       # Reco/monitoring case (either online but downstream from HLT, or at Tier-0) with xTOB, input tower and multi-slice decoding
       else:
         eFexByteStreamTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
@@ -250,22 +228,6 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
         decoderTools += [jFexInputByteStreamTool]
         maybeMissingRobs += jFexInputByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
-      # Temporary addition of TOB decoding to reco/monitoring case:
-      if _decodeTOBsOfflineDuringCommissioning and not flags.Trigger.doHLT:
-        jFexRoiByteStreamTool_TOB = acc.popToolsAndMerge(jFexRoiByteStreamToolCfg(
-          flags,
-          'jFexBSDecoderTool_TOB',
-          writeBS=False,
-          xTOBs=False
-        ))
-        jFexRoiByteStreamTool_TOB.jJRoIContainerWriteKey.Path += _extraOfflineTOBSuffix
-        jFexRoiByteStreamTool_TOB.jLJRoIContainerWriteKey.Path += _extraOfflineTOBSuffix
-        jFexRoiByteStreamTool_TOB.jTauRoIContainerWriteKey.Path += _extraOfflineTOBSuffix
-        jFexRoiByteStreamTool_TOB.jEMRoIContainerWriteKey.Path += _extraOfflineTOBSuffix
-        jFexRoiByteStreamTool_TOB.jTERoIContainerWriteKey.Path += _extraOfflineTOBSuffix
-        jFexRoiByteStreamTool_TOB.jXERoIContainerWriteKey.Path += _extraOfflineTOBSuffix
-        decoderTools += [jFexRoiByteStreamTool_TOB]
-        maybeMissingRobs += jFexRoiByteStreamTool_TOB.ROBIDs
 
     #--------------------
     # gFex
@@ -280,26 +242,6 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
         ))
         decoderTools += [gFexByteStreamTool]
         maybeMissingRobs += gFexByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
-      # Reco/monitoring case with temporarily added decoding of TOBs
-      elif _decodeTOBsOfflineDuringCommissioning:
-        gFexByteStreamTool_TOB = acc.popToolsAndMerge(gFexByteStreamToolCfg(
-          flags,
-          'gFexBSDecoderTool_TOB',
-          writeBS=False
-        ))
-        gFexByteStreamTool_TOB.gFexRhoOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gFexSRJetOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gFexLRJetOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gScalarEJwojOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gMETComponentsJwojOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gMHTComponentsJwojOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gMSTComponentsJwojOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gMETComponentsNoiseCutOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gMETComponentsRmsOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gScalarENoiseCutOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        gFexByteStreamTool_TOB.gScalarERmsOutputContainerWriteKey.Path += _extraOfflineTOBSuffix
-        decoderTools += [gFexByteStreamTool_TOB]
-        maybeMissingRobs += gFexByteStreamTool_TOB.ROBIDs
 
       # Input towers decoding
       if flags.Trigger.L1.doCaloInputs:

@@ -407,6 +407,8 @@ TrigConf::L1ThrExtraInfo_eTAU::load()
                iso.addRangeValue(WorkingPoints_eTAU(c.second), etamin, etamax, priority, /*symmetric=*/ false);
             }
          }
+      } else if (x.first == "algoVersion") {
+	 m_algoVersion = x.second.getValue<unsigned int>();
       }
    }
 }
