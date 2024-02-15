@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 import os
@@ -39,6 +39,10 @@ def IOVDbSvcCfg(flags, **kwargs):
         kwargs['Folders'] = ['/TagInfo<metaOnly/>'] + kwargs['Folders']
     else:
         kwargs.setdefault('Folders', ['/TagInfo<metaOnly/>'])
+
+    # Select CREST backend if needed
+    if flags.IOVDb.GlobalTag.startswith('CREST-'):
+        kwargs.setdefault('Source', 'CREST')
 
     result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)
 
