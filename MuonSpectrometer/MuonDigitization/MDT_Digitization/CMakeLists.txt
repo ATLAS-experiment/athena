@@ -15,5 +15,3 @@ atlas_add_component( MDT_Digitization
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps AthenaKernel PileUpToolsLib StoreGateLib Identifier xAODEventInfo GaudiKernel GeneratorObjects MdtCalibData MdtCalibSvcLib MuonCondInterface MuonCondData MuonReadoutGeometry MuonDigitContainer MDT_Response MuonIdHelpersLib MuonSimData MuonSimEvent HitManagement PathResolver TrkDetDescrUtils EventPrimitives )
 
-# Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

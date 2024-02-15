@@ -17,8 +17,6 @@ atlas_add_component( TGC_Digitization
                                     GaudiKernel MuonSimEvent HitManagement xAODEventInfo GeneratorObjects MuonCondData 
                                     MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonSimData PathResolver RDBAccessSvcLib )
 
-# Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/*.dat )
 
