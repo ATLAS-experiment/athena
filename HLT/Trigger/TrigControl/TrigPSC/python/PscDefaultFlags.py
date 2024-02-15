@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''Functions setting default flags for generating online HLT python configuration'''
 
@@ -39,7 +39,7 @@ def defaultOnlineFlags():
     global _flags
     if _flags is None:
         setDefaultOnlineFlagsOldStyle()
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        _flags = ConfigFlags
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        _flags = initConfigFlags()
         setDefaultOnlineFlagsNewStyle(_flags)
     return _flags
