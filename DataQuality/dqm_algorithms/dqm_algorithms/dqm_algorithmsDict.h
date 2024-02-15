@@ -17,6 +17,7 @@
 #include "dqm_algorithms/AddReference_Bins_LessThan_Threshold.h"
 #include "dqm_algorithms/AddReference_Bins_NotEqual_Threshold.h"
 #include "dqm_algorithms/AFP_LBsOutOfRange.h"
+#include "dqm_algorithms/AFP_ToFEfficiency.h"
 #include "dqm_algorithms/All_Bins_Filled.h"
 #include "dqm_algorithms/AveragePrint.h"
 #include "dqm_algorithms/BasicGraphCheck.h"
