@@ -155,7 +155,7 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
                 chains += "'HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V',"
                 chains += "'HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF',"
-                flags += "'Muon','Bphysics'," if self._iseCA else 'doMuonSlice=True;doBphysicsSlice=True;'
+                flags += "'Muon','Bphysics'," if self._isCA else 'doMuonSlice=True;doBphysicsSlice=True;'
         if ( flags=='' ) : 
             print( "ERROR: no chains configured" )
 
