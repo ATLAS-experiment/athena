@@ -64,7 +64,7 @@ echo "Found ${NWARNING} WARNING, ${NERROR} ERROR and ${NFATAL} FATAL messages in
 
 #####################################################################
 # create histograms for dcube
-python /afs/cern.ch/user/m/mbarel/QualificationTask/MuonARTTests/athena/MuonSpectrometer/MuonValidation/MuonPRDTest/scripts/createDCubeSimHistograms.py --doMM --doSTGC
+python $Athena_DIR/bin/createDCubeSimHistograms.py --doMM --doSTGC
 exit_code=$?
 echo  "art-result: ${exit_code} DCubeSimHist"
 if [ ${exit_code} -ne 0 ]
