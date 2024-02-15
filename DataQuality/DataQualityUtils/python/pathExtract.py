@@ -8,12 +8,18 @@ import subprocess as sp
 import os 
 # Return the path of the output of tier0 monitoring
 
+def getStreamPrefix(stream):
+    prefix = {'express': 'express_', 'Egamma': 'physics_', 'CosmicCalo': 'physics_', 'JetTauEtmiss': 'physics_', 'Main': 'physics_', 'ZeroBias': 'physics_', 'MinBias': 'physics_', 'UPC': 'physics_', 'HardProbes':'physics_'}
+    if any(pref in stream for pref in prefix.values()):
+        # Prefix already in stream name
+        fullstream = stream
+    else:
+        fullstream = prefix[stream]+stream
+    return fullstream
 
 def returnEosHistPath(run, stream, amiTag, tag="data16_13TeV"):
-    prefix = {'express': 'express_', 'Egamma': 'physics_', 'CosmicCalo': 'physics_',
-              'JetTauEtmiss': 'physics_', 'Main': 'physics_', 'ZeroBias': 'physics_', 'MinBias': 'physics_'}
     path = '/eos/atlas/atlastier0/rucio/'+tag + \
-        '/'+prefix[stream]+stream+'/00'+str(run)+'/'
+        '/'+getStreamPrefix(stream)+'/00'+str(run)+'/'
     listOfDirs = [ path+p for p in os.listdir(path) ]
     for iDir in listOfDirs:
         if ("HIST.%s" % (amiTag) in iDir):
@@ -30,10 +36,8 @@ def returnEosHistPath(run, stream, amiTag, tag="data16_13TeV"):
 
 
 def returnEosHistPathLB(run, lb0, lb1, stream, amiTag, tag="data16_13TeV"):
-    prefix = {'express': 'express_', 'Egamma': 'physics_', 'CosmicCalo': 'physics_',
-              'JetTauEtmiss': 'physics_', 'Main': 'physics_', 'ZeroBias': 'physics_'}
     path = '/eos/atlas/atlastier0/tzero/prod/'+tag + \
-        '/'+prefix[stream]+stream+'/00'+str(run)+'/'
+        '/'+getStreamPrefix(stream)+'/00'+str(run)+'/'
     P = sp.Popen(['/usr/bin/eos', 'ls', path], stdout=sp.PIPE, stderr=sp.PIPE)
     p = P.communicate()[0].decode("utf-8")
     listOfFiles = p.split('\n')
@@ -42,7 +46,7 @@ def returnEosHistPathLB(run, lb0, lb1, stream, amiTag, tag="data16_13TeV"):
     for iFile in listOfFiles:
         if ("recon.HIST.%s" % (amiTag) in iFile and "LOG" not in iFile):
             path = '/eos/atlas/atlastier0/tzero/prod/'+tag+'/' + \
-                prefix[stream]+stream+'/00'+str(run)+'/'+iFile
+                getStreamPrefix(stream)+'/00'+str(run)+'/'+iFile
             P = sp.Popen(['/usr/bin/eos', 'ls', path],
                          stdout=sp.PIPE, stderr=sp.PIPE)
             p = P.communicate()[0].decode("utf-8")
@@ -53,7 +57,7 @@ def returnEosHistPathLB(run, lb0, lb1, stream, amiTag, tag="data16_13TeV"):
 #               print(iFile2,ilb)
                     if (lb0 <= ilb and ilb <= lb1):
                         path = '/eos/atlas/atlastier0/tzero/prod/'+tag+'/' + \
-                            prefix[stream]+stream+'/00' + \
+                            getStreamPrefix(stream)+'/00' + \
                             str(run)+'/'+iFile+'/'+iFile2
                         pathList.append(path)
 
@@ -66,12 +70,10 @@ def returnEosHistPathLB(run, lb0, lb1, stream, amiTag, tag="data16_13TeV"):
 
 
 def returnEosTagPath(run, stream, amiTag="f", tag="data16_13TeV"):
-    prefix = {'express': 'express_', 'Egamma': 'physics_', 'CosmicCalo': 'physics_',
-              'JetTauEtmiss': 'physics_', 'Main': 'physics_', 'ZeroBias': 'physics_'}
     found = False
     listOfFiles = []
     path = '/eos/atlas/atlastier0/rucio/'+tag + \
-        '/'+prefix[stream]+stream+'/00'+str(run)+'/'
+        '/'+getStreamPrefix(stream)+'/00'+str(run)+'/'
     P = sp.Popen(['/usr/bin/eos', 'ls', path], stdout=sp.PIPE, stderr=sp.PIPE)
     p = P.communicate()
     if p[1] == '':
@@ -101,12 +103,10 @@ def returnEosTagPath(run, stream, amiTag="f", tag="data16_13TeV"):
 
 
 def returnEosLArNoisePath(run, stream, amiTag="f", tag="data16_13TeV"):
-    prefix = {'express': 'express_', 'Egamma': 'physics_',
-              'CosmicCalo': 'physics_', 'JetTauEtmiss': 'physics_', 'Main': 'physics_'}
     found = False
     listOfFiles = []
     path = '/eos/atlas/atlascerngroupdisk/det-larg/Tier0/perm/' + \
-        tag+'/'+prefix[stream]+stream+'/00'+str(run)+'/'
+        tag+'/'+getStreamPrefix(stream)+'/00'+str(run)+'/'
     P = sp.Popen(['/usr/bin/eos', 'ls', path], stdout=sp.PIPE, stderr=sp.PIPE)
     p = P.communicate()
     if p[1] == '':
@@ -136,12 +136,10 @@ def returnEosLArNoisePath(run, stream, amiTag="f", tag="data16_13TeV"):
 
 
 def returnEosEsdPath(run, stream, amiTag="f", tag="data16_13TeV"):
-    prefix = {'express': 'express_', 'Egamma': 'physics_',
-              'CosmicCalo': 'physics_', 'JetTauEtmiss': 'physics_', 'Main': 'physics_'}
     found = False
     listOfFiles = []
     path = '/eos/atlas/atlastier0/rucio/'+tag + \
-        '/'+prefix[stream]+stream+'/00'+str(run)+'/'
+        '/'+getStreamPrefix(stream)+'/00'+str(run)+'/'
     P = sp.Popen(['/usr/bin/eos', 'ls', path], stdout=sp.PIPE, stderr=sp.PIPE)
     p = P.communicate()
     if p[1] == '':
