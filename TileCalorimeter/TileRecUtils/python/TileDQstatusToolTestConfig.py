@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
-# File: TileRecUtils/share/TileDQstatusTool_test.py
+# File: TileRecUtils/python/TileDQstatusToolTestConfig.py
 # Author: scott snyder
 # Date: Nov, 2018
 # Brief: Test for TileDQstatusTool.
@@ -11,43 +11,12 @@
 import ROOT
 ROOT.TH1F
 
-from AthenaCommon.DetFlags      import DetFlags
-DetFlags.detdescr.Tile_setOn()
-DetFlags.detdescr.LAr_setOn()
-
-RunNumber = 284500
-
-import sys
-import string
-import ROOT
-import math
-from AtlasGeoModel import SetGeometryVersion
-from AtlasGeoModel import GeoModelInit
-from AtlasGeoModel import SetupRecoGeometry
-include('TileConditions/TileConditions_jobOptions.py')
-
-# Disable Geant version checking.
-from AthenaCommon.AlgSequence import AthSequencer
-condSeq = AthSequencer("AthCondSeq")
-condSeq.TileSamplingFractionCondAlg.G4Version = -1
-
-from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
-ServiceMgr += GeoModelSvc()
-theApp.CreateSvc += [ "GeoModelSvc"]
-from AtlasGeoModel import TileGM
-from AtlasGeoModel import LArGM   #LAr needed to get MBTS DD.
-
-from IOVDbSvc.IOVDbSvcConf import IOVDbSvc
-IOVDbSvc().GlobalTag = 'OFLCOND-RUN12-SDR-35'
-
-from AthenaCommon.AlgSequence import AlgSequence
-topSequence = AlgSequence()
-
-theApp.EvtMax=1
-
-
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentAccumulator import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 from AthenaPython.PyAthenaComps import Alg, StatusCode
 
+import sys
 
 ############################################################################
 
@@ -325,7 +294,7 @@ class TestAlg (Alg):
 
         eid = ROOT.EventIDBase()
         eid.set_bunch_crossing_id (1234)
-        eid.set_run_number(1)
+        eid.set_run_number(self.getContext().eventID().run_number())
         eid.set_lumi_block(0)
         ctx = ROOT.EventContext()
         ctx.setEventID (eid)
@@ -351,9 +320,9 @@ class TestAlg (Alg):
             tool = self.tool1
         assert tool.makeStatus (ctx, rc, digits, be, dq).isSuccess()
 
-        assert dq.isFilled() == True
+        assert dq.isFilled() is True
         assert dq.isBiGain() == isCalib
-        assert dq.nonZeroCounter() == True
+        assert dq.nonZeroCounter() is True
         assert dq.incompleteDigits() == incomplete
         assert dq.calibMode() == isCalib
         assert dq.trigType() == trigType
@@ -422,7 +391,7 @@ class TestAlg (Alg):
                 getattr(coll, func)(mask)
 
             for addr, data in colldata:
-                if type(addr) == type(()):
+                if isinstance(addr, tuple):
                     adc_id = idHelper.adc_id (*addr)
                     chan = ROOT.TileRawChannel (adc_id, *data)
                 else:
@@ -463,7 +432,7 @@ class TestAlg (Alg):
                 ndig = 48
 
             digits = getattr(ROOT,'vector<float>')()
-            digits.resize (12);
+            digits.resize (12)
             for idig in range(ndig):
                 dig = ROOT.TileDigits(ROOT.HWIdentifier(), digits)
                 coll.push_back (dig)
@@ -476,7 +445,6 @@ class TestAlg (Alg):
 
     def make_beamelem (self, frag):
         cont = ROOT.TileBeamElemContainer()
-        hashFunc = cont.hashFunc()
 
         coll = ROOT.TileBeamElemCollection (frag)
         coll.setLvl1Type (123)
@@ -526,12 +494,60 @@ class TestAlg (Alg):
 
 ############################################################################
 
-from TileRecUtils.TileRecUtilsConf import TileDQstatusTool
+def TileDQstatusToolTestCfg(flags):
 
-tool1 = TileDQstatusTool ('tool1')
-ToolSvc += tool1
-tool2 = TileDQstatusTool ('tool2', SimulateTrips = True)
-ToolSvc += tool2
+    acc = ComponentAccumulator()
 
-test1 = TestAlg ('test1')
-topSequence += test1
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    acc.merge(TileGMCfg(flags))
+
+    from RngComps.RandomServices import AthRNGSvcCfg
+    acc.merge( AthRNGSvcCfg(flags) )
+
+    from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+    acc.merge( TileBadChannelsCondAlgCfg(flags) )
+
+    TileDQstatusTool = CompFactory.TileDQstatusTool
+    acc.addPublicTool( TileDQstatusTool('tool1') )
+    acc.addPublicTool( TileDQstatusTool('tool2', SimulateTrips=True) )
+
+    acc.addEventAlgo( TestAlg('test1') )
+
+    return acc
+
+
+if __name__ == "__main__":
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaCommon.Logging import log
+    from AthenaCommon.Constants import INFO
+
+    # Test setup
+    log.setLevel(INFO)
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
+    flags.Tile.RunType = TileRunType.PHY
+    flags.Exec.MaxEvents = 1
+    flags.fillFromArgs()
+
+    flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
+
+    # Configure reading POOL files
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
+
+    cfg.merge( TileDQstatusToolTestCfg(flags) )
+
+    flags.dump()
+    cfg.printConfig(withDetails=True)
+    cfg.store( open('TileDQstatusToolTest.pkl', 'wb') )
+
+    sc = cfg.run()
+
+    # Success should be 0
+    sys.exit(not sc.isSuccess())
