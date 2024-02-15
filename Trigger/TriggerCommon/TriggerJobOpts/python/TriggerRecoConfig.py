@@ -65,7 +65,7 @@ def TriggerRecoCfgData(flags):
 
     # Legacy L1Calo, L1Topo reco
     if flags.Trigger.enableL1CaloLegacy:
-        from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
+        from AnalysisTriggerAlgs.AnalysisTriggerAlgsConfig import RoIBResultToxAODCfg
         xRoIBResultAcc, _ = RoIBResultToxAODCfg(flags)
         acc.merge( xRoIBResultAcc )
 

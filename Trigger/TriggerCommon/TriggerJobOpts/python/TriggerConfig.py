@@ -465,7 +465,7 @@ def triggerPOOLOutputCfg(flags):
     acc.merge( metadataAcc )
 
     # Produce xAOD L1 RoIs from RoIBResult
-    from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
+    from AnalysisTriggerAlgs.AnalysisTriggerAlgsConfig import RoIBResultToxAODCfg
     xRoIBResultAcc, xRoIBResultOutputs = RoIBResultToxAODCfg(flags)
     acc.merge(xRoIBResultAcc)
     # Ensure outputs are produced before streamAlg runs

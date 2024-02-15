@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 from AthenaCommon.Logging import logging
-_log = logging.getLogger('AnalysisTriggerAlgsCAConfig.py')
+_log = logging.getLogger('AnalysisTriggerAlgsConfig.py')
 
 def RoIBResultToxAODCfg(flags):
     if flags.Trigger.enableL1MuonPhase1 and not flags.Trigger.enableL1CaloLegacy:

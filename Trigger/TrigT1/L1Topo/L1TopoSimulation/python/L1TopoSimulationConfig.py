@@ -278,7 +278,7 @@ if __name__ == '__main__':
     generateL1Menu(flags)
   
   # Produce xAOD L1 RoIs from RoIBResult
-  from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
+  from AnalysisTriggerAlgs.AnalysisTriggerAlgsConfig import RoIBResultToxAODCfg
   xRoIBResultAcc, xRoIBResultOutputs = RoIBResultToxAODCfg(flags)
   acc.merge(xRoIBResultAcc)
   
