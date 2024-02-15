@@ -453,7 +453,7 @@ class L1Menu(object):
         for algtype in [AlgType.SORT, AlgType.DEC]:
             # Only check Phase-I Topo algs
             for algname,algo in self.topoAlgos.topoAlgos[AlgCategory.TOPO][algtype].items():
-                log.info(f'Checking variable parameter ordering for {algname} ({algo.classtype})')
+                log.debug(f'Checking variable parameter ordering for {algname} ({algo.classtype})')
                 pars_for_algo = params[algo.classtype]
                 generics_map = {g.name:g.value for g in algo.generics}
                 # No conditional parameters
@@ -495,17 +495,17 @@ class L1Menu(object):
                     raise RuntimeError(f'checkL1TopoParams: Did not find ordered parameter list for L1Topo algorithm type {algo.classtype}')
 
                 menu_params = [p.name for p in algo.variables]
-                log.info(f'Menu contains parameter list: {menu_params}')
+                log.debug(f'Menu contains parameter list: {menu_params}')
 
                 if common_params is None: common_params = []
                 if ordered_params is None: ordered_params = []
-                log.info(f'Expected parameter list: {common_params + ordered_params}')
+                log.debug(f'Expected parameter list: {common_params + ordered_params}')
 
                 # Handle case where parameters are supplied repeatedly to
                 # configure multiple instances
                 non_common_param_count = len(menu_params) - len(common_params)
                 if non_common_param_count > len(ordered_params):
-                    log.info(f'Can repeat the parameters: {ordered_params}')
+                    log.debug(f'Can repeat the parameters: {ordered_params}')
                     if non_common_param_count % len(ordered_params) == 0:
                         ordered_params = int(non_common_param_count/len(ordered_params)) * ordered_params
                     else:
