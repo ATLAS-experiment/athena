@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: perform debug recovery from PU crash using PhysicsP1 menu
 # art-type: build
@@ -17,7 +17,7 @@ hlt.forks = 1
 hlt.threads = 1
 hlt.concurrent_events = 1
 hlt.max_events = 50
-hlt.args  = '--precommand=\\\"setMenu=\\\'PhysicsP1_pp_run3_v1\\\'\\\"'
+hlt.args  = '--CA --preExec="Trigger.triggerMenuSetup=\'PhysicsP1_pp_run3_v1\'"'
 hlt.args += ' --streamSelection=Main,BphysDelayed,VBFDelayed'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
