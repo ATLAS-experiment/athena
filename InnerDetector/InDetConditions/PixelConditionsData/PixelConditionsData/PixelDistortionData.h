@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsData/PixelDistortionData.h
@@ -38,7 +38,7 @@ class PixelDistortionData {
     void clear();
 
   private:
-    int m_version;
+    int m_version{};
     std::unordered_map<uint32_t,unsigned long long> m_ids;
     std::unordered_map<uint32_t,std::vector<float>> m_distortionMap;
 };
