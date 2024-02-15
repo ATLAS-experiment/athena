@@ -136,18 +136,3 @@ CBNT_AthenaAware+=theCBNTAA_Truth
 
 
 
-# add special MonteCarlo =>  dropped
-# from CBNT_Truth.CBNT_TruthConf import CBNTAA_SpclMC
-# CBNT_AthenaAware+=CBNTAA_SpclMC()
-
-# spcial for HeavyIon simulation
-# spcial for HeavyIon simulation
-
-try:
-    from HIRecExample.HIRecExampleFlags import jobproperties
-    if jobproperties.HIRecExampleFlags.withHijingEventPars :
-        from CBNT_Truth.CBNT_TruthConf import CBNTAA_HijingEventParams
-        CBNT_AthenaAware+=CBNTAA_HijingEventParams()
-except Exception:
-    treatException("Could not configure CBNTAA_HijingEventParams")
-

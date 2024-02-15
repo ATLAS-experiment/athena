@@ -539,17 +539,6 @@ AODFix.AODFix_postCombinedRec()
 
 
 
-
-#
-# Heavy ion reconstruction  special configuration
-#
-pdr.flag_domain('HI')
-if rec.doHeavyIon():
-    protectedInclude ("HIRecExample/HIRec_jobOptions.py")
-
-if rec.doHIP ():
-    protectedInclude ("HIRecExample/HIPRec_jobOptions.py")
-
 if rec.doWriteBS():
     include( "ByteStreamCnvSvc/RDP_ByteStream_jobOptions.py" )
     pass
@@ -928,12 +917,6 @@ if rec.doWriteESD():
         pass
     pass
 
-if rec.doESD() or rec.doWriteESD():
-    #
-    # Heavy ion reconstruction  special configuration
-    #
-    if rec.doHeavyIon():
-        protectedInclude ("HIRecExample/heavyion_postOptionsESD.py")
 
 
 #########
@@ -1194,13 +1177,6 @@ if rec.doWriteAOD():
     elif  AODFlags.AddEgammaTracksInMCAOD and rec.doTruth():
         StreamAOD_Augmented.AddItem("TrackCollection#GSFTracks")
 
-
-if rec.doAOD() or rec.doWriteAOD():
-    #
-    # Heavy ion reconstruction  special configuration
-    #
-    if rec.doHeavyIon():
-        protectedInclude ("HIRecExample/heavyion_postOptionsAOD.py")
 
 
 # event dumper at the very end

@@ -49,15 +49,6 @@ if rec.triggerStream().startswith('express'):
    logRecExCommon_flags.info('Disabling track slimming for express stream.')
    include("RecJobTransforms/NoTrackSlimming.py")
 
-
-#Some special (monitoring) setting for Heavy Ions:
-if rec.doHeavyIon():
-   logRecExCommon_flags.info('Heavy Ion case: Calling HIEarlyIncludes.py')
-   include("HIRecExample/HIEarlyIncludes.py")
-
-if rec.doHIP():
-   logRecExCommon_flags.info('Heavy Ion p+Pb case: Calling HIPEarlyIncludes.py')
-   include("HIRecExample/HIPEarlyIncludes.py")
    
 
 from RecExConfig.RecFlags import rec

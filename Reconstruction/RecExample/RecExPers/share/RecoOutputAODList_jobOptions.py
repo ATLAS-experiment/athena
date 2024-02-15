@@ -311,15 +311,6 @@ if rec.doWriteCalibHits():
                                 )
 
 
-
-# Heavy Ion:
-if rec.doHeavyIon():
-    try:
-        include ("HIRecExample/HIRecOutputAODList_jobOptions.py")
-        fullAODList += CfgItemList( "HeavyIonsAod", items = HIAODItemList )
-    except Exception:
-        treatException("Could not load HIRecExample/HIRecOutputAODList_jobOptions.py")
-
 # ring-shaped calorimetry
 if rec.doCaloRinger():
     try:
