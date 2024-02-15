@@ -7,7 +7,10 @@
 
 namespace CookieCutterHelpers
 {
-CentralPosition::CentralPosition(const std::vector<const xAOD::CaloCluster*>& clusters)
+CentralPosition::CentralPosition(
+  const std::vector<const xAOD::CaloCluster*>& clusters,
+  const CaloDetDescrManager& mgr)
+  : AthMessaging("CookieCutterHelpers::CentralPosition")
 {
   for (const auto* cluster : clusters) {
     if (cluster->hasSampling(CaloSampling::EMB2)) {
@@ -33,6 +36,40 @@ CentralPosition::CentralPosition(const std::vector<const xAOD::CaloCluster*>& cl
         etaF = cluster->etamax(CaloSampling::FCAL0);
         phiF = cluster->phimax(CaloSampling::FCAL0);
       }
+    }
+  }
+
+  if (emaxB > 0) {
+    const CaloDetDescrElement* dde =
+      mgr.get_element(CaloCell_ID::EMB2, etaB, phiB);
+    if (dde) {
+      etaB = dde->eta_raw();
+      phiB = dde->phi_raw();
+    } else {
+      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
+                      << etaB << ", phi = " << phiB);
+    }
+  }
+  if (emaxEC > 0) {
+    const CaloDetDescrElement* dde =
+      mgr.get_element(CaloCell_ID::EME2, etaEC, phiEC);
+    if (dde) {
+      etaEC = dde->eta_raw();
+      phiEC = dde->phi_raw();
+    } else {
+      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
+                      << etaEC << ", phi = " << phiEC);
+    }
+  }
+  if (emaxF > 0) {
+    const CaloDetDescrElement* dde =
+      mgr.get_element(CaloCell_ID::FCAL0, etaF, phiF);
+    if (dde) {
+      etaF = dde->eta_raw();
+      phiF = dde->phi_raw();
+    } else {
+      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
+                      << etaF << ", phi = " << phiF);
     }
   }
 }

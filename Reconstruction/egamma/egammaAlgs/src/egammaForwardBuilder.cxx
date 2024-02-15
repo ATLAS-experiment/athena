@@ -297,32 +297,7 @@ void egammaForwardBuilder::cookieCut(
     return;
   }
 
-  CookieCutterHelpers::CentralPosition cp0({&cluster});
-  CookieCutterHelpers::CentralPosition cpRef = cp0;
-
-  if (cp0.emaxEC > 0) {
-    const CaloDetDescrElement* dde =
-      mgr.get_element(CaloCell_ID::EME2, cpRef.etaEC, cpRef.phiEC);
-    if (dde) {
-      cp0.etaEC = dde->eta_raw();
-      cp0.phiEC = dde->phi_raw();
-    } else {
-      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
-                      << cpRef.etaEC << ", phi = " << cpRef.phiEC);
-    }
-  }
-  if (cp0.emaxF > 0) {
-    const CaloDetDescrElement* dde =
-      mgr.get_element(CaloCell_ID::FCAL0, cpRef.etaF, cpRef.phiF);
-    if (dde) {
-      cp0.etaF = dde->eta_raw();
-      cp0.phiF = dde->phi_raw();
-    } else {
-      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
-                      << cpRef.etaF << ", phi = " << cpRef.phiF);
-    }
-  }
-
+  CookieCutterHelpers::CentralPosition cp0({&cluster}, mgr);
   CaloClusterCellLink* cell_links = cluster.getOwnCellLinks();
   CaloClusterCellLink::iterator cell_itr = cell_links->begin();
 
