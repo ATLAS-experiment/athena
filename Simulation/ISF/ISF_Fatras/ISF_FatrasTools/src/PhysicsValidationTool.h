@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,26 +54,30 @@ namespace iFatras
     virtual ~PhysicsValidationTool ();
     
     /** AlgTool initialize method */
-    virtual StatusCode initialize();
+    virtual StatusCode initialize() override;
     
     /** AlgTool finalize method */
 
-    virtual StatusCode finalize();
+    virtual StatusCode finalize() override;
 
     /** ISFParticle info: old transport tool */
-    void saveISFParticleInfo(const ISF::ISFParticle& isp, int endProcess, const Trk::TrackParameters* ePar, double time, double dX0 ) const;
+    virtual
+    void saveISFParticleInfo(const ISF::ISFParticle& isp, int endProcess, const Trk::TrackParameters* ePar, double time, double dX0 ) const override;
     
     /** ISFParticle info: new transport tool */
+    virtual
     void saveISFParticleInfo(const ISF::ISFParticle& isp, const Trk::ExtrapolationCell<Trk::TrackParameters>& ec,
-				     Trk::ExtrapolationCode ecode ) const;
+				     Trk::ExtrapolationCode ecode ) const override;
 
     /** ISFParticle info: new transport tool */
+    virtual
     void saveISFParticleInfo(const ISF::ISFParticle& isp, const Trk::ExtrapolationCell<Trk::NeutralParameters>& ec,
-				     Trk::ExtrapolationCode ecode ) const;
+				     Trk::ExtrapolationCode ecode ) const override;
 
 
+    virtual
     void saveISFVertexInfo(int process,Amg::Vector3D vertex,const ISF::ISFParticle& isp,Amg::Vector3D primIn,
-			   Amg::Vector3D* primOut, const ISF::ISFParticleVector children) const;
+			   Amg::Vector3D* primOut, const ISF::ISFParticleVector& children) const override;
 
     
   private:

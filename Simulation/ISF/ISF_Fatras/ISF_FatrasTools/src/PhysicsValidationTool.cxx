@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -303,7 +303,7 @@ void iFatras::PhysicsValidationTool::saveInfo(const ISF::ISFParticle& isp) const
 }
 
 void iFatras::PhysicsValidationTool::saveISFVertexInfo(int process,Amg::Vector3D vertex,const ISF::ISFParticle& parent,Amg::Vector3D primIn,
-						       Amg::Vector3D* primOut, const ISF::ISFParticleVector children) const {
+						       Amg::Vector3D* primOut, const ISF::ISFParticleVector& children) const {
 
   m_process = process;
   unsigned int nSec = children.size();
