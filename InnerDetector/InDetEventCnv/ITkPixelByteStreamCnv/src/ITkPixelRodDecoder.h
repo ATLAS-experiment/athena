@@ -19,21 +19,21 @@ class StatusCode;
 class EventContext;
 class IdentifierHash;
 
-class ITkPixelRodDecoder : virtual public IITkPixelRodDecoder, public AthAlgTool {
+class ITkPixelRodDecoder final: virtual public IITkPixelRodDecoder, public AthAlgTool {
 
   public:
     ITkPixelRodDecoder(const std::string& type, const std::string& name,
       const IInterface* parent ) ;
 
     // destructor
-    ~ITkPixelRodDecoder() final = default;
+    ~ITkPixelRodDecoder() = default;
 
-    StatusCode initialize() final;
-    StatusCode finalize() final;
+    StatusCode initialize() override;
+    StatusCode finalize() override;
 
-    StatusCode fillCollection  (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment *robFrag,
-		  IPixelRDO_Container* rdoIdc,
-			std::vector<IdentifierHash>* vecHash, const EventContext& ctx) const override;
+    StatusCode fillCollection (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment *robFrag,
+		               IPixelRDO_Container* rdoIdc,
+			       std::vector<IdentifierHash>* vecHash, const EventContext& ctx) const override;
 
   private:
    
