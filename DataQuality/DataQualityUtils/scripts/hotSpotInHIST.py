@@ -660,7 +660,7 @@ if __name__ == "__main__":
   parser.add_argument('-r','--run',type=int,dest='runNumber',default='267599',help="Run number",action='store')
   parser.add_argument('-ll','--lowerlb',type=int,dest='lowerLumiBlock',default='0',help="Lower lb",action='store')
   parser.add_argument('-ul','--upperlb',type=int,dest='upperLumiBlock',default='999999',help="Upper lb",action='store')
-  parser.add_argument('-s','--stream',dest='stream',default='Main',help="Stream without prefix: express/CosmicCalo/Main/ZeroBias/MinBias",action='store')
+  parser.add_argument('-s','--stream',dest='stream',default='Main',help="Stream with or without prefix: express/CosmicCalo/Main/ZeroBias/MinBias",action='store')
   parser.add_argument('-t','--tag',dest='tag',default='',help="DAQ tag: data16_13TeV, data16_cos... By default retrieve it via atlasdqm",action='store')
   parser.add_argument('-a','--amiTag',dest='amiTag',default='f',help="First letter of AMI tag: x->express / f->bulk",action='store')
   parser.add_argument('-e','--eta',type=float,dest='etaSpot',default='-999.',help='Eta of hot spot',action='store')
