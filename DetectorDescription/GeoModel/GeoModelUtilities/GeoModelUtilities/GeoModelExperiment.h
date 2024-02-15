@@ -21,6 +21,7 @@
 #include "GeoModelKernel/GeoPhysVol.h"
 #ifndef BUILDVP1LIGHT
     #include "AthenaKernel/CLASS_DEF.h"
+    #include "AthenaKernel/CondCont.h"
 #endif
 #include <set>
 #include <string>
@@ -103,7 +104,8 @@ public:
 #ifndef BUILDVP1LIGHT
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
- CLASS_DEF(GeoModelExperiment, 9875, 1)
+CLASS_DEF(GeoModelExperiment, 9875, 1);
+CONDCONT_MIXED_DEF( GeoModelExperiment , 67974987 );
 #endif
 
 #endif // GEOMODELSVC_GEOMODELEXPERIMENT_H

@@ -13,6 +13,7 @@
 #include "MuonGeoModel/MuonDetectorTool.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "GeoModelKernel/GeoVolumeCursor.h"
+#include "GeoModelKernel/GeoPhysVol.h"
 #include <fstream>
 
 MuonDetectorCondAlg::MuonDetectorCondAlg(const std::string &name, ISvcLocator *pSvcLocator) : 
@@ -31,6 +32,7 @@ StatusCode MuonDetectorCondAlg::initialize() {
     ATH_CHECK(m_condMmPassivKey.initialize(m_applyMmPassivation));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeDetectorManagerKey.initialize());
+    ATH_CHECK(m_worldWriteKey.initialize());
     ATH_MSG_INFO("Initialize successful -- "<<m_applyALines<<", "<<m_applyBLines<<","
                                             <<m_applyILines<<","<<m_applyMdtAsBuilt<<","
                                             <<m_applyNswAsBuilt<<","<<m_applyMmPassivation);
@@ -52,14 +54,17 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     }
     writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
 
-    // =======================
-    // Create the MuonDetectorManager by calling the MuonDetectorFactory001
-    // =======================
+    
+    GeoModelExperiment *theExpt = nullptr;
+    ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
+    /// Create a new world with the same dimensions as ATLAS. Decouple the ATLAS and the aligned muon world
+    /// Otherwise the created GeoModelTree is never deleted if the alignment constants go out of scope
+    PVConstLink ATLASWorld = theExpt->getPhysVol();
+    GeoIntrusivePtr<GeoPhysVol> world{new GeoPhysVol(ATLASWorld->getLogVol())};
+
+    
     MuonGM::MuonDetectorManager *mgr{nullptr};
-    if (m_iGeoModelTool->createFactory(mgr).isFailure()) {
-        ATH_MSG_FATAL("unable to create MuonDetectorFactory001 ");
-        return StatusCode::FAILURE;
-    }
+    ATH_CHECK (m_iGeoModelTool->createFactory(mgr, world));
     std::unique_ptr<MuonGM::MuonDetectorManager> MuonMgrData(mgr);
    
     // =======================
@@ -157,7 +162,15 @@ StatusCode MuonDetectorCondAlg::execute(const EventContext& ctx) const {
     ATH_CHECK(copyInertMaterial(*MuonMgrData));
     ATH_CHECK(writeHandle.record(std::move(MuonMgrData)));
     ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
-
+    /// Create a new elvery tower for the aligned Muon Detector manager
+    SG::WriteCondHandle<GeoModelExperiment> alignedExperimentHandle{m_worldWriteKey, ctx};
+    alignedExperimentHandle.addDependency(writeHandle.getRange());
+    ATH_CHECK(alignedExperimentHandle.record(std::make_unique<GeoModelExperiment>(world)));
+    /* Short check that the reference count of the new universe is indeed 2 (1 from the experiment & 1 from the world Ptr) */   
+    if (world->refCount() != 2) {
+        ATH_MSG_FATAL("The leaking reference counter to the GeoModel world detected "<<world->refCount());
+        return StatusCode::FAILURE;
+    }
     return StatusCode::SUCCESS;
 }
 StatusCode MuonDetectorCondAlg::copyInertMaterial(MuonGM::MuonDetectorManager& detMgr) const {

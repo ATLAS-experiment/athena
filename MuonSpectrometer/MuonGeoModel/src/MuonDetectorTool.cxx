@@ -51,21 +51,17 @@ MuonDetectorTool::~MuonDetectorTool() {
 StatusCode MuonDetectorTool::create() {
 
     std::ofstream geoModelStats;
-    int mem = 0;
-    float cpu = 0;
-    int umem = 0;
-    float ucpu = 0;
-
+    int mem{0}, umem{0};
+    float cpu{0.f}, ucpu{0.f};
 
     MuonGM::MuonDetectorManager *mgr=nullptr;
-    if (createFactory(mgr).isFailure())
-        return StatusCode::FAILURE;
+    GeoModelExperiment *theExpt = nullptr;
+    ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
+    GeoIntrusivePtr<GeoPhysVol> world{theExpt->getPhysVol()};
+    ATH_CHECK(createFactory(mgr, world));
 
     if (!m_detector) {
         ATH_CHECK(detStore()->record(mgr,mgr->getName()));
-
-        GeoModelExperiment *theExpt = nullptr;
-        ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
         theExpt->addManager(mgr);
 
         m_manager = mgr;
@@ -96,13 +92,11 @@ StatusCode MuonDetectorTool::create() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) const {
+StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, GeoPhysVol* world) const {
 
     std::ofstream geoModelStats;
-    int mem = 0;
-    float cpu = 0;
-    int umem = 0;
-    float ucpu = 0;
+    int mem{0}, umem{0};
+    float cpu{0.f}, ucpu{0.f};
 
 
     if (m_dumpMemoryBreakDown) {
@@ -144,9 +138,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
     std::map<std::string, std::string> altAsciiDBMap{};
 
     
-    GeoModelExperiment *theExpt = nullptr;
-    ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
-    GeoIntrusivePtr<GeoPhysVol> world{theExpt->getPhysVol()};
     // Get the detector configuration.
     ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc",name());
     ATH_CHECK(geoDbTag.retrieve());
@@ -180,10 +171,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr) 
     
       return StatusCode::SUCCESS;
     }
-    if (m_runFromCondAlg) {
-        world.reset(new GeoPhysVol(world->getLogVol()));
-    }
-
     //
     // New DD:  action ends here!!
     // 
