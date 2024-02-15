@@ -1136,6 +1136,41 @@ class TileCalibDefaultWriter(TileCalibLogger):
 
 
     #____________________________________________________________________
+    def writeRODmap(self, tag=""):
+
+        self.log().info( "*** Writing dummy RODmap using tag %s",tag)
+
+        default = cppyy.gbl.std.vector('int')()
+        default.push_back(0x0) # offline drawer ID
+        default.push_back(0x500000) # ROB ID for given drawer
+        default.push_back(0x0) # bytestream frag ID
+        default.push_back(0) # drawer type (0=legacy, 1=upgrade)
+        defVec = cppyy.gbl.std.vector('std::vector<int>')()
+        defVec.push_back(default)
+        defVec.push_back(default)
+
+        folders = [self.__tilePrefixOfl+"STATUS/ROD",
+                   self.__tilePrefixOnl+"STATUS/ROD"]
+
+        for folder in folders:
+            try:
+                multiVers=('OFL' in folder)
+                blobWriter = TileCalibTools.TileBlobWriter(self.__db,folder,'Int',multiVers)
+                #=== initialize all channels
+                util = cppyy.gbl.TileCalibUtils()
+                for ros in range(util.max_ros()):
+                    for drawer in range(util.getMaxDrawer(ros)):
+                        flt = blobWriter.zeroBlob(ros,drawer)
+                flt = blobWriter.getDrawer(0, 0)
+                flt.init(defVec,1,0)
+                blobWriter.setComment(self.__author,"dummy ROD map")
+                folderTag = TileCalibUtils.getFullTag(folder, tag) if multiVers else ""
+                blobWriter.register((MINRUN,MINLBK),(MAXRUN,MAXLBK),folderTag)
+            except Exception as e:
+                self.log().critical( e )
+
+
+    #____________________________________________________________________
     def writeNoiseOnl(self, tag="", loGainDef=0.8, hiGainDef=1.6):
 
         self.log().info( "*** Writing 1-g noise(ADC counts)+pileup(MeV) defaults loGain=%f, hiGain=%f and tag %s",
