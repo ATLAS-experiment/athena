@@ -247,7 +247,7 @@ namespace FlavorTagDiscriminants {
     ){
 
       // we rewrite the inputs if we're using flip taggers
-      StringRegexes flip_converters = getFlipConverters(flip_config);
+      StringRegexes flip_converters = getNameFlippers(flip_config);
 
       if (flip_config != FlipTagConfig::STANDARD) {
         rewriteFlipConfig(config, flip_converters);
@@ -320,7 +320,6 @@ namespace FlavorTagDiscriminants {
 
         std::vector<std::string> names;
         for (const auto& var: node.variables) {
-          std::cout << node.name << "  " << var.name << std::endl;
           names.push_back(var.name);
         }
         constituent_names.emplace_back(node.name, names);
@@ -328,11 +327,10 @@ namespace FlavorTagDiscriminants {
 
       std::vector<FTagConstituentsSequenceConfig> constituent_configs;
       for (auto el: constituent_names){
-        std::cout << "CONSTITUENT: " << el.first << std::endl;
         if (el.first.find("tracks") != std::string::npos){
           constituent_configs.push_back(createTracksLoaderConfig(el, flip_config));
         }
-        else if (el.first.find("neutral_flows") != std::string::npos){
+        else if (el.first.find("flows") != std::string::npos){
           constituent_configs.push_back(createIParticlesLoaderConfig(el));
         }
       }
@@ -342,14 +340,11 @@ namespace FlavorTagDiscriminants {
       
       if (auto h = remap_scalar.extract(options.track_prefix)) {
         options.track_prefix = h.mapped();
-        std::cout << "TRK_PREF: " << options.track_prefix << std::endl;
       }
       if (auto h = remap_scalar.extract(options.track_link_name)) {
         options.track_link_name = h.mapped();
-        std::cout << "TRK_LINK: " << options.track_link_name << std::endl;
       }
       if (auto h = remap_scalar.extract(options.invalid_ip_key)) {
-        std::cout << "IP_KEY: " << options.invalid_ip_key << std::endl;
         options.invalid_ip_key = h.mapped();
       }
       options.flip = flip_config;

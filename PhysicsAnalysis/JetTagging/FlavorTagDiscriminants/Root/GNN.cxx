@@ -70,10 +70,6 @@ namespace FlavorTagDiscriminants {
     m_varsFromJet = vj;
     m_dataDependencyNames = ds;
 
-    // Initialize data dependencies and output decorators.
-    FlavorTagDiscriminants::FTagDataDependencyNames dd;
-    std::set<std::string> rd;
-
     // Retrieve the configuration for the model outputs.
     OnnxUtil::OutputConfig gnn_output_config = m_onnxUtil->getOutputConfig();
 

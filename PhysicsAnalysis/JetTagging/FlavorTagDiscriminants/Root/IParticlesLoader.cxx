@@ -4,45 +4,22 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include "FlavorTagDiscriminants/IParticlesLoader.h"
 #include "xAODPFlow/FlowElement.h"
+#include "FlavorTagDiscriminants/StringUtils.h"
 
 namespace {
+  using namespace FlavorTagDiscriminants;
 
   // define a regex literal operator
   std::regex operator "" _r(const char* c, size_t /* length */) {
     return std::regex(c);
   }
 
-  using FlavorTagDiscriminants::ConstituentsEDMType;
-  using FlavorTagDiscriminants::ConstituentsSortOrder;
-  using FlavorTagDiscriminants::ConstituentsSelection;
-  using FlavorTagDiscriminants::FTagConstituentsSequenceConfig;
-  using FlavorTagDiscriminants::FTagConstituentsInputConfig;
-  using FlavorTagDiscriminants::FTagOptions;
   // ____________________________________________________________________
-  // High level adapter stuff
   //
   // We define a few structures to map variable names to type, default
-  // value, etc. These are only used by the high level interface.
+  // value, etc.
   //
   typedef std::vector<std::pair<std::regex, ConstituentsEDMType> > TypeRegexes;
-
-  //_______________________________________________________________________
-  // Implementation of the above functions
-  //
-
-  template <typename T>
-  T match_first(const std::vector<std::pair<std::regex, T> >& regexes,
-                const std::string& var_name,
-                const std::string& context) {
-    for (const auto& pair: regexes) {
-      if (std::regex_match(var_name, pair.first)) {
-        return pair.second;
-      }
-    }
-    throw std::logic_error(
-      "no regex match found for input variable '" + var_name + "' in "
-      + context);
-  }
 
   FTagConstituentsSequenceConfig get_iparticle_input_config(
     const std::pair<std::string, std::vector<std::string>> name_node,
@@ -59,8 +36,7 @@ namespace {
       else{
         input.name = varname;
       }
-      // input.name = varname;
-      input.type = match_first(type_regexes, input.name,
+      input.type = str::match_first(type_regexes, input.name,
                                 "track type matching");
       config.inputs.push_back(input);
     }
@@ -73,7 +49,7 @@ namespace FlavorTagDiscriminants {
     FTagConstituentsSequenceConfig createIParticlesLoaderConfig(
       std::pair<std::string, std::vector<std::string>> iparticle_names
     ){
-        // build the track inputs
+        // build the iparticle inputs
         TypeRegexes var_type_regexes {
           // Some innermost / next-to-innermost hit variables had a different
           // definition in 21p9, recomputed here with customGetter to reuse
@@ -110,8 +86,7 @@ namespace FlavorTagDiscriminants {
         case ConstituentsSortOrder::PT_DESCENDING:
           return [](const Ip* tp, const Jet&) {return tp->pt();};
         default: {
-          // throw std::logic_error("Unknown sort function");
-          return [](const Ip* tp, const Jet&) {return tp->pt();};
+          throw std::logic_error("Unknown sort function");
         }
       }
     } // end of iparticle sort getter

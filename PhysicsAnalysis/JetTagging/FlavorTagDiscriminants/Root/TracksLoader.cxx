@@ -5,44 +5,23 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
 #include "FlavorTagDiscriminants/TracksLoader.h"
+#include "FlavorTagDiscriminants/StringUtils.h"
 
 namespace {
-
+  using namespace FlavorTagDiscriminants;
   // define a regex literal operator
   std::regex operator "" _r(const char* c, size_t /* length */) {
     return std::regex(c);
   }
 
-  using FlavorTagDiscriminants::ConstituentsEDMType;
-  using FlavorTagDiscriminants::ConstituentsSortOrder;
-  using FlavorTagDiscriminants::ConstituentsSelection;
-  using FlavorTagDiscriminants::FTagConstituentsSequenceConfig;
-  using FlavorTagDiscriminants::FTagConstituentsInputConfig;
-  using FlavorTagDiscriminants::FlipTagConfig;
   // ____________________________________________________________________
-  // High level adapter stuff
   //
   // We define a few structures to map variable names to type, default
-  // value, etc. These are only used by the high level interface.
+  // value, etc.
   //
   typedef std::vector<std::pair<std::regex, ConstituentsEDMType> > TypeRegexes;
   typedef std::vector<std::pair<std::regex, ConstituentsSortOrder> > SortRegexes;
   typedef std::vector<std::pair<std::regex, ConstituentsSelection> > TrkSelRegexes;
-
-
-  template <typename T>
-  T match_first(const std::vector<std::pair<std::regex, T> >& regexes,
-                const std::string& var_name,
-                const std::string& context) {
-    for (const auto& pair: regexes) {
-      if (std::regex_match(var_name, pair.first)) {
-        return pair.second;
-      }
-    }
-    throw std::logic_error(
-      "no regex match found for input variable '" + var_name + "' in "
-      + context);
-  }
 
   FTagConstituentsSequenceConfig get_track_input_config(
     const std::pair<std::string, std::vector<std::string>> name_node,
@@ -53,14 +32,14 @@ namespace {
     const FlipTagConfig& flip_config) {
     FTagConstituentsSequenceConfig config;
     config.name = name_node.first;
-    config.order = match_first(sort_regexes, name_node.first,
+    config.order = str::match_first(sort_regexes, name_node.first,
                               "track order matching");
-    config.selection = match_first(select_regexes, name_node.first,
+    config.selection = str::match_first(select_regexes, name_node.first,
                                   "track selection matching");
     for (const auto& varname: name_node.second) {
       FTagConstituentsInputConfig input;
       input.name = varname;
-      input.type = match_first(type_regexes, varname,
+      input.type = str::match_first(type_regexes, varname,
                                 "track type matching");
 
       input.flip_sign=false;
