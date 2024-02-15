@@ -18,6 +18,8 @@
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
 
+#include "TrigConfData/L1Menu.h"
+
 #include "xAODTrigger/eFexEMRoI.h"
 #include "xAODTrigger/eFexEMRoIContainer.h"
 #include "xAODTrigger/eFexEMRoIAuxContainer.h"
@@ -57,14 +59,16 @@ namespace LVL1 {
     ATH_CHECK( m_eFexOutKey.initialize() );
     ATH_CHECK( m_eFexEMxTOBOutKey.initialize() );
 
-    ATH_CHECK( m_eFexTauHeuristicOutKey.initialize() );
-    ATH_CHECK( m_eFexTauHeuristicxTOBOutKey.initialize() );
-    ATH_CHECK( m_eFexTauBDTOutKey.initialize() );
-    ATH_CHECK( m_eFexTauBDTxTOBOutKey.initialize() );
+    ATH_CHECK( m_eFexTauActiveOutKey.initialize() );
+    ATH_CHECK( m_eFexTauActivexTOBOutKey.initialize() );
+    ATH_CHECK( m_eFexTauAltOutKey.initialize(SG::AllowEmpty) );
+    ATH_CHECK( m_eFexTauAltxTOBOutKey.initialize(SG::AllowEmpty) );
 
     ATH_CHECK( m_eFEXFPGATowerIdProviderTool.retrieve() );
 
     ATH_CHECK( m_eFEXFPGATool.retrieve() );
+    
+    ATH_CHECK(m_l1MenuKey.initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -439,9 +443,25 @@ namespace LVL1 {
     ATH_MSG_DEBUG("  write: " << outputeFexHandle.key() << " = " << "..." );
     ATH_CHECK(outputeFexHandle.record(std::move(m_eContainer),std::move(m_eAuxContainer)));
 
+    SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
+    ATH_CHECK(l1Menu.isValid());
+
+    auto & thr_eTAU = l1Menu->thrExtraInfo().eTAU();
+    int activeAlgo = thr_eTAU.algoVersion() == 0 ? xAOD::eFexTauRoI_v1::Heuristic : xAOD::eFexTauRoI_v1::BDT;
+    bool omitAltTauContainer = m_eFexTauAltxTOBOutKey.empty() || m_eFexTauAltOutKey.empty();
+
     // Repeat for Tau TOBs and xTOBs
-    ATH_CHECK(StoreTauTOBs(m_allTauHeuristicTobObjects, m_eFexTauHeuristicxTOBOutKey, m_eFexTauHeuristicOutKey));
-    ATH_CHECK(StoreTauTOBs(m_allTauBDTTobObjects, m_eFexTauBDTxTOBOutKey, m_eFexTauBDTOutKey));
+    if (activeAlgo == xAOD::eFexTauRoI_v1::Heuristic) {
+        ATH_CHECK(StoreTauTOBs(m_allTauHeuristicTobObjects, m_eFexTauActivexTOBOutKey, m_eFexTauActiveOutKey));
+        if (!omitAltTauContainer) {
+            ATH_CHECK(StoreTauTOBs(m_allTauBDTTobObjects, m_eFexTauAltxTOBOutKey, m_eFexTauAltOutKey));
+        }
+    } else if (activeAlgo == xAOD::eFexTauRoI_v1::BDT) {
+        ATH_CHECK(StoreTauTOBs(m_allTauBDTTobObjects, m_eFexTauActivexTOBOutKey, m_eFexTauActiveOutKey));
+        if (!omitAltTauContainer) {
+            ATH_CHECK(StoreTauTOBs(m_allTauHeuristicTobObjects, m_eFexTauAltxTOBOutKey, m_eFexTauAltOutKey));
+        }
+    }
 
     //Send TOBs to bytestream?
     // ToDo

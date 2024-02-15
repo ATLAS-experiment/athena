@@ -47,6 +47,7 @@ atlas_add_test( L1CaloFEXSimCfg_R3data
 
 atlas_add_test( L1CaloFEXSimCfgBDTTau_R3data
                 SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data -e -d -n 5
+                PROPERTIES TIMEOUT 300
                 PRIVATE_WORKING_DIRECTORY 
 		ENVIRONMENT "TAU_EFEX_BDT_CONFIG_PATH=${CMAKE_CURRENT_SOURCE_DIR}/data/bdt_config_v16.json"
 		POST_EXEC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/validateBDTTau.py )
