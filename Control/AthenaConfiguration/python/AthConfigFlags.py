@@ -122,16 +122,13 @@ class FlagAddress(object):
         if isinstance(f, AthConfigFlags):
             self._flags = f
             rname = self._flags._renames.get(name, name)
-            # print("HERE add init, with flags ", name, rname)
             self._name = rname
 
         elif isinstance(f, FlagAddress):
             self._flags = f._flags
             name = f._name+"."+name
             rname = self._flags._renames.get(name, name)
-            # print("HERE add init, with addr ", name, rname)
             self._name  = rname
-        # print("HERE addr ctror", self._flags._renames)
 
     def __getattr__(self, name):
         return getattr(self._flags, self._name + "." + name)
@@ -481,44 +478,7 @@ class AthConfigFlags(object):
         newFlags._renames[subsetToReplace] = replacementSubset
         newFlags._renames[replacementSubset] = "" # block access to original flags
         newFlags._hash = None
-        # print ("HERE c&r", newFlags._renames)
         return newFlags
-        # replacedNames=set()
-        # replacementNames=set()
-        # newFlagDict=dict()
-        # for (name,flag) in self._flagdict.items():
-        #     if name.startswith(subsetToReplace):
-        #         replacedNames.add(name[len(subsetToReplace):]) #Remember replaced flag for the check later
-        #     elif name.startswith(replacementSubset):
-        #         subName=name[len(replacementSubset):]
-        #         replacementNames.add(subName) # remember replacement name
-        #         #Move the flag to the new name:
-
-        #         newFlagDict[subsetToReplace+subName] = _copyFunction(flag)
-        #         pass
-        #     else:
-        #         newFlagDict[name] = _copyFunction(flag) #All other flags are simply copied
-        #         pass
-        #     #End loop over flags
-        #     pass
-
-        # #Last sanity check: Make sure that the replaced section still contains the same names:
-        # if not replacementNames.issuperset(replacedNames):
-        #     _msg.error(replacedNames)
-        #     _msg.error(replacementNames)
-        #     raise RuntimeError("Attempt to replace incompatible flags subsets: distinct flag are "
-        #                        + repr(replacementNames - replacedNames))
-        # newFlags = AthConfigFlags()
-        # newFlags._flagdict = newFlagDict
-
-        # for k,v in self._dynaflags.items(): # cant just assign the dicts because then they are shared when loading
-        #     newFlags._dynaflags[k] = _copyFunction(v)
-        # newFlags._hash = None
-
-        # if self._locked:
-        #     newFlags.lock()
-        # return newFlags
-
 
 
     def join(self, other, prefix=''):
