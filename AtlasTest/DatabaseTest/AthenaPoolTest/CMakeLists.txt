@@ -26,6 +26,7 @@ atlas_add_component( AthenaPoolTest
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests in the package:
 function (athenapooltest_run_test testName jo pattern)
@@ -42,6 +43,22 @@ function (athenapooltest_run_test testName jo pattern)
                   PROPERTIES TIMEOUT 900
                   DEPENDS ${ARG_DEPENDS} )
 endfunction (athenapooltest_run_test)
+
+function (athenapooltest_runca_test testName jo pattern)
+  cmake_parse_arguments( ARG "PRIVATE_WORKING_DIRECTORY" "" "DEPENDS" ${ARGN} )
+  set(_extraArgs)
+  if( ARG_PRIVATE_WORKING_DIRECTORY )
+     set(_extraArgs "PRIVATE_WORKING_DIRECTORY")
+  endif()
+  atlas_add_test( ${testName}
+                  SCRIPT python -m AthenaPoolTest.${jo}
+                  ${_extraArgs}
+                  LOG_SELECT_PATTERN ${pattern}
+                  LOG_IGNORE_PATTERN "0x[0-9a-f]{4,}|DEBUG Try item:|AthenaAttribute.*DB=|AtlasRelease|Release version|data dependencies"
+                  PROPERTIES TIMEOUT 900
+                  DEPENDS ${ARG_DEPENDS} )
+endfunction (athenapooltest_runca_test)
+
 
 
 # Write/read out some simple objects:
@@ -105,20 +122,20 @@ athenapooltest_run_test( ReadCombinedRDO ReadCombinedRDO
 #                 PROPERTIES TIMEOUT 900 PROCESSORS 4)
 
 # Check for adding DetDescr tags to event info object:
-athenapooltest_run_test( EventInfoWrite EventInfoWrite
+athenapooltest_runca_test( EventInfoWrite EventInfoWrite
                          "^TagInfoMgr|^EventInfoWriter" )
-athenapooltest_run_test( EventInfoWriteStep2 EventInfoWriteStep2
+athenapooltest_runca_test( EventInfoWriteStep2 EventInfoWriteStep2
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWrite )
-athenapooltest_run_test( EventInfoWriteStep3 EventInfoWriteStep3
+athenapooltest_runca_test( EventInfoWriteStep3 EventInfoWriteStep3
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWriteStep2 )
-athenapooltest_run_test( EventInfoWriteStep4 EventInfoWriteStep4
+athenapooltest_runca_test( EventInfoWriteStep4 EventInfoWriteStep4
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWriteStep3 )
-athenapooltest_run_test( EventInfoWriteStep5 EventInfoWriteStep5
+athenapooltest_runca_test( EventInfoWriteStep5 EventInfoWriteStep5
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWriteStep4 )
-athenapooltest_run_test( EventInfoRead EventInfoRead
+athenapooltest_runca_test( EventInfoRead EventInfoRead
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWriteStep5 )
