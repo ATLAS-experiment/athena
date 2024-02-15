@@ -44,7 +44,7 @@ Release = "current"
 # preinclude_file = "RDOtoRDOTrigger:TrigInDetValidation/TIDAvtx_preinclude.py"
 
 # CA
-preexec_tris = "flags.Trigger.InDetTracking.fullScan.addSingleTrackVertices=True;flags.Trigger.InDetTracking.fullScan.minNSiHits_vtx=8;flags.Trigger.InDetTracking.fullScan.TracksMaxZinterval=3;"
+preexec_trig = "flags.Trigger.InDetTracking.fullScan.addSingleTrackVertices=True;flags.Trigger.InDetTracking.fullScan.minNSiHits_vtx=8;flags.Trigger.InDetTracking.fullScan.TracksMaxZinterval=3;"
 
 
 
