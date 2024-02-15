@@ -224,9 +224,9 @@ def addStandardHITSMergeSubstep(executorSet):
 
 
 def addDigitizationSubstep(executorSet, in_reco_chain=False):
-    executorSet.add(athenaExecutor(name = 'HITtoRDO', skeletonFile = 'SimuJobTransforms/skeleton.HITtoRDO.py',
+    executorSet.add(athenaExecutor(name = 'HITtoRDO', skeletonFile = None,
                                               skeletonCA='SimuJobTransforms.HITtoRDO_Skeleton',
-                                              substep = 'h2r', tryDropAndReload = False, 
+                                              substep = 'h2r', tryDropAndReload = False,
                                               inData = ['HITS'], outData = ['RDO','RDO_FILT'],
                                               onlyMPWithRunargs = [
                                                 'inputLowPtMinbiasHitsFile',
