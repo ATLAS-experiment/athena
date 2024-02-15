@@ -291,8 +291,10 @@ def topNBins(histname,h,topn,bins,h_fracQth=None):
     ylow = h.GetYaxis().GetBinLowEdge(y.value)
     yhi = h.GetYaxis().GetBinUpEdge(y.value)
     content.append(c)
-    if h_fracQth is not None:
+    if h_fracQth is not None and isinstance(h_fracQth, R.TH1):
       fracQthContent.append(h_fracQth.GetBinContent(nb))
+    else:
+      fracQthContent.append(0)
     binx.append( [xlow,xcent,xhi] )
     biny.append( [ylow,ycent,yhi] )
   # hottest bins
@@ -343,7 +345,7 @@ if __name__ == "__main__":
   parser.add_argument('-r','--run',type=int,dest='runNumber',default='267599',help="Run number",action='store')
   parser.add_argument('-ll','--lowerlb',type=int,dest='lowerlb',default='0',help="Lower lb",action='store')
   parser.add_argument('-ul','--upperlb',type=int,dest='upperlb',default='999999',help="Upper lb",action='store')
-  parser.add_argument('-s','--stream',dest='stream',default='Main',help="Stream without prefix: express/CosmicCalo/Main/ZeroBias/MinBias",action='store')
+  parser.add_argument('-s','--stream',dest='stream',default='Main',help="Stream with or without prefix: express/CosmicCalo/Main/ZeroBias/MinBias",action='store')
   parser.add_argument('-t','--tag',dest='tag',default='',help="DAQ tag: data16_13TeV, data16_cos...By default retrieve it via atlasdqm",action='store')
   parser.add_argument('-a','--amiTag',dest='amiTag',default='f',help="First letter of AMI tag: x->express / f->bulk",action='store')
   parser.add_argument('-x','--globalX',type=float,dest='globalX',default='-999.',help='X region common to all histos',action='store')
