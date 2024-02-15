@@ -14,12 +14,14 @@
 
 namespace RootAuxDynIO { class IRNTupleWriter; }
 namespace ROOT { namespace Experimental {
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
   namespace Detail {
     class RPageSource;
-#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
     class RFieldBase;
   }
 #else
+  namespace Internal {
+    class RPageSource;
   }
   class RFieldBase;
 #endif
@@ -30,10 +32,11 @@ namespace RootAuxDynIO
 {
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
    using ROOT::Experimental::RFieldBase;
+   using ROOT::Experimental::Internal::RPageSource;
 #else
    using ROOT::Experimental::Detail::RFieldBase;
-#endif
    using ROOT::Experimental::Detail::RPageSource;
+#endif
 
    class RNTupleAuxDynReader : public AthMessaging, public IRootAuxDynReader
    {
