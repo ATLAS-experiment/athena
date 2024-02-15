@@ -1,13 +1,13 @@
 """The function in this module you should look to be using is meta_diff"""
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # This script reads metadata from a given file
 from __future__ import print_function
 
 import logging
 import re
 
-from PyUtils.MetaReader import read_metadata
+from PyUtils.MetaReader import read_metadata, trigger_keys
 
 
 def summary(content):
@@ -54,11 +54,11 @@ def truncateDict(value):
 
 def print_diff(parent_key, obj1, obj2, diff_format, filter_key, key_only):
     """build comparison string for two non-dictionary objects"""
-    
+
     if filter_key is not None and filter_key(parent_key) is False:
         # skip this key
         return
-    
+
     result = "\n"
 
     if diff_format == "simple":
@@ -75,9 +75,9 @@ def print_diff(parent_key, obj1, obj2, diff_format, filter_key, key_only):
                 )
         result += "\n"
     else:
-        
+
         if parent_key is not None:
-            
+
             if key_only:
                 result += "{}".format(parent_key)
             else:
@@ -102,11 +102,11 @@ def print_diff(parent_key, obj1, obj2, diff_format, filter_key, key_only):
 
 def print_diff_type(parent_key, obj1, obj2, diff_format, filter_key, key_only):
     """Build diff string for objet of different type"""
-    
+
     if filter_key is not None and filter_key(parent_key) is False:
         # skip this key
         return
-        
+
     result = "\n"
 
     if diff_format == "simple":
@@ -130,7 +130,7 @@ def print_diff_type(parent_key, obj1, obj2, diff_format, filter_key, key_only):
     else:
         if parent_key is not None:
             if key_only:
-                result += "{}".format(parent_key)   
+                result += "{}".format(parent_key)
             else:
                 result += "{}:\n".format(parent_key)
                 result += """\
@@ -146,11 +146,11 @@ def print_diff_type(parent_key, obj1, obj2, diff_format, filter_key, key_only):
 
 def print_diff_dict_keys(parent_key, obj1, obj2, diff_format, filter_key, key_only):
     """build diff style string for dictionary objects"""
-    
+
     if filter_key is not None and filter_key(parent_key) is False:
         # skip this key
         return
-    
+
     result = '\n'
     if diff_format != 'simple':
         shared_keys = set(obj1.keys()).intersection(obj2.keys())
@@ -168,7 +168,7 @@ def print_diff_dict_keys(parent_key, obj1, obj2, diff_format, filter_key, key_on
         elif obj2 is None:
             result += "{} has been deleted".format(parent_key)
         else:
-            
+
             if key_only:
                 result += "{} has changed".format(parent_key)
             else:
@@ -179,12 +179,12 @@ def print_diff_dict_keys(parent_key, obj1, obj2, diff_format, filter_key, key_on
                 )
     else:
         if parent_key is not None:
-            
-        
+
+
             if key_only:
-                result += "{}".format(parent_key)   
+                result += "{}".format(parent_key)
             else:
-                result += "{}:\n".format(parent_key)    
+                result += "{}:\n".format(parent_key)
                 result += """\
                 < {}
                 ----------
@@ -256,7 +256,7 @@ def compare_dicts(test, reference, ordered=False, diff_format="simple", filter_k
 
     keys = set(test.keys()).union(reference.keys())
     for key in keys:
-        
+
         try:
             val1 = test[key]
         except KeyError:
@@ -288,7 +288,8 @@ def meta_diff(
         promote=False,
         diff_format="simple",
         regex=False,
-        key_only=False
+        key_only=False,
+        ignore_trigger=False,
 ):
     """
     Compare the in-file metadata in two given files. Uses PyUtils.MetaReader
@@ -334,7 +335,7 @@ def meta_diff(
             drop[i] = re.compile( drop[i] )
 
     def filter_key(key):
-        
+
         if drop is not None:
             for drop_key in drop:
                 if not regex:
@@ -343,6 +344,11 @@ def meta_diff(
                 else:
                     if drop_key.match(key):
                         return False
+
+        if ignore_trigger:
+            for trigger_key in trigger_keys:
+                if key.startswith(trigger_key):
+                    return False
 
         return True
 
@@ -358,8 +364,4 @@ def meta_diff(
     if not result:
         msg.info("No differences found")
 
-
-    
-             
-           
     return list(sorted([r for r in result if r is not None ]))
