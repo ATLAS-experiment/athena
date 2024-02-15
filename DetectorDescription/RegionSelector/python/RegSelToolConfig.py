@@ -7,7 +7,7 @@
 #
 #   @date    Sun  8 Mar 2020 03:27:57 GMT
 #                 
-#   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration#                 
+#   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration#
 #
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -454,4 +454,4 @@ if __name__=='__main__':
         RegionSelectorTools = acc.popToolsAndMerge(toolsCfg) )
     acc.addEventAlgo(alg, sequenceName='AthAlgSeq')
 
-    acc.run()
+    sys.exit(acc.run().isFailure())
