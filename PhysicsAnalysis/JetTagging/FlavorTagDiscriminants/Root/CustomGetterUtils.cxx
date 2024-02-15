@@ -1,12 +1,14 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include "FlavorTagDiscriminants/SequenceGetter.h"
+#include "FlavorTagDiscriminants/CustomGetterUtils.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 
 #include <optional>
 
 namespace {
+
+  using FlavorTagDiscriminants::getter_utils::SequenceFromConstituents;
   // ______________________________________________________________________
   // Custom getters for jet-wise quantities
   //
@@ -85,13 +87,11 @@ namespace {
         return {m_name, seq};
       }
   };
-}
-  namespace FlavorTagDiscriminants {
-  namespace sequence_getter {
+
 
   
-  std::optional<typename CustomSequenceGetter::SequenceFromConstituents>
-  CustomSequenceGetter::sequenceWithIpDep(
+  std::optional<SequenceFromConstituents>
+  sequenceWithIpDep(
     const std::string& name,
     const std::string& prefix)
   {
@@ -158,8 +158,8 @@ namespace {
   }
 
   
-  std::optional<typename CustomSequenceGetter::SequenceFromConstituents>
-  CustomSequenceGetter::sequenceNoIpDep(const std::string& name)
+  std::optional<SequenceFromConstituents>
+  sequenceNoIpDep(const std::string& name)
   {
     using Ip = xAOD::IParticle;
     using Tp = xAOD::TrackParticle;
@@ -319,10 +319,12 @@ namespace {
         return barrel_hits(p) + endcap_hits(p);
       });
     }
-
-
     return std::nullopt;
   }
+
+}
+  namespace FlavorTagDiscriminants {
+  namespace getter_utils {
 
     // ________________________________________________________________
     // Interface functions
@@ -342,10 +344,10 @@ namespace {
     }
 
     // Case for constituents variables
-    std::pair<typename CustomSequenceGetter::NamedSequenceFromConstituents, std::set<std::string>> 
-    CustomSequenceGetter::customNamedSeqGetterWithDeps(const std::string& name,
+    std::pair<typename getter_utils::NamedSequenceFromConstituents, std::set<std::string>> 
+    customNamedSeqGetterWithDeps(const std::string& name,
                                  const std::string& prefix) {
-      auto [getter, deps] = CustomSequenceGetter::customSequenceGetterWithDeps(name, prefix);
+      auto [getter, deps] = customSequenceGetterWithDeps(name, prefix);
       return {
         [n=name, g=getter](const xAOD::Jet& j,
                        const std::vector<const xAOD::IParticle*>& t) {
@@ -360,16 +362,16 @@ namespace {
   // These functions are wrapped by the customNamedSeqGetter function
   // below to become the ones that are actually used in DL2.
   //
-  std::pair<typename CustomSequenceGetter::SequenceFromConstituents, std::set<std::string>>
-  CustomSequenceGetter::customSequenceGetterWithDeps(const std::string& name,
+  std::pair<typename getter_utils::SequenceFromConstituents, std::set<std::string>>
+  customSequenceGetterWithDeps(const std::string& name,
                                const std::string& prefix) {
 
-    if (auto getter = CustomSequenceGetter::sequenceWithIpDep(name, prefix)) {
+    if (auto getter = sequenceWithIpDep(name, prefix)) {
       auto deps = BTagTrackIpAccessor(prefix).getTrackIpDataDependencyNames();
       return {*getter, deps};
     }
 
-    if (auto getter = CustomSequenceGetter::sequenceNoIpDep(name)) {
+    if (auto getter = sequenceNoIpDep(name)) {
       return {*getter, {}};
     }
     throw std::logic_error("no match for custom getter " + name);
@@ -378,7 +380,7 @@ namespace {
   // ________________________________________________________________________
   // Class implementation
   //
-  std::pair<typename CustomSequenceGetter::NamedSequenceFromConstituents, std::set<std::string>> 
+  std::pair<typename getter_utils::NamedSequenceFromConstituents, std::set<std::string>> 
   CustomSequenceGetter::seqFromConsituents(
       const FTagConstituentsInputConfig& cfg, 
       const FTagOptions& options){
@@ -397,7 +399,7 @@ namespace {
           SequenceGetter<unsigned char, xAOD::IParticle>(cfg.name), {cfg.name}
         };
       case ConstituentsEDMType::CUSTOM_GETTER: {
-        return CustomSequenceGetter::customNamedSeqGetterWithDeps(
+        return customNamedSeqGetterWithDeps(
           cfg.name, options.track_prefix);
       }
       default: {
@@ -439,7 +441,7 @@ namespace {
     const xAOD::Jet& jet, const IParticles& constituents) const
   {
     std::vector<float> cnsts_feats;
-    int num_vars = static_cast<int>(sequencesFromConstituents.size());
+    int num_vars = sequencesFromConstituents.size();
     int num_cnsts = 0;
 
     int cnst_var_idx = 0;

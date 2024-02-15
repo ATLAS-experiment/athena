@@ -7,7 +7,7 @@
 
 // local includes
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
-#include "FlavorTagDiscriminants/SequenceGetter.h"
+#include "FlavorTagDiscriminants/CustomGetterUtils.h"
 
 // EDM includes
 #include "xAODJet/JetFwd.h"
@@ -60,7 +60,7 @@ namespace FlavorTagDiscriminants {
         std::vector<const xAOD::IParticle*> getIParticlesFromJet(const xAOD::Jet& jet) const;
 
         IParticleSortVar m_iparticleSortVar;
-        sequence_getter::CustomSequenceGetter m_customSequenceGetter;        
+        getter_utils::CustomSequenceGetter m_customSequenceGetter;        
         std::function<IPV(const Jet&)> m_associator;
         bool m_isCharged;
     };

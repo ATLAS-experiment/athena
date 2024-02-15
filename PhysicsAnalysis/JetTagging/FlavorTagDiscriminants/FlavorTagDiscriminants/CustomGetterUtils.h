@@ -2,7 +2,7 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-// The customGetter file is a catch-all for various getter functinos
+// The CustomGetterUtils file is a catch-all for various getter functinos
 // that need to be hard coded for whatever reason. Some of these are
 // accessing methods like `pt` which have no name in the EDM, others
 // can't be stored in the edm directly for various reasons.
@@ -20,12 +20,12 @@
 #include <string>
 #include <set>
 
-#ifndef SEQUENCE_GETTER_H
-#define SEQUENCE_GETTER_H
+#ifndef CUSTOM_GETTER_UTILS_H
+#define CUSTOM_GETTER_UTILS_H
 
 namespace FlavorTagDiscriminants {
 
-  /// Class to produce IParticle -> vector<double> functions
+  /// Utils to produce IParticle -> vector<double> functions
   ///
   /// DL2 configures the its inputs when the algorithm is initalized,
   /// meaning that the list of track and jet properties that are used
@@ -39,28 +39,29 @@ namespace FlavorTagDiscriminants {
   /// like to avoid reimplementing the logic in these functions in
   /// multiple places, they are exposed here.
   ///
-  /// This function will return a getter based on a string key. See the
-  /// implementation for the definitions.
-  ///
-  /// NOTE: This function is for experts only, don't expect support.
+  /// NOTE: This file is for experts only, don't expect support.
   ///
 
-  namespace sequence_getter {
+  namespace getter_utils {
+
+    using IParticles = std::vector<const xAOD::IParticle*>;
+
+    using SequenceFromConstituents = std::function<std::vector<double>(
+            const xAOD::Jet&,
+            const IParticles&)>;
+    using NamedSequenceFromConstituents = std::function<std::pair<std::string, std::vector<double>>(
+      const xAOD::Jet&,
+      const IParticles&)>;
 
     std::function<std::pair<std::string, double>(const xAOD::Jet&)>
     customGetterAndName(const std::string&);
 
+    std::pair<SequenceFromConstituents, std::set<std::string>>
+    customSequenceGetterWithDeps(const std::string& name,
+                                const std::string& prefix);
+
     class CustomSequenceGetter {
         public:
-          using IParticles = std::vector<const xAOD::IParticle*>;
-          using SequenceFromConstituents = std::function<std::vector<double>(
-            const xAOD::Jet&,
-            const IParticles&)>;
-          
-          using NamedSequenceFromConstituents = std::function<std::pair<std::string, std::vector<double>>(
-            const xAOD::Jet&,
-            const IParticles&)>;
-
           CustomSequenceGetter(std::vector<FTagConstituentsInputConfig> inputs,
                               const FTagOptions& options);
 
@@ -71,22 +72,9 @@ namespace FlavorTagDiscriminants {
           std::set<std::string> getUsedRemap() const;
           
         private:
-
-          std::pair<NamedSequenceFromConstituents, std::set<std::string>>
-          customNamedSeqGetterWithDeps(const std::string& name, const std::string& prefix);
-
-          std::pair<SequenceFromConstituents, std::set<std::string>>
-          customSequenceGetterWithDeps(const std::string& name,
-                                      const std::string& prefix);
-
-          std::optional<SequenceFromConstituents> sequenceNoIpDep(const std::string& name);
-
-          std::optional<SequenceFromConstituents> sequenceWithIpDep(const std::string& name,
-                                                                  const std::string& prefix);
-
           std::pair<NamedSequenceFromConstituents, std::set<std::string>> seqFromConsituents(
-          const FTagConstituentsInputConfig& cfg, 
-          const FTagOptions& options);
+            const FTagConstituentsInputConfig& cfg, 
+            const FTagOptions& options);
 
           std::vector<NamedSequenceFromConstituents> sequencesFromConstituents;
           std::set<std::string> deps;

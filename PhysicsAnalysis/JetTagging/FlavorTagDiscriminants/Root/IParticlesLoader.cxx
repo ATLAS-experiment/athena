@@ -96,7 +96,7 @@ namespace FlavorTagDiscriminants {
     ):
         ConstituentsLoader(cfg),
         m_iparticleSortVar(IParticlesLoader::iparticleSortVar(cfg.order)),
-        m_customSequenceGetter(sequence_getter::CustomSequenceGetter(
+        m_customSequenceGetter(getter_utils::CustomSequenceGetter(
           cfg.inputs, options))
     {
         SG::AuxElement::ConstAccessor<PartLinks> acc("constituentLinks");

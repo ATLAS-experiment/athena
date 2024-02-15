@@ -13,7 +13,7 @@
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
-#include "FlavorTagDiscriminants/SequenceGetter.h"
+#include "FlavorTagDiscriminants/CustomGetterUtils.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -88,7 +88,7 @@ namespace FlavorTagDiscriminants {
         TrackFilter m_trackFilter;
         TrackSequenceFilter m_flipFilter;
         std::function<TPV(const SG::AuxElement&)> m_associator;
-        sequence_getter::CustomSequenceGetter m_customSequenceGetter;
+        getter_utils::CustomSequenceGetter m_customSequenceGetter;
     };
 }
 

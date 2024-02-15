@@ -4,7 +4,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
-#include "FlavorTagDiscriminants/customGetter.h"
+#include "FlavorTagDiscriminants/CustomGetterUtils.h"
 #include "FlavorTagDiscriminants/StringUtils.h"
 #include "FlavorTagDiscriminants/TracksLoader.h"
 #include "FlavorTagDiscriminants/IParticlesLoader.h"
@@ -375,7 +375,7 @@ namespace FlavorTagDiscriminants {
           deps.bTagInputs.insert(input.name);
           varsFromBTag.push_back(filler);
         } else {
-          varsFromJet.push_back(internal::customGetterAndName(input.name));
+          varsFromJet.push_back(getter_utils::customGetterAndName(input.name));
         }
         if (input.default_flag.size() > 0) {
           deps.bTagInputs.insert(input.default_flag);

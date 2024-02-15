@@ -377,7 +377,7 @@ namespace FlavorTagDiscriminants {
         m_trackSortVar(TracksLoader::trackSortVar(cfg.order, options)),
         m_trackFilter(TracksLoader::trackFilter(cfg.selection, options).first),
         m_flipFilter(TracksLoader::flipFilter(options).first),
-        m_customSequenceGetter(sequence_getter::CustomSequenceGetter(
+        m_customSequenceGetter(getter_utils::CustomSequenceGetter(
           cfg.inputs, options))
     {
         // We have several ways to get tracks: either we retrieve an
