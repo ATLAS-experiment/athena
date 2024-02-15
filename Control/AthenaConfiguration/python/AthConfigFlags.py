@@ -121,11 +121,17 @@ class FlagAddress(object):
     def __init__(self, f, name):
         if isinstance(f, AthConfigFlags):
             self._flags = f
-            self._name = name
+            rname = self._flags._renames.get(name, name)
+            # print("HERE add init, with flags ", name, rname)
+            self._name = rname
 
         elif isinstance(f, FlagAddress):
             self._flags = f._flags
-            self._name  = f._name+"."+name
+            name = f._name+"."+name
+            rname = self._flags._renames.get(name, name)
+            # print("HERE add init, with addr ", name, rname)
+            self._name  = rname
+        # print("HERE addr ctror", self._flags._renames)
 
     def __getattr__(self, name):
         return getattr(self._flags, self._name + "." + name)
@@ -219,6 +225,7 @@ class AthConfigFlags(object):
         self._hash = None
         self._parser = None
         self._args = None # user args from parser
+        self._renames = {}
 
     def athHash(self):
         if self._locked is False:
@@ -383,6 +390,9 @@ class AthConfigFlags(object):
         if name in self._categoryCache:
             return True
 
+        if name in self._renames:
+            return self.hasCategory(self._renames[name])
+        
         # If not found do search through all keys.
         # TODO: could be improved by using a trie for _flagdict
         for f in self._flagdict.keys():
@@ -453,61 +463,61 @@ class AthConfigFlags(object):
         newflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon')
         """
 
-        def _copyFunction(obj):
-            return obj if self.locked() else deepcopy(obj) # if flags are locked we can reuse containers, no need to deepcopy
-
         _msg.info("cloning flags and replacing %s by %s", subsetToReplace, replacementSubset)
 
         self._loadDynaFlags( subsetToReplace )
         self._loadDynaFlags( replacementSubset )
 
-        if not subsetToReplace.endswith("."):
-            subsetToReplace+="."
-            pass
-        if not replacementSubset.endswith("."):
-            replacementSubset+="."
-            pass
+        subsetToReplace = subsetToReplace.strip(".")
+        replacementSubset = replacementSubset.strip(".")
 
         #Sanity check: Don't replace a by a
         if (subsetToReplace == replacementSubset):
             raise RuntimeError("Can not replace flags {} with themselves".format(subsetToReplace))
 
 
-        replacedNames=set()
-        replacementNames=set()
-        newFlagDict=dict()
-        for (name,flag) in self._flagdict.items():
-            if name.startswith(subsetToReplace):
-                replacedNames.add(name[len(subsetToReplace):]) #Remember replaced flag for the check later
-            elif name.startswith(replacementSubset):
-                subName=name[len(replacementSubset):]
-                replacementNames.add(subName) # remember replacement name
-                #Move the flag to the new name:
-
-                newFlagDict[subsetToReplace+subName] = _copyFunction(flag)
-                pass
-            else:
-                newFlagDict[name] = _copyFunction(flag) #All other flags are simply copied
-                pass
-            #End loop over flags
-            pass
-
-        #Last sanity check: Make sure that the replaced section still contains the same names:
-        if not replacementNames.issuperset(replacedNames):
-            _msg.error(replacedNames)
-            _msg.error(replacementNames)
-            raise RuntimeError("Attempt to replace incompatible flags subsets: distinct flag are "
-                               + repr(replacementNames - replacedNames))
-        newFlags = AthConfigFlags()
-        newFlags._flagdict = newFlagDict
-
-        for k,v in self._dynaflags.items(): # cant just assign the dicts because then they are shared when loading
-            newFlags._dynaflags[k] = _copyFunction(v)
+        newFlags = copy(self) # shallow copy
+        newFlags._renames = deepcopy(self._renames) #maintains renames
+        newFlags._renames[subsetToReplace] = replacementSubset
+        newFlags._renames[replacementSubset] = "" # block access to original flags
         newFlags._hash = None
-
-        if self._locked:
-            newFlags.lock()
+        # print ("HERE c&r", newFlags._renames)
         return newFlags
+        # replacedNames=set()
+        # replacementNames=set()
+        # newFlagDict=dict()
+        # for (name,flag) in self._flagdict.items():
+        #     if name.startswith(subsetToReplace):
+        #         replacedNames.add(name[len(subsetToReplace):]) #Remember replaced flag for the check later
+        #     elif name.startswith(replacementSubset):
+        #         subName=name[len(replacementSubset):]
+        #         replacementNames.add(subName) # remember replacement name
+        #         #Move the flag to the new name:
+
+        #         newFlagDict[subsetToReplace+subName] = _copyFunction(flag)
+        #         pass
+        #     else:
+        #         newFlagDict[name] = _copyFunction(flag) #All other flags are simply copied
+        #         pass
+        #     #End loop over flags
+        #     pass
+
+        # #Last sanity check: Make sure that the replaced section still contains the same names:
+        # if not replacementNames.issuperset(replacedNames):
+        #     _msg.error(replacedNames)
+        #     _msg.error(replacementNames)
+        #     raise RuntimeError("Attempt to replace incompatible flags subsets: distinct flag are "
+        #                        + repr(replacementNames - replacedNames))
+        # newFlags = AthConfigFlags()
+        # newFlags._flagdict = newFlagDict
+
+        # for k,v in self._dynaflags.items(): # cant just assign the dicts because then they are shared when loading
+        #     newFlags._dynaflags[k] = _copyFunction(v)
+        # newFlags._hash = None
+
+        # if self._locked:
+        #     newFlags.lock()
+        # return newFlags
 
 
 
@@ -559,7 +569,10 @@ class AthConfigFlags(object):
         for name,gen_and_prefix in sorted(self._dynaflags.items()):
             if compiled.match(name):
                 print("{:25} : {:>30} : {}".format( name, gen_and_prefix[0].__name__, '/'.join(gen_and_prefix[0].__code__.co_filename.split('/')[-2:]) ) )
-
+        print("Flag renamings")
+        for alias,src in self._renames.items():
+            print("{:30} points to {:>30} ".format( alias, src  if src else "nothing") )
+            
 
     def initAll(self):
         """
