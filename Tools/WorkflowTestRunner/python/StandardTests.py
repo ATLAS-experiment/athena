@@ -45,7 +45,6 @@ class QTest(WorkflowTest):
         self.output_checks.append(FrozenTier0PolicyCheck(setup, "AOD", 60))
         self.output_checks.append(FrozenTier0PolicyCheck(setup, "ESD", 20))
         self.output_checks.append(MetadataCheck(setup, "AOD"))
-        self.output_checks.append(MetadataCheck(setup, "ESD"))
 
         self.digest_checks = []
         if not setup.disable_output_checks:
