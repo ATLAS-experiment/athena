@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 """
@@ -10,8 +10,9 @@
 """
 
 from math import pi as M_PI
+from AthenaConfiguration.ComponentFactory import CompFactory
 
-def InDetGlobalLRTMonAlgCfg(helper, alg, **kwargs):
+def HistoInDetGlobalLRTMonAlgCfg(helper, alg):
 
     # values
     m_nBinsEta = 50
@@ -191,3 +192,22 @@ def InDetGlobalLRTMonAlgCfg(helper, alg, **kwargs):
 # end histograms
 
 
+def InDetGlobalLRTMonAlgCfg(helper, acc,
+                            flags, name="InDetGlobalLRTMonAlg", **kwargs):
+
+    if "TrackSelectionTool" not in kwargs:
+        from InDetConfig.InDetTrackSelectionToolConfig import (
+            InDetGlobalLRTMonAlg_TrackSelectionToolCfg)
+        kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
+            InDetGlobalLRTMonAlg_TrackSelectionToolCfg(flags)))
+
+    from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
+    from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
+
+    monAlg = helper.addAlgorithm(
+        CompFactory.InDetGlobalLRTMonAlg, name,
+        addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
+        **kwargs)
+
+    HistoInDetGlobalLRTMonAlgCfg(helper, monAlg)
+    return

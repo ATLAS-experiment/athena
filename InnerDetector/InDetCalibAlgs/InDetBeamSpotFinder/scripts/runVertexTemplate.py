@@ -9,9 +9,11 @@ def GetCustomAthArgs():
     parser.add_argument("--filesInput", required=True)
     parser.add_argument("--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int)
     parser.add_argument("--skipEvents", help="Skip this number of events. Default: no events are skipped", default=0, type=int)
-    parser.add_argument("--outputDBFile", help="Name of output DB file", default="beamspot.db", type=string)
-    parser.add_argument("--outputHistFile", help="Name of output hist file", default="nt.root", type=string)
-    parser.add_argument("--doMonitoring", help="Run monitoring", default=True, type=bool)
+    parser.add_argument("--outputDBFile", help="Name of output DB file", default="beamspot.db", type=str)
+    parser.add_argument("--outputHistFile", help="Name of output hist file", default="nt.root", type=str)
+    parser.add_argument("--doMonitoring", help="Run monitoring", action='store_true')
+    parser.add_argument("--outputMonFile", help="Name of output monitoring file",
+                        default="beamspotmonitoring.root", type=str)
     return parser.parse_args()
 
 # Parse the arguments
@@ -39,16 +41,20 @@ acc.merge(PoolReadCfg(flags))
 from InDetBeamSpotFinder.InDetBeamSpotFinderConfig import InDetBeamSpotFinderCfg
 acc.merge(InDetBeamSpotFinderCfg(flags))
 
-# Output SQLite and ROOT files
-from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-acc.merge(IOVDbSvcCfg(
-    flags,
-    dbConnection= "sqlite://;schema=%s;dbname=BEAMSPOT"
-    % MyArgs.outputDBFile))
+Outputs = ["INDETBEAMSPOTFINDER DATAFILE='%s' OPT='RECREATE'" % MyArgs.outputHistFile]
 
-acc.addService(CompFactory.THistSvc(
-    Output = [ "INDETBEAMSPOTFINDER DATAFILE='%s' OPT='RECREATE'"
-               % MyArgs.outputHistFile ]))
+if MyArgs.doMonitoring:
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, "BeamSpotMonitoring")
+    from InDetGlobalMonitoringRun3Test.InDetGlobalBeamSpotMonAlgCfg import (
+        InDetGlobalBeamSpotMonAlgCfg )
+    InDetGlobalBeamSpotMonAlgCfg(helper, acc, flags)
+    acc.merge(helper.result())
+    Outputs += [ "BeamSpotMonitoring DATAFILE='%s' OPT='RECREATE'" % MyArgs.outputMonFile ]
+
+
+from AthenaConfiguration.ComponentFactory import CompFactory
+acc.addService(CompFactory.THistSvc(Output = Outputs))
 
 acc.printConfig(withDetails=True)
 
