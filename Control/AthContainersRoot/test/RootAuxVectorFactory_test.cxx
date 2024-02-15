@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/test/RootAuxVectorFactory_test.cxx
@@ -489,8 +489,20 @@ void test6()
 
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
 
+  // Need to create the factories before the store: the store dtor will use the factories
+  // to delete the contained vectors.
+
   TClass* cl1 = TClass::GetClass ("std::vector<ElementLink<std::vector<AthContainersRootTest::Foo*> > >");
   SG::RootAuxVectorFactory fac1 (cl1);
+
+  TClass* cl2 = TClass::GetClass ("std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo*> > > >");
+  SG::RootAuxVectorFactory fac2 (cl2);
+
+  TClass* cl3 = TClass::GetClass ("std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > >");
+  SG::RootAuxVectorFactory fac3 (cl3);
+
+  TClass* cl4 = TClass::GetClass ("std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > > >");
+  SG::RootAuxVectorFactory fac4 (cl4);
 
   std::unique_ptr<SG::IAuxTypeVector> vec1 = fac1.create (1, 10, 10);
   EL* elv = reinterpret_cast<EL*> (vec1->toPtr());
@@ -507,9 +519,6 @@ void test6()
   assert (elv[2].index() == 10);
   assert (elv[3].key() == 124);
   assert (elv[3].index() == 11);
-
-  TClass* cl2 = TClass::GetClass ("std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo*> > > >");
-  SG::RootAuxVectorFactory fac2 (cl2);
 
   std::unique_ptr<SG::IAuxTypeVector> vec2 = fac2.create (2, 10, 10);
   std::vector<EL>* velv = reinterpret_cast<std::vector<EL>*> (vec2->toPtr());
@@ -550,9 +559,6 @@ void test6()
   assert (velv[6][1].key() == 457);
   assert (velv[6][1].index() == 28);
 
-  TClass* cl3 = TClass::GetClass ("std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > >");
-  SG::RootAuxVectorFactory fac3 (cl3);
-
   typedef ElementLink<std::vector<AthContainersRootTest::Foo> > EL2;
   std::unique_ptr<SG::IAuxTypeVector> vec3 = fac3.create (3, 10, 10);
   EL2* elv2 = reinterpret_cast<EL2*> (vec3->toPtr());
@@ -561,9 +567,6 @@ void test6()
   elv2[2] = EL2 (124, 11);
 
   fac3.copyForOutput (3, avd1, 2, avd1, 1, 2);
-
-  TClass* cl4 = TClass::GetClass ("std::vector<std::vector<ElementLink<std::vector<AthContainersRootTest::Foo> > > >");
-  SG::RootAuxVectorFactory fac4 (cl4);
 
   std::unique_ptr<SG::IAuxTypeVector> vec4 = fac4.create (4, 10, 10);
   std::vector<EL2>* velv2 = reinterpret_cast<std::vector<EL2>*> (vec4->toPtr());
