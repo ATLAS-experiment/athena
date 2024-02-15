@@ -8450,6 +8450,10 @@ HLT_g140_loose_tau20_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM26M:
   eventCount: 0
 HLT_g140_loose_tau20_mediumRNN_tracktwoMVA_probe_03dRAB_L1eEM28M:
   eventCount: 0
+HLT_g140_loose_tau20_mediumRNN_tracktwoMVA_probe_L1eTAU12_03dRAB_L1eEM26M:
+  eventCount: 0
+HLT_g140_loose_tau20_mediumRNN_tracktwoMVA_probe_L1eTAU12_03dRAB_L1eEM28M:
+  eventCount: 0
 HLT_g15_loose_L1EM10VH:
   eventCount: 4
   stepCounts:
