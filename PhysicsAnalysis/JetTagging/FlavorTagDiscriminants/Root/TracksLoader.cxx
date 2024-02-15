@@ -447,7 +447,7 @@ namespace FlavorTagDiscriminants {
 
     std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> TracksLoader::getData(
       const xAOD::Jet& jet, 
-      const SG::AuxElement& btag) const {
+      [[maybe_unused]] const SG::AuxElement& btag) const {
         Tracks flipped_tracks;
         Tracks sorted_tracks = getTracksFromJet(jet, btag);
         std::vector<const xAOD::IParticle*> flipped_tracks_ip;

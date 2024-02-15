@@ -26,14 +26,13 @@ namespace FlavorTagDiscriminants {
     FTagConstituentsSequenceConfig createIParticlesLoaderConfig(
       std::pair<std::string, std::vector<std::string>> iparticle_names
     );
-    // Subclass for Tracks loader inherited from abstract ConstituentsLoader class
+    // Subclass for IParticles loader inherited from abstract ConstituentsLoader class
     class IParticlesLoader : public ConstituentsLoader {
       public:
-        // TracksLoader();
         IParticlesLoader(FTagConstituentsSequenceConfig, const FTagOptions& options);
         std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
-          const SG::AuxElement& btag) const override ;
+          [[maybe_unused]] const SG::AuxElement& btag) const override ;
         FTagDataDependencyNames getDependencies() const override;
         std::set<std::string> getUsedRemap() const override;
         std::string getName() const override;
@@ -42,7 +41,7 @@ namespace FlavorTagDiscriminants {
         typedef xAOD::Jet Jet;
         typedef std::pair<std::string, double> NamedVar;
         typedef std::pair<std::string, std::vector<double> > NamedSeq;
-        // tracks typedefs
+        // iparticle typedefs
         typedef std::vector<const xAOD::IParticle*> IParticles;
         typedef std::function<double(const xAOD::IParticle*,
                                     const Jet&)> IParticleSortVar;
@@ -56,7 +55,7 @@ namespace FlavorTagDiscriminants {
         using PartLinks = std::vector<ElementLink<IPC>>;
         using IPV = std::vector<const xAOD::IParticle*>;
 
-        IParticleSortVar iparticleSortVar(ConstituentsSortOrder, const FTagOptions&);
+        IParticleSortVar iparticleSortVar(ConstituentsSortOrder);
         
         std::vector<const xAOD::IParticle*> getIParticlesFromJet(const xAOD::Jet& jet) const;
 

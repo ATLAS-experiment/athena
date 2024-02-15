@@ -53,9 +53,11 @@ namespace FlavorTagDiscriminants {
     auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
     std::vector<FTagTrackSequenceConfig> track_sequences;
+    int n_track_sequences = 0;
     for (auto config : constituents_configs){
       if (config.name.find("tracks") != std::string::npos){
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
+        n_track_sequences++;
       }
       else if (config.name.find("flow") != std::string::npos){
         m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
@@ -64,6 +66,11 @@ namespace FlavorTagDiscriminants {
         throw std::runtime_error("Unknown constituent type. Only tracks and neutrals are supported.");
       }
     }
+
+    if ((n_track_sequences > 1) && m_decorate_tracks){
+      throw std::runtime_error("Only one track sequence is supported when decorating tracks.");
+    }
+    
     // Initialize jet and b-tagging input getters.
     auto [vb, vj, ds] = dataprep::createBvarGetters(inputs);
     m_varsFromBTag = vb;

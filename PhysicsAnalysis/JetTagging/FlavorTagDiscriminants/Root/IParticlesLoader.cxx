@@ -37,7 +37,7 @@ namespace {
         input.name = varname;
       }
       input.type = str::match_first(type_regexes, input.name,
-                                "track type matching");
+                                "iparticle type matching");
       config.inputs.push_back(input);
     }
     return config;
@@ -77,8 +77,7 @@ namespace FlavorTagDiscriminants {
     // factory for functions which return the sort variable we
     // use to order iparticles
     IParticlesLoader::IParticleSortVar IParticlesLoader::iparticleSortVar(
-        ConstituentsSortOrder config, 
-        const FTagOptions& options) 
+        ConstituentsSortOrder config) 
     {
       typedef xAOD::IParticle Ip;
       typedef xAOD::Jet Jet;
@@ -96,7 +95,7 @@ namespace FlavorTagDiscriminants {
         const FTagOptions& options
     ):
         ConstituentsLoader(cfg),
-        m_iparticleSortVar(IParticlesLoader::iparticleSortVar(cfg.order, options)),
+        m_iparticleSortVar(IParticlesLoader::iparticleSortVar(cfg.order)),
         m_customSequenceGetter(sequence_getter::CustomSequenceGetter(
           cfg.inputs, options))
     {
@@ -155,7 +154,7 @@ namespace FlavorTagDiscriminants {
 
     std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> IParticlesLoader::getData(
       const xAOD::Jet& jet, 
-      const SG::AuxElement& btag) const {
+      [[maybe_unused]] const SG::AuxElement& btag) const {
         IParticles sorted_particles = getIParticlesFromJet(jet);
 
         return std::make_tuple("flow_features", m_customSequenceGetter.getFeats(jet, sorted_particles), sorted_particles);
