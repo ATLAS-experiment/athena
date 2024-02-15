@@ -13644,6 +13644,22 @@ HLT_j0_Z120XX4c120_roiftf_presel4j85_L13J50:
     0: 1
   stepFeatures:
     0: 1
+HLT_j0_Z120XX4c20_MAXMULT20_roiftf_presel4c20_L1RD0_FILLED:
+  eventCount: 18
+  stepCounts:
+    0: 20
+    1: 18
+  stepFeatures:
+    0: 20
+    1: 102
+HLT_j0_Z120XX4c20_MAXMULT6_roiftf_presel4c20_L1RD0_FILLED:
+  eventCount: 17
+  stepCounts:
+    0: 20
+    1: 17
+  stepFeatures:
+    0: 20
+    1: 83
 HLT_j0_Z120XX4c20_roiftf_presel4c20_L1RD0_FILLED:
   eventCount: 19
   stepCounts:
