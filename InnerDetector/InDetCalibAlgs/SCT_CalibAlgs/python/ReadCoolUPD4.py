@@ -1,3 +1,7 @@
+#
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#
+
 ############################################################################################
 # @file: Script to extract information for the uploaded in the COOL DB runs with UPD4 Tag
 #       
@@ -5,15 +9,15 @@
 ###########################################################################################
 
 #!/bin/env python
-import os,sys,time,glob,fnmatch, string, datetime
-from PyCool import cool,coral
-from time import gmtime, strftime
+import sys
+from PyCool import cool
 
 #############################################################################################
 def formDbString(technology,server,schema,dbname):
   theString=technology+'://'+server+';schema='+schema+';dbname='+dbname
   return theString
   
+#############################################################################################
 def openDatabase(dbstring):
   dbSvc=cool.DatabaseSvcFactory.databaseService()
   technology='oracle'
@@ -28,17 +32,20 @@ def openDatabase(dbstring):
       sys.exit(-1)
   return db
 
+#############################################################################################
 def formIov(runNumber):
   s,u=((runNumber) << 32), ((runNumber + 1) << 32) - 1
   print ("formIOV: ", s, u)
   return s,u
 
+#############################################################################################
 def formIovFromTo(runNumberStart, runNumber):
   s,u=((runNumberStart ) << 32), ((runNumber + 1) << 32) - 1
   print ("formIOV: ", s, u)
   return s,u
   
-#CS this modification checks which was the k-last run before the processed one
+#############################################################################################
+# this modification checks which was the k-last run before the processed one
 def getRunNumberStart(runNumber, k):
     runlistfile = open("/afs/cern.ch/work/s/sctcalib/lastRuns.txt", mode = 'r')
     content = runlistfile.read()
@@ -73,8 +80,8 @@ def GetRunList(dbstring, folder, tag, runNumber, k):
     temp=[]
     objs=myfolder.browseObjects(iovSince,iovUntil,cool.ChannelSelection.all(),tag)
     for obj in objs:
-        mypayload=obj.payload()
-        dfl=mypayload['DefectList']
+        #mypayload=obj.payload()
+        #dfl=mypayload['DefectList']
         temp.append(obj.since()>>32)
     objs.close()
     db.closeDatabase()
@@ -125,7 +132,8 @@ def GetNumNoisyStrips(dbstring, folder, tag, runNumber):
     myfolder=db.getFolder(folder)
     iovSince, iovUntil = formIov(runNumber) 
 
-    Array_numNoisyStrips, numNoisyStrips = [], 0
+    #Array_numNoisyStrips, numNoisyStrips = [], 0
+    numNoisyStrips = 0
     objs=myfolder.browseObjects(iovSince,iovUntil,cool.ChannelSelection.all(),tag)
     for obj in objs:
         mypayload=obj.payload()
@@ -147,44 +155,3 @@ def GetNumNoisyStrips(dbstring, folder, tag, runNumber):
     db.closeDatabase()
 
     return numNoisyStrips
-
-#############################################################################################
-### --> Execution phase: Called in SCTCalib_topOptions.py
-###     (Uncomment below if want to use as standalone script)
-#############################################################################################
-
-### In order to get the run number we need:
-# from SCTCalibConfig import RunNumber
-##########################################
-# # # RunNumber=161520
-
-# k=5 
-# dbstring="ATLAS_COOLOFL_SCT/COMP200"
-# folder='/SCT/Derived/Monitoring'
-# tag="SctDerivedMonitoring-UPD4-001"
-    
-# RunList=GetRunList(dbstring, folder, tag, RunNumber, k)
-
-# sumNoisyModulesInDB=0
-# print("------------> Runs to compare in COOL DB <--------------------------------------")
-# for i in range(len(RunList)):
-
-    # numNoisyMods=GetNumNoisyMods(dbstring, folder, tag, RunList[i])
-    # numNoisyStrips=GetNumNoisyStrips(dbstring, folder, tag, RunList[i])
-
-    # if (i==0): NoisyStripLastRunInDB = numNoisyStrips
-
-    # print("", "Run: ", RunList[i], "Noisy Modules: ", numNoisyMods, "Noisy Strips: ", numNoisyStrips)
-        
-    # sumNoisyModulesInDB = sumNoisyModulesInDB + numNoisyMods
-
-# if (len(RunList) != 0):
-    # NoisyModuleAverageInDB = float(sumNoisyModulesInDB) / float(len(RunList))               
-# else:
-    # NoisyModuleAverageInDB=-999.
-
-# print("")
-# print("--> The average value of the number of noisy modules over the above runs is ", NoisyModuleAverageInDB)
-# print("--> The number of nosiy strips in the last uploaded run, ", RunList[0],", is ", NoisyStripLastRunInDB)
-# print("--------------------------------------------------------------------------------")
-
