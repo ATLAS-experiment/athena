@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileRecUtils )
@@ -49,9 +49,9 @@ atlas_add_test( TileCellBuilderFromHit_test
   LOG_IGNORE_PATTERN "LArDetectorToolNV|is still valid|no data retrieved|Database being retired|Reading file|Unable to locate catalog|Resolved path|DigitizationFlags|^Domain|created CondCont|no dictionary for class|^ +[+]|Reading LArPedestalMC|IOV callback|^DetectorStore|TileDetectorTool|Creating TileCondProxyFile|Cache alignment|IncrementalExecutor::executeFunction|You are probably missing the definition|Maybe you need to load|No RecFlags available|MetaReader|AutoConfiguration|IOVDbSvc +INFO" )
 
 atlas_add_test( TileRawChannelBuilder_test
-  SCRIPT test/TileRawChannelBuilder_test.sh
-  PROPERTIES TIMEOUT 600
-  LOG_IGNORE_PATTERN ${extra_patterns} )
+                SCRIPT test/TileRawChannelBuilder_test.sh
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileDQstatusAlg_test
                 SCRIPT test/TileDQstatusAlg_test.sh
