@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ namespace iFatras {
 
     /** Interaction vertex info */
     virtual void saveISFVertexInfo(int process, Amg::Vector3D vertex,const ISF::ISFParticle& isp, Amg::Vector3D primIn,
-				   Amg::Vector3D* primOut, const ISF::ISFParticleVector children) const = 0;
+				   Amg::Vector3D* primOut, const ISF::ISFParticleVector& children) const = 0;
   };
   
 } // end of namespace
