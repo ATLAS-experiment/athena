@@ -14,10 +14,6 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 
-
-########
-# to move into TrigMinBiasHypoConfigMT?
-
 def SPCountHypoToolGen(chainDict):
     hypo = CompFactory.SPCountHypoTool(chainDict["chainName"])
     if "hmt" in chainDict["chainName"]:
@@ -188,12 +184,8 @@ if __name__ == "__main__":
     flags.lock()
     zf = MinBiasZVertexFinderSequenceCfg(flags)
     zf.ca.printConfig(withDetails=True)
-    from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
-    zfms = menuSequenceCAToGlobalWrapper(MinBiasZVertexFinderSequenceCfg, flags)
-
 
     mb = MinBiasMbtsSequenceCfg(flags)
     mb.ca.printConfig()
-    mbms = menuSequenceCAToGlobalWrapper(MinBiasMbtsSequenceCfg, flags)
 
 

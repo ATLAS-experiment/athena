@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger( __name__ )
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequenceCfg, 
                                                             MinBiasTrkSequenceCfg,
@@ -17,14 +16,8 @@ from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlob
 # fragments generating configuration will be functions in New JO,
 # so let's make them functions already now
 #----------------------------------------------------------------
-
-if isComponentAccumulatorCfg():
-    def callGenerator(flags, genf, **kwargs):
-        return genf(flags, **kwargs)
-else:
-    def callGenerator(flags ,genf, **kwargs):
-        from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper 
-        return menuSequenceCAToGlobalWrapper(genf, flags, **kwargs)
+def callGenerator(flags, genf, **kwargs):
+    return genf(flags, **kwargs)
 
 class MinBiasChainConfig(ChainConfigurationBase):
 
@@ -60,30 +53,26 @@ class MinBiasChainConfig(ChainConfigurationBase):
 
         return self.buildChain(steps)
 
-    # TODO: When cleaning up the legacy configuration, the callGenerator
-    # invocation can simply be replaced by the *SequenceCfg.
-    # Current syntax is needed so that the latter becomes part of the key for
-    # RecoFragmentsPool.retrieve().
     def getMinBiasMbtsStep(self, flags):
-        return self.getStep(flags,1,'Mbts',[callGenerator],genf=MinBiasMbtsSequenceCfg)
+        return self.getStep(flags,1,'Mbts', [MinBiasMbtsSequenceCfg])
 
     def getMinBiasEmptyMbtsStep(self, flags):
         return self.getEmptyStep(1,'EmptyMbts')
 
     def getMinBiasSpStep(self, flags):
-        return self.getStep(flags,2,'SPCount',[callGenerator],genf=MinBiasSPSequenceCfg)
+        return self.getStep(flags,2,'SPCount', [MinBiasSPSequenceCfg])
 
     def getMinBiasZFindStep(self, flags):
-        return self.getStep(flags,3,'ZFind',[callGenerator],genf=MinBiasZVertexFinderSequenceCfg)
+        return self.getStep(flags,3,'ZFind', [MinBiasZVertexFinderSequenceCfg])
 
     def getMinBiasTrkStep(self, flags):
-        return self.getStep(flags,4,'TrkCount',[callGenerator],genf=MinBiasTrkSequenceCfg)
+        return self.getStep(flags,4,'TrkCount', [MinBiasTrkSequenceCfg])
 
     def getAFPTrkStep(self, flags):
-        return self.getStep(flags,1,'AFPTrk',[callGenerator],genf=AFPTrkSequenceCfg)
+        return self.getStep(flags,1,'AFPTrk', [AFPTrkSequenceCfg])
 
     def getAFPGlobalStep(self, flags):
-        return self.getStep(flags,2,'AFPGlobal',[callGenerator],genf=AFPGlobalSequenceCfg)
+        return self.getStep(flags,2,'AFPGlobal', [AFPGlobalSequenceCfg])
     
     def getAFPToFDeltaZStep(self, flags):
-        return self.getStep(flags,2,'AFPToFDeltaZ',[callGenerator],genf=AFPToFDeltaZSequenceCfg)
+        return self.getStep(flags,2,'AFPToFDeltaZ', [AFPToFDeltaZSequenceCfg])

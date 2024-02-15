@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -180,12 +180,9 @@ if __name__ == '__main__':
     flags.Input.Files = defaultTestFiles.AOD_RUN3_MC
     flags.lock()
 
-    from TriggerMenuMT.HLT.Config.MenuComponents import menuSequenceCAToGlobalWrapper
 
     afp_trk = AFPTrkSequenceCfg(flags)
     afp_trk.ca.printConfig(withDetails=True)
-    afp_trk_gw = menuSequenceCAToGlobalWrapper(AFPTrkSequenceCfg, flags)
 
     afp_glob = AFPGlobalSequenceCfg(flags)
     afp_glob.ca.printConfig(withDetails=True)
-    afp_glob_gw = menuSequenceCAToGlobalWrapper(AFPGlobalSequenceCfg, flags)
