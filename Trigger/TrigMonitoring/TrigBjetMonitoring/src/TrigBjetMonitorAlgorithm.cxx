@@ -250,8 +250,7 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  
 	  float muonPt1(0.), muonEta1(0.), muonPhi1(0.), muonZ1(0.), jetPt1(0.), jetEta1(0.), jetPhi1(0.), jetZ1(0.), muonZ(0.);
 	  double GN1_mv(0.);
-	  double DL1d_mv(0.);
-	  bool theLLR(false), theLLR_DL1d(false), theLLR_GN1(false);
+	  bool theLLR(false), theLLR_GN1(false);
 	  bool plotDeltaZ(false);
 	  
 	  for(const auto& muonLinkInfo : onlinemuons) {
@@ -345,18 +344,6 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 		  if ( !theLLR ) GN1_mv=-100.;
 		  ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
 		  
-		  double DL1d_pu(0.), DL1d_pc(0.), DL1d_pb(0.);
-		  btag->pu("DL1d20211216",DL1d_pu);
-		  ATH_MSG_DEBUG("        DL1d_pu: " << DL1d_pu);
-		  btag->pc("DL1d20211216",DL1d_pc);
-		  ATH_MSG_DEBUG("        DL1d_pc: " << DL1d_pc);
-		  btag->pb("DL1d20211216",DL1d_pb);
-		  ATH_MSG_DEBUG("        DL1d_pb: " << DL1d_pb);
-		  theLLR = LLR (DL1d_pu, DL1d_pc, DL1d_pb, DL1d_mv);
-		  theLLR_DL1d = theLLR;
-		  if ( !theLLR ) DL1d_mv=-100.;
-		  ATH_MSG_DEBUG("        DL1d_mv: " << DL1d_mv << " LLR: " << theLLR);
-		  
 		}
 
 	      }// if ijet==0
@@ -413,15 +400,6 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  wGN1 = float(GN1_mv);
 	  ATH_MSG_DEBUG("        wGN1: " << wGN1 << " RelPt : " << RelPt);
 	  if (calc_relpt && theLLR_GN1) fill("TrigBjetMonitor",wGN1,RelPt);
-	  
-	  // wDL1d
-	  std::string wDL1dH = "wDL1d_"+trigName;
-	  ATH_MSG_DEBUG( " NameH: " << wDL1dH  );
-	  auto wDL1d = Monitored::Scalar<float>(wDL1dH,0.0);
-	  wDL1d = float(DL1d_mv);
-	  ATH_MSG_DEBUG("        wDL1d: " << wDL1d << " RelPt : " << RelPt);
-	  if (calc_relpt && theLLR_DL1d) fill("TrigBjetMonitor",wDL1d,RelPt);
-	  
 	  
 	  
 	}// if mujetChain
@@ -589,34 +567,6 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	    
 	    
 
-	    NameH = "DL1d_pu_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DL1d_pu = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pu("DL1d20211216",DL1d_pu);
-	    ATH_MSG_DEBUG("        DL1d_pu: " << DL1d_pu);
-	    fill("TrigBjetMonitor",DL1d_pu);
-	    
-	    NameH = "DL1d_pc_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DL1d_pc = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pc("DL1d20211216",DL1d_pc);
-	    ATH_MSG_DEBUG("        DL1d_pc: " << DL1d_pc);
-	    fill("TrigBjetMonitor",DL1d_pc);
-	    
-	    NameH = "DL1d_pb_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DL1d_pb = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pb("DL1d20211216",DL1d_pb);
-	    ATH_MSG_DEBUG("        DL1d_pb: " << DL1d_pb);
-	    fill("TrigBjetMonitor",DL1d_pb);
-	    
-	    NameH = "DL1d_mv_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DL1d_mv = Monitored::Scalar<double>(NameH,0.0);
-	    theLLR = LLR (DL1d_pu, DL1d_pc, DL1d_pb, DL1d_mv);
-	    if ( theLLR ) fill("TrigBjetMonitor",DL1d_mv);
-	    ATH_MSG_DEBUG("        DL1d_mv: " << DL1d_mv << " LLR: " << theLLR); 
-	    
 	    
 	    
 	    NameH = "DIPSL_pu_tr_"+trigName;
