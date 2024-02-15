@@ -112,13 +112,11 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # Re-simulate from LATOME
     if isNotPool:
         from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
-        acc.merge(L1CaloFEXSimCfg(flags))
+        acc.merge(L1CaloFEXSimCfg(flags, simulateAltTau=True))
 
     # decorate the eFEX TOBs (offline copy) - must be configured to run *after* resimulation
     if flags.Trigger.L1.doeFex and isNotPool:
         from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import eFexTOBDecoratorCfg
-        DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator','L1_eEMRoI_OfflineCopy','L1_eTauRoI_OfflineCopy')
-        acc.merge(DecoratorAlgo)
         DecoratorAlgoSim = eFexTOBDecoratorCfg(flags,'eFexTOBDecoratorSim','L1_eEMRoISim','L1_eTauRoISim')
         acc.merge(DecoratorAlgoSim)
 
@@ -376,10 +374,6 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     L1CaloSlimmingHelper,AllVariables = addEfexTOBs(L1CaloSlimmingHelper, AllVariables)
     L1CaloSlimmingHelper,AllVariables = addJfexTOBs(L1CaloSlimmingHelper, AllVariables)
     L1CaloSlimmingHelper,AllVariables = addGfexTOBs(L1CaloSlimmingHelper, AllVariables)
-    # TOBs from reconstruction (_OfflineCopy) - will be removed once fully commissioned
-    L1CaloSlimmingHelper,AllVariables = addEfexTOBs(L1CaloSlimmingHelper, AllVariables, "_OfflineCopy")
-    L1CaloSlimmingHelper,AllVariables = addJfexTOBs(L1CaloSlimmingHelper, AllVariables, "_OfflineCopy")
-    L1CaloSlimmingHelper,AllVariables = addGfexTOBs(L1CaloSlimmingHelper, AllVariables, "_OfflineCopy")
 
     # re-simulated 
     L1CaloSlimmingHelper,AllVariables = addEfexTOBs(L1CaloSlimmingHelper, AllVariables, "Sim")
@@ -471,24 +465,24 @@ def addEfexTOBs(slimminghelper, allVariables, postFix = ""):
          "L1_eEMRoI"+postFix+"Aux" : "xAOD::eFexEMRoIAuxContainer",
          "L1_eTauRoI"+postFix : "xAOD::eFexTauRoIContainer",
          "L1_eTauRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
-         "L1_eTauBDTRoI"+postFix : "xAOD::eFexTauRoIContainer",
-         "L1_eTauBDTRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
+         "L1_eTauRoIAlt"+postFix : "xAOD::eFexTauRoIContainer",
+         "L1_eTauRoIAlt"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
          "L1_cTauRoI"+postFix : "xAOD::eFexTauRoIContainer",
          "L1_cTauRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
          "L1_eEMxRoI"+postFix : "xAOD::eFexEMRoIContainer",
          "L1_eEMxRoI"+postFix+"Aux" : "xAOD::eFexEMRoIAuxContainer",
          "L1_eTauxRoI"+postFix : "xAOD::eFexTauRoIContainer",
          "L1_eTauxRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer",
-         "L1_eTauBDTxRoI"+postFix : "xAOD::eFexTauRoIContainer",
-         "L1_eTauBDTxRoI"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer"} )    
+         "L1_eTauxRoIAlt"+postFix : "xAOD::eFexTauRoIContainer",
+         "L1_eTauxRoIAlt"+postFix+"Aux" : "xAOD::eFexTauRoIAuxContainer"} )    
 
     allVariables += ["L1_eEMRoI" + postFix,
                      "L1_eTauRoI" + postFix,
-                     "L1_eTauBDTRoI" + postFix,
+                     "L1_eTauRoIAlt" + postFix,
                      "L1_cTauRoI" + postFix,
                      "L1_eEMxRoI" + postFix,
                      "L1_eTauxRoI" + postFix,
-                     "L1_eTauBDTxRoI" + postFix]
+                     "L1_eTauxRoIAlt" + postFix]
     
     return slimminghelper, allVariables
 
