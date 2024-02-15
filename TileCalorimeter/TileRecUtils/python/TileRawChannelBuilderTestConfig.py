@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
-# File: TileRecUtils/share/TileRawChannelBuilder_test.py
+# File: TileRecUtils/python/TileRawChannelBuilderTestConfig.py
 # Author: sss
 # Date: Aug, 2018
 # Brief: Test for TileRawChannelBuilder.
@@ -11,41 +11,9 @@
 import ROOT
 ROOT.TH1F
 
-from AthenaCommon.DetFlags      import DetFlags
-DetFlags.detdescr.Tile_setOn()
-DetFlags.detdescr.LAr_setOn()
-
-RunNumber = 284500
-
-import sys
-import string
-import ROOT
-import math
-from AtlasGeoModel import SetGeometryVersion
-from AtlasGeoModel import GeoModelInit
-from AtlasGeoModel import SetupRecoGeometry
-include('TileConditions/TileConditions_jobOptions.py')
-
-# Disable Geant version checking.
-from AthenaCommon.AlgSequence import AthSequencer
-condSeq = AthSequencer("AthCondSeq")
-condSeq.TileSamplingFractionCondAlg.G4Version = -1
-
-from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
-ServiceMgr += GeoModelSvc()
-theApp.CreateSvc += [ "GeoModelSvc"]
-from AtlasGeoModel import TileGM
-from AtlasGeoModel import LArGM   #LAr needed to get MBTS DD.
-
-from IOVDbSvc.IOVDbSvcConf import IOVDbSvc
-IOVDbSvc().GlobalTag = 'OFLCOND-RUN12-SDR-35'
-
-from AthenaCommon.AlgSequence import AlgSequence
-topSequence = AlgSequence()
-
-theApp.EvtMax=4
-
-
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 
 def reldiff (a, b):
     den = abs(a)+abs(b)
@@ -166,7 +134,7 @@ exp_chans_2 = exp_merge (exp_chans_0, {
     (1, 1, 0, 2, 0, 1) : [ 41.0,  0.1, 2.5, 46.5],
     (1, 1, 0, 2, 1, 1) : [  0.6, 12.9, 4.7, 43.9],
 })
-    
+
 
 # Noise filter+dsp
 exp_chans_3 = exp_merge (exp_chans_0, {
@@ -177,7 +145,7 @@ exp_chans_3 = exp_merge (exp_chans_0, {
     (1, 1, 0, 2, 0, 0) : [ 30.525,  -0.4,  2.0, 120033.180],
     (1, 1, 0, 2, 1, 1) : [  1.325,  12.9,  4.7,     43.175],
 })
-    
+
 
 
 # TileFragHash::TYPE
@@ -225,7 +193,7 @@ class PrepareDataAlg (Alg):
 
         return StatusCode.Success
 
-            
+
     def make_rc (self, digits):
         idHelper  = self.detStore['CaloCell_ID'].tile_idHelper()
 
@@ -249,7 +217,7 @@ class PrepareDataAlg (Alg):
         coll = ROOT.TileRawChannelCollection (hashFunc.identifier(icoll))
 
         for addr, data in colldata:
-            if type(addr) == type(()):
+            if isinstance(addr, tuple):
                 adc_id = idHelper.adc_id (*addr)
                 chan = ROOT.TileRawChannel (adc_id, *data)
             else:
@@ -310,8 +278,6 @@ class TestAlg (Alg):
 
         if iev == 3:
             return StatusCode.Success
-
-        dspcolls = set()
 
         tool = self.tool1
         exp_chans = exp_chans_0
@@ -381,7 +347,7 @@ class TestAlg (Alg):
         coll = ROOT.TileDigitsCollection (hashFunc.identifier(icoll))
 
         for addr, data in colldata:
-            if type(addr) == type(()):
+            if isinstance(addr, tuple):
                 adc_id = idHelper.adc_id (*addr)
                 chan = ROOT.TileDigits (adc_id, TestAlg.make_vec (data))
             else:
@@ -440,25 +406,70 @@ class TestAlg (Alg):
 
 #########################################################################
 
+def TileRawChannelBuilderTestCfg(flags):
 
-from TileRecUtils.TileRecUtilsConf import \
-    TileRawChannelBuilderTest, TileRawChannelNoiseFilter, \
-    TileDQstatusAlg
-noisefilter = TileRawChannelNoiseFilter ('noisefilter')
+    acc = ComponentAccumulator()
 
-ToolSvc += TileRawChannelBuilderTest ('tool1')
-ToolSvc += TileRawChannelBuilderTest ('tool2', NoiseFilterTools = [noisefilter])
+    from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
+    acc.merge( TileInfoLoaderCfg(flags) )
 
-from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg
-topSequence += xAODMaker__EventInfoCnvAlg ()
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
-prepalg1 = PrepareDataAlg ('prepalg1')
-topSequence += prepalg1
+    from TileConditions.TileSampleNoiseConfig import TileSampleNoiseCondAlgCfg
+    acc.merge( TileSampleNoiseCondAlgCfg(flags) )
 
-dqstat1 = TileDQstatusAlg ('dqstat1', TileRawChannelContainer = 'TRCDQ')
-topSequence += dqstat1
+    TileRawChannelBuilderTest = CompFactory.TileRawChannelBuilderTest
+    acc.addPublicTool( TileRawChannelBuilderTest('tool1') )
 
-testalg1 = TestAlg ('testalg1')
-topSequence += testalg1
+    TileRawChannelNoiseFilter = CompFactory.TileRawChannelNoiseFilter
+    noisefilter = TileRawChannelNoiseFilter('noisefilter')
+    acc.addPublicTool( TileRawChannelBuilderTest('tool2', NoiseFilterTools=[noisefilter]) )
+
+    acc.addEventAlgo( PrepareDataAlg('prepalg1') )
+
+    from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
+    acc.merge(TileDQstatusAlgCfg(flags, name='dqstat1',
+                                 TileRawChannelContainer='TRCDQ'))
+
+    acc.addEventAlgo( TestAlg('testalg1') )
+
+    return acc
 
 
+if __name__ == "__main__":
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaCommon.Logging import log
+    from AthenaCommon.Constants import INFO
+
+    # Test setup
+    log.setLevel(INFO)
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
+    flags.Tile.RunType = TileRunType.PHY
+    flags.Exec.MaxEvents = 4
+    flags.fillFromArgs()
+
+    flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
+
+    # Configure reading POOL files
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
+
+    cfg.merge( TileRawChannelBuilderTestCfg(flags) )
+
+    flags.dump()
+    cfg.printConfig(withDetails=True)
+    cfg.store( open('TileRawChannelBuilderTest.pkl', 'wb') )
+
+    sc = cfg.run()
+
+    import sys
+    # Success should be 0
+    sys.exit(not sc.isSuccess())
