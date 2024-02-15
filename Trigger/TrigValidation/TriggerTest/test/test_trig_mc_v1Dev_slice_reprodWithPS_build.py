@@ -124,7 +124,8 @@ def generate_exec_steps(slice_name = None):
     ex.input = ''
     ex.use_pickle = True
     ex.job_options = 'athena.ConfigOnly.pkl'
-    ex.threads = 1
+    ex.args = '--CA'
+    ex.fpe_auditor = False # included in pickle
     ex.depends_on_previous = False if slice_name else True
     ex.perfmon = False
 
