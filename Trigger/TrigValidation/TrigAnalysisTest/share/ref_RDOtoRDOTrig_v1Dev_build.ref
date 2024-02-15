@@ -14624,26 +14624,6 @@ HLT_j200_0eta290_020jvt_boffperf_pf_ftf_preselj140_L1jJ160:
     0: 3
     1: 1
     2: 1
-HLT_j200_0eta290_020jvt_pf_ftf_boffperf_preselj140_L1J100:
-  eventCount: 1
-  stepCounts:
-    0: 3
-    1: 1
-    2: 1
-  stepFeatures:
-    0: 3
-    1: 1
-    2: 1
-HLT_j200_0eta290_020jvt_pf_ftf_boffperf_preselj140_L1jJ160:
-  eventCount: 1
-  stepCounts:
-    0: 3
-    1: 1
-    2: 1
-  stepFeatures:
-    0: 3
-    1: 1
-    2: 1
 HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1J15:
   eventCount: 19
   stepCounts:
@@ -16407,26 +16387,6 @@ HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20:
     1: 83
     2: 83
 HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1jJ50:
-  eventCount: 20
-  stepCounts:
-    0: 20
-    1: 20
-    2: 20
-  stepFeatures:
-    0: 20
-    1: 84
-    2: 84
-HLT_j45_0eta290_020jvt_pf_ftf_boffperf_L1J20:
-  eventCount: 19
-  stepCounts:
-    0: 19
-    1: 19
-    2: 19
-  stepFeatures:
-    0: 19
-    1: 83
-    2: 83
-HLT_j45_0eta290_020jvt_pf_ftf_boffperf_L1jJ50:
   eventCount: 20
   stepCounts:
     0: 20
