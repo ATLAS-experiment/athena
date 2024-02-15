@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of transform HITS->RDO->RDO_TRIG->AOD
 # art-type: build
@@ -17,9 +17,9 @@ hit2aod.threads = 1
 hit2aod.args = '--inputRDO_BKGFile=' + Input.get_input('pileup_RDO').paths[0]
 hit2aod.args += ' --outputAODFile=AOD.pool.root'
 hit2aod.args += ' --steering "doOverlay" "doRDO_TRIG"'
-hit2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
+hit2aod.args += ' --CA "all:True"'
 hit2aod.args += ' --preInclude "all:Campaigns.MC23c"'
-hit2aod.args += ' --preExec="setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\'"'
+hit2aod.args += ' --preExec="flags.Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\'"'
 hit2aod.args += ' --conditionsTag="default:OFLCOND-MC23-SDR-RUN3-02"'
 hit2aod.args += ' --geometryVersion="default:ATLAS-R3S-2021-03-02-00"'
 hit2aod.args += ' --autoConfiguration="everything"'
