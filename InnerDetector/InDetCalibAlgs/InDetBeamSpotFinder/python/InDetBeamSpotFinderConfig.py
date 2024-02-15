@@ -28,10 +28,10 @@ def InDetBeamSpotFinderCfg(flags, name="InDetBeamSpotFinder", **kwargs):
 
     if "BeamSpotToolList" not in kwargs:
         kwargs.setdefault("BeamSpotToolList", [
-            result.popToolsAndMerge(
-                InDetBeamSpotRooFitCfg(flags)),
-            result.popToolsAndMerge(
-                InDetBeamSpotVertexCfg(flags)) ])
+            result.addPublicTool(result.popToolsAndMerge(
+                InDetBeamSpotRooFitCfg(flags))),
+            result.addPublicTool(result.popToolsAndMerge(
+                InDetBeamSpotVertexCfg(flags))) ])
 
     kwargs.setdefault("VertexTreeName", "Vertices") 
     kwargs.setdefault("VertexTypes", ["PriVtx"])
