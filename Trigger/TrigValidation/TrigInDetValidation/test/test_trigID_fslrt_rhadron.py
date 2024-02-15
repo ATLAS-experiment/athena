@@ -45,7 +45,7 @@ Release = "current"
 # CA
 # ATR-25582 - FSLRT is now excluded from the default dev menu so need to change to the full dev
 # menu rather than the filtered versions
-preexec_trig="from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.triggerMenuSetup='Dev_pp_run3_v1';"
+preexec_trig="flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1';"
 
 
 Jobs = [ ( "Truth",  " TIDAdata-run3-fslrt.dat -o data-hists.root ", "Test_bin_lrt.dat" ),
