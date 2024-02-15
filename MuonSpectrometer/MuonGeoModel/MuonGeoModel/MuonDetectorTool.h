@@ -7,6 +7,7 @@
 
 #include "GeoPrimitives/GeoPrimitives.h" // need to include Amg stuff first to avoid that another Eigen implementation is included first which breaks compilation
 #include "GeoModelUtilities/GeoModelTool.h"
+#include "GeoModelKernel/GeoPhysVol.h"
 
 namespace MuonGM {
     class MuonDetectorManager;
@@ -26,14 +27,13 @@ class MuonDetectorTool final : public GeoModelTool {
 
     // build the geometry
     virtual StatusCode create() override final;
-    StatusCode createFactory(MuonGM::MuonDetectorManager * & ) const;
+    StatusCode createFactory(MuonGM::MuonDetectorManager * &, GeoPhysVol* world ) const;
 
     // Dereference tree tops and drop readout objects
     virtual StatusCode clear() override final;
 
   private:
 
-    Gaudi::Property<bool> m_runFromCondAlg{this,"runFromCondAlg", false};
     Gaudi::Property<std::string> m_layout{this, "LayoutName", "R.08" };
     Gaudi::Property<bool> m_accessCondDb{this,"UseConditionDb", true};
     Gaudi::Property<bool> m_asciiCondData{this,"UseAsciiConditionData", false};
