@@ -1,7 +1,7 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
-# File: TileRecUtils/share/TileDQstatusAlg_test.py
+# File: TileRecUtils/python/TileDQstatusAlgTestConfig.py
 # Author: sss
 # Date: Sep, 2018
 # Brief: Test for TileDQstatusAlg.
@@ -11,41 +11,8 @@
 import ROOT
 ROOT.TH1F
 
-from AthenaCommon.DetFlags      import DetFlags
-DetFlags.detdescr.Tile_setOn()
-DetFlags.detdescr.LAr_setOn()
-
-RunNumber = 284500
-
-import sys
-import string
-import ROOT
-import math
-from AtlasGeoModel import SetGeometryVersion
-from AtlasGeoModel import GeoModelInit
-from AtlasGeoModel import SetupRecoGeometry
-include('TileConditions/TileConditions_jobOptions.py')
-
-# Disable Geant version checking.
-from AthenaCommon.AlgSequence import AthSequencer
-condSeq = AthSequencer("AthCondSeq")
-condSeq.TileSamplingFractionCondAlg.G4Version = -1
-
-from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
-ServiceMgr += GeoModelSvc()
-theApp.CreateSvc += [ "GeoModelSvc"]
-from AtlasGeoModel import TileGM
-from AtlasGeoModel import LArGM   #LAr needed to get MBTS DD.
-
-from IOVDbSvc.IOVDbSvcConf import IOVDbSvc
-IOVDbSvc().GlobalTag = 'OFLCOND-RUN12-SDR-35'
-
-from AthenaCommon.AlgSequence import AlgSequence
-topSequence = AlgSequence()
-
-theApp.EvtMax=2
-
-
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TileConfiguration.TileConfigFlags import TileRunType
 from AthenaPython.PyAthenaComps import Alg, StatusCode
 
 
@@ -77,6 +44,7 @@ LASE_ADC_FRAG = 0x005
 ADD_FADC_FRAG = 0x006
 ECAL_ADC_FRAG = 0x007
 DIGI_PAR_FRAG = 0x0ff
+LASER_OBJ_FRAG = 0x016
 
 
 hits_0 = [
@@ -201,7 +169,7 @@ class RecordAlg (Alg):
             coll.setFragMemoryPar(mask)
 
             for addr, data in colldata:
-                if type(addr) == type(()):
+                if isinstance(addr, tuple):
                     adc_id = idHelper.adc_id (*addr)
                     chan = ROOT.TileRawChannel (adc_id, *data)
                 else:
@@ -242,7 +210,7 @@ class RecordAlg (Alg):
                 ndig = 48
 
             digits = getattr(ROOT,'vector<float>')()
-            digits.resize (12);
+            digits.resize (12)
             for idig in range(ndig):
                 dig = ROOT.TileDigits(ROOT.HWIdentifier(), digits)
                 coll.push_back (dig)
@@ -254,7 +222,6 @@ class RecordAlg (Alg):
 
     def record_beamelem (self, key, frag):
         cont = ROOT.TileBeamElemContainer()
-        hashFunc = cont.hashFunc()
 
         coll = ROOT.TileBeamElemCollection (frag)
         coll.setLvl1Type (123)
@@ -319,31 +286,15 @@ class CheckAlg (Alg):
     def execute (self):
         dq = self.evtStore[self.dq_key]
 
-        assert dq.isFilled() == True
-        assert dq.isBiGain() == False
-        assert dq.nonZeroCounter() == True
-        assert dq.incompleteDigits() == False
+        assert dq.isFilled() is True
+        assert dq.isBiGain() is False
+        assert dq.nonZeroCounter() is True
+        assert dq.incompleteDigits() is False
         assert dq.calibMode() == 0
         assert dq.trigType() == 0
 
         self.check_empty (dq)
         
-        #cispar
-        #isAdcDQgood
-        #isChanDQgood
-        #checkGlobalErr
-        #checkGlobalCRCErr
-        #checkROD_CRCErr
-        #checkFE_CRCErr
-        #checkBCIDErr
-        #checkBCIDErrDetail
-        #checkHeaderFormatErr
-        #checkHeaderParityErr
-        #checkSampleFormatErr
-        #checkSampleParityErr
-        #checkMemoryParityErr
-        #checkSingleStrobeErr
-        #checkDoubleStrobeErr
         return StatusCode.Success
 
 
@@ -359,15 +310,56 @@ class CheckAlg (Alg):
         
 ############################################################################
 
-from TileRecUtils.TileRecUtilsConf import TileDQstatusAlg
+def TileDQstatusAlgTestCfg(flags):
 
-record1 = RecordAlg ('record1',
-                     'RC1', 'Dig1')
-topSequence += record1
-alg1 = TileDQstatusAlg ('alg1',
-                        TileRawChannelContainer = 'RC1',
-                        TileDigitsContainer = 'Dig1',
-                        TileDQstatus = 'DQ1')
-topSequence += alg1
-check1 = CheckAlg ('check1', 'DQ1')
-topSequence += check1
+    acc = ComponentAccumulator()
+
+    acc.addEventAlgo( RecordAlg('record1', 'RC1', 'Dig1') )
+
+    from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
+    acc.merge(TileDQstatusAlgCfg(flags, name='alg1',
+                                 TileRawChannelContainer='RC1',
+                                 TileDigitsContainer='Dig1',
+                                 TileDQstatus='DQ1'))
+
+    acc.addEventAlgo( CheckAlg('check1', 'DQ1') )
+
+    return acc
+
+
+if __name__ == "__main__":
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaCommon.Logging import log
+    from AthenaCommon.Constants import INFO
+
+    # Test setup
+    log.setLevel(INFO)
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
+    flags.Tile.RunType = TileRunType.PHY
+    flags.Exec.MaxEvents = 2
+    flags.fillFromArgs()
+
+    flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
+
+    # Configure reading POOL files
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
+
+    cfg.merge( TileDQstatusAlgTestCfg(flags) )
+
+    flags.dump()
+    cfg.printConfig(withDetails=True)
+    cfg.store( open('TileDQstatusTest.pkl', 'wb') )
+
+    sc = cfg.run()
+
+    import sys
+    # Success should be 0
+    sys.exit(not sc.isSuccess())

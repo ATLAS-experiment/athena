@@ -54,9 +54,9 @@ atlas_add_test( TileRawChannelBuilder_test
   LOG_IGNORE_PATTERN ${extra_patterns} )
 
 atlas_add_test( TileDQstatusAlg_test
-  SCRIPT test/TileDQstatusAlg_test.sh
-  PROPERTIES TIMEOUT 600
-  LOG_IGNORE_PATTERN ${extra_patterns} )
+                SCRIPT test/TileDQstatusAlg_test.sh
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileDQstatusTool_test
   SCRIPT test/TileDQstatusTool_test.sh
