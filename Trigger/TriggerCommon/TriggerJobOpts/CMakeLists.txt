@@ -32,11 +32,7 @@ if (NOT XAOD_ANALYSIS)
       PRIVATE_WORKING_DIRECTORY
       POST_EXEC_SCRIPT noerror.sh )
 
-   atlas_add_test( Run3ConfigFetchKeysTest
-      SCRIPT python -m TriggerJobOpts.TriggerConfigGetter
-      POST_EXEC_SCRIPT noerror.sh )
-
-   atlas_add_test( Run1TriggerRecoConfigTest 
+   atlas_add_test( Run1TriggerRecoConfigTest
       SCRIPT python -m TriggerJobOpts.TriggerRecoConfig --config-only -- Trigger.EDMVersion=1
       POST_EXEC_SCRIPT noerror.sh )
 
