@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 """
@@ -9,7 +9,9 @@
 @brief Configuration for Run 3 based on InDetGlobalBeamSpotMonTool.cxx
 """
 
-def InDetGlobalBeamSpotMonAlgCfg(helper, alg, **kwargs):
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg):
     '''Function to configures some algorithms in the monitoring system.'''
     
     # Values set by default here
@@ -96,3 +98,20 @@ def InDetGlobalBeamSpotMonAlgCfg(helper, alg, **kwargs):
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: original track #eta; #eta",path=pathbs,xbins=100,xmin=-3,xmax=3)
 
 # end histograms
+
+
+def InDetGlobalBeamSpotMonAlgCfg(helper, acc,
+                                 flags, name="InDetGlobalBeamSpotMonAlg", **kwargs):
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc.merge(BeamSpotCondAlgCfg(flags))
+
+    from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
+    from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
+
+    monAlg = helper.addAlgorithm(
+        CompFactory.InDetGlobalBeamSpotMonAlg, name,
+        addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
+        **kwargs)
+
+    HistoInDetGlobalBeamSpotMonAlgCfg(helper, monAlg)
+    return

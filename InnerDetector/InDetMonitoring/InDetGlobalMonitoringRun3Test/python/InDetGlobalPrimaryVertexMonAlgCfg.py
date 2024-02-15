@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 """
@@ -9,7 +9,9 @@
 @brief Configuration for Run 3 based on InDetGlobalPrimaryVertexMonTool.cxx
 """
 
-def InDetGlobalPrimaryVertexMonAlgCfg(helper, alg, **kwargs):
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, alg):
 
     # this creates a "pvGroup" called "alg" which will put its histograms into the subdirectory "PrimaryVertex"
     pvGroup = helper.addGroup(alg, 'PrimaryVertex')
@@ -67,9 +69,22 @@ def InDetGlobalPrimaryVertexMonAlgCfg(helper, alg, **kwargs):
     varName = 'm_PvTrackEta;pvTrackEta'  #done
     title   = 'Primary vertex: original track #eta; #eta;Events'
     pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=-3, xmax=3)
- 
-
 
 # end histograms
 
 
+def InDetGlobalPrimaryVertexMonAlgCfg(helper, acc,
+                                      flags, name="InDetGlobalPrimaryVertexMonAlg",
+                                      **kwargs):
+    kwargs.setdefault("doEnhancedMonitoring", True)
+
+    from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
+    from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
+
+    monAlg = helper.addAlgorithm(
+        CompFactory.InDetGlobalPrimaryVertexMonAlg, name,
+        addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
+        **kwargs)
+
+    HistoInDetGlobalPrimaryVertexMonAlgCfg(helper, monAlg)
+    return
