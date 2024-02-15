@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbFolder.cxx - helper class for IOVDbSvc to manage folder & data cache
 // Richard Hawkings, started 24/11/08
-
-
-
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IOpaqueAddress.h"
@@ -233,6 +230,8 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   // timer to track amount of time in loadCache
   TStopwatch cachetimer;
   const auto & [cachestart, cachestop] = m_iovs.getCacheBounds();
+
+  bool vectorPayload{};
   BasicFolder basicFolder;
   if (m_source == "CREST"){
     //const std::string  jsonFolderName=sanitiseCrestTag(m_foldername);
@@ -241,6 +240,17 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     
     ATH_MSG_INFO("Download tag would be: "<<m_crestTag);
 
+    if (m_crest_tag != m_crestTag){
+      m_crest_tag = m_crestTag;
+      m_tag_info = cfunctions.getTagInfo(m_crestTag);
+    }
+
+    const std::string& nodeDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
+    vectorPayload = (nodeDescription.find("CondAttrListVec") != std::string::npos);
+
+    // *******
+    basicFolder.setVectorPayloadFlag(vectorPayload);
+
     std::string crestPayloadType="crest-json-single-iov";
     nlohmann::json tagProperties = cfunctions.getTagProperties(m_crestTag);
     if(tagProperties!=nullptr){
@@ -248,48 +258,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
         crestPayloadType=tagProperties["payloadSpec"].get<std::string>();
     }
     ATH_MSG_INFO("CREST payload type: "<<crestPayloadType);
-    // *** *** *** *** *** ***
-    // Routine which converts openended CREST IOVs into non-overlapping IOVs
     
-    // Get a vector of pairs retrieved from crest
-    //  <IOV_SINCE(string),HASH(string)>
-    auto crestIOVs = cfunctions.getIovsForTag(m_crestTag);
-    if(crestIOVs.empty()){
-      ATH_MSG_WARNING("Load cache failed for " << m_foldername << ". No IOVs retrieved from the DB");
-    }
-    typedef std::pair<cool::ValidityKey,size_t> IOV2Index; // <CREST_IOV(converted to ull),Index_in_crestIOVs>
-    std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
-    iov2IndexVect.reserve(crestIOVs.size());
-    size_t hashInd{0};
-    for(const auto& crestIOV : crestIOVs) {
-      iov2IndexVect.emplace_back(std::stoull(crestIOV.first),hashInd++);
-    }
-
-    std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
-	      [](const IOV2Index& a, const IOV2Index& b)
-	      {
-		return a.first < b.first;
-	      });
-
-
-    typedef std::pair<IovStore::Iov_t,std::string> IOVHash; // <<IOV_SINCE(ull),IOV_UNTIL(ull)>,HASH(string)>
-    std::vector<IOVHash> iovHashVect;                       // Vector of non-overlapping IOVs + corresponding Hashes
-    size_t nIOVs = iov2IndexVect.size();
-    iovHashVect.reserve(nIOVs);
-    if(nIOVs>0) {
-      if(nIOVs>1) {
-    	  for(size_t ind=0; ind<nIOVs-1; ++ind) {
-      	 	  iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[ind].first
-							   , iov2IndexVect[ind+1].first)
-					   , crestIOVs[iov2IndexVect[ind].second].second);
-    	  }
-      }
-      iovHashVect.emplace_back(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
-					       , cool::ValidityKeyMax)
-			       , crestIOVs[iov2IndexVect[nIOVs-1].second].second);
-    }
-    // End of the CREST IOV conversion routine
-    // *** *** *** *** *** ***
+    // Vector of non-overlapping IOVs + corresponding Hashes
+    std::vector<IOVHash> iovHashVect = fetchCrestIOVs();
 
     int indIOV = iovHashVect.empty() ? -1 : 0;
     for(const auto& iovhash : iovHashVect) {
@@ -316,9 +287,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
         try{
           nlohmann::json multiPayload = nlohmann::json::parse(reply);
           nlohmann::json jsIovs=multiPayload["obj"];
-          iov2IndexVect.clear();
+          std::vector<IOV2Index> iov2IndexVect;
           iov2IndexVect.reserve(jsIovs.size());
-          hashInd=0;
+          size_t hashInd{0};
           for(const auto& jsIov : jsIovs.items()) {
             iov2IndexVect.emplace_back(std::stoull(jsIov.key()),hashInd++);
           }
@@ -386,17 +357,6 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
       }
     }
 
-    //
-    if (m_crest_tag != m_crestTag){
-      m_crest_tag = m_crestTag;
-      m_tag_info = cfunctions.getTagInfo(m_crestTag);
-    }
-
-    const std::string& nodeDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
-    if(nodeDescription.find("CondAttrListVec") != std::string::npos) {
-      basicFolder.setVectorPayloadFlag(true);
-    }
-
     const std::string& specString = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");
     if (specString.empty()){
       ATH_MSG_FATAL("Reading payload spec from "<<m_foldername<<" failed.");
@@ -434,6 +394,9 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
 
     }
   }
+  else {
+    vectorPayload = (m_foldertype ==CoraCool) or (m_foldertype == CoolVector);
+  }
 
   ATH_MSG_DEBUG( "Load cache for folder " << m_foldername << " validitykey " << vkey);
   // if not first time through, and limit not reached,and cache was not reset, 
@@ -470,12 +433,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
   //
   const auto & [since, until] = m_iovs.getCacheBounds();
   ATH_MSG_DEBUG( "IOVDbFolder:loadCache limits set to ["  << since << "," << until << "]" );
-  bool vectorPayload{};
-  if (m_source=="CREST"){
-    vectorPayload = basicFolder.isVectorPayload();
-  } else {
-    vectorPayload = (m_foldertype ==CoraCool) or (m_foldertype == CoolVector);
-  }
+
   if (m_cachespec==nullptr) {
     // on first init, guess size based on channel count
     unsigned int estsize=m_nchan;
@@ -1363,4 +1321,46 @@ IOVDbFolder::printCache(){
     }
     ATH_MSG_DEBUG("folder cache printout -------------------");
   
+}
+
+std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestIOVs()
+{
+  std::vector<IOVHash> result;
+  CrestFunctions cfunctions(m_crestServer);
+
+  // Get a vector of pairs retrieved from crest
+  //  <IOV_SINCE(string),HASH(string)>
+  auto crestIOVs = cfunctions.getIovsForTag(m_crestTag);
+  if(crestIOVs.empty()){
+    ATH_MSG_WARNING("Load cache failed for " << m_foldername << ". No IOVs retrieved from the DB");
+  }
+  std::vector<IOV2Index> iov2IndexVect;                  // Temporary vector for sorting IOV_SINCE values
+  iov2IndexVect.reserve(crestIOVs.size());
+  size_t hashInd{0};
+  for(const auto& crestIOV : crestIOVs) {
+    iov2IndexVect.emplace_back(std::stoull(crestIOV.first),hashInd++);
+  }
+
+  std::sort(iov2IndexVect.begin(),iov2IndexVect.end(),
+		  [](const IOV2Index& a, const IOV2Index& b)
+		  {
+		    return a.first < b.first;
+		  });
+
+  size_t nIOVs = iov2IndexVect.size();
+  result.reserve(nIOVs);
+  if(nIOVs>0) {
+    if(nIOVs>1) {
+      for(size_t ind=0; ind<nIOVs-1; ++ind) {
+	result.emplace_back(IovStore::Iov_t(iov2IndexVect[ind].first
+					    , iov2IndexVect[ind+1].first)
+			    , crestIOVs[iov2IndexVect[ind].second].second);
+      }
+    }
+    result.emplace_back(IovStore::Iov_t(iov2IndexVect[nIOVs-1].first
+				        , cool::ValidityKeyMax)
+		        , crestIOVs[iov2IndexVect[nIOVs-1].second].second);
+  }
+
+  return result;
 }
