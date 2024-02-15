@@ -5,8 +5,6 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
-# art-input: MuonCosmic/data17_cos.00342172.physics_CosmicMuons.merge.RAW._lb0006._SFO-ALL._0001.1
-# art-input-nfiles: 1
 
 set -x
 
