@@ -3,10 +3,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
+from PathResolver import PathResolver
 log = AthenaLogger(__name__)
 
 def getNSubregions(filePath):
-    with open(filePath, 'r') as f:
+    with open(PathResolver.FindCalibFile(filePath), 'r') as f:
         fields = f.readline()
         assert(fields.startswith('towers'))
         # towers 10 phi 16
@@ -329,6 +330,8 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
         theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
         theFPGATrackSimLogicalHistProcessAlg.SGInputTool = ""
     else:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
         theFPGATrackSimLogicalHistProcessAlg.InputTool = ""
         theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
         theFPGATrackSimLogicalHistProcessAlg.SGInputTool = result.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
@@ -388,30 +391,32 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     return result
 
 
-
-
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     flags = initConfigFlags()
     flags.fillFromArgs()
+    
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
-
-    flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+        flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+    
     flags.lock()
     acc=MainServicesCfg(flags)
-
+    
+    if flags.Trigger.FPGATrackSim.wrapperFileName == [] or flags.Trigger.FPGATrackSim.wrapperFileName is None:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        acc.merge(PoolReadCfg(flags))
+    
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
     acc.addService(CompFactory.THistSvc(Output = ["MONITOROUT DATAFILE='dataflow.root', OPT='RECREATE'"]))
 
     acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))
     
-    statusCode = acc.run()
+    statusCode = acc.run(flags.Exec.MaxEvents)
     assert statusCode.isSuccess() is True, "Application execution did not succeed"
-
