@@ -76,6 +76,14 @@ class RpcStrip_v1 : public UncalibratedMeasurement_v1 {
         Exceptions are thrown if that fails as well */
     const MuonGMR4::RpcReadoutElement* readoutElement() const;
 
+    /** @brief Returns the local position of the strip within
+     *        the Muon Station (I.e. the center plane between 2 multilayers)
+     */
+    ConstVectorMap<3> stripPosInStation() const;
+
+    /** @brief Sets the position of the strip within a muon station*/
+    void setStripPosInStation(const MeasVector<3>& pos);
+
     private:
 #ifdef __CLING__
     /// Down cast the memory of the readoutElement cache if the object is stored to disk 
