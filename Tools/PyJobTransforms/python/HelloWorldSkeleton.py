@@ -7,10 +7,6 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from AthExHelloWorld.HelloWorldConfig import HelloWorldCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-# temporarily force no global config flags
-from AthenaConfiguration import AllConfigFlags
-del AllConfigFlags.ConfigFlags
-
 # force no legacy job properties
 from AthenaCommon import JobProperties
 JobProperties.jobPropertiesDisallowed = True

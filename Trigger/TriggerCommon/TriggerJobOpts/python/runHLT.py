@@ -29,11 +29,6 @@ def lock_and_restrict(flags):
 
 def set_flags(flags):
    """Set default flags for running HLT"""
-
-   # Make sure nobody uses deprecated global ConfigFlags
-   import AthenaConfiguration.AllConfigFlags
-   del AthenaConfiguration.AllConfigFlags.ConfigFlags
-
    from AthenaConfiguration.Enums import BeamType
 
    flags.Trigger.doHLT = True    # needs to be set early as other flags depend on it

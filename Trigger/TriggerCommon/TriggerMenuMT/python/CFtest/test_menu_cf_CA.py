@@ -72,10 +72,6 @@ def makeMenu(flags):
     return menuCA
 
 def main():
-    # Make sure nobody uses deprecated global ConfigFlags
-    import AthenaConfiguration.AllConfigFlags
-    del AthenaConfiguration.AllConfigFlags.ConfigFlags
-
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     set_flags(flags)
