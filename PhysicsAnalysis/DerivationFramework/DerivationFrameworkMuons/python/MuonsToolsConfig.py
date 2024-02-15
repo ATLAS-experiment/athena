@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -54,9 +54,11 @@ def TriggerMatchingToolCfg(flags, name="TriggerMatchingTool", **kwargs):
 
 
 ### Di-muon tagging tool, for T&P studies
-def DiMuonTaggingAlgCfg(ConfigFlags, name="DiMuonTaggingTool", **kwargs):
+def DiMuonTaggingAlgCfg(ConfigFlags, name="DiMuonTaggingTool", **kwargs): 
     acc = ComponentAccumulator()
-    kwargs.setdefault("TrigMatchingTool",  acc.getPrimaryAndMerge(TriggerMatchingToolCfg(ConfigFlags)))
+    kwargs.setdefault("applyTrigger",True)
+    if kwargs["applyTrigger"]:
+        kwargs.setdefault("TrigMatchingTool",  acc.getPrimaryAndMerge(TriggerMatchingToolCfg(ConfigFlags)))
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(MuonSelectionToolCfg(ConfigFlags)))
     kwargs.setdefault("isMC", ConfigFlags.Input.isMC)
