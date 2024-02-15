@@ -6,7 +6,8 @@
 #define COOKIECUTTERHELPERS_H
 
 #include "xAODCaloEvent/CaloCluster.h"
-
+#include "AthenaBaseComps/AthMessaging.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 namespace CookieCutterHelpers
@@ -14,7 +15,7 @@ namespace CookieCutterHelpers
 /** Find the reference position (eta, phi) relative to which cells are
    restricted.
 */
-struct CentralPosition
+struct CentralPosition : public AthMessaging
 {
   float etaB = 999;
   float phiB = 999;
@@ -27,7 +28,9 @@ struct CentralPosition
   float emaxF = -999 * Gaudi::Units::GeV;
 
   CentralPosition() = default;
-  CentralPosition(const std::vector<const xAOD::CaloCluster*>& clusters);
+  CentralPosition(
+    const std::vector<const xAOD::CaloCluster*>& clusters,
+    const CaloDetDescrManager& mgr);
 };
 
 /** Find the size of the cluster in phi using L2 cells.
