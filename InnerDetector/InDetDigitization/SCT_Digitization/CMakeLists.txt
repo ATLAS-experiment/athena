@@ -16,12 +16,10 @@ atlas_add_component( SCT_Digitization
 
 # Test(s) in the package:
 atlas_add_test( SCT_DigitizationMT_test
-                SCRIPT Digi_tf.py --detectors SCT Truth --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/HITS.04919495._001041.pool.root.1 --conditionsTag default:OFLCOND-RUN12-SDR-25 --digiSeedOffset1 170 --digiSeedOffset2 170 --geometryVersion ATLAS-R2-2015-03-01-00 --DataRunNumber 222525 --outputRDOFile mc15_2015_ttbar.RDO.pool.root --preInclude HITtoRDO:Digitization/ForceUseOfAlgorithms.py --postInclude Digitization/FixDataDependenciesForMT.py --skipEvents 0  --maxEvents 100 --athenaopts=--threads=10
+                SCRIPT Digi_tf.py --CA --detectors SCT Truth --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/HITS.04919495._001041.pool.root.1 --conditionsTag default:OFLCOND-RUN12-SDR-25 --digiSeedOffset1 170 --digiSeedOffset2 170 --geometryVersion ATLAS-R2-2015-03-01-00 --DataRunNumber 222525 --outputRDOFile mc15_2015_ttbar.RDO.pool.root --skipEvents 0  --maxEvents 100 --athenaopts=--threads=10
                 POST_EXEC_SCRIPT noerror.sh
                 PROPERTIES TIMEOUT 1200
                 ENVIRONMENT THREADS=10 )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
-
