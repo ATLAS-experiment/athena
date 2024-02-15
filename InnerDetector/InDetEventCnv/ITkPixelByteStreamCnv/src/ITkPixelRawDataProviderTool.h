@@ -20,22 +20,22 @@ class EventContext;
 class StatusCode;
 
 // the tool to decode a ROB frament
-class ITkPixelRawDataProviderTool : 
+class ITkPixelRawDataProviderTool final:
   virtual public IITkPixelRawDataProviderTool, public AthAlgTool{
 
  public:
   ITkPixelRawDataProviderTool( const std::string& type, const std::string& name,
 			    const IInterface* parent ) ;
 
-  ~ITkPixelRawDataProviderTool() final = default;
+  ~ITkPixelRawDataProviderTool() = default;
 
-  StatusCode initialize() final;
+  StatusCode initialize() override;
 
-  StatusCode finalize() final;
+  StatusCode finalize() override;
   
   //! this is the main decoding method
   StatusCode convert( std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-		      IPixelRDO_Container* rdoIdc, const EventContext& ctx) const final;
+		      IPixelRDO_Container* rdoIdc, const EventContext& ctx) const override;
 
 
 private: 
