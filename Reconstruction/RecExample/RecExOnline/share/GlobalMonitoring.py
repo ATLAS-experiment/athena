@@ -294,5 +294,3 @@ jobproperties.Beam.bunchSpacing.set_Value_and_Lock(25)
 
 ## main online reco scripts
 include ("RecExOnline/RecExOnline_jobOptions.py")
-if isHI_2016:
-   include ("HIRecExample/hip_outputPostExec.py")

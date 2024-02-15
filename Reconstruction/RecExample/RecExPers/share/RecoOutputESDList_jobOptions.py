@@ -230,11 +230,6 @@ if recAlgs.doAtlfast():
 # Now filled through objKeyStore in configurables (see HLTTriggerGetter)
 
 
-# Heavy Ion:
-if rec.doHeavyIon():
-    protectedInclude ("HIRecExample/HIRecOutputESDList_jobOptions.py")
-    fullESDList += CfgItemList( "HeavyIonsEsd", items = HIESDItemList )
-
 # remove decorations that might be created by monitoring
 if rec.doMonitoring():
     fullESDList += CfgItemList( "MonitoringEsd", 
