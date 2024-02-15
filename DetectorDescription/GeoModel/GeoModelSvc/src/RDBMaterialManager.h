@@ -18,6 +18,8 @@
 #include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "GeoModelKernel/GeoElement.h"
 
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+#include "GeoModelKernel/GeoElement.h"
 #include <string>
 #include <map>
 #include <vector>
