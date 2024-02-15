@@ -240,13 +240,11 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
       GeoTrf::Transform3D rm = GeoTrf::RotateZ3D(parameters->Rotation_Z()*Gaudi::Units::deg)
 	* GeoTrf::RotateY3D(parameters->Rotation_Y()*Gaudi::Units::deg)
 	* GeoTrf::RotateX3D(parameters->Rotation_X()*Gaudi::Units::deg);
-      GeoTransform* xform = new GeoTransform(GeoTrf::Transform3D(pos*rm));
-      xform->ref();
+      GeoIntrusivePtr<GeoTransform> xform{new GeoTransform(GeoTrf::Transform3D(pos*rm))};
       //building module
       int k=i+222;
 
-      GeoNameTag* tag = new GeoNameTag("BLM Module");
-      tag->ref();
+      GeoIntrusivePtr<GeoNameTag> tag{new GeoNameTag("BLM Module")};
       if (materialManager){
         GeoVPhysVol* blmModPhys = blm.Build(materialManager, parameters, (msgLvl(MSG::INFO) ? &msg(MSG::INFO) : nullptr));
         Phys->add(tag);
@@ -255,8 +253,6 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
         Phys->add(blmModPhys);
         ATH_MSG_DEBUG(" --> BUILD MODULE: " << i);
       }
-      tag->unref();
-      xform->unref();
     }
 
   //save Geometry_manager in storegate

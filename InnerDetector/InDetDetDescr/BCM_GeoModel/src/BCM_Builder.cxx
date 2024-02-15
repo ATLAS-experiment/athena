@@ -234,15 +234,13 @@ StatusCode InDetDD::BCM_Builder::build(GeoVPhysVol* pv)
 	* GeoTrf::RotateX3D(parameters->Rotation_X()*Gaudi::Units::deg)
 	* GeoTrf::RotateZ3D(-90.*Gaudi::Units::deg)
 	* GeoTrf::RotateY3D(-90.*Gaudi::Units::deg);
-      GeoTransform* xform = new GeoTransform(GeoTrf::Transform3D(pos*rm));
-      xform->ref();
+      GeoIntrusivePtr<GeoTransform> xform{new GeoTransform(GeoTrf::Transform3D(pos*rm))};
       ATH_MSG_DEBUG(" --> Module " << i << " build!");
 
       //building module
       int k=i+951;
       
-      GeoNameTag* tag = new GeoNameTag("BCM Module"); 
-      tag->ref();
+      GeoIntrusivePtr<GeoNameTag> tag{new GeoNameTag("BCM Module")}; 
       if (materialManager){
         GeoVPhysVol* bcmModPhys = bcm.Build(materialManager, parameters, (msgLvl(MSG::INFO) ? &msg(MSG::INFO) : nullptr));
         Phys->add(tag);
@@ -250,8 +248,6 @@ StatusCode InDetDD::BCM_Builder::build(GeoVPhysVol* pv)
         Phys->add(xform);
         Phys->add(bcmModPhys);	
       }
-      tag->unref();
-      xform->unref();  
     }
   
   ATH_MSG_DEBUG("Registering BCM_GeometryManager."); 
