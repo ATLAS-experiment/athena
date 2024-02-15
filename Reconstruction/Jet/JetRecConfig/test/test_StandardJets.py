@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 # should choose a better default ??
@@ -71,8 +71,7 @@ cfg=MainServicesCfg(flags)
 if args.jetType=='smallR':
     from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4Truth
     jetdefs0 = []
-    from RecExConfig.AutoConfiguration import IsInInputFile
-    if IsInInputFile("xAOD::CaloClusterContainer","CaloCalFwdTopoTowers"):
+    if 'xAOD::CaloClusterContainer#CaloCalFwdTopoTowers' in flags.Input.TypedCollections:
         jetdefs0 = [AntiKt4EMPFlow, AntiKt4LCTopo, AntiKt4Truth]
     else:
         ghostdefs_PFlow_noTower = [g for g in AntiKt4EMPFlow.ghostdefs if g != "Tower"]
