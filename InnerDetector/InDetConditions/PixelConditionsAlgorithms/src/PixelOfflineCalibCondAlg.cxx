@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelOfflineCalibCondAlg.h"
@@ -46,7 +46,7 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
   else if (m_inputSource==1) {
     ATH_MSG_INFO("read from file");
 
-    PixelCalib::PixelOfflineCalibData* calibData = new PixelCalib::PixelOfflineCalibData;
+    auto calibData = std::make_unique<PixelCalib::PixelOfflineCalibData>();
 
     PixelCalib::PixelClusterErrorData* pced = calibData->getPixelClusterErrorData();
     PixelCalib::PixelChargeInterpolationParameters* pcip = calibData->getPixelChargeInterpolationParameters();
@@ -95,7 +95,6 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
       ATH_MSG_DEBUG("Dump the constants to file");
       calibData->Dump();
     }
-    delete calibData;
 
   }
   else if (m_inputSource==2) {
