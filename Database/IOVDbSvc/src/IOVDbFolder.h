@@ -5,8 +5,8 @@
 // IOVDbFolder.h
 // helper class for IOVDbSvc managing folder access
 // Richard Hawkings, started 24/11/08
-#ifndef IOVDbSvc_IOVDbFolder_h
-#define IOVDbSvc_IOVDbFolder_h
+#ifndef IOVDBSVC_IOVDBFOLDER_H
+#define IOVDBSVC_IOVDBFOLDER_H
 
 #include <string>
 #include "GaudiKernel/IClassIDSvc.h"
@@ -223,6 +223,15 @@ private:
   void 
   specialCacheUpdate(const cool::IObject& obj,const ServiceHandle<IIOVSvc>& iovSvc);
 
+  // _________ Helper functions for the CREST reading _________
+  using IOVHash=std::pair<IOVDbNamespace::IovStore::Iov_t,std::string>;
+  using IOV2Index=std::pair<cool::ValidityKey,size_t>;
+
+  // Function which converts openended CREST IOVs into non-overlapping IOVs
+  // It returns a vector of non-overlapping IOVs + corresponding Hashes
+  std::vector<IOVHash> fetchCrestIOVs();
+
+  // __________________________________________________________
 
   ITagInfoMgr*         p_tagInfoMgr{nullptr};   // pointer to TagInfoMgr
   IClassIDSvc*         p_clidSvc{nullptr};      // pointer to CLID service
