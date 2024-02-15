@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: Test of the RDOtoRDOTrigger transform with Dev menu
 # art-type: grid
@@ -23,9 +23,9 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 preExec = ';'.join([
-  'setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
+  'flags.Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
   'flags.Trigger.AODEDMSet=\'AODFULL\'',
-  'doRuntimeNaviVal=True', # Perform runtime graph vaidation in this test
+  'flags.Trigger.doRuntimeNaviVal=True', # Perform runtime graph vaidation in this test
 ])
 
 ex = ExecStep.ExecStep()
@@ -36,6 +36,8 @@ ex.threads = 4
 ex.concurrent_events = 4
 ex.args = '--outputRDO_TRIGFile=RDO_TRIG.pool.root'
 ex.args += ' --preExec="all:{:s};"'.format(preExec)
+ex.args += ' --preInclude "all:Campaigns.MC23c"'
+ex.args += ' --CA "all:True"'
 
 test = Test.Test()
 test.art_type = 'grid'

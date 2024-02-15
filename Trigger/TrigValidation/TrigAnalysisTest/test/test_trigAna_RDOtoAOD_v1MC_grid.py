@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-
 # art-description: Test of transform RDO->RDO_TRIG->AOD->DAOD with threads=4, MC_pp_run3_v1 and AODSLIM
 # art-type: grid
 # art-include: main/Athena
@@ -25,7 +24,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
 preExec = ';'.join([
-  'setMenu=\'MC_pp_run3_v1\'',
+  'flags.Trigger.triggerMenuSetup=\'MC_pp_run3_v1\'',
   'flags.Trigger.AODEDMSet=\'AODSLIM\'',
 ])
 
@@ -36,8 +35,9 @@ rdo2aod.max_events = 800
 rdo2aod.threads = 4
 rdo2aod.concurrent_events = 4
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
-rdo2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
+rdo2aod.args += ' --CA "all:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
+rdo2aod.args += ' --preInclude "all:Campaigns.MC23c"'
 
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
 aod2daod.type = 'Derivation_tf'
