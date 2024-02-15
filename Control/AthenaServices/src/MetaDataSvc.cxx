@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file MetaDataSvc.cxx
@@ -23,7 +23,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "SGTools/SGVersionedKey.h"
 #include "PersistentDataModel/DataHeader.h"
-#include "RootAuxDynIO/RootAuxDynIO.h"
+#include "RootAuxDynIO/RootAuxDynDefs.h"
 
 #include "OutputStreamSequencerSvc.h"
 
