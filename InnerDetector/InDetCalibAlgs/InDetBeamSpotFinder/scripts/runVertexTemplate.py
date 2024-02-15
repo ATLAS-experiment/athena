@@ -29,7 +29,9 @@ for path in MyArgs.filesInput.split(','):
 flags.Exec.SkipEvents = MyArgs.skipEvents
 flags.Exec.MaxEvents = MyArgs.maxEvents
 
-flags.Trigger.triggerConfig="DB"
+flags.Trigger.triggerConfig = "DB"
+flags.DQ.enableLumiAccess = False
+flags.Output.HISTFileName = MyArgs.outputMonFile
 
 flags.lock()
 
@@ -41,7 +43,9 @@ acc.merge(PoolReadCfg(flags))
 from InDetBeamSpotFinder.InDetBeamSpotFinderConfig import InDetBeamSpotFinderCfg
 acc.merge(InDetBeamSpotFinderCfg(flags))
 
-Outputs = ["INDETBEAMSPOTFINDER DATAFILE='%s' OPT='RECREATE'" % MyArgs.outputHistFile]
+from AthenaConfiguration.ComponentFactory import CompFactory
+acc.addService(CompFactory.THistSvc(
+    Output = ["INDETBEAMSPOTFINDER DATAFILE='%s' OPT='RECREATE'" % MyArgs.outputHistFile]
 
 if MyArgs.doMonitoring:
     from AthenaMonitoring import AthMonitorCfgHelper
@@ -50,8 +54,6 @@ if MyArgs.doMonitoring:
         InDetGlobalBeamSpotMonAlgCfg )
     InDetGlobalBeamSpotMonAlgCfg(helper, acc, flags)
     acc.merge(helper.result())
-    Outputs += [ "BeamSpotMonitoring DATAFILE='%s' OPT='RECREATE'" % MyArgs.outputMonFile ]
-
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 acc.addService(CompFactory.THistSvc(Output = Outputs))
