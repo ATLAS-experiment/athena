@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,9 +22,6 @@
     The PixelOfflineCalibData is a class that designed to hold the 
     data used by pixel offline algorithms. This includes 
     Pixel Cluster error parametrizations, and other stuff will follow
-
-    The details can be found at 
-    https://twiki.cern.ch/twiki/bin/view/Atlas/AWikiPageNotExistingYet
     
     @author Tommaso Lari <lari@mi.infn.it>
 */  
@@ -66,7 +63,6 @@ class PixelOfflineCalibData{
   void Dump();
 
  private: 
-  //  Identifier m_ident; 
   PixelClusterErrorData* m_clustererrordata; 
   PixelChargeInterpolationParameters* m_chargeinterpolationparameters; 
   PixelClusterOnTrackErrorData* m_clusterontrackerrordata;
