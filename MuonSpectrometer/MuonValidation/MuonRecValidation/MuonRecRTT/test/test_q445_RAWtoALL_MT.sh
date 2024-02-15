@@ -22,12 +22,12 @@
 # art-output: log.RDOtoRDOTrigger_8thread
 # art-output: NSWPRDValAlg.reco.ntuple.root
 
+export ATHENA_CORE_NUMBER=1
 
 #####################################################################
 # Run reconstruction with AthenaMT with 1 thread
 Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
            --AMI q445 \
-           --athenaopts 'all:--threads=1' \
            --postInclude "RAWtoALL:MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
            --imf False \
            --outputESDFile OUT_ESD_1thread.root
@@ -42,12 +42,13 @@ mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_1thread
 mv log.RAWtoALL log.RAWtoALL_1thread
 #####################################################################
 
+export ATHENA_CORE_NUMBER=5
+
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
 Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
            --AMI q445 \
            --imf False \
-           --athenaopts 'all:--threads=5' \
            --outputESDFile OUT_ESD_5thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf_5thread.py"
@@ -60,12 +61,13 @@ mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_5thread
 mv log.RAWtoALL log.RAWtoALL_5thread
 #####################################################################
 
+export ATHENA_CORE_NUMBER=8
+
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
 Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
            --AMI q445 \
            --imf False \
-           --athenaopts 'all:--threads=8' \
            --outputESDFile OUT_ESD_8thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf_8thread.py"
