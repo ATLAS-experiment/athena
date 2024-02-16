@@ -147,6 +147,8 @@ JetChainParts = {
       ['nopresel',
        # Single jet
        'preselj20emf24',
+       'preselj20emf12',
+       'preselj20emf6',
        'preselj20',
        'preselj50',
        'preselj80',
@@ -333,7 +335,7 @@ JetChainParts = {
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',
                   'emergingPTF0p2dR0p4', 'emergingPTF0p1dR0p4', 'emergingPTF0p09dR0p4', 'emergingPTF0p08dR0p4', 'emergingPTF0p075dR0p4', 'emergingPTF0p07dR0p4', 'emergingPTF0p0dR0p4',
                   'tracklessdR1p2',      'tracklessdR0p4',
-                  'calratio','calratiormbib' # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
+                  'calratio','calratiormbib','calrtold','calrtoldrmbib'  # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
               ],
 
     # Simple hypo configuration. Single property cuts defined as MINvarMAX
@@ -346,7 +348,7 @@ JetChainParts = {
     'jvt'           : # Jet Vertex Tagger pileup discriminant
       ['010jvt', '011jvt', '015jvt', '020jvt', '050jvt', '059jvt'],
     'momCuts'       : # Generic moment cut on single jets
-       ['050momemfrac100', 'momhecfrac010', '050momemfrac100XXmomhecfrac010'],
+       ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010'],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
     ['2timing'],
     'timeSig'       : # delayed jets, based on pT-dependent significance of delay [sigma]

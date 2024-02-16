@@ -32,12 +32,6 @@
 #include "CxxUtils/phihelper.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
-using TrigCompositeUtils::DecisionID;
-using TrigCompositeUtils::Decision;
-using TrigCompositeUtils::DecisionContainer;
-using TrigCompositeUtils::DecisionIDContainer;
-using TrigCompositeUtils::decisionIDs;
-
 using namespace TrigCompositeUtils;
 
 TrigJetCRHypoTool::TrigJetCRHypoTool(const std::string& type,
@@ -51,6 +45,8 @@ TrigJetCRHypoTool::TrigJetCRHypoTool(const std::string& type,
 
 TrigJetCRHypoTool::~TrigJetCRHypoTool(){
 }
+
+
 
 StatusCode TrigJetCRHypoTool::initialize(){
   ATH_MSG_VERBOSE( "In TrigJetCRHypoTool, initialize()." ); 
@@ -69,22 +65,11 @@ StatusCode TrigJetCRHypoTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode TrigJetCRHypoTool::finalize(){
-  return StatusCode::SUCCESS;
-}
+bool TrigJetCRHypoTool::emf_dis(     const xAOD::Jet* jet  ) const {
 
-bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
-
-  auto jet = input.jet;
-  auto cellContainer = input.cells;
-  auto allTracks= jet->getAttribute<std::vector<ElementLink<xAOD::IParticleContainer> >>("TracksForMinimalJetTag");
-  //Checking jet logRatio requirements
-  double jetEMF = jet->getAttribute<float>("EMFrac");
-  ATH_MSG_DEBUG( " Jet EMF = " << jetEMF << " jet pT = " << jet->pt() << "jet eta = " << jet->eta() << " phi = " << jet->phi() );
-
-  double jetRatio=-999;
-
-  if (CxxUtils::fpcompare::greater(jetEMF,0.)){
+double jetEMF = jet->getAttribute<float>("EMFrac");
+double jetRatio=-999;
+if (CxxUtils::fpcompare::greater(jetEMF,0.)){
     if(CxxUtils::fpcompare::greater_equal(jetEMF,1.)){
       ATH_MSG_DEBUG( "Fails logR cut, EMF>=1" );
       return false;
@@ -165,13 +150,34 @@ bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
     } 
     ATH_MSG_DEBUG( "Jet "<< " above the " << m_jetlogRCut<< " threshold for the log-ratio cut; logRatio = " << jetRatio << "; skipping this jet.");
   }
- 
+  return true;
+}
 
 
+
+bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
+
+  auto jet = input.jet;
+  auto cellContainer = input.cells;
+  auto alltracks= jet->getAttribute<std::vector<ElementLink<xAOD::IParticleContainer> >>("TracksForMinimalJetTag");
+  //Checking jet logRatio requirements
+  double jetEMF = jet->getAttribute<float>("EMFrac");
+  double jetRatio=-999;
+  ATH_MSG_DEBUG( "Jet EMF = " << jetEMF << " jet pT = " << jet->pt() << "jet eta = " << jet->eta() << " phi = " << jet->phi() );
+
+  if (!emf_dis(jet)){
+    return false;
+  }
+
+  auto jetPhi= jet->phi();
+  auto jetEta= jet->eta();
+
+
+  ATH_MSG_DEBUG("jet passed logR" );
 
   // Loop over all tracks above m_trackPtCut and reject the jet if the closest track is at dR(jet, track)< m_deltaR
-  for ( unsigned int index(0); index < allTracks.size(); index++  ) {         
-     const xAOD::IParticle* track = *( allTracks.at(index));
+  for ( unsigned int index(0); index < alltracks.size(); index++  ) {         
+     const xAOD::IParticle* track = *( alltracks.at(index));
 
      if(track->pt() < m_trackPtCut ) continue;
 
@@ -179,11 +185,11 @@ bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
      double eta  = track->p4().Eta() ;
 
      double dR = xAOD::P4Helpers::deltaR( eta, phi, jetEta, jetPhi );
-     ATH_MSG_DEBUG(" track with " << "pt=" << track->pt() << ", eta=" << eta << ", phi=" << phi << " dR = " << dR);
+     ATH_MSG_DEBUG("track with " << "pt=" << track->pt() << ", eta=" << eta << ", phi=" << phi << " dR = " << dR);
      if (dR<m_deltaR)   return false;
   }
 
-  ATH_MSG_DEBUG(" jet passed tracking" );
+  ATH_MSG_DEBUG("jet passed tracking" );
 
   if(m_doBIBrm==1){
     int countCaloCell=0;
@@ -248,12 +254,15 @@ bool TrigJetCRHypoTool::decide_on_single_jet( JetInfo& input ) const {
 StatusCode TrigJetCRHypoTool::decide( std::vector<JetInfo>& input )  const{
   for ( JetInfo& j: input ) {
     if ( passed ( m_decisionId.numeric(), j.previousDecisionIDs ) ) {
+
       if ( decide_on_single_jet( j ) ) {
-	        addDecisionID( m_decisionId, j.decision );      
+	        addDecisionID( m_decisionId, j.decision );     
+             return StatusCode::SUCCESS;
       }
     }
   }
   return StatusCode::SUCCESS;
 
 }
+
 
