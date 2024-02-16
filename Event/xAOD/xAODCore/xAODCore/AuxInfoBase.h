@@ -167,8 +167,8 @@ namespace xAOD {
       template< typename T >
       auxid_t getAuxID( const std::string& name,
                         T& /*info*/,
-                        SG::AuxTypeRegistry::Flags flags =
-                        SG::AuxTypeRegistry::Flags::None );
+                        SG::AuxVarFlags flags =
+                        SG::AuxVarFlags::None );
       /// Register one of the persistent variables internally
       template< typename T >
       void regAuxVar( auxid_t auxid, const std::string& name,
