@@ -76,7 +76,7 @@ def runHLTCfg(flags):
    cfg.merge(TriggerHistSvcConfig(flags))
 
    # Menu
-   from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
+   from TriggerMenuMT.HLT.Config.GenerateMenuMT import generateMenuMT
    from TriggerJobOpts.TriggerConfig import triggerRunCfg
    menu = triggerRunCfg(flags, menu=generateMenuMT)
    cfg.merge(menu)

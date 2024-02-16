@@ -36,8 +36,8 @@ def set_flags(flags):
     
     # these flags are proper for these tests
     flags.Trigger.doCFEmulationTest = True # this enables this emulation tests 
-    import TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO
-    TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO._isCAMenu = True
+    import TriggerMenuMT.HLT.Config.GenerateMenuMT
+    TriggerMenuMT.HLT.Config.GenerateMenuMT._isCAMenu = True
     flags.Trigger.generateMenuDiagnostics = True
     # set DEBUG flag on the control-flow builder (before building)
     import TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig
@@ -69,7 +69,7 @@ def makeMenu(flags):
     generateL1Menu(flags)
     # from here generate the ControlFlow and the Dataflow
     # doing the same as menu.generateMT()
-    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import makeHLTTree
+    from TriggerMenuMT.HLT.Config.GenerateMenuMT import makeHLTTree
     menuCA = makeHLTTree(flags)
     return menuCA
 

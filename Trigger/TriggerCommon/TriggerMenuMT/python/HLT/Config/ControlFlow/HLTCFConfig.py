@@ -25,22 +25,17 @@
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFDot import stepCF_DataFlow_to_dot, stepCF_ControlFlow_to_dot, all_DataFlow_to_dot
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFComponents import CFSequence, RoRSequenceFilterNode, PassFilterNode, CFSequenceCA
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
-from TriggerMenuMT.HLT.Config.Validation.CFValidation import testHLTTree
 
-from AthenaCommon.CFElements import parOR, seqAND, getSequenceChildren, isSequence, compName, findSubSequence,findAlgorithm
-from AthenaCommon.AlgSequence import AlgSequence, dumpSequence
+from AthenaCommon.CFElements import parOR, seqAND, getSequenceChildren, isSequence, compName
+from AthenaCommon.AlgSequence import  dumpSequence
 from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaCommon.Logging import logging
 
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from DecisionHandling.DecisionHandlingConfig import TriggerSummaryAlg
-from TriggerJobOpts.TriggerConfig import collectHypos, collectFilters, collectViewMakers, collectDecisionObjects, \
-     triggerMonitoringCfg, triggerSummaryCfg, collectHypoDecisionObjects
-from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import getTrigNavSlimmingMTOnlineConfig
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
+from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu 
 
 from builtins import map, range, str, zip
 from collections import OrderedDict, defaultdict
@@ -119,166 +114,6 @@ def createCFTree(CFseq):
 #######################################
 ## CORE of Decision Handling
 #######################################
-
-def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
-    """ Creates the full HLT tree, main function called from GenerateMenu.py"""
-
-    # Check if hltMenuConfig exits, if yes, derive information from this
-    if hltMenuConfig is None:
-        raise Exception("[makeHLTTree] hltMenuConfig is set to None, please check!")
-
-    # get topSequnece
-    topSequence = AlgSequence()
-
-    # find main HLT top sequence (already set up in runHLT_standalone)
-    hltSeeding = findAlgorithm(topSequence, "HLTSeeding")
-
-    # add the HLT steps Node
-    steps = seqAND("HLTAllSteps")
-    hltTop = findSubSequence(topSequence, "HLTTop")
-    hltTop += steps
-
-    hltEndSeq = parOR("HLTEndSeq")
-    hltTop += hltEndSeq
-
-    hltFinalizeSeq = seqAND("HLTFinalizeSeq")
-
-    log.debug("[makeHLTTree] will now make the DF and CF tree from chains")
-
-    # make DF and CF tree from chains
-    finalDecisions, acc = decisionTreeFromChains(flags, steps, hltMenuConfig.configsList(), hltMenuConfig.dictsList(), newJO)
-
-    successful_scan = sequenceScanner( steps )
-
-    if not successful_scan:
-        raise Exception("[makeHLTTree] At least one sequence is expected in more than one step. Check error messages and fix!")    
-
-    flatDecisions=[]
-    for step in finalDecisions:
-        flatDecisions.extend (step)
-
-    summary = makeSummary(flags, "Final", flatDecisions)
-    hltEndSeq += summary
-
-    log.debug("[makeHLTTree] created the final summary tree")
-    # TODO - check we are not running things twice. Once here and once in TriggerConfig.py
-    
-
-    # Collections required to configure the algs below
-    hypos = collectHypos(steps)
-    filters = collectFilters(steps)
-    viewMakers = collectViewMakers(steps)
-
-    viewMakerMap = {compName(vm):vm for vm in viewMakers}
-    for vmname, vm in viewMakerMap.items():
-        log.debug(f"{vmname} InputMakerOutputDecisions: {vm.InputMakerOutputDecisions}")
-        if vmname.endswith("_probe"):
-            try:
-                log.debug(f"Setting InputCachedViews on {vmname} to read decisions from tag leg {vmname[:-6]}: {vm.InputMakerOutputDecisions}")
-                vm.InputCachedViews = viewMakerMap[vmname[:-6]].InputMakerOutputDecisions
-            except KeyError: # We may be using a probe leg that has different reco from the tag
-                log.debug(f"Tag leg does not match probe: '{vmname[:-6]}', will not use cached views")
-
-    with ConfigurableCABehavior():
-        summaryAcc, summaryAlg = triggerSummaryCfg( flags, hypos )
-
-    # Schedule the DecisionSummaryMakerAlg
-    hltFinalizeSeq += conf2toConfigurable( summaryAlg )
-    appendCAtoAthena( summaryAcc )
-
-    # Add end-of-event sequences executed conditionally on the DecisionSummaryMakerAlg filter status
-    acceptedEventChainDicts = [cd for cd in hltMenuConfig.dictsList() \
-                               if 'Calib' in cd['signatures'] \
-                               and 'acceptedevts' in cd['chainParts'][0]['purpose']]
-    if flags.Trigger.enableEndOfEventProcessing and acceptedEventChainDicts:
-        from TrigGenericAlgs.TrigGenericAlgsConfig import EndOfEventROIConfirmerAlgCfg, EndOfEventFilterAlgCfg
-        endOfEventRoIMaker = conf2toConfigurable(EndOfEventROIConfirmerAlgCfg('EndOfEventROIConfirmerAlg'))
-        hltFinalizeSeq += endOfEventRoIMaker
-        acceptedEventTopSeq = parOR("acceptedEventTopSeq")
-        acceptedEventTopSeq.IgnoreFilterPassed=True
-        hltFinalizeSeq += conf2toConfigurable(acceptedEventTopSeq)
-        for acceptedEventChainDict in acceptedEventChainDicts:
-            # Common config for each chain
-            prescaleChain = acceptedEventChainDict['chainName']
-            seqLabel = prescaleChain.replace('HLT_acceptedevts','')
-            acceptedEventSeq = seqAND('acceptedEventSeq'+seqLabel)
-            endOfEventFilterAlg = EndOfEventFilterAlgCfg('EndOfEventFilterAlg'+seqLabel, chainName=prescaleChain)
-            acceptedEventSeq += conf2toConfigurable(endOfEventFilterAlg)
-            # Now add chain-specific end-of-event sequences executed conditionally on the prescale
-            purposes = acceptedEventChainDict['chainParts'][0]['purpose']
-
-            # The LAr Noise Burst end-of-event sequence
-            if 'larnoiseburst' in purposes:
-                # Add stream filter to EndOfEventFilterAlg
-                # Only accept events going to streams that already do full calo reco
-                # CosmicCalo explicitly requested [ATR-26096]
-                endOfEventFilterAlg.StreamFilter = ['Main','VBFDelayed','TLA','DarkJetPEBTLA','FTagPEBTLA','CosmicCalo']
-
-                from TriggerMenuMT.HLT.CalibCosmicMon.CalibChainConfiguration import getLArNoiseBurstRecoCfg
-                from ..MenuComponents import algorithmCAToGlobalWrapper
-                recoSeq = algorithmCAToGlobalWrapper(getLArNoiseBurstRecoCfg,flags)
-                acceptedEventSeq += recoSeq
-            elif any(purpose.startswith("met") for purpose in purposes):
-                from TriggerMenuMT.HLT.MET.EndOfEvent import getMETRecoSequences
-                algorithms, rois, streams = getMETRecoSequences(flags, purposes)
-                endOfEventFilterAlg.StreamFilter = streams
-                endOfEventRoIMaker.RoIs = [x for x in rois if x not in endOfEventRoIMaker.RoIs]
-                acceptedEventSeq += algorithms
-            # elif ... add other end of event sequences (with the corresponding chain) here if needed
-
-            acceptedEventTopSeq += conf2toConfigurable(acceptedEventSeq)
-    
-    # More collections required to configure the algs below
-    decObj = collectDecisionObjects( hypos, filters, hltSeeding, summaryAlg )
-    decObjHypoOut = collectHypoDecisionObjects(hypos, inputs=False, outputs=True)
-
-    with ConfigurableCABehavior():
-        monAcc, monAlg = triggerMonitoringCfg( flags, hypos, filters, hltSeeding )
-
-    hltEndSeq += conf2toConfigurable( monAlg )
-    appendCAtoAthena( monAcc )
-
-    from TrigCostMonitor.TrigCostMonitorConfig import TrigCostMonitorFinalizeCfg
-    costAlg = TrigCostMonitorFinalizeCfg(flags)
-    if costAlg: # None if Cost Monitoring is turned off
-        hltFinalizeSeq += conf2toConfigurable( costAlg )
-
-    # Finally, we create the EDM output
-    from TriggerJobOpts.TriggerConfig import triggerMergeViewsCfg, triggerEDMGapFillerCfg
-    with ConfigurableCABehavior():
-        edmAcc = ComponentAccumulator()
-        # The order is important: 1) view merging, 2) gap filling
-        edmAcc.merge( triggerMergeViewsCfg(flags, viewMakers) )
-        # For RDO output, we run the GapFiller. Otherwise it is done in Reco.
-        edmSet = ['AOD','ESD'] if flags.Output.doWriteRDO else []
-        edmAcc.merge( triggerEDMGapFillerCfg(flags, edmSet, decObj, decObjHypoOut) )
-        edmAlg = edmAcc.popEventAlgo("EDMCreatorAlg")
-    appendCAtoAthena( edmAcc )
-    hltFinalizeSeq += conf2toConfigurable(edmAlg)
-
-    if flags.Trigger.doOnlineNavigationCompactification:
-        onlineSlimAlg = getTrigNavSlimmingMTOnlineConfig(flags)
-        hltFinalizeSeq += conf2toConfigurable(onlineSlimAlg)
-
-    hltEndSeq += hltFinalizeSeq
-
-    # Test the configuration
-    testHLTTree( hltTop )
-
-    def debugDecisions(hypos, summary, mon, summaryAlg):
-        """ set DEBUG flag to the hypos of all the sequences (used to debug), other debug functions can be added here """
-        from GaudiKernel.Constants import DEBUG # noqa: ATL900
-        for step, stepHypos in sorted(hypos.items()):
-            for hypo in stepHypos:
-                hypo.OutputLevel=DEBUG   # noqa:  ATL900
-        summary.OutputLevel = DEBUG # noqa: ATL900
-        mon.OutputLevel = DEBUG # noqa: ATL900
-        summaryAlg.OutputLevel = DEBUG # noqa: ATL900
-
-
-    # Switch on  DEBUG ouput in some algorithms
-    #debugDecisions(hypos, summary, monAlg, summaryAlg)
-
     
 def matrixDisplay( allCFSeq ):
 

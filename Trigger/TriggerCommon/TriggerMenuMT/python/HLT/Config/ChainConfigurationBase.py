@@ -48,7 +48,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         stepName = 'Step%d'%stepID + '_' + stepPartName
         log.debug("Configuring step %s", stepName)
         seqArray = []   
-        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu             
+        from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu             
         for sequenceCfg in sequenceCfgArray:            
             if isCAMenu():
                 seqArray.append (sequenceCfg(flags, **stepArgs) )
