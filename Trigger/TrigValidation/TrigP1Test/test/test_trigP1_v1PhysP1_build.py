@@ -4,7 +4,7 @@
 # art-description: Trigger athenaHLT test of the PhysicsP1_pp_run3_v1 menu, then running BS decoding follows the athenaHLT process
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, PyStep
 

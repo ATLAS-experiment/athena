@@ -4,7 +4,7 @@
 # art-description: Test running only L1 result decoding with forks=2, threads=2, concurrent_events=2
 # art-type: build                                                                  
 # art-include: main/Athena
-# art-include: 23.0/Athena                                                       
+# art-include: 24.0/Athena                                                       
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

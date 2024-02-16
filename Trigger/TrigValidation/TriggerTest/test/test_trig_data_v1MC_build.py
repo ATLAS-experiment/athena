@@ -4,7 +4,7 @@
 # art-description: Trigger BS->RDO_TRIG athena test of the MC_pp_run3_v1 menu
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 

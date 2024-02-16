@@ -4,7 +4,7 @@
 # art-description: Test of transform RDO->RDO_TRIG->AOD with threads=1
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 

@@ -4,7 +4,7 @@
 # art-description: HelloWorld test with forks=2, threads=2, concurrent_events=2
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 

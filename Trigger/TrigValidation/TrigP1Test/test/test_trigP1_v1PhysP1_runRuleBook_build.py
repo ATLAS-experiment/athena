@@ -4,7 +4,7 @@
 # art-description: PhysicsP1_pp_run3_v1 menu test only dumping options for SMK generation and running RuleBook to create prescales
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Step, Test, ExecStep, CheckSteps
 

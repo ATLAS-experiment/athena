@@ -4,7 +4,7 @@
 # art-description: art job for all_ttbar_pu80
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4154_s4114_r14839_tid34183111_00
 # art-input-nfiles: 8
 # art-athena-mt: 8
