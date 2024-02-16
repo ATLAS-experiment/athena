@@ -184,8 +184,6 @@
 #+ Reconstruction/RecEvent
 #+ Reconstruction/RecEventAthenaPool
 #+ Reconstruction/RecEventTPCnv
-+ Reconstruction/RecExample/RecExCommon
-+ Reconstruction/RecExample/RecExConfig
 + Simulation/Tools/AtlasCLHEP_RandomGenerators
 + Tools/ART
 + Tools/Campaigns
