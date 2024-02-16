@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
@@ -432,14 +432,14 @@ def enableDetectors(flags, detectors, toggle_geometry=False):
     for d in detectors:
         name = f'Detector.Enable{d}'
         if flags.hasFlag(name):
-            if flags(name) is not True:
+            if flags[name] is not True:
                 changed = True
                 log.info("Enabling '%s'", name)
                 flags._set(name, True)
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
-                if flags(name) is not True:
+                if flags[name] is not True:
                     changed = True
                     log.info("Enabling '%s'", name)
                     flags._set(name, True)
@@ -463,14 +463,14 @@ def disableDetectors(flags, detectors, toggle_geometry=False):
     for d in detectors:
         name = f'Detector.Enable{d}'
         if flags.hasFlag(name):
-            if flags(name) is not False:
+            if flags[name] is not False:
                 changed = True
                 log.info("Disabling '%s'", name)
                 flags._set(name, False)
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
-                if flags(name) is not False:
+                if flags[name] is not False:
                     changed = True
                     log.info("Disabling '%s'", name)
                     flags._set(name, False)
