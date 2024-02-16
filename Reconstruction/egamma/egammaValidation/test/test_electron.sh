@@ -7,7 +7,7 @@
 # art-input-nfiles: 30
 # art-cores: 4
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-output: *.hist.root
 # art-output: *.txt
 # art-output: *.png
