@@ -438,7 +438,7 @@ if __name__ == '__main__':
   ########################################
   if 'legacy' in args.outputs:
     # Produce xAOD L1 RoIs from RoIBResult. RoIB readout only
-    from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
+    from AnalysisTriggerAlgs.AnalysisTriggerAlgsConfig import RoIBResultToxAODCfg
     xRoIBResultAcc, xRoIBResultOutputs = RoIBResultToxAODCfg(flags)
     acc.merge(xRoIBResultAcc)
 

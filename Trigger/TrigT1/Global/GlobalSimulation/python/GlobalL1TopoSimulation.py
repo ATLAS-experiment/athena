@@ -275,7 +275,7 @@ if __name__ == '__main__':
     acc.merge(ByteStreamReadCfg(flags, type_names=['CTP_RDO/CTP_RDO']))
 
     # Produce xAOD L1 RoIs from RoIBResult
-    from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
+    from AnalysisTriggerAlgs.AnalysisTriggerAlgsConfig import RoIBResultToxAODCfg
     xRoIBResultAcc, xRoIBResultOutputs = RoIBResultToxAODCfg(flags)
     acc.merge(xRoIBResultAcc)
   
