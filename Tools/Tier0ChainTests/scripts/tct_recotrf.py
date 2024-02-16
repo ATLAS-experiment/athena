@@ -318,17 +318,14 @@ def generateRecoTrfCmd(config):
         #ntuplist = ['NTUP_HI','NTUP_TRKVALID']
         ntuplist = []
         config.outputAODFile = "myAOD_%s_%d.pool.root" % (config.trigStream_,config.jobnum_)
-        config.outputTAGFile = "myTAG_%s_%d.root" % (config.trigStream_,config.jobnum_)
     elif config.doHIP_:
         desdlist = []
         drawlist = []
         #ntuplist = ['NTUP_HI','NTUP_MINBIAS','NTUP_TRKVALID']
         ntuplist = []
         config.outputAODFile = "myAOD_%s_%d.pool.root" % (config.trigStream_,config.jobnum_)
-        config.outputTAGFile = "myTAG_%s_%d.root" % (config.trigStream_,config.jobnum_)
     else:
         config.outputAODFile = "myAOD_%s_%d.AOD.pool.root" % (config.trigStream_,config.jobnum_)
-        config.outputTAGFile = "myTAG_%s_%d.root" % (config.trigStream_,config.jobnum_)
     if not config.dropDAODs_:
         for dtype in daodlist:
             setattr(config,'output%sFile' % dtype,

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfExe
 #
@@ -877,7 +877,7 @@ class athenaExecutor(scriptExecutor):
     #  uses repr(), so the RHS is the same as the python object in the transform; @c runtimeRunargs uses str() so 
     #  that a string can be interpreted at runtime; @c literalRunargs allows the direct insertion of arbitary python
     #  snippets into the runArgs file.
-    def __init__(self, name = 'athena', trf = None, conf = None, skeletonFile = 'PyJobTransforms/skeleton.dummy.py', skeletonCA=None, 
+    def __init__(self, name = 'athena', trf = None, conf = None, skeletonFile=None, skeletonCA=None, 
                  inData = set(), outData = set(), inputDataTypeCountCheck = None, exe = 'athena.py', exeArgs = ['athenaopts'], 
                  substep = None, inputEventTest = True, perfMonFile = None, tryDropAndReload = True, extraRunargs = {}, runtimeRunargs = {},
                  literalRunargs = [], dataArgs = [], checkEventCount = False, errorMaskFiles = None,
@@ -1846,7 +1846,7 @@ class hybridPOOLMergeExecutor(athenaExecutor):
     #  @param inputEventTest Boolean switching the skipEvents < inputEvents test
     #  @param perfMonFile Name of perfmon file for this substep (used to retrieve vmem/rss information)
     #  @param tryDropAndReload Boolean switch for the attempt to add '--drop-and-reload' to athena args
-    def __init__(self, name = 'hybridPOOLMerge', trf = None, conf = None, skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py', skeletonCA=None,
+    def __init__(self, name = 'hybridPOOLMerge', trf = None, conf = None, skeletonFile=None, skeletonCA='RecJobTransforms.MergePool_Skeleton',
                  inData = set(), outData = set(), exe = 'athena.py', exeArgs = ['athenaopts'], substep = None, inputEventTest = True,
                  perfMonFile = None, tryDropAndReload = True, extraRunargs = {},
                  manualDataDictionary = None, memMonitor = True):
@@ -2122,50 +2122,6 @@ class bsMergeExecutor(scriptExecutor):
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'), 
                                                                 'Exception raised when renaming {0} to {1}: {2}'.format(self._outputFilename, self.conf.dataDictionary[self._outputBS].value[0], e))
         super(bsMergeExecutor, self).postExecute()
-
-
-class tagMergeExecutor(scriptExecutor):
-    
-    def preExecute(self, input = set(), output = set()):
-        self.setPreExeStart()
-        # Just need to write the customised CollAppend command line
-        self._cmd = [self._exe, '-src']
-        for dataType in input:
-            for fname in self.conf.dataDictionary[dataType].value:
-                self._cmd.extend(['PFN:{0}'.format(fname), 'RootCollection'])
-        self._cmd.extend(['-dst', 'PFN:{0}'.format(self.conf.dataDictionary[list(output)[0]].value[0]), 'RootCollection', '-nevtcached', '5000'])
-        
-        # In AthenaMP jobs the output file can be created empty, which CollAppend does not like
-        # so remove it
-        if os.access(self.conf.dataDictionary[list(output)[0]].value[0], os.F_OK):
-            os.unlink(self.conf.dataDictionary[list(output)[0]].value[0]) 
-        
-        super(tagMergeExecutor, self).preExecute(input=input, output=output)
-
-        
-    def validate(self):
-        self.setValStart()
-        super(tagMergeExecutor, self).validate()
-        
-        # Now scan the logfile...
-        try:
-            msg.debug('Scanning TAG merging logfile {0}'.format(self._logFileName))
-            with open(self._logFileName) as logfile:
-                for line in logfile:
-                    # Errors are signaled by 'error' (case independent) and NOT ('does not exist' or 'hlterror')
-                    # Logic copied from Tier 0 TAGMerge_trf.py
-                    if 'error' in line.lower():
-                        if 'does not exist' in line:
-                            continue
-                        if 'hlterror' in line:
-                            continue
-                        raise trfExceptions.TransformValidationException(trfExit.nameToCode('TRF_EXEC_LOGERROR'),
-                                                                         'Found this error message in the logfile {0}: {1}'.format(self._logFileName, line))
-        except (OSError, IOError) as e:
-                        raise trfExceptions.TransformValidationException(trfExit.nameToCode('TRF_EXEC_LOGERROR'),
-                                                                         'Exception raised while attempting to scan logfile {0}: {1}'.format(self._logFileName, e))            
-        self._valStop = os.times()
-        msg.debug('valStop time is {0}'.format(self._valStop))
 
 
 ## @brief Archive transform

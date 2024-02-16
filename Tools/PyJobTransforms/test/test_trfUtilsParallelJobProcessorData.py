@@ -118,34 +118,6 @@ class TestOutputFileValidationInParallel(unittest.TestCase):
 #             sys.stdout.write(line)
 #         self.assertEqual(p.returncode, 0)
 # 
-#     ## @brief unit test for TAG
-#     #  @detail This method is a unit test for output file validation of TAG data
-#     #  using the parallel job processor.
-#     def test_TAG(self):
-#         msg.info("\n\n\n\nTAG OUTPUT FILE VALIDATION USING PARALLEL JOB PROCESSOR")
-#         cmd = [
-#             'ValidateFiles_tf.py',
-#             '--outputTAGFile',
-#             fileTAG1,
-#             '--parallelFileValidation',
-#             'True',
-#             '--verbose'
-#         ]
-#         p = subprocess.Popen(
-#             cmd,
-#             shell = False,
-#             stdout = subprocess.PIPE,
-#             stderr = subprocess.STDOUT,
-#             bufsize = 1
-#         )
-#         while p.poll() is None:
-#             line = p.stdout.readline()
-#             sys.stdout.write(line)
-#         # Clean remaining buffered output lines.
-#         for line in p.stdout:
-#             sys.stdout.write(line)
-#         self.assertEqual(p.returncode, 0)
-# 
 #     ## @brief unit test for BS
 #     #  @detail This method is a unit test for output file validation of BS data
 #     #  using the parallel job processor.

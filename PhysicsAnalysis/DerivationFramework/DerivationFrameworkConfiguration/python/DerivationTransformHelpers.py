@@ -1,6 +1,6 @@
 """Main derivation transform configuration helpers
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from PyJobTransforms.trfArgClasses import argFactory, argList, argNTUPFile, argPOOLFile, argSubstepBool
@@ -66,7 +66,6 @@ def addDerivationSubstep(executor_set):
     # It handles the composite output filenames and inserts them into the transform's dataDictionary.
     # If this isn't done the file validation will run over the wrong file name.
     executor = reductionFrameworkExecutor(name='Derivation',
-                                          skeletonFile=None,
                                           skeletonCA='DerivationFrameworkConfiguration.DerivationSkeleton',
                                           substep='DerivationFramework',
                                           tryDropAndReload=False,
@@ -78,7 +77,6 @@ def addDerivationSubstep(executor_set):
 
 def addPhysicsValidationSubstep(executor_set):
     executor = athenaExecutor(name='PhysicsValidation',
-                              skeletonFile=None,
                               skeletonCA='DerivationFrameworkConfiguration.PhysicsValidationSkeleton',
                               substep='PhysicsValidation',
                               tryDropAndReload=False,
