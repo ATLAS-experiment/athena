@@ -271,7 +271,7 @@ def fromRunArgs(runArgs):
         log.info("---------- Configured ALLCELLS perfDPD")
 
     # Special message service configuration
-    from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
+    from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
     cfg.merge(DigitizationMessageSvcCfg(flags))
 
     # Post-include

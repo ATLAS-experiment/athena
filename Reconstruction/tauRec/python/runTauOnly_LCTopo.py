@@ -62,7 +62,7 @@ def _run():
     tauSpecialContent(flags,acc)
 
     # Special message service configuration
-    from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
+    from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
     acc.merge(DigitizationMessageSvcCfg(flags))
 
     from AthenaConfiguration.Utils import setupLoggingLevels

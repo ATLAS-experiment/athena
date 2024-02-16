@@ -9,9 +9,9 @@ from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
 from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
 from TRT_PAI_Process.TRT_PAI_ProcessConfig import TRT_PAI_Process_XeToolCfg, TRT_PAI_Process_ArToolCfg, TRT_PAI_Process_KrToolCfg
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-from Digitization.PileUpToolsConfig import PileUpToolsCfg
-from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
-from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
+from DigitizationConfig.PileUpToolsConfig import PileUpToolsCfg
+from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 
 
 # The earliest and last bunch crossing times for which interactions will be sent

@@ -10,7 +10,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
-from Digitization.DigitizationParametersConfig import writeDigitizationParameters
+from DigitizationConfig.DigitizationParametersConfig import writeDigitizationParameters
 from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck
 from OverlayConfiguration.OverlayTestHelpers import overlayTestFlags, postprocessAndLockFlags, printAndRun, CommonTestArgumentParser
 

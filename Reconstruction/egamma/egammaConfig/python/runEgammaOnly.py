@@ -55,7 +55,7 @@ def _run(args):
     acc = RecoSteering(flags)
 
     # Special message service configuration
-    from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
+    from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
 
     acc.merge(DigitizationMessageSvcCfg(flags))
 

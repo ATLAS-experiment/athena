@@ -822,7 +822,7 @@ def bookTileSamplingFractionCondAlg(source = 'FILE'):
 
         G4Version = ""
         try:
-            from Digitization.DigitizationFlags import jobproperties
+            from DigitizationConfig.DigitizationFlags import jobproperties
             G4Version = jobproperties.Digitization.SimG4VersionUsed()
             if not G4Version or G4Version == 'not_specified':
                 from PyUtils.MetaReaderPeeker import metadata

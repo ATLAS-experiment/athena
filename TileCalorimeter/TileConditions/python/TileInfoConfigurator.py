@@ -103,7 +103,7 @@ class _TileInfoConfigurator( TileInfoLoader ):
         from PyUtils.moduleExists import moduleExists
         doXingByXingPileUp = False
         if moduleExists ('Digitization'):
-            from Digitization.DigitizationFlags import digitizationFlags
+            from DigitizationConfig.DigitizationFlags import digitizationFlags
             doXingByXingPileUp = digitizationFlags.doXingByXingPileUp()
         if not doXingByXingPileUp:
             self.msg.info("Changing default TileCondToolTiming configuration to COOL source")
