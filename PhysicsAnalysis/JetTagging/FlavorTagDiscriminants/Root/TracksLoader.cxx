@@ -420,10 +420,10 @@ namespace FlavorTagDiscriminants {
         auto track_data_deps = trackFilter(cfg.selection, options).second;
         track_data_deps.merge(flipFilter(options).second);
         track_data_deps.merge(m_customSequenceGetter.getDependencies());
-        deps.trackInputs.merge(track_data_deps);
-        deps.bTagInputs.insert(options.track_link_name);
-        used_remap = m_customSequenceGetter.getUsedRemap();
-        name = cfg.name;
+        m_deps.trackInputs.merge(track_data_deps);
+        m_deps.bTagInputs.insert(options.track_link_name);
+        m_used_remap = m_customSequenceGetter.getUsedRemap();
+        m_name = cfg.name;
     }
 
     std::vector<const xAOD::TrackParticle*> TracksLoader::getTracksFromJet(
@@ -481,13 +481,13 @@ namespace FlavorTagDiscriminants {
     };
 
     FTagDataDependencyNames TracksLoader::getDependencies() const {
-        return deps;
+        return m_deps;
     }
     std::set<std::string> TracksLoader::getUsedRemap() const {
-        return used_remap;
+        return m_used_remap;
     }
 
     std::string TracksLoader::getName() const {
-        return name;
+        return m_name;
     }
 }

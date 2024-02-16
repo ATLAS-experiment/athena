@@ -63,11 +63,13 @@ namespace FlavorTagDiscriminants {
         m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
       }
       else {
-        throw std::runtime_error("Unknown constituent type. Only tracks and neutrals are supported.");
+        throw std::runtime_error(
+          "Unknown constituent type: " + config.name + ". Only tracks and neutrals are supported."
+          );
       }
     }
 
-    if ((n_track_sequences > 1) && m_decorate_tracks){
+    if ((n_track_sequences != 1) && m_decorate_tracks){
       throw std::runtime_error("Only one track sequence is supported when decorating tracks.");
     }
     
@@ -151,6 +153,7 @@ namespace FlavorTagDiscriminants {
     for (auto loader : m_constituentsLoaders){
       auto [sequence_name, sequence_data, sequence_iparticles] = loader->getData(jet, btag);
       gnn_input.insert({sequence_name, sequence_data});
+      // collect tracks for decoration
       if (sequence_name.find("track") != std::string::npos){
         for (auto iparticle : sequence_iparticles){
           input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(iparticle));

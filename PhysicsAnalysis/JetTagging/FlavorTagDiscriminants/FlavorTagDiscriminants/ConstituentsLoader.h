@@ -1,5 +1,9 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+  This is a virtual class to represent loader of any type of constituents.
+  It defines the interface for loading constituents from a jet 
+  and extracting their features for the NN evaluation.
 */
 
 #ifndef CONTITUENTS_LOADER_H
@@ -56,7 +60,7 @@ namespace FlavorTagDiscriminants {
     class ConstituentsLoader {
         public:
             ConstituentsLoader(FTagConstituentsSequenceConfig cfg) {
-              config = cfg;
+              m_config = cfg;
             };
             virtual ~ConstituentsLoader() {
             };
@@ -68,10 +72,10 @@ namespace FlavorTagDiscriminants {
             virtual std::string getName() const = 0;
 
         protected:
-            FTagDataDependencyNames deps;
-            FTagConstituentsSequenceConfig config;
-            std::set<std::string> used_remap;
-            std::string name;
+            FTagDataDependencyNames m_deps;
+            FTagConstituentsSequenceConfig m_config;
+            std::set<std::string> m_used_remap;
+            std::string m_name;
     };
 }
 

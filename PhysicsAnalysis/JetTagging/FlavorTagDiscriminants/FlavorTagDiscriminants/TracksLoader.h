@@ -1,5 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+  This is a subclass of ConstituentsLoader. It is used to load the tracks from the jet 
+  and extract their features for the NN evaluation.
 */
 
 #ifndef TRACKS_LOADER_H
@@ -8,7 +11,6 @@
 // local includes
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
-// #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 
 #include "FlavorTagDiscriminants/ConstituentsLoader.h"
 #include "FlavorTagDiscriminants/DataPrepUtilities.h"

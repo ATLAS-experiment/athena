@@ -1,5 +1,9 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+  This is a subclass of ConstituentsLoader. It is used to load the general IParticles from the jet 
+  and extract their features for the NN evaluation. For now it supports only neutral flow objects.
+  Charged flow objects have experimental support and are not recommended for use.
 */
 
 #ifndef IPARTICLES_LOADER_H

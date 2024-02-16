@@ -36,6 +36,7 @@ namespace {
       else{
         input.name = varname;
       }
+      input.flip_sign = false;
       input.type = str::match_first(type_regexes, input.name,
                                 "iparticle type matching");
       config.inputs.push_back(input);
@@ -117,8 +118,8 @@ namespace FlavorTagDiscriminants {
         } else {
             m_isCharged = false;
         }
-        used_remap = m_customSequenceGetter.getUsedRemap();
-        name = cfg.name;
+        m_used_remap = m_customSequenceGetter.getUsedRemap();
+        m_name = cfg.name;
     }
 
     std::vector<const xAOD::IParticle*> IParticlesLoader::getIParticlesFromJet(
@@ -161,13 +162,13 @@ namespace FlavorTagDiscriminants {
     }
 
     FTagDataDependencyNames IParticlesLoader::getDependencies() const {
-        return deps;
+        return m_deps;
     }
     std::set<std::string> IParticlesLoader::getUsedRemap() const {
-        return used_remap;
+        return m_used_remap;
     }
     std::string IParticlesLoader::getName() const {
-        return name;
+        return m_name;
     }
 
 }
