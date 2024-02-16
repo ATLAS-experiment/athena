@@ -30,8 +30,8 @@ hlt.concurrent_events = 4
 hlt.input = 'data_cos'
 hlt.max_events = 2000
 hlt.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
-             'Trigger.doLVL1=True',
-             'Beam.Type=BeamType.Cosmics']
+             'Beam.Type=BeamType.Cosmics',
+             'Trigger.forceEnableAllChains=True']
 hlt.args = '-o output'
 
 # Extract the physics_Main stream out of the BS file with many streams
@@ -58,8 +58,8 @@ tzreco.explicit_input = True
 tzreco.max_events = 2000
 tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
 tzreco.args += ' --outputAODFile=AOD.pool.root'
-tzreco.args += ' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\'' # RecExConfig AutoConfiguration use outdated default
-tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\''     # RecExConfig AutoConfiguration use outdated default
+tzreco.args += ' --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
+tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2023-02\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 tzreco.args += ' --CA'
 
