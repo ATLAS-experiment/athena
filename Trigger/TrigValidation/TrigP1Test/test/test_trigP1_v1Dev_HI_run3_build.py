@@ -4,7 +4,7 @@
 # art-description: Test of HI data 2023 workflow, runs athenaHLT with HI menu followed by filtering of HP stream and offline reco
 # art-type: build
 # art-include: master/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file

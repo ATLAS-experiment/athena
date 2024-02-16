@@ -4,7 +4,7 @@
 # art-description: athenaHLT test of the Dev_pp_run3_v1 menu, with forks=2, threads=4, concurrent_events=4
 # art-type: build                                                                  
 # art-include: main/Athena
-# art-include: 23.0/Athena                                                       
+# art-include: 24.0/Athena                                                       
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

@@ -4,7 +4,7 @@
 # art-description: Trigger RDO->RDO_TRIG athena test with L1 simulation but without any HLT chains
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 

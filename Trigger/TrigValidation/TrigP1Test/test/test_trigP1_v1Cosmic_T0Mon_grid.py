@@ -5,7 +5,7 @@
 # art-type: grid
 # art-athena-mt: 4
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*

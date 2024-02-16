@@ -4,7 +4,7 @@
 # art-description: Trigger athenaHLT test of DB upload (inlcuding duplicate), download and running.
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
