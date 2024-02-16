@@ -61,7 +61,7 @@ if [ ${ca} -eq 0 ]
 then
     # Reconstruction
     Reco_tf.py \
-               --CA "all:True" "RDOtoRDOTrigger:False" \
+               --CA \
                --inputRDOFile ${RDO_File} \
                --outputAODFile ${AOD_File} \
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \
@@ -82,7 +82,7 @@ then
                     --maxEvents '-1' \
                     --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
                     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
-		    --asetup 'Athena,23.0.53' \
+		            --asetup 'Athena,23.0.53' \
                     --ignoreErrors True \
                     --validationFlags 'doInDet' \
                     --valid 'True'
