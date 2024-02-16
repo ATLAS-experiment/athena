@@ -4,7 +4,7 @@
 # art-description: CalibPeb test where chains are executed in parallel doing concurrent ROB requests
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*

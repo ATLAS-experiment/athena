@@ -4,7 +4,7 @@
 # art-description: Check that the menu and job configuration don't depend on input file
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 

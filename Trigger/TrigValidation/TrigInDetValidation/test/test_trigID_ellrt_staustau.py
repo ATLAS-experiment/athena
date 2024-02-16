@@ -4,7 +4,7 @@
 # art-description: art job for ellrt_staustau
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.516757.MGPy8EG_A14NNPDF23LO_SelSelLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14844_tid34200279_00
 # art-input-nfiles: 4
 # art-athena-mt: 8

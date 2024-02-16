@@ -4,7 +4,7 @@
 # art-description: art job for bjet_pu55
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200060_00
 # art-input-nfiles: 2
 # art-athena-mt: 4

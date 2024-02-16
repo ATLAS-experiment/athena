@@ -4,7 +4,7 @@
 # art-description: art job for tau_ztautau_pu46
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200039_00
 # art-input-nfiles: 3
 # art-athena-mt: 8
