@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  */
 #ifndef TRACKTOGENPARTICLEASSOCIATION_H
 #define TRACKTOGENPARTICLEASSOCIATION_H
 #include "boost/container/small_vector.hpp"
@@ -13,7 +16,13 @@ namespace ActsTrk
    constexpr unsigned int NHitCounter = static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::sTgcStripType)+1u;
    constexpr unsigned int NTruthParticlesPerTrack = 5;  // a tiny fraction of measurements will have more than
                                                         // 6 associated GenParticles
-   using HitCounterArray = std::array<uint8_t,  NHitCounter>;
+
+   // Wrapper around std::array to ensure that by default elements are initialised to zero
+   class  HitCounterArray : public  std::array<uint8_t,  NHitCounter>
+   {
+   public:
+      HitCounterArray() : std::array<uint8_t,  NHitCounter>{} {}
+   };
    using TruthParticleHitCountVector = boost::container::small_vector<std::pair<const xAOD::TruthParticle *,
                                                                                 HitCounterArray >, NTruthParticlesPerTrack>;
    using TrackToTruthParticleAssociation = std::vector<TruthParticleHitCountVector> ;
