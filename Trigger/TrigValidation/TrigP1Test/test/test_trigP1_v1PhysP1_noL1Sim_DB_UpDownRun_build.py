@@ -35,13 +35,23 @@ moveJSON.prmon = False
 
 
 # Common DB commands
+# Setup
+# - setup TDAQ release to access TriggerDB scripts
+# - copy authentication files as can't be read on afs/eos, set TRIGGER_DB_ART to use these files
+# - copy TNS lookup file as not in ART container
 trigDBsetup =  '&& source /cvmfs/atlas.cern.ch/repo/sw/tdaq/tdaq/prod/installed/setup.sh \
   && export TRIGGER_DB_ART=1 \
   && export EOS_MGM_URL=root://eosuser.cern.ch \
   && xrdcp root://eosuser.cern.ch//eos/user/t/trigcomm/.dbauth/run3/write/dblookup.xml . \
-  && xrdcp root://eosuser.cern.ch//eos/user/t/trigcomm/.dbauth/run3/write/authentication.xml . '
-trigDBfinalise = '&& rm authentication.xml && rm dblookup.xml \
-  && grep smk uploadRecord*.json | awk \'{print "SMK=" substr($2, 1, length($2)-1)}\' > exportMenuKeys.sh \
+  && xrdcp root://eosuser.cern.ch//eos/user/t/trigcomm/.dbauth/run3/write/authentication.xml . \
+  && export TNS_ADMIN="." \
+  && xrdcp root://eosuser.cern.ch//eos/project/o/oracle/public/admin/tnsnames.ora .'
+# Cleanup
+# - remove copied files
+trigDBcleanup = '&& rm authentication.xml && rm dblookup.xml && rm tnsnames.ora'
+# Export
+# - create file containing keys to be used to set the env in later steps
+trigDBexport = '&& grep smk uploadRecord*.json | awk \'{print "SMK=" substr($2, 1, length($2)-1)}\' > exportMenuKeys.sh \
   && grep l1PSK uploadRecord*.json | awk \'{print "L1PSK=" substr($2, 1, length($2)-1)}\' >> exportMenuKeys.sh \
   && grep hltPSK uploadRecord*.json | awk \'{print "HLTPSK=" substr($2, 1, length($2)-1)}\' >> exportMenuKeys.sh'
 
@@ -53,7 +63,8 @@ uploadDB.input = ''
 uploadDB.executable = '(cd filesForUpload'
 uploadDB.executable += trigDBsetup
 uploadDB.executable += '&& insertAll.py --dbalias TRIGGERDBART --comment "ART test SMK upload `date +%F` release ${AtlasVersion} ${AtlasBuildStamp}" --directory ./ '
-uploadDB.executable += trigDBfinalise
+uploadDB.executable += trigDBcleanup
+uploadDB.executable += trigDBexport
 uploadDB.executable += '&& cd ..)'
 uploadDB.prmon = False
 
@@ -66,9 +77,9 @@ downloadDB.executable = '(mkdir filesDownloaded && cd filesDownloaded'
 downloadDB.executable += trigDBsetup
 downloadDB.executable += '&& source ../filesForUpload/exportMenuKeys.sh \
   && extractMenu.py --dbalias TRIGGERDBART --smk $SMK \
-  && extractPrescales.py --dbalias TRIGGERDBART --l1psk $L1PSK --hltpsk $HLTPSK \
-  && rm authentication.xml && rm dblookup.xml \
-  && cd .. \
+  && extractPrescales.py --dbalias TRIGGERDBART --l1psk $L1PSK --hltpsk $HLTPSK'
+downloadDB.executable += trigDBcleanup
+downloadDB.executable += '&& cd .. \
   && diff -q -s filesDownloaded/L1Prescale_${L1PSK}.json filesForUpload/L1PrescalesSet_*.json \
   && diff -q -s filesDownloaded/HLTPrescale_${HLTPSK}.json filesForUpload/HLTPrescalesSet_*.json \
   && diff -q -s filesDownloaded/SMK_${SMK}/L1Menu_${SMK}.json filesForUpload/L1Menu_*.json \
@@ -111,7 +122,8 @@ uploadDBdupe.input = ''
 uploadDBdupe.executable = '(cd filesDuplicate'
 uploadDBdupe.executable += trigDBsetup
 uploadDBdupe.executable += '&& insertAll.py --dbalias TRIGGERDBART --comment "ART test duplicate SMK upload `date +%F` release ${AtlasVersion} ${AtlasBuildStamp}" --directory ./'
-uploadDBdupe.executable += trigDBfinalise
+uploadDBdupe.executable += trigDBcleanup
+uploadDBdupe.executable += trigDBexport
 uploadDBdupe.executable += '&& cd .. \
   && diff -q -s filesDuplicate/exportMenuKeys.sh filesForUpload/exportMenuKeys.sh)'
 uploadDBdupe.prmon = False
