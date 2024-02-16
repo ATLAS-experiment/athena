@@ -207,6 +207,17 @@ def pebInfoWriterToolCfg(flags, name, eventBuildType):
             PhiWidth = 0.6,
             MaxRoIs = 3 )
 
+    elif 'EgammaPEBTLA' == eventBuildType:
+        acc = RoIPEBInfoWriterToolCfg(
+            flags, name,
+            # Add subdetectors within a ROI for PEB
+            regSelDets = ['Pixel', 'SCT', 'TRT', 'TTEM', 'TTHEC', 'FCALEM', 'FCALHAD', 'TILE'],
+            # DS HLT result
+            ROBs = [SourceIdentifier(SubDetector.TDAQ_HLT,
+                                     DataScoutingInfo.getDataScoutingResultID(eventBuildType))],
+            EtaWidth = 0.4, # half-width (the RoI is between etaJet-EtaWidth and etaJet+EtaWidth)
+            PhiWidth = 0.4,
+            MaxRoIs = 6 )
     elif 'FTagPEBTLA' == eventBuildType:
         acc = RoIPEBInfoWriterToolCfg(
             flags, name,

@@ -159,25 +159,25 @@ HLT_2e5_lhvloose_bBeeM6000_L1eEM26M:
   eventCount: 0
   stepFeatures:
     0: 1
+HLT_2g10_loose_EgammaPEBTLA_L12DR15-M70-2eEM9L:
+  eventCount: 0
 HLT_2g10_loose_L1eEM9_mu20_L1MU14FCH:
   eventCount: 0
 HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH:
-  eventCount: 0
-HLT_2g10_loose_PhysicsTLA_L12DR15-M70-2eEM9L:
   eventCount: 0
 HLT_2g10_loose_mu20_L1MU14FCH:
   eventCount: 0
 HLT_2g10_loose_mu23_L1MU18VFCH:
   eventCount: 0
-HLT_2g10_medium_PhysicsTLA_L12DR15-M70-2eEM9L:
+HLT_2g10_medium_EgammaPEBTLA_L12DR15-M70-2eEM9L:
   eventCount: 0
-HLT_2g13_loose_PhysicsTLA_L113DR25-25M70-2eEM12L:
+HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L:
   eventCount: 0
-HLT_2g13_loose_PhysicsTLA_L12DR15-0M30-2eEM12L:
+HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L:
   eventCount: 0
-HLT_2g13_loose_PhysicsTLA_L12DR15-M70-2eEM12L:
+HLT_2g13_loose_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
-HLT_2g13_medium_PhysicsTLA_L12DR15-M70-2eEM12L:
+HLT_2g13_medium_EgammaPEBTLA_L12DR15-M70-2eEM12L:
   eventCount: 0
 HLT_2g15_loose_25dphiAA_invmAA80_L12eEM9:
   eventCount: 0
@@ -2781,9 +2781,9 @@ HLT_g12_loose_LArPEBHLT_L1EM10VH:
     4: 4
 HLT_g12_tight_j30a_j25a_pf_ftf_xe35_cell_xe40_pfopufit_L1eEM22M_jMJJ-300:
   eventCount: 0
-HLT_g13_loose_g10_loose_PhysicsTLA_L113DR25-25M70-eEM12LeEM9L:
+HLT_g13_loose_g10_loose_EgammaPEBTLA_L113DR25-25M70-eEM12LeEM9L:
   eventCount: 0
-HLT_g13_loose_g10_loose_PhysicsTLA_L12DR15-0M30-eEM12LeEM9L:
+HLT_g13_loose_g10_loose_EgammaPEBTLA_L12DR15-0M30-eEM12LeEM9L:
   eventCount: 0
 HLT_g140_loose_L1eEM26M:
   eventCount: 0
@@ -5079,6 +5079,32 @@ HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1eEM28M:
     0: 1
   stepFeatures:
     0: 1
+HLT_g7_loose_EgammaPEBTLA_L1eEM5:
+  eventCount: 6
+  stepCounts:
+    0: 25
+    1: 22
+    2: 19
+    3: 6
+    4: 6
+  stepFeatures:
+    0: 57
+    1: 40
+    2: 35
+    3: 6
+    4: 6
+HLT_g7_loose_L1eEM5:
+  eventCount: 6
+  stepCounts:
+    0: 25
+    1: 22
+    2: 19
+    3: 6
+  stepFeatures:
+    0: 57
+    1: 40
+    2: 35
+    3: 6
 HLT_g80_loose_L1eEM26M:
   eventCount: 0
 HLT_g80_loose_L1eEM28M:

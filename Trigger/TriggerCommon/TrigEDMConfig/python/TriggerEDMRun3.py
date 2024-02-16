@@ -337,8 +337,8 @@ TriggerHLTListRun3 = [
     ('xAOD::MuonRoIContainer#LVL1MuonRoIsBCp2',                      'BS ESD AODFULL', 'L1'),
     ('xAOD::MuonRoIAuxContainer#LVL1MuonRoIsBCp2Aux.',               'BS ESD AODFULL', 'L1'),
 
-    ('xAOD::eFexEMRoIContainer#L1_eEMRoI',                                          'BS ESD AODFULL PhysicsTLA', 'L1'),
-    ('xAOD::eFexEMRoIAuxContainer#L1_eEMRoIAux.thresholdPatterns',                  'BS ESD AODFULL PhysicsTLA', 'L1'),
+    ('xAOD::eFexEMRoIContainer#L1_eEMRoI',                                          'BS ESD AODFULL PhysicsTLA EgammaPEBTLA', 'L1'),
+    ('xAOD::eFexEMRoIAuxContainer#L1_eEMRoIAux.thresholdPatterns',                  'BS ESD AODFULL PhysicsTLA EgammaPEBTLA', 'L1'),
     ('xAOD::eFexTauRoIContainer#L1_eTauRoI',                                        'BS ESD AODFULL', 'L1'),
     ('xAOD::eFexTauRoIAuxContainer#L1_eTauRoIAux.thresholdPatterns',                'BS ESD AODFULL', 'L1'),
     ('xAOD::eFexTauRoIContainer#L1_cTauRoI',                                        'BS ESD AODFULL', 'L1'),
@@ -454,8 +454,8 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Electron',               'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionCaloElectronViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_ElectronAux.',    'BS ESD AODFULL AODSLIM', 'Egamma'),
 
-    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Photon',               'BS PhysicsTLA ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionCaloPhotonViews')]),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.',    'BS PhysicsTLA ESD AODFULL AODSLIM', 'Egamma'),
+    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Photon',               'BS PhysicsTLA EgammaPEBTLA ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionCaloPhotonViews')]),
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.',    'BS PhysicsTLA EgammaPEBTLA ESD AODFULL AODSLIM', 'Egamma'),
 
     # these two corresponds to the output of the precisionHICalo step
     ('xAOD::CaloClusterContainer#HLT_HICaloEMClusters',               'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionHICaloElectronViews'),InViews('precisionHICaloPhotonViews')]),
@@ -827,6 +827,7 @@ TriggerHLTListRun3 = [
     # TLA jets + PEB jets
     ('TrigRoiDescriptorCollection#HLT_Roi_DarkJetPEBTLA',             'BS ESD DarkJetPEBTLA',  'Jet'),
     ('TrigRoiDescriptorCollection#HLT_Roi_FTagPEBTLA',             'BS ESD FTagPEBTLA',  'Jet'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_EgammaPEBTLA',             'BS ESD EgammaPEBTLA',  'Jet'),
 
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',                                 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet' ),
     ('xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',         'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'    ),
@@ -839,8 +840,8 @@ TriggerHLTListRun3 = [
 
 
     # TLA Photons
-    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA DarkJetPEBTLA ESD', 'Egamma'),
-    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA DarkJetPEBTLA ESD', 'Egamma'),
+    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA DarkJetPEBTLA EgammaPEBTLA ESD', 'Egamma'),
+    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA DarkJetPEBTLA EgammaPEBTLA ESD', 'Egamma'),
 
     # TLA Muons
     ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
