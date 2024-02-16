@@ -24,6 +24,7 @@ _DataScoutingIdentifiers = {
     'PhysicsTLA': 5,
     'DarkJetPEBTLA': 6,
     'FTagPEBTLA' : 7,
+    'EgammaPEBTLA' : 8,
 }
 
 # Each stream should correspond to exactly one event building type
@@ -32,6 +33,7 @@ _DataScoutingStreams = {
     'physics_TLA': 'PhysicsTLA',
     'physics_DarkJetPEBTLA': 'DarkJetPEBTLA',
     'physics_FTagPEBTLA': 'FTagPEBTLA',
+    'physics_EgammaPEBTLA': 'EgammaPEBTLA',
 }
 
 # Truncation thresholds (in bytes) for each HLT result type
@@ -41,6 +43,7 @@ TruncationThresholds = {
     5: 1*(1024**2),  # PhysicsTLA: 1 MB
     6: 1*(1024**2),  # DarkJetPEBTLA: 1 MB
     7: 1*(1024**2),  # FTagPEBTLA 1 MB
+    8: 1*(1024**2),  # EgammaPEBTLA 1 MB
     
 }
 

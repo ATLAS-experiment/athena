@@ -38,6 +38,7 @@ _PartialEventBuildingIdentifiers = {
     'PhysicsTLA': False,
     'DarkJetPEBTLA' : True,
     'FTagPEBTLA' : True,
+    'EgammaPEBTLA' : True,
 }
 
 
