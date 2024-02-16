@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileRecUtils/share/TileCellBuilder_test.py
 # Author: sss
@@ -11,40 +11,9 @@
 import ROOT
 ROOT.TH1F
 
-from AthenaCommon.DetFlags      import DetFlags
-DetFlags.detdescr.Tile_setOn()
-DetFlags.detdescr.LAr_setOn()
-
-RunNumber = 284500
-
-import sys
-import string
-import ROOT
-import math
-from AtlasGeoModel import SetGeometryVersion
-from AtlasGeoModel import GeoModelInit
-from AtlasGeoModel import SetupRecoGeometry
-include('TileConditions/TileConditions_jobOptions.py')
-
-# Disable Geant version checking.
-from AthenaCommon.AlgSequence import AthSequencer
-condSeq = AthSequencer("AthCondSeq")
-condSeq.TileSamplingFractionCondAlg.G4Version = -1
-
-from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
-ServiceMgr += GeoModelSvc()
-theApp.CreateSvc += [ "GeoModelSvc"]
-from AtlasGeoModel import TileGM
-from AtlasGeoModel import LArGM   #LAr needed to get MBTS DD.
-
-from IOVDbSvc.IOVDbSvcConf import IOVDbSvc
-IOVDbSvc().GlobalTag = 'OFLCOND-RUN12-SDR-35'
-
-from AthenaCommon.AlgSequence import AlgSequence
-topSequence = AlgSequence()
-
-theApp.EvtMax=12
-
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from TileConfiguration.TileConfigFlags import TileRunType
 
 
 hits_0 = [
@@ -399,7 +368,7 @@ class PrepareDataAlg (Alg):
             coll.setFragMemoryPar(mask)
 
             for addr, data in colldata:
-                if type(addr) == type(()):
+                if isinstance(addr, tuple):
                     adc_id = idHelper.adc_id (*addr)
                     chan = ROOT.TileRawChannel (adc_id, *data)
                 else:
@@ -568,173 +537,206 @@ BAD_HIGH = [   0, 1<<1,    0] # AdcDead
 BAD_BOTH = [   0,    0, 1<<1] # NoHV
 BADTIMING = [  0,    0, 1<<9] # BadTiming
 
-# chans: [(sec, side, mod, tow, samp, pmt), [DATA0, DATA1, DATA2]]
-# We'd like to specify cells using offline addressing, but the bad cell
-# file uses online addressing.  We can convert, but that requires
-# idhelpers, etc, that aren't available until after initialization.
-# So we pass in both representations; in finalize(), we'll check
-# that they match and print out the correct bad cell lines
-# if they do not.
-def make_tileBadChannels (name, chans = [], lines = ''):
-    global ToolSvc
-    from TileConditions.TileCondProxyConf import getTileCondProxy
-    from TileConditions.TileConditionsConf import TileBadChannelsCondAlg
+def TileBadChannelsCfg(flags, badChannels, chans=[], lines=''):
 
-    # File data line format:
-    #  frag channel dummy adcStatus0 adcStatus1 chnStatus
-    #  chnStatus + adcStatusN are given to TileBchDecoder.
-    #  Offline problem masks:
-    #         chn                         adc
-    #   0     GeneralMaskChannel          GeneralMaskAdc
-    #   1     NoPmt                       AdcDead
-    #   2     NoHV                        StuckBit
-    #   3     WrongHV                     DataCorruption
-    #   4     NoLaser                     VeryLargeHfNoise
-    #   5     BadLaser                    NoData
-    #   6     NoCesium                    WrongDspConfig
-    #   7     BadCesium                   LargeHfNoise
-    #   8     NoTiming                    CorrelatedNoise
-    #   9     BadTiming                   LargeLfNoise
-    #  10     TrigGeneralMask             NoCis
-    #  11     TrigNoGain                  BadCis
-    #  12     TrigHalfGain                SevereStuckBit
-    #  13     TrigNoisy                   SevereDataCorruption
-    #  14     Emergency                   IgnoredByDQV
-    #  15     HVReadoutPb
-    #  16     BrokenClearFibre
-    #  17     IgnoreCs
-    #  18     UnstableCs
-    #
-    # 
-    #  Online problem masks:
-    #         chn                         adc
-    #   0     IgnoredInDsp                OnlineGeneralMaskAdc
-    #   1     IgnoredInHlt
-    #   2     DisableForL1
-    #   3     TrigGeneralMask
-    #   4     TrigNoGain
-    #   5     TrigHalfGain
-    #   6     TrigNoisy
-    #   7     OnlineBadTiming
+    """
+
+    chans: [(sec, side, mod, tow, samp, pmt), [DATA0, DATA1, DATA2]]
+    We'd like to specify cells using offline addressing, but the bad cell
+    file uses online addressing.  We can convert, but that requires
+    idhelpers, etc, that aren't available until after initialization.
+    So we pass in both representations; in finalize(), we'll check
+    that they match and print out the correct bad cell lines
+    if they do not.
+
+      File data line format:
+       frag channel dummy adcStatus0 adcStatus1 chnStatus
+       chnStatus + adcStatusN are given to TileBchDecoder.
+       Offline problem masks:
+              chn                         adc
+        0     GeneralMaskChannel          GeneralMaskAdc
+        1     NoPmt                       AdcDead
+        2     NoHV                        StuckBit
+        3     WrongHV                     DataCorruption
+        4     NoLaser                     VeryLargeHfNoise
+        5     BadLaser                    NoData
+        6     NoCesium                    WrongDspConfig
+        7     BadCesium                   LargeHfNoise
+        8     NoTiming                    CorrelatedNoise
+        9     BadTiming                   LargeLfNoise
+       10     TrigGeneralMask             NoCis
+       11     TrigNoGain                  BadCis
+       12     TrigHalfGain                SevereStuckBit
+       13     TrigNoisy                   SevereDataCorruption
+       14     Emergency                   IgnoredByDQV
+       15     HVReadoutPb
+       16     BrokenClearFibre
+       17     IgnoreCs
+       18     UnstableCs
+
+
+       Online problem masks:
+              chn                         adc
+        0     IgnoredInDsp                OnlineGeneralMaskAdc
+        1     IgnoredInHlt
+        2     DisableForL1
+        3     TrigGeneralMask
+        4     TrigNoGain
+        5     TrigHalfGain
+        6     TrigNoisy
+        7     OnlineBadTiming
+    """
 
     if not chans:
         TileBchList = 'TileNoBad.oflBch'
     else:
-        TileBchList = name + '.bch'
+        TileBchList = badChannels + '.bch'
         f = open (TileBchList, 'w')
         print ('OBJVERSION 0', file=f)
         print ('0x000	0	0	0 0 0', file=f)
         f.write (lines)
         f.close()
-        baddefs[name] = (chans, lines)
-
-    from AthenaCommon.AlgSequence import AthSequencer
-    condSeq = AthSequencer("AthCondSeq")
-
-    badChannels = name + 'CondData'
-    condAlg = TileBadChannelsCondAlg (name + 'Cond',
-                                      TileBadChannels = badChannels,
-                                      OflBchProxy = getTileCondProxy ('FILE', 'Bch', TileBchList, name + '_ofl'),
-                                      OnlBchProxy = getTileCondProxy ('FILE', 'Bch', 'TileNoBad.oflBch', name + '_onl'),
-                                      )
-    condSeq += condAlg
-
-    return badChannels
+        baddefs[badChannels] = (chans, lines)
 
 
-bc1 = make_tileBadChannels ('tilecellbuilder_bc1')
+    TileCondProxyFileBch = CompFactory.getComp("TileCondProxyFile<TileCalibDrawerBch>")
+    onlineBadChannelsProxy = TileCondProxyFileBch('TileCondProxyFile_OnlBch', Source=TileBchList)
+    offlineBadChannelsProxy = TileCondProxyFileBch('TileCondProxyFile_OflBch', Source='TileNoBad.oflBch')
 
-bc2 = make_tileBadChannels ('tilecellbuilder_bc2',
-                            [[(3, 1, 18,  8, 2, 0), BAD_HIGH],
-                             [(2, 1, 18,  9, 1, 0), BAD_LOW],
-                             [(2, 1, 18, 12, 0, 1), BAD_BOTH],
-                             [(2, 1, 18, 11, 0, 0), BADTIMING],
-                             [(4, 1,  0,  1, 0, 0), BAD_BOTH],
-                             [(4, 1,  6,  1, 0, 0), BADTIMING],
-                            ],
-                            """
+    TileBadChannelsCondAlg = CompFactory.TileBadChannelsCondAlg
+    badChannelsCondAlg = TileBadChannelsCondAlg(name=f'{badChannels}_CondAlg',
+                                                OnlBchProxy=onlineBadChannelsProxy,
+                                                OflBchProxy=offlineBadChannelsProxy,
+                                                TileBadChannels=badChannels)
+
+    acc = ComponentAccumulator()
+    acc.addCondAlgo(badChannelsCondAlg)
+
+    return acc
+
+
+badChannelsLines = """
 0x312 2 0 0 2 0
 0x312 4 0 2 0 0
 0x312 11 0 0 0 2
 0x312 6 0 0 0 512
 0x307 12 0 0 0 2
 0x335 12 0 0 0 512
-""")
-
-
-
-from TileRecUtils.TileRecUtilsConf import TileCellBuilder, \
-    TileRawChannelNoiseFilter, TileDQstatusAlg
-noisefilter = TileRawChannelNoiseFilter ('noisefilter')
+"""
 
 def maketool (name, badChannels, **kw):
-    return TileCellBuilder (name, TileBadChannels = badChannels, **kw)
-ToolSvc += maketool ('tool1', bc1)
-ToolSvc += maketool ('tool2', bc2)
-ToolSvc += maketool ('tool5', bc1, fakeCrackCells = True)
-ToolSvc += maketool ('tool6', bc1, EThreshold = 300)
-ToolSvc += maketool ('tool7', bc1, correctAmplitude = True, correctTime = True)
-ToolSvc += maketool ('tool8', bc1, NoiseFilterTools = [noisefilter])
-ToolSvc += maketool ('tool9', bc1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp')
-ToolSvc += maketool ('tool10', bc1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp',
-                     correctTime = True, correctAmplitude = True)
-ToolSvc += maketool ('tool11', bc1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp',
-                     NoiseFilterTools = [noisefilter])
-
-from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg
-topSequence += xAODMaker__EventInfoCnvAlg ()
-
-prepalg1 = PrepareDataAlg ('prepalg1')
-topSequence += prepalg1
-
-dqstat1 = TileDQstatusAlg ('dqstat1', TileRawChannelContainer = 'TRCDQ')
-topSequence += dqstat1
-
-testalg1 = TestAlg ('testalg1', prepalg1)
-topSequence += testalg1
+    TileCellBuilder = CompFactory.TileCellBuilder
+    return TileCellBuilder(name, TileBadChannels=badChannels, **kw)
 
 
+def TileRawChannelBuilderTestCfg(flags):
 
-def addr(x):
-    cabling=ROOT.TileCablingService.getInstance()
-    hwid = ROOT.HWIdentifier(x)
-    adcid=cabling.h2s_adc_id(hwid)
-    idHelper  = testalg1.detStore['CaloCell_ID'].tile_idHelper()
-    return (idHelper.section(adcid),
-            idHelper.side(adcid),
-            idHelper.module(adcid),
-            idHelper.tower(adcid),
-            idHelper.sampling(adcid),
-            idHelper.pmt(adcid),
-            idHelper.adc(adcid))
+    acc = ComponentAccumulator()
 
-def selindex (fname):
-    from array import array
-    cabling=ROOT.TileCablingService.getInstance()
-    lcoll = ''
-    for l in open(fname).readlines():
-        l = l.strip()
-        if l.find('Coll') == 0:
-            lcoll = l
-            continue
-        if l.find('[') < 0: continue
-        iid = int(l.split()[0])
-        hwid = ROOT.HWIdentifier(iid)
-        index=array('i',[0]) 
-        pmt=array('i',[0])
-        cabling.h2s_cell_id_index (hwid, index, pmt)
-        #if index[0] == -3:
-        #    print (iid, addr(iid), lcoll, l)
-        hwidHelper = testalg1.detStore['TileHWID']
-        ros = hwidHelper.ros (hwid)
-        chan = hwidHelper.channel (hwid)
-        if chan == 0 and ros > 2:
-            drawer = hwidHelper.drawer (hwid)
-            idx = (ros - 3) * 64 + drawer
-            print (iid, idx, addr(iid), lcoll, l)
-    return
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    acc.merge( TileGMCfg(flags) )
+
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    acc.merge(LArGMCfg(flags))
+
+    from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
+    acc.merge( TileCablingSvcCfg(flags) )
+
+    from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
+    acc.merge( TileInfoLoaderCfg(flags) )
+
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
+
+    from TileConditions.TileTimingConfig import TileTimingCondAlgCfg
+    acc.merge( TileTimingCondAlgCfg(flags) )
+
+    from TileConditions.TileSampleNoiseConfig import TileSampleNoiseCondAlgCfg
+    acc.merge( TileSampleNoiseCondAlgCfg(flags) )
+
+    bc1 = 'tilecellbuilder_bc1'
+    acc.merge( TileBadChannelsCfg(flags, bc1) )
+
+    bc2 = 'tilecellbuilder_bc2'
+    acc.merge( TileBadChannelsCfg(flags, bc2,
+                                  [[(3, 1, 18,  8, 2, 0), BAD_HIGH],
+                                   [(2, 1, 18,  9, 1, 0), BAD_LOW],
+                                   [(2, 1, 18, 12, 0, 1), BAD_BOTH],
+                                   [(2, 1, 18, 11, 0, 0), BADTIMING],
+                                   [(4, 1,  0,  1, 0, 0), BAD_BOTH],
+                                   [(4, 1,  6,  1, 0, 0), BADTIMING],
+                                   ], badChannelsLines) )
 
 
-# Suppress useless GeoModelSvc messages.
-from AthenaCommon import Constants
-GeoModelSvc().OutputLevel=Constants.WARNING
+    TileRawChannelNoiseFilter = CompFactory.TileRawChannelNoiseFilter
+    noisefilter = TileRawChannelNoiseFilter('noisefilter')
+
+    acc.addPublicTool( maketool ('tool1', bc1) )
+    acc.addPublicTool( maketool ('tool2', bc2) )
+    acc.addPublicTool( maketool ('tool5', bc1, fakeCrackCells=True) )
+    acc.addPublicTool( maketool ('tool6', bc1, EThreshold=300) )
+    acc.addPublicTool( maketool ('tool7', bc1, correctAmplitude=True, correctTime=True) )
+    acc.addPublicTool( maketool ('tool8', bc1, NoiseFilterTools=[noisefilter]) )
+    acc.addPublicTool( maketool ('tool9', bc1, TileDSPRawChannelContainer='TileRawChannelCntDsp') )
+    acc.addPublicTool( maketool ('tool10', bc1, TileDSPRawChannelContainer = 'TileRawChannelCntDsp',
+                                 correctTime=True, correctAmplitude=True) )
+    acc.addPublicTool( maketool ('tool11', bc1, TileDSPRawChannelContainer='TileRawChannelCntDsp',
+                                 NoiseFilterTools=[noisefilter]) )
+
+    acc.addEventAlgo( PrepareDataAlg('prepalg1') )
+    prepalg1 = acc.getEventAlgo('prepalg1')
+
+    from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
+    acc.merge(TileDQstatusAlgCfg(flags, name='dqstat1',
+                                 TileRawChannelContainer='TRCDQ',
+                                 TileDigitsContainer=''))
+
+
+    acc.addEventAlgo( TestAlg('testalg1', prepalg1) )
+
+    return acc
+
+
+
+if __name__ == "__main__":
+
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaCommon.Logging import log
+    from AthenaCommon.Constants import INFO
+
+    # Test setup
+    log.setLevel(INFO)
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.HITS_RUN2
+    flags.Input.ConditionsRunNumber = 1
+    flags.Input.OverrideRunNumber = True
+    flags.IOVDb.GlobalTag = 'OFLCOND-RUN12-SDR-35'
+    flags.Tile.RunType = TileRunType.PHY
+    flags.Exec.MaxEvents = 12
+    flags.fillFromArgs()
+
+    flags.lock()
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
+
+    # Configure reading POOL files
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg.merge(PoolReadCfg(flags))
+
+    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+    cfg.merge (EventInfoCnvAlgCfg (flags, disableBeamSpot = True))
+
+    cfg.merge( TileRawChannelBuilderTestCfg(flags) )
+
+    flags.dump()
+    cfg.printConfig(withDetails=True)
+    cfg.store( open('TileCellBuilderTest.pkl', 'wb') )
+
+    sc = cfg.run()
+
+    import sys
+    # Success should be 0
+    sys.exit(not sc.isSuccess())
