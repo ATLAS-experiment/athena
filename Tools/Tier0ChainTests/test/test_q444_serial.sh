@@ -6,6 +6,7 @@
 # art-include: 23.0/Athena
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
+# art-include: 24.0/Athena
 
 Reco_tf.py \
 --AMI=q444 \
