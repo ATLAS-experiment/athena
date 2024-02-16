@@ -22,10 +22,6 @@ GeoPixelSimpleStaveSupport::GeoPixelSimpleStaveSupport(InDetDD::PixelDetectorMan
     m_transform(GeoTrf::Transform3D::Identity())
 {
   m_physVol = GeoPixelSimpleStaveSupport::Build();
-  m_physVol->ref();
-}
-GeoPixelSimpleStaveSupport::~GeoPixelSimpleStaveSupport(){
-  m_physVol->unref();
 }
 
 GeoVPhysVol* GeoPixelSimpleStaveSupport::Build() {

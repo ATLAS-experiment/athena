@@ -122,14 +122,9 @@ GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* m_DDmgr,
     else {
       const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
       m_theLadder = new GeoLogVol("Ladder",ladderShape,air);
-      m_theLadder->ref();
     }
   }
   m_thickness = 2*std::max(m_thicknessN,m_thicknessP);
-}
-
-GeoPixelLadder::~GeoPixelLadder() {
-  if(m_theLadder) m_theLadder->unref();
 }
 
 

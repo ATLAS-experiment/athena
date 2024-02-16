@@ -58,7 +58,6 @@ GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr,
       const GeoBox* moduleBox = new GeoBox(thickness/2.,width/2.,length/2.);
       const GeoShape * moduleShape = moduleBox;
       m_theModule = new GeoLogVol(logName,moduleShape,air);
-      m_theModule->ref();
     } 
     else {
       
@@ -74,7 +73,6 @@ GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr,
       
       if(m_moduleSvcThickness<0.001) {
 	m_theModule = new GeoLogVol(logName,moduleShape,air);
-	m_theModule->ref();
       }
       else {
 	const GeoShape * gblShape = nullptr;
@@ -109,15 +107,10 @@ GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr,
 	}
 	
 	m_theModule = new GeoLogVol(logName,gblShape,air);
-	m_theModule->ref();	
       }
     }
   }
     
-}
-
-GeoPixelModule::~GeoPixelModule(){
-  if(m_theModule) m_theModule->unref();
 }
 
 

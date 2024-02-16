@@ -6,7 +6,10 @@
 #define PIXELGEOMODEL_GEOPIXELLADDER_H
 
 #include "GeoVPixelFactory.h"
-class GeoLogVol;
+
+#include "GeoModelKernel/GeoLogVol.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+
 class GeoPixelSiCrystal;
 class GeoPixelStaveSupport;
 
@@ -21,7 +24,7 @@ class GeoPixelLadder : public GeoVPixelFactory {
 		  GeoPixelStaveSupport * staveSupport);
   GeoPixelLadder (const GeoPixelLadder&) = delete;
   GeoPixelLadder& operator= (const GeoPixelLadder&) = delete;
-  virtual ~GeoPixelLadder();
+  virtual ~GeoPixelLadder() = default;
   virtual GeoVPhysVol* Build() override;
   double thickness() const {return m_thickness;}
   double thicknessP() const {return m_thicknessP;}
@@ -33,7 +36,7 @@ class GeoPixelLadder : public GeoVPixelFactory {
   double calcThickness();
   double calcWidth(); 
 
-  const GeoLogVol* m_theLadder;
+  GeoIntrusivePtr<const GeoLogVol> m_theLadder{};
   GeoPixelSiCrystal& m_theSensor;
   GeoPixelStaveSupport * m_staveSupport;
   double m_thickness;

@@ -11,13 +11,11 @@
 #include "RDBAccessSvc/IRDBRecord.h" //IRDBRecord used in code in the header
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h" //for IRDBRecordset_ptr typedef
-
+#include "GeoModelKernel/GeoVPhysVol.h"
 #include <string>
 #include <vector>
 
 
-class GeoLogVol;
-class GeoVPhysVol;
 class StoredMaterialManager;
 class StoreGateSvc;
 class PixelID;
@@ -120,13 +118,13 @@ class GeoPixelDisk : public GeoVPixelFactory {
                PixelGeometryManager* mgr);
   GeoPixelDisk (const GeoPixelDisk&) = delete;
   GeoPixelDisk& operator= (const GeoPixelDisk&) = delete;
-  virtual ~GeoPixelDisk();
+  virtual ~GeoPixelDisk() = default;
   virtual GeoVPhysVol* Build() override;
   double Thickness();
   double RMax();
   double RMin();
  private:
-  const GeoLogVol* m_theDisk{};
+  GeoIntrusivePtr<GeoLogVol> m_theDisk{};
   int getPhiId();
 };
 
@@ -164,9 +162,9 @@ class GeoPixelECCable : public GeoVPixelFactory {
   GeoPixelECCable (const GeoPixelECCable&) = delete;
   GeoPixelECCable& operator= (const GeoPixelECCable&) = delete;
   virtual GeoVPhysVol* Build() override;
-  virtual ~GeoPixelECCable();
+  virtual ~GeoPixelECCable() = default;
  private:
-  const GeoLogVol* m_theECCable;
+  GeoIntrusivePtr<GeoLogVol> m_theECCable;
 };
 
 #endif
@@ -219,11 +217,11 @@ class GeoPixelLadder : public GeoVPixelFactory {
                  GeoPixelSiCrystal& theSensor);
   GeoPixelLadder (const GeoPixelLadder&) = delete;
   GeoPixelLadder& operator= (const GeoPixelLadder&) = delete;
-  virtual ~GeoPixelLadder();
+  virtual ~GeoPixelLadder() = default;
   virtual GeoVPhysVol* Build() override;
   double Thickness();
  private:
-  const GeoLogVol* m_theLadder ;
+  GeoIntrusivePtr<GeoLogVol> m_theLadder ;
   GeoPixelSiCrystal& m_theSensor;
 };
 
@@ -266,14 +264,14 @@ class GeoPixelModule : public GeoVPixelFactory {
                  GeoPixelSiCrystal &theSensor);
   GeoPixelModule (const GeoPixelModule&) = delete;
   GeoPixelModule& operator= (const GeoPixelModule&) = delete;
-  virtual ~GeoPixelModule();
+  virtual ~GeoPixelModule() = default;
   virtual GeoVPhysVol* Build() override;
   double Thickness();
   double Width();
   double Length();
   Identifier getID();
  private:
-  const GeoLogVol* m_theModule;
+  GeoIntrusivePtr<GeoLogVol> m_theModule;
   Identifier m_id;
   GeoPixelSiCrystal& m_theSensor;
 };
@@ -338,7 +336,7 @@ class GeoPixelSubDisk : public GeoVPixelFactory {
   GeoPixelSubDisk(InDetDD::PixelDetectorManager* ddmgr,
                   PixelGeometryManager* mgr,
                   GeoPixelSiCrystal &theSensor);
-  virtual ~GeoPixelSubDisk();
+   virtual ~GeoPixelSubDisk()= default;
   GeoPixelSubDisk (const GeoPixelSubDisk&) = delete;
   GeoPixelSubDisk& operator= (const GeoPixelSubDisk&) = delete;
   virtual GeoVPhysVol* Build() override;
@@ -347,7 +345,7 @@ class GeoPixelSubDisk : public GeoVPixelFactory {
   double RMin();
  private:
   GeoPixelSiCrystal & m_theSensor;
-  const GeoLogVol* m_theSubDisk;
+  GeoIntrusivePtr<GeoLogVol> m_theSubDisk;
 };
 
 #endif
@@ -360,13 +358,13 @@ class GeoPixelTubeCables : public GeoVPixelFactory {
  public:
   GeoPixelTubeCables(InDetDD::PixelDetectorManager* ddmgr,
                      PixelGeometryManager* mgr);
-  virtual ~GeoPixelTubeCables();
+  virtual ~GeoPixelTubeCables() = default;
   GeoPixelTubeCables (const GeoPixelTubeCables&) = delete;
   GeoPixelTubeCables& operator= (const GeoPixelTubeCables&) = delete;
   virtual GeoVPhysVol* Build() override;
   double Thickness();
  private:
-  const GeoLogVol* m_theBox;
+  GeoIntrusivePtr<GeoLogVol> m_theBox;
 };
 
 #endif
