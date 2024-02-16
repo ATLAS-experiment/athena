@@ -2,7 +2,7 @@
 #
 # art-description: ESDMerge_tf.py serial
 # art-type: grid
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 ESDMerge_tf.py \
     --inputESDFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/DESDM_MCP.26614755._001203.pool.root.1,/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/DESDM_MCP.26614755._001208.pool.root.1 \
