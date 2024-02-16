@@ -1170,8 +1170,8 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
       pStrawPlaneA_Kr	= makeStrawPlane(firstIndexOfA, GM_KRYPTON);
     if (m_doArgon)
       pStrawPlaneA_Ar = makeStrawPlane(firstIndexOfA, GM_ARGON);
-    GeoFullPhysVol* pStrawPlaneA      = makeStrawPlane(firstIndexOfA);
-    // pStrawPlaneA->ref();
+    GeoIntrusivePtr<GeoFullPhysVol> pStrawPlaneA      = makeStrawPlane(firstIndexOfA);
+
 
     //TK:
     // Instead of this confusing stuf (main, thin, middle??), make:
@@ -1424,28 +1424,25 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 							 m_data->endCapOuterRadiusOfSupportA - m_data->endCapRadialThicknessOfOuterSupportA,
 							 m_data->endCapFaradayFoilThickness/2);
 	      GeoLogVol* lFaradayFoilWheelAB = new GeoLogVol("FaradayKaptonFoil",sFaradayFoilWheelAB, m_materialManager->getMaterial("trt::FaradayFoilMaterial"));
-	      GeoPhysVol* pFaradayFoilWheelAB = new GeoPhysVol(lFaradayFoilWheelAB);
+	      GeoIntrusivePtr<GeoPhysVol> pFaradayFoilWheelAB{new GeoPhysVol(lFaradayFoilWheelAB)};
 	      
 	      // Heat Exchanger added
 	      GeoTube* sHeatExchangerA = new GeoTube(m_data->endCapRMinOfHeatExchanger,m_data->endCapRMaxOfHeatExchanger,m_data->endCapHeatExchangerThicknessA/2);
 	      GeoLogVol* lHeatExchangerA = new GeoLogVol("HeatExchangerA",sHeatExchangerA, m_materialManager->getMaterial("trt::HeatExchangerAMat"));
-	      GeoPhysVol* pHeatExchangerA = new GeoPhysVol(lHeatExchangerA);
-	      pHeatExchangerA->ref(); // So we can unref later since doesn't get used for every wheel
+	      GeoIntrusivePtr<GeoPhysVol> pHeatExchangerA{new GeoPhysVol(lHeatExchangerA)};
 
 	      // Inner/Outer Support Gapper added
 	      GeoTube* sInnerSupportGapperA = new GeoTube(m_data->endCapInnerRadiusOfSupportA,
 					                  m_data->endCapInnerRadiusOfSupportA + m_data->endCapRadialThicknessOfInnerSupportA,
                                                           m_data->endCapHeatExchangerThicknessA/2 + m_data->endCapFaradayFoilThickness/2 + zdelta);
 	      GeoLogVol* lInnerSupportGapperA = new GeoLogVol("InnerSupportGapperA", sInnerSupportGapperA, m_materialManager->getMaterial("trt::InnerSupportA"));
-	      GeoPhysVol* pInnerSupportGapperA = new GeoPhysVol(lInnerSupportGapperA);
-	      pInnerSupportGapperA->ref(); // So we can unref later since doesn't get used for every wheel
+	      GeoIntrusivePtr<GeoPhysVol> pInnerSupportGapperA{new GeoPhysVol(lInnerSupportGapperA)};
 
 	      GeoTube* sOuterSupportGapperA = new GeoTube(m_data->endCapOuterRadiusOfSupportA - m_data->endCapRadialThicknessOfOuterSupportA,
 					                  m_data->endCapOuterRadiusOfSupportA, 
 							  m_data->endCapHeatExchangerThicknessA/2 + m_data->endCapFaradayFoilThickness/2 + zdelta);
 	      GeoLogVol* lOuterSupportGapperA = new GeoLogVol("OuterSupportGapperA", sOuterSupportGapperA, m_materialManager->getMaterial("trt::OuterSupportA"));
-	      GeoPhysVol* pOuterSupportGapperA = new GeoPhysVol(lOuterSupportGapperA);
-              pOuterSupportGapperA->ref(); // So we can unref later since doesn't get used for every wheel
+	      GeoIntrusivePtr<GeoPhysVol> pOuterSupportGapperA{new GeoPhysVol(lOuterSupportGapperA)};
 
 	      if(iiWheel<=firstIndexOfB-1) 
 		{ 
@@ -1485,17 +1482,12 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 		  pCommonEndcapAB[iiSide]->add(xfOuterSupportGapperA);
 		  pCommonEndcapAB[iiSide]->add(pOuterSupportGapperA);
 		}
-	      // Unref a few volumes. This will delete them if they did not get added.
-	      pHeatExchangerA->unref();
-	      pInnerSupportGapperA->unref();
-	      pOuterSupportGapperA->unref();
 
 	    } //include membrane, heat  exchanger and foil 
 	  } // iiWheel loop for Wheel A
       } // if (pCommonEndcapAB[iiSide]) block for Wheel A
     } // iiSide loop for Wheel A
     
-    //pStrawPlaneA->unref(); // Get eventual seg fault if unref. Clone doesn't increment ref count of orig, See bug #34074
 
 
       // ---------------  Wheel B  ----------------------------
@@ -1523,8 +1515,7 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
       pStrawPlaneB_Kr = makeStrawPlane(firstIndexOfB,GM_KRYPTON);
     if (m_doArgon)
       pStrawPlaneB_Ar = makeStrawPlane(firstIndexOfB,GM_ARGON);
-    GeoFullPhysVol* pStrawPlaneB    = makeStrawPlane(firstIndexOfB);
-//    pStrawPlaneB->ref();
+    GeoIntrusivePtr<GeoFullPhysVol> pStrawPlaneB {makeStrawPlane(firstIndexOfB)};
 
     // Radiators
     
@@ -1716,30 +1707,26 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 							 m_data->endCapOuterRadiusOfSupportB - m_data->endCapRadialThicknessOfOuterSupportB,
 							 m_data->endCapFaradayFoilThickness/2);
 	      GeoLogVol* lFaradayFoilWheelAB = new GeoLogVol("FaradayKaptonFoil",sFaradayFoilWheelAB,  m_materialManager->getMaterial("trt::FaradayFoilMaterial"));
-	      GeoPhysVol* pFaradayFoilWheelAB = new GeoPhysVol(lFaradayFoilWheelAB);
-        pFaradayFoilWheelAB->ref(); //add a ref count here, then unref at the end to allow deletion (sar)
+	      GeoIntrusivePtr<GeoPhysVol> pFaradayFoilWheelAB{new GeoPhysVol(lFaradayFoilWheelAB)};
 
 	      // Heat Exchanger 
 	      GeoTube* sHeatExchangerB = new GeoTube(m_data->endCapRMinOfHeatExchanger,m_data->endCapRMaxOfHeatExchanger,m_data->endCapHeatExchangerThicknessB/2);
 
 	      GeoLogVol* lHeatExchangerB = new GeoLogVol("HeatExchangerB", sHeatExchangerB, m_materialManager->getMaterial("trt::HeatExchangerBMat"));
-	      GeoPhysVol* pHeatExchangerB = new GeoPhysVol(lHeatExchangerB);
-	      pHeatExchangerB->ref(); // Doesn't get used for every wheel// Doesn't get used for every wheel
+	      GeoIntrusivePtr<GeoPhysVol> pHeatExchangerB{new GeoPhysVol(lHeatExchangerB)};
 
 	      // Inner/Outer Support Gapper added
 	      GeoTube* sInnerSupportGapperB = new GeoTube(m_data->endCapInnerRadiusOfSupportB,
 							  m_data->endCapInnerRadiusOfSupportB + m_data->endCapRadialThicknessOfInnerSupportB,
                                                           m_data->endCapHeatExchangerThicknessB/2 + m_data->endCapFaradayFoilThickness/2 + zdelta);
 	      GeoLogVol* lInnerSupportGapperB = new GeoLogVol("InnerSupportGapperB", sInnerSupportGapperB, m_materialManager->getMaterial("trt::InnerSupportB"));
-	      GeoPhysVol* pInnerSupportGapperB = new GeoPhysVol(lInnerSupportGapperB);
-	      pInnerSupportGapperB->ref(); // So we can unref later since doesn't get used for every wheel
+	      GeoIntrusivePtr<GeoPhysVol> pInnerSupportGapperB{new GeoPhysVol(lInnerSupportGapperB)};
 
 	      GeoTube* sOuterSupportGapperB = new GeoTube(m_data->endCapOuterRadiusOfSupportB - m_data->endCapRadialThicknessOfOuterSupportB,
 							  m_data->endCapOuterRadiusOfSupportB,
 							  m_data->endCapHeatExchangerThicknessB/2 + m_data->endCapFaradayFoilThickness/2 + zdelta);
 	      GeoLogVol* lOuterSupportGapperB = new GeoLogVol("OuterSupportGapperB", sOuterSupportGapperB, m_materialManager->getMaterial("trt::OuterSupportB"));
-	      GeoPhysVol* pOuterSupportGapperB = new GeoPhysVol(lOuterSupportGapperB);
-	      pOuterSupportGapperB->ref(); // So we can unref later since doesn't get used for every wheel
+	      GeoIntrusivePtr<GeoPhysVol> pOuterSupportGapperB{new GeoPhysVol(lOuterSupportGapperB)};
 
 	      // Place kapton foils on a wheel just like a sandwitch 
 	      if(iiWheel-firstIndexOfB<firstIndexOfC-firstIndexOfB)
@@ -1782,16 +1769,10 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 		pCommonEndcapAB[iiSide]->add(xfOuterSupportGapperB);
 		pCommonEndcapAB[iiSide]->add(pOuterSupportGapperB);
 	      }
-	      // Unref a few volumes. This will delete them if they did not get added.
-	      pHeatExchangerB->unref();
-	      pInnerSupportGapperB->unref();
-	      pOuterSupportGapperB->unref();
-        pFaradayFoilWheelAB->unref(); //added 31/05/2018 (sar)
 	    } // include foil, heat exchanger and membrane
 	  }// iiWheel loop  for Wheel B
       } // if (pCommonEndcapAB[iiSide]) block for Wheel B
     } // iiSide loop for Wheel B
-    //pStrawPlaneB->unref(); // Get eventual seg fault if unref. Clone doesn't increment ref count of orig, See bug #34074
     
   } // end AB
 
@@ -1843,8 +1824,7 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
     GeoPhysVol* pOuterSupportC = new GeoPhysVol(lOuterSupportC);
 
     // Straw plane
-    GeoFullPhysVol* pStrawPlaneC 	= makeStrawPlane(firstIndexOfC);
-    // pStrawPlaneC->ref();
+    GeoIntrusivePtr<GeoFullPhysVol> pStrawPlaneC 	= makeStrawPlane(firstIndexOfC);
 
     // Radiators
     GeoTube* sMainRadiatorC = new GeoTube(m_data->endCapInnerRadiusOfSupportC + m_data->endCapRadialThicknessOfInnerSupportC,
@@ -1997,7 +1977,6 @@ void TRTDetectorFactory_Full::create(GeoPhysVol *world)
 	  } // iiWheel loop for Wheel C
       } // if (pCommonEndcapC[iiSide]) block for Wheel C
     } // iiSide loop for Wheel C
-    //pStrawPlaneC->unref(); // Get eventual seg fault if unref. Clone doesn't increment ref count of orig, See bug #34074
 
   } // End Wheel C
 
