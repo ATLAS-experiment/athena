@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TABLE_UTILS_H
 #define TABLE_UTILS_H
@@ -23,18 +23,21 @@ namespace TableUtils {
    struct Range {
       const T     *m_ptr  = nullptr;
       std::size_t  m_size = 0u;
+      std::size_t  m_offset = 1u;
 
       struct const_iterator {
-         const_iterator &operator++() { ++m_ptr; return *this; }
+         const_iterator &operator++() { m_ptr += m_offset; return *this; }
          const T &operator*() const { return *m_ptr; }
          bool operator!=(const const_iterator &other) const { return m_ptr != other.m_ptr; }
          const T *m_ptr;
+         std::size_t m_offset;
       };
       const_iterator begin() const {
-         return const_iterator{ m_ptr };
+         return const_iterator{ m_ptr, m_offset };
       }
       const_iterator end() const {
-         return const_iterator{ m_ptr+m_size };
+         assert( (m_size % m_offset) == 0 );
+         return const_iterator{ m_ptr+m_size, m_offset };
       }
       const T &operator[](std::size_t index) const { assert(index<m_size && m_ptr); return m_ptr[index]; }
 
@@ -58,25 +61,29 @@ namespace TableUtils {
       std::size_t  m_rows    = 0u;
       std::size_t  m_columns = 0u;
       std::size_t  m_columnOffset = 0u;
+      std::size_t  m_firstColumnIndex = 0u;
+      std::size_t  m_offset  = 1u;
 
       struct const_iterator {
          const_iterator &operator++() { m_ptr += m_columnOffset; return *this; }
-         Range<T> operator*() const { return Range<T> { m_ptr, m_columns }; }
+         Range<T> operator*() const { return Range<T> { m_ptr, m_columns, m_offset }; }
          bool operator!=(const const_iterator &other) const { return m_ptr != other.m_ptr; }
          const T *m_ptr;
          std::size_t m_columns;
          std::size_t m_columnOffset;
+         std::size_t m_firstColumnIndex;
+         std::size_t m_offset;
       };
 
       const_iterator begin() const {
-         return const_iterator{ m_ptr, m_columns, m_columnOffset};
+         return const_iterator{ m_ptr, m_columns, m_columnOffset, m_firstColumnIndex, m_offset};
       }
       const_iterator end() const {
-         return const_iterator{ m_ptr+m_rows * m_columnOffset, m_columns, m_columnOffset };
+         return const_iterator{ m_ptr+m_rows * m_columnOffset, m_columns, m_columnOffset, m_firstColumnIndex, m_offset };
       }
       Range<T> operator[](std::size_t index) const {
          assert(index<m_rows && m_ptr);
-         return Range<T>{m_ptr + m_columnOffset * index, m_columns};
+         return Range<T>{m_ptr + m_columnOffset * index, m_columns, m_offset};
       }
 
       std::size_t nColumns() const { return m_columns; }
@@ -499,10 +506,12 @@ TableUtils::MultiColumnTable<T> makeTable(const std::array<std::array<T, Ncolumn
                                           const std::string &top_left_label="") {
    return TableUtils::MultiColumnTable<T> {
       TableUtils::Range2D<T>         {!counter.empty() ? counter[0].data() : nullptr,
-                          counter.size(), column_label.size(),
-                          !counter.empty() ? static_cast<std::size_t>(&counter[1][0] - &counter[0][0]) : 0u},
-      TableUtils::Range<std::string> {row_label.data(),    row_label.size() },
-      TableUtils::Range<std::string> {column_label.data(), column_label.size()},
+                                      counter.size(), column_label.size(),
+                                      !counter.empty() ? static_cast<std::size_t>(&counter[1][0] - &counter[0][0]) : 0u,
+                                      0u,  // index of first column
+                                      1u}, // offset between columns
+      TableUtils::Range<std::string> {row_label.data(),    row_label.size(),   1u},
+      TableUtils::Range<std::string> {column_label.data(), column_label.size(),1u},
       top_left_label
    };
 }
@@ -537,12 +546,64 @@ TableUtils::MultiColumnTable<T> makeTable(const std::vector<T> &counter,
       TableUtils::Range2D<T>         {!counter.empty() ? &counter[start_idx] : nullptr,
                                       row_label.size(),      // n-rows
                                       column_label.size(),   // n-columns
-                                      row_stride},  // offset between rows
+                                      row_stride,            // offset between rows
+                                      0u,                    // first column index
+                                      1u},                   // offset between columns
       TableUtils::Range<std::string> {row_label.data(),    row_label.size() },
       TableUtils::Range<std::string> {column_label.data(), column_label.size()},
       top_left_label
    };
 }
+
+template <typename T, std::size_t N>
+TableUtils::MultiColumnTable<T> makeTable(const std::vector<std::array<T,N> > &counter,
+                                          std::size_t start_row_idx,
+                                          std::size_t row_stride,
+                                          std::size_t start_column_idx,
+                                          std::size_t column_stride,
+                                          const std::vector<std::string>    &row_label,
+                                          const std::vector<std::string> &column_label,
+                                          const std::string &top_left_label="") {
+   if (start_row_idx + (row_label.size()-1) * row_stride >= counter.size()*N
+       || start_column_idx + (column_label.size()-1) * column_stride >= counter.size()*N
+       || (row_stride*row_label.size()>column_stride && column_stride*column_label.size()>row_stride) ) {
+      std::stringstream msg;
+      msg << "Counter dimension and label dimensions (" << row_label.size() << " * " << column_label.size()
+          << ") do not match: [" << start_row_idx << ", "
+          <<  start_row_idx << " + " << (row_label.size()-1) << " * " << row_stride << " = "
+          << (start_row_idx + (row_label.size()-1) * row_stride)
+          << " or "
+          <<  start_column_idx << " + " << (column_label.size()-1) << " * " << column_stride << " = "
+          << (start_column_idx + (column_label.size()-1) * column_stride)
+          << " !< " << counter.size()
+          << std::endl
+          << (start_row_idx + (row_label.size()-1) * row_stride) << "  >= " << (counter.size()*N)
+          << " || " << (start_column_idx + (column_label.size()-1) * column_stride) << "  >= " << (counter.size()*N)
+          << " || ( " << (row_stride*row_label.size()) << " > " << column_stride << " &&  " << (column_stride*column_label.size()) << " > " << (row_stride)
+          << ")";
+      msg << " [row_labels:";
+      for (const std::string &label : row_label) {
+         msg << " " << label;
+      }
+      msg << "; column_labels:";
+      for (const std::string &label : column_label) {
+         msg << " " << label;
+      }
+      msg << "]";
+      throw std::logic_error(msg.str());
+   }
+   return TableUtils::MultiColumnTable<T> {
+      TableUtils::Range2D<T>         {!counter.empty() && N>0 ? counter[start_row_idx].data() : nullptr,
+                                      row_label.size(),      // n-rows
+                                      column_label.size(),   // n-columns
+                                      row_stride,            // offset between rows
+                                      start_column_idx,                    // first column index
+                                      column_stride},                   // offset between columns
+      TableUtils::Range<std::string> {row_label.data(),    row_label.size() },
+      TableUtils::Range<std::string> {column_label.data(), column_label.size()},
+      top_left_label};
+}
+
 
 // Helper method to wrap two dimensional data that should be dumped in table form to an output stream
 template <typename T>
