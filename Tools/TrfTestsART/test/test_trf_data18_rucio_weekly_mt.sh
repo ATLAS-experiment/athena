@@ -5,7 +5,7 @@
 # art-input: data18_13TeV:data18_13TeV.00357750.physics_Main.daq.RAW
 # art-input-nfiles: 300
 # art-input-nfilesperjob: 3
-# art-include: main/Athena/x86_64-centos7-gcc11-opt
+# art-include: main/Athena/x86_64-el9-gcc13-opt
 # art-athena-mt: 8
 # art-runon: Saturday
 

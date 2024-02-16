@@ -3,7 +3,7 @@
 # art-description: Reco_tf.py q445, AODMerge and output comparison
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 8
 
 export ATHENA_CORE_NUMBER=8
