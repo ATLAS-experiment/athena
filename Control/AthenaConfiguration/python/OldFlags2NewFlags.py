@@ -169,6 +169,22 @@ def getNewConfigFlags():
         log.info('RecExConfig not available, "ConfigFlags.BTagging.SaveSV1Probabilities" and "ConfigFlags.BTagging.RunFlipTaggers" not set')
         pass
 
+
+    #Hack for event-less unit-test (avoid peeking into inexistant input file)
+    oldDefaultFile="Hits.pool.root"
+    if (ConfigFlags.Input.Files == [oldDefaultFile,]):
+        import os
+        if not (os.access(oldDefaultFile,os.R_OK)):
+            from AthenaConfiguration.TestDefaults import defaultGeometryTags
+            from Campaigns.Utils import Campaign
+            ConfigFlags.Input.isMC=True
+            #flags.IOVDb.GlobalTag = 'OFLCOND-MC23-SDR-RUN3-02'
+            ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
+            ConfigFlags.Input.MCCampaign=Campaign.Unknown
+            ConfigFlags.Input.TypedCollections=[]
+            pass
+        pass
+    
     return ConfigFlags
 
 
