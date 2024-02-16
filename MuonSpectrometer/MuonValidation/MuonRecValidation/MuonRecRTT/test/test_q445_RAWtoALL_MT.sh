@@ -4,7 +4,7 @@
 #
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-output: OUT_ESD_1thread.root
 # art-output: OUT_ESD_5thread.root

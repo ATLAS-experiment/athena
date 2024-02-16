@@ -4,7 +4,7 @@
 #
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 set -x
 
@@ -15,7 +15,7 @@ Reco_tf.py --CA True \
            --conditionsTag RAWtoESD:CONDBR2-BLKPA-RUN2-09  \
            --geometryVersion ATLAS-R2-2016-01-00-01 \
            --inputBSFile='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/MuonCosmic/data17_cos.00342172.physics_CosmicMuons.merge.RAW._lb0006._SFO-ALL._0001.1' \
-           --outputAODFile=MuonCosmic_Reco.AOD.pool.root \
+           --outputAODFile MuonCosmic_Reco.AOD.pool.root \
            --preExec 'flags.Trigger.doLVL1=False;flags.Trigger.doHLT=False'
 
 exit_code=$?
