@@ -34,6 +34,11 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     from DerivationFrameworkMuons.TrackIsolationDecoratorConfig import TrackIsolationCfg
     acc.merge(TrackIsolationCfg(ConfigFlags,TrackCollection="InDetTrackParticles", TrackSelections = trkThinFlags))
     acc.merge(TrackIsolationCfg(ConfigFlags,TrackCollection="ExtrapolatedMuonTrackParticles"))
+
+    from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
+    contNames = [ "Muons", "Electrons", "Photons" ]
+    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = kwargs['StreamName']))
+
     ### Calo deposits 
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonCaloDepositAlgCfg
     acc.merge(MuonCaloDepositAlgCfg(ConfigFlags)) ### Decorate directly the muons
@@ -117,6 +122,16 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
                                                                        CaloClCollectionSGKey   = "egammaClusters",
                                                                        ConeSize                = 0.4))
     MUON5ThinningTools.append(MUON5ThinningTool2)
+
+    # keep egammaclusters around photons
+    MUON5ThinningTool3 = acc.getPrimaryAndMerge(CaloClusterThinningCfg(ConfigFlags,
+                                                                       name                    = "MUON5ThinningTool3",
+                                                                       StreamName              = kwargs['StreamName'],
+                                                                       SGKey                   = "Photons",
+                                                                       SelectionString         = "Photons.pt>4*GeV",
+                                                                       CaloClCollectionSGKey   = "egammaClusters",
+                                                                       ConeSize                = 0.4))
+    MUON5ThinningTools.append(MUON5ThinningTool3)
     
     ### cell thinning
     acc.merge(thinCaloCellsForDFCfg(ConfigFlags,
@@ -243,7 +258,7 @@ def MUON5Cfg(ConfigFlags):
         "ptcone20_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000",
         "ptcone30_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000",
         "ptcone40_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
-        "topoetconecoreConeEnergyCorrection", "topoetconecoreConeSCEnergyCorrection",
+        "topoetconecoreConeEnergyCorrection"
     ]
     ElectronsExtraContent = [
         ".".join(
