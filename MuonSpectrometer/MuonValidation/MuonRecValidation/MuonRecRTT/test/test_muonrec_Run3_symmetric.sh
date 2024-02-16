@@ -4,7 +4,7 @@
 # 
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-output: trkPerformance_MuonSpectrometerTracks.txt
 # art-output: trkPerformance_ExtrapolatedMuonTracks.txt
 # art-output: trkPerformance_MSOnlyExtrapolatedMuonTracks.txt
