@@ -505,22 +505,28 @@ class AthConfigFlags(object):
     def dump(self, pattern=".*", evaluate=False, formatStr="{:40} : {}", maxLength=None):
         import re
         compiled = re.compile(pattern)
-        print(formatStr.format( "Flag Name","Value" ) )
         def truncate(s): return s[:maxLength] + ("..." if maxLength and len(s)>maxLength else "")
+        reverse_renames = {value: key for key, value in self._renames.items() if value != ''} # new name to old
         for name in sorted(self._flagdict):
-            if compiled.match(name):
+            renamed = name
+            if any([name.startswith(r) for r in reverse_renames.keys()]):
+                for oldprefix, newprefix in reverse_renames.items():
+                    if name.startswith(oldprefix):
+                        renamed = name.replace(oldprefix, newprefix)
+                        break
+            if compiled.match(renamed):
                 if evaluate:
                     try:
                         rep = repr(self._flagdict[name] )
                         val = repr(self._flagdict[name].get(self))
                         if val != rep:
-                            print(formatStr.format(name,truncate("{} {}".format( val, rep )) ))
+                            print(formatStr.format(renamed,truncate("{} {}".format( val, rep )) ))
                         else:
-                            print(formatStr.format( name, truncate("{}".format(val)) ) )
+                            print(formatStr.format(renamed, truncate("{}".format(val)) ) )
                     except Exception as e:
-                        print(formatStr.format(name, truncate("Exception: {}".format( e )) ))
+                        print(formatStr.format(renamed, truncate("Exception: {}".format( e )) ))
                 else:
-                    print(formatStr.format( name, truncate("{}".format(repr(self._flagdict[name] ) )) ))
+                    print(formatStr.format( renamed, truncate("{}".format(repr(self._flagdict[name] ) )) ))
 
         if len(self._dynaflags) == 0:
             return
