@@ -39,6 +39,7 @@ flags.Common.ProductionStep = ProductionStep.Simulation
 flags.Input.Files = [args.input]
 if args.localgeo:
     flags.ITk.Geometry.AllLocal = True
+flags.Output.HISTFileName = 'SiHitAnalysis.root'
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 setupDetectorFlags(flags, args.detectors, use_metadata=True, toggle_geometry=True)
 flags.lock()
@@ -48,7 +49,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
-from HitAnalysis.SiHitAnalysis import SiHitAnalysisCfg
+from HitAnalysis.HitAnalysisConfig import SiHitAnalysisCfg
 acc.merge(SiHitAnalysisCfg(flags))
 
 # Execute and finish

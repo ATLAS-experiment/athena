@@ -239,14 +239,16 @@ def addDigitizationSubstep(executorSet, in_reco_chain=False):
 
 def addSimValidationSubstep(executorSet):
     executorSet.add(athenaExecutor(name = 'SimValidation',
-                                           skeletonFile = 'SimuJobTransforms/skeleton.HITStoHIST_SIM.py',
-                                           inData = ['HITS'], outData = ['HIST_SIM'],))
+                                   skeletonFile = None,
+                                   skeletonCA='SimuJobTransforms.HITtoHIST_SIM_Skeleton',
+                                   inData = ['HITS'], outData = ['HIST_SIM'],))
 
 
 def addDigiValidationSubstep(executorSet):
     executorSet.add(athenaExecutor(name = 'DigiValidation',
-                                           skeletonFile = 'SimuJobTransforms/skeleton.RDOtoHIST_DIGI.py',
-                                           inData = ['RDO'], outData = ['HIST_DIGI'],))
+                                   skeletonFile = None,
+                                   skeletonCA='SimuJobTransforms.RDOtoHIST_DIGI_Skeleton',
+                                   inData = ['RDO'], outData = ['HIST_DIGI'],))
 
 ### Append Sub-step Methods
 def appendSimulationSubstep(trf):
