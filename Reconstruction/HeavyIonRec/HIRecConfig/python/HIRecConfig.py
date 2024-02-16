@@ -77,7 +77,7 @@ if __name__ == "__main__":
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     acc.merge(ByteStreamReadCfg(flags))
     if flags.Reco.EnableBeamSpotDecoration:
-        from xAODEventInfoCnv.EventInfoBeamSpotDecoratorAlgConfig import EventInfoBeamSpotDecoratorAlgCfg
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoBeamSpotDecoratorAlgCfg
         acc.merge(EventInfoBeamSpotDecoratorAlgCfg(flags))
     if flags.HeavyIon.redoTracking:
         from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
