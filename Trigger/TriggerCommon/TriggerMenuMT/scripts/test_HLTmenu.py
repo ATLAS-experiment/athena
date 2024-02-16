@@ -26,7 +26,7 @@ flags.lock()
 from AthenaCommon.Logging import log
 log.setLevel(flags.Exec.OutputLevel)
 
-from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
+from TriggerMenuMT.HLT.Config.GenerateMenuMT import generateMenuMT
 acc = ComponentAccumulator()
 menu = generateMenuMT(flags)
 acc.merge(menu)

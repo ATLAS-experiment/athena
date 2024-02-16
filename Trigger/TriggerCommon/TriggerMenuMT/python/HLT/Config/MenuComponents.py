@@ -21,7 +21,7 @@ from TrigCompositeUtils.TrigCompositeUtils import legName
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
+from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu 
 
 from collections.abc import MutableSequence
 import collections.abc

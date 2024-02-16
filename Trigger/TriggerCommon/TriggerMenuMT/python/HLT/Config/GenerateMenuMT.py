@@ -4,11 +4,15 @@ import importlib
 import string
 
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
- 
-
+from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
+
+_isCAMenu = True
+def isCAMenu():
+  return _isCAMenu
+
 
 def calibCosmicMonSignatures():
     return ['Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias']
@@ -38,6 +42,19 @@ class Singleton(type):
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
+class FilterChainsToGenerate(object):
+    """
+    class to use filters for chains
+    """
+    def __init__(self,flags):
+        self.enabledSignatures  = flags.Trigger.enabledSignatures  if flags.hasFlag("Trigger.enabledSignatures") else []
+        self.disabledSignatures = flags.Trigger.disabledSignatures if flags.hasFlag("Trigger.disabledSignatures") else []
+        self.selectChains       = flags.Trigger.selectChains       if flags.hasFlag("Trigger.selectChains") else []
+        self.disableChains      = flags.Trigger.disableChains      if flags.hasFlag("Trigger.disableChains") else []          
+    def __call__(self, signame, chain):            
+        return ((signame in self.enabledSignatures and signame not in self.disabledSignatures) and \
+            (not self.selectChains or chain in self.selectChains) and chain not in self.disableChains)
+  
 
 # for now we make this a singleton because calling menu generation twice leads to problems
 class GenerateMenuMT(object, metaclass=Singleton):
@@ -165,8 +182,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
 
         return
 
-    def generateChains(self, flags):
-        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
+    def generateChains(self, flags):       
         all_chains = []
         combinations_in_menu = []
         alignmentGroups_to_align = set()
@@ -214,7 +230,6 @@ class GenerateMenuMT(object, metaclass=Singleton):
         == Obtains chain configs for all chains in menu
         """
 
-        from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig  import HLTMenuConfig
         from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import MenuAlignment
         from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences, TLABuildingSequences
 
@@ -307,9 +322,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
     def getChainsFromMenu(self, flags):
         """
         == Returns the list of chain names that are in the menu
-        """
-
-        from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig  import HLTMenuConfig
+        """       
         from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import MenuPrescaleConfig
 
         # go over the slices and put together big list of signatures requested
@@ -358,7 +371,6 @@ class GenerateMenuMT(object, metaclass=Singleton):
         from TriggerMenuMT.HLT.Config.Utility.ComboHypoHandling import addTopoInfo, comboConfigurator, topoLegIndices
         from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
         from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences, TLABuildingSequences
-        from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
 
         # split the the chainDictionaries for each chain and print them in a pretty way
         chainDicts = splitInterSignatureChainDict(mainChainDict)
@@ -497,17 +509,13 @@ class GenerateMenuMT(object, metaclass=Singleton):
             except TypeError as ex:
                     log.error(ex)
                     raise Exception('[__generateChainConfigs] Stopping menu generation for EventBuilding/TLA sequences. Please investigate the exception shown above.')
-            
-
 
         log.debug('[__generateChainConfigs] lengthOfChainConfigs %s, ChainConfigs  %s ', lengthOfChainConfigs, theChainConfig)
         return theChainConfig,lengthOfChainConfigs
  
     
     def resolveEmptySteps(self,chainConfigs):
-
         max_steps = max([len(cc.steps) for cc in chainConfigs], default=0)    
-
         steps_are_empty = [True for i in range(0,max_steps)]
         emptySteps = []
         for cc in chainConfigs:
@@ -546,65 +554,107 @@ class GenerateMenuMT(object, metaclass=Singleton):
         return chainConfigs 
  
 
-    def generateMT(self, flags):
-        """
-        == Main function of the class which generates L1, L1Topo and HLT menu
-        """
+def generateMenuMT(flags): 
+    """
+    == Main function to generates L1, L1Topo and HLT menu CA, using class GenerateMenuMT
+    """         
+    # generate L1 menu
+    # This probably will go to TriggerConfig.triggerRunCfg
+    from TrigConfigSvc.TrigConfigSvcCfg import generateL1Menu, createL1PrescalesFileFromMenu
+    from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import MenuPrescaleConfig
+    generateL1Menu(flags)
+    createL1PrescalesFileFromMenu(flags)
 
-        from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig  import HLTMenuConfig
-        from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import applyHLTPrescale
-        from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import makeHLTTree
+    # Generate the menu, stolen from HLT_standalone
+    from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
+    menu = GenerateMenuMT() 
 
-        log.info('Starting menu generation')
+    chainsToGenerate = FilterChainsToGenerate(flags)
+    menu.setChainFilter(chainsToGenerate)
+    log.debug("Filtering chains = %d", (menu.chainFilter is not None))
+    finalListOfChainConfigs = menu.generateAllChainConfigs(flags)
+    log.info("Length of FinalListOfChainConfigs %s", len(finalListOfChainConfigs))
 
-        # --------------------------------------------------------------------
-        # HLT menu generation
-        # --------------------------------------------------------------------
-        finalListOfChainConfigs = self.generateAllChainConfigs(flags)
-        log.info("Length of FinalListofChainConfigs %s", len(finalListOfChainConfigs))
+    # Add prescales for disabling items (e.g. MC production)
+    log.info("Applying HLT prescales")
+    
+    (menu.L1Prescales, menu.HLTPrescales, menu.chainsInMenu) = MenuPrescaleConfig(HLTMenuConfig, flags)
+    from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import applyHLTPrescale
+    applyHLTPrescale(HLTMenuConfig, menu.HLTPrescales, menu.signaturesOverwritten)
+ 
+    # make sure that we didn't generate any steps that are fully empty in all chains
+    # if there are empty steps, remove them
+    finalListOfChainConfigs = menu.resolveEmptySteps(finalListOfChainConfigs)
 
-        # make sure that we didn't generate any steps that are fully empty in all chains
-        # if there are empty steps, remove them
-        finalListOfChainConfigs = self.resolveEmptySteps(finalListOfChainConfigs)
+    log.debug("finalListOfChainConfig %s", finalListOfChainConfigs)
+    log.info("Making the HLT configuration tree")
+    menuAcc=makeHLTTree(flags)
 
-        log.debug("finalListOfChainConfig %s", finalListOfChainConfigs)
-        for cc in finalListOfChainConfigs:
-            log.debug('Steps for %s are %s', cc.name, cc.steps)
+    # Configure ChainFilters for ROBPrefetching
+    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
+    if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
+        from TrigGenericAlgs.TrigGenericAlgsConfig import prefetchingInitialRoIConfig
+        menuAcc.merge( prefetchingInitialRoIConfig(flags, HLTMenuConfig.configsList()), 'HLTBeginSeq')
 
-        log.info("Making the HLT configuration tree")
-        makeHLTTree(flags, newJO=False, hltMenuConfig = HLTMenuConfig)
-        # the return values used for debugging, might be removed later
+    log.info("Checking the L1HLTConsistency...")
+    from TriggerMenuMT.HLT.Config.Validation.CheckL1HLTConsistency import checkL1HLTConsistency
+    checkL1HLTConsistency(flags)
 
-        from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-        if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
-            from TrigGenericAlgs.TrigGenericAlgsConfig import configurePrefetchingInitialRoI
-            configurePrefetchingInitialRoI(flags, HLTMenuConfig.configsList())
+    log.info("Checking the Coherent Prescale assignments...")
+    from TriggerMenuMT.HLT.Config.Validation.CheckCPSGroups import checkCPSGroups
+    checkCPSGroups(HLTMenuConfig.dictsList())
 
-        # Having built the Menu add prescales for disabling items (e.g. MC production)
-        log.info("Applying HLT prescales")
-        applyHLTPrescale(HLTMenuConfig, self.HLTPrescales, self.signaturesOverwritten)
 
-        log.info("Checking the L1HLTConsistency...")
-        from TriggerMenuMT.HLT.Config.Validation.CheckL1HLTConsistency import checkL1HLTConsistency
-        checkL1HLTConsistency(flags)
-        
-        log.info("Checking the Coherent Prescale assignments...")
-        from TriggerMenuMT.HLT.Config.Validation.CheckCPSGroups import checkCPSGroups
-        checkCPSGroups(HLTMenuConfig.dictsList())
+    return menuAcc
+    
 
-        log.info("Generating HLT menu JSON...")
-        
-        from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON
-        generateJSON(flags)
+def makeHLTTree(flags):
+    """
+    Generate appropriate Control Flow Graph wiht all HLT algorithms
+    """
+    from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import decisionTreeFromChains, sequenceScanner
+    from TriggerJobOpts.TriggerConfig import collectViewMakers
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaCommon.CFElements import compName 
+    from AthenaCommon.CFElements import seqAND  
 
-        log.info("Generating HLT prescale JSON...")
+    acc = ComponentAccumulator()    
+    steps = seqAND('HLTAllSteps')
+    finalDecisions, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList(), newJO=False)
+    if log.getEffectiveLevel() <= logging.DEBUG:
+        menuAcc.printConfig()
 
-        from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generateJSON as generatePrescaleJSON
-        generatePrescaleJSON(flags)
+    acc.merge(menuAcc)
+    successful_scan = sequenceScanner( steps )
+    if not successful_scan:
+        raise Exception("[makeHLTTree] At least one sequence is expected in more than one step. Check error messages and fix!")    
 
-        from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
-        generateDefaultMonitoringJSON(flags)
+    flatDecisions=[]
+    for step in finalDecisions:
+        flatDecisions.extend (step)
+ 
+    viewMakers = collectViewMakers(steps)
+    viewMakerMap = {compName(vm):vm for vm in viewMakers}
+    for vmname, vm in viewMakerMap.items():
+        log.debug(f"[makeHLTTree] {vmname} InputMakerOutputDecisions: {vm.InputMakerOutputDecisions}")
+        if vmname.endswith("_probe"):
+            try:
+                log.debug(f"Setting InputCachedViews on {vmname} to read decisions from tag leg {vmname[:-6]}: {vm.InputMakerOutputDecisions}")
+                vm.InputCachedViews = viewMakerMap[vmname[:-6]].InputMakerOutputDecisions
+            except KeyError: # We may be using a probe leg that has different reco from the tag
+                log.debug(f"Tag leg does not match probe: '{vmname[:-6]}', will not use cached views")
 
-        log.info('Menu generation is complete.')
-        return finalListOfChainConfigs
+    
+    # generate JSON representation of the config
+    from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON_newJO
+    generateJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
 
+    from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generateJSON_newJO as generatePrescaleJSON_newJO
+    generatePrescaleJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
+
+    from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON_newJO
+    generateDefaultMonitoringJSON_newJO(flags, HLTMenuConfig.dictsList())
+
+    from AthenaCommon.CFElements import checkSequenceConsistency 
+    checkSequenceConsistency(steps)
+    return acc

@@ -4,7 +4,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import AlgNode, HypoAlgNode
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import isComboHypoAlg
-from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
+from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu
 from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
 from AthenaConfiguration.ComponentFactory import CompFactory
