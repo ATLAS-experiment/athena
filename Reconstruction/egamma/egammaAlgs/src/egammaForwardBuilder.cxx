@@ -152,12 +152,11 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     // the clusters used are CaloTopoClusters so need to access the sister 
     // cluster to maintain consistency.
     if (m_doTrackMatching) {
-      static const SG::AuxElement::Accessor<
-        ElementLink<xAOD::CaloClusterContainer>
-      > sisterCluster("SisterCluster");
+      ElementLink<xAOD::CaloClusterContainer> sisterCluster = 
+        cluster->getSisterClusterLink();
 
-      if (sisterCluster.isAvailable(*cluster)) {
-        constituentLinks.push_back(sisterCluster(*cluster));
+      if (sisterCluster) {
+        constituentLinks.push_back(sisterCluster);
       } else {
         ATH_MSG_WARNING("No sister Link available");
       }      
