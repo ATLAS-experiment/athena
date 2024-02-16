@@ -24,7 +24,6 @@ def _getTransformsFromPATH():
         'ESDtoAOD_tf.py',
         'ExeWrap_tf.py',
         'Sleep_tf.py',
-        'RAWtoESD_tf.py',
     ])
 
     ##########################################################################

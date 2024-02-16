@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # $Id: test_AODMerge_tf.py 617963 2014-09-22 13:13:07Z graemes $
 # Run a EVNTMerge job and test key metadata in the output
@@ -9,8 +9,6 @@
 import glob
 import json
 import subprocess
-import os
-import os.path
 import sys
 import unittest
 
@@ -26,7 +24,6 @@ class AODMergetest(unittest.TestCase):
         cmd = ['AODMerge_tf.py', '--inputAODFile']
         cmd.extend(inputs)
         cmd.extend(['--outputAOD_MRGFile', 'merged.AOD.pool.root'])
-        cmd.extend(['--outputTAGFile', 'TAG.pool.root'])
         cmd.extend(['--reportName', 'jobReportFast'])
         msg.info('Will run this transform: {0}'.format(cmd))
         p = subprocess.Popen(cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 1)
@@ -50,7 +47,6 @@ class AODMergetest(unittest.TestCase):
         cmd = ['AODMerge_tf.py', '--inputAODFile']
         cmd.extend(inputs)
         cmd.extend(['--outputAOD_MRGFile', 'slowmerged.AOD.pool.root'])
-        cmd.extend(['--outputTAGFile', 'slowTAG.pool.root'])
         cmd.extend(['--reportName', 'jobReportSlow'])
         msg.info('Will run this transform: {0}'.format(cmd))
         p = subprocess.Popen(cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 1)

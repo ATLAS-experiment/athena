@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import sys
 import time
@@ -35,7 +35,7 @@ def main():
 
 def getTransform():
     executorSet = set()
-    executorSet.add(athenaExecutor(name = 'RDOMerge', skeletonFile = None,
+    executorSet.add(athenaExecutor(name = 'RDOMerge',
                                    skeletonCA = 'SimuJobTransforms.RDOMerge_Skeleton',
                                    inData = ['RDO'], outData = ['RDO_MRG']))
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """JobTransform to run LAr CAF jobs"""
 
@@ -14,7 +14,7 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 if __name__ == '__main__':
 
     executorSet = set()
-    executorSet.add(athenaExecutor(name = 'LArCAFcalib', skeletonFile = None,
+    executorSet.add(athenaExecutor(name = 'LArCAFcalib',
                                    skeletonCA='LArCafJobs.LArShapeDumperSkeleton',
                                    substep = 'r2e', inData = ['BS',], outData = ['NTUP_SAMPLESMON','NTUP_HECNOISE']))
     

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## SkimRAW_tf.py - Bytestream skimmer transform
 # @version $Id: RAWSkim_tf.py 643395 2015-02-01 19:51:21Z graemes $ 
@@ -8,15 +8,12 @@
 import sys
 import time
 
-import logging
-
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
 msg.info('logging set in %s' % sys.argv[0])
 
 from PyJobTransforms.transform import transform
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
-from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 

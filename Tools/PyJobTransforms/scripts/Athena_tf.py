@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## A simple athena transform. 
 # @version $Id: Athena_tf.py 557865 2013-08-12 21:54:36Z graemes $ 
@@ -35,7 +35,7 @@ def main():
 
 ## Get the base transform with all arguments added
 def getTransform():
-    trf = transform(executor = athenaExecutor(name = 'athena'))
+    trf = transform(executor = athenaExecutor(name='athena', skeletonCA='PyJobTransforms.HelloWorldSkeleton'))
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)
     addMyArgs(trf.parser)

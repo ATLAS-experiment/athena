@@ -1,16 +1,13 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Run Geant4 simulation on generated events and produce a HITS file.
 """
 
-import os.path
 import sys
 import time
-
-import logging
 
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
@@ -20,7 +17,6 @@ from PyJobTransforms.transform import transform
 from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
-from SimuJobTransforms.simTrfArgs import addForwardDetTrfArgs, addCosmicsTrfArgs, addCommonSimTrfArgs
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
@@ -45,8 +41,9 @@ def main():
     sys.exit(trf.exitCode)
 
 def getTransform():
-    trf = transform(executor = athenaExecutor(name = 'FilterHitTf', substep="filthits", skeletonFile = 'SimuJobTransforms/skeleton.FilterHit.py', skeletonCA = 'SimuJobTransforms.FilterHit_Skeleton',
-                                              tryDropAndReload = False))
+    trf = transform(executor = athenaExecutor(name='FilterHitTf', substep='filthits',
+                                              skeletonCA='SimuJobTransforms.FilterHit_Skeleton',
+                                              tryDropAndReload=False))
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)
     addMyArgs(trf.parser)

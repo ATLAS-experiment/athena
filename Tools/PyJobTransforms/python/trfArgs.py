@@ -391,13 +391,13 @@ class dpdType(object):
         #  if your data is made in a non-standard step
         if substeps == []:
             if 'RAW' in name:
-                self._substeps = ['RAWtoESD']
+                self._substeps = ['RAWtoALL']
             elif 'ESD' in name:
-                self._substeps = ['RAWtoESD']
+                self._substeps = ['RAWtoALL']
             elif 'AOD' in name:
-                self._substeps = ['ESDtoAOD']
+                self._substeps = ['RAWtoALL']
             elif 'NTUP' in name:
-                self._substeps = ['ESDtoDPD', 'AODtoDPD']
+                self._substeps = ['RAWtoALL', 'AODtoDPD']
         else:
             self._substeps = substeps
             
@@ -568,7 +568,7 @@ def addTriggerArguments(parser, addTrigFilter=True):
     if addTrigFilter:
         parser.add_argument('--trigFilterList',
                             type=argFactory(trfArgClasses.argList), nargs="+",
-                            help='Trigger filter list (multiple values can be given separately or split on commas; only understood in RAWtoALL/RAWtoESD)', 
+                            help='Trigger filter list (multiple values can be given separately or split on commas; only understood in RAWtoALL)', 
                             group='Trigger')
 
 ## Tea for two and two for tea... these arguments are used for testing
