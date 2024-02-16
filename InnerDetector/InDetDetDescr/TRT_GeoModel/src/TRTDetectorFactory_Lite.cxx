@@ -932,7 +932,6 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 	  }// iiWheel loop  for Wheel B
       } // if (pCommonEndcapAB[iiSide]) block for Wheel B
     } // iiSide loop for Wheel B
-    //pStrawPlaneB->unref(); // Get eventual seg fault if unref. Clone doesn't increment ref count of orig, See bug #34074
     
   } // end AB
   
@@ -1046,7 +1045,6 @@ void TRTDetectorFactory_Lite::create(GeoPhysVol *)
 	  } // iiWheel loop for Wheel C
       } // if (pCommonEndcapC[iiSide]) block for Wheel C
     } // iiSide loop for Wheel C
-    //pStrawPlaneC->unref(); // Get eventual seg fault if unref. Clone doesn't increment ref count of orig, See bug #34074
 
   } // End Wheel C
 
