@@ -35,9 +35,9 @@ atlas_add_dictionary( TileRecUtilsDict
 set( extra_patterns "LArDetectorToolNV|is still valid|no data retrieved|Database being retired|Reading file|Unable to locate catalog|Resolved path|DigitizationFlags|^Domain|created CondCont|no dictionary for class|^ +[+]|Reading LArPedestalMC|IOV callback|^DetectorStore|TileDetectorTool|Creating TileCondProxyFile|Cache alignment|No RecFlags available|MetaReader|AutoConfiguration|IOVDbSvc +INFO" )
 
 atlas_add_test( TileCellBuilder_test
-  SCRIPT test/TileCellBuilder_test.sh
-  PROPERTIES TIMEOUT 600
-  LOG_IGNORE_PATTERN ${extra_patterns} )
+                SCRIPT test/TileCellBuilder_test.sh
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT noerror.sh)
 
 # The entries 
 # IncrementalExecutor::executeFunction|You are probably missing the definition|Maybe you need to load
