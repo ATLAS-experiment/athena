@@ -8,7 +8,7 @@ from TrigHLTJetHypo.hypoConfigBuilder import hypotool_from_chaindict
 from TrigHLTJetHypo.TrigJetHypoMonitoringConfig import TrigJetHypoToolMonitoring
 from AthenaCommon.Logging import logging
 logger = logging.getLogger(__name__)
-
+import re
 
 import os
 debug = 'JETHYPODEBUG' in os.environ
@@ -123,9 +123,30 @@ def  trigJetCRHypoToolFromDict(chain_dict):
             doBIBrm = int(1)
     else:
         raise Exception("misconfiguration of Exotic jet chain")
-
+    presel_matched = re.match(r'.*emf(?P<cut>\d?\d?[\d\D]+)', chain_dict['chainParts'][0]['trkpresel'])
+    emf_cut = presel_matched.groupdict()['cut']
+    import math
     hypo = CompFactory.TrigJetCRHypoTool(chain_name)
-    hypo.MpufixLogRatio     = 0.5
+    hypo.MpufixLogRatio     = math.log10(1./(float(emf_cut)*0.01) - 1.)
+    hypo.MinjetlogR      = 1.2
+    hypo.MintrackPt      = 2*GeV
+    hypo.MindeltaR       = 0.2
+    hypo.countBIBcells   = 4
+    hypo.doBIBremoval = doBIBrm
+
+    return  hypo
+
+def  trigJetCROldHypoToolFromDict(chain_dict):
+    chain_name = chain_dict['chainName']
+ 
+    doBIBrm = int(0)
+    if 'calrtold' in chain_dict['chainParts'][0]['exotHypo'] or 'calrtoldrmbib' in chain_dict['chainParts'][0]['exotHypo']:
+        if 'calrtoldrmbib' in chain_dict['chainParts'][0]['exotHypo']:
+            doBIBrm = int(1)
+    else:
+        raise Exception("misconfiguration of Exotic jet chain")
+
+    hypo = CompFactory.TrigJetCROldHypoTool(chain_name)
     hypo.MinjetlogR      = 1.2
     hypo.MintrackPt      = 2*GeV
     hypo.MindeltaR       = 0.2
