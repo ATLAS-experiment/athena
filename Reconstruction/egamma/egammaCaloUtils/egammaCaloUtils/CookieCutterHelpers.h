@@ -27,7 +27,7 @@ struct CentralPosition : public AthMessaging
   float phiF = 999;
   float emaxF = -999 * Gaudi::Units::GeV;
 
-  CentralPosition() = default;
+  CentralPosition() = delete;
   CentralPosition(
     const std::vector<const xAOD::CaloCluster*>& clusters,
     const CaloDetDescrManager& mgr);
