@@ -22,7 +22,12 @@
 
 
 // Forward declarations
-namespace ROOT { namespace Experimental { namespace Detail {
+namespace ROOT { namespace Experimental {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+  namespace Internal {
+#else
+  namespace Detail {
+#endif
    class RPageSource;
 } } }
 
@@ -40,7 +45,11 @@ namespace RootAuxDynIO {
  * POOL namespace declaration
  */
 namespace pool  {  
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+   using ROOT::Experimental::Internal::RPageSource;
+#else
    using ROOT::Experimental::Detail::RPageSource;
+#endif
 
    class RootTreeContainer;
    
