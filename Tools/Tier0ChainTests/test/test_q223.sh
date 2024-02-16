@@ -10,6 +10,7 @@
 # art-include: 22.0-mc20/Athena
 # art-include: 21.3/Athena
 # art-include: 21.9/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 8                                                                                                                                     
 # Added "preExec" here, because it was needed to disable dynamic alignment wrt q223 as discussed in ATLASRECTS-5783 (changed InDetGeometryFlags.useDynamicAlignFolders to false wrt q223).
 # Updated to data18 input file (q223 uses data15 input file)
