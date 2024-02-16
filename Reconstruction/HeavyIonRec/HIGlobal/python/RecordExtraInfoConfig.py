@@ -6,7 +6,7 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.ComponentFactory import CompFactory
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
 
-spacePointKeys = [ "xAOD::BaseContainer#SpacePoints", "xAOD::AuxContainerBase#SpacePointsAux.x.y.z.tot.csize" ]
+spacePointKeys = [ "xAOD::BaseContainer#SpacePoints", "xAOD::AuxContainerBase#SpacePointsAux.x.y.z.tot.csize.module1.module2" ]
 mbtsBitsKeys = [ "xAOD::TrigT2MbtsBitsContainer#MBTSBits", "xAOD::TrigT2MbtsBitsAuxContainer#MBTSBitsAux." ]
 
 def _inRecoOrLater(flags):

@@ -3,6 +3,8 @@
 */
 #include <algorithm>
 #include "InDetPrepRawData/PixelCluster.h"
+#include "InDetIdentifier/PixelID.h"
+#include "InDetIdentifier/SCT_ID.h"
 #include "SpacePointCopier.h"
 
 SpacePointCopier::SpacePointCopier(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -64,6 +66,14 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
     static const SG::AuxElement::Accessor< float > z ("z");
     static const SG::AuxElement::Accessor< float > tot ("tot");
     static const SG::AuxElement::Accessor< short > csize ("csize");
+    static const SG::AuxElement::Accessor< unsigned int > module1 ("module1");
+    static const SG::AuxElement::Accessor< unsigned int > module2 ("module2");
+
+    const PixelID *pixelID = nullptr;
+    const SCT_ID *stripID = nullptr;
+    
+    ATH_CHECK(detStore()->retrieve(pixelID, "PixelID"));
+    ATH_CHECK(detStore()->retrieve(stripID, "SCT_ID"));
 
 
     for ( auto coll: *pixelSPContainer ) {
@@ -76,6 +86,9 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
         const InDet::PixelCluster* cluster = static_cast<const InDet::PixelCluster *>(sp->clusterList().first);
         tot(*item) = float(cluster->totalToT());
         csize(*item) = short(cluster->totList().size());
+        auto[hashId1, hashId2]  = sp->elementIdList();
+        module1(*item) = hashId1;
+        module2(*item) = hashId2;     
 
       }
     }
@@ -90,7 +103,10 @@ StatusCode SpacePointCopier::execute(const EventContext& context) const
         z(*item) =  float(sp->globalPosition().z());   
         tot(*item) = 0;
         csize(*item) = 0;
-     
+
+        auto[hashId1, hashId2]  = sp->elementIdList();
+        module1(*item) = hashId1;
+        module2(*item) = hashId2;     
       }
     }
     for ( size_t i = 0; i < std::min(10ul, output->size()); ++i ) {
