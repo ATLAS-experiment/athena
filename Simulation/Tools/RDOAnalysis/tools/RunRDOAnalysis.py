@@ -43,6 +43,7 @@ if args.localgeo:
     flags.ITk.Geometry.AllLocal = True
 if args.presampling:
     flags.Common.ProductionStep = ProductionStep.PileUpPresampling
+flags.Output.HISTFileName = 'RDOAnalysis.root'
 
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 setupDetectorFlags(flags, args.detectors, use_metadata=True, toggle_geometry=True)

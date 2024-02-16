@@ -238,6 +238,9 @@ def addHITSValidArgs(parser):
     parser.add_argument('--outputHIST_SIMFile', nargs = '+',
                         type=argFactory(argFile, io='output'),
                         help=' Output HIST_SIM files', group='SimValid_tf')
+    parser.add_argument('--localgeo',
+                        type=argFactory(argBool),
+                        help='Use local Geo XML file', group='SimValid_tf')
 
 ## Add RDO validation transform arguments
 def addRDOValidArgs(parser):
@@ -248,3 +251,9 @@ def addRDOValidArgs(parser):
     parser.add_argument('--outputHIST_DIGIFile', nargs = '+',
                         type=argFactory(argFile, io='output'),
                         help=' Output HIST_DIGI files', group='DigiValid_tf')
+    parser.add_argument('--PileUpPresampling',
+                        type=argFactory(argBool),
+                        help='Running over a presamped RDO file.', group='DigiValid_tf')
+    parser.add_argument('--localgeo',
+                        type=argFactory(argBool),
+                        help='Use local Geo XML file', group='DigiValid_tf')
