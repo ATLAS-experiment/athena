@@ -1,6 +1,6 @@
 """Main overlay transform configuration helpers
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 
 from PyJobTransforms.trfArgClasses import argBSFile, argFactory, argList, argRDOFile, argSubstep, argSubstepInt
@@ -60,7 +60,7 @@ def addOverlayArguments(parser, in_reco_chain=False):
 
 def addOverlaySubstep(executor_set, in_reco_chain=False):
     executor = athenaExecutor(name='Overlay',
-                              skeletonFile='OverlayConfiguration/skeleton_LegacyOverlay.py',
+                              skeletonFile=None,
                               skeletonCA='OverlayConfiguration.OverlaySkeleton',
                               substep='overlay',
                               tryDropAndReload=False,

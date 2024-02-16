@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format, MetadataCategory, HIMode
@@ -19,7 +19,7 @@ def RecoSteering(flags):
         acc.merge(ByteStreamReadCfg(flags))
         # Decorate EventInfo obj with Beam Spot information
         if flags.Reco.EnableBeamSpotDecoration:
-            from xAODEventInfoCnv.EventInfoBeamSpotDecoratorAlgConfig import (
+            from xAODEventInfoCnv.xAODEventInfoCnvConfig import (
                 EventInfoBeamSpotDecoratorAlgCfg)
             acc.merge(EventInfoBeamSpotDecoratorAlgCfg(flags))
         log.info("---------- Configured BS reading")

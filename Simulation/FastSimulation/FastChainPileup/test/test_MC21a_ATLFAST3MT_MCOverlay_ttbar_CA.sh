@@ -56,7 +56,7 @@ if [ ${ca} -eq 0 ]
 then
     # Reconstruction
     Reco_tf.py \
-               --CA "all:True" "RDOtoRDOTrigger:False" \
+               --CA \
                --inputRDOFile ${RDO_File} \
                --outputAODFile ${AOD_File} \
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \

@@ -69,18 +69,20 @@ athenapooltest_run_test( AthenaPoolTestRead AthenaPoolTestRead
                          DEPENDS AthenaPoolTestWrite )
 
 # Write with DoubleEventSelector
-athenapooltest_run_test( AthenaPoolTestWriteDoubleSelector AthenaPoolTestWriteDoubleSelector
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest" )
-athenapooltest_run_test( AthenaPoolTestReadDoubleSelector AthenaPoolTestReadDoubleSelector
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
-                         DEPENDS AthenaPoolTestWriteDoubleSelector )
+# TODO: migrate to CA
+# athenapooltest_run_test( AthenaPoolTestWriteDoubleSelector AthenaPoolTestWriteDoubleSelector
+#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest" )
+# athenapooltest_run_test( AthenaPoolTestReadDoubleSelector AthenaPoolTestReadDoubleSelector
+#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
+#                          DEPENDS AthenaPoolTestWriteDoubleSelector )
 
 # Add on test of navigation still using simple objects:
 # AthenaPoolTestWrite - Step2 - rewrite part in another file
 # DoubleEventSelector
-athenapooltest_run_test( AthenaPoolTestStep2WriteDoubleSelector AthenaPoolTestStep2WriteDoubleSelector
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
-                         DEPENDS AthenaPoolTestWriteDoubleSelector )
+# TODO: migrate to CA
+# athenapooltest_run_test( AthenaPoolTestStep2WriteDoubleSelector AthenaPoolTestStep2WriteDoubleSelector
+#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
+#                          DEPENDS AthenaPoolTestWriteDoubleSelector )
 # normal EventSelector
 athenapooltest_run_test( AthenaPoolTestStep2Write AthenaPoolTestStep2Write
                          "^AthenaPoolTestD"
@@ -101,12 +103,13 @@ athenapooltest_run_test( LArCellContRead LArCellContReader_jobOptions
                          DEPENDS LArCellContWriter )
 
 # Read two RDOs with the DoubleEventSelector
-athenapooltest_run_test( ReadRDODoubleSelector ReadRDODoubleSelector
-                         "^DoubleEvent|^SecondaryEvent|^RDOReader"
-                         DEPENDS InDetRawDataWriter LArCellContWriter )
-athenapooltest_run_test( ReadCombinedRDO ReadCombinedRDO
-                         "^DoubleEvent|^SecondaryEvent|^LArCellContFake|^InDetRawDataFak"
-                         DEPENDS ReadRDODoubleSelector )
+# TODO: migrate to CA
+# athenapooltest_run_test( ReadRDODoubleSelector ReadRDODoubleSelector
+#                          "^DoubleEvent|^SecondaryEvent|^RDOReader"
+#                          DEPENDS InDetRawDataWriter LArCellContWriter )
+# athenapooltest_run_test( ReadCombinedRDO ReadCombinedRDO
+#                          "^DoubleEvent|^SecondaryEvent|^LArCellContFake|^InDetRawDataFak"
+#                          DEPENDS ReadRDODoubleSelector )
 
 # Test basic overlay algorithms with DoubleEventSelector
 # TODO: migrate to CA

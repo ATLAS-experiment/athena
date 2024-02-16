@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @author Tulin Mete
@@ -187,9 +187,6 @@ if __name__=='__main__':
 
     flags.dump()
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(flags)
 
@@ -230,10 +227,10 @@ if __name__=='__main__':
             bytestreamInput.StreamNames = ['express','IDCosmic','HLT_IDCosmic','CosmicMuons','CosmicCalo']
         else:
             if GetAtlasReady():
-                printfunc ("ATLAS READY, reading express stream")
+                print ("ATLAS READY, reading express stream")
                 bytestreamInput.StreamNames = ['express']
             else:
-                printfunc ("ATLAS NOT READY, reading standby stream")
+                print ("ATLAS NOT READY, reading standby stream")
                 bytestreamInput.StreamNames = ['express','IDCosmic','HLT_IDCosmic','CosmicMuons','MinBias','Standby','Main','CosmicCalo']
     else:
         bytestreamInput.StreamLogic = 'Ignore'
@@ -247,7 +244,7 @@ if __name__=='__main__':
     # This needs to be fixed by muon experts 
     # ######################################################################
 
-    from xAODEventInfoCnv.EventInfoBeamSpotDecoratorAlgConfig import EventInfoBeamSpotDecoratorAlgCfg
+    from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoBeamSpotDecoratorAlgCfg
     acc.merge(EventInfoBeamSpotDecoratorAlgCfg(flags))
 
     # ###########################################################

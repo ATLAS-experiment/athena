@@ -58,7 +58,7 @@ if [ ${ca} -eq 0 ]
 then
     # Reconstruction
     Reco_tf.py \
-               --CA "all:True" "RDOtoRDOTrigger:False" \
+               --CA \
                --inputRDOFile ${RDO_File} \
                --outputAODFile ${AOD_File} \
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \
@@ -68,7 +68,7 @@ then
                --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
                --athenaopts "all:--threads=1" \
                --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
-               --preExec 'RAWtoALL:flags.Reco.EnableTrackOverlay=True; flags.TrackOverlay.MLThreshold=0.1;' 'RDOtoRDOTrigger:from OverlayCommonAlgs.OverlayFlags import overlayFlags; overlayFlags.doTrackOverlay=True; ConfigFlags.Overlay.doTrackOverlay=True;'\
+               --preExec 'RAWtoALL:flags.Reco.EnableTrackOverlay=True; flags.TrackOverlay.MLThreshold=0.1;' 'RDOtoRDOTrigger:flags.Overlay.doTrackOverlay=True;'\
                --imf False
 
      rec=$?
@@ -80,7 +80,7 @@ then
                     --maxEvents '-1' \
                     --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
                     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
-		    --asetup 'Athena,23.0.53' \
+		                --asetup 'Athena,23.0.53' \
                     --ignoreErrors True \
                     --validationFlags 'doInDet' \
                     --valid 'True'
