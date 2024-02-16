@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPGATrackSimSGInput_FPGATrackSimSGTORAWHITSTOOL_H
@@ -84,7 +84,6 @@ private:
   Gaudi::Property<double>      m_minPt { this, "minPt", .8*CLHEP::GeV };
 
   //internal pointers
-  AtlasDetectorID* m_idHelper = nullptr;
   const PixelID* m_pixelId = nullptr;
   const SCT_ID* m_sctId = nullptr;
 
