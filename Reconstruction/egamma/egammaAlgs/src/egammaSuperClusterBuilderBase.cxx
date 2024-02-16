@@ -472,8 +472,6 @@ egammaSuperClusterBuilderBase::createNewCluster(
   xAOD::CaloClusterContainer* newClusters,
   xAOD::CaloClusterContainer* precorrClusters) const
 {
-
-  const auto acSize = clusters.size();
   if (clusters.empty()) {
     ATH_MSG_ERROR("Missing the seed cluster! Should not happen.");
     return false;
@@ -557,13 +555,13 @@ egammaSuperClusterBuilderBase::createNewCluster(
   if (m_linkToConstituents) {
     // EDM vector to constituent clusters
     std::vector<ElementLink<xAOD::CaloClusterContainer>> constituentLinks;
-    static const SG::AuxElement::Accessor<
-      ElementLink<xAOD::CaloClusterContainer>>
-      sisterCluster("SisterCluster");
-    for (size_t i = 0; i < acSize; i++) {
+    for (const xAOD::CaloCluster* cluster : clusters) {
+      ElementLink<xAOD::CaloClusterContainer> sisterCluster = 
+        cluster->getSisterClusterLink();
+
       // Set the element Link to the constitents
-      if (sisterCluster.isAvailable(*clusters[i])) {
-        constituentLinks.push_back(sisterCluster(*clusters[i]));
+      if (sisterCluster) {
+        constituentLinks.push_back(sisterCluster);
       } else {
         ATH_MSG_WARNING("No sister Link available");
       }
