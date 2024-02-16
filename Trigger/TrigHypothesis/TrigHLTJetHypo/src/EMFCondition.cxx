@@ -21,7 +21,7 @@ bool EMFCondition::isSatisfied(const pHypoJet& ip,
   float emf =999; 
   ip->getAttribute("EMFrac",emf);
   bool pass = m_min >= emf;
-
+ 
   if(collector){
     const void* address = static_cast<const void*>(this);
 

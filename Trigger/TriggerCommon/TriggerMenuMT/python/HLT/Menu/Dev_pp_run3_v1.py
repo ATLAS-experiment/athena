@@ -244,16 +244,35 @@ def getDevSignatures():
 
     chains['Jet'] = [
 
+        # old calratio chain with emf cut  
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac006_calrtold_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        # new calratio chain  fo comparison only
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1TAU100', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac024_calratio_roiftf_preselj20emf24_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac012_calratio_roiftf_preselj20emf12_L1TAU60', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1eTAU80HL', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1eTAU60HL', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1J100', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
         # new calratio chain  
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1J100', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1eTAU60_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1eTAU60_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1eTAU40HT', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1eTAU60HL', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1eTAU80HL', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1eTAU60_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1eTAU60_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1eTAU60_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1eTAU60_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1TAU40_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1TAU40_EMPTY', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1TAU40_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1TAU40_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1eTAU40HT', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1eTAU40HT', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        # Phase I duplicates for primary calratio TAU
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
+
         # ATR-28563 Multi-BC L1Topo 
         ChainProp(name='HLT_noalg_L1LLPDPHI-jXE27-jJ27', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
         ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1LLPDPHI-jXE27-jJ27', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),

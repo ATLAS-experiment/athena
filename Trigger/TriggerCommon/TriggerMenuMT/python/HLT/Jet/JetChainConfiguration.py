@@ -16,7 +16,7 @@ from .JetMenuSequencesConfig import (
     jetCaloRecoMenuSequence, 
     jetCaloPreselMenuSequence,
 )
-from .ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRMenuSequence
+from .ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRMenuSequence,jetCROldMenuSequence
 
 if isComponentAccumulatorCfg():
     def callGenerator(genf, flags, **kwargs):
@@ -200,6 +200,9 @@ class JetChainConfiguration(ChainConfigurationBase):
         elif self.exotHypo != '' and ("calratio" in self.exotHypo):
              CRStep = self.getJetCRChainStep(flags, self.jetName, self.exotHypo)
              chainSteps+= [ CRStep]
+        elif self.exotHypo != '' and ("calrtold" in self.exotHypo):
+            CRStep = self.getJetCROldChainStep(flags,self.jetName, self.exotHypo)
+            chainSteps+= [self.getEmptyStep(2, 'RoIFTFEmptyStep'), CRStep]
 
         myChain = self.buildChain(chainSteps)
 
@@ -356,4 +359,20 @@ class JetChainConfiguration(ChainConfigurationBase):
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])#, comboHypoCfg=PassthroughComboHypoCfg)
 
         return chainStep
+    def getJetCROldChainStep(self, flags, jetCollectionName, exotdictstring):
+        
+        if 'calrtold' in exotdictstring:
+            MinjetlogR = 1.2
+            doBIBremoval = int(0)
+        else:
+            log.error('Misconfiguration of trackless exotic jet chain - need calrtold selection')
+            exit(1)
 
+        log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
+
+        stepName = "CRPldStep_"+self.chainName
+        jetSeq = callGenerator( jetCROldMenuSequence, flags, jetsIn=jetCollectionName)
+        #from TrigGenericAlgs.TrigGenericAlgsConfig import PassthroughComboHypoCfg
+        chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])#, comboHypoCfg=PassthroughComboHypoCfg)
+
+        return chainStep
