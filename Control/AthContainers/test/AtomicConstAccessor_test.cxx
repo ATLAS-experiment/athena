@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -80,7 +80,7 @@ void test1()
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp2_id = r.getAuxID<int> ("anInt2", "",
-                                          SG::AuxTypeRegistry::Flags::Atomic);
+                                          SG::AuxVarFlags::Atomic);
   assert (ityp2.auxid() == ityp2_id);
 
   static_assert (std::is_same<decltype(ityp2(b)),

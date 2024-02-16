@@ -126,7 +126,7 @@ void test_type(const std::string& typname,
   assert (auxid == r.getAuxID<T> (name, clsname));
   assert (auxid == r.findAuxID (name, clsname));
   assert (auxid == r.getAuxID (typeid(T), name, clsname));
-  assert (r.getFlags (auxid) == SG::AuxTypeRegistry::Flags::None);
+  assert (r.getFlags (auxid) == SG::AuxVarFlags::None);
 
   EXPECT_EXCEPTION (SG::ExcAuxTypeMismatch, r.getAuxID<char> (name, clsname));
 
@@ -479,14 +479,14 @@ void test_atomic()
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid1 = r.getAuxID<int> ("atest1");
   SG::auxid_t auxid2 = r.getAuxID<int> ("atest2", "",
-                                        SG::AuxTypeRegistry::Flags::Atomic);
+                                        SG::AuxVarFlags::Atomic);
   assert (r.getAuxID<int> ("atest1", "",
-                           SG::AuxTypeRegistry::Flags::Atomic) == auxid1);
+                           SG::AuxVarFlags::Atomic) == auxid1);
   assert (r.getAuxID<int> ("atest2", "",
-                           SG::AuxTypeRegistry::Flags::Atomic) == auxid2);
+                           SG::AuxVarFlags::Atomic) == auxid2);
 
-  assert (r.getFlags (auxid1) == SG::AuxTypeRegistry::Flags::None);
-  assert (r.getFlags (auxid2) == SG::AuxTypeRegistry::Flags::Atomic);
+  assert (r.getFlags (auxid1) == SG::AuxVarFlags::None);
+  assert (r.getFlags (auxid2) == SG::AuxVarFlags::Atomic);
   
   EXPECT_EXCEPTION (SG::ExcAtomicMismatch, r.getAuxID<int> ("atest2"));
 }
