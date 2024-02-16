@@ -7,7 +7,7 @@ from AthenaCommon.Logging import logging
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
-from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu 
+from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu 
 
 from collections import OrderedDict
 from copy import deepcopy
