@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from RngComps.RandomServices import dSFMT, AthRNGSvcCfg
-from DigitizationConfig.import PileUpEventType
+from DigitizationConfig import PileUpEventType
 from DigitizationConfig.RunDependentConfig import (
     maxNevtsPerXing,
     LumiProfileSvcCfg, NoProfileSvcCfg,
