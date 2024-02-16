@@ -264,7 +264,11 @@ CorrectionCode JetJvtEfficiency::applyAllEfficiencyScaleFactor(const xAOD::IPart
       result = this->getInefficiencyScaleFactor(*jet,current_sf);
     }
 
-    if (result == CP::CorrectionCode::Error) {
+    // set the SF to 1 in case the corrections don't apply for this jet
+    if (result == CP::CorrectionCode::OutOfValidityRange) {
+      current_sf = 1.0;
+    }
+    else if (result == CP::CorrectionCode::Error) {
       ATH_MSG_ERROR("Inexplicably failed JVT calibration" );
       return result;
     }
