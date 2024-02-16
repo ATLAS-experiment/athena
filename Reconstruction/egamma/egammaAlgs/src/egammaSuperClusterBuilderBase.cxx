@@ -472,8 +472,6 @@ egammaSuperClusterBuilderBase::createNewCluster(
   xAOD::CaloClusterContainer* newClusters,
   xAOD::CaloClusterContainer* precorrClusters) const
 {
-
-  const auto acSize = clusters.size();
   if (clusters.empty()) {
     ATH_MSG_ERROR("Missing the seed cluster! Should not happen.");
     return false;
@@ -492,34 +490,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
   newCluster->setClusterSize(xAOD::CaloCluster::SuperCluster);
   // Let's try to find the eta and phi of the hottest cell in L2.
   // This will be used as the center for restricting the cluster size.
-  CookieCutterHelpers::CentralPosition cpRef(clusters);
-  // these are the same as the reference but in calo frame
-  // (after the processing below)
-  CookieCutterHelpers::CentralPosition cp0 = cpRef;
-  // Get the hotest in raw co-ordinates
-  if (cp0.emaxB > 0) {
-    const CaloDetDescrElement* dde =
-      mgr.get_element(CaloCell_ID::EMB2, cpRef.etaB, cpRef.phiB);
-    if (dde) {
-      cp0.etaB = dde->eta_raw();
-      cp0.phiB = dde->phi_raw();
-    } else {
-      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
-                      << cpRef.etaB << ", phi = " << cpRef.phiB);
-    }
-  }
-
-  if (cp0.emaxEC > 0) {
-    const CaloDetDescrElement* dde =
-      mgr.get_element(CaloCell_ID::EME2, cpRef.etaEC, cpRef.phiEC);
-    if (dde) {
-      cp0.etaEC = dde->eta_raw();
-      cp0.phiEC = dde->phi_raw();
-    } else {
-      ATH_MSG_WARNING("Couldn't get CaloDetDescrElement from mgr for eta = "
-                      << cpRef.etaEC << ", phi = " << cpRef.phiEC);
-    }
-  }
+  CookieCutterHelpers::CentralPosition cp0(clusters, mgr);
 
   // Set the eta0/phi0 based on the references, but in raw coordinates
   if (cp0.emaxB >= cp0.emaxEC) {
@@ -584,13 +555,13 @@ egammaSuperClusterBuilderBase::createNewCluster(
   if (m_linkToConstituents) {
     // EDM vector to constituent clusters
     std::vector<ElementLink<xAOD::CaloClusterContainer>> constituentLinks;
-    static const SG::AuxElement::Accessor<
-      ElementLink<xAOD::CaloClusterContainer>>
-      sisterCluster("SisterCluster");
-    for (size_t i = 0; i < acSize; i++) {
+    for (const xAOD::CaloCluster* cluster : clusters) {
+      ElementLink<xAOD::CaloClusterContainer> sisterCluster = 
+        cluster->getSisterClusterLink();
+
       // Set the element Link to the constitents
-      if (sisterCluster.isAvailable(*clusters[i])) {
-        constituentLinks.push_back(sisterCluster(*clusters[i]));
+      if (sisterCluster) {
+        constituentLinks.push_back(sisterCluster);
       } else {
         ATH_MSG_WARNING("No sister Link available");
       }
