@@ -37,6 +37,7 @@ private:
   SG::ReadHandleKey<LArTTL1Container> m_inputTTL1HADKey;
   SG::ReadHandleKey<LArTTL1Container> m_inputTTL1EMKey;
   SG::ReadHandleKey<LArDigitContainer> m_inputDigitKey;
+  BooleanProperty m_presampling{this, "PreSampling", false};
 
   // LAR RAW CHANNELS
   std::vector<unsigned long long>* m_larID;

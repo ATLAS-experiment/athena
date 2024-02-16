@@ -41,6 +41,7 @@ private:
   SG::ReadHandleKey<TileL2Container> m_inputL2Key;
   SG::ReadHandleKey<TileDigitsContainer> m_inputDigitsFltKey;
   SG::ReadHandleKey<TileDigitsContainer> m_inputDigitsMuRcvKey;
+  BooleanProperty m_presampling{this, "PreSampling", false};
   // TileRawChannel
   // AMP, TIME, QUAL REALLY VECTORS - CHECK SIZE/OUTPUT
   std::vector<unsigned long long>* m_adcID;
