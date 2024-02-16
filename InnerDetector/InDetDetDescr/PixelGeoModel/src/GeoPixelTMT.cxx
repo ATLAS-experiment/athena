@@ -32,13 +32,10 @@ GeoPixelTMT::GeoPixelTMT(InDetDD::PixelDetectorManager* ddmgr,
 {
   if(!m_sqliteReader) {
     m_physVol = GeoPixelTMT::Build();
-    m_physVol->ref();
+
   }
 }
 
-GeoPixelTMT::~GeoPixelTMT(){
-  if(m_physVol) m_physVol->unref();
-}
 
 GeoVPhysVol* GeoPixelTMT::Build() {
 
@@ -96,7 +93,7 @@ GeoVPhysVol* GeoPixelTMT::Build() {
     double angleydzn = 0;
     double angleydzp = 0;
 
-    const GeoShape * shape = nullptr;
+    GeoIntrusivePtr<const GeoShape> shape{};
     if (w1 == w2 && theta == 0) {
       // Its a box
       shape = new GeoBox(0.5*w1, 0.5*widthy, 0.5*length);
@@ -105,8 +102,7 @@ GeoVPhysVol* GeoPixelTMT::Build() {
                           0.5*widthy, 0.5*w2, 0.5*w2, angleydzp);
       // Test GeoModel volume calculation. OK.
     }
-    //assuming 'shape' cannot be null.
-    shape->ref();
+
 
     // end of the old part
     // now we put everything into the assembly
@@ -145,7 +141,6 @@ GeoVPhysVol* GeoPixelTMT::Build() {
 
       }
     }
-    shape->unref(); //this will delete shape if it was never added
   }
   // Return the assembly
   return theTMT;
