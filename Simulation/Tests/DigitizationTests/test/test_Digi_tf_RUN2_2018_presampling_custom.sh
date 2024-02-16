@@ -30,7 +30,7 @@ Digi_tf.py \
     --jobNumber 568 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileName} \
-    --postInclude 'PyJobTransforms.UseFrontier' 'HITtoRDO:Digitization.DigitizationSteering.DigitizationTestingPostInclude' \
+    --postInclude 'PyJobTransforms.UseFrontier' 'HITtoRDO:DigitizationConfig.DigitizationSteering.DigitizationTestingPostInclude' \
     --preExec 'HITtoRDO:ConfigFlags.Digitization.PU.CustomProfile={"run":310000, "startmu":0.0, "endmu":10.0, "stepmu":1.0, "startlb":1, "timestamp": 1550000000};' \
     --preInclude 'HITtoRDO:Campaigns.MC20e' \
     --skipEvents 0

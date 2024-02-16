@@ -10,13 +10,13 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # Auxiliary
 def maxNevtsPerXing(flags):
     """Return the largest minbias pileup value, for PileUpEvtLoopMgr caches"""
-    # migrated from DigitizationFlags.py
+    # migrated from DigitizationConfig.lags.py
     pDicts = flags.Input.RunAndLumiOverrideList
     return max(element["mu"] for element in pDicts)
 
 
 def runLumiListAndScaleFactorLists(flags):
-    # migrated from DigitizationFlags.py
+    # migrated from DigitizationConfig.lags.py
     runLumiList = []
     scaleFactorList = []
     pDicts = flags.Input.RunAndLumiOverrideList

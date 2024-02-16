@@ -50,11 +50,11 @@ def fromRunArgs(runArgs):
         detectors = None
 
     # Setup digitization flags
-    from Digitization.DigitizationConfigFlags import digitizationRunArgsToFlags
+    from DigitizationConfig.DigitizationConfigFlags import digitizationRunArgsToFlags
     digitizationRunArgsToFlags(runArgs, flags)
 
     # Setup common digitization flags
-    from Digitization.DigitizationConfigFlags import setupDigitizationFlags
+    from DigitizationConfig.DigitizationConfigFlags import setupDigitizationFlags
     setupDigitizationFlags(runArgs, flags)
     log.info('Running with pile-up: %s', flags.Digitization.PileUp)
 
@@ -76,7 +76,7 @@ def fromRunArgs(runArgs):
     processPreExec(runArgs, flags)
 
     # Load pile-up stuff after pre-include/exec to ensure everything is up-to-date
-    from Digitization.DigitizationConfigFlags import pileupRunArgsToFlags
+    from DigitizationConfig.DigitizationConfigFlags import pileupRunArgsToFlags
     pileupRunArgsToFlags(runArgs, flags)
 
     # Setup pile-up profile
@@ -94,11 +94,11 @@ def fromRunArgs(runArgs):
     flags.lock()
 
     # Main overlay steering
-    from Digitization.DigitizationSteering import DigitizationMainCfg
+    from DigitizationConfig.DigitizationSteering import DigitizationMainCfg
     cfg = DigitizationMainCfg(flags)
 
     # Special message service configuration
-    from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
+    from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
     cfg.merge(DigitizationMessageSvcCfg(flags))
 
     # Special Configuration postInclude

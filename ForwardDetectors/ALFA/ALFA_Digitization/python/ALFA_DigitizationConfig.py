@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
-from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the ALFA Digitization code.
@@ -82,7 +82,7 @@ def ALFA_DigitizationBasicCfg(flags, **kwargs):
     if "PileUpTools" not in kwargs:
         PileUpTools = acc.popToolsAndMerge(ALFA_PileUpToolCfg(flags))
         kwargs["PileUpTools"] = PileUpTools
-    from Digitization.PileUpToolsConfig import PileUpToolsCfg
+    from DigitizationConfig.PileUpToolsConfig import PileUpToolsCfg
     acc.merge(PileUpToolsCfg(flags, **kwargs))
     return acc
 
