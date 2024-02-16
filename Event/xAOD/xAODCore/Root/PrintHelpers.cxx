@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -116,7 +116,7 @@ std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
 
       // The type of the variable:
       const std::type_info* ti = reg.getType( auxid );
-      if( reg.getFlags( auxid ) & SG::AuxTypeRegistry::Atomic ) {
+      if( reg.getFlags( auxid ) & SG::AuxVarFlags::Atomic ) {
         if( *ti == typeid( unsigned int ) ) {
           SG::AtomicConstAccessor<unsigned int> acc( reg.getName( auxid ) );
           if ( acc.isAvailable( obj )) {

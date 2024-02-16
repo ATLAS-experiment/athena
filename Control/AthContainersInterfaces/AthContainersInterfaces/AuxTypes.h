@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: AuxTypes.h 781615 2016-11-01 16:20:50Z ssnyder $
 /**
  * @file AthContainersInterfaces/AuxTypes.h
  * @author scott snyder <snyder@bnl.gov>
@@ -21,6 +18,7 @@
 
 #include <cstddef>
 #include "CxxUtils/ConcurrentBitset.h"
+#include "CxxUtils/bitmask.h"
 
 
 namespace SG {
@@ -53,6 +51,30 @@ public:
     : CxxUtils::ConcurrentBitset (nbits)
   {
   }
+};
+
+
+/// Additional flags to qualify an auxiliary variable.
+enum AuxVarFlags {
+  /// No special flags set.
+  None   = 0x00,
+
+  /// Mark that this variable should only be accessed atomically.
+  /// If this is set, then the variable can be accessed only via
+  /// @c AtomicDecorator.
+  /// Be aware that this is not completely safe; it is still possible
+  /// to have non-atomic accesses to the variable via either the implicit
+  /// operations provided by this class or by explicit access to the
+  /// value vector.  Therefore, this is not recommended for general use.
+  /// Contact core software before using this for new code.
+  Atomic = 0x01,
+
+  // These flags control the behavior of findAuxID() but are not
+  // stored with the variable.
+  SkipNameCheck = 0x80,
+
+  /// Enable bitwise functions on this enum; see bitmask.h.
+  ATH_BITMASK
 };
 
 

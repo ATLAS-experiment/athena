@@ -23,7 +23,6 @@
 #include "AthContainers/tools/threading.h"
 #include "CxxUtils/ConcurrentStrMap.h"
 #include "CxxUtils/SimpleUpdater.h"
-#include "CxxUtils/bitmask.h"
 #ifndef XAOD_STANDALONE
 #include "AthenaKernel/IInputRename.h"
 #include "AthenaKernel/IStringPool.h"
@@ -64,27 +63,9 @@ class AuxTypeRegistry
 {
 public:
   /// Additional flags to qualify an auxiliary variable.
-  enum Flags {
-    /// No special flags set.
-    None   = 0x00,
+  // Now in AuxTypes.h to avoid cyclic header dependencies.
+  using Flags = SG::AuxVarFlags;
 
-    /// Mark that this variable should only be accessed atomically.
-    /// If this is set, then the variable can be accessed only via
-    /// @c AtomicDecorator.
-    /// Be aware that this is not completely safe; it is still possible
-    /// to have non-atomic accesses to the variable via either the implicit
-    /// operations provided by this class or by explicit access to the
-    /// value vector.  Therefore, this is not recommended for general use.
-    /// Contact core software before using this for new code.
-    Atomic = 0x01,
-
-    // These flags control the behavior of findAuxID() but are not
-    // stored with the variable.
-    SkipNameCheck = 0x80,
-
-    /// Enable bitwise functions on this enum; see bitmask.h.
-    ATH_BITMASK
-  };
 
   /**
    * @brief Return the singleton registry instance.
