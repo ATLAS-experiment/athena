@@ -75,7 +75,9 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         findAllJets = ['1'+el if len(el) == 1 else el for el in findAllJets]
         nAllJets = sum(int(i[:-1]) for i in findAllJets)
         nCentralJets = sum(int(i[:-1]) if 'c' in i else 0 for i in findAllJets)
-        assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. Please investigate."
+        findAllPts = re.findall(r'[jacf](?P<ptcut>\d+)', presel_cut_str)
+        ptCut = min(float(i) for i in findAllPts)
+        assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. This isn't currently supported. Please investigate."
 
     preselCommonJetParts = dict(JetChainParts_Default)
     
@@ -99,6 +101,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
         if hasDIPZsel: cut_dict['region'] = 'c'
+        if hasDIPZsel: cut_dict['cut'] = ptCut
 
         if 'mult' not in cut_dict.keys(): cut_dict['mult'] = ''
         if 'emfc' not in cut_dict.keys(): cut_dict['emfc'] = ''
@@ -119,7 +122,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
         elif scenario == "Z":
-            hyposcenario=f'Z{dipzwp}XX{nCentralJets}c'
+            hyposcenario=f'Z{dipzwp}XX{nCentralJets}c{cut}'
             prefilt = cut_dict['prefilt']   
             if prefilt != '': prefilters.append(prefilt)
             threshold='0'
