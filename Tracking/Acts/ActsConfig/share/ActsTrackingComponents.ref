@@ -5,17 +5,22 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkMainPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : True
 Tracking.ActiveConfig.doAthenaSpacePoint : True
 Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsTrack : False					       
+Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to           Tracking.ITkMainPass 
+Tracking.ITkMainPass           points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkMainPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : False
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : False
@@ -28,6 +33,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to           Tracking.ITkMainPass 
+Tracking.ITkMainPass           points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkActsPass
 
@@ -35,17 +43,22 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is Acts
 Flag Name                                : Value
+HERE rev {'Tracking.ITkActsPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
 Tracking.ActiveConfig.doAthenaCluster    : False
 Tracking.ActiveConfig.doAthenaSeed       : False
 Tracking.ActiveConfig.doAthenaSpacePoint : False
 Tracking.ActiveConfig.doAthenaToActsCluster : False
 Tracking.ActiveConfig.doAthenaToActsSpacePoint : False
-Tracking.ActiveConfig.doAthenaToActsTrack : False					       
+Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to           Tracking.ITkActsPass 
+Tracking.ITkActsPass           points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkActsPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : False [function]
 Tracking.ActiveConfig.doActsCluster      : True
 Tracking.ActiveConfig.doActsSeed         : True
@@ -58,6 +71,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to           Tracking.ITkActsPass 
+Tracking.ITkActsPass           points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkValidateActsClustersPass
 
@@ -65,6 +81,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is ValidateActsClusters
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsClustersPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
 Tracking.ActiveConfig.doAthenaCluster    : False
 Tracking.ActiveConfig.doAthenaSeed       : True
@@ -75,7 +92,11 @@ Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsClustersPass 
+Tracking.ITkValidateActsClustersPass points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsClustersPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : False
 Tracking.ActiveConfig.doActsCluster      : True
 Tracking.ActiveConfig.doActsSeed         : False
@@ -88,6 +109,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsClustersPass 
+Tracking.ITkValidateActsClustersPass points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkValidateActsSpacePointsPass
 
@@ -95,6 +119,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is ValidateActsSpacePoints
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsSpacePointsPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -105,7 +130,11 @@ Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsSpacePointsPass 
+Tracking.ITkValidateActsSpacePointsPass points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsSpacePointsPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : False
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : False
@@ -118,6 +147,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsSpacePointsPass 
+Tracking.ITkValidateActsSpacePointsPass points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkValidateActsSeedsPass
 
@@ -125,6 +157,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is ValidateActsSeeds
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsSeedsPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -135,7 +168,11 @@ Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsSeedsPass 
+Tracking.ITkValidateActsSeedsPass points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsSeedsPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : False
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : False
@@ -148,6 +185,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsSeedsPass 
+Tracking.ITkValidateActsSeedsPass points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkValidateActsTracksPass
 
@@ -155,6 +195,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is ValidateActsTracks
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsTracksPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : True [function]
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -165,7 +206,11 @@ Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
+Tracking.ITkValidateActsTracksPass points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsTracksPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : False [function]
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : True
@@ -178,6 +223,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : True [function]
 Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
+Tracking.ITkValidateActsTracksPass points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkValidateActsAmbiguityResolutionPass
 
@@ -185,6 +233,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is ValidateActsAmbiguityResolution
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsAmbiguityResolutionPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : True
@@ -195,7 +244,11 @@ Tracking.ActiveConfig.doAthenaToActsTrack : True
 Tracking.ActiveConfig.doAthenaTrack      : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsAmbiguityResolutionPass 
+Tracking.ITkValidateActsAmbiguityResolutionPass points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsAmbiguityResolutionPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : True
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : False
@@ -208,6 +261,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsAmbiguityResolutionPass 
+Tracking.ITkValidateActsAmbiguityResolutionPass points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkActsBenchmarkSpotPass
 
@@ -215,6 +271,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is ActsBenchmarkSpot
 Flag Name                                : Value
+HERE rev {'Tracking.ITkActsBenchmarkSpotPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -225,7 +282,11 @@ Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkActsBenchmarkSpotPass 
+Tracking.ITkActsBenchmarkSpotPass points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkActsBenchmarkSpotPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : True
 Tracking.ActiveConfig.doActsCluster      : True
 Tracking.ActiveConfig.doActsSeed         : True
@@ -238,6 +299,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkActsBenchmarkSpotPass 
+Tracking.ITkActsBenchmarkSpotPass points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkValidateActsTracksPass
 
@@ -245,6 +309,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is ValidateActsResolvedTracks
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsTracksPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False [function]
 Tracking.ActiveConfig.doAthenaCluster    : True
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -255,7 +320,11 @@ Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
+Tracking.ITkValidateActsTracksPass points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkValidateActsTracksPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : True [function]
 Tracking.ActiveConfig.doActsCluster      : False
 Tracking.ActiveConfig.doActsSeed         : True
@@ -268,6 +337,9 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False [function]
 Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkValidateActsTracksPass 
+Tracking.ITkValidateActsTracksPass points to                        nothing 
 ************************************************************************
 Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by Tracking.ITkActsConversionPass
 
@@ -275,6 +347,7 @@ Py:AthConfigFlags    INFO cloning flags and replacing Tracking.ActiveConfig by T
 ******************** Tracking reconstruction Config ********************
                      Active Config is ActsConversion
 Flag Name                                : Value
+HERE rev {'Tracking.ITkActsConversionPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doAthenaAmbiguityResolution : False
 Tracking.ActiveConfig.doAthenaCluster    : False
 Tracking.ActiveConfig.doAthenaSeed       : False
@@ -285,7 +358,11 @@ Tracking.ActiveConfig.doAthenaToActsTrack : False
 Tracking.ActiveConfig.doAthenaTrack      : False
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkActsConversionPass 
+Tracking.ITkActsConversionPass points to                        nothing 
 Flag Name                                : Value
+HERE rev {'Tracking.ITkActsConversionPass': 'Tracking.ActiveConfig'}
 Tracking.ActiveConfig.doActsAmbiguityResolution : True [function]
 Tracking.ActiveConfig.doActsCluster      : True
 Tracking.ActiveConfig.doActsSeed         : True
@@ -298,4 +375,7 @@ Tracking.ActiveConfig.doActsToAthenaTrack : False
 Tracking.ActiveConfig.doActsTrack        : True
 Flag categories that can be loaded dynamically
 Category                  :                 Generator name : Defined in
+Flag renamings
+Tracking.ActiveConfig          points to Tracking.ITkActsConversionPass 
+Tracking.ITkActsConversionPass points to                        nothing 
 ************************************************************************
