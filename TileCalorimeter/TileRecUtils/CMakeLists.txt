@@ -44,9 +44,9 @@ atlas_add_test( TileCellBuilder_test
 # are to work around an abi issue seen in gcc6 vs cling.
 # They should not be needed with gcc8.
 atlas_add_test( TileCellBuilderFromHit_test
-  SCRIPT test/TileCellBuilderFromHit_test.sh
-  PROPERTIES TIMEOUT 600
-  LOG_IGNORE_PATTERN "LArDetectorToolNV|is still valid|no data retrieved|Database being retired|Reading file|Unable to locate catalog|Resolved path|DigitizationFlags|^Domain|created CondCont|no dictionary for class|^ +[+]|Reading LArPedestalMC|IOV callback|^DetectorStore|TileDetectorTool|Creating TileCondProxyFile|Cache alignment|IncrementalExecutor::executeFunction|You are probably missing the definition|Maybe you need to load|No RecFlags available|MetaReader|AutoConfiguration|IOVDbSvc +INFO" )
+                SCRIPT test/TileCellBuilderFromHit_test.sh
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( TileRawChannelBuilder_test
                 SCRIPT test/TileRawChannelBuilder_test.sh
