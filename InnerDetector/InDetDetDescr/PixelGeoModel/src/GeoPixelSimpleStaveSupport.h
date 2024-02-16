@@ -17,7 +17,7 @@ public:
 			     GeoModelIO::ReadGeoModel* sqliteReader,
                              std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
                              std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX);
-  virtual ~GeoPixelSimpleStaveSupport();
+  virtual ~GeoPixelSimpleStaveSupport() = default;
   virtual GeoVPhysVol* Build() override;
   virtual GeoVPhysVol* getPhysVol() override {return m_physVol;}
   virtual const GeoTrf::Transform3D & transform() const override {return m_transform;}
@@ -37,7 +37,7 @@ public:
   virtual int PixelN3DModule() const override {return 0;}
 
 private:
-  GeoVPhysVol* m_physVol;
+  PVLink m_physVol{};
   GeoTrf::Transform3D m_transform;
   double m_thicknessP = 0.0;
   double m_thicknessN = 0.0;

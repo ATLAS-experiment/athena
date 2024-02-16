@@ -434,10 +434,8 @@ DBPixelGeoManager::distortedMatManager() {
 //
 /////////////////////////////////////////////////////////
 double DBPixelGeoManager::CalculateThickness(double tck,const string& mat) {
-  const GeoMaterial* material =  m_pMatMgr->getMaterial(mat);
+  GeoIntrusivePtr<const GeoMaterial> material{m_pMatMgr->getMaterial(mat)};
   double rl = material->getRadLength();
-  material->ref();
-  material->unref();
   return -1.*rl*tck/100.;
 }
 

@@ -19,7 +19,7 @@ public:
               GeoModelIO::ReadGeoModel* sqliteReader,
               std::shared_ptr<std::map<std::string, GeoFullPhysVol*>> mapFPV,
               std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX);
-  virtual ~GeoPixelTMT();
+  virtual ~GeoPixelTMT() = default;
   virtual GeoVPhysVol* Build() override;
   virtual GeoVPhysVol* getPhysVol () override {return m_physVol;}
   virtual const GeoTrf::Transform3D & transform() const override {return m_transform;}
@@ -40,7 +40,7 @@ public:
 private:
   const GeoShape * addShape(const GeoShape * lastShape, const GeoShape * nextShape, const GeoTrf::Transform3D & trans);
 
-  GeoVPhysVol* m_physVol{nullptr};
+  PVLink m_physVol{nullptr};
   GeoTrf::Transform3D m_transform;
 };
 
