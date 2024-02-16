@@ -75,7 +75,7 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
     return acc
 
-def ITkPixelPrepDataToxAODCfg_ExtraTruthCfg(flags, name='ITkPixelPrepDataToxAODCfg_ExtraTruth', **kwargs):
+def ITkPixelPrepDataToxAODCfg_ExtraTruthCfg(flags, name='ITkPixelPrepDataToxAOD_ExtraTruth', **kwargs):
     kwargs.setdefault("WriteSDOs", True)
     kwargs.setdefault("WriteSiHits", True)
     return ITkPixelPrepDataToxAODCfg(flags, name, **kwargs)
@@ -110,7 +110,7 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc
 
-def ITkStripPrepDataToxAODCfg_ExtraTruthCfg(flags, name='ITkStripPrepDataToxAODCfg_ExtraTruth', **kwargs):
+def ITkStripPrepDataToxAODCfg_ExtraTruthCfg(flags, name='ITkStripPrepDataToxAOD_ExtraTruth', **kwargs):
     kwargs.setdefault("WriteSDOs", True)
     kwargs.setdefault("WriteSiHits", True)
     return ITkStripPrepDataToxAODCfg(flags, name, **kwargs)
