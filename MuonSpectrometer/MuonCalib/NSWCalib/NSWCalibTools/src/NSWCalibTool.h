@@ -88,7 +88,7 @@ namespace Muon {
     // these values should go into the conditions database, but introduce them as properties for now
     // they describe the shift of the time to get it into the VMM time window
     Gaudi::Property<float> m_mmLatencyMC{this,"mmLatencyMC",25};
-    Gaudi::Property<float> m_mmLatencyData{this,"mmLatencyData",50}; //this is temporary, need to align with what we find in data
+    Gaudi::Property<float> m_mmLatencyData{this,"mmLatencyData",0}; //tuned with 2023 data, should not change anymore. 
     
     Gaudi::Property<float> m_stgcLatencyMC{this,"stgcLatencyMC",-50};
     Gaudi::Property<float> m_stgcLatencyData{this,"stgcLatencyData",-50}; //this is temporary, need to align with what we find in data
