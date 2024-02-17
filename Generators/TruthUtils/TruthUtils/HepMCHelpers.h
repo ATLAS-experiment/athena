@@ -47,6 +47,12 @@ namespace MC
     return ( isStable<T>(p) || (isDecayed<T>(p) && (!vertex || HepMC::is_simulation_vertex(vertex))));
   }
 
+  /// @brief Identify if particle is satble or decayed in simulation. w/o a pathological case of decayed particle w/o end vertex.
+  template <class T> inline bool isStableOrSimDecayedv2(const T& p) {
+    const auto vertex = p->end_vertex();
+    return ( isStable<T>(p) || (isDecayed<T>(p) && vertex && HepMC::is_simulation_vertex(vertex)));
+  }
+
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
   
@@ -59,28 +65,6 @@ namespace MC
     if (apid == 39 || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK
     if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
     return false;
-  }
-
-/* The functions below should be unified */
-  template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
-    if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
-    if (isZeroEnergyPhoton<T>(p)) return false;
-    const auto vertex = p->end_vertex();
-    return ( isStable<T>(p) || //< Fully stable, even if marked that way by G4
-            ( isDecayed<T>(p) && vertex && HepMC::is_simulation_vertex(vertex))); //< Gen-stable with G4 decay
-  }
-
-  template <class T> inline bool jettruthparticleselectortool_isInteracting(const T& p) {
-      if (! jettruthparticleselectortool_isStable(p)) return false;
-      if ( isStable<T>(p) && isSpecialNonInteracting<T>(p)) return false;
-      return true;      
-    }
-
-  template <class T> inline bool egammaTruthAlg_isGenStable_and_isGenInteracting (const T& p) {
-    if (HepMC::is_simulation_particle(p)) return false;
-    if (isZeroEnergyPhoton<T>(p)) return false;
-    if ( isStable<T>(p) && isSpecialNonInteracting<T>(p)) return false;
-    return isStableOrSimDecayed<T>(p);
   }
 
 }
