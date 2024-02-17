@@ -13,6 +13,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "SCT_GeoModel/SCT_ComponentFactory.h"
 #include "GeoModelKernel/GeoDefinitions.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+#include "GeoModelKernel/GeoTransform.h"
 
 #include <memory>
 #include <string>
@@ -78,8 +80,8 @@ private:
   std::unique_ptr<SCT_Hybrid> m_hybrid;
   std::unique_ptr<SCT_Sensor> m_sensor;
 
-  GeoTransform * m_hybridPos = nullptr;
-  GeoTransform * m_sensorPos = nullptr;
+  GeoIntrusivePtr<GeoTransform> m_hybridPos{nullptr};
+  GeoIntrusivePtr<GeoTransform> m_sensorPos{nullptr};
 
   std::unique_ptr<GeoTrf::Vector3D> m_env1RefPointVector;
   std::unique_ptr<GeoTrf::Vector3D> m_env2RefPointVector;

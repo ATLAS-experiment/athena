@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_SKI_H
@@ -8,13 +8,13 @@
 #include "SCT_GeoModel/SCT_ComponentFactory.h"
 
 #include "GeoModelKernel/GeoDefinitions.h"
+#include "GeoModelKernel/GeoVPhysVol.h"
 
 #include <memory>
 #include <string>
 #include <vector>
 
 class GeoMaterial;
-class GeoVPhysVol;
 class GeoLogVol;
 class GeoNameTag;
 class GeoTransform;
@@ -126,8 +126,8 @@ private:
   std::unique_ptr<SCT_CoolingBlock> m_coolingBlock;
   std::unique_ptr<SCT_CoolingPipe> m_coolingPipe;
 
-  GeoTransform * m_refPointTransform = nullptr;
-  GeoTransform * m_coolingPipePos = nullptr;
+  GeoIntrusivePtr<GeoTransform> m_refPointTransform{};
+  GeoIntrusivePtr<GeoTransform> m_coolingPipePos{};
 
   //! For calculations of envelopes of SCT_DetailLayer.
   std::unique_ptr<GeoTrf::Vector3D> m_env1RefPointVector;

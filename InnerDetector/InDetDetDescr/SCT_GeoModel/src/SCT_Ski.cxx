@@ -59,12 +59,7 @@ SCT_Ski::SCT_Ski(const std::string & name,
 }
 
 
-SCT_Ski::~SCT_Ski()
-{
-  if (m_refPointTransform) m_refPointTransform->unref();
-  if (m_coolingPipePos) m_coolingPipePos->unref();
-}
-
+SCT_Ski::~SCT_Ski() = default;
 
 void
 SCT_Ski::getParameters()
@@ -156,7 +151,6 @@ SCT_Ski::preBuild()
   double xCoolingPipePos = coolingPipeOffsetX() - m_coolingPipeRadialOffset;
   double yCoolingPipePos = coolingPipeOffsetY() + m_coolingPipePhiOffset; 
   m_coolingPipePos = new GeoTransform(GeoTrf::Translate3D(xCoolingPipePos, yCoolingPipePos, 0));
-  m_coolingPipePos->ref();
   //
   //
   //
@@ -300,7 +294,6 @@ SCT_Ski::preBuild()
   double yShift2 = 0.5*(ymin2+ymax2) - yCenter;
 
   m_refPointTransform = new GeoTransform(GeoTrf::Translate3D(-xCenter, -yCenter, 0));
-  m_refPointTransform->ref();
 
   m_env1RefPointVector = std::make_unique<GeoTrf::Vector3D>(-xCenter, -yCenter, 0.0);
   m_env2RefPointVector = std::make_unique<GeoTrf::Vector3D>(-xShift2, -yShift2, 0.0);
