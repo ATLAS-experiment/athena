@@ -38,12 +38,7 @@ SCT_InterLink::SCT_InterLink(const std::string & name,
   m_physVolume = SCT_InterLink::build();
 }
 
-SCT_InterLink::~SCT_InterLink() {
-  if (m_interLink) m_interLink->unref();
-  if (m_interLinkSeg) m_interLinkSeg->unref();
-  if (m_bearing) m_bearing->unref();
-  if (m_FSIFlange) m_FSIFlange->unref();
-}
+SCT_InterLink::~SCT_InterLink() = default;
 
 void 
 SCT_InterLink::getParameters()
@@ -96,7 +91,6 @@ SCT_InterLink::build()
     if(!material) {material = m_materials->getMaterial(m_materialName);}
     m_interLinkLog = new GeoLogVol(getName(), m_interLinkShape, material);
     m_interLink = new GeoPhysVol(m_interLinkLog);
-    m_interLink->ref();
   }
 
   else {
@@ -106,13 +100,11 @@ SCT_InterLink::build()
     m_interLinkShape = new GeoTube(m_innerRadius, m_outerRadiusBearing, 0.5*m_length);
     m_interLinkLog = new GeoLogVol(getName(), m_interLinkShape, m_materials->gasMaterial());
     m_interLink = new GeoPhysVol(m_interLinkLog);
-    m_interLink->ref();
 
     // Interlink segments:
     m_interLinkSegShape = new GeoTubs(m_innerRadius, m_outerRadius, 0.5*m_length, - 0.5*m_dPhi*Gaudi::Units::radian, m_dPhi*Gaudi::Units::radian);
     m_interLinkSegLog = new GeoLogVol("InterlinkSegment", m_interLinkSegShape, m_materials->getMaterialForVolume(m_materialName, m_interLinkSegShape->volume()));
     m_interLinkSeg = new GeoPhysVol(m_interLinkSegLog);
-    m_interLinkSeg->ref();
 
     for(int i=0; i<m_nRepeat; i++) {
       double interlinkAngle = m_phiPos + (i * 360./m_nRepeat)*Gaudi::Units::deg;
@@ -126,7 +118,6 @@ SCT_InterLink::build()
     m_bearingShape = new GeoTubs(m_innerRadiusBearing, m_outerRadiusBearing, 0.5*m_lengthBearing, - 0.5*m_dPhiBearing*Gaudi::Units::radian, m_dPhiBearing*Gaudi::Units::radian);
     m_bearingLog = new GeoLogVol("Bearing", m_bearingShape, m_materials->getMaterialForVolume(m_materialNameBearing, m_bearingShape->volume()));
     m_bearing = new GeoPhysVol(m_bearingLog);
-    m_bearing->ref();
 
     for(int i=0; i<m_nRepeatBearing; i++) {
       double bearingAngle = m_phiPosBearing + (i * 360./m_nRepeatBearing)*Gaudi::Units::deg;
@@ -143,7 +134,6 @@ SCT_InterLink::build()
       m_FSIFlangeShape = new GeoTubs(m_innerRadiusFSIFlange, m_outerRadiusFSIFlange, 0.5*m_length, - 0.5*dPhiFSI*Gaudi::Units::radian, dPhiFSI*Gaudi::Units::radian);
       m_FSIFlangeLog = new GeoLogVol("FSIFlangeSegment", m_FSIFlangeShape, m_materials->getMaterialForVolume(m_materialNameFSIFlange, m_FSIFlangeShape->volume()));
       m_FSIFlange = new GeoPhysVol(m_FSIFlangeLog);
-      m_FSIFlange->ref();
 
       for(int i=0; i<m_nRepeat; i++) {
         double phiPosFSI = m_phiPos + (180./m_nRepeat)*Gaudi::Units::deg;

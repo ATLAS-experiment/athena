@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_FWDSENSOR_H
@@ -21,11 +21,9 @@
 
 #define SENSOR_BOTTOM 0
 #define SENSOR_TOP  1
+#include "GeoModelKernel/GeoPhysVol.h"
 
 
-class GeoMaterial;
-class GeoVPhysVol;
-class GeoPhysVol;
 
 namespace InDetDD{class SiDetectorDesign;}
 
@@ -119,7 +117,7 @@ private:
   const GeoMaterial * m_materialSensor = nullptr;
   const GeoMaterial * m_materialGlass = nullptr;
 
-  GeoPhysVol * m_inactive = nullptr;
+  GeoIntrusivePtr<GeoPhysVol>  m_inactive = nullptr;
   
   const InDetDD::SiDetectorDesign * m_design = nullptr;
 

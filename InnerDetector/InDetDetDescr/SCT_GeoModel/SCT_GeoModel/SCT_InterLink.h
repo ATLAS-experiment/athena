@@ -10,12 +10,12 @@
 #include <string>
 #include <vector>
 
+#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoTubs.h"
+#include "GeoModelKernel/GeoTube.h"
+#include "GeoModelKernel/GeoTransform.h"
+
 class GeoMaterial;
-class GeoTube;
-class GeoLogVol;
-class GeoPhysVol;
-class GeoTubs;
-class GeoTransform;
 
 class SCT_InterLink : public SCT_SharedComponentFactory
 {
@@ -61,19 +61,19 @@ private:
   double m_phiPosBearing = 0.0;
   int m_nRepeatBearing = 0;
 
-  const GeoTube* m_interLinkShape;
-  const GeoLogVol* m_interLinkLog;
-  GeoPhysVol* m_interLink;
-  const GeoTubs* m_interLinkSegShape;
-  const GeoLogVol* m_interLinkSegLog;
-  GeoPhysVol* m_interLinkSeg;
-  const GeoTubs* m_bearingShape;
-  const GeoLogVol* m_bearingLog;
-  GeoPhysVol* m_bearing;
-  const GeoTubs* m_FSIFlangeShape;
-  const GeoLogVol* m_FSIFlangeLog;
-  GeoPhysVol* m_FSIFlange;
-  std::vector<GeoTransform*> m_geoTransforms;
+  GeoIntrusivePtr<const GeoTube> m_interLinkShape{};
+  GeoIntrusivePtr<const GeoLogVol> m_interLinkLog{};
+  GeoIntrusivePtr<GeoPhysVol> m_interLink{};
+  GeoIntrusivePtr<const GeoTubs> m_interLinkSegShape{};
+  GeoIntrusivePtr<const GeoLogVol> m_interLinkSegLog{};
+  GeoIntrusivePtr<GeoPhysVol> m_interLinkSeg{};
+  GeoIntrusivePtr<const GeoTubs> m_bearingShape{};
+  GeoIntrusivePtr<const GeoLogVol> m_bearingLog{};
+  GeoIntrusivePtr<GeoPhysVol> m_bearing{};
+  GeoIntrusivePtr<const GeoTubs> m_FSIFlangeShape{};
+  GeoIntrusivePtr<const GeoLogVol> m_FSIFlangeLog{};
+  GeoIntrusivePtr<GeoPhysVol> m_FSIFlange{};
+  std::vector<GeoIntrusivePtr<GeoTransform>> m_geoTransforms{};
 };
 
 #endif // SCT_GEOMODEL_SCT_INTERLINK_H

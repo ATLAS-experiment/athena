@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_OUTERSIDE_H
@@ -8,6 +8,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "SCT_GeoModel/SCT_ComponentFactory.h"
 #include "GeoModelKernel/GeoDefinitions.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+#include "GeoModelKernel/GeoTransform.h"
 
 #include <memory>
 #include <string>
@@ -15,7 +17,6 @@
 class GeoMaterial;
 class GeoVPhysVol;
 class GeoLogVol;
-class GeoTransform;
 
 class SCT_Identifier;
 class SCT_Hybrid;
@@ -72,9 +73,9 @@ private:
   std::unique_ptr<SCT_Pigtail> m_pigtail;
   std::unique_ptr<SCT_Sensor> m_sensor;
 
-  GeoTransform * m_hybridPos = nullptr;
-  GeoTransform * m_pigtailPos = nullptr;
-  GeoTransform * m_sensorPos = nullptr;
+  GeoIntrusivePtr<GeoTransform> m_hybridPos{};
+  GeoIntrusivePtr<GeoTransform> m_pigtailPos{};
+  GeoIntrusivePtr<GeoTransform> m_sensorPos{};
   std::unique_ptr<GeoTrf::Vector3D> m_env1RefPointVector;
   std::unique_ptr<GeoTrf::Vector3D> m_env2RefPointVector;
 
