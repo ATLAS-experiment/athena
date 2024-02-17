@@ -355,35 +355,6 @@ def addD3PDArguments(parser, pick = None, transform = None, multipleOK=False, ad
         msg.warning('D3PDProdFlags not available - cannot add D3PD arguments')
 
 
-## @brief Add derivation framework output file argument
-# @details This is the base name for the D(2)AOD output streams. It will get appended
-# to it the names of the specific reduced types.
-# @param parser Argument parser object to add arguments to
-# @param transform Transform object, to add reduced object to (maybe don't need that here?)
-def addReductionArguments(parser, transform = None):
-    parser.defineArgGroup('Reduction', 'Reduced Filetype Options')
-    parser.add_argument('--inputNTUP_COMMONFile', 
-                        type=argFactory(trfArgClasses.argNTUPFile, io='input', treeNames=['physics']),
-                        group='Reduction', help='NTUP common input file', nargs='+')
-    parser.add_argument('--inputDAOD_PHYSFile',
-                        type=argFactory(trfArgClasses.argPOOLFile, io='input', type='aod'),
-                        group='Reduction', help='Input DAOD_PHYS for skimming')
-    parser.add_argument('--outputDNTUPFile', 
-                        type=argFactory(trfArgClasses.argNTUPFile, treeNames=None),
-                        group='Reduction', help='Reduced NTUP output filename base')
-    parser.add_argument('--outputDAODFile', 
-                        type=argFactory(trfArgClasses.argPOOLFile, io='output', type='aod'),
-                        help='Output reduced AOD filename base', group='Reduction')
-    parser.add_argument('--outputD2AODFile', 
-                        type=argFactory(trfArgClasses.argPOOLFile, io='output', type='aod'),
-                        help='Output skimmed D2AOD filename base', group='Reduction')
-    parser.add_argument('--reductionConf',
-                        type=argFactory(trfArgClasses.argList), nargs='+', 
-                        help='Configuration of reduced stream outputs', group='Reduction')
-    parser.add_argument('--passThrough', type=argFactory(trfArgClasses.argBool), metavar="True/False",
-                        help='Run the derivation framework in a pass-through mode, needed for some MC samples. Needs to be implemented in derivation JOs')
-
-
 ## @brief Simple class to store information about extra DPD filetypes
 #  @details Implement this type of information as a class allowing for
 #  extensions to be easily added and for some convenient heuristics
