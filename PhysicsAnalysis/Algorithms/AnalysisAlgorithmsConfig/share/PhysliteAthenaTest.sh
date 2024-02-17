@@ -1,6 +1,6 @@
 #/bin/bash
 #
-# Copyright (C) 2002-2022  CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024  CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -21,7 +21,7 @@ cd physlite_test_$dataType
 # This is the transform to run for producing PHYSLITE from AOD, whereas
 # the line below runs the transform on PHYS.
 # Reco_tf.py --maxEvents=500 --inputAODFile $input_file --outputDAODFile test_file.pool.root --reductionConf PHYS PHYSLITE --preExec 'default:from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff();DetFlags.detdescr.Muon_setOn();' --postExec 'from DerivationFrameworkJetEtMiss.JetCommon import swapAlgsInSequence;swapAlgsInSequence(topSequence,"jetalg_ConstitModCorrectPFOCSSKCHS_GPFlowCSSK", "UFOInfoAlgCSSK" );' 2>&1 | tee mylog.txt
-Reco_tf.py --maxEvents 500 --inputDAOD_PHYSFile $inputFile --outputD2AODFile test_mc.root --reductionConf PHYSLITE 2>&1 | tee my_log_physlite.txt
+Derivation_tf.py --CA --maxEvents 500 --inputDAOD_PHYSFile $inputFile --outputD2AODFile test_mc.root --formats PHYSLITE 2>&1 | tee my_log_physlite.txt
 
 inputPhys=/data/krumnack/test_files/DAOD_PHYS.test_file.pool.root 
 inputPhyslite=/data/krumnack/test_files/DAOD_PHYSLITE.test_file.pool.root
