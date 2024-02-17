@@ -101,10 +101,9 @@ void TRT_ServMatFactory::create(GeoPhysVol *mother)
   double phiTop = asin((yWidthTRSB + coordY) / (rminInt));
   double phiBot = asin((yWidthTRSB/2. - coordY) / (rminInt));
 
-  const GeoShape*  railGap1  = new GeoTubs( rminInt, outROfIDet, endZOfIDet,  -phiBot,      phiBot + phiTop);
-  const GeoShape*  railGap2  = new GeoTubs( rminInt, outROfIDet, endZOfIDet,  M_PI - phiTop, phiBot + phiTop);
-  railGap1->ref(); 
-  railGap2->ref(); 
+  GeoIntrusivePtr<const GeoShape>  railGap1{new GeoTubs( rminInt, outROfIDet, endZOfIDet,  -phiBot,      phiBot + phiTop)};
+  GeoIntrusivePtr<const GeoShape>  railGap2{new GeoTubs( rminInt, outROfIDet, endZOfIDet,  M_PI - phiTop, phiBot + phiTop)};
+
 
   for (unsigned int ii =0; ii < trtGenServices->size(); ii++) {
  
@@ -143,8 +142,7 @@ void TRT_ServMatFactory::create(GeoPhysVol *mother)
       tubeHelper.placeVolume(mother, servPhys);
     }
   }
-  railGap1->unref(); 
-  railGap2->unref(); 
+
   }
   else {
     // ______________________________________________________________________________________________________________________
@@ -169,13 +167,11 @@ void TRT_ServMatFactory::create(GeoPhysVol *mother)
   double endZOfIDet =       (*atls)[0]->getDouble("IDETZMX")*Gaudi::Units::cm;
   double minRofGap  =       1050.0;
   double phiWid=70./outROfIDet;    double safetyGap=1.;
-  const GeoShape* railGap1=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
-					-phiWid/2.,phiWid);
-  const GeoShape* railGap2=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
-					-phiWid/2.+M_PI,phiWid);
-  // In case they don't get used. 
-  railGap1->ref(); 
-  railGap2->ref(); 
+  GeoIntrusivePtr<const GeoShape> railGap1{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
+					-phiWid/2.,phiWid)};
+  GeoIntrusivePtr<const GeoShape> railGap2{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
+					-phiWid/2.+M_PI,phiWid)};
+
 
 
 //VK 26.03.2007  Construct a gap for SquirrelCage ribbon
@@ -229,9 +225,6 @@ void TRT_ServMatFactory::create(GeoPhysVol *mother)
     tubeHelper.placeVolume(mother, servPhys);
 
   }
-
-  railGap1->unref(); 
-  railGap2->unref(); 
   }
 }
 

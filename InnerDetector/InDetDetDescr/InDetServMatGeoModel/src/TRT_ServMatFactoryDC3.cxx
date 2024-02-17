@@ -69,12 +69,10 @@ void TRT_ServMatFactoryDC3::create(GeoPhysVol *mother)
     double endZOfIDet =       (*atls)[0]->getDouble("IDETZMX")*Gaudi::Units::cm;
     double minRofGap  =       1050.0;
     double phiWid=70./outROfIDet;    double safetyGap=1.;
-    const GeoShape* railGap1=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
-                                          -phiWid/2.,phiWid);
-    const GeoShape* railGap2=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
-                                          -phiWid/2.+M_PI,phiWid);
-    railGap1->ref();
-    railGap2->ref();
+    GeoIntrusivePtr<const GeoShape> railGap1{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
+                                          -phiWid/2.,phiWid)};
+    GeoIntrusivePtr<const GeoShape> railGap2{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
+                                          -phiWid/2.+M_PI,phiWid)};
 
   // Build the patch panels:
   
@@ -195,8 +193,6 @@ void TRT_ServMatFactoryDC3::create(GeoPhysVol *mother)
     mother->add(xform2);
     mother->add(ServPhys);
   }
-  railGap1->unref();//should delete if not used anywhere
-  railGap2->unref();
   
 }
 

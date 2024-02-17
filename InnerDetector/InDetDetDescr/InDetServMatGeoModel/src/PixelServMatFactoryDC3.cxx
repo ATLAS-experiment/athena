@@ -165,9 +165,8 @@ void PixelServMatFactoryDC3::create(GeoPhysVol *mother)
             o<<"_";  o << isec;
             std::string logNameTmp = logName+o.str();    
 //std::cout<<isec<<", "<<logNameTmp<<'\n';
-	    GeoTransform *xform1 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.,0.,isec*M_PI/6.),servpos1));
-	    GeoTransform *xform2 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.,0.,isec*M_PI/6.),servpos2));
-	    xform2->ref();//artificial refcount increment
+	    GeoIntrusivePtr<GeoTransform> xform1{new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.,0.,isec*M_PI/6.),servpos1))};
+	    GeoIntrusivePtr<GeoTransform> xform2{new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.,0.,isec*M_PI/6.),servpos2))};
 	    mother->add(new GeoNameTag(logNameTmp));
 	    mother->add(xform1);//xform1 is always used
 	    mother->add(ServPhys);
@@ -176,19 +175,16 @@ void PixelServMatFactoryDC3::create(GeoPhysVol *mother)
 	       mother->add(xform2);
 	       mother->add(ServPhys);
 	    }
-	    xform2->unref(); //will delete it, if it was never used
         }
     }else{
-        GeoTransform *xform1 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,0,0),servpos1));
-	GeoTransform *xform2 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,0,0),servpos2));
-	xform2->ref();//artificial refcount increment
+        GeoIntrusivePtr<GeoTransform> xform1{new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,0,0),servpos1))};
+	      GeoIntrusivePtr<GeoTransform> xform2{new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,0,0),servpos2))};
 	mother->add(xform1);
 	mother->add(ServPhys);
 	if( rmin > 0.){
 	  mother->add(xform2);
 	  mother->add(ServPhys);
 	}
-	xform2->unref(); //will delete it, if it was never used
 
     }
       
