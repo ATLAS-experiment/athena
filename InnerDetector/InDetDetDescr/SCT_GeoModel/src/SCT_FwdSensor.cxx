@@ -55,9 +55,7 @@ SCT_FwdSensor::SCT_FwdSensor(const std::string & name,
 
 }
 
-SCT_FwdSensor::~SCT_FwdSensor() {
-  if (m_inactive) m_inactive->unref();
-}
+SCT_FwdSensor::~SCT_FwdSensor() = default;
 
 void
 SCT_FwdSensor::getParameters()
@@ -159,10 +157,7 @@ const GeoLogVol * SCT_FwdSensor::preBuild()
             const GeoShape & sensorPosN = (*sensorShapeN<< GeoTrf::TranslateZ3D(positionZ) );
             GeoLogVol * inactiveLog = new GeoLogVol(getName()+"Glass", &sensorPosN, m_materialGlass);
             m_inactive = new GeoPhysVol(inactiveLog);
-            m_inactive->ref();
-        } else {
-            m_inactive = nullptr;
-        }
+        } 
     }
     
     // Make the moduleside design for this sensor

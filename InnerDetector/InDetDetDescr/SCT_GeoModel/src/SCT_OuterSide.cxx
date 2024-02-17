@@ -47,12 +47,7 @@ SCT_OuterSide::SCT_OuterSide(const std::string & name,
 }
 
 
-SCT_OuterSide::~SCT_OuterSide()
-{
-  if (m_hybridPos) m_hybridPos->unref();
-  if (m_pigtailPos) m_pigtailPos->unref();
-  if (m_sensorPos) m_sensorPos->unref();
-}
+SCT_OuterSide::~SCT_OuterSide() = default;
 
 
 void
@@ -131,9 +126,7 @@ SCT_OuterSide::preBuild()
   m_env2RefPointVector = std::make_unique<GeoTrf::Vector3D>(-ose2PosX, -ose2PosY, -ose2PosZ);
 
   m_hybridPos             = new GeoTransform(GeoTrf::Translate3D(hybridPosX, hybridPosY, hybridPosZ));
-  m_hybridPos->ref();
   m_pigtailPos            = new GeoTransform(GeoTrf::Translate3D(pigtailPosX, pigtailPosY, pigtailPosZ));
-  m_pigtailPos->ref();
 
   // The depth axis goes from the backside to the implant side 
   // and so point to away from the  module center.
@@ -148,7 +141,6 @@ SCT_OuterSide::preBuild()
   //Gaudi::Units::HepRotation rotSensor;
   //rotSensor.rotateZ(180*Gaudi::Units::deg);
   m_sensorPos             = new GeoTransform(GeoTrf::Translate3D(sensorPosX, sensorPosY, sensorPosZ));
-  m_sensorPos->ref();
 
   //
   // Make an envelope for the whole module.
