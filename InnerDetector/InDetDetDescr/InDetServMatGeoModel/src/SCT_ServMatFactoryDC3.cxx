@@ -66,13 +66,10 @@ void SCT_ServMatFactoryDC3::create(GeoPhysVol *mother)
   double endZOfIDet =       (*atls)[0]->getDouble("IDETZMX")*Gaudi::Units::cm;
   double minRofGap  =       1050.0*Gaudi::Units::mm;
   double phiWid=(70.*Gaudi::Units::mm)/outROfIDet;    double safetyGap=1.*Gaudi::Units::mm;
-  const GeoShape* railGap1=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
-					-phiWid/2.,phiWid);
-  const GeoShape* railGap2=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
-					-phiWid/2.+M_PI,phiWid);
-  // In case they don't get used.
-  railGap1->ref();
-  railGap2->ref();
+  GeoIntrusivePtr<const GeoShape> railGap1{new GeoTubs( minRofGap, outROfIDet +safetyGap ,endZOfIDet+safetyGap , 
+					-phiWid/2.,phiWid)};
+  GeoIntrusivePtr<const GeoShape> railGap2{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
+					-phiWid/2.+M_PI,phiWid)};
   
   // Build SCT services in Endcap.
   // (Code taken from TRT_GeoModel)
@@ -211,8 +208,6 @@ void SCT_ServMatFactoryDC3::create(GeoPhysVol *mother)
     mother->add(ServPhys);
   }
 
-  railGap1->unref();
-  railGap2->unref();
 }
 
 

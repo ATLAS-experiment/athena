@@ -102,16 +102,12 @@ void SCT_ServMatFactory::create(GeoPhysVol *mother)
   double phiTop = asin((yWidthTRSB + coordY) / (rminInt));
   double phiBot = asin((yWidthTRSB/2. - coordY) / (rminInt));
 
-  const GeoShape* railGap1=new GeoTubs( rminInt, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
-					-phiBot, phiBot + phiTop);
-  const GeoShape* railGap2=new GeoTubs( rminInt, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
-					-phiTop + M_PI, phiBot + phiTop);
-  const GeoShape* railGap12=new GeoTubs( rminInt, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
-					-phiTop, phiBot + phiTop); //because of asymmetry
-  // In case they don't get used. 
-  railGap1->ref(); 
-  railGap2->ref(); 
-  railGap12->ref();   
+  GeoIntrusivePtr<const GeoShape> railGap1{new GeoTubs( rminInt, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
+					-phiBot, phiBot + phiTop)};
+  GeoIntrusivePtr<const GeoShape> railGap2{new GeoTubs( rminInt, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
+					-phiTop + M_PI, phiBot + phiTop)};
+  GeoIntrusivePtr<const GeoShape> railGap12{new GeoTubs( rminInt, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
+					-phiTop, phiBot + phiTop)}; //because of asymmetry
  
   // Build general services:
   //
@@ -187,10 +183,6 @@ void SCT_ServMatFactory::create(GeoPhysVol *mother)
      tubeHelper.placeVolume(mother, servPhys);
     
   }
-  
-  railGap1->unref(); 
-  railGap2->unref(); 
-  railGap12->unref(); 
 
   //-------------------------------------------------------------------------------------------
   // SCT supports (wings,mechanisms)
@@ -303,14 +295,11 @@ void SCT_ServMatFactory::create(GeoPhysVol *mother)
   double phiWid=(70.*Gaudi::Units::mm)/outROfIDet;   
   //  std::cout << "Gap phiWid = " << phiWid << std::endl;
   double safetyGap=1.*Gaudi::Units::mm;
-  const GeoShape* railGap1=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
-					-phiWid/2.,phiWid);
-  const GeoShape* railGap2=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
-					-phiWid/2.+M_PI,phiWid);
-  // In case they don't get used. 
-  railGap1->ref(); 
-  railGap2->ref(); 
-
+  GeoIntrusivePtr<const GeoShape> railGap1{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
+					-phiWid/2.,phiWid)};
+  GeoIntrusivePtr<const GeoShape> railGap2{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
+					-phiWid/2.+M_PI,phiWid)};
+  
  
   // Build general services:
   //
@@ -357,10 +346,6 @@ void SCT_ServMatFactory::create(GeoPhysVol *mother)
     tubeHelper.placeVolume(mother, servPhys);
 
   }
-  
-  railGap1->unref(); 
-  railGap2->unref(); 
-
   //-------------------------------------------------------------------------------------------
   // SCT supports (wings,mechanisms)
   {
