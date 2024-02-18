@@ -39,7 +39,7 @@ Release = "current"
 Input   = 'StauStau'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 
-ExtraAna = " -c 'LRT=True;parentpdgid=15' "
+ExtraAna = " --LRT=True --parentpdgid=15 "
 
 # legacy 
 # preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'

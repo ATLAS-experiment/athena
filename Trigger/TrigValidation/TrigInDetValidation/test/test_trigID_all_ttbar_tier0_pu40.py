@@ -38,7 +38,7 @@ Threads = 8
 Slots   = 8
 Release = "current"
 
-ExtraAna = " -c doTIDATier0=True "
+ExtraAna = " --doTIDATier0=True "
 
 Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json  
 GridFiles = True
