@@ -41,7 +41,7 @@
 #include "TrigInDetAnalysisExample/ChainString.h"
 #include "TrigInDetAnalysisUtils/Associator_TruthMatch.h"
 
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
 
 #include "TrigInDetAnalysis/TIDARoiDescriptor.h"
 #include "TrigInDetAnalysis/TrigObjectMatcher.h"
@@ -591,7 +591,7 @@ int main(int argc, char** argv)
       refChain = argv[i];
 
       // Merge multiple references
-      if (refChain.find('+') != string::npos){
+      if (refChain.find("+") != string::npos){
         std::istringstream iss(refChain);
         std::string token;
         while (std::getline(iss, token, '+')){ // tokenize string based on '+' delimeter
@@ -1119,7 +1119,6 @@ int main(int argc, char** argv)
 
 
   /// clean up
-  //cppcheck-suppress autovarInvalidDeallocation
   if ( binningConfig!=&inputdata ) delete binningConfig;
 
 
@@ -1877,7 +1876,7 @@ int main(int argc, char** argv)
     }
 
     //// get the reference tracks
-    for (const std::string& rc : refChains){
+    for (std::string rc : refChains){
       for (unsigned int ic=0 ; ic<chains.size() ; ic++ ) {
         if ( chains[ic].name()==rc ) {
           offTracks.selectTracks( chains[ic][0].tracks() );

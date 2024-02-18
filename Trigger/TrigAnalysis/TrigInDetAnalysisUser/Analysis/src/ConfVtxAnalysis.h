@@ -17,7 +17,7 @@
 #include "TrigInDetAnalysis/VertexAnalysis.h"
 #include "TrigInDetAnalysis/TIDAVertex.h"
 #include "TrigInDetAnalysis/TIDDirectory.h"
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
 
 #include "Resplot.h"
 
@@ -90,20 +90,20 @@ private:
 
   Resplot* m_rnvtxrec_nvtx = 0;
 
-  Efficiency* m_eff_zed = 0;
-  Efficiency* m_eff_x = 0;
-  Efficiency* m_eff_y = 0;
-  Efficiency* m_eff_ntrax = 0;
-  Efficiency* m_eff_nvtx = 0;
-  Efficiency* m_eff_mu = 0;
-  Efficiency* m_eff_lb = 0;
-  Efficiency* m_eff_r = 0;
+  Efficiency1D* m_eff_zed = 0;
+  Efficiency1D* m_eff_x = 0;
+  Efficiency1D* m_eff_y = 0;
+  Efficiency1D* m_eff_ntrax = 0;
+  Efficiency1D* m_eff_nvtx = 0;
+  Efficiency1D* m_eff_mu = 0;
+  Efficiency1D* m_eff_lb = 0;
+  Efficiency1D* m_eff_r = 0;
 
   Resplot* m_rdx_vs_lb = 0;
   Resplot* m_rdy_vs_lb = 0;
   Resplot* m_rdz_vs_lb = 0;
  
-  //  Contour<Efficiency>* eff_zed_vs_ntrax;
+  //  Contour<Efficiency1D>* eff_zed_vs_ntrax;
 
 };
 

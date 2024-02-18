@@ -31,7 +31,6 @@
 #include "TGraphAsymmErrors.h"
 
 #include "TLegend.h"
-#include "TrigInDetAnalysis/Efficiency.h"
 
 
 extern bool LINEF;

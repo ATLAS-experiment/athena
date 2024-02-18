@@ -22,7 +22,8 @@
 #include <algorithm>
 #include <regex>
 
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
+#include "TrigInDetAnalysis/Efficiency2D.h"
 
 #include "ReadCards.h"
 
@@ -2069,7 +2070,7 @@ int main(int argc, char** argv) {
 	      }
 
     
-	      Efficiency e( htestnum, htestden, "", scale_eff );
+	      Efficiency1D e( htestnum, htestden, "", scale_eff );
 	      tgtest = e.Bayes(scale_eff);
 
 	      htest = e.Hist();
@@ -2105,7 +2106,7 @@ int main(int argc, char** argv) {
 		  hrefden = Rebin(hrefden, rebin );
 		}
 		
-		Efficiency e( hrefnum, hrefden, "", scale_eff_ref );
+		Efficiency1D e( hrefnum, hrefden, "", scale_eff_ref );
 		/// leave for documentation purposes ...
 		// tgref = e.Bayes(scale_eff);
 
@@ -2362,7 +2363,7 @@ int main(int argc, char** argv) {
 	if ( make_ref_efficiencies ) { 
 	
 	  if ( htestnum && hrefnum ) { 
-	    Efficiency e( htestnum, hrefnum, "", scale_eff );
+	    Efficiency1D e( htestnum, hrefnum, "", scale_eff );
 
 	    TH1* h = e.Hist();
 

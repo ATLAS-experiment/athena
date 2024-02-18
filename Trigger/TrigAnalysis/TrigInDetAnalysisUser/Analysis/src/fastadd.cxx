@@ -31,7 +31,7 @@
 #include "dataset.h"
 
 // #include "Resplot.h"
-// #include "TrigInDetAnalysis/Efficiency.h"
+// #include "TrigInDetAnalysis/Efficiency1D.h"
 
 /// file names and file pointers
 std::vector<std::string> files;
