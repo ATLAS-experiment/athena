@@ -320,7 +320,7 @@ namespace InDetDD {
     if (!volume && serviceShape != nullptr) volume = serviceShape->volume();
 
     m_volume = volume;
-    m_geoShape.set(serviceShape);
+    m_geoShape = serviceShape;
     return serviceShape;
   }
 
@@ -340,7 +340,7 @@ namespace InDetDD {
       // We allow a volume to specified as the volume calculation for some shapes (ie boolean volumes) are unreliable.
       // If volume is not supplied, get it from the shape itself.
       if (!m_volume) m_volume = geoShape->volume();
-      m_geoShape.set(geoShape);
+      m_geoShape = geoShape;
       m_lockGeoShape = true; // This disables resetGeoShape().
       setShapeType("CUSTOM");
     } else {
@@ -366,56 +366,4 @@ namespace InDetDD {
     }
   }
 
-  GeoShapeHolder::GeoShapeHolder()
-    : m_geoShape(nullptr)
-  {}
-
-  GeoShapeHolder::GeoShapeHolder(const GeoShape* geoShape)
-    : m_geoShape(geoShape) {
-    if (m_geoShape) m_geoShape->ref();
-  }
-
-  GeoShapeHolder::~GeoShapeHolder() {
-    reset();
-  }
-
-  GeoShapeHolder::GeoShapeHolder(const GeoShapeHolder& rhs) {
-    m_geoShape = rhs.m_geoShape;
-    if (m_geoShape) m_geoShape->ref();
-  }
-
-  GeoShapeHolder&
-  GeoShapeHolder::operator = (const GeoShapeHolder& rhs) {
-    if (&rhs != this) {
-      reset();
-      m_geoShape = rhs.m_geoShape;
-      if (m_geoShape) m_geoShape->ref();
-    }
-    return *this;
-  }
-  
-  GeoShapeHolder&
-  GeoShapeHolder::operator = (GeoShapeHolder&& rhs)  noexcept {
-    if (&rhs != this) {
-      if (m_geoShape) m_geoShape->unref();//this geoshape will be overwritten, so decrement its reference
-      m_geoShape = rhs.m_geoShape; //simply equate the pointers
-      rhs.m_geoShape=nullptr;      //render the original unusable for safety
-      //if (m_geoShape) m_geoShape->ref(); << no need to increment the reference; the original is moved here
-      //                                      with its original refcount intact.
-    }
-    return *this;
-  }
-
-  void
-  GeoShapeHolder::set(const GeoShape* geoShape) {
-    reset();
-    m_geoShape = geoShape;
-    if (m_geoShape) m_geoShape->ref();
-  }
-
-  void
-  GeoShapeHolder::reset() {
-    if (m_geoShape) m_geoShape->unref();
-    m_geoShape = nullptr;
-  }
 } // end namespace
