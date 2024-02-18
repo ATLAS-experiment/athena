@@ -18,7 +18,7 @@
 
 #include "TrigInDetAnalysis/TrackAnalysis.h"
 #include "TrigInDetAnalysis/Track.h"
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
 #include "TrigInDetAnalysis/TIDDirectory.h"
 
 #include "TH1F.h"
@@ -43,8 +43,8 @@ public:
     std::map<std::string, TH1F*>::iterator hend=m_histos.end();
     for ( ; hitr!=hend ; hitr++ ) delete hitr->second;     
 
-    Efficiency* heff[4]    = {    m_eff_pt,    m_eff_eta,    m_eff_phi,    m_eff_z0 };
-    Efficiency* hpurity[4] = { m_purity_pt, m_purity_eta, m_purity_phi, m_purity_z0 };
+    Efficiency1D* heff[4]    = {    m_eff_pt,    m_eff_eta,    m_eff_phi,    m_eff_z0 };
+    Efficiency1D* hpurity[4] = { m_purity_pt, m_purity_eta, m_purity_phi, m_purity_z0 };
 
     for ( int i=4 ; i-- ; ) { delete heff[i]; delete hpurity[i]; } 
 
@@ -81,23 +81,23 @@ private:
 private:
 
   std::map<std::string, TH1F*> m_histos;
- 
-  Efficiency* m_eff_pt;
-  Efficiency* m_eff_ptp;
-  Efficiency* m_eff_ptm;
 
-  Efficiency* m_eff_eta;
-  Efficiency* m_eff_phi;
-  Efficiency* m_eff_z0;
-  Efficiency* m_eff_d0;
-  Efficiency* m_eff_a0;
+  Efficiency1D* m_eff_pt;
+  Efficiency1D* m_eff_ptp;
+  Efficiency1D* m_eff_ptm;
 
-  Efficiency* m_purity_pt;
-  Efficiency* m_purity_eta;
-  Efficiency* m_purity_phi;
-  Efficiency* m_purity_z0;
-  Efficiency* m_purity_d0;
-  Efficiency* m_purity_a0;
+  Efficiency1D* m_eff_eta;
+  Efficiency1D* m_eff_phi;
+  Efficiency1D* m_eff_z0;
+  Efficiency1D* m_eff_d0;
+  Efficiency1D* m_eff_a0;
+
+  Efficiency1D* m_purity_pt;
+  Efficiency1D* m_purity_eta;
+  Efficiency1D* m_purity_phi;
+  Efficiency1D* m_purity_z0;
+  Efficiency1D* m_purity_d0;
+  Efficiency1D* m_purity_a0;
 
 
   TH2F* m_h2;

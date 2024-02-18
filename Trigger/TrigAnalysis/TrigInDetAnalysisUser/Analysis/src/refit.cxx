@@ -28,7 +28,7 @@
 
 #include "dataset.h"
 
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
 #include "Resplot.h"
 
 /// file names and file pointers
@@ -96,7 +96,7 @@ bool handleEfficiency( TDirectory* tnd ) {
 
 	    delete eff;
 
-	    Efficiency e( num, den, name );
+	    Efficiency1D e( num, den, name );
 	    eff = e.Hist();
 	    eff->SetName( name.c_str() );
 	    eff->SetTitle( title.c_str() );

@@ -22,7 +22,7 @@
 #include "TrigInDetAnalysis/TrackFilter.h"
 #include "TrigInDetAnalysis/TIDARoiDescriptor.h"
 #include "TrigInDetAnalysis/TIDDirectory.h"
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
 
 #include "TrigInDetAnalysisUtils/Filter_Track.h"
 #include "TrigInDetAnalysisUtils/Filter_RoiSelector.h"

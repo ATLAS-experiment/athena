@@ -19,7 +19,8 @@
 #include "TrigInDetAnalysis/TrackAnalysis.h"
 #include "TrigInDetAnalysis/Track.h"
 #include "TrigInDetAnalysis/TIDDirectory.h"
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
+#include "TrigInDetAnalysis/Efficiency2D.h"
 #include "TrigInDetAnalysis/TIDARoiDescriptor.h"
 #include "TrigInDetAnalysis/TrigObjectMatcher.h"
 
@@ -165,26 +166,28 @@ private:
   // tag and probe object
   TagNProbe* m_TnP_tool = 0;
 
-  Efficiency* m_eff_pt = 0;
-  Efficiency* m_eff_ptp = 0;
-  Efficiency* m_eff_ptm = 0;
+  ///  Efficiency2D* m_eff_pt_vs_eta = 0;
 
-  Efficiency* m_eff_eta = 0;
-  Efficiency* m_eff_phi = 0;
-  Efficiency* m_eff_z0 = 0;
-  Efficiency* m_eff_d0 = 0;
-  Efficiency* m_eff_a0 = 0;
+  Efficiency1D* m_eff_pt = 0;
+  Efficiency1D* m_eff_ptp = 0;
+  Efficiency1D* m_eff_ptm = 0;
 
-  Efficiency* m_eff_roi_deta = 0;
-  Efficiency* m_eff_roi_dphi = 0;
-  Efficiency* m_eff_roi_dR = 0;
+  Efficiency1D* m_eff_eta = 0;
+  Efficiency1D* m_eff_phi = 0;
+  Efficiency1D* m_eff_z0 = 0;
+  Efficiency1D* m_eff_d0 = 0;
+  Efficiency1D* m_eff_a0 = 0;
 
-  Efficiency* m_purity_pt = 0;
-  Efficiency* m_purity_eta = 0;
-  Efficiency* m_purity_phi = 0;
-  Efficiency* m_purity_z0 = 0;
-  Efficiency* m_purity_d0 = 0;
-  Efficiency* m_purity_a0 = 0;
+  Efficiency1D* m_eff_roi_deta = 0;
+  Efficiency1D* m_eff_roi_dphi = 0;
+  Efficiency1D* m_eff_roi_dR = 0;
+
+  Efficiency1D* m_purity_pt = 0;
+  Efficiency1D* m_purity_eta = 0;
+  Efficiency1D* m_purity_phi = 0;
+  Efficiency1D* m_purity_z0 = 0;
+  Efficiency1D* m_purity_d0 = 0;
+  Efficiency1D* m_purity_a0 = 0;
 
 #if 0
   TH2F* m_h2;
@@ -324,22 +327,22 @@ private:
   TH1F*  m_hphivsDd0res[3];
   TH1F*  m_hphivsDa0res[3];
 
-  Efficiency* m_eff_vs_lb = 0;
+  Efficiency1D* m_eff_vs_lb = 0;
 
   Resplot* m_z_vs_lb = 0;
 
   std::map<int, int> m_rmap;
 
-  Efficiency* m_eff_vs_mult = 0;
+  Efficiency1D* m_eff_vs_mult = 0;
 
   TH1F* m_n_vtx_tracks = 0;
-  Efficiency* m_eff_vs_ntracks = 0;
-  Efficiency* m_eff_vs_ntracks2 = 0;
+  Efficiency1D* m_eff_vs_ntracks = 0;
+  Efficiency1D* m_eff_vs_ntracks2 = 0;
 
   TH1F* m_n_vtx = 0;
-  Efficiency* m_eff_vs_nvtx = 0;
+  Efficiency1D* m_eff_vs_nvtx = 0;
   TH1F* m_mu = 0;
-  Efficiency* m_eff_vs_mu = 0;
+  Efficiency1D* m_eff_vs_mu = 0;
 
   /// beam spot dependent
 
@@ -355,10 +358,10 @@ private:
   /// electron specific ET/PT related stuff
   TH1F* m_etovpt_raw = 0;
   TH1F* m_etovpt = 0;
-  Efficiency* m_eff_vs_etovpt = 0;
+  Efficiency1D* m_eff_vs_etovpt = 0;
 
   TH1F* m_et = 0;
-  Efficiency* m_eff_vs_et = 0;
+  Efficiency1D* m_eff_vs_et = 0;
 
   /// flag to print out the matched tracks etc
   bool m_print = false;
