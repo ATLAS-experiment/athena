@@ -218,17 +218,16 @@ class TrigInDetReco(ExecStep):
 class TrigInDetAna(ExecStep):
     def __init__(self, name='TrigInDetAna', extraArgs=None):
         ExecStep.__init__(self, name )
-        self.type = 'athena'
-        self.job_options = 'TrigInDetValidation/TrigInDetValidation_AODtoTrkNtuple.py'
+        self.type = 'other'
+        self.executable = 'python'
+        self.args = ' -m TrigInDetValidation.TrigInDetValidation_AODtoTrkNtuple_CA '
         self.max_events=-1
         self.required = True
         self.depends_on_previous = True
         #self.input = 'AOD.pool.root'
         self.input = ''
-        self.perfmon=False
-        self.imf=False
         if extraArgs is not None:
-            self.args = extraArgs
+            self.args += extraArgs
 
 
 ##################################################

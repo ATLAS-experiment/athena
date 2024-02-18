@@ -40,7 +40,7 @@ Input   = 'SelSel'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-ExtraAna = ' -c LRT="True" '
+ExtraAna = ' --LRT=True '
 
 # legacy 
 # preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'

@@ -29,8 +29,6 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-
-
 useCA_Reco = True
 Slices  = ['L2muonLRT']
 Events  = 8000 
@@ -40,7 +38,7 @@ Input   = 'SmuSmu'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-ExtraAna = ' -c LRT="True" '
+ExtraAna = ' --LRT=True '
 
 # legacy
 # preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'

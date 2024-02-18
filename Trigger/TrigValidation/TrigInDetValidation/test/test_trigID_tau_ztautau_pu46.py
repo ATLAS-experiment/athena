@@ -40,7 +40,7 @@ Release = "current"
 Input   = 'Ztautau'    # defined in TrigValTools/share/TrigValInputs.json  
 GridFiles = True
 
-ExtraAna = " -c 'parentpdgid=15' "
+ExtraAna = " --parentpdgid=15 "
 
 
 Jobs = [ ( "Offline",  " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ),
