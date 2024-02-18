@@ -7,8 +7,9 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+#include "GeoModelKernel/GeoMaterial.h"
 
-class GeoMaterial;
 class GeoElement;
 class StoredMaterialManager;
 class StoreGateSvc;
@@ -211,7 +212,7 @@ private:
   StoredMaterialManager *m_materialManager;
   std::string m_managerName;
 
-  typedef std::map<std::string, const GeoMaterial *> MaterialStore;
+  using MaterialStore = std::map<std::string, GeoIntrusivePtr<const GeoMaterial>>;
   MaterialStore m_store;
 
   typedef std::map<std::string, MaterialByWeight > MaterialWeightMap;

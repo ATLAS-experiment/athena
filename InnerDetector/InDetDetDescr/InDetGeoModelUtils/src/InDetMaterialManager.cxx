@@ -5,6 +5,7 @@
 #include "InDetGeoModelUtils/InDetMaterialManager.h"
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/Units.h"
@@ -74,13 +75,7 @@ InDetMaterialManager::InDetMaterialManager(const std::string& managerName,
   addTextFileMaterials();
 }
 
-InDetMaterialManager::~InDetMaterialManager() {
-  // Dereference the materials.
-  MaterialStore::const_iterator iter;
-  for (iter = m_store.begin(); iter != m_store.end(); ++iter) {
-    iter->second->unref();
-  }
-}
+InDetMaterialManager::~InDetMaterialManager() = default;
 
 inline StoredMaterialManager*
 InDetMaterialManager::retrieveManager(const StoreGateSvc* detStore) {
@@ -302,17 +297,15 @@ InDetMaterialManager::getMaterialScaledInternal(const std::string& origMaterialN
 
 void
 InDetMaterialManager::addMaterial(GeoMaterial* material) {
+  GeoIntrusivePtr<const GeoMaterial> matPtr{material};
   std::string name(material->getName());
   if (m_store.find(name) != m_store.end()) {
     ATH_MSG_WARNING("Ignoring attempt to redefine an existing material: " << name);
     // Delete the material if it is not already ref counted.
-    material->ref();
-    material->unref();
     //std::cout << m_store[name] << std::endl;
   } else {
     material->lock();
-    material->ref();
-    m_store[name] = material;
+    m_store[name] = matPtr;
 
     ATH_MSG_DEBUG("Created new material: " << name << ", " << material->getDensity() /
                   (Gaudi::Units::g / Gaudi::Units::cm3) << " g/cm3");
@@ -883,7 +876,7 @@ InDetMaterialManager::createMaterial(const MaterialDef& material) {
     }
   }
   // Now build the material
-  GeoMaterial* newMaterial = new GeoMaterial(material.name(), material.density());
+  GeoIntrusivePtr<GeoMaterial> newMaterial{new GeoMaterial(material.name(), material.density())};
   ATH_MSG_DEBUG("Creating material: " << material.name() << " with density: "
                 << material.density() / (Gaudi::Units::g / Gaudi::Units::cm3));
   for (unsigned int i = 0; i < material.numComponents(); i++) {
@@ -893,8 +886,6 @@ InDetMaterialManager::createMaterial(const MaterialDef& material) {
       if (!element) {
         ATH_MSG_ERROR("Error making material " << material.name() << ". Element not found: " << material.compName(i));
         // delete the partially created material
-        newMaterial->ref();
-        newMaterial->unref();
         return;
       }
       if (byAtomicRatio) {
@@ -903,19 +894,17 @@ InDetMaterialManager::createMaterial(const MaterialDef& material) {
       newMaterial->add(const_cast<GeoElement*>(element), fracWeight);
       ATH_MSG_DEBUG(" Component: " << material.compName(i) << " " << fracWeight);
     } else {
-      const GeoMaterial* materialTmp = getMaterialInternal(material.compName(i));
+      GeoIntrusivePtr<const GeoMaterial> materialTmp{getMaterialInternal(material.compName(i))};
       if (!materialTmp) {
         ATH_MSG_ERROR("Error making material " << material.name() << ". Component not found: " << material.compName(i));
         // delete the partially created material
-        newMaterial->ref();
-        newMaterial->unref();
         return;
       }
       if (byAtomicRatio) {
         // Should not happen as already checked that all components were elements.
         ATH_MSG_ERROR("Unexpected Error");
       }
-      newMaterial->add(const_cast<GeoMaterial*>(materialTmp), fracWeight);
+      newMaterial->add(const_cast<GeoMaterial*>(materialTmp.get()), fracWeight);
       ATH_MSG_DEBUG(" Component: " << material.compName(i) << " " << fracWeight);
     }
   }
