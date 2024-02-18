@@ -39,7 +39,7 @@ Slots   = 8
 Input   = 'Bphys_JpsiPhi'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 
-ExtraAna = " -c 'parentpdgid=531' "
+ExtraAna = " --parentpdgid=531 "
 
 Jobs = [ ( "Truth",       " TIDAdata-run3-larged0.dat                    -o data-hists.root " ),
          ( "Offline",     " TIDAdata-run3-offline-larged0.dat -r Offline -o data-hists-offline.root" ) ]

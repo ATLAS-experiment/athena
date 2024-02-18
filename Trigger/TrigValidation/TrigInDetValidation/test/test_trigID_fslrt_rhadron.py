@@ -36,7 +36,7 @@ Threads = 8
 Slots   = 8
 Input   = 'RHadron'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = False
-ExtraAna = ' -c LRT="True" '
+ExtraAna = ' --LRT=True '
 Release = "current"
 
 # legacy                                                                                                                                                                                 
