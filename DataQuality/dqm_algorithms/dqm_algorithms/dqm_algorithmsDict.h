@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DQM_ALGORITHMS_DQM_ALGORITHMSDICT_H
 #define DQM_ALGORITHMS_DQM_ALGORITHMSDICT_H
 
-#include "dqm_algorithms/AFP_LBsOutOfRange.h"
 #include "dqm_algorithms/AddReference.h"
 #include "dqm_algorithms/AddReference_All_Bins_Filled.h"
 #include "dqm_algorithms/AddReference_BinContentComp.h"
@@ -17,6 +16,7 @@
 #include "dqm_algorithms/AddReference_Bins_LessThan_Threshold.h"
 #include "dqm_algorithms/AddReference_Bins_NotEqual_Threshold.h"
 #include "dqm_algorithms/AFP_LBsOutOfRange.h"
+#include "dqm_algorithms/AFP_ToFSiTCorrCheck.h"
 #include "dqm_algorithms/AFP_ToFEfficiency.h"
 #include "dqm_algorithms/All_Bins_Filled.h"
 #include "dqm_algorithms/AveragePrint.h"
