@@ -340,59 +340,59 @@ void ConfAnalysis::initialiseInternal() {
   }
 
   // efficiencies and purities
-  m_eff_pt  = new Efficiency( find("pT"),  "pT_eff"  );
+  m_eff_pt  = new Efficiency1D( find("pT"),  "pT_eff"  );
   m_eff_pt->Hist()->GetXaxis()->SetTitle("P_{T} [GeV]");
   m_eff_pt->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_eta = new Efficiency( find("eta"), "eta_eff" );
+  m_eff_eta = new Efficiency1D( find("eta"), "eta_eff" );
   m_eff_eta->Hist()->GetXaxis()->SetTitle("#eta");
   m_eff_eta->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_phi = new Efficiency( find("phi"), "phi_eff" );
+  m_eff_phi = new Efficiency1D( find("phi"), "phi_eff" );
   m_eff_phi->Hist()->GetXaxis()->SetTitle("#phi");
   m_eff_phi->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_z0  = new Efficiency( find("z0"),  "z0_eff"  );
+  m_eff_z0  = new Efficiency1D( find("z0"),  "z0_eff"  );
   m_eff_z0->Hist()->GetXaxis()->SetTitle("z0");
   m_eff_z0->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_d0  = new Efficiency( find("d0"),  "d0_eff"  );
+  m_eff_d0  = new Efficiency1D( find("d0"),  "d0_eff"  );
   m_eff_d0->Hist()->GetXaxis()->SetTitle("d0");
   m_eff_d0->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_a0  = new Efficiency( find("a0"),  "a0_eff"  );
+  m_eff_a0  = new Efficiency1D( find("a0"),  "a0_eff"  );
   m_eff_a0->Hist()->GetXaxis()->SetTitle("a0");
   m_eff_a0->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
           
-  m_eff_ptm = new Efficiency( find("pT"), "pTm_eff" );
+  m_eff_ptm = new Efficiency1D( find("pT"), "pTm_eff" );
   m_eff_ptm->Hist()->GetXaxis()->SetTitle("Negative P_{T} [GeV]");
   m_eff_ptm->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_ptp = new Efficiency( find("pT"), "pTp_eff" );
+  m_eff_ptp = new Efficiency1D( find("pT"), "pTp_eff" );
   m_eff_ptp->Hist()->GetXaxis()->SetTitle("Positive P_{T} [GeV]");
   m_eff_ptp->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_roi_deta = new Efficiency( find("roi_deta"), "roi_deta_eff" );
+  m_eff_roi_deta = new Efficiency1D( find("roi_deta"), "roi_deta_eff" );
   m_eff_roi_deta->Hist()->GetXaxis()->SetTitle("RoI #Delta#eta");
   m_eff_roi_deta->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_roi_dphi = new Efficiency( find("roi_dphi"), "roi_dphi_eff" );
+  m_eff_roi_dphi = new Efficiency1D( find("roi_dphi"), "roi_dphi_eff" );
   m_eff_roi_dphi->Hist()->GetXaxis()->SetTitle("RoI #Delta#phi");
   m_eff_roi_dphi->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
-  m_eff_roi_dR = new Efficiency( find("roi_dR"), "roi_dR_eff" );
+  m_eff_roi_dR = new Efficiency1D( find("roi_dR"), "roi_dR_eff" );
   m_eff_roi_dR->Hist()->GetXaxis()->SetTitle("RoI #Delta R");
   m_eff_roi_dR->Hist()->GetYaxis()->SetTitle("Efficiency [%]");
 
   // addHistogram ( m_hDeltaR = new TH1F("DeltaR", "DeltaR", 100, 0, 0.1 ) );
   addHistogram ( m_hDeltaR = new TH1F("DeltaR", "DeltaR", 100, 0, 0.2 ) );
 
-  m_purity_pt  = new Efficiency( find("pT"),  "pT_pur"  );
-  m_purity_eta = new Efficiency( find("eta"), "eta_pur" );
-  m_purity_phi = new Efficiency( find("phi"), "phi_pur" );
-  m_purity_z0  = new Efficiency( find("z0"),  "z0_pur"  );
-  m_purity_d0  = new Efficiency( find("d0"),  "d0_pur"  );
-  m_purity_a0  = new Efficiency( find("a0"),  "a0_pur"  );
+  m_purity_pt  = new Efficiency1D( find("pT"),  "pT_pur"  );
+  m_purity_eta = new Efficiency1D( find("eta"), "eta_pur" );
+  m_purity_phi = new Efficiency1D( find("phi"), "phi_pur" );
+  m_purity_z0  = new Efficiency1D( find("z0"),  "z0_pur"  );
+  m_purity_d0  = new Efficiency1D( find("d0"),  "d0_pur"  );
+  m_purity_a0  = new Efficiency1D( find("a0"),  "a0_pur"  );
 
   // "test" quantities
   addHistogram(    new TH1F(  "pT_rec",   "pT_rec",   ptnbins,    ptbinlims ) );
@@ -758,7 +758,7 @@ void ConfAnalysis::initialiseInternal() {
     //  TH1F heffvlb("eff vs lb", "eff vs lb", 600, 1260400000, 1260700000); 
 
 
-  m_eff_vs_lb = new Efficiency( &heffvlb );
+  m_eff_vs_lb = new Efficiency1D( &heffvlb );
 
   //  m_z_vs_lb = new Resplot("z vs lb", 100, 1270515000,  1270560000, 100, -250, 250);
   m_z_vs_lb = new Resplot("z vs lb", 301, -0.5,  3009.5, 100, -250, 250);
@@ -777,11 +777,11 @@ void ConfAnalysis::initialiseInternal() {
 
   TH1F* eff_vs_mult = new TH1F( "eff_vs_mult", "eff_vs_mult", 25, 0, 25 );
 
-  m_eff_vs_mult = new Efficiency( eff_vs_mult, "eff_mult" );
+  m_eff_vs_mult = new Efficiency1D( eff_vs_mult, "eff_mult" );
 
 
   m_n_vtx_tracks   = new TH1F("nvtxtracks", "nvtxtracks", 150, 0, 600);
-  m_eff_vs_ntracks = new Efficiency( m_n_vtx_tracks, "eff_vs_ntracks");
+  m_eff_vs_ntracks = new Efficiency1D( m_n_vtx_tracks, "eff_vs_ntracks");
 
 
 
@@ -800,14 +800,14 @@ void ConfAnalysis::initialiseInternal() {
 			151.5,  164.5, 200.5, 250.5, 300.5, 400.5, 600 };
 
   TH1F* n_vtx_tracks2   = new TH1F("nvtxtracks2", "nvtxtracks2", 22, nbins);
-  m_eff_vs_ntracks2 = new Efficiency( n_vtx_tracks2, "eff_vs_ntracks2");
+  m_eff_vs_ntracks2 = new Efficiency1D( n_vtx_tracks2, "eff_vs_ntracks2");
   delete n_vtx_tracks2;
 
   m_n_vtx       = new TH1F("nvtx", "nvtx", 81, -0.5, 80.5);
-  m_eff_vs_nvtx = new Efficiency( m_n_vtx, "eff_vs_nvtx");
+  m_eff_vs_nvtx = new Efficiency1D( m_n_vtx, "eff_vs_nvtx");
   //m_mu          = new TH1F("mu", "mu", 3000, -0.5, 29.5);
   m_mu          = new TH1F("mu", "mu", 90, 0, 90);
-  m_eff_vs_mu   = new Efficiency( m_mu, "eff_vs_mu");
+  m_eff_vs_mu   = new Efficiency1D( m_mu, "eff_vs_mu");
 
 
   /// electron specific histograms
@@ -822,11 +822,11 @@ void ConfAnalysis::initialiseInternal() {
   m_etovpt_raw    = new TH1F("etovpt_raw", "ET / pT", 100, 0, 10 );
 
   m_etovpt        = new TH1F("etovpt", "ET / pT", 38, etovpt_bins );
-  m_eff_vs_etovpt = new Efficiency( m_etovpt, "eff_vs_etovpt");
+  m_eff_vs_etovpt = new Efficiency1D( m_etovpt, "eff_vs_etovpt");
 
 
   m_et          = new TH1F("ET", "ET; E_{T} [GeV]", ptnbins, ptbinlims );
-  m_eff_vs_et   = new Efficiency( m_et, "eff_vs_ET" );
+  m_eff_vs_et   = new Efficiency1D( m_et, "eff_vs_ET" );
 
 
   //  std::cout << "initialize() Directory " << gDirectory->GetName() << " on leaving" << std::endl;
@@ -959,7 +959,7 @@ void ConfAnalysis::finalise() {
   //  std::vector<Efficiency*> heff = { eff_pt,
 
   const unsigned Neff = 11;
-  Efficiency*  heff[Neff] = { m_eff_pt,
+  Efficiency1D*  heff[Neff] = { m_eff_pt,
 			      m_eff_eta,
 			      m_eff_phi,
 			      m_eff_z0,
@@ -993,7 +993,7 @@ void ConfAnalysis::finalise() {
   m_eff_vs_et->finalise();
 
   const unsigned Npurity = 6;
-  Efficiency* hpurity[Npurity] = {
+  Efficiency1D* hpurity[Npurity] = {
     m_purity_pt,
     m_purity_eta,
     m_purity_phi,

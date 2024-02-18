@@ -114,8 +114,8 @@ void PurityAnalysis::initialise() {
   //  delete effpt2d;
   //  delete effeta2d;
 
-  Efficiency* heff[8];  
-  Efficiency* hpurity[6]; 
+  Efficiency1D* heff[8];  
+  Efficiency1D* hpurity[6]; 
 
   addHistogram( m_hchi2=new TH1F("chi2", "chi2", 100, 0, 20) );
 
@@ -128,15 +128,15 @@ void PurityAnalysis::initialise() {
   addHistogram(  new TH1F(  "a0",   "a0",    a0Bins,       -a0Max,      a0Max ) );
   
   // efficienies and purities
-  heff[0]    = new Efficiency( find("pT"),  "pT_eff"  );
-  heff[1]    = new Efficiency( find("eta"), "eta_eff" );
-  heff[2]    = new Efficiency( find("phi"), "phi_eff" );
-  heff[3]    = new Efficiency( find("z0"),  "z0_eff"  );
-  heff[4]    = new Efficiency( find("d0"),  "d0_eff"  );
-  heff[5]    = new Efficiency( find("a0"),  "a0_eff"  );
+  heff[0]    = new Efficiency1D( find("pT"),  "pT_eff"  );
+  heff[1]    = new Efficiency1D( find("eta"), "eta_eff" );
+  heff[2]    = new Efficiency1D( find("phi"), "phi_eff" );
+  heff[3]    = new Efficiency1D( find("z0"),  "z0_eff"  );
+  heff[4]    = new Efficiency1D( find("d0"),  "d0_eff"  );
+  heff[5]    = new Efficiency1D( find("a0"),  "a0_eff"  );
   
-  heff[6]    = new Efficiency( find("pT"), "pTm_eff" );
-  heff[7]    = new Efficiency( find("pT"), "pTp_eff" );
+  heff[6]    = new Efficiency1D( find("pT"), "pTm_eff" );
+  heff[7]    = new Efficiency1D( find("pT"), "pTp_eff" );
 
   m_eff_pt  = heff[0];
   m_eff_eta = heff[1];
@@ -151,12 +151,12 @@ void PurityAnalysis::initialise() {
   // addHistogram ( hDeltaR = new TH1F("DeltaR", "DeltaR", 100, 0, 0.1 ) );
   addHistogram ( m_hDeltaR = new TH1F("DeltaR", "DeltaR", 100, 0, 0.2 ) );
 
-  hpurity[0] = new Efficiency( find("pT"),  "pT_pur"  );
-  hpurity[1] = new Efficiency( find("eta"), "eta_pur" );
-  hpurity[2] = new Efficiency( find("phi"), "phi_pur" );
-  hpurity[3] = new Efficiency( find("z0"),  "z0_pur"  );
-  hpurity[4] = new Efficiency( find("d0"),  "d0_pur"  );
-  hpurity[5] = new Efficiency( find("a0"),  "a0_pur"  );
+  hpurity[0] = new Efficiency1D( find("pT"),  "pT_pur"  );
+  hpurity[1] = new Efficiency1D( find("eta"), "eta_pur" );
+  hpurity[2] = new Efficiency1D( find("phi"), "phi_pur" );
+  hpurity[3] = new Efficiency1D( find("z0"),  "z0_pur"  );
+  hpurity[4] = new Efficiency1D( find("d0"),  "d0_pur"  );
+  hpurity[5] = new Efficiency1D( find("a0"),  "a0_pur"  );
 
   m_purity_pt  = hpurity[0];
   m_purity_eta = hpurity[1];
@@ -245,7 +245,7 @@ void PurityAnalysis::finalise() {
 
   //  std::cout << "DBG >" << m_eff_pt->Hist()->GetName() << "< DBG" << std::endl;
 
-  Efficiency* heff[8] = { m_eff_pt, m_eff_eta, m_eff_phi, m_eff_z0, m_eff_d0, m_eff_a0, m_eff_ptm, m_eff_ptp };
+  Efficiency1D* heff[8] = { m_eff_pt, m_eff_eta, m_eff_phi, m_eff_z0, m_eff_d0, m_eff_a0, m_eff_ptm, m_eff_ptp };
   for ( int i=8 ; i-- ; ) { heff[i]->finalise();  } // heff[i]->Hist()->Write(); } 
 
   //  std::cout << "DBG >" << m_purity_pt->Hist()->GetName() << "< DBG" << std::endl;
@@ -260,7 +260,7 @@ void PurityAnalysis::finalise() {
   //  TH1F* h = m_eff_etapt->SliceY(i);
   // }
 
-  Efficiency* hpurity[6] = { m_purity_pt, m_purity_eta, m_purity_phi, m_purity_z0, m_purity_d0, m_purity_a0 };
+  Efficiency1D* hpurity[6] = { m_purity_pt, m_purity_eta, m_purity_phi, m_purity_z0, m_purity_d0, m_purity_a0 };
   for ( int i=6 ; i-- ; ) { hpurity[i]->finalise();  } //  hpurity[i]->Hist()->Write(); } 
 
   //  d.pop();

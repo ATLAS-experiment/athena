@@ -148,14 +148,14 @@ void ConfVtxAnalysis::initialise() {
   m_rdr_vs_r      = new Resplot( "rdr_vs_r",     40, vrbins,  800, -15,  15 );
   m_rdr_vs_ntrax  = new Resplot( "rdr_vs_ntrax", 14,   -0.5, 13.5, 800, -15, 15 );
 
-  m_eff_zed   = new Efficiency( m_hzed,   "zed_eff" );
-  m_eff_x     = new Efficiency( m_hx,     "x_eff" );
-  m_eff_y     = new Efficiency( m_hy,     "y_eff" );
-  m_eff_ntrax = new Efficiency( m_hntrax, "ntrax_eff" );
-  m_eff_nvtx  = new Efficiency( m_hnvtx,  "nvtx_eff" );
-  m_eff_mu    = new Efficiency( m_hmu, "mu_eff" );
-  m_eff_lb    = new Efficiency( m_hlb, "lb_eff" );
-  m_eff_r     = new Efficiency( m_hr, "r_eff" );
+  m_eff_zed   = new Efficiency1D( m_hzed,   "zed_eff" );
+  m_eff_x     = new Efficiency1D( m_hx,     "x_eff" );
+  m_eff_y     = new Efficiency1D( m_hy,     "y_eff" );
+  m_eff_ntrax = new Efficiency1D( m_hntrax, "ntrax_eff" );
+  m_eff_nvtx  = new Efficiency1D( m_hnvtx,  "nvtx_eff" );
+  m_eff_mu    = new Efficiency1D( m_hmu, "mu_eff" );
+  m_eff_lb    = new Efficiency1D( m_hlb, "lb_eff" );
+  m_eff_r     = new Efficiency1D( m_hr, "r_eff" );
 
   m_rnvtxrec_nvtx = new Resplot( "rnvtxrec_vs_nvtx",   81,  -0.5,   80.5,  81,   -0.5,   80.5 );
 
