@@ -354,7 +354,28 @@ double dqm_algorithms::tools::GetFirstFromMap(const std::string &paramName, cons
     } else {
         return it->second;
     }
-}        	
+}
+
+//string overloads
+const std::string& dqm_algorithms::tools::GetFirstFromMap(const std::string &paramName, const std::map<std::string, std::string > &params)
+{
+    std::map<std::string, std::string >::const_iterator it = params.find(paramName);
+    if (it == params.end()) {
+        throw dqm_core::BadConfig(ERS_HERE, "None", paramName);	// this is the only difference between the two overloaded versions
+    } else {
+        return it->second;
+    }
+}
+
+const std::string& dqm_algorithms::tools::GetFirstFromMap(const std::string &paramName, const std::map<std::string, std::string > &params, const std::string& defaultValue)
+{
+    std::map<std::string, std::string >::const_iterator it = params.find(paramName);
+    if (it == params.end()) {
+        return defaultValue; // this is the only difference between the two overloaded versions
+    } else {
+        return it->second;
+    }
+} 
 
 std::vector<int> dqm_algorithms::tools::GetBinRange(const TH1 *h, const std::map<std::string, double > &params)
 {
