@@ -390,7 +390,7 @@ class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
     def __init__ (self, algoName):
-        super(PerEventSFBlock, self).__init__()
+        super(PerEventSFBlock, self).__init__('PerEventSF'+algoName)
         self.algoName = algoName
         self.addOption('particles', '', type=str)
         self.addOption('objectSF', '', type=str)
