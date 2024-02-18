@@ -19,6 +19,7 @@ MTDigiOutputFile="mc20_nopileup_ttbar.MT.RDO.pool.root"
 STDigiOutputFile="mc20_nopileup_ttbar.ST.RDO.pool.root"
 
 Digi_tf.py \
+    --CA \
     --multithreaded \
     --inputHITSFile ${HSHITSFILE} \
     --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
@@ -27,8 +28,8 @@ Digi_tf.py \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --DataRunNumber 310000 \
     --outputRDOFile ${MTDigiOutputFile} \
-    --preInclude 'HITtoRDO:Campaigns/MC20NoPileUp.py,Digitization/ForceUseOfAlgorithms.py' \
-    --postInclude 'PyJobTransforms/UseFrontier.py' \
+    --preInclude 'HITtoRDO:Campaigns.MC20NoPileUp' \
+    --postInclude 'all:PyJobTransforms.UseFrontier' \
     --skipEvents 0  \
     --maxEvents 100 \
     --imf False
@@ -39,6 +40,7 @@ echo "art-result: $rc MTdigi"
 mv log.HITtoRDO log.HITtoRDO_MT
 
 Digi_tf.py \
+    --CA \
     --inputHITSFile ${HSHITSFILE} \
     --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 \
     --digiSeedOffset1 170 \
@@ -46,8 +48,8 @@ Digi_tf.py \
     --geometryVersion default:ATLAS-R2-2016-01-00-01 \
     --DataRunNumber 310000 \
     --outputRDOFile ${STDigiOutputFile} \
-    --preInclude 'HITtoRDO:Campaigns/MC20NoPileUp.py,Digitization/ForceUseOfAlgorithms.py' \
-    --postInclude 'PyJobTransforms/UseFrontier.py' \
+    --preInclude 'HITtoRDO:Campaigns.MC20NoPileUp' \
+    --postInclude 'all:PyJobTransforms.UseFrontier' \
     --skipEvents 0  \
     --maxEvents 100 \
     --imf False
