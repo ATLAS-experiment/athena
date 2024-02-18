@@ -1104,10 +1104,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       // the main loop around all phi modules position
       int ModuleNcp =0;
 
-      GeoTransform* yrotMod = new GeoTransform(GeoTrf::RotateY3D(90*Gaudi::Units::deg));
-      yrotMod->ref();
-      GeoTransform* XYrtMod = new GeoTransform(GeoTrf::RotateX3D(180*Gaudi::Units::deg) * GeoTrf::RotateY3D(90*Gaudi::Units::deg));
-      XYrtMod->ref();
+      GeoIntrusivePtr<GeoTransform> yrotMod{new GeoTransform(GeoTrf::RotateY3D(90*Gaudi::Units::deg))};
+      GeoIntrusivePtr<GeoTransform> XYrtMod{new GeoTransform(GeoTrf::RotateX3D(180*Gaudi::Units::deg) * GeoTrf::RotateY3D(90*Gaudi::Units::deg))};
 
       for (int ModCounter = 0; ModCounter < NumberOfMod; ModCounter++) {
 
@@ -1117,10 +1115,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
         double phi = (double(ModuleNcp-1) + 0.5)*deltaPhi;
         double ph1 = (double(ModuleNcp-1))*deltaPhi;
 
-        GeoTransform* zrotMod = new GeoTransform(GeoTrf::RotateZ3D(phi*Gaudi::Units::deg));
-        zrotMod->ref();
-        GeoTransform* zrotSaddle =  new GeoTransform(GeoTrf::RotateZ3D(ph1*Gaudi::Units::deg));
-        zrotSaddle->ref();
+        GeoIntrusivePtr<GeoTransform> zrotMod{new GeoTransform(GeoTrf::RotateZ3D(phi*Gaudi::Units::deg))};
+        GeoIntrusivePtr<GeoTransform> zrotSaddle{new GeoTransform(GeoTrf::RotateZ3D(ph1*Gaudi::Units::deg))};
 
         dbManager->SetCurrentModuleByIndex(ModuleNcp-1);
         int ModType = dbManager->GetModType();
@@ -1401,7 +1397,6 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                 GeoCutVolAction action1(*CutA, TransCut2);
                 pvEBarrelModuleMotherPos->apply(&action1);
                 pvTmp_EBarrelModuleMotherPos = action1.getPV();
-                pvEBarrelModuleMotherPos->unref(); // Cleaning useless volume
 
                 if (ModuleNcp>=60 && ModuleNcp<=62) {
                   GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
@@ -1412,7 +1407,6 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                   GeoCutVolAction action2(*CutB, TransCutL);
                   pvTmp_EBarrelModuleMotherPos->apply(&action2);
                   pvTmL_EBarrelModuleMotherPos = action2.getPV();
-                  pvTmp_EBarrelModuleMotherPos->unref();// Cleaning useless volume
 
                   pvEBarrelMotherPos->add(pvTmL_EBarrelModuleMotherPos);
 
@@ -1425,7 +1419,6 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                   GeoCutVolAction action3(*CutB, TransCutR);
                   pvTmp_EBarrelModuleMotherPos->apply(&action3);
                   pvTmR_EBarrelModuleMotherPos = action3.getPV();
-                  pvTmp_EBarrelModuleMotherPos->unref();// Cleaning useless volume
 
                   pvEBarrelMotherPos->add(pvTmR_EBarrelModuleMotherPos);
                 }
@@ -1619,7 +1612,6 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                 GeoCutVolAction action1(*CutA, TransCut2);
                 pvEBarrelModuleMotherNeg->apply(&action1);
                 pvTmp_EBarrelModuleMotherNeg = action1.getPV();
-                pvEBarrelModuleMotherNeg->unref(); // Cleaning useless volume
 
                 if (ModuleNcp>=60 && ModuleNcp<=62) {
                   GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
@@ -1630,7 +1622,6 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                   GeoCutVolAction action2(*CutB, TransCutL);
                   pvTmp_EBarrelModuleMotherNeg->apply(&action2);
                   pvTmL_EBarrelModuleMotherNeg = action2.getPV();
-                  pvTmp_EBarrelModuleMotherNeg->unref();// Cleaning useless volume
 
                   pvEBarrelMotherNeg->add(pvTmL_EBarrelModuleMotherNeg);
 
@@ -1643,7 +1634,6 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                   GeoCutVolAction action3(*CutB, TransCutR);
                   pvTmp_EBarrelModuleMotherNeg->apply(&action3);
                   pvTmR_EBarrelModuleMotherNeg = action3.getPV();
-                  pvTmp_EBarrelModuleMotherNeg->unref();// Cleaning useless volume
 
                   pvEBarrelMotherNeg->add(pvTmR_EBarrelModuleMotherNeg);
                 }
@@ -2406,14 +2396,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
         } // if (EnvType == 4 || EnvType == 5)
 
-        zrotMod->unref();
-        zrotSaddle->unref();
       }// ModCounter, end
 
-
-
-      yrotMod->unref();
-      XYrtMod->unref();
 
     }
 
