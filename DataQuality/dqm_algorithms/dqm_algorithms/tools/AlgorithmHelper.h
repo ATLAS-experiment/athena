@@ -87,6 +87,13 @@ namespace dqm_algorithms
 
     double GetFirstFromMap(const std::string &paramName, const std::map<std::string, double > &params, double defaultValue);
     // optional: returns defaultValue if the parameter is not found
+
+    //string overloads
+    const std::string& GetFirstFromMap(const std::string &paramName, const std::map<std::string, std::string > &params);
+    // mandatory: throws an exception if the parameter is not found
+
+    const std::string& GetFirstFromMap(const std::string &paramName, const std::map<std::string, std::string > &params, const std::string& defaultValue);
+    // optional: returns defaultValue if the parameter is not found
     
     std::vector<int> GetBinRange(const TH1* histogram, const std::map<std::string, double > & params);
   
