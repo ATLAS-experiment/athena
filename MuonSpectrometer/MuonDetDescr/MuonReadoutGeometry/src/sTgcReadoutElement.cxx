@@ -175,6 +175,7 @@ namespace MuonGM {
     double      ylFrame               = (*wstgcRec)[ind]->getDouble("ylFrame");                
     double      ysFrame               = (*wstgcRec)[ind]->getDouble("ysFrame");                
     double      wirePitch             = (*wstgcRec)[ind]->getDouble("wirePitch");              
+    double      stripPitch            = (*wstgcRec)[ind]->getDouble("stripPitch");             
     double      stripWidth            = (*wstgcRec)[ind]->getDouble("stripWidth");             
     double      sPadWidth             = (*wstgcRec)[ind]->getDouble("sPadWidth");              
     double      lPadWidth             = (*wstgcRec)[ind]->getDouble("lPadWidth");              
@@ -251,7 +252,7 @@ namespace MuonGM {
     // Get frame widths
     m_tckChamber    = Tck;            // thickness (full chamber)
 
-    double yCutout  = getStationName().substr(0,3)=="QL3" ? yCutoutCathode: 0.0; // y of cutout of trapezoid (only in outermost detectors)
+    double yCutout  = m_diamondShape ? yCutoutCathode: 0.0; // y of cutout of trapezoid (only in outermost detectors)
 
     // For strips:
     m_halfX        = std::vector<double>(m_nlayers);
@@ -266,7 +267,7 @@ namespace MuonGM {
     // For diamond shape (QL3) the origin is on the cutout base. For the rest, the it is at the center 
     // of the active area, therefore the shift is half the difference of the top and bottom frame widths.
     m_offset = (m_diamondShape) ? 0.5*m_lengthChamber - (yCutout + ylFrame) : -0.5*(ylFrame - ysFrame); 
-    
+
     //-------------------
     // Strips
     //-------------------
@@ -284,7 +285,7 @@ namespace MuonGM {
       else 
         m_etaDesign[il].defineDiamond(0.5 * sStripWidth, 0.5 * lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
       
-      m_etaDesign[il].inputPitch  = stripWidth;
+      m_etaDesign[il].inputPitch  = stripPitch;
       m_etaDesign[il].inputWidth  = stripWidth;
       m_etaDesign[il].thickness   = gasTck;
       firstStripWidthStream >> m_etaDesign[il].firstPitch;
@@ -616,7 +617,6 @@ namespace MuonGM {
             Identifier id = manager()->stgcIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, layer + 1, 2, 1);
 
             m_surfaceData->m_layerSurfaces.push_back(std::make_unique<Trk::PlaneSurface>(*this, id));
-
             m_surfaceData->m_layerTransforms.push_back(
                absTransform()                        // transformation from chamber to ATLAS frame
                * m_delta                             // transformations from the alignment group
