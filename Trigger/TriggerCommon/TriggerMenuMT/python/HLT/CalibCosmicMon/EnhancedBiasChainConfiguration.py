@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -97,14 +97,6 @@ def enhancedBiasMenuSequence(flags):
                           HypoToolGen = EnhancedBiasHypoToolGen)
 
 
-
-def enahncedBiasSequence_Cfg(flags):
-    if isComponentAccumulatorCfg():
-        return enhancedBiasMenuSequence(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(enhancedBiasMenuSequence, flags)
-
-
 class EnhancedBiasChainConfiguration(ChainConfigurationBase):
     def __init__(self, chainDict):
         ChainConfigurationBase.__init__(self, chainDict)
@@ -114,6 +106,6 @@ class EnhancedBiasChainConfiguration(ChainConfigurationBase):
         chainSteps = []
         log.debug("Assembling chain for %s", self.chainName)
 
-        chainSteps.append( self.getStep(flags, 1, "EnhancedBias", [enahncedBiasSequence_Cfg]) )
+        chainSteps.append( self.getStep(flags, 1, "EnhancedBias", [enhancedBiasMenuSequence]) )
 
         return self.buildChain(chainSteps)
