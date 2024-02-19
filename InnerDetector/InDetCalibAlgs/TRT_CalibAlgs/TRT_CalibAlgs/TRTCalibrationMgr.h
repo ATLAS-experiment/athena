@@ -21,20 +21,14 @@
 #include "TRT_ConditionsData/RtRelationMultChanContainer.h"
 #include "TRT_ConditionsData/StrawT0MultChanContainer.h"
 #include "CxxUtils/checker_macros.h"
-
+#include "TRT_CalibTools/IFitTool.h"
+#include "TrkFitterInterfaces/ITrackFitter.h"
+#include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "TRT_CalibTools/IFillAlignTrkInfo.h"
+#include "TRT_CalibData/TrackInfo.h"
 
 
-namespace TRT{
-  class TrackInfo;
-}
-
-namespace Trk{
- class ITrackSelectorTool;
- class ITrackFitter;
-}
 class IAccumulator;
-class IFitTool;
 
 
 /**
@@ -81,8 +75,8 @@ private:
     // Tools for the algorithm
     ToolHandleArray<IFillAlignTrkInfo> m_TrackInfoTools {this, "AlignTrkTools", {}, ""};
     PublicToolHandleArray<ITRTCalibrator> m_TRTCalibTools {this, "TRTCalibrator", {}, ""};
-    ToolHandleArray<IFitTool> m_FitTools;
-    ToolHandle<Trk::ITrackFitter> m_trackFitter;
+    ToolHandleArray<IFitTool> m_FitTools {this, "FitTools", {}, ""};
+    ToolHandle<Trk::ITrackFitter> m_trackFitter {this, "TrackFitter", "ActsTrk::KalmanFitter/TrkKalmanFitter", ""};
     ToolHandle<Trk::ITrackSelectorTool> m_trackSelector; //!< Tool handle to the Trk::ITrackSelectorTool
     ToolHandle<IAthenaOutputStreamTool> m_streamer; //!< OutputStreamTool
 

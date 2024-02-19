@@ -14,14 +14,7 @@ def FillAlignTrkInfoCfg(flags,name='FillAlignTrkInfo',**kwargs) :
     acc = ComponentAccumulator()
     
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    
     kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags)))
-    
-    # if "TrackSummaryTool" not in kwargs:
-    #     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    #     InDetTrackSummaryTool = acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
-    #     acc.addPublicTool(InDetTrackSummaryTool)
-    # acc.setPrivateTools(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags, name, **kwargs)))
     
     acc.setPrivateTools(CompFactory.FillAlignTrkInfo(name, **kwargs))
     return acc
@@ -41,24 +34,6 @@ def FillAlignTRTHitsCfg(flags,name='FillAlignTRTHits',**kwargs) :
     
     acc.setPrivateTools(CompFactory.FillAlignTRTHits(name, **kwargs))
     
-    # if "NeighbourSvc" not in kwargs:
-        # from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawNeighbourSvcCfg
-        # TRT_StrawNeighbourSvc = acc.popToolsAndMerge(CompFactory.TRT_StrawNeighbourSvc("TRT_StrawNeighbourSvc"))
-        # kwargs.setdefault("NeighbourSvc" , TRT_StrawNeighbourSvc)
-        # acc.addPublicTool(TRT_StrawNeighbourSvc)
-    # if "TRTCaldbTool" not in kwargs:
-        # from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
-        # TRT_CalDbTool = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
-        # kwargs.setdefault("TRTCalDbTool", TRT_CalDbTool)
-        # acc.addPublicTool(TRT_CalDbTool)
-    # if "TRTStrawSummaryTool" not in kwargs:
-        # from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-        # InDetStrawSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
-        # kwargs.setdefault("TRTStrawSummaryTool", InDetStrawSummaryTool)
-        # acc.addPublicTool(InDetStrawSummaryTool)
-    # kwargs.setdefault("minTimebinsOverThreshold",0)
-    
-    
     return acc
 
 # Tool to refit tracks
@@ -68,7 +43,7 @@ def FitToolCfg(flags, name = "FitToolCfg" ,**kwargs):
     return acc
 
 # Tool to process R-t ntuple. Produces histograms and calibration text files.
-def TRTCalibratorCfg(flags,**kwargs) :
+def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
     acc = ComponentAccumulator()
     kwargs.setdefault("MinRt",500)
     kwargs.setdefault("MinT0",1000)
@@ -116,6 +91,10 @@ def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool
     kwargs.setdefault("nHitTrtPlusOutliersHighE",20)
     kwargs.setdefault("nHitTrtHighE",0)
     
+    # from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+    # kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags, **kwargs)))
+    
+    
     from InDetConfig.InDetTrackSelectorToolConfig import InDetTrackSelectorToolCfg
     acc.setPrivateTools(acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, **kwargs)))
     return acc
@@ -124,37 +103,21 @@ def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool
 def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kwargs) :
     acc = ComponentAccumulator()
     
-    # Is this an accumulatiuon or a calibration job?
     kwargs.setdefault("DoCalibrate",False)
-
-    # NOTE 'TRTCalibrationMgr' object has no attribute 'TRT_CalDbTool' - it should be romeved from here
-    # Needed tools (in addition to TRTCalibrator)
-    # if "TRT_CalDbTool" not in kwargs:
-    #     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
-    #     kwargs.setdefault("TRTCalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
-
-    # NOTE 'TRTCalibrationMgr' object has no attribute 'TRTTrackSelectorTool' - it should be romeved from here
-    # if "InDetDetailedTrackSelectorTool" not in kwargs:    
-    #     kwargs.setdefault("TRTTrackSelectorTool", acc.popToolsAndMerge(InDetDetailedTrackSelectorToolCfg(flags)))        
 
 
     # FIXME - FillAlignTRTHitsCfg and FillAlignTrkInfoCfg functions should be moved to TRT_CalibTools (where the .cxx/.h are stored)
     kwargs.setdefault("AlignTrkTools", [acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))), 
                                         acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags)))] )      
-           
-    # SERGI - FitTool.cxx is empty?? why it is actually used? 
-    # if "FitTools" not in kwargs:
-    #     kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
 
-    # Include analysis of DCS information                          
-    # if flags.Input.Format is not Format.POOL :
-        # acc.merge(addFolders(flags, "/TRT/DCS/HV/BARREL" , "DCS_OFL", className="CondAttrListCollection"))
-        # acc.merge(addFolders(flags, "/TRT/DCS/HV/ENDCAPA", "DCS_OFL", className="CondAttrListCollection"))                          
-        # acc.merge(addFolders(flags, "/TRT/DCS/HV/ENDCAPC", "DCS_OFL", className="CondAttrListCollection"))
-        # acc.merge(addFolders(flags, "/TRT/DCS/HV/BARREL" , "DCS_OFL"))
-        # acc.merge(addFolders(flags, "/TRT/DCS/HV/ENDCAPA", "DCS_OFL"))                          
-        # acc.merge(addFolders(flags, "/TRT/DCS/HV/ENDCAPC", "DCS_OFL"))
-
+    # FIXME - FitToolCfg function should be moved to TRT_CalibTools (where the .cxx/.h are stored)
+    kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
+    
+    # check this line below - needs the function
+    # kwargs.setdefault("TrackFitter", acc.setPrivateTools(CompFactory.ActsTrk.KalmanFitter("KalmanFitter")))
+    from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
+    kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(ActsFitterCfg(flags)))
+    
     # FIXME! Let all straws participate in trackfinding as default - SERGI This is wrong and needs to be UPDATED @peter    
         # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
         # TypeError: addOverride() missing 1 required positional argument: 'tag'  
