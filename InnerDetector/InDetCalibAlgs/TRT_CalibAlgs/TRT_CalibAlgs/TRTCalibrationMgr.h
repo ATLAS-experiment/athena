@@ -78,19 +78,21 @@ private:
     ToolHandleArray<IFitTool> m_FitTools {this, "FitTools", {}, ""};
     ToolHandle<Trk::ITrackFitter> m_trackFitter {this, "TrackFitter", "ActsTrk::KalmanFitter/TrkKalmanFitter", ""};
     ToolHandle<Trk::ITrackSelectorTool> m_trackSelector {this, "TrackSelectorTool", "InDet::InDetTrackSelectorTool/InDetTrackSelectorTool", "Tool for the selection of tracks"}; 
-    ToolHandle<IAthenaOutputStreamTool> m_streamer {this, "StreamTool", "AthenaOutputStreamTool/CondStream1"}; //!< OutputStreamTool
+    ToolHandle<IAthenaOutputStreamTool> m_streamer {this, "StreamTool", "AthenaOutputStreamTool/CondStream1", "OutputStreamTool"};
 
     // Gaudi properties
     Gaudi::Property<bool> m_dorefit       {this, "DoRefit"       , true , "Does a Re-Fit"};
     Gaudi::Property<bool> m_docalibrate   {this, "DoCalibrate"   , false, "Does the calibration"};
     Gaudi::Property<bool> m_writeConstants{this, "WriteConstants", false, "Write out the calibration constants"};
 
+    Gaudi::Property<unsigned int> m_max_ntrk {this, "Max_ntrk", 100000, ""};
+
+    Gaudi::Property<std::string> m_par_rtcontainerkey {this, "Par_rtcontainer", "/TRT/Calib/RT", ""};
+    Gaudi::Property<std::string> m_par_t0containerkey {this, "par_t0container", "/TRT/Calib/T0", ""};
+
+
     int m_ntrk = 0;
     
-    unsigned int m_max_ntrk;
-    std::string m_par_rtcontainerkey; //"/TRT/Calib/RT"
-    std::string m_par_t0containerkey; //"/TRT/Calib/T0"
-
     // ReadHandleKeys
     SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey   {this, "VerticesKey"     , "PrimaryVertices"    , "RHK for primary vertices"  };
     SG::ReadHandleKey<xAOD::EventInfo>       m_EventInfoKey  {this, "EventInfoKey"    , "EventInfo"          , "RHK for xAOD::EventInfo"   };

@@ -26,13 +26,7 @@
 #include "StoreGate/ReadHandle.h"
 
 TRTCalibrationMgr::TRTCalibrationMgr(const std::string& name, ISvcLocator* pSvcLocator) :
-	AthAlgorithm   (name, pSvcLocator),
-	m_max_ntrk(100000),
-    m_par_rtcontainerkey("/TRT/Calib/RT"),
-    m_par_t0containerkey("/TRT/Calib/T0")
-{
-	declareProperty("Max_ntrk",m_max_ntrk);
-}
+	AthAlgorithm   (name, pSvcLocator){}
 
 //---------------------------------------------------------------------
 
