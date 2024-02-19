@@ -88,7 +88,7 @@ def SetupVP1():
     but below are the flags that can be used to configure VP1 (most are standard Athena flags, but some are VP1-specific).
     """
     parser.description ="""
-    So, for example, to run VP1 on a file, you can do: vp1 [options] myESD.pool.root"""
+    So for example, to run VP1 on a file: vp1 [options] myESD.pool.root"""
     # Add VP1-specific arguments here, but remember you can also directly pass flags in form <flagName>=<value>.
     group = parser.add_argument_group('VP1 specific')
     group.add_argument('Filename', help="Input file to pass to VP1 (i.e. vp1 myESD.pool.root as an alternative to vp1 --filesInput=[])", metavar="File name")           
@@ -226,7 +226,7 @@ def setup_batch_mode(args):
     # If "--batch" is True, then set the corresponding env var. 
     # The GUI of VP1 will not be shown, but the config file will be taken
     # and in the end a render of the 3D window will be saved as PNG file.
-    
+    import os
     if args.batch:
         os.putenv("VP1_BATCHMODE","1")
     if args.batch_all_events:
