@@ -94,11 +94,20 @@ def SetupVP1():
     group.add_argument('Filename', help="Input file to pass to VP1 (i.e. vp1 myESD.pool.root as an alternative to vp1 --filesInput=[])", metavar="File name")           
     group.add_argument('--verboseAthena', action='store_true', help="If false, tell Athena to suppress INFO messages and below.")  
     group.add_argument('--cruise', type=int, help="Start in cruise mode, changing events after N seconds.")           
+    # Batch
     group.add_argument('--batch', action='store_true', help="Run VP1 in 'batch' mode with a given configuration file.")         
     group.add_argument('--batch-all-events', action='store_true', help="Process all events in the input data file in '-batch' mode. Use this together with '-batch'.")         
     group.add_argument('--batch-n-events', type=int, help="Process 'N' events in the input data file in '-batch' mode. Use this together with '-batch'.")           
     group.add_argument('--batch-output-folder', help="Specify an output folder to store the event displays produced with the '-batch' option.")           
     group.add_argument('--batch-random-config', action='store_true', help="Run VP1 in 'batch' mode; for each single event a configuration file will be randomly picked out of the configuration files provided by the user. Use this together with '-batch'.")         
+    # Live / Livelocal
+    group.add_argument('--live', action='store_true', help="Run on live events from point 1.")         
+    group.add_argument('--livelocal', action='store_true', help="Run on live events from point 1 in local directory.")         
+    group.add_argument('--eventsrc', help="Directory to take single event files from (do not specify input files in this case). To get files from a web server (i.e. live events), put instead the url to the file residing in the same directory (most users should just use the --live option instead).")           
+    group.add_argument('--extraevtsrcdir', help="Directory to take single event files from (do not specify input files in this case). To get files from a web server (i.e. live events), put instead the url to the file residing in the same directory (most users should just use the -live option instead).")           
+    group.add_argument('--eventcpy', help="Directory to keep local copies of processed event files. If --eventsrc is set, then -eventcpy will default to /tmp/emoyse/vp1events/6897 .")           
+    #group.add_argument('--nocleanupeventcpy', action='store_true', help="Prevent removal of eventcpy directory after athena process finishes.")         
+    # Commented, because I'm not sure how to implement this safely.
 
     # Support the positional version of passing file name e.g. vp1 myESD.pool.root
     args = flags.fillFromArgs(parser=parser)
@@ -214,12 +223,32 @@ def SetupVP1():
         vp1config.setdefault('vp1Alg.InitialCruiseModePeriod', args.cruise)
 
     # Batch mode
-    if args.batch:
+    if 'batch' in args:
        setup_batch_mode(args)
+    
+    # Event copying and live
+    if 'eventsrc' in args:
+        vp1config.setdefault('MultipleFilesON', True)
+
+    if 'live' in args or 'livelocal' in args:
+        setup_live_mode(args, vp1config)
 
     # configure VP1
-    cfg.merge(VP1AlgCfg(flags)) 
+    cfg.merge(VP1AlgCfg(flags, vp1config)) 
     cfg.run()
+
+
+def setup_live_mode(args, vp1config):
+    vp1config.setdefault('MultipleFilesON', True)
+    if 'eventcpy' in args:
+        vp1config.setdefault('vp1Alg.MFLocalCopyDir', args.eventcpy)
+    if 'extraevtsrcdir' in args:
+        vp1config.setdefault('MFAvailableLocalInputDirectories', args.extraevtsrcdir)
+    if 'live' in args:
+        vp1config.setdefault('MFSourceDir', "https://atlas-live.cern.ch/event_files/L1MinBias/vp1fileinfo.txt")
+    elif 'livelocal' in args:
+        vp1config.setdefault('MFSourceDir', "/VP1_events/")
+
 
 def setup_batch_mode(args):
     # BATCH-MODE
