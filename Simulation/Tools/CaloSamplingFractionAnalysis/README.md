@@ -43,15 +43,13 @@ Input files with 10k events each can be found in:
 ## G4 Simulation
 Simulation is run with calibration hits in batches of 5000 events per job with the following simulation command
 ```
-Sim_tf.py --simulator 'FullG4' \
+Sim_tf.py --simulator 'FullG4MT' \
+--CA \
 --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
 --physicsList 'FTFP_BERT_ATL' \
 --truthStrategy 'MC15aPlus' \
---postExec 'EVNTtoHITS:topSequence.BeamEffectsAlg.GenEventManipulators = [getPublicTool("GenEventValidityChecker")]' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.CalHits.py,SimulationJobOptions/preInclude.ParticleID.py' \
---preExec 'EVNTtoHITS:simFlags.TightMuonStepping=True' \
---DataRunNumber '284500' \
+--postInclude 'default:PyJobTransforms.UseFrontier' \
+--preExec 'from SimulationConfig.SimEnums import VertexSource;flags.Sim.VertexSource=VertexSource.AsGenerated;from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill;enableBeamPipeKill(flags);from SimuJobTransforms.SimulationHelpers import enableCalHits;enableCalHits(flags);from SimuJobTransforms.SimulationHelpers import enableParticleID;enableParticleID(flags);from SimuJobTransforms.SimulationHelpers import enableTightMuonStepping;enableTightMuonStepping;enableTightMuonStepping(flags)' \
 --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
 --inputEVNTFile INPUTEVNTfile \
 --outputHITSFile OUTPUTEVNTfile \
