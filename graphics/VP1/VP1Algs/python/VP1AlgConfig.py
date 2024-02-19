@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -62,9 +62,7 @@ def VP1AlgCfg(flags, name="VP1AlgCA", **kwargs):
     result.addEventAlgo(the_alg, primary=True)
     return result
 
-
-if __name__=="__main__":
-    # Run with e.g. python -m VP1Algs.VP1AlgConfig --filesInput=myESD_ca.pool.root
+def SetupVP1():
     from AthenaConfiguration.Enums import Format
     from AthenaCommon.Logging import logging
     from AthenaCommon.Constants import VERBOSE
@@ -83,13 +81,23 @@ if __name__=="__main__":
     # Turning off the scheduler (with NumThreads=0) fixes this.
 
     parser = flags.getArgumentParser()
-    parser.prog = 'VP1'
+    parser.prog = 'vp1'
+    parser.description = """
+    VP1, or Virtual Point 1, is the interactive 3D event display for the ATLAS experiment at CERN.
+    Detailed documentation can be found at the webpage: https://atlas-vp1.web.cern.ch/atlas-vp1, 
+    but below are the flags that can be used to configure VP1 (most are standard Athena flags, but some are VP1-specific).
+    """
+    parser.description ="""
+    So, for example, to run VP1 on a file, you can do: vp1 [options] myESD.pool.root"""
     # Add VP1-specific arguments here, but remember you can also directly pass flags in form <flagName>=<value>.
-    # e.g.
-    # parser.add_argument("-o", "--output", dest="output", default='Event.json',
-    #                     help="write JSON to FILE", metavar="FILE")
+    parser.add_argument('Filename', help="Input file to pass to VP1 (alternative to --filesInput=[])", metavar="File name")           # positional argument 
+    parser.add_argument('--verboseAthena', action='store_true', help="If false, tell Athena to suppress INFO messages and below.")           # positional argument 
 
+    # Support the positional version of passing file name e.g. vp1 myESD.pool.root
     args = flags.fillFromArgs(parser=parser)
+    if args.Filename and (flags.Input.Files == [] or 
+        flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']):
+        flags.Input.Files = [args.Filename]
 
     if 'help' in args:
         # No point doing more here, since we just want to print the help.
@@ -134,14 +142,14 @@ if __name__=="__main__":
                 _logger.warning("Input file", file, "does not exist")
                 import sys
                 sys.exit(1)
-    _logger.verbose("+ ... Done")
+    _logger.verbose("+ ... Input flags done")
 
     _logger.verbose("+ About to set the detector flags")
     # So we can now set up the geometry flags from the input
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, None, use_metadata=not vp1_empty_input,
                        toggle_geometry=True, keep_beampipe=True)
-    _logger.verbose("+ ... Done")
+    _logger.verbose("+ ... Detector flags done")
 
     # finalize setting flags: lock them.
     flags.lock()
@@ -179,13 +187,25 @@ if __name__=="__main__":
             # AOD2xAOD Truth conversion
             from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
             cfg.merge(GEN_AOD2xAODCfg(flags))
-    _logger.verbose("+ ...Done")
+    _logger.verbose("+ ... Main services done")
 
     _logger.verbose("+ About to setup geometry")
     configureGeometry(flags,cfg)
-    _logger.verbose("+ ...Done")
+    _logger.verbose("+ ... Geometry done")
+
+    if not args.verboseAthena:
+        # Suppress the output from Athena
+        print('Suppressing most messages from Athena.')
+        print('To see more, set the --verboseAthena flag to true.')
+        msgService = cfg.getService('MessageSvc')
+        msgService.OutputLevel = 4
 
     # configure VP1
     cfg.merge(VP1AlgCfg(flags)) 
     cfg.run()
 
+if __name__=="__main__":
+    # Run with e.g. python -m VP1Algs.VP1AlgConfig --filesInput=myESD_ca.pool.root
+    SetupVP1()    
+    import sys
+    sys.exit()
