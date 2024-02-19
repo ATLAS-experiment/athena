@@ -14,9 +14,18 @@ evgenConfig.keywords = ["Higgs", "SMHiggs"]
 evgenConfig.contact = ["james.robinson@cern.ch"]
 
 # --------------------------------------------------------------
-# Load ATLAS defaults for the Powheg ggF_H process
+# Load ATLAS defaults for the Powheg ggF_HH process
 # --------------------------------------------------------------
 include("PowhegControl/PowhegControl_ggF_HH_Common.py")
+
+# --------------------------------------------------------------
+# Modify couplings
+# --------------------------------------------------------------
+#PowhegConfig.chhh = 1.0 # Trilinear Higgs self-coupling [default: 1.0 (SM)]
+#PowhegConfig.ct = 1.0 # Top-Higgs Yukawa coupling [default: 1.0 (SM)]
+#PowhegConfig.ctt = 0. # Two-top-two-Higgs (tthh) coupling [default: 0. (SM)]
+#PowhegConfig.cggh = 0. # Effective gluon-gluon-Higgs coupling [default: 0. (SM)]
+#PowhegConfig.cgghh = 0. # Effective two-gluon-two-Higgses coupling [default: 0. (SM)]
 
 # --------------------------------------------------------------
 # Generate events
