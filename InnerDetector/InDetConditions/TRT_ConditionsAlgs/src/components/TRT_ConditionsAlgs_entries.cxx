@@ -1,5 +1,4 @@
 #include "TRT_ConditionsAlgs/TRTCondWrite.h"
-#include "TRT_ConditionsAlgs/TRTCondPrint.h"
 #include "TRT_ConditionsAlgs/TRTCondRead.h"
 #include "TRT_ConditionsAlgs/TRTCondStoreText.h"
 #include "TRT_ConditionsAlgs/TRTStrawAlign.h"
@@ -16,7 +15,6 @@
 
 
 DECLARE_COMPONENT( TRTCondWrite )
-DECLARE_COMPONENT( TRTCondPrint )
 DECLARE_COMPONENT( TRTCondRead )
 DECLARE_COMPONENT( TRTCondStoreText )
 DECLARE_COMPONENT( TRTStrawAlign )
