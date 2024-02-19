@@ -45,7 +45,7 @@ acc.merge(InDetBeamSpotFinderCfg(flags))
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 acc.addService(CompFactory.THistSvc(
-    Output = ["INDETBEAMSPOTFINDER DATAFILE='%s' OPT='RECREATE'" % MyArgs.outputHistFile]
+    Output = ["INDETBEAMSPOTFINDER DATAFILE='%s' OPT='RECREATE'" % MyArgs.outputHistFile]))
 
 if MyArgs.doMonitoring:
     from AthenaMonitoring import AthMonitorCfgHelper
@@ -54,9 +54,6 @@ if MyArgs.doMonitoring:
         InDetGlobalBeamSpotMonAlgCfg )
     InDetGlobalBeamSpotMonAlgCfg(helper, acc, flags)
     acc.merge(helper.result())
-
-from AthenaConfiguration.ComponentFactory import CompFactory
-acc.addService(CompFactory.THistSvc(Output = Outputs))
 
 acc.printConfig(withDetails=True)
 
