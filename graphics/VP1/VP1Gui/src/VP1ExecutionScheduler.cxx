@@ -368,8 +368,8 @@ VP1ExecutionScheduler* VP1ExecutionScheduler::init( StoreGateSvc* eventStore,
 		QString alternative = VP1QtUtils::environmentVariableValue("DISPLAY_ORIG");
 		if (alternative.isEmpty()) {
 			VP1Msg::message("ERROR: The DISPLAY environment variable is "+QString(unset?"not set":"empty")+".");
-			VP1Msg::message("This is likely due to perfmon being turned on (cf. https://savannah.cern.ch/bugs/?35461 ).");
-			VP1Msg::message("You can work around this problem by either disabling perfmon, or by setting "
+			VP1Msg::message("This might be because something else in Athena has disabled it.");
+			VP1Msg::message("You can work around this problem by setting "
 					"the DISPLAY_ORIG environment variable to the contents of DISPLAY before launching your job.");
 			VP1Msg::message("E.g., in bash do:");
 			VP1Msg::message("  export DISPLAY_ORIG=$DISPLAY");
