@@ -90,8 +90,15 @@ def SetupVP1():
     parser.description ="""
     So, for example, to run VP1 on a file, you can do: vp1 [options] myESD.pool.root"""
     # Add VP1-specific arguments here, but remember you can also directly pass flags in form <flagName>=<value>.
-    parser.add_argument('Filename', help="Input file to pass to VP1 (alternative to --filesInput=[])", metavar="File name")           # positional argument 
-    parser.add_argument('--verboseAthena', action='store_true', help="If false, tell Athena to suppress INFO messages and below.")           # positional argument 
+    group = parser.add_argument_group('VP1 specific')
+    group.add_argument('Filename', help="Input file to pass to VP1 (i.e. vp1 myESD.pool.root as an alternative to vp1 --filesInput=[])", metavar="File name")           
+    group.add_argument('--verboseAthena', action='store_true', help="If false, tell Athena to suppress INFO messages and below.")  
+    group.add_argument('--cruise', type=int, help="Start in cruise mode, changing events after N seconds.")           
+    group.add_argument('--batch', action='store_true', help="Run VP1 in 'batch' mode with a given configuration file.")         
+    group.add_argument('--batch-all-events', action='store_true', help="Process all events in the input data file in '-batch' mode. Use this together with '-batch'.")         
+    group.add_argument('--batch-n-events', type=int, help="Process 'N' events in the input data file in '-batch' mode. Use this together with '-batch'.")           
+    group.add_argument('--batch-output-folder', help="Specify an output folder to store the event displays produced with the '-batch' option.")           
+    group.add_argument('--batch-random-config', action='store_true', help="Run VP1 in 'batch' mode; for each single event a configuration file will be randomly picked out of the configuration files provided by the user. Use this together with '-batch'.")         
 
     # Support the positional version of passing file name e.g. vp1 myESD.pool.root
     args = flags.fillFromArgs(parser=parser)
@@ -193,6 +200,8 @@ def SetupVP1():
     configureGeometry(flags,cfg)
     _logger.verbose("+ ... Geometry done")
 
+    # Setup some VP1 specific stuff
+    vp1config = {}
     if not args.verboseAthena:
         # Suppress the output from Athena
         print('Suppressing most messages from Athena.')
@@ -200,9 +209,34 @@ def SetupVP1():
         msgService = cfg.getService('MessageSvc')
         msgService.OutputLevel = 4
 
+    if args.cruise:
+        vp1config.setdefault('InitialCruiseMode', 'EVENT')
+        vp1config.setdefault('vp1Alg.InitialCruiseModePeriod', args.cruise)
+
+    # Batch mode
+    if args.batch:
+       setup_batch_mode(args)
+
     # configure VP1
     cfg.merge(VP1AlgCfg(flags)) 
     cfg.run()
+
+def setup_batch_mode(args):
+    # BATCH-MODE
+    # If "--batch" is True, then set the corresponding env var. 
+    # The GUI of VP1 will not be shown, but the config file will be taken
+    # and in the end a render of the 3D window will be saved as PNG file.
+    
+    if args.batch:
+        os.putenv("VP1_BATCHMODE","1")
+    if args.batch_all_events:
+        os.putenv("VP1_BATCHMODE_ALLEVENTS","1")
+    if args.batch-n-events > 0:
+        os.putenv("VP1_BATCHMODE_NEVENTS", str(args.batch-n-events) )
+    if (args.batch-output-folder != ""):
+        os.putenv("VP1_BATCHMODE_OUT_FOLDER", args.batch-output-folder)
+    if args.batch_random_config:
+        os.putenv("VP1_BATCHMODE_RANDOMCONFIG","1")
 
 if __name__=="__main__":
     # Run with e.g. python -m VP1Algs.VP1AlgConfig --filesInput=myESD_ca.pool.root
