@@ -1,22 +1,17 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import (NoHypoToolCreated, 
                                                              algColor, 
-                                                             isHypoBase, 
-                                                             isComboHypoAlg, 
-                                                             isInputMakerBase, 
-                                                             isHypoAlg)
+                                                             isHypoBase,
+                                                             isInputMakerBase)
 from AthenaCommon.CFElements import parOR, seqAND, compName, getProp, hasProp, findAlgorithmByPredicate
 from AthenaCommon.Configurable import Configurable, ConfigurableCABehavior
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 import GaudiConfig2
-from GaudiKernel.DataHandle import DataHandle
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
@@ -24,14 +19,13 @@ from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu 
 
 from collections.abc import MutableSequence
-import collections.abc
 import inspect
 import re
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
 
-# Pool of mutable ComboHypo instances (as opposed to immutable cache of RecoFragmentsPool)
+# Pool of mutable ComboHypo instances
 _ComboHypoPool = dict()
 
 
@@ -391,31 +385,14 @@ class MenuSequence(object):
 
     def __init__(self, flags, Sequence, Maker,  Hypo, HypoToolGen, IsProbe=False):
         assert compName(Maker).startswith("IM"), "The input maker {} name needs to start with letter: IM".format(compName(Maker))        
-        # For probe legs we need to substitute the inputmaker and hypo alg
-        # so we will use temp variables for both
-        if IsProbe: 
-            #CA based config should have probe IM set up already, so use existing IM/Hypo if it's already probe
-            if 'probe' in Maker.getName():
-                _Maker= Maker
-                _Hypo = Hypo
-            else:
-                _Hypo = RecoFragmentsPool.retrieve(MenuSequence.getProbeHypo,flags,basehypo=Hypo)
-                # Reset this so that HypoAlgNode.addOutput will actually do something
-                _Hypo.HypoOutputDecisions = "StoreGateSvc+UNSPECIFIED_OUTPUT"
-                _Maker = RecoFragmentsPool.retrieve(MenuSequence.getProbeInputMaker,flags,baseIM=Maker)
-
-        else: # For regular legs, just use the provided components
-            _Hypo = Hypo
-            _Maker = Maker
-            _Sequence = Sequence
-        self._maker = InputMakerNode( Alg = _Maker )
+        self._maker = InputMakerNode( Alg = Maker )
         input_maker_output= self.maker.readOutputList()[0] # only one since it's merged       
 
-        self._name = CFNaming.menuSequenceName(compName(_Hypo))
+        self._name = CFNaming.menuSequenceName(compName(Hypo))
         self._hypoToolConf = HypoToolConf( HypoToolGen )
         Hypo.RuntimeValidation = flags.Trigger.doRuntimeNaviVal
-        self._hypo = HypoAlgNode( Alg = _Hypo )
-        hypo_output = CFNaming.hypoAlgOutName(compName(_Hypo))
+        self._hypo = HypoAlgNode( Alg = Hypo )
+        hypo_output = CFNaming.hypoAlgOutName(compName(Hypo))
         self._hypo.addOutput(hypo_output)
         self._hypo.setPreviousDecision( input_maker_output )
 
@@ -451,7 +428,7 @@ class MenuSequence(object):
                         probeSeq += probeChild
                 return probeSeq
             # Make sure nothing was lost
-            _Sequence = getProbeSequence(baseSeq=Sequence,probeIM=_Maker)
+            _Sequence = getProbeSequence(baseSeq=Sequence,probeIM=Maker)
             assert len(_Sequence.getChildren()) == len(Sequence.getChildren()), f'Different number of children in sequence {_Sequence.getName()} vs {Sequence.getName()} ({len(_Sequence.getChildren())} vs {len(Sequence.getChildren())})'
         else:
             _Sequence = Sequence
@@ -1255,121 +1232,3 @@ def appendMenuSequenceCAToAthena(msca, flags):
                         Maker       = maker,
                         Hypo        = hypo,
                         HypoToolGen = msca._hypoToolConf.hypoToolGen)
-
-
-def lockConfigurable(conf):
-    # Need to recurse through a few possibilities to ensure the
-    # locking block only receives Configurables
-    if isinstance(conf,Node): # Send along the alg from the node
-        lockConfigurable(conf.Alg)
-    elif isinstance(conf, collections.abc.Sequence): # Iterate over children
-        for i in list(conf):
-            if isinstance(i,Configurable):
-                lockConfigurable(i)
-    # Skip all other types
-    if not isinstance(conf,Configurable):
-        return
-
-    log.debug('RecoFragmentsPool: Trying to lock %s',compName(conf))
-
-    # Don't attempt this on components that the menu needs to configure
-    skiplock = False
-    if isInputMakerBase(conf) or isHypoAlg(conf) or isComboHypoAlg(conf):
-        skiplock=True
-    if skiplock:
-        return
-
-    try:
-        # lock item if possible
-        # except if it is a ComboHypo, as the menu needs to modify this
-        # -- should not be configured in signature code
-        log.debug("RecoFragmentsPool: Attempting to lock %s of type %s",compName(conf),conf.__class__)
-        conf.lock()
-    except AttributeError:
-        log.info(f"RecoFragmentsPool: Unable to lock returned fragment {compName(conf)} of type {conf.__class__}")
-    pass
-
-class RecoFragmentsPool(object):
-    """
-    This used to be a custom cache implementation for the creator function,
-    but now it is a fairly simple wrapper to apply @AccumulatorCache to creator.
-    All methods are static, this class holds no state (instead AccumulatorCache does).
-    """
-
-    # Set RecoFragmentsPool.DebugCaching=True in top-level JO to enable debug messages.
-    # This is very useful to study cache misses and find which ones can be avoided.
-    DebugCaching = False
-
-    @staticmethod
-    def cacheableArgsDict(kwargsDict):
-        """
-        Sort the kwargs dictionary and replace all DataHandle objects in dict values with
-        their string representation.
-
-        For the purpose of RecoFragmentsPool we can assume DataHandle objects in kwargs
-        are immutable and thus hashable by their string representation.
-        """
-        kwargsCopy = dict()
-        for k,v in sorted(kwargsDict.items()):
-            if (isinstance(v,DataHandle)):
-                kwargsCopy[k] = str(v)
-            else:
-                kwargsCopy[k] = v
-        return kwargsCopy
-
-    @staticmethod
-    def recursiveToTuple(obj):
-        """Convert unhashable dict or list to a hashable tuple"""
-        if isinstance(obj,list):
-            new_list = [RecoFragmentsPool.recursiveToTuple(x) for x in obj]
-            return tuple(new_list)
-        if isinstance(obj,dict):
-            new_dict = dict([(k,RecoFragmentsPool.recursiveToTuple(v)) for k,v in obj.items()])
-            # Workaround for odd case where a passed Configurable is compared by pointer value
-            conf_dict = {}
-            for k,v in new_dict.items():
-                if hasattr(v,'getFullName'):
-                    conf_dict[k+'.__fullname__'] = v.getFullName()
-            new_dict.update(conf_dict)
-            return tuple(new_dict.items())
-        # neither list or dict
-        return obj
-
-    @staticmethod
-    def recursiveFromTuple(obj):
-        """Reverse operation to recursiveToTuple"""
-        if not isinstance(obj,tuple):
-            return obj
-        if all([isinstance(x,tuple) and len(x)==2 for x in obj]):
-            # tuple consisting only of 2-element tuples is most likely a dict
-            # Ignore the [something]__name__ keys used for workaround above
-            return dict([(k,RecoFragmentsPool.recursiveFromTuple(v)) for k,v in obj if not k.endswith('.__fullname__')])
-        # all other cases is a list
-        return list([RecoFragmentsPool.recursiveFromTuple(x) for x in obj])
-
-    @staticmethod
-    def retrieve(creator, flags, **kwargs):
-        if not isinstance(flags, AthConfigFlags):
-            raise TypeError("RecoFragmentsPool: First argument for creator function passed to retrieve() must be of type AthConfigFlags but is %s" % type(flags))
-        kwargs2 = RecoFragmentsPool.cacheableArgsDict(kwargs)
-        return RecoFragmentsPool.retrieve_cacheable(creator, flags, RecoFragmentsPool.recursiveToTuple(kwargs2))
-
-    @staticmethod
-    @AccumulatorCache(maxSize=1024)
-    def retrieve_cacheable(creator, flags, kwargsTuple):
-        kwargs = RecoFragmentsPool.recursiveFromTuple(kwargsTuple)
-
-        if RecoFragmentsPool.DebugCaching:
-            fName = 'RecoFragmentsPool.retrieve_cacheable'
-            log.debug('%s: creator = %s hash = %s', fName, creator, hash(creator))
-            log.debug('%s: flags = %s hash = %s', fName, flags, flags.athHash())
-            log.debug('%s: kwargs = %s hash = %s', fName, kwargs, hash(kwargsTuple))
-        recoFragment = creator( flags, **kwargs )
-        try:
-            lockConfigurable(recoFragment)
-        except Exception as e:
-            log.error("RecoFragmentsPool: Failed to lock %s with exception %s", recoFragment, e)
-            raise e
-        return recoFragment
-
-

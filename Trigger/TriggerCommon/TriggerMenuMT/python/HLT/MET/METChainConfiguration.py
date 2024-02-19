@@ -1,17 +1,14 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 
 logging.getLogger().info("Importing %s", __name__)
 log = logging.getLogger(__name__)
 
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-from AthenaCommon.Configurable import ConfigurableCABehavior
-
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from .ConfigHelpers import recoKeys, AlgConfig
 from ..Menu.SignatureDicts import METChainParts_Default
-from ..Config.MenuComponents import appendMenuSequenceCAToAthena, RecoFragmentsPool, ChainStep
+
 
 def extractMETRecoDict(chainDict, fillDefaults=True):
     """ Extract the keys relevant to reconstruction from a provided dictionary
@@ -42,25 +39,6 @@ class METChainConfiguration(ChainConfigurationBase):
     def assembleChainImpl(self, flags):
         log.debug("Assembling chain for %s", self.chainName)
         conf = AlgConfig.fromRecoDict(**self.recoDict)
-        if isComponentAccumulatorCfg():
-            steps = conf.make_accumulator_steps(flags, self.dict)
-        else:
-            def get_ca_steps(flags, **dict_via_args):
-                with ConfigurableCABehavior():
-                    # Avoid setting ComboHypo in the ChainStep here otherwise the cache gets filled
-                    # with a GaudiConfig2 that causes problems when generating the CF
-                    ca_steps = conf.make_accumulator_steps(flags, dict_via_args, noComboHypo=True)
-                return ca_steps
-            ca_steps = RecoFragmentsPool.retrieve(get_ca_steps,flags,**self.dict)
-            steps = []
-            for step in ca_steps:
-                steps.append(
-                    ChainStep(
-                        name=step.name,
-                        multiplicity=step.multiplicity,
-                        chainDicts=step.stepDicts,
-                        Sequences=[appendMenuSequenceCAToAthena(s,flags) for s in step.sequences],
-                    )
-                )
+        steps = conf.make_accumulator_steps(flags, self.dict)
 
         return self.buildChain(steps)
