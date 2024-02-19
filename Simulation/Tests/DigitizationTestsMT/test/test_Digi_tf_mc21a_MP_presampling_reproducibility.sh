@@ -54,7 +54,7 @@ Digi_tf.py \
     --jobNumber 568 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileNameSP} \
-    --preInclude 'HITtoRDO:Campaigns.PileUpPresamplingMC21a' \
+    --preInclude 'HITtoRDO:Campaigns.MC21a' \
     --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --skipEvents 0
@@ -85,7 +85,7 @@ Digi_tf.py \
     --jobNumber 568 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileNameMP0} \
-    --preInclude 'HITtoRDO:Campaigns.PileUpPresamplingMC21a' \
+    --preInclude 'HITtoRDO:Campaigns.MC21a' \
     --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --skipEvents 0
@@ -118,7 +118,7 @@ Digi_tf.py \
     --jobNumber 568 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileNameMP1} \
-    --preInclude 'HITtoRDO:Campaigns.PileUpPresamplingMC21a' \
+    --preInclude 'HITtoRDO:Campaigns.MC21a' \
     --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --skipEvents 0
