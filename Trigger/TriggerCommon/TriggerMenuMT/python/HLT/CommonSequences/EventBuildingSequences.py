@@ -5,12 +5,12 @@
 from TrigEDMConfig import DataScoutingInfo
 from TrigEDMConfig.TriggerEDM import recordable
 from TriggerMenuMT.HLT.Menu import EventBuildingInfo
-from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, menuSequenceCAToGlobalWrapper, MenuSequenceCA, SelectionCA, InEventRecoCA
+from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, MenuSequenceCA, SelectionCA, InEventRecoCA
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInfoWriterToolCfg, RoIPEBInfoWriterToolCfg
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
 from AthenaCommon.Configurable import ConfigurableCABehavior
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from .LATOMESourceIDs import LATOMESourceIDs
 from AthenaCommon.Logging import logging
@@ -28,10 +28,7 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
         log.error('eventBuildType \'%s\' not found in the allowed Event Building identifiers', eventBuildType)
         return
 
-    if isComponentAccumulatorCfg():
-        seq=pebMenuSequenceCfg(flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
-    else:
-        seq=menuSequenceCAToGlobalWrapper(pebMenuSequenceCfg, flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
+    seq = pebMenuSequenceCfg(flags, chain=chain, eventBuildType=eventBuildType, chainDict=chainDict)
 
     if len(chain.steps)==0:
         # noalg PEB chain

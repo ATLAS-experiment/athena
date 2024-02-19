@@ -167,7 +167,7 @@ def generateCFChains(flags):
     # bjet chains
     ##################################################################
     if 'Bjet' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Bjet.BjetChainConfiguration import getBJetSequence
+        from TriggerMenuMT.HLT.Bjet.BjetMenuSequences import getBJetSequenceCfg
 
         jetSeq_a4_tc_em_presel, jetDef, emclusters = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
         jetSeq_a4_tc_em_gsc_ftf, jetDef = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subjesgscIS_ftf",emclusters)
@@ -175,7 +175,7 @@ def generateCFChains(flags):
         
         step1 = makeChainStep("Step_jet_a4_tc_em_presel", [jetSeq_a4_tc_em_presel])
         step2 = makeChainStep("Step_jet_a4_tc_em_gsc_ftf", [jetSeq_a4_tc_em_gsc_ftf])
-        step3 = makeChainStep("Step3_bjet", [getBJetSequence(flags, jc_name)])
+        step3 = makeChainStep("Step3_bjet", [getBJetSequenceCfg(flags, jc_name)])
         
         menu.chainsInMenu['Bjet']  = [
             makeChain(flags, name='HLT_j45_boffperf_ftf_subjesgscIS_preselj20_L1J20', L1Thresholds=["FSNOSEED"], ChainSteps=[step1,step2,step3] ),

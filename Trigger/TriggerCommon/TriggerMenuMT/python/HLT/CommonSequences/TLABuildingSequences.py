@@ -1,9 +1,8 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Jet.JetChainConfiguration import JetChainConfiguration
 from ..Photon.PrecisionPhotonTLAMenuSequenceConfig import PhotonTLAMenuSequenceCfg
 from ..Jet.JetTLASequenceConfig import JetTLAMenuSequenceCfg
@@ -48,17 +47,11 @@ def getTLASignatureSequence(flags, chainDict, chainPart):
     
     if signature == 'Photon':    
         photonOutCollectionName = "HLT_egamma_Photons"
-        if isComponentAccumulatorCfg():
-            return PhotonTLAMenuSequenceCfg(flags, photonsIn=photonOutCollectionName)
-        else:
-            return menuSequenceCAToGlobalWrapper(PhotonTLAMenuSequenceCfg,flags, photonsIn=photonOutCollectionName)
-    
+        return PhotonTLAMenuSequenceCfg(flags, photonsIn=photonOutCollectionName)
+
     elif signature == 'Muon':    
-        if isComponentAccumulatorCfg():
-            return MuonTLAMenuSequenceCfg(flags, muChainPart=chainPart)
-        else:
-            return menuSequenceCAToGlobalWrapper(MuonTLAMenuSequenceCfg,flags, muChainPart=chainPart)
-    
+        return MuonTLAMenuSequenceCfg(flags, muChainPart=chainPart)
+
     elif signature  == 'Jet' or signature  == 'Bjet':   
         jetDef = JetChainConfiguration(chainDict)
         jetInputCollectionName = jetDef.jetName
@@ -70,10 +63,7 @@ def getTLASignatureSequence(flags, chainDict, chainPart):
         # Thus, BTag recording will always run for PFlow jets, creating an empty container if no btagging exists. 
         attachBtag = True
         if jetDef.recoDict["trkopt"] == "notrk": attachBtag = False
-        if isComponentAccumulatorCfg():
-            return JetTLAMenuSequenceCfg(flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
-        else:
-            return menuSequenceCAToGlobalWrapper(JetTLAMenuSequenceCfg, flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
+        return JetTLAMenuSequenceCfg(flags, jetsIn=jetInputCollectionName, attachBtag=attachBtag)
 
 
 def findTLAStep(chainConfig):
