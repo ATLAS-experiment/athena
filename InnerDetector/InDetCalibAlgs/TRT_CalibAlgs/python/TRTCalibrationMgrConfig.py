@@ -106,7 +106,6 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     
     kwargs.setdefault("DoCalibrate",False)
 
-
     # FIXME - FillAlignTRTHitsCfg and FillAlignTrkInfoCfg functions should be moved to TRT_CalibTools (where the .cxx/.h are stored)
     kwargs.setdefault("AlignTrkTools", [acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))), 
                                         acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags)))] )      
@@ -115,9 +114,10 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
     
     # check this line below - needs the function
-    # kwargs.setdefault("TrackFitter", acc.setPrivateTools(CompFactory.ActsTrk.KalmanFitter("KalmanFitter")))
     from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
     kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(ActsFitterCfg(flags)))
+    
+    kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(InDetDetailedTrackSelectorToolCfg(flags)))
     
     # FIXME! Let all straws participate in trackfinding as default - SERGI This is wrong and needs to be UPDATED @peter    
         # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
@@ -126,10 +126,10 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
                           
     # if a text file is in the arguments, use the constants in that instead of the DB
-    if not calibconstants=="":
+    # if not calibconstants=="":
 
-        from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTCondWriteCfg
-        acc.merge(TRTCondWriteCfg(flags,calibconstants))
+    #     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTCondWriteCfg
+    #     acc.merge(TRTCondWriteCfg(flags,calibconstants))
 
     # add this algorithm to the configuration accumulator                       
     acc.addEventAlgo(CompFactory.TRTCalibrationMgr(name, **kwargs))
