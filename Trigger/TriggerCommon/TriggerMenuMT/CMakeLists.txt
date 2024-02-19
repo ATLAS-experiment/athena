@@ -49,10 +49,6 @@ atlas_add_test( EventBuildingSequences
 atlas_add_test( checkMenuPrimaries SCRIPT scripts/checkMenuPrimaries.py 
                 POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf checkMenuPrimaries.log" )
 
-atlas_add_test( RecoFragmentsPool
-                SCRIPT python -m unittest -v TriggerMenuMT.HLT.Test.RecoFragmentsPoolTest
-                POST_EXEC_SCRIPT noerror.sh )
-
 # Test L1/HLT trigger menus:
 function( atlas_test_lvl1_trigger_menu menu )
    set (extra_args ${ARGN})

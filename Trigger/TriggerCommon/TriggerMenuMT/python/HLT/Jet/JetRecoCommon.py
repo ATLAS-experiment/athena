@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 ##########################################################################################
@@ -305,16 +305,6 @@ def getDecorList(jetRecoDict):
         if isPFlow(jetRecoDict):
             decorlist += ["SumPtChargedPFOPt500"]
     return decorlist
-
-
-##########################################################################################
-### --- Helpers for track reco ---
-
-# Need to do this hacky extraction to get around the inability
-# to hash dicts as input to RecoFragmentsPool.retrieve
-def getTrkColls(jetRecoDict):
-    trkcolls = {key:jetRecoDict[key] for key in StandardJetContext.jetContextDic["trackKeys"]}
-    return trkcolls
 
 
 ##########################################################################################

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -10,9 +10,6 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from TriggerMenuMT.CFtest.HLTSignatureConfig import  muMenuSequence, elMenuSequence, gamMenuSequence
 from TriggerMenuMT.CFtest.HLTSignatureHypoTools import dimuDrComboHypoTool
 
-# Test function used in RecoFragmentsPoolTest
-def creator(flags, name):
-    return 'TestChainConfiguration.creator_'+name
 
 #--------------------------------------------------------
 # fragments generating config will be functions in new JO
