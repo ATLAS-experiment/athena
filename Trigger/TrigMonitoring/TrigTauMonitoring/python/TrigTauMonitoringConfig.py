@@ -105,19 +105,26 @@ class TrigTauMonAlgBuilder:
   def configureTriggers(self):
     self.logger.info('Configuring triggers')
 
-    from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess, getHLTMonitoringAccess
-    L1_menu = getL1MenuAccess(self.helper.flags) # The L1 menu should always be available
+    from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess, getHLTMenuAccess, getHLTMonitoringAccess
+    # The L1 and HLT menus should always be available
+    L1_menu = getL1MenuAccess(self.helper.flags)
+    HLT_menu = getHLTMenuAccess(self.helper.flags)
 
     # Try to load the monitoring groups
     HLT_monitoring = getHLTMonitoringAccess(self.helper.flags)
-    all_items = HLT_monitoring.monitoredChains(signatures="tauMon", monLevels=["shifter","t0","val"])
+    all_items = HLT_monitoring.monitoredChains(signatures='tauMon', monLevels=['shifter', 't0', 'val'])
     # If the mon groups are not available, fallback to the hard-coded trigger monitoring list
     if not all_items:
       from TrigTauMonitoring.ManualChains import monitored_chains
+      self.logger.info('Could not find any monitored tau chains in the HLTMonitoring information. Will use the available items from the fallback trigger list')
       all_items = monitored_chains
 
     # Classify HLT trigger chains:
     for trigger in all_items:
+      # Skip items not included in the menu. This is needed if e.g. using the fallback list on new files without Legacy triggers, or old files
+      # without PhI triggers. Also some old SMKs have broken HLTMonitoring DB links, with chains that are not in the Trigger Menu
+      if trigger not in HLT_menu: continue
+
       info = self.getTriggerInfo(trigger)
 
       if self.activate_single_tau and info.isHLTSingleTau():
