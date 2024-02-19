@@ -17,6 +17,7 @@ from .fourtops import fourtops
 from .gg4l import gg4l
 from .ggF_H import ggF_H
 from .ggF_HH import ggF_HH
+from .ggF_HH_SMEFT import ggF_HH_SMEFT
 from .ggF_HZ import ggF_HZ
 from .Hj import Hj
 from .Hj_MiNNLO import Hj_MiNNLO
