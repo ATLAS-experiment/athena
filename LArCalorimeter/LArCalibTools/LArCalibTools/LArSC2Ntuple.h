@@ -11,7 +11,7 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "LArRawEvent/LArLATOMEHeaderContainer.h"
-#include "xAODTrigL1Calo/TriggerTowerContainer.h"
+#include "TrigT1CaloEvent/TriggerTower.h"
 #include "TrigT1CaloCalibToolInterfaces/IL1CaloxAODOfflineTriggerTowerTools.h"
 
 class LArSC2Ntuple : public LArDigits2Ntuple
@@ -47,8 +47,7 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "EventInfoDecorKey", "EventInfo.larFlags"};
 
   SG::ReadHandleKey<LArLATOMEHeaderContainer> m_LArLatomeHeaderContainerKey { this, "LArLatomeHeaderKey", "SC_LATOME_HEADER" };
-  SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_triggerTowerContainerKey{this, "TriggerTowerKey", "xAODTriggerTowers", "Trigger Tower container"};
-  ToolHandle<LVL1::IL1CaloxAODOfflineTriggerTowerTools> m_ttTool;
+  Gaudi::Property< std::string > m_triggerTowerKey{this, "TriggerTowerKey", "TriggerTowers", "Trigger Tower container"};
 
   NTuple::Item<short> m_latomeChannel;
 
