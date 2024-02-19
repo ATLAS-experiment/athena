@@ -77,8 +77,8 @@ private:
     PublicToolHandleArray<ITRTCalibrator> m_TRTCalibTools {this, "TRTCalibrator", {}, ""};
     ToolHandleArray<IFitTool> m_FitTools {this, "FitTools", {}, ""};
     ToolHandle<Trk::ITrackFitter> m_trackFitter {this, "TrackFitter", "ActsTrk::KalmanFitter/TrkKalmanFitter", ""};
-    ToolHandle<Trk::ITrackSelectorTool> m_trackSelector; //!< Tool handle to the Trk::ITrackSelectorTool
-    ToolHandle<IAthenaOutputStreamTool> m_streamer; //!< OutputStreamTool
+    ToolHandle<Trk::ITrackSelectorTool> m_trackSelector {this, "TrackSelectorTool", "InDet::InDetTrackSelectorTool/InDetTrackSelectorTool", "Tool for the selection of tracks"}; 
+    ToolHandle<IAthenaOutputStreamTool> m_streamer {this, "StreamTool", "AthenaOutputStreamTool/CondStream1"}; //!< OutputStreamTool
 
     // Gaudi properties
     Gaudi::Property<bool> m_dorefit       {this, "DoRefit"       , true , "Does a Re-Fit"};
