@@ -61,23 +61,25 @@ def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
     if "NeighbourSvc" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawNeighbourSvcCfg
         kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
-    if "TRTCaldbTool" not in kwargs:
+    if "TRTCalDbTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
-        TRT_CalDbTool = acc.popToolsAndMerge(TRT_CalDbToolCfg(flags))
-        acc.setPrivateTools(TRT_CalDbTool)
+        kwargs.setdefault("TRT_CalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.TRTCalibrator(name, **kwargs))
+
         
         
     return acc
 
 # Tool to select tracks to be used for calibration
 def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool",**kwargs):
+    # FIXME - This function should go to the correct Athena pkg...
     
     from AthenaCommon.SystemOfUnits import GeV, mm
     
     acc = ComponentAccumulator()      
-    kwargs.setdefault("name", name)    
     kwargs.setdefault("pTMin", 1.0*GeV)     
-    # kwargs.setdefault("fitChi2OndfMax",50.0)  ---> This does not exist in the InDetDetailedTrackSelectorTool.cxx file
+    kwargs.setdefault("fitChi2OnNdfMax",50.0)
     kwargs.setdefault("z0Max",99999.0*mm)   
     kwargs.setdefault("IPd0Max",10.0*mm)    
     kwargs.setdefault("IPd0Max",300.0*mm)   
@@ -91,12 +93,11 @@ def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool
     kwargs.setdefault("nHitTrtPlusOutliersHighE",20)
     kwargs.setdefault("nHitTrtHighE",0)
     
-    # from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    # kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags, **kwargs)))
-    
+    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
     
     from InDetConfig.InDetTrackSelectorToolConfig import InDetTrackSelectorToolCfg
-    acc.setPrivateTools(acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, **kwargs)))
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, name=name , **kwargs)))
     return acc
     
 # Steering algorithm. Either it fills track and hit ntuples, or it calls TRTCalibrator

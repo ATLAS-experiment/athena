@@ -27,17 +27,11 @@
 
 TRTCalibrationMgr::TRTCalibrationMgr(const std::string& name, ISvcLocator* pSvcLocator) :
 	AthAlgorithm   (name, pSvcLocator),
-    m_trackSelector("InDet::InDetTrackSelectorTool/InDetTrackSelectorTool"),
-    m_streamer("AthenaOutputStreamTool/CondStream1"),
 	m_max_ntrk(100000),
     m_par_rtcontainerkey("/TRT/Calib/RT"),
     m_par_t0containerkey("/TRT/Calib/T0")
 {
-	m_TRTCalibTools.push_back("TRTCalibrator");
-	// declare algorithm parameters
-	declareProperty("StreamTool", m_streamer);
 	declareProperty("Max_ntrk",m_max_ntrk);
-	declareProperty("TrackSelectorTool", m_trackSelector, "Tool for the selection of tracks");
 }
 
 //---------------------------------------------------------------------
