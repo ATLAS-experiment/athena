@@ -42,7 +42,13 @@ class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm,
   IToolSvc* m_toolSvc;
   GeoExporter* m_geoExporter;
 
-  bool m_noGui;//For testing job-options in RTT
+  // bool m_noGui;//For testing job-options in RTT
+
+// Properties
+  // -- Athena-related
+  Gaudi::Property<std::string> m_atlasRelease{this, "AtlasRelease", "", "The current, in use Atlas release"}; 
+
+
 };
 
 #endif
