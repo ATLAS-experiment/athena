@@ -1736,6 +1736,7 @@ namespace top {
     parse_bTagWPs(settings->value("BTaggingOnlineConditionalWP"), m_chosen_btaggingWP_onlCond, m_sgKeyJets);
     parse_bTagWPs(settings->value("BTaggingCaloJetWP"), m_chosen_btaggingWP_caloJet, m_sgKeyJets);
     parse_bTagWPs(settings->value("BTaggingTrackJetWP"), m_chosen_btaggingWP_trkJet, m_sgKeyTrackJets);
+    parse_bTagWPs_pair(settings->value("BTaggingOff1Off2WP"), m_chosen_btaggingWP_off1_off2, m_sgKeyJets);
     parse_bTagWPs_triplet(settings->value("BTaggingOfflOnlCondWP"), m_chosen_btaggingWP_offl_onl_cond, m_sgKeyJets);
     if (settings->value("UseXbbTagger") == "True") this->m_useXbbTagger = true;
 
@@ -2364,6 +2365,58 @@ namespace top {
         btagWPlist.push_back(alg_tag);
       } else {
         ATH_MSG_INFO("This b-tag algorithm was already added!");
+      }
+    }
+  }
+
+  void TopConfig::parse_bTagWPs_pair(const std::string& btagWPsettingString,
+				     std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& btagWPlist,
+      const std::string& jetCollectionName) {
+    std::istringstream str_btagging_WP(btagWPsettingString);
+    std::vector<std::string> all_btagging_WP;
+    std::copy(std::istream_iterator<std::string>(str_btagging_WP),
+              std::istream_iterator<std::string>(),
+              std::back_inserter(all_btagging_WP));
+    // loop through all btagging pairs requested
+    for (const auto& Off1Off2: all_btagging_WP) {
+      std::vector<std::string> btagOff1_btagOff2;
+      tokenize(Off1Off2, btagOff1_btagOff2, ";");
+      std::string alg_tag[2][2] = {{"",""},{"",""}};
+      if (btagOff1_btagOff2.size() == 2) {
+	for(unsigned int i=0;i<btagOff1_btagOff2.size();++i) {
+	  std::vector<std::string> btagAlgo_btagTag;
+	  tokenize(btagOff1_btagOff2.at(i), btagAlgo_btagTag, ":");
+	  if (btagAlgo_btagTag.size() == 2) {
+	    for(unsigned int j=0;j<btagAlgo_btagTag.size();++j) {
+	      alg_tag[i][j] = btagAlgo_btagTag.at(j);
+	    }
+	  } else {
+	    ATH_MSG_ERROR("Cannot parse b-tagging ALGORITHM_NAME:WP. Incorrect format.");
+	    continue;
+	  }
+	}
+      } else {
+        ATH_MSG_ERROR("Cannot parse b-tagging Off1;Off2. Incorrect format.");
+        continue;
+      }
+
+      ATH_MSG_INFO("BTagging pair:"
+		   << " Off1: " << alg_tag[0][0] << "_" << alg_tag[0][1]
+		   << " Off2: " << alg_tag[1][0] << "_" << alg_tag[1][1]
+		   << " for collection: " << jetCollectionName);
+      std::string formatedWP[2];
+      for(unsigned int j=0;j<2;++j) {
+	formatedWP[j] = FormatedWP(alg_tag[j][1]);
+      }
+      std::pair<std::pair<std::string, std::string>,
+	        std::pair<std::string, std::string>> off1_off2 = std::make_pair(std::make_pair(alg_tag[0][0],alg_tag[0][1]),
+										std::make_pair(alg_tag[1][0],alg_tag[1][1]));
+
+      // take care that no b-tagging triplet is taken twice
+      if (std::find(btagWPlist.begin(), btagWPlist.end(), off1_off2) == btagWPlist.end()) {
+        btagWPlist.push_back(off1_off2);
+      } else {
+        ATH_MSG_INFO("This b-tag pair was already added!");
       }
     }
   }

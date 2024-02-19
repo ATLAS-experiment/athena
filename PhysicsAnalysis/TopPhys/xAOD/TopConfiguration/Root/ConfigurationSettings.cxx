@@ -644,6 +644,13 @@ namespace top {
                       " By default, no WP is used.",
                       " ");
 
+    registerParameter("BTaggingOff1Off2WP",
+                      "b-tagging pairs consisting of a loser (offline1) and a tighter (offline2) offline b-tagging algo:WP pairs, separated by semicolon."
+                      "These pairs are used for the off1, off2, cond1, cond2, onl 5-tuple b-tagging."
+                      " The format should follow the convention of the b-tagging CP group, e.g. DL1r:FixedCutBEff_85;DL1r:FixedCutBEff_60."
+                      " By default, no offline pair is used.",
+                      " ");
+
     registerParameter("BTaggingOfflOnlCondWP",
                       "b-tagging triplets consisting of offline, online and conditoinal b-tagging algo:WP pairs, separated by semicolon."
                       " The format should follow the convention of the b-tagging CP group, e.g. DL1r:FixedCutBEff_60;OnlineMV2:FixedCutBEff_60;ConditionalOnlineMV2GivenOfflineDL1r60:FixedCutBEff_60."

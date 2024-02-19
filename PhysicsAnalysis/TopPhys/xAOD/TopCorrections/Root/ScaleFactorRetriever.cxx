@@ -1510,6 +1510,557 @@ namespace top {
     return sf;
   }
 
+  /**
+   * @brief nominal SF or named systematics
+   */
+  float ScaleFactorRetriever::btagSF_off_onl(const top::Event& event,
+                                     const top::topSFSyst SFSyst,
+                                     std::string WP, bool do_trackjets, std::string uncert_name) const {
+    double sf(1.);
+
+    std::string decoration_tag = "btag_isTagged_" + WP;
+    std::string decoration_SF = "btag_SF_" + WP;
+    std::string decoration_MCeff = "btag_MCeff_" + WP;
+
+    // tagger decision
+    std::string decoration_tag_off = decoration_tag + "_nom"; // offline tag
+    std::string decoration_tag_onl = decoration_tag + "_onl_" + "_nom"; // online tag
+
+    // MC efficiency Scale Factor
+    std::string decoration_SF_off = decoration_SF + "_nom"; // this is either eff SF or ineff SF 
+    std::string decoration_SF_onl = decoration_SF + "_onl_" + "_nom"; // this is always eff SF
+    std::string decoration_SF_cond = decoration_SF + "_cond_" + "_nom"; // this is always eff SF
+
+    // MC efficiency
+    std::string decoration_MCeff_off = decoration_MCeff + "_nom";
+    std::string decoration_MCeff_onl = decoration_MCeff + "_onl_" + "_nom"; 
+    std::string decoration_MCeff_cond = decoration_MCeff + "_cond_" + "_nom";
+    
+    std::string systematicName, bTagSystName;
+    switch (SFSyst) {
+    case top::topSFSyst::nominal:
+      // If this is the nominal tree, we proceed as normal
+      // If not nominal tree, we need to know which systematic this event corresponds to,
+      // in case the systematic is removed from EV decomposition (will enter as a nominal retrieval)
+      systematicName = m_config->systematicName(event.m_hashValue);
+      bTagSystName = top::bTagNamedSystCheck(m_config, systematicName, WP, do_trackjets, false);
+      if (bTagSystName != "") {
+	// Only change decorations if found,
+	decoration_tag_off = decoration_tag + "_" + bTagSystName;
+	decoration_tag_onl = decoration_tag + "_onl_" + bTagSystName;
+
+	decoration_SF_off = decoration_SF + "_" + bTagSystName;
+	decoration_SF_onl = decoration_SF + "_onl_" + bTagSystName;
+	decoration_SF_cond = decoration_SF + "_cond_" + bTagSystName;
+
+	decoration_MCeff_off = decoration_MCeff + "_" + bTagSystName;
+	decoration_MCeff_onl = decoration_MCeff + "_onl_" + bTagSystName;
+	decoration_MCeff_cond = decoration_MCeff + "_cond_" + bTagSystName;
+      }
+                                                                                 // otherwise we will use the nominal
+      break;
+
+    case top::topSFSyst::BTAG_SF_NAMED_UP:
+      if (uncert_name == "") {
+        ATH_MSG_INFO("Named b-tagging systematics should have a name. Please provide one.");
+        return 0;
+      }
+      decoration_tag_off = decoration_tag + "_" + uncert_name + "__1up";
+      decoration_tag_onl = decoration_tag + "_onl_" + uncert_name + "__1up";
+      
+      decoration_SF_off = decoration_SF + "_" + uncert_name + "__1up";
+      decoration_SF_onl = decoration_SF + "_onl_" + uncert_name + "__1up";
+      decoration_SF_cond = decoration_SF + "_cond_" + uncert_name + "__1up";
+      
+      decoration_MCeff_off = decoration_MCeff + "_" + uncert_name + "__1up";
+      decoration_MCeff_onl = decoration_MCeff + "_onl_" + uncert_name + "__1up";
+      decoration_MCeff_cond = decoration_MCeff + "_cond_" + uncert_name + "__1up";
+      break;
+
+    case top::topSFSyst::BTAG_SF_NAMED_DOWN:
+      if (uncert_name == "") {
+        ATH_MSG_INFO("Named b-tagging systematics should have a name. Please provide one.");
+        return 0;
+      }
+      decoration_tag_off = decoration_tag + "_" + uncert_name + "__1down";
+      decoration_tag_onl = decoration_tag + "_onl_" + uncert_name + "__1down";
+      
+      decoration_SF_off = decoration_SF + "_" + uncert_name + "__1down";
+      decoration_SF_onl = decoration_SF + "_onl_" + uncert_name + "__1down";
+      decoration_SF_cond = decoration_SF + "_cond_" + uncert_name + "__1down";
+      
+      decoration_MCeff_off = decoration_MCeff + "_" + uncert_name + "__1down";
+      decoration_MCeff_onl = decoration_MCeff + "_onl_" + uncert_name + "__1down";
+      decoration_MCeff_cond = decoration_MCeff + "_cond_" + uncert_name + "__1down";
+      break;
+
+    case top::topSFSyst::BTAG_SF_EIGEN_B:
+    case top::topSFSyst::BTAG_SF_EIGEN_C:
+    case top::topSFSyst::BTAG_SF_EIGEN_LIGHT:
+      ATH_MSG_INFO("For Eigenvectors please use ScaleFactorRetriever::btagSF_eigen_vars");
+      return 0;
+
+      break;
+
+    default:
+      ATH_MSG_INFO("Not the right function: " << __PRETTY_FUNCTION__);
+      return 0;
+
+      break;
+    }
+
+    // I'm testing!
+    xAOD::JetContainer jets = event.m_jets;
+    if (do_trackjets) jets = event.m_trackJets;
+    for (auto jetPtr : jets) {
+      double weight = 1.0;
+      bool isTagged_off = false;
+      bool isTagged_onl = false;
+      double sf_off     = 1;
+      double sf_onl     = 1;
+      double sf_cond    = 1;
+      double mceff_off  = 1;
+      double mceff_onl  = 1;
+      double mceff_cond = 1;
+      // offline quantities
+      if (jetPtr->isAvailable<char>(decoration_tag_off)) isTagged_off = jetPtr->auxdataConst<char>(decoration_tag_off);
+      if (jetPtr->isAvailable<float>(decoration_SF_off)) sf_off = jetPtr->auxdataConst<float>(decoration_SF_off);
+      if (jetPtr->isAvailable<float>(decoration_MCeff_off)) mceff_off = jetPtr->auxdataConst<float>(decoration_MCeff_off);
+      // check for negative values
+      if ( mceff_off <= 0 ) {
+	mceff_off = 1;
+	sf_off = 1;
+      }
+      else {
+	// convert inefficiency into efficiency SF for off
+	if ( !isTagged_off ) {
+	  sf_off = (1-sf_off*(1-mceff_off))/mceff_off;
+	}
+      }
+      // online quantities
+      if (jetPtr->isAvailable<char>(decoration_tag_onl)) isTagged_onl = jetPtr->auxdataConst<char>(decoration_tag_onl);
+      if (jetPtr->isAvailable<float>(decoration_SF_onl)) sf_onl = jetPtr->auxdataConst<float>(decoration_SF_onl);
+      if (jetPtr->isAvailable<float>(decoration_MCeff_onl)) mceff_onl = jetPtr->auxdataConst<float>(decoration_MCeff_onl);
+      // check for negative values
+      if ( mceff_onl <= 0 ) {
+	mceff_onl = 1;
+	sf_onl = 1;
+      }
+      // conditional quantities
+      if (jetPtr->isAvailable<float>(decoration_SF_cond)) sf_cond = jetPtr->auxdataConst<float>(decoration_SF_cond);
+      if (jetPtr->isAvailable<float>(decoration_MCeff_cond)) mceff_cond = jetPtr->auxdataConst<float>(decoration_MCeff_cond);
+      // check for negative values
+      if ( mceff_cond <= 0 ) {
+	mceff_cond = 1;
+	sf_cond = 1;
+      }
+
+      weight = btagSF_off_onl_weight(isTagged_off,isTagged_onl,mceff_off,sf_off,mceff_onl,sf_onl,mceff_cond,sf_cond);
+      if ( weight > 0 ) {
+	sf *= weight;
+      }
+    }
+
+    // for now
+    return ((float)sf);
+  }
+
+  double ScaleFactorRetriever::btagSF_off_onl_weight(const bool isTagged_off,
+						     const bool isTagged_onl,
+						     const double mceff_off,
+						     const double sf_off,
+						     const double mceff_onl,
+						     const double sf_onl,
+						     const double mceff_cond,
+						     const double sf_cond) const {
+
+    double weight = 1;
+    double denom;
+    // there are 4 cases based on offline and online tag
+    //
+    // In case online or conditional info is absent - just use the offline
+    // SF but make sure to convert back to inefficiency SF for not tagged
+    // jets
+    // 
+    if ( isTagged_off ) {
+      // offline tagged
+      if (isTagged_onl) {
+	// online tagged
+	weight = sf_cond*sf_off;
+      }
+      else {
+	// not online tagged
+	denom = (1-mceff_cond);
+	if ( denom > 0 ) {
+	  weight = (1-mceff_cond*sf_cond)/denom * sf_off; 
+	}
+	else {
+	  // no valid conditional info
+	  weight = sf_off;
+	}
+      }
+    }
+    else {
+      // not offline tagged
+      if (isTagged_onl) {
+	// online tagged
+	denom = mceff_onl - mceff_cond*mceff_off;
+	if ( denom > 0 ) {
+	  weight = (mceff_onl*sf_onl - mceff_cond*sf_cond*mceff_off*sf_off)/denom;
+	}
+	else {
+	  // no valid online/conditional info
+	  // convert back to offline inefficiency SF
+	  denom = 1 - mceff_off;
+	  if ( denom > 0 ) {
+	    weight = (1-mceff_off*sf_off)/denom;
+	  }
+	}
+      }
+      else {
+	// not online tagged
+	denom = 1 - mceff_off - mceff_onl + mceff_cond * mceff_off;
+	if ( denom > 0 ) {
+	  weight = (1 - mceff_off*sf_off - mceff_onl*sf_onl + mceff_cond*sf_cond * mceff_off*sf_off)/denom;
+	}
+	else {
+	  // no valid online/conditional info
+	  // convert back to offline inefficiency SF
+	  denom = 1 - mceff_off;
+	  if ( denom > 0 ) {
+	    weight = (1-mceff_off*sf_off)/denom;
+	  }
+	}
+      }
+    }
+    return weight;
+  }
+  
+  /**
+   * @brief nominal SF or named systematics
+   */
+  float ScaleFactorRetriever::btagSF_off1_off2_onl(const top::Event& event,
+						   const top::topSFSyst SFSyst,
+						   std::string WP1,
+						   std::string WP2,
+						   bool do_trackjets, std::string uncert_name) const {
+    double sf(1.);
+
+    std::string decoration_tag1 = "btag_isTagged_" + WP1;
+    std::string decoration_SF1 = "btag_SF_" + WP1;
+    std::string decoration_MCeff1 = "btag_MCeff_" + WP1;
+
+    std::string decoration_tag2 = "btag_isTagged_" + WP2;
+    std::string decoration_SF2 = "btag_SF_" + WP2;
+    std::string decoration_MCeff2 = "btag_MCeff_" + WP2;
+
+    // tagger decision
+    std::string decoration_tag_off1 = decoration_tag1 + "_nom"; // offline1 tag
+    std::string decoration_tag_off2 = decoration_tag2 + "_nom"; // offline2 tag
+    std::string decoration_tag_onl = decoration_tag1 + "_onl_" + "_nom"; // online tag based on WP1
+
+    // MC efficiency Scale Factor
+    std::string decoration_SF_off1 = decoration_SF1 + "_nom"; // this is either eff SF or ineff SF 
+    std::string decoration_SF_off2 = decoration_SF2 + "_nom"; // this is either eff SF or ineff SF 
+    std::string decoration_SF_onl = decoration_SF1 + "_onl_" + "_nom"; // this is always eff SF
+    std::string decoration_SF_cond1 = decoration_SF1 + "_cond_" + "_nom"; // this is always eff SF
+    std::string decoration_SF_cond2 = decoration_SF2 + "_cond_" + "_nom"; // this is always eff SF
+
+    // MC efficiency
+    std::string decoration_MCeff_off1 = decoration_MCeff1 + "_nom";
+    std::string decoration_MCeff_off2 = decoration_MCeff2 + "_nom";
+    std::string decoration_MCeff_onl = decoration_MCeff1 + "_onl_" + "_nom"; 
+    std::string decoration_MCeff_cond1 = decoration_MCeff1 + "_cond_" + "_nom";
+    std::string decoration_MCeff_cond2 = decoration_MCeff2 + "_cond_" + "_nom";
+    
+    std::string systematicName, bTagSystName;
+    switch (SFSyst) {
+    case top::topSFSyst::nominal:
+      // If this is the nominal tree, we proceed as normal
+      // If not nominal tree, we need to know which systematic this event corresponds to,
+      // in case the systematic is removed from EV decomposition (will enter as a nominal retrieval)
+      systematicName = m_config->systematicName(event.m_hashValue);
+      bTagSystName = top::bTagNamedSystCheck(m_config, systematicName, WP1, do_trackjets, false);
+      if (bTagSystName != "") {
+	// Only change decorations if found,
+	decoration_tag_off1 = decoration_tag1 + "_" + bTagSystName;
+	decoration_tag_off2 = decoration_tag2 + "_" + bTagSystName;
+	decoration_tag_onl = decoration_tag1 + "_onl_" + bTagSystName;
+
+	decoration_SF_off1 = decoration_SF1 + "_" + bTagSystName;
+	decoration_SF_off2 = decoration_SF2 + "_" + bTagSystName;
+	decoration_SF_onl = decoration_SF1 + "_onl_" + bTagSystName;
+	decoration_SF_cond1 = decoration_SF1 + "_cond_" + bTagSystName;
+	decoration_SF_cond2 = decoration_SF2 + "_cond_" + bTagSystName;
+
+	decoration_MCeff_off1 = decoration_MCeff1 + "_" + bTagSystName;
+	decoration_MCeff_off2 = decoration_MCeff2 + "_" + bTagSystName;
+	decoration_MCeff_onl = decoration_MCeff1 + "_onl_" + bTagSystName;
+	decoration_MCeff_cond1 = decoration_MCeff1 + "_cond_" + bTagSystName;
+	decoration_MCeff_cond2 = decoration_MCeff2 + "_cond_" + bTagSystName;
+      }
+                                                                                 // otherwise we will use the nominal
+      break;
+
+    case top::topSFSyst::BTAG_SF_NAMED_UP:
+      if (uncert_name == "") {
+        ATH_MSG_INFO("Named b-tagging systematics should have a name. Please provide one.");
+        return 0;
+      }
+      decoration_tag_off1 = decoration_tag1 + "_" + uncert_name + "__1up";
+      decoration_tag_off2 = decoration_tag2 + "_" + uncert_name + "__1up";
+      decoration_tag_onl = decoration_tag1 + "_onl_" + uncert_name + "__1up";
+      
+      decoration_SF_off1 = decoration_SF1 + "_" + uncert_name + "__1up";
+      decoration_SF_off2 = decoration_SF2 + "_" + uncert_name + "__1up";
+      decoration_SF_onl = decoration_SF1 + "_onl_" + uncert_name + "__1up";
+      decoration_SF_cond1 = decoration_SF1 + "_cond_" + uncert_name + "__1up";
+      decoration_SF_cond2 = decoration_SF2 + "_cond_" + uncert_name + "__1up";
+      
+      decoration_MCeff_off1 = decoration_MCeff1 + "_" + uncert_name + "__1up";
+      decoration_MCeff_off2 = decoration_MCeff2 + "_" + uncert_name + "__1up";
+      decoration_MCeff_onl = decoration_MCeff1 + "_onl_" + uncert_name + "__1up";
+      decoration_MCeff_cond1 = decoration_MCeff1 + "_cond_" + uncert_name + "__1up";
+      decoration_MCeff_cond2 = decoration_MCeff2 + "_cond_" + uncert_name + "__1up";
+      break;
+
+    case top::topSFSyst::BTAG_SF_NAMED_DOWN:
+      if (uncert_name == "") {
+        ATH_MSG_INFO("Named b-tagging systematics should have a name. Please provide one.");
+        return 0;
+      }
+      decoration_tag_off1 = decoration_tag1 + "_" + uncert_name + "__1down";
+      decoration_tag_off2 = decoration_tag2 + "_" + uncert_name + "__1down";
+      decoration_tag_onl = decoration_tag1 + "_onl_" + uncert_name + "__1down";
+      
+      decoration_SF_off1 = decoration_SF1 + "_" + uncert_name + "__1down";
+      decoration_SF_off2 = decoration_SF2 + "_" + uncert_name + "__1down";
+      decoration_SF_onl = decoration_SF1 + "_onl_" + uncert_name + "__1down";
+      decoration_SF_cond1 = decoration_SF1 + "_cond_" + uncert_name + "__1down";
+      decoration_SF_cond2 = decoration_SF2 + "_cond_" + uncert_name + "__1down";
+      
+      decoration_MCeff_off1 = decoration_MCeff1 + "_" + uncert_name + "__1down";
+      decoration_MCeff_off2 = decoration_MCeff2 + "_" + uncert_name + "__1down";
+      decoration_MCeff_onl = decoration_MCeff1 + "_onl_" + uncert_name + "__1down";
+      decoration_MCeff_cond1 = decoration_MCeff1 + "_cond_" + uncert_name + "__1down";
+      decoration_MCeff_cond2 = decoration_MCeff2 + "_cond_" + uncert_name + "__1down";
+      break;
+
+    case top::topSFSyst::BTAG_SF_EIGEN_B:
+    case top::topSFSyst::BTAG_SF_EIGEN_C:
+    case top::topSFSyst::BTAG_SF_EIGEN_LIGHT:
+      ATH_MSG_INFO("For Eigenvectors please use ScaleFactorRetriever::btagSF_eigen_vars");
+      return 0;
+
+      break;
+
+    default:
+      ATH_MSG_INFO("Not the right function: " << __PRETTY_FUNCTION__);
+      return 0;
+
+      break;
+    }
+
+    // I'm testing!
+    xAOD::JetContainer jets = event.m_jets;
+    if (do_trackjets) jets = event.m_trackJets;
+    for (auto jetPtr : jets) {
+      double weight = 1.0;
+      bool isTagged_off1 = false;
+      bool isTagged_off2 = false;
+      bool isTagged_onl = false;
+      double sf_off1    = 1;
+      double sf_off2    = 1;
+      double sf_onl     = 1;
+      double sf_cond1   = 1;
+      double sf_cond2   = 1;
+      double mceff_off1 = 1;
+      double mceff_off2 = 1;
+      double mceff_onl  = 1;
+      double mceff_cond1= 1;
+      double mceff_cond2= 1;
+      // offline quantities
+      if (jetPtr->isAvailable<char>(decoration_tag_off1)) isTagged_off1 = jetPtr->auxdataConst<char>(decoration_tag_off1);
+      if (jetPtr->isAvailable<char>(decoration_tag_off2)) isTagged_off2 = jetPtr->auxdataConst<char>(decoration_tag_off2);
+      if (jetPtr->isAvailable<float>(decoration_SF_off1)) sf_off1 = jetPtr->auxdataConst<float>(decoration_SF_off1);
+      if (jetPtr->isAvailable<float>(decoration_SF_off2)) sf_off2 = jetPtr->auxdataConst<float>(decoration_SF_off2);
+      if (jetPtr->isAvailable<float>(decoration_MCeff_off1)) mceff_off1 = jetPtr->auxdataConst<float>(decoration_MCeff_off1);
+      if (jetPtr->isAvailable<float>(decoration_MCeff_off2)) mceff_off2 = jetPtr->auxdataConst<float>(decoration_MCeff_off2);
+      // check for negative values
+      if ( mceff_off1 <= 0 ) {
+	mceff_off1 = 1;
+	sf_off1 = 1;
+      }
+      else {
+	// convert inefficiency into efficiency SF for off
+	if ( !isTagged_off1 ) {
+	  sf_off1 = (1-sf_off1*(1-mceff_off1))/mceff_off1;
+	}
+      }
+      // check for negative values
+      if ( mceff_off2 <= 0 ) {
+	mceff_off2 = 1;
+	sf_off2 = 1;
+      }
+      else {
+	// convert inefficiency into efficiency SF for off
+	if ( !isTagged_off2 ) {
+	  sf_off2 = (1-sf_off2*(1-mceff_off2))/mceff_off2;
+	}
+      }
+      // online quantities
+      if (jetPtr->isAvailable<char>(decoration_tag_onl)) isTagged_onl = jetPtr->auxdataConst<char>(decoration_tag_onl);
+      if (jetPtr->isAvailable<float>(decoration_SF_onl)) sf_onl = jetPtr->auxdataConst<float>(decoration_SF_onl);
+      if (jetPtr->isAvailable<float>(decoration_MCeff_onl)) mceff_onl = jetPtr->auxdataConst<float>(decoration_MCeff_onl);
+      // check for negative values
+      if ( mceff_onl <= 0 ) {
+	mceff_onl = 1;
+	sf_onl = 1;
+      }
+      // conditional quantities
+      if (jetPtr->isAvailable<float>(decoration_SF_cond1)) sf_cond1 = jetPtr->auxdataConst<float>(decoration_SF_cond1);
+      if (jetPtr->isAvailable<float>(decoration_SF_cond2)) sf_cond2 = jetPtr->auxdataConst<float>(decoration_SF_cond2);
+      if (jetPtr->isAvailable<float>(decoration_MCeff_cond1)) mceff_cond1 = jetPtr->auxdataConst<float>(decoration_MCeff_cond1);
+      if (jetPtr->isAvailable<float>(decoration_MCeff_cond2)) mceff_cond2 = jetPtr->auxdataConst<float>(decoration_MCeff_cond2);
+      // check for negative values
+      if ( mceff_cond1 <= 0 ) {
+	mceff_cond1 = 1;
+	sf_cond1 = 1;
+      }
+      if ( mceff_cond2 <= 0 ) {
+	mceff_cond2 = 1;
+	sf_cond2 = 1;
+      }
+
+      weight = btagSF_off1_off2_onl_weight(isTagged_off1,isTagged_off2,isTagged_onl,mceff_off1,sf_off1,mceff_off2,sf_off2,mceff_onl,sf_onl,mceff_cond1,sf_cond1,mceff_cond2,sf_cond2);
+      if ( weight > 0 ) {
+	sf *= weight;
+      }
+    }
+
+    // for now
+    return ((float)sf);
+  }
+
+  double ScaleFactorRetriever::btagSF_off1_off2_onl_weight(const bool isTagged_off1,
+							   const bool isTagged_off2,
+							   const bool isTagged_onl,
+							   const double mceff_off1,
+							   const double sf_off1,
+							   const double mceff_off2,
+							   const double sf_off2,
+							   const double mceff_onl,
+							   const double sf_onl,
+							   const double mceff_cond1,
+							   const double sf_cond1,
+							   const double mceff_cond2,
+							   const double sf_cond2) const {
+    
+    double weight = 1;
+    double denom;
+    // there are 8 cases based on offline1, offline2 and online tag
+    //
+    // In case online or conditional info is absent - just use the offline
+    // SF but make sure to convert back to inefficiency SF for not tagged
+    // jets
+    // 
+    if ( isTagged_off1 ) {
+      // loser offline1 WP tagged - for example 85%
+      if ( isTagged_off2 ) {
+	// tighter offline2 WP tagged - for example 60%
+	if (isTagged_onl) {
+	  // online tagged
+	  weight = sf_cond2*sf_off2;
+	}
+	else {
+	  // not online tagged
+	  denom = (1-mceff_cond2);
+	  if ( denom > 0 ) {
+	    weight = (1-mceff_cond2*sf_cond2)/denom * sf_off2; 
+	  }
+	  else {
+	    // no valid conditional info
+	    weight = sf_off2;
+	  }
+	}
+      }
+      else {
+	// not offline2 tagged
+	if (isTagged_onl) {
+	  // online tagged
+	  denom = mceff_cond1*mceff_off1 - mceff_cond2*mceff_off2;
+	  if ( denom > 0 ) {
+	    weight = (mceff_cond1*sf_cond1*mceff_off1*sf_off1 - mceff_cond2*sf_cond2*mceff_off2*sf_off2)/denom;
+	  }
+	  else {
+	    // no valid online/conditional info
+	    // take offline only
+	    denom = mceff_off1 - mceff_off2;
+	    if ( denom > 0 ) {
+	      weight = (mceff_off1*sf_off1-mceff_off2*sf_off2)/denom;
+	    }
+	  }
+	}
+	else {
+	  // not online tagged
+	  denom = (1 - mceff_cond1)*mceff_off1 - (1-mceff_cond2)*mceff_off2;
+	  if ( denom > 0 ) {
+	    weight = ((1 - mceff_cond1*sf_cond1)*mceff_off1*sf_off1 - (1-mceff_cond2*sf_cond2)*mceff_off2*sf_off2)/denom;
+	  }
+	  else {
+	    // no valid online/conditional info
+	    // take offline only
+	    denom = mceff_off1 - mceff_off2;
+	    if ( denom > 0 ) {
+	      weight = (mceff_off1*sf_off1-mceff_off2*sf_off2)/denom;
+	    }
+	  }
+	}
+      }
+    }
+    else {
+      // not offline1 tagged
+      if ( isTagged_off2 ) {
+	// this should not happen and does not depend on online
+	weight = 0;
+      }
+      else {
+	// not offline2 tagged
+	if (isTagged_onl) {
+	  // online tagged
+	  denom = mceff_onl-mceff_cond1*mceff_off1;
+	  if ( denom > 0 ) {
+	    weight = (mceff_onl*sf_onl-mceff_cond1*sf_cond1*mceff_off1*sf_off1)/denom;
+	  }
+	  else {
+	    // no valid online/conditional info
+	    // take offline only
+	    denom = 1-mceff_off1;
+	    if ( denom > 0 ) {
+	      weight = (1-mceff_off1*sf_off1)/denom;
+	    }
+	  }
+	}
+	else {
+	  // not online tagged
+	  denom = 1 - mceff_onl-(1-mceff_cond1)*mceff_off1;
+	  if ( denom > 0 ) {
+	    weight = (1 - mceff_onl*sf_onl-(1-mceff_cond1*sf_cond1)*mceff_off1*sf_off1)/denom;
+	  }
+	  else {
+	    // no valid online/conditional info
+	    // take offline only
+	    denom = 1-mceff_off1;
+	    if ( denom > 0 ) {
+	      weight = (1-mceff_off1*sf_off1)/denom;
+	    }
+	  }
+	}
+      }
+    }
+    return weight;
+  }
+  
   void ScaleFactorRetriever::btagSF_eigen_vars(const top::Event& event,
                                                const top::topSFSyst SFSyst,
                                                std::vector<float>& vec_btagSF_up,
@@ -1558,6 +2109,385 @@ namespace top {
       for (auto jetPtr : jets) {
         if (jetPtr->isAvailable<float>(SF_dec_up)) SF_up *= jetPtr->auxdataConst<float>(SF_dec_up);
         if (jetPtr->isAvailable<float>(SF_dec_down)) SF_down *= jetPtr->auxdataConst<float>(SF_dec_down);
+      }
+      vec_btagSF_up[i] = SF_up;
+      vec_btagSF_down[i] = SF_down;
+    }
+    return;
+  }
+
+  void ScaleFactorRetriever::btagSF_off_onl_eigen_vars(const top::Event& event,
+                                               const top::topSFSyst SFSyst,
+                                               std::vector<float>& vec_btagSF_up,
+                                               std::vector<float>& vec_btagSF_down,
+                                               std::string WP, bool do_trackjets) const {
+    // just in case
+    vec_btagSF_up.clear();
+    vec_btagSF_down.clear();
+
+    unsigned int n_eigen = 0;
+    std::string prefix = "btag_SF_" + WP + "_FT_EFF_Eigen_";
+    std::string flav = "";
+
+    switch (SFSyst) {
+    case top::topSFSyst::BTAG_SF_EIGEN_B:
+      n_eigen = do_trackjets ? m_config->trkjet_btagging_num_B_eigenvars(WP) : m_config->btagging_num_B_eigenvars(WP);
+      flav = "B_";
+      break;
+
+    case top::topSFSyst::BTAG_SF_EIGEN_C:
+      n_eigen = do_trackjets ? m_config->trkjet_btagging_num_C_eigenvars(WP) : m_config->btagging_num_C_eigenvars(WP);
+      flav = "C_";
+      break;
+
+    case top::topSFSyst::BTAG_SF_EIGEN_LIGHT:
+      n_eigen =
+        do_trackjets ? m_config->trkjet_btagging_num_Light_eigenvars(WP) : m_config->btagging_num_Light_eigenvars(WP);
+      flav = "Light_";
+      break;
+
+    default:
+      ATH_MSG_INFO("Not the right function: " << __PRETTY_FUNCTION__);
+      return;
+    }
+    vec_btagSF_up.resize(n_eigen);
+    vec_btagSF_down.resize(n_eigen);
+
+    for (unsigned int i = 0; i < n_eigen; ++i) {
+      float SF_up(1.0), SF_down(1.0);
+      std::string num = std::to_string(i);
+
+      std::string decoration_tag = "btag_isTagged_" + WP;
+      
+      std::string decoration_SF = "btag_SF_" + WP; 
+      std::string decoration_MCeff = "btag_MCeff_" + WP;
+
+      // tagger decision
+      std::string decoration_tag_off = decoration_tag + "_nom"; // offline tag
+      std::string decoration_tag_onl = decoration_tag + "_onl_" + "_nom"; // online tag
+
+      // MC efficiency Scale Factor
+      std::string decoration_SF_off_up = decoration_SF + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_off_down = decoration_SF + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_onl_up = decoration_SF + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_onl_down = decoration_SF + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
+      std::string decoration_SF_cond_up = decoration_SF + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_cond_down = decoration_SF + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
+
+
+      // MC efficiency
+      std::string decoration_MCeff_off_up = decoration_MCeff + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_off_down = decoration_MCeff + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_onl_up = decoration_MCeff + "_onl_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_onl_down = decoration_MCeff + "_onl_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_cond_up = decoration_MCeff + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_cond_down = decoration_MCeff + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+    
+      xAOD::JetContainer jets = event.m_jets;
+      if (do_trackjets) jets = event.m_trackJets;
+      for (auto jetPtr : jets) {
+	double weight_up = 1.0;
+	double weight_down = 1.0;
+	bool isTagged_off = false;
+	bool isTagged_onl = false;
+	double sf_off_up       = 1;
+	double sf_off_down     = 1;
+	double sf_onl_up       = 1;
+	double sf_onl_down     = 1;
+	double sf_cond_up      = 1;
+	double sf_cond_down    = 1;
+	double mceff_off_up    = 1;
+	double mceff_off_down  = 1;
+	double mceff_onl_up    = 1;
+	double mceff_onl_down  = 1;
+	double mceff_cond_up   = 1;
+	double mceff_cond_down = 1;
+	// offline quantities
+	if (jetPtr->isAvailable<char>(decoration_tag_off)) isTagged_off = jetPtr->auxdataConst<char>(decoration_tag_off);
+	if (jetPtr->isAvailable<float>(decoration_SF_off_up)) sf_off_up = jetPtr->auxdataConst<float>(decoration_SF_off_up);
+	if (jetPtr->isAvailable<float>(decoration_SF_off_down)) sf_off_down = jetPtr->auxdataConst<float>(decoration_SF_off_down);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_off_up)) mceff_off_up = jetPtr->auxdataConst<float>(decoration_MCeff_off_up);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_off_down)) mceff_off_down = jetPtr->auxdataConst<float>(decoration_MCeff_off_down);
+	// check for negative values
+	if ( mceff_off_up <= 0 ) {
+	  mceff_off_up = 1;
+	  sf_off_up = 1;
+	}
+	else {
+	  // convert inefficiency into efficiency SF for off
+	  if ( !isTagged_off ) {
+	    sf_off_up = (1-sf_off_up*(1-mceff_off_up))/mceff_off_up;
+	  }
+	}
+	if ( mceff_off_down <= 0 ) {
+	  mceff_off_down = 1;
+	  sf_off_down = 1;
+	}
+	else {
+	  // convert inefficiency into efficiency SF for off
+	  if ( !isTagged_off ) {
+	    sf_off_down = (1-sf_off_down*(1-mceff_off_down))/mceff_off_down;
+	  }
+	}
+	// online quantities
+	if (jetPtr->isAvailable<char>(decoration_tag_onl)) isTagged_onl = jetPtr->auxdataConst<char>(decoration_tag_onl);
+	if (jetPtr->isAvailable<float>(decoration_SF_onl_up)) sf_onl_up = jetPtr->auxdataConst<float>(decoration_SF_onl_up);
+	if (jetPtr->isAvailable<float>(decoration_SF_onl_down)) sf_onl_down = jetPtr->auxdataConst<float>(decoration_SF_onl_down);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_onl_up)) mceff_onl_up = jetPtr->auxdataConst<float>(decoration_MCeff_onl_up);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_onl_down)) mceff_onl_down = jetPtr->auxdataConst<float>(decoration_MCeff_onl_down);
+	// check for negative values
+	if ( mceff_onl_up <= 0 ) {
+	  mceff_onl_up = 1;
+	  sf_onl_up = 1;
+	}
+	if ( mceff_onl_down <= 0 ) {
+	  mceff_onl_down = 1;
+	  sf_onl_down = 1;
+	}
+	// conditional quantities
+	if (jetPtr->isAvailable<float>(decoration_SF_cond_up)) sf_cond_up = jetPtr->auxdataConst<float>(decoration_SF_cond_up);
+	if (jetPtr->isAvailable<float>(decoration_SF_cond_down)) sf_cond_down = jetPtr->auxdataConst<float>(decoration_SF_cond_down);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_cond_up)) mceff_cond_up = jetPtr->auxdataConst<float>(decoration_MCeff_cond_up);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_cond_down)) mceff_cond_down = jetPtr->auxdataConst<float>(decoration_MCeff_cond_down);
+	// check for negative values
+	if ( mceff_cond_up <= 0 ) {
+	  mceff_cond_up = 1;
+	  sf_cond_up = 1;
+	}
+	if ( mceff_cond_down <= 0 ) {
+	  mceff_cond_down = 1;
+	  sf_cond_down = 1;
+	}
+	
+	weight_up = btagSF_off_onl_weight(isTagged_off,isTagged_onl,mceff_off_up,sf_off_up,mceff_onl_up,sf_onl_up,mceff_cond_up,sf_cond_up);
+	if ( weight_up > 0 ) {
+	  SF_up *= weight_up;
+	}
+	weight_down = btagSF_off_onl_weight(isTagged_off,isTagged_onl,mceff_off_down,sf_off_down,mceff_onl_down,sf_onl_down,mceff_cond_down,sf_cond_down);
+	if ( weight_down > 0 ) {
+	  SF_down *= weight_down;
+	}
+      }
+      vec_btagSF_up[i] = SF_up;
+      vec_btagSF_down[i] = SF_down;
+    }
+    return;
+  }
+
+  void ScaleFactorRetriever::btagSF_off1_off2_onl_eigen_vars(const top::Event& event,
+							     const top::topSFSyst SFSyst,
+							     std::vector<float>& vec_btagSF_up,
+							     std::vector<float>& vec_btagSF_down,
+							     std::string WP1,
+							     std::string WP2,
+							     bool do_trackjets) const {
+    // just in case
+    vec_btagSF_up.clear();
+    vec_btagSF_down.clear();
+
+    unsigned int n_eigen = 0;
+    std::string prefix1 = "btag_SF_" + WP1 + "_FT_EFF_Eigen_";
+    std::string prefix2 = "btag_SF_" + WP2 + "_FT_EFF_Eigen_";
+    std::string flav = "";
+
+    switch (SFSyst) {
+    case top::topSFSyst::BTAG_SF_EIGEN_B:
+      n_eigen = do_trackjets ? m_config->trkjet_btagging_num_B_eigenvars(W1) : m_config->btagging_num_B_eigenvars(WP1);
+      flav = "B_";
+      break;
+
+    case top::topSFSyst::BTAG_SF_EIGEN_C:
+      n_eigen = do_trackjets ? m_config->trkjet_btagging_num_C_eigenvars(WP1) : m_config->btagging_num_C_eigenvars(WP1);
+      flav = "C_";
+      break;
+
+    case top::topSFSyst::BTAG_SF_EIGEN_LIGHT:
+      n_eigen =
+        do_trackjets ? m_config->trkjet_btagging_num_Light_eigenvars(WP1) : m_config->btagging_num_Light_eigenvars(WP1);
+      flav = "Light_";
+      break;
+
+    default:
+      ATH_MSG_INFO("Not the right function: " << __PRETTY_FUNCTION__);
+      return;
+    }
+    vec_btagSF_up.resize(n_eigen);
+    vec_btagSF_down.resize(n_eigen);
+
+    for (unsigned int i = 0; i < n_eigen; ++i) {
+      float SF_up(1.0), SF_down(1.0);
+      std::string num = std::to_string(i);
+
+      std::string decoration_tag1 = "btag_isTagged_" + WP1;
+      std::string decoration_tag2 = "btag_isTagged_" + WP2;
+      
+      std::string decoration_SF1 = "btag_SF_" + WP1; 
+      std::string decoration_SF2 = "btag_SF_" + WP2; 
+      std::string decoration_MCeff1 = "btag_MCeff_" + WP1;
+      std::string decoration_MCeff2 = "btag_MCeff_" + WP2;
+
+      // tagger decision
+      std::string decoration_tag_off1 = decoration_tag1 + "_nom"; // offline tag
+      std::string decoration_tag_off2 = decoration_tag2 + "_nom"; // offline tag
+      std::string decoration_tag_onl = decoration_tag1 + "_onl_" + "_nom"; // online tag
+
+      // MC efficiency Scale Factor
+      std::string decoration_SF_off1_up = decoration_SF1 + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_off1_down = decoration_SF1 + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_off2_up = decoration_SF2 + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_off2_down = decoration_SF2 + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is either eff SF or ineff SF 
+      std::string decoration_SF_onl_up = decoration_SF1 + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_onl_down = decoration_SF1 + "_onl" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
+      std::string decoration_SF_cond1_up = decoration_SF1 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_cond1_down = decoration_SF1 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
+      std::string decoration_SF_cond2_up = decoration_SF2 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1up"; // this is always eff SF
+      std::string decoration_SF_cond2_down = decoration_SF2 + "_cond" + "_FT_EFF_EIGEN_" + flav + num + "__1down"; // this is always eff SF
+
+
+      // MC efficiency
+      std::string decoration_MCeff_off1_up = decoration_MCeff1 + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_off1_down = decoration_MCeff1 + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_off2_up = decoration_MCeff2 + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_off2_down = decoration_MCeff2 + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_onl_up = decoration_MCeff1 + "_onl_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_onl_down = decoration_MCeff1 + "_onl_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_cond1_up = decoration_MCeff1 + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_cond1_down = decoration_MCeff1 + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+      std::string decoration_MCeff_cond2_up = decoration_MCeff2 + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1up";
+      std::string decoration_MCeff_cond2_down = decoration_MCeff2 + "_cond_" + "_FT_EFF_EIGEN_" + flav + num + "__1down";
+    
+      xAOD::JetContainer jets = event.m_jets;
+      if (do_trackjets) jets = event.m_trackJets;
+      for (auto jetPtr : jets) {
+	double weight_up = 1.0;
+	double weight_down = 1.0;
+	bool isTagged_off1 = false;
+	bool isTagged_off2 = false;
+	bool isTagged_onl = false;
+	double sf_off1_up       = 1;
+	double sf_off1_down     = 1;
+	double sf_off2_up       = 1;
+	double sf_off2_down     = 1;
+	double sf_onl_up       = 1;
+	double sf_onl_down     = 1;
+	double sf_cond1_up      = 1;
+	double sf_cond1_down    = 1;
+	double sf_cond2_up      = 1;
+	double sf_cond2_down    = 1;
+	double mceff_off1_up    = 1;
+	double mceff_off1_down  = 1;
+	double mceff_off2_up    = 1;
+	double mceff_off2_down  = 1;
+	double mceff_onl_up    = 1;
+	double mceff_onl_down  = 1;
+	double mceff_cond1_up   = 1;
+	double mceff_cond1_down = 1;
+	double mceff_cond2_up   = 1;
+	double mceff_cond2_down = 1;
+	// offline quantities
+	if (jetPtr->isAvailable<char>(decoration_tag_off1)) isTagged_off1 = jetPtr->auxdataConst<char>(decoration_tag_off1);
+	if (jetPtr->isAvailable<char>(decoration_tag_off2)) isTagged_off2 = jetPtr->auxdataConst<char>(decoration_tag_off2);
+	if (jetPtr->isAvailable<float>(decoration_SF_off1_up)) sf_off1_up = jetPtr->auxdataConst<float>(decoration_SF_off1_up);
+	if (jetPtr->isAvailable<float>(decoration_SF_off1_down)) sf_off1_down = jetPtr->auxdataConst<float>(decoration_SF_off1_down);
+	if (jetPtr->isAvailable<float>(decoration_SF_off2_up)) sf_off2_up = jetPtr->auxdataConst<float>(decoration_SF_off2_up);
+	if (jetPtr->isAvailable<float>(decoration_SF_off2_down)) sf_off2_down = jetPtr->auxdataConst<float>(decoration_SF_off2_down);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_off1_up)) mceff_off1_up = jetPtr->auxdataConst<float>(decoration_MCeff_off1_up);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_off1_down)) mceff_off1_down = jetPtr->auxdataConst<float>(decoration_MCeff_off1_down);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_off2_up)) mceff_off2_up = jetPtr->auxdataConst<float>(decoration_MCeff_off2_up);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_off2_down)) mceff_off2_down = jetPtr->auxdataConst<float>(decoration_MCeff_off2_down);
+	// check for negative values
+	if ( mceff_off1_up <= 0 ) {
+	  mceff_off1_up = 1;
+	  sf_off1_up = 1;
+	}
+	else {
+	  // convert inefficiency into efficiency SF for off1
+	  if ( !isTagged_off1 ) {
+	    sf_off1_up = (1-sf_off1_up*(1-mceff_off1_up))/mceff_off1_up;
+	  }
+	}
+	if ( mceff_off1_down <= 0 ) {
+	  mceff_off1_down = 1;
+	  sf_off1_down = 1;
+	}
+	else {
+	  // convert inefficiency into efficiency SF for off1
+	  if ( !isTagged_off1 ) {
+	    sf_off1_down = (1-sf_off1_down*(1-mceff_off1_down))/mceff_off1_down;
+	  }
+	}
+	// same for off2
+	if ( mceff_off2_up <= 0 ) {
+	  mceff_off2_up = 1;
+	  sf_off2_up = 1;
+	}
+	else {
+	  // convert inefficiency into efficiency SF for off2
+	  if ( !isTagged_off2 ) {
+	    sf_off2_up = (1-sf_off2_up*(1-mceff_off2_up))/mceff_off2_up;
+	  }
+	}
+	if ( mceff_off2_down <= 0 ) {
+	  mceff_off2_down = 1;
+	  sf_off2_down = 1;
+	}
+	else {
+	  // convert inefficiency into efficiency SF for off2
+	  if ( !isTagged_off2 ) {
+	    sf_off2_down = (1-sf_off2_down*(1-mceff_off2_down))/mceff_off2_down;
+	  }
+	}
+	// online quantities
+	if (jetPtr->isAvailable<char>(decoration_tag_onl)) isTagged_onl = jetPtr->auxdataConst<char>(decoration_tag_onl);
+	if (jetPtr->isAvailable<float>(decoration_SF_onl_up)) sf_onl_up = jetPtr->auxdataConst<float>(decoration_SF_onl_up);
+	if (jetPtr->isAvailable<float>(decoration_SF_onl_down)) sf_onl_down = jetPtr->auxdataConst<float>(decoration_SF_onl_down);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_onl_up)) mceff_onl_up = jetPtr->auxdataConst<float>(decoration_MCeff_onl_up);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_onl_down)) mceff_onl_down = jetPtr->auxdataConst<float>(decoration_MCeff_onl_down);
+	// check for negative values
+	if ( mceff_onl_up <= 0 ) {
+	  mceff_onl_up = 1;
+	  sf_onl_up = 1;
+	}
+	if ( mceff_onl_down <= 0 ) {
+	  mceff_onl_down = 1;
+	  sf_onl_down = 1;
+	}
+	// conditional quantities
+	if (jetPtr->isAvailable<float>(decoration_SF_cond1_up)) sf_cond1_up = jetPtr->auxdataConst<float>(decoration_SF_cond1_up);
+	if (jetPtr->isAvailable<float>(decoration_SF_cond1_down)) sf_cond1_down = jetPtr->auxdataConst<float>(decoration_SF_cond1_down);
+	if (jetPtr->isAvailable<float>(decoration_SF_cond2_up)) sf_cond2_up = jetPtr->auxdataConst<float>(decoration_SF_cond2_up);
+	if (jetPtr->isAvailable<float>(decoration_SF_cond2_down)) sf_cond2_down = jetPtr->auxdataConst<float>(decoration_SF_cond2_down);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_cond1_up)) mceff_cond1_up = jetPtr->auxdataConst<float>(decoration_MCeff_cond1_up);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_cond1_down)) mceff_cond1_down = jetPtr->auxdataConst<float>(decoration_MCeff_cond1_down);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_cond2_up)) mceff_cond2_up = jetPtr->auxdataConst<float>(decoration_MCeff_cond2_up);
+	if (jetPtr->isAvailable<float>(decoration_MCeff_cond2_down)) mceff_cond2_down = jetPtr->auxdataConst<float>(decoration_MCeff_cond2_down);
+	// check for negative values
+	if ( mceff_cond1_up <= 0 ) {
+	  mceff_cond1_up = 1;
+	  sf_cond1_up = 1;
+	}
+	if ( mceff_cond1_down <= 0 ) {
+	  mceff_cond1_down = 1;
+	  sf_cond1_down = 1;
+	}
+	// same for cond2
+	if ( mceff_cond2_up <= 0 ) {
+	  mceff_cond2_up = 1;
+	  sf_cond2_up = 1;
+	}
+	if ( mceff_cond2_down <= 0 ) {
+	  mceff_cond2_down = 1;
+	  sf_cond2_down = 1;
+	}
+	
+	weight_up = btagSF_off1_off2_onl_weight(isTagged_off1,isTagged_off2,isTagged_onl,mceff_off1_up,sf_off1_up,mceff_off2_up,sf_off2_up,mceff_onl_up,sf_onl_up,mceff_cond1_up,sf_cond1_up,mceff_cond2_up,sf_cond2_up);
+	if ( weight_up > 0 ) {
+	  SF_up *= weight_up;
+	}
+	weight_down = btagSF_off1_off2_onl_weight(isTagged_off1,isTagged_off2,isTagged_onl,mceff_off1_down,sf_off1_down,mceff_off2_down,sf_off2_down,mceff_onl_down,sf_onl_down,mceff_cond1_down,sf_cond1_down,mceff_cond2_down,sf_cond2_down);
+	if ( weight_down > 0 ) {
+	  SF_down *= weight_down;
+	}
       }
       vec_btagSF_up[i] = SF_up;
       vec_btagSF_down[i] = SF_down;

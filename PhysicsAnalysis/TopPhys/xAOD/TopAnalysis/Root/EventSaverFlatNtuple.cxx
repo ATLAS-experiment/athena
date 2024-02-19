@@ -490,6 +490,17 @@ namespace top {
                         tagWP) == m_config->bTagWP_calibrated().end()) continue;
           m_weight_bTagSF[tagWP] = 0.;
           systematicTree->makeOutputVariable(m_weight_bTagSF[tagWP], "weight_bTagSF_" + shortBtagWP(tagWP));
+	  //
+	  // also add combined off_onl weight in case the triplet (offl,onl,cond) is configured
+	  //
+	  for (auto offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	    // check if this offline WP has a triplet (offl_onl_cond)
+	    std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	    if(tagWP == offlWP) {
+	      m_weight_bTagSF_off_onl[tagWP] = 0.;
+	      systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl[tagWP], "weight_bTagSF_off_onl_" + shortBtagWP(tagWP));
+	    }
+	  }
           if (m_config->storePerJetBtagSFs() && m_config->isMC()) {
             m_perjet_weight_bTagSF[tagWP] = std::vector<float>();
             m_perjet_weight_bTagSF_eigen_B_up[tagWP] = std::vector<std::vector<float> >();
@@ -1027,7 +1038,38 @@ namespace top {
               systematicTree->makeOutputVariable(m_weight_bTagSF_named_down[tagWP][name], "weight_bTagSF_" + shortBtagWP(
                                                    tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
             }
-          }
+	    //
+	    // also add off_onl combined systematics in case the triplet (offl,onl,cond) is configured
+	    //
+	    for (auto offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	      // check if this offline WP has a triplet (offl_onl_cond)
+	      std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	      if(tagWP == offlWP) {
+		// up
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_B_up[tagWP], "weight_bTagSF_off_onl_" + shortBtagWP(
+																     tagWP) + "_eigenvars_B_up");
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_C_up[tagWP], "weight_bTagSF_off_onl_" + shortBtagWP(
+																     tagWP) + "_eigenvars_C_up");
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_Light_up[tagWP],
+						   "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_eigenvars_Light_up");
+		// down
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_B_down[tagWP], "weight_bTagSF_off_onl_" + shortBtagWP(
+																       tagWP) + "_eigenvars_B_down");
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_C_down[tagWP], "weight_bTagSF_off_onl_" + shortBtagWP(
+																       tagWP) + "_eigenvars_C_down");
+		systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_eigen_Light_down[tagWP],
+						   "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_eigenvars_Light_down");
+		// named systematics
+		for (auto name : m_config->btagging_namedSysts(tagWP)) {
+		  systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_named_up[tagWP][name],
+						     "weight_bTagSF_off_onl_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(
+															       name) + "_up");
+		  systematicTree->makeOutputVariable(m_weight_bTagSF_off_onl_named_down[tagWP][name], "weight_bTagSF_off_onl_" + shortBtagWP(
+																	     tagWP) + "_" + betterBtagNamedSyst(name) + "_down");
+		}
+	      }
+	    }
+	  }
           if (m_config->useTrackJets()) {
             for (const auto& tagWP : m_config->bTagWP_available_trkJet()) {
               // skip uncalibrated though available WPs
@@ -2171,6 +2213,16 @@ namespace top {
       for (const auto& tagWP : m_config->bTagWP_available()) {
         if (std::find(m_config->bTagWP_calibrated().begin(), m_config->bTagWP_calibrated().end(), tagWP) == m_config->bTagWP_calibrated().end()) continue;
         m_weight_bTagSF[tagWP] = m_sfRetriever->btagSF(event, top::topSFSyst::nominal, tagWP);
+	//
+	// also add off_onl combined weight in case the triplet (offl,onl,cond) is configured
+	//
+	for (auto offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	  // check if this offline WP has a triplet (offl_onl_cond)
+	  std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	  if(tagWP == offlWP) {
+	    m_weight_bTagSF_off_onl[tagWP] = m_sfRetriever->btagSF_off_onl(event, top::topSFSyst::nominal, tagWP);
+	  }
+	}
       }
       if (m_config->useTrackJets()) {
         for (const auto& tagWP : m_config->bTagWP_available_trkJet()) {
@@ -2421,6 +2473,28 @@ namespace top {
             m_weight_bTagSF_named_up[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_UP, tagWP, false, name);
             m_weight_bTagSF_named_down[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_DOWN, tagWP, false, name);
           }
+	  //
+	  // also add combined off_onl weight in case the triplet (offl,onl,cond) is configured
+	  //
+	  for (auto offlOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+	    // check if this offline WP has a triplet (offl_onl_cond)
+	    std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+	    if(tagWP == offlWP) {
+	      m_sfRetriever->btagSF_off_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_B,
+						       m_weight_bTagSF_off_onl_eigen_B_up[tagWP],
+						       m_weight_bTagSF_off_onl_eigen_B_down[tagWP], tagWP);
+	      m_sfRetriever->btagSF_off_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_C,
+						       m_weight_bTagSF_off_onl_eigen_C_up[tagWP],
+						       m_weight_bTagSF_off_onl_eigen_C_down[tagWP], tagWP);
+	      m_sfRetriever->btagSF_off_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_LIGHT,
+						       m_weight_bTagSF_off_onl_eigen_Light_up[tagWP],
+						       m_weight_bTagSF_off_onl_eigen_Light_down[tagWP], tagWP);
+	      for (auto name : m_config->btagging_namedSysts(tagWP)) {
+		m_weight_bTagSF_off_onl_named_up[tagWP][name] = m_sfRetriever->btagSF_off_onl(event, top::topSFSyst::BTAG_SF_NAMED_UP, tagWP, false, name);
+		m_weight_bTagSF_off_onl_named_down[tagWP][name] = m_sfRetriever->btagSF_off_onl(event, top::topSFSyst::BTAG_SF_NAMED_DOWN, tagWP, false, name);
+	      }
+	    }
+	  }
         }
         if (m_config->useTrackJets()) {
           for (const auto& tagWP : m_config->bTagWP_available_trkJet()) {
@@ -3263,8 +3337,6 @@ namespace top {
 	      // check if this offline WP has a triplet (offl_onl_cond)
 	      std::string offlWP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
 	      if(tagWP == offlWP) {
-		if (std::find(m_config->bTagWP_calibrated().begin(),
-			      m_config->bTagWP_calibrated().end(), tagWP) == m_config->bTagWP_calibrated().end()) continue;
 		m_perjet_weight_bTagSF_onl[tagWP][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_onl_" + "_nom");
 		m_perjet_weight_bTagMCeff_onl[tagWP][i] = jetPtr->auxdataConst<float>("btag_MCeff_" + tagWP + "_onl_" + "_nom");
 		m_perjet_weight_bTagSF_cond[tagWP][i] = jetPtr->auxdataConst<float>("btag_SF_" + tagWP + "_cond_" + "_nom");

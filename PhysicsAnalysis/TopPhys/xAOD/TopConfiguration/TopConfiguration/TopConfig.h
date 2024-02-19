@@ -2044,6 +2044,8 @@ namespace top {
     void setCalibBoostedJetTagger(const std::string& WP, const std::string& SFname);
     void setBoostedTaggersSFSysNames(const std::unordered_map<std::string, std::vector<std::string>>& sysNames) {m_boostedTaggersSFSysNames=sysNames;}
     // B-tagging WPs requested by user (updated to pair of strings to hold algorithm and WP)
+    const std::vector<std::pair<std::string, std::string>,
+		     <std::pair<std::string, std::string>>> bTagWP_off1_off2() const {return m_chosen_btaggingWP_off1_off2;}
     const std::vector<std::pair<std::pair<std::string, std::string>,
 				std::pair<std::pair<std::string, std::string>,
 				          std::pair<std::string, std::string>>>> bTagWP_offl_onl_cond() const {return m_chosen_btaggingWP_offl_onl_cond;}
@@ -2053,6 +2055,10 @@ namespace top {
     // parse b-tagging configuration from config file into a vector of pair <algorithm, WP>
     void parse_bTagWPs(const std::string& btagWPsettingString,
         std::vector<std::pair<std::string, std::string>>& btagWPlist,
+        const std::string& jetCollectionName);
+    // parse b-tagging configuration from config file into a vector of pair<pair<algo,WP>,pair<algo,WP>>
+    void parse_bTagWPs_pair(const std::string& btagWPsettingString,
+			    std::vector<std::pair<std::pair<std::string, std::string>, std::pair<std::string, std::string>>>& btagWPlist,
         const std::string& jetCollectionName);
     // parse b-tagging configuration from config file into a vector of pair <pair<algo, WP>,pair<pair<algo,WP>,pair<algo,WP>>>
     void parse_bTagWPs_triplet(const std::string& btagWPsettingString,
@@ -2886,6 +2892,9 @@ namespace top {
     std::vector<std::pair<std::pair<std::string,std::string>,
 			  std::pair<std::pair<std::string,std::string>,
 				    std::pair<std::string,std::string>>>> m_chosen_btaggingWP_offl_onl_cond;
+    // vector of pairs of off1 and off2 WP: <off1,off2>
+    std::vector<std::pair<std::pair<std::string,std::string>,
+			  std::pair<std::string,std::string>>> m_chosen_btaggingWP_off1_off2;
     std::string m_bTagSystsExcludedFromEV = "";
 
     // list of B-tagging WP actualy available
