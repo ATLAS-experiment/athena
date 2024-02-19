@@ -74,6 +74,7 @@ def SetupVP1():
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = 0 
+
     # ^ VP1 will not work with the scheduler, since its condition/data dependencies are not known in advance
     # More in details: the scheduler needs to know BEFORE the event, what the dependencies of each Alg are. 
     # So for VP1, no dependencies are declared, which means the conditions data is not there. 
@@ -93,6 +94,7 @@ def SetupVP1():
     group = parser.add_argument_group('VP1 specific')
     group.add_argument('Filename', help="Input file to pass to VP1 (i.e. vp1 myESD.pool.root as an alternative to vp1 --filesInput=[])", metavar="File name")           
     group.add_argument('--verboseAthena', action='store_true', help="If false, tell Athena to suppress INFO messages and below.")  
+    group.add_argument('--online', action='store_true', help="Use this flag for running VP1 at P1.")  
     group.add_argument('--cruise', type=int, help="Start in cruise mode, changing events after N seconds.")           
     # Batch
     group.add_argument('--batch', action='store_true', help="Run VP1 in 'batch' mode with a given configuration file.")         
@@ -109,16 +111,20 @@ def SetupVP1():
     #group.add_argument('--nocleanupeventcpy', action='store_true', help="Prevent removal of eventcpy directory after athena process finishes.")         
     # Commented, because I'm not sure how to implement this safely.
 
-    # Support the positional version of passing file name e.g. vp1 myESD.pool.root
     args = flags.fillFromArgs(parser=parser)
-    if args.Filename and (flags.Input.Files == [] or 
-        flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']):
-        flags.Input.Files = [args.Filename]
 
     if 'help' in args:
         # No point doing more here, since we just want to print the help.
         import sys
         sys.exit()
+
+    # Support the positional version of passing file name e.g. vp1 myESD.pool.root
+    if args.Filename and (flags.Input.Files == [] or 
+        flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']):
+        flags.Input.Files = [args.Filename]    
+    
+    # Set the online flag if we are running at P1
+    flags.Common.isOnline = args.online
 
     _logger.verbose("+ About to set flags related to the input")
 
@@ -171,7 +177,7 @@ def SetupVP1():
     flags.lock()
 
     # DEBUG -- inspect the flags
-    # flags.dump()
+    flags.dump()
     # flags._loadDynaFlags('GeoModel')
     # flags._loadDynaFlags('Detector')
     # flags.dump('Detector.(Geometry|Enable)', True)
@@ -223,14 +229,14 @@ def SetupVP1():
         vp1config.setdefault('vp1Alg.InitialCruiseModePeriod', args.cruise)
 
     # Batch mode
-    if 'batch' in args:
-       setup_batch_mode(args)
+    if args.batch:
+        setup_batch_mode(args)
     
     # Event copying and live
-    if 'eventsrc' in args:
+    if args.eventsrc:
         vp1config.setdefault('MultipleFilesON', True)
 
-    if 'live' in args or 'livelocal' in args:
+    if args.live or args.livelocal:
         setup_live_mode(args, vp1config)
 
     # configure VP1
@@ -240,13 +246,13 @@ def SetupVP1():
 
 def setup_live_mode(args, vp1config):
     vp1config.setdefault('MultipleFilesON', True)
-    if 'eventcpy' in args:
+    if args.eventcpy:
         vp1config.setdefault('vp1Alg.MFLocalCopyDir', args.eventcpy)
-    if 'extraevtsrcdir' in args:
+    if args.extraevtsrcdir:
         vp1config.setdefault('MFAvailableLocalInputDirectories', args.extraevtsrcdir)
-    if 'live' in args:
+    if args.live:
         vp1config.setdefault('MFSourceDir', "https://atlas-live.cern.ch/event_files/L1MinBias/vp1fileinfo.txt")
-    elif 'livelocal' in args:
+    elif args.livelocal:
         vp1config.setdefault('MFSourceDir', "/VP1_events/")
 
 
@@ -257,15 +263,15 @@ def setup_batch_mode(args):
     # and in the end a render of the 3D window will be saved as PNG file.
     import os
     if args.batch:
-        os.putenv("VP1_BATCHMODE","1")
+        os.putenv("VP1_BATCHMODE", "1")
     if args.batch_all_events:
-        os.putenv("VP1_BATCHMODE_ALLEVENTS","1")
-    if args.batch-n-events > 0:
-        os.putenv("VP1_BATCHMODE_NEVENTS", str(args.batch-n-events) )
-    if (args.batch-output-folder != ""):
-        os.putenv("VP1_BATCHMODE_OUT_FOLDER", args.batch-output-folder)
+        os.putenv("VP1_BATCHMODE_ALLEVENTS", "1")
+    if args.batch_n_events:
+        os.putenv("VP1_BATCHMODE_NEVENTS", str(args.batch_n_events))
+    if args.batch_output_folder:
+        os.putenv("VP1_BATCHMODE_OUT_FOLDER", args.batch_output_folder)
     if args.batch_random_config:
-        os.putenv("VP1_BATCHMODE_RANDOMCONFIG","1")
+        os.putenv("VP1_BATCHMODE_RANDOMCONFIG", "1")
 
 if __name__=="__main__":
     # Run with e.g. python -m VP1Algs.VP1AlgConfig --filesInput=myESD_ca.pool.root
