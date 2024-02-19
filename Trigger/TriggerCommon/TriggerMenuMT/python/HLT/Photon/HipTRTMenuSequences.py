@@ -2,9 +2,8 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-# menu components
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigTRTHighTHitCounter.TrigTRTHTHCounterConfig import TrigTRTHTHCounterFex
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -64,12 +63,4 @@ def TRTHitGeneratorSequenceCfg(flags, is_probe_leg = False):
     selAcc.addHypoAlgo(trtHTHhypo)
     from TrigTRTHighTHitCounter.TrigTRTHTHhypoTool import TrigTRTHTHhypoToolFromDict
     return MenuSequenceCA(flags,selAcc, HypoToolGen=TrigTRTHTHhypoToolFromDict, isProbe=is_probe_leg)
-
-def hipTRTMenuSequence(flags, is_probe_leg=False):
-
-    if isComponentAccumulatorCfg():
-        return TRTHitGeneratorSequenceCfg(flags, is_probe_leg=is_probe_leg)
-    else: 
-        return menuSequenceCAToGlobalWrapper(TRTHitGeneratorSequenceCfg, flags, is_probe_leg=is_probe_leg)
-
 
