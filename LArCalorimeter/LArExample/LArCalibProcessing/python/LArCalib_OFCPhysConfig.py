@@ -194,7 +194,7 @@ def LArOFCPhysCfg(flags,loadPhysAC=True):
 
 if __name__ == "__main__":
 
-
+    import sys
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     ConfigFlags=initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
@@ -224,4 +224,4 @@ if __name__ == "__main__":
 
     print(cfg.getService("IOVDbSvc").Folders)
     print("Start running...")
-    cfg.run(1)
+    sys.exit(cfg.run(1).isFailure())

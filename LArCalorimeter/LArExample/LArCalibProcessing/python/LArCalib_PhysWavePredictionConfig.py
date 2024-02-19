@@ -153,7 +153,7 @@ def LArPhysWavePredictionCfg(flags):
 
 if __name__ == "__main__":
 
-
+    import sys
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     ConfigFlags=initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
@@ -182,4 +182,5 @@ if __name__ == "__main__":
     cfg.merge(LArPhysWavePredictionCfg(ConfigFlags))
 
     print("Start running...")
-    cfg.run(1)
+    sys.exit(cfg.run(1).isFailure())
+    

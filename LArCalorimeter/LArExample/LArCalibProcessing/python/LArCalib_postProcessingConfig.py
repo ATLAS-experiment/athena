@@ -85,4 +85,4 @@ if __name__=="__main__":
 
     cfg.getService("PoolSvc").ReadCatalog+=["xmlcatalog_file:%s"%args.poolcat,]
 
-    cfg.run(1)
+    sys.exit(cfg.run(1).isFailure())

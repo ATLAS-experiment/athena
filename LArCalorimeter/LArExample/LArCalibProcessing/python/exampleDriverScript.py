@@ -89,9 +89,10 @@ cfg.merge(LArDelay_OFCCaliCfg(flags))
 #                                                 AddFEBTempInfo = False
 #                                             ))
 
+import sys
 #run the application
 print("Start running...")
-cfg.run() 
+sys.exit(cfg.run().isFailure())
 #For jobs with no bytestream-input the last line is
 #cfg.run(1)
 #to process exactly one 'fake' event as the job does all it's work in stop()
