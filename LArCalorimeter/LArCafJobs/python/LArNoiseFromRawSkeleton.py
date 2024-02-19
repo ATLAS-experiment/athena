@@ -49,6 +49,10 @@ def fromRunArgs(runArgs):
     if hasattr(runArgs,"maxEvents"):
         flags.Exec.MaxEvents=runArgs.maxEvents
 
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    flags.Trigger.triggerConfig = 'DB'    
+    flags.Trigger.L1.doCTP = True
     flags.Trigger.doID=False
     flags.Trigger.doMuon=False
     flags.Trigger.doLVL1=False

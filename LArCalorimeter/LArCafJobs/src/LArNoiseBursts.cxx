@@ -87,7 +87,6 @@ LArNoiseBursts::LArNoiseBursts(const std::string& name,
   : AthAlgorithm(name, pSvcLocator),
     m_thistSvc(nullptr),
     m_tree(nullptr),
-    m_trigDec( "Trig::TrigDecisionTool/TrigDecisionTool" ),
     m_LArOnlineIDHelper(nullptr),
     m_LArHVLineIDHelper(nullptr),
     m_LArElectrodeIDHelper(nullptr),
@@ -204,10 +203,6 @@ LArNoiseBursts::LArNoiseBursts(const std::string& name,
     m_nt_cellIdentifier_sat(0)
  {
 
-   // Trigger
-   declareProperty( "TrigDecisionTool", m_trigDec );
-   
-   
    //event cuts
    declareProperty("SigmaCut", m_sigmacut = 3.0);
    declareProperty("NumberOfBunchesInFront",m_frontbunches = 36);
@@ -252,13 +247,7 @@ StatusCode LArNoiseBursts::initialize() {
   ATH_MSG_DEBUG ( "Initializing LArNoiseBursts" );
  
   // Trigger Decision Tool
-  if(!m_trigDec.empty()){
-    if(m_trigDec.retrieve().isFailure()){
-      ATH_MSG_WARNING ( "Failed to retrieve trigger decision tool " << m_trigDec );
-    }else{
-      ATH_MSG_INFO ( "Retrieved tool " << m_trigDec );
-    }
-   }
+  ATH_CHECK( m_trigDec.retrieve() );
   
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_BCKey.initialize() );

@@ -99,7 +99,7 @@ class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
    SG::ReadCondHandleKey<BunchCrossingCondData> m_bcDataKey 
      {this, "BunchCrossingCondDataKey", "BunchCrossingData" ,"SG Key of BunchCrossing CDO"};
    /*Tools*/
-   ToolHandle< Trig::TrigDecisionTool > m_trigDec;
+   PublicToolHandle< Trig::TrigDecisionTool > m_trigDec{this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool"};
 
    /*services*/
    const LArOnlineID* m_LArOnlineIDHelper;
