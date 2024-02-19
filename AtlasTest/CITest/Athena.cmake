@@ -62,7 +62,7 @@ atlas_add_citest( RecoRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25' )
 
 atlas_add_citest( RecoRun2MC_PileUp
-   SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--steering doOverlay --maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1918/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1918/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
 atlas_add_citest( RecoRun3Data
