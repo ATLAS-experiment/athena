@@ -1,0 +1,12 @@
+ --------- MEASUREMENT BASE ------------
+Identifier Hash = 156237
+Identifier = 96851257
+Local Position = 0.1
+0.5
+3.2
+Local Covariance = 0.012     0	0
+    0 0.012	0
+    0	0       0.005	
+ --------- HGTD CLUSTER INFO -----------
+RDOs = [0x200921680c00000, 0x298094737200000, 0x24e105292800000, 0x298094737200000, 0xaa1cdd0d200000, 0x200921680c00000]
+ToTs = [1, 2, 3, 4, 5, 6] 

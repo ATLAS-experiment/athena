@@ -11,6 +11,16 @@
            id="AC1AEA8C-20D8-4206-B785-0B4538EFF66B" />
     <typedef name="xAOD::PixelClusterAuxContainer" />
 
+    <class name="xAOD::HGTDCluster_v1" />
+    <class name="xAOD::HGTDClusterContainer_v1" 
+	   id="D7E0027E-A4F2-4051-88CA-3FC696A9C65F" />
+    <typedef name="xAOD::HGTDCluster" />
+    <typedef name="xAOD::HGTDClusterContainer" />
+
+    <class name="xAOD::HGTDClusterAuxContainer_v1"
+           id="B9F8256A-DEC7-4DDB-A024-36F0C322ADDC" />
+    <typedef name="xAOD::HGTDClusterAuxContainer" />
+
     <class name="xAOD::StripCluster_v1" />
     <class name="xAOD::StripClusterContainer_v1"
            id="BF692A4A-BF3E-4626-8DD4-135C58E6C0AB" />
