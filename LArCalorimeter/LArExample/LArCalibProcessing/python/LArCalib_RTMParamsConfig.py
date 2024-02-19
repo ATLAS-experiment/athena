@@ -165,4 +165,5 @@ if __name__ == "__main__":
     cfg.merge(LArRTMParamsCfg(ConfigFlags))
 
     print("Start running...")
-    cfg.run(1)
+    import sys
+    sys.exit(cfg.run(1).isFailure())

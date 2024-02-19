@@ -318,6 +318,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    import sys
     ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
@@ -345,5 +346,5 @@ if __name__ == "__main__":
     cfg=MainServicesCfg(ConfigFlags)
     cfg.merge(LArDelay_OFCCaliCfg(ConfigFlags))
     print("Start running...")
-    cfg.run()
+    sys.exit(cfg.run().isFailure())
 

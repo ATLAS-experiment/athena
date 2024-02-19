@@ -225,6 +225,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    import sys
     ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
@@ -255,5 +256,5 @@ if __name__ == "__main__":
     cfg.merge(LArPedestalAutoCorrCfg(ConfigFlags))
 
     log.info("Start running...")
+    sys.exit(cfg.run().isFailure())
 
-    cfg.run()
