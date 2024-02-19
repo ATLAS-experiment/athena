@@ -11,6 +11,14 @@
 #include "xAODInDetMeasurement/versions/PixelClusterContainer_v1.h"
 #include "xAODInDetMeasurement/versions/PixelClusterAuxContainer_v1.h"
 
+#include "xAODInDetMeasurement/HGTDCluster.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
+#include "xAODInDetMeasurement/versions/HGTDCluster_v1.h"
+#include "xAODInDetMeasurement/versions/HGTDClusterContainer_v1.h"
+#include "xAODInDetMeasurement/versions/HGTDClusterAuxContainer_v1.h"
+
+
 #include "xAODInDetMeasurement/StripCluster.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/versions/StripCluster_v1.h"
@@ -32,6 +40,7 @@ namespace {
   struct GCCXML_DUMMY_INSTANTIATION_XAODINDETMEASUREMENT {
         // Type(s) needed for the dictionary generation to succeed.
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, PixelClusterContainer_v1 );
+        XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, HGTDClusterContainer_v1 );
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, StripClusterContainer_v1 );
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, SpacePointContainer_v1 );
         xAOD::ArrayFloat3 array_type1;
