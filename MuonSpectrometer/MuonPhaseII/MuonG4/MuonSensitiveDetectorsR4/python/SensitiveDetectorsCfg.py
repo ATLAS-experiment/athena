@@ -70,6 +70,8 @@ def sTgcSensitiveDetectorToolCfg(flags, name = "sTgcSensitiveDetector", **kwargs
 
 def SetupSensitiveDetectorsCfg(flags):
     result = ComponentAccumulator()
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
     tools = []
 
     if flags.Detector.EnableMDT:
