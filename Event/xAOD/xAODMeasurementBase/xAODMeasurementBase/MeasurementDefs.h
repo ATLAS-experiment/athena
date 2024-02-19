@@ -32,6 +32,7 @@ enum class UncalibMeasType {
     TgcStripType = 5,
     MMClusterType = 6,
     sTgcStripType = 7,
+    HGTDClusterType = 8,
 };
 
 /// @ detector ID element hash
