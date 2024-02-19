@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 # logger
@@ -15,7 +15,7 @@ def tag(ion):
 
 
 @AccumulatorCache
-def precisionPhotonMenuSequenceCfg(flags, name, ion=False, is_probe_leg=False):
+def precisionPhotonSequenceCfg(flags, ion=False, is_probe_leg=False):
     """ This function creates the PrecisionPhoton sequence"""
     # Prepare first the EventView
     InViewRoIs="PrecisionPhotonRoIs"                                          
@@ -39,15 +39,6 @@ def precisionPhotonMenuSequenceCfg(flags, name, ion=False, is_probe_leg=False):
 
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonHypoTool import TrigEgammaPrecisionPhotonHypoAlgCfg, TrigEgammaPrecisionPhotonHypoToolFromDict
 
-    selAcc.mergeHypo(TrigEgammaPrecisionPhotonHypoAlgCfg(flags, name+ tag(ion) +"Hypo"+probeInfo, sequenceOut))
+    selAcc.mergeHypo(TrigEgammaPrecisionPhotonHypoAlgCfg(flags, "Photon"+tag(ion)+"Hypo"+probeInfo, sequenceOut))
 
     return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionPhotonHypoToolFromDict, isProbe=is_probe_leg)
-
-
-def precisionPhotonMenuSequence(flags, name, is_probe_leg=False, ion=False):
-    """ Creates precisionCalo MENU sequence """
-
-    if isComponentAccumulatorCfg():
-        return precisionPhotonMenuSequenceCfg(flags,name, ion = ion, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(precisionPhotonMenuSequenceCfg, flags,name, ion=ion, is_probe_leg=is_probe_leg)

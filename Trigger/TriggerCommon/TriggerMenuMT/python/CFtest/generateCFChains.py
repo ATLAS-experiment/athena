@@ -19,9 +19,12 @@ def generateCFChains(flags):
     # egamma chains
     ##################################################################
     if 'Egamma' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Electron.ElectronChainConfiguration import electronFastCaloCfg, fastElectronSequenceCfg, precisionCaloSequenceCfg
-        fastCaloSeq = electronFastCaloCfg ( flags )
-        electronSeq = fastElectronSequenceCfg (flags )
+        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
+        from TriggerMenuMT.HLT.Electron.FastElectronMenuSequences import fastElectronSequenceCfg
+        from TriggerMenuMT.HLT.Electron.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
+
+        fastCaloSeq = fastCaloMenuSequenceCfg( flags, name='Electron' )
+        electronSeq = fastElectronSequenceCfg( flags )
         precisionCaloSeq = precisionCaloSequenceCfg( flags )
         
         FastCaloStep      = makeChainStep("ElectronFastCaloStep", [fastCaloSeq])
@@ -36,12 +39,12 @@ def generateCFChains(flags):
             ]
         menu.chainsInMenu['Egamma'] += electronChains
 
-        from TriggerMenuMT.HLT.Photon.PhotonChainConfiguration import fastPhotonCaloSequenceCfg, fastPhotonSequenceCfg
-        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
+        from TriggerMenuMT.HLT.Photon.FastPhotonMenuSequences import fastPhotonSequenceCfg
+        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
 
-        fastCaloSeq            = fastPhotonCaloSequenceCfg( flags )
+        fastCaloSeq            = fastCaloMenuSequenceCfg( flags, name='Photon' )
         fastPhotonSeq          = fastPhotonSequenceCfg( flags )
-        precisionCaloPhotonSeq = precisionCaloMenuSequence( flags, name='Photon')
+        precisionCaloPhotonSeq = precisionCaloSequenceCfg( flags )
         
         FastCaloStep            = makeChainStep("PhotonFastCaloStep", [fastCaloSeq])
         fastPhotonStep          = makeChainStep("PhotonStep2", [fastPhotonSeq])
@@ -235,8 +238,8 @@ def generateCFChains(flags):
     ##################################################################
     doCombinedSlice = True
     if doCombinedSlice:
-        from TriggerMenuMT.HLT.Electron.ElectronChainConfiguration import electronFastCaloCfg
-        fastCaloSeq = electronFastCaloCfg ( flags )
+        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
+        fastCaloSeq = fastCaloMenuSequenceCfg(flags, name='Electron')
         
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence
         muFast = muFastSequence(flags)

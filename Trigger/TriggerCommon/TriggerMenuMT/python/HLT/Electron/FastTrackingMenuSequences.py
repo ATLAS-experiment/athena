@@ -1,11 +1,11 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 @AccumulatorCache
@@ -49,25 +49,6 @@ def fastTrackingSequenceCfg(flags, variant='', is_probe_leg = False):
     return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
 
-def fastTrackingSequenceCfg_lrt(flags, is_probe_leg=False):
+def fastTrackingSequence_LRTCfg(flags, is_probe_leg=False):
     # This is to call fastElectronMenuSequence for the _LRT variant
     return fastTrackingSequenceCfg(flags, variant='_LRT', is_probe_leg=is_probe_leg)
-
-
-def fastTrackingMenuSequence(flags, is_probe_leg=False):
-    """Creates second step electron sequence"""
-
-    if isComponentAccumulatorCfg():
-        return fastTrackingSequenceCfg(flags, is_probe_leg=is_probe_leg)
-    else: 
-        return menuSequenceCAToGlobalWrapper(fastTrackingSequenceCfg, flags, is_probe_leg=is_probe_leg)
-
-
-def fastTrackingMenuSequence_LRT(flags, is_probe_leg=False):
-    """Creates secpond step photon sequence"""
-
-    if isComponentAccumulatorCfg():
-        return fastTrackingSequenceCfg_lrt(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(fastTrackingSequenceCfg_lrt, flags, is_probe_leg=is_probe_leg)
-

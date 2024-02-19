@@ -1,8 +1,8 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -42,16 +42,4 @@ def fastCaloMenuSequence_FWDCfg(flags,name,doRinger=True, is_probe_leg=False):
    selAcc.addHypoAlgo(theFastCaloHypo)
 
    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaForwardFastCaloHypoToolFromDict,isProbe=is_probe_leg)
-
-#
-# Create e/g fast calo menu sequence for central or forward region.
-#
-def fastCaloMenuSequence_FWD(flags, name, doRinger=True, is_probe_leg=False):
-     from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-     if isComponentAccumulatorCfg():
-       return fastCaloMenuSequence_FWDCfg(flags,name=name,doRinger=doRinger,is_probe_leg=is_probe_leg)
-     else : 
-       return menuSequenceCAToGlobalWrapper(fastCaloMenuSequence_FWDCfg,flags,name=name,doRinger=doRinger,is_probe_leg=is_probe_leg)
-       
-
 
