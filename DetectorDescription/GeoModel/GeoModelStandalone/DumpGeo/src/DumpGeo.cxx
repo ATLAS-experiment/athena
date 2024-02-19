@@ -17,7 +17,7 @@ DumpGeo::DumpGeo(const std::string& name, ISvcLocator* svcLocator):
   AthAlgorithm(name, svcLocator),
   m_toolSvc(0),m_geoExporter(0)
 {
-  declareProperty("NoGui",m_noGui=false);
+  // declareProperty("NoGui",m_noGui=false);
 
   ::setenv("LCGPATCH_COINMULTISELECT","1",1);
 }

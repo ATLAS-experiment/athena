@@ -135,6 +135,8 @@ void GeoExporter::init()
   else {
     VP1Msg::message("User's settings - DetDescrTag: " + user_detdescrtag);
     }
+  // -- get 'force' option
+  bool forceOverride = environment.value("DUMPGEOFORCEOVERRIDE");
   // -- get sub-systems settings
   bool user_noid = environment.value("DUMPGEO_NOID").toInt();
   bool user_nocalo = environment.value("DUMPGEO_NOCALO").toInt();
