@@ -3,8 +3,8 @@
 # art-input: user.keli:user.keli.mc23a_13TeV.801271.Py8EG_A14NNPDF23LO_flatpT_Zprime.merge.HITS.e8514_s4100_s4101_tid32652444_00
 # art-input-nfiles: 1
 # art-type: grid
-# art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: main/Athena
+# art-include: 24.0/Athena
 # art-include: 23.0/Athena
 # art-output: physval*.root
 # art-output: *.xml
