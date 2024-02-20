@@ -336,7 +336,8 @@ MetaData(xAOD::...  DEBUG Opening
 MetaData(xAOD::...  DEBUG    attributes# = 1
 MetaData(xAOD::...  DEBUG Branch container 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.'
 MetaData(xAOD::...  DEBUG Opened container MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMetaDataAux.) of type ROOT_Tree
-Stream1.FileMet...  DEBUG Could not get simulation parameters from input metadata store
+Stream1.FileMet...  DEBUG Could not get xAOD::FileMetaData::simFlavour from input metadata store
+Stream1.FileMet...  DEBUG Could not get xAOD::FileMetaData::isDataOverlay from input metadata store
 Stream1.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream1
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG added 1 to list of runNumbers
