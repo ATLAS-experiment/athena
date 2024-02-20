@@ -184,7 +184,10 @@ def ActsSiSpacePointsSeedMakerCfg(flags,
     seedTool_pixel = None
     if 'SeedToolPixel' not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool_pixel = acc.popToolsAndMerge(ActsITkPixelOrthogonalSeedingToolCfg(flags))
+            if flags.Tracking.doITkFastTracking:
+                seedTool_pixel = acc.popToolsAndMerge(ActsITkPixelOrthogonalSeedingToolCfg(flags))
+            else:
+                seedTool_pixel = acc.popToolsAndMerge(ActsITkFastPixelOrthogonalSeedingToolCfg(flags))
         else:
             if flags.Tracking.doITkFastTracking:
                 kwargs.setdefault("useFastTracking", True)
@@ -232,14 +235,17 @@ def ActsITkPixelSeedingCfg(flags,
     seedTool = None
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool = acc.popToolsAndMerge(ActsITkPixelOrthogonalSeedingToolCfg(flags))
+            if flags.Tracking.doITkFastTracking:
+                seedTool = acc.popToolsAndMerge(ActsITkPixelOrthogonalSeedingToolCfg(flags))
+            else:
+                seedTool = acc.popToolsAndMerge(ActsITkFastPixelOrthogonalSeedingToolCfg(flags))
         else:
             if flags.Tracking.doITkFastTracking:
-                kwargs.setdefault("useFastTracking", True)
                 seedTool = acc.popToolsAndMerge(ActsITkFastPixelSeedingToolCfg(flags))
             else:
                 seedTool = acc.popToolsAndMerge(ActsITkPixelSeedingToolCfg(flags))
 
+    kwargs.setdefault("useFastTracking", flags.Tracking.doITkFastTracking)
     kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
     kwargs.setdefault('SeedTool', seedTool)
@@ -302,7 +308,7 @@ def ActsMainSeedingCfg(flags) -> ComponentAccumulator:
     
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsITkPixelSeedingCfg(flags))
-    if flags.Detector.EnableITkStrip:
+    if flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking:
         acc.merge(ActsITkStripSeedingCfg(flags))
         
     # Analysis extensions
@@ -312,7 +318,7 @@ def ActsMainSeedingCfg(flags) -> ComponentAccumulator:
             acc.merge(ActsPixelSeedAnalysisAlgCfg(flags))
             acc.merge(ActsPixelEstimatedTrackParamsAnalysisAlgCfg(flags))
             
-        if flags.Detector.EnableITkStrip:
+        if flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking:
             from ActsConfig.ActsAnalysisConfig import ActsStripSeedAnalysisAlgCfg, ActsStripEstimatedTrackParamsAnalysisAlgCfg
             acc.merge(ActsStripSeedAnalysisAlgCfg(flags))
             acc.merge(ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags))

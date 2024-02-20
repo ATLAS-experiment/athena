@@ -83,7 +83,7 @@ def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
 
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsPixelSpacePointFormationCfg(flags))
-    if flags.Detector.EnableITkStrip:
+    if flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking:
         # Need to schedule this here in case the Athena space point formation is not schedule
         # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
         # This may be because the current strip space point formation algorithm is not using Acts
@@ -104,7 +104,7 @@ def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
         if flags.Detector.EnableITkPixel:
             from ActsConfig.ActsAnalysisConfig import ActsPixelSpacePointAnalysisAlgCfg
             acc.merge(ActsPixelSpacePointAnalysisAlgCfg(flags))
-        if flags.Detector.EnableITkStrip:
+        if flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking:
             from ActsConfig.ActsAnalysisConfig import ActsStripSpacePointAnalysisAlgCfg, ActsStripOverlapSpacePointAnalysisAlgCfg
             acc.merge(ActsStripSpacePointAnalysisAlgCfg(flags))
             acc.merge(ActsStripOverlapSpacePointAnalysisAlgCfg(flags))
