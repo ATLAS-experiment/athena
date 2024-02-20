@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from CoolConvUtilities.MagFieldUtils import getFieldForRun
+
 
 
 #So far no attempt to auto-config field for MC or online-running
@@ -15,7 +15,8 @@ from CoolConvUtilities.MagFieldUtils import getFieldForRun
 def _toroidFieldAutoCfg(prevFlags):
     if prevFlags.Input.isMC or prevFlags.Common.isOnline:
         return True
-
+    
+    from CoolConvUtilities.MagFieldUtils import getFieldForRun
     lbs=prevFlags.Input.LumiBlockNumbers
     fieldStat=getFieldForRun(run=prevFlags.Input.RunNumbers[0],lumiblock=0 if len(lbs)==0 else lbs[0],quiet=True)
     return (fieldStat.toroidCurrent()>1)
@@ -24,6 +25,7 @@ def _solenoidFieldAutoCfg(prevFlags):
     if prevFlags.Input.isMC or prevFlags.Common.isOnline:
         return True
 
+    from CoolConvUtilities.MagFieldUtils import getFieldForRun
     lbs=prevFlags.Input.LumiBlockNumbers
     fieldStat=getFieldForRun(run=prevFlags.Input.RunNumbers[0],lumiblock=0 if len(lbs)==0 else lbs[0],quiet=True)
     return (fieldStat.solenoidCurrent()>1)
