@@ -29,21 +29,17 @@
 
 
 
-# not yet - need to establish how to postinclude in the RAWtoALL
-# useCA_Reco = True      
+useCA_Reco = True      
 
 Slices  = ['cosmic']
 Events  = 4000
 Threads = 8 
 Slots   = 8
 Release = "current"
-preexec_reco = [
-  "from InDetRecExample.InDetJobProperties import InDetFlags",
-  "InDetFlags.doCosmics.set_Value_and_Lock(True)",
-  "InDetFlags.doTRTStandalone.set_Value_and_Lock(False)",
-  "InDetFlags.doR3LargeD0.set_Value_and_Lock(False)",
-  "InDetFlags.doForwardTracks.set_Value_and_Lock(False)",
-]
+preexec_reco = ["from AthenaConfiguration.Enums import BeamType", "flags.Beam.Type=BeamType.Cosmics",
+                "flags.Tracking.doTRTStandalone=False",
+                "flags.Tracking.doForwardTracks=False",
+                "flags.Tracking.doLargeD0=False"]
 Input   = 'data_cos'    # defined in TrigValTools/share/TrigValInputs.json
 # don't use grid files, as ART submission doesn't allow multiple LBs to be processed in 1 job (ATR-26472)
 # once this is fixed, we can use the 3 files from group.trig-hlt.data23_cos.00448208.physics_CosmicMuons.merge.RAW
