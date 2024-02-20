@@ -26,14 +26,13 @@ do
   echo job=$ijob, skip=$skip, outputHITS=$outfile_job, rundir=$rundir
   mkdir -p $rundir
   cd $rundir
-  nohup Sim_tf.py --simulator 'FullG4' \
+  nohup Sim_tf.py --simulator 'FullG4MT' \
+  --CA \
   --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
   --physicsList "$physlist" \
   --truthStrategy 'MC15aPlus' \
-  --postExec 'EVNTtoHITS:topSequence.BeamEffectsAlg.GenEventManipulators = [getPublicTool("GenEventValidityChecker")]' \
-  --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-  --preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.CalHits.py,SimulationJobOptions/preInclude.ParticleID.py' \
-  --preExec 'EVNTtoHITS:simFlags.TightMuonStepping=True; simFlags.VertexFromCondDB.set_Off()' \
+  --postInclude 'default:PyJobTransforms.UseFrontier' \
+  --preExec 'from SimulationConfig.SimEnums import VertexSource;flags.Sim.VertexSource=VertexSource.AsGenerated;from SimuJobTransforms.SimulationHelpers import enableBeamPipeKill;enableBeamPipeKill(flags);from SimuJobTransforms.SimulationHelpers import enableCalHits;enableCalHits(flags);from SimuJobTransforms.SimulationHelpers import enableParticleID;enableParticleID(flags);from SimuJobTransforms.SimulationHelpers import enableTightMuonStepping;enableTightMuonStepping;enableTightMuonStepping(flags)' \
   --DataRunNumber '284500' \
   --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
   --inputEVNTFile "$inputEVNT" \

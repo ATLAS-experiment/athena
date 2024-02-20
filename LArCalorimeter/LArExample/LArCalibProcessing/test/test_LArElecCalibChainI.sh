@@ -3,6 +3,7 @@
 # art-description: Testing LAr ElecCalib Chain I
 # art-type: build
 # art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-include: main/Athena
  
 athena --CA LArCalibProcessing/LArCalib_PedestalAutoCorrConfig.py 
