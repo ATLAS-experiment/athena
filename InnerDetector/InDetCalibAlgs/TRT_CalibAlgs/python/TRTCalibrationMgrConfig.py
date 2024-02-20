@@ -32,34 +32,7 @@ def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
         
     return acc
 
-# Tool to select tracks to be used for calibration
-def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool",**kwargs):
-    # FIXME - This function should go to the correct Athena pkg...
-    
-    from AthenaCommon.SystemOfUnits import GeV, mm
-    
-    acc = ComponentAccumulator()      
-    kwargs.setdefault("pTMin", 1.0*GeV)     
-    kwargs.setdefault("fitChi2OnNdfMax",50.0)
-    kwargs.setdefault("z0Max",99999.0*mm)   
-    kwargs.setdefault("IPd0Max",10.0*mm)    
-    kwargs.setdefault("IPd0Max",300.0*mm)   
-    kwargs.setdefault("etaMax",2.1)
-    kwargs.setdefault("nHitBLayer",0)
-    kwargs.setdefault("nHitPix",2)
-    kwargs.setdefault("nHitBLayerPlusPix",0)
-    kwargs.setdefault("nHitSct",0)
-    kwargs.setdefault("nHitSi",7)
-    kwargs.setdefault("nHitTrtPlusOutliers",20)
-    kwargs.setdefault("nHitTrtPlusOutliersHighE",20)
-    kwargs.setdefault("nHitTrtHighE",0)
-    
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
-    
-    from InDetConfig.InDetTrackSelectorToolConfig import InDetTrackSelectorToolCfg
-    acc.setPrivateTools(acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, name=name , **kwargs)))
-    return acc
+
     
 # Steering algorithm. Either it fills track and hit ntuples, or it calls TRTCalibrator
 def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kwargs) :
@@ -77,6 +50,7 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
     kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(ActsFitterCfg(flags)))
     
+    from InDetConfig.InDetTrackSelectorToolConfig import InDetDetailedTrackSelectorToolCfg
     kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(InDetDetailedTrackSelectorToolCfg(flags)))
     
     # FIXME! Let all straws participate in trackfinding as default - SERGI This is wrong and needs to be UPDATED @peter    
@@ -95,7 +69,8 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     acc.addEventAlgo(CompFactory.TRTCalibrationMgr(name, **kwargs))
 
     return acc
-                          
+        
+# FIXME - where is this tool used? Needs some feedback                  
 def TRT_TrackHoleSearch(flags,name="TRT_TrackHoleSearch",**kwargs):
                         
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg                          
