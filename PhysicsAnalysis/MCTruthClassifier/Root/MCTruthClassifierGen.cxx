@@ -1889,17 +1889,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
 }
 
 //---------------------------------------------------------------------------------
-float MCTruthClassifier::detPhi(float x, float y) {
-  //---------------------------------------------------------------------------------
-  float det;
-  det = x - y;
-  if (det > M_PI)
-    det = det - 2. * M_PI;
-  if (det < -M_PI)
-    det = det + 2. * M_PI;
-  return std::abs(det);
-}
-//---------------------------------------------------------------------------------
 ParticleOrigin
 MCTruthClassifier::convHadronTypeToOrig(ParticleType pType, int motherPDG)
 {
