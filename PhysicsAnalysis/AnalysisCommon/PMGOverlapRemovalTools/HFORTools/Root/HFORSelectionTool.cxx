@@ -24,7 +24,6 @@
  *
  */
 #include <string>
-#include "boost/current_function.hpp"
 
 #include "PathResolver/PathResolver.h"
 
@@ -58,12 +57,12 @@ HFORSelectionTool::HFORSelectionTool( const std::string& name )
 StatusCode HFORSelectionTool::initialize() {
 
   // Greet the user:
-  ATH_MSG_INFO( BOOST_CURRENT_FUNCTION << ": Starting tool initialization ..." );
-  ATH_MSG_INFO( BOOST_CURRENT_FUNCTION << ": Using matching cone deltaR = " << m_matchCone );
+  ATH_MSG_INFO( __PRETTY_FUNCTION__ << ": Starting tool initialization ..." );
+  ATH_MSG_INFO( __PRETTY_FUNCTION__ << ": Using matching cone deltaR = " << m_matchCone );
   ATH_MSG_INFO(" ") ;
-  ATH_MSG_INFO( BOOST_CURRENT_FUNCTION << " ************************************ " );
-  ATH_MSG_INFO( BOOST_CURRENT_FUNCTION << " ** THIS TOOL IS UNDER DEVELOPMENT ** " );
-  ATH_MSG_INFO( BOOST_CURRENT_FUNCTION << " ************************************ " );
+  ATH_MSG_INFO( __PRETTY_FUNCTION__ << " ************************************ " );
+  ATH_MSG_INFO( __PRETTY_FUNCTION__ << " ** THIS TOOL IS UNDER DEVELOPMENT ** " );
+  ATH_MSG_INFO( __PRETTY_FUNCTION__ << " ************************************ " );
   ATH_MSG_INFO(" ") ;
 
   //Initialize the Overlap Removal engine
@@ -71,12 +70,12 @@ StatusCode HFORSelectionTool::initialize() {
 
   if(m_HFORStrategy == "DRBased"){
     m_hforTruth.setAngularBasedHFOR();
-    ATH_MSG_INFO( BOOST_CURRENT_FUNCTION << " ** Angular-Based HFOR ** " );
+    ATH_MSG_INFO( __PRETTY_FUNCTION__ << " ** Angular-Based HFOR ** " );
   } else if(m_HFORStrategy == "JetBased"){
     m_hforTruth.setJetBasedHFOR();
-    ATH_MSG_INFO( BOOST_CURRENT_FUNCTION << " ** Jet-Based HFOR ** " );
+    ATH_MSG_INFO( __PRETTY_FUNCTION__ << " ** Jet-Based HFOR ** " );
   } else {
-    ATH_MSG_ERROR( BOOST_CURRENT_FUNCTION << " ** HFORStrategy is not known! ** " );
+    ATH_MSG_ERROR( __PRETTY_FUNCTION__ << " ** HFORStrategy is not known! ** " );
     return StatusCode::FAILURE;
   }
 
@@ -84,7 +83,7 @@ StatusCode HFORSelectionTool::initialize() {
   std::string filename = PathResolverFindCalibFile(m_runConfigFile);
   m_hforTruth.readRunConfig(filename) ;
 
-  ATH_MSG_INFO( BOOST_CURRENT_FUNCTION << ": Initialization done.");
+  ATH_MSG_INFO( __PRETTY_FUNCTION__ << ": Initialization done.");
   m_isConfigured = false ;
 
   return StatusCode::SUCCESS ;
@@ -97,7 +96,7 @@ StatusCode HFORSelectionTool::initialize() {
 //==============================================================================
 StatusCode HFORSelectionTool::beginInputFile() {
 
-  //ATH_MSG_DEBUG( BOOST_CURRENT_FUNCTION << " File change detected, will check the sample type " ) ;
+  //ATH_MSG_DEBUG( __PRETTY_FUNCTION__ << " File change detected, will check the sample type " ) ;
   //ATH_CHECK( setSampleType() ) ;
   m_isConfigured = false ;
 
@@ -112,15 +111,15 @@ StatusCode HFORSelectionTool::beginInputFile() {
 //==============================================================================
 StatusCode HFORSelectionTool::endInputFile() {
 
-  ATH_MSG_DEBUG( BOOST_CURRENT_FUNCTION << " End Of File detected ");
+  ATH_MSG_DEBUG( __PRETTY_FUNCTION__ << " End Of File detected ");
   m_isConfigured = false ;
 
   if (m_evtCounterAll != 0) {
     ATH_MSG_DEBUG(" ") ;
     ATH_MSG_DEBUG("****************************************************************************") ;
-    ATH_MSG_DEBUG(BOOST_CURRENT_FUNCTION << ": Sample type   : "  << m_sampleName ) ;
-    ATH_MSG_DEBUG(BOOST_CURRENT_FUNCTION << ": Total  Events : " << m_evtCounterAll );
-    ATH_MSG_DEBUG(BOOST_CURRENT_FUNCTION << ": Killed Events : " << m_evtCounterKilled <<
+    ATH_MSG_DEBUG(__PRETTY_FUNCTION__ << ": Sample type   : "  << m_sampleName ) ;
+    ATH_MSG_DEBUG(__PRETTY_FUNCTION__ << ": Total  Events : " << m_evtCounterAll );
+    ATH_MSG_DEBUG(__PRETTY_FUNCTION__ << ": Killed Events : " << m_evtCounterKilled <<
                   " (" << 100*float(m_evtCounterKilled)/float(m_evtCounterAll)  << "%)");
     ATH_MSG_DEBUG("****************************************************************************") ;
     ATH_MSG_DEBUG(" ") ;
@@ -162,7 +161,7 @@ bool HFORSelectionTool::isSelected()  {
   ATH_CHECK( evtStore()->retrieve(eventInfo, "EventInfo"), false );
   const bool isSim = eventInfo->eventType(xAOD::EventInfo::EventType::IS_SIMULATION);
   if ( !isSim ) {
-    ATH_MSG_DEBUG (BOOST_CURRENT_FUNCTION << "It is a data event... nothing to be done...");
+    ATH_MSG_DEBUG (__PRETTY_FUNCTION__ << "It is a data event... nothing to be done...");
     return selected;
   }
 
@@ -186,7 +185,7 @@ bool HFORSelectionTool::isSelected()  {
   m_decisionType  =  m_hforTruth.findOverlap(*truthEvent, jets) ;
 
 
-  ATH_MSG_DEBUG( BOOST_CURRENT_FUNCTION << " Event Type " << (unsigned int) m_decisionType) ;
+  ATH_MSG_DEBUG( __PRETTY_FUNCTION__ << " Event Type " << (unsigned int) m_decisionType) ;
 
   selected = m_decisionType != HFORType::kill ;
 
@@ -226,7 +225,7 @@ StatusCode HFORSelectionTool::setSampleType()  {
   // Only run this function on Monte Carlo
   const bool isSim = eventInfo->eventType(xAOD::EventInfo::EventType::IS_SIMULATION);
   if ( !isSim ) {
-    ATH_MSG_DEBUG (BOOST_CURRENT_FUNCTION << "It is a data event... nothing to be done...");
+    ATH_MSG_DEBUG (__PRETTY_FUNCTION__ << "It is a data event... nothing to be done...");
     return StatusCode::SUCCESS;
   }
 
@@ -235,7 +234,7 @@ StatusCode HFORSelectionTool::setSampleType()  {
   //while  mcChannelNumber is 0 in Truth derivations
   m_sampleRunNumber = eventInfo->mcChannelNumber() ;
   if (m_sampleRunNumber == 0 ) {
-    ATH_MSG_WARNING(BOOST_CURRENT_FUNCTION << "mcChannelNumber is 0, falling back to runNumber" ) ;
+    ATH_MSG_WARNING(__PRETTY_FUNCTION__ << "mcChannelNumber is 0, falling back to runNumber" ) ;
     m_sampleRunNumber = eventInfo->runNumber() ;
   }
 
@@ -246,14 +245,14 @@ StatusCode HFORSelectionTool::setSampleType()  {
   m_sampleName = m_hforTruth.getSampleName() ;
 
   if (m_sampleType == HFORType::noType) {
-    ATH_MSG_WARNING(BOOST_CURRENT_FUNCTION <<
+    ATH_MSG_WARNING(__PRETTY_FUNCTION__ <<
                     ": This MC (Run " << m_sampleRunNumber <<
                     " ) is not an mc15 Alpgen+Pythia6 sample - this tool is useless ") ;
   }
   else {
-    ATH_MSG_INFO(BOOST_CURRENT_FUNCTION <<
+    ATH_MSG_INFO(__PRETTY_FUNCTION__ <<
                  ": Good ! This is a valid Alpgen+Pythia6 sample ( " << m_sampleName << " )" ) ;
-    ATH_MSG_INFO(BOOST_CURRENT_FUNCTION << ": MC Channel Number = " << eventInfo->mcChannelNumber()
+    ATH_MSG_INFO(__PRETTY_FUNCTION__ << ": MC Channel Number = " << eventInfo->mcChannelNumber()
                  << " ,  MC Run Number = "  << eventInfo->runNumber() );
   }
 

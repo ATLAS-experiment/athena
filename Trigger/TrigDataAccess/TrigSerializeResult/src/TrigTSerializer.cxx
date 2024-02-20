@@ -640,12 +640,11 @@ void TrigTSerializer::setCLID(const uint32_t *guid){
 }
 
 
-#include <boost/current_function.hpp>
 using namespace std;
 
 void TrigTSerializerUnimplError() {
    cerr << endl
-        << "ERROR!  method TrigTSerializer::" << BOOST_CURRENT_FUNCTION
+        << "ERROR!  method TrigTSerializer::" << __PRETTY_FUNCTION__
         << " was removed during migration to ROOT6" << endl;
    abort();
 }
