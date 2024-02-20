@@ -22,6 +22,7 @@ def IOVDbSvcCfg(flags, **kwargs):
 
     kwargs.setdefault('OnlineMode', flags.Common.isOnline)
     kwargs.setdefault('dbConnection', flags.IOVDb.DBConnection)
+    kwargs.setdefault('crestServer', flags.IOVDb.CrestServer)
     # setup knowledge of dbinstance in IOVDbSvc, for global tag x-check
     kwargs.setdefault('DBInstance', flags.IOVDb.DatabaseInstance)
 
