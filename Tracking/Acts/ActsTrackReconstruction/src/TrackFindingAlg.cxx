@@ -72,7 +72,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_etaBins);
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
-    ATH_MSG_DEBUG("   " << m_maxHoles);
+    ATH_MSG_DEBUG("   " << m_maxHolesBranch);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
     ATH_MSG_DEBUG("   " << m_etaMin);
@@ -82,7 +82,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_ptMin);
     ATH_MSG_DEBUG("   " << m_ptMax);
     ATH_MSG_DEBUG("   " << m_minMeasurements);
-    ATH_MSG_DEBUG("   " << m_maxHolesSelect);
+    ATH_MSG_DEBUG("   " << m_maxHoles);
     ATH_MSG_DEBUG("   " << m_maxOutliers);
     ATH_MSG_DEBUG("   " << m_maxSharedHits);
     ATH_MSG_DEBUG("   " << m_maxChi2);
@@ -187,7 +187,7 @@ namespace ActsTrk
       setCut(cfg.ptMin, m_ptMin, cutIndex);
       setCut(cfg.ptMax, m_ptMax, cutIndex);
       setCut(cfg.minMeasurements, m_minMeasurements, cutIndex);
-      setCut(cfg.maxHoles, m_maxHolesSelect, cutIndex);
+      setCut(cfg.maxHoles, m_maxHoles, cutIndex);
       setCut(cfg.maxOutliers, m_maxOutliers, cutIndex);
       setCut(cfg.maxSharedHits, m_maxSharedHits, cutIndex);
       setCut(cfg.maxChi2, m_maxChi2, cutIndex);
@@ -393,7 +393,7 @@ namespace ActsTrk
   // === findTracks ==========================================================
 
   template <typename cut_value_t>
-  static cut_value_t variableCut(double eta,
+  static cut_value_t variableCut(double absEta,
                                  const std::vector<double> &etaBins,
                                  const std::vector<cut_value_t> &cuts,
                                  cut_value_t nocut)
@@ -403,11 +403,10 @@ namespace ActsTrk
     if (etaBins.size() < 2)
       return cuts[0];
     std::size_t nbins = etaBins.size() - 2;
-    const auto abseta = std::abs(eta);
-    size_t bin;
+    std::size_t bin;
     for (bin = 0; bin < nbins; bin++)
     {
-      if (!(etaBins[bin + 1] < abseta))
+      if (!(etaBins[bin + 1] < absEta))
         break;
     }
     if (!(bin < cuts.size()))
@@ -417,27 +416,28 @@ namespace ActsTrk
 
   struct TrackFindingAlg::CkfBranchStopper
   {
-    bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState, 
-        ActsTrk::MutableMultiTrajectory::TrackStateProxy& /*trackState*/) const
+    bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState,
+                    ActsTrk::MutableMultiTrajectory::TrackStateProxy &trackState) const
     {
-      if (!(tipState.nHoles > variableCut<std::size_t>(eta, alg->m_etaBins, alg->m_maxHoles, std::numeric_limits<std::size_t>::max())))
+      const auto &parameters = trackState.hasFiltered() ? trackState.filtered() : trackState.predicted();
+      double absEta = std::abs(std::log(std::tan(parameters[Acts::eBoundTheta] / 2)));
+      if (!(tipState.nHoles > variableCut<std::size_t>(absEta, alg.m_etaBins, alg.m_maxHolesBranch, std::numeric_limits<std::size_t>::max()) &&
+            (trackState.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag) ||
+             tipState.nMeasurements < variableCut<std::size_t>(absEta, alg.m_etaBins, alg.m_minMeasurements, 0u))))
         return false;
       ++event_stat[category_i][kNStoppedTracksMaxHoles];
-      ATH_MSG_INFO("CkfBranchStopper (seed eta " << eta << ") stopped branch with nSensitiveSurfaces="
-                    << tipState.nSensitiveSurfaces
-                    << " nStates=" << tipState.nStates
+      ATH_MSG_DEBUG("CkfBranchStopper: stopped branch with nHoles=" << tipState.nHoles
                     << " nMeasurements=" << tipState.nMeasurements
-                    << " nOutliers=" << tipState.nOutliers
-                    << " nHoles=" << tipState.nHoles);
+                    << " " << const_cast<const ActsTrk::MutableMultiTrajectory::TrackStateProxy &>(trackState).typeFlags());
       return true;
     };
-    MsgStream &msg(const MSG::Level lvl) const { return alg->msgStream(lvl); }
-    bool msgLvl(const MSG::Level lvl) const { return alg->msgLevel(lvl); }
+    // Allow AthMsgStreamMacros.h macros using TrackFindingAlg's msgStream.
+    MsgStream &msg(const MSG::Level lvl) const { return alg.msgStream(lvl); }
+    bool msgLvl(const MSG::Level lvl) const { return alg.msgLevel(lvl); }
 
-    const TrackFindingAlg *alg;
-    // keep references to stats variables so we can update them.
-    const double &eta;
+    const TrackFindingAlg &alg;
     const std::size_t &category_i;
+    // keep references to stats variables so we can update them.
     EventStats &event_stat ATLAS_THREAD_SAFE;
   };
 
@@ -490,9 +490,8 @@ namespace ActsTrk
     UncalibratedMeasurementCalibrator calibrator(*m_ATLASConverterTool, tracking_surface_helper);
     options.extensions.calibrator.connect<&UncalibratedMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
 
-    double eta = 0.0;
     std::size_t category_i = 0;
-    CkfBranchStopper ckfBranchStopper{this, eta, category_i, event_stat};
+    CkfBranchStopper ckfBranchStopper{*this, category_i, event_stat};
     options.extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
 
     // Perform the track finding for all initial parameters
@@ -513,7 +512,7 @@ namespace ActsTrk
 
       const Acts::BoundTrackParameters &initialParameters = *estimatedTrackParameters[iseed];
 
-      eta = -std::log(std::tan(initialParameters.theta() / 2));
+      double eta = -std::log(std::tan(initialParameters.theta() / 2));
       category_i = getStatCategory(typeIndex, eta);
       ++event_stat[category_i][kNTotalSeeds];
 

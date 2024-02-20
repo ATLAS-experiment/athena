@@ -51,7 +51,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
     actscf.addFlag('Acts.trackFindingChi2CutOff', 15.0)
-    actscf.addFlag('Acts.doTrackFindingTrackSelector', 1) # 0=no selection, 1=default track selection, 2=no eta-dependant cuts, 3=no holes/shared cuts
+    actscf.addFlag('Acts.doTrackFindingTrackSelector', 1) # 0=no selection, 1=default track selection, 2=no eta-dependant cuts, 3=no holes/shared cuts, 4=no branch stopper
     actscf.addFlag('Acts.trackFindingMaxHoles', []) # add eta-dependent cut for branch stopper
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)

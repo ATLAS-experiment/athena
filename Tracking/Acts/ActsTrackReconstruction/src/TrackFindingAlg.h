@@ -96,7 +96,7 @@ namespace ActsTrk
     // Acts::MeasurementSelector selection cuts for associating measurements with predicted track parameters on a surface.
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
-    Gaudi::Property<std::vector<std::size_t>> m_maxHoles{this, "maxHoles", {}, "Maximum number of holes before stopping branch"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxHolesBranch{this, "maxHolesBranch", {}, "Maximum number of holes before stopping branch"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
@@ -109,7 +109,7 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_ptMin{this, "ptMin", {}, "TrackSelector: ptMin"};
     Gaudi::Property<std::vector<double>> m_ptMax{this, "ptMax", {}, "TrackSelector: ptMax"};
     Gaudi::Property<std::vector<std::size_t>> m_minMeasurements{this, "minMeasurements", {}, "TrackSelector: minMeasurements"};
-    Gaudi::Property<std::vector<std::size_t>> m_maxHolesSelect{this, "maxHolesSelect", {}, "TrackSelector: maxHoles"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxHoles{this, "maxHoles", {}, "TrackSelector: maxHoles"};
     Gaudi::Property<std::vector<std::size_t>> m_maxOutliers{this, "maxOutliers", {}, "TrackSelector: maxOutliers"};
     Gaudi::Property<std::vector<std::size_t>> m_maxSharedHits{this, "maxSharedHits", {}, "TrackSelector: maxSharedHits"};
     Gaudi::Property<std::vector<double>> m_maxChi2{this, "maxChi2", {}, "TrackSelector: maxChi2"};
