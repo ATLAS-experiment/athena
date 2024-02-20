@@ -323,7 +323,7 @@ def PHYSLITECfg(flags):
                                                InputTaus = "AnalysisTauJets"))
         acc.merge(TriggerMatchingCommonRun2Cfg(flags, 
                                                name = "PHYSLITETrigMatchTau", 
-                                               OutputContainerPrefix = "AnlaysisTrigMatch_", 
+                                               OutputContainerPrefix = "AnalysisTrigMatch_", 
                                                ChainNames = PHYSLITETriggerListsHelper.Run2TriggerNamesTau, 
                                                DRThreshold = 0.2,
                                                InputElectrons = "AnalysisElectrons",
