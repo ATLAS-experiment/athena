@@ -5,6 +5,8 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 def createHGTD_ConfigFlags():
   hgtdcf = AthConfigFlags()
 
+  hgtdcf.addFlag('HGTD.doMonitoring', False)
+  
   hgtdcf.addFlag("HGTD.Geometry.useGeoModelXml", True)
   hgtdcf.addFlag("HGTD.Geometry.isLocal", False)
   hgtdcf.addFlag("HGTD.Geometry.Filename", "HGTD.gmx")

@@ -10,6 +10,7 @@
 
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "StoreGate/WriteHandle.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 namespace HGTD {
 
@@ -25,11 +26,15 @@ StatusCode PadClusterizationAlg::initialize() {
   ATH_CHECK(m_prd_wh_key.initialize());
 
   ATH_CHECK(detStore()->retrieve(m_hgtd_idhelper, "HGTD_ID"));
-
+  ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
+  
   return StatusCode::SUCCESS;
 }
 
 StatusCode PadClusterizationAlg::execute(const EventContext& ctx) const {
+  auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+  auto mon = Monitored::Group( m_monTool, timer );
+
   // retrieve the RDOs
   SG::ReadHandle<HGTD_RDO_Container> rdo_container_handle(m_rdo_rh_key, ctx);
 

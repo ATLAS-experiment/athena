@@ -29,5 +29,12 @@ def PadClusterizationCfg(flags, name = "PadClusterizationAlg", **kwargs):
     kwargs.setdefault("ClusterizationTool", acc.popToolsAndMerge(SinglePadClusterToolCfg(flags)))
     kwargs.setdefault("RDOContainerName", "HGTD_RDOs")
     kwargs.setdefault("PRDContainerName", "HGTD_Clusters")
+
+    # Monitor Execution Time
+    if flags.HGTD.doMonitoring and 'MonTool' not in kwargs:
+        # Monitoring lives in ACTS since this is (will be) the same used for the ACTS clusterisation algorithm
+        from ActsConfig.ActsMonitoringConfig import ActsHgtdClusterizationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHgtdClusterizationMonitoringToolCfg(flags)))
+        
     acc.addEventAlgo(CompFactory.HGTD.PadClusterizationAlg(name, **kwargs))
     return acc
