@@ -13,9 +13,9 @@ parser = flags.getArgumentParser()
 parser.add_argument('--LRT', default=False, help='Turn on LRT flag')
 parser.add_argument('--doTIDATier0', default=False, help='Turn on Tier-0 Analysis')
 parser.add_argument('--doNewTIDATier0', default=False, help='Turn on Tier-0 Analysis')
-parser.add_argument('--parentpdgid', default=0, help='Set parentpdgid in TIDA')
-parser.add_argument('--pdgid', default=0, help='Set pdgid in TIDA')
-parser.add_argument('--ptmin', default=1000, help='Set parentpdgid in TIDA')
+parser.add_argument('--parentpdgid', type=int, default=0, help='Set parentpdgid in TIDA')
+parser.add_argument('--pdgid', type=int, default=0, help='Set pdgid in TIDA')
+parser.add_argument('--ptmin', type=float, default=1000, help='Set min pT for tracks in TIDA')
 
 
 args, _ = parser.parse_known_args()
