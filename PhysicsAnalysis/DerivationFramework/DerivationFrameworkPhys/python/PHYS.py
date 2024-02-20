@@ -55,36 +55,18 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
     return acc
 
 
-def PHYSCfg(ConfigFlags):
+def PHYSCoreCfg(ConfigFlags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerListsHelper=None, TauJets_EleRM_in_input=None):
     
-    logPHYS.info('****************** STARTING PHYS *****************')
-
-    stream_name = 'StreamDAOD_PHYS'
+    if TriggerListsHelper is None:
+        from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+        TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    
+    if TauJets_EleRM_in_input is None:
+        # for AOD produced before 24.0.17, the electron removal tau is not available
+        TauJets_EleRM_in_input = (ConfigFlags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
+    
     acc = ComponentAccumulator()
 
-    # Get the lists of triggers needed for trigger matching.
-    # This is needed at this scope (for the slimming) and further down in the config chain
-    # for actually configuring the matching, so we create it here and pass it down
-    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
-    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSTriggerListsHelper = TriggerListsHelper(ConfigFlags)
-
-    # for AOD produced before 24.0.17, the electron removal tau is not available
-    TauJets_EleRM_in_input = (ConfigFlags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
-    if TauJets_EleRM_in_input:
-        logPHYS.info("TauJets_EleRM is in the input AOD. Relevant containers will be scheduled")
-    else:
-        logPHYS.info("TauJets_EleRM is Not in the input AOD. No relevant containers will be written")
-
-    # Common augmentations
-    acc.merge(PHYSKernelCfg(
-        ConfigFlags, 
-        name="PHYSKernel", 
-        StreamName = stream_name, 
-        TriggerListsHelper = PHYSTriggerListsHelper, 
-        TauJets_EleRM_in_input=TauJets_EleRM_in_input
-    ))
-    
     ## Higgs augmentations - create 4l vertex
     from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
     acc.merge(HiggsAugmentationAlgsCfg(ConfigFlags))
@@ -92,7 +74,7 @@ def PHYSCfg(ConfigFlags):
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, suff = "_PHYS", isPhysLite = False, stream_name = stream_name))
+    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, suff = "_"+name_tag, isPhysLite = False, stream_name = StreamName))
 
 
     #===================================================
@@ -108,7 +90,7 @@ def PHYSCfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    PHYSSlimmingHelper = SlimmingHelper("PHYSSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    PHYSSlimmingHelper = SlimmingHelper(name_tag+"SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     PHYSSlimmingHelper.SmartCollections = ["EventInfo",
                                            "Electrons",
                                            "Photons",
@@ -199,10 +181,10 @@ def PHYSCfg(ConfigFlags):
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = PHYSTriggerListsHelper.Run2TriggerNamesTau)
+                                         TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper, 
                                          OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = PHYSTriggerListsHelper.Run2TriggerNamesNoTau)
+                                         TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3, or Run 2 with navigation conversion
     if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
@@ -222,8 +204,48 @@ def PHYSCfg(ConfigFlags):
 
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYS", ItemList=PHYSItemList, AcceptAlgs=["PHYSKernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_PHYS", AcceptAlgs=["PHYSKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_"+name_tag, ItemList=PHYSItemList, AcceptAlgs=[name_tag+"Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_"+name_tag, AcceptAlgs=[name_tag+"Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
+    return acc
+
+def PHYSCfg(ConfigFlags):
+    
+    logPHYS.info('****************** STARTING PHYS *****************')
+
+    stream_name = 'StreamDAOD_PHYS'
+    acc = ComponentAccumulator()
+
+    # Get the lists of triggers needed for trigger matching.
+    # This is needed at this scope (for the slimming) and further down in the config chain
+    # for actually configuring the matching, so we create it here and pass it down
+    # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
+    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+    PHYSTriggerListsHelper = TriggerListsHelper(ConfigFlags)
+
+    # for AOD produced before 24.0.17, the electron removal tau is not available
+    TauJets_EleRM_in_input = (ConfigFlags.Input.TypedCollections.count('xAOD::TauJetContainer#TauJets_EleRM') > 0)
+    if TauJets_EleRM_in_input:
+        logPHYS.info("TauJets_EleRM is in the input AOD. Relevant containers will be scheduled")
+    else:
+        logPHYS.info("TauJets_EleRM is Not in the input AOD. No relevant containers will be written")
+
+    # Common augmentations
+    acc.merge(PHYSKernelCfg(
+        ConfigFlags, 
+        name="PHYSKernel", 
+        StreamName = stream_name, 
+        TriggerListsHelper = PHYSTriggerListsHelper, 
+        TauJets_EleRM_in_input=TauJets_EleRM_in_input
+    ))
+    # PHYS content
+    acc.merge(PHYSCoreCfg(
+        ConfigFlags, 
+        "PHYS",
+        StreamName = stream_name, 
+        TriggerListsHelper = PHYSTriggerListsHelper, 
+        TauJets_EleRM_in_input=TauJets_EleRM_in_input
+        ))
+    
     return acc
 
