@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef StaveServices_H
-#define StaveServices_H
+#ifndef INDETSERVMATGEOMODEL_STAVESERVICES_H
+#define INDETSERVMATGEOMODEL_STAVESERVICES_H
 
-#include "InDetServMatGeoModel/DetType.h"
-
+#include "DetType.h"
 #include <vector>
 
 /** Class storing all the services of a stave (or a petal, etc...) 

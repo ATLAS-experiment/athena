@@ -2,11 +2,11 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/InDetServMatTool.h"
-#include "InDetServMatGeoModel/InDetServMatFactory_Lite.h"
-#include "InDetServMatGeoModel/InDetServMatFactory.h"
+#include "InDetServMatTool.h"
+#include "InDetServMatFactory_Lite.h"
+#include "InDetServMatFactory.h"
+#include "InDetServMatAthenaComps.h"
 #include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
-#include "InDetServMatGeoModel/InDetServMatAthenaComps.h"
 
 #include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -23,8 +23,6 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
 
-
-
 /**
  ** Constructor(s)
  **/
@@ -32,10 +30,7 @@ InDetServMatTool::InDetServMatTool( const std::string& type, const std::string& 
   : GeoModelTool( type, name, parent ),
     m_geoDbTagSvc("GeoDbTagSvc",name),
     m_geometryDBSvc("InDetGeometryDBSvc",name),
-    m_builderTool(""),
-    m_devVersion(false),
-    m_manager(nullptr),
-    m_athenaComps(nullptr)
+    m_builderTool("")
 {
   declareProperty("DevVersion",m_devVersion);
   declareProperty("OverrideVersionName", m_overrideVersionName);

@@ -1,19 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/InDetServMatFactory_Lite.h"
+#include "InDetServMatFactory_Lite.h"
 
 #include "GeoModelKernel/GeoVolumeCursor.h"  
 #include "GeoModelKernel/GeoPhysVol.h"  
 #include "GeoModelKernel/GeoDefinitions.h"  
-
-
-
-InDetServMatFactory_Lite::InDetServMatFactory_Lite()
-  :m_manager(nullptr)
-{}
-
 
 void InDetServMatFactory_Lite::create(GeoPhysVol *world)
 {

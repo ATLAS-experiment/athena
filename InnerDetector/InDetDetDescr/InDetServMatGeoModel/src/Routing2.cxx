@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/Routing2.h"
-
-#include "InDetServMatGeoModel/ServicesLayer.h"
-#include "InDetServMatGeoModel/InDetServMatGeometryManager.h"
-
+#include "Routing2.h"
+#include "ServicesLayer.h"
+#include "InDetServMatGeometryManager.h"
 #include <algorithm>
-
 #include <iostream>
 using namespace std;
 

@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ComputeStaveServices_H
-#define ComputeStaveServices_H
+#ifndef INDETSERVMATGEOMODEL_COMPUTESTAVESERVICES_H
+#define INDETSERVMATGEOMODEL_COMPUTESTAVESERVICES_H
 
+#include "StaveServices.h"
 #include "GaudiKernel/MsgStream.h"
-#include "InDetServMatGeoModel/StaveServices.h"
 
 class ComputeStaveServices {
 public:

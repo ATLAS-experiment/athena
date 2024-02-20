@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ServicesTracker_H
-#define ServicesTracker_H
+#ifndef INDETSERVMATGEOMODEL_SERVICESTRACKER_H
+#define INDETSERVMATGEOMODEL_SERVICESTRACKER_H
 
-//#include "InDetServMatGeoModel/ServicesLayer.h"
-#include "InDetServMatGeoModel/DetType.h"
-#include "InDetServMatGeoModel/ServiceMaterial.h"
+#include "DetType.h"
+#include "ServiceMaterial.h"
 #include "AthenaBaseComps/AthMessaging.h"
-
 #include <vector>
 #include <map>
 #include <string>
@@ -24,9 +22,6 @@ public:
   /// Construct an empty tracker, to be filled by Builder
   ServicesTracker();
   ~ServicesTracker();
-
-  // Construct somehow (for testing)
-  //ServicesTracker(bool toy);
 
   typedef std::vector<ServicesLayer*>  LayerContainer;
 

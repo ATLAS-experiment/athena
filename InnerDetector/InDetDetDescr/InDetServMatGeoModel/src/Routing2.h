@@ -1,15 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef Routing2_H
-#define Routing2_H
+#ifndef INDETSERVMATGEOMODEL_ROUTING2_H
+#define INDETSERVMATGEOMODEL_ROUTING2_H
 
-#include "InDetServMatGeoModel/ServicesTracker.h"
-#include "InDetServMatGeoModel/ServiceVolume.h"
-#include "InDetServMatGeoModel/VRoute.h"
-#include "InDetServMatGeoModel/HRoute.h"
-
+#include "ServicesTracker.h"
+#include "ServiceVolume.h"
+#include "VRoute.h"
+#include "HRoute.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include <vector>
 

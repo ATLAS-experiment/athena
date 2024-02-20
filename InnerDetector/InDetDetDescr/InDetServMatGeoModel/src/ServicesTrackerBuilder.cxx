@@ -1,16 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/ServicesTrackerBuilder.h"
-#include "InDetServMatGeoModel/ServicesTracker.h"
-#include "InDetServMatGeoModel/InDetServMatGeometryManager.h"
-
+#include "ServicesTrackerBuilder.h"
+#include "ServicesTracker.h"
+#include "InDetServMatGeometryManager.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
-
 #include <string>
-
 #include <iostream>  // for DEBUG only
 using namespace std;
 

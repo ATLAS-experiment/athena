@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETSERVMATGEOMODEL_INDETSERVMATTOOL_H
@@ -27,21 +27,20 @@ class InDetServMatTool final : public GeoModelTool {
   // Standard Constructor
   InDetServMatTool( const std::string& type, const std::string& name, const IInterface* parent );
   // Standard Destructor
-  virtual ~InDetServMatTool() override final;
+  virtual ~InDetServMatTool() override;
   
-  virtual StatusCode create() override final;
-  virtual StatusCode clear() override final;
+  virtual StatusCode create() override;
+  virtual StatusCode clear() override;
 
  private:
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
   ServiceHandle< IGeometryDBSvc > m_geometryDBSvc;
   ToolHandle<IInDetServMatBuilderTool> m_builderTool;
 
-  bool m_devVersion;
-  bool m_forFrozenShowers;
-  std::string m_overrideVersionName;
-  const InDetDD::InDetServMatManager* m_manager;
-  InDetServMatAthenaComps * m_athenaComps;
+  bool m_devVersion{false};
+  std::string m_overrideVersionName{};
+  const InDetDD::InDetServMatManager* m_manager{nullptr};
+  InDetServMatAthenaComps * m_athenaComps{nullptr};
 };
 
 #endif // INDETSERVMATGEOMODEL_INDETSERVMATTOOL_H

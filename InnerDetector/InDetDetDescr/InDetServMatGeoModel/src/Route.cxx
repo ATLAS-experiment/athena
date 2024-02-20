@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/Route.h"
-
-#include "InDetServMatGeoModel/ServiceVolume.h"
-
+#include "Route.h"
+#include "ServiceVolume.h"
 #include <iostream>
 using namespace std;
 
