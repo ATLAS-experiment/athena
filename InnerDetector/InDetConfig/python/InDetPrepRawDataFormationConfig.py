@@ -4,6 +4,18 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
+def HGTDInDetToXAODClusterConversionCfg(flags, name="HGTDInDetToXAODClusterConversion", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault('ProcessHgtd', True)
+    acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
+    return acc
+
+def HGTDXAODToInDetClusterConversionCfg(flags, name="HGTDXAODToInDetClusterConversion", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault('ProcessHgtd', True)
+    acc.addEventAlgo(CompFactory.InDet.XAODToInDetClusterConversion(name, **kwargs))
+    return acc
+
 def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConversion", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault('ProcessPixel', flags.Detector.EnableITkPixel)

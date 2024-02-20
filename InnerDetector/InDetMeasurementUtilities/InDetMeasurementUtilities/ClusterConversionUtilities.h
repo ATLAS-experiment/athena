@@ -7,17 +7,21 @@
 
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
+#include "HGTD_PrepRawData/HGTD_Cluster.h"
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
+#include "HGTD_Identifier/HGTD_ID.h"
 
 namespace TrackingUtilities {
 
@@ -39,6 +43,15 @@ namespace TrackingUtilities {
                                        const SCT_ID& stripID,
                                        InDet::SCT_Cluster*& indetCluster,
                                        double shift = 0.);  
+
+  // HGTD
+  StatusCode convertInDetToXaodCluster(const HGTD_Cluster& indetCluster,
+                                       const InDetDD::HGTD_DetectorElement& element,
+                                       xAOD::HGTDCluster& xaodCluster);
+
+  StatusCode convertXaodToInDetCluster(const xAOD::HGTDCluster& xaodCluster,
+                                       const InDetDD::HGTD_DetectorElement& element,
+				       ::HGTD_Cluster*& indetCluster);  
 } // Namespace
 
 #endif

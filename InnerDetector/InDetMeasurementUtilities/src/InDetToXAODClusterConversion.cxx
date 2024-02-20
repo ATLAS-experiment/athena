@@ -8,6 +8,7 @@
 #include "Identifier/Identifier.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
+#include "HGTD_Identifier/HGTD_ID.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
 
@@ -40,15 +41,20 @@ StatusCode InDetToXAODClusterConversion::initialize() {
   
   ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
   ATH_CHECK(detStore()->retrieve(m_stripID,"SCT_ID"));
-
+  ATH_CHECK(detStore()->retrieve(m_hgtdID,"HGTD_ID"));
+  
   ATH_CHECK( m_pixelDetEleCollKey.initialize(m_processPixel) );
   ATH_CHECK( m_stripDetEleCollKey.initialize(m_processStrip) );
-
+  ATH_CHECK( m_HGTDDetEleCollKey.initialize(m_processHgtd) );
+  
   ATH_CHECK( m_inputPixelClusterContainerKey.initialize(m_processPixel) );
   ATH_CHECK( m_inputStripClusterContainerKey.initialize(m_processStrip) );
   ATH_CHECK( m_outputPixelClusterContainerKey.initialize(m_processPixel) );
   ATH_CHECK( m_outputStripClusterContainerKey.initialize(m_processStrip) );
 
+  ATH_CHECK( m_inputHgtdClusterContainerKey.initialize(m_processHgtd) );
+  ATH_CHECK( m_outputHgtdClusterContainerKey.initialize(m_processHgtd) );
+  
   ATH_MSG_DEBUG( "Initialize done !" );
   return StatusCode::SUCCESS;
 }
@@ -66,6 +72,11 @@ StatusCode InDetToXAODClusterConversion::execute(const EventContext& ctx) const 
   if (m_processStrip.value()) {
     ATH_MSG_DEBUG("Converting Strip Clusters: InDet -> xAOD");
     ATH_CHECK( convertStripClusters(ctx) );
+  }
+
+  if (m_processHgtd.value()) {
+    ATH_MSG_DEBUG("Converting HGTD Clusters: InDet -> xAOD");    
+    ATH_CHECK( convertHgtdClusters(ctx) );
   }
 
   return StatusCode::SUCCESS;
@@ -154,3 +165,46 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
   
   return StatusCode::SUCCESS;
 }
+
+StatusCode InDetToXAODClusterConversion::convertHgtdClusters(const EventContext& ctx) const {
+    SG::ReadCondHandle<InDetDD::HGTD_DetectorElementCollection> hgtdDetEleHandle(m_HGTDDetEleCollKey, ctx);
+  const InDetDD::HGTD_DetectorElementCollection* hgtdElements(*hgtdDetEleHandle);
+  if (not hgtdDetEleHandle.isValid() or hgtdElements==nullptr) {
+    ATH_MSG_FATAL(m_HGTDDetEleCollKey.fullKey() << " is not available.");
+    return StatusCode::FAILURE;
+  }
+  
+  SG::WriteHandle<xAOD::HGTDClusterContainer> outputHgtdClusterContainer(m_outputHgtdClusterContainerKey, ctx);
+  ATH_CHECK( outputHgtdClusterContainer.record (std::make_unique<xAOD::HGTDClusterContainer>(),
+						std::make_unique<xAOD::HGTDClusterAuxContainer>()) );
+  ATH_MSG_DEBUG( "Recorded xAOD::HGTDClusterContainer with key: " << m_outputHgtdClusterContainerKey.key() );
+  
+  SG::ReadHandle<::HGTD_ClusterContainer> inputHgtdClusterContainer(m_inputHgtdClusterContainerKey, ctx);
+  ATH_CHECK(inputHgtdClusterContainer.isValid());  
+
+  static const SG::AuxElement::Accessor< ElementLink< ::HGTD_ClusterCollection > > hgtdLinkAcc("hgtdClusterLink");
+  for (const auto *const clusterCollection : *inputHgtdClusterContainer) {
+    if (!clusterCollection) continue;
+    for(const auto *const theCluster : *clusterCollection)  {
+      Identifier clusterId = theCluster->identify();
+
+      const auto *element=hgtdElements->getDetectorElement(m_hgtdID->wafer_hash(m_hgtdID->wafer_id(clusterId)));
+      if ( element==nullptr ) {
+        ATH_MSG_FATAL( "Invalid strip detector element for cluster with identifier " << clusterId );
+        return StatusCode::FAILURE;
+      }
+     
+      xAOD::HGTDCluster * hgtdCl = new xAOD::HGTDCluster();
+      outputHgtdClusterContainer->push_back(hgtdCl);
+      ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *hgtdCl) );
+
+      // Create auxiliary branches accessors
+      ElementLink<::HGTD_ClusterCollection> hgtdLink(theCluster, *clusterCollection);
+      hgtdLinkAcc( *hgtdCl ) = hgtdLink;
+    }
+  }
+  
+  ATH_MSG_DEBUG("xAOD::HGTDClusterContainer with size: " << outputHgtdClusterContainer->size());
+  return StatusCode::SUCCESS;
+}
+ 
