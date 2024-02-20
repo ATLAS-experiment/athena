@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-/********************************************************************************
+/***********************************************************************
 
 NAME:     MCTruthClassifier.cxx
 PACKAGE:  atlasoff/PhysicsAnalysis/MCTruthClassifier
@@ -17,30 +17,22 @@ PURPOSE:  to classify  truth particles according to their origin. Based on
           See  for details:
     https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EgammaMCTruthClassifier
 Updated:
-********************************************************************************/
+************************************************************************
+Updated Feb 2024 by Andrii Verbytskyi <andrii.verbytskyi@mpp.mpg.de>
+************************************************************************/
 
-//
 #include "MCTruthClassifier/MCTruthClassifier.h"
 using namespace MCTruthPartClassifier;
-using std::abs;
 
 // -----------------------------------------------------------------------
 // Constructor
 // -----------------------------------------------------------------------
-MCTruthClassifier::MCTruthClassifier(const std::string& type)
-  : asg::AsgTool(type)
-{
+MCTruthClassifier::MCTruthClassifier(const std::string& type) : asg::AsgTool(type) {
 
-#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) /*Add properties used/available only in Athena*/
-  declareProperty("FwdElectronUseG4Sel" , m_FwdElectronUseG4Sel = true,
-		  "Use Geant4 selection for forward electrons calo clusters");
-  declareProperty("FwdElectronTruthExtrEtaCut",
-                  m_FwdElectronTruthExtrEtaCut = 2.4,
-                  "Cut on the eta of the truth Particles to be extrapolated for Fwd electrons");
-  declareProperty(
-    "FwdElectronTruthExtrEtaWindowCut",
-    m_FwdElectronTruthExtrEtaWindowCut = 0.15,
-    "Cut on the delta eta of the truth Particles to be extrapolated for Fwd electrons and the current FwdElectron");
+#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
+  declareProperty("FwdElectronUseG4Sel" , m_FwdElectronUseG4Sel = true, "Use Geant4 selection for forward electrons calo clusters");
+  declareProperty("FwdElectronTruthExtrEtaCut", m_FwdElectronTruthExtrEtaCut = 2.4, "Cut on the eta of the truth Particles to be extrapolated for Fwd electrons");
+  declareProperty("FwdElectronTruthExtrEtaWindowCut", m_FwdElectronTruthExtrEtaWindowCut = 0.15, "Cut on the delta eta of the truth Particles to be extrapolated for Fwd electrons and the current FwdElectron");
   declareProperty("partExtrConePhi", m_partExtrConePhi = 0.4);
   declareProperty("partExtrConeEta", m_partExtrConeEta = 0.2);
   declareProperty("phtClasConePhi", m_phtClasConePhi = 0.05);
@@ -50,13 +42,12 @@ MCTruthClassifier::MCTruthClassifier(const std::string& type)
   declareProperty("fwrdEledRtoTrCut", m_fwrdEledRtoTrCut = 0.15);
   declareProperty("ROICone", m_ROICone = false);
 #endif
-#ifndef GENERATIONBASE /*Add propertied not available in Generation only release*/
+#ifndef GENERATIONBASE
   declareProperty("deltaRMatchCut", m_deltaRMatchCut = 0.2);
   declareProperty("deltaPhiMatchCut", m_deltaPhiMatchCut = 0.2);
   declareProperty("NumOfSiHitsCut", m_NumOfSiHitsCut = 3);
   declareProperty("jetPartDRMatch", m_jetPartDRMatch = 0.4);
 #endif
-  //
   // Properties Available in all
   declareProperty("inclEgammaFwrdEle", m_inclEgammaFwrdEle = true);
   declareProperty("inclEgammaPhoton", m_inclEgammaPhoton = true);
@@ -66,16 +57,10 @@ MCTruthClassifier::MCTruthClassifier(const std::string& type)
 
 }
 
-// DESTRUCTOR:
 MCTruthClassifier::~MCTruthClassifier() = default;
 
-// INITIALIZE METHOD:
-StatusCode
-MCTruthClassifier::initialize()
-{
-
+StatusCode MCTruthClassifier::initialize(){
   ATH_MSG_INFO(" Initializing MCTruthClassifier");
-
 #ifndef XAOD_ANALYSIS
   // Only needed for GenParticle interface
   if (!m_truthLinkVecReadHandleKey.key().empty()) {
@@ -84,7 +69,7 @@ MCTruthClassifier::initialize()
 #endif
   ATH_CHECK(m_truthParticleContainerKey.initialize());
 
-#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) /*Tools making sense only for the Athena only environment*/
+#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   if (!m_caloExtensionTool.empty()) {
     ATH_CHECK(m_caloExtensionTool.retrieve());
   } else {
@@ -102,11 +87,7 @@ MCTruthClassifier::initialize()
   return StatusCode::SUCCESS;
 }
 
-// FINALIZE METHOD:
-StatusCode
-MCTruthClassifier::finalize()
+StatusCode MCTruthClassifier::finalize()
 {
-
   return StatusCode::SUCCESS;
 }
-
