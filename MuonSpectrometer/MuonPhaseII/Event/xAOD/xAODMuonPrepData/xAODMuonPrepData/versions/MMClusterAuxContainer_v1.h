@@ -42,6 +42,7 @@ class MMClusterAuxContainer_v1 : public AuxContainerBase {
     std::vector<std::vector<int>>       stripCharges{};
     std::vector<std::vector<float>>     stripDriftDist{};
     std::vector<std::vector<PosAccessor<2>::element_type>> stripDriftErrors{};
+    std::vector<PosAccessor<3>::element_type> stripPosInStation{};
     /// @}
 };
 }  // namespace xAOD

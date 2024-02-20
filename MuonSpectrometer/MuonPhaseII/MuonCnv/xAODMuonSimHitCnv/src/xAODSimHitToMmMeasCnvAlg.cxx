@@ -93,6 +93,10 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
         xAOD::MeasVector<1> lClusterPos{newLocalX};
         xAOD::MeasMatrix<1> lCov{uncert*uncert}; 
         prd->setMeasurement(m_idHelperSvc->detElementHash(clusId) ,lClusterPos, lCov);
+        const Amg::Vector3D strip3D = lClusterPos.x() * Amg::Vector3D::UnitX();
+        const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx, clusId)};
+        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx, prd->layerHash()) * strip3D)); 
+
     }
 
     return StatusCode::SUCCESS;
