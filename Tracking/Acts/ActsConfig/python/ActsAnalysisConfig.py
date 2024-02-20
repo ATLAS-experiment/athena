@@ -3,6 +3,34 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def ActsHgtdClusterAnalysisAlgCfg(flags,
+                                  name: str = "ActsHgtdClusterAnalysisAlg",
+                                  **kwargs) -> ComponentAccumulator:
+    if flags.HGTD.Geometry.useGeoModelXml:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    else:
+        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    result = HGTD_ReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("MonGroupName", "ActsHgtdClusters")
+    
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, 'ActsHgtdClusterAnalysisAlgCfg')
+
+    monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.HgtdClusterAnalysisAlg, name, **kwargs)
+    monitoringGroup = helper.addGroup(monitoringAlgorithm, kwargs['MonGroupName'], '/ActsAnalysis/')
+
+    path = "ActsHgtdClusters"
+    monitoringGroup.defineHistogram('localX,localY;h_localXY', title="h_localXY; x [mm]; y [mm]", type="TH2F", path=path,
+                                    xbins=20, xmin=-30, xmax=30,
+                                    ybins=20, ymin=-30, ymax=30)
+    monitoringGroup.defineTree('localX,localY,localT,localCovXX,localCovYY,localCovTT;HgtdClusters',
+                               path='ntuples',
+                               treedef='localX/vector<float>:localY/vector<float>:localT/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:localCovTT/vector<float>')
+    
+    result.merge(helper.result())
+    return result
+
 def ActsPixelClusterAnalysisAlgCfg(flags,
                                    name: str = "ActsPixelClusterAnalysisAlg",
                                    extension: str = "Acts",

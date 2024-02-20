@@ -38,7 +38,6 @@ def ActsITkStripClusterizationMonitoringToolCfg(flags,
     acc.merge(ActsMonitoringHistSvcCfg(flags))
     return acc
 
-
 def ActsPixelSpacePointFormationMonitoringToolCfg(flags,
                                                   name: str = "ActsPixelSpacePointFormatioMonitoringTool",
                                                   **kwargs) -> ComponentAccumulator:
