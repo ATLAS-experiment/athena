@@ -146,13 +146,11 @@ namespace ActsTrk {
     }
 
     if (m_zBinsCustomLooping.size() != 0) {
-      // check if zBinsCustomLooping contains numbers from 1 to the total number
-      // of bin in zBinEdges
-      for (size_t i = 1; i != m_zBinEdges.size(); i++) {
-        if (std::find(m_zBinsCustomLooping.begin(),
-                      m_zBinsCustomLooping.end(),
-                      i) == m_zBinsCustomLooping.end()) {
-          ATH_MSG_ERROR("Inconsistent config zBinsCustomLooping does not contain the same bins as zBinEdges");
+      // zBinsCustomLooping can contain a number of elements <= to the total number
+      // of bin in zBinEdges 
+      for (std::size_t i : m_zBinsCustomLooping) {
+	if (i >= m_zBinEdges.size()) {
+          ATH_MSG_ERROR("Inconsistent config zBinsCustomLooping contains bins that are not in zBinEdges");
           return StatusCode::FAILURE;
         }
       }
