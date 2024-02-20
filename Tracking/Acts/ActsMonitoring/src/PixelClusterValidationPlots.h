@@ -9,8 +9,6 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "InDetIdentifier/PixelID.h"
 
-#include <mutex>
-
 namespace ActsTrk {
 
   class PixelClusterValidationPlots :
@@ -24,8 +22,6 @@ namespace ActsTrk {
 	      const PixelID*);
     
   private:
-    mutable std::mutex m_mutex;
-
     TH1* m_barrelEndcap {};
 
     TH1* m_layerDisk_barrel {};

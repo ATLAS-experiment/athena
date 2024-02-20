@@ -60,8 +60,6 @@ namespace ActsTrk {
 					    float beamSpotWeight,
 					    const PixelID* pixelID)
   {
-    std::lock_guard<std::mutex> lock(m_mutex);
-    
     const Identifier& id = pixelID->wafer_id(spacePoint->elementIdList()[0]);
     bool isBarrel = (pixelID->barrel_ec(id) == 0);
     int pixLayerDisk = pixelID->layer_disk(id);

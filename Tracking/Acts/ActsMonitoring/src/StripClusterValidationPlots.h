@@ -9,8 +9,6 @@
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "InDetIdentifier/SCT_ID.h"
 
-#include <mutex>
-
 namespace ActsTrk {
 
   class StripClusterValidationPlots :
@@ -24,8 +22,6 @@ namespace ActsTrk {
 	      const SCT_ID*);
     
   private:
-    std::mutex m_mutex;
-
     TH1* m_barrelEndcap {};
 
     TH1* m_layerDisk_barrel {};

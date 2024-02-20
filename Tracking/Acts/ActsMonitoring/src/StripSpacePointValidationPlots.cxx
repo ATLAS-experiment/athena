@@ -77,7 +77,6 @@ namespace ActsTrk {
 					    float beamSpotWeight,
 					    const SCT_ID* stripID)
   {
-    std::lock_guard<std::mutex> lock(m_mutex);
     const std::vector<Identifier>& ids { stripID->wafer_id(spacePoint->elementIdList()[0]), 
 	stripID->wafer_id(spacePoint->elementIdList()[1])};
 
