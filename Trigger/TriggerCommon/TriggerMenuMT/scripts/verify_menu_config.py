@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 '''
 Script for verifying menu configurations.
@@ -16,7 +16,7 @@ import argparse
 
 from collections import OrderedDict as odict
 from AthenaCommon.Logging import logging
-from menu_config_tests import TriggerLevel, menu_tests
+from TriggerMenuMT.menu_config_tests import TriggerLevel, menu_tests
 
 log = logging.getLogger("TriggerMenuConfigTest")
 
