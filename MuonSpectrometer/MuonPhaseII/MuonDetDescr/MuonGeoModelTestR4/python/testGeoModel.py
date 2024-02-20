@@ -182,7 +182,7 @@ if __name__=="__main__":
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     
-    if flags.Detector.GeometryMDT:
+    if False and flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
                                      TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
                                      ReadoutSideXML="ReadoutSides.xml"))

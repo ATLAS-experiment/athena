@@ -57,6 +57,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<uint8_t>& m_doubletZ{m_tree.newScalar<uint8_t>("stationDoubletZ")};
     MuonVal::ScalarBranch<uint8_t>& m_doubletPhi{m_tree.newScalar<uint8_t>("stationDoubletPhi")};
     MuonVal::ScalarBranch<std::string>& m_chamberDesign{m_tree.newScalar<std::string>("chamberDesign")};
+
  
     /// Number of strips, strip pitch in eta & phi direction
     MuonVal::ScalarBranch<uint8_t>& m_numStripsEta{m_tree.newScalar<uint8_t>("numEtaStrips")};
@@ -70,9 +71,9 @@ class GeoModelRpcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>& m_stripEtaLength{m_tree.newScalar<float>("stripEtaLength")};
     MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")};
     /// Number of eta & phi gas gaps
-    MuonVal::ScalarBranch<uint8_t>& m_numGasGapsEta{m_tree.newScalar<uint8_t>("numEtaGasGaps")};
+    MuonVal::ScalarBranch<uint8_t>& m_numRpcLayers{m_tree.newScalar<uint8_t>("numRpcLayers")}; 
     MuonVal::ScalarBranch<uint8_t>& m_numGasGapsPhi{m_tree.newScalar<uint8_t>("numPhiGasGaps")};
-    
+    MuonVal::ScalarBranch<uint8_t>& m_numPhiPanels{m_tree.newScalar<uint8_t>("numPhiPanels")};
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
     

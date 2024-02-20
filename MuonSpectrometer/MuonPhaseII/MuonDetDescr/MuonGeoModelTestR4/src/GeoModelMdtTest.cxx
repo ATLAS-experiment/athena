@@ -166,7 +166,9 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
          const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTrans(gctx,measHash)};
          m_tubeLay.push_back(lay);
          m_tubeNum.push_back(tube);         
-         m_tubeTransform.push_back(tubeTransform);        
+         m_tubeTransform.push_back(tubeTransform);
+         m_tubePosInCh.push_back(m_surfaceProvTool->globalToChambCenter(gctx, readoutEle->identify()) * 
+                                 readoutEle->center(gctx, measHash));
          m_roPos.push_back(readoutEle->readOutPos(gctx, measHash));
          m_tubeLength.push_back(readoutEle->tubeLength(measHash));
          m_activeTubeLength.push_back(readoutEle->activeTubeLength(measHash));

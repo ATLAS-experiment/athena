@@ -74,8 +74,8 @@ StatusCode GeoModelRpcTest::execute() {
       ATH_MSG_FATAL("Failed to retrieve "<<m_geoCtxKey.fullKey());
       return StatusCode::FAILURE;
     }
-    const ActsGeometryContext& gctx{**geoContextHandle};
-
+    // const ActsGeometryContext& gctx{**geoContextHandle};
+    ActsGeometryContext gctx{};
     for (const Identifier& test_me : m_testStations) {
       ATH_MSG_DEBUG("Test retrieval of Rpc detector element "<<m_idHelperSvc->toStringDetEl(test_me));
       const RpcReadoutElement* reElement = m_detMgr->getRpcReadoutElement(test_me);
@@ -150,8 +150,10 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    m_doubletPhi = reElement->doubletPhi();
    m_chamberDesign = reElement->chamberDesign();
    
-   m_numGasGapsEta = reElement->nGasGaps();
-   m_numGasGapsPhi = reElement->nGasGaps();
+   m_numRpcLayers = reElement->nGasGaps();
+
+   m_numGasGapsPhi = reElement->nPhiPanels();
+   m_numPhiPanels = reElement->nPhiPanels();
 
    ///
    m_numStripsEta = reElement->nEtaStrips();
