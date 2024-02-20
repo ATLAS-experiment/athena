@@ -39,7 +39,7 @@ echo "art-result: $? overlay";
 ATHENA_CORE_NUMBER=8 \
 timeout 64800 \
 Reco_tf.py \
-  --CA="False" \
+  --CA="True" \
   --inputRDOFile="myRDO.pool.root" \
   --outputRDO_TRIGFile="myRDO_TRIG.pool.root" \
   --multithreaded="True" \
