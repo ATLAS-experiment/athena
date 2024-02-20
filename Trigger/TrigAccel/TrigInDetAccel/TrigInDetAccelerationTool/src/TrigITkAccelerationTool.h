@@ -22,6 +22,11 @@ class TrigITkAccelerationTool: public extends<AthAlgTool, ITrigInDetAcceleration
   size_t virtual exportSeedMakingJob(const TrigCombinatorialSettings&, const IRoiDescriptor*, const std::vector<TrigSiSpacePointBase>&, TrigAccel::DATA_EXPORT_BUFFER&) const override;
   virtual int extractTripletsFromOutput(std::shared_ptr<TrigAccel::OffloadBuffer>, const std::vector<TrigSiSpacePointBase>&, std::vector<TrigInDetTriplet>&) const override;
  private:
+  // Return ITk covariance on radius depending on the layer location based on offline studies
+  float getCovR(bool isBarrel) const;
+
+  // Return ITk covariance on z measurement depending on the layer location based on offline studies
+  float getCovZ(bool isBarrel) const;
 
   ServiceHandle<ITrigInDetAccelerationSvc> m_accelSvc;
 };
