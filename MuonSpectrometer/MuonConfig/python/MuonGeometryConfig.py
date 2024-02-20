@@ -28,7 +28,7 @@ def MuonIdHelperSvcCfg(flags):
 def MuonGeoModelCfg(flags):
     result = ComponentAccumulator()
     result.merge(MuonIdHelperSvcCfg(flags)) 
-    if flags.Muon.setupGeoModelXML:
+    if flags.Muon.usePhaseIIGeoSetup:
         from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg as MuonGeoModelCfgR4
         result.merge(MuonGeoModelCfgR4(flags))
         from MuonGeometryCnv.MuonReadoutGeomCnvCfg import MuonReadoutGeometryCnvAlgCfg

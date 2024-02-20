@@ -19,8 +19,9 @@ def getDataTypes(flags, haveRDO=False, readAOD=False):
     data_types = []  # These need to match the tools added later
     if flags.Detector.EnableID:
         # General ID types
-        data_types += ["JiveXML::SiSpacePointRetriever/SiSpacePointRetriever"]
-        data_types += ["JiveXML::SiClusterRetriever/SiClusterRetriever"]
+        if flags.Detector.GeometryPixel and flags.Detector.GeometrySCT:
+            data_types += ["JiveXML::SiSpacePointRetriever/SiSpacePointRetriever"]
+            data_types += ["JiveXML::SiClusterRetriever/SiClusterRetriever"]
         data_types += ["JiveXML::VertexRetriever/VertexRetriever"]
         # These options will retrieve any available collection of segments/tracks from storegate
         data_types += ["JiveXML::SegmentRetriever/SegmentRetriever"]
@@ -88,6 +89,15 @@ def getDataTypes(flags, haveRDO=False, readAOD=False):
     data_types += ["JiveXML::xAODTrackParticleRetriever/xAODTrackParticleRetriever"]
     data_types += ["JiveXML::xAODVertexRetriever/xAODVertexRetriever"]
 
+    if flags.Reco.EnableTrigger:
+        # Taken from TrigJiveXML_DataTypes.py
+        data_types += ["JiveXML::LVL1ResultRetriever/LVL1ResultRetriever"]
+        data_types += ["JiveXML::TriggerInfoRetriever/TriggerInfoRetriever"]
+        data_types += ["JiveXML::xAODEmTauROIRetriever/xAODEmTauROIRetriever"]
+        data_types += ["JiveXML::xAODJetROIRetriever/xAODJetROIRetriever"]
+        data_types += ["JiveXML::xAODMuonROIRetriever/xAODMuonROIRetriever"]
+        data_types += ["JiveXML::xAODTriggerTowerRetriever/xAODTriggerTowerRetriever"]
+
     return data_types
 
 
@@ -99,8 +109,9 @@ def InDetRetrieversCfg(flags):
         result.merge(PixelClusterRetrieverCfg(flags))
 
     if flags.Detector.EnableID:
-        result.merge(SiClusterRetrieverCfg(flags))
-        result.merge(SiSpacePointRetrieverCfg(flags))
+        if flags.Detector.GeometryPixel and flags.Detector.GeometrySCT:
+            result.merge(SiClusterRetrieverCfg(flags))
+            result.merge(SiSpacePointRetrieverCfg(flags))
         result.merge(TrackRetrieverCfg(flags))
 
     if flags.Detector.EnableTRT:
@@ -407,14 +418,53 @@ def xAODRetrieversCfg(flags):
 
 def TriggerRetrieversCfg(flags):
     result = ComponentAccumulator()
-    # TODO
+    if flags.Reco.EnableTrigger:
+        #--- LVL1 result from TrigDecision
+        result.addPublicTool(
+            CompFactory.JiveXML.LVL1ResultRetriever(
+                name="LVL1ResultRetriever"
+            )
+        )
+
+        #--- TriggerInfo (Etmiss, etc)
+        result.addPublicTool(
+            CompFactory.JiveXML.TriggerInfoRetriever(
+                name="TriggerInfoRetriever" 
+            )
+        )
+
+        # new xAOD retrievers
+        result.addPublicTool(
+            CompFactory.JiveXML.xAODEmTauROIRetriever(
+                name="xAODEmTauROIRetriever"
+            )
+        )
+
+        result.addPublicTool(
+            CompFactory.JiveXML.xAODJetROIRetriever(
+                name="xAODJetROIRetriever"
+            )
+        )
+
+        result.addPublicTool(
+            CompFactory.JiveXML.xAODMuonROIRetriever(
+                name="xAODMuonROIRetriever"
+            )
+        )
+
+        result.addPublicTool(
+            CompFactory.JiveXML.xAODTriggerTowerRetriever(
+                name="xAODTriggerTowerRetriever"
+            )
+        )
     return result
 
-def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
+def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
     # This is based on a few old-style configuation files:
     # JiveXML_RecEx_config.py
     # JiveXML_jobOptionBase.py
     result = ComponentAccumulator()
+
     kwargs.setdefault("AtlasRelease", getATLASVersion())
     kwargs.setdefault("WriteToFile", True)
     kwargs.setdefault("OnlineMode", False)
@@ -444,8 +494,7 @@ def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
 
     result.merge(xAODRetrieversCfg(flags))
 
-    #if flags.Trigger.doHLT: #FIXME - is this the right flag?
-    #result.merge(TriggerRetrieversCfg(flags))
+    result.merge(TriggerRetrieversCfg(flags))
 
     the_alg = CompFactory.JiveXML.AlgoJiveXML(name="AlgoJiveXML", **kwargs)
     result.addEventAlgo(the_alg, primary=True)

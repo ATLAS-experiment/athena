@@ -79,8 +79,8 @@ def RPC_DigitizationToolCommonCfg(flags, name="RpcDigitizationTool", **kwargs):
     kwargs.setdefault("MeanClusterSizeTail_C",[0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598, 0.548598])
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-    RpcDigitizationTool = CompFactory.RpcDigitizationTool
-    acc.setPrivateTools(RpcDigitizationTool(name, **kwargs))
+    RpcDigitizationTool = CompFactory.RpcDigitizationTool(name, **kwargs)
+    acc.setPrivateTools(RpcDigitizationTool)
     return acc
 
 

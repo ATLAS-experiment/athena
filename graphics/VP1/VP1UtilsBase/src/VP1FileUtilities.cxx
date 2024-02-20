@@ -73,7 +73,8 @@ void VP1FileUtilities::produceNewFile(const std::string& sourceFile,
   // Check if the sourceFile exists
   QString srcName(sourceFile.c_str());
   QFile srcFile(srcName);
-  std::cout << "VP1FileUtilities melissa: " <<  m_outputDirectory << std::endl;
+  std::cout << "VP1FileUtilities m_outputDirectory: " <<  m_outputDirectory << std::endl;
+  std::cout << "VP1FileUtilities eventNumber: " << eventNumber << std::endl;
   if(!srcFile.exists())
     throw std::runtime_error("Source file does not exist!");
 

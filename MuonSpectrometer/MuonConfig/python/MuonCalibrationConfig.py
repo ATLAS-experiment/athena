@@ -135,7 +135,7 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("AthRNGSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     
-    kwargs.setdefault("UseR4DetMgr", flags.Muon.setupGeoModelXML)
+    kwargs.setdefault("UseR4DetMgr", flags.Muon.usePhaseIIGeoSetup)
     alg = CompFactory.MdtCalibDbAlg (name, **kwargs)
 
     result.addCondAlgo (alg, primary = True)

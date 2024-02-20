@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -16,12 +16,14 @@ def MuonPrepDataConvCfg(flags):
         ("Muon::sTgcPrepDataContainer", "STGC_Measurements"),
   
     ]
+    from SGComps.AddressRemappingConfig import AddressRemappingCfg
+    result.merge (AddressRemappingCfg())
     for cont_type, cont_name in prepdata_container:
         if len([item for item in flags.Input.Collections if item == cont_name]) == 0: continue
         the_alg = CompFactory.AthReadAlg (f'AthReadAlg_{cont_name}',
                                           Key = f'{cont_type}/{cont_name}',
                                           Aliases = [],
                                           ExtraInputs = dependencies)
-        result.addCondAlgo(the_alg)
+        result.addEventAlgo(the_alg)
     return result
 

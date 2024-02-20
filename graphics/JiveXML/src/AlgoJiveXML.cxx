@@ -157,7 +157,7 @@ namespace JiveXML{
       return StatusCode::FAILURE;
     }else{
     // Event/xAOD/xAODEventInfo/trunk/xAODEventInfo/versions/EventInfo_v1.h
-     ATH_MSG_VERBOSE(" xAODEventInfo: runNumber: "  << eventInfo->runNumber()  // is '222222' for mc events ?
+     ATH_MSG_INFO(" xAODEventInfo: runNumber: "  << eventInfo->runNumber()  // is '222222' for mc events ?
           << ", eventNumber: " << eventInfo->eventNumber()
           << ", mcChannelNumber: " << eventInfo->mcChannelNumber()
           << ", mcEventNumber: "  << eventInfo->mcEventNumber() // MC: use this instead of runNumber
