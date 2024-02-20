@@ -460,11 +460,12 @@ def TriggerRetrieversCfg(flags):
         )
     return result
 
-def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
+def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
     # This is based on a few old-style configuation files:
     # JiveXML_RecEx_config.py
     # JiveXML_jobOptionBase.py
     result = ComponentAccumulator()
+
     kwargs.setdefault("AtlasRelease", getATLASVersion())
     kwargs.setdefault("WriteToFile", True)
     kwargs.setdefault("OnlineMode", False)
