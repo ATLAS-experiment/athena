@@ -123,17 +123,18 @@ const MuonGMR4::TgcReadoutElement* TgcSensitiveDetector::getReadoutElement(const
     const std::string stationVolume = touchHist->GetVolume(2)->GetName();
     const std::vector<std::string> volumeTokens = CxxUtils::tokenize(stationVolume, "_");
     /// We should have a string which kind of looks like
-    ///     av_7088_impr_1_MuonR4::T1E1_Station2MuonStation_pv_172_T1E_Station2_-2_4
+    ///     av_319_impr_1_MuonR4::LogVolMuonStation_pv_190_T3E_Station2_-2_46
     /// Of interest are only the T1E part and the last 2 numbers
-    if (volumeTokens.size() != 12) {
-        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Cannot deduce the station name from "<<stationVolume<<" "<<volumeTokens.size());
-        throw std::runtime_error("Invalid station Identifier");
-    }
+    const size_t nTokens{volumeTokens.size()};
     const TgcIdHelper& idHelper{m_detMgr->idHelperSvc()->tgcIdHelper()};
-    const std::string stationName{volumeTokens[8].substr(0,3)};
-    const int stationEta = CxxUtils::atoi(volumeTokens[10]);
-    const int stationPhi = CxxUtils::atoi(volumeTokens[11]);
-    const Identifier stationId = idHelper.elementID(stationName, stationEta, stationPhi);
+    const std::string stationName{volumeTokens[nTokens-4].substr(0,3)};
+    const int stationEta = CxxUtils::atoi(volumeTokens[nTokens-2]);
+    const int stationPhi = CxxUtils::atoi(volumeTokens[nTokens-1]);
+    bool isValid{false};
+    const Identifier stationId = idHelper.elementID(stationName, stationEta, stationPhi,  isValid);
+    if (!isValid) {
+       throw std::runtime_error("Failed to deduce station name from "+stationVolume);
+    }
     return m_detMgr->getTgcReadoutElement(stationId);
 }
 

@@ -103,8 +103,9 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx, const RpcReadout
 
    m_numStripsEta = readoutEle->Nstrips(false);
    m_numStripsPhi = readoutEle->Nstrips(true);
-   m_numGasGapsEta = readoutEle->NgasGaps(false);
-   m_numGasGapsPhi = readoutEle->NgasGaps(true);   
+   m_numRpcLayers = readoutEle->numberOfLayers();
+   m_numGasGapsPhi = readoutEle->NgasGaps(true);
+   m_numPhiPanels = readoutEle->NphiStripPanels();   
 
    m_stripEtaPitch = readoutEle->StripPitch(false);
    m_stripPhiPitch = readoutEle->StripPitch(true);
@@ -127,12 +128,9 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx, const RpcReadout
         m_ALineRotT   = station->getALine_rotz();
         m_ALineRotZ   = station->getALine_rott();
     }
-
-    const int numGaps = std::max(readoutEle->NgasGaps(false), 
-                                 readoutEle->NgasGaps(true));
     const int maxDoubPhi = std::max(readoutEle->getDoubletPhi(), readoutEle->NphiStripPanels());
     for (int doubPhi = readoutEle->getDoubletPhi(); doubPhi <= maxDoubPhi; ++doubPhi) {
-        for (int gap = 1; gap <= numGaps; ++gap) {   
+        for (int gap = 1; gap <= readoutEle->numberOfLayers(); ++gap) {   
             for (bool measPhi : {false, true}) {
                 unsigned int numStrip = readoutEle->Nstrips(measPhi);
                 for (unsigned int strip = 1; strip <= numStrip ; ++strip) {

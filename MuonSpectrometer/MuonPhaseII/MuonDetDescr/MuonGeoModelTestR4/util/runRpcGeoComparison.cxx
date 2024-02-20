@@ -8,6 +8,7 @@
  *        python -m MuonGeoModelTestR4.runGeoModelTest 
  *  
 */
+#include <algorithm>
 #include <GeoPrimitives/GeoPrimitives.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
@@ -22,6 +23,7 @@ using namespace ActsTrk;
 #include <PathResolver/PathResolver.h>
 #include <TFile.h>
 #include <TTreeReader.h>
+
 
 constexpr double tolerance = 1.*Gaudi::Units::millimeter;
 
@@ -52,9 +54,12 @@ struct RpcChamber{
 
     unsigned int numStripsEta{0};
     unsigned int numStripsPhi{0};
-
-    unsigned int numGasGapsEta{0};
+    /// Number of rpc singlets along the radial direction
+    unsigned int numLayers{0};
+    /// Number of rpc gasGaps along the phi direction
     unsigned int numGasGapsPhi{0};
+    /// Number of rpc readout panels along the phi direction
+    unsigned int numPhiPanels{0};
 
     struct RpcStrip{
         Amg::Vector3D position{Amg::Vector3D::Zero()};
@@ -155,8 +160,9 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<uint8_t> numStripsEta{treeReader, "numEtaStrips"};
     TTreeReaderValue<uint8_t> numStripsPhi{treeReader, "numPhiStrips"};
     /// Number of eta & phi gas gaps
-    TTreeReaderValue<uint8_t> numGasGapsEta{treeReader, "numEtaGasGaps"};
     TTreeReaderValue<uint8_t> numGasGapsPhi{treeReader, "numPhiGasGaps"};
+    TTreeReaderValue<uint8_t> numPhiPanels{treeReader, "numPhiPanels"};
+    TTreeReaderValue<uint8_t> numLayers{treeReader, "numRpcLayers"};
        
     /// Strip dimensions 
     TTreeReaderValue<float> stripEtaPitch{treeReader, "stripEtaPitch"};
@@ -170,6 +176,12 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformX{treeReader, "GeoModelTransformX"};
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
+
+
+    TTreeReaderValue<std::vector<float>> stripRotTranslationX{treeReader, "stripRotTranslationX"};
+    TTreeReaderValue<std::vector<float>> stripRotTranslationY{treeReader, "stripRotTranslationY"};
+    TTreeReaderValue<std::vector<float>> stripRotTranslationZ{treeReader, "stripRotTranslationZ"};
+
 
     TTreeReaderValue<std::vector<float>> stripRotCol1X{treeReader, "stripRotLinearCol1X"};
     TTreeReaderValue<std::vector<float>> stripRotCol1Y{treeReader, "stripRotLinearCol1Y"};
@@ -215,8 +227,9 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
 
         newchamber.numStripsEta = (*numStripsEta);
         newchamber.numStripsPhi = (*numStripsPhi);
-        newchamber.numGasGapsEta = (*numGasGapsEta);
         newchamber.numGasGapsPhi = (*numGasGapsPhi);
+        newchamber.numPhiPanels = (*numPhiPanels);
+        newchamber.numLayers = (*numLayers);
         
 
         Amg::Vector3D geoTrans{(*geoModelTransformX)[0], (*geoModelTransformY)[0], (*geoModelTransformZ)[0]};
@@ -243,10 +256,11 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
             newLayer.gasGap = (*stripRotGasGap)[l];
             newLayer.doubletPhi = (*stripRotDblPhi)[l];
             Amg::RotationMatrix3D stripRot{Amg::RotationMatrix3D::Identity()};
+            Amg::Vector3D translation{(*stripRotTranslationX)[l],(*stripRotTranslationY)[l],(*stripRotTranslationZ)[l]};
             stripRot.col(0) = Amg::Vector3D((*stripRotCol1X)[l],(*stripRotCol1Y)[l], (*stripRotCol1Z)[l]);
             stripRot.col(1) = Amg::Vector3D((*stripRotCol2X)[l],(*stripRotCol2Y)[l], (*stripRotCol2Z)[l]);
             stripRot.col(2) = Amg::Vector3D((*stripRotCol3X)[l],(*stripRotCol3Y)[l], (*stripRotCol3Z)[l]);
-            newLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), Amg::Vector3D::Zero());
+            newLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), std::move(translation));
             newchamber.layers.insert(std::move(newLayer));
         } 
         
@@ -305,25 +319,28 @@ int main( int argc, char** argv ) {
         std::cerr<<"The file "<<testFile<<" should contain at least one chamber "<<std::endl;
         return EXIT_FAILURE;
     }
+    std::cout<<"Read "<<refChambers.size()<<" chambers from reference: "<<refFile
+             <<" & "<<testChambers.size()<<" from "<<testFile<<std::endl;
     int return_code = EXIT_SUCCESS;
     /// Start to loop over the chambers
     for (const RpcChamber& reference : refChambers) {
         std::set<RpcChamber>::const_iterator test_itr = testChambers.find(reference);
         
         if (test_itr == testChambers.end()) {
-            std::cerr<<"The chamber "<<reference<<" is not part of the testing "<<std::endl;
+            std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": The chamber "<<reference<<" is not part of the testing "<<std::endl;
             return_code = EXIT_FAILURE;
             continue;
         }
         bool chamberOkay = true;
         const RpcChamber& test = {*test_itr};
+      
+        TEST_BASICPROP(numLayers, "number of rpc singlets");
+        TEST_BASICPROP(numGasGapsPhi, "number of phi gas gaps");
+        TEST_BASICPROP(numPhiPanels, "number of phi readout panels");
         
-        // TEST_BASICPROP(numGasGapsEta, "numer of eta gas gaps");
-        // chamberOkay = true;
-        TEST_BASICPROP(numGasGapsPhi, "numer of phi gas gaps");
         
-        TEST_BASICPROP(numStripsEta, "numer of eta strips");
-        TEST_BASICPROP(numStripsPhi, "numer of phi strips");
+        TEST_BASICPROP(numStripsEta, "number of eta strips");
+        TEST_BASICPROP(numStripsPhi, "number of phi strips");
         
         TEST_BASICPROP(stripPitchEta, "eta strip pitch");
         TEST_BASICPROP(stripPitchPhi, "phi strip pitch");
@@ -333,22 +350,29 @@ int main( int argc, char** argv ) {
 
         TEST_BASICPROP(stripLengthEta, "eta strip length");
         TEST_BASICPROP(stripLengthPhi, "phi strip length");
-        chamberOkay = true;
         using RpcLayer = RpcChamber::RpcLayer;
         for (const RpcLayer& refLayer : reference.layers) {
-            break;
             std::set<RpcLayer>::const_iterator lay_itr = test.layers.find(refLayer);
             if (lay_itr == test.layers.end()) {
-                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
                          <<refLayer<<" is not found. "<<std::endl;
                 chamberOkay = false;
                 continue;
             }
+            break;
             const RpcLayer& testLayer{*lay_itr};
             const Amg::Transform3D layAlignment = testLayer.transform.inverse() *
                                                   refLayer.transform;
-            if (Amg::doesNotDeform(layAlignment)) {
-                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+            if (layAlignment.translation().mag() > tolerance) {
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
+                         <<"the layer "<<testLayer<<" is misplaced w.r.t. reference by "
+                         <<Amg::toString(layAlignment)<<std::endl;
+                chamberOkay = false;
+                continue;
+            }
+            continue;            
+            if (!Amg::doesNotDeform(layAlignment)) {
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
                          <<"the layer "<<testLayer<<" is misaligned w.r.t. reference by "
                          <<Amg::toString(layAlignment)<<std::endl;
                 continue;
@@ -359,7 +383,7 @@ int main( int argc, char** argv ) {
         for (const RpcStrip& refStrip : reference.strips) {
             std::set<RpcStrip>::const_iterator strip_itr = test.strips.find(refStrip);
             if (strip_itr == test.strips.end()) {
-                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
                          <<refStrip<<" is not found. "<<std::endl;
                 chamberOkay = false;
                 continue;
@@ -367,9 +391,10 @@ int main( int argc, char** argv ) {
             const RpcStrip& testStrip{*strip_itr};
             const Amg::Vector3D diffStrip{testStrip.position - refStrip.position};
             if (diffStrip.mag() > tolerance) {
-                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
                          <<testStrip<<" should be located at "<<Amg::toString(refStrip.position, 2)
-                         <<" displacement: "<<Amg::toString(diffStrip,2)<<std::endl;
+                         <<" displacement: "<<Amg::toString(diffStrip,2)<<"Ich depp "<<diffStrip.perp()<<" "<<diffStrip.z()
+                            <<"  "<<diffStrip.mag()<<std::endl;
                 chamberOkay = false;
             }
         }

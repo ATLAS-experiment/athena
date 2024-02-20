@@ -189,7 +189,9 @@ std::vector<MuonGeoUtilityTool::physVolWithTrans> MuonGeoUtilityTool::findAllLea
     PVConstLink childVol = aV.getVolume();
     const Amg::Transform3D childTrans{aV.getTransform()};
     /// The logical volume has precisely the name for what we're searching for
-    if (childVol->getLogVol()->getName() == volumeName) {
+    
+    if (childVol->getLogVol()->getName() == volumeName ||
+        aV.getName() == volumeName) {
         physVolWithTrans foundNode{};
         foundNode.physVol = childVol;
         foundNode.transform = childTrans;

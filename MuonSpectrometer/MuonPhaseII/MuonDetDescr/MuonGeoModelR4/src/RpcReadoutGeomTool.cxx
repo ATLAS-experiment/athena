@@ -46,6 +46,13 @@ struct gapVolume: public physVolWithTrans {
     
 };
 
+inline bool layerSorter(const physVolWithTrans&a, const physVolWithTrans & b){
+    const Amg::Vector3D cA = a.transform.translation();
+    const Amg::Vector3D cB = b.transform.translation();
+    if (std::abs(cA.x() - cB.x()) > tolerance) return (cA.x() < cB.x());
+    return (cA.y() < cB.y());
+}
+
 
 RpcReadoutGeomTool::RpcReadoutGeomTool(const std::string& type,
                                        const std::string& name,
@@ -83,29 +90,53 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     define.halfLength = box->getZHalfLength() * Gaudi::Units::mm;
     define.halfWidth = box->getYHalfLength() * Gaudi::Units::mm;
    
-    /// Navigate through the GeoModel tree to find all gas volume leaves
-    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "StripLayer");
+    /** Rpc are made up out of 2 or 3 gasGap singlet. A singlet module is a RPC gas gap
+     *  sandwiched by two strip layers. In large sectors, the gas gap may be split
+     *  into two gasGaps.  
+     *
+     *          | Strip layer  |  Strip layer |    |  Strip layer  |  Strip layer |
+     *          |           gas gap           |    |    Gas gap    |    Gas gap   | 
+     *          | Strip layer  |  Strip layer |    |  Strip layer  |  Strip layer |
+     *   
+    */
+    std::vector<physVolWithTrans> stripLayers = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "bottomStripLayer");
+    if (stripLayers.empty()) {
+        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern 'bottomStripLayer'"
+            <<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
+        return StatusCode::FAILURE;
+    }   
+    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "RpcGasGap");
     if (allGasGaps.empty()) {
-        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern StripLayer"
+        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern 'RpcGasGap'"
             <<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
         return StatusCode::FAILURE;
     }
-    /// For one reason or another the x-axis points along the gasgap 
-    /// and y along doublet phi
-    std::stable_sort(allGasGaps.begin(), allGasGaps.end(), [](const physVolWithTrans&a, const physVolWithTrans & b){
-         const Amg::Vector3D cA = a.transform.translation();
-         const Amg::Vector3D cB = b.transform.translation();
-         if (std::abs(cA.x() - cB.x()) > tolerance) return (cA.x() < cB.x());
-         return (cA.y() < cB.y());
-    });
+    /// In the GeoModel world, the x-axis points in radial direction & y axis along the phi direction
+    std::stable_sort(allGasGaps.begin(), allGasGaps.end(), layerSorter);
+    std::stable_sort(stripLayers.begin(),stripLayers.end(), layerSorter);
+    /// The strip layers are used to express the dimensions of the strip layer. However, that's projected into the 
+    /// Center of the gasgap which may or maybe not be split into two --> Find the closest gas gap in x for each
+    /// strip layer and overwrite the x coordinate of the strip layerof that one.
+    for (physVolWithTrans& stripLayer : stripLayers){
+        /// Find the closest gas Gap
+        const Amg::Vector3D stripTrans = stripLayer.transform.translation();
+        std::vector<physVolWithTrans>::iterator closestGap =  std::min_element(allGasGaps.begin(), allGasGaps.end(), 
+                             [&stripTrans](const physVolWithTrans& a, const physVolWithTrans& b){
+                                return std::abs(stripTrans.x() - a.transform.translation().x()) <
+                                       std::abs(stripTrans.x() - b.transform.translation().x());                                
+                             });
+        stripLayer.transform.translation().x() = closestGap->transform.translation().x();
+    }
+
     /// Now we need to associate the gasGap volumes with the gas gap number &
     /// the doublet Phi
-    Amg::Vector3D prevGap{allGasGaps[0].transform.translation()};
+    Amg::Vector3D prevGap{stripLayers[0].transform.translation()};
     unsigned int gasGap{1}, doubletPhi{0};
     
     unsigned int modulePhi = m_idHelperSvc->rpcIdHelper().doubletPhi(define.detElId);
     std::vector<gapVolume> allGapsWithIdx{};
-    for (physVolWithTrans& gapVol : allGasGaps) {
+    const bool isAside{m_idHelperSvc->stationEta(define.detElId) > 0};
+    for (physVolWithTrans& gapVol : stripLayers) {
         Amg::Vector3D gCen = gapVol.transform.translation();
         /// The volume points to a new gasgap
         if (std::abs(gCen.x() - prevGap.x()) > tolerance) {
@@ -146,7 +177,7 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
                                      paramBook.numEtaStrips);
         /// Define the box layout
         etaDesign->defineTrapezoid(gapBox->getYHalfLength(), gapBox->getYHalfLength(), gapBox->getZHalfLength());
-        gapVol.transform = gapVol.transform * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
+        gapVol.transform = gapVol.transform * Amg::getRotateY3D( (isAside ? -90. :  90.)* Gaudi::Units::degree);
         
         etaDesign = (*factoryCache.stripDesigns.emplace(etaDesign).first);
         const IdentifierHash etaHash {RpcReadoutElement::createHash(0, gapVol.gasGap, gapVol.doubPhi, false)};
@@ -160,9 +191,9 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         if (!define.etaDesign) define.etaDesign = etaDesign;
         StripDesignPtr phiDesign = std::make_unique<StripDesign>();
         phiDesign->defineStripLayout(Amg::Vector2D{-gapBox->getYHalfLength() + paramBook.firstOffSetPhi, 0.},
-                                     paramBook.stripPitchPhi,
-                                     paramBook.stripWidthPhi,
-                                     paramBook.numPhiStrips);
+                                                   paramBook.stripPitchPhi,
+                                                   paramBook.stripWidthPhi,
+                                                   paramBook.numPhiStrips);
         phiDesign->defineTrapezoid(gapBox->getZHalfLength(), gapBox->getZHalfLength(), gapBox->getYHalfLength());
         /// Next build the phi layer
         phiDesign = (*factoryCache.stripDesigns.emplace(phiDesign).first);
@@ -222,7 +253,6 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
             ATH_MSG_FATAL("Failed to construct the station Identifier from "<<key);
             return StatusCode::FAILURE;
         }
-        
         defineArgs define{};        
         define.physVol = pv;
         define.chambDesign = key_tokens[1];
@@ -253,16 +283,16 @@ StatusCode RpcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
     for (const IRDBRecord* record : *paramTable) {
         const std::string chambType = record->getString("WRPC_TYPE");
         wRPCTable& parBook = cache.parameterBook[record->getString("WRPC_TYPE")];
-        parBook.stripPitchEta = record->getDouble("STRIPPITCH_Z") * Gaudi::Units::cm;
-        parBook.stripPitchPhi = record->getDouble("STRIPPITCH_S") * Gaudi::Units::cm;
-        const double stripDeadWidth = record->getDouble("STRIPDEADSEP") * Gaudi::Units::cm;
+        parBook.stripPitchEta = record->getDouble("etaStripPitch") * Gaudi::Units::cm;
+        parBook.stripPitchPhi = record->getDouble("phiStripPitch") * Gaudi::Units::cm;
+        const double stripDeadWidth = record->getDouble("stripDeadWidth") * Gaudi::Units::cm;
         parBook.stripWidthEta = parBook.stripPitchEta - stripDeadWidth;
         parBook.stripWidthPhi = parBook.stripPitchPhi - stripDeadWidth;
-        parBook.numEtaStrips = record->getInt("NSTRIPS_Z");
-        parBook.numPhiStrips = record->getInt("NSTRIPS_S");
-        parBook.firstOffSetPhi = record->getDouble("STRIPOFFSET_S") * Gaudi::Units::cm + 
+        parBook.numEtaStrips = record->getInt("nEtaStrips");
+        parBook.numPhiStrips = record->getInt("nPhiStrips");
+        parBook.firstOffSetPhi = record->getDouble("phiStripOffSet") * Gaudi::Units::cm + 
                                  0.5 * parBook.stripPitchPhi;
-        parBook.firstOffSetEta = record->getDouble("STRIPOFFSET_Z") * Gaudi::Units::cm +
+        parBook.firstOffSetEta = record->getDouble("etaStripOffSet") * Gaudi::Units::cm +
                                  record->getDouble("TCKSSU") * Gaudi::Units::cm +
                                  0.5 * parBook.stripPitchEta;
         
@@ -271,8 +301,8 @@ StatusCode RpcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
                        <<", strip pitch (eta/phi) "<<parBook.stripPitchEta<<"/"<<parBook.stripPitchPhi
                        <<", strip width (eta/phi): "<<parBook.stripWidthEta<<"/"<<parBook.stripWidthPhi
                        <<", strip offset (eta/phi): "<<parBook.firstOffSetEta<<"/"<<parBook.firstOffSetPhi
-                       <<", STRIPOFFSET_Z: "<<(record->getDouble("STRIPOFFSET_Z") * Gaudi::Units::cm)
-                       <<", STRIPOFFSET_S: "<<(record->getDouble("STRIPOFFSET_S") * Gaudi::Units::cm)
+                       <<", etaStripOffSet: "<<(record->getDouble("etaStripOffSet") * Gaudi::Units::cm)
+                       <<", phiStripOffSet: "<<(record->getDouble("phiStripOffSet") * Gaudi::Units::cm)
                        <<", TCKSSU: "<<(record->getDouble("TCKSSU")* Gaudi::Units::cm));
     }
     return StatusCode::SUCCESS;
