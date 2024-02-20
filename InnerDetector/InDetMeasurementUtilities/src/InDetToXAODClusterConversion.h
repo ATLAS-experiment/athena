@@ -27,13 +27,17 @@
 //can't fwd declare this, needed for typedef to Pixel_RDO_Container
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
+#include "HGTD_PrepRawData/HGTD_ClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElementCollection.h"
 
 class PixelID;
 class SCT_ID;
+class HGTD_ID;
 
 namespace InDet {
 
@@ -58,22 +62,29 @@ public:
 private:
   StatusCode convertPixelClusters(const EventContext& ctx) const;
   StatusCode convertStripClusters(const EventContext& ctx) const;
+  StatusCode convertHgtdClusters(const EventContext& ctx) const;
   
 private:
   const PixelID* m_pixelID {};
   const SCT_ID* m_stripID {};
-
+  const HGTD_ID* m_hgtdID {};
+  
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey{this, "StripDetEleCollKey", "ITkStripDetectorElementCollection", "Key of SiDetectorElementCollection for Strip"};
-
+  SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_HGTDDetEleCollKey{this, "HGTDDetEleCollKey", "HGTD_DetectorElementCollection", "Key of HGTD_DetectorElementCollection for HGTD"};
+  
   SG::ReadHandleKey<InDet::PixelClusterContainer> m_inputPixelClusterContainerKey {this, "InputPixelClustersName", "ITkPixelClusters", "name of the input InDet pixel cluster container"};
   SG::ReadHandleKey<InDet::SCT_ClusterContainer>  m_inputStripClusterContainerKey {this, "InputStripClustersName", "ITkStripClusters", "name of the input InDet strip cluster container"};
 
   SG::WriteHandleKey<xAOD::PixelClusterContainer> m_outputPixelClusterContainerKey {this, "OutputPixelClustersName", "ITkPixelClusters", "name of the output xAOD pixel cluster container"};
   SG::WriteHandleKey<xAOD::StripClusterContainer> m_outputStripClusterContainerKey {this, "OutputStripClustersName", "ITkStripClusters", "name of the output xAOD strip cluster container"};
 
-  Gaudi::Property<bool> m_processPixel {this, "ProcessPixel", true};
-  Gaudi::Property<bool> m_processStrip {this, "ProcessStrip", true};
+  SG::ReadHandleKey<::HGTD_ClusterContainer> m_inputHgtdClusterContainerKey {this, "InputHgtdClustersName", "HGTD_Clusters", "name of the input hgtd cluster container"};
+  SG::WriteHandleKey<xAOD::HGTDClusterContainer> m_outputHgtdClusterContainerKey {this, "OutputHgtdClustersName", "HGTD_Clusters", "name of the output xAOD hgtd cluster container"};
+  
+  Gaudi::Property<bool> m_processPixel {this, "ProcessPixel", false};
+  Gaudi::Property<bool> m_processStrip {this, "ProcessStrip", false};
+  Gaudi::Property<bool> m_processHgtd {this, "ProcessHgtd", false};
 };
 
 }

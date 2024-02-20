@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/XAODToInDetClusterConversion.h"
@@ -43,6 +43,13 @@ namespace InDet {
     ATH_CHECK( m_outputStripClusterContainerKey.initialize(m_processStrip) );
     
     ATH_CHECK( m_lorentzAngleTool.retrieve() );
+
+    // Hgtd Clusters
+    ATH_CHECK( m_HGTDDetEleCollKey.initialize(m_processHgtd) );
+    ATH_CHECK( detStore()->retrieve(m_hgtdID, "HGTD_ID") );
+
+    ATH_CHECK( m_inputHgtdClusterContainerKey.initialize(m_processHgtd) );
+    ATH_CHECK( m_outputHgtdClusterContainerKey.initialize(m_processHgtd) );
     
     return StatusCode::SUCCESS;
   }
@@ -61,6 +68,11 @@ namespace InDet {
       ATH_CHECK( convertStripClusters(ctx) );
     }
 
+    if (m_processHgtd.value()) {
+      ATH_MSG_DEBUG("Converting HGTD Clusters: xAOD -> InDet");
+      ATH_CHECK( convertHgtdClusters(ctx) );
+    }
+    
     return StatusCode::SUCCESS;
   }
   
@@ -196,6 +208,63 @@ namespace InDet {
     
     return StatusCode::SUCCESS;
   }
+
+  StatusCode XAODToInDetClusterConversion::convertHgtdClusters(const EventContext& ctx) const
+  {
+    SG::ReadCondHandle<InDetDD::HGTD_DetectorElementCollection> hgtdDetEleHandle( m_HGTDDetEleCollKey, ctx );
+    const InDetDD::HGTD_DetectorElementCollection *hgtdElements( *hgtdDetEleHandle );
+    if (not hgtdDetEleHandle.isValid() or hgtdElements==nullptr) {
+      ATH_MSG_FATAL(m_HGTDDetEleCollKey.fullKey() << " is not available.");
+      return StatusCode::FAILURE;
+    }
+
+    SG::ReadHandle<xAOD::HGTDClusterContainer> inputHgtdClusterContainer = SG::makeHandle( m_inputHgtdClusterContainerKey, ctx );
+    ATH_CHECK( inputHgtdClusterContainer.isValid() );
+    const xAOD::HGTDClusterContainer *inputHgtdClusters = inputHgtdClusterContainer.cptr();
+
+    SG::WriteHandle<::HGTD_ClusterContainer> outputHgtdClusterContainer = SG::makeHandle(m_outputHgtdClusterContainerKey, ctx);
+    ATH_CHECK( outputHgtdClusterContainer.record (std::make_unique<::HGTD_ClusterContainer>(m_hgtdID->wafer_hash_max(), EventContainers::Mode::OfflineFast)) );
+    ATH_MSG_DEBUG( "Container '" << m_outputHgtdClusterContainerKey.key() << "' initialised" );
+
+    ContainerAccessor<xAOD::HGTDCluster, IdentifierHash, 1>
+      hgtdAccessor ( *inputHgtdClusters,
+		     [] (const xAOD::HGTDCluster& cl) -> IdentifierHash { return cl.identifierHash(); },
+		     hgtdElements->size());
+
+     const auto& allIdHashes = hgtdAccessor.allIdentifiers();
+    for (const auto& hashId : allIdHashes) {
+      const auto *element = hgtdElements->getDetectorElement(hashId);
+      if ( element == nullptr ) {
+        ATH_MSG_FATAL( "Invalid hgtd detector element for hash " << hashId);
+        return StatusCode::FAILURE;
+      }
+
+      std::unique_ptr<::HGTD_ClusterCollection> collection = std::make_unique<::HGTD_ClusterCollection>(hashId);
+
+      // Get the detector element and range for the idHash
+      for (const auto& this_range : hgtdAccessor.rangesForIdentifierDirect(hashId)) {
+        for (auto start = this_range.first; start != this_range.second; ++start) {
+          const xAOD::HGTDCluster* in_cluster = *start;
+
+          ::HGTD_Cluster* cluster = nullptr;
+          ATH_CHECK( TrackingUtilities::convertXaodToInDetCluster(*in_cluster, *element, cluster) );
+          cluster->setHashAndIndex(hashId, collection->size());
+
+          // Add to Collection
+          collection->push_back(cluster);
+        }
+      }
+
+      ::HGTD_ClusterContainer::IDC_WriteHandle lock = outputHgtdClusterContainer->getWriteHandle(hashId);
+      ATH_CHECK(lock.addOrDelete( std::move(collection) ));
+
+    } // loop on hashIds
+    
+    ATH_CHECK( outputHgtdClusterContainer.setConst() );
+    
+    return StatusCode::SUCCESS;
+  }
+  
 
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMeasurementUtilities/ClusterConversionUtilities.h"
@@ -9,8 +9,45 @@
 
 #include "xAODInDetMeasurement/Utilities.h"
 
+#include "HGTD_PrepRawData/HGTD_Cluster.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
+
 namespace TrackingUtilities {
 
+  StatusCode convertInDetToXaodCluster(const HGTD_Cluster& indetCluster,
+				       const InDetDD::HGTD_DetectorElement& element,
+				       xAOD::HGTDCluster& xaodCluster)
+  {
+    IdentifierHash idHash = element.identifyHash();
+
+    auto localPos = indetCluster.localPosition();
+    auto localCov = indetCluster.localCovariance();
+
+    const float time = indetCluster.time();
+    const float timeResolution = indetCluster.timeResolution();
+    
+    const auto& RDOs = indetCluster.rdoList();
+    const auto& ToTs = indetCluster.totList();
+
+    // Time to fill the xaod cluster
+    Eigen::Matrix<float,3,1> localPosition = Eigen::Matrix<float,3,1>::Zero();
+    localPosition(0, 0) = localPos.x();
+    localPosition(1, 0) = localPos.y();
+    localPosition(2, 0)	= time;
+
+    Eigen::Matrix<float,3,3> localCovariance = Eigen::Matrix<float,3,3>::Zero();
+    localCovariance(0, 0) = localCov(0, 0);
+    localCovariance(1, 1) = localCov(1, 1);
+    localCovariance(2, 2) = timeResolution;
+
+    xaodCluster.setMeasurement<3>(idHash, localPosition, localCovariance);
+    xaodCluster.setRDOlist(RDOs);
+    xaodCluster.setToTlist(ToTs);
+    
+    return StatusCode::SUCCESS;
+  }
+  
   StatusCode convertInDetToXaodCluster(const InDet::PixelCluster& indetCluster,
 				       const InDetDD::SiDetectorElement& element,
 				       xAOD::PixelCluster& xaodCluster)
@@ -273,6 +310,42 @@ namespace TrackingUtilities {
     return StatusCode::SUCCESS;
   }
 
+  StatusCode convertXaodToInDetCluster(const xAOD::HGTDCluster& xaodCluster,
+                                       const InDetDD::HGTD_DetectorElement& element,
+                                       ::HGTD_Cluster*& indetCluster) {
+
+    const auto& locPos = xaodCluster.localPosition<3>(); 
+    Amg::Vector2D localPosition(locPos(0,0), locPos(1,0));
+    float time = locPos(2,0);
+
+    InDetDD::SiLocalPosition centroid(localPosition);
+    const Identifier id = element.identifierOfPosition(centroid);
+
+    auto errorMatrix = Amg::MatrixX(2,2);
+    errorMatrix.setIdentity();
+    errorMatrix.fillSymmetric(0, 0, xaodCluster.localCovariance<3>()(0, 0));
+    errorMatrix.fillSymmetric(1, 1, xaodCluster.localCovariance<3>()(1, 1));    
+    float time_resolution = xaodCluster.localCovariance<3>()(2, 2);
+
+    double etaWidth = 1.3;
+    double phiWidth = 1.3;
+    int channelsPhi = 1;
+    int channelsEta = 1;
+    InDet::SiWidth width( Amg::Vector2D(channelsPhi, channelsEta), Amg::Vector2D(phiWidth, etaWidth) );
+
+    indetCluster = new ::HGTD_Cluster(id,
+				      localPosition,
+				      std::vector<Identifier>(xaodCluster.rdoList()),
+				      width,
+				      &element,
+				      std::move(errorMatrix),
+				      time,
+				      time_resolution,
+				      std::vector<int>(xaodCluster.totList()));				      
+
+    return StatusCode::SUCCESS;
+  }
+  
 } // Namespace
 
 

@@ -10,10 +10,13 @@ atlas_add_library( InDetMeasurementUtilitiesLib
 		      InDetMeasurementUtilities
    		   LINK_LIBRARIES
 		      InDetPrepRawData
+		      HGTD_PrepRawData
 		      xAODInDetMeasurement
 		      InDetIdentifier
+		      HGTD_Identifier
 		      InDetReadoutGeometry
 		      PixelReadoutGeometryLib
+		      HGTD_ReadoutGeometry
 		      SCT_ReadoutGeometry
 		      TrkSpacePoint
 		      SiSpacePoint
