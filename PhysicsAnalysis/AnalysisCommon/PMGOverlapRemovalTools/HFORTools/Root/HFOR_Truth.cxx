@@ -9,8 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "boost/current_function.hpp"
-
 #include "boost/property_tree/info_parser.hpp"
 #include "boost/property_tree/xml_parser.hpp"
 
@@ -118,7 +116,7 @@ HFORType HFOR_Truth::findOverlap(const xAOD::TruthEventContainer& truthEvent,
   //If this sample is not Alpgen+Pythia, do nothing
   if ( m_sampleType == HFORType::noType ) {
     //This message should be debug ...
-    //Warning(BOOST_CURRENT_FUNCTION, "This is not a valid AlpgenPythia sample, do nothing") ;
+    //Warning(__PRETTY_FUNCTION__, "This is not a valid AlpgenPythia sample, do nothing") ;
     return action ;
   }
 
@@ -196,7 +194,7 @@ HFORType HFOR_Truth::jetBasedRemoval( const xAOD::JetContainer* jets) {
 
   //If this sample is not Alpgen+Pythia, do nothing
   if ( m_sampleType == HFORType::noType ) {		//This message should be debug ...
-    Warning(BOOST_CURRENT_FUNCTION, "This is not a valid AlpgenPythia sample, do nothing") ;
+    Warning(__PRETTY_FUNCTION__, "This is not a valid AlpgenPythia sample, do nothing") ;
     return (HFORType::noType) ;
   }
 
@@ -538,7 +536,7 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
       }
     }
     if (PDF.size() != xPDF[fsq_pdgId].size()) {
-      //Warning(BOOST_CURRENT_FUNCTION, "Mismatch number of PDF identified partons of flavor %i", fsq_pdgId);
+      //Warning(__PRETTY_FUNCTION__, "Mismatch number of PDF identified partons of flavor %i", fsq_pdgId);
     }
   }
 
