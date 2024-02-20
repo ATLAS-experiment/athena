@@ -5,9 +5,7 @@
 #include "src/InDetToXAODClusterConversion.h"
 #include "src/XAODToInDetClusterConversion.h"
 #include "src/InDetToXAODSpacePointConversion.h"
-#include "src/SpacePointPersistification.h"
 
 DECLARE_COMPONENT( InDet::InDetToXAODClusterConversion )
 DECLARE_COMPONENT( InDet::XAODToInDetClusterConversion )
 DECLARE_COMPONENT( InDet::InDetToXAODSpacePointConversion )
-DECLARE_COMPONENT( InDet::SpacePointPersistification )

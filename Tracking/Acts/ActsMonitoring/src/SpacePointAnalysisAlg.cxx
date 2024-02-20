@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SpacePointAnalysisAlg.h"
@@ -57,6 +57,7 @@ namespace ActsTrk {
 	  [[maybe_unused]] const auto idHash = el->identifierHash();
 	}
       } else if (sp->isAvailable< std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > >("measurementLink")) {
+	// For now this is still allowed. Once we have a Space Point reader algorithm, thi will imply an error instead
 	static const SG::AuxElement::Accessor< std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > > accCluster("measurementLink");
 	const auto& els = accCluster(*sp);
 	for (const auto& el : els) {
@@ -64,7 +65,6 @@ namespace ActsTrk {
         }
       }
     }
-
 
     auto monitor_barrelEndcap = Monitored::Collection("barrelEndcap", *inputSpacePointCollection,
 						      [this, &pixelID, &stripID] (const auto* spacePoint) -> int
