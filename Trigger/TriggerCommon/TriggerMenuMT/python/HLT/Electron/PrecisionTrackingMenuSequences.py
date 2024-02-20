@@ -1,18 +1,18 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components
-from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Tracking'
 
 
 @AccumulatorCache
-def precisionTrackingMenuSequenceCfg(flags, ion=False, variant='', is_probe_leg = False):
+def precisionTrackingSequenceCfg(flags, ion=False, variant='', is_probe_leg = False):
     """ fourth step:  precision electron....."""
 
     inViewRoIs = "precisionTracking" + variant
@@ -45,13 +45,5 @@ def precisionTrackingMenuSequenceCfg(flags, ion=False, variant='', is_probe_leg 
     return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
 
-def precisionTrackingMenuSequence(flags, name, is_probe_leg=False, ion=False, variant=''):
-    """Creates fifth step of electron sequence"""
-    if isComponentAccumulatorCfg():
-        return precisionTrackingMenuSequenceCfg(flags, ion=ion, variant=variant, is_probe_leg=is_probe_leg)
-    else: 
-        return menuSequenceCAToGlobalWrapper(precisionTrackingMenuSequenceCfg, flags, ion=ion, variant=variant, is_probe_leg=is_probe_leg)
-
-
-def precisionTrackingMenuSequence_LRT(flags, name, is_probe_leg=False):
-    return precisionTrackingMenuSequence(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')
+def precisionTrackingSequence_LRTCfg(flags, is_probe_leg=False):
+    return precisionTrackingSequenceCfg(flags, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')

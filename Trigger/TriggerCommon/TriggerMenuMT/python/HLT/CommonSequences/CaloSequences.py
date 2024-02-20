@@ -2,8 +2,7 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 class CaloMenuDefs(object):
@@ -44,10 +43,3 @@ def fastCaloMenuSequenceCfg(flags, name, doRinger=True, is_probe_leg=False):
 
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastCaloHypoToolFromDict,isProbe=is_probe_leg)
-
-
-def fastCaloMenuSequence(flags, name, doRinger=True, is_probe_leg=False):
-     if isComponentAccumulatorCfg():
-        return fastCaloMenuSequenceCfg(flags,name=name,doRinger=doRinger,is_probe_leg=is_probe_leg)
-     else: 
-        return menuSequenceCAToGlobalWrapper(fastCaloMenuSequenceCfg,flags,name=name,doRinger=doRinger,is_probe_leg=is_probe_leg)
