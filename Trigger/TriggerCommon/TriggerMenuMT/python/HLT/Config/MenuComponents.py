@@ -12,10 +12,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 import GaudiConfig2
 from TrigCompositeUtils.TrigCompositeUtils import legName
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu 
 
 from collections.abc import MutableSequence
 import inspect
@@ -176,17 +173,10 @@ class HypoAlgNode(AlgNode):
             if isinstance(result, ComponentAccumulator):
                 tool = result.popPrivateTools()
                 assert not isinstance(tool, list), "Can not handle list of tools"
-                if not isCAMenu():
-                    # do not do this in CA, use unconverted tool
-                    tool = conf2toConfigurable(tool)
-                    self.Alg.HypoTools = self.Alg.HypoTools + [tool]  # see ATEAM-773
-                else:
-                    self.Alg.HypoTools.append(tool)
+                self.Alg.HypoTools.append(tool)
                 return result
             else:
                 self.Alg.HypoTools = self.Alg.HypoTools + [result]  # see ATEAM-773
-            if isCAMenu():
-                assert isinstance(self.Alg.HypoTools[-1], GaudiConfig2._configurables.Configurable), "The Hypo Tool for {} is not Configurable2".format(hypoToolConf.chainDict['chainName'])
 
         except NoHypoToolCreated as e:
             log.debug("%s returned empty tool: %s", hypoToolConf.name, e)
@@ -225,15 +215,13 @@ class ComboMaker(AlgNode):
         self.prop2 = "LegToInputCollectionMap"
         self.comboHypoCfg = comboHypoCfg        
         self.acc = self.create( name )        
-        if isComponentAccumulatorCfg(): 
-            thealgs= self.acc.getEventAlgos()
-            if thealgs is None:
-                log.error("ComboMaker: Combo alg %s not found", name)
-            if len(thealgs) != 1: 
-                log.error("ComboMaker: Combo alg %s len is %d",name, len(thealgs))
-            Alg=thealgs[0]
-        else:
-            Alg=self.acc
+        thealgs= self.acc.getEventAlgos()
+        if thealgs is None:
+            log.error("ComboMaker: Combo alg %s not found", name)
+        if len(thealgs) != 1:
+            log.error("ComboMaker: Combo alg %s len is %d",name, len(thealgs))
+        Alg=thealgs[0]
+
         log.debug("ComboMaker init: Alg %s", name)
         AlgNode.__init__(self,  Alg, 'HypoInputDecisions', 'HypoOutputDecisions')
         self.resetInput()
@@ -318,11 +306,8 @@ class ComboMaker(AlgNode):
 
 
 def getEmptyMenuSequence(name):
-    # to clean up
-    if isCAMenu():
-        return EmptyMenuSequenceCA(name)
-    else:
-        return EmptyMenuSequence(name)
+    return EmptyMenuSequenceCA(name)
+
              
 class EmptyMenuSequence(object):
     """ Class to emulate reco sequences with no Hypo"""
