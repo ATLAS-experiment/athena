@@ -19,8 +19,11 @@ def createGeneratorConfigFlags():
     # Events per job
     gencf.addFlag("Generator.nEventsPerJob", 10000)
 
+    # Events per job
+    gencf.addFlag("Generator.DSID", 999999)
+
     # First event
-    gencf.addFlag("Generator.firstEvent", 1)
+    gencf.addFlag("Generator.firstEvent", -1)
     
     # Number of HepMC events to print
     gencf.addFlag("Generator.printEvts", 0)
@@ -43,7 +46,7 @@ def generatorRunArgsToFlags(runArgs, flags):
         flags.Beam.Energy = runArgs.ecmEnergy/2	* GeV 
     else:
         raise RuntimeError("No center of mass energy provided.") 
-    
+        
     if hasattr(runArgs, "ignoreBlackList"):
         flags.Generator.ignoreBlackList = runArgs.ignoreBlackList
 

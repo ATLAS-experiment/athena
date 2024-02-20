@@ -1,5 +1,9 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+# Get logger
+from AthenaCommon.Logging import logging
+evgenLog = logging.getLogger('GenConfigHelpers')
+
 # Generators providing input events via the LHEF format 
 # (used to determine the input file dummy-naming strategy for C++ generators)
 LHEFGenerators = ["Lhef", # generic name: prefer to use the names below
@@ -93,3 +97,35 @@ def gen_sortkey(genname):
 
     # Return a tuple
     return (genstage,  genname)
+
+# Function to perform consistency check on jO
+def checkJOConsistency(jofile):
+    import os, sys, string
+    
+    joparts = (os.path.basename(jofile)).split(".")
+    # Perform some consistency checks
+    if joparts[0].startswith("mc") and all(c in string.digits for c in joparts[0][2:]):
+        # Check that there are exactly 4 name parts separated by '.': MCxx, DSID, physicsShort, .py
+        if len(joparts) != 3:
+            evgenLog.error(jofile + " name format is wrong: must be of the form mc.<physicsShort>.py: please rename.")
+            sys.exit(1)
+        # Check the length limit on the physicsShort portion of the filename
+        jo_physshortpart = joparts[1]
+        if len(jo_physshortpart) > 50:
+            evgenLog.error(jofile + " contains a physicsShort field of more than 60 characters: please rename.")
+            sys.exit(1)
+        # There must be at least 2 physicsShort sub-parts separated by '_': gens, (tune)+PDF, and process
+        jo_physshortparts = jo_physshortpart.split("_")
+        if len(jo_physshortparts) < 2:
+            evgenLog.error(jofile + " has too few physicsShort fields separated by '_': should contain <generators>(_<tune+PDF_if_available>)_<process>. Please rename.")
+            sys.exit(1)
+        
+        # NOTE: a further check on physicsShort consistency is done below, after fragment loading
+        check_jofiles="/cvmfs/atlas.cern.ch/repo/sw/Generators/MC16JobOptions/scripts"
+        sys.path.append(check_jofiles)
+        from check_jo_consistency import check_naming       
+        if os.path.exists(check_jofiles):
+            check_naming(os.path.basename(jofile))
+        else:
+            evgenLog.error("check_jo_consistency.py not found")
+            sys.exit(1)
