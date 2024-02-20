@@ -9,4 +9,4 @@ atlas_add_component( HGTD_RecAlgs
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps GaudiKernel GeneratorObjects
                      HGTD_RecToolInterfaces HGTD_RawData HGTD_RIO_OnTrack HGTD_Identifier
-                     xAODTracking xAODTruth InDetSimData)
+                     xAODTracking xAODTruth InDetSimData AthenaMonitoringKernelLib)

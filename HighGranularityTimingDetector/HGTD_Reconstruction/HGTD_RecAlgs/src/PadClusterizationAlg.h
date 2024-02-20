@@ -19,6 +19,7 @@
 #include "HGTD_RecToolInterfaces/IHGTD_PadClusterizationTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 #include <string>
 
@@ -36,6 +37,7 @@ public:
 
 private:
   ToolHandle<IHGTD_PadClusterizationTool> m_clusterization_tool{this, "ClusterizationTool", "HGTD::SinglePadClusterTool", "Tool for translating HGTD_RDO objects into HGTD_PrepRawData clusters"};
+  ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
 
   SG::ReadHandleKey<HGTD_RDO_Container> m_rdo_rh_key{this, "RDOContainerName", "HGTD_RDOs", "Name of the HGTD_RDO container"};
   SG::WriteHandleKey<HGTD_ClusterContainer> m_prd_wh_key{this, "PRDContainerName", "HGTD_Clusters", "Name of the HGTD_Cluster container"};
