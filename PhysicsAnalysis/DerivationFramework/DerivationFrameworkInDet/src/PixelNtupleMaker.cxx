@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkInDet/PixelNtupleMaker.h"
@@ -151,7 +151,7 @@ StatusCode DerivationFramework::PixelNtupleMaker::addBranches() const {
         clusterCharge.push_back(clus_itr->auxdata<float>("charge"));
         clusterToT.push_back(clus_itr->auxdata<int>("ToT"));
         clusterL1A.push_back(clus_itr->auxdata<int>("LVL1A"));
-        clusterIsSplit.push_back(clus_itr->auxdata<int>("isSplit"));
+        clusterIsSplit.push_back(clus_itr->auxdata<char>("isSplit"));
         clusterSize.push_back(clus_itr->auxdata<int>("nRDO"));
         clusterSizePhi.push_back(clus_itr->auxdata<int>("sizePhi"));
         clusterSizeZ.push_back(clus_itr->auxdata<int>("sizeZ"));
