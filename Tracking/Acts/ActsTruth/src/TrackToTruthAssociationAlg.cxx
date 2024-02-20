@@ -145,13 +145,15 @@ namespace ActsTrk
 
        unsigned int n_measurements=0u;
 
-       ActsTrk::TruthParticleHitCountVector &truth_particle_counts = track_association->at(track_i);
+       HitCounterArray &reco_hits = track_association->at(track_i).totalCounts();
+       ActsTrk::HitCountsPerTrack::container  &truth_particle_counts = track_association->at(track_i).countsPerTruthParticle();
        tracksContainer->trackStateContainer().visitBackwards(
           lastMeasurementIndex,
           [this,
            &n_measurements,
            &measurement_to_truth_association_maps,
-           &truth_particle_counts](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+           &truth_particle_counts,
+           &reco_hits](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             if (!state.typeFlags().test(Acts::TrackStateFlag::OutlierFlag) && state.hasUncalibratedSourceLink()) {
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
@@ -164,7 +166,7 @@ namespace ActsTrk
                  ++n_measurements;
                  for (const xAOD::TruthParticle *truth_particle : association_map->at(uncalibMeas.index()) ) {
                     const xAOD::TruthParticle *mother_particle = m_elasticDecayUtil.getMother(*truth_particle, m_maxEnergyLoss.value());
-                    ActsTrk::TruthParticleHitCountVector::iterator
+                    ActsTrk::HitCountsPerTrack::container::iterator
                        hit_count_iter = std::find_if(truth_particle_counts.begin(),
                                                      truth_particle_counts.end(),
                                                      [mother_particle](const std::pair<const xAOD::TruthParticle *, HitCounterArray > &a) {
@@ -177,6 +179,7 @@ namespace ActsTrk
                     ++(hit_count_iter->second.at( to_underlying(uncalibMeas.type())));
                  }
               }
+              ++reco_hits.at( to_underlying(uncalibMeas.type()));
             }
 
           });

@@ -15,7 +15,7 @@ namespace ActsTrk
 {
    constexpr unsigned int NHitCounter = static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::sTgcStripType)+1u;
    constexpr unsigned int NTruthParticlesPerTrack = 5;  // a tiny fraction of measurements will have more than
-                                                        // 6 associated GenParticles
+                                                        // 5 associated GenParticles
 
    // Wrapper around std::array to ensure that by default elements are initialised to zero
    class  HitCounterArray : public  std::array<uint8_t,  NHitCounter>
@@ -23,9 +23,40 @@ namespace ActsTrk
    public:
       HitCounterArray() : std::array<uint8_t,  NHitCounter>{} {}
    };
-   using TruthParticleHitCountVector = boost::container::small_vector<std::pair<const xAOD::TruthParticle *,
-                                                                                HitCounterArray >, NTruthParticlesPerTrack>;
-   using TrackToTruthParticleAssociation = std::vector<TruthParticleHitCountVector> ;
+
+   /** Container for hit counts per track
+    * Contains hit counts per associated truth particle and the total hit counts
+    * As last element in the container.
+    * The sub-container returned by @ref countsPerTruthParticle contains
+    * the subset where each of the pairs contains a valid pointer to a truth
+    * particle and its associated hit counts.
+    */
+   class HitCountsPerTrack {
+   public:
+      using container = boost::container::small_vector<std::pair<const xAOD::TruthParticle *, HitCounterArray >, NTruthParticlesPerTrack>;
+
+      /** vector with counts per associated truth particle
+       */
+      const container &countsPerTruthParticle() const { return m_counts; }
+
+      /** vector with counts per associated truth particle (read only)
+       */
+      container &countsPerTruthParticle()             { return m_counts; }
+
+      /** Total hit counts per track.
+       */
+      HitCounterArray &totalCounts()               { return m_totalCounts; }
+
+      /** Total hit counts per track (read only).
+       */
+      const HitCounterArray &totalCounts() const   { return m_totalCounts; }
+
+   private:
+      container m_counts;
+      HitCounterArray m_totalCounts;
+   };
+
+   using TrackToTruthParticleAssociation = std::vector<HitCountsPerTrack> ;
 }
 
 #include "AthenaKernel/CLASS_DEF.h"
