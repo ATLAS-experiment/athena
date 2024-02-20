@@ -50,17 +50,24 @@ class TgcStrip_v1 : public UncalibratedMeasurement_v1 {
 
     void setMeasuresPhi(uint8_t measPhi);
 
-    /** @brief Returns the hash of the measurement channel (tube (x) layer) */
+    /** @brief Returns the hash of the measurement channel  */
     IdentifierHash measurementHash() const;
-    
-    
+    /** @brief Returns the hash of the associated layer (Needed for surface retrieval)*/
+    IdentifierHash layerHash() const;
+
     /** @brief set the pointer to the TgcReadoutElement */
     void setReadoutElement(const MuonGMR4::TgcReadoutElement* readoutEle);
     /** @brief Retrieve the associated TgcReadoutElement. 
         If the element has not been set before, it's tried to load it on the fly. 
         Exceptions are thrown if that fails as well */
     const MuonGMR4::TgcReadoutElement* readoutElement() const;
+    /** @brief Returns the local position of the strip within
+     *        the Muon Station (I.e. the center plane between 2 multilayers)
+     */
+    ConstVectorMap<3> stripPosInStation() const;
 
+    /** @brief Sets the position of the strip within a muon station*/
+    void setStripPosInStation(const MeasVector<3>& pos);
     private:
 #ifdef __CLING__
     /// Down cast the memory of the readoutElement cache if the object is stored to disk 

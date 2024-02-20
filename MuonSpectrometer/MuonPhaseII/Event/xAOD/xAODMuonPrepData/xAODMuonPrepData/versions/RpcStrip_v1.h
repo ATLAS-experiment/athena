@@ -57,9 +57,10 @@ class RpcStrip_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Returns the time over threshold */
     float timeOverThreshold() const;
 
-    /** @brief Returns the hash of the measurement channel (tube (x) layer) */
+    /** @brief Returns the hash of the measurement channel */
     IdentifierHash measurementHash() const;
-
+    /** @brief Returns the hash of the associated layer (Needed for surface retrieval)*/
+    IdentifierHash layerHash() const;
     /** @brief Sets the the triger time of the hit */
     void setTime(float time);
     /** @brief Set the trigger info of the hit  */

@@ -80,6 +80,10 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
             prd->setGasGap(gasGap);
             prd->setMeasuresPhi(false);
             prd->setReadoutElement(readOutEle);
+            const Amg::Vector3D strip3D = lPos.x() * Amg::Vector3D::UnitX();
+            const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx,etaHitId)};
+            prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D)); 
+
         }
         /// Check whether the read out element contains phi strips or not.
         if (!readOutEle->numStrips(gasGap)) {
@@ -111,6 +115,9 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setGasGap(gasGap);
         prd->setMeasuresPhi(true);
         prd->setReadoutElement(readOutEle);
+        const Amg::Vector3D strip3D = lPos.x() * Amg::Vector3D::UnitX();
+        const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx, phiHitId)};
+        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D)); 
     }
     return StatusCode::SUCCESS;
 }

@@ -93,9 +93,9 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
             prd->setReadoutElement(readOutEle);
             prd->setTime(hitTime);
             prd->setAmbiguityFlag(0);
-            Amg::Vector3D strip3D {smearedEtaPos.x(), 0.,0.};
-            auto globToCenter = m_surfaceProvTool->globalToChambCenter(gctx,etaHitId);
-            prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,readOutEle->layerHash(prd->measurementHash())) * strip3D)); 
+            const Amg::Vector3D strip3D  = lPos.x() * Amg::Vector3D::UnitX();
+            const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx,etaHitId)};
+            prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D)); 
         }
         /// Check whether the read out element contains phi strips or not.
         if (!readOutEle->nPhiStrips()) {
@@ -132,9 +132,9 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setReadoutElement(readOutEle);
         prd->setTime(hitTime);
         prd->setAmbiguityFlag(0);
-        Amg::Vector3D strip3D {smearedPhiPos.x(), 0.,0.};
-        auto globToCenter = m_surfaceProvTool->globalToChambCenter(gctx,phiHitId);
-        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,readOutEle->layerHash(prd->measurementHash())) * strip3D)); 
+        const Amg::Vector3D strip3D = lPos.x() * Amg::Vector3D::UnitX();
+        const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx, phiHitId)};
+        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D)); 
     }
     return StatusCode::SUCCESS;
 }

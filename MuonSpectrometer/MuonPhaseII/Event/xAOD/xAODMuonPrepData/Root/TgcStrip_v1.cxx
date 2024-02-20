@@ -13,6 +13,8 @@
 
 namespace {
     static const std::string preFixStr{"Tgc_"};
+    static const xAOD::PosAccessor<3> accStripPos{preFixStr + "stripPosInStation"};
+
 }
 
 namespace xAOD {
@@ -25,6 +27,16 @@ IMPLEMENT_READOUTELEMENT(TgcStrip_v1, m_readoutEle, TgcReadoutElement)
 
 IdentifierHash TgcStrip_v1::measurementHash() const {
    return MuonGMR4::TgcReadoutElement::constructHash(channelNumber(), gasGap(), measuresPhi());
+}
+IdentifierHash TgcStrip_v1::layerHash() const {
+   return MuonGMR4::TgcReadoutElement::constructHash(0, gasGap(), measuresPhi());
+}
+void TgcStrip_v1::setStripPosInStation(const MeasVector<3>& pos){
+    VectorMap<3> v{accStripPos(*this).data()};
+    v = pos;
+}
+ConstVectorMap<3> TgcStrip_v1::stripPosInStation() const {
+    return ConstVectorMap<3>{accStripPos(*this).data()};
 }
 }  // namespace xAOD
 #undef IMPLEMENT_SETTER_GETTER

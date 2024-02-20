@@ -38,6 +38,8 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     
     /** @brief Returns the hash of the measurement channel*/
     IdentifierHash measurementHash() const;
+    /** @brief Returns the hash of the associated layer (Needed for surface retrieval)*/
+    IdentifierHash layerHash() const;
 
     /** @brief Returns the time  (ns). 
     The time is calibrated, i.e. it is in units of ns, after t0 subtraction.*/
@@ -104,6 +106,14 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
         If the element has not been set before, it's tried to load it on the fly. 
         Exceptions are thrown if that fails as well */
     const MuonGMR4::MmReadoutElement* readoutElement() const;
+
+    /** @brief Returns the local position of the strip within
+     *        the Muon Station (I.e. the center plane between 2 multilayers)
+     */
+    ConstVectorMap<3> stripPosInStation() const;
+
+    /** @brief Sets the position of the strip within a muon station*/
+    void setStripPosInStation(const MeasVector<3>& pos);
 
     private:
 #ifdef __CLING__

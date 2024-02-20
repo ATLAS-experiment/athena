@@ -34,6 +34,7 @@ MMClusterAuxContainer_v1::MMClusterAuxContainer_v1()
    PRD_AUXVARIABLE(stripCharges);
    PRD_AUXVARIABLE(stripDriftDist);
    PRD_AUXVARIABLE(stripDriftErrors);
+   PRD_AUXVARIABLE(stripPosInStation);
 }
 }  // namespace xAOD
 #undef PRD_AUXVARIABLE

@@ -34,6 +34,9 @@ IdentifierHash RpcStrip_v1::measurementHash() const {
                                                    doubletPhi(),
                                                    measuresPhi());
 }
+IdentifierHash RpcStrip_v1::layerHash() const {
+    return MuonGMR4::RpcReadoutElement::createHash(0, gasGap(), doubletPhi(), measuresPhi());
+}
 void RpcStrip_v1::setStripPosInStation(const MeasVector<3>& pos){
     VectorMap<3> v{accStripPos(*this).data()};
     v = pos;
