@@ -46,7 +46,6 @@ atlas_add_test( MultiTrajectoryBasic_test
 
 atlas_add_test( MultiTrajectorySE_test
 				SOURCES test/MultiTrajectorySE_test.cxx
-<<<<<<< HEAD
 				LINK_LIBRARIES ActsEventLib
 				POST_EXEC_SCRIPT nopost.sh)
 
@@ -58,12 +57,4 @@ atlas_add_test( MultiTrajectoryACTS_test
 atlas_add_test( TrackSummaryContainer_test
 				SOURCES test/TrackSummaryContainer_test.cxx
 				LINK_LIBRARIES ActsEventLib
-=======
-				LINK_LIBRARIES TestTools ActsEventLib
-				POST_EXEC_SCRIPT nopost.sh)				
-
-atlas_add_test( TrackSummaryContainer_test
-				SOURCES test/TrackSummaryContainer_test.cxx
-				LINK_LIBRARIES TestTools ActsEventLib
->>>>>>> ceee5aad679 (reverting accidental changes...)
 				POST_EXEC_SCRIPT nopost.sh)

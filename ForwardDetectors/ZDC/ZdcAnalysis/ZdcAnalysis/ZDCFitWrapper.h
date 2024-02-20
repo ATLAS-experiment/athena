@@ -18,19 +18,19 @@ double ZDCFermiExpFitRefl(const double* xvec, const double* pvec);
 class ATLAS_NOT_THREAD_SAFE ZDCFitWrapper
 {
 private:
-   std::shared_ptr<TF1> m_wrapperTF1;
+  std::shared_ptr<TF1> m_wrapperTF1{};
 
-  float m_tmin{};
-  float m_tmax{};
+  float m_tmin{0};
+  float m_tmax{0};
 
-  float m_ampMin{};
-  float m_ampMax{};
+  float m_ampMin{0};
+  float m_ampMax{0};
 
-  float m_t0Min{};
-  float m_t0Max{};
+  float m_t0Min{0};
+  float m_t0Max{0};
 
-  bool  m_adjTLimitsEvent{};
-  float m_tminAdjust{};
+  bool  m_adjTLimitsEvent{false};
+  float m_tminAdjust{0};
 
 public:
  ZDCFitWrapper(const std::shared_ptr<TF1>& wrapperTF1) : m_wrapperTF1(wrapperTF1),
@@ -153,11 +153,11 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTaus : public ZDCFitWrapper
 {
 protected:
-  bool m_fixTau1;
-  bool m_fixTau2;
+  bool m_fixTau1{false};
+  bool m_fixTau2{false};
 
-  float m_tau1;
-  float m_tau2;
+  float m_tau1{0};
+  float m_tau2{0};
 
 public:
 
@@ -220,11 +220,11 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTausLHCf : public ZDCFitWrapper
 {
 protected:
-  bool m_fixTau1;
-  bool m_fixTau2;
+  bool m_fixTau1{false};
+  bool m_fixTau2{false};
 
-  float m_tau1;
-  float m_tau2;
+  float m_tau1{0};
+  float m_tau2{0};
 
 public:
 
@@ -287,13 +287,13 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiFixedTaus : public ZDCFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
+  float m_tau1{0};
+  float m_tau2{0};
 
-  float m_norm;
-  float m_timeCorr;
+  float m_norm{0};
+  float m_timeCorr{0};
 
-  std::shared_ptr<TF1> m_expFermiFunc = 0;
+  std::shared_ptr<TF1> m_expFermiFunc{};
 
 public:
 
@@ -350,10 +350,10 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiPrePulse : public ZDCPrePulseFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{0};
+  float m_tau2{0};
+  float m_norm{0};
+  float m_timeCorr{0};
   std::shared_ptr<TF1> m_expFermiFunc = 0;
 
 public:
@@ -416,8 +416,6 @@ public:
     double preT0 = theTF1->GetParameter(3);
 
     double deltaTPre = maxTime - preT0;
-    double deltaPresamp = GetTMinAdjust() - preT0;
-
     double background = preAmp * m_norm * m_expFermiFunc->operator()(deltaTPre);
 
     return background / (amp + background);
@@ -454,12 +452,12 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiPreExp : public ZDCPreExpFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{0};
+  float m_tau2{0};
+  float m_norm{0};
+  float m_timeCorr{0};
   
-  std::shared_ptr<TF1> m_expFermiFunc = 0;
+  std::shared_ptr<TF1> m_expFermiFunc{0};
 
 public:
   ZDCFitExpFermiPreExp(const std::string& tag, float tmin, float tmax, float tau1, float tau2,
@@ -544,12 +542,12 @@ public:
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiLHCfPreExp : public ZDCPreExpFitWrapper
 {
 private:
-  float m_tau1;
-  float m_tau2;
-  float m_norm;
-  float m_timeCorr;
+  float m_tau1{0};
+  float m_tau2{0};
+  float m_norm{0};
+  float m_timeCorr{0};
   
-  std::shared_ptr<TF1> m_expFermiLHCfFunc = 0;
+  std::shared_ptr<TF1> m_expFermiLHCfFunc{};
 
 public:
   ZDCFitExpFermiLHCfPreExp(const std::string& tag, float tmin, float tmax, float tau1, float tau2,

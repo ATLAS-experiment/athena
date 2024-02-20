@@ -36,18 +36,11 @@ public:
 
 private:
 
-<<<<<<< HEAD
   ZDC_DetManager *m_detectorManager{};
   StoreGateSvc *m_detectorStore{};
   const ZdcID *m_zdcID{};
   bool m_RPDs_On{}; //Flag for both RPD modules
-=======
-  ZDC_DetManager *m_detectorManager;
-  StoreGateSvc *m_detectorStore;
-  const ZdcID *m_zdcID;
-  bool m_RPDs_On; //Flag for both RPD modules
-  bool m_BRANs_On; //Flag for both BRAN modules
->>>>>>> 3e23e3da737 (Add BRAN module to ZDC description)
+  bool m_BRANs_On{}; //Flag for both BRAN modules
   std::vector< std::vector< bool > > m_zdcOn;
   std::vector< std::vector< float > > m_zdcPos; //Positions of the ZDC modules
   std::vector< std::vector< std::pair<int,int> > > m_zdcPixelStart_Stop; //Start and stop layers of the pixels for a given ZDC module
