@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
 import json
@@ -28,7 +28,6 @@ def __getStepsDataFromAlgSequence(HLTAllSteps):
     if HLTAllSteps is not None:
         for HLTStep in getSequenceChildren( HLTAllSteps ):
             if "_reco" not in HLTStep.getName(): # Avoid the pre-step Filter execution
-                # Look for newJO reco
                 for Step in getChildrenIfSequence( HLTStep ):
                     for View in getChildrenIfSequence( Step ):
                         for Reco in getChildrenIfSequence( View ):
@@ -84,12 +83,12 @@ def __getSequencerAlgs(stepsData):
             sequencerAlgs[ sequencer.getName() ] = list(map(lambda x: x.getFullJobOptName(), findAllAlgorithms(sequencer)))
     return sorted(sequencerAlgs.items(), key=lambda t: t[0])
 
-def __generateJSON( chainDicts, chainConfigs, HLTAllSteps, menuName, fileName ):
+def generateJSON(flags, chainDicts, chainConfigs, HLTAllSteps):
     """ Generates JSON given the ChainProps and sequences
     """
     # Menu dictionary that is used to create the JSON content
     menuDict = {"filetype": "hltmenu",
-                "name": __getMenuBaseName(menuName),
+                "name": __getMenuBaseName(flags.Trigger.triggerMenuSetup),
                 "chains": {},
                 "streams": {},
                 "sequencers": {}}
@@ -142,6 +141,7 @@ def __generateJSON( chainDicts, chainConfigs, HLTAllSteps, menuName, fileName ):
     __validateJSON(menuDict)
 
     # Menu dictionary now completed, write to JSON
+    fileName = getHLTMenuFileName( flags)
     __log.info( "Writing HLT Menu JSON to %s", fileName )
     with open( fileName, 'w' ) as fp:
         json.dump( menuDict, fp, indent=4, sort_keys=False )
@@ -176,24 +176,3 @@ def __validateGlobalAlgs(menuDict):
                 algToStep[alg] = stepNumber
     if inError:
         raise Exception("[validateJSON] Problems detected in validateGlobalAlgs().")    
-
-def generateJSON(flags):
-    __log.info("Generating HLT Menu JSON in the rec-ex-common job")
-    from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
-    from AthenaCommon.AlgSequence import AlgSequence
-    from AthenaCommon.CFElements import findSubSequence
-
-    return __generateJSON( HLTMenuConfig.dictsList(), 
-                           HLTMenuConfig.configsList(), 
-                           findSubSequence(AlgSequence(), "HLTAllSteps"),
-                           flags.Trigger.triggerMenuSetup,
-                           getHLTMenuFileName(flags) )
-    
-def generateJSON_newJO(flags, chainDicts, chainConfigs, HLTAllSteps ):
-    __log.info("Generating HLT Menu JSON in the new JO")
-
-    return __generateJSON( chainDicts, 
-                           chainConfigs, 
-                           HLTAllSteps,
-                           flags.Trigger.triggerMenuSetup, 
-                           getHLTMenuFileName( flags) )

@@ -646,14 +646,14 @@ def makeHLTTree(flags):
 
     
     # generate JSON representation of the config
-    from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON_newJO
-    generateJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
+    from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON
+    generateJSON(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
 
-    from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generateJSON_newJO as generatePrescaleJSON_newJO
-    generatePrescaleJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
+    from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generatePrescaleJSON
+    generatePrescaleJSON(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
 
-    from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON_newJO
-    generateDefaultMonitoringJSON_newJO(flags, HLTMenuConfig.dictsList())
+    from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
+    generateDefaultMonitoringJSON(flags, HLTMenuConfig.dictsList())
 
     from AthenaCommon.CFElements import checkSequenceConsistency 
     checkSequenceConsistency(steps)
