@@ -55,7 +55,6 @@ def ActsMainTrackFindingCfg(flags,
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
     kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
     kwargs.setdefault("numMeasurementsCutOff", [3])
-    kwargs.setdefault("maxHoles", flags.Acts.trackFindingMaxHoles)
 
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
     # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
@@ -64,18 +63,24 @@ def ActsMainTrackFindingCfg(flags,
     if flags.Acts.doTrackFindingTrackSelector:
         def tolist(c):
             return c if isinstance(c, list) else [c]
+        # Use settings from flags.Tracking.ActiveConfig, initialised in createITkTrackingPassFlags() at
+        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L376
         kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
         kwargs.setdefault("ptMin",
                           [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
         kwargs.setdefault("minMeasurements",
                           tolist(flags.Tracking.ActiveConfig.minClusters))
-        if flags.Acts.doTrackFindingTrackSelector != 3:
-            kwargs.setdefault("maxHolesSelect", tolist(flags.Tracking.ActiveConfig.maxHoles))
-            kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
         if flags.Acts.doTrackFindingTrackSelector == 2:
             # use the same cut for all eta for comparison with previous behaviour
             kwargs["ptMin"] = [min(kwargs["ptMin"])]
             kwargs["minMeasurements"] = [min(kwargs["minMeasurements"])]
+        elif flags.Acts.doTrackFindingTrackSelector != 3:
+            # don't include hole/shared hit cuts for comparison with previous behaviour
+            kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
+            kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
+            if flags.Acts.doTrackFindingTrackSelector != 4:
+                # don't use branch stopper for comparison with previous behaviour
+                kwargs.setdefault("maxHolesBranch", tolist(flags.Tracking.ActiveConfig.maxHoles))
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
