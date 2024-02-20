@@ -1,18 +1,6 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-
-def decorateSpacePoints(flags,
-                        name: str,
-                        spacePointName: str,
-                        clusterLinkName: str,
-                        **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    kwargs.setdefault('InputSpacePointsName', spacePointName)
-    kwargs.setdefault('ClusterLinkName', clusterLinkName)
-    acc.addEventAlgo(CompFactory.InDet.SpacePointPersistification(name, **kwargs))
-    return acc
 
 def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
@@ -36,15 +24,6 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                       'xAOD::StripClusterAuxContainer#ITkConversionStripClustersAux.' + strip_cluster_variables]
         
     if flags.Acts.EDM.PersistifySpacePoints:
-        acc.merge(decorateSpacePoints(flags,
-                                      name='PixelSpacePointDecoration',
-                                      spacePointName='ITkPixelSpacePoints',
-                                      clusterLinkName='measurementLink'))
-        acc.merge(decorateSpacePoints(flags,
-                                      name='StripSpacePointDecoration',
-                                      spacePointName='ITkStripSpacePoints',
-                                      clusterLinkName='measurementLink'))
-
         pixel_spacepoint_shortlist = ['-measurements']
         strip_spacepoint_shortlist = ['topHalfStripLength', 
                                       'bottomHalfStripLength', 
