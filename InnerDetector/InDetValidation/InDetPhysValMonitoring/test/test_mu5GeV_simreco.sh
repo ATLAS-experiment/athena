@@ -4,7 +4,7 @@
 # art-input: user.keli:user.keli.mc16_13TeV.422033.ParticleGun_single_mu_Pt5.merge.EVNT.e7967_e5984_tid20254920_00
 # art-input-nfiles: 1
 # art-include: main/Athena
-# art-include: 22.0/Athena
+# art-include: 24.0/Athena
 # art-include: 23.0/Athena
 # art-output: physval*.root
 # art-output: SiHitValid*.root
