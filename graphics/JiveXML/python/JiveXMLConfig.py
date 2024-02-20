@@ -19,8 +19,9 @@ def getDataTypes(flags, haveRDO=False, readAOD=False):
     data_types = []  # These need to match the tools added later
     if flags.Detector.EnableID:
         # General ID types
-        data_types += ["JiveXML::SiSpacePointRetriever/SiSpacePointRetriever"]
-        data_types += ["JiveXML::SiClusterRetriever/SiClusterRetriever"]
+        if flags.Detector.GeometryPixel and flags.Detector.GeometrySCT:
+            data_types += ["JiveXML::SiSpacePointRetriever/SiSpacePointRetriever"]
+            data_types += ["JiveXML::SiClusterRetriever/SiClusterRetriever"]
         data_types += ["JiveXML::VertexRetriever/VertexRetriever"]
         # These options will retrieve any available collection of segments/tracks from storegate
         data_types += ["JiveXML::SegmentRetriever/SegmentRetriever"]
@@ -108,8 +109,9 @@ def InDetRetrieversCfg(flags):
         result.merge(PixelClusterRetrieverCfg(flags))
 
     if flags.Detector.EnableID:
-        result.merge(SiClusterRetrieverCfg(flags))
-        result.merge(SiSpacePointRetrieverCfg(flags))
+        if flags.Detector.GeometryPixel and flags.Detector.GeometrySCT:
+            result.merge(SiClusterRetrieverCfg(flags))
+            result.merge(SiSpacePointRetrieverCfg(flags))
         result.merge(TrackRetrieverCfg(flags))
 
     if flags.Detector.EnableTRT:
@@ -457,11 +459,12 @@ def TriggerRetrieversCfg(flags):
         )
     return result
 
-def AlgoJiveXMLCfg(flags, name="AlgoJiveXML", **kwargs):
+def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
     # This is based on a few old-style configuation files:
     # JiveXML_RecEx_config.py
     # JiveXML_jobOptionBase.py
     result = ComponentAccumulator()
+
     kwargs.setdefault("AtlasRelease", getATLASVersion())
     kwargs.setdefault("WriteToFile", True)
     kwargs.setdefault("OnlineMode", False)

@@ -3,11 +3,13 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetRunType, GetBFields, WaitForPartition
+from AthenaConfiguration.Enums import BeamType
 
+isCosmicData = False
 isHIMode = False #TODO
-#TODO isBeamSplashMode = False
-isOfflineTest = True
-testWithoutPartition = True
+isBeamSplashMode = False #TODO
+isOfflineTest = False
+testWithoutPartition = False
 
 # An explicit list for nominal data taking to exclude some high rate streams
 # Empty list to read all
@@ -15,7 +17,8 @@ testWithoutPartition = True
 streamsWanted = ['express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
 
 # if testing at p1, write out to /tmp/ to see output
-outputDirectory="/atlas/EventDisplayEvents/"
+#outputDirectory="/atlas/EventDisplayEvents/"
+outputDirectory="/tmp/myexley"
 
 if isOfflineTest:
     outputDirectory="/afs/cern.ch/user/m/myexley/WorkSpace/hackTest/run/output/"
@@ -28,7 +31,7 @@ if isHIMode:
 else:
     maxEvents=100 # Number of events to keep per stream
     projectTags=['data23_13p6TeV']
-    projectName='data24_13p6TeV'
+    projectName='data23_13p6TeV'
     publicStreams=['Main']
 
 sendToPublicStream = True # Gets set later, overwrite here to True to test it
@@ -70,11 +73,11 @@ if not isOfflineTest:
     autoConfigOnlineRecoFlags(flags, partitionName)
 
 # Conditions tag
+flags.IOVDb.DatabaseInstance = "CONDBR2"
 if isOfflineTest:
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-02'
 else:
     flags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2023-01' # Online conditions tag
-
 flags.GeoModel.Layout="atlas"
 flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00' # Geometry tag
 
@@ -86,7 +89,7 @@ flags.Trigger.triggerConfig='DB'
 
 # Test wth a small amount of events and write out to e.g. a tmp dir
 if testWithoutPartition or partitionName != 'ATLAS' or isOfflineTest:
-    flags.Exec.MaxEvents = 3
+    flags.Exec.MaxEvents = 10
     flags.Output.ESDFileName = outputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
 else:
     flags.Exec.MaxEvents = -1
@@ -104,8 +107,13 @@ else:
 
 flags.Reco.EnableTrigger = False # TODO test True
 flags.LAr.doHVCorr = False # ATLASRECTS-6823
-from AthenaCommon.Constants import INFO
-flags.Exec.OutputLevel = INFO
+flags.Detector.EnableMuon = False
+flags.Reco.EnableCombinedMuon = False
+#flags.InDet.useSctDCS = False
+#flags.InDet.useDCS = False
+#flags.Tracking.doPixelClusterSplitting = False
+from AthenaCommon.Constants import DEBUG
+flags.Exec.OutputLevel = DEBUG
 flags.Concurrency.NumThreads = 0
 
 if isOfflineTest:
@@ -142,16 +150,17 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
     flags.BField.endcapToroidOn = toroidOn
 
 # GM test partition needs to be given the below info
-if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9') and not testWithoutPartition:
+if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9'):
     flags.Input.OverrideRunNumber = True
-    flags.Input.RunNumbers = [412343]
+    flags.Input.RunNumbers = [454188]#keep this number the same as (or close to) the run number of the file you are testing on
     flags.Input.LumiBlockNumbers = [1]
     flags.Input.ProjectName = projectName
 
 if not testWithoutPartition:
-    RunType = GetRunType()
-    flags.Beam.Type = RunType # "singlebeam", "collisions" or "cosmics"
-
+    if isCosmicData:
+        flags.Beam.Type = BeamType.Cosmics
+    else:
+        flags.Beam.Type = BeamType.Collisions
 flags.lock()
 flags.dump()
 ##----------------------------------------------------------------------##
@@ -161,7 +170,7 @@ acc = RecoSteering(flags)
 
 from IOVDbSvc.IOVDbSvcConfig import addOverride
 if not isOfflineTest:
-    acc.merge(addOverride(flags, "/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v2"))
+    acc.merge(addOverride(flags, "/TRT/Onl/Calib/PID_NN", "TRTCalibPID_NN_v2", db=""))
 
 if not testWithoutPartition:
     bytestreamConversion = CompFactory.ByteStreamCnvSvc()
