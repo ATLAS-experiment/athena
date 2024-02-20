@@ -11,7 +11,6 @@
 #include "InDetIdentifier/SCT_ID.h"
 
 #include <string>
-#include <mutex>
 
 namespace ActsTrk {
 
@@ -30,8 +29,6 @@ namespace ActsTrk {
     std::string m_type;
 
   private:
-    std::mutex m_mutex;
-
     TH1* m_barrelEndcap {};
 
     TH1* m_layerDisk_barrel {};

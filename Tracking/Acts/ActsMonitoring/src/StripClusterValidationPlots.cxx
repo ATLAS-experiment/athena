@@ -59,8 +59,6 @@ namespace ActsTrk {
 					  float beamSpotWeight,
 					  const SCT_ID* stripID)
   {
-    std::lock_guard<std::mutex> lock(m_mutex);
-
     const Identifier& id = stripID->wafer_id(cluster->identifierHash());
     bool isBarrel = (stripID->barrel_ec(id) == 0);
 
