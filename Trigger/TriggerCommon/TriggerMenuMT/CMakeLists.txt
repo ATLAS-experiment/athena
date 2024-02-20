@@ -9,6 +9,7 @@ atlas_install_python_modules( python/*.py
                               python/HLT
                               python/TriggerAPI
                               python/CFtest
+                              scripts/menu_config_tests.py
                               POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-select=ATL900,ATL901 )
 
 atlas_install_scripts( scripts/generateL1MenuRun3.py
@@ -89,7 +90,7 @@ atlas_test_lvl1_trigger_menu( Dev_HI_run3_v1 )
 # Test only most comprehensive HLT menus:
 atlas_test_hlt_trigger_menu( Dev_pp_run3_v1_BulkMCProd_prescale )
 atlas_test_hlt_trigger_menu( Cosmic_run3_v1 )
-# atlas_test_hlt_trigger_menu( Dev_HI_run3_v1 )
+atlas_test_hlt_trigger_menu( Dev_HI_run3_v1 )
 atlas_test_hlt_trigger_menu( PhysicsP1_pp_run3_v1_HLTReprocessing_prescale )
 atlas_test_hlt_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 )
 
