@@ -112,7 +112,7 @@ def LArDelay_OFCCaliCfg(flags):
         theLArCaliWavePatcher=CompFactory.getComp("LArCalibPatchingAlg<LArCaliWaveContainer>")("LArCaliWavePatch")
         theLArCaliWavePatcher.ContainerKey = "LArCaliWave"
         theLArCaliWavePatcher.BadChanKey = bcKey 
-        theLArCaliWavePatcher.SuperCell = flags.LArCalib.isSC 
+        theLArCaliWavePatcher.SuperCells = flags.LArCalib.isSC 
         #theLArCaliWavePatcher.PatchMethod="PhiNeighbor" ##take the first neigbour
         theLArCaliWavePatcher.PatchMethod = "PhiAverage" ##do an aveage in phi after removing bad and empty event
         theLArCaliWavePatcher.ProblemsToPatch = [
