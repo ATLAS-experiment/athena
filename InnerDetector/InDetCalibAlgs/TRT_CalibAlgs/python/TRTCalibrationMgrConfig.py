@@ -2,45 +2,8 @@
 
 Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
-
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-# from IOVDbSvc.IOVDbSvcConfig import addFolders
-# from AthenaConfiguration.Enums import Format
-
-
-# Tool to write a track-tuple with TRT hit info
-def FillAlignTrkInfoCfg(flags,name='FillAlignTrkInfo',**kwargs) :
-    acc = ComponentAccumulator()
-    
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags)))
-    
-    acc.setPrivateTools(CompFactory.FillAlignTrkInfo(name, **kwargs))
-    return acc
-
-
-# SERGI - This function should be in the correct athena pkg.. not here
-# Tool to write a hit-tuple with R-t info  
-def FillAlignTRTHitsCfg(flags,name='FillAlignTRTHits',**kwargs) :
-    acc = ComponentAccumulator()
-    
-    kwargs.setdefault("minTimebinsOverThreshold", 0)
-    
-    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg, TRT_StrawStatusSummaryToolCfg, TRT_StrawNeighbourSvcCfg
-    kwargs.setdefault("TRTCalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
-    kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))
-    kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
-    
-    acc.setPrivateTools(CompFactory.FillAlignTRTHits(name, **kwargs))
-    
-    return acc
-
-# Tool to refit tracks
-def FitToolCfg(flags, name = "FitToolCfg" ,**kwargs):
-    acc = ComponentAccumulator()  
-    acc.setPrivateTools(CompFactory.FitTool(name, **kwargs))
-    return acc
 
 # Tool to process R-t ntuple. Produces histograms and calibration text files.
 def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
@@ -66,8 +29,6 @@ def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
         kwargs.setdefault("TRT_CalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
 
     acc.setPrivateTools(CompFactory.TRTCalibrator(name, **kwargs))
-
-        
         
     return acc
 
@@ -106,11 +67,10 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     
     kwargs.setdefault("DoCalibrate",False)
 
-    # FIXME - FillAlignTRTHitsCfg and FillAlignTrkInfoCfg functions should be moved to TRT_CalibTools (where the .cxx/.h are stored)
+    from TRT_CalibTools.TRTCalibToolsConfig import FillAlignTrkInfoCfg, FillAlignTRTHitsCfg, FitToolCfg
     kwargs.setdefault("AlignTrkTools", [acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))), 
                                         acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags)))] )      
 
-    # FIXME - FitToolCfg function should be moved to TRT_CalibTools (where the .cxx/.h are stored)
     kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
     
     # check this line below - needs the function
@@ -151,7 +111,7 @@ def TRT_TrackHoleSearch(flags,name="TRT_TrackHoleSearch",**kwargs):
 
     return acc
 
-# we need to recheck this not fully sure - Sergi                     
+# we need to recheck this, not fully sure - Sergi                     
 def TRT_StrawStatusCfg(flags,name='InDet__TRT_StrawStatus',**kwargs) :
 
     if "TRT_TrackHoleSearch" not in kwargs:
@@ -164,15 +124,14 @@ def TRT_StrawStatusCfg(flags,name='InDet__TRT_StrawStatus',**kwargs) :
 
 
 if __name__ == '__main__':
-    print("start running")
+    
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     
     from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags 
-    print(defaultTestFiles.RAW_RUN3)
-    
     flags.Input.Files = defaultTestFiles.RAW_RUN3
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+    
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-03"
     flags.Exec.MaxEvents = 10
     
@@ -181,8 +140,6 @@ if __name__ == '__main__':
     
     flags.fillFromArgs()
     flags.lock()
-    
-    print("start running 1")
     
     # Set up the main service "acc"
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
