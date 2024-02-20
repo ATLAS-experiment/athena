@@ -149,9 +149,14 @@ public:
 
 private:
   /* All get to see these*/
-  static float detEta(float x, float y) { return fabs(x - y); }
-  static float detPhi(float, float);
-  static float rCone(float x, float y) { return sqrt(x * x + y * y); }
+  inline float detEta(float x, float y) const { return fabs(x - y); }
+  inline float detPhi(float x, float y)  const {
+    float det = x - y;
+    if (det > M_PI) det = det - 2. * M_PI;
+    if (det < -M_PI) det = det + 2. * M_PI;
+    return std::abs(det);
+  }
+  inline float rCone(float x, float y)  const { return sqrt(x * x + y * y); }
   //
   static MCTruthPartClassifier::ParticleType defTypeOfElectron(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer* xTruthParticleContainer,
