@@ -2292,7 +2292,7 @@ namespace top {
 
     switch (SFSyst) {
     case top::topSFSyst::BTAG_SF_EIGEN_B:
-      n_eigen = do_trackjets ? m_config->trkjet_btagging_num_B_eigenvars(W1) : m_config->btagging_num_B_eigenvars(WP1);
+      n_eigen = do_trackjets ? m_config->trkjet_btagging_num_B_eigenvars(WP1) : m_config->btagging_num_B_eigenvars(WP1);
       flav = "B_";
       break;
 

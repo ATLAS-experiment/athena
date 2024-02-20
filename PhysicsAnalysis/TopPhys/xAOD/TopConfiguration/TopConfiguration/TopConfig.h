@@ -2044,8 +2044,8 @@ namespace top {
     void setCalibBoostedJetTagger(const std::string& WP, const std::string& SFname);
     void setBoostedTaggersSFSysNames(const std::unordered_map<std::string, std::vector<std::string>>& sysNames) {m_boostedTaggersSFSysNames=sysNames;}
     // B-tagging WPs requested by user (updated to pair of strings to hold algorithm and WP)
-    const std::vector<std::pair<std::string, std::string>,
-		     <std::pair<std::string, std::string>>> bTagWP_off1_off2() const {return m_chosen_btaggingWP_off1_off2;}
+    const std::vector<std::pair<std::pair<std::string, std::string>,
+                                std::pair<std::string, std::string>>> bTagWP_off1_off2() const {return m_chosen_btaggingWP_off1_off2;}
     const std::vector<std::pair<std::pair<std::string, std::string>,
 				std::pair<std::pair<std::string, std::string>,
 				          std::pair<std::string, std::string>>>> bTagWP_offl_onl_cond() const {return m_chosen_btaggingWP_offl_onl_cond;}
