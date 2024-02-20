@@ -133,11 +133,7 @@ MutableTrackContainerHandle<C>::moveToConst(ActsTrk::MutableTrackContainer&& tc,
         "MutableTrackContainerHandle::moveToConst, can't record "
         "xAODTrackSurfaces");
   }
-<<<<<<< HEAD
   auto constTrackSummary = std::make_unique<ActsTrk::TrackSummaryContainer>(
-=======
-  auto constTrackStorage = std::make_unique<ActsTrk::TrackSummaryContainer>(
->>>>>>> ceee5aad679 (reverting accidental changes...)
       DataLink<xAOD::TrackSummaryContainer>(m_xAODTrackSummaryKey.key(),
                                             context));
   constTrackSummary->restoreDecorations();
