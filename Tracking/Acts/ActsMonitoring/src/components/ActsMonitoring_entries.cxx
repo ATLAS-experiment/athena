@@ -5,6 +5,7 @@
 // Algs
 #include "src/PixelClusterAnalysisAlg.h"
 #include "src/StripClusterAnalysisAlg.h"
+#include "src/HgtdClusterAnalysisAlg.h"
 #include "src/SpacePointAnalysisAlg.h"
 #include "src/SeedAnalysisAlg.h"
 #include "src/EstimatedTrackParamsAnalysisAlg.h"
@@ -15,6 +16,7 @@
 // Algs
 DECLARE_COMPONENT( ActsTrk::PixelClusterAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::StripClusterAnalysisAlg )
+DECLARE_COMPONENT( ActsTrk::HgtdClusterAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SpacePointAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedingAlgorithmAnalysisAlg )
