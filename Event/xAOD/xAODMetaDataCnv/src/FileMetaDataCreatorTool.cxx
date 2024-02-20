@@ -293,20 +293,28 @@ StatusCode
               input = m_inputMetaDataStore->tryConstRetrieve< xAOD::FileMetaData >(key);
               if (input) {
                   std::string orig_simFlavour = "none";
-                  bool orig_isDataOverlay = false;
-                  if (!input->value(xAOD::FileMetaData::simFlavour, orig_simFlavour) ||
-                      !input->value(xAOD::FileMetaData::isDataOverlay,
-                                    orig_isDataOverlay))
+                  if (!input->value(xAOD::FileMetaData::simFlavour, orig_simFlavour)) {
                       ATH_MSG_DEBUG(
-                          "Could not get simulation parameters from input metadata "
+                          "Could not get xAOD::FileMetaData::simFlavour "
+                          "from input metadata "
                           "store");
-                  else {
+                  } else {
                       ATH_MSG_DEBUG("Retrieved from input metadata store: "
                                     << xAOD::FileMetaData::simFlavour << " = "
-                                    << orig_simFlavour << ", "
+                                    << orig_simFlavour);
+                      set(xAOD::FileMetaData::simFlavour, orig_simFlavour);
+                  }
+
+                  bool orig_isDataOverlay = false;
+                  if (!input->value(xAOD::FileMetaData::isDataOverlay, orig_isDataOverlay)) {
+                      ATH_MSG_DEBUG(
+                          "Could not get "
+                          "xAOD::FileMetaData::isDataOverlay from input "
+                          "metadata store");
+                  } else {
+                      ATH_MSG_DEBUG("Retrieved from input metadata store: "
                                     << xAOD::FileMetaData::isDataOverlay << " = "
                                     << orig_isDataOverlay);
-                      set(xAOD::FileMetaData::simFlavour, orig_simFlavour);
                       set(xAOD::FileMetaData::isDataOverlay, orig_isDataOverlay);
                   }
               }
