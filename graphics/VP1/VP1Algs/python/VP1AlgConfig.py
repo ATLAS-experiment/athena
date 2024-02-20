@@ -124,7 +124,11 @@ def SetupVP1():
         flags.Input.Files = [args.Filename]    
     
     # Set the online flag if we are running at P1
-    flags.Common.isOnline = args.online
+    if args.online:
+        flags.Common.isOnline = args.online
+    elif 'HLTP' in flags.IOVDb.GlobalTag:
+        print('HLTP detected in the global tag, but --online mode is not enabled. Enabling it now.')
+        flags.Common.isOnline = True
 
     _logger.verbose("+ About to set flags related to the input")
 
