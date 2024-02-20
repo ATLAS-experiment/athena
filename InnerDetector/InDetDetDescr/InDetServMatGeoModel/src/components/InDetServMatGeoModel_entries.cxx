@@ -1,3 +1,3 @@
-#include "InDetServMatGeoModel/InDetServMatTool.h"
+#include "../InDetServMatTool.h"
 
 DECLARE_COMPONENT( InDetServMatTool )

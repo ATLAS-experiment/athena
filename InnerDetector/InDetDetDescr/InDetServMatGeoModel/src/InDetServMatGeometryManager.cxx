@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/InDetServMatGeometryManager.h"
+#include "InDetServMatGeometryManager.h"
 #include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "InDetGeoModelUtils/InDetMaterialManager.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"

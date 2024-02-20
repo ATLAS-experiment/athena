@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/ComputeStaveServices.h"
-
-#include "InDetServMatGeoModel/CcawUtils.h"
-
+#include "ComputeStaveServices.h"
+#include "CcawUtils.h"
 #include <iostream>
 using namespace std;
-
 
 StaveServices ComputeStaveServices::compute( DetType::Type type, DetType::Part part, int layerNumber,
 					     int nModulesPerStave, int nChipsPerModule,

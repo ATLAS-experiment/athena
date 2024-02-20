@@ -1,16 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/InDetServMatFactory.h"
+#include "InDetServMatFactory.h"
 
 // Pixel, SCT and TRT factories
-#include "InDetServMatGeoModel/PixelServMatFactory.h"
-#include "InDetServMatGeoModel/SCT_ServMatFactory.h"
-#include "InDetServMatGeoModel/TRT_ServMatFactory.h"
-#include "InDetServMatGeoModel/EndPlateFactory.h"
-#include "InDetServMatGeoModel/SupportRailFactory.h"
-#include "InDetServMatGeoModel/SquirrelCageFactory.h"
+#include "PixelServMatFactory.h"
+#include "SCT_ServMatFactory.h"
+#include "TRT_ServMatFactory.h"
+#include "EndPlateFactory.h"
+#include "SupportRailFactory.h"
+#include "SquirrelCageFactory.h"
 
 // Extra material
 #include "InDetGeoModelUtils/DistortedMaterialManager.h"
@@ -42,18 +42,9 @@
 #include <iostream>
 
 InDetServMatFactory::InDetServMatFactory(InDetDD::AthenaComps * athenaComps)
-  : InDetDD::DetectorFactoryBase(athenaComps),
-    m_manager(nullptr)
+  : InDetDD::DetectorFactoryBase(athenaComps)
 {  
 }
-
-
-InDetServMatFactory::~InDetServMatFactory()
-{
-
-}
-
-
 
 //## Other Operations (implementation)
 void InDetServMatFactory::create(GeoPhysVol *world )

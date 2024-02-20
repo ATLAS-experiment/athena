@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ServiceVolume_H
-#define ServiceVolume_H
+#ifndef INDETSERVMATGEOMODEL_SERVICEVOLUME_H
+#define INDETSERVMATGEOMODEL_SERVICEVOLUME_H
 
-//#include "InDetServMatGeoModel/LinearService.h"
-#include "InDetServMatGeoModel/ServiceMaterial.h"
-
+#include "ServiceMaterial.h"
 #include <vector>
 #include <string>
 
@@ -28,13 +26,6 @@ public:
   void addLayer( const ServicesLayer* l) {
     m_layers.push_back(l);
   }
-
-  /* don't remember why I wrote this one
-  void addLayer( const ServicesLayer* l, const ServicesLayer* lnext) {
-    m_layers.push_back(l);
-    m_endingLayer = lnext;
-  }
-  */
 
   void addLayers( const LayerContainer& lc) {
     m_layers.insert( m_layers.end(), lc.begin(), lc.end());

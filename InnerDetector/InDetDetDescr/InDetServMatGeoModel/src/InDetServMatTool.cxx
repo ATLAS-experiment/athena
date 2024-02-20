@@ -1,15 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/InDetServMatTool.h"
-#include "InDetServMatGeoModel/InDetServMatFactory_Lite.h"
-#include "InDetServMatGeoModel/InDetServMatFactory.h"
-#include "InDetServMatGeoModel/InDetServMatFactoryDC2.h"
-#include "InDetServMatGeoModel/InDetServMatFactoryDC3.h"
-#include "InDetServMatGeoModel/InDetServMatFactoryFS.h"
+#include "InDetServMatTool.h"
+#include "InDetServMatFactory_Lite.h"
+#include "InDetServMatFactory.h"
+#include "InDetServMatAthenaComps.h"
 #include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
-#include "InDetServMatGeoModel/InDetServMatAthenaComps.h"
 
 #include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -26,8 +23,6 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
 
-
-
 /**
  ** Constructor(s)
  **/
@@ -35,14 +30,9 @@ InDetServMatTool::InDetServMatTool( const std::string& type, const std::string& 
   : GeoModelTool( type, name, parent ),
     m_geoDbTagSvc("GeoDbTagSvc",name),
     m_geometryDBSvc("InDetGeometryDBSvc",name),
-    m_builderTool(""),
-    m_devVersion(false),
-    m_forFrozenShowers(false),
-    m_manager(nullptr),
-    m_athenaComps(nullptr)
+    m_builderTool("")
 {
   declareProperty("DevVersion",m_devVersion);
-  declareProperty("FrozenShowers",m_forFrozenShowers);
   declareProperty("OverrideVersionName", m_overrideVersionName);
   declareProperty("GeometryDBSvc", m_geometryDBSvc);
   declareProperty("ServiceBuilderTool", m_builderTool);
@@ -103,13 +93,7 @@ StatusCode InDetServMatTool::create()
     m_manager = factoryLite.getDetectorManager();
   }
   else {
-    
-    
-    
-    
-    
     DecodeVersionKey versionKey(&*m_geoDbTagSvc, "InnerDetector");
-    
     
     std::string versionTag = accessSvc->getChildTag("InDetServices", versionKey.tag(), versionKey.node());
     if(msgLvl(MSG::DEBUG)) msg() << "versionTag=" << versionTag <<" %%%"<< endmsg;
@@ -171,56 +155,32 @@ StatusCode InDetServMatTool::create()
       }
     }
     
-    if ( nullptr == m_detector ) {
-      // Create the InDetServMatNode instance
-      try {   
-	//
-	// This strange way of casting is to avoid an
-	// utterly brain damaged compiler warning.
-	//
-	if(m_forFrozenShowers) {
-	  if(msgLvl(MSG::DEBUG)) msg() << " InDetServMat Factory FS " << endmsg;
-	  InDetServMatFactoryFS theIDSM(detStore().operator->(),accessSvc);
-	  theIDSM.create(world);
-	  m_manager=theIDSM.getDetectorManager();
-	} else {
-	  if(!m_devVersion) {
-	    if (versionName.empty() || versionName == "DC2") {
-	      // DC2 and Rome
-	      if(msgLvl(MSG::DEBUG)) msg() << " InDetServMat Factory DC2 " << endmsg;
-	      InDetServMatFactoryDC2 theIDSM(detStore().operator->(), accessSvc);
-	      theIDSM.create(world);
-	      m_manager=theIDSM.getDetectorManager();
-	    } else if (versionName == "DC3") {
-	      // DC3 
-	      if(msgLvl(MSG::DEBUG)) msg() << " InDetServMat Factory DC3 " << endmsg;
-	      InDetServMatFactoryDC3 theIDSM(m_athenaComps);
-	      theIDSM.create(world);
-	      m_manager=theIDSM.getDetectorManager();
-	    } else if (versionName == "CSC") {
-	      if(msgLvl(MSG::DEBUG)) msg() << " InDetServMat Factory CSC " << endmsg;
-	      InDetServMatFactory theIDSM(m_athenaComps);
-	      theIDSM.create(world);
-	      m_manager=theIDSM.getDetectorManager();
-	    } else {
-	      // Unrecognized name.
-	      msg(MSG::ERROR) << " Unrecognized VersionName: " << versionName << endmsg;
-	      return StatusCode::FAILURE;
-	    }
-	  } else { // Development Versions
-	    // CSC 
-	    if(msgLvl(MSG::DEBUG)) msg() << " InDetServMat Factory Development version " << endmsg;
+    if(!m_detector) {
+      try {
+	if(!m_devVersion) {
+	  if (versionName == "CSC") {
+	    if(msgLvl(MSG::DEBUG)) msg() << " InDetServMat Factory CSC " << endmsg;
 	    InDetServMatFactory theIDSM(m_athenaComps);
 	    theIDSM.create(world);
 	    m_manager=theIDSM.getDetectorManager();
+	  } else {
+	    // Unrecognized name.
+	    msg(MSG::ERROR) << " Unrecognized VersionName: " << versionName << endmsg;
+	    return StatusCode::FAILURE;
 	  }
+	} else { // Development Versions
+	  // CSC 
+	  if(msgLvl(MSG::DEBUG)) msg() << " InDetServMat Factory Development version " << endmsg;
+	  InDetServMatFactory theIDSM(m_athenaComps);
+	  theIDSM.create(world);
+	  m_manager=theIDSM.getDetectorManager();
 	}
-	
-      } catch (const std::bad_alloc&) {
-	msg(MSG::FATAL) << "Could not create new InDetServMatNode!" << endmsg;
-	return StatusCode::FAILURE; 
       }
-    }
+      catch (const std::bad_alloc&) {
+        msg(MSG::FATAL) << "Could not create new InDetServMatNode!" << endmsg;
+        return StatusCode::FAILURE;
+      }
+    } 
   }
   if (m_manager) {
     theExpt->addManager(m_manager);

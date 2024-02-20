@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ConvertStaveServices_H
-#define ConvertStaveServices_H
+#ifndef INDETSERVMATGEOMODEL_CONVERTSTAVESERVICES_H
+#define INDETSERVMATGEOMODEL_CONVERTSTAVESERVICES_H
 
-#include "InDetServMatGeoModel/ServiceMaterial.h"
-#include "InDetServMatGeoModel/DetType.h"
-
+#include "ServiceMaterial.h"
+#include "DetType.h"
 #include <string>
 
 class StaveServices;

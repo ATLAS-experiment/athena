@@ -1,18 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetServMatGeoModel/ServicesTracker.h"
-
-#include "InDetServMatGeoModel/ServicesLayer.h"
-#include "InDetServMatGeoModel/Routing2.h"
-#include "InDetServMatGeoModel/ServicesStave.h"
-
-#include "InDetServMatGeoModel/ComputeStaveServices.h"
-#include "InDetServMatGeoModel/ConvertStaveServices.h"
-
+#include "ServicesTracker.h"
+#include "ServicesLayer.h"
+#include "Routing2.h"
+#include "ServicesStave.h"
+#include "ComputeStaveServices.h"
+#include "ConvertStaveServices.h"
 #include <map>
-
 #include <iostream>  // for DEBUG only
 using namespace std;
 

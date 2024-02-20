@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ServicesStave_H
-#define ServicesStave_H
+#ifndef INDETSERVMATGEOMODEL_SERVICESSTAVE_H
+#define INDETSERVMATGEOMODEL_SERVICESSTAVE_H
 
-#include "InDetServMatGeoModel/DetType.h"
-
+#include "DetType.h"
 #include <string>
 
 /** There are several possible types of staves from services point of view:
