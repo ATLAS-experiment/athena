@@ -25,8 +25,6 @@ def ActsITkPixelSeedingToolCfg(flags,
 def ActsITkFastPixelSeedingToolCfg(flags,
                                    name: str = "ActsITkFastPixelSeedingTool",
                                    **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
     ## Additional cuts for fast seed configuration
     kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
     kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
@@ -46,12 +44,11 @@ def ActsITkFastPixelSeedingToolCfg(flags,
              [70.0, 200.0],
              [70.0, 200.0],
              [40.0, 200.0],
-             [40.0, 80.0],])
+             [40.0, 80.0]])
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("useExperimentCuts", True)
 
-    acc.merge(ActsITkPixelSeedingToolCfg(flags, name=name, **kwargs))
-    return acc
+    return ActsITkPixelSeedingToolCfg(flags, name=name, **kwargs)
 
 def ActsITkStripSeedingToolCfg(flags,
                                name: str = "ActsITkStripSeedingTool",
