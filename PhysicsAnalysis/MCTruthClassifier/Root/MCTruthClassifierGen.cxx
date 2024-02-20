@@ -268,7 +268,7 @@ ParticleOrigin MCTruthClassifier::defJetOrig(const std::set<const xAOD::TruthPar
     if (MC::isW(pdg) && !(partOrig == top)) {
       partOrig = WBoson;
     }
-    if ((pdg < 6 || MC::isGluon(pdg)) && partOrig != top && partOrig != ZBoson && partOrig != WBoson) {
+    if (( MC::isQuark(pdg) || MC::isGluon(pdg)) && partOrig != top && partOrig != ZBoson && partOrig != WBoson) {
       partOrig = QCD;
     }
     if (MC::isHiggs(pdg)) {
@@ -684,27 +684,22 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
-
+  if (numOfParents == 2) {
+    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
+    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
   //--Sherpa Z->ee
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfEl == 1 && NumOfPos == 1) return ZBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfEl == 1 && NumOfPos == 1) return ZBoson;
 
   //--Sherpa W->enu ??
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) return WBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) return WBoson;
 
   //--Sherpa ZZ,ZW
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 4 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
-  }
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
+      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
   //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 && (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
 
   // New Sherpa Z->ee
@@ -979,29 +974,26 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
-
+  if (numOfParents == 2 ) {
+    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
+    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
   //--Sherpa Z->mumu
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfMuPl == 1 && NumOfMuMin == 1) return ZBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfMuPl == 1 && NumOfMuMin == 1) return ZBoson;
 
   //--Sherpa W->munu ??
   // if(numOfParents==2&&(numOfDaug-NumOfquark-NumOfgluon)==2&&(NumOfEl==1||NumOfPos==1)&&NumOfElNeut==1) return WBoson;
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfMuPl == 1 || NumOfMuMin == 1) && NumOfMuNeut == 1) return WBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfMuPl == 1 || NumOfMuMin == 1) && NumOfMuNeut == 1) return WBoson;
 
   //--Sherpa ZZ,ZW
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 4 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
-  }
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 4 &&
+      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) &&
+      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
   //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
-  }
+  if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
+      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+}
 
   //--New Sherpa Z->mumu
   if (partOriVert == mothOriVert) {
@@ -1212,33 +1204,25 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
     if (isWboson) return WBoson;
     if (isZboson) return ZBoson;
   }
+  if (numOfParents == 2 ) {
+  int pdg1 = partOriVert->incomingParticle(0)->pdgId();
+  int pdg2 = partOriVert->incomingParticle(1)->pdgId();
   //--Sherpa Z->tautau
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 2) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return ZBoson;
-  }
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 2  && (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return ZBoson;
 
   //--Sherpa W->taunu  new
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 1 && NumOfTauNeut == 1)
-    return WBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && NumOfTau == 1 && NumOfTauNeut == 1) return WBoson;
 
   //--Sherpa ZZ,ZW
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 4 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
-  }
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 4 &&
+      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) && 
+      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
   //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
-      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
+      (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+      (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
-
   // New Sherpa Z->tautau
   if (partOriVert == mothOriVert) {
     int NumOfTauLoop = 0;
@@ -1249,20 +1233,15 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
         if (!partOriVert->outgoingParticle(ipOut)) continue;
         if (!partOriVert->incomingParticle(ipIn)) continue;
         if (partOriVert->outgoingParticle(ipOut)->barcode() == partOriVert->incomingParticle(ipIn)->barcode()) {
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 15)
-            NumOfTauLoop++;
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 16)
-            NumOfTauNeuLoop++;
-          if (MC::isSMLepton(partOriVert->outgoingParticle(ipOut)))
-            NumOfLepLoop++;
+          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 15) NumOfTauLoop++;
+          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 16) NumOfTauNeuLoop++;
+          if (MC::isSMLepton(partOriVert->outgoingParticle(ipOut))) NumOfLepLoop++;
         }
       }
     }
     if (NumOfTauLoop == 2 && NumOfTauNeuLoop == 0) return ZBoson;
     if (NumOfTauLoop == 1 && NumOfTauNeuLoop == 1) return WBoson;
-    if ((NumOfTauLoop == 4 && NumOfTauNeuLoop == 0) || (NumOfTauLoop == 3 && NumOfTauNeuLoop == 1) ||
-        (NumOfTauLoop == 2 && NumOfTauNeuLoop == 2))
-      return DiBoson;
+    if ((NumOfTauLoop == 4 && NumOfTauNeuLoop == 0) || (NumOfTauLoop == 3 && NumOfTauNeuLoop == 1) || (NumOfTauLoop == 2 && NumOfTauNeuLoop == 2)) return DiBoson;
     if (NumOfLepLoop == 4) return DiBoson;
   }
 
@@ -1335,8 +1314,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   }
 
   int numOfParents = partOriVert->nIncomingParticles();
-  if (partOriVert->nIncomingParticles() > 1)
-    ATH_MSG_DEBUG("DefOrigOfPhoton:: photon  has more than one mother ");
+  if (partOriVert->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfPhoton:: photon  has more than one mother ");
 
   const xAOD::TruthParticle* mother = getMother(thePriPart);
   if (info) {
@@ -1844,33 +1822,24 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     if (isZboson) return ZBoson;
   }
 
+  if (numOfParents == 2) {
+    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
+    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
   //--Sherpa Z->nunu
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 &&
-      (NumOfElNeut == 2 || NumOfMuNeut == 2 || NumOfTauNeut == 2))
-    return ZBoson;
+    if ( (numOfDaug - NumOfquark - NumOfgluon) == 2 && (NumOfElNeut == 2 || NumOfMuNeut == 2 || NumOfTauNeut == 2)) return ZBoson;
 
   //--Sherpa W->enu ??
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 2 &&
-      ((NumOfEl == 1 && NumOfElNeut == 1) || (NumOfMu == 1 && NumOfMuNeut == 1) ||
-       (NumOfTau == 1 && NumOfTauNeut == 1)))
-    return WBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon) == 2 && ((NumOfEl == 1 && NumOfElNeut == 1) || (NumOfMu == 1 && NumOfMuNeut == 1) || (NumOfTau == 1 && NumOfTauNeut == 1))) return WBoson;
 
   //--Sherpa ZZ,ZW
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon) == 4 &&
-      (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ((MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
-  }
+  if ( (numOfDaug - NumOfquark - NumOfgluon) == 4 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 4) && 
+       (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return DiBoson;
 
   //--Sherpa VVV -- Note, have to allow for prompt photon radiation or these get lost
-  if (numOfParents == 2 && (numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 &&
-      (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    if ( (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2)) ) return MultiBoson;
+  if ((numOfDaug - NumOfquark - NumOfgluon - NumOfPhot) == 6 && (NumOfEl + NumOfMu + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 6) &&
+     (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) return MultiBoson;
   }
-
+  
   // New Sherpa Z->nunu
   if (partOriVert == mothOriVert && partOriVert != nullptr) {
     int NumOfLepLoop = 0;
