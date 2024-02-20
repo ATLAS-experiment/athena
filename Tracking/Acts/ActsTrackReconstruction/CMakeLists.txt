@@ -22,7 +22,6 @@ atlas_add_component( ActsTrackReconstruction
 		       ActsInteropLib
 		       ActsToolInterfacesLib
 		       AthenaBaseComps
-<<<<<<< HEAD
 		       AthenaMonitoringKernelLib
 		       BeamSpotConditionsData
 		       GaudiKernel
@@ -34,17 +33,10 @@ atlas_add_component( ActsTrackReconstruction
 		       InDetReadoutGeometry
 		       MagFieldConditions
 		       MagFieldElements
-=======
-		       AthenaKernel
-		       TrkTruthData
-		       CaloDetDescrLib
-		       EventInfo
->>>>>>> ceee5aad679 (reverting accidental changes...)
 		       StoreGateLib
 		       TRT_ReadoutGeometry
 		       TrkEventPrimitives
 		       TrkFitterInterfaces
-<<<<<<< HEAD
 		       TrkMeasurementBase
 		       TrkParameters
 		       TrkPrepRawData
@@ -59,9 +51,5 @@ atlas_add_component( ActsTrackReconstruction
 		       xAODInDetMeasurement
 		       xAODMeasurementBase
 		       xAODTracking
-=======
-		       InDetRIO_OnTrack
-		       TruthUtils
->>>>>>> ceee5aad679 (reverting accidental changes...)
                      )
 
