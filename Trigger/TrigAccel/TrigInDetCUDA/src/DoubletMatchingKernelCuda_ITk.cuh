@@ -26,7 +26,6 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 	__shared__ int spmIdx;
 	__shared__ float rm;
-	__shared__ float zm;
 
 	__shared__ float covZ;
 	__shared__ float covR;
@@ -41,8 +40,8 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	__shared__ float Rinv_array[MAX_NUMBER_DOUBLETS_ITk]; // inverse radius (xy plane)
 	__shared__ float tau_array[MAX_NUMBER_DOUBLETS_ITk]; // tau = cot(theta) = dz/dr
 	__shared__ int spIdx_array[MAX_NUMBER_DOUBLETS_ITk];
-	__shared__ float u_array[MAX_NUMBER_DOUBLETS_ITk];
-	__shared__ float v_array[MAX_NUMBER_DOUBLETS_ITk];
+	__shared__ float u_array[MAX_NUMBER_DOUBLETS_ITk]; // x, y mapped into conformal space
+	__shared__ float v_array[MAX_NUMBER_DOUBLETS_ITk]; // x, y mapped into conformal space
 	__shared__ float tauCov_array[MAX_NUMBER_DOUBLETS_ITk]; // covariance of tau
 
 	__shared__ int PairIdx_array[MAX_TRIPLETS_ITk];
@@ -63,7 +62,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 	const float ptCoeff = 0.29997*dSettings->m_magFieldZ/2;// ~0.3 
 	const float minPt2 = dSettings->m_tripletPtMin*dSettings->m_tripletPtMin; 
-	const float ptCoeff2 = ptCoeff*ptCoeff;
+	const float ptCoeff2 = ptCoeff*ptCoeff; // multiple scattering term
 	const float maxD0 = dSettings->m_tripletD0Max;
 
 	const float phiPlus = dSettings->m_phiPlus;
@@ -91,7 +90,6 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 			outerStart = d_Storage->m_outerStart[itemIdx];
 
 			rm = dSpacepoints->m_r[spmIdx];
-			zm = dSpacepoints->m_z[spmIdx];
 			covZ = dSpacepoints->m_covZ[spmIdx];
 			covR = dSpacepoints->m_covR[spmIdx];
 		
@@ -126,6 +124,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 				float xn_inn = dx_inn*cosA + dy_inn*sinA; 
 				float yn_inn =-dx_inn*sinA + dy_inn*cosA;	
 
+				// conformal transformation
 				u_array[k] = xn_inn*R2inv;
 				v_array[k] = yn_inn*R2inv;
 			}
@@ -177,9 +176,6 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		
 		if(doublet_i >= MAX_NUMBER_DOUBLETS_ITk || doublet_j >=MAX_NUMBER_DOUBLETS_ITk ) continue;
 
-		//int spiIdx = spIdx_array[doublet_i];
-		//int spoIdx = spIdx_array[doublet_j];
-		
 		//retrieve shared data for doublets doublet_i and doublet_j and apply cut(s)	  
 		
 		//0. dt matching
@@ -198,9 +194,8 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 		
 		float covdt = tauCov_inn + tauCov_out; 
 		covdt += 2*Rinv_array[doublet_i]*Rinv_array[doublet_j]*(tau_inn*tau_out*covR + covZ); 
-		float dt2 = dt*dt*(1/9.0);
-		if(dt2 > covdt+dCov) continue;//i.e. 3-sigma cut 
-		if (GPUTrackSeedingItkHelpers::getSignificanceCut(std::sqrt(dt2/(covdt+dCov))) < std::abs(dt)) continue;
+		float dt2 = dt*dt*(1/4.0);
+		if(dt2 > covdt+dCov) continue;//i.e. 2-sigma cut 
 
 		//2. pT estimate 
 

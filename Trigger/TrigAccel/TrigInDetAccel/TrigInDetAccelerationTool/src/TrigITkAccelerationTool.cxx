@@ -165,14 +165,14 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
         if (!isBarrel && clusterWidth > 0.2) continue;
 
         sps.m_index[spIdx] = (*it).first;
-        sps.m_type[spIdx] = 1; // always Pixel
+        sps.m_type[spIdx] = layerTypes[layer]; // store layer number
         sps.m_x[spIdx] = sp->x();
         sps.m_y[spIdx] = sp->y();
         sps.m_z[spIdx] = sp->z();
         sps.m_r[spIdx] = sp->r();
         sps.m_phi[spIdx] = sp->phi();
-        sps.m_covR[spIdx] = sp->dr()*sp->dr();
-        sps.m_covZ[spIdx] = sp->dz()*sp->dz();
+        sps.m_covR[spIdx] = getCovR(isBarrel);
+        sps.m_covZ[spIdx] = getCovZ(isBarrel);
         sps.m_clusterWidth[spIdx] = clusterWidth;
         spIdx++;
       }
@@ -203,4 +203,14 @@ int TrigITkAccelerationTool::extractTripletsFromOutput(std::shared_ptr<TrigAccel
   }
 
   return nTriplets;
+}
+
+float TrigITkAccelerationTool::getCovR(bool isBarrel) const {
+  if (isBarrel) return 0.01*0.01;
+  else return 0.02*0.02;
+}
+
+float TrigITkAccelerationTool::getCovZ(bool isBarrel) const {
+  if (isBarrel) return 0.02*0.02;
+  else return 0.01*0.01;
 }
