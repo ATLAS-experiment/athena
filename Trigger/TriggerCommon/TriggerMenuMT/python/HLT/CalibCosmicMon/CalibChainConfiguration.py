@@ -1,12 +1,12 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA, menuSequenceCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigT2CaloCommon.CaloDef import fastCaloRecoSequenceCfg
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -48,17 +48,10 @@ def getLArNoiseBurstSequenceCfg(flags):
     
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigLArNoiseBurstHypoToolGen)
     
-def getLArNoiseBurst(flags):
-    if isComponentAccumulatorCfg():
-       return getLArNoiseBurstSequenceCfg(flags)
-    else:
-       return menuSequenceCAToGlobalWrapper(getLArNoiseBurstSequenceCfg,flags)
-#----------------------------------------------------------------
 
 # --------------------
 # LArPS Noise Detection EM configuration
 # --------------------
-
 @AccumulatorCache
 def getCaloAllEMLayersPSSequenceCfg(flags,doAllorAllEM=False):
 
@@ -86,17 +79,6 @@ def getCaloAllEMLayersPSSequenceCfg(flags,doAllorAllEM=False):
     selAcc.addHypoAlgo(TrigL2CaloLayersAlg)
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigL2CaloLayersHypoToolGen)
 
-def getCaloAllEMLayersPS(flags):
-    if isComponentAccumulatorCfg():
-       return getCaloAllEMLayersPSSequenceCfg(flags,doAllorAllEM=False)
-    else:
-       return menuSequenceCAToGlobalWrapper(getCaloAllEMLayersPSSequenceCfg,flags,doAllorAllEM=False)
-
-def getCaloAllLayersPS(flags):
-    if isComponentAccumulatorCfg():
-       return getCaloAllEMLayersPSSequenceCfg(flags,doAllorAllEM=True)
-    else:
-       return menuSequenceCAToGlobalWrapper(getCaloAllEMLayersPSSequenceCfg,flags,doAllorAllEM=True)
 
 #----------------------------------------------------------------
 
@@ -148,25 +130,25 @@ class CalibChainConfiguration(ChainConfigurationBase):
 
 
     def getAcceptedEventsStep(self, flags, i):
-        return self.getStep(flags,1, 'AcceptedEvents', [acceptedEventsSequence])
+        return self.getStep(flags,1, 'AcceptedEvents', [acceptedEventsCfg])
 
     def getAllTEStep(self, flags, i):
-        return self.getStep(flags,1, 'LArNoiseBurst', [getLArNoiseBurst])
+        return self.getStep(flags,1, 'LArNoiseBurst', [getLArNoiseBurstSequenceCfg])
 
     def getCaloAllEMStep(self, flags, i):
-        return self.getStep(flags,1, 'LArPSALLEM', [getCaloAllEMLayersPS])
+        return self.getStep(flags,1, 'LArPSALLEM', [getCaloAllEMLayersPSSequenceCfg], doAllorAllEM=False)
 
     def getCaloAllStep(self, flags, i):
-        return self.getStep(flags,1, 'LArPSALL', [getCaloAllLayersPS])
+        return self.getStep(flags,1, 'LArPSALL', [getCaloAllEMLayersPSSequenceCfg], doAllorAllEM=True)
 
     def getIDCalibEmpty(self, flags, i):
         return self.getEmptyStep(1, 'IDCalibEmptyStep')
 
     def getIDCalibFTFReco(self, flags, i):
-        return self.getStep(flags,2,'IDCalibFTFCfg',[IDCalibFTFSeq])
+        return self.getStep(flags,2,'IDCalibFTFCfg',[IDCalibFTFCfg])
 
     def getIDCalibTrigger(self, flags, i):
-        return self.getStep(flags,3,'IDCalibTriggerCfg',[IDCalibTriggerSeq])
+        return self.getStep(flags,3,'IDCalibTriggerCfg',[IDCalibTriggerCfg])
 
 #----------------------------------------------------------------
 
@@ -194,12 +176,6 @@ def IDCalibTriggerCfg(flags):
     )
     return msca
     
-def IDCalibTriggerSeq(flags):
-    if isComponentAccumulatorCfg():
-        return IDCalibTriggerCfg(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(IDCalibTriggerCfg, flags)
-
 
 # --------------------
 
@@ -218,11 +194,6 @@ def IDCalibFTFCfg(flags):
     )
     return msca
 
-def IDCalibFTFSeq(flags):
-    if isComponentAccumulatorCfg():
-        return IDCalibFTFCfg(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(IDCalibFTFCfg, flags)
 
 #----------------------------------------------------------------
 
@@ -261,9 +232,3 @@ def acceptedEventsCfg(flags):
     )
     return msca
 
-def acceptedEventsSequence(flags):
-
-    if isComponentAccumulatorCfg():
-        return acceptedEventsCfg(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(acceptedEventsCfg, flags)

@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequence, EmptyMenuSequenceCA, menuSequenceCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import CompFactory
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequenceCA
 from TrigEDMConfig.TriggerEDM import recordable
 import AthenaCommon.SystemOfUnits as Units
 
@@ -52,17 +52,9 @@ def CosmicsTrkSequenceCfg(flags):
                           trkSequence,
                           HypoToolGen = TrackCountHypoToolGen)
 
-def CosmicsTrkSequence(flags):
-    if isComponentAccumulatorCfg():
-        return CosmicsTrkSequenceCfg(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(CosmicsTrkSequenceCfg, flags)
 
 def EmptyMSBeforeCosmicID(flags):
-    if isComponentAccumulatorCfg():
-        return EmptyMenuSequenceCA("EmptyBeforeCosmicID")
-    else:
-        return EmptyMenuSequence("EmptyBeforeCosmicID")
+    return EmptyMenuSequenceCA("EmptyBeforeCosmicID")
 
 #----------------------------------------------------------------
 class CosmicChainConfiguration(ChainConfigurationBase):
@@ -82,7 +74,7 @@ class CosmicChainConfiguration(ChainConfigurationBase):
         # --------------------
         if 'cosmic_id' in self.chainName:
             steps += [  self.getStep(flags, 1, 'Empty', [EmptyMSBeforeCosmicID]),
-                        self.getStep(flags, 2, 'CosmicTracking', [CosmicsTrkSequence]) ]
+                        self.getStep(flags, 2, 'CosmicTracking', [CosmicsTrkSequenceCfg]) ]
 
         return self.buildChain(steps)
 

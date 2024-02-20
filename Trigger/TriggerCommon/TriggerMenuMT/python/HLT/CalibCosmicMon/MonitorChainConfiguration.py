@@ -1,12 +1,12 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, menuSequenceCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen, L1CorrelationAlgCfg
 from TrigHypoCommonTools.TrigHypoCommonTools import TrigGenericHypoToolFromDict
 from TrigEDMConfig.TriggerEDM import recordable
@@ -36,11 +36,6 @@ def timeBurnerCfg(flags):
                           HypoToolGen=TimeBurnerHypoToolGen)
     return msca
 
-def timeBurnerSequence(flags):
-    if isComponentAccumulatorCfg():
-        return timeBurnerCfg(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(timeBurnerCfg, flags)
 
 def MistimeMonSequenceCfg(flags):
         inputMaker = CompFactory.InputMakerForRoI("IM_MistimeMon",
@@ -65,12 +60,6 @@ def MistimeMonSequenceCfg(flags):
         return MenuSequenceCA(flags, selAcc,
                 HypoToolGen = TrigGenericHypoToolFromDict)
 
-def MistimeMonSequence(flags):
-    if isComponentAccumulatorCfg():
-        return MistimeMonSequenceCfg(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(MistimeMonSequenceCfg, flags)
- 
 
 #----------------------------------------------------------------
 # Class to configure chain
@@ -107,10 +96,10 @@ class MonitorChainConfiguration(ChainConfigurationBase):
     # TimeBurner configuration
     # --------------------
     def getTimeBurnerStep(self, flags):
-        return self.getStep(flags,1,'TimeBurner',[timeBurnerSequence])
+        return self.getStep(flags,1,'TimeBurner',[timeBurnerCfg])
 
     # --------------------
     # MistTimeMon configuration
     # --------------------
     def getMistimeMonStep(self, flags):
-        return self.getStep(flags,1,'MistimeMon',[MistimeMonSequence])
+        return self.getStep(flags,1,'MistimeMon',[MistimeMonSequenceCfg])
