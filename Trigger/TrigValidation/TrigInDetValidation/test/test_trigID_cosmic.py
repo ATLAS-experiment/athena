@@ -28,24 +28,17 @@
 # art-output: *.dat 
 
 
-# not yet, need yo sort out the replacement of the preinclude / preexecs
-# useCA_Reco = True
+useCA_Reco = True
 
 Slices  = ['cosmic']
 Events  = 4000
 Threads = 8 
 Slots   = 8
 Release = "current"
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAcosmic_preinclude.py'
-preexec_reco = [
-  "from AthenaCommon.BeamFlags import jobproperties",
-  "jobproperties.Beam.beamType.set_Value_and_Lock('cosmics')",
-  "from InDetRecExample.InDetJobProperties import InDetFlags",
-  "InDetFlags.doCosmics.set_Value_and_Lock(True)",
-  "InDetFlags.doTRTStandalone.set_Value_and_Lock(False)",
-  "InDetFlags.doR3LargeD0.set_Value_and_Lock(False)",
-  "InDetFlags.doForwardTracks.set_Value_and_Lock(False)",
-]
+preexec_reco = ["from AthenaConfiguration.Enums import BeamType", "flags.Beam.Type=BeamType.Cosmics",
+                "flags.Tracking.doTRTStandalone=False",
+                "flags.Tracking.doForwardTracks=False",
+                "flags.Tracking.doLargeD0=False"]
 Input   = 'mc_cosmics'    # defined in TrigValTools/share/TrigValInputs.json  
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline-cosmic.dat      -r Offline -o data-hists-offline.root" ) ]

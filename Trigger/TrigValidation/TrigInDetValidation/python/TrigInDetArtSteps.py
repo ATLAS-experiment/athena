@@ -252,7 +252,7 @@ class TrigInDetRecoData(ExecStep):
 #        super(TrigInDetRecoData, self).__init__(name)
         ExecStep.__init__(self, name)
         self.type = 'athenaHLT'
-        self.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+        self.job_options = 'TriggerJobOpts.runHLT'
         self.max_events=-1
         self.required = True
         self.threads = 1 # TODO: change to 4
@@ -263,6 +263,7 @@ class TrigInDetRecoData(ExecStep):
         self.perfmon=False
         self.imf=False
         self.args = '-c "setMenu=\'Cosmic_run3_v1\';doCosmics=True;doL1Sim=False;forceEnableAllChains=True;"'
+        self.args = '-c "flags.Trigger.forceEnableAllChains=True;flags.Trigger.triggerMenuSetup=\'Cosmic_run3_v1\';from AthenaConfiguration.Enums import BeamType;flags.Beam.Type=BeamType.Cosmics;"'
         self.args += ' -o output'
 
 
