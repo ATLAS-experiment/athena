@@ -86,8 +86,3 @@ To run locally:
    Gen_tf.py --ecmEnergy=13000.0 --maxEvents=1000 --firstEvent=1 --randomSeed=14 --outputEVNTFile=test.pool.root --jobConfig 999999
    ```
 
-# Releases
-
-A functional version of the SuperChic interface was first incorporated into the nightly release 21.6,AthGeneration,r2021-04-30T0933.  
-Any full release more recent than 21.6.70 should contain a functional interface.  However, a slightly tweak was implemented in EventFiller.py 
-to put the initial state protons into the EVNT files in the unshowered case.  This will likely be in release 21.6.72 and onward.
