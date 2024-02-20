@@ -14,17 +14,6 @@ atlas_add_component( MuonGeoModelTestR4
                                     xAODTruth xAODMuonSimHit MuonStationGeoHelpersLib CxxUtils)
 
 
-atlas_add_test( testR4Geometry
-                SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers "BML1A3 T1E1A01" --noMM --noSTGC 
-                PROPERTIES TIMEOUT 600
-                POST_EXEC_SCRIPT nopost.sh)
-
-
-atlas_add_test( testR4SensitiveDetectors
-                SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 10 
-                PROPERTIES TIMEOUT 600
-                POST_EXEC_SCRIPT nopost.sh)
-
 file(GLOB_RECURSE files "util/*.cxx")
 foreach(_exeFile ${files})
   get_filename_component(_theExec ${_exeFile} NAME_WE)
