@@ -382,7 +382,7 @@ namespace {
   //
   std::pair<typename getter_utils::NamedSequenceFromConstituents, std::set<std::string>> 
   CustomSequenceGetter::seqFromConsituents(
-      const FTagConstituentsInputConfig& cfg, 
+      const InputVariableConfig& cfg, 
       const FTagOptions& options){
     const std::string prefix = options.track_prefix;
     switch (cfg.type) {
@@ -410,11 +410,11 @@ namespace {
 
   
   CustomSequenceGetter::CustomSequenceGetter(
-    std::vector<FTagConstituentsInputConfig> inputs,
+    std::vector<InputVariableConfig> inputs,
     const FTagOptions& options)
   {
       std::map<std::string, std::string> remap = options.remap_scalar;
-      for (const FTagConstituentsInputConfig& input_cfg: inputs) {
+      for (const InputVariableConfig& input_cfg: inputs) {
         auto [seqGetter, seq_deps] = seqFromConsituents(
         input_cfg, options);
 

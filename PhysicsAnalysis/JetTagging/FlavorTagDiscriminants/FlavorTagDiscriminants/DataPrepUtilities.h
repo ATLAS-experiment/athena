@@ -31,23 +31,6 @@
 namespace FlavorTagDiscriminants {
 
   enum class EDMType {CHAR, UCHAR, INT, FLOAT, DOUBLE, CUSTOM_GETTER};
-  enum class SortOrder {
-    ABS_D0_SIGNIFICANCE_DESCENDING,
-    D0_SIGNIFICANCE_DESCENDING,
-    PT_DESCENDING,
-    ABS_D0_DESCENDING
-  };
-  enum class TrackSelection {
-    ALL,
-    IP3D_2018,
-    DIPS_TIGHT_UPGRADE,
-    DIPS_LOOSE_UPGRADE,
-    DIPS_LOOSE_202102,
-    LOOSE_202102_NOIP,
-    R22_DEFAULT,
-    R22_LOOSE
-  };
-
 
   // Structures to define DL2/GNNTool input.
   //
@@ -56,19 +39,6 @@ namespace FlavorTagDiscriminants {
     std::string name;
     EDMType type;
     std::string default_flag;
-  };
-  struct FTagTrackInputConfig
-  {
-    std::string name;
-    EDMType type;
-    bool flip_sign;
-  };
-  struct FTagTrackSequenceConfig
-  {
-    std::string name;
-    SortOrder order;
-    TrackSelection selection;
-    std::vector<FTagTrackInputConfig> inputs;
   };
 
   // other DL2/GNNTool options
@@ -90,7 +60,6 @@ namespace FlavorTagDiscriminants {
   namespace internal {
     // typedefs
     typedef std::pair<std::string, double> NamedVar;
-    typedef std::pair<std::string, std::vector<double> > NamedSeq;
     typedef xAOD::Jet Jet;
     typedef xAOD::BTagging BTagging;
     typedef std::vector<const xAOD::TrackParticle*> Tracks;
@@ -159,29 +128,6 @@ namespace FlavorTagDiscriminants {
         }
     };
 
-    // The sequence getter takes in tracks and calculates arrays of
-    // values which are better suited for inputs to the NNs
-    template <typename T>
-    class SequenceGetter{
-      private:
-        SG::AuxElement::ConstAccessor<T> m_getter;
-        std::string m_name;
-      public:
-        SequenceGetter(const std::string& name):
-          m_getter(name),
-          m_name(name)
-          {
-          }
-        NamedSeq operator()(const xAOD::Jet&, const Tracks& trks) const {
-          std::vector<double> seq;
-          for (const xAOD::TrackParticle* track: trks) {
-            seq.push_back(m_getter(*track));
-          }
-          return {m_name, seq};
-        }
-    };
-
-
     // Filler functions
     //
     // factory functions to produce callable objects that build inputs
@@ -220,7 +166,7 @@ namespace FlavorTagDiscriminants {
     // structure.
     std::tuple<
       std::vector<FTagInputConfig>,
-      std::vector<FTagConstituentsSequenceConfig>,
+      std::vector<ConstituentsInputConfig>,
       FTagOptions>
     createGetterConfig( lwt::GraphConfig& graph_config,
       FlipTagConfig flip_config,

@@ -6,8 +6,6 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
 #include "FlavorTagDiscriminants/CustomGetterUtils.h"
 #include "FlavorTagDiscriminants/StringUtils.h"
-#include "FlavorTagDiscriminants/TracksLoader.h"
-#include "FlavorTagDiscriminants/IParticlesLoader.h"
 
 #include "xAODBTagging/BTaggingUtilities.h"
 
@@ -20,11 +18,7 @@ namespace {
   }
 
   using FlavorTagDiscriminants::EDMType;
-  using FlavorTagDiscriminants::SortOrder;
-  using FlavorTagDiscriminants::TrackSelection;
-  using FlavorTagDiscriminants::FTagTrackSequenceConfig;
   using FlavorTagDiscriminants::FTagInputConfig;
-  using FlavorTagDiscriminants::FTagTrackInputConfig;
   using FlavorTagDiscriminants::FlipTagConfig;
   // ____________________________________________________________________
   // High level adapter stuff
@@ -34,8 +28,6 @@ namespace {
   //
   typedef std::vector<std::pair<std::regex, EDMType> > TypeRegexes;
   typedef std::vector<std::pair<std::regex, std::string> > StringRegexes;
-  typedef std::vector<std::pair<std::regex, SortOrder> > SortRegexes;
-  typedef std::vector<std::pair<std::regex, TrackSelection> > TrkSelRegexes;
 
   // Function to map the regular expressions + the list of inputs to a
   // list of variable configurations.
@@ -238,7 +230,7 @@ namespace FlavorTagDiscriminants {
     //
     std::tuple<
       std::vector<FTagInputConfig>,
-      std::vector<FTagConstituentsSequenceConfig>,
+      std::vector<ConstituentsInputConfig>,
       FTagOptions>
     createGetterConfig( lwt::GraphConfig& config,
       FlipTagConfig flip_config,
@@ -325,14 +317,10 @@ namespace FlavorTagDiscriminants {
         constituent_names.emplace_back(node.name, names);
       }
 
-      std::vector<FTagConstituentsSequenceConfig> constituent_configs;
+      std::vector<ConstituentsInputConfig> constituent_configs;
       for (auto el: constituent_names){
-        if (el.first.find("tracks") != std::string::npos){
-          constituent_configs.push_back(createTracksLoaderConfig(el, flip_config));
-        }
-        else if (el.first.find("flows") != std::string::npos){
-          constituent_configs.push_back(createIParticlesLoaderConfig(el));
-        }
+        constituent_configs.push_back(
+          createConstituentsLoaderConfig(el.first, el.second, flip_config));
       }
 
       // some additional options

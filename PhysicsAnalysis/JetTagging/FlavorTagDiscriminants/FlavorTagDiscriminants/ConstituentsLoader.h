@@ -14,6 +14,7 @@
 #include "FlavorTagDiscriminants/AssociationEnums.h"
 #include "FlavorTagDiscriminants/OnnxUtil.h"
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
+#include "FlavorTagDiscriminants/StringUtils.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -42,24 +43,36 @@ namespace FlavorTagDiscriminants {
         R22_DEFAULT,
         R22_LOOSE
     };
+    enum class ConstituentsType {
+        IPARTICLE,
+        TRACK
+    };
 
-    struct FTagConstituentsInputConfig {
+    struct InputVariableConfig {
         std::string name;
         ConstituentsEDMType type;
         bool flip_sign;
     };
 
-    struct FTagConstituentsSequenceConfig {
+    struct ConstituentsInputConfig {
         std::string name;
+        std::string output_name;
+        ConstituentsType type;
         ConstituentsSortOrder order;
         ConstituentsSelection selection;
-        std::vector<FTagConstituentsInputConfig> inputs;
+        std::vector<InputVariableConfig> inputs;
     };
+
+    ConstituentsInputConfig createConstituentsLoaderConfig(
+      std::string name,
+      std::vector<std::string> input_variables,
+      FlipTagConfig flip_config
+    );
 
     // Virtual class to represent loader of any type of constituents
     class ConstituentsLoader {
         public:
-            ConstituentsLoader(FTagConstituentsSequenceConfig cfg) {
+            ConstituentsLoader(ConstituentsInputConfig cfg) {
               m_config = cfg;
             };
             virtual ~ConstituentsLoader() {
@@ -70,10 +83,11 @@ namespace FlavorTagDiscriminants {
             virtual FTagDataDependencyNames getDependencies() const = 0;
             virtual std::set<std::string> getUsedRemap() const = 0;
             virtual std::string getName() const = 0;
+            virtual ConstituentsType getType() const = 0;
 
         protected:
             FTagDataDependencyNames m_deps;
-            FTagConstituentsSequenceConfig m_config;
+            ConstituentsInputConfig m_config;
             std::set<std::string> m_used_remap;
             std::string m_name;
     };

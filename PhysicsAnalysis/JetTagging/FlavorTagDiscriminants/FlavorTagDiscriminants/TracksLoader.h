@@ -35,7 +35,7 @@
 namespace FlavorTagDiscriminants {
 
     // tracksConfig 
-    FTagConstituentsSequenceConfig createTracksLoaderConfig(
+    ConstituentsInputConfig createTracksLoaderConfig(
       std::pair<std::string, std::vector<std::string>> trk_names,
       FlipTagConfig flip_config
     );
@@ -46,7 +46,7 @@ namespace FlavorTagDiscriminants {
       public:
         typedef std::vector<const xAOD::TrackParticle*> Tracks;
 
-        TracksLoader(FTagConstituentsSequenceConfig, const FTagOptions& options);
+        TracksLoader(ConstituentsInputConfig, const FTagOptions& options);
         std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
           [[maybe_unused]] const SG::AuxElement& btag) const override;
@@ -57,6 +57,7 @@ namespace FlavorTagDiscriminants {
         FTagDataDependencyNames getDependencies() const override;
         std::set<std::string> getUsedRemap() const override;
         std::string getName() const override;
+        ConstituentsType getType() const override;
       private:
         // typedefs
         typedef std::pair<std::string, double> NamedVar;

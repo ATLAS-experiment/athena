@@ -21,7 +21,7 @@ namespace FlavorTagDiscriminants {
   public:
     DL2(const lwt::GraphConfig&,
         const std::vector<FTagInputConfig>&,
-        const std::vector<FTagConstituentsSequenceConfig>& = {},
+        const std::vector<ConstituentsInputConfig>& = {},
         const FTagOptions& = FTagOptions());
     void decorate(const xAOD::BTagging& btag) const;
     void decorate(const xAOD::Jet& jet) const;

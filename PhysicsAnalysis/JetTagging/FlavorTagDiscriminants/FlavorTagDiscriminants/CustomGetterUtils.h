@@ -62,7 +62,7 @@ namespace FlavorTagDiscriminants {
 
     class CustomSequenceGetter {
         public:
-          CustomSequenceGetter(std::vector<FTagConstituentsInputConfig> inputs,
+          CustomSequenceGetter(std::vector<InputVariableConfig> inputs,
                               const FTagOptions& options);
 
           std::pair<std::vector<float>, std::vector<int64_t>> getFeats(const xAOD::Jet& jet, const IParticles& constituents) const;
@@ -73,7 +73,7 @@ namespace FlavorTagDiscriminants {
           
         private:
           std::pair<NamedSequenceFromConstituents, std::set<std::string>> seqFromConsituents(
-            const FTagConstituentsInputConfig& cfg, 
+            const InputVariableConfig& cfg, 
             const FTagOptions& options);
 
           std::vector<NamedSequenceFromConstituents> sequencesFromConstituents;

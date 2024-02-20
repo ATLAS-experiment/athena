@@ -27,19 +27,20 @@
 
 namespace FlavorTagDiscriminants {
 
-    FTagConstituentsSequenceConfig createIParticlesLoaderConfig(
+    ConstituentsInputConfig createIParticlesLoaderConfig(
       std::pair<std::string, std::vector<std::string>> iparticle_names
     );
     // Subclass for IParticles loader inherited from abstract ConstituentsLoader class
     class IParticlesLoader : public ConstituentsLoader {
       public:
-        IParticlesLoader(FTagConstituentsSequenceConfig, const FTagOptions& options);
+        IParticlesLoader(ConstituentsInputConfig, const FTagOptions& options);
         std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
           const xAOD::Jet& jet, 
           [[maybe_unused]] const SG::AuxElement& btag) const override ;
         FTagDataDependencyNames getDependencies() const override;
         std::set<std::string> getUsedRemap() const override;
         std::string getName() const override;
+        ConstituentsType getType() const override;
       protected:
         // typedefs
         typedef xAOD::Jet Jet;

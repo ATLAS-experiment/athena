@@ -7,112 +7,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #include "FlavorTagDiscriminants/TracksLoader.h"
 #include "FlavorTagDiscriminants/StringUtils.h"
 
-namespace {
-  using namespace FlavorTagDiscriminants;
-  // define a regex literal operator
-  std::regex operator "" _r(const char* c, size_t /* length */) {
-    return std::regex(c);
-  }
-
-  // ____________________________________________________________________
-  //
-  // We define a few structures to map variable names to type, default
-  // value, etc.
-  //
-  typedef std::vector<std::pair<std::regex, ConstituentsEDMType> > TypeRegexes;
-  typedef std::vector<std::pair<std::regex, ConstituentsSortOrder> > SortRegexes;
-  typedef std::vector<std::pair<std::regex, ConstituentsSelection> > TrkSelRegexes;
-
-  FTagConstituentsSequenceConfig get_track_input_config(
-    const std::pair<std::string, std::vector<std::string>> name_node,
-    const TypeRegexes& type_regexes,
-    const SortRegexes& sort_regexes,
-    const TrkSelRegexes& select_regexes,
-    const std::regex& re,
-    const FlipTagConfig& flip_config) {
-    FTagConstituentsSequenceConfig config;
-    config.name = name_node.first;
-    config.order = str::match_first(sort_regexes, name_node.first,
-                              "track order matching");
-    config.selection = str::match_first(select_regexes, name_node.first,
-                                  "track selection matching");
-    for (const auto& varname: name_node.second) {
-      FTagConstituentsInputConfig input;
-      input.name = varname;
-      input.type = str::match_first(type_regexes, varname,
-                                "track type matching");
-
-      input.flip_sign=false;
-      if ((flip_config != FlipTagConfig::STANDARD) && std::regex_match(varname, re)){
-        input.flip_sign=true;
-      }
-      config.inputs.push_back(input);
-    }
-    return config;
-  }
-}
-
 namespace FlavorTagDiscriminants {
-
-    FTagConstituentsSequenceConfig createTracksLoaderConfig(
-      std::pair<std::string, std::vector<std::string>> trk_names,
-      FlipTagConfig flip_config
-    ){
-        // some sequences also need to be sign-flipped. We apply this by
-        // changing the input scaling and normalizations
-        std::regex flip_sequences;
-        if (flip_config == FlipTagConfig::FLIP_SIGN || flip_config == FlipTagConfig::NEGATIVE_IP_ONLY){
-          flip_sequences=std::regex(".*signed_[dz]0.*");
-        }
-        if (flip_config == FlipTagConfig::SIMPLE_FLIP){
-          flip_sequences=std::regex("(.*signed_[dz]0.*)|d0|z0SinTheta");
-        }
-
-        // build the track inputs
-        TypeRegexes trk_type_regexes {
-          // Some innermost / next-to-innermost hit variables had a different
-          // definition in 21p9, recomputed here with customGetter to reuse
-          // existing training
-          // EDMType picked correspond to the first matching regex
-          {"numberOf.*21p9"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"numberOf.*"_r, ConstituentsEDMType::UCHAR},
-          {"btagIp_(d0|z0SinTheta)Uncertainty"_r, ConstituentsEDMType::FLOAT},
-          {"(numberDoF|chiSquared|qOverP|theta)"_r, ConstituentsEDMType::FLOAT},
-          {"(^.*[_])?(d|z)0.*"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"(log_)?(ptfrac|dr|pt).*"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"(deta|dphi)"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"phi|theta|qOverP"_r, ConstituentsEDMType::FLOAT},
-          {"(phi|theta|qOverP)Uncertainty"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"leptonID"_r, ConstituentsEDMType::CHAR}
-        };
-        // We have a number of special naming conventions to sort and
-        // filter tracks. The track nodes should be named according to
-        //
-        // tracks_<selection>_<sort-order>
-        //
-        SortRegexes trk_sort_regexes {
-          {".*absSd0sort"_r, ConstituentsSortOrder::ABS_D0_SIGNIFICANCE_DESCENDING},
-          {".*sd0sort"_r, ConstituentsSortOrder::D0_SIGNIFICANCE_DESCENDING},
-          {".*ptsort"_r, ConstituentsSortOrder::PT_DESCENDING},
-          {".*absD0DescendingSort"_r, ConstituentsSortOrder::ABS_D0_DESCENDING},
-        };
-        TrkSelRegexes trk_select_regexes {
-          {".*_ip3d_.*"_r, ConstituentsSelection::IP3D_2018},
-          {".*_dipsTightUpgrade_.*"_r, ConstituentsSelection::DIPS_TIGHT_UPGRADE},
-          {".*_dipsLooseUpgrade_.*"_r, ConstituentsSelection::DIPS_LOOSE_UPGRADE},
-          {".*_all_.*"_r, ConstituentsSelection::ALL},
-          {".*_dipsLoose202102_.*"_r, ConstituentsSelection::DIPS_LOOSE_202102},
-          {".*_loose202102NoIpCuts_.*"_r, ConstituentsSelection::LOOSE_202102_NOIP},
-          {".*_r22default_.*"_r, ConstituentsSelection::R22_DEFAULT},
-          {".*_r22loose_.*"_r, ConstituentsSelection::R22_LOOSE},
-        };
-
-        auto trk_config = get_track_input_config(
-          trk_names, trk_type_regexes, trk_sort_regexes, trk_select_regexes,flip_sequences,flip_config);
-
-        return trk_config;
-    }
-
 
     // factory for functions which return the sort variable we
     // use to order tracks
@@ -370,7 +265,7 @@ namespace FlavorTagDiscriminants {
     }
 
     TracksLoader::TracksLoader(
-        FTagConstituentsSequenceConfig cfg,
+        ConstituentsInputConfig cfg,
         const FTagOptions& options
     ):
         ConstituentsLoader(cfg),
@@ -458,7 +353,7 @@ namespace FlavorTagDiscriminants {
             flipped_tracks_ip.push_back(dynamic_cast<const xAOD::IParticle*>(trk));
         }
 
-        return std::make_tuple("track_features", m_customSequenceGetter.getFeats(jet, flipped_tracks_ip), flipped_tracks_ip);
+        return std::make_tuple(m_config.output_name, m_customSequenceGetter.getFeats(jet, flipped_tracks_ip), flipped_tracks_ip);
     }
 
     std::tuple<char, std::map<std::string, std::vector<double>>> TracksLoader::getDL2Data(
@@ -486,8 +381,10 @@ namespace FlavorTagDiscriminants {
     std::set<std::string> TracksLoader::getUsedRemap() const {
         return m_used_remap;
     }
-
     std::string TracksLoader::getName() const {
         return m_name;
+    }
+    ConstituentsType TracksLoader::getType() const {
+        return m_config.type;
     }
 }

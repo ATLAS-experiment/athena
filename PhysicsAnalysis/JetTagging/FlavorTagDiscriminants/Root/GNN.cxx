@@ -52,20 +52,17 @@ namespace FlavorTagDiscriminants {
     // Create configuration objects for data preprocessing.
     auto [inputs, constituents_configs, options] = dataprep::createGetterConfig(
         lwt_config, o.flip_config, o.variable_remapping, o.track_link_type);
-    std::vector<FTagTrackSequenceConfig> track_sequences;
+    
     int n_track_sequences = 0;
     for (auto config : constituents_configs){
-      if (config.name.find("tracks") != std::string::npos){
+      switch (config.type){
+      case ConstituentsType::TRACK:
         m_constituentsLoaders.push_back(std::make_shared<TracksLoader>(config, options));
         n_track_sequences++;
-      }
-      else if (config.name.find("flow") != std::string::npos){
+        break;
+      case ConstituentsType::IPARTICLE:
         m_constituentsLoaders.push_back(std::make_shared<IParticlesLoader>(config, options));
-      }
-      else {
-        throw std::runtime_error(
-          "Unknown constituent type: " + config.name + ". Only tracks and neutrals are supported."
-          );
+        break;
       }
     }
 
@@ -154,7 +151,7 @@ namespace FlavorTagDiscriminants {
       auto [sequence_name, sequence_data, sequence_iparticles] = loader->getData(jet, btag);
       gnn_input.insert({sequence_name, sequence_data});
       // collect tracks for decoration
-      if (sequence_name.find("track") != std::string::npos){
+      if (loader->getType() == ConstituentsType::TRACK){
         for (auto iparticle : sequence_iparticles){
           input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(iparticle));
         }

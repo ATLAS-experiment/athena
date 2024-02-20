@@ -43,6 +43,7 @@ set(FTDSource
   Root/VRJetOverlapDecorator.cxx
   Root/FTagDataDependencyNames.cxx
   Root/TrackClassifier.cxx
+  Root/ConstituentsLoader.cxx
   Root/TracksLoader.cxx
   Root/IParticlesLoader.cxx
   Root/CustomGetterUtils.cxx

@@ -21,7 +21,7 @@ namespace FlavorTagDiscriminants {
   // TODO: make this work with more input nodes
   DL2::DL2(const lwt::GraphConfig& graph_config,
            const std::vector<FTagInputConfig>& inputs,
-           const std::vector<FTagConstituentsSequenceConfig>& tracks_configs,
+           const std::vector<ConstituentsInputConfig>& tracks_configs,
            const FTagOptions& options):
     m_jetLink(jetLinkName),
     m_input_node_name(""),
