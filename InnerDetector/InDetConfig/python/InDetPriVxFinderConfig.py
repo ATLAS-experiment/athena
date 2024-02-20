@@ -86,7 +86,7 @@ def primaryVertexFindingCfg(flags, vxCandidatesOutputName="PrimaryVertices"):
 
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 
-    excludedVtxAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+    excludedVtxAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV.-TruthEventMatchingInfos.-TruthEventRawMatchingInfos.-VertexMatchType"
     verticesContainer = [
         f"xAOD::VertexContainer#{vxCandidatesOutputName}",
         f"xAOD::VertexAuxContainer#{vxCandidatesOutputName}Aux." + excludedVtxAuxData,
