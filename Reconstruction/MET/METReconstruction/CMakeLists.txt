@@ -15,5 +15,4 @@ atlas_add_component( METReconstruction
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools FourMomUtils xAODCaloEvent xAODEgamma xAODJet xAODMissingET xAODMuon xAODPFlow xAODTracking xAODTruth GaudiKernel RecoToolInterfaces CaloEvent CaloConditions AthContainers AthenaBaseComps EventPrimitives xAODTau TruthUtils METRecoInterface PFlowUtilsLib StoreGateLib InDetTrackSelectionToolLib TrackVertexAssociationToolLib tauRecToolsLib)
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py python/LegacyRunII/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
