@@ -1120,7 +1120,6 @@ void VP1GeometrySystem::Imp::buildSystem(SubSystemInfo* si)
 
   if (si->geomodelchildrenregexp.isEmpty()) {
 	  //Loop over the treetop's that we previously selected:
-
 	  std::vector<SubSystemInfo::TreetopInfo>::const_iterator it, itE = si->treetopinfo.end();
 	  for (it=si->treetopinfo.begin();it!=itE;++it)
 	  {
