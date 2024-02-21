@@ -1,15 +1,14 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigBphysHypo.TrigBmuxComboHypoMonitoringConfig import TrigBmuxComboHypoMonitoring
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigBmuxComboHypoConfig')
 
-def BmuxComboHypoInternalCfg(flags):
+def BmuxComboHypoCfg(flags, name):
+    log.debug('BmuxComboHypoCfg.name = %s ', name)
     suffix = 'Bmux'
     acc = ComponentAccumulator()
     from TrigBphysHypo.TrigBPhyCommonConfig import TrigBPHY_TrkVKalVrtFitterCfg
@@ -84,10 +83,3 @@ def BmuxComboHypoInternalCfg(flags):
         MonTool = TrigBmuxComboHypoMonitoring(flags, 'TrigBmuxComboHypoMonitoring'))
     acc.addEventAlgo(hypo)
     return acc
-
-def BmuxComboHypoCfg(flags, name):
-    log.debug('BmuxComboHypoCfg.name = %s ', name)
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(BmuxComboHypoInternalCfg, flags)[0]
-    else:
-        return BmuxComboHypoInternalCfg(flags)

@@ -1,17 +1,16 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 @AccumulatorCache
-def fastElectronSequenceCfg(flags, name, variant='', is_probe_leg = False):
+def fastElectronSequenceCfg(flags, name='FastElectron', variant='', is_probe_leg = False):
     """ second step:  tracking....."""
 
     InViewRoIs = "EMFastElectronRoIs"+variant
@@ -41,24 +40,6 @@ def fastElectronSequenceCfg(flags, name, variant='', is_probe_leg = False):
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastElectronHypoToolFromDict,isProbe=is_probe_leg)
 
 
-def fastElectronSequenceCfg_lrt(flags, name, is_probe_leg=False):
+def fastElectronSequence_LRTCfg(flags, name='FastElectron', is_probe_leg=False):
     # This is to call fastElectronMenuSequence for the _LRT variant
     return fastElectronSequenceCfg(flags, name, is_probe_leg=is_probe_leg, variant='_LRT')
-
-
-def fastElectronMenuSequence(flags, name="FastElectron", is_probe_leg=False):
-    """Creates secpond step photon sequence"""
-
-    if isComponentAccumulatorCfg():
-        return fastElectronSequenceCfg(flags, name = name, is_probe_leg=is_probe_leg)
-    else: 
-        return menuSequenceCAToGlobalWrapper(fastElectronSequenceCfg, flags, name = name, is_probe_leg=is_probe_leg)
-
-
-def fastElectronMenuSequence_LRT(flags,name="FastElectron", is_probe_leg=False):
-    """Creates secpond step photon sequence"""
-
-    if isComponentAccumulatorCfg():
-        return fastElectronSequenceCfg_lrt(flags, name = name, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(fastElectronSequenceCfg_lrt, flags, name = name, is_probe_leg=is_probe_leg)

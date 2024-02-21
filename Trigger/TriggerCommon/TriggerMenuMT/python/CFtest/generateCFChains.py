@@ -19,9 +19,12 @@ def generateCFChains(flags):
     # egamma chains
     ##################################################################
     if 'Egamma' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Electron.ElectronChainConfiguration import electronFastCaloCfg, fastElectronSequenceCfg, precisionCaloSequenceCfg
-        fastCaloSeq = electronFastCaloCfg ( flags )
-        electronSeq = fastElectronSequenceCfg (flags )
+        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
+        from TriggerMenuMT.HLT.Electron.FastElectronMenuSequences import fastElectronSequenceCfg
+        from TriggerMenuMT.HLT.Electron.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
+
+        fastCaloSeq = fastCaloMenuSequenceCfg( flags, name='Electron' )
+        electronSeq = fastElectronSequenceCfg( flags )
         precisionCaloSeq = precisionCaloSequenceCfg( flags )
         
         FastCaloStep      = makeChainStep("ElectronFastCaloStep", [fastCaloSeq])
@@ -36,12 +39,12 @@ def generateCFChains(flags):
             ]
         menu.chainsInMenu['Egamma'] += electronChains
 
-        from TriggerMenuMT.HLT.Photon.PhotonChainConfiguration import fastPhotonCaloSequenceCfg, fastPhotonSequenceCfg
-        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
+        from TriggerMenuMT.HLT.Photon.FastPhotonMenuSequences import fastPhotonSequenceCfg
+        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
 
-        fastCaloSeq            = fastPhotonCaloSequenceCfg( flags )
+        fastCaloSeq            = fastCaloMenuSequenceCfg( flags, name='Photon' )
         fastPhotonSeq          = fastPhotonSequenceCfg( flags )
-        precisionCaloPhotonSeq = precisionCaloMenuSequence( flags, name='Photon')
+        precisionCaloPhotonSeq = precisionCaloSequenceCfg( flags )
         
         FastCaloStep            = makeChainStep("PhotonFastCaloStep", [fastCaloSeq])
         fastPhotonStep          = makeChainStep("PhotonStep2", [fastPhotonSeq])
@@ -112,21 +115,20 @@ def generateCFChains(flags):
     ##################################################################
 
     from TriggerMenuMT.HLT.Jet.JetRecoCommon import jetRecoDictFromString
-    from TriggerMenuMT.HLT.Jet.JetChainConfiguration import callGenerator
     def jetCaloHypoMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloHypoMenuSequence
-        return callGenerator(jetCaloHypoMenuSequence,flags, isPerf=False, **jetRecoDict)
+        return jetCaloHypoMenuSequence(flags, isPerf=False, **jetRecoDict)
 
     def jetCaloPreselMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloPreselMenuSequence
-        return callGenerator(jetCaloPreselMenuSequence,flags, **jetRecoDict)
+        return jetCaloPreselMenuSequence(flags, **jetRecoDict)
 
     def jetTrackingHypoMenuSequenceFromString(jet_def_str,clustersKey):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetFSTrackingHypoMenuSequence
-        return callGenerator(jetFSTrackingHypoMenuSequence,flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
+        return jetFSTrackingHypoMenuSequence(flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
 
     if 'Jet' in flags.Trigger.enabledSignatures:
 
@@ -168,7 +170,7 @@ def generateCFChains(flags):
     # bjet chains
     ##################################################################
     if 'Bjet' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Bjet.BjetChainConfiguration import getBJetSequence
+        from TriggerMenuMT.HLT.Bjet.BjetMenuSequences import getBJetSequenceCfg
 
         jetSeq_a4_tc_em_presel, jetDef, emclusters = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
         jetSeq_a4_tc_em_gsc_ftf, jetDef = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subjesgscIS_ftf",emclusters)
@@ -176,7 +178,7 @@ def generateCFChains(flags):
         
         step1 = makeChainStep("Step_jet_a4_tc_em_presel", [jetSeq_a4_tc_em_presel])
         step2 = makeChainStep("Step_jet_a4_tc_em_gsc_ftf", [jetSeq_a4_tc_em_gsc_ftf])
-        step3 = makeChainStep("Step3_bjet", [getBJetSequence(flags, jc_name)])
+        step3 = makeChainStep("Step3_bjet", [getBJetSequenceCfg(flags, jc_name)])
         
         menu.chainsInMenu['Bjet']  = [
             makeChain(flags, name='HLT_j45_boffperf_ftf_subjesgscIS_preselj20_L1J20', L1Thresholds=["FSNOSEED"], ChainSteps=[step1,step2,step3] ),
@@ -236,8 +238,8 @@ def generateCFChains(flags):
     ##################################################################
     doCombinedSlice = True
     if doCombinedSlice:
-        from TriggerMenuMT.HLT.Electron.ElectronChainConfiguration import electronFastCaloCfg
-        fastCaloSeq = electronFastCaloCfg ( flags )
+        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
+        fastCaloSeq = fastCaloMenuSequenceCfg(flags, name='Electron')
         
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence
         muFast = muFastSequence(flags)

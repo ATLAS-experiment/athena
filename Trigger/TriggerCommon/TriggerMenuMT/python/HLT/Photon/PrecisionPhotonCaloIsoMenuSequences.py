@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 # logger
 from AthenaCommon.Logging import logging
@@ -34,12 +34,3 @@ def precisionPhotonCaloIsoSequenceCfg(flags, name, ion=False, is_probe_leg=False
     sequenceOut = TrigEgammaKeys.precisionPhotonIsoContainer
     selAcc.addHypoAlgo(createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name+tag(ion) +"Hypo", sequenceOut, TrigEgammaKeys.precisionPhotonContainer)) 
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict,isProbe=is_probe_leg)
-
-
-def precisionPhotonCaloIsoMenuSequence(flags, name, ion=False, is_probe_leg=False):
-    """Creates secpond step photon sequence"""
-
-    if isComponentAccumulatorCfg():
-        return precisionPhotonCaloIsoSequenceCfg(flags, name, ion=False, is_probe_leg=False)
-    else: 
-        return menuSequenceCAToGlobalWrapper(precisionPhotonCaloIsoSequenceCfg, flags, name, ion=False, is_probe_leg=False)

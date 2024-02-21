@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #
@@ -10,68 +10,9 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
-
 
 from .generateTau import tauCaloMVAMenuSeq, tauFTFTauCoreSeq, tauFTFTauIsoSeq, tauFTFTauLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq
 
-#--------------------------------------------------------
-# fragments generating config will be functions in new JO
-#--------------------------------------------------------
-def getTauCaloMVACfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauCaloMVAMenuSeq(flags,"Tau",is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauCaloMVAMenuSeq,flags, "Tau", is_probe_leg=is_probe_leg)
-
-def getFTFCoreCfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauFTFTauCoreSeq(flags,is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauFTFTauCoreSeq,flags,is_probe_leg=is_probe_leg)
-
-def getFTFLRTCfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauFTFTauLRTSeq(flags, is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauFTFTauLRTSeq,flags, is_probe_leg=is_probe_leg)
-
-def getFTFIsoCfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauFTFTauIsoSeq(flags, is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauFTFTauIsoSeq,flags, is_probe_leg=is_probe_leg)
-
-def getTrackTwoMVACfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauTrackTwoMVASeq(flags, is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauTrackTwoMVASeq, flags, is_probe_leg=is_probe_leg)
-
-def getTrackTwoLLPCfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauTrackTwoLLPSeq(flags, is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauTrackTwoLLPSeq, flags, is_probe_leg=is_probe_leg)
-
-def getTrackLRTCfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauTrackLRTSeq(flags, is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauTrackLRTSeq, flags, is_probe_leg=is_probe_leg)
-
-def getPrecTrackIsoCfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauPrecTrackIsoSeq(flags,is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauPrecTrackIsoSeq,flags,is_probe_leg=is_probe_leg)
-
-def getPrecTrackLRTCfg(flags, is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-       return tauPrecTrackLRTSeq(flags,is_probe_leg=is_probe_leg)
-    else:
-       return menuSequenceCAToGlobalWrapper(tauPrecTrackLRTSeq,flags,is_probe_leg=is_probe_leg)
 
 ############################################# 
 ###  Class/function to configure muon chains 
@@ -117,17 +58,17 @@ class TauChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getCaloMVASeq(self, flags, is_probe_leg=False):
         stepName = 'MVA_tau'
-        return self.getStep(flags,1,stepName, [getTauCaloMVACfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,1,stepName, [tauCaloMVAMenuSeq], is_probe_leg=is_probe_leg)
         
     # --------------------
     def getFTFCore(self, flags, is_probe_leg=False):
         stepName = 'FTFCore_tau'
-        return self.getStep(flags,2,stepName, [getFTFCoreCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,2,stepName, [tauFTFTauCoreSeq], is_probe_leg=is_probe_leg)
 
     # --------------------
     def getFTFLRT(self, flags, is_probe_leg=False):
         stepName = 'FTFLRT_tau'
-        return self.getStep(flags,2,stepName, [getFTFLRTCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,2,stepName, [tauFTFTauLRTSeq], is_probe_leg=is_probe_leg)
 
     # --------------------
 
@@ -139,7 +80,7 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getFTFIso(self, flags, is_probe_leg=False):
         stepName = 'FTFIso_tau'
-        return self.getStep(flags,3,stepName, [getFTFIsoCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,3,stepName, [tauFTFTauIsoSeq], is_probe_leg=is_probe_leg)
 
     # --------------------
 
@@ -151,12 +92,12 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getPrecTrackIso(self, flags, is_probe_leg=False):
         stepName = 'PrecTrkIso_tau'
-        return self.getStep(flags,4,stepName,[getPrecTrackIsoCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags,4,stepName,[tauPrecTrackIsoSeq],is_probe_leg=is_probe_leg)
 
     # --------------------
     def getPrecTrackLRT(self, flags, is_probe_leg=False):
         stepName = 'PrecTrkLRT_tau'
-        return self.getStep(flags,4,stepName,[getPrecTrackLRTCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags,4,stepName,[tauPrecTrackLRTSeq],is_probe_leg=is_probe_leg)
 
     # --------------------
 
@@ -168,18 +109,18 @@ class TauChainConfiguration(ChainConfigurationBase):
 
     def getTrackTwoMVA(self, flags, is_probe_leg=False):
         stepName = "TrkTwoMVA_tau"
-        return self.getStep(flags,5,stepName,[getTrackTwoMVACfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags,5,stepName,[tauTrackTwoMVASeq],is_probe_leg=is_probe_leg)
 
     # --------------------
 
     def getTrackTwoLLP(self, flags, is_probe_leg=False):
         stepName = "TrkTwoLLP_tau"
-        return self.getStep(flags,5,stepName,[getTrackTwoLLPCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags,5,stepName,[tauTrackTwoLLPSeq],is_probe_leg=is_probe_leg)
 
     # --------------------
     def getTrackLRT(self, flags, is_probe_leg=False):
         stepName = "TrkLRT_tau"
-        return self.getStep(flags,5,stepName,[getTrackLRTCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags,5,stepName,[tauTrackLRTSeq],is_probe_leg=is_probe_leg)
 
     # --------------------
 

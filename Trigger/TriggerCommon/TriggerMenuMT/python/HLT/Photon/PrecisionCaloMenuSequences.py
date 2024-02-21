@@ -1,19 +1,18 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys    import getTrigEgammaKeys
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'CaloPhoton'
 
 @AccumulatorCache
-def precisionCaloMenuSequenceCfg(flags, name=None, ion=False, is_probe_leg=False):
+def precisionCaloSequenceCfg(flags, ion=False, is_probe_leg=False):
     """ Creates PrecisionCalo sequence """
     TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
     
@@ -43,7 +42,7 @@ def precisionCaloMenuSequenceCfg(flags, name=None, ion=False, is_probe_leg=False
 
     selAcc.mergeReco(recoAcc)
 
-    hypoAlg = CompFactory.TrigEgammaPrecisionCaloHypoAlg(name+tag(ion) + 'Hypo')
+    hypoAlg = CompFactory.TrigEgammaPrecisionCaloHypoAlg('Photon' + tag(ion) + 'Hypo')
 
     hypoAlg.CaloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
     
@@ -52,15 +51,3 @@ def precisionCaloMenuSequenceCfg(flags, name=None, ion=False, is_probe_leg=False
     from TrigEgammaHypo.TrigEgammaPrecisionCaloHypoTool import TrigEgammaPrecisionCaloHypoToolFromDict
 
     return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict, isProbe=is_probe_leg)
-
-
-def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False):
-    """ Creates precisionCalo MENU sequence """
-
-    if isComponentAccumulatorCfg():
-        return precisionCaloMenuSequenceCfg(flags, name = name, ion = ion, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(precisionCaloMenuSequenceCfg, flags, name, ion=ion, is_probe_leg=is_probe_leg)
-
-
-

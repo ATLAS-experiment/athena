@@ -12,13 +12,6 @@ from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequenceCfg
                                                             MinBiasZVertexFinderSequenceCfg)
 from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlobalSequenceCfg, AFPToFDeltaZSequenceCfg
 
-#----------------------------------------------------------------
-# fragments generating configuration will be functions in New JO,
-# so let's make them functions already now
-#----------------------------------------------------------------
-def callGenerator(flags, genf, **kwargs):
-    return genf(flags, **kwargs)
-
 class MinBiasChainConfig(ChainConfigurationBase):
 
     def __init__(self, chainDict):
