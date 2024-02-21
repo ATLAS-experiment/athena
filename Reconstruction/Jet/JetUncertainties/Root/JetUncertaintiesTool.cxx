@@ -2489,7 +2489,7 @@ double JetUncertaintiesTool::getSmearingFactor(const xAOD::Jet& jet, const CompS
     // Throw an error if the userSeed is set to 1 as this is the seed used in JetCalibTools so leads to correlated smearing
     if (m_userSeed == 1){
         ATH_MSG_ERROR("A seed of 1e5 times the jet phi is used in JetCalibTools so using it here leads to correlated smearing");
-        return StatusCode::FAILURE;       
+        return 0;
     }
 
     // We have the smearing factor, so prepare to smear
