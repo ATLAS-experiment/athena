@@ -3,8 +3,6 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigBphysHypo.TrigMultiTrkComboHypoMonitoringConfig import TrigMultiTrkComboHypoMonitoring, TrigMultiTrkComboHypoToolMonitoring
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigMultiTrkComboHypoConfig')
 
@@ -39,30 +37,21 @@ def StreamerDimuL2ComboHypoCfg(flags, name):
         "trigSequenceName" : 'Dimu',
         "trigLevel" : 'L2',
         "TrackCollectionKey" : 'HLT_IDTrack_Muon_FTF'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def StreamerDimuL2IOComboHypoCfg(flags, name):
     log.debug('DimuL2IOComboHypoCfg.name = %s ', name)
     kwargs = {"isStreamer" : True,
         "trigSequenceName" : 'Dimu',
         "trigLevel" : 'L2IO'   }
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def StreamerDimuL2MTComboHypoCfg(flags, name):
     log.debug('DimuL2MTComboHypoCfg.name = %s ', name)
     kwargs = { "isStreamer" : True,
         "trigSequenceName" : 'Dimu',
         "trigLevel" : 'L2MT' }
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def DimuEFComboHypoCfg(flags, name):
     log.debug('DimuEFComboHypoCfg.name = %s ', name)
@@ -71,10 +60,7 @@ def DimuEFComboHypoCfg(flags, name):
         "trigLevel" : 'EF',
         "checkMultiplicity" : True,
         "TrigBphysCollectionKey" : 'HLT_DimuEF'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def StreamerDimuEFComboHypoCfg(flags, name):
     log.debug('StreamerDimuEFComboHypoCfg.name = %s ', name)
@@ -85,10 +71,7 @@ def StreamerDimuEFComboHypoCfg(flags, name):
         "massRange" : [ (100., 6000.) ],
         "trackPtThresholds" : [ [ 100., 100. ] ],
         "trigLevel" : 'EF'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def DiElecPrecisionGSFComboHypoCfg(flags, name):
     log.debug('DiElecPrecisionGSFComboHypoCfg.name = %s ', name)
@@ -97,10 +80,7 @@ def DiElecPrecisionGSFComboHypoCfg(flags, name):
         "trigLevel" : 'EF',
         "doElectrons" : True,
         "TrigBphysCollectionKey" : 'HLT_DiElecPrecisionGSF'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def NoMuonDiElecPrecisionGSFComboHypoCfg(flags, name):
     log.debug('NoMuonDiElecPrecisionGSFComboHypoCfg.name = %s ', name)
@@ -109,10 +89,7 @@ def NoMuonDiElecPrecisionGSFComboHypoCfg(flags, name):
         "trigLevel" : 'EF',
         "doElectrons" : True,
         "TrigBphysCollectionKey" : 'HLT_NoMuonDiElecPrecisionGSF' }
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def BmutrkComboHypoCfg(flags, name):
     log.debug('BmutrkComboHypoCfg.name = %s ', name)
@@ -127,10 +104,7 @@ def BmutrkComboHypoCfg(flags, name):
         "massRange" : [ (2500., 4400.) ],
         "trackPtThresholds" : [ [ 10000., 2000. ] ],
         "TrigBphysCollectionKey" : 'HLT_Bmutrk'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def DrellYanComboHypoCfg(flags, name):
     log.debug('DrellYanComboHypoCfg.name = %s ', name)
@@ -146,10 +120,7 @@ def DrellYanComboHypoCfg(flags, name):
         "applyOverlapRemoval" : False,
         "useLeptonMomentum" : True,
         "TrigBphysCollectionKey" : 'HLT_DrellYan'}
-    if not isComponentAccumulatorCfg():
-        return algorithmCAToGlobalWrapper(ConfigurationComboHypo, flags, **kwargs)[0]
-    else:
-        return ConfigurationComboHypo(flags, **kwargs)
+    return ConfigurationComboHypo(flags, **kwargs)
 
 def TrigMultiTrkComboHypoToolFromDict(flags, chainDict):
     return ConfigurationComboHypoTool(flags, chainDict)

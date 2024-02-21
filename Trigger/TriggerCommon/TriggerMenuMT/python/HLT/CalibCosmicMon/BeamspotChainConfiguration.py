@@ -1,34 +1,16 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
-
-#----------------------------------------------------------------
-# fragments generating configuration will be functions in New JO,
-# so let's make them functions already now
-#----------------------------------------------------------------
-
-def trkFS_trkfast_Cfg( flags ):
-    if isComponentAccumulatorCfg():
-        return allTE_trkfast( flags, signature="FS" )
-    else:
-        return menuSequenceCAToGlobalWrapper(allTE_trkfast, flags, signature="FS" )
-
-def allTE_trkfast_Cfg(flags):
-    if isComponentAccumulatorCfg():
-        return allTE_trkfast( flags, signature="beamSpot" )
-    else:
-        return menuSequenceCAToGlobalWrapper(allTE_trkfast, flags, signature="beamSpot" )
+from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA
 
 
 def allTE_trkfast( flags, signature="FS" ):
@@ -105,13 +87,6 @@ def getBeamspotVtx(flags):
                                 HypoToolGen = getRejectingHypoTool )
 
 
-def getBeamspotVtxCfg( flags ):
-        if isComponentAccumulatorCfg():
-            return getBeamspotVtx(flags)
-        else:
-            return menuSequenceCAToGlobalWrapper(getBeamspotVtx, flags)
-
-
 #----------------------------------------------------------------
 # Class to configure chain
 #----------------------------------------------------------------
@@ -130,7 +105,7 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
 
                 if self.chainPart['beamspotChain'] != '':
                         stepName = f"Step4_{self.jc_name}_beamspotJet"
-                        chainSteps = [self.getStep(flags, 4, stepName, [getBeamspotVtxCfg])]
+                        chainSteps = [self.getStep(flags, 4, stepName, [getBeamspotVtx])]
 
                 else:
                         key = self.chainPart['addInfo'][0] + "_" + self.chainPart['l2IDAlg'][0] #TODO: hardcoded index
@@ -157,10 +132,10 @@ class BeamspotChainConfiguration(ChainConfigurationBase):
         # Configuration TrkFS step
         # --------------------
         def getTrkFSStep(self, flags):
-                return self.getStep(flags,1,"trkFS_trkfast",[trkFS_trkfast_Cfg])
+                return self.getStep(flags,1,"trkFS_trkfast",[allTE_trkfast],signature="FS")
 
         # --------------------
         # Configuration of costmonitor (costmonitor ?? but isn't this is the actua chain configuration ??)
         # --------------------
         def getAllTEStep(self, flags):
-                return self.getStep(flags,1,"allTE_trkfast",[allTE_trkfast_Cfg])
+                return self.getStep(flags,1,"allTE_trkfast",[allTE_trkfast],signature="beamSpot")

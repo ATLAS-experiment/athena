@@ -39,13 +39,15 @@ moveJSON.prmon = False
 # - setup TDAQ release to access TriggerDB scripts
 # - copy authentication files as can't be read on afs/eos, set TRIGGER_DB_ART to use these files
 # - copy TNS lookup file as not in ART container
+# - export missing ART username into env
 trigDBsetup =  '&& source /cvmfs/atlas.cern.ch/repo/sw/tdaq/tdaq/prod/installed/setup.sh \
   && export TRIGGER_DB_ART=1 \
   && export EOS_MGM_URL=root://eosuser.cern.ch \
   && xrdcp root://eosuser.cern.ch//eos/user/t/trigcomm/.dbauth/run3/write/dblookup.xml . \
   && xrdcp root://eosuser.cern.ch//eos/user/t/trigcomm/.dbauth/run3/write/authentication.xml . \
   && export TNS_ADMIN="." \
-  && xrdcp root://eosuser.cern.ch//eos/project/o/oracle/public/admin/tnsnames.ora .'
+  && xrdcp root://eosuser.cern.ch//eos/project/o/oracle/public/admin/tnsnames.ora .\
+  && export USER="artprod"'
 # Cleanup
 # - remove copied files
 trigDBcleanup = '&& rm authentication.xml && rm dblookup.xml && rm tnsnames.ora'

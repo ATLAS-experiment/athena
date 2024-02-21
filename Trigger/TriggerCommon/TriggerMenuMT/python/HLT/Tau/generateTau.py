@@ -51,7 +51,7 @@ def _caloSeq(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def tauCaloMVAMenuSeq(flags, name, is_probe_leg=False):
+def tauCaloMVAMenuSeq(flags, is_probe_leg=False):
     (selAcc , menuCA) = _caloSeq(flags, is_probe_leg)
     return menuCA 
 

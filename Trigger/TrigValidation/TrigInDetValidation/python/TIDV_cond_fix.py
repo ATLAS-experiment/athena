@@ -7,10 +7,13 @@ def TIDV_cond_fix(flags):
     log = logging.getLogger('TIDV_cond_fix')
     log.info('Overriding conditions for old MC inputs')
 
+    f2 = flags.clone()
+    f2.lock()
+
     cfg = ComponentAccumulator()
-    cfg.merge(addOverride(flags, '/PIXEL/PixelModuleFeMask', 'PixelModuleFeMask-SIM-MC16-000-03'))
-    cfg.merge(addOverride(flags, '/TRT/Calib/PID_NN', 'TRTCalibPID_NN_v1'))
-    cfg.merge(addOverride(flags, '/PIXEL/PixelClustering/PixelNNCalibJSON', 'PixelNNCalibJSON-SIM-RUN2-000-02'))
+    cfg.merge(addOverride(f2, '/PIXEL/PixelModuleFeMask', 'PixelModuleFeMask-SIM-MC16-000-03'))
+    cfg.merge(addOverride(f2, '/TRT/Calib/PID_NN', 'TRTCalibPID_NN_v1'))
+    cfg.merge(addOverride(f2, '/PIXEL/PixelClustering/PixelNNCalibJSON', 'PixelNNCalibJSON-SIM-RUN2-000-02'))
     return cfg
 
 def TIDV_singlebeamspot(flags):
@@ -20,6 +23,9 @@ def TIDV_singlebeamspot(flags):
     log = logging.getLogger('TIDV_singlebeamspot')
     log.info('Overriding conditions for single beamspot')
 
+    f2 = flags.clone()
+    f2.lock()
+
     cfg = ComponentAccumulator()
-    cfg.merge(addOverride(flags, '/Indet/Beampos', 'IndetBeampos-RunDep-MC21-BestKnowledge-002'))
+    cfg.merge(addOverride(f2, '/Indet/Beampos', 'IndetBeampos-RunDep-MC21-BestKnowledge-002'))
     return cfg

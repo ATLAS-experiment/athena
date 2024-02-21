@@ -1,43 +1,21 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ..CommonSequences.CaloSequences import fastCaloMenuSequence
-from ..Photon.FastPhotonMenuSequences import fastPhotonMenuSequence
-from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoMenuSequence
-from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonMenuSequence
-from ..Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
-from ..Photon.HipTRTMenuSequences import hipTRTMenuSequence
-
-
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-#----------------------------------------------------------------
-# fragments generating configuration will be functions in New JO,
-# so let's make them functions already now
-#----------------------------------------------------------------
-def hipTRTMenuSequenceCfg(flags, is_probe_leg=False):
-    return hipTRTMenuSequence(flags, is_probe_leg=is_probe_leg)
+from ..Config.ChainConfigurationBase import ChainConfigurationBase
+from ..CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
+from ..Photon.FastPhotonMenuSequences import fastPhotonSequenceCfg
+from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoSequenceCfg
+from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonSequenceCfg
+from ..Photon.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
+from ..Photon.HipTRTMenuSequences import TRTHitGeneratorSequenceCfg
 
-def precisionPhotonCaloIsoMenuSequenceCfg(flags, name, ion, is_probe_leg=False):
-    return precisionPhotonCaloIsoMenuSequence(flags, name, ion=ion, is_probe_leg=is_probe_leg)
-
-def precisionPhotonMenuSequenceCfg(flags, name, ion, is_probe_leg=False):
-    return precisionPhotonMenuSequence(flags, name, ion=ion, is_probe_leg=is_probe_leg)
-
-def precisionCaloMenuSequenceCfg(flags, name, ion, is_probe_leg=False):
-    return precisionCaloMenuSequence(flags, name, ion=ion, is_probe_leg=is_probe_leg)
-
-def fastPhotonCaloSequenceCfg( flags, is_probe_leg=False ):
-    return fastCaloMenuSequence(flags, 'Photon', is_probe_leg=is_probe_leg)
-    
-def fastPhotonSequenceCfg( flags, is_probe_leg=False ):    
-    return fastPhotonMenuSequence( flags, is_probe_leg=is_probe_leg )
 
 def _diPhotonComboHypoToolFromDict(flags, chainDict, lowermass=80000,uppermass=-999,dphi=1.5,applymass=False,applydphi=False):
     name = chainDict['chainName']
@@ -149,11 +127,11 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     def getFastCalo(self, flags, is_probe_leg=False):
         stepName = "PhotonFastCalo"
         
-        return self.getStep(flags,1,stepName,[ fastPhotonCaloSequenceCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,1,stepName,[fastCaloMenuSequenceCfg], name='Photon', is_probe_leg=is_probe_leg)
 
     def getFastPhoton(self, flags, is_probe_leg=False):
         stepName = "FastPhoton"
-        return self.getStep(flags,2,stepName,[ fastPhotonSequenceCfg], is_probe_leg=is_probe_leg)        
+        return self.getStep(flags,2,stepName,[fastPhotonSequenceCfg], is_probe_leg=is_probe_leg)
 
     def getPrecisionCaloPhoton(self, flags, is_probe_leg=False):
         do_ion = 'ion' in self.chainPart['extra']
@@ -162,11 +140,11 @@ class PhotonChainConfiguration(ChainConfigurationBase):
         else:
             stepName = "PhotonPrecisionCalo"
 
-        return self.getStep(flags,3,stepName,[ precisionCaloMenuSequenceCfg], name = 'Photon', ion=do_ion, is_probe_leg=is_probe_leg)
+        return self.getStep(flags,3,stepName,[precisionCaloSequenceCfg], ion=do_ion, is_probe_leg=is_probe_leg)
     
     def getHipTRT(self, flags, is_probe_leg=False):
         stepName = "hipTRT"
-        return self.getStep(flags,2,stepName,[ hipTRTMenuSequenceCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,2,stepName,[TRTHitGeneratorSequenceCfg], is_probe_leg=is_probe_leg)
 
     def getPrecisionPhoton(self, flags, is_probe_leg=False):
 
@@ -175,9 +153,8 @@ class PhotonChainConfiguration(ChainConfigurationBase):
 
         if do_ion:
             stepName += '_ion'
-        
 
-        return self.getStep(flags,4,stepName,sequenceCfgArray=[precisionPhotonMenuSequenceCfg], name = 'Photon',  ion=do_ion, is_probe_leg=is_probe_leg)
+        return self.getStep(flags,4,stepName,sequenceCfgArray=[precisionPhotonSequenceCfg], ion=do_ion, is_probe_leg=is_probe_leg)
 
     def getPhotonCaloIso(self, flags, is_probe_leg=False):
 
@@ -196,7 +173,4 @@ class PhotonChainConfiguration(ChainConfigurationBase):
             else:
                 comboTools.append(diphotonDPhiHypoToolFromDict)
 
-       
-
-        return self.getStep(flags,5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoMenuSequenceCfg], name = 'Photon', comboTools=comboTools, ion=do_ion, is_probe_leg=is_probe_leg)
-
+        return self.getStep(flags,5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoSequenceCfg], name='Photon', comboTools=comboTools, ion=do_ion, is_probe_leg=is_probe_leg)

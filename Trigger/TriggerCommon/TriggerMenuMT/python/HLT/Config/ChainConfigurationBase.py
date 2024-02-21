@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaCommon.Logging import logging
@@ -7,7 +7,7 @@ log = logging.getLogger(__name__)
 import abc
 import inspect
 import functools
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
@@ -50,10 +50,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         seqArray = []   
         from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu             
         for sequenceCfg in sequenceCfgArray:            
-            if isCAMenu():
-                seqArray.append (sequenceCfg(flags, **stepArgs) )
-            else:
-                seqArray.append( RecoFragmentsPool.retrieve( sequenceCfg, flags, **stepArgs ))
+            seqArray.append (sequenceCfg(flags, **stepArgs) )
 
         if (len(seqArray)>0):                                
             if inspect.signature(comboHypoCfg).parameters and all(inspect.signature(comboTool).parameters for comboTool in comboTools):                
