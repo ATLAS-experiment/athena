@@ -37,6 +37,7 @@ class TileDetectorTool final : public GeoModelTool
   void setSwitch(int & param, int value, const char * name);
 
   TileSwitches m_switches;
+  Gaudi::Property<std::vector<std::string>> m_volumes{this, "TopVolumes", {}, "List of top-level volumes where crack scintillators will be placed"};
 
   bool m_not_locked;
   bool m_useNewFactory;
