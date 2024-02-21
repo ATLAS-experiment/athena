@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolSvc.cxx
@@ -43,11 +43,11 @@
 
 #include "DBReplicaSvc/IDBReplicaSvc.h"
 
-#include <cstdlib> 	// for getenv()
-#include <cstring> 	// for strcmp()
-#include <sys/stat.h> 	// for struct stat
-#include <algorithm> 	// for STL find()
-#include <ctype.h>
+#include <cstdlib> 	  // for getenv()
+#include <cstring> 	  // for strcmp()
+#include <algorithm>  // for STL find()
+#include <cstdio>     // for fopen
+#include <ctype.h>    // for isdigit
 
 bool isNumber(const std::string& s) {
    return !s.empty() and ( isdigit(s[0]) or s[0]=='+' or s[0]=='-' );
@@ -1030,19 +1030,18 @@ std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* d
 }
 //__________________________________________________________________________
 std::string PoolSvc::poolCondPath(const std::string& leaf) {
-   // look for files at $ATLAS_POOLCOND_PATH/poolcond/<leaf>
+   // look for files at $ATLAS_POOLCOND_PATH/<leaf>
    // return full filename if exists, or empty string if not
-   std::string respath;
-   const char* cpath = getenv("ATLAS_POOLCOND_PATH");
+   const char* cpath = std::getenv("ATLAS_POOLCOND_PATH");
    if (cpath && strcmp(cpath, "") != 0) {
-      std::string testpath = cpath;
-      testpath += '/';
-      testpath += leaf;
-      struct stat stFileInfo;
-      // try to retrieve file attribute - success indicates file exists
-      if (stat(testpath.c_str(), &stFileInfo) == 0) {
-         respath = std::move(testpath);
+      const std::string testpath = std::string(cpath) + "/" + leaf;
+
+      // Try to open file for reading. Note that a simple stat call may return
+      // a wrong result if the file is residing on an auto-mounted FS (ATR-28801).
+      if (FILE* fp = std::fopen(testpath.c_str(), "r")) {
+         std::fclose(fp);
+         return testpath;
       }
    }
-   return(respath);
+   return {};
 }
