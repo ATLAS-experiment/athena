@@ -70,24 +70,14 @@ def getStreamHITS_ItemList(flags):
     # HGTD
     if flags.Detector.EnableHGTD:
         ItemList += ["SiHitCollection#HGTD_Hits"]
-    #CSC
-    if flags.Detector.EnableCSC:
-        ItemList+=["CSCSimHitCollection#CSC_Hits"]
-    #MDT
-    if flags.Detector.EnableMDT:
-        ItemList+=["MDTSimHitCollection#MDT_Hits"]
-    #RPC
-    if flags.Detector.EnableRPC:
-        ItemList+=["RPCSimHitCollection#RPC_Hits"]
-    #TGC
-    if flags.Detector.EnableTGC:
-        ItemList+=["TGCSimHitCollection#TGC_Hits"]
-    #STGC
-    if flags.Detector.EnablesTGC:
-        ItemList+=["sTGCSimHitCollection#sTGC_Hits"]
-    #MM
-    if flags.Detector.EnableMM:
-        ItemList+=["MMSimHitCollection#MM_Hits"]
+
+    if flags.Detector.GeometryMuon:
+        if flags.Muon.usePhaseIIGeoSetup:
+            from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import OutputSimContainersCfg
+            ItemList += OutputSimContainersCfg(flags)
+        else:
+            from MuonG4SD.MuonG4SDConfig import OutputSimContainersCfg
+            ItemList += OutputSimContainersCfg(flags)
     return ItemList
 
 

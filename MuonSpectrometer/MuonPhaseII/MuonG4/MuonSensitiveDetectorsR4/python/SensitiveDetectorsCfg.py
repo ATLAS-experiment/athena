@@ -90,6 +90,7 @@ def SetupSensitiveDetectorsCfg(flags):
     result.setPrivateTools(tools)
     return result
 
+### Name of the container names written by the R4 sensitive detectors
 def SimHitContainerListCfg(flags):
     simHitContainers = []
     if flags.Detector.EnableMDT:
@@ -101,6 +102,25 @@ def SimHitContainerListCfg(flags):
     if flags.Detector.EnableTGC:
         simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawTgcSimHits")]
     if flags.Detector.EnablesTGC:
-        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits")]
-    
+        simHitContainers+=[("xAOD::MuonSimHitContainer", "xRawStgcSimHits")]    
     return simHitContainers
+
+### Returns the list of Container names written to the HITS file
+def OutputSimContainersCfg(flags):
+    outContainers = []
+    containerNames = []
+    if flags.Detector.EnableMDT:
+        containerNames+=["xMdtSimHits"]
+    if flags.Detector.EnableMM:
+        containerNames+=["xMmSimHits"]
+    if flags.Detector.EnableRPC:
+        containerNames+=["xRpcSimHits"]
+    if flags.Detector.EnableTGC:
+        containerNames+=["xTgcSimHits"]
+    if flags.Detector.EnablesTGC:
+        containerNames+=["xStgcSimHits"]    
+    
+    outContainers +=[ f"xAOD::MuonSimHitContainer#{cont}" for cont in containerNames]
+    outContainers +=[ f"xAOD::MuonSimHitAuxContainer#{cont}Aux." for cont in containerNames]
+
+    return outContainers

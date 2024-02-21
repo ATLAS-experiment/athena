@@ -92,25 +92,15 @@ def getStreamHITS_ItemList(flags):
                          "TileHitVector#TileHitVec_G4",
                          "TileHitVector#TileHitVec_FastCaloSim"]
 
-    if flags.Detector.EnableRPC:
-        ItemList += ["RPCSimHitCollection#*"]
-
-    if flags.Detector.EnableTGC:
-        ItemList += ["TGCSimHitCollection#*"]
-
-    if flags.Detector.EnableMDT:
-        ItemList += ["MDTSimHitCollection#*"]
-
-    if flags.Detector.EnableCSC:
-        ItemList += ["CSCSimHitCollection#*"]
-
-    if flags.Detector.EnablesTGC:
-        ItemList += ["sTGCSimHitCollection#*"]
-
-    if flags.Detector.EnableMM:
-        ItemList += ["MMSimHitCollection#*"]
-
     if flags.Detector.EnableMuon:
+        if flags.Muon.usePhaseIIGeoSetup:
+            from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import OutputSimContainersCfg
+            ItemList += OutputSimContainersCfg(flags)
+        else:
+            from MuonG4SD.MuonG4SDConfig import OutputSimContainersCfg
+            ItemList += OutputSimContainersCfg(flags)
+
+    
         ItemList += ["TrackRecordCollection#MuonExitLayer"]
 
     if flags.Detector.EnableLucid:

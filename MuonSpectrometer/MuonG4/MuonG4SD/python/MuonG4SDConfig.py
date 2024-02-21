@@ -61,3 +61,5 @@ def SimHitContainerListCfg(flags):
         simHitContainers+=[("CSCSimHitCollection", "CSC_Hits")]
     return simHitContainers
 
+def OutputSimContainersCfg(flags):
+    return [f"{contType}#{contName}" for contType, contName in SimHitContainerListCfg(flags) ]

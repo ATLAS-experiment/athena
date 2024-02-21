@@ -37,9 +37,10 @@ def ActsGeomContextAlgCfg(flags, name="ActsGeomContextAlg", **kwargs):
     result.merge(ActsMuonAlignCondAlgCfg(flags))
     
     inAlignContainers = []
-    if flags.Detector.GeometryMDT: inAlignContainers += ["MdtActsAlignContainer"]
-    if flags.Detector.GeometryRPC: inAlignContainers += ["RpcActsAlignContainer"]
-    if flags.Detector.GeometryTGC: inAlignContainers += ["TgcActsAlignContainer"]
+    if (flags.Muon.enableAlignment or flags.Muon.applyMMPassivation):
+        if flags.Detector.GeometryMDT: inAlignContainers += ["MdtActsAlignContainer"]
+        if flags.Detector.GeometryRPC: inAlignContainers += ["RpcActsAlignContainer"]
+        if flags.Detector.GeometryTGC: inAlignContainers += ["TgcActsAlignContainer"]
     
     kwargs.setdefault("AlignKeys", inAlignContainers)
     the_alg = CompFactory.ActsMuonGeomContextAlg(name, **kwargs)

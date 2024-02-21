@@ -11,13 +11,11 @@ def setupTestOutputCfg(flags,**kwargs):
     # =============================
     # Define contents of the format
     # =============================
-    sim_containers = ["xMdtSimHits", "xRpcSimHits", "xTgcSimHits","xMmSimHits","xStgcSimHits"]
+    from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import OutputSimContainersCfg
     container_items = ["xAOD::TruthParticleContainer#",
                        "xAOD::TruthParticleAuxContainer#",
-                       "McEventCollection#"]
-    for cont in sim_containers:
-        container_items +=[ "xAOD::MuonSimHitContainer#{cont}".format(cont = cont),
-                            "xAOD::MuonSimHitAuxContainer#{cont}Aux.".format(cont = cont)]
+                       "McEventCollection#"] + OutputSimContainersCfg(flags)
+
    
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     kwargs.setdefault("ItemList", container_items)
