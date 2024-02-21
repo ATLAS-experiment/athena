@@ -264,17 +264,17 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int gXE_seedThrA = 0;
    int gXE_seedThrB = 0;
    int gXE_seedThrC = 0;
-   gXE_seedThrA = thr_gXE.seedThrCounts('A'); //defined in GeV by default
-   gXE_seedThrB = thr_gXE.seedThrCounts('B'); //defined in GeV by default
-   gXE_seedThrC = thr_gXE.seedThrCounts('C'); //defined in GeV by default
+   gXE_seedThrA = thr_gXE.seedThr('A')/0.800; //defined in GeV by default, with value 24
+   gXE_seedThrB = thr_gXE.seedThr('B')/0.800; //defined in GeV by default, with value 24
+   gXE_seedThrC = thr_gXE.seedThr('C')/0.800; //defined in GeV by default, with value 24
 
 
-   int aFPGA_A = thr_gXE.JWOJ_param('A','a');
-   int bFPGA_A = thr_gXE.JWOJ_param('A','b');
-   int aFPGA_B = thr_gXE.JWOJ_param('B','a');
-   int bFPGA_B = thr_gXE.JWOJ_param('B','b');
-   int aFPGA_C = thr_gXE.JWOJ_param('C','a');
-   int bFPGA_C = thr_gXE.JWOJ_param('C','b');
+   int aFPGA_A = thr_gXE.JWOJ_param('A','a');// 1003
+   int bFPGA_A = thr_gXE.JWOJ_param('A','b');// 409
+   int aFPGA_B = thr_gXE.JWOJ_param('B','a');// 1003
+   int bFPGA_B = thr_gXE.JWOJ_param('B','b');// 409
+   int aFPGA_C = thr_gXE.JWOJ_param('C','a');// 1003
+   int bFPGA_C = thr_gXE.JWOJ_param('C','b');// 409
 
    //Set constants for JwoJ and run the algorithm
    m_gFEXJwoJAlgoTool->setAlgoConstant(aFPGA_A, bFPGA_A,
