@@ -64,11 +64,21 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
     kwargs.setdefault("AtlasRelease", getATLASVersion())
 
     # TODO: Fix this
-    # This is a temporary hack to reflect how detdescr is handled in the old bash-driven DumpGeo
+    # This is a temporary hack to reflect how detDescr is handled in the old bash-driven DumpGeo
     # This should be replaced by proper python flags and Gaudy properties
-    os.environ["DUMPGEODETDESCRTAG"] = args.detdescr # save to an env var, for later use in GeoModelStandalone/GeoExporter
-    if args.force == True:
-        os.environ["DUMPGEOOVERWRITE"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
+    if args.detDescr:
+        os.environ["DUMPGEODETDESCRTAG"] = args.detDescr # save to an env var, for later use in GeoModelStandalone/GeoExporter
+        print("+ DumpGeo -- NOTE -- You chose to overwrite the default Detector Descriptoon Geometry TAG with this: '%s'" % args.detDescr)
+    if args.forceOverwrite is True:
+        print("+ DumpGeo -- NOTE -- You chose to overwrite an existing geometry dump file with the same name, if present.")
+        os.environ["DUMPGEOFORCEOVERWRITE"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
+    if args.filterTreeTops:
+        print("+ DumpGeo -- NOTE -- Your 'GeoModel TreeTop' filter set: '%s'" % args.filterTreeTops)
+        os.environ["DUMPGEOFILTERTREETOPS"] = args.filterTreeTops # save to an env var, for later use in GeoModelStandalone/GeoExporter
+    if args.filterDetManagers:
+        print("+ DumpGeo -- NOTE -- Your 'GeoModel Detector Manager' filter set: '%s'" % args.filterDetManagers)
+        os.environ["DUMPGEOFILTERDETMANAGERS"] = args.filterDetManagers # save to an env var, for later use in GeoModelStandalone/GeoExporter
+
 
     the_alg = CompFactory.DumpGeo(name="DumpGeoAlg", **kwargs)
     result.addEventAlgo(the_alg, primary=True)
@@ -76,7 +86,7 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
 
 
 if __name__=="__main__":
-    # Run with e.g. python -m DumpGeo.DumpGeoConfig --detdescr=<ATLAS-geometry-tag> --filter=[<list of tree tops>]
+    # Run with e.g. python -m DumpGeo.DumpGeoConfig --detDescr=<ATLAS-geometry-tag> --filter=[<list of tree tops>]
     
     # from AthenaConfiguration.Enums import Format
     from AthenaCommon.Logging import logging
@@ -102,10 +112,12 @@ if __name__=="__main__":
     # e.g.
     # parser.add_argument("-o", "--output", dest="output", default='Event.json',
     #                     help="write JSON to FILE", metavar="FILE")
-    parser.add_argument("--detdescr", default='',
-                        help="The ATLAS geometry tag you want to dump", metavar="DETDESCR")
-    parser.add_argument("-f", "--force",
-                        help="Force to override an existing SQLite output file with the same name, if any", action = 'store_true')
+    parser.add_argument("--detDescr", default='',
+                        help="The ATLAS geometry tag you want to dump (a convenience alias for the Athena flag 'GeoModel.AtlasVersion=TAG')", metavar="TAG")
+    parser.add_argument("--filterTreeTops", help="Only output the GeoModel Tree Tops specified in the FILTER list; input is a comma-separated list")
+    parser.add_argument("--filterDetManagers", help="Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list")
+    parser.add_argument("-f", "--forceOverwrite",
+                        help="Force to overwrite an existing SQLite output file with the same name, if any", action = 'store_true')
 
     args = flags.fillFromArgs(parser=parser)
 
@@ -147,7 +159,7 @@ if __name__=="__main__":
     _logger.verbose("+ ... Done")
     _logger.verbose("+ empty input: '%s'" % vp1_empty_input)
 
-    _logger.verbose("+ detdescr flag: '%s'" % args.detdescr)
+    _logger.verbose("+ detDescr flag: '%s'" % args.detDescr)
 
 
     _logger.verbose("+ About to set the detector flags")
@@ -157,9 +169,9 @@ if __name__=="__main__":
                        toggle_geometry=True, keep_beampipe=True)
     _logger.verbose("+ ... Done")
 
-    if args.detdescr:
+    if args.detDescr:
         _logger.verbose("+ About to set a custom detector description tag")
-        flags.GeoModel.AtlasVersion = args.detdescr
+        flags.GeoModel.AtlasVersion = args.detDescr
         _logger.verbose("+ ... Done")
 
 
