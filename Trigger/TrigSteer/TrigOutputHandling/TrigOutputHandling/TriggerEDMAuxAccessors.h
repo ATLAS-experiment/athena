@@ -144,6 +144,8 @@ auto floatAccessors = initAccessors<float>(
   "GN2Xv01_phbb",
   "GN2Xv01_ptop",
   "GN2Xv01_pqcd",
+  "fastGNTau20240216_ptau",
+  "fastGNTau20240216_pu",
   "DetectorEta", "DetectorPhi",
   "EMFrac", "HECFrac", "JVFCorr", "seed_eta", "seed_phi", "trk_a0beam",
   "btagIp_d0", "btagIp_d0Uncertainty", "btagIp_z0SinTheta", "btagIp_z0SinThetaUncertainty",
