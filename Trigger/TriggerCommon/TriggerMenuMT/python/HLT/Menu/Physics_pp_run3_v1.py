@@ -1999,6 +1999,8 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_2g10_loose_mu23_L1MU18VFCH', l1SeedThresholds=['EM7','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryLegGroup+EgammaMuonGroup), # unsure what EM seed should be
         ChainProp(name='HLT_2g10_loose_L1eEM9_mu23_L1MU18VFCH', l1SeedThresholds=['eEM9','MU18VFCH'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaMuonGroup), # unsure what eEM seed should be
         
+        # ATR-24698-28783: muon + bjet chains for calibrations Legacy moved
+        ChainProp(name='HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU5VF_J40', l1SeedThresholds=['MU5VF','FSNOSEED'], groups=SupportLegGroup+MuonBjetGroup, monGroups=['bJetMon:t0','muonMon:online','bJetMon:online'], stream=['Main','express']),
         #---------- support 2m + 1g + ZRad triggers
         ChainProp(name='HLT_2mu14_g20_tight_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM15VHI'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
         ChainProp(name='HLT_2mu14_g22_tight_probe_L12MU8F', l1SeedThresholds=['MU8F','PROBEEM15VHI'],groups=TagAndProbeLegGroup+EgammaMuonGroup),
@@ -2384,7 +2386,7 @@ def setupMenu(menu_name):
 
         # ATR-24698: muon + bjet chains for calibrations
         ChainProp(name='HLT_mu4_j20_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU3V'    ,   l1SeedThresholds=['MU3V' ,'FSNOSEED'], groups=SupportGroup   +MuonBjetGroup, monGroups=['bJetMon:t0','muonMon:online','bJetMon:online'], stream=[PhysicsStream,'express']),
-        ChainProp(name='HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU5VF_jJ90', l1SeedThresholds=['MU5VF','FSNOSEED'], groups=SupportPhIGroup+MuonBjetGroup, monGroups=['bJetMon:t0','muonMon:online','bJetMon:online'], stream=[PhysicsStream,'express']),
+        ChainProp(name='HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU5VF_jJ80', l1SeedThresholds=['MU5VF','FSNOSEED'], groups=SupportPhIGroup+MuonBjetGroup, monGroups=['bJetMon:t0','muonMon:online','bJetMon:online'], stream=[PhysicsStream,'express']),
         
         # ATR-28761 added some  muon + bjet Phase-1 chains
         ChainProp(name='HLT_mu4_j35_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU3V_jJ30',   l1SeedThresholds=['MU3V' ,'FSNOSEED'], groups=SupportPhIGroup+MuonBjetGroup, monGroups=['muonMon:online','bJetMon:online'], stream=[PhysicsStream,         ]),
