@@ -145,8 +145,9 @@ void ConfAnalysis::initialiseInternal() {
   //  pt_a = 4;
   // pt_b = 1;
   //  }
-  
 
+
+  
   const int  ptnbins = Npt;  
   std::vector<double> ptbinlimsv(ptnbins+1);
   double*   ptbinlims = &ptbinlimsv[0];
@@ -338,6 +339,18 @@ void ConfAnalysis::initialiseInternal() {
     addHistogram( m_invmass );
     addHistogram( m_invmassObj );
   }
+
+  /// 2D histograms for the 2D efficiencies
+  TH2F* heta_vs_pt = new TH2F( "eta_vs_pt", "p_{T} [GeV],#eta",       ptnbins, ptbinlims, 10, -3, 3 );
+  TH2F* hd0_vs_pt  = new TH2F( "d0_vs_pt",  "p_{T} [GeV],d_{0} [mm]", ptnbins, ptbinlims, 30, -300, 300 );
+  
+
+  m_eff_eta_vs_pt = new Efficiency2D( heta_vs_pt, "eff_eta_vs_pt" ); 
+  m_eff_d0_vs_pt  = new Efficiency2D( hd0_vs_pt,  "eff_d0_vs_pt" ); 
+
+  delete  heta_vs_pt;
+  delete  hd0_vs_pt;
+
 
   // efficiencies and purities
   m_eff_pt  = new Efficiency1D( find("pT"),  "pT_eff"  );
@@ -991,6 +1004,10 @@ void ConfAnalysis::finalise() {
   m_eff_vs_etovpt->finalise();
 
   m_eff_vs_et->finalise();
+  
+  m_eff_eta_vs_pt->finalise();
+  m_eff_d0_vs_pt->finalise();
+
 
   const unsigned Npurity = 6;
   Efficiency1D* hpurity[Npurity] = {
@@ -1485,6 +1502,12 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 
       m_eff_vs_mult->Fill( m_Nref );
 
+
+      m_eff_eta_vs_pt->Fill( std::fabs(pTt), etat );    
+      m_eff_d0_vs_pt->Fill( std::fabs(pTt), a0t );    
+
+
+
       //    m_eff_vs_lb->Fill( m_rmap[r]+lb );
       // m_eff_vs_lb->Fill( ts_scale );
       //   m_eff_vs_lb->Fill( ts );
@@ -1495,6 +1518,7 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 	m_eff_vs_etovpt->Fill(etovpt_val);
 	m_eff_vs_et->Fill( std::fabs(tobj->pt()*0.001) );    
       }
+
 
       /// fill residual histos
 
