@@ -77,6 +77,7 @@ public:
 
   //People:
   bool showPeople() const;
+  SbColor4f peopleColourAndTransp() const;
   double peopleZPos() const;
   double peopleVerticalPos() const;
 
@@ -138,6 +139,7 @@ signals:
   void floorHeightChanged(const double&);
   void showLettersChanged(bool);
   void showPeopleChanged(bool);
+  void peopleColourAndTranspChanged( const SbColor4f& );
   void lettersZPosChanged(const double&);
   void lettersVerticalPosChanged(const double&);
   void peopleVerticalPosChanged(const double&);
@@ -186,6 +188,7 @@ private Q_SLOTS:
   void possibleChange_floorHeight();
   void possibleChange_showLetters();
   void possibleChange_showPeople();
+  void possibleChange_peopleColourAndTransp();
   void possibleChange_lettersZPos();
   void possibleChange_lettersVerticalPos();
   void possibleChange_peopleVerticalPos();

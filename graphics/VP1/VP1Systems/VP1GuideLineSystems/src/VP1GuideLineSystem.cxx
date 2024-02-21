@@ -176,6 +176,8 @@ void VP1GuideLineSystem::buildPermanentSceneGraph(StoreGateSvc* /*detstore*/, So
   m_d->people->setVerticalPosition(m_d->controller->peopleVerticalPos());
   connect(m_d->controller,SIGNAL(showPeopleChanged(bool)),m_d->people,SLOT(setShown(bool)));
   m_d->people->setShown(m_d->controller->showPeople());
+  connect(m_d->controller,SIGNAL(peopleColourAndTranspChanged( const SbColor4f&)),m_d->people,SLOT(setColourAndTransp(const SbColor4f&)));
+  m_d->people->setColourAndTransp(m_d->controller->peopleColourAndTransp());
   
   //Coordinate axes:
   m_d->coordinateaxes = new VP1CoordinateAxes(m_d->controller->xAxisMaterial(),
