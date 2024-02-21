@@ -10,7 +10,7 @@ def InDetToXAODSpacePointConversionCfg(flags,
                                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     kwargs.setdefault('ProcessPixel', flags.Detector.EnableITkPixel)
-    kwargs.setdefault('ProcessStrip', flags.Detector.EnableITkStrip)
+    kwargs.setdefault('ProcessStrip', flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking)
     acc.addEventAlgo( CompFactory.InDet.InDetToXAODSpacePointConversion(name, **kwargs) )
     return acc
 
