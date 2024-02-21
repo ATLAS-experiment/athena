@@ -34,34 +34,85 @@ public:
   /// fill methods ...
     
   void Fill( double x, double y, double w=1) {
-    int ibin = m_hnumer->FindBin(float(x),float(y)); 
-    m_hnumer->Fill(ibin,float(w));
-    m_hdenom->Fill(ibin,float(w));
+    m_hnumer->Fill( float(x), float(y), float(w) );
+    m_hdenom->Fill( float(x), float(y), float(w) );
   }
 
   void FillDenom( double x, double y, float w=1) { 
-    int ibin = m_hdenom->FindBin(float(x),float(y)); 
-    m_hdenom->Fill(ibin,float(w));
-    m_hmissed->Fill(ibin,float(w));
+    m_hmissed->Fill(float(x), float(y), float(w));
+    m_hdenom->Fill(float(x), float(y), float(w));
   }
   
 
   /// evaluate the uncertainties correctly ...
 
-  TGraphAsymmErrors* Bayes(int slice, double scale=100) { 
+  TGraphAsymmErrors* BayesX(int slice, double scale=100) { 
+    
+    if ( slice<0 || slice>=slicesX() ) return 0; 
+    
+    TH1D* hn = 0;
+    TH1D* hd = 0;
+    
+    if ( m_hnumer ) { 
+      // get some slice from the numerator histo
+      hn = m_hnumer->ProjectionY( slicename( name()+"_yslice", slice).c_str(), slice+1, slice+1, "e");
+    }
+    
+    if ( m_hdenom ) { 
+      // get some slice from the denominator histo
+      hd = m_hdenom->ProjectionY( slicename( name()+"_yslice", slice).c_str(), slice+1, slice+1, "e");
+    }
+    
+    return BayesInternal( hn, hd, scale );
+    
+  }
+ 
 
-    TH1F* hn = 0; // get some slice from the numerator histo
-    TH1F* hd = 0; // get some slice from the denominator histo
 
-    /// an operation to hopefully shut up the 
-    /// compilker warnings because I haven;t got 
-    /// round to implementing the functionality yet 
-    slice++; 
+  TGraphAsymmErrors* BayesY(int slice, double scale=100) { 
+
+    if ( slice<0 || slice>=slicesY() ) return 0; 
+
+    TH1D* hn = 0;
+    TH1D* hd = 0;
+
+    if ( m_hnumer ) { 
+      // get some slice from the numerator histo
+      hn = m_hnumer->ProjectionX( slicename( name()+"_yslice", slice).c_str(), slice+1, slice+1, "e");
+    }
+
+    if ( m_hdenom ) { 
+      // get some slice from the denominator histo
+      hd = m_hdenom->ProjectionX( slicename( name()+"_yslice", slice).c_str(), slice+1, slice+1, "e");
+    }
 
     return BayesInternal( hn, hd, scale );
      
   }
  
+
+  TH1D* sliceX( int i ) { 
+    if ( i<0 || i>=slicesX() ) return 0; 
+    return m_heff->ProjectionY( slicename( name()+"_xslice", i).c_str(), i+1, i+1, "e");
+  }
+
+  TH1D* sliceY( int i ) { 
+    if ( i<0 || i>=slicesY() ) return 0; 
+    return m_heff->ProjectionX( slicename( name()+"_yslice", i).c_str(), i+1, i+1, "e");
+  }
+
+
+  int slicesX() const { 
+    if ( m_hdenom ) return m_hdenom->GetXaxis()->GetNbins();
+    return 0;
+  }
+
+
+  int slicesY() const { 
+    if ( m_hdenom ) return m_hdenom->GetYaxis()->GetNbins();
+    return 0;
+  }
+
 protected:
  
   virtual void getibinvec(bool force=false) { 
@@ -71,6 +122,12 @@ protected:
 	m_ibin.push_back( m_hdenom->GetBin(i,j) );
       }
     }
+  }
+
+
+  std::string slicename( const std::string& s, int i ) const { 
+    if ( i<10 ) return s + "0" + std::to_string(i);
+    else        return s + std::to_string(i);
   }
 
 };
