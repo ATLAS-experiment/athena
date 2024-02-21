@@ -29,7 +29,7 @@
 # art-output: NSWPRDValAlg.reco.dcube.root
 
 #####################################################################
-Reco_tf.py --CA 'RAWtoALL:True' \
+Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
            --postInclude "RAWtoALL:MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
@@ -46,12 +46,14 @@ mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_serial
 mv log.RAWtoALL log.RAWtoALL_serial
 #####################################################################
 
+export ATHENA_CORE_NUMBER=1
+
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
-Reco_tf.py --CA 'RAWtoALL:True' \
+Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
-           --athenaopts 'HITtoRDO:--threads=1' 'RAWtoALL:--threads=1' \
+           --multithreaded \
            --imf False \
            --outputESDFile OUT_ESD_1thread.root
 exit_code=$?
@@ -65,13 +67,15 @@ mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_1thread
 mv log.RAWtoALL log.RAWtoALL_1thread
 #####################################################################
 
+export ATHENA_CORE_NUMBER=5
+
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
-Reco_tf.py --CA 'RAWtoALL:True' \
+Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
            --imf False \
-           --athenaopts 'HITtoRDO:--threads=5' 'RAWtoALL:--threads=5' \
+           --multithreaded \
            --outputESDFile OUT_ESD_5thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf_5thread.py"
@@ -84,13 +88,15 @@ mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_5thread
 mv log.RAWtoALL log.RAWtoALL_5thread
 #####################################################################
 
+export ATHENA_CORE_NUMBER=8
+
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
-Reco_tf.py --CA 'RAWtoALL:True' \
+Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
            --imf False \
-           --athenaopts 'HITtoRDO:--threads=8' 'RAWtoALL:--threads=8' \
+           --multithreaded \
            --outputESDFile OUT_ESD_8thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf_8thread.py"
