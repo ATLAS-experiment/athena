@@ -29,5 +29,4 @@ atlas_add_test( SCTLorentzMonAlg_test
                 PROPERTIES TIMEOUT 600 )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py )
