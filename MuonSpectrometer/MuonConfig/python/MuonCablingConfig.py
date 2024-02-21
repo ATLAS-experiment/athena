@@ -154,8 +154,9 @@ def NswCablingCfg(flags, name = "MuonNSW_CablingAlg", **kwargs):
 
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     cablingFolder = ["/MDT/MM/CABLING" if not flags.Common.isOnline else  "/MDT/Onl/MM/CABLING"]
+    cablingTag = "MmCabling-FrontEndShifts-v1" if not flags.Common.isOnline else "MmOnlCabling-FrontEndShifts-v1"
     kwargs.setdefault("CablingFolder",cablingFolder)
-    result.merge(addFolders(flags,kwargs["CablingFolder"], detDb=("MDT_OFL" if not  flags.Common.isOnline else "MDT_ONL"), className="CondAttrListCollection", tag="MmCabling-FrontEndShifts-v1"))
+    result.merge(addFolders(flags,kwargs["CablingFolder"], detDb=("MDT_OFL" if not  flags.Common.isOnline else "MDT_ONL"), className="CondAttrListCollection", tag=cablingTag))
 
     the_alg = CompFactory.MuonNSW_CablingAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
