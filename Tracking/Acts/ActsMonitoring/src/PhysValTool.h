@@ -7,12 +7,15 @@
 
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/HGTDClusterContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
+#include "HGTD_Identifier/HGTD_ID.h"
 #include "src/PixelClusterValidationPlots.h"
 #include "src/StripClusterValidationPlots.h"
+#include "src/HgtdClusterValidationPlots.h"
 #include "src/PixelSpacePointValidationPlots.h"
 #include "src/StripSpacePointValidationPlots.h"
 
@@ -36,6 +39,9 @@ namespace ActsTrk {
     template<typename external_collection_t>
       StatusCode bookCollection(external_collection_t*);
 
+    StatusCode fillHgtd(const EventContext& ctx,
+			float beamSpotWeight);
+    
   private:
     SG::ReadHandleKey< xAOD::EventInfo > m_eventInfo {this, "EventInfo", "EventInfo", 
 	"Event info key"};
@@ -44,7 +50,9 @@ namespace ActsTrk {
 	"Key of input pixel clusters"};
     SG::ReadHandleKey< xAOD::StripClusterContainer > m_stripClusterContainerKey {this, "StripClusterContainerKey", "ITkStripClusters", 
 	"Key of input pixel clusters"};
-
+    SG::ReadHandleKey< xAOD::HGTDClusterContainer > m_hgtdClusterContainerKey {this, "HGTDClusterContainerKey", "HGTD_Clusters",
+        "Key of input hgtd clusters"};
+    
     SG::ReadHandleKey< xAOD::SpacePointContainer > m_pixelSpacePointContainerKey {this, "PixelSpacePointContainerKey", "ITkPixelSpacePoints",
 	"Key of input pixel space points"};
     SG::ReadHandleKey< xAOD::SpacePointContainer > m_stripSpacePointContainerKey {this, "StripSpacePointContainerKey", "ITkStripSpacePoints",
@@ -52,15 +60,22 @@ namespace ActsTrk {
     SG::ReadHandleKey< xAOD::SpacePointContainer > m_stripOverlapSpacePointContainerKey {this, "StripOverlapSpacePointContainerKey", "ITkStripOverlapSpacePoints",
 	"Key of input strip overlap space points"};
 
+    SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_HGTDDetEleCollKey {this, "HGTDDetEleCollKey", "HGTD_DetectorElementCollection",
+      "Key of HGTD_DetectorElementCollection for HGTD"};
+    
+    Gaudi::Property<bool> m_doHGTD {this, "doHGTD", false, "Analyse HGTD collections"};
+    
     std::unique_ptr< ActsTrk::PixelClusterValidationPlots > m_pixelClusterValidationPlots;
     std::unique_ptr< ActsTrk::StripClusterValidationPlots > m_stripClusterValidationPlots;
-
+    std::unique_ptr< ActsTrk::HgtdClusterValidationPlots > m_hgtdClusterValidationPlots;
+    
     std::unique_ptr< ActsTrk::PixelSpacePointValidationPlots > m_pixelSpacePointValidationPlots;
     std::unique_ptr< ActsTrk::StripSpacePointValidationPlots > m_stripSpacePointValidationPlots;
     std::unique_ptr< ActsTrk::StripSpacePointValidationPlots > m_stripOverlapSpacePointValidationPlots;
-
+    
     const PixelID *m_pixelID {};
     const SCT_ID *m_stripID {};
+    const HGTD_ID *m_hgtdID {};
   };
 
   template<typename external_collection_t>

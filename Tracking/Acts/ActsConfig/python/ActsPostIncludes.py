@@ -19,6 +19,14 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
                   'xAOD::StripClusterContainer#ITkStripClusters',
                   'xAOD::StripClusterAuxContainer#ITkStripClustersAux.' + strip_cluster_variables]
 
+        if flags.Reco.EnableHGTDExtension:
+            hgtd_cluster_shortlist = ['-hgtdClusterLink']
+
+            hgtd_cluster_variables = '.'.join(hgtd_cluster_shortlist)
+            
+            toAOD += ['xAOD::HGTDClusterContainer#HGTD_Clusters',
+                      'xAOD::HGTDClusterAuxContainer#HGTD_ClustersAux.' + hgtd_cluster_variables]
+
         if flags.Acts.doITkConversion:
             toAOD += ['xAOD::StripClusterContainer#ITkConversionStripClusters',
                       'xAOD::StripClusterAuxContainer#ITkConversionStripClustersAux.' + strip_cluster_variables]
