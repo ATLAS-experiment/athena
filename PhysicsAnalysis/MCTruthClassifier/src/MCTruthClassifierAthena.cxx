@@ -1,11 +1,8 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
- */
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
 
-// File Including the Athena only methods of the MCTruthClassifier Class
-
-#if !defined(XAOD_ANALYSIS) &&                                                 \
-  !defined(GENERATIONBASE) // Can only be used in Athena
+#if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) // Can only be used in Athena
 
 //
 #include "MCTruthClassifier/MCTruthClassifier.h"
@@ -34,8 +31,7 @@ using std::abs;
 
 namespace {
 
-std::unique_ptr<Trk::CurvilinearParameters>
-extractParamFromTruth(const xAOD::TruthParticle& particle)
+std::unique_ptr<Trk::CurvilinearParameters> extractParamFromTruth(const xAOD::TruthParticle& particle)
 {
   // get start parameters
   const xAOD::TruthVertex* pvtx = particle.prodVtx();
@@ -58,34 +54,26 @@ extractParamFromTruth(const xAOD::TruthParticle& particle)
 
 // Methods using directly the extrapolator usable only from Athena
 //-----------------------------------------------------------------------------------------
-const xAOD::TruthParticle*
-MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
-                                   bool isFwrdEle,
-                                   Info* info) const
+const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus, bool isFwrdEle, Info* info) const
 {
   //-----------------------------------------------------------------------------------------
 
   ATH_MSG_DEBUG("Executing egammaClusMatch ");
 
   const xAOD::TruthParticle* theMatchPart = nullptr;
-  const EventContext& ctx =
-    info ? info->eventContext : Gaudi::Hive::currentContext();
+  const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
 
   // retrieve collection and get a pointer
-  SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(
-    m_truthParticleContainerKey, ctx);
+  SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey, ctx);
 
   if (!truthParticleContainerReadHandle.isValid()) {
-    ATH_MSG_WARNING(
-      " Invalid ReadHandle for xAOD::TruthParticleContainer with key: "
-      << truthParticleContainerReadHandle.key());
+    ATH_MSG_WARNING( " Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
     return theMatchPart;
   }
 
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{ m_caloMgrKey, ctx };
   if (!caloMgrHandle.isValid()) {
-    ATH_MSG_WARNING(" Invalid ReadCondHandle for CaloDetDescrManager with key: "
-                    << m_caloMgrKey.key());
+    ATH_MSG_WARNING(" Invalid ReadCondHandle for CaloDetDescrManager with key: " << m_caloMgrKey.key());
     return theMatchPart;
   }
 
@@ -131,8 +119,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
     }
     long iParticlePDG = thePart->pdgId();
     // excluding neutrino
-    if (abs(iParticlePDG) == 12 || abs(iParticlePDG) == 14 ||
-        abs(iParticlePDG) == 16) {
+    if (abs(iParticlePDG) == 12 || abs(iParticlePDG) == 14 || abs(iParticlePDG) == 16) {
       continue;
     }
 
@@ -147,10 +134,8 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
     }
 
     // eleptical cone  for extrapolations m_partExtrConePhi X m_partExtrConeEta
-    if (!isFwrdEle && m_ROICone &&
-        std::pow((detPhi(phiClus, thePart->phi()) / m_partExtrConePhi), 2) +
-            std::pow((detEta(etaClus, thePart->eta()) / m_partExtrConeEta), 2) >
-          1.0) {
+    if (!isFwrdEle && m_ROICone && std::pow((detPhi(phiClus, thePart->phi()) / m_partExtrConePhi), 2) 
+      + std::pow((detEta(etaClus, thePart->eta()) / m_partExtrConeEta), 2) > 1.0) {
       continue;
     }
 
@@ -159,11 +144,9 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
     if (isFwrdEle && // It is forward and
         (((etaClus < 0) - (thePart->eta() < 0) != 0)
          // The truth eta has different sign wrt to the fwd electron
-         || (std::fabs(thePart->eta()) <
-             m_FwdElectronTruthExtrEtaCut) // or the truth is less than 2.4
+         || (std::fabs(thePart->eta()) < m_FwdElectronTruthExtrEtaCut) // or the truth is less than 2.4
                                            // (default cut)
-         || (std::fabs(thePart->eta() - etaClus) >
-             m_FwdElectronTruthExtrEtaWindowCut) // or if the delta Eta between
+         || (std::fabs(thePart->eta() - etaClus) > m_FwdElectronTruthExtrEtaWindowCut) // or if the delta Eta between
                                                  // el and truth is  > 0.15
          ) // then do no extrapolate this truth Particle for this fwd electron
     ) {
@@ -173,8 +156,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
     double dR(-999.);
     bool isNCone = false;
 
-    bool isExt =
-      genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
+    bool isExt = genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
     if (!isExt) {
       continue;
     }
@@ -192,16 +174,14 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
     if (!isFwrdEle) {
       // the leading photon or electron  inside narrow eleptical cone
       // m_phtClasConePhi  X m_phtClasConeEta
-      if ((iParticlePDG == 22 || abs(iParticlePDG) == 11) && isNCone &&
-          pt > LeadingPhtPT) {
+      if ((iParticlePDG == 22 || abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
         theEgamma = thePart;
         LeadingPhtPT = pt;
         LeadingPhtdR = dR;
       }
       // leading particle (excluding photon and electron) inside narrow eleptic
       // cone m_phtClasConePhi  X m_phtClasConeEta
-      if ((iParticlePDG != 22 && abs(iParticlePDG) != 11) && isNCone &&
-          pt > LeadingPartPT) {
+      if ((iParticlePDG != 22 && abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
         theLeadingPartInCone = thePart;
         LeadingPartPT = pt;
         LeadingPartdR = dR;
@@ -226,20 +206,17 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
       info->deltaRMatch = LeadingPhtdR;
     }
   } else if (theLeadingPartInCone != nullptr) {
-    theMatchPart =
-      find_matching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
+    theMatchPart = find_matching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
     if (info) {
       info->deltaRMatch = LeadingPartdR;
     }
   } else if (theBestPartOutCone != nullptr) {
-    theMatchPart =
-      find_matching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
+    theMatchPart = find_matching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
     if (info) {
       info->deltaRMatch = BestPartdR;
     }
   } else if (isFwrdEle && theBestPartdR != nullptr) {
-    theMatchPart =
-      find_matching(truthParticleContainerReadHandle.ptr(),theBestPartdR );
+    theMatchPart = find_matching(truthParticleContainerReadHandle.ptr(),theBestPartdR );
     if (info) {
       info->deltaRMatch = BestPartdR;
     }
@@ -253,28 +230,20 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
   // additional loop over G4 particles,
   for (const auto* const thePart : tps) {
     // loop over the stable particle
-    if (!MC::isStable(thePart)) {
-      continue;
-    }
+    if (!MC::isStable(thePart)) continue;
     // only G4 particle
-    if (!HepMC::is_simulation_particle(thePart)) {
-      continue;
-    }
+    if (!HepMC::is_simulation_particle(thePart)) continue;
+
     long iParticlePDG = thePart->pdgId();
     // exclude neutrino
-    if (abs(iParticlePDG) == 12 || abs(iParticlePDG) == 14 ||
-        abs(iParticlePDG) == 16) {
-      continue;
-    }
+    if (abs(iParticlePDG) == 12 || abs(iParticlePDG) == 14 || abs(iParticlePDG) == 16) continue;
+
     // exclude particles interacting into the detector volume
     if (thePart->decayVtx() != nullptr) {
       continue;
     }
 
-    if (std::pow((detPhi(phiClus, thePart->phi()) / m_partExtrConePhi), 2) +
-          std::pow((detEta(etaClus, thePart->eta()) / m_partExtrConeEta), 2) >
-        1.0)
-      continue;
+    if (std::pow((detPhi(phiClus, thePart->phi()) / m_partExtrConePhi), 2) + std::pow((detEta(etaClus, thePart->eta()) / m_partExtrConeEta), 2) > 1.0) continue;
 
     double pt = thePart->pt() / GeV;
     double q = thePart?thePart->charge():0.0;
@@ -288,8 +257,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
 
     double dR(-999.);
     bool isNCone = false;
-    bool isExt =
-      genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
+    bool isExt = genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
     if (!isExt) {
       continue;
     }
@@ -304,8 +272,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
 
     // the leading photon or electron  inside narrow eleptical cone
     // m_phtClasConePhi  X m_phtClasConeEta
-    if ((iParticlePDG == 22 || abs(iParticlePDG) == 11) && isNCone &&
-        pt > LeadingPhtPT) {
+    if ((iParticlePDG == 22 || abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
       theEgamma = thePart;
       LeadingPhtPT = pt;
       LeadingPhtdR = dR;
@@ -313,8 +280,7 @@ MCTruthClassifier::egammaClusMatch(const xAOD::CaloCluster* clus,
 
     // leading particle (excluding photon or electron) inside narrow eleptic
     // cone m_phtClasConePhi  X m_phtClasConeEta
-    if ((iParticlePDG != 22 && abs(iParticlePDG) != 11) && isNCone &&
-        pt > LeadingPartPT) {
+    if ((iParticlePDG != 22 && abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
       theLeadingPartInCone = thePart;
       LeadingPartPT = pt;
       LeadingPartdR = dR;
@@ -385,15 +351,11 @@ MCTruthClassifier::genPartToCalo(const EventContext& ctx,
   // define calo sample
   CaloSampling::CaloSample sample = CaloSampling::EMB2;
   if ((clus->inBarrel() && !clus->inEndcap()) ||
-      (clus->inBarrel() && clus->inEndcap() &&
-       clus->eSample(CaloSampling::EMB2) >=
-         clus->eSample(CaloSampling::EME2))) {
+      (clus->inBarrel() && clus->inEndcap() && clus->eSample(CaloSampling::EMB2) >= clus->eSample(CaloSampling::EME2))) {
     // Barrel
     sample = CaloSampling::EMB2;
   } else if ((!clus->inBarrel() && clus->inEndcap() && !isFwrdEle) ||
-             (clus->inBarrel() && clus->inEndcap() &&
-              clus->eSample(CaloSampling::EME2) >
-                clus->eSample(CaloSampling::EMB2))) {
+             (clus->inBarrel() && clus->inEndcap() && clus->eSample(CaloSampling::EME2) > clus->eSample(CaloSampling::EMB2))) {
     // End-cap
     sample = CaloSampling::EME2;
   } else if (isFwrdEle && clus->inEndcap()) {
@@ -402,25 +364,20 @@ MCTruthClassifier::genPartToCalo(const EventContext& ctx,
   } else {
     return false;
   }
-  std::unique_ptr<Trk::CurvilinearParameters> params =
-    extractParamFromTruth(*thePart);
+  std::unique_ptr<Trk::CurvilinearParameters> params = extractParamFromTruth(*thePart);
   if (!params) {
     return false;
   }
 
   // create extension to sample
   std::vector<CaloSampling::CaloSample> samples = { sample };
-  std::vector<std::pair<CaloSampling::CaloSample,
-                        std::unique_ptr<const Trk::TrackParameters>>>
-    extension = m_caloExtensionTool->layersCaloExtension(
-      ctx, *params, samples, etaClus, caloDDMgr);
+  std::vector<std::pair<CaloSampling::CaloSample, std::unique_ptr<const Trk::TrackParameters>>> 
+    extension = m_caloExtensionTool->layersCaloExtension(ctx, *params, samples, etaClus, caloDDMgr);
   double etaCalo = -99;
   double phiCalo = -99;
   bool extensionOK = (!extension.empty());
   if (!extensionOK) {
-    ATH_MSG_WARNING("extrapolation of Truth Particle with eta  "
-                    << thePart->eta() << " , charge " << thePart->charge()
-                    << " , Pt " << thePart->pt() << " to calo failed");
+    ATH_MSG_WARNING("extrapolation of Truth Particle with eta  " << thePart->eta() << " , charge " << thePart->charge() << " , Pt " << thePart->pt() << " to calo failed");
     return false;
   }
   etaCalo = extension[0].second->position().eta();
@@ -430,14 +387,9 @@ MCTruthClassifier::genPartToCalo(const EventContext& ctx,
   double dEta = detEta(etaCalo, etaClus);
   dRmatch = rCone(dPhi, dEta);
 
-  if ((!isFwrdEle && dRmatch > m_phtdRtoTrCut) ||
-      (isFwrdEle && dRmatch > m_fwrdEledRtoTrCut))
-    return false;
+  if ((!isFwrdEle && dRmatch > m_phtdRtoTrCut) || (isFwrdEle && dRmatch > m_fwrdEledRtoTrCut)) return false;
 
-  if (!isFwrdEle && std::pow(dPhi / m_phtClasConePhi, 2) +
-                        std::pow(dEta / m_phtClasConeEta, 2) <=
-                      1.0)
-    isNarrowCone = true;
+  if (!isFwrdEle && std::pow(dPhi / m_phtClasConePhi, 2) + std::pow(dEta / m_phtClasConeEta, 2) <= 1.0) isNarrowCone = true;
 
   return true;
 }
