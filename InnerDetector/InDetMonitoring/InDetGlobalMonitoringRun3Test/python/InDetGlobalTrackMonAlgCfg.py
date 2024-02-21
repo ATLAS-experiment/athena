@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 """
@@ -10,8 +10,10 @@
 """
 
 from math import pi as M_PI
+from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.ComponentFactory import CompFactory
 
-def InDetGlobalTrackMonAlgCfg(helper, alg, **kwargs):
+def HistoInDetGlobalTrackMonAlgCfg(helper, alg):
 
     # values
     m_nBinsEta = 50
@@ -186,3 +188,50 @@ def InDetGlobalTrackMonAlgCfg(helper, alg, **kwargs):
 # end histograms
 
 
+def InDetGlobalTrackMonAlgCfg(helper, acc,
+                              flags, name="InDetGlobalTrackMonAlg", **kwargs):
+
+    from InDetConfig.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg,
+        InDetTrackSelectionTool_Loose_Cfg)
+
+    if "TrackSelectionTool" not in kwargs:
+        if (flags.Beam.Type is BeamType.Cosmics or flags.Beam.Energy < 500000 or
+            flags.Reco.EnableHI):
+            kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
+                InDetTrackSelectionTool_Loose_Cfg(flags, name='LowECMTrackSelectionTool',
+                                                  minPt = 500)))
+        else:
+            kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
+                InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(
+                    flags,
+                    maxNPixelHoles = 1, # Default for TightPrimary is 0
+                    minPt = 5000)))
+
+    if "Tight_TrackSelectionTool" not in kwargs:
+        kwargs.setdefault("Tight_TrackSelectionTool", acc.popToolsAndMerge(
+            InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(
+                flags,
+                minPt = 5000)))
+
+    if "Loose_TrackSelectionTool" not in kwargs:
+        kwargs.setdefault("Loose_TrackSelectionTool", acc.popToolsAndMerge(
+            InDetTrackSelectionTool_Loose_Cfg(
+                flags,
+                minPt = 1000)))
+
+    if "TrackToVertexIPEstimator" not in kwargs:
+        from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
+        kwargs.setdefault("TrackToVertexIPEstimator", acc.popToolsAndMerge(
+            TrackToVertexIPEstimatorCfg(flags)))
+
+    from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
+    from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
+
+    monAlg = helper.addAlgorithm(
+        CompFactory.InDetGlobalTrackMonAlg, name,
+        addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
+        **kwargs)
+
+    HistoInDetGlobalTrackMonAlgCfg(helper, monAlg)
+    return
