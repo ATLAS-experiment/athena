@@ -1,23 +1,23 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def main():
     EvtMax = 20
     inputFiles = ['/global/homes/c/cvarni/Athena/TrigBtagEmulationToolLayout/data/TrigAnalysisTest.2022-05-09T2101.test_trigAna_RDOtoADO_v1Dev_grid.AOD.pool.root']
 
-    from AthenaCommon.Configurable import ConfigurableCABehavior
-    with ConfigurableCABehavior():
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        ConfigFlags.Scheduler.ShowDataDeps = True
-        ConfigFlags.Scheduler.ShowDataFlow = True
-        ConfigFlags.Scheduler.ShowControlFlow = True
-        ConfigFlags.Input.Files = inputFiles 
-        ConfigFlags.Exec.MaxEvents = EvtMax
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Input.Files = inputFiles
+    flags.Exec.MaxEvents = EvtMax
+    flags.Common.MsgSuppression = False
 
-        ConfigFlags.lock()
-        ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
-    menu_name = ConfigFlags.Trigger.triggerMenuSetup
+    menu_name = flags.Trigger.triggerMenuSetup
 
     # for validation compare the decisions of a single chain, or all the chains in the menu 
     jetcoll_name_mapping = {
@@ -67,13 +67,11 @@ def main():
     with ConfigurableCABehavior():
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        acc = MainServicesCfg( ConfigFlags )
-        acc.merge( PoolReadCfg( ConfigFlags ) )
-        acc.getService("MessageSvc").Format = "% F%80W%S%7W%R%T %0W%M"
-        acc.getService("MessageSvc").defaultLimit = 2147483647
-    
+        acc = MainServicesCfg( flags )
+        acc.merge( PoolReadCfg( flags ) )
+
         from TrigBtagEmulationTool.TrigBtagEmulationToolConfig import TrigBtagValidationTestCfg
-        acc.merge(TrigBtagValidationTestCfg(ConfigFlags,
+        acc.merge(TrigBtagValidationTestCfg(flags,
                                             toBeEmulatedTriggers = emulatedChains,
                                             InputChain_EMTopo = '',
                                             InputJetContainer_EMTopo = jetcontainer_EMTopo,
