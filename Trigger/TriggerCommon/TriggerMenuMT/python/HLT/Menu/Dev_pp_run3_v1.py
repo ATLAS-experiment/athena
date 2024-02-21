@@ -1056,7 +1056,7 @@ def getDevSignatures():
         ChainProp(name='HLT_mu6_j100_0eta290_boffperf_pf_ftf_dRAB04_L1BTAG-MU5VFjJ90', l1SeedThresholds=['MU5VF','FSNOSEED'], groups=SingleBjetGroup+Topo2Group),
         #jFEX
         ChainProp(name='HLT_mu4_j20_0eta290_boffperf_pf_ftf_dRAB04_L1MU3V_jJ30', l1SeedThresholds=['MU3V','FSNOSEED'], groups=SingleBjetGroup), # added temporarily
-        ChainProp(name='HLT_mu6_j100_0eta290_boffperf_pf_ftf_dRAB04_L1MU5VF_jJ90', l1SeedThresholds=['MU5VF','FSNOSEED'], groups=SingleBjetGroup), 
+        ChainProp(name='HLT_mu6_j100_0eta290_boffperf_pf_ftf_dRAB04_L1MU5VF_jJ80', l1SeedThresholds=['MU5VF','FSNOSEED'], groups=SingleBjetGroup), 
         ChainProp(name='HLT_mu4_j35_0eta290_boffperf_pf_ftf_dRAB04_L1MU3V_jJ40', l1SeedThresholds=['MU3V','FSNOSEED'], groups=SingleBjetGroup),
         ChainProp(name='HLT_mu4_j45_0eta290_boffperf_pf_ftf_dRAB04_L1MU3V_jJ40', l1SeedThresholds=['MU3V','FSNOSEED'], groups=SingleBjetGroup),
         ChainProp(name='HLT_mu6_j60_0eta290_boffperf_pf_ftf_dRAB04_L1MU3V_jJ40', l1SeedThresholds=['MU3V','FSNOSEED'], groups=SingleBjetGroup),
