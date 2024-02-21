@@ -23,7 +23,8 @@ class TileSwitches
           glue(-1),
           pvt(-1),
           steel(-1),
-          csTube(-1)
+          csTube(-1),
+          crackOption(0)
       {}
 
   /** setting up testbeam geometry or ATLAS geometry **/
@@ -52,6 +53,22 @@ class TileSwitches
   /** 0: without Cesium tubes
       1: with cesium tubes **/
   int csTube;
+
+  /** 0: crack scintillators in ext.barrel top-level envelopes
+      1: crack scintillators in separate TileCal top-level envelopes
+      2: crack scintillators in top-level enevelopes defined via jobOptions
+      3: crack scintillators in top-level enevelopes passed by pointer in constructor
+      4: positive crack scintillator in top-level enevelope passed by pointer in create method
+      5: negative crack scintillator in top-level enevelope passed by pointer in create method
+      9: crack scintillators are not created by TileAtlasFactory
+     x0: where x=1,2,3,4,5 the same as 0, but skip creation of Barrel/ExtBar/ITC/Gap/Crack
+     x1: where x=1,2,3,4,5 the same as 1, but skip creation of Barrel/ExtBar/ITC/Gap/Crack
+     x2: where x=1,2,3,4,5 the same as 2, but skip creation of Barrel/ExtBar/ITC/Gap/Crack
+     x3: where x=1,2,3,4,5 the same as 3, but skip creation of Barrel/ExtBar/ITC/Gap/Crack
+     x9: where x=1,2,3,4,5 the same as 9, but skip creation of Barrel/ExtBar/ITC/Gap/Crack
+     59: nothing is created **/
+  int crackOption;
+
 };
 
 #endif

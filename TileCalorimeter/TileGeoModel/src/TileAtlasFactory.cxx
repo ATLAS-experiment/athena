@@ -27,6 +27,7 @@
 #include "GeoModelKernel/GeoIdentifierTag.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 
+#include "GeoModelUtilities/GeoVisitVolumes.h"
 #include "GeoGenericFunctions/AbsFunction.h"
 #include "GeoGenericFunctions/Variable.h"
 #include "GeoModelKernel/GeoXF.h"
@@ -61,6 +62,28 @@ TileAtlasFactory::TileAtlasFactory(StoreGateSvc *pDetStore,
         , m_detectorManager(manager)
         , m_log(log)
         , m_switches(switches)
+        , m_verbose(log->level()<=MSG::VERBOSE)
+        , m_fullGeo(fullGeo)
+{
+  m_switches.testBeam = false;
+}
+
+// Constructor:
+TileAtlasFactory::TileAtlasFactory(StoreGateSvc *pDetStore,
+                                   TileDetDescrManager *manager,
+                                   const TileSwitches & switches,
+                                   const std::vector<std::string> & volumeNames,
+                                   std::vector<GeoPhysVol *> & volumePtrs,
+                                   const std::vector<double> & volumePositions,
+                                   MsgStream *log,
+                                   bool fullGeo)
+        : m_detectorStore(pDetStore)
+        , m_detectorManager(manager)
+        , m_log(log)
+        , m_switches(switches)
+        , m_volumeNames(volumeNames)
+        , m_volumePtrs(volumePtrs)
+        , m_volumePositions(volumePositions)
         , m_verbose(log->level()<=MSG::VERBOSE)
         , m_fullGeo(fullGeo)
 {
@@ -120,15 +143,74 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                << endmsg;
   }
 
-  if (m_log->level()<=MSG::DEBUG)
+  if (m_log->level()<=MSG::DEBUG) {
     (*m_log) <<MSG::DEBUG << "TileAtlasFactory. addPlates = " <<m_switches.addPlatesToCell<<endmsg;
+    (*m_log) <<MSG::DEBUG << "TileAtlasFactory. crackOption = " <<m_switches.crackOption<<endmsg;
+  }
+  int barrel_flag = m_switches.crackOption/10; // >0 - no barrel, >1 - no ext.bar, >2-no ITC, >3-no Gap, >4-no Crack
+  int crack_flag  = m_switches.crackOption%10;
+  if (barrel_flag == 5) crack_flag = 9;        // nothing will be created if barrel_flag is 5
+  if (crack_flag == 4 || crack_flag == 5) barrel_flag = 4; // only one crack is created, nothing else
+  bool eb_flag = (barrel_flag<4 || (barrel_flag==4 && crack_flag==0) ); // true if ext.barrel envelope is needed
+  if (m_log->level()<=MSG::DEBUG) {
+    (*m_log) << MSG::DEBUG << "barrel_flag " << barrel_flag << endmsg;
+    (*m_log) << MSG::DEBUG << "crack_flag " << crack_flag << endmsg;
+  }
+
   // -------- -------- CUT BUILDER  -------- ----------
   //TileGeoCutBuilder* CutBuilder = new TileGeoCutBuilder(theMaterialManager,dbManager,m_log);
 
   // --------------- TILE  -------  TILE  --------- TILE ---------- TILE ------------
   // Envelope creation. Building three tree tops for standard setup and only one for commissioning
-  GeoLogVol  *lvTileEnvelopeBarrel =0, *lvTileEnvelopePosEndcap =0, *lvTileEnvelopeNegEndcap =0;
-  GeoPhysVol *pvTileEnvelopeBarrel =0, *pvTileEnvelopePosEndcap =0, *pvTileEnvelopeNegEndcap =0;
+  GeoLogVol  *lvTileEnvelopeBarrel =0, *lvTileEnvelopePosEndcap =0, *lvTileEnvelopeNegEndcap =0, *lvTileEnvelopePosCrack =0, *lvTileEnvelopeNegCrack =0;
+  GeoPhysVol *pvTileEnvelopeBarrel =0, *pvTileEnvelopePosEndcap =0, *pvTileEnvelopeNegEndcap =0, *pvTileEnvelopePosCrack =0, *pvTileEnvelopeNegCrack =0;
+
+  if (crack_flag==2) {
+    if ( m_volumeNames.size()<1 ) {
+      (*m_log) <<MSG::WARNING << "Top-level volume names for crack scintillators are missing"<<endmsg;
+      (*m_log) <<MSG::WARNING << "Crack scintillators will not be built"<<endmsg;
+      crack_flag = 9;
+    } else {
+      GeoVolumeVec_t vols = geoGetVolumes (&*world);
+      for (auto v : vols) {
+        if (v.first->getLogVol()->getName() == m_volumeNames[0] )
+          pvTileEnvelopePosCrack = (GeoPhysVol *)(v.first);
+        else if (m_volumeNames.size()>1 && v.first->getLogVol()->getName() == m_volumeNames[1] )
+          pvTileEnvelopeNegCrack = (GeoPhysVol *)(v.first);
+      }
+    }
+  } else if (crack_flag==3) {
+    if ( m_volumePtrs.size()<1 ) {
+      (*m_log) <<MSG::WARNING << "Top-level volume pointers for crack scintillators are missing"<<endmsg;
+      (*m_log) <<MSG::WARNING << "Crack scintillators will not be built"<<endmsg;
+      crack_flag = 9;
+    } else {
+      pvTileEnvelopePosCrack = m_volumePtrs[0];
+      if (m_volumePtrs.size()>1) pvTileEnvelopeNegCrack = m_volumePtrs[1];
+    }
+  } else if (crack_flag==4) {
+    pvTileEnvelopePosCrack = world;
+  } else if (crack_flag==5) {
+    pvTileEnvelopeNegCrack = world;
+  }
+
+  if (pvTileEnvelopePosCrack || pvTileEnvelopeNegCrack) {
+    (*m_log) <<MSG::DEBUG << "Top-level volume names for crack scintillators are "
+             << " positive: " << ( (pvTileEnvelopePosCrack) ? pvTileEnvelopePosCrack->getLogVol()->getName() : "none" )
+             << " negative: " << ( (pvTileEnvelopeNegCrack) ? pvTileEnvelopeNegCrack->getLogVol()->getName() : "none" )
+             << endmsg;
+  } else if (crack_flag==2) {
+    (*m_log) <<MSG::WARNING << "Top-level volume names for crack scintillators  "
+             << ((m_volumeNames.size()>0) ? m_volumeNames[0] : "") << " "
+             << ((m_volumeNames.size()>1) ? m_volumeNames[1] : "") << " "
+             << " were not found" << endmsg;
+    (*m_log) <<MSG::WARNING << "Crack scintillators will not be built"<<endmsg;
+    (*m_log) <<MSG::WARNING << "Available top-level volumes are:";
+    GeoVolumeVec_t vols = geoGetVolumes (&*world);
+    for (auto v : vols) (*m_log) << " " << v.first->getLogVol()->getName();
+    (*m_log) <<endmsg;
+    crack_flag = 9;
+  }
 
   // radius for minimization overlap volumes
   double rless   =0.15; // 150 [mkm]
@@ -207,14 +289,16 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   PosDelta = EnvDZPos[3] - EnvDZPos[1];
   if (m_log->level()<=MSG::DEBUG)
     (*m_log) << MSG::DEBUG <<" BFingerLengthPos "<<BFingerLengthPos<<" PosDelta "<<PosDelta;
-  if (fabs(PosDelta) < fabs(EBFingerLength - BFingerLength) ) {
+  if (std::abs(PosDelta) < std::abs(EBFingerLength - BFingerLength) ) {
     BFingerLengthPos += PosDelta;
-    (*m_log) <<" => New BFingerLengthPos "<<BFingerLengthPos<<endmsg;
+    if (m_log->level()<=MSG::DEBUG)
+      (*m_log) <<" => New BFingerLengthPos "<<BFingerLengthPos<<endmsg;
   } else {
     /** Relative shift of EBpos is too big, This is expected behaviour for testbeam and commissioning configurations */
     BFingerLengthPos = BFingerLength;
     PosDelta =0;
-    (*m_log) <<" => New PosDelta "<<PosDelta<<endmsg;
+    if (m_log->level()<=MSG::DEBUG)
+      (*m_log) <<" => New PosDelta "<<PosDelta<<endmsg;
   }
 
   //
@@ -225,14 +309,16 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   NegDelta = (-EnvDZPos[2] + EnvDZPos[1]); // negative shift - bigger finger
   if (m_log->level()<=MSG::DEBUG)
     (*m_log) << MSG::DEBUG <<" BFingerLengthNeg "<<BFingerLengthNeg<<" NegDelta "<<NegDelta;
-  if (fabs(NegDelta) < fabs(EBFingerLength - BFingerLength) ) {
+  if (std::abs(NegDelta) < std::abs(EBFingerLength - BFingerLength) ) {
     BFingerLengthNeg += NegDelta;
-    (*m_log) <<" => New BFingerLengthNeg "<<BFingerLengthNeg<<endmsg;
+    if (m_log->level()<=MSG::DEBUG)
+      (*m_log) <<" => New BFingerLengthNeg "<<BFingerLengthNeg<<endmsg;
   } else {
     /** Relative shift of EBpos is too big, This is expected behaviour for testbeam and commissioning configurations */
     BFingerLengthNeg = BFingerLength;
     NegDelta =0;
-    (*m_log) <<" => New NegDelta "<<NegDelta<<endmsg;
+    if (m_log->level()<=MSG::DEBUG)
+      (*m_log) <<" => New NegDelta "<<NegDelta<<endmsg;
   }
 
   // extra flag sayubg that special C10 goes outside envelope for normal C10
@@ -248,11 +334,17 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     }
   }
 
+  dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
+  double rMinE2pos = dbManager->TILBrminimal();
+  double rMinE2neg = rMinE2pos;
+
   // extra flag sayubg that E4' present on negative eta side
   bool spE4 = false;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
   double rMinE4pos = dbManager->TILBrminimal();
   double rMinE4neg = rMinE4pos;
+  double rMaxE3pos = dbManager->TILBrmaximal();
+  double rMaxE3neg = rMaxE3pos;
   if ( dbManager->SetCurrentSection(10+TileDddbManager::TILE_PLUG4, false) ) {
     double rMinE4sp = dbManager->TILBrminimal();
     spE4 = (rMinE4sp < rMinE4neg);
@@ -288,24 +380,29 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   // R maximal
   double rmaxTotal = ROutMax[1];
 
-  GeoPcon* tileEnvPconeBarrel = new GeoPcon(PhiMin[1]*Gaudi::Units::deg, PhiMax[1]*Gaudi::Units::deg);
+  if (barrel_flag<1) { // >0 - no central barrel
 
-  tileEnvPconeBarrel->addPlane(-endEnvelopeNeg,                   BFingerRmin,             rmaxTotal);
-  tileEnvPconeBarrel->addPlane(-endCentralBarrel-DzSaddleSupport, BFingerRmin,             rmaxTotal);
-  if (dbManager->BoolSaddle()) {
-    tileEnvPconeBarrel->addPlane(-endCentralBarrel-DzSaddleSupport, BFingerRmin-RadiusSaddle,rmaxTotal);
-    tileEnvPconeBarrel->addPlane(-endCentralBarrel,                 BFingerRmin-RadiusSaddle,rmaxTotal);
+    GeoPcon* tileEnvPconeBarrel = new GeoPcon(PhiMin[1]*Gaudi::Units::deg, PhiMax[1]*Gaudi::Units::deg);
+
+    tileEnvPconeBarrel->addPlane(-endEnvelopeNeg,                   BFingerRmin,             rmaxTotal);
+    tileEnvPconeBarrel->addPlane(-endCentralBarrel-DzSaddleSupport, BFingerRmin,             rmaxTotal);
+    if (dbManager->BoolSaddle()) {
+      tileEnvPconeBarrel->addPlane(-endCentralBarrel-DzSaddleSupport, BFingerRmin-RadiusSaddle,rmaxTotal);
+      tileEnvPconeBarrel->addPlane(-endCentralBarrel,                 BFingerRmin-RadiusSaddle,rmaxTotal);
+    }
+    tileEnvPconeBarrel->addPlane(-endCentralBarrel,                 rminBarrel,              rmaxTotal);
+    tileEnvPconeBarrel->addPlane( endCentralBarrel,                 rminBarrel,              rmaxTotal);
+    if (dbManager->BoolSaddle()) {
+      tileEnvPconeBarrel->addPlane( endCentralBarrel,                 BFingerRmin-RadiusSaddle,rmaxTotal);
+      tileEnvPconeBarrel->addPlane( endCentralBarrel+DzSaddleSupport, BFingerRmin-RadiusSaddle,rmaxTotal);
+    }
+    tileEnvPconeBarrel->addPlane( endCentralBarrel+DzSaddleSupport, BFingerRmin,             rmaxTotal);
+    tileEnvPconeBarrel->addPlane( endEnvelopePos,                   BFingerRmin,             rmaxTotal);
+
+    lvTileEnvelopeBarrel = new GeoLogVol("TileCentralBarrel",tileEnvPconeBarrel,matAir);
+    pvTileEnvelopeBarrel = new GeoPhysVol(lvTileEnvelopeBarrel);
+
   }
-  tileEnvPconeBarrel->addPlane(-endCentralBarrel,                 rminBarrel,              rmaxTotal);
-  tileEnvPconeBarrel->addPlane( endCentralBarrel,                 rminBarrel,              rmaxTotal);
-  if (dbManager->BoolSaddle()) {
-    tileEnvPconeBarrel->addPlane( endCentralBarrel,                 BFingerRmin-RadiusSaddle,rmaxTotal);
-    tileEnvPconeBarrel->addPlane( endCentralBarrel+DzSaddleSupport, BFingerRmin-RadiusSaddle,rmaxTotal);
-  }tileEnvPconeBarrel->addPlane( endCentralBarrel+DzSaddleSupport, BFingerRmin,             rmaxTotal);
-  tileEnvPconeBarrel->addPlane( endEnvelopePos,                   BFingerRmin,             rmaxTotal);
-
-  lvTileEnvelopeBarrel = new GeoLogVol("TileCentralBarrel",tileEnvPconeBarrel,matAir);
-  pvTileEnvelopeBarrel = new GeoPhysVol(lvTileEnvelopeBarrel);
 
   //
   // Pos Ext. Barrel
@@ -333,7 +430,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
   double PosEndITC1 = (dbManager->TILBzoffset() + dbManager->TILEzshift() + dbManager->TILBdzmodul()/2)*Gaudi::Units::cm;
   double corr = PosEndITC - PosEndITC1;
-  if (fabs(corr)>0.01) {
+  if (std::abs(corr)>0.01) {
     (*m_log) << MSG::WARNING
              << "Discrepancy between TileGlobals and TILB tables in GeoModel DB "
              << PosEndITC << " != " << PosEndITC1 << "; take this into account"
@@ -369,8 +466,11 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   double PosRminITC1  = dbManager->TILBrminimal()*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
   double PosRminITC   = rMinC10 /* dbManager->TILBrminimal() */ *Gaudi::Units::cm;
+  dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
+  double PosRminGap   = rMinE2pos*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
   double PosRminCrack = rMinE4pos*Gaudi::Units::cm;
+  double PosRmaxCrack = rMaxE3pos*Gaudi::Units::cm;
 
   double PosRminExt = RInMin[3];
 
@@ -381,31 +481,57 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     (*m_log) << MSG::DEBUG
              << " PosRminITC1 = "  << PosRminITC1
              << " PosRminITC2 = "  << PosRminITC
+             << " PosRminGap   = " << PosRminGap
+             << " PosRmaxCrack = " << PosRmaxCrack
              << " PosRminCrack = " << PosRminCrack
              << " PosRminExt = "   << PosRminExt
              << " PosRmaxTotal = " << PosRmaxTotal
              << endmsg;
 
-  GeoPcon* tileEnvPconePosEndcap = new GeoPcon(PhiMin[3]*Gaudi::Units::deg, PhiMax[3]*Gaudi::Units::deg);
+  if (eb_flag) {
 
-  // Positive Endcap
-  tileEnvPconePosEndcap->addPlane(PosEndBarrelFinger,             PosRminITC1,              PosRmaxTotal);
-  tileEnvPconePosEndcap->addPlane(PosBeginITC2,                   PosRminITC1,              PosRmaxTotal);
-  tileEnvPconePosEndcap->addPlane(PosBeginITC2,                   PosRminITC,               PosRmaxTotal);
-  tileEnvPconePosEndcap->addPlane(PosBeginCrack,                  PosRminITC,               PosRmaxTotal);
-  tileEnvPconePosEndcap->addPlane(PosBeginCrack,                  PosRminCrack,             PosRmaxTotal);
-  tileEnvPconePosEndcap->addPlane(PosEndCrack,                    PosRminCrack,             PosRmaxTotal);
-  tileEnvPconePosEndcap->addPlane(PosEndCrack,                    PosRminExt,               PosRmaxTotal);
-  tileEnvPconePosEndcap->addPlane(PosEndExBarrel,                 PosRminExt,               PosRmaxTotal);
-  if (dbManager->BoolSaddle()) {
-    tileEnvPconePosEndcap->addPlane(PosEndExBarrel,                 EFingerRmin-RadiusSaddle, PosRmaxTotal);
-    tileEnvPconePosEndcap->addPlane(PosEndExBarrel+DzSaddleSupport, EFingerRmin-RadiusSaddle, PosRmaxTotal);
+    GeoPcon* tileEnvPconePosEndcap = new GeoPcon(PhiMin[3]*Gaudi::Units::deg, PhiMax[3]*Gaudi::Units::deg);
+
+    // Positive Endcap
+    tileEnvPconePosEndcap->addPlane(PosEndBarrelFinger,             PosRminITC1,              PosRmaxTotal);
+    tileEnvPconePosEndcap->addPlane(PosBeginITC2,                   PosRminITC1,              PosRmaxTotal);
+    tileEnvPconePosEndcap->addPlane(PosBeginITC2,                   PosRminITC,               PosRmaxTotal);
+    if (crack_flag>0) {
+      // endcap volume without crack scintillators
+      tileEnvPconePosEndcap->addPlane(PosBeginGap,                  PosRminITC,               PosRmaxTotal);
+      tileEnvPconePosEndcap->addPlane(PosBeginGap,                  PosRminGap,               PosRmaxTotal);
+      tileEnvPconePosEndcap->addPlane(PosEndGap,                    PosRminGap,               PosRmaxTotal);
+      tileEnvPconePosEndcap->addPlane(PosEndGap,                    PosRminExt,               PosRmaxTotal);
+    } else {
+      // endcap volume with crack scintillators
+      tileEnvPconePosEndcap->addPlane(PosBeginCrack,                PosRminITC,               PosRmaxTotal);
+      tileEnvPconePosEndcap->addPlane(PosBeginCrack,                PosRminCrack,             PosRmaxTotal);
+      tileEnvPconePosEndcap->addPlane(PosEndCrack,                  PosRminCrack,             PosRmaxTotal);
+      tileEnvPconePosEndcap->addPlane(PosEndCrack,                  PosRminExt,               PosRmaxTotal);
+    }
+    tileEnvPconePosEndcap->addPlane(PosEndExBarrel,                 PosRminExt,               PosRmaxTotal);
+    if (dbManager->BoolSaddle()) {
+      tileEnvPconePosEndcap->addPlane(PosEndExBarrel,                 EFingerRmin-RadiusSaddle, PosRmaxTotal);
+      tileEnvPconePosEndcap->addPlane(PosEndExBarrel+DzSaddleSupport, EFingerRmin-RadiusSaddle, PosRmaxTotal);
+    }
+    tileEnvPconePosEndcap->addPlane(PosEndExBarrel+DzSaddleSupport, EFingerRmin,              PosRmaxTotal);
+    tileEnvPconePosEndcap->addPlane(PosEndExBarrelFinger,           EFingerRmin,              PosRmaxTotal);
+
+    lvTileEnvelopePosEndcap = new GeoLogVol("TileEndcapPos",tileEnvPconePosEndcap,matAir);
+    pvTileEnvelopePosEndcap = new GeoPhysVol(lvTileEnvelopePosEndcap);
+
   }
-  tileEnvPconePosEndcap->addPlane(PosEndExBarrel+DzSaddleSupport, EFingerRmin,              PosRmaxTotal);
-  tileEnvPconePosEndcap->addPlane(PosEndExBarrelFinger,           EFingerRmin,              PosRmaxTotal);
 
-  lvTileEnvelopePosEndcap = new GeoLogVol("TileEndcapPos",tileEnvPconePosEndcap,matAir);
-  pvTileEnvelopePosEndcap = new GeoPhysVol(lvTileEnvelopePosEndcap);
+  if (crack_flag==1) {
+    // Positive Crack as separate volume
+    GeoPcon* tileEnvPconePosCrack = new GeoPcon(PhiMin[3]*Gaudi::Units::deg, PhiMax[3]*Gaudi::Units::deg);
+
+    tileEnvPconePosCrack->addPlane(PosBeginCrack,                  PosRminCrack,             PosRmaxCrack);
+    tileEnvPconePosCrack->addPlane(PosEndCrack,                    PosRminCrack,             PosRmaxCrack);
+
+    lvTileEnvelopePosCrack = new GeoLogVol("TileCrackPos",tileEnvPconePosCrack,matAir);
+    pvTileEnvelopePosCrack = new GeoPhysVol(lvTileEnvelopePosCrack);
+  }
 
   //
   // Neg Ex Barrel
@@ -434,10 +560,11 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   double NegEndITC1 = (dbManager->TILBzoffset() + dbManager->TILEzshift() + dbManager->TILBdzmodul()/2)*Gaudi::Units::cm;
   corr = NegEndITC - NegEndITC1;
 
-  if (fabs(corr)>0.01) { (*m_log) << MSG::WARNING
-                                  << "Discrepancy between TileGlobals and TILB tables in GeoModel DB "
-                                  << NegEndITC << " != " << NegEndITC1 << "; take this into account"
-                                  << endmsg;
+  if (std::abs(corr)>0.01) {
+    (*m_log) << MSG::WARNING
+             << "Discrepancy between TileGlobals and TILB tables in GeoModel DB "
+             << NegEndITC << " != " << NegEndITC1 << "; take this into account"
+             << endmsg;
   }
   //double NegBeginITC1 = corr + (dbManager->TILBzoffset() + dbManager->TILEzshift()-dbManager->TILBdzmodul()/2)*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
@@ -468,8 +595,11 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   double NegRminITC1 = dbManager->TILBrminimal()*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
   double NegRminITC = rMinC10 /* dbManager->TILBrminimal() */ *Gaudi::Units::cm;
+  dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
+  double NegRminGap = rMinE2neg*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
   double NegRminCrack = rMinE4neg*Gaudi::Units::cm;
+  double NegRmaxCrack = rMaxE3neg*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_EBARREL);
 
   double NegRminExt = RInMin[2];
@@ -481,34 +611,60 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     (*m_log) << MSG::DEBUG
              << " NegRminITC1 = "  << NegRminITC1
              << " NegRminITC2 = "  << NegRminITC
+             << " NegRminGap   = " << NegRminGap
+             << " NegRmaxCrack = " << NegRmaxCrack
              << " NegRminCrack = " << NegRminCrack
              << " NegRminExt = "   << NegRminExt
              << " NegRmaxTotal = " << NegRmaxTotal
              << endmsg;
 
-  GeoPcon* tileEnvPconeNegEndcap = new GeoPcon(PhiMin[2]*Gaudi::Units::deg, PhiMax[2]*Gaudi::Units::deg);
+  if (eb_flag) {
 
-  // Negative Endcap
-  tileEnvPconeNegEndcap->addPlane(-NegEndExtBarrelFinger,          EFingerRmin,              NegRmaxTotal);
-  tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel-DzSaddleSupport, EFingerRmin,              NegRmaxTotal);
-  if (dbManager->BoolSaddle()) {
-    tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel-DzSaddleSupport, EFingerRmin-RadiusSaddle, NegRmaxTotal);
-    tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel,                 EFingerRmin-RadiusSaddle, NegRmaxTotal);
+    GeoPcon* tileEnvPconeNegEndcap = new GeoPcon(PhiMin[2]*Gaudi::Units::deg, PhiMax[2]*Gaudi::Units::deg);
+
+    // Negative Endcap
+    tileEnvPconeNegEndcap->addPlane(-NegEndExtBarrelFinger,          EFingerRmin,              NegRmaxTotal);
+    tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel-DzSaddleSupport, EFingerRmin,              NegRmaxTotal);
+    if (dbManager->BoolSaddle()) {
+      tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel-DzSaddleSupport, EFingerRmin-RadiusSaddle, NegRmaxTotal);
+      tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel,                 EFingerRmin-RadiusSaddle, NegRmaxTotal);
+    }
+    tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel,                 NegRminExt,               NegRmaxTotal);
+    if (crack_flag>0) {
+      // endcap volume without crack scintillators
+      tileEnvPconeNegEndcap->addPlane(-NegEndGap,                    NegRminExt,               NegRmaxTotal);
+      tileEnvPconeNegEndcap->addPlane(-NegEndGap,                    NegRminGap,               NegRmaxTotal);
+      tileEnvPconeNegEndcap->addPlane(-NegBeginGap,                  NegRminGap,               NegRmaxTotal);
+      tileEnvPconeNegEndcap->addPlane(-NegBeginGap,                  NegRminITC,               NegRmaxTotal);
+    } else {
+      // endcap volume with crack scintillators
+      tileEnvPconeNegEndcap->addPlane(-NegEndCrack,                  NegRminExt,               NegRmaxTotal);
+      tileEnvPconeNegEndcap->addPlane(-NegEndCrack,                  NegRminCrack,             NegRmaxTotal);
+      tileEnvPconeNegEndcap->addPlane(-NegBeginCrack,                NegRminCrack,             NegRmaxTotal);
+      tileEnvPconeNegEndcap->addPlane(-NegBeginCrack,                NegRminITC,               NegRmaxTotal);
+    }
+    tileEnvPconeNegEndcap->addPlane(-NegBeginITC2,                   NegRminITC,               NegRmaxTotal);
+    tileEnvPconeNegEndcap->addPlane(-NegBeginITC2,                   NegRminITC1,              NegRmaxTotal);
+    tileEnvPconeNegEndcap->addPlane(-NegEndBarrelFinger,             NegRminITC1,              NegRmaxTotal);
+
+    lvTileEnvelopeNegEndcap = new GeoLogVol("TileEndcapNeg",tileEnvPconeNegEndcap,matAir);
+    pvTileEnvelopeNegEndcap = new GeoPhysVol(lvTileEnvelopeNegEndcap);
+
   }
-  tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel,                 NegRminExt,               NegRmaxTotal);
-  tileEnvPconeNegEndcap->addPlane(-NegEndCrack,                    NegRminExt,               NegRmaxTotal);
-  tileEnvPconeNegEndcap->addPlane(-NegEndCrack,                    NegRminCrack,             NegRmaxTotal);
-  tileEnvPconeNegEndcap->addPlane(-NegBeginCrack,                  NegRminCrack,             NegRmaxTotal);
-  tileEnvPconeNegEndcap->addPlane(-NegBeginCrack,                  NegRminITC,               NegRmaxTotal);
-  tileEnvPconeNegEndcap->addPlane(-NegBeginITC2,                   NegRminITC,               NegRmaxTotal);
-  tileEnvPconeNegEndcap->addPlane(-NegBeginITC2,                   NegRminITC1,              NegRmaxTotal);
-  tileEnvPconeNegEndcap->addPlane(-NegEndBarrelFinger,             NegRminITC1,              NegRmaxTotal);
 
-  lvTileEnvelopeNegEndcap = new GeoLogVol("TileEndcapNeg",tileEnvPconeNegEndcap,matAir);
-  pvTileEnvelopeNegEndcap = new GeoPhysVol(lvTileEnvelopeNegEndcap);
+  if (crack_flag==1) {
+    // Negative Crack as separate volume
+    GeoPcon* tileEnvPconeNegCrack = new GeoPcon(PhiMin[3]*Gaudi::Units::deg, PhiMax[3]*Gaudi::Units::deg);
+
+    tileEnvPconeNegCrack->addPlane(-NegEndCrack,                    NegRminCrack,            NegRmaxCrack);
+    tileEnvPconeNegCrack->addPlane(-NegBeginCrack,                  NegRminCrack,            NegRmaxCrack);
+
+    lvTileEnvelopeNegCrack = new GeoLogVol("TileCrackNeg",tileEnvPconeNegCrack,matAir);
+    pvTileEnvelopeNegCrack = new GeoPhysVol(lvTileEnvelopeNegCrack);
+  }
 
   // --------------- Configure Section Builder for the Reco geometry --------------------
-  if (!m_fullGeo) {
+  if (!m_fullGeo || barrel_flag!=0) {
     // Central barrel part
     dbManager->SetCurrentSectionByNumber(1);
 
@@ -758,7 +914,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       (*m_log) << MSG::DEBUG << " EnvCounter " << EnvCounter << " EnvType " << EnvType
                << " EnvNModules " << NumberOfMod << endmsg;
 
-    if (EnvType == 1) {
+    if (EnvType == 1 && barrel_flag < 1) {
       // nominal position of end plate
       zEndSection = ZLength[1]/2 - BFingerLength;
 
@@ -824,7 +980,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       }
     }
 
-    if (EnvType == 3) {
+    if (EnvType == 3 && eb_flag) {
 
       if (m_log->level()<=MSG::DEBUG)
         (*m_log) << MSG::DEBUG <<" EBarrelPos DZ "<<(dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2<< endmsg;
@@ -849,42 +1005,44 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                  << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
                  << endmsg;
 
-      // Envelope for finger separately
-      checking("EBarrel (+)", false, 0,
-               EFingerRmin,dbManager->GetEnvRout()*Gaudi::Units::cm,
-               AnglMin,AnglMax, EBFingerLength/2);
+      if (barrel_flag < 2) {
+        // Envelope for finger separately
+        checking("EBarrel (+)", false, 0,
+                 EFingerRmin,dbManager->GetEnvRout()*Gaudi::Units::cm,
+                 AnglMin,AnglMax, EBFingerLength/2);
 
-      GeoTubs* fingerMother = new GeoTubs(EFingerRmin,
-                                          dbManager->GetEnvRout()*Gaudi::Units::cm,
-                                          EBFingerLength/2,
-                                          AnglMin, AnglMax);
+        GeoTubs* fingerMother = new GeoTubs(EFingerRmin,
+                                            dbManager->GetEnvRout()*Gaudi::Units::cm,
+                                            EBFingerLength/2,
+                                            AnglMin, AnglMax);
 
-      GeoLogVol* lvEFingerMother = new GeoLogVol("EFinger",fingerMother,matAir);
-      pvEFingerMotherPos = new GeoPhysVol(lvEFingerMother);
+        GeoLogVol* lvEFingerMother = new GeoLogVol("EFinger",fingerMother,matAir);
+        pvEFingerMotherPos = new GeoPhysVol(lvEFingerMother);
 
-      if (m_log->level()<=MSG::DEBUG)
-        (*m_log) << MSG::DEBUG << "Positive ext.barrel finger envelope parameters: "
-                 << " length=" << EBFingerLength
-                 << " Rmin=" << EFingerRmin
-                 << " Rmax=" << (dbManager->GetEnvRout())*Gaudi::Units::cm
-                 << endmsg;
+        if (m_log->level()<=MSG::DEBUG)
+          (*m_log) << MSG::DEBUG << "Positive ext.barrel finger envelope parameters: "
+                   << " length=" << EBFingerLength
+                   << " Rmin=" << EFingerRmin
+                   << " Rmax=" << (dbManager->GetEnvRout())*Gaudi::Units::cm
+                   << endmsg;
 
-      if (dbManager->BoolSaddle()) { //Envelopes for two barrel saddle supports, positive
-        checking("ESaddle (+)", false, 0,
-                 EFingerRmin-RadiusSaddle,EFingerRmin,AnglMin,AnglMax, DzSaddleSupport/2);
+        if (dbManager->BoolSaddle()) { //Envelopes for two barrel saddle supports, positive
+          checking("ESaddle (+)", false, 0,
+                   EFingerRmin-RadiusSaddle,EFingerRmin,AnglMin,AnglMax, DzSaddleSupport/2);
 
-        GeoTubs* ESaddleMother = new GeoTubs(EFingerRmin-RadiusSaddle,
-                                             EFingerRmin,
-                                             DzSaddleSupport/2,
-                                             AnglMin, AnglMax);
+          GeoTubs* ESaddleMother = new GeoTubs(EFingerRmin-RadiusSaddle,
+                                               EFingerRmin,
+                                               DzSaddleSupport/2,
+                                               AnglMin, AnglMax);
 
-        GeoLogVol* lvESaddleMother = new GeoLogVol("ESaddlePos",ESaddleMother,matAir);
-        pvESaddleMotherPos = new GeoPhysVol(lvESaddleMother);
+          GeoLogVol* lvESaddleMother = new GeoLogVol("ESaddlePos",ESaddleMother,matAir);
+          pvESaddleMotherPos = new GeoPhysVol(lvESaddleMother);
+        }
       }
     }
 
     // Negative Ext.Barrel
-    if (EnvType == 2) {
+    if (EnvType == 2 && eb_flag) {
       if (m_log->level()<=MSG::DEBUG)
         (*m_log) << MSG::DEBUG <<" EBarrelNeg DZ "<<(dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthNeg)/2<< endmsg;
 
@@ -904,196 +1062,222 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                  << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
                  << endmsg;
 
-      // Envelope for finger separately
-      GeoTubs* fingerMother = new GeoTubs(EFingerRmin,
-                                          dbManager->GetEnvRout()*Gaudi::Units::cm,
-                                          EBFingerLengthNeg/2,
-                                          AnglMin, AnglMax);
+      if (barrel_flag < 2) {
+        // Envelope for finger separately
+        GeoTubs* fingerMother = new GeoTubs(EFingerRmin,
+                                            dbManager->GetEnvRout()*Gaudi::Units::cm,
+                                            EBFingerLengthNeg/2,
+                                            AnglMin, AnglMax);
 
-      GeoLogVol* lvEFingerMother = new GeoLogVol("EFinger",fingerMother,matAir);
-      pvEFingerMotherNeg = new GeoPhysVol(lvEFingerMother);
+        GeoLogVol* lvEFingerMother = new GeoLogVol("EFinger",fingerMother,matAir);
+        pvEFingerMotherNeg = new GeoPhysVol(lvEFingerMother);
 
-      if (m_log->level()<=MSG::DEBUG)
-        (*m_log) << MSG::DEBUG <<"Negative ext.barrel finger envelope parameters: "
-                 << " length=" << EBFingerLengthNeg
-                 << " Rmin=" << EFingerRmin
-                 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
-                 << endmsg;
+        if (m_log->level()<=MSG::DEBUG)
+          (*m_log) << MSG::DEBUG <<"Negative ext.barrel finger envelope parameters: "
+                   << " length=" << EBFingerLengthNeg
+                   << " Rmin=" << EFingerRmin
+                   << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
+                   << endmsg;
 
-      if (dbManager->BoolSaddle()) { //Envelopes for Ext. barrel saddle supports, positive
-        checking("ESaddle (-)", false, 0,
-                 EFingerRmin-RadiusSaddle,EFingerRmin,AnglMin,AnglMax, DzSaddleSupport/2);
+        if (dbManager->BoolSaddle()) { //Envelopes for Ext. barrel saddle supports, positive
+          checking("ESaddle (-)", false, 0,
+                   EFingerRmin-RadiusSaddle,EFingerRmin,AnglMin,AnglMax, DzSaddleSupport/2);
 
-        GeoTubs* ESaddleMother = new GeoTubs(EFingerRmin-RadiusSaddle,
-                                             EFingerRmin,
-                                             DzSaddleSupport/2,
-                                             AnglMin, AnglMax);
+          GeoTubs* ESaddleMother = new GeoTubs(EFingerRmin-RadiusSaddle,
+                                               EFingerRmin,
+                                               DzSaddleSupport/2,
+                                               AnglMin, AnglMax);
 
-        GeoLogVol* lvESaddleMother = new GeoLogVol("ESaddlePos",ESaddleMother,matAir);
-        pvESaddleMotherNeg = new GeoPhysVol(lvESaddleMother);
+          GeoLogVol* lvESaddleMother = new GeoLogVol("ESaddlePos",ESaddleMother,matAir);
+          pvESaddleMotherNeg = new GeoPhysVol(lvESaddleMother);
+        }
       }
     }
 
     // ITC Positive
     if (EnvType == 5) {
 
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
+      if (barrel_flag < 3) { // allow ITC
 
-      rMinITC2 = rMinC10; // dbManager->TILBrminimal();
-      rMaxITC2 = dbManager->TILBrmaximal();
-      dzITC2   = dbManager->TILBdzmodul();
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
 
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
+        rMinITC2 = rMinC10; // dbManager->TILBrminimal();
+        rMaxITC2 = dbManager->TILBrmaximal();
+        dzITC2   = dbManager->TILBdzmodul();
 
-      rMinITC1 = dbManager->TILBrminimal();
-      rMaxITC1 = dbManager->TILErmam();
-      dzITC1   = dbManager->TILBdzmodul();
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
 
-      (*m_log) << MSG::INFO << " Positive ITC envelope parameters: PLUG1 "
-               <<" Rmin= "<<rMinITC1*Gaudi::Units::cm<<" Rmax= "<<rMaxITC1*Gaudi::Units::cm<<" dzITC1= "<<dzITC1/2*Gaudi::Units::cm<< endmsg;
-      (*m_log) << MSG::INFO << "                                   PLUG2 "
-               <<" Rmin= "<<rMinITC2*Gaudi::Units::cm<<" Rmax= "<<rMaxITC2*Gaudi::Units::cm<<" dzITC2= "<<dzITC2/2*Gaudi::Units::cm<< endmsg;
+        rMinITC1 = dbManager->TILBrminimal();
+        rMaxITC1 = dbManager->TILErmam();
+        dzITC1   = dbManager->TILBdzmodul();
 
-      checking("ITC itcWheel1 (+)", false, 0,
-               rMinITC1*Gaudi::Units::cm,rMaxITC1*Gaudi::Units::cm, AnglMin,AnglMax, dzITC1/2*Gaudi::Units::cm);
+        (*m_log) << MSG::INFO << " Positive ITC envelope parameters: PLUG1 "
+                 <<" Rmin= "<<rMinITC1*Gaudi::Units::cm<<" Rmax= "<<rMaxITC1*Gaudi::Units::cm<<" dzITC1= "<<dzITC1/2*Gaudi::Units::cm<< endmsg;
+        (*m_log) << MSG::INFO << "                                   PLUG2 "
+                 <<" Rmin= "<<rMinITC2*Gaudi::Units::cm<<" Rmax= "<<rMaxITC2*Gaudi::Units::cm<<" dzITC2= "<<dzITC2/2*Gaudi::Units::cm<< endmsg;
 
-      GeoTubs* itcWheel1 = new GeoTubs(rMinITC1*Gaudi::Units::cm,
-                                       rMaxITC1*Gaudi::Units::cm,
-                                       dzITC1/2*Gaudi::Units::cm,
-                                       AnglMin, AnglMax);
+        checking("ITC itcWheel1 (+)", false, 0,
+                 rMinITC1*Gaudi::Units::cm,rMaxITC1*Gaudi::Units::cm, AnglMin,AnglMax, dzITC1/2*Gaudi::Units::cm);
 
-      checking("ITC itcWheel2 (+)", false, 0,
-               rMinITC2*Gaudi::Units::cm,rMaxITC2*Gaudi::Units::cm, AnglMin,AnglMax, dzITC2/2*Gaudi::Units::cm);
+        GeoTubs* itcWheel1 = new GeoTubs(rMinITC1*Gaudi::Units::cm,
+                                         rMaxITC1*Gaudi::Units::cm,
+                                         dzITC1/2*Gaudi::Units::cm,
+                                         AnglMin, AnglMax);
 
-      GeoTubs* itcWheel2 = new GeoTubs(rMinITC2*Gaudi::Units::cm,
-                                       rMaxITC2*Gaudi::Units::cm,
-                                       dzITC2/2*Gaudi::Units::cm,
-                                       AnglMin, AnglMax);
+        checking("ITC itcWheel2 (+)", false, 0,
+                 rMinITC2*Gaudi::Units::cm,rMaxITC2*Gaudi::Units::cm, AnglMin,AnglMax, dzITC2/2*Gaudi::Units::cm);
 
-      Z = ( dzITC1 - dzITC2)/2*Gaudi::Units::cm;
-      GeoTrf::Translate3D itcWheel2OffsetPos(0.,0., Z);
+        GeoTubs* itcWheel2 = new GeoTubs(rMinITC2*Gaudi::Units::cm,
+                                         rMaxITC2*Gaudi::Units::cm,
+                                         dzITC2/2*Gaudi::Units::cm,
+                                         AnglMin, AnglMax);
 
-      zITCStandard = Z;
+        Z = ( dzITC1 - dzITC2)/2*Gaudi::Units::cm;
+        GeoTrf::Translate3D itcWheel2OffsetPos(0.,0., Z);
 
-      const GeoShapeUnion& itcMotherPos = itcWheel1->add(*itcWheel2<<itcWheel2OffsetPos);
+        zITCStandard = Z;
 
-      GeoLogVol* lvITCMotherPos = new GeoLogVol("ITC",&itcMotherPos,matAir);
-      pvITCMotherPos = new GeoPhysVol(lvITCMotherPos);
+        const GeoShapeUnion& itcMotherPos = itcWheel1->add(*itcWheel2<<itcWheel2OffsetPos);
+
+        GeoLogVol* lvITCMotherPos = new GeoLogVol("ITC",&itcMotherPos,matAir);
+        pvITCMotherPos = new GeoPhysVol(lvITCMotherPos);
+
+      }
 
       // Gap Positive
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
+      if (barrel_flag < 4) { // allow Gap
 
-      checking("Gap (+)", false, 0,
-               dbManager->TILBrminimal()*Gaudi::Units::cm,
-               dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-               AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
 
-      GeoTubs* GapMotherPos = new GeoTubs(dbManager->TILBrminimal()*Gaudi::Units::cm,
-                                          dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-                                          dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
-                                          AnglMin, AnglMax);
+        checking("Gap (+)", false, 0,
+                 dbManager->TILBrminimal()*Gaudi::Units::cm,
+                 dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                 AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
 
-      GeoLogVol* lvGapMotherPos = new GeoLogVol("Gap",GapMotherPos,matAir);
-      pvGapMotherPos = new GeoPhysVol(lvGapMotherPos);
-
-      // Crack Positive
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
-
-      checking("Crack (+)", spE4, 0,
-               rMinE4pos*Gaudi::Units::cm,
-               dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-               AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
-
-      GeoTubs* crackMotherPos = new GeoTubs(rMinE4pos*Gaudi::Units::cm,
+        GeoTubs* GapMotherPos = new GeoTubs(dbManager->TILBrminimal()*Gaudi::Units::cm,
                                             dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
                                             dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
                                             AnglMin, AnglMax);
 
-      GeoLogVol* lvCrackMotherPos = new GeoLogVol("Crack",crackMotherPos,matAir);
-      pvCrackMotherPos = new GeoPhysVol(lvCrackMotherPos);
+        GeoLogVol* lvGapMotherPos = new GeoLogVol("Gap",GapMotherPos,matAir);
+        pvGapMotherPos = new GeoPhysVol(lvGapMotherPos);
 
+      }
+
+      // Crack Positive
+      if (crack_flag<=0 || pvTileEnvelopePosCrack) { // allow Crack
+
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
+
+        checking("Crack (+)", spE4, 0,
+                 rMinE4pos*Gaudi::Units::cm,
+                 dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                 AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
+
+        GeoTubs* crackMotherPos = new GeoTubs(rMinE4pos*Gaudi::Units::cm,
+                                              dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                                              dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
+                                              AnglMin, AnglMax);
+
+        GeoLogVol* lvCrackMotherPos = new GeoLogVol("Crack",crackMotherPos,matAir);
+        pvCrackMotherPos = new GeoPhysVol(lvCrackMotherPos);
+      }
     }
+
     // ITC Negative
     if (EnvType == 4) {
 
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
+      if (barrel_flag < 3) { // allow ITC
 
-      rMinITC2 = rMinC10; // dbManager->TILBrminimal();
-      rMaxITC2 = dbManager->TILBrmaximal();
-      dzITC2   = dbManager->TILBdzmodul();
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
 
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
+        rMinITC2 = rMinC10; // dbManager->TILBrminimal();
+        rMaxITC2 = dbManager->TILBrmaximal();
+        dzITC2   = dbManager->TILBdzmodul();
 
-      rMinITC1 = dbManager->TILBrminimal();
-      rMaxITC1 = dbManager->TILErmam();
-      dzITC1   = dbManager->TILBdzmodul();
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
 
-      (*m_log) << MSG::INFO << " Negative ITC envelope parameters: PLUG1 "
-               <<" Rmin= "<<rMinITC1*Gaudi::Units::cm<<" Rmax= "<<rMaxITC1*Gaudi::Units::cm<<" dzITC1= "<<dzITC1/2*Gaudi::Units::cm<<endmsg;
-      (*m_log) << MSG::INFO << "                                   PLUG2 "
-               <<" Rmin= "<<rMinITC2*Gaudi::Units::cm<<" Rmax= "<<rMaxITC2*Gaudi::Units::cm<<" dzITC2= "<<dzITC2/2*Gaudi::Units::cm<<endmsg;
+        rMinITC1 = dbManager->TILBrminimal();
+        rMaxITC1 = dbManager->TILErmam();
+        dzITC1   = dbManager->TILBdzmodul();
 
-      checking("ITC itcWheel1 (-)", false, 0,
-               rMinITC1*Gaudi::Units::cm,rMaxITC1*Gaudi::Units::cm, AnglMin,AnglMax, dzITC1/2*Gaudi::Units::cm);
+        (*m_log) << MSG::INFO << " Negative ITC envelope parameters: PLUG1 "
+                 <<" Rmin= "<<rMinITC1*Gaudi::Units::cm<<" Rmax= "<<rMaxITC1*Gaudi::Units::cm<<" dzITC1= "<<dzITC1/2*Gaudi::Units::cm<<endmsg;
+        (*m_log) << MSG::INFO << "                                   PLUG2 "
+                 <<" Rmin= "<<rMinITC2*Gaudi::Units::cm<<" Rmax= "<<rMaxITC2*Gaudi::Units::cm<<" dzITC2= "<<dzITC2/2*Gaudi::Units::cm<<endmsg;
 
-      GeoTubs* itcWheel1 = new GeoTubs(rMinITC1*Gaudi::Units::cm,
-                                       rMaxITC1*Gaudi::Units::cm,
-                                       dzITC1/2*Gaudi::Units::cm,
-                                       AnglMin, AnglMax);
+        checking("ITC itcWheel1 (-)", false, 0,
+                 rMinITC1*Gaudi::Units::cm,rMaxITC1*Gaudi::Units::cm, AnglMin,AnglMax, dzITC1/2*Gaudi::Units::cm);
 
-      checking("ITC itcWheel2 (-)", false, 0,
-               rMinITC2*Gaudi::Units::cm,rMaxITC2*Gaudi::Units::cm, AnglMin,AnglMax, dzITC2/2*Gaudi::Units::cm);
+        GeoTubs* itcWheel1 = new GeoTubs(rMinITC1*Gaudi::Units::cm,
+                                         rMaxITC1*Gaudi::Units::cm,
+                                         dzITC1/2*Gaudi::Units::cm,
+                                         AnglMin, AnglMax);
 
-      GeoTubs* itcWheel2 = new GeoTubs(rMinITC2*Gaudi::Units::cm,
-                                       rMaxITC2*Gaudi::Units::cm,
-                                       dzITC2/2*Gaudi::Units::cm,
-                                       AnglMin, AnglMax);
+        checking("ITC itcWheel2 (-)", false, 0,
+                 rMinITC2*Gaudi::Units::cm,rMaxITC2*Gaudi::Units::cm, AnglMin,AnglMax, dzITC2/2*Gaudi::Units::cm);
 
-      Z = (-dzITC1 + dzITC2)/2*Gaudi::Units::cm;
-      GeoTrf::Translate3D itcWheel2OffsetNeg(0.,0., Z);
+        GeoTubs* itcWheel2 = new GeoTubs(rMinITC2*Gaudi::Units::cm,
+                                         rMaxITC2*Gaudi::Units::cm,
+                                         dzITC2/2*Gaudi::Units::cm,
+                                         AnglMin, AnglMax);
 
-      zITCStandard = Z;
+        Z = (-dzITC1 + dzITC2)/2*Gaudi::Units::cm;
+        GeoTrf::Translate3D itcWheel2OffsetNeg(0.,0., Z);
 
-      const GeoShapeUnion& itcMotherNeg = itcWheel1->add(*itcWheel2<<itcWheel2OffsetNeg);
+        zITCStandard = Z;
 
-      GeoLogVol* lvITCMotherNeg = new GeoLogVol("ITC",&itcMotherNeg,matAir);
-      pvITCMotherNeg = new GeoPhysVol(lvITCMotherNeg);
+        const GeoShapeUnion& itcMotherNeg = itcWheel1->add(*itcWheel2<<itcWheel2OffsetNeg);
+
+        GeoLogVol* lvITCMotherNeg = new GeoLogVol("ITC",&itcMotherNeg,matAir);
+        pvITCMotherNeg = new GeoPhysVol(lvITCMotherNeg);
+
+      }
 
       // Gap Negative
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
+      if (barrel_flag < 4) { // allow Gap
 
-      checking("Gap (-)", false, 1,
-               dbManager->TILBrminimal()*Gaudi::Units::cm,
-               dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-               AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
 
-      GeoTubs* GapMotherNeg = new GeoTubs(dbManager->TILBrminimal()*Gaudi::Units::cm,
-                                          dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-                                          dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
-                                          AnglMin, AnglMax);
+        checking("Gap (-)", false, 1,
+                 dbManager->TILBrminimal()*Gaudi::Units::cm,
+                 dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                 AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
 
-      GeoLogVol* lvGapMotherNeg = new GeoLogVol("Gap",GapMotherNeg,matAir);
-      pvGapMotherNeg = new GeoPhysVol(lvGapMotherNeg);
-
-      // Crack Negative
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
-
-      checking("Crack (-)", spE4, 0,
-               rMinE4neg*Gaudi::Units::cm,
-               dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-               AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
-
-      GeoTubs* crackMotherNeg = new GeoTubs(rMinE4neg*Gaudi::Units::cm,
+        GeoTubs* GapMotherNeg = new GeoTubs(dbManager->TILBrminimal()*Gaudi::Units::cm,
                                             dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
                                             dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
                                             AnglMin, AnglMax);
 
-      GeoLogVol* lvCrackMotherNeg = new GeoLogVol("Crack",crackMotherNeg,matAir);
-      pvCrackMotherNeg = new GeoPhysVol(lvCrackMotherNeg);
+        GeoLogVol* lvGapMotherNeg = new GeoLogVol("Gap",GapMotherNeg,matAir);
+        pvGapMotherNeg = new GeoPhysVol(lvGapMotherNeg);
 
+      }
+
+      // Crack Negative
+      if (crack_flag<=0 || pvTileEnvelopeNegCrack) { // allow Crack
+
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
+
+        checking("Crack (-)", spE4, 0,
+                 rMinE4neg*Gaudi::Units::cm,
+                 dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                 AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
+
+        GeoTubs* crackMotherNeg = new GeoTubs(rMinE4neg*Gaudi::Units::cm,
+                                              dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                                              dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
+                                              AnglMin, AnglMax);
+
+        GeoLogVol* lvCrackMotherNeg = new GeoLogVol("Crack",crackMotherNeg,matAir);
+        pvCrackMotherNeg = new GeoPhysVol(lvCrackMotherNeg);
+      }
     }
 
-    if (m_fullGeo) {
+    if (m_fullGeo && (
+            ((EnvType&6) == 0 && barrel_flag < 1) ||
+            ((EnvType&6) == 2 && barrel_flag < 2) ||
+            ((EnvType&6) == 4 && barrel_flag < 5) )) {
 
       // ModuleNumber[NumberOfMod] array for independent of positrion numeration
       int ModuleIndex[64];
@@ -1138,7 +1322,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
         // ------------------- BARREL BLOCKS ------------------------
         //
 
-        if ( EnvType == 1 ) { // normal barrel module or module zero
+        if ( EnvType == 1 && barrel_flag < 1) { // normal barrel module or module zero
 
           dbManager->SetCurrentSectionByNumber(ModType);
 
@@ -1277,7 +1461,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
         //------------------- Extended Barrel Module Positive ----------------------------------------------------------
 
-        if (EnvType == 3) {
+        if (EnvType == 3 && barrel_flag < 2) {
 
           dbManager->SetCurrentSectionByNumber(ModType);
 
@@ -1490,7 +1674,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
         //------------------- Extended Barrel Module Negative ----------------------------------------------------------
 
-        if (EnvType == 2) {
+        if (EnvType == 2 && barrel_flag < 2) {
 
           dbManager->SetCurrentSectionByNumber(ModType);
 
@@ -1707,7 +1891,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
         //------------------- D4/C10/Gap/Crack
 
-        if ((EnvType == 4) || (EnvType == 5)) {
+        if (((EnvType == 4) || (EnvType == 5)) && barrel_flag < 5) {
 
           int Id4 = ModType%100;
           int Ic10 = (ModType/100)%100;
@@ -1760,7 +1944,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
           if (EnvType == 4) {
 
             // Common mother for ITC1/2 modules
-            if (Ifd4 || Ifc10) {
+            if ((Ifd4 || Ifc10) && pvITCMotherNeg) {
 
               //  The first sub shape
               thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
@@ -1960,7 +2144,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
               //
               Z = (dzITC1 - dzITC2)/2*Gaudi::Units::cm;
 
-              if (NbPeriod == 6 && !Ifspecialgirder && fabs(Z) < fabs(zITCStandard)) zShift = zITCStandard*(1./Gaudi::Units::cm);
+              if (NbPeriod == 6 && !Ifspecialgirder && std::abs(Z) < std::abs(zITCStandard)) zShift = zITCStandard*(1./Gaudi::Units::cm);
 
               if (m_log->level()<=MSG::DEBUG)
                 (*m_log) << MSG::DEBUG <<"  ITCModule Negative, position X= "<<X<<" Z= "<<Z
@@ -1982,7 +2166,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
             }//if (Ifd4 || Ifc10)
 
             //-------------------------- G A P Negative ---------------------------------
-            if (Ifgap) {
+            if (Ifgap && pvGapMotherNeg) {
 
               // TILE_PLUG3
               dbManager->SetCurrentSectionByNumber(Igap);
@@ -2028,7 +2212,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
             }
 
             //-------------------------- Crack Negative ---------------------------------
-            if (Ifcrack) {
+            if (Ifcrack && pvCrackMotherNeg) {
 
               // TILE_PLUG4
               dbManager->SetCurrentSectionByNumber(Icrack);
@@ -2078,7 +2262,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
           if (EnvType == 5) {
 
             // Common mother for ITC1/2 modules
-            if (Ifd4 || Ifc10) {
+            if ((Ifd4 || Ifc10) && pvITCMotherPos) {
 
               // The first sub shape
               thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
@@ -2278,7 +2462,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
               //ps          Z = (dbManager->TILBdzmodul()-dzITC2)/2*Gaudi::Units::cm;
               Z = (dzITC1 - dzITC2)/2*Gaudi::Units::cm;
 
-              if (NbPeriod == 6 && !Ifspecialgirder && fabs(Z) < fabs(zITCStandard)) zShift = zITCStandard*(1./Gaudi::Units::cm);
+              if (NbPeriod == 6 && !Ifspecialgirder && std::abs(Z) < std::abs(zITCStandard)) zShift = zITCStandard*(1./Gaudi::Units::cm);
 
               if (m_log->level()<=MSG::DEBUG)
                 (*m_log) << MSG::DEBUG <<"  ITCModule Positive, position X= "<<X<<" Z= "<<Z
@@ -2301,7 +2485,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
 
             //-------------------------- G A P Positive ---------------------------------
-            if (Ifgap) {
+            if (Ifgap && pvGapMotherPos) {
 
               // TILE_PLUG3
               dbManager->SetCurrentSectionByNumber(Igap);
@@ -2347,7 +2531,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
             }
 
             //-------------------------- Crack Positive ---------------------------------
-            if (Ifcrack) {
+            if (Ifcrack && pvCrackMotherPos) {
 
               // TILE_PLUG4
               dbManager->SetCurrentSectionByNumber(Icrack);
@@ -2412,7 +2596,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     double ztrans =0;
     dbManager->SetCurrentEnvByType(EnvType);
 
-    if (EnvType == 1) {
+    if (EnvType == 1 && barrel_flag < 1) {
 
       GeoTransform* tfBarrelMother;
 
@@ -2490,7 +2674,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     //
     //----------------------------------------- EBarrel Positive -----------------------------------------------------
 
-    if (EnvType == 3) { // positive ext.barrel is always at positive boundary, after finger
+    if (EnvType == 3 && eb_flag) { // positive ext.barrel is always at positive boundary, after finger
 
       dbManager->SetCurrentSection(TileDddbManager::TILE_EBARREL);
       double thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
@@ -2501,7 +2685,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       //--------------------------------------------------------------------------------------------------------------
       // CutA in Tile (Positive) (close center)
       if (m_fullGeo) {
-        if (dbManager->BoolCuts()) {
+        if (dbManager->BoolCuts() && barrel_flag < 2) {
 
           // Iron1, down
           volname = "Iron1"; dbManager->SetCurrentCuts(volname); //>>
@@ -2632,45 +2816,47 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       pvTileEnvelopePosEndcap->add(pvEBarrelMotherPos);
       //
 
-      //--------------------------------------------------------------------------------------------------------------
-      // Finger
-      ztrans = (PosEndExBarrel + EBFingerLengthPos/2)*(1./Gaudi::Units::cm);
+      if (barrel_flag < 2) {
 
-      GeoTransform* tfEFingerMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
-                                                          GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
+        //--------------------------------------------------------------------------------------------------------------
+        // Finger
+        ztrans = (PosEndExBarrel + EBFingerLengthPos/2)*(1./Gaudi::Units::cm);
 
-      (*m_log) << MSG::INFO <<" Positioning positive ext.barrel finger with translation ztrans= "<<ztrans*Gaudi::Units::cm<<endmsg;
-
-      GeoNameTag* ntEFingerMotherPos = new GeoNameTag("TileEFingerPos");
-
-      pvTileEnvelopePosEndcap->add(tfEFingerMotherPos);
-      pvTileEnvelopePosEndcap->add(ntEFingerMotherPos);
-      pvTileEnvelopePosEndcap->add(pvEFingerMotherPos);
-
-      //--------------------------------------------------------------------------------------------------------------
-      // Ext. Saddle Support
-      if (dbManager->BoolSaddle()) {
-        ztrans = (PosEndExBarrel + DzSaddleSupport/2)*(1./Gaudi::Units::cm);
-
-        GeoTransform* tfESaddleMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+        GeoTransform* tfEFingerMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
                                                             GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
 
-        (*m_log) << MSG::INFO <<" Positioning positive ext.barrel saddle with translation ztrans= "<<ztrans*Gaudi::Units::cm
-                 << endmsg;
+        (*m_log) << MSG::INFO <<" Positioning positive ext.barrel finger with translation ztrans= "<<ztrans*Gaudi::Units::cm<<endmsg;
 
-        GeoNameTag* ntESaddleMotherPos = new GeoNameTag("TileESaddlePos");
+        GeoNameTag* ntEFingerMotherPos = new GeoNameTag("TileEFingerPos");
 
-        pvTileEnvelopePosEndcap->add(tfESaddleMotherPos);
-        pvTileEnvelopePosEndcap->add(ntESaddleMotherPos);
-        pvTileEnvelopePosEndcap->add(pvESaddleMotherPos);
+        pvTileEnvelopePosEndcap->add(tfEFingerMotherPos);
+        pvTileEnvelopePosEndcap->add(ntEFingerMotherPos);
+        pvTileEnvelopePosEndcap->add(pvEFingerMotherPos);
+
+        //--------------------------------------------------------------------------------------------------------------
+        // Ext. Saddle Support
+        if (dbManager->BoolSaddle()) {
+          ztrans = (PosEndExBarrel + DzSaddleSupport/2)*(1./Gaudi::Units::cm);
+
+          GeoTransform* tfESaddleMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+                                                              GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
+
+          (*m_log) << MSG::INFO <<" Positioning positive ext.barrel saddle with translation ztrans= "<<ztrans*Gaudi::Units::cm
+                   << endmsg;
+
+          GeoNameTag* ntESaddleMotherPos = new GeoNameTag("TileESaddlePos");
+
+          pvTileEnvelopePosEndcap->add(tfESaddleMotherPos);
+          pvTileEnvelopePosEndcap->add(ntESaddleMotherPos);
+          pvTileEnvelopePosEndcap->add(pvESaddleMotherPos);
+        }
+
       }
-
     }
-
 
     //----------------------------------------- EBarrel Negative -----------------------------------------------------
     //
-    if (EnvType == 2) { // negative ext.barrel is always at negative boundary, after finger
+    if (EnvType == 2 && eb_flag) { // negative ext.barrel is always at negative boundary, after finger
 
       dbManager->SetCurrentSection(TileDddbManager::TILE_EBARREL);
       double thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
@@ -2681,7 +2867,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       //*>------------------------------------------------------------------------------------------------------
       // LArPart in Tile (Negative) (close center)
       if (m_fullGeo) {
-        if (dbManager->BoolCuts()) {
+        if (dbManager->BoolCuts() && barrel_flag < 2) {
           // Iron1, down
           volname = "Iron1"; dbManager->SetCurrentCuts(volname); //>>
           dxIron = dbManager->CutsXpos();
@@ -2801,37 +2987,41 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       pvTileEnvelopeNegEndcap->add(new GeoIdentifierTag(2));
       pvTileEnvelopeNegEndcap->add(pvEBarrelMotherNeg);
 
-      //*>------------------------------------------------------------------------------------------------------
-      // Finger
-      ztrans = (-NegEndExBarrel - EBFingerLengthPos/2)*(1./Gaudi::Units::cm);
+      if (barrel_flag < 2) {
 
-      GeoTransform* tfEFingerMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
-                                                          GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
+        //*>------------------------------------------------------------------------------------------------------
+        // Finger
+        ztrans = (-NegEndExBarrel - EBFingerLengthPos/2)*(1./Gaudi::Units::cm);
 
-      (*m_log) << MSG::INFO <<" Positioning negative ext.barrel finger with translation ztrans= "<<ztrans*Gaudi::Units::cm<< endmsg;
-
-      GeoNameTag* ntEFingerMotherNeg = new GeoNameTag("TileEFingerNeg");
-
-      pvTileEnvelopeNegEndcap->add(tfEFingerMotherNeg);
-      pvTileEnvelopeNegEndcap->add(ntEFingerMotherNeg);
-      pvTileEnvelopeNegEndcap->add(pvEFingerMotherNeg);
-
-      //*>------------------------------------------------------------------------------------------------------
-      // Ext. Saddle Support
-      if (dbManager->BoolSaddle()) {
-        ztrans = (-NegEndExBarrel - DzSaddleSupport/2)*(1./Gaudi::Units::cm);
-
-        GeoTransform* tfESaddleMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+        GeoTransform* tfEFingerMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
                                                             GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
 
-        (*m_log) << MSG::INFO <<" Positioning negative ext.barrel saddle with translation ztrans= "<<ztrans*Gaudi::Units::cm
-                 << endmsg;
+        (*m_log) << MSG::INFO <<" Positioning negative ext.barrel finger with translation ztrans= "<<ztrans*Gaudi::Units::cm<< endmsg;
 
-        GeoNameTag* ntESaddleMotherNeg = new GeoNameTag("TileESaddleNeg");
+        GeoNameTag* ntEFingerMotherNeg = new GeoNameTag("TileEFingerNeg");
 
-        pvTileEnvelopeNegEndcap->add(tfESaddleMotherNeg);
-        pvTileEnvelopeNegEndcap->add(ntESaddleMotherNeg);
-        pvTileEnvelopeNegEndcap->add(pvESaddleMotherNeg);
+        pvTileEnvelopeNegEndcap->add(tfEFingerMotherNeg);
+        pvTileEnvelopeNegEndcap->add(ntEFingerMotherNeg);
+        pvTileEnvelopeNegEndcap->add(pvEFingerMotherNeg);
+
+        //*>------------------------------------------------------------------------------------------------------
+        // Ext. Saddle Support
+        if (dbManager->BoolSaddle()) {
+          ztrans = (-NegEndExBarrel - DzSaddleSupport/2)*(1./Gaudi::Units::cm);
+
+          GeoTransform* tfESaddleMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+                                                              GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
+
+          (*m_log) << MSG::INFO <<" Positioning negative ext.barrel saddle with translation ztrans= "<<ztrans*Gaudi::Units::cm
+                   << endmsg;
+
+          GeoNameTag* ntESaddleMotherNeg = new GeoNameTag("TileESaddleNeg");
+
+          pvTileEnvelopeNegEndcap->add(tfESaddleMotherNeg);
+          pvTileEnvelopeNegEndcap->add(ntESaddleMotherNeg);
+          pvTileEnvelopeNegEndcap->add(pvESaddleMotherNeg);
+        }
+
       }
     }
 
@@ -2841,52 +3031,79 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
     if (EnvType == 5) { // positive ITC attached to positive ext.barrel
 
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
+      if (barrel_flag < 3) {
 
-      ztrans = PosEndBarrelFinger*(1./Gaudi::Units::cm) + dbManager->TILBdzmodul()/2;
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
 
-      //std::cout <<" ztrans "<<ztrans<<" PosEndBarrelFinger/Gaudi::Units::cm "<<PosEndBarrelFinger/Gaudi::Units::cm
-      //          <<" dbManager->TILBdzmodul()/2*Gaudi::Units::cm"<<dbManager->TILBdzmodul()/2<<"\n";
+        ztrans = PosEndBarrelFinger*(1./Gaudi::Units::cm) + dbManager->TILBdzmodul()/2;
 
-      (*m_log) << MSG::INFO <<" Positioning positive ITC with translation "<<ztrans*Gaudi::Units::cm<< endmsg;
+        //std::cout <<" ztrans "<<ztrans<<" PosEndBarrelFinger/Gaudi::Units::cm "<<PosEndBarrelFinger/Gaudi::Units::cm
+        //          <<" dbManager->TILBdzmodul()/2*Gaudi::Units::cm"<<dbManager->TILBdzmodul()/2<<"\n";
 
-      GeoTransform* tfITCMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
-                                                      GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
+        (*m_log) << MSG::INFO <<" Positioning positive ITC with translation "<<ztrans*Gaudi::Units::cm<< endmsg;
 
-      GeoNameTag* ntITCMotherPos = new GeoNameTag("ITCPos");
+        GeoTransform* tfITCMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+                                                        GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
 
-      pvTileEnvelopePosEndcap->add(tfITCMotherPos);
-      pvTileEnvelopePosEndcap->add(ntITCMotherPos);
-      pvTileEnvelopePosEndcap->add(pvITCMotherPos);
+        GeoNameTag* ntITCMotherPos = new GeoNameTag("ITCPos");
 
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
-      ztrans = PosBeginGap*(1./Gaudi::Units::cm) + dbManager->TILBdzmodul()/2;
+        pvTileEnvelopePosEndcap->add(tfITCMotherPos);
+        pvTileEnvelopePosEndcap->add(ntITCMotherPos);
+        pvTileEnvelopePosEndcap->add(pvITCMotherPos);
 
-      (*m_log) << MSG::INFO <<" Positioning positive Gap with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+      }
 
-      GeoTransform* tfGapMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
-                                                      GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+      if (barrel_flag < 4) {
 
-      GeoNameTag* ntGapMotherPos = new GeoNameTag("GapPos");
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
+        ztrans = PosBeginGap*(1./Gaudi::Units::cm) + dbManager->TILBdzmodul()/2;
 
-      pvTileEnvelopePosEndcap->add(tfGapMotherPos);
-      pvTileEnvelopePosEndcap->add(ntGapMotherPos);
-      pvTileEnvelopePosEndcap->add(pvGapMotherPos);
+        (*m_log) << MSG::INFO <<" Positioning positive Gap with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
 
-      // Crack
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
-      ztrans = PosBeginCrack*(1./Gaudi::Units::cm) + dbManager->TILBdzmodul()/2;
-
-      (*m_log) << MSG::INFO <<" Positioning positive Crack with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
-
-      GeoTransform* tfCrackMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+        GeoTransform* tfGapMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
                                                         GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
 
-      GeoNameTag* ntCrackMotherPos = new GeoNameTag("CrackPos");
+        GeoNameTag* ntGapMotherPos = new GeoNameTag("GapPos");
 
-      pvTileEnvelopePosEndcap->add(tfCrackMotherPos);
-      pvTileEnvelopePosEndcap->add(ntCrackMotherPos);
-      pvTileEnvelopePosEndcap->add(pvCrackMotherPos);
+        pvTileEnvelopePosEndcap->add(tfGapMotherPos);
+        pvTileEnvelopePosEndcap->add(ntGapMotherPos);
+        pvTileEnvelopePosEndcap->add(pvGapMotherPos);
+
+      }
+
+      // Crack
+      if (crack_flag<=0 || pvTileEnvelopePosCrack) {
+
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
+        ztrans = PosBeginCrack*(1./Gaudi::Units::cm) + dbManager->TILBdzmodul()/2;
+
+        if (crack_flag<=0) {
+          (*m_log) << MSG::INFO <<" Positioning positive Crack with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+        } else if (crack_flag==1) {
+          (*m_log) << MSG::INFO <<" Positioning positive Crack in separate mother volume with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+        } else {
+          ztrans = (m_volumePositions.size()>0) ? m_volumePositions[0] : 0.0;
+          (*m_log) << MSG::INFO <<" Positioning positive Crack in " << pvTileEnvelopePosCrack->getLogVol()->getName() << " mother volume with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+        }
+
+        GeoTransform* tfCrackMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+                                                          GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+
+        GeoNameTag* ntCrackMotherPos = new GeoNameTag("CrackPos");
+
+        if (crack_flag<=0) {
+          pvTileEnvelopePosEndcap->add(tfCrackMotherPos);
+          pvTileEnvelopePosEndcap->add(ntCrackMotherPos);
+          pvTileEnvelopePosEndcap->add(pvCrackMotherPos);
+        } else {
+          pvTileEnvelopePosCrack->add(tfCrackMotherPos);
+          pvTileEnvelopePosCrack->add(ntCrackMotherPos);
+          pvTileEnvelopePosCrack->add(pvCrackMotherPos);
+        }
+      } else {
+        (*m_log) << MSG::INFO <<" Do not create positive Crack"<<endmsg;
+      }
+
     }
 
     //
@@ -2896,48 +3113,74 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     // negative ITC attached to negative ext.barrel
     if (EnvType == 4) {
 
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
-      ztrans = -NegEndBarrelFinger*(1./Gaudi::Units::cm) - dbManager->TILBdzmodul()/2;
+      if (barrel_flag < 3) {
 
-      (*m_log) << MSG::INFO <<" Positioning negative ITC with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
+        ztrans = -NegEndBarrelFinger*(1./Gaudi::Units::cm) - dbManager->TILBdzmodul()/2;
 
-      GeoTransform* tfITCMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
-                                                      GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+        (*m_log) << MSG::INFO <<" Positioning negative ITC with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
 
-      GeoNameTag* ntITCMotherNeg = new GeoNameTag("ITCNeg");
-
-      pvTileEnvelopeNegEndcap->add(tfITCMotherNeg);
-      pvTileEnvelopeNegEndcap->add(ntITCMotherNeg);
-      pvTileEnvelopeNegEndcap->add(pvITCMotherNeg);
-
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
-      ztrans = -NegBeginGap*(1./Gaudi::Units::cm) - dbManager->TILBdzmodul()/2;
-
-      (*m_log) << MSG::INFO <<" Positioning negative Gap with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
-
-      GeoTransform* tfGapMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
-                                                      GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
-
-      GeoNameTag* ntGapMotherNeg = new GeoNameTag("GapNeg");
-
-      pvTileEnvelopeNegEndcap->add(tfGapMotherNeg);
-      pvTileEnvelopeNegEndcap->add(ntGapMotherNeg);
-      pvTileEnvelopeNegEndcap->add(pvGapMotherNeg);
-
-      // Crack
-      dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
-      ztrans = -NegBeginCrack*(1./Gaudi::Units::cm) - dbManager->TILBdzmodul()/2;
-
-      (*m_log) << MSG::INFO <<" Positioning negative Crack with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
-
-      GeoTransform* tfCrackMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+        GeoTransform* tfITCMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
                                                         GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
 
-      GeoNameTag* ntCrackMotherNeg = new GeoNameTag("CrackNeg");
+        GeoNameTag* ntITCMotherNeg = new GeoNameTag("ITCNeg");
 
-      pvTileEnvelopeNegEndcap->add(tfCrackMotherNeg);
-      pvTileEnvelopeNegEndcap->add(ntCrackMotherNeg);
-      pvTileEnvelopeNegEndcap->add(pvCrackMotherNeg);
+        pvTileEnvelopeNegEndcap->add(tfITCMotherNeg);
+        pvTileEnvelopeNegEndcap->add(ntITCMotherNeg);
+        pvTileEnvelopeNegEndcap->add(pvITCMotherNeg);
+
+      }
+
+      if (barrel_flag < 4) {
+
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
+        ztrans = -NegBeginGap*(1./Gaudi::Units::cm) - dbManager->TILBdzmodul()/2;
+
+        (*m_log) << MSG::INFO <<" Positioning negative Gap with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+
+        GeoTransform* tfGapMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+                                                        GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+
+        GeoNameTag* ntGapMotherNeg = new GeoNameTag("GapNeg");
+
+        pvTileEnvelopeNegEndcap->add(tfGapMotherNeg);
+        pvTileEnvelopeNegEndcap->add(ntGapMotherNeg);
+        pvTileEnvelopeNegEndcap->add(pvGapMotherNeg);
+
+      }
+
+      // Crack
+      if (crack_flag<=0 || pvTileEnvelopeNegCrack) {
+
+        dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
+        ztrans = -NegBeginCrack*(1./Gaudi::Units::cm) - dbManager->TILBdzmodul()/2;
+
+        if (crack_flag<=0) {
+          (*m_log) << MSG::INFO <<" Positioning negative Crack with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+        } else if (crack_flag==1) {
+          (*m_log) << MSG::INFO <<" Positioning negative Crack in separate mother volume with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+        } else {
+          ztrans = (m_volumePositions.size()>1) ? m_volumePositions[1] : (m_volumePositions.size()>0) ? m_volumePositions[0] : 0.0;
+          (*m_log) << MSG::INFO <<" Positioning positive Crack in " << pvTileEnvelopeNegCrack->getLogVol()->getName() << " mother volume with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
+        }
+
+        GeoTransform* tfCrackMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+                                                          GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+
+        GeoNameTag* ntCrackMotherNeg = new GeoNameTag("CrackNeg");
+
+        if (crack_flag<=0) {
+          pvTileEnvelopeNegEndcap->add(tfCrackMotherNeg);
+          pvTileEnvelopeNegEndcap->add(ntCrackMotherNeg);
+          pvTileEnvelopeNegEndcap->add(pvCrackMotherNeg);
+        } else {
+          pvTileEnvelopeNegCrack->add(tfCrackMotherNeg);
+          pvTileEnvelopeNegCrack->add(ntCrackMotherNeg);
+          pvTileEnvelopeNegCrack->add(pvCrackMotherNeg);
+        }
+      } else {
+        (*m_log) << MSG::INFO <<" Do not create negative Crack"<<endmsg;
+      }
 
     }
   }  // EnvCounter, end
@@ -2945,75 +3188,79 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   //
   // creating Descriptiors and CaloDetDescrElements
   //
-  (*m_log) << MSG::DEBUG << "Creating descriptors for " << dbManager->GetNumberOfEnv() << " envelopes..." << endmsg;
 
-  int nModulesInSection[6] = {0,0,0,0,0,0};
-  double zShiftInSection[6] = {0.0,0.0,0.0,0.0,0.0,0.0,};
+  if (barrel_flag<4 || (barrel_flag==4 && crack_flag<2) ) { // create descriptors only if top-level volumes were created
 
+    (*m_log) << MSG::DEBUG << "Creating descriptors for " << dbManager->GetNumberOfEnv() << " envelopes..." << endmsg;
 
-  for (int EnvCounter = 0; EnvCounter < dbManager->GetNumberOfEnv(); ++EnvCounter) { //Loop over Envelopes
-
-    dbManager->SetCurrentEnvByIndex(EnvCounter);
-    int EnvType = dbManager->GetEnvType();
-    int NumberOfMod = dbManager->GetEnvNModules();
-    double Zshift = dbManager->GetEnvZShift()*Gaudi::Units::cm;
-
-    if (m_log->level()<=MSG::DEBUG)
-      (*m_log) << MSG::DEBUG
-               << " EnvCounter is " << EnvCounter
-               << " EnvType is " << EnvType
-               << " Zshift is " << Zshift*(1./Gaudi::Units::cm) << " cm"
-               << endmsg;
-
-    // Central barrel
-    if (EnvType == 1 || EnvType == 0) {
-      nModulesInSection[0] = nModulesInSection[1] = NumberOfMod;
-      zShiftInSection[0] = zShiftInSection[1] = Zshift;
-    } else if (EnvType < 6) {
-      nModulesInSection[EnvType] = NumberOfMod;
-      zShiftInSection[EnvType] = Zshift;
-    }
-  }
-
-  const TileID* tileID = m_detectorManager->get_id();
-
-  unsigned int dete[6] = {TILE_REGION_CENTRAL,TILE_REGION_CENTRAL,TILE_REGION_EXTENDED,TILE_REGION_EXTENDED,
-                          TILE_REGION_GAP,TILE_REGION_GAP};
-  int side[6] = {0,1,0,1,0,1};
+    int nModulesInSection[6] = {0,0,0,0,0,0};
+    double zShiftInSection[6] = {0.0,0.0,0.0,0.0,0.0,0.0,};
 
 
-  (*m_log) << MSG::DEBUG << "Loop over Tile detector regions, and call computeCellDim() when needed..." << endmsg;
-  for (int ii=0; ii<6; ++ii) {
+    for (int EnvCounter = 0; EnvCounter < dbManager->GetNumberOfEnv(); ++EnvCounter) { //Loop over Envelopes
 
-    (*m_log) << MSG::DEBUG << "ii: " << ii << ", region: " << dete[ii] << endmsg;
+      dbManager->SetCurrentEnvByIndex(EnvCounter);
+      int EnvType = dbManager->GetEnvType();
+      int NumberOfMod = dbManager->GetEnvNModules();
+      double Zshift = dbManager->GetEnvZShift()*Gaudi::Units::cm;
 
-    if (ii%2 == 0) {
-      (*m_log) << MSG::DEBUG << "ii: " << ii << ", region: " << dete[ii] << " --> calling computeCellDim()..." << endmsg;
-      sectionBuilder->computeCellDim(m_detectorManager, dete[ii],
-                                     m_switches.addPlatesToCell,
-                                     zShiftInSection[ii+1], // zShiftPos
-                                     zShiftInSection[ii]);  // zShiftNeg
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG
+                 << " EnvCounter is " << EnvCounter
+                 << " EnvType is " << EnvType
+                 << " Zshift is " << Zshift*(1./Gaudi::Units::cm) << " cm"
+                 << endmsg;
+
+      // Central barrel
+      if (EnvType == 1 || EnvType == 0) {
+        nModulesInSection[0] = nModulesInSection[1] = NumberOfMod;
+        zShiftInSection[0] = zShiftInSection[1] = Zshift;
+      } else if (EnvType < 6) {
+        nModulesInSection[EnvType] = NumberOfMod;
+        zShiftInSection[EnvType] = Zshift;
+      }
     }
 
-    (*m_log) << MSG::DEBUG << "calling fillDescriptor()..." << endmsg;
-    TileDetDescriptor* descriptor = new TileDetDescriptor();
-    sectionBuilder->fillDescriptor(descriptor, dete[ii], side[ii],
-                                   m_switches.testBeam,        // set to false - ATLAS geometry
-                                   m_switches.addPlatesToCell, // add front/end plates to cell volume
-                                   nModulesInSection[ii],   // 0-64 modules
-                                   zShiftInSection[ii]);    // Z-shift
+    const TileID* tileID = m_detectorManager->get_id();
 
-    (*m_log) << MSG::DEBUG << "Get an Identifier for the region and add it to the detectorManager..." << endmsg;
-    Identifier idRegion = tileID->region_id(ii);
-    descriptor->set(idRegion);
-    m_detectorManager->add(descriptor);
-    m_detectorManager->add(new TileDetDescrRegion(idRegion, descriptor));
+    unsigned int dete[6] = {TILE_REGION_CENTRAL,TILE_REGION_CENTRAL,TILE_REGION_EXTENDED,TILE_REGION_EXTENDED,
+                            TILE_REGION_GAP,TILE_REGION_GAP};
+    int side[6] = {0,1,0,1,0,1};
+
+
+    (*m_log) << MSG::DEBUG << "Loop over Tile detector regions, and call computeCellDim() when needed..." << endmsg;
+    for (int ii=0; ii<6; ++ii) {
+
+      (*m_log) << MSG::DEBUG << "ii: " << ii << ", region: " << dete[ii] << endmsg;
+
+      if (ii%2 == 0) {
+        (*m_log) << MSG::DEBUG << "ii: " << ii << ", region: " << dete[ii] << " --> calling computeCellDim()..." << endmsg;
+        sectionBuilder->computeCellDim(m_detectorManager, dete[ii],
+                                       m_switches.addPlatesToCell,
+                                       zShiftInSection[ii+1], // zShiftPos
+                                       zShiftInSection[ii]);  // zShiftNeg
+      }
+
+      (*m_log) << MSG::DEBUG << "calling fillDescriptor()..." << endmsg;
+      TileDetDescriptor* descriptor = new TileDetDescriptor();
+      sectionBuilder->fillDescriptor(descriptor, dete[ii], side[ii],
+                                     m_switches.testBeam,        // set to false - ATLAS geometry
+                                     m_switches.addPlatesToCell, // add front/end plates to cell volume
+                                     nModulesInSection[ii],   // 0-64 modules
+                                     zShiftInSection[ii]);    // Z-shift
+
+      (*m_log) << MSG::DEBUG << "Get an Identifier for the region and add it to the detectorManager..." << endmsg;
+      Identifier idRegion = tileID->region_id(ii);
+      descriptor->set(idRegion);
+      m_detectorManager->add(descriptor);
+      m_detectorManager->add(new TileDetDescrRegion(idRegion, descriptor));
+    }
   }
 
   // --------- ----------- --------- -------- ------ --------- ------- ----------
   GeoNameTag *nTag = new GeoNameTag("Tile");
 
-  if (BAR) {
+  if (BAR && barrel_flag<1) {
     world->add(nTag);
 
     // Top transform for the Central barrel
@@ -3034,7 +3281,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     m_detectorManager->addTreeTop(pvTileEnvelopeBarrel);
   }
 
-  if (EBA) {
+  if (EBA && eb_flag) {
     world->add(nTag);
 
     // Top transform for the Positive endcap
@@ -3055,7 +3302,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     m_detectorManager->addTreeTop(pvTileEnvelopePosEndcap);
   }
 
-  if (EBC) {
+  if (EBC && eb_flag) {
     world->add(nTag);
 
     // Top transform for the Negative endcap
@@ -3074,6 +3321,58 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     world->add(negEcTT);
     world->add(pvTileEnvelopeNegEndcap);
     m_detectorManager->addTreeTop(pvTileEnvelopeNegEndcap);
+
+  }
+
+  if (crack_flag==1) {
+
+    // repeating the same for crack in EBA
+    if (EBA && pvTileEnvelopePosCrack) {
+      //GeoNameTag *nTag = new GeoNameTag("TileCrackEBA");
+      world->add(nTag);
+
+      // Top transform for the Positive crack
+      dbManager->SetCurrentEnvByType(5);
+      GeoTrf::Transform3D mz = GeoTrf::RotateZ3D(dbManager->GetEnvDPhi());
+      GeoTrf::Transform3D my = GeoTrf::RotateY3D(dbManager->GetEnvDTheta());
+      GeoTrf::Transform3D mx = GeoTrf::RotateZ3D(dbManager->GetEnvDPsi());
+      GeoTrf::Transform3D vpos = GeoTrf::Translate3D(dbManager->GetEnvDX()*Gaudi::Units::cm,dbManager->GetEnvDY()*Gaudi::Units::cm,dbManager->GetEnvDZ()*Gaudi::Units::cm);
+      GeoTransform*  posCrackTT = new GeoTransform(GeoTrf::Transform3D(vpos*(mx*(my*(mz)))));
+
+      (*m_log) << MSG::INFO << " Global positioning of positive Crack with rotation ("
+               << dbManager->GetEnvDPhi() << "," << dbManager->GetEnvDTheta() << "," << dbManager->GetEnvDPsi() << ")"
+               << ") and translation (" << dbManager->GetEnvDX() << "," << dbManager->GetEnvDY() << "," << dbManager->GetEnvDZ()
+               << ") Gaudi::Units::cm" << endmsg;
+
+      world->add(posCrackTT);
+      world->add(pvTileEnvelopePosCrack);
+      m_detectorManager->addTreeTop(pvTileEnvelopePosCrack);
+
+    }
+
+    // repeating the same for crack in EBC
+    if (EBC && pvTileEnvelopeNegCrack) {
+      //GeoNameTag *nTag = new GeoNameTag("TileCrackEBC");
+      world->add(nTag);
+
+      // Top transform for the Negative endcap
+      dbManager->SetCurrentEnvByType(4);
+      GeoTrf::Transform3D mz = GeoTrf::RotateZ3D(dbManager->GetEnvDPhi());
+      GeoTrf::Transform3D my = GeoTrf::RotateY3D(dbManager->GetEnvDTheta());
+      GeoTrf::Transform3D mx = GeoTrf::RotateZ3D(dbManager->GetEnvDPsi());
+      GeoTrf::Transform3D vpos = GeoTrf::Translate3D(dbManager->GetEnvDX()*Gaudi::Units::cm,dbManager->GetEnvDY()*Gaudi::Units::cm,dbManager->GetEnvDZ()*Gaudi::Units::cm);
+      GeoTransform* negCrackTT = new GeoTransform(GeoTrf::Transform3D(vpos*(mx*(my*(mz)))));
+
+      (*m_log) << MSG::INFO << " Global positioning of negative Crack with rotation ("
+               << dbManager->GetEnvDPhi() << "," << dbManager->GetEnvDTheta() << "," << dbManager->GetEnvDPsi() << ")"
+               << ") and translation (" << dbManager->GetEnvDX() << "," << dbManager->GetEnvDY() << "," << dbManager->GetEnvDZ()
+               << ") Gaudi::Units::cm" << endmsg;
+
+      world->add(negCrackTT);
+      world->add(pvTileEnvelopeNegCrack);
+      m_detectorManager->addTreeTop(pvTileEnvelopeNegCrack);
+    }
+
   }
 
   delete sectionBuilder;

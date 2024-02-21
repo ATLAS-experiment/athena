@@ -280,9 +280,13 @@ G4bool TileGeoG4SDCalc::FindTileScinSection(const G4Step* aStep, TileHitData& hi
   static const char * const cenBarrelVolumeString = "CentralBarrel";
   static const char * const endcapPosVolumeString = "EndcapPos";
   static const char * const endcapNegVolumeString = "EndcapNeg";
+  static const char * const tileCrackVolumeString = "Crack";
   if (nameLogiVol.find(cenBarrelVolumeString) != G4String::npos ||
       nameLogiVol.find(endcapPosVolumeString) != G4String::npos ||
-      nameLogiVol.find(endcapNegVolumeString) != G4String::npos ) {
+      nameLogiVol.find(endcapNegVolumeString) != G4String::npos ||
+      (nameLogiVol.find(tileCrackVolumeString) != G4String::npos &&
+       nameLogiVol  !=  tileCrackVolumeString) ) {
+
     level--;
   }
 

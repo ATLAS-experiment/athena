@@ -55,6 +55,7 @@ TileDetectorTool::TileDetectorTool(const std::string& type,
   declareProperty("PVT",m_switches.pvt);
   declareProperty("Steel",m_switches.steel);
   declareProperty("CsTube",m_switches.csTube);
+  declareProperty("CrackOption",m_switches.crackOption);
 }
 
 
@@ -170,7 +171,9 @@ StatusCode TileDetectorTool::create()
         }();
 
       } else if (m_useNewFactory) {
-        TileAtlasFactory theTileFactory(detStore().operator->(),m_manager,m_switches,&log,m_geometryConfig=="FULL");
+        std::vector<GeoPhysVol *> volumePtrs;
+        std::vector<double> volumePositions;
+        TileAtlasFactory theTileFactory(detStore().operator->(),m_manager,m_switches,m_volumes,volumePtrs,volumePositions,&log,m_geometryConfig=="FULL");
         theTileFactory.create(world);
 
       } else {

@@ -20,6 +20,7 @@
 
 class MsgStream;
 class StoreGateSvc;
+class GeoPhysVol;
 
 
 class TileAtlasFactory : public GeoVDetectorFactory
@@ -28,7 +29,15 @@ class TileAtlasFactory : public GeoVDetectorFactory
 
   /** Constructor */
   TileAtlasFactory(StoreGateSvc *pDetStore, TileDetDescrManager *manager,
-                   const TileSwitches & switches, MsgStream *log, bool fullGeo);
+                   const TileSwitches & switches,
+                   MsgStream *log, bool fullGeo);
+
+  TileAtlasFactory(StoreGateSvc *pDetStore, TileDetDescrManager *manager,
+                   const TileSwitches & switches,
+                   const std::vector<std::string> & volumeNames,
+                   std::vector<GeoPhysVol *> & volumePtrs,
+                   const std::vector<double> & volumePositions,
+                   MsgStream *log, bool fullGeo);
 
   /** Destructor */
   ~TileAtlasFactory();
@@ -61,6 +70,11 @@ class TileAtlasFactory : public GeoVDetectorFactory
 
   /** all switches */
   TileSwitches m_switches;
+
+  /** all additional variables which passed to constructor */
+  std::vector<std::string> m_volumeNames;
+  std::vector<GeoPhysVol *> m_volumePtrs;
+  std::vector<double> m_volumePositions;
 
   /** Flag for activation verbose level for debugging */
   bool                       m_verbose;
