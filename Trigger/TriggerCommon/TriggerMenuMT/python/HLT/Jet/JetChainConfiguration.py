@@ -65,7 +65,7 @@ class JetChainConfiguration(ChainConfigurationBase):
                 # Need to ensure a few conditions to ensure there is no selection bias:
                 # No preselection, no special hypo
                 # Only one chainPart is permitted
-                verify_null_str = [ p[k]!='' for k in ['jvt','momCuts','timing','bsel','bTag']]
+                verify_null_str = [ p[k]!='' for k in ['jvt','momCuts','timing','bsel','bTag', 'tausel']]
                 verify_null_list = [ p[k]!=[] for k in ['prefilters','exotHypo'] ]
                 if (
                     p['trkpresel']!='nopresel' or p['hypoScenario']!='simple'
@@ -159,10 +159,11 @@ class JetChainConfiguration(ChainConfigurationBase):
             else:
                 clustersKey, preselJetDef, jetPreselStep = self.getJetCaloPreselChainStep(flags)
                 chainSteps.append( jetPreselStep )
-                if re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)|.*Z', self.trkpresel):
+                if re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)|.*Z|.*gntau', self.trkpresel):
                     roitrkPreselStep = self.getJetRoITrackJetTagPreselChainStep(flags, preselJetDef.fullname())
                 else:
                     roitrkPreselStep=self.getEmptyStep(2, 'RoIFTFEmptyStep')
+
             chainSteps.append(roitrkPreselStep)
             jetCollectionName, jetDef, jetFSTrackingHypoStep = self.getJetFSTrackingHypoChainStep(flags, clustersKey)
             chainSteps.append( jetFSTrackingHypoStep )
@@ -262,8 +263,7 @@ class JetChainConfiguration(ChainConfigurationBase):
     def getJetRoITrackJetTagPreselChainStep(self, flags, jetsInKey):
 
         #Find if a a4 or a10 calo jet needs to be used in the pre-selection from the last chain dict
-        assert 'recoAlg' in self.trkpresel_parsed_reco.keys(
-        ), "Impossible to find \'recoAlg\' key in last chain dictionary for preselection"
+        assert 'recoAlg' in self.trkpresel_parsed_reco.keys(), "Impossible to find \'recoAlg\' key in last chain dictionary for preselection"
         #Want to match now only a4 and a10 in the original reco algorithm. We don't want to use a10sd or a10t in the preselection
         matched_reco = re.match(
             r'^a\d?\d?', self.trkpresel_parsed_reco['recoAlg'])

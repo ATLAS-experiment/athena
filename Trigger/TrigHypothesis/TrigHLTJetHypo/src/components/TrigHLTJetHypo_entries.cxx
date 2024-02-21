@@ -25,6 +25,7 @@
 #include "../TrigJetConditionConfig_jvt.h"
 #include "../TrigJetConditionConfig_clean.h"
 #include "../TrigJetConditionConfig_bdips.h"
+#include "../TrigJetConditionConfig_gntau.h"
 #include "../TrigJetConditionConfig_acceptAll.h"
 #include "../TrigJetConditionConfig_moment.h"
 #include "../TrigJetConditionConfig_repeated.h"
@@ -66,6 +67,7 @@ DECLARE_COMPONENT(TrigJetConditionConfig_timing)
 DECLARE_COMPONENT(TrigJetConditionConfig_timesig)
 DECLARE_COMPONENT(TrigJetConditionConfig_clean)
 DECLARE_COMPONENT(TrigJetConditionConfig_bdips)
+DECLARE_COMPONENT(TrigJetConditionConfig_gntau)
 DECLARE_COMPONENT(TrigJetConditionConfig_acceptAll)
 DECLARE_COMPONENT(TrigJetConditionConfig_moment)
 DECLARE_COMPONENT(TrigJetConditionConfig_repeated)

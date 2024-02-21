@@ -35,6 +35,7 @@ class ConditionDefaults:
             'smc': {'min': '0', 'max': 'inf'},
             'jvt': {'min': '0', 'max': 'inf'},
             'bsel': {'min': '-inf', 'max': 'inf'},
+            'tausel': {'min': '-inf', 'max': 'inf'},
             'clrsel': {'min': '-inf', 'max': 'inf'},
             'momCuts': {'min': '-inf', 'max': 'inf'},
             'timing': {'min': '0', 'max': 'inf'},
