@@ -112,12 +112,20 @@ void  PixelClusterContainerCnv_p3::persToTrans(const InDet::PixelClusterContaine
 
     const InDetDD::SiDetectorElementCollection* elements(nullptr);
     if (m_useDetectorElement) {
-        SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey);
-        elements = *pixelDetEleHandle;
-        if (not pixelDetEleHandle.isValid() or elements==nullptr) {
-            log << MSG::FATAL << m_pixelDetEleCollKey.fullKey() << " is not available." << endmsg;
-            return;
-        }
+    try {
+        SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle1(m_pixelDetEleCollKey);
+        elements = pixelDetEleHandle1.cptr();
+    } catch (const SG::ExcNoCondCont& e) {
+          log << MSG::DEBUG << m_pixelDetEleCollKey << " is not available - probably RUN4, trying "<<m_pixelITkEleCollKey<<" instead."<< endmsg;
+    // If the first key fails, try the second key
+       try {
+             SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle2(m_pixelITkEleCollKey);
+             elements = pixelDetEleHandle2.cptr();
+         } catch (const SG::ExcNoCondCont& e) {
+             log << MSG::FATAL << "No valid Pixel detector element collection keys available." << endmsg;
+             return;
+       	   }
+       }
     }
 
     InDet::PixelClusterCollection* coll = nullptr;
@@ -228,7 +236,7 @@ StatusCode PixelClusterContainerCnv_p3::initialize(MsgStream &log) {
    //   }
 
    CHECK(m_pixelDetEleCollKey.initialize(m_useDetectorElement));
-
+   CHECK(m_pixelITkEleCollKey.initialize(m_useDetectorElement));
    //    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Converter initialized." << endmsg;
    return StatusCode::SUCCESS;
 }

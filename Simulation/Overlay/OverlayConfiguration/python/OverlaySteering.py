@@ -117,12 +117,18 @@ def OverlayMainContentCfg(configFlags):
         #need this to ensure that the ElementLinks to the PRDs are handled correctly (since the name is hardcoded in the converters)
         from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
         acc.merge(TrkEventCnvSuperToolCfg(configFlags))
-        from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyTrackCollectionsCfg,CopyPixelClusterContainerCfg, CopySCT_ClusterContainerCfg,\
+        if configFlags.Detector.GeometryITk:
+           from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyITkTrackCollectionsCfg, CopyITkPixelClusterContainerCfg, CopyITkStripClusterContainerCfg
+           acc.merge(CopyITkTrackCollectionsCfg(configFlags))
+           acc.merge(CopyITkPixelClusterContainerCfg(configFlags))
+           acc.merge(CopyITkStripClusterContainerCfg(configFlags))
+        else:
+           from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyTrackCollectionsCfg,CopyPixelClusterContainerCfg, CopySCT_ClusterContainerCfg,\
             CopyTRT_DriftCircleContainerCfg
-        acc.merge(CopyTrackCollectionsCfg(configFlags))
-        acc.merge(CopyPixelClusterContainerCfg(configFlags))
-        acc.merge(CopySCT_ClusterContainerCfg(configFlags))
-        acc.merge(CopyTRT_DriftCircleContainerCfg(configFlags))
+           acc.merge(CopyTrackCollectionsCfg(configFlags))
+           acc.merge(CopyPixelClusterContainerCfg(configFlags))
+           acc.merge(CopySCT_ClusterContainerCfg(configFlags))
+           acc.merge(CopyTRT_DriftCircleContainerCfg(configFlags))
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
