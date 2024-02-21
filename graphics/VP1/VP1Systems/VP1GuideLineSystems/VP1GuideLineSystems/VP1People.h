@@ -19,6 +19,7 @@
 
 #include "VP1Base/VP1HelperClassBase.h"
 #include <QObject>
+#include <Inventor/SbColor4f.h>
 
 class SoMaterial;
 class SoSeparator;
@@ -38,6 +39,7 @@ public Q_SLOTS:
   void setShown(bool);//will attach/detach itself from attachsep depending on this
   void setZPos(const double&);
   void setVerticalPosition(const double&);
+  void setColourAndTransp(const SbColor4f&);
 
 private:
   class Imp;
