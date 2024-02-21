@@ -508,9 +508,9 @@ namespace top {
 		std::string off1WP = off1Off2BtagWP.first.first + "_" + off1Off2BtagWP.first.second;
 		if ( tagWP == off1WP ) {
 		  std::string tag2WP = off1Off2BtagWP.second.first + "_" + off1Off2BtagWP.second.second;
-		  for (auto off2lOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+		  for (auto offl2OnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
 		    // check if this off2 WP has a triplet (offl_onl_cond)
-		    std::string off2WP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+		    std::string off2WP = offl2OnlCondBtagWP.first.first + "_" + offl2OnlCondBtagWP.first.second; 
 		    if(tag2WP == off2WP) {
 		      m_weight_bTagSF_off1_off2_onl[tagWP] = 0.;
 		      systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl[tagWP], "weight_bTagSF_off1_off2_onl_" + shortBtagWP(tagWP));
@@ -1093,9 +1093,9 @@ namespace top {
 		  std::string off1WP = off1Off2BtagWP.first.first + "_" + off1Off2BtagWP.first.second;
 		  if ( tagWP == off1WP ) {
 		    std::string tag2WP = off1Off2BtagWP.second.first + "_" + off1Off2BtagWP.second.second;
-		    for (auto off2lOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+		    for (auto offl2OnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
 		      // check if this off2 WP has a triplet (offl_onl_cond)
-		      std::string off2WP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+		      std::string off2WP = offl2OnlCondBtagWP.first.first + "_" + offl2OnlCondBtagWP.first.second; 
 		      if(tag2WP == off2WP) {
 			// up
 			systematicTree->makeOutputVariable(m_weight_bTagSF_off1_off2_onl_eigen_B_up[tagWP],
@@ -2285,9 +2285,9 @@ namespace top {
 	      std::string off1WP = off1Off2BtagWP.first.first + "_" + off1Off2BtagWP.first.second;
 	      if ( tagWP == off1WP ) {
 		std::string tag2WP = off1Off2BtagWP.second.first + "_" + off1Off2BtagWP.second.second;
-		for (auto off2lOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+		for (auto offl2OnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
 		  // check if this off2 WP has a triplet (offl_onl_cond)
-		  std::string off2WP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+		  std::string off2WP = offl2OnlCondBtagWP.first.first + "_" + offl2OnlCondBtagWP.first.second; 
 		  if(tag2WP == off2WP) {
 		    m_weight_bTagSF_off1_off2_onl[tagWP] = m_sfRetriever->btagSF_off1_off2_onl(event, top::topSFSyst::nominal, tagWP, tag2WP);
 		  }
@@ -2575,9 +2575,9 @@ namespace top {
 		std::string off1WP = off1Off2BtagWP.first.first + "_" + off1Off2BtagWP.first.second;
 		if ( tagWP == off1WP ) {
 		  std::string tag2WP = off1Off2BtagWP.second.first + "_" + off1Off2BtagWP.second.second;
-		  for (auto off2lOnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
+		  for (auto offl2OnlCondBtagWP : m_config->bTagWP_offl_onl_cond()) {
 		    // check if this off2 WP has a triplet (offl_onl_cond)
-		    std::string off2WP = offlOnlCondBtagWP.first.first + "_" + offlOnlCondBtagWP.first.second; 
+		    std::string off2WP = offl2OnlCondBtagWP.first.first + "_" + offl2OnlCondBtagWP.first.second; 
 		    if(tag2WP == off2WP) {
 		      m_sfRetriever->btagSF_off1_off2_onl_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_B,
 								 m_weight_bTagSF_off1_off2_onl_eigen_B_up[tagWP],
