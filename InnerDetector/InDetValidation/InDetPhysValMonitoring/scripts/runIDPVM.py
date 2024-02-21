@@ -107,6 +107,11 @@ acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
 
+# Schedule ACTS data pool if requested
+if flags.PhysVal.IDPVM.doActs:
+    from ActsConfig.ActsCollectionsConfig import ActsPoolReadCfg
+    acc.merge(ActsPoolReadCfg(flags))
+
 if flags.PhysVal.IDPVM.doPRW:    
     acc.addService(CompFactory.CP.SystematicsSvc("SystematicsSvc"))
     from AsgAnalysisAlgorithms.PileupReweightingAlgConfig import PileupReweightingAlgCfg

@@ -57,12 +57,14 @@ namespace ActsTrk {
 	  [[maybe_unused]] const auto idHash = el->identifierHash();
 	}
       } else if (sp->isAvailable< std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > >("measurementLink")) {
-	// For now this is still allowed. Once we have a Space Point reader algorithm, thi will imply an error instead
-	static const SG::AuxElement::Accessor< std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > > accCluster("measurementLink");
-	const auto& els = accCluster(*sp);
-	for (const auto& el : els) {
-          [[maybe_unused]] const auto idHash = (*el)->identifierHash();
-        }
+	// if we are here, that means the bare pointers are not available
+	// This should not happen
+	ATH_MSG_ERROR("Space point has Element links but not bare pointers to cluster. This should not happen!");
+	return StatusCode::FAILURE;
+      } else {
+	// This should never happen
+	ATH_MSG_ERROR("There are no decorations that link the space point to the original clusters");
+	return StatusCode::FAILURE;
       }
     }
 

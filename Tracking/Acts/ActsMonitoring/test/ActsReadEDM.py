@@ -27,6 +27,9 @@ if __name__ == "__main__":
     
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(flags))
+
+    from ActsConfig.ActsCollectionsConfig import ActsPoolReadCfg
+    acc.merge(ActsPoolReadCfg(flags))
     
     if flags.readClusters:
         if flags.Detector.EnableITkPixel:
