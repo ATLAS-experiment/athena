@@ -111,7 +111,7 @@ namespace Simulation
     // update with the tilt
     *vertexSmearing = transform * HepGeom::Point3D<double>(*vertexSmearing);
 
-    float vertexT = m_timeSmearing ? CLHEP::RandGaussZiggurat::shoot(randomEngine)*m_timeWidth : 0.;
+    float vertexT = m_timeSmearing ? CLHEP::RandGaussZiggurat::shoot(randomEngine)*m_timeWidth*Gaudi::Units::c_light : 0.;
     vertexSmearing->setT(vertexT);
 
     // and return it
