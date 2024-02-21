@@ -7,16 +7,12 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import (NoHypoToolCreated,
                                                              isHypoBase,
                                                              isInputMakerBase)
 from AthenaCommon.CFElements import parOR, seqAND, compName, getProp, hasProp, findAlgorithmByPredicate
-from AthenaCommon.Configurable import Configurable, ConfigurableCABehavior
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 import GaudiConfig2
 from TrigCompositeUtils.TrigCompositeUtils import legName
-from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu 
 
 from collections.abc import MutableSequence
 import inspect
@@ -177,17 +173,10 @@ class HypoAlgNode(AlgNode):
             if isinstance(result, ComponentAccumulator):
                 tool = result.popPrivateTools()
                 assert not isinstance(tool, list), "Can not handle list of tools"
-                if not isCAMenu():
-                    # do not do this in CA, use unconverted tool
-                    tool = conf2toConfigurable(tool)
-                    self.Alg.HypoTools = self.Alg.HypoTools + [tool]  # see ATEAM-773
-                else:
-                    self.Alg.HypoTools.append(tool)
+                self.Alg.HypoTools.append(tool)
                 return result
             else:
                 self.Alg.HypoTools = self.Alg.HypoTools + [result]  # see ATEAM-773
-            if isCAMenu():
-                assert isinstance(self.Alg.HypoTools[-1], GaudiConfig2._configurables.Configurable), "The Hypo Tool for {} is not Configurable2".format(hypoToolConf.chainDict['chainName'])
 
         except NoHypoToolCreated as e:
             log.debug("%s returned empty tool: %s", hypoToolConf.name, e)
@@ -226,15 +215,13 @@ class ComboMaker(AlgNode):
         self.prop2 = "LegToInputCollectionMap"
         self.comboHypoCfg = comboHypoCfg        
         self.acc = self.create( name )        
-        if isComponentAccumulatorCfg(): 
-            thealgs= self.acc.getEventAlgos()
-            if thealgs is None:
-                log.error("ComboMaker: Combo alg %s not found", name)
-            if len(thealgs) != 1: 
-                log.error("ComboMaker: Combo alg %s len is %d",name, len(thealgs))
-            Alg=thealgs[0]
-        else:
-            Alg=self.acc
+        thealgs= self.acc.getEventAlgos()
+        if thealgs is None:
+            log.error("ComboMaker: Combo alg %s not found", name)
+        if len(thealgs) != 1:
+            log.error("ComboMaker: Combo alg %s len is %d",name, len(thealgs))
+        Alg=thealgs[0]
+
         log.debug("ComboMaker init: Alg %s", name)
         AlgNode.__init__(self,  Alg, 'HypoInputDecisions', 'HypoOutputDecisions')
         self.resetInput()
@@ -319,11 +306,8 @@ class ComboMaker(AlgNode):
 
 
 def getEmptyMenuSequence(name):
-    # to clean up
-    if isCAMenu():
-        return EmptyMenuSequenceCA(name)
-    else:
-        return EmptyMenuSequence(name)
+    return EmptyMenuSequenceCA(name)
+
              
 class EmptyMenuSequence(object):
     """ Class to emulate reco sequences with no Hypo"""
@@ -1110,125 +1094,3 @@ class SelectionCA(ComponentAccumulator):
 
     def topSequence(self):
         return self.stepViewSequence
-
-# mainline/rec-ex-common and CA based JO compatibility layer (basically converters)
-def algorithmCAToGlobalWrapper(gen, flags, *args, **kwargs):
-    """ Merges CA with athena for all components except the algorithms. Those are converted to Run2 objects and returned.
-        If CA contains more than one algorithm, a list is returned, else a single algorithm is returned.
-    """
-    with ConfigurableCABehavior():
-        ca = gen(flags, *args, **kwargs)
-        assert isinstance(ca, ComponentAccumulator), "Function provided does not generate ComponentAccumulator"
-    return extractAlgorithmsAndAppendCA(ca)
-
-def extractAlgorithmsAndAppendCA(ca: ComponentAccumulator) -> list[Configurable]:
-    """Extract and return the algorithms from a component accumulator
-       By default, extracts all event algorithms as a flat list.
-       If the CA declares a primary component, returns only this, to handle
-       nested sequences properly and avoid duplicating algorithms.
-    """
-    algorithms = []
-    try:
-        primary = ca.getPrimary()
-        assert primary.__component_type__ == 'Algorithm'
-        algorithms = [primary]
-    except ConfigurationError:
-        algorithms = ca.getEventAlgos()
-    ca._algorithms.clear()
-    ca._allSequences.clear()
-    # Special handling for SGInputLoader, which needs to be in
-    # the TopAlg only, and not in any other sequences
-    # If present, we do not return SGInputLoader with the other
-    # algs, so the list can directly be added to whichever
-    # sequence without any further sanitisation.
-    # We then explicitly merge the SGInputLoader with the
-    # global instance, to make sure the config is complete
-    sgil = None
-    for alg in algorithms:
-        if compName(alg) == "SGInputLoader":
-            sgil = alg
-    if sgil is not None:
-        algorithms.remove(sgil)
-        conf2toConfigurable(sgil)
-    appendCAtoAthena(ca)
-    return list(map(conf2toConfigurable, algorithms))
-
-
-def menuSequenceCAToGlobalWrapper(gen, flags, *args, **kwargs):
-    """
-    Generates & converts MenuSequenceCA into the MenuSequence, in addition appending aux stuff to global configuration
-    """
-    with ConfigurableCABehavior():
-        msca = gen(flags, *args, **kwargs)
-        assert isinstance(msca, MenuSequenceCA), "Function provided to menuSequenceCAToGlobalWrapper does not generate MenuSequenceCA"
-    return appendMenuSequenceCAToAthena(msca, flags)
-
-def appendMenuSequenceCAToAthena(msca, flags):
-    """
-    Converts MenuSequenceCA into the MenuSequence, in addition appending aux stuff to global configuration.
-    For use when MSCA generator function returns a tuple instead of bare MSCA
-    """
-    from AthenaCommon.AlgSequence import AthSequencer
-    from AthenaCommon.CFElements import compName, isSequence
-    hypo = conf2toConfigurable(msca.hypo.Alg)
-    maker = conf2toConfigurable(msca.maker.Alg)
-
-    def _convertSeq(s):
-        sname = compName(s)
-        # Create fresh if not existing, else retrieve the configured one
-        old = AthSequencer(sname)
-
-        # We only need to handle these and the members?
-        props_that_matter = ['ModeOR','Sequential','StopOverride']
-
-        # Compare properties one by one
-        # Return False if any of the properties above or the member list disagrees
-        # If all agree, we can simply return old
-        # Otherwise assume we have to do the conversion
-        # This does not verify the member configuration, assume the recursion into
-        # subsequences and other checks suffice
-        def seq_properties_agree(s,old):
-            for propname in props_that_matter:
-                if not hasattr(old,propname) or getattr(old,propname) != getattr(s,propname):
-                    return False
-            # Collect the list of member name/types
-            # Skip the hypo
-            s_members = [m.getFullJobOptName() for m in s.Members if m != msca.hypo.Alg]
-            old_members = [m.getFullName() for m in old.getChildren()]
-            return s_members == old_members
-
-        if seq_properties_agree(s,old):
-            return old
-
-        # From here we configure the legacy sequence assuming it was never defined previously
-        # If we missed anything in the preceding checks, this should clash with the locked sequence
-        old.ModeOR = s.ModeOR
-        old.Sequential = s.Sequential
-        old.StopOverride = s.StopOverride
-
-        for member in s.Members:
-            if isSequence(member):
-                old += _convertSeq(member)
-            else:
-                 # removed hypo, as MenuSequence assembles it later
-                if member != msca.hypo.Alg:
-                    member_cnv = conf2toConfigurable(member)
-                     # Skip SGInputLoader as it should only run in the top alg
-                     # But we need to ensure that it is converted and merged
-                    if not compName(member)=='SGInputLoader':
-                        old += member_cnv
-        return old
-
-    sequence = _convertSeq(msca.ca.topSequence())
-    msca.ca._algorithms.clear()
-    msca.ca._sequence = None
-    msca.ca._allSequences.clear()
-    appendCAtoAthena(msca.ca)
-    if msca.globalRecoCA:
-        appendCAtoAthena(msca.globalRecoCA)
-
-    return MenuSequence(flags,
-                        Sequence   = sequence,
-                        Maker       = maker,
-                        Hypo        = hypo,
-                        HypoToolGen = msca._hypoToolConf.hypoToolGen)

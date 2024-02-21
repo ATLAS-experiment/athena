@@ -1,15 +1,13 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.MenuComponents import AlgNode, HypoAlgNode
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import isComboHypoAlg
-from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu
 from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import compName, findAlgorithmByPredicate, parOR, seqAND
-from AthenaCommon.Configurable import ConfigurableCABehavior
 from functools import lru_cache
 
 from AthenaCommon.Logging import logging
@@ -166,8 +164,8 @@ class CFSequence(object):
         if self.combo is None:
             return
         
-        with ConfigurableCABehavior(): 
-            acc = ComponentAccumulator()
+        acc = ComponentAccumulator()
+
         assert len(newstep.sequences) == len(self.step.sequences), f'Trying to add HypoTools from new step {newstep.name}, which differ in number of sequences'
         assert len(self.step.sequences) == len(newstep.stepDicts), f'The number of sequences of step {self.step.name} ({len(self.step.sequences)}) differ from the number of dictionaries in the chain {len(newstep.stepDicts)}'
  
@@ -183,10 +181,7 @@ class CFSequence(object):
                 hypoToolConf.setConf( onePartChainDict )
                 hypoAcc = myseq.hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
                 if isinstance(hypoAcc, ComponentAccumulator):
-                    if isCAMenu():
-                        acc.merge(hypoAcc)
-                    else:
-                        appendCAtoAthena(hypoAcc)
+                    acc.merge(hypoAcc)
 
         chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
         self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)

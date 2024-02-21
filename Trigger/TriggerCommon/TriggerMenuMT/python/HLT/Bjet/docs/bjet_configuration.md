@@ -1,4 +1,4 @@
-<!--Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration-->
+<!--Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration-->
 
 # Bjet Trigger configuration guide
 
@@ -314,11 +314,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
         )
       ```
       '*secondStageAlgs*' and '*PTTrackParticles*' are the sequences of tracking algorithms which produces the final precision-track particle-collections.\
-      Afterwards flavour-tagging algorithms are executed. This code is written in new-style format, so the configuration has to be adapted correspondingly
-      ```python
-        from AthenaCommon.Configurable import ConfigurableCABehavior
-        with ConfigurableCABehavior():
-      ```
+      Afterwards flavour-tagging algorithms are executed.
       Then we can extract the sequence of flavour-tagging algorithms from '*getFlavourTagging*' (see [BjetFlavourTaggingConfiguration.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TriggerCommon/TriggerMenuMT/python/HLT/Bjet/BjetFlavourTaggingConfiguration.py))
       ```python
         acc_flavourTaggingAlgs = getFlavourTagging(
