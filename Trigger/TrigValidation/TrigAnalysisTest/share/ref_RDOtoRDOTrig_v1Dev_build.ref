@@ -30006,6 +30006,20 @@ HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L1cTAU20M_cTA
     2: 60
     3: 60
     4: 8
+HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_2cTAU20M:
+  eventCount: 1
+  stepCounts:
+    0: 11
+    1: 11
+    2: 11
+    3: 11
+    4: 1
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 7
 HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25:
   eventCount: 1
   stepCounts:
