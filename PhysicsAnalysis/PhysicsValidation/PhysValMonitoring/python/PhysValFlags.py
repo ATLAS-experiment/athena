@@ -19,7 +19,6 @@ def createPhysValConfigFlags():
     icf.addFlag("PhysVal.doPFlow", False)
     icf.addFlag("PhysVal.doMuon", False)
     icf.addFlag("PhysVal.doLRTMuon", False)
-    icf.addFlag("PhysVal.doActs", False)
     icf.addFlag("PhysVal.doLLPSecVtx", False)
     icf.addFlag("PhysVal.doLLPSecVtxLeptons", False)
 

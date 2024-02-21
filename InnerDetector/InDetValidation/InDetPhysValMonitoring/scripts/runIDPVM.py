@@ -28,6 +28,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doElectronMatchedTracks", help='run plots for tracks matched to true electrons', action='store_true', default=False)
     IDPVMparser.add_argument("--doTruthToRecoNtuple", help='output track-to-truth ntuple', action='store_true', default=False)
     IDPVMparser.add_argument("--doActs", help='run plots for acts collections', action='store_true', default=False)
+    IDPVMparser.add_argument("--doHGTD", help='run plots fof HGTD collections', action='store_true', default=False)
     IDPVMparser.add_argument("--disableDecoration", help='disable extra track and truth decoration if possible', action='store_true', default=False)
     IDPVMparser.add_argument("--hardScatterStrategy", help='Strategy to select the hard scatter. 0 = SumPt² 1 = SumPt , 2 = Sumptw, 3 = H->yy', choices=["0","1","2","3"], default="0")
     IDPVMparser.add_argument("--truthMinPt", help='minimum truth particle pT', type=float, default=None)
@@ -93,7 +94,8 @@ flags.PhysVal.IDPVM.GRL = MyArgs.GRL
 flags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
 flags.PhysVal.IDPVM.doTechnicalEfficiency = MyArgs.doTechnicalEfficiency
 flags.PhysVal.IDPVM.doPRW = MyArgs.doPRW
-flags.PhysVal.doActs = MyArgs.doActs
+flags.PhysVal.IDPVM.doActs = MyArgs.doActs
+flags.PhysVal.IDPVM.doHGTD = MyArgs.doHGTD
 
 flags.Exec.SkipEvents = MyArgs.skipEvents
 flags.Exec.MaxEvents = MyArgs.maxEvents

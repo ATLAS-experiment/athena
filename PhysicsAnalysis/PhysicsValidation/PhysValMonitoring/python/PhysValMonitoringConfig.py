@@ -84,7 +84,7 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
     if flags.PhysVal.doLRTMuon:
         from MuonPhysValMonitoring.MuonPhysValConfig import PhysValLRTMuonCfg
         tools.append(acc.popToolsAndMerge(PhysValLRTMuonCfg(flags)))
-    if flags.PhysVal.doActs:
+    if flags.PhysVal.IDPVM.doActs:
         from ActsConfig.ActsAnalysisConfig import PhysValActsCfg
         tools.append(acc.popToolsAndMerge(PhysValActsCfg(flags)))
     if flags.PhysVal.doLLPSecVtx:

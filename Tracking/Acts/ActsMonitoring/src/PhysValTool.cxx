@@ -21,11 +21,14 @@ namespace ActsTrk {
 
     ATH_CHECK(m_pixelClusterContainerKey.initialize());
     ATH_CHECK(m_stripClusterContainerKey.initialize());
-
+    ATH_CHECK(m_hgtdClusterContainerKey.initialize(m_doHGTD));
+    
     ATH_CHECK(m_pixelSpacePointContainerKey.initialize());
     ATH_CHECK(m_stripSpacePointContainerKey.initialize());
     ATH_CHECK(m_stripOverlapSpacePointContainerKey.initialize());
 
+    ATH_CHECK(m_HGTDDetEleCollKey.initialize(m_doHGTD));
+    
     std::string folder = "SquirrelPlots/Acts"; 
     m_pixelClusterValidationPlots = 
       std::make_unique< ActsTrk::PixelClusterValidationPlots >(nullptr, 
@@ -55,9 +58,19 @@ namespace ActsTrk {
 								       folder.c_str(),
 								       m_stripOverlapSpacePointContainerKey.key().c_str()),
 								  "StripOverlap");
+
+    // Schedule HGTD objects
+    if (m_doHGTD) {
+      m_hgtdClusterValidationPlots =
+	std::make_unique< ActsTrk::HgtdClusterValidationPlots >(nullptr,
+								Form("%s/%s/",
+								     folder.c_str(),
+								     m_hgtdClusterContainerKey.key().c_str()));
+    }
     
     ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
     ATH_CHECK(detStore()->retrieve(m_stripID, "SCT_ID"));
+    if (m_doHGTD) ATH_CHECK(detStore()->retrieve(m_hgtdID, "HGTD_ID"));
 
     return StatusCode::SUCCESS;
   }
@@ -68,11 +81,37 @@ namespace ActsTrk {
 
     ATH_CHECK(bookCollection(m_pixelClusterValidationPlots.get()));
     ATH_CHECK(bookCollection(m_stripClusterValidationPlots.get()));
-
+    if (m_doHGTD) ATH_CHECK(bookCollection(m_hgtdClusterValidationPlots.get()));
+      
     ATH_CHECK(bookCollection(m_pixelSpacePointValidationPlots.get()));
     ATH_CHECK(bookCollection(m_stripSpacePointValidationPlots.get()));
     ATH_CHECK(bookCollection(m_stripOverlapSpacePointValidationPlots.get()));
 
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode PhysValTool::fillHgtd(const EventContext& ctx,
+				   float beamSpotWeight) {
+    // Get collection
+    SG::ReadHandle< xAOD::HGTDClusterContainer > inputHgtdClusterContainer = SG::makeHandle( m_hgtdClusterContainerKey, ctx );
+    if (not inputHgtdClusterContainer.isValid()) {
+      ATH_MSG_FATAL("xAOD::HGTDClusterContainer with key " << m_hgtdClusterContainerKey.key() << " is not available...");
+      return StatusCode::FAILURE;
+    }
+    const xAOD::HGTDClusterContainer *hgtdClusterContainer = inputHgtdClusterContainer.cptr();
+
+    SG::ReadCondHandle<InDetDD::HGTD_DetectorElementCollection> hgtdDetEleHandle(m_HGTDDetEleCollKey, ctx);
+    const InDetDD::HGTD_DetectorElementCollection* hgtdElements(*hgtdDetEleHandle);
+    if (not hgtdDetEleHandle.isValid() or hgtdElements==nullptr) {
+      ATH_MSG_FATAL(m_HGTDDetEleCollKey.fullKey() << " is not available.");
+      return StatusCode::FAILURE;
+    }
+    
+    // Fill plots
+    for (const xAOD::HGTDCluster* cluster : *hgtdClusterContainer) {
+      m_hgtdClusterValidationPlots->fill(cluster, *hgtdElements, beamSpotWeight, m_hgtdID);
+    }
+    
     return StatusCode::SUCCESS;
   }
   
@@ -150,6 +189,8 @@ namespace ActsTrk {
       m_stripOverlapSpacePointValidationPlots->fill(spacePoint, beamSpotWeight, m_stripID);
     }
 
+    if (m_doHGTD) ATH_CHECK(fillHgtd(ctx, beamSpotWeight));
+    
     return StatusCode::SUCCESS;
   }
   
@@ -158,6 +199,10 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("Finalising hists for " << name() << "...");
     m_pixelClusterValidationPlots->finalize();
     m_stripClusterValidationPlots->finalize();
+    if (m_doHGTD) m_hgtdClusterValidationPlots->finalize();
+    m_pixelSpacePointValidationPlots->finalize();
+    m_stripSpacePointValidationPlots->finalize();
+    m_stripOverlapSpacePointValidationPlots->finalize();
     return StatusCode::SUCCESS;
   }
 

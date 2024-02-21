@@ -36,7 +36,8 @@ atlas_add_component( ActsMonitoring
 			TrkValHistUtils
 			xAODEventInfo
 			xAODInDetMeasurement
-			xAODMeasurementBase )
+			xAODMeasurementBase
+			HGTD_ReadoutGeometry )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 

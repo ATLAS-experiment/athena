@@ -476,7 +476,8 @@ def ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags,
 def PhysValActsCfg(flags,
                    name: str = 'PhysValActs') -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.setPrivateTools(CompFactory.ActsTrk.PhysValTool(name=name))
+    acc.setPrivateTools(CompFactory.ActsTrk.PhysValTool(name=name,
+                                                        doHGTD=flags.PhysVal.IDPVM.doHGTD))
     return acc
     
 def ActsSeedAnalysisCfg(flags):
