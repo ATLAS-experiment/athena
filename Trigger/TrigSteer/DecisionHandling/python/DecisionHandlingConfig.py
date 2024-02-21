@@ -1,16 +1,16 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 EnableFilterMonitoring = False  # Can be changed in a precommand/preExec
 
 def setupFilterMonitoring( flags, filterAlg ):
     if not EnableFilterMonitoring or not hasattr(filterAlg, "Input"):
         return
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+
     monTool = GenericMonitoringTool(flags, 'MonTool')
     
     inputKeys = [str(i) for i in filterAlg.Input]
@@ -23,23 +23,19 @@ def setupFilterMonitoring( flags, filterAlg ):
 
     filterAlg.MonTool = monTool
 
+
 def TriggerSummaryAlg( flags, name ):
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    alg = CompFactory.TriggerSummaryAlg( name )
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
     monTool.defineHistogram('TIME_SinceEventStart', path='EXPERT', type='TH1F',
                                    title='Time since beginning of event processing;time [ms]',
                                    xbins=100, xmin=0, xmax=3.5e3   )
-    alg.MonTool = monTool
+
+    alg = CompFactory.TriggerSummaryAlg( name,
+                                         MonTool = monTool )
     return alg
 
-def ComboHypoCfg(name ):    
-    alg = CompFactory.ComboHypo( name ) 
-    if isComponentAccumulatorCfg():         
-        acc= ComponentAccumulator()  
-        acc.addEventAlgo(alg)
-        return acc
-    else:
-        return alg
 
+def ComboHypoCfg( name ):
+    acc = ComponentAccumulator()
+    acc.addEventAlgo( CompFactory.ComboHypo(name) )
+    return acc
