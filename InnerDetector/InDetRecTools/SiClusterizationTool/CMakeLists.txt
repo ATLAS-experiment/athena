@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SiClusterizationTool )
@@ -28,8 +28,6 @@ atlas_add_component( SiClusterizationTool
    src/components/*.cxx
    LINK_LIBRARIES SiClusterizationToolLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 # These files can be added by the user for testing in Grid environments,
 # in which case un-comment this line and re-cmake
 # atlas_install_data( share/*.db )
