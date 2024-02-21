@@ -387,13 +387,7 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, Info* info /*= nul
   return (theGenParticle);
 }
 
-// Now that we use TLorentzVector for the momentum base class, this is straightforward
-double
-MCTruthClassifier::deltaR(const xAOD::TruthParticle& v1, const xAOD::Jet& v2)
-{
-  // Should this use delta y though?
-  return v1.p4().DeltaR(v2.p4());
-}
+
 void
 MCTruthClassifier::findJetConstituents(const xAOD::Jet* jet,
                                        std::set<const xAOD::TruthParticle*>& constituents,
