@@ -346,7 +346,8 @@ void IVP1System::message(const QString& str) const
 //_______________________________________________________
 void IVP1System::messageDebug(const QString& str) const
 {
-  std::cout<<VP1Msg::prefix_debug()<<" ["<<m_d->name.toStdString()<<"]: "<<str.toStdString()<<std::endl;
+  if (VP1Msg::debug())
+    std::cout<<VP1Msg::prefix_debug()<<" ["<<m_d->name.toStdString()<<"]: "<<str.toStdString()<<std::endl;
 }
 
 //_______________________________________________________
