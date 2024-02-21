@@ -29,9 +29,9 @@
 # art-output: *.dat 
 
 Slices  = ['muon','electron','tau','fsjet'] # TODO: Get Bjet working for ITk
-Events  = 500
-Threads = 1
-Slots   = 1
+Events  = 4000
+Threads = 8
+Slots   = 8
 Input   = 'ttbar_pu200_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 useCA_Reco = True
