@@ -22,7 +22,11 @@ class StoreGateSvc;
 class PixelClusterContainerCnv_p3 : public T_AthenaPoolTPCnvBase<InDet::PixelClusterContainer, InDet::PixelClusterContainer_p3>
 {
  public:
-  PixelClusterContainerCnv_p3() : m_pixelDetEleCollKey{"PixelDetectorElementCollection"}, m_useDetectorElement{true}, m_isInitialized{false} {};
+  PixelClusterContainerCnv_p3():
+   m_pixelDetEleCollKey{"PixelDetectorElementCollection"},
+   m_pixelITkEleCollKey{"ITkPixelDetectorElementCollection"},
+   m_useDetectorElement{true},
+   m_isInitialized{false} {};
   
   virtual void	persToTrans(const InDet::PixelClusterContainer_p3* persCont,
 			    InDet::PixelClusterContainer* transCont,
@@ -40,6 +44,7 @@ class PixelClusterContainerCnv_p3 : public T_AthenaPoolTPCnvBase<InDet::PixelClu
    const PixelID *m_pixId{};
    StoreGateSvc *m_storeGate{};
    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey;
+   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelITkEleCollKey;
    bool m_useDetectorElement;
    bool m_isInitialized;
    StatusCode initialize(MsgStream &log);

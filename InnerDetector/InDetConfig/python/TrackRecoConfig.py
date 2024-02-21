@@ -302,7 +302,6 @@ def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
 
     AssociationMapName = ""
     extension = flags.Tracking.ActiveConfig.extension
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
 
     if extension == "Disappearing" or doTrackOverlay:
         if extension == "Disappearing":

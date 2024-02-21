@@ -39,6 +39,11 @@ def ITkStripOverlayAlgCfg(flags, name="ITkStripOverlay", **kwargs):
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
             f"SCT_RDO_Container#{flags.Overlay.SigPrefix}ITkStripRDOs"
         ]))
+    
+    if flags.Overlay.doTrackOverlay:
+    #for track overlay, write out the signal RDOs because reco tracking will only run on them
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
+            f"SCT_RDO_Container#{flags.Overlay.SigPrefix}ITkStripRDOs"]))
 
     return acc
 
