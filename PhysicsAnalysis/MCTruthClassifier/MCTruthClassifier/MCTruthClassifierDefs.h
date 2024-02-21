@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTHCLASSIFIER_MCTRUTHCLASSIFIERDEFS_H
@@ -12,19 +12,14 @@ PACKAGE:  atlasoff/PhysicsAnalysis/MCTruthClassifier
 AUTHORS:  O. Fedin
 CREATED:  Oct 2007
 
-PURPOSE:
-
-Updated:
-
 For more information, please see the twiki page:
 https://twiki.cern.ch/twiki/bin/view/AtlasProtected/MCTruthClassifier
+********************************************************************
+Updated Feb 2024 by Andrii Verbytskyi <andrii.verbytskyi@mpp.mpg.de>
 ********************************************************************/
+
 #include <vector>
 #include <string>
-//
-#define PARTICLETYPES   40
-#define PARTICLEORIGIN  48
-#define PARTICLEOUTCOME 12
 
 namespace MCTruthPartClassifier {
 
@@ -143,125 +138,114 @@ namespace MCTruthPartClassifier {
 
 
   struct ParticleDef {
-
     /** the vector of particle types */
-    std::vector<std::string> sParticleType;
-    /** the vector of particle origin */
-    std::vector<std::string> sParticleOrigin;
-    /** the vector of particle out come */
-    std::vector<std::string> sParticleOutCome;
+      std::vector<std::string> sParticleType{
+      "Unknown",
+      "UnknownElectron",
+      "IsoElectron",
+      "NonIsoElectron",
+      "BkgElectron",
+      "UnknownMuon",
+      "IsoMuon",
+      "NonIsoMuon",
+      "BkgMuon",
+      "UnknownTau",
+      "IsoTau",
+      "NonIsoTau",
+      "BkgTau",
+      "UnknownPhoton",
+      "IsoPhoton",
+      "NonIsoPhoton",
+      "BkgPhoton",
+      "Hadron",
+      "Neutrino",
+      "NuclFrag",
+      "NonPrimary",
+      "GenParticle",
+      "SUSYParticle",
+      "BBbarMesonPart",
+      "BottomMesonPart",
+      "CCbarMesonPart",
+      "CharmedMesonPart",
+      "BottomBaryonPart",
+      "CharmedBaryonPart",
+      "StrangeBaryonPart",
+      "LightBaryonPart",
+      "StrangeMesonPart",
+      "LightMesonPart",
+      "BJet",
+      "CJet",
+      "LJet",
+      "GJet",
+      "TauJet",
+      "UnknownJet",
+      "OtherBSMParticle"};
 
-    /**Default constructor*/
-    ParticleDef()
-    {
-      sParticleType.reserve(PARTICLETYPES);
-      sParticleType.emplace_back("Unknown");
-      sParticleType.emplace_back("UnknownElectron");
-      sParticleType.emplace_back("IsoElectron");
-      sParticleType.emplace_back("NonIsoElectron");
-      sParticleType.emplace_back("BkgElectron");
-      sParticleType.emplace_back("UnknownMuon");
-      sParticleType.emplace_back("IsoMuon");
-      sParticleType.emplace_back("NonIsoMuon");
-      sParticleType.emplace_back("BkgMuon");
-      sParticleType.emplace_back("UnknownTau");
-      sParticleType.emplace_back("IsoTau");
-      sParticleType.emplace_back("NonIsoTau");
-      sParticleType.emplace_back("BkgTau");
-      sParticleType.emplace_back("UnknownPhoton");
-      sParticleType.emplace_back("IsoPhoton");
-      sParticleType.emplace_back("NonIsoPhoton");
-      sParticleType.emplace_back("BkgPhoton");
-      sParticleType.emplace_back("Hadron");
-      sParticleType.emplace_back("Neutrino");
-      sParticleType.emplace_back("NuclFrag");
-      sParticleType.emplace_back("NonPrimary");
-      sParticleType.emplace_back("GenParticle");
-      sParticleType.emplace_back("SUSYParticle");
-      sParticleType.emplace_back("BBbarMesonPart");
-      sParticleType.emplace_back("BottomMesonPart");
-      sParticleType.emplace_back("CCbarMesonPart");
-      sParticleType.emplace_back("CharmedMesonPart");
-      sParticleType.emplace_back("BottomBaryonPart");
-      sParticleType.emplace_back("CharmedBaryonPart");
-      sParticleType.emplace_back("StrangeBaryonPart");
-      sParticleType.emplace_back("LightBaryonPart");
-      sParticleType.emplace_back("StrangeMesonPart");
-      sParticleType.emplace_back("LightMesonPart");
-      sParticleType.emplace_back("BJet");
-      sParticleType.emplace_back("CJet");
-      sParticleType.emplace_back("LJet");
-      sParticleType.emplace_back("GJet");
-      sParticleType.emplace_back("TauJet");
-      sParticleType.emplace_back("UnknownJet");
-      sParticleType.emplace_back("OtherBSMParticle");
+      /** the vector of particle origin */
+      std::vector<std::string> sParticleOrigin{
+      "NonDefined",
+      "SingleElec",
+      "SingleMuon",
+      "SinglePhot",
+      "SingleTau",
+      "PhotonConv",
+      "DalitzDec",
+      "ElMagProc",
+      "Mu",
+      "TauLep",
+      "top",
+      "QuarkWeakDec",
+      "WBoson",
+      "ZBoson",
+      "Higgs",
+      "HiggsMSSM",
+      "WZMSSM",
+      "WBosonLRSM",
+      "NuREle",
+      "NuRMu ",
+      "NuRTau",
+      "LQ",
+      "SUSY",
+      "LightMeson",
+      "StrangeMeson",
+      "CharmedMeson",
+      "BottomMeson",
+      "CCbarMeson",
+      "JPsi",
+      "BBbarMeson",
+      "LightBaryon",
+      "StrangeBaryon",
+      "CharmedBaryon",
+      "BottomBaryon",
+      "PionDecay",
+      "KaonDecay",
+      "BremPhot",
+      "PromptPhot",
+      "UndrPhot",
+      "ISRPhot",
+      "FSRPhot",
+      "NucReact",
+      "PiZero",
+      "DiBoson",
+      "ZorHeavyBoson",
+      "QCD",
+      "OtherBSM",
+      "MultiBoson"};
 
-      sParticleOrigin.reserve(PARTICLEORIGIN);
-      sParticleOrigin.emplace_back("NonDefined");
-      sParticleOrigin.emplace_back("SingleElec");
-      sParticleOrigin.emplace_back("SingleMuon");
-      sParticleOrigin.emplace_back("SinglePhot");
-      sParticleOrigin.emplace_back("SingleTau");
-      sParticleOrigin.emplace_back("PhotonConv");
-      sParticleOrigin.emplace_back("DalitzDec");
-      sParticleOrigin.emplace_back("ElMagProc");
-      sParticleOrigin.emplace_back("Mu");
-      sParticleOrigin.emplace_back("TauLep");
-      sParticleOrigin.emplace_back("top");
-      sParticleOrigin.emplace_back("QuarkWeakDec");
-      sParticleOrigin.emplace_back("WBoson");
-      sParticleOrigin.emplace_back("ZBoson");
-      sParticleOrigin.emplace_back("Higgs");
-      sParticleOrigin.emplace_back("HiggsMSSM");
-      sParticleOrigin.emplace_back("WZMSSM");
-      sParticleOrigin.emplace_back("WBosonLRSM");
-      sParticleOrigin.emplace_back("NuREle");
-      sParticleOrigin.emplace_back("NuRMu ");
-      sParticleOrigin.emplace_back("NuRTau");
-      sParticleOrigin.emplace_back("LQ");
-      sParticleOrigin.emplace_back("SUSY");
-      sParticleOrigin.emplace_back("LightMeson");
-      sParticleOrigin.emplace_back("StrangeMeson");
-      sParticleOrigin.emplace_back("CharmedMeson");
-      sParticleOrigin.emplace_back("BottomMeson");
-      sParticleOrigin.emplace_back("CCbarMeson");
-      sParticleOrigin.emplace_back("JPsi");
-      sParticleOrigin.emplace_back("BBbarMeson");
-      sParticleOrigin.emplace_back("LightBaryon");
-      sParticleOrigin.emplace_back("StrangeBaryon");
-      sParticleOrigin.emplace_back("CharmedBaryon");
-      sParticleOrigin.emplace_back("BottomBaryon");
-      sParticleOrigin.emplace_back("PionDecay");
-      sParticleOrigin.emplace_back("KaonDecay");
-      sParticleOrigin.emplace_back("BremPhot");
-      sParticleOrigin.emplace_back("PromptPhot");
-      sParticleOrigin.emplace_back("UndrPhot");
-      sParticleOrigin.emplace_back("ISRPhot");
-      sParticleOrigin.emplace_back("FSRPhot");
-      sParticleOrigin.emplace_back("NucReact");
-      sParticleOrigin.emplace_back("PiZero");
-      sParticleOrigin.emplace_back("DiBoson");
-      sParticleOrigin.emplace_back("ZorHeavyBoson");
-      sParticleOrigin.emplace_back("QCD");
-      sParticleOrigin.emplace_back("OtherBSM");
-      sParticleOrigin.emplace_back("MultiBoson");
-
-      sParticleOutCome.reserve(PARTICLEOUTCOME);
-      sParticleOutCome.emplace_back("NonDefinedOutCome");
-      sParticleOutCome.emplace_back("UnknownOutCome");
-      sParticleOutCome.emplace_back("UnConverted");
-      sParticleOutCome.emplace_back("Converted");
-      sParticleOutCome.emplace_back("NonInteract");
-      sParticleOutCome.emplace_back("NuclInteraction");
-      sParticleOutCome.emplace_back("ElectrMagInter");
-      sParticleOutCome.emplace_back("DecaytoElectron");
-      sParticleOutCome.emplace_back("DecaytoMuon");
-      sParticleOutCome.emplace_back("OneProng");
-      sParticleOutCome.emplace_back("ThreeProng");
-      sParticleOutCome.emplace_back("FiveProng");
-
-    }
-
+      /** the vector of particle out come */
+      std::vector<std::string> sParticleOutCome{
+      "NonDefinedOutCome",
+      "UnknownOutCome",
+      "UnConverted",
+      "Converted",
+      "NonInteract",
+      "NuclInteraction",
+      "ElectrMagInter",
+      "DecaytoElectron",
+      "DecaytoMuon",
+      "OneProng",
+      "ThreeProng",
+      "FiveProng"};
   };
 
   // Ensure that the enums are available from ROOT
