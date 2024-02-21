@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PhotonVertexSelection_PhotonPointingTool_h
@@ -50,36 +50,21 @@ namespace CP {
     };
 
     //Write decoration handle keys
-    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_zvertex{
-      this,
-      "zvertex",
-      "Photons.zvertex"
-      "z vertex"
-    };
-    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_errz{
-      this,
-      "errz",
-      "Photons.errz"
-      "error in Z"
-    };
-    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_HPV_zvertex{
-      this,
-      "HPV_zvertex",
-      "Photons.HPV_zvertex",
-      "HPV z vertex"
-    };
-    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_HPV_errz{
-      this,
-      "HPV_errz",
-      "Photons.HPV_errz",
-      "HPV error in z"
-    };
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_zvertex;
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_errz;
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_HPV_zvertex;
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_HPV_errz;
+
 
   private:
     ///
     float getCorrectedZ(float zPointing, float etas2) const;
     bool m_isMC{};
     std::string m_zOscFileMC, m_zOscFileData;
+    std::string m_zvertexDecorName;
+    std::string m_errzDecorName;
+    std::string m_HPV_zvertexDecorName;
+    std::string m_HPV_errzDecorName;
     std::string m_ContainerName;
 
   public:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -32,9 +32,13 @@ PhotonPointingTool::PhotonPointingTool(const std::string &name)
     , m_zCorrection(nullptr)
 {
   declareProperty("isSimulation", m_isMC);
-  declareProperty("zOscillationFileMC", m_zOscFileMC ="PhotonVertexSelection/v1/pointing_correction_mc.root");
-  declareProperty("zOscillationFileData", m_zOscFileData ="PhotonVertexSelection/v1/pointing_correction_data.root");
-  declareProperty("ContainerName", m_ContainerName ="Photons");
+  declareProperty("zOscillationFileMC", m_zOscFileMC = "PhotonVertexSelection/v1/pointing_correction_mc.root");
+  declareProperty("zOscillationFileData", m_zOscFileData = "PhotonVertexSelection/v1/pointing_correction_data.root");
+  declareProperty("zvertex", m_zvertexDecorName = "zvertex");
+  declareProperty("errz", m_errzDecorName = "errz");
+  declareProperty("HPV_zvertex", m_HPV_zvertexDecorName = "HPV_zvertex");
+  declareProperty("HPV_errz", m_HPV_errzDecorName = "HPV_errz");
+  declareProperty("ContainerName", m_ContainerName = "Photons");
 }
 
 //____________________________________________________________________________
@@ -50,12 +54,12 @@ StatusCode PhotonPointingTool::initialize()
 
   ATH_CHECK( m_evtInfo.initialize() );
 
-  if (!m_ContainerName.empty()){
-    m_zvertex = m_ContainerName + ".zvertex";
-    m_errz = m_ContainerName + ".errz";
-    m_HPV_zvertex = m_ContainerName + ".HPV_zvertex";
-    m_HPV_errz = m_ContainerName + ".HPV_errz";
-  }
+  if(m_ContainerName.empty()) m_ContainerName = "Photons";
+
+  m_zvertex = m_ContainerName + "." + m_zvertexDecorName;
+  m_errz = m_ContainerName + "." + m_errzDecorName;
+  m_HPV_zvertex = m_ContainerName + "." + m_HPV_zvertexDecorName;
+  m_HPV_errz = m_ContainerName + "." + m_HPV_errzDecorName;
 
   ATH_CHECK(m_zvertex.initialize());
   ATH_CHECK(m_errz.initialize());
@@ -118,6 +122,8 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
   SG::WriteDecorHandle<xAOD::EgammaContainer, float> s_HPV_zvertex(m_HPV_zvertex, ctx);
   SG::WriteDecorHandle<xAOD::EgammaContainer, float> s_HPV_errz(m_HPV_errz, ctx);
 
+  bool isDecorAvailable = s_zvertex.isAvailable();
+
   // Loop over photons and add calo pointing auxdata
   std::pair<float, float> result;
   for (const auto *egamma: egammas) {
@@ -129,8 +135,13 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     result = getCaloPointing(egamma);
 
     // Set photon auxdata with new value
-    s_zvertex(*egamma) = result.first;
-    s_errz(*egamma)    = result.second;
+    if(isDecorAvailable){
+      ATH_MSG_DEBUG("Called updatePointingAuxdata but decoration is already available");
+    }
+    else{
+      s_zvertex(*egamma) = result.first;
+      s_errz(*egamma)    = result.second;
+    }
 
     // Get conv pointing variables
     if (egamma->type() == xAOD::Type::Photon) {
@@ -142,13 +153,15 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     }
 
     // Set photon auxdata with new value
-    s_HPV_zvertex(*egamma) = result.first;
-    s_HPV_errz(*egamma)    = result.second;
-
+    if(!isDecorAvailable){
+      s_HPV_zvertex(*egamma) = result.first;
+      s_HPV_errz(*egamma)    = result.second;
     }
 
-    return StatusCode::SUCCESS;
   }
+
+  return StatusCode::SUCCESS;
+}
 
   //____________________________________________________________________________
   float PhotonPointingTool::getCorrectedZ(float zPointing, float etas2) const
