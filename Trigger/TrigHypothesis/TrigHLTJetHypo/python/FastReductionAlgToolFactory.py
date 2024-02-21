@@ -53,6 +53,7 @@ class FastReductionAlgToolFactory:
             'ht': [CompFactory.TrigJetConditionConfig_htfr, 0],
             'dipz_mlpl': [CompFactory.TrigJetConditionConfig_dipzmlpl, 0],
             'bsel': [CompFactory.TrigJetConditionConfig_bdips, 0],
+            'tausel': [CompFactory.TrigJetConditionConfig_gntau, 0],
             'clrsel': [CompFactory.TrigJetConditionConfig_emf, 0],
             'clean': [CompFactory.TrigJetConditionConfig_clean, 0],
             'all': [CompFactory.TrigJetConditionConfig_acceptAll, 0],
