@@ -1877,16 +1877,15 @@ class reductionFrameworkExecutor(athenaExecutor):
         msg.debug('Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))
         if 'NTUP_PILEUP' not in output:
             # New derivation framework transform uses "formats"
-            if 'reductionConf' not in self.conf.argdict and 'formats' not in self.conf.argdict:
+            if 'formats' not in self.conf.argdict:
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_REDUCTION_CONFIG_ERROR'),
-                                                                'No reduction configuration specified')
+                                                                'No derivation configuration specified')
 
             if ('DAOD' not in output) and ('D2AOD' not in output):
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_REDUCTION_CONFIG_ERROR'),
-                                                                'No base name for DAOD reduction')
+                                                                'No base name for DAOD output')
 
             formatList = []
-            if 'reductionConf' in self.conf.argdict: formatList = self.conf.argdict['reductionConf'].value
             if 'formats' in self.conf.argdict: formatList = self.conf.argdict['formats'].value        
             for reduction in formatList:
                 if ('DAOD' in output):
@@ -1929,50 +1928,6 @@ class reductionFrameworkExecutor(athenaExecutor):
         msg.info('Data dictionary is now: {0}'.format(self.conf.dataDictionary))
         msg.info('Input/Output: {0}/{1}'.format(input, output))
         super(reductionFrameworkExecutor, self).preExecute(input, output)
-
-
-## @brief Specialist executor to manage the handling of multiple implicit input
-#  and output files within the reduction framework. 
-#  @note This is the temporary executor used for NTUP->DNTUP. It will be dropped
-#  after the move to D(x)AOD.
-class reductionFrameworkExecutorNTUP(athenaExecutor):
-    
-    ## @brief Take inputDNTUPFile and setup the actual outputs needed
-    #  in this job.
-    def preExecute(self, input=set(), output=set()):
-        self.setPreExeStart()
-        msg.debug('Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))
-
-        if 'reductionConf' not in self.conf.argdict:
-            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_REDUCTION_CONFIG_ERROR'),
-                                                            'No reduction configuration specified')
-        if 'DNTUP' not in output:
-            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_REDUCTION_CONFIG_ERROR'),
-                                                            'No base name for DNTUP reduction')
-        
-        for reduction in self.conf.argdict['reductionConf'].value:
-            dataType = 'DNTUP_' + reduction
-            # Prodsys 1 request - don't add a suffix, but replace DNTUP with DNTUP_TYPE
-            outputName = self.conf.argdict['outputDNTUPFile'].value[0].replace('DNTUP', dataType)
-            if outputName == self.conf.argdict['outputDNTUPFile'].value[0]:
-                # Rename according to the old scheme
-                outputName = self.conf.argdict['outputDNTUPFile'].value[0] + '_' + reduction + '.root'
-            msg.info('Adding reduction output type {0}, target filename {1}'.format(dataType, outputName))
-            output.add(dataType)
-            newReduction = trfArgClasses.argNTUPFile(outputName, io='output', runarg=True, type='NTUP', subtype=dataType,
-                                                     name=reduction, treeNames=['physics'])
-            self.conf.dataDictionary[dataType] = newReduction
-            
-        # Clean up the stub file from the executor input and the transform's data dictionary
-        # (we don't remove the actual argFile instance)
-        output.remove('DNTUP')
-        del self.conf.dataDictionary['DNTUP']
-        del self.conf.argdict['outputDNTUPFile']
-        
-        msg.info('Data dictionary is now: {0}'.format(self.conf.dataDictionary))
-        msg.info('Input/Output: {0}/{1}'.format(input, output))
-        
-        super(reductionFrameworkExecutorNTUP, self).preExecute(input, output)
 
 
 ## @brief Specialist execution class for merging DQ histograms
