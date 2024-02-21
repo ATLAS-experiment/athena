@@ -139,7 +139,7 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   int MET_y = 0x0;
 
   int total_sumEt = 0x0; //currently only placeholder
-  int MET = 0x0; //currently only placeholder
+  int MET = 0x0; 
 
   metFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
   etFPGA (Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_eth, A_ets, A_etw); 
@@ -158,7 +158,6 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   int MET2 = MET_x * MET_x + MET_y * MET_y;
 
   if (MET2 > 0x000FFF) MET = 0x000FFF;
-  else if (MET2 < 0) MET = 0x000FFF;
   else MET = std::sqrt(MET2);
 
   //Define a vector to be filled with all the TOBs of one event

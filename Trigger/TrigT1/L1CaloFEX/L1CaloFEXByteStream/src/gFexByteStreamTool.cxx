@@ -470,6 +470,12 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
         // Apply truncation
         sum_x = sum_x >> gPos::GLOBAL_BIT_TRUNCATION;
         sum_y = sum_y >> gPos::GLOBAL_BIT_TRUNCATION;
+
+        if (sum_x < -0x0007FF) sum_x = -0x0007FF;
+        if (sum_y < -0x0007FF) sum_y = -0x0007FF;
+
+        if (sum_x > 0x0007FF) sum_x  = 0x0007FF;
+        if (sum_y > 0x0007FF) sum_y  = 0x0007FF;
     }
 
     ATH_MSG_DEBUG("  fillGlobal type " << type << std::dec << " sum_x " << sum_x << " sum_y " << sum_y);
@@ -486,7 +492,13 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
     container->back()->setSaturated(0);
     container->back()->setGlobalType(type);
 
-    return std::sqrt(sum_x * sum_x + sum_y * sum_y);
+    int16_t MET2 = sum_x * sum_x + sum_y * sum_y;
+    int16_t MET = 0x0;
+
+    if (MET2 > 0x000FFF) MET = 0x000FFF;
+    else MET = std::sqrt(MET2);
+
+    return MET;
 
 }
 
