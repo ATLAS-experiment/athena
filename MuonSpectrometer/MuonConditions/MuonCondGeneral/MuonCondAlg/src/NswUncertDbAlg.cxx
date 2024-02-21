@@ -99,6 +99,7 @@ StatusCode NswUncertDbAlg::parseDataFromJSON(const nlohmann::json& lines,
         Identifier errorCalibId{};
         bool isValid{true};
         if (stationType[0] == 'M') {
+            if (!m_idHelperSvc->hasMM()) continue;
             errorCalibId = m_idHelperSvc->mmIdHelper().channelID(stationType, stationEta, stationPhi,
                                                                  multilayer, gasGap, 1
 #ifndef NDEBUG
@@ -106,6 +107,7 @@ StatusCode NswUncertDbAlg::parseDataFromJSON(const nlohmann::json& lines,
 #endif
                                                                 );
         } else if (stationType[0] == 'S') {
+            if (!m_idHelperSvc->hasSTGC()) continue;
             errorCalibId = m_idHelperSvc->stgcIdHelper().channelID (stationType, stationEta, stationPhi,
                                                                     multilayer, gasGap, 
                                                                     sTgcIdHelper::sTgcChannelTypes::Strip, 1
