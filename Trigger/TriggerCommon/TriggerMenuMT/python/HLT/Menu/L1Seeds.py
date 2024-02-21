@@ -130,7 +130,7 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         ],
         'PhysicsVeryHigh':
         [
-            'L1_XE300', 'L1_J400', 'L1_6J15'
+            'L1_XE300', 'L1_J400', 'L1_6jJ40'
         ],
         'EMPTY': 
         [
@@ -182,7 +182,7 @@ def getL1LowLumi():
         'L1_J75', 'L1_4J15',
         'L1_XE50', 'L1_3J25p0ETA23',
         'L1_3J40', 'L1_2jJ40_jXE110',
-        'L1_MU5VF_jJ90', 'L1_J75p31ETA49'
+        'L1_MU5VF_jJ80', 'L1_J75p31ETA49'
     ]
 
 #####################################
