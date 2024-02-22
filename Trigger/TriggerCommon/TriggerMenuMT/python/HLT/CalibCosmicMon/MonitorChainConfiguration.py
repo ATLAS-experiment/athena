@@ -45,7 +45,7 @@ def MistimeMonSequenceCfg(flags):
 
         outputName = recordable("HLT_TrigCompositeMistimeJ400")
         reco = InEventRecoCA('Mistime_reco',inputMaker=inputMaker)
-        recoAlg = L1CorrelationAlgCfg(flags, "MistimeMonj400", ItemList=['L1_J400'],
+        recoAlg = L1CorrelationAlgCfg(flags, "MistimeMonj400", ItemList=['L1_J400','L1_jJ500'],
                                       TrigCompositeWriteHandleKey=outputName, trigCompPassKey=outputName+".pass",
                                       l1AKey=outputName+".l1a_type", otherTypeKey=outputName+".other_type",
                                       beforeAfterKey=outputName+".beforeafterflag")

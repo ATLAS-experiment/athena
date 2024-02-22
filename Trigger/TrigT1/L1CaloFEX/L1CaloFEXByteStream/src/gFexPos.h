@@ -43,8 +43,8 @@ namespace LVL1::gFEXPos {
         constexpr unsigned int RMS_MET_POSITION     = 8 ;//position of Rho+RMS MET word in Global TOB dataframe, within the same slice
         constexpr unsigned int RMS_SCALAR_POSITION  = 10;//position of Rho+RMS Scalar word in Global TOB dataframe, within the same slice
 
-        constexpr unsigned int GLOBAL_X_MASK = 0x7FFF; // 16 bit mask to extract the x component
-        constexpr unsigned int GLOBAL_Y_MASK = 0x7FFF; // 16 bit mask to extract the y component
+        constexpr unsigned int GLOBAL_X_MASK = 0xFFFF; // 16 bit mask to extract the x component
+        constexpr unsigned int GLOBAL_Y_MASK = 0xFFFF; // 16 bit mask to extract the y component
         constexpr unsigned int GLOBAL_X_BIT = 16; // bit position to extract the x and y components
         constexpr unsigned int GLOBAL_Y_BIT = 0; // bit position to extract the x and y components
         constexpr unsigned int GLOBAL_BIT_TRUNCATION = 4; // truncation

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """ Helper functions for configuring MET chains"""
 
@@ -190,14 +190,8 @@ class AlgConfig(ABC):
         steps[-1].addEventAlgo(fex)
         return steps
 
-    def make_accumulator_steps(self, flags, chainDict, noComboHypo=False):
+    def make_accumulator_steps(self, flags, chainDict):
         """Make the full accumulator steps"""
-        # The 'noComboHypo' argument is a workaround to avoid errors in jobs
-        # that convert CA configuration into legacy sequences. If we create
-        # a ChainStep with ConfigurableCABehavior on, the constructor caches
-        # a GaudiConfig2 ComboHypo. So we disable the combo creation when
-        # making the CA, and then enable it when making a legacy ChainStep.
-
 
         # Get the reco sequences
         reco_sequences = self.make_reco_algs(flags, **self.interpret_reco_dict()).steps
@@ -246,9 +240,7 @@ class AlgConfig(ABC):
                             flags, selectionCA=sel_acc, HypoToolGen=hypo_tool
                         )
                     ],
-                    # If converting from CA to legacy we need to avoid
-                    # caching the GaudiConfig2 ComboHypo
-                    comboHypoCfg=None if noComboHypo else ComboHypoCfg,
+                    comboHypoCfg=ComboHypoCfg
                 )
             )
 

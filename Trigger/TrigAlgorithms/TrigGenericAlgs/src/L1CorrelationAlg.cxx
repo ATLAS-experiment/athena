@@ -46,7 +46,7 @@ StatusCode L1CorrelationAlg::start(){
 	 if( m_l1itemlist[nl1].find( "L1_MU" )  != std::string::npos ){
 	   ctpids_mu.push_back( item.ctpId() );
 	 }
-	 if( m_l1itemlist[nl1].find( "L1_J" )  != std::string::npos ){
+         if((  m_l1itemlist[nl1].find( "L1_J")  != std::string::npos ) || ( m_l1itemlist[nl1].find( "L1_jJ" )  != std::string::npos)){
 	   ctpids_jets.push_back( item.ctpId() );
 	 }
       }

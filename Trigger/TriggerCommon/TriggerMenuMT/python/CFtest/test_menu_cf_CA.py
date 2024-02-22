@@ -35,9 +35,7 @@ def set_flags(flags):
     log.info("Running on these signatures: %s",flags.Trigger.enabledSignatures)
     
     # these flags are proper for these tests
-    flags.Trigger.doCFEmulationTest = True # this enables this emulation tests 
-    import TriggerMenuMT.HLT.Config.GenerateMenuMT
-    TriggerMenuMT.HLT.Config.GenerateMenuMT._isCAMenu = True
+    flags.Trigger.doCFEmulationTest = True # this enables this emulation tests
     flags.Trigger.generateMenuDiagnostics = True
     # set DEBUG flag on the control-flow builder (before building)
     import TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig

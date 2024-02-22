@@ -180,6 +180,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     'btagIp_': trackIpPrefix,
                 }
             ],
+
         ]
         if inputVertex: 
             dl2_configs += [
@@ -196,6 +197,13 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                     **{f'p{x}': f'fastGN220240122_p{x}' for x in 'cub'},
                 }
+                ],
+
+                [ 'BTagging/20240216trig/gn2/antikt4emtopo/GNTau.onnx',
+                    { 'BTagTrackToJetAssociator': tracksOnJetDecoratorName
+                    , 'GN2_ptau' : 'fastGNTau20240216_ptau'
+                    , 'GN2_pu' : 'fastGNTau20240216_pu'
+                    }
                 ]   
             ]
 

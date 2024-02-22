@@ -9,7 +9,6 @@ import inspect
 import functools
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 
 
@@ -48,8 +47,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         stepName = 'Step%d'%stepID + '_' + stepPartName
         log.debug("Configuring step %s", stepName)
         seqArray = []   
-        from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu             
-        for sequenceCfg in sequenceCfgArray:            
+        for sequenceCfg in sequenceCfgArray:
             seqArray.append (sequenceCfg(flags, **stepArgs) )
 
         if (len(seqArray)>0):                                
@@ -59,17 +57,8 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
                     comboHypoCfg = functools.partial(comboHypoCfg, flags)
                 return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg = comboHypoCfg, comboToolConfs = comboTools) 
 
-        
         # if not returned any step
-        try:
-            if isCAMenu():
-                raise NoCAmigration                            
-            raise RuntimeError("[getStep] No sequences generated for step %s!", stepPartName)        
-        except NoCAmigration:
-            # return an Empty step with newJO if no Sequence was found 
-            log.warning("[getStep] No sequence generated for step %s, replacing with empty step %s", stepPartName, stepPartName+"_MissingCA")
-            return self.getEmptyStep(stepID, stepPartName+"_MissingCA")
-
+        raise RuntimeError("[getStep] No sequences generated for step %s!", stepPartName)
 
     def getEmptyStep(self, stepID, stepPartName):
         stepName = 'Step%d'%stepID + '_' + stepPartName

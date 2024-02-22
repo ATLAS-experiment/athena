@@ -150,7 +150,7 @@ def defineMenu():
 
         'L1_4jJ40', 'L1_3jJ90', 'L1_4jJ50', 'L1_4jJ40p0ETA25', 'L1_5jJ40p0ETA25', 
         'L1_3jJ70p0ETA23', 'L1_jJ140_3jJ60', 
-        'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ90',  
+        'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ80',  
         #Kept as Phase-1 ATR-28761 
   
         # jLJ
@@ -176,7 +176,6 @@ def defineMenu():
         
         'L1_3J50', 'L1_4J15', 
 
-        'L1_6J15',
 
         # multi jet forward
         'L1_J40p0ETA25_2J15p31ETA49',

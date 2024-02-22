@@ -8,7 +8,7 @@ from TrigHLTJetHypo.make_treevec import make_treevec
 
 # make a list of all possible cut items for the simple scenario
 all_elemental_keys = ('etaRange', 'jvt', 'smc',
-                      'threshold', 'momCuts', 'bsel',
+                      'threshold', 'momCuts', 'bsel', 'tausel',
                       'clrsel', 'timing', 'timeSig')
 
 # Extract moment cuts
@@ -212,6 +212,30 @@ def get_condition_args_from_chainpart(cp):
 
             else:
                 raise ValueError(f'btagger {v.split("b")[1]} not supportted')
+
+        if k == "tausel":
+            key = 'gntau'
+            values = v.split(key)
+            assert values[1] == '' , 'gntau condition takes only one argument, two were given' # protection when an upper (not supported) cut is requested
+
+            gntau_WPs = \
+              { '':   float('-inf')
+              , '90': -0.846
+              , '85': 0.048
+              }
+
+            assert (values[0] in gntau_WPs.keys()),f"The efficiency of the specified gntau cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the gntau WP dictionary."
+
+            lo   = gntau_WPs[values[0]]
+            vals = {
+                'min': str(lo),
+                'max': '',
+                'namePtau': 'fastGNTau20240216_ptau',
+                'namePu': 'fastGNTau20240216_pu',
+                'nameValid': 'TracksForMinimalJetTag_isValid'
+            }
+            condargs.append((k, vals))
+
 
         if k == 'momCuts':
             from TrigHLTJetHypo.FastReductionAlgToolFactory import jetMoments

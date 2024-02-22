@@ -2,7 +2,6 @@
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from libpyeformat_helper import SourceIdentifier, SubDetector
@@ -54,8 +53,7 @@ def getRegSelTools(flags, detNames):
         func = getattr(RegSelToolConfig, funcName)
         if not callable(func):
             raise RuntimeError('Cannot add detector "' + det + '", RegSelToolConfig.' + funcName + ' is not callable')
-        with ConfigurableCABehavior():
-            regSelTools += [acc.popToolsAndMerge(func(flags))]
+        regSelTools += [acc.popToolsAndMerge(func(flags))]
 
     acc.setPrivateTools(regSelTools)
     return acc

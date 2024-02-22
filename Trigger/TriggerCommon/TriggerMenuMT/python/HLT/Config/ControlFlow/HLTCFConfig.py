@@ -23,19 +23,17 @@
 """
 
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFDot import stepCF_DataFlow_to_dot, stepCF_ControlFlow_to_dot, all_DataFlow_to_dot
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFComponents import CFSequence, RoRSequenceFilterNode, PassFilterNode, CFSequenceCA
+from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFComponents import RoRSequenceFilterNode, PassFilterNode, CFSequenceCA
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 
 from AthenaCommon.CFElements import parOR, seqAND, getSequenceChildren, isSequence, compName
 from AthenaCommon.AlgSequence import  dumpSequence
-from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaCommon.Logging import logging
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from DecisionHandling.DecisionHandlingConfig import TriggerSummaryAlg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu 
 
 from builtins import map, range, str, zip
 from collections import OrderedDict, defaultdict
@@ -206,17 +204,15 @@ def sequenceScanner( HLTNode ):
     return _status
    
 
-def decisionTreeFromChains(flags, HLTNode, chains, allDicts, newJO):
+def decisionTreeFromChains(flags, HLTNode, chains, allDicts):
     """ Creates the decision tree, given the starting node and the chains containing the sequences  """
     log.info("[decisionTreeFromChains] Run decisionTreeFromChains on %s", HLTNode.getName())    
     HLTNodeName = HLTNode.getName()
-    with ConfigurableCABehavior():
-        acc = ComponentAccumulator()
+    acc = ComponentAccumulator()
 
     if len(chains) == 0:
         log.info("[decisionTreeFromChains] Configuring empty decisionTree")
-        if isCAMenu():
-            acc.addSequence(HLTNode)
+        acc.addSequence(HLTNode)
         return ([], acc)
     
     ( finalDecisions, CFseq_list) = createDataFlow(flags, chains, allDicts)    
@@ -279,10 +275,7 @@ def createDataFlow(flags, chains, allDicts):
             log.debug("Found %d CF sequences with filter name %s", len(foundCFSeq), filterName)
             if not foundCFSeq:
                 sequenceFilter = buildFilter(filterName, filterInput, chainStep.isEmpty)
-                if isCAMenu():
-                    CFseq = CFSequenceCA( chainStep = chainStep, filterAlg = sequenceFilter)
-                else:
-                    CFseq = CFSequence( ChainStep = chainStep, FilterAlg = sequenceFilter)
+                CFseq = CFSequenceCA( chainStep = chainStep, filterAlg = sequenceFilter)
                 CFseq.connect(filterOutput)
                 CFseqList[nstep].append(CFseq)
                 lastCFseq = CFseq
@@ -291,15 +284,12 @@ def createDataFlow(flags, chains, allDicts):
                     log.error("Found more than one sequence containing filter %s", filterName)
                 
                 lastCFseq = foundCFSeq[0]
-                if isCAMenu():
-                    # skip re-merging
-                    if flags.Trigger.fastMenuGeneration:
-                        for menuseq in chainStep.sequences:
-                            menuseq.ca.wasMerged()
-                            if menuseq.globalRecoCA:
-                                menuseq.globalRecoCA.wasMerged()
-                    else:
-                        lastCFseq.mergeStepSequences(chainStep)
+                # skip re-merging
+                if flags.Trigger.fastMenuGeneration:
+                    for menuseq in chainStep.sequences:
+                        menuseq.ca.wasMerged()
+                        if menuseq.globalRecoCA:
+                            menuseq.globalRecoCA.wasMerged()
 
                 sequenceFilter = lastCFseq.filter
                 if len(list(set(sequenceFilter.getInputList()).intersection(filterInput))) != len(list(set(filterInput))):
@@ -348,10 +338,10 @@ def createControlFlow(flags, HLTNode, CFseqList):
     """ Creates Control Flow Tree starting from the CFSequences"""    
     HLTNodeName = HLTNode.getName()    
     log.debug("[createControlFlow] on node %s with %d CFsequences",HLTNodeName, len(CFseqList))
-    with ConfigurableCABehavior():
-        acc = ComponentAccumulator()
-    if isCAMenu():
-        acc.addSequence(HLTNode)
+
+    acc = ComponentAccumulator()
+    acc.addSequence(HLTNode)
+
     for nstep, sequences in enumerate(CFseqList):
         stepSequenceName =  CFNaming.stepName(nstep)
         log.debug("\n******** Create CF Tree %s with %d AthSequencers", stepSequenceName, len(sequences))
@@ -359,10 +349,8 @@ def createControlFlow(flags, HLTNode, CFseqList):
         # create filter node
         log.debug("[createControlFlow] Create filter step %s with %d filters", stepSequenceName, len(CFseqList[nstep])) 
         stepCFFilter = parOR(stepSequenceName + CFNaming.FILTER_POSTFIX)
-        if isCAMenu():
-            acc.addSequence(stepCFFilter, parentName=HLTNodeName)
-        else:
-            HLTNode += stepCFFilter
+        acc.addSequence(stepCFFilter, parentName=HLTNodeName)
+
         filter_list = []
         # add the filter to the node
         for cseq in sequences:
@@ -370,49 +358,23 @@ def createControlFlow(flags, HLTNode, CFseqList):
             if filterAlg.getName() not in filter_list:
                 log.debug("[createControlFlow] Add  %s to filter node %s", filterAlg.getName(), stepSequenceName)
                 filter_list.append(filterAlg.getName())   
-                if isCAMenu():
-                    stepCFFilter.Members += [filterAlg]
-                else:
-                    stepCFFilter += filterAlg
-    
+                stepCFFilter.Members += [filterAlg]
+
         # create reco step node
         log.debug("[createControlFlow] Create reco step %s with %d sequences", stepSequenceName, len(CFseqList))
         stepCFReco = parOR(stepSequenceName + CFNaming.RECO_POSTFIX)  
-        if isCAMenu():
-            acc.addSequence(stepCFReco, parentName = HLTNodeName)
-        else:
-            HLTNode += stepCFReco
+        acc.addSequence(stepCFReco, parentName = HLTNodeName)
+
         # add the sequences to the reco node
         addedEmtpy = False
         for cseq in sequences:
             if  cseq.empty and addedEmtpy:
-                if isCAMenu():
-                    cseq.ca.wasMerged()
+                cseq.ca.wasMerged()
                 continue
             if  cseq.empty: # adding Empty only once to avoid merging multiple times the PassSequence
                 addedEmtpy= True
             log.debug(" *** Create CF Tree for CFSequence %s", cseq.step.name)
-            if isCAMenu():
-                acc.merge(cseq.ca, sequenceName=stepCFReco.getName())
-            else:
-                filterAlg = cseq.filter.Alg  
-                if len(cseq.step.sequences) == 0:  
-                    stepCFReco += filterAlg                 
-                else:
-                    seqAndWithFilter = seqAND(cseq.step.name)  
-                    stepReco = parOR(cseq.step.name + CFNaming.RECO_POSTFIX)                                 
-                    seqAndWithFilter += [filterAlg, stepReco]
-                    recoSeqSet = set()
-                    hypoSet = set()
-                    for menuseq in cseq.step.sequences:
-                        menuseq.addToSequencer(recoSeqSet, hypoSet)
-  
-                    stepReco += sorted(list(recoSeqSet), key = lambda t: t.getName())
-                    seqAndWithFilter += sorted(list(hypoSet), key = lambda t: t.getName()) 
-                    if cseq.step.combo is not None:         
-                        seqAndWithFilter += cseq.step.combo.Alg
-            
-                    stepCFReco += seqAndWithFilter
+            acc.merge(cseq.ca, sequenceName=stepCFReco.getName())
 
         # add the monitor summary
         stepDecisions = []
@@ -420,10 +382,7 @@ def createControlFlow(flags, HLTNode, CFseqList):
             stepDecisions.extend(CFseq.decisions)
 
         summary = makeSummary( flags, stepSequenceName, stepDecisions )
-        if isCAMenu():
-            acc.addEventAlgo([summary],sequenceName = HLTNode.getName())            
-        else:
-            HLTNode += summary
+        acc.addEventAlgo([summary],sequenceName = HLTNode.getName())
 
         if flags.Trigger.generateMenuDiagnostics:
             log.debug("Now Draw Menu Diagnostic dot graphs...")

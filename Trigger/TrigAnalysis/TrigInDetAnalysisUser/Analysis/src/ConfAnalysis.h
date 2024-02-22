@@ -166,7 +166,9 @@ private:
   // tag and probe object
   TagNProbe* m_TnP_tool = 0;
 
-  ///  Efficiency2D* m_eff_pt_vs_eta = 0;
+  Efficiency2D* m_eff_eta_vs_pt = 0;
+  Efficiency2D* m_eff_d0_vs_pt  = 0;
+
 
   Efficiency1D* m_eff_pt = 0;
   Efficiency1D* m_eff_ptp = 0;

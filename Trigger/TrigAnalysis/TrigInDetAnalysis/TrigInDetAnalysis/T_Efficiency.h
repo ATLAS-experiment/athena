@@ -159,6 +159,13 @@ public:
     return 0.;
   }
 
+  void Write() { 
+    m_hnumer->Write();
+    m_hdenom->Write();
+    m_hmissed->Write();
+    m_heff->Write();
+  }
+
 protected:
 
   virtual void getibinvec(bool force=false) = 0;
