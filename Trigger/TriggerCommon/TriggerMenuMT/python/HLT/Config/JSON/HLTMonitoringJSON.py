@@ -1,9 +1,8 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
 import json
-from collections import OrderedDict as odict
-from TrigConfigSvc.TrigConfigSvcCfg import getHLTMenuFileName, getHLTMonitoringFileName
+from TrigConfigSvc.TrigConfigSvcCfg import getHLTMonitoringFileName
 from AthenaCommon.Logging import logging
 __log = logging.getLogger( __name__ )
 
@@ -18,29 +17,21 @@ def __getMenuBaseName(menuName):
         __log.info('Can\'t find pattern to shorten menu name, either non-existent in name or not implemented.')
     return menuName
 
-def generateDefaultMonitoringJSON(flags):
-    __log.info("Generating HLT Monitoring JSON in the rec-ex-common job")
 
-    from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
-
-    __log.debug("[HLTMonitoring::generateJSON] HLTMenuFileName =  %s"        , getHLTMenuFileName(flags)        )
-    __log.debug("[HLTMonitoring::generateJSON] HLTMonitoringFileName =  %s"  , getHLTMonitoringFileName(flags)  )
-
-    return generateMonitoringJSON(flags.Trigger.triggerMenuSetup,
-                                  HLTMenuConfig.dictsList(), 
-                                  getHLTMonitoringFileName(flags))
-
-def generateDefaultMonitoringJSON_newJO(flags, chainDicts):
-    __log.info("Generating HLT Monitoring JSON in the new JO")
-
+def generateDefaultMonitoringJSON(flags, chainDicts):
     return generateMonitoringJSON(flags.Trigger.triggerMenuSetup,
                                   chainDicts,
                                   getHLTMonitoringFileName(flags))
 
+
 def generateMonitoringJSON(menuName, chainDicts, fileName):
 
     #create a summary file 
-    summaryDict=odict([ ("filetype", "hltmonitoringsummary"), ("name", __getMenuBaseName(menuName)), ("signatures", odict())])
+    summaryDict = {
+        "filetype": "hltmonitoringsummary",
+        "name": __getMenuBaseName(menuName),
+        "signatures": {}
+    }
 
     # then you can iterate, say over the HLT menu:
     for chain in chainDicts:
@@ -64,16 +55,16 @@ def generateMonitoringJSON(menuName, chainDicts, fileName):
             monGroup     = entry.split(':')[1]
             
             if monSignature not in summaryDict['signatures']:
-                summaryDict['signatures'][monSignature] = odict([(chain_name, [monGroup])])
+                summaryDict['signatures'][monSignature] = {chain_name: [monGroup]}
             else:
                 #the signature is already present, 
                 # now check the chain
                 if chain_name not in summaryDict['signatures'][monSignature]:
-                    summaryDict['signatures'][monSignature].update(odict([(chain_name, [monGroup])]))
+                    summaryDict['signatures'][monSignature].update({chain_name: [monGroup]})
                 else:
                     summaryDict['signatures'][monSignature][chain_name].append(monGroup)
 
     # # then writing the summary to a file is as simple as:
-    __log.info( "[HLTMonitoring::generateMonitoringJSON] Writing Summary of HLT Monitoring JSON to %s",  fileName)
+    __log.info( "Writing Summary of HLT Monitoring JSON to %s", fileName)
     with open(fileName, 'w') as outfile:
         json.dump(summaryDict, outfile, indent = 4, sort_keys=False )

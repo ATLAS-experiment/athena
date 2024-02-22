@@ -54,10 +54,10 @@ def caloPreselJetHypoToolFromDict(flags, mainChainDict):
     
 
 def roiPreselJetHypoToolFromDict(flags, mainChainDict):
-    return _preselJetHypoToolFromDict(flags, mainChainDict,doBJetSel=True)
+    return _preselJetHypoToolFromDict(flags, mainChainDict,doTaggingSel=True)
 
 
-def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
+def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
 
     preselChainDict = dict(mainChainDict)
     preselChainDict['chainParts']=[]
@@ -83,18 +83,25 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
     
     for ip,p in enumerate(presel_cut_str.split('XX')):
         hascalSel= bool(re.match(r'.*emf\w?\d+', p))
-        if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
+        # This appears to be very much a hack... we should just have separate
+        # functions for with/without bjet or tau selections. -- Chris Pollard
+        if not doTaggingSel:  # Removing b-jet and tau parts if b-jet presel is not requested
             p = re.sub(r'b\d\d|bg\d\d|bgtwo\d\d', '', p)
-        hasBjetSel = bool(re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)', p))
-        hasDIPZsel = bool(re.match(r'.*Z', p))
-        if hasDIPZsel and not doBJetSel: continue # Skipping calopresel step when DIPZ is run
-        if usingDIPZ and not hasDIPZsel and not hasBjetSel and doBJetSel: continue # Skipping roiftf step only when running the calo selection leg (and if in the DIPZ scenario)
+            p = re.sub(r'gntau\d\d', '', p)
 
-        assert not ( (hasBjetSel or hasDIPZsel) and not doBJetSel), "Your jet preselection has a b-jet or DIPZ part but a calo-only preselection was requested instead. This should not be possible. Please investigate."        
+        hasBjetSel = bool(re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)', p))
+        hasTauSel = bool(re.match(r'.*(gntau\d\d)', p))
+        hasDIPZsel = bool(re.match(r'.*Z', p))
+
+        if hasDIPZsel and not doTaggingSel: continue # Skipping calopresel step when DIPZ is run
+        if usingDIPZ and not hasDIPZsel and not hasBjetSel and doTaggingSel: continue # Skipping roiftf step only when running the calo selection leg (and if in the DIPZ scenario)
+
+        assert not ( (hasBjetSel or hasDIPZsel) and not doTaggingSel), "Your jet preselection has a b-jet or DIPZ part but a calo-only preselection was requested instead. This should not be possible. Please investigate."        
 
         pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
         pattern_to_test += r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
         pattern_to_test += r'b(?P<btagger>\D*)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
+        pattern_to_test += r'gntau(?P<tauwp>\d\d)' if hasTauSel else '' # tau preselection if needed
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
         if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+)?)'
         matched = re.match(pattern_to_test, p)
@@ -103,16 +110,24 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         if hasDIPZsel: cut_dict['region'] = 'c'
         if hasDIPZsel: cut_dict['cut'] = ptCut
 
-        if 'mult' not in cut_dict.keys(): cut_dict['mult'] = ''
-        if 'emfc' not in cut_dict.keys(): cut_dict['emfc'] = ''
-        if 'bwp' not in cut_dict.keys(): cut_dict['bwp'] = ''
-        if 'btagger' not in cut_dict.keys(): cut_dict['btagger'] = ''
-        if 'cut' not in cut_dict.keys(): cut_dict['cut'] = ''
-        if 'dipzwp' not in cut_dict.keys(): cut_dict['dipzwp'] = ''
-        if 'cut_add' not in cut_dict.keys(): cut_dict['cut_add'] = ''
-        if 'prefilt' not in cut_dict.keys(): cut_dict['prefilt'] = ''
 
-        mult,region,scenario,cut,btagger,bwp,dipzwp,emfc=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'],cut_dict['bwp'],cut_dict['dipzwp'],cut_dict['emfc']
+        # any missing keys k below need to have cut_dict[k] set to "".
+        testkeys = \
+            [ "mult" , "emfc" , "cut" , "cut_add" , "prefilt"
+            , "bwp" , "btagger" , "dipzwp"
+            , "tauwp"
+            ]
+
+
+        for k in testkeys:
+            cut_dict.setdefault(k, "")
+
+        # why oh why is it written this way?
+        mult,region,scenario,cut,btagger,bwp,dipzwp,emfc = \
+            cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'],cut_dict['bwp'],cut_dict['dipzwp'],cut_dict['emfc']
+
+        tauwp = cut_dict["tauwp"]
+
         prefilters = []
 
         if mult=='': mult='1'
@@ -149,12 +164,15 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             'jvt':'',
             'clrsel': emfc,
             'bsel': '' if bwp == '' else f'{bwp}b{btagger}',
+            'tausel': "" if tauwp == '' else f'{tauwp}gntau',
             'chainPartIndex': ip,
             'hypoScenario': hyposcenario,
             'prefilters': prefilters,
             }
         )
         preselChainDict['chainParts'] += [tmpChainDict]
+
+
 
     # We need to pad by the legs not in the preselection expression
     # otherwise the ComboHypo does not find the corresponding

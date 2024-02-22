@@ -30,8 +30,8 @@
 
 Slices  = ['muon']
 Events  = 20000 
-Threads = 1
-Slots   = 1
+Threads = 8
+Slots   = 8
 Input   = 'Single_mu_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 useCA_Reco = True

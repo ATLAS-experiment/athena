@@ -710,7 +710,7 @@ class ItemDef:
         MenuItem('L1_MU3V_jJ20'      ).setLogic( d.MU3V & d.jJ20    & physcond).setTriggerType(TT.calo) # added temporarily 
         MenuItem('L1_MU3V_jJ30'      ).setLogic( d.MU3V & d.jJ30    & physcond).setTriggerType(TT.calo) # added temporarily 
         MenuItem('L1_MU3V_jJ40'      ).setLogic( d.MU3V & d.jJ40    & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_MU5VF_jJ90'      ).setLogic( d.MU5VF & d.jJ90  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_MU5VF_jJ80'      ).setLogic( d.MU5VF & d.jJ80  & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jLJ60'         ).setLogic( d.jLJ60        & physcond).setTriggerType(TT.calo) # Not in commissioning
         MenuItem('L1_jLJ80'         ).setLogic( d.jLJ80        & physcond).setTriggerType(TT.calo)

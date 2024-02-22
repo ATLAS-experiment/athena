@@ -19,4 +19,3 @@ atlas_add_test( testCsvDumper
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 
-

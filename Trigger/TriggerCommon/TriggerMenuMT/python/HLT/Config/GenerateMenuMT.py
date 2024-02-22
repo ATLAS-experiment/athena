@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import importlib
 import string
@@ -620,7 +620,7 @@ def makeHLTTree(flags):
 
     acc = ComponentAccumulator()    
     steps = seqAND('HLTAllSteps')
-    finalDecisions, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList(), newJO=False)
+    finalDecisions, menuAcc = decisionTreeFromChains(flags, steps, HLTMenuConfig.configsList(), HLTMenuConfig.dictsList())
     if log.getEffectiveLevel() <= logging.DEBUG:
         menuAcc.printConfig()
 
@@ -646,14 +646,14 @@ def makeHLTTree(flags):
 
     
     # generate JSON representation of the config
-    from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON_newJO
-    generateJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
+    from TriggerMenuMT.HLT.Config.JSON.HLTMenuJSON import generateJSON
+    generateJSON(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList(), menuAcc.getSequence("HLTAllSteps"))
 
-    from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generateJSON_newJO as generatePrescaleJSON_newJO
-    generatePrescaleJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
+    from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generatePrescaleJSON
+    generatePrescaleJSON(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
 
-    from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON_newJO
-    generateDefaultMonitoringJSON_newJO(flags, HLTMenuConfig.dictsList())
+    from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON
+    generateDefaultMonitoringJSON(flags, HLTMenuConfig.dictsList())
 
     from AthenaCommon.CFElements import checkSequenceConsistency 
     checkSequenceConsistency(steps)

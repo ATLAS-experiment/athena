@@ -375,10 +375,10 @@ def getHTBinning(chain,binwidth):
 
 # Add fast flavour-tag monitoring.
 # Adds a 20 GeV jet pT cut to avoid FPE WARNINGS from jets below min jet pT for RoI track association
-def addFlavourTagVariables(conf, network_prefix):
+def addFlavourTagVariables(conf, network_prefix, flavs="cub"):
     cutname='pt20'
     fillerTools = []
-    for f in "cub":
+    for f in flavs:
       xvar = f"{network_prefix}_p{f}"
       varname = f"ftag_p{f}"
       fillerTools += [HistoSpec(varname, xvar=xvar, bins=(70, -0.2, 1.2), title=f"{varname};{varname};;Entries")]
@@ -748,6 +748,7 @@ def jetMonitoringConfig(inputFlags,jetcoll,jetCollDict,monMode):
            addFlavourTagVariables(conf,"fastDips")
            addFlavourTagVariables(conf, "fastGN120230327")
            addFlavourTagVariables(conf,"fastGN220240122")
+           addFlavourTagVariables(conf,"fastGNTau20240216", flavs=["ptau", "pu"])
        if 'EMTopo' in jetcoll: #dedicated histograms for online EMTopo jets
            conf.appendHistos("Timing")
      else:

@@ -55,7 +55,8 @@ def defineMenu():
         
         # jLJ, Production thresholds, not used in commissioning
         'L1_jLJ60', 'L1_jLJ100', 'L1_jLJ160', 'L1_jLJ200',
-
+        #ATR28783
+        'L1_6J15',
         # TOPO
         'L1_BTAG-MU5VFjJ90',
         'L1_BPH-0M9-EM7-EM5',
