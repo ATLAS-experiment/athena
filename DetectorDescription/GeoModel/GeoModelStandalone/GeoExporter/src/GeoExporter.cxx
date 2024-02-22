@@ -214,28 +214,49 @@ if ( !(user_detmanagerslist.empty()) ) {
   if ( !(managersList.empty()) ) {
    for (auto const& mm : managersList)
     {
+        // get the DetectorManager
         const GeoVDetectorManager* manager = theExpt->getManager(mm);
+
+        // get the name of the DetectorManager
         std::string detManName = manager->getName();
         std::cout << "\n\t DetectorManager: " << detManName << std::endl;
+
+        // get the DetManager's TreeTops
         unsigned int nTreetops = manager->getNumTreeTops();
         std::cout << mm << "\t - n.Treetops: " << nTreetops << std::endl;
 
         if ( nTreetops > 0 && user_detmanagerslist.contains(QString::fromStdString(detManName)) ) {
+            
+            // // Add a dummy PhysVol to contain the TreeTops of the DetectorManager
+            // volTop->add(createTheWorld());
 
             for(unsigned int i=0; i < nTreetops; ++i) {
 
                 PVConstLink treetop(manager->getTreeTop(i));
-                // mainTopPhysVol->add( const_cast<GeoVPhysVol*>(&(*treetop)));
+
+                // get treetop's volume
                 const GeoVPhysVol* vol = &(*treetop);
-                volTop->add(const_cast<GeoVPhysVol*>(vol));
+                
+                // get volume's transform
+                // NOTE: we use getDefX() to get the transform without any alignment
+                GeoTransform* volXf = new GeoTransform( vol->getDefX() );
+                
+                // get volume's logvol's name
                 std::string volName = vol->getLogVol()->getName();
                 std::cout << "\t\t treetop: " << volName << std::endl;
+
+
+                // Add to the main volume a GeoNameTag with the name of the DetectorManager 
+                volTop->add(new GeoNameTag(detManName));
+                // add to the main PhysVol
+                volTop->add(volXf);
+                volTop->add(const_cast<GeoVPhysVol*>(vol));
 
                 // DEBUG: dive into the Treetop
                 if ("BeamPipe"==detManName) {
                 GeoVolumeCursor av(treetop);
                 while (!av.atEnd()) {
-                    std::cout << i << " - name: "  << av.getName() << "\n";
+                    std::cout << "\t\ttreetop n." << i << " - child name: "  << av.getName() << "\n";
                     av.next(); // increment volume cursor.
                 } // end while
                 }
@@ -250,10 +271,17 @@ if ( !(user_detmanagerslist.empty()) ) {
   while (!av.atEnd()) {
 
 	  std::string volname = av.getName();
-    std::cout << "\t* volume name:" << volname << std::endl ;
+    std::cout << "\t* relevant NameTag:" << volname << std::endl ;
     
     av.next(); // increment volume cursor.
     }
+// }
+
+
+// GeoVolumeCursor av2(volTop);
+// while (!av2.atEnd()) {
+//     std::cout << "\t\t- child name: "  << av2.getName() << "\n";
+//     av2.next(); // increment volume cursor.
 // }
 
   std::cout << "Creating the SQLite DB file..." << std::endl;
