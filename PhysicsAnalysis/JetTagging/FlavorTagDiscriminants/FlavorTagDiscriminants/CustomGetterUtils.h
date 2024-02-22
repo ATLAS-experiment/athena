@@ -76,9 +76,9 @@ namespace FlavorTagDiscriminants {
             const InputVariableConfig& cfg, 
             const FTagOptions& options);
 
-          std::vector<NamedSequenceFromConstituents> sequencesFromConstituents;
-          std::set<std::string> deps;
-          std::set<std::string> used_remap;        
+          std::vector<NamedSequenceFromConstituents> m_sequencesFromConstituents;
+          std::set<std::string> m_deps;
+          std::set<std::string> m_used_remap;        
         };
     }
 }

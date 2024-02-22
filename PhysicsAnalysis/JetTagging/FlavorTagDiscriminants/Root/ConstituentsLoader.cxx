@@ -22,50 +22,6 @@ namespace {
   typedef std::vector<std::pair<std::regex, ConstituentsSortOrder>> SortRegexes;
   typedef std::vector<std::pair<std::regex, ConstituentsSelection>> SelRegexes;
   
-  static TypeRegexes iparticle_type_regexes {
-      // iparticle variables
-      // ConstituentsEDMType picked correspond to the first matching regex
-      {"(pt|deta|dphi|energy)"_r, ConstituentsEDMType::CUSTOM_GETTER}
-  };
-
-  static TypeRegexes trk_type_regexes {
-      // Some innermost / next-to-innermost hit variables had a different
-      // definition in 21p9, recomputed here with customGetter to reuse
-      // existing training
-      // ConstituentsEDMType picked correspond to the first matching regex
-      {"numberOf.*21p9"_r, ConstituentsEDMType::CUSTOM_GETTER},
-      {"numberOf.*"_r, ConstituentsEDMType::UCHAR},
-      {"btagIp_(d0|z0SinTheta)Uncertainty"_r, ConstituentsEDMType::FLOAT},
-      {"(numberDoF|chiSquared|qOverP|theta)"_r, ConstituentsEDMType::FLOAT},
-      {"(^.*[_])?(d|z)0.*"_r, ConstituentsEDMType::CUSTOM_GETTER},
-      {"(log_)?(ptfrac|dr|pt).*"_r, ConstituentsEDMType::CUSTOM_GETTER},
-      {"(deta|dphi)"_r, ConstituentsEDMType::CUSTOM_GETTER},
-      {"phi|theta|qOverP"_r, ConstituentsEDMType::FLOAT},
-      {"(phi|theta|qOverP)Uncertainty"_r, ConstituentsEDMType::CUSTOM_GETTER},
-      {"leptonID"_r, ConstituentsEDMType::CHAR}
-  };
-  // We have a number of special naming conventions to sort and
-  // filter tracks. The track nodes should be named according to
-  //
-  // tracks_<selection>_<sort-order>
-  //
-  static SortRegexes trk_sort_regexes {
-      {".*absSd0sort"_r, ConstituentsSortOrder::ABS_D0_SIGNIFICANCE_DESCENDING},
-      {".*sd0sort"_r, ConstituentsSortOrder::D0_SIGNIFICANCE_DESCENDING},
-      {".*ptsort"_r, ConstituentsSortOrder::PT_DESCENDING},
-      {".*absD0DescendingSort"_r, ConstituentsSortOrder::ABS_D0_DESCENDING},
-  };
-  static SelRegexes trk_select_regexes {
-      {".*_ip3d_.*"_r, ConstituentsSelection::IP3D_2018},
-      {".*_dipsTightUpgrade_.*"_r, ConstituentsSelection::DIPS_TIGHT_UPGRADE},
-      {".*_dipsLooseUpgrade_.*"_r, ConstituentsSelection::DIPS_LOOSE_UPGRADE},
-      {".*_all_.*"_r, ConstituentsSelection::ALL},
-      {".*_dipsLoose202102_.*"_r, ConstituentsSelection::DIPS_LOOSE_202102},
-      {".*_loose202102NoIpCuts_.*"_r, ConstituentsSelection::LOOSE_202102_NOIP},
-      {".*_r22default_.*"_r, ConstituentsSelection::R22_DEFAULT},
-      {".*_r22loose_.*"_r, ConstituentsSelection::R22_LOOSE},
-  };
-
   ConstituentsInputConfig get_iparticle_input_config(
     const std::string name,
     const std::vector<std::string> input_variables,
@@ -130,6 +86,50 @@ namespace FlavorTagDiscriminants {
       FlipTagConfig flip_config
     ){
       ConstituentsInputConfig config;
+
+      TypeRegexes iparticle_type_regexes {
+          // iparticle variables
+          // ConstituentsEDMType picked correspond to the first matching regex
+          {"(pt|deta|dphi|energy)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+      };
+      TypeRegexes trk_type_regexes {
+          // Some innermost / next-to-innermost hit variables had a different
+          // definition in 21p9, recomputed here with customGetter to reuse
+          // existing training
+          // ConstituentsEDMType picked correspond to the first matching regex
+          {"numberOf.*21p9"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"numberOf.*"_r, ConstituentsEDMType::UCHAR},
+          {"btagIp_(d0|z0SinTheta)Uncertainty"_r, ConstituentsEDMType::FLOAT},
+          {"(numberDoF|chiSquared|qOverP|theta)"_r, ConstituentsEDMType::FLOAT},
+          {"(^.*[_])?(d|z)0.*"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(log_)?(ptfrac|dr|pt).*"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(deta|dphi)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"phi|theta|qOverP"_r, ConstituentsEDMType::FLOAT},
+          {"(phi|theta|qOverP)Uncertainty"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"leptonID"_r, ConstituentsEDMType::CHAR}
+      };
+      // We have a number of special naming conventions to sort and
+      // filter tracks. The track nodes should be named according to
+      //
+      // tracks_<selection>_<sort-order>
+      //
+      SortRegexes trk_sort_regexes {
+          {".*absSd0sort"_r, ConstituentsSortOrder::ABS_D0_SIGNIFICANCE_DESCENDING},
+          {".*sd0sort"_r, ConstituentsSortOrder::D0_SIGNIFICANCE_DESCENDING},
+          {".*ptsort"_r, ConstituentsSortOrder::PT_DESCENDING},
+          {".*absD0DescendingSort"_r, ConstituentsSortOrder::ABS_D0_DESCENDING},
+      };
+      SelRegexes trk_select_regexes {
+          {".*_ip3d_.*"_r, ConstituentsSelection::IP3D_2018},
+          {".*_dipsTightUpgrade_.*"_r, ConstituentsSelection::DIPS_TIGHT_UPGRADE},
+          {".*_dipsLooseUpgrade_.*"_r, ConstituentsSelection::DIPS_LOOSE_UPGRADE},
+          {".*_all_.*"_r, ConstituentsSelection::ALL},
+          {".*_dipsLoose202102_.*"_r, ConstituentsSelection::DIPS_LOOSE_202102},
+          {".*_loose202102NoIpCuts_.*"_r, ConstituentsSelection::LOOSE_202102_NOIP},
+          {".*_r22default_.*"_r, ConstituentsSelection::R22_DEFAULT},
+          {".*_r22loose_.*"_r, ConstituentsSelection::R22_LOOSE},
+      };
+      
       if (name.find("tracks") != std::string::npos){
         std::regex flip_sequences;
         if (flip_config == FlipTagConfig::FLIP_SIGN || flip_config == FlipTagConfig::NEGATIVE_IP_ONLY){

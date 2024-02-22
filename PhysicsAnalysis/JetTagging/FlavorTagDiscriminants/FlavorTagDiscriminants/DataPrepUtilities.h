@@ -137,22 +137,8 @@ namespace FlavorTagDiscriminants {
                               const std::string& defaultflag);
     }
 
-
     typedef SG::AuxElement::Decorator<float> OutputSetterFloat;
-    typedef std::vector<std::pair<std::string, OutputSetterFloat > > OutNodeFloat;
-
-    typedef SG::AuxElement::Decorator<char> OutputSetterChar;
-    typedef std::vector<std::pair<std::string, OutputSetterChar > > OutNodeChar;
-
-    typedef SG::AuxElement::Decorator<std::vector<char>> OutputSetterVecChar;
-    typedef std::vector<std::pair<std::string, OutputSetterVecChar > > OutNodeVecChar;
- 
-    typedef SG::AuxElement::Decorator<std::vector<float>> OutputSetterVecFloat;
-    typedef std::vector<std::pair<std::string, OutputSetterVecFloat > > OutNodeVecFloat;
-
-    typedef std::vector<ElementLink<xAOD::TrackParticleContainer>> TrackLinks;
-    typedef SG::AuxElement::Decorator<internal::TrackLinks> OutputSetterTrackLinks;
-    typedef std::vector<std::pair<std::string, OutputSetterTrackLinks > > OutNodeTrackLinks;
+    typedef std::vector<std::pair<std::string, OutputSetterFloat>> OutNodeFloat;
 
   }
 

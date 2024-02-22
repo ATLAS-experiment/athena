@@ -60,8 +60,6 @@ namespace FlavorTagDiscriminants {
         ConstituentsType getType() const override;
       private:
         // typedefs
-        typedef std::pair<std::string, double> NamedVar;
-        typedef std::pair<std::string, std::vector<double> > NamedSeq;
         typedef xAOD::Jet Jet;
         typedef xAOD::TrackParticle Track;
         // tracks typedefs

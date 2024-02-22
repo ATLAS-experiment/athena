@@ -424,14 +424,14 @@ namespace {
             std::for_each(v.begin(), v.end(), [](double &n){ n=-1.0*n; });
             return std::make_pair(n,v);
           };
-          sequencesFromConstituents.push_back(seqGetter_flip);
+          m_sequencesFromConstituents.push_back(seqGetter_flip);
         }
         else{
-          sequencesFromConstituents.push_back(seqGetter);
+          m_sequencesFromConstituents.push_back(seqGetter);
         }
-        deps.merge(seq_deps);
+        m_deps.merge(seq_deps);
         if (auto h = remap.extract(input_cfg.name)){
-          used_remap.insert(h.key());
+          m_used_remap.insert(h.key());
         }
       }
   }
@@ -441,11 +441,11 @@ namespace {
     const xAOD::Jet& jet, const IParticles& constituents) const
   {
     std::vector<float> cnsts_feats;
-    int num_vars = sequencesFromConstituents.size();
+    int num_vars = m_sequencesFromConstituents.size();
     int num_cnsts = 0;
 
     int cnst_var_idx = 0;
-    for (const auto& seq_builder: sequencesFromConstituents){
+    for (const auto& seq_builder: m_sequencesFromConstituents){
       auto double_vec = seq_builder(jet, constituents).second;
 
       if (cnst_var_idx==0){
@@ -468,17 +468,17 @@ namespace {
     const xAOD::Jet& jet, const IParticles& constituents) const
   {
     std::map<std::string, std::vector<double>> feats;
-    for (const auto& seq_builder: sequencesFromConstituents){
+    for (const auto& seq_builder: m_sequencesFromConstituents){
       feats.insert(seq_builder(jet, constituents));
     }
     return feats;
   }
 
   std::set<std::string> CustomSequenceGetter::getDependencies() const {
-    return deps;
+    return m_deps;
   }
   std::set<std::string> CustomSequenceGetter::getUsedRemap() const {
-    return used_remap;
+    return m_used_remap;
   }
   }
 }

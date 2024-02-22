@@ -68,7 +68,9 @@ namespace FlavorTagDiscriminants {
         for (const auto& particle: particles) {
           auto* flow = dynamic_cast<const xAOD::FlowElement*>(particle.second);
           const xAOD::IParticle* obj = nullptr;
-          if (!flow) continue;
+          if (!flow){
+            throw std::runtime_error("IParticlesLoader: Dynamic cast to FlowElement failed");
+          }
           if ((flow->isCharged() != m_isCharged)) continue;
           else {
             if (m_isCharged){
