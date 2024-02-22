@@ -14,9 +14,9 @@ parser.add_option( '-d', '--data-type', dest = 'data_type',
 parser.add_option( '-s', '--submission-dir', dest = 'submission_dir',
                    action = 'store', type = 'string', default = 'submitDir',
                    help = 'Submission directory for EventLoop' )
-parser.add_option("--force-input", action = "append", dest = "force_input",
+parser.add_option("--input-file", action = "append", dest = "input_file",
                   default = None,
-                  help = "Force the given input file")
+                  help = "Specify the input file")
 parser.add_option( '-u', '--unit-test', dest='unit_test',
                    action = 'store_true', default = False,
                    help = 'Run the job in "unit test mode"' )
@@ -56,9 +56,6 @@ parser.add_option( '--for-compare', dest='for_compare',
 parser.add_option( '--physlite', dest='physlite',
                    action = 'store_true', default = False,
                    help = 'Configure the job for physlite' )
-parser.add_option( '--no-physlite-broken', dest='no_physlite_broken',
-                   action = 'store_true', default = False,
-                   help = 'Configure the job to skip algorithms that fail on physlite test file' )
 parser.add_option( '--geometry', dest='geometry',
                    action = 'store', type = 'string', default = 'RUN2',
                    help = 'LHC Run period to run over. Valid options are RUN2, RUN3' )
@@ -85,7 +82,6 @@ blockConfig = options.block_config
 textConfig = options.text_config
 forCompare = options.for_compare
 isPhyslite = options.physlite
-noPhysliteBroken = options.no_physlite_broken
 geometry = options.geometry
 
 # No R24 FastSim recommendations for EGamma yet
@@ -108,9 +104,9 @@ else :
     inputfile = {"data": 'ASG_TEST_FILE_DATA',
                  "mc":   'ASG_TEST_FILE_MC',
                  "afii": 'ASG_TEST_FILE_MC_AFII'}
-if options.force_input :
-    for file_idx in range(len(options.force_input)):
-        testFile = options.force_input[file_idx]
+if options.input_file:
+    for file_idx in range(len(options.input_file)):
+        testFile = options.input_file[file_idx]
         sample.add (testFile)
 else:
     testFile = os.getenv (inputfile[dataType])
@@ -122,7 +118,10 @@ flags = None
 if options.use_flags:
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = [testFile]
+    if options.input_file:
+        flags.Input.Files = options.input_file[:]
+    else:
+        flags.Input.Files = [testFile]
     flags.lock()
 
 # Create an EventLoop job.
@@ -142,7 +141,7 @@ from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSeq
 algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = options.no_systematics,
                        hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
-                       noPhysliteBroken=noPhysliteBroken, geometry=geometry,
+                       geometry=geometry,
                        autoconfigFromFlags=flags, onlyNominalOR=options.onlyNominalOR,
                        forceEGammaFullSimConfig=forceEGammaFullSimConfig)
 printSequenceAlgs( algSeq ) # For debugging

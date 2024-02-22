@@ -27,7 +27,8 @@ class AnaAlgSequence( AlgSequence ):
         "_algorithmMeta",
         "_metaConfigDefault",
         "_isGaudiConfig2",
-        "_gaudiConfig2List",
+        "_gaudiConfig2Algorithms",
+        "_gaudiConfig2PublicTools",
         "_algToDecorToolMap",
     )
 
@@ -53,21 +54,33 @@ class AnaAlgSequence( AlgSequence ):
         self._metaConfigDefault = {}
         # Special members for GaudiConfig2 types
         self._isGaudiConfig2 = False
-        self._gaudiConfig2List = []
+        self._gaudiConfig2Algorithms = []
+        self._gaudiConfig2PublicTools = []
         # For tools that need to be aware of their parent's
         # input/output properties (for DecorHandle management)
         self._algToDecorToolMap = {}
 
         return
 
-    # Special method to add Gaudi2 components to a stand-alone list to avoid type clashes  
-    def addGaudiConfig2Component(self,alg):
+    # Special method to add Gaudi2 algorithms to a stand-alone list to avoid type clashes  
+    def addGaudiConfig2Algorithm(self,alg):
         self._isGaudiConfig2 = True
-        self._gaudiConfig2List.append(alg)
+        self._gaudiConfig2Algorithms.append(alg)
         return
-    # Access Gaudi2 components
-    def getGaudiConfig2Components(self):
-        return self._gaudiConfig2List
+
+    # Special method to add Gaudi2 public tools to a stand-alone list to avoid type clashes  
+    def addGaudiConfig2PublicTool(self,alg):
+        self._isGaudiConfig2 = True
+        self._gaudiConfig2PublicTools.append(alg)
+        return
+
+    # Access Gaudi2 algorithms
+    def getGaudiConfig2Algorithms(self):
+        return self._gaudiConfig2Algorithms
+
+    # Access Gaudi2 public tools
+    def getGaudiConfig2PublicTools(self):
+        return self._gaudiConfig2PublicTools
 
     # Some tools (e.g. IJetDecorator instances) hold a container name to handle
     # Read/WriteDecorHandles correctly
@@ -108,7 +121,8 @@ class AnaAlgSequence( AlgSequence ):
         # are not actually attached to the sequence, rather than looping directly over the 
         # sequence the contents are copied into a list so that it works for both cases
         listOfAlgs = []
-        if self._isGaudiConfig2: listOfAlgs = self._gaudiConfig2List
+        if self._isGaudiConfig2:
+            listOfAlgs = self._gaudiConfig2Algorithms
         else:
             for alg in self: listOfAlgs.append(alg)
 
@@ -272,7 +286,7 @@ class AnaAlgSequence( AlgSequence ):
         meta = AnaAlgorithmMeta( stageName=stageName, inputPropName=inputPropName, outputPropName=outputPropName, metaConfig=metaConfig, dynConfig=dynConfig )
         # This makes sure that a GaudiConfig2 alg isn't attached to an  old-style sequence
         if 'GaudiConfig2' in str(type(alg)):
-            self.addGaudiConfig2Component(alg)
+            self.addGaudiConfig2Algorithm(alg)
         else:   
             self += alg
         self._algorithmMeta.append( meta )
@@ -320,7 +334,9 @@ class AnaAlgSequence( AlgSequence ):
         if not isAthena:
             # We're not in Athena, so let's remember this as a "normal" algorithm:
             self.append( tool, inputPropName = None, stageName = stageName )
-            pass
+        else:
+            if 'GaudiConfig2' in str(type(tool)):
+                self.addGaudiConfig2PublicTool(tool) 
         return
 
     def __delattr__( self, name ):
