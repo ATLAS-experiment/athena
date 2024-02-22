@@ -69,6 +69,7 @@ void ZDC_PileUpTool::initializePbPb2015(){
   m_delayChannels = true;
   m_LTQuadStepFilt = true;
   m_doRPD = false;
+  m_doBRAN = false;
   m_zdct0 = 28;
   m_qsfRiseTime =  0.5;
   m_qsfFallTime =  11;
@@ -83,6 +84,7 @@ void ZDC_PileUpTool::initializeLHCf2022(){
   m_delayChannels = false;
   m_LTQuadStepFilt = false;
   m_doRPD = false;
+  m_doBRAN = false;
   m_zdct0 = 28;
   m_rpdt0 = 28;
   m_zdcRiseTime =  1;
@@ -98,14 +100,15 @@ void ZDC_PileUpTool::initializePbPb2023(){
   m_delayChannels = false;
   m_LTQuadStepFilt = false;
   m_doRPD = true;
-  m_zdct0 = 28;
-  m_rpdt0 = 28;
-  m_zdcRiseTime =  1;
-  m_zdcFallTime =  5.5;
-  m_rpdRiseTime =  0.9;
-  m_rpdFallTime =  20;
+  m_doBRAN = true;
+  m_zdct0 = 31.2;
+  m_rpdt0 = 27.9;
+  m_zdcRiseTime =  1.1;
+  m_zdcFallTime =  4.5;
+  m_rpdRiseTime =  0.8;
+  m_rpdFallTime =  8.4;
   m_zdcAdcPerPhoton = 0.000498;
-  m_rpdAdcPerPhoton = 1.0;
+  m_rpdAdcPerPhoton = 3.5;
 }
 
 StatusCode ZDC_PileUpTool::processAllSubEvents(const EventContext& ctx){
@@ -266,32 +269,42 @@ void ZDC_PileUpTool::fillContainer(const ZDC_SimFiberHit_Collection* ZDC_SimFibe
 }
 
 void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContainer, CLHEP::HepRandomEngine* rndEngine){
-  bool zdcFound[2][4] = {false};
-  bool rpdFound[2][16] = {false};
+  //Initialize bools to keep track of what modules/channels we have seen
+  bool zdcFound[2][4] =  {{false},{false}};
+  bool rpdFound[2][16] = {{false},{false}};
+  bool branFound[2] = {false};
   for(auto module : *zdcModuleContainer){
-    int side = (module->zdcSide() == -1) ? 0 : 1;
+    int iside = (module->zdcSide() == -1) ? 0 : 1;
     int mod = module->zdcModule();
     if(mod < 4){ //ZDC
-      zdcFound[side][mod] = true;
-      ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Found ZDC side " << side << " module " << mod);
-    }else{ //RPD
-      rpdFound[side][module->zdcChannel()] = true;
-      ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Found RPD side " << side << " channel " << module->zdcChannel());
+      zdcFound[iside][mod] = true;
+      ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Found ZDC side " << module->zdcSide() << " module " << mod);
+    }else if(mod == 4){ //RPD
+      rpdFound[iside][module->zdcChannel()] = true;
+      ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Found RPD side " << module->zdcSide() << " channel " << module->zdcChannel());
+    }else{//BRAN
+      branFound[iside] = true;
+      ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Found BRAN side " << module->zdcSide() );
     }
   }
 
-  for(int side : {0,1}){
+  for(int iside : {0,1}){
+    int side = (iside == 0) ? -1 : 1;
     for(int mod = 0; mod < 4; mod++){
-      if(!zdcFound[side][mod]){
+      if(!zdcFound[iside][mod]){
         ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Creating empty waveform for ZDC side " << side << " module " << mod);
         createAndStoreWaveform(new ZDC_SimFiberHit( m_ZdcID->channel_id(side, mod, ZdcIDType::SINGLECHANNEL, 0), 0, 0), rndEngine, zdcModuleContainer);
       }
     }
     for(int channel = 0; channel < 16; channel++){
-      if(!rpdFound[side][channel] && m_doRPD){
+      if(!rpdFound[iside][channel] && m_doRPD){
         ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Creating empty waveform for RPD side " << side << " channel " << channel);
         createAndStoreWaveform(new ZDC_SimFiberHit( m_ZdcID->channel_id(side, 4, ZdcIDType::MULTICHANNEL, channel), 0, 0), rndEngine, zdcModuleContainer);
       }
+    }
+    if(!branFound[iside] && m_doBRAN){
+      ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Creating empty waveform for BRAN side " << side );
+      createAndStoreWaveform(new ZDC_SimFiberHit( m_ZdcID->channel_id(side, 5, ZdcIDType::SINGLECHANNEL, 0), 0, 0), rndEngine, zdcModuleContainer);
     }
   }
 }
@@ -353,6 +366,9 @@ void ZDC_PileUpTool::createAndStoreWaveform(const ZDC_SimFiberHit &hit, CLHEP::H
   int side = m_ZdcID->side(id);
   int module = m_ZdcID->module(id);
   int channel = m_ZdcID->channel(id);
+
+  if(module == 4 && !m_doRPD) return;
+  if(module == 5 && !m_doBRAN) return;
 
   //Here we have to switch the type of the RPD from ACTIVE to MULTICHANNEL
   //TODO: Either change the channel numbering in the geometry, or the analysis
