@@ -40,11 +40,7 @@ class ZDC_SimFiberHit
   {
   }
 
-  /**
-   * @brief Copy constructor 
   
-  ZDC_SimFiberHit(const ZDC_SimFiberHit *right) : ZDC_SimFiberHit(*right){};
-  */
   Identifier getID      () const { return m_ID; }
   double     getEdep    () const { return m_Edep; }
   int        getNPhotons() const { return m_Nphotons; }
@@ -110,17 +106,11 @@ class ZDC_SimFiberHit
     m_Edep += h.m_Edep;
   }
 
-  void Add(ZDC_SimFiberHit *h){
-    Add(*h);
-  }
 
   bool Equals(const ZDC_SimFiberHit& h) const { 
     return (m_ID == h.m_ID); 
   };
-  bool Equals(const ZDC_SimFiberHit* h) const {
-    return Equals (*h);
-  }
-
+  
 
  private:
   
