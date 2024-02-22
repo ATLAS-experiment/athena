@@ -1,6 +1,6 @@
 #!/bin/env python3
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Original Author: davide.gerbaudo@gmail.com, Jul 2017
 # Modified by edward.moyse@cern.ch, Dec 2020
@@ -20,7 +20,7 @@ import subprocess
 import re
 import os
 import argparse
-
+from functools import cache
 
 gitlab_available = True
 try:
@@ -57,7 +57,11 @@ def main():
 
     if args.sweep:
         target_release = ''         # not used
-        previous_release = 'HEAD^'  # parent of merge commit
+        # The base for the release notes is the parent of the last merge commit.
+        # Usually this should be (HEAD^) but in case commits had to be reverted it
+        # could be further back in the history.
+        last_merge = get_command_output("git log --pretty=format:%H --merges -n 1")['stdout'].decode('ascii')
+        previous_release = f'{last_merge}^'
         nightly_tag = 'HEAD'        # current HEAD
     else:
         if args.target is None or args.nightly is None:
@@ -102,7 +106,7 @@ def main():
     release_notes = fill_template(sweep_template() if args.sweep else default_template(),
                                   target_release, nightly_tag, previous_release,
                                   merged_mrs, output_filename=args.output, verbose=verbose,
-                                  gl_project=gl_project, group_mrs=args.group_merge_requests)
+                                  gl=gl, group_mrs=args.group_merge_requests)
 
     print()
     if not args.sweep and args.token and gitlab_available:
@@ -126,6 +130,23 @@ def main():
 
     # Create a Draft sweep MR in GitLab
     if args.sweep and args.token and gitlab_available:
+        # Warn in case one of the merged MRs has the sweep:ignore label
+
+        sweep_ignore = [mr for mr in merged_mrs if 'sweep:ignore' in mr.labels]
+        if sweep_ignore:
+            print('*'*80)
+            print('WARNING - the following MRs have the sweep:ignore label attached')
+            for mr in sweep_ignore:
+                print(f'  { mr.web_url} [branch: {mr.source_branch}]')
+            print()
+            print('Check the MRs and if needed revert them before proceeding:')
+            for mr in sweep_ignore:
+                print(' ', get_revert_cmd(mr.source_branch))
+            print('  git push origin')
+            print('  # Then rerun prepare_release_notes.py, ignore this message and edit the MR description as needed')
+            print('*'*80)
+            print()
+
         current_branch = subprocess.check_output("git rev-parse --abbrev-ref HEAD",
                                                  shell=True).decode('ascii').strip()
         msg = f'Would you like me to create the sweep MR in gitlab from "{current_branch}"?'
@@ -208,12 +229,19 @@ def guess_previous_and_check(target_release='release/xx.y.z'):
 
 
 def get_command_output(command, with_current_environment=False):
-    "lifted from supy (https://github.com/elaird/supy/blob/master/utils/io.py)"
+    # lifted from supy (https://github.com/elaird/supy/blob/master/utils/io.py)
     env = None if not with_current_environment else os.environ.copy()
     p = subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     stdout, stderr = p.communicate()
     return {"stdout": stdout, "stderr": stderr, "returncode": p.returncode}
+
+
+def get_revert_cmd(branch):
+    """Get git revert commands required to revert the given branch name"""
+    # Find the merge commit that mentions the branch name
+    commit = get_command_output(f"git log --pretty=format:%H --grep \"^Merge branch '{branch}'\"")['stdout'].decode('ascii')
+    return f"git revert -m1 {commit}"
 
 
 class MergeRequestInfo(object):
@@ -305,18 +333,27 @@ def sweep_template():
 {formatted_list_of_merge_requests:s}
 """
 
-def format_mrs_from_gitlab(merged_mrs, group_mrs=False):
+def format_mrs_from_gitlab(merged_mrs, group_mrs=False, gl=None):
 
-    # FIXME - we don't want to dump all labels, so have an approved list
-    # However should try to think of a way to link to domain_map.py?
-    # For the time being, this list was made as follows:
-    # import domain_map.py
-    # allowed_labels = sorted(domain_map.DOMAIN_MAP.keys())
-    # and then edited to remove e.g. Bugfix
     def allowed_label(label):
-        allowed_labels = {'ACTS', 'Analysis', 'AnalysisTop', 'BTagging', 'Build', 'CI', 'Calorimeter', 'CaloRinger', 'Core', 'DQ', 'Database', 'Derivation', 'Digitization', 'EDM', 'Egamma', 'EventDisplay', 'Externals', 'ForwardDetectors', 'Generators', 'Geometry', 'HGTD', 'ITk', 'InnerDetector', 'JetEtmiss', 'LAr', 'Magnets', 'MuonSpectrometer', 'Other', 'Overlay', 'Powheg', 'QuickAna', 'Reconstruction', 'SUSYTools', 'Simulation', 'Tau', 'Test', 'TestBeam', 'Tile', 'Tools', 'Tracking', 'Trigger', 'TriggerEDM', 'TriggerID', 'TriggerJet', 'TriggerMenu', 'TriggerMinBias', 'frozen-tier0-violating'}
+        """Check if given label should be shown in release notes"""
+        @cache
+        def allowed_labels():
+            """Read domain labels from the CI repository"""
+            gl_project = gl.projects.get("atlas-sit/CI")
+            domains_py = gl_project.files.raw("data/domain_map.py", "master")
+            namespace = {}
+            exec(domains_py, namespace)
+            labels = set(namespace['DOMAIN_MAP'])
+
+            # Add/remove some labels
+            labels.discard('full-unit-tests')
+            labels.add('frozen-tier0-violating')
+            labels.add('sweep:ignore')
+            return labels
+
         allowed_labels_regex = [re.compile('changes-.*'), re.compile('.*-output-changed')]
-        return label in allowed_labels or any(regex.match(label) for regex in allowed_labels_regex)
+        return label in allowed_labels() or any(regex.match(label) for regex in allowed_labels_regex)
 
     lines = []
     if group_mrs:
@@ -339,10 +376,10 @@ def format_mrs_from_gitlab(merged_mrs, group_mrs=False):
 
 
 def fill_template(template, target_release, nightly_tag, previous_release,
-                  merged_mrs=[], output_filename='foo.md', verbose=False, gl_project=None, group_mrs=False):
+                  merged_mrs=[], output_filename='foo.md', verbose=False, gl=None, group_mrs=False):
     formatted_mrs = ""
-    if gl_project:
-        formatted_mrs = format_mrs_from_gitlab(merged_mrs, group_mrs)
+    if gl:
+        formatted_mrs = format_mrs_from_gitlab(merged_mrs, group_mrs, gl=gl)
     else:
         formatted_mrs = '\n'.join(
             [" * %s" % mr for mr in merged_mrs]) if merged_mrs else '* None'
