@@ -2,7 +2,11 @@
 #include("GeneratorFilters/AntiKt4TruthWZJets.py")
 include ("GeneratorFilters/FindJets.py")
 CreateJets(prefiltSeq, 0.4,"WZ")
+
 include ("GeneratorFilters/CreatexAODSlimContainers.py")
+createxAODSlimmedContainer("TruthGen",prefiltSeq)
+prefiltSeq.xAODCnv.AODContainerName = 'GEN_EVENT'
+
 from GeneratorFilters.GeneratorFiltersConf import xAODHTFilter
 if "xAODHTFilter" not in filtSeq:
     filtSeq += xAODHTFilter()

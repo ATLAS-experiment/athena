@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -65,8 +65,25 @@ StatusCode xAODTruthParticleSlimmerElectron::execute()
     for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++itr) {
 
         unsigned int nPart = (*itr)->nTruthParticles();
+        std::vector<int> barcode_list;
+        int zero_barcode=0;
+        int dup_barcode=0;
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
+            int my_barcode = theParticle->barcode();
+            if (my_barcode==0 ) {
+                zero_barcode++;
+                continue;
+              }
+           bool found = false;
+           if (barcode_list.size() > 0){
+             found = (std::find(barcode_list.begin(), barcode_list.end(), my_barcode) != barcode_list.end());
+             if(found) {
+                       dup_barcode++; 
+                       continue;}
+            }
+            barcode_list.push_back(my_barcode);
+            
 
             //Save stable Electrons
             if (MC::isStable(theParticle) && MC::isElectron(theParticle))
@@ -78,6 +95,7 @@ StatusCode xAODTruthParticleSlimmerElectron::execute()
                 *xTruthParticle=*theParticle;
             }   
         }
+        if (zero_barcode!=0 || dup_barcode!=0) ATH_MSG_INFO("Found " << zero_barcode << " barcode=0 particles and " << dup_barcode <<" duplicated");
     }
 
     return StatusCode::SUCCESS;

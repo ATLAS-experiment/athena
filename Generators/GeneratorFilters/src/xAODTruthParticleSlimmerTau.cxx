@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -103,15 +103,36 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
   const static SG::AuxElement::Decorator<int> tauTypeDecorator("tauType");
 
   // Loop over full TruthParticle container
+  
+  std::vector<int> barcode_list;  
+  int zero_barcode=0;
+  int dup_barcode = 0;
+
   unsigned int nParticles = xTruthParticleContainer->size();
+
   for (unsigned int iPart = 0; iPart < nParticles; ++iPart)
   {
     ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, iPart);
     const xAOD::TruthParticle *theParticle = (*xTruthParticleContainer)[iPart];
+             
+    int my_barcode = theParticle->barcode();
+    if (my_barcode==0 ) {
+       zero_barcode++;
+       continue;
+       }
+     bool found = false;
+     if (barcode_list.size() > 0){
+        found = (std::find(barcode_list.begin(), barcode_list.end(), my_barcode) != barcode_list.end());
+        if(found) {
+           dup_barcode++;
+           continue;}
+     }
+     barcode_list.push_back(my_barcode);
 
     float this_abseta = theParticle->abseta();
     float this_pt = theParticle->pt();
     int this_status = theParticle->status();
+
 
     //Save Taus above 0.001 GeV, & with any eta (may be changed on JOs level eg. to dectector acceptance of eta 4.5)
     // see GeneratorFilters/share/common/xAODTauFilter_Common.py
@@ -166,6 +187,6 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
     }
 
   } //end of loop over particles
-
+  if(zero_barcode!=0 || dup_barcode != 0) ATH_MSG_INFO("Found " << zero_barcode << " barcode=0 particles and " << dup_barcode << " duplicated");
   return StatusCode::SUCCESS;
 }

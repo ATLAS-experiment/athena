@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 // This is a general-purpose multi-b-jet filter. It can cut on:
 //    - Multiplicity of b-jets (both min and max can be specified)
@@ -80,12 +80,12 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
     jets.push_back(jitr);
   }
 
- // Retrieve full TruthEventContainer container
-   const xAOD::TruthEventContainer *xTruthEventContainer=NULL;
-   if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-   {
-  ATH_MSG_ERROR("No TruthEvent collection with name " << "TruthEvents" << " found in StoreGate!");
-    return StatusCode::FAILURE;
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
   }
                                   
   // Apply leading jet pt cut
@@ -98,14 +98,11 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
 
   int bJetCounter = 0;
  
-  McEventCollection::const_iterator itr;
-
-    // Make a vector containing all the event's b-hadrons
-    std::vector< const xAOD::TruthParticle* > bHadrons;  
-  for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr) {
-       unsigned int nPart = (*itr)->nTruthParticles();
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+  // Make a vector containing all the event's b-hadrons
+  std::vector< const xAOD::TruthParticle* > bHadrons;  
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
    
       if( !isBwithWeakDK( part->absPdgId()) ) continue;
       if( part->pt() < m_bottomPtMin ) continue;
@@ -125,7 +122,6 @@ StatusCode xAODMultiBjetFilter::filterEvent() {
         }
       }
     }
-  }
 
   // Apply b-jet multiplicity cut
   if(bJetCounter < m_nBJetsMin) pass = false;

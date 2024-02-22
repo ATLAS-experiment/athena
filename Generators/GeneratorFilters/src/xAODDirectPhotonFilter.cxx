@@ -59,22 +59,19 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
   std::vector<const xAOD::TruthParticle*> promptPhotonsInEta;
 
   int phot = 0;
-  // Retrieve full TruthEvent container
-  const xAOD::TruthEventContainer *xTruthEventContainer;
-  if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-  {
-    ATH_MSG_ERROR("No TruthEvents collection with name  TruthEvents found in StoreGate!");
-    return StatusCode::FAILURE;
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
   }
 
-  xAOD::TruthEventContainer::const_iterator itr;
-  for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++itr) {
-    const xAOD::TruthEvent* genEvt = (*itr);
- 
-    // Find all prompt photons with within given eta range
-    unsigned int nPart = genEvt->nTruthParticles();
-    for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-        const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
+ // Loop over all particles in the event and find photons in given eta range
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
+
       if (MC::isPhoton(pitr) &&
           MC::isStable(pitr) &&
           std::abs(pitr->eta()) <= m_EtaRange) {
@@ -95,8 +92,8 @@ StatusCode xAODDirectPhotonFilter::filterEvent() {
         if (!fromHadron) promptPhotonsInEta.push_back(pitr);
         else ATH_MSG_DEBUG("non-prompt photon ignored");
       }
-    }
-  }
+    } //loop over TruthParticles
+  
 
   ATH_MSG_DEBUG("number of photons" << phot);
 

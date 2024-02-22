@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // --------------------------------------------------
@@ -64,20 +64,19 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
   std::vector<double> vLeptonEta;
   std::vector<  std::vector < size_t > > vLeptonParentPDGIDs;
 
-  // Retrieve full TruthEvent container
-  const xAOD::TruthEventContainer *xTruthEventContainer;
-  if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-  {
-    ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthEvents" << " found in StoreGate!");
-    return StatusCode::FAILURE;
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
   }
-  for (xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++itr) {
-    // Loop over all particles in the event
-    const xAOD::TruthEvent* genEvt = (*itr);
 
-    unsigned int nPart = genEvt->nTruthParticles();
-    for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-        const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
+  // Loop over all particles in the event 
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
+
         if( !MC::isStable(pitr) ) continue;
         // check stable particles only
         // We do not place requirements on their origins (updated: optionally rejecting hadron decays)
@@ -114,9 +113,8 @@ StatusCode xAODLeptonPairFilter::filterEvent() {
         for(size_t thisParent_id=0; pitr->prodVtx()->nIncomingParticles()<thisParent_id;thisParent_id++) 
           parentPDG_tmp.push_back(pitr->prodVtx()->incomingParticle(thisParent_id)->pdgId());
         vLeptonParentPDGIDs.push_back(parentPDG_tmp);
-    }
+    } //loop over TruthParticles
 
-  }
 
   int nLeptons = vLeptonPDGIDs.size();
 

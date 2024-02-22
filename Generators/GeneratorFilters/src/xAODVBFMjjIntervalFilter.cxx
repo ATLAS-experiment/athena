@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -83,30 +83,28 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
         return StatusCode::SUCCESS;
     }
 
-    // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer = NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-        ATH_MSG_ERROR("No TruthEvent collection with name "
-                      << "TruthEvents"
-                      << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }
+
 
     // Find overlap objects
     std::vector<const xAOD::TruthParticle *> MCTruthPhotonList;
     std::vector<const xAOD::TruthParticle *> MCTruthElectronList;
     std::vector<TLorentzVector> MCTruthTauList;
-    for (xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr)
-    {
-        unsigned int nPart = (*itr)->nTruthParticles();
 
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart)
-        {
-            const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
-            if (m_photonjetoverlap == true)
-            {
-                // photon - copied from VBFForwardJetsFilter.cxx
+  // Loop over all particles in the event
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
+
+      if (m_photonjetoverlap == true)
+          {
+         // photon - copied from VBFForwardJetsFilter.cxx
                 if (MC::isPhoton(pitr) && MC::isStable(pitr) &&
                     pitr->pt() >= m_olapPt &&
                     std::abs(pitr->eta()) <= m_yMax)
@@ -158,8 +156,8 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
                     }
                 }
             }
-        }
-    }
+        } //loop over truth particles
+    
 
     // Filter based on rapidity acceptance and sort
     ConstDataVector<xAOD::JetContainer> filteredJets(SG::VIEW_ELEMENTS);

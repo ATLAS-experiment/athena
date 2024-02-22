@@ -2,7 +2,7 @@
 # connecting the filter
 
 include ("GeneratorFilters/CreatexAODSlimContainers.py")
-createxAODSlimmedContainer("TruthLightLeptons",prefiltSeq)
+createxAODSlimmedContainer("TruthGen",prefiltSeq)
 prefiltSeq.xAODCnv.AODContainerName = 'GEN_EVENT'
 
 

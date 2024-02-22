@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -128,27 +128,21 @@ StatusCode xAODHTFilter::filterEvent()
   if (m_UseLep || m_UseNu)
   {
 
-    // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer = NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-      ATH_MSG_ERROR("No TruthEvent collection with name "
-                    << "TruthEvents"
-                    << " found in StoreGate!");
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
       return StatusCode::FAILURE;
-    }
+  }
 
     std::vector<const xAOD::TruthParticle *> WZleptons;
     WZleptons.reserve(10);
     
     // Loop over full TruthParticle container
-    xAOD::TruthEventContainer::const_iterator itr;
-    for (itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr)
-    {
-      unsigned int nPart = (*itr)->nTruthParticles();
-      for (unsigned int iPart = 0; iPart < nPart; ++iPart)
-      {
-        const xAOD::TruthParticle *theParticle = (*itr)->truthParticle(iPart);
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+        const xAOD::TruthParticle* theParticle =  (*xTruthParticleContainer)[iPart];
         if (!theParticle)
           continue;
         int pdgid = theParticle->pdgId();
@@ -169,8 +163,7 @@ StatusCode xAODHTFilter::filterEvent()
             HT += theParticle->pt();
           }
         }
-      }
-    } // End need to access MC Event
+      } // End loop over particles
   }
 
   HT /= Gaudi::Units::GeV; // Make sure we're in GeV

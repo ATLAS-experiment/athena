@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODJetFilter.h"
@@ -63,16 +63,20 @@ StatusCode xAODJetFilter::filterEvent() {
     }
   }
 
-  // Retrieve full TruthEventContainer container
-  const xAOD::TruthEventContainer* xTruthEventContainer = NULL;
-  ATH_CHECK(evtStore()->retrieve(xTruthEventContainer, "TruthEvents"));
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }
   
   // Loop over all particles in the event and build up the grid
 
-  for(const xAOD::TruthEvent* genEvt : *xTruthEventContainer) {
-    unsigned int nPart = (genEvt)->nTruthParticles();
-    for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-      const xAOD::TruthParticle* part = (genEvt)->truthParticle(iPart);
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
+
       if (part->isGenStable()) {  // stables only
         if ((part->pdgId() != 13) && (part->pdgId() != -13) &&
             (part->pdgId() != 12) && (part->pdgId() != -12) &&
@@ -99,9 +103,8 @@ StatusCode xAODJetFilter::filterEvent() {
                             // is calculated
           etgrid[ip][ie] = etgrid[ip][ie] + part->pt();  // fortran had pt here
         }
-      }
     }
-  }
+  } // end Particles loop
 
   // Find the highest cell; we loop here until we cannot find more jets
   double ethigh = 2. * m_stop;  // et of highest cell

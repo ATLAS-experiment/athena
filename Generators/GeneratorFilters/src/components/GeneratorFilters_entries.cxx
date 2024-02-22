@@ -40,6 +40,7 @@
 // slimmers for 22.6
 #include "GeneratorFilters/PileupTruthParticleSlimmer.h"
 #include "GeneratorFilters/xAODTruthParticleSlimmerElectron.h"
+#include "GeneratorFilters/xAODTruthParticleSlimmerGen.h" 
 #include "GeneratorFilters/xAODTruthParticleSlimmerLightLepton.h"
 #include "GeneratorFilters/xAODTruthParticleSlimmerMET.h"
 #include "GeneratorFilters/xAODTruthParticleSlimmerMuon.h"
@@ -144,6 +145,7 @@ DECLARE_COMPONENT( xAODParticleDecayFilter)
 //slimmers accepted for 22.6
 DECLARE_COMPONENT( PileupTruthParticleSlimmer )
 DECLARE_COMPONENT( xAODTruthParticleSlimmerElectron )
+DECLARE_COMPONENT( xAODTruthParticleSlimmerGen)  
 DECLARE_COMPONENT( xAODTruthParticleSlimmerLightLepton )
 DECLARE_COMPONENT( xAODTruthParticleSlimmerMET)
 DECLARE_COMPONENT( xAODTruthParticleSlimmerMuon )
@@ -172,6 +174,7 @@ DECLARE_COMPONENT( MultiCjetFilter )
 DECLARE_COMPONENT( MultiElecMuTauFilter )
 DECLARE_COMPONENT( MultiLeptonFilter )   
 DECLARE_COMPONENT( MultiMuonFilter )
+DECLARE_COMPONENT( MuDstarFilter )
 DECLARE_COMPONENT( MuonFilter )  
 DECLARE_COMPONENT( ParentChildFilter )
 DECLARE_COMPONENT( ParentTwoChildrenFilter )
