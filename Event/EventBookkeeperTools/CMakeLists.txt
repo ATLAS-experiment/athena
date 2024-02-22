@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( EventBookkeeperTools )
@@ -41,7 +41,6 @@ atlas_add_executable( dump-cbk
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
 
 # Tests
 atlas_add_test( DumpCbkTest
@@ -81,46 +80,5 @@ if( NOT XAOD_STANDALONE )
                         PRIVATE_WORKING_DIRECTORY
                         POST_EXEC_SCRIPT noerror.sh )
       endif()
-   endif()
-
-   atlas_add_test( CutFlowSvcDummyAlg
-                   SCRIPT athena EventBookkeeperTools/TestCutFlowSvcDummyAlg.py
-                   PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT noerror.sh )
-
-   atlas_add_test( CutFlowSvcOutput
-                   SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py
-                   PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT noerror.sh )
-
-   atlas_add_test( CutFlowSvcOutputAlt
-                   SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py -c alternativeInput=True
-                   PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT noerror.sh )
-
-   atlas_add_test( CutFlowSvcOutputMT
-                   SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py --threads=2
-                   PROPERTIES PROCESSORS 2
-                   PRIVATE_WORKING_DIRECTORY
-                   POST_EXEC_SCRIPT noerror.sh )
-
-   if( NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
-      atlas_add_test( CutFlowSvcOutputMPStandardIO
-                      SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py --nprocs=2 -c sharedWriter=False
-                      PROPERTIES PROCESSORS 2
-                      PRIVATE_WORKING_DIRECTORY
-                      POST_EXEC_SCRIPT noerror.sh )
-
-      atlas_add_test( CutFlowSvcOutputMPSharedWriter
-                      SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py --nprocs=2 -c sharedWriter=True
-                      PROPERTIES PROCESSORS 2
-                      PRIVATE_WORKING_DIRECTORY
-                      POST_EXEC_SCRIPT nopost.sh )
-
-      atlas_add_test( CutFlowSvcOutputMPSharedWriterAlt
-                      SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py --nprocs=2 -c sharedWriter=True -c alternativeInput=True
-                      PROPERTIES PROCESSORS 2
-                      PRIVATE_WORKING_DIRECTORY
-                      POST_EXEC_SCRIPT nopost.sh )
    endif()
 endif()
