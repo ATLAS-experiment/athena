@@ -750,7 +750,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   if (MC::isBSM(motherPDG)) return OtherBSM;
 
   ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && isHardScatVrtx(mothOriVert)) isPrompt = true;
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatVrtx(mothOriVert)) isPrompt = true;
 
   return convHadronTypeToOrig(pType, motherPDG);
 }
@@ -1034,7 +1034,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   if (MC::isBSM(motherPDG)) return OtherBSM;
 
   ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && isHardScatVrtx(mothOriVert))
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatVrtx(mothOriVert))
     isPrompt = true;
 
   return convHadronTypeToOrig(pType, motherPDG);
@@ -1582,7 +1582,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   }
 
   ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && isHardScatVrtx(mothOriVert)) isPrompt = true;
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatVrtx(mothOriVert)) isPrompt = true;
   return convHadronTypeToOrig(pType, motherPDG);
 }
 //-------------------------------------------------------------------------------
@@ -1881,7 +1881,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (MC::isBSM(motherPDG)) return OtherBSM;
 
   ParticleType pType = defTypeOfHadron(motherPDG);
-  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && isHardScatVrtx(mothOriVert))
+  if ((pType == BBbarMesonPart || pType == CCbarMesonPart) && mothOriVert != nullptr && MC::isHardScatVrtx(mothOriVert))
     isPrompt = true;
 
   //----
@@ -1950,36 +1950,6 @@ ParticleType MCTruthClassifier::defTypeOfHadron(int pdg) {
   if (MC::isStrangeMeson(pdg)) return StrangeMesonPart;
   if (MC::isLightMeson(pdg)) return LightMesonPart;
   return Unknown;
-}
-
-//-------------------------------------------------------------------------------
-bool MCTruthClassifier::isHardScatVrtx(const xAOD::TruthVertex* pVert) {
-  if (pVert == nullptr) return false;
-
-  const xAOD::TruthVertex* pV = pVert;
-  int numOfPartIn(0);
-  int pdg(0);
-  int NumOfParton(0);
-
-  do {
-    pVert = pV;
-    numOfPartIn = pVert->nIncomingParticles();
-    pdg = numOfPartIn != 0 && pVert->incomingParticle(0) != nullptr ? pVert->incomingParticle(0)->pdgId() : 0;
-    pV = numOfPartIn != 0 && pVert->incomingParticle(0) != nullptr && pVert->incomingParticle(0)->hasProdVtx()
-           ? pVert->incomingParticle(0)->prodVtx()
-           : nullptr;
-
-  } while (numOfPartIn == 1 && (abs(pdg) < 81 || abs(pdg) > 100) && pV != nullptr);
-
-  if (numOfPartIn == 2) {
-    for (unsigned int ipIn = 0; ipIn < pVert->nIncomingParticles(); ipIn++) {
-      if (!pVert->incomingParticle(ipIn)) continue;
-      if (abs(pVert->incomingParticle(ipIn)->pdgId()) < 7 || pVert->incomingParticle(ipIn)->pdgId() == 21) NumOfParton++;
-    }
-    if (NumOfParton == 2) return true;
-  }
-
-  return false;
 }
 
 //---------------------------------------------------------------------------------
@@ -2272,23 +2242,6 @@ MCTruthClassifier::find_matching(const xAOD::TruthParticleContainer* TruthTES, c
   return ptrPart;
 }
 
-//------------------------------------------------------------------------
-const xAOD::TruthParticle* MCTruthClassifier::isHadronFromB(const xAOD::TruthParticle* p) const {
-  // If we have reached a dead end, stop here
-  if (!p) return nullptr;
-  // If we have struck a bottom hadron or b-quark, then this is from a b and we return it
-  int pid = abs(p->pdgId());
-  if (p->isBottomHadron() || pid == MC::BQUARK) return p;
-  // End cases -- if we have hit anything fundamental other than a c-quark, stop
-  if (pid == MC::CQUARK) return nullptr;
-  // If we hit a BSM particle or nucleus, stop
-  if (MC::isNucleus(pid) || MC::isBSM(pid)) return nullptr;
-  // Check for loops and dead-ends
-  if (!p->hasProdVtx()) return nullptr;
-  if (p->prodVtx()->nIncomingParticles() == 0) return nullptr;
-  // Otherwise grab the mother and recurse - no need to deal with 2->1 vertices here
-  return isHadronFromB(p->prodVtx()->incomingParticle(0));
-}
 void
 MCTruthClassifier::findParticleDaughters(const xAOD::TruthParticle* thePart, std::set<const xAOD::TruthParticle*>& daughters) const {
 

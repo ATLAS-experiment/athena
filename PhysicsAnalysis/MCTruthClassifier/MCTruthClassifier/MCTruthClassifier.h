@@ -81,7 +81,6 @@ public:
     const xAOD::TruthParticle* thePart,
     Info* info = nullptr) const override;
 
-  virtual const xAOD::TruthParticle* isHadronFromB(const xAOD::TruthParticle*) const override;
   const xAOD::TruthParticle* getMother(const xAOD::TruthParticle*) const;
 
   virtual unsigned int classify(const xAOD::TruthParticle*) const override;
@@ -201,7 +200,6 @@ private:
                                                                     int motherPDG);
   //
   static const xAOD::TruthVertex* findEndVert(const xAOD::TruthParticle*) ;
-  static bool isHardScatVrtx(const xAOD::TruthVertex*);
   //
   std::vector<const xAOD::TruthParticle*> findFinalStatePart(const xAOD::TruthVertex*) const;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTHUTILS_HEPMCHELPERS_H
 #define TRUTHUTILS_HEPMCHELPERS_H
@@ -8,12 +8,12 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include <set>
 #include "TruthUtils/MagicNumbers.h"
 
 /// @file
 ///
-/// Provides the HepMC tools from the external MCUtils header package,
-/// ATLAS-specific HepMC functions not suitable for MCUtils.
+/// ATLAS-specific HepMC functions
 
 namespace MC
 {
@@ -66,6 +66,63 @@ namespace MC
     if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
     return false;
   }
+
+/** MCTruthCalssifier functions */
+
+  /// @brief Function to get the particle stable MC daughters.
+  /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
+  template <class T> void findParticleDaughters(T thePart, std::set<T>& daughters) {
+    auto endVtx = thePart->end_vertex();
+    if (!endVtx) return;
+    for (auto theDaughter: endVtx->particles_out()) {
+      if (theDaughter && isStable(theDaughter) && !HepMC::is_simulation_particle(theDaughter)) {
+         daughters.insert(theDaughter);
+      }
+      findParticleDaughters(theDaughter, daughters);
+    }
+  }
+
+  /// @brief Function to get the parent B hadron.
+  /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
+  template <class T>  T isHadronFromB(T p) {
+    if (!p) return nullptr;
+    int pid = abs(p->pdg_id());
+    if (isBottomHadron(pid) || pid == BQUARK) return p;
+    if (pid == CQUARK || isNucleus(pid) || isBSM(pid) || !p->production_vertex()) return nullptr;
+    auto incoming = p->production_vertex()->particles_in();
+    if (incoming.size() == 0) return nullptr;
+    /// AV: Strictly speaking, this is wrong and one has to check all the incoming particles.
+    /// However that is MCTruthCalssifier legacy that should be fixed later at some point.
+    return isHadronFromB(incoming.front());
+  }
+
+  /// @brief Function to classify the vertex as hard scattering vertex.
+  /// AV: This is MCtruthClassifier legacy. Note that this function willnot capture some cases of the HardScattering vertices.
+  /// The function should be improved in the future.
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
+  template <class T>  bool isHardScatVrtx(T pVert) {
+    if (pVert == nullptr) return false;
+    T pV = pVert;
+    int numOfPartIn(0);
+    int pdg(0);
+
+    do {
+      pVert = pV;
+      auto incoming = pVert->particles_in();
+      numOfPartIn = incoming.size();
+      pdg = numOfPartIn && incoming.front() != nullptr ? incoming.front()->pdg_id() : 0;
+      pV = numOfPartIn && incoming.front() != nullptr ? incoming.front()->production_vertex() : nullptr;
+
+    } while (numOfPartIn == 1 && (std::abs(pdg) < 81 || std::abs(pdg) > 100) && pV != nullptr);
+
+    if (numOfPartIn == 2) {
+      auto incoming = pVert->particles_in();
+      if (incoming.at(0) && incoming.at(1) && (std::abs(incoming.at(0)->pdg_id()) < 7 || incoming.at(0)->pdg_id() == 21) && (std::abs(incoming.at(1)->pdg_id()) < 7 || incoming.at(1)->pdg_id() == 21)) return true;
+    }
+    return false;
+}
+
+
 
 }
 #endif
