@@ -45,6 +45,7 @@ run "Reconstruction-ckf" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
+    --preExec 'flags.Acts.doMonitoring=True;' \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.ckf.root \
@@ -74,6 +75,7 @@ run "Reconstruction-ambi" \
     Reco_tf.py --CA \
     --steering doRAWtoALL \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
+    --preExec 'flags.Acts.doMonitoring=True;' \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.ambi.root \
