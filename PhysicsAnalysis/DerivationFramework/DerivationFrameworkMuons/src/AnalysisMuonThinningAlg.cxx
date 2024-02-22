@@ -14,6 +14,8 @@ namespace {
 
     using MuonPassDecor = SG::ReadDecorHandle<xAOD::MuonContainer, bool>;
     using TrackPassDecor = SG::ReadDecorHandle<xAOD::TrackParticleContainer, bool>;
+
+    constexpr double MeVtoGeV = 1./ Gaudi::Units::GeV;
 }  // namespace
 namespace DerivationFramework {
 
@@ -108,14 +110,20 @@ namespace DerivationFramework {
         for (const xAOD::Muon* muon : *MuonContainer) {
             /// The muon is rejected by the selection tool
             /// & not marked as pass by the augmentation tools upstream
-            if (m_muonSelTool->getQuality(*muon) > m_quality &&
-                std::find_if(mu_passFlags.begin(), mu_passFlags.end(), [muon](const MuonPassDecor& decor) { return decor(*muon); }) ==
-                    mu_passFlags.end())
+            ATH_MSG_DEBUG("Check muon with pt " << muon->pt() * MeVtoGeV << " [GeV], eta: " << muon->eta() << ", phi: " << muon->phi() << " q: " << muon->charge()
+                                          << " quality: " << muon->quality() << ", author: " << muon->author());
+            
+            if (!m_muonSelTool->accept(*muon) &&
+                std::find_if(mu_passFlags.begin(), mu_passFlags.end(), 
+                            [this, muon](const MuonPassDecor& decor) ->bool { 
+                                ATH_MSG_VERBOSE("Check decorator "<<decor.decorKey()<<" "
+                                            <<SG::AuxTypeRegistry::instance().getName(decor.auxid())
+                                            <<" "<< decor(*muon));
+                                return decor(*muon); 
+                            }) == mu_passFlags.end())
                 continue;
             keep_muo[muon->index()] = true;
-            ATH_MSG_DEBUG("Muon with pt " << muon->pt() << ", eta: " << muon->eta() << ", phi: " << muon->phi() << " q: " << muon->charge()
-                                          << " quality: " << muon->quality() << ", author: " << muon->author()
-                                          << " will be written to the output");
+            ATH_MSG_DEBUG("Muon will be dumped");
 
             /// Ensure that all associated track particles are written to the output file
             for (auto tp :
