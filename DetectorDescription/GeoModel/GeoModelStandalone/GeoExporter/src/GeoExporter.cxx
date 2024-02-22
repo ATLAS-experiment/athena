@@ -235,7 +235,7 @@ if ( !(user_detmanagerslist.empty()) ) {
                 PVConstLink treetop(manager->getTreeTop(i));
 
                 // get treetop's volume
-                const GeoVPhysVol* vol = &(*treetop);
+                const GeoVPhysVol* vol = treetop;
                 
                 // get volume's transform
                 // NOTE: we use getDefX() to get the transform without any alignment
