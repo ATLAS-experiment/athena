@@ -284,13 +284,13 @@ void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContai
     for(int mod = 0; mod < 4; mod++){
       if(!zdcFound[side][mod]){
         ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Creating empty waveform for ZDC side " << side << " module " << mod);
-        createAndStoreWaveform(new ZDC_SimFiberHit( m_ZdcID->channel_id(side, mod, ZdcIDType::SINGLECHANNEL, 0), 0, 0), rndEngine, zdcModuleContainer);
+        createAndStoreWaveform(ZDC_SimFiberHit( m_ZdcID->channel_id(side, mod, ZdcIDType::SINGLECHANNEL, 0), 0, 0), rndEngine, zdcModuleContainer);
       }
     }
     for(int channel = 0; channel < 16; channel++){
       if(!rpdFound[side][channel] && m_doRPD){
         ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Creating empty waveform for RPD side " << side << " channel " << channel);
-        createAndStoreWaveform(new ZDC_SimFiberHit( m_ZdcID->channel_id(side, 4, ZdcIDType::MULTICHANNEL, channel), 0, 0), rndEngine, zdcModuleContainer);
+        createAndStoreWaveform(ZDC_SimFiberHit( m_ZdcID->channel_id(side, 4, ZdcIDType::MULTICHANNEL, channel), 0, 0), rndEngine, zdcModuleContainer);
       }
     }
   }
@@ -333,7 +333,7 @@ TimedHitCollection<ZDC_SimFiberHit> ZDC_PileUpTool::doZDClightGuideCuts(const ZD
       //Make sure the hit exists before attempting to insert it
       //If it doesn't we will take care of this module in addEmptyWaveforms
       if(newHits[side][module]){
-        newCollection->Insert(newHits[side][module]);
+        newCollection->Insert(*(newHits[side][module]));
       }
     }
   }

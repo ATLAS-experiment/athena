@@ -44,11 +44,11 @@ class ZDC_SimFiberHit
    * @brief Copy constructor 
   
   ZDC_SimFiberHit(const ZDC_SimFiberHit *right) : ZDC_SimFiberHit(*right){};
-  
+  */
   Identifier getID      () const { return m_ID; }
   double     getEdep    () const { return m_Edep; }
   int        getNPhotons() const { return m_Nphotons; }
- */
+ 
   /** 
    * @brief Assignment operator 
    */
