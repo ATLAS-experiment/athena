@@ -120,7 +120,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	//	m_provider->msg(MSG::INFO) << " online  beam position\tx=" << xbeam_online << "\ty=" << ybeam_online << "\tz=" << zbeam_online << endmsg; 
 
 	/// list the configured chains once
-    static const std::set<std::string> configuredHLTChains = get_configured_chains();
+	static const std::set<std::string> configuredHLTChains = get_configured_chains();
 
 	Filter_AcceptAll filter;
 	/// FIXME: should really have hardcoded limits encoded as 
