@@ -52,6 +52,13 @@ def configureGeometry(flags, cfg):
 
         cfg.merge(MuonGeoModelCfg(flags))
 
+    # Material due to InDet services
+    if flags.Detector.GeometryID:
+        from InDetServMatGeoModel.InDetServMatGeoModelConfig import (
+             InDetServiceMaterialCfg)
+        cfg.merge(InDetServiceMaterialCfg(flags))
+
+
 
 def getATLASVersion():
     import os
