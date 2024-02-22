@@ -103,8 +103,10 @@ int main(int argc, char* argv[]) {
       float jet_pb = btag->auxdata<float>(EDMTaggerName + "_pb");
       float jet_pc = btag->auxdata<float>(EDMTaggerName + "_pc");
       float jet_pu = btag->auxdata<float>(EDMTaggerName + "_pu");
+      float jet_ptau = 0.;
+      if (taggerName == "GN2v01") jet_ptau = btag->auxdata<float>(EDMTaggerName + "_ptau");
 
-      if( tool->getTaggerWeight(jet_pb,jet_pc,jet_pu, tagweight) != CorrectionCode::Ok ){
+      if( tool->getTaggerWeight(jet_pb,jet_pc,jet_pu, tagweight, jet_ptau) != CorrectionCode::Ok ){
         ANA_MSG_ERROR (" error retrieving tagger weight! " );
         return 1;
       }

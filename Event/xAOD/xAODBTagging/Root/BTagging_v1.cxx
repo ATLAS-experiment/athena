@@ -370,6 +370,13 @@ namespace xAOD {
      if ( output ) value = tmp;
      return output;
    }
+
+   bool BTagging_v1::ptau(const std::string& taggername, double &value) const {
+     float tmp = 0.;
+     bool output = variable<float>(taggername, "ptau", tmp);
+     if ( output ) value = tmp;
+     return output;
+   }
  
    bool BTagging_v1::MVx_discriminant(const std::string& taggername, double &value) const {
      float tmp = 0.;

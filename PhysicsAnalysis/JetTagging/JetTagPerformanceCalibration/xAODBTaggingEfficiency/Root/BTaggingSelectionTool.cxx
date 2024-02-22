@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "CxxUtils/checker_macros.h"
 #include "xAODBTaggingEfficiency/BTaggingSelectionTool.h"
@@ -230,7 +230,16 @@ void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, co
     tagger.fraction_c = fraction;
     tagger.fraction_b = fraction;
 
+    double fraction_tau = 0.;
+    TString fraction_tau_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction_tau";
+    TVector *fraction_tau_data = (TVector*) m_inf->Get(fraction_tau_name);
+    if( fraction_tau_data != nullptr ) {
+      fraction_tau = fraction_tau_data[0](0);
+    }
+    tagger.fraction_tau = fraction_tau;
+
     delete fraction_data;
+    delete fraction_tau_data;
   }
 }
 
@@ -273,6 +282,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
   double dl1_pb(-10.);
   double dl1_pc(-10.);
   double dl1_pu(-10.);
+  double dl1_ptau(0.);
 
   const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( jet );
 
@@ -283,7 +293,8 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
 
   if ( (!btag->pb(taggerName, dl1_pb ))
    || (!btag->pc(taggerName, dl1_pc ))
-   || (!btag->pu(taggerName, dl1_pu )) ){
+   || (!btag->pu(taggerName, dl1_pu ))
+   || (taggerName=="GN2v01" && !btag->ptau(taggerName, dl1_ptau))){
 
      if(m_ErrorOnTagWeightFailure){
        ATH_MSG_ERROR("Failed to retrieve "+taggerName+" weight!");
@@ -294,7 +305,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
      }
   }
 
-   return getTaggerWeight(dl1_pb, dl1_pc, dl1_pu, tagweight, getCTagW);
+   return getTaggerWeight(dl1_pb, dl1_pc, dl1_pu, tagweight, getCTagW, dl1_ptau);
 
   }
 
@@ -304,11 +315,11 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
 
 }
 
-CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu , double & tagweight) const{
-  return getTaggerWeight(pb, pc, pu, tagweight, m_useCTag);
+CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau) const{
+  return getTaggerWeight(pb, pc, pu, tagweight, m_useCTag, ptau);
 }
 
-CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu , double & tagweight, bool getCTagW) const {
+CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu, double & tagweight, bool getCTagW, double ptau) const {
 
   std::string taggerName = m_tagger.name;
 
@@ -320,28 +331,29 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
   tagweight = -100.;
   if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::GN1) || (m_taggerEnum == Tagger::GN2)){
 
-    bool valid_input = (!std::isnan(pu) && pb>=0 && pc>=0 && pu>=0);
+    bool valid_input = (!std::isnan(pu) && pb>=0 && pc>=0 && pu>=0 && ptau>=0);
 
     if (!valid_input){
       if(m_ErrorOnTagWeightFailure){
-        ATH_MSG_ERROR("Invalid inputs for "+taggerName+" pb " << pb << " pc " << pc << " pu " << pu << " ");
+        ATH_MSG_ERROR("Invalid inputs for "+taggerName+" pb " << pb << " pc " << pc << " pu " << pu << " ptau " << ptau << " ");
         return CorrectionCode::Error;
       }else{
-        ATH_MSG_WARNING("Invalid inputs for "+taggerName+" pb " << pb << " pc " << pc << " pu " << pu << " ");
+        ATH_MSG_WARNING("Invalid inputs for "+taggerName+" pb " << pb << " pc " << pc << " pu " << pu << " ptau " << ptau << " ");
         return CorrectionCode::Ok;
       }
     }
 
     if(getCTagW){
-     tagweight = log(pc / (m_tagger.fraction_b * pb + (1. - m_tagger.fraction_b) * pu));
+     tagweight = log(pc / (m_tagger.fraction_b * pb + (1. - m_tagger.fraction_b - m_tagger.fraction_tau) * pu + m_tagger.fraction_tau * ptau) );
     }
     else{
-     tagweight = log(pb / (m_tagger.fraction_c * pc + (1. - m_tagger.fraction_c) * pu) );
+     tagweight = log(pb / (m_tagger.fraction_c * pc + (1. - m_tagger.fraction_c - m_tagger.fraction_tau) * pu + m_tagger.fraction_tau * ptau) );
     }
 
     ATH_MSG_VERBOSE( "pb " <<  pb );
     ATH_MSG_VERBOSE( "pc " <<  pc );
     ATH_MSG_VERBOSE( "pu " <<  pu );
+    ATH_MSG_VERBOSE( "ptau" << ptau );
     ATH_MSG_VERBOSE( "tagweight " <<  tagweight );
 
     return CorrectionCode::Ok;
@@ -500,7 +512,7 @@ asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double tagg
 }
 
 
-asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double pb, double pc, double pu) const
+asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double pb, double pc, double pu, double ptau) const
  {
    asg::AcceptData acceptData (&m_acceptinfo);
 
@@ -524,14 +536,14 @@ asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double pb, 
    if(m_continuous2D){
      double tagger_weight_b(-100);
      double tagger_weight_c(-100);
-     if( ( getTaggerWeight(pb, pc, pu, tagger_weight_b, false)!=CorrectionCode::Ok) ||
-	     ( getTaggerWeight(pb, pc, pu, tagger_weight_c, true )!=CorrectionCode::Ok) )
+     if( ( getTaggerWeight(pb, pc, pu, tagger_weight_b, false, ptau)!=CorrectionCode::Ok) ||
+	     ( getTaggerWeight(pb, pc, pu, tagger_weight_c, true, ptau)!=CorrectionCode::Ok) )
        return acceptData;
      return accept(pT, eta, tagger_weight_b, tagger_weight_c);
    }
    else{
      double tagger_weight(-100);
-     if( getTaggerWeight(pb, pc, pu, tagger_weight, m_useCTag)!=CorrectionCode::Ok)
+     if( getTaggerWeight(pb, pc, pu, tagger_weight, m_useCTag, ptau)!=CorrectionCode::Ok)
        return acceptData;
      if ( tagger_weight < cutvalue )
        return acceptData;
