@@ -18,15 +18,11 @@ CellFinder::CellFinder(const std::string& type,
 		       const std::string& name,
 		       const IInterface * parent) :
   DiTauToolBase(type, name, parent),
-  m_bWriteJetCells(false),
-  m_bWriteSubjetCells(false),
   m_ClusterContainerName("CaloCalTopoClusters"),
   m_CellContainerName("AllCalo"),
   m_Rsubjet(0.2)
 {
   declareInterface<DiTauToolBase > (this);
-  declareProperty("writeJetCells", m_bWriteJetCells);
-  declareProperty("writeSubjetCells", m_bWriteSubjetCells);
   declareProperty("ClusterContainer", m_ClusterContainerName);
   declareProperty("CellContainer", m_CellContainerName);
   declareProperty("Rsubjet", m_Rsubjet);
