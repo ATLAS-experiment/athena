@@ -1,5 +1,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+#----------------------------------------------------------------
+# Author: Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>
+# Initial version: Feb 2024
+#----------------------------------------------------------------
+
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 #from AthenaConfiguration.Enums import Format
@@ -78,7 +83,7 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
     # This should be replaced by proper python flags and Gaudy properties
     if args.detDescr:
         os.environ["DUMPGEODETDESCRTAG"] = args.detDescr # save to an env var, for later use in GeoModelStandalone/GeoExporter
-        print("+ DumpGeo -- INFO -- This is the Detector Descriptoon Geometry TAG you are dumping: '%s'" % args.detDescr)
+        print("+ DumpGeo -- INFO -- This is the Detector Description geometry TAG you are dumping: '%s'" % args.detDescr)
     if args.forceOverwrite is True:
         print("+ DumpGeo -- NOTE -- You chose to overwrite an existing geometry dump file with the same name, if present.")
         os.environ["DUMPGEOFORCEOVERWRITE"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
@@ -110,6 +115,8 @@ if __name__=="__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    flags.Exec.MaxEvents = 1 
+    # ^ We only need one event to get the GeoModel tree from the GeoModelSvc (even less, we don't need any event at all!)
     flags.Concurrency.NumThreads = 0 
     # ^ VP1 will not work with the scheduler, since its condition/data dependencies are not known in advance
     # More in details: the scheduler needs to know BEFORE the event, what the dependencies of each Alg are. 
@@ -119,11 +126,7 @@ if __name__=="__main__":
 
     parser = flags.getArgumentParser()
     parser.prog = 'dump-geo'
-    # here we extend the parser
-    # Add DumpGeo-specific arguments here, but remember you can also directly pass flags in form <flagName>=<value>.
-    # e.g.
-    # parser.add_argument("-o", "--output", dest="output", default='Event.json',
-    #                     help="write JSON to FILE", metavar="FILE")
+    # here we extend the parser with CLI options specific to DumpGeo
     parser.add_argument("--detDescr", default=defaultGeometryTags.RUN3,
                         help="The ATLAS geometry tag you want to dump (a convenience alias for the Athena flag 'GeoModel.AtlasVersion=TAG')", metavar="TAG")
     # parser.add_argument("--filterTreeTops", help="Only output the GeoModel Tree Tops specified in the FILTER list; input is a comma-separated list")
@@ -141,9 +144,9 @@ if __name__=="__main__":
     _logger.verbose("+ About to set flags related to the input")
 
     # Empty input is not normal for Athena, so we will need to check 
-    # this repeatedly below
+    # this repeatedly below (the same as with VP1)
     vp1_empty_input = False  
-    # This covers the use case where we launch VP1
+    # This covers the use case where we launch DumpGeo
     # without input files; e.g., to check the detector description
     if (flags.Input.Files == [] or 
         flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']):
@@ -197,22 +200,16 @@ if __name__=="__main__":
     # flags.dump('Detector.(Geometry|Enable)', True)
 
     # ++++ Now we setup the actual configuration ++++
-
-    # NB Must have set ConfigFlags.Input.RunNumber and
-    # ConfigFlags.Input.TimeStamp before calling to avoid
-    # attempted auto-configuration from an input file.
-    _logger.verbose("+ Setup main services, and input file reading")
-
+    _logger.verbose("+ Setup main services")
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
-  
     _logger.verbose("+ ...Done")
 
     _logger.verbose("+ About to setup geometry")
     configureGeometry(flags,cfg)
     _logger.verbose("+ ...Done")
 
-    # configure VP1
+    # configure DumpGeo
     cfg.merge(DumpGeoCfg(flags, args)) 
     cfg.run()
 
