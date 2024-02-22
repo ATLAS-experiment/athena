@@ -414,7 +414,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfElectron ");
 
-  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
+  const xAOD::TruthParticle* thePriPart = MC::find_matching(mcTruthTES, thePart);
   if (!thePriPart) return NonDefined;
   if (!MC::isElectron(thePriPart)) return NonDefined;
 
@@ -784,7 +784,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   Info* info = infoin;
   ATH_MSG_DEBUG("Executing DefOrigOfMuon ");
 
-  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
+  const xAOD::TruthParticle* thePriPart = MC::find_matching(mcTruthTES, thePart);
   if (!thePriPart) return NonDefined;
   if (abs(thePriPart->pdgId()) != 13) return NonDefined;
 
@@ -1067,7 +1067,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
 
   ATH_MSG_DEBUG("Executing DefOrigOfTau ");
 
-  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
+  const xAOD::TruthParticle* thePriPart = MC::find_matching(mcTruthTES, thePart);
   if (!thePriPart) return NonDefined;
   if (abs(thePriPart->pdgId()) != 15) return NonDefined;
 
@@ -1300,7 +1300,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     info->motherBarcode = 0;
   }
 
-  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
+  const xAOD::TruthParticle* thePriPart = MC::find_matching(mcTruthTES, thePart);
   if (!thePriPart) return NonDefined;
   if (abs(thePriPart->pdgId()) != 22) return NonDefined;
 
@@ -1599,7 +1599,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   ATH_MSG_DEBUG("Executing DefOrigOfNeutrino ");
 
   int nuFlav = abs(thePart->pdgId());
-  const xAOD::TruthParticle* thePriPart = find_matching(mcTruthTES, thePart);
+  const xAOD::TruthParticle* thePriPart = MC::find_matching(mcTruthTES, thePart);
   if (!thePriPart) return NonDefined;
   if (abs(thePriPart->pdgId()) != nuFlav) return NonDefined;
 
@@ -2224,7 +2224,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
       && info->photonMotherStatus < 3) {
     do {
       const xAOD::TruthParticle* theMotherPart =
-        find_matching(truthParticleContainerReadHandle.ptr(), info ? info->PhotonMother() : nullptr );
+       MC::find_matching(truthParticleContainerReadHandle.ptr(), info ? info->PhotonMother() : nullptr );
       if (theMotherPart == nullptr || theMotherPart == thePart) break;
       thePart = theMotherPart;
 
@@ -2238,7 +2238,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
     if (part.first == BkgElectron && part.second == PhotonConv) {
       // in case of photon from gen particle  classify photon
       // part=particleTruthClassifier(mother);
-      thePart = find_matching(truthParticleContainerReadHandle.ptr(), info ? info->Mother() : nullptr );
+      thePart = MC::find_matching(truthParticleContainerReadHandle.ptr(), info ? info->Mother() : nullptr );
       if (thePart != nullptr)
         part = particleTruthClassifier(thePart, info);
 
@@ -2250,7 +2250,7 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
 
   } else {
     // in case of photon from gen particle  classify photon
-    thePart = find_matching(truthParticleContainerReadHandle.ptr(), info ? info->Mother() : nullptr);
+    thePart = MC::find_matching(truthParticleContainerReadHandle.ptr(), info ? info->Mother() : nullptr);
     if (thePart != nullptr) part = particleTruthClassifier(thePart, info);
   }
 
@@ -2258,19 +2258,6 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
   return part;
 }
 
-const xAOD::TruthParticle*
-MCTruthClassifier::find_matching(const xAOD::TruthParticleContainer* TruthTES, const xAOD::TruthParticle* bcin)
-{
-  const xAOD::TruthParticle* ptrPart = nullptr;
-  if (!bcin) return ptrPart;
-  for (const auto *const truthParticle : *TruthTES) {
-    if (HepMC::is_sim_descendant(bcin,truthParticle)) {
-      ptrPart = truthParticle;
-      break;
-    }
-  }
-  return ptrPart;
-}
 
 //------------------------------------------------------------------------
 const xAOD::TruthParticle* MCTruthClassifier::isHadronFromB(const xAOD::TruthParticle* p) const {
