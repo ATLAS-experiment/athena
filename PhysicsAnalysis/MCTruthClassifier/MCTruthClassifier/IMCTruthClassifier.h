@@ -124,9 +124,6 @@ public:
   checkOrigOfBkgElec(const xAOD::TruthParticle*,
                      Info* info = nullptr) const = 0;
 
-  virtual const xAOD::TruthParticle* isHadronFromB(
-    const xAOD::TruthParticle*) const = 0;
-
   /// \brief main function used in \ref MCTruthClassifier returning the value
   /// from defOrigofParticle to \ref TruthClassificationDecorator
   virtual unsigned int classify(const xAOD::TruthParticle*) const = 0;
