@@ -474,10 +474,29 @@ def ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags,
                                                       **kwargs)
 
 def PhysValActsCfg(flags,
-                   name: str = 'PhysValActs') -> ComponentAccumulator:
+                   name: str = 'PhysValActs',
+                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+
+    # deduce what to analyse from the collectiosn in the input file
+    typedCollections = flags.Input.TypedCollections
+    for col in typedCollections:
+        col_type, col_name = col.split("#")
+        if col_type == "xAOD::PixelClusterContainer":
+            kwargs.setdefault("doPixelClusters", True)
+        elif col_type == "xAOD::StripClusterContainer":
+            kwargs.setdefault("doStripClusters", True)
+        elif col_type == "xAOD::HGTDClusterContainer":
+            kwargs.setdefault("doHgtdClusters", flags.PhysVal.IDPVM.doHGTD)
+        elif col_type == "xAOD::SpacePointContainer":
+            if 'Pixel' in col_name:
+                kwargs.setdefault("doPixelSpacePoints", True)
+            elif 'Strip' in col_name:
+                kwargs.setdefault("doStripSpacePoints", True)
+                kwargs.setdefault("doStripOverlapSpacePoints", True)
+
     acc.setPrivateTools(CompFactory.ActsTrk.PhysValTool(name=name,
-                                                        doHGTD=flags.PhysVal.IDPVM.doHGTD))
+                                                        **kwargs))
     return acc
     
 def ActsSeedAnalysisCfg(flags):

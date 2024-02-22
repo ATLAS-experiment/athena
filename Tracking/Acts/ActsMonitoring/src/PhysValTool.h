@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTS_PHYSVAL_TOOL_H
@@ -39,8 +39,19 @@ namespace ActsTrk {
     template<typename external_collection_t>
       StatusCode bookCollection(external_collection_t*);
 
-    StatusCode fillHgtd(const EventContext& ctx,
-			float beamSpotWeight);
+    StatusCode fillPixelClusters(const EventContext& ctx,
+				 float beamSpotWeight);
+    StatusCode fillStripClusters(const EventContext& ctx,
+                                 float beamSpotWeight);
+    StatusCode fillHgtdClusters(const EventContext& ctx,
+				float beamSpotWeight);
+
+    StatusCode fillPixelSpacePoints(const EventContext& ctx,
+				    float beamSpotWeight);
+    StatusCode fillStripSpacePoints(const EventContext& ctx,
+				    float beamSpotWeight);
+    StatusCode fillStripOverlapSpacePoints(const EventContext& ctx,
+					   float beamSpotWeight);
     
   private:
     SG::ReadHandleKey< xAOD::EventInfo > m_eventInfo {this, "EventInfo", "EventInfo", 
@@ -63,7 +74,12 @@ namespace ActsTrk {
     SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_HGTDDetEleCollKey {this, "HGTDDetEleCollKey", "HGTD_DetectorElementCollection",
       "Key of HGTD_DetectorElementCollection for HGTD"};
     
-    Gaudi::Property<bool> m_doHGTD {this, "doHGTD", false, "Analyse HGTD collections"};
+    Gaudi::Property<bool> m_doPixelClusters {this, "doPixelClusters", false, "Analyse Pixel Clusters"};
+    Gaudi::Property<bool> m_doStripClusters {this, "doStripClusters", false, "Analyse Strip Clusters"};
+    Gaudi::Property<bool> m_doHgtdClusters {this, "doHgtdClusters", false, "Analyse HGTD Clusters"};    
+    Gaudi::Property<bool> m_doPixelSpacePoints {this, "doPixelSpacePoints", false, "Analyse Pixel Space Points"};
+    Gaudi::Property<bool> m_doStripSpacePoints {this, "doStripSpacePoints", false, "Analyse Strip Space Points"};
+    Gaudi::Property<bool> m_doStripOverlapSpacePoints {this, "doStripOverlapSpacePoints", false, "Analyse Overlap Strip Space Points"};
     
     std::unique_ptr< ActsTrk::PixelClusterValidationPlots > m_pixelClusterValidationPlots;
     std::unique_ptr< ActsTrk::StripClusterValidationPlots > m_stripClusterValidationPlots;
@@ -72,7 +88,7 @@ namespace ActsTrk {
     std::unique_ptr< ActsTrk::PixelSpacePointValidationPlots > m_pixelSpacePointValidationPlots;
     std::unique_ptr< ActsTrk::StripSpacePointValidationPlots > m_stripSpacePointValidationPlots;
     std::unique_ptr< ActsTrk::StripSpacePointValidationPlots > m_stripOverlapSpacePointValidationPlots;
-    
+
     const PixelID *m_pixelID {};
     const SCT_ID *m_stripID {};
     const HGTD_ID *m_hgtdID {};
@@ -89,7 +105,7 @@ namespace ActsTrk {
       plot_collection->initialize();
       return StatusCode::SUCCESS;
     }
-
+  
 }
 
 #endif
