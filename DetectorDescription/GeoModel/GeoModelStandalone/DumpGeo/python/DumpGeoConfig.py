@@ -43,6 +43,16 @@ def configureGeometry(flags, cfg):
         from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
         cfg.merge(MuonGeoModelCfg(flags))
 
+     # Trigger the build of the InDetServMat geometry 
+    # if any ID subsystems have been enabled
+    if flags.Detector.GeometryID:
+        from InDetServMatGeoModel.InDetServMatGeoModelConfig import (
+             InDetServiceMaterialCfg)
+        cfg.merge(InDetServiceMaterialCfg(flags))
+
+
+
+
 def getATLASVersion():
     import os
 
@@ -68,13 +78,13 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
     # This should be replaced by proper python flags and Gaudy properties
     if args.detDescr:
         os.environ["DUMPGEODETDESCRTAG"] = args.detDescr # save to an env var, for later use in GeoModelStandalone/GeoExporter
-        print("+ DumpGeo -- NOTE -- You chose to overwrite the default Detector Descriptoon Geometry TAG with this: '%s'" % args.detDescr)
+        print("+ DumpGeo -- INFO -- This is the Detector Descriptoon Geometry TAG you are dumping: '%s'" % args.detDescr)
     if args.forceOverwrite is True:
         print("+ DumpGeo -- NOTE -- You chose to overwrite an existing geometry dump file with the same name, if present.")
         os.environ["DUMPGEOFORCEOVERWRITE"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
-    if args.filterTreeTops:
-        print("+ DumpGeo -- NOTE -- Your 'GeoModel TreeTop' filter set: '%s'" % args.filterTreeTops)
-        os.environ["DUMPGEOFILTERTREETOPS"] = args.filterTreeTops # save to an env var, for later use in GeoModelStandalone/GeoExporter
+    # if args.filterTreeTops:
+    #     print("+ DumpGeo -- NOTE -- Your 'GeoModel TreeTop' filter set: '%s'" % args.filterTreeTops)
+    #     os.environ["DUMPGEOFILTERTREETOPS"] = args.filterTreeTops # save to an env var, for later use in GeoModelStandalone/GeoExporter
     if args.filterDetManagers:
         print("+ DumpGeo -- NOTE -- Your 'GeoModel Detector Manager' filter set: '%s'" % args.filterDetManagers)
         os.environ["DUMPGEOFILTERDETMANAGERS"] = args.filterDetManagers # save to an env var, for later use in GeoModelStandalone/GeoExporter
@@ -91,6 +101,8 @@ if __name__=="__main__":
     # from AthenaConfiguration.Enums import Format
     from AthenaCommon.Logging import logging
     from AthenaCommon.Constants import VERBOSE
+
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
     # ++++ Firstly we setup flags ++++
     _logger = logging.getLogger('DumpGeo')
@@ -112,9 +124,9 @@ if __name__=="__main__":
     # e.g.
     # parser.add_argument("-o", "--output", dest="output", default='Event.json',
     #                     help="write JSON to FILE", metavar="FILE")
-    parser.add_argument("--detDescr", default='',
+    parser.add_argument("--detDescr", default=defaultGeometryTags.RUN3,
                         help="The ATLAS geometry tag you want to dump (a convenience alias for the Athena flag 'GeoModel.AtlasVersion=TAG')", metavar="TAG")
-    parser.add_argument("--filterTreeTops", help="Only output the GeoModel Tree Tops specified in the FILTER list; input is a comma-separated list")
+    # parser.add_argument("--filterTreeTops", help="Only output the GeoModel Tree Tops specified in the FILTER list; input is a comma-separated list")
     parser.add_argument("--filterDetManagers", help="Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list")
     parser.add_argument("-f", "--forceOverwrite",
                         help="Force to overwrite an existing SQLite output file with the same name, if any", action = 'store_true')
