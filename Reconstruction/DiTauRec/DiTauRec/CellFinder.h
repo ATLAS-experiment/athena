@@ -26,8 +26,6 @@ class CellFinder : public DiTauToolBase {
 
 
  private:
-  bool m_bWriteJetCells;
-  bool m_bWriteSubjetCells;
   std::string m_ClusterContainerName;
   std::string m_CellContainerName;
   float m_Rsubjet;

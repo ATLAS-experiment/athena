@@ -97,7 +97,6 @@ def CellFinderCfg(ConfigFlags, name="DiTauRec_CellFinder", **kwargs):
     kwargs.setdefault("Rsubjet", 0.2)
 
     CellFinder = CompFactory.CellFinder(name, **kwargs)
-    CellFinder.writeSubjetCells = CellFinder.writeJetCells
     acc.setPrivateTools(CellFinder)
     return acc
 
