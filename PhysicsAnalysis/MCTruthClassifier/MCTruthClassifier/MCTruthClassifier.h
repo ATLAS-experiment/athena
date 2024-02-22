@@ -228,9 +228,6 @@ private:
   void findAllJetMothers(const xAOD::TruthParticle*, std::set<const xAOD::TruthParticle*>&) const;
   void findParticleDaughters(const xAOD::TruthParticle*, std::set<const xAOD::TruthParticle*>&) const;
   static MCTruthPartClassifier::ParticleOrigin defJetOrig(const std::set<const xAOD::TruthParticle*>&) ;
-  //
-  /** Searches for matching particle in the container **/
-  static const xAOD::TruthParticle* find_matching(const xAOD::TruthParticleContainer*, const xAOD::TruthParticle* xx);
 
   /* Data members*/
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerKey{

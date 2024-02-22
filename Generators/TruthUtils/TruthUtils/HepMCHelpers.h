@@ -66,6 +66,19 @@ namespace MC
     if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
     return false;
   }
+  /// @brief Function to find a particle in container
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
+  template <class C, class T>  T find_matching(C TruthTES, T bcin) {
+    T ptrPart = nullptr;
+    if (!bcin) return ptrPart;
+    for (T truthParticle : *TruthTES) {
+      if (HepMC::is_sim_descendant(bcin,truthParticle)) {
+        ptrPart = truthParticle;
+        break;
+      }
+    }
+    return ptrPart;
+  }
 
 /** MCTruthCalssifier functions */
 
