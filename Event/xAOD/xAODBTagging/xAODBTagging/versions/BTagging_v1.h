@@ -222,6 +222,7 @@ namespace xAOD {
     bool pu(const std::string& taggername, double &value) const;
     bool pb(const std::string& taggername, double &value) const;
     bool pc(const std::string& taggername, double &value) const;
+    bool ptau( const std::string& taggername, double &value) const;
     float calcLLR(double num, double den) const;
 
 

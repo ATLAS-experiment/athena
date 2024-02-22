@@ -1,5 +1,3 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
@@ -57,7 +55,7 @@ class BTaggingSelectionTool: public asg::AsgTool,
   /// Get the decision using thet jet's pt and tag weight values
   virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* tag_weight */ ) const override;
   virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta*/ , double /* taggerWeight_b */, double /* taggerWeight_c */) const override;
-  virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */) const override;
+  virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */, double /* dl1ptau */ = 0.) const override;
 
   /// Decide in which quantile of the tag weight distribution the jet belongs (continuous tagging)
   /// The return value represents the bin index of the quantile distribution
@@ -69,11 +67,11 @@ class BTaggingSelectionTool: public asg::AsgTool,
   virtual CP::CorrectionCode getCutValue(double /* jet pt */, double & cutval) const override;
    //1D tagging wrapper
   virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & tagweight) const override;
-  virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu , double & tagweight) const override;
+  virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau = 0.) const override;
 
   //flexibility for Continuous2D
   virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & weight ,bool getCTagW) const override;
-  virtual CP::CorrectionCode getTaggerWeight( double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */ , double & weight, bool getCTagW) const override;
+  virtual CP::CorrectionCode getTaggerWeight( double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */, double & weight, bool getCTagW , double /* dl1ptau  */ = 0.) const override;
   const asg::AcceptInfo& getAcceptInfo( ) const  override {return m_acceptinfo;} 
 private:
   /// Helper function that decides whether a jet belongs to the correct jet selection for b-tagging
@@ -108,6 +106,7 @@ private:
     std::string  name;
     double fraction_b;
     double fraction_c;
+    double fraction_tau;
     TSpline3*  spline;
     TVector* constcut; 
     TMatrixD*  cuts2D; //useful only in Continuous2D
