@@ -106,7 +106,8 @@ public:
   Gaudi::Property<bool  >      m_LTQuadStepFilt     {this, "LTQuadStepFilt"     , false     , "Use LT Quad Step Filter waveform for ZDC channels"                   };
   Gaudi::Property<bool  >      m_delayChannels      {this, "delayChannels"      , false     , "Include delayed channels in the output"                              };
   Gaudi::Property<bool  >      m_doRPD              {this, "doRPD"              , false     , "Include RPD channels in the output"                                  };
-
+  Gaudi::Property<bool  >      m_doBRAN             {this, "doBRAN"             , false     , "Include BRAN channels in the output"                                 };
+  
 };
 
 #endif
