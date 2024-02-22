@@ -42,15 +42,11 @@ namespace MC
   template <class T> inline bool isSimInteracting(const T& p) { return isGenStable<T>(p) && isInteracting<T>(p);}
 
   /// @brief Identify if particle is satble or decayed in simulation. + a pathological case of decayed particle w/o end vertex.
+  /// The decayed particles w/o end vertex might occur in case of simulation of long lived particles in Geant stripped off the decay products. 
+  /// I.e. those particles should be re-decayed later.
   template <class T> inline bool isStableOrSimDecayed(const T& p) {
     const auto vertex = p->end_vertex();
     return ( isStable<T>(p) || (isDecayed<T>(p) && (!vertex || HepMC::is_simulation_vertex(vertex))));
-  }
-
-  /// @brief Identify if particle is satble or decayed in simulation. w/o a pathological case of decayed particle w/o end vertex.
-  template <class T> inline bool isStableOrSimDecayedv2(const T& p) {
-    const auto vertex = p->end_vertex();
-    return ( isStable<T>(p) || (isDecayed<T>(p) && vertex && HepMC::is_simulation_vertex(vertex)));
   }
 
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.

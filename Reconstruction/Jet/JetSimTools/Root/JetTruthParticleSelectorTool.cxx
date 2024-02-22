@@ -231,18 +231,18 @@ bool JetTruthParticleSelectorTool::selector(const xAOD::TruthParticle* truthPart
   switch( m_selectionMode) { // For now only 4 modes used in practice for jets...
                              // a switch statement is probably not optimal here...
   case StableNoMuonNoNu:
-    result =(   MC::isStableOrSimDecayedv2(truthPart) && !HepMC::is_simulation_particle(truthPart) &&  !MC::isZeroEnergyPhoton(truthPart) &&
+    result =(   MC::isStableOrSimDecayed(truthPart) && !HepMC::is_simulation_particle(truthPart) &&  !MC::isZeroEnergyPhoton(truthPart) &&
      passKinematics(truthPart) && !MC::isMuon(truthPart) && (!( MC::isStable(truthPart) && MC::isSpecialNonInteracting(truthPart))));
     break;
   case NuOnly:
-    result= ( MC::isStableOrSimDecayedv2(truthPart) && !HepMC::is_simulation_particle(truthPart) &&  !MC::isZeroEnergyPhoton(truthPart) &&
+    result= ( MC::isStableOrSimDecayed(truthPart) && !HepMC::is_simulation_particle(truthPart) &&  !MC::isZeroEnergyPhoton(truthPart) &&
      passKinematics(truthPart) &&  MC::isStable(truthPart) && MC::isSpecialNonInteracting(truthPart));
     break;
   case MuonOnly:
     result = MC::isMuon(truthPart);
     break;
   case NoWZDecay:
-    result = (MC::isStableOrSimDecayedv2(truthPart) && !HepMC::is_simulation_particle(truthPart) &&  !MC::isZeroEnergyPhoton(truthPart) && 
+    result = (MC::isStableOrSimDecayed(truthPart) && !HepMC::is_simulation_particle(truthPart) &&  !MC::isZeroEnergyPhoton(truthPart) && 
                passKinematics(truthPart) &&
                !isWZDecay(truthPart, m_wzLeptons, m_wzPhotonCone*m_wzPhotonCone) &&
                !isLeptonFromTau(truthPart) );
