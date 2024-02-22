@@ -99,6 +99,7 @@ public:
   SbVec3f last_lineDirection;
   double last_line_eta = 0.0; // This is needed to update the display in possibleChange_lineDirection
   bool last_showPeople = false;
+  SbColor4f last_peopleColourAndTransp;
   double last_peopleVerticalPos = 0.0;
 
   InDetProjFlags::InDetProjPartsFlags last_applicablePixelProjParts;
@@ -230,25 +231,23 @@ GuideSysController::GuideSysController(IVP1System * sys)
   connectToLastUpdateSlot(m_d->ui_people.colorButton_people);
   connectToLastUpdateSlot(m_d->ui_people.spinBox_peopletransp);
 
-  addUpdateSlot(SLOT(possibleChange_peopleExtent()));
-  connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peopleextent);
+  // Commenting this out for the moment as it is not implemented and is causing connect warnings
 
-  addUpdateSlot(SLOT(possibleChange_peopleSpacing()));
-  connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peoplespacing);
+  // addUpdateSlot(SLOT(possibleChange_peopleExtent()));
+  // connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peopleextent);
 
-  addUpdateSlot(SLOT(possibleChange_peopleHeight()));
-  connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peopleheight);
+  // addUpdateSlot(SLOT(possibleChange_peopleSpacing()));
+  // connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peoplespacing);
 
-  addUpdateSlot(SLOT(possibleChange_showPeople()));
-  connectToLastUpdateSlot(m_d->ui.checkBox_people);
-  connectToLastUpdateSlot(m_d->ui_people.checkBox_acdesignations);
+  // addUpdateSlot(SLOT(possibleChange_peopleHeight()));
+  // connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peopleheight);
 
-  addUpdateSlot(SLOT(possibleChange_peopleZPos()));
-  connectToLastUpdateSlot(this,SIGNAL(peopleExtentChanged(const double&)));
-  connectToLastUpdateSlot(this,SIGNAL(peopleSpacingChanged(const double&)));
+  // addUpdateSlot(SLOT(possibleChange_peopleZPos()));
+  // connectToLastUpdateSlot(this,SIGNAL(peopleExtentChanged(const double&)));
+  // connectToLastUpdateSlot(this,SIGNAL(peopleSpacingChanged(const double&)));
 
-  addUpdateSlot(SLOT(possibleChange_peopleVerticalPos()));
-  connectToLastUpdateSlot(this,SIGNAL(floorHeightChanged(const double&)));
+  // addUpdateSlot(SLOT(possibleChange_peopleVerticalPos()));
+  // connectToLastUpdateSlot(this,SIGNAL(floorHeightChanged(const double&)));
 
   // === Axes ===
   addUpdateSlot(SLOT(possibleChange_showAxes()));
@@ -426,6 +425,13 @@ SbColor4f GuideSysController::floorColourAndTransp() const
 {
   return Imp::color4f(m_d->ui_floorandletters.colorButton_floor->color(),m_d->ui_floorandletters.spinBox_floortransp->value());
 }
+
+//____________________________________________________________________
+SbColor4f GuideSysController::peopleColourAndTransp() const
+{
+  return Imp::color4f(m_d->ui_people.colorButton_people->color(),m_d->ui_people.spinBox_peopletransp->value());
+}
+
 
 //____________________________________________________________________
 double GuideSysController::floorExtent() const
@@ -1151,6 +1157,7 @@ POSSIBLECHANGE_IMP(showMuonSpectrometer)
 POSSIBLECHANGE_IMP(showLines)  
 //POSSIBLECHANGE_IMP(lineDirection) Implemented this manually so we can update eta/theta
 POSSIBLECHANGE_IMP(showPeople)
+POSSIBLECHANGE_IMP(peopleColourAndTransp)
 POSSIBLECHANGE_IMP(peopleVerticalPos)
 
 

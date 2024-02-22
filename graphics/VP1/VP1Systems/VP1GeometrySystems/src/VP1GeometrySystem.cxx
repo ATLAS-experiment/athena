@@ -364,7 +364,7 @@ void VP1GeometrySystem::Imp::addSubSystem(const VP1GeoFlags::SubSystemFlag& f,
 					  const std::string& matname, bool negatetreetopregexp, bool negatechildrenregexp,
 					  const QString& grandchildrenregexp, bool negategrandchildrenregexp)
 {
-  theclass->message("VP1GeometrySystem::Imp::addSubSystem - flag: '" + QString(f) + "' - matName: '" + str(matname.c_str()) + "'." );
+  theclass->messageDebug("VP1GeometrySystem::Imp::addSubSystem - flag: '" + QString(f) + "' - matName: '" + str(matname.c_str()) + "'." );
 
   QCheckBox * cb = controller->subSystemCheckBox(f);
   if (!cb) {
@@ -1224,8 +1224,7 @@ void VP1GeometrySystem::Imp::buildSystem(SubSystemInfo* si)
 	  }
   }
 
-  
-  si->dump();
+  if (VP1Msg::debug()) si->dump();
 
   VP1Msg::messageDebug("volumetreemodel->addSubSystem...");
   volumetreemodel->addSubSystem( si->flag, si->vollist );
