@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODMultiElecMuTauFilter.h"
@@ -28,20 +28,18 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
   int charge1 = 0; 
   int charge2 = 0; 
 
-  // Retrieve full TruthEvent container
-  const xAOD::TruthEventContainer *xTruthEventContainer;
-  if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-  {
-    ATH_MSG_ERROR("No TruthEvents collection with name " << "TruthEvents" << " found in StoreGate!");
-    return StatusCode::FAILURE;
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
   }
 
-  xAOD::TruthEventContainer::const_iterator itr;
-  for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++itr) {
-    const xAOD::TruthEvent *genEvt = (*itr);
-    unsigned int nPart = genEvt->nTruthParticles();
-    for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-       const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
+  // Loop over all particles in the event and build up the grid
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+       const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
        if (MC::isStable(pitr) && (std::abs(pitr->pdgId()) == 11 || std::abs(pitr->pdgId()) == 13)) {
          if (pitr->pt() >= m_minPt && std::abs(pitr->eta()) <= m_maxEta) {
            ATH_MSG_DEBUG("Found lepton with PDG ID = " << pitr->pdgId()
@@ -101,9 +99,8 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
         
            }
        }
-    }
-  }
-
+    }//loop over TruthParticles
+  
  bool passed_event = false;
   if (m_TwoSameSignLightLeptonsOneHadTau) {
     if ( ((numLightLeptons+numHadTaus)==numLeptons) && numLightLeptons == 2 && numHadTaus == 1 && charge1==charge2 ) {

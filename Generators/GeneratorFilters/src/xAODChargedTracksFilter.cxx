@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODChargedTracksFilter.h"
@@ -18,19 +18,19 @@ xAODChargedTracksFilter::xAODChargedTracksFilter(const std::string& name, ISvcLo
 
 StatusCode xAODChargedTracksFilter::filterEvent() {
 
-      // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer=NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-        ATH_MSG_ERROR("No TruthEvent collection with name " << "TruthEvents" << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }
+
 
     int nChargedTracks = 0;
-    for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr) {
-        unsigned int nPart = (*itr)->nTruthParticles();
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+            const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
             // We only care about stable particles
             if (!part->isGenStable()) continue;
 
@@ -50,8 +50,7 @@ StatusCode xAODChargedTracksFilter::filterEvent() {
                 nChargedTracks += 1;
             }
 
-        }
-    }
+        } //end loop on particles
 
     // Summarise event
     ATH_MSG_DEBUG("# of tracks " << nChargedTracks <<

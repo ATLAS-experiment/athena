@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODParentChildFilter.h"
@@ -29,20 +29,20 @@ StatusCode xAODParentChildFilter::filterInitialize() {
 
 StatusCode xAODParentChildFilter::filterEvent() {
     
-   // Retrieve full TruthEventContainer container
-   const xAOD::TruthEventContainer *xTruthEventContainer=NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-        ATH_MSG_ERROR("No TruthEvent collection with name " << "TruthEvents" << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }
+
+  // Loop over all particles in the event and build up the grid
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
      
-    for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr) {
-       unsigned int nPart = (*itr)->nTruthParticles();
-       for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* pitr =  (*itr)->truthParticle(iPart);
-  
-    int okPDGParent = 0;
+      int okPDGParent = 0;
       for (int i = 0; i < int(m_PDGParent.size()); i++) if (std::abs(pitr->pdgId()) == m_PDGParent[i]) okPDGParent=1;
       if ( (m_PDGParent[0] == 0) || (okPDGParent
            && pitr->pt() >= m_PtMinParent
@@ -69,8 +69,8 @@ StatusCode xAODParentChildFilter::filterEvent() {
           }
         }
       }
-    }
-  }
+    }// TruthParticles loop
+  
   setFilterPassed(false);
   return StatusCode::SUCCESS;
 }

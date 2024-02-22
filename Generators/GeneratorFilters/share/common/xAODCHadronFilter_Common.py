@@ -3,6 +3,8 @@
 ## with any pT within |eta| < 4
 ##
 include ("GeneratorFilters/CreatexAODSlimContainers.py")
+createxAODSlimmedContainer("TruthGen",prefiltSeq)
+prefiltSeq.xAODCnv.AODContainerName = 'GEN_EVENT'
 
 if not hasattr(filtSeq, "xAODHeavyFlavorCHadronFilter"):
     from GeneratorFilters.GeneratorFiltersConf import xAODHeavyFlavorHadronFilter

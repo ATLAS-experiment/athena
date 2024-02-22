@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -62,9 +62,29 @@ StatusCode xAODTruthParticleSlimmerPhoton::execute()
     xAOD::TruthEventContainer::const_iterator itr;
     for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++itr) {
 
+        std::vector<int> barcode_list;  
+        int zero_barcode=0;
+        int dup_barcode = 0;
+
         unsigned int nPart = (*itr)->nTruthParticles();
+
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
+             
+            int my_barcode = theParticle->barcode();
+            if (my_barcode==0 ) {
+                zero_barcode++;
+                continue;
+            }
+           bool found = false;
+           if (barcode_list.size() > 0){
+             found = (std::find(barcode_list.begin(), barcode_list.end(), my_barcode) != barcode_list.end());
+             if(found) {
+                       dup_barcode++;
+                       continue;}
+           }
+           barcode_list.push_back(my_barcode);
+          
 
             //Save stable Photons
             if (MC::isStable(theParticle) && MC::isPhoton(theParticle))
@@ -76,6 +96,7 @@ StatusCode xAODTruthParticleSlimmerPhoton::execute()
                 *xTruthParticle=*theParticle;
             }   
         }
+     if (zero_barcode != 0 || dup_barcode != 0) ATH_MSG_INFO("Found " << zero_barcode << " barcode zero particles and  " <<dup_barcode<< " duplicated");
     }
 
     return StatusCode::SUCCESS;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Allows the user to search for particles with specified kinematics.
@@ -30,18 +30,19 @@ StatusCode xAODParticleFilter::filterEvent()
 {
   int nParts = 0;
 
-  // Retrieve full TruthEventContainer container
-  const xAOD::TruthEventContainer *xTruthEventContainer = NULL;
-  ATH_CHECK(evtStore()->retrieve(xTruthEventContainer, "TruthEvents"));
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }
 
   // Loop over all particles in the event and build up the grid
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
 
-  for (const xAOD::TruthEvent *genEvt : *xTruthEventContainer)
-  {
-    unsigned int nPart = genEvt->nTruthParticles();
-    for (unsigned int iPart = 0; iPart < nPart; ++iPart)
-    {
-      const xAOD::TruthParticle *pitr = genEvt->truthParticle(iPart);
       if (std::abs(pitr->pdgId()) != m_PDGID ||
           !(m_StatusReq == -1 || pitr->status() == m_StatusReq))
         continue;
@@ -75,7 +76,6 @@ StatusCode xAODParticleFilter::filterEvent()
         if (notSelfDecay)
           nParts++;
       }
-    }
   }
   if (m_Exclusive)
   {

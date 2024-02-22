@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODHeavyFlavorHadronFilter.h"
@@ -63,18 +63,17 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
     }
   }
 
-    // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer=NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-    ATH_MSG_ERROR("No TruthEvent collection with name " << "TruthEvents" << " found in StoreGate!");
-    return StatusCode::FAILURE;
-    } 
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }
 
-    for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr) {
-       unsigned int nPart = (*itr)->nTruthParticles();
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
  
       // b-quarks
       // ==========
@@ -168,8 +167,7 @@ StatusCode xAODHeavyFlavorHadronFilter::filterEvent() {
           PDGIDPass = true;
         }
       }
-    }
-  }
+    }//end of Particle loop
 
   /// @todo This could be so much more efficient!
   pass = BHadronPass || DHadronPass || bPass || cPass || PDGIDPass;

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "GeneratorFilters/xAODChargedTracksWeightFilter.h"
@@ -72,13 +72,13 @@ CLHEP::HepRandomEngine* xAODChargedTracksWeightFilter::getRandomEngine(const std
 
 StatusCode xAODChargedTracksWeightFilter::filterEvent() {
 
-      // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer=NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-        ATH_MSG_ERROR("No TruthEvent collection with name " << "TruthEvents" << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;   
+  }
 
     const EventContext& ctx = Gaudi::Hive::currentContext();
     CLHEP::HepRandomEngine* rndmGen = this->getRandomEngine(name(), ctx);
@@ -89,10 +89,10 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
     }
 
     int nChargedTracks = 0;
-    for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr) {
-        unsigned int nPart = (*itr)->nTruthParticles();
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+    unsigned int nPart = xTruthParticleContainer->size();
+    for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+            const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
+
             // We only care about stable particles
             if (!part->isGenStable()) continue;
 
@@ -112,8 +112,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
                 nChargedTracks += 1;
             }
 
-        }
-    }
+        } // end of particles loop
 
     // Summarise event
     ATH_MSG_DEBUG("# of tracks " << nChargedTracks <<

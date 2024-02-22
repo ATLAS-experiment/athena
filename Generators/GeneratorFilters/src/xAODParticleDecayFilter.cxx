@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODParticleDecayFilter.h"
@@ -44,20 +44,19 @@ StatusCode xAODParticleDecayFilter::filterEvent()
     }
 
     ATH_MSG_DEBUG("xAODParticleDecayFilter::filterEvent()");
-    // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer = NULL;
-    ATH_CHECK(evtStore()->retrieve(xTruthEventContainer, "TruthEvents"));
-    
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }    
 
-    for (const xAOD::TruthEvent *genEvent : *xTruthEventContainer)
-    {
-        // get the truth particles
+  // Loop over all particles in the event 
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* particle =  (*xTruthParticleContainer)[iPart];
 
-        unsigned int nPart = genEvent->nTruthParticles();
-        // loop over all particles
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart)
-        {
-            const xAOD::TruthParticle *particle = genEvent->truthParticle(iPart);
             ATH_MSG_DEBUG("pdg code of this particle in the event is " << particle->pdgId() << " with status " << particle->status());
             //maps with key pdgId and value of number of particles with that pdgId
             std::map<int, unsigned int> childCounters;
@@ -94,7 +93,7 @@ StatusCode xAODParticleDecayFilter::filterEvent()
                 }
             } // end if particle has parent pdg id
         }     // end loop over particles
-    }         //loop over truth events
+    
 
     // if we get here, no particle was found with the required set of children
     setFilterPassed(false);

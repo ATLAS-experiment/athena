@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODTTbarWToLeptonFilter.h"
@@ -15,15 +15,15 @@ xAODTTbarWToLeptonFilter::xAODTTbarWToLeptonFilter(const std::string &name, ISvc
 
 StatusCode xAODTTbarWToLeptonFilter::filterEvent()
 {
-    // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer = NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-        ATH_MSG_ERROR("No TruthEvent collection with name "
-                      << "TruthEvents"
-                      << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
+
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }
+
     int N_quark_t = 0;
     int N_quark_tbar = 0;
     int N_quark_t_all = 0;
@@ -37,13 +37,10 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
     if (m_fourTopsFilter)
         count_found_leptons = 2; // In four tops, one can have the same charged lepton flavour twice
 
-    for (xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr)
-    {
-        unsigned int nPart = (*itr)->nTruthParticles();
-
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart)
-        {
-            const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
+  // Loop over all particles in the event 
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+            const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
             if (std::abs(pitr->pdgId()) != 6)
                 continue;
             if (pitr->pdgId() == 6)
@@ -155,8 +152,8 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                         break;
                 }
             }
-        }
-    }
+        } //loop over TruthParticles
+    
 
     ATH_MSG_INFO("Found " << N_quark_t_all << " t    quarks in event record");
     ATH_MSG_INFO("Found " << N_quark_tbar_all << " tbar quarks in event record");
@@ -179,19 +176,14 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
     {
 
         ATH_MSG_ERROR("No t or tbar quarks were found decaying to W in a (presumably) ttbar event! Event is rejected. Event dump follows.");
-        int event = 0;
-        for (xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr)
-        {
-            unsigned int nPart = (*itr)->nTruthParticles();
-            event++;
-            int part = 0;
-            for (unsigned int iPart = 0; iPart < nPart; ++iPart)
-            {
-                const xAOD::TruthParticle *mcpart = (*itr)->truthParticle(iPart);
-
+        int part = 0;
+     // Loop over all particles in the event and build up the grid
+        unsigned int nPart = xTruthParticleContainer->size();
+        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+                const xAOD::TruthParticle *mcpart =  (*xTruthParticleContainer)[iPart];
                 part++;
                 int pid = mcpart->pdgId();
-                ATH_MSG_ERROR("In event (from MC collection) " << event << " particle number " << part << " has pdgId = " << pid);
+                ATH_MSG_ERROR("Particle number " << part << " has pdgId = " << pid);
                 // retrieve decay vertex
                 auto decayVtx = mcpart->decayVtx();
                 // verify if we got a valid pointer
@@ -205,8 +197,8 @@ StatusCode xAODTTbarWToLeptonFilter::filterEvent()
                     int child_pid = child_mcpart->pdgId();
                     ATH_MSG_ERROR("          child " << part_child << " with pdgId = " << child_pid);
                 }
-            }
-        }
+            } // loop over TruthParticles
+        
         setFilterPassed(false);
         return StatusCode::SUCCESS;
     }

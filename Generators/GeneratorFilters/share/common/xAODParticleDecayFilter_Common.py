@@ -1,3 +1,7 @@
+include ("GeneratorFilters/CreatexAODSlimContainers.py")
+createxAODSlimmedContainer("TruthGen",prefiltSeq)
+prefiltSeq.xAODCnv.AODContainerName = 'GEN_EVENT'
+
 if not hasattr(filtSeq, "xAODParticleDecayFilter"):
     from GeneratorFilters.GeneratorFiltersConf import xAODParticleDecayFilter
     filtSeq += xAODParticleDecayFilter("xAODParticleDecayFilter")

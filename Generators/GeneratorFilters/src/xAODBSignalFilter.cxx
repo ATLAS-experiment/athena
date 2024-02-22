@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // -----------------------------------------------------------------------------------------------
@@ -97,33 +97,29 @@ StatusCode xAODBSignalFilter::filterEvent()
             ATH_MSG_ERROR("");
             return StatusCode::FAILURE;
         }
-    
-    // Retrieve full TruthEventContainer container
-    const xAOD::TruthEventContainer *xTruthEventContainer=NULL;
-    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-    {
-        ATH_MSG_ERROR("No TruthEvent collection with name " << "TruthEvents" << " found in StoreGate!");
-        return StatusCode::FAILURE;
-    }
-    // ** Begin iterating over McEventCollection **
-    for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr)
-    {
-        unsigned int nPart = (*itr)->nTruthParticles();
-        m_EventCnt++;
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }    
 
-        bool acceptEvent = true;
-
-        // ** Check HepMC for particles activating LVL1 trigger, if that is what user wishes **
-        //
-        bool LVL1Passed = false;
-        const xAOD::TruthParticle* LVL1Muon = 0;
-        //
-        if (m_localLVL1MuonCutOn)
-        {
+bool acceptEvent = true;
+unsigned int nPart = xTruthParticleContainer->size();  
+// ** Check HepMC for particles activating LVL1 trigger, if that is what user wishes **
+//
+bool LVL1Passed = false;
+const xAOD::TruthParticle* LVL1Muon = 0;
+//
+if (m_localLVL1MuonCutOn)
+   {
             //
-            for (unsigned int iPart = 0; iPart < nPart; ++iPart) 
-            {
-                const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+
+  // Loop over all particles in the event 
+    for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+         const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
+
                 bool LVL1Result = LVL1_Mu_Trigger(part);
                 if (LVL1Result)
                 {
@@ -131,18 +127,17 @@ StatusCode xAODBSignalFilter::filterEvent()
                     LVL1Muon = part; // Remember the muon for LVL2 testing
                     break;
                 }
-            }
+            } // loop over TruthParticles
         }
 
-        // ** Check HepMC for particles activating LVL2 trigger, if that is what user wishes **
-        //
-        bool LVL2Passed = false;
-        //
-        if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
+// ** Check HepMC for particles activating LVL2 trigger, if that is what user wishes **
+//
+bool LVL2Passed = false;
+//
+if (LVL1Passed && (m_localLVL2MuonCutOn || m_localLVL2ElectronCutOn))
         {
-            for (unsigned int iPart = 0; iPart < nPart; ++iPart) 
-            {
-                const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+            const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
                 bool LVL2Result = LVL2_eMu_Trigger(part);
                 if (LVL2Result)
                 {
@@ -151,7 +146,7 @@ StatusCode xAODBSignalFilter::filterEvent()
                                                                  // since, effectively, LVL2 trigger is not applied.
                                                                  // This is needed to "trigger" the 2nd muon!
                 }
-            }
+            } //loop over particles
         }
 
         // ** Flag event as passing LVL1 if it has passed **
@@ -181,9 +176,8 @@ StatusCode xAODBSignalFilter::filterEvent()
 
         // ** Reject event if an undecayed quark is found **
         //
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) 
-        {
-            const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+            const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
             if (std::abs(part->pdgId()) <= 6 && MC::isStable(part))
             {
                 acceptEvent = false;
@@ -199,9 +193,8 @@ StatusCode xAODBSignalFilter::filterEvent()
         if (LVL1Passed && LVL2Passed)
         {
             // ** Loop on all particles **
-            for (unsigned int iPart = 0; iPart < nPart; ++iPart) 
-            {
-                const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+            for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+                const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
                 const int particleID = part->pdgId();
                 //
                 bool motherIsB = false;
@@ -404,7 +397,6 @@ StatusCode xAODBSignalFilter::filterEvent()
         }
         ATH_MSG_DEBUG("");
 
-    } // End event iteration
     // End of execution for each event
     return StatusCode::SUCCESS;
 }

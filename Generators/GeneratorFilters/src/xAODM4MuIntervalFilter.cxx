@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -48,19 +48,18 @@ StatusCode xAODM4MuIntervalFilter::filterEvent() {
   // Find overlap objects
   std::vector<HepMC::FourVector> MCTruthMuonList;
   
-// Retrieve full TruthEvent container
-const xAOD::TruthEventContainer *xTruthEventContainer;
-if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-{
-    ATH_MSG_ERROR("No TruthEvents collection with name " << "TruthEvents" << " found in StoreGate!");
-    return StatusCode::FAILURE;
-}
-xAOD::TruthEventContainer::const_iterator itr;
-for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++itr) {
-    const xAOD::TruthEvent *genEvt = (*itr);
-    unsigned int nPart = genEvt->nTruthParticles();
-    for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-     const xAOD::TruthParticle* pitr =  genEvt->truthParticle(iPart);
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
+  }
+
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+           const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
+
 	   // muon
 	   if (std::abs((pitr)->pdgId()) == 13 && MC::isStable(pitr) &&
 	      (pitr)->pt() >= m_minPt &&
@@ -69,9 +68,8 @@ for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++it
            MCTruthMuonList.push_back(tmp);
            
 	       }
-    }
+    } // end loop over Particles
    
-  }
   
  std::sort(MCTruthMuonList.begin(), MCTruthMuonList.end(), High2LowByPt());
 

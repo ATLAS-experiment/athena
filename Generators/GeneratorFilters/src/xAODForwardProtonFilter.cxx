@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // GeneratorFilters/ForwardProtonFilter
@@ -26,24 +26,18 @@ StatusCode xAODForwardProtonFilter::filterEvent()
   bool accepted_A = false;
   bool accepted_C = false;
 
-  // Retrieve TruthMuons container
-  const xAOD::TruthEventContainer *xTruthEventContainer;
-  if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-  {
-    ATH_MSG_ERROR("No TruthEvents collection with name "
-                  << "TruthEvents"
-                  << " found in StoreGate!");
-    return StatusCode::FAILURE;
+  // Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;   
   }
 
-  xAOD::TruthEventContainer::const_iterator itr;
-  for (itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr)
-  {
-    const xAOD::TruthEvent *genEvt = (*itr);
-    unsigned int nPart = genEvt->nTruthParticles();
-    for (unsigned int iPart = 0; iPart < nPart; ++iPart)
-    {
-      const xAOD::TruthParticle *pitr = genEvt->truthParticle(iPart);
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* pitr =  (*xTruthParticleContainer)[iPart];
+
       // We're only interested in stable (status == 1) particles
 
       if (!MC::isStable(pitr))
@@ -80,8 +74,7 @@ StatusCode xAODForwardProtonFilter::filterEvent()
         return StatusCode::SUCCESS;
       if (m_Single_tagC && accepted_C)
         return StatusCode::SUCCESS;
-    }
-  }
+    } // end loop on particles
 
   // If we get here the event doesn't pass the criteria
   setFilterPassed(false);

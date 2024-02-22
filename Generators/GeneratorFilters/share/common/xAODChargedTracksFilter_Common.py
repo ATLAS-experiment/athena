@@ -4,6 +4,8 @@
 # connecting the filter
 
 include ("GeneratorFilters/CreatexAODSlimContainers.py")
+createxAODSlimmedContainer("TruthGen",prefiltSeq)
+prefiltSeq.xAODCnv.AODContainerName = 'GEN_EVENT'
 
 from GeneratorFilters.GeneratorFiltersConf import xAODChargedTracksFilter
 xAODChargedTracksFilter = xAODChargedTracksFilter("xAODChargedTracksFilter")  

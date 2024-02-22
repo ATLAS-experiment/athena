@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration 
 */
 // This is a general-purpose multi-c-jet filter with the removal of the 
 // c-hadrons orriginating from b-hadrons decay.
@@ -92,42 +92,41 @@ StatusCode xAODMultiCjetFilter::filterEvent() {
   if(njets < m_nJetsMin) pass = false;
   if(njets > m_nJetsMax && m_nJetsMax > 0) pass = false;
   int cJetCounter = 0;
-  McEventCollection::const_iterator itr;
 
-    // Retrieve full TruthEventContainer container
-   const xAOD::TruthEventContainer *xTruthEventContainer=NULL;
-   if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
-   {
-  ATH_MSG_ERROR("No TruthEvent collection with name " << "TruthEvents" << " found in StoreGate!");
-    return StatusCode::FAILURE;
+// Retrieve TruthGen container from xAOD Gen slimmer, contains all particles witout barcode_zero and 
+// duplicated barcode ones
+  const xAOD::TruthParticleContainer* xTruthParticleContainer;
+  if (evtStore()->retrieve(xTruthParticleContainer, "TruthGen").isFailure()) {
+      ATH_MSG_ERROR("No TruthParticle collection with name " << "TruthGen" << " found in StoreGate!");
+      return StatusCode::FAILURE;
   }
+
     
-        // Make a vector containing all the event's b-hadrons
-        std::vector< const xAOD::TruthParticle* > bHadrons;
-  for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr) {
-       unsigned int nPart = (*itr)->nTruthParticles();
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+  // Make a vector containing all the event's b-hadrons
+  std::vector< const xAOD::TruthParticle* > bHadrons;
+
+  unsigned int nPart = xTruthParticleContainer->size();
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
 
       if( !isBwithWeakDK( part->absPdgId()) ) continue;
       if( part->pt() < m_bottomPtMin ) continue;
       if( std::abs( part->abseta() ) > m_bottomEtaMax) continue;
       bHadrons.push_back(part);
-    }
-}
-    // Make a vector containing all the event's c-hadrons
-    std::vector< const xAOD::TruthParticle* > cHadrons;
-  for ( xAOD::TruthEventContainer::const_iterator itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr) {
-       unsigned int nPart = (*itr)->nTruthParticles();
-        for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
-            const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
+    
+  }
+  // Make a vector containing all the event's c-hadrons
+  std::vector< const xAOD::TruthParticle* > cHadrons;
+
+  for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
+      const xAOD::TruthParticle* part =  (*xTruthParticleContainer)[iPart];
 
       if( !isCwithWeakDK( part->absPdgId()) ) continue;
       if( part->pt() < m_bottomPtMin ) continue;
       if( std::abs( part->abseta() ) > m_bottomEtaMax) continue;
       cHadrons.push_back(part);
     }
-}
+
     // Count how many truth jets contain c-hadrons
     for(uint i = 0; i < jets.size(); i++){
       for(uint j = 0; j < cHadrons.size(); j++){
@@ -143,7 +142,7 @@ StatusCode xAODMultiCjetFilter::filterEvent() {
     
     // check if cjets contian b-hadron 
     // select only those withouty b-hadron 
-    // @todo - removal based on parrent  
+    // @todo - removal based on parent  
     
     for(uint i = 0; i < cjets_all.size(); i++){
       bool b_inside_cjet = false; 
