@@ -14,3 +14,8 @@ atlas_add_component( xAODMuonTrkPrepDataCnv
                                      MuonPrepRawData xAODMuonPrepData StoreGateLib)
 
 atlas_install_python_modules( python/*.py)
+
+atlas_add_test(xAODMuonTrkPrepDataCnv_PRDtest
+    SCRIPT test/testPRDConversion.py
+    PROPERTIES TIMEOUT 900
+    POST_EXEC_SCRIPT noerror.sh)
