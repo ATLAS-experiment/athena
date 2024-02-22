@@ -1934,6 +1934,9 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 
       m_eff_vs_mult->FillDenom( m_Nref );
 
+      m_eff_eta_vs_pt->FillDenom( std::fabs(pTt), etat );
+      m_eff_d0_vs_pt->FillDenom( std::fabs(pTt), a0t );
+
       dump = false; 
 
       m_eff_vs_ntracks->FillDenom( Nvtxtracks );
