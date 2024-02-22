@@ -2,8 +2,13 @@
 
 
 # Run over AOD or TRIG8 to produce the TIDA track ntuple
-# Example: 
+# Note, to run using the python file in your current directory you need to drop 'TrigInDetValidation.'
+# Local example: 
 # python -m TrigInDetValidation.TrigInDetValidation_AODtoTrkNtuple_CA --filesInput AOD.root
+# Grid example:
+# prun --exec="python -m TrigInDetValidation.TrigInDetValidation_AODtoTrkNtuple_CA --LRT=True --filesInput=%IN" --inDS=DATASETNAME --outDS=OUTPUTNAME --useAthenaPackage --outputs="TrkNtuple-0000.root" 
+
+import sys
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
@@ -22,12 +27,9 @@ args, _ = parser.parse_known_args()
 args = flags.fillFromArgs(parser=parser)
 
 
-if hasattr(args, "filesInput") and args.filesInput:
-    FilesInput = args.filesInput
-else:
-    FilesInput = ["AOD.pool.root"]
+if not (hasattr(args, "filesInput") and args.filesInput):
+    flags.Input.Files = ["AOD.pool.root"]
 
-flags.Input.Files = FilesInput
 flags.lock()
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -162,7 +164,6 @@ if ( True ) :
 
     "HLT_mu.*_LRT_idperf_.*:HLT_IDTrack_MuonLRT_FTF:HLT_Roi_L2SAMuon_LRT",
     "HLT_mu.*_LRT_idperf_.*:HLT_IDTrack_MuonLRT_IDTrig:HLT_Roi_L2SAMuon_LRT",
-    "HLT_mu.*_LRT_idperf_.*:HLT_IDTrack_MuonLRT_FTF:HLT_Roi_L2SAMuon_LRT",
 
     "HLT_b.*perf.*:HLT_IDTrack_Bjet_FTF",
     "HLT_b.*perf.*:HLT_IDTrack_Bjet_IDTrig",
@@ -175,10 +176,11 @@ if ( True ) :
     "HLT_e.*:HLT_IDTrack_Electron_IDTrig",
     "HLT_e.*:HLT_IDTrack_Electron_GSF",
 
-    "HLT_e20_idperf_loose_lrtloose_L1eEM18L:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT",
-    "HLT_e30_idperf_loose_lrtloose_L1eEM26M:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT",
-    "HLT_e20_idperf_loose_lrtloose_L1eEM18L:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT",
-    "HLT_e30_idperf_loose_lrtloose_L1eEM26M:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT",
+
+    # LRT electron idperf               
+    "HLT_e.*idperf.*lrt.*:HLT_IDTrack_ElecLRT_FTF:HLT_Roi_FastElectron_LRT",
+    "HLT_e.*idperf.*lrt.*:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT",
+    "HLT_e.*idperf.*lrt.*:HLT_IDTrack_Electron_LRTGSF:HLT_Roi_FastElectron_LRT",
 
     # electron lrt e tag
     "HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M:HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:te=1",
@@ -284,5 +286,7 @@ print ("configured everything")
 # Adjust message limits
 acc.getService("MessageSvc").infoLimit = 100000000
 
-acc.run()
+# Return a status code
+sys.exit(not acc.run().isSuccess())
+
 
