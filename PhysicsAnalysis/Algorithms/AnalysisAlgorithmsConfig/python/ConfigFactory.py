@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # This file defines a factory method that can create a configuration
 # block sequence based on a passed in name.  This avoids having to
@@ -98,7 +98,7 @@ class FactoryBlock():
                     continue
                 else:
                     raise ValueError(f"{arg} is requried for {funcName}")
-            if type(func) == type(dict):
+            if isinstance(func, type):
                 configSeq.append(func(**args))
             else:
                 func(**args)
@@ -121,14 +121,14 @@ class ConfigFactory():
         """Add class to list of available algorithms"""
         if not callable(alg):
             raise ValueError(f"{algName} is not a callable.")
-        if type(alg) == type(dict):
+        if isinstance(alg, type):
             opts = getClassArgs(alg)
         else:
             opts = getFuncArgs(alg)    
 
         if superBlocks is None:
             superBlocks = [self.ROOTNAME]
-        elif type(superBlocks) != list:
+        elif not isinstance(superBlocks, list):
             superBlocks = [superBlocks]
 
         # add new alg block to subAlgs dict of super block
