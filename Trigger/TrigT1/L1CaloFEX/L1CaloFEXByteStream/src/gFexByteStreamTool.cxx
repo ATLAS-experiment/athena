@@ -492,7 +492,7 @@ int16_t gFexByteStreamTool::fillGlobal(const std::vector<uint32_t> &tob, const i
     container->back()->setSaturated(0);
     container->back()->setGlobalType(type);
 
-    int16_t MET2 = sum_x * sum_x + sum_y * sum_y;
+    int MET2 = sum_x * sum_x + sum_y * sum_y;
     int16_t MET = 0x0;
 
     if (MET2 > 0x000FFF) MET = 0x000FFF;
