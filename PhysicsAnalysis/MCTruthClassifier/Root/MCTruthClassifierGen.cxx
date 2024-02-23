@@ -255,46 +255,18 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
 //---------------------------------------------------------------------------------
 ParticleOrigin MCTruthClassifier::defJetOrig(const std::set<const xAOD::TruthParticle*>& allJetMothers) {
   ParticleOrigin partOrig = NonDefined;
-  std::set<const xAOD::TruthParticle*>::iterator it;
-
-  for (it = allJetMothers.begin(); it != allJetMothers.end(); ++it) {
-    int pdg = abs((*it)->pdgId());
-    if (MC::isTop(pdg)) {
-      partOrig = top;
-    }
-    if (MC::isZ(pdg)) {
-      partOrig = ZBoson;
-    }
-    if (MC::isW(pdg) && !(partOrig == top)) {
-      partOrig = WBoson;
-    }
-    if (( MC::isQuark(pdg) || MC::isGluon(pdg)) && partOrig != top && partOrig != ZBoson && partOrig != WBoson) {
-      partOrig = QCD;
-    }
-    if (MC::isHiggs(pdg)) {
-      partOrig = Higgs;
-      return partOrig;
-    }
-    if (pdg == 35 || pdg == 36 || pdg == 37) {
-      partOrig = HiggsMSSM;
-      return partOrig;
-    }
-    if (pdg == 32 || pdg == 33 || pdg == 34) {
-      partOrig = HeavyBoson;
-      return partOrig;
-    }
-    if (pdg == 42) {
-      partOrig = LQ;
-      return partOrig;
-    }
-    if (MC::isSUSY(pdg)) {
-      partOrig = SUSY;
-      return partOrig;
-    }
-    if (MC::isBSM(pdg)) {
-      partOrig = OtherBSM;
-      return partOrig;
-    }
+  for (const auto& it: allJetMothers) {
+    int pdg = abs(it->pdg_id());
+    if (MC::isTop(pdg)) partOrig = top;
+    if (MC::isZ(pdg))   partOrig = ZBoson;
+    if (MC::isW(pdg) && !(partOrig == top)) partOrig = WBoson;
+    if ((MC::isQuark(pdg) || MC::isGluon(pdg)) && partOrig != top && partOrig != ZBoson && partOrig != WBoson) partOrig = QCD;
+    if (MC::isHiggs(pdg)) return Higgs;
+    if (pdg == 35 || pdg == 36 || pdg == 37) return HiggsMSSM;
+    if (pdg == 32 || pdg == 33 || pdg == 34) return HeavyBoson;
+    if (pdg == 42) return LQ;
+    if (MC::isSUSY(pdg)) return SUSY;
+    if (MC::isBSM(pdg)) return OtherBSM;
   }
   return partOrig;
 }
