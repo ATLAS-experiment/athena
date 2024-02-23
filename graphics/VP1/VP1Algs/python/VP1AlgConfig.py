@@ -70,7 +70,6 @@ def VP1AlgCfg(flags, name="VP1AlgCA", **kwargs):
     result = ComponentAccumulator()
 
     kwargs.setdefault("AtlasRelease", getATLASVersion())
-
     the_alg = CompFactory.VP1Alg(name="VP1EventDisplayAlg", **kwargs)
     result.addEventAlgo(the_alg, primary=True)
     return result
@@ -109,8 +108,14 @@ def SetupVP1():
     group = parser.add_argument_group("VP1 specific")
     group.add_argument(
         "Filename",
+        nargs='?',
         help="Input file to pass to VP1 (i.e. vp1 myESD.pool.root as an alternative to vp1 --filesInput=[])",
         metavar="File name",
+    )
+    group.add_argument(
+        "--config",
+        nargs="*",
+        help="Config file to use for VP1. If not specified, the default configuration will be used.",
     )
     group.add_argument(
         "--verboseAthena",
@@ -179,7 +184,6 @@ def SetupVP1():
     if "help" in args:
         # No point doing more here, since we just want to print the help.
         import sys
-
         sys.exit()
 
     # Support the positional version of passing file name e.g. vp1 myESD.pool.root
@@ -188,15 +192,6 @@ def SetupVP1():
         or flags.Input.Files == ["_ATHENA_GENERIC_INPUTFILE_NAME_"]
     ):
         flags.Input.Files = [args.Filename]
-
-    # Set the online flag if we are running at P1
-    if args.online:
-        flags.Common.isOnline = args.online
-    elif "HLTP" in flags.IOVDb.GlobalTag:
-        print(
-            "HLTP detected in the global tag, but --online mode is not enabled. Enabling it now."
-        )
-        flags.Common.isOnline = True
 
     _logger.verbose("+ About to set flags related to the input")
 
@@ -237,8 +232,17 @@ def SetupVP1():
             if not path.exists(flags.Input.Files[0]):
                 _logger.warning("Input file", file, "does not exist")
                 import sys
-
                 sys.exit(1)
+    
+        # Set the online flag if we are running at P1
+    if args.online:
+        flags.Common.isOnline = args.online
+    elif "HLTP" in flags.IOVDb.GlobalTag:
+        print(
+            "HLTP detected in the global tag, but --online mode is not enabled. Enabling it now."
+        )
+        flags.Common.isOnline = True
+    
     _logger.verbose("+ ... Input flags done")
 
     _logger.verbose("+ About to set the detector flags")
@@ -284,11 +288,15 @@ def SetupVP1():
             # Check if running on legacy inputs
             if "EventInfo" not in flags.Input.Collections:
                 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-
                 cfg.merge(EventInfoCnvAlgCfg(flags))
-            from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
 
+            from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
             cfg.merge(TrackCollectionReadCfg(flags, "Tracks"))
+
+            from TrkConfig.AtlasExtrapolationEngineConfig import AtlasExtrapolationEngineCfg
+            AtlasExtrapolationEngine = cfg.getPrimaryAndMerge(AtlasExtrapolationEngineCfg(flags))
+            cfg.addPublicTool(AtlasExtrapolationEngine)
+
         if flags.Input.isMC:
             # AOD2xAOD Truth conversion
             from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
@@ -311,7 +319,11 @@ def SetupVP1():
 
     if args.cruise:
         vp1config.setdefault("InitialCruiseMode", "EVENT")
-        vp1config.setdefault("vp1Alg.InitialCruiseModePeriod", args.cruise)
+        vp1config.setdefault("InitialCruiseModePeriod", args.cruise)
+
+    if args.config:
+        print("Using config file", args.config)
+        vp1config.setdefault("InitialInputVP1Files", args.config)
 
     # Batch mode
     if args.batch:
@@ -325,7 +337,7 @@ def SetupVP1():
         setup_live_mode(args, vp1config)
 
     # configure VP1
-    cfg.merge(VP1AlgCfg(flags, vp1config))
+    cfg.merge(VP1AlgCfg(flags, **vp1config))
     cfg.run()
 
 

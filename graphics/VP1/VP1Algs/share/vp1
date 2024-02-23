@@ -19,8 +19,10 @@ Launching VP1 - the ATLAS 3D event display
 
 ******************************************
 
-*IMPORTANT*: VP1 has now been migrated to use ComponentAccumulator. At the same time, we have tried to simplify the configuration of VP1.
-If you have any problems, or if you needed some of the removed configuration options, please contact us on the JIRA ticket:
+*IMPORTANT*: VP1 has now been migrated to use ComponentAccumulator. 
+At the same time, we have tried to simplify the configuration of VP1.
+If you have any problems, or if you needed some of the removed configuration options,
+please contact us on the JIRA ticket:
 https://its.cern.ch/jira/browse/ATLASRECTS-7853
 
 ******************************************
