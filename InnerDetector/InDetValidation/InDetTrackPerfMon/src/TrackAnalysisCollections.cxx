@@ -7,7 +7,8 @@
  * @author Marco Aparo <marco.aparo@cern.ch>
  */
 
-#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "TrackAnalysisCollections.h"
+#include "TrackParmetersHelper.h"
 
 /// -------------------
 /// --- Constructor ---
@@ -500,9 +501,9 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
   size_t it(0);
   for( const xAOD::TrackParticle* thisOfflineTrack : m_offlTrackVec[ stage ] ) {
     ss << "Offline track" 
-       << " : pt = "  << thisOfflineTrack->pt() 
-       << " : eta = " << thisOfflineTrack->eta() 
-       << " : phi = " << thisOfflineTrack->phi() 
+       << " : pt = "  << pT( *thisOfflineTrack )
+       << " : eta = " << eta( *thisOfflineTrack )
+       << " : phi = " << phi( *thisOfflineTrack )
        << std::endl;
     if( it > 20 ) { ss << "et al...." << std::endl; break; }
     it++;
@@ -514,9 +515,9 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
   it = 0;
   for( const xAOD::TruthParticle* thisTruthParticle : m_truthTrackVec[ stage ] ) {
     ss << "Truth particle"
-       << " : pt = "  << thisTruthParticle->pt()
-       << " : eta = " << thisTruthParticle->eta()
-       << " : phi = " << thisTruthParticle->phi()
+       << " : pt = "  << pT( *thisTruthParticle )
+       << " : eta = " << eta( *thisTruthParticle )
+       << " : phi = " << phi( *thisTruthParticle )
        << std::endl;
     if( it > 20 ) { ss << "et al...." << std::endl; break; }
     it++;
@@ -528,9 +529,9 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
   it = 0;
   for( const xAOD::TrackParticle* thisTriggerTrack : m_trigTrackVec[ stage ] ) {
     ss << "Trigger track"
-       << " : pt = "  << thisTriggerTrack->pt()
-       << " : eta = " << thisTriggerTrack->eta()
-       << " : phi = " << thisTriggerTrack->phi()
+       << " : pt = "  << pT( *thisTriggerTrack )
+       << " : eta = " << eta( *thisTriggerTrack )
+       << " : phi = " << phi( *thisTriggerTrack )
        << std::endl;
     if( it > 20 ) { ss << "et al...." << std::endl; break; }
     it++;

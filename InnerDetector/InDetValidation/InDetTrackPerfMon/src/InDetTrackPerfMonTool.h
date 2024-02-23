@@ -25,12 +25,10 @@
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
-#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
-#include "InDetTrackPerfMon/RoiSelectionTool.h"
+#include "../src/TrackAnalysisCollections.h"
+#include "../src/RoiSelectionTool.h"
 #include "InDetTrackPerfMon/ITrackSelectionTool.h"
 /// TODO - To be included in later MRs
-//#include "InDetTrackPerfMon/InDetObjectDecorHelper.h"
-//#include "InDetTrackPerfMon/TrackRoiSelectionTool.h"
 //#include "InDetTrackPerfMon/ITrackMatchingTool.h"
 //#include "InDetTrackPerfMon/TrackAnalysisPlotsMgr.h"
 

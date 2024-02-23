@@ -65,7 +65,7 @@ namespace IDTPM {
   
     /// geometric RoI filters - for non-trigger tracks (e.g. offline, truth, etc.)
     template< class T >
-    bool accept( const T* t, const TrigRoiDescriptor* r ) const;
+    bool accept( const T& t, const TrigRoiDescriptor* r ) const;
 
     /// track getter function (for offline tracks or truth particles)
     template< class T >

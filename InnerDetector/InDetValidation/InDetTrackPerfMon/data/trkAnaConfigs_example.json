@@ -24,14 +24,15 @@
     "TrkAnaTrigEle" : {
         "enabled" : true,
         "TestType"  : "Trigger",
-        "RefType"   : "OfflineElectron", 
+        "RefType"   : "Offline", 
         "TrigTrkKey"    : "HLT_IDTrack_Electron_IDTrig",
         "ChainNames"    : [ "HLT_e.*_idperf_.*" ],
         "MatchingType"    : "DeltaRMatch",
         "dRmax"           : 0.05,
         "pTResMax"        : -9.9,
         "SubFolder"  : "TrkAnaTrigEle/",
-        "ObjectQuality" : "Tight",
+        "SelectOfflineObject" : "Electron", 
+        "ObjectQuality"       : "Tight",
         "doOfflineElectrons" : true
     },
     "TrkAnaOffl1" : {

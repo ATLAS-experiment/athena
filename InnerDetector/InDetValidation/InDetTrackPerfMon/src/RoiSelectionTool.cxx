@@ -7,7 +7,7 @@
  * @author marco aparo
  **/
 
-#include "InDetTrackPerfMon/RoiSelectionTool.h"
+#include "RoiSelectionTool.h"
 
 
 ///----------------------------------------

@@ -128,19 +128,27 @@ def InDetTrackPerfMonCfg( flags ):
     ## Configuring IDTPM tool instances
     tools = [] 
 
-    ## TODO - to be uncommented in future MRs
-    #useTruth = False
-    #for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
-    #    if "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".RefType" ) :
-    #        useTruth = True
-    #if useTruth:
-    #    acc.merge( InDetTruthDecoratorAlgCfg(flags) )
+    useTruth = False
+    useOfflineObject = False
+    for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
+        if "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".RefType" ):
+            useTruth = True
+            break
+        if getattr( flags.PhysVal.IDTPM, trkAnaName+".SelectOfflineObject" ):
+            if "Truth" in getattr( flags.PhysVal.IDTPM, trkAnaName+".SelectOfflineObject" ):
+                continue # Do not schedule algorithm for Truth-match offline selection
+            useOfflineObject = True
+            break
 
-    ## TODO - to be uncommented in future MRs
-    ## true only if offline objects are requested in any scheduled trkAnalysis
-    #if getObjectStrList(flags):
-    #    from InDetTrackPerfMon.InDetOfflineObjectDecoratorAlgConfig import InDetOfflineObjectDecoratorAlgCfg
-    #    acc.merge( InDetOfflineObjectDecoratorAlgCfg(flags) )
+    ## Truth-hit decorator
+    if useTruth:
+        from InDetTrackPerfMon.InDetAlgorithmConfig import TruthHitDecoratorAlgCfg
+        acc.merge( TruthHitDecoratorAlgCfg(flags) )
+
+    ## Offline track-object decorator
+    if useOfflineObject:
+        from InDetTrackPerfMon.InDetAlgorithmConfig import OfflineObjectDecoratorAlgCfg
+        acc.merge( OfflineObjectDecoratorAlgCfg(flags) )
 
     for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames:
         ## cloning flags of current TrackAnalysis to PhysVal.IDTPM.currentTrkAna
