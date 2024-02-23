@@ -223,12 +223,13 @@ def defineMenu():
         # low-priority (all mu)
         'L1_AFP_FSA_TOF_T2_BGRP12', 'L1_AFP_FSA_TOF_T3_BGRP12','L1_AFP_FSC_TOF_T2_BGRP12', 'L1_AFP_FSC_TOF_T3_BGRP12',
         'L1_AFP_A_OR_C_UNPAIRED_ISO', 'L1_AFP_A_OR_C_UNPAIRED_NONISO', 'L1_AFP_A_OR_C_EMPTY', 'L1_AFP_A_OR_C_FIRSTEMPTY',
-
+        
+        'L1_AFP_A_OR_C_TOF_UNPAIRED_ISO', 'L1_AFP_A_OR_C_TOF_UNPAIRED_NONISO', 'L1_AFP_A_OR_C_TOF_EMPTY', 'L1_AFP_A_OR_C_TOF_FIRSTEMPTY',
         'L1_AFP_A_AND_C_TOF_jJ50', 'L1_AFP_A_AND_C_TOF_T0T1_jJ50', 'L1_AFP_A_AND_C_TOF_jJ60', 'L1_AFP_A_AND_C_TOF_T0T1_jJ60', 'L1_AFP_A_AND_C_TOF_jJ90', 'L1_AFP_A_AND_C_TOF_T0T1_jJ90', 'L1_AFP_A_AND_C_TOF_jJ125', 'L1_AFP_A_AND_C_TOF_T0T1_jJ125',
 
         # high-priority (low mu)
         'L1_AFP_NSA_BGRP12', 'L1_AFP_NSC_BGRP12', 
-        'L1_AFP_A','L1_AFP_C', 'L1_AFP_A_AND_C',
+        'L1_AFP_A','L1_AFP_C', 'L1_AFP_A_AND_C', 'L1_AFP_A_AND_C_TOF',
         #'L1_AFP_A_OR_C_J5','L1_AFP_A_AND_C_J5', # J5 not available in legacy menu. Need to update to jJ threshold for low-mu
         'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
         'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
@@ -236,7 +237,7 @@ def defineMenu():
         'L1_eEM9_AFP_A_OR_C', 'L1_eEM9_AFP_A_AND_C',
         # med-priority (low mu)
         'L1_AFP_A_OR_C', 'L1_AFP_A_OR_C_MBTS_2', 'L1_AFP_A_AND_C_MBTS_2',
-          
+        
 
         # MBTS
         'L1_MBTS_A', 'L1_MBTS_C',
