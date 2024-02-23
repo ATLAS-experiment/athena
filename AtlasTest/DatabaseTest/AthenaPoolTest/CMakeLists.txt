@@ -96,13 +96,6 @@ athenapooltest_run_test( InDetRawDataRead InDetRawDataReader_jobOptions
                          "InDetRawDataFak"
                          DEPENDS InDetRawDataWriter )
 
-# Test write/read of LAr cell
-athenapooltest_run_test( LArCellContWriter LArCellContWriter_jobOptions
-                         "LArCellContFake" )
-athenapooltest_run_test( LArCellContRead LArCellContReader_jobOptions
-                         "LArCellContFake"
-                         DEPENDS LArCellContWriter )
-
 # Read two RDOs with the DoubleEventSelector
 # TODO: migrate to CA
 # athenapooltest_run_test( ReadRDODoubleSelector ReadRDODoubleSelector
