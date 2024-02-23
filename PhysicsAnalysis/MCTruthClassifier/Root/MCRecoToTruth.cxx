@@ -228,7 +228,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Jet* jet, bool DR, Info* 
   for (it = constituents.begin(); it != constituents.end(); ++it) {
     const xAOD::TruthParticle* thePart = (*it);
     // determine jet origin
-    findAllJetMothers(thePart, allJetMothers);
+    MC::findAllJetMothers(thePart, allJetMothers);
     // determine jet type
     if (thePart->status() == 3)
       continue;
