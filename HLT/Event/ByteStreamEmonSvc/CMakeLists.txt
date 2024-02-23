@@ -1,6 +1,4 @@
-################################################################################
-# Package: ByteStreamEmonSvc
-################################################################################
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ByteStreamEmonSvc )
@@ -16,7 +14,6 @@ atlas_add_component( ByteStreamEmonSvc
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} ${TDAQ_LIBRARIES} ByteStreamCnvSvcLib ByteStreamData GaudiKernel StoreGateLib PersistentDataModel ByteStreamCnvSvcBaseLib xAODEventInfo TrigConfData )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py )
 
 atlas_add_test(
