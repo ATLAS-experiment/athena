@@ -19,6 +19,10 @@ atlas_add_test( testR4Geometry
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
 
+atlas_add_test( checkStripDesign
+                SCRIPT runStripDesignDump                
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( testR4SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 10 

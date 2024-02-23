@@ -68,10 +68,51 @@ void testChannelNumber(const StripDesign& design, TFile& outFile, const std::str
         }
     }
     outFile.WriteObject(histo.get(), histo->GetName());
-
 }
 
-int main() {
+bool testChamberBackForthMapping(const MuonGMR4::StripDesign& design){
+    std::cout<<"##################################################################################"<<std::endl;
+    std::cout<<"runStripDesignDump() --  Check strip back and forth mapping of "
+             <<typeid(design).name()<<" "<<design<<std::endl;
+    std::cout<<"##################################################################################"<<std::endl;
+    using CheckVector2D = MuonGMR4::CheckVector2D;
+    const int numStrips = design.numStrips();
+    const AmgSymMatrix(2) restRot{Eigen::Rotation2D{design.stereoAngle()}};
+    for (int ch = 1; ch <= numStrips; ++ch) {
+        const CheckVector2D stripCent = design.center(ch);
+        if (!stripCent) {
+            std::cout<<"runStripDesignDump() "<<__LINE__<<"  -- Strip "<<ch<< " is not fetchable"<<std::endl;
+            continue;
+        }
+        const Amg::Vector2D& stripCentVal{(*stripCent)};
+        int backChNum = design.stripNumber(stripCentVal);
+        if (backChNum != ch) {
+            std::cerr<<"runStripDesignDump() "<<__LINE__<<"  -- Back & forth mapping of strip "<<ch
+                    <<" "<<Amg::toString(stripCentVal)<<" gave different results "<<ch<<" vs. "<<backChNum<<std::endl;
+            return false;
+        }
+        if (ch == 1 || ch == numStrips) continue;
+        const CheckVector2D prevCent = design.center(ch-1);
+        const Amg::Vector2D leftShift = stripCentVal + 0.49 * (prevCent.value_or(Amg::Vector2D::Zero()) - stripCentVal);
+        if (design.insideTrapezoid(restRot * leftShift) && 
+            (backChNum = design.stripNumber(leftShift)) != ch) {
+            std::cerr<<"runStripDesignDump() "<<__LINE__<<"  -- the point "<<Amg::toString(leftShift)
+                     <<" should be assigned to "<<ch<<" but the design decided that it's gonna be "<<backChNum<<std::endl;
+            return false;
+        }
+        const CheckVector2D nextCent = design.center(ch+1);
+        const Amg::Vector2D rightShift = stripCentVal + 0.49 * (nextCent.value_or(Amg::Vector2D::Zero()) - stripCentVal);
+        if (design.insideTrapezoid(restRot * rightShift) && 
+            (backChNum = design.stripNumber(rightShift)) != ch) {
+            std::cerr<<"runStripDesignDump() "<<__LINE__<<"  -- the point "<<Amg::toString(rightShift)
+                     <<" should be assigned to "<<ch<<" but the design decided that it's gonna be "<<backChNum<<std::endl;
+            return false;
+        }
+    }    
+    return true;
+}
+
+int main(int argc, char** argv) {
     constexpr double halfHeight = 200. * Gaudi::Units::mm;
     constexpr double shortEdge  = 150. * Gaudi::Units::mm;
     constexpr double longEdge   = 300. * Gaudi::Units::mm;
@@ -79,8 +120,12 @@ int main() {
     constexpr double stripPitch = 5 * Gaudi::Units::mm;
     constexpr double stripWidth = stripPitch / 3;
     constexpr double stereoAngle = 20. * Gaudi::Units::deg;
-    constexpr unsigned int numStrips = 2.*halfHeight / stripPitch -1; 
-    std::unique_ptr<TFile> file = std::make_unique<TFile>("/srv/build/Strip.root", "RECREATE");
+    constexpr unsigned int numStrips = 2.*halfHeight / stripPitch -1;
+    std::string outFile{"./Strip.root"};
+    if (argc > 1) outFile = argv[1];
+
+
+    std::unique_ptr<TFile> file = std::make_unique<TFile>(outFile.c_str(), "RECREATE");
    
     StripDesign nominalDesign{};
     nominalDesign.defineTrapezoid(shortEdge, longEdge, halfHeight);
@@ -89,6 +134,10 @@ int main() {
     /// 
     createGraph(nominalDesign, *file, "NominalDesign");
     testChannelNumber(nominalDesign, *file, "NominalNumbers");
+    if (!testChamberBackForthMapping(nominalDesign)) {
+        std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --  Nominal design channel mapping failed "<<std::endl;
+        return EXIT_FAILURE;
+    }
     
     /// Flip the strip design
     StripDesign flippedDesign{};
@@ -100,6 +149,10 @@ int main() {
    
     createGraph(flippedDesign,*file, "FlippedDesign");
     testChannelNumber(flippedDesign, *file, "FlippedNumbers");
+    if (!testChamberBackForthMapping(flippedDesign)) {
+        std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --   Flipped design channel mapping failed "<<std::endl;
+        return EXIT_FAILURE;
+    }
 
     StripDesign rotatedDesign{};
     rotatedDesign.defineTrapezoid(shortEdge, longEdge, halfHeight, stereoAngle);
@@ -108,7 +161,10 @@ int main() {
     /// 
     createGraph(rotatedDesign, *file, "StereoDesign");
     testChannelNumber(rotatedDesign, *file, "StereoNumbers");
-
+    if (!testChamberBackForthMapping(rotatedDesign)) {
+        std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --  Stereo Rotated design channel mapping failed "<<std::endl;
+        return EXIT_FAILURE;
+    }
 
     StripDesign rotatedDesignNeg{};
     rotatedDesignNeg.defineTrapezoid(shortEdge, longEdge, halfHeight, -stereoAngle);
@@ -116,6 +172,12 @@ int main() {
                                         stripPitch, stripWidth, numStrips, 0);
     /// 
     createGraph(rotatedDesignNeg, *file, "NegStereoDesign");
+    testChannelNumber(rotatedDesign, *file, "NegStereoDesignNumbers");
+    if (!testChamberBackForthMapping(rotatedDesignNeg)) {
+        std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --  Rotated design VolII channel mapping failed "<<std::endl;
+        return EXIT_FAILURE;
+    }
+
     
     StripDesign flippedRotated{};
     flippedRotated.defineTrapezoid(shortEdge, longEdge, halfHeight, stereoAngle);
@@ -123,7 +185,12 @@ int main() {
                                         stripPitch, stripWidth, numStrips, 0);
     flippedRotated.flipTrapezoid();
     /// 
-    createGraph(flippedRotated, *file, "StereoFlipped");   
+    createGraph(flippedRotated, *file, "StereoFlipped");
+    testChannelNumber(rotatedDesign, *file, "StereoFlippedNumbers");
+    if (!testChamberBackForthMapping(rotatedDesignNeg)) {
+        std::cerr<<"runStripDesignDump() "<<__LINE__<<"  --  Rotated flipped design channel mapping failed "<<std::endl;
+        return EXIT_FAILURE;
+    }
 
     WireGroupDesign groupDesign{};
     groupDesign.defineTrapezoid(shortEdge, longEdge, halfHeight);
