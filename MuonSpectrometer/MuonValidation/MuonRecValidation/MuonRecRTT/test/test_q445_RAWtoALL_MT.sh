@@ -26,7 +26,7 @@ export ATHENA_CORE_NUMBER=1
 
 #####################################################################
 # Run reconstruction with AthenaMT with 1 thread
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q445 \
            --postInclude "RAWtoALL:MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
            --imf False \
@@ -46,7 +46,7 @@ export ATHENA_CORE_NUMBER=5
 
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q445 \
            --imf False \
            --outputESDFile OUT_ESD_5thread.root
@@ -65,7 +65,7 @@ export ATHENA_CORE_NUMBER=8
 
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q445 \
            --imf False \
            --outputESDFile OUT_ESD_8thread.root

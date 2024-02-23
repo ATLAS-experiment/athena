@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __all__ = ['metadata', 'convert_itemList', 'convert_metadata_items']
 
@@ -15,24 +15,17 @@ def _setup():
     global metadata
 
     # get input file name
-    # Start by checking ConfigFlags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    inFiles = ConfigFlags.Input.Files
-    if inFiles == ['_ATHENA_GENERIC_INPUTFILE_NAME_']:
-        # Input files have not been set in ConfigFlags
-        # Fall back to the legacy configuration mechanisms
+    try:
+        from RecExConfig.RecoFunctions import InputFileNames
+        inFiles = InputFileNames()
+    except ModuleNotFoundError:
         try:
-            msg.warning("Input files not set ConfigFlags.Input.Files. Falling back to the legacy way of obtaining input file names")
-            from RecExConfig.RecoFunctions import InputFileNames
-            inFiles = InputFileNames()
+            msg.warning("In a release without RecExConfig, trying AthenaCommonFlags")
+            from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+            inFiles = athenaCommonFlags.FilesInput()
         except ModuleNotFoundError:
-            try:
-                msg.warning("In a release without RecExConfig, trying AthenaCommonFlags")
-                from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-                inFiles = athenaCommonFlags.FilesInput()
-            except ModuleNotFoundError:
-                msg.warning("Failed to load any module containing list of input files")
-                pass
+            msg.warning("Failed to load any module containing list of input files")
+            pass
 
     from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
     if athenaCommonFlags.isOnline() and (not inFiles or all([f.strip() == '' for f in inFiles])):

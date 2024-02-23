@@ -9,7 +9,7 @@
 # art-include: 24.0/Athena
 
 Reco_tf.py \
---CA 'all:True' 'RDOtoRDOTrigger:False' \
+--CA 'all:True' \
 --AMI=q445 \
 --preExec "r2a:flags.DQ.Steering.HLT.doInDet=False; flags.Exec.FPE=500;" \
 --athenaopts "RDOtoRDOTrigger:--threads=1" \

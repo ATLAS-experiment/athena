@@ -66,6 +66,7 @@ public:
   double getScaleFactor(SoNode* node, double desiredHeight);
 
   bool shown;
+  SbColor4f colourAndTransp;
   double zpos;
   double vertpos;
 
@@ -76,6 +77,8 @@ public:
 
   void updateFields();
   void ensureInit3DObjects();
+  void updateColour();
+
 };
 
 //____________________________________________________________________
@@ -346,6 +349,20 @@ void VP1People::Imp::updateFields()
 }
 
 //____________________________________________________________________
+void VP1People::Imp::updateColour()
+{
+  theclass->messageVerbose("Updating packed colour");
+  if (!sep||sep->getNumChildren()<1)
+    return;
+  SoNode * n = sep->getChild(0);
+  if (!n||n->getTypeId()!=SoVRMLMaterial::getClassTypeId())
+    return;
+
+  SoVRMLMaterial* matVRML = static_cast<SoVRMLMaterial*>(n);
+  matVRML->diffuseColor.setValue( colourAndTransp.getValue() );
+}
+
+//____________________________________________________________________
 void VP1People::setShown(bool b)
 {
   messageVerbose("Signal received: setShown("+str(b)+")");
@@ -360,6 +377,17 @@ void VP1People::setShown(bool b)
     if (m_d->sep&&m_d->attachSep->findChild(m_d->sep)>=0)
       m_d->attachSep->removeChild(m_d->sep);
   }
+}
+
+//____________________________________________________________________
+void VP1People::setColourAndTransp(const SbColor4f&ct)
+{
+  messageVerbose("Signal received in setColourAndTransp slot.");
+  if (m_d->colourAndTransp==ct)
+    return;
+  m_d->colourAndTransp=ct;
+  if (m_d->shown)
+    m_d->updateColour();
 }
 
 //____________________________________________________________________
