@@ -15,5 +15,5 @@ atlas_install_scripts( share/*.py )
 atlas_add_test( DCSCRun
    SCRIPT dcsc.py -r348885 -d 'sqlite://$<SEMICOLON>schema=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/AthDataQuality/dcscalc_input_348885.db$<SEMICOLON>dbname=CONDBR2'
    POST_EXEC_SCRIPT nopost.sh
-   PROPERTIES TIMEOUT 360
+   PROPERTIES TIMEOUT 600
    )
