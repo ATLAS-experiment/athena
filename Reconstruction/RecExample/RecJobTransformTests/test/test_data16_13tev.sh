@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# art-description: Reco_tf runs on 13TeV collision data with all streams 2016
+# art-description: Reco_tf runs on 2016 13 TeV collision data with all streams
 # art-athena-mt: 8
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 export ATHENA_CORE_NUMBER=8
 #The setup for run2 data is described in test_data15_13TeV.sh

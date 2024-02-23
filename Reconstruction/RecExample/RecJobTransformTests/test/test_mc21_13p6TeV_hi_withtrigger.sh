@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: heavy ion reconstruction on mc21 using ttbar
+# art-description: Reco_tf runs on MC21 13.6 TeV Heavy Ion using ttbar with HITS input (HI mode)
 # art-athena-mt: 8
 # art-type: grid
 # art-include: main/Athena
