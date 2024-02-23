@@ -88,8 +88,11 @@ void ConfAnalysis::initialiseInternal() {
 
   const int pTResBins = int(100*binConfig.ptres_NScale);
 
+
   //+++ Eta ranges
-  double tmp_maxEta    = 3.;
+  /// keep the old ranges commented, since we need the new ranges to be consistent
+  ///  double tmp_maxEta    = 3.;
+  double tmp_maxEta    = 5.;
   double tmp_absResEta = 0.04; // 0.0005;
 
   //+++ Phi ranges
@@ -99,8 +102,9 @@ void ConfAnalysis::initialiseInternal() {
 
   //  std::cout << "ConfAnalysis::initialise() " << name() << " config: " << binConfig << std::endl;
 
-
-  int etaBins          = int(30*binConfig.eta_NScale);
+  ///  keep the old eta bins commented, since we need the new binning to be consisten with the old 
+  ///  int etaBins          = int(30*binConfig.eta_NScale);
+  int etaBins          = int(50*binConfig.eta_NScale);
   const int etaResBins = int(600*binConfig.eta_NScale);
 
   const int phiBins    = int(30*binConfig.phi_NScale);
@@ -1933,6 +1937,9 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
       m_eff_roi_dR->FillDenom(droi_dRt);
 
       m_eff_vs_mult->FillDenom( m_Nref );
+
+      m_eff_eta_vs_pt->FillDenom( std::fabs(pTt), etat );
+      m_eff_d0_vs_pt->FillDenom( std::fabs(pTt), a0t );
 
       dump = false; 
 
