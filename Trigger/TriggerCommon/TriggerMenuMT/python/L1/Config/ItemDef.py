@@ -189,6 +189,9 @@ class ItemDef:
         MenuItem('L1_eEM9_UNPAIRED_ISO' ).setLogic(d.eEM9 & unpaired_isocond).setTriggerType( TT.calo )
         MenuItem('L1_eEM15_EMPTY'       ).setLogic(d.eEM15 & cosmiccond     ).setTriggerType( TT.calo )
 
+        MenuItem('L1_eEM22A'    ).setLogic( d.eEM22A     & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_eEM22C'    ).setLogic( d.eEM22C     & physcond).setTriggerType( TT.calo )
+
         # PhaseI 2xEM and 3xEM
         MenuItem('L1_2eEM12').setLogic(d.eEM12.x(2) & physcond).setTriggerType(TT.calo) #heavy ions, ATR-26333
         MenuItem('L1_2eEM12L').setLogic(d.eEM12L.x(2) & physcond).setTriggerType(TT.calo) #heavy ions, ATR-26333
