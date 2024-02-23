@@ -155,7 +155,6 @@ namespace MissingEtDQA {
     ATH_CHECK( m_tauSelTool.retrieve() );
     ATH_CHECK( m_jvtToolEM.retrieve() );
     ATH_CHECK( m_jvtToolPFlow.retrieve() );
-
     m_MET_Ref.clear();
     m_MET_Ref_x.clear();
     m_MET_Ref_y.clear();
@@ -211,8 +210,37 @@ namespace MissingEtDQA {
     if (m_detailLevel >= 10) {
 
      for (const auto& type : m_types){
+		std::string name_met;
+		std::string name_sub;
+		std::vector<std::string> corrClus_names;
+      	std::vector<std::string> corrTrk_names;
+		std::vector<std::string> sum_names;
+		std::string dir;
 
-      	std::string name_met = "MET_Reference_" + type;
+      	corrClus_names.emplace_back("RefEle");
+      	corrClus_names.emplace_back("RefGamma");
+      	corrClus_names.emplace_back("RefTau");
+      	corrClus_names.emplace_back("Muons");
+      	corrClus_names.emplace_back("RefJet");
+      	corrClus_names.emplace_back("SoftClus");
+	
+      	corrTrk_names.emplace_back("RefEle");
+      	corrTrk_names.emplace_back("RefGamma");
+      	corrTrk_names.emplace_back("RefTau");
+      	corrTrk_names.emplace_back("Muons");
+      	corrTrk_names.emplace_back("RefJet");
+      	corrTrk_names.emplace_back("PVSoftTrk");
+
+      	sum_names.emplace_back("RefEle");
+      	sum_names.emplace_back("RefGamma");
+      	sum_names.emplace_back("RefTau");
+      	sum_names.emplace_back("Muons");
+      	sum_names.emplace_back("RefJet");
+
+		//-------------------------------------------------------------------------------------
+      	// First set-up Reference MET histograms (if we want them)
+		if (m_doMETRefPlots){
+      	name_met = "MET_Reference_" + type;
       	m_dir_met.clear();
       	std::vector<TH1D*> v_MET_Ref;
       	std::vector<TH1D*> v_MET_Ref_x;
@@ -254,7 +282,7 @@ namespace MissingEtDQA {
       	  ATH_CHECK(regHist(m_MET_Ref_sum[type].at(i),m_dir_met[i],all));
       	}
 
-      	std::string name_sub = name_met + "/Cumulative";
+      	name_sub = name_met + "/Cumulative";
       	v_MET_Cumu_Ref.push_back( new  TH1D((name_met + "_Cumulative_FinalClus").c_str(), (name_met + " CST MET cumulative; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
       	v_MET_Cumu_Ref.push_back( new  TH1D((name_met + "_Cumulative_FinalTrk").c_str(), (name_met + " TST MET cumulative; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi) );
 	
@@ -301,20 +329,6 @@ namespace MissingEtDQA {
       	}
 
       	name_sub = name_met + "/Correlations";
-      	std::vector<std::string> corrClus_names;
-      	corrClus_names.emplace_back("RefEle");
-      	corrClus_names.emplace_back("RefGamma");
-      	corrClus_names.emplace_back("RefTau");
-      	corrClus_names.emplace_back("Muons");
-      	corrClus_names.emplace_back("RefJet");
-      	corrClus_names.emplace_back("SoftClus");
-      	std::vector<std::string> corrTrk_names;
-      	corrTrk_names.emplace_back("RefEle");
-      	corrTrk_names.emplace_back("RefGamma");
-      	corrTrk_names.emplace_back("RefTau");
-      	corrTrk_names.emplace_back("Muons");
-      	corrTrk_names.emplace_back("RefJet");
-      	corrTrk_names.emplace_back("PVSoftTrk");
 
       	v_MET_CorrFinalClus_Ref.reserve(corrClus_names.size());
 
@@ -336,13 +350,6 @@ for(const auto& it : corrTrk_names) {
       	for(std::vector<TH2D*>::size_type i = 0; i < v_MET_CorrFinalClus_Ref.size(); ++i) {
       	  ATH_CHECK(regHist(m_MET_CorrFinalClus_Ref[type].at(i),"MET/" + name_sub + "/",all));
       	}
-
-      	std::vector<std::string> sum_names;
-      	sum_names.emplace_back("RefEle");
-      	sum_names.emplace_back("RefGamma");
-      	sum_names.emplace_back("RefTau");
-      	sum_names.emplace_back("Muons");
-      	sum_names.emplace_back("RefJet");
 
       	m_dir_met.clear();
 
@@ -368,7 +375,7 @@ for(const auto& it : corrTrk_names) {
       	  ATH_CHECK(regHist(m_MET_Diff_Ref_phi[type].at(i),m_dir_met[i],all));
       	  ATH_CHECK(regHist(m_MET_Diff_Ref_sum[type].at(i),m_dir_met[i],all));
       	}
-	
+		}
 
       	//-------------------------------------------------------------------------------------
       	//Now the same for Rebuilt MET
@@ -510,12 +517,13 @@ for(const auto& it : corrTrk_names) {
 
 
 	//-------------------------------------------------------------------------------------
-	//Now MET_Track
-
+	//Now MET_Track (only built if METRef is too)
+	if (m_doMETRefPlots){
       std::string name_met = "MET_Track";
       std::string dir = "MET/" + name_met + "/";
+	  std::string sub_dir;
 
-      std::string sub_dir = dir + "Track/";
+      sub_dir = dir + "Track/";
       ATH_CHECK(regHist(m_MET_Track = new  TH1D("Track", (name_met + " " + m_names["Track"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), sub_dir, all));
       ATH_CHECK(regHist(m_MET_Track_x = new  TH1D("Track_x", (name_met + " " + m_names["Track"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), sub_dir, all));
       ATH_CHECK(regHist(m_MET_Track_y = new  TH1D("Track_y", (name_met + " " + m_names["Track"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), sub_dir, all));
@@ -535,12 +543,12 @@ for(const auto& it : corrTrk_names) {
       ATH_CHECK(regHist(m_MET_PVTrack_Pileup_y = new  TH1D("PVTrack_Pileup_y", (name_met +" " +  m_names["PVTrack_Pileup"] + " y; E_{y}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), sub_dir, all));
       ATH_CHECK(regHist(m_MET_PVTrack_Pileup_phi = new  TH1D("PVTrack_Pileup_phi", (name_met + " " + m_names["PVTrack_Pileup"] + " phi; #Phi; Entries / 0.1").c_str(), nbinphi,-binphi,binphi), sub_dir, all));
       ATH_CHECK(regHist(m_MET_PVTrack_Pileup_sum = new  TH1D("PVTrack_Pileup_sum", (name_met + " " + m_names["PVTrack_Pileup"] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET), sub_dir, all));
-
+	}
 	//-------------------------------------------------------------------------------------
 	//Now MET_Calo
 
-      name_met = "MET_Calo";
-      dir = "MET/" + name_met + "/";
+      std::string name_met = "MET_Calo";
+      std::string dir = "MET/" + name_met + "/";
 
       ATH_CHECK(regHist(m_MET_Calo = new  TH1D("Calo", (name_met + " " + m_names["Calo"] + "; E_{T}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinp, 0., suptmi), dir, all));
       ATH_CHECK(regHist(m_MET_Calo_x = new  TH1D("Calo_x", (name_met + " " + m_names["Calo"] + " x; E_{x}^{miss} [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -suptmixy, suptmixy), dir, all));
@@ -1100,6 +1108,7 @@ for(const auto& it : corrTrk_names) {
       }
 
       //Rebuilt
+
       for(const auto& it : *met_Reb) {
     	std::string name = it->name();
     	if(name == "RefEle"){
@@ -1362,6 +1371,7 @@ for(const auto& it : corrTrk_names) {
   {
     ATH_MSG_INFO ("Finalising hists " << name() << "...");
 
+	if (m_doMETRefPlots){
     for (const auto& type : m_types){
       for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Ref[type]).size(); ++i) {
     	(m_MET_Ref[type]).at(i)->Sumw2();
@@ -1375,7 +1385,7 @@ for(const auto& it : corrTrk_names) {
     	(m_MET_Reb_phi[type]).at(i)->Sumw2();
     	(m_MET_Reb_sum[type]).at(i)->Sumw2();
       }
-
+	  
       for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Diff_Ref[type]).size(); ++i) {
     	(m_MET_Diff_Ref[type]).at(i)->Sumw2();
     	(m_MET_Diff_Ref_x[type]).at(i)->Sumw2();
@@ -1448,7 +1458,7 @@ for(const auto& it : corrTrk_names) {
     m_MET_PVTrack_Pileup_y->Sumw2();
     m_MET_PVTrack_Pileup_phi->Sumw2();
     m_MET_PVTrack_Pileup_sum->Sumw2();
-
+	}
     m_MET_Calo->Sumw2();
     m_MET_Calo_x->Sumw2();
     m_MET_Calo_y->Sumw2();
