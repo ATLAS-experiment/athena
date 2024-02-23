@@ -1,6 +1,5 @@
-// -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CALIBALGS_TRTCALIBRATIONMGR_H
@@ -17,24 +16,19 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
 #include "TrkTrack/TrackCollection.h"
+#include "TrkTrack/Track.h"
 #include "StoreGate/ReadHandleKey.h"
-#include "CommissionEvent/ComTime.h"
 #include "TRT_ConditionsData/RtRelationMultChanContainer.h"
 #include "TRT_ConditionsData/StrawT0MultChanContainer.h"
 #include "CxxUtils/checker_macros.h"
+#include "TRT_CalibTools/IFitTool.h"
+#include "TrkFitterInterfaces/ITrackFitter.h"
+#include "TrkToolInterfaces/ITrackSelectorTool.h"
+#include "TRT_CalibTools/IFillAlignTrkInfo.h"
+#include "TRT_CalibData/TrackInfo.h"
 
 
-namespace TRT{
-  class TrackInfo;
-}
-
-namespace Trk{
- class ITrackSelectorTool;
- class ITrackFitter;
-}
-class IFillAlignTrkInfo;
 class IAccumulator;
-class IFitTool;
 
 
 /**
@@ -59,53 +53,50 @@ made and Dt0 is set to the mean of that. The new t0 is then the old t0
 
 */
 
-// TRTCalibrator is not thread-safe.
-class ATLAS_NOT_THREAD_SAFE TRTCalibrationMgr: public AthAlgorithm
+// TRTCalibrator is called by TRTCalibrationMgr and is not thread-safe.
+// But the job calling TRTCalibrator reconstructs only one event, in order to get access to Athena tools. This job never run multi-threaded.
+class ATLAS_NOT_THREAD_SAFE TRTCalibrationMgr : public AthAlgorithm
 {
 
 public:
+    TRTCalibrationMgr(const std::string &name, ISvcLocator *pSvcLocator);
+    ~TRTCalibrationMgr(void);
 
-  TRTCalibrationMgr(const std::string& name, ISvcLocator* pSvcLocator);
-  ~TRTCalibrationMgr(void);
+    typedef TRTCond::RtRelationMultChanContainer RtRelationContainer;
+    typedef TRTCond::StrawT0MultChanContainer StrawT0Container;
 
-  typedef TRTCond::RtRelationMultChanContainer RtRelationContainer ;
-  typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
-
-  virtual StatusCode initialize(void) override;
-  virtual StatusCode execute(void) override;
-  virtual StatusCode finalize(void) override;
-  StatusCode streamOutCalibObjects();
+    virtual StatusCode initialize(void) override;
+    virtual StatusCode execute(void) override;
+    virtual StatusCode finalize(void) override;
+    StatusCode streamOutCalibObjects();
 
 private:
 
-  ToolHandleArray<IFillAlignTrkInfo>  m_TrackInfoTools;
-  PublicToolHandleArray<ITRTCalibrator>     m_TRTCalibTools
-     {this,"TRTCalibrator",{ /* "TRTCalibrator"*/ },"" };
-  ToolHandleArray<IAccumulator>       m_AccumulatorTools;
-  ToolHandleArray<IFitTool>           m_FitTools;
-  ToolHandle<Trk::ITrackFitter>       m_trackFitter;
+    // Tools for the algorithm
+    ToolHandleArray<IFillAlignTrkInfo> m_TrackInfoTools {this, "AlignTrkTools", {}, ""};
+    PublicToolHandleArray<ITRTCalibrator> m_TRTCalibTools {this, "TRTCalibrator", {}, ""};
+    ToolHandleArray<IFitTool> m_FitTools {this, "FitTools", {}, ""};
+    ToolHandle<Trk::ITrackFitter> m_trackFitter {this, "TrackFitter", "ActsTrk::KalmanFitter/TrkKalmanFitter", ""};
+    ToolHandle<Trk::ITrackSelectorTool> m_trackSelector {this, "TrackSelectorTool", "InDet::InDetTrackSelectorTool/InDetTrackSelectorTool", "Tool for the selection of tracks"}; 
+    ToolHandle<IAthenaOutputStreamTool> m_streamer {this, "StreamTool", "AthenaOutputStreamTool/CondStream1", "OutputStreamTool"};
 
-  ToolHandle<IAthenaOutputStreamTool> m_streamer;        //!< OutputStreamTool
+    // Gaudi properties
+    Gaudi::Property<bool> m_dorefit       {this, "DoRefit"       , true , "Does a Re-Fit"};
+    Gaudi::Property<bool> m_docalibrate   {this, "DoCalibrate"   , false, "Does the calibration"};
+    Gaudi::Property<bool> m_writeConstants{this, "WriteConstants", false, "Write out the calibration constants"};
 
-  bool m_dorefit;
-  bool m_docalibrate;
+    Gaudi::Property<unsigned int> m_max_ntrk {this, "Max_ntrk", 100000, ""};
 
-  bool m_writeConstants;
-  int m_ntrk;
-  ToolHandle<Trk::ITrackSelectorTool>   m_trackSelector;   //!< Tool handle to the Trk::ITrackSelectorTool
-  unsigned int m_max_ntrk;
-  std::string m_par_rtcontainerkey;        //"/TRT/Calib/RT"
-  std::string m_par_t0containerkey;        //"/TRT/Calib/T0"
-
-
-  SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey{this,"VerticesKey","PrimaryVertices","RHK for primary veritces"};
-  SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{this,"EventInfoKey","EventInfo","RHK for xAOD::EventInfo"};
-  SG::ReadHandleKeyArray<TrackCollection> m_TrkCollections{this,"TrkCollections",{"Tracks", "ConvertedIParTracks"},"RHKs for track collections"};
-  SG::ReadHandleKey<ComTime> m_comTimeKey{this, "ComTimeKey", "TRT_Phase", "Name of TRT Com time object"};
+    Gaudi::Property<std::string> m_par_rtcontainerkey {this, "Par_rtcontainer", "/TRT/Calib/RT", ""};
+    Gaudi::Property<std::string> m_par_t0containerkey {this, "par_t0container", "/TRT/Calib/T0", ""};
 
 
-
-
+    int m_ntrk = 0;
+    
+    // ReadHandleKeys
+    SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey   {this, "VerticesKey"     , "PrimaryVertices"    , "RHK for primary vertices"  };
+    SG::ReadHandleKey<xAOD::EventInfo>       m_EventInfoKey  {this, "EventInfoKey"    , "EventInfo"          , "RHK for xAOD::EventInfo"   };
+    SG::ReadHandleKey<TrackCollection>       m_TrkCollection {this, "TrkCollectionKey", "CombinedInDetTracks", "RHKs for track collections"};
 };
 
 #endif // TRT_CALIBALGS_TRTCALIBRATIONMGR_H

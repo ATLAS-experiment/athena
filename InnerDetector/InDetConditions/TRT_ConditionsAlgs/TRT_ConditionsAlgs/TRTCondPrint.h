@@ -2,11 +2,11 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRTCONDITIONSALGS_TRTCONDWRITE_H
-#define TRTCONDITIONSALGS_TRTCONDWRITE_H
+#ifndef TRTCONDITIONSALGS_TRTCONDPRINT_H
+#define TRTCONDITIONSALGS_TRTCONDPRINT_H
 
-/** @file TRTCondWrite.h
- * @brief CondAlg to read TRT calibration constants in from text file and load them in ConditionsStore
+/** @file TRTCondPrint.h
+ * @brief Algorithm to dump TRT Conditions objects to text file
  * @author Peter Hansen <phansen@nbi.dk>
  **/
 
@@ -18,7 +18,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ICondSvc.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/WriteCondHandleKey.h"
+#include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 #include "StoreGate/DataHandle.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "TRT_ConditionsData/RtRelationMultChanContainer.h"
@@ -26,20 +26,20 @@
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "GaudiKernel/EventIDRange.h"
 
-/** @class TRTCondWrite
-   read calibration constants from text file and publish them in ConditionsStore
+/** @class TRTCondPrint
+   Dump calibration constants from ConditionStore to text file
 **/ 
 
-class TRTCondWrite:public AthAlgorithm {
+class TRTCondPrint:public AthAlgorithm {
 public:
   typedef TRTCond::RtRelationMultChanContainer RtRelationContainer ;
   typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
 
 
   /** constructor **/
-  TRTCondWrite(const std::string& name, ISvcLocator* pSvcLocator);
+  TRTCondPrint(const std::string& name, ISvcLocator* pSvcLocator);
   /** destructor **/
-  ~TRTCondWrite(void);
+  ~TRTCondPrint(void);
 
   virtual StatusCode  initialize(void) override;    
   virtual StatusCode  execute(void) override;
@@ -48,28 +48,20 @@ public:
   /// create an TRTCond::ExpandedIdentifier from a TRTID identifier
   virtual TRTCond::ExpandedIdentifier trtcondid( const Identifier& id, int level = TRTCond::ExpandedIdentifier::STRAW) const;
 
-  /// read calibration from text file into TDS
-  virtual StatusCode checkTextFile(const std::string& file, int& format);
-  virtual StatusCode readTextFile(const std::string& file, int& format);
-  virtual StatusCode readTextFile_Format1(std::istream&);
-
-  virtual EventIDRange IOVInfRange() const;
+  /// write calibration constants or errors to flat text file 
+  virtual StatusCode writeCalibTextFile(std::ostream&) const;
+  virtual StatusCode writeErrorTextFile(std::ostream&) const;
 
 
  private:
 
+  ToolHandle<ITRT_CalDbTool> m_TRTCalDbTool;
   bool m_setup;                            //!< true at first event
-  std::string m_par_caltextfile;           //!< input text file
+  std::string m_par_caloutputfile;         //!< must be either nothing, caliboutput.txt or erroroutput.txt
   const TRT_ID* m_trtid;                   //!< trt id helper
   ServiceHandle<StoreGateSvc> m_detstore;
-  ServiceHandle<ICondSvc> m_condSvc;
- 
-  // WriteHandle Keys
-  SG::WriteCondHandleKey<RtRelationContainer> m_rtWriteKey{this,"RtWriteKeyName","/TRT/Calib/RT","r-t relation out-key"};
-  SG::WriteCondHandleKey<StrawT0Container> m_t0WriteKey{this,"T0WriteKeyName","/TRT/Calib/T0","t0 out-key"};
-
 
 };
  
-#endif // TRTCONDITIONSALGS_TRTCONDWRITE_H
+#endif // TRTCONDITIONSALGS_TRTCONDPRINT_H
 

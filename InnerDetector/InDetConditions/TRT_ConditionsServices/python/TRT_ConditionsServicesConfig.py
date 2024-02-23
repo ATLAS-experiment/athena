@@ -6,6 +6,20 @@ from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 
 
 @AccumulatorCache
+def TRT_CalDbToolCfg(flags, name="TRT_CalDbTool", **kwags):
+    """Return a ComponentAccumulator for TRT_CalDbTool"""
+    from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
+    acc = ComponentAccumulator()
+    
+    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/RT", "/TRT/Calib/RT", className="TRTCond::RtRelationMultChanContainer"))
+    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/T0", "/TRT/Calib/T0", className='TRTCond::StrawT0MultChanContainer'))
+    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/errors2d", "/TRT/Calib/errors2d", className="TRTCond::RtRelationMultChanContainer"))
+    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/slopes", "/TRT/Calib/slopes", className='TRTCond::RtRelationMultChanContainer'))
+    
+    acc.setPrivateTools(CompFactory.TRT_CalDbTool(name, **kwags))
+    return acc
+
+
 def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", forceLegacyAccess=False, **kwargs):
     """Return a ComponentAccumulator for TRT_StrawStatusSummaryTool"""
     acc = ComponentAccumulator()
@@ -19,26 +33,15 @@ def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", forc
         from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTStrawStatusCondAlgCfg
         acc.merge(TRTStrawStatusCondAlgCfg(flags))
 
+    
     kwargs.setdefault("isGEANT4", flags.GeoModel.Align.LegacyConditionsAccess or forceLegacyAccess)
 
     acc.setPrivateTools(CompFactory.TRT_StrawStatusSummaryTool(name, **kwargs))
     return acc
 
-
-def TRT_CalDbToolCfg(flags, name="TRT_CalDbTool", **kwargs):
-    """Return a ComponentAccumulator for TRT_CalDbTool"""
-    from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
+def TRT_StrawNeighbourSvcCfg(flags, name="TRT_StrawNeighbourSvc", **kwargs):
     acc = ComponentAccumulator()
-    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/RT", "/TRT/Calib/RT",
-                                    className="TRTCond::RtRelationMultChanContainer"))
-    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/T0", "/TRT/Calib/T0",
-                                    className='TRTCond::StrawT0MultChanContainer'))
-    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/errors2d", "/TRT/Calib/errors2d",
-                                    className="TRTCond::RtRelationMultChanContainer"))
-    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Calib/slopes", "/TRT/Calib/slopes",
-                                    className='TRTCond::RtRelationMultChanContainer'))
-
-    acc.setPrivateTools(CompFactory.TRT_CalDbTool(name="TRT_CalDbTool", **kwargs))
+    acc.addService(CompFactory.TRT_StrawNeighbourSvc(name, **kwargs), primary=True)
     return acc
 
 

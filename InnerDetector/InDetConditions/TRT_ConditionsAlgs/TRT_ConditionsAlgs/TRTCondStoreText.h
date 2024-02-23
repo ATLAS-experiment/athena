@@ -2,44 +2,41 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRTCONDITIONSALGS_TRTCONDWRITE_H
-#define TRTCONDITIONSALGS_TRTCONDWRITE_H
+#ifndef TRTCONDITIONSALGS_TRTCONDSTORETEXT_H
+#define TRTCONDITIONSALGS_TRTCONDSTORETEXT_H
 
-/** @file TRTCondWrite.h
- * @brief CondAlg to read TRT calibration constants in from text file and load them in ConditionsStore
+/** @file TRTCondStoreText.h
+ * @brief Algorithm to read TRT Conditions objects
+ * from text file and stream them to db.
  * @author Peter Hansen <phansen@nbi.dk>
  **/
 
 //
 #include <string>
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ICondSvc.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/DataHandle.h"
 #include "InDetIdentifier/TRT_ID.h"
 #include "TRT_ConditionsData/RtRelationMultChanContainer.h"
 #include "TRT_ConditionsData/StrawT0MultChanContainer.h"
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
-#include "GaudiKernel/EventIDRange.h"
 
-/** @class TRTCondWrite
-   read calibration constants from text file and publish them in ConditionsStore
+/** @class TRTCondStoreText
+   read calibration constants from text file and store them in a pool and cool file.
 **/ 
 
-class TRTCondWrite:public AthAlgorithm {
+class TRTCondStoreText:public AthAlgorithm {
 public:
   typedef TRTCond::RtRelationMultChanContainer RtRelationContainer ;
   typedef TRTCond::StrawT0MultChanContainer StrawT0Container ;
 
 
   /** constructor **/
-  TRTCondWrite(const std::string& name, ISvcLocator* pSvcLocator);
+  TRTCondStoreText(const std::string& name, ISvcLocator* pSvcLocator);
   /** destructor **/
-  ~TRTCondWrite(void);
+  ~TRTCondStoreText();
 
   virtual StatusCode  initialize(void) override;    
   virtual StatusCode  execute(void) override;
@@ -52,24 +49,22 @@ public:
   virtual StatusCode checkTextFile(const std::string& file, int& format);
   virtual StatusCode readTextFile(const std::string& file, int& format);
   virtual StatusCode readTextFile_Format1(std::istream&);
-
-  virtual EventIDRange IOVInfRange() const;
+  virtual StatusCode readTextFile_Format2(std::istream&);
+  virtual StatusCode readTextFile_Format3(std::istream&);
 
 
  private:
 
-  bool m_setup;                            //!< true at first event
-  std::string m_par_caltextfile;           //!< input text file
+  std::string m_par_rtcontainerkey;        //"/TRT/Calib/RT"
+  std::string m_par_errcontainerkey;       //"/TRT/Calib/errors2d"
+  std::string m_par_slopecontainerkey;     //"/TRT/Calib/slopes"
+  std::string m_par_t0containerkey;        //"/TRT/Calib/T0"
+  std::string m_par_caltextfile;           //!< calibration text file specified in jobOptions
   const TRT_ID* m_trtid;                   //!< trt id helper
+  std::string m_streamer;                  //"AthenaOutputStreamTool/CondStream1"
   ServiceHandle<StoreGateSvc> m_detstore;
-  ServiceHandle<ICondSvc> m_condSvc;
  
-  // WriteHandle Keys
-  SG::WriteCondHandleKey<RtRelationContainer> m_rtWriteKey{this,"RtWriteKeyName","/TRT/Calib/RT","r-t relation out-key"};
-  SG::WriteCondHandleKey<StrawT0Container> m_t0WriteKey{this,"T0WriteKeyName","/TRT/Calib/T0","t0 out-key"};
-
-
 };
  
-#endif // TRTCONDITIONSALGS_TRTCONDWRITE_H
+#endif // TRTCONDITIONSALGS_TRTCONDSTORETEXT_H
 

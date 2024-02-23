@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CALIBTOOLS__TRTCALIBRATOR_H
@@ -182,7 +182,6 @@ private:
 
   enum {CALIB_ALL=-3, CALIB_NONE=-4};
 
-  TFile* m_histfile;
   
 };
 
