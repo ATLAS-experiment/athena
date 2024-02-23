@@ -2262,6 +2262,11 @@ namespace dqutils
         myC->cd();
         e->Draw(drawopt.c_str());
       }
+      
+      // Fix to display x axis title
+      myC->Update();
+      e->GetPaintedGraph()->GetXaxis()->SetTitleColor();
+
       myC->cd();
       displayExtra(myC.get(), display);
       TLatex t;
@@ -2561,6 +2566,11 @@ namespace dqutils
       formatTEfficiency(myC.get(), e);
       formatTEfficiency(myC.get(), e2);
       e->Draw((std::string("AP") + drawopt).c_str());
+
+      // Fix to display x axis title
+      myC->Update();
+      e->GetPaintedGraph()->GetXaxis()->SetTitleColor();
+
       displayExtra(myC.get(), display);
       e2->SetMarkerColor(2);
       e2->SetLineColor(2);
