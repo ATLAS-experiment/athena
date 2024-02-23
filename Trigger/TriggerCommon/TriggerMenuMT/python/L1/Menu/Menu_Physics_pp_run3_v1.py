@@ -259,27 +259,6 @@ def defineMenu():
         # TOPO items
         #--------------------------------
 
-        # legacy L1Topo
-        'L1_HT190-J15s5pETA21', 
-        'L1_BPH-0M9-EM7-EM5_2MU3V',
-        'L1_BPH-0M9-EM7-EM5_MU5VF',
-        'L1_BPH-0DR3-EM7J15_2MU3V',
-        'L1_BPH-0DR3-EM7J15_MU5VF',
-        'L1_JPSI-1M5-EM7',
-        'L1_JPSI-1M5-EM12',
-        'L1_MJJ-500-NFF',
-        'L1_MJJ-700',
-        'L1_EM18VHI_MJJ-300',
-        'L1_HT150-J20s5pETA31_MJJ-400-CF',
-        'L1_LLP-RO',
-        'L1_LLP-NOMATCH',
-        #'L1_DPHI-2EM3',
-        'L1_SC111-CJ15',
-        'L1_J50_DETA20-J50J',
-        #'L1_BPH-0M9-EM7-EM5', 
-        #'L1_BPH-0DR3-EM7J15',
-        'L1_LAR-ZEE',
-
         # phase1 L1Topo
         'L1_LAR-ZEE-eEM',
         'L1_JPSI-1M5-eEM9',
