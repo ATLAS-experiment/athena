@@ -3101,6 +3101,8 @@ HLT_g20_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1EM18VHI_M
     0: 1
   stepFeatures:
     0: 1
+HLT_g20_tight_j35_0eta290_020jvt_bgn177_3j35a_j0_DJMASS500j35_pf_ftf_L1eEM22M_jMJJ-300:
+  eventCount: 0
 HLT_g20_tight_ringer_L1eEM18M:
   eventCount: 1
   stepCounts:
