@@ -270,9 +270,9 @@ void ZDC_PileUpTool::fillContainer(const ZDC_SimFiberHit_Collection* ZDC_SimFibe
 
 void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContainer, CLHEP::HepRandomEngine* rndEngine){
   //Initialize bools to keep track of what modules/channels we have seen
-  bool zdcFound[2][4] =  {{false},{false}};
-  bool rpdFound[2][16] = {{false},{false}};
-  bool branFound[2] = {false};
+  bool zdcFound[2][4] =  {{}};
+  bool rpdFound[2][16] = {{}};
+  bool branFound[2] = {};
   for(auto module : *zdcModuleContainer){
     int iside = (module->zdcSide() == -1) ? 0 : 1;
     int mod = module->zdcModule();
@@ -304,7 +304,7 @@ void ZDC_PileUpTool::addEmptyWaveforms(xAOD::ZdcModuleContainer *zdcModuleContai
     }
     if(!branFound[iside] && m_doBRAN){
       ATH_MSG_DEBUG("ZDC_PileUpTool::addEmptyWaveforms Creating empty waveform for BRAN side " << side );
-      createAndStoreWaveform(new ZDC_SimFiberHit( m_ZdcID->channel_id(side, 5, ZdcIDType::SINGLECHANNEL, 0), 0, 0), rndEngine, zdcModuleContainer);
+      createAndStoreWaveform(ZDC_SimFiberHit( m_ZdcID->channel_id(side, 5, ZdcIDType::SINGLECHANNEL, 0), 0, 0), rndEngine, zdcModuleContainer);
     }
   }
 }
