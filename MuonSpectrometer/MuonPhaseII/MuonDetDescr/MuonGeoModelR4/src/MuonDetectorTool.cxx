@@ -20,19 +20,15 @@ MuonDetectorTool::MuonDetectorTool(const std::string &type,
     declareInterface<IGeoModelTool>(this);
 }
 
-StatusCode MuonDetectorTool::initialize() {
-    ATH_MSG_INFO("Initializing ...");
-    ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_detTechTools.retrieve());
-    ATH_CHECK(m_geoDbTagSvc.retrieve());
-    return StatusCode::SUCCESS;
-}
-
 MuonDetectorTool::~MuonDetectorTool() = default;
 /**
  ** Create the Detector Node corresponding to this tool
  **/
 StatusCode MuonDetectorTool::create() {
+
+    ATH_CHECK(m_idHelperSvc.retrieve());
+    ATH_CHECK(m_detTechTools.retrieve());
+    ATH_CHECK(m_geoDbTagSvc.retrieve());
 
     m_manager = new MuonDetectorManager();
 

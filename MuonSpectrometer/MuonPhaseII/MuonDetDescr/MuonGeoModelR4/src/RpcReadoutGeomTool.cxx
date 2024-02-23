@@ -61,12 +61,6 @@ RpcReadoutGeomTool::RpcReadoutGeomTool(const std::string& type,
     declareInterface<IMuonReadoutGeomTool>(this);
 
 }
-StatusCode RpcReadoutGeomTool::initialize() {
-    ATH_CHECK(m_geoDbTagSvc.retrieve());
-    ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_geoUtilTool.retrieve());
-    return StatusCode::SUCCESS;
-}
 StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& define,
                                               FactoryCache& factoryCache) {    
     

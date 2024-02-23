@@ -25,9 +25,6 @@ class MuonDetectorTool final : public GeoModelTool {
     // Destructor
     virtual ~MuonDetectorTool() override final;
 
-    // Initialize
-    virtual StatusCode initialize() override final;
-
     // build the geometry
     virtual StatusCode create() override final;
 

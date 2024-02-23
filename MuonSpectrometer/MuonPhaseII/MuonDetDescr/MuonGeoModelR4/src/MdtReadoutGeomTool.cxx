@@ -31,12 +31,7 @@ MdtReadoutGeomTool::MdtReadoutGeomTool(const std::string& type,
     : AthAlgTool{type, name, parent} {
     declareInterface<IMuonReadoutGeomTool>(this);
 }
-StatusCode MdtReadoutGeomTool::initialize() {
-    ATH_CHECK(m_geoDbTagSvc.retrieve());
-    ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_geoUtilTool.retrieve());
-    return StatusCode::SUCCESS;
-}
+
 StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache, 
                                               MdtReadoutElement::defineArgs& define) const {
     
@@ -103,6 +98,9 @@ StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache,
     return StatusCode::SUCCESS;
 }
 StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
+    ATH_CHECK(m_geoDbTagSvc.retrieve());
+    ATH_CHECK(m_idHelperSvc.retrieve());
+    ATH_CHECK(m_geoUtilTool.retrieve());
     GeoModelIO::ReadGeoModel* sqliteReader = m_geoDbTagSvc->getSqliteReader();
     if (!sqliteReader) {
         ATH_MSG_FATAL("Error, the tool works exclusively from sqlite geometry inputs");
