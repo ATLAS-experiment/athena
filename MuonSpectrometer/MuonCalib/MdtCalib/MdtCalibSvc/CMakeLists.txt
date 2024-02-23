@@ -19,5 +19,5 @@ atlas_add_component( MdtCalibSvc
 
 # Install files from the package:
 atlas_install_runtime( share/DC2_t0.dat share/DC2_rt.dat )
-atlas_install_joboptions( share/*.py )
+
 
