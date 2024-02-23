@@ -10,7 +10,6 @@
 #include <GeoModelUtilities/GeoModelTool.h>
 #include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
 #include <AthenaBaseComps/AthAlgTool.h>
-#include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <GeoModelKernel/GeoSimplePolygonBrep.h>
 
 
@@ -23,8 +22,6 @@ class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthA
     MuonGeoUtilityTool(const std::string &type, const std::string &name,
                      const IInterface *parent);
 
-    /// tool hook
-    StatusCode initialize() override final;
     // Destructor
     virtual ~MuonGeoUtilityTool() override final;
 
@@ -53,9 +50,6 @@ class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthA
    private:
     std::string dumpVolume(const PVConstLink& physVol, const std::string& childDelim) const;
 
-
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
-        this, "IdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 };
 }  // namespace MuonGMR4
 #endif

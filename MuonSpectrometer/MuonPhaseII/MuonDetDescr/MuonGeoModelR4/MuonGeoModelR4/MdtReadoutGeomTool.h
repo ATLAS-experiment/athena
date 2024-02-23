@@ -22,7 +22,6 @@ class MdtReadoutGeomTool : public AthAlgTool,
     MdtReadoutGeomTool(const std::string &type, const std::string &name,
                        const IInterface *parent);
 
-    StatusCode initialize() override final;
 
     StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
 

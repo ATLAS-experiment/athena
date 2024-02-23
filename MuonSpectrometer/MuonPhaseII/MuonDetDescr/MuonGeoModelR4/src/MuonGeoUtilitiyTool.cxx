@@ -30,11 +30,6 @@ MuonGeoUtilityTool::MuonGeoUtilityTool(const std::string &type, const std::strin
     declareInterface<IMuonGeoUtilityTool>(this);
 }
 
-StatusCode MuonGeoUtilityTool::initialize() {
-    ATH_CHECK(m_idHelperSvc.retrieve());
-    return StatusCode::SUCCESS;
-}
-
 const GeoShape* MuonGeoUtilityTool::extractShape(const PVConstLink& physVol) const {
     const GeoLogVol* logVol = physVol->getLogVol();
     if (!logVol) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODELR4_TgcREAOUDGEOMTOOL_H
@@ -23,7 +23,6 @@ class TgcReadoutGeomTool : public AthAlgTool,
     TgcReadoutGeomTool(const std::string &type, const std::string &name,
                        const IInterface *parent);
 
-    StatusCode initialize() override final;
 
     StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
 

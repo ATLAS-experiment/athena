@@ -25,8 +25,6 @@ class MmReadoutGeomTool : public AthAlgTool,
 
     StatusCode buildReadOutElements(MuonDetectorManager& mgr) override final;
 
-    StatusCode initialize() override final;
-
 
    private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
