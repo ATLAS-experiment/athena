@@ -319,7 +319,7 @@ class ThresholdDef:
         # ATR-22344
         LArSaturationThreshold('LArSaturation')
 
-        ZeroBiasThresholdTopo('ZeroBiasA')
+        ZeroBiasThresholdTopo('ZeroBiasA').setSeedThreshold(seed=[805306368, 0, 0, 0, 0, 0], bcdelay=3564) # eEM18
         ZeroBiasThresholdTopo('ZeroBiasB')
 
         # CALREQ
