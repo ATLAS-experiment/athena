@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,8 +9,13 @@
 //                                                                   //
 //  Author: Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>  //
 //                                                                   //
-//  Initial version: Sep 2017                                        //
-//                                                                   //
+//  Initial version: Sep 2017                                        
+//
+//  Main updates:
+//  - 2024, Feb -- Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>
+//                 Migrated to CA, added new CLI options, 
+//                 added new filter over DetectorManagers
+//
 ///////////////////////////////////////////////////////////////////////
 
 #include "GeoExporter/GeoExporter.h"
@@ -46,8 +51,7 @@
 
 // Units
 #include "GeoModelKernel/Units.h"
-#define UNITS \
-  GeoModelKernelUnits  // so we will get, e.g., 'GeoModelKernelUnits::cm'
+#define UNITS GeoModelKernelUnits  // so we can use, e.g., 'UNITS::cm'
 
 //TODO: replace this with GeoModelHelpers/defineWorld.h
 //_____________________________________________________________________________________
@@ -89,7 +93,6 @@ GeoPhysVol* createTheWorld()
 class GeoExporter::Imp {
 public:
   Imp() {};
-
   //We hold the arguments here until init is called:
   StoreGateSvc* sg = nullptr;
   StoreGateSvc* detstore = nullptr;
@@ -119,7 +122,6 @@ GeoExporter::~GeoExporter()
 bool GeoExporter::argumentsAreValid() const
 {
   //Athena pointers:
-
   if (!m_d->sg) {
     VP1Msg::message("ERROR: Null pointer to event store.");
     return false;
@@ -189,10 +191,7 @@ void GeoExporter::init()
   // -- get GeoModel Detector Managers filter // FIXME: check and update this!!
   QString user_filterDetManagers = environment.value("DUMPGEOFILTERDETMANAGERS");
   VP1Msg::message("User's settings - GeoModel DetectorManagers filter: " + user_filterDetManagers);
-  // // -- get Overwrite flag
-  // auto getOWFlag = [&environment]() -> bool { bool okConv; int flag = environment.value("DUMPGEOFORCEOVERWRITE").toInt(&okConv, 10); return (okConv && 1==flag) ? true : false; }; // convert the "0"/"1" env var string to bool with a lambda
-  // bool user_overwrite = getOWFlag();
-  // VP1Msg::message("User's settings - Overwrite filter: " + QString::number(user_overwrite) );
+
 
   // Get list of TreeTops from the TREETOPFILTER
   QStringList user_treetopslist;
@@ -227,9 +226,6 @@ if ( !(user_detmanagerslist.empty()) ) {
 
         if ( nTreetops > 0 && user_detmanagerslist.contains(QString::fromStdString(detManName)) ) {
             
-            // // Add a dummy PhysVol to contain the TreeTops of the DetectorManager
-            // volTop->add(createTheWorld());
-
             for(unsigned int i=0; i < nTreetops; ++i) {
 
                 PVConstLink treetop(manager->getTreeTop(i));
@@ -248,7 +244,7 @@ if ( !(user_detmanagerslist.empty()) ) {
 
                 // Add to the main volume a GeoNameTag with the name of the DetectorManager 
                 volTop->add(new GeoNameTag(detManName));
-                // add to the main PhysVol
+                // add Transform and Volume to the main PhysVol
                 volTop->add(volXf);
                 volTop->add(const_cast<GeoVPhysVol*>(vol));
 
@@ -275,13 +271,6 @@ if ( !(user_detmanagerslist.empty()) ) {
     
     av.next(); // increment volume cursor.
     }
-// }
-
-
-// GeoVolumeCursor av2(volTop);
-// while (!av2.atEnd()) {
-//     std::cout << "\t\t- child name: "  << av2.getName() << "\n";
-//     av2.next(); // increment volume cursor.
 // }
 
   std::cout << "Creating the SQLite DB file..." << std::endl;

@@ -48,7 +48,7 @@ def configureGeometry(flags, cfg):
         from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
         cfg.merge(MuonGeoModelCfg(flags))
 
-     # Trigger the build of the InDetServMat geometry 
+    # Trigger the build of the InDetServMat geometry 
     # if any ID subsystems have been enabled
     if flags.Detector.GeometryID:
         from InDetServMatGeoModel.InDetServMatGeoModelConfig import (
