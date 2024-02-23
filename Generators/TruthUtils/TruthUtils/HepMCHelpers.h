@@ -67,6 +67,16 @@ namespace MC
     return false;
   }
 
+  template <class T> void findAllJetMothers(T thePart, std::set<T>& allJetMothers) {
+    auto partOriVert = thePart->production_vertex();
+    if (!partOriVert) return;
+    auto incoming = partOriVert->particles_in();
+    for (auto theMoth: incoming) {
+      if (!theMoth) continue;
+      allJetMothers.insert(theMoth);
+      findAllJetMothers(theMoth, allJetMothers);
+    }
+  }
 /** MCTruthCalssifier functions */
 
   /// @brief Function to get the particle stable MC daughters.
@@ -121,7 +131,6 @@ namespace MC
     }
     return false;
 }
-
 
 
 }

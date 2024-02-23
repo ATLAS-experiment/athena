@@ -225,7 +225,6 @@ private:
   // Now that we use TLorentzVector for the momentum base class, this is straightforward
   template <class A, class B> inline double deltaR(A& v1, B& v2) const {return v1.p4().DeltaR(v2.p4());}
 
-  void findAllJetMothers(const xAOD::TruthParticle*, std::set<const xAOD::TruthParticle*>&) const;
   void findParticleDaughters(const xAOD::TruthParticle*, std::set<const xAOD::TruthParticle*>&) const;
   static MCTruthPartClassifier::ParticleOrigin defJetOrig(const std::set<const xAOD::TruthParticle*>&) ;
   //

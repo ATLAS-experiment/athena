@@ -298,17 +298,6 @@ ParticleOrigin MCTruthClassifier::defJetOrig(const std::set<const xAOD::TruthPar
   }
   return partOrig;
 }
-//---------------------------------------------------------------------------------------------------------
-void MCTruthClassifier::findAllJetMothers(const xAOD::TruthParticle* thePart, std::set<const xAOD::TruthParticle*>& allJetMothers) const {
-  const xAOD::TruthVertex* partOriVert = thePart->hasProdVtx() ? thePart->prodVtx() : nullptr;
-  if (!partOriVert) return;
-  for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-    const xAOD::TruthParticle* theMoth = partOriVert->incomingParticle(ipIn);
-    if (!theMoth) continue;
-    allJetMothers.insert(theMoth);
-    findAllJetMothers(theMoth, allJetMothers);
-  }
-}
 
 const xAOD::TruthParticle* MCTruthClassifier::getParentHadron(const xAOD::TruthParticle* thePart) const {
   ATH_MSG_DEBUG( "Executing getParentHadron" );
