@@ -81,7 +81,6 @@ StatusCode xAODTruthParticleSlimmerGen::execute()
         std::vector<int> barcode_list;
         int zero_barcode=0;
         int dup_barcode=0;
-        int xTruthP=0;
 
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* theParticle =  (*itr)->truthParticle(iPart);
@@ -104,7 +103,6 @@ StatusCode xAODTruthParticleSlimmerGen::execute()
 
           xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
           xTruthParticleContainerGen->push_back( xTruthParticle );
-          xTruthP++;
           // Fill with numerical content
           *xTruthParticle=*theParticle;
 
