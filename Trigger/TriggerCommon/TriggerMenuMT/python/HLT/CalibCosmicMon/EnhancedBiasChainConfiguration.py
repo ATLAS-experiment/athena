@@ -15,7 +15,7 @@ l1seeds = { 'low'  : \
                 'L1_eEM12L',\
                 #'L1_EM12_XS20',\
                 'L1_jJ40p30ETA49',\
-                'L1_JPSI-1M5-EM12',\
+                'L1_JPSI-1M5-eEM15',\
                 'L1_jJ60',\
                 #'L1_J30p0ETA49_2J20p0ETA49',\
                 'L1_JPSI-1M5-eEM9',\
@@ -27,9 +27,9 @@ l1seeds = { 'low'  : \
                [
                 'L1_2eEM18L',\
                 'L1_2MU3V',\
-                'L1_BPH-0DR3-EM7J15_2MU3V',\
-                'L1_BPH-0DR3-EM7J15_MU5VF',\
-                'L1_BPH-0M9-EM7-EM5_MU5VF',\
+                'L1_BPH-0DR3-eEM9jJ40_2MU3V',\
+                'L1_BPH-0DR3-eEM9jJ40_MU5VF',\
+                'L1_BPH-0M9-eEM9-eEM7_MU5VF',\
                 'L1_BPH-2M9-2DR15-2MU5VF',\
                 'L1_BPH-2M9-0DR15-C-MU5VFMU3V',\
                 'L1_BPH-8M15-0DR22-2MU5VF',\
@@ -42,13 +42,13 @@ l1seeds = { 'low'  : \
                 #'L1_EM15_XS30',\
                 'L1_eEM18L',\
                 'L1_eEM24L',\
-                'L1_HT190-J15s5pETA21',\
+                'L1_HT190-jJ40s5pETA21',\
                 'L1_jJ60p30ETA49',\
                 'L1_jJ80p0ETA25_2jJ40p30ETA49',\
                 'L1_J50',\
-                'L1_J50_DETA20-J50J',\
+                'L1_jJ90_DETA20-jJ90J',\
                 'L1_LFV-MU5VF',\
-                'L1_MJJ-500-NFF',\
+                'L1_jMJJ-500-NFF',\
                 'L1_MU5VF_J40',\
                 'L1_MU8F_eTAU20M',\
                 #'L1_MU5VF_J20',\
