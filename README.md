@@ -13,8 +13,8 @@ The following major branches are currently active:
 
 Branch                                                            | Purpose                      | Main Project, Release Series
 ------------------------------------------------------------------| ---------------------------- | ---------------------------------------
-[main](https://gitlab.cern.ch/atlas/athena/tree/main)             | Upgrade, Analysis, Derivations | Athena 24.0.X, (Ath)AnalysisBase 24.2.X
-[23.0](https://gitlab.cern.ch/atlas/athena/tree/23.0)             | Run-3 Tier0, Point1, MCProd  | Athena 23.0.X, AthSimulation 23.0.X, AthGeneration 23.6.X
+[main](https://gitlab.cern.ch/atlas/athena/tree/main)             | Upgrade, Analysis, Derivations | Athena 25.0.X, (Ath)AnalysisBase 25.2.X
+[24.0](https://gitlab.cern.ch/atlas/athena/tree/23.0)             | Run-3 Tier0, Point1, MCProd  | Athena 24.0.X, AthSimulation 24.0.X
 [21.2](https://gitlab.cern.ch/atlas/athena/tree/21.2)             | Legacy run 2 derivations     | AthDerivation 21.2.X
 
 Links
