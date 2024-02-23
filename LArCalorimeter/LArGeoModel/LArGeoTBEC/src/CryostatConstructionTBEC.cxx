@@ -42,7 +42,7 @@ m_LArPhysical(nullptr)
 
 LArGeo::CryostatConstructionTBEC::~CryostatConstructionTBEC() {;}
 
-GeoVFullPhysVol* LArGeo::CryostatConstructionTBEC::GetEnvelope()
+GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::CryostatConstructionTBEC::GetEnvelope()
 {
 
   if (m_cryoEnvelopePhysical) return m_cryoEnvelopePhysical;
@@ -115,7 +115,7 @@ GeoVFullPhysVol* LArGeo::CryostatConstructionTBEC::GetEnvelope()
   std::string cryoMotherName = baseName + "::MotherVolume";
   GeoBox* cryoMotherShape = new GeoBox( 152.*Gaudi::Units::cm, 195.*Gaudi::Units::cm, 60.09*Gaudi::Units::cm );
   const GeoLogVol* cryoMotherLogical = new GeoLogVol( cryoMotherName, cryoMotherShape, Air );
-  //GeoFullPhysVol* m_cryoEnvelopePhysical = new GeoFullPhysVol( cryoMotherLogical );
+  //GeoIntrusivePtr<GeoFullPhysVol> m_cryoEnvelopePhysical = new GeoFullPhysVol( cryoMotherLogical );
   m_cryoEnvelopePhysical = new GeoFullPhysVol( cryoMotherLogical );
   
   // Cryostat walls
@@ -123,32 +123,32 @@ GeoVFullPhysVol* LArGeo::CryostatConstructionTBEC::GetEnvelope()
   std::string ExtWallName = baseName + "::ExternalWarmWall";
   GeoBox* ExtWallShape = new GeoBox( 152.*Gaudi::Units::cm, 195.*Gaudi::Units::cm, 60.09*Gaudi::Units::cm );
   const GeoLogVol* ExtWallLogical = new GeoLogVol( ExtWallName, ExtWallShape, Al );
-  GeoPhysVol* ExtWallPhysical = new GeoPhysVol( ExtWallLogical );
+  GeoIntrusivePtr<GeoPhysVol> ExtWallPhysical = new GeoPhysVol( ExtWallLogical );
   
   std::string WallName = baseName + "::WarmWallInterval";
   GeoBox* WallShape = new GeoBox( ( 152. - 0.8 )*Gaudi::Units::cm, ( 195. - 0.8 )*Gaudi::Units::cm, ( 60.09 - 0.8 )*Gaudi::Units::cm );
   const GeoLogVol* WallLogical = new GeoLogVol( WallName, WallShape, Vacuum );
-  GeoPhysVol* WallPhysical = new GeoPhysVol( WallLogical );
+  GeoIntrusivePtr<GeoPhysVol> WallPhysical = new GeoPhysVol( WallLogical );
   
   std::string IntWallName = baseName + "::InternalWarmWall";
   GeoBox* IntWallShape = new GeoBox( 148.4*Gaudi::Units::cm, 191.6*Gaudi::Units::cm, 46.8*Gaudi::Units::cm );
   const GeoLogVol* IntWallLogical = new GeoLogVol( IntWallName, IntWallShape, Al );
-  GeoPhysVol* IntWallPhysical = new GeoPhysVol( IntWallLogical );
+  GeoIntrusivePtr<GeoPhysVol> IntWallPhysical = new GeoPhysVol( IntWallLogical );
   
   std::string VacuumName = baseName + "::Vacuum";
   GeoBox* VacuumShape = new GeoBox( ( 148.4 - 0.8 )*Gaudi::Units::cm, ( 191.6 - 0.8 )*Gaudi::Units::cm, ( 46.8 - 0.8 )*Gaudi::Units::cm );
   const GeoLogVol* VacuumLogical = new GeoLogVol( VacuumName, VacuumShape, Vacuum );
-  GeoPhysVol* VacuumPhysical = new GeoPhysVol( VacuumLogical );
+  GeoIntrusivePtr<GeoPhysVol> VacuumPhysical = new GeoPhysVol( VacuumLogical );
   
   std::string ColdWallName = baseName + "::ColdWall";
   GeoBox* ColdWallShape = new GeoBox( 142.5*Gaudi::Units::cm, 184.85*Gaudi::Units::cm, 38.*Gaudi::Units::cm );
   const GeoLogVol* ColdWallLogical = new GeoLogVol( ColdWallName, ColdWallShape, Iron );
-  GeoPhysVol* ColdWallPhysical = new GeoPhysVol( ColdWallLogical );
+  GeoIntrusivePtr<GeoPhysVol> ColdWallPhysical = new GeoPhysVol( ColdWallLogical );
   
   std::string LArName = baseName + "::LiquidArgon";
   GeoBox* LArShape = new GeoBox( ( 142.5 - .5 )*Gaudi::Units::cm, ( 184.85 - .5 )*Gaudi::Units::cm, ( 38. - .5 )*Gaudi::Units::cm );
   const GeoLogVol* LArLogical = new GeoLogVol( LArName, LArShape, LAr );
-  // GeoPhysVol* m_LArPhysical = new GeoPhysVol( LArLogical );
+  // GeoIntrusivePtr<GeoPhysVol> m_LArPhysical = new GeoPhysVol( LArLogical );
   m_LArPhysical = new GeoPhysVol( LArLogical );
   
   ColdWallPhysical->add( new GeoIdentifierTag( 1 ) );
@@ -180,22 +180,22 @@ GeoVFullPhysVol* LArGeo::CryostatConstructionTBEC::GetEnvelope()
   std::string PConeName = baseName + "::PressureCone::Mother";
   GeoTubs* PConeShape = new GeoTubs( 0.*Gaudi::Units::cm, 6.5*Gaudi::Units::cm, 4.*Gaudi::Units::cm, 0.*Gaudi::Units::deg, 360.*Gaudi::Units::deg );
   const GeoLogVol* PConeLogical = new GeoLogVol( PConeName, PConeShape, Vacuum );
-  GeoPhysVol* PConePhysical = new GeoPhysVol( PConeLogical );
+  GeoIntrusivePtr<GeoPhysVol> PConePhysical = new GeoPhysVol( PConeLogical );
   
   std::string IntFlangeName = baseName + "::PressureCone::InternalFlange";
   GeoTubs* IntFlangeShape = new GeoTubs( 0.*Gaudi::Units::cm, 4.9*Gaudi::Units::cm, 0.4*Gaudi::Units::cm, 0.*Gaudi::Units::deg, 360.*Gaudi::Units::deg );
   const GeoLogVol* IntFlangeLogical = new GeoLogVol( IntFlangeName, IntFlangeShape, Gten );
-  GeoPhysVol* IntFlangePhysical = new GeoPhysVol( IntFlangeLogical );
+  GeoIntrusivePtr<GeoPhysVol> IntFlangePhysical = new GeoPhysVol( IntFlangeLogical );
   
   std::string ExtFlangeName = baseName + "::PressureCone::ExternalFlange";
   GeoTubs* ExtFlangeShape = new GeoTubs( 5.*Gaudi::Units::cm, 6.5*Gaudi::Units::cm, 0.4*Gaudi::Units::cm, 0.*Gaudi::Units::deg, 360.*Gaudi::Units::deg );
   const GeoLogVol* ExtFlangeLogical = new GeoLogVol( ExtFlangeName, ExtFlangeShape, Gten );
-  GeoPhysVol* ExtFlangePhysical = new GeoPhysVol( ExtFlangeLogical );
+  GeoIntrusivePtr<GeoPhysVol> ExtFlangePhysical = new GeoPhysVol( ExtFlangeLogical );
   
   std::string ConeName = baseName + "::PressureCone::Cone";
   GeoCons* ConeShape = new GeoCons( 5.4*Gaudi::Units::cm, 4.5*Gaudi::Units::cm, 5.5*Gaudi::Units::cm, 4.6*Gaudi::Units::cm, 3.2*Gaudi::Units::cm, 0.*Gaudi::Units::deg, 360.*Gaudi::Units::deg );
   const GeoLogVol* ConeLogical = new GeoLogVol( ConeName, ConeShape, Gten );
-  GeoPhysVol* ConePhysical = new GeoPhysVol( ConeLogical );
+  GeoIntrusivePtr<GeoPhysVol> ConePhysical = new GeoPhysVol( ConeLogical );
   
   PConePhysical->add( new GeoIdentifierTag( 1 ) );
   PConePhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, 3.6*Gaudi::Units::cm ) ) );
@@ -222,27 +222,27 @@ GeoVFullPhysVol* LArGeo::CryostatConstructionTBEC::GetEnvelope()
   std::string ZigZagMotherName = baseName + "::ZigZag::Mother";
   GeoBox* ZigZagMotherShape = new GeoBox( 130.*Gaudi::Units::cm, 15.*Gaudi::Units::cm, 6.45*Gaudi::Units::cm );
   const GeoLogVol* ZigZagMotherLogical = new GeoLogVol( ZigZagMotherName, ZigZagMotherShape, Vacuum );
-  GeoPhysVol* ZigZagMotherPhysical = new GeoPhysVol( ZigZagMotherLogical );
+  GeoIntrusivePtr<GeoPhysVol> ZigZagMotherPhysical = new GeoPhysVol( ZigZagMotherLogical );
   
   std::string ZigZagStrAName = baseName + "::ZigZag::StrA";
   GeoBox* ZigZagStrAShape = new GeoBox( 2.45*Gaudi::Units::cm, 5.*Gaudi::Units::cm, .4*Gaudi::Units::cm );
   const GeoLogVol* ZigZagStrALogical = new GeoLogVol( ZigZagStrAName, ZigZagStrAShape, Al );
-  GeoPhysVol* ZigZagStrAPhysical = new GeoPhysVol( ZigZagStrALogical );
+  GeoIntrusivePtr<GeoPhysVol> ZigZagStrAPhysical = new GeoPhysVol( ZigZagStrALogical );
   
   std::string ZigZagStrBName = baseName + "::ZigZag::StrB";
   GeoBox* ZigZagStrBShape = new GeoBox( 8.53*Gaudi::Units::cm, 5.*Gaudi::Units::cm, .4*Gaudi::Units::cm );
   const GeoLogVol* ZigZagStrBLogical = new GeoLogVol( ZigZagStrBName, ZigZagStrBShape, Al );
-  GeoPhysVol* ZigZagStrBPhysical = new GeoPhysVol( ZigZagStrBLogical );
+  GeoIntrusivePtr<GeoPhysVol> ZigZagStrBPhysical = new GeoPhysVol( ZigZagStrBLogical );
   
   std::string ZigZagStrCName = baseName + "::ZigZag::StrC";
   GeoTrd* ZigZagStrCShape = new GeoTrd( 1.03*Gaudi::Units::cm, .453*Gaudi::Units::cm, 5.*Gaudi::Units::cm, 5.*Gaudi::Units::cm, .283*Gaudi::Units::cm );
   const GeoLogVol* ZigZagStrCLogical = new GeoLogVol( ZigZagStrCName, ZigZagStrCShape, Al );
-  GeoPhysVol* ZigZagStrCPhysical = new GeoPhysVol( ZigZagStrCLogical );
+  GeoIntrusivePtr<GeoPhysVol> ZigZagStrCPhysical = new GeoPhysVol( ZigZagStrCLogical );
   
   std::string ZigZagStrDName = baseName + "::ZigZag::StrD";
   GeoTrd* ZigZagStrDShape = new GeoTrd( .005*Gaudi::Units::cm, .31*Gaudi::Units::cm, 5.*Gaudi::Units::cm, 5.*Gaudi::Units::cm, .365*Gaudi::Units::cm );
   const GeoLogVol* ZigZagStrDLogical = new GeoLogVol( ZigZagStrDName, ZigZagStrDShape, Al );
-  GeoPhysVol* ZigZagStrDPhysical = new GeoPhysVol( ZigZagStrDLogical );
+  GeoIntrusivePtr<GeoPhysVol> ZigZagStrDPhysical = new GeoPhysVol( ZigZagStrDLogical );
   
   int StrAIdTag = 1;
   
@@ -321,7 +321,7 @@ GeoVFullPhysVol* LArGeo::CryostatConstructionTBEC::GetEnvelope()
 return m_cryoEnvelopePhysical;
 }
 
-GeoPhysVol* LArGeo::CryostatConstructionTBEC::GetLArPhysical()
+GeoIntrusivePtr<GeoPhysVol> LArGeo::CryostatConstructionTBEC::GetLArPhysical()
 {
   return m_LArPhysical;
 }

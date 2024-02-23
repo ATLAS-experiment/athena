@@ -35,7 +35,7 @@ namespace LArGeo {
     virtual ~BarrelCryostatConstruction();
 
     // Get the envelope containing this detector.
-    virtual GeoFullPhysVol* GetEnvelope(const VDetectorParameters* params);
+    virtual GeoIntrusivePtr<GeoFullPhysVol> GetEnvelope(const VDetectorParameters* params);
 
 
     void setBarrelSagging(bool flag)        {m_barrelSagging  = flag;}

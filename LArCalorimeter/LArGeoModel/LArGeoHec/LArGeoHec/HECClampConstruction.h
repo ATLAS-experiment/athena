@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // HECClampConstruction.h
@@ -13,9 +13,8 @@
 #define LARGEOHEC_HECCLAMPCONSTRUCTION_H
 
 #include <string>
+#include "GeoModelKernel/GeoFullPhysVol.h"
 
-class GeoFullPhysVol;
-class GeoPhysVol;
 
 namespace LArGeo 
 {
@@ -25,11 +24,11 @@ namespace LArGeo
     public:
       HECClampConstruction(bool front=true, bool posZSide=true);
       virtual ~HECClampConstruction();
-      void AddClamps(GeoFullPhysVol*physiHECWheel);      
+      void AddClamps(GeoIntrusivePtr<GeoFullPhysVol> physiHECWheel);      
 
 
     private:
-      GeoPhysVol* GetClampingBar(bool rail=false,bool left=false);
+      PVLink GetClampingBar(bool rail=false,bool left=false);
       bool     m_front;
       //bool     m_rail;
       //bool     m_left;

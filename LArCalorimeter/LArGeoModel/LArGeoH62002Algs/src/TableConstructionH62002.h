@@ -24,7 +24,7 @@ namespace LArGeo {
     virtual ~TableConstructionH62002();
     
     // Get the envelope containing this detector.
-    virtual GeoVPhysVol* GetEnvelope();
+    virtual PVLink GetEnvelope();
     void SetManager(LArDetDescrManager* /*mgr*/){}
     
       

@@ -76,8 +76,7 @@ LArGeo::HECClampConstruction::HECClampConstruction(bool front, bool posZSide)
 LArGeo::HECClampConstruction::~HECClampConstruction() 
 = default;
 
-
-GeoPhysVol* LArGeo::HECClampConstruction::GetClampingBar(bool rail,bool left)
+PVLink LArGeo::HECClampConstruction::GetClampingBar(bool rail,bool left)
 {
   
   ISvcLocator *svcLocator = Gaudi::svcLocator();
@@ -218,26 +217,26 @@ GeoPhysVol* LArGeo::HECClampConstruction::GetClampingBar(bool rail,bool left)
 
   // Construct the the slots and notches here. For the support rails, they have to be inserted
   // into the physExt[0] volume. For the regular clamps they go into physClamp.
-  GeoTubs*         clampExt[3];
-  const GeoLogVol* logExt[3];
-  GeoPhysVol*      physExt[3];
+  std::array<GeoIntrusivePtr<GeoTubs>, 3>    clampExt;
+  std::array<GeoIntrusivePtr<GeoLogVol>, 3>  logExt;
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 3> physExt;
 
-  GeoTubs*         Notch      = new GeoTubs(moduleRouter+notchLevel+g4allow, moduleRouter+notchLevel+notchHeight-g4allow, 
-					    notchWidth/2.,
-					    modulePhistart-(clampAngle/2.) , clampAngle);
-  const GeoLogVol* logNotch   = new GeoLogVol(larName, Notch, LAr);  
-  GeoPhysVol*      physiNotch = new GeoPhysVol(logNotch);
+  GeoIntrusivePtr<GeoTubs> Notch{new GeoTubs(moduleRouter+notchLevel+g4allow, moduleRouter+notchLevel+notchHeight-g4allow, 
+					                                   notchWidth/2.,
+					                                   modulePhistart-(clampAngle/2.) , clampAngle)};
+  GeoIntrusivePtr<GeoLogVol>   logNotch  {new GeoLogVol(larName, Notch, LAr)};  
+  GeoIntrusivePtr<GeoPhysVol>  physiNotch{new GeoPhysVol(logNotch)};
   
-  GeoTubs*         Slot      = new GeoTubs(moduleRouter+g4allow, moduleRouter+notchLevel-g4allow, slotWidth/2. ,
-					   modulePhistart-(slotAngle/2.) , slotAngle);
-  const GeoLogVol* logSlot   = new GeoLogVol(larName, Slot, LAr);  
-  GeoPhysVol*      physiSlot = new GeoPhysVol(logSlot);
+  GeoIntrusivePtr<GeoTubs> Slot {new GeoTubs(moduleRouter+g4allow, moduleRouter+notchLevel-g4allow, slotWidth/2. ,
+					                                  modulePhistart-(slotAngle/2.) , slotAngle)};
+  GeoIntrusivePtr<GeoLogVol> logSlot{new GeoLogVol(larName, Slot, LAr)};  
+  GeoIntrusivePtr<GeoPhysVol> physiSlot{new GeoPhysVol(logSlot)};
 
 
 
-  GeoTubs*         clampBar;
-  const GeoLogVol* logClamp;
-  GeoPhysVol*      physClamp;
+  GeoIntrusivePtr<GeoTubs>     clampBar{};
+  GeoIntrusivePtr<GeoLogVol>  logClamp{};
+  GeoIntrusivePtr<GeoPhysVol> physClamp{};
 
   if(!rail){
     clampBar = new GeoTubs(moduleRouter, moduleRouter+clampThick, clampLength/2. ,
@@ -300,12 +299,6 @@ GeoPhysVol* LArGeo::HECClampConstruction::GetClampingBar(bool rail,bool left)
 
     }
 
-
-    for (int i=0; i<3; i++){
-      clampExt[i]->ref();     clampExt[i]->unref();
-      logExt[i]->ref();       logExt[i]->unref();
-      physExt[i]->ref();      physExt[i]->unref();
-    }
  
   }
     
@@ -332,24 +325,13 @@ GeoPhysVol* LArGeo::HECClampConstruction::GetClampingBar(bool rail,bool left)
       
     }
   
-  
-
-  Slot->ref();          Slot->unref();     
-  logSlot->ref();       logSlot->unref();     
-  physiSlot->ref();     physiSlot->unref();     
-  clampBar->ref();       clampBar->unref();     
-  logClamp->ref();       logClamp->unref();     
-  Notch->ref();          Notch->unref();     
-  logNotch->ref();       logNotch->unref();     
-  physiNotch->ref();     physiNotch->unref();     
-
 
   return physClamp;
 }
 
 
 
-void LArGeo::HECClampConstruction::AddClamps(GeoFullPhysVol* physiHECWheel)
+void LArGeo::HECClampConstruction::AddClamps(GeoIntrusivePtr<GeoFullPhysVol> physiHECWheel)
 {
   //----------------------------------------------------------------
   //   Add Outer Connecting Bars to HEC Wheel
@@ -369,38 +351,36 @@ void LArGeo::HECClampConstruction::AddClamps(GeoFullPhysVol* physiHECWheel)
     railOffset  =  shrinkCold * 0.*mm;  
   }
 
-  GeoVPhysVol* clampingBar   = GetClampingBar(false,false);
-  GeoVPhysVol* clampingRailR = GetClampingBar(true,false);
-  GeoVPhysVol* clampingRailL = GetClampingBar(true,true);
+  GeoIntrusivePtr<GeoVPhysVol> clampingBar   = GetClampingBar(false,false);
+  GeoIntrusivePtr<GeoVPhysVol> clampingRailR = GetClampingBar(true,false);
+  GeoIntrusivePtr<GeoVPhysVol> clampingRailL = GetClampingBar(true,true);
 
 
 
   // In the below positioning sequence, the ORDER MATTERS!
   // 
 
-  GeoTransform *xt = new GeoTransform(TranslateZ3D(clampLength/2.));
+  GeoIntrusivePtr<GeoTransform> xt{new GeoTransform(TranslateZ3D(clampLength/2.))};
   physiHECWheel->add(xt);
 
-  GeoSerialIdentifier  *sIC = new GeoSerialIdentifier(0);
+  GeoIntrusivePtr<GeoSerialIdentifier> sIC{new GeoSerialIdentifier(0)};
   GeoGenfun::Variable    IndexC;
 
   if (m_posZSide)
     {
       GeoGenfun::GENFUNCTION ModuleRotationAngleC = -m_modulePhistart+m_moduleDeltaPhi + m_moduleDeltaPhi*IndexC;
       GeoXF::TRANSFUNCTION tC   = GeoXF::Pow(RotateZ3D(1.0),ModuleRotationAngleC);
-      GeoSerialTransformer *sTC = new GeoSerialTransformer (clampingBar,&tC,((m_moduleNumber/2)-1));
+      GeoIntrusivePtr<GeoSerialTransformer> sTC{new GeoSerialTransformer (clampingBar,&tC,((m_moduleNumber/2)-1))};
       physiHECWheel->add(sIC);
       physiHECWheel->add(sTC);
-      sTC->ref();  sTC->unref();
     }
   else
     {
       GeoGenfun::GENFUNCTION ModuleRotationAngleC = -m_modulePhistart-m_moduleDeltaPhi+180*deg -  m_moduleDeltaPhi*IndexC;
       GeoXF::TRANSFUNCTION tC   = GeoXF::Pow(RotateZ3D(1.0),ModuleRotationAngleC);
-      GeoSerialTransformer *sTC = new GeoSerialTransformer (clampingBar,&tC,((m_moduleNumber/2)-1));
+      GeoIntrusivePtr<GeoSerialTransformer> sTC{new GeoSerialTransformer (clampingBar,&tC,((m_moduleNumber/2)-1))};
       physiHECWheel->add(sIC);
       physiHECWheel->add(sTC);
-      sTC->ref();  sTC->unref();
     }
 
 
@@ -423,17 +403,15 @@ void LArGeo::HECClampConstruction::AddClamps(GeoFullPhysVol* physiHECWheel)
     {
       GeoGenfun::GENFUNCTION ModuleRotationAngleC2 = -m_modulePhistart+m_moduleDeltaPhi-(180.*deg) + m_moduleDeltaPhi*IndexC2;
       GeoXF::TRANSFUNCTION tC2   = GeoXF::Pow(RotateZ3D(1.0),ModuleRotationAngleC2);
-      GeoSerialTransformer *sTC2 = new GeoSerialTransformer (clampingBar,&tC2,((m_moduleNumber/2)-1));
+      GeoIntrusivePtr<GeoSerialTransformer> sTC2{new GeoSerialTransformer (clampingBar,&tC2,((m_moduleNumber/2)-1))};
       physiHECWheel->add(sTC2);
-      sTC2->ref(); sTC2->unref();
     }
   else
     {
       GeoGenfun::GENFUNCTION ModuleRotationAngleC2 = -m_modulePhistart-m_moduleDeltaPhi -  m_moduleDeltaPhi*IndexC2;
       GeoXF::TRANSFUNCTION tC2   = GeoXF::Pow(RotateZ3D(1.0),ModuleRotationAngleC2);
-      GeoSerialTransformer *sTC2 = new GeoSerialTransformer (clampingBar,&tC2,((m_moduleNumber/2)-1));
+      GeoIntrusivePtr<GeoSerialTransformer> sTC2{new GeoSerialTransformer (clampingBar,&tC2,((m_moduleNumber/2)-1))};
       physiHECWheel->add(sTC2);
-      sTC2->ref(); sTC2->unref();
     }
 
   physiHECWheel->add(new GeoTransform(TranslateZ3D(railLength/2.)*RotateZ3D(-m_modulePhistart))); 
@@ -443,13 +421,6 @@ void LArGeo::HECClampConstruction::AddClamps(GeoFullPhysVol* physiHECWheel)
       physiHECWheel->add(sIR);                                 
     }
   physiHECWheel->add(clampingRailR);
-
-
-   clampingBar->ref();   clampingBar->unref();  
-   clampingRailR->ref(); clampingRailR->unref(); 
-   clampingRailL->ref(); clampingRailL->unref(); 
-   xt->ref();   xt->unref();   
-   sIC->ref();  sIC->unref();
 
 }
 

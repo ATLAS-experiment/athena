@@ -32,7 +32,7 @@ class EndcapPresamplerConstruction
   virtual ~EndcapPresamplerConstruction();
   
   // Get the envelope containing this detector.
-  GeoFullPhysVol* Envelope();
+  GeoIntrusivePtr<GeoFullPhysVol> Envelope();
   
  private: 
   
@@ -43,7 +43,7 @@ class EndcapPresamplerConstruction
   EndcapPresamplerConstruction & operator= (const EndcapPresamplerConstruction &);
   
   // volumes that are private member variables:
-  GeoFullPhysVol*  m_psPhysical;
+  GeoIntrusivePtr<GeoFullPhysVol>  m_psPhysical;
 
   // Flag for module only presampler ( TB )
   bool m_isModule;

@@ -44,8 +44,6 @@ FCALDetectorManager::~FCALDetectorManager()
       delete m_Module[s][m];
     }
   }
-  unsigned int ntree = FCALDetectorManager::getNumTreeTops();
-  for (unsigned int i=0;i<ntree;i++) FCALDetectorManager::getTreeTop(i)->unref();
 }
 
 
@@ -87,7 +85,6 @@ void FCALDetectorManager::addModule (FCALModule* fcalModule)
 void FCALDetectorManager::addTreeTop (PVLink treeTop)
 {
   m_treeTop.push_back(treeTop);
-  treeTop->ref();
 }
 
 const FCALHVManager& FCALDetectorManager::getHVManager () const

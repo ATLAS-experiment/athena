@@ -45,7 +45,7 @@ LArGeo::EndcapDMConstruction::EndcapDMConstruction(bool ft) :
 
 
 
-void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
+void LArGeo::EndcapDMConstruction::create(GeoIntrusivePtr<GeoFullPhysVol> envelope) const
 {
   ISvcLocator* svcLocator = Gaudi::svcLocator();
   IMessageSvc* msgSvc(nullptr);
@@ -197,7 +197,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
 			     subtract((*Ped2)  <<GeoTrf::TranslateY3D(ped2ytr)*GeoTrf::RotateY3D(90*Gaudi::Units::deg)));
 
   GeoLogVol  *lvped   = new GeoLogVol("LAr::DM::Ped",&CratePed,alu);
-  GeoPhysVol *pedestal   = new GeoPhysVol(lvped);
+  GeoIntrusivePtr<GeoPhysVol>pedestal   = new GeoPhysVol(lvped);
 
   // ----- build crates -----
   GeoBox     *Crate1   = new GeoBox(crate1hlen, crate1hwdt, crate1hhgt - epsilon);
@@ -206,12 +206,12 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
   const GeoShape & FEBCrate=(*Crate1).subtract(*Crate2).add((*Crate3)  <<GeoTrf::TranslateX3D(-crate3xtr));
 
   GeoLogVol  *lvcrate = new GeoLogVol("LAr::DM::Crate",&FEBCrate,alu);
-  GeoPhysVol *crate   = new GeoPhysVol(lvcrate);
+  GeoIntrusivePtr<GeoPhysVol>crate   = new GeoPhysVol(lvcrate);
 
   // ----- build boardenvelopes -----
   GeoBox     *BoardEnvelope   = new GeoBox(BoardEhlen, BoardEhwdt, BoardEhhgt - epsilon);
   GeoLogVol  *lvbenv = new GeoLogVol("LAr::DM::FEBoard",BoardEnvelope,matBoardsEnvelope);
-  GeoPhysVol *boardenvelope   = new GeoPhysVol(lvbenv);
+  GeoIntrusivePtr<GeoPhysVol>boardenvelope   = new GeoPhysVol(lvbenv);
 
   //-------------- Place volumes in envelope ----------------------------
   GeoTransform* xfCrateBase(new GeoTransform(GeoTrf::TranslateX3D(crate1xtr)*GeoTrf::TranslateZ3D(crate1ztr)));
@@ -252,7 +252,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
 
     GeoShape* wflange = new GeoTube(0., wflange_R, wflange_height/2);
     GeoLogVol* wflangeLV = new GeoLogVol(name + "WarmFlange", wflange, wflange_mat);
-    GeoPhysVol* wflangePV = new GeoPhysVol(wflangeLV);
+    GeoIntrusivePtr<GeoPhysVol> wflangePV = new GeoPhysVol(wflangeLV);
 
     const double bellow_height = 225.*Gaudi::Units::mm;
     const double bellow_Router = 0.5*299.*Gaudi::Units::mm; // this also to be cut in warm wall
@@ -262,20 +262,20 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
     const double bellow_Rinner = bellow_Router - bellow_wall;
     GeoShape* bellow = new GeoTube(bellow_Rinner, bellow_Router, bellow_height/2);
     GeoLogVol* bellowLV = new GeoLogVol(name + "Bellow", bellow, bellow_mat);
-    GeoPhysVol* bellowPV = new GeoPhysVol(bellowLV);
+    GeoIntrusivePtr<GeoPhysVol> bellowPV = new GeoPhysVol(bellowLV);
 
     const GeoMaterial* vcables_mat = materialManager->getMaterial("LAr::FT::VacuumCables");
 
     GeoShape* vcables = new GeoTube(0., bellow_Rinner, bellow_height/2);
     GeoLogVol* vcablesLV = new GeoLogVol(name + "VacuumCables", vcables, vcables_mat);
-    GeoPhysVol* vcablesPV = new GeoPhysVol(vcablesLV);
+    GeoIntrusivePtr<GeoPhysVol> vcablesPV = new GeoPhysVol(vcablesLV);
 
     const double cflange_height = 35.*Gaudi::Units::mm;
     const double cflange_Router = 0.5*283.*Gaudi::Units::mm;
     const GeoMaterial* cflange_mat = materialManager->getMaterial("LAr::FT::ColdFlange");
     GeoShape* cflange = new GeoTube(0., cflange_Router, cflange_height/2);
     GeoLogVol* cflangeLV = new GeoLogVol(name + "ColdFlange", cflange, cflange_mat);
-    GeoPhysVol* cflangePV = new GeoPhysVol(cflangeLV);
+    GeoIntrusivePtr<GeoPhysVol> cflangePV = new GeoPhysVol(cflangeLV);
 
     const double coldbox1_Router = cflange_Router;
     const double coldbox1_wall = 0.134*2.54*Gaudi::Units::cm;
@@ -289,16 +289,16 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
     GeoShape* coldbox1 = new GeoTube(coldbox1_Router - coldbox1_wall, coldbox1_Router, coldbox1_height/2); // wide part
     GeoShape* coldbox11 = new GeoTube(0., coldbox1_Router, coldbox1_height/2); // wide part for FTenvelope
     GeoLogVol* coldbox1LV = new GeoLogVol(name + "ColdBox1", coldbox1, coldbox_mat);
-    GeoPhysVol* coldbox1PV = new GeoPhysVol(coldbox1LV);
+    GeoIntrusivePtr<GeoPhysVol> coldbox1PV = new GeoPhysVol(coldbox1LV);
     GeoShape* coldbox21 = new GeoTube(0., coldbox1_Router, coldbox2_height/2); // plate
     GeoShape* coldbox22 = new GeoTube(0., hole_r, coldbox2_height); // hole in the plate
     const GeoShape& coldbox2 = coldbox21->subtract((*coldbox22) << GeoTrf::TranslateY3D(hole_shift));
     GeoLogVol* coldbox2LV = new GeoLogVol(name + "ColdBox2", &coldbox2, coldbox_mat);
-    GeoPhysVol* coldbox2PV = new GeoPhysVol(coldbox2LV);
+    GeoIntrusivePtr<GeoPhysVol> coldbox2PV = new GeoPhysVol(coldbox2LV);
     GeoShape* coldbox3 = new GeoTube(hole_r, coldbox3_Router, coldbox3_height/2); // narrow part
     GeoShape* coldbox31 = new GeoTube(0., coldbox3_Router, coldbox3_height/2); // narrow part for FTenvelope
     GeoLogVol* coldbox3LV = new GeoLogVol(name + "ColdBox3", coldbox3, coldbox_mat);
-    GeoPhysVol* coldbox3PV = new GeoPhysVol(coldbox3LV);
+    GeoIntrusivePtr<GeoPhysVol> coldbox3PV = new GeoPhysVol(coldbox3LV);
 
     GeoTrf::TranslateZ3D bellow_pos(-wflange_height/2 - bellow_height/2);
     GeoTrf::TranslateZ3D cflange_pos(-wflange_height/2 - bellow_height - cflange_height/2);
@@ -329,7 +329,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
       &FTenvelope,
       materialManager->getMaterial("std::Air")
     );
-    GeoPhysVol* FTPV = new GeoPhysVol(FTLV);
+    GeoIntrusivePtr<GeoPhysVol> FTPV = new GeoPhysVol(FTLV);
 
     FTPV->add(wflangePV);
     GeoTransform *bellow_trf = new GeoTransform(bellow_pos);
@@ -355,7 +355,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
     GeoShape* lar2 = new GeoTube(0., hole_r, coldbox1_height);
     const GeoShape& lar = lar1->subtract((*lar2) << GeoTrf::TranslateY3D(hole_shift));
     GeoLogVol* larLV = new GeoLogVol(name + "LAr", &lar, lar_mat);
-    GeoPhysVol* larPV = new GeoPhysVol(larLV);
+    GeoIntrusivePtr<GeoPhysVol> larPV = new GeoPhysVol(larLV);
     FTPV->add(coldbox1_trf);
     FTPV->add(larPV);
 
@@ -368,7 +368,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
     ));
     GeoShape* pigtail = new GeoTube(0., hole_r, pth);
     GeoLogVol* pigtailLV = new GeoLogVol(name + "Pigtails", pigtail, pigtail_mat);
-    GeoPhysVol* pigtailPV = new GeoPhysVol(pigtailLV);
+    GeoIntrusivePtr<GeoPhysVol> pigtailPV = new GeoPhysVol(pigtailLV);
     FTPV->add(pigtail_trf);
     FTPV->add(pigtailPV);
 
@@ -378,7 +378,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
     const GeoMaterial* ocable_mat = materialManager->getMaterial("LAr::FT::Cable");
     GeoShape* ocable = new GeoTube(0., ocable_R, ocable_len / 2);
     GeoLogVol* ocableLV = new GeoLogVol("LAr::Endcap::FTCables", ocable, ocable_mat);
-    GeoPhysVol* ocablePV = new GeoPhysVol(ocableLV);
+    GeoIntrusivePtr<GeoPhysVol> ocablePV = new GeoPhysVol(ocableLV);
 
     const double chimney_height = 277.*Gaudi::Units::mm;
     const double chimney_wall = 5.*Gaudi::Units::mm;
@@ -397,7 +397,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
       (*chimney3) << GeoTrf::TranslateZ3D(chimney_height/2 - ch_upring_h/2)
     );
     GeoLogVol* chimneyLV = new GeoLogVol("LAr::Endcap::FTChimney", &chimney, chimney_mat);
-    GeoPhysVol* chimneyPV = new GeoPhysVol(chimneyLV);
+    GeoIntrusivePtr<GeoPhysVol> chimneyPV = new GeoPhysVol(chimneyLV);
 
     // todo: take cryostat parameters from DB
     const double cryo_Router = 2475.*Gaudi::Units::mm; // cryo warm wall outer radius
@@ -405,7 +405,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
     const double r0 = cryo_Router + chimney_height + wflange_height/2;
     const double r1 = cryo_Router + chimney_height/2;
     const double r2 = cryo_Router + chimney_height + wflange_height + ocable_len/2;
-    auto put1 = [&envelope, z_pos](GeoPhysVol *object, double r, double phi)
+    auto put1 = [&envelope, z_pos](GeoIntrusivePtr<GeoPhysVol>object, double r, double phi)
     {
       envelope->add(new GeoTransform(
         GeoTrf::Translate3D(r*cos(phi), r*sin(phi), z_pos) *
@@ -445,7 +445,7 @@ void LArGeo::EndcapDMConstruction::create(GeoFullPhysVol* envelope) const
       for(unsigned i(0); i<EndcapDMTubes->size(); ++i) {
         GeoTube* endcapTube = new GeoTube((*EndcapDMTubes)[i]->getDouble("RMIN"),(*EndcapDMTubes)[i]->getDouble("RMAX"),(*EndcapDMTubes)[i]->getDouble("DZ"));
         GeoLogVol* endcapTubeLv = new GeoLogVol((*EndcapDMTubes)[i]->getString("TUBENAME"),endcapTube,matECServices);
-        GeoPhysVol* endcapTubePv = new GeoPhysVol(endcapTubeLv);
+        GeoIntrusivePtr<GeoPhysVol> endcapTubePv = new GeoPhysVol(endcapTubeLv);
         envelope->add(new GeoTransform(GeoTrf::TranslateZ3D((*EndcapDMTubes)[i]->getDouble("ZPOS"))));
         envelope->add(endcapTubePv);
       }

@@ -118,12 +118,12 @@ LArGeo::BarrelConstruction::~BarrelConstruction()
 
 //================== get envelope
 
-GeoFullPhysVol *LArGeo::BarrelConstruction::GetPositiveEnvelope() {
+GeoIntrusivePtr<GeoFullPhysVol>LArGeo::BarrelConstruction::GetPositiveEnvelope() {
   if (!m_ecamPhysicalPos) MakeEnvelope();
   return m_ecamPhysicalPos;
 }
 
-GeoFullPhysVol *LArGeo::BarrelConstruction::GetNegativeEnvelope() {
+GeoIntrusivePtr<GeoFullPhysVol>LArGeo::BarrelConstruction::GetNegativeEnvelope() {
   if (!m_ecamPhysicalNeg) MakeEnvelope();
   return m_ecamPhysicalNeg;
 }
@@ -500,7 +500,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 
 
   //-----------------TELF---------------------------------------------------------//
-  GeoPhysVol *Elnicsf_phys=nullptr;
+  GeoIntrusivePtr<GeoPhysVol>Elnicsf_phys=nullptr;
   double Xel1f;
   {
     // WARNING : this "hard_coded" 0.010*Gaudi::Units::mm is a "security" to avoid
@@ -536,7 +536,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
   // GU 28-07-2005
   //------- effective Copper + LAr mixture to accoung for pins+summing boards
   //  (follow mixture described in Pascal Perrodo note
-  GeoPhysVol *Sumb_phys=nullptr;
+  GeoIntrusivePtr<GeoPhysVol>Sumb_phys=nullptr;
   {
     double ThickSum = 10.*Gaudi::Units::mm;    // FIXME should be in geometry database
     double Rmini = Moth_inner_radius+Xel1f-ThickSum;
@@ -714,7 +714,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
     GeoCons* cons = new GeoCons(Rmini1,Rmini2,Rmaxi1,Rmaxi2,                        //
 				DeltaZ,Moth_Phi_Min,Moth_Phi_Max);                  //
     const GeoLogVol* logVol = new GeoLogVol(name,cons,Cable_elect);                 //
-    GeoPhysVol* physVol = new GeoPhysVol(logVol);                                   //
+    GeoIntrusivePtr<GeoPhysVol> physVol = new GeoPhysVol(logVol);                                   //
     m_ecamPhysicalPos->add(new GeoTransform(GeoTrf::TranslateZ3D(Zpos)));                //
     m_ecamPhysicalPos->add(physVol);                                                //
     m_ecamPhysicalNeg->add(new GeoTransform(GeoTrf::TranslateZ3D(Zpos)));                //
@@ -751,7 +751,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 #endif
     GeoTubs* tubs = new GeoTubs(Rmini,Rmaxi,DeltaZ,Moth_Phi_Min,Moth_Phi_Max);     //
     const GeoLogVol* logVol = new GeoLogVol(name,tubs,G10_bar);                    //
-    GeoPhysVol* physVol = new GeoPhysVol(logVol);                                  //
+    GeoIntrusivePtr<GeoPhysVol> physVol = new GeoPhysVol(logVol);                                  //
     m_ecamPhysicalPos->add(new GeoTransform(GeoTrf::TranslateZ3D(Zpos)));               //
     m_ecamPhysicalPos->add(physVol);                                               //
     m_ecamPhysicalNeg->add(new GeoTransform(GeoTrf::TranslateZ3D(Zpos)));               //
@@ -777,7 +777,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 	  GeoCons* cons = new GeoCons(extra_rmin1,extra_rmin2,extra_rmax1,extra_rmax2,
 				      extra_dz,extra_phi0,extra_dphi);
 	  const GeoLogVol* logVol = new GeoLogVol(name,cons,Lead);
-	  GeoPhysVol* physVol2 = new GeoPhysVol(logVol);
+	  GeoIntrusivePtr<GeoPhysVol> physVol2 = new GeoPhysVol(logVol);
 	  physVol->add(new GeoTransform(GeoTrf::TranslateZ3D(extra_zpos)));
 	  physVol->add(physVol2);
         }
@@ -811,7 +811,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 
     GeoTubs* tubs = new GeoTubs(Rmini,Rmaxi,DeltaZ,Moth_Phi_Min,Moth_Phi_Max);    //
     const GeoLogVol* logVol = new GeoLogVol(name,tubs,G10_bar);                       //
-    GeoPhysVol* physVol = new GeoPhysVol(logVol);                                 //
+    GeoIntrusivePtr<GeoPhysVol> physVol = new GeoPhysVol(logVol);                                 //
     m_ecamPhysicalPos->add(new GeoTransform(GeoTrf::TranslateZ3D(Zpos)));              //
     m_ecamPhysicalPos->add(physVol);                                              //
     m_ecamPhysicalNeg->add(new GeoTransform(GeoTrf::TranslateZ3D(Zpos)));              //
@@ -821,7 +821,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 #endif // BUILD_BACK_G10
 
 
-  GeoPhysVol *stacPhysical=nullptr;
+  GeoIntrusivePtr<GeoPhysVol>stacPhysical=nullptr;
   //---------------------------------ACCORDION VOLUME---------------------------//
   //  STAC = Pcon: LAr volume in which the accordion structure is located       //
   //     (the front/back small straight parts are in ECAM not in STAC)           //
@@ -998,8 +998,8 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 	  GeoBox *box2             = new GeoBox(Xhalfb,Thce/2,dz01);
 	  const GeoLogVol *logVol  = new GeoLogVol(name,box,Thin_abs);
 	  const GeoLogVol *logVol2 = new GeoLogVol(name,box2,Thick_abs);
-	  GeoPhysVol* physVol      = new GeoPhysVol(logVol);
-	  GeoPhysVol* physVol2     = new GeoPhysVol(logVol2);
+	  GeoIntrusivePtr<GeoPhysVol> physVol      = new GeoPhysVol(logVol);
+	  GeoIntrusivePtr<GeoPhysVol> physVol2     = new GeoPhysVol(logVol2);
 	  physVol->add(new GeoTransform(GeoTrf::Translate3D(0.,0.,dz01-Zhalfb)));
 	  physVol->add(physVol2);
 	  GeoGenfun::GENFUNCTION Xcd = radius*Cos(Gama);
@@ -1052,7 +1052,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 #endif
           GeoBox *box2 = new GeoBox(Xhalfbg,Tgfe/4.,Zhalfbg);
           const GeoLogVol *logVol2 = new GeoLogVol(name,box2,Iron);
-          GeoPhysVol *physVol2 = new GeoPhysVol(logVol2);
+          GeoIntrusivePtr<GeoPhysVol>physVol2 = new GeoPhysVol(logVol2);
 #ifdef DEBUGGEO
           std::cout << "  Position Iron in G10 at y = +- " << 0.5*(+Thce-Tgfe/2.) << std::endl;
 #endif
@@ -1089,7 +1089,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 	  std::string name        = baseName + "FrontBack::Electrode";
 	  GeoBox *box             = new GeoBox(Xhalfbe,Thel/2,Zhalfbe);
 	  const GeoLogVol *logVol = new GeoLogVol(name,box,Kapton_Cu);
-	  GeoPhysVol* physVol     = new GeoPhysVol(logVol);
+	  GeoIntrusivePtr<GeoPhysVol> physVol     = new GeoPhysVol(logVol);
 	  GeoGenfun::GENFUNCTION Xcd  = radiuse*Cos(Game);
 	  GeoGenfun::GENFUNCTION Ycd  = radiuse*Sin(Game);
 	  GeoGenfun::GENFUNCTION Zcd  = GeoGenfun::FixedConstant(Zmin+Zhalfbe);
@@ -1322,7 +1322,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 #endif
 
 		
-	        GeoPhysVol* thinPhys = nullptr;
+	        GeoIntrusivePtr<GeoPhysVol> thinPhys = nullptr;
                 GeoTrap* thinTrap = new GeoTrap(Dz,0.,0.,h1(instance),tl1,bl1,alpha(instance),
                                                          h1(instance),tl1,bl1,alpha(instance));
                 if (!doDetailedAbsorberStraight) {
@@ -1333,7 +1333,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                   GeoTrap* thickTrap = new GeoTrap(Dz,0.,0.,h1(instance),Xt1,Xb1,alpha_t(instance),
                                                             h1(instance),Xt1,Xb1,alpha_t(instance));
 		  const GeoLogVol* thickLog =  new GeoLogVol(thickName,thickTrap,Thick_abs);
-                  GeoPhysVol* thickPhys = new GeoPhysVol(thickLog);
+                  GeoIntrusivePtr<GeoPhysVol> thickPhys = new GeoPhysVol(thickLog);
 		  // put thick absorber in straight_phys
 		  thinPhys->add(new GeoTransform(GeoTrf::TranslateX3D(Xtrans)));
 		  thinPhys->add(thickPhys);
@@ -1363,7 +1363,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                                                                       h1(instance),tl1,bl1,alpha(instance));
                    std::string thickGlueName = baseName + "ThickAbsGlue::Straight";
                    const GeoLogVol* thickTrapGlueLog = new GeoLogVol(thickGlueName,thickTrapGlue, Glue);
-                   GeoPhysVol * thickTrapGluePhys = new GeoPhysVol(thickTrapGlueLog);
+                   GeoIntrusivePtr<GeoPhysVol> thickTrapGluePhys = new GeoPhysVol(thickTrapGlueLog);
                    thinPhys->add(new GeoTransform(GeoTrf::Translate3D(0.,0.,0.)));
                    thinPhys->add(thickTrapGluePhys);
 
@@ -1377,7 +1377,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                                                                             h1(instance),Xt1,Xb1,alpha_t(instance));
                    std::string thickLeadName= baseName+"ThickAbsLead::Straight";
                    const GeoLogVol* thickTrapLeadLog = new GeoLogVol(thickLeadName,thickTrapLead, myLead);
-                   GeoPhysVol * thickTrapLeadPhys = new GeoPhysVol(thickTrapLeadLog);
+                   GeoIntrusivePtr<GeoPhysVol> thickTrapLeadPhys = new GeoPhysVol(thickTrapLeadLog);
                    thickTrapGluePhys->add(new GeoTransform(GeoTrf::TranslateX3D(Xtrans)));
                    thickTrapGluePhys->add(thickTrapLeadPhys);
 
@@ -1390,7 +1390,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                                                                           h1(instance),Xt2,Xb2,alpha_2(instance));
                    std::string thinLeadName = baseName+"ThinAbsLead::Straight";
                    const GeoLogVol* thinTrapLeadLog = new GeoLogVol(thinLeadName,thinTrapLead, myLead);
-                   GeoPhysVol * thinTrapLeadPhys = new GeoPhysVol(thinTrapLeadLog);
+                   GeoIntrusivePtr<GeoPhysVol> thinTrapLeadPhys = new GeoPhysVol(thinTrapLeadLog);
                    thickTrapGluePhys->add(new GeoTransform(GeoTrf::TranslateX3D(Xtrans2)));
                    thickTrapGluePhys->add(thinTrapLeadPhys);
 
@@ -1570,7 +1570,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                  for (int instance = 0; instance < Nabsorber; instance++)
                  {
 
-                  GeoPhysVol* thinPhys = nullptr;
+                  GeoIntrusivePtr<GeoPhysVol> thinPhys = nullptr;
 
                   if (!doDetailedAbsorberFold) {
                      GeoTubs* thinTubs        = new GeoTubs(Rcmin,Rcmax,ddz0,
@@ -1591,7 +1591,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                      const GeoLogVol* thickLog = new GeoLogVol(thickName,thickTubs,Thick_abs);
 
                      thinPhys   = new GeoPhysVol(thinLog);
-                     GeoPhysVol* thickPhys  = new GeoPhysVol(thickLog);
+                     GeoIntrusivePtr<GeoPhysVol> thickPhys  = new GeoPhysVol(thickLog);
 
                      thinPhys->add(new GeoTransform(GeoTrf::TranslateZ3D(ddz01-ddz0)));
                      thinPhys->add(thickPhys);
@@ -1618,7 +1618,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                                            (*phi0_fold)(instance),(*dphi_fold)(instance));
                      std::string foldGlueName = baseName+"Glue::Fold";
                      const GeoLogVol* glueTubsLog = new GeoLogVol(foldGlueName,glueTubs,Glue);
-                     GeoPhysVol* glueTubsPhys = new GeoPhysVol(glueTubsLog);
+                     GeoIntrusivePtr<GeoPhysVol> glueTubsPhys = new GeoPhysVol(glueTubsLog);
                      thinPhys->add(new GeoTransform(GeoTrf::TranslateZ3D(0.)));
                      thinPhys->add(glueTubsPhys); 
 #ifdef DEBUGGEO
@@ -1632,7 +1632,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                                            (*phi0_fold)(instance),(*dphi_fold)(instance));
                      std::string foldThickLeadName = baseName+"ThickLead::Fold";
                      const GeoLogVol* thickLeadLog = new GeoLogVol(foldThickLeadName,thickLeadTubs,myLead);
-                     GeoPhysVol* thickLeadPhys = new GeoPhysVol(thickLeadLog);
+                     GeoIntrusivePtr<GeoPhysVol> thickLeadPhys = new GeoPhysVol(thickLeadLog);
                      glueTubsPhys->add(new GeoTransform(GeoTrf::TranslateZ3D(ddz01-ddz0)));
                      glueTubsPhys->add(thickLeadPhys);
 #ifdef DEBUGGEO
@@ -1645,7 +1645,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
                                            (*phi0_fold)(instance),(*dphi_fold)(instance));
                      std::string foldThinLeadName = baseName+"ThinLead::Fold";
                      const GeoLogVol* thinLeadLog = new GeoLogVol(foldThinLeadName,thinLeadTubs,myLead);
-                     GeoPhysVol* thinLeadPhys = new GeoPhysVol(thinLeadLog);
+                     GeoIntrusivePtr<GeoPhysVol> thinLeadPhys = new GeoPhysVol(thinLeadLog);
                      glueTubsPhys->add(new GeoTransform(GeoTrf::TranslateZ3D(ddz01))); 
                      glueTubsPhys->add(thinLeadPhys);
 
@@ -1760,7 +1760,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 		GeoTrap* trap = new GeoTrap(Dze,0.,0.,h1e(instance),tl1,bl1,alpha_e(instance),
                                                       h1e(instance),tl1,bl1,alpha_e(instance));
 		const GeoLogVol* logVol = new GeoLogVol(name,trap,Kapton_Cu);
-		GeoPhysVol* physVol = new GeoPhysVol(logVol);
+		GeoIntrusivePtr<GeoPhysVol> physVol = new GeoPhysVol(logVol);
 		//------------------------------------------------------------------------
 		// JFB.  If there is no sagging we can exit this loop after only one pass..
 		// We simply declare the placement recipe, and place the first phys Vol 
@@ -1939,7 +1939,7 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
 #endif
                   const GeoLogVol* foldeLog  = new GeoLogVol(eName,foldeTubs,Kapton_Cu);
 
-                  GeoPhysVol* foldePhys   = new GeoPhysVol(foldeLog);
+                  GeoIntrusivePtr<GeoPhysVol> foldePhys   = new GeoPhysVol(foldeLog);
 
 #ifdef DEBUGGEO
                   if (jrl!=Nbrt) {

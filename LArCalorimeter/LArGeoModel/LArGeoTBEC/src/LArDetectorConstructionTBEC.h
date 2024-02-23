@@ -23,7 +23,7 @@ namespace LArGeo {
     virtual ~LArDetectorConstructionTBEC();
     
     // Get the envelope containing this detector.
-    virtual GeoVPhysVol* GetEnvelope();
+    virtual PVLink GetEnvelope();
     
 
     // Set a vis limit for the EC
@@ -43,7 +43,7 @@ namespace LArGeo {
 
     void                getSimulationParameters();
 
-    GeoFullPhysVol*     createEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol>     createEnvelope();
 
     GeoPhysVol          *m_tbecEnvelopePhysical;
 

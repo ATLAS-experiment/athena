@@ -10,7 +10,8 @@
 #ifndef LARGEOH62002ALGS_EXCLUDERCONSTRUCTION_H
 #define LARGEOH62002ALGS_EXCLUDERCONSTRUCTION_H
 
-class GeoPhysVol;
+#include "GeoModelKernel/GeoPhysVol.h"
+
 
 namespace LArGeo {
   
@@ -22,7 +23,7 @@ namespace LArGeo {
     virtual ~ExcluderConstruction();
     
     // Get the envelope containing this detector.
-    virtual GeoPhysVol* GetEnvelope();
+    virtual GeoIntrusivePtr<GeoPhysVol> GetEnvelope();
       
   private:
   };

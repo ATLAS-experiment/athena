@@ -33,7 +33,7 @@ namespace LArGeo {
     virtual ~FCALConstruction();
 
     // Get the envelope containing this detector.
-    GeoVFullPhysVol* GetEnvelope(bool bPos);
+    GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope(bool bPos);
 
     // Set a limit on cell number (for Visualization only);
     void setFCALVisLimit(int maxCell) {m_VisLimit    = maxCell;}
@@ -51,10 +51,12 @@ namespace LArGeo {
 
     
     // volumes that are private member variables:
-    GeoFullPhysVol*  m_fcalPhysical;
+    GeoIntrusivePtr<GeoFullPhysVol>  m_fcalPhysical;
 
     // full physical volumes for absorbers
-    GeoFullPhysVol* m_absPhysical1, * m_absPhysical2, * m_absPhysical3;
+    GeoIntrusivePtr<GeoFullPhysVol>  m_absPhysical1{};
+    GeoIntrusivePtr<GeoFullPhysVol>  m_absPhysical2{};  
+    GeoIntrusivePtr<GeoFullPhysVol>  m_absPhysical3{};
 
     int m_VisLimit;
 

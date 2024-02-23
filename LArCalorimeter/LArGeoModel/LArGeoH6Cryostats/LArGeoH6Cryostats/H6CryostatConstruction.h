@@ -27,13 +27,13 @@ namespace LArGeo {
     virtual ~H6CryostatConstruction();
     
     // Get the envelope containing this detector.
-    virtual GeoVFullPhysVol* GetEnvelope();
-    GeoPhysVol* GetLArPhysical();
+    virtual GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope();
+    GeoIntrusivePtr<GeoPhysVol> GetLArPhysical();
 
       
   private:
 
-    //GeoFullPhysVol*     createEnvelope();
+    //GeoIntrusivePtr<GeoFullPhysVol>     createEnvelope();
 
     GeoFullPhysVol      *m_cryoMotherPhysical;
     GeoPhysVol          *m_cryoLArPhys;

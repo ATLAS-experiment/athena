@@ -147,7 +147,7 @@ LArGeo::ModulesConstructionH62004::ModulesConstructionH62004():m_ModulesPhys(nul
 
 LArGeo::ModulesConstructionH62004::~ModulesConstructionH62004() = default;
 
-GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
+GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::ModulesConstructionH62004::GetEnvelope()
 {
   StoredMaterialManager* materialManager = nullptr;
   if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, std::string("MATERIALS"))) {
@@ -277,7 +277,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
   ExcluderConstructionH62004 excluder(0);
   /*if(excluder != 0)*/{
 //     std::cout<<"ModulesConstructionH62004::GetEnvelope positioning Excluder"<<std::endl;
-    GeoVFullPhysVol* excluderEnvelope = excluder.GetEnvelope();
+    GeoIntrusivePtr<GeoVFullPhysVol> excluderEnvelope = excluder.GetEnvelope();
     /*if(excluderEnvelope != 0)*/{
       GeoTrf::Transform3D rot2 = GeoTrf::RotateX3D(bepo_Beta) * GeoTrf::RotateX3D(bepo_ty) * GeoTrf::RotateZ3D(bepo_tz);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
@@ -293,7 +293,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
   ExcluderConstructionH62004 fcexcluder(1);
   /*if(fcexcluder != 0)*/{
 //     std::cout<<"ModulesConstructionH62004::GetEnvelope positioning Excluder"<<std::endl;
-    GeoVFullPhysVol* fcexcluderEnvelope = fcexcluder.GetEnvelope();
+    GeoIntrusivePtr<GeoVFullPhysVol> fcexcluderEnvelope = fcexcluder.GetEnvelope();
     if(fcexcluderEnvelope != nullptr){
       GeoTrf::Transform3D rot2 = GeoTrf::RotateX3D(0.8*bepo_Beta) * GeoTrf::RotateX3D(-bepo_ty) * GeoTrf::RotateZ3D(bepo_tx);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
@@ -309,7 +309,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
   ExcluderConstructionH62004 frontexcluder(2);
 
   /*if(frontexcluder != 0)*/{
-    GeoVFullPhysVol* frontexcluderEnvelope = frontexcluder.GetEnvelope();
+    GeoIntrusivePtr<GeoVFullPhysVol> frontexcluderEnvelope = frontexcluder.GetEnvelope();
     if(frontexcluderEnvelope != nullptr){
       GeoTrf::RotateZ3D rot2((90.)*Gaudi::Units::degree);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
@@ -334,7 +334,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
   ExcluderConstructionH62004 backexcluder(3);
 
   /*if(backexcluder != 0)*/{
-    GeoVFullPhysVol* backexcluderEnvelope = backexcluder.GetEnvelope();
+    GeoIntrusivePtr<GeoVFullPhysVol> backexcluderEnvelope = backexcluder.GetEnvelope();
     if(backexcluderEnvelope != nullptr){
       GeoTrf::RotateZ3D rot2((-90.-29.)*Gaudi::Units::degree);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
@@ -387,7 +387,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
 //     EMECModuleConstruction*  emecConstruction = new EMECModuleConstruction(true, true, false);
      EMECModuleConstruction emecConstruction(true, true, false);
 
-     GeoVFullPhysVol* emecEnvelope = emecConstruction.GetEnvelope();
+     GeoIntrusivePtr<GeoVFullPhysVol> emecEnvelope = emecConstruction.GetEnvelope();
      m_ModulesPhys->add(new GeoNameTag("LAr"));
      m_ModulesPhys->add( new GeoTransform(trans) );
      m_ModulesPhys->add( new GeoTransform( pos3Emec * MrotEmec ));
@@ -401,7 +401,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
 
     HECConstructionH62004 hec;
     /*if(hec != 0)*/{
-      GeoVPhysVol* hecEnvelope = hec.GetEnvelope();
+      PVLink hecEnvelope = hec.GetEnvelope();
       if(hecEnvelope != nullptr){
 //        rot.rotateZ(-bepo_pz);
 //        rot.rotateX(bepo_ty);
@@ -429,7 +429,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
     FCALConstructionH62004 fcal;
     /*if(fcal != 0)*/{
       fcal.setFCALVisLimit(m_fcalVisLimit); 
-      GeoVPhysVol* fcalEnvelope = fcal.GetEnvelope();
+      PVLink fcalEnvelope = fcal.GetEnvelope();
       if(fcalEnvelope != nullptr){
 //        Gaudi::Units::HepRotation rotFCal;
        // rotFCal.rotateY(0.*Gaudi::Units::deg);
@@ -496,7 +496,7 @@ GeoVFullPhysVol* LArGeo::ModulesConstructionH62004::GetEnvelope()
   const GeoShapeUnion &uSolid3 =  uSolid2.add((*Cone)<<CylTrans);
 
   GeoLogVol* Cnose = new GeoLogVol("LArGeoTB::LeakageDet::ColdNose", &uSolid3 , Alu);
-  GeoPhysVol *PhysCnose = new GeoPhysVol(Cnose);
+  GeoIntrusivePtr<GeoPhysVol>PhysCnose = new GeoPhysVol(Cnose);
 //  cnose->SetVisAttributes(G4VisAttributes::Invisible);
   GeoTrf::Transform3D CRotation = GeoTrf::RotateZ3D(-3*M_PI/4.) * GeoTrf::RotateX3D(M_PI);
 //  GeoTrf::Vector3D tShift(NoseXshift,0.,FCALzStart-EMECzStart+NoseZshift);

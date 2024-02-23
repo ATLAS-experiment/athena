@@ -60,7 +60,6 @@ using GeoTrf::RotateZ3D;
 
 //Constructor
 LArGeo::HECWheelConstruction::HECWheelConstruction(bool fullGeo, const std::string& wheelType, bool threeBoards, bool posZSide):
-  m_physiHECWheel(nullptr),
   m_posZSide(posZSide),
   m_threeBoards(threeBoards),
   m_wheelType(wheelType),
@@ -70,14 +69,11 @@ LArGeo::HECWheelConstruction::HECWheelConstruction(bool fullGeo, const std::stri
 }
 
 //~Destructor
-LArGeo::HECWheelConstruction::~HECWheelConstruction() 
-{;}
+LArGeo::HECWheelConstruction::~HECWheelConstruction() = default;
 
 
-GeoFullPhysVol* LArGeo::HECWheelConstruction::GetEnvelope()
-{
-  if(m_physiHECWheel) return m_physiHECWheel->clone();
-
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HECWheelConstruction::GetEnvelope() {
+ 
   // Get access to the material manager:
   
   ISvcLocator *svcLocator = Gaudi::svcLocator();
@@ -224,7 +220,7 @@ GeoFullPhysVol* LArGeo::HECWheelConstruction::GetEnvelope()
      }
   std::string hecFrontName = "LAr::HEC::LiquidArgon";
   const GeoLogVol* logicHECWheel = new GeoLogVol(hecFrontName, solidHECWheel , LAr);
-  GeoFullPhysVol* physiHECWheel = new GeoFullPhysVol(logicHECWheel);
+  GeoIntrusivePtr<GeoFullPhysVol> physiHECWheel{new GeoFullPhysVol(logicHECWheel)};
 
 
   if(m_fullGeo) {
@@ -235,7 +231,7 @@ GeoFullPhysVol* LArGeo::HECWheelConstruction::GetEnvelope()
     // NB:  HECModuleConstruction( threeBoards, frontWheel, TB,TByear) ;
 
     HECModuleConstruction HECModule(m_threeBoards,m_frontWheel,false,0) ;
-    GeoVPhysVol* moduleEnvelope = HECModule.GetEnvelope();
+    PVLink moduleEnvelope = HECModule.GetEnvelope();
     
     //----------------------------------------------------------------
     //   Place Modules into HEC Wheel

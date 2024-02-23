@@ -17,14 +17,11 @@ HECDetectorRegion::HECDetectorRegion (const GeoVFullPhysVol *physVol
   , m_endcapIndex(endcap)
   , m_projectivityDisplacement(projectivityDisplacement)
 {
-  hecDescriptor->ref();
+
 }
 
 
-HECDetectorRegion::~HECDetectorRegion()
-{
-  m_descriptor->unref();
-}
+HECDetectorRegion::~HECDetectorRegion() = default;
 
 HECCellConstLink HECDetectorRegion::getHECCell (unsigned int ieta, unsigned int iphi) const
 {

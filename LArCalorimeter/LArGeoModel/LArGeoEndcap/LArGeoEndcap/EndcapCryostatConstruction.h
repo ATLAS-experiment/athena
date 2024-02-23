@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -47,9 +47,9 @@ namespace LArGeo {
     EndcapCryostatConstruction& operator= (const EndcapCryostatConstruction&) = delete;
 
     // Get the envelope containing one endcap (pos/neg)
-    GeoFullPhysVol*     createEnvelope(bool bPos);
+    GeoIntrusivePtr<GeoFullPhysVol>  createEnvelope(bool bPos);
 
-    virtual GeoVPhysVol* GetEnvelope() {return 0;};
+    virtual GeoIntrusivePtr<GeoFullPhysVol> GetEnvelope() { return  GeoIntrusivePtr<GeoFullPhysVol>{};}
 
 
     // Set a vis limit for the FCAL
@@ -77,9 +77,9 @@ namespace LArGeo {
 
     friend class ::LArDetectorToolNV;
 
-    static GeoPhysVol* buildMbtsTrd(const IRDBRecord* rec
+    static GeoIntrusivePtr<GeoPhysVol> buildMbtsTrd(const IRDBRecord* rec
 			     , StoredMaterialManager* matmanager
-			     , GeoPhysVol* parent);
+			     , GeoIntrusivePtr<GeoPhysVol> parent);
   };
 
 } // namespace LArGeo

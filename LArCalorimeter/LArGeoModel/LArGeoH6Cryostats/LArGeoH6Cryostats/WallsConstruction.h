@@ -26,7 +26,7 @@ namespace LArGeo {
     virtual ~WallsConstruction();
     
     // Get the envelope containing this detector:
-    virtual GeoVPhysVol* GetEnvelope();
+    virtual PVLink GetEnvelope();
 
   private:
     std::unique_ptr<MsgStream> m_msg;

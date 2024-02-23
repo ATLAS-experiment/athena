@@ -113,8 +113,6 @@ HECDetectorManager::~HECDetectorManager()
 {
   for (unsigned int i=0;i<getNumBlocks();i++) delete m_HecLongBlock[i];
   for (unsigned int i=0;i<getNumDetectorRegions();i++) delete m_DetRegionsIterative[i];
-  unsigned int ntree = HECDetectorManager::getNumTreeTops();
-  for (unsigned int i=0;i<ntree;i++) HECDetectorManager::getTreeTop(i)->unref();
 }
 
 
@@ -178,7 +176,6 @@ void HECDetectorManager::addDetectorRegion (const HECDetectorRegion *region)
 void HECDetectorManager::addTreeTop (PVLink treeTop)
 {
   m_treeTop.push_back(treeTop);
-  treeTop->ref();
 }
 
 const HECHVManager& HECDetectorManager::getHVManager () const

@@ -101,7 +101,7 @@ class EMBDetectorRegion : public GeoVDetectorElement
   
   EMBDetectorRegion(const EMBDetectorRegion &right);
   EMBDetectorRegion & operator=(const EMBDetectorRegion &right);
-  const EMBDetDescr *m_descriptor;
+  GeoIntrusivePtr<const EMBDetDescr> m_descriptor{};
   EMBDetectorRegion::DetectorSide m_endcapIndex;
 };
 

@@ -54,7 +54,7 @@ LArGeo::WallsConstruction::~WallsConstruction()
 
 
 
-GeoVPhysVol* LArGeo::WallsConstruction::GetEnvelope()
+PVLink LArGeo::WallsConstruction::GetEnvelope()
 {
 
   if (m_WallsPhysical) return m_WallsPhysical;
@@ -183,13 +183,13 @@ GeoVPhysVol* LArGeo::WallsConstruction::GetEnvelope()
   GeoBox* IronWallShape = new GeoBox(IronX, IronY, IronZ);  
   std::string IronWallName = baseName + "::IronWall";
   GeoLogVol* IronWallLogical = new GeoLogVol( IronWallName, IronWallShape, Iron );
-  GeoPhysVol* IronWallPhysical = new GeoPhysVol( IronWallLogical );    
+  GeoIntrusivePtr<GeoPhysVol> IronWallPhysical = new GeoPhysVol( IronWallLogical );    
 
   //Have to put a hole into the wall:
   GeoBox* IronHoleShape = new GeoBox(IronHoleX, IronHoleY, IronHoleZ);  
   std::string IronHoleName = baseName + "::IronWall::Hole";
   GeoLogVol* IronHoleLogical = new GeoLogVol( IronHoleName, IronHoleShape, Air );
-  GeoPhysVol* IronHolePhysical = new GeoPhysVol( IronHoleLogical );    
+  GeoIntrusivePtr<GeoPhysVol> IronHolePhysical = new GeoPhysVol( IronHoleLogical );    
   IronWallPhysical->add(IronHolePhysical);
 
   // Add the iron wall to the Wall mother:
@@ -217,13 +217,13 @@ GeoVPhysVol* LArGeo::WallsConstruction::GetEnvelope()
   GeoBox* LeadWallShape = new GeoBox(LeadX, LeadY, LeadZ);  
   std::string LeadWallName = baseName + "::LeadWall";
   GeoLogVol* LeadWallLogical = new GeoLogVol( LeadWallName, LeadWallShape, Lead );
-  GeoPhysVol* LeadWallPhysical = new GeoPhysVol( LeadWallLogical );    
+  GeoIntrusivePtr<GeoPhysVol> LeadWallPhysical = new GeoPhysVol( LeadWallLogical );    
 
   //Have to put a hole into the wall:
   GeoBox* LeadHoleShape = new GeoBox(LeadHoleX, LeadHoleY, LeadHoleZ);  
   std::string LeadHoleName = baseName + "::LeadWall::Hole";
   GeoLogVol* LeadHoleLogical = new GeoLogVol( LeadHoleName, LeadHoleShape, Air );
-  GeoPhysVol* LeadHolePhysical = new GeoPhysVol( LeadHoleLogical );    
+  GeoIntrusivePtr<GeoPhysVol> LeadHolePhysical = new GeoPhysVol( LeadHoleLogical );    
   LeadWallPhysical->add(LeadHolePhysical);
 
   // Add the lead wall to the Wall mother:
@@ -250,13 +250,13 @@ GeoVPhysVol* LArGeo::WallsConstruction::GetEnvelope()
   GeoBox* ScintWallShape = new GeoBox(ScintX, ScintY, ScintZ);  
   std::string ScintWallName = baseName + "::ScintWall";
   GeoLogVol* ScintWallLogical = new GeoLogVol( ScintWallName, ScintWallShape, Scint );
-  GeoPhysVol* ScintWallPhysical = new GeoPhysVol( ScintWallLogical );    
+  GeoIntrusivePtr<GeoPhysVol> ScintWallPhysical = new GeoPhysVol( ScintWallLogical );    
 
   //Have to put a hole into the wall:
   GeoBox* ScintHoleShape = new GeoBox(ScintHoleX, ScintHoleY, ScintHoleZ);  
   std::string ScintHoleName = baseName + "::ScintWall::Hole";
   GeoLogVol* ScintHoleLogical = new GeoLogVol( ScintHoleName, ScintHoleShape, Air );
-  GeoPhysVol* ScintHolePhysical = new GeoPhysVol( ScintHoleLogical );    
+  GeoIntrusivePtr<GeoPhysVol> ScintHolePhysical = new GeoPhysVol( ScintHoleLogical );    
   ScintWallPhysical->add(ScintHolePhysical);
 
   // Add the scintillator wall to the Wall mother:
@@ -299,7 +299,7 @@ for (int iz=0; iz<(nPlate); iz++)  v_PlateZ.push_back(IronPlatePosZ + double(iz)
     GeoBox* IronPlateShape = new GeoBox(IronPlateX, IronPlateY, IronPlateZ);  
     std::string IronPlateName = baseName + "::IronPlate";
     GeoLogVol* IronPlateLogical = new GeoLogVol( IronPlateName, IronPlateShape, Iron );
-    GeoPhysVol* IronPlatePhysical = new GeoPhysVol( IronPlateLogical );    
+    GeoIntrusivePtr<GeoPhysVol> IronPlatePhysical = new GeoPhysVol( IronPlateLogical );    
     
     
     // Add the iron plate to the Plate mother:

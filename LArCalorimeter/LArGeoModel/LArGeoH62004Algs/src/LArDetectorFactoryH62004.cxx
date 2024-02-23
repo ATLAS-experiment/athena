@@ -122,7 +122,7 @@ void LArGeo::LArDetectorFactoryH62004::getSimulationParameters()
 }
 
 //## Other Operations (implementation)
-void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
+void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol* world)
 {
 
 //   VDetectorParameters* parameters = (VDetectorParameters *) new  LArGeo::RAL();
@@ -193,7 +193,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
 				   , 12250.*Gaudi::Units::mm );
 
   H6CryostatConstruction  H6CryoCons;
-  GeoVPhysVol* CryoEnvelope = nullptr;
+  PVLink CryoEnvelope = nullptr;
   CryoEnvelope = H6CryoCons.GetEnvelope();
   expHallPhys->add(new GeoNameTag("LAr"));
   //expHallPhys->add( new GeoTransform( GeoTrf::Translate3D(pos3Vector)*GeoTrf::RotateX3D(Theta)*GeoTrf::RotateZ3D(Phi) ));
@@ -202,7 +202,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
  
 
   // Get LArPhysical so that we can add the HEC
-  GeoPhysVol* LArPhysical = nullptr;
+  GeoIntrusivePtr<GeoPhysVol> LArPhysical = nullptr;
   LArPhysical = H6CryoCons.GetLArPhysical();
 
   // Add the front beam instrumentation:
@@ -211,7 +211,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   const double bard_z = 100.0*Gaudi::Units::cm;
   const double z_bard=-2160.0*Gaudi::Units::cm+80.1*Gaudi::Units::cm+16.*Gaudi::Units::cm+bard_z;
   {                                             // (with 350=1/2 length of FrontBeam volume)
-    GeoVPhysVol* front = nullptr;
+    PVLink front = nullptr;
     front = FrontBeamConstruction.GetEnvelope();
     if(front !=nullptr){
       expHallPhys->add( new GeoNameTag("H62004::Front"));
@@ -224,7 +224,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   const double z_bardm=-2160.0*Gaudi::Units::cm+1362.3*Gaudi::Units::cm;
   const double bttb_pos = 833.5*Gaudi::Units::cm;
   {
-     GeoVPhysVol* middle = nullptr;
+     PVLink middle = nullptr;
      middle = MiddleBeamConstruction.GetEnvelope();
      if(middle != nullptr ){
         double ym_pos = m_tableYpos  * (z_bardm + 2160*Gaudi::Units::cm) * (1./(bttb_pos + 2160*Gaudi::Units::cm));
@@ -236,7 +236,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   // Add MovableTable
   MovableTableConstructionH62004 MovableTable;
   {
-     GeoVPhysVol* mov = nullptr;
+     PVLink mov = nullptr;
      mov = MovableTable.GetEnvelope();
      if(mov != nullptr ){
 	expHallPhys->add( new GeoNameTag("H62004::Movable"));
@@ -262,9 +262,9 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
    WarmTCConstructionH62004 wtcConstruction;
    {
      std::cout<<"WTC constructed: "<<std::endl;
-     GeoVPhysVol* wtc = nullptr;
+     PVLink wtc = nullptr;
      wtc = wtcConstruction.GetEnvelope();
-     std::cout<<"WTC envelope: "<<wtc<<"/"<<expHallPhys<<std::endl;
+     std::cout<<"WTC envelope: "<<wtc.get()<<"/"<<expHallPhys<<std::endl;
      if(wtc !=nullptr ){
        expHallPhys->add( new GeoNameTag("LAr"));
        GeoTrf::RotateX3D rotTC(WTC_tild);
@@ -277,10 +277,10 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
    ModulesConstructionH62004 moduleConstruction;
    {    
      std::cout<<"Module constructed: "<<std::endl;
-     GeoVPhysVol* module = nullptr;
+     PVLink module = nullptr;
      module = moduleConstruction.GetEnvelope();
-     std::cout<<"Module envelope: "<<module<<"/"<<LArPhysical<<std::endl;
-     if(module !=nullptr && LArPhysical !=nullptr){
+     std::cout<<"Module envelope: "<<module.get()<<"/"<<LArPhysical.get()<<std::endl;
+     if(module && LArPhysical){
        LArPhysical->add( new GeoNameTag("LAr::H6::Cryostat::Modules"));
        LArPhysical->add(module);    
      }
@@ -293,7 +293,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   StoredPhysVol *sEmecInnerWheel;   
   if (StatusCode::SUCCESS==m_detectorStore->retrieve(sEmecInnerWheel, "EMEC_INNER_WHEEL_POS" )) {        
       emecDetectorManager = new EMECDetectorManager();
-      GeoFullPhysVol *emecEnvelope= sEmecInnerWheel->getPhysVol();
+      GeoIntrusivePtr<GeoFullPhysVol>emecEnvelope= sEmecInnerWheel->getPhysVol();
       // Inner Wheel Sampling 1 Region 0:
       {
 //      CellBinning phiBinning(M_PI/2-M_PI/8-2*M_PI/768/2,M_PI/2+M_PI/8-2*M_PI/768/2,8,20);

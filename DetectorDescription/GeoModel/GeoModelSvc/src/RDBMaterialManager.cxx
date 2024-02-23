@@ -321,29 +321,25 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
 }
 
 // Destructor:
-RDBMaterialManager::~RDBMaterialManager() {
-  // Unreference the materials:
-  for (auto &p : m_materialMap) {
-    p.second->unref();
-  }
-}
+RDBMaterialManager::~RDBMaterialManager() = default;
 
 GeoMaterial* RDBMaterialManager::searchMaterialMap(const std::string & name) const
 {
   MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
 	
-  std::map< std::string, GeoMaterial * >::const_iterator m   = m_materialMap.find(std::string(name));
-  std::map< std::string, GeoMaterial * >::const_iterator end = m_materialMap.end();
-  if (m!=end) {
+  MaterialMap::const_iterator m   = m_materialMap.find(std::string(name));
+
+  if (m!=m_materialMap.end()) {
     if(log.level()==MSG::VERBOSE)
       log << MSG::VERBOSE << " ***** in searchMaterialMap(): search sucess "  << endmsg;	
     return (*m).second;
   }
-  else {
-    if(log.level()==MSG::VERBOSE)
-      log << MSG::VERBOSE << " ***** in searchMaterialMap(): search fail "  << endmsg;	
-    return NULL;
-  }
+  
+  if(log.level()==MSG::VERBOSE)    
+    log << MSG::VERBOSE << " ***** in searchMaterialMap(): search fail "  << endmsg;	
+  
+  return nullptr;
+  
 }
 
 
@@ -362,7 +358,7 @@ GeoElement *RDBMaterialManager::searchElementVector(const std::string & name)  c
   else {
     if(log.level()==MSG::VERBOSE)
       log << MSG::VERBOSE << " ***** in searchElementVector() search fail "  << endmsg;	
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -379,26 +375,26 @@ GeoElement *RDBMaterialManager::searchElementVector(const unsigned int atomicNum
       log << MSG::VERBOSE << " ***** in searchElementVector(atomicNumber) search succes "  << endmsg;
     return *e;
   }
-  else {
-    if(log.level()==MSG::VERBOSE)
-      log << MSG::VERBOSE << " ***** in searchElementVector(atomicNumber) search succes "  << endmsg;
-    return NULL;
-  }
+ 
+  if(log.level()==MSG::VERBOSE)
+    log << MSG::VERBOSE << " ***** in searchElementVector(atomicNumber) search succes "  << endmsg;
+  return nullptr;
+  
 }
 
 const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
 
-  unsigned int  ind, com_ind;
+  unsigned int  ind{0}, com_ind{0};
 	
   std::string material_name;
   std::string tmp_name;
-  long 	    material_id = 0;
-  double      material_density = 0;
+  long 	    material_id{0};
+  double    material_density{0.};
 	
 	
-  std::string component_name;
-  double      component_fraction;
-  int 	    component_id;
+  std::string component_name{};
+  double      component_fraction{0.};
+  int 	      component_id{0};
 		
   std::string detector;
   std::string tmp_det;
@@ -423,9 +419,9 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
   if(log.level()<=MSG::DEBUG) 
     log << MSG::DEBUG  << " ***** getMaterial( ): "  << name << endmsg;	
 
-  pmaterial = NULL;
+  pmaterial = nullptr;
   pmaterial = searchMaterialMap( name);
-  if (pmaterial!= NULL) 
+  if (pmaterial!= nullptr) 
       return pmaterial;
 
   if(CxxUtils::starts_with(name, "std"))
@@ -524,7 +520,7 @@ const GeoMaterial*  RDBMaterialManager:: getMaterial(const std::string &name) {
     }
 		
   if (ind == tmp_materials->size()) 
-      return NULL;
+      return nullptr;
 
   pmaterial = new GeoMaterial( material_name,material_density * (GeoModelKernelUnits::gram / Gaudi::Units::cm3));
 
@@ -604,9 +600,9 @@ const GeoElement *RDBMaterialManager::getElement(const std::string & name) {
 	
   GeoElement *pelement;
 
-  pelement = NULL;
+  pelement = nullptr;
   pelement = searchElementVector( name);
-  if (pelement != NULL) 
+  if (pelement != nullptr) 
       return pelement;
 
   MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
@@ -634,7 +630,7 @@ const GeoElement *RDBMaterialManager::getElement(const std::string & name) {
 	  break;
 	}
     }
-  if (ind == m_elements->size()) 		return NULL;
+  if (ind == m_elements->size()) 		return nullptr;
 	
   return pelement;
 
@@ -676,7 +672,7 @@ const GeoElement *RDBMaterialManager::getElement(unsigned int atomicNumber) {
 	  break;
 	}
     }
-  if (ind == m_elements->size()) 	return NULL;
+  if (ind == m_elements->size()) 	return nullptr;
 	
   return pelement;
 }
@@ -693,7 +689,6 @@ void RDBMaterialManager::addMaterial(const std::string & /*space*/, GeoMaterial 
     log << MSG::WARNING << " Attempt to redefine material " << key << "!. The existing instance is kept. Please choose another name for new material" << endmsg;
   else {
     material->lock();             
-    material->ref();
     m_materialMap[key]=material;
   }
 }

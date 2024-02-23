@@ -18,13 +18,10 @@ EMECDetectorRegion::EMECDetectorRegion (const GeoVFullPhysVol *physVol
   , m_endcapIndex(endcap)
   , m_projectivityDisplacement(projectivityDisplacement)
 {
-  emecDescriptor->ref();
+
 }
 
-EMECDetectorRegion::~EMECDetectorRegion()
-{
-  m_descriptor->unref();
-}
+EMECDetectorRegion::~EMECDetectorRegion() = default;
 
 EMECCellConstLink EMECDetectorRegion::getEMECCell (unsigned int ieta, unsigned int iphi) const
 {

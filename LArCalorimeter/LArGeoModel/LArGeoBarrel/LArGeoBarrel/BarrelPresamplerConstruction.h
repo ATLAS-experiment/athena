@@ -35,8 +35,8 @@ namespace LArGeo {
     virtual ~BarrelPresamplerConstruction();
 
     // Get the envelope containing this detector.
-    GeoFullPhysVol* GetPositiveEnvelope();
-    GeoFullPhysVol* GetNegativeEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> GetPositiveEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> GetNegativeEnvelope();
 
   private: 
 
@@ -52,8 +52,8 @@ namespace LArGeo {
     const LArGeo::VDetectorParameters* m_parameters;
     
     // volumes that are private member variables:
-    GeoFullPhysVol*  m_psPhysicalPos;
-    GeoFullPhysVol*  m_psPhysicalNeg;
+    GeoIntrusivePtr<GeoFullPhysVol>  m_psPhysicalPos{};
+    GeoIntrusivePtr<GeoFullPhysVol>  m_psPhysicalNeg{};
 
     bool                       m_fullGeo;  // true->FULL, false->RECO    
   };

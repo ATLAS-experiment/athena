@@ -108,7 +108,7 @@ LArGeo::EMECConstruction::EMECConstruction(bool is_tb, bool has_inner, bool has_
 LArGeo::EMECConstruction::~EMECConstruction()
 = default;
 
-GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EMECConstruction::GetEnvelope(bool bPos)
 {
   ISvcLocator *svcLocator = Gaudi::svcLocator();
   StoreGateSvc *detStore;
@@ -342,7 +342,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
 
     const GeoLogVol* emecMotherLogical =
         new GeoLogVol(emecMotherName, emecMotherShape, LAr);
-    GeoFullPhysVol* emecMotherPhysical = new GeoFullPhysVol(emecMotherLogical);
+    GeoIntrusivePtr<GeoFullPhysVol> emecMotherPhysical = new GeoFullPhysVol(emecMotherLogical);
 
     if(!m_isTB) baseName += bPos? "::Pos": "::Neg";
 
@@ -394,7 +394,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         innerShape->addPlane(zBack              , rMin[0][1], rMax[0][1]);
 
         GeoLogVol*  innerLogical  = new GeoLogVol (LArName,innerShape, LAr);
-        GeoFullPhysVol* fullPV = new GeoFullPhysVol(innerLogical);
+        GeoIntrusivePtr<GeoFullPhysVol> fullPV = new GeoFullPhysVol(innerLogical);
 
         emecMotherPhysical->add(new GeoIdentifierTag(1));
         emecMotherPhysical->add(refSystemTransform);
@@ -462,7 +462,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         outerShape->addPlane(zBack              , rMin[1][2], rMax[1][2]);
 
         GeoLogVol *outerLogical = new GeoLogVol(LArName, outerShape, LAr);
-        GeoFullPhysVol *fullPV = new GeoFullPhysVol(outerLogical);
+        GeoIntrusivePtr<GeoFullPhysVol>fullPV = new GeoFullPhysVol(outerLogical);
 
         emecMotherPhysical->add(new GeoIdentifierTag(1));
         emecMotherPhysical->add(refSystemTransform);
@@ -538,7 +538,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         EMECSupportConstruction *fsc = nullptr;
         if(m_isTB) fsc = new EMECSupportConstruction(FrontSupp, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else fsc = new EMECSupportConstruction(FrontSupp, bPos);
-        GeoPhysVol* physicalFSM = fsc->GetEnvelope();
+        GeoIntrusivePtr<GeoPhysVol> physicalFSM = fsc->GetEnvelope();
         emecMotherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
         emecMotherPhysical->add(refSystemTransform);
         emecMotherPhysical->add(physicalFSM);
@@ -548,7 +548,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         EMECSupportConstruction *bsc = nullptr;
         if(m_isTB) bsc = new EMECSupportConstruction(BackSupp, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else bsc = new EMECSupportConstruction(BackSupp, bPos);
-        GeoPhysVol *physicalBSM = bsc->GetEnvelope();
+        GeoIntrusivePtr<GeoPhysVol>physicalBSM = bsc->GetEnvelope();
         GeoTrf::Transform3D rotBSM(GeoTrf::RotateX3D(-M_PI));
         if(m_isTB) rotBSM = GeoTrf::RotateZ3D(M_PI)*rotBSM;
         emecMotherPhysical->add(refSystemTransform);
@@ -560,7 +560,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         EMECSupportConstruction *osc = nullptr;
         if(m_isTB) osc = new EMECSupportConstruction(EMECSupportConstruction::Outer, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else osc = new EMECSupportConstruction(EMECSupportConstruction::Outer, bPos);
-        GeoPhysVol *physicalOSM = osc->GetEnvelope();
+        GeoIntrusivePtr<GeoPhysVol>physicalOSM = osc->GetEnvelope();
         emecMotherPhysical->add(refSystemTransform);
         emecMotherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
         emecMotherPhysical->add(physicalOSM);
@@ -570,7 +570,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         EMECSupportConstruction *isc = nullptr;
         if(m_isTB) isc = new EMECSupportConstruction(EMECSupportConstruction::Inner, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else isc = new EMECSupportConstruction(EMECSupportConstruction::Inner, bPos);
-        GeoPhysVol *physicalISM = isc->GetEnvelope();
+        GeoIntrusivePtr<GeoPhysVol>physicalISM = isc->GetEnvelope();
         emecMotherPhysical->add(refSystemTransform);
         emecMotherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
         emecMotherPhysical->add(physicalISM);
@@ -580,7 +580,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
         EMECSupportConstruction *msc = nullptr;
         if(m_isTB) msc = new EMECSupportConstruction(EMECSupportConstruction::Middle, bPos, true, "LAr::EMEC::", Gaudi::Units::halfpi*Gaudi::Units::rad);
         else msc = new EMECSupportConstruction(EMECSupportConstruction::Middle, bPos);
-        GeoPhysVol *physicalMSM = msc->GetEnvelope();
+        GeoIntrusivePtr<GeoPhysVol>physicalMSM = msc->GetEnvelope();
         emecMotherPhysical->add(refSystemTransform);
         emecMotherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
         emecMotherPhysical->add(physicalMSM);
@@ -597,7 +597,7 @@ void LArGeo::EMECConstruction::setFullGeo(bool flag)
 
 // Place the custom accordion volumes into the liquid argon
 void LArGeo::EMECConstruction::place_custom_solids(
-    GeoFullPhysVol *fullPV,
+    GeoIntrusivePtr<GeoFullPhysVol>fullPV,
     std::vector<std::string> &absorbers,
     std::vector<std::string> &electrodes,
     int multilayered_absorbers,
@@ -608,12 +608,12 @@ void LArGeo::EMECConstruction::place_custom_solids(
 
   for(const auto& name: absorbers){
     GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape("LArCustomShape", name) , Absorber);
-    GeoPhysVol* phys_volume = new GeoPhysVol(log_volume);
+    GeoIntrusivePtr<GeoPhysVol> phys_volume = new GeoPhysVol(log_volume);
     fullPV->add(new GeoIdentifierTag(1));
     fullPV->add(new GeoTransform(GeoTrf::Transform3D::Identity()));
     fullPV->add(phys_volume);
     if(multilayered_absorbers > 0){
-      GeoPhysVol* glue_phys = phys_volume;
+      GeoIntrusivePtr<GeoPhysVol> glue_phys = phys_volume;
       std::string lead_name = name;
       size_t repl = lead_name.find("Absorber");
       if(std::string::npos != repl) lead_name.replace(repl, 8, "Lead");
@@ -628,7 +628,7 @@ void LArGeo::EMECConstruction::place_custom_solids(
 	phys_volume->add(glue_phys);
       }
       GeoLogVol *lead_log = new GeoLogVol(lead_name, new GeoUnidentifiedShape("LArCustomShape",lead_name), Lead);
-      GeoPhysVol *lead_phys  = new GeoPhysVol(lead_log);
+      GeoIntrusivePtr<GeoPhysVol>lead_phys  = new GeoPhysVol(lead_log);
       glue_phys->add(new GeoIdentifierTag(1));
       glue_phys->add(new GeoTransform(GeoTrf::Transform3D::Identity()));
       glue_phys->add(lead_phys);
@@ -637,7 +637,7 @@ void LArGeo::EMECConstruction::place_custom_solids(
 
     for(const auto& name: electrodes){
       GeoLogVol* log_volume = new GeoLogVol(name, new GeoUnidentifiedShape("LArCustomShape",name), Electrode);
-      GeoPhysVol* phys_volume = new GeoPhysVol(log_volume);
+      GeoIntrusivePtr<GeoPhysVol> phys_volume = new GeoPhysVol(log_volume);
       fullPV->add(new GeoIdentifierTag(1));
       fullPV->add(new GeoTransform(GeoTrf::Transform3D::Identity()));
       fullPV->add(phys_volume);

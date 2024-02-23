@@ -289,7 +289,7 @@ static double getNumber(
 
 EMECSupportConstruction::~EMECSupportConstruction() = default;
 
-GeoPhysVol* EMECSupportConstruction::GetEnvelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::GetEnvelope(void) const
 {
 	switch(m_Type){
 	case Front: return front_envelope();
@@ -657,13 +657,13 @@ for(int i = 0; i < nzplanes; ++ i){
 	return shape;
 }
 
-GeoPhysVol* EMECSupportConstruction::front_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::front_envelope(void) const
 {
 	std::string id = "FrontSupportMother";
 	std::string name = m_BaseName + id;
 	GeoPcon *motherShape = getPcon(id);
 	GeoLogVol *motherLogical = new GeoLogVol(name, motherShape, m_LAr);
-	GeoPhysVol *motherPhysical= new GeoPhysVol(motherLogical);
+	GeoIntrusivePtr<GeoPhysVol>motherPhysical= new GeoPhysVol(motherLogical);
 
         put_front_outer_extracyl(motherPhysical); // put lead plate after PS
 	put_front_outer_ring(motherPhysical);
@@ -679,13 +679,13 @@ GeoPhysVol* EMECSupportConstruction::front_envelope(void) const
 	return motherPhysical;
 }
 
-GeoPhysVol* EMECSupportConstruction::back_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::back_envelope(void) const
 {
 	std::string id = "BackSupportMother";
 	std::string name = m_BaseName + id;
 	GeoPcon *motherShape = getPcon(id);
 	GeoLogVol *motherLogical = new GeoLogVol(name, motherShape, m_LAr);
-	GeoPhysVol *motherPhysical= new GeoPhysVol(motherLogical);
+	GeoIntrusivePtr<GeoPhysVol>motherPhysical= new GeoPhysVol(motherLogical);
 
 	put_back_indexing_rings(motherPhysical);
 	put_back_outer_ring(motherPhysical);
@@ -699,7 +699,7 @@ GeoPhysVol* EMECSupportConstruction::back_envelope(void) const
 	return motherPhysical;
 }
 
-void EMECSupportConstruction::put_front_outer_barettes(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_outer_barettes(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	
         const double coldContraction=(*m_DB_ColdContraction)[0]->getDouble("ABSORBERCONTRACTION");
@@ -723,7 +723,7 @@ void EMECSupportConstruction::put_front_outer_barettes(GeoPhysVol *motherPhysica
 	double zposFOB = getNumber(m_DB_numbers, numbers, "Z0", "PARVALUE", 50.) + dzFOB;
 	GeoTubs *shapeFOB = new GeoTubs(rminFOB, rmaxFOB, dzFOB, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFOB = new GeoLogVol(name, shapeFOB, m_LAr);
-	GeoPhysVol *physFOB = new GeoPhysVol(logicalFOB);
+	GeoIntrusivePtr<GeoPhysVol>physFOB = new GeoPhysVol(logicalFOB);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(zposFOB)));
 	motherPhysical->add(physFOB);
 
@@ -736,7 +736,7 @@ void EMECSupportConstruction::put_front_outer_barettes(GeoPhysVol *motherPhysica
 	name = m_BaseName + "FrontOuterBarrette::Module::Phidiv";
 	GeoTubs *shapeFOBMP = new GeoTubs(rminFOB, rmaxFOB, dzFOB, -dfi/4., dfi);
 	GeoLogVol *logicalFOBMP = new GeoLogVol(name, shapeFOBMP, m_LAr);
-	GeoPhysVol *physFOBMP = new GeoPhysVol(logicalFOBMP);
+	GeoIntrusivePtr<GeoPhysVol>physFOBMP = new GeoPhysVol(logicalFOBMP);
 
   //longitudinal bar - absorber connection
 	name = m_BaseName + "FrontOuterBarrette::Abs";
@@ -748,7 +748,7 @@ void EMECSupportConstruction::put_front_outer_barettes(GeoPhysVol *motherPhysica
 	const double r0A = rmn + dr + dx;
 	GeoBox *shapeFOBA = new GeoBox(dx, outerAbsorberDy, dzFOB);
 	GeoLogVol *logicalFOBA = new GeoLogVol(name, shapeFOBA, m_G10FeOuter);
-	GeoPhysVol *physFOBA = new GeoPhysVol(logicalFOBA);
+	GeoIntrusivePtr<GeoPhysVol>physFOBA = new GeoPhysVol(logicalFOBA);
 	physFOBMP->add(new GeoTransform(GeoTrf::TranslateX3D(r0A)));
 	physFOBMP->add(physFOBA);
 
@@ -762,7 +762,7 @@ void EMECSupportConstruction::put_front_outer_barettes(GeoPhysVol *motherPhysica
 	double y0 = r0E * sin(dfi/2.);
 	GeoBox *shapeFOBE = new GeoBox(dx, electrodeDy, dzFOB);
 	GeoLogVol *logicalFOBE = new GeoLogVol(name, shapeFOBE, m_Kapton_Cu);
-	GeoPhysVol *physFOBE = new GeoPhysVol(logicalFOBE);
+	GeoIntrusivePtr<GeoPhysVol>physFOBE = new GeoPhysVol(logicalFOBE);
 	physFOBMP->add(new GeoTransform(GeoTrf::Transform3D(GeoTrf::Translate3D(x0,y0,0.)*GeoTrf::RotateZ3D(dfi/2.))));
 	physFOBMP->add(physFOBE);
 
@@ -787,7 +787,7 @@ void EMECSupportConstruction::put_front_outer_barettes(GeoPhysVol *motherPhysica
 		name = m_BaseName + "FrontOuterBarrette::Module";
 		GeoTubs *shapeFOBM = new GeoTubs(rminFOB, rmaxFOB, dzFOB, -dfi/4., moduldfi);
 		GeoLogVol *logicalFOBM = new GeoLogVol(name, shapeFOBM, m_LAr);
-		GeoPhysVol *physFOBM = new GeoPhysVol(logicalFOBM);
+		GeoIntrusivePtr<GeoPhysVol>physFOBM = new GeoPhysVol(logicalFOBM);
       //position the fi divisions into module
 		name = m_BaseName + "FrontOuterBarrette::Module::Phidiv";
 		for(int i = 0; i < nofdiv; ++ i){
@@ -807,7 +807,7 @@ void EMECSupportConstruction::put_front_outer_barettes(GeoPhysVol *motherPhysica
 	}
 }
 
-void EMECSupportConstruction::put_front_inner_barettes(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_inner_barettes(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 
         const double coldContraction=(*m_DB_ColdContraction)[0]->getDouble("ABSORBERCONTRACTION");
@@ -832,7 +832,7 @@ void EMECSupportConstruction::put_front_inner_barettes(GeoPhysVol *motherPhysica
 
 	GeoTubs *shapeFIB = new GeoTubs(rminFIB, rmaxFIB, dzFIB, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFIB = new GeoLogVol(name, shapeFIB, m_LAr);
-	GeoPhysVol *physFIB = new GeoPhysVol(logicalFIB);
+	GeoIntrusivePtr<GeoPhysVol>physFIB = new GeoPhysVol(logicalFIB);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(zposFIB)));
 	motherPhysical->add(physFIB);
 
@@ -845,7 +845,7 @@ void EMECSupportConstruction::put_front_inner_barettes(GeoPhysVol *motherPhysica
 	name = m_BaseName + "FrontInnerBarrette::Module::Phidiv";
 	GeoTubs *shapeFIBMP = new GeoTubs(rminFIB,rmaxFIB,dzFIB, -dfi/4., dfi);
 	GeoLogVol *logicalFIBMP = new GeoLogVol(name, shapeFIBMP, m_LAr);
-	GeoPhysVol *physFIBMP = new GeoPhysVol(logicalFIBMP);
+	GeoIntrusivePtr<GeoPhysVol>physFIBMP = new GeoPhysVol(logicalFIBMP);
 
 	name = m_BaseName + "FrontInnerBarrette::Abs";
 	double rmn = getNumber(m_DB_numbers, numbers, "R0", "PARVALUE", 302.31);     // start of abs.
@@ -856,7 +856,7 @@ void EMECSupportConstruction::put_front_inner_barettes(GeoPhysVol *motherPhysica
 	const double r0A = rmn + dr + dx;
 	GeoBox *shapeFIBA = new GeoBox(dx, innerAbsorberDy, dzFIB);
 	GeoLogVol *logicalFIBA = new GeoLogVol(name, shapeFIBA, m_G10FeInner);
-	GeoPhysVol *physFIBA = new GeoPhysVol(logicalFIBA);
+	GeoIntrusivePtr<GeoPhysVol>physFIBA = new GeoPhysVol(logicalFIBA);
 	physFIBMP->add(new GeoTransform(GeoTrf::TranslateX3D(r0A)));
 	physFIBMP->add(physFIBA);
 
@@ -870,7 +870,7 @@ void EMECSupportConstruction::put_front_inner_barettes(GeoPhysVol *motherPhysica
 	double y0 = r0E * sin(dfi/2.);
 	GeoBox *shapeFIBE = new GeoBox(dx, electrodeDy, dzFIB);
 	GeoLogVol *logicalFIBE = new GeoLogVol(name, shapeFIBE, m_Kapton_Cu);
-	GeoPhysVol *physFIBE = new GeoPhysVol(logicalFIBE);
+	GeoIntrusivePtr<GeoPhysVol>physFIBE = new GeoPhysVol(logicalFIBE);
 	physFIBMP->add(new GeoTransform(GeoTrf::Transform3D(GeoTrf::Translate3D(x0,y0,0.)*GeoTrf::RotateZ3D(dfi/2.))));
 	physFIBMP->add(physFIBE);
 
@@ -895,7 +895,7 @@ void EMECSupportConstruction::put_front_inner_barettes(GeoPhysVol *motherPhysica
 		name = m_BaseName + "FrontInnerBarrette::Module";
 		GeoTubs *shapeFIBM = new GeoTubs(rminFIB, rmaxFIB, dzFIB, -dfi/4., moduldfi);
 		GeoLogVol *logicalFIBM = new GeoLogVol(name, shapeFIBM, m_LAr);
-		GeoPhysVol *physFIBM = new GeoPhysVol(logicalFIBM);
+		GeoIntrusivePtr<GeoPhysVol>physFIBM = new GeoPhysVol(logicalFIBM);
 		name = m_BaseName + "FrontInnerBarrette::Module::Phidiv";
 		for(int i = 0; i < nofdiv; ++ i){
 			double fi = i * dfi;
@@ -915,7 +915,7 @@ void EMECSupportConstruction::put_front_inner_barettes(GeoPhysVol *motherPhysica
 }
 
 // It seems we need to accout for z side for BOB only at the moment
-void EMECSupportConstruction::put_back_outer_barettes(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_back_outer_barettes(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 
         const double coldContraction=(*m_DB_ColdContraction)[0]->getDouble("ABSORBERCONTRACTION");
@@ -943,7 +943,7 @@ void EMECSupportConstruction::put_back_outer_barettes(GeoPhysVol *motherPhysical
 	double zposBOB = getNumber(m_DB_numbers, numbers, "Z0", "PARVALUE", 44.) + dzBOB;
 	GeoTubs *shapeBOB = new GeoTubs(rminBOB, rmaxBOB, dzBOB, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalBOB = new GeoLogVol(name, shapeBOB, m_LAr);
-	GeoPhysVol *physBOB = new GeoPhysVol(logicalBOB);
+	GeoIntrusivePtr<GeoPhysVol>physBOB = new GeoPhysVol(logicalBOB);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(zposBOB)));
 	motherPhysical->add(physBOB);
 
@@ -956,7 +956,7 @@ void EMECSupportConstruction::put_back_outer_barettes(GeoPhysVol *motherPhysical
 	name = baseName + "BackOuterBarrette::Module::Phidiv";
 	GeoTubs *shapeBOBMP = new GeoTubs(rminBOB, rmaxBOB, dzBOB, -dfi/4., dfi);
 	GeoLogVol *logicalBOBMP = new GeoLogVol(name, shapeBOBMP, m_LAr);
-	GeoPhysVol *physBOBMP = new GeoPhysVol(logicalBOBMP);
+	GeoIntrusivePtr<GeoPhysVol>physBOBMP = new GeoPhysVol(logicalBOBMP);
 
 	name = baseName + "BackOuterBarrette::Abs";  //longitudinal bar - absorber connection
 	double rmn = getNumber(m_DB_numbers, numbers, "R0", "PARVALUE", 698.4);        // start of abs.
@@ -967,7 +967,7 @@ void EMECSupportConstruction::put_back_outer_barettes(GeoPhysVol *motherPhysical
 	const double r0A = rmn + dr + dx;
 	GeoBox *shapeBOBA = new GeoBox(dx, outerAbsorberDy, dzBOB);
 	GeoLogVol *logicalBOBA = new GeoLogVol(name, shapeBOBA, m_G10FeOuter);
-	GeoPhysVol *physBOBA = new GeoPhysVol(logicalBOBA);
+	GeoIntrusivePtr<GeoPhysVol>physBOBA = new GeoPhysVol(logicalBOBA);
 	physBOBMP->add(new GeoTransform(GeoTrf::TranslateX3D(r0A)));
 	physBOBMP->add(physBOBA);
 
@@ -981,7 +981,7 @@ void EMECSupportConstruction::put_back_outer_barettes(GeoPhysVol *motherPhysical
 	double x0 = r0E * cos(dfi/2.);
 	GeoBox *shapeBOBE = new GeoBox(dx, electrodeDy, dzBOB);
 	GeoLogVol *logicalBOBE = new GeoLogVol(name, shapeBOBE, m_Kapton_Cu);
-	GeoPhysVol *physBOBE = new GeoPhysVol(logicalBOBE);
+	GeoIntrusivePtr<GeoPhysVol>physBOBE = new GeoPhysVol(logicalBOBE);
 	physBOBMP->add(new GeoTransform(GeoTrf::Transform3D(GeoTrf::Translate3D(x0,y0,0.)*GeoTrf::RotateZ3D(dfi/2.))));
 	physBOBMP->add(physBOBE);
 
@@ -1007,7 +1007,7 @@ void EMECSupportConstruction::put_back_outer_barettes(GeoPhysVol *motherPhysical
 		name = m_BaseName + "BackOuterBarrette::Module";
 		GeoTubs *shapeBOBM = new GeoTubs(rminBOB, rmaxBOB, dzBOB, -dfi/4.,moduldfi);
 		GeoLogVol *logicalBOBM = new GeoLogVol(name, shapeBOBM, m_LAr);
-		GeoPhysVol *physBOBM = new GeoPhysVol(logicalBOBM);
+		GeoIntrusivePtr<GeoPhysVol>physBOBM = new GeoPhysVol(logicalBOBM);
      //position the fi divisions into module
 		name = baseName + "BackOuterBarrette::Module::Phidiv";
 		for(int i = 0; i < nofdiv; ++ i){
@@ -1027,7 +1027,7 @@ void EMECSupportConstruction::put_back_outer_barettes(GeoPhysVol *motherPhysical
 	}
 }
 
-void EMECSupportConstruction::put_back_inner_barettes(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_back_inner_barettes(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
         const double coldContraction=(*m_DB_ColdContraction)[0]->getDouble("ABSORBERCONTRACTION");
         const double electrodeInvColdContraction=(*m_DB_ColdContraction)[0]->getDouble("ELECTRODEINVCONTRACTION");
@@ -1053,7 +1053,7 @@ void EMECSupportConstruction::put_back_inner_barettes(GeoPhysVol *motherPhysical
 	double zposBIB = getNumber(m_DB_numbers, numbers, "Z0", "PARVALUE", 44.) + dzBIB;
 	GeoTubs *shapeBIB = new GeoTubs(rminBIB, rmaxBIB, dzBIB, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalBIB = new GeoLogVol(name, shapeBIB, m_LAr);
-	GeoPhysVol *physBIB = new GeoPhysVol(logicalBIB);
+	GeoIntrusivePtr<GeoPhysVol>physBIB = new GeoPhysVol(logicalBIB);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(zposBIB)));
 	motherPhysical->add(physBIB);
 
@@ -1066,7 +1066,7 @@ void EMECSupportConstruction::put_back_inner_barettes(GeoPhysVol *motherPhysical
 	name = m_BaseName + "BackInnerBarrette::Module::Phidiv";
 	GeoTubs *shapeBIBMP = new GeoTubs(rminBIB, rmaxBIB, dzBIB, -dfi/4., dfi);
 	GeoLogVol *logicalBIBMP = new GeoLogVol(name, shapeBIBMP, m_LAr);
-	GeoPhysVol *physBIBMP = new GeoPhysVol(logicalBIBMP);
+	GeoIntrusivePtr<GeoPhysVol>physBIBMP = new GeoPhysVol(logicalBIBMP);
 
   //longitudinal bar - absorber connection
 	id = "BackInnerBarrette::Abs";
@@ -1079,7 +1079,7 @@ void EMECSupportConstruction::put_back_inner_barettes(GeoPhysVol *motherPhysical
 	const double r0A = rmn + dr + dx;
 	GeoBox *shapeBIBA = new GeoBox(dx, innerAbsorberDy, dzBIB);
 	GeoLogVol *logicalBIBA = new GeoLogVol(name, shapeBIBA, m_G10FeInner);
-	GeoPhysVol *physBIBA = new GeoPhysVol(logicalBIBA);
+	GeoIntrusivePtr<GeoPhysVol>physBIBA = new GeoPhysVol(logicalBIBA);
 	physBIBMP->add(new GeoTransform(GeoTrf::TranslateX3D(r0A)));
 	physBIBMP->add(physBIBA);
 
@@ -1094,7 +1094,7 @@ void EMECSupportConstruction::put_back_inner_barettes(GeoPhysVol *motherPhysical
 	double x0 = r0E * cos(dfi * 0.5);
 	GeoBox *shapeBIBE = new GeoBox(dx, electrodeDy, dzBIB);
 	GeoLogVol *logicalBIBE = new GeoLogVol(name, shapeBIBE, m_Kapton_Cu);
-	GeoPhysVol *physBIBE = new GeoPhysVol(logicalBIBE);
+	GeoIntrusivePtr<GeoPhysVol>physBIBE = new GeoPhysVol(logicalBIBE);
 	physBIBMP->add(new GeoTransform(GeoTrf::Transform3D(GeoTrf::Translate3D(x0, y0, 0.)*GeoTrf::RotateZ3D(dfi*0.5))));
 	physBIBMP->add(physBIBE);
 
@@ -1131,7 +1131,7 @@ void EMECSupportConstruction::put_back_inner_barettes(GeoPhysVol *motherPhysical
 		name = m_BaseName + "BackInnerBarrette::Module";
 		GeoTubs *shapeBIBM = new GeoTubs(rminBIB, rmaxBIB, dzBIB, -dfi/4., moduldfi);
 		GeoLogVol *logicalBIBM = new GeoLogVol(name, shapeBIBM, m_LAr);
-		GeoPhysVol *physBIBM = new GeoPhysVol(logicalBIBM);
+		GeoIntrusivePtr<GeoPhysVol>physBIBM = new GeoPhysVol(logicalBIBM);
      //position the fi divisions into module
 		name = m_BaseName + "BackInnerBarrette::Module::Phidiv";
 		for(int i = 0; i < nofdiv; ++ i){
@@ -1151,7 +1151,7 @@ void EMECSupportConstruction::put_back_inner_barettes(GeoPhysVol *motherPhysical
 	}
 }
 
-GeoPhysVol* EMECSupportConstruction::outer_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::outer_envelope(void) const
 {
 	map_t tubes = getMap(m_DB_tubes, "TUBENAME");
 	std::string id = "OuterTransversalBars";
@@ -1161,7 +1161,7 @@ GeoPhysVol* EMECSupportConstruction::outer_envelope(void) const
 	double dzOTB = getNumber(m_DB_tubes, tubes, id, "DZ", 201.*Gaudi::Units::mm);
 	GeoTubs* shapeOTB = new GeoTubs(rminOTB, rmaxOTB, dzOTB, m_PhiStart, m_PhiSize);
 	GeoLogVol* logicalOTB = new GeoLogVol(name, shapeOTB, m_Gten);
-	GeoPhysVol* physOTB = new GeoPhysVol(logicalOTB);
+	GeoIntrusivePtr<GeoPhysVol> physOTB = new GeoPhysVol(logicalOTB);
 
 	id = "TopIndexingRing";
 	name = m_BaseName + id;
@@ -1170,7 +1170,7 @@ GeoPhysVol* EMECSupportConstruction::outer_envelope(void) const
 	double dzTIR = getNumber(m_DB_tubes, tubes, id, "DZ", 10.*Gaudi::Units::mm);
 	GeoTubs* shapeTIR = new GeoTubs(rminTIR, rmaxTIR, dzTIR, m_PhiStart, m_PhiSize);
 	GeoLogVol* logicalTIR = new GeoLogVol(name, shapeTIR, m_Alu);
-	GeoPhysVol* physTIR = new GeoPhysVol(logicalTIR);
+	GeoIntrusivePtr<GeoPhysVol> physTIR = new GeoPhysVol(logicalTIR);
 	id += "::Hole";
 	name = m_BaseName + id;
 	double dzTIRH = getNumber(m_DB_tubes, tubes, id, "DZ", 4.5*Gaudi::Units::mm);
@@ -1178,26 +1178,26 @@ GeoPhysVol* EMECSupportConstruction::outer_envelope(void) const
 	double rminTIRH = getNumber(m_DB_tubes, tubes, id, "RMIN", rmaxTIRH - 2.*Gaudi::Units::mm);
 	GeoTubs* shapeTIRH = new GeoTubs(rminTIRH, rmaxTIRH, dzTIRH, m_PhiStart, m_PhiSize);
 	GeoLogVol* logicalTIRH = new GeoLogVol(name, shapeTIRH, m_LAr);
-	GeoPhysVol* physTIRH = new GeoPhysVol(logicalTIRH);
+	GeoIntrusivePtr<GeoPhysVol> physTIRH = new GeoPhysVol(logicalTIRH);
 	physTIR->add(physTIRH);
 
 	id = "WideStretchers";
 	name = m_BaseName + id;
 	GeoPcon* shapeWS = getPcon(id);
 	GeoLogVol* logicalWS = new GeoLogVol(name, shapeWS, m_Alu);
-	GeoPhysVol* physWS = new GeoPhysVol(logicalWS);
+	GeoIntrusivePtr<GeoPhysVol> physWS = new GeoPhysVol(logicalWS);
 
 	id = "NarrowStretchers";
 	name = m_BaseName + id;
 	GeoPcon* shapeNS = getPcon(id);
 	GeoLogVol* logicalNS = new GeoLogVol(name, shapeNS, m_Alu);
-	GeoPhysVol* physNS = new GeoPhysVol(logicalNS);
+	GeoIntrusivePtr<GeoPhysVol> physNS = new GeoPhysVol(logicalNS);
 
 	id = "OuterSupportMother";
 	name = m_BaseName + id;
 	GeoPcon *motherShape = getPcon(id);
 	GeoLogVol *motherLogical = new GeoLogVol(name, motherShape, m_LAr);
-	GeoPhysVol *motherPhysical= new GeoPhysVol(motherLogical);
+	GeoIntrusivePtr<GeoPhysVol>motherPhysical= new GeoPhysVol(motherLogical);
 
 	motherPhysical->add(physTIR);
 	motherPhysical->add(physOTB);
@@ -1233,7 +1233,7 @@ GeoPhysVol* EMECSupportConstruction::outer_envelope(void) const
 	return motherPhysical;
 }
 
-GeoPhysVol* EMECSupportConstruction::inner_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::inner_envelope(void) const
 {
 	std::string id = "InnerAluCone";
 	map_t numbers = getNumbersMap(m_DB_numbers, id);
@@ -1268,7 +1268,7 @@ GeoPhysVol* EMECSupportConstruction::inner_envelope(void) const
                                           dz, m_PhiStart, m_PhiSize);
 
 	GeoLogVol* logicalIAC = new GeoLogVol (name0, shapeIAC, m_LAr);
-	GeoPhysVol* physIAC = new GeoPhysVol(logicalIAC);
+	GeoIntrusivePtr<GeoPhysVol> physIAC = new GeoPhysVol(logicalIAC);
 
 	if(m_isModule) return physIAC; // keep simplified shape
 
@@ -1280,7 +1280,7 @@ GeoPhysVol* EMECSupportConstruction::inner_envelope(void) const
                                r1min+surfthick*inv_calpha, r2min+surfthick*inv_calpha,
                                dz, m_PhiStart, m_PhiSize);
   GeoLogVol* logicalIACIS = new GeoLogVol (name,shapeIACIS,m_Alu);
-  GeoPhysVol*   physIACIS = new GeoPhysVol(logicalIACIS);
+  GeoIntrusivePtr<GeoPhysVol>   physIACIS = new GeoPhysVol(logicalIACIS);
   physIAC->add(physIACIS);
 
   name = name0 + "::OuterShell";
@@ -1291,7 +1291,7 @@ GeoPhysVol* EMECSupportConstruction::inner_envelope(void) const
                               r1max,                   r2max,
                               dz, m_PhiStart, m_PhiSize);
   GeoLogVol* logicalIACOS = new GeoLogVol (name,shapeIACOS,m_Alu);
-  GeoPhysVol*   physIACOS = new GeoPhysVol(logicalIACOS);
+  GeoIntrusivePtr<GeoPhysVol>   physIACOS = new GeoPhysVol(logicalIACOS);
   physIAC->add(physIACOS);
 
   name = name0 + "::Phidiv";
@@ -1304,7 +1304,7 @@ GeoPhysVol* EMECSupportConstruction::inner_envelope(void) const
                               r1max-surfthick*inv_calpha,r2max-surfthick*inv_calpha,
                               dz, -moduldphi/2.,moduldphi);
   GeoLogVol* logicalIACP = new GeoLogVol (name,shapeIACP,m_LAr);
-  GeoPhysVol*   physIACP = new GeoPhysVol(logicalIACP);
+  GeoIntrusivePtr<GeoPhysVol>   physIACP = new GeoPhysVol(logicalIACP);
 
   name = name0 + "::AluBar";
 //-------------------------/
@@ -1313,7 +1313,7 @@ GeoPhysVol* EMECSupportConstruction::inner_envelope(void) const
                                   barthick/2.*inv_calpha,barthick/2.,dz,
                                   0.,alpha,0.);
   GeoLogVol* logicalIACAB= new GeoLogVol (name,shapeIACAB, m_Alu);
-  GeoPhysVol*   physIACAB= new GeoPhysVol(logicalIACAB);
+  GeoIntrusivePtr<GeoPhysVol>   physIACAB= new GeoPhysVol(logicalIACAB);
 
   const double dphi = Gaudi::Units::twopi / 256.;
   const int    nbar = 9;
@@ -1340,7 +1340,7 @@ GeoPhysVol* EMECSupportConstruction::inner_envelope(void) const
 }
 
 //!!!!
-GeoPhysVol* EMECSupportConstruction::middle_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::middle_envelope(void) const
 {
 	double dMechFocaltoWRP = (*m_DB_EmecGeometry)[0]->getDouble("Z1") *Gaudi::Units::cm;
 	double LArEMECHalfCrack = (*m_DB_EmecGeometry)[0]->getDouble("DCRACK") *Gaudi::Units::cm;
@@ -1365,12 +1365,12 @@ GeoPhysVol* EMECSupportConstruction::middle_envelope(void) const
 				                    dz, m_PhiStart, m_PhiSize);
 
 	GeoLogVol* logicalITB  = new GeoLogVol (name,shapeITB,m_Gten);
-	GeoPhysVol* physITB = new GeoPhysVol(logicalITB);
+	GeoIntrusivePtr<GeoPhysVol> physITB = new GeoPhysVol(logicalITB);
 
 	return physITB;
 }
 
-void EMECSupportConstruction::put_front_middle_ring(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_middle_ring(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 
 	std::string id = "FrontMiddleRing";
@@ -1379,7 +1379,7 @@ void EMECSupportConstruction::put_front_middle_ring(GeoPhysVol *motherPhysical) 
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 2.);
 	GeoPcon *shapeFMR = getPcon(id);
 	GeoLogVol *logicalFMR = new GeoLogVol(name, shapeFMR, m_PermaliE730);
-	GeoPhysVol *physFMR = new GeoPhysVol(logicalFMR);
+	GeoIntrusivePtr<GeoPhysVol>physFMR = new GeoPhysVol(logicalFMR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physFMR);
 
@@ -1387,7 +1387,7 @@ void EMECSupportConstruction::put_front_middle_ring(GeoPhysVol *motherPhysical) 
 	name = m_BaseName + id;
 	GeoPcon *shapeFMRLH = getPcon(id);
 	GeoLogVol *logicalFMRLH = new GeoLogVol(name, shapeFMRLH, m_LAr);
-	GeoPhysVol *physFMRLH = new GeoPhysVol(logicalFMRLH);
+	GeoIntrusivePtr<GeoPhysVol>physFMRLH = new GeoPhysVol(logicalFMRLH);
 	physFMR->add(physFMRLH);
 
   // endpiece of the inner longitudinal bar  embedded into middle ring
@@ -1395,14 +1395,14 @@ void EMECSupportConstruction::put_front_middle_ring(GeoPhysVol *motherPhysical) 
 	name = m_BaseName + id;
 	GeoPcon *shapeFMRLG = getPcon(id);
 	GeoLogVol *logicalFMRLG = new GeoLogVol(name, shapeFMRLG, m_Gten);
-	GeoPhysVol *physFMRLG = new GeoPhysVol(logicalFMRLG);
+	GeoIntrusivePtr<GeoPhysVol>physFMRLG = new GeoPhysVol(logicalFMRLG);
 	physFMRLH->add(physFMRLG);
 
 	id = "FrontMiddleRing::UpperHole";
 	name = m_BaseName + id;
 	GeoPcon *shapeFMRUH = getPcon(id);
 	GeoLogVol *logicalFMRUH = new GeoLogVol(name, shapeFMRUH, m_LAr);
-	GeoPhysVol *physFMRUH = new GeoPhysVol(logicalFMRUH);
+	GeoIntrusivePtr<GeoPhysVol>physFMRUH = new GeoPhysVol(logicalFMRUH);
 	physFMR->add(physFMRUH);
 
   // endpiece of the outer longitudinal bar embedded into middle ring
@@ -1410,18 +1410,18 @@ void EMECSupportConstruction::put_front_middle_ring(GeoPhysVol *motherPhysical) 
 	name = m_BaseName + id;
 	GeoPcon *shapeFMRUG = getPcon(id);
 	GeoLogVol *logicalFMRUG = new GeoLogVol(name, shapeFMRUG, m_Gten);
-	GeoPhysVol *physFMRUG = new GeoPhysVol(logicalFMRUG);
+	GeoIntrusivePtr<GeoPhysVol>physFMRUG = new GeoPhysVol(logicalFMRUG);
 	physFMRUH->add(physFMRUG);
 }
 
-void EMECSupportConstruction::put_front_inner_ring(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_inner_ring(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	std::string id = "FrontInnerRing";
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 2.);    // z pos. of front face of the ring rel. to front of envelope
 	std::string name = m_BaseName + id;
 	GeoPcon *shapeFIR = getPcon(id);
 	GeoLogVol *logicalFIR = new GeoLogVol(name, shapeFIR, m_Alu);
-	GeoPhysVol *physFIR = new GeoPhysVol(logicalFIR);
+	GeoIntrusivePtr<GeoPhysVol>physFIR = new GeoPhysVol(logicalFIR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physFIR);
 
@@ -1429,7 +1429,7 @@ void EMECSupportConstruction::put_front_inner_ring(GeoPhysVol *motherPhysical) c
 	name = m_BaseName + id;
 	GeoPcon *shapeFIRH = getPcon(id);
 	GeoLogVol *logicalFIRH = new GeoLogVol(name, shapeFIRH, m_LAr);
-	GeoPhysVol *physFIRH = new GeoPhysVol(logicalFIRH);
+	GeoIntrusivePtr<GeoPhysVol>physFIRH = new GeoPhysVol(logicalFIRH);
 	physFIR->add(physFIRH);
 
   //endpiece of the inner longitudinal embedded into inner ring
@@ -1437,11 +1437,11 @@ void EMECSupportConstruction::put_front_inner_ring(GeoPhysVol *motherPhysical) c
 	name = m_BaseName + id;
 	GeoPcon *shapeFIRG = getPcon(id);
 	GeoLogVol *logicalFIRG = new GeoLogVol(name, shapeFIRG, m_Gten);
-	GeoPhysVol *physFIRG = new GeoPhysVol(logicalFIRG);
+	GeoIntrusivePtr<GeoPhysVol>physFIRG = new GeoPhysVol(logicalFIRG);
 	physFIRH->add(physFIRG);
 }
 
-void EMECSupportConstruction::put_front_inner_longbar(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_inner_longbar(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	map_t tubes = getMap(m_DB_tubes, "TUBENAME");
 	std::string id = "FrontInnerLongBar";
@@ -1454,19 +1454,19 @@ void EMECSupportConstruction::put_front_inner_longbar(GeoPhysVol *motherPhysical
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 30.) + dz;
 	GeoTubs *shapeFILB = new GeoTubs(rmin, rmax, dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFILB = new GeoLogVol(name,shapeFILB,m_Gten);
-	GeoPhysVol *physFILB = new GeoPhysVol(logicalFILB);
+	GeoIntrusivePtr<GeoPhysVol>physFILB = new GeoPhysVol(logicalFILB);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physFILB);
 }
 
-void EMECSupportConstruction::put_back_middle_ring(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_back_middle_ring(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	std::string id = "BackMiddleRing";
 	double z0 =  getNumber(m_DB_numbers, id, "Z0", 2.5);
 	std::string name = m_BaseName + id;
 	GeoPcon *shapeBMR = getPcon(id);
 	GeoLogVol *logicalBMR = new GeoLogVol(name, shapeBMR, m_Alu);
-	GeoPhysVol *physBMR = new GeoPhysVol(logicalBMR);
+	GeoIntrusivePtr<GeoPhysVol>physBMR = new GeoPhysVol(logicalBMR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physBMR);
 
@@ -1474,7 +1474,7 @@ void EMECSupportConstruction::put_back_middle_ring(GeoPhysVol *motherPhysical) c
 	name = m_BaseName + id;
 	GeoPcon *shapeBMRLH = getPcon(id);
 	GeoLogVol *logicalBMRLH = new GeoLogVol(name, shapeBMRLH, m_LAr);
-	GeoPhysVol *physBMRLH = new GeoPhysVol(logicalBMRLH);
+	GeoIntrusivePtr<GeoPhysVol>physBMRLH = new GeoPhysVol(logicalBMRLH);
 	physBMR->add( physBMRLH);
 
   //endpiece of the inner longitudinal
@@ -1482,14 +1482,14 @@ void EMECSupportConstruction::put_back_middle_ring(GeoPhysVol *motherPhysical) c
 	name = m_BaseName + id;
 	GeoPcon *shapeBMRLG = getPcon(id);
 	GeoLogVol *logicalBMRLG = new GeoLogVol(name, shapeBMRLG, m_Gten);
-	GeoPhysVol *physBMRLG = new GeoPhysVol(logicalBMRLG);
+	GeoIntrusivePtr<GeoPhysVol>physBMRLG = new GeoPhysVol(logicalBMRLG);
 	physBMRLH->add(physBMRLG);
 
 	id = "BackMiddleRing::UpperHole";
 	name = m_BaseName + id;
 	GeoPcon *shapeBMRUH = getPcon(id);
 	GeoLogVol *logicalBMRUH = new GeoLogVol(name, shapeBMRUH, m_LAr);
-	GeoPhysVol *physBMRUH = new GeoPhysVol(logicalBMRUH);
+	GeoIntrusivePtr<GeoPhysVol>physBMRUH = new GeoPhysVol(logicalBMRUH);
 	physBMR->add( physBMRUH);
 
   //endpiece of the outer longitudinal bar embedded into middle ring
@@ -1497,18 +1497,18 @@ void EMECSupportConstruction::put_back_middle_ring(GeoPhysVol *motherPhysical) c
 	name = m_BaseName + id;
 	GeoPcon *shapeBMRUG = getPcon(id);
 	GeoLogVol *logicalBMRUG = new GeoLogVol(name, shapeBMRUG, m_Gten);
-	GeoPhysVol *physBMRUG = new GeoPhysVol(logicalBMRUG);
+	GeoIntrusivePtr<GeoPhysVol>physBMRUG = new GeoPhysVol(logicalBMRUG);
 	physBMRUH->add(physBMRUG);
 }
 
-void EMECSupportConstruction::put_back_inner_ring(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_back_inner_ring(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	std::string id = "BackInnerRing";
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 1.);   // z pos. of back face of the ring rel. to back of envelope
 	std::string name = m_BaseName + id;
 	GeoPcon *shapeBIR = getPcon(id);
 	GeoLogVol *logicalBIR = new GeoLogVol(name, shapeBIR, m_Alu);
-	GeoPhysVol *physBIR = new GeoPhysVol(logicalBIR);
+	GeoIntrusivePtr<GeoPhysVol>physBIR = new GeoPhysVol(logicalBIR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physBIR);
 
@@ -1516,7 +1516,7 @@ void EMECSupportConstruction::put_back_inner_ring(GeoPhysVol *motherPhysical) co
 	name = m_BaseName + id;
 	GeoPcon *shapeBIRH = getPcon(id);
 	GeoLogVol *logicalBIRH = new GeoLogVol(name, shapeBIRH, m_LAr);
-	GeoPhysVol *physBIRH = new GeoPhysVol(logicalBIRH);
+	GeoIntrusivePtr<GeoPhysVol>physBIRH = new GeoPhysVol(logicalBIRH);
 	physBIR->add(physBIRH);
 
   //endpiece of the inner longitudinal bar
@@ -1524,11 +1524,11 @@ void EMECSupportConstruction::put_back_inner_ring(GeoPhysVol *motherPhysical) co
 	name = m_BaseName + id;
 	GeoPcon *shapeBIRG = getPcon(id);
 	GeoLogVol *logicalBIRG = new GeoLogVol(name, shapeBIRG, m_Gten);
-	GeoPhysVol *physBIRG = new GeoPhysVol(logicalBIRG);
+	GeoIntrusivePtr<GeoPhysVol>physBIRG = new GeoPhysVol(logicalBIRG);
 	physBIRH->add(physBIRG);
 }
 
-void EMECSupportConstruction::put_back_inner_longbar(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_back_inner_longbar(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	std::string id = "BackInnerLongBar";
 	std::string name = m_BaseName + id;
@@ -1540,36 +1540,36 @@ void EMECSupportConstruction::put_back_inner_longbar(GeoPhysVol *motherPhysical)
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 24.) + dz;
 	GeoTubs *shapeBILB = new GeoTubs(rmin, rmax, dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalBILB = new GeoLogVol(name, shapeBILB, m_Gten);
-	GeoPhysVol *physBILB = new GeoPhysVol(logicalBILB);
+	GeoIntrusivePtr<GeoPhysVol>physBILB = new GeoPhysVol(logicalBILB);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physBILB);
 }
 
-void EMECSupportConstruction::put_front_outer_ring(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_outer_ring(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	std::string id = "FrontOuterRing";
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 9.); //position of the front face of the ring rel. to front of envelope
 	std::string name = m_BaseName + id;
 	GeoPcon *shapeFOR = getPcon(id);
 	GeoLogVol *logicalFOR = new GeoLogVol(name, shapeFOR, m_Alu);
-	GeoPhysVol *physFOR = new GeoPhysVol(logicalFOR);
+	GeoIntrusivePtr<GeoPhysVol>physFOR = new GeoPhysVol(logicalFOR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physFOR);
 }
 
-void EMECSupportConstruction::put_front_outer_longbar(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_outer_longbar(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	std::string id = "FrontOuterLongBar";
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 29.);//rel to front of envelope
 	std::string name = m_BaseName + id;
 	GeoPcon *shapeFOLB = getPcon(id);
 	GeoLogVol *logicalFOLB = new GeoLogVol(name, shapeFOLB, m_Gten);
-	GeoPhysVol *physFOLB = new GeoPhysVol(logicalFOLB);
+	GeoIntrusivePtr<GeoPhysVol>physFOLB = new GeoPhysVol(logicalFOLB);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physFOLB);
 }
 
-void EMECSupportConstruction::put_front_indexing_rings(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_indexing_rings(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	map_t tubes = getMap(m_DB_tubes, "TUBENAME");
 	map_t numbers = getNumbersMap(m_DB_numbers, "FrontIndexingRings");
@@ -1591,14 +1591,14 @@ void EMECSupportConstruction::put_front_indexing_rings(GeoPhysVol *motherPhysica
 	std::string name = m_BaseName + "FrontHighRIndexingRing";
 	GeoTubs *shapeFHIR = new GeoTubs(r0 + ring_rmin, r0 + ring_rmax, ring_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFHIR = new GeoLogVol(name, shapeFHIR, m_Alu);
-	GeoPhysVol *physFHIR = new GeoPhysVol(logicalFHIR);
+	GeoIntrusivePtr<GeoPhysVol>physFHIR = new GeoPhysVol(logicalFHIR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physFHIR);
 
 	name = m_BaseName + "FrontHighRIndexingRing::Hole";
 	GeoTubs *shapeFHIRH = new GeoTubs(r0 + hole_rmin, r0 + hole_rmax, hole_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFHIRH = new GeoLogVol(name, shapeFHIRH, m_LAr);
-	GeoPhysVol *physFHIRH = new GeoPhysVol(logicalFHIRH);
+	GeoIntrusivePtr<GeoPhysVol>physFHIRH = new GeoPhysVol(logicalFHIRH);
 	physFHIR->add(new GeoTransform(GeoTrf::TranslateZ3D(z_hole + hole_dz)));
 	physFHIR->add(physFHIRH);
 
@@ -1607,21 +1607,21 @@ void EMECSupportConstruction::put_front_indexing_rings(GeoPhysVol *motherPhysica
 //	GeoTubs *shapeFHIRG = new GeoTubs(r0 + ring_rmin, r0 + ring_rmax, ring_dz, m_PhiStart, m_PhiSize);
 	GeoTubs *shapeFHIRG = new GeoTubs(r0 + ring_rmin, r0 + ring_rmax, gten_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFHIRG = new GeoLogVol(name, shapeFHIRG, m_Gten);
-	GeoPhysVol *physFHIRG = new GeoPhysVol(logicalFHIRG);
+	GeoIntrusivePtr<GeoPhysVol>physFHIRG = new GeoPhysVol(logicalFHIRG);
 	physFHIR->add(new GeoTransform(GeoTrf::TranslateZ3D(ring_dz - gten_dz)));
 	physFHIR->add(physFHIRG);
 
 	name = m_BaseName + "FrontLowRIndexingRing";
 	GeoTubs *shapeFLIR = new GeoTubs(r1 + ring_rmin, r1 + ring_rmax, ring_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFLIR = new GeoLogVol(name, shapeFLIR, m_Alu);
-	GeoPhysVol *physFLIR = new GeoPhysVol(logicalFLIR);
+	GeoIntrusivePtr<GeoPhysVol>physFLIR = new GeoPhysVol(logicalFLIR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physFLIR);
 
 	name = m_BaseName + "FrontLowRIndexingRing::Hole";
 	GeoTubs *shapeFLIRH = new GeoTubs(r1 + hole_rmin, r1 + hole_rmax, hole_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFLIRH = new GeoLogVol(name, shapeFLIRH, m_LAr);
-	GeoPhysVol *physFLIRH = new GeoPhysVol(logicalFLIRH);
+	GeoIntrusivePtr<GeoPhysVol>physFLIRH = new GeoPhysVol(logicalFLIRH);
 	physFLIR->add(new GeoTransform(GeoTrf::TranslateZ3D(z_hole + hole_dz)));
 	physFLIR->add(physFLIRH);
 
@@ -1629,12 +1629,12 @@ void EMECSupportConstruction::put_front_indexing_rings(GeoPhysVol *motherPhysica
 //	GeoTubs *shapeFLIRG = new GeoTubs(r1 + ring_rmin, r1 + ring_rmax, ring_dz, m_PhiStart, m_PhiSize);
 	GeoTubs *shapeFLIRG = new GeoTubs(r1 + ring_rmin, r1 + ring_rmax, gten_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalFLIRG = new GeoLogVol(name, shapeFLIRG, m_Gten);
-	GeoPhysVol *physFLIRG = new GeoPhysVol(logicalFLIRG);
+	GeoIntrusivePtr<GeoPhysVol>physFLIRG = new GeoPhysVol(logicalFLIRG);
 	physFLIR->add(new GeoTransform(GeoTrf::TranslateZ3D(ring_dz - gten_dz)));
 	physFLIR->add(physFLIRG);
 }
 
-void EMECSupportConstruction::put_back_indexing_rings(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_back_indexing_rings(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	map_t tubes = getMap(m_DB_tubes, "TUBENAME");
 	map_t numbers = getNumbersMap(m_DB_numbers, "BackIndexingRings");
@@ -1656,7 +1656,7 @@ void EMECSupportConstruction::put_back_indexing_rings(GeoPhysVol *motherPhysical
 	std::string name = m_BaseName + "BackHighRIndexingRing";
 	GeoTubs *shapeBHIR = new GeoTubs(r0 + ring_rmin, r0 + ring_rmax, ring_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalBHIR = new GeoLogVol(name, shapeBHIR, m_Alu);
-	GeoPhysVol *physBHIR = new GeoPhysVol(logicalBHIR);
+	GeoIntrusivePtr<GeoPhysVol>physBHIR = new GeoPhysVol(logicalBHIR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physBHIR);
 
@@ -1665,21 +1665,21 @@ void EMECSupportConstruction::put_back_indexing_rings(GeoPhysVol *motherPhysical
 //	GeoTubs *shapeBHIRG = new GeoTubs(r0 + ring_rmin, r0 + ring_rmax, ring_dz, m_PhiStart, m_PhiSize);
 	GeoTubs *shapeBHIRG = new GeoTubs(r0 + ring_rmin, r0 + ring_rmax, gten_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalBHIRG = new GeoLogVol(name, shapeBHIRG, m_Gten);
-	GeoPhysVol *physBHIRG = new GeoPhysVol(logicalBHIRG);
+	GeoIntrusivePtr<GeoPhysVol>physBHIRG = new GeoPhysVol(logicalBHIRG);
 	physBHIR->add(new GeoTransform(GeoTrf::TranslateZ3D(ring_dz - gten_dz)));
 	physBHIR->add(physBHIRG);
 
 	name = m_BaseName + "BackHighRIndexingRing::Hole";
 	GeoTubs* shapeBHIRH = new GeoTubs(r0 + hole_rmin, r0 + hole_rmax, hole_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol* logicalBHIRH = new GeoLogVol(name, shapeBHIRH, m_LAr);
-	GeoPhysVol* physBHIRH = new GeoPhysVol(logicalBHIRH);
+	GeoIntrusivePtr<GeoPhysVol> physBHIRH = new GeoPhysVol(logicalBHIRH);
 	physBHIR->add(new GeoTransform(GeoTrf::TranslateZ3D(z_hole + hole_dz)));
 	physBHIR->add(physBHIRH);
 
 	name = m_BaseName + "BackLowRIndexingRing";
 	GeoTubs *shapeBLIR = new GeoTubs(r1 + ring_rmin, r1 + ring_rmax, ring_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalBLIR = new GeoLogVol(name, shapeBLIR, m_Alu);
-	GeoPhysVol *physBLIR = new GeoPhysVol(logicalBLIR);
+	GeoIntrusivePtr<GeoPhysVol>physBLIR = new GeoPhysVol(logicalBLIR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physBLIR);
 
@@ -1687,43 +1687,43 @@ void EMECSupportConstruction::put_back_indexing_rings(GeoPhysVol *motherPhysical
 //	GeoTubs *shapeBLIRG = new GeoTubs(r1 + ring_rmin, r1 + ring_rmax, ring_dz, m_PhiStart, m_PhiSize);
 	GeoTubs *shapeBLIRG = new GeoTubs(r1 + ring_rmin, r1 + ring_rmax, gten_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalBLIRG = new GeoLogVol(name, shapeBLIRG, m_Gten);
-	GeoPhysVol *physBLIRG = new GeoPhysVol(logicalBLIRG);
+	GeoIntrusivePtr<GeoPhysVol>physBLIRG = new GeoPhysVol(logicalBLIRG);
 	physBLIR->add(new GeoTransform(GeoTrf::TranslateZ3D(ring_dz - gten_dz)));
 	physBLIR->add(physBLIRG);
 
 	name = m_BaseName + "BackLowRIndexingRing::Hole";
 	GeoTubs *shapeBLIRH = new GeoTubs(r1 + hole_rmin, r1 + hole_rmax, hole_dz, m_PhiStart, m_PhiSize);
 	GeoLogVol *logicalBLIRH = new GeoLogVol(name, shapeBLIRH, m_LAr);
-	GeoPhysVol *physBLIRH = new GeoPhysVol(logicalBLIRH);
+	GeoIntrusivePtr<GeoPhysVol>physBLIRH = new GeoPhysVol(logicalBLIRH);
 	physBLIR->add(new GeoTransform(GeoTrf::TranslateZ3D(z_hole + hole_dz)));
 	physBLIR->add(physBLIRH);
 }
 
-void EMECSupportConstruction::put_back_outer_ring(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_back_outer_ring(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	std::string id = "BackOuterRing";
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 8.);
 	std::string name = m_BaseName + id;
 	GeoPcon *shapeBOR = getPcon(id);
 	GeoLogVol *logicalBOR = new GeoLogVol(name, shapeBOR, m_Alu);
-	GeoPhysVol *physBOR = new GeoPhysVol(logicalBOR);
+	GeoIntrusivePtr<GeoPhysVol>physBOR = new GeoPhysVol(logicalBOR);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physBOR);
 }
 
-void EMECSupportConstruction::put_back_outer_longbar(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_back_outer_longbar(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	std::string id = "BackOuterLongBar";
 	double z0 = getNumber(m_DB_numbers, id, "Z0", 23.);
 	std::string name = m_BaseName + id;
 	GeoPcon *shapeBOLB = getPcon(id);
 	GeoLogVol *logicalBOLB = new GeoLogVol(name, shapeBOLB, m_Gten);
-	GeoPhysVol *physBOLB = new GeoPhysVol(logicalBOLB);
+	GeoIntrusivePtr<GeoPhysVol>physBOLB = new GeoPhysVol(logicalBOLB);
 	motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z0)));
 	motherPhysical->add(physBOLB);
 }
 
-void EMECSupportConstruction::put_front_outer_extracyl(GeoPhysVol *motherPhysical) const{
+void EMECSupportConstruction::put_front_outer_extracyl(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const{
 
   // put extra material after PS
 
@@ -1760,7 +1760,7 @@ void EMECSupportConstruction::put_front_outer_extracyl(GeoPhysVol *motherPhysica
 
               GeoTubs    *solidCyl  = new GeoTubs(rmin, rmax, dz/2., m_PhiStart, m_PhiSize);
               GeoLogVol  *logicCyl  = new GeoLogVol(name, solidCyl, mat);
-              GeoPhysVol *physCyl   = new GeoPhysVol(logicCyl);
+              GeoIntrusivePtr<GeoPhysVol>physCyl   = new GeoPhysVol(logicCyl);
 
               motherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(dz/2.)));
               motherPhysical->add(physCyl);
@@ -1781,7 +1781,7 @@ void EMECSupportConstruction::put_front_outer_extracyl(GeoPhysVol *motherPhysica
   } // check on record length
 } // end of put_front_outer_extracyl
 
-void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhysical) const
+void EMECSupportConstruction::put_front_outer_electronics(GeoIntrusivePtr<GeoPhysVol>motherPhysical) const
 {
 	map_t boxes = getMap(m_DB_boxes, "BOXNAME");
 	map_t tubes = getMap(m_DB_tubes, "TUBENAME");
@@ -1802,7 +1802,7 @@ void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhys
 	double phi_start = -0.5 * phi_size;
 	GeoTubs *bi_shape = new GeoTubs(rmin, rmax, dz_boards, phi_start, phi_size);
 	GeoLogVol *bi_l = new GeoLogVol(name, bi_shape, m_Gten);
-	GeoPhysVol *bi_phys = new GeoPhysVol(bi_l);
+	GeoIntrusivePtr<GeoPhysVol>bi_phys = new GeoPhysVol(bi_l);
 	double z_boards = getNumber(m_DB_numbers, fbn, "Zdist", "PARVALUE", 29.) - dz_boards;// 29 - start of longbar
 
 	idx = id + "M";
@@ -1812,7 +1812,7 @@ void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhys
 	dz_boards = getNumber(m_DB_tubes, tubes, idx, "DZ", 1.);
 	GeoTubs *bm_shape = new GeoTubs(rmin, rmax, dz_boards, phi_start, phi_size);
 	GeoLogVol *bm_l = new GeoLogVol(name, bm_shape, m_Gten);
-	GeoPhysVol *bm_phys = new GeoPhysVol(bm_l);
+	GeoIntrusivePtr<GeoPhysVol>bm_phys = new GeoPhysVol(bm_l);
 
 	idx = id + "O";
 	name = m_BaseName + idx;
@@ -1821,7 +1821,7 @@ void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhys
 	dz_boards = getNumber(m_DB_tubes, tubes, idx, "DZ", 1.);
 	GeoTubs *bo_shape = new GeoTubs(rmin, rmax, dz_boards, phi_start, phi_size);
 	GeoLogVol *bo_l = new GeoLogVol(name, bo_shape, m_Gten);
-	GeoPhysVol *bo_phys = new GeoPhysVol(bo_l);
+	GeoIntrusivePtr<GeoPhysVol>bo_phys = new GeoPhysVol(bo_l);
 
   // !!!To be checked whether the MBs do not cross the indexing ring in cold
 	id = "MotherBoard";
@@ -1834,7 +1834,7 @@ void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhys
 	double mb_r[5]  = { (1739.-5.) , (1640.-5.), (1400.-4.), (1140. - 4.), (835.-1.)};
 	double mb_dz[5] = {    1.4,    1.1,   1.25,  1.1,  1.25 };
 
-	GeoPhysVol *mb_p[5];
+	GeoIntrusivePtr<GeoPhysVol>mb_p[5];
 	for(int i = 0; i < 5; ++ i){
 		idx = id + "::" + mb_n[i];
 		name = m_BaseName + idx;
@@ -1851,7 +1851,7 @@ void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhys
 		double dz1 = getNumber(m_DB_numbers, mbn, tmp.str(), "PARVALUE", mb_dz_cu[i]);
 		GeoBox *cu = new GeoBox(dx, dy, dz1);
 		GeoLogVol *cul = new GeoLogVol(name, cu, m_Copper);
-		GeoPhysVol *cup = new GeoPhysVol(cul);
+		GeoIntrusivePtr<GeoPhysVol>cup = new GeoPhysVol(cul);
 		mb_p[i]->add(new GeoTransform(GeoTrf::TranslateZ3D(dz1 - mb_dz[i])));
 		mb_p[i]->add(cup);
 
@@ -1870,7 +1870,7 @@ void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhys
 	rmax = getNumber(m_DB_tubes, tubes, idx, "RMAX", 1961.-7.); // -7mm for cold; To be checked
 	GeoTubs *oc_s = new GeoTubs(rmin, rmax, dz_oc, phi_start, phi_size);
 	GeoLogVol *oc_l = new GeoLogVol(name, oc_s, m_Cable);
-	GeoPhysVol *oc_p = new GeoPhysVol(oc_l);
+	GeoIntrusivePtr<GeoPhysVol>oc_p = new GeoPhysVol(oc_l);
 	double z_oc = z_boards - dz_boards - dz_oc;
 
 	idx = id + "::SideOuter";
@@ -1881,7 +1881,7 @@ void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhys
 	double dphi_sc = getNumber(m_DB_numbers, fcson, "Width", "PARVALUE", 100.) / rmax;
 	GeoTubs *soc_s = new GeoTubs(rmin, rmax, dz_soc, -0.5 * dphi_sc, dphi_sc);
 	GeoLogVol *soc_l = new GeoLogVol(name, soc_s, m_Cable);
-	GeoPhysVol *soc_p = new GeoPhysVol(soc_l);
+	GeoIntrusivePtr<GeoPhysVol>soc_p = new GeoPhysVol(soc_l);
    // relative to indexing rings
 	double z_soc = getNumber(m_DB_numbers, fcson, "Zdist", "PARVALUE", 9.) - dz_soc;
 
@@ -1931,13 +1931,13 @@ void EMECSupportConstruction::put_front_outer_electronics(GeoPhysVol *motherPhys
 	}
 }
 
-GeoPhysVol* EMECSupportConstruction::front_inner_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::front_inner_envelope(void) const
 {
 	std::string id = "FrontSupportMother";
 	std::string name = m_BaseName + id;
 	GeoPcon *motherShape = getPcon(id + "::Inner");
 	GeoLogVol *motherLogical = new GeoLogVol(name, motherShape, m_LAr);
-	GeoPhysVol *motherPhysical = new GeoPhysVol(motherLogical);
+	GeoIntrusivePtr<GeoPhysVol>motherPhysical = new GeoPhysVol(motherLogical);
 
 	put_front_inner_ring(motherPhysical);
 	put_front_inner_longbar(motherPhysical);
@@ -1946,13 +1946,13 @@ GeoPhysVol* EMECSupportConstruction::front_inner_envelope(void) const
 	return motherPhysical;
 }
 
-GeoPhysVol* EMECSupportConstruction::back_inner_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::back_inner_envelope(void) const
 {
 	std::string id = "BackSupportMother";
 	std::string name = m_BaseName + id;
 	GeoPcon *motherShape = getPcon(id + "::Inner");
 	GeoLogVol *motherLogical = new GeoLogVol(name, motherShape, m_LAr);
-	GeoPhysVol *motherPhysical = new GeoPhysVol(motherLogical);
+	GeoIntrusivePtr<GeoPhysVol>motherPhysical = new GeoPhysVol(motherLogical);
 
 	put_back_inner_ring(motherPhysical);
 	put_back_inner_longbar(motherPhysical);
@@ -1961,13 +1961,13 @@ GeoPhysVol* EMECSupportConstruction::back_inner_envelope(void) const
 	return motherPhysical;
 }
 
-GeoPhysVol* EMECSupportConstruction::front_outer_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::front_outer_envelope(void) const
 {
 	std::string id = "FrontSupportMother";
 	std::string name = m_BaseName + id;
 	GeoPcon *motherShape = getPcon(id + "::Outer");
 	GeoLogVol *motherLogical = new GeoLogVol(name, motherShape, m_LAr);
-	GeoPhysVol *motherPhysical= new GeoPhysVol(motherLogical);
+	GeoIntrusivePtr<GeoPhysVol>motherPhysical= new GeoPhysVol(motherLogical);
 
 	put_front_outer_ring(motherPhysical);
 	put_front_outer_longbar(motherPhysical);
@@ -1979,13 +1979,13 @@ GeoPhysVol* EMECSupportConstruction::front_outer_envelope(void) const
 	return motherPhysical;
 }
 
-GeoPhysVol* EMECSupportConstruction::back_outer_envelope(void) const
+GeoIntrusivePtr<GeoPhysVol> EMECSupportConstruction::back_outer_envelope(void) const
 {
 	std::string id = "BackSupportMother";
 	std::string name = m_BaseName + id;
 	GeoPcon *motherShape = getPcon(id + "::Outer");
 	GeoLogVol *motherLogical = new GeoLogVol(name, motherShape, m_LAr);
-	GeoPhysVol *motherPhysical= new GeoPhysVol(motherLogical);
+	GeoIntrusivePtr<GeoPhysVol>motherPhysical= new GeoPhysVol(motherLogical);
 
 	put_back_indexing_rings(motherPhysical);
 	put_back_outer_ring(motherPhysical);

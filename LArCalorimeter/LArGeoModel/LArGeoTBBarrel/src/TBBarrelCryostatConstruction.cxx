@@ -56,7 +56,7 @@ LArGeo::TBBarrelCryostatConstruction::TBBarrelCryostatConstruction():
 
 LArGeo::TBBarrelCryostatConstruction::~TBBarrelCryostatConstruction() = default;
 
-GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetectorParameters* params)
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetectorParameters* params)
 {
 
   if (cryoMotherPhysical) return cryoMotherPhysical;
@@ -239,7 +239,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
      double zpos = Cryo_Distz/2.-Cryo_z0;
      double phi  = -1.*360.*Gaudi::Units::deg/16/2.;   // to have x axis in middle of volume
 
-    GeoPhysVol* Cent_phys  = new GeoPhysVol(Cent_log);
+    GeoIntrusivePtr<GeoPhysVol> Cent_phys  = new GeoPhysVol(Cent_log);
     cryoMotherPhysical->add(new GeoTransform(GeoTrf::RotateZ3D(phi)));
     cryoMotherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(zpos)));
     cryoMotherPhysical->add(Cent_phys);
@@ -277,7 +277,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                                      CryoW_tube,
                                                      Aluminium);
 
-    GeoPhysVol* CryoW_phys = new GeoPhysVol(CryoW_log);
+    GeoIntrusivePtr<GeoPhysVol> CryoW_phys = new GeoPhysVol(CryoW_log);
     Cent_phys->add(new GeoTransform(GeoTrf::Translate3D(Cryo_Xcent, 0., -Dz_end_tot/2.)));
     Cent_phys->add(CryoW_phys);
 
@@ -294,7 +294,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                                CryoV_tube,
                                                Vacuum);
 
-    GeoPhysVol* CryoV_phys = new GeoPhysVol(CryoV_log);
+    GeoIntrusivePtr<GeoPhysVol> CryoV_phys = new GeoPhysVol(CryoV_log);
     Cent_phys->add(new GeoTransform(GeoTrf::Translate3D(Cryo_Xcent, 0., -Dz_end_tot/2.)));
     Cent_phys->add(CryoV_phys);
 
@@ -311,7 +311,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                                CryoC_tube,
                                                Aluminium);
 
-    GeoPhysVol* CryoC_phys = new GeoPhysVol(CryoC_log);
+    GeoIntrusivePtr<GeoPhysVol> CryoC_phys = new GeoPhysVol(CryoC_log);
     Cent_phys->add(new GeoTransform(GeoTrf::Translate3D(Cryo_Xcent, 0., -Dz_end_tot/2.)));
     Cent_phys->add(CryoC_phys);
 
@@ -351,7 +351,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
 
      GeoLogVol* moth_log = new GeoLogVol(baseName+"LAr",moth_tube,LAr);
 
-     GeoPhysVol* moth_phys = new GeoPhysVol(moth_log);
+     GeoIntrusivePtr<GeoPhysVol> moth_phys = new GeoPhysVol(moth_log);
 
      Cent_phys->add(new GeoTransform(GeoTrf::TranslateZ3D((LAr_z_max-Cryo_Distz)/2.)));
      Cent_phys->add(moth_phys);
@@ -409,7 +409,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
 
       GeoLogVol* lar_log = new GeoLogVol(baseName+"LAr2",lar_tube,LAr);
 
-      GeoPhysVol* lar_phys = new GeoPhysVol(lar_log);
+      GeoIntrusivePtr<GeoPhysVol> lar_phys = new GeoPhysVol(lar_log);
       Cent_phys->add(new GeoTransform(GeoTrf::TranslateZ3D((LAr_z_max-Cryo_Distz)/2.)));
       Cent_phys->add(lar_phys);
 
@@ -448,7 +448,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                  Phi_Min,
                                  Phi_Span);
      GeoLogVol* ring1_log = new GeoLogVol(baseName+"Ring1",ring1_shape,Iron);
-     GeoPhysVol* ring1_phys = new GeoPhysVol(ring1_log);
+     GeoIntrusivePtr<GeoPhysVol> ring1_phys = new GeoPhysVol(ring1_log);
      
      GeoTubs* ring2_shape = new GeoTubs(
                                  R_ring+DeltaR1_ring,
@@ -457,7 +457,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                  Phi_Min,
                                  Phi_Span);
      GeoLogVol* ring2_log = new GeoLogVol(baseName+"Ring2",ring2_shape,Iron);
-     GeoPhysVol* ring2_phys = new GeoPhysVol(ring2_log);
+     GeoIntrusivePtr<GeoPhysVol> ring2_phys = new GeoPhysVol(ring2_log);
 
      GeoTubs* ring3_shape = new GeoTubs(
                                  R_ring+DeltaR1_ring+DeltaR2_ring,
@@ -466,7 +466,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                  Phi_Min,
                                  Phi_Span);
      GeoLogVol* ring3_log = new GeoLogVol(baseName+"Ring3",ring3_shape,Iron);
-     GeoPhysVol* ring3_phys = new GeoPhysVol(ring3_log);
+     GeoIntrusivePtr<GeoPhysVol> ring3_phys = new GeoPhysVol(ring3_log);
 
      static const double zring[6] = {397.,805.,1255.,1750.,2316.,2868.};
      for (int iring=0; iring < 6; iring++)
@@ -507,7 +507,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                      Phi_Min,
                                      Phi_Span);
      GeoLogVol* CryoC2_log = new GeoLogVol(baseName+"ColdTube2",CryoC2_tube,Aluminium);
-     GeoPhysVol* CryoC2_phys = new GeoPhysVol(CryoC2_log);
+     GeoIntrusivePtr<GeoPhysVol> CryoC2_phys = new GeoPhysVol(CryoC2_log);
      Cent_phys->add(new GeoTransform(GeoTrf::TranslateZ3D(-Dz_end_tot/2.)));
      Cent_phys->add(CryoC2_phys);
 
@@ -524,7 +524,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                      Phi_Min,
                                      Phi_Span);
      GeoLogVol* CryoV2_log = new GeoLogVol(baseName+"VacTube2",CryoV2_tube,Vacuum);
-     GeoPhysVol* CryoV2_phys = new GeoPhysVol(CryoV2_log);
+     GeoIntrusivePtr<GeoPhysVol> CryoV2_phys = new GeoPhysVol(CryoV2_log);
      Cent_phys->add(new GeoTransform(GeoTrf::TranslateZ3D(-Dz_end_tot/2.)));
      Cent_phys->add(CryoV2_phys);
 
@@ -541,7 +541,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                      Phi_Min,
                                      Phi_Span);
       GeoLogVol* CryoW2_log = new GeoLogVol(baseName+"WarmTube2",CryoW2_tube,Aluminium);
-      GeoPhysVol* CryoW2_phys = new GeoPhysVol(CryoW2_log);
+      GeoIntrusivePtr<GeoPhysVol> CryoW2_phys = new GeoPhysVol(CryoW2_log);
       Cent_phys->add(new GeoTransform(GeoTrf::TranslateZ3D(-Dz_end_tot/2.)));
       Cent_phys->add(CryoW2_phys);
 #endif
@@ -563,7 +563,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                      Phi_Min,
                                      Phi_Span);
        GeoLogVol* CryoEndW_log = new GeoLogVol(baseName+"EndWarm",CryoEndW_tube,Aluminium);
-       GeoPhysVol* CryoEndW_phys = new GeoPhysVol(CryoEndW_log);
+       GeoIntrusivePtr<GeoPhysVol> CryoEndW_phys = new GeoPhysVol(CryoEndW_log);
        double zwarm = Cryo_Distz/2. - Dz_end_warm/2.;
 #ifdef DEBUG_GEO
        std::cout << " position in mother at z " << zwarm << std::endl;
@@ -584,7 +584,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                      Phi_Min,
                                      Phi_Span);
        GeoLogVol* CryoEndV_log = new GeoLogVol(baseName+"EndVac",CryoEndV_tube,Vacuum);
-       GeoPhysVol* CryoEndV_phys = new GeoPhysVol(CryoEndV_log);
+       GeoIntrusivePtr<GeoPhysVol> CryoEndV_phys = new GeoPhysVol(CryoEndV_log);
        double zvac = Cryo_Distz/2. - Dz_end_warm - Dz_end_vac/2.;
 #ifdef DEBUG_GEO
        std::cout << " position in mother at z " << zvac << std::endl;
@@ -605,7 +605,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
                                      Phi_Min,
                                      Phi_Span);
        GeoLogVol* CryoEndC_log = new GeoLogVol(baseName+"EndCold",CryoEndC_tube,Aluminium);
-       GeoPhysVol* CryoEndC_phys = new GeoPhysVol(CryoEndC_log);
+       GeoIntrusivePtr<GeoPhysVol> CryoEndC_phys = new GeoPhysVol(CryoEndC_log);
        double zcold = Cryo_Distz/2. - Dz_end_warm - Dz_end_vac -Dz_end_cold/2.;
 #ifdef DEBUG_GEO
        std::cout << " position in mother at z " << zcold << std::endl;
@@ -623,7 +623,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
        BarrelConstruction barrelConstruction(true, params); // full geometry
     barrelConstruction.setBarrelSagging(_barrelSagging);
     barrelConstruction.setBarrelCellVisLimit(_barrelVisLimit);
-    GeoFullPhysVol* barrelEnvelope = barrelConstruction.GetPositiveEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> barrelEnvelope = barrelConstruction.GetPositiveEnvelope();
 
 //z=0 of ECAM is z=0 of Atlas
 //z=0 of moth_phys is at + LAr_z_max/2.-Cryo_z0 in atlas frame
@@ -646,7 +646,7 @@ GeoFullPhysVol* LArGeo::TBBarrelCryostatConstruction::GetEnvelope(const VDetecto
 // ------------------------------------------------------------------------
 #ifdef BUILD_PRESAMPLER
      BarrelPresamplerConstruction barrelPSConstruction(1, params);
-     GeoFullPhysVol* barrelPSEnvelope = barrelPSConstruction.GetPositiveEnvelope();
+     GeoIntrusivePtr<GeoFullPhysVol> barrelPSEnvelope = barrelPSConstruction.GetPositiveEnvelope();
 // PS lenght = 2*1582.5
 // start should be a z=0 in Atlas  => z = -LAr_z_max/2.+Cryo_z0 in moth_phys
 // center of PS in moth phys should be at 1582.5-Cryo_Distz+Cryo_z0 in moth_phys

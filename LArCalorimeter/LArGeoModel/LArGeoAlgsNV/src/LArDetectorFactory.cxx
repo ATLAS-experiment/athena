@@ -64,12 +64,10 @@ LArGeo::LArDetectorFactory::~LArDetectorFactory()
 
 
 // Place the cryostats into a container physical volume.
-void LArGeo::LArDetectorFactory::create( GeoPhysVol* a_container )
+void LArGeo::LArDetectorFactory::create(GeoPhysVol* a_container )
 {
   // Tree Tops:
-  GeoFullPhysVol *barrelEnvelope=nullptr;
-  GeoFullPhysVol *endcapEnvelopePos=nullptr;
-  GeoFullPhysVol *endcapEnvelopeNeg=nullptr;
+  GeoIntrusivePtr<GeoFullPhysVol> barrelEnvelope{nullptr}, endcapEnvelopePos{nullptr}, endcapEnvelopeNeg{nullptr};
 
   double projectivityDisplacement(0.);
 

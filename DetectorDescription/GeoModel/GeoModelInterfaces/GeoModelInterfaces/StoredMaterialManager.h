@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELINTERFACES_STOREDMATERIALMANAGER_H
@@ -19,20 +19,22 @@
 #include <string>
 #include <iostream>
 
-class GeoMaterial;
-class GeoElement;
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+#include "GeoModelKernel/GeoMaterial.h"
+#include "GeoModelKernel/GeoElement.h"
+
 
 class StoredMaterialManager
 {
  public:
-  typedef std::map<std::string, GeoMaterial* > MaterialMap;
-  typedef MaterialMap::const_iterator MaterialMapIterator;
+  using MaterialMap = std::map<std::string, GeoIntrusivePtr<GeoMaterial>>;
+  using MaterialMapIterator = MaterialMap::const_iterator;
 
   // Constructor:
-  StoredMaterialManager() {};
+  StoredMaterialManager() = default;
   
   // Destructor:
-  virtual ~StoredMaterialManager() {};
+  virtual ~StoredMaterialManager() = default;
 
   // Query the material:
   virtual const GeoMaterial* getMaterial(const std::string& name) = 0;

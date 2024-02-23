@@ -66,7 +66,7 @@ void LArGeo::LArDetectorFactoryH62003::create( GeoPhysVol* a_container )
   BeamLineDets.SetFCALVisLimit(m_fcalVisLimit);
   BeamLineDets.SetAxisVisState(m_axisVisState);
     
-  GeoVPhysVol* Envelope = nullptr;
+  PVLink Envelope = nullptr;
 
   Envelope = BeamLineDets.GetEnvelope();
     

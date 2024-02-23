@@ -107,7 +107,7 @@ LArGeo::EndcapCryostatConstruction::~EndcapCryostatConstruction()
 }
 
 
-GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 {
   // Get access to the material manager:
 
@@ -269,7 +269,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
   }
 
   const GeoLogVol* cryoMotherLogical = new GeoLogVol(cryoMotherName, cryoMotherShape, Air);
-  GeoFullPhysVol* cryoMotherPhysical = new GeoFullPhysVol(cryoMotherLogical);
+  GeoIntrusivePtr<GeoFullPhysVol> cryoMotherPhysical{new GeoFullPhysVol(cryoMotherLogical)};
 
   //JT. 04.2013
   // insert extra material in form of Tubes
@@ -478,7 +478,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
         }
 
         const GeoLogVol* logicCyl = new GeoLogVol(cylName,solidCyl,material);
-        GeoPhysVol* physCyl = new GeoPhysVol(logicCyl);
+        GeoIntrusivePtr<GeoPhysVol> physCyl = new GeoPhysVol(logicCyl);
 
         double zInCryostat = currentRecord->getDouble("ZMIN")*Gaudi::Units::cm
                            + currentRecord->getDouble("DZ")*Gaudi::Units::cm / 2.;
@@ -498,7 +498,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 
           EndcapPresamplerConstruction endcapPresamplerConstruction;
 
-          GeoFullPhysVol* emecPSEnvelope = endcapPresamplerConstruction.Envelope();
+          GeoIntrusivePtr<GeoFullPhysVol> emecPSEnvelope = endcapPresamplerConstruction.Envelope();
           if ( emecPSEnvelope != nullptr ) {
             // Get the position of the presampler from the geometry helper.
             double Zpos = 30.5*Gaudi::Units::mm;
@@ -547,7 +547,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
       int coneNumber = 1;
       const GeoLogVol *fcalNoseLog = new GeoLogVol("LAr::Endcap::Cryostat::Cone::Mixed", fcalNosePcon, Al);
       cryoMotherPhysical->add(new GeoIdentifierTag(coneNumber));
-      GeoPhysVol *fcalNosePhys = new GeoPhysVol(fcalNoseLog);
+      GeoIntrusivePtr<GeoPhysVol>fcalNosePhys = new GeoPhysVol(fcalNoseLog);
       cryoMotherPhysical->add(fcalNosePhys);
     }
 
@@ -582,7 +582,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
   const GeoLogVol* totalEMHLArLogical =
     new GeoLogVol(totalEMHLArName, totalEMHLArShape, LAr);
 
-  GeoFullPhysVol* totalEMHLArPhysical = new GeoFullPhysVol(totalEMHLArLogical);
+  GeoIntrusivePtr<GeoFullPhysVol> totalEMHLArPhysical = new GeoFullPhysVol(totalEMHLArLogical);
 
   // Add brass plugs
   const GeoMaterial *PlugBrass(nullptr);
@@ -607,7 +607,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 	}
       }
       const GeoLogVol *brassPlugLog = new GeoLogVol("LAr::Endcap::Cryostat::BrassPlug", brassPlugPcon, PlugBrass);
-      GeoPhysVol *brassPlugPhys = new GeoPhysVol(brassPlugLog);
+      GeoIntrusivePtr<GeoPhysVol>brassPlugPhys = new GeoPhysVol(brassPlugLog);
       totalEMHLArPhysical->add(new GeoIdentifierTag(i+1));
       totalEMHLArPhysical->add(brassPlugPhys);
     }
@@ -629,7 +629,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
     const GeoMaterial* icable_mat = materialManager->getMaterial("LAr::FT::Cable");
     GeoShape* icable = new GeoTube(rcoldwall - icable_dr, rcoldwall, icable_dz);
     GeoLogVol* icableLV = new GeoLogVol("LAr::Endcap::InnerFTCables", icable, icable_mat);
-    GeoPhysVol* icablePV = new GeoPhysVol(icableLV);
+    GeoIntrusivePtr<GeoPhysVol> icablePV = new GeoPhysVol(icableLV);
     totalEMHLArPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(z_pos)));
     totalEMHLArPhysical->add(icablePV);
   }
@@ -640,7 +640,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
     m_emec.setFullGeo(m_fullGeo);
     m_emec.setInnerVariant(m_EMECVariantInner);
     m_emec.setOuterVariant(m_EMECVariantOuter);
-    GeoFullPhysVol *envelope = m_emec.GetEnvelope(bPos);
+    GeoIntrusivePtr<GeoFullPhysVol>envelope = m_emec.GetEnvelope(bPos);
 
     //=>
     const IRDBRecord *posRec = GeoDBUtils::getTransformRecord(larPosition, bPos ? "EMEC_POS":"EMEC_NEG");
@@ -670,7 +670,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
     std::string wheelType="front";
     bool threeBoards= false;
     HECWheelConstruction frontHEC(m_fullGeo,wheelType,threeBoards,bPos) ;
-    GeoFullPhysVol* EnvelopeF = frontHEC.GetEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> EnvelopeF = frontHEC.GetEnvelope();
 
     StatusCode status;
 
@@ -700,7 +700,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
     wheelType="rear";
     threeBoards= false;
     HECWheelConstruction rearHEC(m_fullGeo,wheelType,threeBoards,bPos) ;
-    GeoFullPhysVol* EnvelopeR = rearHEC.GetEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> EnvelopeR = rearHEC.GetEnvelope();
 
     const IRDBRecord *posHec2 = GeoDBUtils::getTransformRecord(larPosition, bPos ? "HEC2_POS":"HEC2_NEG");
     GeoTrf::Transform3D xfPosHec2 = posHec2 ? GeoDBUtils::getTransform(posHec2) : GeoTrf::Translate3D(0.,0.,-1566.0);
@@ -731,7 +731,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
   {
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
-    GeoVFullPhysVol* fcalEnvelope = m_fcal->GetEnvelope(bPos);
+    GeoIntrusivePtr<GeoVFullPhysVol> fcalEnvelope = m_fcal->GetEnvelope(bPos);
 
     /* For now, comment out the FCAL placement, for two reasons:
        1) The FCAL geometry helper class has been written yet;
@@ -799,7 +799,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
       IRDBRecordset::const_iterator last = mbtsTubs->end();
 
       // Mother volume
-      GeoPhysVol* pvMM = nullptr;
+      GeoIntrusivePtr<GeoPhysVol> pvMM = nullptr;
 
       if(mbtsPcons->size()==0) {
 	// ****
@@ -827,7 +827,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 
 	const GeoMaterial *matMM  = materialManager->getMaterial((*itMother)->getString("MATERIAL"));
 
-	GeoTube  *tubeMM = new GeoTube(rminMM,rmaxMM,dzMM);
+	GeoIntrusivePtr<GeoTube> tubeMM{new GeoTube(rminMM,rmaxMM,dzMM)};
 
 	GeoTube *tubeJM=nullptr;
 	const GeoShape *solidMM=nullptr;
@@ -862,19 +862,18 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 
 	GeoTube* solidMod = new GeoTube(rminMM,rmaxMM,dzMod);
 	GeoLogVol* lvMod = new GeoLogVol("Moderator",solidMod, matMod);
-	GeoPhysVol* pvMod = new GeoPhysVol(lvMod);
+	GeoIntrusivePtr<GeoPhysVol> pvMod = new GeoPhysVol(lvMod);
 
 	pvMM->add(new GeoTransform(GeoTrf::TranslateZ3D(zposMod)));
 	pvMM->add(pvMod);
 
 	if (tubeJM) {
 	  GeoLogVol* lvMod  = new GeoLogVol("ModeratorTube",tubeJM, matMod);
-	  GeoPhysVol* pvMod = new GeoPhysVol(lvMod);
+	  GeoIntrusivePtr<GeoPhysVol> pvMod = new GeoPhysVol(lvMod);
 
 	  pvMM->add(new GeoTransform(GeoTrf::TranslateZ3D(tubeMM->getZHalfLength()+tubeJM->getZHalfLength())));
 	  pvMM->add(pvMod);
 	}
-	tubeMM->ref();  tubeMM->unref();
       } else {
 	// ****
 	// In this description the Moderator and the JM tube are constructed one polycone + one extra part for the moderator
@@ -944,14 +943,14 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 				      (*mbtsTubs)[0]->getDouble("DZ"));
 	const GeoMaterial* matJM  = materialManager->getMaterial((*mbtsTubs)[0]->getString("MATERIAL"));
 	GeoLogVol* lvJM = new GeoLogVol("ModeratorJMTube",tubeJM, matJM);
-	GeoPhysVol* pvJM = new GeoPhysVol(lvJM);
+	GeoIntrusivePtr<GeoPhysVol> pvJM = new GeoPhysVol(lvJM);
 
 	pvMM->add(new GeoTransform(GeoTrf::TranslateZ3D((*mbtsTubs)[0]->getDouble("ZPOS"))));
 	pvMM->add(pvJM);
 
 	// Moderator+JM polycone
 	GeoLogVol* lvMod = new GeoLogVol("ModeratorJMPcon",solidMod, matJM);
-	GeoPhysVol* pvMod = new GeoPhysVol(lvMod);
+	GeoIntrusivePtr<GeoPhysVol> pvMod = new GeoPhysVol(lvMod);
 
 	pvMM->add(pvMod);
       }
@@ -986,7 +985,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 
 	  GeoTrd* solidScin = new GeoTrd(dx1Scin,dx2Scin,dy1Scin,dy2Scin,dzScin);
 	  GeoLogVol* lvScin = new GeoLogVol(scinName,solidScin,matScin);
-	  GeoPhysVol* pvScin = new GeoPhysVol(lvScin);
+	  GeoIntrusivePtr<GeoPhysVol> pvScin = new GeoPhysVol(lvScin);
 
 	  // parameterizations
 	  double deltaPhi = 360./nScin;
@@ -1016,7 +1015,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 	double zposAirEnv = (*mbtsGen)[0]->getDouble("ZPOSENV");
 	double rposAirEnv = (*mbtsGen)[0]->getDouble("RPOSENV");
 
-	GeoPhysVol *pvAirEnv(nullptr),*pvAluEnv(nullptr),*pvAirInAlu(nullptr);
+	GeoIntrusivePtr<GeoPhysVol>pvAirEnv{}, pvAluEnv{} , pvAirInAlu{};
 
 	// Build the air envelope first
 	std::map<std::string,unsigned>::const_iterator itTrdMap = trdMap.find("MBTSAirEnv");
@@ -1030,7 +1029,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 	  rec = (*mbtsTrds)[itTrdMap->second];
 	  const std::string& trd = rec->getString("TRD");
 	  if(rec->getString("PARENT")=="MBTSAirEnv") {
-	    GeoPhysVol* nevVol = buildMbtsTrd(rec,materialManager,pvAirEnv);
+	    GeoIntrusivePtr<GeoPhysVol> nevVol = buildMbtsTrd(rec,materialManager,pvAirEnv);
 	    if(trd.compare("MBTSAluEnv")==0)
 	      pvAluEnv = nevVol;
 	  }
@@ -1041,7 +1040,7 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
 	  rec = (*mbtsTrds)[itTrdMap->second];
 	  const std::string& trd = rec->getString("TRD");
 	  if(rec->getString("PARENT")=="MBTSAluEnv") {
-	    GeoPhysVol* nevVol = buildMbtsTrd(rec,materialManager,pvAluEnv);
+	    GeoIntrusivePtr<GeoPhysVol> nevVol = buildMbtsTrd(rec,materialManager,pvAluEnv);
 	    if(trd.compare("MBTSAirInAlu")==0)
 	      pvAirInAlu = nevVol;
 	  }
@@ -1097,9 +1096,9 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
   return cryoMotherPhysical;
 }
 
-GeoPhysVol* LArGeo::EndcapCryostatConstruction::buildMbtsTrd(const IRDBRecord* rec
+GeoIntrusivePtr<GeoPhysVol> LArGeo::EndcapCryostatConstruction::buildMbtsTrd(const IRDBRecord* rec
 							     , StoredMaterialManager* matmanager
-							     , GeoPhysVol* parent)
+							     , GeoIntrusivePtr<GeoPhysVol> parent)
 {
   // Construct the Trd
   double dx1 = rec->getDouble("DX1");
@@ -1111,7 +1110,7 @@ GeoPhysVol* LArGeo::EndcapCryostatConstruction::buildMbtsTrd(const IRDBRecord* r
   GeoLogVol* lv = new GeoLogVol(rec->getString("TRD")
 				,solid
 				,matmanager->getMaterial(rec->getString("MATERIAL")));
-  GeoPhysVol* pv = new GeoPhysVol(lv);
+  GeoIntrusivePtr<GeoPhysVol> pv = new GeoPhysVol(lv);
   if(parent) {
     double xpos = rec->getDouble("XPOS");
     double ypos = rec->getDouble("YPOS");

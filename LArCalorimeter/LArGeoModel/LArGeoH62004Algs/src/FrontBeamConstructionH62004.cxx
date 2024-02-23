@@ -56,7 +56,7 @@ LArGeo::FrontBeamConstructionH62004::~FrontBeamConstructionH62004()
 
 
 
-GeoVPhysVol* LArGeo::FrontBeamConstructionH62004::GetEnvelope()
+PVLink LArGeo::FrontBeamConstructionH62004::GetEnvelope()
 {
 
   if (m_H62004FrontBeamPhysical) return m_H62004FrontBeamPhysical;
@@ -171,8 +171,8 @@ GeoVPhysVol* LArGeo::FrontBeamConstructionH62004::GetEnvelope()
   std::string ScintName = H62004FrontBeamName + "::Scintillator";
   GeoLogVol* WScintLogical = new GeoLogVol( ScintName, ScintShapeW, Scint );
   GeoLogVol* BScintLogical = new GeoLogVol( ScintName, ScintShapeB, Scint );
-  GeoPhysVol* WScintPhysical = new GeoPhysVol( WScintLogical );    
-  GeoPhysVol* BScintPhysical = new GeoPhysVol( BScintLogical );    
+  GeoIntrusivePtr<GeoPhysVol> WScintPhysical = new GeoPhysVol( WScintLogical );    
+  GeoIntrusivePtr<GeoPhysVol> BScintPhysical = new GeoPhysVol( BScintLogical );    
   //WScintPhysical->add( new GeoNameTag(ScintName) );
   //BScintPhysical->add( new GeoNameTag(ScintName) );
   for ( unsigned int i = 0; i < v_ScintZ.size(); i++ ) {
@@ -194,7 +194,7 @@ GeoVPhysVol* LArGeo::FrontBeamConstructionH62004::GetEnvelope()
   log << MSG::INFO << " Create MWPC5 " << endmsg;
   
   MWPCConstruction MWPC5 (2.*Gaudi::Units::mm);
-  GeoVPhysVol* MwpcPhysical = MWPC5.GetEnvelope();
+  PVLink MwpcPhysical = MWPC5.GetEnvelope();
 
   const double MwpcPos = 445.*Gaudi::Units::mm;
 
@@ -208,7 +208,7 @@ GeoVPhysVol* LArGeo::FrontBeamConstructionH62004::GetEnvelope()
   log << MSG::INFO << " Create BPC 1&2 " << endmsg;
 
   BPCConstruction BPC (false);
-  GeoVPhysVol* BPCPhysical = BPC.GetEnvelope();
+  PVLink BPCPhysical = BPC.GetEnvelope();
   for(int i=1; i<3; ++i) {
      m_H62004FrontBeamPhysical->add( new GeoIdentifierTag(i) );
      m_H62004FrontBeamPhysical->add( new GeoTransform(GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, (MwpcPos-bard_z) + fbpc_z[i-1]) ) );

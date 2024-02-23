@@ -28,7 +28,7 @@ namespace LArGeo {
     virtual ~HECConstructionH62004();
 
     // Get the envelope containing this detector.
-    GeoVFullPhysVol* GetEnvelope();  // h6Phys is GeoVPhysVol   
+    GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope();  // h6Phys is GeoVPhysVol   
 
 
   private: 
@@ -41,7 +41,7 @@ namespace LArGeo {
 
     
     // volumes that are private member variables:
-    GeoFullPhysVol*  m_h6Phys;
+    GeoIntrusivePtr<GeoFullPhysVol>  m_h6Phys;
 
     //static LArGeo::VDetectorParameters* m_parameters;
     //static VDetectorParameters* HECConstructionH62004::m_parameters;

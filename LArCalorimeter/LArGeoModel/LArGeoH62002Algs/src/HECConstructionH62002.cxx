@@ -62,7 +62,7 @@ LArGeo::HECConstructionH62002::~HECConstructionH62002()
 = default;
 
 
-GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
+GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::HECConstructionH62002::GetEnvelope()
 {
 
   if (m_h6Phys) return (m_h6Phys);
@@ -191,19 +191,19 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
   // First Absorber
   GeoTubs*           solidFirstAbsorber[2];
   const GeoLogVol*   logiFirstAbsorber[2];
-  GeoPhysVol*        physiFirstAbsorber[2];
+  GeoIntrusivePtr<GeoPhysVol>        physiFirstAbsorber[2];
   double             firstAbsorber[5];
   // TieRod in the gap
   GeoTubs*           solidTieRod[2];
   const GeoLogVol*   logiTieRod[2];
-  GeoPhysVol*        physiTieRod[2];
+  GeoIntrusivePtr<GeoPhysVol>        physiTieRod[2];
   // TieRod in absorbers
   GeoTubs*           solidAbsorberTieRod[2];
   const GeoLogVol*   logiAbsorberTieRod[2];
-  GeoPhysVol*        physiAbsorberTieRod[2];
+  GeoIntrusivePtr<GeoPhysVol>        physiAbsorberTieRod[2];
   GeoTubs*           solidAbsorberTieRodRear[2];
   const GeoLogVol*   logiAbsorberTieRodRear[2];
-  GeoPhysVol*        physiAbsorberTieRodRear[2];
+  GeoIntrusivePtr<GeoPhysVol>        physiAbsorberTieRodRear[2];
   double             tieRodPositionX[4]; // 4 radial tie rod locations
   double             tieRodPositionY[4];
   double             tieRodDiameter[2];  // 2 sizes for the two wheels
@@ -221,15 +221,15 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
   // Slice
   GeoTubs*           solidSlice[3];
   const GeoLogVol*   logiSlice[3];
-  GeoPhysVol*        physiSlice[3];
+  GeoIntrusivePtr<GeoPhysVol>        physiSlice[3];
   // Absorber
   double             radialShift = 1.02*Gaudi::Units::cm;  // absorbers are adjusted by this amount          
   GeoTubs*           solidFrontAbsorber[2];
   const GeoLogVol*   logiFrontAbsorber[2];
-  GeoPhysVol*        physiFrontAbsorber[2];
+  GeoIntrusivePtr<GeoPhysVol>        physiFrontAbsorber[2];
   GeoTubs*           solidRearAbsorber;
   const GeoLogVol*   logiRearAbsorber;
-  GeoPhysVol*        physiRearAbsorber;
+  GeoIntrusivePtr<GeoPhysVol>        physiRearAbsorber;
 
 
   // Those with index - idepth:
@@ -237,18 +237,18 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
   int                gapNumber[5];
   GeoTubs*           solidDepth[5];
   const GeoLogVol*   logiDepth[5];
-  GeoPhysVol*        physiDepth[5];
+  GeoIntrusivePtr<GeoPhysVol>        physiDepth[5];
 
 
   // And some that are just more convenient here:
   // EstBoard
   GeoTubs*           solidEstBoard;
   const GeoLogVol*   logiEstBoard;
-  GeoPhysVol*        physiEstBoard;
+  GeoIntrusivePtr<GeoPhysVol>        physiEstBoard;
   // PadBoard
   GeoTubs*           solidPadBoard;
   const GeoLogVol*   logiPadBoard;
-  GeoPhysVol*        physiPadBoard;
+  GeoIntrusivePtr<GeoPhysVol>        physiPadBoard;
 
 
 
@@ -377,7 +377,7 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
         solidFrontHEC->addPlane(zCoordinate[i],innerRadius[i], moduleRouter);
      }
   const GeoLogVol* logicFrontHEC = new GeoLogVol(hecFrontName, solidFrontHEC , LAr);
-  GeoPhysVol*  physiFrontHEC = new GeoPhysVol(logicFrontHEC);
+  GeoIntrusivePtr<GeoPhysVol>  physiFrontHEC = new GeoPhysVol(logicFrontHEC);
   m_h6Phys->add(physiFrontHEC);
   
 
@@ -394,7 +394,7 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
      }
 
   const GeoLogVol* logicRearHEC = new GeoLogVol(hecRearName, solidRearHEC , LAr);
-  GeoPhysVol* physiRearHEC = new GeoPhysVol(logicRearHEC);
+  GeoIntrusivePtr<GeoPhysVol> physiRearHEC = new GeoPhysVol(logicRearHEC);
   m_h6Phys->add(physiRearHEC);
   
 
@@ -413,7 +413,7 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
         solidFrontModule->addPlane(zCoordinate[i],innerRadius[i], moduleRouter);
      }
   const GeoLogVol* logicFrontModule = new GeoLogVol(frontmoduleName, solidFrontModule , LAr);
-  GeoPhysVol* physiFrontModule = new GeoPhysVol(logicFrontModule);
+  GeoIntrusivePtr<GeoPhysVol> physiFrontModule = new GeoPhysVol(logicFrontModule);
 
   //----------------------------------------------------------------
   //   HEC RearModule
@@ -427,7 +427,7 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62002::GetEnvelope()
        solidRearModule->addPlane(tempZ, innerRadius[i], moduleRouter);
      }
   const GeoLogVol* logicRearModule = new GeoLogVol(rearmoduleName, solidRearModule , LAr);
-  GeoPhysVol* physiRearModule = new GeoPhysVol(logicRearModule);
+  GeoIntrusivePtr<GeoPhysVol> physiRearModule = new GeoPhysVol(logicRearModule);
 
 
 

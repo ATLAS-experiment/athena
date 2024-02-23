@@ -56,7 +56,7 @@ LArGeo::MiddleBeamConstructionH62004::~MiddleBeamConstructionH62004()
 
 
 
-GeoVPhysVol* LArGeo::MiddleBeamConstructionH62004::GetEnvelope()
+PVLink LArGeo::MiddleBeamConstructionH62004::GetEnvelope()
 {
 
   if (m_H62004MiddleBeamPhysical) return m_H62004MiddleBeamPhysical;
@@ -127,7 +127,7 @@ GeoVPhysVol* LArGeo::MiddleBeamConstructionH62004::GetEnvelope()
   log << MSG::INFO << " Create BPC 1&2 " << endmsg;
 
   BPCConstruction *BPC = new BPCConstruction(true);
-  GeoVPhysVol* BPCPhysical = BPC->GetEnvelope();
+  PVLink BPCPhysical = BPC->GetEnvelope();
   for(int i=0; i<4; ++i) {
      m_H62004MiddleBeamPhysical->add( new GeoIdentifierTag((3+i/2)*10+i) );
      switch(i) {
