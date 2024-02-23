@@ -558,6 +558,10 @@ void StripGmxInterface::addSensor(const std::string& typeName,
   // Get the ATLAS "Offline" wafer identifier
   //
   const SCT_ID *sctIdHelper = dynamic_cast<const SCT_ID *> (m_commonItems->getIdHelper());
+  if (not sctIdHelper){
+    ATH_MSG_ERROR("StripGmxInterface::addSensor: ID helper pointer could not be cast to SCT_ID *");
+    return;
+  }
   Identifier id = sctIdHelper->wafer_id(index["barrel_endcap"],
                                         index["layer_wheel"],
                                         index["phi_module"],
