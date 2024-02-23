@@ -925,7 +925,13 @@ HLT_3j35_0eta290_020jvt_bgn170_j35_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25:
   eventCount: 0
 HLT_3j35_0eta290_020jvt_bgn170_j35_pf_ftf_presel2j25XX2j25b85_L14jJ40p0ETA25:
   eventCount: 0
+HLT_3j45_j45_2timeSig_L14jJ40:
+  eventCount: 0
 HLT_3j45_j45_2timeSig_roiftf_presel4c35_L14jJ40p0ETA25:
+  eventCount: 0
+HLT_3j45_j45_2timing_L14jJ40:
+  eventCount: 0
+HLT_3j45_j45_3timeSig_L14jJ40:
   eventCount: 0
 HLT_3j60_0eta290_020jvt_bdl1d77_pf_ftf_presel3j45b95_L13J35p0ETA23:
   eventCount: 0
@@ -5848,6 +5854,12 @@ HLT_j210_0eta290_020jvt_bgn170_pf_ftf_preselj200_L1J100:
 HLT_j210_0eta290_020jvt_bgn170_pf_ftf_preselj200_L1jJ160:
   eventCount: 0
 HLT_j220_320eta490_L1J75p31ETA49:
+  eventCount: 0
+HLT_j220_j150_2timeSig_L1jJ160:
+  eventCount: 0
+HLT_j220_j150_2timing_L1jJ160:
+  eventCount: 0
+HLT_j220_j150_3timeSig_L1jJ160:
   eventCount: 0
 HLT_j220f_L1J75p31ETA49:
   eventCount: 0
