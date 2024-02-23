@@ -169,10 +169,19 @@ namespace MuonGMR4 {
         if (!stripCent) return std::numeric_limits<double>::max();
         return (pos - (*stripCent)).x();
     }
-    inline int StripDesign::stripNumber(const Amg::Vector2D& pos) const {        
-        const double xMid = (pos - m_firstStripPos).dot(stripNormal());
-        const int chNum = static_cast<int>(std::floor(xMid / stripPitch()));
-        if (chNum < 0 || chNum > numStrips()) {
+    inline int StripDesign::stripNumber(const Amg::Vector2D& pos) const {
+        std::optional<double> stripPitches = Amg::intersect<2>(m_firstStripPos, stripDir(),
+                                                               m_nominalRotMat * pos, - Amg::Vector2D::UnitX());
+        if (!stripPitches) {
+            return -1;
+        }
+        const double xMid = (*stripPitches);  
+        if (xMid < - 0.5*stripPitch()) {
+            ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is way before the first strip.");
+            return -1;
+        }
+        const int chNum = static_cast<int>(std::round(std::abs(xMid / stripPitch())));
+        if (chNum > numStrips()) {
             ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is not covered by any strip."
                           <<" Virtual channel number: "<<chNum<<" max strips: "<<numStrips());
             return -1;
