@@ -112,12 +112,12 @@ TrigConf::L1Threshold_ZB::load()
 void
 TrigConf::L1Threshold_ZBTopo::load()
 {
-   m_mask0 = getAttribute("mask0");
-   m_mask1 = getAttribute("mask1");
-   m_mask2 = getAttribute("mask2");
-   m_mask3 = getAttribute("mask3");
-   m_mask4 = getAttribute("mask4");
-   m_mask5 = getAttribute("mask5");
+   m_mask0 = getAttribute<unsigned int>("mask0");
+   m_mask1 = getAttribute<unsigned int>("mask1");
+   m_mask2 = getAttribute<unsigned int>("mask2");
+   m_mask3 = getAttribute<unsigned int>("mask3");
+   m_mask4 = getAttribute<unsigned int>("mask4");
+   m_mask5 = getAttribute<unsigned int>("mask5");
 
    m_seedBcdelay = getAttribute<unsigned int>("delay");
 
