@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPoolTest )
@@ -62,11 +62,12 @@ endfunction (athenapooltest_runca_test)
 
 
 # Write/read out some simple objects:
-athenapooltest_run_test( AthenaPoolTestWrite AthenaPoolTestWrite
-                         "^AthenaPoolTestD" )
-athenapooltest_run_test( AthenaPoolTestRead AthenaPoolTestRead
-                         "AthenaPoolTestD"
-                         DEPENDS AthenaPoolTestWrite )
+athenapooltest_runca_test( AthenaPoolTestWrite AthenaPoolTestWrite
+                           "^AthenaPoolTestD" )
+
+athenapooltest_runca_test( AthenaPoolTestRead AthenaPoolTestRead
+                           "AthenaPoolTestD"
+                           DEPENDS AthenaPoolTestWrite )
 
 # Write with DoubleEventSelector
 # TODO: migrate to CA
@@ -84,9 +85,9 @@ athenapooltest_run_test( AthenaPoolTestRead AthenaPoolTestRead
 #                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
 #                          DEPENDS AthenaPoolTestWriteDoubleSelector )
 # normal EventSelector
-athenapooltest_run_test( AthenaPoolTestStep2Write AthenaPoolTestStep2Write
-                         "^AthenaPoolTestD"
-                         DEPENDS AthenaPoolTestWrite )
+athenapooltest_runca_test( AthenaPoolTestStep2Write AthenaPoolTestStep2Write
+                           "^AthenaPoolTestD"
+                           DEPENDS AthenaPoolTestWrite )
 
 # Test write/read of indet rdos:
 athenapooltest_run_test( InDetRawDataWriter InDetRawDataWriter_jobOptions
