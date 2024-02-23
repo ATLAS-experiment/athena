@@ -12,25 +12,17 @@ atlas_add_component( LArConditionsTest
                      LINK_LIBRARIES AthenaBaseComps CxxUtils StoreGateLib Identifier GaudiKernel LArCablingLib LArElecCalib LArIdentifier LArRawConditions LArRawUtilsLib LArRecConditions CaloDetDescrLib CaloEvent CaloIdentifier AthenaKernel CaloInterfaceLib CaloConditions )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests in the package:
-function (larconditions_run_test testName)
-  cmake_parse_arguments( ARG "" "DEPENDS" "" ${ARGN} )
+atlas_add_test( LArConditionsTestWriteNoReg
+		SCRIPT  python -m LArConditionsTest.LArConditionsTestConfig LArCondTest.Step=1
+ 		PROPERTIES TIMEOUT 1200
+ 		LOG_SELECT_PATTERN "DEBUG|ERROR" )
 
-  atlas_add_test( ${testName}
-                  SCRIPT athena.py LArConditionsTest/${testName}_jobOptions.py
-                  ENVIRONMENT ATLAS_REFERENCE_TAG=LArConditionsTest/LArConditionsTest-01-00-12
-                  PROPERTIES TIMEOUT 1200
- 		  LOG_SELECT_PATTERN "DEBUG|ERROR"
-                  DEPENDS ${ARG_DEPENDS} )
+atlas_add_test( LArConditionsTestReadNoReg
+		SCRIPT  python -m LArConditionsTest.LArConditionsTestConfig LArCondTest.Step=2
+ 		PROPERTIES TIMEOUT 1200
+ 		LOG_SELECT_PATTERN "DEBUG|ERROR"
+	    	DEPENDS LArConditionsTestWriteNoReg)
 
-  # Turn off POOL verbose printing:
-  set_property(TEST LArConditionsTest_${testName}_ctest
-     APPEND PROPERTY ENVIRONMENT POOL_OUTMSG_LEVEL=4)
-
-endfunction (larconditions_run_test)
-
-larconditions_run_test (LArConditionsTest)
-larconditions_run_test (LArConditionsTestWriteNoReg)
-larconditions_run_test (LArConditionsTestReadNoReg DEPENDS LArConditionsTestWriteNoReg)
