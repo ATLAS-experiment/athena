@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# art-description: heavy ion reconstruction test from Andrzej Olszewski and Iwona Grabowska-Bold
+# art-description: Reco_tf runs on 2015 Heavy Ion data with MinBiasOverlay stream (contact Andrzej Olszewski and Iwona Grabowska-Bold)
 # art-athena-mt: 4
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
