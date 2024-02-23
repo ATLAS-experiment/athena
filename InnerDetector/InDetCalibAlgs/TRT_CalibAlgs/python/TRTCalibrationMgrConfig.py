@@ -46,7 +46,6 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
 
     kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
     
-    # check this line below - needs the function
     from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
     kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(ActsFitterCfg(flags)))
     
