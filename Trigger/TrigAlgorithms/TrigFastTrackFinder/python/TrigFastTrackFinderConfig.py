@@ -418,7 +418,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         LayerNumberTool = numberingTool,
         useGPU = flags.Trigger.InDetTracking.doGPU,
         SpacePointProviderTool=spTool,
-        MinHits = 5, #Only process RoI with more than 5 spacepoints
+        MinHits = 3 if flags.Detector.GeometryITk else 5, #Only process RoI with more than 5 (3) spacepoints for Run 3 (Run 4)
         Triplet_MinPtFrac = 0.8 if flags.Detector.GeometryITk else 1,
         Triplet_nMaxPhiSlice = 53 if "cosmics" not in flags.Tracking.ActiveConfig.name else 2,
         LRT_Mode = flags.Tracking.ActiveConfig.isLRT,
