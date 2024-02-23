@@ -175,21 +175,6 @@ def TrackingGeometryCondAlgCfg(flags, name='AtlasTrackingGeometryCondAlg',
     result.addCondAlgo(CompFactory.Trk.TrackingGeometryCondAlg(name, **kwargs),
                        primary=True)
 
-    # Hack for running on  RecExCommon  via CAtoGlobalWrapper.
-    # We need to be sure
-    # we set "all" DetectorTools otherwise
-    # we get Py:conf2toConfigurable WARNINGs
-    # due to conflicts.
-    # "all" can include forward detectors
-    # when enabled (the module below check for this internally)
-    import inspect
-    stack = inspect.stack()
-    if len(stack) >= 2:
-        functions = list(map(lambda x: x.function, stack))
-        if 'CAtoGlobalWrapper' in functions:
-            from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
-            result.merge(ForDetGeometryCfg(flags))
-
     return result
 
 
