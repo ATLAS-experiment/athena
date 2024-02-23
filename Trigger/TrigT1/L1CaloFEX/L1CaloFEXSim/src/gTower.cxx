@@ -256,22 +256,22 @@ namespace LVL1 {
         }
         else if ( iEta == 36 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 22);
-          iPhiFW = iPhi*2;
+          iPhiFW = (iPhi*2)+1;
           iEtaFW = 36;
         }   
         else if ( iEta == 37 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 10);
-          iPhiFW = (iPhi*2)+1;
+          iPhiFW = iPhi*2;
           iEtaFW = 36;
         } 
         else if ( iEta == 38 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 23);
-          iPhiFW = iPhi*2;
+          iPhiFW = (iPhi*2)+1;
           iEtaFW = 37;
         }
         else if ( iEta == 39 ){
           gFEXtowerID = gFEXtowerID + ((iPhi*24) + 11);
-          iPhiFW = (iPhi*2)+1;
+          iPhiFW = iPhi*2;
           iEtaFW = 37;
         }  
       }
