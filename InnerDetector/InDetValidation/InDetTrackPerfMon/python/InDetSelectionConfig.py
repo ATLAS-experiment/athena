@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetSelectionConfig.py
@@ -40,35 +40,32 @@ def TrackRoiSelectionToolCfg( flags, name="TrackRoiSelectionTool", **kwargs ):
     return acc
 
 
-def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwargs ):
+def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwargs ):
     acc = ComponentAccumulator()
 
-    ## TODO - to be uncommented in later MRs
-    ## offline track-object selection
-    #from InDetTrackPerfMon.ConfigUtils import getObjectStr
-    #if getObjectStr( flags ):
-    #    kwargs.setdefault( "DoObjectSelection", True )
-    #
-    #    if "TrackObjectSelectionTool" not in kwargs:
-    #       kwargs.setdefault( "TrackObjectSelectionTool", acc.popToolsAndMerge(
-    #           InDetTrackObjectSelectionToolCfg( flags,
-    #               name="TrackObjectSelectionTool" + flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+    objStr = flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject
+    kwargs.setdefault( "ObjectType",    objStr )
+    kwargs.setdefault( "ObjectQuality", flags.PhysVal.IDTPM.currentTrkAna.ObjectQuality )
 
-    acc.setPrivateTools( CompFactory.IDTPM.TrackQualitySelectionTool( name, **kwargs ) )
+    if "Tau" in objStr:
+        kwargs.setdefault( "TauType",    flags.PhysVal.IDTPM.currentTrkAna.TauType )
+        kwargs.setdefault( "TauNprongs", flags.PhysVal.IDTPM.currentTrkAna.TauNprongs )
+
+    acc.setPrivateTools( CompFactory.IDTPM.TrackObjectSelectionTool( name, **kwargs ) )
     return acc
 
 
-## TODO - to be uncommented in later MRs
-#def InDetTrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwargs ):
-#    acc = ComponentAccumulator()
-#
-#    from InDetTrackPerfMon.ConfigUtils import getObjectStr
-#    objectStr = getObjectStr( flags )
-#    kwargs.setdefault( "ObjectType",     objectStr )
-#    kwargs.setdefault( "ObjectQuality",  flags.PhysVal.IDTPM.currentTrkAna.ObjectQuality )
-#    if "Tau" in objectStr:
-#        kwargs.setdefault( "TauType",    flags.PhysVal.IDTPM.currentTrkAna.TauType )
-#        kwargs.setdefault( "TauNprongs", flags.PhysVal.IDTPM.currentTrkAna.TauNprongs )
-#
-#    acc.setPrivateTools( CompFactory.IDTPM.InDetTrackObjectSelectionTool( name, **kwargs ) )
-#    return acc
+def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwargs ):
+    acc = ComponentAccumulator()
+
+    ## offline track-object selection
+    if flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject:
+        kwargs.setdefault( "DoObjectSelection", True )
+    
+        if "TrackObjectSelectionTool" not in kwargs:
+           kwargs.setdefault( "TrackObjectSelectionTool", acc.popToolsAndMerge(
+               TrackObjectSelectionToolCfg( flags,
+                   name="TrackObjectSelectionTool" + flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+
+    acc.setPrivateTools( CompFactory.IDTPM.TrackQualitySelectionTool( name, **kwargs ) )
+    return acc

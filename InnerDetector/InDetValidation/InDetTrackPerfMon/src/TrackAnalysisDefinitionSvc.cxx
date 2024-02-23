@@ -9,7 +9,7 @@
 **/
 
 /// local includes
-#include "InDetTrackPerfMon/TrackAnalysisDefinitionSvc.h"
+#include "TrackAnalysisDefinitionSvc.h"
 
 /// STL includes 
 #include <algorithm>

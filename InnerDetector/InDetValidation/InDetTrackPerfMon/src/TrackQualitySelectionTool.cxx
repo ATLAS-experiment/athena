@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -8,8 +8,8 @@
  **/
 
 /// Local include(s)
-#include "InDetTrackPerfMon/TrackQualitySelectionTool.h"
-#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "TrackQualitySelectionTool.h"
+#include "TrackAnalysisCollections.h"
 
 
 ///----------------------------------------
@@ -29,8 +29,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::initialize() {
 
   ATH_MSG_INFO( "Initializing " << name() );
 
-  /// TODO - to be included in later MRs
-  //ATH_CHECK( m_objSelectionTool.retrieve( EnableTool{ m_doObjSelection.value() } ) );
+  ATH_CHECK( m_objSelectionTool.retrieve( EnableTool{ m_doObjSelection.value() } ) );
 
   return StatusCode::SUCCESS;
 }
@@ -65,11 +64,10 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
   ATH_MSG_DEBUG( "Tracks after initial FullScan copy: " << 
       trkAnaColls.printInfo( IDTPM::TrackAnalysisCollections::FS ) );
 
-  /// TODO - To be included in later MRs
   /// Select offline tracks matched to offline objects
-  //if( trkAnaDefSvc->useOffline() and m_doObjSelection.value() ) {
-  //  ATH_CHECK( m_objSelectionTool->selectTracks( trkAnaColls ) );
-  //}
+  if( trkAnaDefSvc->useOffline() and m_doObjSelection.value() ) {
+    ATH_CHECK( m_objSelectionTool->selectTracks( trkAnaColls ) );
+  }
 
   /// TODO - put offline and truth selections here...
 

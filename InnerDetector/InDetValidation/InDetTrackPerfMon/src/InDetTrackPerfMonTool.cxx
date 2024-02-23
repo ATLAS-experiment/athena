@@ -8,7 +8,7 @@
  **/
 
 /// local include
-#include "InDetTrackPerfMon/InDetTrackPerfMonTool.h"
+#include "InDetTrackPerfMonTool.h"
 
 /// gaudi includes
 #include "GaudiKernel/SystemOfUnits.h"
@@ -231,7 +231,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     unsigned decisionType = TrigDefs::Physics; // TrigDefs::includeFailedDecisions;
 
     /// skipping TrkAnalysis if chain is not passed for this event
-    if( thisChain != "" and thisChain != "Offline" and m_trkAnaDefSvc->useTrigger() ) {
+    if( !thisChain.empty() and thisChain != "Offline" and m_trkAnaDefSvc->useTrigger() ) {
       if( not m_trigDecTool->isPassed( thisChain, decisionType ) ) { 
         ATH_MSG_DEBUG( "Trigger chain " << thisChain << " is not fired. Skipping" );
         continue;

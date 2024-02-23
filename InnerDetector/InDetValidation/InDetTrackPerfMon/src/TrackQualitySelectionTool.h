@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKPERFMON_TRACKQUALITYSELECTIONTOOL_H
@@ -56,15 +56,14 @@ namespace IDTPM {
       return StatusCode::SUCCESS;
     }
 
-/* TODO - To be included in later MRs
   private:
 
-    BooleanProperty m_doObjSelection{ this, "DoObjectSelection", false, "Perform track-object selection" };
+    BooleanProperty m_doObjSelection {
+        this, "DoObjectSelection", false, "Perform track-object selection" };
 
-    ToolHandle< IDTPM::IInDetSelectionTool > m_objSelectionTool{
-        this, "TrackObjectSelectionTool", "IDTPM::InDetTrackPerfMon/IInDetSelectionTool", 
-        "Tool to perform track-object quality selection" };
-*/
+    ToolHandle< IDTPM::ITrackSelectionTool > m_objSelectionTool {
+        this, "TrackObjectSelectionTool", "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", 
+        "Tool to perform track-object selection" };
 
   }; // class InDetGeneralSelectionTool
 

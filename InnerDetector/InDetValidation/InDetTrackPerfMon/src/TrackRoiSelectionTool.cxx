@@ -11,63 +11,12 @@
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
 /// Local include(s)
-#include "InDetTrackPerfMon/TrackRoiSelectionTool.h"
-#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "TrackRoiSelectionTool.h"
+#include "TrackAnalysisCollections.h"
+#include "TrackParmetersHelper.h"
 
 /// STD includes
 #include <cmath> // std::fabs
-
-
-///---------------------------------------------------
-/// Placing utility functions in anonymous namespace
-///---------------------------------------------------
-namespace {
-
-  /// Accessor utility function for getting the value of pT
-  template< class U >
-  float pT( const U* p ) {
-    return p->pt();
-  }
-
-  /// Accessor utility function for getting the value of pTsig
-  template< class U >
-  float pTsig( const U* p ) {
-    float pT = std::fabs( p->pt() );
-    if( p->charge() < 0 )  pT *= -1;
-    if( p->charge() == 0 ) pT = 0.;
-    return pT;
-  }
-
-  /// Accessor utility function for getting the value of eta
-  template< class U >
-  float eta( const U* p ) {
-    return p->eta();
-  }
-
-  /// Accessor utility function for getting the value of phi
-  template< class U >
-  float phi( const U* p ) {
-    return p->phi();
-  }
-
-  /// Accessor utility function for getting the value of z0
-  float getZ0( const xAOD::TrackParticle* p ) { 
-    return p->z0();
-  }
-  ///
-  float getZ0( const xAOD::TruthParticle* /*p*/ ) {
-    /// TODO - To be included in later MRs
-    //return ( p->isAvailable<float>("z0") ) ?
-    //       p->auxdata<float>("z0") : -9999.;
-    return 0.; // TODO - to be removed in later MRs
-  }
-  ///
-  template< class U >
-  float z0( const U* p ) {
-    return getZ0( p );
-  }
-
-} // namespace
 
 
 ///----------------------------------------
@@ -101,7 +50,7 @@ StatusCode IDTPM::TrackRoiSelectionTool::initialize() {
 ///-----------------------
 template< class T >
 bool IDTPM::TrackRoiSelectionTool::accept(
-    const T* t, const TrigRoiDescriptor* r ) const {
+    const T& t, const TrigRoiDescriptor* r ) const {
 
   if( r==0 ) { 
     ATH_MSG_ERROR( "Called with null RoiDescriptor" );
@@ -119,7 +68,7 @@ bool IDTPM::TrackRoiSelectionTool::accept(
     if( r->isFullscan() ) return true;
 
     /// NB: This isn't actually correct - the tracks can bend out of the 
-    ///     RoI even if the perigee phi is withing the Roi
+    ///     RoI even if the perigee phi is within the Roi
     bool contained_phi = ( r->phiMinus() < r->phiPlus() ) ?
                          ( phi(t) > r->phiMinus() && phi(t) < r->phiPlus() ) :
                          ( phi(t) > r->phiMinus() || phi(t) < r->phiPlus() ); 
@@ -242,7 +191,7 @@ std::vector< const T* > IDTPM::TrackRoiSelectionTool::getTracks(
 
   for( size_t it=0 ; it<tvec.size() ; it++ ) {
     const T* thisTrack = tvec.at(it);
-    if( accept<T>( thisTrack, r ) ) {
+    if( accept<T>( *thisTrack, r ) ) {
       selectedTracks.push_back( thisTrack );
     }
   }
