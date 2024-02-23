@@ -123,8 +123,12 @@ class ThresholdDef:
         for thrV in eEM_cuts:
             eEMThreshold('eEM%i' %thrV, 'eEM').addThrValue(max(get_threshold_cut('eEM', thrV), ptMin))
 
+        # eEM beam splashes    
+        eEMVarThreshold('eEM22A', 'eEM').addThrValue(get_threshold_cut('eEM',255),priority=1).addThrValue(get_threshold_cut('eEM',22),16,20,priority=2)
+        eEMVarThreshold('eEM22C', 'eEM').addThrValue(get_threshold_cut('eEM',255),priority=1).addThrValue(get_threshold_cut('eEM',22),-16,-20,priority=2)
+        
         # eEM SPARES
-        for thrV in range(1,6):
+        for thrV in range(1,3):
             eEMThreshold('eEMSPARE%i' % thrV, 'eEM').addThrValue(thrVal_SPARE)
 
         # L section (used to be VH in Run2)
