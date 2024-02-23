@@ -50,8 +50,8 @@ LArGeo::ExcluderConstruction::ExcluderConstruction()
 
 LArGeo::ExcluderConstruction::~ExcluderConstruction() = default;
 
-//GeoVFullPhysVol* LArGeo::ExcluderConstruction::GetEnvelope()
-GeoPhysVol* LArGeo::ExcluderConstruction::GetEnvelope()
+//GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::ExcluderConstruction::GetEnvelope()
+GeoIntrusivePtr<GeoPhysVol> LArGeo::ExcluderConstruction::GetEnvelope()
 {
 
   // Need to do the equivalent for excluder here:                   <<<================ 
@@ -134,7 +134,7 @@ GeoPhysVol* LArGeo::ExcluderConstruction::GetEnvelope()
   const GeoShapeUnion* Excluder = new GeoShapeUnion(&rohaBoxShift, rohaTubs);
 
   const GeoLogVol* LogExcluder = new GeoLogVol(ExcluderName, Excluder, Rohacell);  // <<<==== air should be rohacell !!!
-  GeoPhysVol* PhysExcluder = new GeoPhysVol(LogExcluder);
+  GeoIntrusivePtr<GeoPhysVol> PhysExcluder = new GeoPhysVol(LogExcluder);
   PhysExcluder->add( new GeoNameTag(ExcluderName) );
 
   return PhysExcluder;

@@ -114,7 +114,7 @@ std::tuple<EMBDetectorManager*
 
       if(detStore->contains<StoredPhysVol>(e==0 ? "EMEC_OUTER_WHEEL_NEG" : "EMEC_OUTER_WHEEL_POS")) {
 	if (detStore->retrieve(sPhys,e==0 ? "EMEC_OUTER_WHEEL_NEG" : "EMEC_OUTER_WHEEL_POS")==StatusCode::SUCCESS) {
-	  GeoFullPhysVol *emecEnvelope=(GeoFullPhysVol *) sPhys->getPhysVol();
+	  GeoIntrusivePtr<GeoFullPhysVol>emecEnvelope=(GeoIntrusivePtr<GeoFullPhysVol>) sPhys->getPhysVol();
 
 	  {
 	    CellBinning phiBinning(startPhi,endPhi,64);
@@ -189,7 +189,7 @@ std::tuple<EMBDetectorManager*
       if(detStore->contains<StoredPhysVol>(e==0 ? "EMEC_INNER_WHEEL_NEG" : "EMEC_INNER_WHEEL_POS")) {
 	if (detStore->retrieve(sPhys,e==0 ? "EMEC_INNER_WHEEL_NEG" : "EMEC_INNER_WHEEL_POS")==StatusCode::SUCCESS) {
 
-	  GeoFullPhysVol *emecEnvelope=(GeoFullPhysVol *) sPhys->getPhysVol();
+	  GeoIntrusivePtr<GeoFullPhysVol>emecEnvelope=(GeoIntrusivePtr<GeoFullPhysVol>) sPhys->getPhysVol();
 
 	  // Inner Wheel Sampling 1 Region 0:
 	  {
@@ -218,7 +218,7 @@ std::tuple<EMBDetectorManager*
 
       if(detStore->contains<StoredPhysVol>(e==0 ? "PRESAMPLER_EC_NEG":"PRESAMPLER_EC_POS" )) {
 	if (StatusCode::SUCCESS==detStore->retrieve(sPresamplerEnvelope, e==0 ? "PRESAMPLER_EC_NEG":"PRESAMPLER_EC_POS" )) {
-	  GeoFullPhysVol * PresamplerEnvelope=sPresamplerEnvelope->getPhysVol();
+	  GeoIntrusivePtr<GeoFullPhysVol> PresamplerEnvelope=sPresamplerEnvelope->getPhysVol();
 	  CellBinning presamplerPhiBinning(startPhi,endPhi,64);
 	  EMECDetDescr *presamplerDetDescr = new EMECDetDescr(emecDetectorManager,0,0,0,presamplerPhiBinning);
 	  EMECDetectorRegion *presamplerRegion = new EMECDetectorRegion(PresamplerEnvelope,presamplerDetDescr,EMECDetectorRegion::DetectorSide(e),projectivityDisplacement);
@@ -255,7 +255,7 @@ std::tuple<EMBDetectorManager*
 	  if (detStore->retrieve(sPhys,e==0 ? "EMB_NEG" : "EMB_POS")==StatusCode::SUCCESS) {
 	    CellBinning phiBinning(startPhi,endPhi,256/NDIV);
 	    EMBDetDescr *detDescr = new EMBDetDescr(embDetectorManager,3,0,phiBinning);
-	    GeoFullPhysVol *embEnvelope=(GeoFullPhysVol *) sPhys->getPhysVol();
+	    GeoIntrusivePtr<GeoFullPhysVol>embEnvelope=(GeoIntrusivePtr<GeoFullPhysVol>) sPhys->getPhysVol();
 	    EMBDetectorRegion *region = new EMBDetectorRegion(embEnvelope,detDescr,EMBDetectorRegion::DetectorSide(e));
 	    embDetectorManager->addDetectorRegion(region);
 	  }
@@ -271,7 +271,7 @@ std::tuple<EMBDetectorManager*
 	  if (detStore->retrieve(sPhys,e==0 ? "EMB_NEG" : "EMB_POS")==StatusCode::SUCCESS) {
 	    CellBinning phiBinning(startPhi,endPhi,256/NDIV);
 	    EMBDetDescr *detDescr = new EMBDetDescr(embDetectorManager,2,0,phiBinning);
-	    GeoFullPhysVol *embEnvelope=(GeoFullPhysVol *) sPhys->getPhysVol();
+	    GeoIntrusivePtr<GeoFullPhysVol>embEnvelope=(GeoIntrusivePtr<GeoFullPhysVol>) sPhys->getPhysVol();
 	    EMBDetectorRegion *region = new EMBDetectorRegion(embEnvelope,detDescr,EMBDetectorRegion::DetectorSide(e));
 	    embDetectorManager->addDetectorRegion(region);
 	  }
@@ -287,7 +287,7 @@ std::tuple<EMBDetectorManager*
 	  if (detStore->retrieve(sPhys,e==0 ? "EMB_NEG" : "EMB_POS")==StatusCode::SUCCESS) {
 	    CellBinning phiBinning(startPhi,endPhi,256/NDIV);
 	    EMBDetDescr *detDescr = new EMBDetDescr(embDetectorManager,2,1,phiBinning);
-	    GeoFullPhysVol *embEnvelope=(GeoFullPhysVol *) sPhys->getPhysVol();
+	    GeoIntrusivePtr<GeoFullPhysVol>embEnvelope=(GeoIntrusivePtr<GeoFullPhysVol>) sPhys->getPhysVol();
 	    EMBDetectorRegion *region = new EMBDetectorRegion(embEnvelope,detDescr,EMBDetectorRegion::DetectorSide(e));
 	    embDetectorManager->addDetectorRegion(region);
 	  }
@@ -303,7 +303,7 @@ std::tuple<EMBDetectorManager*
 	  if (detStore->retrieve(sPhys,e==0 ? "EMB_NEG" : "EMB_POS")==StatusCode::SUCCESS) {
 	    CellBinning phiBinning(startPhi,endPhi,64/NDIV);
 	    EMBDetDescr *detDescr = new EMBDetDescr(embDetectorManager,1,0,phiBinning);
-	    GeoFullPhysVol *embEnvelope=(GeoFullPhysVol *) sPhys->getPhysVol();
+	    GeoIntrusivePtr<GeoFullPhysVol>embEnvelope=(GeoIntrusivePtr<GeoFullPhysVol>) sPhys->getPhysVol();
 	    EMBDetectorRegion *region = new EMBDetectorRegion(embEnvelope,detDescr,EMBDetectorRegion::DetectorSide(e));
 	    embDetectorManager->addDetectorRegion(region);
 	  }
@@ -319,7 +319,7 @@ std::tuple<EMBDetectorManager*
 	  if (detStore->retrieve(sPhys,e==0 ? "EMB_NEG" : "EMB_POS")==StatusCode::SUCCESS) {
 	    CellBinning phiBinning(startPhi,endPhi,256/NDIV);
 	    EMBDetDescr *detDescr = new EMBDetDescr(embDetectorManager,1,1,phiBinning);
-	    GeoFullPhysVol *embEnvelope=(GeoFullPhysVol *) sPhys->getPhysVol();
+	    GeoIntrusivePtr<GeoFullPhysVol>embEnvelope=(GeoIntrusivePtr<GeoFullPhysVol>) sPhys->getPhysVol();
 	    EMBDetectorRegion *region = new EMBDetectorRegion(embEnvelope,detDescr,EMBDetectorRegion::DetectorSide(e));
 	    embDetectorManager->addDetectorRegion(region);
 	  }
@@ -335,7 +335,7 @@ std::tuple<EMBDetectorManager*
 	  if (detStore->retrieve(sPhys,e==0 ? "EMB_NEG" : "EMB_POS")==StatusCode::SUCCESS) {
 	    CellBinning phiBinning(startPhi,endPhi,64/NDIV);
 	    EMBDetDescr *detDescr = new EMBDetDescr(embDetectorManager,0,0,phiBinning);
-	    GeoFullPhysVol *embEnvelope=(GeoFullPhysVol *) sPhys->getPhysVol();
+	    GeoIntrusivePtr<GeoFullPhysVol>embEnvelope=(GeoIntrusivePtr<GeoFullPhysVol>) sPhys->getPhysVol();
 	    EMBDetectorRegion *region = new EMBDetectorRegion(embEnvelope,detDescr,EMBDetectorRegion::DetectorSide(e));
 	    embDetectorManager->addDetectorRegion(region);
 	  }

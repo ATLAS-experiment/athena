@@ -23,7 +23,7 @@ namespace LArGeo {
     virtual ~MiddleBeamConstructionH62004();
     
     // Get the envelope containing this detector.
-    virtual GeoVPhysVol* GetEnvelope();
+    virtual PVLink GetEnvelope();
     void SetManager(LArDetDescrManager* mgr){m_detectorManager = mgr;}
 
     //void SetAxisVisState(bool state) {_axisVisState=state;}

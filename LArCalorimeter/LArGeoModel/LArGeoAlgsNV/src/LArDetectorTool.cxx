@@ -136,7 +136,7 @@ StatusCode LArDetectorToolNV::create()
   // testbeam=0  Atlas
   int testbeam = 0;
 
-  GeoPhysVol *world=theExpt->getPhysVol();
+  GeoIntrusivePtr<GeoPhysVol>world=theExpt->getPhysVol();
   if(sqliteReader) {
     // Geometry is constructed from SQLite file
     LArGeo::LArDetectorFactoryLite theLArFactoryLite(detStore().operator->()

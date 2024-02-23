@@ -28,7 +28,7 @@ namespace LArGeo {
 
     virtual ~MWPCConstruction();
     
-    virtual GeoVPhysVol* GetEnvelope();
+    virtual PVLink GetEnvelope();
 
 
       

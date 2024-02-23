@@ -85,7 +85,7 @@ LArGeo::BarrelCryostatConstruction::BarrelCryostatConstruction(
 LArGeo::BarrelCryostatConstruction::~BarrelCryostatConstruction() = default;
 
 
-GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorParameters* params)
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorParameters* params)
 {
   if (m_cryoMotherPhysical) return m_cryoMotherPhysical;
 
@@ -345,7 +345,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
 	  const GeoShape & shape = tubs->intersect(*box);
 	  const GeoLogVol *logVol = new GeoLogVol ("LAr::Barrel::Cryostat::Sector::Ear",&shape, material);
-	  GeoPhysVol *earPhysVol = new GeoPhysVol(logVol);
+	  GeoIntrusivePtr<GeoPhysVol>earPhysVol = new GeoPhysVol(logVol);
 
 	  m_cryoMotherPhysical->add(new GeoNameTag(std::string("CryostatEarForward")));
 	  m_cryoMotherPhysical->add(new GeoIdentifierTag(cylNumber));
@@ -377,7 +377,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 	  const GeoShape & shape = tubs->subtract((*box)<<offset);
 
 	  const GeoLogVol *logVol = new GeoLogVol ("LAr::Barrel::Cryostat::Sector::Leg",&shape, material);
-	  GeoPhysVol *legPhysVol = new GeoPhysVol(logVol);
+	  GeoIntrusivePtr<GeoPhysVol>legPhysVol = new GeoPhysVol(logVol);
 
 	  m_cryoMotherPhysical->add(new GeoNameTag(std::string("CryostatLegForward")));
 	  m_cryoMotherPhysical->add(new GeoIdentifierTag(cylNumber));
@@ -470,7 +470,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 	// If ZMIN < 0 place the cylinder onse
 	// If ZMIN >=0 place each cylinder twice, at +z and -z.
 	if(zMin<0) {
-	  GeoFullPhysVol* physBarrelCylinder = new GeoFullPhysVol(logicBarrelCylinder);
+	  GeoIntrusivePtr<GeoFullPhysVol> physBarrelCylinder = new GeoFullPhysVol(logicBarrelCylinder);
 
 	  m_cryoMotherPhysical->add(new GeoNameTag(cylName+std::string("Phys")));
 	  m_cryoMotherPhysical->add(new GeoIdentifierTag(cylNumber));
@@ -494,7 +494,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 	  }
 
 	}else{
-	  GeoPhysVol* physBarrelCylinder = new GeoPhysVol(logicBarrelCylinder);
+	  GeoIntrusivePtr<GeoPhysVol> physBarrelCylinder = new GeoPhysVol(logicBarrelCylinder);
 
 	  m_cryoMotherPhysical->add(new GeoNameTag(cylName+std::string("PhysForward")));
 	  m_cryoMotherPhysical->add(new GeoIdentifierTag(cylNumber));
@@ -535,7 +535,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
     const GeoLogVol *outerWallLog = new GeoLogVol("LAr::Barrel::Cryostat::OuterWall", outerWallPcon, Aluminium);
     m_cryoMotherPhysical->add(new GeoNameTag(std::string("Barrel Cryo OuterWall Phys")));
-    GeoPhysVol *outerWallPhys = new GeoPhysVol(outerWallLog);
+    GeoIntrusivePtr<GeoPhysVol>outerWallPhys = new GeoPhysVol(outerWallLog);
     m_cryoMotherPhysical->add(outerWallPhys);
 
     // Make a Polycon for the inner wall:
@@ -556,7 +556,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
     const GeoLogVol *innerWallLog = new GeoLogVol("LAr::Barrel::Cryostat::InnerWall", innerWallPcon, Aluminium);
     m_cryoMotherPhysical->add(new GeoNameTag(std::string("Barrel Cryo InnerWall Phys")));
-    GeoPhysVol *innerWallPhys = new GeoPhysVol(innerWallLog);
+    GeoIntrusivePtr<GeoPhysVol>innerWallPhys = new GeoPhysVol(innerWallLog);
     m_cryoMotherPhysical->add(innerWallPhys);
 
     // Vis a la fin du cryostat
@@ -594,7 +594,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
           GeoTubs *tub_vis =  new GeoTubs(0.,rmax_vis,zthick_vis/2., (double) 0., dphi_all);
           const GeoLogVol * log_vis = new GeoLogVol("LAr::Barrel::Cryostat::InnerWall::Vis",tub_vis,bolt_material);
-          GeoPhysVol* phys_vis = new GeoPhysVol(log_vis);
+          GeoIntrusivePtr<GeoPhysVol> phys_vis = new GeoPhysVol(log_vis);
 
           double xxVis=((double)(Nvis));
           double ZposB=0.5*(z1+z2);
@@ -653,7 +653,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 	  //      std::cout << " extraName " << extraName << std::endl;
 
 	  GeoLogVol* extraLog = new GeoLogVol(extraName,extraCons,Aluminium);
-	  GeoPhysVol* extraPhys = new GeoPhysVol(extraLog);
+	  GeoIntrusivePtr<GeoPhysVol> extraPhys = new GeoPhysVol(extraLog);
 	  m_cryoMotherPhysical->add(new GeoTransform(GeoTrf::TranslateZ3D(extra_zpos)));
 	  m_cryoMotherPhysical->add(extraPhys);
 	}
@@ -709,7 +709,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
       // Make one block:
         GeoBox *box = new GeoBox(length/2.0, height/2.0, width/2.0);
         GeoLogVol *logVol = new GeoLogVol("LAr::Barrel::Cryostat::Sector::TitaniumBlock", box,myMaterial);
-        GeoPhysVol *physVol = new GeoPhysVol(logVol);
+        GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 
         double angle=pairSeparation/r;
         double pos  = -z+width/2 + distFromRidge;
@@ -771,7 +771,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
       const GeoLogVol *innerEndWallLog = new GeoLogVol("LAr::Barrel::Cryostat::InnerEndWall", innerEndWallPcon, Aluminium);
       m_cryoMotherPhysical->add(new GeoNameTag(std::string("Barrel Cryo InnerEndWall Phys")));
-      GeoPhysVol *innerEndWallPhys = new GeoPhysVol(innerEndWallLog);
+      GeoIntrusivePtr<GeoPhysVol>innerEndWallPhys = new GeoPhysVol(innerEndWallLog);
       m_cryoMotherPhysical->add(innerEndWallPhys);
       m_cryoMotherPhysical->add(new GeoTransform(GeoTrf::RotateY3D(M_PI)));
       m_cryoMotherPhysical->add(innerEndWallPhys);
@@ -818,7 +818,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
     // co-ordinates will be the same.  (Let's hope this is still true
     // in GeoModel.)
   m_cryoMotherPhysical->add(new GeoNameTag("Total LAR Volume"));
-  GeoPhysVol* totalLArPhysical = new GeoPhysVol(totalLArLogical);
+  GeoIntrusivePtr<GeoPhysVol> totalLArPhysical = new GeoPhysVol(totalLArLogical);
   m_cryoMotherPhysical->add(totalLArPhysical);
   //                                                                                                //
 
@@ -860,11 +860,11 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
   // Define logical volumes for both halves of the barrel.
   const GeoLogVol* halfLArLogicalPos =
     new GeoLogVol(halfLArName + "::Pos", halfLArShape, LAr);
-  GeoPhysVol* halfLArPhysicalPos = new GeoPhysVol(halfLArLogicalPos);
+  GeoIntrusivePtr<GeoPhysVol> halfLArPhysicalPos = new GeoPhysVol(halfLArLogicalPos);
 
   const GeoLogVol* halfLArLogicalNeg =
     new GeoLogVol(halfLArName + "::Neg", halfLArShape, LAr);
-  GeoPhysVol* halfLArPhysicalNeg = new GeoPhysVol(halfLArLogicalNeg);
+  GeoIntrusivePtr<GeoPhysVol> halfLArPhysicalNeg = new GeoPhysVol(halfLArLogicalNeg);
 
   totalLArPhysical->add(new GeoNameTag(halfLArName + "::PosPhysical"));
 
@@ -891,12 +891,12 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
-    GeoFullPhysVol* barrelPosEnvelope = barrelConstruction.GetPositiveEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> barrelPosEnvelope = barrelConstruction.GetPositiveEnvelope();
     if ( barrelPosEnvelope != nullptr )
       halfLArPhysicalPos->add(barrelPosEnvelope);
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
-    GeoFullPhysVol* barrelNegEnvelope = barrelConstruction.GetNegativeEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> barrelNegEnvelope = barrelConstruction.GetNegativeEnvelope();
     if ( barrelNegEnvelope != nullptr )
       halfLArPhysicalNeg->add(barrelNegEnvelope);
 
@@ -940,7 +940,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 	  const GeoLogVol* logicBarrelCylinder
 	    = new GeoLogVol(cylName,solidBarrelCylinder,material);
 
-	  GeoPhysVol* physBarrelCylinder = new GeoPhysVol(logicBarrelCylinder);
+	  GeoIntrusivePtr<GeoPhysVol> physBarrelCylinder = new GeoPhysVol(logicBarrelCylinder);
 
 	  double zInCryostat = currentRecord->getDouble("ZMIN")*Gaudi::Units::cm + currentRecord->getDouble("DZ")*Gaudi::Units::cm / 2.;
 
@@ -984,7 +984,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
     BarrelPresamplerConstruction barrelPSConstruction(m_fullGeo, params);
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
-    GeoFullPhysVol* barrelPSPosEnvelope = barrelPSConstruction.GetPositiveEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> barrelPSPosEnvelope = barrelPSConstruction.GetPositiveEnvelope();
     GeoTransform *xfPos = new GeoTransform(GeoTrf::Transform3D(GeoTrf::TranslateZ3D(PresamplerMother_length+presamplerShift)));
     {
       halfLArPhysicalPos->add(xfPos);
@@ -996,7 +996,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
       if(!status.isSuccess()) throw std::runtime_error ("Cannot store PRESAMPLER_B_POS");
     }
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
-    GeoFullPhysVol* barrelPSNegEnvelope = barrelPSConstruction.GetNegativeEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> barrelPSNegEnvelope = barrelPSConstruction.GetNegativeEnvelope();
     GeoTransform *xfNeg = new GeoTransform(GeoTrf::Transform3D(GeoTrf::TranslateZ3D(PresamplerMother_length+presamplerShift)));
     {
       halfLArPhysicalNeg->add(xfNeg);
@@ -1043,7 +1043,7 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
         } // iterate over planes
 
         const GeoLogVol* sctCiCoolingLog = new GeoLogVol("LAr::Barrel::Cryostat::SctCiCooling",pcon,material);
-        GeoPhysVol* sctCiCoolingPhys = new GeoPhysVol(sctCiCoolingLog);
+        GeoIntrusivePtr<GeoPhysVol> sctCiCoolingPhys = new GeoPhysVol(sctCiCoolingLog);
 
         GeoTransform* xfPos1 = new GeoTransform(GeoTrf::Transform3D::Identity());
         GeoTransform* xfPos2 = new GeoTransform(GeoTrf::RotateZ3D(180*Gaudi::Units::deg));

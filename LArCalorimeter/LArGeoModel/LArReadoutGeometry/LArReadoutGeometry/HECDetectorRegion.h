@@ -142,7 +142,7 @@ class HECDetectorRegion : public GeoVDetectorElement
     
   HECDetectorRegion(const HECDetectorRegion &right);
   HECDetectorRegion & operator=(const HECDetectorRegion &right);
-  const HECDetDescr *m_descriptor;
+  GeoIntrusivePtr<const HECDetDescr> m_descriptor{};
   HECDetectorRegion::DetectorSide m_endcapIndex;
 
   double m_projectivityDisplacement;

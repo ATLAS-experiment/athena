@@ -15,13 +15,9 @@ EMBDetectorRegion::EMBDetectorRegion (const GeoVFullPhysVol *physVol
   , m_descriptor(embDescriptor)
   , m_endcapIndex(endcap)
 {
-  m_descriptor->ref();
 }
 
-EMBDetectorRegion::~EMBDetectorRegion()
-{
-  m_descriptor->unref();
-}
+EMBDetectorRegion::~EMBDetectorRegion() = default;
 
 EMBCellConstLink EMBDetectorRegion::getEMBCell (unsigned int ieta, unsigned int iphi) const
 {

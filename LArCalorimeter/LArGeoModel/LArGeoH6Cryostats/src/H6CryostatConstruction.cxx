@@ -50,7 +50,7 @@ LArGeo::H6CryostatConstruction::H6CryostatConstruction():
 
 LArGeo::H6CryostatConstruction::~H6CryostatConstruction() = default;
 
-GeoVFullPhysVol* LArGeo::H6CryostatConstruction::GetEnvelope()
+GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::H6CryostatConstruction::GetEnvelope()
 {
 
   if (m_cryoMotherPhysical) return m_cryoMotherPhysical;
@@ -136,19 +136,19 @@ GeoVFullPhysVol* LArGeo::H6CryostatConstruction::GetEnvelope()
   GeoTube* cryoWarmWallShape = new GeoTube(0. , rwarm, zcryo);   
   const GeoLogVol* cryoWarmWallLog = new GeoLogVol(cryoWarmWallName, cryoWarmWallShape, Iron);
   //m_cryoMotherPhysical->add(new GeoNameTag(std::string("Cryostat")));    
-  GeoPhysVol*  cryoWarmWallPhys = new GeoPhysVol(cryoWarmWallLog);
+  GeoIntrusivePtr<GeoPhysVol>  cryoWarmWallPhys = new GeoPhysVol(cryoWarmWallLog);
   m_cryoMotherPhysical->add(cryoWarmWallPhys);
 
   // "Vacuum" gap (filled with air...)
   GeoTube* cryoVacuumGapShape = new GeoTube(0. , rvac, zcryo-2.0*Gaudi::Units::mm);   // an arbitrary 2mm shorter to avoid confilct  
   const GeoLogVol* cryoVacuumGapLog = new GeoLogVol(cryoVacuumGapName, cryoVacuumGapShape, Air);
-  GeoPhysVol*  cryoVacuumGapPhys = new GeoPhysVol(cryoVacuumGapLog);
+  GeoIntrusivePtr<GeoPhysVol>  cryoVacuumGapPhys = new GeoPhysVol(cryoVacuumGapLog);
   cryoWarmWallPhys->add(cryoVacuumGapPhys);
 
   // Cold Wall
   GeoTube* cryoColdWallShape = new GeoTube(0. , rcold, zcryo-4.0*Gaudi::Units::mm);  // an arbitrary 4mm shorter to avoid confilct   
   const GeoLogVol* cryoColdWallLog = new GeoLogVol(cryoColdWallName, cryoColdWallShape, Iron);
-  GeoPhysVol*  cryoColdWallPhys = new GeoPhysVol(cryoColdWallLog);
+  GeoIntrusivePtr<GeoPhysVol>  cryoColdWallPhys = new GeoPhysVol(cryoColdWallLog);
   cryoVacuumGapPhys->add(cryoColdWallPhys);
 
  
@@ -174,7 +174,7 @@ GeoVFullPhysVol* LArGeo::H6CryostatConstruction::GetEnvelope()
 }
 
 // Added so that FCal can be inserted in LArDetectorConstruction.
-GeoPhysVol* LArGeo::H6CryostatConstruction::GetLArPhysical()
+GeoIntrusivePtr<GeoPhysVol> LArGeo::H6CryostatConstruction::GetLArPhysical()
 {
   return m_cryoLArPhys;
 }

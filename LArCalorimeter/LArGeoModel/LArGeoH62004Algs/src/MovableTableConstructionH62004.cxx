@@ -56,7 +56,7 @@ LArGeo::MovableTableConstructionH62004::~MovableTableConstructionH62004()
 
 
 
-GeoVPhysVol* LArGeo::MovableTableConstructionH62004::GetEnvelope()
+PVLink LArGeo::MovableTableConstructionH62004::GetEnvelope()
 {
 
   if (m_H62004MovableTablePhysical) return m_H62004MovableTablePhysical;
@@ -164,8 +164,8 @@ GeoVPhysVol* LArGeo::MovableTableConstructionH62004::GetEnvelope()
   std::string ScintName = H62004MovableName + "::Scintillator";
   GeoLogVol* S1ScintLogical = new GeoLogVol( ScintName, ScintShapeS1, Scint );
   GeoLogVol* S23ScintLogical = new GeoLogVol( ScintName, ScintShapeS23, Scint );
-  GeoPhysVol* S1ScintPhysical = new GeoPhysVol( S1ScintLogical );    
-  GeoPhysVol* S2ScintPhysical = new GeoPhysVol( S23ScintLogical );    
+  GeoIntrusivePtr<GeoPhysVol> S1ScintPhysical = new GeoPhysVol( S1ScintLogical );    
+  GeoIntrusivePtr<GeoPhysVol> S2ScintPhysical = new GeoPhysVol( S23ScintLogical );    
 
   m_H62004MovableTablePhysical->add( new GeoIdentifierTag(4) );
   m_H62004MovableTablePhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, btas_pos[0]-bttb_z ) ) ) ;     
@@ -180,14 +180,14 @@ GeoVPhysVol* LArGeo::MovableTableConstructionH62004::GetEnvelope()
   GeoTubs* tubH = new GeoTubs(0., bh_d/2., btas_z/2., 0., 2*M_PI);
   const GeoShapeSubtraction &shapeHSc = (*boxH).subtract(*tubH);
   GeoLogVol* logHSc = new GeoLogVol( ScintName, &shapeHSc, Scint);
-  GeoPhysVol* physHSc = new GeoPhysVol(logHSc);
+  GeoIntrusivePtr<GeoPhysVol> physHSc = new GeoPhysVol(logHSc);
   m_H62004MovableTablePhysical->add( new GeoIdentifierTag(5) );
   m_H62004MovableTablePhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, (btas_pos[0]-bttb_z) + bh_shift) )  ) ;     
   m_H62004MovableTablePhysical->add(physHSc);
 
   GeoBox* boxB = new GeoBox(bb2_x/2., bb2_x/2., (btas_z+2.5*Gaudi::Units::cm)/2.);
   GeoLogVol* logBSc = new GeoLogVol( ScintName, boxB, Scint);
-  GeoPhysVol* physBSc = new GeoPhysVol(logBSc);
+  GeoIntrusivePtr<GeoPhysVol> physBSc = new GeoPhysVol(logBSc);
   m_H62004MovableTablePhysical->add( new GeoIdentifierTag(8) );
   m_H62004MovableTablePhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, (btas_pos[2]-bttb_z) + bb_shift )  ) ) ;     
   m_H62004MovableTablePhysical->add(physBSc);
@@ -198,7 +198,7 @@ GeoVPhysVol* LArGeo::MovableTableConstructionH62004::GetEnvelope()
   log << MSG::INFO << " Create MWPC's " << endmsg;
   
   MWPCConstruction MWPC(1.*Gaudi::Units::mm);
-  GeoVPhysVol* MwpcPhysical = MWPC.GetEnvelope();
+  PVLink MwpcPhysical = MWPC.GetEnvelope();
 
   for(int i = 1; i < 4; ++i){
      m_H62004MovableTablePhysical->add( new GeoIdentifierTag(i+1) );
@@ -211,7 +211,7 @@ GeoVPhysVol* LArGeo::MovableTableConstructionH62004::GetEnvelope()
   log << MSG::INFO << " Create BPC 5&6 " << endmsg;
 
   BPCConstruction BPC(false);
-  GeoVPhysVol* BPCPhysical = BPC.GetEnvelope();
+  PVLink BPCPhysical = BPC.GetEnvelope();
   for(int i=1; i<3; ++i) {
      m_H62004MovableTablePhysical->add( new GeoIdentifierTag(7-i) );
      m_H62004MovableTablePhysical->add( new GeoTransform(GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, bpc_pos[i-1]-bttb_z) ) );

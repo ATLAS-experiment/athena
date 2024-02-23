@@ -101,7 +101,7 @@ LArGeo::FCALConstructionH62004::~FCALConstructionH62004()
 
 //================== get envelope
 
-GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
+GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::FCALConstructionH62004::GetEnvelope()
 {
 
   // Flags to turn on volumes.
@@ -205,7 +205,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 
   FCAL_ChannelMap *cmap = new FCAL_ChannelMap(0);
 
-  GeoFullPhysVol *fcalPhysical(nullptr);
+  GeoIntrusivePtr<GeoFullPhysVol>fcalPhysical(nullptr);
 
   std::string baseName = "LAr::FCAL::";
 
@@ -240,12 +240,12 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
   if (F1) 
     {
       // Module 1
-      GeoFullPhysVol *modPhysical =nullptr;
+      GeoIntrusivePtr<GeoFullPhysVol>modPhysical =nullptr;
       {
 	double halfDepth       = fcalData[0].fullModuleDepth/2;
 	double innerRadius     = fcalData[0].innerModuleRadius;
 	double outerRadius     = fcalData[0].outerModuleRadius;
-	GeoFullPhysVol *physVol;
+	GeoIntrusivePtr<GeoFullPhysVol>physVol;
 
 	if(m_absPhysical1)
 	  physVol = m_absPhysical1->clone();
@@ -279,7 +279,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	  double startPhi          = 11.25 * Gaudi::Units::deg - deltaPhi/2.0;
 	  GeoTubs * tubs = new GeoTubs(innerRadius,outerRadius,halfLength,startPhi,deltaPhi );
 	  GeoLogVol *logVol = new GeoLogVol(baseName+"Module1::CableTrough",tubs,FCalCableHarness);
-	  GeoPhysVol *physVol = new GeoPhysVol(logVol);
+	  GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 	  GeoGenfun::Variable i;
 	  GeoGenfun::GENFUNCTION rotationAngle = fcalstartPhi + 22.5*Gaudi::Units::deg*i;
 	  GeoXF::TRANSFUNCTION xf = GeoXF::Pow(GeoTrf::RotateZ3D(1.0),rotationAngle);
@@ -294,7 +294,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	  double outerRadius  = fcalData[0].outerGapRadius;
 	  GeoTubs *tubs       = new GeoTubs(innerRadius,outerRadius,halfDepth, 0.*Gaudi::Units::deg, 360.*Gaudi::Units::deg);
 	  GeoLogVol *logVol   = new GeoLogVol(baseName + "Module1::Gap",tubs, LAr);
-	  GeoPhysVol *physVol = new GeoPhysVol(logVol);
+	  GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 	  
 	  int counter=0;
 	  modPhysical->add(new GeoSerialIdentifier(0));
@@ -336,12 +336,12 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
   if (F2) 
     {
       // Module 2
-      GeoFullPhysVol *modPhysical =nullptr;
+      GeoIntrusivePtr<GeoFullPhysVol>modPhysical =nullptr;
       {
 	double halfDepth       = fcalData[1].fullModuleDepth/2;
 	double innerRadius     = fcalData[1].innerModuleRadius;
 	double outerRadius     = fcalData[1].outerModuleRadius;
-	GeoFullPhysVol *physVol;
+	GeoIntrusivePtr<GeoFullPhysVol>physVol;
 	
 	if(m_absPhysical2)
 	  physVol = m_absPhysical2->clone();
@@ -375,7 +375,7 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	  double startPhi          = 11.25 * Gaudi::Units::deg - deltaPhi/2.0;
 	  GeoTubs * tubs = new GeoTubs(innerRadius,outerRadius,halfLength,startPhi,deltaPhi );
 	  GeoLogVol *logVol = new GeoLogVol(baseName+"Module2::CableTrough",tubs,FCalCableHarness);
-	  GeoPhysVol *physVol = new GeoPhysVol(logVol);
+	  GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 	  GeoGenfun::Variable i;
 	  GeoGenfun::GENFUNCTION rotationAngle = fcalstartPhi + 22.5*Gaudi::Units::deg*i;
 	  GeoXF::TRANSFUNCTION xf = GeoXF::Pow(GeoTrf::RotateZ3D(1.0),rotationAngle);
@@ -393,11 +393,11 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	
 	GeoTubs *gapTubs       = new GeoTubs(0,outerRadius,halfDepth, fcalstartPhi, fcaldeltaPhi);
 	GeoLogVol *gapLog      = new GeoLogVol(baseName + "Module2::Gap",gapTubs, LAr);
-	GeoPhysVol *gapPhys    = new GeoPhysVol(gapLog);
+	GeoIntrusivePtr<GeoPhysVol>gapPhys    = new GeoPhysVol(gapLog);
 	
 	GeoTubs *rodTubs       = new GeoTubs(0,innerRadius,halfDepth, fcalstartPhi, fcaldeltaPhi);
 	GeoLogVol *rodLog      = new GeoLogVol(baseName + "Module2::Rod",rodTubs, FCal23Slugs);
-	GeoPhysVol *rodPhys    = new GeoPhysVol(rodLog);
+	GeoIntrusivePtr<GeoPhysVol>rodPhys    = new GeoPhysVol(rodLog);
 	
 	gapPhys->add(rodPhys);
 	
@@ -439,12 +439,12 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
   if (F3) 
     {
       // ColdTC......
-      GeoFullPhysVol *modPhysical =nullptr;
+      GeoIntrusivePtr<GeoFullPhysVol>modPhysical =nullptr;
       {
 	double halfDepth       = fcalData[2].fullModuleDepth/2;
 	double innerRadius     = fcalData[2].innerModuleRadius;
 	double outerRadius     = fcalData[2].outerModuleRadius;
-	GeoFullPhysVol *physVol;
+	GeoIntrusivePtr<GeoFullPhysVol>physVol;
 
 	// We need few more materials
 	// ColdTC effective absorber: Cu with a little bit of inactive argon
@@ -496,9 +496,9 @@ GeoVFullPhysVol* LArGeo::FCALConstructionH62004::GetEnvelope()
 	GeoTubs  *activeSolid = new GeoTubs(innerRadius,outerRadius,ActiveDepth/2.,1.0001*fcalstartPhi, 0.9999*fcaldeltaPhi);
 	GeoLogVol *activeLV = new GeoLogVol(baseName + "ColdTC::Active", activeSolid, LAr);
 
-	GeoPhysVol *activePhys = new GeoPhysVol(activeLV);
-	GeoPhysVol *electrodePhys = new GeoPhysVol(electrodeLV);
-	GeoPhysVol *gapPhys = new GeoPhysVol(gapLV);
+	GeoIntrusivePtr<GeoPhysVol>activePhys = new GeoPhysVol(activeLV);
+	GeoIntrusivePtr<GeoPhysVol>electrodePhys = new GeoPhysVol(electrodeLV);
+	GeoIntrusivePtr<GeoPhysVol>gapPhys = new GeoPhysVol(gapLV);
 
 	// active gaps in electrode
 	int iCopy = 1;

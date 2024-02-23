@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARGEOENDCAP_ENDCAPDMCONSTRUCTION_H
 #define LARGEOENDCAP_ENDCAPDMCONSTRUCTION_H
 
-class GeoFullPhysVol;
+#include "GeoModelKernel/GeoFullPhysVol.h"
+
 
 namespace LArGeo {
 
@@ -15,7 +16,7 @@ namespace LArGeo {
     EndcapDMConstruction(bool);
     ~EndcapDMConstruction() = default;
 
-    void create(GeoFullPhysVol* envelope) const;
+    void create(GeoIntrusivePtr<GeoFullPhysVol> envelope) const;
 
   private:
     EndcapDMConstruction(const EndcapDMConstruction&);

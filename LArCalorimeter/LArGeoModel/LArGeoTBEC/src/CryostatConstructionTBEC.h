@@ -22,10 +22,10 @@ namespace LArGeo {
     virtual ~CryostatConstructionTBEC();
     
     // Get the envelope containing this detector.
-    virtual GeoVFullPhysVol* GetEnvelope();
+    virtual GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope();
     
     // Get the LAr physical volume.
-    GeoPhysVol* GetLArPhysical();
+    GeoIntrusivePtr<GeoPhysVol> GetLArPhysical();
       
   private:
 

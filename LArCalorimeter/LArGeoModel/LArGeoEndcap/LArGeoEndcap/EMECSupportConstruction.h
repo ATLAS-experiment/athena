@@ -62,38 +62,38 @@ class EMECSupportConstruction
     virtual ~EMECSupportConstruction();
 
     // Get the envelope containing this detector.
-    virtual GeoPhysVol* GetEnvelope(void) const;
+    virtual GeoIntrusivePtr<GeoPhysVol> GetEnvelope(void) const;
 
   private:
-    GeoPhysVol *front_envelope(void) const;
-    GeoPhysVol *back_envelope(void) const;
-    GeoPhysVol *outer_envelope(void) const;
-    GeoPhysVol *inner_envelope(void) const;
-    GeoPhysVol *middle_envelope(void) const;
-    GeoPhysVol *front_inner_envelope(void) const;
-    GeoPhysVol *back_inner_envelope(void) const;
-    GeoPhysVol *front_outer_envelope(void) const;
-    GeoPhysVol *back_outer_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>front_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>back_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>outer_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>inner_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>middle_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>front_inner_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>back_inner_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>front_outer_envelope(void) const;
+    GeoIntrusivePtr<GeoPhysVol>back_outer_envelope(void) const;
 
-    void put_front_outer_extracyl(GeoPhysVol *) const;
+    void put_front_outer_extracyl(GeoIntrusivePtr<GeoPhysVol>) const;
 
-    void put_front_inner_barettes(GeoPhysVol *) const;
-    void put_front_inner_longbar(GeoPhysVol *) const;
-    void put_front_inner_ring(GeoPhysVol *) const;
-    void put_front_middle_ring(GeoPhysVol *) const;
-    void put_back_middle_ring(GeoPhysVol *) const;
-    void put_back_inner_ring(GeoPhysVol *) const;
-    void put_back_inner_longbar(GeoPhysVol *) const;
-    void put_back_inner_barettes(GeoPhysVol *) const;
-    void put_front_outer_ring(GeoPhysVol *) const;
-    void put_front_indexing_rings(GeoPhysVol *) const;
-    void put_front_outer_longbar(GeoPhysVol *) const;
-    void put_front_outer_barettes(GeoPhysVol *) const;
-    void put_back_outer_ring(GeoPhysVol *) const;
-    void put_back_indexing_rings(GeoPhysVol *) const;
-    void put_back_outer_longbar(GeoPhysVol *) const;
-    void put_back_outer_barettes(GeoPhysVol *) const;
-    void put_front_outer_electronics(GeoPhysVol *) const;
+    void put_front_inner_barettes(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_front_inner_longbar(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_front_inner_ring(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_front_middle_ring(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_back_middle_ring(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_back_inner_ring(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_back_inner_longbar(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_back_inner_barettes(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_front_outer_ring(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_front_indexing_rings(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_front_outer_longbar(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_front_outer_barettes(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_back_outer_ring(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_back_indexing_rings(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_back_outer_longbar(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_back_outer_barettes(GeoIntrusivePtr<GeoPhysVol>) const;
+    void put_front_outer_electronics(GeoIntrusivePtr<GeoPhysVol>) const;
 
 	GeoPcon* getPcon(const std::string&) const;
 

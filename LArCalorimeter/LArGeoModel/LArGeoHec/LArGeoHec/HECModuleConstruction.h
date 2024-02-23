@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,7 +12,8 @@
 #ifndef __HECModuleConstruction_H__
 #define __HECModuleConstruction_H__
 
-class GeoFullPhysVol;
+#include "GeoModelKernel/GeoFullPhysVol.h"
+
 
 namespace LArGeo 
 {
@@ -28,10 +29,10 @@ namespace LArGeo
       HECModuleConstruction(bool threeBoards=false, bool frontWheel=true, bool tb=false, int tbyear=2002);
       virtual ~HECModuleConstruction();
       // Get the envelope containing this detector.
-      GeoFullPhysVol* GetEnvelope();
+      GeoIntrusivePtr<GeoFullPhysVol> GetEnvelope();
       
     private:
-      GeoFullPhysVol* m_physiHECModule;
+      GeoIntrusivePtr<GeoFullPhysVol> m_physiHECModule;
       bool	      m_threeBoards;
       bool     	      m_frontWheel;
       bool	      m_tb;

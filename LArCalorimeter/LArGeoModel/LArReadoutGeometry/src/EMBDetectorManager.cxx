@@ -46,11 +46,8 @@ EMBDetectorManager::EMBDetectorManager(const EMBHVManager& hvManager
 }
 
 
-EMBDetectorManager::~EMBDetectorManager()
-{
+EMBDetectorManager::~EMBDetectorManager() {
   for (unsigned int i=0;i<getNumDetectorRegions();i++) delete m_DetRegionsIterative[i];
-  unsigned int ntree = EMBDetectorManager::getNumTreeTops();
-  for (unsigned int i=0;i<ntree;i++) EMBDetectorManager::getTreeTop(i)->unref();
 }
 
 
@@ -100,7 +97,6 @@ void EMBDetectorManager::addDetectorRegion (const EMBDetectorRegion *region)
 void EMBDetectorManager::addTreeTop (PVLink treeTop)
 {
   m_treeTop.push_back(treeTop);
-  treeTop->ref();
 }
 
 const EMBHVManager& EMBDetectorManager::getHVManager () const

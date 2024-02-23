@@ -85,7 +85,7 @@ LArGeo::HEC2WheelConstruction::~HEC2WheelConstruction()
 {;}
 
 
-GeoFullPhysVol* LArGeo::HEC2WheelConstruction::GetEnvelope(bool fullGeo, bool posZSide)
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HEC2WheelConstruction::GetEnvelope(bool fullGeo, bool posZSide)
 {
   m_posZSide = posZSide;
 
@@ -167,7 +167,7 @@ GeoFullPhysVol* LArGeo::HEC2WheelConstruction::GetEnvelope(bool fullGeo, bool po
 
   GeoPcon*           solidHEC;     //pointer to the solid HEC
   const GeoLogVol*   logicHEC;     //pointer to the logical HEC
-  GeoFullPhysVol*    physiHEC;     //pointer to the physical HEC
+  GeoIntrusivePtr<GeoFullPhysVol>    physiHEC;     //pointer to the physical HEC
 
   
 
@@ -208,7 +208,7 @@ GeoFullPhysVol* LArGeo::HEC2WheelConstruction::GetEnvelope(bool fullGeo, bool po
   std::string tag1 = m_posZSide? std::string("HEC1_POS") : std::string("HEC1_NEG");
 
   HECWheelConstruction theFrontHEC(fullGeo,"front",false,m_posZSide) ;
-  GeoFullPhysVol* EnvelopeF = theFrontHEC.GetEnvelope();
+  GeoIntrusivePtr<GeoFullPhysVol> EnvelopeF = theFrontHEC.GetEnvelope();
 
   StoredPhysVol *sPhysVolHec1 = new StoredPhysVol(EnvelopeF);
   sc=detStore->record(sPhysVolHec1,tag1);
@@ -234,7 +234,7 @@ GeoFullPhysVol* LArGeo::HEC2WheelConstruction::GetEnvelope(bool fullGeo, bool po
   std::string tag2 = m_posZSide? std::string("HEC2_POS") : std::string("HEC2_NEG");
 
   HECWheelConstruction theRearHEC(fullGeo,"rear",false,m_posZSide);
-  GeoFullPhysVol* EnvelopeR = theRearHEC.GetEnvelope();
+  GeoIntrusivePtr<GeoFullPhysVol> EnvelopeR = theRearHEC.GetEnvelope();
 
   StoredPhysVol *sPhysVolHec2 = new StoredPhysVol(EnvelopeR);
   sc=detStore->record(sPhysVolHec2,tag2);

@@ -50,7 +50,7 @@ EndcapPresamplerConstruction::EndcapPresamplerConstruction( bool imb ):
 EndcapPresamplerConstruction::~EndcapPresamplerConstruction() {;}
 
 
-GeoFullPhysVol* EndcapPresamplerConstruction::Envelope()
+GeoIntrusivePtr<GeoFullPhysVol> EndcapPresamplerConstruction::Envelope()
 {
   if (m_psPhysical) return m_psPhysical->clone();
 

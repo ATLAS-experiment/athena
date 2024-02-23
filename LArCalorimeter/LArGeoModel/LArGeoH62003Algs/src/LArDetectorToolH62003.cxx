@@ -73,7 +73,7 @@ StatusCode LArDetectorToolH62003::create()
 
   if (nullptr == m_detector) 
   {
-    GeoPhysVol *world=&*theExpt->getPhysVol();
+    GeoIntrusivePtr<GeoPhysVol>world=&*theExpt->getPhysVol();
     theLArFactory.create(world);
 
     if (StatusCode::SUCCESS != detStore()->record(theLArFactory.getDetectorManager(),theLArFactory.getDetectorManager()->getName())) 

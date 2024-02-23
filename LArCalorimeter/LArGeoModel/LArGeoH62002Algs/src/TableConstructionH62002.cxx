@@ -55,7 +55,7 @@ LArGeo::TableConstructionH62002::~TableConstructionH62002()
 
 
 
-GeoVPhysVol* LArGeo::TableConstructionH62002::GetEnvelope()
+PVLink LArGeo::TableConstructionH62002::GetEnvelope()
 {
 
   if (m_H62002TablePhysical) return m_H62002TablePhysical;
@@ -168,7 +168,7 @@ GeoVPhysVol* LArGeo::TableConstructionH62002::GetEnvelope()
   GeoBox* ScintShape = new GeoBox(ScintDx, ScintDy, ScintDz);  // A generic Box Scintillator
   std::string ScintName = baseName + "::Scintillator";
   GeoLogVol* ScintLogical = new GeoLogVol( ScintName, ScintShape, Scint );
-  GeoPhysVol* ScintPhysical = new GeoPhysVol( ScintLogical );    
+  GeoIntrusivePtr<GeoPhysVol> ScintPhysical = new GeoPhysVol( ScintLogical );    
   for ( unsigned int i = 0; i < v_ScintZ.size(); i++ ) {
     m_H62002TablePhysical->add( new GeoIdentifierTag(i) );
     m_H62002TablePhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, (v_ScintZ[ i ]-H62002TableZ) ) ) );
@@ -191,7 +191,7 @@ GeoVPhysVol* LArGeo::TableConstructionH62002::GetEnvelope()
   v_MwpcPos.push_back(1815.*Gaudi::Units::mm);
   double WireStep = 1.*Gaudi::Units::mm;
   MWPCConstruction mwpcXConstruction (WireStep);
-  GeoVPhysVol* mwpcEnvelope = mwpcXConstruction.GetEnvelope();
+  PVLink mwpcEnvelope = mwpcXConstruction.GetEnvelope();
   for ( int imwpc = 0; imwpc<MwpcNumber ; imwpc++)
     { 
       m_H62002TablePhysical->add(new GeoIdentifierTag(imwpc+2));

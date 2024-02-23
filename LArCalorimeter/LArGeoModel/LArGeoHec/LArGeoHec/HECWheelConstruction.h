@@ -13,8 +13,8 @@
 #define LARGEOHEC_HECWHEELCONSTRUCTION_H
 
 #include <string>
+#include "GeoModelKernel/GeoFullPhysVol.h"
 
-class GeoFullPhysVol;
 
 namespace LArGeo 
 {
@@ -26,10 +26,9 @@ namespace LArGeo
       virtual ~HECWheelConstruction();
 
       // Get the envelope containing this detector.
-      GeoFullPhysVol* GetEnvelope();
+      GeoIntrusivePtr<GeoFullPhysVol> GetEnvelope();
       
     private:
-      GeoFullPhysVol* m_physiHECWheel;
       bool	      m_posZSide;
       //bool	      m_rail;
       //bool	      m_left;

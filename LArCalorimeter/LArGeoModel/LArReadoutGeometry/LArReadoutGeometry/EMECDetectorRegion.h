@@ -146,7 +146,7 @@ class EMECDetectorRegion : public GeoVDetectorElement
     
   EMECDetectorRegion(const EMECDetectorRegion &right);
   EMECDetectorRegion & operator=(const EMECDetectorRegion &right);
-  const EMECDetDescr *m_descriptor;
+  GeoIntrusivePtr<const EMECDetDescr> m_descriptor{};
   EMECDetectorRegion::DetectorSide m_endcapIndex;
   double m_projectivityDisplacement;
 

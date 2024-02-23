@@ -87,11 +87,8 @@ EMECDetectorManager::EMECDetectorManager(const EMECHVManager* hvManagerInner
 }
 
 
-EMECDetectorManager::~EMECDetectorManager()
-{
-  for (unsigned int i=0;i<getNumDetectorRegions();i++) delete m_DetRegionsIterative[i];
-  unsigned int ntree = EMECDetectorManager::getNumTreeTops();
-  for (unsigned int i=0;i<ntree;i++) EMECDetectorManager::getTreeTop(i)->unref();
+EMECDetectorManager::~EMECDetectorManager() {
+  for (unsigned int i=0;i<getNumDetectorRegions();i++) delete m_DetRegionsIterative[i]; 
   delete m_MagicNumbers;
 }
 
@@ -137,7 +134,6 @@ void EMECDetectorManager::addDetectorRegion (const EMECDetectorRegion *region)
 void EMECDetectorManager::addTreeTop (PVLink treeTop)
 {
   m_treeTop.push_back(treeTop);
-  treeTop->ref();
 }
 
 const EMECHVManager& EMECDetectorManager::getHVManager (EMECHVManager::IOType io) const

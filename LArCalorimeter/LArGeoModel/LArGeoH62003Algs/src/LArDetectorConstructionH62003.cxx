@@ -79,7 +79,7 @@ LArGeo::LArDetectorConstructionH62003::LArDetectorConstructionH62003()
 LArGeo::LArDetectorConstructionH62003::~LArDetectorConstructionH62003() 
 = default;
 
-GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
+PVLink LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 {
 
   if (m_H62003EnvelopePhysical) return m_H62003EnvelopePhysical;
@@ -209,8 +209,8 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 
   // Cryostat
   H6CryostatConstruction cryoConstruction;
-  GeoVFullPhysVol* cryoPhys = cryoConstruction.GetEnvelope();
-  GeoPhysVol* LArPhysical = cryoConstruction.GetLArPhysical();
+  GeoIntrusivePtr<GeoVFullPhysVol> cryoPhys = cryoConstruction.GetEnvelope();
+  GeoIntrusivePtr<GeoPhysVol> LArPhysical = cryoConstruction.GetLArPhysical();
 
   // The Cryostat will be the reference to which other detectors are positioned.
   std::string nickname   = "POSITION1";
@@ -312,7 +312,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
       const GeoLogVol* tubEnvelopeLog   = 
 	new GeoLogVol(tubName,tubEnvelopeShape,LAr);
       //new GeoLogVol(tubName,tubEnvelopeShape,Air);
-      GeoPhysVol* tubEnvelopePhys = new GeoPhysVol(tubEnvelopeLog);
+      GeoIntrusivePtr<GeoPhysVol> tubEnvelopePhys = new GeoPhysVol(tubEnvelopeLog);
       // Recall that in the coords of the cryostat, a transformation
       // in z wrt to the world will be a transformation in -y in the 
       // cryostat and a transformation in y wrt to world will be 
@@ -330,7 +330,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 	new GeoBox(tubWidth,tubHeighth,tubThickness); 
       const GeoLogVol* tubEndLog = 
 	new GeoLogVol(tubEndName, tubEndShape, StainlessSteel);
-      GeoPhysVol* tubEndPhys = new GeoPhysVol(tubEndLog);
+      GeoIntrusivePtr<GeoPhysVol> tubEndPhys = new GeoPhysVol(tubEndLog);
 
       // All transformations of the tub sides will be w.r.t the 
       // tubEnvelope
@@ -349,7 +349,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 	new GeoBox(tubHeighth,tubLength,tubThickness); 
       const GeoLogVol* tubSideLog = 
 	new GeoLogVol(tubSideName, tubSideShape, StainlessSteel);
-      GeoPhysVol* tubSidePhys = new GeoPhysVol(tubSideLog);
+      GeoIntrusivePtr<GeoPhysVol> tubSidePhys = new GeoPhysVol(tubSideLog);
 
       tubEnvelopePhys->add(new GeoTransform(Translate3D(tubWidth,
                                                         0.0*cm,
@@ -369,7 +369,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 	new GeoBox(tubWidth,tubLength,tubThickness); 
       const GeoLogVol* tubBottomLog = 
 	new GeoLogVol(tubBottomName, tubBottomShape, StainlessSteel);
-      GeoPhysVol* tubBottomPhys = new GeoPhysVol(tubBottomLog);
+      GeoIntrusivePtr<GeoPhysVol> tubBottomPhys = new GeoPhysVol(tubBottomLog);
       tubEnvelopePhys->add(new GeoTransform(Translate3D(0.0*cm,
                                                         -tubHeighth,
                                                         0.0*cm)));
@@ -382,7 +382,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
       fcalConstruction.setFCALVisLimit(m_fcalVisLimit);
       // Only need one FCal    
       bool isPositive(false); // C side for TB 2003; C side is negative
-      GeoVFullPhysVol* fcalEnvelope = fcalConstruction.GetEnvelope(isPositive);
+      GeoIntrusivePtr<GeoVFullPhysVol> fcalEnvelope = fcalConstruction.GetEnvelope(isPositive);
       if(fcalEnvelope == nullptr)
 	{
 	  throw std::runtime_error("Error getting FCAL envelope");
@@ -418,7 +418,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
       GeoTubs *FCalBeamTubs = 
 		  new GeoTubs(innerRadius, outerRadius,halfDepth,0,360*deg);
       GeoLogVol* FCalBeamLog = new GeoLogVol(FCalBeamName,FCalBeamTubs,Vac);
-      GeoPhysVol* FCalBeamPhys = new GeoPhysVol(FCalBeamLog);
+      GeoIntrusivePtr<GeoPhysVol> FCalBeamPhys = new GeoPhysVol(FCalBeamLog);
 
       tubEnvelopePhys->add(new GeoNameTag(FCalBeamName));
       tubEnvelopePhys->add(FCalBeamPhys);
@@ -442,7 +442,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 		  new GeoLogVol(AlPlateName, &AlPlateShape, Aluminum);
       
       const double AlTrans = tubLength - (tubThickness + AlZDim);      
-      GeoPhysVol* AlPlatePhys = new GeoPhysVol(AlPlateLog);
+      GeoIntrusivePtr<GeoPhysVol> AlPlatePhys = new GeoPhysVol(AlPlateLog);
 
       tubEnvelopePhys->
       	add(new GeoTransform(Translate3D(20.0*cm,  
@@ -468,7 +468,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 		  (ExcluderTubShape->subtract(*ExcluderSlit<<ExSlitOffset));
       const GeoLogVol* ExcluderTubLog = 
 		  new GeoLogVol(ExcludertubName, &ExcluderShape, Rohacell);
-      GeoPhysVol* ExcluderTubPhys = 
+      GeoIntrusivePtr<GeoPhysVol> ExcluderTubPhys = 
 		  new GeoPhysVol(ExcluderTubLog);
       
       // The excuder is right up against the cryostat
@@ -546,7 +546,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 		  ScintName += o.str(); 
 		  const GeoLogVol* ScintLogical = 
 			  new GeoLogVol(ScintName,ScintShape,PStyrene);
-		  GeoPhysVol* ScintPhysical = new GeoPhysVol(ScintLogical);
+		  GeoIntrusivePtr<GeoPhysVol> ScintPhysical = new GeoPhysVol(ScintLogical);
 		  
 		  m_H62003EnvelopePhysical->add(new GeoIdentifierTag(1));
 		  m_H62003EnvelopePhysical->
@@ -630,7 +630,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 		  TableScintName += o.str(); 
 		  const GeoLogVol* TableScintLogical = 
 			  new GeoLogVol(TableScintName,TableScintShape,PStyrene );
-		  GeoPhysVol* TableScintPhysical = 
+		  GeoIntrusivePtr<GeoPhysVol> TableScintPhysical = 
 			  new GeoPhysVol( TableScintLogical );
 		  
 		  //	m_H62003EnvelopePhysical->add( new GeoIdentifierTag( 1 ) );
@@ -662,7 +662,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 		  VetoBoxShape->subtract(*VetoHole);
 	  
 	  const GeoLogVol* VetoLog = new GeoLogVol(VetoName, &VetoShape, PStyrene);
-	  GeoPhysVol* VetoPhys = new GeoPhysVol(VetoLog);
+	  GeoIntrusivePtr<GeoPhysVol> VetoPhys = new GeoPhysVol(VetoLog);
 	  
 	  m_H62003EnvelopePhysical->
 		  add(new GeoTransform(Translate3D(VetoXPos, 
@@ -687,7 +687,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 		  GeoBox(MuonCtrXDim,MuonCtrYDim,MuonCtrZDim);
 	  const GeoLogVol* MuonCtrLogical = 
 		  new GeoLogVol(MuonCtrName,MuonCtrShape,PStyrene);
-	  GeoPhysVol* MuonCtrPhysical = new GeoPhysVol(MuonCtrLogical);
+	  GeoIntrusivePtr<GeoPhysVol> MuonCtrPhysical = new GeoPhysVol(MuonCtrLogical);
 	  
 	  m_H62003EnvelopePhysical->
 		  add(new GeoTransform(Translate3D(MuonCtrXPos, 
@@ -739,7 +739,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 	  m_H62003EnvelopePhysical->add(TCScintName);      
 	  for(int i = 0; i<6; i++)
       {
-		  GeoPhysVol* TCScintPhysical = new GeoPhysVol(TCScintLogical);
+		  GeoIntrusivePtr<GeoPhysVol> TCScintPhysical = new GeoPhysVol(TCScintLogical);
 		  GeoAlignableTransform* TCScintTrans = 
 			  new GeoAlignableTransform(Translate3D(TCScintXPos,
                                                                 TCScintYPos,
@@ -756,7 +756,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 	  m_H62003EnvelopePhysical->add(TCIronName);
 	  for(int i = 0; i<6; i++)
       {
-		  GeoPhysVol* TCIronPhysical = new GeoPhysVol(TCIronLogical);
+		  GeoIntrusivePtr<GeoPhysVol> TCIronPhysical = new GeoPhysVol(TCIronLogical);
 		  GeoAlignableTransform* TCIronTrans = 
 			  new GeoAlignableTransform(Translate3D(TCIronXPos,
 													   TCIronYPos,
@@ -799,7 +799,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 		  (WallShape->subtract(*SlitShape<<SlitOffset));
 	  GeoLogVol* IronWallLogical     = 
 		  new GeoLogVol(IronWallName, &IronWallShape, Iron);
-	  GeoPhysVol* IronWallPhysical   = new GeoPhysVol(IronWallLogical);
+	  GeoIntrusivePtr<GeoPhysVol> IronWallPhysical   = new GeoPhysVol(IronWallLogical);
 	  
 	  m_H62003EnvelopePhysical->
 		  add(new GeoTransform(Translate3D(
@@ -826,7 +826,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 	  const GeoBox* ConAShape = new GeoBox(ConSizeX, ConSizeY, ConSizeZ);
 	  const GeoLogVol* ConALogical = 
 		  new GeoLogVol(ConcreteWallAName,ConAShape,Concrete);
-	  GeoPhysVol* ConAPhysical = new GeoPhysVol(ConALogical);
+	  GeoIntrusivePtr<GeoPhysVol> ConAPhysical = new GeoPhysVol(ConALogical);
 	  
 	  m_H62003EnvelopePhysical->
 		  add(new GeoTransform(Translate3D(ConAXPos,
@@ -840,7 +840,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
 	  const GeoBox* ConBShape = new GeoBox(ConSizeX, ConSizeY, ConSizeZ);
 	  const GeoLogVol* ConBLogical = 
 		  new GeoLogVol(ConcreteWallBName, ConBShape, Concrete);
-	  GeoPhysVol* ConBPhysical = new GeoPhysVol(ConBLogical);
+	  GeoIntrusivePtr<GeoPhysVol> ConBPhysical = new GeoPhysVol(ConBLogical);
 	  
 	  m_H62003EnvelopePhysical->add(new GeoTransform(Translate3D(ConBXPos,
                                                                    ConBYPos, 
@@ -876,7 +876,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionH62003::GetEnvelope()
   return m_H62003EnvelopePhysical;
 }
 
-void LArGeo::LArDetectorConstructionH62003::createAxis(GeoFullPhysVol* H62003EnvelopePhysical, const GeoMaterial* mat)
+void LArGeo::LArDetectorConstructionH62003::createAxis(GeoIntrusivePtr<GeoFullPhysVol> H62003EnvelopePhysical, const GeoMaterial* mat)
 {
 	std::string baseName = "LAr::TBH62003::";
 	double axisXYHalfLength = 2.5*m;
@@ -888,7 +888,7 @@ void LArGeo::LArDetectorConstructionH62003::createAxis(GeoFullPhysVol* H62003Env
 	// x-axis
 	std::string XAxisName = baseName + "::XAxis";
 	const GeoLogVol* XAxisLogical = new GeoLogVol(XAxisName,XYaxisShape,mat);
-	GeoPhysVol* XAxisPhysVol = new GeoPhysVol(XAxisLogical);
+	GeoIntrusivePtr<GeoPhysVol> XAxisPhysVol = new GeoPhysVol(XAxisLogical);
 	
 	H62003EnvelopePhysical->add(new GeoTransform(Transform3D(GeoTrf::Translate3D(axisXYHalfLength,0.*m,0.*m)*GeoTrf::RotateY3D(90.*deg))));
 	H62003EnvelopePhysical->add(XAxisPhysVol);
@@ -896,7 +896,7 @@ void LArGeo::LArDetectorConstructionH62003::createAxis(GeoFullPhysVol* H62003Env
 	// y-axis
 	std::string YAxisName = baseName + "::YAxis";
 	const GeoLogVol* YAxisLogical = new GeoLogVol(YAxisName,XYaxisShape,mat);
-	GeoPhysVol* YAxisPhysVol = new GeoPhysVol( YAxisLogical );
+	GeoIntrusivePtr<GeoPhysVol> YAxisPhysVol = new GeoPhysVol( YAxisLogical );
 	
 	H62003EnvelopePhysical->add(new GeoTransform(Transform3D(GeoTrf::Translate3D(0.*m,axisXYHalfLength,0.*m)*GeoTrf::RotateX3D(-90.*deg))));
 	H62003EnvelopePhysical->add(YAxisPhysVol);
@@ -904,7 +904,7 @@ void LArGeo::LArDetectorConstructionH62003::createAxis(GeoFullPhysVol* H62003Env
 	//z-axis
 	std::string ZAxisName = baseName + "::ZAxis";
 	const GeoLogVol* ZAxisLogical = new GeoLogVol(ZAxisName,ZaxisShape,mat);
-	GeoPhysVol* ZAxisPhysVol = new GeoPhysVol(ZAxisLogical);
+	GeoIntrusivePtr<GeoPhysVol> ZAxisPhysVol = new GeoPhysVol(ZAxisLogical);
 	
 	H62003EnvelopePhysical->
 		add(new GeoTransform(TranslateZ3D(axisZHalfLength)));

@@ -203,8 +203,6 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
     GeoLogVol* logVol = new GeoLogVol(basename,tubs,LAr);
     m_psPhysicalPos = new GeoFullPhysVol(logVol);
     m_psPhysicalNeg = new GeoFullPhysVol(logVol);
-    m_psPhysicalPos->ref();
-    m_psPhysicalNeg->ref();
   }
 
   // Make a presampler sector:
@@ -275,7 +273,7 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
     double delta01 =  0.5*larheight*tan(-mod[1][3]*Gaudi::Units::deg);   // delta01 is >0
     mod_leng[0]=mod_leng[0]-delta01; 
     mod_leng[1]=mod_leng[1]+delta01; 
-    GeoPhysVol* pvModule[8];
+    GeoIntrusivePtr<GeoPhysVol> pvModule[8];
     {
 
       double modYPrev=0, modLenPrev=0;
@@ -311,7 +309,7 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
     {
       GeoBox *box = new GeoBox((smallLength/2+1.)*cmm, (shell_leng/2)*cmm,(shell_th/2)*cmm);
       GeoLogVol *logVol=new GeoLogVol(basename+"::ProtectionShell",box,FR4);
-      GeoPhysVol *physVol = new GeoPhysVol(logVol);
+      GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 
       double glZ = -sector_height/2+(shell_th/2)*cmm+epsil;
       
@@ -344,7 +342,7 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
     {
       GeoBox* MB = new GeoBox((mb_width/2)*cmm,(mb_length/2)*cmm,(mb_th/2)*cmm);
       GeoLogVol *logVol=new GeoLogVol(basename+"::MotherBoard",MB,MBMat);
-      GeoPhysVol *physVol = new GeoPhysVol(logVol);
+      GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 
       GeoTransform* xf = new GeoTransform(GeoTrf::TranslateZ3D(mbZ));
       sectorPhysVol->add(xf);
@@ -359,7 +357,7 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
 
       GeoBox* plate = new GeoBox(prot_x,prot_y,prot_z);
       GeoLogVol *logVol=new GeoLogVol(basename+"::ProtectionPlate",plate,FR4);
-      GeoPhysVol *physVol = new GeoPhysVol(logVol);
+      GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 
       GeoTransform* xf = new GeoTransform(GeoTrf::Translate3D(glX,glY,mbZ+(mb_th/2+heightOut+prot_th/2)*cmm+2*epsil));
       sectorPhysVol->add(xf);
@@ -376,7 +374,7 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
 
       GeoTrd* connectics = new GeoTrd(conn_xm,conn_xp,conn_ym,conn_yp,conn_leng);
       GeoLogVol *logVol=new GeoLogVol(basename+"::Connectics",connectics,ConnecMat);
-      GeoPhysVol *physVol = new GeoPhysVol(logVol);
+      GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 
       double connZ = mbZ+(mb_th/2+heightOut/2)*cmm+epsil;
       GeoTransform* xf1 = new GeoTransform(GeoTrf::TranslateZ3D(connZ));
@@ -391,7 +389,7 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
     {
       GeoBox* rail = new GeoBox((rail_width/2)*cmm,(shell_leng/2)*cmm,(rail_th/2)*cmm);
       GeoLogVol *logVol=new GeoLogVol(basename+"::Rail",rail,FR4);
-      GeoPhysVol *physVol = new GeoPhysVol(logVol);
+      GeoIntrusivePtr<GeoPhysVol>physVol = new GeoPhysVol(logVol);
 
       double railX = (bigLength/2+1-rail_pos-rail_width/2)*cmm+epsil;
       double railZ = modz[0]+mod_heig[0]/2+(rail_th/2)*cmm+epsil;
@@ -419,19 +417,19 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
 
     GeoTrd* catho1 = new GeoTrd(smallLength/2*cmm,bigLength/2*cmm,cathode_th/2*cmm,cathode_th/2*cmm,heig_elec1/2*cmm);
     GeoLogVol* LV_catho1 = new GeoLogVol(basename+"::Cathode1",catho1,CathodeMat);
-    GeoPhysVol *PV_catho1 = new GeoPhysVol(LV_catho1);
+    GeoIntrusivePtr<GeoPhysVol>PV_catho1 = new GeoPhysVol(LV_catho1);
 
     GeoTrd* catho3 = new GeoTrd(smallLength/2 *cmm,bigLength/2 *cmm,cathode_th/2 *cmm,cathode_th/2 *cmm,heig_elec3/2);
     GeoLogVol* LV_catho3 = new GeoLogVol(basename+"::Cathode3",catho3,CathodeMat);
-    GeoPhysVol *PV_catho3 = new GeoPhysVol(LV_catho3);
+    GeoIntrusivePtr<GeoPhysVol>PV_catho3 = new GeoPhysVol(LV_catho3);
 
     GeoTrd* ano1 = new GeoTrd(smallLength/2 *cmm,bigLength/2 *cmm,anode_th/2 *cmm,anode_th/2 *cmm,heig_elec1/2);
     GeoLogVol* LV_ano1 = new GeoLogVol(basename+"::Anode1",ano1,AnodeMat);
-    GeoPhysVol *PV_ano1 = new GeoPhysVol(LV_ano1);
+    GeoIntrusivePtr<GeoPhysVol>PV_ano1 = new GeoPhysVol(LV_ano1);
 
     GeoTrd* ano3 = new GeoTrd(smallLength/2 *cmm,bigLength/2 *cmm,anode_th/2 *cmm,anode_th/2 *cmm,heig_elec3/2);
     GeoLogVol* LV_ano3 = new GeoLogVol(basename+"::Anode3",ano3,AnodeMat);
-    GeoPhysVol *PV_ano3 = new GeoPhysVol(LV_ano3);
+    GeoIntrusivePtr<GeoPhysVol>PV_ano3 = new GeoPhysVol(LV_ano3);
 
     //-- Prepreg. plates --
     double prep2_height = (bigLength/2+1.)*cmm;
@@ -440,7 +438,7 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
     double prep_length[8];
     for(int i=0; i<8; i++ ) prep_length[i] = mod_leng[i]-2.*epsil;
 
-    GeoPhysVol* PV_Prep1[8], *PV_Prep2[8];
+    std::array<GeoIntrusivePtr<GeoPhysVol>,8> PV_Prep1{}, PV_Prep2{};
 
     for(int i=0; i<8; i++ )
     {
@@ -454,8 +452,8 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
     }
 
     // 2. Fill the module contents
-    double prep1_pos[8];
-    double prep2_pos[8];
+    std::array<double, 8> prep1_pos{};
+    std::array<double, 8> prep2_pos{};
     double elec_trans = -2*prep2_z+mod_heig[0]/2-(larheight/2)*cmm-3*epsil; 
     for(int i=0; i<8; i++ )
     {
@@ -518,17 +516,13 @@ LArGeo::BarrelPresamplerConstruction ::BarrelPresamplerConstruction(bool fullGeo
 }
 
 // Destructor:
-LArGeo::BarrelPresamplerConstruction::~BarrelPresamplerConstruction()
-{
-  m_psPhysicalPos->unref();
-  m_psPhysicalNeg->unref();
-}
+LArGeo::BarrelPresamplerConstruction::~BarrelPresamplerConstruction() = default;
   
 
-GeoFullPhysVol* LArGeo::BarrelPresamplerConstruction::GetPositiveEnvelope() {
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelPresamplerConstruction::GetPositiveEnvelope() {
   return m_psPhysicalPos;
 }
 
-GeoFullPhysVol* LArGeo::BarrelPresamplerConstruction::GetNegativeEnvelope(){
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelPresamplerConstruction::GetNegativeEnvelope(){
   return m_psPhysicalNeg;
 }

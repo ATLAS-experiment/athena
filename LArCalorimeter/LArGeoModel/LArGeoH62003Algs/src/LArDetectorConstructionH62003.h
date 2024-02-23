@@ -23,7 +23,7 @@ namespace LArGeo {
       virtual ~LArDetectorConstructionH62003();
       
       // Get the envelope containing this detector.
-      virtual GeoVPhysVol* GetEnvelope();
+      virtual PVLink GetEnvelope();
       
       // Set a vis limit for the EC
       void SetFCALVisLimit(int limit) {m_fcalVisLimit=limit;}
@@ -31,9 +31,9 @@ namespace LArGeo {
       
     private:
       
-      static void  createAxis(GeoFullPhysVol* H62003MotherPhysical, const GeoMaterial* mat);
+      static void  createAxis(GeoIntrusivePtr<GeoFullPhysVol> H62003MotherPhysical, const GeoMaterial* mat);
       
-      GeoFullPhysVol*      m_H62003EnvelopePhysical;
+      GeoIntrusivePtr<GeoFullPhysVol>      m_H62003EnvelopePhysical;
       
       int                  m_fcalVisLimit;
       bool                 m_axisVisState;

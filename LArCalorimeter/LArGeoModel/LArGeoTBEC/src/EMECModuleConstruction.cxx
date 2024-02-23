@@ -72,7 +72,7 @@ LArGeo::EMECModuleConstruction::EMECModuleConstruction( bool tbb, bool iwb, bool
 
 LArGeo::EMECModuleConstruction::~EMECModuleConstruction() = default;
 
-GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
+GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::EMECModuleConstruction::GetEnvelope()
 {
   ISvcLocator *svcLocator = Gaudi::svcLocator();
   StoreGateSvc *detStore;
@@ -546,7 +546,7 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
   								      emecMotherRin[i],
 								      emecMotherRout[i] );
   const GeoLogVol* emecMotherLogical = new GeoLogVol( emecMotherName, emecMotherShape, LAr );
-  GeoFullPhysVol* emecMotherPhysical = new GeoFullPhysVol( emecMotherLogical );
+  GeoIntrusivePtr<GeoFullPhysVol> emecMotherPhysical = new GeoFullPhysVol( emecMotherLogical );
 
   if ( m_isInnerWheel ) {
     std::string innerName = baseName + "::InnerWheel";
@@ -554,7 +554,7 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
     innerShape->addPlane( zWheelInner[0], rMinInner[0], rMaxInner[0] );
     innerShape->addPlane( zWheelInner[1], rMinInner[1], rMaxInner[1] );
     GeoLogVol*  innerLogical  = new GeoLogVol ( innerName, innerShape, LAr );
-    GeoFullPhysVol* innerPhysical = new GeoFullPhysVol( innerLogical );
+    GeoIntrusivePtr<GeoFullPhysVol> innerPhysical = new GeoFullPhysVol( innerLogical );
     emecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
     emecMotherPhysical->add( new GeoTransform( GeoTrf::TranslateZ3D( zWheelFrontFace ) ) );
     emecMotherPhysical->add( innerPhysical );
@@ -572,8 +572,8 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
     GeoLogVol* innerElectrodeLogical =
 	    new GeoLogVol( IEWname, innerElectrodeShape, innerElectrodMaterial );
 
-    GeoFullPhysVol* innerAbsorberPhysical  = new GeoFullPhysVol( innerAbsorberLogical );
-    GeoPhysVol* innerElectrodePhysical = new GeoPhysVol( innerElectrodeLogical );
+    GeoIntrusivePtr<GeoFullPhysVol> innerAbsorberPhysical  = new GeoFullPhysVol( innerAbsorberLogical );
+    GeoIntrusivePtr<GeoPhysVol> innerElectrodePhysical = new GeoPhysVol( innerElectrodeLogical );
     innerPhysical->add( new GeoIdentifierTag( 1 ) );
     innerPhysical->add( innerAbsorberPhysical );
     innerPhysical->add( new GeoIdentifierTag( 1 ) );
@@ -592,7 +592,7 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
     outerShape->addPlane( zWheelOuter[1], rMinOuter[1], rMaxOuter[1] );
     outerShape->addPlane( zWheelOuter[2], rMinOuter[2], rMaxOuter[2] );
     GeoLogVol*  outerLogical  = new GeoLogVol ( outerName, outerShape, LAr );
-    GeoFullPhysVol* outerPhysical = new GeoFullPhysVol(outerLogical);
+    GeoIntrusivePtr<GeoFullPhysVol> outerPhysical = new GeoFullPhysVol(outerLogical);
     emecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
     emecMotherPhysical->add( new GeoTransform( GeoTrf::TranslateZ3D( zWheelFrontFace ) ) );
     emecMotherPhysical->add( outerPhysical );
@@ -610,8 +610,8 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
     GeoLogVol* outerElectrodeLogical =
 	    new GeoLogVol( OEWname,outerElectrodeShape, outerElectrodMaterial );
 
-    GeoPhysVol* outerAbsorberPhysical  = new GeoPhysVol( outerAbsorberLogical );
-    GeoPhysVol* outerElectrodePhysical = new GeoPhysVol( outerElectrodeLogical );
+    GeoIntrusivePtr<GeoPhysVol> outerAbsorberPhysical  = new GeoPhysVol( outerAbsorberLogical );
+    GeoIntrusivePtr<GeoPhysVol> outerElectrodePhysical = new GeoPhysVol( outerElectrodeLogical );
     outerPhysical->add( new GeoIdentifierTag( 1 ) );
     outerPhysical->add( outerAbsorberPhysical);
     outerPhysical->add( new GeoIdentifierTag( 1 ) );
@@ -654,14 +654,14 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
 
   z0 = zWheelFrontFace - 61.*Gaudi::Units::mm;
   EMECSupportConstruction *fsc = new EMECSupportConstruction( FrontIndx, true, true, "LAr::EMEC::", M_PI/2 );
-  GeoPhysVol* physicalFSM = fsc->GetEnvelope();
+  GeoIntrusivePtr<GeoPhysVol> physicalFSM = fsc->GetEnvelope();
   emecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
   emecMotherPhysical->add( new GeoTransform( GeoTrf::TranslateZ3D( z0 ) ) );
   emecMotherPhysical->add( physicalFSM );
 
   z0 = zWheelFrontFace + 514.*Gaudi::Units::mm + 55.*Gaudi::Units::mm;
   EMECSupportConstruction *bsc = new EMECSupportConstruction( BackIndx, true, true, "LAr::EMEC::", M_PI/2 );
-  GeoPhysVol *physicalBSM = bsc->GetEnvelope();
+  GeoIntrusivePtr<GeoPhysVol>physicalBSM = bsc->GetEnvelope();
   emecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
   GeoTrf::Transform3D rotBSM(GeoTrf::RotateZ3D(2*M_PI/2)*GeoTrf::RotateX3D(-M_PI));
   emecMotherPhysical->add( new GeoTransform( GeoTrf::Transform3D(GeoTrf::Translate3D( 0., 0., z0 )*rotBSM ) ) );
@@ -670,7 +670,7 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
   if ( m_isOuterWheel ) {
     z0 = zWheelFrontFace + 514.*Gaudi::Units::mm/2;
     EMECSupportConstruction *osc = new EMECSupportConstruction( EMECSupportConstruction::Outer, true, true, "LAr::EMEC::", M_PI/2 );
-    GeoPhysVol *physicalOSM = osc->GetEnvelope();
+    GeoIntrusivePtr<GeoPhysVol>physicalOSM = osc->GetEnvelope();
     emecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
     emecMotherPhysical->add( new GeoTransform( GeoTrf::TranslateZ3D( z0 ) ) );
     emecMotherPhysical->add( physicalOSM );
@@ -679,7 +679,7 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
   if ( m_isInnerWheel ) {
     z0 = zWheelFrontFace + 514.*Gaudi::Units::mm/2;
     EMECSupportConstruction *isc = new EMECSupportConstruction( EMECSupportConstruction::Inner, true, true, "LAr::EMEC::", M_PI/2 );
-    GeoPhysVol *physicalISM = isc->GetEnvelope();
+    GeoIntrusivePtr<GeoPhysVol>physicalISM = isc->GetEnvelope();
     emecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
     emecMotherPhysical->add(new GeoTransform( GeoTrf::TranslateZ3D( z0 ) ) )  ;
     emecMotherPhysical->add( physicalISM );
@@ -687,7 +687,7 @@ GeoVFullPhysVol* LArGeo::EMECModuleConstruction::GetEnvelope()
 
   z0 = zWheelFrontFace + 514.*Gaudi::Units::mm/2;
   EMECSupportConstruction *msc = new EMECSupportConstruction( EMECSupportConstruction::Middle, true, true, "LAr::EMEC::", M_PI/2 );
-  GeoPhysVol *physicalMSM = msc->GetEnvelope();
+  GeoIntrusivePtr<GeoPhysVol>physicalMSM = msc->GetEnvelope();
   emecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
   emecMotherPhysical->add(new GeoTransform( GeoTrf::TranslateZ3D( z0 ) ) )  ;
   emecMotherPhysical->add( physicalMSM );

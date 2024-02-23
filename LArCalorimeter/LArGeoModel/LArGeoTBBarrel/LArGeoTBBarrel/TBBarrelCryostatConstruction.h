@@ -22,7 +22,7 @@ namespace LArGeo {
    virtual ~TBBarrelCryostatConstruction();
 
    // get the envelope containing this detector
-   virtual GeoFullPhysVol* GetEnvelope(const VDetectorParameters* params);
+   virtual GeoIntrusivePtr<GeoFullPhysVol> GetEnvelope(const VDetectorParameters* params);
 
    void setBarrelSagging(bool flag) {_barrelSagging=flag;}
    void setBarrelCellVisLimit(int maxCell) {_barrelVisLimit = maxCell;}
@@ -30,7 +30,7 @@ namespace LArGeo {
    private:
     bool                  _barrelSagging;
     int                   _barrelVisLimit;
-    GeoFullPhysVol*       cryoMotherPhysical;
+    GeoIntrusivePtr<GeoFullPhysVol>       cryoMotherPhysical;
   };
 
 } // namespace LArGeo

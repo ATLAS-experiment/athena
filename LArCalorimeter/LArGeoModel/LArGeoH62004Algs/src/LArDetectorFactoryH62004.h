@@ -25,7 +25,7 @@ namespace LArGeo {
     ~LArDetectorFactoryH62004();
     
     // Creation of geometry:
-    virtual void create(GeoPhysVol *world);
+    virtual void create(GeoPhysVol* world);
     
     //
     virtual const LArDetectorManager * getDetectorManager() const;

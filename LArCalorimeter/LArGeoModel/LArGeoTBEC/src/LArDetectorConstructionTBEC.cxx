@@ -115,7 +115,7 @@ StoreGate interface");
 
 LArGeo::LArDetectorConstructionTBEC::~LArDetectorConstructionTBEC() = default;
 
-GeoVPhysVol* LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
+PVLink LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
 {
 
   if (m_tbecEnvelopePhysical) return m_tbecEnvelopePhysical;
@@ -190,7 +190,7 @@ GeoVPhysVol* LArGeo::LArDetectorConstructionTBEC::GetEnvelope()
   return m_tbecEnvelopePhysical;
 }
 
-GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::LArDetectorConstructionTBEC::createEnvelope()
 {
   // Get access to the material manager:
   
@@ -245,7 +245,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
   std::string tbecMotherName = baseName + "::MotherVolume";
   GeoBox* tbecMotherShape = new GeoBox( 5.*Gaudi::Units::m, 5.*Gaudi::Units::m, 15.*Gaudi::Units::m  );
   const GeoLogVol* tbecMotherLogical = new GeoLogVol( tbecMotherName, tbecMotherShape, Air );
-  GeoFullPhysVol* tbecMotherPhysical = new GeoFullPhysVol( tbecMotherLogical );
+  GeoIntrusivePtr<GeoFullPhysVol> tbecMotherPhysical = new GeoFullPhysVol( tbecMotherLogical );
   
   double xcent = -120.*Gaudi::Units::cm, zcent = 395.7*Gaudi::Units::cm;
   double zfface = zcent - 60.09*Gaudi::Units::cm;
@@ -266,7 +266,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
      // x-axis
      std::string XAxisName = baseName + "::XAxis";
      const GeoLogVol* XAxisLogical = new GeoLogVol( XAxisName, axisShape, Air );
-     GeoPhysVol* XAxisPhysVol = new GeoPhysVol( XAxisLogical );
+     GeoIntrusivePtr<GeoPhysVol> XAxisPhysVol = new GeoPhysVol( XAxisLogical );
   
      tbecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
      tbecMotherPhysical->add( new GeoTransform( GeoTrf::Transform3D( GeoTrf::Translation3D( axisZHalfLength, 0.*Gaudi::Units::m, 0.*Gaudi::Units::m ) *GeoTrf::RotateY3D( 90.*Gaudi::Units::deg )) ) );
@@ -275,7 +275,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
      // y-axis
      std::string YAxisName = baseName + "::YAxis";
      const GeoLogVol* YAxisLogical = new GeoLogVol( YAxisName, axisShape, Air );
-     GeoPhysVol* YAxisPhysVol = new GeoPhysVol( YAxisLogical );
+     GeoIntrusivePtr<GeoPhysVol> YAxisPhysVol = new GeoPhysVol( YAxisLogical );
   
      tbecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
      tbecMotherPhysical->add( new GeoTransform( GeoTrf::Transform3D( GeoTrf::Translation3D( 0.*Gaudi::Units::m, axisZHalfLength, 0.*Gaudi::Units::m )*GeoTrf::RotateX3D( -90.*Gaudi::Units::deg ) ) ) );
@@ -284,7 +284,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
      //z-axis
      std::string ZAxisName = baseName + "::ZAxis";
      const GeoLogVol* ZAxisLogical = new GeoLogVol( ZAxisName, axisShape, Air );
-     GeoPhysVol* ZAxisPhysVol = new GeoPhysVol( ZAxisLogical );
+     GeoIntrusivePtr<GeoPhysVol> ZAxisPhysVol = new GeoPhysVol( ZAxisLogical );
   
      tbecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
      tbecMotherPhysical->add( new GeoTransform( GeoTrf::TranslateZ3D( axisZHalfLength ) ) );
@@ -297,7 +297,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
      std::string CompensatorName = baseName + "::LeadCompensator";
      GeoBox* CompensatorShape = new GeoBox( 152.*Gaudi::Units::cm, 195.*Gaudi::Units::cm, 0.56*Gaudi::Units::cm );
      const GeoLogVol* CompensatorLogical = new GeoLogVol( CompensatorName, CompensatorShape, Lead );
-     GeoPhysVol* CompensatorPhysical = new GeoPhysVol( CompensatorLogical );
+     GeoIntrusivePtr<GeoPhysVol> CompensatorPhysical = new GeoPhysVol( CompensatorLogical );
 	
      tbecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
 
@@ -311,8 +311,8 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
   // Cryostat
   
   CryostatConstructionTBEC cryoConstruction;
-  GeoVFullPhysVol* cryoPhys = cryoConstruction.GetEnvelope();
-  GeoPhysVol* LArPhysical = cryoConstruction.GetLArPhysical();
+  GeoIntrusivePtr<GeoVFullPhysVol> cryoPhys = cryoConstruction.GetEnvelope();
+  GeoIntrusivePtr<GeoPhysVol> LArPhysical = cryoConstruction.GetLArPhysical();
   
   tbecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
   GeoTrf::Vector3D tmpvec2(xcent, 0., zcent);
@@ -333,7 +333,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
   	std::string BeamCName = baseName + "::BeamChamber";
 	BeamCName+= char( i ) + '0';
   	GeoLogVol* BeamCLogical = new GeoLogVol( BeamCName, BeamCShape, Air );
-  	GeoPhysVol* BeamCPhysical = new GeoPhysVol( BeamCLogical );
+  	GeoIntrusivePtr<GeoPhysVol> BeamCPhysical = new GeoPhysVol( BeamCLogical );
 	
 	tbecMotherPhysical->add( new GeoIdentifierTag( 1 ) );
   	tbecMotherPhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, zfface - beamCZ[ i ] ) ) );
@@ -350,7 +350,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
   // z = 0 in emecMother is at active region's front face
   
   EMECConstruction emecModuleConstruction( true, true, true );
-  GeoFullPhysVol *emecEnvelope= (GeoFullPhysVol *) emecModuleConstruction.GetEnvelope();
+  GeoIntrusivePtr<GeoFullPhysVol>emecEnvelope= (GeoIntrusivePtr<GeoFullPhysVol>) emecModuleConstruction.GetEnvelope();
   StoredPhysVol *sPhysVol = new StoredPhysVol(emecEnvelope);
   StatusCode status=detStore->record(sPhysVol,"EMEC_POS");
   if(!status.isSuccess()) throw std::runtime_error ("Cannot store EMEC_POS");  
@@ -370,7 +370,7 @@ GeoFullPhysVol* LArGeo::LArDetectorConstructionTBEC::createEnvelope()
   if ( m_hasPresampler ) {
 
     EndcapPresamplerConstruction PresamplerConstruction( true );
-    GeoFullPhysVol* PresamplerEnvelope = PresamplerConstruction.Envelope();
+    GeoIntrusivePtr<GeoFullPhysVol> PresamplerEnvelope = PresamplerConstruction.Envelope();
 
     StoredPhysVol *sPhysVol = new StoredPhysVol(PresamplerEnvelope);
     StatusCode status=detStore->record(sPhysVol,"PRESAMPLER_EC_POS");

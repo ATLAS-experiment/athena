@@ -60,7 +60,7 @@ LArGeo::WarmTCConstructionH62004::WarmTCConstructionH62004():m_WarmTCPhys(nullpt
 LArGeo::WarmTCConstructionH62004::~WarmTCConstructionH62004() {;}
 
 
-GeoVFullPhysVol* LArGeo::WarmTCConstructionH62004::GetEnvelope()
+GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::WarmTCConstructionH62004::GetEnvelope()
 {
    StoredMaterialManager* materialManager = nullptr;
    if (StatusCode::SUCCESS != m_detectorStore->retrieve(materialManager, std::string("MATERIALS"))) {
@@ -180,7 +180,7 @@ double z_x[3], z_y[3], z_Fe[4];
  std::string muname = "LAr::WarmTC::MuonWall";
  GeoBox *mu_box = new GeoBox(Muon_x/2, Muon_y/2, Muon_z/2);
  GeoLogVol *mu_log = new GeoLogVol(muname, mu_box, Scintillator);
- GeoPhysVol *mu_phys = new GeoPhysVol(mu_log);
+ GeoIntrusivePtr<GeoPhysVol>mu_phys = new GeoPhysVol(mu_log);
  for(int i=1; i<=3; ++i) {
     a = -5.*i*Gaudi::Units::mm + (2*i-1)*Muon_x/2;
     n = pow(-1,i) * Muon_z/2 - z_m + Muon_z;
@@ -202,7 +202,7 @@ double z_x[3], z_y[3], z_Fe[4];
  std::string aname = "LAr::WarmTC::Absorber";
  GeoBox *Fe_box = new GeoBox(Fe_x,Fe_y,Fe_z);
  GeoLogVol *Fe_log = new GeoLogVol(aname,Fe_box,Iron);  
- GeoPhysVol *Fe_phys = new GeoPhysVol(Fe_log);
+ GeoIntrusivePtr<GeoPhysVol>Fe_phys = new GeoPhysVol(Fe_log);
  
  for(int i=0; i<4; i++) {
    m_WarmTCPhys->add(new GeoSerialIdentifier(i+1)); 
@@ -216,7 +216,7 @@ double z_x[3], z_y[3], z_Fe[4];
  std::string sname = "LAr::WarmTC::Sci";
  GeoBox *X_box = new GeoBox(x_x,x_y,z_s);
  GeoLogVol *X_log = new GeoLogVol(sname+"::X", X_box,Scintillator);  
- GeoPhysVol *X_phys = new GeoPhysVol(X_log);
+ GeoIntrusivePtr<GeoPhysVol>X_phys = new GeoPhysVol(X_log);
  
  for(int i=0; i<3; i++) {
     m_WarmTCPhys->add(new GeoSerialIdentifier(i+1));
@@ -230,7 +230,7 @@ double z_x[3], z_y[3], z_Fe[4];
  sname = "LAr::WarmTC::Sci";
  GeoBox *Y_box = new GeoBox(y_x,y_y,z_s);
  GeoLogVol *Y_log = new GeoLogVol(sname+"::Y", Y_box,Scintillator);  
- GeoPhysVol *Y_phys = new GeoPhysVol(Y_log);
+ GeoIntrusivePtr<GeoPhysVol>Y_phys = new GeoPhysVol(Y_log);
  
  for(int i=0; i<3; i++) {
     m_WarmTCPhys->add(new GeoSerialIdentifier(i+1));

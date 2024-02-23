@@ -61,7 +61,7 @@ LArGeo::MWPCConstruction::~MWPCConstruction()
 
 
 
-GeoVPhysVol* LArGeo::MWPCConstruction::GetEnvelope()
+PVLink LArGeo::MWPCConstruction::GetEnvelope()
 {
 
   if (m_MWPCPhysical) return m_MWPCPhysical;
@@ -187,7 +187,7 @@ GeoVPhysVol* LArGeo::MWPCConstruction::GetEnvelope()
       else         MylarPos = MWPCDz-MylarDz;
       std::string MylarName = MWPCName + "::Mylar";
       GeoLogVol* MylarLogical = new GeoLogVol( MylarName, MylarShape, Mylar );   
-      GeoPhysVol* MylarPhysical = new GeoPhysVol( MylarLogical );
+      GeoIntrusivePtr<GeoPhysVol> MylarPhysical = new GeoPhysVol( MylarLogical );
       m_MWPCPhysical->add( new GeoIdentifierTag( side ) );
       m_MWPCPhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, (MylarPos) ) ) );
       m_MWPCPhysical->add( MylarPhysical );
@@ -216,7 +216,7 @@ GeoVPhysVol* LArGeo::MWPCConstruction::GetEnvelope()
 
       std::string AluName = MWPCName + "::AlFoil";
       GeoLogVol* AluLogical = new GeoLogVol( AluName, AluShape, Aluminium );  
-      GeoPhysVol* AluPhysical = new GeoPhysVol( AluLogical );
+      GeoIntrusivePtr<GeoPhysVol> AluPhysical = new GeoPhysVol( AluLogical );
       m_MWPCPhysical->add( new GeoIdentifierTag( pos ) );
       m_MWPCPhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, (AluPos) ) ) );
       m_MWPCPhysical->add( AluPhysical );
@@ -236,8 +236,8 @@ GeoVPhysVol* LArGeo::MWPCConstruction::GetEnvelope()
   std::string YPlaneName = MWPCName + "::YPlane";
   GeoLogVol* XPlaneLogical = new GeoLogVol( XPlaneName, SenPlaneShape, ArIso );  
   GeoLogVol* YPlaneLogical = new GeoLogVol( YPlaneName, SenPlaneShape, ArIso );  
-  GeoPhysVol* XPlanePhysical = new GeoPhysVol( XPlaneLogical );
-  GeoPhysVol* YPlanePhysical = new GeoPhysVol( YPlaneLogical );
+  GeoIntrusivePtr<GeoPhysVol> XPlanePhysical = new GeoPhysVol( XPlaneLogical );
+  GeoIntrusivePtr<GeoPhysVol> YPlanePhysical = new GeoPhysVol( YPlaneLogical );
   m_MWPCPhysical->add( new GeoIdentifierTag( 0 ) );
   m_MWPCPhysical->add( new GeoTransform( GeoTrf::Translate3D( 0.*Gaudi::Units::cm, 0.*Gaudi::Units::cm, (-SenPos) ) ) );
   m_MWPCPhysical->add( XPlanePhysical );  
@@ -259,8 +259,8 @@ GeoVPhysVol* LArGeo::MWPCConstruction::GetEnvelope()
   std::string YDivName = MWPCName + "::YDiv";
   GeoLogVol* XDivLogical = new GeoLogVol( XDivName, XPlaneDiv, ArIso );  
   GeoLogVol* YDivLogical = new GeoLogVol( YDivName, YPlaneDiv, ArIso );  
-  GeoPhysVol* XDivPhysical = new GeoPhysVol( XDivLogical );
-  GeoPhysVol* YDivPhysical = new GeoPhysVol( YDivLogical );
+  GeoIntrusivePtr<GeoPhysVol> XDivPhysical = new GeoPhysVol( XDivLogical );
+  GeoIntrusivePtr<GeoPhysVol> YDivPhysical = new GeoPhysVol( YDivLogical );
 
   GeoSerialIdentifier *sIX = new GeoSerialIdentifier(0);
   GeoSerialTransformer *sTSX = new GeoSerialTransformer(XDivPhysical,  &TX, NDiv );
@@ -277,7 +277,7 @@ GeoVPhysVol* LArGeo::MWPCConstruction::GetEnvelope()
   GeoTubs* WireShape = new GeoTubs(0.*Gaudi::Units::cm, WireDiam/2., WireLen , 0.*Gaudi::Units::deg,360.*Gaudi::Units::deg); 
   std::string WireName = MWPCName + "::Wire";
   GeoLogVol* WireLogical = new GeoLogVol(WireName, WireShape, Tungsten);  
-  GeoPhysVol* WirePhysical = new GeoPhysVol( WireLogical );
+  GeoIntrusivePtr<GeoPhysVol> WirePhysical = new GeoPhysVol( WireLogical );
   XDivPhysical->add(new GeoTransform(GeoTrf::RotateX3D( 90.*Gaudi::Units::deg )));
   XDivPhysical->add(WirePhysical);
   YDivPhysical->add(new GeoTransform(GeoTrf::RotateY3D( 90.*Gaudi::Units::deg )));

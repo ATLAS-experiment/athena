@@ -12,6 +12,7 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
 #include "GeoModelKernel/GeoTrap.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "GaudiKernel/MsgStream.h"
@@ -325,9 +326,8 @@ StatusCode LArGeo::buildElStraightSections(StoreGateSvc* detStore
 	  
 	  for (int instance = 0; instance < Nabsorber; instance++) {
 		
-	    GeoTrap* thinTrap = new GeoTrap(Dz,0.,0.,h1(instance),tl1,bl1,alpha(instance),
-					    h1(instance),tl1,bl1,alpha(instance));
-	    thinTrap->ref();	    
+	    GeoIntrusivePtr<GeoTrap> thinTrap{new GeoTrap(Dz,0.,0.,h1(instance),tl1,bl1,alpha(instance),
+					    h1(instance),tl1,bl1,alpha(instance))};
 	    if (sagging) {
 	      if (!gStraightAbsorbers) {
 		gStraightAbsorbers = new GeoStraightAccSection();
@@ -337,7 +337,6 @@ StatusCode LArGeo::buildElStraightSections(StoreGateSvc* detStore
 	      gStraightAbsorbers->Cosu(instance,irl)    =-(TX(instance)(0,1)); //xy
 	      gStraightAbsorbers->Sinu(instance,irl)    = (TX(instance)(0,2)); //xz
 	      gStraightAbsorbers->HalfLength(instance,irl) = thinTrap->getDydzn();
-	      thinTrap->unref();	    
 	    }
 	    else {
 	      if (!gStraightAbsorbers) {
@@ -345,7 +344,6 @@ StatusCode LArGeo::buildElStraightSections(StoreGateSvc* detStore
 	      }
 	      gStraightAbsorbers->setTransform (irl,TX);
 	      gStraightAbsorbers->setHalfLength(irl,thinTrap->getDydzn());
-	      thinTrap->unref();
 	      break;
 	    }
 	  }    // loop over instances
@@ -401,9 +399,8 @@ StatusCode LArGeo::buildElStraightSections(StoreGateSvc* detStore
 	  
 	  for (int instance = 0; instance < Nelectrode; instance++) {
 
-	    GeoTrap* trap = new GeoTrap(Dze,0.,0.,h1e(instance),tl1,bl1,alpha_e(instance),
-					h1e(instance),tl1,bl1,alpha_e(instance));
-	    trap->ref();
+	    GeoIntrusivePtr<GeoTrap> trap{new GeoTrap(Dze,0.,0.,h1e(instance),tl1,bl1,alpha_e(instance),
+					h1e(instance),tl1,bl1,alpha_e(instance))};
 	    if (sagging) {
 	      if (!gStraightElectrodes) {
 		gStraightElectrodes = new GeoStraightAccSection();
@@ -413,7 +410,7 @@ StatusCode LArGeo::buildElStraightSections(StoreGateSvc* detStore
 	      gStraightElectrodes->Cosu(instance,irl)    =-(TXE(instance)(0,1)); //xy
 	      gStraightElectrodes->Sinu(instance,irl)    = (TXE(instance)(0,2)); //xz
 	      gStraightElectrodes->HalfLength(instance,irl) = trap->getDydzn();
-	      trap->unref();
+
 	    }
 	    else {
 	      if (!gStraightElectrodes) {
@@ -421,7 +418,6 @@ StatusCode LArGeo::buildElStraightSections(StoreGateSvc* detStore
 	      }
 	      gStraightElectrodes->setTransform (irl,TXE);
 	      gStraightElectrodes->setHalfLength(irl,trap->getDydzn());
-	      trap->unref();
 	      break;
 	    }
 	  }   // loop over instances

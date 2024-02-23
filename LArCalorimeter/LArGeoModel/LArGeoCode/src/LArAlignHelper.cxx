@@ -147,7 +147,7 @@ StatusCode LArAlignHelper::applyAlignments(const ServiceHandle<StoreGateSvc>& de
       if(detStore->contains<StoredPhysVol>(alignName)) {
         StoredPhysVol* storedPV{nullptr};
         if(detStore->retrieve(storedPV,alignName).isSuccess()) {
-          const GeoFullPhysVol* fullPV = storedPV->getPhysVol();
+          const GeoIntrusivePtr<GeoFullPhysVol> fullPV = storedPV->getPhysVol();
           const GeoTrf::Transform3D& xf =  fullPV->getAbsoluteTransform(alignmentStore);
 	  GeoTrf::Vector3D trans=xf.translation();
 	  GeoTrf::RotationMatrix3D rot=xf.rotation();

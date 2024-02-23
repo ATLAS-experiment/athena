@@ -41,6 +41,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <array>
 
 
 
@@ -61,7 +62,7 @@ LArGeo::HECConstructionH62004::~HECConstructionH62004()
 = default;
 
 
-GeoVFullPhysVol* LArGeo::HECConstructionH62004::GetEnvelope()
+GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::HECConstructionH62004::GetEnvelope()
 {
 
   if (m_h6Phys) return (m_h6Phys);
@@ -220,41 +221,41 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62004::GetEnvelope()
 
 
 // Depth
-  GeoTubs* solidDepth[7];
-  GeoLogVol* logiDepth[7];
-  GeoPhysVol* physiDepth[7];
+  std::array<GeoIntrusivePtr<GeoTubs>, 7> solidDepth{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 7> logiDepth{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 7> physiDepth{};
 
 // Slice
-  GeoTubs* solidSlice[3];
-  GeoLogVol* logiSlice[3];
-  GeoPhysVol* physiSlice[3];
+  std::array<GeoIntrusivePtr<GeoTubs>, 3> solidSlice{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 3> logiSlice{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 3> physiSlice{};
 
 // EstBoard
-  GeoTubs* solidEstBoard;
-  GeoLogVol* logiEstBoard;
-  GeoPhysVol* physiEstBoard;
+  GeoIntrusivePtr<GeoTubs> solidEstBoard{};
+  GeoIntrusivePtr<GeoLogVol> logiEstBoard{};
+  GeoIntrusivePtr<GeoPhysVol> physiEstBoard{};
 
 // PadBoard
-  GeoTubs* solidPadBoard;
-  GeoLogVol* logiPadBoard;
-  GeoPhysVol* physiPadBoard;
+  GeoIntrusivePtr<GeoTubs> solidPadBoard{};
+  GeoIntrusivePtr<GeoLogVol> logiPadBoard{};
+  GeoIntrusivePtr<GeoPhysVol> physiPadBoard{};
 
 // TieRod in the gap
-  GeoTubs* solidTieRod[2];
-  GeoLogVol* logiTieRod[2];
-  GeoPhysVol* physiTieRod[2];
+  std::array<GeoIntrusivePtr<GeoTubs>, 2> solidTieRod{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 2> logiTieRod{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 2> physiTieRod{};
 // TieRod in absorbers
-  GeoTubs* solidAbsorberTieRod[2];
-  GeoLogVol* logiAbsorberTieRod[2];
-  GeoPhysVol* physiAbsorberTieRod[2];
+  std::array<GeoIntrusivePtr<GeoTubs>, 2> solidAbsorberTieRod{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 2> logiAbsorberTieRod{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 2> physiAbsorberTieRod{};
 // Absorber
-  GeoTubs* solidAbsorber[3] ;
-  GeoLogVol* logiAbsorber[3] ;
-  GeoPhysVol* physiAbsorber[3] ;
+  std::array<GeoIntrusivePtr<GeoTubs>, 3> solidAbsorber{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 3> logiAbsorber{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 3> physiAbsorber{};
 // First Absorber
-  GeoTubs* solidFirstAbsorber ;
-  GeoLogVol* logiFirstAbsorber ;
-  GeoPhysVol* physiFirstAbsorber ;
+  GeoIntrusivePtr<GeoTubs> solidFirstAbsorber{};
+  GeoIntrusivePtr<GeoLogVol> logiFirstAbsorber{};
+  GeoIntrusivePtr<GeoPhysVol> physiFirstAbsorber{};
 
 //----------------------------------------------------------------
 //   HEC Module
@@ -267,7 +268,7 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62004::GetEnvelope()
      solidModule->addPlane(zCoordinate[i],innerRadius[i]-PosYcorr,outerRadius[i]);
   }
   GeoLogVol*  logicModule = new GeoLogVol(moduleName, solidModule , LAr);
-  GeoPhysVol* physiModule = new GeoPhysVol(logicModule);
+  GeoIntrusivePtr<GeoPhysVol> physiModule = new GeoPhysVol(logicModule);
   {
      //----------------------------------------------------------------
     //   Place Module in HEC mother
@@ -497,13 +498,6 @@ GeoVFullPhysVol* LArGeo::HECConstructionH62004::GetEnvelope()
     physiAbsorber[indexA]->add(physiAbsorberTieRod[indexR]);
   }      
   
-  // Some slices may not be used.
-  // Make sure that if they're not used, that they get deleted.
-  for (sliceNo = 0; sliceNo < 3; sliceNo++) {
-    solidSlice[sliceNo]->ref();    solidSlice[sliceNo]->unref();
-    logiSlice[sliceNo]->ref();     logiSlice[sliceNo]->unref();
-    physiSlice[sliceNo]->ref();    physiSlice[sliceNo]->unref();
-  }
 
   std::cout << " In the H6 2004 HEC Constr. GetEnvelope - about to return m_h6Phys " << std::endl;
 

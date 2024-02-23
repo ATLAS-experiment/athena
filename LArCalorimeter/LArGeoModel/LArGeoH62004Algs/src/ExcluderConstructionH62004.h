@@ -16,7 +16,7 @@ namespace LArGeo {
      ExcluderConstructionH62004(int which = 0);
      virtual ~ExcluderConstructionH62004();
 
-     GeoVFullPhysVol*  GetEnvelope() const;
+     GeoIntrusivePtr<GeoVFullPhysVol>  GetEnvelope() const;
 
    private:
      int m_which;

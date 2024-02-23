@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // BarrelConstruction
@@ -9,9 +9,9 @@
 #ifndef LARGEOBARREL_BARRELCONSTRUCTION_H
 #define LARGEOBARREL_BARRELCONSTRUCTION_H
 
+#include "GeoModelKernel/GeoFullPhysVol.h"
 
 
-class GeoFullPhysVol;
 namespace LArGeo{
   class VDetectorParameters;
 }
@@ -29,8 +29,8 @@ namespace LArGeo {
     virtual ~BarrelConstruction();
 
     // Get the envelope containing this detector.
-    GeoFullPhysVol* GetPositiveEnvelope();
-    GeoFullPhysVol* GetNegativeEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> GetPositiveEnvelope();
+    GeoIntrusivePtr<GeoFullPhysVol> GetNegativeEnvelope();
 
     // Set parameters for the barrel.
     void setBarrelSagging(bool flag)        {m_A_SAGGING  = flag;}
@@ -55,8 +55,8 @@ namespace LArGeo {
     int                     m_NVISLIM{-1};
     
     // volumes that are private member variables:
-    GeoFullPhysVol*  m_ecamPhysicalPos{};
-    GeoFullPhysVol*  m_ecamPhysicalNeg{};
+    GeoIntrusivePtr<GeoFullPhysVol>  m_ecamPhysicalPos{};
+    GeoIntrusivePtr<GeoFullPhysVol>  m_ecamPhysicalNeg{};
     
     bool             m_fullGeo{};  // true->FULL, false->RECO
   };

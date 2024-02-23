@@ -83,7 +83,7 @@ void LArGeo::LArDetectorFactoryTBEC::create( GeoPhysVol* a_container )
   LArDetectorConstructionTBEC CryostatConstructionTB;
   CryostatConstructionTB.setECVisLimit(m_ecVisLimit);
   
-  GeoVPhysVol* Envelope = nullptr;
+  PVLink Envelope = nullptr;
   
   Envelope = CryostatConstructionTB.GetEnvelope();
   
@@ -95,7 +95,7 @@ void LArGeo::LArDetectorFactoryTBEC::create( GeoPhysVol* a_container )
 
   StoredPhysVol *sEmecOuterWheel;   
   if (StatusCode::SUCCESS==detStore->retrieve(sEmecOuterWheel, "EMEC_OUTER_WHEEL_POS" )) {        
-    GeoFullPhysVol *emecEnvelope= sEmecOuterWheel->getPhysVol();
+    GeoIntrusivePtr<GeoFullPhysVol>emecEnvelope= sEmecOuterWheel->getPhysVol();
 
 
     // Outer Wheel Sampling 1 Region 0:
@@ -165,7 +165,7 @@ void LArGeo::LArDetectorFactoryTBEC::create( GeoPhysVol* a_container )
   }
   StoredPhysVol *sEmecInnerWheel;   
   if (StatusCode::SUCCESS==detStore->retrieve(sEmecInnerWheel, "EMEC_INNER_WHEEL_POS" )) {        
-    GeoFullPhysVol *emecEnvelope= sEmecInnerWheel->getPhysVol();
+    GeoIntrusivePtr<GeoFullPhysVol>emecEnvelope= sEmecInnerWheel->getPhysVol();
     // Inner Wheel Sampling 1 Region 0:
     {
       CellBinning phiBinning(startPhi,endPhi,8,12);
@@ -186,7 +186,7 @@ void LArGeo::LArDetectorFactoryTBEC::create( GeoPhysVol* a_container )
 
   StoredPhysVol *sPresamplerEnvelope;   
   if (StatusCode::SUCCESS==detStore->retrieve(sPresamplerEnvelope, "PRESAMPLER_EC_POS" )) {        
-    GeoFullPhysVol * PresamplerEnvelope=sPresamplerEnvelope->getPhysVol();
+    GeoIntrusivePtr<GeoFullPhysVol> PresamplerEnvelope=sPresamplerEnvelope->getPhysVol();
     CellBinning presamplerPhiBinning(startPhi,endPhi,8,12);
     EMECDetDescr *presamplerDetDescr = new EMECDetDescr(emecDetectorManager,0,0,0,presamplerPhiBinning);
     EMECDetectorRegion *presamplerRegion = new EMECDetectorRegion(PresamplerEnvelope,presamplerDetDescr,EMECDetectorRegion::POS);

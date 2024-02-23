@@ -141,7 +141,7 @@ LArDetectorToolH62004::create()
       // This strange way of casting is to avoid an
       // utterly brain damaged compiler warning.
       //
-      GeoPhysVol *world=&*theExpt->getPhysVol();
+      GeoIntrusivePtr<GeoPhysVol>world=&*theExpt->getPhysVol();
       theLArFactory.create(world);
     } catch (const std::bad_alloc&) {
       log << MSG::FATAL << "Could not create new H62004Node!" << endmsg;

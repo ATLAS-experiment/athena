@@ -33,7 +33,7 @@ namespace LArGeo {
     virtual ~EMECConstruction();
 
     // Get the envelope containing this detector.
-    virtual GeoFullPhysVol* GetEnvelope(bool bPos = true);
+    virtual GeoIntrusivePtr<GeoFullPhysVol> GetEnvelope(bool bPos = true);
 
     // Set fullGeo flag
     void setFullGeo(bool flag);
@@ -52,7 +52,7 @@ namespace LArGeo {
     std::string m_outerWheelVariant;
 
     static void place_custom_solids(
-        GeoFullPhysVol *fullPV,
+        GeoIntrusivePtr<GeoFullPhysVol>fullPV,
         std::vector<std::string> &absorbers,
         std::vector<std::string> &electrodes,
         int multilayered_absorbers,

@@ -19,10 +19,10 @@ namespace LArGeo {
         public:
            WarmTCConstructionH62004();
            virtual ~WarmTCConstructionH62004();
-	   GeoVFullPhysVol* GetEnvelope();
+	   GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope();
 
         private:
-	   GeoFullPhysVol*  m_WarmTCPhys;
+	   GeoIntrusivePtr<GeoFullPhysVol>  m_WarmTCPhys;
 	   StoreGateSvc * m_detectorStore = nullptr;
   };
 }

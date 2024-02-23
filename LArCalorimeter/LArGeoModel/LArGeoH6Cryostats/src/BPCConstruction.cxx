@@ -59,7 +59,7 @@ LArGeo::BPCConstruction::~BPCConstruction()
 
 
 
-GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
+PVLink LArGeo::BPCConstruction::GetEnvelope()
 {
 
   if (m_BPCPhysical) return m_BPCPhysical;
@@ -213,7 +213,7 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   if(m_oldType) shape_bpc_almylar = new GeoBox(bpc_old_x, bpc_old_y, bpc_old_alml);
   else          shape_bpc_almylar = new GeoBox(bpc_x, bpc_y, bpc_alml);
   GeoLogVol* log_bpc_almylar = new GeoLogVol(BPCName + "::bpcalmylar",shape_bpc_almylar, AlMylar);
-  GeoPhysVol* phys_bpc_almylar = new GeoPhysVol(log_bpc_almylar); 
+  GeoIntrusivePtr<GeoPhysVol> phys_bpc_almylar = new GeoPhysVol(log_bpc_almylar); 
   for(int i = 0; i < 2; i ++){
     double mylar_pos = 0;
     if(m_oldType) {
@@ -233,7 +233,7 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   if(m_oldType) shape_bpc_mylar = new GeoBox(bpc_old_x, bpc_old_y, bpc_old_ml);
   else          shape_bpc_mylar = new GeoBox(bpc_x, bpc_y, bpc_ml);
   GeoLogVol* log_bpc_mylar = new GeoLogVol(BPCName + "::bpc_mylar", shape_bpc_mylar, Mylar);
-  GeoPhysVol* phys_bpc_mylar = new GeoPhysVol(log_bpc_mylar);
+  GeoIntrusivePtr<GeoPhysVol> phys_bpc_mylar = new GeoPhysVol(log_bpc_mylar);
   for(int i = 0; i < 2; ++i){
     double mylar_pos = 0;
     if(m_oldType) {
@@ -258,7 +258,7 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   GeoLogVol* log_bpc_xplane;
   if(m_oldType) log_bpc_xplane = new GeoLogVol(BPCName + "::bpco_plane", shape_bpc_xplane, ArCO2_2);
   else          log_bpc_xplane = new GeoLogVol(BPCName + "::bpc_xplane", shape_bpc_xplane, ArCO2_1);
-  GeoPhysVol* phys_bpc_xplane = new GeoPhysVol(log_bpc_xplane);
+  GeoIntrusivePtr<GeoPhysVol> phys_bpc_xplane = new GeoPhysVol(log_bpc_xplane);
   m_BPCPhysical->add( new GeoIdentifierTag( 0 ) );
   if(m_oldType) m_BPCPhysical->add( new GeoTransform( GeoTrf::Translate3D(0., 0., bpc_old_sen) ) );
   else          m_BPCPhysical->add( new GeoTransform( GeoTrf::Translate3D(0., 0., -bpc_sen-bpc_send) ) );
@@ -274,7 +274,7 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   GeoLogVol* log_bpc_xdiv;
   if(m_oldType) log_bpc_xdiv = new GeoLogVol(BPCName + "::bpco_div", shape_bpc_xdiv, ArCO2_2);
   else          log_bpc_xdiv = new GeoLogVol(BPCName + "::bpc_xdiv", shape_bpc_xdiv, ArCO2_1);
-  GeoPhysVol* phys_bpc_xdiv = new GeoPhysVol(log_bpc_xdiv);
+  GeoIntrusivePtr<GeoPhysVol> phys_bpc_xdiv = new GeoPhysVol(log_bpc_xdiv);
   GeoGenfun::Variable Index;
   GeoXF::TRANSFUNCTION TXO = GeoXF::Pow(GeoTrf::TranslateX3D(1.0), -bpc_old_x+(2*Index+1)*bpc_old_step/2.);
   GeoXF::TRANSFUNCTION TX = GeoXF::Pow(GeoTrf::TranslateX3D(1.0), -bpc_x+(2*Index+1)*bpc_step/2.);
@@ -283,8 +283,8 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   else          phys_bpc_xplane->add( new GeoSerialTransformer(phys_bpc_xdiv,  &TX, Ndiv ) );
 
   // Y sensitive plane
-  GeoPhysVol* phys_bpc_yplane = nullptr;
-  GeoPhysVol* phys_bpc_ydiv = nullptr;
+  GeoIntrusivePtr<GeoPhysVol> phys_bpc_yplane = nullptr;
+  GeoIntrusivePtr<GeoPhysVol> phys_bpc_ydiv = nullptr;
   if(!m_oldType) {
      GeoBox* shape_bpc_yplane = new GeoBox(bpc_x, bpc_y, bpc_send);
      GeoLogVol* log_bpc_yplane = new GeoLogVol(BPCName + "::bpc_yplane",shape_bpc_yplane, ArCO2_1);
@@ -309,7 +309,7 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   GeoLogVol* log_bpc_wire;
   if(m_oldType) log_bpc_wire = new GeoLogVol(BPCName + "::bpco_wire", shape_bpc_wire, Tungsten);
   else          log_bpc_wire = new GeoLogVol(BPCName + "::bpc_wire", shape_bpc_wire, Tungsten);
-  GeoPhysVol* phys_bpc_wire = new GeoPhysVol(log_bpc_wire);
+  GeoIntrusivePtr<GeoPhysVol> phys_bpc_wire = new GeoPhysVol(log_bpc_wire);
   phys_bpc_xdiv->add( new GeoIdentifierTag( 1 ) );
   phys_bpc_xdiv->add( new GeoTransform( GeoTrf::RotateX3D( 90.*Gaudi::Units::deg ) ) );
   phys_bpc_xdiv->add(phys_bpc_wire);
@@ -328,7 +328,7 @@ GeoVPhysVol* LArGeo::BPCConstruction::GetEnvelope()
   GeoLogVol* log_bpc_cwire;
   if(m_oldType) log_bpc_cwire = new GeoLogVol(BPCName + "::bpco_cwire",shape_bpc_cwire, Tungsten);
   else          log_bpc_cwire = new GeoLogVol(BPCName + "::bpc_cwire",shape_bpc_cwire, Tungsten);
-  GeoPhysVol* phys_bpc_cwire = new GeoPhysVol(log_bpc_cwire);
+  GeoIntrusivePtr<GeoPhysVol> phys_bpc_cwire = new GeoPhysVol(log_bpc_cwire);
 //  GeoXF::TRANSFUNCTION TXXMO = GeoTrf::RotateX3D( 90.*Gaudi::Units::deg ) * GeoXF::Pow(GeoTrf::TranslateX3D(1.0), -bpc_old_x+(2*Index+1)*bpc_old_cstep/2.) * GeoTrf::TranslateZ3D(-bpc_old_send-bpc_cwd+bpc_old_space);
 //  GeoXF::TRANSFUNCTION TXXPO = GeoTrf::RotateX3D( 90.*Gaudi::Units::deg ) * GeoXF::Pow(GeoTrf::TranslateX3D(1.0), -bpc_old_x+(2*Index+1)*bpc_old_cstep/2.) * GeoTrf::TranslateZ3D(bpc_old_send-bpc_old_space+bpc_cwd);
   GeoXF::TRANSFUNCTION TXXMO = GeoXF::Pow(GeoTrf::TranslateX3D(1.0), -bpc_old_x+(2*Index+1)*bpc_old_cstep/2.) * GeoTrf::TranslateZ3D(-bpc_old_send-2.*bpc_cwd+bpc_old_space) * GeoTrf::RotateX3D( 90.*Gaudi::Units::deg );

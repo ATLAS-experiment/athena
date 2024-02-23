@@ -22,7 +22,7 @@ namespace LArGeo {
          public:
             ModulesConstructionH62004();
             virtual ~ModulesConstructionH62004();
-            GeoVFullPhysVol* GetEnvelope();
+            GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope();
          private:
 	    ModulesConstructionH62004 (const ModulesConstructionH62004 &);
             ModulesConstructionH62004 & operator= (const ModulesConstructionH62004 &);
@@ -36,7 +36,7 @@ namespace LArGeo {
                         //  calo = 0 - EMEC, 1 - HEC1,  2 - HEC2, 3 - FCAL1
                         //         4 - FCAL2, 5 - ColdTail
 
-	   GeoFullPhysVol*  m_ModulesPhys;
+	   GeoIntrusivePtr<GeoFullPhysVol>  m_ModulesPhys;
 	   StoreGateSvc * m_detectorStore = nullptr;
 
 	   const LArGeoTB2004Options      *m_Options;

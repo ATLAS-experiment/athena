@@ -51,7 +51,7 @@ LArGeo::ExcluderConstructionH62004::ExcluderConstructionH62004(int which)
 LArGeo::ExcluderConstructionH62004::~ExcluderConstructionH62004() {;}
 
 
-GeoVFullPhysVol*  LArGeo::ExcluderConstructionH62004::GetEnvelope() const {
+GeoIntrusivePtr<GeoVFullPhysVol>  LArGeo::ExcluderConstructionH62004::GetEnvelope() const {
 //----------------------------------------------------------------
 // Elements , Mixtures and Materials 
 //----------------------------------------------------------------
@@ -122,7 +122,7 @@ GeoVFullPhysVol*  LArGeo::ExcluderConstructionH62004::GetEnvelope() const {
 
 
   GeoLogVol*   logicEx = nullptr;  //pointer to the logical excluder
-  GeoVFullPhysVol* physiEx = nullptr; // return physical volume
+  GeoIntrusivePtr<GeoVFullPhysVol> physiEx = nullptr; // return physical volume
   GeoPcon*        fEx;
 //  GeoLogVol*   lfEx; 
 //  G4VPhysicalVolume*  pfEx;

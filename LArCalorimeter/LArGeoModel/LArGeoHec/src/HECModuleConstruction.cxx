@@ -38,7 +38,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
-
+#include <array>
 
 using Gaudi::Units::cm;
 using Gaudi::Units::mm;
@@ -68,7 +68,7 @@ LArGeo::HECModuleConstruction::~HECModuleConstruction()
 {;}
 
 
-GeoFullPhysVol* LArGeo::HECModuleConstruction::GetEnvelope()
+GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HECModuleConstruction::GetEnvelope()
 {
   if(m_physiHECModule) return m_physiHECModule->clone();
 
@@ -320,28 +320,28 @@ GeoFullPhysVol* LArGeo::HECModuleConstruction::GetEnvelope()
 
   //---- Tie rods to go into Absorbers --------------------------------------
 
-  GeoTubs* solidAbsorberTieRod         = new GeoTubs(0.*cm,tieRodDiameter/2.,absThickness/2.,0.*deg,360.*deg); 
-  const GeoLogVol* logiAbsorberTieRod  = new GeoLogVol(absTieRodName,solidAbsorberTieRod,Iron);  //,0,0,0);
-  GeoPhysVol* physiAbsorberTieRod      = new GeoPhysVol(logiAbsorberTieRod);
+  GeoIntrusivePtr<GeoTubs>solidAbsorberTieRod     = new GeoTubs(0.*cm,tieRodDiameter/2.,absThickness/2.,0.*deg,360.*deg); 
+  GeoIntrusivePtr<GeoLogVol> logiAbsorberTieRod   = new GeoLogVol(absTieRodName,solidAbsorberTieRod,Iron);  //,0,0,0);
+  GeoIntrusivePtr<GeoPhysVol> physiAbsorberTieRod = new GeoPhysVol(logiAbsorberTieRod);
 
-  GeoTubs* solidFirstAbsorberTieRod    = new GeoTubs(0.*cm,tieRodDiameter/2.,firstAbsThickness/2.,0.*deg,360.*deg); 
-  const GeoLogVol* logiFirstAbsorberTieRod = new GeoLogVol(firstabsTieRodName,solidFirstAbsorberTieRod,Iron);  //,0,0,0);
-  GeoPhysVol* physiFirstAbsorberTieRod = new GeoPhysVol(logiFirstAbsorberTieRod);
+  GeoIntrusivePtr<GeoTubs> solidFirstAbsorberTieRod    = new GeoTubs(0.*cm,tieRodDiameter/2.,firstAbsThickness/2.,0.*deg,360.*deg); 
+  GeoIntrusivePtr<GeoLogVol> logiFirstAbsorberTieRod   = new GeoLogVol(firstabsTieRodName,solidFirstAbsorberTieRod,Iron);  //,0,0,0);
+  GeoIntrusivePtr<GeoPhysVol> physiFirstAbsorberTieRod = new GeoPhysVol(logiFirstAbsorberTieRod);
 
 
   //---- Tie rods to go into Slices (i.e. sensitive LAr gaps) -----------------
 
-  GeoTubs* solidTieRod        = new GeoTubs(0.*cm,spacerDiameter/2.,rodSize/2.,0.*deg,360.*deg);  
-  const GeoLogVol* logiTieRod = new GeoLogVol(tieRodName, solidTieRod, Iron); 
-  GeoPhysVol* physiTieRod     = new GeoPhysVol(logiTieRod);
+  GeoIntrusivePtr<GeoTubs> solidTieRod    = new GeoTubs(0.*cm,spacerDiameter/2.,rodSize/2.,0.*deg,360.*deg);  
+  GeoIntrusivePtr<GeoLogVol> logiTieRod   = new GeoLogVol(tieRodName, solidTieRod, Iron); 
+  GeoIntrusivePtr<GeoPhysVol> physiTieRod = new GeoPhysVol(logiTieRod);
 
 
-  GeoTubs* solidDeadTie        = new GeoTubs(g4allowS+spacerDiameter/2.,
-					     spacerDeadZone+spacerDiameter/2.,
-					     rodSize/2.,
-					     0.*deg,360.*deg);  
-  const GeoLogVol* logiDeadTie = new GeoLogVol(deadTieName, solidDeadTie, LAr); 
-  GeoPhysVol* physiDeadTie     = new GeoPhysVol(logiDeadTie);
+  GeoIntrusivePtr<GeoTubs> solidDeadTie = new GeoTubs(g4allowS+spacerDiameter/2.,
+					                                            spacerDeadZone+spacerDiameter/2.,
+					                                            rodSize/2.,
+					                                            0.*deg,360.*deg);  
+  GeoIntrusivePtr<GeoLogVol> logiDeadTie = new GeoLogVol(deadTieName, solidDeadTie, LAr); 
+  GeoIntrusivePtr<GeoPhysVol> physiDeadTie = new GeoPhysVol(logiDeadTie);
 
 
   //----  Create PAD board and EST boards, then also Slices (ie. LAr gaps) and put the boards into Slices ------------
@@ -351,35 +351,35 @@ GeoFullPhysVol* LArGeo::HECModuleConstruction::GetEnvelope()
   //      And finally equip the LAr Slices as well as the Absorbers with their respective tie-rods.  
 
 
-  GeoTubs*         solidPadBoard[2] ;
-  const GeoLogVol* logiPadBoard[2];
-  GeoPhysVol*      physiPadBoard[2];
+  std::array<GeoIntrusivePtr<GeoTubs>, 2>    solidPadBoard{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 2>  logiPadBoard{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 2> physiPadBoard{};
 
-  GeoTubs*         solidCopperPad[2];
-  const GeoLogVol* logiCopperPad[2];
-  GeoPhysVol*      physiCopperPad[2];
+  std::array<GeoIntrusivePtr<GeoTubs>, 2>     solidCopperPad{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 2>   logiCopperPad{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 2>  physiCopperPad{};
 
-  GeoTubs*         solidEstBoard[2];
-  const GeoLogVol* logiEstBoard[2];
-  GeoPhysVol*      physiEstBoard[2];
+  std::array<GeoIntrusivePtr<GeoTubs>, 2>    solidEstBoard{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 2>  logiEstBoard{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 2> physiEstBoard{};
 
-  GeoTubs*         solidSlice[2];
-  const GeoLogVol* logiSlice[2];
-  GeoPhysVol*      physiSlice[2];
+  std::array<GeoIntrusivePtr<GeoTubs>, 2>     solidSlice{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 2>   logiSlice{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>,2>   physiSlice{};
 
-  GeoTubs*         solidAbsorber[2];
-  const GeoLogVol* logiAbsorber[2];
-  GeoPhysVol*      physiAbsorber[2];
+  std::array<GeoIntrusivePtr<GeoTubs>,2>       solidAbsorber{};
+  std::array<GeoIntrusivePtr<GeoLogVol>,2>     logiAbsorber{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>,2>    physiAbsorber{};
 
   // First Absorbers in front of first and third samplings (need only one type in each wheel)
   double rOuterF           = moduleRouter-radialShift;
   double rInnerF           = moduleRinner2-radialShift;
   if (m_frontWheel) rInnerF= moduleRinner1-radialShift;
-  GeoTubs* solidFirstAbsorber         = new GeoTubs(rInnerF,rOuterF,
-					    firstAbsThickness/2.,
-					    modulePhistart,moduleDeltaPhi);                   
-  const GeoLogVol* logiFirstAbsorber  = new GeoLogVol(firstAbsorberName, solidFirstAbsorber, Copper);
-  GeoPhysVol* physiFirstAbsorber      = new GeoPhysVol(logiFirstAbsorber);
+  GeoIntrusivePtr<GeoTubs> solidFirstAbsorber = new GeoTubs(rInnerF,rOuterF,
+					                                                 firstAbsThickness/2.,
+					                                                 modulePhistart,moduleDeltaPhi);                   
+  GeoIntrusivePtr<GeoLogVol> logiFirstAbsorber = new GeoLogVol(firstAbsorberName, solidFirstAbsorber, Copper);
+  GeoIntrusivePtr<GeoPhysVol> physiFirstAbsorber = new GeoPhysVol(logiFirstAbsorber);
 
 
   for(int iSect=0; iSect<sectMax; iSect++)
@@ -559,9 +559,9 @@ GeoFullPhysVol* LArGeo::HECModuleConstruction::GetEnvelope()
   // There are 3 depths in the front wheel, and 4 in the rear wheel.
   // Create them and equip them with fully assembled slices and absorbers.
 
-  GeoTubs*           solidDepth[4] ;
-  const GeoLogVol*   logiDepth[4]  ;
-  GeoPhysVol*        physiDepth[4] ;
+  std::array<GeoIntrusivePtr<GeoTubs>, 4>     solidDepth{};
+  std::array<GeoIntrusivePtr<GeoLogVol>, 4>   logiDepth{};
+  std::array<GeoIntrusivePtr<GeoPhysVol>, 4>  physiDepth{};
 
   for(int iDepth=0; iDepth<depthNumber; iDepth++)
     {
@@ -634,8 +634,8 @@ GeoFullPhysVol* LArGeo::HECModuleConstruction::GetEnvelope()
         if (i<2 && m_frontWheel) innerRadius=moduleRinner1;  
         solidHECModule->addPlane(zCoordinate[i],innerRadius-drModOverlap,moduleRouter);
      }
-  const GeoLogVol* logicHECModule = new GeoLogVol(moduleName, solidHECModule , LAr);
-  GeoFullPhysVol* physiHECModule  = new GeoFullPhysVol(logicHECModule);
+  GeoIntrusivePtr<GeoLogVol> logicHECModule = new GeoLogVol(moduleName, solidHECModule , LAr);
+  GeoIntrusivePtr<GeoFullPhysVol> physiHECModule  = new GeoFullPhysVol(logicHECModule);
 
 
   //---  Place the fully instrumented depths into the Module: ----
@@ -655,48 +655,5 @@ GeoFullPhysVol* LArGeo::HECModuleConstruction::GetEnvelope()
 
 
   // Return the physical volume that contains everything we've placed.
-
-  //-- clean up:
-  solidAbsorberTieRod->ref();       solidAbsorberTieRod->unref();     
-  logiAbsorberTieRod->ref();        logiAbsorberTieRod->unref();  
-  physiAbsorberTieRod->ref();       physiAbsorberTieRod->unref(); 
-  solidFirstAbsorberTieRod->ref();  solidFirstAbsorberTieRod->unref(); 
-  logiFirstAbsorberTieRod->ref();   logiFirstAbsorberTieRod->unref();
-  physiFirstAbsorberTieRod->ref();  physiFirstAbsorberTieRod->unref();   
-  solidTieRod->ref();               solidTieRod->unref();    
-  logiTieRod->ref();                logiTieRod->unref(); 
-  physiTieRod->ref();               physiTieRod->unref();
-  solidDeadTie->ref();              solidDeadTie->unref();    
-  logiDeadTie->ref();               logiDeadTie->unref(); 
-  physiDeadTie->ref();              physiDeadTie->unref();
-  solidFirstAbsorber->ref();        solidFirstAbsorber->unref(); 
-  logiFirstAbsorber->ref();         logiFirstAbsorber->unref();  
-  physiFirstAbsorber->ref();        physiFirstAbsorber->unref(); 
-  for(int iSect=0; iSect<sectMax; iSect++)
-    {
-      solidCopperPad[iSect]->ref(); solidCopperPad[iSect]->unref(); 
-      logiCopperPad[iSect]->ref();  logiCopperPad[iSect]->unref();  
-      physiCopperPad[iSect]->ref(); physiCopperPad[iSect]->unref(); 
-      solidPadBoard[iSect]->ref();  solidPadBoard[iSect]->unref(); 
-      logiPadBoard[iSect]->ref();   logiPadBoard[iSect]->unref();  
-      physiPadBoard[iSect]->ref();  physiPadBoard[iSect]->unref(); 
-      if(m_threeBoards){
-	solidEstBoard[iSect]->ref();  solidEstBoard[iSect]->unref(); 
-	logiEstBoard[iSect]->ref();   logiEstBoard[iSect]->unref();  
-	physiEstBoard[iSect]->ref();  physiEstBoard[iSect]->unref(); 
-      }
-      solidAbsorber[iSect]->ref();  solidAbsorber[iSect]->unref(); 
-      logiAbsorber[iSect]->ref();   logiAbsorber[iSect]->unref();  
-      physiAbsorber[iSect]->ref();  physiAbsorber[iSect]->unref(); 
-      solidSlice[iSect]->ref();     solidSlice[iSect]->unref(); 
-      logiSlice[iSect]->ref();      logiSlice[iSect]->unref();  
-      physiSlice[iSect]->ref();     physiSlice[iSect]->unref(); 
-    }
-  for(int iDepth=0; iDepth<depthNumber; iDepth++){
-    solidDepth[iDepth]->ref();  solidDepth[iDepth]->unref();  
-    logiDepth[iDepth]->ref();   logiDepth[iDepth]->unref();   
-    physiDepth[iDepth]->ref();  physiDepth[iDepth]->unref();  
-  }
-
   return physiHECModule;
 }

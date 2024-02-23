@@ -24,7 +24,7 @@ namespace LArGeo {
     virtual ~EMECModuleConstruction();
     
     // Get the envelope containing this detector.
-    virtual GeoVFullPhysVol* GetEnvelope();
+    virtual GeoIntrusivePtr<GeoVFullPhysVol> GetEnvelope();
 
   private:
 
