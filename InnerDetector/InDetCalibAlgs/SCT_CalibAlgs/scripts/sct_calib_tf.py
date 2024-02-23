@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 The SCT 24h Calibration Loop.
 This transformation will run the SCT 24 hours calibration loop.
@@ -8,26 +8,21 @@ Mandatory values as to be given for the input ntuples
 as well as the output HitMaps and output stream file.
 """
 
-import os,sys,time,shutil
+import os,sys,time
 
-from PyJobTransforms.trfLogger import *
 from PyJobTransforms.transform import transform
-from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
+from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfExitCodes import trfExit
-from PyJobTransforms.trfSignal import setTrfSignalHandlers, resetTrfSignalHandlers
-
-from IOVDbSvc.CondDB import conddb
-
-from ROOT import TFile, TH1I
-
+from PyJobTransforms.trfLogger import stdLogLevels, msg
+from PyJobTransforms.trfSignal import resetTrfSignalHandlers
+from PyJobTransformsCore.trfutil import fileutil
 import PyJobTransforms.trfArgClasses as trfArgClasses
 import PyJobTransforms.trfExceptions as trfExceptions
 import PyJobTransforms.trfValidation as trfValidation
 
-from PyJobTransforms.trfReports import *
-from PyJobTransformsCore.trfutil import *
+from ROOT import TFile
 
 dsDict={'input': [] , 'output' : []}
 RunNumber=-1
@@ -165,17 +160,17 @@ def addSCTCalibArgs(parser):
 
 def addOutputArgs(parser,dict):
     
-    if not 'part' in dict:
+    if 'part' not in dict:
         checkPart = ['doNoisyStrip']
     else:
         checkPart = dict['part']._value
         
-    if not 'splitHitMap' in dict:
+    if 'splitHitMap' not in dict:
         checkSplit= 0
     else:
         checkSplit = dict['splitHitMap']._value
         
-    if not 'prefix' in dict:
+    if 'prefix' not in dict:
         checkPrefix=''
     else:
         checkPrefix=dict['prefix']._value
@@ -185,7 +180,7 @@ def addOutputArgs(parser,dict):
         checkPrefix += '.'
 
 
-    if not 'doHV' in checkPart and checkSplit != 1:
+    if 'doHV' not in checkPart and checkSplit != 1:
         parser.add_argument('--outputCOOL', type=trfArgClasses.argFactory(trfArgClasses.argFile, runarg=True,io='output'),
                             help = 'COOL DB',group='Calibration',default=trfArgClasses.argFile([checkPrefix+'mycool.db'],runarg=True))
     
@@ -341,7 +336,7 @@ class SCTCalibExecutor( athenaExecutor ):
         #### Try to avoid validation of output files
         #self.skipOutputFileValidation=True
 
-        if not 'doRunInfo' in runArgs:
+        if 'doRunInfo' not in runArgs:
             self.conf.addToArgdict('doRunInfo', trfArgClasses.argBool(False))
         else:
             if runArgs['doRunInfo']._value:
@@ -350,17 +345,17 @@ class SCTCalibExecutor( athenaExecutor ):
                 print ("RunNumber for the runInfo = ", str(RunNumber), " ", Stream)
                 runInfo.main(RunNumber, projectName)
 
-        if not 'splitHitMap' in runArgs:
+        if 'splitHitMap' not in runArgs:
             self.conf.addToArgdict('splitHitMap', trfArgClasses.argInt(0))
-        if not 'doRunSelector' in runArgs:
+        if 'doRunSelector' not in runArgs:
             self.conf.addToArgdict('doRunSelector', trfArgClasses.argBool(False))
 
         #### This is a try to set event number manually if run over HIST files
-        if not 'EventNumber' in runArgs:
+        if 'EventNumber' not in runArgs:
             self.conf.addToArgdict('EventNumber', trfArgClasses.argInt(0))
 
         # Set STAGE_SVCCLASS
-        if not SvcClass == '' and not SvcClass == None:
+        if SvcClass != '' and SvcClass is not None:
             os.environ['STAGE_SVCCLASS']=SvcClass
 
         # Check input type
@@ -369,18 +364,18 @@ class SCTCalibExecutor( athenaExecutor ):
         self.conf.addToArgdict('InputType', trfArgClasses.argString(inputtype))
 
         # check which parts to be run
-        if not 'part' in runArgs:
+        if 'part' not in runArgs:
             self.conf.addToArgdict('part', trfArgClasses.argString('doNoisyStrip'))
 
         part=runArgs['part']._value
 
         for ipart in part:
-            if not ipart in ['doNoisyStrip','doNoiseOccupancy','doDeadChip','doDeadStrip','doQuietChip','doQuietStrip','doHV','doBSErrorDB','doRawOccupancy','doEfficiency','doLorentzAngle','doNoisyLB']:
+            if ipart not in ['doNoisyStrip','doNoiseOccupancy','doDeadChip','doDeadStrip','doQuietChip','doQuietStrip','doHV','doBSErrorDB','doRawOccupancy','doEfficiency','doLorentzAngle','doNoisyLB']:
                 self._errMsg = 'Argument part=%s does not match any of the possible candidates' % ipart
                 raise trfExceptions.TransformValidationException(trfExit.nameToCode('TRF_ARG_ERRO'), self._errMsg)
 
         # get prefix
-        if not 'prefix' in runArgs:
+        if 'prefix' not in runArgs:
             self.conf.addToArgdict('prefix', trfArgClasses.argString(''))
 
         prefix=runArgs['prefix']._value
@@ -501,7 +496,7 @@ class SCTCalibExecutor( athenaExecutor ):
                 retcode=1
                 try:
                     retcode = os.system(cmd)
-                except (OSError, e):
+                except OSError:
                     retcode = 1
                 if retcode == 0:
                     self._echologger.info('Root merge successful')
@@ -523,7 +518,7 @@ class SCTCalibExecutor( athenaExecutor ):
                 retcode=1
                 try:
                     retcode = os.system(cmd)
-                except (OSError, e):
+                except OSError:
                     retcode = 1
                 if retcode == 0:
                     self._echologger.info('Root merge successful')
@@ -545,7 +540,7 @@ class SCTCalibExecutor( athenaExecutor ):
                 retcode=1
                 try:
                     retcode = os.system(cmd)
-                except (OSError, e):
+                except OSError:
                     retcode = 1
                 if retcode == 0:
                     self._echologger.info('Root merge successful')
@@ -556,11 +551,10 @@ class SCTCalibExecutor( athenaExecutor ):
 
         if self._rc != 0:
             try:
-
                 if 'less than the required minimum number of events' in open('log.sctcalib').read():
                     self._errMsg = 'Successful but warrants further investigation'
                     raise trfExceptions.TransformValidationException(trfExit.nameToCode('TRF_UNKOWN'), self._errMsg)
-            except:
+            except trfExceptions.TransformValidationException:
                 pass
 
     def postExecute(self):
@@ -704,27 +698,17 @@ class SCTCalibExecutor( athenaExecutor ):
                 redDict = {key:dataDic[key] for key in listOfKeys}
                 self._trf._dataDictionary = redDict
 
-
-        if 'JobNumber' in runArgs and runArgs['splitHitMap']._value == 1:
-            jobnb=runArgs['JobNumber']._value
-        else:
-            jobnb=''
-
         if prefix != '':
             try:
                 if runArgs['splitHitMap']._value !=1 and 'COOL' in listOfKeys:
                     os.rename('mycool.db',prefix+'.mycool.db')                
-                if jobnb != '':
-                    prefixTmp = prefix + "."+ jobnb
-                else :
-                    prefixTmp = prefix
                 if runArgs['splitHitMap']._value == 2:
                     os.rename('SCTHitMaps.root',prefix+'.SCTHitMaps.root')
                     if 'doNoisyStrip' in runArgs['part']._value:
                         os.rename('SCTLB.root',prefix+'.SCTLB.root')
                     if ('doDeadStrip' in runArgs['part']._value or 'doDeadChip' in runArgs['part']._value or 'doQuietStrip' in runArgs['part']._value or 'doQuietChip' in runArgs['part']._value ):
                         os.rename('SCTBSErrors.root',prefix+'.SCTBSErrors.root')
-            except:
+            except OSError:
                 self._echologger.warning('failed to rename DB, ROOT or LOG file.' )
             
         super(SCTCalibExecutor, self).postExecute()
