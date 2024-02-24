@@ -55,6 +55,7 @@ run "Reconstruction-ckf" \
 reco_rc=$?
 
 mv log.RAWtoALL log.RAWtoALL.CKF
+mv acts-expert-monitoring.root acts-expert-monitoring.ckf.root
 
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
@@ -86,6 +87,7 @@ run "Reconstruction-ambi" \
 reco_rc=$?
 
 mv log.RAWtoALL log.RAWtoALL.AMBI
+mv acts-expert-monitoring.root acts-expert-monitoring.ambi.root
 
 if [ $reco_rc != 0 ]; then
     exit $reco_rc
