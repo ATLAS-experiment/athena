@@ -19,8 +19,10 @@ Contents of this file:
 The current Powheg experts in ATLAS and maintainers of Powheg installations and the PowhegControl interface are:
 
 * **Dan Hayden** (@dhayden) — mostly handles Powheg source code and installation
+* **Marcos Miralles Lopez** (@mmiralle) — Powheg compilation and installation
 * **Stefan Richter** (@strichte) — mostly maintains PowhegControl interface, i.e. the Athena user interface to Powheg
 * **Timothée Theveneaux-Pelzer** (@tpelzer) — mostly maintains PowhegControl interface
+* **Andrej Saibel** (@asaibel) —  PowhegControl interface
 * **Jan Kretzschmar** (@jkretz) — Powheg 'power user' happy to share his knowledge or help out with simple code changes
 * All of us provide help with software usage and physics questions to our best availability and ability
 
@@ -125,17 +127,22 @@ The standard steps needed are:
 
 # Usage instructions
 
-All of the following instructions assume that you are working in ATLAS generator software release 21.6. In the rare event that you need instructions for earlier (or later) releases, please [contact the Powheg experts](mailto:atlas-generators-powhegcontrol-experts@cern.ch).
-Most instructions will directly apply as well to the release 22.6 series.
+All of the following instructions assume that you are working in ATLAS generator software release 23.6. In the rare event that you need instructions for earlier (or later) releases, please [contact the Powheg experts](mailto:atlas-generators-powhegcontrol-experts@cern.ch).
+
+The current latest developments can be found in **Athena,main**. They are regularly synchronized to the production releases **release/23.6.XX**.
+
+For **MC16** MC, you should use **AthGeneration,21.6.XX**.
 
 ## Setting up
 
-Powheg for ATLAS is available in the **release series 21.6 and 22.6** (`AthGeneration` releases). The recommendation is to use [the most recent release](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware#Versions_release_21_6_AthGenerat), unless
-specifically noted otherwise. To set up, do the following on any machine with access to the ATLAS software (CERN LXPlus, your institute's cluster, …):
+Powheg for ATLAS is available in the **release series 21.6, 22.6, and 23.6** (`AthGeneration` releases). The recommendation is to use [the most recent release](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware#Versions_main_release_22_6_and_2), unless
+specifically noted otherwise. 
+
+To set up, do the following on any machine with access to the ATLAS software (CERN LXPlus, your institute's cluster, …):
 
 ```bash
 setupATLAS # = source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
-asetup AthGeneration 21.6.99 # or whichever release number you want
+asetup AthGeneration 23.6.23 # or whichever release number you want
 ```
 
 #### Side note about releases and versioning
@@ -143,7 +150,7 @@ asetup AthGeneration 21.6.99 # or whichever release number you want
 While PowhegControl is part of Athena and therefore automatically versioned with the release, the Powheg Box installations are versioned and installed on CVMFS separately from Athena. The install path is contained in the environment variable `$POWHEGPATH` - this may be handy also for very advanced users to have a look at the Powheg documentation or source code of your process.
 
 To ensure compatibility, each Athena release points to a specific ATLAS Powheg installation version. Normally you don't need to know their version, but if you ever want to check it, you can find it in the PowhegControl source at `https://gitlab.cern.ch/atlas/athena/-/blob/<release of interest>/Generators/PowhegControl/cmake/PowhegEnvironmentConfig.cmake.in`
-Just replace `<release of interest>` by whatever release you're interested in. E.g. for release 21.6.99 you would substitute in `release/21.6.99` to get [this URL](https://gitlab.cern.ch/atlas/athena/-/blob/release/21.6.99/Generators/PowhegControl/cmake/PowhegEnvironmentConfig.cmake.in) and then you can see that the Powheg installation version for that release is `ATLASOTF-00-05-05`.
+Just replace `<release of interest>` by whatever release you're interested in. E.g. for release 23.6.23 you would substitute in `release/23.6.23` to get [this URL](https://gitlab.cern.ch/atlas/athena/-/blob/release/23.6.23/Generators/PowhegControl/cmake/PowhegEnvironmentConfig.cmake.in) and then you can see that the Powheg installation version for that release is `ATLASOTF-00-06-03`.
 
 
 ## Running event generation
@@ -159,12 +166,12 @@ Gen_tf.py --jobConfig foo --ecmEnergy 13000 --runNumber 999999 --firstEvent 1 --
 [You can find example job option directories for all Powheg processes supported in ATLAS here](https://gitlab.cern.ch/atlas/athena/-/tree/21.6/Generators/PowhegControl/share/example/processes).
 
 
-**Powheg generates only the hard scattering process** (typically $`2 \to 1`$ or $`2 \to 2`$ or $`2 \to 3`$ at Born level) **plus NLO QCD corrections** (and sometimes other higher-order corrections). This includes the **virtual corrections** as well as the **real-emission correction** that involves the emission of an additional coloured parton (quark or gluon). These hard events are stored in the text-based [Les Houches Event format](https://arxiv.org/abs/hep-ph/0609017) (LHE). These Les Houches event may then be read by a suitably configured general-purpose MC generator, most commonly Pythia 8 or Herwig 7, which then generate
+**Powheg generates only the hard scattering process** (typically $`2 \to 1`$ or $`2 \to 2`$ or $`2 \to 3`$ at Born level) **plus NLO QCD corrections** (and sometimes other higher-order corrections). This includes the **virtual corrections** as well as the **real-emission correction** that involves the emission of an additional coloured parton (quark or gluon). These hard events are stored in the text-based [Les Houches Event format](https://arxiv.org/abs/hep-ph/0609017) (LHE). These Les Houches event may then be read by a suitably configured general-purpose MC generator, most commonly **Pythia 8 or Herwig 7**, which then generate
 
 * additional parton emissions in the [parton shower formalism](http://www.scholarpedia.org/article/Parton_shower_Monte_Carlo_event_generators),
 * (additional electroweak radiation,)
 * the underlying event (beam remnants, soft multiple parton interactions),
-* resonance decays (e.g. $`H \to b\bar{b}`$; if these were not included in the Powheg matrix element or performed by Powheg in the narrow-width approximation),
+* resonance decays (e.g. $`H \to b\bar{b}`$); if these were not included in the Powheg matrix element or performed by Powheg in the narrow-width approximation),
 * hadronisation (formation of physically observable, colour-neutral composite states from unobservable partons),
 * decays of "long-lived" particles such as τ-leptons and hadrons.
 
@@ -174,7 +181,9 @@ Since Powheg Box only provides *executables*, event generation with Powheg is do
 
 #### Setting the number of events
 
-**Use the `Gen_tf.py` argument `--maxEvents` to request the number of events you want.** If you are generating showered events, i.e. not just [LHE-level events](#generating-lhe-only-events), PowhegControl applies a **default safety factor of 1.1 to your requested number of events**. This is to prevent the parton shower MC from "running out" of events in case some events are discarded. **In cases where a generator filter is used** that rejects a significant fraction of your events, you will have to test and set this factor around $`1.1 / \mathrm{filter\,efficiency} `$, where again an 10% safety buffer is included here. E.g. in the case your filter only keeps 10% of the events, you will produce 11 times more LHE events than will eventually be available in the EVNT (and passed to simulation).
+**Use the `Gen_tf.py` argument `--maxEvents` to request the number of events you want.** If you are generating showered events, i.e. not just [LHE-level events](#generating-lhe-only-events), PowhegControl applies a **default safety factor of 1.1 to your requested number of events**. This is to prevent the parton shower MC from "running out" of events in case some events are discarded. 
+
+**In cases where a generator filter is used** that rejects a significant fraction of your events, you will have to test and set this factor around $`1.1 / \mathrm{filter\,efficiency} `$, where again an 10% safety buffer is included here. E.g. in the case your filter only keeps 10% of the events, you will produce 11 times more LHE events than will eventually be available in the EVNT (and passed to simulation).
 
 If your parton shower MC does run out of events (you should see a line similar to: `Abort from Pythia::next: reached end of Les Houches Events File...` in the `log.generate` file), you need to understand why and potentially increase this factor in your job option like this:
 
@@ -210,6 +219,8 @@ Even when you want to make your own job options, say to study varying some param
 
 Most Powheg parameters exist for multiple processes. Important ones are listed here. For process-specific parameters, see TODO.
 
+The parameters available in `PowhegControl` and their meaning is given in the [Registry](https://gitlab.cern.ch/atlas/athena/-/blob/main/Generators/PowhegControl/python/parameters/registry.py).
+
 | Parameter name | Meaning | Allowed values | Notes and examples |
 | :------------: | :-----: | :------------: |:----------------: |
 | `PDF`          | Choice of nominal and (optionally) variation PDF sets | A single LHAPDF ID (`int`) or a `list` of LHAPDF IDs. You can find a table of all available LHAPDF sets and their IDs [here](https://lhapdf.hepforge.org/pdfsets). By default PDFs are taken from the central repository `/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current` that will contain basically all sets although the LHAPDF team may need a bit of time to get the latest sets installed. Ask experts for help if necessary.
@@ -219,13 +230,12 @@ Most Powheg parameters exist for multiple processes. Important ones are listed h
 
 ### Writing/changing job options
 
-The Powheg Box executables need to receive a runcard which specifies
-various parameters and options. Default parameters are already set for
-all the parameters associated with each process, and these are
+The Powheg Box executables need to receive a `runcard` which specifies various parameters and options. 
+`Default parameters` are already set for all the parameters associated with each process, and these are
 automatically set by including the relevant
 `PowhegControl_MyProcess_Common.py` file. Each process can all be
 accessed by changing the `MyProcess` in the jobOption include to the
-_Athena_ name of the desired process --- see the table of supported processes above. Example job options are available [here](https://gitlab.cern.ch/atlas/athena/-/tree/21.6/Generators/PowhegControl/share/example/processes).
+_Athena_ name of the desired process --- see the table of supported processes above. Example job options are available [here](https://gitlab.cern.ch/atlas/athena/-/tree/main/Generators/PowhegControl/share/example/processes).
 
 Here is an example for the production of $`\mathrm{t}\bar{\mathrm{t}}`$ events through the PowhegControl interface.
 
@@ -293,7 +303,7 @@ parameter changes like this **must be placed before the call to
 `PowhegConfig.generate()`**, or they will be ignored in favour of the
 default settings.
 
-The last two includes would run Pythia8 after the production of the LHE events by Powheg.
+The last two includes would run Pythia 8 after the production of the LHE events by Powheg.
 The line
 ```py
 include("Pythia8_i/Pythia8_A14_NNPDF23LO_EvtGen_Common.py")
@@ -305,7 +315,7 @@ include("Pythia8_i/Pythia8_Powheg_Main31.py")
 instructs Pythia8 to use the events in the produced LHE file assuming they
 are events produced by Powheg, using the main31 routine which is the 
 appropriate 'matching routine' for the majority of Powheg processes.
-Other tunes and/or other routines may be preferable or needed for some cases; in doubt, ask your MC expert.
+Other tunes and/or other routines may be preferable or needed for some cases; in doubt, `ask your MC expert`.
 
 
 
@@ -465,15 +475,15 @@ git clone ssh://git@gitlab.cern.ch:7999/atlas-physics/pmg/mcexperts/powheg-exper
 # If you want to use central Athena, just replace the line above with:
 # git clone ssh://git@gitlab.cern.ch:7999/atlas/athena.git
 cd athena
-git checkout 21.6 # or whichever branch/commit you wish to use!
+git checkout 23.6 # or whichever branch/commit you wish to use!
 # Branch 21.6 is the "master" for things related to MC16/20 event generation
-# Branch 22.6/master is used for MC21+ event generation
+# Branch 23.6/main is used for MC21+ event generation
 cd ..
 echo "+ Generators/PowhegControl" > package_filters.txt
 echo "- .*" >> package_filters.txt
 mkdir build
 cd build
-asetup AthGeneration,21.6.99 # or whichever release you want to use
+asetup AthGeneration,23.6.23 # or whichever release you want to use
 cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt ../athena/Projects/WorkDir
 cmake --build ./ # or just use the command "make" instead
 source */setup.sh
@@ -504,7 +514,7 @@ installation, **you need to also manually update the shell environment variable
 location, e.g.:
 
 ```bash
-export POWHEGPATH=/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-05-05
+export POWHEGPATH=/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-06-03
 ```
 
 Hint: use `ls $POWHEGPATH/..` to list the available ATLAS Powheg installations.
