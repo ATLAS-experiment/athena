@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -43,7 +43,6 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "SCT_ConditionsTools/ISCT_RadDamageSummaryTool.h"
-#include "SCT_ModuleDistortions/ISCT_ModuleDistortionsTool.h"
 #include "SiPropertiesTool/ISiPropertiesTool.h"
 #include "StoreGate/ReadCondHandle.h"
 
@@ -119,7 +118,6 @@ class SCT_SurfaceChargesGenerator : public extends<AthAlgTool, ISurfaceChargesGe
   FloatProperty m_tfix{this, "FixedTime", -999., "fixed time"};
   FloatProperty m_tsubtract{this, "SubtractTime", -999., "subtract drift time from mid gap"};
 
-  BooleanProperty m_doDistortions{this, "doDistortions", false, "Simulation of module distortions"};
   BooleanProperty m_useSiCondDB{this, "UseSiCondDB", true, "Usage of SiConditions DB values can be disabled to use setable ones"};
   FloatProperty m_vdepl{this, "DepletionVoltage", 70., "depletion voltage, default 70V"};
   FloatProperty m_vbias{this, "BiasVoltage", 150., "bias voltage, default 150V"};
@@ -130,7 +128,6 @@ class SCT_SurfaceChargesGenerator : public extends<AthAlgTool, ISurfaceChargesGe
   BooleanProperty m_doInducedChargeModel{this, "doInducedChargeModel", false, "Flag for Induced Charge Model"};
 
   //ToolHandles
-  ToolHandle<ISCT_ModuleDistortionsTool> m_distortionsTool{this, "SCTDistortionsTool", "SCT_DistortionsTool", "Tool to retrieve SCT distortions"};
   ToolHandle<ISiPropertiesTool> m_siPropertiesTool{this, "SiPropertiesTool", "SCT_SiPropertiesTool", "Tool to retrieve SCT silicon properties"};
   ToolHandle<ISCT_RadDamageSummaryTool> m_radDamageTool{this, "RadDamageSummaryTool", "SCT_RadDamageSummaryTool", "Tool to retrieve SCT radiation damages"};
   ToolHandle<ISiliconConditionsTool> m_siConditionsTool{this, "SiConditionsTool", "SCT_SiliconConditionsTool", "Tool to retrieve SCT silicon information"};

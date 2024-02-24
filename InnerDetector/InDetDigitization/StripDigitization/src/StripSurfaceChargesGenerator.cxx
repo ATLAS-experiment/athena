@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripSurfaceChargesGenerator.h"
@@ -99,12 +99,6 @@ StatusCode StripSurfaceChargesGenerator::initialize() {
     ATH_MSG_FATAL("\tCannot set both FixedTime and SubtractTime options!");
     ATH_MSG_INFO("\tMake sure the two flags are not set simultaneously in jo");
     return StatusCode::FAILURE;
-  }
-
-  if (m_doDistortions) {
-    ATH_CHECK(m_distortionsTool.retrieve());
-  } else {
-    m_distortionsTool.disable();
   }
 
   ATH_CHECK(m_lorentzAngleTool.retrieve());
@@ -428,16 +422,6 @@ void StripSurfaceChargesGenerator::processSiHit(const SiDetectorElement* element
                                               m_siConditionsTool,
                                               rndmEngine,
                                               ctx);
-  }
-
-  if (m_doDistortions) {
-    if (element->isBarrel()) {// Only apply disortions to barrel modules
-      Amg::Vector2D BOW;
-      BOW[0] = m_distortionsTool->correctSimulation(hashId, xhit, yhit, cX, cY, cZ)[0];
-      BOW[1] = m_distortionsTool->correctSimulation(hashId, xhit, yhit, cX, cY, cZ)[1];
-      xhit = BOW.x();
-      yhit = BOW.y();
-    }
   }
 
   const float stepX{cX / numberOfSteps};

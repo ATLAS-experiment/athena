@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,9 +30,7 @@ using CLHEP::deg;
 InDet::SCT_ClusterOnTrackTool::SCT_ClusterOnTrackTool
   (const std::string &t, const std::string &n, const IInterface *p) :
   AthAlgTool(t, n, p),
-  m_distortionsTool("SCT_DistortionsTool", this),
   m_option_make2dimBarrelClusters(false),
-  m_doDistortions(false),
   m_option_errorStrategy(-1),
   m_option_correctionStrategy(-1) {
   // declareInterface<SCT_ClusterOnTrackTool>(this);
@@ -44,10 +42,6 @@ InDet::SCT_ClusterOnTrackTool::SCT_ClusterOnTrackTool
                   "if ErrorStrategy < 0, keep previous errors else recompute");
   declareProperty("CorrectionStrategy", m_option_correctionStrategy,
                   "if CorrectionStrategy >= 0, apply a correction to the cluster position");
-  declareProperty("doDistortions", m_doDistortions,
-                  "Simulation of module distortions");
-  declareProperty("SCTDistortionsTool", m_distortionsTool,
-                  "Tool to retrieve SCT distortions");
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -84,12 +78,6 @@ InDet::SCT_ClusterOnTrackTool::initialize() {
   if (!m_sctErrorScalingKey.key().empty()) {
     ATH_CHECK(m_sctErrorScalingKey.initialize());
     ATH_MSG_DEBUG("Detected need for scaling sct errors.");
-  }
-
-  // Get ISCT_ModuleDistortionsTool
-  if (m_distortionsTool.retrieve().isFailure()) {
-    msg(MSG::FATAL) << "Could not retrieve distortions tool: " << m_distortionsTool.name() << endmsg;
-    return StatusCode::FAILURE;
   }
 
   ATH_CHECK(m_lorentzAngleTool.retrieve());
@@ -258,13 +246,6 @@ InDet::SCT_ClusterOnTrackTool::correct
     cov(0, 1) = cov(1, 0);
     cov(1, 1) += (Sn2 * dV0);
   }
-
-  if (m_doDistortions) {
-    if (EL->isBarrel() == 1) {// Only apply disortions to barrel modules
-      locpar[Trk::locX] -= m_distortionsTool->correctReconstruction(trackPar, *EL, locpar, loct);
-    }
-  }
-
 
   // Apply correction for cluster position bias
   //

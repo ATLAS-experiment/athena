@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_DetailedSurfaceChargesGenerator.h"
@@ -133,12 +133,6 @@ StatusCode SCT_DetailedSurfaceChargesGenerator::initialize() {
   ATH_MSG_INFO("\tn.charg " << m_numberOfCharges);
   ATH_MSG_INFO("\tdigi steps " << m_smallStepLength << " mm");
 #endif
-
-  if (m_doDistortions) {
-    ATH_CHECK(m_distortionsTool.retrieve());
-  } else {
-    m_distortionsTool.disable();
-  }
 
   ATH_CHECK(m_lorentzAngleTool.retrieve());
 
@@ -309,16 +303,6 @@ void SCT_DetailedSurfaceChargesGenerator::processSiHit(const SiDetectorElement* 
   double xhit{xEta};
   double yhit{xPhi};
   double zhit{xDep};
-  
-  if (m_doDistortions) {
-    if (element->isBarrel()==1) { //Only apply distortions to barrel modules
-      Amg::Vector2D BOW;
-      BOW[0] = (m_distortionsTool->correctSimulation(hashId, xhit, yhit, cEta, cPhi, cDep))[0];
-      BOW[1] = (m_distortionsTool->correctSimulation(hashId, xhit, yhit, cEta, cPhi, cDep))[1];
-      xhit = BOW.x();
-      yhit = BOW.y();
-    }
-  }
 
   double StepX{cEta/numberOfSteps};
   double StepY{cPhi/numberOfSteps};

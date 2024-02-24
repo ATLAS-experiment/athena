@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,7 +22,6 @@
 #include "InDetCondTools/ISiLorentzAngleTool.h"
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
 #include "InDetRIO_OnTrack/SCTRIO_OnTrackErrorScaling.h"
-#include "SCT_ModuleDistortions/ISCT_ModuleDistortionsTool.h"
 #include "TrkParameters/TrackParameters.h"
 
 namespace InDet {
@@ -98,13 +97,11 @@ public:
    SG::ReadCondHandleKey<RIO_OnTrackErrorScaling> m_sctErrorScalingKey
      {this,"SCTErrorScalingKey", "/Indet/TrkErrorScalingSCT", "Key for SCT error scaling conditions data."};
 
-   ToolHandle<ISCT_ModuleDistortionsTool> m_distortionsTool;
    ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool", "Tool to retreive Lorentz angle"};
    //! flag storing if errors need scaling or should be kept nominal
 
    //! job options
    bool                               m_option_make2dimBarrelClusters;
-   bool                               m_doDistortions ;//!< Flag to set Distortions
    int                                m_option_errorStrategy;
    int                                m_option_correctionStrategy;
 };
