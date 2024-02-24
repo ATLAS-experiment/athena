@@ -57,34 +57,33 @@
 //_____________________________________________________________________________________
 GeoPhysVol* createTheWorld()
 {
-// Define the units
-     #define gr   UNITS::gram
-     #define mole UNITS::mole
-     #define cm3  UNITS::cm3
+  // Define the units
+  #define gr   UNITS::gram
+  #define mole UNITS::mole
+  #define cm3  UNITS::cm3
+
+  // Define the chemical elements
+  GeoElement*  Nitrogen = new GeoElement ("Nitrogen" ,"N"  ,  7.0 ,  14.0067 *gr/mole);
+  GeoElement*  Oxygen   = new GeoElement ("Oxygen"   ,"O"  ,  8.0 ,  15.9995 *gr/mole);
+  GeoElement*  Argon    = new GeoElement ("Argon"    ,"Ar" , 18.0 ,  39.948  *gr/mole);
+  GeoElement*  Hydrogen = new GeoElement ("Hydrogen" ,"H"  ,  1.0 ,  1.00797 *gr/mole);
+
+  // Define the materials
+  double densityOfAir=0.001214 *gr/cm3;
+  GeoMaterial *air = new GeoMaterial("Air", densityOfAir);
+  air->add(Nitrogen  , 0.7494);
+  air->add(Oxygen, 0.2369);
+  air->add(Argon, 0.0129);
+  air->add(Hydrogen, 0.0008);
+  air->lock();
  
-     // Define the chemical elements
-     GeoElement*  Nitrogen = new GeoElement ("Nitrogen" ,"N"  ,  7.0 ,  14.0067 *gr/mole);
-     GeoElement*  Oxygen   = new GeoElement ("Oxygen"   ,"O"  ,  8.0 ,  15.9995 *gr/mole);
-     GeoElement*  Argon    = new GeoElement ("Argon"    ,"Ar" , 18.0 ,  39.948  *gr/mole);
-     GeoElement*  Hydrogen = new GeoElement ("Hydrogen" ,"H"  ,  1.0 ,  1.00797 *gr/mole);
- 
-     // Define the materials
- 
-     double densityOfAir=0.001214 *gr/cm3;
-     GeoMaterial *air = new GeoMaterial("Air", densityOfAir);
-     air->add(Nitrogen  , 0.7494);
-     air->add(Oxygen, 0.2369);
-     air->add(Argon, 0.0129);
-     air->add(Hydrogen, 0.0008);
-     air->lock();
- 
-   //-----------------------------------------------------------------------------------//
-   // create the world volume container and
-   // get the 'world' volume, i.e. the root volume of the GeoModel tree
-   std::cout << "Creating the 'world' volume, i.e. the root volume of the GeoModel tree..." << std::endl;
-   const GeoBox* worldBox = new GeoBox(1000*UNITS::cm, 1000*UNITS::cm, 1000*UNITS::cm);
-   const GeoLogVol* worldLog = new GeoLogVol("WorldLog", worldBox, air);
-   GeoPhysVol* world = new GeoPhysVol(worldLog);
+  //-----------------------------------------------------------------------------------//
+  // create the world volume container and
+  // get the 'world' volume, i.e. the root volume of the GeoModel tree
+  std::cout << "Creating the 'world' volume, i.e. the root volume of the GeoModel tree..." << std::endl;
+  const GeoBox* worldBox = new GeoBox(1000*UNITS::cm, 1000*UNITS::cm, 1000*UNITS::cm);
+  const GeoLogVol* worldLog = new GeoLogVol("WorldLog", worldBox, air);
+  GeoPhysVol* world = new GeoPhysVol(worldLog);
   return world;
 }
 
