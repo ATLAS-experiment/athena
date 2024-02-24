@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,7 +22,6 @@
 // Athena
 #include "InDetConditionsSummaryService/ISiliconConditionsTool.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h"
-#include "SCT_ModuleDistortions/ISCT_ModuleDistortionsTool.h"
 #include "SiPropertiesTool/ISiPropertiesTool.h"
 
 // Gaudi
@@ -128,8 +127,6 @@ private:
   FloatProperty m_tfix{this, "FixedTime", -999., "ixed time"};
   FloatProperty m_tsubtract{this, "SubtractTime", -999., "subtract drift time from mid gap"};
 
-  BooleanProperty m_doDistortions{this, "doDistortions", false, "Flag to set simulation of module distortions"};
-
   // -- Charge Trapping -- //
   BooleanProperty m_doHistoTrap{this, "doHistoTrap", false, "Allow filling of histos for charge trapping effect"};
   BooleanProperty m_doTrapping{this, "doTrapping", false, "Simulation of charge trapping effect"};
@@ -150,7 +147,6 @@ private:
   BooleanProperty m_isOverlay{this, "isOverlay", false, "flag for overlay"};
 
   //ToolHandles
-  ToolHandle<ISCT_ModuleDistortionsTool> m_distortionsTool{this, "SCTDistortionsTool", "SCT_DistortionsTool", "Tool to retrieve SCT distortions"};
   ToolHandle<ISiPropertiesTool> m_siPropertiesTool{this, "SiPropertiesTool", "SCT_SiPropertiesTool", "Tool to retrieve SCT silicon properties"};
   ToolHandle<ISiliconConditionsTool> m_siConditionsTool{this, "SiConditionsTool", "SCT_SiliconConditionsTool", "Tool to retrieve SCT silicon information"};
   ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retreive Lorentz angle"};
