@@ -223,12 +223,13 @@ def defineMenu():
         # low-priority (all mu)
         'L1_AFP_FSA_TOF_T2_BGRP12', 'L1_AFP_FSA_TOF_T3_BGRP12','L1_AFP_FSC_TOF_T2_BGRP12', 'L1_AFP_FSC_TOF_T3_BGRP12',
         'L1_AFP_A_OR_C_UNPAIRED_ISO', 'L1_AFP_A_OR_C_UNPAIRED_NONISO', 'L1_AFP_A_OR_C_EMPTY', 'L1_AFP_A_OR_C_FIRSTEMPTY',
-
+        
+        'L1_AFP_A_OR_C_TOF_UNPAIRED_ISO', 'L1_AFP_A_OR_C_TOF_UNPAIRED_NONISO', 'L1_AFP_A_OR_C_TOF_EMPTY', 'L1_AFP_A_OR_C_TOF_FIRSTEMPTY',
         'L1_AFP_A_AND_C_TOF_jJ50', 'L1_AFP_A_AND_C_TOF_T0T1_jJ50', 'L1_AFP_A_AND_C_TOF_jJ60', 'L1_AFP_A_AND_C_TOF_T0T1_jJ60', 'L1_AFP_A_AND_C_TOF_jJ90', 'L1_AFP_A_AND_C_TOF_T0T1_jJ90', 'L1_AFP_A_AND_C_TOF_jJ125', 'L1_AFP_A_AND_C_TOF_T0T1_jJ125',
 
         # high-priority (low mu)
         'L1_AFP_NSA_BGRP12', 'L1_AFP_NSC_BGRP12', 
-        'L1_AFP_A','L1_AFP_C', 'L1_AFP_A_AND_C',
+        'L1_AFP_A','L1_AFP_C', 'L1_AFP_A_AND_C', 'L1_AFP_A_AND_C_TOF',
         #'L1_AFP_A_OR_C_J5','L1_AFP_A_AND_C_J5', # J5 not available in legacy menu. Need to update to jJ threshold for low-mu
         'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
         'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
@@ -236,7 +237,7 @@ def defineMenu():
         'L1_eEM9_AFP_A_OR_C', 'L1_eEM9_AFP_A_AND_C',
         # med-priority (low mu)
         'L1_AFP_A_OR_C', 'L1_AFP_A_OR_C_MBTS_2', 'L1_AFP_A_AND_C_MBTS_2',
-          
+        
 
         # MBTS
         'L1_MBTS_A', 'L1_MBTS_C',
@@ -258,27 +259,6 @@ def defineMenu():
         #--------------------------------
         # TOPO items
         #--------------------------------
-
-        # legacy L1Topo
-        'L1_HT190-J15s5pETA21', 
-        'L1_BPH-0M9-EM7-EM5_2MU3V',
-        'L1_BPH-0M9-EM7-EM5_MU5VF',
-        'L1_BPH-0DR3-EM7J15_2MU3V',
-        'L1_BPH-0DR3-EM7J15_MU5VF',
-        'L1_JPSI-1M5-EM7',
-        'L1_JPSI-1M5-EM12',
-        'L1_MJJ-500-NFF',
-        'L1_MJJ-700',
-        'L1_EM18VHI_MJJ-300',
-        'L1_HT150-J20s5pETA31_MJJ-400-CF',
-        'L1_LLP-RO',
-        'L1_LLP-NOMATCH',
-        #'L1_DPHI-2EM3',
-        'L1_SC111-CJ15',
-        'L1_J50_DETA20-J50J',
-        #'L1_BPH-0M9-EM7-EM5', 
-        #'L1_BPH-0DR3-EM7J15',
-        'L1_LAR-ZEE',
 
         # phase1 L1Topo
         'L1_LAR-ZEE-eEM',

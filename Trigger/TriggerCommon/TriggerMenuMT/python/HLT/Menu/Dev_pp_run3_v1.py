@@ -158,9 +158,7 @@ def getDevSignatures():
         ChainProp(name='HLT_2g10_medium_EgammaPEBTLA_L12DR15-M70-2eEM9L',l1SeedThresholds=['eEM9'],stream=['EgammaPEBTLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
         ChainProp(name='HLT_2g13_loose_EgammaPEBTLA_L12DR15-M70-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['EgammaPEBTLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
         ChainProp(name='HLT_2g13_medium_EgammaPEBTLA_L12DR15-M70-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['EgammaPEBTLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
-        # Ranges
-        ChainProp(name='HLT_2g13_loose_EgammaPEBTLA_L12DR15-0M30-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['EgammaPEBTLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
-        ChainProp(name='HLT_2g13_loose_EgammaPEBTLA_L113DR25-25M70-2eEM12L',l1SeedThresholds=['eEM12L'],stream=['EgammaPEBTLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
+        
         # Ranges + Asymmetric
         ChainProp(name='HLT_g13_loose_g10_loose_EgammaPEBTLA_L12DR15-0M30-eEM12LeEM9L',l1SeedThresholds=['eEM12L', 'eEM9'],stream=['EgammaPEBTLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
         ChainProp(name='HLT_g13_loose_g10_loose_EgammaPEBTLA_L113DR25-25M70-eEM12LeEM9L',l1SeedThresholds=['eEM12L','eEM9'],stream=['EgammaPEBTLA'], groups=SupportPhIGroup+Topo2Group+DevGroup),
@@ -459,6 +457,14 @@ def getDevSignatures():
 
         # ATR-28103 Test chains for delayed jets, based on significance of delay
         ChainProp(name='HLT_3j45_j45_2timeSig_roiftf_presel4c35_L14jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup), 
+
+        # ATR-28836 additional delayed jets more delay significance thresholds
+        ChainProp(name='HLT_3j45_j45_2timeSig_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j220_j150_2timeSig_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_3j45_j45_3timeSig_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j220_j150_3timeSig_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_3j45_j45_2timing_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
+        ChainProp(name='HLT_j220_j150_2timing_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
 
         ### END PURE TEST CHAINS
 
@@ -865,40 +871,6 @@ def getDevSignatures():
         ChainProp(name='HLT_mu20_mu4_bBmux_BdmuDstarX_L1MU14FCH', l1SeedThresholds=['MU14FCH','MU3V'], stream=["BphysDelayed"], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU14FCH']+DevGroup),
         ChainProp(name='HLT_mu23_mu4_bBmux_BdmuDstarX_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','MU3V'], stream=["BphysDelayed"], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU18VFCH']+DevGroup),
 
-        #ATR-28779; bDimu2700 chains needed for B_d0 -> mu+ mu- K_s0
-        ChainProp(name='HLT_mu11_mu6_bDimu2700_sigmaLxy3_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+DevGroup),
-        ChainProp(name='HLT_mu11_mu6_bDimu2700_sigmaLxy3_L1LFV-MU8VF', l1SeedThresholds=['MU8VF','MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+Topo2Group+DevGroup),
-        #
-        ChainProp(name='HLT_2mu6_bDimu2700_sigmaLxy3_L12MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU5VF']+DevGroup),
-        ChainProp(name='HLT_2mu6_bDimu2700_sigmaLxy3_L1BPH-2M9-2DR15-2MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-2DR15-2MU5VF']+Topo2Group+DevGroup),
-        ChainProp(name='HLT_2mu6_bDimu2700_sigmaLxy3_L1LFV-MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_LFV-MU5VF']+Topo2Group+DevGroup),
-        #
-        ChainProp(name='HLT_mu6_mu4_bDimu2700_sigmaLxy3_L1MU5VF_2MU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU5VF_2MU3V']+DevGroup),
-        ChainProp(name='HLT_mu6_mu4_bDimu2700_sigmaLxy3_L1MU5VF_2MU3VF', l1SeedThresholds=['MU5VF','MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU5VF_2MU3VF']+DevGroup),
-        ChainProp(name='HLT_mu6_mu4_bDimu2700_sigmaLxy3_L1BPH-2M9-0DR15-MU5VFMU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-MU5VFMU3V']+Topo2Group+DevGroup),
-        ChainProp(name='HLT_mu6_mu4_bDimu2700_sigmaLxy3_L1BPH-2M9-0DR15-C-MU5VFMU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-C-MU5VFMU3V']+Topo3Group+DevGroup),
-        #
-        ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy3_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']+DevGroup),
-        ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy3_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3VF']+DevGroup),
-        ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy3_L1BPH-2M9-0DR15-2MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-2MU3V']+Topo2Group+DevGroup),
-        ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy3_L1BPH-2M9-0DR15-2MU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-2MU3VF']+Topo2Group+DevGroup),
-        #
-        ChainProp(name='HLT_mu11_mu6_bDimu2700_sigmaLxy5_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+DevGroup),
-        ChainProp(name='HLT_mu11_mu6_bDimu2700_sigmaLxy5_L1LFV-MU8VF', l1SeedThresholds=['MU8VF','MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+PrimaryL1MuGroup+Topo2Group+DevGroup),
-        #
-        ChainProp(name='HLT_2mu6_bDimu2700_sigmaLxy5_L12MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU5VF']+DevGroup),
-        ChainProp(name='HLT_2mu6_bDimu2700_sigmaLxy5_L1BPH-2M9-2DR15-2MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-2DR15-2MU5VF']+Topo2Group+DevGroup),
-        ChainProp(name='HLT_2mu6_bDimu2700_sigmaLxy5_L1LFV-MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_LFV-MU5VF']+Topo2Group+DevGroup),
-        #
-        ChainProp(name='HLT_mu6_mu4_bDimu2700_sigmaLxy5_L1MU5VF_2MU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU5VF_2MU3V']+DevGroup),
-        ChainProp(name='HLT_mu6_mu4_bDimu2700_sigmaLxy5_L1MU5VF_2MU3VF', l1SeedThresholds=['MU5VF','MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU5VF_2MU3VF']+DevGroup),
-        ChainProp(name='HLT_mu6_mu4_bDimu2700_sigmaLxy5_L1BPH-2M9-0DR15-MU5VFMU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-MU5VFMU3V']+Topo2Group+DevGroup),
-        ChainProp(name='HLT_mu6_mu4_bDimu2700_sigmaLxy5_L1BPH-2M9-0DR15-C-MU5VFMU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-C-MU5VFMU3V']+Topo3Group+DevGroup),
-        #
-        ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy5_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']+DevGroup),
-        ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy5_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3VF']+DevGroup),
-        ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy5_L1BPH-2M9-0DR15-2MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-2MU3V']+Topo2Group+DevGroup),
-        ChainProp(name='HLT_2mu4_bDimu2700_sigmaLxy5_L1BPH-2M9-0DR15-2MU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_BPH-2M9-0DR15-2MU3VF']+Topo2Group+DevGroup),
     ]
 
     chains['Combined'] = [

@@ -415,8 +415,8 @@ def loadConfigFile(fname, args) -> Dict:
                     to_json.setdefault(comp, {})[name] = value
                     to_json[comp][name] = value
                 conf.update(to_json)
-                conf.update(props[0])
-                conf.update(props[1])
+                conf['ApplicationMgr'] = props[0]
+                conf['MessageSvc'] = props[1]
 
             elif isinstance(
                 cfg, (collections.defaultdict, dict)

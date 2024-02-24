@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class header
@@ -169,7 +169,7 @@ void ZDC_FiberSD::EndOfAthenaEvent()
         m_HitColl = std::make_unique<ZDC_SimFiberHit_Collection>(m_HitColl.name());
 
     for(auto hit : m_hitMap){
-        m_HitColl->Emplace(hit.second);
+        m_HitColl->Emplace(*(hit.second));
     }
 
 

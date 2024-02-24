@@ -24,7 +24,6 @@ from .Physics_pp_run3_v1 import (
     SupportPhIGroup,
     Topo2Group,
     Topo3Group,
-    LegacyTopoGroup,
 )
 
 from AthenaCommon.Logging import logging
@@ -76,7 +75,6 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_Lvl1CaloPEB_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['L1CaloCalib'], groups=['RATE:Calibration','BW:Detector']),
 
         ChainProp(name='HLT_noalg_LArPEBCalib_L1jJ500_LAR', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_LArPEBCalib_L1LAR-ZEE', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportLegGroup+LegacyTopoGroup),
         ChainProp(name='HLT_noalg_LArPEBCalib_L1LAR-ZEE-eEM', l1SeedThresholds=['FSNOSEED'], stream=['LArCells'], groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup+Topo2Group),
 
         ChainProp(name='HLT_noalg_LATOMEPEB_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['LArPEBDigitalTrigger'], groups=['RATE:Calibration','BW:Detector']),
@@ -140,10 +138,15 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_noalg_AFPPEB_L1AFP_C', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_AND_C_TOF_T0T1', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_AND_C_TOF', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_OR_C_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_OR_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_OR_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_OR_C_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_OR_C_TOF_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_OR_C_TOF_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_OR_C_TOF_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
+        ChainProp(name='HLT_noalg_AFPPEB_L1AFP_A_OR_C_TOF_FIRSTEMPTY', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
         ChainProp(name='HLT_noalg_AFPPEB_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['AFPCalib'], groups=SupportGroup),
 
         #NSW mon
@@ -377,7 +380,6 @@ def addHighMuP1Signatures(chains):
         # ATR-23061, ATR-26394
         # Beamspot chains using FS tracking -- no PEB, fill BeamSpot histograms then reject all events
         ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_J15']+SupportLegGroup),
-        ChainProp(name='HLT_j0_pf_ftf_preselcHT450_beamspotVtx_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD']+SupportLegGroup+LegacyTopoGroup),
         ChainProp(name='HLT_j0_pf_ftf_presel6c25_beamspotVtx_L14J15', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_4J15']+SupportLegGroup),
         # ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_beamspotVtx_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:BeamSpot', 'RATE:CPS_J45p0ETA21_3J15p0ETA25']+SupportLegGroup),
         #
@@ -391,7 +393,6 @@ def addHighMuP1Signatures(chains):
         # ATR-23061, ATR-26394
         # BeamspotPEB chains -- only run preselection without tracking, write PEB data
         ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_J15']+SupportLegGroup),
-        ChainProp(name='HLT_j0_pf_ftf_preselcHT450_BeamSpotPEB_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup+LegacyTopoGroup),
         ChainProp(name='HLT_j0_pf_ftf_presel6c25_BeamSpotPEB_L14J15', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_4J15']+SupportLegGroup),
         # ChainProp(name='HLT_j0_pf_ftf_presel2c20b85_BeamSpotPEB_L1J45p0ETA21_3J15p0ETA25', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_J45p0ETA21_3J15p0ETA25']+SupportLegGroup),
         #

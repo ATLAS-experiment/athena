@@ -1106,8 +1106,7 @@ class ComponentAccumulator(AccumulatorCachable):
 
         #Public Tools:
         for pt in self._publicTools:
-            pt.name = "ToolSvc." + pt.name
-            getCompsToBeAdded(pt)
+            getCompsToBeAdded(pt, namePrefix="ToolSvc.")
 
         #Auditors:
         for aud in self._auditors:
