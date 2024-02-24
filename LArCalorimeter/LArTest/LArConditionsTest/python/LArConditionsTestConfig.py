@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from Campaigns.Utils import Campaign
 import sys
+from pathlib import Path
 
 def LArConditionsTestCfg(flags):
     #Get basic services and cond-algos
@@ -76,6 +77,11 @@ if __name__ == "__main__":
     msgsvc.Format='% F%18W%S%7W%R%T %0W%M'
     
     poolSvc=cfg.getService("PoolSvc")
-    poolSvc.WriteCatalog="file:Catalog%i.xml" % flags.LArCondTest.Step
-    
+    poolSvc.WriteCatalog=f"file:Catalog{flags.LArCondTest.Step}.xml"
+
+    # remove catalog on re-run to help with incremental testing
+    catalogFile = Path(f"Catalog{flags.LArCondTest.Step}.xml")
+    if catalogFile.exists():
+        catalogFile.unlink()
+
     sys.exit(cfg.run(1).isFailure())
