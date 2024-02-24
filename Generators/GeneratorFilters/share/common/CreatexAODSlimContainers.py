@@ -28,6 +28,10 @@ def createxAODSlimmedContainer(container_name,prefiltSeq):
         if not hasattr(prefiltSeq, "xAODTruthParticleSlimmerLightLepton"):
             from GeneratorFilters.GeneratorFiltersConf import xAODTruthParticleSlimmerLightLepton
             prefiltSeq += xAODTruthParticleSlimmerLightLepton('xAODTruthParticleSlimmerLightLepton')           
+    elif container_name=="TruthGen":
+        if not hasattr(prefiltSeq, "xAODTruthParticleSlimmerGen"):
+            from GeneratorFilters.GeneratorFiltersConf import xAODTruthParticleSlimmerGen
+            prefiltSeq += xAODTruthParticleSlimmerGen('xAODTruthParticleSlimmerGen')
     else:
         from AthenaCommon.Logging import logging
         msg_logger = logging.getLogger("CreatexAODSlimContainers ")       
