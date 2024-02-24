@@ -18,16 +18,16 @@ package](https://gitlab.cern.ch/atlas/athena/tree/21.6/Generators/Pythia8_i).
 ## Running Pythia 8 in Athena
 
 `Pythia8_i` can be used from any MC production release, set up with
-e.g. `setupATLAS; lsetup asetup; asetup 21.6.20,AthGeneration`.  Releases not
-used for MC production will not have been tested, but may nevertheless work.
+e.g. `setupATLAS; lsetup asetup; asetup main,latest,AthGeneration` (or in case of HepMC2 releases `asetup main--HepMC2,latest,AthGeneration`).  
+Releases not used for MC production will not have been tested, but may nevertheless work.
 
-Pythia8_i should be run via the `Gen_tf.py` transform script in release 21
+Pythia8_i should be run via the `Gen_tf.py` transform script in release 21/22/23
 (formerly `Generate_tf.py` in MC15/releases 19-20, and `Generate_trf.py` in
 MC12/release 17).  The transform can download standard "job option" run
 configuration scripts automatically, given a job-config/dataset ID number, so if
 you just want to run an existing MC process just run like this:
 
-    Gen_tf.py --ecmEnergy=13000 --jobConfig=421113 --maxEvents=10 --outputEVNTFile=test_minbias_inelastic.EVNT.pool.root
+    Gen_tf.py --ecmEnergy=13600 --jobConfig=421113 --maxEvents=10 --outputEVNTFile=test_minbias_inelastic.EVNT.pool.root
 
 If the process you want does not already exist, you will need to make your own
 job option script and run it locally: this is covered in the following section.
@@ -68,14 +68,14 @@ personal fork of the ATLAS codebase. Then make and a sparse checkout of the
     git atlas init-workdir https://:@gitlab.cern.ch/USERNAME/athena.git
     cd athena
     git atlas addpkg Pythia8_i
-    git checkout -b 21.6 release/21.6.20 --no-track   #< use your own preferred tag or branch
+    git checkout -b 23.6 release/23.6.20 --no-track   #< use your own preferred tag or branch
     cd ..
 
 Now make a build directory separate from the source checkout, set up the release
 to build against with your local modifications, and build & set up the run:
 
     mkdir athena-build && cd athena-build
-    asetup 21.6.20,AthGeneration
+    asetup 23.6.20,AthGeneration
     cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt ../athena/Projects/WorkDir
     make
     source x86_64-*/setup.sh
