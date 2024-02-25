@@ -128,13 +128,13 @@ class MonitorDef:
                 # Combined
                 #"L1_MU3V_J12",
                 # L1Topo
-                "L1_BPH-0DR3-EM7J15_MU5VF", "L1_HT190-J15s5pETA21", "L1_LLP-RO", # Board 0 FPGA 0
-                "L1_MJJ-500-NFF",                                                # Board 0 FPGA 1
-                "L1_SC111-CJ15",                                                 # Board 1 FPGA 0
-                "L1_BPH-0M9-EM7-EM5_MU5VF", "L1_BPH-0DR3-EM7J15_2MU3V",
-                "L1_JPSI-1M5-EM7", "L1_JPSI-1M5-EM12",
-                "L1_MJJ-700", "L1_LLP-NOMATCH",
-                "L1_LAR-ZEE",
+                "L1_BPH-0DR3-eEM9jJ40_MU5VF", "L1_HT190-jJ40s5pETA21", "L1_LLP-RO-eEM", # Board 0 FPGA 0
+                "L1_jMJJ-500-NFF",                                                # Board 0 FPGA 1
+                "L1_SC111-CjJ40",                                                 # Board 1 FPGA 0
+                "L1_BPH-0M9-eEM9-eEM7_MU5VF", "L1_BPH-0DR3-eEM9jJ40_2MU3V",
+                "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
+                "L1_jMJJ-700", "L1_LLP-NOMATCH-eEM",
+                "L1_LAR-ZEE-eEM",
 
                 ## Phase-I
                 # L1Calo

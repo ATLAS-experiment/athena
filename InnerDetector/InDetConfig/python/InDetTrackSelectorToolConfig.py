@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackSelectorTool package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -263,3 +263,32 @@ def InDetTrigTRTDriftCircleCutToolCfg(flags, name='InDetTrigTRTDriftCircleCutToo
     kwargs.setdefault("UseNewParameterization", True)
     kwargs.setdefault("UseActiveFractionSvc", True)
     return InDetTRTDriftCircleCutToolCfg(flags, name, **kwargs)
+
+
+
+# Tool to select tracks to be used for TRT calibration
+def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool",**kwargs):
+    
+    from AthenaCommon.SystemOfUnits import GeV, mm
+    
+    acc = ComponentAccumulator()      
+    kwargs.setdefault("pTMin", 1.0*GeV)     
+    kwargs.setdefault("fitChi2OnNdfMax",50.0)
+    kwargs.setdefault("z0Max",99999.0*mm)   
+    kwargs.setdefault("IPd0Max",10.0*mm)    
+    kwargs.setdefault("IPd0Max",300.0*mm)   
+    kwargs.setdefault("etaMax",2.1)
+    kwargs.setdefault("nHitBLayer",0)
+    kwargs.setdefault("nHitPix",2)
+    kwargs.setdefault("nHitBLayerPlusPix",0)
+    kwargs.setdefault("nHitSct",0)
+    kwargs.setdefault("nHitSi",7)
+    kwargs.setdefault("nHitTrtPlusOutliers",20)
+    kwargs.setdefault("nHitTrtPlusOutliersHighE",20)
+    kwargs.setdefault("nHitTrtHighE",0)
+    
+    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
+    
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, name=name , **kwargs)))
+    return acc

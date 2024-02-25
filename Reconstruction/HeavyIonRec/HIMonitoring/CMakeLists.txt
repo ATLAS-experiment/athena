@@ -13,7 +13,3 @@ atlas_add_component( HIMonitoring
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringLib xAODHIEvent xAODTrigMinBias
                      ElectronPhotonSelectorToolsLib LWHists PATCoreAcceptLib xAODEgamma xAODForward xAODMuon )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-

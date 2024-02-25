@@ -63,27 +63,25 @@ def main():
             JetChainParts['bTag'] += ['newTagger']
 
 
-    from AthenaCommon.Configurable import ConfigurableCABehavior
-    with ConfigurableCABehavior():
-        from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        acc = MainServicesCfg( flags )
-        acc.merge( PoolReadCfg( flags ) )
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    acc = MainServicesCfg( flags )
+    acc.merge( PoolReadCfg( flags ) )
 
-        from TrigBtagEmulationTool.TrigBtagEmulationToolConfig import TrigBtagValidationTestCfg
-        acc.merge(TrigBtagValidationTestCfg(flags,
-                                            toBeEmulatedTriggers = emulatedChains,
-                                            InputChain_EMTopo = '',
-                                            InputJetContainer_EMTopo = jetcontainer_EMTopo,
-                                            InputJetContainer_EMTopoPresel = '',
-                                            InputChain_PFlow = validation_singlechain,
-                                            InputJetContainer_PFlow = jetcontainer_PFlow,
-                                            InputJetContainer_PFlowPresel = '' ))
-        
-        acc.printConfig(withDetails = True, summariseProps = True)
-        acc.store( open('TrigBtagValidationConfig.pkl','wb') )
+    from TrigBtagEmulationTool.TrigBtagEmulationToolConfig import TrigBtagValidationTestCfg
+    acc.merge(TrigBtagValidationTestCfg(flags,
+                                        toBeEmulatedTriggers = emulatedChains,
+                                        InputChain_EMTopo = '',
+                                        InputJetContainer_EMTopo = jetcontainer_EMTopo,
+                                        InputJetContainer_EMTopoPresel = '',
+                                        InputChain_PFlow = validation_singlechain,
+                                        InputJetContainer_PFlow = jetcontainer_PFlow,
+                                        InputJetContainer_PFlowPresel = '' ))
 
-        acc.run()
+    acc.printConfig(withDetails = True, summariseProps = True)
+    acc.store( open('TrigBtagValidationConfig.pkl','wb') )
+
+    acc.run()
 
 if __name__ == "__main__":
     main()

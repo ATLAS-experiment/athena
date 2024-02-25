@@ -1,7 +1,7 @@
 /** -*- c++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -16,16 +16,14 @@
 #define SCTCalibWriteTool_H
 
 // Athena includes
-//#include "AthenaBaseComps/AthService.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IIOVDbSvc.h"
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "Identifier/Identifier.h"
+
 #include "InDetConditionsSummaryService/InDetHierarchy.h"
 #include "StoreGate/ReadHandleKey.h"
-//#include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/WriteCondHandle.h"
 
 #include "CoralBase/AttributeListSpecification.h"
@@ -48,6 +46,7 @@
 
 //forward declarations
 class IdentifierHash;
+class Identifier;
 class SCT_ID;
 class IIOVRegistrationSvc;
 class IAthenaOutputStreamTool;
@@ -160,7 +159,7 @@ class SCTCalibWriteTool : public AthAlgTool {
       StatusCode streamOutCondObjectsWithErrMsg(const std::string& foldername);
 
       StatusCode registerCondObjects(const std::string& foldername,const std::string& tagname) const;
-      StatusCode recordAndStream(const CondAttrListCollection* pCollection,const std::string& foldername, bool& flag);
+      StatusCode recordAndStream(std::unique_ptr<CondAttrListCollection> pCollection,const std::string& foldername, bool& flag);
       StatusCode registerCondObjectsWithErrMsg(const std::string& foldername,const std::string& tagname) const;
 
       coral::AttributeListSpecification* createBasicDbSpec(const bool capsFormat) const;

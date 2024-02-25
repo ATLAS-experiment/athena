@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# art-description: heavy ion reconstruction on data22
+# art-description: Reco_tf runs on 2022 Heavy Ion data with Minbias stream (HIP mode)
 # art-athena-mt: 8
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \

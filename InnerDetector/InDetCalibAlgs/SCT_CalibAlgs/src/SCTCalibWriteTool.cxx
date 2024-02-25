@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,6 +19,7 @@
 #include "CoralBase/Attribute.h"
 
 #include "Identifier/IdentifierHash.h"
+#include "Identifier/Identifier.h"
 #include "InDetIdentifier/SCT_ID.h"
 
 //path resolver to find the file
@@ -122,30 +123,6 @@ SCTCalibWriteTool::initialize()
 StatusCode
 SCTCalibWriteTool::finalize() {
    ATH_MSG_DEBUG("SCTCalibWriteTool::finalize");
-   if (!m_attrListColl.release()) {
-      return StatusCode::FAILURE;
-   }
-   if (!m_attrListColl_deadStrip.release()) {
-      return StatusCode::FAILURE;
-   }
-   if (!m_attrListColl_deadChip.release()) {
-      return StatusCode::FAILURE;
-   }
-   if (!m_attrListColl_eff.release()) {
-      return StatusCode::FAILURE;
-   }
-   if (!m_attrListColl_no.release()) {
-      return StatusCode::FAILURE;
-   }
-   if (!m_attrListColl_RawOccu.release()) {
-      return StatusCode::FAILURE;
-   }
-   if (!m_attrListColl_BSErr.release()) {
-      return StatusCode::FAILURE;
-   }
-   if (!m_attrListColl_LA.release()) {
-      return StatusCode::FAILURE;
-   }
    if (!m_streamer.release().isSuccess()) {
       return StatusCode::FAILURE;
    }
@@ -510,7 +487,7 @@ SCTCalibWriteTool::stringToInt(const std::string& s) const {
 
 StatusCode
 SCTCalibWriteTool::wrapUpNoisyChannel() {
-   if (recordAndStream(m_attrListColl.get(), s_defectFolderName, m_defectRecorded).isFailure()) return StatusCode::FAILURE;
+   if (recordAndStream(std::move(m_attrListColl), s_defectFolderName, m_defectRecorded).isFailure()) return StatusCode::FAILURE;
    if (registerCondObjectsWithErrMsg(s_defectFolderName, m_tagID4NoisyStrips).isFailure()) return StatusCode::FAILURE;
    return StatusCode::SUCCESS;
 }
@@ -519,7 +496,7 @@ SCTCalibWriteTool::wrapUpNoisyChannel() {
 
 StatusCode
 SCTCalibWriteTool::wrapUpDeadStrips() {
-   if (recordAndStream(m_attrListColl_deadStrip.get(), s_deadStripFolderName, m_deadStripRecorded).isFailure()) return  StatusCode::FAILURE;
+   if (recordAndStream(std::move(m_attrListColl_deadStrip), s_deadStripFolderName, m_deadStripRecorded).isFailure()) return  StatusCode::FAILURE;
    if (registerCondObjectsWithErrMsg(s_deadStripFolderName, m_tagID4DeadStrips).isFailure()) return StatusCode::FAILURE;
    return StatusCode::SUCCESS;
 }
@@ -528,7 +505,7 @@ SCTCalibWriteTool::wrapUpDeadStrips() {
 StatusCode
 
 SCTCalibWriteTool::wrapUpDeadChips() {
-   if (recordAndStream(m_attrListColl_deadChip.get(), s_deadChipFolderName, m_deadChipRecorded).isFailure())  return StatusCode::FAILURE;
+   if (recordAndStream(std::move(m_attrListColl_deadChip), s_deadChipFolderName, m_deadChipRecorded).isFailure())  return StatusCode::FAILURE;
    if (registerCondObjectsWithErrMsg(s_deadChipFolderName, m_tagID4DeadChips).isFailure()) return StatusCode::FAILURE;
    return StatusCode::SUCCESS;
 }
@@ -537,7 +514,7 @@ SCTCalibWriteTool::wrapUpDeadChips() {
 
 StatusCode
 SCTCalibWriteTool::wrapUpEfficiency() {
-   if (recordAndStream(m_attrListColl_eff.get(), s_effFolderName, m_effRecorded).isFailure()) return StatusCode::FAILURE;
+   if (recordAndStream(std::move(m_attrListColl_eff), s_effFolderName, m_effRecorded).isFailure()) return StatusCode::FAILURE;
    if (registerCondObjectsWithErrMsg(s_effFolderName, m_tagID4Efficiency).isFailure()) return StatusCode::FAILURE;
    return StatusCode::SUCCESS;
 }
@@ -546,7 +523,7 @@ SCTCalibWriteTool::wrapUpEfficiency() {
 
 StatusCode
 SCTCalibWriteTool::wrapUpNoiseOccupancy() {
-   if (recordAndStream(m_attrListColl_no.get(), s_noFolderName, m_noRecorded).isFailure()) return StatusCode::FAILURE;
+   if (recordAndStream(std::move(m_attrListColl_no), s_noFolderName, m_noRecorded).isFailure()) return StatusCode::FAILURE;
    if (registerCondObjectsWithErrMsg(s_noFolderName, m_tagID4NoiseOccupancy).isFailure()) return StatusCode::FAILURE;
    return StatusCode::SUCCESS;
 }
@@ -555,7 +532,7 @@ SCTCalibWriteTool::wrapUpNoiseOccupancy() {
 
 StatusCode
 SCTCalibWriteTool::wrapUpRawOccupancy() {
-   if (recordAndStream(m_attrListColl_RawOccu.get(), s_RawOccuFolderName, m_RawOccuRecorded).isFailure()) return StatusCode::FAILURE;
+   if (recordAndStream(std::move(m_attrListColl_RawOccu), s_RawOccuFolderName, m_RawOccuRecorded).isFailure()) return StatusCode::FAILURE;
    if (registerCondObjectsWithErrMsg(s_RawOccuFolderName, m_tagID4RawOccupancy).isFailure()) return StatusCode::FAILURE;
    return StatusCode::SUCCESS;
 }
@@ -564,7 +541,7 @@ SCTCalibWriteTool::wrapUpRawOccupancy() {
 
 StatusCode
 SCTCalibWriteTool::wrapUpBSErrors() {
-   if (recordAndStream(m_attrListColl_BSErr.get(), s_BSErrFolderName, m_BSErrRecorded).isFailure()) return StatusCode::FAILURE;
+   if (recordAndStream(std::move(m_attrListColl_BSErr), s_BSErrFolderName, m_BSErrRecorded).isFailure()) return StatusCode::FAILURE;
    if (registerCondObjectsWithErrMsg(s_BSErrFolderName, m_tagID4BSErrors).isFailure()) return StatusCode::FAILURE;
    return StatusCode::SUCCESS;
 }
@@ -573,7 +550,7 @@ SCTCalibWriteTool::wrapUpBSErrors() {
 
 StatusCode
 SCTCalibWriteTool::wrapUpLorentzAngle() {
-   if (recordAndStream(m_attrListColl_LA.get(), s_LAFolderName, m_LARecorded).isFailure()) return StatusCode::FAILURE;
+   if (recordAndStream(std::move(m_attrListColl_LA), s_LAFolderName, m_LARecorded).isFailure()) return StatusCode::FAILURE;
    if (registerCondObjectsWithErrMsg(s_LAFolderName, m_tagID4LorentzAngle).isFailure()) return StatusCode::FAILURE;
    return StatusCode::SUCCESS;
 }
@@ -589,7 +566,6 @@ SCTCalibWriteTool::streamOutCondObjects(const std::string& foldername) {
    }
    IAthenaOutputStreamTool::TypeKeyPairs typeKeys{1};
    if (m_readWriteCool) {
-      //ATH_MSG_DEBUG("before CondAttrListCollection " << foldername);
       IAthenaOutputStreamTool::TypeKeyPair attrCollPair{"CondAttrListCollection", foldername};
       typeKeys[0] = attrCollPair;
    }
@@ -688,10 +664,10 @@ SCTCalibWriteTool::registerCondObjectsWithErrMsg(const std::string& foldername,c
 ///////////////////////////////////////////////////////////////////////////////////////
 
 StatusCode
-SCTCalibWriteTool::recordAndStream(const CondAttrListCollection* pCollection,const std::string& foldername, bool& flag) {
+SCTCalibWriteTool::recordAndStream(std::unique_ptr<CondAttrListCollection> pCollection,const std::string& foldername, bool& flag) {
    ATH_MSG_DEBUG("recordAndStream start " << foldername);
    if (m_writeCondObjs) {
-      if (detStore()->record(pCollection, foldername).isFailure()) {
+      if (detStore()->record(std::move(pCollection), foldername).isFailure()) {
          ATH_MSG_ERROR("Could not record "<<foldername);
          return StatusCode::FAILURE;
       }

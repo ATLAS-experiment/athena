@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_SD_ZDC_FIBER_SD_H
@@ -14,6 +14,7 @@
 
 // STL header
 #include <string>
+#include <map>
 #include <gtest/gtest_prod.h>
 
 // G4 needed classes

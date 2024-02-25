@@ -150,7 +150,7 @@ void TrigTauMonitorSingleAlgorithm::fillHLTEfficiencies(const EventContext& ctx,
 
         if(!L1_match || !l1_accept_flag) continue; // Skip this offline tau since not matched with L1 item   
 
-        fill(monGroup, tauPt, tauEta, tauPhi, averageMu, HLT_match, HLT_match_highPt);
+        fill(monGroup, tauPt, tauEta, tauPhi, averageMu, HLT_match);
 
         if(is_highPt) {
             HLT_match_highPt = static_cast<bool>(HLT_match);

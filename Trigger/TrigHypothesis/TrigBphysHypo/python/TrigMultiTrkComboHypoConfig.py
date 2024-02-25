@@ -208,9 +208,6 @@ def ConfigurationComboHypoTool(flags, chainDict):
    if 'sigmaLxy3' in chainDict['topo']:
        tool.sigmaLxyCut = 3.
 
-   if 'sigmaLxy5' in chainDict['topo']:
-       tool.sigmaLxyCut = 5.
-
    electronMultiplicity = [int(chainPart['multiplicity']) for chainPart in chainDict['chainParts'] if chainPart['signature']=='Electron']
    if len(electronMultiplicity) == 1 and electronMultiplicity[0] == 1:
        tool.isMergedElectronChain = True

@@ -1,6 +1,5 @@
-// -*- c++ -*-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CALIBTOOLS__FILLALIGNTRTHITS_H
@@ -56,19 +55,18 @@ public:
   virtual StatusCode finalize();
 
   //virtual bool fill(const Trk::Track* aTrack, TRT::TrackInfo* output) const;
-  virtual bool fill(const Trk::Track* aTrack, TRT::TrackInfo* output,
-                    const ComTime* theComTime, const xAOD::EventInfo& eventInfo,
+  virtual bool fill(const Trk::Track* aTrack, TRT::TrackInfo* output, const xAOD::EventInfo& eventInfo,
                     const xAOD::VertexContainer& vertices);
 
 private:
   const AtlasDetectorID* m_DetID;
   const TRT_ID* m_TRTID;
 
-  ToolHandle< ITRT_DriftFunctionTool > m_driftFunctionTool{this, "TRTDriftFunctionTool", "TRT_DriftFunctionTool", "Drift function tool name"};
-  ToolHandle<Trk::IUpdator> m_updatorHandle{this, "UpdatorTool", "Trk::KalmanUpdator/TrkKalmanUpdator", "Measurement updator to calculate unbiased track states"};
-  ToolHandle<ITRT_CalDbTool> m_trtcaldbTool ;
-  ServiceHandle<ITRT_StrawNeighbourSvc> m_neighbourSvc ;
-  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool; //!< The ConditionsSummaryTool
+  ToolHandle< ITRT_DriftFunctionTool > m_driftFunctionTool {this, "TRTDriftFunctionTool", "TRT_DriftFunctionTool", "Drift function tool name"};
+  ToolHandle<Trk::IUpdator> m_updatorHandle {this, "UpdatorTool" , "Trk::KalmanUpdator/TrkKalmanUpdator", "Measurement updator to calculate unbiased track states"};
+  ToolHandle<ITRT_CalDbTool> m_trtcaldbTool {this, "TRTCalDbTool", "CalDbTool", "Access to the folder of the calibration constants"}; 
+  ServiceHandle<ITRT_StrawNeighbourSvc> m_neighbourSvc {this, "NeighbourSvc", "NeighbourSvc", ""};
+  ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool  {this, "TRTStrawSummaryTool", "InDetTRTStrawStatusSummaryTool", ""};
 
   Trk::IUpdator* m_updator; //!< updator for unbiased states
 
