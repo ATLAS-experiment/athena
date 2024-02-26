@@ -627,7 +627,6 @@ InDetPhysValMonitoringTool::fillHistograms() {
 							primaryvertex,
 							beamSpotWeight) );
   }
-  
   return StatusCode::SUCCESS;
 }
 

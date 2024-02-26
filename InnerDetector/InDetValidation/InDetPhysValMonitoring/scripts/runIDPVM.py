@@ -44,6 +44,9 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doIDTIDE", help='run the output from IDTIDE derivation', action='store_true', default=False)
     IDPVMparser.add_argument("--doTechnicalEfficiency", help='fill the technical efficiency plot (requires additional si hit information in the input file)', action='store_true', default=False)
     IDPVMparser.add_argument("--doPRW", help='apply pileup reweight', action='store_true', default=False)
+    IDPVMparser.add_argument("--maxTrkJetDR", help='the maximum dR to jets to allow for track-in-jet plots', type=float, default=0.4)
+    IDPVMparser.add_argument("--JetAbsEtaMax", help='Maximum Eta value for jet selection', type=float, default=-1)
+
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -96,6 +99,9 @@ flags.PhysVal.IDPVM.doTechnicalEfficiency = MyArgs.doTechnicalEfficiency
 flags.PhysVal.IDPVM.doPRW = MyArgs.doPRW
 flags.PhysVal.IDPVM.doActs = MyArgs.doActs
 flags.PhysVal.IDPVM.doHGTD = MyArgs.doHGTD
+flags.PhysVal.IDPVM.maxTrkJetDR = MyArgs.maxTrkJetDR
+if MyArgs.JetAbsEtaMax != -1:
+    flags.PhysVal.IDPVM.JetAbsEtaMax = MyArgs.JetAbsEtaMax
 
 flags.Exec.SkipEvents = MyArgs.skipEvents
 flags.Exec.MaxEvents = MyArgs.maxEvents

@@ -235,7 +235,10 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
 
         # Set Jet cuts used for CTIDE studies
         kwargs.setdefault('JetAbsEtaMin', 0)
-        kwargs.setdefault('JetAbsEtaMax', 2.5 if flags.Detector.GeometryID else 4.0)
+        kwargs.setdefault('JetAbsEtaMax', 
+                          flags.PhysVal.IDPVM.JetAbsEtaMax)
+        kwargs.setdefault('maxTrkJetDR', 
+                          flags.PhysVal.IDPVM.maxTrkJetDR)
         # Pt cuts are in GeV
         kwargs.setdefault('JetPtMin', 100)
         kwargs.setdefault('JetPtMax', 5000)
