@@ -10,6 +10,9 @@ namespace {
         return chamber.detectorType() == ActsTrk::DetectorType::Mm ||
                chamber.detectorType() == ActsTrk::DetectorType::sTgc;
     }
+    constexpr int sign(const int num){
+        return num >= 0 ? 1 : -1;
+    }
 }
 
 namespace MuonGMR4 {
@@ -36,6 +39,7 @@ MuonChamber& MuonChamber::operator=(MuonChamber&& other) {
     }
     return *this;
 }
+PVConstLink MuonChamber::physVol() const { return m_args.chamberVol; }
 const MuonChamber::defineArgs& MuonChamber::parameters() const { return m_args; }
 const Muon::IMuonIdHelperSvc* MuonChamber::idHelperSvc() const { return m_args.readoutEles[0]->idHelperSvc();}
 Muon::MuonStationIndex::ChIndex MuonChamber::chamberIndex() const { return m_args.readoutEles[0]->chamberIndex(); }
@@ -86,7 +90,9 @@ bool operator<(const MuonChamber& a, const MuonChamber& b) {
         const int secA = a.sector();
         const int secB = b.sector();
         if (secA != secB) return secA < secB;
-    } else if (a.stationName() != b.stationName()) {
+        return sign(a.stationEta()) < sign(b.stationEta());
+    }  
+    if (a.stationName() != b.stationName()) {
         return a.stationName() < b.stationName();
     }
     if (a.stationEta() != b.stationEta()) {
@@ -101,10 +107,10 @@ bool operator<(const Identifier& a, const MuonChamber& b) {
         const int secB = b.sector();
         const int secA = b.idHelperSvc()->sector(a);
         if (secA != secB) return secA < secB;
-    } else{
-        const int stName = b.idHelperSvc()->stationName(a);
-        if (stName != b.stationName()) { return stName < b.stationName(); }
-    }
+        return sign(b.idHelperSvc()->stationEta(a)) < sign(b.stationEta());
+    } 
+    const int stName = b.idHelperSvc()->stationName(a);
+    if (stName != b.stationName()) { return stName < b.stationName(); }
     const int stEta = b.idHelperSvc()->stationEta(a);
     if (stEta != b.stationEta()) { return  stEta < b.stationEta(); }
     return  b.idHelperSvc()->stationPhi(a) < b.stationPhi();
@@ -116,10 +122,11 @@ bool operator<(const MuonChamber& a, const Identifier& b) {
         const int secA = a.sector();
         const int secB = a.idHelperSvc()->sector(b);
         if (secA != secB) return secA < secB;
-    } else{
-        const int stName = a.idHelperSvc()->stationName(b);
-        if (stName != a.stationName()) { return a.stationName() < stName; }
-    }
+        return sign(a.stationEta()) < sign(a.idHelperSvc()->stationEta(b));        
+    } 
+    const int stName = a.idHelperSvc()->stationName(b);
+    if (stName != a.stationName()) { return a.stationName() < stName; }
+    
     const int stEta = a.idHelperSvc()->stationEta(b);
     if (stEta != a.stationEta()) { return a.stationEta() < stEta; }
     return a.stationPhi() < a.idHelperSvc()->stationPhi(b);

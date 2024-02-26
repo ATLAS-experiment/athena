@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSTATIONGEOHELPERS_MUONCHAMBER_H
 #define MUONSTATIONGEOHELPERS_MUONCHAMBER_H
@@ -77,6 +77,8 @@ namespace MuonGMR4 {
             std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
 
             const defineArgs& parameters() const;
+            /// Returns the physical volume that's associated with the chamber
+            PVConstLink physVol() const;
 
         private:
            defineArgs m_args{};

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONSIMHITCNV_xAODSimHitToMmMeasurementCnvAlg_H
 #define XAODMUONSIMHITCNV_xAODSimHitToMmMeasurementCnvAlg_H
@@ -33,8 +33,9 @@ class xAODSimHitToMmMeasCnvAlg : public AthReentrantAlgorithm {
 
         ~xAODSimHitToMmMeasCnvAlg() = default;
 
-        StatusCode execute(const EventContext& ctx) const override;
-        StatusCode initialize() override; 
+        StatusCode execute(const EventContext& ctx) const override final;
+        StatusCode initialize() override final; 
+        StatusCode finalize() override final;
     
     private:
         CLHEP::HepRandomEngine* getRandomEngine(const EventContext& ctx) const;
@@ -57,6 +58,9 @@ class xAODSimHitToMmMeasCnvAlg : public AthReentrantAlgorithm {
 
         SG::ReadCondHandleKey<NswErrorCalibData> m_uncertCalibKey{this, "ErrorCalibKey", "NswUncertData",
                                                          "Key of the parametrized NSW uncertainties"};
+
+        mutable std::atomic<unsigned> m_allHits ATLAS_THREAD_SAFE{};
+        mutable std::atomic<unsigned> m_acceptedHits ATLAS_THREAD_SAFE{};
 
 };
 

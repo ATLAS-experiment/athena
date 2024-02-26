@@ -23,9 +23,9 @@ namespace MuonGMR4{
   using defineArgs = MuonChamber::defineArgs;
   using ReadoutSet = MuonChamber::ReadoutSet;
 
-  ActsMuonChamberTool::ActsMuonChamberTool( const std::string& type, 
-                                                            const std::string& name, 
-                                                            const IInterface* parent ):
+  ActsMuonChamberTool::ActsMuonChamberTool(const std::string& type, 
+                                           const std::string& name, 
+                                           const IInterface* parent ):
         AthAlgTool{type,name, parent} {
     declareInterface<IActsMuonChamberTool>(this);
   }
@@ -189,6 +189,7 @@ namespace MuonGMR4{
         define.halfXShort += tolerance;
         define.halfXLong += tolerance;
         define.halfZ += tolerance;
+        define.chamberVol = motherVol;
 
         define.readoutEles = std::move(readoutEles);
         
