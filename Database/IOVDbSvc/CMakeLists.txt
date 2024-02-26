@@ -112,7 +112,7 @@ atlas_add_test( IOVDbFolder_test
    src/IOVDbFolder.cxx src/IovStore.cxx
    src/ReadFromFileMetaData.cxx src/IOVDbCoolFunctions.cxx src/TagFunctions.cxx
    src/Cool2Json.cxx src/Base64Codec.cxx src/Json2Cool.cxx 
-   src/BasicFolder.cxx src/CrestFunctions.cxx
+   src/BasicFolder.cxx src/CrestFunctions.cxx src/IOVDbJsonStringFunctions.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
    ${ROOT_INCLUDE_DIRS} 
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
@@ -139,23 +139,23 @@ atlas_add_test( TagFunctions_test
 
 
 atlas_add_test( BasicFolder_test
-   SOURCES test/BasicFolder_test.cxx src/BasicFolder.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} CrestApiLib
+   SOURCES test/BasicFolder_test.cxx src/BasicFolder.cxx src/IOVDbJsonStringFunctions.cxx src/FolderTypes.cxx src/IOVDbStringFunctions.cxx src/Base64Codec.cxx
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} CoralUtilities
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} AthenaPoolUtilities CrestApiLib
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( Json2Cool_test
-   SOURCES test/Json2Cool_test.cxx src/Json2Cool.cxx src/BasicFolder.cxx 
+   SOURCES test/Json2Cool_test.cxx src/Json2Cool.cxx src/BasicFolder.cxx src/IOVDbJsonStringFunctions.cxx src/FolderTypes.cxx 
    src/IOVDbStringFunctions.cxx src/Base64Codec.cxx 
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} 
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} AthenaPoolUtilities
    nlohmann_json::nlohmann_json CxxUtils 
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( Cool2Json_test
    SOURCES test/Cool2Json_test.cxx src/Cool2Json.cxx src/IOVDbConn.cxx
-   src/IOVDbParser.cxx src/IOVDbStringFunctions.cxx src/FolderTypes.cxx
-   src/Base64Codec.cxx
+   src/IOVDbParser.cxx src/IOVDbJsonStringFunctions.cxx src/IOVDbStringFunctions.cxx src/FolderTypes.cxx
+   src/Base64Codec.cxx 
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    ${ROOT_INCLUDE_DIRS} CoralUtilities
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES} 
