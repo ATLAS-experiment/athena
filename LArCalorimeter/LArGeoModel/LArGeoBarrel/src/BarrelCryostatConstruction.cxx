@@ -892,12 +892,12 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::BarrelCryostatConstruction::GetEnvelope(
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
     GeoIntrusivePtr<GeoFullPhysVol> barrelPosEnvelope = barrelConstruction.GetPositiveEnvelope();
-    if ( barrelPosEnvelope != nullptr )
+    if ( barrelPosEnvelope)
       halfLArPhysicalPos->add(barrelPosEnvelope);
 
     // The "envelope" determined by the EMB should be a GeoFullPhysVol.
     GeoIntrusivePtr<GeoFullPhysVol> barrelNegEnvelope = barrelConstruction.GetNegativeEnvelope();
-    if ( barrelNegEnvelope != nullptr )
+    if ( barrelNegEnvelope)
       halfLArPhysicalNeg->add(barrelNegEnvelope);
 
     if(m_fullGeo) {

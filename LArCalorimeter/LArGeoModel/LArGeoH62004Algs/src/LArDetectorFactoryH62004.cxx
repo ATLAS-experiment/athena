@@ -213,7 +213,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol* world)
   {                                             // (with 350=1/2 length of FrontBeam volume)
     PVLink front = nullptr;
     front = FrontBeamConstruction.GetEnvelope();
-    if(front !=nullptr){
+    if(front ){
       expHallPhys->add( new GeoNameTag("H62004::Front"));
       expHallPhys->add( new GeoTransform( GeoTrf::TranslateZ3D(z_bard) ) );  
       expHallPhys->add(front);    
@@ -226,7 +226,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol* world)
   {
      PVLink middle = nullptr;
      middle = MiddleBeamConstruction.GetEnvelope();
-     if(middle != nullptr ){
+     if(middle  ){
         double ym_pos = m_tableYpos  * (z_bardm + 2160*Gaudi::Units::cm) * (1./(bttb_pos + 2160*Gaudi::Units::cm));
 	expHallPhys->add( new GeoNameTag("H62004::Middle"));
 	expHallPhys->add( new GeoTransform( GeoTrf::TranslateY3D(ym_pos) * GeoTrf::TranslateZ3D(z_bardm) ) );
@@ -238,7 +238,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol* world)
   {
      PVLink mov = nullptr;
      mov = MovableTable.GetEnvelope();
-     if(mov != nullptr ){
+     if(mov  ){
 	expHallPhys->add( new GeoNameTag("H62004::Movable"));
 	expHallPhys->add( new GeoTransform( GeoTrf::TranslateY3D(m_tableYpos) *  GeoTrf::TranslateZ3D(bttb_pos) ) );
 	expHallPhys->add(mov);
@@ -265,7 +265,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol* world)
      PVLink wtc = nullptr;
      wtc = wtcConstruction.GetEnvelope();
      std::cout<<"WTC envelope: "<<wtc.get()<<"/"<<expHallPhys<<std::endl;
-     if(wtc !=nullptr ){
+     if(wtc  ){
        expHallPhys->add( new GeoNameTag("LAr"));
        GeoTrf::RotateX3D rotTC(WTC_tild);
        expHallPhys->add( new GeoTransform( GeoTrf::Translation3D(WTC_x, WTC_y, bcry_zpos + bcry_rwarm + WTC_z + z_m) * rotTC));

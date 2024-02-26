@@ -358,7 +358,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::LArDetectorConstructionTBEC::createEnvel
   GeoTrf::Transform3D Mrot(GeoTrf::RotateZ3D( m_phi_pos + 90*Gaudi::Units::deg)*GeoTrf::RotateY3D(m_ModuleRotation));
   GeoTrf::Vector3D pos( -xcent, m_YShift, -51.4/2*Gaudi::Units::cm );
   
-  if ( LArPhysical != nullptr ) {
+  if ( LArPhysical  ) {
   
      LArPhysical->add( new GeoIdentifierTag( 1 ) );     
      LArPhysical->add( new GeoTransform( GeoTrf::Transform3D( GeoTrf::Translation3D(pos(0),pos(1),pos(2)))*Mrot  ) );
@@ -376,7 +376,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::LArDetectorConstructionTBEC::createEnvel
     StatusCode status=detStore->record(sPhysVol,"PRESAMPLER_EC_POS");
     if(!status.isSuccess()) throw std::runtime_error ("Cannot store PRESAMPLER_EC_POS");
 	      
-    if ( LArPhysical != nullptr ) {
+    if ( LArPhysical  ) {
      
        LArPhysical->add( new GeoIdentifierTag( 1 ) );
        LArPhysical->add( new GeoTransform( GeoTrf::Transform3D( GeoTrf::Translation3D(pos(0),pos(1),pos(2)))*Mrot  ) );
