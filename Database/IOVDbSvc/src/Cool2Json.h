@@ -29,11 +29,6 @@ namespace IOVDbNamespace {
     //
     public:
     //class methods
-    ///Produce a representation of a coral::Attribute as a json string
-    static std::string jsonAttribute(const coral::Attribute&);
-    
-    ///Produce a representation of a coral::AttributeList as a json string
-    static std::string jsonAttributeList(const coral::AttributeList&);
     
     //@Constructor sets internal variables
     Cool2Json(const cool::IFolderPtr & pFolder, const cool::ValidityKey & since, 
