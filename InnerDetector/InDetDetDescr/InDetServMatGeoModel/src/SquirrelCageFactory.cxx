@@ -342,7 +342,7 @@ void SquirrelCageFactory::create(GeoPhysVol *mother)
     GeoTrf::Translate3D  suppos1(0.,0., zposSupRing+supWid/2.);
     GeoTrf::Vector3D  suppos2(0.,0.,-zposSupRing-supWid/2.);
     GeoTransform *sform1  = new GeoTransform(suppos1);
-    GeoTransform *sform2  = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,M_PI,0),suppos2));
+    GeoTransform *sform2  = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,-M_PI,0),suppos2));
     mother->add(sform1);
     mother->add(ringPhysSup);
     mother->add(sform2);

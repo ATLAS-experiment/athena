@@ -809,7 +809,7 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
       
       // Add flex in 3D model : A component
       GeoTrf::Vector3D wingflex_posA((flex1x+flex2x+flex3x+flex4x)*0.25,(flex1y+flex2y+flex3y+flex4y)*0.25,(wingZmax-wingZmin)*.5+FlexStaveMiddleGap);
-      GeoTransform* wingflex_xformA = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.0,0.0,-fabs(flex_angle)),wingflex_posA));
+      GeoTransform* wingflex_xformA = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.0,0.0,std::abs(flex_angle)),wingflex_posA));
       
       const GeoMaterial* wingflex_material= m_mat_mgr->getMaterial("pix::WingFlexA");
       GeoLogVol * wingflex_logVol = new GeoLogVol(wingName.str(),wingflex_shape,wingflex_material);
@@ -821,7 +821,7 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
       logVolPV->add(wingflex_logVolPV);
       
       GeoTrf::Vector3D wingflex_posC((flex1x+flex2x+flex3x+flex4x)*0.25,(flex1y+flex2y+flex3y+flex4y)*0.25,-((wingZmax-wingZmin)*.5+FlexStaveMiddleGap));
-      GeoTransform* wingflex_xformC = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.0,0.0,-fabs(flex_angle)),wingflex_posC));
+      GeoTransform* wingflex_xformC = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.0,0.0,std::abs(flex_angle)),wingflex_posC));
       logVolPV->add(wingflex_tag);
       logVolPV->add(wingflex_xformC);
       logVolPV->add(wingflex_logVolPV);
@@ -1038,7 +1038,7 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
   // Add flex in 3D model : A component
   //  GeoNameTag* cableflex_tag = new GeoNameTag(lname.str());
   GeoTrf::Vector3D cableflex_pos(EndblockFlexXpos,EndblockFlexYpos,0.);
-  m_endblockFlexTrf = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.0,0.0,-fabs(flex_angle)),cableflex_pos));
+  m_endblockFlexTrf = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0.0,0.0, std::abs(flex_angle)),cableflex_pos));
   GeoLogVol * cableflex_logVol = new GeoLogVol(lname.str(),cableflex_shape,scaledFlexMaterial);
   m_endblockFlexPhysVol = new GeoPhysVol(cableflex_logVol);
 
