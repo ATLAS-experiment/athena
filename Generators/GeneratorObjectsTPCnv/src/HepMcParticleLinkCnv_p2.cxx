@@ -25,7 +25,6 @@ void HepMcParticleLinkCnv_p2::persToTrans( const HepMcParticleLink_p2* persObj,
   transObj->setExtendedBarCode
     ( HepMcParticleLink::ExtendedBarCode( persObj->m_barcode,
                                           persObj->m_mcEvtIndex,
-                                          HepMcParticleLink::ExtendedBarCode::eventCollectionFromChar(persObj->m_evtColl),
                                           flag) );
 }
 
@@ -45,7 +44,6 @@ void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,
   unsigned short index{0};
   const HepMcParticleLink::index_type position =
     HepMcParticleLink::getEventPositionInCollection(transObj->eventIndex(),
-                                                    transObj->getEventCollection(),
                                                     proxy).at(0);
   if (position!=0) {
     index = transObj->eventIndex();
@@ -54,7 +52,7 @@ void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,
     }
   }
   persObj->m_mcEvtIndex = index;
-  persObj->m_barcode    = transObj->barcode();
-  persObj->m_evtColl    = transObj->getEventCollectionAsChar();
+  persObj->m_barcode   = transObj->barcode();
+  persObj->m_evtColl    = 'a';
 }
 

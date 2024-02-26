@@ -354,12 +354,8 @@ float HGTD_SmearedDigitizationTool::smearMeanTime(float time, float time_res, CL
 
 StatusCode HGTD_SmearedDigitizationTool::fillMultiTruthCollection(PRD_MultiTruthCollection* map, Cluster_t* cluster, const TimedHitPtr<SiHit>& hit, const EventContext& ctx) {
 
-  // FIXME is this a dummy or does this actually mean something>
-  EBC_EVCOLL ev_coll = EBC_MAINEVCOLL; // enum from HepMcParticleLink.h, usually
-                                       // contains the HS GenEvent
-
   HepMcParticleLink::PositionFlag is_event_index_is_position = (hit.eventId() == 0)? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-  HepMcParticleLink trk_link(hit->trackNumber(), hit.eventId(), ev_coll,
+  HepMcParticleLink trk_link(hit->trackNumber(), hit.eventId(),
                              is_event_index_is_position, ctx);
 
   ATH_MSG_DEBUG("Truth map filling with cluster "

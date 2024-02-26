@@ -48,20 +48,17 @@ namespace ISF {
     /** Convert selected particles from the given McEventCollection into ISFParticles
         and push them into the given ISFParticleContainer */
     virtual StatusCode convert(McEventCollection& inputGenEvents,
-                               ISFParticleContainer& simParticles,
-                               EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const = 0;
+                               ISFParticleContainer& simParticles) const = 0;
 
     /** Convert selected particles from the given McEventCollection into G4PrimaryParticles
         and push them into the given G4Event */
     virtual StatusCode convertHepMCToG4Event(McEventCollection& inputGenEvents,
-                                             G4Event*& outputG4Event, McEventCollection& shadowGenEvents,
-                                             EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const = 0;
+                                             G4Event*& outputG4Event, McEventCollection& shadowGenEvents) const = 0;
 
     /** Convert selected particles from the given McEventCollection into G4PrimaryParticles
         and push them into the given G4Event */
     virtual StatusCode convertHepMCToG4EventLegacy(McEventCollection& inputGenEvents,
-                                             G4Event*& outputG4Event,
-                                             EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const = 0;
+                                             G4Event*& outputG4Event) const = 0;
 
     /** Converts vector of ISF::ISFParticles to G4Event */
     virtual G4Event* ISF_to_G4Event(const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent=nullptr, bool useHepMC=false) const = 0;

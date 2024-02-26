@@ -60,17 +60,16 @@ void MuonSimHit_v1::setLocalDirection(MeasVector<3> vec) {
    lPos = vec;   
 }
 ConstVectorMap<3> MuonSimHit_v1::localDirection() const { return ConstVectorMap<3>{acc_localDir(*this).data()};}
+
 const HepMcParticleLink& MuonSimHit_v1::genParticleLink() const {
    if (!m_hepMCLink) {
       const unsigned short eventIndex = acc_mcEventIndex(*this);
       const HepMcParticleLink::PositionFlag flag =  eventIndex > 0 ? HepMcParticleLink::IS_EVENTNUM :
                                                                      HepMcParticleLink::IS_POSITION;
       std::unique_ptr<HepMcParticleLink> link = std::make_unique<HepMcParticleLink>();
-      
-      auto collType = HepMcParticleLink::ExtendedBarCode::eventCollectionFromChar(acc_mcCollectionType(*this));
+
       HepMcParticleLink::ExtendedBarCode barcode {acc_mcBarcode(*this),
                                                   eventIndex,
-                                                  collType,
                                                   flag};
       link->setExtendedBarCode(std::move(barcode));
       return *m_hepMCLink.set(std::move(link));
@@ -81,7 +80,7 @@ void MuonSimHit_v1::setGenParticleLink(const HepMcParticleLink& link) {
    m_hepMCLink.release();
    acc_mcEventIndex(*this) = link.eventIndex();
    acc_mcBarcode(*this) = link.barcode();
-   acc_mcCollectionType(*this) = link.getEventCollectionAsChar();
+   acc_mcCollectionType(*this) = 'a'; // Hard-coding as this only ever had a single value in production
 }
 
 }

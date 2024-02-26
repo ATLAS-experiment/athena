@@ -140,11 +140,10 @@ StatusCode EnergyDepositionTool::depositEnergy(const TimedHitPtr<SiHit>& phit, c
   ATH_MSG_DEBUG("Deposit energy in sensor volume.");
 
   //Check if simulated particle or delta ray
-  const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
   const HepMcParticleLink::PositionFlag idxFlag =
     (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
   const HepMcParticleLink McLink {
-    HepMcParticleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag, ctx)
+    HepMcParticleLink(phit->trackNumber(), phit.eventId(), idxFlag, ctx)
   };
   HepMC::ConstGenParticlePtr genPart = McLink.cptr();
   bool delta_hit = true;

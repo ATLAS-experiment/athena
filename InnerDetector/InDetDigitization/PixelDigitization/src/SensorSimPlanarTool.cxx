@@ -325,7 +325,6 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
     coLorentz = std::sqrt(1.0 + (tanLorentz*tanLorentz));
   }
 
-  const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
   const HepMcParticleLink::PositionFlag idxFlag =
     (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
 
@@ -333,7 +332,7 @@ StatusCode SensorSimPlanarTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   //*** Now diffuse charges to surface *** //
   //**************************************//
   // pre-make HepMcParticleLink
-  const auto particleLink = HepMcParticleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag, ctx);
+  const auto particleLink = HepMcParticleLink(phit->trackNumber(), phit.eventId(), idxFlag, ctx);
   const double pHitTime = hitTime(phit);
 
   const double halfEtaPitch = 0.5*Module.etaPitch();

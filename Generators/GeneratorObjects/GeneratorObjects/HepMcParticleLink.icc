@@ -15,14 +15,11 @@
 
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode()
-  : m_BC(0),
-    m_evtIndex(0),
-    m_evtColl(EBC_MAINEVCOLL)
 {
 }
 
 
-/** 
+/**
  * @brief Constructor.
  * @param barcode Barcode of target particle.
  * @param eventIndex Identifies the target GenEvent in a McEventCollection,
@@ -30,45 +27,16 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode()
  *        or the position in the container
  *        if isIndexEventPosition is IS_POSITION.
  *        0 always means the first event in the collection.
- * @param evtColl Identifies which McEventCollection to use.
  * @param isIndexEventPosition: See @c eventIndex.
  */
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode
   (barcode_type barcode,
    index_type eventIndex,
-   EBC_EVCOLL evtColl /*=EBC_MAINEVCOLL*/,
    PositionFlag isIndexEventPosition /*=IS_EVENTNUM*/)
-    : m_BC(barcode),
-      m_evtColl (evtColl)
+    : m_BC(barcode)
 {
   setIndex (eventIndex, isIndexEventPosition);
-}
-
-
-/** 
- * @brief Constructor.
- * @param barcode Barcode of target particle.
- * @param eventIndex Identifies the target GenEvent in a McEventCollection,
- *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
- *        or the position in the container
- *        if isIndexEventPosition is IS_POSITION.
- *        0 always means the first event in the collection.
- * @param evtColl Identifies which McEventCollection to use,
- *        as a character ('a'..'d').
- * @param isIndexEventPosition: See @c eventIndex.
- */
-inline
-HepMcParticleLink::ExtendedBarCode::ExtendedBarCode
-  (barcode_type barcode,
-   index_type eventIndex,
-   char evtColl,
-   PositionFlag isIndexEventPosition /*=IS_EVENTNUM*/)
-    : ExtendedBarCode (barcode,
-                       eventIndex,
-                       eventCollectionFromChar (evtColl),
-                       isIndexEventPosition)
-{
 }
 
 
@@ -78,8 +46,7 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (const ExtendedBarCode& rhs)
   : m_BC (rhs.m_BC),
-    m_evtIndex (static_cast<index_type> (rhs.m_evtIndex)),
-    m_evtColl (rhs.m_evtColl)
+    m_evtIndex (static_cast<index_type> (rhs.m_evtIndex))
 {
 }
 
@@ -90,8 +57,7 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (const ExtendedBarCode& rhs)
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (ExtendedBarCode&& rhs) noexcept
   : m_BC (std::exchange(rhs.m_BC,0)),
-    m_evtIndex (rhs.m_evtIndex.load()), // no move constructor for atomics
-    m_evtColl (std::exchange(rhs.m_evtColl,EBC_MAINEVCOLL))
+    m_evtIndex (rhs.m_evtIndex.load()) // no move constructor for atomics
 {
 }
 
@@ -105,7 +71,6 @@ HepMcParticleLink::ExtendedBarCode::operator= (const ExtendedBarCode& rhs)
   if (this != &rhs) {
     m_BC = rhs.m_BC;
     m_evtIndex = static_cast<index_type> (rhs.m_evtIndex);
-    m_evtColl=rhs.m_evtColl;
   }
   return *this;
 }
@@ -120,7 +85,6 @@ HepMcParticleLink::ExtendedBarCode::operator= (ExtendedBarCode&& rhs) noexcept
   if (this != &rhs) {
     m_BC = std::exchange(rhs.m_BC, 0);
     m_evtIndex = static_cast<index_type>(rhs.m_evtIndex.load());
-    m_evtColl = std::exchange(rhs.m_evtColl, EBC_MAINEVCOLL);
   }
   return *this;
 }
@@ -163,26 +127,6 @@ void HepMcParticleLink::ExtendedBarCode::eventIndex (index_type& index,
 
 
 /**
- * @brief Return which collection we're targeting, as an enum.
- */
-inline
-EBC_EVCOLL HepMcParticleLink::ExtendedBarCode::getEventCollection() const
-{
-  return m_evtColl;
-}
-
-
-/**
- * @brief Return which collection we're targeting, as a char ('a'..'d').
- */
-inline
-char HepMcParticleLink::ExtendedBarCode::getEventCollectionAsChar() const
-{
-  return eventCollectionAsChar (m_evtColl);
-}
-
-
-/**
  * @brief Equality test.
  *
  * Be aware: if one EBC holds the target GenEvent by number and the
@@ -195,7 +139,6 @@ bool
 HepMcParticleLink::ExtendedBarCode::operator==(const ExtendedBarCode& rhs) const
 {
   return (this->m_BC == rhs.m_BC &&
-          this->m_evtColl == rhs.m_evtColl &&
           this->m_evtIndex == rhs.m_evtIndex);
 }
 
@@ -227,9 +170,9 @@ inline
 bool
 HepMcParticleLink::ExtendedBarCode::operator< (const ExtendedBarCode& rhs) const
 {
-  return (m_evtColl < rhs.m_evtColl ||
-          (m_evtColl == rhs.m_evtColl && m_evtIndex < rhs.m_evtIndex)  ||
-          (m_evtColl == rhs.m_evtColl && m_evtIndex == rhs.m_evtIndex && m_BC < rhs.m_BC) ) ;
+  return (
+          (m_evtIndex < rhs.m_evtIndex)  ||
+          (m_evtIndex == rhs.m_evtIndex && m_BC < rhs.m_BC) ) ;
 }
 
 
@@ -347,7 +290,6 @@ HepMcParticleLink::HepMcParticleLink (const EventContext& ctx)
 {
 }
 
-                       
 /**
  * @brief Constructor.
  * @param barCode Barcode of the target particle.  0 means a null link.
@@ -356,43 +298,16 @@ HepMcParticleLink::HepMcParticleLink (const EventContext& ctx)
  *        or the position in the container
  *        if isIndexEventPosition is IS_POSITION.
  *        0 always means the first event in the collection.
- * @param evColl The targeted event collection, as an enum.
  * @param positionFlag: See @c eventIndex.
  * @param sg Optional specification of a specific store to reference.
  */
 inline
 HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
                                       uint32_t eventIndex /*= 0*/,
-                                      EBC_EVCOLL evColl /*= EBC_MAINEVCOLL*/,
                                       PositionFlag positionFlag /*= IS_EVENTNUM*/,
                                       IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
   : m_store (sg),
-    m_extBarcode (barCode, eventIndex, evColl, positionFlag)
-{
-}
-
-                      
-/**
- * @brief Constructor.
- * @param barCode Barcode of the target particle.  0 means a null link.
- * @param eventIndex Identifies the target GenEvent in a McEventCollection,
- *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
- *        or the position in the container
- *        if isIndexEventPosition is IS_POSITION.
- *        0 always means the first event in the collection.
- * @param evCollName The name of the targeted event collection.
- * @param positionFlag: See @c eventIndex.
- * @param sg Optional specification of a specific store to reference.
- */
-inline
-HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
-                                      uint32_t eventIndex /*= 0*/,
-                                      const std::string& evCollName,
-                                      PositionFlag positionFlag /*= IS_EVENTNUM*/,
-                                      IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
-  : HepMcParticleLink (barCode, eventIndex,
-                       find_enumFromKey (evCollName),
-                       positionFlag, sg)
+    m_extBarcode (barCode, eventIndex, positionFlag)
 {
 }
 
@@ -405,17 +320,15 @@ HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
  *        or the position in the container
  *        if isIndexEventPosition is IS_POSITION.
  *        0 always means the first event in the collection.
- * @param evColl The targeted event collection, as an enum.
  * @param positionFlag: See @c eventIndex.
  * @param ctx Context of the store to reference.
  */
 inline
 HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
                                       uint32_t eventIndex,
-                                      EBC_EVCOLL evColl,
                                       PositionFlag positionFlag,
                                       const EventContext& ctx)
-  : HepMcParticleLink (barCode, eventIndex, evColl, positionFlag,
+  : HepMcParticleLink (barCode, eventIndex, positionFlag,
                        Atlas::getExtendedEventContext(ctx).proxy())
 {
 }
@@ -429,42 +342,15 @@ HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
  *        or the position in the container
  *        if isIndexEventPosition is IS_POSITION.
  *        0 always means the first event in the collection.
- * @param evCollName The name of the targeted event collection.
- * @param positionFlag: See @c eventIndex.
- * @param sg Optional specification of a specific store to reference.
- */
-inline
-HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
-                                      uint32_t eventIndex,
-                                      const std::string& evCollName,
-                                      PositionFlag positionFlag /*= IS_EVENTNUM*/,
-                                      IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
-  : HepMcParticleLink (part, eventIndex,
-                       find_enumFromKey (evCollName),
-                       positionFlag, sg)
-{
-}
-
-
-/**
- * @brief Constructor.
- * @param p Particle to reference.
- * @param eventIndex Identifies the target GenEvent in a McEventCollection,
- *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
- *        or the position in the container
- *        if isIndexEventPosition is IS_POSITION.
- *        0 always means the first event in the collection.
- * @param evColl The targeted event collection, as an enum.
  * @param positionFlag: See @c eventIndex.
  * @param ctx Context of the store to reference.
  */
 inline
 HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
-                                      EBC_EVCOLL evColl,
                                       PositionFlag positionFlag,
                                       const EventContext& ctx)
-  : HepMcParticleLink (part, eventIndex, evColl, positionFlag,
+  : HepMcParticleLink (part, eventIndex, positionFlag,
                        Atlas::getExtendedEventContext(ctx).proxy())
 {
 }
@@ -536,7 +422,6 @@ inline
 bool HepMcParticleLink::operator== (const HepMcParticleLink& rhs) const
 {
   return  (m_extBarcode.barcode()==rhs.m_extBarcode.barcode() &&
-           m_extBarcode.getEventCollection()==rhs.m_extBarcode.getEventCollection() &&
            ExtendedBarCode::compareIndex (*this, rhs) == 0);
 }
 
@@ -557,13 +442,10 @@ bool HepMcParticleLink::operator!= (const HepMcParticleLink& rhs) const
 inline
 bool HepMcParticleLink::operator< (const HepMcParticleLink& rhs) const
 {
-  if (m_extBarcode.getEventCollection() < rhs.m_extBarcode.getEventCollection()) return true;
-  if (m_extBarcode.getEventCollection() == rhs.m_extBarcode.getEventCollection()) {
-    int cmpIndex = ExtendedBarCode::compareIndex (*this, rhs);
-    if (cmpIndex < 0) return true;
-    if (cmpIndex == 0) {
-      return m_extBarcode.barcode() < rhs.m_extBarcode.barcode();
-    }
+  int cmpIndex = ExtendedBarCode::compareIndex (*this, rhs);
+  if (cmpIndex < 0) return true;
+  if (cmpIndex == 0) {
+    return m_extBarcode.barcode() < rhs.m_extBarcode.barcode();
   }
   return false;
 }
@@ -577,26 +459,6 @@ inline
 int HepMcParticleLink::barcode() const
 {
   return int(m_extBarcode.barcode());
-}
-
-
-/**
- * @brief Return which collection we're targeting, as an enum.
- */
-inline
-EBC_EVCOLL HepMcParticleLink::getEventCollection() const
-{
-  return m_extBarcode.getEventCollection();
-}
-
-
-/**
- * @brief Return which collection we're targeting, as a char ('a'..'d').
- */
-inline
-char HepMcParticleLink::getEventCollectionAsChar() const
-{
-  return m_extBarcode.getEventCollectionAsChar();
 }
 
 

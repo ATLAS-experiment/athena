@@ -607,10 +607,9 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 continue;
             }
             const RpcReadoutElement* ele = detMgr->getRpcReadoutElement(atlasRpcIdeta);  // first add time jitter to the time:
-            const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
             const HepMcParticleLink::PositionFlag idxFlag =
                 (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-            const HepMcParticleLink particleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag);
+            const HepMcParticleLink particleLink(phit->trackNumber(), phit.eventId(), idxFlag);
 
             ATH_CHECK(DetectionEfficiency(ctx, atlasRpcIdeta, atlasRpcIdphi, undefPhiStripStat, rndmEngine, particleLink));
 

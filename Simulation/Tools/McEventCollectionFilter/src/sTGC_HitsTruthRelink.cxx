@@ -55,7 +55,7 @@ StatusCode sTGC_HitsTruthRelink::execute(const EventContext &ctx) const
       currentBarcode = referenceBarcode;
     }
 
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), oldLink.getEventCollection(), HepMcParticleLink::IS_EVENTNUM, ctx);
+    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, ctx);
 
     int           id            = hit.sTGCId();
     double        time          = hit.globalTime();

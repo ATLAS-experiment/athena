@@ -189,7 +189,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
       // Create postTransportISP if required.
       const auto pBarcode = HepMC::barcode(gParticle);
       auto tBinding = std::make_unique<ISF::TruthBinding>(gParticle);
-      auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, gEvent->event_number(), EBC_MAINEVCOLL);
+      auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, gEvent->event_number());
       const Amg::Vector3D pos(postTransportPosition.x(), postTransportPosition.y(), postTransportPosition.z());
       const Amg::Vector3D mom(postTransportMomentum.x(), postTransportMomentum.y(), postTransportMomentum.z());
       postTransportISP = std::make_unique<ISF::ISFParticle>(pos,

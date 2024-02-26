@@ -278,7 +278,7 @@ void ISF::ISFParticle::setBarcodeAndUpdateHepMcParticleLink( Barcode::ParticleBa
   //creating/changing the ISFParticle's HepMcParticleLink
   HepMcParticleLink* newHMPL = nullptr;
   if (m_partLink) {
-    newHMPL = new HepMcParticleLink(bc, m_partLink->eventIndex(), m_partLink->getEventCollection());
+    newHMPL = new HepMcParticleLink(bc, m_partLink->eventIndex());
     delete m_partLink;
   } else {
     newHMPL = new HepMcParticleLink(bc);

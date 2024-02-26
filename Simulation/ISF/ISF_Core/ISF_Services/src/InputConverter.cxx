@@ -115,8 +115,7 @@ ISF::InputConverter::finalize()
     and push them into the given ISFParticleContainer */
 StatusCode
 ISF::InputConverter::convert(McEventCollection& inputGenEvents,
-                             ISF::ISFParticleContainer& simParticles,
-                             EBC_EVCOLL kindOfCollection) const
+                             ISF::ISFParticleContainer& simParticles) const
 {
   for ( auto eventPtr : inputGenEvents ) {
     // skip empty events
@@ -136,7 +135,7 @@ ISF::InputConverter::convert(McEventCollection& inputGenEvents,
 
     for ( auto& genPartPtr : passedGenParticles ) {
       ATH_MSG_VERBOSE("Picking up following GenParticle for conversion to ISFParticle: " <<  genPartPtr);
-      auto simParticlePtr = convertParticle(genPartPtr, kindOfCollection);
+      auto simParticlePtr = convertParticle(genPartPtr);
       if (!simParticlePtr) {
         ATH_MSG_ERROR("Error while trying to convert input generator particles. Aborting.");
         return StatusCode::FAILURE;
@@ -154,11 +153,10 @@ ISF::InputConverter::convert(McEventCollection& inputGenEvents,
 }
 
 StatusCode ISF::InputConverter::convertHepMCToG4Event(McEventCollection& inputGenEvents,
-                                                      G4Event*& outputG4Event, McEventCollection& shadowGenEvents,
-                                                      EBC_EVCOLL kindOfCollection) const
+                                                      G4Event*& outputG4Event, McEventCollection& shadowGenEvents) const
 {
   ISF::ISFParticleContainer simParticleList{}; // particles for ISF simulation
-  ATH_CHECK(this->convert(inputGenEvents, simParticleList, kindOfCollection));
+  ATH_CHECK(this->convert(inputGenEvents, simParticleList));
   //Convert from ISFParticleContainer to ConstISFParticleVector
   ISF::ISFParticleVector simParticleVector{
     std::make_move_iterator(std::begin(simParticleList)),
@@ -175,11 +173,10 @@ StatusCode ISF::InputConverter::convertHepMCToG4Event(McEventCollection& inputGe
 
 
 StatusCode ISF::InputConverter::convertHepMCToG4EventLegacy(McEventCollection& inputGenEvents,
-                                                            G4Event*& outputG4Event,
-                                                            EBC_EVCOLL kindOfCollection) const
+                                                            G4Event*& outputG4Event) const
 {
   ISF::ISFParticleContainer simParticleList{}; // particles for ISF simulation
-  ATH_CHECK(this->convert(inputGenEvents, simParticleList, kindOfCollection));
+  ATH_CHECK(this->convert(inputGenEvents, simParticleList));
   //Convert from ISFParticleContainer to ConstISFParticleVector
   ISF::ISFParticleVector simParticleVector{
     std::make_move_iterator(std::begin(simParticleList)),
@@ -283,7 +280,7 @@ ISF::InputConverter::getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrde
 
 /** get all generator particles which pass filters */
 ISF::ISFParticle*
-ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EBC_EVCOLL kindOfCollection) const {
+ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) const {
   if (!genPartPtr) { return nullptr; }
 
   auto  pVertex = genPartPtr->production_vertex();
@@ -343,11 +340,8 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EB
   DetRegionSvcIDPair origin(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
   const auto pBarcode = HepMC::barcode(genPartPtr);
   auto tBinding = std::make_unique<ISF::TruthBinding>(genPartPtr);
-  // @FIXME: set the bunch-crossing identifier for pile-up dynamically
-  // rather than a constant '1' (e.g. could use GenEvent index for that?)
-  const int bcid = (kindOfCollection==EBC_MAINEVCOLL) ? 0 : 1;
 
-  auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, parentEvent->event_number(), kindOfCollection);
+  auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, parentEvent->event_number());
 
   auto sParticle = std::make_unique<ISF::ISFParticle>( std::move(pos),
                                                        std::move(mom),
@@ -357,7 +351,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr, EB
                                                        genPartPtr->status(),
                                                        pTime,
                                                        origin,
-                                                       bcid,
+                                                       0,
                                                        pBarcode,
                                                        tBinding.release(),
                                                        hmpl.release() );

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -162,7 +162,7 @@ TEST_F(InputConverter_test, initialize_empty) {
 
 TEST_F(InputConverter_test, convertParticle_nullptr) {
   ISF::ISFParticle* expected = nullptr;
-  ASSERT_EQ( expected, convertParticle(nullptr, EBC_MAINEVCOLL) );
+  ASSERT_EQ( expected, convertParticle(nullptr) );
 }
 
 
@@ -173,7 +173,7 @@ TEST_F(InputConverter_test, convertParticle_without_production_vertex) {
                                                        1 // status
                                                       );
   ISF::ISFParticle* expected = nullptr;
-  ASSERT_EQ( expected, convertParticle(genPart, EBC_FIRSTPUEVCOLL) );
+  ASSERT_EQ( expected, convertParticle(genPart) );
 #ifdef HEPMC3
   //When compiled with HepMC3, genPart is smart pointer
 #else
@@ -202,7 +202,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
   prodVtx->add_particle_out(genPart);
 
   // create dummy input McEventCollection containing a dummy GenEvent
-  SG::WriteHandle<McEventCollection> inputTestDataHandle{"GEN_EVENT_HighPtPU"};
+  SG::WriteHandle<McEventCollection> inputTestDataHandle{"GEN_EVENT"};
   inputTestDataHandle = std::make_unique<McEventCollection>();
   inputTestDataHandle->push_back(new HepMC::GenEvent());
   HepMC::GenEvent& ge = *(inputTestDataHandle->at(0));
@@ -210,15 +210,14 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
   //AV: we set barcode here because only here the particle in HepMC3 enters event and can have a meaningful barcode.
   HepMC::suggest_barcode(genPart,particleBarcode);
   HepMC::fillBarcodesAttribute(&ge);
-  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, EBC_SECONDPUEVCOLL);
+  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0);
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
   ISF::DetRegionSvcIDPair expectedHistory(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
   auto expectedTruthBinding = new ISF::TruthBinding(genPart);
-  const int expectedBCID(1); // FIXME for now convertParticle forces
-                             // the bcid for pile-up
-                             // McEventCollections to be 1.
+  const int expectedBCID(0);
+
   ISF::ISFParticle expected(expectedPos,
                             expectedMom,
                             1234.56,
@@ -233,7 +232,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
                             trackLink);
 
   // call the InputConverter's private method
-  ISF::ISFParticle* returned = convertParticle(genPart, EBC_SECONDPUEVCOLL);
+  ISF::ISFParticle* returned = convertParticle(genPart);
   ASSERT_TRUE( returned );
 
   ASSERT_EQ( expected, *returned );
@@ -290,7 +289,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
                             );
 
   // call the InputConverter's private method
-  ISF::ISFParticle* returned = convertParticle(genPart, EBC_MAINEVCOLL);
+  ISF::ISFParticle* returned = convertParticle(genPart);
   ASSERT_TRUE( returned );
 
   ASSERT_EQ( expected, *returned );
@@ -317,21 +316,20 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
   prodVtx->add_particle_out(genPart);
 
   // create dummy input McEventCollection containing a dummy GenEvent
-  SG::WriteHandle<McEventCollection> inputTestDataHandle{"GEN_EVENT_PU"};
+  SG::WriteHandle<McEventCollection> inputTestDataHandle{"GEN_EVENT"};
   inputTestDataHandle = std::make_unique<McEventCollection>();
   inputTestDataHandle->push_back(new HepMC::GenEvent());
   HepMC::GenEvent& ge = *(inputTestDataHandle->at(0));
   ge.add_vertex( prodVtx );
   HepMC::suggest_barcode(genPart,particleBarcode);
-  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, EBC_FIRSTPUEVCOLL);
+  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0);
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
   ISF::DetRegionSvcIDPair expectedHistory(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
   auto expectedTruthBinding = new ISF::TruthBinding(genPart);
-  const int expectedBCID(1); // FIXME for now convertParticle forces
-                             // the bcid for pile-up
-                             // McEventCollections to be 1.
+  const int expectedBCID(0);
+
   ISF::ISFParticle expected(expectedPos,
                             expectedMom,
                             0.51099891/Gaudi::Units::MeV, // from particle
@@ -347,7 +345,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
                             );
 
   // call the InputConverter's private method
-  ISF::ISFParticle* returned = convertParticle(genPart, EBC_FIRSTPUEVCOLL);
+  ISF::ISFParticle* returned = convertParticle(genPart);
   ASSERT_TRUE( returned );
 
   ASSERT_EQ( expected, *returned );

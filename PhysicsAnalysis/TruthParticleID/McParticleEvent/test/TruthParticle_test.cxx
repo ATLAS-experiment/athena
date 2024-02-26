@@ -89,7 +89,7 @@ make_map_t_pair(const HepMC::GenParticlePtr &p,
                 const TruthParticle &tp)
 {
   const std::size_t genEventIdx = 0;
-  HepMcParticleLink link(HepMC::barcode(p), genEventIdx, EBC_MAINEVCOLL, HepMcParticleLink::IS_POSITION);
+  HepMcParticleLink link(HepMC::barcode(p), genEventIdx, HepMcParticleLink::IS_POSITION);
   return Map_t::value_type(link.compress(), &tp);
 }
 bool operator==(TruthParticle a, HepMC::GenParticlePtr b)
@@ -105,7 +105,7 @@ make_map_t_pair(const HepMC::GenParticle &p,
                 const TruthParticle &tp)
 {
   const std::size_t genEventIdx = 0;
-  HepMcParticleLink link(p.barcode(), genEventIdx, EBC_MAINEVCOLL, HepMcParticleLink::IS_POSITION);
+  HepMcParticleLink link(p.barcode(), genEventIdx, HepMcParticleLink::IS_POSITION);
   return Map_t::value_type(link.compress(), &tp);
 }
 #endif

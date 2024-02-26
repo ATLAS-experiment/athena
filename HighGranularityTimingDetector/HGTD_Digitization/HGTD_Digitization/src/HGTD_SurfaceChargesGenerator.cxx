@@ -67,9 +67,8 @@ void HGTD_SurfaceChargesGenerator::createSurfaceChargesFromHit(
   // check the status of truth information for this SiHit
   // some Truth information is cut for pile up events
   unsigned short eventId = timed_hit_ptr.eventId();
-  const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
   const HepMcParticleLink::PositionFlag idxFlag = (eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink trklink{HepMcParticleLink(hit.trackNumber(), eventId, evColl, idxFlag, ctx)};
+  const HepMcParticleLink trklink{HepMcParticleLink(hit.trackNumber(), eventId, idxFlag, ctx)};
   SiCharge::Process hitproc{SiCharge::track};
   if (hit.trackNumber() != 0) {
     if (not trklink.isValid()) {

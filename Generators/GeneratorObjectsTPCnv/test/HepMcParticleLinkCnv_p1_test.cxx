@@ -31,7 +31,6 @@ void compare (const HepMcParticleLink& p1,
   assert ( p1.isValid() == p2.isValid() );
   assert ( p1.barcode() == p2.barcode() );
   assert ( p1.eventIndex() == p2.eventIndex() );
-  assert ( p1.getEventCollectionAsChar() == p2.getEventCollectionAsChar() );
   assert ( p1.cptr() == p2.cptr() );
   assert ( p1 == p2 );
 }
@@ -217,7 +216,7 @@ void test1()
   HepMcParticleLink trans1a(HepMC::barcode(particle1),particle1->parent_event()->event_number());
   testit (trans1a);
   // By position
-  HepMcParticleLink trans1b(HepMC::barcode(particle1),0,EBC_MAINEVCOLL,HepMcParticleLink::IS_POSITION);
+  HepMcParticleLink trans1b(HepMC::barcode(particle1),0,HepMcParticleLink::IS_POSITION);
   testit (trans1b);
   // HepMcParticleLinks pointing at GenParticles in other GenEvents in the McEventCollection
   HepMC::ConstGenParticlePtr particle2 = genPartList.at(7);
@@ -235,7 +234,7 @@ void test1()
   HepMcParticleLink trans5a(deltaRayBarcode,particle1->parent_event()->event_number());
   testit (trans5a);
   // HepMcParticleLinks pointing at delta-ray (barcode=0 - not recorded in McEventCollection) using position
-  HepMcParticleLink trans5b(deltaRayBarcode,0,EBC_MAINEVCOLL,HepMcParticleLink::IS_POSITION);
+  HepMcParticleLink trans5b(deltaRayBarcode,0,HepMcParticleLink::IS_POSITION);
   testit (trans5b);
   // Link to a GenParticle which was not recorded to the
   // McEventCollection, even though other parts of the same GenEvent
