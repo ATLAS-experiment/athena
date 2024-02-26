@@ -326,10 +326,7 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
   copySummaryValue(original, created, xAOD::numberOfTRTSharedHits);
 
   if (m_doHGTD) {
-    uint8_t hasValidTime = 0;
-    original.summaryValue(hasValidTime, xAOD::hasValidTime);
-    created.setSummaryValue(hasValidTime, xAOD::hasValidTime);
-
+    created.setHasValidTime(original.hasValidTime());
     created.setTime(original.time());
   }
 

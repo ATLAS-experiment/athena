@@ -92,6 +92,8 @@ private:
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_time_res_dec_key{
       this, "timeResolution", "InDetTrackParticles.timeResolution",
       "Time resolution assigned to this track"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_hasValidTime_dec_key{
+      this, "hasValidTime", "InDetTrackParticles.hasValidTime", "Time assigned to this track is valid"};
   SG::WriteDecorHandleKey<xAOD::TrackParticleContainer>
       m_summarypattern_dec_key{this, "HGTD_summaryinfo",
                                "InDetTrackParticles.HGTD_summaryinfo",
@@ -112,6 +114,7 @@ private:
     uint32_t m_field = 0x0;
     float m_time;
     float m_resolution;
+    uint8_t m_hasValidTime;
   };
 
   FloatProperty m_chi2_threshold{

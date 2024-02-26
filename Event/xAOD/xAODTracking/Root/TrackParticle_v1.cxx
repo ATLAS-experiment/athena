@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Misc includes
@@ -166,6 +166,7 @@ namespace xAOD {
 
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, float, time, setTime)
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, float, timeResolution, setTimeResolution)
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackParticle_v1, uint8_t, hasValidTime, setHasValidTime )
 
   DefiningParameters_t TrackParticle_v1::definingParameters() const{
     DefiningParameters_t tmp;
@@ -758,21 +759,6 @@ namespace xAOD {
     const xAOD::TrackParticle_v1::Accessor< float >* acc = trackSummaryAccessorV1<float>( information );
   // Set the value:
     ( *acc )( *this ) = value;
-  }
-
-  bool TrackParticle_v1::hasValidTime() const {
-    uint8_t valid = 0;
-    if (summaryValue(valid, xAOD::hasValidTime)) {
-      // succeeded in retrieving validity value
-      if (valid) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      // failed in retrieving validity value -> assume no valid time
-      return false;
-    }
   }
 
   const TrackParticle_v1::covMatrixIndexPairVec& TrackParticle_v1::covMatrixComprIndexPairs(){

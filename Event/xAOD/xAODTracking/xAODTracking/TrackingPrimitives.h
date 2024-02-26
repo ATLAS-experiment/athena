@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: xAODPrimitives.h 576255 2013-12-19 12:54:41Z emoyse $
@@ -314,9 +314,6 @@ namespace xAOD {
     numberOfPixelBarrelFlatHoles             = 74,  //!< number of pixel barrel flat layers on track with absence of hits [unit8_t].
     numberOfPixelBarrelInclinedHoles         = 75,  //!< number of pixel barrel flat inclined on track with absence of hits [unit8_t].
     numberOfPixelEndcapHoles                 = 76,  //!< number of pixel endcap layers on track with absence of hits [unit8_t].
-
-    // HGTD SummaryTypes
-    hasValidTime = 79,
 
     // -- numbers...
     numberOfTrackSummaryTypes       = 86

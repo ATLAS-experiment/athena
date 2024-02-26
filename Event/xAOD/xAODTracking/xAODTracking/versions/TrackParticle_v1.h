@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRACKING_VERSIONS_TRACKPARTICLE_V1_H
@@ -109,6 +109,8 @@ namespace xAOD {
         float time() const;
         /// Returns the time resolution
         float timeResolution() const;
+        /// Returns whether or not the track has a valid time
+        uint8_t hasValidTime() const;
         /// @brief Returns a SVector of the Perigee track parameters.
         /// i.e. a vector of
         ///  \f$\left(\begin{array}{c}d_0\\z_0\\\phi_0\\\theta\\q/p\end{array}\right)\f$
@@ -129,6 +131,7 @@ namespace xAOD {
         void setDefiningParameters(float d0, float z0, float phi0, float theta, float qOverP, float time);
         void setTime(float time);
         void setTimeResolution(float timeResolution);
+        void setHasValidTime(uint8_t hasValidTime);
         /// Set the defining parameters covariance matrix.
         void setDefiningParametersCovMatrix(const ParametersCovMatrix_t& cov);
         /// Set the defining parameters covariance matrix using a length 15 vector.
@@ -320,9 +323,6 @@ namespace xAOD {
 		///  @copydoc TrackParticle_v1::setSummaryValue(uint8_t& value, const SummaryType &information)
         void setSummaryValue(float& value, const SummaryType &information);
       /// @}
-
-      /// Returns true if the time parameter is valid based on the hasValidTime SummaryType
-      bool hasValidTime() const;
 
       /// @name Links
       /// @{
