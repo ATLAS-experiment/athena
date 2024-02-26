@@ -13,10 +13,8 @@ atlas_add_component( TGC_Digitization
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel PileUpToolsLib GeoPrimitives Identifier 
-                                    GaudiKernel MuonSimEvent HitManagement xAODEventInfo GeneratorObjects MuonCondData 
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel PileUpToolsLib GeoPrimitives Identifier
+                                    GaudiKernel MuonSimEvent HitManagement xAODEventInfo GeneratorObjects MuonCondData
                                     MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonSimData PathResolver RDBAccessSvcLib )
 
-atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/*.dat )
-
