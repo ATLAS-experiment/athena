@@ -28,6 +28,7 @@ StatusCode TrackTimeDefAndQualityAlg::initialize() {
   ATH_CHECK(m_layerClusterTruthClassKey.initialize());
   ATH_CHECK(m_time_dec_key.initialize());
   ATH_CHECK(m_time_res_dec_key.initialize());
+  ATH_CHECK(m_hasValidTime_dec_key.initialize());
   ATH_CHECK(m_summarypattern_dec_key.initialize());
 
   return StatusCode::SUCCESS;
@@ -53,6 +54,8 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
       m_time_dec_key, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> timeres_handle(
       m_time_res_dec_key, ctx);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, uint8_t> hasValidTime_handle(
+      m_hasValidTime_dec_key, ctx);
   SG::WriteDecorHandle<xAOD::TrackParticleContainer, uint32_t> summary_handle(
       m_summarypattern_dec_key, ctx);
 
@@ -81,6 +84,7 @@ StatusCode TrackTimeDefAndQualityAlg::execute(const EventContext& ctx) const {
     // decorate the track again with this info
     time_handle(*track_ptkl) = res.m_time;
     timeres_handle(*track_ptkl) = res.m_resolution;
+    hasValidTime_handle(*track_ptkl) = res.m_hasValidTime;
     summary_handle(*track_ptkl) = res.m_field;
   }
   return StatusCode::SUCCESS;
@@ -101,6 +105,7 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
   result.m_field = 0x0;
   result.m_time = m_default_time;
   result.m_resolution = m_default_time_res;
+  result.m_hasValidTime = 0;
 
   short recoed_pattern = getValidPattern(valid_hits);
   // stored the pattern of hits as retrieved from the iterative extension
@@ -113,6 +118,7 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
     result.m_field |= (recoed_pattern << m_comp_ptrn_sft);
     result.m_time = meanTime(valid_hits);
     result.m_resolution = trackTimeResolution(valid_hits);
+    result.m_hasValidTime = recoed_pattern ? 1 : 0;
     return result;
   } else if (nhits == 2) {
     // if the deltaT cut is  passed, the pattern stays the same, otherwise set
@@ -122,6 +128,7 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
       result.m_field |= (recoed_pattern << m_comp_ptrn_sft); // stays the same
       result.m_time = meanTime(valid_hits);
       result.m_resolution = trackTimeResolution(valid_hits);
+      result.m_hasValidTime = 1;
       return result;
     } else {
       result.m_field |= (0b0000 << m_comp_ptrn_sft); // no hit passes
@@ -153,6 +160,7 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
         result.m_field |= (chi2_rej_pattern << m_comp_ptrn_sft);
         result.m_time = meanTime(valid_hits);
         result.m_resolution = trackTimeResolution(valid_hits);
+        result.m_hasValidTime = 1;
         return result;
       } else {
         result.m_field |= (0b0000 << m_comp_ptrn_sft); // no hit passes
@@ -165,6 +173,7 @@ TrackTimeDefAndQualityAlg::runTimeConsistencyCuts(
       result.m_field |= (chi2_rej_pattern << m_comp_ptrn_sft);
       result.m_time = meanTime(valid_hits);
       result.m_resolution = trackTimeResolution(valid_hits);
+      result.m_hasValidTime = 1;
       return result;
     }
   }
