@@ -28,6 +28,12 @@ StatusCode xAODSimHitToMmMeasCnvAlg::initialize(){
     ATH_CHECK(detStore()->retrieve(m_DetMgr));
     return StatusCode::SUCCESS;
 }
+StatusCode xAODSimHitToMmMeasCnvAlg::finalize() {
+    if (m_allHits == 0) return StatusCode::SUCCESS;
+    ATH_MSG_INFO("Tried to convert "<<m_allHits<<" hits. In, "
+                <<(100.*m_acceptedHits /  m_allHits) <<" cases, the conversion was successful");
+    return StatusCode::SUCCESS;
+}
 
 
 StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
@@ -55,26 +61,32 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
         const Identifier hitId = simHit->identify();
         //ignore radiation for now
         if(std::abs(simHit->pdgId())!=13) continue;
+        ++m_allHits;
 
 
         const MuonGMR4::MmReadoutElement* readOutEle = m_DetMgr->getMmReadoutElement(hitId);
+        const MuonGMR4::StripDesign& design{readOutEle->stripLayer(hitId).design()};
         bool isValid{false};
 
         const Amg::Vector3D lHitPos{xAOD::toEigen(simHit->localPosition())};
-        const Amg::Vector2D lHitPos2D{lHitPos.x(), lHitPos.y()};
         
-        int channelNumber = readOutEle->stripLayer(hitId).design().stripNumber(lHitPos2D);
-        if(channelNumber==-1){
-            ATH_MSG_WARNING("hit is outside bounds, rejecting it");
+        int channelNumber = design.stripNumber(lHitPos.block<2,1>(0,0));
+        if(channelNumber<0){
+            if (design.insideTrapezoid(lHitPos.block<2,1>(0,0))) {
+                ATH_MSG_WARNING("hit "<<Amg::toString(lHitPos)<<" is outside bounds "<<std::endl<<design<<" rejecting it");
+            }
             continue;
         }
-        Identifier clusId = id_helper.channelID(hitId, id_helper.multilayer(hitId), 
-                                                       id_helper.gasGap(hitId), 
-                                                       channelNumber, isValid);
+        const Identifier clusId = id_helper.channelID(hitId, 
+                                                      id_helper.multilayer(hitId), 
+                                                      id_helper.gasGap(hitId), 
+                                                      channelNumber, isValid);
         if(!isValid) {
-            ATH_MSG_WARNING("Invalid strip identifier for layer " << m_idHelperSvc->toString(hitId) << " channel " << channelNumber << " lHitPos " << lHitPos.x() << " " << lHitPos.y());
+            ATH_MSG_WARNING("Invalid strip identifier for layer " << m_idHelperSvc->toString(hitId) << " channel " << channelNumber 
+                            << " lHitPos " << Amg::toString(lHitPos));
             continue;
         }
+        ++m_acceptedHits;
         xAOD::MMCluster* prd = new xAOD::MMCluster();
         prdContainer->push_back(prd);
         
