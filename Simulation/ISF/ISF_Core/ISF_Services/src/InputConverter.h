@@ -61,17 +61,14 @@ namespace ISF {
     /** Convert selected particles from the given McEventCollection into ISFParticles
         and push them into the given ISFParticleContainer */
     virtual StatusCode convert(McEventCollection& inputGenEvents,
-                               ISF::ISFParticleContainer& simParticles,
-                               EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const override final;
+                               ISF::ISFParticleContainer& simParticles) const override final;
 
     /** */
     virtual StatusCode convertHepMCToG4Event(McEventCollection& inputGenEvents,
-                                             G4Event*& outputG4Event, McEventCollection& shadowGenEvents,
-                                             EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const override final;
+                                             G4Event*& outputG4Event, McEventCollection& shadowGenEvents) const override final;
 
     virtual StatusCode convertHepMCToG4EventLegacy(McEventCollection& inputGenEvents,
-                                             G4Event*& outputG4Event,
-                                             EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const override final;
+                                             G4Event*& outputG4Event) const override final;
 
     /** Converts vector of ISF::ISFParticles to G4Event */
     G4Event* ISF_to_G4Event(const std::vector<ISF::ISFParticle*>& isp, HepMC::GenEvent *genEvent, HepMC::GenEvent *shadowGenEvent=nullptr, bool useHepMC=false) const override final;
@@ -122,7 +119,7 @@ namespace ISF {
 #endif
 
     /** convert GenParticle to ISFParticle */
-    ISF::ISFParticle* convertParticle(const HepMC::GenParticlePtr& genPartPtr, EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const;
+    ISF::ISFParticle* convertParticle(const HepMC::GenParticlePtr& genPartPtr) const;
 
     /** ParticlePropertyService and ParticleDataTable */
     ServiceHandle<IPartPropSvc>           m_particlePropSvc;          //!< particle properties svc to retrieve PDT

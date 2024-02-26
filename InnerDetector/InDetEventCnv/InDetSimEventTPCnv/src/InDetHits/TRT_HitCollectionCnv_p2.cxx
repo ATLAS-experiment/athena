@@ -159,7 +159,7 @@ void TRT_HitCollectionCnv_p2::persToTrans(const TRT_HitCollection_p2* persCont, 
         HepGeom::Point3D<double> endThis(persCont->m_endX[j], persCont->m_endY[j], persCont->m_endZ[j]);
 
         HepMcParticleLink partLink(persCont->m_barcode[idxBC]);
-        partLink.setExtendedBarCode(HepMcParticleLink::ExtendedBarCode(persCont->m_barcode[idxBC], 0, EBC_MAINEVCOLL, HepMcParticleLink::IS_POSITION));;
+        partLink.setExtendedBarCode(HepMcParticleLink::ExtendedBarCode(persCont->m_barcode[idxBC], 0, HepMcParticleLink::IS_POSITION));;
         transCont->Emplace( persCont->m_hitId[hitCount], partLink, persCont->m_id[idxId], persCont->m_kinEne[hitCount],
                             eneLoss, endLast.x(), endLast.y(), endLast.z(), endThis.x(), endThis.y(), endThis.z(),
                             persCont->m_meanTime[hitCount] );

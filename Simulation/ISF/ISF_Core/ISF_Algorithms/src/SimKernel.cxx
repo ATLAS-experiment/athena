@@ -560,7 +560,7 @@ StatusCode ISF::SimKernel::prepareInput(SG::ReadHandle<McEventCollection>& input
       }
     }
   }
-  ATH_CHECK( m_inputConverter->convert(*outputTruth, simParticles, HepMcParticleLink::find_enumFromKey(outputTruth.name())) );
+  ATH_CHECK( m_inputConverter->convert(*outputTruth, simParticles) );
 
   return StatusCode::SUCCESS;
 }

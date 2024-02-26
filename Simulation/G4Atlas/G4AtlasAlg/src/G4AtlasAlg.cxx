@@ -379,7 +379,7 @@ StatusCode G4AtlasAlg::execute()
 
   ATH_MSG_DEBUG("Recorded output GenEvent collection " << outputTruthCollection.name() << " in store " << outputTruthCollection.store());
   G4Event *inputEvent{};
-  ATH_CHECK( m_inputConverter->convertHepMCToG4Event(*outputTruthCollection, inputEvent, *shadowTruth, HepMcParticleLink::find_enumFromKey(outputTruthCollection.name())) );
+  ATH_CHECK( m_inputConverter->convertHepMCToG4Event(*outputTruthCollection, inputEvent, *shadowTruth) );
 
   bool abort = false;
   // Worker run manager

@@ -115,12 +115,11 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
   double module_size_x = Module.width();
   double module_size_y = Module.length();
 
-  const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
   const HepMcParticleLink::PositionFlag idxFlag =
     (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
 
   // pre-make HepMcParticleLink
-  auto particleLink = HepMcParticleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag, ctx);
+  auto particleLink = HepMcParticleLink(phit->trackNumber(), phit.eventId(), idxFlag, ctx);
   const double pHitTime = hitTime(phit);
 
   if (m_radiationDamageSimulationType != RadiationDamageSimulationType::NO_RADIATION_DAMAGE) {
@@ -265,7 +264,7 @@ StatusCode SensorSim3DTool::induceCharge(const TimedHitPtr<SiHit>& phit,
       float ramoInit_mizj  = ramoPotentialMap.getContent(ramo_init_bin_x_zj, ramo_init_bin_y_mi);
       float ramoInit_mimj  = ramoPotentialMap.getContent(ramo_init_bin_x_mj, ramo_init_bin_y_mi);
 
-      auto mc_particle_link = HepMcParticleLink(phit->trackNumber(), phit.eventId(), evColl, idxFlag, ctx);
+      auto mc_particle_link = HepMcParticleLink(phit->trackNumber(), phit.eventId(), idxFlag, ctx);
       const auto hit_time = hitTime(phit);
 
       //Loop over charge-carrier pairs, we're looping over electrons and holes at the same time

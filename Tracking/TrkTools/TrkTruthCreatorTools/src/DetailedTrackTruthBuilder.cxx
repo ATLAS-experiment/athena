@@ -211,7 +211,6 @@ class ExtendedEventIndex {
 public:
    ExtendedEventIndex(const HepMcParticleLink &source, IProxyDict *proxy)
       : m_eventIndex(source.eventIndex()),
-        m_eventCollection(source.getEventCollection()),
         m_isPosition(m_eventIndex == HepMcParticleLink::ExtendedBarCode::UNDEFINED)
    {
       if (m_isPosition) {
@@ -220,12 +219,11 @@ public:
    }
 
    HepMcParticleLink makeLink(HepMcParticleLink::barcode_type other_particle_barcode, IProxyDict *proxy) {
-      return {other_particle_barcode, m_eventIndex,m_eventCollection, (m_isPosition ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM ), proxy};
+      return {other_particle_barcode, m_eventIndex, (m_isPosition ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM ), proxy};
    }
 
 private:
    HepMcParticleLink::index_type m_eventIndex;
-   EBC_EVCOLL                    m_eventCollection;
    bool                          m_isPosition;
 };
 }

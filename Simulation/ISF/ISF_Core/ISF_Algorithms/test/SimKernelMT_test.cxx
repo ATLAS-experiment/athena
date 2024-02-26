@@ -64,16 +64,13 @@ namespace ISFTesting {
 
     MOCK_METHOD0(finalize, StatusCode());
     // cppcheck-suppress unknownMacro
-    MOCK_CONST_METHOD3(convert, StatusCode(McEventCollection&,
-                                           ISF::ISFParticleContainer&,
-                                           EBC_EVCOLL kindOfCollection));
-    MOCK_CONST_METHOD4(convertHepMCToG4Event, StatusCode(McEventCollection&,
+    MOCK_CONST_METHOD2(convert, StatusCode(McEventCollection&,
+                                           ISF::ISFParticleContainer&));
+    MOCK_CONST_METHOD3(convertHepMCToG4Event, StatusCode(McEventCollection&,
                                                          G4Event*&,
-                                                         McEventCollection&,
-                                                         EBC_EVCOLL kindOfCollection));
-   MOCK_CONST_METHOD3(convertHepMCToG4EventLegacy, StatusCode(McEventCollection&,
-                                                              G4Event*&,
-                                                              EBC_EVCOLL kindOfCollection));
+                                                         McEventCollection&));
+   MOCK_CONST_METHOD2(convertHepMCToG4EventLegacy, StatusCode(McEventCollection&,
+                                                              G4Event*&));
     MOCK_CONST_METHOD4(ISF_to_G4Event, G4Event*(const std::vector<ISF::ISFParticle*>&,
                                                 HepMC::GenEvent*,
                                                 HepMC::GenEvent*,
@@ -622,7 +619,6 @@ protected:
 
     ASSERT_NE( m_mockInputConverter, nullptr );
     EXPECT_CALL( *m_mockInputConverter, convert(ContainsOneGenEventEq(*genEvent),
-                                                ::testing::_,
                                                 ::testing::_) )
       .WillOnce(::testing::Return(StatusCode::SUCCESS));
 

@@ -296,7 +296,7 @@ void TRT_HitCollectionCnv_p3::persToTrans(const TRT_HitCollection_p3* persCont, 
 
   // Assume that all Hits should be linked to the hard-scatter GenEvent
   IProxyDict *sg = SG::CurrentEventStore::store();
-  const int event_number = HepMcParticleLink::getEventNumberAtPosition (0, EBC_MAINEVCOLL, sg);
+  const int event_number = HepMcParticleLink::getEventNumberAtPosition (0, sg);
 
   //
   // loop over strings - index [i]
@@ -482,7 +482,7 @@ void TRT_HitCollectionCnv_p3::persToTrans(const TRT_HitCollection_p3* persCont, 
         // - For charged particles kinEne is *zero*!
         //
 
-        HepMcParticleLink partLink(persCont->m_barcode[idxBC], event_number, EBC_MAINEVCOLL, HepMcParticleLink::IS_EVENTNUM, sg);
+        HepMcParticleLink partLink(persCont->m_barcode[idxBC], event_number, HepMcParticleLink::IS_EVENTNUM, sg);
         transCont->Emplace( strawId, partLink, persCont->m_id[idxId],
                             kinEne, hitEne, startX, startY, startZ,
                             endX, endY, endZ, meanTime );

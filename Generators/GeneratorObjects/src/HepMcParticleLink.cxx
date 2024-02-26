@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -23,17 +23,11 @@ namespace {
 
 
 /**
- * @brief StoreGate keys to try for each EBC_EVCOLL enum.
+ * @brief StoreGate keys to try
  */
 constexpr int NKEYS = 5;
 const
-std::string s_keys[EBC_NCOLLKINDS][NKEYS] =
-  {
-    {"TruthEvent","G4Truth","GEN_AOD","GEN_EVENT","Bkg_TruthEvent"},
-    {"TruthEvent_PU","G4Truth_PU","GEN_AOD_PU","GEN_EVENT_PU","Bkg_TruthEvent_PU"},
-    {"TruthEvent_HighPtPU","G4Truth_HighPtPU","GEN_AOD_HighPtPU","GEN_EVENT_HighPtPU","Bkg_TruthEvent_HighPtPU"},
-    {"TruthEvent_Cavern","G4Truth_Cavern","GEN_AOD_Cavern","GEN_EVENT_Cavern","Bkg_TruthEvent_Cavern"},
-  };
+std::string s_keys[NKEYS] = {"TruthEvent","G4Truth","GEN_AOD","GEN_EVENT","Bkg_TruthEvent"};
 
 
 /**
@@ -43,7 +37,7 @@ std::string s_keys[EBC_NCOLLKINDS][NKEYS] =
  * in the s_keys array of the key that worked.  We can that start the
  * search at that position the next time.
  */
-std::atomic<unsigned> s_hints[EBC_NCOLLKINDS] = {NKEYS, NKEYS, NKEYS, NKEYS};
+std::atomic<unsigned> s_hint = NKEYS;
 
 
 const unsigned short CPTRMAXMSGCOUNT = 100;
@@ -55,38 +49,6 @@ const unsigned short CPTRMAXMSGCOUNT = 100;
 //**************************************************************************
 // ExtendedBarCode
 //
-
-
-/**
- * @brief Translate event collection enum to a char ('a'..'d').
- */
-char
-HepMcParticleLink::ExtendedBarCode::eventCollectionAsChar (EBC_EVCOLL evtColl)
-{
-  static const char codes[EBC_NCOLLKINDS] = {'a', 'b', 'c', 'd'};
-  assert (evtColl < EBC_NCOLLKINDS);
-  return codes[evtColl];
-}
-
-
-/**
- * @brief Translate event char ('a'..'d') to an enum.
- */
-EBC_EVCOLL
-HepMcParticleLink::ExtendedBarCode::eventCollectionFromChar (char evtColl)
-{
-  switch (evtColl) {
-  case 'a': return EBC_MAINEVCOLL;
-  case 'b': return EBC_FIRSTPUEVCOLL;
-  case 'c': return EBC_SECONDPUEVCOLL;
-  case 'd': return EBC_THIRDPUEVCOLL;
-  default:
-    // Should not reach this
-    MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
-    log << MSG::ERROR << " Wrong event collection (" << std::string(&evtColl,1) << ") set in HepMcParticleLink ExtendedBarCode object !!!" << endmsg;
-  }
-  return EBC_MAINEVCOLL;
-}
 
 
 /**
@@ -105,8 +67,7 @@ void HepMcParticleLink::ExtendedBarCode::print (std::ostream& os) const
   }
   os << ", Barcode " << m_BC
      << ", McEventCollection "
-     << HepMcParticleLink::getLastEventCollectionName(this->getEventCollection())
-     << "(" << eventCollectionAsChar (m_evtColl) << ")";
+     << HepMcParticleLink::getLastEventCollectionName();
 }
 
 
@@ -134,18 +95,16 @@ void HepMcParticleLink::ExtendedBarCode::print (MsgStream& os) const
  *        or the position in the container
  *        if isIndexEventPosition is IS_POSITION.
  *        0 always means the first event in the collection.
- * @param evColl The targeted event collection, as an enum.
  * @param positionFlag: See @c eventIndex.
  * @param sg Optional specification of a specific store to reference.
  */
 HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
-                                      EBC_EVCOLL evColl,
                                       PositionFlag positionFlag /*= IS_EVENTNUM*/,
                                       IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
   : m_store (sg),
     m_ptr (part),
-    m_extBarcode((nullptr != part) ? HepMC::barcode(part) : 0, eventIndex, evColl, positionFlag)
+    m_extBarcode((nullptr != part) ? HepMC::barcode(part) : 0, eventIndex, positionFlag)
 {
   assert(part);
 
@@ -257,7 +216,7 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
   m_extBarcode.eventIndex (event_number, event_position);
   if (event_number == ExtendedBarCode::UNDEFINED) {
     const HepMC::GenEvent* pEvt{};
-    if (const McEventCollection* coll = retrieveMcEventCollection (getEventCollection(),m_store)) {
+    if (const McEventCollection* coll = retrieveMcEventCollection (m_store)) {
       if (event_position < coll->size()) {
         pEvt = coll->at (event_position);
       }
@@ -311,8 +270,7 @@ HepMcParticleLink::getEventPositionInCollection (const IProxyDict* sg) const
     return 0;
   }
 
-  EBC_EVCOLL evColl = getEventCollection();
-  std::vector<index_type> positions = getEventPositionInCollection(index, evColl, sg);
+  std::vector<index_type> positions = getEventPositionInCollection(index, sg);
   return positions[0];
 }
 
@@ -322,11 +280,11 @@ HepMcParticleLink::getEventPositionInCollection (const IProxyDict* sg) const
  *        (first) GenEvent with a given event number
  */
 std::vector<HepMcParticleLink::index_type>
-HepMcParticleLink::getEventPositionInCollection (index_type index, EBC_EVCOLL evColl, const IProxyDict* sg)
+HepMcParticleLink::getEventPositionInCollection (index_type index, const IProxyDict* sg)
 {
   std::vector<index_type> positions; positions.reserve(1);
   const int intIndex = static_cast<int>(index);
-  if (const McEventCollection* coll = retrieveMcEventCollection (evColl,sg)) {
+  if (const McEventCollection* coll = retrieveMcEventCollection (sg)) {
     size_t sz = coll->size();
     for (size_t i = 0; i < sz; i++) {
       if ((*coll)[i]->event_number() == intIndex) {
@@ -345,9 +303,9 @@ HepMcParticleLink::getEventPositionInCollection (index_type index, EBC_EVCOLL ev
  * @brief Return the event number of the GenEvent at the specified
  *        position in the McEventCollection.
  */
-int HepMcParticleLink::getEventNumberAtPosition (index_type position, EBC_EVCOLL evColl, const IProxyDict* sg)
+int HepMcParticleLink::getEventNumberAtPosition (index_type position, const IProxyDict* sg)
 {
-  if (const McEventCollection* coll = retrieveMcEventCollection (evColl,sg)) {
+  if (const McEventCollection* coll = retrieveMcEventCollection (sg)) {
     if (position < coll->size()) {
       return coll->at (position)->event_number();
     }
@@ -361,24 +319,6 @@ int HepMcParticleLink::getEventNumberAtPosition (index_type position, EBC_EVCOLL
 
 
 /**
- * @brief Return the corresponding enum from a McEventCollection name.
- */
-EBC_EVCOLL HepMcParticleLink::find_enumFromKey (const std::string& evCollName)
-{
-  for (unsigned int iEnum=0; iEnum<EBC_NCOLLKINDS; ++iEnum) {
-    for (unsigned int iName=0;iName<NKEYS;iName++)
-      if (evCollName==s_keys[iEnum][iName]) {
-        return static_cast<EBC_EVCOLL>(iEnum);
-      }
-  }
-
-  MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
-  log << MSG::WARNING << "HepMcParticleLink::find_enumFromKey(" << evCollName << "): trying to find enum for unknown McEventCollection, returning " << EBC_MAINEVCOLL << endmsg;
-  return EBC_MAINEVCOLL;
-}
-
-
-/** 
  * @brief Alter the persistent part of the link.
  */
 void HepMcParticleLink::setExtendedBarCode (const ExtendedBarCode& extBarcode)
@@ -391,15 +331,14 @@ void HepMcParticleLink::setExtendedBarCode (const ExtendedBarCode& extBarcode)
 
 /**
  * @brief Look up the event collection we're targeting.
- * @param evColl McEventCollection type
  * @param sg Target event store.
  * May return nullptr if the collection is not found.
  */
 const McEventCollection*
-HepMcParticleLink::retrieveMcEventCollection (EBC_EVCOLL evColl, const IProxyDict* sg)
+HepMcParticleLink::retrieveMcEventCollection (const IProxyDict* sg)
 {
   const McEventCollection* pEvtColl = nullptr;
-  SG::DataProxy* proxy = find_proxy (evColl, sg);
+  SG::DataProxy* proxy = find_proxy (sg);
   if (proxy) {
     pEvtColl = SG::DataProxy_cast<McEventCollection> (proxy);
     if (!pEvtColl) {
@@ -411,40 +350,26 @@ HepMcParticleLink::retrieveMcEventCollection (EBC_EVCOLL evColl, const IProxyDic
 }
 
 /**
- * @brief Look up the event collection we're targeting.
- * @param sg Target event store.
- * May return nullptr if the collection is not found.
- */
-const McEventCollection*
-HepMcParticleLink::retrieveMcEventCollection (const IProxyDict* sg) const
-{
-  EBC_EVCOLL evColl = getEventCollection();
-  return retrieveMcEventCollection(evColl, sg);
-}
-
-
-/**
  * @brief Find the proxy for the target event collection.
  * @param sg Target event store.
  * May return nullptr if the collection is not found.
  */
-SG::DataProxy* HepMcParticleLink::find_proxy (EBC_EVCOLL evColl, const IProxyDict* sg)
+SG::DataProxy* HepMcParticleLink::find_proxy (const IProxyDict* sg)
 {
   const CLID clid = ClassID_traits<McEventCollection>::ID();
-  assert (evColl < EBC_NCOLLKINDS);
-  unsigned int hint_orig = s_hints[evColl];
+  unsigned int hint_orig = s_hint;
   if (hint_orig >= NKEYS) hint_orig = 0;
   unsigned int hint = hint_orig;
   do {
-    SG::DataProxy* proxy = sg->proxy (clid, s_keys[evColl][hint]);
+    SG::DataProxy* proxy = sg->proxy (clid, s_keys[hint]);
     if (proxy) {
-      if (hint != s_hints[evColl]) {
-        s_hints[evColl] = hint;
+      if (hint != s_hint) {
+        s_hint = hint;
       }
       static std::atomic<unsigned> findCount {0};
       if(++findCount == 1) {
         MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
-        log << MSG::INFO << "find_proxy: Using " << s_keys[evColl][hint]
+        log << MSG::INFO << "find_proxy: Using " << s_keys[hint]
             <<" as McEventCollection key for this job " << endmsg;
       }
       return proxy;
@@ -475,23 +400,15 @@ SG::DataProxy* HepMcParticleLink::find_proxy (EBC_EVCOLL evColl, const IProxyDic
 
 /**
  * @brief Return the most recent SG key used for a particular collection type.
- * @param evColl The targeted event collection, as an enum.
  */
-std::string HepMcParticleLink::getLastEventCollectionName (EBC_EVCOLL evColl)
+std::string HepMcParticleLink::getLastEventCollectionName ()
 {
-  static const std::string unset[EBC_NCOLLKINDS] =
-    {
-     "CollectionNotSet",
-     "PUCollectionNotSet",
-     "PU2CollectionNotSet",
-     "PU3CollectionNotSet",
-    };
-  assert (evColl < EBC_NCOLLKINDS);
-  unsigned idx = s_hints[evColl];
+  static const std::string unset =  "CollectionNotSet";
+  unsigned idx = s_hint;
   if (idx < NKEYS) {
-    return s_keys[evColl][idx];
+    return s_keys[idx];
   }
-  return unset[evColl];
+  return unset;
 }
 
 

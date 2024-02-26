@@ -190,7 +190,7 @@ StatusCode ISF::SimKernelMT::execute() {
 
   // read and convert input
   ISFParticleContainer simParticles;
-  ATH_CHECK( m_inputConverter->convert(*outputTruth, simParticles, HepMcParticleLink::find_enumFromKey(outputTruth.name())) );
+  ATH_CHECK( m_inputConverter->convert(*outputTruth, simParticles) );
 
   // create an ordered queue of particles
   ISFParticleOrderedQueue particleQueue;

@@ -60,7 +60,7 @@ StatusCode SiliconHitsTruthRelink::execute(const EventContext &ctx) const
     if (oldLink.barcode() != 0) {
       currentBarcode = referenceBarcode;
     }
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), oldLink.getEventCollection(), HepMcParticleLink::IS_EVENTNUM, ctx);
+    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, ctx);
     outputCollection->Emplace(lP1, lP2, energyLoss, meanTime, currentBarcode, id);
   }
 

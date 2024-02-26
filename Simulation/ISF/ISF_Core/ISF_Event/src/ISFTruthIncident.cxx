@@ -211,7 +211,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFP
   const HepMcParticleLink* oldHMPL = particle.getParticleLink();
   HepMcParticleLink* newHMPL = nullptr;
   if (oldHMPL) {
-    newHMPL = new HepMcParticleLink(hepTruthParticle, oldHMPL->eventIndex(), oldHMPL->getEventCollection());
+    newHMPL = new HepMcParticleLink(hepTruthParticle, oldHMPL->eventIndex());
     delete oldHMPL;
   } else {
     newHMPL = new HepMcParticleLink(hepTruthParticle);

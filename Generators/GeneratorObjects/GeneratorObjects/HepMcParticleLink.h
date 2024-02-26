@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOROBJECTS_HEPMCPARTICLELINK_H
@@ -31,26 +31,15 @@
 class IProxyDict;
 class McEventCollection;
 
-enum EBC_EVCOLL : unsigned char {
-  EBC_MAINEVCOLL=0,   //Usually contains the HS GenEvent
-  EBC_FIRSTPUEVCOLL,  //Low pt minbias PU, or full PU collection where applicable (i.e. Fast Chain)
-  EBC_SECONDPUEVCOLL, //High pt minbias PU
-  EBC_THIRDPUEVCOLL,  //Reserved for cavern background
-  EBC_NCOLLKINDS      //Just contains the maximum of the enum (for loops)
-};
-
-
 /**
  * @brief a link optimized in size for a GenParticle in a McEventCollection
- * 
+ *
  * A link is defined by three items:
  *  - A target McEventCollection;
  *  - A particular GenEvent within this collection; and
  *  - A particular particle within the GenEvent.
  *
- * The target McEventCollection is identified by an enum of type EBC_EVCOLL.
- * These enums may also be represented as the characters 'a'..'d'.
- * Each of these enums has an associated list of StoreGate keys (see
+ * There is a list of StoreGate keys for the McEventCollection (see
  * the initialization of @c s_keys).  When we want to dereference the link,
  * we try to look up each possible key in turn until we find one that works.
  * (The position of that key in the list is then remembered as a hint
@@ -107,7 +96,7 @@ public:
     ExtendedBarCode();
 
 
-    /** 
+    /**
      * @brief Constructor.
      * @param barcode Barcode of target particle.
      * @param eventIndex Identifies the target GenEvent in a McEventCollection,
@@ -115,32 +104,11 @@ public:
      *        or the position in the container
      *        if isIndexEventPosition is IS_POSITION.
      *        0 always means the first event in the collection.
-     * @param evtColl Identifies which McEventCollection to use.
      * @param isIndexEventPosition: See @c eventIndex.
      */
     ExtendedBarCode (barcode_type barcode,
                      index_type eventIndex,
-                     EBC_EVCOLL evtColl=EBC_MAINEVCOLL,
                      PositionFlag isIndexEventPosition = IS_EVENTNUM);
-
-                    
-    /** 
-     * @brief Constructor.
-     * @param barcode Barcode of target particle.
-     * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-     *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
-     *        or the position in the container
-     *        if isIndexEventPosition is IS_POSITION.
-     *        0 always means the first event in the collection.
-     * @param evtColl Identifies which McEventCollection to use,
-     *        as a character ('a'..'d').
-     * @param isIndexEventPosition: See @c eventIndex.
-     */
-    ExtendedBarCode (barcode_type barcode,
-                     index_type eventIndex,
-                     char evtColl,
-                     PositionFlag isIndexEventPosition = IS_EVENTNUM);
-
 
     /**
      * @brief Copy constructor.  (Can't be defaulted due to the atomic member.)
@@ -181,30 +149,6 @@ public:
      * the other one is set to @c UNDEFINED.
      */
     void eventIndex (index_type& index, index_type& position) const;
-
-
-    /**
-     * @brief Return which collection we're targeting, as an enum.
-     */
-    EBC_EVCOLL getEventCollection() const;
-
-
-    /**
-     * @brief Return which collection we're targeting, as a char ('a'..'d').
-     */
-    char getEventCollectionAsChar() const;
-
-
-    /**
-     * @brief Translate event collection enum to a char ('a'..'d').
-     */
-    static char eventCollectionAsChar (EBC_EVCOLL evtColl);
-
-
-    /**
-     * @brief Translate event char ('a'..'d') to an enum.
-     */
-    static EBC_EVCOLL eventCollectionFromChar (char evtColl);
 
 
     /**
@@ -297,16 +241,14 @@ public:
 
 
     /// Barcode of the target particle.  0 means a null link.
-    barcode_type m_BC;
+    barcode_type m_BC{0};
 
     /// Identifies the target GenEvent within the event collection.
     /// If the high bit is set, then this (with the high bit clear)
     /// is a position within the collection; otherwise, it is the
     /// target GenEvent number.
-    mutable std::atomic<index_type> m_evtIndex;
+    mutable std::atomic<index_type> m_evtIndex{0};
 
-    /// Identifies which event collection is targeted.
-    EBC_EVCOLL m_evtColl;
   };
 
 
@@ -332,13 +274,11 @@ public:
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
-   * @param evColl The targeted event collection, as an enum.
    * @param positionFlag: See @c eventIndex.
    * @param sg Optional specification of a specific store to reference.
    */
   HepMcParticleLink (barcode_type barCode,
                      uint32_t eventIndex = 0,
-                     EBC_EVCOLL evColl = EBC_MAINEVCOLL,
                      PositionFlag positionFlag = IS_EVENTNUM,
                      IProxyDict* sg = SG::CurrentEventStore::store());
 
@@ -351,51 +291,28 @@ public:
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
-   * @param evColl The targeted event collection, as an enum.
    * @param positionFlag: See @c eventIndex.
    * @param ctx Context of the store to reference.
    */
   HepMcParticleLink (barcode_type barCode,
                      uint32_t eventIndex,
-                     EBC_EVCOLL evColl,
                      PositionFlag positionFlag,
                      const EventContext& ctx);
 
 
  /**
    * @brief Constructor.
-   * @param barCode Barcode of the target particle.  0 means a null link.
-   * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-   *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
-   *        or the position in the container
-   *        if isIndexEventPosition is IS_POSITION.
-   *        0 always means the first event in the collection.
-   * @param evCollName The name of the targeted event collection.
-   * @param positionFlag: See @c eventIndex.
-   * @param sg Optional specification of a specific store to reference.
-   */
-  HepMcParticleLink (barcode_type barCode,
-                     uint32_t eventIndex,
-                     const std::string& evCollName,
-                     PositionFlag positionFlag = IS_EVENTNUM,
-                     IProxyDict* sg = SG::CurrentEventStore::store());
-
-
- /**
-   * @brief Constructor.
    * @param p Particle to reference.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
    *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
-   * @param evColl The targeted event collection, as an enum.
    * @param positionFlag: See @c eventIndex.
    * @param sg Optional specification of a specific store to reference.
    */
   HepMcParticleLink (const HepMC::ConstGenParticlePtr& p,
                      uint32_t eventIndex = 0,
-                     EBC_EVCOLL evColl=EBC_MAINEVCOLL,
                      PositionFlag positionFlag = IS_EVENTNUM,
                      IProxyDict* sg = SG::CurrentEventStore::store());
 
@@ -408,32 +325,11 @@ public:
    *        or the position in the container
    *        if isIndexEventPosition is IS_POSITION.
    *        0 always means the first event in the collection.
-   * @param evCollName The name of the targeted event collection.
-   * @param positionFlag: See @c eventIndex.
-   * @param sg Optional specification of a specific store to reference.
-   */
-  HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
-                     uint32_t eventIndex,
-                     const std::string& evCollName,
-                     PositionFlag positionFlag = IS_EVENTNUM,
-                     IProxyDict* sg = SG::CurrentEventStore::store());
-
-
- /**
-   * @brief Constructor.
-   * @param p Particle to reference.
-   * @param eventIndex Identifies the target GenEvent in a McEventCollection,
-   *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
-   *        or the position in the container
-   *        if isIndexEventPosition is IS_POSITION.
-   *        0 always means the first event in the collection.
-   * @param evColl The targeted event collection, as an enum.
    * @param positionFlag: See @c eventIndex.
    * @param ctx Context of the store to reference.
    */
   HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                      uint32_t eventIndex,
-                     EBC_EVCOLL evColl,
                      PositionFlag positionFlag,
                      const EventContext& ctx);
 
@@ -558,23 +454,21 @@ public:
    * @brief Return the event number of the GenEvent at the specified
    *        position in the McEventCollection.
    * @param position in the McEventCollection
-   * @param evColl McEventCollection type
    * @param sg Target event store.
    * Returns -999 when position is larger than the McEventCollection size
    */
-  static int getEventNumberAtPosition (index_type position, EBC_EVCOLL evColl, const IProxyDict* sg);
+  static int getEventNumberAtPosition (index_type position, const IProxyDict* sg);
 
 
   /**
    * @brief Return a vector of the positions in the McEventCollection of the
    *        GenEvent(s) with a given event number.
    * @param index the event number of the required GenEvent
-   * @param evColl McEventCollection type
    * @param sg Target event store.
    * Returns a vector containing only ExtendedBarCode::UNDEFINED FIXME when no event with the appropriate event_number was found.
    * (Multiple entries in the vector is technically a bug, but can't be fixed until the HepMC3 migration.)
    */
-  static std::vector<index_type> getEventPositionInCollection (index_type index, EBC_EVCOLL evColl, const IProxyDict* sg);
+  static std::vector<index_type> getEventPositionInCollection (index_type index, const IProxyDict* sg);
 
   /**
    * @brief Return the position in the McEventCollection of the
@@ -586,30 +480,12 @@ public:
 
 
   /**
-   * @brief Return which collection we're targeting, as an enum.
-   */
-  EBC_EVCOLL getEventCollection() const;
-
-
-  /**
-   * @brief Return which collection we're targeting, as a char ('a'..'d').
-   */
-  char getEventCollectionAsChar() const;
-
-
-  /**
    * @brief Hash the 32 bit barcode and 16 bit eventindex into a 32bit int.
    */
   barcode_type compress() const;
 
 
-  /** 
-   * @brief Return the corresponding enum from a McEventCollection name.
-   */
-  static EBC_EVCOLL find_enumFromKey (const std::string& evCollName);
-
-
-  /** 
+  /**
    * @brief Alter the persistent part of the link.
    */
   void setExtendedBarCode (const ExtendedBarCode& extBarcode);
@@ -623,39 +499,27 @@ public:
   friend MsgStream& operator << (MsgStream&, const HepMcParticleLink&);
 
 
-  /**
-   * @brief Look up the event collection we're targeting.
-   * @param sg Target event store.
-   * @param evColl McEventCollection type
-   * May return nullptr if the collection is not found.
-   */
-  static const McEventCollection*
-  retrieveMcEventCollection (EBC_EVCOLL evColl, const IProxyDict* sg);
-
-
-  /**
-   * @brief Look up the event collection we're targeting.
-   * @param sg Target event store.
-   * May return nullptr if the collection is not found.
-   */
-  const McEventCollection*
-  retrieveMcEventCollection (const IProxyDict* sg) const;
+   /**
+    * @brief Look up the event collection we're targeting.
+    * @param sg Target event store.
+    * May return nullptr if the collection is not found.
+    */
+   static const McEventCollection*
+   retrieveMcEventCollection (const IProxyDict* sg);
 
 
   /**
    * @brief Find the proxy for the target event collection.
-   * @param evColl McEventCollection type
    * @param sg Target event store.
    * May return nullptr if the collection is not found.
    */
-  static SG::DataProxy* find_proxy (EBC_EVCOLL evColl, const IProxyDict* sg);
+  static SG::DataProxy* find_proxy (const IProxyDict* sg);
 
 
   /**
    * @brief Return the most recent SG key used for a particular collection type.
-   * @param evColl The targeted event collection, as an enum.
    */
-  static std::string getLastEventCollectionName (EBC_EVCOLL evColl);
+  static std::string getLastEventCollectionName ();
 
 
   /// Pointer to the store containing the event.

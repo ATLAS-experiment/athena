@@ -110,7 +110,6 @@ void SiHitCollectionCnv_p3::transToPers(const SiHitCollection* transCont, SiHitC
       unsigned short index{0};
       const HepMcParticleLink::index_type position =
         HepMcParticleLink::getEventPositionInCollection(lastLink->eventIndex(),
-                                                        lastLink->getEventCollection(),
                                                         proxy).at(0);
       if (position!=0) {
         index = lastLink->eventIndex();
@@ -119,7 +118,7 @@ void SiHitCollectionCnv_p3::transToPers(const SiHitCollection* transCont, SiHitC
         }
       }
       persCont->m_mcEvtIndex.push_back(index);
-      persCont->m_evtColl.push_back(lastLink->getEventCollectionAsChar());
+      persCont->m_evtColl.push_back('a'); // Hard-coding as this only ever had a single value in production
 
       if (idx > 0) {
         persCont->m_nBC.push_back(idx - endBC);
@@ -353,7 +352,7 @@ void SiHitCollectionCnv_p3::persToTrans(const SiHitCollection_p3* persCont, SiHi
         if (persCont->m_mcEvtIndex[idxBC] == 0) {
           flag = HepMcParticleLink::IS_POSITION;
         }
-        HepMcParticleLink partLink( persCont->m_barcode[idxBC], persCont->m_mcEvtIndex[idxBC], HepMcParticleLink::ExtendedBarCode::eventCollectionFromChar(persCont->m_evtColl[idxBC]), flag, ctx );
+        HepMcParticleLink partLink( persCont->m_barcode[idxBC], persCont->m_mcEvtIndex[idxBC], flag, ctx );
         transCont->Emplace( endLast, endThis, eneLoss, meanTime, partLink, persCont->m_id[idxId]);
 
         endLast = endThis;

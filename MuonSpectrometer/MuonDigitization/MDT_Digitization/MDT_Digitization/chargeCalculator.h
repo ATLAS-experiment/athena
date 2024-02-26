@@ -37,9 +37,8 @@ to the third digit of decimal number of the  pdgid.
 #include "AtlasHepMC/GenParticle.h"
 //
 double chargeCalculator(const MDTSimHit& hit, unsigned short eventId = 0) {
-    const EBC_EVCOLL evColl = EBC_MAINEVCOLL;
     const HepMcParticleLink::PositionFlag idxFlag = (eventId == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-    const HepMcParticleLink trkParticle(hit.trackNumber(), eventId, evColl, idxFlag);
+    const HepMcParticleLink trkParticle(hit.trackNumber(), eventId, idxFlag);
     HepMC::ConstGenParticlePtr genParticle = trkParticle.cptr();
     double qcharge = 1.;
     if (genParticle) {

@@ -31,7 +31,6 @@ void HepMcParticleLinkCnv_p1::persToTrans( const HepMcParticleLink_p1* persObj,
                                            HepMcParticleLink* transObj,
                                            MsgStream &/*msg*/ ) const
 {
-  EBC_EVCOLL evColl = EBC_MAINEVCOLL;
   HepMcParticleLink::PositionFlag flag = HepMcParticleLink::IS_EVENTNUM;
 
   if (persObj->m_mcEvtIndex == 0) {
@@ -41,7 +40,6 @@ void HepMcParticleLinkCnv_p1::persToTrans( const HepMcParticleLink_p1* persObj,
   transObj->setExtendedBarCode
     ( HepMcParticleLink::ExtendedBarCode( persObj->m_barcode,
                                           persObj->m_mcEvtIndex,
-                                          evColl,
                                           flag) );
 }
 
@@ -57,7 +55,6 @@ void HepMcParticleLinkCnv_p1::transToPers( const HepMcParticleLink* transObj,
   unsigned short index{0};
   const HepMcParticleLink::index_type position =
     HepMcParticleLink::getEventPositionInCollection(transObj->eventIndex(),
-                                                    transObj->getEventCollection(),
                                                     proxy).at(0);
   if (position!=0) {
     index = transObj->eventIndex();

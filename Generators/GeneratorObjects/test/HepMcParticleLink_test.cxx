@@ -293,9 +293,9 @@ namespace MCTesting {
     out << "Testing HepMcParticleLink streamer "
               << gammaLink1 << " --- " << gammaLink11 <<std::endl;
 #ifdef HEPMC3
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 10005, McEventCollection CollectionNotSet(a) --- Event index 1, Barcode 10005, McEventCollection CollectionNotSet(a)\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 10005, McEventCollection CollectionNotSet --- Event index 1, Barcode 10005, McEventCollection CollectionNotSet\n");
 #else
-    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 10005, McEventCollection CollectionNotSet(a) --- Event index 1, Barcode 10005, McEventCollection CollectionNotSet(a)\n");
+    ASSERT_EQ(out.str(),"Testing HepMcParticleLink streamer Event index 0, Barcode 10005, McEventCollection CollectionNotSet --- Event index 1, Barcode 10005, McEventCollection CollectionNotSet\n");
 #endif
 
 #ifdef GENP_DEBUG
@@ -375,7 +375,7 @@ namespace MCTesting {
 
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
-    HepMcParticleLink testLink1a(particle1,dummyIndex1, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink1a(particle1,dummyIndex1,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink1a.isValid() );
     ASSERT_EQ(HepMC::barcode(particle1), testLink1a.barcode());
@@ -384,7 +384,7 @@ namespace MCTesting {
     ASSERT_EQ(particle1,testLink1a.cptr());
     // A HepMcParticleLink built using the barcode and the position of
     // the GenEvent.
-    HepMcParticleLink testLink1b(HepMC::barcode(particle1),dummyIndex1, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink1b(HepMC::barcode(particle1),dummyIndex1,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink1b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1b.barcode());
@@ -450,7 +450,7 @@ namespace MCTesting {
 
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
-    HepMcParticleLink testLink2a(particle2, dummyIndex2, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink2a(particle2, dummyIndex2,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink2a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2a.barcode());
@@ -459,7 +459,7 @@ namespace MCTesting {
     ASSERT_EQ(particle2,testLink2a.cptr());
     // A HepMcParticleLink built using the barcode and the position of
     // the GenEvent.
-    HepMcParticleLink testLink2b(HepMC::barcode(particle2), dummyIndex2, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink2b(HepMC::barcode(particle2), dummyIndex2,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink2b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2b.barcode());
@@ -524,7 +524,7 @@ namespace MCTesting {
 
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
-    HepMcParticleLink testLink3a(particle3, dummyIndex3, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink3a(particle3, dummyIndex3,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink3a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle3), testLink3a.barcode());
@@ -532,7 +532,7 @@ namespace MCTesting {
     ASSERT_EQ(particle3,testLink3a.cptr());
     // A HepMcParticleLink built using the barcode and the position of
     // the GenEvent.
-    HepMcParticleLink testLink3b(HepMC::barcode(particle3), dummyIndex3, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink3b(HepMC::barcode(particle3), dummyIndex3,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink3b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle3), testLink3b.barcode());
@@ -612,7 +612,7 @@ namespace MCTesting {
     ASSERT_EQ( particle4, testLink4b.cptr());
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
-    HepMcParticleLink testLink4c(particle4, dummyIndex4, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink4c(particle4, dummyIndex4,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink4c.isValid() );
     ASSERT_EQ( HepMC::barcode(particle4), testLink4c.barcode());
@@ -622,7 +622,7 @@ namespace MCTesting {
 
     // A HepMcParticleLink built using the barcode and the position of
     // the GenEvent.
-    HepMcParticleLink testLink4d(HepMC::barcode(particle4), dummyIndex4, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink4d(HepMC::barcode(particle4), dummyIndex4,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink4d.isValid() );
     ASSERT_EQ( HepMC::barcode(particle4), testLink4d.barcode());
@@ -694,7 +694,7 @@ namespace MCTesting {
 
     // HepMcParticleLink built using a delta-ray barcode and the
     // position of the GenEvent.
-    HepMcParticleLink testLink5c(deltaRayBarcode, dummyIndex1, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink5c(deltaRayBarcode, dummyIndex1,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_FALSE( testLink5c.isValid() );
     ASSERT_EQ( deltaRayBarcode, testLink5c.barcode());
@@ -704,7 +704,7 @@ namespace MCTesting {
 
     // HepMcParticleLink built using a delta-ray barcode and the
     // position of the GenEvent.
-    HepMcParticleLink testLink5d(deltaRayBarcode, dummyIndex2, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink5d(deltaRayBarcode, dummyIndex2,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_FALSE( testLink5d.isValid() );
     ASSERT_EQ( deltaRayBarcode, testLink5d.barcode());
@@ -815,7 +815,7 @@ namespace MCTesting {
 
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
-    HepMcParticleLink testLink1a(particle1, dummyIndex1, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink1a(particle1, dummyIndex1,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink1a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1a.barcode());
@@ -824,7 +824,7 @@ namespace MCTesting {
     ASSERT_EQ(particle1,testLink1a.cptr());
     // A HepMcParticleLink built using the barcode and the position of
     // the GenEvent.
-    HepMcParticleLink testLink1b(HepMC::barcode(particle1), dummyIndex1, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink1b(HepMC::barcode(particle1), dummyIndex1,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink1b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle1), testLink1b.barcode());
@@ -854,7 +854,7 @@ namespace MCTesting {
 
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
-    HepMcParticleLink testLink2a(particle2, dummyIndex2, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink2a(particle2, dummyIndex2,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink2a.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2a.barcode());
@@ -863,7 +863,7 @@ namespace MCTesting {
     ASSERT_EQ(particle2,testLink2a.cptr());
     // A HepMcParticleLink built using the barcode and the position of
     // the GenEvent.
-    HepMcParticleLink testLink2b(HepMC::barcode(particle2), dummyIndex2, EBC_MAINEVCOLL,
+    HepMcParticleLink testLink2b(HepMC::barcode(particle2), dummyIndex2,
                                  HepMcParticleLink::IS_POSITION);
     ASSERT_TRUE( testLink2b.isValid() );
     ASSERT_EQ( HepMC::barcode(particle2), testLink2b.barcode());

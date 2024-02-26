@@ -58,7 +58,7 @@ StatusCode TRT_HitsTruthRelink::execute(const EventContext &ctx) const
       }
     }
 
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), oldLink.getEventCollection(), HepMcParticleLink::IS_EVENTNUM, ctx);
+    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, ctx);
     int   id            = hit.GetHitID();
     float kineticEnergy = hit.GetKineticEnergy();
     float energyDeposit = hit.GetEnergyDeposit();
