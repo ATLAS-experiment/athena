@@ -119,7 +119,9 @@ void CaloClusterCollectionSettingsButton::Imp::initEditWindow()
 
 	// init UI, with the same parent widget
 	ui_commonsettings.setupUi(editwindow);
-	ui_customsettings.setupUi(editwindow);
+	auto customsettings = new QWidget();
+	ui_commonsettings.verticalLayout_additional_widgets->addWidget(customsettings);
+	ui_customsettings.setupUi(customsettings);  //JetSysSettingsDisplayForm
 
 	//// CUSTOMIZE "Momentum cuts" widget
 	// change labels to match object's nomenclature
@@ -137,10 +139,6 @@ void CaloClusterCollectionSettingsButton::Imp::initEditWindow()
 
 	// get a handle on the material button
 	matButton = ui_commonsettings.pushButton_matButton;
-
-	// compose UI: adding to the default GUI the "display" custom cuts for jets
-	ui_commonsettings.verticalLayout_additional_widgets->layout()->addWidget( ui_customsettings.groupBox_calocluster_scale );
-	ui_commonsettings.verticalLayout_additional_widgets->layout()->addWidget( ui_customsettings.groupBox_calocluster_drawsettings );
 
 //	// set "Material" checked by default ("Skin" will be optional)
 //	ui_customsettings.radioButton_material->setChecked(true);
@@ -731,22 +729,11 @@ QPair<bool,double> CaloClusterCollectionSettingsButton::scale() const
 
   double highestvisibleenergy=0*SYSTEM_OF_UNITS::eV;
 
-////  for(VP1StdCollection* stdcol : m_d->collWidget->visibleStdCollections()) {
-////    VP1CaloClusterCollection* col = dynamic_cast<VP1CaloClusterCollection*>(stdcol);
-
-  std::cout << "coll: ";
-  std::cout << m_d->coll << std::endl;
-  std::cout << "highestvisibleenergy: ";
-  std::cout << highestvisibleenergy << std::endl;
-  std::cout << "coll->name: ";
   QString colname = m_d->coll->name();
   VP1Msg::messageDebug(colname);
-//  std::cout << "coll->highestVisibleClusterEnergy(): ";
-//  std::cout << m_d->coll->highestVisibleClusterEnergy() << std::endl;
 
   //IParticleCollHandle_CaloCluster* col = dynamic_cast<IParticleCollHandle_CaloCluster*>(m_d->coll);
   if (dynamic_cast<IParticleCollHandle_CaloCluster*>(m_d->coll)) {
-	  std::cout << "col OK! " << std::endl;
     if ( highestvisibleenergy < m_d->coll->highestVisibleClusterEnergy() )
       highestvisibleenergy = m_d->coll->highestVisibleClusterEnergy();
   }

@@ -186,7 +186,6 @@ void IParticleCollHandle_Jet::init(VP1MaterialButtonBase*)
   connect(this,SIGNAL(visibilityChanged(bool)),this,SLOT(collVisibilityChanged(bool)));
 
 
-
   // create semi-transparent material for all jets, with the default color
   	m_d->m_jetMaterialDefault = VP1MaterialButton::createMaterial(defaultColor(), 0.2, 0.3);  // RGBcolor, brightness, transparency
   	m_d->m_jetMaterialDefault->ref();
@@ -206,12 +205,10 @@ void IParticleCollHandle_Jet::init(VP1MaterialButtonBase*)
   //==========
   // b-tagging
   if(m_d->collSettingsButton->is_bTaggingSkinEnabled()) {
-    std::cout << "switch texture" << std::endl;
     setBTaggingSkin(m_d->collSettingsButton->bTaggingSkin());
     //	  m_d->bTaggingSwitch->addChild(m_d->bTaggingTexture);
   }
   else if (m_d->collSettingsButton->is_bTaggingMaterialEnabled()) {
-    std::cout << "switch material" << std::endl;
     setBTaggingMaterial();
     //	  m_d->bTaggingMaterial = controller->bTaggingMaterial();
     //	  m_d->bTaggingSwitch->addChild(m_d->bTaggingMaterial);
@@ -404,7 +401,6 @@ void IParticleCollHandle_Jet::setRandomJetColours(const bool& b)
     return;
 
   m_d->randomColours = b;
-  std::cout << "isRandom: " << m_d->randomColours << std::endl;
 
   if (!isLoaded())
     return;
@@ -648,8 +644,6 @@ void IParticleCollHandle_Jet::setBTaggingMaterial(SoMaterial* mat)
 
     messageVerbose("Updating the material node");
 
-    //std::cout << "Updating - old mat: " << m_d->bTaggingMaterial << "..." << std::endl; // it continues below...
-
     //remove the previous skin and material
     m_d->bTaggingSwitch->removeChild(m_d->bTaggingTexture);
     m_d->bTaggingSwitch->removeChild(m_d->bTaggingMaterial);
@@ -701,8 +695,6 @@ void IParticleCollHandle_Jet::setBTaggingTagger(const QString & tagger){
 
 //____________________________________________________________________
 void IParticleCollHandle_Jet::setBTaggingCut(const double& wCut){
-
-  std::cout << m_d->bTaggingCut << std::endl;
 
   if (m_d->bTaggingCut == wCut)
     return;

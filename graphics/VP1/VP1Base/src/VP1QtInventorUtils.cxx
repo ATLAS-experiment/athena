@@ -430,14 +430,6 @@ QImage VP1QtInventorUtils::imageFromRGBFile(const QString& filename)
 	return im;
 }
 
-//____________________________________________________________________
-//void VP1QtInventorUtils::Imp::prerendercallback_rendertoimage( void * userdata, class SoGLRenderAction * action )
-//{
-//  std::cout<<"TKTEST LALA VP1QtInventorUtils::Imp::prerendercallback_rendertoimage"<<std::endl;
-//  glEnable(GL_MULTISAMPLE);
-//  std::cout<<"isSmoothing: "<<action->isSmoothing()<<std::endl;
-//}
-
 
 //____________________________________________________________________
 //QImage VP1QtInventorUtils::renderToImage(SoQtRenderArea *ra, int pixels_x, int pixels_y,

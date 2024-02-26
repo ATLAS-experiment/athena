@@ -170,7 +170,7 @@ void VP1GuideLineSystem::buildPermanentSceneGraph(StoreGateSvc* /*detstore*/, So
 
   //People:
   m_d->people = new VP1People(m_d->controller->peopleMaterial(),root,this);
-  connect(m_d->controller,SIGNAL(peopleZPosChanged(const double&)),m_d->people,SLOT(setZPos(const double&)));
+  // connect(m_d->controller,SIGNAL(peopleZPosChanged(const double&)),m_d->people,SLOT(setZPos(const double&)));
   m_d->people->setZPos(m_d->controller->peopleZPos());
   connect(m_d->controller,SIGNAL(peopleVerticalPosChanged(const double&)),m_d->people,SLOT(setVerticalPosition(const double&)));
   m_d->people->setVerticalPosition(m_d->controller->peopleVerticalPos());

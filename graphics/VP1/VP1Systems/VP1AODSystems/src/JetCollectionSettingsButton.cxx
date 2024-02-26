@@ -128,11 +128,13 @@ void JetCollectionSettingsButton::Imp::initEditWindow()
 	// create a parent widget
 	editwindow = new QWidget(0,Qt::WindowStaysOnTopHint); // parent widget
 
-	// init the different UIs, with the same parent widget
-	editwindow_ui.setupUi(editwindow);
-	ui_disp.setupUi(editwindow);
 
 
+	// init the different UIs
+	editwindow_ui.setupUi(editwindow); //IParticleCollectionSettingsForm
+	auto jetsettings = new QWidget();
+	editwindow_ui.verticalLayout_additional_widgets->addWidget(jetsettings);
+	ui_disp.setupUi(jetsettings);  //JetSysSettingsDisplayForm
 
 	//// CUSTOMIZE "Momentum cuts" widget
 	// change labels to match jets' nomenclature
@@ -353,9 +355,6 @@ JetCollectionSettingsButton::JetCollectionSettingsButton(QWidget * parent,int di
 	////////////////////////
 	//  Custom Materials  //
 	////////////////////////
-
-	std::cout << "setting jet custom materials..." << std::endl;
-
 
 
 	// create default material for b-jets
