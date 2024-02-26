@@ -169,9 +169,10 @@ namespace MuonGMR4 {
         if (!stripCent) return std::numeric_limits<double>::max();
         return (pos - (*stripCent)).x();
     }
-    inline int StripDesign::stripNumber(const Amg::Vector2D& pos) const {
+    inline int StripDesign::stripNumber(const Amg::Vector2D& extPos) const {
+        const Amg::Vector2D pos = m_nominalRotMat * extPos;
         std::optional<double> stripPitches = Amg::intersect<2>(m_firstStripPos, stripDir(),
-                                                               m_nominalRotMat * pos, - Amg::Vector2D::UnitX());
+                                                               pos, - Amg::Vector2D::UnitX());
         if (!stripPitches) {
             return -1;
         }

@@ -53,11 +53,16 @@ class WireGroupDesign: public StripDesign {
     
         int stripNumber(const Amg::Vector2D& pos) const override;
 
+        /// @brief Returns a pair where the first component indicate the wire group number and 
+        ///        the second one returns the number of the closest wire in the group
+        std::pair<int, int> wireNumber(const Amg::Vector2D& extPos) const;
+
         /// Returns the length of the i-th wire in group j
         double wireLength(unsigned int groupNum,
                           unsigned int wireNum) const;
 
     private:
+        void print(std::ostream& ostr) const override final; 
         Amg::Vector2D stripPosition(int stripNum) const override final;
         /// @brief helper construct to cache the number of wires in each group as well
         ///        as the accumulated number of wires from the previous groups.

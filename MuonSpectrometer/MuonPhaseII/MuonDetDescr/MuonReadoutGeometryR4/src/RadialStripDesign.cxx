@@ -19,6 +19,11 @@ namespace MuonGMR4{
     }
     void RadialStripDesign::addStrip(const double posOnBottom,
                                      const double posOnTop) {        
-        m_strips.emplace_back( 0.5*lenBottomEdge() + posOnBottom, 0.5* lenTopEdge()+ posOnTop);
+        m_strips.emplace_back(0.5*lenBottomEdge() + posOnBottom, 0.5* lenTopEdge()+ posOnTop, *this);
+        /// There're strip panels where the order goes from left to right and others, where the numbering is
+        /// exactly opposite. Razupaltuff would be a pretty appropiate comment...
+        if (m_strips.size() == 2) {
+            m_reversedStripOrder = m_strips[1].distOnBottom < m_strips[0].distOnBottom;
+        }
     }
 }

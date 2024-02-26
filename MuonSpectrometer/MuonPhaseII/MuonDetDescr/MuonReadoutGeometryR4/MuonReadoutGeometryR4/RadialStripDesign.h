@@ -40,13 +40,13 @@ class RadialStripDesign: public StripDesign {
         /** @bief: Returns the vector perpendicular to the stripDir and pointing to the next strip*/
         Amg::Vector2D stripNormal(int stripNumber) const;
         /** @brief: Returns the intersection of the left strip edge at the bottom panel's edge*/
-        Amg::Vector2D stripLeftEdgeBottom(int stripNumber) const;
+        Amg::Vector2D stripLeftBottom(int stripNumber) const;
         /** @brief: Returns the intersecton of the strip right edge at the bottom panel's edge*/
-        Amg::Vector2D stripRightEdgeBottom(int stripNumber) const;
+        Amg::Vector2D stripRightBottom(int stripNumber) const;
         /** @brief: Returns the intersection of the left strip edge at the top panel's edge */
-        Amg::Vector2D stripLeftEdgeTop(int stripNumber) const;
+        Amg::Vector2D stripLeftTop(int stripNumber) const;
         /** @brief: Returns the intersecetion fo the right strip edge at the top panel's edge */
-        Amg::Vector2D stripRightEdgeTop(int stripNumber) const;
+        Amg::Vector2D stripRightTop(int stripNumber) const;
 
         /// Returns the number of defined strips
         int numStrips() const override;
@@ -57,18 +57,40 @@ class RadialStripDesign: public StripDesign {
     private:
         CheckVector2D leftInterSect(int stripNum, bool uncapped = false) const override final;
         CheckVector2D rightInterSect(int stripNum, bool uncapped = false) const override final;
-        /// @brief Helper struct to cache the 
+        /// @brief Helper struct to cache the mounting points of the strips with the bottom & top
+        ///        edge of the Tgc panel. By convention, one instance of stripEdges represent the left
+        ///        edge of strip i and the right ege of strip i-1, except for the very first & last one
+        ///        which is just representing the left edge of the first & the last edge of the last strip.
         struct stripEdges{
-            stripEdges(double dBot, double dTop):
+            /// @brief Standard constrcutor
+            /// @param dBot Mounting at the bottom edge of readout panel. 
+            ///             Measured from the bottom left panel corner.
+            /// @param dTop Mounting at the top edge of readout panel. 
+            ///             Measured from the top left panel corner.
+            /// @param _parent: Instance of the constructing RadialStripDesign to fetch the trapezoid boundaries
+            stripEdges(double dBot, double dTop, 
+                       const RadialStripDesign& _parent):
+                parent{_parent},
                 distOnBottom{dBot},
                 distOnTop{dTop} {}
 
+            /* Returns the bottom mounting point */
+            Amg::Vector2D bottomMounting() const;
+            /* Returns the top mounting point */
+            Amg::Vector2D topMounting() const;
+            /* Returns the connecting vector from bottom top */
+            Amg::Vector2D fromBottomToTop() const;
+
+            const RadialStripDesign& parent;
             double distOnBottom{0.};
             double distOnTop{0.};
         };
         using stripEdgeVec = std::vector<stripEdges>;
         using stripEdgeVecItr = stripEdgeVec::const_iterator;
         stripEdgeVec m_strips{};
+        
+        bool m_reversedStripOrder{false};
+
 };
 
 struct RadialDesignSorter{

@@ -1,8 +1,23 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
+#include <GaudiKernel/SystemOfUnits.h>
+
 namespace MuonGMR4{
+    void WireGroupDesign::print(std::ostream& ostr) const {
+        ostr<<"Dimension  -- width x height [mm]: "<<halfWidth() * Gaudi::Units::mm<<" x ";
+        ostr<<shortHalfHeight()<<"/"<<longHalfHeight()<<" [mm], ";
+        if (hasStereoAngle()) ostr<<"stereo angle: "<<stereoAngle() / Gaudi::Units::deg<<", ";
+        ostr<<"position first strip "<<Amg::toString(center(firstStripNumber()).value_or(Amg::Vector2D::Zero()),1);
+        ostr<<" *** Trapezoid edges "<<Amg::toString(cornerBotLeft(),1)<<" - "<<Amg::toString(cornerBotRight(), 1)<<" --- ";
+        ostr<<Amg::toString(cornerTopLeft(), 1)<<" - "<<Amg::toString(cornerTopRight(), 1);
+        ostr<<" -- numWireGroups: "<<m_groups.size()<<", wire pitch: "<<stripPitch()<<", nWires: [";
+        for (const wireGroup & grp : m_groups){
+            ostr<<grp.numWires<<",";
+        }
+        ostr<<"] ";
+    }
     bool WireGroupDesign::operator<(const WireGroupDesign& other) const {
         if (other.m_groups.size() != m_groups.size()) {
             return m_groups.size() < other.m_groups.size();

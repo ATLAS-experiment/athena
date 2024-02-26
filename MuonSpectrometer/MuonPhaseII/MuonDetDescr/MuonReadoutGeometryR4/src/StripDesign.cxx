@@ -52,8 +52,8 @@ namespace MuonGMR4{
         ostr<<shortHalfHeight()<<"/"<<longHalfHeight()<<" [mm], ";
         if (hasStereoAngle()) ostr<<"stereo angle: "<<stereoAngle() / Gaudi::Units::deg<<", ";
         ostr<<"position first strip "<<Amg::toString(center(firstStripNumber()).value_or(Amg::Vector2D::Zero()),1);
-        ostr<<"Trapezoid edges "<<Amg::toString(m_bottomLeft,1)<<" - "<<Amg::toString(m_bottomRight, 1)<<" --- ";
-        ostr<<Amg::toString(m_topLeft, 1)<<" - "<<Amg::toString(m_topRight, 1);
+        ostr<<" *** Trapezoid edges "<<Amg::toString(cornerBotLeft(),1)<<" - "<<Amg::toString(cornerBotRight(), 1)<<" --- ";
+        ostr<<Amg::toString(cornerTopLeft(), 1)<<" - "<<Amg::toString(cornerTopRight(), 1);
     }
     void StripDesign::defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight, double sAngle){
         defineTrapezoid(HalfShortY,HalfLongY, HalfHeight);
