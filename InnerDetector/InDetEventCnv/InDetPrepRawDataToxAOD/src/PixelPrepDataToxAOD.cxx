@@ -111,6 +111,7 @@ StatusCode PixelPrepDataToxAOD::initialize()
   ATH_CHECK(m_sihitContainer_key.initialize(m_need_sihits));
   ATH_CHECK(m_SDOcontainer_key.initialize(m_writeSDOs));
   ATH_CHECK(m_multiTruth_key.initialize(m_useTruthInfo));
+  ATH_CHECK(m_truthParticleLinks.initialize( m_useTruthInfo && !m_truthParticleLinks.empty()));
 
   ATH_CHECK(m_write_xaod_key.initialize());
   m_write_offsets = m_clustercontainer_key.key() + "Offsets";
@@ -139,10 +140,17 @@ StatusCode PixelPrepDataToxAOD::execute()
   }
 
   const PRD_MultiTruthCollection* prdmtColl(nullptr);
+  const xAODTruthParticleLinkVector *truth_particle_links{nullptr};
   if (m_useTruthInfo) {
      SG::ReadHandle<PRD_MultiTruthCollection> prdmtCollHandle(m_multiTruth_key,ctx);
     if (prdmtCollHandle.isValid()) {
       prdmtColl = &*prdmtCollHandle;
+    }
+    if (!m_truthParticleLinks.empty()) {
+       SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinksHandle{m_truthParticleLinks, ctx};
+       if (truthParticleLinksHandle.isValid()) {
+          truth_particle_links = truthParticleLinksHandle.cptr();
+       }
     }
   }
 
@@ -202,6 +210,9 @@ StatusCode PixelPrepDataToxAOD::execute()
   SG::WriteHandle<std::vector<unsigned int>> offsets(m_write_offsets,ctx);
   ATH_CHECK(offsets.record(std::make_unique<std::vector<unsigned int>>(m_PixelHelper->wafer_hash_max(), 0)));
   
+  unsigned int have_truth_link=0u;
+  unsigned int missing_truth_particle=0u;
+  unsigned int missing_parent_particle=0u;
   // Loop over the container
   unsigned int counter(0);
  
@@ -356,12 +367,35 @@ StatusCode PixelPrepDataToxAOD::execute()
       
       // Use the MultiTruth Collection to get a list of all true particle contributing to the cluster
       if (prdmtColl) {
-        std::vector<int> barcodes;
-        auto range = prdmtColl->equal_range(clusterId);
-        for (auto i = range.first; i != range.second; ++i) {
-          barcodes.push_back( i->second.barcode() );
-        }
-        AUXDATA(xprd,std::vector<int>, truth_barcode) = barcodes;
+         auto range{prdmtColl->equal_range(clusterId)};
+         if (truth_particle_links) {
+            std::vector<unsigned int> tp_indices;
+            for (auto& i{range.first}; i!=range.second; ++i) {
+               ElementLink<xAOD::TruthParticleContainer> a_truth_particle_link = truth_particle_links->find(i->second);
+               if (a_truth_particle_link) {
+                  const xAOD::TruthParticle *truth_particle = *a_truth_particle_link;
+                  if (truth_particle) {
+                     ++have_truth_link;
+                     tp_indices.push_back(static_cast<int>(truth_particle->index()));
+                  }
+                  else {
+                     ++missing_parent_particle;
+                  }
+               }
+               else {
+                  tp_indices.push_back(std::numeric_limits<unsigned int>::max());
+                  ++missing_truth_particle;
+               }
+            }
+            // @TODO provide possibility to move tp_indices to its final destination
+            AUXDATA(xprd,std::vector<unsigned int>, truth_index) = tp_indices;
+         }
+         std::vector<int> barcodes;
+         for (auto i = range.first; i != range.second; ++i) {
+            barcodes.push_back( i->second.barcode() );
+         }
+         // @TODO move vector
+         AUXDATA(xprd,std::vector<int>, truth_barcode) = barcodes;
       }
       
       std::vector< std::vector< int > > sdo_tracks;
@@ -389,6 +423,9 @@ StatusCode PixelPrepDataToxAOD::execute()
   for ( auto clusItr = xaod->begin(); clusItr != xaod->end(); ++clusItr ) {
       AUXDATA(*clusItr,char,broken) = false;
   }
+  m_haveTruthLink += have_truth_link;
+  m_missingTruthParticle += missing_truth_particle;
+  m_missingParentParticle += missing_parent_particle;
 
   static const SG::AuxElement::Accessor<int> acc_layer ("layer");
   static const SG::AuxElement::Accessor<int> acc_phi_module ("phi_module");
@@ -1241,5 +1278,9 @@ InDetDD::SiCellId PixelPrepDataToxAOD::getCellIdWeightedPosition(  const InDet::
 /////////////////////////////////////////////////////////////////////
 StatusCode PixelPrepDataToxAOD::finalize()
 {
+   if (m_useTruthInfo && !m_truthParticleLinks.empty()) {
+      ATH_MSG_INFO("Missing truth particles " << m_missingTruthParticle << " missing parent: " << m_missingParentParticle
+                   << " have " << m_haveTruthLink);
+   }
   return StatusCode::SUCCESS;
 }

@@ -93,13 +93,11 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
   if (sctClusters.isValid() && pixelClusters.isValid()) {
     for (const auto *const sct : *sctClusters) {
       const xAOD::TrackMeasurementValidation* sctCluster = sct;
-      std::vector<int> truth_barcode;
-      static const SG::AuxElement::ConstAccessor< std::vector<int> > barcodeAcc("truth_barcode");
-      if (barcodeAcc.isAvailable(*sctCluster)) {
-        truth_barcode = barcodeAcc(*sctCluster);
-        std::map<int, float>::iterator it;
-        for (auto barcode = truth_barcode.begin(); barcode != truth_barcode.end();  ++barcode) {
-          auto result = barcodeSCTclustercount.emplace( std::pair<int, float>(*barcode, 0.0) ); 
+      static const SG::AuxElement::ConstAccessor< std::vector<unsigned int> > truthIndexAcc("truth_index");
+      if (truthIndexAcc.isAvailable(*sctCluster)) {
+        const std::vector<unsigned int> &truth_indices = truthIndexAcc(*sctCluster);
+        for (auto index : truth_indices) {
+          auto result = barcodeSCTclustercount.emplace( std::pair<int, float>(index, 0.0) );
           ++(result.first->second);
         }
       }
@@ -108,12 +106,11 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
     for (const auto *const pix : *pixelClusters) {
       const xAOD::TrackMeasurementValidation* pixCluster = pix;
       std::vector<int> truth_barcode;
-      static const SG::AuxElement::ConstAccessor< std::vector<int> > barcodeAcc("truth_barcode");
-      if (barcodeAcc.isAvailable(*pixCluster)) {
-        truth_barcode = barcodeAcc(*pixCluster);
-        std::map<int, float>::iterator it;
-        for (auto barcode = truth_barcode.begin(); barcode != truth_barcode.end();  ++barcode) {
-          auto result = barcodePIXclustercount.emplace( std::pair<int, float>(*barcode, 0.0) ); 
+      static const SG::AuxElement::ConstAccessor< std::vector<unsigned int> > truthIndexAcc("truth_index");
+      if (truthIndexAcc.isAvailable(*pixCluster)) {
+        const std::vector<unsigned int> &truth_indices = truthIndexAcc(*pixCluster);
+        for (auto index : truth_indices) {
+          auto result = barcodePIXclustercount.emplace( std::pair<int, float>(index, 0.0) );
           ++(result.first->second);
         }
       }
@@ -167,8 +164,8 @@ InDetPhysValTruthDecoratorAlg::decorateTruth(const xAOD::TruthParticle& particle
    
   //Retrieve the cluster count from the pre-filled maps   
   std::map<int, float>::iterator it1, it2;
-  it1 =pixelMap.find(particle.barcode());
-  it2 =sctMap.find(particle.barcode());
+  it1 =pixelMap.find(particle.index());
+  it2 =sctMap.find(particle.index());
   float nSiHits = 0;
   if (it1 !=pixelMap.end()) nSiHits += (*it1).second; 
   if (it2 !=sctMap.end()) nSiHits += (*it2).second; 
