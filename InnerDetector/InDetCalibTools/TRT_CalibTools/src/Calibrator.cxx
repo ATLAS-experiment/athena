@@ -279,7 +279,7 @@ RtGraph::RtGraph(TH2F* rtHist, int binvar, const char* binlabel, bool pflag, TDi
   trgr->SetName("trgraph") ;
 
   dir->cd();
-
+  delete [] hslizes;
 }
 
 
@@ -616,7 +616,7 @@ float Calibrator::FitRt ATLAS_NOT_THREAD_SAFE (const std::string& key, const std
       }
 
   }
-  if (!bequiet)  rtg->rtgr->Write();
+  if (!bequiet and (rtg->rtgr != nullptr))  rtg->rtgr->Write();
 
   // old r-m_t relation
   oldrtfunc->SetRange(0,45);
