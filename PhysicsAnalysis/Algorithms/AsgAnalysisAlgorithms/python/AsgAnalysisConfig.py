@@ -218,9 +218,9 @@ class PtEtaSelectionBlock (ConfigBlock):
 
     def __init__ (self, containerName, selectionName) :
         groupName = containerName
-        if selectionName != '' :
-            groupName += '.' + selectionName
-        super (PtEtaSelectionBlock, self).__init__ (groupName)
+        if selectionName:
+            groupName += f'.{selectionName}'
+        super (PtEtaSelectionBlock, self).__init__ (f'PtEtaSelection.{groupName}')
         self.containerName = containerName
         self.selectionName = selectionName
         self.addOption ('postfix', '', type=str)
