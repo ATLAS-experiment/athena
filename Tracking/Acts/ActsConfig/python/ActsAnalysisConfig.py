@@ -24,9 +24,15 @@ def ActsHgtdClusterAnalysisAlgCfg(flags,
     monitoringGroup.defineHistogram('localX,localY;h_localXY', title="h_localXY; x [mm]; y [mm]", type="TH2F", path=path,
                                     xbins=20, xmin=-30, xmax=30,
                                     ybins=20, ymin=-30, ymax=30)
-    monitoringGroup.defineTree('localX,localY,localT,localCovXX,localCovYY,localCovTT;HgtdClusters',
+    monitoringGroup.defineHistogram('globalX,globalY;h_globalXY', title="h_globalXY; x [mm]; y [mm]", type="TH2F", path=path,
+                                    xbins=100, xmin=-750, xmax=750,
+                                    ybins=100, ymin=-750, ymax=750)
+    monitoringGroup.defineHistogram('globalZ,globalR;h_globalZR', title="h_globalZR; z [mm]; r [mm]", type="TH2F", path=path,
+                                    xbins=100, xmin=-3600, xmax=3600,
+                                    ybins=100, ymin=0, ymax=800)
+    monitoringGroup.defineTree('localX,localY,localT,localCovXX,localCovYY,localCovTT,globalX,globalY,globalZ,globalR,eta;HgtdClusters',
                                path='ntuples',
-                               treedef='localX/vector<float>:localY/vector<float>:localT/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:localCovTT/vector<float>')
+                               treedef='localX/vector<float>:localY/vector<float>:localT/vector<float>:localCovXX/vector<float>:localCovYY/vector<float>:localCovTT/vector<float>:globalX/vector<float>:globalY/vector<float>:globalZ/vector<float>:globalR/vector<float>:eta/vector<float>')
     
     result.merge(helper.result())
     return result
