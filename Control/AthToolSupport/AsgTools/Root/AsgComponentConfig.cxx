@@ -18,6 +18,7 @@
 #ifdef XAOD_STANDALONE
 
 #include <AsgTools/AsgComponent.h>
+#include <AsgTools/AsgComponentFactories.h>
 #include <AsgTools/AsgTool.h>
 #include <AsgTools/AnaToolHandle.h>
 #include <TInterpreter.h>
@@ -259,6 +260,21 @@ namespace asg
                                 const std::string& newCommand)
     {
       using namespace msgComponentConfig;
+
+      const auto *factory = getComponentFactory (type);
+      if (factory)
+      {
+        ANA_MSG_DEBUG ("using registered factory for type " << type);
+        component = (*factory) (name);
+        if (component == nullptr)
+        {
+          ANA_MSG_ERROR ("factory for type " << type << " returned a null pointer");
+          return StatusCode::FAILURE;
+        }
+        return StatusCode::SUCCESS;
+      }
+
+      ANA_MSG_DEBUG ("using dictionary as factory for type " << type);
 
       // Load the ROOT dictionary, this is needed to be able to
       // instantiate the component below, i.e. the code below won't load
