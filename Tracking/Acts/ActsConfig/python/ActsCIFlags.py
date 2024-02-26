@@ -1,8 +1,16 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Flags used in CI tests
 
 from TrkConfig.TrkConfigFlags import TrackingComponent
 
+def actsAloneWorkflowFlags(flags):
+    """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence"""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Acts.doAmbiguityResolution = True
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+    
+    
 def actsWorkflowFlags(flags):
     """flags for Reco_tf with CA used in CI tests: add Acts workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
