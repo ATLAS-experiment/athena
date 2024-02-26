@@ -10,9 +10,11 @@
 
 #include "GaudiKernel/FileIncident.h"
 
+#include <boost/exception/diagnostic_information.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 
+#include <optional>
 #include <sstream>
 
 const std::size_t maxTokenLength = 512;
@@ -92,7 +94,17 @@ StatusCode AthenaSharedMemoryTool::stop() {
 StatusCode AthenaSharedMemoryTool::finalize() {
    ATH_MSG_INFO("in finalize()");
    if (m_isServer) {
-      boost::interprocess::shared_memory_object::remove(m_sharedMemory.value().c_str());
+      try {
+         boost::interprocess::shared_memory_object::remove(m_sharedMemory.value().c_str());
+      } catch(boost::interprocess::interprocess_exception &e) {
+         ATH_MSG_WARNING("Cannot remove shared memory " << m_sharedMemory.value() << ": " << boost::diagnostic_information(e));
+      }
+      const std::string statusName = m_sharedMemory.value() + "_status";
+      try {
+         boost::interprocess::shared_memory_object::remove(statusName.c_str());
+      } catch(boost::interprocess::interprocess_exception &e) {
+         ATH_MSG_WARNING("Cannot remove shared memory " << statusName << ": " << boost::diagnostic_information(e));
+      }
    }
    // Release IncidentSvc
    if (!m_incidentSvc.release().isSuccess()) {
@@ -114,19 +126,25 @@ StatusCode AthenaSharedMemoryTool::makeServer(int num, const std::string& stream
    m_num = num;
    m_isServer = true;
    ATH_MSG_DEBUG("Creating shared memory object with name \"" << m_sharedMemory.value() << "\"");
-   boost::interprocess::shared_memory_object::remove(m_sharedMemory.value().c_str());
-   boost::interprocess::shared_memory_object shm(boost::interprocess::create_only,
-	   m_sharedMemory.value().c_str(),
-	   boost::interprocess::read_write);
-   shm.truncate(m_maxSize);
-   m_payload = new boost::interprocess::mapped_region(shm, boost::interprocess::read_write, 0, m_maxSize);
+   std::optional<boost::interprocess::shared_memory_object> shm;
+   try {
+      shm.emplace(boost::interprocess::create_only, m_sharedMemory.value().c_str(), boost::interprocess::read_write);
+   } catch(boost::interprocess::interprocess_exception &e) {
+      ATH_MSG_ERROR("Cannot create shared memory " << m_sharedMemory.value() << ": " << boost::diagnostic_information(e));
+      return StatusCode::FAILURE;
+   }
+   shm->truncate(m_maxSize);
+   m_payload = new boost::interprocess::mapped_region(*shm, boost::interprocess::read_write, 0, m_maxSize);
    const std::string statusName = m_sharedMemory.value() + "_status";
-   boost::interprocess::shared_memory_object::remove(statusName.c_str());
-   boost::interprocess::shared_memory_object shm_status(boost::interprocess::create_only,
-	   statusName.c_str(),
-	   boost::interprocess::read_write);
-   shm_status.truncate(num * sizeof(ShareEventHeader));
-   m_status = new boost::interprocess::mapped_region(shm_status, boost::interprocess::read_write, 0, num * sizeof(ShareEventHeader));
+   std::optional<boost::interprocess::shared_memory_object> shm_status;
+   try {
+      shm_status.emplace(boost::interprocess::create_only, statusName.c_str(), boost::interprocess::read_write);
+   } catch(boost::interprocess::interprocess_exception &e) {
+      ATH_MSG_ERROR("Cannot create shared memory " << statusName << ": " << boost::diagnostic_information(e));
+      return StatusCode::FAILURE;
+   }
+   shm_status->truncate(num * sizeof(ShareEventHeader));
+   m_status = new boost::interprocess::mapped_region(*shm_status, boost::interprocess::read_write, 0, num * sizeof(ShareEventHeader));
    ShareEventHeader evtH = { ShareEventHeader::UNLOCKED, -1, -1, 0, 0, 0, 0, "" };
    std::memcpy(evtH.token, streamPortSuffix.c_str(), maxTokenLength - 1);
    evtH.token[maxTokenLength - 1] = 0;

@@ -8,7 +8,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 from AthenaCommon.Logging import log as msg
 
-import os, shutil
+import os, shutil, uuid
 
 
 def athenaMPRunArgsToFlags(runArgs, flags):
@@ -86,6 +86,7 @@ def AthenaMPCfg(flags):
     event_range_channel = flags.MP.EventRangeChannel
     use_shared_reader = flags.MP.UseSharedReader
     use_shared_writer = flags.MP.UseSharedWriter
+    unique_id = f"{str(os.getpid())}-{uuid.uuid4().hex}"
 
     if flags.MP.Strategy == 'SharedQueue' or flags.MP.Strategy == 'RoundRobin':
         if use_shared_reader:
@@ -101,7 +102,7 @@ def AthenaMPCfg(flags):
                 evSel = CompFactory.EventSelectorAthenaPool("EventSelector")
 
                 inputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool",
-                                                            SharedMemoryName=f"InputStream{str(os.getpid())}")
+                                                            SharedMemoryName=f"InputStream{unique_id}")
 
                 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
                 result.merge(PoolReadCfg(flags))
@@ -109,7 +110,7 @@ def AthenaMPCfg(flags):
                 result.merge(AthenaPoolCnvSvcCfg(flags, InputStreamingTool=inputStreamingTool))
 
             evSel.SharedMemoryTool = AthenaSharedMemoryTool("EventStreamingTool",
-                                                            SharedMemoryName=f"EventStream{str(os.getpid())}")
+                                                            SharedMemoryName=f"EventStream{unique_id}")
             result.addService(evSel)
 
         if use_shared_writer:
@@ -119,7 +120,7 @@ def AthenaMPCfg(flags):
                     flags.Output.doWriteRDO)) or flags.Output.HITSFileName!='':
                 AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
                 outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool",
-                                                             SharedMemoryName=f"OutputStream{str(os.getpid())}")
+                                                             SharedMemoryName=f"OutputStream{unique_id}")
 
                 from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
                 result.merge(AthenaPoolCnvSvcCfg(flags, OutputStreamingTool=outputStreamingTool))

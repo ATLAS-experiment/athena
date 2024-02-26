@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 #-----Python imports---#
-import os, sys, shutil
+import os, sys, shutil, uuid
 
 #-----Athena imports---#
 from AthenaCommon.Logging import log as msg
@@ -66,20 +66,21 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
         use_shared_reader = jp.AthenaMPFlags.UseSharedReader()
         use_shared_writer = jp.AthenaMPFlags.UseSharedWriter()
         use_parallel_compression = jp.AthenaMPFlags.UseParallelCompression()
+        unique_id = f"{str(os.getpid())}-{uuid.uuid4().hex}"
 
         if strategy=='SharedQueue' or strategy=='RoundRobin':
             if use_shared_reader:
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
                 svcMgr.PoolSvc.MaxFilesOpen = 2
                 from AthenaIPCTools.AthenaIPCToolsConf import AthenaSharedMemoryTool
-                svcMgr.EventSelector.SharedMemoryTool = AthenaSharedMemoryTool("EventStreamingTool", SharedMemoryName="EventStream"+str(os.getpid()))
+                svcMgr.EventSelector.SharedMemoryTool = AthenaSharedMemoryTool("EventStreamingTool", SharedMemoryName=f"EventStream{unique_id}")
                 if 'AthenaPoolCnvSvc.ReadAthenaPool' in sys.modules:
-                    svcMgr.AthenaPoolCnvSvc.InputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool", SharedMemoryName="InputStream"+str(os.getpid()))
+                    svcMgr.AthenaPoolCnvSvc.InputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool", SharedMemoryName=f"InputStream{unique_id}")
             if use_shared_writer:
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
                 if 'AthenaPoolCnvSvc.WriteAthenaPool' in sys.modules:
                     from AthenaIPCTools.AthenaIPCToolsConf import AthenaSharedMemoryTool
-                    svcMgr.AthenaPoolCnvSvc.OutputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool", SharedMemoryName="OutputStream"+str(os.getpid()))
+                    svcMgr.AthenaPoolCnvSvc.OutputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool", SharedMemoryName=f"OutputStream{unique_id}")
                 svcMgr.AthenaPoolCnvSvc.ParallelCompression=use_parallel_compression
 
             from AthenaMPTools.AthenaMPToolsConf import SharedEvtQueueProvider
