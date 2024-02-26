@@ -199,7 +199,7 @@ void GeoExporter::init()
 
 if ( !(user_detmanagerslist.empty()) ) {
   // Get list of managers
-  std::cout << "\nList of GeoModel managers: " << std::endl;
+  std::cout << "\nList of GeoModel Detector Managers: " << std::endl;
   std::vector<std::string> managersList = theExpt->getListOfManagers();
   if ( !(managersList.empty()) ) {
    for (auto const& mm : managersList)
@@ -209,11 +209,11 @@ if ( !(user_detmanagerslist.empty()) ) {
 
         // get the name of the DetectorManager
         std::string detManName = manager->getName();
-        std::cout << "\n\t DetectorManager: " << detManName << std::endl;
+        std::cout << "\n\tDetectorManager: " << detManName << std::endl;
 
         // get the DetManager's TreeTops
         unsigned int nTreetops = manager->getNumTreeTops();
-        std::cout << mm << "\t - n.Treetops: " << nTreetops << std::endl;
+        std::cout << "\t" << mm << " - # TreeTops: " << nTreetops << std::endl;
 
         if ( nTreetops > 0 && user_detmanagerslist.contains(QString::fromStdString(detManName)) ) {
             
@@ -230,7 +230,7 @@ if ( !(user_detmanagerslist.empty()) ) {
                 
                 // get volume's logvol's name
                 std::string volName = vol->getLogVol()->getName();
-                std::cout << "\t\t treetop: " << volName << std::endl;
+                //std::cout << "\t\t treetop: " << volName << std::endl; // debug msg
 
 
                 // Add to the main volume a GeoNameTag with the name of the DetectorManager 
