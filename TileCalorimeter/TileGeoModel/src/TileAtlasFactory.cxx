@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileAtlasFactory.h"
@@ -38,6 +38,7 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -173,10 +174,14 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     } else {
       GeoVolumeVec_t vols = geoGetVolumes (&*world);
       for (auto v : vols) {
-        if (v.first->getLogVol()->getName() == m_volumeNames[0] )
-          pvTileEnvelopePosCrack = (GeoPhysVol *)(v.first);
-        else if (m_volumeNames.size()>1 && v.first->getLogVol()->getName() == m_volumeNames[1] )
-          pvTileEnvelopeNegCrack = (GeoPhysVol *)(v.first);
+        if (v.first->getLogVol()->getName() == m_volumeNames[0] ) {
+          GeoPhysVol* tmpPV ATLAS_THREAD_SAFE = (GeoPhysVol *)(v.first);
+          pvTileEnvelopePosCrack = tmpPV;
+	}
+        else if (m_volumeNames.size()>1 && v.first->getLogVol()->getName() == m_volumeNames[1] ) {
+	  GeoPhysVol* tmpPV ATLAS_THREAD_SAFE = (GeoPhysVol *)(v.first);
+          pvTileEnvelopeNegCrack = tmpPV;
+	}
       }
     }
   } else if (crack_flag==3) {
