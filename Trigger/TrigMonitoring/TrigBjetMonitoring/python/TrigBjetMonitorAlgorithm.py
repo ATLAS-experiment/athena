@@ -216,6 +216,15 @@ def TrigBjetMonConfig(inputFlags):
                 BjetMonGroup.defineHistogram(HistName,type='TH2F',title='RelPt vs GN1 weight;GN1 weight;RelPt',
                                              path='Shifter/'+chain[2:],xbins=20,xmin=-20.0,xmax=+20.0,ybins=20,ymin=0.,ymax=20.)
 
+            HistName = 'wGN2_' + chain[2:] + ',RelPt_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName,type='TH2F',title='RelPt vs GN2 weight;GN2 weight;RelPt',
+                                             path='Expert/'+chain[2:],xbins=20,xmin=-20.0,xmax=+20.0,ybins=20,ymin=0.,ymax=20.)
+
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName,type='TH2F',title='RelPt vs GN2 weight;GN2 weight;RelPt',
+                                             path='Shifter/'+chain[2:],xbins=20,xmin=-20.0,xmax=+20.0,ybins=20,ymin=0.,ymax=20.)
+
 
             HistName = 'DeltaR_' + chain[2:]
             if chain[0:1] == "E" :
@@ -459,68 +468,6 @@ def TrigBjetMonConfig(inputFlags):
       # b-tagging quantities
 
 
-
-            HistName = 'xMVtx_tr_' + chain[2:]
-            if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='SV1 mass distribution;SV1 mass;Events',
-                                             path='Expert/'+chain[2:],xbins=50,xmin=0.0,xmax=10.0)
-            if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='SV1 mass distribution;SV1 mass;Events',
-                                             path='Shifter/'+chain[2:],xbins=50,xmin=0.0,xmax=10.0)
-
-            HistName = 'xEVtx_tr_' + chain[2:]
-            if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='SV1 E-fraction distribution;SV1 E-fraction;Events',
-                                             path='Expert/'+chain[2:],xbins=50,xmin=0.0,xmax=1.0)
-            if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='SV1 E-fraction distribution;SV1 E-fraction;Events',
-                                             path='Shifter/'+chain[2:],xbins=50,xmin=0.0,xmax=1.0)
-
-            HistName = 'xNVtx_tr_' + chain[2:]
-            if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of number of 2-track SV1;Number of 2-track SV1;Events',
-                                             path='Expert/'+chain[2:],xbins=40,xmin=0.0,xmax=40.0)
-            if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of number of 2-track SV1;Number of 2-track SV1;Events',
-                                             path='Shifter/'+chain[2:],xbins=40,xmin=0.0,xmax=40.0)
-
-
-            HistName = 'JFxMVtx_tr_' + chain[2:]
-            if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='JF mass distribution;JF mass;Events',
-                                             path='Expert/'+chain[2:],xbins=50,xmin=0.0,xmax=10.0)
-            if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='JF mass distribution;JF mass;Events',
-                                             path='Shifter/'+chain[2:],xbins=50,xmin=0.0,xmax=10.0)
-
-            HistName = 'JFxEVtx_tr_' + chain[2:]
-            if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='JF E-fraction distribution;JF E-fraction;Events',
-                                             path='Expert/'+chain[2:],xbins=50,xmin=0.0,xmax=1.0)
-            if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='JF E-fraction distribution;JF E-fraction;Events',
-                                             path='Shifter/'+chain[2:],xbins=50,xmin=0.0,xmax=1.0)
-
-
-            HistName = 'JFxSig_tr_' + chain[2:]
-            if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='JF 3d significance distribution;JF 3d significance;Events',
-                                             path='Expert/'+chain[2:],xbins=50,xmin=0.0,xmax=5.0)
-            if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='JF 3d significance distribution;JF 3d significance;Events',
-                                             path='Shifter/'+chain[2:],xbins=50,xmin=0.0,xmax=5.0)
-
-
-            HistName = 'JFxNVtx_tr_' + chain[2:]
-            if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of number of 2-track JFVtx;Number of 2-track JFVtx;Events',
-                                             path='Expert/'+chain[2:],xbins=40,xmin=0.0,xmax=40.0)
-            if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of number of 2-track JFVtx;Number of 2-track JFVtx;Events',
-                                             path='Shifter/'+chain[2:],xbins=40,xmin=0.0,xmax=40.0)
-
-
-
             HistName = 'GN1_pu_tr_' + chain[2:]
             if chain[0:1] == "E" :
                 BjetMonGroup.defineHistogram(HistName, title='Distribution of GN1_pu probability;GN1_pu;Events',
@@ -554,31 +501,38 @@ def TrigBjetMonConfig(inputFlags):
                                              path='Shifter/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
 
 
-
-
-            HistName = 'DIPSL_pu_tr_' + chain[2:]
+            HistName = 'GN2_pu_tr_' + chain[2:]
             if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of DIPS u probability;dipsLoose20210517_pu;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2_pu probability;GN2_pu;Events',
                                              path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
             if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of DIPS u probability;dipsLoose20210517_pu;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2_pu probability;GN2_pu;Events',
                                              path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
 
-            HistName = 'DIPSL_pc_tr_' + chain[2:]
+            HistName = 'GN2_pc_tr_' + chain[2:]
             if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of DIPS c probability;dipsLoose20210517_pc;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2_pc probability;GN2_pc;Events',
                                              path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
             if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of DIPS c probability;dipsLoose20210517_pc;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2_pc probability;GN2_pc;Events',
                                              path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
 
-            HistName = 'DIPSL_pb_tr_' + chain[2:]
+            HistName = 'GN2_pb_tr_' + chain[2:]
             if chain[0:1] == "E" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of DIPS b probability;dipsLoose20210517_pb;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2_pb probability;GN2_pb;Events',
                                              path='Expert/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
             if chain[0:1] == "S" :
-                BjetMonGroup.defineHistogram(HistName, title='Distribution of DIPS b probability;dipsLoose20210517_pb;Events',
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2_pb probability;GN2_pb;Events',
                                              path='Shifter/'+chain[2:],xbins=200,xmin=0.0,xmax=1.0)
+
+            HistName = 'GN2_mv_tr_' + chain[2:]
+            if chain[0:1] == "E" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2_mv LLR;GN2_mv;Events',
+                                             path='Expert/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
+            if chain[0:1] == "S" :
+                BjetMonGroup.defineHistogram(HistName, title='Distribution of GN2_mv LLR;GN2_mv;Events',
+                                             path='Shifter/'+chain[2:],xbins=200,xmin=-50.,xmax=50.)
+
 
 
             continue

@@ -249,8 +249,8 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  fill("TrigBjetMonitor",nJet);
 	  
 	  float muonPt1(0.), muonEta1(0.), muonPhi1(0.), muonZ1(0.), jetPt1(0.), jetEta1(0.), jetPhi1(0.), jetZ1(0.), muonZ(0.);
-	  double GN1_mv(0.);
-	  bool theLLR(false), theLLR_GN1(false);
+	  double GN1_mv(0.), GN2_mv(0.);
+	  bool theLLR(false), theLLR_GN1(false), theLLR_GN2(false);
 	  bool plotDeltaZ(false);
 	  
 	  for(const auto& muonLinkInfo : onlinemuons) {
@@ -344,6 +344,18 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 		  if ( !theLLR ) GN1_mv=-100.;
 		  ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
 		  
+		  double GN2_pu(0.), GN2_pc(0.), GN2_pb(0.);
+		  btag->pu("GN120220813",GN2_pu);
+		  ATH_MSG_DEBUG("        GN2_pu: " << GN2_pu);
+		  btag->pc("GN120220813",GN2_pc);
+		  ATH_MSG_DEBUG("        GN2_pc: " << GN2_pc);
+		  btag->pb("GN120220813",GN2_pb);
+		  ATH_MSG_DEBUG("        GN2_pb: " << GN2_pb);
+		  theLLR = LLR (GN2_pu, GN2_pc, GN2_pb, GN2_mv);
+		  theLLR_GN2 = theLLR;
+		  if ( !theLLR ) GN2_mv=-100.;
+		  ATH_MSG_DEBUG("        GN2_mv: " << GN2_mv << " LLR: " << theLLR); 
+		  
 		}
 
 	      }// if ijet==0
@@ -400,6 +412,14 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	  wGN1 = float(GN1_mv);
 	  ATH_MSG_DEBUG("        wGN1: " << wGN1 << " RelPt : " << RelPt);
 	  if (calc_relpt && theLLR_GN1) fill("TrigBjetMonitor",wGN1,RelPt);
+	  
+	  // wGN2
+	  std::string wGN2H = "wGN2_"+trigName;
+	  ATH_MSG_DEBUG( " NameH: " << wGN2H  );
+	  auto wGN2 = Monitored::Scalar<float>(wGN2H,0.0);
+	  wGN2 = float(GN2_mv);
+	  ATH_MSG_DEBUG("        wGN2: " << wGN2 << " RelPt : " << RelPt);
+	  if (calc_relpt && theLLR_GN2) fill("TrigBjetMonitor",wGN2,RelPt);
 	  
 	  
 	}// if mujetChain
@@ -480,63 +500,8 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	    const xAOD::BTagging* btag = *(btaggingLinkInfo.link);
 	    
 	    
-	    // SV1 variables (credit LZ)
-	    NameH = "xNVtx_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto svp_n2t = Monitored::Scalar<int>(NameH,0.0);
-	    btag->variable<int>("SV1", "N2Tpair", svp_n2t);
-	    ATH_MSG_DEBUG("        svp_n2t: " << svp_n2t);
-	    fill("TrigBjetMonitor",svp_n2t);
+	    bool theLLR(false);
 	    
-	    NameH = "xMVtx_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto svp_mass = Monitored::Scalar<float>(NameH,0.0);
-	    btag->variable<float>("SV1", "masssvx", svp_mass);
-	    svp_mass *= 1.e-3;
-	    ATH_MSG_DEBUG("        svp_mass in GeV: " << svp_mass );
-	    fill("TrigBjetMonitor",svp_mass);
-	    
-	    if (svp_mass > 0) {
-	      NameH = "xEVtx_tr_"+trigName;
-	      ATH_MSG_DEBUG( " NameH: " << NameH  );
-	      auto svp_efrc = Monitored::Scalar<float>(NameH,0.0);
-	      btag->variable<float>("SV1", "efracsvx", svp_efrc);
-	      ATH_MSG_DEBUG("        svp_efrc: " << svp_efrc);
-	      fill("TrigBjetMonitor",svp_efrc);
-	    }
-	    
-	    // JF variables (a la LZ)
-	    NameH = "JFxNVtx_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto jf_n2t = Monitored::Scalar<int>(NameH,0.0);
-	    btag->variable<int>("JetFitter", "N2Tpair", jf_n2t);
-	    ATH_MSG_DEBUG("        jf_n2t: " << jf_n2t);
-	    fill("TrigBjetMonitor",jf_n2t);
-	    
-	    NameH = "JFxSig_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto jf_sig3 = Monitored::Scalar<float>(NameH,0.0);
-	    btag->variable<float>("JetFitter", "significance3d", jf_sig3);
-	    ATH_MSG_DEBUG("        jf_sig3: " << jf_sig3);
-	    fill("TrigBjetMonitor",jf_sig3);
-	    
-	    NameH = "JFxMVtx_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto jf_mass = Monitored::Scalar<float>(NameH,0.0);
-	    btag->variable<float>("JetFitter", "mass", jf_mass);
-	    jf_mass *= 1.e-3;
-	    ATH_MSG_DEBUG("        jf_mass in GeV: " << jf_mass );
-	    fill("TrigBjetMonitor",jf_mass);
-	    
-	    NameH = "JFxEVtx_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto jf_efrc = Monitored::Scalar<float>(NameH,0.0);
-	    btag->variable<float>("JetFitter", "energyFraction", jf_efrc);
-	    ATH_MSG_DEBUG("        jf_efrc: " << jf_efrc);
-	    fill("TrigBjetMonitor",jf_efrc);
-	    
-	    
-	    bool theLLR(false);	    
 	    NameH = "GN1_pu_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
 	    auto GN1_pu = Monitored::Scalar<double>(NameH,0.0);
@@ -565,30 +530,36 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	    if ( theLLR ) fill("TrigBjetMonitor",GN1_mv);
 	    ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
 	    
-	    
 
-	    
-	    
-	    NameH = "DIPSL_pu_tr_"+trigName;
+
+	    NameH = "GN2_pu_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DIPSL_pu = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pu("dips20211116",DIPSL_pu);
-	    ATH_MSG_DEBUG("        DIPSL_pu: " << DIPSL_pu);
-	    fill("TrigBjetMonitor",DIPSL_pu);
+	    auto GN2_pu = Monitored::Scalar<double>(NameH,0.0);
+	    btag->pu("GN120220813",GN2_pu);
+	    ATH_MSG_DEBUG("        GN2_pu: " << GN2_pu);
+	    fill("TrigBjetMonitor",GN2_pu);
 	    
-	    NameH = "DIPSL_pc_tr_"+trigName;
+	    NameH = "GN2_pc_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DIPSL_pc = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pc("dips20211116",DIPSL_pc);
-	    ATH_MSG_DEBUG("        DIPSL_pc: " << DIPSL_pc);
-	    fill("TrigBjetMonitor",DIPSL_pc);
+	    auto GN2_pc = Monitored::Scalar<double>(NameH,0.0);
+	    btag->pc("GN120220813",GN2_pc);
+	    ATH_MSG_DEBUG("        GN2_pc: " << GN2_pc);
+	    fill("TrigBjetMonitor",GN2_pc);
 	    
-	    NameH = "DIPSL_pb_tr_"+trigName;
+	    NameH = "GN2_pb_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DIPSL_pb = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pb("dips20211116",DIPSL_pb);
-	    ATH_MSG_DEBUG("        DIPSL_pb: " << DIPSL_pb);
-	    fill("TrigBjetMonitor",DIPSL_pb);
+	    auto GN2_pb = Monitored::Scalar<double>(NameH,0.0);
+	    btag->pb("GN120220813",GN2_pb);
+	    ATH_MSG_DEBUG("        GN2_pb: " << GN2_pb);
+	    fill("TrigBjetMonitor",GN2_pb);
+	    
+	    NameH = "GN2_mv_tr_"+trigName;
+	    ATH_MSG_DEBUG( " NameH: " << NameH  );
+	    auto GN2_mv = Monitored::Scalar<double>(NameH,0.0);
+	    theLLR = LLR (GN2_pu, GN2_pc, GN2_pb, GN2_mv);
+	    if ( theLLR ) fill("TrigBjetMonitor",GN2_mv);
+	    ATH_MSG_DEBUG("        GN2_mv: " << GN2_mv << " LLR: " << theLLR); 
+	    
 	    
 	    // Tracks associated to triggered jets ( featurs = onlinejets ) courtesy of Tim Martin on 12/05/2020 
 	    const auto track_it_pair = m_trigDecTool->associateToEventView(theTracks, jetLinkInfo.source, "roi");
