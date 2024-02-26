@@ -18,8 +18,9 @@
 #include "TVirtualCollectionProxy.h"
 #include "TROOT.h"
 
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RField.hxx"
 
-#include <ROOT/RNTuple.hxx>
 using std::string;
 
 namespace {

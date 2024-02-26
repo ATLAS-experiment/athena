@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RNTUPLEAUXDYNWRITER_H
@@ -9,10 +9,18 @@
 #include "RootAuxDynIO/RootAuxDynIO.h"
 
 #include "ROOT/RNTuple.hxx"
-#include "ROOT/RNTupleModel.hxx"
-#include "ROOT/RNTupleOptions.hxx"
 #include "ROOT/RField.hxx"
 #include "ROOT/REntry.hxx"
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+#include "ROOT/RNTupleWriter.hxx"
+#include "ROOT/RNTupleWriteOptions.hxx"
+#else
+#include "ROOT/RNTupleOptions.hxx"
+#endif
+
+namespace ROOT { namespace Experimental {
+   class RNTupleModel;
+} }
 
 namespace SG { class IAuxStoreIO; }
 
