@@ -5,12 +5,13 @@
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, executeTest
     parser = SetupArgParser()
-    parser.set_defaults(nEvents = -1)
+    parser.set_defaults(nEvents = 1000)
+    parser.set_defaults(inputFile=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/R4SimHits.pool.root"])
 
     args = parser.parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
-    from xAODMuonSimHitCnv.MuonSimHitCnvCfg import xAODtoMdtCnvAlgCfg
-    cfg.merge(xAODtoMdtCnvAlgCfg(flags))
+    from xAODMuonSimHitCnv.MuonSimHitCnvCfg import MuonSimHitToMeasurementCfg
+    cfg.merge(MuonSimHitToMeasurementCfg(flags))
 
     executeTest(cfg, num_events = args.nEvents)
   

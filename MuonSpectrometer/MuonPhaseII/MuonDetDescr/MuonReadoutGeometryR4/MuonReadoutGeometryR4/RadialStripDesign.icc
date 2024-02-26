@@ -32,7 +32,14 @@ namespace MuonGMR4{
                                                       m_strips[stripNum +1].bottomMounting()));
     }
 
-    
+    inline Amg::Vector2D RadialStripDesign::stripLeftEdge(int stripNumber) const{
+        CHECK_STRIPRANGE(stripNumber);
+        return m_strips[stripCh].fromBottomToTop().unit();
+    }
+    inline Amg::Vector2D RadialStripDesign::stripRightEdge(int stripNumber) const {
+        CHECK_STRIPRANGE(stripNumber);
+        return m_strips[stripCh + 1].fromBottomToTop().unit();
+    }
     inline Amg::Vector2D RadialStripDesign::stripDir(int stripNumber) const {
         CHECK_STRIPRANGE(stripNumber);  
         return (m_strips[stripCh].fromBottomToTop() + m_strips[stripCh+1].fromBottomToTop()).unit();

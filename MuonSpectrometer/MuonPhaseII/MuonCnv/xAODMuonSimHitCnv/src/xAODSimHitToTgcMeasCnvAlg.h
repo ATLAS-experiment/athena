@@ -19,6 +19,9 @@
 
 #include <AthenaKernel/IAthRNGSvc.h>
 #include <CLHEP/Random/RandomEngine.h>
+
+#include "CxxUtils/checker_macros.h"
+
 /**
  *  The xAODSimHitToTgcMasCnvAlg is a short cut towards the TgcStrip measurement
  *  The TgcSimHits are taken and expressed w.r.t. eta & phi gas gaps.
@@ -34,7 +37,7 @@ class xAODSimHitToTgcMeasCnvAlg : public AthReentrantAlgorithm {
 
         StatusCode execute(const EventContext& ctx) const override;
         StatusCode initialize() override; 
-    
+        StatusCode finalize() override;
     private:
         CLHEP::HepRandomEngine* getRandomEngine(const EventContext& ctx) const;
   
@@ -53,6 +56,11 @@ class xAODSimHitToTgcMeasCnvAlg : public AthReentrantAlgorithm {
         Gaudi::Property<std::string> m_streamName{this, "RandomStream", "TgcSimHitForkLifting"};
 
         PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
+
+
+        mutable std::array<std::atomic<unsigned>, 2> m_allHits ATLAS_THREAD_SAFE{};
+        mutable std::array<std::atomic<unsigned>, 2> m_acceptedHits ATLAS_THREAD_SAFE{};
+
 
 };
 
