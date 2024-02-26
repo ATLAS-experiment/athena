@@ -452,7 +452,7 @@ class AthConfigFlags(object):
         return cln
 
 
-    def cloneAndReplace(self,subsetToReplace,replacementSubset):
+    def cloneAndReplace(self,subsetToReplace,replacementSubset, keepOriginal=False):
         """
         This is to replace subsets of configuration flags like
 
@@ -476,7 +476,8 @@ class AthConfigFlags(object):
         newFlags = copy(self) # shallow copy
         newFlags._renames = deepcopy(self._renames) #maintains renames
         newFlags._renames[subsetToReplace] = replacementSubset
-        newFlags._renames[replacementSubset] = "" # block access to original flags
+        if not keepOriginal:
+            newFlags._renames[replacementSubset] = "" # block access to original flags
         newFlags._hash = None
         return newFlags
 
@@ -528,16 +529,16 @@ class AthConfigFlags(object):
                 else:
                     print(formatStr.format( renamed, truncate("{}".format(repr(self._flagdict[name] ) )) ))
 
-        if len(self._dynaflags) == 0:
-            return
-        print("Flag categories that can be loaded dynamically")
-        print("{:25} : {:>30} : {}".format( "Category","Generator name", "Defined in" ) )
-        for name,gen_and_prefix in sorted(self._dynaflags.items()):
-            if compiled.match(name):
-                print("{:25} : {:>30} : {}".format( name, gen_and_prefix[0].__name__, '/'.join(gen_and_prefix[0].__code__.co_filename.split('/')[-2:]) ) )
-        print("Flag renamings")
-        for alias,src in self._renames.items():
-            print("{:30} points to {:>30} ".format( alias, src  if src else "nothing") )
+        if len(self._dynaflags) != 0:
+            print("Flag categories that can be loaded dynamically")
+            print("{:25} : {:>30} : {}".format( "Category","Generator name", "Defined in" ) )
+            for name,gen_and_prefix in sorted(self._dynaflags.items()):
+                if compiled.match(name):
+                    print("{:25} : {:>30} : {}".format( name, gen_and_prefix[0].__name__, '/'.join(gen_and_prefix[0].__code__.co_filename.split('/')[-2:]) ) )
+        if len(self._renames):
+            print("Flag categories that are redirected by the cloneAndReplace")
+            for alias,src in self._renames.items():
+                print("{:30} points to {:>30} ".format( alias, src  if src else "nothing") )
             
 
     def initAll(self):
