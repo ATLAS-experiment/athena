@@ -90,11 +90,12 @@ athenapooltest_runca_test( AthenaPoolTestStep2Write AthenaPoolTestStep2Write
                            DEPENDS AthenaPoolTestWrite )
 
 # Test write/read of indet rdos:
-athenapooltest_run_test( InDetRawDataWriter InDetRawDataWriter_jobOptions
-                         "InDetRawDataFak" )
-athenapooltest_run_test( InDetRawDataRead InDetRawDataReader_jobOptions
-                         "InDetRawDataFak"
-                         DEPENDS InDetRawDataWriter )
+athenapooltest_runca_test( InDetRawDataWriter InDetRawDataWriter
+                           "InDetRawDataFakeWriter" )
+
+athenapooltest_runca_test( InDetRawDataReader InDetRawDataReader
+                           "InDetRawDataFakeReader"
+                           DEPENDS InDetRawDataWriter )
 
 # Read two RDOs with the DoubleEventSelector
 # TODO: migrate to CA
