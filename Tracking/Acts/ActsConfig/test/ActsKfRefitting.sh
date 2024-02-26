@@ -10,7 +10,7 @@ n_events=5
 #  2) in addition to only use the --postInclude option:  ActsConfig.ActsTrackFittingConfig.forceITkActsReFitterAlgCfg
 
 Reco_tf.py --CA \
-   --preExec "flags.Exec.FPE=500;" "flags.Reco.EnableHGTDExtension=False;" \
+   --preExec "flags.Exec.FPE=500;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
    --postInclude "ActsConfig.ActsTrackFittingConfig.ActsReFitterAlgCfg" \
    --inputRDOFile ${input_rdo} \
