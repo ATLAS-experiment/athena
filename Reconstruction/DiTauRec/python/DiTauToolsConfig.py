@@ -31,7 +31,6 @@ def ElMuFinderCfg(ConfigFlags, name = "DiTauRec_ElMuFinder", **kwargs):
     kwargs.setdefault("ElectronMaxEta", 2.47)
     kwargs.setdefault("MuonMinPt", 7000)
     kwargs.setdefault("MuonMaxEta", 2.7)
-    kwargs.setdefault("MuonQuality", 3)   # Tight,Medium,Loose,VeryLoose: 0,1,2,3
 
     acc.setPrivateTools(CompFactory.ElMuFinder(name, **kwargs))
     return acc
