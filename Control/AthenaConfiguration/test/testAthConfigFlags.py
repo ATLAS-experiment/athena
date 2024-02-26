@@ -282,9 +282,27 @@ class TestFlagsSetupDynamic(FlagsSetup):
         copyf.dump()
 
         self.flags.lock()
-        copyf = self.flags.cloneAndReplace( "X", "Z.Xclone2")
-        self.assertEqual( copyf.X.a, 40, "dynamically loaded flags have wrong value")
+        copyf = self.flags.cloneAndReplace( "X", "Z.Xclone2").cloneAndReplace( "X2", "Z.Xclone1")
+        self.assertEqual( copyf.X.a, 40, "cloned loaded flags have wrong value")
         self.assertEqual( copyf.T.Abool, False, "The flags clone does not have dynamic flags")
+        self.assertEqual( copyf.T.Abool, False, "The flags clone does not have dynamic flags")
+        self.assertEqual( copyf.X2.a, 20, "cloned loaded flags have wrong value")
+        def _touchRemappedFlag():
+            copyf.Z.Xclone1.a
+        self.assertRaises(AttributeError, _touchRemappedFlag)
+
+        copyf = self.flags.cloneAndReplace( "X", "Z.Xclone2").cloneAndReplace( "X2", "Z.Xclone1", keepOriginal=True)
+        self.assertEqual( copyf.X2.a, 20, "cloned flags have wrong value")
+        self.assertEqual( copyf.Z.Xclone1.a, 20, "original flag have wrong value")
+
+        print("\nFlag after double remap:")
+        print("-"*80)
+        copyf.dump()
+        print("\nFlag after double remap ..")
+        print("-"*80)
+
+
+
 
     def test_exists(self):
         """Test `has` methods"""
