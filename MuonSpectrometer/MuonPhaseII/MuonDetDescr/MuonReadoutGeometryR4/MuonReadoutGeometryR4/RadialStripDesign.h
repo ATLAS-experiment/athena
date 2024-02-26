@@ -37,6 +37,10 @@ class RadialStripDesign: public StripDesign {
           * @param: Strip number in the global scheme [1- nStrips()] 
         */
         Amg::Vector2D stripDir(int stripNumber) const;
+        /** @brief: Returns the direction of the left edge */
+        Amg::Vector2D stripLeftEdge(int stripNumber) const; 
+        /** @brief: Returns the direction of the right edge */
+        Amg::Vector2D stripRightEdge(int stripNumber) const;
         /** @bief: Returns the vector perpendicular to the stripDir and pointing to the next strip*/
         Amg::Vector2D stripNormal(int stripNumber) const;
         /** @brief: Returns the intersection of the left strip edge at the bottom panel's edge*/

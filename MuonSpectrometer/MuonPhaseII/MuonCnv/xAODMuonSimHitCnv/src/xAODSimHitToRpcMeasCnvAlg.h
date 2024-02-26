@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONSIMHITCNV_xAODSimHitToRpcMeasurementCnvAlg_H
 #define XAODMUONSIMHITCNV_xAODSimHitToRpcMeasurementCnvAlg_H
@@ -19,6 +19,7 @@
 
 #include <AthenaKernel/IAthRNGSvc.h>
 #include <CLHEP/Random/RandomEngine.h>
+#include "CxxUtils/checker_macros.h"
 /**
  *  The xAODSimHitToRpcMasCnvAlg is a short cut towards the RpcStrip measurement
  *  The RpcSimHits are taken and expressed w.r.t. eta & phi gas gaps.
@@ -34,6 +35,7 @@ class xAODSimHitToRpcMeasCnvAlg : public AthReentrantAlgorithm {
 
         StatusCode execute(const EventContext& ctx) const override;
         StatusCode initialize() override; 
+        StatusCode finalize() override;
     
     private:
         CLHEP::HepRandomEngine* getRandomEngine(const EventContext& ctx) const;
@@ -53,6 +55,9 @@ class xAODSimHitToRpcMeasCnvAlg : public AthReentrantAlgorithm {
         Gaudi::Property<std::string> m_streamName{this, "RandomStream", "RpcSimHitForkLifting"};
 
         PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
+
+        mutable std::array<std::atomic<unsigned>, 2> m_allHits ATLAS_THREAD_SAFE{};
+        mutable std::array<std::atomic<unsigned>, 2> m_acceptedHits ATLAS_THREAD_SAFE{};
 
 };
 

@@ -16,6 +16,9 @@
 
 namespace {
     constexpr double invC = 1./ Gaudi::Units::c_light;
+    constexpr double percentage( unsigned int numerator, unsigned int denom) {
+        return 100. * numerator / std::max(denom, 1u);
+    }
 }
 
 xAODSimHitToRpcMeasCnvAlg::xAODSimHitToRpcMeasCnvAlg(const std::string& name, 
@@ -28,6 +31,12 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::initialize(){
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(detStore()->retrieve(m_DetMgr));
+    return StatusCode::SUCCESS;
+}
+StatusCode xAODSimHitToRpcMeasCnvAlg::finalize() {
+    ATH_MSG_INFO("Tried to convert "<<m_allHits[0]<<"/"<<m_allHits[1]<<" hits. In, "
+                <<percentage(m_acceptedHits[0], m_allHits[0]) <<"/"
+                <<percentage(m_acceptedHits[1], m_allHits[1]) <<" cases, the conversion was successful");
     return StatusCode::SUCCESS;
 }
 StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
@@ -44,97 +53,92 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
     
     const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
     CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
+
+    double hitTime{0.};
+    const MuonGMR4::RpcReadoutElement* readOutEle{nullptr};
+
+    using CheckVector2D = MuonGMR4::CheckVector2D;
+    auto digitizeHit = [&] (const double locX,
+                            const MuonGMR4::StripDesignPtr& designPtr,
+                            const Identifier& hitId,                            
+                            bool measPhi) {
+        /// There're Rpc chambers without phi strips (BI)
+        if (!designPtr){
+            return;
+        }
+        const MuonGMR4::StripDesign& design{*designPtr};        
+        const double uncert = design.stripPitch() / std::sqrt(12.);
+        const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locX, uncert);
+        const Amg::Vector2D locHitPos{locX * Amg::Vector2D::UnitX()};
+        m_allHits[measPhi] = m_allHits[measPhi] + 1;
+        if (!design.insideTrapezoid(locHitPos)) {
+            ATH_MSG_VERBOSE("The hit "<<Amg::toString(locHitPos)<<" is outside of the trapezoid bounds for "
+                            <<m_idHelperSvc->toStringGasGap(hitId)<<", measuresPhi: "<<(measPhi ? "yay" : "nay"));
+            return;
+        }
+        int stripNumber = design.stripNumber(locHitPos);
+        /// There're subtle cases where the hit is smeared outside the boundaries
+        if (stripNumber < 0) {            
+            const CheckVector2D firstStrip = design.center(1);
+            const CheckVector2D lastStrip  = design.center(design.numStrips());
+            if (!firstStrip || !lastStrip) {
+                return;
+            }
+            if ( (*firstStrip).x() - 0.5 *design.stripPitch() < locHitPos.x()) {
+                stripNumber = 1;
+            } else if ( (*lastStrip).x() + 0.5 * design.stripPitch() > locHitPos.x()) {
+                stripNumber = design.numStrips();
+            } else {
+                ATH_MSG_VERBOSE("Hit " << Amg::toString(locHitPos) << " cannot trigger any signal in a strip for "
+                               << m_idHelperSvc->toStringGasGap(hitId) <<", measuresPhi: "<<(measPhi ? "yay" : "nay"));
+                return;
+            }
+        }
+        bool isValid{false};
+        const Identifier prdId{id_helper.channelID(hitId, 
+                                                   id_helper.doubletZ(hitId), 
+                                                   id_helper.doubletPhi(hitId), 
+                                                   id_helper.gasGap(hitId),
+                                                   measPhi, stripNumber, isValid)};
+
+        if (!isValid) {
+            ATH_MSG_WARNING("Invalid hit identifier obtained for "<<m_idHelperSvc->toStringGasGap(hitId)
+                            <<",  eta strip "<<stripNumber<<" & hit "<<Amg::toString(locHitPos,2 )
+                            <<" /// "<<design);
+            return;
+        }
+        m_acceptedHits[measPhi] =  m_acceptedHits[measPhi]  + 1;
+        xAOD::RpcStrip* prd = new xAOD::RpcStrip();
+        prdContainer->push_back(prd);
+        prd->setIdentifier(prdId.get_compact());
+        xAOD::MeasVector<1> lPos{smearedX};
+        xAOD::MeasMatrix<1> cov{uncert * uncert};
+        prd->setMeasurement<1>(m_idHelperSvc->detElementHash(prdId), 
+                               std::move(lPos), std::move(cov));
+        prd->setReadoutElement(readOutEle);
+        prd->setStripNumber(stripNumber);
+        prd->setGasGap(id_helper.gasGap(prdId));
+        prd->setDoubletPhi(id_helper.doubletPhi(prdId));
+        prd->setMeasuresPhi(id_helper.measuresPhi(prdId));
+        prd->setReadoutElement(readOutEle);
+        prd->setTime(hitTime);
+        prd->setAmbiguityFlag(0);
+        const Amg::Vector3D strip3D  = lPos.x() * Amg::Vector3D::UnitX();
+        const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx,prdId)};
+        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D));
+    };
+
     for (const xAOD::MuonSimHit* simHit : *simHitContainer) {
         const Identifier hitId = simHit->identify();
         // ignore radiation for now
         if (std::abs(simHit->pdgId()) != 13) continue;
-        
-       
-        const MuonGMR4::RpcReadoutElement* readOutEle = m_DetMgr->getRpcReadoutElement(hitId);
-        const MuonGMR4::StripDesign& etaDesign{*readOutEle->getParameters().etaDesign};
-        
+        readOutEle = m_DetMgr->getRpcReadoutElement(hitId);
         const Amg::Vector3D locSimHitPos{xAOD::toEigen(simHit->localPosition())};
+        hitTime = simHit->globalTime() - invC *(readOutEle->localToGlobalTrans(gctx, hitId) * locSimHitPos).mag();
 
-        const double etaUncert = etaDesign.stripPitch() / std::sqrt(12);
-        const Amg::Vector2D smearedEtaPos{CLHEP::RandGaussZiggurat::shoot(rndEngine, locSimHitPos.x(), etaUncert), 0.};
-
-        const double hitTime = simHit->globalTime() - 
-                               invC *(readOutEle->localToGlobalTrans(gctx, hitId) * locSimHitPos).mag(); 
-
-        const unsigned int etaStripNum = etaDesign.stripNumber(smearedEtaPos.block<2,1>(0,0));
+        digitizeHit(locSimHitPos.x(), readOutEle->getParameters().etaDesign, hitId, false);
+        digitizeHit(locSimHitPos.y(), readOutEle->getParameters().phiDesign, hitId, true);
         
-        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toStringGasGap(hitId)<<" located in gas gap at "
-                        <<Amg::toString(locSimHitPos, 2)<<" eta strip number: "<<etaStripNum
-                        <<" strip position "<<Amg::toString(etaDesign.center(etaStripNum).value_or(Amg::Vector2D::Zero()), 2));
-        
-
-        bool isValid{false};
-        const Identifier etaHitId{id_helper.channelID(hitId, readOutEle->doubletZ(), 
-                                                             id_helper.doubletPhi(hitId), 
-                                                             id_helper.gasGap(hitId),
-                                                             false, etaStripNum, isValid)};
-        
-        if (!isValid) {
-            ATH_MSG_WARNING("Invalid hit identifier obtained for "<<m_idHelperSvc->toStringGasGap(hitId)
-                            <<",  eta strip "<<etaStripNum<<" & hit "<<Amg::toString(locSimHitPos,2 ));
-        } else {
-            xAOD::RpcStrip* prd = new xAOD::RpcStrip();
-            prdContainer->push_back(prd);
-            prd->setIdentifier(etaHitId.get_compact());
-            xAOD::MeasVector<1> lPos{smearedEtaPos.x()};
-            xAOD::MeasMatrix<1> cov{etaUncert * etaUncert};
-            prd->setMeasurement<1>(m_idHelperSvc->detElementHash(etaHitId), 
-                                   std::move(lPos), std::move(cov));
-            prd->setReadoutElement(readOutEle);
-            prd->setStripNumber(etaStripNum);
-            prd->setGasGap(id_helper.gasGap(etaHitId));
-            prd->setDoubletPhi(id_helper.doubletPhi(etaHitId));
-            prd->setMeasuresPhi(id_helper.measuresPhi(etaHitId));
-            prd->setReadoutElement(readOutEle);
-            prd->setTime(hitTime);
-            prd->setAmbiguityFlag(0);
-            const Amg::Vector3D strip3D  = lPos.x() * Amg::Vector3D::UnitX();
-            const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx,etaHitId)};
-            prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D)); 
-        }
-        /// Check whether the read out element contains phi strips or not.
-        if (!readOutEle->nPhiStrips()) {
-            continue;
-        }
-        const MuonGMR4::StripDesign& phiDesign{*readOutEle->getParameters().phiDesign};
-        const double phiUncert = phiDesign.stripPitch() / std::sqrt(12.);
-        const Amg::Vector2D smearedPhiPos{CLHEP::RandGaussZiggurat::shoot(rndEngine, locSimHitPos.y(), phiUncert), 0.};
-        
-        const unsigned int phiStripNum = phiDesign.stripNumber(smearedPhiPos.block<2,1>(0,0));
-        const Identifier phiHitId{id_helper.channelID(hitId, readOutEle->doubletZ(), 
-                                                             id_helper.doubletPhi(hitId), 
-                                                             id_helper.gasGap(hitId),
-                                                             true, phiStripNum, isValid)};
-        
-        if (!isValid) {
-            ATH_MSG_WARNING("Invalid hit identifier obtained for "<<m_idHelperSvc->toStringGasGap(hitId)
-                            <<",  phi strip "<<phiStripNum<<" & hit "<<Amg::toString(locSimHitPos,2 ));
-            continue;
-        }
-
-        xAOD::RpcStrip* prd = new xAOD::RpcStrip();
-        prdContainer->push_back(prd);
-        prd->setIdentifier(phiHitId.get_compact());
-        xAOD::MeasVector<1> lPos{smearedPhiPos.x()};
-        xAOD::MeasMatrix<1> cov{phiUncert * phiUncert};
-        prd->setMeasurement<1>(m_idHelperSvc->detElementHash(phiHitId), 
-                                std::move(lPos), std::move(cov));
-        prd->setReadoutElement(readOutEle);
-        prd->setStripNumber(phiStripNum);
-        prd->setGasGap(id_helper.gasGap(phiHitId));
-        prd->setDoubletPhi(id_helper.doubletPhi(phiHitId));
-        prd->setMeasuresPhi(id_helper.measuresPhi(phiHitId));
-        prd->setReadoutElement(readOutEle);
-        prd->setTime(hitTime);
-        prd->setAmbiguityFlag(0);
-        const Amg::Vector3D strip3D = lPos.x() * Amg::Vector3D::UnitX();
-        const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx, phiHitId)};
-        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D)); 
     }
     return StatusCode::SUCCESS;
 }
