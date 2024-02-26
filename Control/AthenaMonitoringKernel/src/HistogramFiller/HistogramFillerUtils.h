@@ -16,6 +16,7 @@
 #include "TH1.h"
 #include "TProfile.h"
 #include "THashList.h"
+#include "TProfile2D.h"
 
 namespace Monitored {
 
@@ -189,6 +190,14 @@ namespace Monitored {
     void doFill(TProfile*, W, size_t, const double&, const char* const&) {}
     template<typename W>
     void doFill(TProfile*, W, size_t, const char* const&, const char* const&) {}
+    template<typename W>
+    void doFill(TProfile2D*, W, size_t, const double&, const double&, const char* const&) {}
+    template<typename W>
+    void doFill(TProfile2D*, W, size_t, const char* const&, const char* const&, const char* const&) {}
+    template<typename W>
+    void doFill(TProfile2D*, W, size_t, const char* const&, const double&, const char* const&) {}
+    template<typename W>
+    void doFill(TProfile2D*, W, size_t, const double&, const char* const&, const char* const&) {}
   }
 }
 
