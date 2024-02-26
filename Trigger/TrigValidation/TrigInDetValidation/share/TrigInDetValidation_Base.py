@@ -21,6 +21,7 @@ except getopt.GetoptError:
     print("-l | --local   run locally with input file from art eos grid-input")
     print("-x             don't run athena or post post-processing, only plotting")
     print("-m             run cost monitoring plotting, even if -x is set")
+    print("-r             run only ntuple building stage")
     print("-p             run post-processing, even if -x is set")
     print("-n  N          run only on N events per job")
     print("-c | --config  run with config_only and print to a pkl file")
