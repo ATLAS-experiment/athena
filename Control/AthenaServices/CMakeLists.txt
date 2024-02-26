@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaServices )
@@ -18,7 +18,7 @@ atlas_add_component( AthenaServices
    ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils
    AthContainers AthContainersInterfaces DataModelRoot PerfMonEvent
    PerfMonKernel SGTools StoreGateLib PersistentDataModel EventInfo xAODCore
-   xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIO )
+   xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIOHeaders )
 
 # Test library checking the ability to build T/P converters:
 atlas_add_tpcnv_library( AthenaServicesTest src/test/*.cxx
@@ -31,7 +31,7 @@ atlas_add_test( AthenaOutputStream_test
    src/OutputStreamSequencerSvc.cxx src/MetaDataSvc.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES TestTools AsgTools AthenaKernel SGTools StoreGateLib
-                  GaudiKernel AthenaBaseComps PersistentDataModel RootAuxDynIO
+                  GaudiKernel AthenaBaseComps PersistentDataModel RootAuxDynIOHeaders
    LOG_SELECT_PATTERN "AthenaOutputStream_test" )
 # Avoid spurious ubsan warnings.
 set_target_properties( AthenaServices_AthenaOutputStream_test PROPERTIES ENABLE_EXPORTS True )
@@ -63,7 +63,8 @@ atlas_add_test( ThinningCacheTool_test
 atlas_add_test( MetaDataSvc_test
    SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx 
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES TestTools  AthenaKernel GaudiKernel StoreGateLib  PersistencySvc AthenaBaseComps RootAuxDynIO ${Boost_LIBRARIES} 
+   LINK_LIBRARIES TestTools  AthenaKernel GaudiKernel StoreGateLib
+      PersistencySvc AthenaBaseComps RootAuxDynIOHeaders ${Boost_LIBRARIES}
    POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( AthTPCnvSvc
