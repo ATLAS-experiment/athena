@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #  FastChain_tf.py
 #  One step transform to run SIM+DIGI as one job, then reco
@@ -20,7 +20,6 @@ from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments, ad
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addRecoSubsteps, addAllRecoArgs
 from SimuJobTransforms.simTrfArgs import addCommonSimTrfArgs, addBasicDigiArgs, addCommonSimDigTrfArgs, addTrackRecordArgs, addSim_tfArgs, addPileUpTrfArgs
-from PATJobTransforms.PATTransformUtils import addPhysValidationFiles, addValidationArguments, appendPhysValidationSubstep
 
 from PyJobTransforms.trfArgClasses import argFactory, argList, argRDOFile
 
@@ -44,14 +43,14 @@ def getTransform():
     addRecoSubsteps(executorSet)
 
     # Sim + Digi - factor these out into an importable function in time
-    executorSet.add(athenaExecutor(name = 'EVNTtoRDO', skeletonFile = None,
+    executorSet.add(athenaExecutor(name = 'EVNTtoRDO',
                                    skeletonCA = 'FullChainTransforms.FastChainSkeleton',
                                    substep = 'simdigi', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
                                    inData=['NULL','EVNT', 'RDO_BKG', 'BS_SKIM'],
                                    outData=['RDO','NULL'] ))
 
     # Sim + Overlay - execute with the argument --steering "doFCwOverlay"
-    executorSet.add(athenaExecutor(name = 'EVNTtoRDOwOverlay', skeletonFile = None,
+    executorSet.add(athenaExecutor(name = 'EVNTtoRDOwOverlay',
                                    substep = 'simoverlay', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
                                    inData = ['NULL'], outData = ['NULL']))
 
@@ -81,11 +80,6 @@ def getTransform():
     # Overlay arguments
     from OverlayConfiguration.OverlayTransformHelpers import addOverlayArguments
     addOverlayArguments(trf.parser)
-
-    # Add PhysVal
-    addPhysValidationFiles(trf.parser)
-    addValidationArguments(trf.parser)
-    appendPhysValidationSubstep(trf)
 
     return trf
 

@@ -1,15 +1,12 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## A simple ESDtoAOD transform. 
 # @version $Id: ESDtoAOD_tf.py 670203 2015-05-27 13:19:01Z graemes $ 
 
-import os.path
 import sys
 import time
-
-import logging
 
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
@@ -40,8 +37,7 @@ def main():
     sys.exit(trf.exitCode)
 
 def getTransform():
-    trf = transform(executor = athenaExecutor(name = 'ESDtoAOD', skeletonFile = 'RecJobTransforms/skeleton.ESDtoAOD_tf.py',
-                                              substep = 'e2a'))
+    trf = transform(executor = athenaExecutor(name = 'ESDtoAOD', substep = 'e2a'))
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)
     addCommonRecTrfArgs(trf.parser)

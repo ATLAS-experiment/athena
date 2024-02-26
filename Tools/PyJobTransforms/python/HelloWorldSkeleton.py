@@ -31,6 +31,10 @@ def fromRunArgs(runArgs):
     # To respect --athenaopts 
     flags.fillFromArgs()
 
+    # Run 10 events by default
+    if flags.Exec.MaxEvents == -1:
+        flags.Exec.MaxEvents = 10
+
     flags.lock()
 
     cfg=MainServicesCfg(flags)

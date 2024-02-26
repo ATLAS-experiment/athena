@@ -1,11 +1,10 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Test the various DBRelease scenarios
 #
 
-import json
 import subprocess
 import os
 import os.path
@@ -21,7 +20,7 @@ class DBReleasetest(unittest.TestCase):
     
     # Standard setup using CVMFS
     def test_cvmfsStandard(self):
-        cmd = ['Athena_tf.py', '--DBRelease', '23.3.1']
+        cmd = ['Athena_tf.py', '--CA', '--DBRelease', '23.3.1']
         msg.info('Will run this transform: {0}'.format(cmd))
         p = subprocess.Popen(cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 1)
         while p.poll() is None:
@@ -34,7 +33,7 @@ class DBReleasetest(unittest.TestCase):
     
     # Setup using CVMFS 'current'
     def test_cvmfsCurrent(self):
-        cmd = ['Athena_tf.py', '--DBRelease', 'current']
+        cmd = ['Athena_tf.py', '--CA', '--DBRelease', 'current']
         msg.info('Will run this transform: {0}'.format(cmd))
         p = subprocess.Popen(cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 1)
         while p.poll() is None:
@@ -57,7 +56,7 @@ class DBReleasetest(unittest.TestCase):
                 pass
             else:
                 raise
-        cmd = ['Athena_tf.py', '--DBRelease', 'DBRelease-22.7.1.tar.gz']
+        cmd = ['Athena_tf.py', '--CA', '--DBRelease', 'DBRelease-22.7.1.tar.gz']
         msg.info('Will run this transform: {0}'.format(cmd))
         p = subprocess.Popen(cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 1)
         while p.poll() is None:
@@ -109,7 +108,7 @@ class DBReleasetest(unittest.TestCase):
     
     # Negative test - use an illegal name format
     def test_illegalName(self):
-        cmd = ['Athena_tf.py', '--DBRelease', 'FailMeHarder']
+        cmd = ['Athena_tf.py', '--CA', '--DBRelease', 'FailMeHarder']
         msg.info('Will run this transform: {0}'.format(cmd))
         p = subprocess.Popen(cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 1)
         while p.poll() is None:

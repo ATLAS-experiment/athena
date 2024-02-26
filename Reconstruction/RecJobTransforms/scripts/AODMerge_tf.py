@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## AODMerge_tf.py - AOD merger with optional TAG and DPD outputs
 #  N.B. Do need clarification as to if AODtoDPD is ever run in parallel with AOD merging 
@@ -9,21 +9,19 @@
 import sys
 import time
 
-import logging
-
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
 msg.info('logging set in %s' % sys.argv[0])
 
 from PyJobTransforms.transform import transform
-from PyJobTransforms.trfExe import athenaExecutor, hybridPOOLMergeExecutor
+from PyJobTransforms.trfExe import hybridPOOLMergeExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
-ListOfDefaultPositionalKeys=['--DBRelease', '--amiConfig', '--amiMetadataTag', '--asetup', '--athena', '--athenaopts', '--autoConfiguration', '--beamType', '--checkEventCount', '--command', '--conditionsTag', '--env', '--eventAcceptanceEfficiency', '--execOnly', '--geometryVersion', '--ignoreErrors', '--ignoreFilters', '--ignorePatterns', '--inputAODFile', '--maxEvents', '--noimf', '--notcmalloc', '--outputAOD_MRGFile', '--outputTAGFile', '--postExec', '--postInclude', '--preExec', '--preInclude', '--reportName', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation']
+ListOfDefaultPositionalKeys=['--DBRelease', '--amiConfig', '--amiMetadataTag', '--asetup', '--athena', '--athenaopts', '--autoConfiguration', '--beamType', '--checkEventCount', '--command', '--conditionsTag', '--env', '--eventAcceptanceEfficiency', '--execOnly', '--geometryVersion', '--ignoreErrors', '--ignoreFilters', '--ignorePatterns', '--inputAODFile', '--maxEvents', '--noimf', '--notcmalloc', '--outputAOD_MRGFile', '--postExec', '--postInclude', '--preExec', '--preInclude', '--reportName', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation']
 
 @stdTrfExceptionHandler
 @sigUsrStackTrace
@@ -41,10 +39,7 @@ def main():
 
 def getTransform():
     executorSet = set()
-    executorSet.add(hybridPOOLMergeExecutor(name = 'AODMerge', skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py',
-                                   skeletonCA = 'RecJobTransforms.MergePool_Skeleton', inData = ['AOD'], outData = ['AOD_MRG']))
-    executorSet.add(athenaExecutor(name = 'AODtoTAG', skeletonFile = 'RecJobTransforms/skeleton.AODtoTAG_tf.py',
-                                   inData = ['AOD_MRG'], outData = ['TAG'],))
+    executorSet.add(hybridPOOLMergeExecutor(name = 'AODMerge', inData = ['AOD'], outData = ['AOD_MRG']))
 
     trf = transform(executor = executorSet)
     
@@ -67,9 +62,6 @@ def addMyArgs(parser):
     parser.add_argument('--outputAOD_MRGFile', '--outputAODFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output', type='aod'),
                         help='Output merged AOD file', group='AODMerge_tf')
-    parser.add_argument('--outputTAGFile', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argTAGFile, io='output', type='tag'), 
-                        help='Output TAG file', group='AODMerge_tf')
 
 if __name__ == '__main__':
     main()

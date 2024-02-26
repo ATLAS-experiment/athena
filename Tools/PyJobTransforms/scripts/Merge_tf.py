@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## Merge_tf.py - Transform for merging any data type
 
@@ -17,7 +17,6 @@ from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
 from PyJobTransforms.trfExe import DQMergeExecutor
-from PyJobTransforms.trfExe import tagMergeExecutor
 from PyJobTransforms.trfExe import bsMergeExecutor
 from PyJobTransforms.trfArgs import addD3PDArguments, addExtraDPDTypes
 from PATJobTransforms.PATTransformUtils import addNTUPMergeSubsteps, addPhysValidationMergeFiles
@@ -41,13 +40,8 @@ def main():
 
 def getTransform():
     executorSet = set()
-    executorSet.add(hybridPOOLMergeExecutor(name = 'ESDMerge', skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py',
-                                   skeletonCA = 'RecJobTransforms.MergePool_Skeleton', inData = ['ESD'], outData = ['ESD_MRG']))
-    executorSet.add(hybridPOOLMergeExecutor(name = 'AODMerge', skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py',
-                                   skeletonCA = 'RecJobTransforms.MergePool_Skeleton', inData = ['AOD'], outData = ['AOD_MRG']))
-    executorSet.add(athenaExecutor(name = 'AODtoTAG', skeletonFile = 'RecJobTransforms/skeleton.AODtoTAG_tf.py',
-                                   inData = ['AOD_MRG'], outData = ['TAG'],))
-    executorSet.add(tagMergeExecutor(name = 'TAGFileMerge', exe = 'CollAppend', inData = set(['TAG']), outData = set(['TAG_MRG'])))
+    executorSet.add(hybridPOOLMergeExecutor(name = 'ESDMerge', inData = ['ESD'], outData = ['ESD_MRG']))
+    executorSet.add(hybridPOOLMergeExecutor(name = 'AODMerge', inData = ['AOD'], outData = ['AOD_MRG']))
     executorSet.add(DQMergeExecutor(name = 'DQHistogramMerge', inData = [('HIST_ESD', 'HIST_AOD'), 'HIST'], outData = ['HIST_MRG']))
     executorSet.add(bsMergeExecutor(name = 'RAWFileMerge', exe = 'file_merging', inData = set(['BS']), outData = set(['BS_MRG'])))
     executorSet.add(athenaExecutor(name = 'EVNTMerge', skeletonFile = 'PyJobTransforms/skeleton.EVNTMerge.py',inData = ['EVNT'], outData = ['EVNT_MRG']))
@@ -71,11 +65,11 @@ def getTransform():
     try:
         from SimuJobTransforms.SimTransformUtils import addHITSMergeArguments
         addHITSMergeArguments(trf.parser)
-        trf.appendToExecutorSet(athenaExecutor(name = 'HITSMerge', substep="hitsmerge", skeletonFile = 'SimuJobTransforms/skeleton.HITSMerge.py',
+        trf.appendToExecutorSet(athenaExecutor(name = 'HITSMerge', substep='hitsmerge',
                                                skeletonCA = 'SimuJobTransforms.HITSMerge_Skeleton',
                                                tryDropAndReload = False, inData = ['HITS'], outData = ['HITS_MRG']))
 
-        trf.appendToExecutorSet(athenaExecutor(name = 'RDOMerge', skeletonFile = 'SimuJobTransforms/skeleton.RDOMerge.py',
+        trf.appendToExecutorSet(athenaExecutor(name = 'RDOMerge',
                                 skeletonCA = 'SimuJobTransforms.RDOMerge_Skeleton',
                                 inData = ['RDO'], outData = ['RDO_MRG']))
 
@@ -116,17 +110,6 @@ def addMyArgs(parser):
     parser.add_argument('--outputAOD_MRGFile', '--outputAODFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output', type='aod'),
                         help='Output merged AOD file', group='AODMerge_tf')
-    parser.add_argument('--outputTAGFile', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argTAGFile, io='output', type='tag'), 
-                        help='Output TAG file', group='AODMerge_tf')
-
-    parser.defineArgGroup('TAGMerge_tf', 'TAG merging specific options')
-    parser.add_argument('--inputTAGFile', nargs='+', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argTAGFile, io='input'),
-                        help='Input TAG file(s)', group='TAGMerge_tf')
-    parser.add_argument('--outputTAG_MRGFile',
-                        type=trfArgClasses.argFactory(trfArgClasses.argTAGFile, io='output'),
-                        help='Output merged TAG file', group='TAGMerge_tf')
 
     parser.defineArgGroup('DQHistMerge_tf', 'DQ merge specific options')
     parser.add_argument('--inputHISTFile', nargs='+', 

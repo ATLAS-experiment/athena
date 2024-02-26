@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """JobTransform to run LAr Noise Burst jobs"""
 
@@ -14,7 +14,7 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 if __name__ == '__main__':
 
     executorSet = set()
-    executorSet.add(athenaExecutor(name = 'LArNoiseBursts', skeletonFile = None,
+    executorSet.add(athenaExecutor(name = 'LArNoiseBursts',
                                    skeletonCA='LArCafJobs.LArNoiseSkeleton',
                                    substep = 'e2a', inData = ['ESD',], outData = ['NTUP_LARNOISE','NTUP_HECNOISE']))
    

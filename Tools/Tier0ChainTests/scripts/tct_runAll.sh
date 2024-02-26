@@ -161,7 +161,7 @@ echo ${RUNCMD}
 echo 
 
 ## make tag file
-RUNCMD="AODtoTAG_trf.py maxEvents=-1 trigStream=${TRIGSTR} inputAODFile=MergedAOD.pool.root autoConfiguration=FieldAndGeo,ConditionsTag outputTAGFile=myTag.pool.root ${TRFARGS}"
+RUNCMD="AODtoTAG_trf.py maxEvents=-1 trigStream=${TRIGSTR} inputAODFile=MergedAOD.pool.root autoConfiguration=FieldAndGeo,ConditionsTag ${TRFARGS}"
 echo
 echo ">> Now running command:"
 echo ">> ===================="
