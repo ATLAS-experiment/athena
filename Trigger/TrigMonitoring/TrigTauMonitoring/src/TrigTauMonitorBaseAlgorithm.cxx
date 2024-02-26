@@ -300,7 +300,7 @@ std::pair<std::vector<const xAOD::TauJet*>, std::vector<const xAOD::TauJet*>> Tr
     std::vector<const xAOD::TauJet*> tau_vec_1p, tau_vec_3p;
 
     for(const xAOD::TauJet* const tau : taus) {
-        if(tau->pt() < threshold) continue;
+        if(tau->pt()/Gaudi::Units::GeV < threshold) continue;
 
         int nTracks = -1;
         tau->detail(xAOD::TauJetParameters::nChargedTracks, nTracks);
