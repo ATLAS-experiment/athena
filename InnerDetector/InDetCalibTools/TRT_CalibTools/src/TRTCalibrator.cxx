@@ -588,14 +588,12 @@ bool TRTCalibrator::calibrate ATLAS_NOT_THREAD_SAFE () {
     ATH_MSG_INFO( " Opened " << infile << " as binary histogram file " );        
     int ihist=0;
     int ihistAr=0;
-    int ihistTotal=0;
 
     while(true){
 
       //read a binary histogram
       myFile.read ((char*)&npop,sizeof(int)); //number of populated bins
       if (myFile.eof()) break;
-      ihistTotal++;
       int* chist=new int[2*npop+2]; //the histogram
       if (npop>0) myFile.read ((char*)(chist+2), sizeof(int)*2*npop);
       myFile.read ((char*)&isid,sizeof(int)); //the straw id 
