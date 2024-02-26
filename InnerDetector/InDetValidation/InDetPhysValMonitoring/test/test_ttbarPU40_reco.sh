@@ -21,7 +21,7 @@ run() { (set -x; exec "$@") }
 
 lastref_dir=last_results
 artdata=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art
-dcubeXml_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_lrt.xml"
+dcubeXml_lrt=IDPVMPlots_lrt.xml
 dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r24.root"
 if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
   dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r23.root"
@@ -29,6 +29,14 @@ fi
 dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r24.root"
 if [[ "$ATLAS_RELEASE_BASE" == *"23.0"* ]]; then
   dcubeRef_lrt="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_ttbarPU40_lrt_r23.root"
+fi
+
+# search in $DATAPATH for matching file
+dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml_lrt -print -quit 2>/dev/null)
+# Don't run if dcube config not found
+if [ -z "$dcubeXmlAbsPath" ]; then
+    echo "art-result: 1 dcube-xml-config"
+    exit 1
 fi
 
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
@@ -61,14 +69,14 @@ if [ $rec_tf_exit_code -eq 0 ]  ;then
 
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_lrt \
-    -c ${dcubeXml_lrt} \
+    -c ${dcubeXmlAbsPath} \
     -r ${dcubeRef_lrt} \
     physval_lrt.ntuple.root
   
   echo "compare with last build"
   $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py \
     -p -x dcube_lrt_last \
-    -c ${dcubeXml_lrt} \
+    -c ${dcubeXmlAbsPath} \
     -r ${lastref_dir}/physval_lrt.ntuple.root \
     physval_lrt.ntuple.root
   echo "art-result: $? shifter_plots_lrt_last"
