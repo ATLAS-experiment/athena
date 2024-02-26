@@ -499,7 +499,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EndcapCryostatConstruction::createEnvelo
           EndcapPresamplerConstruction endcapPresamplerConstruction;
 
           GeoIntrusivePtr<GeoFullPhysVol> emecPSEnvelope = endcapPresamplerConstruction.Envelope();
-          if ( emecPSEnvelope != nullptr ) {
+          if (emecPSEnvelope) {
             // Get the position of the presampler from the geometry helper.
             double Zpos = 30.5*Gaudi::Units::mm;
 

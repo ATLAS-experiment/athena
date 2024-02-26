@@ -216,8 +216,7 @@ PVLink LArGeo::LArDetectorConstructionH62003::GetEnvelope()
   std::string nickname   = "POSITION1";
   int nicknumber = 0; 
 
-  if(LArPhysical != nullptr)
-    {
+  if(LArPhysical) {
       IRDBRecordset_ptr larTBPos = 
 	m_pAccessSvc->getRecordsetPtr("LArTBPosition", detectorKey, detectorNode);
           

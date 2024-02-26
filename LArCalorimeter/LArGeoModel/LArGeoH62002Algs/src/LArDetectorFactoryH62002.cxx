@@ -212,7 +212,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol* world)
     const double H62002WallsPos = 10182.*Gaudi::Units::mm;  // A wild guess at the moment.....
     WallsConstruction  WallsConstruction2002;
     PVLink frontwalls = WallsConstruction2002.GetEnvelope();
-    if(frontwalls !=nullptr){
+    if(frontwalls ){
       expHallPhys->add( new GeoNameTag("LAr"));
       expHallPhys->add( new GeoTransform( GeoTrf::TranslateZ3D(H62002WallsPos) ) );  
       expHallPhys->add(frontwalls);    
@@ -225,7 +225,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol* world)
     const double H62002TablePos = 8320.*Gaudi::Units::mm;  
     TableConstructionH62002  TableConstruction;
     PVLink table = TableConstruction.GetEnvelope();
-    if(table !=nullptr && expHallPhys !=nullptr){
+    if(table  && expHallPhys ){
       expHallPhys->add( new GeoNameTag("LAr"));
       expHallPhys->add( new GeoTransform( GeoTrf::TranslateZ3D(H62002TablePos) ) );  
       expHallPhys->add(table);    
@@ -240,7 +240,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol* world)
     // (with 350=1/2 length of FrontBeam volume)
     FrontBeamConstructionH62002  FrontBeamConstruction;
     PVLink front = FrontBeamConstruction.GetEnvelope();
-    if(front !=nullptr && expHallPhys !=nullptr){
+    if(front  && expHallPhys ){
       expHallPhys->add( new GeoNameTag("LAr"));
       expHallPhys->add( new GeoTransform( GeoTrf::TranslateZ3D(H62002FrontBeamPos) ) );  
       expHallPhys->add(front);    
@@ -269,7 +269,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol* world)
   {    
     ExcluderConstruction excluderConstruction;
     GeoIntrusivePtr<GeoPhysVol> excluder = excluderConstruction.GetEnvelope();
-    if(excluder !=nullptr && LArPhysical !=nullptr){
+    if(excluder  && LArPhysical ){
       LArPhysical->add( new GeoNameTag("LAr::H6::Cryostat::Excluder"));
       LArPhysical->add(excluder);    
     }
@@ -400,7 +400,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol* world)
   //std::string PresamplerName = baseName + "::Presampler::";
   EndcapPresamplerConstruction PresamplerConstruction(true);
   GeoIntrusivePtr<GeoFullPhysVol> PresamplerEnvelope = PresamplerConstruction.Envelope();
-  if ( PresamplerEnvelope != nullptr && LArPhysical != nullptr ) {    
+  if ( PresamplerEnvelope  && LArPhysical  ) {    
     //LArPhysical->add( new GeoTransform( GeoTrf::Translate3D(pos3PS)*GeoTrf::RotateX3D(ThetaPS)*GeoTrf::RotateZ3D(PhiPS) ));
      LArPhysical->add( new GeoTransform( GeoTrf::Transform3D(pos3PS*MrotPS) ) );
      LArPhysical->add( PresamplerEnvelope );
@@ -426,7 +426,7 @@ void LArGeo::LArDetectorFactoryH62002::create(GeoPhysVol* world)
   {    
     HECConstructionH62002 hecConstruction;
     GeoIntrusivePtr<GeoVFullPhysVol> hecEnvelope = hecConstruction.GetEnvelope();
-    if(hecEnvelope !=nullptr && LArPhysical !=nullptr){
+    if(hecEnvelope  && LArPhysical ){
       LArPhysical->add( new GeoNameTag("LAr"));
       //LArPhysical->add( new GeoTransform( GeoTrf::Translate3D(pos3Hec)*GeoTrf::RotateX3D(ThetaHec)*GeoTrf::RotateZ3D(PhiHec) ));
       LArPhysical->add( new GeoTransform( GeoTrf::Transform3D(pos3Hec*MrotHec) ) );

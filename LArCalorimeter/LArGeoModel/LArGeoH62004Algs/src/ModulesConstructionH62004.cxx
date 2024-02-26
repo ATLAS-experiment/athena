@@ -294,7 +294,7 @@ GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::ModulesConstructionH62004::GetEnvelope(
   /*if(fcexcluder != 0)*/{
 //     std::cout<<"ModulesConstructionH62004::GetEnvelope positioning Excluder"<<std::endl;
     GeoIntrusivePtr<GeoVFullPhysVol> fcexcluderEnvelope = fcexcluder.GetEnvelope();
-    if(fcexcluderEnvelope != nullptr){
+    if(fcexcluderEnvelope ){
       GeoTrf::Transform3D rot2 = GeoTrf::RotateX3D(0.8*bepo_Beta) * GeoTrf::RotateX3D(-bepo_ty) * GeoTrf::RotateZ3D(bepo_tx);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
 //      m_ModulesPhys->add(new GeoTransform(GeoTrf::Transform3D(rot2,GeoTrf::Vector3D(0.,bepo_y_ex-138.*Gaudi::Units::mm,-477.3*Gaudi::Units::mm))));
@@ -310,7 +310,7 @@ GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::ModulesConstructionH62004::GetEnvelope(
 
   /*if(frontexcluder != 0)*/{
     GeoIntrusivePtr<GeoVFullPhysVol> frontexcluderEnvelope = frontexcluder.GetEnvelope();
-    if(frontexcluderEnvelope != nullptr){
+    if(frontexcluderEnvelope ){
       GeoTrf::RotateZ3D rot2((90.)*Gaudi::Units::degree);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
       m_ModulesPhys->add(new GeoTransform(GeoTrf::Translation3D(0.,0.,20.*Gaudi::Units::mm) * rot2));
@@ -335,7 +335,7 @@ GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::ModulesConstructionH62004::GetEnvelope(
 
   /*if(backexcluder != 0)*/{
     GeoIntrusivePtr<GeoVFullPhysVol> backexcluderEnvelope = backexcluder.GetEnvelope();
-    if(backexcluderEnvelope != nullptr){
+    if(backexcluderEnvelope ){
       GeoTrf::RotateZ3D rot2((-90.-29.)*Gaudi::Units::degree);
       m_ModulesPhys->add(new GeoSerialIdentifier(0));
       m_ModulesPhys->add(new GeoTransform(GeoTrf::Translation3D(0.,0.,0.*Gaudi::Units::mm) * rot2));
@@ -402,7 +402,7 @@ GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::ModulesConstructionH62004::GetEnvelope(
     HECConstructionH62004 hec;
     /*if(hec != 0)*/{
       PVLink hecEnvelope = hec.GetEnvelope();
-      if(hecEnvelope != nullptr){
+      if(hecEnvelope ){
 //        rot.rotateZ(-bepo_pz);
 //        rot.rotateX(bepo_ty);
 //        rot.rotateX(bepo_Beta);
@@ -430,7 +430,7 @@ GeoIntrusivePtr<GeoVFullPhysVol> LArGeo::ModulesConstructionH62004::GetEnvelope(
     /*if(fcal != 0)*/{
       fcal.setFCALVisLimit(m_fcalVisLimit); 
       PVLink fcalEnvelope = fcal.GetEnvelope();
-      if(fcalEnvelope != nullptr){
+      if(fcalEnvelope ){
 //        Gaudi::Units::HepRotation rotFCal;
        // rotFCal.rotateY(0.*Gaudi::Units::deg);
        //  rotFCal.rotateZ(-bepo_pz);

@@ -635,7 +635,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::TBBarrelCryostatConstruction::GetEnvelop
      std::cout << " Position ECAM volume in mother LAr at z " << Zcd << std::endl;
 #endif
 
-     if (barrelEnvelope !=nullptr) { 
+     if (barrelEnvelope ) { 
           moth_phys->add(new GeoTransform(GeoTrf::TranslateZ3D(Zcd)));
           moth_phys->add(barrelEnvelope);
      }
@@ -664,7 +664,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::TBBarrelCryostatConstruction::GetEnvelop
      std::cout << " Position PS volume in mother LAr at z " << Zcd << std::endl;
 #endif
 
-     if (barrelPSEnvelope !=nullptr) {
+     if (barrelPSEnvelope ) {
        moth_phys->add(new GeoTransform(GeoTrf::TranslateZ3D(Zcd)));
        moth_phys->add(barrelPSEnvelope);
        StoredPhysVol *sPhysVol = new StoredPhysVol(barrelPSEnvelope);
