@@ -8,6 +8,7 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
+#include "HGTD_ReadoutGeometry/HGTD_DetectorElementCollection.h"
 #include "HGTD_Identifier/HGTD_ID.h"
 
 namespace ActsTrk {
@@ -22,6 +23,10 @@ namespace ActsTrk {
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
   private:
+    SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_HGTDDetEleCollKey
+    {this, "HGTDDetEleCollKey", "HGTD_DetectorElementCollection",
+	"Key of HGTD_DetectorElementCollection for HGTD"};
+
     SG::ReadHandleKey< xAOD::HGTDClusterContainer > m_hgtdClusterContainerKey
     {this, "ClusterContainerKey", "HGTD_Clusters",
 	"Key of input hgtd clusters"};    
