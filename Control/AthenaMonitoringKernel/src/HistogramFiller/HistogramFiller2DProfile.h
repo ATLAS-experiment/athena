@@ -36,8 +36,9 @@ namespace Monitored {
           const size_t size0 = vars.var[0]->size();
           const size_t size1 = vars.var[1]->size();
           const size_t size2 = vars.var[2]->size();
+          const size_t sizeWeight = vars.weight->size();
           if (ATH_UNLIKELY(size0 > 1 && size1 > 1 && size2 > 1 &&
-                           vars.weight->size() > 1 && size0 != vars.weight->size())) {
+                           sizeWeight > 1 && size0 != sizeWeight)) {
               MsgStream log(Athena::getMessageSvc(), "HistogramFiller2DProfile");
               log << MSG::ERROR << "Weight does not match the size of plotted variable: "
                   << vars.weight->size() << " " << size0 << endmsg;
@@ -45,7 +46,7 @@ namespace Monitored {
           }
           // Need to fill here while weightVector is still in scope
           if (not vars.cut) return HistogramFiller::fill<TProfile2D>(weightAccessor, detail::noCut, *vars.var[0], *vars.var[1], *vars.var[2]);
-          else                  return HistogramFiller::fill<TProfile2D>(weightAccessor, cutMaskAccessor, *vars.var[0], *vars.var[1], *vars.var[2]);
+          else              return HistogramFiller::fill<TProfile2D>(weightAccessor, cutMaskAccessor, *vars.var[0], *vars.var[1], *vars.var[2]);
 
       } else {
           // Unweighted fill
