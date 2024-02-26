@@ -20,15 +20,13 @@ ElMuFinder::ElMuFinder(const std::string& type,
   m_elMinPt(7000),
   m_elMaxEta(2.47),
   m_muMinPt(7000),
-  m_muMaxEta(2.47),
-  m_muQual(2)
+  m_muMaxEta(2.47)
 {
   declareInterface<DiTauToolBase > (this);
   declareProperty("ElectronMinPt", m_elMinPt);
   declareProperty("ElectronMaxEta", m_elMaxEta);
   declareProperty("MuonMinPt", m_muMinPt);
   declareProperty("MuonMaxEta", m_muMaxEta);
-  declareProperty("MuonQuality", m_muQual);
 }
 
 
@@ -89,11 +87,17 @@ StatusCode ElMuFinder::execute(DiTauCandidateData * data,
   data->muons.clear();
   if (pMuCont.isValid()) {
     for (const auto *const mu : *pMuCont) {
-      ATH_MSG_DEBUG("muon pt:" << mu->pt() << " eta:" << mu->eta() << " ");
+      ATH_MSG_DEBUG("muon pt:" << mu->pt() << " eta:" << mu->eta() << " phi: " << mu->phi());
+
       xAOD::Muon::Quality muonQuality = mu->quality();
-      // FIXME: to be checked
-      if (muonQuality >= m_muQual && std::abs(mu->eta()) >= m_muMaxEta) continue;
-    
+      if (muonQuality >= xAOD::Muon::VeryLoose) 
+	continue; 
+      ATH_MSG_DEBUG("Muon passes quality selection.");
+      
+      if(mu->pt() < m_muMinPt || std::abs(mu->eta()) >= m_muMaxEta) 
+	continue;
+      ATH_MSG_DEBUG("Muon passes basic kinematic selection");
+
       // muon inside seed jet area?
       if (data->seed->p4().DeltaR(mu->p4())  > data->Rjet)
 	continue;
