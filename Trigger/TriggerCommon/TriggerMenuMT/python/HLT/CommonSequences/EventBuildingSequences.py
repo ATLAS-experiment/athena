@@ -10,7 +10,6 @@ from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInf
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from .LATOMESourceIDs import LATOMESourceIDs
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -286,13 +285,6 @@ def pebInputMaker(flags, chain, eventBuildType):
     return maker
 
 
-@AccumulatorCache
-def pebSequenceCfg(eventBuildType, inputMaker):
-    # Create new sequence and add inputMaker. Sequence is cached for next call.
-    recoAcc = InEventRecoCA("pebSequence_"+eventBuildType, inputMaker=inputMaker)
-    return recoAcc
-
-
 def pebMenuSequenceCfg(flags, chain, eventBuildType, chainDict):
     '''
     Return the MenuSequenceCA for the PEB input maker for this chain.
@@ -304,7 +296,7 @@ def pebMenuSequenceCfg(flags, chain, eventBuildType, chainDict):
     suffix = getPEBBuildSuffix(chain, eventBuildType)
 
     inputMaker = pebInputMaker(flags, chain, eventBuildType)
-    recoAcc = pebSequenceCfg(eventBuildType, inputMaker)
+    recoAcc = InEventRecoCA("pebSequence_"+eventBuildType, inputMaker=inputMaker)
     selAcc = SelectionCA("pebMainSeq_"+eventBuildType+suffix)
     selAcc.mergeReco(recoAcc)
     selAcc.addHypoAlgo(CompFactory.PEBInfoWriterAlg('PEBInfoWriterAlg_' + eventBuildType+suffix))
