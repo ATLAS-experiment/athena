@@ -40,7 +40,8 @@ class BasicFolder{
   std::pair<cool::ValidityKey, cool::ValidityKey> iov();
   //
   bool empty() const;
-  
+  std::string jsonPayload(const std::string & folderDescription, const std::string & spec);
+
   private:
   //ugh, should be templated, and consider using hashmaps
   std::map<int, coral::AttributeList> m_payload;

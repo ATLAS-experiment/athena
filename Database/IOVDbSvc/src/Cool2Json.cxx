@@ -26,6 +26,7 @@
 #include "AthenaPoolUtilities/CondAttrListCollAddress.h"
 #include "AthenaPoolUtilities/CondAttrListVec.h"
 #include "AthenaPoolUtilities/CondAttrListVecAddress.h"
+#include "IOVDbJsonStringFunctions.h"
 #include "FolderTypes.h"
 #include "IOVDbStringFunctions.h"
 #include "Base64Codec.h"
@@ -90,20 +91,6 @@ namespace IOVDbNamespace {
     return m_spec;
   }
   
-  std::string 
-  Cool2Json::open(){
-    return "{";
-  }
-  
-  std::string 
-  Cool2Json::close(){
-    return "}";
-  }
-  
-  std::string 
-  Cool2Json::delimiter(){
-    return ", ";
-  }
   
   std::string 
   Cool2Json::payload() {
@@ -115,7 +102,7 @@ namespace IOVDbNamespace {
       const cool::IObject& ref=itr->currentRef();
       result+=sep;
       const long long cId=ref.channelId();
-      result+="{ "+quote(std::to_string(cId))+" : ";
+      result+=s_openJson+quote(std::to_string(cId))+" : ";
       switch  (ftype){
       case IOVDbNamespace::CoolVector:
         result+=formatCvp(itr);
@@ -139,7 +126,7 @@ namespace IOVDbNamespace {
         result+=" a_data_value";
       }
       if (sep.empty()) sep=",";
-      result+='}';
+      result+=s_closeJson;
     }
     result+=']';
     itr->close();
@@ -177,8 +164,8 @@ namespace IOVDbNamespace {
     for (const auto & vitr:*pvec){
       os+=sep;
       const coral::AttributeList& atrlist=(vitr)->attributeList();
-      os+=jsonAttributeList(atrlist);
-      if (sep.empty()) sep =", ";
+      os+=IOVDbNamespace::jsonAttributeList(atrlist);
+      if (sep.empty()) sep =IOVDbNamespace::s_delimiterJson;
     }
     os+=']';
     return os;
@@ -189,7 +176,7 @@ namespace IOVDbNamespace {
     const cool::IObject& ref=itr->currentRef();
     const coral::AttributeList& atrlist=ref.payload().attributeList();
     std::string sep="";
-    return jsonAttributeList(atrlist);
+    return IOVDbNamespace::jsonAttributeList(atrlist);
   }
   
   std::string 
@@ -216,42 +203,4 @@ namespace IOVDbNamespace {
     return o;
   }
   
-  std::string
-  Cool2Json::jsonAttribute(const coral::Attribute & attr){
-    std::ostringstream os;
-    attr.toOutputStream(os);
-    const std::string native=os.str();
-    const bool stringPayload=(native.find(" (string) ") != std::string::npos);
-    const bool blobPayload=(native.find(" (blob) ") != std::string::npos);
-    //take away anything between brackets in the original
-    const std::string regex=R"delim( \(.*\))delim";
-    const std::string deleted= deleteRegex(native,regex);
-    const std::string sep(" : ");
-    const auto separatorPosition = deleted.find(sep);
-    const std::string payloadOnly=deleted.substr(separatorPosition+3);
-    if (stringPayload) return quote(sanitiseJsonString(payloadOnly));
-    if (blobPayload){
-      return quote(IOVDbNamespace::base64Encode(attr.data<coral::Blob>()));
-    }
-    std::string result(payloadOnly);
-    if (result=="NULL"){
-      result="null";
-    }
-    
-    return result;
-  }
-  
-  std::string 
-  Cool2Json::jsonAttributeList(const coral::AttributeList& atrlist){
-    std::string os("[");
-    const unsigned int nelement=atrlist.size();
-    std::string delimiter(" ");
-    for (unsigned int i(0);i!=nelement;++i){
-      if (i==1) delimiter = ", ";
-      os+=delimiter;
-      os+=jsonAttribute(atrlist[i]);
-    }
-    os+="]";
-    return os;
-  }
 }
