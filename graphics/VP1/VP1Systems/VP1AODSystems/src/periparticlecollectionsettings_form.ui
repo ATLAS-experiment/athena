@@ -55,7 +55,7 @@
         <item>
          <widget class="VP1MaterialButton" name="pushButton_matButton">
           <property name="text">
-           <string>Material</string>
+           <string></string>
           </property>
          </widget>
         </item>

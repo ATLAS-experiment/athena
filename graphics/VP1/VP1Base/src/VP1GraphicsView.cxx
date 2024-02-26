@@ -124,7 +124,6 @@ public:
   HighLightItem ( const QPainterPath & path, QGraphicsItem * parent, VP1GraphicsView*v)
     : QGraphicsPathItem(path,parent),view(v),sendsignalondelete(true) {}
   virtual ~HighLightItem() {
-    std::cout<<"dying"<<std::endl;
     if (sendsignalondelete)
       view->m_d->HighLightItemBeingDeleted(this);
   }
@@ -508,7 +507,6 @@ void VP1GraphicsView::mousePressEvent(QMouseEvent *event)
     //If we have previous selections already, and the mult select key
     //is down, then we will only consider items in the same collection
     //as active.
-    //    std::cout<<"pick mouse press. Multiselection stored:"<<m_d->ic_multiselection<<std::endl;
     bool continueselection = m_d->ic_multiselection && (event->modifiers() & Qt::ShiftModifier);
     QGraphicsItem*item(0);VP1GraphicsItemCollection*ic(0);
 
@@ -657,18 +655,14 @@ void VP1GraphicsView::Imp::HighLightItemBeingDeleted(HighLightItem*hlitem)
     it = selecteditems.begin(), itE = selecteditems.end();
   for (;it!=itE;++it) {
     if (it.value()==hlitem) {
-      std::cout<<"lala1"<<std::endl;
       selecteditems.erase(it);
-      std::cout<<"lala2"<<std::endl;
       break;
     }
   }
-  std::cout<<"hej"<<std::endl;
 
   if (ic_multiselection) {
     view->emitSelectionChanged(ic_multiselection);
   }
-  std::cout<<"dav"<<std::endl;
 #ifndef NDEBUG
   QMapIterator<QGraphicsItem*,HighLightItem*> ittest2(selecteditems);
   assert(!ittest2.findNext(hlitem));

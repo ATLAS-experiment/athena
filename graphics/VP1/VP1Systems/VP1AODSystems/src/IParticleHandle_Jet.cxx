@@ -314,7 +314,6 @@ void IParticleHandle_Jet::Imp::createShapeFromJetParameters(const IParticleCollH
 
 	//	sep->addChild(collHandleJet->collSettingsButton().defaultParameterMaterial());
 
-	std::cout<<"About to add material: "<<collHandleJet->material()<<std::endl;
 	sep->addChild(collHandleJet->material());
 	// ^^ FIXME - should rearrange so we don't need to reset material
 

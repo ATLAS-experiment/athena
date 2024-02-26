@@ -128,8 +128,10 @@ void VisAttributes::add(const std::string & name, SoMaterial *material) {
   m_d->_map[name]=material;
   if (material->transparency.getNum()!=1)
     std::cout<<"VisAttributes::add Warning: Found #transparency values different from 1 in material "<<name<<std::endl;
-  if (material->transparency[0]!=0.0)
-    std::cout<<"VisAttributes::add Warning: Found transparency value different from 0 in material "<<name<<std::endl;
+  // FIXME. Commented out, because Ric and I are not sure why this is an issue
+  // We may want to add this back if this turns out to indicate a real problem
+  // if (material->transparency[0]!=0.0)
+  //   std::cout<<"VisAttributes::add Warning: Found transparency value different from 0 in material "<<name<<std::endl;
 }
 
 void VisAttributes::overrideTransparencies(float transpfact)
@@ -910,15 +912,6 @@ MatVisAttributes::MatVisAttributes() {
   }
 
   {
-    SoMaterial *m = new SoMaterial;
-    m->ambientColor.setValue (0.60, 0.62, 0.62);
-    m->diffuseColor.setValue (0.51, 0.52, 0.52);
-    m->specularColor.setValue(0.61, 0.38, 0.36);
-    m->shininess.setValue(0.28);
-    add("Peek",m);
-  }
-
-  {
     //Glass
     SoMaterial *m = new SoMaterial;
     m->diffuseColor.setValue (0.8, 0.9, 1.0);
@@ -1323,15 +1316,6 @@ MatVisAttributes::MatVisAttributes() {
     add("CO2Liquid",m);
   }
 
-  {
-    // C02:
-    SoMaterial *m = new SoMaterial;
-    m->ambientColor.setValue(0.2, 0.2, 0.2);
-    m->diffuseColor.setValue(0.58, 0.47, 0.81);
-    m->specularColor.setValue(0.56, 0.55, 0.56);
-    add("CO2Liquid",m);
-  }
-
 //////////////
   init();
 }
@@ -1514,7 +1498,6 @@ VolVisAttributes::VolVisAttributes() {
     for (auto& layer : layers) {
       for (unsigned int sector = 0; sector<sectors; sector++) {
         std::string volumeName = "Pixel__ModuleSvcM" + std::to_string(sectors-sector) + "_L" + std::to_string(layer) + "_S" + std::to_string(sector);
-        std::cout << volumeName << std::endl;
         add( volumeName,m);
       }
     }

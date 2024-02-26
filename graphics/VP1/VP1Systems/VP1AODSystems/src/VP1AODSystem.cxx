@@ -677,16 +677,13 @@ void VP1AODSystem::userChangedSelection(SoCooperativeSelection* sel, QSet<SoNode
 void VP1AODSystem::updateAssociatedObjects(const QList<const xAOD::TrackParticle*>& trackparticles)
 {
   messageVerbose("updateAssociatedObjects TrackParticle");
-  std::cout<<"EJWM Got "<<trackparticles.size() << " from " <<typeid(sender()).name()<<std::endl;
 
   IParticleCollHandle_TrackParticle* newcoll = new  IParticleCollHandle_TrackParticle( m_d->common, "TrackParticlesFromMuons", xAOD::Type::Muon, false );
 
-  std::cout<<"EJWM Adding handles "<<std::endl;
   for (auto tp : trackparticles){
     IParticleHandle_TrackParticle* newhandle = new IParticleHandle_TrackParticle(newcoll, tp);
     newcoll->addHandle( newhandle );
   }
-  std::cout<<"EJWM init "<<std::endl;
 
   newcoll->init();
   // TrackCollHandle_RefittedTracks * newtrackcoll =
@@ -697,10 +694,8 @@ void VP1AODSystem::updateAssociatedObjects(const QList<const xAOD::TrackParticle
   QList<IParticleCollHandle_TrackParticle*> newcolls;
   newcolls << newcoll;
 
-  std::cout<<"EJWM addCollections "<<std::endl;
 
   m_d->common->controller()->collWidget()->addCollections(newcolls);
-  std::cout<<"EJWM addChild "<<std::endl;
 
   for (IParticleCollHandle_TrackParticle* col : newcolls) {
     m_d->selObjects->addChild(col->collSwitch());

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>430</width>
-    <height>485</height>
+    <width>439</width>
+    <height>603</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -154,15 +154,12 @@
     </widget>
    </item>
    <item>
-    <widget class="VP1EtaPhiCutWidget" name="etaPhiCutWidget_2" native="true"/>
-   </item>
-   <item>
     <widget class="QWidget" name="cuts" native="true">
      <property name="enabled">
       <bool>true</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
-      <property name="margin">
+      <property name="margin" stdset="0">
        <number>0</number>
       </property>
       <item>
