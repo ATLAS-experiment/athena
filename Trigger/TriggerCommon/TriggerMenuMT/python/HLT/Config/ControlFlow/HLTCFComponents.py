@@ -7,7 +7,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import isComboHypoAlg
 from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.CFElements import compName, findAlgorithmByPredicate, parOR, seqAND
+from AthenaCommon.CFElements import findAlgorithmByPredicate, parOR, seqAND
 from functools import lru_cache
 
 from AthenaCommon.Logging import logging
@@ -32,7 +32,7 @@ class SequenceFilterNode(AlgNode):
         return [[]]
 
     def __repr__(self):
-        return "SequenceFilter::%s  [%s] -> [%s], chains=%s"%(compName(self.Alg),' '.join(map(str, self.getInputList())),' '.join(map(str, self.getOutputList())), self.getChains())
+        return "SequenceFilter::%s  [%s] -> [%s], chains=%s"%(self.Alg.name,' '.join(map(str, self.getInputList())),' '.join(map(str, self.getOutputList())), self.getChains())
 
 class RoRSequenceFilterNode(SequenceFilterNode):
     def __init__(self, name): 
@@ -118,7 +118,7 @@ class CFSequence(object):
         the filter is connected only once (to avoid multiple DH links)
         """
         if log.isEnabledFor(logging.DEBUG):
-            log.debug("CFSequence: connect Filter %s with %d menuSequences of step %s, using %d connections", compName(self.filter.Alg), len(self.step.sequences), self.step.name, len(connections))
+            log.debug("CFSequence: connect Filter %s with %d menuSequences of step %s, using %d connections", self.filter.Alg.name, len(self.step.sequences), self.step.name, len(connections))
             log.debug("   --- sequences: ")
             for seq in self.step.sequences:
                 log.debug(seq)
@@ -134,7 +134,7 @@ class CFSequence(object):
             nseq=0
             for seq in self.step.sequences:
                 filter_out = connections[nseq]
-                log.debug("CFSequence: Found input %s to sequence::%s from Filter::%s", filter_out, seq.name, compName(self.filter.Alg))
+                log.debug("CFSequence: Found input %s to sequence::%s from Filter::%s", filter_out, seq.name, self.filter.Alg.name)
                 seq.connectToFilter( filter_out )
                 nseq+=1
         else:
@@ -189,7 +189,7 @@ class CFSequence(object):
     
     def __repr__(self):
         return "--- CFSequence ---\n + Filter: %s \n + decisions: %s\n +  %s \n"%(\
-                    compName(self.filter.Alg), self.decisions, self.step)
+                    self.filter.Alg.name, self.decisions, self.step)
 
 
 class CFSequenceCA(CFSequence):
@@ -235,7 +235,7 @@ class CFSequenceCA(CFSequence):
 
     @lru_cache(None)
     def findComboHypoAlg(self):
-        return findAlgorithmByPredicate(self.seq, lambda alg: compName(alg) == self.step.Alg.getName() and isComboHypoAlg(alg))
+        return findAlgorithmByPredicate(self.seq, lambda alg: alg.name == self.step.Alg.name and isComboHypoAlg(alg))
 
 
     def createHypoTools(self, flags, chain, newstep):
