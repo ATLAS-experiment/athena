@@ -5,14 +5,14 @@ from collections import OrderedDict, defaultdict
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format, MetadataCategory
-from AthenaCommon.CFElements import seqAND, seqOR, parOR, flatAlgorithmSequences, getSequenceChildren, isSequence, hasProp, getProp
+from AthenaCommon.CFElements import seqAND, seqOR, parOR, flatAlgorithmSequences, getSequenceChildren, isSequence
 from AthenaCommon.Logging import logging
 
 __log = logging.getLogger('TriggerConfig')
 
 
 def __isCombo(alg):
-    return hasProp( alg, "MultiplicitiesMap" )
+    return hasattr( alg, "MultiplicitiesMap" )
 
 def __stepNumber(stepName):
     """extract step number frmo strings like Step2... -> 2"""
@@ -29,7 +29,7 @@ def collectHypos( steps ):
     __log.info("Collecting hypos from steps")
     hypos = defaultdict( list )
 
-    for stepSeq in getSequenceChildren( steps ):
+    for stepSeq in steps.Members:
         if not isSequence( stepSeq ):
             continue
 
@@ -38,13 +38,12 @@ def collectHypos( steps ):
             continue
 
         __log.debug( "collecting hypos from step %s", stepSeq.getName() )
-#        start = {}
         for seq,algs in flatAlgorithmSequences(stepSeq).items():
             for alg in sorted(algs, key=lambda t: str(t.getName())):
                 if isSequence( alg ):
                     continue
                 # will replace by function once dependencies are sorted
-                if hasProp(alg, 'HypoInputDecisions'):
+                if hasattr(alg, 'HypoInputDecisions'):
                     __log.debug("found hypo %s in %s", alg.getName(), stepSeq.getName())
                     if __isCombo( alg ) and len(alg.ComboHypoTools):
                         __log.debug( "    with %d comboHypoTools: %s", len(alg.ComboHypoTools), ' '.join(map(str, [tool.getName() for  tool in alg.ComboHypoTools])))
@@ -63,16 +62,12 @@ def __decisionsFromHypo( hypo ):
     else: # regular hypos
         return [ t.getName() for t in hypo.HypoTools if not isLegId(t.getName())], [str(hypo.HypoOutputDecisions)]
 
-def __getSequenceChildrenIfIsSequence( s ):
-    if isSequence( s ):
-        return getSequenceChildren( s )
-    return []
 
 def collectViewMakers( steps ):
     """ collect all view maker algorithms in the configuration """
     makers = [] # map with name, instance and encompasing recoSequence
-    for stepSeq in __getSequenceChildrenIfIsSequence( steps ):
-        for recoSeq in __getSequenceChildrenIfIsSequence( stepSeq ):
+    for stepSeq in getSequenceChildren( steps ):
+        for recoSeq in getSequenceChildren( stepSeq ):
             if not isSequence( recoSeq ):
                 continue
             algsInSeq = flatAlgorithmSequences( recoSeq )
@@ -96,10 +91,10 @@ def collectFilters( steps ):
     __log.info("Collecting filters")
     filters = defaultdict( list )
 
-    for stepSeq in getSequenceChildren( steps ):
+    for stepSeq in steps.Members:
         if "filter" in stepSeq.getName():
-            filters[stepSeq.getName()] = getSequenceChildren( stepSeq )
-            __log.debug("Found Filters in Step %s : %s", stepSeq.getName(), getSequenceChildren(stepSeq))
+            filters[stepSeq.getName()] = stepSeq.Members
+            __log.debug("Found Filters in Step %s : %s", stepSeq.getName(), stepSeq.Members)
 
     return filters
 
@@ -275,7 +270,7 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
 
         acc.merge(onlineServicesAcc)
 
-    mon.L1Decisions  = getProp( hltSeeding, 'HLTSeedingSummaryKey' )
+    mon.L1Decisions  = hltSeeding.HLTSeedingSummaryKey
 
     from DecisionHandling.DecisionHandlingConfig import setupFilterMonitoring
     [ [ setupFilterMonitoring( flags, alg ) for alg in algs ]  for algs in list(filters.values()) ]
