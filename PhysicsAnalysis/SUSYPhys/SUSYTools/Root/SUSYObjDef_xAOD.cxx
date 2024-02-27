@@ -1542,12 +1542,12 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_JMScalib, "Jet.JMSCalib", rEnv, false);
   //
   configFromFile(m_useBtagging, "Btag.enable", rEnv, true);
-  configFromFile(m_BtagTagger, "Btag.Tagger", rEnv, "DL1r");
+  configFromFile(m_BtagTagger, "Btag.Tagger", rEnv, "DL1dv01");
   configFromFile(m_BtagWP, "Btag.WP", rEnv, "FixedCutBEff_77");
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
 
   configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, m_isRun3 ? "xAODBTaggingEfficiency/13p6TeV/2023-22-13TeV-MC21-CDI-2023-09-13_v1.root": "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root");
-  configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "Envelope");
+  configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "SFEigen");
 
   configFromFile(m_useBtagging_trkJet, "BtagTrkJet.enable", rEnv, true);
   configFromFile(m_BtagTagger_trkJet, "BtagTrkJet.Tagger", rEnv, "DL1r");
