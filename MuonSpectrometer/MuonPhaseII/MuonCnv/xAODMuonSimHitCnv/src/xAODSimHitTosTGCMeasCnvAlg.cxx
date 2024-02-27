@@ -65,7 +65,7 @@ StatusCode xAODSimHitTosTGCMeasCnvAlg::execute(const EventContext& ctx) const {
             continue;
         }
         const Amg::Vector3D lHitPos{xAOD::toEigen(simHit->localPosition())};
-        int channelNumber = readOutEle->stripLayer(simStripLayerIdentifier).design().stripNumber(lHitPos.block<2,1>(0,0));
+        int channelNumber = readOutEle->stripDesign(simStripLayerIdentifier).stripNumber(lHitPos.block<2,1>(0,0));
         Identifier simStripChannelIdentifier = id_helper.channelID(hitId, id_helper.multilayer(hitId), id_helper.gasGap(hitId),1, channelNumber, isValid);
         if(channelNumber==-1){
             ATH_MSG_WARNING("hit is outside bounds, rejecting it");

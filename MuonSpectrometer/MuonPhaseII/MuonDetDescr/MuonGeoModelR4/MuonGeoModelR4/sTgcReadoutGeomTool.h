@@ -54,12 +54,25 @@ class sTgcReadoutGeomTool : public AthAlgTool,
       int wireGroupWidth{0}; //wireGroupWidth
       std::vector<double> firstWirePos; //firstWire 
 
-
       //// Pads
       std::vector<int> numPadEta; //nPadH
       std::vector<int> numPadPhi; //nPadPhi
       std::vector<double> firstPadHeight; //firstPadH
       std::vector<double> padHeight; //padH
+      ///Extra Pad Variables 
+      std::vector<int> PadPhiShift_A;
+      std::vector<int> PadPhiShift_C;
+      double anglePadPhi{0.};
+      std::vector<double> firstPadPhiDivision_A;
+      std::vector<double> firstPadPhiDivision_C;
+      std::vector<int> firstPadRow;
+      double lPadWidth{0.};
+      std::vector<int> rankPadEta; //rankPadH
+      std::vector<int> rankPadPhi; //rankPadPhi
+      double sPadWidth{0.};
+      
+
+
 
       double gasTck{0.}; //gasTck
 
@@ -71,10 +84,29 @@ class sTgcReadoutGeomTool : public AthAlgTool,
       using CutOutTable = std::map<Identifier, std::vector<CutOutArea>>;
 
        std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
+       std::set<WireDesignPtr, WireDesignSorter> wireGroupDesigns{};
+
        ParamBookTable parameterBook{};
        CutOutTable cutOuts{};
        
     };
+
+    /// Helper struct to translate the GeoModelShape into the parameters 
+    /// used to construct the readout element dimensions
+    struct sTgcShape{
+          /// Height of the module in radial direction
+         double halfHeight{0.};
+         /// Width of the module at the upper edge
+         double longWidth{0.};
+         /// Width of the module ath the bottom edge
+         double shortWidth{0.};
+         /// Thickness of the shape along global z
+         double thickness{0.};
+         /// Cut out of the module
+         double yCutOut{0.};
+    };
+
+    sTgcShape extractParameters(const GeoShape* shape) const;
 
     /// Retrieves the auxillary tables from the database
     StatusCode readParameterBook(FactoryCache& cache);

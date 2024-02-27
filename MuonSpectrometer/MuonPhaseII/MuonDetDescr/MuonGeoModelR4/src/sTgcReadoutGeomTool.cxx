@@ -38,6 +38,36 @@ sTgcReadoutGeomTool::sTgcReadoutGeomTool(const std::string& type,
     declareInterface<IMuonReadoutGeomTool>(this);
 }
 
+sTgcReadoutGeomTool::sTgcShape sTgcReadoutGeomTool::extractParameters(const GeoShape* shape) const {
+    sTgcShape result{};
+    if (shape->typeID() == GeoTrd::getClassTypeID()) {
+        const GeoTrd* trd = static_cast<const GeoTrd*>(shape);
+        result.longWidth = trd->getXHalfLength1();
+        result.shortWidth =  trd->getXHalfLength2();      
+        result.halfHeight =  trd->getYHalfLength1();
+        result.thickness =  trd->getZHalfLength();
+    } else if (shape->typeID() == GeoSimplePolygonBrep::getClassTypeID()) {
+        const GeoSimplePolygonBrep* poly = static_cast<const GeoSimplePolygonBrep*>(shape);
+        std::vector<Amg::Vector2D> polyEdges = m_geoUtilTool->polygonEdges(*poly);
+        result.thickness = poly->getDZ() * Gaudi::Units::mm;
+        if (polyEdges.size() == 4) {
+            result.longWidth = 0.5 * (polyEdges[0].x() - polyEdges[1].x()) * Gaudi::Units::mm;
+            result.shortWidth = 0.5 * (polyEdges[3].x() - polyEdges[2].x()) * Gaudi::Units::mm;            
+            result.halfHeight = 0.5 * (polyEdges[0].y() - polyEdges[3].y()) * Gaudi::Units::mm;
+        } else if (polyEdges.size() == 6) {
+            result.longWidth = 0.5 * (polyEdges[0].x() - polyEdges[1].x()) * Gaudi::Units::mm;
+            result.shortWidth = 0.5 * (polyEdges[4].x() - polyEdges[3].x()) * Gaudi::Units::mm;
+            result.halfHeight = 0.5 * (polyEdges[0].y() - polyEdges[4].y()) * Gaudi::Units::mm;
+            result.yCutOut = (polyEdges[1].y() - polyEdges[2].y()) * Gaudi::Units::mm;
+        }
+    } else {
+        ATH_MSG_FATAL("Unknown shape type "<<shape->type());
+        throw std::runtime_error("Invalid shape to extract sTGC parameters");
+    }
+    return result;
+}
+    
+
 StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& define, FactoryCache& factoryCache) {
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
                      <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
@@ -48,32 +78,14 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
     }
     ATH_MSG_DEBUG("Extracted shape "<<m_geoUtilTool->dumpShape(shape));
     /// The half sizes of the 
-    if (shape->typeID() != GeoSimplePolygonBrep::getClassTypeID()) {
-        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" expect shape to be a Trapezoid but it's "<<m_geoUtilTool->dumpShape(shape));
-        return StatusCode::FAILURE;
-    }
-    /// Registering vertices of the Polygon
-    const GeoSimplePolygonBrep* simplePoly = static_cast<const GeoSimplePolygonBrep*>(shape);
-    std::vector<Amg::Vector2D> polyChamb = m_geoUtilTool->polygonEdges(*simplePoly);
-    /// Building sTGC chamber
-    if (polyChamb.size() == 4) {
-        define.lHalfChamberLength = 0.5 * (polyChamb[0].x() - polyChamb[1].x()) * Gaudi::Units::mm;
-        define.sHalfChamberLength = 0.5 * (polyChamb[3].x() - polyChamb[2].x()) * Gaudi::Units::mm;
-        define.halfChamberTck = simplePoly->getDZ() * Gaudi::Units::mm;
-        define.halfChamberHeight = 0.5 * (polyChamb[0].y() - polyChamb[3].y()) * Gaudi::Units::mm;
-        define.yCutout = 0.;
-    }
-    else if (polyChamb.size() == 6) {
-        define.lHalfChamberLength = 0.5 * (polyChamb[0].x() - polyChamb[1].x()) * Gaudi::Units::mm;
-        define.sHalfChamberLength = 0.5 * (polyChamb[4].x() - polyChamb[3].x()) * Gaudi::Units::mm;
-        define.halfChamberTck = simplePoly->getDZ() * Gaudi::Units::mm;
-        define.halfChamberHeight = 0.5 * (polyChamb[0].y() - polyChamb[4].y()) * Gaudi::Units::mm;
-        define.yCutout = (polyChamb[1].y() - polyChamb[2].y()) * Gaudi::Units::mm;
-    } else {
-        ATH_MSG_FATAL("Found unusual polygon with number of vertices:" << polyChamb.size());
-        return StatusCode::FAILURE;
-    }
+    sTgcShape modPars = extractParameters(shape);
 
+    define.sHalfChamberLength = modPars.shortWidth;
+    define.lHalfChamberLength = modPars.longWidth;
+    define.halfChamberHeight = modPars.halfHeight;
+    define.halfChamberTck = modPars.thickness;
+    define.yCutout = modPars.yCutOut;
+    
     ATH_MSG_VERBOSE("chamber length (L/S) is: " << 2*define.lHalfChamberLength << "/" 
                  << 2*define.sHalfChamberLength << " chamber height is: " 
                  << 2*define.halfChamberHeight << " chamber thickness is: " << 2*define.halfChamberTck);
@@ -93,55 +105,62 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
     if (parBookItr == factoryCache.parameterBook.end()) {
         ATH_MSG_FATAL("The chamber "<<define.chambDesign<<" is not part of the WSTGC table");
         return StatusCode::FAILURE;
-    }
+    }    
+
     const wSTGCTable& paramBook{parBookItr->second};
+
     define.gasTck = paramBook.gasTck;
     /// Gasgaps are trapezoid
     unsigned int gasGap{0};
     for (physVolWithTrans& gapVol : allGasGaps) {
-        /// WireGroupDesign will join here
         StripDesignPtr stripDesign = std::make_unique<StripDesign>();
- 
-        const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.physVol);
-        if (gapShape->typeID() == GeoTrd::getClassTypeID()) {
-            const GeoTrd* gapTrd = static_cast<const GeoTrd*>(gapShape);
-            double halfHeight = gapTrd->getZHalfLength();
-            double halfShortY = std::min(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
-            double halfLongY = std::max(gapTrd->getYHalfLength1(), gapTrd->getYHalfLength2());
-            double firstStripPos = -halfHeight + paramBook.firstStripPitch[gasGap];
-            stripDesign->defineTrapezoid(halfShortY, halfLongY, halfHeight);
+        WireDesignPtr wireGroupDesign = std::make_unique<WireGroupDesign>();
+
+        sTgcShape gapPars = extractParameters(m_geoUtilTool->extractShape(gapVol.physVol));
+
+        if (true || !gapPars.yCutOut) {
+            //StripDesign
+            double firstStripPos = -gapPars.halfHeight + paramBook.firstStripPitch[gasGap] - 0.5 * paramBook.stripPitch;
+            define.firstStripPitch = paramBook.firstStripPitch;
+            ATH_MSG_DEBUG("FirstStripPos is: " << Amg::toString(firstStripPos, 2) << " and the half height is: " << gapPars.halfHeight);
+            stripDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight);
             stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
                                            paramBook.stripPitch, paramBook.stripWidth, paramBook.numStrips);
-            ATH_MSG_VERBOSE("Created new strip design "<<(*stripDesign));           
-        } else if (gapShape->typeID() == GeoSimplePolygonBrep::getClassTypeID()) {
-            /// Fetching edges of the diamond gasGap
-            const GeoSimplePolygonBrep* gapPoly = static_cast<const GeoSimplePolygonBrep*>(gapShape);
-            ATH_MSG_VERBOSE("Gas gap dimensions: "<<m_geoUtilTool->dumpShape(gapShape));
-            std::vector<Amg::Vector2D> polyGap = m_geoUtilTool->polygonEdges(*gapPoly);
-            double halfLongY = 0.5 * (polyGap[0].x() - polyGap[1].x()) * Gaudi::Units::mm;
-            double halfShortY = 0.5 * (polyGap[4].x() - polyGap[3].x()) * Gaudi::Units::mm;
-            double halfHeight = 0.5 * (polyGap[0].y() - polyGap[4].y()) * Gaudi::Units::mm;
-            double yCut = (polyGap[1].y() - polyGap[2].y()) * Gaudi::Units::mm;
-            double firstStripPos = -2*halfHeight + yCut + paramBook.firstStripPitch[gasGap];
-            ///Need Diamond function
-            stripDesign->defineStripLayout(Amg::Vector2D{firstStripPos, 0.},
-                                           paramBook.stripPitch, 
-                                           paramBook.stripWidth, 
-                                           paramBook.numStrips);
-            stripDesign->defineTrapezoid(halfShortY, halfLongY, halfHeight);
-            ATH_MSG_VERBOSE("Added new strip design "<<(*stripDesign));           
-        } else {
-            ATH_MSG_FATAL("Failed to extract a geo shape");
-            return StatusCode::FAILURE;
-        }
+            ATH_MSG_VERBOSE("Created new strip design "<<(*stripDesign));
 
-        /// Strip rotation by 90 degrees (Not sure if required)
-        gapVol.transform = gapVol.transform * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
-        ++gasGap;
+            //WireGroupDesign
+            wireGroupDesign->defineTrapezoid(gapPars.shortWidth, gapPars.longWidth, gapPars.halfHeight);
+            wireGroupDesign->flipTrapezoid();
+            unsigned int numWireGroups = paramBook.numWireGroups[gasGap];
+            /// Placing wires in the designated wireGroups for easy retrieval later, first and last are placed separately.
+            wireGroupDesign->declareGroup(paramBook.firstWireGroupWidth[gasGap]);
+            for (uint wireGr=2; wireGr<numWireGroups; wireGr++){
+                wireGroupDesign->declareGroup(paramBook.wireGroupWidth);
+            }
+            unsigned int lastWireGroup = (paramBook.numWires[gasGap] - wireGroupDesign->nAllWires());
+            wireGroupDesign->declareGroup(lastWireGroup);
+            /// Defining the wire group layout
+            /// firstWirePos locates the y-coordinate of the beginning of first WireGroup
+            double firstWirePos = paramBook.firstWirePos[gasGap];
+            wireGroupDesign->defineStripLayout(Amg::Vector2D{firstWirePos, 0.}, 
+                                                paramBook.wirePitch, 
+                                                paramBook.wireWidth, 
+                                                numWireGroups);
+
+            wireGroupDesign->defineWireCutout(paramBook.wireCutout[gasGap]);
+        }
+        /// Stacking strip and wireGroup layers
+        ++gasGap;        
+        wireGroupDesign = (*factoryCache.wireGroupDesigns.emplace(wireGroupDesign).first);
+        StripLayer wireGroupLayer(gapVol.transform * Amg::getRotateY3D(180* Gaudi::Units::deg), wireGroupDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Wire, 0));
+        ATH_MSG_VERBOSE("Added new wireGroup layer at "<<wireGroupLayer);
+        define.wireGroupLayers.push_back(std::move(wireGroupLayer));
+        if(!define.wireGroupDesign) define.wireGroupDesign = wireGroupDesign;
         stripDesign = (*factoryCache.stripDesigns.emplace(stripDesign).first);
-        StripLayer stripLayer(gapVol.transform, stripDesign, 
-                              sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0));
-        ATH_MSG_VERBOSE("Added new strip layer at "<<stripLayer);
+        StripLayer stripLayer(gapVol.transform * Amg::getRotateZ3D(-90. * Gaudi::Units::deg) * 
+                                                 Amg::getRotateY3D(180* Gaudi::Units::deg), stripDesign, 
+                                                 sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Strip, 0));
+        ATH_MSG_VERBOSE("Added new strip layer at "<< stripLayer);
         define.stripLayers.push_back(std::move(stripLayer));
         if (!define.stripDesign) define.stripDesign = stripDesign;  
     }
@@ -171,12 +190,9 @@ StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
 #endif
 
     for (auto& [key, pv] : mapFPV) {
-        /// The keys should be formatted like UPDATE!!
-        /// <STATION_NAME>_<MUON_CHAMBERTYPE>_etc. The <MUON_CHAMBERTYPE> also
-        /// indicates whether we're dealing with a MDT / TGC / CSC / RPC chamber
-        ///    If we are dealing with a MDT chamber, then there are 3 additional
-        ///    properties encoded into the chamber
-        ///       <STATIONETA>_(<STATIONPHI>-1)_ML
+        /// Key formatted as follows for sTGC:
+        /// <sTGC>_<L/S + MODULE TYPE>_<QUADRUPLET NUMBER>_<ETA INDEX>_<PHI INDEX + 1>
+        /// e.g. sTGC_STL1QL2_1_6_1 .
         std::vector<std::string> key_tokens = tokenize(key, "_");
         if (key_tokens.size() != 5 ||
             key_tokens[0].find("sTGC") == std::string::npos)
@@ -193,6 +209,7 @@ StatusCode sTgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
 #ifndef SIMULATIONBASE
         define.layerBounds = layerBounds;
 #endif
+        //Need identifier to get multilayer, the following constants don't matter.
         define.detElId = idHelper.channelID(stName, stEta, stPhi, ml, 1, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
         if (!isValid) {
             ATH_MSG_FATAL("Failed to build a good identifier out of " << key);
@@ -242,6 +259,17 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
         parBook.numPadPhi = tokenizeInt(record->getString("nPadPhi"), ";");
         parBook.firstPadHeight = tokenizeDouble(record->getString("firstPadH"), ";");
         parBook.padHeight = tokenizeDouble(record->getString("padH"), ";");
+        ///Extra Pad Variables
+        parBook.PadPhiShift_A = tokenizeInt(record->getString("PadPhiShift_A"), ";");
+        parBook.PadPhiShift_C = tokenizeInt(record->getString("PadPhiShift_C"), ";");
+        parBook.anglePadPhi = record->getDouble("anglePadPhi");
+        parBook.firstPadPhiDivision_A = tokenizeDouble(record->getString("firstPadPhiDivision_A"), ";");
+        parBook.firstPadPhiDivision_C = tokenizeDouble(record->getString("firstPadPhiDivision_C"), ";");
+        parBook.firstPadRow = tokenizeInt(record->getString("firstPadRow"), ";");
+        parBook.lPadWidth = record->getDouble("lPadWidth");
+        parBook.rankPadEta = tokenizeInt(record->getString("rankPadH"), ";");
+        parBook.rankPadPhi = tokenizeInt(record->getString("rankPadPhi"), ";");
+        parBook.sPadWidth = record->getDouble("sPadWidth");
 
         parBook.gasTck = record->getDouble("gasTck");
 
@@ -262,6 +290,18 @@ StatusCode sTgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
                         << " Pads in Phi: " << parBook.numPadPhi
                         << " firstPadHeight: " << parBook.firstPadHeight
                         << " padHeight: " << parBook.padHeight
+                        ///ExtraPadVariables
+                        << " PadPhiShift_A: " << parBook.PadPhiShift_A
+                        << " PadPhiShift_C: " << parBook.PadPhiShift_C
+                        << " anglePadPhi: " << parBook.anglePadPhi
+                        << " firstPadPhiDivision_A: " << parBook.firstPadPhiDivision_A
+                        << " firstPadPhiDivision_C: " << parBook.firstPadPhiDivision_C
+                        << " firstPadRow: " << parBook.firstPadRow
+                        << " lPadWidth: " << parBook.lPadWidth
+                        << " rankPadEta: " << parBook.rankPadEta
+                        << " rankPadPhi: " << parBook.rankPadPhi
+                        << " sPadWidth: " << parBook.sPadWidth
+
                         << " gasGapTck: " << parBook.gasTck);
     }
     return StatusCode::SUCCESS;

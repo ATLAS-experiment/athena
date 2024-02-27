@@ -93,6 +93,7 @@ namespace MuonGMR4 {
         const int wire = std::round(wirePitches.value_or(-1.) / stripPitch()) +1;
         return std::make_pair(wireGrp, wire);
     }
+    
 
 
 }

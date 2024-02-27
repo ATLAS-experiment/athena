@@ -80,7 +80,7 @@ G4bool sTgcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   
   
   // The middle of the gas gap is at X= 0
-  std::optional<double> travelDist = Amg::intersect<3>(localPos, localDir, Amg::Vector3D::UnitX(), 0.);
+  std::optional<double> travelDist = Amg::intersect<3>(localPos, localDir, Amg::Vector3D::UnitZ(), 0.);
   if (!travelDist) return true;
   const Amg::Vector3D locGapCross = localPos + (*travelDist) * localDir;
   ATH_MSG_VERBOSE("Propagation to the gas gap center: "<<Amg::toString(locGapCross, 2));

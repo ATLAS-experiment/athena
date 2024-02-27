@@ -28,7 +28,7 @@ using namespace ActsTrk;
 #include <TFile.h>
 #include <TTreeReader.h>
 
-constexpr double tolerance = 1.*Gaudi::Units::millimeter;
+constexpr double tolerance = 100.*Gaudi::Units::micrometer;
 
 /// Helper struct to represent a full sTgc chamber
 struct sTgcChamber{
@@ -56,36 +56,39 @@ struct sTgcChamber{
 
     ////Chamber Details
     unsigned int numLayers{0};
-    float yCutout{0.f};
-    float gasTck{0.f};
+    double yCutout{0.f};
+    double gasTck{0.f};
 
     ////Chamber lengths for debug
-    float sChamberLength{0.f};
-    float lChamberLength{0.f};
-    float chamberHeight{0.f};
-    float sGapLength{0.f};
-    float lGapLength{0.f};
-    float gapHeight{0.f};
+    double sChamberLength{0.f};
+    double lChamberLength{0.f};
+    double chamberHeight{0.f};
+    double sGapLength{0.f};
+    double lGapLength{0.f};
+    double gapHeight{0.f};
 
 
     //// Wires
     std::vector<unsigned int> numWires;
-    std::vector<short> firstWireGroupWidth;
-    std::vector<short> numWireGroups;
+    std::vector<uint> firstWireGroupWidth;
+    std::vector<uint> numWireGroups;
     std::vector<float> wireCutout;
-    float wirePitch{0.f};
-    float wireWidth{0.f};
-    short wireGroupWidth{0};
+    double wirePitch{0.f};
+    double wireWidth{0.f};
+    uint wireGroupWidth{0};
 
     //// Strips
     unsigned int numStrips{0};
-    float stripPitch{0.f};
-    float stripWidth{0.f};
+    double stripPitch{0.f};
+    double stripWidth{0.f};
     std::vector<float> firstStripPitch;
 
     //// Wires and Strips
     struct sTgcChannel{
-        Amg::Vector3D position{Amg::Vector3D::Zero()};
+        /// @brief local strip postion
+        Amg::Vector2D localPosition{Amg::Vector2D::Zero()};
+        /// @brief global strip postion
+        Amg::Vector3D globalPosition{Amg::Vector3D::Zero()};
         /// @brief  wireGroup/strip number
         unsigned int channelNumber{0};
         /// @brief  Gas gap of the wireGroup/strip
@@ -162,7 +165,8 @@ std::ostream& operator<<(std::ostream& ostr,const sTgcChamber::sTgcChannel & cha
     ostr<<channel.gasGap<<"/";
     ostr<<channel.channelNumber<<", ";
     ostr<<channel.channelType<<", ";
-    ostr<<"position: "<<Amg::toString(channel.position, 2);
+    ostr<<" global Position: "<<Amg::toString(channel.globalPosition, 2)<<", ";
+    ostr<<" local Position: "<<Amg::toString(channel.localPosition, 2);
     return ostr;
 }
 
@@ -218,23 +222,26 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<float> sGapLength{treeReader, "sGapLength"};
     TTreeReaderValue<float> lGapLength{treeReader, "lGapLength"};
     TTreeReaderValue<float> gapHeight{treeReader, "gapHeight"};
-/*
+
     //// Wire Dimensions
     TTreeReaderValue<std::vector<uint>> numWires{treeReader, "numWires"};
-    TTreeReaderValue<std::vector<short>> firstWireGroupWidth{treeReader, "firstWireGroupWidth"};
-    TTreeReaderValue<std::vector<short>> numWireGroups{treeReader, "numWireGroups"};
+    TTreeReaderValue<std::vector<uint>> firstWireGroupWidth{treeReader, "firstWireGroupWidth"};
+    TTreeReaderValue<std::vector<uint>> numWireGroups{treeReader, "numWireGroups"};
     TTreeReaderValue<std::vector<float>> wireCutout{treeReader, "wireCutout"};
     TTreeReaderValue<float> wirePitch{treeReader, "wirePitch"};
     TTreeReaderValue<float> wireWidth{treeReader, "wireWidth"};
-    TTreeReaderValue<short> wireGroupWidth{treeReader, "wireGroupWidth"};
+    TTreeReaderValue<uint> wireGroupWidth{treeReader, "wireGroupWidth"};
 
     TTreeReaderValue<std::vector<float>> globalWireGroupPosX{treeReader, "globalWireGroupPosX"};
     TTreeReaderValue<std::vector<float>> globalWireGroupPosY{treeReader, "globalWireGroupPosY"};
     TTreeReaderValue<std::vector<float>> globalWireGroupPosZ{treeReader, "globalWireGroupPosZ"};
+
+    TTreeReaderValue<std::vector<float>> localWireGroupPosX{treeReader, "localWireGroupPosX"};
+    TTreeReaderValue<std::vector<float>> localWireGroupPosY{treeReader, "localWireGroupPosY"};
  
     TTreeReaderValue<std::vector<uint8_t>> wireGroupNum{treeReader, "wireGroupNum"};
     TTreeReaderValue<std::vector<uint8_t>> wireGroupGasGap{treeReader, "wireGroupGasGap"};
-*/
+
     /// Strip dimensions 
     TTreeReaderValue<uint> numStrips{treeReader, "numStrips"};
     TTreeReaderValue<float> stripPitch{treeReader, "stripPitch"};
@@ -244,6 +251,9 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> globalStripPosX{treeReader, "globalStripPosX"};
     TTreeReaderValue<std::vector<float>> globalStripPosY{treeReader, "globalStripPosY"};
     TTreeReaderValue<std::vector<float>> globalStripPosZ{treeReader, "globalStripPosZ"};
+    
+    TTreeReaderValue<std::vector<float>> localStripPosX{treeReader, "localStripPosX"};
+    TTreeReaderValue<std::vector<float>> localStripPosY{treeReader, "localStripPosY"};
 
     TTreeReaderValue<std::vector<uint>> stripNum{treeReader, "stripNumber"};
     TTreeReaderValue<std::vector<uint8_t>> stripGasGap{treeReader, "stripGasGap"};
@@ -282,7 +292,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformX{treeReader, "GeoModelTransformX"};
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
-
+    /// Local to Global Strip Transformation
     TTreeReaderValue<std::vector<float>> stripRotCol1X{treeReader, "stripRotLinearCol1X"};
     TTreeReaderValue<std::vector<float>> stripRotCol1Y{treeReader, "stripRotLinearCol1Y"};
     TTreeReaderValue<std::vector<float>> stripRotCol1Z{treeReader, "stripRotLinearCol1Z"};
@@ -300,7 +310,25 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> stripRotTransZ{treeReader, "stripRotTranslationZ"};
 
     TTreeReaderValue<std::vector<uint8_t>> stripRotGasGap{treeReader, "stripRotGasGap"};
+    
+    /// Local to Global wire Group Transformation
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol1X{treeReader, "wireGroupRotLinearCol1X"};
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol1Y{treeReader, "wireGroupRotLinearCol1Y"};
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol1Z{treeReader, "wireGroupRotLinearCol1Z"};
 
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol2X{treeReader, "wireGroupRotLinearCol2X"};
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol2Y{treeReader, "wireGroupRotLinearCol2Y"};
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol2Z{treeReader, "wireGroupRotLinearCol2Z"};
+
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol3X{treeReader, "wireGroupRotLinearCol3X"};
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol3Y{treeReader, "wireGroupRotLinearCol3Y"};
+    TTreeReaderValue<std::vector<float>> wireGroupRotCol3Z{treeReader, "wireGroupRotLinearCol3Z"};
+
+    TTreeReaderValue<std::vector<float>> wireGroupRotTransX{treeReader, "wireGroupRotTranslationX"};
+    TTreeReaderValue<std::vector<float>> wireGroupRotTransY{treeReader, "wireGroupRotTranslationY"};
+    TTreeReaderValue<std::vector<float>> wireGroupRotTransZ{treeReader, "wireGroupRotTranslationZ"};
+
+    TTreeReaderValue<std::vector<uint8_t>> wireGroupRotGasGap{treeReader, "wireGroupRotGasGap"};
 
     while (treeReader.Next()) {
         sTgcChamber newchamber{};
@@ -326,7 +354,6 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
         newchamber.lChamberLength = (*lChamberLength);
         newchamber.chamberHeight = (*chamberHeight);
 
-/*
         //// Wires
         newchamber.numWires = (*numWires);
         newchamber.firstWireGroupWidth = (*firstWireGroupWidth);
@@ -335,12 +362,11 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
         newchamber.wirePitch = (*wirePitch);
         newchamber.wireWidth = (*wireWidth);
         newchamber.wireGroupWidth = (*wireGroupWidth);
-*/
+
         //// Strips
         newchamber.numStrips = (*numStrips);
         newchamber.stripPitch = (*stripPitch);
         newchamber.stripWidth = (*stripWidth);
-        //newchamber.firstStripPitch = (*firstStripPitch);
 /*
         //// Pads
         newchamber.numPads = (*numPads);
@@ -353,27 +379,31 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
         geoRot.col(1) = Amg::Vector3D((*geoModelTransformX)[2], (*geoModelTransformY)[2], (*geoModelTransformZ)[2]);
         geoRot.col(2) = Amg::Vector3D((*geoModelTransformX)[3], (*geoModelTransformY)[3], (*geoModelTransformZ)[3]);       
         newchamber.geoModelTransform = Amg::getTransformFromRotTransl(std::move(geoRot), std::move(geoTrans));       
-/*                
+                
         //WireGroups
         for (size_t wg = 0; wg < globalWireGroupPosX->size(); ++wg){
             sTgcChamber::sTgcChannel newWireGroup{};
-            newWireGroup.position = Amg::Vector3D{(*globalWireGroupPosX)[wg], (*globalWireGroupPosY)[wg], (*globalWireGroupPosZ)[wg]};      
+            newWireGroup.localPosition = Amg::Vector2D{(*localWireGroupPosX)[wg], (*localWireGroupPosY)[wg]};    
+            newWireGroup.globalPosition = Amg::Vector3D{(*globalWireGroupPosX)[wg], (*globalWireGroupPosY)[wg], (*globalWireGroupPosZ)[wg]};      
             newWireGroup.gasGap = (*wireGroupGasGap)[wg];
             newWireGroup.channelNumber = (*wireGroupNum)[wg];
             newWireGroup.channelType = 2;
+            //if (newWireGroup.channelNumber > 0) continue;
             newchamber.channels.insert(std::move(newWireGroup));
         }
-*/        
-        //Strips
+
+        //Strips Filling in global positions
         for (size_t s = 0; s < globalStripPosX->size(); ++s){
             sTgcChamber::sTgcChannel newStrip{};
-            newStrip.position = Amg::Vector3D{(*globalStripPosX)[s], (*globalStripPosY)[s], (*globalStripPosZ)[s]};    
+            newStrip.localPosition = Amg::Vector2D{(*localStripPosX)[s], (*localStripPosY)[s]};    
+            newStrip.globalPosition = Amg::Vector3D{(*globalStripPosX)[s], (*globalStripPosY)[s], (*globalStripPosZ)[s]};    
             newStrip.gasGap = (*stripGasGap)[s];
             newStrip.channelNumber = (*stripNum)[s];
             newStrip.channelType = 1;
-            if (newStrip.channelNumber > 3 /* || newStrip.gasGap != 1 || newStrip.channelType != 1*/) continue;
+            //if (newStrip.channelNumber > 2 && newStrip.channelNumber < newchamber.numStrips) continue;
             newchamber.channels.insert(std::move(newStrip));
         }
+
 /*
         //Pads
         for (size_t p = 0; p < globalPadPosX->size(); ++p){
@@ -391,15 +421,27 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
         }
 */
         for (size_t l = 0; l < stripRotGasGap->size(); ++l){
-            sTgcChamber::sTgcLayer newLayer{};
-            newLayer.gasGap = (*stripRotGasGap)[l];
+            sTgcChamber::sTgcLayer stripLayer{};
+            stripLayer.gasGap = (*stripRotGasGap)[l];
             Amg::RotationMatrix3D stripRot{Amg::RotationMatrix3D::Identity()};
             stripRot.col(0) = Amg::Vector3D((*stripRotCol1X)[l],(*stripRotCol1Y)[l], (*stripRotCol1Z)[l]);
             stripRot.col(1) = Amg::Vector3D((*stripRotCol2X)[l],(*stripRotCol2Y)[l], (*stripRotCol2Z)[l]);
             stripRot.col(2) = Amg::Vector3D((*stripRotCol3X)[l],(*stripRotCol3Y)[l], (*stripRotCol3Z)[l]);
             Amg::Vector3D layTrans{(*stripRotTransX)[l], (*stripRotTransY)[l], (*stripRotTransZ)[l]};
-            newLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), std::move(layTrans)/*Amg::Vector3D::Zero()*/);
-            newchamber.layers.insert(std::move(newLayer));
+            stripLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), std::move(layTrans));
+            newchamber.layers.insert(std::move(stripLayer));
+        }
+        
+        for (size_t l = 0; l < wireGroupRotGasGap->size(); ++l){
+            sTgcChamber::sTgcLayer wireGroupLayer{};
+            wireGroupLayer.gasGap = (*wireGroupRotGasGap)[l];
+            Amg::RotationMatrix3D wireGroupRot{Amg::RotationMatrix3D::Identity()};
+            wireGroupRot.col(0) = Amg::Vector3D((*wireGroupRotCol1X)[l],(*wireGroupRotCol1Y)[l], (*wireGroupRotCol1Z)[l]);
+            wireGroupRot.col(1) = Amg::Vector3D((*wireGroupRotCol2X)[l],(*wireGroupRotCol2Y)[l], (*wireGroupRotCol2Z)[l]);
+            wireGroupRot.col(2) = Amg::Vector3D((*wireGroupRotCol3X)[l],(*wireGroupRotCol3Y)[l], (*wireGroupRotCol3Z)[l]);
+            Amg::Vector3D layTrans{(*wireGroupRotTransX)[l], (*wireGroupRotTransY)[l], (*wireGroupRotTransZ)[l]};
+            wireGroupLayer.transform = Amg::getTransformFromRotTransl(std::move(wireGroupRot), std::move(layTrans));
+            newchamber.layers.insert(std::move(wireGroupLayer));
         }
 
         auto insert_itr = to_ret.insert(std::move(newchamber));
@@ -416,7 +458,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
 
 #define TEST_BASICPROP(attribute, propName) \
     if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {           \
-        std::cerr<<"sTgcGeoModelComparison() "<<__LINE__<<": The chamber "<<reference  \
+        std::cerr<<"sTgcGeoModelComparison() "<<__LINE__<<": The chamber "<<reference \
                  <<" differs w.r.t "<<propName<<" "<< reference.attribute             \
                  <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;          \
         chamberOkay = false;                                                          \
@@ -481,37 +523,16 @@ int main( int argc, char** argv ) {
         TEST_BASICPROP(sGapLength, "GasGap length on the short side");
         TEST_BASICPROP(lGapLength, "GasGap length on the long side");
         TEST_BASICPROP(gapHeight, "GasGap Height");
-
-
-/*     
+     
         TEST_BASICPROP(wirePitch, "pitch of a single wire");
         TEST_BASICPROP(wireWidth, "width of a single wire");
         TEST_BASICPROP(wireGroupWidth, "number of wires in a normal wiregroup");
-*/        
+        
         TEST_BASICPROP(numStrips, "number of strips in a chamber");
         TEST_BASICPROP(stripPitch, "pitch of a normal strip");
         TEST_BASICPROP(stripWidth, "width of a normal strip");
-/*       
-        using sTgcWireGroup = sTgcChamber::sTgcChannel;    
-        for (const sTgcWireGroup& refWireGroup : reference.channels) {
-            std::set<sTgcWireGroup>::const_iterator wireGroup_itr = test.channels.find(refWireGroup);
-            if (wireGroup_itr == test.channels.end()) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                        <<refWireGroup<<" is not found. "<<std::endl;
-                chamberOkay = false;
-                continue;
-            }
-            const sTgcWireGroup& testWireGroup{*wireGroup_itr};
-            const Amg::Vector3D diffWireGroup{testWireGroup.position - refWireGroup.position};
-            if (diffWireGroup.mag() > tolerance) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                        <<testWireGroup<<" should be located at "
-                        <<Amg::toString(refWireGroup.position, 2)<<" in chamber "
-                        <<" displacement: "<<Amg::toString(diffWireGroup,2)<<std::endl;
-                chamberOkay = false;
-            }
-        }
-*/      int c = 0;
+
+        int c = 0;
         using sTgcLayer = sTgcChamber::sTgcLayer;
         for (const sTgcLayer& refLayer : reference.layers) {
             std::set<sTgcLayer>::const_iterator lay_itr = test.layers.find(refLayer);
@@ -524,15 +545,16 @@ int main( int argc, char** argv ) {
             const sTgcLayer& testLayer{*lay_itr};
             const Amg::Transform3D layAlignment = testLayer.transform.inverse() *
                                                   refLayer.transform;
+            TEST_BASICPROP(numWires[c], "number of wires in a chamber");
+            TEST_BASICPROP(firstWireGroupWidth[c], "number of wires in first wire group");
+            
+            ///Dumping local to global layer transformation
             ++c;
-            if (c!=1) continue;
+/*
             std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                     << "The R4 GeoModel transform is: " << Amg::toString(test.geoModelTransform) 
-                     << " and the R3 GeoModel is  transform is: " << Amg::toString(reference.geoModelTransform) << std::endl;
-            //std::cout <<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-            //          << "The test layer transform for layer: "<< c << " is: " << Amg::toString(testLayer.transform) 
-            //          << " and the reference layer transform is: " << Amg::toString(refLayer.transform) <<std::endl;
-
+                      << "The test layer transform for layer "<< c << " is: " << Amg::toString(testLayer.transform) 
+                      << " and the reference layer transform is: " << Amg::toString(refLayer.transform) <<std::endl;
+*/
             if (!Amg::doesNotDeform(layAlignment)) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
                          <<"the layer "<<testLayer<<" is misaligned w.r.t. reference by "
@@ -541,24 +563,35 @@ int main( int argc, char** argv ) {
                 continue;
             }
         }
-
-        using sTgcStrip = sTgcChamber::sTgcChannel;   
-        for (const sTgcStrip& refStrip : reference.channels) {
-            std::set<sTgcStrip>::const_iterator strip_itr = test.channels.find(refStrip);
-            if (strip_itr == test.channels.end()) {
+            
+        using sTgcChannel = sTgcChamber::sTgcChannel;   
+        for (const sTgcChannel& refChannel : reference.channels) {
+            std::set<sTgcChannel>::const_iterator channel_itr = test.channels.find(refChannel);
+            if (channel_itr == test.channels.end()) {
                 std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                        <<refStrip<<" is not found. "<<std::endl;
+                        <<refChannel<<" is not found. "<<std::endl;
                 chamberOkay = false;
                 continue;
             }
-            const sTgcStrip& testStrip{*strip_itr};
+            const sTgcChannel& testChannel{*channel_itr};
         
-            const Amg::Vector3D diffStrip{testStrip.position - refStrip.position};
-            if (diffStrip.mag() > tolerance) {
-                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
-                         <<testStrip<<" should be located at "<<Amg::toString(refStrip.position, 2)
-                         <<" displacement: "<<Amg::toString(diffStrip,2)<<std::endl;
+            const Amg::Vector3D diffGlobalPos{testChannel.globalPosition - refChannel.globalPosition};
+            const Amg::Vector2D diffLocalPos{testChannel.localPosition - refChannel.localPosition};
+/*                        
+            if (diffGlobalPos.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"channel (gasGap/number): "
+                            <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", "<<testChannel.channelType<<", "<< " global position: "
+                            <<Amg::toString(testChannel.globalPosition, 2)<<" should be located at "<<Amg::toString(refChannel.globalPosition, 2)
+                            <<" displacement: "<<Amg::toString(diffGlobalPos,2)<<std::endl;
                 chamberOkay = false;
+            }
+*/
+            if (diffLocalPos.mag() > tolerance) {
+                std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "<<"channel (gasGap/number): "
+                            <<testChannel.gasGap<<"/"<<testChannel.channelNumber<<", "<<testChannel.channelType<<", "<< " local position: "
+                            <<Amg::toString(testChannel.localPosition, 2)<<" should be located at "<<Amg::toString(refChannel.localPosition, 2)
+                            <<" displacement: "<<Amg::toString(diffLocalPos,2)<<std::endl;
+                                chamberOkay = false;
             }
         }
 /*
