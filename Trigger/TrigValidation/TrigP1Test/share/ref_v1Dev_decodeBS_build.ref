@@ -8949,6 +8949,8 @@ HLT_mu6_ivarmedium_L1MU5VF:
     2: 2
     3: 2
     4: 2
+HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1BTAG-MU5VFjJ80:
+  eventCount: 0
 HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU5VF_J40:
   eventCount: 0
 HLT_mu6_j100_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU5VF_jJ80:
@@ -8957,7 +8959,7 @@ HLT_mu6_j100_0eta290_boffperf_pf_ftf_dRAB04_L1BTAG-MU5VFjJ90:
   eventCount: 0
 HLT_mu6_j100_0eta290_boffperf_pf_ftf_dRAB04_L1MU5VF_jJ80:
   eventCount: 0
-HLT_mu6_j45_0eta290_boffperf_pf_ftf_dRAB03_L1BTAG-MU5VFjJ50:
+HLT_mu6_j45_0eta290_boffperf_pf_ftf_dRAB03_L1BTAG-MU5VFjJ80:
   eventCount: 0
 HLT_mu6_j45_nojcalib_L1J20:
   eventCount: 0

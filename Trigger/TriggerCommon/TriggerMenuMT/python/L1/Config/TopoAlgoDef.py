@@ -987,7 +987,7 @@ class TopoAlgoDef:
         # added for muon-jet:
         algoList = [
             {"minDr": 0, "maxDr": 4, "otype1" : "MU3Vab",  "otype2" : "CjJ", "ocut2": 40, "olist2" : "ab"}, #0DR04-MU3Vab-CjJ40ab
-            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 50, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ50ab
+            {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 80, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ80ab
             {"minDr": 0, "maxDr": 4, "otype1" : "MU5VFab", "otype2" : "CjJ", "ocut2": 90, "olist2" : "ab"}, #0DR04-MU5VFab-CjJ90ab
         ]
         for x in algoList:
