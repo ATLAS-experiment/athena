@@ -1,12 +1,12 @@
-"""Define method to configure and test SCT_ModuleVetoTestAlg
+"""Define method to configure and test ITkStrip_ModuleVetoTestAlg
 
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def SCT_StripVetoTestAlgCfg(flags, name="SCT_ModuleVetoTestAlg", **kwargs):
-    """Return a configured SCT_ModuleVetoTestAlg"""
+def ITkStripVetoTestAlgCfg(flags, name="ITkStripModuleVetoTestAlg", **kwargs):
+    """Return a configured ITkStripModuleVetoTestAlg"""
     acc = ComponentAccumulator()
     from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ModuleVetoCfg
     acc.addEventAlgo(CompFactory.SCT_ModuleVetoTestAlg(name,
@@ -23,12 +23,12 @@ if __name__=="__main__":
     flags.Input.Files = []
     flags.Input.isMC = True
     flags.Input.ProjectName = "mc16_13TeV"
-    flags.Input.RunNumbers = [300000] # MC16c 2017 run number
-    flags.Input.TimeStamps = [1500000000] # MC16c 2017 time stamp
-    flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-18"
+    flags.Input.RunNumbers = [350200] # MC23 PhaseII mu=200 run number
+    flags.Input.TimeStamps = [1625130000] # MC23 PhaseII mu=200 time stamp
+    flags.IOVDb.GlobalTag = "OFLP200"
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
-    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
-    flags.Detector.GeometrySCT = True
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+    flags.Detector.GeometryITkStrip = True
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -40,13 +40,13 @@ if __name__=="__main__":
     kwargs = {}
 
     ### Use COOL database for SCT_ModuleVetoTool
-    kwargs["useDB"] = True # False
+    kwargs["useDB"] = False
     if kwargs["useDB"]:
-        kwargs["folderTag"] = "SCTManualBadModules-000-00"
+        kwargs["folderStrings"] = "/ITk/Manual/BadModules"
         kwargs["BadModuleIdentifiers"] = ["database"]
     else:
         kwargs["BadModuleIdentifiers"] = ["1", "2"]
 
-    cfg.merge(SCT_StripVetoTestAlgCfg(flags, **kwargs))
+    cfg.merge(ITkStripVetoTestAlgCfg(flags, **kwargs))
 
     cfg.run(maxEvents=20)

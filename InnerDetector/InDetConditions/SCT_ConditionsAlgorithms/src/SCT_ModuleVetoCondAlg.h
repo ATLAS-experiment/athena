@@ -27,8 +27,8 @@ class SCT_ModuleVetoCondAlg : public AthReentrantAlgorithm
   virtual bool isReEntrant() const override final { return false; }
 
  private:
-  SG::ReadCondHandleKey<AthenaAttributeList> m_readKey{this, "ReadKey", "/SCT/Manual/BadModules", "Key of input (raw) bad module conditions folder"};
-  SG::WriteCondHandleKey<SCT_ModuleVetoCondData> m_writeKey{this, "WriteKey", "SCT_ModuleVetoCondData", "Key of output (derived) bad module conditions data"};
+  SG::ReadCondHandleKey<AthenaAttributeList> m_readKey{this, "ReadKey", "/ITk/Manual/BadModules", "Key of input (raw) bad module conditions folder"};
+  SG::WriteCondHandleKey<SCT_ModuleVetoCondData> m_writeKey{this, "WriteKey", "ITkStrip_ModuleVetoCondData", "Key of output (derived) bad module conditions data"};
 };
 
 #endif // SCT_MODULEVETOCONDALG
