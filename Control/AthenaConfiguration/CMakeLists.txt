@@ -100,8 +100,4 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
     atlas_add_test( ComponentAccumulatorTestReco
                     SCRIPT test/testComponentAccumulatorReco.py
                     POST_EXEC_SCRIPT nopost.sh )
-
-    atlas_add_test( OldFlags2NewFlagsTest
-                    SCRIPT python -m AthenaConfiguration.OldFlags2NewFlags
-                    POST_EXEC_SCRIPT nopost.sh )
 endif()
