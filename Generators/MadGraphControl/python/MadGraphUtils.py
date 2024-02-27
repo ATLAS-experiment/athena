@@ -2034,10 +2034,11 @@ def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=M
         mglog.info('Using input param card at '+param_card_input)
 
     #ensure all blocknames and paramnames are upper case
+    paramsUpper = {}
     for blockName in list(params.keys()):
-       params[blockName.upper()] = params.pop(blockName)
-       for paramName in list(params[blockName.upper()].keys()):
-          params[blockName.upper()][paramName.upper()] = params[blockName.upper()].pop(paramName)
+       paramsUpper[blockName.upper()] = params[blockName]
+       for paramName in list(params[blockName].keys()):
+          paramsUpper[blockName.upper()][paramName.upper()] = params[blockName.upper()][paramName]
 
     if param_card_backup is not None:
         mglog.info('Keeping backup of original param card at '+param_card_backup)
@@ -2061,23 +2062,23 @@ def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=M
             if decayEdit and blockName == 'DECAY':
                 decayEdit = False # Start a new DECAY block
             pos = 0 if line.strip().startswith('DECAY') else 1
-            if blockName=='MASS' and 'MASS' in params:
+            if blockName=='MASS' and 'MASS' in paramsUpper:
                 # Any residual masses to set?
                 if "MASS" in doneParams:
-                    leftOvers = [ x for x in params['MASS'] if x not in doneParams['MASS'] ]
+                    leftOvers = [ x for x in paramsUpper['MASS'] if x not in doneParams['MASS'] ]
                 else:
-                    leftOvers = [ x for x in params['MASS'] ]
+                    leftOvers = [ x for x in paramsUpper['MASS'] ]
 
                 for pdg_id in leftOvers:
-                    mglog.warning('Adding mass line for '+str(pdg_id)+' = '+str(params['MASS'][pdg_id])+' which was not in original param card')
-                    newcard.write('   '+str(pdg_id)+'  '+str(params['MASS'][pdg_id])+'\n')
+                    mglog.warning('Adding mass line for '+str(pdg_id)+' = '+str(paramsUpper['MASS'][pdg_id])+' which was not in original param card')
+                    newcard.write('   '+str(pdg_id)+'  '+str(paramsUpper['MASS'][pdg_id])+'\n')
                     doneParams['MASS'][pdg_id]=True
-            if blockName=='DECAY' and 'DECAY' not in line.strip().upper() and 'DECAY' in params:
+            if blockName=='DECAY' and 'DECAY' not in line.strip().upper() and 'DECAY' in paramsUpper:
                 # Any residual decays to include?
-                leftOvers = [ x for x in params['DECAY'] if x not in doneParams['DECAY'] ]
+                leftOvers = [ x for x in paramsUpper['DECAY'] if x not in doneParams['DECAY'] ]
                 for pdg_id in leftOvers:
                     mglog.warning('Adding decay for pdg id '+str(pdg_id)+' which was not in the original param card')
-                    newcard.write( params['DECAY'][pdg_id].strip()+'\n' )
+                    newcard.write( paramsUpper['DECAY'][pdg_id].strip()+'\n' )
                     doneParams['DECAY'][pdg_id]=True
             blockName = line.strip().upper().split()[pos]
         if decayEdit:
@@ -2099,10 +2100,10 @@ def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=M
            continue
 
         #check if we have params for this block
-        if blockName not in params:
+        if blockName not in paramsUpper:
            newcard.write(linewithcomment)
            continue
-        blockParams = params[blockName]
+        blockParams = paramsUpper[blockName]
         # Check the spacing in the key
         akey = find_key_and_update(akey,blockParams)
 
@@ -2152,10 +2153,10 @@ def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=M
         # Done editing the line!
 
     #check that all specified parameters have been updated (helps to catch typos)
-    for blockName in params:
-       if blockName not in doneParams and len(params[blockName].keys())>0:
+    for blockName in paramsUpper:
+       if blockName not in doneParams and len(paramsUpper[blockName].keys())>0:
           raise RuntimeError('Did not find any of the parameters for block '+blockName+' in param_card')
-       for paramName in params[blockName]:
+       for paramName in paramsUpper[blockName]:
           if paramName not in doneParams[blockName]:
             raise RuntimeError('Was not able to replace parameter '+paramName+' in param_card')
 
@@ -2174,10 +2175,9 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
         return
 
     # Operate on lower case settings, and choose the capitalization MG5 has as the default (or all lower case)
+    settings_lower = {}
     for s in list(settings.keys()):
-        if s.lower() not in settings:
-            settings[s.lower()] = settings[s]
-            del settings[s]
+        settings_lower[s.lower()] = settings[s]
 
     # Check for the default run card location
     if run_card_input is None:
@@ -2192,26 +2192,26 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
     isNLO=is_NLO_run(process_dir=process_dir)
     # add gobal PDF and scale uncertainty config to extras, except PDF or weights for syscal config are explictly set
     if not skipBaseFragment:
-        MadGraphControl.MadGraphSystematicsUtils.setup_pdf_and_systematic_weights(MADGRAPH_PDFSETTING,settings,isNLO)
+        MadGraphControl.MadGraphSystematicsUtils.setup_pdf_and_systematic_weights(MADGRAPH_PDFSETTING,settings_lower,isNLO)
 
     # Get some info out of the runArgs
     if runArgs is not None:
         beamEnergy,rand_seed = get_runArgs_info(runArgs)
-        if 'iseed' not in settings:
-            settings['iseed']=rand_seed
-        if not isNLO and 'python_seed' not in settings:
-            settings['python_seed']=rand_seed
-        if 'beamenergy' in settings:
-            mglog.warning('Do not set beam energy in MG settings. The variables are ebeam1 and ebeam2. Will use your setting of '+str(settings['beamenergy']))
-            beamEnergy=settings['beamenergy']
-            settings.pop('beamenergy')
-        if 'ebeam1' not in settings:
-            settings['ebeam1']=beamEnergy
-        if 'ebeam2' not in settings:
-            settings['ebeam2']=beamEnergy
+        if 'iseed' not in settings_lower:
+            settings_lower['iseed']=rand_seed
+        if not isNLO and 'python_seed' not in settings_lower:
+            settings_lower['python_seed']=rand_seed
+        if 'beamenergy' in settings_lower:
+            mglog.warning('Do not set beam energy in MG settings. The variables are ebeam1 and ebeam2. Will use your setting of '+str(settings_lower['beamenergy']))
+            beamEnergy=settings_lower['beamenergy']
+            settings_lower.pop('beamenergy')
+        if 'ebeam1' not in settings_lower:
+            settings_lower['ebeam1']=beamEnergy
+        if 'ebeam2' not in settings_lower:
+            settings_lower['ebeam2']=beamEnergy
     # Make sure nevents is an integer
-    if 'nevents' in settings:
-        settings['nevents'] = int(settings['nevents'])
+    if 'nevents' in settings_lower:
+        settings_lower['nevents'] = int(settings_lower['nevents'])
 
     mglog.info('Modifying run card located at '+run_card_input)
     if run_card_backup is not None:
@@ -2219,7 +2219,7 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
         run_card_old = run_card_backup
     else:
         run_card_old = run_card_input+'.old_to_be_deleted'
-    mglog.debug('Modifying runcard settings: '+str(settings))
+    mglog.debug('Modifying runcard settings: '+str(settings_lower))
     if os.path.isfile(run_card_old):
         os.unlink(run_card_old) # delete old backup
     os.rename(run_card_input, run_card_old) # change name of original card
@@ -2235,28 +2235,28 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
                 setting = command.split('=')[-1] #.strip()
                 stripped_setting = setting.strip()
                 oldValue = '='.join(command.split('=')[:-1])
-                if stripped_setting.lower() in settings:
+                if stripped_setting.lower() in settings_lower:
                     # if setting set to 'None' it will be removed from run_card
-                    if settings[stripped_setting.lower()] is None:
+                    if settings_lower[stripped_setting.lower()] is None:
                         line=''
                         mglog.info('Removing '+stripped_setting+'.')
                         used_settings += [ stripped_setting.lower() ]
                     else:
-                        line = oldValue.replace(oldValue.strip(), str(settings[stripped_setting.lower()]))+'='+setting
+                        line = oldValue.replace(oldValue.strip(), str(settings_lower[stripped_setting.lower()]))+'='+setting
                         if comment != '':
                             line += '  !' + comment
-                        mglog.info('Setting '+stripped_setting+' = '+str(settings[stripped_setting.lower()]))
+                        mglog.info('Setting '+stripped_setting+' = '+str(settings_lower[stripped_setting.lower()]))
                         used_settings += [ stripped_setting.lower() ]
         newCard.write(line.strip()+'\n')
 
     # Clean up unused options
-    for asetting in settings:
+    for asetting in settings_lower:
         if asetting in used_settings:
             continue
-        if settings[asetting] is None:
+        if settings_lower[asetting] is None:
             continue
-        mglog.warning('Option '+asetting+' was not in the default run_card.  Adding by hand a setting to '+str(settings[asetting]) )
-        newCard.write( ' '+str(settings[asetting])+'   = '+str(asetting)+'\n')
+        mglog.warning('Option '+asetting+' was not in the default run_card.  Adding by hand a setting to '+str(settings_lower[asetting]) )
+        newCard.write( ' '+str(settings_lower[asetting])+'   = '+str(asetting)+'\n')
     # close files
     oldCard.close()
     newCard.close()
