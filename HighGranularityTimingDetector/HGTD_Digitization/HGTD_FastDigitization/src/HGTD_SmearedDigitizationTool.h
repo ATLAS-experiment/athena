@@ -63,17 +63,20 @@ public:
 
 private:
   // methods called within processAllSubEvents
-  StatusCode retrieveTruth();
+  StatusCode retrieveTruth(PRD_MultiTruthCollection*& prd_truth_coll);
 
   TimedHitCollection<SiHit> setupTimedHitCollection();
 
-  // creat HGTD_Cluster from SiHit
-  StatusCode digitize(const EventContext& ctx);
+  // create HGTD_Cluster from SiHit
+  StatusCode digitize(const EventContext& ctx,
+                      TimedHitCollection<SiHit>& timed_hit_collection,
+                      HGTD_DetElement_RIO_Map_t& det_element_rio_map);
 
   StatusCode fillMultiTruthCollection(PRD_MultiTruthCollection*, Cluster_t*,
                                       const TimedHitPtr<SiHit>&, const EventContext&);
 
-  StatusCode fillClusterContainer();
+  StatusCode fillClusterContainer(HGTD_DetElement_RIO_Map_t& det_element_rio_map,
+                                  ClusterContainer_t& cluster_container);
 
   float smearPosition(float pos, float sig, float boundary, CLHEP::HepRandomEngine * rndmEngine);
 
@@ -82,19 +85,14 @@ private:
   const HGTD_DetectorManager* m_hgtd_det_manager{nullptr};
   const HGTD_ID* m_hgtd_idhelper{nullptr};
 
-  PRD_MultiTruthCollection* m_prd_truth_coll{nullptr};
   std::string m_prd_truth_coll_name{"PRD_MultiTruthPixel"};
 
   ServiceHandle<PileUpMergeSvc> m_merge_svc{this, "MergeSvc", "PileUpMergeSvc", "Merge service used in HGTD fast digitization"}; //!
   ServiceHandle<IAthRNGSvc> m_rndm_svc{this, "RndmSvc", "AthRNGSvc", "Random number service used in HGTD fast digitization"}; //!< Random number service
 
-  ClusterContainer_t* m_cluster_container{nullptr};
   StringProperty m_cluster_name{this, "HGTD_ClustersContainerName", "HGTD_Cluster", "Name of the HGTD cluster container"};
 
   StringProperty m_si_hit_collection_name{this, "SiHitCollectionName", "HGTD_Hits", "Name of the Si Hit collection"};
-  TimedHitCollection<SiHit>* m_timed_hit_collection{nullptr};
-
-  std::unique_ptr<HGTD_DetElement_RIO_Map_t> m_det_element_rio_map{nullptr};
 
   BooleanProperty m_smear_intersection_position{this, "SmearIntersectionPosition", true, ""};
   BooleanProperty m_smear_mean_time{this, "SmearMeanTime", true, ""};
