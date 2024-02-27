@@ -83,11 +83,11 @@ namespace MuonGMR4{
         }
         const Eigen::Rotation2D normalRot{(m_reversedStripOrder ? 90 : -90)*Gaudi::Units::deg};
         stripEdgeVecItr itr = std::lower_bound(m_strips.begin(), m_strips.end(), extPos,
-                    [this, & normalRot](const stripEdges& stripPos, const Amg::Vector2D& pos) {                            
-                            const Amg::Vector2D dir = stripPos.fromBottomToTop().unit();
-                            const Amg::Vector2D normal = normalRot * dir;                            
-                            std::optional<double> distFromBotEdge = Amg::intersect<2>(stripPos.bottomMounting(), dir, pos, normal);
-                            return distFromBotEdge.value_or(1.) < 0;
+                    [& normalRot](const stripEdges& stripPos, const Amg::Vector2D& pos) {
+                      const Amg::Vector2D dir = stripPos.fromBottomToTop().unit();
+                      const Amg::Vector2D normal = normalRot * dir;
+                      std::optional<double> distFromBotEdge = Amg::intersect<2>(stripPos.bottomMounting(), dir, pos, normal);
+                      return distFromBotEdge.value_or(1.) < 0;
                     });        
         
         if (itr == m_strips.end() || m_strips.begin() == itr) {
