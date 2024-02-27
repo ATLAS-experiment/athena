@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AuxDiscoverySvc.cxx
@@ -13,6 +13,7 @@
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthContainers/tools/AuxVectorInterface.h"
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthContainersRoot/getDynamicAuxID.h"
 
@@ -27,6 +28,7 @@
 #include "TClass.h"
 
 #include <stdexcept>
+
 
 class AthenaPoolAuxStore : public SG::AuxStoreInternal {
 public:
@@ -63,8 +65,10 @@ bool AuxDiscoverySvc::getAuxStore(void* obj, const Guid& classId, const std::str
 bool AuxDiscoverySvc::setData(SG::auxid_t auxid, void* data, const RootType& type) {
    SG::AuxTypeRegistry& registry = SG::AuxTypeRegistry::instance();
    if (m_storeInt->standalone()) {
-      void* dstdata = m_storeInt->getData(auxid, 1, 1);
-      registry.copy(auxid, dstdata, 0, data, 0);
+      (void)m_storeInt->getData(auxid, 1, 1);
+      registry.copy(auxid,
+                    SG::AuxVectorInterface (*m_storeInt), 0,
+                    SG::AuxVectorInterface (auxid, 1, const_cast<const void*>(data)), 0, 1);
       if (type.IsFundamental()) {
          delete [] (char*)data; data = nullptr;
       } else {

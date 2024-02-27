@@ -6,7 +6,8 @@
 #define InDetDD_ServiceVolume_H
 
 #include "CxxUtils/checker_macros.h"
-
+#include "GeoModelKernel/GeoShape.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 #include <cmath>
 #include <mutex>
 #include <string>
@@ -18,20 +19,7 @@ namespace InDetDD {
 
   // class to hold GeoShape pointer. This takes care of the GeoShape ref counting and 
   // avoids needing to write a copy constructor for ServiceVolume
-  class GeoShapeHolder {
-  public:
-    GeoShapeHolder(); 
-    GeoShapeHolder(const GeoShape *); 
-    GeoShapeHolder(const GeoShapeHolder &);
-    GeoShapeHolder & operator=(const GeoShapeHolder &);
-    GeoShapeHolder & operator=(GeoShapeHolder &&) noexcept;
-    ~GeoShapeHolder(); 
-    const GeoShape * get() const {return m_geoShape;}
-    void set(const GeoShape *);
-    void reset();
-  private:
-    const GeoShape * m_geoShape;
-  };
+  using GeoShapeHolder = GeoIntrusivePtr<const GeoShape>;
   
   class ServiceVolume {
 

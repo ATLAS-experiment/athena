@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_RADIALSTRIPDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_RADIALSTRIPDESIGN_ICC
-
+#include <GaudiKernel/SystemOfUnits.h>
 /// Helper macro to shift the strip number and check that's valid
 #define CHECK_STRIPRANGE(STRIP_NUM)                                                           \
     const int stripCh = (STRIP_NUM - firstStripNumber());                                     \
@@ -16,44 +16,72 @@
     
 
 namespace MuonGMR4{
+    using CheckVector2D = RadialStripDesign::CheckVector2D;
     inline int RadialStripDesign::numStrips() const { return m_strips.size() -1; }
-    inline Amg::Vector2D RadialStripDesign::panelEdgeCenter() const {
-        return (isFlipped()? halfWidth():  0.5 * (shortHalfHeight() + longHalfHeight()) ) * Amg::Vector2D::UnitY();
-    }
-    inline Amg::Vector2D RadialStripDesign::leftInterSect(int stripNum, bool /*uncapped*/) const {
+    
+    inline CheckVector2D RadialStripDesign::leftInterSect(int stripNum, bool /*uncapped*/) const {
         /// Calculate the strip width center at the bottom edge
-        return panelEdgeCenter() + 0.5*(m_strips[stripNum].distOnTop  + 
-                                        m_strips[stripNum +1].distOnTop)* edgeDirTop();
+        return std::make_optional<Amg::Vector2D>(cornerTopLeft() + 0.5*(m_strips[stripNum].distOnTop  + 
+                                                                        m_strips[stripNum +1].distOnTop)* edgeDirTop());
     }
 
 
-    inline Amg::Vector2D RadialStripDesign::rightInterSect(int stripNum, bool /*uncapped*/) const {
+    inline CheckVector2D RadialStripDesign::rightInterSect(int stripNum, bool /*uncapped*/) const {
         /// Calculate the strip width center at the top edge
-        return -panelEdgeCenter() + 0.5*(m_strips[stripNum].distOnBottom  + 
-                                        m_strips[stripNum +1].distOnBottom)* edgeDirBottom();
+        return std::make_optional<Amg::Vector2D>(cornerBotLeft() + 0.5*(m_strips[stripNum].distOnBottom  + 
+                                                                        m_strips[stripNum +1].distOnBottom)* edgeDirBottom());
     }
 
     
     inline Amg::Vector2D RadialStripDesign::stripDir(int stripNumber) const {
-        CHECK_STRIPRANGE(stripNumber);
-        return (rightInterSect(stripCh) - leftInterSect(stripCh)).unit();
+        CHECK_STRIPRANGE(stripNumber);  
+        return ( (*leftInterSect(stripCh)) - (*rightInterSect(stripCh))).unit();
+    }
+    inline Amg::Vector2D RadialStripDesign::stripNormal(int stripNumber) const {
+        static const AmgSymMatrix(2) rotMat{Eigen::Rotation2D{-90 * Gaudi::Units::deg}};
+        return rotMat * stripDir(stripNumber);
+
     }
     inline Amg::Vector2D RadialStripDesign::stripLeftEdgeBottom(int stripNumber) const{
         CHECK_STRIPRANGE(stripNumber);
-        return panelEdgeCenter() + m_strips[stripCh].distOnBottom*edgeDirBottom();
+        return cornerBotLeft() + m_strips[stripCh].distOnBottom*edgeDirBottom();
     }
     inline Amg::Vector2D RadialStripDesign::stripRightEdgeBottom(int stripNumber) const{
         CHECK_STRIPRANGE(stripNumber);
-        return panelEdgeCenter() + m_strips[stripCh+1].distOnBottom*edgeDirBottom();
+        return cornerBotLeft() + m_strips[stripCh+1].distOnBottom*edgeDirBottom();
     }
     inline Amg::Vector2D RadialStripDesign::stripLeftEdgeTop(int stripNumber) const{
         CHECK_STRIPRANGE(stripNumber);
-        return panelEdgeCenter() + m_strips[stripCh].distOnTop*edgeDirTop();
+        return cornerTopLeft() + m_strips[stripCh].distOnTop*edgeDirTop();
     }
     inline Amg::Vector2D RadialStripDesign::stripRightEdgeTop(int stripNumber) const{
         CHECK_STRIPRANGE(stripNumber);
-        return panelEdgeCenter() + m_strips[stripCh+1].distOnTop*edgeDirTop();
+        return cornerTopLeft() + m_strips[stripCh+1].distOnTop*edgeDirTop();
     }
-}
+
+    inline int RadialStripDesign::stripNumber(const Amg::Vector2D& extPos) const {        
+        if (!insideTrapezoid(extPos)) {
+            ATH_MSG_VERBOSE("The point "<<Amg::toString(extPos)<<" is outside the active trapezoid area");
+            return -1;
+        }
+        stripEdgeVecItr itr = std::lower_bound(m_strips.begin(), m_strips.end(), extPos,
+                    [this](const stripEdges& stripPos, const Amg::Vector2D& pos){
+                            /// Calculate the intersections
+                            const Amg::Vector2D top = cornerTopLeft() + stripPos.distOnTop * edgeDirTop();
+                            const Amg::Vector2D bot = cornerBotLeft() + stripPos.distOnBottom * edgeDirBottom();
+                            const Amg::Vector2D dir = (top-bot).unit();
+                            const double distFromBot = dir.dot(pos - bot);
+                            const Amg::Vector2D closest = bot + distFromBot *dir;
+                            const Amg::Vector2D normal = Eigen::Rotation2D{-90 * Gaudi::Units::deg} * dir;
+                            return normal.dot(pos - closest) > 0;
+                    });
+        
+        
+        if (itr == m_strips.end() || itr == m_strips.end() - 1) {
+            return -1;
+        }
+        return std::distance(m_strips.begin(), itr) + firstStripNumber();
+    }
+} 
 #undef CHECK_STRIPRANGE
 #endif

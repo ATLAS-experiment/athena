@@ -37,6 +37,7 @@ namespace ITk {
     int m_nLayers;
     int m_nModules;
     SILICON_LAYER m_layers[MAX_SILICON_LAYERS];
+    int m_middleSpacePointLayers[MAX_SILICON_LAYERS];
     int m_hashArray[MAX_NUMBER_PIX_MODULES+MAX_NUMBER_SCT_MODULES];
     float m_minRZ[MAX_NUMBER_PIX_MODULES+MAX_NUMBER_SCT_MODULES];
     float m_maxRZ[MAX_NUMBER_PIX_MODULES+MAX_NUMBER_SCT_MODULES];
@@ -53,6 +54,7 @@ namespace ITk {
     int m_nSpacepoints;
     int m_nPhiSlices;
     int m_nLayers;
+    int m_nMiddleLayers;
     int m_index[MAX_NUMBER_SPACEPOINTS];
     int m_type[MAX_NUMBER_SPACEPOINTS];
     float m_x[MAX_NUMBER_SPACEPOINTS];
@@ -62,6 +64,7 @@ namespace ITk {
     float m_phi[MAX_NUMBER_SPACEPOINTS];
     float m_covR[MAX_NUMBER_SPACEPOINTS];
     float m_covZ[MAX_NUMBER_SPACEPOINTS];
+    float m_clusterWidth[MAX_NUMBER_SPACEPOINTS];
     SPACEPOINT_LAYER_RANGE m_phiSlices[MAX_PHI_SLICES];
   } SPACEPOINT_STORAGE;
 

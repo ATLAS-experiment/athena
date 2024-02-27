@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -37,26 +37,17 @@ def AnalysisMuonThinningAlgCfg(ConfigFlags, name="AnalysisMuonThinningAlg", **kw
     acc.addEventAlgo(the_alg, primary = True)
     return acc
 
-def TriggerMatchingToolCfg(flags, name="TriggerMatchingTool", **kwargs):
-    result = ComponentAccumulator()
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    trig_dec_tool = result.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    kwargs.setdefault("TrigDecisionTool", trig_dec_tool)
-
-    from AthenaConfiguration.Enums import LHCPeriod
-    if flags.GeoModel.Run == LHCPeriod.Run3:
-        matching_tool = CompFactory.Trig.R3MatchingTool(name, **kwargs)
-    else:
-        matching_tool = CompFactory.Trig.MatchingTool(name, **kwargs)
-
-    result.setPrivateTools(matching_tool)
-    return result
-
 
 ### Di-muon tagging tool, for T&P studies
-def DiMuonTaggingAlgCfg(ConfigFlags, name="DiMuonTaggingTool", **kwargs):
+def DiMuonTaggingAlgCfg(ConfigFlags, name="DiMuonTaggingTool", **kwargs): 
     acc = ComponentAccumulator()
-    kwargs.setdefault("TrigMatchingTool",  acc.getPrimaryAndMerge(TriggerMatchingToolCfg(ConfigFlags)))
+
+    kwargs.setdefault("applyTrigger",True)
+    if kwargs["applyTrigger"]:
+        from TriggerMatchingTool.TriggerMatchingToolConfig import TriggerMatchingToolCfg
+        kwargs.setdefault("TrigMatchingTool",  acc.popToolsAndMerge(
+            TriggerMatchingToolCfg(ConfigFlags)))
+
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(MuonSelectionToolCfg(ConfigFlags)))
     kwargs.setdefault("isMC", ConfigFlags.Input.isMC)

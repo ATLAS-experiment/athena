@@ -20,6 +20,7 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "SGTools/DataProxy.h"
 #include "PathResolver/PathResolver.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
@@ -36,6 +37,9 @@ GeoModelSvc::GeoModelSvc(const std::string& name,ISvcLocator* svc)
 StatusCode GeoModelSvc::initialize ATLAS_NOT_THREAD_SAFE()
 //                                 ^ due to IGeoModelTool::registerCallback
 {
+  // Activate the initialization from SQLite if the overrider has been used
+  if(!m_sqliteDbFullPath.empty()) m_sqliteDb=true;
+
   if(!m_sqliteDb && m_supportedGeometry==0) {
     ATH_MSG_FATAL("The Supported Geometry flag was not set in Job Options! Exiting ...");
     return StatusCode::FAILURE;
@@ -152,9 +156,11 @@ StatusCode GeoModelSvc::geoInit()
   // Build geometry from the SQLiteDB file
   if(m_sqliteDb) {
     std::string sqliteDbName = "Geometry/" + m_atlasVersion + ".db";
-    std::string sqliteDbPath = PathResolver::find_file (sqliteDbName, "DATAPATH");
-    if(sqliteDbPath.empty()) {
-      ATH_MSG_FATAL("Filed to find SQLite database file " << sqliteDbName << " for reading in persistent GeoModel tree");
+    std::string sqliteDbPath = m_sqliteDbFullPath.empty()
+	    ? PathResolver::find_file (sqliteDbName, "DATAPATH")
+	    : m_sqliteDbFullPath.value();
+    if(sqliteDbPath.empty() && m_sqliteDbFullPath.empty()) {
+      ATH_MSG_FATAL("Failed to find SQLite database file " << sqliteDbName << " for reading in persistent GeoModel tree");
       return StatusCode::FAILURE;
     }
     else {
@@ -166,11 +172,11 @@ StatusCode GeoModelSvc::geoInit()
       ATH_MSG_INFO("Successfully opened SQLite DB file " << sqliteDbPath << " for reading in persistent GeoModel tree");
     }
     else {
-      ATH_MSG_FATAL("Failed to open SQLite database for reading in persistent GeoModel tree");
+      ATH_MSG_FATAL("Failed to open SQLite database " << sqliteDbPath << " for reading in persistent GeoModel tree");
       return StatusCode::FAILURE;
     }
     m_sqliteReader = std::make_unique<GeoModelIO::ReadGeoModel>(m_sqliteDbManager.get());
-    GeoVPhysVol* vWorldPhys = m_sqliteReader->buildGeoModel();
+    GeoVPhysVol* vWorldPhys ATLAS_THREAD_SAFE = const_cast<GeoVPhysVol*>(m_sqliteReader->buildGeoModel());
     worldPhys = dynamic_cast<GeoPhysVol*>(vWorldPhys);
     if(!worldPhys) {
       ATH_MSG_FATAL("Having Full Physical Volumes as World Volumes not supported!");

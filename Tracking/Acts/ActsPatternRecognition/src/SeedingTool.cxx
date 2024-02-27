@@ -6,7 +6,7 @@
 
 // ACTS
 #include "Acts/Seeding/SeedFilterConfig.hpp"
-#include "Acts/Seeding/BinnedSPGroup.hpp"
+#include "Acts/Seeding/BinnedGroup.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinder.hpp"
 #include "Acts/Seeding/SeedFinderConfig.hpp"
@@ -160,8 +160,11 @@ namespace ActsTrk {
 
     ATH_CHECK( prepareConfiguration() );
 
-    m_bottomBinFinder = std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsBottom, m_numPhiNeighbors);
-    m_topBinFinder = std::make_shared< Acts::BinFinder< value_type > >(m_zBinNeighborsTop, m_numPhiNeighbors);
+    m_bottomBinFinder = std::make_unique< Acts::GridBinFinder< 2ul > >(m_numPhiNeighbors.value(), m_zBinNeighborsBottom.value());
+    m_topBinFinder = std::make_unique< Acts::GridBinFinder< 2ul > >(m_numPhiNeighbors.value(), m_zBinNeighborsTop.value());
+
+    m_navigation[0ul] = {};
+    m_navigation[1ul] = m_finderCfg.zBinsCustomLooping;
     
     return StatusCode::SUCCESS;
   }
@@ -209,7 +212,7 @@ namespace ActsTrk {
       return StatusCode::SUCCESS;
 
     // Space Point Grid Options
-    Acts::SpacePointGridOptions gridOpts;
+    Acts::CylindricalSpacePointGridOptions gridOpts;
     gridOpts.bFieldInZ = bField[2];
     gridOpts = gridOpts.toInternalUnits();
     
@@ -221,7 +224,7 @@ namespace ActsTrk {
     finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
     
     auto extractCovariance = [](const value_type& sp, 
-				float, float, float) -> std::pair<Acts::Vector3, Acts::Vector2> 
+				float, float, float) -> std::tuple<Acts::Vector3, Acts::Vector2, std::optional<Acts::ActsScalar>> 
       {
 	/// Do not convert coordinates w.r.t. beam spot
 	/// Coordinates are converted internally when constructing 
@@ -230,16 +233,20 @@ namespace ActsTrk {
 			       sp.y(),
 			       sp.z());
 	Acts::Vector2 covariance(sp.varianceR(), sp.varianceZ());
-	return std::make_pair(position, covariance);
+	return std::make_tuple(position, covariance, std::nullopt);
       };
     
     
     Acts::Extent rRangeSPExtent;
         
-    std::unique_ptr< Acts::SpacePointGrid< value_type > > grid =
-      Acts::SpacePointGridCreator::createGrid< value_type >(m_gridCfg, gridOpts);
-    Acts::BinnedSPGroup< value_type > spacePointsGrouping(spBegin, spEnd, extractCovariance,								     
-      m_bottomBinFinder, m_topBinFinder, std::move(grid), rRangeSPExtent, m_finderCfg, finderOpts);
+    Acts::CylindricalSpacePointGrid< value_type > grid =
+      Acts::CylindricalSpacePointGridCreator::createGrid< value_type >(m_gridCfg, gridOpts);
+
+    Acts::CylindricalSpacePointGridCreator::fillGrid(m_finderCfg, finderOpts, grid,
+						     spBegin, spEnd, extractCovariance, rRangeSPExtent);
+
+    Acts::CylindricalBinnedGroup< value_type > spacePointsGrouping(std::move(grid), *m_bottomBinFinder,
+								   *m_topBinFinder, m_navigation);
     
     // variable middle SP radial region of interest
     const Acts::Range1D<float> rMiddleSPRange(std::floor(rRangeSPExtent.min(Acts::binR) / 2) * 2 +
@@ -417,6 +424,35 @@ namespace ActsTrk {
           });
     }
 
+    // Fast tracking
+    // manually convert the two types
+    for (const auto& vec : m_rRangeMiddleSP) {
+	std::vector<float> convertedVec;
+	
+	for (const auto& val : vec) {
+	    convertedVec.push_back(static_cast<float>(val));
+	}
+	
+	m_finderCfg.rRangeMiddleSP.push_back(convertedVec);
+    }
+    
+    // define cuts used for fast tracking configuration
+    if (m_useExperimentCuts) {
+      m_finderCfg.experimentCuts.connect(
+					 [](const void*, float bottomRadius, float cotTheta) -> bool {
+					   
+					   float fastTrackingRMin = 50.;
+					   float fastTrackingCotThetaMax = 1.5;
+					   
+					   if (bottomRadius < fastTrackingRMin and
+					       (cotTheta > fastTrackingCotThetaMax or
+						cotTheta < -fastTrackingCotThetaMax)) {
+					     return false;
+					   }
+					   return true;
+					 });
+    }
+    
     // Configuration for Acts::SeedFilter (used by FinderCfg)
     Acts::SeedFilterConfig filterCfg;
     filterCfg.deltaRMin = m_deltaRMin;
@@ -450,6 +486,7 @@ namespace ActsTrk {
     m_gridCfg.deltaRMax = m_deltaRMax;
     m_gridCfg.rMax = m_gridRMax;
     m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
+    m_gridCfg.maxPhiBins = m_maxPhiBins;
     m_gridCfg = m_gridCfg.toInternalUnits();
 
     // Seed Finder

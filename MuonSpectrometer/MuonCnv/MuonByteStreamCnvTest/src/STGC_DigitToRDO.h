@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STGCDIGITTORDO_H
@@ -12,6 +12,9 @@
 #include "MuonRDO/STGC_RawDataContainer.h"
 #include "NSWCalibTools/INSWCalibTool.h"
 #include "StoreGate/DataHandle.h"
+
+#include "StoreGate/ReadCondHandleKey.h"
+#include "MuonCablingData/Nsw_CablingMap.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -29,6 +32,10 @@ private:
     SG::ReadHandleKey<sTgcDigitContainer> m_digitContainer{this, "InputObjectName", "sTGC_DIGITS",
                                                            "ReadHandleKey for Input sTgcDigitContainer"};
     ToolHandle<Muon::INSWCalibTool> m_calibTool{this, "CalibrationTool", ""};
+
+    //The cabling map is only needed for studies of the mm connector misalignmen, but not it regular jobs. Therefore the key is left empty here.
+    SG::ReadCondHandleKey<Nsw_CablingMap> m_cablingKey{this, "CablingMap", "","Key of Nsw_CablingMap"};
+
 };
 
 #endif

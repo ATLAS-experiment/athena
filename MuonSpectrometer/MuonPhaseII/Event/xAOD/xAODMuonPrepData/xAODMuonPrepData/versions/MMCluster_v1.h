@@ -96,7 +96,7 @@ class MMCluster_v1 : public UncalibratedMeasurement_v1 {
     const std::vector<DriftCov_t>& stripDriftErrors() const;
 
     void setStripDriftErrors(const std::vector<DriftCov_t>& stripDriftErrors);
-    void setStripDriftErrors(const std::vector<Amg::MatrixX>& stripDriftErrors);
+    void setStripDriftErrors(const std::vector<AmgVector(2)>& stripDriftErrors);
 
     /** @brief set the pointer to the MmReadoutElement */
     void setReadoutElement(const MuonGMR4::MmReadoutElement* readoutEle);

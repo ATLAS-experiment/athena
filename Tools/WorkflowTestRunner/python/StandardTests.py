@@ -4,7 +4,7 @@ from typing import List
 from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck, MetadataCheck
 from .Inputs import input_EVNT, input_HITS, \
     input_HITS_unfiltered, \
-    input_HITS_MC_overlay, input_RDO_BKG, \
+    input_RDO_BKG, \
     input_HITS_data_overlay, input_BS_SKIM, \
     input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino, \
     input_AOD
@@ -44,9 +44,7 @@ class QTest(WorkflowTest):
         #     self.output_checks.append(FrozenTier0PolicyCheck(setup, "RDO", 10))
         self.output_checks.append(FrozenTier0PolicyCheck(setup, "AOD", 60))
         self.output_checks.append(FrozenTier0PolicyCheck(setup, "ESD", 20))
-        if "CA" not in extra_args or "--CA True" in extra_args:
-            self.output_checks.append(MetadataCheck(setup, "AOD"))
-            self.output_checks.append(MetadataCheck(setup, "ESD"))
+        self.output_checks.append(MetadataCheck(setup, "AOD"))
 
         self.digest_checks = []
         if not setup.disable_output_checks:
@@ -99,10 +97,9 @@ class SimulationTest(WorkflowTest):
                 f" --imf False {extra_args}")
 
         self.output_checks = [
-            FrozenTier0PolicyCheck(setup, "HITS", 10)
+            FrozenTier0PolicyCheck(setup, "HITS", 10),
+            MetadataCheck(setup, "HITS"),
         ]
-        if "CA" not in extra_args:
-            self.output_checks.append(MetadataCheck(setup, "HITS"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -116,17 +113,16 @@ class OverlayTest(WorkflowTest):
 
         self.command = \
             (f"Overlay_tf.py --AMIConfig {ID}"
-             f" --inputHITSFile {input_HITS_MC_overlay[run]} --inputRDO_BKGFile {input_RDO_BKG[run]} --outputRDOFile myRDO.pool.root"
+             f" --inputHITSFile {input_HITS[run]} --inputRDO_BKGFile {input_RDO_BKG[run]} --outputRDOFile myRDO.pool.root"
              f" --imf False {extra_args}")
 
-        # skip performance checks for now due to CA
+        # skip performance checks for now
         self.skip_performance_checks = True
 
         self.output_checks = [
-            FrozenTier0PolicyCheck(setup, "RDO", 10)
+            FrozenTier0PolicyCheck(setup, "RDO", 10),
+            MetadataCheck(setup, "RDO"),
         ]
-        if "CA" not in extra_args or "--CA True" in extra_args:
-            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -145,10 +141,9 @@ class DataOverlayTest(WorkflowTest):
              f" --imf False {extra_args}")
 
         self.output_checks = [
-            FrozenTier0PolicyCheck(setup, "RDO", 10)
+            FrozenTier0PolicyCheck(setup, "RDO", 10),
+            MetadataCheck(setup, "RDO"),
         ]
-        if "CA" not in extra_args:
-            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -163,14 +158,12 @@ class PileUpTest(WorkflowTest):
         self.command = \
             (f"Digi_tf.py --AMIConfig {ID} --jobNumber 1 --digiSeedOffset1 1 --digiSeedOffset2 1"
              f" --inputHITSFile {input_HITS_neutrino[run]} --inputHighPtMinbiasHitsFile {input_HITS_minbias_high[run]} --inputLowPtMinbiasHitsFile {input_HITS_minbias_low[run]} --outputRDOFile myRDO.pool.root"
-             " --postExec 'FPEAuditor.NStacktracesOnFPE=500'"
              f" --imf False {extra_args}")
 
         self.output_checks = [
-            FrozenTier0PolicyCheck(setup, "RDO", 5)
+            FrozenTier0PolicyCheck(setup, "RDO", 5),
+            MetadataCheck(setup, "RDO"),
         ]
-        if "CA" not in extra_args:
-            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -207,7 +200,7 @@ class DerivationTest(WorkflowTest):
              " --outputDAODFile myOutput.pool.root"
              f" --imf False {extra_args}")
 
-        # skip performance checks for now due to CA
+        # skip performance checks for now
         self.skip_performance_checks = True
 
         enable_checks = True if format == "PHYS" else False

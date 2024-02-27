@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxTypeRegistry.icc
@@ -56,11 +56,34 @@ AuxTypeRegistry::getFactory (SG::auxid_t auxid) const
  * @param auxid The desired aux data item.
  */
 inline
-AuxTypeRegistry::Flags AuxTypeRegistry::getFlags (SG::auxid_t auxid) const
+AuxVarFlags AuxTypeRegistry::getFlags (SG::auxid_t auxid) const
 {
   if (auxid >= m_types.size())
     return Flags::None;
   return m_types[auxid].m_flags;
+}
+
+
+/**
+ * @brief Copy elements between vectors.
+ * @param auxid The aux data item being operated on.
+ * @param dst Container for the destination vector.
+ *            Declared as a rvalue reference to allow passing a temporary
+ *            here (such as from AuvVectorInterface).
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
+ *
+ * @c dst and @ src can be either the same or different.
+ */
+inline
+void AuxTypeRegistry::copy (SG::auxid_t auxid,
+                            AuxVectorData&& dst,      size_t dst_index,
+                            const AuxVectorData& src, size_t src_index,
+                            size_t n) const
+{
+  return copy (auxid, dst, dst_index, src, src_index, n);
 }
 
 

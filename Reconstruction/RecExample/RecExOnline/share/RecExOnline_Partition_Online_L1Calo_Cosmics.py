@@ -462,7 +462,7 @@ if (partitionName.find("L1CaloStandalone") >= 0) or (partitionName.find("ATLAS")
     printfunc ("L1Calo Monitoring check DBInstance ",DBInstance)
     connstring = "COOLONL_TRIGGER/"+str(DBInstance)
     from CoolConvUtilities.AtlCoolLib import indirectOpen
-    coolDB=indirectOpen(connstring,oracle='True')
+    coolDB=indirectOpen(connstring)
     SMKfolder=coolDB.getFolder('/TRIGGER/HLT/HltConfigKeys')
 
     retrieved_obj=SMKfolder.findObject(pointintime,0)

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the MC_pp_run3_v1 menu
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -12,10 +12,11 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar'
 ex.threads = 1
-ex.args = '-c "setMenu=\'MC_pp_run3_v1\';doWriteBS=False;doWriteRDOTrigger=True;"'
+ex.flags = ['Trigger.triggerMenuSetup="MC_pp_run3_v1"']
+ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

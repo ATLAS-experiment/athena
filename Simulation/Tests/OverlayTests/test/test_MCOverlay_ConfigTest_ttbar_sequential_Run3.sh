@@ -1,9 +1,8 @@
 #!/bin/sh
 
-# art-description: MC+MC Overlay with MT support, running sequentially, new config
+# art-description: MC+MC Overlay with MT support, running sequentially
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
-# art-include: 22.0/Athena
 # art-include: main/Athena
 
 # art-output: mcOverlayRDO.pool.root

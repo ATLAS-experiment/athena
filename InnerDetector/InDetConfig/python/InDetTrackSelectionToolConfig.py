@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackSelectionTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -59,6 +59,11 @@ def InDetTrackSelectionTool_TightPrimary_Cfg(
         flags, name="InDetTrackSelectionTool_TightPrimary", **kwargs):
     kwargs.setdefault("CutLevel", "TightPrimary")
     return InDetTrackSelectionToolCfg(flags, name, **kwargs)
+
+def InDetTrackSelectionTool_HILoose_Cfg(
+        flags, name="InDetTrackSelectionTool_HILoose", **kwargs):
+    kwargs.setdefault("CutLevel", "HILoose")
+    return InDetTrackSelectionToolCfg(flags, name, **kwargs)    
 
 def InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(
         flags, name="InDetTrackSelectionTool_TightPrimary", **kwargs):

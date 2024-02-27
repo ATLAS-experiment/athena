@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # This script reads metadata from a given file
 
 from __future__ import print_function
@@ -18,7 +18,7 @@ if 'TERM' in os.environ:
 
 msg = logging.getLogger('MetaReader')
 
-from PyUtils.MetaReader import read_metadata
+from PyUtils.MetaReader import read_metadata, trigger_keys
 
 
 def _tree_print(content, indent=2, pad=0, list_max_items=-1, dict_sort=None, ascii=False, hide_content=False, hide_trigger=False):
@@ -43,12 +43,7 @@ def _tree_print(content, indent=2, pad=0, list_max_items=-1, dict_sort=None, asc
 			if hide_content and (key in ['itemList', 'metadata_items'] or 'EventFormatStream' in key):
 				continue
 
-			if hide_trigger and key in [
-				'TriggerConfigInfo',
-				'TriggerMenu', 'TriggerMenuJson_BG', 'TriggerMenuJson_HLT', 'TriggerMenuJson_HLTMonitoring', 'TriggerMenuJson_HLTPS', 'TriggerMenuJson_L1', 'TriggerMenuJson_L1PS',
-				'/TRIGGER/HLT/Groups', '/TRIGGER/HLT/HltConfigKeys', '/TRIGGER/HLT/Menu', '/TRIGGER/HLT/PrescaleKey', '/TRIGGER/HLT/Prescales',
-				'/TRIGGER/LVL1/ItemDef', '/TRIGGER/LVL1/Lvl1ConfigKey', '/TRIGGER/LVL1/Menu', '/TRIGGER/LVL1/Prescales', '/TRIGGER/LVL1/Thresholds',
-			]:
+			if hide_trigger and key in trigger_keys:
 				continue
 
 			if pad == 0:

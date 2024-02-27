@@ -204,7 +204,7 @@ namespace top {
     return jetCollectionName;
   }
 
-  StatusCode FlavorTaggingCPTools::checkExcludedSysts(BTaggingEfficiencyTool* btageff, std::string excludedSysts) {
+  StatusCode FlavorTaggingCPTools::checkExcludedSysts(BTaggingEfficiencyTool* btageff, const std::string& excludedSysts) {
     // We pass the pointer to the btagging efficiency tool which is being created and also the excludedSysts string
     // which will be used
     // If the string is empty, then nothing to check

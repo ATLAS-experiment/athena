@@ -271,12 +271,6 @@ namespace ActsTrk
       uncalibratedMeasurementContainers.push_back(uncalibratedMeasurementContainerHandle.cptr());
       ATH_MSG_DEBUG("Retrieved " << uncalibratedMeasurementContainers.back()->size() << " input elements from key " << uncalibratedMeasurementContainerKey.key());
 
-      if (!checkHashOrder(*uncalibratedMeasurementContainers.back()))
-      {
-        ATH_MSG_ERROR("Measurements " << uncalibratedMeasurementContainerKey.key() << " not ordered by identifier hash.");
-        return StatusCode::FAILURE;
-      }
-
       xAOD::UncalibMeasType typ = !uncalibratedMeasurementContainers.back()->empty()
                                       ? uncalibratedMeasurementContainers.back()->at(0)->type()
                                       : xAOD::UncalibMeasType::Other;
@@ -423,7 +417,8 @@ namespace ActsTrk
 
   struct TrackFindingAlg::CkfBranchStopper
   {
-    bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState) const
+    bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState, 
+        ActsTrk::MutableMultiTrajectory::TrackStateProxy& /*trackState*/) const
     {
       if (!(tipState.nHoles > variableCut<std::size_t>(eta, alg->m_etaBins, alg->m_maxHoles, std::numeric_limits<std::size_t>::max())))
         return false;

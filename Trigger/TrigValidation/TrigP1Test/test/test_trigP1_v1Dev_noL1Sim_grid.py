@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: athenaHLT test of the Dev_pp_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log
@@ -24,12 +24,12 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
 ex.threads = 4
 ex.concurrent_events = 4
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doL1Sim=False;forceEnableAllChains=True;"'
-ex.args += ' --dump-config-reload'
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+            'Trigger.forceEnableAllChains=True']
 
 test = Test.Test()
 test.art_type = 'grid'

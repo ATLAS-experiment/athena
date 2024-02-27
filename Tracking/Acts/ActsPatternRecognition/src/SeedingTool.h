@@ -21,8 +21,8 @@
 #include "Acts/Definitions/Common.hpp"
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Seeding/SpacePointGrid.hpp"
-#include "Acts/Seeding/BinFinder.hpp"
-#include "Acts/Seeding/BinnedSPGroup.hpp"
+#include "Acts/Utilities/GridBinFinder.hpp"
+#include "Acts/Seeding/BinnedGroup.hpp"
 #include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
@@ -81,7 +81,7 @@ namespace ActsTrk {
   protected:
     Acts::SeedFinder< value_type > m_finder;
     Acts::SeedFinderConfig< value_type > m_finderCfg;
-    Acts::SpacePointGridConfig m_gridCfg;
+    Acts::CylindricalSpacePointGridConfig m_gridCfg;
 
     // See quality selection
     Gaudi::Property< bool > m_seedQualitySelection {this, "doSeedQualitySelection", true,
@@ -111,6 +111,7 @@ namespace ActsTrk {
       "phi max for space point grid formation"};
     Gaudi::Property< int > m_phiBinDeflectionCoverage {this, "phiBinDeflectionCoverage", 3,
       "sets of consecutive phi bins to cover full deflection of minimum pT particle"};
+    Gaudi::Property< int > m_maxPhiBins {this, "maxPhiBins", 200, "max number of bins"};
 
     // Properties to set SeedfinderConfig
     Gaudi::Property< float > m_rMax {this, "rMax", 320. * Acts::UnitConstants::mm,
@@ -251,9 +252,13 @@ namespace ActsTrk {
     Gaudi::Property< int > m_numPhiNeighbors {this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};
 
+    Gaudi::Property< bool > m_useExperimentCuts {this, "useExperimentCuts", false, ""};
+    
   private:
-    std::shared_ptr< Acts::BinFinder< value_type > > m_bottomBinFinder{nullptr};
-    std::shared_ptr< Acts::BinFinder< value_type > > m_topBinFinder{nullptr};
+    std::unique_ptr< Acts::GridBinFinder< 2ul > > m_bottomBinFinder{nullptr};
+    std::unique_ptr< Acts::GridBinFinder< 2ul > > m_topBinFinder{nullptr};
+
+    std::array<std::vector<std::size_t>, 2ul> m_navigation{};
   };
 
 } // namespace

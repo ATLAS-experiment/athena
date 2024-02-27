@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RDBMaterialManager.h"
@@ -7,7 +7,6 @@
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 
 #include "GeoModelKernel/GeoMaterial.h"
-#include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/Units.h"
 
 #include "StoreGate/DataHandle.h"
@@ -323,15 +322,9 @@ StatusCode RDBMaterialManager::readMaterialsFromDB(ISvcLocator* pSvcLocator)
 
 // Destructor:
 RDBMaterialManager::~RDBMaterialManager() {
-	
   // Unreference the materials:
   for (auto &p : m_materialMap) {
     p.second->unref();
-  }
-	 	
-  // Unreference the elements:
-  for (GeoElement *elt : m_elementVector) {
-    elt->unref();
   }
 }
 
@@ -359,7 +352,7 @@ GeoElement *RDBMaterialManager::searchElementVector(const std::string & name)  c
   MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
 	
   NameEquals matchByName(name);
-  std::vector<GeoElement *>::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(),matchByName);
+  GeoEleVec::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(),matchByName);
   	
   if (e!=m_elementVector.end()) {	
     if(log.level()==MSG::VERBOSE)    		
@@ -379,7 +372,7 @@ GeoElement *RDBMaterialManager::searchElementVector(const unsigned int atomicNum
   MsgStream log(Athena::getMessageSvc(), "GeoModelSvc::RDBMaterialManager"); 
 	
   NumberEquals matchByNumber(atomicNumber);
-  std::vector<GeoElement *>::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(), matchByNumber);
+  GeoEleVec::const_iterator e=std::find_if(m_elementVector.begin(), m_elementVector.end(), matchByNumber);
   	
   if (e!=m_elementVector.end()) {
     if(log.level()==MSG::VERBOSE)  		
@@ -636,7 +629,6 @@ const GeoElement *RDBMaterialManager::getElement(const std::string & name) {
 	  pelement = new GeoElement( element_name , element_symbol  ,element_z , element_a *(GeoModelKernelUnits::gram/Gaudi::Units::mole));
 
 	  // a table to keep the memory allocation, and easy for delete 
-	  pelement->ref();
 	  m_elementVector.push_back( pelement);
 			
 	  break;
@@ -679,7 +671,6 @@ const GeoElement *RDBMaterialManager::getElement(unsigned int atomicNumber) {
 	  pelement = new GeoElement( element_name , element_symbol  ,element_z , element_a *(GeoModelKernelUnits::gram/Gaudi::Units::mole));
 
 	  // a table to keep the memory allocation, and easy for delete 
-	  pelement->ref();
 	  m_elementVector.push_back( pelement);
 			
 	  break;
@@ -746,7 +737,6 @@ void RDBMaterialManager::buildSpecialMaterials()
 {
   // Create special materials
   GeoElement* ethElement = new GeoElement("Ether","ET",500.0,0.0);
-  ethElement->ref();
   m_elementVector.push_back(ethElement);  
   GeoMaterial* ether = new GeoMaterial("special::Ether",0.0);	
   ether->add(ethElement,1.);

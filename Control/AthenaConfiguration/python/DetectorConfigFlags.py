@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
@@ -58,49 +58,49 @@ def createDetectorConfigFlags():
     dcf.addFlag('Detector.GeometryBpipe', True)  # always enabled by default
 
     # Inner Detector
-    dcf.addFlag('Detector.GeometryBCM',   lambda prevFlags : 'BCM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryPixel', lambda prevFlags : 'Pixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometrySCT',   lambda prevFlags : 'SCT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryTRT',   lambda prevFlags : 'TRT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryBCM',   lambda prevFlags : 'BCM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryPixel', lambda prevFlags : 'Pixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometrySCT',   lambda prevFlags : 'SCT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryTRT',   lambda prevFlags : 'TRT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
     dcf.addFlag('Detector.GeometryID',    lambda prevFlags : (prevFlags.Detector.GeometryBCM
                                                               or prevFlags.Detector.GeometryPixel or prevFlags.Detector.GeometrySCT
                                                               or prevFlags.Detector.GeometryTRT))
 
     # Upgrade ITk Inner Tracker is a separate and parallel detector
-    dcf.addFlag('Detector.GeometryPLR',   lambda prevFlags : 'PLR' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryBCMPrime', lambda prevFlags : 'BCMPrime' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryITkPixel', lambda prevFlags : 'ITkPixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryITkStrip', lambda prevFlags : 'ITkStrip' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryPLR',   lambda prevFlags : 'PLR' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryBCMPrime', lambda prevFlags : 'BCMPrime' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryITkPixel', lambda prevFlags : 'ITkPixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryITkStrip', lambda prevFlags : 'ITkStrip' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
     dcf.addFlag('Detector.GeometryITk',      lambda prevFlags : (prevFlags.Detector.GeometryBCMPrime
                                                                  or prevFlags.Detector.GeometryITkPixel
                                                                  or prevFlags.Detector.GeometryITkStrip
                                                                  or prevFlags.Detector.GeometryPLR))
     # HGTD
-    dcf.addFlag('Detector.GeometryHGTD', lambda prevFlags : 'HGTD' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryHGTD', lambda prevFlags : 'HGTD' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
 
     # Calorimeters
-    dcf.addFlag('Detector.GeometryLAr',  lambda prevFlags : 'LAr' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)) # Add separate em HEC and FCAL flags?
-    dcf.addFlag('Detector.GeometryTile', lambda prevFlags : 'Tile' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryMBTS', lambda prevFlags : (prevFlags.Detector.GeometryLAr and 'MBTS' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)))
+    dcf.addFlag('Detector.GeometryLAr',  lambda prevFlags : 'LAr' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)) # Add separate em HEC and FCAL flags?
+    dcf.addFlag('Detector.GeometryTile', lambda prevFlags : 'Tile' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryMBTS', lambda prevFlags : (prevFlags.Detector.GeometryLAr and 'MBTS' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)))
     dcf.addFlag('Detector.GeometryCalo', lambda prevFlags : (prevFlags.Detector.GeometryLAr or prevFlags.Detector.GeometryTile))
 
     # Muon Spectrometer
-    dcf.addFlag('Detector.GeometryCSC',  lambda prevFlags : 'CSC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryMDT',  lambda prevFlags : 'MDT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryRPC',  lambda prevFlags : 'RPC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryTGC',  lambda prevFlags : 'TGC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometrysTGC', lambda prevFlags : 'sTGC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
-    dcf.addFlag('Detector.GeometryMM',   lambda prevFlags : 'MM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB))
+    dcf.addFlag('Detector.GeometryCSC',  lambda prevFlags : 'CSC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryMDT',  lambda prevFlags : 'MDT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryRPC',  lambda prevFlags : 'RPC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryTGC',  lambda prevFlags : 'TGC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometrysTGC', lambda prevFlags : 'sTGC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
+    dcf.addFlag('Detector.GeometryMM',   lambda prevFlags : 'MM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath))
     dcf.addFlag('Detector.GeometryMuon', lambda prevFlags : (prevFlags.Detector.GeometryCSC or prevFlags.Detector.GeometryMDT
                                                              or prevFlags.Detector.GeometryRPC or prevFlags.Detector.GeometryTGC
                                                              or prevFlags.Detector.GeometrysTGC or prevFlags.Detector.GeometryMM))
 
     # Forward detectors (disabled by default)
-    dcf.addFlag('Detector.GeometryLucid',     lambda prevFlags : 'Lucid' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
-    dcf.addFlag('Detector.GeometryZDC',       lambda prevFlags : 'ZDC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
-    dcf.addFlag('Detector.GeometryALFA',      lambda prevFlags : 'ALFA' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
-    dcf.addFlag('Detector.GeometryAFP',       lambda prevFlags : 'AFP' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
-    dcf.addFlag('Detector.GeometryFwdRegion', lambda prevFlags : 'FwdRegion' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryLucid',     lambda prevFlags : 'Lucid' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, prevFlags.GeoModel.SQLiteDBFullPath, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryZDC',       lambda prevFlags : 'ZDC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, prevFlags.GeoModel.SQLiteDBFullPath, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryALFA',      lambda prevFlags : 'ALFA' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, prevFlags.GeoModel.SQLiteDBFullPath, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryAFP',       lambda prevFlags : 'AFP' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, prevFlags.GeoModel.SQLiteDBFullPath, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryFwdRegion', lambda prevFlags : 'FwdRegion' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB, prevFlags.GeoModel.SQLiteDBFullPath, includeForward=not prevFlags.Input.isMC))
     dcf.addFlag('Detector.GeometryForward',   lambda prevFlags : (prevFlags.Detector.GeometryLucid or prevFlags.Detector.GeometryZDC
                                                                   or prevFlags.Detector.GeometryALFA or prevFlags.Detector.GeometryAFP
                                                                   or prevFlags.Detector.GeometryFwdRegion))
@@ -176,7 +176,7 @@ def getEnabledDetectors(flags, geometry=False):
         # test whether each detector is on
         name = f'Detector.Geometry{d}' if geometry else f'Detector.Enable{d}'
         if flags.hasFlag(name):
-            if flags(name) is not False:
+            if flags[name] is not False:
                 values.append(d)
     return values
 
@@ -207,7 +207,7 @@ def _parseDetectorsList(flags, detectors):
         else:
             # in case of groups only enable defaults
             for d in allGroups[g]:
-                if d in getDefaultDetectors(flags.GeoModel.AtlasVersion,flags.GeoModel.SQLiteDB):
+                if d in getDefaultDetectors(flags.GeoModel.AtlasVersion,flags.GeoModel.SQLiteDB,flags.GeoModel.SQLiteDBFullPath):
                     log.debug("Appending detector '%s'", d)
                     detectors.add(d)
 
@@ -254,7 +254,7 @@ def _getDetectorFlagStatus(flags, list=None, geometry=False):
                 else:
                     values.append('--')
             else:
-                if flags(name) is not False:
+                if flags[name] is not False:
                     values.append('ON')
                 else:
                     values.append('--')
@@ -395,7 +395,7 @@ def setupDetectorsFromList(flags, detectors, toggle_geometry=False, validate_onl
         status = d in detectors
         name = f'Detector.Enable{d}'
         if flags.hasFlag(name):
-            if flags(name) != status:
+            if flags[name] != status:
                 changed = True
                 if validate_only:
                     log.warning("Flag '%s' should be %s but is set to %s", name, status, not status)
@@ -405,7 +405,7 @@ def setupDetectorsFromList(flags, detectors, toggle_geometry=False, validate_onl
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
-                if flags(name) != status:
+                if flags[name] != status:
                     changed = True
                     if validate_only:
                         log.warning("Flag '%s' should be %s but is set to %s", name, status, not status)
@@ -432,14 +432,14 @@ def enableDetectors(flags, detectors, toggle_geometry=False):
     for d in detectors:
         name = f'Detector.Enable{d}'
         if flags.hasFlag(name):
-            if flags(name) is not True:
+            if flags[name] is not True:
                 changed = True
                 log.info("Enabling '%s'", name)
                 flags._set(name, True)
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
-                if flags(name) is not True:
+                if flags[name] is not True:
                     changed = True
                     log.info("Enabling '%s'", name)
                     flags._set(name, True)
@@ -463,14 +463,14 @@ def disableDetectors(flags, detectors, toggle_geometry=False):
     for d in detectors:
         name = f'Detector.Enable{d}'
         if flags.hasFlag(name):
-            if flags(name) is not False:
+            if flags[name] is not False:
                 changed = True
                 log.info("Disabling '%s'", name)
                 flags._set(name, False)
         if toggle_geometry:
             name = f'Detector.Geometry{d}'
             if flags.hasFlag(name):
-                if flags(name) is not False:
+                if flags[name] is not False:
                     changed = True
                     log.info("Disabling '%s'", name)
                     flags._set(name, False)

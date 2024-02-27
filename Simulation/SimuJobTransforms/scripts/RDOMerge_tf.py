@@ -35,7 +35,7 @@ def main():
 
 def getTransform():
     executorSet = set()
-    executorSet.add(athenaExecutor(name = 'RDOMerge', skeletonFile = 'SimuJobTransforms/skeleton.RDOMerge.py',
+    executorSet.add(athenaExecutor(name = 'RDOMerge', skeletonFile = None,
                                    skeletonCA = 'SimuJobTransforms.RDOMerge_Skeleton',
                                    inData = ['RDO'], outData = ['RDO_MRG']))
 

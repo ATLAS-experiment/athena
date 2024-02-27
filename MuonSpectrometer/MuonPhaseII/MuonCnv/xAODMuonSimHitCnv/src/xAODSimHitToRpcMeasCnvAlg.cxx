@@ -63,7 +63,7 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
 
         const unsigned int etaStripNum = etaDesign.stripNumber(smearedEtaPos.block<2,1>(0,0));
         
-        ATH_MSG_ALWAYS("Convert simulated hit "<<m_idHelperSvc->toStringGasGap(hitId)<<" located in gas gap at "
+        ATH_MSG_VERBOSE("Convert simulated hit "<<m_idHelperSvc->toStringGasGap(hitId)<<" located in gas gap at "
                         <<Amg::toString(locSimHitPos, 2)<<" eta strip number: "<<etaStripNum
                         <<" strip position "<<Amg::toString(etaDesign.center(etaStripNum).value_or(Amg::Vector2D::Zero()), 2));
         
@@ -93,6 +93,9 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
             prd->setReadoutElement(readOutEle);
             prd->setTime(hitTime);
             prd->setAmbiguityFlag(0);
+            Amg::Vector3D strip3D {smearedEtaPos.x(), 0.,0.};
+            auto globToCenter = m_surfaceProvTool->globalToChambCenter(gctx,etaHitId);
+            prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,readOutEle->layerHash(prd->measurementHash())) * strip3D)); 
         }
         /// Check whether the read out element contains phi strips or not.
         if (!readOutEle->nPhiStrips()) {
@@ -129,6 +132,9 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setReadoutElement(readOutEle);
         prd->setTime(hitTime);
         prd->setAmbiguityFlag(0);
+        Amg::Vector3D strip3D {smearedPhiPos.x(), 0.,0.};
+        auto globToCenter = m_surfaceProvTool->globalToChambCenter(gctx,phiHitId);
+        prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,readOutEle->layerHash(prd->measurementHash())) * strip3D)); 
     }
     return StatusCode::SUCCESS;
 }

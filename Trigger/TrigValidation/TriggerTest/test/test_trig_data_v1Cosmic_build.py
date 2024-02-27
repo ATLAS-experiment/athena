@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger BS->RDO_TRIG athena test of the Cosmic_run3_v1 menu on express stream from a cosmic run
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -12,18 +12,13 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'data_cos'
 ex.threads = 1
-precommand = ''.join([
-  "setMenu='Cosmic_run3_v1';",
-  "doCosmics=True;",
-  "doL1Sim=False;",
-  "forceEnableAllChains=True;",
-  "doWriteBS=False;",
-  "doWriteRDOTrigger=True;",
-])
-ex.args = f'-c "{precommand}"'
+ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
+            'Beam.Type=BeamType.Cosmics',
+            'Trigger.forceEnableAllChains=True']
+ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'build'

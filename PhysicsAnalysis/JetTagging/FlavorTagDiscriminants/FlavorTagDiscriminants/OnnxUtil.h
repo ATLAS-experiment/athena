@@ -1,13 +1,22 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
+  This class acts as the interface to an ONNX model. It handles loading model
+  the model, initializing the ORT session, and running inference. It is decoupled 
+  from the ATLAS EDM as much as possible. The FlavorTagDiscriminants::GNN class
+  handles the interaction with the ATLAS EDM.
 */
 
 #ifndef ONNXUTIL_H
 #define ONNXUTIL_H
 
-#include "nlohmann/json.hpp"
 #include <core/session/onnxruntime_cxx_api.h>
-#include "FlavorTagDiscriminants/GNNConfig.h"
+
+#include "nlohmann/json.hpp"
+#include "lwtnn/parse_json.hh"
+
+#include "FlavorTagDiscriminants/OnnxOutput.h"
+
 #include <map> //also has std::pair
 #include <vector>
 #include <string>
@@ -17,26 +26,13 @@ namespace FlavorTagDiscriminants {
 
   typedef std::pair<std::vector<float>, std::vector<int64_t>> input_pair;
 
-  enum class OnnxModelVersion{
-    UNKNOWN,
-    V0,
-    V1
-  };
+  enum class OnnxModelVersion{UNKNOWN, V0, V1};
 
   NLOHMANN_JSON_SERIALIZE_ENUM( OnnxModelVersion , {
     { OnnxModelVersion::UNKNOWN, "" },
     { OnnxModelVersion::V0, "v0" },
     { OnnxModelVersion::V1, "v1" },
   })
-
-  struct ONNXOutputNode {
-    std::string name;
-    ONNXTensorElementDataType type;
-    int rank;
-
-    // needed for the old metadata format
-    std::string name_in_model;
-  };
 
   //
   // Utility class that loads the onnx model from the given path
@@ -45,42 +41,44 @@ namespace FlavorTagDiscriminants {
   class OnnxUtil final{
 
     public:
+      using OutputConfig = std::vector<OnnxOutput>;
 
       OnnxUtil(const std::string& path_to_onnx);
-      ~OnnxUtil();
 
       void initialize();
 
-      std::tuple<
-        std::map<std::string, float>,
-        std::map<std::string, std::vector<char>>,
-        std::map<std::string, std::vector<float>> >
-      runInference(
-        std::map<std::string, input_pair> & gnn_inputs) const;
+      struct InferenceOutput {
+        std::map<std::string, float> singleFloat;
+        std::map<std::string, std::vector<char>> vecChar;
+        std::map<std::string, std::vector<float>> vecFloat;
+      };
 
-      std::string getMetadataString(const std::string& key) const;
-      GNNConfig::Config getOutputConfig() const;
-      GNNConfig::OutputNodeType getOutputNodeType(
-        const ONNXTensorElementDataType& type, int rank) const;
-      
-      GNNConfig::OutputNodeTarget getOutputNodeTarget(int rank) const;
-      std::vector<ONNXOutputNode> getOutputNodeInfo() const;
+      InferenceOutput runInference(std::map<std::string, input_pair>& gnn_inputs) const;
 
+      const lwt::GraphConfig getLwtConfig() const;
+      const nlohmann::json& getMetadata() const;
+      const OutputConfig& getOutputConfig() const;
       OnnxModelVersion getOnnxModelVersion() const;
+      const std::string& getModelName() const;
 
     private:
-
+      const nlohmann::json loadMetadata(const std::string& key) const;
+      const std::string determineModelName() const;
+      
+      nlohmann::json m_metadata;
       std::string m_path_to_onnx;
 
       std::unique_ptr< Ort::Session > m_session;
       std::unique_ptr< Ort::Env > m_env;
 
+      size_t m_num_inputs;
+      size_t m_num_outputs;
+      std::string m_model_name;
       std::vector<std::string> m_input_node_names;
-      std::vector<ONNXOutputNode> m_output_nodes;
+      OutputConfig m_output_nodes;
 
       OnnxModelVersion m_onnx_model_version = OnnxModelVersion::UNKNOWN;
 
   }; // Class OnnxUtil
 } // end of FlavorTagDiscriminants namespace
-
 #endif //ONNXUTIL_H

@@ -1,13 +1,13 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Electron'
@@ -33,26 +33,6 @@ def precisionElectronSequenceCfg(flags, ion=False, variant='',is_probe_leg = Fal
     selAcc.mergeHypo(TrigEgammaPrecisionElectronHypoAlgCfg(flags, "TrigEgamma"+tag(ion)+"HypoAlg_noGSF"+variant+probeInfo, TrigEgammaKeys.precisionElectronContainer ))
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict, isProbe=is_probe_leg)
 
-def precisionElectronSequenceCfg_lrt(flags,is_probe_leg=False):
+def precisionElectronSequence_LRTCfg(flags, is_probe_leg=False):
     # This is to call precisionElectronMenuSequence for the _LRT variant
     return precisionElectronSequenceCfg(flags, ion=False, variant='_LRT',is_probe_leg=is_probe_leg)
-
-
-def precisionElectronMenuSequence(flags, is_probe_leg=False, ion=False,  variant=''):
-    """Creates seventh step of electron sequence"""
-
-    if isComponentAccumulatorCfg():
-        return precisionElectronSequenceCfg(flags, ion=ion, variant=variant, is_probe_leg=is_probe_leg)
-    else: 
-        return menuSequenceCAToGlobalWrapper(precisionElectronSequenceCfg, flags, ion=ion, variant=variant, is_probe_leg=is_probe_leg)
-
-
-def precisionElectronMenuSequence_LRT(flags, is_probe_leg=False):
-    """Creates seventh step of electron sequence"""
-
-    if isComponentAccumulatorCfg():
-        return precisionElectronSequenceCfg_lrt(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(precisionElectronSequenceCfg_lrt, flags, is_probe_leg=is_probe_leg)
-
-

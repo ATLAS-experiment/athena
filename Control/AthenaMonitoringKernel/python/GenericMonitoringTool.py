@@ -1,52 +1,24 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
-
-from AthenaMonitoringKernel.AthenaMonitoringKernelConf import GenericMonitoringTool as _GMT1
-from GaudiConfig2.Configurables import GenericMonitoringTool as _GMT2
-
 import json
 
 log = logging.getLogger(__name__)
 
 
-def _isOnline(flags):
-    if isComponentAccumulatorCfg():
-        return flags.Common.isOnline
-    else:
-        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-        return athenaCommonFlags.isOnline()
+class GenericMonitoringTool(CompFactory.GenericMonitoringTool):
+    '''GenericMonitoringTool configurable class'''
 
+    __slots__ = ('_configFlags', '_convention', '_defaultDuration')
 
-def GenericMonitoringTool(flags, name='GenericMonitoringTool', **kwargs):
-    '''Create GenericMonitoringTool'''
-
-    # For legacy config we allow flags=None:
-    if flags is not None and not isinstance(flags, AthConfigFlags):
-        raise RuntimeError("Flags need to be passed as first argument to GenericMonitoringTool but received: %s" % flags)
-
-    if isComponentAccumulatorCfg():
-        gmt = GenericMonitoringTool_v2(name, **kwargs)
-    else:
-        gmt = GenericMonitoringTool_v1(name, **kwargs)
-
-    # We pass the flags this way because the legacy Configurable class does not play
-    # nicely with additional arguments in its constructor:
-    gmt._configFlags = flags
-    return gmt
-
-
-class GenericMonitoringToolMixin:
-    '''Mixin class for GenericMonitoringTool'''
-
-    def __init__(self, **kwargs):
-        self._configFlags = None
+    def __init__(self, flags, name='GenericMonitoringTool', **kwargs):
+        self._configFlags = flags
         self._convention = ''
         self._defaultDuration = kwargs.pop('defaultDuration', None)
+        super().__init__(name, **kwargs)
 
     @property
     def convention(self):
@@ -84,21 +56,6 @@ class GenericMonitoringToolMixin:
 
     def defineTree(self, *args, **kwargs):
         self._coreDefine(defineTree, *args, **kwargs)
-
-
-class GenericMonitoringTool_v1(_GMT1, GenericMonitoringToolMixin):
-    '''Legacy Configurable'''
-    def __init__(self, name='GenericMonitoringTool', **kwargs):
-        # cannot use super() because configurable base classes don't use it either
-        _GMT1.__init__(self, name, **kwargs)
-        GenericMonitoringToolMixin.__init__(self, **kwargs)
-
-
-class GenericMonitoringTool_v2(_GMT2, GenericMonitoringToolMixin):
-    '''GaudiConfig2 Configurable'''
-    def __init__(self, name='GenericMonitoringTool', **kwargs):
-        _GMT2.__init__(self, name, **kwargs)
-        GenericMonitoringToolMixin.__init__(self, **kwargs)
 
 
 class GenericMonitoringArray:
@@ -204,7 +161,6 @@ class GenericMonitoringArray:
         else:
             #Assume GaudiConfig2.semantics._ListHelper
             iterable = list(first)
-            #print("Type of first:",type(first))
         for i in iterable:
             if len(dimensions)==1:
                 postList.append(previous+'_'+str(i))
@@ -228,7 +184,7 @@ class GenericMonitoringArray:
 #  @return set of forbidden characters found
 def _invalidName(flags, name):
     blacklist = '/\\'
-    if _isOnline(flags):
+    if flags.Common.isOnline:
         blacklist += '=,:.()'
     return set(name).intersection(blacklist)
 
@@ -392,7 +348,7 @@ def defineHistogram(flags, varname, type='TH1F', path=None,
     nVars = len(varList)
 
     # Type
-    if _isOnline(flags) and type in ['TTree']:
+    if flags.Common.isOnline and type in ['TTree']:
         log.warning('Object %s of type %s is not supported for online running and '
                     'will not be added.', varname, type)
         return ''
@@ -484,7 +440,7 @@ def defineHistogram(flags, varname, type='TH1F', path=None,
 
     # some things need merging
     if ((settings['kAddBinsDynamically'] or settings['kRebinAxes'] or settings['kCanRebin'])
-        and (not _isOnline(flags) and 'OFFLINE' in settings['convention'])):
+        and (not flags.Common.isOnline and 'OFFLINE' in settings['convention'])):
         if merge is None:
             log.warning(f'Merge method for {alias} is not specified but needs to be "merge" due to histogram definition; overriding for your convenience')
             merge = 'merge'
@@ -495,7 +451,7 @@ def defineHistogram(flags, varname, type='TH1F', path=None,
         settings['merge'] = merge
 
     # LB histograms always need to be published online (ADHI-4947)
-    if settings['kLBNHistoryDepth']>0 and _isOnline(flags):
+    if settings['kLBNHistoryDepth']>0 and flags.Common.isOnline:
         settings['kAlwaysCreate'] = True
         log.debug('Setting kAlwaysCreate for lumiblock histogram "%s"', varname)
 
@@ -506,7 +462,7 @@ def defineHistogram(flags, varname, type='TH1F', path=None,
     assert settings['kLBNHistoryDepth']==0 or settings['kLive']==0,\
     f'Cannot use both kLBNHistoryDepth and kLive for histogram {alias}.'
     # kLive histograms are only available for Online monitoring.
-    assert settings['kLive']==0 or _isOnline(flags),\
+    assert settings['kLive']==0 or flags.Common.isOnline,\
     f'Cannot use kLive with offline histogram {alias}.'
 
     return json.dumps(settings)

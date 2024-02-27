@@ -1,37 +1,9 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
-from HLTSeeding.HLTSeedingConf import CTPUnpackingEmulationTool, RoIsUnpackingEmulationTool
+from AthenaConfiguration.ComponentAccumulator import CompFactory
 
 log = logging.getLogger('EmuStepProcessingConfig')
-
-###########################################################################    
-def thresholdToChains( chains ):
-    """
-    Produces list "threshod : chain" for all chains passed. Uses the L1Thresholds/vseeds Chain property
-    """
-    ret = []
-    for c in chains:
-        for t in c.vseeds:
-            ret.append(t+ " : " + c.name)
-    return ret
-
-###########################################################################    
-def generateHLTSeedingAndChainsManually(flags, topSequence):
-    log.info( "generateHLTSeedingAndChainsManually")
-    generateEmuEvents()
-    emulateHLTSeeding(topSequence)
-    generateChainsManually(flags)
-    
-
-###########################################################################    
-def generateHLTSeedingAndChainsByMenu(flags, topSequence):
-    log.info("generateHLTSeedingAndChainsByMenu")
-    generateEmuEvents()
-    emulateHLTSeeding(topSequence)
-    generateEmuMenu(flags)
-
-
 
 ###########################################################################    
 def generateEmuMenu(flags):
@@ -49,7 +21,6 @@ def generateEmuMenu(flags):
     # Generate the menu
     menu = GenerateMenuMT()
     menu.generateAllChainConfigs(flags)
-    #menu.generateMT()
 
 
 
@@ -150,7 +121,7 @@ def generateEmuEvents():
                        ';',
                        ';']
 
-    from DecisionHandling.TestUtils import writeEmulationFiles
+    from TriggerMenuMT.CFtest.TestUtils import writeEmulationFiles
     writeEmulationFiles(data)
 
 
@@ -161,7 +132,7 @@ def generateChainsManually(flags, maskbit=0x7):
     maskbits used to enable signature-lke group of chains
     """
     log.info("generateChainsManually mask=0x%d",maskbit)
-    from DecisionHandling.TestUtils import makeChain, makeChainStep
+    from TriggerMenuMT.CFtest.TestUtils import makeChain, makeChainStep
     from TriggerMenuMT.HLT.Config.MenuComponents import getEmptyMenuSequence   
     doMuon     = maskbit & 0x1
     doElectron = maskbit>>1 & 0x1
@@ -171,7 +142,7 @@ def generateChainsManually(flags, maskbit=0x7):
 
     # muon chains
     if doMuon:
-        from DecisionHandling.HLTSignatureConfig import  muMenuSequence
+        from TriggerMenuMT.CFtest.HLTSignatureConfig import  muMenuSequence
         #step1
         mu11 = muMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
         mu12 = muMenuSequence(flags,step="1",reconame="v2", hyponame="v2")
@@ -208,7 +179,7 @@ def generateChainsManually(flags, maskbit=0x7):
 
     ## #electron chains
     if doElectron:
-        from DecisionHandling.HLTSignatureConfig import  elMenuSequence, gamMenuSequence
+        from TriggerMenuMT.CFtest.HLTSignatureConfig import  elMenuSequence, gamMenuSequence
         el11 = elMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
         el21 = elMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
         el22 = elMenuSequence(flags,step="2",reconame="v2", hyponame="v2")
@@ -236,13 +207,13 @@ def generateChainsManually(flags, maskbit=0x7):
         emptySeq2 = getEmptyMenuSequence("step2EmptySeqence")
         
         if not doElectron:
-            from DecisionHandling.HLTSignatureConfig import elMenuSequence        
+            from TriggerMenuMT.CFtest.HLTSignatureConfig import elMenuSequence        
             el11 = elMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
             el21 = elMenuSequence(flags,step="2",reconame="v1", hyponame="v1")
             el41 = elMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
             
         if not doMuon:
-            from DecisionHandling.HLTSignatureConfig import muMenuSequence
+            from TriggerMenuMT.CFtest.HLTSignatureConfig import muMenuSequence
             #step1
             mu11 = muMenuSequence(flags,step="1",reconame="v1", hyponame="v1")
             mu12 = muMenuSequence(flags,step="1",reconame="v2", hyponame="v2")
@@ -256,7 +227,7 @@ def generateChainsManually(flags, maskbit=0x7):
             mu41 = muMenuSequence(flags,step="4",reconame="v1", hyponame="v1")
            
            
-        from DecisionHandling.HLTSignatureHypoTools import dimuDrComboHypoTool
+        from TriggerMenuMT.CFtest.HLTSignatureHypoTools import dimuDrComboHypoTool
                        
         # multiplicity here indicates the number of objects to be combined:
         # for the chain dictionary, get the sum of the multiplicity in the multiplicy array
@@ -322,33 +293,13 @@ def generateChainsManually(flags, maskbit=0x7):
 
 
 ########################## L1 #################################################        
-def emulateHLTSeeding(topSequence):
-    log.info("emulateHLTSeeding")    
-    # modify hltSeeding already in the Tree
-    hltSeeding=topSequence.HLTTop.HLTBeginSeq.HLTSeeding    
-    
-    ctpUnpacker = CTPUnpackingEmulationTool( ForceEnableAllChains=False , InputFilename="ctp.dat" )
-    hltSeeding.ctpUnpacker = ctpUnpacker
-
-    ## hack to solve the PS crash:
-    from HLTSeeding.HLTSeedingConf import PrescalingEmulationTool
-    psEmulation = PrescalingEmulationTool()
-    hltSeeding.prescaler = psEmulation
-
-    from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection, mapThresholdToL1DecisionCollection
-    emUnpacker = RoIsUnpackingEmulationTool("EMRoIsUnpackingTool", InputFilename="l1emroi.dat", OutputTrigRoIs=mapThresholdToL1RoICollection("EM"), Decisions=mapThresholdToL1DecisionCollection("EM"), ThresholdPrefix="EM" )
-    muUnpacker = RoIsUnpackingEmulationTool("MURoIsUnpackingTool", InputFilename="l1muroi.dat",  OutputTrigRoIs=mapThresholdToL1RoICollection("MU"), Decisions=mapThresholdToL1DecisionCollection("MU"), ThresholdPrefix="MU" )
-
-    hltSeeding.RoIBRoIUnpackers = [emUnpacker, muUnpacker]
-
 
 def emulateHLTSeedingCfg(flags, seqName = None):
     """
     copy of HLTSeeding/python/HLTSeedingConfig.py to allow seeding with emulated data with CA
     """
 
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.ComponentAccumulator import CompFactory
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator    
     acc = ComponentAccumulator()
     
     decoderAlg = CompFactory.HLTSeeding()

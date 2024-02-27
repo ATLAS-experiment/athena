@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
 #
 # Author: Christos Anastopoulos
 # Date: Jan, 2023
@@ -9,7 +9,7 @@
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
 from AthenaConfiguration.TestDefaults import defaultTestFiles
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaPython.PyAthenaComps import Alg, StatusCode
 import ROOT
@@ -61,29 +61,29 @@ class CaloDetDescrManagerAlg (Alg):
         return StatusCode.Success
 
 
-def testCfg(configFlags):
+def testCfg(flags):
     result = ComponentAccumulator()
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from TileGeoModel.TileGMConfig import TileGMCfg
-    result.merge(LArGMCfg(configFlags))
-    result.merge(TileGMCfg(configFlags))
+    result.merge(LArGMCfg(flags))
+    result.merge(TileGMCfg(flags))
     result.addEventAlgo(CaloDetDescrManagerAlg('CaloDetDescrManagerAlg'))
 
     return result
 
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.RDO_RUN2
+flags.Input.TimeStamps = [1000]
+flags.Detector.GeometryLAr = True
+flags.Detector.GeometryTile = True
+flags.needFlagsCategory('Tile')
+flags.needFlagsCategory('LAr')
 
-ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-ConfigFlags.Input.TimeStamps = [1000]
-ConfigFlags.Detector.GeometryLAr = True
-ConfigFlags.Detector.GeometryTile = True
-ConfigFlags.needFlagsCategory('Tile')
-ConfigFlags.needFlagsCategory('LAr')
+flags.lock()
+acc = MainServicesCfg(flags)
 
-ConfigFlags.lock()
-acc = MainServicesCfg(ConfigFlags)
+acc.merge(McEventSelectorCfg(flags))
 
-acc.merge(McEventSelectorCfg(ConfigFlags))
-
-acc.merge(testCfg(ConfigFlags))
+acc.merge(testCfg(flags))
 acc.run(1)

@@ -74,9 +74,9 @@ StatusCode LArRDOAnalysis::initialize() {
 
   // This will check that the properties were initialized
   // properly by job configuration.
-  ATH_CHECK( m_inputRawChannelKey.initialize() );
-  ATH_CHECK( m_inputTTL1HADKey.initialize() );
-  ATH_CHECK( m_inputTTL1EMKey.initialize() );
+  ATH_CHECK( m_inputRawChannelKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_inputTTL1HADKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_inputTTL1EMKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_inputDigitKey.initialize() );
 
   // Grab Ntuple and histogramming service for tree
@@ -188,87 +188,89 @@ StatusCode LArRDOAnalysis::execute() {
   m_digiGain->clear();
   m_digiSamples->clear();
 
-  // LAr Raw Channels
-  SG::ReadHandle<LArRawChannelContainer> p_larRawCont(m_inputRawChannelKey);
-  if (p_larRawCont.isValid()) {
-    // loop over LAr raw channels container
-    LArRawChannelContainer::const_iterator lar_itr(p_larRawCont->begin());
-    const LArRawChannelContainer::const_iterator lar_end(p_larRawCont->end());
-    for ( ; lar_itr != lar_end; ++lar_itr ) {
-      const HWIdentifier larID(lar_itr->identify());
-      const int rawEnergy(lar_itr->energy());
-      const int rawTime(lar_itr->time());
-      const uint16_t rawQual(lar_itr->quality());
-      const uint16_t rawProv(lar_itr->provenance());
-      CaloGain::CaloGain larGain(lar_itr->gain());
+  if (!m_presampling)
+    {
+      // LAr Raw Channels
+      SG::ReadHandle<LArRawChannelContainer> p_larRawCont(m_inputRawChannelKey);
+      if (p_larRawCont.isValid()) {
+        // loop over LAr raw channels container
+        LArRawChannelContainer::const_iterator lar_itr(p_larRawCont->begin());
+        const LArRawChannelContainer::const_iterator lar_end(p_larRawCont->end());
+        for ( ; lar_itr != lar_end; ++lar_itr ) {
+          const HWIdentifier larID(lar_itr->identify());
+          const int rawEnergy(lar_itr->energy());
+          const int rawTime(lar_itr->time());
+          const uint16_t rawQual(lar_itr->quality());
+          const uint16_t rawProv(lar_itr->provenance());
+          CaloGain::CaloGain larGain(lar_itr->gain());
 
-      const unsigned long long larID_int = larID.get_compact();
-      const int larGain_int = (int)larGain;
-      m_larID->push_back(larID_int);
-      m_energy->push_back(rawEnergy);
-      m_time->push_back(rawTime);
-      m_qual->push_back(rawQual);
-      m_prov->push_back(rawProv);
-      m_gain->push_back(larGain_int);
+          const unsigned long long larID_int = larID.get_compact();
+          const int larGain_int = (int)larGain;
+          m_larID->push_back(larID_int);
+          m_energy->push_back(rawEnergy);
+          m_time->push_back(rawTime);
+          m_qual->push_back(rawQual);
+          m_prov->push_back(rawProv);
+          m_gain->push_back(larGain_int);
 
-      m_h_larID->Fill(larID_int);
-      m_h_energy->Fill(rawEnergy);
-      m_h_time->Fill(rawTime);
-      m_h_qual->Fill(rawQual);
-      m_h_prov->Fill(rawProv);
-      m_h_gain->Fill(larGain_int);
-    }
-  }
-
-
-  // LAr TTL1 - Had
-  SG::ReadHandle<LArTTL1Container> p_larTTL1Cont_had(m_inputTTL1HADKey);
-  if (p_larTTL1Cont_had.isValid()) {
-    LArTTL1Container::const_iterator ttl1Had_itr(p_larTTL1Cont_had->begin());
-    const LArTTL1Container::const_iterator ttl1Had_end(p_larTTL1Cont_had->end());
-    for ( ; ttl1Had_itr != ttl1Had_end; ++ttl1Had_itr ) {
-      const HWIdentifier& hadOnID((*ttl1Had_itr)->ttOnlineID());
-      const Identifier& hadOffID((*ttl1Had_itr)->ttOfflineID());
-      const std::vector<float>& hadSamples = (*ttl1Had_itr)->samples();
-
-      const unsigned long long hadOnID_int = hadOnID.get_compact();
-      const unsigned long long hadOffID_int = hadOffID.get_compact();
-      m_hadOnID->push_back(hadOnID_int);
-      m_hadOffID->push_back(hadOffID_int);
-      for (std::vector<float>::size_type i = 0; i != hadSamples.size(); ++i) {
-        m_hadSamples->push_back(hadSamples.at(i));
-        m_h_hadSamples->Fill(hadSamples.at(i));
+          m_h_larID->Fill(larID_int);
+          m_h_energy->Fill(rawEnergy);
+          m_h_time->Fill(rawTime);
+          m_h_qual->Fill(rawQual);
+          m_h_prov->Fill(rawProv);
+          m_h_gain->Fill(larGain_int);
+        }
       }
 
-      m_h_hadOnID->Fill(hadOnID_int);
-      m_h_hadOffID->Fill(hadOffID_int);
-    }
-  }
 
-  // LAr TTL1 - EM
-  SG::ReadHandle<LArTTL1Container> p_larTTL1Cont_em(m_inputTTL1EMKey);
-  if (p_larTTL1Cont_em.isValid()) {
-    LArTTL1Container::const_iterator ttl1EM_itr(p_larTTL1Cont_em->begin());
-    const LArTTL1Container::const_iterator ttl1EM_end(p_larTTL1Cont_em->end());
-    for ( ; ttl1EM_itr != ttl1EM_end; ++ttl1EM_itr ) {
-      const HWIdentifier& emOnID((*ttl1EM_itr)->ttOnlineID());
-      const Identifier& emOffID((*ttl1EM_itr)->ttOfflineID());
-      const std::vector<float>& emSamples((*ttl1EM_itr)->samples());
+      // LAr TTL1 - Had
+      SG::ReadHandle<LArTTL1Container> p_larTTL1Cont_had(m_inputTTL1HADKey);
+      if (p_larTTL1Cont_had.isValid()) {
+        LArTTL1Container::const_iterator ttl1Had_itr(p_larTTL1Cont_had->begin());
+        const LArTTL1Container::const_iterator ttl1Had_end(p_larTTL1Cont_had->end());
+        for ( ; ttl1Had_itr != ttl1Had_end; ++ttl1Had_itr ) {
+          const HWIdentifier& hadOnID((*ttl1Had_itr)->ttOnlineID());
+          const Identifier& hadOffID((*ttl1Had_itr)->ttOfflineID());
+          const std::vector<float>& hadSamples = (*ttl1Had_itr)->samples();
 
-      const unsigned long long emOnID_int = emOnID.get_compact();
-      const unsigned long long emOffID_int = emOffID.get_compact();
-      m_emOnID->push_back(emOnID_int);
-      m_emOffID->push_back(emOffID_int);
-      for (std::vector<float>::size_type j = 0; j != emSamples.size(); ++j) {
-        m_emSamples->push_back(emSamples.at(j));
-        m_h_emSamples->Fill(emSamples.at(j));
+          const unsigned long long hadOnID_int = hadOnID.get_compact();
+          const unsigned long long hadOffID_int = hadOffID.get_compact();
+          m_hadOnID->push_back(hadOnID_int);
+          m_hadOffID->push_back(hadOffID_int);
+          for (std::vector<float>::size_type i = 0; i != hadSamples.size(); ++i) {
+            m_hadSamples->push_back(hadSamples.at(i));
+            m_h_hadSamples->Fill(hadSamples.at(i));
+          }
+
+          m_h_hadOnID->Fill(hadOnID_int);
+          m_h_hadOffID->Fill(hadOffID_int);
+        }
       }
 
-      m_h_emOnID->Fill(emOnID_int);
-      m_h_emOffID->Fill(emOffID_int);
-    }
-  }
+      // LAr TTL1 - EM
+      SG::ReadHandle<LArTTL1Container> p_larTTL1Cont_em(m_inputTTL1EMKey);
+      if (p_larTTL1Cont_em.isValid()) {
+        LArTTL1Container::const_iterator ttl1EM_itr(p_larTTL1Cont_em->begin());
+        const LArTTL1Container::const_iterator ttl1EM_end(p_larTTL1Cont_em->end());
+        for ( ; ttl1EM_itr != ttl1EM_end; ++ttl1EM_itr ) {
+          const HWIdentifier& emOnID((*ttl1EM_itr)->ttOnlineID());
+          const Identifier& emOffID((*ttl1EM_itr)->ttOfflineID());
+          const std::vector<float>& emSamples((*ttl1EM_itr)->samples());
 
+          const unsigned long long emOnID_int = emOnID.get_compact();
+          const unsigned long long emOffID_int = emOffID.get_compact();
+          m_emOnID->push_back(emOnID_int);
+          m_emOffID->push_back(emOffID_int);
+          for (std::vector<float>::size_type j = 0; j != emSamples.size(); ++j) {
+            m_emSamples->push_back(emSamples.at(j));
+            m_h_emSamples->Fill(emSamples.at(j));
+          }
+
+          m_h_emOnID->Fill(emOnID_int);
+          m_h_emOffID->Fill(emOffID_int);
+        }
+      }
+    }
 
   // LAr Digits
   SG::ReadHandle<LArDigitContainer> p_larDigiCont(m_inputDigitKey);

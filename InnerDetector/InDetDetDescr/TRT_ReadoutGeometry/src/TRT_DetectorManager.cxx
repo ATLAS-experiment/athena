@@ -63,9 +63,6 @@ namespace InDetDD {
 
     TRT_DetectorManager::~TRT_DetectorManager()
     {
-        for (auto & i : m_volume) {
-            i->unref();
-        }
         delete m_numerology;
         if (m_ownsIdHelper)    delete m_idHelper;
         for (auto & i : m_barrelXF) delete i;
@@ -97,8 +94,7 @@ namespace InDetDD {
         return m_volume[i];
     }
 
-    void  TRT_DetectorManager::addTreeTop(PVLink vol){
-        vol->ref();
+    void  TRT_DetectorManager::addTreeTop(PVLink vol) {
         m_volume.push_back(vol);
     }
   

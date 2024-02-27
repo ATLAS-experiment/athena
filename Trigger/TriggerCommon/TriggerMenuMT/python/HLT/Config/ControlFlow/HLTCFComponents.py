@@ -4,7 +4,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import AlgNode, HypoAlgNode
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import isComboHypoAlg
-from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import isCAMenu
+from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu
 from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -136,7 +136,7 @@ class CFSequence(object):
             nseq=0
             for seq in self.step.sequences:
                 filter_out = connections[nseq]
-                log.debug("CFSequence: Found input %s to sequence::%s from Filter::%s (from seed %s)", filter_out, seq.name, compName(self.filter.Alg), seq.seed)
+                log.debug("CFSequence: Found input %s to sequence::%s from Filter::%s", filter_out, seq.name, compName(self.filter.Alg))
                 seq.connectToFilter( filter_out )
                 nseq+=1
         else:
@@ -246,8 +246,7 @@ class CFSequenceCA(CFSequence):
     def createHypoTools(self, flags, chain, newstep):
         """ set and create HypoTools accumulated on the self.step from an input step configuration
         """
-        with ConfigurableCABehavior(): 
-            acc = ComponentAccumulator()
+        
         if self.step.combo is None:
             return
 
@@ -266,10 +265,9 @@ class CFSequenceCA(CFSequence):
                 hypoToolConf.setConf( onePartChainDict )
                 hypo = HypoAlgNode(Alg = self.ca.getEventAlgo(myseq.hypo.Alg.getName()))
                 hypoToolAcc = hypo.addHypoTool(flags, hypoToolConf) #this creates the HypoTools
-                if isinstance(hypoToolAcc, ComponentAccumulator):
-                    acc.merge(hypoToolAcc)
+                if isinstance(hypoToolAcc, ComponentAccumulator):                   
+                    self.ca.merge(hypoToolAcc)
                    
 
         chainDict = HLTMenuConfig.getChainDictFromChainName(chain)
-        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)
-        return acc
+        self.combo.createComboHypoTools(flags, chainDict, newstep.comboToolConfs)      

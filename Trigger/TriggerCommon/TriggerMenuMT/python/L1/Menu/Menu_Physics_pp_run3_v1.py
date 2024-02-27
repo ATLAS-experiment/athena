@@ -68,69 +68,90 @@ def defineMenu():
         'L1_cTAU30M_2cTAU20M_4jJ30p0ETA25',
         'L1_cTAU35M_2cTAU30M_2jJ55_3jJ50',  
         'L1_cTAU35M_2cTAU30M',
-
+        'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ30',
+        'L1_eTAU35M_2eTAU30M',
+        
         # combined tau - lepton
-        'L1_EM15VHI_2TAU12IM',
-        'L1_MU8F_TAU12IM',  
-        'L1_MU8F_TAU12IM_J25_2J12',
-        'L1_MU8F_TAU12IM_3J12',
-        'L1_EM15VHI_2TAU12IM_J25_3J12',
-        'L1_MU8F_TAU20IM',
-        'L1_MU8F_TAU20IM_J25_2J20',
-
+        #Phase-I
+        'L1_eEM18M_2eTAU20M',
+        'L1_MU8F_eTAU20M',
+        'L1_MU8F_eTAU20M_jJ55_2jJ30',
+        'L1_MU8F_eTAU20M_3jJ30',
+        'L1_eEM18M_2eTAU20M_jJ55_3jJ30',
+        'L1_MU8F_eTAU30M',
+        'L1_eEM18M_2eTAU20M_4jJ30',
+        
         # combined tau - jet
-        'L1_TAU20IM_2TAU12IM_J25_2J20_3J12',
         'L1_TAU20IM_2TAU12IM_4J12p0ETA25',
-        'L1_TAU25IM_2TAU20IM_2J25_3J20',
-        'L1_TAU25IM_2TAU20IM',
 
         # combined tau - xe
-        'L1_TAU20IM_2J20_XE45',
-        'L1_TAU20IM_2J20_XE50',
-        'L1_EM15VHI_2TAU12IM_XE35',
-        'L1_EM15VHI_2TAU12IM_4J12',
-        'L1_MU8F_TAU12IM_XE35',  
-        'L1_TAU20IM_2TAU12IM_XE35', 
-        'L1_TAU40_2TAU12IM_XE40',  
+        'L1_eEM18M_2eTAU20M_jXE70',
+        'L1_eTAU30M_2jJ50_jXE90',
+        'L1_MU8F_eTAU20M_jXE70',
+        'L1_eTAU30M_2eTAU20M_jXE70',
+        'L1_eTAU60_2eTAU20M_jXE80',
 
-        # combined em - jet
-        'L1_EM18VHI_3J20',
-        'L1_EM20VH_3J20',
+
+        # ATR-28761 Phase1 combined em - jet
+        'L1_eEM22M_3jJ50',
+        'L1_eEM24L_3jJ50',
 
         # combined mu - jet 
-        'L1_MU3V_J12', 'L1_MU3V_J15', 'L1_MU5VF_J40', 'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ50', 
+        'L1_MU3V_J15', 'L1_MU5VF_J40', 'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ50',  
+        # L1_MU3V_J12 moved to MC ATR-28761
 
         #ATR-13743 J,XE thershold change for ATR-19376 
-        'L1_MU8F_2J20','L1_MU8F_3J20', 'L1_MU8F_2J15_J20',
-        'L1_MU14FCH_J50',
-        'L1_MU14FCH_XE40',
+        'L1_MU8F_2jJ50','L1_MU8F_3jJ50', 'L1_MU8F_2jJ40_jJ50',
+        'L1_MU14FCH_jJ90',
+        'L1_MU14FCH_jXE80',
         'L1_MU14FCH_EMPTY',
         'L1_MU14FCH_UNPAIRED_ISO',
 
-        # single jet
-        # L1_J12 must be kept in the menu for online monitoring of BIB (can be disabled via PS is necessary)
-        'L1_J12', 'L1_J15','L1_J20','L1_J25', 'L1_J30', 'L1_J40', 'L1_J50' ,'L1_J75','L1_J85', 'L1_J100', 'L1_J120', 'L1_J400',
-        'L1_J400_LAR',
-        'L1_J20p31ETA49', 'L1_J30p31ETA49', 'L1_J50p31ETA49', 'L1_J75p31ETA49', 'L1_J15p31ETA49',
-        'L1_J12_EMPTY','L1_J12_FIRSTEMPTY', 'L1_J12_UNPAIRED_ISO', 'L1_J12_UNPAIRED_NONISO', 'L1_J12_UNPAIREDB1', 'L1_J12_UNPAIREDB2',
-        'L1_J15p31ETA49_UNPAIRED_ISO',
-        'L1_J30_EMPTY', 'L1_J30_FIRSTEMPTY', 'L1_J30p31ETA49_EMPTY', 'L1_J30p31ETA49_UNPAIRED_ISO', 'L1_J30p31ETA49_UNPAIRED_NONISO',
-        'L1_J50_UNPAIRED_ISO', 'L1_J50_UNPAIRED_NONISO',
-        'L1_J100_FIRSTEMPTY',
-        'L1_J12_BGRP12',
+        # Single jet Legacy
+        'L1_J15','L1_J20','L1_J50','L1_J100','L1_J400','L1_J75p31ETA49',
 
-        # jJ 
-        'L1_jJ30', 'L1_jJ30_EMPTY', 'L1_jJ30p0ETA25', 'L1_jJ40', 'L1_jJ40p0ETA25', 'L1_jJ50', 'L1_jJ55',  'L1_jJ55p0ETA23',
-        'L1_jJ60', 'L1_jJ60_EMPTY', 'L1_jJ60_FIRSTEMPTY', 'L1_jJ70p0ETA23', 'L1_jJ80', 'L1_jJ80p0ETA25', 'L1_jJ85p0ETA21', 'L1_jJ90',
-        'L1_jJ125', 'L1_jJ140', 'L1_jJ160', 'L1_jJ180', 'L1_jJ500',
-        'L1_jJ500_LAR',
+        # jJ
+        'L1_jJ30', 'L1_jJ30_BRGP12','L1_jJ30_EMPTY','L1_jJ30_FIRSTEMPTY',
+        'L1_jJ30_UNPAIRED_ISO','L1_jJ30_UNPAIRED_NONISO','L1_jJ30_UNPAIREDB1','L1_jJ30_UNPAIREDB2',
+        'L1_jJ30p0ETA25',
+         
+        'L1_jJ40', 'L1_jJ40p0ETA25', 'L1_jJ40p30ETA49', 'L1_jJ40p30ETA49_UNPAIRED_ISO',
 
-        'L1_jJ40p30ETA49', 'L1_jJ50p30ETA49', 'L1_jJ60p30ETA49', 'L1_jJ90p30ETA49', 'L1_jJ125p30ETA49',
+        'L1_jJ50', 'L1_jJ50p30ETA49',
+
+        'L1_jJ55', 'L1_jJ55p0ETA23', 'L1_jJ55p0ETA23_2jJ40p30ETA49', 
+
+        'L1_jJ60', 'L1_jJ60_EMPTY', 'L1_jJ60_FIRSTEMPTY','L1_jJ60p30ETA49',  
+        'L1_jJ60p30ETA49_EMPTY', 'L1_jJ60p30ETA49_UNPAIRED_ISO', 'L1_jJ60p30ETA49_UNPAIRED_NONISO',
+
+        'L1_jJ70p0ETA23', 
+
+        'L1_jJ80', 
+        'L1_jJ80p0ETA25', 'L1_jJ80p0ETA25_2jJ40p30ETA49', 'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49', 
+
+        'L1_jJ85p0ETA21', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 
+
+        'L1_jJ90', 'L1_jJ90_UNPAIRED_ISO', 'L1_jJ90_UNPAIRED_NONISO',
+        'L1_jJ90p30ETA49', 
+        'L1_jJ90_2jJ80p0ETA25_3jJ40p0ETA25',
+
+        'L1_jJ125', 'L1_jJ125p30ETA49',
+
+        'L1_jJ140',  
+
+        'L1_jJ160', 'L1_jJ160_FIRSTEMPTY',
+
+        'L1_jJ180', 
+
+        'L1_jJ500', 'L1_jJ500_LAR',
+
+        'L1_3jJ55p0ETA23',
+        'L1_6jJ40',
 
         'L1_4jJ40', 'L1_3jJ90', 'L1_4jJ50', 'L1_4jJ40p0ETA25', 'L1_5jJ40p0ETA25', 
         'L1_3jJ70p0ETA23', 'L1_jJ140_3jJ60', 
-        'L1_jJ80p0ETA25_2jJ55_jJ50p30ETA49', 'L1_jJ55p0ETA23_2jJ40p30ETA49', 'L1_jJ85p0ETA21_3jJ40p0ETA25', 
-        'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ90',  #L1_MU3V_jJ30 added temporarily 
+        'L1_MU3V_jJ30', 'L1_MU3V_jJ40', 'L1_MU5VF_jJ90',  
+        #Kept as Phase-1 ATR-28761 
   
         # jLJ
         'L1_jLJ80', 'L1_jLJ120', 'L1_jLJ140', 'L1_jLJ180',
@@ -147,48 +168,48 @@ def defineMenu():
         # LAr saturation
         'L1_LArSaturation',
 
+        # ZeroBias
+        'L1_ZeroBias',
+
         # multi jet
-        'L1_J45p0ETA21_3J15p0ETA25',
         'L1_J50_2J40p0ETA25_3J15p0ETA25',
-        'L1_3J50', 'L1_4J15', 'L1_4J20',
-        'L1_3J15p0ETA25_XE40',
+        
+        'L1_3J50', 'L1_4J15', 
+
         'L1_6J15',
-        'L1_J85_3J30',
 
         # multi jet forward
-        'L1_J25p0ETA23_2J15p31ETA49',
         'L1_J40p0ETA25_2J15p31ETA49',
-        'L1_J40p0ETA25_2J25_J20p31ETA49',
         
         # multi jet central
         'L1_3J25p0ETA23',
-        'L1_3J35p0ETA23',
-        'L1_4J15p0ETA25',
-        'L1_5J15p0ETA25', 
 
         # combined jet
-        'L1_2J15_XE55', 'L1_J40_XE50',
-        'L1_2J50_XE40', 'L1_J40_XE60',
+        'L1_jJ80_jXE100',
+        #'L1_jJ80_jXE120',
         # ATR-27250 Duplicate multijet-seeded triggers to jFEX
-        #'L1_2jJ90_jXE80', 'L1_2jJ40_jXE110',
-        #'L1_3jJ40p0ETA25_jXE80',
+        'L1_2jJ90_jXE80', 
+        'L1_2jJ40_jXE110',
+        'L1_3jJ40p0ETA25_jXE80',
         
         # XE
-        'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50', 
-        'L1_XE55', 'L1_XE60', 'L1_XE30', 'L1_XE300',
+        'L1_XE50', 'L1_XE55', 'L1_XE30', 'L1_XE300',
         # new calo
-        'L1_gXERHO70', 'L1_gXERHO100',
+        #'L1_gXERHO70', 'L1_gXERHO100',
         'L1_gXENC70', 'L1_gXENC100',
-        'L1_gXEJWOJ70', 'L1_gXEJWOJ80', 'L1_gXEJWOJ100',
+        'L1_gXEJWOJ60', 'L1_gXEJWOJ70', 'L1_gXEJWOJ80', 'L1_gXEJWOJ100', 'L1_gXEJWOJ110', 'L1_gXEJWOJ120', 'L1_gXEJWOJ500',
         'L1_gTE200',
         'L1_gMHT500',
 
-        'L1_jXE70', 'L1_jXE80', 'L1_jXE100', 'L1_jXE110', 'L1_jXE500', 
+        'L1_jXE60', 'L1_jXE70', 'L1_jXE80', 'L1_jXE90', 'L1_jXE100', 'L1_jXE110', 'L1_jXE120', 'L1_jXE500', 
         'L1_jXEC100', 'L1_jTE200', 'L1_jTEC200', 'L1_jTEFWD100', 'L1_jTEFWDA100', 'L1_jTEFWDC100',
     
         #LUCID
         'L1_LUCID_A', 'L1_LUCID_C',
         'L1_LUCID_A_BGRP11', 'L1_LUCID_C_BGRP11',
+
+        #combined jet xe
+        'L1_jJ80_jXE120',
 
         # VDM
 
@@ -203,7 +224,6 @@ def defineMenu():
         # low-priority (all mu)
         'L1_AFP_FSA_TOF_T2_BGRP12', 'L1_AFP_FSA_TOF_T3_BGRP12','L1_AFP_FSC_TOF_T2_BGRP12', 'L1_AFP_FSC_TOF_T3_BGRP12',
         'L1_AFP_A_OR_C_UNPAIRED_ISO', 'L1_AFP_A_OR_C_UNPAIRED_NONISO', 'L1_AFP_A_OR_C_EMPTY', 'L1_AFP_A_OR_C_FIRSTEMPTY',
-        'L1_AFP_A_AND_C_TOF_J20', 'L1_AFP_A_AND_C_TOF_T0T1_J20', 'L1_AFP_A_AND_C_TOF_J30', 'L1_AFP_A_AND_C_TOF_T0T1_J30', 'L1_AFP_A_AND_C_TOF_J50', 'L1_AFP_A_AND_C_TOF_T0T1_J50', 'L1_AFP_A_AND_C_TOF_J75', 'L1_AFP_A_AND_C_TOF_T0T1_J75', 
 
         'L1_AFP_A_AND_C_TOF_jJ50', 'L1_AFP_A_AND_C_TOF_T0T1_jJ50', 'L1_AFP_A_AND_C_TOF_jJ60', 'L1_AFP_A_AND_C_TOF_T0T1_jJ60', 'L1_AFP_A_AND_C_TOF_jJ90', 'L1_AFP_A_AND_C_TOF_T0T1_jJ90', 'L1_AFP_A_AND_C_TOF_jJ125', 'L1_AFP_A_AND_C_TOF_T0T1_jJ125',
 
@@ -211,12 +231,12 @@ def defineMenu():
         'L1_AFP_NSA_BGRP12', 'L1_AFP_NSC_BGRP12', 
         'L1_AFP_A','L1_AFP_C', 'L1_AFP_A_AND_C',
         #'L1_AFP_A_OR_C_J5','L1_AFP_A_AND_C_J5', # J5 not available in legacy menu. Need to update to jJ threshold for low-mu
-        'L1_AFP_A_OR_C_J12','L1_AFP_A_AND_C_J12',
-        'L1_MU5VF_AFP_A_OR_C','L1_MU5VF_AFP_A_AND_C',
+        'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
+        'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
         # 'L1_EM7_AFP_A_OR_C','L1_EM7_AFP_A_AND_C',# ATR-27654
-        'L1_eEM9_AFP_A_OR_C','L1_eEM9_AFP_A_AND_C',
+        'L1_eEM9_AFP_A_OR_C', 'L1_eEM9_AFP_A_AND_C',
         # med-priority (low mu)
-        'L1_AFP_A_OR_C','L1_AFP_A_OR_C_MBTS_2', 'L1_AFP_A_AND_C_MBTS_2',
+        'L1_AFP_A_OR_C', 'L1_AFP_A_OR_C_MBTS_2', 'L1_AFP_A_AND_C_MBTS_2',
           
 
         # MBTS
@@ -355,7 +375,9 @@ def defineMenu():
         'L1_CEP-CjJ90',
         'L1_AFP_A_AND_C_TOF_CEP-CjJ100','L1_AFP_A_AND_C_TOF_T0T1_CEP-CjJ100',
 
-
+        #ATR-28563
+        'L1_LLPDPHI-jXE27-jJ27',
+        
         ]
 
     L1MenuFlags.CtpIdMap = FixedIDMap

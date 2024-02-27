@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,7 +11,7 @@
 
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "MuonCablingData/MicroMega_CablingMap.h"
+#include "MuonCablingData/Nsw_CablingMap.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -35,7 +35,7 @@ private:
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
                                                                                 "Key of input MuonDetectorManager condition data"};
 
-    SG::ReadCondHandleKey<MicroMega_CablingMap> m_cablingKey{this, "ReadKey", "MicroMegaCabling", "Key of input MM cabling map"};
+    SG::ReadCondHandleKey<Nsw_CablingMap> m_cablingKey{this, "ReadKey", "MicroMegaCabling", "Key of input MM cabling map"};
 
     Gaudi::Property<std::string> m_dumpFile{this, "DumpMap", "" , "Text file to which every cabling channel is dumped"};
     

@@ -31,6 +31,7 @@ namespace ActsTrk {
   private:
     SG::ReadHandleKey< xAOD::SpacePointContainer > m_spacePointContainerKey {this, "SpacePointContainerKey", "ITkPixelSpacePoints", "Key of input space points"};
 
+    Gaudi::Property< std::string > m_monGroupName {this, "MonGroupName", "ActsSpacePointAnalysisAlg"};
     Gaudi::Property< bool > m_usePixel {this, "UsePixel", true, "enable use of pixel ID or SCT ID"};
     Gaudi::Property< bool > m_useOverlap {this, "UseOverlap", false, "looking at strip strip space points"};
   };

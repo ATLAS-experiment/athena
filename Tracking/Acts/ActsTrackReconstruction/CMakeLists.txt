@@ -1,56 +1,55 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsTrackReconstruction )
 
 # External dependencies:
 find_package( Acts COMPONENTS Core )
-find_package( ROOT COMPONENTS Core Tree RIO )
+find_package( Boost )
 
 atlas_add_component( ActsTrackReconstruction
-                     src/*.cxx
+                     src/*.h src/*.cxx
                      src/components/*.cxx
 		     INCLUDE_DIRS
-		       ${ROOT_INCLUDE_DIRS}	
+		       ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES
-		       ${ROOT_LIBRARIES}
-                       GaudiKernel
-                       BeamSpotConditionsData
+		       ${Boost_LIBRARIES}
                        ActsCore
-                       ActsEventLib
-                       ActsToolInterfacesLib
-                       MagFieldConditions
-                       ActsGeometryInterfacesLib
-                       SiSPSeededTrackFinderData
-		       AthenaMonitoringKernelLib
-                       ActsEventCnvLib
-		       ActsInteropLib
-		       InDetRecToolInterfaces
-		       xAODInDetMeasurement
-		       SiSpacePoint		     
-		       CxxUtils
+		       ActsEventLib
+		       ActsEventCnvLib
 		       ActsGeometryLib
-		       EventPrimitives
-		       GeoPrimitives
+		       ActsGeometryInterfacesLib
+		       ActsInteropLib
+		       ActsToolInterfacesLib
 		       AthenaBaseComps
-		       AthenaKernel
-		       TrkTruthData
-		       CaloDetDescrLib
-		       EventInfo
+		       AthenaMonitoringKernelLib
+		       BeamSpotConditionsData
+		       GaudiKernel
+		       GeoPrimitives
+		       Identifier
+		       InDetIdentifier
+		       InDetPrepRawData
+		       InDetRIO_OnTrack
+		       InDetReadoutGeometry
+		       MagFieldConditions
+		       MagFieldElements
 		       StoreGateLib
 		       TRT_ReadoutGeometry
-                       TrkGeometry
-                       TrkExInterfaces
-                       TrkParameters
-                       TrkSurfaces
-                       TrkFitterUtils
-                       TrkTrackSummary
-		       xAODTracking
+		       TrkEventPrimitives
 		       TrkFitterInterfaces
-		       InDetRIO_OnTrack
+		       TrkMeasurementBase
+		       TrkParameters
+		       TrkPrepRawData
+		       TrkRIO_OnTrack
+		       TrkSurfaces
+		       TrkToolInterfaces
+		       TrkTrack
+		       TrkTrackSummary
+		       TrkTruthData
 		       TruthUtils
+		       xAODEventInfo
+		       xAODInDetMeasurement
+		       xAODMeasurementBase
+		       xAODTracking
                      )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 

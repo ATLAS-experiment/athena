@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: xAODHIEventShapeAuxContainerCnv_v1.cxx 694377 2015-09-11 13:50:57Z krasznaa $
 
 // System include(s):
 #include <stdexcept>
@@ -114,15 +112,7 @@ persToTrans( const xAOD::HIEventShapeAuxContainer_v1* oldObj,
          }
 
          // Copy the variable:
-         void* dst = newInt.getDataArray( auxid );
-         const void* src = oldInt.getDataArrayAllowMissing( auxid );
-         if (!src) {
-            // This can happen with corrupt input files. In this case just
-            // fill dummy values into the new object:
-            r.clear( auxid, dst, nindex );
-            continue;
-         }
-         r.copy( auxid, dst, nindex, src, oindex );
+         r.copy( auxid, newInt, nindex, oldInt, oindex, 1 );
       }
    }
 

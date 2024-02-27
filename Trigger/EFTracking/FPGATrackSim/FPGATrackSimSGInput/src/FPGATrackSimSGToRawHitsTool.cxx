@@ -60,17 +60,6 @@ StatusCode FPGATrackSimSGToRawHitsTool::initialize() {
   ATH_CHECK(service("PartPropSvc", partPropSvc));
   m_particleDataTable = partPropSvc->PDT();
 
-
-  const IdDictManager* idDictMgr = nullptr;
-  ATH_CHECK(detStore()->retrieve(idDictMgr, "IdDict"));
-
-  // ID helpers
-  m_idHelper = new AtlasDetectorID;
-  if (idDictMgr->initializeHelper(*m_idHelper)) {
-    ATH_MSG_ERROR("Unable to initialize ID IdHelper");
-    return StatusCode::FAILURE;
-  }
-
   ATH_CHECK(detStore()->retrieve(m_PIX_mgr, "ITkPixel"));
   ATH_CHECK(detStore()->retrieve(m_pixelId, "PixelID"));
   ATH_CHECK(detStore()->retrieve(m_SCT_mgr, "ITkStrip"));
@@ -94,7 +83,6 @@ StatusCode FPGATrackSimSGToRawHitsTool::initialize() {
 
 
 StatusCode FPGATrackSimSGToRawHitsTool::finalize() {
-  if (m_idHelper) { delete m_idHelper; }
   return StatusCode::SUCCESS;
 }
 
@@ -179,7 +167,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackS
           const Trk::RIO_OnTrack* hit = dynamic_cast <const Trk::RIO_OnTrack*>(measurement);
           const Identifier& hitId = hit->identify();
           FPGATrackSimOfflineHit tmpOfflineHit;
-          if (m_idHelper->is_pixel(hitId)) {
+          if (m_pixelId->is_pixel(hitId)) {
             tmpOfflineHit.setIsPixel(true);
             tmpOfflineHit.setIsBarrel(m_pixelId->is_barrel(hitId));
 
@@ -190,7 +178,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackS
             tmpOfflineHit.setLocX((float)measurement->localParameters()[Trk::locX]);
             tmpOfflineHit.setLocY((float)measurement->localParameters()[Trk::locY]);
           }
-          else if (m_idHelper->is_sct(hitId)) {
+          else if (m_sctId->is_sct(hitId)) {
             tmpOfflineHit.setIsPixel(false);
             tmpOfflineHit.setIsBarrel(m_sctId->is_barrel(hitId));
             const InDetDD::SiDetectorElement* sielement = m_SCT_mgr->getDetectorElement(hitId);
@@ -701,6 +689,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       tmpSGTrack.setVtxY(track_truth_y0);
       tmpSGTrack.setVtxZ(track_truth_z0);
       tmpSGTrack.setD0(track_truth_d0);
+      tmpSGTrack.setZ0(track_truth_z0);
       tmpSGTrack.setVtxZ(primaryVtx.z());
       tmpSGTrack.setQ(track_truth_q);
       tmpSGTrack.setPX(track_truth_p * (track_truth_cosphi * track_truth_sintheta));

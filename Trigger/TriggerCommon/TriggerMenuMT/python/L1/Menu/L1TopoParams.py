@@ -286,5 +286,6 @@ L1TopoParams = {
  
  # For the time being, no dedicated algs for gJetNoSort, jLJetNoSort
  'jXENoSort': {'comment': '', 'parameters': []},
+ 'jXESort': {'comment': '', 'parameters': []},
  'gXENoSort': {'comment': '', 'parameters': []},
 }

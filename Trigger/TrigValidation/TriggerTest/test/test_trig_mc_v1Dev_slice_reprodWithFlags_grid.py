@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by doXYZFlag=False
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -29,14 +29,14 @@ def generate_exec_steps(slice_name = None):
     # athena
     ex = ExecStep.ExecStep(name)
     ex.type = 'athena'
-    ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+    ex.job_options = 'TriggerJobOpts/runHLT.py'
     ex.input = 'ttbar'
     ex.threads = 1
     ex.max_events = 100
-    pre_exec = ''
+    ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"']
     if slice_name:
-        pre_exec += 'doEmptyMenu=True;do{:s}Slice=True;'.format(slice_name)
-    ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doWriteBS=False;doWriteRDOTrigger=False;{:s}"'.format(pre_exec)
+        ex.flags += [f'Trigger.enabledSignatures=[\\\"{slice_name}\\\"]']
+    ex.args = '--CA'
     # rename histogram file
     hist_file_name = 'expert-monitoring_{:s}.root'.format(name)
     mv = ExecStep.ExecStep('RenameHist' + name)

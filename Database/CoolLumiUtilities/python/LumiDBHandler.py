@@ -81,7 +81,7 @@ class LumiDBHandler:
             print(('LumiDBHandler.openDB - Connecting to', dbstring))
             
         try:
-            db = indirectOpen(dbstring, readOnly=True, oracle=oracle, debug=debug)
+            db = indirectOpen(dbstring, readOnly=True, debug=debug)
         except Exception as e:
             print(e)
             return False

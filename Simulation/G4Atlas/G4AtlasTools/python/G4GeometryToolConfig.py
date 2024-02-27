@@ -9,7 +9,7 @@ from AthenaCommon import Logging
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
 
 #the physics region tools
-from G4AtlasTools.G4PhysicsRegionConfig import SX1PhysicsRegionToolCfg, BedrockPhysicsRegionToolCfg, CavernShaftsConcretePhysicsRegionToolCfg, PixelPhysicsRegionToolCfg, SCTPhysicsRegionToolCfg, TRTPhysicsRegionToolCfg, TRT_ArPhysicsRegionToolCfg,ITkPixelPhysicsRegionToolCfg,ITkStripPhysicsRegionToolCfg,HGTDPhysicsRegionToolCfg,BeampipeFwdCutPhysicsRegionToolCfg, FWDBeamLinePhysicsRegionToolCfg, EMBPhysicsRegionToolCfg, EMECPhysicsRegionToolCfg, HECPhysicsRegionToolCfg, FCALPhysicsRegionToolCfg, FCAL2ParaPhysicsRegionToolCfg, EMECParaPhysicsRegionToolCfg, FCALParaPhysicsRegionToolCfg, PreSampLArPhysicsRegionToolCfg, DeadMaterialPhysicsRegionToolCfg
+from G4AtlasTools.G4PhysicsRegionConfig import SX1PhysicsRegionToolCfg, BedrockPhysicsRegionToolCfg, CavernShaftsConcretePhysicsRegionToolCfg, PixelPhysicsRegionToolCfg, SCTPhysicsRegionToolCfg, TRTPhysicsRegionToolCfg, TRT_ArPhysicsRegionToolCfg,ITkPixelPhysicsRegionToolCfg,ITkStripPhysicsRegionToolCfg,HGTDPhysicsRegionToolCfg,BeampipeFwdCutPhysicsRegionToolCfg, FWDBeamLinePhysicsRegionToolCfg, CALOPhysicsRegionToolCfg, EMBPhysicsRegionToolCfg, EMECPhysicsRegionToolCfg, HECPhysicsRegionToolCfg, FCALPhysicsRegionToolCfg, FCAL2ParaPhysicsRegionToolCfg, EMECParaPhysicsRegionToolCfg, FCALParaPhysicsRegionToolCfg, PreSampLArPhysicsRegionToolCfg, DeadMaterialPhysicsRegionToolCfg
 from G4AtlasTools.G4PhysicsRegionConfig import DriftWallPhysicsRegionToolCfg, DriftWall1PhysicsRegionToolCfg, DriftWall2PhysicsRegionToolCfg, MuonSystemFastPhysicsRegionToolCfg
 
 #the field config tools
@@ -205,7 +205,7 @@ def FwdRegionGeoDetectorToolCfg(flags, name='FwdRegion', **kwargs):
 def MuonGeoDetectorToolCfg(flags, name='Muon', **kwargs):
     #set up geometry
     result = ComponentAccumulator()
-    if not flags.Muon.setupGeoModelXML:
+    if not flags.Muon.usePhaseIIGeoSetup:
         from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
         result.merge(MuonGeoModelCfg(flags))
         kwargs.setdefault("DetectorName", "Muon")
@@ -566,12 +566,14 @@ def ATLAS_RegionCreatorListCfg(flags):
             if flags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
                 regionCreatorList += [result.popToolsAndMerge(FCALParaPhysicsRegionToolCfg(flags)),
                                       result.popToolsAndMerge(FCAL2ParaPhysicsRegionToolCfg(flags))]
-                if flags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly]:
+                if flags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly, LArParameterization.FastCaloSim]: # TODO Check this makes sense
                     pass
                     #todo - add the line below
                     regionCreatorList += [
                         result.popToolsAndMerge(PreSampLArPhysicsRegionToolCfg(flags)),
                         result.popToolsAndMerge(DeadMaterialPhysicsRegionToolCfg(flags))]
+            if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
+                regionCreatorList += [result.popToolsAndMerge(CALOPhysicsRegionToolCfg(flags))]
     ## FIXME _initPR never called for FwdRegion??
     #if simFlags.ForwardDetectors.statusOn:
     #    if DetFlags.geometry.FwdRegion_on():

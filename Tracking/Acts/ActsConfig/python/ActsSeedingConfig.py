@@ -10,31 +10,54 @@ from ActsInterop import UnitConstants
 
 # ACTS tools
 def ActsITkPixelSeedingToolCfg(flags,
+                               name: str = "ActsITkPixelSeedingTool",
                                **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+
     ## For ITkPixel
     kwargs.setdefault("numSeedIncrement" , float("inf"))
     kwargs.setdefault("deltaZMax" , float("inf"))
     kwargs.setdefault("maxPtScattering", float("inf"))
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel", **kwargs))
+
+    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name=name, **kwargs))
     return acc
 
 def ActsITkFastPixelSeedingToolCfg(flags,
+                                   name: str = "ActsITkFastPixelSeedingTool",
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    ## For ITkPixel
-    kwargs.setdefault("numSeedIncrement" , float("inf"))
-    kwargs.setdefault("deltaZMax" , float("inf"))
-    kwargs.setdefault("maxPtScattering", float("inf"))
 
     ## Additional cuts for fast seed configuration
+    kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
+    kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
+    kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
+    kwargs.setdefault("maxPhiBins", 200)
+    kwargs.setdefault("gridRMax", 250 * UnitConstants.mm)
+    kwargs.setdefault("deltaRMax", 200 * UnitConstants.mm)
+    kwargs.setdefault("zBinsCustomLooping" , [2, 10, 3, 9, 6, 4, 8, 5, 7])
+    kwargs.setdefault("rRangeMiddleSP", [
+             [40.0, 80.0],
+             [40.0, 200.0],
+             [70.0, 200.0],
+             [70.0, 200.0],
+             [70.0, 250.0],
+             [70.0, 250.0],
+             [70.0, 250.0],
+             [70.0, 200.0],
+             [70.0, 200.0],
+             [40.0, 200.0],
+             [40.0, 80.0],])
+    kwargs.setdefault("useVariableMiddleSPRange", False)
+    kwargs.setdefault("useExperimentCuts", True)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsFastSeedingTool_ITkPixel", **kwargs))
+    acc.merge(ActsITkPixelSeedingToolCfg(flags, name=name, **kwargs))
     return acc
 
 def ActsITkStripSeedingToolCfg(flags,
+                               name: str = "ActsITkStripSeedingTool",
                                **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
     kwargs.setdefault("doSeedQualitySelection", False)
     # For SpacePointGridConfig
@@ -66,19 +89,37 @@ def ActsITkStripSeedingToolCfg(flags,
     # For seeding algorithm
     kwargs.setdefault("zBinNeighborsBottom" , [(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0)])
 
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkStrip", **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
 def ActsITkPixelOrthogonalSeedingToolCfg(flags,
+                                         name: str = "ActsITkPixelOrthogonalSeedingTool",
                                          **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()    
+    ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
+    return acc
+
+def ActsITkFastPixelOrthogonalSeedingToolCfg(flags,
+                                             name: str = "ActsITkFastPixelOrthogonalSeedingTool", 
+                                             **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
-    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkPixel", **kwargs))
+
+    ## Additional cuts for fast seed configuration
+    kwargs.setdefault("minPt", 1000 * UnitConstants.MeV)
+    kwargs.setdefault("collisionRegionMin", -150 * UnitConstants.mm)
+    kwargs.setdefault("collisionRegionMax", 150 * UnitConstants.mm)
+    kwargs.setdefault("useExperimentCuts", True)
+    
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name=name, **kwargs))
     return acc
 
 def ActsITkStripOrthogonalSeedingToolCfg(flags,
+                                         name: str = "ActsITkStripOrthogonalSeedingTool",
                                          **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
     kwargs.setdefault("impactMax" , 20. * UnitConstants.mm)
     kwargs.setdefault('rMax', 1200. * UnitConstants.mm)
@@ -99,7 +140,7 @@ def ActsITkStripOrthogonalSeedingToolCfg(flags,
     kwargs.setdefault("rMinMiddle", 33. * UnitConstants.mm)
     kwargs.setdefault("rMaxMiddle", 1200. * UnitConstants.mm)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkStrip", **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
     return acc
 
 def ActsSiSpacePointsSeedMakerCfg(flags,
@@ -108,8 +149,6 @@ def ActsSiSpacePointsSeedMakerCfg(flags,
     assert isinstance(name, str)
 
     acc = ComponentAccumulator()
-
-    kwargs['name'] = name
 
     # Main properties
     kwargs.setdefault('usePixel', 
@@ -169,7 +208,7 @@ def ActsSiSpacePointsSeedMakerCfg(flags,
         HistService = CompFactory.THistSvc(Output = ["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"])
         acc.addService(HistService)
 
-    acc.setPrivateTools(CompFactory.ActsTrk.SiSpacePointsSeedMaker(**kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.SiSpacePointsSeedMaker(name, **kwargs))
     return acc
 
 
@@ -258,17 +297,64 @@ def ActsITkStripSeedingCfg(flags,
     return acc
 
 
-def ActsSeedingCfg(flags):
+def ActsMainSeedingCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsITkPixelSeedingCfg(flags))
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsITkStripSeedingCfg(flags))
-
+        
+    # Analysis extensions
     if flags.Acts.doAnalysis:
-        from ActsConfig.ActsAnalysisConfig import ActsSeedAnalysisCfg, ActsEstimatedTrackParamsAnalysisCfg
-        acc.merge(ActsSeedAnalysisCfg(flags))
-        acc.merge(ActsEstimatedTrackParamsAnalysisCfg(flags))
+        if flags.Detector.EnableITkPixel:
+            from ActsConfig.ActsAnalysisConfig import ActsPixelSeedAnalysisAlgCfg, ActsPixelEstimatedTrackParamsAnalysisAlgCfg
+            acc.merge(ActsPixelSeedAnalysisAlgCfg(flags))
+            acc.merge(ActsPixelEstimatedTrackParamsAnalysisAlgCfg(flags))
+            
+        if flags.Detector.EnableITkStrip:
+            from ActsConfig.ActsAnalysisConfig import ActsStripSeedAnalysisAlgCfg, ActsStripEstimatedTrackParamsAnalysisAlgCfg
+            acc.merge(ActsStripSeedAnalysisAlgCfg(flags))
+            acc.merge(ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags))
 
     return acc
 
+def ActsConversionSeedingCkf(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    
+    if flags.Detector.EnableITkStrip:
+        acc.merge(ActsITkStripSeedingCfg(flags,
+                                         name="ActsConversionStripSeedingAlg",
+                                         InputSpacePoints=["ITkConversionStripSpacePoints", "ITkConversionStripOverlapSpacePoints"],
+                                         OutputSeeds="ITkConversionStripSeeds",
+                                         OutputEstimatedTrackParameters="ITkConversionStripEstimatedTrackParams"))
+
+    # Analysis extensions
+    if flags.Acts.doAnalysis:
+        if flags.Detector.EnableITkStrip:
+            from ActsConfig.ActsAnalysisConfig import ActsStripSeedAnalysisAlgCfg, ActsStripEstimatedTrackParamsAnalysisAlgCfg
+            acc.merge(ActsStripSeedAnalysisAlgCfg(flags,
+                                                  name="ActsConversionStripSeedAnalysisAlg",
+                                                  extension="ActsConversion",
+                                                  InputSeedCollection="ITkConversionStripSeeds"))            
+            acc.merge(ActsStripEstimatedTrackParamsAnalysisAlgCfg(flags,
+                                                                  name="ActsConversionStripEstimatedTrackParamsAnalysisAlg",
+                                                                  extension="ActsConversion",
+                                                                  InputTrackParamsCollection="ITkConversionStripEstimatedTrackParams"))
+            
+    return acc
+
+def ActsSeedingCfg(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # Acts Main pass
+    if flags.Tracking.ActiveConfig.extension == "Acts":
+        acc.merge(ActsMainSeedingCfg(flags))
+    # Acts Conversion pass
+    elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
+        acc.merge(ActsConversionSeedingCkf(flags))
+    # Any other pass -> Validation mainly
+    else:
+        acc.merge(ActsMainSeedingCfg(flags))
+        
+    return acc

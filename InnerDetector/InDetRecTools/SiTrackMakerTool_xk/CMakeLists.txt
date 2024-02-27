@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SiTrackMakerTool_xk )
@@ -7,4 +7,4 @@ atlas_subdir( SiTrackMakerTool_xk )
 atlas_add_component( SiTrackMakerTool_xk
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel InDetRecToolInterfaces TrkGeometry TrkCaloClusterROI InDetPrepRawData SiSPSeededTrackFinderData TrkRIO_OnTrack MagFieldElements MagFieldConditions BeamSpotConditionsData )
+                     LINK_LIBRARIES AthenaBaseComps GaudiKernel InDetRecToolInterfaces TrkGeometry TrkCaloClusterROI InDetPrepRawData SiSPSeededTrackFinderData TrkRIO_OnTrack MagFieldElements MagFieldConditions BeamSpotConditionsData TrigInDetToolInterfacesLib)

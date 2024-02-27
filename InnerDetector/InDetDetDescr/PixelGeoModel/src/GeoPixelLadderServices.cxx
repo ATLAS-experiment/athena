@@ -83,7 +83,6 @@ GeoPixelLadderServices::GeoPixelLadderServices(InDetDD::PixelDetectorManager* m_
     .add(*connCEnv << connCShift);
 
   m_ladderServicesLV = new GeoLogVol("LadderSvc",&ladderSvcShape,air);
-  m_ladderServicesLV->ref();
   // store coordinates of corners of envelope.
   m_envelopeCornerA1 = GeoTrf::Vector3D(xMaxConnA - xCenter, yPosConnA + 0.5* yWidthConnA + safety, 0.);
   m_envelopeCornerA2 = GeoTrf::Vector3D(xMaxConnA - xCenter, yPosConnA - 0.5* yWidthConnA + safety, 0.);
@@ -94,9 +93,6 @@ GeoPixelLadderServices::GeoPixelLadderServices(InDetDD::PixelDetectorManager* m_
   m_xOffset = xBase;
   m_yOffset = 0;
 
-}
-GeoPixelLadderServices::~GeoPixelLadderServices(){
-  m_ladderServicesLV->unref();
 }
 
 

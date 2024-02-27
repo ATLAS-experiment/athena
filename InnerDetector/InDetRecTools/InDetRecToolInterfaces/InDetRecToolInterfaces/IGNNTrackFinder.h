@@ -38,7 +38,7 @@ namespace InDet {
      * @param tracks a list of track candidates in terms of spacepoint indices.
      * @return 
     */
-    virtual void getTracks(
+    virtual StatusCode getTracks(
       const std::vector<const Trk::SpacePoint*>& spacepoints,
       std::vector<std::vector<uint32_t> >& tracks) const=0;
 

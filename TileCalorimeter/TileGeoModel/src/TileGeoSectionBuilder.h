@@ -16,6 +16,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "TileGeoModel/TileSwitches.h"
+#include "GeoModelKernel/GeoPhysVol.h"
 
 // Definition for regions
 #define TILE_REGION_CENTRAL 1
@@ -209,8 +210,8 @@ class TileGeoSectionBuilder
   /** Flag for activation verbose level for debugging */
   bool         m_verbose;
 
-  GeoMaterial* m_matLArServices;
-  GeoMaterial* m_matIronHalfDens;
+  GeoIntrusivePtr<GeoMaterial> m_matLArServices{};
+  GeoIntrusivePtr<GeoMaterial> m_matIronHalfDens{};
 
   /** Makes iron layer a little bit wider to obtain the same sampling fraction for simulation without a glue*/
   double       m_additionalIronLayer;

@@ -295,8 +295,8 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
     for (size_t icomb = 0; icomb < combs.size(); icomb++)
     {
       //Need to set the ID and the hits size of this track
-        track_cands[icomb].setTrackID(m_idbase + icomb);
-	    track_cands[icomb].setNLayers(m_pmap->getNLogiLayers());
+      track_cands[icomb].setTrackID(m_idbase + icomb);
+      track_cands[icomb].setNLayers(m_pmap->getNLogiLayers());
 
         std::vector<int> const & hit_indices = combs[icomb]; // size nLayers
         for (unsigned layer = 0; layer < m_pmap->getNLogiLayers(); layer++)

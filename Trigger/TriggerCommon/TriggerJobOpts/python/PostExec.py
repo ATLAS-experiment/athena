@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # This module contains postExec commands that can be used with the CA-based
 # runHLT in athena(HLT).
@@ -23,6 +23,10 @@ __postExec_frame = next(filter(lambda f : ('TrigPSCPythonCASetup.py' in f.filena
 if __postExec_frame is not None:
    __globals = dict(inspect.getmembers(__postExec_frame[0]))["f_globals"]
 
+
+#
+# PostExec functions
+#
 
 def forceConditions(run, lb, iovDbSvc=None):
    """Force all conditions (except prescales) to match the given run and LB number"""
@@ -63,3 +67,31 @@ def forceConditions(run, lb, iovDbSvc=None):
          iovDbSvc.Folders[i] += f'<forceTimestamp>{timestamp:d}</forceTimestamp>'
       else:
          iovDbSvc.Folders[i] += f'<forceRunNumber>{run:d}</forceRunNumber> <forceLumiblockNumber>{lb:d}</forceLumiblockNumber>'
+
+
+def reverseViews():
+   """Process views in reverse order"""
+
+   log.info(forceConditions.__doc__)
+
+   from TriggerJobOpts.TriggerConfig import collectViewMakers
+   viewMakers = collectViewMakers( __globals['cfg'].getSequence() )
+   for alg in viewMakers:
+      alg.ReverseViewsDebug = True
+
+
+def dbmod_BFieldAutoConfig():  # DB modifier for debug recovery when using an online SMK
+   """Use DCS currents to configure magnetic field"""
+
+   log.info(dbmod_BFieldAutoConfig.__doc__)
+
+   from GaudiPython.Bindings import iProperty
+   # Add the DCS folder
+   f = '<db>COOLOFL_DCS/CONDBR2</db> /EXT/DCS/MAGNETS/SENSORDATA'
+   iProperty('IOVDbSvc').Folders += [f]
+   iProperty('CondInputLoader').Load.add(('CondAttrListCollection','/EXT/DCS/MAGNETS/SENSORDATA'))
+   # Configure CondAlgs
+   iProperty('AtlasFieldCacheCondAlg').UseDCS = True
+   iProperty('AtlasFieldMapCondAlg').LoadMapOnStart = False
+   iProperty('AtlasFieldMapCondAlg').UseMapsFromCOOL = True
+   iProperty('HltEventLoopMgr').setMagFieldFromPtree = False

@@ -287,11 +287,6 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       auto iso_medium = thr_eTAU.isolation(TrigConf::Selection::WP::MEDIUM, menuEta);
       auto iso_tight  = thr_eTAU.isolation(TrigConf::Selection::WP::TIGHT, menuEta);  
 
-      // TODO Add corresponding entries to menu and read from there. These are fillers for now
-      auto bdt_loose = 0;
-      auto bdt_medium = 0;
-      auto bdt_tight = 0; 
-
       std::vector<unsigned int> threshRCore;
       threshRCore.push_back(iso_loose.rCore_fw());
       threshRCore.push_back(iso_medium.rCore_fw());
@@ -329,10 +324,13 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
         SetIsoWP(rCoreVec,threshRCore,rCoreWP,RcoreBitS);
         SetIsoWP(rHadVec,threshRHad,rHadWP,RhadBitS);
       }
+
+      // Only one tau algorithm may be active and this is controlled by the L1 menu.
+      // When the BDT algorithm is active, the rCore field contains the BDT L/M/T thresholds.
       std::vector<unsigned int> threshBDT;
-      threshBDT.push_back(bdt_loose);
-      threshBDT.push_back(bdt_medium);
-      threshBDT.push_back(bdt_tight);
+      threshBDT.push_back(iso_loose.rCore_fw());
+      threshBDT.push_back(iso_medium.rCore_fw());
+      threshBDT.push_back(iso_tight.rCore_fw());
       m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, ptTauMinToTopoInEfexCounts, maxEtCountsTau);
       // Re-compute after setting thresholds. 
       // Threshold bits in the BDT algorithm's implementation are computed inside the algorithm class

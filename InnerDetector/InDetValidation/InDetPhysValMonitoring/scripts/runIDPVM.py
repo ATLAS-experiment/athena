@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from glob import glob
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -17,6 +17,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doRecoOnly", help='skip truth-specific processing', action='store_true', default=False)
     IDPVMparser.add_argument("--doLoose", help='also run loose plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doTightPrimary", help='also run tight-primary plots', action='store_true', default=False)
+    IDPVMparser.add_argument("--doHILoose", help='also run Heavy Ion loose plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doTracksInJets", help='also run tracks in jets', action='store_true', default=False)
     IDPVMparser.add_argument("--doTracksInBJets", help='also run tracks in jets', action='store_true', default=False)
     IDPVMparser.add_argument("--doTruthOrigin", help='make plots by track origin', action='store_true', default=False)
@@ -70,6 +71,7 @@ flags.PhysVal.IDPVM.doValidateTracksInJets = MyArgs.doTracksInJets
 flags.PhysVal.IDPVM.doIDTIDE= MyArgs.doIDTIDE
 flags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
 flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
+flags.PhysVal.IDPVM.doValidateHILoose = MyArgs.doHILoose
 flags.PhysVal.IDPVM.doTruthOriginPlots = MyArgs.doTruthOrigin
 flags.PhysVal.IDPVM.doValidateMuonMatchedTracks = MyArgs.doMuonMatchedTracks
 flags.PhysVal.IDPVM.doValidateElectronMatchedTracks = MyArgs.doElectronMatchedTracks

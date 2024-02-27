@@ -52,7 +52,7 @@ class TrigInDetReco(ExecStep):
         self._isCA = useCA_Reco
 
         self.preexec_all = ';'.join([
-            'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
+            'ConfigFlags.Trigger.AODEDMSet=\'ESD\'',
         ])
         if self._isCA:
             self.postexec_trig = ''
@@ -83,10 +83,10 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_mu6_LRT_idperf_L1MU5VF',"
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
                 chains += "'HLT_mu24_idperf_L1MU14FCH',"
-                flags += 'doMuonSlice=True;'
+                flags += "'Muon'," if self._isCA else 'doMuonSlice=True;'
             if (i=='FSLRT') :
                 chains += "'HLT_fslrt0_L1J100',"
-                flags  += 'doUnconventionalTrackingSlice=True;'
+                flags  += "'UnconventionalTracking'," if self._isCA else 'doUnconventionalTrackingSlice=True;'
             if (i=='muon') :
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
                 chains += "'HLT_mu24_idperf_L1MU14FCH',"
@@ -95,13 +95,13 @@ class TrigInDetReco(ExecStep):
             if (i=='muon-tnp') :
                 chains += "'HLT_mu14_mu14_idtp_idZmumu_L12MU8F'," 
                 chains += "'HLT_mu14_mu14_idperf_50invmAB130_L12MU8F',"
-                flags += 'doMuonSlice=True;'
+                flags += "'Muon'," if self._isCA else 'doMuonSlice=True;'
             if (i=='L2electronLRT') :
                 chains += "'HLT_e20_idperf_loose_lrtloose_L1eEM18L',"
                 chains += "'HLT_e30_idperf_loose_lrtloose_L1eEM26M',"
                 chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M',"
                 chains += "'HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L',"
-                flags += 'doEgammaSlice=True;'
+                flags += "'Egamma'," if self._isCA else 'doEgammaSlice=True;'
             if (i=='electron') :
                 # chains +=  "'HLT_e5_etcut_L1EM3',"  ## need an idperf chain once one is in the menu
                 # chains +=  "'HLT_e17_lhvloose_nod0_L1EM15VH',"
@@ -112,7 +112,7 @@ class TrigInDetReco(ExecStep):
             if (i=='electron-tnp') :
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M',"
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M',"
-                flags += 'doEgammaSlice=True;'
+                flags += "'Egamma'," if self._isCA else 'doEgammaSlice=True;'
             if (i=='tau') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
                 chains +=  "'HLT_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_03dRAB_L1MU14FCH',"
@@ -121,7 +121,7 @@ class TrigInDetReco(ExecStep):
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_tracktwoLLP_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_trackLRT_L1TAU12IM',"
-                flags += 'doTauSlice=True;'
+                flags += "'Tau'," if self._isCA else 'doTauSlice=True;'
             if (i=='bjet') :
 #               chains += "'HLT_j80_pf_ftf_preselj20b95_L1J20',"
                 chains += "'HLT_j20_roiftf_preselj20_L1RD0_FILLED',"
@@ -130,32 +130,40 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J20',"
 #               chains += "'HLT_j75_0eta290_020jvt_bdl1r60_3j75_pf_ftf_preselj50b85XX3j50_L14J20',"
                 chains += "'HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b85_L1J45p0ETA21_3J15p0ETA25',"
-                flags  += 'doBjetSlice=True;'
+                flags  += "'Bjet'," if self._isCA else 'doBjetSlice=True;'
             if ( i=='fsjet' or i=='fs' or i=='jet' ) :
                 chains += "'HLT_j45_pf_ftf_preselj20_L1J15',"
                 flags  += "'Jet'," if self._isCA else 'doJetSlice=True;'
             if (i=='beamspot') :
                 chains += "'HLT_beamspot_allTE_trkfast_BeamSpotPEB_L1J15','HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J15',"
-                flags  += 'doBeamspotSlice=True;'
+                flags  += "'Beamspot'," if self._isCA else 'doBeamspotSlice=True;'
             if (i=='minbias') :
                 chains += "'HLT_mb_sptrk_L1RD0_FILLED',"
-                flags  += "doMinBiasSlice=True;setMenu='PhysicsP1_pp_lowMu_run3_v1';"
+                if self._isCA:
+                    flags  +=  "'MinBias',"
+                    self.preexec_trig += "flags.Trigger.triggerMenuSetup='PhysicsP1_pp_lowMu_run3_v1';"
+                else:
+                    flags  += "doMinBiasSlice=True;setMenu='PhysicsP1_pp_lowMu_run3_v1';"
             if (i=='cosmic') :
                 chains += "'HLT_mu4_cosmic_L1MU3V_EMPTY'"
-                flags  += "doMuonSlice=True;doCosmics=True;setMenu='Cosmic_run3_v1';"
+                if self._isCA:
+                    flags  +=  "'Muon','Cosmic',"
+                    self.preexec_trig+= "flags.Trigger.triggerMenuSetup='Cosmic_run3_v1';"
+                else:
+                    flags  += "doMuonSlice=True;doCosmics=True;setMenu='Cosmic_run3_v1';"
             if (i=='bphys') :
                 chains += "'HLT_mu6_idperf_L1MU5VF',"
                 chains += "'HLT_2mu4_bBmumux_BsmumuPhi_L12MU3V',"
                 chains += "'HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF',"
-                flags += 'doMuonSlice=True;doBphysicsSlice=True;'
+                flags += "'Muon','Bphysics'," if self._isCA else 'doMuonSlice=True;doBphysicsSlice=True;'
         if ( flags=='' ) : 
             print( "ERROR: no chains configured" )
 
         chains += ']'
         if self._isCA:
-            self.preexec_trig = "flags.Trigger.disableCPS=True;flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
+            self.preexec_trig += "flags.Trigger.enabledSignatures=[" + flags + "];flags.Trigger.selectChains="+chains
         else:
-            self.preexec_trig = 'doEmptyMenu=True;'+flags+'selectChains='+chains
+            self.preexec_trig += 'doEmptyMenu=True;'+flags+'selectChains='+chains
 
         AVERSION = ""
         ### # temporary hack until we get to the bottom of why the tests are really failing
@@ -210,17 +218,16 @@ class TrigInDetReco(ExecStep):
 class TrigInDetAna(ExecStep):
     def __init__(self, name='TrigInDetAna', extraArgs=None):
         ExecStep.__init__(self, name )
-        self.type = 'athena'
-        self.job_options = 'TrigInDetValidation/TrigInDetValidation_AODtoTrkNtuple.py'
+        self.type = 'other'
+        self.executable = 'python'
+        self.args = ' -m TrigInDetValidation.TrigInDetValidation_AODtoTrkNtuple_CA '
         self.max_events=-1
         self.required = True
         self.depends_on_previous = True
         #self.input = 'AOD.pool.root'
         self.input = ''
-        self.perfmon=False
-        self.imf=False
         if extraArgs is not None:
-            self.args = extraArgs
+            self.args += extraArgs
 
 
 ##################################################
@@ -245,7 +252,7 @@ class TrigInDetRecoData(ExecStep):
 #        super(TrigInDetRecoData, self).__init__(name)
         ExecStep.__init__(self, name)
         self.type = 'athenaHLT'
-        self.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+        self.job_options = 'TriggerJobOpts.runHLT'
         self.max_events=-1
         self.required = True
         self.threads = 1 # TODO: change to 4
@@ -256,6 +263,7 @@ class TrigInDetRecoData(ExecStep):
         self.perfmon=False
         self.imf=False
         self.args = '-c "setMenu=\'Cosmic_run3_v1\';doCosmics=True;doL1Sim=False;forceEnableAllChains=True;"'
+        self.args = '-c "flags.Trigger.forceEnableAllChains=True;flags.Trigger.triggerMenuSetup=\'Cosmic_run3_v1\';from AthenaConfiguration.Enums import BeamType;flags.Beam.Type=BeamType.Cosmics;"'
         self.args += ' -o output'
 
 

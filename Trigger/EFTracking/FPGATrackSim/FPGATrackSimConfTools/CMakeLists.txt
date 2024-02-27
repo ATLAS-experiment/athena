@@ -12,7 +12,7 @@ atlas_add_library( FPGATrackSimConfToolsLib
    PUBLIC_HEADERS FPGATrackSimConfTools
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib TruthUtils
-   LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib GaudiKernel FPGATrackSimObjectsLib )
+   LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib GaudiKernel FPGATrackSimObjectsLib PathResolver )
 
 atlas_add_component( FPGATrackSimConfTools
    src/components/*.cxx
@@ -36,8 +36,3 @@ atlas_add_test( FPGATrackSimEventSelectionSvc_test
 atlas_add_test( FPGATrackSimConfigFlags_test
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimConfigFlags
                 POST_EXEC_SCRIPT noerror.sh )
-
-
-atlas_add_test( FPGATrackSimWorflows_test
-                SCRIPT FPGATrackWorkflow.sh 
-                POST_EXEC_SCRIPT noerror.sh)

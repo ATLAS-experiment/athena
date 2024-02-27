@@ -102,11 +102,11 @@ namespace ActsTrk {
     finderOpts.bFieldInZ = bField[2];
     finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
 
-    std::function<std::pair<Acts::Vector3, Acts::Vector2>(const xAOD::SpacePoint *sp)>
+    std::function<std::tuple<Acts::Vector3, Acts::Vector2, std::optional<Acts::ActsScalar>>(const xAOD::SpacePoint *sp)>
       create_coordinates = [](const xAOD::SpacePoint *sp) {
       Acts::Vector3 position(sp->x(), sp->y(), sp->z());
       Acts::Vector2 variance(sp->varianceR(), sp->varianceZ());
-      return std::make_pair(position, variance);
+      return std::make_tuple(position, variance, std::nullopt);
     };
     
     // Compute seeds
@@ -186,6 +186,35 @@ namespace ActsTrk {
     m_finderCfg.centralSeedConfirmationRange = filterCfg.centralSeedConfirmationRange;
     m_finderCfg.forwardSeedConfirmationRange = filterCfg.forwardSeedConfirmationRange;
     m_finderCfg.radLengthPerSeed = m_radLengthPerSeed;
+
+    // Fast tracking
+    // manually convert the two types
+    for (const auto& vec : m_rRangeMiddleSP) {
+        std::vector<float> convertedVec;
+
+        for (const auto& val : vec) {
+            convertedVec.push_back(static_cast<float>(val));
+        }
+
+        m_finderCfg.rRangeMiddleSP.push_back(convertedVec);
+    }
+    // define cuts used for fast tracking configuration
+    if (m_useExperimentCuts) {
+    m_finderCfg.experimentCuts.connect(
+	[](const void*, float bottomRadius, float cotTheta) -> bool {
+
+        float fastTrackingRMin = 50.;
+        float fastTrackingCotThetaMax = 1.5;
+
+        if (bottomRadius < fastTrackingRMin and
+               (cotTheta > fastTrackingCotThetaMax or
+                cotTheta < -fastTrackingCotThetaMax)) {
+             return false;
+        }
+        return true;
+    });
+    }
+    
     m_finderCfg = m_finderCfg.toInternalUnits();
 
     m_finder = Acts::SeedFinderOrthogonal<value_type>(m_finderCfg);

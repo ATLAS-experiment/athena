@@ -41,7 +41,7 @@
 #include "TrigInDetAnalysisExample/ChainString.h"
 #include "TrigInDetAnalysisUtils/Associator_TruthMatch.h"
 
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
 
 #include "TrigInDetAnalysis/TIDARoiDescriptor.h"
 #include "TrigInDetAnalysis/TrigObjectMatcher.h"
@@ -1119,7 +1119,6 @@ int main(int argc, char** argv)
 
 
   /// clean up
-  //cppcheck-suppress autovarInvalidDeallocation
   if ( binningConfig!=&inputdata ) delete binningConfig;
 
 

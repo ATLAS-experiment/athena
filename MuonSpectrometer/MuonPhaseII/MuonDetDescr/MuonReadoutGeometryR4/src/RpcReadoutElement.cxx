@@ -29,7 +29,12 @@ RpcReadoutElement::RpcReadoutElement(defineArgs&& args)
 
 const parameterBook& RpcReadoutElement::getParameters() const { return m_pars; }
 
-StatusCode RpcReadoutElement::initElement() {    
+StatusCode RpcReadoutElement::initElement() {   
+    /// Check that the alignable node has been assigned
+    if(!alignableTransform()) {
+      ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
+      return StatusCode::FAILURE;
+    } 
     ATH_MSG_DEBUG("Parameter book "<<parameterBook());
     if (m_pars.layers.empty()) {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -28,29 +28,6 @@ def _actions(mode):
         "cleanup_noreload": ["DropFeatures", "SyncThinning", "Save"],
     }
     return options[mode]
-
-
-def navigationThinningSvc(config):
-    assert "name" in config, "name of the configuration is missing"
-    assert "mode" in config, "mode of slimming has to be configured"
-
-    from TrigNavTools.TrigNavToolsConf import TrigNavigationThinningSvc
-
-    svc = TrigNavigationThinningSvc(config["name"] + "ThinSvc")
-
-    if "chains" in config:
-        svc.ChainsRegex = config["chains"]
-    if "features" in config:
-        svc.FeatureInclusionList = config["features"]
-    svc.Actions = _actions(config["mode"])
-    if "Print" in svc.Actions:
-        from AthenaCommon.Constants import DEBUG
-        svc.OutputLevel = DEBUG
-
-    from AthenaCommon.AppMgr import ServiceMgr
-
-    ServiceMgr += svc
-    return svc
 
 
 def TrigNavigationThinningSvcCfg(flags, thinningConfig):

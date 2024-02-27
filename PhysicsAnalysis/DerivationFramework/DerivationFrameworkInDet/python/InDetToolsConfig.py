@@ -234,6 +234,8 @@ def GSFTrackStateOnSurfaceDecoratorCfg(
     return TrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
 def GSFTSOS_CommonKernelCfg(flags, name="GSFTSOS_CommonKernel"):
+    if flags.Detector.GeometryITk:
+        return ITkGSFTSOS_CommonKernelCfg(flags)
     acc = ComponentAccumulator()
     GSFTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
         GSFTrackStateOnSurfaceDecoratorCfg(flags))
@@ -328,6 +330,24 @@ def ITkSiSPTSOS_CommonKernelCfg(flags, name="ITkSiSPTSOS_CommonKernel"):
         ITkSiSPTrackStateOnSurfaceDecoratorCfg(flags))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
         name, AugmentationTools=[ITkSiSPTrackStateOnSurfaceDecorator]))
+    return acc
+
+def ITkGSFTrackStateOnSurfaceDecoratorCfg(
+        flags, name="ITkGSFTrackStateOnSurfaceDecorator", **kwargs):
+    kwargs.setdefault("ContainerName", "GSFTrackParticles")
+    kwargs.setdefault("DecorationPrefix", "GSF_")
+    kwargs.setdefault("PixelMsosName", "GSF_ITkPixel_MSOSs")
+    kwargs.setdefault("SctMsosName", "GSF_ITkStrip_MSOSs")
+    kwargs.setdefault("TrtMsosName", "")
+    kwargs.setdefault("PRDtoTrackMap", "")
+    return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
+
+def ITkGSFTSOS_CommonKernelCfg(flags, name="ITkGSFTSOS_CommonKernel"):
+    acc = ComponentAccumulator()
+    GSFTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
+        ITkGSFTrackStateOnSurfaceDecoratorCfg(flags))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+        name, AugmentationTools=[GSFTrackStateOnSurfaceDecorator]))
     return acc
 
 # Expression of Z0 at the primary vertex

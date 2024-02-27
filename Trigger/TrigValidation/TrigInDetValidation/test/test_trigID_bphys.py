@@ -4,7 +4,7 @@
 # art-description: art job for bphys
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.801921.P8B_A14_CTEQ6L1_Bs_Jpsim3p5mu3p5_phi.recon.RDO.e8542_e8528_s4159_s4114_r14844_tid34183318_00
 # art-input-nfiles: 3
 # art-athena-mt: 8
@@ -30,6 +30,8 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True
 Slices  = ['bphys']
 Events  = 6000 
 Threads = 8 
@@ -37,7 +39,7 @@ Slots   = 8
 Input   = 'Bphys_JpsiPhi'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 
-ExtraAna = " -c 'parentpdgid=531' "
+ExtraAna = " --parentpdgid=531 "
 
 Jobs = [ ( "Truth",       " TIDAdata-run3-larged0.dat                    -o data-hists.root " ),
          ( "Offline",     " TIDAdata-run3-offline-larged0.dat -r Offline -o data-hists-offline.root" ) ]

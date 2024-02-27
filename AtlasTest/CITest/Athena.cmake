@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # CI test definitions for the Athena project
 # --> README.md before you modify this file
@@ -33,25 +33,23 @@ atlas_add_citest( SimulationRun4FullSim
    LOG_IGNORE_PATTERN "WARNING FPE" )  # ignore FPEs from Geant4
 
 atlas_add_citest( PileUpPresamplingRun2
-   SCRIPT RunWorkflowTests_Run2.py --CI -p -w PileUpPresampling -e '--maxEvents 5 --conditionsTag OFLCOND-MC16-SDR-RUN2-11' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run2.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
 
 atlas_add_citest( PileUpPresamplingRun3
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
 
+# TODO: pending inputs on CVMFS
+# atlas_add_citest( PileUpPresamplingRun4
+#    SCRIPT RunWorkflowTests_Run4.py --CI -p -w PileUpPresampling -e '--maxEvents 5' --no-output-checks )
+
 atlas_add_citest( OverlayRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA True --conditionsTag OFLCOND-MC16-SDR-RUN2-11' )
 
-atlas_add_citest( OverlayRun2MC_Legacy
-   SCRIPT RunWorkflowTests_Run2.py --CI -o -w MCOverlay -e '--CA False --conditionsTag OFLCOND-MC16-SDR-RUN2-11' )
-
 atlas_add_citest( OverlayRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay -e '--conditionsTag CONDBR2-BLKPA-RUN2-11' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -o -w DataOverlay )
 
 atlas_add_citest( OverlayRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay -e '--CA True' )
-
-atlas_add_citest( OverlayRun3MC_Legacy
-   SCRIPT RunWorkflowTests_Run3.py --CI -o -w MCOverlay -e '--CA False' )
 
 #################################################################################
 # Standard reconstruction workflows
@@ -61,10 +59,10 @@ atlas_add_citest( RecoRun2Data
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA True --maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11 --preExec pass' )
 
 atlas_add_citest( RecoRun2MC
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--CA "all:True" "RDOtoRDOTrigger:False" --conditionsTag "default:OFLCOND-MC16-SDR-RUN2-11" "RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02" --maxEvents 25' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25' )
 
 atlas_add_citest( RecoRun2MC_PileUp
-   SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--CA True --maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1730/myRDO.pool.root --conditionsTag OFLCOND-MC16-SDR-RUN2-11 --preExec="flags.Exec.FPE=500;" ' --no-output-checks  # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--steering doOverlay --maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1918/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
 atlas_add_citest( RecoRun3Data
@@ -96,10 +94,10 @@ atlas_add_citest( RecoRun3Data_Calib
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--CA True --maxEvents 25  --preExec="all:flags.Exec.FPE=500;"' --no-output-checks )
 
 atlas_add_citest( RecoRun3MC
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--CA "all:True" "RDOtoRDOTrigger:False" --maxEvents 25' )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25' )
 
 atlas_add_citest( RecoRun3MC_PileUp
-    SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--CA "all:True" "RDOtoRDOTrigger:False" --maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1760/myRDO.pool.root --preExec="flags.Exec.FPE=500;" ' --no-output-checks  # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1919/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun3 )
 
 atlas_add_citest( RecoRun4MC
@@ -188,7 +186,7 @@ atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
 #################################################################################
 
 atlas_add_citest( DataQuality_Run3MC
-   SCRIPT Run3DQTestingDriver.py 'Input.Files=["../RecoRun3MC/run_q445/myAOD.pool.root"]' DQ.Environment=AOD DQ.Steering.doHLTMon=False --threads=1
+   SCRIPT Run3DQTestingDriver.py 'Input.Files=["../RecoRun3MC/run_q454/myAOD.pool.root"]' DQ.Environment=AOD DQ.Steering.doHLTMon=False --threads=1
    DEPENDS_SUCCESS RecoRun3MC )
 
 atlas_add_citest( DataQuality_Run3Data_Postprocessing
@@ -229,6 +227,10 @@ atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh
    LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
 
+ atlas_add_citest( Acts_ConversionWorkflow
+   SCRIPT ActsConversionWorkflow.sh
+   LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters|ActsTrackFindingAlg.*ERROR CombinatorialKalmanFilter failed: CombinatorialKalmanFilterError:5 Propagation reaches max steps before track finding is finished with the initial parameters" )
+ 
 atlas_add_citest( ACTS_ValidateClusters
    SCRIPT ActsValidateClusters.sh )
 
@@ -282,9 +284,6 @@ atlas_add_citest( TriggerMC
 
 atlas_add_citest( TriggerData
    SCRIPT test_trig_data_v1Dev_build.py )
-
-atlas_add_citest( TriggerDataCAConfig
-   SCRIPT test_trig_data_v1Dev_newJO_build.py )
 
 atlas_add_citest( Trigger_athenaHLT_v1Dev
    SCRIPT test_trigP1_v1Dev_decodeBS_build.py )

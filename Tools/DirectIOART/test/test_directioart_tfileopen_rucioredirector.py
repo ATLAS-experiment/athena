@@ -3,8 +3,6 @@
 # art-description: DirectIOART TFile::Open RucioRedirector
 # art-type: grid
 # art-include: main/Athena
-# art-include: 21.2/AthAnalysis
-# art-include: 21.2/AnalysisBase
 
 import ROOT
 ROOT.gEnv.SetValue("Davix.Debug", 3.0)

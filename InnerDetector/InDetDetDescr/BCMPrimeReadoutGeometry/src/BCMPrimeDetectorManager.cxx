@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BCMPrimeReadoutGeometry/BCMPrimeDetectorManager.h"
@@ -12,16 +12,6 @@ namespace InDetDD {
         setName(name);
     }
 
-    BCMPrimeDetectorManager::~BCMPrimeDetectorManager() {
-
-        //
-        // Clean up
-        //
-        for (size_t i=0; i < m_volume.size(); i++) {
-            m_volume[i]->unref();
-        }
-    }
-
     unsigned int BCMPrimeDetectorManager::getNumTreeTops() const {
         return m_volume.size();
     }
@@ -30,8 +20,7 @@ namespace InDetDD {
         return m_volume[i];
     }
 
-    void BCMPrimeDetectorManager::addTreeTop(PVLink vol) {
-        vol->ref();
+    void BCMPrimeDetectorManager::addTreeTop(PVConstLink vol) {
         m_volume.push_back(vol);
     }
 

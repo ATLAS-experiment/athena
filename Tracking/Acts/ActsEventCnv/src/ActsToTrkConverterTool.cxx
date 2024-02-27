@@ -31,7 +31,7 @@
 #include "Acts/EventData/detail/TransformationBoundToFree.hpp"
 #include "Acts/EventData/detail/TransformationFreeToBound.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/Propagator/CovarianceTransport.hpp"
+#include "Acts/Propagator/detail/JacobianEngine.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "ActsEvent/MultiTrajectory.h"
@@ -290,24 +290,30 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
         auto helperSurface = Acts::Surface::makeShared<Acts::PlaneSurface>(
             planeSurface->transform());
 
-        auto boundToFree =
+        auto boundToFreeJacobian =
             actsSurface.boundToFreeJacobian(gctx, actsParameter.parameters());
 
         auto covpc = actsParameter.covariance().value();
         Acts::FreeVector freePars =
             Acts::detail::transformBoundToFreeParameters(
                 actsSurface, gctx, actsParameter.parameters());
-        Acts::FreeMatrix freeCov =
-            boundToFree * covpc * boundToFree.transpose();
 
         Acts::BoundVector targetPars =
             Acts::detail::transformFreeToBoundParameters(freePars,
                                                          *helperSurface, gctx)
                 .value();
-        Acts::CovarianceCache covCache{freePars, freeCov};
-        auto [varNewCov, varNewJac] = Acts::transportCovarianceToBound(
-            gctx, *helperSurface, freePars, covCache);
-        auto targetCov = std::get<Acts::BoundSquareMatrix>(varNewCov);
+        
+        Acts::FreeMatrix freeTransportJacobian = Acts::FreeMatrix::Identity();
+
+        Acts::FreeVector freeToPathDerivatives = Acts::FreeVector::Zero();
+        freeToPathDerivatives.head<3>() = freePars.segment<3>(Acts::eFreeDir0);
+
+        Acts::BoundMatrix boundToBoundJac = Acts::detail::boundToBoundTransportJacobian(
+            gctx, freePars, boundToFreeJacobian, freeTransportJacobian,
+            freeToPathDerivatives, *helperSurface);
+
+        Acts::BoundMatrix targetCov = 
+          boundToBoundJac * covpc * boundToBoundJac.transpose();
 
         auto pars = std::make_unique<Trk::AtaPlane>(
             targetPars[Acts::eBoundLoc0], targetPars[Acts::eBoundLoc1],

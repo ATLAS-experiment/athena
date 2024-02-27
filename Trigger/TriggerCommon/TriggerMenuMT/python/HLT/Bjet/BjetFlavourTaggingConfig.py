@@ -41,6 +41,8 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
         'BTagging/20220813trig/gn1/antikt4empflow/network.onnx',
         # Trigger DL1dbb training
         'BTagging/20230314trig/dl1dbb/antikt4empflow/network.json',
+        #Trigger GN2 training
+        'BTagging/20240122trig/gn2/antikt4empflow/SmallPrec.onnx'
     ]
 
 
@@ -145,6 +147,13 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                         'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                     },
                 ],
+                                [
+                 'BTagging/20240122trig/gn2/antikt4empflow/Small.onnx',
+                {
+                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    **{f'p{x}': f'tlaGN220240122_p{x}' for x in 'cub'},
+                }
+                ],   
             ]
     else:
         dl2_configs=[
@@ -170,7 +179,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                     'btagIp_': trackIpPrefix,
                 }
-            ]
+            ],
         ]
         if inputVertex: 
             dl2_configs += [
@@ -180,7 +189,14 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
                     **{f'GN120230331_p{x}': f'fastGN120230331_p{x}' for x in 'cub'}
                 },   
-                ]
+                ],
+                [
+                 'BTagging/20240122trig/gn2/antikt4empflow/Small.onnx',
+                {
+                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    **{f'p{x}': f'fastGN220240122_p{x}' for x in 'cub'},
+                }
+                ]   
             ]
 
     # not all the keys that the NN requests are declaired. This will

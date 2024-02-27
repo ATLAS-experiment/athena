@@ -88,6 +88,7 @@ namespace JetTagDQA {
     // Containers
     std::string m_jetNameEMTopo;
     std::string m_jetNamePFlow;
+    std::string m_jetNameR10;
     std::string m_jetNameTrackJet;
 
     std::string m_trackName;
@@ -105,6 +106,7 @@ namespace JetTagDQA {
     bool m_onZprime = false;
     float m_jetPtCutTtbar;
     float m_jetPtCutZprime;
+    float m_jetPtCutR10;
     float m_jetEtaCut;
     float m_JVTCutAntiKt4EMTopoJets;
     float m_JVTCutLargerEtaAntiKt4EMTopoJets;
@@ -116,9 +118,11 @@ namespace JetTagDQA {
     std::string m_DL1dv01Name;
     std::string m_GN1Name;
     std::string m_GN2v00Name;
+    std::string m_GN2Xv01Name;
 
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMTopoPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMPFlowJetsPlots;
+    JetTagDQA::BTaggingValidationPlots m_antiKt10UFOCSSKSoftDropBeta100Zcut10Jets;
     JetTagDQA::BTaggingValidationPlots m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots;
 
     int m_nevents;

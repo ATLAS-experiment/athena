@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 # import Hypo Algs/Tools
@@ -387,7 +387,7 @@ class TrigMufastHypoToolConfig:
         self.tool().DRThresBE       = 0.05
         self.tool().MassThresBE     = 0.20
         # EE
-        self.tool().EtaBinsEC       = [0, 1.9, 2.1, 9.9]
+        self.tool().EtaBinsEC       = [0.0, 1.9, 2.1, 9.9]
         self.tool().DRThresEC       = [0.06, 0.05, 0.05]
         self.tool().MassThresEC     = [0.20, 0.15, 0.10]
 
@@ -404,7 +404,7 @@ class TrigMufastHypoToolConfig:
         self.tool().DRThresBE       = 0.05
         self.tool().MassThresBE     = 0.20
         # EE
-        self.tool().EtaBinsEC       = [0, 1.9, 2.1, 9.9]
+        self.tool().EtaBinsEC       = [0.0, 1.9, 2.1, 9.9]
         self.tool().DRThresEC       = [0.06, 0.05, 0.05]
         self.tool().MassThresEC     = [0.20, 0.15, 0.10]
 
@@ -414,7 +414,7 @@ class TrigMufastHypoToolConfig:
         if self.isCalibration():
             self.tool().AcceptAll = False
             self.tool().DoCalib = True
-            self.tool().PtBins = [ [ 0, 2.5 ] ] * nt
+            self.tool().PtBins = [ [ 0.0, 2.5 ] ] * nt
 
         elif self.isPassThrough():
             self.tool().AcceptAll = True
@@ -426,7 +426,7 @@ class TrigMufastHypoToolConfig:
         else:
             self.log().debug('Set %d thresholds', nt)
             self.tool().AcceptAll = False
-            self.tool().PtBins = [ [ 0, 2.5 ] ] * nt
+            self.tool().PtBins = [ [ 0.0, 2.5 ] ] * nt
             self.tool().PtThresholds = [ [ 5.49 * GeV ] ] * nt
             self.tool().PtThresholdForECWeakBRegionA = [ 3. * GeV ] * nt
             self.tool().PtThresholdForECWeakBRegionB = [ 3. * GeV ] * nt
@@ -626,7 +626,7 @@ class TrigmuCombHypoConfig(object):
 
         nt = len(thresholds)
         log.debug('Set %d thresholds', nt)
-        tool.PtBins = [ [ 0, 2.5 ] ] * nt
+        tool.PtBins = [ [ 0.0, 2.5 ] ] * nt
         tool.PtThresholds = [ [ 5.83 * GeV ] ] * nt
 
         for th, thvalue in enumerate(thresholds):
@@ -771,7 +771,7 @@ def TrigMuonEFHypoToolCfg(name, thresholds, doSA=False, **kwargs):
 
     nt = len(thresholds)
     log.debug('Set %d thresholds', nt)
-    PtBins = [ [ 0, 2.5 ] ] * nt
+    PtBins = [ [ 0.0, 2.5 ] ] * nt
     PtThresholds = [ [ 5.49 * GeV ] ] * nt
     passthrough=False
     for th, thvalue in enumerate(thresholds):

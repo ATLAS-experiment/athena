@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AtomicConstAccessor.icc
@@ -22,7 +22,7 @@ namespace SG {
 template <class T>
 inline
 AtomicConstAccessor<T>::AtomicConstAccessor (const std::string& name)
-  : Base (name, "", SG::AuxTypeRegistry::Flags::Atomic)
+  : Base (name, "", SG::AuxVarFlags::Atomic)
 {
 }
 
@@ -38,7 +38,7 @@ template <class T>
 inline
 AtomicConstAccessor<T>::AtomicConstAccessor (const std::string& name,
                                              const std::string& clsname)
-  : Base (name, clsname, SG::AuxTypeRegistry::Flags::Atomic)
+  : Base (name, clsname, SG::AuxVarFlags::Atomic)
 {
 }
 

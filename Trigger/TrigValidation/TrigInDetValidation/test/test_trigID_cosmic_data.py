@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for cosmic data
+# art-description: art job for cosmic_data
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -28,18 +28,18 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True      
+
 Slices  = ['cosmic']
 Events  = 4000
 Threads = 8 
 Slots   = 8
 Release = "current"
-preexec_reco = [
-  "from InDetRecExample.InDetJobProperties import InDetFlags",
-  "InDetFlags.doCosmics.set_Value_and_Lock(True)",
-  "InDetFlags.doTRTStandalone.set_Value_and_Lock(False)",
-  "InDetFlags.doR3LargeD0.set_Value_and_Lock(False)",
-  "InDetFlags.doForwardTracks.set_Value_and_Lock(False)",
-]
+preexec_reco = ["from AthenaConfiguration.Enums import BeamType", "flags.Beam.Type=BeamType.Cosmics",
+                "flags.Tracking.doTRTStandalone=False",
+                "flags.Tracking.doForwardTracks=False",
+                "flags.Tracking.doLargeD0=False"]
 Input   = 'data_cos'    # defined in TrigValTools/share/TrigValInputs.json
 # don't use grid files, as ART submission doesn't allow multiple LBs to be processed in 1 job (ATR-26472)
 # once this is fixed, we can use the 3 files from group.trig-hlt.data23_cos.00448208.physics_CosmicMuons.merge.RAW

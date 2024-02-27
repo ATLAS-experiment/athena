@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/span.icc
@@ -50,6 +50,7 @@ span<T>::span (T* beg, T* end)
   : m_ptr(beg),
     m_size (end-beg)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
@@ -165,6 +166,34 @@ constexpr typename span<T>::const_reference
 span<T>::operator[] (size_type i) const noexcept
 {
   assert (i < m_size);
+  return m_ptr[i];
+}
+
+
+/**
+  * @brief Return a reference to the i-th element in the span (bounds-checked).
+  * @param i Index of the element to return.
+  */
+template <class T>
+inline
+constexpr typename span<T>::reference
+span<T>::at (size_type i)
+{
+  if (i >= m_size) throw std::out_of_range ("CxxUtils::span::at");
+  return m_ptr[i];
+}
+
+
+/**
+  * @brief Return a reference to the i-th element in the span (bounds-checked).
+  * @param i Index of the element to return.
+  */
+template <class T>
+inline
+constexpr typename span<T>::const_reference
+span<T>::at (size_type i) const
+{
+  if (i >= m_size) throw std::out_of_range ("CxxUtils::span::at");
   return m_ptr[i];
 }
 

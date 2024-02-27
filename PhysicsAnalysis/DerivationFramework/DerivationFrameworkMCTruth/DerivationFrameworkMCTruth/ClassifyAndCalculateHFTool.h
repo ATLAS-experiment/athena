@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -78,8 +78,11 @@ namespace DerivationFramework {
       //  -isBHadron:               Determine if an hadron is a B-type.
       //  -isCHadron:               Determine if an hadron is a C-type.
 
-      void flagJets(const xAOD::JetContainer* jets, std::map<const xAOD::Jet*, std::vector<xAOD::TruthParticleContainer::const_iterator>> particleMatch, std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>  hadronMap, const std::string hfDecorationName) const;
-      int computeHFClassification(const xAOD::JetContainer* jets, const std::string hfDecorationName) const;
+      void flagJets(const xAOD::JetContainer* jets,
+                    const std::map<const xAOD::Jet*, std::vector<xAOD::TruthParticleContainer::const_iterator>>& particleMatch,
+                    const std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>&  hadronMap,
+                    const std::string& hfDecorationName) const;
+      int computeHFClassification(const xAOD::JetContainer* jets, const std::string& hfDecorationName) const;
       int getSimpleClassification(int hfclassif) const;
       bool isBHadron(int pdgId) const;
       bool isCHadron(int pdgId) const;

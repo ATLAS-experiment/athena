@@ -170,8 +170,8 @@ namespace xAOD {
       template< typename T, typename ALLOC >
       auxid_t getAuxID( const std::string& name,
                         std::vector< T, ALLOC >& /*vec*/,
-                        SG::AuxTypeRegistry::Flags flags =
-                        SG::AuxTypeRegistry::Flags::None );
+                        SG::AuxVarFlags flags =
+                        SG::AuxVarFlags::None );
       /// Get the auxiliary ID for one of the persistent variables
       template< typename T >
       auxid_t getAuxID( const std::string& name,

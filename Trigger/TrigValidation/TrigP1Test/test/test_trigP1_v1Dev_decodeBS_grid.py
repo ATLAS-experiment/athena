@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Runs athenaHLT writing BS output and then runs BS decoding
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log
@@ -34,13 +34,13 @@ from TrigP1Test.TrigP1TestSteps import filterBS, decodeBS
 # Run standard athenaHLT BS->BS job
 writeBS = ExecStep.ExecStep("WriteBS")
 writeBS.type = 'athenaHLT'
-writeBS.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+writeBS.job_options = 'TriggerJobOpts.runHLT'
 writeBS.input = 'data'
 writeBS.threads = 4
 writeBS.concurrent_events = 4
+writeBS.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
+                 'Trigger.doLVL1=True']
 writeBS.args = '-o output'
-writeBS.args += ' -c "setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\';doL1Sim=True;"'
-writeBS.args += ' --dump-config-reload'
 
 # Extract and decode physics_Main
 filterMain = filterBS("Main")

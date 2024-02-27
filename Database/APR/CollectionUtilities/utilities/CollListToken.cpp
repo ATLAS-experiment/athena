@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -80,22 +80,17 @@ int main(int argc, const char *argv[])
 	 std::cout << std::endl;
 	 std::cout << "Collection name: " << description.name() << std::endl;
 	 std::cout << "Collection type: " << description.type() << std::endl;
-	 std::cout << "Number of collection fragments: " << description.numberOfCollectionFragments() << std::endl;
-         std::cout << "Primary Reference Token name is: " << description.eventReferenceColumnName() << std::endl;
+    std::cout << "Primary Reference Token name is: " << description.eventReferenceColumnName() << std::endl;
 	 std::cout << "Number of tokens: " << description.numberOfTokenColumns() << std::endl;
 	 std::cout << "Tokens are: " << std::endl;
 
 	 unsigned  maxNameSize = 0;
-	 for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-	    for( int c=0; c < description.numberOfTokenColumns( f ); c++ ) {
-	       const pool::ICollectionColumn&	column = description.tokenColumn(c, f);
-	       if( maxNameSize < column.name().size() ) 
-		  maxNameSize = column.name().size();
-	    }
+    for( int c=0; c < description.numberOfTokenColumns(); c++ ) {
+	   const pool::ICollectionColumn&	column = description.tokenColumn(c);
+	   if( maxNameSize < column.name().size() )  maxNameSize = column.name().size();
 	 }
-	 for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-	    for( int c=0; c < description.numberOfTokenColumns( f ); c++ ) {
-	       const pool::ICollectionColumn&	column = description.tokenColumn(c, f);
+    for( int c=0; c < description.numberOfTokenColumns(); c++ ) {
+	       const pool::ICollectionColumn&	column = description.tokenColumn(c);
 	       std::cout.setf(std::ios::left);
 	       std::cout << "NAME: ";
 	       std::cout.width(maxNameSize+5);
@@ -103,7 +98,6 @@ int main(int argc, const char *argv[])
 	       std::cout << "INFO: ";
 	       std::cout << column.annotation();
 	       std::cout << std::endl;
-	    }
 	 }
 
 	 log << coral::Debug << "Creating query for the collection" << corENDL;

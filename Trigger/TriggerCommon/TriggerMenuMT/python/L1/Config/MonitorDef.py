@@ -117,13 +117,16 @@ class MonitorDef:
                 "L1_3MU3V", "L1_MU5VF_3MU3VF", "L1_4MU3V",
                 ## Legacy L1 items
                 # L1Calo
-                "L1_TAU8", "L1_TAU20IM",
-                "L1_J30", "L1_J75", "L1_J100", "L1_J400",
-                "L1_J15p31ETA49", "L1_J30p31ETA49",
-                "L1_J45p0ETA21_3J15p0ETA25", "L1_4J15p0ETA25",
-                "L1_XE35", "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
+                #"L1_TAU8", "L1_TAU20IM",
+                #"L1_J100", 
+                #"L1_J400",
+                #"L1_XE35",
+                # "L1_XE45",
+                #"L1_XE50", 
+                "L1_XE55", "L1_XE300",
+                # "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
                 # Combined
-                "L1_MU3V_J12",
+                #"L1_MU3V_J12",
                 # L1Topo
                 "L1_BPH-0DR3-EM7J15_MU5VF", "L1_HT190-J15s5pETA21", "L1_LLP-RO", # Board 0 FPGA 0
                 "L1_MJJ-500-NFF",                                                # Board 0 FPGA 1
@@ -155,16 +158,17 @@ class MonitorDef:
                 "L1_3jJ70p0ETA23", "L1_4jJ40p0ETA25", "L1_5jJ40p0ETA25",
                 "L1_jJ140_3jJ60",
                 "L1_jLJ80", "L1_jLJ120", "L1_jLJ140",
-                "L1_jXE70", "L1_jXE80", "L1_jXE100",
-                "L1_jXE110", "L1_jXE500",
+                "L1_jXE60", "L1_jXE70", "L1_jXE80", "L1_jXE90", "L1_jXE100",
+                "L1_jXE110", "L1_jXE120", "L1_jXE500",
                 "L1_jXEC100",
                 "L1_jTE200",
                 "L1_jTEC200", "L1_jTEFWD100", "L1_jTEFWDA100", "L1_jTEFWDC100",
+                "L1_jJ85p0ETA21_3jJ40p0ETA25",
                 "L1_gJ20p0ETA25", "L1_gJ20p25ETA49","L1_gJ20p0ETA25_EMPTY", "L1_gJ50p0ETA25",
                 "L1_gJ100p0ETA25", "L1_gJ400p0ETA25", "L1_gLJ80p0ETA25",
-                "L1_gXERHO70", "L1_gXERHO100",
+                #"L1_gXERHO70", "L1_gXERHO100",
                 "L1_gXENC70", "L1_gXENC100",
-                "L1_gXEJWOJ70", "L1_gXEJWOJ80", "L1_gXEJWOJ100",
+                "L1_gXEJWOJ60", "L1_gXEJWOJ70", "L1_gXEJWOJ80", "L1_gXEJWOJ100", "L1_gXEJWOJ110", "L1_gXEJWOJ120", "L1_gXEJWOJ500",
                 "L1_gTE200",
                 "L1_gMHT500",
                 # Combined
@@ -217,10 +221,8 @@ class MonitorDef:
                     "L1_MBTS_1_A", "L1_MBTS_1_C", "L1_MBTS_4_A", "L1_MBTS_4_C",
                     "L1_MBTS_1_1_EMPTY",
                     "L1_ZB",
-                    "L1_AFP_A_AND_C_TOF_J20",
-                    "L1_J400_LAR",
+                    "L1_AFP_A_AND_C_TOF_jJ50",
                     # Phase-I
-                    "L1_ZB_eEM18",
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
                     "L1_jJ500_LAR",
 
@@ -407,7 +409,7 @@ class MonitorDef:
                 # TRT
                 "L1_TRT_VTE50", "L1_TRT_VTE200", "L1_TRT_VTE20",
                 # XE
-                "L1_XE30", "L1_XE35", "L1_XE50", "L1_XE60",
+                "L1_XE30", "L1_XE50",
                 # Phase-I L1Calo
                 "L1_eEM5", "L1_eEM9", "L1_eEM12", "L1_eEM15",
                 "L1_eEM18", "L1_eEM18L",
@@ -440,7 +442,7 @@ class MonitorDef:
         monItemsHF[TBP|TAP|TAV] = [
            "L1_BCM_2A_FIRSTINTRAIN",
            "L1_BCM_2C_FIRSTINTRAIN",
-           "L1_J12",
+           "L1_jJ30",
            "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
            "L1_BCM_Wide",
         ]

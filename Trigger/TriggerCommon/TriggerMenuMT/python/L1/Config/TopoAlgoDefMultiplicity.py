@@ -3,7 +3,7 @@ from collections import namedtuple
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-from ..Base.TopoAlgos import EMMultiplicityAlgo, TauMultiplicityAlgo, JetMultiplicityAlgo, XEMultiplicityAlgo, LArSaturationAlgo
+from ..Base.TopoAlgos import EMMultiplicityAlgo, TauMultiplicityAlgo, JetMultiplicityAlgo, XEMultiplicityAlgo, LArSaturationAlgo, ZeroBiasAlgo
 from ..Base.TopoAlgorithms import AlgType, AlgCategory
 
 class TopoAlgoDefMultiplicity(object):
@@ -76,10 +76,10 @@ class TopoAlgoDefMultiplicity(object):
             'cTAUSPARE1',
         ]
         etauThresholds_2bits = [ 
-            'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU35', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
+            'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M', 'eTAU35', 'eTAU35M', 'eTAU40HM', 'eTAU60', 'eTAU80', 'eTAU140', 
  
             #spares
-            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', 'eTAUSPARE6', 'eTAUSPARE7',
+            'eTAU40HT', 'eTAU60HM','eTAU60HL', 'eTAU80HL', #'eTAUSPARE6', 'eTAUSPARE7',
         ]
         jtauThresholds_2bits = [ 
             'jTAU30', 'jTAU30M',
@@ -204,11 +204,11 @@ class TopoAlgoDefMultiplicity(object):
             tm.registerTopoAlgo(alg)
 
         XEThresholds = [ 
-            'gXEJWOJ70', 'gXEJWOJ80', 'gXEJWOJ100',
-            'gXERHO70', 'gXERHO100', 
+            'gXEJWOJ60', 'gXEJWOJ70', 'gXEJWOJ80', 'gXEJWOJ100', 'gXEJWOJ110', 'gXEJWOJ120', 'gXEJWOJ500',
+            #'gXERHO70', 'gXERHO100', 
             'gXENC70', 'gXENC100',
 
-            'jXE70', 'jXE80', 'jXE100', 'jXE110', 'jXE500',
+            'jXE60', 'jXE70', 'jXE80', 'jXE90', 'jXE100', 'jXE110', 'jXE120', 'jXE500',
 
             'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
             'gTE200',
@@ -226,9 +226,9 @@ class TopoAlgoDefMultiplicity(object):
             #replace jXESPARE16 - jXESPARE27 with heavy ion jTE threhsolds
             'jXESPARE1', 'jXESPARE2', 'jXESPARE3', 'jXESPARE4',
             'jXESPARE5', 'jXESPARE6', 'jXESPARE7', 'jXESPARE8', 'jXESPARE9',
-            'jXESPARE10', 'jXESPARE11', 'jXESPARE12', 'jXESPARE13', 
-            'jXESPARE14',
-            'jXESPARE15',
+            #'jXESPARE10', 'jXESPARE11', 'jXESPARE12', 'jXESPARE13', 
+            #'jXESPARE14',
+            #'jXESPARE15',
 
         ]
 
@@ -239,6 +239,9 @@ class TopoAlgoDefMultiplicity(object):
             tm.registerTopoAlgo(alg)
 
         tm.registerTopoAlgo(LArSaturationAlgo())
+
+        tm.registerTopoAlgo(ZeroBiasAlgo("ZeroBiasA"))
+        tm.registerTopoAlgo(ZeroBiasAlgo("ZeroBiasB"))
 
     @staticmethod
     def checkMultAlgoFWconstraints(l1menu):
@@ -252,6 +255,7 @@ class TopoAlgoDefMultiplicity(object):
            multLimits( thrtype='eEM',  conn='Topo1Opt0', nbit=3, startbit=0,  endbit=11),
            multLimits( thrtype='eEM',  conn='Topo1Opt0', nbit=2, startbit=24, endbit=43),
            multLimits( thrtype='eEMV', conn='Topo1Opt0', nbit=2, startbit=44, endbit=63),
+           multLimits( thrtype='ZeroBiasA',   conn='Topo1Opt0', nbit=1, startbit=64, endbit=64),
            multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=3, startbit=0,  endbit=8 ),
            multLimits( thrtype='eTAU', conn='Topo1Opt1', nbit=2, startbit=12, endbit=31),
            multLimits( thrtype='gLJ',  conn='Topo1Opt1', nbit=2, startbit=33, endbit=51),
@@ -267,7 +271,9 @@ class TopoAlgoDefMultiplicity(object):
            multLimits( thrtype='cTAU', conn='Topo1Opt3', nbit=2, startbit=23, endbit=28),
            multLimits( thrtype='jEM',  conn='Topo1Opt3', nbit=2, startbit=31, endbit=36),
            multLimits( thrtype='LArSaturation', conn='Topo1Opt3', nbit=1, startbit=37, endbit=37),
+           multLimits( thrtype='ZeroBiasB',   conn='Topo1Opt3', nbit=1, startbit=38, endbit=38),
            multLimits( thrtype='EN',   conn='Topo1Opt3', nbit=1, startbit=39, endbit=86),
+           
         ]
 
         for conn in l1menu.connectors:

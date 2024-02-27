@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKANALYSIS_PIXELCLUSTERANALYSISALG_H
@@ -22,7 +22,12 @@ namespace ActsTrk {
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
 
   private:
-    SG::ReadHandleKey< xAOD::PixelClusterContainer > m_pixelClusterContainerKey{this, "ClusterContainerKey", "ITkPixelClusters", "Key of input pixel clusters"};    
+    SG::ReadHandleKey< xAOD::PixelClusterContainer > m_pixelClusterContainerKey
+    {this, "ClusterContainerKey", "ITkPixelClusters",
+	"Key of input pixel clusters"};    
+    
+    Gaudi::Property< std::string > m_monGroupName
+      {this, "MonGroupName", "ActsClusterAnalysisAlg"};
 
     const PixelID *m_pixelID {};
   };

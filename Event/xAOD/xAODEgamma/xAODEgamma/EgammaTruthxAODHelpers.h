@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: EgammaTruthxAODHelpers.h 768706 2016-08-18 23:55:25Z christos $
@@ -52,7 +52,9 @@ namespace xAOD {
 
     ///@brief Helper wrapper function for calling the function below that accepts truth input.
     /// It extract the  truth from the  reco electron and uses the function below 
-    const xAOD::TruthParticle* getBkgElectronMother(const xAOD::Electron* el,const bool hard = true);
+    const xAOD::TruthParticle*
+    getBkgElectronMother(const xAOD::Electron* el,
+			 const bool allTheWayBack = true);
 
     ///@brief Helper function for getting the True "Mother" electron for an existing electron.
     /// There are cases when an electron has  a  photon (or electron) mother, that in turn comes
@@ -65,11 +67,14 @@ namespace xAOD {
     /// The user can also get the first Geant4 particle cut. This is handy in cases when we want to find
     /// the first non geant particle occuring when going back the lineage.
     /// The method will stop after the 1st particle failing this cut 
-    const xAOD::TruthParticle* getBkgElectronMother(const xAOD::TruthParticle* truthel,const bool hard = true);
+    const xAOD::TruthParticle*
+    getBkgElectronMother(const xAOD::TruthParticle* truthel,
+			 const bool allTheWayBack = true);
 
     ///@brief Helper wrapper function for calling the function below that accepts truth input.
     std::vector<const xAOD::TruthParticle*> 
-    getBkgElectronLineage(const xAOD::Electron* el,const bool hard = true);
+    getBkgElectronLineage(const xAOD::Electron* el,
+			  const bool allTheWayBack = true);
     
     ///@brief Helper function for getting the True Lineage of an electron for an existing electron.
     /// There are cases when an electron has  a  photon (or electron) mother, that in turn comes
@@ -81,7 +86,8 @@ namespace xAOD {
     /// the first non geant particle occuring when going back the lineage.
     /// The method will stop after the 1st particle failing this cut 
     std::vector<const xAOD::TruthParticle*> 
-    getBkgElectronLineage(const xAOD::TruthParticle* truthel,const bool hard = true);
+    getBkgElectronLineage(const xAOD::TruthParticle* truthel,
+			  const bool allTheWayBack = true);
 
         
   }// EgammaHelpers

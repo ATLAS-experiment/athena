@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/SeedingAlg.h"
@@ -8,8 +8,7 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "Acts/Seeding/BinFinder.hpp"
-#include "Acts/Seeding/BinnedSPGroup.hpp"
+#include "Acts/Seeding/BinnedGroup.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinder.hpp"
 
@@ -73,9 +72,23 @@ namespace ActsTrk {
     auto time_seedCreation = Monitored::Timer<std::chrono::milliseconds>( "TIME_seedCreation" );
     auto time_parameterEstimation = Monitored::Timer<std::chrono::milliseconds>( "TIME_parameterEstimation" );
     auto mon = Monitored::Group( m_monTool, timer, time_seedCreation, time_parameterEstimation );
+
+    // ================================================== // 
+    // ===================== OUTPUTS ==================== //
+    // ================================================== // 
+    
+    SG::WriteHandle< ActsTrk::SeedContainer > seedHandle = SG::makeHandle( m_seedKey, ctx );
+    ATH_MSG_DEBUG( "    \\__ Seed Container `" << m_seedKey.key() << "` created ..." );
+    ATH_CHECK( seedHandle.record( std::make_unique< ActsTrk::SeedContainer >() ) );
+    ActsTrk::SeedContainer *seedPtrs = seedHandle.ptr();
+    
+    SG::WriteHandle< ActsTrk::BoundTrackParametersContainer > boundTrackParamsHandle = SG::makeHandle( m_actsTrackParamsKey, ctx );
+    ATH_MSG_DEBUG( "    \\__ Track Params Estimated `"<< m_actsTrackParamsKey.key() << "` created ..." );
+    ATH_CHECK( boundTrackParamsHandle.record( std::make_unique< ActsTrk::BoundTrackParametersContainer >() ) );
+    ActsTrk::BoundTrackParametersContainer *trackParams = boundTrackParamsHandle.ptr();
     
     // ================================================== //
-    // ===================== CONDS ====================== // 
+    // ===================== INPUTS ===================== // 
     // ================================================== //
     
     // Read the Beam Spot information
@@ -87,10 +100,50 @@ namespace ActsTrk {
     }
     auto beamSpotData = beamSpotHandle.cptr();
     // Beam Spot Position
-   Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
+    Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
                            beamSpotData->beamPos().y() * Acts::UnitConstants::mm,
                            beamSpotData->beamPos().z() * Acts::UnitConstants::mm);
     
+    
+    ATH_MSG_DEBUG( "Retrieving elements from " << m_spacePointKey.size() << " input collections...");
+    std::vector<const xAOD::SpacePointContainer *> all_input_collections;
+    all_input_collections.reserve(m_spacePointKey.size());
+    
+    std::size_t number_input_space_points = 0;
+    for (const auto& spacePointKey : m_spacePointKey) {
+      ATH_MSG_DEBUG( "Retrieving from Input Collection '" << spacePointKey.key() << "' ..." );
+      SG::ReadHandle< xAOD::SpacePointContainer > handle = SG::makeHandle( spacePointKey, ctx );
+      ATH_CHECK( handle.isValid() );
+      all_input_collections.push_back(handle.cptr());
+      ATH_MSG_DEBUG( "    \\__ " << handle->size() << " elements!");
+      number_input_space_points += handle->size();
+    }
+    
+    // Apply selection on which SPs you want to use from the input container
+    std::vector<const xAOD::SpacePoint*> selectedSpacePoints;
+    selectedSpacePoints.reserve(number_input_space_points);
+    
+    for (const auto* collection : all_input_collections) {
+      for (const auto* sp : *collection) {
+        if (m_fastTracking and skipSpacePoint(sp->x()-beamPos.x(), sp->y()-beamPos.y(), sp->z()-beamPos.z()))
+          continue;
+        selectedSpacePoints.push_back( sp );
+      }
+    }
+    
+    ATH_MSG_DEBUG( "    \\__ Total input space points: " << selectedSpacePoints.size());
+    m_stat[kNSpacepoints] += selectedSpacePoints.size();
+    
+    // Early Exit in case no space points at this stage
+    if (selectedSpacePoints.empty()) {
+      ATH_MSG_DEBUG("No input space points found, we stop seeding");
+      return StatusCode::SUCCESS;
+    }
+    
+    // ================================================== //
+    // ===================== CONDS ====================== // 
+    // ================================================== //
+        
     // Read the b-field information
     SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle { m_fieldCondObjInputKey, ctx };
     ATH_CHECK( readHandle.isValid() );
@@ -108,39 +161,6 @@ namespace ActsTrk {
     Acts::MagneticFieldProvider::Cache magFieldCache = magneticField.makeCache( magFieldContext );
     Acts::Vector3 bField = *magneticField.getField( Acts::Vector3(beamPos.x(), beamPos.y(), 0),
                                                     magFieldCache );
-    
-    // ================================================== //
-    // ===================== INPUTS ===================== // 
-    // ================================================== //
-
-    ATH_MSG_DEBUG( "Retrieving elements from " << m_spacePointKey.size() << " input collections...");
-    std::vector<const xAOD::SpacePointContainer *> all_input_collections;
-    all_input_collections.reserve(m_spacePointKey.size());
-
-    std::size_t number_input_space_points = 0;
-    for (auto& spacePointKey : m_spacePointKey) {
-      ATH_MSG_DEBUG( "Retrieving from Input Collection '" << spacePointKey.key() << "' ..." );
-      SG::ReadHandle< xAOD::SpacePointContainer > handle = SG::makeHandle( spacePointKey, ctx );
-      ATH_CHECK( handle.isValid() );
-      all_input_collections.push_back(handle.cptr());
-      ATH_MSG_DEBUG( "    \\__ " << handle->size() << " elements!");
-      number_input_space_points += handle->size();
-    }
-
-    // Apply selection on which SPs you want to use from the input container
-    std::vector<const xAOD::SpacePoint*> selectedSpacePoints;
-    selectedSpacePoints.reserve(number_input_space_points);
-
-    for (const auto* collection : all_input_collections) {
-      for (const auto* sp : *collection) {
-        if (m_fastTracking and skipSpacePoint(sp->x()-beamPos.x(), sp->y()-beamPos.y(), sp->z()-beamPos.z()))
-          continue;
-        selectedSpacePoints.push_back( sp );
-      }
-    }
-
-    ATH_MSG_DEBUG( "    \\__ Total input space points: " << selectedSpacePoints.size());
-    m_stat[kNSpacepoints] += selectedSpacePoints.size();
 
     SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle( m_detEleCollKey, ctx );
     ATH_CHECK( detEleHandle.isValid() );
@@ -149,18 +169,7 @@ namespace ActsTrk {
       ATH_MSG_FATAL( m_detEleCollKey.fullKey() << " is not available." );
       return StatusCode::FAILURE;
     }
-
-    // ================================================== // 
-    // ===================== OUTPUTS ==================== //
-    // ================================================== // 
     
-    SG::WriteHandle< ActsTrk::SeedContainer > seedHandle = SG::makeHandle( m_seedKey, ctx );
-    ATH_MSG_DEBUG( "    \\__ Seed Container `" << m_seedKey.key() << "` created ..." );
-    std::unique_ptr< ActsTrk::SeedContainer > seedPtrs = std::make_unique< ActsTrk::SeedContainer >();
-    
-    SG::WriteHandle< ActsTrk::BoundTrackParametersContainer > boundTrackParamsHandle = SG::makeHandle( m_actsTrackParamsKey, ctx );
-    ATH_MSG_DEBUG( "    \\__ Track Params Estimated `"<< m_actsTrackParamsKey.key() << "` created ..." );
-    std::unique_ptr< ActsTrk::BoundTrackParametersContainer > trackParams = std::make_unique< ActsTrk::BoundTrackParametersContainer >();
 
     // ================================================== // 
     // ===================== COMPUTATION ================ //
@@ -172,7 +181,7 @@ namespace ActsTrk {
 					 selectedSpacePoints,
 					 beamPos,
 					 bField,
-					 *seedPtrs.get() ) );
+					 *seedPtrs ) );
     time_seedCreation.stop();
     ATH_MSG_DEBUG("    \\__ Created " << seedPtrs->size() << " seeds");
     m_stat[kNSeeds] += seedPtrs->size();
@@ -211,14 +220,6 @@ namespace ActsTrk {
     }
     m_stat[kNSeedsWithoutParam] += (seedPtrs->size() - trackParams->size() );
     time_parameterEstimation.stop();
-
-    // ================================================== //   
-    // ===================== STORE OUTPUT =============== //
-    // ================================================== //   
-    
-    ATH_MSG_DEBUG("Storing Output Collections");
-    ATH_CHECK( seedHandle.record( std::move( seedPtrs ) ) );
-    ATH_CHECK( boundTrackParamsHandle.record( std::move( trackParams ) ) );
 
     return StatusCode::SUCCESS;
   }

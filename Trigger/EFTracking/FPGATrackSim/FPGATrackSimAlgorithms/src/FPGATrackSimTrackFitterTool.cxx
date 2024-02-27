@@ -69,7 +69,6 @@ StatusCode FPGATrackSimTrackFitterTool::initialize()
 
     if (!m_guessHits && m_doMissingHitsChecks) ATH_MSG_WARNING("We can't do missing hits check if we don't guess hits");
     m_tfpobj->setDoMissingHitsCheck(m_doMissingHitsChecks);
-
     m_tfpobj->setIdealCoordFitType(static_cast<TrackCorrType>(m_idealCoordFitType.value()));
     m_tfpobj->setDoDeltaGPhis(m_doDeltaGPhis);
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of lowMu menu
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log
@@ -23,17 +23,12 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'minbias'
 ex.threads = 4
 ex.concurrent_events = 4
-precommand = ''.join([
-  "setMenu='PhysicsP1_pp_lowMu_run3_v1';",
-  "doWriteBS=False;",
-  "doWriteRDOTrigger=True;",
-  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
-])
-ex.args = '-c "{:s}"'.format(precommand)
+ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"']
+ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'

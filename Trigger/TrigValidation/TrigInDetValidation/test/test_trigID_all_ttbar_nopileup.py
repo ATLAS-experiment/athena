@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for all_ttbar_nopileup
+# Elliot - This test is a duplicate of test_trigID_all_ttbar_nopileup.py which will use CA for the RDOtoRDOTrigger step. Included to ensure that results for non-CA and CA implementations are consistent, intended so that this duplicate will be deleted once all tests are migrated to use CA for the RDOtoRDOTrigger step. Confirmed with ID trigger coordinators.
+
+# art-description: art job for all_ttbar_nopileup_CA
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14838_tid34200062_00
 # art-input-nfiles: 2
 # art-athena-mt: 8
@@ -29,12 +31,15 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
+useCA_Reco = True # Use CA for RDOtoRDOTrigger step
+
 
 Slices  = ['muon','electron','tau','bjet','fsjet']
 Events  = 4000
 Threads = 8 
 Slots   = 8
 Release = "current"
+
 
 Input   = 'ttbar_noPU'    # defined in TrigValTools/share/TrigValInputs.json  
 GridFiles = True

@@ -80,13 +80,14 @@ def TileLaserObjByteStreamToolCfg (flags,
     return _createTileContByteStreamToolCfg(flags, name, InitializeForWriting, **kwargs)
 
 def addTileReadAlg(cfg, name, **kwargs):
+    decoder = CompFactory.TileROD_Decoder(TileBadChanTool="", TileCondToolEmscale="")
     TileRawDataReadingAlg = CompFactory.TileRawDataReadingAlg
-    cfg.addEventAlgo(TileRawDataReadingAlg(name, **kwargs))
+    cfg.addEventAlgo(TileRawDataReadingAlg(name, TileROD_Decoder=decoder, **kwargs))
 
 def TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=True,
                           readMuRcv=None, readMuRcvDigits=False, readMuRcvRawCh=False,
                           readBeamElem=None, readLaserObj=None, readDigitsFlx=False,
-                          stateless=False, **kwargs):
+                          readL2=False, stateless=False, **kwargs):
     """
     Configure reading the Tile BS files
 
@@ -140,6 +141,8 @@ def TileRawDataReadingCfg(flags, readDigits=True, readRawChannel=True,
         addTileReadAlg(cfg, 'TileBeamElemReadAlg', TileBeamElemContainer='TileBeamElemCnt')
     if readDigitsFlx:
         addTileReadAlg(cfg, 'TileDigitsFlxReadAlg', TileDigitsFlxContainer='TileDigitsFlxCnt')
+    if readL2:
+        addTileReadAlg(cfg, 'TileL2ReadAlg', TileL2Container='TileL2Cnt')
 
     return cfg
 

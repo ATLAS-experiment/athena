@@ -328,43 +328,47 @@ size_t AuxTypeRegistry::getEltSize (SG::auxid_t auxid) const
 
 
 /**
- * @brief Copy an element between vectors.
+ * @brief Copy elements between vectors.
  * @param auxid The aux data item being operated on.
- * @param dst Pointer to the start of the destination vector's data.
- * @param dst_index Index of destination element in the vector.
- * @param src Pointer to the start of the source vector's data.
- * @param src_index Index of source element in the vector.
+ * @param dst Container for the destination vector.
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
  *
  * @c dst and @ src can be either the same or different.
  */
 void AuxTypeRegistry::copy (SG::auxid_t auxid,
-                            void* dst,       size_t dst_index,
-                            const void* src, size_t src_index)
+                            AuxVectorData& dst,       size_t dst_index,
+                            const AuxVectorData& src, size_t src_index,
+                            size_t n) const
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   if (factory)
-    factory->copy (dst, dst_index, src, src_index);
+    factory->copy (auxid, dst, dst_index, src, src_index, n);
 }
 
 
 /**
- * @brief Copy an element between vectors.
+ * @brief Copy elements between vectors.
  *        Apply any transformations needed for output.
  * @param auxid The aux data item being operated on.
- * @param dst Pointer to the start of the destination vector's data.
- * @param dst_index Index of destination element in the vector.
- * @param src Pointer to the start of the source vector's data.
- * @param src_index Index of source element in the vector.
+ * @param dst Container for the destination vector.
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
  *
  * @c dst and @ src can be either the same or different.
  */
 void AuxTypeRegistry::copyForOutput (SG::auxid_t auxid,
-                                     void* dst,       size_t dst_index,
-                                     const void* src, size_t src_index)
+                                     AuxVectorData& dst,       size_t dst_index,
+                                     const AuxVectorData& src, size_t src_index,
+                                     size_t n) const
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   if (factory) {
-    factory->copyForOutput (dst, dst_index, src, src_index);
+    factory->copyForOutput (auxid, dst, dst_index, src, src_index, n);
   }
 }
 
@@ -393,16 +397,19 @@ void AuxTypeRegistry::swap (SG::auxid_t auxid,
 
 
 /**
- * @brief Clear an element within a vector.
+ * @brief Clear a range of elements within a vector.
  * @param auxid The aux data item being operated on.
- * @param dst Pointer to the start of the vector's data.
- * @param dst_index Index of the element in the vector.
+ * @param dst Container holding the element
+ * @param dst_index Index of the first element in the vector.
+ * @param n Number of elements to clear.
  */
-void AuxTypeRegistry::clear (SG::auxid_t auxid, void* dst, size_t dst_index)
+void AuxTypeRegistry::clear (SG::auxid_t auxid,
+                             AuxVectorData& dst, size_t dst_index,
+                             size_t n) const
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   if (factory)
-    factory->clear (dst, dst_index);
+    factory->clear (auxid, dst, dst_index, n);
 }
 
 

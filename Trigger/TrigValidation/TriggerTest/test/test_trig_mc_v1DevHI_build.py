@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the Dev_HI_run3_v1 menu
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -12,17 +12,15 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
-ex.input = 'ttbar' # TODO restore to once HI MC has supercells 'pbpb'
+ex.args = '--CA'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
+ex.input = 'ttbar' # TODO restore to 'pbpb' once it has supercells MR: !68783
 ex.threads = 1
-precommand = ''.join([
-  "setMenu='Dev_HI_run3_v1_TriggerValidation_prescale';",
-  "doWriteBS=False;",
-  "doWriteRDOTrigger=True;",
-  "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
-  # TODO restore/fix once switching back to HI data "from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC16-SDR-RUN2-09'"
-])
-ex.args = '-c "{:s}"'.format(precommand)
+ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
+            'Trigger.doLVL1=True',
+            'Output.RDOFileName="RDO_TRIG.pool.root"',
+            'Trigger.doRuntimeNaviVal=True',
+            'Trigger.L1.Menu.doHeavyIonTobThresholds=True']
 
 test = Test.Test()
 test.art_type = 'build'

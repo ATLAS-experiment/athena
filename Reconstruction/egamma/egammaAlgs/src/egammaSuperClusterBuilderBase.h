@@ -20,6 +20,7 @@
 #include "egammaInterfaces/IegammaCellRecoveryTool.h"
 #include "egammaInterfaces/IegammaSwTool.h"
 #include "egammaRecEvent/egammaRecContainer.h"
+#include "egammaCaloUtils/CookieCutterHelpers.h"
 //
 #include "xAODCaloEvent/CaloClusterFwd.h"
 #include "xAODEgamma/EgammaEnums.h"
@@ -44,25 +45,6 @@ class CaloDetDescrManager;
  **/
 class egammaSuperClusterBuilderBase : public AthReentrantAlgorithm
 {
-public:
-  struct CentralPosition
-  {
-    float etaB = 999;
-    float phiB = 999;
-    float emaxB = -999 * Gaudi::Units::GeV;
-    float etaEC = 999;
-    float phiEC = 999;
-    float emaxEC = -999 * Gaudi::Units::GeV;
-  };
-
-  struct PhiSize
-  {
-    float plusB = 0;
-    float minusB = 0;
-    float plusEC = 0;
-    float minusEC = 0;
-  };
-
 protected:
   /** Protected constructor since this class should not be instantiated by
    * itself */
@@ -255,7 +237,7 @@ private:
   StatusCode fillClusterConstrained(
     xAOD::CaloCluster& tofill,
     const std::vector<const xAOD::CaloCluster*>& clusters,
-    const CentralPosition& cp0) const;
+    const CookieCutterHelpers::CentralPosition& cp0) const;
 
   /** add all tile Gap 3 cells in a window.
    * All the cells in the TileGap3 layer which are in a eta x phi window 0.2,

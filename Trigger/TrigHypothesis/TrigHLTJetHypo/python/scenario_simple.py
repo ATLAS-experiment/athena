@@ -117,6 +117,67 @@ def get_condition_args_from_chainpart(cp):
                 }
 
                 condargs.append((k, vals))
+            # GN2x has to go before GN2 in order to avoid ` elif 'bgntwo' in v:` l149 to pass 'bgntwox'
+            elif 'bgntwox' in v:
+                key = 'bgntwox'
+                values = v.split(key)
+                assert values[1] == '','bgntwox condition takes only one argument, two were given'
+                
+                #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
+                gn2x_WPs = {
+                    '':   float('-inf'),
+                    '60': 3.1077,
+                    '70': 2.2998,
+                    '80': 1.2486,
+                    '90': -0.4298,
+                }
+
+                assert (values[0] in gn2x_WPs.keys()),f"The efficiency of the specified gn2x cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the dips WP dictionary."
+
+                lo   = gn2x_WPs[values[0]]
+                vals = {
+                    'min': str(lo),
+                    'max': '',
+                    'cfrac': '0.25',
+                    'namePb': 'GN2Xv01_phbb', 
+                    'namePc': 'GN2Xv01_ptop', 
+                    'namePu': 'GN2Xv01_pqcd',
+                    'nameValid': 'TracksForMinimalJetTag_isValid'
+                }
+                condargs.append((k, vals))
+
+            elif 'bgntwo' in v:
+                key = 'bgntwo'
+                values = v.split(key)
+                assert values[1] == '', 'bgn2 condition takes only one argument, two were given'
+                
+                gn2_WPs = {
+                    '': float('-inf'),
+                    "95": -2.432,
+                    "90": -1.351,
+                    "85": -0.150,
+                    "82": 0.5105,
+                    "80": 0.931,
+                    "77": 1.471,
+                    "75": 1.832,
+                    "60": 4.054,
+                }
+
+                assert (values[0] in gn2_WPs.keys()),f"The efficiency of the specified GN2 cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the GN2 WP dictionary."
+                
+                lo   = gn2_WPs[values[0]]
+                
+                vals = {
+                    'min': str(lo),
+                    'max': '',
+                    'cfrac': '0.018',
+                    'namePb': 'fastGN220240122_pb', 
+                    'namePc': 'fastGN220240122_pc', 
+                    'namePu': 'fastGN220240122_pu',
+                    'nameValid': 'TracksForMinimalJetTag_isValid'
+                }
+
+                condargs.append((k, vals))                
             elif 'bdips' in v:
                 key = 'bdips'
                 values = v.split(key)
@@ -148,33 +209,7 @@ def get_condition_args_from_chainpart(cp):
                     'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
                 condargs.append((k, vals))
-            elif 'bgntwox' in v:
-                key = 'bgntwox'
-                values = v.split(key)
-                assert values[1] == '','bgntwox condition takes only one argument, two were given'
-                
-                #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
-                gn2x_WPs = {
-                    '':   float('-inf'),
-                    '60': 3.1077,
-                    '70': 2.2998,
-                    '80': 1.2486,
-                    '90': -0.4298,
-                }
 
-                assert (values[0] in gn2x_WPs.keys()),f"The efficiency of the specified gn2x cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the dips WP dictionary."
-
-                lo   = gn2x_WPs[values[0]]
-                vals = {
-                    'min': str(lo),
-                    'max': '',
-                    'cfrac': '0.25',
-                    'namePb': 'GN2Xv01_phbb', 
-                    'namePc': 'GN2Xv01_ptop', 
-                    'namePu': 'GN2Xv01_pqcd',
-                    'nameValid': 'TracksForMinimalJetTag_isValid'
-                }
-                condargs.append((k, vals))
             else:
                 raise ValueError(f'btagger {v.split("b")[1]} not supportted')
 

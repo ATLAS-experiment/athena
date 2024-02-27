@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetGeoModelUtils_VolumeBuilder_H
@@ -9,13 +9,13 @@
 #include "InDetGeoModelUtils/VolumeSplitterUtils.h"
 #include "InDetGeoModelUtils/VolumeSplitter.h"
 
+#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoFullPhysVol.h"
+
 #include <string>
 #include <vector>
 
 class InDetMaterialManager;
-class GeoPhysVol;
-class GeoFullPhysVol;
-class GeoVPhysVol;
 class GeoTransform;
 class GeoShape;
 
@@ -41,7 +41,8 @@ namespace InDetDD {
     void buildAndPlaceEnvelope(const std::string & region, GeoFullPhysVol * parent, int iParent, int iElement, double zcenter = 0);
     void buildAndPlaceEnvelope(const std::string & region, GeoPhysVol * parent, int iParent, int iElement, double zcenter = 0);
     void addServices(const Zone & zone, const std::vector<const ServiceVolume * > & services);
-    GeoVPhysVol* build(int iElement);
+    using PhysVolPtr = GeoIntrusivePtr<GeoPhysVol>; 
+    PhysVolPtr build(int iElement);
     int numCopies(int iElement);
     GeoTransform * getPlacement(int iElement, int iCopy);
     GeoTransform * getPlacementEnvelope(int iElement, int iCopy,  int iMothElement);

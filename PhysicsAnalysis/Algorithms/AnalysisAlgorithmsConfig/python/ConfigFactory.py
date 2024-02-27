@@ -109,11 +109,12 @@ class ConfigFactory():
     """This class provides a configuration manager that is intended to allow the user to:
         - define and configure functions that return an algSequence(?) object
     """
-    def __init__(self):
+    def __init__(self, addDefaultBlocks=True):
         self.ROOTNAME = 'root' # constant
         self._algs = {}
         self._order = {self.ROOTNAME: []}
-        self.addDefaultAlgs()
+        if addDefaultBlocks:
+            self.addDefaultAlgs()
 
 
     def addAlgConfigBlock(self, algName, alg, defaults=None, pos=None, superBlocks=None):

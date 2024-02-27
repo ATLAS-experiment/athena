@@ -115,7 +115,9 @@ namespace ActsTrk
 
     
     auto spConstructor = [this, &clusterContainer, &elements](const Acts::Vector3 &pos,
+                    std::optional<double> /*t*/,
 							      const Acts::Vector2 &cov,
+                    std::optional<double> /*varT*/,
 							      const boost::container::static_vector<Acts::SourceLink, 2> &slinks)
       -> StripSP{
       std::vector<std::size_t> measIndices;

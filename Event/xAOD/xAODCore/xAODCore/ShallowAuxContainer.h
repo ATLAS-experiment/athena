@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ShallowAuxContainer.h 793737 2017-01-24 20:11:10Z ssnyder $
@@ -192,7 +192,7 @@ namespace xAOD {
       bool m_shallowIO;
 
       /// Mutex for multithread synchronization.
-      typedef AthContainers_detail::mutex mutex_t;
+      typedef AthContainers_detail::recursive_mutex mutex_t;
       typedef AthContainers_detail::lock_guard<mutex_t> guard_t;
       mutable mutex_t m_mutex;
 

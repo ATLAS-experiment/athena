@@ -1,17 +1,17 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
-from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Tracking_GSFRefitted'
 
 @AccumulatorCache
-def precisionTracks_GSFRefittedSequenceCfg(flags, name, ion=False, variant='', is_probe_leg = False):
+def precisionTracks_GSFRefittedSequenceCfg(flags, name='Electron', ion=False, variant='_GSF', is_probe_leg = False):
     """ sixth step:  GSF refitting of precision track....."""
 
     inViewRoIs = "precisionTracks_GSFRefitted"+variant
@@ -41,22 +41,6 @@ def precisionTracks_GSFRefittedSequenceCfg(flags, name, ion=False, variant='', i
         return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
     return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
-def precisionTracks_GSFRefittedMenuSequenceCfg_lrt(flags, name, is_probe_leg=False):
+
+def precisionTracks_GSFRefittedSequence_LRTCfg(flags, name='Electron', is_probe_leg=False):
     return precisionTracks_GSFRefittedSequenceCfg(flags, name, is_probe_leg=is_probe_leg, ion=False, variant='_LRTGSF')
-
-def precisionTracks_GSFRefittedMenuSequence(flags, name, ion=False, is_probe_leg=False):
-    """Creates sixth step electron sequence"""
-
-    if isComponentAccumulatorCfg():
-        return precisionTracks_GSFRefittedSequenceCfg(flags, name=name, ion=ion, variant='_GSF', is_probe_leg = is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(precisionTracks_GSFRefittedSequenceCfg, flags, name=name, ion=ion, variant='_GSF', is_probe_leg = is_probe_leg)
-
-def precisionTracks_GSFRefittedMenuSequence_LRT(flags, name, is_probe_leg=False):
-    """Creates sixth step photon sequence"""
-
-    if isComponentAccumulatorCfg():
-        return precisionTracks_GSFRefittedMenuSequenceCfg_lrt(flags, name=name, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(precisionTracks_GSFRefittedMenuSequenceCfg_lrt, flags, name=name, is_probe_leg=is_probe_leg)
-

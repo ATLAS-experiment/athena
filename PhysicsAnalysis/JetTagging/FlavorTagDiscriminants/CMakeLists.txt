@@ -28,6 +28,7 @@ set(FTDSource
   Root/DL2Tool.cxx
   Root/DataPrepUtilities.cxx
   Root/OnnxUtil.cxx
+  Root/OnnxOutput.cxx
   Root/GNN.cxx
   Root/GNNTool.cxx
   Root/GNNToolifiers.cxx
@@ -43,6 +44,7 @@ set(FTDSource
   Root/VRJetOverlapDecorator.cxx
   Root/FTagDataDependencyNames.cxx
   Root/TrackClassifier.cxx
+  Root/StringUtils.cxx
 )
 if (NOT XAOD_STANDALONE)
   list(

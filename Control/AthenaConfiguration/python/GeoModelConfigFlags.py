@@ -13,7 +13,7 @@ def createGeoModelConfigFlags(analysis=False):
 
     gcf.addFlag("GeoModel.AtlasVersion", lambda flags :
                 (__getTrigTag(flags) if flags.Trigger.doLVL1 or flags.Trigger.doHLT else None) or
-                GetFileMD(flags.Input.Files).get("GeoAtlas", None))
+                GetFileMD(flags.Input.Files).get("GeoAtlas", None), help='ATLAS Geometry version tag')
 
     # Special handling of analysis releases where we only want AtlasVersion and Run
     if analysis:
@@ -37,12 +37,12 @@ def createGeoModelConfigFlags(analysis=False):
             return period
 
         gcf.addFlag("GeoModel.Run",  # Run deducted from other metadata
-                    _deduct_LHCPeriod, type=LHCPeriod)
+                    _deduct_LHCPeriod, type=LHCPeriod, help='LHC Run period')
         return gcf
 
     def _deduct_LHCPeriod(prevFlags):
         if prevFlags.GeoModel.AtlasVersion:
-            return LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)['Common']['Run'])
+            return LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Common']['Run'])
 
         if prevFlags.Input.isMC:
             raise ValueError('No geometry tag specified')
@@ -56,30 +56,32 @@ def createGeoModelConfigFlags(analysis=False):
 
         raise RuntimeError('Can not determine LHC period from the data project name')
 
-    gcf.addFlag("GeoModel.Run", _deduct_LHCPeriod, type=LHCPeriod)
+    gcf.addFlag("GeoModel.Run", _deduct_LHCPeriod, type=LHCPeriod, help='LHC Run period')
 
-    gcf.addFlag('GeoModel.Layout', 'atlas') # replaces global.GeoLayout
+    gcf.addFlag('GeoModel.Layout', 'atlas', help='Geometry layout') # replaces global.GeoLayout
 
     gcf.addFlag("GeoModel.Align.Dynamic",
-                lambda prevFlags : prevFlags.GeoModel.Run >= LHCPeriod.Run2 and not prevFlags.Input.isMC)
+                lambda prevFlags : prevFlags.GeoModel.Run >= LHCPeriod.Run2 and not prevFlags.Input.isMC, help='Flag for using dynamic alignment')
                 # TODO: dynamic alignment is for now enabled by default for data overlay
                 # to disable, add 'and prevFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.Overlay]'
 
     gcf.addFlag("GeoModel.Align.LegacyConditionsAccess",
-                lambda prevFlags : prevFlags.Common.Project is Project.AthSimulation or prevFlags.Common.ProductionStep is ProductionStep.Simulation)
+                lambda prevFlags : prevFlags.Common.Project is Project.AthSimulation or prevFlags.Common.ProductionStep is ProductionStep.Simulation,
+                help='Flag for using the legacy conditions access infrastructure')
                 # Mainly for G4 which still loads alignment on initialize
 
     gcf.addFlag("GeoModel.Type",
-                lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)['Common']['GeoType'])
-                # Geometry type in {ITKLoI, ITkLoI-VF, etc...}
+                lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Common']['GeoType'],
+                help='Geometry type in {ITKLoI, ITkLoI-VF, etc...}')
 
     gcf.addFlag("GeoModel.IBLLayout",
-                lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB)['Pixel']['IBLlayout'])
-                # IBL layer layout  in {"planar", "3D", "noIBL"}
+                lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion,prevFlags.GeoModel.SQLiteDB,prevFlags.GeoModel.SQLiteDBFullPath)['Pixel']['IBLlayout'],
+                help='IBL layer layout in {"planar", "3D", "noIBL"}')
 
-    gcf.addFlag('GeoModel.SQLiteDB',False)
-                # Switch for activating GeoModel initialization from an SQLite Geometry DB
+    gcf.addFlag('GeoModel.SQLiteDB',False, help='Flag for activating GeoModel initialization from SQLite Geometry DB')
 
-    gcf.addFlag('GeoModel.IgnoreTagDifference',False)
+    gcf.addFlag('GeoModel.SQLiteDBFullPath','', help='Override default location of the SQLite Geometry DB')
+
+    gcf.addFlag('GeoModel.IgnoreTagDifference',False, help='Ignore geometry tag difference between the configured value and the value read from the input file metadata')
 
     return gcf

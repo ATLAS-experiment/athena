@@ -3,10 +3,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
+from PathResolver import PathResolver
 log = AthenaLogger(__name__)
 
 def getNSubregions(filePath):
-    with open(filePath, 'r') as f:
+    with open(PathResolver.FindCalibFile(filePath), 'r') as f:
         fields = f.readline()
         assert(fields.startswith('towers'))
         # towers 10 phi 16
@@ -17,7 +18,7 @@ def getNSubregions(filePath):
 def FPGATrackSimEventSelectionCfg(flags):
     result=ComponentAccumulator()
     eventSelector = CompFactory.FPGATrackSimEventSelectionSvc()
-    eventSelector.regions = "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
+    eventSelector.regions = "HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
     eventSelector.regionID = 0
     eventSelector.sampleType = flags.Trigger.FPGATrackSim.sampleType
     eventSelector.withPU = False
@@ -41,7 +42,7 @@ def FPGATrackSimMappingCfg(flags):
 def FPGATrackSimBankSvcCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimBankSvc = CompFactory.FPGATrackSimBankSvc()
-    pathBankSvc = f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/eta0103phi0305/SectorBanks/'
+    pathBankSvc = flags.Trigger.FPGATrackSim.bankDir if flags.Trigger.FPGATrackSim.bankDir != '' else f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/eta0103phi0305/SectorBanks/'
     FPGATrackSimBankSvc.constantsNoGuess_1st = [
         f'{pathBankSvc}corrgen_raw_8L_skipPlane0.gcon', 
         f'{pathBankSvc}corrgen_raw_8L_skipPlane1.gcon', 
@@ -113,7 +114,7 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.scale = flags.Trigger.FPGATrackSim.ActiveConfig.scale
         HoughTransform.subRegion = number
         HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
-        HoughTransform.traceHits = False
+        HoughTransform.traceHits = True
         tools.append(HoughTransform)
 
     RF.tools = tools
@@ -202,8 +203,8 @@ def NNTrackToolCfg(flags):
 def FPGATrackSimWriteOutputCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimWriteOutput = CompFactory.FPGATrackSimOutputHeaderTool("FPGATrackSimWriteOutput")
-    FPGATrackSimWriteOutput.InFileName = ["test"]
-    FPGATrackSimWriteOutput.RWstatus = "HEADER" # do not open file, use THistSvc
+    FPGATrackSimWriteOutput.InFileName = ["test.root"]
+    FPGATrackSimWriteOutput.RWstatus = "RECREATE" # do not open file, use THistSvc
     FPGATrackSimWriteOutput.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage
     result.addPublicTool(FPGATrackSimWriteOutput, primary=True)
     return result
@@ -308,7 +309,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.HitFiltering = flags.Trigger.FPGATrackSim.ActiveConfig.hitFiltering
     theFPGATrackSimLogicalHistProcessAlg.writeOutputData = flags.Trigger.FPGATrackSim.ActiveConfig.writeOutputData
     theFPGATrackSimLogicalHistProcessAlg.Clustering = True
-    theFPGATrackSimLogicalHistProcessAlg.tracking = flags.Trigger.FPGATrackSim.ActiveConfig.doTracking
+    theFPGATrackSimLogicalHistProcessAlg.tracking = flags.Trigger.FPGATrackSim.tracking
     theFPGATrackSimLogicalHistProcessAlg.outputHitTxt = flags.Trigger.FPGATrackSim.ActiveConfig.outputHitTxt
     theFPGATrackSimLogicalHistProcessAlg.RunSecondStage = flags.Trigger.FPGATrackSim.ActiveConfig.secondStage
     theFPGATrackSimLogicalHistProcessAlg.DoMissingHitsChecks = flags.Trigger.FPGATrackSim.ActiveConfig.doMissingHitsChecks
@@ -326,7 +327,11 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
 
     if flags.Trigger.FPGATrackSim.wrapperFileName != [] and flags.Trigger.FPGATrackSim.wrapperFileName is not None:
         theFPGATrackSimLogicalHistProcessAlg.InputTool = result.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
+        theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
+        theFPGATrackSimLogicalHistProcessAlg.SGInputTool = ""
     else:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
         theFPGATrackSimLogicalHistProcessAlg.InputTool = ""
         theFPGATrackSimLogicalHistProcessAlg.InputTool2 = ""
         theFPGATrackSimLogicalHistProcessAlg.SGInputTool = result.getPrimaryAndMerge(FPGATrackSimSGInputToolCfg(flags))
@@ -386,28 +391,32 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     return result
 
 
-
-
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     flags = initConfigFlags()
     flags.fillFromArgs()
+    
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
-
-    flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+        flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
+    
     flags.lock()
     acc=MainServicesCfg(flags)
-
+    
+    if flags.Trigger.FPGATrackSim.wrapperFileName == [] or flags.Trigger.FPGATrackSim.wrapperFileName is None:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        acc.merge(PoolReadCfg(flags))
+    
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = ["MONITOROUT DATAFILE='dataflow.root', OPT='RECREATE'"]))
+
     acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))
     
-    statusCode = acc.run()
+    statusCode = acc.run(flags.Exec.MaxEvents)
     assert statusCode.isSuccess() is True, "Application execution did not succeed"
-

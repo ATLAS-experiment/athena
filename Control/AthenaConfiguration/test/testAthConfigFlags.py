@@ -145,25 +145,27 @@ class BasicTests(FlagsSetup):
         self.flags.addFlag("TupleFlag", (123456,), type=tuple)
         self.flags.addFlag("IntFlag", 123, type=int)
         self.flags.addFlag("FloatFlag", 123.45, type=float)
+        self.flags.addFlag("FloatFlag2", 123, type=float)  # implicit int to float conversion OK
+        self.flags.addFlag("BoolFlag", True, type=bool)
         self.flags.TupleFlag = (123456, 1234567)
         self.flags.lock()
 
     def test_types_incorrect_assign(self):
         """Test that types are properly validated (incorrect flags)"""
         self.flags.addFlag("IntWrong", 123, type=int)
-        with self.assertRaises(TypeError) as _:
+        with self.assertRaises(TypeError):
             self.flags.IntWrong = 123.45
 
-        self.flags.addFlag("FloatWrong", 123.45, type=float)
-        with self.assertRaises(TypeError) as _:
-            self.flags.FloatWrong = 123
-
         self.flags.addFlag("ListWrong", [], type=list)
-        with self.assertRaises(TypeError) as _:
+        with self.assertRaises(TypeError):
             self.flags.ListWrong = 123
 
-        with self.assertRaises(TypeError) as _:
+        with self.assertRaises(TypeError):
             self.flags.ListWrong = "123"
+
+        self.flags.addFlag("BoolWrong", False, type=bool)
+        with self.assertRaises(TypeError):
+            self.flags.BoolWrong = 1
 
     def test_types_incorrect_lambda(self):
         """Test that types are properly validated (incorrect flags)"""
@@ -323,10 +325,12 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.flags.addFlag("detA.flagD", [], type=list)
         self.flags.addFlag("intE", 123, type=int)
         self.flags.addFlag("floatF", 123.45, type=float)
+        self.flags.addFlag("boolB", False, type=bool)
+        self.flags.addFlag("bool_notype", False)
         self.flags.addFlag("Format", Format.BS, type=Format)
 
     def test(self):
-        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 Format=Format.BS detA.flagC=a.2 detA.flagD+=['val'] intE=42 floatF=42.42"
+        argline="-l VERBOSE --evtMax=10 --skipEvents=3 --filesInput=bla1.data,bla2.data detA.flagB=7 Format=Format.BS detA.flagC=a.2 detA.flagD+=['val'] intE=42 floatF=42.42 boolB=True bool_notype=True"
         if isGaudiEnv():
             argline += " --debug exec"
         print (f"Interpreting arguments: '{argline}'")
@@ -341,7 +345,19 @@ class FlagsFromArgsTest(unittest.TestCase):
         self.assertEqual(self.flags.detA.flagD,["val"],"Failed to append to list flag")
         self.assertEqual(self.flags.intE, 42, "Failed to set integer flag")
         self.assertEqual(self.flags.floatF, 42.42, "Failed to set floating point value flag")
+        self.assertEqual(self.flags.boolB, True, "Failed to set boolean flag")
+        self.assertEqual(self.flags.bool_notype, True, "Failed to set boolean flag")
         self.assertEqual(self.flags.Format, Format.BS,"Failed to set FlagEnum")
+
+    def test2(self):
+        with self.assertRaises(TypeError):
+            self.flags.fillFromArgs(['intE=42.3'])
+
+        with self.assertRaises(TypeError):
+            self.flags.fillFromArgs(['boolB=2'])
+
+        self.flags.fillFromArgs(['floatF=42'])  # implicit conversion
+        self.assertEqual(self.flags.floatF, 42)
 
 
 class FlagsHelpTest(unittest.TestCase):

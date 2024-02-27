@@ -87,29 +87,36 @@ bool xAOD::EgammaHelpers::isTrueConvertedPhoton(const xAOD::TruthParticle* truth
 
 // ==================================================================
 
-const xAOD::TruthParticle* xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::Electron* el,  const bool hard/*=true*/){ 
-  const xAOD::TruthParticle *truthel = xAOD::TruthHelpers::getTruthParticle(*el);
-  return getBkgElectronMother(truthel,hard);
+const xAOD::TruthParticle*
+xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::Electron* el,
+					  const bool allTheWayBack/*=true*/){ 
+  const xAOD::TruthParticle *truthel =
+    xAOD::TruthHelpers::getTruthParticle(*el);
+  return getBkgElectronMother(truthel,allTheWayBack);
 }
 
-const xAOD::TruthParticle* xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::TruthParticle* truthel, const bool hard/*=true*/){
-
-  std::vector<const xAOD::TruthParticle*>  vec = xAOD::EgammaHelpers::getBkgElectronLineage(truthel,hard);
-  if(!vec.empty()){ 
+const xAOD::TruthParticle*
+xAOD::EgammaHelpers::getBkgElectronMother(const xAOD::TruthParticle* truthel,
+					  const bool allTheWayBack/*=true*/) {
+  std::vector<const xAOD::TruthParticle*>  vec =
+    xAOD::EgammaHelpers::getBkgElectronLineage(truthel,allTheWayBack);
+  if (!vec.empty()) { 
     return vec.back();
   }
   return nullptr;
 }
 
 std::vector<const xAOD::TruthParticle*> 
-xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::Electron* el,const bool hard/*=true*/){
+xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::Electron* el,
+					   const bool allTheWayBack/*=true*/) {
   const xAOD::TruthParticle *truthel = xAOD::TruthHelpers::getTruthParticle(*el);
-  return getBkgElectronLineage(truthel,hard);
+  return getBkgElectronLineage(truthel,allTheWayBack);
 }
 
 //The actual implementation code 
 std::vector<const xAOD::TruthParticle*> 
-xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,const bool hard/*=true*/){
+xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,
+					   const bool allTheWayBack/*=true*/) {
   std::vector<const xAOD::TruthParticle*> vec;
   //Truth must exist and be an electron
   if (!truthel || !MC::isElectron(truthel)){
@@ -118,26 +125,31 @@ xAOD::EgammaHelpers::getBkgElectronLineage(const xAOD::TruthParticle* truthel,co
   vec.push_back(truthel); //push its self back as first entry
 
   // The first parent has to exist
-  if ( !truthel->nParents() || ( (!HepMC::is_simulation_particle(truthel)) && hard)   ){
+  if (!truthel->nParents()) {
     return vec;
   }
+
+  if (!HepMC::is_simulation_particle(truthel) && !allTheWayBack)  {
+    return vec;
+  }
+  
   //And has to be a photon or electron
   const xAOD::TruthParticle* parent = truthel->parent();
   if ( !MC::isPhoton(parent) && !MC::isElectron(parent) ) {
     return vec;
   }
-  
+
   vec.push_back(parent); //push in the parent as the second entry
 
   //Loop over the generations
-  while (parent->nParents() && ( HepMC::is_simulation_particle(parent) || hard ) ){ 
+  while (parent->nParents() &&
+	 (HepMC::is_simulation_particle(parent) || allTheWayBack)) {
     //Find the next parent
     const xAOD::TruthParticle* tmp = parent->parent();
     //You want to see an electron or a photon 
-    if ( MC::isPhoton(tmp) || MC::isElectron(tmp) ) {
+    if (MC::isPhoton(tmp) || MC::isElectron(tmp)) {
       parent=tmp;
-    }
-    else{ // if we do not see any more electron and photons we stop
+    } else { // if we do not see any more electron and photons we stop
       break; 
     }
     vec.push_back(parent); //push in the parent

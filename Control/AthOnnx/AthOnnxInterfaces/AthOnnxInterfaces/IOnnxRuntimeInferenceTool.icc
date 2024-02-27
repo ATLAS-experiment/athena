@@ -1,0 +1,46 @@
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+template <typename T>
+Ort::Value AthOnnx::IOnnxRuntimeInferenceTool::createTensor(std::vector<T>& data, const std::vector<int64_t>& dataShape, int64_t batchSize) const
+{
+    std::vector<int64_t> dataShapeCopy = dataShape;
+
+    if (batchSize > 0) {
+        for (auto& shape: dataShapeCopy) {
+            if (shape == -1) {
+                shape = batchSize;
+                break;
+            }
+        }
+    }
+
+    auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    return Ort::Value::CreateTensor<T>(
+        memoryInfo, data.data(), data.size(), dataShapeCopy.data(), dataShapeCopy.size()
+    );
+}
+
+template <typename T>
+StatusCode AthOnnx::IOnnxRuntimeInferenceTool::addInput(std::vector<Ort::Value>& inputTensors, std::vector<T>& data, unsigned idx, int64_t batchSize) const
+{
+    if (idx >= m_numInputs ) {
+        return StatusCode::FAILURE;
+    }
+
+    inputTensors.push_back(std::move(createTensor(data, m_inputShapes[idx], batchSize)));
+    return StatusCode::SUCCESS;
+}
+
+template <typename T>
+StatusCode AthOnnx::IOnnxRuntimeInferenceTool::addOutput(std::vector<Ort::Value>& outputTensors, std::vector<T>& data, unsigned idx, int64_t batchSize) const
+{
+    if (idx >= m_numOutputs ) {
+        return StatusCode::FAILURE;
+    }
+    auto tensorSize = std::accumulate(m_outputShapes[idx].begin(), m_outputShapes[idx].end(), 1, std::multiplies<int64_t>());
+    if (tensorSize < 0) {
+        tensorSize = abs(tensorSize) * batchSize;
+    }
+    data.resize(tensorSize);
+    outputTensors.push_back(std::move(createTensor(data, m_outputShapes[idx], batchSize)));
+    return StatusCode::SUCCESS;
+}

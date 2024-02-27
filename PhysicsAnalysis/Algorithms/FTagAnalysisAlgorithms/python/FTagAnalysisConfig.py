@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -35,9 +35,28 @@ class FTagConfig (ConfigBlock):
         self.addOption ('generator', "autoconfig", type=str)
         self.addOption ('kinematicSelection', True, type=bool)
         self.addOption ('noEffSF', False, type=bool)
+        self.addOption ('globalSF', True, type=bool)
         self.addOption ('minPt', None, type=float)
         self.addOption ('bTagCalibFile', None, type=str,
                         info='calibration file for CDI')
+        self.addOption ('systematicsStrategy', 'SFEigen', type=str,
+                        info="name of systematics model; presently choose between 'SFEigen' and 'Envelope'")
+        self.addOption ('eigenvectorReductionB', 'Loose', type=str,
+                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+        self.addOption ('eigenvectorReductionC', 'Loose', type=str,
+                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+        self.addOption ('eigenvectorReductionLight', 'Loose', type=str,
+                        info="b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'")
+        self.addOption ('excludeFromEigenVectorTreatment', '', type=str,
+                        info="(semicolon-separated) names of uncertainties to be excluded from all eigenvector decompositions (if used)")
+        self.addOption ('excludeFromEigenVectorBTreatment', '', type=str,
+                        info="(semicolon-separated) names of uncertainties to be excluded from b-jet eigenvector decompositions (if used)")
+        self.addOption ('excludeFromEigenVectorCTreatment', '', type=str,
+                        info="(semicolon-separated) names of uncertainties to be excluded from c-jet eigenvector decompositions (if used)")
+        self.addOption ('excludeFromEigenVectorLightTreatment', '', type=str,
+                        info="(semicolon-separated) names of uncertainties to be excluded from light-flavour-jet eigenvector decompositions (if used)")
+        self.addOption ('excludeRecommendedFromEigenVectorTreatment', False, type=str,
+                        info="whether or not to add recommended lists to the user specified eigenvector decomposition exclusion lists")
 
     def resolveMCMCgenerator(self, config, generatorDict):
         """use either the metadata (generatorDict) or TopDataPreparation
@@ -227,9 +246,19 @@ class FTagConfig (ConfigBlock):
             alg.efficiencyTool.TaggerName = self.btagger
             alg.efficiencyTool.OperatingPoint = self.btagWP
             alg.efficiencyTool.JetAuthor = jetCollection
-            alg.efficiencyTool.ScaleFactorFileName = bTagCalibFile
-            alg.efficiencyTool.SystematicsStrategy = "Envelope"
             alg.efficiencyTool.MinPt = minPt
+            alg.efficiencyTool.EfficiencyFileName = bTagCalibFile
+            alg.efficiencyTool.ScaleFactorFileName = bTagCalibFile
+            alg.efficiencyTool.SystematicsStrategy = self.systematicsStrategy
+            if self.systematicsStrategy == "SFEigen":
+                alg.efficiencyTool.EigenvectorReductionB = self.eigenvectorReductionB
+                alg.efficiencyTool.EigenvectorReductionC = self.eigenvectorReductionC
+                alg.efficiencyTool.EigenvectorReductionLight = self.eigenvectorReductionLight
+                alg.efficiencyTool.ExcludeFromEigenVectorTreatment = self.excludeFromEigenVectorTreatment
+                alg.efficiencyTool.ExcludeFromEigenVectorBTreatment = self.excludeFromEigenVectorBTreatment
+                alg.efficiencyTool.ExcludeFromEigenVectorCTreatment = self.excludeFromEigenVectorCTreatment
+                alg.efficiencyTool.ExcludeFromEigenVectorLightTreatment = self.excludeFromEigenVectorLightTreatment
+                alg.efficiencyTool.ExcludeRecommendedFromEigenVectorTreatment = self.excludeRecommendedFromEigenVectorTreatment
             if DSID != "default":
                 alg.efficiencyTool.EfficiencyBCalibrations = DSID
                 alg.efficiencyTool.EfficiencyTCalibrations = DSID
@@ -244,6 +273,19 @@ class FTagConfig (ConfigBlock):
             alg.jets = config.readName (self.containerName)
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, selectionName + '_eff')
 
+            if self.globalSF:
+                alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg',
+                                             'FTagEventScaleFactorAlg' + postfix)
+                preselection = config.getFullSelection(self.containerName, '')
+                alg.preselection = ((preselection + '&&' if preselection else '')
+                                    + 'ftag_kin_select_' + selectionName + ',as_char')
+                alg.scaleFactorInputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
+                alg.scaleFactorOutputDecoration = 'ftag_effSF_' + selectionName + '_%SYS%'
+                alg.particles = config.readName(self.containerName)
+
+                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
+                                    'weight_ftag_effSF_' + selectionName)
+
 
 def makeFTagAnalysisConfig( seq, containerName,
                             selectionName,
@@ -252,6 +294,7 @@ def makeFTagAnalysisConfig( seq, containerName,
                             generator = None,
                             kinematicSelection = None,
                             noEffSF = None,
+                            globalSF = None,
                             minPt = None ):
     """Create a ftag analysis algorithm config
 
@@ -261,6 +304,7 @@ def makeFTagAnalysisConfig( seq, containerName,
       generator -- Generator for MC/MC scale factors
       kinematicSelection -- Wether to run kinematic selection
       noEffSF -- Disables efficiency and scale factor calculations
+      globalSF -- Compute event level FTAG scale factor
       minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
 
@@ -275,6 +319,8 @@ def makeFTagAnalysisConfig( seq, containerName,
         config.setOptionValue ('kinematicSelection', kinematicSelection)
     if noEffSF is not None :
         config.setOptionValue ('noEffSF', noEffSF)
+    if globalSF is not None :
+        config.setOptionValue ('globalSF', globalSF)
     if minPt is not None :
         config.setOptionValue ('minPt', minPt)
     seq.append (config)

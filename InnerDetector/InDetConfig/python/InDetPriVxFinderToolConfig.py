@@ -10,9 +10,15 @@ def IterativeFindingBaseCfg(
     acc = ComponentAccumulator()
 
     if "SeedFinder" not in kwargs:
-        from TrkConfig.TrkVertexSeedFinderToolsConfig import ZScanSeedFinderCfg
-        kwargs.setdefault("SeedFinder", acc.popToolsAndMerge(
-            ZScanSeedFinderCfg(flags)))
+        if flags.Tracking.PriVertex.useBeamConstraint:
+            from TrkConfig.TrkVertexSeedFinderToolsConfig import ZScanSeedFinderCfg
+            kwargs.setdefault("SeedFinder", acc.popToolsAndMerge(
+                ZScanSeedFinderCfg(flags)))
+        else:
+            from TrkConfig.TrkVertexSeedFinderToolsConfig import (
+                IVF_CrossDistancesSeedFinderCfg)
+            kwargs.setdefault("SeedFinder", acc.popToolsAndMerge(
+                IVF_CrossDistancesSeedFinderCfg(flags)))
 
     if "TrackSelector" not in kwargs:
         from InDetConfig.InDetTrackSelectionToolConfig import (

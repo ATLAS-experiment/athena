@@ -19,6 +19,10 @@ namespace EL
   {
     /// \brief a \ref Module wrapping each algorithm with its own
     /// timer
+    ///
+    /// @note There is a dedicated test in AnalysisAlgorithms config that runs a
+    /// test job with this module enabled to ensure it runs and doesn't break
+    /// the output.
 
     class AlgorithmTimerModule final : public Module
     {

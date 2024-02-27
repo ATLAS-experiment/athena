@@ -1,6 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-
-from __future__ import print_function
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypoUnitTests.TrigHLTJetHypoUnitTestsConf import (
     JetHypoExerciserAlg,
@@ -290,10 +288,11 @@ if __name__=="__main__":
 
     label = test_strings[label_ind]
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    ConfigFlags.Exec.MaxEvents=10
-    cfg=MainServicesCfg(ConfigFlags)
+    flags = initConfigFlags()
+    flags.Exec.MaxEvents=10
+    cfg=MainServicesCfg(flags)
     cfg.merge(JetHypoExerciserCfg(label,
                                   n_signal,
                                   n_background,

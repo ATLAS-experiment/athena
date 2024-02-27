@@ -4,7 +4,7 @@
 # art-description: art job for fsjet_vtx_pu55
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34200060_00
 # art-input-nfiles: 1
 # art-athena-mt: 8
@@ -30,6 +30,8 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True
 Slices  = ['fsjet']
 Events  = 2000
 Threads = 8
@@ -38,7 +40,12 @@ Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-preinclude_file = "RDOtoRDOTrigger:TrigInDetValidation/TIDAvtx_preinclude.py"
+# legacy 
+# preinclude_file = "RDOtoRDOTrigger:TrigInDetValidation/TIDAvtx_preinclude.py"
+
+# CA
+preexec_trig = "flags.Trigger.InDetTracking.fullScan.addSingleTrackVertices=True;flags.Trigger.InDetTracking.fullScan.minNSiHits_vtx=8;flags.Trigger.InDetTracking.fullScan.TracksMaxZinterval=3;"
+
 
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                        -o data-hists.root" ), 

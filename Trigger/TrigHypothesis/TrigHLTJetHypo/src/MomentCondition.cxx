@@ -38,7 +38,6 @@ bool MomentCondition::isSatisfied(const pHypoJet& ip,
   }
 
   bool pass = m_min <= momentValue and m_max > momentValue;
-
   
   if(collector){
     const void* address = static_cast<const void*>(this);

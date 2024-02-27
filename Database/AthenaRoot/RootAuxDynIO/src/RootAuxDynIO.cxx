@@ -21,7 +21,11 @@
 
 #include <ROOT/RNTuple.hxx>
 using ROOT::Experimental::RNTupleModel;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+using ROOT::Experimental::Internal::RPageSource;
+#else
 using ROOT::Experimental::Detail::RPageSource;
+#endif
 
 namespace RootAuxDynIO
 {
@@ -55,24 +59,6 @@ namespace RootAuxDynIO
       return "";
    }
 
-
-   std::string
-   auxBranchName(const std::string& attr_name, const std::string& baseBranchName)
-   {
-      std::string branch_name = baseBranchName;
-      if( !branch_name.empty() and branch_name.back() == '.' )  branch_name.pop_back();
-      branch_name += RootAuxDynIO::AUXDYN_POSTFIX + attr_name;
-      return branch_name;
-   }
-
-   std::string
-   auxFieldName(const std::string& attr_name, const std::string& baseName)
-   {
-      std::string field_name = baseName;
-      if( field_name.back() == '.' )  field_name.pop_back();
-      field_name += ":" + attr_name;    // MN TODO <- find a good delimiter
-      return field_name;
-   }
 
    bool
    isAuxDynBranch(TBranch *branch)

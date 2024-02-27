@@ -40,7 +40,7 @@ namespace JetTagDQA{
 
       void bookNJetsThatPassedWPCutsHistos();
       void initializeNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts);
-      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_IP3D, const double& discr_IP2D, const double& discr_RNNIP, const double& discr_DIPS, const double& discr_SV1, const double& discr_DL1dv00, const double& DL1dv01, const double& discr_DL1r, const double& GN1, const double& GN2v00);
+      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_IP3D, const double& discr_IP2D, const double& discr_RNNIP, const double& discr_DIPS, const double& discr_SV1, const double& discr_DL1dv00, const double& DL1dv01, const double& discr_DL1r, const double& GN1, const double& GN2v00, const double& GN2Xv01);
       void fillNJetsThatPassedWPCutsHistos(std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
 
       void setTaggerInfos();    
@@ -484,6 +484,11 @@ namespace JetTagDQA{
       TH1* m_GN2v00_pc = nullptr;
       TH1* m_GN2v00_pu = nullptr;
 
+      TH1* m_GN2Xv01_phbb = nullptr;
+      TH1* m_GN2Xv01_phcc = nullptr;
+      TH1* m_GN2Xv01_ptop = nullptr;
+      TH1* m_GN2Xv01_pqcd = nullptr;
+
       TH1* m_nGTinSV1_incl = nullptr;
       TH1* m_nGTinSV1_b = nullptr;
       TH1* m_nGTinSV1_c = nullptr;
@@ -545,6 +550,8 @@ namespace JetTagDQA{
       std::map<std::string, double> m_DL1r_workingPoints;
       std::map<std::string, double> m_GN1_workingPoints;
       std::map<std::string, double> m_GN2v00_workingPoints;
+      std::map<std::string, double> m_GN2Xv01_workingPoints;
+
       double m_RNNIP_fc = 0.0;
       double m_DIPS_fc = 0.0;
       double m_DL1dv00_fc = 0.0;
@@ -552,6 +559,8 @@ namespace JetTagDQA{
       double m_DL1r_fc = 0.0;
       double m_GN1_fc = 0.0;
       double m_GN2v00_fc = 0.0;
+      double m_GN2Xv01_hcc_fc = 0.0;
+      double m_GN2Xv01_top_fc = 0.0;
       std::map<std::string, TH1*> m_weight_histos; 
 
       std::map<std::string, TH1*> m_nJetsThatPassedWPCutsHistos; 
@@ -562,7 +571,7 @@ namespace JetTagDQA{
       // a setter for the HistogramDefinitions and the jvt and TMP cuts
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
       void setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut);
-      void setTaggerNames(const std::string& dipsName, const std::string& DL1dv00Name, const std::string& DL1dv01Name, const std::string& GN1Name, const std::string& GN2v00Name);
+      void setTaggerNames(const std::string& dipsName, const std::string& DL1dv00Name, const std::string& DL1dv01Name, const std::string& GN1Name, const std::string& GN2v00Name, const std::string& GN2Xv01Name);
 
       // jvt variables 
       bool m_JVT_defined;
@@ -596,7 +605,8 @@ namespace JetTagDQA{
       std::string m_DL1dv01Name;
       std::string m_GN1Name;
       std::string m_GN2v00Name;
-
+      std::string m_GN2Xv01Name;
+  
   };
     
 }

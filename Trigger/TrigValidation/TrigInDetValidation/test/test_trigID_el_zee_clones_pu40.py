@@ -4,7 +4,7 @@
 # art-description: art job for el_zee_clones_pu40
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171431_00
 # art-input-nfiles: 8
 # art-athena-mt: 8
@@ -29,6 +29,8 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
+
+useCA_Reco = True
 Slices  = ['electron']
 Events  = 16000
 Threads = 8
@@ -37,7 +39,11 @@ Input   = 'Zee'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAcloneremoval.py'
+# legacy ...
+# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAcloneremoval.py'
+#
+# CA ...
+preexec_trig = "flags.Trigger.InDetTracking.electron.doCloneRemoval = False;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 11" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]

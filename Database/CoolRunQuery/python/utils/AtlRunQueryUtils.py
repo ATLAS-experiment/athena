@@ -122,15 +122,9 @@ class DBConnectionController:
                 defdb = DQDefects.DefectsDB("COOLOFL_GLOBAL/CONDBR2",tag=db)
                 defdb.closeDatabase = lambda: None
                 self.openConn[(schema,db)] = defdb
-            else:
-                readoracle=False # Richard: Tools which expect to read from the real
-                                 # data conditions database have to be
-                                 # setup in such a way as to ignore SQLite
-                                 # replicas have to use 'indirectOpen' with
-                                 # the oracle=True argument
                 logging=False
                 from CoolConvUtilities.AtlCoolLib  import indirectOpen
-                self.openConn[(schema,db)] = indirectOpen("%s/%s"%(schema,db),True,readoracle, logging)
+                self.openConn[(schema,db)] = indirectOpen("%s/%s"%(schema,db),True, logging)
         except Exception:
             import traceback
             traceback.print_exc()

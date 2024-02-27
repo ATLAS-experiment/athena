@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -185,7 +185,7 @@ void TileDetectorFactoryLite::create(GeoPhysVol *world)
     std::string volName = cursor.getName();
     if (volName.compare(0,4,"Tile")==0) {
       (*m_log) << MSG::DEBUG << "Adding vol '" << volName << "' to detManager" << endmsg;
-      m_detectorManager->addTreeTop(GeoPVLink(cursor.getVolume().operator->()));
+      m_detectorManager->addTreeTop(cursor.getVolume());
     }
     cursor.next();
   }

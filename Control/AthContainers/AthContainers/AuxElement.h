@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxElement.h
@@ -344,7 +344,7 @@ public:
      */
     ConstAccessor (const std::string& name,
                    const std::string& clsname,
-                   const SG::AuxTypeRegistry::Flags flags);
+                   const SG::AuxVarFlags flags);
 
 
     /// The cached @c auxid.
@@ -536,7 +536,7 @@ public:
      */
     Decorator (const std::string& name,
                const std::string& clsname,
-               const SG::AuxTypeRegistry::Flags flags);
+               const SG::AuxVarFlags flags);
 
 
   private:
@@ -555,7 +555,7 @@ public:
    * or @c ConstAccessor classes above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name) const;
 
 
@@ -570,7 +570,7 @@ public:
    * or @c ConstAccessor classes above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name,
            const std::string& clsname) const;
 
@@ -585,7 +585,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name) const;
 
 
@@ -600,7 +600,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename ConstAccessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name,
                 const std::string& clsname) const;
 
@@ -649,7 +649,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name) const;
 
 
@@ -668,7 +668,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name,
             const std::string& clsname) const;
 
@@ -991,7 +991,7 @@ public:
   protected:
     ConstAccessor (const std::string& name,
                    const std::string& clsname,
-                   const SG::AuxTypeRegistry::Flags flags)
+                   const SG::AuxVarFlags flags)
       : ConstAuxElement::ConstAccessor<T, ALLOC> (name, clsname, flags) {}
   };
 
@@ -1152,7 +1152,7 @@ public:
   protected:
     Decorator (const std::string& name,
                const std::string& clsname,
-               const SG::AuxTypeRegistry::Flags flags)
+               const SG::AuxVarFlags flags)
     
       : ConstAuxElement::Decorator<T, ALLOC> (name, clsname, flags) {}
   };
@@ -1168,7 +1168,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Accessor<T, ALLOC>::reference_type
   auxdata (const std::string& name);
 
 
@@ -1183,7 +1183,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Accessor<T, ALLOC>::reference_type
   auxdata (const std::string& name,
            const std::string& clsname);
 
@@ -1198,7 +1198,7 @@ public:
    * or @c ConstAccessor classes above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename Accessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name) const;
 
 
@@ -1213,7 +1213,7 @@ public:
    * or @c ConstAccessor classes above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename Accessor<T, ALLOC>::const_reference_type
   auxdata (const std::string& name,
            const std::string& clsname) const;
 
@@ -1228,7 +1228,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename Accessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name) const;
 
 
@@ -1243,7 +1243,7 @@ public:
    * class above.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::const_reference_type
+  typename Accessor<T, ALLOC>::const_reference_type
   auxdataConst (const std::string& name,
                 const std::string& clsname) const;
 
@@ -1307,7 +1307,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name) const;
 
 
@@ -1326,7 +1326,7 @@ public:
    * or variables already marked as decorations.
    */
   template <class T, class ALLOC = AuxAllocator_t<T> >
-  typename AuxDataTraits<T, ALLOC>::reference_type
+  typename Decorator<T, ALLOC>::reference_type
   auxdecor (const std::string& name,
             const std::string& clsname) const;
 

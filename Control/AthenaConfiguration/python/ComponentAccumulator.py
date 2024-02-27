@@ -1,10 +1,9 @@
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
 import GaudiKernel.GaudiHandles as GaudiHandles
 
-import AthenaPython.Configurables
 from AthenaCommon.Logging import logging
 from AthenaCommon.Debugging import DbgStage
 from AthenaCommon.CFElements import (isSequence, findSubSequence, findAlgorithm, flatSequencers,
@@ -330,12 +329,12 @@ class ComponentAccumulator(AccumulatorCachable):
 
     def addSequence(self, newseq, primary=False, parentName = None ):
         """ Adds new sequence. If second argument is present then it is added under another sequence  """
-        from AthenaCommon.AlgSequence import AthSequencer as LegacySequence
-        if isinstance( newseq, LegacySequence ):
-            raise ConfigurationError('{} is not the Conf2 Sequence, ComponentAccumulator handles only the former'.format(newseq.name))
 
         if not isSequence(newseq):
             raise TypeError('{} is not a sequence'.format(newseq.name))
+
+        if not isinstance(newseq, GaudiConfig2.Configurable):
+            raise ConfigurationError('{} is not the Conf2 Sequence, ComponentAccumulator handles only the former'.format(newseq.name))
 
         algorithmsInside = findAllAlgorithmsByName(newseq)
         if len(algorithmsInside) != 0:
@@ -484,8 +483,7 @@ class ComponentAccumulator(AccumulatorCachable):
             raise ConfigurationError("Can not find sequence {}".format(sequenceName))
 
         for algo in algorithms:
-            if not isinstance(algo, (GaudiConfig2._configurables.Configurable,
-                                     AthenaPython.Configurables.CfgPyAlgorithm)):
+            if not isinstance(algo, GaudiConfig2.Configurable):
                 raise TypeError(f"Attempt to add wrong type: {type(algo).__name__} as event algorithm")
 
             if algo.__component_type__ != "Algorithm":
@@ -538,8 +536,7 @@ class ComponentAccumulator(AccumulatorCachable):
 
     def addCondAlgo(self,algo,primary=False,domain=None):
         """Add Conditions algorithm"""
-        if not isinstance(algo, (GaudiConfig2._configurables.Configurable,
-                                 AthenaPython.Configurables.CfgPyAlgorithm)):
+        if not isinstance(algo, GaudiConfig2.Configurable):
             raise TypeError(f"Attempt to add wrong type: {type(algo).__name__} as conditions algorithm")
 
         if algo.__component_type__ != "Algorithm":
@@ -575,8 +572,7 @@ class ComponentAccumulator(AccumulatorCachable):
 
     def addService(self, newSvc, primary=False, create=False):
         """Add service and return the deduplicated instance"""
-        if not isinstance(newSvc, (GaudiConfig2._configurables.Configurable,
-                                   AthenaPython.Configurables.CfgPyService)):
+        if not isinstance(newSvc, GaudiConfig2.Configurable):
             raise TypeError(f"Attempt to add wrong type: {type(newSvc).__name__} as service")
 
         if newSvc.__component_type__ != "Service":
@@ -606,8 +602,7 @@ class ComponentAccumulator(AccumulatorCachable):
     def addAuditor(self, auditor):
         """Add Auditor to ComponentAccumulator and return the deduplicated instance.
         This function will also create the required AuditorSvc."""
-        if not isinstance(auditor, (GaudiConfig2._configurables.Configurable,
-                                    AthenaPython.Configurables.CfgPyAud)):
+        if not isinstance(auditor, GaudiConfig2.Configurable):
             raise TypeError(f"Attempt to add wrong type: {type(auditor).__name__} as auditor")
 
         if auditor.__component_type__ != "Auditor":
@@ -623,8 +618,7 @@ class ComponentAccumulator(AccumulatorCachable):
 
     def addPublicTool(self, newTool, primary=False):
         """Add public tool and return the deduplicated instance."""
-        if not isinstance(newTool, (GaudiConfig2._configurables.Configurable,
-                                    AthenaPython.Configurables.CfgPyAlgTool)):
+        if not isinstance(newTool, GaudiConfig2.Configurable):
             raise TypeError(f"Attempt to add wrong type: {type(newTool).__name__} as public AlgTool")
 
         if newTool.__component_type__ != "AlgTool":
@@ -1015,13 +1009,6 @@ class ComponentAccumulator(AccumulatorCachable):
         return app
 
     def gatherProps(self):
-        from GaudiConfig2._configurables import Configurable
-
-        # Convenice hack
-        Configurable.getFullName = lambda self: "{}/{}".format(
-            self.__cpp_type__, self.name
-        )
-
         appPropsToSet = {k: str(v) for k, v in self._theAppProps.items()}
         mspPropsToSet = {}
         bshPropsToSet = []
@@ -1049,16 +1036,16 @@ class ComponentAccumulator(AccumulatorCachable):
             for k, v in comp._properties.items():
                 # Handle special cases of properties:
                 # 1.PrivateToolHandles
-                if isinstance(v, Configurable):
+                if isinstance(v, GaudiConfig2.Configurable):
                     # Add the name of the tool as property to the parent
-                    bshPropsToSet.append((name, k, v.getFullName()))
+                    bshPropsToSet.append((name, k, v.getFullJobOptName()))
                     # Recursively add properties of this tool to the JobOptionSvc
                     getCompsToBeAdded(v, namePrefix=name + ".")
                 # 2. PrivateToolHandleArray
                 elif isinstance(v, GaudiHandles.PrivateToolHandleArray):
                     # Add names of tools as properties to the parent
                     bshPropsToSet.append(
-                        (name, k, str([v1.getFullName() for v1 in v]),)
+                        (name, k, str([v1.getFullJobOptName() for v1 in v]),)
                     )
                     # Recursively add properties of tools to JobOptionsSvc
                     for v1 in v:
@@ -1086,16 +1073,10 @@ class ComponentAccumulator(AccumulatorCachable):
 
         # Services:
         for svc in self._services:
-            if (
-                svc.getName() != "MessageSvc"
-            ):  # MessageSvc will exist already! Needs special treatment
-                if isinstance(svc, PySvc):
-                    svc._properties = svc.getValuedProperties()
-
+            if svc.getName() != "MessageSvc":  # MessageSvc will exist already! Needs special treatment
                 getCompsToBeAdded(svc)
                 if isinstance(svc, PySvc):
-                    svc.setup2()
-                    
+                    svc.setup()
             else:
                 mspPropsToSet.update((k,str(v)) for k,v in svc._properties.items())
 
@@ -1103,29 +1084,24 @@ class ComponentAccumulator(AccumulatorCachable):
         for seqName, algoList in flatSequencers(self._sequence, algsCollection=self._algorithms).items():
             seq = self.getSequence(seqName)
             for k, v in seq._properties.items():
-                if k != "Members":  # This property his handled separately
+                if k != "Members":  # This property is handled separately
                     vstr = "" if v is None else str(v)
                     bshPropsToSet.append((seqName, k, vstr))
             bshPropsToSet.append(
-                (seqName, "Members", str([alg.getFullName() for alg in algoList]),)
+                (seqName, "Members", str([alg.getFullJobOptName() for alg in algoList]),)
             )
             for alg in algoList:
-                if isinstance(
-                    alg, PyAlg
-                ):  # Hack for py-algs deriving from old-style configurables
-                    alg._properties = alg.getValuedProperties()
-
                 getCompsToBeAdded(alg)
-
                 if isinstance(alg, PyAlg):
-                    alg.setup2()
+                    alg.setup()
+
         #Cond-Algs
         condalgseq = []
         for alg in self._conditionsAlgs:
             getCompsToBeAdded(alg)
-            condalgseq.append(alg.getFullName())
+            condalgseq.append(alg.getFullJobOptName())
             if isinstance(alg, PyAlg):
-                alg.setup2()
+                alg.setup()
         bshPropsToSet.append(("AthCondSeq", "Members", str(condalgseq)))
 
         #Public Tools:
@@ -1241,12 +1217,6 @@ class ComponentAccumulator(AccumulatorCachable):
         return PropSetterProxy(self, path)
 
 
-# Legacy support
-from AthenaConfiguration.LegacySupport import (conf2toConfigurable,  # noqa: F401 (for client use)
-                                               CAtoGlobalWrapper,
-                                               appendCAtoAthena)
-
-
 def startInteractive(localVarDic):
     """Setup and start a useful interactive session including auto-completion and history"""
     import code
@@ -1292,3 +1262,18 @@ def printInteractiveMsg_run():
     print("\tStoreGate is accessible as 'sg'") 
     print("\t^D will exit the interactive mode and athena will finalize")
     return 
+
+
+# Make legacy support available in legacy jobs
+if not isComponentAccumulatorCfg():
+    from AthenaConfiguration.LegacySupport import (conf2toConfigurable,  # noqa: F401 (for client use)
+                                                   CAtoGlobalWrapper,
+                                                   appendCAtoAthena)
+# and the same names in CA (to support migration) but bomb on calling them
+else:
+    def conf2toConfigurable(*args, **kwargs):
+        raise RuntimeError("conf2toConfigurable cannot be called in a CA job")
+    def CAtoGlobalWrapper(*args, **kwargs):
+        raise RuntimeError("CAtoGlobalWrapper cannot be called in a CA job")
+    def appendCAtoAthena(*args, **kwargs):
+        raise RuntimeError("appendCAtoAthena cannot be called in a CA job")

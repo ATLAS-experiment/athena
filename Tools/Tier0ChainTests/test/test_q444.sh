@@ -6,11 +6,12 @@
 # art-include: 23.0/Athena
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 8
 
 Reco_tf.py \
 --AMI=q444 \
---CA "RAWtoALL:True" \
+--CA "Overlay,RAWtoALL:True" \
 --preExec="RAWtoALL:flags.Exec.FPE=500" \
 --postExec="" \
 --conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-11' \

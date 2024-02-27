@@ -3,7 +3,7 @@
 # art-description: art job for tauLRT_staustau
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.516640.MGPy8EG_A14NNPDF23LO_StauStauLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14844_tid34200275_00
 # art-input-nfiles: 3
 # art-athena-mt: 8
@@ -29,6 +29,8 @@
 # art-output: *.dat
 
 
+
+useCA_Reco = True
 Slices  = ['tauLRT']
 Events  = 5000
 Threads = 8
@@ -37,9 +39,16 @@ Release = "current"
 Input   = 'StauStau'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 
-ExtraAna = " -c 'LRT=True;parentpdgid=15' "
+ExtraAna = " --LRT=True --parentpdgid=15 "
 
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'
+# legacy 
+# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'
+
+# CA
+# ATR-25582 - FSLRT is now excluded from the default dev menu so need to change to the full dev 
+# menu rather than the filtered versions
+preexec_trig="flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1';"
+
 
 Jobs = [ ( "Offline",  " TIDAdata-run3-offline-lrt.dat -r Offline+InDetLargeD0TrackParticles -o data-hists-offline-lrt.root", "Test_bin_lrt.dat" ),
          ( "Truth",    " TIDAdata-run3-lrt.dat                    -o data-hists-lrt.root",         "Test_bin_lrt.dat" ) ]

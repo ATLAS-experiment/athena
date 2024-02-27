@@ -236,10 +236,6 @@ GeoPixelDisk::GeoPixelDisk(InDetDD::PixelDetectorManager* ddmgr,
   const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
   const GeoTube* diskTube = new GeoTube(rmin,rmax,halflength);
   m_theDisk = new GeoLogVol("diskLog",diskTube,air);
-  m_theDisk->ref();
-}
-GeoPixelDisk::~GeoPixelDisk() {
-  m_theDisk->unref();
 }
 
 GeoVPhysVol* GeoPixelDisk::Build( ) {
@@ -435,7 +431,6 @@ GeoPixelECCable::GeoPixelECCable(InDetDD::PixelDetectorManager* ddmgr,
   const GeoMaterial* cableMat = m_mat_mgr->getMaterial("pix::ECCables");
   const GeoTube* cableTube = new GeoTube(rmin,rmax,thickness*0.5);
   m_theECCable = new GeoLogVol("ECCableLog",cableTube,cableMat);
-  m_theECCable->ref();
 }
 
 GeoVPhysVol* GeoPixelECCable::Build( ) {
@@ -443,9 +438,6 @@ GeoVPhysVol* GeoPixelECCable::Build( ) {
   return cablePhys;
 }
 
-GeoPixelECCable::~GeoPixelECCable(){
-  m_theECCable->unref();
-}
 
 //---------------------------------------------------//
 //                                                   //
@@ -708,10 +700,6 @@ GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* ddmgr,
   const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
   const GeoBox* ladderBox = new GeoBox(thickness*0.5,width*0.5,halflength);
   m_theLadder = new GeoLogVol("ladderLog",ladderBox,air);
-  m_theLadder->ref();
-}
-GeoPixelLadder::~GeoPixelLadder(){
-  m_theLadder->unref();
 }
 
 GeoVPhysVol* GeoPixelLadder::Build( ) {
@@ -935,10 +923,7 @@ GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* ddmgr,
   const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
   const GeoBox* moduleBox = new GeoBox(thickness*0.5,width*0.5,length*0.5);
   m_theModule = new GeoLogVol("moduleLog",moduleBox,air);
-  m_theModule->ref();
-}
-GeoPixelModule::~GeoPixelModule(){
-  m_theModule->unref();
+
 }
 
 GeoVPhysVol* GeoPixelModule::Build( ) {
@@ -1365,10 +1350,7 @@ GeoPixelSubDisk::GeoPixelSubDisk(InDetDD::PixelDetectorManager* ddmgr,
   const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
   const GeoTubs* SDTubs = new GeoTubs(rmin,rmax,halflength,-180.*Gaudi::Units::deg/m_gmt_mgr->PixelECNSectors1()+0.000005,360.*Gaudi::Units::deg/m_gmt_mgr->PixelECNSectors1()-0.00001);
   m_theSubDisk = new GeoLogVol("SubDiskLog",SDTubs,air);
-  m_theSubDisk->ref();
-}
-GeoPixelSubDisk::~GeoPixelSubDisk(){
-  m_theSubDisk->unref();
+
 }
 
 
@@ -1461,10 +1443,7 @@ GeoPixelTubeCables::GeoPixelTubeCables(InDetDD::PixelDetectorManager* ddmgr,
   const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
   const GeoBox* solBox = new GeoBox(thickness*0.5,width*0.5,halflength+m_epsilon);
   m_theBox = new GeoLogVol("TubeCablesLog",solBox,air);
-  m_theBox->ref();
-}
-GeoPixelTubeCables::~GeoPixelTubeCables(){
-  m_theBox->unref();
+
 }
 
 
@@ -1750,10 +1729,8 @@ bool OraclePixGeoManager::isEndcap() {
 //
 /////////////////////////////////////////////////////////
 double OraclePixGeoManager::CalculateThickness(double tck,const string& mat) {
-  const GeoMaterial* material =  m_pMatMgr->getMaterial(mat);
+  GeoIntrusivePtr<const GeoMaterial> material{m_pMatMgr->getMaterial(mat)};
   double rl = material->getRadLength();
-  material->ref();
-  material->unref();
   return -1.*rl*tck/100.;
 }
 /////////////////////////////////////////////////////////

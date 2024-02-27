@@ -21,7 +21,6 @@
 
 using namespace ActsTrk;
 namespace MuonGMR4{
-using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
 using geoShapeWithShift = IMuonGeoUtilityTool::geoShapeWithShift;
 
 MuonGeoUtilityTool::~MuonGeoUtilityTool() = default;
@@ -166,23 +165,20 @@ std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol, const std
   return sstr.str();
 }
 
-alignedPhysNodes MuonGeoUtilityTool::selectAlignableVolumes(const physNodeMap& publishedPhysVols, 
-                                                            const alignNodeMap& publishedAlignNodes) const {
-    alignedPhysNodes result{};
-    for(const auto& [key, trans] : publishedAlignNodes) {
-        physNodeMap::const_iterator itr = publishedPhysVols.find(key);
-        if (itr == publishedPhysVols.end()) continue;
-        PVConstLink physVol{itr->second};
-        result[physVol] = trans;
+const GeoAlignableTransform* MuonGeoUtilityTool::findAlignableTransform(const PVConstLink& physVol) const {
+    PVConstLink parent{physVol->getParent()}, child{physVol};
+    while (parent) {
+       const GeoGraphNode * const * node1 = parent->findChildNode(child);
+       const GeoGraphNode * const * fence =  parent->getChildNode(0);
+       for(const GeoGraphNode * const * current = node1 - 1; current>=fence; current--) {
+          const GeoGraphNode* node{*current};
+          if (dynamic_cast<const GeoVPhysVol*>(node)) break;
+          const GeoAlignableTransform* alignTrans{dynamic_cast<const GeoAlignableTransform*>(node)};
+          if (alignTrans) return alignTrans;
+       }       
+       child = parent;
+       parent = child->getParent();
     }
-    return result;
-}
-const GeoAlignableTransform* MuonGeoUtilityTool::findAlignableTransform(const PVConstLink& physVol,
-                                                                        const alignedPhysNodes& alignNodes) const {
-    alignedPhysNodes::const_iterator itr = alignNodes.find(physVol);
-    if (itr != alignNodes.end()) return itr->second;
-    const PVConstLink parent = physVol->getParent();
-    if (parent) return findAlignableTransform(parent, alignNodes);    
     return nullptr;
 }
 

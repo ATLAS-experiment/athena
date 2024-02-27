@@ -1,16 +1,9 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from xml.dom import minidom
 import re
 import os
-
-try:
-    _set = set
-except NameError:
-    from sets import Set
-    _set = Set
-
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.Utils.unixtools import FindFile
@@ -285,7 +278,7 @@ def _get_mysql_cursor (host, db, user, passwd=""):
     return connection.cursor()
 
 def getUsedTables(output, condition, schemaname, tables):
-    usedtables = _set()
+    usedtables = set()
     for o in output:
         usedtables.add(o.split('.')[0])
     for c in condition:

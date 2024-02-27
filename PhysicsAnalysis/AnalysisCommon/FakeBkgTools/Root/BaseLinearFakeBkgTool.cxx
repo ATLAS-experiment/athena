@@ -27,7 +27,7 @@ namespace
     const char savedHistogramsKey[] = "BaseLinearFakeBkgTool__histograms";
 }
 
-BaseLinearFakeBkgTool::BaseLinearFakeBkgTool(const std::string toolname) : BaseFakeBkgTool(toolname), m_yields(1)
+BaseLinearFakeBkgTool::BaseLinearFakeBkgTool(const std::string& toolname) : BaseFakeBkgTool(toolname), m_yields(1)
 {
     /// Note: don't use the usual syntax declareProperty("", x = default, ""), it won't work for standalone compilation
 

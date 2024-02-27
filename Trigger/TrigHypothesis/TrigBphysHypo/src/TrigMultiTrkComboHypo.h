@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**************************************************************************
@@ -35,6 +35,7 @@
 
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
+#include "TrkVertexAnalysisUtils/V0Tools.h"
 
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -224,14 +225,13 @@ class TrigMultiTrkComboHypo: public ::ComboHypo {
   xAOD::TrigBphys* makeTrigBPhys(
       const xAOD::Vertex& vertex,
       const std::vector<double>& particleMasses,
-      const Amg::Vector3D& beamSpot,
+      const xAOD::Vertex& beamSpot,
       const Trk::IVKalState& fitterState) const;
 
   bool isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const;
   bool isIdenticalTracks(const xAOD::Muon* lhs, const xAOD::Muon* rhs) const;
   bool isIdenticalTracks(const xAOD::Electron* lhs, const xAOD::Electron* rhs) const;
   bool isInMassRange(double mass, size_t idx) const;
-  float Lxy(const xAOD::TrigBphys& vertex, const Amg::Vector3D& beamSpot) const;
   bool passedDeltaRcut(const std::vector<xAOD::TrackParticle::GenVecFourMom_t>& momenta) const;
 
   SG::ReadHandleKey<xAOD::TrackParticleContainer>
@@ -284,6 +284,7 @@ class TrigMultiTrkComboHypo: public ::ComboHypo {
 
   ToolHandle<InDet::VertexPointEstimator> m_vertexPointEstimator {this, "VertexPointEstimator", "", "tool to find starting point for the vertex fitter"};
   ToolHandle<Trk::TrkVKalVrtFitter> m_vertexFitter {this, "VertexFitter", "", "VKalVrtFitter tool to fit tracks into the common vertex"};
+  ToolHandle<Trk::V0Tools> m_v0Tools {this, "V0Tools", "", "tool to calculate Lxy/LxyError of dimuon candidate wrt beam spot"};
 
   ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "monitoring tool"};
 

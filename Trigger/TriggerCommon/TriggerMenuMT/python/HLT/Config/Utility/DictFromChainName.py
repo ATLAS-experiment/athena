@@ -678,7 +678,10 @@ def dictFromChainName(flags, chainInfo):
     for chainPart in chainDict['chainParts']:
         # fill the sigFolder and subSigs folder
         for sf in chainPart['sigFolder']:
-            chainDict['sigDicts'].update({sf:chainPart['subSigs']})
+            if sf in chainDict['sigDicts']:
+                chainDict['sigDicts'][sf].extend(chainPart['subSigs'])                
+            else:
+                chainDict['sigDicts'].update({sf:chainPart['subSigs']})
             if sf == 'Bjet':
                 chainDict['sigDicts'].update({'Jet':['Jet']})
                 

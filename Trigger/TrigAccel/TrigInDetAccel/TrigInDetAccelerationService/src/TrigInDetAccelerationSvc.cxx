@@ -36,6 +36,7 @@ TrigInDetAccelerationSvc::TrigInDetAccelerationSvc( const std::string& name, ISv
   declareProperty( "NumberOfDCs", m_nDCs = 8 );
   declareProperty( "ModuleName", m_moduleName = "libTrigInDetCUDA.so");
   declareProperty( "useITkGeometry", m_useITkGeometry = false);
+  declareProperty( "MiddleSpacePointLayers", m_middleSpacePointLayers = std::vector<int>(), "Global IDs of layers that can contain middle spacepoints of track seeds" );
 } 
 
 
@@ -211,6 +212,7 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
   pArray->m_nModules=0;
   
   int layerIdx=0;
+  int middleLayerIdx=0;
 
   for(std::map<std::tuple<short,short, int, int>,std::vector<PhiEtaHash> >::const_iterator it = hashMap.begin();it!=hashMap.end();++it, layerIdx++) {
     
@@ -223,6 +225,12 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
     pArray->m_layers[layerIdx].m_nElements = 0;
     pArray->m_layers[layerIdx].m_subdet = globalLayerId;
     pArray->m_layers[layerIdx].m_type = barrel_ec;
+
+    // Fill in a table of layer ids that can contain the middle SPs
+    if (std::find(m_middleSpacePointLayers.begin(), m_middleSpacePointLayers.end(), globalLayerId) != m_middleSpacePointLayers.end()){
+      pArray->m_middleSpacePointLayers[middleLayerIdx] = layerIdx;
+      ++middleLayerIdx;
+    }
     
     std::vector<std::vector<PhiEtaHash>::const_iterator> vStops;
     vStops.push_back((*it).second.begin());

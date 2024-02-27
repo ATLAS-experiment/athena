@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MuonDetectorFactory001.h"
@@ -39,8 +39,6 @@
 #include "MuonGeoModel/RDBReaderAtlas.h"
 #include "MuonGeoModel/Station.h"
 #include "MuonGeoModel/StationSelector.h"
-#include "MuonReadoutGeometry/GenericCSCCache.h"
-#include "MuonReadoutGeometry/GenericMDTCache.h"
 #include "MuonReadoutGeometry/GenericRPCCache.h"
 #include "MuonReadoutGeometry/GenericTGCCache.h"
 #include "MuonReadoutGeometry/MuonStation.h"
@@ -218,12 +216,6 @@ namespace MuonGM {
         rpcCache.frontendBoardWidth = r->frontendBoardWidth;
         m_manager->setGenericRpcDescriptor(rpcCache);
 
-        const MDT *mdtobj = dynamic_cast<const MDT*>(mysql->GetATechnology("MDT0"));
-        GenericMDTCache mdtCache;
-        mdtCache.innerRadius = mdtobj->innerRadius;
-        mdtCache.outerRadius = mdtobj->innerRadius + mdtobj->tubeWallThickness;
-
-        m_manager->setGenericMdtDescriptor(mdtCache);
 
         const TGC *t = dynamic_cast<const TGC*>(mysql->GetATechnology("TGC0"));
         GenericTGCCache tgcCache;
@@ -233,10 +225,6 @@ namespace MuonGM {
 
         m_manager->setGenericTgcDescriptor(tgcCache);
 
-        GenericCSCCache cscCache;
-        cscCache.dummy1 = 0;
-        cscCache.dummy2 = 0;
-        m_manager->setGenericCscDescriptor(cscCache);
 
         StoredMaterialManager *theMaterialManager;
         if (StatusCode::SUCCESS != m_pDetStore->retrieve(theMaterialManager, "MATERIALS")) {

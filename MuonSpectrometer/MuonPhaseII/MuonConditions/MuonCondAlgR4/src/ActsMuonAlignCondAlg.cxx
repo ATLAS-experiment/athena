@@ -67,7 +67,8 @@ Identifier ActsMuonAlignCondAlg::alignmentId(const MuonGMR4::MuonReadoutElement*
             return m_idHelperSvc->chamberId(re->identify());
     } else if (re->detectorType() == ActsTrk::DetectorType::Rpc) {
         /// The BML eta 7 stations have their own alignment. 
-        if (std::abs(re->stationEta()) == 7 && m_idHelperSvc->stationNameString(re->identify()) == "BML") {
+        if (!m_idHelperSvc->hasMDT() || 
+            (std::abs(re->stationEta()) == 7 && m_idHelperSvc->stationNameString(re->identify()) == "BML")) {
             return m_idHelperSvc->rpcIdHelper().elementID(re->stationName(), re->stationEta(), re->stationPhi(), 1);
         /// The rest shares the same alignmnet constants with the Mdts
         } else {

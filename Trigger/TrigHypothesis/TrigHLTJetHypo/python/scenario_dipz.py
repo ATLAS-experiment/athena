@@ -14,7 +14,7 @@ rgx_pattern = re.compile(pattern_dipz)
 def get_kin_args_from_matchdict(groupdict):
     """ Get kinematic cuts on jets for DIPZ MLPL hypo """
     
-    if groupdict['ptlo'] is None:  # then default filtering for pt
+    if not groupdict['ptlo']:  # then default filtering for pt
         groupdict['ptlo'] = '20'
         groupdict['pthi'] = ''
     
@@ -33,9 +33,9 @@ def get_kin_args_from_matchdict(groupdict):
 
 def get_mult_args_from_matchdict(groupdict):
     """Get jet multiplicity for DIPZ MLPL hypo """
-    
-    if groupdict['N'] is None:  
-        groupdict['N'] = '2'
+     
+    if not groupdict['N']:
+        raise ValueError('DIPZ scenario requires a pre-defined jet multiplicity.')
 
     condargs = []
 
@@ -47,12 +47,12 @@ def get_mult_args_from_matchdict(groupdict):
 def get_dipz_mlpl_from_matchdict(groupdict, njets):
     """Get DIPz WP, capacity (njets) and decorator names"""
     
-    if groupdict['WP'] is None:  # scale factor of -1 applied by default
-        groupdict['WP'] = '-inf'
+    if not groupdict['WP'] :
+        raise ValueError('DIPZ scenario requires a pre-defined working point cut on MLPL.')
 
     condargs = []
 
-    vals = defaults('dipz_mlpl', lo = groupdict['WP'])
+    vals = defaults('dipz_mlpl', lo = groupdict['WP']) # Note: scale factor of -0.1 applied by default
     vals['decName_z']='dipz20231122_z'
     vals['decName_sigma']='dipz20231122_negLogSigma2'
     vals['capacity']=njets
@@ -71,6 +71,11 @@ def scenario_dipz(scenario, chainPartInd):
         'routing error, module %s: bad scenario %s' % (__name__, scenario)
 
     m = rgx_pattern.match(scenario)
+
+    assert m is not None, \
+        'scenario_dipz.py - regex part %s does not match scenario %s' % (        
+            pattern_dipz, scenario)
+
     groupdict = m.groupdict()
 
     # list for the repeatedCondition parameters, FilterParams and their indices
@@ -83,7 +88,7 @@ def scenario_dipz(scenario, chainPartInd):
 
     ## Get kinematic cuts, number of jets, DIPZ cut, ... 
     condargs_kin = get_kin_args_from_matchdict(groupdict)
-    chooseN = float(get_mult_args_from_matchdict(groupdict)[0][1]['min']) # TODO improve
+    chooseN = float(get_mult_args_from_matchdict(groupdict)[0][1]['min']) 
     condargs = get_dipz_mlpl_from_matchdict(groupdict, str(chooseN))
 
     ## DIPz condition for N jets

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGEOMODEL_MUONDETECTORCONDALG_H
@@ -15,6 +15,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "GeoModelUtilities/GeoModelExperiment.h"
 
 class MuonDetectorCondAlg : public AthReentrantAlgorithm {
 
@@ -60,6 +61,9 @@ class MuonDetectorCondAlg : public AthReentrantAlgorithm {
     // Write Handle
     SG::WriteCondHandleKey<MuonGM::MuonDetectorManager> m_writeDetectorManagerKey{this, "WriteDetectorManagerKey", "MuonDetectorManager",
                                                                                   "Key of output MuonDetectorManager condition data"};
+    SG::WriteCondHandleKey<GeoModelExperiment> m_worldWriteKey{this, "WorldKey", "AlignedMuonWorld",
+                                                               "Key to the output of the world node saved as conditions data."};
+
 };
 
 #endif

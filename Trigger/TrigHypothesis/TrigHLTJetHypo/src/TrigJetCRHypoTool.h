@@ -39,8 +39,7 @@ class TrigJetCRHypoTool: public AthAlgTool{
 		    const IInterface* parent);
 
   ~TrigJetCRHypoTool();
-  StatusCode initialize();
-  StatusCode finalize();
+  virtual StatusCode initialize() override final;
 
   // typedef for passing jet - decision object assocation
   using JetDecision = std::pair<const xAOD::Jet*,TrigCompositeUtils::Decision*>;
@@ -51,7 +50,8 @@ class TrigJetCRHypoTool: public AthAlgTool{
     const CaloConstCellContainer* cells;
     TrigCompositeUtils::Decision* decision;
   };
-
+  
+  bool emf_dis(     const xAOD::Jet* jet  ) const;
 
   /**
    * @brief decides upon a collection of jets

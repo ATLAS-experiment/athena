@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of HI data 2023 workflow, runs athenaHLT with HI menu followed by filtering of HP stream and offline reco
 # art-type: build
 # art-include: master/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
@@ -16,16 +16,19 @@ triggermenu = 'Dev_HI_run3_v1_TriggerValidation_prescale'
 
 hlt = ExecStep.ExecStep()
 hlt.type = 'athenaHLT'
-hlt.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+hlt.job_options = 'TriggerJobOpts.runHLT'
 hlt.input = 'data_hi_2023'
-hlt.args = f'-c "setMenu=\'{triggermenu}\';'
-hlt.args += ';'.join(['flags.Trigger.L1MuonSim.NSWVetoMode=False',
-                     'flags.Trigger.L1MuonSim.doMMTrigger=False',
-                     'flags.Trigger.L1MuonSim.doPadTrigger=False',
-                     'flags.Trigger.L1MuonSim.doStripTrigger=False']) + '"'
+hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
+             'Trigger.doLVL1=True',
+             'Trigger.doZDC=True',
+             'Input.ProjectName="data23_hi"',
+             'Trigger.L1MuonSim.NSWVetoMode=False',
+             'Trigger.L1MuonSim.doMMTrigger=False',
+             'Trigger.L1MuonSim.doPadTrigger=False',
+             'Trigger.L1MuonSim.doStripTrigger=False']
 hlt.fpe_auditor = True
 hlt.max_events = -1
-hlt.args += ' -o output'
+hlt.args = '-o output'
 
 #====================================================================================================
 
@@ -51,7 +54,9 @@ filter_upc.args = '-s UPC ' + find_file('*_HLTMPPy_output.*.data')
 
 recoHPPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'", 
                            "flags.Trigger.AODEDMSet=\'AODFULL\'", 
-                           "flags.Egamma.doForward=False" ])
+                           "flags.Reco.HIMode=HIMode.HI",
+                           "flags.Input.ProjectName='data23_hi'",
+                           ])
 
 reco_hp = ExecStep.ExecStep('Tier0RecoHP')
 reco_hp.type = 'Reco_tf'
@@ -65,13 +70,18 @@ reco_hp.args += ' --outputAODFile=HP_AOD.pool.root'
 reco_hp.args += ' --outputHISTFile=hist.root'
 reco_hp.args += f' --preExec="all:{recoHPPreExec}"'
 reco_hp.args += ' --CA'
+reco_hp.args += ' --geometryVersion="ATLAS-R3S-2021-03-02-00"'
+reco_hp.args += ' --conditionsTag="CONDBR2-BLKPA-2023-02"'
 reco_hp.args += ' --autoConfiguration="everything"'
-reco_hp.args += ' --preInclude="all:HIRecConfig.HIModeFlags.HImode"'
 
 #====================================================================================================
 # Tier-0 UPC reco step (BS->AOD)
 # for reference see: Reconstruction/RecExample/RecJobTransformTests/test/test_data22_upc.sh
-recoUPCPreExec = recoHPPreExec
+recoUPCPreExec = ';'.join([f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\'",
+                           "flags.Trigger.AODEDMSet=\'AODFULL\'",
+                           "flags.Reco.HIMode=HIMode.UPC",
+                           "flags.Input.ProjectName='data23_hi'",
+                           ])
 
 reco_upc = ExecStep.ExecStep('Tier0RecoUPC')
 reco_upc.type = 'Reco_tf'
@@ -83,16 +93,16 @@ reco_upc.max_events = -1
 reco_upc.args = '--inputBSFile=' + find_file('*.physics_UPC*._athenaHLT*.data')  # output of the previous step
 reco_upc.args += ' --outputAODFile=AOD_UPC.pool.root'
 reco_upc.args += ' --outputHISTFile=hist_UPC.root'
-reco_upc.args += ' --preInclude="all:HIRecConfig.HIModeFlags.UPCmode"'
 reco_upc.args += f' --preExec="all:{recoUPCPreExec}"'
 reco_upc.args += ' --CA'
+reco_upc.args += ' --geometryVersion="ATLAS-R3S-2021-03-02-00"'
+reco_upc.args += ' --conditionsTag="CONDBR2-BLKPA-2023-02"'
 reco_upc.args += ' --autoConfiguration="everything"'
-reco_upc.args += ' --postInclude="all:HIGlobal.RecordExtraInfoConfig.addSpacePoints,HIGlobal.RecordExtraInfoConfig.addMBTS"'
 
 # The full test
 test = Test.Test()
 test.art_type = 'build'
-test.exec_steps = [hlt, filter_hp, filter_upc] # + [reco_hp, reco_upc] TODO once reco works, this steps could be included
+test.exec_steps = [hlt, filter_hp, filter_upc]  + [reco_hp, reco_upc]
 
 test.check_steps = CheckSteps.default_check_steps(test)
 

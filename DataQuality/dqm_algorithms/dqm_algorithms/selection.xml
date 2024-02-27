@@ -11,6 +11,8 @@
   <class name="dqm_algorithms::AddReference_Bins_LessThan_Threshold"/>
   <class name="dqm_algorithms::AddReference_Bins_NotEqual_Threshold"/>
   <class name="dqm_algorithms::AFP_LBsOutOfRange"/>
+  <class name="dqm_algorithms::AFP_ToFSiTCorrCheck"/>
+  <class name="dqm_algorithms::AFP_ToFEfficiency"/>
   <class name="dqm_algorithms::All_Bins_Filled"/>
   <class name="dqm_algorithms::AveragePrint"/>
   <class name="dqm_algorithms::BasicGraphCheck"/>

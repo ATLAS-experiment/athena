@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Check that the menu and job configuration don't depend on input file
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
@@ -32,9 +32,9 @@ def gen_config(input_name):
     # athenaHLT step to generate the job configuration
     ex = ExecStep.ExecStep(dirname)
     ex.type = 'athenaHLT'
-    ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+    ex.job_options = 'TriggerJobOpts.runHLT'
     ex.input = input_name
-    ex.args = f'-c "setMenu=\'{_menu_name}\';"'
+    ex.flags = [f'Trigger.triggerMenuSetup={_menu_name}']
     ex.args += ' -M --dump-config-exit'
     ex.perfmon = False  # Cannot use PerfMon with -M
     ex.fpe_auditor = False  # Don't want FPEAuditor in SMK for P1

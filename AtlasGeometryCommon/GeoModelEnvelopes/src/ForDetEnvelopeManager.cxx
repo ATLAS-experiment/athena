@@ -10,12 +10,7 @@ ForDetEnvelopeManager::ForDetEnvelopeManager()
 }
 
 
-ForDetEnvelopeManager::~ForDetEnvelopeManager()
-{
-  for (unsigned int i = 0; i < m_volume.size(); i++) {
-    m_volume[i]->unref();
-  }
-}
+ForDetEnvelopeManager::~ForDetEnvelopeManager() = default;
 
 
 unsigned int ForDetEnvelopeManager::getNumTreeTops() const
@@ -30,7 +25,6 @@ PVConstLink ForDetEnvelopeManager::getTreeTop(unsigned int i) const
 
 void  ForDetEnvelopeManager::addTreeTop(PVLink vol)
 {
-  vol->ref();
   m_volume.push_back(vol);
 }
 

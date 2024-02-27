@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamPipeGeoModel/BeamPipeDetectorManager.h"
@@ -10,13 +10,7 @@ BeamPipeDetectorManager::BeamPipeDetectorManager()
 }
 
 
-BeamPipeDetectorManager::~BeamPipeDetectorManager()
-{
-  for (unsigned int i = 0; i < m_volume.size(); i++) {
-    m_volume[i]->unref();
-  }
-}
-
+BeamPipeDetectorManager::~BeamPipeDetectorManager() = default;
 
 unsigned int BeamPipeDetectorManager::getNumTreeTops() const
 {
@@ -30,7 +24,6 @@ PVConstLink BeamPipeDetectorManager::getTreeTop(unsigned int i) const
 
 void  BeamPipeDetectorManager::addTreeTop(PVConstLink vol)
 {
-  vol->ref();
   m_volume.push_back(vol);
 }
 

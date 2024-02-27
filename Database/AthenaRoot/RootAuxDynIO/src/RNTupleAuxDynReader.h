@@ -13,16 +13,30 @@
 #include <string>
 
 namespace RootAuxDynIO { class IRNTupleWriter; }
-namespace ROOT { namespace Experimental { namespace Detail {
-   class RPageSource;
-   class RFieldBase;
-} } }
+namespace ROOT { namespace Experimental {
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
+  namespace Detail {
+    class RPageSource;
+    class RFieldBase;
+  }
+#else
+  namespace Internal {
+    class RPageSource;
+  }
+  class RFieldBase;
+#endif
+} }
 class TClass;
 
 namespace RootAuxDynIO
 {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+   using ROOT::Experimental::RFieldBase;
+   using ROOT::Experimental::Internal::RPageSource;
+#else
    using ROOT::Experimental::Detail::RFieldBase;
    using ROOT::Experimental::Detail::RPageSource;
+#endif
 
    class RNTupleAuxDynReader : public AthMessaging, public IRootAuxDynReader
    {

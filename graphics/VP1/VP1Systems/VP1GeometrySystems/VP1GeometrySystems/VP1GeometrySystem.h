@@ -38,7 +38,7 @@ public:
 
 
   VP1GeometrySystem( const VP1GeoFlags::SubSystemFlags& SubSystemsTurnedOn = VP1GeoFlags::None,
-		     QString name = "Geo" );
+		     const QString& name = "Geo" );
   virtual ~VP1GeometrySystem();
 
   //Method that channel can use to override defaults:
@@ -84,8 +84,8 @@ protected Q_SLOTS:
   void autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool);//pixel,brl,ecA,ecC,bcmA,bcmC
   void autoAdaptMuonNSW(bool reset, bool stgc, bool mm, bool passiveSpacer, bool passiveStructure,bool  passiveAPlate); // select NSW geo: sTGC, MicroMegas, Spacer, Structure, APlate
   void resetSubSystems(VP1GeoFlags::SubSystemFlags);
-  void autoExpandByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
-  void autoIconifyByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
+  void autoExpandByVolumeOrMaterialName(bool,const QString&);//volname: (false,namestr), matname: (true,namestr)
+  void autoIconifyByVolumeOrMaterialName(bool,const QString&);//volname: (false,namestr), matname: (true,namestr)
   void actionOnAllNonStandardVolumes(bool);//true: zap, false: expand.
 
   void volumeStateChangeRequested(VolumeHandle*,VP1GeoFlags::VOLSTATE);
@@ -93,11 +93,11 @@ protected Q_SLOTS:
 
   void setShowVolumeOutLines(bool);
 
-  void saveMaterialsToFile(QString,bool);//(filename,onlyChangedMaterials)
-  void loadMaterialsFromFile(QString);//filename
+  void saveMaterialsToFile(const QString&,bool);//(filename,onlyChangedMaterials)
+  void loadMaterialsFromFile(const QString&);//filename
   
   void setLabels(int);
-  void setLabelPosOffsets(QList<int>);
+  void setLabelPosOffsets(const QList<int>&);
 
 protected:
   class Imp;

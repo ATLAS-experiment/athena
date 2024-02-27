@@ -55,10 +55,8 @@ StatusCode FPGATrackSimConstGenAlgo::initialize()
     ATH_MSG_DEBUG("initialize()");
     ATH_MSG_DEBUG("Are we going to dump missing hist constants? " << m_dumpMissingHitsConstants);
     ATH_CHECK(m_FPGATrackSimMapping.retrieve());
-
     m_pmap = (m_isSecondStage ? m_FPGATrackSimMapping->PlaneMap_2nd() : m_FPGATrackSimMapping->PlaneMap_1st() );
 
-    ATH_CHECK(m_FPGATrackSimMapping.retrieve());
     ATH_CHECK(m_tHistSvc.retrieve());
     if (m_Monitor) ATH_CHECK(bookHistograms());
 
@@ -66,7 +64,6 @@ StatusCode FPGATrackSimConstGenAlgo::initialize()
     ATH_MSG_DEBUG("reading " << m_cfpath.value());
     m_mafile = TFile::Open(m_cfpath.value().c_str());
     gROOT->cd();
-
     // Copy the slice tree
     ATH_CHECK(copySliceTree(m_mafile));
 

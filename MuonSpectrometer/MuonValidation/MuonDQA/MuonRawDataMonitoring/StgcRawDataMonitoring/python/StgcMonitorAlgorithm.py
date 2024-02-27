@@ -1,9 +1,9 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration #
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration #
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from  StgcRawDataMonitoring.StgcRawMonLabels import labelColumns, labelRows
+import math
 
 def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     '''Function to configures some algorithms in the monitoring system.'''
@@ -29,6 +29,8 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     # Adding an algorithm to the helper.
     sTgcMonAlg = helper.addAlgorithm(CompFactory.sTgcRawDataMonAlg,'sTgcMonAlg')
     sTgcMonAlg.cutPt = 15000.
+    sTgcMonAlg.cutEtaDown = 1.3
+    sTgcMonAlg.cutEtaUp = 2.4
     sTgcMonAlg.cutTriggerPhiId = 63
     sTgcMonAlg.cutTriggerBandId = 255
     sTgcMonAlg.NSW_PadTriggerDataKey = NSW_PadTrigKey
@@ -53,7 +55,35 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     stationEtaMax = 3
     sectorMax     = 16
     layerMax      = 8
+    
+    titleEtaPhiEffMap = '; #eta (reco); #phi (reco); Efficiency'
+    varEtaPhiEffMap   = 'muonRecoTriggerMatch,etaRecoMuonEff,phiRecoMuonEff;padTrigger_Efficiency_per_etaPhi'
+    sTgcOverviewGroup.defineHistogram(varEtaPhiEffMap, type = 'TEfficiency', title = titleEtaPhiEffMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
 
+    titleEtaEffMap = '; #eta (reco); Efficiency'
+    varEtaEffMap   = 'muonRecoTriggerMatch,etaRecoMuonEff;padTrigger_Efficiency_per_eta'
+    sTgcOverviewGroup.defineHistogram(varEtaEffMap, type = 'TEfficiency', title = titleEtaEffMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., opt = 'kAlwaysCreate')
+
+    titleEtaPhiRecoMuonMap = '; #eta (reco); #phi (reco); Entries'
+    varEtaPhiRecoMuonMap   = 'etaRecoMuon,phiRecoMuon;recoMuon_Map_per_etaPhi'
+    sTgcOverviewGroup.defineHistogram(varEtaPhiRecoMuonMap, type = 'TH2F', title = titleEtaPhiRecoMuonMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
+    
+    titleEtaPhiPadTriggerMap = '; #eta (trig); #phi (trig); Entries'
+    varEtaPhiPadTriggerMap   = 'etaPadTrigger,phiPadTrigger;padTrigger_Map_per_etaPhi'
+    sTgcOverviewGroup.defineHistogram(varEtaPhiPadTriggerMap, type = 'TH2F', title = titleEtaPhiPadTriggerMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., ybins = 100, ymin = -math.pi, ymax = math.pi, opt = 'kAlwaysCreate')
+    
+    titleEtaRecoMuonMap = '; #eta (reco); Entries'
+    varEtaRecoMuonMap   = 'etaRecoMuon;recoMuon_Map_per_eta'
+    sTgcOverviewGroup.defineHistogram(varEtaRecoMuonMap, type = 'TH1F', title = titleEtaRecoMuonMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., opt = 'kAlwaysCreate')
+    
+    titleEtaPadTriggerMap = '; #eta (trig); Entries'
+    varEtaPadTriggerMap   = 'etaPadTrigger;padTrigger_Map_per_eta'
+    sTgcOverviewGroup.defineHistogram(varEtaPadTriggerMap, type = 'TH1F', title = titleEtaPadTriggerMap, path = 'Overview', xbins = 100, xmin = -3., xmax = 3., opt = 'kAlwaysCreate')    
+
+    titleDeltaR = '; #Delta R(trig,reco); Entries'
+    varDeltaR   = 'deltaR;deltaR_Matching_recoMuonPadTrigger'
+    sTgcOverviewGroup.defineHistogram(varDeltaR, type = 'TH1F', title = titleDeltaR, path = 'Overview', xbins = 100, xmin = 0, xmax = 10, opt = 'kAlwaysCreate')
+    
     titleSectorsVersusLumiblockPad  = '; LB (Pad); Sector; Hits'
     varSectorsVersusLumiblockPad    = 'padLumiblock,padSector;Nhits_all_pad_in_sector_per_LB'
     sTgcLBshifterGroup.defineHistogram(varSectorsVersusLumiblockPad, type = 'TH2F', title = titleSectorsVersusLumiblockPad, path = 'Pad', xbins = 2001, xmin = -0.5, xmax = 2000.5, ybins = 2*sectorMax + 1, ymin = -sectorMax - 0.5, ymax = sectorMax + 0.5, opt = 'kAlwaysCreate')
@@ -84,6 +114,18 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     sTgcPadTriggerShifterGroup.defineHistogram(varHitRelBCID, type = 'TH2F', title = titleHitRelBCID, path = 'PadTrigger/Hits', xbins = 2*sectorMax + 1, xmin = -sectorMax - 0.5, xmax = sectorMax + 0.5, ybins = 7, ymin = -0.5, ymax = 6.5, opt = 'kAlwaysCreate')
 
     for sideIndex in side:
+        titlePhiRecoMuonMap = f'{sideIndex}; #phi (reco); Entries'
+        varPhiRecoMuonMap   = f'phiRecoMuon_{sideIndex};recoMuon_Map_per_phi_Side{sideIndex}'
+        sTgcOverviewGroup.defineHistogram(varPhiRecoMuonMap, type = 'TH1F', title = titlePhiRecoMuonMap, path = 'Overview', xbins = 100, xmin = -math.pi, xmax = math.pi, opt = 'kAlwaysCreate')
+        
+        titlePhiPadTriggerMap = f'{sideIndex}; #phi (trig); Entries'
+        varPhiPadTriggerMap   = f'phiPadTrigger_{sideIndex};padTrigger_Map_per_phi_Side{sideIndex}'
+        sTgcOverviewGroup.defineHistogram(varPhiPadTriggerMap, type = 'TH1F', title = titlePhiPadTriggerMap, path = 'Overview', xbins = 100, xmin = -math.pi, xmax = math.pi, opt = 'kAlwaysCreate')
+        
+        titlePhiEffMap = f'{sideIndex}; #phi (reco); Efficiency'
+        varPhiEffMap   = f'muonRecoTriggerMatch,phiRecoMuonEff_{sideIndex};padTrigger_Efficiency_per_phi_Side_{sideIndex}'
+        sTgcOverviewGroup.defineHistogram(varPhiEffMap, type = 'TEfficiency', title = titlePhiEffMap, path = 'Overview', xbins = 100, xmin = -math.pi, xmax = math.pi, opt = 'kAlwaysCreate')
+
         for sectorIndex in range(1, sectorMax + 1):
             efficiencyGlobalRgroup = helper.addGroup(sTgcMonAlg, f'rPosStrip_{sideIndex}{sectorIndex}', globalPath + 'Expert/Efficiency/')
             
@@ -139,7 +181,7 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             for layerIndex in range(1, layerMax + 1):
                 titleEtaPhiOcc = f'{layerIndex}{sideIndex}{sizeIndex}; Pad column; Pad row; Hits'
                 varEtaPhiOcc = f'padPhi_{sideIndex}_{sizeIndex}_layer_{layerIndex},padEta_{sideIndex}_{sizeIndex}_layer_{layerIndex};padEtaPhiOcc_{layerIndex}{sideIndex}{sizeIndex}'
-                padTriggerOccupancyGroup.defineHistogram(varEtaPhiOcc, type = 'TH2F', title = titleEtaPhiOcc, path = 'padTriggerOccupancy', xbins = 71, xmin = 0.5, xmax = 71.5, xlabels = labelColumns, ybins = 56, ymin = 0.5, ymax = 56.5, ylabels = labelRows, opt = 'kAlwaysCreate')
+                padTriggerOccupancyGroup.defineHistogram(varEtaPhiOcc, type = 'TH2F', title = titleEtaPhiOcc, path = 'padTriggerOccupancy', xbins = 71, xmin = 0.5, xmax = 71.5, ybins = 56, ymin = 0.5, ymax = 56.5, opt = 'kAlwaysCreate')
 
         for sectorIndex in range(1, sectorMax + 1):
             titleBandIdVersusLBperSector = f'{sideIndex}' + f'{sectorIndex}'.zfill(2) + '; LB; Trigger bandID; number of triggers'

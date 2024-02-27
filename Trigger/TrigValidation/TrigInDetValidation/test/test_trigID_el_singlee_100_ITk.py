@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for el_singlee_ITk
+# art-description: art job for el_singlee_100_ITk
 # art-type: grid
 # art-include: main/Athena
 # art-input: mc21_14TeV.900497.PG_single_epm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697
@@ -35,6 +35,8 @@ Slots   = 8
 Input   = 'Single_el_Run4'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 useCA_Reco = True
+
+preexec_trig = "flags.Tracking.doTruth=False;flags.Trigger.enableL1CaloPhase1=False;"
 
 Jobs = [ ( "Truth",       " TIDAdata-run4.dat                    -o data-hists.root -p 11" ),
          ( "Offline",     " TIDAdata-run4-offline.dat -r Offline -o data-hists-offline.root" ) ]

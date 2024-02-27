@@ -35,7 +35,7 @@ public:
   StoredPhysVol(GeoFullPhysVol* physVol);                                                    //
   //                                                                                         //
   // Standard Destructor                                                                     //
-  virtual ~StoredPhysVol();                                                                  //
+  virtual ~StoredPhysVol() = default;                                                                  //
   //                                                                                         //
   // Return the World physical volume:                                                       //
   GeoFullPhysVol *getPhysVol();                                                              //
@@ -46,7 +46,7 @@ public:
   
  private:
   
-  GeoFullPhysVol                                           *m_physVol;
+    GeoIntrusivePtr<GeoFullPhysVol> m_physVol{};
 
 };
 

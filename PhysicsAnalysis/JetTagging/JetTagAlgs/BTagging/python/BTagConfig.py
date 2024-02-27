@@ -335,12 +335,22 @@ def BTagAlgsCfg(
     # Add the final taggers based on neural networks
     for nn_path in nnList:
         # add standard (unflipped) taggers
+        output_remapping={}
+        if  '20240122trig' in nn_path:
+            output_remapping={
+                'pb': 'GN220240122_pb',
+                'pc': 'GN220240122_pc',
+                'pu': 'GN220240122_pu',
+
+            }
+
         result.merge(
             FlavorTagNNCfg(
                 inputFlags,
                 BTaggingCollection=BTagCollection,
                 TrackCollection=trackCollection,
-                NNFile=nn_path)
+                NNFile=nn_path,
+                variableRemapping=output_remapping)
         )
         # add flip taggers if requested
         if inputFlags.BTagging.RunFlipTaggers:

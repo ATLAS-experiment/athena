@@ -14,7 +14,9 @@
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
+
 namespace InDetDD {
+  using PhysVolPtr = VolumeBuilder::PhysVolPtr;
   VolumeBuilder::VolumeBuilder(const Zone& zone, const std::vector<const ServiceVolume* >& services)
     : AthMessaging("InDetDDVolumeBuilder"),
     m_region("None"), // Empty refers to a valid region. Set some default so we can check it is actually set.
@@ -83,14 +85,12 @@ namespace InDetDD {
     setRegion(region, zcenter);
     for (unsigned int iElement = 0; iElement < services().size(); ++iElement)
       if (!isEnvelopeOrChild(iElement)) {
-        GeoVPhysVol* physVol = build(iElement);
+        PhysVolPtr physVol{build(iElement)};
         if (physVol) {
-          physVol->ref();
           for (int iCopy = 0; iCopy < numCopies(iElement); ++iCopy) {
             parent->add(getPlacement(iElement, iCopy));
             parent->add(physVol);
           }
-          physVol->unref();//should delete if never added
         }
       }
   }
@@ -101,15 +101,12 @@ namespace InDetDD {
     setRegion(region, zcenter);
     for (unsigned int iElement = 0; iElement < services().size(); ++iElement) {
       if (!isEnvelopeOrChild(iElement)) {
-        //    GeoVPhysVol* physVol = build(iElement);
-        GeoVPhysVol* physVol = build(iElement);
+        PhysVolPtr physVol{build(iElement)};
         if (physVol) {
-          physVol->ref();
           for (int iCopy = 0; iCopy < numCopies(iElement); ++iCopy) {
             parent->add(getPlacement(iElement, iCopy));
             parent->add(physVol);
           }
-          physVol->unref();//should delete if never used
         }
       }
     }
@@ -126,9 +123,8 @@ namespace InDetDD {
   void
   VolumeBuilder::buildAndPlaceEnvelope(const std::string& region, GeoFullPhysVol* parent, int iParent, int iElement,
                                        double zcenter) {
-    GeoPhysVol* physVol = dynamic_cast<GeoPhysVol*>(build(iElement));
+    PhysVolPtr physVol{build(iElement)};
     if (physVol) {
-      physVol->ref();
       for (unsigned int iChild = 0; iChild < services().size(); ++iChild) {
         if (isChildService(iElement, iChild) && services()[iChild]->envelopeNum() > 0) {
           // if volume is a child volume : build and place it
@@ -138,14 +134,12 @@ namespace InDetDD {
       for (unsigned int iChild = 0; iChild < services().size(); ++iChild) {
         if (isChildService(iElement, iChild) && services()[iChild]->envelopeNum() == 0) {
           // if volume is not a child volume
-          GeoVPhysVol* physVol_child = build(iChild);
+          PhysVolPtr physVol_child{build(iChild)};
           if (physVol_child) {
-            physVol_child->ref();
             for (int iCopy2 = 0; iCopy2 < numCopies(iChild); ++iCopy2) {
               physVol->add(getPlacementEnvelope(iChild, iCopy2, iElement));
               physVol->add(physVol_child);
             }
-            physVol_child->unref();//should delete if was never added
           }
         }
       }
@@ -155,16 +149,14 @@ namespace InDetDD {
         else parent->add(getPlacementEnvelope(iElement, iCopy, iParent));
         parent->add(physVol);
       }
-      physVol->unref(); ///should delete even if it was never added
     }
   }
 
   void
   VolumeBuilder::buildAndPlaceEnvelope(const std::string& region, GeoPhysVol* parent, int iParent, int iElement,
                                        double zcenter) {
-    GeoPhysVol* physVol = dynamic_cast<GeoPhysVol*>(build(iElement));
+    PhysVolPtr physVol{build(iElement)};
     if (physVol) {
-      physVol->ref();
       for (unsigned int iChild = 0; iChild < services().size(); ++iChild) {
         if (isChildService(iElement, iChild) && services()[iChild]->envelopeNum() > 0) {
           // if volume is a child volume : build and place it
@@ -174,14 +166,12 @@ namespace InDetDD {
       for (unsigned int iChild = 0; iChild < services().size(); ++iChild) {
         if (isChildService(iElement, iChild) && services()[iChild]->envelopeNum() == 0) {
           // if volume is not a child volume
-          GeoVPhysVol* physVol_child = build(iChild);
+          PhysVolPtr physVol_child{build(iChild)};
           if (physVol_child) {
-            physVol_child->ref();
             for (int iCopy2 = 0; iCopy2 < numCopies(iChild); ++iCopy2) {
               physVol->add(getPlacementEnvelope(iChild, iCopy2, iElement));
               physVol->add(physVol_child);
             }
-            physVol_child->unref(); //will delete physVol_child if never used
           }
         }
       }
@@ -191,12 +181,10 @@ namespace InDetDD {
         else parent->add(getPlacementEnvelope(iElement, iCopy, iParent));
         parent->add(physVol);
       }
-      physVol->unref();//will delete physvol if it was never used
     }
   }
 
-  GeoVPhysVol*
-  VolumeBuilder::build(int iElement) {
+  PhysVolPtr VolumeBuilder::build(int iElement) {
     if (m_region == "None") {
       ATH_MSG_ERROR("No region set. Cannot build services");
       return nullptr;
@@ -236,7 +224,7 @@ namespace InDetDD {
     // Or use volume of original volume in param.
     //const GeoMaterial* serviceMat = mat_mgr->getMaterialForVolume(param.material(),param.origVolume());
     GeoLogVol* serviceLog = new GeoLogVol(logName, serviceShape, serviceMat);
-    GeoPhysVol* servicePhys = new GeoPhysVol(serviceLog);
+    PhysVolPtr servicePhys{new GeoPhysVol(serviceLog)};
     return servicePhys;
   }
 

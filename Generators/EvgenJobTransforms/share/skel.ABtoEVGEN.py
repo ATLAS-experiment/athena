@@ -77,14 +77,6 @@ evgenLog = logging.getLogger('Generate_ab')
 evgenLog.debug("****************** CHECKING EVENT GENERATION ARGS *****************")
 evgenLog.debug(str(runArgs))
 
-if hasattr(runArgs, "runNumber"):
-   evgenLog.warning("##########################################################################" )         
-   evgenLog.warning("runNumber - no longer a valid argument, do not use it ! " )         
-   evgenLog.warning("##########################################################################")
-
-if hasattr(runArgs, "inputGenConfFile"):
-   raise RuntimeError("inputGenConfFile is invalid !! Gridpacks and config. files/links to be put into DSID directory ")
-
 ## Ensure that an output name has been given
 # TODO: Allow generation without writing an output file (if outputEVNTFile is None)?
 if not hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_PreFile"):
@@ -115,7 +107,7 @@ evgenLog.debug("****************** CONFIGURING EVENT GENERATION ****************
 ## Functions for operating on generator names
 ## NOTE: evgenConfig, topSeq, svcMgr, theApp, etc. should NOT be explicitly re-imported in JOs
 from EvgenJobTransforms.EvgenConfig import evgenConfig
-from EvgenJobTransforms.EvgenConfig import gens_known, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune
+from GeneratorConfig.GenConfigHelpers import gens_known, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune
 
 ## Sanity check the event record (not appropriate for all generators)
 from EvgenProdTools.EvgenProdToolsConf import TestHepMC

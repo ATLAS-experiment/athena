@@ -5,11 +5,6 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 def addStdEvgenArgs(parser):
     parser.defineArgGroup("Evgen", "Event generator options")
 
-    # TODO: Try to automatically determine the run number from the JO name, if not specified
-    parser.add_argument('--runNumber', '--RunNumber', group='Evgen',
-                        type=trfArgClasses.argFactory(trfArgClasses.argInt, runarg=True),
-                         help='Manual run number setting')
-
     parser.add_argument("--ecmEnergy", "--EcmEnergy", group="Evgen",
                         default=trfArgClasses.argFloat(13000, runarg=True),
                         help="centre-of-mass energy parameter in GeV",
@@ -38,15 +33,6 @@ def addStdEvgenArgs(parser):
     parser.add_argument("--inputGeneratorFile", "--inputGenEventFile", "--inputGenFile", "--InputGeneratorFile", group="Evgen",
                         help="optional parton-level events file to be processed",
                         type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
-
-    # TODO: Add "--confFile"?
-    parser.add_argument("--inputGenConfFile", "--InputGenConfFile", group="Evgen",
-                        help="optional generator configuration file",
-                        type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
-
-    # parser.add_argument("--inputHepMCFile", group="Evgen",
-    #                     help="optional fully showered HepMC input event file",
-    #                     type=trfArgClasses.argFactory(trfArgClasses.argString, runarg=True))
 
     parser.add_argument("--inputEVNTFile", group="Evgen",
                         help="input EVNT file (for use with e.g. Rivet)",

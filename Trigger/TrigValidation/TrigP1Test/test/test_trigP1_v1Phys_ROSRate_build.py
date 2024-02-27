@@ -1,21 +1,21 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test for ROS rates estimate with the Physics_pp_run3_v1 menu
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Step
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
 ex.max_events = 200
-ex.args = '-c "setMenu=\'Physics_pp_run3_v1\';doL1Sim=True;"'
-ex.args += ' --ros2rob /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/ATLASros2rob2018-r22format.py'
-ex.args += ' --dump-config-reload'
+ex.flags = ['Trigger.triggerMenuSetup="Physics_pp_run3_v1"',
+            'Trigger.doLVL1=True']
+ex.args = '--ros2rob /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/ATLASros2rob2018-r22format.py'
 
 ros2json = CheckSteps.InputDependentStep("RosRateToJson")
 ros2json.executable = 'ros-hitstats-to-json.py'

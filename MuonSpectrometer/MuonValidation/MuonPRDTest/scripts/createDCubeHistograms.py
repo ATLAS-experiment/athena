@@ -130,10 +130,10 @@ if __name__ == "__main__":
     for i in range(nEntries):
         inputTree.GetEntry(i)
 # Truth
-        for ntruth in range(0,len(inputTree.MuEntry_Particle_Pt)):
-            truthPtHist.Fill(inputTree.MuEntry_Particle_Pt[ntruth]*0.001)
-            truthEtaHist.Fill(inputTree.MuEntry_Particle_Eta[ntruth])
-            truthPhiHist.Fill(inputTree.MuEntry_Particle_Phi[ntruth])
+        for ntruth in range(0,len(inputTree.MuEntry_ParticlePt)):
+            truthPtHist.Fill(inputTree.MuEntry_ParticlePt[ntruth]*0.001)
+            truthEtaHist.Fill(inputTree.MuEntry_ParticleEta[ntruth])
+            truthPhiHist.Fill(inputTree.MuEntry_ParticlePhi[ntruth])
 # RPC
         for nrpcHit in range(0,len(inputTree.RPC_hitLocalPositionX)):
             rpcLocalX.Fill(inputTree.RPC_hitLocalPositionX[nrpcHit])

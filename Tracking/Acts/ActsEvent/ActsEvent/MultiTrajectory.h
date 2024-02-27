@@ -321,7 +321,16 @@ class MutableMultiTrajectory final
   const Acts::Surface* referenceSurface_impl(IndexType ) const;
 
 
+  void copyDynamicFrom_impl (ActsTrk::IndexType /*itrack*/,
+                             Acts::HashedString /*key*/,
+                             const std::any& /*src_ptr*/) {
+      // @TODO: This is currently unimplemented
+  }
 
+  std::vector<Acts::HashedString> dynamicKeys_impl() const {
+      // @TODO: This currently does not do anything useful
+      return {};
+  }
 
   // access to some backends (for debugging purposes)
   // the receiver should not assume ownership or similar
@@ -443,6 +452,11 @@ class MultiTrajectory
   void moveSurfaces(const ActsTrk::MutableMultiTrajectory* mtj);
 
   void moveLinks(const ActsTrk::MutableMultiTrajectory* mtj);
+
+  std::vector<Acts::HashedString> dynamicKeys_impl() const {
+      // @TODO: This currently does not do anything useful
+      return {};
+  }
 
  private:
   const DataLink<xAOD::TrackStateAuxContainer> m_trackStatesAux;

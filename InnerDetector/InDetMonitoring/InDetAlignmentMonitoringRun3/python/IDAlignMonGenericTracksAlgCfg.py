@@ -26,16 +26,25 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     m_z0Range = 50.
     m_d0BsRange = 0.5
      
+    # Set a folder name from the user options
+    folderName = "ExtendedTracks_NoTriggerSelection"
+    if "TrackName" in kwargs:
+        folderName = kwargs["TrackName"]
+    
     # this creates a "genericTrackGroup" called "alg" which will put its histograms into the subdirectory "GenericTracks"
     genericTrackGroup = helper.addGroup(alg, 'Tracks')
-    pathtrack = '/IDAlignMon/'+kwargs["TrackName"]+'/GenericTracks'
+    pathtrack = '/IDAlignMon/'+folderName+'/GenericTracks'
 
     varName = 'm_ngTracks;NTracksPerEvent'
     title = 'Number of good tracks per event; Tracks; Events'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_NTracksRange+1, xmin=-0.5, xmax=m_NTracksRange +0.5)
     
+    varName = 'mu_m;mu_perEvent'
+    title = '#LT#mu#GT average interactions per crossing;#LT#mu#GT per event;Events'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=101, xmin=-0.5, xmax= 100.5)
+
     varName = 'm_lb;LumiBlock'
-    title = 'Lumiblock;Lumiblock;Events'
+    title = 'Lumiblock of the tracks;Lumiblock;Events'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=1024, xmin=-0.5, xmax=1023.5)
 
     varName = 'm_beamSpotX,m_beamSpotY;YBs_vs_XBs'

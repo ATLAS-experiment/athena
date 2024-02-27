@@ -31,4 +31,3 @@ atlas_add_component( AtlasCLHEP_RandomGenerators_test
                      PRIVATE_LINK_LIBRARIES  ${ROOT_LIBRARIES} ${DSFMT_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel AtlasCLHEP_RandomGenerators )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )

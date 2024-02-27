@@ -13,8 +13,6 @@ def configureFlags(runArgs):
     flags = initConfigFlags()
     from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
     commonRunArgsToFlags(runArgs, flags)
-    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
-    recoRunArgsToFlags(runArgs, flags)
 
     # Input
     if hasattr(runArgs, 'inputBSFile'):
@@ -39,6 +37,19 @@ def configureFlags(runArgs):
             'sTGC', 'MM',
             'Lucid', 'ZDC', 'ALFA', 'AFP',
         ]
+    elif hasattr(runArgs, 'outputDAOD_TLAEGAMPEBFile'):
+        flags.Output.AODFileName = runArgs.outputDAOD_TLAEGAMPEBFile
+        log.info("---------- Configured DAOD_TLAEGAMPEB output")
+        flags.Trigger.AODEDMSet='EGamPEBTLA'
+        disabled_detectors = [
+            'MBTS',
+            'CSC', 'MDT', 'RPC', 'TGC',
+            'sTGC', 'MM',
+            'Lucid', 'ZDC', 'ALFA', 'AFP',
+        ]
+
+    from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
+    recoRunArgsToFlags(runArgs, flags)
 
     # Set non-default flags 
     flags.Trigger.doLVL1=False
@@ -102,12 +113,28 @@ def fromRunArgs(runArgs):
 
     # import the TLA decoding
     cfg.flagPerfmonDomain('Trigger')
+
+    PhToKeep = ['topoetcone20', 'topoetcone40', 'etcone20']
+    PhVars = '.'.join(PhToKeep)
+
     additional_output_items = {
         'PhysicsTLA': [],
         'FTagPEBTLA':
         [
             'xAOD::BTaggingContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',
             'xAOD::BTaggingAuxContainer#BTagging_HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.',
+        ],
+        'EGamPEBTLA':
+        [
+            'xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',
+            'xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',
+            'xAOD::PhotonContainer#HLT_egamma_Photons_TLA',
+            'xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,
+            'xAOD::eFexEMRoIContainer#L1_eEMRoI',  
+            'xAOD::eFexEMRoIAuxContainer#L1_eEMRoIAux.thresholdPatterns',
+            'xAOD::CaloClusterContainer#HLT_CaloEMClusters_Photon', 
+            'xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.'
+
         ],
     }[flags.Trigger.AODEDMSet]
     from TLARecoConfig.DAOD_TLA_OutputConfig import DAOD_TLA_OutputCfg

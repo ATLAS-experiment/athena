@@ -13,14 +13,4 @@ GeoOpticalSurface::GeoOpticalSurface(const std::string& name,
   m_model(model),
   m_finish(finish),
   m_type(type),
-  m_parameter(parameter),
-  m_materialPropertiesTable(0)
-{
-}
-
-GeoOpticalSurface::~GeoOpticalSurface()
-{
-  if(m_materialPropertiesTable)
-    m_materialPropertiesTable->unref();
-}
-
+  m_parameter(parameter) {}

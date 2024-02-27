@@ -1,4 +1,3 @@
-
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     result = ComponentAccumulator()
     ### Do not setup the Acts alignment cond alg if no alignment or passivation is requested
-    if not flags.Muon.setupGeoModelXML or ( not flags.Muon.enableAlignment and \
+    if not flags.Muon.usePhaseIIGeoSetup or ( not flags.Muon.enableAlignment and \
                                             not flags.Muon.applyMMPassivation):
         return result
     
@@ -32,7 +31,7 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
 def ActsGeomContextAlgCfg(flags, name="ActsGeomContextAlg", **kwargs):
     result = ComponentAccumulator()
     ### The Acts Muon align cond alg only works with the new Detector manager
-    if not flags.Muon.setupGeoModelXML: 
+    if not flags.Muon.usePhaseIIGeoSetup: 
         return result
     
     result.merge(ActsMuonAlignCondAlgCfg(flags))

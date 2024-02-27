@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 import ast
@@ -52,7 +52,7 @@ def parse_args():
     parser.add_argument("file", nargs="+", help="Files to work with")
     parser.add_argument(
         "--ignoreMissing",
-        help="Don't report components existing in only of the two configurations",
+        help="Don't report components existing in only one of the two configurations",
         action="store_true",
     )
     parser.add_argument(
@@ -82,21 +82,6 @@ def parse_args():
         default=[],
         help="Print only a single component, in a structured manner (reflecting components parent children)")
 
-    parser.add_argument("--includeClasses",
-        action='append',
-        default=[],
-        help="Only list the components selected by the given classname (anchored regular expression)")
-
-    parser.add_argument("--excludeClasses",
-        action='append',
-        default=[],
-        help="Don't list the components excluded by the given classname (anchored regular expression)")
-
-    parser.add_argument("--excludeComponents",
-        action='append',
-        default=[],
-        help="Don't list these components (anchored regular expression)")
-
     parser.add_argument("--includeClassesSub",
         action='append',
         default=[],
@@ -113,6 +98,20 @@ def parse_args():
     parser.add_argument("--uniqueClasses",
         action="store_true",
         help="Only show unique classes")
+
+    parser.add_argument(
+        "--includeClasses",
+        action='append',
+        default=[],
+        help="Only list the components selected by the given classname (anchored regular expression)  - only used in class listing, for diff or similar use --includeComps"
+        )
+
+    parser.add_argument(
+        "--excludeClasses",
+        action='append',
+        default=[],
+        help="Don't list the components excluded by the given classname (anchored regular expression) - only used in class listing, for diff or similar use --excludeComps"
+    )
 
     parser.add_argument("--showComponentName",
         help="Show component name with --classes",
@@ -385,12 +384,12 @@ def _compareConfig(configRef, configChk, args, color):
                 )
 
 
-def _parseNumericalValues(v1, v2):
-    values = (v1, v2)
+def _parseNumericalValues(values):
+    """Ensure all numeric values are of the same type (int or float)"""
     if any(isinstance(val, float) for val in values):
-        return float(v1), float(v2)
+        return tuple(float(val) for val in values)
     elif all(isinstance(val, int) for val in values):
-        return int(v1), int(v2)
+        return tuple(int(val) for val in values)
     else:
         return values
 
@@ -429,12 +428,11 @@ def _handleComponentsReanaming( refVal ):
 def _compareComponent(compRef, compChk, prefix, args, component, color):
     countDifferent=0
     if isinstance(compRef, dict):
-
         allProps = list(set(compRef.keys()) | set(compChk.keys()))
         allProps.sort()
 
         for prop in allProps:
-            if prop not in compRef.keys(): 
+            if prop not in compRef.keys():
                 if not _knownDifference(component, prop, compChk[prop], None):
                     print(f"{prefix}{color.property}{prop} = {color.second}{compChk[prop]} {color.reset} only in 2nd file {color.reset}")
                     countDifferent += 1
@@ -463,9 +461,9 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
 
             refVal = _handleComponentsReanaming( refVal )
 
-            refVal, chkVal = _parseNumericalValues(refVal, chkVal)
+            refVal, chkVal = _parseNumericalValues((refVal, chkVal))
             diffmarker = ""
-            if str(chkVal) == str(refVal):
+            if chkVal == refVal:
                 if not args.printIdenticalPerParameter:
                     continue
             elif _knownDifference(component, prop, chkVal, refVal):
@@ -486,13 +484,17 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
                         refVal, chkVal, "\t" + prefix + ">> ", args, component, color
                     )
 
-    elif isinstance(compRef, (list, tuple)) and len(compRef) > 1:
+    elif isinstance(compRef, (list, tuple, set)) and len(compRef) > 1:
 
         if isinstance(compRef[0], list):  # to achieve hashability
-            compRef = [tuple(el) for el in compRef]
+            compRef = [tuple(_parseNumericalValues(el)) for el in compRef]
 
         if len(compChk) > 0 and isinstance(compChk[0], list):
-            compChk = [tuple(el) for el in compChk]
+            compChk = [tuple(_parseNumericalValues(el)) for el in compChk]
+
+        # return in case results after parsing are now identical
+        if compRef == compChk:
+            return countDifferent
 
         diffRef = list(set(compRef) - set(compChk))
         diffChk = list(set(compChk) - set(compRef))

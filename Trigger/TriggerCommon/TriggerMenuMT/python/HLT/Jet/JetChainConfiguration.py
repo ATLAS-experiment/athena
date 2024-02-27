@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import re
 from AthenaCommon.Logging import logging
@@ -8,7 +8,6 @@ log = logging.getLogger(__name__)
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from ..Config.MenuComponents import ChainStep
 
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from .JetMenuSequencesConfig import (
     jetCaloHypoMenuSequence,
     jetRoITrackJetTagHypoMenuSequence,
@@ -16,29 +15,7 @@ from .JetMenuSequencesConfig import (
     jetCaloRecoMenuSequence, 
     jetCaloPreselMenuSequence,
 )
-from .ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRMenuSequence
-
-if isComponentAccumulatorCfg():
-    def callGenerator(genf, flags, **kwargs):
-        return genf(flags, **kwargs)
-else:
-    from ..Config.MenuComponents import appendMenuSequenceCAToAthena, MenuSequenceCA, RecoFragmentsPool
-    from AthenaCommon.Configurable import ConfigurableCABehavior
-
-    def jet_config(flags, genf, **kwargs):
-        with ConfigurableCABehavior():
-            result = genf(flags, **kwargs)
-        if type(result) == MenuSequenceCA:
-            return appendMenuSequenceCAToAthena(result,flags)
-        else:
-            # assume MenuSequenceCA is first
-            menuseq = appendMenuSequenceCAToAthena(result[0],flags)
-            outlist = [menuseq] + list(result)[1:]
-            return tuple(outlist)
-
-    def callGenerator(genf, flags, **kwargs):
-        return RecoFragmentsPool.retrieve(jet_config, flags, genf=genf, **kwargs)
-
+from .ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRMenuSequence,jetCROldMenuSequence
 
 from . import JetRecoCommon
 from . import JetPresel
@@ -182,7 +159,7 @@ class JetChainConfiguration(ChainConfigurationBase):
             else:
                 clustersKey, preselJetDef, jetPreselStep = self.getJetCaloPreselChainStep(flags)
                 chainSteps.append( jetPreselStep )
-                if re.match(r'.*bg?\d+|.*Z', self.trkpresel):
+                if re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)|.*Z', self.trkpresel):
                     roitrkPreselStep = self.getJetRoITrackJetTagPreselChainStep(flags, preselJetDef.fullname())
                 else:
                     roitrkPreselStep=self.getEmptyStep(2, 'RoIFTFEmptyStep')
@@ -200,6 +177,9 @@ class JetChainConfiguration(ChainConfigurationBase):
         elif self.exotHypo != '' and ("calratio" in self.exotHypo):
              CRStep = self.getJetCRChainStep(flags, self.jetName, self.exotHypo)
              chainSteps+= [ CRStep]
+        elif self.exotHypo != '' and ("calrtold" in self.exotHypo):
+            CRStep = self.getJetCROldChainStep(flags,self.jetName, self.exotHypo)
+            chainSteps+= [self.getEmptyStep(2, 'RoIFTFEmptyStep'), CRStep]
 
         myChain = self.buildChain(chainSteps)
 
@@ -213,8 +193,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         stepName = f"MainStep_jet_{self.recoDict['jetDefStr']}"
         if self.isPerf:
             stepName += '_perf'
-        jetSeq, jetDef = callGenerator(
-            jetCaloHypoMenuSequence,
+        jetSeq, jetDef = jetCaloHypoMenuSequence(
             flags, isPerf=self.isPerf, **self.recoDict
         )
         jetCollectionName = jetDef.fullname()
@@ -226,23 +205,12 @@ class JetChainConfiguration(ChainConfigurationBase):
         if self.isPerf:
             stepName += '_perf'
 
-        if isComponentAccumulatorCfg():
-            # This CA config still needs improvement
-            # In principle runnable if ATR-28041 is fixed
-            from .JetMenuSequencesConfig import jetHICaloHypoMenuSequence
-            jetSeq, jetDef = callGenerator(
-                jetHICaloHypoMenuSequence,
-                flags, isPerf=self.isPerf, **self.recoDict
-            )
-            # A full hypo selecting only on heavy ion calo jets (step 1)
-        else:
-            # Temporarily restore legacy HI configuration, while HI jet CA
-            # is still under development
-            from .JetHISequences import jetHICaloHypoMenuSequence
-            jetSeq, jetDef = RecoFragmentsPool.retrieve(
-                jetHICaloHypoMenuSequence,
-                flags, isPerf=self.isPerf, **self.recoDict,
-            )
+
+        from .JetMenuSequencesConfig import jetHICaloHypoMenuSequence
+        jetSeq, jetDef = jetHICaloHypoMenuSequence(
+            flags, isPerf=self.isPerf, **self.recoDict
+        )
+
 
         jetCollectionName = jetDef.fullname()
 
@@ -250,8 +218,7 @@ class JetChainConfiguration(ChainConfigurationBase):
 
     def getJetRoITrackJetTagHypoChainStep(self, flags, jetsInKey):
         stepName = "RoIFTFStep_jet_sel_"+self.recoDict['jetDefStr']
-        jetSeq = callGenerator(
-            jetRoITrackJetTagHypoMenuSequence,
+        jetSeq = jetRoITrackJetTagHypoMenuSequence(
             flags, jetsIn=jetsInKey, isPresel=False, **self.recoDict
         )
         return ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
@@ -260,8 +227,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         stepName = "MainStep_jet_"+self.recoDict['jetDefStr']
         if self.isPerf:
             stepName += '_perf'
-        jetSeq, jetDef = callGenerator(
-            jetFSTrackingHypoMenuSequence,
+        jetSeq, jetDef = jetFSTrackingHypoMenuSequence(
             flags, clustersKey=clustersKey,
             isPerf=self.isPerf,
             **self.recoDict
@@ -271,8 +237,7 @@ class JetChainConfiguration(ChainConfigurationBase):
 
     def getJetCaloRecoChainStep(self, flags):
         stepName = "CaloRecoPTStep_jet_"+self.recoDict["clusterCalib"]
-        jetSeq, clustersKey = callGenerator(
-            jetCaloRecoMenuSequence,
+        jetSeq, clustersKey = jetCaloRecoMenuSequence(
             flags, clusterCalib=self.recoDict["clusterCalib"]
         )
 
@@ -290,8 +255,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         preselRecoDict = JetPresel.getPreselRecoDict(matched_reco.group())
 
         stepName = "PreselStep_jet_"+preselRecoDict['jetDefStr']
-        jetSeq, jetDef, clustersKey = callGenerator( jetCaloPreselMenuSequence,
-                                                                  flags, **preselRecoDict )
+        jetSeq, jetDef, clustersKey = jetCaloPreselMenuSequence( flags, **preselRecoDict )
 
         return str(clustersKey), jetDef, ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
@@ -312,8 +276,7 @@ class JetChainConfiguration(ChainConfigurationBase):
         assert preselRecoDict['trkopt'] == 'roiftf', 'getJetRoITrackJetTagPreselChainStep: you requested a RoI tracking preselection but the reco dictionary has \'trkopt\' set to {0}'.format(preselRecoDict['trkopt'])
 
         stepName = "RoIFTFStep_jet_"+self.recoDict['jetDefStr']
-        jetSeq = callGenerator(jetRoITrackJetTagHypoMenuSequence,
-                                            flags, jetsIn=jetsInKey, isPresel=True, **preselRecoDict)
+        jetSeq = jetRoITrackJetTagHypoMenuSequence(flags, jetsIn=jetsInKey, isPresel=True, **preselRecoDict)
 
         return ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
@@ -343,9 +306,8 @@ class JetChainConfiguration(ChainConfigurationBase):
         log.debug("Running exotic jets with ptf: " + str(ptf) + "\tdR: " + str(dr) + "\ttrackless: " + str(trackless) + "\thypo: " + exotdictstring)
 
         stepName = "EJsStep_"
-        jetSeq = callGenerator( jetEJsMenuSequence, flags, jetsIn=jetCollectionName)
-        #from TrigGenericAlgs.TrigGenericAlgsConfig import PassthroughComboHypoCfg
-        chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])#, comboHypoCfg=PassthroughComboHypoCfg)
+        jetSeq = jetEJsMenuSequence(flags, jetsIn=jetCollectionName)
+        chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
         return chainStep
 
@@ -361,9 +323,24 @@ class JetChainConfiguration(ChainConfigurationBase):
         log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
 
         stepName = "CRStep_"+self.chainName
-        jetSeq = callGenerator( jetCRMenuSequence, flags, jetsIn=jetCollectionName)
-        #from TrigGenericAlgs.TrigGenericAlgsConfig import PassthroughComboHypoCfg
-        chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])#, comboHypoCfg=PassthroughComboHypoCfg)
+        jetSeq = jetCRMenuSequence(flags, jetsIn=jetCollectionName)
+        chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
         return chainStep
 
+    def getJetCROldChainStep(self, flags, jetCollectionName, exotdictstring):
+        
+        if 'calrtold' in exotdictstring:
+            MinjetlogR = 1.2
+            doBIBremoval = int(0)
+        else:
+            log.error('Misconfiguration of trackless exotic jet chain - need calrtold selection')
+            exit(1)
+
+        log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
+
+        stepName = "CRPldStep_"+self.chainName
+        jetSeq = jetCROldMenuSequence(flags, jetsIn=jetCollectionName)
+        chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
+
+        return chainStep

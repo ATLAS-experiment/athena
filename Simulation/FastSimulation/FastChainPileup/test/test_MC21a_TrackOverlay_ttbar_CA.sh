@@ -4,7 +4,6 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
-# art-output: run_*
 # art-output: log.*
 # art-output: *.pkl
 # art-output: *.txt
@@ -18,7 +17,6 @@ RDO_File="RDO.pool.root"
 AOD_File="AOD.pool.root"
 NTUP_File="NTUP.pool.root"
 
-mkdir -p run_ca; cd run_ca
 Overlay_tf.py \
   --CA \
   --inputHITSFile ${HITS_File} \
@@ -37,15 +35,7 @@ Overlay_tf.py \
   --imf False
 ca=$?
 echo  "art-result: $ca HITStoRDO_CA"
-# Copy outputs back to main directory
-cp ${RDO_File} ../${RDO_File}
-cp log.* ../
-cp *.txt ../
 status=$ca
-if [ -f "ConfigCA.pkl" ]; then
-    cp ConfigCA.pkl ../ConfigCA.pkl
-fi
-cd ../
 
 reg=-9999
 if [ $ca -eq 0 ]
@@ -62,22 +52,29 @@ if [ ${ca} -eq 0 ]
 then
     # Reconstruction
     Reco_tf.py \
-               --CA "all:True" "RDOtoRDOTrigger:False" \
-               --inputRDOFile run_ca/${RDO_File} --maxEvents '-1' \
+               --CA \
+               --inputRDOFile ${RDO_File} \
                --outputAODFile ${AOD_File} \
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \
+	             --maxEvents '-1' \
                --autoConfiguration=everything \
+    	         --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
+               --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
                --athenaopts "all:--threads=1" \
                --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
-               --preExec 'RAWtoALL:ConfigFlags.Overlay.doTrackOverlay=True;' 'RDOtoRDOTrigger:from OverlayCommonAlgs.OverlayFlags import overlayFlags; overlayFlags.doTrackOverlay=True; ConfigFlags.Overlay.doTrackOverlay=True;'\
+               --preExec 'all:flags.Overlay.doTrackOverlay=True;'\
                --imf False
 
      rec=$?
      if [ ${rec} -eq 0 ]
      then
-         # NTUP prod.
-         Reco_tf.py --inputAODFile ${AOD_File} --maxEvents '-1' \
+         # NTUP prod. (old-style - will be updated after FastChain metadata is fixed)
+         Reco_tf.py --inputAODFile ${AOD_File} \
                     --outputNTUP_PHYSVALFile ${NTUP_File} \
+                    --maxEvents '-1' \
+                    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
+                    --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
+		                --asetup 'Athena,23.0.53' \
                     --ignoreErrors True \
                     --validationFlags 'doInDet' \
                     --valid 'True'

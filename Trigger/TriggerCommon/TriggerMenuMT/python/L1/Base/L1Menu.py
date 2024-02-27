@@ -26,10 +26,12 @@ class L1Menu(object):
 
         # items in menu
         self.items = MenuItemsCollection()
+
+        # store cached flags
+        self.flags = flags
         
         # all thresholds that are in menu (new and legacy)
-        self.do_HI_tob_thresholds = flags.Trigger.L1.doHeavyIonTobThresholds
-        self.thresholds = MenuThresholdsCollection(self.do_HI_tob_thresholds)
+        self.thresholds = MenuThresholdsCollection(flags)
 
         # all thresholds that are in menu (new and legacy)
         self.topoAlgos = MenuTopoAlgorithmsCollection()
@@ -150,10 +152,10 @@ class L1Menu(object):
         boardName = connDefName+fpgaName
 
         allowedInputs = odict()
-        allowedInputs['Topo1Opt0'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                     ] # TOPO1A, FPGA1
+        allowedInputs['Topo1Opt0'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                      'ZeroBiasA'] # TOPO1A, FPGA1
         allowedInputs['Topo1Opt1'] = ['MU', 'eEM', 'eTAU',              'gJ',  'gLJ',                     ] # TOPO1A, FPGA2
         allowedInputs['Topo1Opt2'] = ['MU',        'eTAU', 'cTAU', 'j',               'gXE', 'gTE', 'gMHT'] # TOPO1B, FPGA1
-        allowedInputs['Topo1Opt3'] = ['MU',        'eTAU', 'cTAU', 'j',               'gXE', 'gTE', 'gMHT', 'LArSaturation'] # TOPO1B, FPGA2
+        allowedInputs['Topo1Opt3'] = ['MU',        'eTAU', 'cTAU', 'j',               'gXE', 'gTE', 'gMHT', 'LArSaturation', 'ZeroBiasB'] # TOPO1B, FPGA2
         allowedInputs['Topo2El0']  = ['MU',        'eTAU',         'j',      ] # TOPO2, FPGA1
         allowedInputs['Topo2El1']  = [      'eEM',                 'j',      ] # TOPO2, FPGA2
         allowedInputs['Topo3El0']  = [      'eEM', 'eTAU',         'j',      ] # TOPO3, FPGA1
@@ -375,7 +377,7 @@ class L1Menu(object):
         # collect the ptMinToTopo values
         ptMin = {}
         for thrtype in ThrType.Run3Types():
-            ttconfig = getTypeWideThresholdConfig(thrtype,self.do_HI_tob_thresholds)
+            ttconfig = getTypeWideThresholdConfig(thrtype, self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, self.flags.Trigger.L1.Menu.doeFexBDTTau)
             inputtype = thrtype.name
             if inputtype == 'cTAU':
                 inputtype = 'eTAU'
@@ -395,7 +397,7 @@ class L1Menu(object):
              inputtype = alg.input
              if 'cTAU' in inputtype:
                  inputtype = 'eTAU'
-             elif any(substring in inputtype for substring in ['XE','TE','MHT','LArSaturation']):
+             elif any(substring in inputtype for substring in ['XE','TE','MHT','LArSaturation','ZeroBias']):
                  continue
              thr = self.thresholds.thresholds[threshold]
              minEt = 99999 
@@ -451,7 +453,7 @@ class L1Menu(object):
         for algtype in [AlgType.SORT, AlgType.DEC]:
             # Only check Phase-I Topo algs
             for algname,algo in self.topoAlgos.topoAlgos[AlgCategory.TOPO][algtype].items():
-                log.info(f'Checking variable parameter ordering for {algname} ({algo.classtype})')
+                log.debug(f'Checking variable parameter ordering for {algname} ({algo.classtype})')
                 pars_for_algo = params[algo.classtype]
                 generics_map = {g.name:g.value for g in algo.generics}
                 # No conditional parameters
@@ -493,17 +495,17 @@ class L1Menu(object):
                     raise RuntimeError(f'checkL1TopoParams: Did not find ordered parameter list for L1Topo algorithm type {algo.classtype}')
 
                 menu_params = [p.name for p in algo.variables]
-                log.info(f'Menu contains parameter list: {menu_params}')
+                log.debug(f'Menu contains parameter list: {menu_params}')
 
                 if common_params is None: common_params = []
                 if ordered_params is None: ordered_params = []
-                log.info(f'Expected parameter list: {common_params + ordered_params}')
+                log.debug(f'Expected parameter list: {common_params + ordered_params}')
 
                 # Handle case where parameters are supplied repeatedly to
                 # configure multiple instances
                 non_common_param_count = len(menu_params) - len(common_params)
                 if non_common_param_count > len(ordered_params):
-                    log.info(f'Can repeat the parameters: {ordered_params}')
+                    log.debug(f'Can repeat the parameters: {ordered_params}')
                     if non_common_param_count % len(ordered_params) == 0:
                         ordered_params = int(non_common_param_count/len(ordered_params)) * ordered_params
                     else:

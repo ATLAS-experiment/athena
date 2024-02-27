@@ -10,6 +10,7 @@
 #define TRKDETDESCRGEOMODELCNV_GMTREEBROWSER_H
 
 #include <GeoModelKernel/GeoDefinitions.h>
+
 #include <vector>
 
 class GeoVPhysVol;
@@ -17,51 +18,57 @@ class GeoShape;
 
 namespace Trk {
 
-  /**
-    @class GMTreeBrowser
-    
-    A Helper Class that facilitates navigation through GeoModel tree.
-    To be replaced by equivalent GeoModel functionality when available.
-        
-    @author  Sarka.Todorova@cern.ch
-    */
-    
-    class GMTreeBrowser {
-      
-      public:
-        /** Default constructor*/
-        GMTreeBrowser() = default;
+/**
+  @class GMTreeBrowser
 
-        /** Destructor*/
-        ~GMTreeBrowser() = default;
+  A Helper Class that facilitates navigation through GeoModel tree.
+  To be replaced by equivalent GeoModel functionality when available.
 
-	/** Recursive comparison of trees/branches/volumes : 
-	    in quiet mode (printFullInfo=False) , returns the indicator of first encountered difference ( 0 if none),
-	    in verbose mode (printFullInfo=True), returns the indicator of last encountered difference ( 0 if none)
-            level argument is used to find the depth of the difference in the tree */
- 	int compareGeoVolumes( const GeoVPhysVol* gv1, const GeoVPhysVol* gv2, double tolerance, bool printFullInfo = false,  int level=0 ) const; 
+  @author  Sarka.Todorova@cern.ch
+  */
 
-	/** shape comparison */
-	bool compareShapes( const GeoShape* gs1, const GeoShape* gv2, double tolerance ) const; 
+class GMTreeBrowser {
 
-        /** search of matching name patterns */
-        bool findNamePattern( const GeoVPhysVol* gv, std::string_view name ) const;
+   public:
+    /** Default constructor*/
+    GMTreeBrowser() = default;
 
-        /** search of top branch : returns mother volume for children matching name */
-        const GeoVPhysVol* findTopBranch( const GeoVPhysVol* gv, std::string_view name ) const;
+    /** Destructor*/
+    ~GMTreeBrowser() = default;
 
-      private:
-     
-	/** check of rotation invariance */
-	bool identity_check(GeoTrf::RotationMatrix3D rotation, double tol) const;
-        /** printout diff - unify output */
-        void printTranslationDiff(GeoTrf::Transform3D trtest, GeoTrf::Transform3D trref, double tolerance) const;
-        void printRotationDiff(GeoTrf::Transform3D trtest, GeoTrf::Transform3D trref, double tolerance) const;
+    /** Recursive comparison of trees/branches/volumes :
+        in quiet mode (printFullInfo=False) , returns the indicator of first
+       encountered difference ( 0 if none), in verbose mode
+       (printFullInfo=True), returns the indicator of last encountered
+       difference ( 0 if none) level argument is used to find the depth of the
+       difference in the tree */
+    int compareGeoVolumes(const GeoVPhysVol* gv1, const GeoVPhysVol* gv2,
+                          double tolerance, bool printFullInfo = false,
+                          int level = 0) const;
 
-    };
- 
+    /** shape comparison */
+    bool compareShapes(const GeoShape* gs1, const GeoShape* gv2,
+                       double tolerance) const;
 
-} // end of namespace Trk
+    /** search of matching name patterns */
+    bool findNamePattern(const GeoVPhysVol* gv, std::string_view name) const;
+
+    /** search of top branch : returns mother volume for children matching name
+     */
+    const GeoVPhysVol* findTopBranch(const GeoVPhysVol* gv,
+                                     std::string_view name) const;
+
+   private:
+    /** check of rotation invariance */
+    bool identity_check(GeoTrf::RotationMatrix3D rotation, double tol) const;
+    /** printout diff - unify output */
+    void printTranslationDiff(GeoTrf::Transform3D trtest,
+                              GeoTrf::Transform3D trref,
+                              double tolerance) const;
+    void printRotationDiff(GeoTrf::Transform3D trtest,
+                           GeoTrf::Transform3D trref, double tolerance) const;
+};
+
+}  // end of namespace Trk
 
 #endif
-

@@ -70,16 +70,22 @@ private:
 			   const InDetDD::SiDetectorElement* element,
 			   xAOD::PixelCluster& container) const;
 
-    BooleanProperty m_addCorners{this, "AddCorners", true};
-    ToolHandle<InDet::PixelRDOTool> m_pixelRDOTool {this, "PixelRDOTool", "InDet::PixelRDOTool"};
-    ToolHandle<InDet::ClusterMakerTool> m_clusterMakerTool {this, "ClusterMakerTool", "InDet::ClusterMakerTool"};
-    IntegerProperty m_errorStrategy{this, "ErrorStrategy", 1};
 
-    SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "Pixel charge calibration data"};
+    ToolHandle< InDet::PixelRDOTool > m_pixelRDOTool
+      {this, "PixelRDOTool", "InDet::PixelRDOTool"};
+    ToolHandle< InDet::ClusterMakerTool > m_clusterMakerTool
+      {this, "ClusterMakerTool", "InDet::ClusterMakerTool"};
 
-    SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_offlineCalibDataKey{this, "PixelOfflineCalibData", "PixelOfflineCalibData", "Pixel offline calibration data"};
+    Gaudi::Property<bool> m_addCorners{this, "AddCorners", true};
+    Gaudi::Property<int> m_errorStrategy{this, "ErrorStrategy", 1};
 
+    SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey
+      {this, "PixelChargeCalibCondData", "ITkPixelChargeCalibCondData",
+       "Pixel charge calibration data"};
 
+    SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_offlineCalibDataKey
+      {this, "PixelOfflineCalibData", "ITkPixelOfflineCalibData",
+       "Pixel offline calibration data"};
 };
 
 } // namespace ActsTrk 

@@ -1,12 +1,8 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
-from AthenaCommon.CFElements import parOR
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-from .FullScanDefs import caloFSRoI
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 class CaloMenuDefs(object):
@@ -47,27 +43,3 @@ def fastCaloMenuSequenceCfg(flags, name, doRinger=True, is_probe_leg=False):
 
     from TrigEgammaHypo.TrigEgammaFastCaloHypoTool import TrigEgammaFastCaloHypoToolFromDict
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastCaloHypoToolFromDict,isProbe=is_probe_leg)
-    
-def fastCaloMenuSequence(flags, name, doRinger=True, is_probe_leg=False):
-     if isComponentAccumulatorCfg():
-        return fastCaloMenuSequenceCfg(flags,name=name,doRinger=doRinger,is_probe_leg=is_probe_leg)
-     else: 
-        return menuSequenceCAToGlobalWrapper(fastCaloMenuSequenceCfg,flags,name=name,doRinger=doRinger,is_probe_leg=is_probe_leg)
-
-def cellRecoSequence(flags, name="HLTCaloCellMakerFS", RoIs=caloFSRoI, outputName="CaloCellsFS", monitorCells = False):
-    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellMakerCfg
-    alg = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags=flags, name=name, roisKey=RoIs, CellsName=outputName, monitorCells=monitorCells)
-    return alg,outputName
-
-def caloTowerHIRecoSequence(
-        flags, name="HLTHICaloTowerMakerFS", RoIs=caloFSRoI,
-        outputName="HLT_HICaloTowerFS"):
-    """ Create the EM-level fullscan clusters for heavy-ion"""
-    cell_sequence, cells_name = RecoFragmentsPool.retrieve(cellRecoSequence, flags=flags, RoIs=RoIs)
-    from TrigCaloRec.TrigCaloRecConfig import hltHICaloTowerMakerCfg
-    alg = algorithmCAToGlobalWrapper(hltHICaloTowerMakerCfg,
-                                     flags, name,
-                                     towersKey = outputName,
-                                     cellsKey = cells_name,
-                                     RoIs=RoIs)[0]
-    return parOR(name+"RecoSequence", [cell_sequence, alg]), str(alg.CaloTowers), str(cells_name)

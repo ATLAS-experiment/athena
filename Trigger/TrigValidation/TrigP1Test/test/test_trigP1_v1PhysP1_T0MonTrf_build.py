@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: transform test of BSRDOtoRAW + T0Reco + T0Mon, using v1PhysP1 menu
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
@@ -20,7 +20,7 @@ hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data'
 hlt.max_events = 50
-hlt.args = f'--precommand=\\\"setMenu=\\\'{triggermenu}\\\'\\;doL1Sim=True\\\"'
+hlt.args = f'--CA --preExec="Trigger.triggerMenuSetup=\'{triggermenu}\' Trigger.doLVL1=True"'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
@@ -33,8 +33,6 @@ hlt.args += ' --runNumber 440499'  # RunNumber is set by Panda, but ignored by T
 tzrecoPreExec = ' '.join([
   f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
   "flags.Trigger.AODEDMSet=\'AODFULL\';",
-  "from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff;",
-  "allSteeringFlagsOff(flags);",
   "flags.DQ.Steering.doDataFlowMon=True;",
   "flags.DQ.Steering.doHLTMon=True;",
   "flags.DQ.Steering.doLVL1CaloMon=True;",

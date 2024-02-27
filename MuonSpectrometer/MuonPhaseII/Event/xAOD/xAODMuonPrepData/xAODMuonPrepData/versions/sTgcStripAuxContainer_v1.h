@@ -19,16 +19,24 @@ class sTgcStripAuxContainer_v1 : public AuxContainerBase {
     sTgcStripAuxContainer_v1();
 
    private:
-    /// @name Defining Mdt Drift Circle parameters
+    /// @name Defining sTgcStrip parameters
     /// @{
     std::vector<DetectorIdentType> identifier{};
     std::vector<DetectorIDHashType> identifierHash{};
     std::vector<PosAccessor<1>::element_type> localPosition{};
     std::vector<CovAccessor<1>::element_type> localCovariance{};
-
-    std::vector<uint16_t> bcBitMap{};
-    std::vector<uint16_t> time{};
-    std::vector<uint32_t> charge{}; 
+    /// 
+    std::vector<uint8_t> author{};
+    std::vector<uint8_t> gasGap{};
+    std::vector<uint16_t> channelNumber{};
+    std::vector<short int> time{};
+    std::vector<int> charge{};
+    ///
+    std::vector<std::vector<uint16_t>> stripNumbers{};
+    std::vector<std::vector<short int>> stripTimes{};
+    std::vector<std::vector<int>> stripCharges{};
+    ///
+    std::vector<uint8_t> quality{};
  
     /// @}
 };

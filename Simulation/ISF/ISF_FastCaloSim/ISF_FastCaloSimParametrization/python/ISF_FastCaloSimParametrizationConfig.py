@@ -75,6 +75,17 @@ def FastCaloSimGeometryHelperCfg(flags, name="FastCaloSimGeometryHelper", **kwar
     acc.setPrivateTools(CompFactory.FastCaloSimGeometryHelper(name, **kwargs))
     return acc
 
+def CaloCellContainerSDCfg(flags, name='CaloCellContainerSD', **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault ('NoVolumes', True)
+    kwargs.setdefault("OutputCollectionNames", ["DefaultCaloCellContainer"])
+    # Add ISF_FastHitConvertTool, which will also take care 
+    # of creating mergable FastCaloSim HIT collections
+    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastHitConvertToolCfg
+    kwargs.setdefault("FastHitConvertTool",  acc.addPublicTool(acc.popToolsAndMerge(FastHitConvertToolCfg(flags))))
+    acc.setPrivateTools(CompFactory.CaloCellContainerSDTool(name, **kwargs))
+    return acc
+
 def ISF_FastCaloSimParametrization_SimPreInclude(flags):
     flags.Sim.RecordStepInfo=True
     from SimulationConfig.SimEnums import VertexSource,LArParameterization,CalibrationRun

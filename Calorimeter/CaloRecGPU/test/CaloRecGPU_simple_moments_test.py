@@ -11,12 +11,13 @@ if __name__=="__main__":
     PlotterConfig = PlotterConfigurator(["CPU_moments", "GPU_moments"], ["moments"], DoMoments = True)
     
     flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
-    flags.CaloRecGPU.UseAbsEnergyMoments = True
-    flags.CaloRecGPU.ClustersOutputName="CaloCalTopoClustersNew"
+    flags.CaloRecGPU.Default.UseAbsEnergyMoments = True
+    flags.CaloRecGPU.Default.ClustersOutputName="CaloCalTopoClustersNew"
     flags.lock()
+    flagsActive = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "CaloRecGPU.Default")
 
-    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flags,perfmon)
+    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flagsActive,perfmon)
 
-    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flags, TestMoments = True, PlotterConfigurator = PlotterConfig))
+    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flagsActive, TestMoments = True, PlotterConfigurator = PlotterConfig))
 
     topoAcc.run(numevents)

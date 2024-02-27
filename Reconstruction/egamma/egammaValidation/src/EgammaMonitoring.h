@@ -40,6 +40,8 @@
 #include <string>
 #include <vector>
 
+class TH1D;
+
 class ITHistSvc;
 
 class EgammaMonitoring : public AthAlgorithm
@@ -211,6 +213,9 @@ private:
   StatusCode ZeePostProc();
 
   int m_CenFwdOverlap[2] = { 0, 0 };
+
+  TH1D *m_dR1; //!
+  TH1D *m_dR2; //!
 };
 
 #endif

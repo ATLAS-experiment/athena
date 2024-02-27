@@ -91,6 +91,9 @@ TrigConf::L1Threshold::createThreshold( const std::string & name, const std::str
    if( type == "ZB" )
       return std::make_shared<L1Threshold_ZB>( name, type, extraInfo, data );
 
+   if( type == "ZBTopo" )
+      return std::make_shared<L1Threshold_ZBTopo>( name, type, extraInfo, data );
+
    static const std::string NIMtypes[] = { "BCM", "BCMCMB", "LUCID", "ZDC", "BPTX", "CALREQ", "MBTS", "MBTSSI", "NIM" };
    bool isNIMtype = std::find(std::begin(NIMtypes), std::end(NIMtypes), type) != std::end(NIMtypes);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -327,12 +327,12 @@ float JMSCorrection::getMassCorr(double pT_uncorr, double mass_uncorr, int etabi
   const double pTMin = m_respFactorsMass[etabin]->GetXaxis()->GetBinLowEdge(1);
   const double massMax = m_respFactorsMass[etabin]->GetYaxis()->GetBinLowEdge(m_respFactorsMass[etabin]->GetNbinsY()+1);
   const double massMin = m_respFactorsMass[etabin]->GetYaxis()->GetBinLowEdge(1);
-  if ( pT_uncorr > pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
-  if ( pT_uncorr < m_pTMinCorr ) return 1; // no correction
-  if ( pT_uncorr < pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
+  if ( pT_uncorr >= pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
+  if ( pT_uncorr <= m_pTMinCorr ) return 1; // no correction
+  if ( pT_uncorr <= pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
   if ( std::isnan(mass_uncorr)) return 1; // no correction if the input is NaN, can happen for log(X)
-  if ( mass_uncorr > massMax ) mass_uncorr = massMax-1e-6; //so it fits the up-most m-bin
-  if ( mass_uncorr < massMin ) mass_uncorr = massMin+1e-6; //so it fits the low-most m-bin
+  if ( mass_uncorr >= massMax ) mass_uncorr = massMax-1e-6; //so it fits the up-most m-bin
+  if ( mass_uncorr <= massMin ) mass_uncorr = massMin+1e-6; //so it fits the low-most m-bin
 
   float mass_corr = m_respFactorsMass[etabin]->Interpolate( pT_uncorr, mass_uncorr );
 
@@ -368,12 +368,12 @@ float JMSCorrection::getTrackAssistedMassCorr(double pT_uncorr, double uncorr, i
   const double pTMin = m_respFactorsTrackAssistedMass[etabin]->GetXaxis()->GetBinLowEdge(1);
   const double massMax = m_respFactorsTrackAssistedMass[etabin]->GetYaxis()->GetBinLowEdge(m_respFactorsTrackAssistedMass[etabin]->GetNbinsY()+1);
   const double massMin = m_respFactorsTrackAssistedMass[etabin]->GetYaxis()->GetBinLowEdge(1);
-  if ( pT_uncorr > pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
-  if ( pT_uncorr < m_pTMinCorr ) return 1; // no correction
-  if ( pT_uncorr < pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
+  if ( pT_uncorr >= pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
+  if ( pT_uncorr <= m_pTMinCorr ) return 1; // no correction
+  if ( pT_uncorr <= pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
   if ( std::isnan(uncorr)) return 1; // no correction if the input is NaN, can happen for log(X)
-  if ( uncorr > massMax ) uncorr = massMax-1e-6; //so it fits the up-most m-bin
-  if ( uncorr < massMin ) uncorr = massMin+1e-6; //so it fits the low-most m-bin
+  if ( uncorr >= massMax ) uncorr = massMax-1e-6; //so it fits the up-most m-bin
+  if ( uncorr <= massMin ) uncorr = massMin+1e-6; //so it fits the low-most m-bin
 
   float mass_corr = m_respFactorsTrackAssistedMass[etabin]->Interpolate( pT_uncorr, uncorr );
 
@@ -409,11 +409,11 @@ float JMSCorrection::getRelCalo(double pT_uncorr, double mass_over_pt_uncorr, in
   double pTMin = m_caloResolutionMassCombination[etabin]->GetXaxis()->GetBinLowEdge(1);
   double mass_over_pTMax = m_caloResolutionMassCombination[etabin]->GetYaxis()->GetBinLowEdge(m_caloResolutionMassCombination[etabin]->GetNbinsY()+1);
   double mass_over_pTMin = m_caloResolutionMassCombination[etabin]->GetYaxis()->GetBinLowEdge(1);
-  if ( pT_uncorr > pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
-  if ( pT_uncorr < pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
+  if ( pT_uncorr >= pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
+  if ( pT_uncorr <= pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
   if ( std::isnan(mass_over_pt_uncorr)) return 0; // no weight if the input is NaN, can happen for log(X)
-  if ( mass_over_pt_uncorr > mass_over_pTMax ) mass_over_pt_uncorr = mass_over_pTMax-1e-6; //so it fits the up-most m_over_pt-bin
-  if ( mass_over_pt_uncorr < mass_over_pTMin ) mass_over_pt_uncorr = mass_over_pTMin+1e-6; //so it fits the low-most m_over_pt-bin
+  if ( mass_over_pt_uncorr >= mass_over_pTMax ) mass_over_pt_uncorr = mass_over_pTMax-1e-6; //so it fits the up-most m_over_pt-bin
+  if ( mass_over_pt_uncorr <= mass_over_pTMin ) mass_over_pt_uncorr = mass_over_pTMin+1e-6; //so it fits the low-most m_over_pt-bin
 
   float rel = m_caloResolutionMassCombination[etabin]->Interpolate( pT_uncorr, mass_over_pt_uncorr );
 
@@ -450,11 +450,11 @@ float JMSCorrection::getRelTA(double pT_uncorr, double mass_over_pt_uncorr, int 
   double pTMin = m_taResolutionMassCombination[etabin]->GetXaxis()->GetBinLowEdge(1);
   double mass_over_pTMax = m_taResolutionMassCombination[etabin]->GetYaxis()->GetBinLowEdge(m_taResolutionMassCombination[etabin]->GetNbinsY()+1);
   double mass_over_pTMin = m_taResolutionMassCombination[etabin]->GetYaxis()->GetBinLowEdge(1);
-  if ( pT_uncorr > pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
-  if ( pT_uncorr < pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
+  if ( pT_uncorr >= pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
+  if ( pT_uncorr <= pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
   if ( std::isnan(mass_over_pt_uncorr)) return 0; // no weight if the input is NaN, can happen for log(X)
-  if ( mass_over_pt_uncorr > mass_over_pTMax ) mass_over_pt_uncorr = mass_over_pTMax-1e-6; //so it fits the up-most m_over_pt-bin
-  if ( mass_over_pt_uncorr < mass_over_pTMin ) mass_over_pt_uncorr = mass_over_pTMin+1e-6; //so it fits the low-most m_over_pt-bin
+  if ( mass_over_pt_uncorr >= mass_over_pTMax ) mass_over_pt_uncorr = mass_over_pTMax-1e-6; //so it fits the up-most m_over_pt-bin
+  if ( mass_over_pt_uncorr <= mass_over_pTMin ) mass_over_pt_uncorr = mass_over_pTMin+1e-6; //so it fits the low-most m_over_pt-bin
 
   float rel = m_taResolutionMassCombination[etabin]->Interpolate( pT_uncorr, mass_over_pt_uncorr );
 
@@ -490,11 +490,11 @@ float JMSCorrection::getRho(double pT_uncorr, double mass_over_pt_uncorr, int et
   double pTMin = m_correlationMapMassCombination[etabin]->GetXaxis()->GetBinLowEdge(1);
   double mass_over_pTMax = m_correlationMapMassCombination[etabin]->GetYaxis()->GetBinLowEdge(m_correlationMapMassCombination[etabin]->GetNbinsY()+1);
   double mass_over_pTMin = m_correlationMapMassCombination[etabin]->GetYaxis()->GetBinLowEdge(1);
-  if ( pT_uncorr > pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
-  if ( pT_uncorr < pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
+  if ( pT_uncorr >= pTMax ) pT_uncorr = pTMax-1e-6 ; //so it fits the up-most pt-bin
+  if ( pT_uncorr <= pTMin ) pT_uncorr = pTMin+1e-6; //so it fits the low-most pt-bin
   if ( std::isnan(mass_over_pt_uncorr)) return 0; // no weight if the input is NaN, can happen for log(X)
-  if ( mass_over_pt_uncorr > mass_over_pTMax ) mass_over_pt_uncorr = mass_over_pTMax-1e-6; //so it fits the up-most m_over_pt-bin
-  if ( mass_over_pt_uncorr < mass_over_pTMin ) mass_over_pt_uncorr = mass_over_pTMin+1e-6; //so it fits the low-most m_over_pt-bin
+  if ( mass_over_pt_uncorr >= mass_over_pTMax ) mass_over_pt_uncorr = mass_over_pTMax-1e-6; //so it fits the up-most m_over_pt-bin
+  if ( mass_over_pt_uncorr <= mass_over_pTMin ) mass_over_pt_uncorr = mass_over_pTMin+1e-6; //so it fits the low-most m_over_pt-bin
 
   float rho = m_correlationMapMassCombination[etabin]->Interpolate( pT_uncorr, mass_over_pt_uncorr );
 
@@ -570,9 +570,9 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
           if (jetStartP4.mass() / jetStartP4.e() > 0)
           {
             if (m_use3Dhisto)
-                massFactor = getMassCorr3D( jetStartP4.e()/m_GeV, log(jetStartP4.mass() / jetStartP4.e()), absdetectorEta);
+	      massFactor = getMassCorr3D( jetStartP4.e()/m_GeV, std::log(jetStartP4.mass() / jetStartP4.e()), absdetectorEta);
             else
-                massFactor = getMassCorr( jetStartP4.e()/m_GeV, log(jetStartP4.mass() / jetStartP4.e()), etabin);
+	      massFactor = getMassCorr( jetStartP4.e()/m_GeV, std::log(jetStartP4.mass() / jetStartP4.e()), etabin);
           }
           else
             massFactor = 1; // Prevent log(X) for X <= 0
@@ -581,9 +581,9 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
           if (jetStartP4.mass() / jetStartP4.Et() > 0)
           {
               if (m_use3Dhisto)
-                  massFactor = getMassCorr3D( jetStartP4.e()/m_GeV, log(jetStartP4.mass() / jetStartP4.Et()), absdetectorEta);
+		massFactor = getMassCorr3D( jetStartP4.e()/m_GeV, std::log(jetStartP4.mass() / jetStartP4.Et()), absdetectorEta);
               else
-                  massFactor = getMassCorr( jetStartP4.e()/m_GeV, log(jetStartP4.mass() / jetStartP4.Et()), etabin);
+		massFactor = getMassCorr( jetStartP4.e()/m_GeV, std::log(jetStartP4.mass() / jetStartP4.Et()), etabin);
           }
           else
               massFactor = 1; // Prevent log(X) for X <= 0
@@ -592,9 +592,9 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
           if (jetStartP4.mass() / jetStartP4.pt() > 0)
           {
               if (m_use3Dhisto)
-                  massFactor = getMassCorr3D( jetStartP4.e()/m_GeV, log(jetStartP4.mass() / jetStartP4.pt()), absdetectorEta);
+		massFactor = getMassCorr3D( jetStartP4.e()/m_GeV, std::log(jetStartP4.mass() / jetStartP4.pt()), absdetectorEta);
               else
-                  massFactor = getMassCorr( jetStartP4.e()/m_GeV, log(jetStartP4.mass() / jetStartP4.pt()), etabin);
+		massFactor = getMassCorr( jetStartP4.e()/m_GeV, std::log(jetStartP4.mass() / jetStartP4.pt()), etabin);
           }
           else
               massFactor = 1; // Prevent log(X) for X <= 0
@@ -603,9 +603,9 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
           if (jetStartP4.mass() / jetStartP4.Et() > 0)
           {
               if (m_use3Dhisto)
-                  massFactor = getMassCorr3D( jetStartP4.Et()/m_GeV, log(jetStartP4.mass() / jetStartP4.Et()), absdetectorEta);
+		massFactor = getMassCorr3D( jetStartP4.Et()/m_GeV, std::log(jetStartP4.mass() / jetStartP4.Et()), absdetectorEta);
               else
-                  massFactor = getMassCorr( jetStartP4.Et()/m_GeV, log(jetStartP4.mass() / jetStartP4.Et()), etabin);
+		massFactor = getMassCorr( jetStartP4.Et()/m_GeV, std::log(jetStartP4.mass() / jetStartP4.Et()), etabin);
           }
           else
               massFactor = 1; // Prevent log(X) for X <= 0
@@ -618,7 +618,7 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
 
       mass_corr = jetStartP4.mass() / massFactor;
     
-      if(!m_pTfixed) pT_corr = sqrt(jetStartP4.e()*jetStartP4.e()-mass_corr*mass_corr)/cosh( jetStartP4.eta() );
+      if(!m_pTfixed) pT_corr = std::sqrt(jetStartP4.e()*jetStartP4.e()-mass_corr*mass_corr)/std::cosh( jetStartP4.eta() );
     }
 
     caloCalibJet.SetPtEtaPhiM(pT_corr, jetStartP4.eta(), jetStartP4.phi(), mass_corr);
@@ -720,9 +720,9 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
               if (mTA / jetStartP4.e() > 0)
               {
                 if (m_use3Dhisto)
-                  mTAFactor = getTrackAssistedMassCorr3D( jetStartP4.e()/m_GeV, log(mTA / jetStartP4.e()), absdetectorEta);
+                  mTAFactor = getTrackAssistedMassCorr3D( jetStartP4.e()/m_GeV, std::log(mTA / jetStartP4.e()), absdetectorEta);
                 else
-                  mTAFactor = getTrackAssistedMassCorr( jetStartP4.e()/m_GeV, log(mTA / jetStartP4.e()), etabin);
+                  mTAFactor = getTrackAssistedMassCorr( jetStartP4.e()/m_GeV, std::log(mTA / jetStartP4.e()), etabin);
               }
               else
                 mTAFactor = 1; // Prevent log(X) for X <= 0
@@ -731,9 +731,9 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
               if (mTA / jetStartP4.Et() > 0)
               {
                 if (m_use3Dhisto)
-                  mTAFactor = getTrackAssistedMassCorr3D( jetStartP4.e()/m_GeV, log(mTA / jetStartP4.Et()), absdetectorEta);
+                  mTAFactor = getTrackAssistedMassCorr3D( jetStartP4.e()/m_GeV, std::log(mTA / jetStartP4.Et()), absdetectorEta);
                 else
-                  mTAFactor = getTrackAssistedMassCorr( jetStartP4.e()/m_GeV, log(mTA / jetStartP4.Et()), etabin);
+                  mTAFactor = getTrackAssistedMassCorr( jetStartP4.e()/m_GeV, std::log(mTA / jetStartP4.Et()), etabin);
               }
               else
                 mTAFactor = 1; // Prevent log(X) for X <= 0
@@ -742,9 +742,9 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
               if (mTA / jetStartP4.pt() > 0)
               {
                 if (m_use3Dhisto)
-                  mTAFactor = getTrackAssistedMassCorr3D( jetStartP4.e()/m_GeV, log(mTA / jetStartP4.pt()), absdetectorEta);
+                  mTAFactor = getTrackAssistedMassCorr3D( jetStartP4.e()/m_GeV, std::log(mTA / jetStartP4.pt()), absdetectorEta);
                 else
-                  mTAFactor = getTrackAssistedMassCorr( jetStartP4.e()/m_GeV, log(mTA / jetStartP4.pt()), etabin);
+                  mTAFactor = getTrackAssistedMassCorr( jetStartP4.e()/m_GeV, std::log(mTA / jetStartP4.pt()), etabin);
               }
               else
                 mTAFactor = 1; // Prevent log(X) for X <= 0
@@ -753,9 +753,9 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
               if (mTA / jetStartP4.Et() > 0)
               {
                 if (m_use3Dhisto)
-                  mTAFactor = getTrackAssistedMassCorr3D( jetStartP4.Et()/m_GeV, log(mTA / jetStartP4.Et()), absdetectorEta);
+                  mTAFactor = getTrackAssistedMassCorr3D( jetStartP4.Et()/m_GeV, std::log(mTA / jetStartP4.Et()), absdetectorEta);
                 else
-                  mTAFactor = getTrackAssistedMassCorr( jetStartP4.Et()/m_GeV, log(mTA / jetStartP4.Et()), etabin);
+                  mTAFactor = getTrackAssistedMassCorr( jetStartP4.Et()/m_GeV, std::log(mTA / jetStartP4.Et()), etabin);
               }
               else
                 mTAFactor = 1; // Prevent log(X) for X <= 0
@@ -773,13 +773,13 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
 	  return StatusCode::FAILURE;
 	}
 	
-	if(!m_pTfixed) pT_corr = sqrt(jetStartP4.e()*jetStartP4.e()-mass_corr*mass_corr)/cosh( jetStartP4.eta() );
-	else{E_corr  = sqrt(jetStartP4.P()*jetStartP4.P()+mass_corr*mass_corr);}
+	if(!m_pTfixed) pT_corr = std::sqrt(jetStartP4.e()*jetStartP4.e()-mass_corr*mass_corr)/std::cosh( jetStartP4.eta() );
+	else{E_corr  = std::sqrt(jetStartP4.P()*jetStartP4.P()+mass_corr*mass_corr);}
       }
       else{
 	mTA       = 0;
 	mass_corr = 0;
-	if(!m_pTfixed) pT_corr = jetStartP4.e()/cosh( jetStartP4.eta() );
+	if(!m_pTfixed) pT_corr = jetStartP4.e()/std::cosh( jetStartP4.eta() );
 	else{E_corr = jetStartP4.P();}
       }
 
@@ -928,65 +928,65 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
 	  case BinningParam::e_LOGmOe_eta:
             if (m_use3Dhisto)
             {
-              relCalo = mass_calo/E_calo > 0 ? getRelCalo3D( E_calo/m_GeV, log(mass_calo/E_calo), absdetectorEta ) : 0;
-              relTA   = mass_ta/E_calo   > 0 ? getRelTA3D(   E_calo/m_GeV, log(mass_ta/E_calo), absdetectorEta )   : 0;
+              relCalo = mass_calo/E_calo > 0 ? getRelCalo3D( E_calo/m_GeV, std::log(mass_calo/E_calo), absdetectorEta ) : 0;
+              relTA   = mass_ta/E_calo   > 0 ? getRelTA3D(   E_calo/m_GeV, std::log(mass_ta/E_calo), absdetectorEta )   : 0;
               if (m_useCorrelatedWeights)
-                  rho = mass_calo/E_calo > 0 ? getRho3D(     E_calo/m_GeV, log(mass_calo/E_calo), absdetectorEta ) : 0;
+		rho = mass_calo/E_calo > 0 ? getRho3D(     E_calo/m_GeV, std::log(mass_calo/E_calo), absdetectorEta ) : 0;
             }
             else
             {
-              relCalo = mass_calo/E_calo > 0 ? getRelCalo(   E_calo/m_GeV, log(mass_calo/E_calo), etabin ) : 0;
-              relTA   = mass_ta/E_calo   > 0 ? getRelTA(     E_calo/m_GeV, log(mass_ta/E_calo), etabin )   : 0;
+              relCalo = mass_calo/E_calo > 0 ? getRelCalo(   E_calo/m_GeV, std::log(mass_calo/E_calo), etabin ) : 0;
+              relTA   = mass_ta/E_calo   > 0 ? getRelTA(     E_calo/m_GeV, std::log(mass_ta/E_calo), etabin )   : 0;
               if (m_useCorrelatedWeights)
-                  rho = mass_calo/E_calo > 0 ? getRho(       E_calo/m_GeV, log(mass_calo/E_calo), etabin ) : 0;
+		rho = mass_calo/E_calo > 0 ? getRho(       E_calo/m_GeV, std::log(mass_calo/E_calo), etabin ) : 0;
             }
             break;
           case BinningParam::e_LOGmOet_eta:
             if (m_use3Dhisto)
             {
-              relCalo = mass_calo/Et_calo > 0 ? getRelCalo3D( E_calo/m_GeV, log(mass_calo/Et_calo), absdetectorEta ) : 0;
-              relTA   = mass_ta/Et_calo   > 0 ? getRelTA3D(   E_calo/m_GeV, log(mass_ta/Et_calo), absdetectorEta )   : 0;
+              relCalo = mass_calo/Et_calo > 0 ? getRelCalo3D( E_calo/m_GeV, std::log(mass_calo/Et_calo), absdetectorEta ) : 0;
+              relTA   = mass_ta/Et_calo   > 0 ? getRelTA3D(   E_calo/m_GeV, std::log(mass_ta/Et_calo), absdetectorEta )   : 0;
               if (m_useCorrelatedWeights)
-                  rho = mass_calo/Et_calo > 0 ? getRho3D(     E_calo/m_GeV, log(mass_calo/Et_calo), absdetectorEta ) : 0;
+		rho = mass_calo/Et_calo > 0 ? getRho3D(     E_calo/m_GeV, std::log(mass_calo/Et_calo), absdetectorEta ) : 0;
             }
             else
             {
-              relCalo = mass_calo/Et_calo > 0 ? getRelCalo(   E_calo/m_GeV, log(mass_calo/Et_calo), etabin ) : 0;
-              relTA   = mass_ta/Et_calo   > 0 ? getRelTA(     E_calo/m_GeV, log(mass_ta/Et_calo), etabin )   : 0;
+              relCalo = mass_calo/Et_calo > 0 ? getRelCalo(   E_calo/m_GeV, std::log(mass_calo/Et_calo), etabin ) : 0;
+              relTA   = mass_ta/Et_calo   > 0 ? getRelTA(     E_calo/m_GeV, std::log(mass_ta/Et_calo), etabin )   : 0;
               if (m_useCorrelatedWeights)
-                  rho = mass_calo/Et_calo > 0 ? getRho(       E_calo/m_GeV, log(mass_calo/Et_calo), etabin ) : 0;
+		rho = mass_calo/Et_calo > 0 ? getRho(       E_calo/m_GeV, std::log(mass_calo/Et_calo), etabin ) : 0;
             }
             break;
           case BinningParam::e_LOGmOpt_eta:
             if (m_use3Dhisto)
             {
-              relCalo = mass_calo/pT_calo > 0 ? getRelCalo3D( E_calo/m_GeV, log(mass_calo/pT_calo), absdetectorEta ) : 0;
-              relTA   = mass_ta/pT_calo   > 0 ? getRelTA3D(   E_calo/m_GeV, log(mass_ta/pT_calo), absdetectorEta )   : 0;
+              relCalo = mass_calo/pT_calo > 0 ? getRelCalo3D( E_calo/m_GeV, std::log(mass_calo/pT_calo), absdetectorEta ) : 0;
+              relTA   = mass_ta/pT_calo   > 0 ? getRelTA3D(   E_calo/m_GeV, std::log(mass_ta/pT_calo), absdetectorEta )   : 0;
               if (m_useCorrelatedWeights)
-                  rho = mass_calo/pT_calo > 0 ? getRho3D(     E_calo/m_GeV, log(mass_calo/pT_calo), absdetectorEta ) : 0;
+		rho = mass_calo/pT_calo > 0 ? getRho3D(     E_calo/m_GeV, std::log(mass_calo/pT_calo), absdetectorEta ) : 0;
             }
             else
             {
-              relCalo = mass_calo/pT_calo > 0 ? getRelCalo(   E_calo/m_GeV, log(mass_calo/pT_calo), etabin ) : 0;
-              relTA   = mass_ta/pT_calo   > 0 ? getRelTA(     E_calo/m_GeV, log(mass_ta/pT_calo), etabin )   : 0;
+              relCalo = mass_calo/pT_calo > 0 ? getRelCalo(   E_calo/m_GeV, std::log(mass_calo/pT_calo), etabin ) : 0;
+              relTA   = mass_ta/pT_calo   > 0 ? getRelTA(     E_calo/m_GeV, std::log(mass_ta/pT_calo), etabin )   : 0;
               if (m_useCorrelatedWeights)
-                  rho = mass_calo/pT_calo > 0 ? getRho(       E_calo/m_GeV, log(mass_calo/pT_calo), etabin ) : 0;
+		rho = mass_calo/pT_calo > 0 ? getRho(       E_calo/m_GeV, std::log(mass_calo/pT_calo), etabin ) : 0;
             }
             break;
           case BinningParam::et_LOGmOet_eta:
             if (m_use3Dhisto)
             {
-              relCalo = mass_calo/Et_calo > 0 ? getRelCalo3D( Et_calo/m_GeV, log(mass_calo/Et_calo), absdetectorEta ) : 0;
-              relTA   = mass_ta/Et_calo   > 0 ? getRelTA3D(   Et_calo/m_GeV, log(mass_ta/Et_calo), absdetectorEta )   : 0;
+              relCalo = mass_calo/Et_calo > 0 ? getRelCalo3D( Et_calo/m_GeV, std::log(mass_calo/Et_calo), absdetectorEta ) : 0;
+              relTA   = mass_ta/Et_calo   > 0 ? getRelTA3D(   Et_calo/m_GeV, std::log(mass_ta/Et_calo), absdetectorEta )   : 0;
               if (m_useCorrelatedWeights)
-                  rho = mass_calo/Et_calo > 0 ? getRho3D(     Et_calo/m_GeV, log(mass_calo/Et_calo), absdetectorEta ) : 0;
+		rho = mass_calo/Et_calo > 0 ? getRho3D(     Et_calo/m_GeV, std::log(mass_calo/Et_calo), absdetectorEta ) : 0;
             }
             else
             {
-              relCalo = mass_calo/Et_calo > 0 ? getRelCalo(   Et_calo/m_GeV, log(mass_calo/Et_calo), etabin ) : 0;
-              relTA   = mass_ta/Et_calo   > 0 ? getRelTA(     Et_calo/m_GeV, log(mass_ta/Et_calo), etabin )   : 0;
+              relCalo = mass_calo/Et_calo > 0 ? getRelCalo(   Et_calo/m_GeV, std::log(mass_calo/Et_calo), etabin ) : 0;
+              relTA   = mass_ta/Et_calo   > 0 ? getRelTA(     Et_calo/m_GeV, std::log(mass_ta/Et_calo), etabin )   : 0;
               if (m_useCorrelatedWeights)
-                  rho = mass_calo/Et_calo > 0 ? getRho(       Et_calo/m_GeV, log(mass_calo/Et_calo), etabin ) : 0;
+		rho = mass_calo/Et_calo > 0 ? getRho(       Et_calo/m_GeV, std::log(mass_calo/Et_calo), etabin ) : 0;
             }
             break;
 	  default:
@@ -1013,7 +1013,7 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
 	  Mass_comb =  ( mass_calo * Weight ) + ( mass_ta * ( 1 - Weight) );
 	// Protection
 	if(Mass_comb>jetStartP4.e()) Mass_comb = mass_calo;
-	else if(!m_pTfixed) pT_calo = sqrt(jetStartP4.e()*jetStartP4.e()-mass_calo*mass_calo)/cosh( jetStartP4.eta() );
+	else if(!m_pTfixed) pT_calo = std::sqrt(jetStartP4.e()*jetStartP4.e()-mass_calo*mass_calo)/std::cosh( jetStartP4.eta() );
       }
     }
   
@@ -1030,5 +1030,3 @@ StatusCode JMSCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
   return StatusCode::SUCCESS;
 
 }
-
-

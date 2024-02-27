@@ -105,7 +105,8 @@ def CollectionMergerCfg(flags,
                                      mergeable collection to."""
 
     result = ComponentAccumulator()
-    if flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get(region, True):
+    from SimulationConfig.SimEnums import LArParameterization
+    if (flags.Sim.ISFRun or flags.Sim.LArParameterization is LArParameterization.FastCaloSim) and flags.Sim.ISF.HITSMergingRequired.get(region, True):
         mergeable_collection = f'{bare_collection_name}{mergeable_collection_suffix}'
 
         from ISF_Algorithms.CollectionMergerConfig import ISFCollectionMergerCfg

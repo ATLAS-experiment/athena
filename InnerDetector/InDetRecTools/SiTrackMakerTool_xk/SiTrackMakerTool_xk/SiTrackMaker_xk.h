@@ -23,7 +23,7 @@
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "SiSPSeededTrackFinderData/SiTrackMakerEventData_xk.h"
-
+#include "TrigInDetToolInterfaces/ITrigInDetTrackFollowingTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -120,6 +120,7 @@ namespace InDet{
       //@{
       ToolHandle<InDet::ISiDetElementsRoadMaker> m_roadmaker{this, "RoadTool", "InDet::SiDetElementsRoadMaker_xk"};
       ToolHandle<InDet::ISiCombinatorialTrackFinder> m_tracksfinder{this, "CombinatorialTrackFinder", "InDet::SiCombinatorialTrackFinder_xk"};
+      ToolHandle<ITrigInDetTrackFollowingTool> m_trigInDetTrackFollowingTool{this, "TrigTrackFollowingTool", "TrigInDetTrackFollowingTool"};
       ToolHandle<InDet::ISeedToTrackConversionTool> m_seedtrack{this, "SeedToTrackConversion", "InDet::SeedToTrackConversionTool"};
       //@}
 
@@ -147,7 +148,8 @@ namespace InDet{
       BooleanProperty m_useHClusSeed{this, "doHadCaloSeedSSS", false, "Hadronic Calorimeter Seeds"};
       BooleanProperty m_ITKGeometry{this, "ITKGeometry", false, "ITK geometry"};
       BooleanProperty m_seedsegmentsWrite{this, "SeedSegmentsWrite", false, "Call seed to track conversion"};
-
+      BooleanProperty m_useTrigTrackFollowingTool{this, "useTrigTrackFollowingTool", false, "Option to use TrigInDetTrackFollowingTool instead of SiCombinatorialTrackFinder_xk"};
+      
       DoubleProperty m_xi2max{this, "Xi2max", 15., "max Xi2 for updators"};
       DoubleProperty m_xi2maxNoAdd{this, "Xi2maxNoAdd", 35., "max Xi2 for clusters"};
       DoubleProperty m_xi2maxlink{this, "Xi2maxlink", 200., "max Xi2 for clusters"};

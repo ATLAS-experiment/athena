@@ -17,8 +17,7 @@ using SetterType =
 using GetterType = std::function<const std::any(
     const SG::IConstAuxStore*, ActsTrk::IndexType, SG::auxid_t)>;
 using CopierType =
-    std::function<void(SG::IAuxStore*, ActsTrk::IndexType, SG::auxid_t,
-                        const SG::IConstAuxStore*, ActsTrk::IndexType)>;
+    std::function<void(SG::IAuxStore*, ActsTrk::IndexType, SG::auxid_t, const std::any&)>;
 
 struct Decoration {
   std::string name;                    // for our info
@@ -65,11 +64,9 @@ std::any decorationSetter(SG::IAuxStore* container, ActsTrk::IndexType idx,
 
 template <typename T>
 void decorationCopier(SG::IAuxStore* dst, ActsTrk::IndexType dst_idx,
-                      SG::auxid_t decorationId, const SG::IConstAuxStore* src,
-                      ActsTrk::IndexType src_idx) {
+                      SG::auxid_t decorationId, const std::any& src_ptr) {
   *std::any_cast<T*>(decorationSetter<T>(dst, dst_idx, decorationId)) =
-      *std::any_cast<const T*>(
-          constDecorationGetter<T>(src, src_idx, decorationId));
+      *std::any_cast<const T*>(src_ptr);
 }
 
 template <typename T>

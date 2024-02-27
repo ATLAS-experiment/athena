@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,9 +9,9 @@ def RDOAnalysisOutputCfg(flags, output_name="RDOAnalysis"):
     result = ComponentAccumulator()
 
     histsvc = CompFactory.THistSvc(name="THistSvc",
-                                   Output=[ f"{output_name} DATAFILE='{output_name}.root' OPT='RECREATE'" ])
+                                   Output=[ f"{output_name} DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'" ])
     result.addService(histsvc)
-    
+
     return result
 
 
@@ -24,6 +24,27 @@ def EventInfoRDOAnalysisCfg(flags, name="EventInfoRDOAnalysis", **kwargs):
         kwargs.setdefault("EventInfo", f"{flags.Overlay.BkgPrefix}EventInfo")
 
     result.addEventAlgo(CompFactory.EventInfoRDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
+def BCM_RDOAnalysisCfg(flags, name="BCM_RDOAnalysis", **kwargs):
+    from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
+    result = PixelReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "BCM")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/BCM/")
+    prefix=''
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        prefix=flags.Overlay.BkgPrefix
+    kwargs.setdefault("InputKey", f"{prefix}BCM_RDOs")
+    kwargs.setdefault("InputTruthKey", f"{prefix}BCM_SDO_Map")
+
+    result.addEventAlgo(CompFactory.BCM_RDOAnalysis(name, **kwargs))
 
     result.merge(RDOAnalysisOutputCfg(flags))
 
@@ -78,6 +99,27 @@ def SCT_RDOAnalysisCfg(flags, name="SCT_RDOAnalysis", **kwargs):
     return result
 
 
+def TRT_RDOAnalysisCfg(flags, name="TRT_RDOAnalysis", **kwargs):
+    from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
+    result = TRT_ReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "TRT")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/TRT/")
+    prefix=''
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        prefix=flags.Overlay.BkgPrefix
+    kwargs.setdefault("InputKey", f"{prefix}TRT_RDOs")
+    kwargs.setdefault("InputTruthKey", f"{prefix}TRT_SDO_Map")
+
+    result.addEventAlgo(CompFactory.TRT_RDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
 def ITkPixelRDOAnalysisCfg(flags, name="ITkPixelRDOAnalysis", **kwargs):
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     result = ITkPixelReadoutGeometryCfg(flags)
@@ -123,6 +165,7 @@ def ITkStripRDOAnalysisCfg(flags, name="ITkStripRDOAnalysis", **kwargs):
 
     return result
 
+
 def HGTD_RDOAnalysisCfg(flags, name="HGTD_RDOAnalysis", **kwargs):
     from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     result = HGTD_ReadoutGeometryCfg(flags)
@@ -144,7 +187,6 @@ def HGTD_RDOAnalysisCfg(flags, name="HGTD_RDOAnalysis", **kwargs):
     result.merge(RDOAnalysisOutputCfg(flags))
 
     return result
-
 
 
 def PLR_RDOAnalysisCfg(flags, name="PLR_RDOAnalysis", **kwargs):
@@ -186,7 +228,7 @@ def RDOAnalysisCfg(flags):
 
     if flags.Detector.EnableITkPixel:
         acc.merge(ITkPixelRDOAnalysisCfg(flags))
-    
+
     if flags.Detector.EnableITkStrip:
         acc.merge(ITkStripRDOAnalysisCfg(flags))
 
@@ -197,3 +239,150 @@ def RDOAnalysisCfg(flags):
         acc.merge(PLR_RDOAnalysisCfg(flags))
 
     return acc
+
+
+def LArRDOAnalysisCfg(flags, name="LArRDOAnalysis", **kwargs):
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    result = LArGMCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "LAr")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/LAr/")
+    prefix=''
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        kwargs.setdefault("PreSampling", True)
+        prefix=flags.Overlay.BkgPrefix
+        kwargs.setdefault("InputRawChannelKey", '') # Not in presampled RDO files
+        kwargs.setdefault("InputTTL1HADKey", '') # Not in presampled RDO files
+        kwargs.setdefault("InputTTL1EMKey", '') # Not in presampled RDO files
+    kwargs.setdefault("InputRawChannelKey", "LArRawChannels")
+    kwargs.setdefault("InputTTL1HADKey", "LArTTL1HAD")
+    kwargs.setdefault("InputTTL1EMKey", "LArTTL1EM")
+    kwargs.setdefault("InputDigitKey", f"{prefix}LArDigitContainer_MC_Thinned")
+
+    result.addEventAlgo(CompFactory.LArRDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
+def TileRDOAnalysisCfg(flags, name="TileRDOAnalysis", **kwargs):
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    result = TileGMCfg(flags)
+    from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
+    result.merge(TileCablingSvcCfg(flags))
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "Tile")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/Tile/")
+    prefix=''
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        kwargs.setdefault("PreSampling", True)
+        prefix=flags.Overlay.BkgPrefix
+        kwargs.setdefault("InputRawChKey", '') # Not in presampled RDO files
+        kwargs.setdefault("InputMuRcvRawChKey", '') # Not in presampled RDO files
+        kwargs.setdefault("InputMuRcvKey", '') # Not in presampled RDO files
+        kwargs.setdefault("InputMBTS_TTL1Key", '') # Not in presampled RDO files
+        kwargs.setdefault("InputTileTTL1Key", '') # Not in presampled RDO files
+        kwargs.setdefault("InputL2Key", '') # Not in presampled RDO files
+    kwargs.setdefault("InputRawChKey", 'TileRawChannelCnt')
+    kwargs.setdefault("InputMuRcvRawChKey", 'TileRawChannelCnt')
+    kwargs.setdefault("InputMuRcvKey", 'TileMuRcvCnt')
+    kwargs.setdefault("InputMBTS_TTL1Key", 'TileTTL1MBTS')
+    kwargs.setdefault("InputTileTTL1Key", 'TileTTL1Cnt')
+    kwargs.setdefault("InputL2Key", 'TileL2Cnt')
+    kwargs.setdefault("InputDigitsMuRcvKey", f'{prefix}MuRcvDigitsCnt')
+    kwargs.setdefault("InputDigitsFltKey", f"{prefix}TileDigitsCnt")
+
+    result.addEventAlgo(CompFactory.TileRDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
+def CSC_RDOAnalysisCfg(flags, name="CSC_RDOAnalysis", **kwargs):
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result = MuonGeoModelCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "CSC")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/CSC/")
+    prefix=''
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        prefix=flags.Overlay.BkgPrefix
+    kwargs.setdefault("InputKey", f"{prefix}CSCRDO")
+    kwargs.setdefault("InputTruthKey", f"{prefix}CSC_SDO")
+
+    result.addEventAlgo(CompFactory.CSC_RDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
+def MDT_RDOAnalysisCfg(flags, name="MDT_RDOAnalysis", **kwargs):
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result = MuonGeoModelCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "MDT")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/MDT/")
+    prefix=''
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        prefix=flags.Overlay.BkgPrefix
+    kwargs.setdefault("InputKey", f"{prefix}MDTCSM")
+    kwargs.setdefault("InputTruthKey", f"{prefix}MDT_SDO")
+
+    result.addEventAlgo(CompFactory.MDT_RDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
+def RPC_RDOAnalysisCfg(flags, name="RPC_RDOAnalysis", **kwargs):
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result = MuonGeoModelCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "RPC")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/RPC/")
+    prefix=''
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        prefix=flags.Overlay.BkgPrefix
+    kwargs.setdefault("InputKey", f"{prefix}RPCPAD")
+    kwargs.setdefault("InputTruthKey", f"{prefix}RPC_SDO")
+
+    result.addEventAlgo(CompFactory.RPC_RDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
+def TGC_RDOAnalysisCfg(flags, name="TGC_RDOAnalysis", **kwargs):
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result = MuonGeoModelCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "TGC")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/TGC/")
+    prefix=''
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        prefix=flags.Overlay.BkgPrefix
+    kwargs.setdefault("InputKey", f"{prefix}TGCRDO")
+    kwargs.setdefault("InputTruthKey", f"{prefix}TGC_SDO")
+
+    result.addEventAlgo(CompFactory.TGC_RDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result

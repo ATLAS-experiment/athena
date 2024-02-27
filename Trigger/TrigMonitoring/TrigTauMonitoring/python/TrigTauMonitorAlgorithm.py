@@ -1,6 +1,4 @@
-#
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-#
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 def TrigTauMonConfig(inputFlags):
     '''Function to configures some algorithms in the monitoring system.'''
@@ -30,8 +28,8 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
-    file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
+    nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/'
+    file = 'data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1'
     flags = initConfigFlags()
     flags.Input.Files = [nightly+file]
     flags.Input.isMC = False

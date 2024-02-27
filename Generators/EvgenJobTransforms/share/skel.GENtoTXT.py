@@ -73,13 +73,6 @@ evgenLog = logging.getLogger('Gen_tf')
 evgenLog.debug("****************** CHECKING EVENT GENERATION ARGS *****************")
 evgenLog.debug(str(runArgs))
 evgenLog.info ("****************** CHECKING EVENT GENERATION ARGS *****************")
-if hasattr(runArgs, "runNumber"):
-   evgenLog.warning("##########################################################################" )         
-   evgenLog.warning("runNumber - no longer a valid argument, do not use it ! " )         
-   evgenLog.warning("##########################################################################")
-
-if hasattr(runArgs, "inputGenConfFile"):
-   raise RuntimeError("inputGenConfFile is invalid !! Gridpacks and config. files/links to be put into DSID directory ")
 
 # TODO: Allow generation without writing an output file (if outputEVNTFile is None)?
 if not hasattr(runArgs, "ecmEnergy"):
@@ -97,7 +90,7 @@ evgenLog.info("****************** CONFIGURING MATRIX ELEMENT GENERATION ********
 ## Functions for operating on generator names
 ## NOTE: evgenConfig, topSeq, svcMgr, theApp, etc. should NOT be explicitly re-imported in JOs
 from EvgenJobTransforms.EvgenConfig import evgenConfig
-from EvgenJobTransforms.EvgenConfig import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
+from GeneratorConfig.GenConfigHelpers import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
 
 ## Configure the event counting (AFTER all filters)
 # TODO: Rewrite in Python?

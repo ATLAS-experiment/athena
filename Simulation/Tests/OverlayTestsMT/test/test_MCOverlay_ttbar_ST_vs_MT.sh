@@ -21,6 +21,7 @@ RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/Pre
 
 
 Overlay_tf.py \
+--CA \
 --multithreaded \
 --inputHITSFile ${HITS_File} \
 --inputRDO_BKGFile ${RDO_BKG_File} \
@@ -28,7 +29,7 @@ Overlay_tf.py \
 --maxEvents 10 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
 --conditionsTag OFLCOND-MC16-SDR-RUN2-09 \
 --geometryVersion ATLAS-R2-2016-01-00-01 \
---preInclude 'all:Campaigns/MC20e.py' \
+--preInclude 'all:Campaigns.MC20e' \
 --imf False
 
 rc=$?
@@ -40,13 +41,14 @@ rc2=-9999
 if [ $rc -eq 0 ]
 then
     Overlay_tf.py \
+    --CA \
     --inputHITSFile ${HITS_File} \
     --inputRDO_BKGFile ${RDO_BKG_File} \
     --outputRDOFile MC_plus_MC.ST.RDO.pool.root \
     --maxEvents 10 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
     --conditionsTag OFLCOND-MC16-SDR-RUN2-09 \
     --geometryVersion ATLAS-R2-2016-01-00-01 \
-    --preInclude 'all:Campaigns/MC20e.py' \
+    --preInclude 'all:Campaigns.MC20e' \
     --imf False
     rc2=$?
     status=$rc2
@@ -56,21 +58,23 @@ echo  "art-result: $rc2 overlayST"
 rc3=-9999
 if [ $rc2 -eq 0 ]
 then
-    acmd.py diff-root MC_plus_MC.ST.RDO.pool.root MC_plus_MC.MT.RDO.pool.root --error-mode resilient --mode=semi-detailed --order-trees --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings RecoTimingObj_p1_HITStoRDO_timings index_ref
+    acmd.py diff-root MC_plus_MC.ST.RDO.pool.root MC_plus_MC.MT.RDO.pool.root --error-mode resilient --mode=semi-detailed --order-trees
     rc3=$?
     status=$rc3
 fi
 echo  "art-result: $rc3 comparison"
 
-rc4=-9999
-if [ $rc2 -eq 0 ]
-then
-    ArtPackage=$1
-    ArtJobName=$2
-    art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --order-trees --diff-root
-    rc4=$?
-    status=$rc4
+if command -v art.py >/dev/null 2>&1; then
+    rc4=-9999
+    if [ $rc2 -eq 0 ]
+    then
+        ArtPackage=$1
+        ArtJobName=$2
+        art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --order-trees --diff-root
+        rc4=$?
+        status=$rc4
+    fi
+    echo  "art-result: $rc4 regression"
 fi
-echo  "art-result: $rc4 regression"
 
 exit $status

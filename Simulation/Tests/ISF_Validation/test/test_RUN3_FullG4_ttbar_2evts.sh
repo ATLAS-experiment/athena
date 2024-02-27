@@ -20,4 +20,6 @@ Sim_tf.py \
     --outputHITSFile "test.HITS.pool.root" \
     --maxEvents 2
 
-echo  "art-result: $? simulation"
+rc=$?
+echo  "art-result: $rc simulation"
+exit $rc

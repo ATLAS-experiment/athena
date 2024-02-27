@@ -133,15 +133,14 @@ class COOLQuery:
         self.dcsdbname = 'COOLOFL_DCS/CONDBR2'
         self.coollhcpath = '/LHC/DCS/FILLSTATE'
 
-        self.oracle = useOracle
         self.debug = debug
 
         print ('open cool db' )
-        self.cooldb = AtlCoolLib.indirectOpen(self.tdaqdbname, True, self.oracle, self.debug)
+        self.cooldb = AtlCoolLib.indirectOpen(self.tdaqdbname, True, self.debug)
         print ('open cooltrig db')
-        self.cooltrigdb = AtlCoolLib.indirectOpen(self.trigdbname, True, self.oracle, self.debug)
+        self.cooltrigdb = AtlCoolLib.indirectOpen(self.trigdbname, True, self.debug)
         print ('open cooldcs db')
-        self.cooldcsdb = AtlCoolLib.indirectOpen(self.dcsdbname, True, self.oracle, self.debug)
+        self.cooldcsdb = AtlCoolLib.indirectOpen(self.dcsdbname, True, self.debug)
          
         self.lbDictCache = {'runnr': None, 'lbDict': None}
         self.scanDictCache = {'runnr': None, 'scanDict': None}

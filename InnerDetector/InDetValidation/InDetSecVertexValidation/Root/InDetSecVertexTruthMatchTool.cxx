@@ -512,7 +512,8 @@ StatusCode InDetSecVertexTruthMatchTool::labelTruthVertices( const xAOD::TruthVe
     if(truthVtx->nOutgoingParticles()<2){continue;} //Skipping vertices with only 1 outgoing particle.
     ATH_MSG_DEBUG("Analysing Truth Vertex " << truthVtx );
     std::vector<const xAOD::TruthParticle*> reconstructibleParticles;
-    countReconstructibleDescendentParticles( *truthVtx, reconstructibleParticles );
+    int counter = 0;
+    countReconstructibleDescendentParticles( *truthVtx, reconstructibleParticles, counter );
 
     // temporary solution for keeping track of particles in the vertex
     std::vector<int> particleInfo = {0,0,0};
@@ -923,7 +924,9 @@ int InDetSecVertexTruthMatchTool::checkProduction( const xAOD::TruthParticle & t
 }
 
 void InDetSecVertexTruthMatchTool::countReconstructibleDescendentParticles(const xAOD::TruthVertex& signalTruthVertex,
-                                                                           std::vector<const xAOD::TruthParticle*>& set) const {
+                                                                           std::vector<const xAOD::TruthParticle*>& set, int counter) const {
+
+  counter++;
 
   for( size_t itrk = 0; itrk < signalTruthVertex.nOutgoingParticles(); itrk++) {
     const auto* particle = signalTruthVertex.outgoingParticle( itrk );
@@ -938,10 +941,15 @@ void InDetSecVertexTruthMatchTool::countReconstructibleDescendentParticles(const
       auto isOutside = []( TVector3& v ) { return ( v.Perp() > 563. || std::abs( v.z() ) > 2720. ); };
       
       const auto distance = (decayPos - prodPos).Mag();
+
+      if (counter > 100) {
+        ATH_MSG_WARNING("Vetoing particle that may be added recursively infinitely (potential loop in generator record");
+        break;
+      }
       
       // consider track reconstructible if it travels at least 10mm
       if( distance < 10.0 ) {
-        countReconstructibleDescendentParticles( *particle->decayVtx(), set );
+        countReconstructibleDescendentParticles( *particle->decayVtx(), set , counter);
       } else if( isInside ( prodPos  )  && isOutside( decayPos )  && particle->isCharged() ) {
         set.push_back( particle );
       } else if( particle->isElectron() || particle->isMuon() ) {

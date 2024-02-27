@@ -109,7 +109,7 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(
         # must be equal or larger than phiWidth of its clients: InDetNNScoringTool (phiWidthEM)
         phiWidth.append(0.075)
 
-    if flags.Tracking.doITkConversion:
+    if flags.Tracking.doITkConversion or flags.Acts.doITkConversion:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ15GeVUnordered')
         minPt.append(15000)
         # no phi ordering, no Roi duplication close to +- pi

@@ -24,18 +24,32 @@ class TClass;
 class IRootAuxDynWriter;
 namespace SG { class IAuxStoreIO; }
 namespace RootAuxDynIO { class IRNTupleWriter; }
-namespace ROOT { namespace Experimental { namespace Detail {
-   class RPageSource;
-   class RFieldBase;
-} } }
+namespace ROOT { namespace Experimental {
+#if ROOT_VERSION_CODE < ROOT_VERSION( 6, 31, 0 )
+  namespace Detail {
+    class RPageSource;
+    class RFieldBase;
+  }
+#else
+  namespace Internal {
+    class RPageSource;
+  }
+  class RFieldBase;
+#endif
+} }
 
 /*
  * POOL namespace declaration
  */
 namespace pool {
 
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+using ROOT::Experimental::RFieldBase;
+using ROOT::Experimental::Internal::RPageSource;
+#else
 using ROOT::Experimental::Detail::RFieldBase;
 using ROOT::Experimental::Detail::RPageSource;
+#endif
 
 // Forward declaration
 class DbColumn;

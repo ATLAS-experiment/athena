@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TClass.h>
@@ -7,14 +7,17 @@
 
 // EDM include(s):
 #include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
+#include "AthContainers/AuxVectorData.h"
+#include "AthContainers/tools/AuxVectorInterface.h"
 
 // Local include(s):
 #include "xAODRootAccess/tools/TAuxVector.h"
+#include "xAODRootAccess/tools/TAuxVectorFactory.h"
 #include "xAODRootAccess/tools/Message.h"
 
 namespace xAOD {
 
-   TAuxVector::TAuxVector( const SG::IAuxTypeVectorFactory* factory,
+   TAuxVector::TAuxVector( const TAuxVectorFactory* factory,
                            SG::auxid_t auxid,
                            const ::TClass* cl, size_t size, size_t )
       : m_factory( factory ),
@@ -216,30 +219,11 @@ namespace xAOD {
 
    void TAuxVector::copyRange( const void* src, void* dst, size_t n ) {
 
-      // Size of an element in the vector:
-      const size_t eltsz = m_proxy->GetIncrement();
-
-      // If the payload is a class:
-      if( m_proxy->GetValueClass() ) {
-         // If the source range doesn't overlap with the destination:
-         if( ( dst > src ) &&
-             ( ( reinterpret_cast< unsigned long >( src ) + n * eltsz ) >
-               reinterpret_cast< unsigned long >( dst ) ) ) {
-            for( size_t i = n - 1; i < n; --i ) {
-               m_factory->copy( dst, i, src, i );
-            }
-         }
-         // If it does:
-         else {
-            for( size_t i = 0; i < n; ++i ) {
-               m_factory->copy( dst, i, src, i );
-            }
-         }
-      }
-      // If the payload is an array of primitives, the copying is much simpler:
-      else {
-         memmove( dst, src, n * eltsz );
-      }
+      SG::AuxVectorInterface idst( m_auxid, n, dst );
+      m_factory->copy( m_auxid,
+                       idst, 0,
+                       SG::AuxVectorInterface( m_auxid, n, src ), 0,
+                       n );
 
       return;
    }
@@ -251,9 +235,7 @@ namespace xAOD {
 
       // If the payload is a class:
       if( m_proxy->GetValueClass() ) {
-         for( size_t i = 0; i < n; ++i ) {
-            m_factory->clear (dst, i);
-         }
+         m_factory->clear (dst, 0, n);
       }
       // If the payload is an array of primitives, the cleaning is much simpler:
       else {

@@ -75,15 +75,17 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         findAllJets = ['1'+el if len(el) == 1 else el for el in findAllJets]
         nAllJets = sum(int(i[:-1]) for i in findAllJets)
         nCentralJets = sum(int(i[:-1]) if 'c' in i else 0 for i in findAllJets)
-        assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. Please investigate."
+        findAllPts = re.findall(r'[jacf](?P<ptcut>\d+)', presel_cut_str)
+        ptCut = min(float(i) for i in findAllPts)
+        assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. This isn't currently supported. Please investigate."
 
     preselCommonJetParts = dict(JetChainParts_Default)
-
+    
     for ip,p in enumerate(presel_cut_str.split('XX')):
         hascalSel= bool(re.match(r'.*emf\w?\d+', p))
         if not doBJetSel:  # Removing b-jet parts if b-jet presel is not requested
-            p = re.sub(r'b\w?\d+', '', p)
-        hasBjetSel = bool(re.match(r'.*b\w?\d+', p))
+            p = re.sub(r'b\d\d|bg\d\d|bgtwo\d\d', '', p)
+        hasBjetSel = bool(re.match(r'.*(b\d\d|bg\d\d|bgtwo\d\d)', p))
         hasDIPZsel = bool(re.match(r'.*Z', p))
         if hasDIPZsel and not doBJetSel: continue # Skipping calopresel step when DIPZ is run
         if usingDIPZ and not hasDIPZsel and not hasBjetSel and doBJetSel: continue # Skipping roiftf step only when running the calo selection leg (and if in the DIPZ scenario)
@@ -92,13 +94,14 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
 
         pattern_to_test = r'(?P<mult>\d?\d?)(?P<region>[jacf])' # jet multiplicity and region
         pattern_to_test += r'(?P<scenario>(HT)?)(?P<cut>\d+)' # scenario string # could be made more general
-        pattern_to_test += r'b(?P<btagger>\D?)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
+        pattern_to_test += r'b(?P<btagger>\D*)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
         if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+)?)'
         matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
         if hasDIPZsel: cut_dict['region'] = 'c'
+        if hasDIPZsel: cut_dict['cut'] = ptCut
 
         if 'mult' not in cut_dict.keys(): cut_dict['mult'] = ''
         if 'emfc' not in cut_dict.keys(): cut_dict['emfc'] = ''
@@ -110,6 +113,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         if 'prefilt' not in cut_dict.keys(): cut_dict['prefilt'] = ''
 
         mult,region,scenario,cut,btagger,bwp,dipzwp,emfc=cut_dict['mult'],cut_dict['region'],cut_dict['scenario'],cut_dict['cut'],cut_dict['btagger'],cut_dict['bwp'],cut_dict['dipzwp'],cut_dict['emfc']
+        prefilters = []
 
         if mult=='': mult='1'
         etarange = etaRangeAbbrev[region]
@@ -118,10 +122,9 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
         elif scenario == "Z":
-            #hyposcenario=f'Z{dipzwp}j{nCentralJets}'
-            hyposcenario=f'Z{dipzwp}XX{nCentralJets}c'
-            prefilt = cut_dict['prefilt']            
-            if prefilt != '': hyposcenario += f'_{prefilt}'
+            hyposcenario=f'Z{dipzwp}XX{nCentralJets}c{cut}'
+            prefilt = cut_dict['prefilt']   
+            if prefilt != '': prefilters.append(prefilt)
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
         else:
@@ -131,6 +134,8 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
         
         if btagger == 'g':
             btagger = 'gnone'
+        elif btagger =='gtwo':
+            btagger = 'gntwo'
         elif btagger == '':
             btagger = 'dips'
 
@@ -146,6 +151,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doBJetSel=False):
             'bsel': '' if bwp == '' else f'{bwp}b{btagger}',
             'chainPartIndex': ip,
             'hypoScenario': hyposcenario,
+            'prefilters': prefilters,
             }
         )
         preselChainDict['chainParts'] += [tmpChainDict]

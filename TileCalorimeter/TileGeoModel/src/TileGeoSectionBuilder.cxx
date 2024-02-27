@@ -114,8 +114,8 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
   GeoTrf::Transform3D TransCutL(GeoTrf::Transform3D::Identity());
   GeoTrf::Transform3D TransCutR(GeoTrf::Transform3D::Identity());
 
-  const GeoShapeUnion *CutA{nullptr};
-  GeoShape *CutB{nullptr};
+  GeoIntrusivePtr<const GeoShapeUnion> CutA{nullptr};
+  GeoIntrusivePtr<GeoShape> CutB{nullptr};
 
   // ext. barrel Cuts description
   if (sec_number==2 && m_dbManager->BoolCuts() && ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62))) {
@@ -386,7 +386,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
   // ps . shifts for end plates in cutout regions
   GeoTrf::Transform3D cutOutTransformation(GeoTrf::Transform3D::Identity());
   //first endplate
-  GeoTransform* tfEndPlateSh{nullptr};
+  GeoIntrusivePtr<GeoTransform> tfEndPlateSh{nullptr};
 
   if (m_dbManager->TILBdzend1() > 0) {
     if (m_dbManager->TILBdzend() < m_dbManager->TILBdzend1()) {
@@ -485,11 +485,9 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
                                           specialModuleZShift +
                                           (m_dbManager->TILBdzend1() - m_dbManager->TILBdzmodul())*Gaudi::Units::cm/2, 0.,
                                           (m_dbManager->TILBrmax() - tile_rmax)*Gaudi::Units::cm/2));
-      tfEndPlateSh->ref();
 
       mother->add(tfEndPlateSh);
       mother->add(pvEndPlateSh);
-      tfEndPlateSh->unref();
 
       if (m_log->level()<=MSG::DEBUG)
         (*m_log) << MSG::DEBUG <<" _fillSection: ext.barrel EndPlateSh Ok "<< endmsg;
@@ -537,7 +535,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
   }
 
   //second endplate
-  GeoTransform* tfEndPlate2{nullptr};
+  GeoIntrusivePtr<GeoTransform> tfEndPlate2{nullptr};
 
   if (m_dbManager->TILBdzend2() > 0) {
     //Short endplate Cut-outs
@@ -559,7 +557,6 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
 
     tfEndPlate2 = new GeoTransform(GeoTrf::Translate3D(
                                        (-m_dbManager->TILBdzend2() + m_dbManager->TILBdzmodul())*Gaudi::Units::cm/2, 0., 0.));
-    tfEndPlate2->ref();
 
     if (sec_number==2 && ((ModuleNcp>=35 && ModuleNcp<=37)||(ModuleNcp>=60 && ModuleNcp<=62)) ) { // Short endplate Cut-outs
 
@@ -645,7 +642,6 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
 
     mother->add(tfEndPlate2);
     mother->add(pvEndPlate2);
-    tfEndPlate2->unref();
 
     if (m_log->level()<=MSG::DEBUG)
       (*m_log) << MSG::DEBUG <<" _fillSection: EndPlate2 Ok "<< endmsg;
@@ -668,7 +664,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
 
   GeoTrd *absorber{nullptr}, *absorber1{nullptr}, *absorber3{nullptr};
   GeoLogVol *lvAbsorber{nullptr}, *lvAbsorber1{nullptr}, *lvAbsorber3{nullptr};
-  GeoPhysVol *pvAbsorber{nullptr}, *pvAbsorber1{nullptr}, *pvAbsorber3{nullptr};
+  GeoIntrusivePtr<GeoPhysVol> pvAbsorber{nullptr}, pvAbsorber1{nullptr}, pvAbsorber3{nullptr};
   GeoPhysVol *pvTmp_Absorber1{nullptr}, *pvTmp_Absorber3{nullptr};
 
   // Perform different actions depending on sections
@@ -1312,7 +1308,6 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
     mother->add(tfAbsorber1);
     if (m_dbManager->BoolCuts() && ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62)) ) {
       mother->add(pvTmp_Absorber1);
-      pvAbsorber1->ref(); pvAbsorber1->unref();
     } else {
       mother->add(pvAbsorber1);
     }
@@ -1333,7 +1328,6 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
     mother->add(tfAbsorber3);
     if (m_dbManager->BoolCuts() && ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62)) ) {
       mother->add(pvTmp_Absorber3);
-      pvAbsorber3->ref(); pvAbsorber3->unref();
     } else {
       mother->add(pvAbsorber3);
     }
@@ -1350,14 +1344,6 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
       (*m_log) << MSG::DEBUG << " _fillsection other pvAbsorber Ok"<< endmsg;
   }
 
-  if (CutA) {
-    CutA->ref();
-    CutA->unref();
-  }
-  if (CutB) {
-    CutB->ref();
-    CutB->unref();
-  }
 
 }
 
@@ -1484,7 +1470,7 @@ void TileGeoSectionBuilder::fillFinger(GeoPhysVol*&             mother,
       : m_theMaterialManager->getMaterial("sct::Rubber");
 
   // m_matLArServices
-  if (m_matLArServices == 0) {
+  if (!m_matLArServices) {
     m_matLArServices = new GeoMaterial("LArServices", 2.5*GeoModelKernelUnits::gram/Gaudi::Units::cm3);
     m_matLArServices->add(shieldSteel, 0.20);
     m_matLArServices->add(copper, 0.60);
@@ -1494,7 +1480,7 @@ void TileGeoSectionBuilder::fillFinger(GeoPhysVol*&             mother,
   }
 
   // m_matIronHalfDens
-  if (m_matIronHalfDens == 0) {
+  if (!m_matIronHalfDens) {
     m_matIronHalfDens = new GeoMaterial("LArIronBox", 4.5*GeoModelKernelUnits::gram/Gaudi::Units::cm3);
     m_matIronHalfDens->add(shieldSteel, 0.80);
     m_matIronHalfDens->add(matRubber, 0.10);
@@ -1767,8 +1753,6 @@ void TileGeoSectionBuilder::fillFinger(GeoPhysVol*&             mother,
 
   mother->add(new GeoIdentifierTag(ModuleNcp));
   mother->add(pvFingerCablesR);
-  // m_matLArServices->unref();
-  // m_matIronHalfDens->unref();
 }
 
 

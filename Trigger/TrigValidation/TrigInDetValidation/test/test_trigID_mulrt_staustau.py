@@ -4,7 +4,7 @@
 # art-description: art job for mulrt_staustau
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.516697.MGPy8EG_A14NNPDF23LO_SmuSmuLLP_100_0_1ns.recon.RDO.e8514_e8528_s4159_s4114_r14844_tid34200277_00
 # art-input-nfiles: 4
 # art-athena-mt: 8
@@ -29,7 +29,7 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-
+useCA_Reco = True
 Slices  = ['L2muonLRT']
 Events  = 8000 
 Threads = 8 
@@ -38,9 +38,14 @@ Input   = 'SmuSmu'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 Release = "current"
 
-ExtraAna = ' -c LRT="True" '
+ExtraAna = ' --LRT=True '
 
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'
+# legacy
+# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'
+# CA
+# ATR-25582 - FSLRT is now excluded from the default dev menu so need to change to the full dev
+# menu rather than the filtered versions
+preexec_trig="flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1';"
 
 
 Jobs = [ ( "Truth",  " TIDAdata-run3-lrt.dat -o data-hists.root -p 13", "Test_bin_lrt.dat" ),

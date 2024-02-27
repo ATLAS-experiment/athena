@@ -647,8 +647,13 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
 	  expectedGPhi -= ( pow( htt::TARGET_R_1STAGE[i] * houghRho, 3.0 ) / 6.0 ); //higher order
 	}
 	
-	coords.push_back(hitGPhi - expectedGPhi);
-	coordsG.push_back(hitGPhi - expectedGPhi);	  
+	if (m_doDeltaPhiConsts) {
+	  coords.push_back(hitGPhi - expectedGPhi);
+	  coordsG.push_back(hitGPhi - expectedGPhi);
+	} else {
+	  coords.push_back(hitGPhi);
+	  coordsG.push_back(hitGPhi);
+	}
       }
       else {
 	// Idealise phi coordinate if requested
@@ -696,7 +701,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   
   // Get the track parameters
   acc.pars = track.getPars();
-  if (m_doHoughConstants) {
+  if (m_doHoughConstants && m_doDeltaPhiConsts) {
     acc.pars.qOverPt = (y / 1000.0) - track.getQOverPt(); // fit for delta q/pT
     acc.pars.phi = x - track.getPhi(); // fit for delta phi_0
   }
@@ -707,7 +712,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::makeAccumulator(std::vector<FPGATrackSimHi
   acc.track_bins.push_back(bins);
 
   // Force phi to be in [0, 2pi] (post binning)
-  if (!m_doHoughConstants) {
+  if (!m_doDeltaPhiConsts) {
     while (acc.pars.phi < 0) acc.pars.phi += 2*M_PI;
     while (acc.pars.phi > 2*M_PI) acc.pars.phi -= 2*M_PI;
   }

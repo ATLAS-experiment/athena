@@ -19,6 +19,6 @@ namespace MuonGMR4{
     }
     void RadialStripDesign::addStrip(const double posOnBottom,
                                      const double posOnTop) {        
-        m_strips.emplace_back(posOnBottom, posOnTop);
+        m_strips.emplace_back( 0.5*lenBottomEdge() + posOnBottom, 0.5* lenTopEdge()+ posOnTop);
     }
 }

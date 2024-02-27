@@ -109,13 +109,14 @@ namespace LVL1 {
     ToolHandle<IeFEXFillEDM> m_eFEXFillEDMTool {this, "eFEXFillEDMTool", "LVL1::eFEXFillEDM", "Tool to fille eFEX EDMs"};
 
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerSGKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
+    SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 
 
     SG::WriteHandleKey< xAOD::eFexEMRoIContainer > m_eFexOutKey {this,"Key_eFexEMOutputContainer","L1_eEMRoI","Output eFexEM TOB container"};
     SG::WriteHandleKey< xAOD::eFexEMRoIContainer > m_eFexEMxTOBOutKey {this,"Key_eFexEMxTOBOutputContainer","L1_eEMxRoI","Output eFexEM xTOB container"};
-    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauHeuristicOutKey {this,"Key_eFexTauOutputContainer","L1_eTauRoI","Output eFexTau TOB container"};
-    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauHeuristicxTOBOutKey {this,"Key_eFexTauxTOBOutputContainer","L1_eTauxRoI","Output eFexTau xTOB container"};
-    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauBDTOutKey {this,"Key_eFexTauBDTOutputContainer","L1_eTauBDTRoI","Output eFexTau BDT TOB container"};
-    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauBDTxTOBOutKey {this,"Key_eFexTauBDTxTOBOutputContainer","L1_eTauBDTxRoI","Output eFexTau BDT xTOB container"};
+    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauActiveOutKey {this,"Key_eFexTauOutputContainer","L1_eTauRoI","Output eFexTau active (BDT/heuristic) algorithm TOB container"};
+    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauActivexTOBOutKey {this,"Key_eFexTauxTOBOutputContainer","L1_eTauxRoI","Output eFexTau active (BDT/heuristic) algorithm xTOB container"};
+    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauAltOutKey {this,"Key_eFexAltTauOutputContainer","","Output eFexTau alternative (BDT/heuristic) algorithm TOB container"};
+    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauAltxTOBOutKey {this,"Key_eFexAltTauxTOBOutputContainer","","Output eFexTau alternative (BDT/heuristic) algorithm xTOB container"};
     ToolHandle<IeFEXFPGATowerIdProvider> m_eFEXFPGATowerIdProviderTool {this, "eFEXFPGATowerIdProviderTool", "LVL1::eFEXFPGATowerIdProvider", "Tool that provides tower-FPGA mapping"};
     ToolHandle<IeFEXFPGA> m_eFEXFPGATool {this, "eFEXFPGATool", "LVL1::eFEXFPGA", "Tool that simulates the FPGA hardware"};
 

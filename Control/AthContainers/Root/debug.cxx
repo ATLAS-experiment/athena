@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -64,8 +64,8 @@ void print_aux_vars (const SG::auxid_set_t& auxids)
               << reg.getClassName(id) << "::" << reg.getName(id) << " "
               << "[" << reg.getTypeName(id);
 
-    SG::AuxTypeRegistry::Flags flags = reg.getFlags(id);
-    if (flags & SG::AuxTypeRegistry::Flags::Atomic) {
+    SG::AuxVarFlags flags = reg.getFlags(id);
+    if (flags & SG::AuxVarFlags::Atomic) {
       std::cout << " (atomic)";
     }
 

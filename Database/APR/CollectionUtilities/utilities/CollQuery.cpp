@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -267,22 +267,18 @@ int main(int argc, const char *argv[])
          const pool::ICollectionDescription &description = collection->description();
          unsigned int maxNameSize = 0;
          unsigned int maxTypeNameSize = 0;
-         for( int f=0; f < description.numberOfCollectionFragments(); f++ ) {
-            for( int c=0; c < description.numberOfAttributeColumns( f ); c++ ) {
-               const pool::ICollectionColumn&	column = description.attributeColumn(c, f);
+         for( int c=0; c < description.numberOfAttributeColumns(); c++ ) {
+               const pool::ICollectionColumn&	column = description.attributeColumn(c);
                if( maxNameSize < column.name().size() ) 
                   maxNameSize = column.name().size();
                if( maxTypeNameSize < column.type().size() ) 
                   maxTypeNameSize = column.type().size();
-            }
          }
 
 /*
   std::cout << std::endl;
   std::cout << "Collection name: " << description.name() << std::endl;
   std::cout << "Collection type: " << description.type() << std::endl;
-  std::cout << "Number of collection fragments: " 
-  << description.numberOfCollectionFragments() << std::endl;
   std::cout << "Number of tokens is: " 
   << description.numberOfTokenColumns() << std::endl;
   std::cout << "Number of attributes is: " 
@@ -423,10 +419,6 @@ int main(int argc, const char *argv[])
                cout << endl;
             }
 
-/*
-  for ( coral::AttributeList::const_iterator iter = attribList.begin();
-  iter != attribList.end(); ++iter ) 
-*/
             if( !maxEvents.specified() || evtCounter <= maxEvents.get()  )
             {
                std::cout.width(idWidth);
@@ -443,8 +435,6 @@ int main(int argc, const char *argv[])
 
                for (unsigned int j=0; j<nAttrib; ++j)
                {
-                  //attribName = iter->specification().name();
-                  //attribTypeName = iter->specification().typeName();
                   attribName = attribList[j].specification().name();
                   attribTypeName = attribList[j].specification().typeName();
                   attribNames.push_back(attribName);

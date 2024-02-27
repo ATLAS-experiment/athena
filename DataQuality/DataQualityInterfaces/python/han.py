@@ -21,6 +21,8 @@ def copyMetadata(newgroup: dqi.HanConfigAssessor, oldgroup: dqi.HanConfigAssesso
         newgroup.SetAlgRefName(algrefname)
     for par in oldgroup.GetAllAlgPars():
         newgroup.AddAlgPar(par)
+    for par in oldgroup.GetAllAlgStrPars():
+        newgroup.AddAlgStrPar(par)
     for lim in oldgroup.GetAllAlgLimits():
         newgroup.AddAlgLimit(lim)
     for ann in oldgroup.GetAllAnnotations():

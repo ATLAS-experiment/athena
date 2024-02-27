@@ -75,13 +75,10 @@ void SCT_ServMatFactoryFS::create(GeoPhysVol *motherP,GeoPhysVol *motherM)
   double minRofGap  =       1089.0*Gaudi::Units::mm;
   double phiWid=(70.*Gaudi::Units::mm)/outROfIDet;   
   double safetyGap=1.*Gaudi::Units::mm;
-  const GeoShape* railGap1=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
-					-phiWid/2.,phiWid);
-  const GeoShape* railGap2=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
-					-phiWid/2.+M_PI,phiWid);
-  // In case they don't get used. 
-  railGap1->ref(); 
-  railGap2->ref(); 
+  GeoIntrusivePtr<const GeoShape> railGap1{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
+					                                              -phiWid/2.,phiWid)};
+  GeoIntrusivePtr<const GeoShape> railGap2{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
+					                                              -phiWid/2.+M_PI,phiWid)};
 
  
   // Build general services:
@@ -89,7 +86,7 @@ void SCT_ServMatFactoryFS::create(GeoPhysVol *motherP,GeoPhysVol *motherM)
   for (unsigned int ii =0; ii < sctGenServices->size(); ii++) {
 
     InDetDD::GenericTubeMaker tubeHelper((*sctGenServices)[ii]);
-    const GeoShape * serviceTubeTmp = tubeHelper.buildShape();
+    GeoIntrusivePtr<const GeoShape> serviceTubeTmp{tubeHelper.buildShape()};
 
     std::string logName =  tubeHelper.name();
     if (logName.empty()) {
@@ -107,7 +104,7 @@ void SCT_ServMatFactoryFS::create(GeoPhysVol *motherP,GeoPhysVol *motherM)
 
     const GeoPcon* servicePcon = nullptr; // helper shape 
 
-    const GeoShape* serviceTube = serviceTubeTmp;
+    GeoIntrusivePtr<const GeoShape> serviceTube{serviceTubeTmp};
     if( tubeHelper.volData().maxRadius() > minRofGap && tubeHelper.volData().phiStart() < phiWid/2.)  {
 
       // GeoModel doesn't calculate volume correctly so we calculate the cutout volume.
@@ -145,7 +142,7 @@ void SCT_ServMatFactoryFS::create(GeoPhysVol *motherP,GeoPhysVol *motherM)
       } else {
 	// Here we have SctHSP pcon
 	// Break it into 4 individual placements: 1 tube, 1 cone and 2 tubs
-	servicePcon = dynamic_cast<const GeoPcon*>(serviceTube);
+	servicePcon = dynamic_cast<const GeoPcon*>(serviceTube.get());
 	if(servicePcon==nullptr || servicePcon->getNPlanes()!=3) continue;
 
 	// Shape 1. Tube. Rmax = Rmin of the cutout
@@ -198,7 +195,6 @@ void SCT_ServMatFactoryFS::create(GeoPhysVol *motherP,GeoPhysVol *motherM)
 	tubeHelper.placeVolTwoSide(motherP,motherM,servPhysDown);
       }
 
-      serviceTube->unref();
     }
 
   }

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger RDO->RDO_TRIG athena test of the Cosmic_run3_v1 menu
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log
@@ -24,11 +24,13 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'mc_cosmics'
 ex.threads = 4
 ex.concurrent_events = 4
-ex.args = '-c "setMenu=\'Cosmic_run3_v1\';doCosmics=True;doWriteBS=False;doWriteRDOTrigger=True;from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.enableL1CaloPhase1=False;from IOVDbSvc.CondDB import conddb;conddb.addOverride(\'/PIXEL/PixelModuleFeMask\',\'PixelModuleFeMask-SIM-MC16-000-03\');conddb.addOverride(\'/TRT/Calib/PID_NN\', \'TRTCalibPID_NN_v1\');conddb.addOverride(\'/PIXEL/PixelClustering/PixelNNCalibJSON\', \'PixelNNCalibJSON-SIM-RUN2-000-02\')"'
+ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
+            'Beam.Type=BeamType.Cosmics']
+ex.args = '--CA'
 
 test = Test.Test()
 test.art_type = 'grid'

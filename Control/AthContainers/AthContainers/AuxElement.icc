@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxElement.icc
@@ -123,7 +123,7 @@ void ConstAuxElement::setIndex (size_t index,
  * or @c ConstAccessor classes above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::const_reference_type
+typename ConstAuxElement::ConstAccessor<T, ALLOC>::const_reference_type
 ConstAuxElement::auxdata (const std::string& name) const
 {
   return ConstAccessor<T, ALLOC>(name, "")(*this);
@@ -141,7 +141,7 @@ ConstAuxElement::auxdata (const std::string& name) const
  * or @c ConstAccessor classes above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::const_reference_type
+typename ConstAuxElement::ConstAccessor<T, ALLOC>::const_reference_type
 ConstAuxElement::auxdata (const std::string& name,
                           const std::string& clsname) const
 {
@@ -159,7 +159,7 @@ ConstAuxElement::auxdata (const std::string& name,
  * class above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::const_reference_type
+typename ConstAuxElement::ConstAccessor<T, ALLOC>::const_reference_type
 ConstAuxElement::auxdataConst (const std::string& name) const
 {
   return ConstAccessor<T, ALLOC>(name, "")(*this);
@@ -177,7 +177,7 @@ ConstAuxElement::auxdataConst (const std::string& name) const
  * class above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::const_reference_type
+typename ConstAuxElement::ConstAccessor<T, ALLOC>::const_reference_type
 ConstAuxElement::auxdataConst (const std::string& name,
                                const std::string& clsname) const
 {
@@ -236,7 +236,7 @@ bool ConstAuxElement::isAvailableWritableAsDecoration (const std::string& name,
  * or variables already marked as decorations.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::reference_type
+typename ConstAuxElement::Decorator<T, ALLOC>::reference_type
 ConstAuxElement::auxdecor (const std::string& name) const
 {
   return Decorator<T, ALLOC>(name, "")(*this);
@@ -258,7 +258,7 @@ ConstAuxElement::auxdecor (const std::string& name) const
  * or variables already marked as decorations.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::reference_type
+typename ConstAuxElement::Decorator<T, ALLOC>::reference_type
 ConstAuxElement::auxdecor (const std::string& name,
                            const std::string& clsname) const
 {
@@ -445,7 +445,7 @@ ConstAuxElement::TypelessConstAccessor::auxid() const
 template <class T, class ALLOC>
 inline
 ConstAuxElement::ConstAccessor<T, ALLOC>::ConstAccessor (const std::string& name)
-  : ConstAccessor (name, "", SG::AuxTypeRegistry::Flags::None)
+  : ConstAccessor (name, "", SG::AuxVarFlags::None)
 {
 }
 
@@ -461,7 +461,7 @@ template <class T, class ALLOC>
 inline
 ConstAuxElement::ConstAccessor<T, ALLOC>::ConstAccessor
   (const std::string& name, const std::string& clsname)
-  : ConstAccessor (name, clsname, SG::AuxTypeRegistry::Flags::None)
+  : ConstAccessor (name, clsname, SG::AuxVarFlags::None)
 {
 }
 
@@ -479,7 +479,7 @@ inline
 ConstAuxElement::ConstAccessor<T, ALLOC>::ConstAccessor
   (const std::string& name,
    const std::string& clsname,
-   const SG::AuxTypeRegistry::Flags flags)
+   const SG::AuxVarFlags flags)
     : m_auxid (SG::AuxTypeRegistry::instance().getAuxID<T, ALLOC> (name, clsname, flags))
 {
 }
@@ -609,7 +609,7 @@ ConstAuxElement::ConstAccessor<T, ALLOC>::auxid() const
 template <class T, class ALLOC>
 inline
 ConstAuxElement::Decorator<T, ALLOC>::Decorator (const std::string& name)
-  : Decorator (name, "", SG::AuxTypeRegistry::Flags::None)
+  : Decorator (name, "", SG::AuxVarFlags::None)
 {
 }
 
@@ -625,7 +625,7 @@ template <class T, class ALLOC>
 inline
 ConstAuxElement::Decorator<T, ALLOC>::Decorator (const std::string& name,
                                                  const std::string& clsname)
-  : Decorator (name, clsname, SG::AuxTypeRegistry::Flags::None)
+  : Decorator (name, clsname, SG::AuxVarFlags::None)
 {
 }
 
@@ -643,7 +643,7 @@ inline
 ConstAuxElement::Decorator<T, ALLOC>::Decorator
   (const std::string& name,
    const std::string& clsname,
-   const SG::AuxTypeRegistry::Flags flags)
+   const SG::AuxVarFlags flags)
   : m_auxid (SG::AuxTypeRegistry::instance().getAuxID<T, ALLOC> (name, clsname, flags))
 {
 }
@@ -1116,7 +1116,7 @@ AuxElement::Accessor<T, ALLOC>::isAvailableWritable (AuxElement& e) const
  * class above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::reference_type
+typename AuxElement::Accessor<T, ALLOC>::reference_type
 AuxElement::auxdata (const std::string& name)
 {
   return Accessor<T, ALLOC>(name, "")(*this);
@@ -1134,7 +1134,7 @@ AuxElement::auxdata (const std::string& name)
  * class above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::reference_type
+typename AuxElement::Accessor<T, ALLOC>::reference_type
 AuxElement::auxdata (const std::string& name,
                      const std::string& clsname)
 {
@@ -1152,7 +1152,7 @@ AuxElement::auxdata (const std::string& name,
  * or @c ConstAccessor classes above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::const_reference_type
+typename AuxElement::Accessor<T, ALLOC>::const_reference_type
 AuxElement::auxdata (const std::string& name) const
 {
   return Accessor<T, ALLOC>(name, "")(*this);
@@ -1170,7 +1170,7 @@ AuxElement::auxdata (const std::string& name) const
  * or @c ConstAccessor classes above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::const_reference_type
+typename AuxElement::Accessor<T, ALLOC>::const_reference_type
 AuxElement::auxdata (const std::string& name,
                      const std::string& clsname) const
 {
@@ -1188,7 +1188,7 @@ AuxElement::auxdata (const std::string& name,
  * class above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::const_reference_type
+typename AuxElement::Accessor<T, ALLOC>::const_reference_type
 AuxElement::auxdataConst (const std::string& name) const
 {
   return Accessor<T, ALLOC>(name, "")(*this);
@@ -1206,7 +1206,7 @@ AuxElement::auxdataConst (const std::string& name) const
  * class above.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::const_reference_type
+typename AuxElement::Accessor<T, ALLOC>::const_reference_type
 AuxElement::auxdataConst (const std::string& name,
                           const std::string& clsname) const
 {
@@ -1283,7 +1283,7 @@ bool AuxElement::isAvailableWritableAsDecoration (const std::string& name,
  * or variables already marked as decorations.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::reference_type
+typename AuxElement::Decorator<T, ALLOC>::reference_type
 AuxElement::auxdecor (const std::string& name) const
 {
   return Decorator<T, ALLOC>(name, "")(*this);
@@ -1305,7 +1305,7 @@ AuxElement::auxdecor (const std::string& name) const
  * or variables already marked as decorations.
  */
 template <class T, class ALLOC>
-typename AuxDataTraits<T, ALLOC>::reference_type
+typename AuxElement::Decorator<T, ALLOC>::reference_type
 AuxElement::auxdecor (const std::string& name,
                       const std::string& clsname) const
 {

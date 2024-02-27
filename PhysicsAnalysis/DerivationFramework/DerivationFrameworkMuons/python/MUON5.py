@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_MUON5.py
@@ -9,17 +9,117 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
+import AthenaCommon.SystemOfUnits as Units
+
+def Muon5MumuSelectionCfg(ConfigFlags, 
+                      MuonContainer="Muons", 
+                      IdTrackContainer="InDetTrackParticles",
+                      applyTrigger = False):
+    #copied from MUON1
+    acc = ComponentAccumulator()
+    from DerivationFrameworkMuons.MuonsToolsConfig import DiMuonTaggingAlgCfg
+    ### Z mumu OC events
+    acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+                                  name                    = "DiMuonTaggingZmumuOC",
+                                  Mu1PtMin                = 24*Units.GeV,
+                                  Mu1AbsEtaMax            = 2.5,
+                                  Mu1RequireQual          = True,
+                                  Mu2PtMin                = 3.0*Units.GeV,
+                                  Mu2RequireQual          = True,
+                                  UseTrackProbe           = False,
+                                  MuonContainerKey        = MuonContainer,
+                                  TrackContainerKey       = IdTrackContainer, 
+                                  InvariantMassLow        = 60*Units.GeV,
+                                  IDTrackThinningConeSize = 0.4,
+                                  applyTrigger            = applyTrigger, 
+                                  BranchPrefix            = "Muon1ZmumuOC"))
+    
+    ### Z mumu SC events
+    acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+                                  name                    = "DiMuonTaggingZmumuSC",
+                                  Mu1PtMin                = 24*Units.GeV,
+                                  Mu1AbsEtaMax            = 2.5,
+                                  Mu1RequireQual          = True,
+                                  Mu2PtMin                = 3.0*Units.GeV,
+                                  Mu2RequireQual          = True,
+                                  UseTrackProbe           = False,
+                                  MuonContainerKey        = MuonContainer,
+                                  TrackContainerKey       = IdTrackContainer,
+                                  OppositeCharge          = False,
+                                  applyTrigger            = applyTrigger,
+                                  InvariantMassLow        = 60*Units.GeV,
+                                  BranchPrefix            = "Muon1ZmumuSC")) 
+    return acc
+
+def Muon5ElElSelectionCfg(flags):
+    #copied from EGAM1
+    acc = ComponentAccumulator()
+
+    # ====================================================================
+    # 3. di-electron invariant mass for events passing the Z->ee
+    #    selection for the e efficiencies with tag and probe.
+    #    Based on single e trigger, for reco (central) and ID SF(central)
+    #
+    #    1 tight e, central, pT>25 GeV
+    #    1 e, central, pT>4 GeV
+    #    opposite-sign + same-sign
+    #    mee>50 GeV (cut applied in skimming step later)
+    # ====================================================================
+
+    requirement_tag = " && ".join(
+        ["(Electrons.DFCommonElectronsLHMedium)", "(Electrons.pt > 24.5*GeV)"]
+    )
+
+    requirement_probe = " && ".join(
+        ["(Electrons.DFCommonElectronsLHLoose)", "(Electrons.pt > 3.0*GeV)"]
+    )
+
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGInvariantMassTool(
+            name="EGAM1_ZEEMassTool3",
+            Object1Requirements=requirement_tag,
+            Object2Requirements=requirement_probe,
+            StoreGateEntryName="EGAM1_DiElectronMass3",
+            Mass1Hypothesis=0.511 * Units.MeV,
+            Mass2Hypothesis=0.511 * Units.MeV,
+            Container1Name="Electrons",
+            Container2Name="Electrons",
+            CheckCharge=False,
+            DoTransverseMass=False,
+            MinDeltaR=0.0,
+        )
+    )
+
+    return acc
+
 
 # Main algorithm config
 def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for MUON5"""
     acc = ComponentAccumulator()
+    
+    kwargs.setdefault("MuonContainer", "Muons")
+    kwargs.setdefault("IdTrkContainer", "InDetTrackParticles")
+    kwargs.setdefault("MsTrkContainer", "ExtrapolatedMuonTrackParticles")
+    kwargs.setdefault("scheduleThinning", True)
 
     # --------------------
     # Common augmentations
     # --------------------
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    
+    ### Basic muon selection
+    diMuonSelAcc = Muon5MumuSelectionCfg(ConfigFlags,
+                                     MuonContainer= kwargs["MuonContainer"], 
+                                     IdTrackContainer=kwargs["IdTrkContainer"])
+    # ------------
+    # Augmentation
+    # ------------
+    # Strings for applying cuts based on augmentations
+    dimuon_flags = ["pass{flag}".format(flag = algo.BranchPrefix) for algo in diMuonSelAcc.getEventAlgos()]
+    skimmingORs = [f"DIMU_{flag} > 0" for flag in dimuon_flags ]
+    acc.merge(diMuonSelAcc)
 
     # ------------
     # Augmentation
@@ -30,10 +130,21 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     muonThinFlags = []
     trkThinFlags = []
     
+    Muon5ElElSelectionTool = acc.popToolsAndMerge(Muon5ElElSelectionCfg(ConfigFlags))
+    acc.addPublicTool(Muon5ElElSelectionTool)
+    MUON5AugmentTools.append(Muon5ElElSelectionTool)
+    skimmingORs.append("(count( EGAM1_DiElectronMass3 > 60.0*GeV ) >= 1)")
+
+    
     ### isolation decorations
     from DerivationFrameworkMuons.TrackIsolationDecoratorConfig import TrackIsolationCfg
     acc.merge(TrackIsolationCfg(ConfigFlags,TrackCollection="InDetTrackParticles", TrackSelections = trkThinFlags))
     acc.merge(TrackIsolationCfg(ConfigFlags,TrackCollection="ExtrapolatedMuonTrackParticles"))
+
+    from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
+    contNames = [ "Muons", "Electrons", "Photons" ]
+    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = kwargs['StreamName']))
+
     ### Calo deposits 
     from DerivationFrameworkMuons.MuonsToolsConfig import MuonCaloDepositAlgCfg
     acc.merge(MuonCaloDepositAlgCfg(ConfigFlags,
@@ -54,22 +165,34 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     # Skimming
     # --------
     
-    # Apply skimming requirement: at least one electron, muon or tau
-    eleRequirements = '(Electrons.pt > 5*GeV) && (abs(Electrons.eta) < 2.6) && (Electrons.Loose || Electrons.DFCommonElectronsLHLoose)'
-    muRequirements  = '(Muons.muonType == 0) && (Muons.pt > 5*GeV) && (abs(Muons.eta) < 2.6)'
-    tauRequirements = '(TauJets.pt > 15*GeV) && (abs(TauJets.charge)==1.0) && ((TauJets.nTracks == 1) || (TauJets.nTracks == 3)) && (abs(TauJets.eta) < 2.6)'
-
-    eSelection   = '(count('+eleRequirements+') >= 1)'
-    mSelection   = '(count('+muRequirements +') >= 1)'
-    tauSelection = '(count('+tauRequirements+') >= 1)'
+    #we are applying a Zmumu, Zee and a ttbar emu selection. At the moment tauJets selection is not included    
+    #emu selection
+    elReq1 = '(Electrons.pt > 25*GeV && abs(Electrons.eta) < 2.5 && Electrons.DFCommonElectronsLHMedium)'
+    elReq2 = '(Electrons.pt > 3*GeV && abs(Electrons.eta) < 2.8 && Electrons.DFCommonElectronsLHLoose)'
+    muReq1 = '(Muons.DFCommonMuonPassPreselection && Muons.DFCommonMuonPassIDCuts && Muons.pt>25*GeV && abs(Muons.eta) <2.5)'
+    muReq2 = '(Muons.DFCommonMuonPassPreselection && Muons.DFCommonMuonPassIDCuts && Muons.pt>3*GeV && abs(Muons.eta) <2.8)'
     
-    lepSelection = eSelection+' || '+mSelection+' || '+tauSelection
+    el1 = '(count('+elReq1+') >= 1)'
+    el2 = '(count('+elReq2+') >= 1)'
+    mu1 = '(count('+muReq1+') >= 1)'
+    mu2 = '(count('+muReq2+') >= 1)'
+    
+    emuSel='(('+el1+"&&"+mu2+')'+'||'+'('+el2+"&&"+mu1+'))'
+    skimmingORs.append(emuSel)
+    
+    lepSelection = '||'.join(skimmingORs)
     
     MUON5SkimmingTools = []
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import xAODStringSkimmingToolCfg
+    # if we are running on upgrade MC (no trigger), we disable the TDT inside the skimming tool. 
+    # The TDT is not actually used as we skim only on offline objects. 
+    SkimArgs={}
+    if  not (ConfigFlags.Reco.EnableTrigger or ConfigFlags.Trigger.triggerConfig == 'INFILE'): 
+        SkimArgs["TrigDecisionTool"] = ""
     MUON5SkimmingTool1 = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(ConfigFlags,
                                                                           name       = "MUON5SkimmingTool1",
-                                                                          expression = lepSelection))
+                                                                          expression = lepSelection,
+                                                                          **SkimArgs))
     MUON5SkimmingTools.append(MUON5SkimmingTool1) 
 
     # --------
@@ -83,7 +206,7 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     MUON5TrackThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(ConfigFlags,
                                                                         name                    = "MUON5TrackThinningTool",
                                                                         StreamName              = kwargs['StreamName'],
-                                                                        SelectionString         = "abs(DFCommonInDetTrackZ0AtPV) < 10.0",
+                                                                        SelectionString         = "abs(DFCommonInDetTrackZ0AtPV) < 35.0 && abs(InDetTrackParticles.eta) < 3.2",
                                                                         InDetTrackParticlesKey  = "InDetTrackParticles")
                                                     )
     
@@ -94,10 +217,15 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
     from DerivationFrameworkCalo.CaloCellDFGetterConfig import thinCaloCellsForDFCfg
     from DerivationFrameworkMuons.MuonsToolsConfig import AnalysisMuonThinningAlgCfg
     
+    # protect against missing forward tracks in Upgrade 
+    fwdTracks = "InDetForwardTrackParticles"
+    if fwdTracks not in ConfigFlags.Input.Collections:
+        fwdTracks = "" 
     acc.merge(AnalysisMuonThinningAlgCfg(ConfigFlags,
                                          MuonPassFlags = muonThinFlags,
                                          TrkPassFlags = trkThinFlags,
-                                         StreamName = kwargs['StreamName']))
+                                         StreamName = kwargs['StreamName'], 
+                                         IdTrkFwdThinning=fwdTracks))
     
 
     # keep topoclusters around muons
@@ -119,6 +247,16 @@ def MUON5KernelCfg(ConfigFlags, name='MUON5Kernel', **kwargs):
                                                                        CaloClCollectionSGKey   = "egammaClusters",
                                                                        ConeSize                = 0.4))
     MUON5ThinningTools.append(MUON5ThinningTool2)
+
+    # keep egammaclusters around photons
+    MUON5ThinningTool3 = acc.getPrimaryAndMerge(CaloClusterThinningCfg(ConfigFlags,
+                                                                       name                    = "MUON5ThinningTool3",
+                                                                       StreamName              = kwargs['StreamName'],
+                                                                       SGKey                   = "Photons",
+                                                                       SelectionString         = "Photons.pt>4*GeV",
+                                                                       CaloClCollectionSGKey   = "egammaClusters",
+                                                                       ConeSize                = 0.4))
+    MUON5ThinningTools.append(MUON5ThinningTool3)
     
     ### cell thinning
     acc.merge(thinCaloCellsForDFCfg(ConfigFlags,
@@ -205,19 +343,12 @@ def MUON5Cfg(ConfigFlags):
                                             "Electrons",
                                             "Photons",
                                             "Muons",
-                                            "AntiKt4EMPFlowJets",
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
-                                            "MET_Baseline_AntiKt4EMPFlow",
-                                            "TauJets",
-                                            "TauJets_MuonRM",
-                                            "DiTauJets",
-                                            "DiTauJetsLowPt",
                                           ]
     
 
-    MUON5SlimmingHelper.AllVariables = ["egammaClusters",
+    MUON5SlimmingHelper.AllVariables = [
+                                        "egammaClusters",
                                         "CaloCalTopoClusters",
                                         "MuonClusterCollection",
                                         "TopoClusterIsoCentralEventShape",
@@ -249,7 +380,7 @@ def MUON5Cfg(ConfigFlags):
         "ptcone20_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000",
         "ptcone30_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000",
         "ptcone40_Nonprompt_All_MaxWeightTTVA_pt500", "ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
-        "topoetconecoreConeEnergyCorrection", "topoetconecoreConeSCEnergyCorrection",
+        "topoetconecoreConeEnergyCorrection"
     ]
     ElectronsExtraContent = [
         ".".join(
@@ -279,7 +410,8 @@ def MUON5Cfg(ConfigFlags):
                 "ptvarcone40_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500",
                 "ptcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone30_Nonprompt_All_MaxWeightTTVA_pt500",
                 "ptcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptcone40_Nonprompt_All_MaxWeightTTVA_pt500",
-                "ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000"
+                "ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000",
+                "msInnerMatchChi2",
             ]   
         )
     ]
@@ -287,7 +419,7 @@ def MUON5Cfg(ConfigFlags):
     InDetTrackParticlesExtraContent = [
         ".".join(
             [
-                "InDetTrackParticles",
+                "InDetTrackParticles","TTVA_AMVFVertices.TTVA_AMVFWeights",
                 "btagIp_d0.btagIp_z0SinTheta.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty",
                 "numberOfNextToInnermostPixelLayerHits.numberOfInnermostPixelLayerSharedHits",
                 "numberOfInnermostPixelLayerSplitHits.numberOfPixelSplitHits.leptonID"

@@ -309,7 +309,11 @@ def SCT_MonitorConditionsToolCfg(flags, name="InDetSCT_MonitorConditionsTool", c
 
     if "FolderDb" not in cond_kwargs:
         cond_kwargs["FolderDb"] = cond_kwargs["Folder"]
-    acc.merge(addFolders(flags, cond_kwargs["FolderDb"], cond_kwargs["dbInstance"], className="CondAttrListCollection"))
+    if "Modifiers" not in cond_kwargs:
+        cond_kwargs["Modifiers"] = ""
+    if "FolderTag" not in cond_kwargs:
+        cond_kwargs["FolderTag"] = None
+    acc.merge(addFolders(flags, cond_kwargs["FolderDb"], cond_kwargs["dbInstance"], className="CondAttrListCollection", tag=cond_kwargs["FolderTag"], modifiers=cond_kwargs["Modifiers"]))
 
     acc.addCondAlgo(CompFactory.SCT_MonitorCondAlg(name=cond_kwargs["MonitorCondAlgName"],
                                                    ReadKey=cond_kwargs["Folder"]))

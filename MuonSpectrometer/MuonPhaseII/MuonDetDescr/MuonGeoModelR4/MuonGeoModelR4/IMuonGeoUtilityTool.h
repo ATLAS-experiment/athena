@@ -23,19 +23,9 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
     public:
          /// Gaudi interface ID
         DeclareInterfaceID(IMuonGeoUtilityTool, 1, 0);
-       
-        /// Abbriviate the type definitions of the maps produced by the SqLite publisher
-        using alignNodeMap = std::map<std::string, GeoAlignableTransform*>;
-        using physNodeMap = std::map<std::string, GeoFullPhysVol*>;
-        using alignedPhysNodes = std::map<PVConstLink, const GeoAlignableTransform*>;
-        /// Loops over the publised alignable transforms and the published alignable nodes and produces a map
-        /// of full phys vols that have alignable transformations attached
-        virtual alignedPhysNodes selectAlignableVolumes(const physNodeMap& publishedPhysVols, 
-                                                       const alignNodeMap& publishedAlignNodes) const = 0;
 
-        /// Returns the next alignable transformation in the GeoModel tree hierachy upstream
-        virtual const GeoAlignableTransform* findAlignableTransform(const PVConstLink& physVol,
-                                                                    const alignedPhysNodes& alignNodes) const = 0;
+        /// Returns the next Geo alignable transform in the GeoModelTree upstream
+        virtual const GeoAlignableTransform* findAlignableTransform(const PVConstLink& physVol) const = 0;
                                                              
         
         /// Navigates throughs the volume to find a Box / Prd shape

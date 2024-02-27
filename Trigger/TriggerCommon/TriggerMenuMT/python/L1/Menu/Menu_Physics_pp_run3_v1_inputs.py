@@ -102,7 +102,10 @@ def defineInputsMenu():
 
             # eEM thresholds for production      
             'eEMSPARE1', 'eEMSPARE2', 'eEMSPARE3', 'eEMSPARE4',
+            
+            ('ZeroBiasA', 1)
         ],
+
     })
 
     topoBoards["Topo1"]["connectors"].append({ # second optical connector
@@ -118,12 +121,12 @@ def defineInputsMenu():
 
             (None,3),
 
-            'eTAU20L', 'eTAU20M', 'eTAU30',
-            'eTAU35', 'eTAU60', 'eTAU80', 'eTAU140',
+            'eTAU20L', 'eTAU20M', 'eTAU30', 'eTAU30M',
+            'eTAU35', 'eTAU35M', 'eTAU60', 'eTAU80', 'eTAU140',
             'eTAU40HM', 
          
             # eTAU thresholds for production
-            'eTAUSPARE6', 'eTAUSPARE7',
+            #'eTAUSPARE6', 'eTAUSPARE7',
 
             None, None, 
 
@@ -217,16 +220,19 @@ def defineInputsMenu():
     
             # LAr saturation for Phase-I
             ('LArSaturation',1),
-            (None,1),
+            # ZeroBias Topo Algo
+            ('ZeroBiasB', 1),
+
+         #   (None,1),
 
             # energy thresholds
             # commissioning
             # jXE
-            ('jXE70',1), ('jXE80',1), ('jXE100',1), ('jXE110',1), ('jXE500',1),
+            ('jXE60',1), ('jXE70',1), ('jXE80',1), ('jXE90',1), ('jXE100',1), ('jXE110',1), ('jXE120',1), ('jXE500',1),
             # gXE
-            ('gXERHO70',1), ('gXERHO100',1),
+            #('gXERHO70',1), ('gXERHO100',1),
             ('gXENC70',1), ('gXENC100',1),
-            ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1),
+            ('gXEJWOJ60',1), ('gXEJWOJ70',1), ('gXEJWOJ80',1), ('gXEJWOJ100',1), ('gXEJWOJ110',1), ('gXEJWOJ120',1), ('gXEJWOJ500',1),
             # gTE
             ('gTE200',1),
 
@@ -246,8 +252,8 @@ def defineInputsMenu():
 
             # production
             # decrement jXESPARE for additional heavy ion jTE thresholds
-            ('jXESPARE10',1), ('jXESPARE11',1), ('jXESPARE12',1), ('jXESPARE13',1), 
-            ('jXESPARE14',1),
+            #('jXESPARE10',1), ('jXESPARE11',1), ('jXESPARE12',1), ('jXESPARE13',1), 
+            #('jXESPARE14',1),
 
         ]
     })
@@ -313,8 +319,8 @@ def defineInputsMenu():
                     TopoMenuDef( '0INVM70-27DPHI32-eEM9s1-eEM9s6',       outputbits = 7 ),
                     TopoMenuDef( '0INVM70-27DPHI32-eEM9sl1-eEM9sl6',     outputbits = 8 ),
                     TopoMenuDef( '0INVM9-eEM9ab-eEMab',                  outputbits = 9 ),
-                    TopoMenuDef( 'INVM_BOOSTDR_Ranges_eEM12sl6',         outputbits = (10,11), outputlines = ['0INVM30-2DR15-2eEM12sl6', 
-                                                                                                              '25INVM70-13DR25-2eEM12sl6']),  
+                    TopoMenuDef( 'INVM_BOOSTDR_Ranges_eEM12sl6',         outputbits = (10,11), outputlines = ['0INVM30-2DR15-eEM12sl1-eEM12sl6', 
+                                                                                                              '25INVM70-13DR25-eEM12sl1-eEM12sl6']),  
 
                 ]
             },
@@ -335,6 +341,7 @@ def defineInputsMenu():
                                                                                                                    '400INVM-0DPHI24-AjJ60s6-AjJ50s6',
                                                                                                                    '400INVM-0DPHI22-AjJ60s6-AjJ50s6',
                                                                                                                    '400INVM-0DPHI20-AjJ60s6-AjJ50s6'] ),
+                    TopoMenuDef( '0DPHI15-jXE27delay-jJ27s',        outputbits = 12),
                 ]
             }
         ]

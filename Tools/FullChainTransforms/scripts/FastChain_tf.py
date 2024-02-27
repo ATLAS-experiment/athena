@@ -44,14 +44,14 @@ def getTransform():
     addRecoSubsteps(executorSet)
 
     # Sim + Digi - factor these out into an importable function in time
-    executorSet.add(athenaExecutor(name = 'EVNTtoRDO', skeletonFile = 'FullChainTransforms/FastChainSkeleton.EVGENtoRDO.py',
+    executorSet.add(athenaExecutor(name = 'EVNTtoRDO', skeletonFile = None,
                                    skeletonCA = 'FullChainTransforms.FastChainSkeleton',
                                    substep = 'simdigi', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
                                    inData=['NULL','EVNT', 'RDO_BKG', 'BS_SKIM'],
                                    outData=['RDO','NULL'] ))
 
     # Sim + Overlay - execute with the argument --steering "doFCwOverlay"
-    executorSet.add(athenaExecutor(name = 'EVNTtoRDOwOverlay', skeletonFile = 'FullChainTransforms/FastChainSkeleton.EVGENtoRDOwOverlay.py',
+    executorSet.add(athenaExecutor(name = 'EVNTtoRDOwOverlay', skeletonFile = None,
                                    substep = 'simoverlay', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
                                    inData = ['NULL'], outData = ['NULL']))
 

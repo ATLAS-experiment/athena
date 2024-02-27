@@ -1,16 +1,13 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-
-# menu components   
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
     
 @AccumulatorCache
-def fastPhotonMenuSequenceCfg(flags,is_probe_leg=False):
+def fastPhotonSequenceCfg(flags,is_probe_leg=False):
     """Creates secpond step photon sequence"""
     
     TrigEgammaKeys = getTrigEgammaKeys()
@@ -43,17 +40,3 @@ def fastPhotonMenuSequenceCfg(flags,is_probe_leg=False):
     selAcc.addHypoAlgo(thePhotonHypo)
 
     return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaFastPhotonHypoToolFromDict,isProbe=is_probe_leg)
-
-
-
-def fastPhotonMenuSequence(flags, is_probe_leg=False):
-    """Creates secpond step photon sequence"""
-
-    if isComponentAccumulatorCfg():
-        return fastPhotonMenuSequenceCfg(flags,is_probe_leg=is_probe_leg)
-    else: 
-        return menuSequenceCAToGlobalWrapper(fastPhotonMenuSequenceCfg,flags, is_probe_leg=is_probe_leg)
-
-                         
-
-

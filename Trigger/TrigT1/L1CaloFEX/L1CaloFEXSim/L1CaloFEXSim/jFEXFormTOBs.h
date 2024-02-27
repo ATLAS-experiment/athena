@@ -14,8 +14,6 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXFormTOBs.h"
-#include "L1CaloFEXCond/jFEXDBCondData.h"
-#include "StoreGate/ReadCondHandleKey.h"
 
 namespace LVL1 {
 
@@ -23,6 +21,7 @@ namespace LVL1 {
 /*
  * The jFEXFormTOBs class provides functions for creating TOBs for jFEX objects
 */
+
 
 class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
 
@@ -36,7 +35,7 @@ class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
         virtual ~jFEXFormTOBs();
 
         virtual uint32_t formTauTOB  (int, int, int, int, int, bool, int, int) override;
-        virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int) override;
+        virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int, const std::pair<unsigned int, const std::vector<int>&>&) override;
         virtual uint32_t formLRJetTOB(int, int, int, int, bool, int, int) override;
         virtual uint32_t formSumETTOB(std::tuple<int,bool>&, std::tuple<int,bool>&, int ) override;
         virtual uint32_t formMetTOB  (int, int, bool, int ) override;
@@ -44,10 +43,11 @@ class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
         /** Internal data */
     private:
 
-        int Get_calibrated_SRj_ET(int, int, int );
+        int Get_calibrated_SRj_ET(int, int, const std::vector<int>& );
+        int Get_eta_calibrated_SRj_ET(int, int, unsigned int, int,  const std::vector<int>& );
         
-        SG::ReadCondHandleKey<jFEXDBCondData> m_BDToolKey {this, "BDToolKey", "jFEXDBParams", "DB tool key"};
-
+        
+        UnsignedIntegerProperty m_jetEtaCalibrationBeginTimestamp {this, "JetEtaCalibrationBeginTimestamp", 1704063600 /*2024-01-01, 00:00*/, "Earliest timestamp from which jet calibrations are binned in eta instead of ET"};
 };
 
 } // end of namespace

@@ -1,49 +1,88 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# Athena import(s):
-import AthenaCommon.CfgMgr as CfgMgr
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import Format
+from AthenaCommon.Logging import logging
+_log = logging.getLogger('AnalysisTriggerAlgsConfig.py')
 
-# Import the genConf made configurable:
-import AnalysisTriggerAlgs.AnalysisTriggerAlgsConf as Conf
+def RoIBResultToxAODCfg(flags):
+    if flags.Trigger.enableL1MuonPhase1 and not flags.Trigger.enableL1CaloLegacy:
+        # No Run-2 L1 RoIs -> nothing to covert to xAOD -> don't add RoIBResultToxAOD
+        _log.debug('Not adding RoIBResultToxAOD because no Run-2 L1 system is enabled by flags')
+        return ComponentAccumulator(), []
 
-class RoIBResultToxAOD( Conf.RoIBResultToxAOD ):
+    acc = ComponentAccumulator()
+    alg = CompFactory.RoIBResultToxAOD('RoIBResultToxAOD')
+    alg.DoMuon = flags.Detector.EnableMuon and not flags.Trigger.enableL1MuonPhase1
+    alg.DoCalo = flags.Detector.EnableCalo and flags.Trigger.enableL1CaloLegacy
 
-    def __init__( self, name = "RoIBResultToxAOD" ):
-        super( RoIBResultToxAOD, self ).__init__( name )
+    if flags.Input.Format is Format.POOL:
+        if str(alg.xAODKeyMuon) in flags.Input.Collections:
+            _log.debug('L1Muon xAOD already in the input file, setting RoIBResultToxAOD.DoMuon=False')
+            alg.DoMuon = False
+        allCaloOutputs = [k.Path for k in [alg.xAODKeyEmTau, alg.xAODKeyEsum, alg.xAODKeyJetEt, alg.xAODKeyJet]]
+        if all([k in flags.Input.Collections for k in allCaloOutputs]):
+            _log.debug('L1Calo xAOD already in the input file, setting RoIBResultToxAOD.DoCalo=False')
+            alg.DoCalo = False
 
-        # Get a logger:
-        from AthenaCommon.Logging import logging
-        log = logging.getLogger( 'RoIBResultToxAOD' )
+    if not alg.DoMuon and not alg.DoCalo:
+        _log.debug('Not adding RoIBResultToxAOD because both DoMuon and DoCalo properties are False')
+        return ComponentAccumulator(), []
 
-        #
-        # Set up the L1Calo tools:
-        #
-        log.info( "will add L1CPMTools instance to the algorithm" )
-        self.L1CPMTools = CfgMgr.LVL1__L1CPMTools( 'L1CPMTools' )
+    if flags.Input.Format is Format.BS:
+        from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
+        acc.merge(LVL1CaloRun2ReadBSCfg(flags, forRoIBResultToxAOD=True))
 
-        log.info( "will add L1JEMJetTools instance to the algorithm" )
-        self.L1JEMJetTools = CfgMgr.LVL1__L1JEMJetTools( 'L1JEMJetTools' )
+    # Create output list to return for use by the caller
+    outputList = []
+    if alg.DoMuon:
+        outputList += [
+            (alg.xAODKeyMuon.Type,  alg.xAODKeyMuon.Path)
+        ]
+        from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+        acc.merge(MuonGeoModelCfg(flags))
+        # RPC
+        from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
+        acc.merge(RPCCablingConfigCfg(flags))
+        #TGC
+        from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
+        acc.merge(TGCCablingConfigCfg(flags))
 
-        #
-        # Set up the muon RoI tools:
-        #
-        from AthenaCommon.DetFlags import DetFlags
-        if DetFlags.detdescr.Muon_on():
-            #Configure alignemnt and muon detector conditions algs
-            from MuonRecExample import MuonAlignConfig  # noqa: F401
-            #TGC and RPC RecRoiTools
-            from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConf import LVL1__TrigT1RPCRecRoiTool, LVL1__TrigT1TGCRecRoiTool
-            from AthenaConfiguration.AllConfigFlags import ConfigFlags
-            rpcRecRoiTool = LVL1__TrigT1RPCRecRoiTool("RPCRecRoiTool", UseRun3Config=ConfigFlags.Trigger.enableL1MuonPhase1)
-            self.RecRpcRoiTool = rpcRecRoiTool
-            tgcRecRoiTool = LVL1__TrigT1TGCRecRoiTool("TGCRecRoiTool", UseRun3Config=ConfigFlags.Trigger.enableL1MuonPhase1)
-            self.RecTgcRoiTool = tgcRecRoiTool
-        else:
-            self.RecRpcRoiTool=""
-            self.RecTgcRoiTool=""
+    if alg.DoCalo:
+        outputList += [
+            (alg.xAODKeyEmTau.Type, alg.xAODKeyEmTau.Path),
+            (alg.xAODKeyEsum.Type,  alg.xAODKeyEsum.Path),
+            (alg.xAODKeyJetEt.Type, alg.xAODKeyJetEt.Path),
+            (alg.xAODKeyJet.Type,   alg.xAODKeyJet.Path)
+        ]
+        from  TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
+        acc.merge(L1ConfigSvcCfg(flags))
 
-    def setDefaults( self, handle ):
-        # switch off reading of Muon/Calo inputs if subsystem is not running
-        from AthenaCommon.DetFlags import DetFlags
-        handle.DoCalo = DetFlags.detdescr.Calo_on()
-        handle.DoMuon = DetFlags.detdescr.Muon_on()
+    acc.addEventAlgo(alg)
+
+    return acc, outputList
+
+
+if __name__ == "__main__":
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles, defaultGeometryTags
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.Exec.MaxEvents = 20
+    flags.fillFromArgs()
+    flags.lock()
+
+    topCA = MainServicesCfg(flags)
+    from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
+    topCA.merge(ByteStreamReadCfg(flags))
+    from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
+    topCA.merge(L1TriggerByteStreamDecoderCfg(flags))
+    ca, output = RoIBResultToxAODCfg(flags)
+    topCA.merge(ca)
+    status = topCA.run()
+    if status.isFailure():
+        import sys
+        sys.exit(-1)

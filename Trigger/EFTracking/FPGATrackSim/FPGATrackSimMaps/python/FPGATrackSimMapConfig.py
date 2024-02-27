@@ -49,7 +49,7 @@ def addMapSvc(tag):
             path = tag[param].format(**formats)
         else:
             path = tag[param]
-        setattr(MyFPGATrackSimMappingSvc, param, findFileWithTest(os.environ['DATAPATH'], path))
+        setattr(MyFPGATrackSimMappingSvc, param, path)
 
     MyFPGATrackSimMappingSvc.mappingType = tag['mappingType']
     MyFPGATrackSimMappingSvc.layerOverride = tag['layerOverride']

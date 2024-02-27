@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file ZdcMonitorAlgorithm.py
@@ -35,7 +35,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
     # Edit properties of a algorithm
     zdcMonAlg.EnableTrigger = inputFlags.DQ.useTrigger
-    zdcMonAlg.CalInfoOn = inputFlags.Input.TriggerStream == 'physics_MinBias' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias
+    zdcMonAlg.CalInfoOn = inputFlags.Input.TriggerStream == 'physics_MinBias' or inputFlags.Input.TriggerStream == 'express_express' # turn calorimeter info on if input triggerstream (autoconfigured from input file) is physics_MinBias or express_express
 
     genZdcMonTool = helper.addGroup(
         zdcMonAlg,
@@ -51,6 +51,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     n_energy_bins_default = 200
     n_time_centroid_bins_default = 100
     n_module_amp_zoomin_bins = 100
+    n_mod_fraction_bins_default = 100
     module_chisq_min = 0.1
     module_chisq_max = 800000
     module_chisq_over_amp_min = 0.01
@@ -370,24 +371,24 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.)
     zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
                             path='ModuleFraction',
-                            xbins=50,xmin=0.0,xmax=1.)
+                            xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
     zdcModuleMonToolArr.defineHistogram('zdcModuleFract;zdcModuleFract_above20N',title=';Module Amplitude Fraction;Events',
                             path='ModuleFraction',
                             cutmask='zdcAbove20NCurrentSide',
-                            xbins=50,xmin=0.0,xmax=1.)
+                            xbins=n_mod_fraction_bins_default,xmin=0.0,xmax=1.)
     zdcModuleMonToolArr.defineHistogram('lumiBlock, zdcModuleFract;zdcModuleFract_above20N_vs_lb', type='TH2F',title=';lumi block;Module Amplitude Fraction',
                             path='ModuleFractionLBdep',
                             cutmask='zdcAbove20NCurrentSide',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
-                            ybins=50,ymin=0.0,ymax=1.)
+                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
     zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
                             path='ModuleFraction',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax / 2.,
-                            ybins=50,ymin=0.0,ymax=1.)
+                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
     zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract;zdcModuleFract_vs_zdcUncalibSumCurrentSide_zoomedin', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
                             path='ModuleFraction',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
-                            ybins=50,ymin=0.0,ymax=1.)
+                            ybins=n_mod_fraction_bins_default,ymin=0.0,ymax=1.)
 
     zdcModuleMonToolArr.defineHistogram('zdcModuleCalibAmp',title=';Module Calibrated Amplitude [GeV];Events',
                             path='ModuleCalibAmp',
@@ -546,37 +547,38 @@ if __name__=='__main__':
     log.setLevel(WARNING)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     directory = ''
     inputfile = 'myAOD.pool.root'
-    ConfigFlags.Input.Files = [directory+inputfile]
-    # ConfigFlags.Input.isMC = False
-    parser = ConfigFlags.getArgumentParser()
+    flags.Input.Files = [directory+inputfile]
+    # flags.Input.isMC = False
+    parser = flags.getArgumentParser()
     parser.add_argument('--runNumber',default=None,help="specify to select a run number")
     parser.add_argument('--streamTag',default="ZDCCalib",help="ZDCCalib or MinBias")
     parser.add_argument('--outputHISTFile',default=None,help="specify output HIST file name")
-    args = ConfigFlags.fillFromArgs(parser=parser)
+    args = flags.fillFromArgs(parser=parser)
 
-    ConfigFlags.DQ.useTrigger = False if ConfigFlags.Input.isMC else True # isMC is autoconfigured from the input file; if MC: turn trigger off
+    flags.DQ.useTrigger = False if flags.Input.isMC else True # isMC is autoconfigured from the input file; if MC: turn trigger off
     if args.runNumber is not None: # streamTag has default but runNumber doesn't
-        ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}_{args.runNumber}.root'
+        flags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}_{args.runNumber}.root'
     else:
-        ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}.root'    
+        flags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}.root'    
     
     if args.outputHISTFile is not None: # overwrite the output HIST file name to be match the name set in the grid job
-        ConfigFlags.Output.HISTFileName = f'{args.outputHISTFile}'
-    ConfigFlags.lock()
+        flags.Output.HISTFileName = f'{args.outputHISTFile}'
+    flags.lock()
 
-    print('Output', ConfigFlags.Output.HISTFileName)
+    print('Output', flags.Output.HISTFileName)
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
     run_type = "PbPb2023"
 
-    zdcMonitorAcc = ZdcMonitoringConfig(ConfigFlags, run_type)
+    zdcMonitorAcc = ZdcMonitoringConfig(flags, run_type)
     cfg.merge(zdcMonitorAcc)
 
     # If you want to turn on more detailed messages ...

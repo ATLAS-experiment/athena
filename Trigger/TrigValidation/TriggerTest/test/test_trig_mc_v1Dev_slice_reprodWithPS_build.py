@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Compares results of a slice chains when running in full menu and when running alone with other slices disabled by prescaling
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # Skipping art-output which has no effect for build tests.
 # If you create a grid version, check art-output in existing grid tests.
 
@@ -98,10 +98,11 @@ def generate_config_steps():
     ex = ExecStep.ExecStep('ConfigOnly')
     ex.config_only = True
     ex.type = 'athena'
-    ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+    ex.job_options = 'TriggerJobOpts/runHLT.py'
     ex.input = 'ttbar'
     ex.threads = 1
-    ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doWriteBS=False;doWriteRDOTrigger=False;"'
+    ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"']
+    ex.args = '--CA'
     ex.perfmon = False
     # Make a copy of the default prescales file
     copy_ps = CopyStep('CopyPrescales.Default', 'HLTPrescalesSet*.json', 'prescales_Default.json')
@@ -123,7 +124,8 @@ def generate_exec_steps(slice_name = None):
     ex.input = ''
     ex.use_pickle = True
     ex.job_options = 'athena.ConfigOnly.pkl'
-    ex.threads = 1
+    ex.args = '--CA'
+    ex.fpe_auditor = False # included in pickle
     ex.depends_on_previous = False if slice_name else True
     ex.perfmon = False
 

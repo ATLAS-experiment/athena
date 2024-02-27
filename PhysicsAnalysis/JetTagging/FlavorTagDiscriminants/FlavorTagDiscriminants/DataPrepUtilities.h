@@ -9,7 +9,7 @@
 #include "FlavorTagDiscriminants/FlipTagEnums.h"
 #include "FlavorTagDiscriminants/AssociationEnums.h"
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
-#include "FlavorTagDiscriminants/GNNConfig.h"
+#include "FlavorTagDiscriminants/OnnxUtil.h"
 
 // EDM includes
 #include "xAODJet/Jet.h"
@@ -31,7 +31,7 @@ namespace FlavorTagDiscriminants {
 
   enum class EDMType {CHAR, UCHAR, INT, FLOAT, DOUBLE, CUSTOM_GETTER};
   enum class SortOrder {
-   ABS_D0_SIGNIFICANCE_DESCENDING,
+    ABS_D0_SIGNIFICANCE_DESCENDING,
     D0_SIGNIFICANCE_DESCENDING,
     PT_DESCENDING,
     ABS_D0_DESCENDING
@@ -227,19 +227,6 @@ namespace FlavorTagDiscriminants {
     typedef SG::AuxElement::Decorator<float> OutputSetterFloat;
     typedef std::vector<std::pair<std::string, OutputSetterFloat > > OutNodeFloat;
 
-    typedef SG::AuxElement::Decorator<char> OutputSetterChar;
-    typedef std::vector<std::pair<std::string, OutputSetterChar > > OutNodeChar;
-
-    typedef SG::AuxElement::Decorator<std::vector<char>> OutputSetterVecChar;
-    typedef std::vector<std::pair<std::string, OutputSetterVecChar > > OutNodeVecChar;
- 
-    typedef SG::AuxElement::Decorator<std::vector<float>> OutputSetterVecFloat;
-    typedef std::vector<std::pair<std::string, OutputSetterVecFloat > > OutNodeVecFloat;
-
-    typedef std::vector<ElementLink<xAOD::TrackParticleContainer>> TrackLinks;
-    typedef SG::AuxElement::Decorator<internal::TrackLinks> OutputSetterTrackLinks;
-    typedef std::vector<std::pair<std::string, OutputSetterTrackLinks > > OutNodeTrackLinks;
-
     struct TrackSequenceBuilder {
       TrackSequenceBuilder(SortOrder,
                            TrackSelection,
@@ -255,6 +242,8 @@ namespace FlavorTagDiscriminants {
 
   // higher level configuration functions
   namespace dataprep {
+    typedef std::vector<std::pair<std::regex, std::string> > StringRegexes;
+    StringRegexes getNameFlippers(const FlipTagConfig& flip_config);
 
     // Get the configuration structures based on the lwtnn NN
     // structure.
@@ -291,15 +280,6 @@ namespace FlavorTagDiscriminants {
       std::set<std::string>>
     createDecorators(
       const lwt::GraphConfig& config,
-      const FTagOptions& options);
-
-    std::tuple<
-      internal::OutNodeFloat, internal::OutNodeVecChar,
-      internal::OutNodeVecFloat, internal::OutNodeTrackLinks,
-      internal::OutNodeChar, internal::OutNodeFloat,
-      FTagDataDependencyNames, std::set<std::string>>
-    createGNDecorators(
-      const GNNConfig::Config& config,
       const FTagOptions& options);
 
     // return a function to check if IP is invalid

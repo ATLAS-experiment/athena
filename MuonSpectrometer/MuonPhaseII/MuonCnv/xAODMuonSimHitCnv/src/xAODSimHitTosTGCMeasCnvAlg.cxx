@@ -60,7 +60,10 @@ StatusCode xAODSimHitTosTGCMeasCnvAlg::execute(const EventContext& ctx) const {
         const MuonGMR4::sTgcReadoutElement* readOutEle = m_DetMgr->getsTgcReadoutElement(hitId);
         bool isValid{false};
         Identifier simStripLayerIdentifier = id_helper.channelID(hitId, id_helper.multilayer(hitId), id_helper.gasGap(hitId),1, 1, isValid);
-        if(!isValid) ATH_MSG_ERROR("Invalid layer identifier");
+        if(!isValid) {
+            ATH_MSG_WARNING("Invalid layer identifier");
+            continue;
+        }
         const Amg::Vector3D lHitPos{xAOD::toEigen(simHit->localPosition())};
         int channelNumber = readOutEle->stripLayer(simStripLayerIdentifier).design().stripNumber(lHitPos.block<2,1>(0,0));
         Identifier simStripChannelIdentifier = id_helper.channelID(hitId, id_helper.multilayer(hitId), id_helper.gasGap(hitId),1, channelNumber, isValid);
@@ -70,7 +73,7 @@ StatusCode xAODSimHitTosTGCMeasCnvAlg::execute(const EventContext& ctx) const {
         }
         if(!isValid) ATH_MSG_ERROR("Invalid strip identifier for layer " << m_idHelperSvc->toString(simStripLayerIdentifier) << " channel " << channelNumber << " lHitPos " << Amg::toString(lHitPos));
         
-        xAOD::sTgcStrip* prd = new xAOD::sTgcStrip();
+        xAOD::sTgcStripCluster* prd = new xAOD::sTgcStripCluster();
         prdContainer->push_back(prd);
         prd->setIdentifier(simStripChannelIdentifier.get_compact());
 

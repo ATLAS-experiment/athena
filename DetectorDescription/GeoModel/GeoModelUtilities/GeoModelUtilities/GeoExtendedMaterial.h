@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GeoExtendedMaterial_h
@@ -9,6 +9,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "GeoModelKernel/GeoMaterial.h"
+#include "GeoModelKernel/GeoIntrusivePtr.h"
 #include "GeoModelUtilities/GeoMaterialPropertiesTable.h"
 
 // Physical constants
@@ -32,7 +33,7 @@ class GeoExtendedMaterial : public GeoMaterial
 		      double Temperature = SYSTEM_OF_UNITS::STP_Temperature,
 		      double Pressure  = SYSTEM_OF_UNITS::STP_Pressure);
   
-  virtual ~GeoExtendedMaterial();
+  virtual ~GeoExtendedMaterial() = default;
   
   const GeoMaterialState& getState() const;
   const double& getTemperature() const;
@@ -50,7 +51,7 @@ class GeoExtendedMaterial : public GeoMaterial
   double m_temperature;
   double m_pressure;
 
-  GeoMaterialPropertiesTable* m_properties;
+  GeoIntrusivePtr<GeoMaterialPropertiesTable> m_properties{};
 };
 
 
@@ -72,7 +73,6 @@ inline const double& GeoExtendedMaterial::getPressure() const
 inline void GeoExtendedMaterial::SetMaterialPropertiesTable(GeoMaterialPropertiesTable* MPT)
 {
   m_properties = MPT;
-  m_properties->ref();
 }
 
 inline GeoMaterialPropertiesTable* GeoExtendedMaterial::GetMaterialPropertiesTable()

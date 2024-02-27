@@ -256,7 +256,11 @@ StatusCode TestHepMC::initialize() {
   else {
     ATH_MSG_INFO("extra accept list for PDG IDs not provided");
   }
-
+  
+  // Print Efficiency warning and error thresholds
+  ATH_MSG_INFO("EffWarnThreshold = " << m_eff_warn_threshold * 100 << " %");
+  ATH_MSG_INFO("EffFailThreshold = " << m_eff_fail_threshold * 100 << " %");
+    
   return StatusCode::SUCCESS;
 }
 
@@ -836,10 +840,10 @@ StatusCode TestHepMC::finalize() {
 
   // Check efficiency, and fail (to kill production jobs) if the pass rate is too low
   if (efficiency < m_eff_fail_threshold) {
-    ATH_MSG_FATAL("EFFICIENCY IS TOO LOW! " << 100*efficiency << "% found, but at least: " << 100*m_eff_fail_threshold << "% required");
+    ATH_MSG_FATAL("EFFICIENCY ABOVE ERROR THRESHOLD! " << 100*efficiency << "% found, but at least: " << 100*m_eff_fail_threshold << "% required");
     return StatusCode::FAILURE;
   } else if (efficiency <= m_eff_warn_threshold) {
-    ATH_MSG_WARNING("LOW EFFICIENCY! " << 100*efficiency << "% found, but at least: " << 100*m_eff_warn_threshold << "% expected");
+    ATH_MSG_WARNING("EFFICIENCY ABOVE WARNING THRESHOLD! " << 100*efficiency << "% found, but at least: " << 100*m_eff_warn_threshold << "% expected");
   }
 
   return StatusCode::SUCCESS;

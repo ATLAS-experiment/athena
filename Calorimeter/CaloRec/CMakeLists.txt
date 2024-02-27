@@ -31,12 +31,6 @@ atlas_add_test( CaloCellFastCopyTool_test
    IdDictParser AthenaBaseComps StoreGateLib CxxUtils GaudiKernel
    LOG_IGNORE_PATTERN "@0x[0-9a-f]{4,}|Retrieved const pointer|Retrieved const handle|object not modifiable" )
 
-atlas_add_test( CaloCellContainerFromClusterTool_test
-   SOURCES test/CaloCellContainerFromClusterTool_test.cxx src/CaloCellContainerFromClusterTool.cxx src/Blob2ToolConstants.cxx
-   LINK_LIBRARIES xAODCaloEvent CaloInterfaceLib CaloUtilsLib
-   #LINK_LIBRARIES CaloRecLib 
-   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
-
 atlas_add_test( CaloBCIDCoeffsCondAlg_test
    SOURCES test/CaloBCIDCoeffsCondAlg_test.cxx src/CaloBCIDCoeffsCondAlg.cxx
    LINK_LIBRARIES CaloLumiConditions LArRawConditions IdDictParser TestTools )
@@ -117,6 +111,6 @@ atlas_add_test( CaloCellMakerTest
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( CaloTowerStore_test
-   SCRIPT athena.py CaloRec/CaloTowerStore_test.py
+   SCRIPT python -m CaloRec.CaloTowerStore_test
    LOG_IGNORE_PATTERN "Reading file|Unable to locate catalog|Cache alignment|MetaReader|AutoConfiguration|IOVDbSvc +INFO"
    PROPERTIES TIMEOUT 500 )

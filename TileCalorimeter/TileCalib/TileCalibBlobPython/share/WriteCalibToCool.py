@@ -46,9 +46,10 @@ def usage():
     print ("-s, --schema=     specify input/output schema to use when both input and output schemas are the same")
     print ("-S, --server=     specify server - ORACLE or FRONTIER, default is FRONTIER")
     print ("-u  --update      set this flag if output sqlite file should be updated, otherwise it'll be recreated")
+    print ("-w, --swap=       specify pair of modules which will be swapped in multi-IOV update, e.g. swap=EBA61,EBA63")
 
-letters = "hr:l:R:L:b:e:AD:S:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZuk:"
-keywords = ["help","run=","lumi=","run2=","lumi2=","begin=","end=","adjust","module=","server=","schema=","inschema=","outschema=","tag=","outtag=","folder=","outfolder=","nchannel=","ngain=","nval=","version=","txtfile=","comment=","Comment=","user=","prefix=","default","channel","all","zero","allzero","update","keep="]
+letters = "hr:l:R:L:b:e:AD:S:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZuw:k:"
+keywords = ["help","run=","lumi=","run2=","lumi2=","begin=","end=","adjust","module=","server=","schema=","inschema=","outschema=","tag=","outtag=","folder=","outfolder=","nchannel=","ngain=","nval=","version=","txtfile=","comment=","Comment=","user=","prefix=","default","channel","all","zero","allzero","update","swap=","keep="]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -90,6 +91,7 @@ beg = 0
 end = 2147483647
 moduleList = []
 adjust = False
+swap=[]
 
 try:
     user=os.getlogin()
@@ -136,6 +138,8 @@ for o, a in opts:
         allzero = True
     elif o in ("-u","--update"):
         update = True
+    elif o in ("-w","--swap"):
+        swap += a.split(",")
     elif o in ("-r","--run"):
         run = int(a)
     elif o in ("-l","--lumi"):
@@ -173,6 +177,19 @@ for o, a in opts:
     else:
         assert False, "unhandeled option"
 
+moduleSwap={}
+if len(swap)>0:
+    if len(swap)!=2:
+        assert False, "wrong module list for swap option"
+    else:
+        from TileCalibBlobPython import TileBchTools
+        for i in range(2):
+            m1=swap[i]
+            m2=swap[1-i]
+            moduleSwap[m1]=TileBchTools.TileBchMgr.decodeModule(None,m2)
+else:
+    swap=False
+
 if not len(outSchema):
     outSchema=schema
 else:
@@ -192,7 +209,7 @@ if outtag is None:
 import cppyy
 
 from TileCalibBlobPython import TileCalibTools
-from TileCalibBlobObjs.Classes import TileCalibUtils
+from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibType
 
 if iov and end >= TileCalibTools.MAXRUN:
     end = TileCalibTools.MAXRUN
@@ -233,6 +250,7 @@ iovListMOD = []
 iovListCMT = []
 iovUntilCMT = []
 blobReader = TileCalibTools.TileBlobReader(dbr,folderPath, folderTag)
+blobWriter2 = None
 if iov:
     #=== filling the iovList
     log.info( "Looking for IOVs" )
@@ -360,7 +378,7 @@ else:
         run2=begin[0]
     if run2>begin[0] or (run2==begin[0] and lumi2>begin[1]):
         undo=True
-        blobWriter2 = TileCalibTools.TileBlobWriter(dbw,outfolderPath,'Flt',(True if len(outtag) else False))
+        blobWriter2 = True
     else:
         undo=False
 
@@ -369,6 +387,7 @@ else:
 flt=None
 r=5
 d=0
+blobT=None
 while not flt:
     d-=1
     if d<0:
@@ -393,6 +412,15 @@ else:
 nchanDef=nchan
 ngainDef=ngain
 
+
+if blobT:
+    typeName = TileCalibType.getClassName(blobT)[-3:]
+else:
+    typeName = 'Flt'
+
+if blobWriter2:
+    blobWriter2 = TileCalibTools.TileBlobWriter(dbw,outfolderPath,typeName,(True if len(outtag) else False))
+
 comments = []
 blobWriters = []
 nvalUpdated = []
@@ -403,16 +431,23 @@ for since in iovList:
     comments+=[comm]
     nvalUpdated += [0]
     commentsSplit+=[blobReader.getComment(since,True)]
-    blobWriters += [TileCalibTools.TileBlobWriter(dbw,outfolderPath,'Flt',(True if len(outtag) else False))]
+    blobWriters += [TileCalibTools.TileBlobWriter(dbw,outfolderPath,typeName,(True if len(outtag) else False))]
 log.info( "\n" )
 
 if len(txtFile)>0:
     #=== create default: one number per ADC
-    default = cppyy.gbl.std.vector('float')()
-    for n in range(nval if nval>0 else mval):
-        default.push_back(0.)
+    if typeName=='Flt':
+        defConst = cppyy.gbl.std.vector('std::vector<float>')()
+        default = cppyy.gbl.std.vector('float')()
+        defVal = 0.
+    else:
+        defConst = cppyy.gbl.std.vector('std::vector<int>')()
+        default = cppyy.gbl.std.vector('int')()
+        defVal = 0
 
-    defConst = cppyy.gbl.std.vector('std::vector<float>')()
+    for n in range(nval if nval>0 else mval):
+        default.push_back(defVal)
+
     for ng in range(ngain if ngain>0 else mgain):
         defConst.push_back(default) # low/high gain
 
@@ -470,30 +505,37 @@ if len(txtFile)>0:
                     oldVsize = 0
                 nchan = nchanDef if nchanDef>0 else (flt1.getNChans() if flt1 else TileCalibUtils.max_chan())
                 ngain = ngainDef if ngainDef>0 else (flt1.getNGains() if flt1 else TileCalibUtils.max_gain())
+
+                (rosR,modR,modNameR) = (ros,mod,modName)
+                (rosW,modW,modNameW) = (ros,mod,modName)
+                if swap and modName in moduleSwap:
+                    (rosW,modW) = moduleSwap[modName]
+                    modNameW = TileCalibUtils.getDrawerString(rosW,modW)
+                    log.warning("Swap: read %s write %s", modName,modNameW)
                 for chn in range(nchan):
                     #=== loop over gains
                     for adc in range(ngain):
-                        data = blobParser.getData(ros,mod,chn,adc,since)
+                        data = blobParser.getData(rosR,modR,chn,adc,since)
                         if not len(data) and allzero:
                             continue
                         if not len(data) and (not all or (not flt1 and not rosmin)):
                             if not rosmin:
-                                log.warning("%i/%2i/%2i/%i: No value found in file", ros,mod,chn,adc)
+                                log.warning("%i/%2i/%2i/%i: No value found in file", rosR,modR,chn,adc)
                             continue
                         #=== need to invalidate previous blob in DB when reading from ASCII file
                         if newDrawer:
                             newDrawer=False
-                            blobWriters[io].zeroBlob(ros,mod)
+                            blobWriters[io].zeroBlob(rosW,modW)
                         #=== init drawer for first entry
-                        calibDrawer = blobWriters[io].getDrawer(ros,mod)
+                        calibDrawer = blobWriters[io].getDrawer(rosW,modW)
                         if not calibDrawer.getNObjs():
-                            log.info("Initializing drawer %s", modName)
-                            flt = blobReader.getDrawer(ros, mod, since)
+                            log.info("Initializing drawer %s", modNameW)
+                            flt = blobReader.getDrawer(rosR, modR, since)
                             if nval<1:
                                 mval = flt.getObjSizeUint32()
                                 default.clear()
                                 for n in range(mval):
-                                    default.push_back(0.)
+                                    default.push_back(defVal)
                                 defConst.clear()
                                 for ng in range(ngain):
                                     defConst.push_back(default) # low/high  gain
@@ -504,7 +546,7 @@ if len(txtFile)>0:
                                 blobVersion = flt.getObjVersion()
                             calibDrawer.init(defConst,nchan,blobVersion)
                             if undo:
-                                calibDrawer2 = blobWriter2.getDrawer(ros,mod)
+                                calibDrawer2 = blobWriter2.getDrawer(rosW,modW)
                                 calibDrawer2.init(defConst,nchan,blobVersion)
                             for ch in range(nchan):
                                 for ad in range(ngain):
@@ -512,18 +554,18 @@ if len(txtFile)>0:
                                     for n in range(0,kval):
                                         nvold+=1
                                         val=flt.getData(ch,ad,n)
-                                        log.debug("%i/%2i/%2i/%i: old data[%i] = %f", ros,mod,ch,ad, n, val)
+                                        log.debug("%i/%2i/%2i/%i: old data[%i] = %f", rosR,modR,ch,ad, n, val)
                                         calibDrawer.setData(ch,ad,n,val)
                                         if undo:
                                             calibDrawer2.setData(ch,ad,n,val)
                                     for n in range(kval,nval):
                                         nvdef+=1
                                         val=calibDrawer.getData(ch,ad,n)
-                                        log.debug("%i/%2i/%2i/%i: def data[%i] = %f", ros,mod,ch,ad, n, val)
+                                        log.debug("%i/%2i/%2i/%i: def data[%i] = %f", rosR,modR,ch,ad, n, val)
 
                         if not len(data):
                             if not rosmin:
-                                log.warning("%i/%2i/%2i/%i: No value found in file", ros,mod,chn,adc)
+                                log.warning("%i/%2i/%2i/%i: No value found in file", rosR,modR,chn,adc)
                             continue
                         #=== loop over new data
                         if nval<1:
@@ -542,11 +584,11 @@ if len(txtFile)>0:
                             if strval.startswith("*"):
                                 coef=float(strval[1:])
                                 val = calibDrawer.getData(chn,adc,n)*coef
-                                log.debug("%i/%2i/%2i/%i: new data[%i] = %s  scale old value by %s", ros,mod,chn,adc, n, val, coef)
+                                log.debug("%i/%2i/%2i/%i: new data[%i] = %s  scale old value by %s", rosW,modW,chn,adc, n, val, coef)
                             elif strval.startswith("++") or strval.startswith("+-") :
                                 coef=float(strval[1:])
                                 val = calibDrawer.getData(chn,adc,n)+coef
-                                log.debug("%i/%2i/%2i/%i: new data[%i] = %s  shift old value by %s", ros,mod,chn,adc, n, val, coef)
+                                log.debug("%i/%2i/%2i/%i: new data[%i] = %s  shift old value by %s", rosW,modW,chn,adc, n, val, coef)
                             elif strval=="sync":
                                 val = calibDrawer.getData(chn,adc,n)
                                 if val==0.0 or val==-1.0 or val==1.0: # copy from another gain only if in this gain one of default values
@@ -562,7 +604,12 @@ if len(txtFile)>0:
                                  or ("%sch%ig%i"% (modName,chn,adc)) in keep or ("%sch%ig%i"% (modSpec,chn,adc)) in keep or ("%sch%ig%i"% (modName[:3],chn,adc)) in keep or ("%sch%ig%i"% (modName[:2],chn,adc)) in keep:
                                 val = None
                             else:
-                                val = float(strval)
+                                if "x" in strval or "X" in strval:
+                                    val = int(strval,16)
+                                elif typeName=='Flt':
+                                    val = float(strval)
+                                else:
+                                    val = int(strval)
                             if val is not None:
                                 nvnew+=1
                                 if n>=oldVsize:
@@ -570,25 +617,25 @@ if len(txtFile)>0:
                                     nvnewdef+=1
                                 calibDrawer.setData(chn,adc,n,val)
                                 if coef is None:
-                                    log.debug("%i/%2i/%2i/%i: new data[%i] = %s", ros,mod,chn,adc, n, val)
+                                    log.debug("%i/%2i/%2i/%i: new data[%i] = %s", rosW,modW,chn,adc, n, val)
                             else:
                                 val = calibDrawer.getData(chn,adc,n)
                                 if n>=oldVsize:
-                                    log.debug("%i/%2i/%2i/%i: DEF data[%i] = %s", ros,mod,chn,adc, n, val)
+                                    log.debug("%i/%2i/%2i/%i: DEF data[%i] = %s", rosW,modW,chn,adc, n, val)
                                 else:
-                                    log.debug("%i/%2i/%2i/%i: OLD data[%i] = %s", ros,mod,chn,adc, n, val)
+                                    log.debug("%i/%2i/%2i/%i: OLD data[%i] = %s", rosW,modW,chn,adc, n, val)
                         for n in range(mval,kval+mval):
                             val = calibDrawer.getData(chn,adc,n)
                             if n>=flt.getObjSizeUint32():
-                                log.debug("%i/%2i/%2i/%i: DEF data[%i] = %s", ros,mod,chn,adc, n, val)
+                                log.debug("%i/%2i/%2i/%i: DEF data[%i] = %s", rosW,modW,chn,adc, n, val)
                             else:
-                                log.debug("%i/%2i/%2i/%i: OLD data[%i] = %s", ros,mod,chn,adc, n, val)
+                                log.debug("%i/%2i/%2i/%i: OLD data[%i] = %s", rosW,modW,chn,adc, n, val)
                 if (zero or allzero) and newDrawer:
-                    blobWriters[io].zeroBlob(ros,mod)
-                    if ros==0 and mod==0:
+                    blobWriters[io].zeroBlob(rosW,modW)
+                    if rosW==0 and modW==0:
                         if blobVersion<0:
                             blobVersion = flt.getObjVersion()
-                        calibDrawer = blobWriters[io].getDrawer(ros,mod)
+                        calibDrawer = blobWriters[io].getDrawer(rosW,modW)
                         calibDrawer.init(defConst,1,blobVersion)
 
         nvalUpdated[io]=nvnew
@@ -611,7 +658,7 @@ if (mval!=0 or Comment is not None) and (len(comment)>0 or len(txtFile)>0):
 
         untilMod = iovUntil[io]
         untilCmt = iovUntilCMT[io]
-        appendCmt = (untilCmt < (TileCalibTools.MAXRUN,TileCalibTools.MAXLBK))
+        appendCmt = (untilCmt < (TileCalibTools.MAXRUN,TileCalibTools.MAXLBK)) or iov
 
         if since==untilMod: # empty IOV
             if since==untilCmt:
@@ -625,7 +672,10 @@ if (mval!=0 or Comment is not None) and (len(comment)>0 or len(txtFile)>0):
             elif untilCmt>untilMod:
                 untilCmt = untilMod
 
-        log.info( "Updating IOV %s", str(since) )
+        if iov:
+            log.info( "Updating IOV %s => %s => %s", str(io), str(since), comments[io] )
+        else:
+            log.info( "Updating IOV %s", str(since) )
 
         #=== set comment
         if Comment is not None:

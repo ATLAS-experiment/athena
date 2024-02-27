@@ -1,8 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold
+from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold, ZeroBiasThresholdTopo
 from .L1CaloThresholdMapping import get_threshold_cut
-from .TypeWideThresholdConfig import getTypeWideThresholdConfig
 
 # Max thresholds for SPARE triggers, corresponding to maximum value in L1Topo
 # The pass requirement is et >= cut, so these ensure no events can pass
@@ -119,7 +118,7 @@ class ThresholdDef:
         # eEM
         eEM_cuts = [1, 2, 5, 7, 9, 12, 15, 18, 26]
         # get ptMinToTopo value (different for pp and HI), then adjust threshold for lowest pT items based on this value 
-        ttconfig = getTypeWideThresholdConfig("eEM", tc.l1menu.do_HI_tob_thresholds)
+        ttconfig = tc.l1menu.thresholds.typeWideThresholdConfig('eEM')
         ptMin = ttconfig["ptMinToTopo"]
         for thrV in eEM_cuts:
             eEMThreshold('eEM%i' %thrV, 'eEM').addThrValue(max(get_threshold_cut('eEM', thrV), ptMin))
@@ -170,7 +169,7 @@ class ThresholdDef:
         eTAU_cuts = [20]
         for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iL' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rCore = "Loose" )
-        eTAU_cuts = [20]
+        eTAU_cuts = [20, 30, 35]
         for thrV in eTAU_cuts:
             eTauThreshold('eTAU%iM' % thrV, 'eTAU').setEt(get_threshold_cut('eTAU', thrV)).setIsolation( rCore = "Medium" )
 
@@ -265,11 +264,11 @@ class ThresholdDef:
         for thrV in gXE_cuts:
             XEThreshold('gXENC%i' % thrV, 'gXE').setXE(get_threshold_cut('gXENC', thrV))
 
-        gXE_cuts = [70, 100]
-        for thrV in gXE_cuts:
-            XEThreshold('gXERHO%i' % thrV, 'gXE').setXE(get_threshold_cut('gXERHO', thrV))
+        #gXE_cuts = [70, 100]
+        #for thrV in gXE_cuts:
+        #    XEThreshold('gXERHO%i' % thrV, 'gXE').setXE(get_threshold_cut('gXERHO', thrV))
 
-        gXE_cuts = [70, 80, 100]
+        gXE_cuts = [60, 70, 80, 100, 110, 120, 500]
         for thrV in gXE_cuts:
             XEThreshold('gXEJWOJ%i' % thrV, 'gXE').setXE(get_threshold_cut('gXEJWOJ', thrV))
 
@@ -282,13 +281,13 @@ class ThresholdDef:
             TEThreshold('gTE%i' % thrV, 'gTE').setTE(thrV)
 
         # jXE
-        jXE_cuts = [70, 80, 100, 110, 500]
+        jXE_cuts = [60, 70, 80, 90, 100, 110, 120, 500]
         for thrV in jXE_cuts:
             XEThreshold('jXE%i' % thrV, 'jXE').setXE(get_threshold_cut('jXE', thrV))
 
         # ENERGY SPARES
         # decrement jXE spares for addtional heavy ion jTE thresholds
-        for thrV in range(1,16):
+        for thrV in range(1,12):
             XEThreshold('jXESPARE%i' % thrV, 'jXE').setXE(thrVal_SPAREXE)
 
         jXE_cuts = [100]
@@ -319,6 +318,9 @@ class ThresholdDef:
 
         # ATR-22344
         LArSaturationThreshold('LArSaturation')
+
+        ZeroBiasThresholdTopo('ZeroBiasA')
+        ZeroBiasThresholdTopo('ZeroBiasB')
 
         # CALREQ
             

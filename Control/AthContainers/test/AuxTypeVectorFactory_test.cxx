@@ -59,7 +59,7 @@ using SG::AuxStoreInternal_test;
 
 
 template <class T>
-T makeT(int x=0) { return T(x); }
+T makeT(int x) { return T(x); }
 
 template<>
 bool makeT<bool>(int x) { return (x&1) != 0; }
@@ -87,10 +87,6 @@ void test_vector()
   std::unique_ptr<SG::IAuxTypeVector> v2 = fac.create (1, 10, 20);
   assert (v2->auxid() == 1);
   T* ptr2 = reinterpret_cast<T*> (v2->toPtr());
-  fac.copy (ptr2, 0, ptr, 1);
-  fac.copy (ptr2, 1, ptr, 0);
-  assert (ptr2[0] == makeT(2));
-  assert (ptr2[1] == makeT(20));
 
   AuxVectorData_test avd1;
   AuxVectorData_test avd2;
@@ -116,9 +112,18 @@ void test_vector()
   assert (ptr2[1] == makeT(3));
   assert (ptr2[2] == makeT(12));
 
-  fac.clear (ptr2, 0);
+  fac.copy (1, avd2, 0, avd1, 1, 1);
+  fac.copy (1, avd2, 1, avd1, 0, 1);
+  assert (ptr2[0] == makeT(10));
+  assert (ptr2[1] == makeT(1));
+
+  ptr2[0] = makeT(10);
+  ptr2[1] = makeT(11);
+
+  fac.clear (1, avd2, 0, 2);
   assert (ptr2[0] == makeT());
-  assert (ptr2[1] == makeT(3));
+  assert (ptr2[1] == makeT());
+  assert (ptr2[2] == makeT(12));
 
   using vector_type = typename SG::AuxDataTraits<T, ALLOC<T> >::vector_type;
   vector_type* vec3 = new vector_type;
@@ -132,6 +137,42 @@ void test_vector()
   assert (ptr3[0] == makeT(3));
   assert (ptr3[1] == makeT(2));
   assert (ptr3[2] == makeT(1));
+
+  // Testing range copy, with and without overlap.
+  for (size_t i = 0; i < 10; i++) {
+    ptr[i] = makeT(i);
+    ptr2[i] = makeT(i+10);
+  }
+ 
+  auto checkvec = [&makeT] (const T* p, const std::vector<int>& exp)
+    {
+      for (size_t i = 0; i < exp.size(); i++) {
+        assert (p[i] == makeT(exp[i]));
+      }
+    };
+
+  fac.copy (1, avd1, 3, avd1, 4, 0);
+  checkvec (ptr, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+
+  fac.copy (1, avd1, 1, avd1, 2, 3);
+  checkvec (ptr, {0, 2, 3, 4, 4, 5, 6, 7, 8, 9});
+
+  fac.copy (1, avd1, 6, avd1, 5, 3);
+  checkvec (ptr, {0, 2, 3, 4, 4, 5, 5, 6, 7, 9});
+
+  fac.copy (1, avd1, 2, avd1, 5, 3);
+  checkvec (ptr, {0, 2, 5, 5, 6, 5, 5, 6, 7, 9});
+
+  fac.copy (1, avd2, 2, avd1, 6, 3);
+  checkvec (ptr, {0, 2, 5, 5, 6, 5, 5, 6, 7, 9});
+  checkvec (ptr2, {10, 11, 5, 6, 7, 15, 16, 17, 18, 19});
+
+  AuxVectorData_test avd3;
+  AuxStoreInternal_test store3;
+  avd3.setStore (&store3);
+
+  fac.copy (1, avd1, 3, avd3, 3, 3);
+  checkvec (ptr, {0, 2, 5, 0, 0, 0, 5, 6, 7, 9});
 }
 
 
@@ -199,37 +240,68 @@ void test2()
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
 
   typedef ElementLink<std::vector<int*> > EL;
-  EL elv[10];
-  elv[1] = EL (123, 10);
 
   SG::AuxTypeVectorFactory<EL> ve1;
   SG::AuxTypeVectorFactory<std::vector<EL> > ve2;
 
-  ve1.copyForOutput (elv, 2, elv, 1);
+  std::unique_ptr<SG::IAuxTypeVector> v1 = ve1.create (1, 10, 10);
+  EL* elv = reinterpret_cast<EL*> (v1->toPtr());
+  elv[1] = EL (123, 10);
+  elv[2] = EL (124, 11);
+
+  AuxVectorData_test avd1;
+  AuxStoreInternal_test store1;
+  avd1.setStore (&store1);
+  store1.addVector (std::move(v1), false);
+
+  ve1.copyForOutput (1, avd1, 2, avd1, 1, 2);
   assert (elv[2].key() == 123);
   assert (elv[2].index() == 10);
+  assert (elv[3].key() == 124);
+  assert (elv[3].index() == 11);
 
-  std::vector<EL> velv[10];
+  std::unique_ptr<SG::IAuxTypeVector> v2 = ve2.create (2, 10, 10);
+  std::vector<EL>* velv = reinterpret_cast<std::vector<EL>*> (v2->toPtr());
   velv[1].push_back (EL (123, 5));
   velv[1].push_back (EL (123, 6));
-  ve2.copyForOutput (velv, 2, velv, 1);
+  velv[2].push_back (EL (124, 7));
+  velv[2].push_back (EL (124, 8));
+
+  AuxVectorData_test avd2;
+  AuxStoreInternal_test store2;
+  avd2.setStore (&store2);
+  store2.addVector (std::move(v2), false);
+
+  ve2.copyForOutput (2, avd2, 2, avd2, 1, 2);
   assert (velv[2][0].key() == 123);
   assert (velv[2][0].index() == 5);
   assert (velv[2][1].key() == 123);
   assert (velv[2][1].index() == 6);
+  assert (velv[3][0].key() == 124);
+  assert (velv[3][0].index() == 7);
+  assert (velv[3][1].key() == 124);
+  assert (velv[3][1].index() == 8);
 
   store->remap (123, 456, 10, 20);
+  store->remap (124, 457, 11, 21);
+  store->remap (123, 456, 6, 12);
+  store->remap (124, 457, 8, 28);
 
-  ve1.copyForOutput (elv, 5, elv, 1);
+  ve1.copyForOutput (1, avd1, 5, avd1, 2, 2);
   assert (elv[5].key() == 456);
   assert (elv[5].index() == 20);
+  assert (elv[6].key() == 457);
+  assert (elv[6].index() == 21);
 
-  store->remap (123, 456, 6, 12);
-  ve2.copyForOutput (velv, 5, velv, 1);
+  ve2.copyForOutput (2, avd2, 5, avd2, 2, 2);
   assert (velv[5][0].key() == 123);
   assert (velv[5][0].index() == 5);
   assert (velv[5][1].key() == 456);
   assert (velv[5][1].index() == 12);
+  assert (velv[6][0].key() == 124);
+  assert (velv[6][0].index() == 7);
+  assert (velv[6][1].key() == 457);
+  assert (velv[6][1].index() == 28);
 #endif
 }
 

@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-from AthenaCommon import CfgMgr
-
-def getLucidPhysicsTool(name="LucidPhysicsTool", **kwargs):
-    #Add any future configuration here
-    return CfgMgr.LucidPhysicsTool(name, **kwargs)
+def LucidPhysicsToolCfg(flags, name="LucidPhysicsTool", **kwargs):
+    result = ComponentAccumulator()
+    result.setPrivateTools(CompFactory.LucidPhysicsTool(name, **kwargs))
+    return result

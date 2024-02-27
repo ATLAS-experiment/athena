@@ -49,13 +49,6 @@ def trigCaloClusterMakerMonTool(flags, doMonCells = False):
     return monTool
 
 
-def HLTCaloCellMaker(flags, name, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False):
-    """Wrapper for legacy job options"""
-    from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
-    cellmaker = algorithmCAToGlobalWrapper(hltCaloCellMakerCfg, flags, name, roisKey, CellsName, monitorCells)[0]
-    return cellmaker
-
-
 @AccumulatorCache
 def hltCaloCellMakerCfg(flags, name=None, roisKey='UNSPECIFIED', CellsName=None, monitorCells=False, doTau=False):
     acc = ComponentAccumulator()
@@ -143,7 +136,6 @@ def CaloL0RingerPreCfg(flags):
     flags.Trigger.ExtraEDMList=[('xAOD::TrigRingerRingsContainer#RingerGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo')]
 
 def CaloL0RingerCfg(flags):
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD,addToAOD
     extraContent=['xAOD::TrigRingerRingsContainer#RingerGlobal','xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.','xAOD::TrigEMClusterContainer#CaloClustersGlobal','xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.']
     acc = ComponentAccumulator()
@@ -219,8 +211,9 @@ def hltTopoClusterMakerCfg(flags, name, clustersKey="HLT_TopoCaloClustersFS",
 
     topoMaker = acc.popToolsAndMerge(CaloTopoClusterToolCfg(flags, cellsname=cells))
     topoMaker.RestrictPSNeighbors = False
-    if (flags.hasFlag('CaloRecGPU.UseOriginalCriteria')):
-       topoMaker.UseGPUCriteria=flags.CaloRecGPU.UseOriginalCriteria
+    # TODO - Don't use hasFlag here, use another concrete flag instead
+    if flags.hasFlag("CaloRecGPU.ActiveConfig"):
+       topoMaker.UseGPUCriteria=flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria
     listClusterCorrectionTools = []
     if doLC :
        from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
@@ -342,12 +335,8 @@ TrigEgammaKeys_LRT = getTrigEgammaKeys(name = '_LRT')
 TrigEgammaKeys_HI = getTrigEgammaKeys(ion = True)
 
 def prepareFlagsGPUHLT(flags):
-    from CaloRecGPU.CaloRecGPUFlags import createFlagsCaloRecGPU, configFlagsCaloRecGPU
-    flags.addFlagsCategory('CaloRecGPU',createFlagsCaloRecGPU,prefix=True)
     flags.LAr.doHVCorr=True
-    configFlagsCaloRecGPU(flags,flags.CaloRecGPU,cellsName="CaloCellsFS",ClustersOutputName="HLT_TopoCaloClustersFS")
-    if ( flags.CaloRecGPU.NumPreAllocatedDataHolders < 1 ):
-       flags.CaloRecGPU.NumPreAllocatedDataHolders=1
+    # NOTE: "HLT" flag subdomain defaults moved to CaloRecGPUFlags
     return
 
 @AccumulatorCache
@@ -365,7 +354,8 @@ def hltCaloTopoClusteringCfg(
     acc.merge(
         hltCaloCellMakerCfg(flags, namePrefix + "HLTCaloCellMaker"+nameSuffix, roisKey=roisKey, CellsName=CellsName, monitorCells=monitorCells, doTau = doTau)
     )
-    if flags.hasFlag('CaloRecGPU.CellsName') and (nameSuffix == "FS") and (not doTau): 
+    # TODO - Don't use hasFlag here, use another concrete flag instead
+    if flags.hasFlag("CaloRecGPU.ActiveConfig") and (nameSuffix == "FS") and (not doTau):
        from CaloRecGPU.CaloRecGPUConfig import HybridClusterProcessorCfg
        hyb = HybridClusterProcessorCfg(flags, namePrefix + "HLTCaloClusterMaker"+nameSuffix)
        acc.merge(hyb)
@@ -467,13 +457,27 @@ def hltHICaloTowerMakerCfg(flags, name, towersKey, cellsKey="CaloCellsFS", RoIs=
     return acc
 
 @AccumulatorCache
+def hltHICaloClusterMakerCfg(flags, name, towersKey, cellsKey, clustersKey) :
+    """Function to equip HLT HI cluster builder from towers and cells, adds to output AOD stream"""
+    acc = ComponentAccumulator()
+
+    
+    alg=CompFactory.HIClusterMaker(name,
+                          InputTowerKey=towersKey,
+                          CaloCellContainerKey=cellsKey,
+                          OutputContainerKey=clustersKey
+                          )
+    acc.addEventAlgo(alg, primary=True)
+    return acc
+
+@AccumulatorCache
 def HICaloTowerCfg(flags):
     """ Create the towers for heavy ion """
     acc = ComponentAccumulator()
     acc.merge(
               hltCaloCellMakerCfg(flags, "HLTCaloCellMakerFS", roisKey='')
              )
-    # Then build the clusters
+    # Then build the towers
     acc.merge(
               hltHICaloTowerMakerCfg(
               flags,
@@ -482,6 +486,17 @@ def HICaloTowerCfg(flags):
               cellsKey=fs_cells,
               )
     )
+    # Then build the clusters
+    acc.merge(
+              hltHICaloClusterMakerCfg(
+              flags,
+              "HLTHICaloClusterMakerFS",
+              towersKey=fs_towers,
+              cellsKey=fs_cells,
+              clustersKey = "HLT_HICaloClustersFS"
+              )
+    )
+
     return acc
 
 

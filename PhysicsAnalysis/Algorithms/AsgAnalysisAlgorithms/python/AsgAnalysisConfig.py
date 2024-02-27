@@ -182,7 +182,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         super (GeneratorAnalysisBlock, self).__init__ ('Generator')
         self.addOption ('saveCutBookkeepers', True, type=bool)
         self.addOption ('runNumber', None, type=int)
-        self.addOption ('cutBookkeepersSystematics', True, type=bool)
+        self.addOption ('cutBookkeepersSystematics', None, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -200,7 +200,10 @@ class GeneratorAnalysisBlock (ConfigBlock):
         if self.saveCutBookkeepers:
           alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
           alg.runNumber = self.runNumber
-          alg.enableSystematics = self.cutBookkeepersSystematics
+          if self.cutBookkeepersSystematics:
+              alg.enableSystematics = self.cutBookkeepersSystematics
+          else:
+              alg.enableSystematics = not config.noSystematics()
           config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
 
         # Set up the weights algorithm:
@@ -268,7 +271,7 @@ class ObjectCutFlowBlock (ConfigBlock):
 
         alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName + postfix )
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
-        alg.selection = config.getSelectionCutFlow (self.containerName, self.selectionName)
+        alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
         alg.histTitle = "Object Cutflow: " + self.containerName + "." + self.selectionName
 
@@ -386,9 +389,9 @@ class IFFLeptonDecorationBlock (ConfigBlock):
 class PerEventSFBlock (ConfigBlock):
     """the ConfigBlock for the AsgEventScaleFactorAlg"""
 
-    def __init__ (self, name):
-        super(PerEventSFBlock, self).__init__()
-        self.algName = name
+    def __init__ (self, algoName):
+        super(PerEventSFBlock, self).__init__('PerEventSF'+algoName)
+        self.algoName = algoName
         self.addOption('particles', '', type=str)
         self.addOption('objectSF', '', type=str)
         self.addOption('eventSF', '', type=str)
@@ -397,7 +400,7 @@ class PerEventSFBlock (ConfigBlock):
         if config.dataType() is DataType.Data:
             return
         particles, selection = config.readNameAndSelection(self.particles)
-        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algName)
+        alg = config.createAlgorithm('CP::AsgEventScaleFactorAlg', self.algoName)
         alg.particles = particles
         alg.preselection = selection
         alg.scaleFactorInputDecoration = self.objectSF

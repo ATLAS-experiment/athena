@@ -58,6 +58,9 @@ private:
   // Check and potentially modify events for correct units, beam particles, ...
   const HepMC::GenEvent* checkEvent(const HepMC::GenEvent& event, const EventContext& ctx);
 
+  // Utility method to convert units of the event
+  void MeV2GeV(HepMC::GenEvent* event);
+
   /// A pointer to the THistSvc
   //ServiceHandle<ITHistSvc> m_histSvc;
 

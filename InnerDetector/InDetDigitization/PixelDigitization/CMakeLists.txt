@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelDigitization )
@@ -18,9 +18,9 @@ atlas_add_component( PixelDigitization
 atlas_add_test( BichselData_test
    SOURCES test/BichselData_test.cxx  src/BichselData.cxx src/PixelDigitizationUtilities.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils 
+   LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils
    POST_EXEC_SCRIPT "nopost.sh" )
-   
+
 atlas_add_test( PixelDigitizationUtilities_test
    SOURCES test/PixelDigitizationUtilities_test.cxx src/PixelDigitizationUtilities.cxx src/BichselData.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
@@ -30,6 +30,4 @@ atlas_add_test( PixelDigitizationUtilities_test
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/PixelDigitization_jobOptions.py share/PixelDigiTool_jobOptions.py )
 atlas_install_data( test/BichselTest.dat )
-

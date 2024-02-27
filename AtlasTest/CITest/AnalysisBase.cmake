@@ -11,6 +11,12 @@ atlas_add_citest( AnalysisTop_EMPFlowData
 atlas_add_citest( AnalysisTop_EMPFlowMC
    SCRIPT CI_EMPFlowMCtest.py )
 
+atlas_add_citest( AnalysisTop_EMPFlowData22
+   SCRIPT CI_EMPFlowData22test.py )
+
+atlas_add_citest( AnalysisTop_EMPFlowMC21
+   SCRIPT CI_EMPFlowMC21test.py )
+
 #################################################################################
 # SUSYTools
 #################################################################################

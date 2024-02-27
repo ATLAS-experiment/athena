@@ -138,4 +138,10 @@ add_test_job( TestJobFastSimFullLite     afii ${USE_FLAGS} --block-config --phys
 add_test_job( TestJobFastSimNominalORLite    afii ${USE_FLAGS} --block-config --only-nominal-or --physlite --no-physlite-broken )
 add_test_compare( TestJobFastSimCompareLite afii TestJobFastSimSequenceLite TestJobFastSimConfigLite )
 
+# this test is for testing that the algorithm monitors defined in EventLoop
+# don't break a job of reasonable complexity.  they are tested here instead of
+# in the EventLoop package, because we have a much more complex payload here.
+add_test_job( TestJobDataConfigMonitors   data --for-compare --block-config --no-systematics --algorithm-timer --algorithm-memory )
+add_test_compare( TestJobDataCompareMonitor data TestJobDataConfig TestJobDataConfigMonitors )
+
 endif()

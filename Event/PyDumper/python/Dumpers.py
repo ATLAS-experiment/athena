@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ##
 #
@@ -5611,7 +5611,7 @@ def dump_auxitem (x, auxid, f = sys.stdout):
 
     reg=ROOT.SG.AuxTypeRegistry.instance()
     tname = reg.getTypeName (auxid)
-    atomic = reg.getFlags (auxid) & ROOT.SG.AuxTypeRegistry.Atomic
+    atomic = reg.getFlags (auxid) & ROOT.SG.AuxVarFlags.Atomic
     if atomic:
         ac_cl = atomic_accessors.get (tname)
     else:

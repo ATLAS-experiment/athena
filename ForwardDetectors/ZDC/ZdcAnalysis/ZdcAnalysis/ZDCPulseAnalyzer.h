@@ -298,7 +298,9 @@ private:
 
 
   static std::vector<float> Calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step);
-
+  static std::vector<float> CalculateDerivative(const std::vector <float>& inputData, unsigned int step);
+  static float obtainDelayedBaselineCorr(const std::vector<float>& samples);
+  
   void FillHistogram(const std::vector<float>& samples, float noiseSig) const
   {
     if (!m_useDelayed) {

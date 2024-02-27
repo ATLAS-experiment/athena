@@ -1,34 +1,32 @@
+#!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#
+# Script to print HLT truncation info.
 #
 
-# Set input file to new-style flags
-from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
 flags = initConfigFlags()
-flags.Input.Files = athenaCommonFlags.FilesInput()
+flags.fillFromArgs()
 flags.lock()
 
-# Use new-style config of ByteStream reading and import here into old-style JO
-from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-CAtoGlobalWrapper(ByteStreamReadCfg,flags)
-
 # Define the decoding/analysis sequence
-from TrigHLTResultByteStream.TrigHLTResultByteStreamConf import HLTResultMTByteStreamDecoderAlg
-from TrigOutputHandling.TrigOutputHandlingConf import TriggerEDMDeserialiserAlg, TruncationAnalysisAlg
-from AthenaCommon.CFElements import seqAND
-decoder = HLTResultMTByteStreamDecoderAlg()
-deserialiser = TriggerEDMDeserialiserAlg("TrigDeserialiser")
-deserialiser.ExtraOutputs = {('xAOD::TrigCompositeContainer', 'StoreGateSvc+TruncationDebugInfo')}
-truncationAna = TruncationAnalysisAlg("TruncationAnalysis")
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+cfg = MainServicesCfg(flags)
 
-decodingSeq = seqAND("Decoding")
-decodingSeq += decoder
-decodingSeq += deserialiser
-decodingSeq += truncationAna
+from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+cfg.merge(ByteStreamReadCfg(flags))
 
-# Add decoding/analysis sequence to topSequence
-from AthenaCommon.AlgSequence import AlgSequence
-topSequence = AlgSequence()
-topSequence += decodingSeq
+from TriggerJobOpts.TriggerRecoConfig import Run3TriggerBSUnpackingCfg
+cfg.merge(Run3TriggerBSUnpackingCfg(flags))
+
+cfg.getEventAlgo("TrigDeserialiser").ExtraOutputs.add(
+   ('xAOD::TrigCompositeContainer', 'StoreGateSvc+TruncationDebugInfo') )
+
+cfg.addEventAlgo(CompFactory.TruncationAnalysisAlg("TruncationAnalysis"),
+                 sequenceName="HLTDecodingSeq")
+
+import sys
+sys.exit(cfg.run().isFailure())

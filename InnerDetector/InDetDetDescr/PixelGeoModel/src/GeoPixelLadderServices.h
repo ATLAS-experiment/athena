@@ -7,10 +7,10 @@
 
 #include "GeoVPixelFactory.h"
 #include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "GeoModelKernel/GeoDefinitions.h"
+#include "GeoModelKernel/GeoPhysVol.h"
 
-class GeoLogVol;
-class GeoPhysVol;
 
 class GeoPixelLadderServices : public GeoVPixelFactory {
  public:
@@ -21,7 +21,7 @@ class GeoPixelLadderServices : public GeoVPixelFactory {
                          int ladderType);
   GeoPixelLadderServices (const GeoPixelLadderServices&) = delete;
   GeoPixelLadderServices& operator= (const GeoPixelLadderServices&) = delete;
-  virtual ~GeoPixelLadderServices();
+  virtual ~GeoPixelLadderServices() = default;
   virtual GeoVPhysVol* Build() override;
   const GeoTrf::Vector3D & envelopeCornerA1() {return  m_envelopeCornerA1;}
   const GeoTrf::Vector3D & envelopeCornerA2() {return  m_envelopeCornerA2;}
@@ -36,7 +36,7 @@ class GeoPixelLadderServices : public GeoVPixelFactory {
   void BuildPigtailAndConnector(GeoPhysVol * parent);
 
  private:
-  const GeoLogVol* m_ladderServicesLV;
+  GeoIntrusivePtr<const GeoLogVol> m_ladderServicesLV{};
   int m_ladderType;
 
   GeoTrf::Vector3D m_envelopeCornerA1;

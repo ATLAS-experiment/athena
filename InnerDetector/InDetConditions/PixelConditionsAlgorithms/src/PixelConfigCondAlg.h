@@ -262,49 +262,6 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     Gaudi::Property<float> m_temperature
     {this, "DefaultTemperature", -7.0, "Default temperature in Celcius"};
 
-
-
-    // Distortion parameters
-    /** @brief Flag controlling how module distortions are taken into account:
-      case 0 -----> No distorsions implemented;
-      case 1 -----> Set curvature (in 1/meter) and twist (in radiant) equal for all modules;
-      case 2 -----> Read curvatures and twists from textfile containing Survey data;
-      case 3 -----> Set curvature and twist from Gaussian random generator with mean and RMS coming from Survey data;
-      case 4 -----> Read curvatures and twists from database;
-     */
-    Gaudi::Property<int> m_distortionInputSource
-    {this, "DistortionInputSource", 4, "Source of module distortions: 0 (none), 1 (constant), 2 (text file), 3 (random), 4 (database)"};
-
-    Gaudi::Property<int> m_distortionVersion
-    {this, "DistortionVersion", -1, "Version number for distortion model"};
-
-    Gaudi::Property<double> m_distortionR1
-    {this, "DistortionR1", 0.1/CLHEP::meter, "Fixed distortion parameters: radius of curvature"}; //corresponding to a sagitta of 50 um
-
-    Gaudi::Property<double> m_distortionR2
-    {this, "DistortionR2", 0.1/CLHEP::meter, "Fixed distortion parameters: radius of curvature"}; //corresponding to a sagitta of 50 um
-
-    Gaudi::Property<double> m_distortionTwist
-    {this, "DistortionTwist", 0.0005,"Fixed distortion parameters: twist angle (tan(theta))"};
-
-    Gaudi::Property<double> m_distortionMeanR
-    {this, "DistortionMean_R", 0.12/CLHEP::meter, "Random distortion parameters: Mean of radius of curvature"}; //Mean value from Survey
-
-    Gaudi::Property<double> m_distortionRMSR
-    {this, "DistortionRMS_R", 0.08/CLHEP::meter, "Random distortion parameters: RMS of curvature radius"}; //RMS value from Survey
-
-    Gaudi::Property<double> m_distortionMeanTwist
-    {this, "DistortionMean_twist", -0.0005,"Random distortion parameters: Mean twist angle"}; //Mean value from Survey
-
-    Gaudi::Property<double> m_distortionRMSTwist
-    {this, "DistortionRMS_twist", 0.0008,"Random distortion parameters: RMS of twist angle"}; //RMS value from Survey
-
-    Gaudi::Property<bool> m_distortionWriteToFile
-    {this, "DistortionWriteToFile", false, "Record data in storegate"};
-
-    Gaudi::Property<std::string> m_distortionFileName
-    {this, "DistortionFileName", "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/TrackingCP/PixelDistortions/PixelDistortionsData_v2_BB.txt","Read distortions from this file"};
-
     // Cabling parameters
     Gaudi::Property<bool> m_cablingMapToFile
     {this, "CablingMapToFile", false, "Dump pixel cabling map into file"};

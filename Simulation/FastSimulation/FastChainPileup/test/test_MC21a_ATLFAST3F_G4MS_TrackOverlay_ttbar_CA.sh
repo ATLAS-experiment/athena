@@ -4,7 +4,6 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
-# art-output: run_*
 # art-output: log.*
 # art-output: *.pkl
 # art-output: *.txt
@@ -16,9 +15,8 @@ EVNT_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21
 RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO_TrackOverlay_Run3.pool.root"
 RDO_File="RDO.pool.root"
 AOD_File="AOD.pool.root"
-NTUP_File="NTUP.pool.root"
+NTUP_File="NTUP_PHYSVAL.pool.root"
 
-mkdir -p run_ca; cd run_ca
 FastChain_tf.py \
   --CA \
   --runNumber 601229 \
@@ -35,7 +33,7 @@ FastChain_tf.py \
   --digiSeedOffset1 511 \
   --digiSeedOffset2 727 \
   --preInclude 'Campaigns.MC21a' 'Campaigns.MC21SimulationNoIoV' \
-  --postInclude 'PyJobTransforms.UseFrontier' \
+  --postInclude 'PyJobTransforms.UseFrontier' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
   --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
   --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
   --preExec 'all:ConfigFlags.Overlay.doTrackOverlay=True;' \
@@ -43,13 +41,7 @@ FastChain_tf.py \
   --imf False
 ca=$?
 echo  "art-result: $ca EVNTtoRDO_CA"
-cp log.* ../
-cp ${RDO_File} ../${RDO_File}
-if [ -f "ConfigCA.pkl" ]; then
-    cp ConfigCA.pkl ../ConfigCA.pkl
-fi
 status=$ca
-cd ../
 
 reg=-9999
 if [ $ca -eq 0 ]
@@ -66,8 +58,8 @@ if [ ${ca} -eq 0 ]
 then
     # Reconstruction
     Reco_tf.py \
-               --CA "all:True" "RDOtoRDOTrigger:False" \
-               --inputRDOFile run_ca/${RDO_File} \
+               --CA \
+               --inputRDOFile ${RDO_File} \
                --outputAODFile ${AOD_File} \
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \
                --maxEvents '-1' \
@@ -76,18 +68,19 @@ then
                --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
                --athenaopts "all:--threads=1" \
                --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
-               --preExec 'RAWtoALL:ConfigFlags.Overlay.doTrackOverlay=True;' 'RDOtoRDOTrigger:from OverlayCommonAlgs.OverlayFlags import overlayFlags; overlayFlags.doTrackOverlay=True; ConfigFlags.Overlay.doTrackOverlay=True;'\
+               --preExec 'all:flags.Overlay.doTrackOverlay=True;' \
                --imf False
 
      rec=$?
      if [ ${rec} -eq 0 ]
      then
-         # NTUP prod.
+         # NTUP prod. (old-style - will be updated after FastChain metadata is fixed)
          Reco_tf.py --inputAODFile ${AOD_File} \
                     --outputNTUP_PHYSVALFile ${NTUP_File} \
                     --maxEvents '-1' \
-                    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
+                    --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
                     --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
+	                  --asetup 'Athena,23.0.53' \
                     --ignoreErrors True \
                     --validationFlags 'doInDet' \
                     --valid 'True'

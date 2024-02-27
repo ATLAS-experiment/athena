@@ -270,21 +270,26 @@ namespace CP
   StatusCode SystematicsSvc ::
   finalize ()
   {
-    for (const CP::SystematicVariation& mysys : m_affectingSystematics)
-    {
-      // this logic checks whether a systematic is recommended and
-      // affecting, or only affecting.  if it is only the later, it
-      // reports the systematic in parenthesis to set it apart.
-      if (m_recommendedSystematics.find (mysys) == m_recommendedSystematics.end())
-        ANA_MSG_INFO ("found systematic: (" << mysys << ")");
-      else
-        ANA_MSG_INFO ("found systematic: " << mysys);
+    if (m_systematicsList.empty()) {
+      ANA_MSG_INFO ("no systematics were run.");
     }
+    else{
+      for (const CP::SystematicVariation& mysys : m_affectingSystematics)
+	{
+	  // this logic checks whether a systematic is recommended and
+	  // affecting, or only affecting.  if it is only the later, it
+	  // reports the systematic in parenthesis to set it apart.
+	  if (m_recommendedSystematics.find (mysys) == m_recommendedSystematics.end())
+	    ANA_MSG_INFO ("found systematic: (" << mysys << ")");
+	  else
+	    ANA_MSG_INFO ("found systematic: " << mysys);
+	}
 
-    if(m_systematicsRegex!=".*") {
-      ANA_MSG_INFO("Systematics regex '" << m_systematicsRegex << "' matched:");
-      for(const CP::SystematicSet& mysys : makeSystematicsVector()) {
+      if(m_systematicsRegex!=".*") {
+	ANA_MSG_INFO("Systematics regex '" << m_systematicsRegex << "' matched:");
+	for(const CP::SystematicSet& mysys : makeSystematicsVector()) {
           ANA_MSG_INFO ("  '" << mysys.name() << "'");
+	}
       }
     }
     return StatusCode::SUCCESS;

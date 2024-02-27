@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -22,22 +22,22 @@ if __name__=='__main__':
   log = logging.getLogger("generateTrigNavGraph.py")
   log.info("Generating NavGraphs for :" + args.chain)
 
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
   # Set the Athena configuration flags
-  #
-  ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art//TrigAnalysisTest/AthenaTrigAOD_TrigEDMandTDTCheck_LS2_v1_chain/AOD.pool.root"]
+  flags = initConfigFlags()
+  flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art//TrigAnalysisTest/AthenaTrigAOD_TrigEDMandTDTCheck_LS2_v1_chain/AOD.pool.root"]
 
-  ConfigFlags.Exec.MaxEvents = args.maxEvents
+  flags.Exec.MaxEvents = args.maxEvents
   if args.skipEvents is not None:
-    ConfigFlags.Exec.SkipEvents = args.skipEvents
+    flags.Exec.SkipEvents = args.skipEvents
 
   if args.flags:
-    ConfigFlags.fillFromArgs(args.flags)
+    flags.fillFromArgs(args.flags)
 
-  ConfigFlags.lock()
+  flags.lock()
 
-  if ConfigFlags.Trigger.EDMVersion != 3:
+  if flags.Trigger.EDMVersion != 3:
     log.error("Can only run over a Run 3 AOD or ESD file")
     sys.exit(1)
 
@@ -46,11 +46,11 @@ if __name__=='__main__':
   from AthenaConfiguration.ComponentFactory import CompFactory
 
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-  cfg = MainServicesCfg(ConfigFlags)
-  cfg.merge(PoolReadCfg(ConfigFlags))
+  cfg = MainServicesCfg(flags)
+  cfg.merge(PoolReadCfg(flags))
 
   from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-  tdt_ca = TrigDecisionToolCfg(ConfigFlags)
+  tdt_ca = TrigDecisionToolCfg(flags)
   tdt = tdt_ca.getPrimary()
   tdt.OutputLevel = args.loglevel
   cfg.merge(tdt_ca)

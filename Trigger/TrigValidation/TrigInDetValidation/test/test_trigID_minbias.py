@@ -4,7 +4,7 @@
 # art-description: art job for minbias
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-input: valid1.900341.Epos_LHC_minbias_inelastic.recon.RDO.e8514_e8528_s4159_s4114_r14838_tid34209703_00
 # art-input-nfiles: 4
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
@@ -30,13 +30,15 @@
 # art-output: *.dat 
 
 
+
+useCA_Reco = True
 Slices  = ['minbias']
 Events  = 8000 
 Threads = 8 
 Slots   = 8
 Input   = 'minbias'    # defined in TrigValTools/share/TrigValInputs.json  
 GridFiles = True
-ExtraAna   = " -c 'ptmin=400' "
+ExtraAna   = " --ptmin=400 "
 
 Jobs = [ ( "Truth",       " TIDAdata-run3-minbias.dat                    -o data-hists.root" ),
          ( "Offline",     " TIDAdata-run3-minbias-offline.dat -r Offline -o data-hists-offline.root" ) ]

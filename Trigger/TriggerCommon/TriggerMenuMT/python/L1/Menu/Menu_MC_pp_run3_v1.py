@@ -10,7 +10,6 @@ def defineMenu():
     l1items = L1MenuFlags.items()
     l1items += [
 
-
         # ATR-28612 - legacy EM        
         'L1_EM3',
         'L1_EM18VHI',
@@ -20,8 +19,11 @@ def defineMenu():
         'L1_EM3_EMPTY', 
         'L1_EM7_FIRSTEMPTY',
 
+        # ATR-28761 - Phase 1 Muon + jet
         'L1_MU14FCH_jJ80',
         'L1_MU14FCH_jXE70',
+        'L1_MU14FCH_J50',
+        'L1_MU14FCH_XE40',
 
         # ATR-19376
         'L1_MU14FCH_XE30',
@@ -78,6 +80,70 @@ def defineMenu():
         # ART-28443  test eEMX{} + {{3,4jJY{}}} L1 seeds
         'L1_eEM22M_3jJ40p0ETA25',
         'L1_eEM22M_4jJ30p0ETA25',
+
+        # ATR-28692
+        'L1_EM15VHI_2TAU12IM',
+        'L1_MU8F_TAU12IM',  
+        'L1_MU8F_TAU12IM_J25_2J12',
+        'L1_MU8F_TAU12IM_3J12',
+        'L1_EM15VHI_2TAU12IM_J25_3J12',
+        'L1_MU8F_TAU20IM',
+        #
+        'L1_TAU20IM_2TAU12IM_J25_2J20_3J12',
+        'L1_TAU25IM_2TAU20IM',
+        #
+        'L1_TAU20IM_2J20_XE45',
+        'L1_EM15VHI_2TAU12IM_XE35',
+        'L1_EM15VHI_2TAU12IM_4J12',
+        'L1_MU8F_TAU12IM_XE35',  
+        'L1_TAU20IM_2TAU12IM_XE35', 
+        'L1_TAU40_2TAU12IM_XE40',
+        'L1_TAU25IM_2TAU20IM_2J25_3J20',
+
+        #ATR-28679 - legacy XE
+        'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE60',
+
+        # Legacy combined em - jet moved by ATR-28761
+        'L1_EM18VHI_3J20',
+        'L1_EM20VH_3J20',
+
+        # Legacy combined mu - jet moved by ATR-28761
+        'L1_MU3V_J12',
+        # Legacy ATR-13743 J,XE thershold change for ATR-19376  moved by ATR-28761
+        'L1_MU8F_2J20','L1_MU8F_3J20', 'L1_MU8F_2J15_J20',
+        'L1_3J15p0ETA25_XE40',
+        'L1_2J15_XE55',
+        'L1_J40_XE50',
+        'L1_2J50_XE40',
+        'L1_J40_XE60',
+        'L1_AFP_A_AND_C_TOF_J20', 'L1_AFP_A_AND_C_TOF_T0T1_J20', 'L1_AFP_A_AND_C_TOF_J30', 'L1_AFP_A_AND_C_TOF_T0T1_J30', 'L1_AFP_A_AND_C_TOF_J50', 'L1_AFP_A_AND_C_TOF_T0T1_J50', 'L1_AFP_A_AND_C_TOF_J75', 'L1_AFP_A_AND_C_TOF_T0T1_J75',
+        'L1_AFP_A_OR_C_J12', 'L1_AFP_A_AND_C_J12',
+        
+        # ATR-28678
+        "L1_J12",
+        "L1_J25",
+        "L1_J30",
+        "L1_J40",
+        "L1_J75",
+        "L1_J85",
+        "L1_J120",
+        "L1_J400_LAR",
+        "L1_J20p31ETA49",
+        "L1_J30p31ETA49",
+        "L1_J50p31ETA49",
+        "L1_J15p31ETA49",
+        "L1_J12_EMPTY",
+        "L1_J30_EMPTY",
+        "L1_J30_FIRSTEMPTY",
+        "L1_J45p0ETA21_3J15p0ETA25",
+        "L1_4J20",
+        "L1_J85_3J30",
+        "L1_J25p0ETA23_2J15p31ETA49",
+        "L1_J40p0ETA25_2J25_J20p31ETA49",
+        "L1_3J35p0ETA23",
+        "L1_4J15p0ETA25",
+        "L1_5J15p0ETA25",
+        'L1_J30p31ETA49_EMPTY',
     ]
 
     # To replace thresholds in the physics menu
@@ -104,15 +170,13 @@ def defineMenu():
         'L1_eTAU35':'',
         'L1_eTAU40HM':'',
         'L1_2TAU8':'',
-        'L1_EM15VHI_2TAU12IM':'',
-        'L1_MU8F_TAU12IM':'',
-        'L1_MU8F_TAU12IM_J25_2J12':'',
-        'L1_EM15VHI_2TAU12IM_J25_3J12':'',
-        'L1_MU8F_TAU20IM_J25_2J20':'',
-        'L1_TAU20IM_2TAU12IM_J25_2J20_3J12':'',
-        'L1_TAU20IM_2J20_XE45':'',
-        'L1_TAU20IM_2J20_XE50':'',
-        'L1_TAU20IM_2TAU12IM_XE35':'',
+        'L1_eEM18M_2eTAU20M':'',
+        #'L1_MU8F_eTAU20M':'',
+        'L1_MU8F_eTAU20M_jJ55_2jJ30':'',
+        'L1_eEM18M_2eTAU20M_jJ55_3jJ30':'',
+        'L1_eTAU30M_2eTAU20M_jJ55_2jJ50_3jJ3':'',
+        'L1_eTAU30M_2jJ50_jXE90':'',
+        'L1_eTAU30M_2eTAU20M_jXE70':'',
 
         # non-primary MU 
         #'L1_MU8VF':'',
@@ -136,15 +200,15 @@ def defineMenu():
 
         # non-primary J
         'L1_J12':'',
-        'L1_J25':'',
-        'L1_J85':'',
+        # 'L1_J25':'',
+        # 'L1_J85':'',
         'L1_J12_BGRP12':'',
         'L1_jJ30p0ETA25':'',
         'L1_jJ40p0ETA25':'',
         'L1_jJ55':'',
         'L1_jJ55p0ETA23':'',
         'L1_jJ70p0ETA23':'',
-        'L1_jJ80':'',
+        #'L1_jJ80':'',
         'L1_jJ80p0ETA25':'',
         'L1_jJ85p0ETA21':'',
         'L1_jJ140':'',
@@ -167,7 +231,7 @@ def defineMenu():
         # EM non-FILLED
 
         # J non-FILLED
-        'L1_J12_EMPTY':'',
+        # 'L1_J12_EMPTY':'',
         'L1_J12_FIRSTEMPTY':'', 
         'L1_J12_UNPAIRED_ISO':'', 
         'L1_J12_UNPAIRED_NONISO':'', 

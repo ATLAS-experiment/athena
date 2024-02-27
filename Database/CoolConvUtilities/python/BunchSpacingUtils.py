@@ -23,7 +23,7 @@ def bunchSpacingOfRun(runnumber,LB,verbose=False):
     obj=None
     db = None
     try:
-        db=indirectOpen(tdaqDBName,oracle="DBRELEASE" not in environ)
+        db=indirectOpen(tdaqDBName)
         print (db)
         print (iovtime)
         f=db.getFolder(folder)

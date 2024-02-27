@@ -48,6 +48,8 @@ JetCopyVarsToKeep = ['pt', 'eta', 'phi', 'm',
 FastFtagPFlowVarsToKeep = [f'dips20211116_p{x}' for x in 'cub']
 FastFtagPFlowVarsToKeep += [f'fastDIPS20211215_p{x}' for x in 'cub']
 FastFtagPFlowVarsToKeep += [f'GN120230331_p{x}' for x in 'cub']
+FastFtagPFlowVarsToKeep += [f'tlaGN220240122_p{x}' for x in 'cub']
+
 JetCopyVarsToKeep += FastFtagPFlowVarsToKeep
 JetCopyVars = '.'.join(JetCopyVarsToKeep)
 
@@ -55,6 +57,7 @@ JetFastFTagVarsToKeep = JetCopyVarsToKeep
 JetFastFTagVarsToKeep += [f'fastDips_p{x}' for x in 'cub']
 JetFastFTagVarsToKeep += [f'fastGN120230327_p{x}' for x in 'cub']
 JetFastFTagVarsToKeep += [f'fastGN120230331_p{x}' for x in 'cub']
+JetFastFTagVarsToKeep += [f'fastGN220240122_p{x}' for x in 'cub']
 JetFastFTagVarsToKeep += ['dipz20231122_z']
 JetFastFTagVarsToKeep += ['dipz20231122_negLogSigma2']
 JetFastFTagVars = '.'.join(JetFastFTagVarsToKeep)
@@ -147,7 +150,8 @@ three_output_taggers = [
     'DL1dv00',                  # first 'official' offline r22
     'dips20211116',             # DIPS input to the current online DL1d
     'DL1d20211216',             # current online r22
-    'GN120220813'
+    'GN120220813',
+    'GN220240122'
 ]
 
 b_vs_bb_taggers = [
@@ -333,12 +337,10 @@ TriggerHLTListRun3 = [
     ('xAOD::MuonRoIContainer#LVL1MuonRoIsBCp2',                      'BS ESD AODFULL', 'L1'),
     ('xAOD::MuonRoIAuxContainer#LVL1MuonRoIsBCp2Aux.',               'BS ESD AODFULL', 'L1'),
 
-    ('xAOD::eFexEMRoIContainer#L1_eEMRoI',                                          'BS ESD AODFULL PhysicsTLA', 'L1'),
-    ('xAOD::eFexEMRoIAuxContainer#L1_eEMRoIAux.thresholdPatterns',                  'BS ESD AODFULL PhysicsTLA', 'L1'),
+    ('xAOD::eFexEMRoIContainer#L1_eEMRoI',                                          'BS ESD AODFULL PhysicsTLA EgammaPEBTLA', 'L1'),
+    ('xAOD::eFexEMRoIAuxContainer#L1_eEMRoIAux.thresholdPatterns',                  'BS ESD AODFULL PhysicsTLA EgammaPEBTLA', 'L1'),
     ('xAOD::eFexTauRoIContainer#L1_eTauRoI',                                        'BS ESD AODFULL', 'L1'),
     ('xAOD::eFexTauRoIAuxContainer#L1_eTauRoIAux.thresholdPatterns',                'BS ESD AODFULL', 'L1'),
-    ('xAOD::eFexTauRoIContainer#L1_eTauBDTRoI',                                     'BS ESD AODFULL', 'L1'),
-    ('xAOD::eFexTauRoIAuxContainer#L1_eTauBDTRoIAux.thresholdPatterns',             'BS ESD AODFULL', 'L1'),
     ('xAOD::eFexTauRoIContainer#L1_cTauRoI',                                        'BS ESD AODFULL', 'L1'),
     ('xAOD::eFexTauRoIAuxContainer#L1_cTauRoIAux.thresholdPatterns.jTauLink',       'BS ESD AODFULL', 'L1'),
 
@@ -407,10 +409,10 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeAuxContainer#HLT_TrigCompositeMistimeJ400Aux.pass.other_type.beforeafterflag.l1a_type', 'BS ESD AODFULL', 'L1'),
 
     # LArPS
-    ('xAOD::TrigEMClusterContainer#HLT_LArPS_AllCaloEMClusters',           'BS ESD AODCOMM', 'Egamma', [InViews('LArPS_AllEM_Views')]),
-    ('xAOD::TrigEMClusterAuxContainer#HLT_LArPS_AllCaloEMClustersAux.',    'BS ESD AODCOMM', 'Egamma'),
-    ('xAOD::TrigEMClusterContainer#HLT_LArPS_AllCaloClusters',             'BS ESD AODCOMM', 'Egamma', [InViews('LArPS_All_Views')]),
-    ('xAOD::TrigEMClusterAuxContainer#HLT_LArPS_AllCaloClustersAux.',      'BS ESD AODCOMM', 'Egamma'),
+    ('xAOD::TrigEMClusterContainer#HLT_LArPS_AllCaloEMClusters',           'BS ESD', 'Egamma', [InViews('LArPS_AllEM_Views')]),
+    ('xAOD::TrigEMClusterAuxContainer#HLT_LArPS_AllCaloEMClustersAux.',    'BS ESD', 'Egamma'),
+    ('xAOD::TrigEMClusterContainer#HLT_LArPS_AllCaloClusters',             'BS ESD', 'Egamma', [InViews('LArPS_All_Views')]),
+    ('xAOD::TrigEMClusterAuxContainer#HLT_LArPS_AllCaloClustersAux.',      'BS ESD', 'Egamma'),
 
     # Egamma
     ('xAOD::TrigEMClusterContainer#HLT_FastCaloEMClusters',           'BS ESD AODCOMM', 'Egamma', [InViews('EMCaloViews')]),
@@ -452,8 +454,8 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Electron',               'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionCaloElectronViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_ElectronAux.',    'BS ESD AODFULL AODSLIM', 'Egamma'),
 
-    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Photon',               'BS PhysicsTLA ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionCaloPhotonViews')]),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.',    'BS PhysicsTLA ESD AODFULL AODSLIM', 'Egamma'),
+    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Photon',               'BS PhysicsTLA EgammaPEBTLA ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionCaloPhotonViews')]),
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.',    'BS PhysicsTLA EgammaPEBTLA ESD AODFULL AODSLIM', 'Egamma'),
 
     # these two corresponds to the output of the precisionHICalo step
     ('xAOD::CaloClusterContainer#HLT_HICaloEMClusters',               'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionHICaloElectronViews'),InViews('precisionHICaloPhotonViews')]),
@@ -464,8 +466,8 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_LRTAux.',    'BS ESD AODFULL', 'Egamma'),
 
     # these two corresponds to the output of the precisionCalo forward step
-    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_FWD',               'BS ESD AODCOMM', 'Egamma', [InViews('precisionCaloElectron_FWDViews')]),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_FWDAux.',    'BS ESD AODCOMM', 'Egamma'),
+    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_FWD',               'BS ESD', 'Egamma', [InViews('precisionCaloElectron_FWDViews')]),
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_FWDAux.',    'BS ESD', 'Egamma'),
 
 
     # This variant needed by TrigUpgradeTest/egammaRinger.py
@@ -707,8 +709,8 @@ TriggerHLTListRun3 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',        'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe',  'BS ESD AODFULL',  'Tau'),
 
-    ('xAOD::JetContainer#HLT_jet_seed',                         'BS ESD AODCOMM', 'Tau', [InViews('tauCaloMVAViews')]),
-    ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  'BS ESD AODCOMM', 'Tau'),
+    ('xAOD::JetContainer#HLT_jet_seed',                         'BS ESD', 'Tau', [InViews('tauCaloMVAViews')]),
+    ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  'BS ESD', 'Tau'),
 
     # Jet
     ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS',                        'BS ESD AODFULL AODSLIM', 'Jet', [Alias('JetContainerShallowCopy')]),
@@ -765,8 +767,8 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',                'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jesAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalib',                'BS ESD AODCOMM', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalibAux.'+JetVars, 'BS ESD AODCOMM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalib',                'BS ESD', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalibAux.'+JetVars, 'BS ESD', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10LCTopoSoftDropBeta100Zcut10Jets_nojcalib',                'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10LCTopoSoftDropBeta100Zcut10Jets_nojcalibAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
@@ -777,8 +779,8 @@ TriggerHLTListRun3 = [
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftf',                'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
 
-    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKJets_nojcalib_ftf',                       'BS ESD AODCOMM', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKJets_nojcalib_ftfAux.'+JetVars,        'BS ESD AODCOMM', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKJets_nojcalib_ftf',                       'BS ESD', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKJets_nojcalib_ftfAux.'+JetVars,        'BS ESD', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftf',                'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
@@ -825,6 +827,7 @@ TriggerHLTListRun3 = [
     # TLA jets + PEB jets
     ('TrigRoiDescriptorCollection#HLT_Roi_DarkJetPEBTLA',             'BS ESD DarkJetPEBTLA',  'Jet'),
     ('TrigRoiDescriptorCollection#HLT_Roi_FTagPEBTLA',             'BS ESD FTagPEBTLA',  'Jet'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_EgammaPEBTLA',             'BS ESD EgammaPEBTLA',  'Jet'),
 
     ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_TLA',                                 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet' ),
     ('xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_TLAAux.JetDensityEMPFlow.JetDensityEMTopo.AvgMu.NumPV',         'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'    ),
@@ -837,8 +840,8 @@ TriggerHLTListRun3 = [
 
 
     # TLA Photons
-    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA DarkJetPEBTLA ESD', 'Egamma'),
-    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA DarkJetPEBTLA ESD', 'Egamma'),
+    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA DarkJetPEBTLA EgammaPEBTLA ESD', 'Egamma'),
+    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA DarkJetPEBTLA EgammaPEBTLA ESD', 'Egamma'),
 
     # TLA Muons
     ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS PhysicsTLA DarkJetPEBTLA ESD', 'Muon'),
@@ -1042,15 +1045,15 @@ TriggerHLTListRun3 = [
     ('xAOD::VertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtx',                          'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),
     ('xAOD::VertexAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   'BS ESD AODFULL', 'Bjet'),
 
-    ('xAOD::VertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx',                          'BS ESD AODCOMM', 'Bjet', [InViews(BTagViewsEMPFlow)]),
-    ('xAOD::VertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   'BS ESD AODCOMM', 'Bjet'),
+    ('xAOD::VertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx',                          'BS ESD', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::VertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtxAux.',                   'BS ESD', 'Bjet'),
 
     # btagvertex for b-jets
     ('xAOD::BTagVertexContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtx',                          'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),
     ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   'BS ESD AODFULL', 'Bjet'),
 
-    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtx',                          'BS ESD AODCOMM', 'Bjet', [InViews(BTagViewsEMPFlow)]),
-    ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   'BS ESD AODCOMM', 'Bjet'),
+    ('xAOD::BTagVertexContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtx',                          'BS ESD', 'Bjet', [InViews(BTagViewsEMPFlow)]),
+    ('xAOD::BTagVertexAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingJFVtxAux.',                   'BS ESD', 'Bjet'),
 
     # bjet b-tagging
     ('xAOD::BTaggingContainer#HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf_BTagging',                          'BS ESD AODFULL', 'Bjet', [InViews(BTagViewsEMTopo)]),

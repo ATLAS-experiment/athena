@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 import sys, shutil, re
@@ -6,8 +6,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.SystemOfUnits import GeV,ns # noqa: F401
 from AthenaConfiguration.Enums import ProductionStep
-from Gauginos.GauginosConfig import GauginosPhysicsToolCfg, NeutralinoToPhotonGravitinoCfg
-from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
 
 # Example specialConfiguration {'GMSBSlepton': '100.0*GeV', 'GMSBGravitino': '1e-07*GeV', 'GMSBSleptonTime': '0.01*ns'}
 
@@ -869,6 +867,8 @@ def SleptonsLLPCfg(flags):
     load_files_for_sleptonLLP_scenario(flags)
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
+        from Gauginos.GauginosConfig import GauginosPhysicsToolCfg
         result.merge(PhysicsListSvcCfg(flags))
         physicsOptions = [ result.popToolsAndMerge(GauginosPhysicsToolCfg(flags)) ]
         physicsOptions += [ result.popToolsAndMerge(AllSleptonsPhysicsToolCfg(flags)) ]
@@ -937,6 +937,7 @@ def SleptonsLLPCfg(flags):
 def GMSB_Cfg(flags):
     result = ComponentAccumulator()
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from G4AtlasServices.G4AtlasServicesConfig import PhysicsListSvcCfg
         result.merge(PhysicsListSvcCfg(flags))
 
     simdict = flags.Input.SpecialConfiguration
@@ -944,6 +945,7 @@ def GMSB_Cfg(flags):
     load_files_for_GMSB_scenario(simdict)
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        from Gauginos.GauginosConfig import GauginosPhysicsToolCfg, NeutralinoToPhotonGravitinoCfg
         GMSBIndex = int(simdict["GMSBIndex"])
         physicsOptions = []
         if GMSBIndex == 1: # generic neutralino to photon scenario

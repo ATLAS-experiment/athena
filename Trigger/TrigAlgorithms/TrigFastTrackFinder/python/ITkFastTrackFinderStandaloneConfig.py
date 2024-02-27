@@ -21,6 +21,12 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
     
     inDetAccelSvc = CompFactory.TrigInDetAccelerationSvc("TrigInDetAccelerationSvc")
     inDetAccelSvc.useITkGeometry = True # Allows to read and export the ITk geometry
+    inDetAccelSvc.MiddleSpacePointLayers = [81000, 82000, 
+        91005, 90014, 92000, 92001, 92002, 92003, 92004, 92005, 92006, 92007, 92008, 92009, 92010,  
+        92011, 92012, 92013, 92014, 92015, 92016, 92017, 92018, 92019, 92020, 92021, 92022, 
+        71005, 70014, 72000, 72001, 72002, 72003, 72004, 72005, 72006, 72007, 72008, 72009, 72010, 
+        72011, 72012, 72013, 72014, 72015, 72016, 72017, 72018, 72019, 72020, 72021, 72022
+    ]
     acc.addService(inDetAccelSvc)
 
     acc.addPublicTool(CompFactory.TrigITkAccelerationTool(name = "TrigITkAccelerationTool_FTF"))

@@ -147,6 +147,8 @@ JetChainParts = {
       ['nopresel',
        # Single jet
        'preselj20emf24',
+       'preselj20emf12',
+       'preselj20emf6',
        'preselj20',
        'preselj50',
        'preselj80',
@@ -209,6 +211,7 @@ JetChainParts = {
        'presel2c20XX2c20b85',
        'presel2c20XX2c20b82',
        'presel2c20XX2c20b80',
+       'presel2c20XX2c20bgtwo85',
        'presel2c20XX2c20bg85',
        'presel2c20XX2c20bg82',
        'presel2c20XX2c20bg80',
@@ -233,15 +236,24 @@ JetChainParts = {
        #DIPZ preselection
        'preselZ128XX4c20',
        'preselZ120XX4c20',
+       'preselZ116XX4c20',
+       'preselZ167MAXMULT5XX4c20',
+       'preselZ138MAXMULT5XX4c20',
+       'preselZ126MAXMULT5XX4c20',
        'preselZ120MAXMULT20XX4c85',
+       'preselZ87XX3c20',
+       'preselZ84XX3c20',
+       'preselZ82XX3c20',
+       'preselZ120XX2c20XX2c20b85',
+       'preselZ138MAXMULT5XX2c20XX2c20b85',
+       'preselZ84XX1c20XX2c20b85',
        'preselZ120XX4c85',
        'preselZ116XX4c20',
        'preselZ138XX4c20',
+       'preselZ120MAXMULT20XX4c20',
+       'preselZ84MAXMULT20XX3c20',
        'preselZ116MAXMULT5XX4c20',
        'preselZ116MAXMULT20XX4c20',
-       'preselZ138MAXMULT5XX4c20',
-       'preselZ84XX3c20',
-       'preselZ84MAXMULT20XX3c20',
        'preselZ84XX1c20XX2c20b85',
        'preselZ128XX2c20XX2c20b85',
        'preselZ128MAXMULT20XX4c85',
@@ -317,13 +329,13 @@ JetChainParts = {
                       'Z128XX4c20',
                       'Z120XX5c70',
                       'Z120XX6c55',
-                      'Z120XX10c40',
+                      'Z120XX10c40'
                       ],
 
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',
                   'emergingPTF0p2dR0p4', 'emergingPTF0p1dR0p4', 'emergingPTF0p09dR0p4', 'emergingPTF0p08dR0p4', 'emergingPTF0p075dR0p4', 'emergingPTF0p07dR0p4', 'emergingPTF0p0dR0p4',
                   'tracklessdR1p2',      'tracklessdR0p4',
-                  'calratio','calratiormbib' # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
+                  'calratio','calratiormbib','calrtold','calrtoldrmbib'  # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
               ],
 
     # Simple hypo configuration. Single property cuts defined as MINvarMAX
@@ -336,7 +348,7 @@ JetChainParts = {
     'jvt'           : # Jet Vertex Tagger pileup discriminant
       ['010jvt', '011jvt', '015jvt', '020jvt', '050jvt', '059jvt'],
     'momCuts'       : # Generic moment cut on single jets
-       ['050momemfrac100', 'momhecfrac010', '050momemfrac100XXmomhecfrac010'],
+       ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010'],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
     ['2timing'],
     'timeSig'       : # delayed jets, based on pT-dependent significance of delay [sigma]
@@ -347,8 +359,9 @@ JetChainParts = {
      # jets by ordering by pt, and selecting those with indices in [X,Y]
      'PTRANGE0r1',
      'PTRANGE2r3',
-     'MAXMULT20'],
-    'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone', '60bgntwox', '70bgntwox', '80bgntwox', '90bgntwox' ],
+     'MAXMULT20',
+     'MAXMULT6',],
+    'bsel': ['95bdips','90bdips','85bdips','80bdips','77bdips','95bgnone','90bgnone','85bgnone','80bgnone','77bgnone', '60bgntwox', '70bgntwox', '80bgntwox', '90bgntwox','95bgntwo','90bgntwo','85bgntwo','80bgntwo','82bgntwo','77bgntwo','75bgntwo','60bgntwo'],
     'smc'           : # "Single mass condition" -- rename?
       ['30smcINF', '35smcINF', '40smcINF', '50smcINF', '60smcINF', 'nosmc'],
     # Setup for alternative data stream readout
@@ -361,7 +374,10 @@ JetChainParts = {
                       'bgn160', 'bgn165', 'bgn170', 'bgn172',
                       'bgn175', 'bgn177', 'bgn180', 'bgn182',
                       'bgn185',
-                      'bgn182bb96', 'bgn177bb96', 'bgn175bb90' ],
+                      'bgn182bb96', 'bgn177bb96', 'bgn175bb90',
+                      'bgn260', 'bgn265', 'bgn270', 'bgn272',
+                      'bgn275', 'bgn277', 'bgn280', 'bgn282',
+                      'bgn285',                       ],
     'bTracking'    : [],
     'bConfig'      : ['split',],
     'bMatching'    : ['antimatchdr05mu'],
@@ -504,7 +520,7 @@ AllowedTopos_Bphysics = [
     'Bidperf','BsmumuPhi','BpmumuKp','BcmumuPi','BdmumuKst','LbPqKm','BcmumuDsloose','BcmumuDploose','BcmumuD0Xloose','BcmumuDstarloose',
     'BpmuD0X','BdmuDpX','BdmuDstarX','BsmuDsX','LbmuLcX',
     # topoExtras
-    'Lxy0','noos','nocut','lowpt'
+    'Lxy0','sigmaLxy3','sigmaLxy5','noos','nocut','lowpt'
     #########Remove until here############
 
 ]
@@ -1210,7 +1226,7 @@ UnconventionalTrackingChainParts_Default = {
 #==========================================================
 AllowedTopos_comb = [
     'idZmumu','idJpsimumu',
-    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','02dRBC','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
+    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','03dRAB35','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','03dRAC35','02dRBC','15dRBC45','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
     '90invmAB',# TEST
     '1invmAB5','50invmAB130','50invmBC130', # Jpsiee, Zee/Zeg
     '25dphiAA','25dphiBB','25dphiCC','invmAA80', # Low-mass diphoton

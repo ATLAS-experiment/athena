@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDCHitsTestTool.h"
@@ -23,18 +23,12 @@ ZDCHitsTestTool::ZDCHitsTestTool(const std::string& type, const std::string& nam
       m_rpd[side][channel] = nullptr;
     }
   }
-  const ZdcID* zdcId = nullptr;
-  if (detStore()->retrieve( zdcId ).isFailure() ) {
-    ATH_MSG_ERROR("execute: Could not retrieve ZdcID object from the detector store");
-  }
-  else {
-    ATH_MSG_DEBUG("execute: retrieved ZdcID");
-  }
-  m_ZdcID = zdcId;
 }
 
 StatusCode ZDCHitsTestTool::initialize()
 {
+  ATH_CHECK (detStore()->retrieve( m_ZdcID ) );
+
   m_path+="ZDC/";
 
   for(int side : {0,1}){

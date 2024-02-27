@@ -5,11 +5,12 @@
 import yaml
 import json
 import os
+import sys
+import importlib
 import pathlib
 
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
-
 
 def readYaml(yamlPath):
     """Loads YAML file into a dictionary"""
@@ -28,10 +29,14 @@ def printYaml(d, sort=False, jsonFormat=False):
 class TextConfig(ConfigFactory):
     def __init__(self, yamlPath=None):
         # will add default blocks in ConfigFactory init
-        super().__init__()
+        super().__init__(addDefaultBlocks=False)
         self._textConfig = {}
         if yamlPath is not None:
             self.loadConfig(yamlPath)
+        # Block to add new blocks to this object
+        self.addAlgConfigBlock(algName="AddConfigBlocks", alg=self.addNewConfigBlocks,
+            defaults={'self': self})
+        self.addDefaultAlgs()
 
 
     def setConfig(self, config):
@@ -50,7 +55,7 @@ class TextConfig(ConfigFactory):
         if not os.path.isfile(yamlPath):
             raise ValueError(f"{yamlPath} is not a file")
         self._textConfig = readYaml(yamlPath)
-        return 
+        return
 
 
     def printConfig(self, sort=False, jsonFormat=False):
@@ -58,6 +63,26 @@ class TextConfig(ConfigFactory):
         if self._textConfig is None:
             raise ValueError("No configuration has been loaded.")
         printYaml(self._textConfig, sort, jsonFormat)
+        return
+
+
+    def addNewConfigBlocks(self, modulePath, functionName,
+        algName, defaults=None, pos=None, superBlocks=None):
+        """
+        Load <functionName> from <modulePath>
+        """
+        try:
+            module = importlib.import_module(modulePath)
+            fxn = getattr(module, functionName)
+        except ModuleNotFoundError as e:
+            raise ModuleNotFoundError(f"{e}\nFailed to load {functionName} from {modulePath}")
+        else:
+            sys.modules[functionName] = fxn
+        # add new algorithm to available algorithms
+        self.addAlgConfigBlock(algName=algName, alg=fxn,
+            defaults=defaults,
+            superBlocks=superBlocks,
+            pos=pos)
         return
 
 
@@ -81,9 +106,9 @@ class TextConfig(ConfigFactory):
                 algOpts = seq.setOptions(options)
                 configSeq += seq
 
-                # check to see if there are unused parameters 
+                # check to see if there are unused parameters
                 algOpts = [i['name'] for i in algOpts]
-                expectedOptions = set(funcOpts) 
+                expectedOptions = set(funcOpts)
                 expectedOptions |= set(algOpts)
                 expectedOptions |= set(block.subAlgs)
 
@@ -104,16 +129,25 @@ class TextConfig(ConfigFactory):
 
 
         ### configure starts here ###
+        configSeq = ConfigSequence()
+        # check if blocks are defined in yaml file
+        if "AddConfigBlocks" in self._textConfig:
+            blockConfig = self._textConfig["AddConfigBlocks"]
+            alg = self._algs["AddConfigBlocks"]
+            configureAlg(configSeq, alg, blockConfig)
+
         # make sure all blocks in yaml file are added (otherwise they would be ignored)
         for blockName in self._textConfig:
             if blockName not in self._order[self.ROOTNAME]:
                 raise ValueError(f"Unkown block {blockName} in yaml file")
 
-        configSeq = ConfigSequence()
+        # configure blocks
         for blockName in self._order[self.ROOTNAME]:
-            # consistency check - should never happen
-            if blockName not in self._algs:
-                raise ValueError(f"{blockName} not added")
+            if blockName == "AddConfigBlocks":
+                continue
+
+            assert blockName in self._algs
+
             # order only applies to root blocks
             if blockName in self._textConfig:
                 blockConfig = self._textConfig[blockName]

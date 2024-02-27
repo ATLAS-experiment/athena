@@ -1,20 +1,21 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Trigger athenaHLT test of the Cosmic_run3_v1 menu on express stream from a cosmic run
 # art-type: build
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data_cos'
 ex.max_events = 100
-ex.args = '-c "setMenu=\'Cosmic_run3_v1\';doCosmics=True;doL1Sim=False;forceEnableAllChains=True;"'
-ex.args += ' --dump-config-reload'
+ex.flags = ['Trigger.triggerMenuSetup="Cosmic_run3_v1"',
+            'Trigger.forceEnableAllChains=True',
+            'Beam.Type=BeamType.Cosmics']
 
 test = Test.Test()
 test.art_type = 'build'

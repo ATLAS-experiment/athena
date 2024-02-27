@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -222,15 +222,6 @@ void Prompt::VertexFittingTool::removeDoubleEntries(std::vector<const xAOD::Trac
 
   if(nbefore != tracks.size()) {
     ATH_MSG_DEBUG("removeDoubleEntries nbefore != tracks.size()): " << nbefore << " != " << tracks.size());
-
-    int truthType = -99, truthOrigin = -99;
-
-    if(getVar(*TransfEnd, truthType, "truthType")) {
-      ATH_MSG_DEBUG("removeDoubleEntries : removed track truthType = " << truthType);
-    }
-    if(getVar(*TransfEnd, truthOrigin, "truthOrigin")) {
-      ATH_MSG_DEBUG("removeDoubleEntries : removed track truthOrigin = " << truthOrigin);
-    }
   }
 }
 

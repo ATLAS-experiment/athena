@@ -6,7 +6,9 @@
 #define PIXELGEOMODEL_GEOPIXELMODULE_H
 #include "Identifier/Identifier.h"
 #include "GeoVPixelFactory.h"
-class GeoLogVol;
+
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+#include "GeoModelKernel/GeoLogVol.h"
 class GeoPixelSiCrystal;
 
 class GeoPixelModule : public GeoVPixelFactory {
@@ -20,7 +22,7 @@ class GeoPixelModule : public GeoVPixelFactory {
                  GeoPixelSiCrystal &theSensor);
   GeoPixelModule (const GeoPixelModule&) = delete;
   GeoPixelModule& operator= (const GeoPixelModule&) = delete;
-  virtual ~GeoPixelModule();
+  virtual ~GeoPixelModule() = default;
   virtual GeoVPhysVol* Build() override;
   double Thickness();
   double ThicknessN();
@@ -36,7 +38,7 @@ class GeoPixelModule : public GeoVPixelFactory {
 
   const GeoShape*  addShape(const GeoShape * lastShape, const GeoShape * nextShape, const GeoTrf::Transform3D & trans);
 
-  const GeoLogVol* m_theModule{nullptr};
+  GeoIntrusivePtr<const GeoLogVol> m_theModule{nullptr};
   Identifier m_id;
   GeoPixelSiCrystal& m_theSensor;
   bool m_isModule3D{false};

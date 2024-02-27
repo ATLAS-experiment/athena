@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 CA module to configure the (standalone) HLT for athena and athenaHLT.
 There is a separate entry point for each application to tailor some
@@ -23,11 +23,16 @@ def lock_and_restrict(flags):
    flags.Concurrency.NumProcs = bomb
    flags.Concurrency.NumThreads = bomb
    flags.Concurrency.NumConcurrentEvents = bomb
+
    flags.lock()
 
 
 def set_flags(flags):
    """Set default flags for running HLT"""
+
+   # Make sure nobody uses deprecated global ConfigFlags
+   import AthenaConfiguration.AllConfigFlags
+   del AthenaConfiguration.AllConfigFlags.ConfigFlags
 
    from AthenaConfiguration.Enums import BeamType
 
@@ -50,14 +55,7 @@ def set_flags(flags):
    flags.Input.FailOnUnknownCollections = True
    flags.Scheduler.AutoLoadUnmetDependencies = False
 
-   #-------------------------------------------------------------
-   # Switch off CPS mechanism if we only run selected
-   # signatures or chains, to avoid single-chain sets
-   #-------------------------------------------------------------
-   if flags.Trigger.selectChains or len(flags.Trigger.enabledSignatures) == 1:
-       flags.Trigger.disableCPS = True
-  
-  
+
 def runHLTCfg(flags):
    """Main function to configure the HLT in athena and athenaHLT"""
    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -78,7 +76,7 @@ def runHLTCfg(flags):
    cfg.merge(TriggerHistSvcConfig(flags))
 
    # Menu
-   from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
+   from TriggerMenuMT.HLT.Config.GenerateMenuMT import generateMenuMT
    from TriggerJobOpts.TriggerConfig import triggerRunCfg
    menu = triggerRunCfg(flags, menu=generateMenuMT)
    cfg.merge(menu)
@@ -117,8 +115,16 @@ def runHLTCfg(flags):
 
 def athenaHLTCfg(flags):
    """Top-level cfg function when running in athenaHLT"""
+
    # Set default flags for running HLT
    set_flags(flags)
+
+   # Decoding the flags from the command line is already done in athenaHLT.
+   # But we have to do it again in case some of the flags from set_flags
+   # get overwritten by the user.
+   from TrigPSC import PscConfig
+   for flag_arg in PscConfig.unparsedArguments:
+      flags.fillFromString(flag_arg)
 
    # Lock flags
    lock_and_restrict(flags)
@@ -128,13 +134,11 @@ def athenaHLTCfg(flags):
    return cfg
 
 
-def athenaCfg():
+def athenaCfg(flags):
    """Top-level cfg function when running in athena"""
-   from AthenaConfiguration.AllConfigFlags import initConfigFlags
    from AthenaConfiguration.Enums import Format
 
    # Set default flags for running HLT
-   flags = initConfigFlags()
    set_flags(flags)
 
    # To allow running from MC
@@ -189,17 +193,15 @@ def athenaCfg():
    return cfg
 
 
-def main(flags=None):
-   """This method is called by athena (no flags) and athenaHLT (with pre-populated flags)"""
-
-   # Make sure nobody uses deprecated global ConfigFlags
-   import AthenaConfiguration.AllConfigFlags
-   del AthenaConfiguration.AllConfigFlags.ConfigFlags
-
-   return athenaCfg() if flags is None else athenaHLTCfg(flags)
+def main(flags):
+   """This method is called by athenaHLT (with pre-populated flags)"""
+   return athenaHLTCfg(flags)
 
 
 # This entry point is only used when running in athena
 if __name__ == "__main__":
+   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+   flags = initConfigFlags()
+
    import sys
-   sys.exit(main().run().isFailure())
+   sys.exit(athenaCfg(flags).run().isFailure())

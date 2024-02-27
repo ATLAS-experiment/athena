@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamPipeDetectorFactory.h"
@@ -242,8 +242,7 @@ void BeamPipeDetectorFactory::addSections(GeoPhysVol* parent, int region)
     }
 
     GeoLogVol* lvSection = new GeoLogVol(name,shape,mat);
-    GeoPhysVol* pvSection = new GeoPhysVol(lvSection);
-    pvSection->ref();
+    GeoIntrusivePtr<GeoPhysVol> pvSection{new GeoPhysVol(lvSection)};
     
     // Determine if this is a geometry where the first section can act as the mother of the following
     // sections. The following sections are only added to this if their ave radius is within the radial
@@ -266,8 +265,7 @@ void BeamPipeDetectorFactory::addSections(GeoPhysVol* parent, int region)
 
     GeoTransform* tfSection = 0;
     if (znew != 0 && (secNum==1 || !addToFirstSection)) tfSection = new GeoTransform(GeoTrf::TranslateZ3D(znew));
-    GeoNameTag* ntSection = new GeoNameTag(name);
-    ntSection->ref();
+    GeoIntrusivePtr<GeoNameTag> ntSection{new GeoNameTag(name)};
 
     if (addToFirstSection && secNum!=1) {
       if (!pvMotherSection) {
@@ -302,8 +300,6 @@ void BeamPipeDetectorFactory::addSections(GeoPhysVol* parent, int region)
       parent->add(pvSection);
     }
 
-    pvSection->unref();
-    ntSection->unref();
   }
 }
 

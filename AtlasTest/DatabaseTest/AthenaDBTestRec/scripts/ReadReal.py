@@ -12,7 +12,7 @@ def testRun(globaltag,run,tofs,nevt,deltat,configfile,debug=0):
 
     starttime=time.time()
     # find run start time from SORParams folder
-    tdaqDB=indirectOpen('COOLONL_TDAQ/COMP200',oracle=True)
+    tdaqDB=indirectOpen('COOLONL_TDAQ/COMP200')
     if (tdaqDB is None):
         print "ERROR: Cannot connect to COOLONL_TDAQ/COMP200"
         return 1

@@ -92,6 +92,8 @@ def PoolWriteCfg(flags):
             compAlg, compLvl, autoFlush, splitLvl, dynSplitLvl = defaults[stream]
         elif "DAOD" in stream:
             compAlg, compLvl, autoFlush, splitLvl, dynSplitLvl = 5, 5, 100, 0, 1 # Change the defaults for DAODs
+        elif "D2AOD" in stream:
+            compAlg, compLvl, autoFlush, splitLvl, dynSplitLvl = 5, 5, 500, 1, 1 # Change the defaults for D2AODs
 
         # For temporary files we always use ZLIB for compression algorithm
         compAlg = 1 if fileName.endswith('_000') or fileName.startswith('tmp.') else compAlg

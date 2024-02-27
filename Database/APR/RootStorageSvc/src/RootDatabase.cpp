@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -37,7 +37,11 @@
 #include "TSystem.h"
 
 #include "ROOT/RNTuple.hxx"
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+using ROOT::Experimental::RFieldBase;
+#else
 using ROOT::Experimental::Detail::RFieldBase;
+#endif
 
 using namespace pool;
 using namespace std;
@@ -1118,7 +1122,7 @@ RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
 
 
 uint64_t RootDatabase::indexLookup([[maybe_unused]] RPageSource* page_source, uint64_t idx_val) {
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 30, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
    if( m_ntupleIndexMap.find(page_source) == m_ntupleIndexMap.end() ) {
       // first access to RNTuple, read and store the index
       DbPrint log( m_file->GetName() );
@@ -1132,9 +1136,9 @@ uint64_t RootDatabase::indexLookup([[maybe_unused]] RPageSource* page_source, ui
          uint64_t idx;
          auto idx_field = descGuard->GetFieldDescriptor(fieldId).CreateField( descGuard.GetRef() );
          if( idx_field->GetState() != RFieldBase::EState::kConnectedToSource ) {
-            idx_field->ConnectPageSource(*page_source);
+            ROOT::Experimental::Internal::CallConnectPageSourceOnField(*idx_field, *page_source);
          }
-         auto rfv = idx_field->BindValue( &idx );
+         auto rfv = idx_field->BindValue( std::shared_ptr<void>(&idx, [](void *) {}) );
          for(unsigned row=0; row < size; row++) {
             rfv.Read(row);
             index[idx] = row;

@@ -20,12 +20,14 @@ def NSWPRDValAlgDigiCfg(flags, name = "NSWPRDValAlg", **kwargs):
     kwargs.setdefault("doMMHit", flags.Detector.EnableMM)
     kwargs.setdefault("doMMDigit", flags.Detector.EnableMM)
     kwargs.setdefault("doMMRDO", flags.Detector.EnableMM)
+    kwargs.setdefault("doMMSDO", flags.Detector.EnableMM)
     kwargs.setdefault("doMMPRD", False)
     kwargs.setdefault("doMMFastDigit", False)
 
     kwargs.setdefault("doSTGCHit", flags.Detector.EnablesTGC)
     kwargs.setdefault("doSTGCDigit", flags.Detector.EnablesTGC) 
     kwargs.setdefault("doSTGCRDO", flags.Detector.EnablesTGC)
+    kwargs.setdefault("doSTGCSDO", flags.Detector.EnablesTGC)
     kwargs.setdefault("doSTGCPRD", False)
     kwargs.setdefault("doSTGCFastDigit", False)
 

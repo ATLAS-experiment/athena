@@ -4,7 +4,7 @@
 # art-description: art job for fslrt_rhadron
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -28,16 +28,25 @@
 # art-output: *.dat
 
 
+
+useCA_Reco = True
 Slices  = ['FSLRT']
 Events  = 8000
 Threads = 8
 Slots   = 8
 Input   = 'RHadron'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = False
-ExtraAna = ' -c LRT="True" '
+ExtraAna = ' --LRT=True '
 Release = "current"
 
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'
+# legacy                                                                                                                                                                                 
+# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAlrt_preinclude.py'
+
+# CA
+# ATR-25582 - FSLRT is now excluded from the default dev menu so need to change to the full dev
+# menu rather than the filtered versions
+preexec_trig="flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1';"
+
 
 Jobs = [ ( "Truth",  " TIDAdata-run3-fslrt.dat -o data-hists.root ", "Test_bin_lrt.dat" ),
          ( "Offline",    " TIDAdata-run3-offline-fslrt.dat -r Offline+InDetLargeD0TrackParticles -o data-hists-offline.root", "Test_bin_lrt.dat" ) ]

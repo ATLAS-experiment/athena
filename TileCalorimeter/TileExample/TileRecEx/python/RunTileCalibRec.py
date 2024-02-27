@@ -9,6 +9,7 @@
 from TileRecEx import TileInputFiles
 from AthenaConfiguration.Enums import Format
 from TileConfiguration.TileConfigFlags import TileRunType
+from AthenaCommon.SystemOfUnits import MeV
 
 epiLog = """
 Examples:
@@ -55,6 +56,14 @@ def getArgumentParser(flags):
 
     parser.add_argument('--calib', default=False, help='Calculate calibration constants and store them in ROOT file', action=argparse.BooleanOptionalAction)
     parser.add_argument('--tmdb', default=None, help='Enable TMDB', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--cells', help='Reconstruct Tile cells (default depends on if they are needed)', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--clusters', default=False, help='Reconstruct Tile clusters', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--towers', default=False, help='Reconstruct Tile towers', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--muonfit', default=False, help='Reconstruct Tile MuonFit', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--muid', default=False, help='Reconstruct Tile MuID', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--pool', default=False, help='Create output POOL file', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--jivexml', default=False, help='Create output Jive XML files for Atlantis', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--d3pd', default=False, help='Create output D3PD file', action=argparse.BooleanOptionalAction)
 
     # Set up Tile h2000 ntuple
     ntuple = parser.add_argument_group('Tile h2000 ntuple')
@@ -71,12 +80,18 @@ def getArgumentParser(flags):
     mon.add_argument('--tmdb-mon', dest='tmdb_mon', default=True, help='Run TMDB monitoring', action=argparse.BooleanOptionalAction)
     mon.add_argument('--tmdb-digits-mon', dest='tmdb_digits_mon', default=True, help='Run TMDB digits monitoring', action=argparse.BooleanOptionalAction)
     mon.add_argument('--tmdb-channel-mon', dest='tmdb_channel_mon', default=True, help='Run TMDB raw channels monitoring', action=argparse.BooleanOptionalAction)
+    mon.add_argument('--digi-noise-mon', dest='digi_noise_mon', help='Run Tile digi noise monitoring (default: True for pedestals run)', action=argparse.BooleanOptionalAction)
+    mon.add_argument('--cell-mon', dest='cell_mon', help='Run Tile Cell monitoring (default: True for physics run)', action=argparse.BooleanOptionalAction)
+    mon.add_argument('--dq-mon', dest='dq_mon', default=True, help='Run Tile DQ monitoring for physics run', action=argparse.BooleanOptionalAction)
 
     # Set up Tile run type
     run_type_group = parser.add_argument_group('Tile Run Type')
     run_type = run_type_group.add_mutually_exclusive_group()
     run_type.add_argument('--cis', action='store_true', help='Tile CIS run type')
+    run_type.add_argument('--mono-cis', action='store_true', dest='mono_cis', help='Tile mono CIS run type')
+    run_type.add_argument('--gap-cis', action='store_true', dest='gap_cis', help='Tile gap CIS run type')
     run_type.add_argument('--laser', action='store_true', help='Tile laser run type')
+    run_type.add_argument('--gap-laser', action='store_true', dest='gap_laser', help='Tile gap laser run type')
     run_type.add_argument('--pedestals', action='store_true', help='Tile pedestals run type')
     run_type.add_argument('--physics', action='store_true', help='Tile physics run type')
 
@@ -151,8 +166,14 @@ if __name__=='__main__':
     if flags.Tile.RunType is TileRunType.UNDEFINED:
         if args.cis:
             flags.Tile.RunType = TileRunType.CIS
+        elif args.mono_cis:
+            flags.Tile.RunType = TileRunType.MONOCIS
+        elif args.gap_cis:
+            flags.Tile.RunType = TileRunType.GAPCIS
         elif args.laser:
             flags.Tile.RunType = TileRunType.LAS
+        elif args.gap_laser:
+            flags.Tile.RunType = TileRunType.GAPLAS
         elif args.pedestals:
             flags.Tile.RunType = TileRunType.PED
         elif args.physics:
@@ -217,6 +238,12 @@ if __name__=='__main__':
     if args.channel_time_mon is None:
         args.channel_time_mon = flags.Tile.RunType in [TileRunType.GAPLAS, TileRunType.GAPCIS] and (args.run2 or args.run3) and flags.Tile.doFit
 
+    if args.pool:
+        flags.Output.ESDFileName = f'tile_{runNumber}_{args.version}.pool.root'
+
+    if args.jivexml:
+        flags.Output.doJiveXML = True
+
     # Override default configuration flags from command line arguments
     flags.fillFromArgs(parser=parser)
 
@@ -242,7 +269,21 @@ if __name__=='__main__':
     log.info('=====>>> FINAL CONFIG FLAGS SETTINGS FOLLOW:')
     flags.dump(pattern='Tile.*|Input.*|Exec.*|IOVDb.[D|G].*', evaluate=True)
 
-    biGainRun = True if flags.Tile.RunType in [TileRunType.CIS, TileRunType.PED] else False
+    biGainRun = flags.Tile.RunType.isBiGain()
+
+    # =======>>> Set up default arguments
+    cellsAvailable = (flags.Input.Format is Format.POOL and 'AllCalo' in flags.Input.Collections)
+    if args.cells is None:
+        args.cells = not cellsAvailable and (args.towers or args.clusters or args.muid or args.muonfit
+                                             or args.jivexml or args.d3pd or args.pool
+                                             or flags.Tile.RunType is TileRunType.PHY)
+    cellsAvailable = cellsAvailable or args.cells
+
+    if args.cell_mon is None:
+        args.cell_mon = cellsAvailable and flags.Tile.RunType is TileRunType.PHY
+
+    if args.digi_noise_mon is None:
+        args.digi_noise_mon = flags.Tile.RunType is TileRunType.PED
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -275,6 +316,35 @@ if __name__=='__main__':
             rawChMaker.Cardinality = args.threads
         for builderTool in rawChMaker.TileRawChannelBuilder:
             builderTool.UseDSPCorrection = not biGainRun
+
+    # =======>>> Set up the Tile cell maker
+    if args.cells:
+        from TileRecUtils.TileCellMakerConfig import TileCellMakerCfg
+        if biGainRun:
+            cfg.merge( TileCellMakerCfg(flags, SkipGain=0, mergeChannels=False) )
+            cfg.merge( TileCellMakerCfg(flags, SkipGain=1, mergeChannels=False) )
+        else:
+            cfg.merge( TileCellMakerCfg(flags, mergeChannels=False) )
+
+    # =======>>> Set up the Tile clusters maker
+    if args.clusters:
+        from TileMonitoring.TileTopoClusterConfig import TileTopoClusterCfg
+        cfg.merge( TileTopoClusterCfg(flags) )
+
+    # =======>>> Set up the Tile muon fitter
+    if args.muonfit:
+        from TileCosmicAlgs.TileMuonFitterConfig import TileMuonFitterCfg
+        cfg.merge( TileMuonFitterCfg(flags) )
+
+    # =======>>> Set up the Tile muon ID reconstuction
+    if args.muid:
+        from TileMuId.TileMuIdConfig import TileLookForMuAlgCfg
+        cfg.merge( TileLookForMuAlgCfg(flags) )
+
+    # =======>>> Set up the Tile raw channel to hit algorithm
+    if flags.Output.doWriteESD:
+        from TileRecAlgs.TileRawChannelToHitConfig import TileRawChannelToHitCfg
+        cfg.merge( TileRawChannelToHitCfg(flags) )
 
     # =======>>> Set up the Tile Ntuple
     if args.ntuple:
@@ -332,6 +402,26 @@ if __name__=='__main__':
             from TileMonitoring.TileTMDBMonitorAlgorithm import TileTMDBMonitoringConfig
             cfg.merge(TileTMDBMonitoringConfig(flags))
             setOnlineEnvironment(cfg.getEventAlgo('TileTMDBMonAlg'))
+
+        if args.dq_mon and flags.Tile.RunType is TileRunType.PHY and flags.Tile.readDigits:
+            from TileMonitoring.TileDQFragMonitorAlgorithm import TileDQFragMonitoringConfig
+            cfg.merge(TileDQFragMonitoringConfig(flags))
+            setOnlineEnvironment(cfg.getEventAlgo('TileDQMonAlg'))
+
+        if args.cell_mon:
+            from TileMonitoring.TileCellMonitorAlgorithm import TileCellMonitoringConfig
+            if biGainRun:
+                cfg.merge(TileCellMonitoringConfig(flags, CaloCellContainer='AllCaloHG'))
+            else:
+                cfg.merge(TileCellMonitoringConfig(flags, fillTimeHistograms=True,
+                                                   EnergyThresholdForTime=150.0*MeV))
+            setOnlineEnvironment(cfg.getEventAlgo('TileCellMonAlg'))
+
+        if args.digi_noise_mon:
+            from TileMonitoring.TileDigiNoiseMonitorAlgorithm import TileDigiNoiseMonitoringConfig
+            triggerTypes = [0x82] if flags.Tile.RunType is TileRunType.PHY else []
+            cfg.merge(TileDigiNoiseMonitoringConfig(flags, TriggerTypes=triggerTypes))
+            setOnlineEnvironment(cfg.getEventAlgo('TileDigiNoiseMonAlg'))
 
         if any([args.tmdb_digits_mon, args.tmdb_mon]) and args.postprocessing:
             from AthenaCommon.Utils.unixtools import find_datafile
@@ -409,6 +499,44 @@ if __name__=='__main__':
                 digiNoiseCalibAlg = cfg.getEventAlgo('TileDigiNoiseCalibAlg')
                 digiNoiseCalibAlg.DoAvgCorr = False # False=> Full AutoCorr matrix calculation
                 rawChanNoiseCalibAlg.FileNamePrefix = f'{args.outputDirectory}/Digi_NoiseCalib{fileVersion}'
+
+
+    # =======>>> Set up the Tile output Jive XML files
+    if flags.Output.doJiveXML:
+        from TileMonitoring.TileJiveXMLConfig import TileAlgoJiveXMLCfg
+        cfg.merge(TileAlgoJiveXMLCfg(flags))
+
+
+    # =======>>> Set up the Tile output D3PD file
+    if args.d3pd:
+        d3pdFile = f'{args.outputDirectory}/tile_{runNumber}_{args.version}.aan.root'
+        from D3PDMakerConfig.D3PDMakerFlags import D3PDMakerFlags
+        D3PDMakerFlags.DoTruth = flags.Input.isMC
+        from TileRecEx.TileD3PDConfig import TileD3PDCfg
+        cfg.merge( TileD3PDCfg(flags,
+                               outputFile=d3pdFile,
+                               saveCells=cellsAvailable,
+                               saveMBTS=cellsAvailable,
+                               saveE4pr=args.run2,
+                               saveMuId=args.muid,
+                               saveMuonFitter=args.muonfit,
+                               saveClusters=args.clusters,
+                               saveEventInfo=(flags.Tile.RunType is TileRunType.PHY)) )
+
+    # =======>>> Set up the Tile output POOL file
+    if flags.Output.doWriteESD:
+        outputItemList = ["TileHitVector#*"]
+        outputItemList += ["TileDigitsContainer#*"]
+        outputItemList += ["TileBeamElemContainer#*"]
+        outputItemList += ["TileRawChannelContainer#*"]
+        outputItemList += ["TileCellContainer#*"]
+        outputItemList += ["CaloCellContainer#*"]
+        outputItemList += [ "TileMuContainer#*" ]
+        outputItemList += [ "TileL2Container#*" ]
+        outputItemList += [ "TileCosmicMuonContainer#*" ]
+
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        cfg.merge( OutputStreamCfg(flags, streamName='ESD', ItemList=outputItemList) )
 
     # =======>>> Any last things to do?
     if args.postExec:

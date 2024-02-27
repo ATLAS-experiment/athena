@@ -463,46 +463,93 @@ RootAuxVectorFactory::createFromData (SG::auxid_t auxid,
 }
 
 
-/**
- * @brief Copy an element between vectors.
- * @param dst Pointer to the start of the destination vector's data.
- * @param dst_index Index of destination element in the vector.
- * @param src Pointer to the start of the source vector's data.
- * @param src_index Index of source element in the vector.
- *
- * @c dst and @ src can be either the same or different.
- */
-void RootAuxVectorFactory::copy (void* dst,        size_t dst_index,
-                                 const void* src,  size_t src_index) const
+/// Helper for copy; returns a pointer to the first destination object,
+/// or nullptr if the destination was cleared rather than copied.
+char* RootAuxVectorFactory::copyImpl (SG::auxid_t auxid,
+                                      AuxVectorData& dst,
+                                      size_t dst_index,
+                                      const AuxVectorData& src,
+                                      size_t src_index,
+                                      size_t n) const
 {
-  m_type.assign (dst, dst_index, src, src_index);
+  size_t eltsz = m_type.getSize();
+  char* dstptr = reinterpret_cast<char*> (dst.getDataArray (auxid));
+  if (&src == &dst) {
+    // Source and destination containers are the same,
+    // so we don't need to bother with fetching the src pointer.
+    // copyRange properly handles overlapping regions.
+    m_type.copyRange (dstptr + eltsz*dst_index, dstptr + eltsz*src_index, n);
+    return dstptr + eltsz*dst_index;
+  }
+  else {
+    const char* srcptr = reinterpret_cast<const char*>(src.getDataArrayAllowMissing (auxid));
+    if (srcptr) {
+      m_type.copyRange (dstptr + eltsz*dst_index, srcptr + eltsz*src_index, n);
+      return dstptr + eltsz*dst_index;
+    }
+    else {
+      m_type.clearRange (dstptr + eltsz*dst_index, n);
+      return nullptr;
+    }
+  }
 }
 
 
 /**
- * @brief Copy an element between vectors, possibly applying thinning.
- * @param dst Pointer to the start of the destination vector's data.
- * @param dst_index Index of destination element in the vector.
- * @param src Pointer to the start of the source vector's data.
- * @param src_index Index of source element in the vector.
+ * @brief Copy elements between vectors.
+ * @param auxid The aux data item being operated on.
+ * @param dst Container for the destination vector.
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
  *
  * @c dst and @ src can be either the same or different.
  */
-void RootAuxVectorFactory::copyForOutput (void* dst,        size_t dst_index,
-                                          const void* src,  size_t src_index) const
+void RootAuxVectorFactory::copy (SG::auxid_t auxid,
+                                 AuxVectorData& dst,
+                                 size_t dst_index,
+                                 const AuxVectorData& src,
+                                 size_t src_index,
+                                 size_t n) const
 {
-  m_type.assign (dst, dst_index, src, src_index);
+  (void)copyImpl (auxid, dst, dst_index, src, src_index, n);
+}
+
+
+/**
+ * @brief Copy elements between vectors, possibly applying thinning.
+ * @param auxid The aux data item being operated on.
+ * @param dst Container for the destination vector.
+ * @param dst_index Index of the first destination element in the vector.
+ * @param src Container for the source vector.
+ * @param src_index Index of source element in the vector.
+ * @param src_index Index of the first source element in the vector.
+ * @param n Number of elements to copy.
+ *
+ * @c dst and @ src can be either the same or different.
+ */
+void RootAuxVectorFactory::copyForOutput (SG::auxid_t auxid,
+                                          AuxVectorData& dst,        size_t dst_index,
+                                          const AuxVectorData& src,  size_t src_index,
+                                          size_t n) const
+{
+  char* dstptr = copyImpl (auxid, dst, dst_index, src, src_index, n);
 
   if (m_isEL == ELEMENT_LINK) {
-    char* dstc = reinterpret_cast<char*>(dst) + m_type.getSize() * dst_index;
-    reinterpret_cast<ElementLinkBase*>(dstc)->thin();
+    size_t eltsz = m_type.getSize();
+    for (size_t i = 0; i < n; i++) {
+      reinterpret_cast<ElementLinkBase*>(dstptr + i*eltsz)->thin();
+  }
   }
   else if (m_isEL == ELEMENT_LINK_VECTOR) {
-    char* dstc = reinterpret_cast<char*>(dst) + m_type.getSize() * dst_index;
-    std::vector<ElementLinkBase>& v = 
-      *reinterpret_cast<std::vector<ElementLinkBase>* > (dstc);
-    for (ElementLinkBase& el : v) {
-      el.thin();
+    size_t eltsz = m_type.getSize();
+    for (size_t i = 0; i < n; i++) {
+      std::vector<ElementLinkBase>& v = 
+        *reinterpret_cast<std::vector<ElementLinkBase>* > (dstptr +i*eltsz);
+      for (ElementLinkBase& el : v) {
+        el.thin();
+      }
     }
   }
   else if (m_isEL == ELEMENT_LINK_NONPOINTER) {
@@ -537,13 +584,17 @@ void RootAuxVectorFactory::swap (SG::auxid_t auxid,
 
 
 /**
- * @brief Clear an element within a vector (static method).
- * @param dst Pointer to the start of the vector's data.
- * @param dst_index Index of the element in the vector.
+ * @brief Clear a range of elements within a vector.
+ * @param auxid The aux data item being operated on.
+ * @param dst Container holding the element
+ * @param dst_index Index of the first element in the vector.
+ * @param n Number of elements to clear.
  */
-void RootAuxVectorFactory::clear (void* dst, size_t dst_index) const
+void RootAuxVectorFactory::clear (SG::auxid_t auxid,
+                                  AuxVectorData& dst, size_t dst_index,
+                                  size_t n) const
 {
-  m_type.clear (dst, dst_index);
+  m_type.clearRange (dst.getDataArray (auxid), dst_index, n);
 }
 
 

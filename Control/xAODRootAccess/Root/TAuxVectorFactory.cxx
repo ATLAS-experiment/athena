@@ -73,39 +73,59 @@ namespace xAOD {
       std::abort();
    }
 
-   void TAuxVectorFactory::copy( void* dst,        size_t dst_index,
-                                 const void* src,  size_t src_index ) const {
+   void TAuxVectorFactory::copy( SG::auxid_t auxid,
+                                 SG::AuxVectorData& dst,        size_t dst_index,
+                                 const SG::AuxVectorData& src,  size_t src_index,
+                                 size_t n ) const {
 
       // The size of one element in memory:
       const size_t eltsz = m_proxy->GetIncrement();
 
       // Get the location of the source and target element in memory:
-      dst = reinterpret_cast< void* >( reinterpret_cast< unsigned long >( dst ) +
-                                       eltsz * dst_index );
-      src =
-         reinterpret_cast< const void* >( reinterpret_cast< unsigned long >( src ) +
-                                          eltsz * src_index );
+      char* dstptr = reinterpret_cast<char*> (dst.getDataArray (auxid));
+      const char* srcptr = &dst == &src ? dstptr : reinterpret_cast<const char*>(src.getDataArray (auxid));
+      dstptr += eltsz * dst_index;
+      srcptr += eltsz * src_index;
 
       // Do the copy either using the assignment operator of the type, or using
       // simple memory copying:
       TMethodCall* mc = m_assign.call();
       if( mc ) {
-         mc->ResetParam();
-         mc->SetParam( ( Long_t ) src );
-         mc->Execute( dst );
+        auto copyone = [mc] (void* dst, const void* src)
+          {
+            mc->ResetParam();
+            mc->SetParam( ( Long_t ) src );
+            mc->Execute( dst );
+          };
+
+         // If the source range doesn't overlap with the destination:
+         if( dstptr > srcptr && ( srcptr + n * eltsz ) > dstptr ) {
+            for( size_t i = n - 1; i < n; --i ) {
+               copyone( dstptr + i*eltsz, srcptr + i*eltsz );
+            }
+         }
+         // If it does:
+         else {
+            for( size_t i = 0; i < n; ++i ) {
+               copyone( dstptr + i*eltsz, srcptr + i*eltsz );
+            }
+         }
+
       } else {
-         memcpy( dst, src, eltsz );
+         memmove( dstptr, srcptr, n * eltsz );
       }
 
       return;
    }
 
-   void TAuxVectorFactory::copyForOutput( void* dst, size_t dst_index,
-                                          const void* src,
-                                          size_t src_index ) const {
+   void TAuxVectorFactory::copyForOutput( SG::auxid_t auxid,
+                                          SG::AuxVectorData& dst, size_t dst_index,
+                                          const SG::AuxVectorData& src,
+                                          size_t src_index,
+                                          size_t n) const {
 
       // Do a "regular" copy.
-      copy( dst, dst_index, src, src_index );
+      copy( auxid, dst, dst_index, src, src_index, n );
 
       ::Warning( "xAOD::TAuxVectorFactory::TAuxVectorFactory",
                  XAOD_MESSAGE( "copyForOutput called; should only be used "
@@ -168,26 +188,40 @@ namespace xAOD {
       return;
    }
 
-   void TAuxVectorFactory::clear( void* dst, size_t dst_index ) const {
+   void TAuxVectorFactory::clear( void* dst,
+                                  size_t dst_index,
+                                  size_t n ) const {
 
       // The size of one element in memory:
       const size_t eltsz = m_proxy->GetIncrement();
 
       // Get the memory address of the element:
-      dst = reinterpret_cast< void* >( reinterpret_cast< unsigned long >( dst ) +
-                                       eltsz * dst_index );
+      char* dptr = reinterpret_cast< char* >( dst ) + eltsz * dst_index;
 
       TMethodCall* mc = m_assign.call();
       if( mc ) {
          // Assign the default element's contents to this object:
-         mc->ResetParam();
-         mc->SetParam( ( Long_t ) m_defElt );
-         mc->Execute( dst );
+         for (size_t i = 0; i < n; ++i) {
+            mc->ResetParam();
+            mc->SetParam( ( Long_t ) m_defElt );
+            mc->Execute( static_cast<void*>( dptr ) );
+            dptr += eltsz;
+         }
       } else {
          // Set the memory to zero:
-         memset( dst, 0, eltsz );
+         memset( dst, 0, eltsz*n );
       }
 
+      return;
+   }
+
+
+   void TAuxVectorFactory::clear( SG::auxid_t auxid,
+                                  SG::AuxVectorData& dst,
+                                  size_t dst_index,
+                                  size_t n ) const {
+
+      clear( dst.getDataArray (auxid), dst_index, n );
       return;
    }
 

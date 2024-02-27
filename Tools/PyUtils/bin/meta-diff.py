@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """This script reads metadata from a given file"""
 
 from __future__ import print_function
@@ -123,6 +123,12 @@ def main():
         help="Force promotion or not of the metadata keys ",
     )
 
+    parser.add_argument(
+        "--ignoreTrigger",
+        action='store_true',
+        help="Ignore trigger metadata",
+    )
+
     args = parser.parse_args()
 
     if len(args.files) != 2:
@@ -147,6 +153,7 @@ def main():
         diff_format=args.diff_format,
         regex=args.regex,
         key_only=args.key_only,
+        ignore_trigger=args.ignoreTrigger,
     )
 
 

@@ -21,9 +21,17 @@ sTgcStripAuxContainer_v1::sTgcStripAuxContainer_v1()
     AUX_MEASUREMENTVAR(localCovariance, 1)
 
     /// Names may be shared across different subdetectors
-    PRD_AUXVARIABLE(bcBitMap);
+    PRD_AUXVARIABLE(author);
+    PRD_AUXVARIABLE(gasGap);
+    PRD_AUXVARIABLE(channelNumber);
     PRD_AUXVARIABLE(time);
     PRD_AUXVARIABLE(charge);
+    ///
+    PRD_AUXVARIABLE(stripNumbers);
+    PRD_AUXVARIABLE(stripTimes);
+    PRD_AUXVARIABLE(stripCharges);
+    ///
+    PRD_AUXVARIABLE(quality);
 }
 }  // namespace xAOD
 #undef PRD_AUXVARIABLE

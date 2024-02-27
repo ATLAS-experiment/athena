@@ -76,7 +76,7 @@ MMPrepData::setMicroTPC(float angle, float chisqProb) {
 
   /// set drift distances and errors
 void MMPrepData::setDriftDist(std::vector<float>&& driftDist, 
-                              std::vector<Amg::MatrixX>&& driftDistErrors) {
+                              std::vector<AmgVector(2)>&& driftDistErrors) {
     m_stripDriftDist = std::move(driftDist);
     m_stripDriftErrors = std::move(driftDistErrors);
 }
@@ -86,9 +86,9 @@ void MMPrepData::setDriftDist(std::vector<float>&& driftDist,
     m_stripDriftDist = std::move(driftDist);
     m_stripDriftErrors.reserve(stripDriftErrors_1_1.size());
     for(uint i_strip = 0; i_strip < stripDriftErrors_1_1.size(); i_strip++){
-      Amg::MatrixX tmp(2,2);
-      tmp(0,0) = stripDriftErrors_0_0.at(i_strip);
-      tmp(1,1) = stripDriftErrors_1_1.at(i_strip);
+      AmgVector(2) tmp{AmgVector(2)::Zero()};
+      tmp[0] = stripDriftErrors_0_0.at(i_strip);
+      tmp[1] = stripDriftErrors_1_1.at(i_strip);
       m_stripDriftErrors.push_back(std::move(tmp));
     }
   }
@@ -116,8 +116,8 @@ std::ostream& MMPrepData::dump( std::ostream& stream) const {
 std::vector<float> MMPrepData::stripDriftErrors_0_0 () const {
     std::vector<float> ret;
     ret.reserve(m_stripDriftErrors.size());
-    for (const Amg::MatrixX& mat: m_stripDriftErrors) {
-      ret.push_back(mat(0,0));
+    for (const AmgVector(2)& mat: m_stripDriftErrors) {
+      ret.push_back(mat[0]);
     }
     return ret;
 }
@@ -125,8 +125,8 @@ std::vector<float> MMPrepData::stripDriftErrors_0_0 () const {
 std::vector<float> MMPrepData::stripDriftErrors_1_1 () const {
   std::vector<float> ret;
   ret.reserve(m_stripDriftErrors.size());
-  for (const Amg::MatrixX& mat: m_stripDriftErrors) {
-      ret.push_back(mat(1,1));
+  for (const AmgVector(2)& mat: m_stripDriftErrors) {
+      ret.push_back(mat[1]);
   }
   return ret;
 }

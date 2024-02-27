@@ -76,18 +76,6 @@ StatusCode PixelModuleConfigCondAlg::execute(const EventContext& ctx) const {
   // DCS parameters
   writeCdo -> setDefaultBiasVoltage(m_biasVoltage);
 
-  // Distortion parameters
-  writeCdo -> setDistortionInputSource(m_distortionInputSource);
-  writeCdo -> setDistortionVersion(m_distortionVersion);
-  writeCdo -> setDistortionR1(m_distortionR1);
-  writeCdo -> setDistortionR2(m_distortionR2);
-  writeCdo -> setDistortionTwist(m_distortionTwist);
-  writeCdo -> setDistortionMeanR(m_distortionMeanR);
-  writeCdo -> setDistortionRMSR(m_distortionRMSR);
-  writeCdo -> setDistortionMeanTwist(m_distortionMeanTwist);
-  writeCdo -> setDistortionRMSTwist(m_distortionRMSTwist);
-  writeCdo -> setDistortionWriteToFile(m_distortionWriteToFile);
-  writeCdo -> setDistortionFileName(m_distortionFileName);
 
   // Cabling parameters
   writeCdo -> setCablingMapToFile(m_cablingMapToFile);

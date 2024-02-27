@@ -101,7 +101,7 @@ class InDetSecVertexTruthMatchTool : public virtual IInDetSecVertexTruthMatchToo
   //returns barcode of LLP production truth vertex
   int checkProduction( const xAOD::TruthParticle& truthPart ) const;
   void countReconstructibleDescendentParticles(const xAOD::TruthVertex& signalTruthVertex,
-                                               std::vector<const xAOD::TruthParticle*>& set) const;
+                                               std::vector<const xAOD::TruthParticle*>& set, int counter) const;
   std::vector<int> checkParticle( const xAOD::TruthParticle& part, const xAOD::TrackParticleContainer &tkCont ) const;
 
   // (optional) write out histograms

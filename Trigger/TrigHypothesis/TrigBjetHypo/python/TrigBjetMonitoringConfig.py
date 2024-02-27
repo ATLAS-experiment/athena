@@ -91,7 +91,7 @@ def TrigBjetOnlineMonitoring(flags, name="TrigBjetOnlineMonitoring"):
 
 
     # B-Tagging Histograms
-    for tagger in ['DL1d20211216', 'dips20211116', 'GN120220813']: make_flavor_hists(montool, tagger)
+    for tagger in ['DL1d20211216', 'dips20211116', 'GN120220813','GN220240122']: make_flavor_hists(montool, tagger)
     for tagger in []: make_b_flavor_hists(montool, tagger)
 
 

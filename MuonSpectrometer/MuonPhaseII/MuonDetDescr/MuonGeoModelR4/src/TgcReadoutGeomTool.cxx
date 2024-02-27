@@ -169,16 +169,9 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
 #endif    
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
-    // Get the list of full phys volumes from SQLite, and create detector
-    // elements
-    using alignNodeMap = IMuonGeoUtilityTool::alignNodeMap;    
-    using physNodeMap = IMuonGeoUtilityTool::physNodeMap;
-    using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
+    // Get the list of full phys volumes from SQLite, and create detector elements
     /// Retrieve the list of full physical volumes & alignable nodes and connect them together afterwards
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
-    alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
-    alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
-   
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
         ///   <CHAMBERTYPE>_<STATIONNAME>_<STATIONETA>_<STATIONPHI>
@@ -199,7 +192,7 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         define.physVol = pv;
         define.detElId = elementID;
         define.chambDesign = key_tokens[0];
-        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);
+        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol);
 #ifndef SIMULATIONBASE
         define.layerBounds = layerBounds;
 #endif

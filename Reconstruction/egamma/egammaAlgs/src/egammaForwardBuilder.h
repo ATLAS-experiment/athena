@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAALGS_EGAMMAFORWARDBUILDER_H
@@ -31,10 +31,9 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include "CaloDetDescr/CaloDetDescrManager.h"
-
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
 
 #include "xAODEgamma/Egamma.h"
@@ -79,6 +78,12 @@ private:
     const std::array<double, 4> &match_values
   ) const;
 
+  /** @brief Remove cells that are too far from the center of mass. */
+  void cookieCut(
+    xAOD::CaloCluster& cluster,
+    const CaloDetDescrManager& mgr
+  ) const;
+
   /** @brief Tool to perform object quality. */
   ToolHandle<IegammaOQFlagsBuilder> m_objectQualityTool{
     this,
@@ -111,6 +116,14 @@ private:
     "Name of the input cluster collection"
   };
 
+  /** @brief Calorimeter description. */
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey {
+    this,
+    "CaloDetDescrManager",
+    "CaloDetDescrManager",
+    "SG Key for CaloDetDescrManager in the Condition Store"
+  };
+
   /** @brief Output electron container. */
   SG::WriteHandleKey<xAOD::ElectronContainer> m_electronOutputKey{
     this,
@@ -138,8 +151,44 @@ private:
     "Boolean to do track matching"
   };
 
+  /** @brief Private member flag to do cookie cutting. */
+  Gaudi::Property<bool> m_doCookieCutting { 
+    this,
+    "doCookieCutting",
+    false,
+    "Boolean to do cookie cutting"
+  };
+
+  /** @brief Size of maximum search window in eta. */
+  Gaudi::Property<int> m_maxDelEtaCells{
+    this,
+    "MaxWindowDelEtaCells",
+    3,
+    "Size of maximum search window in eta"
+  };
+
+  /** @brief Size of maximum search window in phi. */
+  Gaudi::Property<int> m_maxDelPhiCells{
+    this,
+    "MaxWindowDelPhiCells",
+    3,
+    "Size of maximum search window in phi"
+  };
+
+  /** @brief Size of cone to cookie cut on FCal. */
+  Gaudi::Property<float> m_maxDelR{
+    this,
+    "MaxWindowDelR",
+    0.3,
+    "Cone size to collect cells around hottest-cell FCAL"
+  };
+
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
   mutable Gaudi::Accumulators::Counter<> m_MatchedClusters {};
+
+  float m_maxDelEta {};
+  float m_maxDelPhi {};
+  float m_maxDelR2 {};
 
 protected:
   /** Handle to the selectors. */

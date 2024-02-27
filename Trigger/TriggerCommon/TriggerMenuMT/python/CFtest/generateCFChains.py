@@ -1,7 +1,6 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-
 
 ##########################################
 # generateCFChains generates some menu-like chains, outside the menu generation framework,  
@@ -9,13 +8,10 @@
 ###########################################
 
 import functools
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
-from ..HLT.Config.MenuComponents import menuSequenceCAToGlobalWrapper
 
 def generateCFChains(flags):
-    from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
     from TriggerMenuMT.HLT.Menu.SignatureDicts import ChainStore
-    from DecisionHandling.TestUtils import makeChain, makeChainStep
+    from TriggerMenuMT.CFtest.TestUtils import makeChain, makeChainStep
     from TriggerMenuMT.HLT.Config.GenerateMenuMT import GenerateMenuMT
     menu = GenerateMenuMT()
     menu.chainsInMenu = ChainStore()
@@ -23,10 +19,13 @@ def generateCFChains(flags):
     # egamma chains
     ##################################################################
     if 'Egamma' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Electron.ElectronChainConfiguration import electronFastCaloCfg, fastElectronSequenceCfg, precisionCaloSequenceCfg
-        fastCaloSeq = RecoFragmentsPool.retrieve( electronFastCaloCfg, flags )
-        electronSeq = RecoFragmentsPool.retrieve( fastElectronSequenceCfg, flags )
-        precisionCaloSeq = RecoFragmentsPool.retrieve( precisionCaloSequenceCfg, flags )
+        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
+        from TriggerMenuMT.HLT.Electron.FastElectronMenuSequences import fastElectronSequenceCfg
+        from TriggerMenuMT.HLT.Electron.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
+
+        fastCaloSeq = fastCaloMenuSequenceCfg( flags, name='Electron' )
+        electronSeq = fastElectronSequenceCfg( flags )
+        precisionCaloSeq = precisionCaloSequenceCfg( flags )
         
         FastCaloStep      = makeChainStep("ElectronFastCaloStep", [fastCaloSeq])
         FastElectronStep  = makeChainStep("ElectronFastTrackStep", [electronSeq])
@@ -40,12 +39,12 @@ def generateCFChains(flags):
             ]
         menu.chainsInMenu['Egamma'] += electronChains
 
-        from TriggerMenuMT.HLT.Photon.PhotonChainConfiguration import fastPhotonCaloSequenceCfg, fastPhotonSequenceCfg
-        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
+        from TriggerMenuMT.HLT.Photon.FastPhotonMenuSequences import fastPhotonSequenceCfg
+        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloSequenceCfg
 
-        fastCaloSeq            = RecoFragmentsPool.retrieve( fastPhotonCaloSequenceCfg, flags )
-        fastPhotonSeq          = RecoFragmentsPool.retrieve( fastPhotonSequenceCfg, flags )
-        precisionCaloPhotonSeq = RecoFragmentsPool.retrieve( precisionCaloMenuSequence, flags, name='Photon')
+        fastCaloSeq            = fastCaloMenuSequenceCfg( flags, name='Photon' )
+        fastPhotonSeq          = fastPhotonSequenceCfg( flags )
+        precisionCaloPhotonSeq = precisionCaloSequenceCfg( flags )
         
         FastCaloStep            = makeChainStep("PhotonFastCaloStep", [fastCaloSeq])
         fastPhotonStep          = makeChainStep("PhotonStep2", [fastPhotonSeq])
@@ -64,31 +63,18 @@ def generateCFChains(flags):
 
         MuonChains  = []
         # step1
-        if isComponentAccumulatorCfg():
-            mufastS= muFastSequence(flags)
-        else:
-            mufastS= menuSequenceCAToGlobalWrapper(muFastSequence,flags)
+        mufastS= muFastSequence(flags)
         step1mufast=makeChainStep("Step1_muFast", [ mufastS ])
         # step2
-        if isComponentAccumulatorCfg():
-            mucombS = muCombSequence(flags)
-        else:
-            mucombS = menuSequenceCAToGlobalWrapper(muCombSequence, flags)
+        mucombS = muCombSequence(flags)
         step2muComb=makeChainStep("Step2_muComb", [ mucombS ])
         # step3
-        if isComponentAccumulatorCfg():
-            muEFSAS = muEFSASequence(flags)
-        else:
-            muEFSAS = menuSequenceCAToGlobalWrapper(muEFSASequence,flags)
+        muEFSAS = muEFSASequence(flags)
         step3muEFSA=makeChainStep("Step3_muEFSA", [ muEFSAS ])
         #/step3muIso =makeChainStep("Step3_muIso",  [ muIsoSequence() ])
         # step4
-        if isComponentAccumulatorCfg():
-            muEFCBS = muEFCBSequence(flags)
-        else:
-            muEFCBS = menuSequenceCAToGlobalWrapper(muEFCBSequence, flags)
+        muEFCBS = muEFCBSequence(flags)
         step4muEFCB=makeChainStep("Step4_muEFCB", [ muEFCBS ])
-
         emptyStep=makeChainStep("Step2_empty", multiplicity=[])
 
         ## single muon trigger  
@@ -115,12 +101,8 @@ def generateCFChains(flags):
         
         #FS Muon trigger
         # Full scan MS tracking step
-        if isComponentAccumulatorCfg():
-            muEFSAFSS = muEFSAFSSequence(flags)
-            muEFCBFSS = muEFCBFSSequence(flags)
-        else:
-            muEFSAFSS = menuSequenceCAToGlobalWrapper(muEFSAFSSequence,flags)
-            muEFCBFSS = menuSequenceCAToGlobalWrapper(muEFCBFSSequence,flags)
+        muEFSAFSS = muEFSAFSSequence(flags)
+        muEFCBFSS = muEFCBFSSequence(flags)
         stepFSmuEFSA=makeChainStep("Step_FSmuEFSA", [muEFSAFSS])
         stepFSmuEFCB=makeChainStep("Step_FSmuEFCB", [muEFCBFSS])
         MuonChains += [ makeChain(flags, name='HLT_mu6noL1_L1MU5VF', L1Thresholds=["FSNOSEED"],  ChainSteps=[stepFSmuEFSA, stepFSmuEFCB])]
@@ -133,21 +115,20 @@ def generateCFChains(flags):
     ##################################################################
 
     from TriggerMenuMT.HLT.Jet.JetRecoCommon import jetRecoDictFromString
-    from TriggerMenuMT.HLT.Jet.JetChainConfiguration import callGenerator
     def jetCaloHypoMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloHypoMenuSequence
-        return callGenerator(jetCaloHypoMenuSequence,flags, isPerf=False, **jetRecoDict)
+        return jetCaloHypoMenuSequence(flags, isPerf=False, **jetRecoDict)
 
     def jetCaloPreselMenuSequenceFromString(jet_def_str):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetCaloPreselMenuSequence
-        return callGenerator(jetCaloPreselMenuSequence,flags, **jetRecoDict)
+        return jetCaloPreselMenuSequence(flags, **jetRecoDict)
 
     def jetTrackingHypoMenuSequenceFromString(jet_def_str,clustersKey):
         jetRecoDict = jetRecoDictFromString(jet_def_str)
         from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import jetFSTrackingHypoMenuSequence
-        return callGenerator(jetFSTrackingHypoMenuSequence,flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
+        return jetFSTrackingHypoMenuSequence(flags, clustersKey=clustersKey, isPerf=False, **jetRecoDict)
 
     if 'Jet' in flags.Trigger.enabledSignatures:
 
@@ -189,7 +170,7 @@ def generateCFChains(flags):
     # bjet chains
     ##################################################################
     if 'Bjet' in flags.Trigger.enabledSignatures:
-        from TriggerMenuMT.HLT.Bjet.BjetChainConfiguration import getBJetSequence
+        from TriggerMenuMT.HLT.Bjet.BjetMenuSequences import getBJetSequenceCfg
 
         jetSeq_a4_tc_em_presel, jetDef, emclusters = jetCaloPreselMenuSequenceFromString("a4_tc_em_subjesIS")
         jetSeq_a4_tc_em_gsc_ftf, jetDef = jetTrackingHypoMenuSequenceFromString("a4_tc_em_subjesgscIS_ftf",emclusters)
@@ -197,7 +178,7 @@ def generateCFChains(flags):
         
         step1 = makeChainStep("Step_jet_a4_tc_em_presel", [jetSeq_a4_tc_em_presel])
         step2 = makeChainStep("Step_jet_a4_tc_em_gsc_ftf", [jetSeq_a4_tc_em_gsc_ftf])
-        step3 = makeChainStep("Step3_bjet", [getBJetSequence(flags, jc_name)])
+        step3 = makeChainStep("Step3_bjet", [getBJetSequenceCfg(flags, jc_name)])
         
         menu.chainsInMenu['Bjet']  = [
             makeChain(flags, name='HLT_j45_boffperf_ftf_subjesgscIS_preselj20_L1J20', L1Thresholds=["FSNOSEED"], ChainSteps=[step1,step2,step3] ),
@@ -233,25 +214,12 @@ def generateCFChains(flags):
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence, muCombSequence, muEFSASequence, muEFCBSequence
         from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerDimuL2ComboHypoCfg, DimuEFComboHypoCfg
         
-        if isComponentAccumulatorCfg():
-            muFast = muFastSequence(flags)
-        else:
-            muFast = menuSequenceCAToGlobalWrapper(muFastSequence,flags)
+        muFast = muFastSequence(flags)
         step1_dimufast=makeChainStep("Step1_dimuFast", [muFast], multiplicity=[2])
-        if isComponentAccumulatorCfg():
-            mucombS = muCombSequence(flags)
-        else:
-            mucombS = menuSequenceCAToGlobalWrapper(muCombSequence,flags)
+        mucombS = muCombSequence(flags)
         step2_dimuComb=makeChainStep("Step2_dimuComb", [mucombS], multiplicity=[2], comboHypoCfg=functools.partial(StreamerDimuL2ComboHypoCfg,flags))
-        if isComponentAccumulatorCfg():
-            muEFSAS = muEFSASequence(flags)
-        else:
-            muEFSAS = menuSequenceCAToGlobalWrapper(muEFSASequence,flags)
-
-        if isComponentAccumulatorCfg():
-            muEFCBS = muEFCBSequence(flags)
-        else:
-            muEFCBS = menuSequenceCAToGlobalWrapper(muEFCBSequence, flags)
+        muEFSAS = muEFSASequence(flags)
+        muEFCBS = muEFCBSequence(flags)
 
         step3_dimuEFSA=makeChainStep("Step3_dimuEFSA", [muEFSAS], multiplicity=[2])
         step4_dimuEFCB=makeChainStep("Step4_dimuEFCB", [muEFCBS], multiplicity=[2], comboHypoCfg=functools.partial(DimuEFComboHypoCfg,flags))
@@ -270,14 +238,11 @@ def generateCFChains(flags):
     ##################################################################
     doCombinedSlice = True
     if doCombinedSlice:
-        from TriggerMenuMT.HLT.Electron.ElectronChainConfiguration import electronFastCaloCfg
-        fastCaloSeq = RecoFragmentsPool.retrieve( electronFastCaloCfg, flags )
+        from TriggerMenuMT.HLT.CommonSequences.CaloSequences import fastCaloMenuSequenceCfg
+        fastCaloSeq = fastCaloMenuSequenceCfg(flags, name='Electron')
         
         from TriggerMenuMT.HLT.Muon.MuonMenuSequences import muFastSequence
-        if isComponentAccumulatorCfg():
-            muFast = muFastSequence(flags)
-        else:
-            muFast = menuSequenceCAToGlobalWrapper(muFastSequence,flags)
+        muFast = muFastSequence(flags)
 
         comboStep_et_mufast = makeChainStep("Step1_et_mufast", [fastCaloSeq, muFast], multiplicity=[1,1])
 

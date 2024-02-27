@@ -28,7 +28,7 @@ rec.RunNumber.set_Value_and_Lock(RunNumber)
 
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 
-trigDB=indirectOpen('COOLONL_TRIGGER/CONDBR2',oracle=True)
+trigDB=indirectOpen('COOLONL_TRIGGER/CONDBR2')
 trigfolder=trigDB.getFolder('/TRIGGER/LUMI/LBLB')
 runiov=(RunNumber << 32)+ LumiBlock
 printfunc (" runiov ", runiov)

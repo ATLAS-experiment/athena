@@ -1,19 +1,18 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
-from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys    import getTrigEgammaKeys
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'CaloElectron'
 
 @AccumulatorCache
-def precisionCaloMenuSequenceCfg(flags, name=None, ion=False, is_probe_leg=False, variant=''):
+def precisionCaloSequenceCfg(flags, ion=False, is_probe_leg=False, variant=''):
     """ Creates PrecisionCalo sequence """
     TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
     hiInfo = 'HI' if ion else ''
@@ -41,11 +40,11 @@ def precisionCaloMenuSequenceCfg(flags, name=None, ion=False, is_probe_leg=False
         selAcc.merge(egammaFSCaloRecoSequenceCfg(flags))
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+'_probe'+variant if is_probe_leg else InViewRoIs+variant)
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+hiInfo+'_probe'+variant if is_probe_leg else InViewRoIs+hiInfo+variant)
 
     selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
 
-    hypoAlg = CompFactory.TrigEgammaPrecisionCaloHypoAlg(name+tag(ion) + 'Hypo' + variant)
+    hypoAlg = CompFactory.TrigEgammaPrecisionCaloHypoAlg('Electron' + tag(ion) + 'Hypo' + variant)
 
     hypoAlg.CaloClusters = TrigEgammaKeys.precisionElectronCaloClusterContainer
     
@@ -56,19 +55,5 @@ def precisionCaloMenuSequenceCfg(flags, name=None, ion=False, is_probe_leg=False
     return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict, isProbe=is_probe_leg)
 
 
-def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False):
-    """ Creates precisionCalo MENU sequence """
-
-    if isComponentAccumulatorCfg():
-        return precisionCaloMenuSequenceCfg(flags, name = name, ion = ion, is_probe_leg=is_probe_leg, variant='')
-    else:
-        return menuSequenceCAToGlobalWrapper(precisionCaloMenuSequenceCfg, flags, name, ion=ion, is_probe_leg=is_probe_leg, variant='')
-
-def precisionCaloMenuSequence_LRT(flags, name, is_probe_leg=False, ion=False):
-
-    if isComponentAccumulatorCfg():
-        return precisionCaloMenuSequenceCfg(flags, name = name, ion = ion, is_probe_leg=is_probe_leg, variant='_LRT')
-    else:
-        return menuSequenceCAToGlobalWrapper(precisionCaloMenuSequenceCfg, flags, name, ion=ion, is_probe_leg=is_probe_leg, variant='_LRT')
-
-
+def precisionCaloSequence_LRTCfg(flags, ion=False, is_probe_leg=False):
+    return precisionCaloSequenceCfg(flags, ion=ion, is_probe_leg=is_probe_leg, variant='_LRT')

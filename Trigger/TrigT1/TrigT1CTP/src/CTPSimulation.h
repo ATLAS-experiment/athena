@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CTP_CTPSIMULATION_H
 #define TRIGT1CTP_CTPSIMULATION_H
@@ -75,7 +75,7 @@ namespace LVL1CTP {
 
       virtual StatusCode execute( const EventContext& context ) const override;
 
-      virtual StatusCode finalize() override;
+      virtual StatusCode stop() override;
 
 
    private:

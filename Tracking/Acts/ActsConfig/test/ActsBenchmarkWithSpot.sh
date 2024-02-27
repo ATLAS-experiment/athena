@@ -22,7 +22,7 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsBenchmarkSpotFlags" \
     --steering 'doRAWtoALL' \
     --preExec 'all:ConfigFlags.Tracking.doITkFastTracking=False' \
-    --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True;cfg.getEventAlgo("ActsTrkITkPixelClusterizationAlg").ClustersKey="xAODpixelClusters";cfg.getEventAlgo("ActsTrkITkStripClusterizationAlg").ClustersKey="xAODstripClusters";' \
+    --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True;cfg.getEventAlgo("ActsPixelClusterizationAlg").ClustersKey="xAODpixelClusters";cfg.getEventAlgo("ActsStripClusterizationAlg").ClustersKey="xAODstripClusters";' \
     --inputRDOFile ${DATADIR}"/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/*" \
     --outputAODFile 'myAOD.pool.root' \
     --jobNumber '1' \

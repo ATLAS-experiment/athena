@@ -4,6 +4,7 @@
 
 #include "egammaForwardBuilder.h"
 #include "egammaInterfaces/IegammaBaseTool.h"
+#include "egammaCaloUtils/CookieCutterHelpers.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
@@ -20,6 +21,11 @@
 #include <algorithm>
 #include <cmath>
 
+namespace {
+  const float cellEtaSize = 0.25;
+  const float cellPhiSize = 0.25;
+}
+
 egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
                                            ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
@@ -29,8 +35,13 @@ egammaForwardBuilder::~egammaForwardBuilder() = default;
 
 StatusCode egammaForwardBuilder::initialize()
 {
+  m_maxDelPhi = m_maxDelPhiCells * cellPhiSize * 0.5;
+  m_maxDelEta = m_maxDelEtaCells * cellEtaSize * 0.5;
+  m_maxDelR2 = m_maxDelR * m_maxDelR; // Square now to avoid a slow sqrt later.
+
   // The data handle keys.
   ATH_CHECK(m_topoClusterKey.initialize());
+  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
   ATH_CHECK(m_electronOutputKey.initialize());
   ATH_CHECK(m_outClusterContainerKey.initialize());
   m_outClusterContainerCellLinkKey = m_outClusterContainerKey.key() + "_links";
@@ -114,6 +125,13 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
   // Check is only used for serial running, remove when MT scheduler used.
   ATH_CHECK(inputClusters.isValid());
 
+  // Calorimeter description.
+  SG::ReadCondHandle<CaloDetDescrManager> caloDetDescrMgrHandle{
+    m_caloDetDescrMgrKey, ctx
+  };
+  ATH_CHECK(caloDetDescrMgrHandle.isValid());
+  const CaloDetDescrManager* calodetdescrmgr = *caloDetDescrMgrHandle;
+
   static const SG::AuxElement::Accessor<
     std::vector<ElementLink<xAOD::CaloClusterContainer>>
   > caloClusterLinks("constituentClusterLinks");
@@ -134,12 +152,11 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     // the clusters used are CaloTopoClusters so need to access the sister 
     // cluster to maintain consistency.
     if (m_doTrackMatching) {
-      static const SG::AuxElement::Accessor<
-        ElementLink<xAOD::CaloClusterContainer>
-      > sisterCluster("SisterCluster");
+      ElementLink<xAOD::CaloClusterContainer> sisterCluster = 
+        cluster->getSisterClusterLink();
 
-      if (sisterCluster.isAvailable(*cluster)) {
-        constituentLinks.push_back(sisterCluster(*cluster));
+      if (sisterCluster) {
+        constituentLinks.push_back(sisterCluster);
       } else {
         ATH_MSG_WARNING("No sister Link available");
       }      
@@ -149,6 +166,11 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
     // Create the new cluster.
     std::unique_ptr<xAOD::CaloCluster> newCluster = std::make_unique<xAOD::CaloCluster>(*cluster);
+
+    if (m_doCookieCutting) {
+      cookieCut(*newCluster, *calodetdescrmgr);
+    }
+
     caloClusterLinks(*newCluster) = constituentLinks;
     outClusterContainer->push_back(std::move(newCluster));
 
@@ -263,5 +285,42 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
   }
 
   return StatusCode::SUCCESS;
+}
+
+void egammaForwardBuilder::cookieCut(
+  xAOD::CaloCluster& cluster,
+  const CaloDetDescrManager& mgr
+) const {
+  if (!cluster.hasSampling(CaloSampling::EME2) &&
+      !cluster.hasSampling(CaloSampling::FCAL0)) {
+    return;
+  }
+
+  CookieCutterHelpers::CentralPosition cp0({&cluster}, mgr);
+  CaloClusterCellLink* cell_links = cluster.getOwnCellLinks();
+  CaloClusterCellLink::iterator cell_itr = cell_links->begin();
+
+  const bool isEC = cp0.emaxEC >= cp0.emaxF;
+  const float eta = isEC ? cp0.etaEC : cp0.etaF;
+  const float phi = isEC ? cp0.phiEC : cp0.phiF;
+   
+  while (cell_itr != cell_links->end()) {
+    const float deltaEta = std::abs(eta - cell_itr->eta());
+    const float deltaPhi = std::abs(phi - cell_itr->phi());
+
+    const float deltaEta2 = deltaEta * deltaEta; 
+    const float deltaPhi2 = deltaPhi * deltaPhi; 
+
+    const bool removeCell = isEC ?
+      (deltaEta >= m_maxDelEta || deltaPhi >= m_maxDelPhi) :
+      (deltaEta2 + deltaPhi2 >= m_maxDelR2);
+
+    if (removeCell) {
+      cell_itr = cell_links->removeCell(cell_itr);
+    }
+    else {
+      ++cell_itr;
+    }
+  }
 }
 

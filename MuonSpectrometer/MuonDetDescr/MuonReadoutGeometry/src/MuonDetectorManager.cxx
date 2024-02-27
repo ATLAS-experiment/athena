@@ -29,9 +29,8 @@ namespace MuonGM {
         loadStationIndices();
     }
 
-    MuonDetectorManager::~MuonDetectorManager() {
-        for (unsigned int p = 0; p < m_envelope.size(); ++p) { m_envelope[p]->unref(); }
-    }
+    MuonDetectorManager::~MuonDetectorManager()  = default;
+    
     template <typename read_out, size_t N> void MuonDetectorManager::clearCache(std::array<std::unique_ptr<read_out>, N>& array) {
         for (std::unique_ptr<read_out>& ele : array) {
             if (ele) ele->clearCache();
@@ -116,7 +115,6 @@ namespace MuonGM {
     PVConstLink MuonDetectorManager::getTreeTop(unsigned int i) const { return m_envelope[i]; }
     PVLink MuonDetectorManager::getTreeTop(unsigned int i) { return m_envelope[i]; }
     void MuonDetectorManager::addTreeTop(PVLink pV) {
-        pV->ref();
         m_envelope.push_back(pV);
     }
 
@@ -801,14 +799,6 @@ namespace MuonGM {
             m_genericTGC.positions[i] = tc.positions[i];
             m_genericTGC.tck[i] = tc.tck[i];
         }
-    }
-    void MuonDetectorManager::setGenericCscDescriptor(const GenericCSCCache& cc) {
-        m_genericCSC.dummy1 = cc.dummy1;
-        m_genericCSC.dummy2 = cc.dummy2;
-    }
-    void MuonDetectorManager::setGenericMdtDescriptor(const GenericMDTCache& mc) {
-        m_genericMDT.innerRadius = mc.innerRadius;
-        m_genericMDT.outerRadius = mc.outerRadius;
     }
     void MuonDetectorManager::setGenericRpcDescriptor(const GenericRPCCache& rc) {
         m_genericRPC.stripSeparation = rc.stripSeparation;

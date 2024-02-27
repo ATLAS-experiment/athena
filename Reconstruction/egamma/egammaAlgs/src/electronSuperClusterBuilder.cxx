@@ -39,8 +39,6 @@ electronSuperClusterBuilder::electronSuperClusterBuilder(
   const std::string& name,
   ISvcLocator* pSvcLocator)
   : egammaSuperClusterBuilderBase(name, pSvcLocator)
-  , m_maxDelEta(m_maxDelEtaCells * s_cellEtaSize * 0.5)
-  , m_maxDelPhi(m_maxDelPhiCells * s_cellPhiSize * 0.5)
 {
 }
 

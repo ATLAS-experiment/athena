@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Define method to configure AMVF
 # attempted by N Ribaric (@LancasterUNI) neza.ribaric@cern.ch
 
@@ -11,9 +11,9 @@ def InDetAdaptiveMultiSecVtxFinderToolCfg(
     flags, name="InDetAdaptiveMultiSecVtxFinderTool", **kwargs):
   acc = ComponentAccumulator()
 
-  from TrkConfig.TrkVertexFittersConfig import AdaptiveMultiVertexFitterCfg
+  from TrkConfig.TrkVertexFittersConfig import AdaptiveMultiSecVertexFitterCfg
   kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(
-    AdaptiveMultiVertexFitterCfg(flags)))
+    AdaptiveMultiSecVertexFitterCfg(flags)))
 
   from InDetConfig.InDetTrackSelectionToolConfig import (
     InDetTrackSelectionTool_AMSVF_Cfg)

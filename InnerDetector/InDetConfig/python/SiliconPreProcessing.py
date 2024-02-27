@@ -174,8 +174,9 @@ def ITkRecPreProcessingSiliconCfg(flags):
     # If you only do the latter (== running on ESD) then the needed input (simdata)
     # is not in ESD but the resulting truth (clustertruth) is already there ...
     if flags.Tracking.doTruth:
-        from InDetConfig.InDetTruthAlgsConfig import ITkPRD_MultiTruthMakerSiCfg
-        acc.merge(ITkPRD_MultiTruthMakerSiCfg(flags))
+        if flags.Tracking.ActiveConfig.doAthenaCluster or flags.Tracking.ActiveConfig.doActsToAthenaCluster:
+            from InDetConfig.InDetTruthAlgsConfig import ITkPRD_MultiTruthMakerSiCfg
+            acc.merge(ITkPRD_MultiTruthMakerSiCfg(flags))
 
         if flags.Tracking.ActiveConfig.doActsCluster or flags.Tracking.ActiveConfig.doAthenaToActsCluster:
             from ActsConfig.ActsTruthConfig import ITkTruthAssociationCfg

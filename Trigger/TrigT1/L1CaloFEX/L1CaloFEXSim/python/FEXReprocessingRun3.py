@@ -367,7 +367,7 @@ if __name__ == '__main__':
           maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI, module_id)))
           
         # Converts RoIBResult to xAOD objects
-        from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
+        from AnalysisTriggerAlgs.AnalysisTriggerAlgsConfig import RoIBResultToxAODCfg
         xRoIBResultAcc, xRoIBResultOutputs = RoIBResultToxAODCfg(flags)
         acc.merge(xRoIBResultAcc)          
 

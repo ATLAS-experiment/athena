@@ -77,14 +77,14 @@ void TRT_ServMatFactoryFS::create(GeoPhysVol *motherP, GeoPhysVol *motherM)
   double endZOfIDet =       (*atls)[0]->getDouble("IDETZMX")*Gaudi::Units::cm;
   double minRofGap  =       1050.0;
   double phiWid=70./outROfIDet;    double safetyGap=1.;
-  const GeoShape* railGap1=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
-					-phiWid/2.,phiWid);
-  const GeoShape* railGap2=new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
-					-phiWid/2.+M_PI,phiWid);
+  GeoIntrusivePtr<const GeoShape> railGap1{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap , 
+					-phiWid/2.,phiWid)};
+  GeoIntrusivePtr<const GeoShape> railGap2{new GeoTubs( minRofGap, outROfIDet+safetyGap ,endZOfIDet+safetyGap ,
+					-phiWid/2.+M_PI,phiWid)};
   // In case they don't get used. 
-  railGap1->ref(); 
-  railGap2->ref(); 
+ if(railGap1->refCount() != railGap2->refCount()) {
 
+ }
 
 //VK 26.03.2007  Construct a gap for SquirrelCage ribbon
   double  rminInt    = (*cage)[0]->getDouble("RINGRMIN")*Gaudi::Units::mm;
@@ -139,10 +139,7 @@ void TRT_ServMatFactoryFS::create(GeoPhysVol *motherP, GeoPhysVol *motherM)
     tubeHelper.placeVolTwoSide(motherP,motherM,servPhysUp);
     tubeHelper.placeVolTwoSide(motherP,motherM,servPhysDown);
 
-    serviceTube->unref();
   }
 
-  railGap1->unref(); 
-  railGap2->unref(); 
 
 }

@@ -24,6 +24,7 @@ class ThrType( Enum ):
 
     # zero bias threshold on CTPIN
     ZB = 50 
+    ZBTopo = 51
 
     # topo thresholds
     TOPO = 60; MUTOPO = 61; MULTTOPO = 62; R2TOPO = 63 # noqa: E702
@@ -34,7 +35,7 @@ class ThrType( Enum ):
     
     @staticmethod
     def Run3Types():
-        return [ ThrType.MU, ThrType.eEM, ThrType.jEM, ThrType.eTAU, ThrType.jTAU, ThrType.cTAU, ThrType.jJ, ThrType.jLJ, ThrType.gJ, ThrType.gLJ, ThrType.gXE, ThrType.gTE, ThrType.jXE, ThrType.jTE, ThrType.LArSat ]
+        return [ ThrType.MU, ThrType.eEM, ThrType.jEM, ThrType.eTAU, ThrType.jTAU, ThrType.cTAU, ThrType.jJ, ThrType.jLJ, ThrType.gJ, ThrType.gLJ, ThrType.gXE, ThrType.gTE, ThrType.jXE, ThrType.jTE, ThrType.LArSat, ThrType.ZBTopo ]
     
     @staticmethod
     def NIMTypes():

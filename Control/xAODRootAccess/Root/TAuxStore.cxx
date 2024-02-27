@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 // System include(s):
 #include <cassert>
@@ -22,6 +22,7 @@
 // Athena include(s):
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/AuxStoreInternal.h"
+#include "AthContainers/tools/AuxVectorInterface.h"
 #include "AthContainers/exceptions.h"
 #include "CxxUtils/checker_macros.h"
 #include "xAODCore/tools/IOStats.h"
@@ -1170,9 +1171,10 @@ namespace xAOD {
          }
 
          // Finally, do the copy:
-         for( std::size_t i = 0; i < m_size; ++i ) {
-            factory->copy( ptr, i, pptr, i );
-         }
+         factory->copy( auxid,
+                        SG::AuxVectorInterface( *this ), 0,
+                        SG::AuxVectorInterface( *m_transientStore ), 0,
+                        m_size );
 
          // And now remember that this is a decoration:
          if( m_isDecoration.size() <= auxid ) {
@@ -1558,7 +1560,7 @@ namespace xAOD {
 
       // Check for an auxiliary ID for this branch:
       auxid_t auxid = registry.getAuxID( *ti, auxName, "",
-                                         SG::AuxTypeRegistry::SkipNameCheck );
+                                         SG::AuxVarFlags::SkipNameCheck );
 
       // First try to find a compiled factory for the vector type:
       if( auxid == SG::null_auxid ) {
@@ -1594,7 +1596,7 @@ namespace xAOD {
                         reinterpret_cast< SG::IAuxTypeVectorFactory* >( tmp );
                      registry.addFactory( *ti, *fac->tiAlloc(), std::unique_ptr<SG::IAuxTypeVectorFactory>( fac ) );
                      auxid = registry.getAuxID( *ti, auxName, "",
-                                                SG::AuxTypeRegistry::SkipNameCheck );
+                                                SG::AuxVarFlags::SkipNameCheck );
                   }
                }
             }
@@ -1625,7 +1627,7 @@ namespace xAOD {
               registry.addFactory( *ti, tiAllocName, std::move( fac ) );
             }
             auxid = registry.getAuxID( *ti, auxName, "",
-                                       SG::AuxTypeRegistry::SkipNameCheck );
+                                       SG::AuxVarFlags::SkipNameCheck );
          } else {
             ::Warning( "xAOD::TAuxStore::setupAuxBranch",
                        "Couldn't find dictionary for type: %s",

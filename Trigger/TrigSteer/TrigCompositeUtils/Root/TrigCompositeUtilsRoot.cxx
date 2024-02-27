@@ -267,14 +267,19 @@ namespace TrigCompositeUtils {
     // The following list contains all known summary store identifiers where the graph nodes are spread out over O(100s) or O(1000s)
     // of different SG collections. This is the raw output from running the trigger online.
     // When dealing with this, we need to query eventStore->keys in every event to obtain the full set of collections to process.
-    static const std::vector<std::string> knownDistributedSummaryStores{"HLTNav_Summary"};
+    static const std::vector<std::string> knownDistributedSummaryStores{
+      "HLTNav_Summary",
+      "_HLTNav_Summary"
+    };
 
     // The following list contains all known summary store identifiers where all nodes from the graph have been compactified / condensed
     // down into a single container. Here we just have to search this one container.
     static const std::vector<std::string> knownCompactSummaryStores{"HLTNav_Summary_OnlineSlimmed",
       "HLTNav_Summary_ESDSlimmed",
       "HLTNav_Summary_AODSlimmed",
-      "HLTNav_Summary_DAODSlimmed"};
+      "HLTNav_Summary_DAODSlimmed",
+      "HLTNav_R2ToR3Summary"
+    };
 
     std::vector<std::string> keys; // The SG keys we will be exploring to find rejected decision nodes
 
@@ -309,8 +314,8 @@ namespace TrigCompositeUtils {
     // Loop over each DecisionContainer,
     for (const std::string& key : keys) {
       // Get and check this container
-      if ( ! CxxUtils::starts_with (key, "HLTNav_") ) {
-        continue; // Only concerned about the decision containers which make up the navigation, they have name prefix of HLTNav
+      if ( not (CxxUtils::starts_with(key, "HLTNav_") or CxxUtils::starts_with(key, "_HLTNav_")) ) {
+        continue; // Only concerned about the decision containers which make up the navigation, they have name prefix of HLTNav (or _HLTNav for transient-only mode)
       }
       if (keysToIgnore.count(key) == 1) {
         continue; // Have been asked to not explore this SG container
@@ -319,10 +324,10 @@ namespace TrigCompositeUtils {
       if (!containerRH.isValid()) {
         throw std::runtime_error("Unable to retrieve " + key + " from event store.");
       }
+
       for (const Decision* d : *containerRH) {
-        if (!d->hasObjectLink(featureString())) {
-          // TODO add logic for ComboHypo where this is expected
-          continue; // Only want Decision objects created by HypoAlgs
+        if ( not (d->name() == hypoAlgNodeName() or d->name() == comboHypoAlgNodeName()) ) {
+          continue; // Only want Decision objects created by HypoAlgs or ComboHypoAlgs
         }
         const std::vector<ElementLink<DecisionContainer>> mySeeds = d->objectCollectionLinks<DecisionContainer>(seedString());
         if (mySeeds.size() == 0) {
@@ -335,6 +340,7 @@ namespace TrigCompositeUtils {
             << "The trigger navigation information is incomplete. Skipping this Decision object.");
           continue;
         }
+
         DecisionIDContainer activeChainsIntoThisDecision;
         decisionIDs(*(mySeeds.at(0)), activeChainsIntoThisDecision); // Get list of active chains from the first parent
         if (mySeeds.size() > 1) {

@@ -34,59 +34,61 @@ LowPtMinbiasHitsFiles4="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13
 
 
 Digi_tf.py \
---splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
---detectors Truth \
---PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
---digiSeedOffset1 170 --digiSeedOffset2 170 \
---digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-R3S-2021-03-00-00 \
---inputHITSFile ${HSHitsFile} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
---jobNumber 568 \
---maxEvents ${Events} \
---outputRDOFile ${DigiOutFileNameSP} \
---preInclude 'HITtoRDO:Campaigns/PileUpPresamplingMC21a.py' \
---postExec 'HITtoRDO:ServiceMgr.PileUpEventLoopMgr.AllowSerialAndMPToDiffer=False' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' 'all:PyJobTransforms/HepMcParticleLinkVerbosity.py' \
---skipEvents 0
+    --CA \
+    --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
+    --detectors Truth \
+    --PileUpPresampling True \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
+    --digiSeedOffset1 170 --digiSeedOffset2 170 \
+    --digiSteeringConf 'StandardSignalOnlyTruth' \
+    --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
+    --inputHITSFile ${HSHitsFile} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
+    --jobNumber 568 \
+    --maxEvents ${Events} \
+    --outputRDOFile ${DigiOutFileNameSP} \
+    --preInclude 'HITtoRDO:Campaigns.PileUpPresamplingMC21a' \
+    --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
+    --postInclude 'all:PyJobTransforms.UseFrontier' \
+    --skipEvents 0
 
 rc=$?
 status=$rc
 echo "art-result: $rc Digi_tf.py SP"
 
 Digi_tf.py \
---multiprocess --athenaMPEventsBeforeFork 0 \
---splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
---detectors Truth \
---PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
---digiSeedOffset1 170 --digiSeedOffset2 170 \
---digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-R3S-2021-03-00-00 \
---inputHITSFile ${HSHitsFile} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
---jobNumber 568 \
---maxEvents ${Events} \
---outputRDOFile ${DigiOutFileNameMP0} \
---preInclude 'HITtoRDO:Campaigns/PileUpPresamplingMC21a.py' \
---postExec 'HITtoRDO:ServiceMgr.PileUpEventLoopMgr.AllowSerialAndMPToDiffer=False' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' 'all:PyJobTransforms/HepMcParticleLinkVerbosity.py' \
---skipEvents 0
+    --CA \
+    --multiprocess --athenaMPEventsBeforeFork 0 \
+    --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
+    --detectors Truth \
+    --PileUpPresampling True \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
+    --digiSeedOffset1 170 --digiSeedOffset2 170 \
+    --digiSteeringConf 'StandardSignalOnlyTruth' \
+    --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
+    --inputHITSFile ${HSHitsFile} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
+    --jobNumber 568 \
+    --maxEvents ${Events} \
+    --outputRDOFile ${DigiOutFileNameMP0} \
+    --preInclude 'HITtoRDO:Campaigns.PileUpPresamplingMC21a' \
+    --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
+    --postInclude 'all:PyJobTransforms.UseFrontier' \
+    --skipEvents 0
 
 rc2=$?
 if [[ $status -eq 0 ]]; then
@@ -95,30 +97,31 @@ fi
 echo "art-result: $rc2 Digi_tf.py MP fork after 0"
 
 Digi_tf.py \
---multiprocess --athenaMPEventsBeforeFork 1 \
---splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
---detectors Truth \
---PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
---digiSeedOffset1 170 --digiSeedOffset2 170 \
---digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-R3S-2021-03-00-00 \
---inputHITSFile ${HSHitsFile} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
---jobNumber 568 \
---maxEvents ${Events} \
---outputRDOFile ${DigiOutFileNameMP1} \
---preInclude 'HITtoRDO:Campaigns/PileUpPresamplingMC21a.py' \
---postExec 'HITtoRDO:ServiceMgr.PileUpEventLoopMgr.AllowSerialAndMPToDiffer=False' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' 'all:PyJobTransforms/HepMcParticleLinkVerbosity.py' \
---skipEvents 0
+    --CA \
+    --multiprocess --athenaMPEventsBeforeFork 1 \
+    --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
+    --detectors Truth \
+    --PileUpPresampling True \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
+    --digiSeedOffset1 170 --digiSeedOffset2 170 \
+    --digiSteeringConf 'StandardSignalOnlyTruth' \
+    --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
+    --inputHITSFile ${HSHitsFile} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles3} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles4} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles1} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles2} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles3} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles4} \
+    --jobNumber 568 \
+    --maxEvents ${Events} \
+    --outputRDOFile ${DigiOutFileNameMP1} \
+    --preInclude 'HITtoRDO:Campaigns.PileUpPresamplingMC21a' \
+    --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
+    --postInclude 'all:PyJobTransforms.UseFrontier' \
+    --skipEvents 0
 
 rc3=$?
 if [[ $status -eq 0 ]]; then

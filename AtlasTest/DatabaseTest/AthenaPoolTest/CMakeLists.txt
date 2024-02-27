@@ -26,6 +26,7 @@ atlas_add_component( AthenaPoolTest
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests in the package:
 function (athenapooltest_run_test testName jo pattern)
@@ -43,6 +44,22 @@ function (athenapooltest_run_test testName jo pattern)
                   DEPENDS ${ARG_DEPENDS} )
 endfunction (athenapooltest_run_test)
 
+function (athenapooltest_runca_test testName jo pattern)
+  cmake_parse_arguments( ARG "PRIVATE_WORKING_DIRECTORY" "" "DEPENDS" ${ARGN} )
+  set(_extraArgs)
+  if( ARG_PRIVATE_WORKING_DIRECTORY )
+     set(_extraArgs "PRIVATE_WORKING_DIRECTORY")
+  endif()
+  atlas_add_test( ${testName}
+                  SCRIPT python -m AthenaPoolTest.${jo}
+                  ${_extraArgs}
+                  LOG_SELECT_PATTERN ${pattern}
+                  LOG_IGNORE_PATTERN "0x[0-9a-f]{4,}|DEBUG Try item:|AthenaAttribute.*DB=|AtlasRelease|Release version|data dependencies"
+                  PROPERTIES TIMEOUT 900
+                  DEPENDS ${ARG_DEPENDS} )
+endfunction (athenapooltest_runca_test)
+
+
 
 # Write/read out some simple objects:
 athenapooltest_run_test( AthenaPoolTestWrite AthenaPoolTestWrite
@@ -52,18 +69,20 @@ athenapooltest_run_test( AthenaPoolTestRead AthenaPoolTestRead
                          DEPENDS AthenaPoolTestWrite )
 
 # Write with DoubleEventSelector
-athenapooltest_run_test( AthenaPoolTestWriteDoubleSelector AthenaPoolTestWriteDoubleSelector
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest" )
-athenapooltest_run_test( AthenaPoolTestReadDoubleSelector AthenaPoolTestReadDoubleSelector
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
-                         DEPENDS AthenaPoolTestWriteDoubleSelector )
+# TODO: migrate to CA
+# athenapooltest_run_test( AthenaPoolTestWriteDoubleSelector AthenaPoolTestWriteDoubleSelector
+#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest" )
+# athenapooltest_run_test( AthenaPoolTestReadDoubleSelector AthenaPoolTestReadDoubleSelector
+#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
+#                          DEPENDS AthenaPoolTestWriteDoubleSelector )
 
 # Add on test of navigation still using simple objects:
 # AthenaPoolTestWrite - Step2 - rewrite part in another file
 # DoubleEventSelector
-athenapooltest_run_test( AthenaPoolTestStep2WriteDoubleSelector AthenaPoolTestStep2WriteDoubleSelector
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
-                         DEPENDS AthenaPoolTestWriteDoubleSelector )
+# TODO: migrate to CA
+# athenapooltest_run_test( AthenaPoolTestStep2WriteDoubleSelector AthenaPoolTestStep2WriteDoubleSelector
+#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
+#                          DEPENDS AthenaPoolTestWriteDoubleSelector )
 # normal EventSelector
 athenapooltest_run_test( AthenaPoolTestStep2Write AthenaPoolTestStep2Write
                          "^AthenaPoolTestD"
@@ -84,40 +103,42 @@ athenapooltest_run_test( LArCellContRead LArCellContReader_jobOptions
                          DEPENDS LArCellContWriter )
 
 # Read two RDOs with the DoubleEventSelector
-athenapooltest_run_test( ReadRDODoubleSelector ReadRDODoubleSelector
-                         "^DoubleEvent|^SecondaryEvent|^RDOReader"
-                         DEPENDS InDetRawDataWriter LArCellContWriter )
-athenapooltest_run_test( ReadCombinedRDO ReadCombinedRDO
-                         "^DoubleEvent|^SecondaryEvent|^LArCellContFake|^InDetRawDataFak"
-                         DEPENDS ReadRDODoubleSelector )
+# TODO: migrate to CA
+# athenapooltest_run_test( ReadRDODoubleSelector ReadRDODoubleSelector
+#                          "^DoubleEvent|^SecondaryEvent|^RDOReader"
+#                          DEPENDS InDetRawDataWriter LArCellContWriter )
+# athenapooltest_run_test( ReadCombinedRDO ReadCombinedRDO
+#                          "^DoubleEvent|^SecondaryEvent|^LArCellContFake|^InDetRawDataFak"
+#                          DEPENDS ReadRDODoubleSelector )
 
 # Test basic overlay algorithms with DoubleEventSelector
-athenapooltest_run_test( DoubleEventSelectorOverlayTest DoubleEventSelectorOverlayTest
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolAddr|^Stream1|Found HelperTools"
-                         PRIVATE_WORKING_DIRECTORY )
+# TODO: migrate to CA
+# athenapooltest_run_test( DoubleEventSelectorOverlayTest DoubleEventSelectorOverlayTest
+#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolAddr|^Stream1|Found HelperTools"
+#                          PRIVATE_WORKING_DIRECTORY )
 
-# AthenaMT test for DoubleEventSelector
-atlas_add_test( DoubleEventSelectorOverlayTestMT
-                SCRIPT athena.py --threads=4 -c \"outputFile=\'OverlayRDOMT.root\'\" AthenaPoolTest/DoubleEventSelectorOverlayTest.py
-                PRIVATE_WORKING_DIRECTORY
-                LOG_SELECT_PATTERN "^DoubleEvent.*WARNING|ERROR|Terminated successfully"
-                PROPERTIES TIMEOUT 900 PROCESSORS 4)
+# # AthenaMT test for DoubleEventSelector
+# atlas_add_test( DoubleEventSelectorOverlayTestMT
+#                 SCRIPT athena.py --threads=4 -c \"outputFile=\'OverlayRDOMT.root\'\" AthenaPoolTest/DoubleEventSelectorOverlayTest.py
+#                 PRIVATE_WORKING_DIRECTORY
+#                 LOG_SELECT_PATTERN "^DoubleEvent.*WARNING|ERROR|Terminated successfully"
+#                 PROPERTIES TIMEOUT 900 PROCESSORS 4)
 
 # Check for adding DetDescr tags to event info object:
-athenapooltest_run_test( EventInfoWrite EventInfoWrite
+athenapooltest_runca_test( EventInfoWrite EventInfoWrite
                          "^TagInfoMgr|^EventInfoWriter" )
-athenapooltest_run_test( EventInfoWriteStep2 EventInfoWriteStep2
+athenapooltest_runca_test( EventInfoWriteStep2 EventInfoWriteStep2
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWrite )
-athenapooltest_run_test( EventInfoWriteStep3 EventInfoWriteStep3
+athenapooltest_runca_test( EventInfoWriteStep3 EventInfoWriteStep3
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWriteStep2 )
-athenapooltest_run_test( EventInfoWriteStep4 EventInfoWriteStep4
+athenapooltest_runca_test( EventInfoWriteStep4 EventInfoWriteStep4
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWriteStep3 )
-athenapooltest_run_test( EventInfoWriteStep5 EventInfoWriteStep5
+athenapooltest_runca_test( EventInfoWriteStep5 EventInfoWriteStep5
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWriteStep4 )
-athenapooltest_run_test( EventInfoRead EventInfoRead
+athenapooltest_runca_test( EventInfoRead EventInfoRead
                          "^TagInfoMgr|^EventInfoWriter"
                          DEPENDS EventInfoWriteStep5 )

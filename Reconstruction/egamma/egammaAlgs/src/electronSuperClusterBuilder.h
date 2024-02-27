@@ -127,8 +127,6 @@ private:
     "Size of maximum search window in phi"
   };
 
-  float m_maxDelEta;
-  float m_maxDelPhi;
   Gaudi::Property<std::size_t> m_numberOfPixelHits{
     this,
     "NumberOfReqPixelHits",
@@ -157,6 +155,9 @@ private:
       "doTrackMatching",
       true,
       "Boolean to do track matching" };
+
+  float m_maxDelEta {};
+  float m_maxDelPhi {};
 };
 
 #endif

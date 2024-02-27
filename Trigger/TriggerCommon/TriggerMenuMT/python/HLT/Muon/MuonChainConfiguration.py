@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #
@@ -10,143 +10,12 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from .MuonMenuSequences import muFastSequence, muFastCalibSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muCombLRTSequence, muEFSASequence, muEFSAFSSequence, efLateMuSequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFCBFSSequence, muEFIDtpSequence, muEFIsoSequence, muEFMSIsoSequence
 
 from .MuonMenuSequences import efLateMuRoISequence, muRoiClusterSequence
-from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFInvMassHypoToolFromDict
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFIdtpInvMassHypoToolFromDict
-
-#--------------------------------------------------------
-# fragments generating config will be functions in new JO
-#--------------------------------------------------------
-def muFastSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muFastSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muFastSequence,flags, is_probe_leg=is_probe_leg)
-
-def muFastCalibSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muFastCalibSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muFastCalibSequence,flags, is_probe_leg=is_probe_leg)
-
-def mul2mtSAOvlpRmSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return mul2mtSAOvlpRmSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(mul2mtSAOvlpRmSequence,flags, is_probe_leg=is_probe_leg)
-
-def muCombSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muCombSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muCombSequence, flags, is_probe_leg=is_probe_leg)
-
-def muCombLRTSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muCombLRTSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muCombLRTSequence,flags, is_probe_leg=is_probe_leg)
-
-def muCombOvlpRmSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muCombOvlpRmSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muCombOvlpRmSequence, flags, is_probe_leg=is_probe_leg)
-
-def mul2IOOvlpRmSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return mul2IOOvlpRmSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(mul2IOOvlpRmSequence, flags, is_probe_leg=is_probe_leg)
-
-def mul2mtCBOvlpRmSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return mul2mtCBOvlpRmSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(mul2mtCBOvlpRmSequence, flags, is_probe_leg=is_probe_leg)
-
-def muEFSASequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFSASequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFSASequence,flags, is_probe_leg=is_probe_leg)
-
-def muEFCBSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFCBSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFCBSequence, flags, is_probe_leg=is_probe_leg)
-
-def muEFCBIDperfSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFCBIDperfSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFCBIDperfSequence, flags, is_probe_leg=is_probe_leg)
-
-def muEFIDtpSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFIDtpSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFIDtpSequence, flags, is_probe_leg=is_probe_leg)
-
-def muEFCBLRTSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFCBLRTSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return  menuSequenceCAToGlobalWrapper(muEFCBLRTSequence, flags, is_probe_leg=is_probe_leg)
-
-def muEFCBLRTIDperfSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFCBLRTIDperfSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFCBLRTIDperfSequence, flags, is_probe_leg=is_probe_leg)
-
-def FSmuEFSASequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFSAFSSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFSAFSSequence, flags, is_probe_leg=is_probe_leg)
-
-def FSmuEFCBSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFCBFSSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFCBFSSequence, flags, is_probe_leg=is_probe_leg)
-
-def muEFIsoSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFIsoSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFIsoSequence, flags, is_probe_leg=is_probe_leg)
-
-def muEFMSIsoSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muEFMSIsoSequence(flags, is_probe_leg=is_probe_leg)
-    else:
-        return menuSequenceCAToGlobalWrapper(muEFMSIsoSequence, flags, is_probe_leg=is_probe_leg)
-
-def muEFLateRoISequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return efLateMuRoISequence(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(efLateMuRoISequence, flags)
-
-def muEFLateSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return efLateMuSequence(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(efLateMuSequence, flags)
-
-def muRoiClusterSequenceCfg(flags,is_probe_leg=False):
-    if isComponentAccumulatorCfg():
-        return muRoiClusterSequence(flags)
-    else:
-        return menuSequenceCAToGlobalWrapper(muRoiClusterSequence, flags)
 
 
 #############################################
@@ -220,11 +89,11 @@ class MuonChainConfiguration(ChainConfigurationBase):
     def getmuFast(self, flags, is_probe_leg=False):
 
         if 'muoncalib' in self.chainPart['extra']:
-           return self.getStep(flags,1,"mufastcalib", [muFastCalibSequenceCfg], is_probe_leg=is_probe_leg )
+           return self.getStep(flags,1,"mufastcalib", [muFastCalibSequence], is_probe_leg=is_probe_leg )
         elif 'l2mt' in self.chainPart['l2AlgInfo']:
-            return self.getStep(flags,1,"mufastl2mt", [mul2mtSAOvlpRmSequenceCfg], is_probe_leg=is_probe_leg )
+            return self.getStep(flags,1,"mufastl2mt", [mul2mtSAOvlpRmSequence], is_probe_leg=is_probe_leg )
         else:
-           return self.getStep(flags,1,"mufast", [muFastSequenceCfg], is_probe_leg=is_probe_leg )
+           return self.getStep(flags,1,"mufast", [muFastSequence], is_probe_leg=is_probe_leg )
 
 
     # --------------------
@@ -241,63 +110,63 @@ class MuonChainConfiguration(ChainConfigurationBase):
            doOvlpRm = False
 
         if 'l2mt' in self.chainPart['l2AlgInfo']:
-            return self.getStep(flags,2,"muCombl2mt", [mul2mtCBOvlpRmSequenceCfg], is_probe_leg=is_probe_leg )
+            return self.getStep(flags,2,"muCombl2mt", [mul2mtCBOvlpRmSequence], is_probe_leg=is_probe_leg )
         elif 'l2io' in self.chainPart['l2AlgInfo']:
-            return self.getStep(flags,2, 'muCombIO', [mul2IOOvlpRmSequenceCfg], is_probe_leg=is_probe_leg )
+            return self.getStep(flags,2, 'muCombIO', [mul2IOOvlpRmSequence], is_probe_leg=is_probe_leg )
         elif doOvlpRm:
-           return self.getStep(flags,2, 'muComb', [muCombOvlpRmSequenceCfg], is_probe_leg=is_probe_leg )
+           return self.getStep(flags,2, 'muComb', [muCombOvlpRmSequence], is_probe_leg=is_probe_leg )
         elif "LRT" in self.chainPart['addInfo']:
-           return self.getStep(flags,2, 'muCombLRT', [muCombLRTSequenceCfg], is_probe_leg=is_probe_leg )
+           return self.getStep(flags,2, 'muCombLRT', [muCombLRTSequence], is_probe_leg=is_probe_leg )
         else:
-           return self.getStep(flags,2, 'muComb', [muCombSequenceCfg], is_probe_leg=is_probe_leg )
+           return self.getStep(flags,2, 'muComb', [muCombSequence], is_probe_leg=is_probe_leg )
 
     # --------------------
     def getmuCombIO(self, flags, is_probe_leg=False):
-        return self.getStep(flags,2, 'muCombIO', [mul2IOOvlpRmSequenceCfg], is_probe_leg=is_probe_leg )
+        return self.getStep(flags,2, 'muCombIO', [mul2IOOvlpRmSequence], is_probe_leg=is_probe_leg )
 
     # --------------------
     def getmuEFSA(self, flags, is_probe_leg=False):
-        return self.getStep(flags,3,'muEFSA',[ muEFSASequenceCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,3,'muEFSA',[ muEFSASequence], is_probe_leg=is_probe_leg)
 
     # --------------------
     def getmuEFCB(self, flags, is_probe_leg=False):
 
         if 'invm' in self.chainPart['invMassInfo']: # No T&P support, add if needed
-            return self.getStep(flags,4,'EFCB', [muEFCBSequenceCfg], comboTools=[TrigMuonEFInvMassHypoToolFromDict], is_probe_leg=is_probe_leg)
+            return self.getStep(flags,4,'EFCB', [muEFCBSequence], comboTools=[TrigMuonEFInvMassHypoToolFromDict], is_probe_leg=is_probe_leg)
         elif "LRT" in self.chainPart['addInfo']:
             if "idperf" in self.chainPart['addInfo']:
-                return self.getStep(flags,4,'EFCBLRTIDPERF', [muEFCBLRTIDperfSequenceCfg], is_probe_leg=is_probe_leg)
+                return self.getStep(flags,4,'EFCBLRTIDPERF', [muEFCBLRTIDperfSequence], is_probe_leg=is_probe_leg)
             else:
-                return self.getStep(flags,4,'EFCBLRT', [muEFCBLRTSequenceCfg], is_probe_leg=is_probe_leg)
+                return self.getStep(flags,4,'EFCBLRT', [muEFCBLRTSequence], is_probe_leg=is_probe_leg)
         elif "idperf" in self.chainPart['addInfo']:
-            return self.getStep(flags,4,'EFCBIDPERF', [muEFCBIDperfSequenceCfg], is_probe_leg=is_probe_leg)
+            return self.getStep(flags,4,'EFCBIDPERF', [muEFCBIDperfSequence], is_probe_leg=is_probe_leg)
         elif "idtp" in self.chainPart['addInfo']:
-            return self.getStep(flags,4,'EFIDTP', [muEFIDtpSequenceCfg], is_probe_leg=is_probe_leg)
+            return self.getStep(flags,4,'EFIDTP', [muEFIDtpSequence], is_probe_leg=is_probe_leg)
         else:
-            return self.getStep(flags,4,'EFCB', [muEFCBSequenceCfg], is_probe_leg=is_probe_leg)
+            return self.getStep(flags,4,'EFCB', [muEFCBSequence], is_probe_leg=is_probe_leg)
 
     # --------------------
     def getFSmuEFSA(self, flags, is_probe_leg=False):
-        return self.getStep(flags,5,'FSmuEFSA', [FSmuEFSASequenceCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,5,'FSmuEFSA', [muEFSAFSSequence], is_probe_leg=is_probe_leg)
 
     # --------------------
     def getFSmuEFCB(self, flags, is_probe_leg=False):
         if 'invm' in self.chainPart['invMassInfo']:
-            return self.getStep(flags,6,'FSmuEFCB', [FSmuEFCBSequenceCfg],comboTools=[TrigMuonEFInvMassHypoToolFromDict], is_probe_leg=is_probe_leg)
+            return self.getStep(flags,6,'FSmuEFCB', [muEFCBFSSequence],comboTools=[TrigMuonEFInvMassHypoToolFromDict], is_probe_leg=is_probe_leg)
         else:
-            return self.getStep(flags,6,'FSmuEFCB', [FSmuEFCBSequenceCfg], is_probe_leg=is_probe_leg)
+            return self.getStep(flags,6,'FSmuEFCB', [muEFCBFSSequence], is_probe_leg=is_probe_leg)
 
     #---------------------
     def getmuEFIso(self, flags, is_probe_leg=False):
         if any(x in self.dict['topo'] for x in ['b7invmAB9vtx20', 'b11invmAB60vtx20', 'b11invmAB24vtx20', 'b24invmAB60vtx20']):
             from TrigBphysHypo.TrigMultiTrkComboHypoConfig import DrellYanComboHypoCfg, TrigMultiTrkComboHypoToolFromDict
-            return self.getStep(flags,5,'muEFIsoDY', [muEFIsoSequenceCfg], comboHypoCfg=DrellYanComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
+            return self.getStep(flags,5,'muEFIsoDY', [muEFIsoSequence], comboHypoCfg=DrellYanComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
         else:
-            return self.getStep(flags,5,'muEFIso', [muEFIsoSequenceCfg], is_probe_leg=is_probe_leg)
+            return self.getStep(flags,5,'muEFIso', [muEFIsoSequence], is_probe_leg=is_probe_leg)
 
     #---------------------
     def getmuEFMSIso(self, flags, is_probe_leg=False):
-        return self.getStep(flags,5,'muEFMSIso',[ muEFMSIsoSequenceCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,5,'muEFMSIso',[ muEFMSIsoSequence], is_probe_leg=is_probe_leg)
 
     #--------------------
     def getmuMSEmptyAll(self, flags, stepID): # No T&P info needed for empty step?
@@ -317,15 +186,15 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     #--------------------
     def getLateMuRoI(self, flags, is_probe_leg=False): # No T&P support, add if needed
-        return self.getStep(flags,1,'muEFLateRoI',[muEFLateRoISequenceCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,1,'muEFLateRoI',[efLateMuRoISequence], is_probe_leg=is_probe_leg)
 
     #--------------------
     def getLateMu(self, flags, is_probe_leg=False): # No T&P support, add if needed
-        return self.getStep(flags,2,'muEFLate',[muEFLateSequenceCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,2,'muEFLate',[efLateMuSequence], is_probe_leg=is_probe_leg)
 
     #--------------------
     def getmuRoiClu(self, flags, is_probe_leg=False):
-        return self.getStep(flags,1,'muRoiClu',[muRoiClusterSequenceCfg])
+        return self.getStep(flags,1,'muRoiClu',[muRoiClusterSequence])
 
 
 def TrigMuonEFIdtpInvMassHypoToolCfg(flags, chainDict):

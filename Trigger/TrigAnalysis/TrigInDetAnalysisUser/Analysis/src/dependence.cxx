@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "TrigInDetAnalysis/Efficiency.h"
+#include "TrigInDetAnalysis/Efficiency1D.h"
 #include "ReadCards.h"
 
 #include "TH1F.h"
@@ -202,7 +202,7 @@ void efficiency( std::vector<double>& bins, std::vector<double>& values, const s
   }
 
   double scale_eff = 1;
-  Efficiency e( hn, hd, "", scale_eff );
+  Efficiency1D e( hn, hd, "", scale_eff );
 
   TGraphAsymmErrors* tgtest = e.Bayes(scale_eff);
 

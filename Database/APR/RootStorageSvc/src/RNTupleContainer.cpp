@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -394,25 +394,26 @@ DbStatus RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
              p.c_str += dsc.offset();
              break;
          }
-#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 30, 0 )
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          // connect the field (with subfields) to the pageSource
          if( dsc.field->GetState() != RFieldBase::EState::kConnectedToSource ) {
-            dsc.field->ConnectPageSource(*m_pageSource);
+            ROOT::Experimental::Internal::CallConnectPageSourceOnField(*dsc.field, *m_pageSource);
             for( auto& subfield : *dsc.field ) {
                if( subfield.GetState() != RFieldBase::EState::kConnectedToSource ) {
-                  subfield.ConnectPageSource(*m_pageSource);
+                  ROOT::Experimental::Internal::CallConnectPageSourceOnField(subfield, *m_pageSource);
                }
             }
          }
          if( p.ptr ) {
             // read into an object given by the user
-            auto v = dsc.field->BindValue( p.ptr );
+            auto v = dsc.field->BindValue( std::shared_ptr<void>(p.ptr, [](void *) {}) );
             v.Read( evt_id );
          } else {
             // create the object for the user and pass ownership to them
-            auto v =  dsc.field->GenerateValue();
-            v.Read( evt_id );
-            *obj_p = v.Release<void>();
+            auto v = std::make_unique<RFieldBase::RValue>( dsc.field->CreateValue() );
+            v->Read( evt_id );
+            *obj_p = v->GetPtr<void>().get();
+            v.release(); // This leaks the RValue!
          }
 #endif
          numBytes += 1;

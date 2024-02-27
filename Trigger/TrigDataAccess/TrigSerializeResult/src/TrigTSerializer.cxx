@@ -246,7 +246,7 @@ StatusCode TrigTSerializer::initialize(){
   // copy missing dictionary names from the property to the static member
   s_dictsToIgnore.insert( std::end(s_dictsToIgnore), std::begin(m_ignoreMissingDicts.value()), std::end(m_ignoreMissingDicts.value()) );
   std::string msg;
-  for( auto n:s_dictsToIgnore ) {
+  for( const auto& n:s_dictsToIgnore ) {
      if( not msg.empty() ) msg += ", ";
      msg += n;
   }
@@ -660,7 +660,7 @@ void TrigTSerializer::do_follow_ptr(const std::string& name, void *ptr){
   
   
   if (ptr){
-    const std::string classname = name.substr(0, name.find_last_of("*"));
+    const std::string classname = name.substr(0, name.find_last_of('*'));
     ATH_MSG_DEBUG( "going deeper for " << classname << " at " << ptr  );
     do_persistify(classname, ptr);
   }

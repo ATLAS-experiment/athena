@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: CaloClusterCorrection/python/compat.py
@@ -19,8 +19,8 @@ import string
 # from old flags.
 #
 def makeFlags():
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    flags = ConfigFlags.clone()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     from CaloClusterCorrection.CaloClusterCorrectionFlags \
          import caloClusterCorrectionFlags

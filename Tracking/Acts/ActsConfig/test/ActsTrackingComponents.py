@@ -42,3 +42,8 @@ if __name__ == "__main__":
     flags.Acts.doAmbiguityResolution = True
     current_flags = deduceConfiguration(flags, "ValidateActsTracks")
     printConfiguration(current_flags)
+
+    # Test workflow with Conversion pass
+    flags.Acts.doITkConversion = True
+    current_flags = deduceConfiguration(flags, "ActsConversion")
+    printConfiguration(current_flags)

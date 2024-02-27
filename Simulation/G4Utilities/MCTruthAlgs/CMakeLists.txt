@@ -22,7 +22,3 @@ atlas_add_library( MCTruthAlgsLib
 atlas_add_component( MCTruthAlgs
                      src/components/*.cxx
                      LINK_LIBRARIES MCTruthAlgsLib )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-

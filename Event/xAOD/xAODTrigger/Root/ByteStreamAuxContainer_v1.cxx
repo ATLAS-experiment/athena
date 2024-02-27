@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ByteStreamAuxContainer_v1.cxx 793760 2017-01-25 02:02:33Z ssnyder $
 
 // System include(s):
 #include <iostream>
@@ -411,7 +409,7 @@ namespace xAOD {
 #define ADD_IDS(VAR, TYP) \
       do { typedef std::map< std::string, std::vector< TYP > > CONT; \
           for (CONT::value_type& p : VAR)                                 \
-             m_auxids.insert (r.getAuxID< TYP > (p.first, "", SG::AuxTypeRegistry::SkipNameCheck)); } while(0)
+             m_auxids.insert (r.getAuxID< TYP > (p.first, "", SG::AuxVarFlags::SkipNameCheck)); } while(0)
       ADD_IDS(m_int, int);
       ADD_IDS(m_float, float);
       ADD_IDS(m_vecInt, std::vector<int>);

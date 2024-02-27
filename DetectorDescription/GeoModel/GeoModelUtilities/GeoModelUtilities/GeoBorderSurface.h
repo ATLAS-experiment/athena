@@ -1,11 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GeoBorderSurface_h
 #define GeoBorderSurface_h 1
 
 #include <string>
+#include "GeoModelKernel/GeoIntrusivePtr.h"
+#include "GeoModelUtilities/GeoOpticalPhysVol.h"
+#include "GeoModelUtilities/GeoOpticalSurface.h"
+
 
 class GeoOpticalPhysVol;
 class GeoOpticalSurface;
@@ -17,8 +21,8 @@ class GeoBorderSurface
 		   GeoOpticalPhysVol* pv1,
 		   GeoOpticalPhysVol* pv2,
 		   GeoOpticalSurface* opticalSurface);
-  GeoBorderSurface(const GeoBorderSurface &right);
-  ~GeoBorderSurface();
+  GeoBorderSurface(const GeoBorderSurface &right) = default;
+  ~GeoBorderSurface() = default;
 
   GeoBorderSurface& operator= (const GeoBorderSurface &right) = delete;
 
@@ -29,9 +33,9 @@ class GeoBorderSurface
  
  private:
   std::string m_name;
-  GeoOpticalPhysVol* m_pv1;
-  GeoOpticalPhysVol* m_pv2;
-  GeoOpticalSurface* m_opticalSurface;
+  GeoIntrusivePtr<GeoOpticalPhysVol> m_pv1{};
+  GeoIntrusivePtr<GeoOpticalPhysVol> m_pv2{};
+  GeoIntrusivePtr<GeoOpticalSurface> m_opticalSurface{};
 
 };
 

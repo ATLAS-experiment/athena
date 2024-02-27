@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -45,16 +46,17 @@ def CaloBasedEventViewCreatorAlgCfg(flags,
 def EventViewCreatorAlgCfg(flags,
                            name: str = "EventViewCreatorAlg",
                            **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
     # Acts main pass
     if flags.Tracking.ActiveConfig.extension == "Acts":
-        return GlobalEventViewCreatorAlgCfg(flags, name=name, **kwargs)
+        acc.merge(GlobalEventViewCreatorAlgCfg(flags, name=name, **kwargs))
     # Acts conversion pass
-    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
+    elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
         from InDetConfig.InDetCaloClusterROISelectorConfig import ITkCaloClusterROIPhiRZContainerMakerCfg
-        acc = ITkCaloClusterROIPhiRZContainerMakerCfg(flags)
+        acc.merge(ITkCaloClusterROIPhiRZContainerMakerCfg(flags))
         acc.merge(CaloBasedEventViewCreatorAlgCfg(flags, name, **kwargs))
-        return acc
     # Any other Acts pass, that means validation passes
-    return GlobalEventViewCreatorAlgCfg(flags, name=name, **kwargs)
+    else:
+        acc.merge(GlobalEventViewCreatorAlgCfg(flags, name=name, **kwargs))
 
-        
+    return acc

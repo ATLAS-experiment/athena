@@ -58,7 +58,7 @@ class TestPhotonVertexSelection(PyAthena.Alg):
     def initialize(self):
         self.msg.info("initializing [%s]", self.name)
         self.vertexTool = PyAthena.py_tool(
-            self.PhotonVertexSelectionTool.getFullName(),
+            self.PhotonVertexSelectionTool.getFullJobOptName(),
             iface="CP::IPhotonVertexSelectionTool",
         )
         if not self.vertexTool:

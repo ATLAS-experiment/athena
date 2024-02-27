@@ -10,26 +10,6 @@
 
 using namespace TrigCompositeUtils;
 
-using TrigCompositeUtils::createAndStore; 
-using TrigCompositeUtils::DecisionContainer;
-using TrigCompositeUtils::DecisionAuxContainer;
-using TrigCompositeUtils::DecisionIDContainer;
-using TrigCompositeUtils::decisionIDs;
-using TrigCompositeUtils::newDecisionIn;
-using TrigCompositeUtils::linkToPrevious;
-using TrigCompositeUtils::viewString;
-using TrigCompositeUtils::featureString;
-using TrigCompositeUtils::hypoAlgNodeName;
-using TrigCompositeUtils::findLink;
-using TrigCompositeUtils::LinkInfo;
-using TrigCompositeUtils::Decision;
-using TrigCompositeUtils::allFailed;
-
-using xAOD::JetContainer;
-using xAOD::TrackParticleContainer;
-using xAOD::VertexContainer;
-
-
 TrigJetCRHypoAlg::TrigJetCRHypoAlg( const std::string& name, 
 				    ISvcLocator* pSvcLocator ) :
   ::HypoBase( name, pSvcLocator ) { }

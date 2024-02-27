@@ -135,7 +135,7 @@ namespace top {
 
     IJetSelector* setupJetCleaningTool(const std::string& WP);
     ECUtils::IEventCleaningTool* setupJetEventCleaningTool(const std::string& WP,
-                                                           ToolHandle<IJetSelector> JetCleaningToolHandle);
+                                                           const ToolHandle<IJetSelector>& JetCleaningToolHandle);
   };
 }  // namespace top
 

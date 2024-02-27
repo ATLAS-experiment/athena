@@ -37,14 +37,11 @@ FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap co
   }
   else {
     ATH_MSG_INFO("Reading " << fname);
-    
     // Read the file header
     readHeader(geocfile);
     ATH_MSG_INFO("Settings: m_ncoords="<<m_ncoords<<" m_npars="<<m_npars);
-    
     // Read the sector constants
     readSectorInfo(geocfile);
-    
     // Pre-calculate the majority logic elements
     if (m_missingPlane == -1)
       calculateMajority();
@@ -53,7 +50,6 @@ FPGATrackSimFitConstantBank::FPGATrackSimFitConstantBank(FPGATrackSimPlaneMap co
       ATH_MSG_WARNING("Floating points on this computer are not 32 bit. This may cause a problem for the hardware agreement. Be careful!");
     
     setIdealCoordFit(true);
-    
     prepareInvFitConstants();
   }
 }
@@ -193,6 +189,7 @@ void FPGATrackSimFitConstantBank::calculateMajority()
         {
             float det = m_maj_kk(isec, ix, ix) * m_maj_kk(isec, ix+1, ix+1)
                       - m_maj_kk(isec, ix+1, ix) * m_maj_kk(isec, ix, ix+1);
+            if (det == 0) continue;
 
             m_maj_invkk(isec, ix, ix)       = m_maj_kk(isec, ix+1, ix+1)/det;
             m_maj_invkk(isec, ix, ix+1)     = -m_maj_kk(isec, ix+1, ix)/det;
@@ -201,8 +198,10 @@ void FPGATrackSimFitConstantBank::calculateMajority()
         }
 
         // Strip layers (1 coordinate)
-        for (int ix=m_npixcy;ix!=m_ncoords;++ix)
-            m_maj_invkk(isec, ix, ix) = 1./m_maj_kk(isec, ix, ix);
+        for (int ix=m_npixcy;ix!=m_ncoords;++ix) {
+	  if (m_maj_kk(isec, ix, ix) == 0) continue;
+	  m_maj_invkk(isec, ix, ix) = 1./m_maj_kk(isec, ix, ix);
+	}
     }
 }
 
@@ -497,14 +496,14 @@ void FPGATrackSimFitConstantBank::linfit_pars_eval(sector_t sector, FPGATrackSim
     for (int ip = 0; ip < m_npars; ip++)
     {
         pars[ip] = m_fit_const(sector, ip);
-
+	
         for (int coord = 0; coord < m_ncoords; coord++) {
-           pars[ip] += m_fit_pars(sector, ip, coord) * trk.getPhiCoord(m_pmap->getCoordLayer(coord));
-           if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
-              pars[ip] += m_fit_pars(sector, ip, coord+1) * trk.getEtaCoord(m_pmap->getCoordLayer(coord));
-              ++coord;
-           }
-        }
+	  pars[ip] += m_fit_pars(sector, ip, coord) * trk.getPhiCoord(m_pmap->getCoordLayer(coord));
+	  if (m_pmap->getDim(m_pmap->getCoordLayer(coord)) == 2) { // do two at a time if 2d, then skip ahead
+	    pars[ip] += m_fit_pars(sector, ip, coord+1) * trk.getEtaCoord(m_pmap->getCoordLayer(coord));
+	    ++coord;
+	  }
+	}
     }
     
     trk.setQOverPt(pars[0]);

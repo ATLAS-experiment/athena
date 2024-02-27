@@ -7,9 +7,13 @@ def InitializeGeometryParameters(dbGeomCursor):
     """
     dbId, dbSwitches, dbParam = dbGeomCursor.GetCurrentLeafContent("MuonSwitches")
     params = {"Layout" : "UNDEFINED",
-              "HasCSC" : True,
+              "HasCSC" : False,
               "HasSTGC" : True,
-              "HasMM" : True}
+              "HasMM" : True,
+              "HasMDT": True,
+              "HasRPC": True,
+              "HasTGC": True,
+              "useR4Plugin": False}
 
     if len(dbId)>0:
         key=dbId[0]
@@ -30,20 +34,30 @@ def InitializeGeometryParameters_SQLite(sqliteDbReader):
     sqliteDbReader: AtlasGeoDBInterface_SQLite instance
     """
     dbData = sqliteDbReader.GetData("MuonSwitches")
-
     params = {"Layout" : "UNDEFINED",
-              "HasCSC" : True,
+              "HasCSC" : False,
               "HasSTGC" : True,
-              "HasMM" : True}
+              "HasMM" : True,
+              "HasMDT": True,
+              "HasRPC": True,
+              "HasTGC": True,
+              "useR4Plugin": False}
 
     if dbData:
         if "LAYOUTNAME" in dbData[0].keys():
             params["Layout"] = dbData[0]["LAYOUTNAME"]
-        if "HASCSC" in dbData[0].keys():
-            params["HasCSC"] = (dbData[0]["HASCSC"] != 0)
-        if "HASSTGC" in dbData[0].keys():
-            params["HasSTGC"] = (dbData[0]["HASSTGC"] !=0)
-        if "HASMM" in dbData[0].keys():
-            params["HasMM"] = (dbData[0]["HASMM"] != 0)
-
+        if "hasCsc" in dbData[0].keys():
+            params["HasCSC"] = (dbData[0]["hasCsc"] != 0)
+        if "hasSTGC" in dbData[0].keys():
+            params["HasSTGC"] = (dbData[0]["hasSTGC"] !=0)
+        if "hasMM" in dbData[0].keys():
+            params["HasMM"] = (dbData[0]["hasMM"] != 0)
+        if "hasMdt" in dbData[0].keys():
+            params["HasMDT"] = (dbData[0]["hasMdt"] != 0)
+        if "hasRpc" in dbData[0].keys():
+            params["HasRPC"] = (dbData[0]["hasRpc"] != 0)
+        if "hasTgc" in dbData[0].keys():
+            params["HasTGC"] = (dbData[0]["hasTgc"] != 0)
+        if "isMuonR4Plugin" in dbData[0].keys():
+            params["useR4Plugin"] = (dbData[0]["isMuonR4Plugin"] != 0)
     return params

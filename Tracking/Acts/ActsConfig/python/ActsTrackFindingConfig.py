@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -33,9 +33,9 @@ def ActsTrackStatePrinterCfg(
 
 # ACTS only algorithm
 
-def ActsTrackFindingCfg(flags,
-                        name: str = "ActsTrackFindingAlg",
-                        **kwargs) -> ComponentAccumulator:
+def ActsMainTrackFindingCfg(flags,
+                            name: str = "ActsTrackFindingAlg",
+                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Seed labels and collections. These 3 lists must match element for element.
@@ -48,17 +48,6 @@ def ActsTrackFindingCfg(flags,
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
 
-    if flags.Acts.doAmbiguityResolution:
-        kwargs.setdefault(
-            "ACTSTracksLocation",
-            "ActsTracks"
-        )
-
-    if flags.Acts.doMonitoring:
-        from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(
-            ActsTrackFindingMonitoringToolCfg(flags)))
-
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
     # bins in |eta|, used for both MeasurementSelectorCuts and TrackSelector::EtaBinnedConfig
@@ -67,6 +56,10 @@ def ActsTrackFindingCfg(flags,
     kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
     kwargs.setdefault("numMeasurementsCutOff", [3])
     kwargs.setdefault("maxHoles", flags.Acts.trackFindingMaxHoles)
+
+    # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
+    # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
+    kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5
 
     if flags.Acts.doTrackFindingTrackSelector:
         def tolist(c):
@@ -84,31 +77,32 @@ def ActsTrackFindingCfg(flags,
             kwargs["ptMin"] = [min(kwargs["ptMin"])]
             kwargs["minMeasurements"] = [min(kwargs["minMeasurements"])]
 
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg, ActsTrackingGeometryToolCfg
-    kwargs.setdefault(
-        "TrackingGeometryTool",
-        acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
-    )  # PrivateToolHandle
-    kwargs.setdefault(
-        "ExtrapolationTool",
-        acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
-    )  # PrivateToolHandle
+    if 'TrackingGeometryTool' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault(
+            "TrackingGeometryTool",
+            acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)),
+        )
+        
+    if 'kwargs.setdefault' not in kwargs:
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        kwargs.setdefault(
+            "ExtrapolationTool",
+            acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags, MaxSteps=10000)),
+        )
+        
+    if 'ATLASConverterTool' not in kwargs:
+        from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+        kwargs.setdefault(
+            "ATLASConverterTool",
+            acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
+        )
 
-    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
-    kwargs.setdefault(
-        "ATLASConverterTool",
-        acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
-    )
-
-    if flags.Acts.doPrintTrackStates:
+    if flags.Acts.doPrintTrackStates and 'TrackStatePrinter' not in kwargs:
         kwargs.setdefault(
             "TrackStatePrinter",
             acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags)),
         )
-    # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
-    # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
-    kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5
-    kwargs.setdefault("DumpEtaBinsForAll", False)
  
     if 'FitterTool' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg 
@@ -118,12 +112,43 @@ def ActsTrackFindingCfg(flags,
                                                ReverseFilteringPt=0,
                                                OutlierChi2Cut=30))
         )
+        
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
+        from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(
+            ActsTrackFindingMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc
 
 
-def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **kwargs):
+def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # Acts Main pass
+    if flags.Tracking.ActiveConfig.extension == "Acts":
+        acc.merge(ActsMainTrackFindingCfg(flags))
+        # Acts Conversion pass
+    elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
+        prefix="SiSPSeededActsConversionTrack"
+        acc.merge(ActsMainTrackFindingCfg(flags,
+                                          name="ActsConversionTrackFindingAlg",
+                                          ACTSTracksLocation="ActsConversionTracks",
+                                          SeedLabels=["SSS"],
+                                          EstimatedTrackParametersKeys=["ITkConversionStripEstimatedTrackParams"],
+                                          SeedContainerKeys=["ITkConversionStripSeeds"],
+                                          UncalibratedMeasurementContainerKeys=["ITkPixelClusters", "ITkConversionStripClusters"],
+                                          TrackBackEndPrefixName=prefix,
+                                          MTJBackEndPrefixName=prefix))
+    # Any other pass -> mainly validation
+    else:
+        acc.merge(ActsMainTrackFindingCfg(flags))
+        
+    return acc
+
+def ActsMainAmbiguityResolutionCfg(flags,
+                                   name: str = "ActsAmbiguityResolution",
+                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     kwargs.setdefault('TracksLocation', 'ActsTracks')
@@ -132,11 +157,65 @@ def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **k
     kwargs.setdefault('MaximumIterations', 10000)
     kwargs.setdefault('NMeasurementsMin', 7)
 
-    if flags.Acts.doMonitoring:
+    if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsAmbiguityResolutionMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
             ActsAmbiguityResolutionMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(
         CompFactory.ActsTrk.AmbiguityResolutionAlg(name, **kwargs))
+    return acc
+
+
+def ActsAmbiguityResolutionCfg(flags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    # Acts Main pass
+    if flags.Tracking.ActiveConfig.extension == "Acts":
+        acc.merge(ActsMainAmbiguityResolutionCfg(flags))
+    # Acts Conversion pass
+    elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
+        prefix="ResolvedActsConversion"
+        acc.merge(ActsMainAmbiguityResolutionCfg(flags,
+                                                 name="ActsConversionAmbiguityResolution",
+                                                 TracksLocation="ActsConversionTracks",
+                                                 ResolvedTracksLocation="ResolvedActsConversionTracks",
+                                                 TrackBackEndPrefixName=prefix,
+                                                 MTJBackEndPrefixName=prefix))
+    # Any other pass -> mainly validation
+    else:
+        acc.merge(ActsMainAmbiguityResolutionCfg(flags))
+        
+    return acc
+
+def ActsTrackToTrackParticleCnvAlgCfg(flags,
+                                      name: str = "ActsTrackToTrackParticleCnvAlg",
+                                      **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault('ExtrapolationTool',    acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
+
+    if flags.Tracking.ActiveConfig.extension == "ActsConversion":
+        kwargs.setdefault('ACTSTracksLocation', 'ResolvedActsConversionTracks')
+        kwargs.setdefault('TrackParticlesOutKey','ResolvedActsConversionTrackParticles')
+    else:
+        kwargs.setdefault('ACTSTracksLocation', 'ResolvedActsTracks')
+        kwargs.setdefault('TrackParticlesOutKey','ResolvedActsTrackParticles')
+        
+    kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
+    kwargs.setdefault('FirstAndLastParameterOnly',True)
+
+    det_elements=[]
+    element_types=[]
+    if flags.Detector.EnableITkPixel:
+        det_elements += ['ITkPixelDetectorElementCollection']
+        element_types += [1]
+    if flags.Detector.EnableITkStrip:
+        det_elements += ['ITkStripDetectorElementCollection']
+        element_types += [2]
+
+    kwargs.setdefault('SiDetectorElementCollections',det_elements)
+    kwargs.setdefault('SiDetEleCollToMeasurementType',element_types)
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs))
     return acc
