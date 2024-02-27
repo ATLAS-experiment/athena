@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import absolute_import
 import os
@@ -631,7 +631,7 @@ def _check_project():
 
 def _get_pfn(filename):
     """
-    Extract the actuall filename if LFN or PFN notation is used
+    Extract the actual filename if LFN or PFN notation is used
     """
     pfx = filename[0:4]
     if pfx == 'PFN:':
@@ -649,7 +649,7 @@ def _get_pfn(filename):
 
 def _read_guid(filename):
     """
-    Extracts the "guid" (Globally Unique Identfier in POOL files and Grid catalogs) value from a POOL file.
+    Extracts the "guid" (Globally Unique Identifier) in POOL files and Grid catalogs) value from a POOL file.
     :param filename: the input file
     :return: the guid value
     """
