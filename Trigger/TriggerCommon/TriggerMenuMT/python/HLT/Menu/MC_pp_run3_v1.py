@@ -930,7 +930,6 @@ def getMCSignatures():
         
         #ATR-28761 Legacy mu + jet moved
         ChainProp(name='HLT_mu4_j35_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU3V_J15',   l1SeedThresholds=['MU3V' ,'FSNOSEED'], groups=SupportLegGroup+MuonBjetGroup, monGroups=['muonMon:online','bJetMon:online'], stream=['Main',         ]),
-        ChainProp(name='HLT_mu4_j45_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU3V_J15',   l1SeedThresholds=['MU3V' ,'FSNOSEED'], groups=SupportLegGroup+MuonBjetGroup, monGroups=['bJetMon:shifter','muonMon:online','bJetMon:online'], stream=['Main','express']),
         ChainProp(name='HLT_mu6_j60_0eta290_020jvt_boffperf_pf_ftf_dRAB04_L1MU3V_J15',   l1SeedThresholds=['MU3V' ,'FSNOSEED'], groups=SupportLegGroup+MuonBjetGroup, monGroups=['muonMon:online','bJetMon:online'], stream=['Main',         ]),
 
 
