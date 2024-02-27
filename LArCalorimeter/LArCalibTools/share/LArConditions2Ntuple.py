@@ -95,6 +95,9 @@ if __name__=='__main__':
 
   #flags.Exec.OutputLevel=1
 
+  if (args.sqlite):
+    flags.IOVDb.SqliteInput=args.sqlite
+
   flags.lock()
   
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -137,7 +140,7 @@ if __name__=='__main__':
 
 
   from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
-  cfg.merge(LArElecCalibDBCfg(flags,objects,args.sqlite))
+  cfg.merge(LArElecCalibDBCfg(flags,objects))
 
   if "Pedestal" in objects:
     cfg.addEventAlgo(CompFactory.LArPedestals2Ntuple(ContainerKey = "LArPedestal",
