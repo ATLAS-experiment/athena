@@ -109,15 +109,3 @@ def getTranslated(runArgs, name, substep, first, output):
         optionList.append('--use-database')
 
     return optionList
-
-# If the transform runs in Rel. >= 24 debug recovery of data taken with Rel. <=23,
-# need to translate CA flags to legacy
-def translateToLegacy(preexec_options):
-    msg.info('Translating {} to legacy'.format(preexec_options))
-    for i,op in enumerate(preexec_options):
-        if "Trigger.triggerMenuSetup" in op:
-            op_menu = op.split("=")[-1].strip('\"').strip("\'")
-            op_legacy = '--precommand="setMenu=\'{}\'"'.format(op_menu)
-            preexec_options[i] = op_legacy
-    msg.info('Translated to {}'.format(preexec_options))
-    return preexec_options
