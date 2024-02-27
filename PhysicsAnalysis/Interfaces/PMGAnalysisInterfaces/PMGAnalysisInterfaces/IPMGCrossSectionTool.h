@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PMGANALYSISINTERFACES_IPMGCROSSSECTIONTOOL_H
@@ -16,16 +16,16 @@ namespace PMGTools {
   
   // store all information for certain DSID in structure
   struct AllSampleInfo{
-    int dsid;
+    int dsid = 0;
     std::string containerName;
-    double amiXSec;
-    double filterEff;
-    double kFactor;
-    double XSecUncUP;
-    double XSecUncDOWN;
-    double br;     
-    double higherOrderXsecTotal;
-    double higherOrderXsecSample;
+    double amiXSec = 0;
+    double filterEff = 0;
+    double kFactor = 0;
+    double XSecUncUP = 0;
+    double XSecUncDOWN = 0;
+    double br = 0;
+    double higherOrderXsecTotal = 0;
+    double higherOrderXsecSample = 0;
   };
 
     
