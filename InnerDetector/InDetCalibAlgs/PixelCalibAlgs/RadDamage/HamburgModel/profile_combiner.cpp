@@ -1,5 +1,5 @@
 /*                                                                                                                                                                                
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration                                                                                                         
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration                                                                                                         
 */
 
 /*
@@ -98,7 +98,7 @@ unsigned long long int diffintime(int time1, int time2, int offset, bool uberold
 
 ///////////////////////////////////////////////////////
 
-unsigned long long int BuildTimeStamp(data newpoint, data oldpoint)
+unsigned long long int BuildTimeStamp(const data& newpoint, const data& oldpoint)
 {
   bool next_uber=false;
   long long int difference_milisecond = diffintime(newpoint.milisecond, oldpoint.milisecond, 1000, false, 1);
