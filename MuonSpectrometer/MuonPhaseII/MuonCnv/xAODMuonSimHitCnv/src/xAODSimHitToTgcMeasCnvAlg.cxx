@@ -66,7 +66,7 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setChannelNumber(id_helper.channel(hitId));
         prd->setGasGap(id_helper.gasGap(hitId));
         const bool measPhi{id_helper.measuresPhi(hitId)};
-        m_acceptedHits[measPhi] = m_acceptedHits[measPhi] + 1;
+        ++(m_acceptedHits[measPhi]);
         prd->setMeasuresPhi(measPhi);
         const MuonGMR4::TgcReadoutElement* readOutEle = m_DetMgr->getTgcReadoutElement(hitId);
         prd->setReadoutElement(readOutEle);
@@ -77,7 +77,7 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
     
     auto processEtaHit = [&] (const Amg::Vector3D& locSimHitPos,
                               const Identifier& hitId) {
-        m_allHits[false] = m_allHits[false] + 1;
+        ++(m_allHits[false]);
         const MuonGMR4::TgcReadoutElement* readOutEle = m_DetMgr->getTgcReadoutElement(hitId);
         const unsigned int gasGap = id_helper.gasGap(hitId);
         const MuonGMR4::WireGroupDesign& design{readOutEle->wireGangLayout(gasGap)};
@@ -121,7 +121,7 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
 
     auto processStripHit  = [&] (const Amg::Vector3D& locSimHitPos,
                                  const Identifier& hitId) {
-        m_allHits[true] = m_allHits[true] + 1;
+        ++(m_allHits[true]);
         const MuonGMR4::TgcReadoutElement* readOutEle = m_DetMgr->getTgcReadoutElement(hitId);
         const unsigned int gasGap = id_helper.gasGap(hitId);
         const MuonGMR4::RadialStripDesign& design{readOutEle->stripLayout(gasGap)};
