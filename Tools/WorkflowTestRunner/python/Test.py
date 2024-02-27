@@ -31,6 +31,7 @@ class TestSetup:
         self.parallel_execution = False
         self.disable_output_checks = False
         self.custom_threads = None
+        self.detailed_comparison = False
 
     def setup_release(self, reference=None, validation=None) -> None:
         if reference and validation:
