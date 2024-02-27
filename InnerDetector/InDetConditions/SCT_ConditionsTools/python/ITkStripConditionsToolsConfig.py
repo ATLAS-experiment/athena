@@ -102,14 +102,15 @@ def ITkStripModuleVetoCfg(flags, name="ITkStripModuleVeto", **kwargs):
     
     kwargs.setdefault("useDB", False)
     kwargs.setdefault("BadModuleIdentifiers", [])
-    
+
     if kwargs["useDB"]:
+        kwargs.setdefault("BadModuleIdentifiers", ["database"])
         # Condition folder
         acc.merge(addFolders(flags,
-                             folderStrings="/SCT/Manual/BadModules",
-                             detDb="SCT_OFL",
+                             folderStrings="/ITk/Manual/BadModules",
+                             detDb="OFLP200",
                              className="AthenaAttributeList",
-                             tag=kwargs["folderTag"]))
+                             tag=kwargs["folderTag"]))                 
         # Condition algorithm
         acc.addCondAlgo(CompFactory.SCT_ModuleVetoCondAlg())
 

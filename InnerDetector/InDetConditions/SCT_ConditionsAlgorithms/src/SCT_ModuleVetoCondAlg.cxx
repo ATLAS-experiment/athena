@@ -65,10 +65,10 @@ StatusCode SCT_ModuleVetoCondAlg::execute(const EventContext& ctx) const {
 
   // Read bad wafer info
   const std::string &badModuleString{(*readCdo)["ModuleList"].data<std::string>()};
-  std::vector<int> v{string2Vector<int>(badModuleString)};
-  int numberInDb{static_cast<int>(v.size())};
+  std::vector<unsigned long long> v{string2Vector<unsigned long long>(badModuleString)};
+  unsigned long long numberInDb{static_cast<unsigned long long>(v.size())};
   ATH_MSG_INFO(numberInDb << " elements were declared bad in the database.");
-  for (const int badWaferId: v) {
+  for (const unsigned long long badWaferId: v) {
     writeCdo->setBadWaferId(Identifier{badWaferId});
   }
 
