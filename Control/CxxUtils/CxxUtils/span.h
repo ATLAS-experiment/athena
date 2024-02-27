@@ -303,6 +303,18 @@ auto make_span (CONTAINER& c)
 }
 
 
+// Stand-alone begin/end functions, findable by ADL.
+// Needed to work around issues seen when root 6.30.04 is used with gcc14.
+template <class T>
+auto begin (span<T>& s) { return s.begin(); }
+template <class T>
+auto begin (const span<T>& s) { return s.begin(); }
+template <class T>
+auto end (span<T>& s) { return s.end(); }
+template <class T>
+auto end (const span<T>& s) { return s.end(); }
+
+
 } // namespace CxxUtils
 
 
