@@ -3,7 +3,7 @@
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
-#define ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H 
+#define ACTSTRACKRECONSTRUCTION_TRACKFINDINGALG_H
 
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -76,7 +76,7 @@ namespace ActsTrk
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
     ToolHandle<ActsTrk::ITrackStatePrinter> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
-    ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this,"FitterTool","","Fitter Tool for Seeds"};
+    ToolHandle<ActsTrk::IFitterTool> m_fitterTool{this, "FitterTool", "", "Fitter Tool for Seeds"};
 
     // Handle Keys
     // Seed collections. These 2 vectors must match element for element.
@@ -92,11 +92,12 @@ namespace ActsTrk
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
     Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
+    Gaudi::Property<bool> m_refitSeeds{this, "refitSeeds", true, "Run KalmanFitter on seeds before passing to CKF"};
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "bins in |eta| to specify variable selections"};
     // Acts::MeasurementSelector selection cuts for associating measurements with predicted track parameters on a surface.
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
-    Gaudi::Property<std::vector<std::size_t>> m_maxHolesBranch{this, "maxHolesBranch", {}, "Maximum number of holes before stopping branch"};
+    Gaudi::Property<bool> m_doBranchHoleCut{this, "doBranchHoleCut", true, "select on maxHoles in branch stopper"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")

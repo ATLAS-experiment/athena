@@ -42,6 +42,7 @@
 #include <sstream>
 #include <functional>
 #include <tuple>
+#include <utility>
 #include <algorithm>
 
 namespace ActsTrk
@@ -69,10 +70,11 @@ namespace ActsTrk
     ATH_MSG_DEBUG("Properties Summary:");
     ATH_MSG_DEBUG("   " << m_maxPropagationStep);
     ATH_MSG_DEBUG("   " << m_skipDuplicateSeeds);
+    ATH_MSG_DEBUG("   " << m_refitSeeds);
     ATH_MSG_DEBUG("   " << m_etaBins);
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
-    ATH_MSG_DEBUG("   " << m_maxHolesBranch);
+    ATH_MSG_DEBUG("   " << m_doBranchHoleCut);
     ATH_MSG_DEBUG("   " << m_phiMin);
     ATH_MSG_DEBUG("   " << m_phiMax);
     ATH_MSG_DEBUG("   " << m_etaMin);
@@ -392,26 +394,12 @@ namespace ActsTrk
 
   // === findTracks ==========================================================
 
-  template <typename cut_value_t>
-  static cut_value_t variableCut(double absEta,
-                                 const std::vector<double> &etaBins,
-                                 const std::vector<cut_value_t> &cuts,
-                                 cut_value_t nocut)
+  static const Acts::TrackSelector::Config &getCuts(const Acts::TrackSelector &trackSelector, double eta)
   {
-    if (cuts.empty())
-      return nocut;
-    if (etaBins.size() < 2)
-      return cuts[0];
-    std::size_t nbins = etaBins.size() - 2;
-    std::size_t bin;
-    for (bin = 0; bin < nbins; bin++)
-    {
-      if (!(etaBins[bin + 1] < absEta))
-        break;
-    }
-    if (!(bin < cuts.size()))
-      bin = cuts.size() - 1;
-    return cuts[bin];
+    const auto &selCfg = trackSelector.config();
+    return (std::abs(eta) < selCfg.absEtaEdges.front())   ? selCfg.cutSets.front()
+           : (std::abs(eta) >= selCfg.absEtaEdges.back()) ? selCfg.cutSets.back()
+                                                          : selCfg.getCuts(eta);
   }
 
   struct TrackFindingAlg::CkfBranchStopper
@@ -419,16 +407,27 @@ namespace ActsTrk
     bool stopBranch(const Acts::CombinatorialKalmanFilterTipState &tipState,
                     ActsTrk::MutableMultiTrajectory::TrackStateProxy &trackState) const
     {
-      const auto &parameters = trackState.hasFiltered() ? trackState.filtered() : trackState.predicted();
-      double absEta = std::abs(std::log(std::tan(parameters[Acts::eBoundTheta] / 2)));
-      if (!(tipState.nHoles > variableCut<std::size_t>(absEta, alg.m_etaBins, alg.m_maxHolesBranch, std::numeric_limits<std::size_t>::max()) &&
-            (trackState.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag) ||
-             tipState.nMeasurements < variableCut<std::size_t>(absEta, alg.m_etaBins, alg.m_minMeasurements, 0u))))
+      if (!alg.m_trackStatePrinter.empty())
+      {
+        alg.m_trackStatePrinter->printTrackState(tgContext, trackState, measurementOffset, true);
+      }
+
+      if (!alg.m_doBranchHoleCut)
         return false;
+
+      const auto &parameters = trackState.hasFiltered() ? trackState.filtered() : trackState.predicted();
+      double eta = -std::log(std::tan(0.5 * parameters[Acts::eBoundTheta]));
+      const auto &cutSet = getCuts(alg.trackFinder().trackSelector, eta);
+
+      if (!(tipState.nHoles > cutSet.maxHoles &&
+            (trackState.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag) ||
+             tipState.nMeasurements < cutSet.minMeasurements)))
+        return false;
+
       ++event_stat[category_i][kNStoppedTracksMaxHoles];
       ATH_MSG_DEBUG("CkfBranchStopper: stopped branch with nHoles=" << tipState.nHoles
-                    << " nMeasurements=" << tipState.nMeasurements
-                    << " " << const_cast<const ActsTrk::MutableMultiTrajectory::TrackStateProxy &>(trackState).typeFlags());
+                                                                    << " nMeasurements=" << tipState.nMeasurements
+                                                                    << " " << std::as_const(trackState).typeFlags());
       return true;
     };
     // Allow AthMsgStreamMacros.h macros using TrackFindingAlg's msgStream.
@@ -436,6 +435,8 @@ namespace ActsTrk
     bool msgLvl(const MSG::Level lvl) const { return alg.msgLevel(lvl); }
 
     const TrackFindingAlg &alg;
+    const Acts::GeometryContext &tgContext;
+    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &measurementOffset;
     const std::size_t &category_i;
     // keep references to stats variables so we can update them.
     EventStats &event_stat ATLAS_THREAD_SAFE;
@@ -491,11 +492,23 @@ namespace ActsTrk
     options.extensions.calibrator.connect<&UncalibratedMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
 
     std::size_t category_i = 0;
-    CkfBranchStopper ckfBranchStopper{*this, category_i, event_stat};
+    CkfBranchStopper ckfBranchStopper{*this, tgContext, measurements.measurementOffsets(), category_i, event_stat};
     options.extensions.branchStopper.connect<&CkfBranchStopper::stopBranch>(&ckfBranchStopper);
 
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
+
+    std::size_t nPrinted = 0;
+    auto printSeed = [&](std::size_t iseed, const Acts::BoundTrackParameters &seedParameters, bool isKF = false)
+    {
+      if (m_trackStatePrinter.empty() || !seeds)
+        return;
+      if (!nPrinted++)
+      {
+        ATH_MSG_INFO("CKF results for " << estimatedTrackParameters.size() << ' ' << seedType << " seeds:");
+      }
+      m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], seedParameters, measurements.measurementOffset(typeIndex), iseed, isKF);
+    };
 
     // Loop over the track finding results for all initial parameters
     for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
@@ -510,20 +523,12 @@ namespace ActsTrk
         continue;
       }
 
-      const Acts::BoundTrackParameters &initialParameters = *estimatedTrackParameters[iseed];
+      const Acts::BoundTrackParameters *initialParameters = estimatedTrackParameters[iseed];
+      printSeed(iseed, *initialParameters);
 
-      double eta = -std::log(std::tan(initialParameters.theta() / 2));
+      double eta = -std::log(std::tan(0.5 * initialParameters->theta()));
       category_i = getStatCategory(typeIndex, eta);
       ++event_stat[category_i][kNTotalSeeds];
-
-      if (!m_trackStatePrinter.empty() && seeds)
-      {
-        if (iseed == 0)
-        {
-          ATH_MSG_INFO("CKF results for " << estimatedTrackParameters.size() << ' ' << seedType << " seeds:");
-        }
-        m_trackStatePrinter->printSeed(tgContext, *(*seeds)[iseed], initialParameters, measurements.measurementOffset(typeIndex), iseed);
-      }
 
       if (duplicateSeedDetector.isDuplicate(typeIndex, iseed))
       {
@@ -536,40 +541,47 @@ namespace ActsTrk
       // Result here contains a vector of TrackProxy objects
       ++event_stat[category_i][kNUsedSeeds];
 
-      // Perform KF before CKF
-      std::unique_ptr< ActsTrk::MutableTrackContainer > fitted_track =  m_fitterTool->fit(ctx, *(*seeds)[iseed], initialParameters,
-											  tgContext, mfContext, calContext,
-											  tracking_surface_helper);
-      if (not fitted_track) {
-	ATH_MSG_ERROR("KF Fitted Track is nullptr");
-	return StatusCode::FAILURE;
+      std::unique_ptr<Acts::BoundTrackParameters> seedParameters;
+      if (m_refitSeeds)
+      {
+        // Perform KF before CKF
+        const auto fittedSeedCollection = m_fitterTool->fit(ctx, *(*seeds)[iseed], *initialParameters,
+                                                            tgContext, mfContext, calContext,
+                                                            tracking_surface_helper);
+        if (not fittedSeedCollection)
+        {
+          ATH_MSG_WARNING("KF Fitted Track is nullptr");
+        }
+        else if (fittedSeedCollection->size() != 1)
+        {
+          ATH_MSG_WARNING("KF produced " << fittedSeedCollection->size() << " tracks but should produce 1!");
+        }
+        else
+        {
+          // Check pTmin requirement
+          const auto fittedSeed = fittedSeedCollection->getTrack(0);
+
+          double etaSeed = -std::log(std::tan(0.5 * fittedSeed.parameters()[Acts::eBoundTheta]));
+          const auto &cutSet = getCuts(trackFinder().trackSelector, etaSeed);
+          if (fittedSeed.transverseMomentum() < cutSet.ptMin)
+          {
+            ATH_MSG_VERBOSE("min pt requirement not satisfied after param refinement: pt min is " << cutSet.ptMin << " but Refined params have pt of " << fittedSeed.transverseMomentum());
+            ++event_stat[category_i][kNRejectedRefinedSeeds];
+            continue;
+          }
+
+          seedParameters.reset(new Acts::BoundTrackParameters(fittedSeed.referenceSurface().getSharedPtr(),
+                                                              fittedSeed.parameters(),
+                                                              fittedSeed.covariance(),
+                                                              fittedSeed.particleHypothesis()));
+          printSeed(iseed, *seedParameters, true);
+
+          // Pass the refined params to the CKF
+          initialParameters = seedParameters.get();
+        }
       }
 
-
-      if (fitted_track->size() != 1) {
-	ATH_MSG_ERROR("KF produced " << fitted_track->size() << " tracks but should produce 1!");
-	return StatusCode::FAILURE;
-      }
-
-      // Check pTmin requirement
-      const auto trackProxy = fitted_track->getTrack(0);
-
-      double thetaValue = trackProxy.parameters()[Acts::eBoundTheta];
-      double etaValue = - std::log( std::tan(0.5 * thetaValue) );  
-      const auto& cutSets = trackFinder().trackSelector.config().getCuts(etaValue);
-      if (trackProxy.transverseMomentum() < cutSets.ptMin) {
-	ATH_MSG_VERBOSE( "min pt requirement not satisfied after param refinement: pt min is " << cutSets.ptMin << " but Refined params have pt of " << trackProxy.transverseMomentum() );
-	++event_stat[category_i][kNRejectedRefinedSeeds];
-	continue;
-      }
-
-      // Pass the refined params to the CKF
-      const Acts::BoundTrackParameters fitterParameters(trackProxy.referenceSurface().getSharedPtr(),
-							trackProxy.parameters(),
-							trackProxy.covariance(),
-							trackProxy.particleHypothesis());
-
-      auto result = trackFinder().ckf.findTracks(fitterParameters, options, tracksContainerTemp);
+      auto result = trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
 
       // The result for this seed
       if (not result.ok())
@@ -698,7 +710,7 @@ namespace ActsTrk
                                           std::make_pair(kNUsedSeeds, "Used   seeds"),
                                           std::make_pair(kNoTrack, "Cannot find track"),
                                           std::make_pair(kNDuplicateSeeds, "Duplicate seeds"),
-					  std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),  
+                                          std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
                                           std::make_pair(kNStoppedTracksMaxHoles, "Stopped tracks reaching max holes"),
@@ -790,7 +802,7 @@ namespace ActsTrk
                                                                                       }, // failed seeds i.e. seeds which are not duplicates but did not produce a track
                                                                                       std::vector<TableUtils::SummandDefinition>{TableUtils::defineSummand(kNTotalSeeds, 1)}),
                                                       TableUtils::defineSimpleRatio("duplication / seeds", kNDuplicateSeeds, kNTotalSeeds),
-		                                      TableUtils::defineSimpleRatio("Rejected refined params / seeds", kNRejectedRefinedSeeds, kNTotalSeeds),
+                                                      TableUtils::defineSimpleRatio("Rejected refined params / seeds", kNRejectedRefinedSeeds, kNTotalSeeds),
                                                       TableUtils::defineSimpleRatio("selected / CKF tracks", kNSelectedTracks, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds)});
 
@@ -886,4 +898,3 @@ namespace ActsTrk
   }
 
 } // namespace
- 

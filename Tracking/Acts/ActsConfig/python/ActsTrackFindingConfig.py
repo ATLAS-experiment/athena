@@ -71,16 +71,16 @@ def ActsMainTrackFindingCfg(flags,
         kwargs.setdefault("minMeasurements",
                           tolist(flags.Tracking.ActiveConfig.minClusters))
         if flags.Acts.doTrackFindingTrackSelector == 2:
-            # use the same cut for all eta for comparison with previous behaviour
+            # use the same cut for all eta - for comparison with previous behaviour
             kwargs["ptMin"] = [min(kwargs["ptMin"])]
             kwargs["minMeasurements"] = [min(kwargs["minMeasurements"])]
         elif flags.Acts.doTrackFindingTrackSelector != 3:
-            # don't include hole/shared hit cuts for comparison with previous behaviour
+            # include hole/shared hit cuts - disable for comparison with previous behaviour
             kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
             kwargs.setdefault("maxSharedHits", tolist(flags.Tracking.ActiveConfig.maxShared))
-            if flags.Acts.doTrackFindingTrackSelector != 4:
-                # don't use branch stopper for comparison with previous behaviour
-                kwargs.setdefault("maxHolesBranch", tolist(flags.Tracking.ActiveConfig.maxHoles))
+            if flags.Acts.doTrackFindingTrackSelector == 4:
+                # don't use branch stopper - for comparison with previous behaviour
+                kwargs.setdefault("doBranchHoleCut", False)
 
     if 'TrackingGeometryTool' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg

@@ -46,13 +46,20 @@ namespace ActsTrk
               const ActsTrk::Seed &seed,
               const Acts::BoundTrackParameters &initialParameters,
               size_t measurementOffset,
-              size_t iseed) const = 0;
+              size_t iseed,
+              bool isKF) const = 0;
 
     virtual void
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::MutableTrackContainer &tracks,
                 const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
                 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const = 0;
+
+    virtual void
+    printTrackState(const Acts::GeometryContext &tgContext,
+                    const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state,
+                    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
+                    bool useFiltered = false) const = 0;
   };
 
 } // namespace

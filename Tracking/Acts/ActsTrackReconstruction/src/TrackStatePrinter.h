@@ -55,13 +55,20 @@ namespace ActsTrk
               const ActsTrk::Seed &seed,
               const Acts::BoundTrackParameters &initialParameters,
               size_t measurementOffset,
-              size_t iseed) const override;
+              size_t iseed,
+              bool isKF) const override;
 
     void
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::MutableTrackContainer &tracks,
                 const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
                 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &offset) const override;
+
+    void
+    printTrackState(const Acts::GeometryContext &tgContext,
+                    const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state,
+                    const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
+                    bool useFiltered = false) const override;
 
     using MeasurementInfo = std::tuple<size_t,
                                        const ATLASUncalibSourceLink *,
@@ -75,6 +82,10 @@ namespace ActsTrk
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
     ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
 
+    // Configuration
+    Gaudi::Property<bool> m_compareMeasurementTransforms{this, "compareMeasurementTransforms", false, "compare measurement coordinates transformed with Athena or ACTS"};
+    Gaudi::Property<bool> m_printFilteredStates{this, "printFilteredStates", false, "print track states during filtering"};
+
     // most measurements are associated to only one SP, but allow some headroom to reduce number of allocations
     static constexpr unsigned int N_SP_PER_MEAS = 2;
     template <class T>
@@ -85,13 +96,12 @@ namespace ActsTrk
                    const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
                    const std::vector<size_t> &offset) const;
 
-    static void
+    void
     printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
                                          const xAOD::UncalibratedMeasurement *measurement,
                                          const std::vector<small_vector<const xAOD::SpacePoint *>> &measToSp,
                                          const InDetDD::SiDetectorElementCollection *detectorElements,
-                                         const ActsTrk::IActsToTrkConverterTool &converterTool,
-                                         size_t offset);
+                                         size_t offset) const;
   };
 
 } // namespace

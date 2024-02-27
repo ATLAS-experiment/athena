@@ -119,7 +119,7 @@ namespace ActsTrk
     return {};
   }
 
-  static void printHeader(int type)
+  static void printHeader(int type, bool extra = false)
   {
     std::cout << std::left
               << std::setw(5) << "Index" << ' '
@@ -135,19 +135,27 @@ namespace ActsTrk
                 << "  "
                 << std::setw(9) << "R" << ' '
                 << std::setw(9) << "phid" << ' '
-                << std::setw(9) << "eta" << ' '
-                << std::setw(10) << "Trk loc0" << ' '
-                << std::setw(10) << "loc1"
-                << "  "
-                << std::setw(9) << "Trk R" << ' '
-                << std::setw(9) << "phid" << ' '
-                << std::setw(9) << "eta" << ' '
-                << std::setw(10) << "g2l loc0" << ' '
-                << std::setw(10) << "loc1" << '\n';
+                << std::setw(9) << "eta";
+      if (extra)
+      {
+        std::cout << ' '
+                  << std::setw(10) << "Trk loc0" << ' '
+                  << std::setw(10) << "loc1"
+                  << "  "
+                  << std::setw(9) << "Trk R" << ' '
+                  << std::setw(9) << "phid" << ' '
+                  << std::setw(9) << "eta" << ' '
+                  << std::setw(10) << "g2l loc0" << ' '
+                  << std::setw(10) << "loc1";
+      }
+      std::cout << '\n';
       static std::atomic<int> kilroy = 0;
       if (!(kilroy++))
       {
-        std::cout << "R (mm) and phi (degrees). Estimated local coordinate indicated by \"*\" (from SP), \"o\" (from module center), or \"#\" (globalToLocal(center) failure). Athena/ACTS comparison only shown if different.\n";
+        std::cout << "R (mm) and phi (degrees). Estimated local coordinate indicated by \"*\" (from SP), \"o\" (from module center), or \"#\" (globalToLocal(center) failure).";
+        if (extra)
+          std::cout << " Athena/ACTS comparison only shown if different.";
+        std::cout << '\n';
       }
     }
     if (type == 1)
@@ -219,7 +227,8 @@ namespace ActsTrk
   printMeasurement(const Acts::GeometryContext &tgContext,
                    const Acts::Surface *surface,
                    const InDetDD::SiDetectorElement *detElem,
-                   const std::tuple<Acts::Vector2, Amg::Vector2D, int, int> &locData)
+                   const std::tuple<Acts::Vector2, Amg::Vector2D, int, int> &locData,
+                   bool compareMeasurementTransforms = false)
   {
     auto &[loc, locTrk, measInd, est] = locData;
     int flag = est < 0 ? est : 2 * est + measInd;
@@ -240,23 +249,26 @@ namespace ActsTrk
       auto glob = surface->localToGlobal(tgContext, loc, Acts::Vector3::Zero());
       printVec3(glob);
 
-      // if measInd=1: won't match because comparing x,y and R,phi, but at least not phi,R.
-      // This is still useful for debugging because the next test also fails.
-      printVec2(locTrk, (measInd == 1 ? loc.reverse() : loc), estimated_flags.at(flagTrk));
-
-      if (detElem)
+      if (compareMeasurementTransforms)
       {
-        auto globTrk = detElem->surface().localToGlobal(locTrk);
-        printVec3(globTrk, glob);
+        // if measInd=1: won't match because comparing x,y and R,phi, but at least not phi,R.
+        // This is still useful for debugging because the next test also fails.
+        printVec2(locTrk, (measInd == 1 ? loc.reverse() : loc), estimated_flags.at(flagTrk));
 
-        auto res = surface->globalToLocal(tgContext, globTrk, Acts::Vector3::Zero());
-        if (!res.ok())
+        if (detElem)
         {
-          std::cout << " ** " << res.error() << " **";
-        }
-        else
-        {
-          printVec2(res.value(), loc);
+          auto globTrk = detElem->surface().localToGlobal(locTrk);
+          printVec3(globTrk, glob);
+
+          auto res = surface->globalToLocal(tgContext, globTrk, Acts::Vector3::Zero());
+          if (!res.ok())
+          {
+            std::cout << " ** " << res.error() << " **";
+          }
+          else
+          {
+            printVec2(res.value(), loc);
+          }
         }
       }
     }
@@ -322,8 +334,7 @@ namespace ActsTrk
                                                           const xAOD::UncalibratedMeasurement *measurement,
                                                           const std::vector<TrackStatePrinter::small_vector<const xAOD::SpacePoint *>> &measToSp,
                                                           const InDetDD::SiDetectorElementCollection *detectorElements,
-                                                          const ActsTrk::IActsToTrkConverterTool &converterTool,
-                                                          size_t offset)
+                                                          size_t offset) const
   {
     if (!measurement || !detectorElements)
       return;
@@ -339,7 +350,7 @@ namespace ActsTrk
     }
     else
     {
-      const Acts::Surface &surface = converterTool.trkSurfaceToActsSurface(detElem->surface());
+      const Acts::Surface &surface = m_ATLASConverterTool->trkSurfaceToActsSurface(detElem->surface());
       surface_ptr = &surface;
       std::cout << std::left;
       std::cout << std::setw(21) << actsSurfaceName(surface) << ' '
@@ -351,7 +362,7 @@ namespace ActsTrk
     if (measurement->type() == xAOD::UncalibMeasType::PixelClusterType)
     {
       const auto loc = measurement->localPosition<2>().cast<double>();
-      printMeasurement(tgContext, surface_ptr, detElem, {loc, loc, -1, -1});
+      printMeasurement(tgContext, surface_ptr, detElem, {loc, loc, -1, -1}, m_compareMeasurementTransforms);
     }
     else if (measurement->type() == xAOD::UncalibMeasType::StripClusterType)
     {
@@ -359,7 +370,8 @@ namespace ActsTrk
       if (spvec.empty())
       {
         printMeasurement(tgContext, surface_ptr, detElem,
-                         localPositionStrip2D(tgContext, *measurement, surface_ptr, nullptr));
+                         localPositionStrip2D(tgContext, *measurement, surface_ptr, nullptr),
+                         m_compareMeasurementTransforms);
       }
       else
       {
@@ -374,7 +386,8 @@ namespace ActsTrk
                       << std::right;
           }
           printMeasurement(tgContext, surface_ptr, detElem,
-                           localPositionStrip2D(tgContext, *measurement, surface_ptr, sp));
+                           localPositionStrip2D(tgContext, *measurement, surface_ptr, sp),
+                           m_compareMeasurementTransforms);
         }
       }
     }
@@ -396,61 +409,6 @@ namespace ActsTrk
               << std::defaultfloat << std::setprecision(-1);
   }
 
-  static void
-  printTrackState(const Acts::GeometryContext &tgContext,
-                  const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state,
-                  const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset)
-  {
-    ptrdiff_t index = -1;
-
-    if (state.hasUncalibratedSourceLink())
-    {
-      ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-      index = (*sl)->index();
-      for (const auto &[container, offset] : container_offset)
-      {
-        if ((*sl)->container() == container)
-        {
-          index += offset;
-          break;
-        }
-      }
-    }
-
-    std::cout << std::setw(5) << state.index() << ' ';
-    if (state.hasCalibrated())
-    {
-      std::cout << std::setw(3) << state.calibratedSize() << 'D';
-    }
-    else if (state.typeFlags().test(Acts::TrackStateFlag::HoleFlag))
-    {
-      std::cout << std::setw(4) << "hole";
-    }
-    else
-    {
-      std::cout << std::setw(4) << " ";
-    }
-    std::cout << ' '
-              << std::left
-              << std::setw(21) << actsSurfaceName(state.referenceSurface()) << ' ';
-    if (index >= 0)
-    {
-      std::cout << std::setw(22) << index << ' ';
-    }
-    else
-    {
-      std::cout << std::setw(22) << to_string(state.referenceSurface().geometryId()) << ' ';
-    }
-    std::cout << std::right;
-    printParameters(state.referenceSurface(), tgContext, state.parameters());
-    std::cout << ' '
-              << std::fixed
-              << std::setw(6) << std::setprecision(1) << state.pathLength() << ' '
-              << std::setw(7) << std::setprecision(1) << state.chi2() << ' '
-              << std::defaultfloat << std::setprecision(-1)
-              << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags()) << '\n';
-  }
-
 } // anonymous namespace
 
 /// =========================================================================
@@ -466,6 +424,9 @@ namespace ActsTrk
   StatusCode TrackStatePrinter::initialize()
   {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
+    ATH_MSG_DEBUG("Properties Summary:");
+    ATH_MSG_DEBUG("   " << m_compareMeasurementTransforms);
+    ATH_MSG_DEBUG("   " << m_printFilteredStates);
 
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_spacePointKey.initialize());
@@ -478,9 +439,11 @@ namespace ActsTrk
                                const ActsTrk::Seed &seed,
                                const Acts::BoundTrackParameters &initialParameters,
                                size_t measurementOffset,
-                               size_t iseed) const
+                               size_t iseed,
+                               bool isKF) const
   {
-    printHeader(1);
+    if (!isKF)
+      printHeader(1);
 
     std::ostringstream os;
     size_t nos = 0;
@@ -502,7 +465,7 @@ namespace ActsTrk
 
     std::cout << std::setw(5) << iseed << ' '
               << std::left
-              << std::setw(4) << "seed" << ' '
+              << std::setw(4) << (!isKF ? "seed" : "KF") << ' '
               << std::setw(21) << actsSurfaceName(initialParameters.referenceSurface()) << ' '
               << std::setw(22) << to_string(os.str()) << ' '
               << std::right;
@@ -571,6 +534,71 @@ namespace ActsTrk
   }
 
   void
+  TrackStatePrinter::printTrackState(const Acts::GeometryContext &tgContext,
+                                     const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state,
+                                     const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t>> &container_offset,
+                                     bool useFiltered) const
+  {
+    if (!m_printFilteredStates && useFiltered)
+      return;
+
+    ptrdiff_t index = -1;
+
+    if (state.hasUncalibratedSourceLink())
+    {
+      ATLASUncalibSourceLink sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
+      index = (*sl)->index();
+      for (const auto &[container, offset] : container_offset)
+      {
+        if ((*sl)->container() == container)
+        {
+          index += offset;
+          break;
+        }
+      }
+    }
+
+    std::cout << std::setw(5) << state.index() << ' ';
+    char ptype = !m_printFilteredStates ? ' '
+                 : useFiltered          ? 'F'
+                                        : 'S';
+    if (state.hasCalibrated())
+    {
+      std::cout << ptype << std::setw(2) << state.calibratedSize() << 'D';
+    }
+    else if (state.typeFlags().test(Acts::TrackStateFlag::HoleFlag))
+    {
+      std::cout << std::setw(4) << "hole";
+    }
+    else
+    {
+      std::cout << ptype << std::setw(3) << " ";
+    }
+    std::cout << ' '
+              << std::left
+              << std::setw(21) << actsSurfaceName(state.referenceSurface()) << ' ';
+    if (index >= 0)
+    {
+      std::cout << std::setw(22) << index << ' ';
+    }
+    else
+    {
+      std::cout << std::setw(22) << to_string(state.referenceSurface().geometryId()) << ' ';
+    }
+    std::cout << std::right;
+    const auto &parameters = !useFiltered          ? state.parameters()
+                             : state.hasFiltered() ? state.filtered()
+                                                   : state.predicted();
+    printParameters(state.referenceSurface(), tgContext, parameters);
+    std::cout << ' '
+              << std::fixed
+              << std::setw(6) << std::setprecision(1) << state.pathLength() << ' '
+              << std::setw(7) << std::setprecision(1) << state.chi2() << ' '
+              << std::defaultfloat << std::setprecision(-1)
+              << std::setw(Acts::TrackStateFlag::NumTrackStateFlags) << trackStateName(state.typeFlags()) << '\n';
+  }
+
+  void
   TrackStatePrinter::printMeasurements(const EventContext &ctx,
                                        const std::vector<const xAOD::UncalibratedMeasurementContainer *> &clusterContainers,
                                        const std::vector<const InDetDD::SiDetectorElementCollection *> &detectorElementCollections,
@@ -582,13 +610,13 @@ namespace ActsTrk
     auto measToSp = addSpacePoints(ctx, clusterContainers, offsets);
 
     ATH_MSG_INFO("CKF input measurements:");
-    printHeader(0);
+    printHeader(0, m_compareMeasurementTransforms);
 
     for (std::size_t icontainer = 0; icontainer < clusterContainers.size(); ++icontainer)
     {
       for (const auto *measurement : *clusterContainers[icontainer])
       {
-        printMeasurementAssociatedSpacePoint(tgContext, measurement, measToSp[icontainer], detectorElementCollections[icontainer], *m_ATLASConverterTool, offsets[icontainer]);
+        printMeasurementAssociatedSpacePoint(tgContext, measurement, measToSp[icontainer], detectorElementCollections[icontainer], offsets[icontainer]);
       }
     }
     std::cout << std::flush;
