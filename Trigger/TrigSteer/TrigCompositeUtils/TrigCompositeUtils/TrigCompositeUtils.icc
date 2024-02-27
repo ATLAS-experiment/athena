@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AsgMessaging/MessageCheck.h"
@@ -154,7 +154,7 @@ namespace TrigCompositeUtils {
     const std::string& containerSGKey,
     const bool lastFeatureOfType,
     const std::string& navElementLinkKey,
-    const DecisionIDContainer chainIDs) {
+    const DecisionIDContainer& chainIDs) {
 
     std::vector< LinkInfo<CONTAINER> > features; // The return vector
     std::set<const NavGraphNode*> fullyExploredFrom; // Lets us navigate more efficiently
@@ -182,7 +182,7 @@ namespace TrigCompositeUtils {
     const std::string& containerSGKey,
     const bool lastFeatureOfType,
     const std::string& navElementLinkKey,
-    const DecisionIDContainer chainIDs) {
+    const DecisionIDContainer& chainIDs) {
 
 
  
