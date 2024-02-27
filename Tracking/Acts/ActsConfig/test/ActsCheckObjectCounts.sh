@@ -18,7 +18,10 @@ Reco_tf.py --CA \
 
 rc=$?
 if [ $rc != 0 ]; then
+    echo ">>>>>>>>>>>>>>>> Reconstruction step just failed:"
     cat ${log_file}
+    echo ">>>>>>>>>>>>>>>> here is the full log (log.RAWtoALL):"
+    cat log.RAWtoALL
     exit $rc
 fi
 
