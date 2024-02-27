@@ -362,7 +362,8 @@ namespace xAOD {
             void* src_ptr = other.getData (id, other_size, other_size);
             if (src_ptr) {
               if (!v_dst->insertMove (pos, src_ptr,
-                                      reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id)))
+                                      reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
+                                      other))
                 nomove = false;
             }
           }
@@ -386,7 +387,8 @@ namespace xAOD {
               size_t sz = size_noLock();
               getData1 (id, sz, sz, true, false);
               m_dynamicVecs[id]->resize (sz - other_size);
-              m_dynamicVecs[id]->insertMove (pos, src_ptr, reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id));
+              m_dynamicVecs[id]->insertMove (pos, src_ptr, reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
+                                             other);
               nomove = false;
             }
           }

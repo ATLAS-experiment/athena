@@ -218,6 +218,7 @@ public:
    * @param pos The starting index of the insertion.
    * @param beg Start of the range of elements to insert.
    * @param end End of the range of elements to insert.
+   * @param srcStore The source store.
    *
    * @c beg and @c end define a range of container elements, with length
    * @c len defined by the difference of the pointers divided by the
@@ -233,7 +234,8 @@ public:
    * Returns true if it is known that the vector's memory did not move,
    * false otherwise.
    */
-  virtual bool insertMove (size_t pos, void* beg, void* end) override;
+  virtual bool insertMove (size_t pos, void* beg, void* end,
+                           IAuxStore& srcStore) override;
 
 
   /**

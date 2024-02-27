@@ -680,7 +680,8 @@ namespace xAOD {
             void* src_ptr = other.getData (id, other_size, other_size);
             if (src_ptr) {
               if (!v_dst->insertMove (pos, src_ptr,
-                                      reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id)))
+                                      reinterpret_cast<char*>(src_ptr) + other_size*r.getEltSize(id),
+                                      other))
                 nomove = false;
             }
           }

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: AuxPersInfo.h 793737 2017-01-24 20:11:10Z ssnyder $
@@ -75,7 +75,8 @@ namespace xAOD {
          throw std::runtime_error( "Calling shift on a non-vector" );
       }
 
-      virtual bool insertMove (size_t /*pos*/, void* /*beg*/, void* /*end*/) override
+      virtual bool insertMove (size_t /*pos*/, void* /*beg*/, void* /*end*/,
+                               SG::IAuxStore& /*srcStore*/) override
       {
         throw std::runtime_error( "Calling insertMove on a non-vector" );
       }

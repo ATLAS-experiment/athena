@@ -197,7 +197,8 @@ namespace xAOD {
       return;
    }
 
-   bool TAuxVector::insertMove (size_t pos, void* beg, void* end)
+   bool TAuxVector::insertMove (size_t pos, void* beg, void* end,
+                                SG::IAuxStore& /*srcStore*/)
    {
      size_t eltsz = m_proxy->GetIncrement();
      const void* orig = this->toPtr();

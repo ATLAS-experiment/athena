@@ -392,6 +392,7 @@ void AuxTypeVectorHolder<T, CONT>::insertMove1
  * @param pos The starting index of the insertion.
  * @param beg Start of the range of elements to insert.
  * @param end End of the range of elements to insert.
+ * @param srcStore The source store.
  *
  * @c beg and @c end define a range of container elements, with length
  * @c len defined by the difference of the pointers divided by the
@@ -408,7 +409,8 @@ void AuxTypeVectorHolder<T, CONT>::insertMove1
  * false otherwise.
  */
 template <class T, class CONT>
-bool AuxTypeVectorHolder<T, CONT>::insertMove (size_t pos, void* beg, void* end)
+bool AuxTypeVectorHolder<T, CONT>::insertMove (size_t pos, void* beg, void* end,
+                                               IAuxStore& /*srcStore*/)
 {
   const void* orig = m_vecPtr->data();
   insertMove1 (m_vecPtr->begin() + pos*SCALE,
