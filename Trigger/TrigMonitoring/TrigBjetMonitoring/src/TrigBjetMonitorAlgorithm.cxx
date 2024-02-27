@@ -345,11 +345,11 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 		  ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR); 
 		  
 		  double GN2_pu(0.), GN2_pc(0.), GN2_pb(0.);
-		  btag->pu("GN120220813",GN2_pu);
+		  btag->pu("GN220240122",GN2_pu);
 		  ATH_MSG_DEBUG("        GN2_pu: " << GN2_pu);
-		  btag->pc("GN120220813",GN2_pc);
+		  btag->pc("GN220240122",GN2_pc);
 		  ATH_MSG_DEBUG("        GN2_pc: " << GN2_pc);
-		  btag->pb("GN120220813",GN2_pb);
+		  btag->pb("GN220240122",GN2_pb);
 		  ATH_MSG_DEBUG("        GN2_pb: " << GN2_pb);
 		  theLLR = LLR (GN2_pu, GN2_pc, GN2_pb, GN2_mv);
 		  theLLR_GN2 = theLLR;
@@ -535,21 +535,21 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	    NameH = "GN2_pu_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
 	    auto GN2_pu = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pu("GN120220813",GN2_pu);
+	    btag->pu("GN220240122",GN2_pu);
 	    ATH_MSG_DEBUG("        GN2_pu: " << GN2_pu);
 	    fill("TrigBjetMonitor",GN2_pu);
 	    
 	    NameH = "GN2_pc_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
 	    auto GN2_pc = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pc("GN120220813",GN2_pc);
+	    btag->pc("GN220240122",GN2_pc);
 	    ATH_MSG_DEBUG("        GN2_pc: " << GN2_pc);
 	    fill("TrigBjetMonitor",GN2_pc);
 	    
 	    NameH = "GN2_pb_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
 	    auto GN2_pb = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pb("GN120220813",GN2_pb);
+	    btag->pb("GN220240122",GN2_pb);
 	    ATH_MSG_DEBUG("        GN2_pb: " << GN2_pb);
 	    fill("TrigBjetMonitor",GN2_pb);
 	    
