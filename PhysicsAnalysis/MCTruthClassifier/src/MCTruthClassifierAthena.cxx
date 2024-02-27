@@ -385,7 +385,7 @@ MCTruthClassifier::genPartToCalo(const EventContext& ctx,
 
   double dPhi = detPhi(phiCalo, phiClus);
   double dEta = detEta(etaCalo, etaClus);
-  dRmatch = rCone(dPhi, dEta);
+  dRmatch = std::hypot(dPhi, dEta);
 
   if ((!isFwrdEle && dRmatch > m_phtdRtoTrCut) || (isFwrdEle && dRmatch > m_fwrdEledRtoTrCut)) return false;
 
