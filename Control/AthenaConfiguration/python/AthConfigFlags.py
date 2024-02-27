@@ -627,7 +627,7 @@ class AthConfigFlags(object):
     # parser argument must be an ArgumentParser returned from getArgumentParser()
     def fillFromArgs(self, listOfArgs=None, parser=None):
         """
-        Used to set flags from command-line parameters, like ConfigFlags.fillFromArgs(sys.argv[1:])
+        Used to set flags from command-line parameters, like flags.fillFromArgs(sys.argv[1:])
         """
         import sys
 

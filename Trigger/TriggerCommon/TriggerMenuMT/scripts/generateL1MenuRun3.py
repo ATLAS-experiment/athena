@@ -4,10 +4,6 @@
 import sys
 
 def main():
-    # Make sure nobody uses deprecated global ConfigFlags
-    import AthenaConfiguration.AllConfigFlags
-    del AthenaConfiguration.AllConfigFlags.ConfigFlags
-
     # Prevent usage of legacy job properties
     from AthenaCommon import JobProperties
     JobProperties.jobPropertiesDisallowed = True

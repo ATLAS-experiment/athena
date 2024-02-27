@@ -6,10 +6,6 @@ from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, specialConfigPostInclude
 
-# temporarily force no global config flags
-from AthenaConfiguration import AllConfigFlags
-del AllConfigFlags.ConfigFlags
-
 # force no legacy job properties
 from AthenaCommon import JobProperties
 JobProperties.jobPropertiesDisallowed = True
