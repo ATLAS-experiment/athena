@@ -26,18 +26,10 @@ using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 TRTRawDataProviderTool::TRTRawDataProviderTool
 ( const std::string& type, const std::string& name,const IInterface* parent )
   :  base_class( type, name, parent ),
-     m_decoder   ("TRT_RodDecoder",this),
-     m_storeInDetTimeColls(true)
+     m_decoder   ("TRT_RodDecoder",this)
 {
   declareProperty ("Decoder", m_decoder);
-  declareProperty ("StoreInDetTimeCollections", m_storeInDetTimeColls);
 }
-
-// -------------------------------------------------------
-// destructor
-
-TRTRawDataProviderTool::~TRTRawDataProviderTool()
-= default;
 
 // -------------------------------------------------------
 // initialize
@@ -51,18 +43,9 @@ StatusCode TRTRawDataProviderTool::initialize()
   ATH_MSG_INFO( "Retrieved tool " << m_decoder );
 
   //initialize write handles
-  ATH_CHECK(m_lvl1idkey.initialize());
-  ATH_CHECK(m_bcidkey.initialize());
+  ATH_CHECK(m_lvl1idkey.initialize(m_storeInDetTimeColls));
+  ATH_CHECK(m_bcidkey.initialize(m_storeInDetTimeColls));
 
-  return StatusCode::SUCCESS;
-}
-
-// -------------------------------------------------------
-// finalize
-
-StatusCode TRTRawDataProviderTool::finalize()
-{
-  ATH_CHECK( AlgTool::finalize() );
   return StatusCode::SUCCESS;
 }
 
@@ -87,8 +70,7 @@ StatusCode TRTRawDataProviderTool::convert(const std::vector<const ROBFragment*>
   std::vector<const ROBFragment*>::const_iterator rob_it = vecRobs.begin();
 
 
-  if ( m_storeInDetTimeColls )
-  {
+  if ( m_storeInDetTimeColls ) {
     // Create Collections for per ROD vectors on L1ID and BCID
     LVL1Collection = std::make_unique<InDetTimeCollection>();
     LVL1Collection->reserve(vecRobs.size());
@@ -137,8 +119,7 @@ StatusCode TRTRawDataProviderTool::convert(const std::vector<const ROBFragment*>
   /*
    * record per ROD L1ID and BCID collections
    */
-  if ( m_storeInDetTimeColls )
-  {
+  if ( m_storeInDetTimeColls ) {
 
     SG::WriteHandle<InDetTimeCollection> lvl1id(m_lvl1idkey,ctx);
     ATH_CHECK(lvl1id.record(std::move(LVL1Collection)));

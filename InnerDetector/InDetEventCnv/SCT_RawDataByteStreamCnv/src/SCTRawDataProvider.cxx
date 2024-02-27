@@ -48,8 +48,8 @@ StatusCode SCTRawDataProvider::initialize()
 
   //Initialize
   ATH_CHECK(m_rdoContainerKey.initialize());
-  ATH_CHECK(m_lvl1CollectionKey.initialize());
-  ATH_CHECK(m_bcIDCollectionKey.initialize());
+  ATH_CHECK(m_lvl1CollectionKey.initialize(m_storeInDetTimeColls));
+  ATH_CHECK(m_bcIDCollectionKey.initialize(m_storeInDetTimeColls));
   ATH_CHECK(m_bsIDCErrContainerKey.initialize());
   ATH_CHECK(m_rdoContainerCacheKey.initialize(!m_rdoContainerCacheKey.key().empty()));
   ATH_CHECK(m_bsErrContainerCacheKey.initialize(!m_bsErrContainerCacheKey.key().empty()));
@@ -114,30 +114,32 @@ StatusCode SCTRawDataProvider::execute(const EventContext& ctx) const
 
 
   ATH_MSG_DEBUG("Number of ROB fragments " << vecROBFrags.size());
+  SG::WriteHandle<InDetTimeCollection> lvl1Collection;
+  SG::WriteHandle<InDetTimeCollection> bcIDCollection;
 
-  SG::WriteHandle<InDetTimeCollection> lvl1Collection{m_lvl1CollectionKey, ctx};
-  lvl1Collection = std::make_unique<InDetTimeCollection>();
-  ATH_CHECK(lvl1Collection.isValid());
+  if (m_storeInDetTimeColls) {
+    lvl1Collection = SG::makeHandle(m_lvl1CollectionKey,ctx);
+    bcIDCollection = SG::makeHandle(m_bcIDCollectionKey,ctx);
 
-  SG::WriteHandle<InDetTimeCollection> bcIDCollection{m_bcIDCollectionKey, ctx};
-  bcIDCollection = std::make_unique<InDetTimeCollection>();
-  ATH_CHECK(bcIDCollection.isValid());
-  lvl1Collection->reserve(vecROBFrags.size());
-  bcIDCollection->reserve(vecROBFrags.size());
+    lvl1Collection->reserve(vecROBFrags.size());
+    bcIDCollection->reserve(vecROBFrags.size());
+  }
 
-  for (const ROBFragment* robFrag : vecROBFrags) {
-    // Store LVL1ID and BCID information in InDetTimeCollection
-    // to be stored in StoreGate at the end of the loop.
-    // We want to store a pair<ROBID, LVL1ID> for each ROD, once per event.
-    uint32_t robID{(robFrag)->rod_source_id()};
+  if (m_storeInDetTimeColls) {
+    for (const ROBFragment* robFrag : vecROBFrags) {
+      // Store LVL1ID and BCID information in InDetTimeCollection
+      // to be stored in StoreGate at the end of the loop.
+      // We want to store a pair<ROBID, LVL1ID> for each ROD, once per event.
+      uint32_t robID{(robFrag)->rod_source_id()};
 
-    unsigned int lvl1ID{(robFrag)->rod_lvl1_id()};
-    lvl1Collection->emplace_back(robID, lvl1ID);
+      unsigned int lvl1ID{(robFrag)->rod_lvl1_id()};
+      lvl1Collection->emplace_back(robID, lvl1ID);
 
-    unsigned int bcID{(robFrag)->rod_bc_id()};
-    bcIDCollection->emplace_back(robID, bcID);
+      unsigned int bcID{(robFrag)->rod_bc_id()};
+      bcIDCollection->emplace_back(robID, bcID);
 
-    ATH_MSG_DEBUG("Stored LVL1ID " << lvl1ID << " and BCID " << bcID << " in InDetTimeCollections");
+      ATH_MSG_DEBUG("Stored LVL1ID " << lvl1ID << " and BCID " << bcID << " in InDetTimeCollections");
+    }
   }
 
   if ( not hashIDs.empty() ) {
