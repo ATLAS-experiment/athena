@@ -301,7 +301,7 @@ std::tuple<unsigned int, const xAOD::TruthParticle*> MCTruthClassifier::defOrigO
 
   const xAOD::TruthVertex* prodVtx = thePart->hasProdVtx() ? thePart->prodVtx() : nullptr;
   if (isPhysical && prodVtx && !isGeant) {
-    fromHad = fromHadron(thePart, parent_hadron_ptr, fromTau, fromBSM); 
+    fromHad = MC::fromHadron(thePart, parent_hadron_ptr, fromTau, fromBSM); 
   }
   else  uncat = 1;
 
@@ -318,33 +318,7 @@ std::tuple<unsigned int, const xAOD::TruthParticle*> MCTruthClassifier::defOrigO
 
   return std::make_tuple(outputvalue,parent_hadron_ptr);
 }
-//-------------------------------------------------------------------------------
-bool MCTruthClassifier::fromHadron(const xAOD::TruthParticle* p, 
-                                   const xAOD::TruthParticle* hadptr, 
-                                   bool &fromTau, bool &fromBSM) {
-  if (MC::isHadron(p)&&!MC::isBeam(p))  return true; // trivial case
-  const xAOD::TruthVertex* vtx = p->hasProdVtx() ? p->prodVtx() : nullptr;
-  if (!vtx)  return false;
-  bool fromHad = false;
-  for (size_t i = 0; i < vtx->nIncomingParticles(); ++i) {
-    const xAOD::TruthParticle* parent = vtx->incomingParticle(i);
-    if (!parent) continue;
-    // should this really go into parton-level territory?
-    // probably depends where BSM particles are being decayed
-    fromBSM |= MC::isBSM(parent);
-    // sometimes Athena replaces status 2 with HepMC::SPECIALSTATUS, see e.g.
-    // PhysicsAnalysis/TruthParticleID/McParticleTools/src/EtaPtFilterTool.cxx#L374
-    // not at all clear why and unfortunately there's no documentation in the code
-    if (!MC::isPhysical(parent) && parent->status() != HepMC::SPECIALSTATUS)  return false;
-    fromTau |= MC::isTau(parent);
-    if (MC::isHadron(parent)&&!MC::isBeam(parent)) {
-      if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
-      return true;
-    }
-    fromHad |= fromHadron(parent, hadptr, fromTau, fromBSM);
-  }
-  return fromHad;
-}
+
 //-------------------------------------------------------------------------------
 ParticleType MCTruthClassifier::defTypeOfElectron(ParticleOrigin EleOrig, bool isPrompt) {
 
@@ -2189,21 +2163,3 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
   return part;
 }
 
-
-void
-MCTruthClassifier::findParticleDaughters(const xAOD::TruthParticle* thePart, std::set<const xAOD::TruthParticle*>& daughters) const {
-
-  // Get descendants
-  const xAOD::TruthVertex* endVtx = thePart->decayVtx();
-  if (endVtx != nullptr) {
-    for (unsigned int i = 0; i < endVtx->nOutgoingParticles(); i++) {
-      const xAOD::TruthParticle* theDaughter = endVtx->outgoingParticle(i);
-      if (theDaughter == nullptr) continue;
-      if (MC::isStable(theDaughter) && !HepMC::is_simulation_particle(theDaughter)) {
-        // Add descendants with status code 1
-        daughters.insert(theDaughter);
-      }
-      findParticleDaughters(theDaughter, daughters);
-    }
-  }
-}

@@ -73,13 +73,11 @@ public:
     ;
 
   /* All get to see these*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
-    const xAOD::TruthParticle*,
-    Info* info = nullptr) const override;
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(const xAOD::TruthParticle*,Info* info = nullptr) const override;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> checkOrigOfBkgElec(
-    const xAOD::TruthParticle* thePart,
-    Info* info = nullptr) const override;
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  checkOrigOfBkgElec(const xAOD::TruthParticle* thePart,Info* info = nullptr) const override;
 
   const xAOD::TruthParticle* getMother(const xAOD::TruthParticle*) const;
 
@@ -112,33 +110,31 @@ public:
 
 
 #ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
-                                                                                    const HepMcParticleLink& theLink,
-    Info* info = nullptr) const override;
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(const HepMcParticleLink& theLink,Info* info = nullptr) const override;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
-    HepMC::ConstGenParticlePtr,
-    Info* info = nullptr) const override;
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(HepMC::ConstGenParticlePtr,Info* info = nullptr) const override;
 
   bool compareTruthParticles(const HepMC::ConstGenParticlePtr& genPart, const xAOD::TruthParticle* truthPart) const;
 #endif
 
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
-    const xAOD::TrackParticle*,
-    Info* info = nullptr) const override;
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
-    const xAOD::Electron*,
-    Info* info = nullptr) const override;
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
-    const xAOD::Photon*,
-    Info* info = nullptr) const override;
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
-    const xAOD::Muon*,
-    Info* info = nullptr) const override;
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
-    const xAOD::CaloCluster*,
-    Info* info = nullptr) const override;
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(const xAOD::TrackParticle*,Info* info = nullptr) const override;
+
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(const xAOD::Electron*,Info* info = nullptr) const override;
+
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(const xAOD::Photon*,Info* info = nullptr) const override;
+
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(const xAOD::Muon*,Info* info = nullptr) const override;
+
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
+  particleTruthClassifier(const xAOD::CaloCluster*,Info* info = nullptr) const override;
+
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::Jet*, bool DR, Info* info = nullptr) const override;
 
@@ -191,7 +187,6 @@ private:
                                                           Info* info) const;
   //MCTruthPartClassifier::ParticleOrigin
   std::tuple<unsigned int, const xAOD::TruthParticle*> defOrigOfParticle(const xAOD::TruthParticle*) const;
-  static bool fromHadron(const xAOD::TruthParticle* p, const xAOD::TruthParticle *hadptr, bool &fromTau, bool &fromBSM);
 
   //
   MCTruthPartClassifier::ParticleOrigin defHadronType(int);
@@ -225,7 +220,6 @@ private:
   // Now that we use TLorentzVector for the momentum base class, this is straightforward
   template <class A, class B> inline double deltaR(A& v1, B& v2) const {return v1.p4().DeltaR(v2.p4());}
 
-  void findParticleDaughters(const xAOD::TruthParticle*, std::set<const xAOD::TruthParticle*>&) const;
   static MCTruthPartClassifier::ParticleOrigin defJetOrig(const std::set<const xAOD::TruthParticle*>&) ;
 
   /* Data members*/
