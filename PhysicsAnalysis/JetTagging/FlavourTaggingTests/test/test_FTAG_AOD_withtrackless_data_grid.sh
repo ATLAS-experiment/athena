@@ -3,7 +3,7 @@
 #
 # art-description: RDO to AOD step with trackless b-tagging on data 2023
 # art-type: grid
-# art-include: main/Athena
+# art-include: 24.0/Athena
 # art-output: *.pool.root
 # art-output: *.log
 # art-output: *log.
