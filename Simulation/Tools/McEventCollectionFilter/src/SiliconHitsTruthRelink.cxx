@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiliconHitsTruthRelink.h"
@@ -61,7 +61,7 @@ StatusCode SiliconHitsTruthRelink::execute(const EventContext &ctx) const
       currentBarcode = referenceBarcode;
     }
     HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), oldLink.getEventCollection(), HepMcParticleLink::IS_EVENTNUM, ctx);
-    outputCollection->Emplace(lP1, lP2, energyLoss, meanTime, currentBarcode, id);
+    outputCollection->Emplace(lP1, lP2, energyLoss, meanTime, particleLink, id);
   }
 
   return StatusCode::SUCCESS;
