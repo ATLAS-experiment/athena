@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -323,13 +323,13 @@ namespace SH
 
 
 
-  void scanForTrees (SampleHandler& sh, const Sample& sample,
+  void scanForTrees (SampleHandler& sh, Sample& sample,
 		     const std::string& pattern)
   {
     SamplePtr mysample = sample.makeLocal();
     if (mysample->numFiles() == 0)
     {
-      sh.add (const_cast<Sample*>(&sample));
+      sh.add (&sample);
       return;
     }
     std::unique_ptr<TFile> file (TFile::Open (mysample->fileName(0).c_str()));

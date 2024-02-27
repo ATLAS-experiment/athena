@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -17,6 +17,7 @@
 #include <RootCoreUtils/StringUtil.h>
 #include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/MetaObject.h>
+#include <CxxUtils/checker_macros.h>
 #include <TSystem.h>
 #include <chrono>
 #include <fstream>
@@ -117,7 +118,8 @@ namespace SH
 
     ProxyData& proxyData ()
     {
-      static ProxyData result;
+      // Methods of ProxyData() are thread-safe.
+      static ProxyData result ATLAS_THREAD_SAFE;
       return result;
     }
 

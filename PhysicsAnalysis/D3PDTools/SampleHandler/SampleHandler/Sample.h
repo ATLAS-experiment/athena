@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <atomic>
 #include <TObject.h>
 #include <SampleHandler/TagList.h>
 
@@ -483,7 +484,7 @@ namespace SH
 
     /// \brief the reference count
   private:
-    mutable unsigned m_references; //!
+    mutable std::atomic<unsigned> m_references; //!
 
     /// \par Rationale
     ///   hiding this to avoid slicing

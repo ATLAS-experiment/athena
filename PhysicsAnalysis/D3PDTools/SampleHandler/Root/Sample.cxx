@@ -469,8 +469,8 @@ namespace SH
     RCU_READ_INVARIANT (this);
     RCU_REQUIRE2 (m_references > 0, "reference count > 0");
 
-    -- m_references;
-    if (m_references == 0)
+    unsigned refs = -- m_references;
+    if (refs == 0)
       delete this;
   }
 }

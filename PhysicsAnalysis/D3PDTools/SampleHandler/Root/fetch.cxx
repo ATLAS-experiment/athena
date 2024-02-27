@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -9,6 +9,7 @@
 #include <SampleHandler/fetch.h>
 
 #include <sstream>
+#include <mutex>
 #include <TPython.h>
 #include <TString.h>
 #include <TSystem.h>
@@ -29,14 +30,13 @@ namespace SH
 {
   void fetchMetaData (MetaDataQuery& query)
   {
-    static bool loaded = false;
-    if (!loaded)
-    {
+    static std::once_flag loaded;
+    auto do_load = []() {
       TString path = "$ROOTCOREBIN/python/SampleHandler/SampleHandler_QueryAMI.py";
       gSystem->ExpandPathName (path);
       TPython::LoadMacro (path.Data());
-      loaded = true;
-    }
+    };
+    std::call_once (loaded, do_load);
 
     std::ostringstream command;
     command << "SampleHandler_QueryAmi([";

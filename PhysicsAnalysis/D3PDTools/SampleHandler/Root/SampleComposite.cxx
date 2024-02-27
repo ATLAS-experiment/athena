@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -122,7 +122,7 @@ namespace SH
   doUpdateLocation (const std::string& from, const std::string& to)
   {
     RCU_READ_INVARIANT (this);
-    for (SamplesIter sample = m_samples.begin(),
+    for (std::vector<SamplePtr>::iterator sample = m_samples.begin(),
 	   end = m_samples.end(); sample != end; ++ sample)
     {
       (*sample)->updateLocation (from, to);
@@ -150,7 +150,7 @@ namespace SH
   doAddSamples (SampleHandler& result)
   {
     RCU_READ_INVARIANT (this);
-    for (SamplesIter sample = m_samples.begin(),
+    for (std::vector<SamplePtr>::iterator sample = m_samples.begin(),
 	   end = m_samples.end(); sample != end; ++ sample)
     {
       (*sample)->addSamples (result);
