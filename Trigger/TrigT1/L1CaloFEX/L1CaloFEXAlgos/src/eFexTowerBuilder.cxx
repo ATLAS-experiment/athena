@@ -24,7 +24,10 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "PathResolver/PathResolver.h"
-
+#include "TH2D.h"
+#include "TROOT.h"
+#include "TCanvas.h"
+#include "TBox.h"
 
 namespace LVL1 {
 
@@ -86,19 +89,28 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
 
+
+
+
     std::map<std::pair<int,int>,std::array<int,11>> towers;
 
     for (auto digi: *scells) {
         const auto itr = m_scMap.find(digi->ID().get_compact());
         if (itr == m_scMap.end()) { continue; } // not in map so not mapping to a tower
-        int val =  std::round(digi->energy()/(12.5*std::cosh(digi->eta())));
-        bool isMasked = ((digi)->provenance()&0x80);
+        int val =  std::round(digi->energy()/(12.5*std::cosh(digi->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
+        // note: a val of -99999 is what is produced if efex was sent an invalid code of 1022
+        bool isMasked = m_applyMasking ? ((digi)->provenance()&0x80) : false;
+        bool isInvalid = m_applyMasking ? ((digi)->provenance()&0x40) : false;
+        if(isInvalid && val!=-99999) {
+            ATH_MSG_ERROR("Unexpected energy value " << val <<" for invalid channel");
+        }
+
         auto& tower = towers[itr->second.first];
         if (itr->second.second.second<11) {
-            // doing an energy split between slots ... don't include a masked channel
-            if (!isMasked) {
-                // if the other contribution was masked, revert to 0 before adding this contribution
-                if (tower.at(itr->second.second.first)==std::numeric_limits<int>::max()) {
+            // doing an energy split between slots ... don't include a masked channel (or invalid channel)
+            if (!isMasked && val!=-99999) {
+                // if the other contribution was masked or invalid, revert to 0 before adding this contribution
+                if (tower.at(itr->second.second.first)==std::numeric_limits<int>::max() || tower.at(itr->second.second.first)==-99999) {
                     tower.at(itr->second.second.first)=0;
                 }
                 tower.at(itr->second.second.first) += val >> 1;
@@ -129,15 +141,85 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         towers[std::pair(etaIndex(tTower->eta()),phiIndex(phi))][10] = tTower->cpET();
     }
 
+    if(msgLvl(MSG::DEBUG)) {
+        std::lock_guard lock(m_debugMutex);
+        // dump towers to histograms
+        // current count units are latome counts = 12.5MeV per count
+
+        TFile *debugFile = dynamic_cast<TFile *>(gROOT->GetListOfFiles()->FindObject("debug_eFexTowerBuilder.root"));
+        if (!debugFile) debugFile = TFile::Open("debug_eFexTowerBuilder.root", "RECREATE");
+        if (debugFile->GetListOfKeys()->GetEntries() < 20) {
+            TDirectory *dir = gDirectory;
+            debugFile->cd();
+            TH2D ps("ps", "ps [MeV];#eta;#phi", 50, -2.5, 2.5, 64, -M_PI, M_PI);
+            TH2D l1("l1", "l1 [MeV];#eta;#phi", 200, -2.5, 2.5, 64, -M_PI, M_PI);
+            TH2D l2("l2", "l2 [MeV];#eta;#phi", 200, -2.5, 2.5, 64, -M_PI, M_PI);
+            TH2D l3("l3", "l3 [MeV];#eta;#phi", 50, -2.5, 2.5, 64, -M_PI, M_PI);
+            TH2D had("had", "had [MeV];#eta;#phi", 50, -2.5, 2.5, 64, -M_PI, M_PI);
+            for (auto &[coord, counts]: towers) {
+                if (counts.empty()) continue;
+                double tEta = ((coord.first < 0 ? 0.5 : -0.5) + coord.first - 0.5) * 0.1; // left edge
+                double tPhi = ((coord.second < 0 ? 0.5 : -0.5) + coord.second) * M_PI / 32; // centre
+                if (counts.at(0) != std::numeric_limits<int>::max()) ps.Fill(tEta + 0.05, tPhi, counts.at(0) * 12.5);
+                for (int i = 0; i < 4; i++)
+                    if (counts.at(i + 1) != std::numeric_limits<int>::max())
+                        l1.Fill(tEta + 0.025 * i + 0.0125, tPhi, counts.at(i + 1) * 12.5);
+                for (int i = 0; i < 4; i++)
+                    if (counts.at(i + 5) != std::numeric_limits<int>::max())
+                        l2.Fill(tEta + 0.025 * i + 0.0125, tPhi, counts.at(i + 5) * 12.5);
+                if (counts.at(9) != std::numeric_limits<int>::max()) l3.Fill(tEta + 0.05, tPhi, counts.at(9) * 12.5);
+                if (counts.at(10) != std::numeric_limits<int>::max())
+                    had.Fill(tEta + 0.05, tPhi, counts.at(10) * (std::abs(coord.first) <= 15 ? 500. : 12.5));
+            }
+            std::vector < TH1 * > hists{&ps, &l1, &l2, &l3, &had};
+            TCanvas c;
+            c.SetName(TString::Format("evt%lu", ctx.eventID().event_number()));
+            c.SetTitle(TString::Format("Run %u LB %u Event %lu", ctx.eventID().run_number(), ctx.eventID().lumi_block(),
+                                       ctx.eventID().event_number()));
+            c.Divide(2, 3);
+            TH2D tobs("tobs", "Sum [MeV];#eta;#phi", 50, -2.5, 2.5, 64, -M_PI, M_PI);
+            for (size_t i = 0; i < hists.size(); i++) {
+                c.GetPad(i + 1)->cd();
+                hists[i]->SetStats(false);
+                hists[i]->SetMarkerSize(2); // controls text size
+                hists[i]->GetXaxis()->SetRangeUser(-0.3, 0.3);
+                hists[i]->GetYaxis()->SetRangeUser(-0.3, 0.3);
+                hists[i]->Draw((hists[i]->GetNbinsX() > 50) ? "coltext89" : "coltext");
+                for (int ii = 1; ii <= hists[i]->GetNbinsX(); ii++) {
+                    for (int jj = 1; jj <= hists[i]->GetNbinsY(); jj++)
+                        tobs.Fill(hists[i]->GetXaxis()->GetBinCenter(ii), hists[i]->GetYaxis()->GetBinCenter(jj),
+                                  hists[i]->GetBinContent(ii, jj));
+                }
+            }
+            c.GetPad(hists.size() + 1)->cd();
+            tobs.SetStats(false);
+            tobs.Draw("col");
+            TBox b(-0.3, -0.3, 0.3, 0.3);
+            b.SetLineColor(kRed);
+            b.SetFillStyle(0);
+            b.SetLineWidth(1);
+            b.SetBit(TBox::kCannotMove);
+            tobs.GetListOfFunctions()->Add(b.Clone());
+            gPad->AddExec("onClick", TString::Format(
+                    "{ auto pad = gPad->GetCanvas()->GetPad(%lu); if( pad->GetEvent()==kButton1Down ) { double x = pad->PadtoX(pad->AbsPixeltoX(pad->GetEventX())); double y = pad->PadtoY(pad->AbsPixeltoY(pad->GetEventY())); for(int i=1;i<%lu;i++) {auto h = dynamic_cast<TH1*>(gPad->GetCanvas()->GetPad(i)->GetListOfPrimitives()->At(1)); if(h) {h->GetXaxis()->SetRangeUser(x-0.3,x+0.3);h->GetYaxis()->SetRangeUser(y-0.3,y+0.3); } } if(auto b = dynamic_cast<TBox*>(pad->FindObject(\"tobs\")->FindObject(\"TBox\"))) {b->SetX1(x-0.3);b->SetX2(x+0.3);b->SetY1(y-0.3);b->SetY2(y+0.3);} gPad->GetCanvas()->Paint(); gPad->GetCanvas()->Update(); } }",
+                    hists.size() + 1, hists.size() + 1));
+            c.Write();
+            gDirectory = dir;
+        }
+    }
+
+
+
     SG::WriteHandle<xAOD::eFexTowerContainer> eTowers = SG::WriteHandle<xAOD::eFexTowerContainer>(m_outKey,ctx);
     ATH_CHECK( eTowers.record(std::make_unique<xAOD::eFexTowerContainer>(),std::make_unique<xAOD::eFexTowerAuxContainer>()) );
 
     static const auto calToFex = [](int calEt) {
         if(calEt == std::numeric_limits<int>::max()) return 0; // indicates masked channel
-        if(calEt<448) return std::max((calEt&~1)/2+32,1);
-        if(calEt<1472) return (calEt-448)/4+256;
-        if(calEt<3520) return (calEt-1472)/8+512;
-        if(calEt<11584) return (calEt-3520)/32+768;
+        if( calEt == -99999 ) return 1022; // invalid channel value
+        if(calEt<448) return std::max((calEt&~1)/2+32,1); // 25 MeV per eFexTower count
+        if(calEt<1472) return (calEt-448)/4+256;          // 50 MeV per eFexTower count
+        if(calEt<3520) return (calEt-1472)/8+512;         // 100 MeV ...
+        if(calEt<11584) return (calEt-3520)/32+768;       // 400 MeV ...
         return 1020;
     };
 

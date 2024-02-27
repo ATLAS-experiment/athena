@@ -26,7 +26,7 @@ def eFexEmulatedTowersCfg(flags, name, writeKey = "L1_eFexEmulatedTowers"):
     """    
     acc=ComponentAccumulator()
     
-    emulator = CompFactory.LVL1.eFexTowerBuilder(name)
+    emulator = CompFactory.LVL1.eFexTowerBuilder(name,ApplyMasking=not flags.Input.isMC)
     emulator.eFexContainerWriteKey   = writeKey
     acc.addEventAlgo(emulator)
 
