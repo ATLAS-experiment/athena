@@ -174,7 +174,7 @@ class MonitorDef:
                 # Combined
                 "L1_2eEM10L_MU8F", "L1_MU3V_jJ40",
                 # L1Topo (Topo2 always in)
-                "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ50",
+                "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ80",
                 "L1_LAR-ZEE-eEM",
                 "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
                 "L1_BPH-0M9-eEM9-eEM7", "L1_BPH-0M9-eEM9-eEM7_MU5VF",

@@ -97,7 +97,7 @@ def defineMenu():
         'L1_eEM24L_3jJ50',
 
         # combined mu - jet 
-        'L1_MU3V_J15', 'L1_MU5VF_J40', 'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ50',  
+        'L1_MU3V_J15', 'L1_MU5VF_J40', 'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ80',  
         # L1_MU3V_J12 moved to MC ATR-28761
 
         #ATR-13743 J,XE thershold change for ATR-19376 
