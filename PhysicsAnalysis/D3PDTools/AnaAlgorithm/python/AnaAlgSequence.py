@@ -44,6 +44,10 @@ class AnaAlgSequence( AlgSequence ):
         # Initialise the base class:
         super( AnaAlgSequence, self ).__init__( name )
 
+        print("WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING")
+        print("WARNING!!!!!    Usage of AnaAlgSequence is deprecated, please use ConfigBlocks instead")
+        print("WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING")
+
         # Set up the sequence's member variables:
         self._algorithmMeta = []
         self._metaConfigDefault = {}
