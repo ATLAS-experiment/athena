@@ -89,35 +89,34 @@ StatusCode HGTD_SmearedDigitizationTool::processAllSubEvents(const EventContext&
 
   ATH_MSG_DEBUG("[HGTD_SmearedDigitizationTool::processAllSubEvents]");
 
-  m_cluster_container =
+  auto cluster_container =
       new ClusterContainer_t(m_hgtd_idhelper->wafer_hash_max());
 
-  m_cluster_container->cleanup();
+  cluster_container->cleanup();
 
-  ATH_CHECK(evtStore()->record(m_cluster_container, m_cluster_name));
-
-  ATH_CHECK(retrieveTruth());
+  ATH_CHECK(evtStore()->record(cluster_container, m_cluster_name));
 
   auto timed_hit_collection = setupTimedHitCollection();
-  m_timed_hit_collection =
-      &timed_hit_collection; // avoids allocating dynamically
-
-  ATH_CHECK(digitize(ctx));
+  HGTD_DetElement_RIO_Map_t det_element_rio_map;
+  ATH_CHECK(digitize(ctx,
+                     timed_hit_collection,
+                     det_element_rio_map));
 
   // TODO: also needs an EventContext (is it the equivalent of createAndStoreRIOs in SiSmearedDigitizationTool)?
-  ATH_CHECK(fillClusterContainer());
+  ATH_CHECK(fillClusterContainer (det_element_rio_map,
+                                  *cluster_container));
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode HGTD_SmearedDigitizationTool::retrieveTruth() {
-
-  m_prd_truth_coll = new PRD_MultiTruthCollection;
+StatusCode
+HGTD_SmearedDigitizationTool::retrieveTruth(PRD_MultiTruthCollection*& prd_truth_coll) {
 
   if ((evtStore()->contains<PRD_MultiTruthCollection>(m_prd_truth_coll_name))) {
-    ATH_CHECK((evtStore()->retrieve(m_prd_truth_coll, m_prd_truth_coll_name)));
+    ATH_CHECK((evtStore()->retrieve(prd_truth_coll, m_prd_truth_coll_name)));
   } else {
-    ATH_CHECK(evtStore()->record(m_prd_truth_coll, m_prd_truth_coll_name));
+    prd_truth_coll = new PRD_MultiTruthCollection;
+    ATH_CHECK(evtStore()->record(prd_truth_coll, m_prd_truth_coll_name));
   }
 
   return StatusCode::SUCCESS;
@@ -158,20 +157,25 @@ HGTD_SmearedDigitizationTool::setupTimedHitCollection() {
   return timed_hit_coll;
 }
 
-StatusCode HGTD_SmearedDigitizationTool::digitize(const EventContext& ctx) {
+StatusCode
+HGTD_SmearedDigitizationTool::digitize(const EventContext& ctx,
+                                       TimedHitCollection<SiHit>& timed_hit_collection,
+                                       HGTD_DetElement_RIO_Map_t& det_element_rio_map)
+{
   ATH_MSG_DEBUG("--- HGTD_SmearedDigitizationTool: in digitize() ---");
-
-  m_det_element_rio_map = std::make_unique<HGTD_DetElement_RIO_Map_t>();
 
   // Set the RNG to use for this event.
   ATHRNG::RNGWrapper* rngWrapper = m_rndm_svc->getEngine(this);
   rngWrapper->setSeed(name(), ctx);
   CLHEP::HepRandomEngine* rndmEngine = rngWrapper->getEngine(ctx);
 
+  PRD_MultiTruthCollection* prd_truth_coll = nullptr;
+  ATH_CHECK(retrieveTruth(prd_truth_coll));
+
   // i, e are iterator and end of one detector element
   TimedHitCollection<SiHit>::const_iterator i, e;
 
-  while (m_timed_hit_collection->nextDetectorElement(i, e) and i != e) {
+  while (timed_hit_collection.nextDetectorElement(i, e) and i != e) {
     const TimedHitPtr<SiHit>& hit(*i++);
 
     // FIXME should I cut on the deposited energy??
@@ -323,10 +327,10 @@ StatusCode HGTD_SmearedDigitizationTool::digitize(const EventContext& ctx) {
       m_tree->Fill();
     }
 
-    m_det_element_rio_map->insert(
+    det_element_rio_map.insert(
         std::pair<IdentifierHash, const Cluster_t*>(wafer_id, cluster));
 
-    ATH_CHECK(fillMultiTruthCollection(m_prd_truth_coll, cluster, hit, ctx));
+    ATH_CHECK(fillMultiTruthCollection(prd_truth_coll, cluster, hit, ctx));
 
   } // END while
   return StatusCode::SUCCESS;
@@ -370,18 +374,19 @@ StatusCode HGTD_SmearedDigitizationTool::fillMultiTruthCollection(PRD_MultiTruth
   return StatusCode::SUCCESS;
 }
 
-StatusCode HGTD_SmearedDigitizationTool::fillClusterContainer() {
+StatusCode HGTD_SmearedDigitizationTool::fillClusterContainer(HGTD_DetElement_RIO_Map_t& det_element_rio_map,
+                                                              ClusterContainer_t& cluster_container) {
   ATH_MSG_DEBUG(
       "--- HGTD_SmearedDigitizationTool: in fillClusterContainer() ---");
   using RIO_map_t = HGTD_DetElement_RIO_Map_t;
 
-  RIO_map_t::iterator i = m_det_element_rio_map->begin();
-  RIO_map_t::iterator e = m_det_element_rio_map->end();
+  RIO_map_t::iterator i = det_element_rio_map.begin();
+  RIO_map_t::iterator e = det_element_rio_map.end();
 
-  for (; i != e; i = m_det_element_rio_map->upper_bound(i->first)) {
+  for (; i != e; i = det_element_rio_map.upper_bound(i->first)) {
 
     std::pair<RIO_map_t::iterator, RIO_map_t::iterator> range;
-    range = m_det_element_rio_map->equal_range(i->first);
+    range = det_element_rio_map.equal_range(i->first);
 
     RIO_map_t::iterator first_det_elem = range.first;
 
@@ -401,12 +406,11 @@ StatusCode HGTD_SmearedDigitizationTool::fillClusterContainer() {
       cluster_coll->push_back(cluster);
     }
 
-    if (m_cluster_container->addCollection(cluster_coll, wafer_id)
+    if (cluster_container.addCollection(cluster_coll, wafer_id)
             .isFailure()) {
       ATH_MSG_WARNING("Could not add collection to Identifiable container!");
     }
   } // end for
 
-  m_det_element_rio_map->clear();
   return StatusCode::SUCCESS;
 }
