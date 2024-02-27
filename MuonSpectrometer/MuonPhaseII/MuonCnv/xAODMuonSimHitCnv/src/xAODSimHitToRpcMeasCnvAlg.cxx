@@ -70,7 +70,7 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
         const double uncert = design.stripPitch() / std::sqrt(12.);
         const double smearedX = CLHEP::RandGaussZiggurat::shoot(rndEngine, locX, uncert);
         const Amg::Vector2D locHitPos{locX * Amg::Vector2D::UnitX()};
-        m_allHits[measPhi] = m_allHits[measPhi] + 1;
+        ++(m_allHits[measPhi]);
         if (!design.insideTrapezoid(locHitPos)) {
             ATH_MSG_VERBOSE("The hit "<<Amg::toString(locHitPos)<<" is outside of the trapezoid bounds for "
                             <<m_idHelperSvc->toStringGasGap(hitId)<<", measuresPhi: "<<(measPhi ? "yay" : "nay"));
@@ -107,7 +107,7 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
                             <<" /// "<<design);
             return;
         }
-        m_acceptedHits[measPhi] =  m_acceptedHits[measPhi]  + 1;
+        ++(m_acceptedHits[measPhi]);
         xAOD::RpcStrip* prd = new xAOD::RpcStrip();
         prdContainer->push_back(prd);
         prd->setIdentifier(prdId.get_compact());
