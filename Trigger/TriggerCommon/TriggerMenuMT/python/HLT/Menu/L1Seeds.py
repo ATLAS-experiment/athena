@@ -50,7 +50,7 @@ def getL1BackgroundSeed():
         'L1_jJ30_UNPAIREDB1', 'L1_jJ30_UNPAIREDB2',
         'L1_jJ30_UNPAIRED_ISO', 'L1_jJ30_UNPAIRED_NONISO',
         'L1_jJ90_UNPAIRED_ISO', 'L1_jJ90_UNPAIRED_NONISO',
-        'L1_jJ30_EMPTY', 'L1_jJ30_FIRSTEMPTY', 'L1_jJ30_BRGP12',
+        'L1_jJ30_EMPTY', 'L1_jJ30_FIRSTEMPTY', 'L1_jJ30_BGRP12',
         ]
 
 ##############################

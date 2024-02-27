@@ -91,7 +91,7 @@ def defineMenu():
         #ATR-28679
         'L1_jXE60', 'L1_jXE110', 'L1_jXE120', 
         'L1_gXEJWOJ60', 'L1_gXEJWOJ110', 'L1_gXEJWOJ120', 'L1_gXEJWOJ500',
-        'L1_jJ80_jXE120',
+        'L1_jJ80_jXE120', 'L1_jJ80_jXE100',
  
          # calo
         'L1_TE3', 'L1_TE4', 'L1_TE5', # also for HMT triggers
@@ -350,7 +350,7 @@ def defineMenu():
         # 'L1_CEP-CjJ90' ,
         
         #ATR-28678 Ph1 Items for Phisics_pp_Run3
-        "L1_jJ30_BRGP12",
+        "L1_jJ30_BGRP12",
         "L1_jJ30_EMPTY",
         "L1_jJ30_FIRSTEMPTY",
         "L1_jJ30_UNPAIRED_ISO",

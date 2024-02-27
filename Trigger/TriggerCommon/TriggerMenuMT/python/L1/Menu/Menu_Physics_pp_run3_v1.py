@@ -111,7 +111,7 @@ def defineMenu():
         'L1_J15','L1_J20','L1_J50','L1_J100','L1_J400','L1_J75p31ETA49',
 
         # jJ
-        'L1_jJ30', 'L1_jJ30_BRGP12','L1_jJ30_EMPTY','L1_jJ30_FIRSTEMPTY',
+        'L1_jJ30', 'L1_jJ30_BGRP12','L1_jJ30_EMPTY','L1_jJ30_FIRSTEMPTY',
         'L1_jJ30_UNPAIRED_ISO','L1_jJ30_UNPAIRED_NONISO','L1_jJ30_UNPAIREDB1','L1_jJ30_UNPAIREDB2',
         'L1_jJ30p0ETA25',
          

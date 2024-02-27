@@ -655,7 +655,7 @@ class ItemDef:
         MenuItem('L1_jJ30_FIRSTEMPTY'         ).setLogic( d.jJ30  & firstempty).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_UNPAIRED_ISO'       ).setLogic( d.jJ30  & unpaired_isocond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_UNPAIRED_NONISO'    ).setLogic( d.jJ30  & unpaired_nonisocond).setTriggerType(TT.calo)
-        MenuItem('L1_jJ30_BRGP12'             ).setLogic( d.jJ30  & bgrp12cond).setTriggerType(TT.calo)
+        MenuItem('L1_jJ30_BGRP12'             ).setLogic( d.jJ30  & bgrp12cond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_UNPAIREDB1'         ).setLogic( d.jJ30  & bgrp13cond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_UNPAIREDB2'         ).setLogic( d.jJ30  & bgrp14cond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30p0ETA25'   ).setLogic( d.jJ300ETA25   & physcond).setTriggerType(TT.calo)
