@@ -442,7 +442,7 @@ MCTruthClassifier::fracParticleInJet(const xAOD::TruthParticle* thePart,
   // Get all particle daughters
   std::set<const xAOD::TruthParticle*> daughters;
   daughters.clear();
-  findParticleDaughters(thePart, daughters);
+  MC::findParticleDaughters(thePart, daughters);
   if (daughters.empty())
     daughters.insert(thePart);
 

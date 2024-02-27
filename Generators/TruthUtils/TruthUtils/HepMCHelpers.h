@@ -141,6 +141,34 @@ namespace MC
     return false;
 }
 
+  /// @brief Function to classify the particle.
+  /// AV: This is MCtruthClassifier legacy.
+  /// The function should be improved in the future.
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
+  template <class T> bool fromHadron(T p, T hadptr, bool &fromTau, bool &fromBSM) {
+    if (isHadron(p)&&!isBeam(p))  return true; // trivial case
+    auto vtx = p->production_vertex();
+    if (!vtx)  return false;
+    bool fromHad = false;
+    auto incoming = vtx->particles_in();
+    for (auto parent: incoming) {
+      if (!parent) continue;
+      // should this really go into parton-level territory?
+      // probably depends where BSM particles are being decayed
+      fromBSM |= isBSM(parent);
+      // sometimes Athena replaces status 2 with HepMC::SPECIALSTATUS, see e.g.
+      // PhysicsAnalysis/TruthParticleID/McParticleTools/src/EtaPtFilterTool.cxx#L374
+      // not at all clear why and unfortunately there's no documentation in the code
+      if (!isPhysical(parent) && parent->status() != HepMC::SPECIALSTATUS)  return false;
+      fromTau |= isTau(parent);
+      if (isHadron(parent)&&!isBeam(parent)) {
+        if (!hadptr)  hadptr = parent; // assumes linear hadron parentage
+        return true;
+      }
+      fromHad |= fromHadron(parent, hadptr, fromTau, fromBSM);
+    }
+    return fromHad;
+  }
 
 }
 #endif
