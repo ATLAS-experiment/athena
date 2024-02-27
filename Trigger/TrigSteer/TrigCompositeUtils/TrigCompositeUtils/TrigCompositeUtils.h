@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_TrigCompositeUtils_h
@@ -445,7 +445,7 @@ namespace TrigCompositeUtils {
     const std::string& containerSGKey = "",
     const bool lastFeatureOfType = true,
     const std::string& navElementLinkKey = featureString(),
-    const DecisionIDContainer chainIDs = DecisionIDContainer());
+    const DecisionIDContainer& chainIDs = DecisionIDContainer());
 
   /**
    * @see recursiveGetFeaturesOfType
@@ -462,7 +462,7 @@ namespace TrigCompositeUtils {
     const std::string& containerSGKey,
     const bool lastFeatureOfType,
     const std::string& navElementLinkKey,
-    const DecisionIDContainer chainIDs);
+    const DecisionIDContainer& chainIDs);
 
   /**
    * @brief Perform a recursive search for ElementLinks of type T and name 'linkName', starting from Decision object 'start' 
