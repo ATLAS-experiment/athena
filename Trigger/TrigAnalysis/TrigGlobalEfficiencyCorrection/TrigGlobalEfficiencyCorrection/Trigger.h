@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -69,7 +69,7 @@ public:
 	template<typename Array>
 	void loadLegs(const ImportData::TrigDef& src, Array& dest)
 	{
-		if(src.type != m_type) throw; /// can't be thrown due to bad user action -- only in case of a bug in the Calculator class
+		if(src.type != m_type) throw std::runtime_error ("Calculator bug"); /// can't be thrown due to bad user action -- only in case of a bug in the Calculator class
 		std::fill(dest.begin(), dest.end(), 0);
 		if(m_type==TT_2E_MU_SYM || m_type==TT_2E_G_SYM || m_type==TT_2MU_G_SYM) /// special case needed to skip the duplicated leg for 2X_Y triggers
 		{
