@@ -15,12 +15,13 @@ import six
 from PyJobTransforms.trfExe import athenaExecutor
 
 # imports for preExecute
-from PyJobTransforms.trfUtils import asetupReport, cvmfsDBReleaseCheck, unpackDBRelease, setupDBRelease, lineByLine
+from PyJobTransforms.trfUtils import asetupReport, cvmfsDBReleaseCheck, unpackDBRelease, setupDBRelease, lineByLine, asetupReleaseIsOlderThan
 import PyJobTransforms.trfEnv as trfEnv
 import PyJobTransforms.trfExceptions as trfExceptions
 from PyJobTransforms.trfExitCodes import trfExit as trfExit
 import TrigTransform.dbgAnalysis as dbgStream
 from TrigTransform.trigTranslate import getTranslated as getTranslated
+from TrigTransform.trigTranslate import translateToLegacy as translateToLegacy
 
 # Setup logging here
 import logging, eformat
@@ -36,7 +37,6 @@ class trigRecoExecutor(athenaExecutor):
     # - added swap of argument name for runargs file so that athenaHLT reads it in
     def preExecute(self, input = set(), output = set()):
         msg.debug('Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))
-
         # Check we actually have events to process!
         if (self._inputEventTest and 'skipEvents' in self.conf.argdict and
             self.conf.argdict['skipEvents'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor) is not None):
@@ -120,17 +120,6 @@ class trigRecoExecutor(athenaExecutor):
             # get list of translated arguments to be used by athenaHLT
             optionList = getTranslated(self.conf.argdict, name=self._name, substep=self._substep, first=self.conf.firstExecutor, output = outputFiles)
             self._cmd.extend(optionList)
-            # updates for CA
-            if self._isCAEnabled():
-                msg.info("Running in CA mode")
-                # we don't use the runargs file with athenaHLT so add the JO and preExecs to the command line and remove the CA option
-                self._cmd.remove('--CA')
-                self._cmd.append(self._skeletonCA)
-                if 'preExec' in self.conf.argdict:
-                    self._cmd.extend(self.conf.argdict['preExec'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor))
-                    msg.info('Command adjusted for CA to %s', self._cmd)
-            else:
-                msg.info("Running in legacy mode")
 
             # Run preRun step debug stream analysis if output histogram are set
             if "outputHIST_DEBUGSTREAMMONFile" in self.conf.argdict:
@@ -142,12 +131,49 @@ class trigRecoExecutor(athenaExecutor):
                     asetupString = dbgAsetupString
                     msg.info('Will use asetup string for debug stream analysis %s', dbgAsetupString)
 
+                # If legacy release, bring up centos7 container
+                OSSetupString = None
+                legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
+                if asetupString is not None:
+                    currentOS = os.environ['ALRB_USER_PLATFORM']
+                if legacyOSRelease and "centos7" not in currentOS:
+                    OSSetupString = "centos7"
+                    msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
+
+                # allow overriding the container OS using a flag
+                if 'runInContainer' in self.conf.argdict:
+                    OSSetupString = self.conf.argdict['runInContainer'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
+                    msg.info('The step {} will be performed in a container running {}, as explicitly requested'.format(self._substep, OSSetupString))
+                if OSSetupString is not None and asetupString is None:
+                    raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_FAIL'),
+                                                                    '--asetup must be used for the substep which requires --runInContainer')
+
                 # Set database in command line if it was missing
                 if 'useDB' in self.conf.argdict and 'DBserver' not in self.conf.argdict and dbAlias:
                     msg.warn("Database alias will be set to %s", dbAlias)
                     self._cmd.append("--db-server " + dbAlias)
             else:
                 msg.info("Flag outputHIST_DEBUGSTREAMMONFile not defined - debug stream analysis will not run.")
+
+            # updates for CA
+            if self._isCAEnabled():
+                msg.info("Running in CA mode")
+                # we don't use the runargs file with athenaHLT so add the JO and preExecs to the command line and remove the CA option
+                self._cmd.remove('--CA')
+                if not legacyOSRelease:
+                    self._cmd.append(self._skeletonCA)
+                    if 'preExec' in self.conf.argdict:
+                        self._cmd.extend(self.conf.argdict['preExec'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor))
+                        msg.info('Command adjusted for CA to %s', self._cmd)
+                else:
+                    # if legacy release, use legacy config
+                    self._cmd.append(self._skeleton[0])
+                    if 'preExec' in self.conf.argdict:
+                        preExecOptions = self.conf.argdict['preExec'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
+                        self._cmd.extend(translateToLegacy(preExecOptions))
+                        msg.info('Original CA preExec adjusted for legacy to %s', self._cmd)
+            else:
+                msg.info("Running in legacy mode")
 
         # The following is needed to avoid conflicts in finding BS files prduced by running the HLT step
         # and those already existing in the working directory
@@ -162,7 +188,6 @@ class trigRecoExecutor(athenaExecutor):
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                     f'Directory already contains files with expected output name format {expectedOutputFileName}, please remove/rename these first: {matchedOutputFileNames}')
 
-
         # Call athenaExecutor parent as the above overrides what athenaExecutor would have done
         super(athenaExecutor, self).preExecute(input, output)
 
@@ -170,7 +195,7 @@ class trigRecoExecutor(athenaExecutor):
         # This will have asetup and/or DB release setups in it
         # Do this last in this preExecute as the _cmd needs to be finalised
         msg.info('Now writing wrapper for substep executor {0}'.format(self._name))
-        self._writeAthenaWrapper(asetup=asetupString, dbsetup=dbsetup)
+        self._writeAthenaWrapper(asetup=asetupString, dbsetup=dbsetup, ossetup=OSSetupString)
         msg.info('Athena will be executed in a subshell via {0}'.format(self._cmd))
 
     def _prepAthenaCommandLine(self):
