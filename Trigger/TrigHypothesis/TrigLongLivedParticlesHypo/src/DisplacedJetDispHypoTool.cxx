@@ -25,9 +25,9 @@ StatusCode DisplacedJetDispHypoTool::decide(  Info& info )  const {
 		return StatusCode::SUCCESS;
 	}
 
-	auto mon_ndisp = Monitored::Scalar<int>("ndisp", 0);
-	auto mon_nprompt = Monitored::Scalar<int>("nprompt", 0);
-	auto mon_frac_other = Monitored::Scalar<float>("frac_other", 0.0);
+	auto mon_ndisp = Monitored::Scalar<int>("ndisp", -1);
+	auto mon_nprompt = Monitored::Scalar<int>("nprompt", -1);
+	auto mon_frac_other = Monitored::Scalar<float>("frac_other", -1.0);
 	
 	std::vector<float> monvec_trk_d0sig;
 	std::vector<float> monvec_trk_z0st;
@@ -101,6 +101,13 @@ StatusCode DisplacedJetDispHypoTool::decide(  Info& info )  const {
 	mon_frac_other = nother_frac;
 
 	if(ndisp >= m_mindisp && nprompt <= m_maxprompt && nother_frac <= m_nother_frac){
+		//monitor passing jet pt and eta
+		auto mon_jetpt = Monitored::Scalar<float>("pass_jet_pt", 0.0);
+		auto mon_jeteta = Monitored::Scalar<float>("pass_jet_eta", -100);
+		Monitored::Group mg_passing(m_monTool, mon_jetpt, mon_jeteta);
+		mon_jetpt = info.jet->pt()/Gaudi::Units::GeV;
+		mon_jeteta = info.jet->eta();
+
 		addDecisionID( m_decisionId.numeric(), info.decision );
 	}
 

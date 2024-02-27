@@ -104,6 +104,8 @@ def TrigDJHypoPromptToolFromDict(flags, chainDict):
         monTool.defineHistogram("trk_z0st", type='TH1F', path='EXPERT', title="Track z0st", xbins=200, xmin=0.0, xmax=20.0)
         monTool.defineHistogram("trk_d0", type='TH1F', path='EXPERT', title="Track d0", xbins=200, xmin=0.0, xmax=20.0)
         monTool.defineHistogram("nprompt", type='TH1F', path='EXPERT', title="nPrompt tracks per Jet", xbins=20, xmin=0, xmax=20)
+        monTool.defineHistogram("pass_jet_pt", type='TH1F', path='EXPERT', title="pT of Jets passing the prompt selection", xbins=35, xmin=50, xmax=400)
+        monTool.defineHistogram("pass_jet_eta", type='TH1F', path='EXPERT', title="eta of Jets passing the prompt selection", xbins=30, xmin=-3, xmax=3)
 
         tool.MonTool = monTool
 
@@ -151,6 +153,8 @@ def TrigDJHypoDispToolFromDict(flags, chainDict):
         monTool.defineHistogram("nprompt", type='TH1F', path='EXPERT', title="nPrompt tracks per Jet", xbins=20, xmin=0, xmax=20)
         monTool.defineHistogram("ndisp", type='TH1F', path='EXPERT', title="nDisplaced tracks per Jet", xbins=20, xmin=0, xmax=20)
         monTool.defineHistogram("frac_other", type='TH1F', path='EXPERT', title="Fraction of tracks which fail all cuts", xbins=20, xmin=0, xmax=1.1)
+        monTool.defineHistogram("pass_jet_pt", type='TH1F', path='EXPERT', title="pT of Jets passing the displaced selection", xbins=35, xmin=50, xmax=400)
+        monTool.defineHistogram("pass_jet_eta", type='TH1F', path='EXPERT', title="eta of Jets passing the displaced selection", xbins=30, xmin=-3, xmax=3)
 
         tool.MonTool = monTool
 
