@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( IOVSvc )
@@ -17,9 +17,6 @@ atlas_add_library( IOVSvcLib
 atlas_add_component( IOVSvc
                      src/components/*.cxx
                      LINK_LIBRARIES IOVSvcLib )
-
-# Install files from the package:
-atlas_install_joboptions( share/IOVSvc.txt share/IOVSvc.py )
 
 # Tests in the package:
 atlas_add_test( IOVSvcTool_test
