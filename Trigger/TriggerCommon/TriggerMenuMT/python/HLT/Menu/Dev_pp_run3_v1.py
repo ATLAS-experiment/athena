@@ -973,11 +973,8 @@ def getDevSignatures():
         # ChainProp(name='HLT_g35_tight_3j25_0eta290_boffperf_pf_ftf_L1EM22VHI', l1SeedThresholds=['EM22VHI','FSNOSEED'], groups=EgammaJetGroup),
 
         # ATR-28443, test H to yjj trigger
-        ChainProp(name='HLT_g24_tight_icaloloose_j50c_j30c_j24c_03dRAB30_03dRAC30_15dRBC45_50invmBC130_pf_ftf_L1eEM26M', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
         ChainProp(name='HLT_g24_tight_icaloloose_j50c_j30c_j24c_03dRAB35_03dRAC35_15dRBC45_50invmBC130_pf_ftf_L1eEM26M', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
         ChainProp(name='HLT_g24_tight_icaloloose_j40c_j30c_j24c_03dRAB35_03dRAC35_15dRBC45_50invmBC130_pf_ftf_L1eEM26M', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM26M','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
-        ChainProp(name='HLT_g20_tight_icaloloose_j40_j35a_j25a_j25_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
-        ChainProp(name='HLT_g20_tight_icaloloose_j40_j35a_j20c_j0_DJMASS300j35_pf_ftf_L1eEM22M_jMJJ-300', groups=PrimaryLegGroup+EgammaJetGroup, l1SeedThresholds=['eEM22M','FSNOSEED','FSNOSEED','FSNOSEED','FSNOSEED'],stream=[PhysicsStream]),
 
         # high-mu AFP
         ChainProp(name='HLT_2j20_mb_afprec_afpdijet_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream],groups=MinBiasGroup+SupportLegGroup),
