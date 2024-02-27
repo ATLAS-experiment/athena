@@ -13,6 +13,7 @@
 
 
 #include "AthContainers/tools/AuxTypeVector.h"
+#include "AthContainers/AuxStoreInternal.h"
 #include "TestTools/TestAlloc.h"
 #include "CxxUtils/checker_macros.h"
 #include <vector>
@@ -241,6 +242,8 @@ void test_vector3()
 template <class T, template<typename> class ALLOC = std::allocator>
 void test_vector4 (bool isPOD)
 {
+  SG::AuxStoreInternal store;
+
   SG::AuxTypeVector<T, ALLOC<T> > v1 (1, 10, 20);
   T* ptr1 = reinterpret_cast<T*> (v1.toPtr());
   for (int i=0; i<10; i++)
@@ -251,7 +254,7 @@ void test_vector4 (bool isPOD)
   for (int i=0; i<5; i++)
     ptr2[i] = makeT<T>(i+10);
 
-  assert (v1.insertMove (3, ptr2, ptr2+5));
+  assert (v1.insertMove (3, ptr2, ptr2+5, store));
   assert (v1.size() == 15);
   for (int i=0; i<3; i++)
     assert (ptr1[i] == makeT<T>(i));
@@ -268,7 +271,7 @@ void test_vector4 (bool isPOD)
   for (int i=0; i<5; i++)
     assert (isPOD || !wasMoved (ptr2[i]));
 
-  assert (v1.insertMove (15, ptr2, ptr2+5));
+  assert (v1.insertMove (15, ptr2, ptr2+5, store));
   assert (v1.size() == 20);
   for (int i=0; i<3; i++)
     assert (ptr1[i] == makeT<T>(i));
@@ -284,7 +287,7 @@ void test_vector4 (bool isPOD)
 
   SG::AuxTypeVector<T, ALLOC<T> > v3 (1, 1000, 1000);
   T* ptr3 = reinterpret_cast<T*> (v3.toPtr());
-  assert ( ! v1.insertMove (20, ptr3, ptr3 + v3.size()) );
+  assert ( ! v1.insertMove (20, ptr3, ptr3 + v3.size(), store) );
 }
 
 

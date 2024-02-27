@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/IAuxTypeVector.h
@@ -15,6 +15,7 @@
 
 
 #include "AthContainersInterfaces/AuxTypes.h"
+#include "AthContainersInterfaces/IAuxStore.h"
 #include <cstddef>
 #include <memory>
 #include <typeinfo>
@@ -125,6 +126,7 @@ public:
    * @param pos The starting index of the insertion.
    * @param beg Start of the range of elements to insert.
    * @param end End of the range of elements to insert.
+   * @param srcStore The source store.
    *
    * @c beg and @c end define a range of container elements, with length
    * @c len defined by the difference of the pointers divided by the
@@ -140,7 +142,8 @@ public:
    * Returns true if it is known that the vector's memory did not move,
    * false otherwise.
    */
-  virtual bool insertMove (size_t pos, void* beg, void* end) = 0;
+  virtual bool insertMove (size_t pos, void* beg, void* end,
+                           IAuxStore& srcStore) = 0;
 
 
   /**

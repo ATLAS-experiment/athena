@@ -279,6 +279,7 @@ void RootAuxVector::shift (size_t pos, ptrdiff_t offs)
  * @param pos The starting index of the insertion.
  * @param beg Start of the range of elements to insert.
  * @param end End of the range of elements to insert.
+ * @param srcStore The source store.
  *
  * @c beg and @c end define a range of container elements, with length
  * @c len defined by the difference of the pointers divided by the
@@ -294,7 +295,8 @@ void RootAuxVector::shift (size_t pos, ptrdiff_t offs)
  * Returns true if it is known that the vector's memory did not move,
  * false otherwise.
  */
-bool RootAuxVector::insertMove (size_t pos, void* beg, void* end)
+bool RootAuxVector::insertMove (size_t pos, void* beg, void* end,
+                                SG::IAuxStore& /*srcStore*/)
 {
   size_t eltsz = m_proxy->GetIncrement();
   const void* orig = this->toPtr();

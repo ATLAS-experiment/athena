@@ -62,6 +62,7 @@ std::string str (int x)
 void test1()
 {
   std::cout << "test1\n";
+  SG::AuxStoreInternal store;
   TClass* cl = TClass::GetClass ("vector<int>");
   SG::RootAuxVectorFactory fac (cl);
   SG::IAuxTypeVector* vec = new SG::RootAuxVector (&fac, 1, 10, 20);
@@ -125,7 +126,7 @@ void test1()
   assert (ptr2[8] == 10);
 
   std::vector<int> vec3 { 20, 21, 22, 23, 24 };
-  assert (vec->insertMove (3, vec3.data(), vec3.data() + 5));
+  assert (vec->insertMove (3, vec3.data(), vec3.data() + 5, store));
   assert (vec->size() == 14);
   assert (ptr[0] == 1);
   assert (ptr[1] == 2);
@@ -143,7 +144,7 @@ void test1()
   assert (ptr[13] == 10);
 
   std::vector<int> vec4 { 30, 31, 32, 33, 34 };
-  assert (vec->insertMove (14, vec4.data(), vec4.data() + 5));
+  assert (vec->insertMove (14, vec4.data(), vec4.data() + 5, store));
   assert (vec->size() == 19);
   assert (ptr[0] == 1);
   assert (ptr[1] == 2);
@@ -175,6 +176,7 @@ void test1()
 void test2()
 {
   std::cout << "test2\n";
+  SG::AuxStoreInternal store;
   TClass* cl = TClass::GetClass ("vector<std::string>");
   SG::RootAuxVectorFactory fac (cl);
   SG::IAuxTypeVector* vec = new SG::RootAuxVector (&fac, 1, 10, 10);
@@ -223,7 +225,7 @@ void test2()
   assert (ptr[8] == str(10));
 
   std::vector<std::string> vec3 { str(20), str(21), str(22), str(23), str(24) };
-  assert (vec->insertMove (3, vec3.data(), vec3.data() + 5));
+  assert (vec->insertMove (3, vec3.data(), vec3.data() + 5, store));
   assert (vec->size() == 14);
   assert (ptr[0] == str(1));
   assert (ptr[1] == str(2));
@@ -241,7 +243,7 @@ void test2()
   assert (ptr[13] == str(10));
 
   std::vector<std::string> vec4 { str(30), str(31), str(32), str(33), str(34) };
-  assert (vec->insertMove (14, vec4.data(), vec4.data() + 5));
+  assert (vec->insertMove (14, vec4.data(), vec4.data() + 5, store));
   assert (vec->size() == 19);
   assert (ptr[0] == str(1));
   assert (ptr[1] == str(2));
