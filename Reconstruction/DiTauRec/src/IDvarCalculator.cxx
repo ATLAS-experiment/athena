@@ -100,8 +100,7 @@ StatusCode IDVarCalculator::execute(DiTauCandidateData * data,
       }
     }
 
-    // FIXME: why require ptCore != 0
-    if (ptAll != 0. && ptCore != 0.)
+    if (ptAll != 0.)
       f_core = ptCore/ptAll;
     else 
       f_core = -999.;
