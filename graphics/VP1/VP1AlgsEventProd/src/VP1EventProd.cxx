@@ -74,6 +74,10 @@ StatusCode VP1EventProd::execute()
 {
   ATH_MSG_DEBUG(" in execute(). Nothing to do here...");
 
+  if(m_isOnline){
+    m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
+  }
+  
   return StatusCode::SUCCESS;
 }
 
@@ -81,9 +85,9 @@ StatusCode VP1EventProd::finalize()
 {
   ATH_MSG_INFO("in finalize() ");
 
-  if(m_isOnline){
-    m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
-  }
+  //if(m_isOnline){
+  //m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
+  //}
 
   ATH_MSG_INFO("VP1ALG m_destinationDir " << m_destinationDir);
   // handle the output of the last event
@@ -127,6 +131,12 @@ void VP1EventProd::handle(const Incident& inc)
   ATH_MSG_INFO("in handle()... ");
   ATH_MSG_INFO("Handling incident '" << inc.type() << "'");
 
+  //if(m_isOnline){
+  // m_destinationDir = m_onlineEDsvc->getEntireOutputStr();
+  //}
+
+  ATH_MSG_INFO("VP1ALG m_destinationDir " << m_destinationDir);
+  
   // Let VP1FileUtilities handle the output of the previous event.
   // Skip this if m_nEvent == 0,
   // because the processing of the event is not completed, yet;

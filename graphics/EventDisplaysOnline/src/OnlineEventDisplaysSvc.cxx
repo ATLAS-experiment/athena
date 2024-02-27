@@ -29,6 +29,8 @@ void OnlineEventDisplaysSvc::beginEvent(){
   for (std::string stream : m_streamsWanted){
     ATH_MSG_INFO(stream);
   }
+  m_eventNumber = evt->eventNumber();
+  m_runNumber = evt->runNumber();
   
   //Check what trigger streams were fired, if in list of desired
   //streams to be reconstructed pick one randomly 
@@ -50,8 +52,7 @@ void OnlineEventDisplaysSvc::beginEvent(){
       bool isPublicStream = std::find(m_publicStreams.begin(), m_publicStreams.end(), tag.name()) != m_publicStreams.end();
       if(m_sendToPublicStream && isPublicStream){
 	streams.emplace_back("Public");
-      }
-      
+      }      
     }
   }
 
@@ -82,17 +83,14 @@ void OnlineEventDisplaysSvc::beginEvent(){
 }
 
 void OnlineEventDisplaysSvc::endEvent(){
-  //set vp1 dir
-  // if don't do vp1 set checkPair to false
-  ATH_MSG_INFO("in end: " << m_entireOutputStr);
   
   RootUtils::PyGILStateEnsure ensure;
   PyObject* pCheckPair = PyBool_FromLong(0); // Use 0 for False
+  PyObject* pBeamSplash = PyBool_FromLong(m_BeamSplash);
   PyObject* pMaxEvents = PyLong_FromLong(m_maxEvents);
   const char* cString = m_entireOutputStr.c_str();
   PyObject* pDirectory = PyUnicode_FromString(cString);
-
-  PyObject* pArgs = PyTuple_Pack(3, pDirectory, pMaxEvents, pCheckPair);
+  PyObject* pArgs = PyTuple_Pack(4, pDirectory, pMaxEvents, pCheckPair,pBeamSplash);
   
   PyObject* pModule = PyImport_ImportModule("EventDisplaysOnline.EventUtils");
   if ( pModule ) {
@@ -101,10 +99,26 @@ void OnlineEventDisplaysSvc::endEvent(){
       ATH_MSG_INFO("About to clean the ED directories");
       PyObject_CallObject(cleanDirectory, pArgs);
     }
+    else {
+      ATH_MSG_WARNING("Could not import EventDisplaysOnline.EventUtils.cleanDirectory");
+    }
     Py_DECREF(cleanDirectory);
-  }
-  else {
-    ATH_MSG_WARNING("Could not import EventDisplaysOnline.EventUtils.cleanDirectory");
+    if(m_BeamSplash){
+      std::string JiveXMLFileName ="JiveXML_"+ m_runNumber+"_"+m_eventNumber+".xml";
+      const char* JiveXMLFileName_cString = JiveXMLFileName.c_str();
+      PyObject* pJiveXMLFileName = PyUnicode_FromString(JiveXMLFileName_cString);
+      PyObject* pArgs_zip = PyTuple_Pack(2, pDirectory, pJiveXMLFileName);
+      PyObject* zipXMLFile = PyObject_GetAttrString(pModule, "zipXMLFile");
+      if ( zipXMLFile ) {
+	PyObject_CallObject(zipXMLFile, pArgs_zip);
+      }
+      else {
+	ATH_MSG_WARNING("Could not import EventDisplaysOnline.EventUtils.zipXMLFile");
+      }
+      Py_DECREF(pJiveXMLFileName);
+      Py_DECREF(zipXMLFile);
+      Py_DECREF(pArgs_zip);
+    }
   }
   Py_DECREF(pModule);
   Py_DECREF(pArgs);
