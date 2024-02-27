@@ -56,6 +56,7 @@ namespace JiveXML {
    StatusCode StreamToFileTool::StreamEvent( const unsigned long EventNumber, const unsigned int RunNumber, const std::ostringstream* EventBuffer ) {
      if(m_isOnline){
        m_FileNamePrefix = m_onlineEDsvc->getFileNamePrefix();
+       ATH_MSG_INFO("m_FileNamePrefix: " << m_FileNamePrefix << " EventNumber: " << EventNumber);
      }
      /// Get a pointer to a new file
      std::ofstream* outFile;

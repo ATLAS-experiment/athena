@@ -109,7 +109,7 @@ def writeEventlist(directory, eventlist, listname='event'):
     msg.verbose('%s end write event list', time.ctime(time.time()))
 
 # Perform all of these in one command
-def cleanDirectory(directory, maxevents, checkpair):
+def cleanDirectory(directory, maxevents, checkpair,isBeamSplashMode):
     msg = logging.getLogger( 'EventUtils' )
     print('In cleanDirectory!')
     msg.verbose('%s begin clean directory', time.ctime(time.time()))
@@ -119,9 +119,8 @@ def cleanDirectory(directory, maxevents, checkpair):
     writeEventlist(directory, eventlist)
 
     # disable this for beam splashes. Call zipXMLFile directly in OnlineEventDisplaysSvc.py to transfer every event.
-    if len(eventlist)>0:
-        prepareFilesForTransfer(directory, eventlist, pair=checkpair, timeinterval=60)
-
+    if len(eventlist)>0 and not isBeamSplashMode:
+        prepareFilesForTransfer(directory, eventlist, pair=checkpair, timeinterval=60)            
     msg.verbose('%s end clean directory', time.ctime(time.time()))
 
 def prepareFilesForTransfer(directory, eventlist, pair, timeinterval):

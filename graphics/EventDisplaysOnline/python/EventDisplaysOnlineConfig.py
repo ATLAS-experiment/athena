@@ -7,7 +7,7 @@ from AthenaConfiguration.Enums import BeamType
 
 isCosmicData = False
 isHIMode = False #TODO
-isBeamSplashMode = False #TODO
+isBeamSplashMode = False
 isOfflineTest = False
 testWithoutPartition = False
 
@@ -16,7 +16,7 @@ testWithoutPartition = False
 # 'MinBias' for beam splashes
 streamsWanted = ['express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
 
-# if testing at p1, write out to /tmp/ to see output
+# If testing at p1, write out to /tmp/ to see output
 #outputDirectory="/atlas/EventDisplayEvents/"
 outputDirectory="/tmp/myexley"
 
@@ -28,13 +28,23 @@ if isHIMode:
     projectTags=['data24_hi']
     projectName='data24_hi'
     publicStreams=['MinBias']
+if isCosmicData:
+    maxEvents=200
+    projectTags=['cosmic24']
+    projectName='cosmic24'
+    publicStreams=['Main']#TODO
+if isBeamSplashMode:
+    maxEvents=-1
+    projectTags=['data24_13p6TeV']
+    projectName='data24_13p6TeV'
+    publicStreams=['']
 else:
     maxEvents=100 # Number of events to keep per stream
     projectTags=['data23_13p6TeV']
     projectName='data23_13p6TeV'
     publicStreams=['Main']
 
-sendToPublicStream = True # Gets set later, overwrite here to True to test it
+sendToPublicStream = False # Gets set later, overwrite here to True to test it
 
 ##----------------------------------------------------------------------##
 ## When the ATLAS partition is not running you can use two test         ##
@@ -47,7 +57,7 @@ sendToPublicStream = True # Gets set later, overwrite here to True to test it
 ## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-10-00-00/         ##
 ## without_gatherer/GMTestPartition.data.xml                            ##
 ##----------------------------------------------------------------------##
-partitionName = 'GMTestPartition' # 'ATLAS', 'GMTestPartitionT9' or 'GMTestPartition'
+partitionName = 'GMTestPartition' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
 
 # Pause this thread until the partition is up
 if not testWithoutPartition or not isOfflineTest:
@@ -89,7 +99,7 @@ flags.Trigger.triggerConfig='DB'
 
 # Test wth a small amount of events and write out to e.g. a tmp dir
 if testWithoutPartition or partitionName != 'ATLAS' or isOfflineTest:
-    flags.Exec.MaxEvents = 10
+    flags.Exec.MaxEvents = -1
     flags.Output.ESDFileName = outputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
 else:
     flags.Exec.MaxEvents = -1
@@ -107,13 +117,10 @@ else:
 
 flags.Reco.EnableTrigger = False # TODO test True
 flags.LAr.doHVCorr = False # ATLASRECTS-6823
-flags.Detector.EnableMuon = False
-flags.Reco.EnableCombinedMuon = False
-#flags.InDet.useSctDCS = False
-#flags.InDet.useDCS = False
-#flags.Tracking.doPixelClusterSplitting = False
-from AthenaCommon.Constants import DEBUG
-flags.Exec.OutputLevel = DEBUG
+#flags.Detector.EnableMuon = False
+#flags.Reco.EnableCombinedMuon = False
+from AthenaCommon.Constants import INFO
+flags.Exec.OutputLevel = INFO
 flags.Concurrency.NumThreads = 0
 
 if isOfflineTest:
@@ -184,15 +191,20 @@ if not testWithoutPartition:
     bytestreamInput.GroupName = "EventDisplaysOnline"
     bytestreamInput.PublishName = "EventDisplays"
     bytestreamInput.Key = "dcm"
-    bytestreamInput.KeyCount = 3 # equal or greater than the number of DCMs for beam splashes
-    bytestreamInput.Timeout = 600000 # 144000000 (40 hrs) for beam splashes
+    bytestreamInput.KeyCount = 3
+    bytestreamInput.Timeout = 600000
     bytestreamInput.UpdatePeriod = 200
     bytestreamInput.BufferSize = 10 # three times of keycount for beam splashes
     bytestreamInput.ISServer = '' # Disable histogramming
     bytestreamInput.StreamNames = streamsWanted
     #bytestreamInput.StreamType = "physics" #comment out for all streams, e.g. if you also want claibration streams
     bytestreamInput.StreamLogic = "Or"
-
+    if isBeamSplashMode:
+        bytestreamInput.KeyCount = 64 # equal or greater than the number of DCMs for beam splashes
+        bytestreamInput.BufferSize = 192 # three times of keycount for beam splashes
+        bytestreamInput.Timeout = 144000000 #(40 hrs) for beam splashes
+        bytestreamInput.StreamNames = ['MinBias']
+        bytestreamInput.StreamType = "physics"
     if partitionName != 'ATLAS':
         bytestreamInput.KeyValue = [ 'Test_emon_push' ]
         bytestreamInput.KeyCount = 1
@@ -204,6 +216,7 @@ onlineEventDisplaysSvc = CompFactory.OnlineEventDisplaysSvc(
     SendToPublicStream = sendToPublicStream, # Allowed to be made public
     PublicStreams = publicStreams,           # These streams go into public stream when Ready4Physics
     StreamsWanted = streamsWanted,
+    BeamSplash = isBeamSplashMode,
 )
 acc.addService(onlineEventDisplaysSvc, create=True)
 
@@ -243,7 +256,7 @@ vp1Alg = CompFactory.VP1EventProd(name="VP1EventProd",
                                   InputPoolFile = StreamESD.OutputFile,
                                   IsOnline = True,
                                   OnlineEventDisplaysSvc = onlineEventDisplaysSvc)
-acc.addEventAlgo(vp1Alg)
+acc.addEventAlgo(vp1Alg, primary=True)
 
 acc.getService("PoolSvc").WriteCatalog = "xmlcatalog_file:PoolFileCatalog_%s_%s.xml" % (jobId[3], jobId[4])
 

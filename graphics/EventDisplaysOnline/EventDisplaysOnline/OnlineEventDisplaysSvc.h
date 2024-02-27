@@ -50,7 +50,10 @@ private:
   Gaudi::Property<std::string> m_outputDirectory {this, "OutputDirectory", "/atlas/EventDisplayEvents", "Output Directory"};
   Gaudi::Property<std::vector<std::string>> m_streamsWanted {this, "StreamsWanted", {}, "Desired trigger streams"};
   Gaudi::Property<std::vector<std::string>> m_publicStreams {this, "PublicStreams", {}, "Desired public streams"};
+  Gaudi::Property<std::string> m_eventNumber {this, "EventNumber", {}, "Event number"};
+  Gaudi::Property<std::string> m_runNumber {this, "RunNumber", {}, "Run number"};
   Gaudi::Property<bool> m_sendToPublicStream {this, "SendToPublicStream", false, "Allowed to be seen by the public on atlas live"};
+  Gaudi::Property<bool> m_BeamSplash {this, "BeamSplash", false, "Is a beam splash event"};
   Gaudi::Property<int> m_maxEvents {this, "MaxEvents", 200, "Number of events to keep per stream"};
   std::string m_FileNamePrefix = "JiveXML";
   std::string m_outputStreamDir = ".Unknown";
