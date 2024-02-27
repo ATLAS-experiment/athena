@@ -120,7 +120,7 @@ class trigRecoExecutor(athenaExecutor):
             # get list of translated arguments to be used by athenaHLT
             optionList = getTranslated(self.conf.argdict, name=self._name, substep=self._substep, first=self.conf.firstExecutor, output = outputFiles)
             self._cmd.extend(optionList)
-
+            legacyOSRelease = False
             # Run preRun step debug stream analysis if output histogram are set
             if "outputHIST_DEBUGSTREAMMONFile" in self.conf.argdict:
                 # Do debug stream preRun step and get asetup string from debug stream input files
