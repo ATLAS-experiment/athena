@@ -12,6 +12,7 @@
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
+#include <MuonTesterTree/TwoVectorBranch.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonTesterTree/CoordTransformBranch.h>
 namespace MuonGMR4{
@@ -80,27 +81,33 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
     MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};    
     MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
 
+    /// Rotation matrix of the respective wireGroup layers
+    MuonVal::CoordSystemsBranch m_wireGroupRot{m_tree, "wireGroupRot"};    
+    MuonVal::VectorBranch<uint8_t>& m_wireGroupRotGasGap{m_tree.newVector<uint8_t>("wireGroupRotGasGap")};
+
     /// Strip dimensions 
     MuonVal::ScalarBranch<uint>& m_numStrips{m_tree.newScalar<uint>("numStrips")}; // nStrips
     MuonVal::ScalarBranch<float>& m_stripPitch{m_tree.newScalar<float>("stripPitch")}; // stripPitch 3.2mm
     MuonVal::ScalarBranch<float>& m_stripWidth{m_tree.newScalar<float>("stripWidth")}; // stripWidth 2.7mm
-    MuonVal::ThreeVectorBranch m_globalStripPos{m_tree, "globalStripPos"};
+    MuonVal::TwoVectorBranch m_localStripPos{m_tree, "localStripPos"}; //Position in chamber coordinates
+    MuonVal::ThreeVectorBranch m_globalStripPos{m_tree, "globalStripPos"}; //Position in ATLAS coordinates
     MuonVal::VectorBranch<uint>& m_stripNum{m_tree.newVector<uint>("stripNumber")}; // strip number
     MuonVal::VectorBranch<uint8_t>& m_stripGasGap{m_tree.newVector<uint8_t>("stripGasGap")}; // gas gap number
     MuonVal::VectorBranch<float>& m_stripLengths{m_tree.newVector<float>("stripLengths")}; // Length of each strip
-/*
+
     //// Wire Dimensions
     MuonVal::VectorBranch<uint>& m_numWires{m_tree.newVector<uint>("numWires")}; // nWires 
-    MuonVal::VectorBranch<short>& m_firstWireGroupWidth{m_tree.newVector<short>("firstWireGroupWidth")}; // firstWireGroup <= 20
-    MuonVal::VectorBranch<short>& m_numWireGroups{m_tree.newVector<short>("numWireGroups")}; // nWireGroups >19
+    MuonVal::VectorBranch<uint>& m_firstWireGroupWidth{m_tree.newVector<uint>("firstWireGroupWidth")}; // firstWireGroup <= 20
+    MuonVal::VectorBranch<uint>& m_numWireGroups{m_tree.newVector<uint>("numWireGroups")}; // nWireGroups >19
     MuonVal::VectorBranch<float>& m_wireCutout{m_tree.newVector<float>("wireCutout")}; // wireCutout ~ 800mm
     MuonVal::ScalarBranch<float>& m_wirePitch{m_tree.newScalar<float>("wirePitch")}; // wirePitch 1.8mm
     MuonVal::ScalarBranch<float>& m_wireWidth{m_tree.newScalar<float>("wireWidth")}; // wireWidth 0.015mm
-    MuonVal::ScalarBranch<short>& m_wireGroupWidth{m_tree.newScalar<short>("wireGroupWidth")}; // wireGroupWidth 20
-    MuonVal::ThreeVectorBranch m_globalWireGroupPos{m_tree, "globalWireGroupPos"};
+    MuonVal::ScalarBranch<uint>& m_wireGroupWidth{m_tree.newScalar<uint>("wireGroupWidth")}; // wireGroupWidth 20
+    MuonVal::TwoVectorBranch m_localWireGroupPos{m_tree, "localWireGroupPos"}; //Position in chamber coordinates
+    MuonVal::ThreeVectorBranch m_globalWireGroupPos{m_tree, "globalWireGroupPos"}; //Position in ATLAS coordinates
     MuonVal::VectorBranch<uint8_t>& m_wireGroupNum{m_tree.newVector<uint8_t>("wireGroupNum")}; // wire Group number
     MuonVal::VectorBranch<uint8_t>& m_wireGroupGasGap{m_tree.newVector<uint8_t>("wireGroupGasGap")}; // gas gap number
-
+/*
    /// Pad dimensions 
     MuonVal::VectorBranch<uint>& m_numPads{m_tree.newVector<uint>("numPads")};
     MuonVal::VectorBranch<uint>& m_numPadEta{m_tree.newVector<uint>("numPadEta")}; //nPadH

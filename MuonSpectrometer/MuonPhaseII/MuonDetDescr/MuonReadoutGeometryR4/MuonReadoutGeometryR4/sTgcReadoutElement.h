@@ -6,6 +6,8 @@
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/StripDesign.h>
+#include <MuonReadoutGeometryR4/WireGroupDesign.h>
+//#include <MuonReadoutGeometryR4/DiamondStripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
 #ifndef SIMULATIONBASE
 #   include "Acts/Surfaces/TrapezoidBounds.hpp"
@@ -58,12 +60,14 @@ class sTgcReadoutElement : public MuonReadoutElement {
         /// Diamond cutout height
         double yCutout{0.};
 
-        /// Pitch of the first strip of the gas gap
+        //// firstStripPitch needed for the globalChannelPosition function
         std::vector<double> firstStripPitch{};
+
         std::vector<StripLayer> stripLayers{};
+        std::vector<StripLayer> wireGroupLayers{};
 
         StripDesignPtr stripDesign{nullptr};
-        StripDesignPtr wireGroupDesign{nullptr};
+        WireDesignPtr wireGroupDesign{nullptr};
 
 #ifndef SIMULATIONBASE
         ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
@@ -93,12 +97,6 @@ class sTgcReadoutElement : public MuonReadoutElement {
     /// Distance between 2 gas gaps
     double gasGapPitch() const;
 
-    /// Length of gas Gap on short side
-    double sGapLength() const;
-    /// Length of gas Gap on long side
-    double lGapLength() const;
-    /// Height of gas Gap
-    double gapHeight() const;
     /// Thickness of the chamber
     double thickness() const override final; //chamberTck
     /// Width of the chamber frame on the short side
@@ -113,38 +111,69 @@ class sTgcReadoutElement : public MuonReadoutElement {
     double gasGapThickness() const;
     /// Returns the yCutout value of the chamber
     double yCutout() const;
+    /// Gas Gaps
+    double firstStripPitch(const Identifier& measId) const;
+    double firstStripPitch(const IdentifierHash& measHash) const;
+    /// Length of gas Gap on short side
+    double sGapLength(const Identifier& measId) const;
+    double sGapLength(const IdentifierHash& measHash) const;
+    /// Length of gas Gap on long side
+    double lGapLength(const Identifier& measId) const;
+    double lGapLength(const IdentifierHash& measHash) const;
+    /// Height of gas Gap
+    double gapHeight(const Identifier& measId) const;
+    double gapHeight(const IdentifierHash& measHash) const;
     ////Strips
     /// Number of strips in a chamber
-    unsigned int numStrips() const;
+    unsigned int numStrips(const Identifier& measId) const;
+    unsigned int numStrips(const IdentifierHash& measHash) const;
     /// Pitch of a strip
-    double stripPitch() const;
-    /// Width of a strip
-    double stripWidth() const;
+    double stripPitch(const Identifier& measId) const;
+    double stripPitch(const IdentifierHash& measHash) const;
+        /// Width of a strip
+    double stripWidth(const Identifier& measId) const;
+    double stripWidth(const IdentifierHash& measHash) const;
     ///Length of each strip
-    double stripLength(const int& stripNumb) const;
+    double stripLength(const Identifier& measId) const;
+    double stripLength(const IdentifierHash& measHash) const;
     /// Number of Channel Types
     unsigned int nChTypes() const;
-/*
+
     //// Wires
-    /// Number of wires in the gas gap
-    std::vector<unsigned int> numWires() const;
-    /// Number of wires in the first wire group
-    std::vector<short> firstWireGroupWidth() const;
-    /// Number of wire groups in the gas gap
-    std::vector<short> numWireGroups() const;
-    /// Wire Cutout
-    std::vector<double> wireCutout() const;
     /// Pitch of the wire
-    double wirePitch{0.};
+    double wirePitch(const Identifier& measId) const;
+    double wirePitch(const IdentifierHash& measHash) const;
     /// Width of a single wire
-    double wireWidth{0.};
+    double wireWidth(const Identifier& measId) const;
+    double wireWidth(const IdentifierHash& measHash) const;
     /// Number of wires in a normal wire group
-    short wireGroupWidth{0};
-*/
+    unsigned int wireGroupWidth(unsigned int gasGap) const;
+    /// Number of wires in the gas gap
+    unsigned int numWires(unsigned int gasGap) const;
+    /// Number of wires in the first wire group
+    unsigned int firstWireGroupWidth(unsigned int gasGap) const;
+    /// Number of wire groups in the gas gap
+    unsigned int numWireGroups(unsigned int gasGap) const;
+    /// Wire Cutout of a gas Gap
+    double wireCutout(unsigned int gasGap) const;
+    /// Retrieves the readoutElement Layer given the Identifier/Hash
+    const StripDesign& stripDesign(const Identifier& measId) const;
+    const StripDesign& stripDesign(const IdentifierHash& measHash) const;
+    /// Retrieves the readoutElement Layer given the gasGap
+    const StripDesign& stripDesign(unsigned int gasGap) const;
 
+    /// Retrieves the readoutElement Layer given the Identifier/Hash
+    const WireGroupDesign& wireDesign(const Identifier& measId) const;
+    const WireGroupDesign& wireDesign(const IdentifierHash& measHash) const;
+    /// Retrieves the readoutElement Layer given the gasGap
+    const WireGroupDesign& wireDesign(unsigned int gasGap) const;
 
-    Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    /// Returns the global strip/wire position
+    Amg::Vector3D globalChannelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D globalChannelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    /// Returns the local strip/wire position
+    Amg::Vector2D localChannelPosition(const Identifier& measId) const;
+    Amg::Vector2D localChannelPosition(const IdentifierHash& measHash) const;
 
     /// Constructs the identifier hash from the full measurement Identifier. The
     /// hash is always defined w.r.t the specific detector element and used to
@@ -174,8 +203,11 @@ class sTgcReadoutElement : public MuonReadoutElement {
 
 
    private:
+        /// Returns channel position for a given identifierHash
         static unsigned int stripNumber(const IdentifierHash& measHash);
+        /// Returns the channel type for a given identifierHash
         static unsigned int chType(const IdentifierHash& measHash);
+        /// Returns the gasGap (0 to 3) for a given identifierHash
         static unsigned int gasGapNumber(const IdentifierHash& measHash);
         Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
         Amg::Vector3D chamberStripPos(const IdentifierHash& measHash) const;

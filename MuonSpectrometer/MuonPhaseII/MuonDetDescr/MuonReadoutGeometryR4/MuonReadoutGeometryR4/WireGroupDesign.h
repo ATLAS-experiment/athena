@@ -26,7 +26,7 @@ class WireGroupDesign: public StripDesign {
         /// set sorting operator
         bool operator<(const WireGroupDesign& other) const;
         /// Adds a new group of wires to the design.
-        void declareGroup(const unsigned int numWires);
+        void declareGroup(const unsigned int x);
         /// Returns the number of wires in a given group.
         unsigned int numWiresInGroup(unsigned int groupNum) const;
         /// Returns the number of all wires
@@ -61,6 +61,11 @@ class WireGroupDesign: public StripDesign {
         double wireLength(unsigned int groupNum,
                           unsigned int wireNum) const;
 
+        /// Extract the wireCutout for a wireGroup layer
+        double wireCutout() const; 
+        /// Define the wirelength available for digitization in a gasGap
+        void defineWireCutout(const double wireCutout);
+        
     private:
         void print(std::ostream& ostr) const override final; 
         Amg::Vector2D stripPosition(int stripNum) const override final;
@@ -77,6 +82,10 @@ class WireGroupDesign: public StripDesign {
         using wireGrpVector = std::vector<wireGroup>;
         using wireGrpVectorItr = wireGrpVector::const_iterator;
         wireGrpVector m_groups{};
+        /// Wire length available for digitization in a gas Gap
+        double m_wireCutout{0};
+
+
 };
 
 struct WireDesignSorter{

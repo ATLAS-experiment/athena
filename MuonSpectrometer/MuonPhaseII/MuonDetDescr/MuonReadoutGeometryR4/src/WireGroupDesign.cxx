@@ -46,4 +46,8 @@ namespace MuonGMR4{
        }
        return m_groups[grpIdx].numWires;
     }
+    double WireGroupDesign::wireCutout() const {return m_wireCutout;} 
+    
+    void WireGroupDesign::defineWireCutout(const double wireCutout){m_wireCutout=wireCutout;}
 }
+

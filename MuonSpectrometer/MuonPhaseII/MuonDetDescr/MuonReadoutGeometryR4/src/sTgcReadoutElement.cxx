@@ -31,7 +31,7 @@ StatusCode sTgcReadoutElement::initElement() {
       ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" has no assigned alignable node");
       return StatusCode::FAILURE;
    } 
-   if (m_pars.stripLayers.empty()) {
+   if (m_pars.stripLayers.empty() || m_pars.wireGroupLayers.empty()) {
       ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
       return StatusCode::FAILURE;
    }
@@ -46,28 +46,96 @@ StatusCode sTgcReadoutElement::initElement() {
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
    }
+   for (unsigned int layer = 0; layer < m_pars.wireGroupLayers.size(); ++layer) {
+      IdentifierHash layHash{layer};
+      if (gasGapNumber(m_pars.wireGroupLayers[layer].hash()) != layHash) {
+         ATH_MSG_FATAL("Layer "<<m_pars.wireGroupLayers[layer]<<" has a very strange hash. Expect "<<layer);
+       return StatusCode::FAILURE;
+      }
+      ATH_CHECK(insertTransform(m_pars.wireGroupLayers[layer].hash(), 
+                                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
+                                    return toStation(store) * fromGapToChamOrigin(hash); 
+                                 }));
+   }
    ActsGeometryContext gctx{};
    m_gasGapPitch = (center(gctx, createHash(1, sTgcIdHelper::sTgcChannelTypes::Strip, 0)) -
-                   center(gctx, createHash(2, sTgcIdHelper::sTgcChannelTypes::Strip, 0))).mag();
-    
+                   center(gctx, createHash(2, sTgcIdHelper::sTgcChannelTypes::Strip, 0))).mag(); 
    return StatusCode::SUCCESS;
 }
 
-Amg::Transform3D sTgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& hash) const{
-   unsigned int layIdx = static_cast<unsigned int>(hash);
-   unsigned int gasGap = gasGapNumber(hash);
-   if (gasGap < m_pars.stripLayers.size()) return m_pars.stripLayers[gasGap].toOrigin();
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
-                 <<" is out of range. Maximum range "<<m_pars.stripLayers.size());
-   return Amg::Transform3D::Identity();
+Amg::Transform3D sTgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& measHash) const{
+   unsigned int layIdx = static_cast<unsigned int>(measHash);
+   unsigned int gasGap = gasGapNumber(measHash);
+   if(chType(measHash) == ReadoutChannelType::Strip && gasGap < m_pars.stripLayers.size()) {
+      return m_pars.stripLayers[gasGap].toOrigin();
+   }
+   else if (chType(measHash) == ReadoutChannelType::Wire && gasGap < m_pars.wireGroupLayers.size()) {
+      return m_pars.wireGroupLayers[gasGap].toOrigin();
+   }
+   else {
+      unsigned int maxReadoutLayers =  m_pars.stripLayers.size() + m_pars.wireGroupLayers.size();
+      ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<< maxReadoutLayers);
+      return Amg::Transform3D::Identity();
+   }
 }
 
-Amg::Vector3D sTgcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
+Amg::Vector2D sTgcReadoutElement::localChannelPosition(const IdentifierHash& measHash) const {
+   if (chType(measHash) == ReadoutChannelType::Strip) {
+      Amg::Vector2D stripCenter{Amg::Vector2D::Zero()};
+      std::optional<Amg::Vector2D> stripCenterOpt = stripDesign(measHash).center(stripNumber(measHash));
+      if (!stripCenterOpt) {
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The strip" << stripNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
+         return stripCenter;
+      }
+      stripCenter = std::move(*stripCenterOpt);
+      if (stripNumber(measHash) == 1 && firstStripPitch(measHash) < stripPitch(measHash)) {
+         stripCenter.x() += 0.25 * stripWidth(measHash);
+      }
+      if (stripNumber(measHash) == numStrips(measHash) && firstStripPitch(measHash) == stripPitch(measHash)) {
+         stripCenter.x() -= 0.25 * stripWidth(measHash);
+      }
+      return stripCenter;
+   }
+   else if (chType(measHash) == ReadoutChannelType::Wire) {
+      Amg::Vector2D wireGroupCenter{Amg::Vector2D::Zero()};
+      std::optional<Amg::Vector2D> wireGroupCenterOpt = wireDesign(measHash).center(stripNumber(measHash));
+      if (!wireGroupCenterOpt) {
+         ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wireGroup" << stripNumber(measHash) << "doesn't intersect with the edges of the trapezoid.");
+         return wireGroupCenter;
+      }
+      wireGroupCenter = std::move(*wireGroupCenterOpt);
+      unsigned int gasGap = gasGapNumber(measHash) + 1;
+      if (stripNumber(measHash) == 1) {
+         ATH_MSG_DEBUG("The first wire pos is: " << wireGroupCenter.x() + (0.5 * firstWireGroupWidth(gasGap))* wirePitch(measHash) );
+         wireGroupCenter.x() = 0.5*(wireGroupCenter.x() + (0.5 * firstWireGroupWidth(gasGap) - 1)* wirePitch(measHash) - 0.5 * lGapLength(measHash));
+      }
+
+      else if (stripNumber(measHash) == numWireGroups(gasGap)) {
+         ATH_MSG_DEBUG("The last wire center before modification is: " << wireGroupCenter.x());
+         wireGroupCenter.x() = 0.5 * (wireGroupCenter.x() + 0.5*lGapLength(measHash) - 
+                              (wireGroupWidth(gasGap) * wirePitch(measHash)));
+         ATH_MSG_DEBUG("The last wire center after modification is: " << wireGroupCenter.x());
+      }
+      return wireGroupCenter;
+   }
+   else {
+      ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<"Invalid channel type: " << chType(measHash));
+      return Amg::Vector2D::Zero();
+   }
+}
+Amg::Vector3D sTgcReadoutElement::globalChannelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    unsigned int gasGap = gasGapNumber(measHash);
-   if (gasGap < m_pars.stripLayers.size()) {
+   if (chType(measHash) == ReadoutChannelType::Strip && gasGap < m_pars.stripLayers.size()) {
       return localToGlobalTrans(ctx, lHash) * m_pars.stripLayers[gasGap].localStripPos(stripNumber(measHash));
+   }
+   else if (chType(measHash) == ReadoutChannelType::Wire && gasGap < m_pars.wireGroupLayers.size()) {
+      Amg::Vector3D wireGrPos{Amg::Vector3D::Zero()};
+      Amg::Vector2D localWireGroup = localChannelPosition(measHash);
+      wireGrPos.block<2,1>(0,0) = std::move(localWireGroup);
+      return localToGlobalTrans(ctx, lHash) * wireGrPos;
    }
    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
                  <<" is out of range. Maximum range "<<m_pars.stripLayers.size());

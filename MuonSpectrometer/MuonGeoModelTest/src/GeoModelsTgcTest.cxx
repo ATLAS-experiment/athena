@@ -143,18 +143,18 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
 
 //// All the Vectors
     for (int lay = 1; lay <= numLayers; ++lay) {
-//        const Identifier layWireID =id_helper.channelID(stIndex, stEta, stPhi, 
-//                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Wire, 1);
+        const Identifier layWireID =id_helper.channelID(stIndex, stEta, stPhi, 
+                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Wire, 1);
         const Identifier layStripID =id_helper.channelID(stIndex, stEta, stPhi, 
                         stML, lay, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
 //        const Identifier layPadID =id_helper.channelID(stIndex, stEta, stPhi, 
 //                        stML, lay, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
-/*
+
 //// Wire Dimensions
-        int numWires = readoutEle->numberOfWires(layWireID); 
-        int firstWireGroupWidth = readoutEle->getDesign(layWireID)->firstPitch;
+        unsigned int numWires = readoutEle->numberOfWires(layWireID); 
+        unsigned int firstWireGroupWidth = readoutEle->getDesign(layWireID)->firstPitch;
         int numWireGroups = readoutEle->getDesign(layWireID)->nGroups;
-        int wireCutout = readoutEle->getDesign(layWireID)->wireCutout;
+        double wireCutout = readoutEle->getDesign(layWireID)->wireCutout;
         double wirePitch = readoutEle->wirePitch(); 
         double wireWidth = readoutEle->getDesign(layWireID)->inputWidth;
         double wireGroupWidth = readoutEle->getDesign(layWireID)->groupWidth;
@@ -176,18 +176,25 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 ATH_MSG_WARNING("The following wire group ID is not valid: " << wireGroupID);
             }
             Amg::Vector3D wireGroupPos(Amg::Vector3D::Zero());
-            
+            Amg::Vector2D localWireGroupPos(Amg::Vector2D::Zero());
+            readoutEle->stripPosition(wireGroupID, localWireGroupPos);
+            m_localWireGroupPos.push_back(localWireGroupPos);            
             readoutEle->stripGlobalPosition(wireGroupID, wireGroupPos);
             m_globalWireGroupPos.push_back(wireGroupPos);
             m_wireGroupNum.push_back(wireGroupIndex);
             m_wireGroupGasGap.push_back(lay);
+
+            if (wireGroupIndex != 1) continue;
+            const Amg::Transform3D locToGlob = readoutEle->transform(wireGroupID);
+            m_wireGroupRot.push_back(locToGlob);                    
+            m_wireGroupRotGasGap.push_back(lay);
         }
-*/
+
 ////Strip Dimensions
         int numStrips = readoutEle->getDesign(layStripID)->nch;
         double stripPitch = readoutEle->channelPitch(layStripID);
         double stripWidth = readoutEle->getDesign(layStripID)->inputWidth;
-        int firstStripPitch = readoutEle->getDesign(layStripID)->firstPitch;
+        double firstStripPitch = readoutEle->getDesign(layStripID)->firstPitch;
         
         m_numStrips = numStrips;
         m_stripPitch = stripPitch;
@@ -203,10 +210,12 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 ATH_MSG_WARNING("The following strip ID is not valid: " << stripID);
             }
             double stripLength = readoutEle->getDesign(stripID)->channelLength(stripIndex);
-            Amg::Vector3D stripPos(Amg::Vector3D::Zero());
-
-            readoutEle->stripGlobalPosition(stripID, stripPos);
-            m_globalStripPos.push_back(stripPos);
+            Amg::Vector3D globalStripPos(Amg::Vector3D::Zero());
+            Amg::Vector2D localStripPos(Amg::Vector2D::Zero());
+            readoutEle->stripPosition(stripID, localStripPos);
+            m_localStripPos.push_back(localStripPos);
+            readoutEle->stripGlobalPosition(stripID, globalStripPos);
+            m_globalStripPos.push_back(globalStripPos);
             m_stripNum.push_back(stripIndex);
             m_stripGasGap.push_back(lay);
             m_stripLengths.push_back(stripLength);

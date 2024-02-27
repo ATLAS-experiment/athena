@@ -72,8 +72,8 @@ StatusCode GeoModelsTgcTest::execute() {
       ATH_MSG_FATAL("Failed to retrieve "<<m_geoCtxKey.fullKey());
       return StatusCode::FAILURE;
     }
+    
     const ActsGeometryContext& gctx{**geoContextHandle};
-
     for (const Identifier& test_me : m_testStations) {
       ATH_MSG_DEBUG("Test retrieval of sTgc detector element "<<m_idHelperSvc->toStringDetEl(test_me));
       const sTgcReadoutElement* reElement = m_detMgr->getsTgcReadoutElement(test_me);
@@ -101,36 +101,57 @@ StatusCode GeoModelsTgcTest::execute() {
       }
       const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
       for (int layer = 1; layer <= reElement->numLayers(); ++layer) {
-        for (int chType = sTgcIdHelper::sTgcChannelTypes::Strip/*Pad*/; chType <= sTgcIdHelper::sTgcChannelTypes::Strip/*Wire*/; ++chType) {
-
-            unsigned int numStrip = reElement->numStrips();
-            for (unsigned int strip = 1; strip < numStrip ; ++strip) {
-                bool isValid{false};
-                const Identifier chId = id_helper.channelID(reElement->identify(),
+        for (int chType = sTgcIdHelper::sTgcChannelTypes::Strip/*Pad*/; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
+            unsigned int numChannel = 0;
+            bool isValidLay{false};
+            const Identifier layID = id_helper.channelID(reElement->identify(),
+                                                        reElement->multilayer(),
+                                                        layer, chType, 1, isValidLay);
+            if (!isValidLay) {
+                continue;
+            }
+            switch(chType) {
+                case sTgcIdHelper::sTgcChannelTypes::Strip:
+                    numChannel = reElement->numStrips(layID);
+                break;
+                
+                case sTgcIdHelper::sTgcChannelTypes::Wire:
+                    numChannel = reElement->numWireGroups(layer);
+                break;
+            }
+            for (unsigned int channel = 1; channel < numChannel ; ++channel) {
+                bool isValidCh{false};
+                const Identifier chID = id_helper.channelID(reElement->identify(),
                                                                 reElement->multilayer(),
-                                                                layer, chType, strip, isValid);
-                if (!isValid) {
+                                                                layer, chType, channel, isValidCh);
+                if (!isValidCh) {
                     continue;
                 }
                 /// Test the back and forth conversion of the Identifier
-                const IdentifierHash measHash = reElement->measurementHash(chId);
-                const IdentifierHash layHash = reElement->layerHash(chId);
+                const IdentifierHash measHash = reElement->measurementHash(chID);
+                const IdentifierHash layHash = reElement->layerHash(chID);
                 ATH_MSG_VERBOSE("layer: "<<layer<<", chType: "<<chType
                                <<" --> layerHash: "<<static_cast<unsigned>(layHash));
                 const Identifier backCnv = reElement->measurementId(measHash);
-                if (backCnv != chId) {
-                    ATH_MSG_FATAL("The back and forth conversion of "<<m_idHelperSvc->toString(chId)
+                if (backCnv != chID) {
+                    ATH_MSG_FATAL("The back and forth conversion of "<<m_idHelperSvc->toString(chID)
                                     <<" failed. Got "<<m_idHelperSvc->toString(backCnv));
                     return StatusCode::FAILURE;
                 }
                 if (layHash != reElement->layerHash(measHash)) {
                     ATH_MSG_FATAL("Constructing the layer hash from the identifier "<<
-                                m_idHelperSvc->toString(chId)<<" leads to different layer hashes "<<
+                                m_idHelperSvc->toString(chID)<<" leads to different layer hashes "<<
                                 layHash<<" vs. "<< reElement->layerHash(measHash));
                     return StatusCode::FAILURE;
                 }
-                ATH_MSG_VERBOSE("Channel "<<m_idHelperSvc->toString(chId)<<" strip position "
-                                        <<Amg::toString(reElement->stripPosition(gctx, measHash)));
+                if (chType == sTgcIdHelper::sTgcChannelTypes::Strip) {
+                    ATH_MSG_VERBOSE("Channel "<<m_idHelperSvc->toString(chID)<<" strip position "
+                                    <<Amg::toString(reElement->globalChannelPosition(gctx, measHash)));
+                } 
+                else if (chType == sTgcIdHelper::sTgcChannelTypes::Wire) {
+                    ATH_MSG_VERBOSE("Channel "<<m_idHelperSvc->toString(chID)<<" wireGroup position "
+                                    <<Amg::toString(reElement->globalChannelPosition(gctx, measHash)));
+                }
             }
         }
       }
@@ -143,7 +164,6 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
                                        const ActsGeometryContext& gctx, 
                                        const sTgcReadoutElement* reElement){
     
-   
     m_stIndex    = reElement->stationName();
     m_stEta      = reElement->stationEta();
     m_stPhi      = reElement->stationPhi();
@@ -152,55 +172,97 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx,
     ///
     m_numLayers = reElement->numLayers();
     m_yCutout = reElement->yCutout();
-    m_gasTck = reElement->gasGapPitch();
+    m_gasTck = reElement->gasGapThickness();
     ///
     m_sChamberLength = reElement->sChamberLength();
     m_lChamberLength = reElement->lChamberLength();
     m_chamberHeight = reElement->chamberHeight();
     ///
-    m_sGapLength = reElement->sGapLength();
-    m_lGapLength = reElement->lGapLength();
-    m_gapHeight = reElement->gapHeight();
-    ///
-    m_numStrips = reElement->numStrips();
-    m_stripPitch = reElement->stripPitch();
-    m_stripWidth = reElement->stripWidth();   
-    ///Wires and Pads will also come here 
+    ///Pads will come here 
  
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
    m_readoutTransform = transform;
    const sTgcIdHelper& id_helper{m_idHelperSvc->stgcIdHelper()};
-      
    for (int layer = 1; layer <= reElement->numLayers(); ++layer) {
-        for (int chType = sTgcIdHelper::sTgcChannelTypes::Pad; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
+        for (int chType = sTgcIdHelper::sTgcChannelTypes::/*Pad*/Strip; chType <= sTgcIdHelper::sTgcChannelTypes::Wire; ++chType) {
+            unsigned int numWireGroup = 0;
+            /// Use idHelper to get the identifier
+            bool isValidLay{false};
+            const Identifier layID = id_helper.channelID(reElement->identify(),
+                                                        reElement->multilayer(),
+                                                        layer, chType, 1, isValidLay);
+            if (!isValidLay) {
+                continue;
+            }
+            /// Gas Gap dimensions
+            m_sGapLength = reElement->sGapLength(layID);
+            m_lGapLength = reElement->lGapLength(layID);
+            m_gapHeight = reElement->gapHeight(layID);
             switch (chType) {
                 case sTgcIdHelper::sTgcChannelTypes::Strip:
-                    unsigned int numStrip = reElement->numStrips();
-                    for (unsigned int strip = 1; strip <= numStrip ; ++strip) {
-
-                        bool isValid{false};
+                    m_numStrips = reElement->numStrips(layID);
+                    m_stripPitch = reElement->stripPitch(layID);
+                    m_stripWidth = reElement->stripWidth(layID); 
+                    for (unsigned int strip = 1; strip <= reElement->numStrips(layID); ++strip) {
+                        bool isValidStrip{false};
                         const Identifier stripID = id_helper.channelID(reElement->identify(), 
                                                                    reElement->multilayer(),
-                                                                    layer, chType, strip, isValid);
-                    if (!isValid) {
+                                                                    layer, chType, strip, isValidStrip);
+                    if (!isValidStrip) {
                         ATH_MSG_WARNING("Invalid Identifier detected for readout element "
                                        <<m_idHelperSvc->toStringDetEl(reElement->identify())
                                        <<" layer: "<<layer<<" strip: "<<strip<<" channelType: "<<chType);
                         continue;
                     }
-                    m_globalStripPos.push_back(reElement->stripPosition(gctx, stripID));
+                    m_localStripPos.push_back((reElement->localChannelPosition(stripID)).block<2,1>(0,0));
+                    m_globalStripPos.push_back(reElement->globalChannelPosition(gctx, stripID));
                     m_stripGasGap.push_back(layer);
                     m_stripNum.push_back(strip);
-                    m_stripLengths.push_back(reElement->stripLength(strip));
+                    m_stripLengths.push_back(reElement->stripLength(stripID));
 
                     if (strip != 1) continue;
                     const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, stripID);
-                    ATH_MSG_ALWAYS("The local to global transformation on layers is: " << Amg::toString(locToGlob));
+                    ATH_MSG_DEBUG("The local to global transformation on layers is: " << Amg::toString(locToGlob));
                     m_stripRot.push_back(locToGlob);
                     m_stripRotGasGap.push_back(layer);
-                
-                }
+
+                    }
+                    break;
+                  
+                case sTgcIdHelper::sTgcChannelTypes::Wire:
+                    m_wireGroupWidth = reElement->wireGroupWidth(layer);
+                    numWireGroup = reElement->numWireGroups(layer);                    
+                    m_wirePitch = reElement->wirePitch(layID);
+                    m_wireWidth = reElement->wireWidth(layID);
+                    m_numWires.push_back(reElement->numWires(layer));
+                    m_firstWireGroupWidth.push_back(reElement->firstWireGroupWidth(layer));
+                    m_numWireGroups.push_back(numWireGroup);
+                    m_wireCutout.push_back(reElement->wireCutout(layer)); 
+                    std::cout << "The number of wire groups are:" << numWireGroup << std::endl;
+                    for (unsigned int wireGroup = 1; wireGroup <= numWireGroup; ++wireGroup) {
+                        bool isValidWire{false};
+                        const Identifier wireGroupID = id_helper.channelID(reElement->identify(), 
+                                                                   reElement->multilayer(),
+                                                                    layer, chType, wireGroup, isValidWire);
+                    if (!isValidWire) {
+                        ATH_MSG_WARNING("Invalid Identifier detected for readout element "
+                                       <<m_idHelperSvc->toStringDetEl(reElement->identify())
+                                       <<" layer: "<<layer<<" wireGroup: "<<wireGroup<<" channelType: "<<chType);
+                        continue;
+                    }  
+                    m_localWireGroupPos.push_back(reElement->localChannelPosition(wireGroupID));
+                    m_globalWireGroupPos.push_back(reElement->globalChannelPosition(gctx, wireGroupID));
+                    m_wireGroupGasGap.push_back(layer);
+                    m_wireGroupNum.push_back(wireGroup);
+                  
+                    if (wireGroup != 1) continue;
+                    const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, wireGroupID);
+                    ATH_MSG_DEBUG("The local to global transformation on layers is: " << Amg::toString(locToGlob));
+                    m_wireGroupRot.push_back(locToGlob);
+                    m_wireGroupRotGasGap.push_back(layer);
+                    }
+                    break;
             }
         }
    }

@@ -34,7 +34,7 @@ namespace MuonGMR4{
         {
             const Amg::Vector2D dP = m_firstStripPos - other.m_firstStripPos;
             if (std::hypot(dP.x(), dP.y()) > tolerance) {
-                if (dP.x() > tolerance) return dP.x()< 0.;
+                if (std::abs(dP.x()) > tolerance) return dP.x()< 0.;
                 return dP.y() < 0.;
             }
         }
