@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DITAUREC_ELMUFINDER_H
@@ -43,7 +43,6 @@ class ElMuFinder : public DiTauToolBase {
     { this, "MuonContainer", "Muons", "" };
   float m_muMinPt;
   float m_muMaxEta;
-  int m_muQual;
 
 };
 
