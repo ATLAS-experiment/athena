@@ -2909,6 +2909,18 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_mu24_ivarmedium_xe0_mhtpufit_em_L1MU18VFCH',  l1SeedThresholds=['MU18VFCH', 'FSNOSEED'], stream=['Main'], groups=TagAndProbeGroup+METGroup+['RATE:CPS_MU18VFCH']),
         ChainProp(name='HLT_mu24_ivarmedium_xe0_mhtpufit_pf_L1MU18VFCH',  l1SeedThresholds=['MU18VFCH', 'FSNOSEED'], stream=['Main'], groups=TagAndProbeGroup+METGroup+['RATE:CPS_MU18VFCH']),
         ChainProp(name='HLT_mu24_ivarmedium_xe0_nn_L1MU18VFCH',  l1SeedThresholds=['MU18VFCH', 'FSNOSEED'], stream=['Main'], groups=TagAndProbeGroup+METGroup+['RATE:CPS_MU18VFCH']),
+
+
+        # ATR-28712 Lowering MET preselection in the isolated high-pT trigger chains 
+        ChainProp(name="HLT_xe50_tcpufit_isotrk120_medium_iaggrmedium_L1jXE100", l1SeedThresholds=["FSNOSEED"]*2, stream=[PhysicsStream], groups=UnconvTrkGroup+PrimaryPhIGroup),
+        ChainProp(name="HLT_xe50_tcpufit_isotrk120_medium_iaggrmedium_L1gXEJWOJ100", l1SeedThresholds=["FSNOSEED"]*2, stream=[PhysicsStream], groups=UnconvTrkGroup+PrimaryPhIGroup),
+        ChainProp(name="HLT_xe60_tcpufit_isotrk120_medium_iaggrmedium_L1jXE100", l1SeedThresholds=["FSNOSEED"]*2, stream=[PhysicsStream], groups=UnconvTrkGroup+PrimaryPhIGroup),
+        ChainProp(name="HLT_xe60_tcpufit_isotrk120_medium_iaggrmedium_L1gXEJWOJ100", l1SeedThresholds=["FSNOSEED"]*2, stream=[PhysicsStream], groups=UnconvTrkGroup+PrimaryPhIGroup),
+        ChainProp(name="HLT_xe50_nn_isotrk120_medium_iaggrmedium_L1jXE100", l1SeedThresholds=["FSNOSEED"]*2, stream=[PhysicsStream], groups=UnconvTrkGroup+PrimaryPhIGroup),
+        ChainProp(name="HLT_xe50_nn_isotrk120_medium_iaggrmedium_L1gXEJWOJ100", l1SeedThresholds=["FSNOSEED"]*2, stream=[PhysicsStream], groups=UnconvTrkGroup+PrimaryPhIGroup),
+        ChainProp(name="HLT_xe60_nn_isotrk120_medium_iaggrmedium_L1jXE100", l1SeedThresholds=["FSNOSEED"]*2, stream=[PhysicsStream], groups=UnconvTrkGroup+PrimaryPhIGroup),
+        ChainProp(name="HLT_xe60_nn_isotrk120_medium_iaggrmedium_L1gXEJWOJ100", l1SeedThresholds=["FSNOSEED"]*2, stream=[PhysicsStream], groups=UnconvTrkGroup+PrimaryPhIGroup),
+
     ]
 
 
