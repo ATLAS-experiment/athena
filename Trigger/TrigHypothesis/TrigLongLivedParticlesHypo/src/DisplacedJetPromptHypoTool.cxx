@@ -23,8 +23,8 @@ StatusCode DisplacedJetPromptHypoTool::initialize()  {
 
 StatusCode DisplacedJetPromptHypoTool::decide(  Info& info )  const {
 	//setup monitoring
-	auto mon_nprompt = Monitored::Scalar("nprompt", 0);
-	
+	auto mon_nprompt = Monitored::Scalar<int>("nprompt", -1);
+
 	std::vector<float> monvec_trk_d0sig;
 	std::vector<float> monvec_trk_z0st;
 	std::vector<float> monvec_trk_d0;
@@ -110,6 +110,14 @@ StatusCode DisplacedJetPromptHypoTool::decide(  Info& info )  const {
 	info.counts->setDetail<int>("nother_"+m_cutname, nother);
 
 	ATH_MSG_DEBUG("Passing Jet pT = "<<info.jet->pt()/Gaudi::Units::GeV);
+	
+	//record some info about the passed jet
+	auto mon_jetpt = Monitored::Scalar<float>("pass_jet_pt", 0.0);
+	auto mon_jeteta = Monitored::Scalar<float>("pass_jet_eta", -100);
+	Monitored::Group mg_passing(m_monTool, mon_jetpt, mon_jeteta);
+	mon_jetpt = info.jet->pt()/Gaudi::Units::GeV;
+	mon_jeteta = info.jet->eta();
+	
 	addDecisionID(m_decisionId.numeric(), info.output_decision);
 
 	return StatusCode::SUCCESS;
