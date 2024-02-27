@@ -71,12 +71,16 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
     
     usingDIPZ = bool(re.match(r'.*Z', presel_cut_str)) # Need to determine if there's DIPZ leg anywhere to enforce central jets across all calopresel legs
     if usingDIPZ:
-        findAllJets = re.findall(r'(?P<nJet>\d?\d?[jacf])', presel_cut_str)
-        findAllJets = ['1'+el if len(el) == 1 else el for el in findAllJets]
+        findSel = re.finditer(r'(?P<nJet>\d?[jacf])(?P<ptcut>\d+)', presel_cut_str) 
+        findAllJets=[]
+        findAllPts=[]
+        for match in findSel:
+            nJ = match.group("nJet")
+            findAllJets.append('1'+nJ if len(nJ)==1 else nJ)
+            findAllPts.append(int(match.group("ptcut")))
         nAllJets = sum(int(i[:-1]) for i in findAllJets)
-        nCentralJets = sum(int(i[:-1]) if 'c' in i else 0 for i in findAllJets)
-        findAllPts = re.findall(r'[jacf](?P<ptcut>\d+)', presel_cut_str)
-        ptCut = min(float(i) for i in findAllPts)
+        nCentralJets = sum(int(i[:-1]) if 'c' in i else 0 for i in findAllJets)        
+        ptCut = min(int(i) for i in findAllPts)
         assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. This isn't currently supported. Please investigate."
 
     preselCommonJetParts = dict(JetChainParts_Default)
@@ -103,7 +107,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
         pattern_to_test += r'b(?P<btagger>\D*)(?P<bwp>\d+)' if hasBjetSel else '' # b-tagging if needed
         pattern_to_test += r'gntau(?P<tauwp>\d\d)' if hasTauSel else '' # tau preselection if needed
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
-        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+)?)'
+        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)((?P<dipzwp>\d+))?(?P<prefilt>(MAXMULT\d+[jacf]?)?)'
         matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
@@ -170,8 +174,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
             'prefilters': prefilters,
             }
         )
-        preselChainDict['chainParts'] += [tmpChainDict]
-
+        preselChainDict['chainParts'] += [tmpChainDict] 
 
 
     # We need to pad by the legs not in the preselection expression

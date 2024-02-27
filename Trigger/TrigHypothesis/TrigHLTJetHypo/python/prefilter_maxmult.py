@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
+from TrigHLTJetHypo.ConditionDefaults import defaults
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.Constants import DEBUG
@@ -10,13 +11,18 @@ import re
 logger = logging.getLogger( __name__)
 logger.setLevel(DEBUG)
 
-pattern = r'^MAXMULT(?P<end>\d+)$'
-
+pattern = r'^MAXMULT(?P<end>\d+)(?P<eta>[jacf]*)$'
 rgx = re.compile(pattern)
 
+etaRangeAbbrev = {
+    "j":"0eta320", # default
+    "a":"0eta490", 
+    "c":"0eta240", 
+    "f":"320eta490"
+}
 
 def prefilter_maxmult(pf_string):
-    """calculate the parameters needed to generate a RangeFilter config 
+    """calculate the parameters needed to generate a MaxMultFilter config 
     AlgTool starting from the prefilter substring if it appears in the 
     chain dict"""
 
@@ -27,8 +33,16 @@ def prefilter_maxmult(pf_string):
     groupdict = m.groupdict()
 
     vals = {}
-    vals['end'] = int(groupdict['end']) 
 
+    # eta region
+    eta_region = groupdict['eta']
+    if not eta_region: eta_region = 'j'
+    eta_sel = etaRangeAbbrev[eta_region]
+    lo, hi = eta_sel.split('eta')
+    vals = defaults('eta', lo=lo, hi=hi)
+
+    # jet multiplicity 
+    vals['end'] = int(groupdict['end'])  
     toolclass, name =  toolfactory('MaxMultFilterConfigTool')
     vals['name'] = name
     
