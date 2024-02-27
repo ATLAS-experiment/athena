@@ -35,6 +35,7 @@ atlas_add_component( ActsDataPreparation
    TrkSurfaces
    xAODInDetMeasurement
    xAODMeasurementBase
+   ViewAlgsLib InDetIdentifier
 )
 
 # Unit tests

@@ -1,0 +1,78 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+namespace ActsTrk::Cache{
+    template<typename CT>
+    StatusCode ViewFillerAlg<CT>::initialize() {
+        ATH_CHECK(m_inputIDC.initialize());
+        ATH_CHECK(m_outputKey.initialize());
+        ATH_CHECK(m_roiCollectionKey.initialize());
+        ATH_CHECK( m_regionSelector.retrieve() );
+
+        return StatusCode::SUCCESS;
+    }
+
+    template<typename CT>
+    StatusCode ViewFillerAlg<CT>::execute (const EventContext& ctx) const{
+        //obtain the idc and output container
+        CacheReadHandle idc(m_inputIDC, ctx);
+        if(!idc.isValid()){
+            ATH_MSG_ERROR("Unable to obtain a valid handle to the IDC container");
+            return StatusCode::FAILURE;
+        }
+
+        SG::WriteHandle<ConstDataVector<CT>> output(m_outputKey, ctx);
+
+        //construct a data vector in view elements mode, as it will not own its objects
+        //the output type supplied must be of flavour DataVector<T>
+        auto container = std::make_unique<ConstDataVector<CT>>(SG::VIEW_ELEMENTS);
+
+        std::set<IdentifierHash> hashes_to_fetch;
+
+        // retrieve the RoI as provided from upstream algos
+        SG::ReadHandle<TrigRoiDescriptorCollection> roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
+        ATH_CHECK(roiCollectionHandle.isValid());      
+        const TrigRoiDescriptorCollection *roiCollection = roiCollectionHandle.cptr();
+
+        std::vector<IdentifierHash> per_roi_ids;
+        for(auto roi: *roiCollection){
+            per_roi_ids.clear();
+            m_regionSelector->HashIDList(*roi, per_roi_ids);
+            hashes_to_fetch.insert(per_roi_ids.begin(), per_roi_ids.end());
+        }
+
+        for(auto idHash: hashes_to_fetch){
+            //this function will wait if an item is not available
+            auto ce = idc->indexFindPtr(idHash);
+
+            if(ce == nullptr){
+                continue;
+            }
+
+            for(unsigned int i=ce->range_start; i<ce->range_end; i++){
+                container->push_back(ce->container->at(i));
+            }
+        }
+
+        ATH_MSG_DEBUG("View filled with "<<container->size()<<" items");
+
+        //record the data against the write handle
+        ATH_CHECK(output.record(std::move(container)));
+
+        if(!output.isValid()){
+            ATH_MSG_ERROR("Unable to write to the output container");
+            return StatusCode::FAILURE;
+        }
+
+        return StatusCode::SUCCESS;
+    }
+
+    template<typename OT>
+    StatusCode Helper<OT>::insert(IDCWriteHandle& wh, DataVector<OT>* dv, unsigned int range_start, unsigned int range_end){
+        if(range_start == range_end){return StatusCode::SUCCESS;}
+        
+        auto ce = std::make_unique<CacheEntry<OT>>(dv, range_start, range_end);
+
+        return wh.addOrDelete(std::move(ce));
+    }
+}

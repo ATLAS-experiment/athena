@@ -30,6 +30,12 @@ StatusCode ClusterizationAlg<IClusteringTool>::initialize()
     // Monitoring
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
 
+    //caching
+    ATH_CHECK(m_ClusterCache.initialize(SG::AllowEmpty));
+    ATH_CHECK(m_ClusterCacheBackend.initialize(SG::AllowEmpty));
+
+    m_cache_enabled = !m_ClusterCache.key().empty();
+
     return StatusCode::SUCCESS;
 }
 
@@ -46,26 +52,26 @@ StatusCode ClusterizationAlg<IClusteringTool>::execute(const EventContext& ctx) 
       return StatusCode::FAILURE;
     }
 
+    Cache_WriteHandle cacheHandle;
+    if(m_cache_enabled){
+      cacheHandle = Cache_WriteHandle(m_ClusterCache, ctx);
+      auto updateHandle = Cache_BackendUpdateHandle(m_ClusterCacheBackend, ctx);
+      ATH_CHECK(updateHandle.isValid());
+      ATH_CHECK(cacheHandle.record(std::make_unique<Cache_IDC>(updateHandle.ptr())));
+      ATH_CHECK(cacheHandle.isValid());
+    }
+
     SG::ReadHandle<RDOContainer> rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
     ATH_CHECK(rdoContainer.isValid());
 
-    SG::WriteHandle<ClusterContainer> clusterHandle
-	= SG::makeHandle(m_clusterContainerKey, ctx);
+    SG::WriteHandle<ClusterContainer> clusterHandle = SG::makeHandle(m_clusterContainerKey, ctx);
     ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(), 
 				    std::make_unique<ClusterAuxContainer>() ));
     ClusterContainer *clusterContainer = clusterHandle.ptr();
     // Reserve space, estimate of mean clusters to reduce re-allocations
     clusterContainer->reserve( m_expectedClustersPerRDO.value() * rdoContainer->size() );
 
-    // This will allow us to access the already processed hash ids
-    // For now we are not using yet an update write handle, so the 
-    // cluster container is empty    
-    // Possibly, we need to find a more efficient solution
-    ContainerAccessor<typename ClusterContainer::base_value_type, IdentifierHash, 1>
-	accessor ( *clusterContainer,
-		   [] (const typename ClusterContainer::base_value_type& cl) -> IdentifierHash 
-		       { return cl.identifierHash(); },
-		   detElements->size());
+
 
     // retrieve the RoI as provided from upstream algos
     SG::ReadHandle<TrigRoiDescriptorCollection> roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
@@ -79,16 +85,29 @@ StatusCode ClusterizationAlg<IClusteringTool>::execute(const EventContext& ctx) 
       m_regionSelector->HashIDList(*roi, listOfIds);
       // We'd need to first check the id hashes have not already been processed beforehand, and only then
       // add it to the list of ids to be processed.
-      for (const IdentifierHash id : listOfIds) {
-	if (accessor.isIdentifierPresent(id)) continue;
+      for (const IdentifierHash id : listOfIds) {      
+        //obtain the write handle directly when we decide to process a given idhash
+        //this will ensure that proper waiting 
+        Cache_IDCLock cache_wh;
+        if(m_cache_enabled){
+          //obtain a write handle
+          auto tmp = cacheHandle->getWriteHandle(id);
+          Cache_IDCLock::Swap(cache_wh, tmp);
+          //check if already available
+          if(cache_wh.OnlineAndPresentInAnotherView()) continue;
+        }
 
-	// If not already processed, do it now
-	const RawDataCollection* rdos = rdoContainer->indexFindPtr(id);
-	if (rdos != nullptr && !rdos->empty()) {
-	  ATH_CHECK(m_clusteringTool->clusterize(*rdos, *m_idHelper, ctx, *clusterContainer));
-	} else {
-	  ATH_MSG_DEBUG("No input RDOs for this container element");
-	}
+        // If not already processed, do it now
+        const RawDataCollection* rdos = rdoContainer->indexFindPtr(id);
+        if (rdos != nullptr && !rdos->empty()) {
+          auto prev_len = clusterContainer->size();
+          ATH_CHECK(m_clusteringTool->clusterize(*rdos, *m_idHelper, ctx,*clusterContainer));
+
+          if(m_cache_enabled){
+            //add to the cache
+            ATH_CHECK(Cache::Helper<BaseClusterType>::insert(cache_wh, clusterContainer, prev_len, clusterContainer->size()));
+          }
+        }
       } // loop on ids
     } // loop on rois
     
