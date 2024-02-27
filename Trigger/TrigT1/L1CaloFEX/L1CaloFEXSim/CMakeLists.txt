@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( L1CaloFEXSim )
@@ -22,32 +22,26 @@ atlas_add_component( L1CaloFEXSim
                      
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/*.csv )
-atlas_install_data( share/*.ref )
 atlas_install_data( data/bdt_config_v*.json )
 
 atlas_add_test( L1CaloFEXSimCfg_MC
                 SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i ttbar -e -n 5
-                LOG_SELECT_PATTERN "^ApplicationMgr"
-                PROPERTIES TIMEOUT 300
-                PRIVATE_WORKING_DIRECTORY )
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( L1CaloFEXSimCfg_R2data
                 SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data_run2_EB -e -n 5
-                LOG_SELECT_PATTERN "^ApplicationMgr"
-                PROPERTIES TIMEOUT 300
-                PRIVATE_WORKING_DIRECTORY )
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( L1CaloFEXSimCfg_R3data
                 SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data -e -n 5
-                LOG_SELECT_PATTERN "^ApplicationMgr"
-                PROPERTIES TIMEOUT 300
-                PRIVATE_WORKING_DIRECTORY )
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( L1CaloFEXSimCfgBDTTau_R3data
                 SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data -e -d -n 5
-                PROPERTIES TIMEOUT 300
-                PRIVATE_WORKING_DIRECTORY 
-		ENVIRONMENT "TAU_EFEX_BDT_CONFIG_PATH=${CMAKE_CURRENT_SOURCE_DIR}/data/bdt_config_v16.json"
-		POST_EXEC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/validateBDTTau.py )
+                PRIVATE_WORKING_DIRECTORY
+		        ENVIRONMENT "TAU_EFEX_BDT_CONFIG_PATH=${CMAKE_CURRENT_SOURCE_DIR}/data/bdt_config_v16.json"
+		        POST_EXEC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/validateBDTTau.py )
