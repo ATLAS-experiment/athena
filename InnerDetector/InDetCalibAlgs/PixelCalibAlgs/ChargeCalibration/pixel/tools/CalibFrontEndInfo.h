@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************************************
@@ -21,7 +21,12 @@
 class CalibFrontEndInfo {
     public:
         CalibFrontEndInfo () {};
-        CalibFrontEndInfo (int MODid, int FEid, const std::string & MODid_str, const std::string & RODid_str) {m_MODid =MODid; m_FEid=FEid; m_MODid_str =MODid_str; m_RODid_str =RODid_str;};
+        CalibFrontEndInfo (int MODid, int FEid, const std::string & MODid_str, const std::string & RODid_str) :
+          m_MODid_str (MODid_str),
+          m_RODid_str (RODid_str),
+          m_MODid (MODid),
+          m_FEid (FEid)
+        {}
         ~ CalibFrontEndInfo (){};
         
         //Setters for the parameters
