@@ -62,6 +62,10 @@ def ActsPixelClusterizationAlgCfg(flags,
     # Regional selection
     kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
 
+    kwargs.setdefault('ClusterCacheBackend', 'ActsPixelClusterCache_Back')
+    kwargs.setdefault('ClusterCache', 'ActsPixelClustersCache')
+
+
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
@@ -88,7 +92,11 @@ def ActsStripClusterizationAlgCfg(flags,
     kwargs.setdefault("IDHelper", "SCT_ID")
     # Regional selection
     kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
-    
+
+    kwargs.setdefault('ClusterCacheBackend', 'ActsStripClusterCache_Back')
+    kwargs.setdefault('ClusterCache', 'ActsStripClustersCache')
+
+
     if 'RegSelTool' not in kwargs:
         from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
@@ -103,13 +111,58 @@ def ActsStripClusterizationAlgCfg(flags,
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterizationAlg(name, **kwargs))
     return acc
 
+def ActsClusterCacheCreatorCfg(flags, name="ActsClusterCacheCreator", **kwargs):
+    kwargs.setdefault("PixelClustersCacheKey", "ActsPixelClusterCache_Back")
+    kwargs.setdefault("StripClustersCacheKey", "ActsStripClusterCache_Back")
+
+    acc = ComponentAccumulator()
+
+    acc.addEventAlgo(CompFactory.ActsTrk.Cache.CreatorAlg(name, **kwargs))
+
+    return acc
+
+def ActsPixelClustersViewFillerCfg(flags,name="PixelClusterViewFiller", **kwargs):
+    kwargs.setdefault("InputIDC", "ActsPixelClustersCache")
+    kwargs.setdefault("Output", "ITKPixelClusters_InView")
+
+    kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
+
+    acc = ComponentAccumulator()
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+        
+    acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterCacheFillerAlg(name, **kwargs))
+
+    return acc
+
+def ActsStripClustersViewFillerCfg(flags,name="StripClusterViewFiller", **kwargs):
+    kwargs.setdefault("InputIDC", "ActsStripClustersCache")
+    kwargs.setdefault("Output", "ITKStripClusters_InView")
+
+    kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
+
+    acc = ComponentAccumulator()
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
+        
+    acc.addEventAlgo(CompFactory.ActsTrk.StripClusterCacheFillerAlg(name, **kwargs))
+
+    return acc
+
+
 def ActsMainClusterizationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    
+    acc.merge(ActsClusterCacheCreatorCfg(flags))
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsPixelClusterizationAlgCfg(flags))
+        acc.merge(ActsPixelClustersViewFillerCfg(flags))
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripClusterizationAlgCfg(flags))
+        acc.merge(ActsStripClustersViewFillerCfg(flags))
 
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -129,6 +182,7 @@ def ActsConversionClusterizationCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                 name="ActsConversionStripClusterizationAlg",
                                                 ClustersKey="ITkConversionStripClusters",
+                                                ClusterCache="",
                                                 RoIs="OfflineCaloBasedRegion"))
 
     # Analysis extensions

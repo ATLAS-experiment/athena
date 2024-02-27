@@ -13,6 +13,7 @@
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
 #include <IRegionSelector/IRegSelTool.h>
 #include <InDetReadoutGeometry/SiDetectorElementCollection.h>
+#include "Cache.h"
 
 namespace ActsTrk {
 
@@ -24,7 +25,16 @@ public:
     using ClusterContainer = typename IClusteringTool::ClusterContainer;
     using ClusterAuxContainer = typename IClusteringTool::ClusterAuxContainer;
     using IDHelper = typename IClusteringTool::IDHelper;
-
+    using BaseClusterType = typename ClusterContainer::base_value_type;
+    
+    //cache related handles
+    using Cache_BackendUpdateHandleKey = typename Cache::Handles<BaseClusterType>::BackendUpdateHandleKey;
+    using Cache_BackendUpdateHandle = typename Cache::Handles<BaseClusterType>::BackendUpdateHandle;
+    using Cache_WriteHandleKey = typename Cache::Handles<BaseClusterType>::WriteHandleKey;
+    using Cache_WriteHandle = typename Cache::Handles<BaseClusterType>::WriteHandle;
+    using Cache_IDC = typename Cache::Handles<BaseClusterType>::IDC;
+    using Cache_IDCLock = typename Cache::Handles<BaseClusterType>::IDC::IDC_WriteHandle;
+    
     ClusterizationAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~ClusterizationAlg() = default;
     virtual StatusCode initialize() override;
@@ -72,6 +82,10 @@ private:
 	"Key of output xAOD pixel cluster container"
     };
 
+    Cache_WriteHandleKey m_ClusterCache{this,"ClusterCache",""};
+    Cache_BackendUpdateHandleKey m_ClusterCacheBackend{this,"ClusterCacheBackend",""};
+    bool m_cache_enabled{false};
+
     // expected number of clusters for RDO
     // This values is used for reserving enough memory of the cluster container
     // reserve = m_expectedClustersPerRDO * nRDOs
@@ -96,6 +110,6 @@ private:
 
 } // namespace ActsTrk
 
-#include "ClusterizationAlg.ipp"
+#include "ClusterizationAlg.icc"
 
 #endif

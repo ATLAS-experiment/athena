@@ -12,5 +12,8 @@ class PixelClusterizationAlg : public ClusterizationAlg<IPixelClusteringTool> {
     using ClusterizationAlg<IPixelClusteringTool>::ClusterizationAlg;
 };
 
-}
+class PixelClusterCacheFillerAlg: public Cache::ViewFillerAlg<xAOD::PixelClusterContainer>{
+    using Cache::ViewFillerAlg<xAOD::PixelClusterContainer>::ViewFillerAlg;
+};
 
+}
