@@ -21,6 +21,8 @@
 
 #include <RDBAccessSvc/IRDBRecord.h>
 
+#include <MuonDetDescrUtils/MuonSectorMapping.h>
+
 using namespace CxxUtils;
 using namespace ActsTrk;
 
@@ -197,7 +199,18 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         ATH_CHECK(loadDimensions(define, facCache));
         std::unique_ptr<TgcReadoutElement> readoutEle = std::make_unique<TgcReadoutElement>(std::move(define));
         ATH_CHECK(mgr.addTgcReadoutElement(std::move(readoutEle)));
-    }    
+    }
+    /// Map the Tgc sectors to the classic muon sectors
+    std::vector<const TgcReadoutElement*> tgcReadOutEles = mgr.getAllTgcReadoutElements();
+    std::unique_ptr<std::vector<int>> tgcSectorMapping = std::make_unique<std::vector<int>>();
+    tgcSectorMapping->resize(idHelper.module_hash_max());
+    Muon::MuonSectorMapping sectorMapping{};
+    const ActsGeometryContext gctx{};
+    for (const TgcReadoutElement* readoutEle : tgcReadOutEles) {
+        int& sectNumb = (*tgcSectorMapping)[m_idHelperSvc->moduleHash(readoutEle->identify())];
+        sectNumb = sectorMapping.getSector(readoutEle->center(gctx).phi());
+    }
+    ATH_CHECK(detStore()->record(std::move(tgcSectorMapping), "TGC_SectorMapping"));
     return StatusCode::SUCCESS;
 }
 StatusCode TgcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
