@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CavernInfraDetectorFactory.h"
@@ -27,15 +27,10 @@
 #include <string>
 #include <map>
 
-CavernInfraDetectorFactory::CavernInfraDetectorFactory(StoreGateSvc *detStore,
-						       IRDBAccessSvc *pAccess)
-  :m_detectorManager(NULL),
-   m_detectorStore(detStore),
-   m_access(pAccess)
-{
-}
-
-CavernInfraDetectorFactory::~CavernInfraDetectorFactory()
+CavernInfraDetectorFactory::CavernInfraDetectorFactory(ServiceHandle<StoreGateSvc> detStore,
+						       ServiceHandle<IRDBAccessSvc> pAccess)
+  : m_detectorStore(detStore)
+  , m_access(pAccess)
 {
 }
 

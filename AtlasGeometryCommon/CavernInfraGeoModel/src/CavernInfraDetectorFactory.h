@@ -1,52 +1,50 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CavernInfraDetectorFactory_h
-#define CavernInfraDetectorFactory_h 1
+#ifndef CAVERNINFRAGEOMODEL_CAVERNINFRADETECTORFACTORY_H
+#define CAVERNINFRAGEOMODEL_CAVERNINFRADETECTORFACTORY_H
 
-#include "GeoModelKernel/GeoVDetectorFactory.h"
 #include "CavernInfraDetectorManager.h"
+#include "GeoModelKernel/GeoVDetectorFactory.h"
+#include "StoreGate/StoreGateSvc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
-#include <string>
 
-class StoreGateSvc;
+#include <string>
 
 class CavernInfraDetectorFactory : public GeoVDetectorFactory  
 {
  public:
-  
   // Constructor:
-  CavernInfraDetectorFactory(StoreGateSvc *pDetStore,
-			     IRDBAccessSvc *pAccess);
+  CavernInfraDetectorFactory(ServiceHandle<StoreGateSvc> pDetStore,
+			     ServiceHandle<IRDBAccessSvc> pAccess);
+  
+  // Illegal operations:
+  const CavernInfraDetectorFactory & operator=(const CavernInfraDetectorFactory &right) = delete;
+  CavernInfraDetectorFactory(const CavernInfraDetectorFactory &right) = delete;
   
   // Destructor:
-  ~CavernInfraDetectorFactory();
+  ~CavernInfraDetectorFactory() = default;
   
   // Creation of geometry:
-  virtual void create(GeoPhysVol *world);
+  virtual void create(GeoPhysVol *world) override;
   
   // Access to the results:
-  virtual const CavernInfraDetectorManager * getDetectorManager() const;
+  const CavernInfraDetectorManager* getDetectorManager() const;
   
   // Set version Tag and Node
   void setTagNode(const std::string& tag, const std::string& node);
-
+  
  private:  
-  // Illegal operations:
-  const CavernInfraDetectorFactory & operator=(const CavernInfraDetectorFactory &right);
-  CavernInfraDetectorFactory(const CavernInfraDetectorFactory &right);
-  
   // The manager:
-  CavernInfraDetectorManager       *m_detectorManager;
+  CavernInfraDetectorManager*  m_detectorManager{nullptr};
   
-  StoreGateSvc             *m_detectorStore;
-  IRDBAccessSvc            *m_access;
+  ServiceHandle<StoreGateSvc>  m_detectorStore;
+  ServiceHandle<IRDBAccessSvc> m_access;
   std::string              m_versionTag;
   std::string              m_versionNode;
 };
 
 // Class CavernInfraDetectorFactory 
 #endif
-
 
