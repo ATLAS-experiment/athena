@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## A transform just getting some default file arguments (only to test file validation )
 
@@ -44,7 +44,6 @@ def addArgs(parser):
     parser.add_argument('--outputESDFile', type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output', type='esd', multipleOK=True), nargs='+')
     parser.add_argument('--outputAODFile', type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output', type='aod', multipleOK=True), nargs='+')
     parser.add_argument('--outputRDOFile', type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output', type='rdo', multipleOK=True), nargs='+')
-    parser.add_argument('--outputTAGFile', type=trfArgClasses.argFactory(trfArgClasses.argTAGFile, io='output', type='tag', multipleOK=True), nargs='+')
     parser.add_argument('--outputEVNTFile', type=trfArgClasses.argFactory(trfArgClasses.argEVNTFile, io='output', type='evnt', multipleOK=True), nargs='+')
     parser.add_argument('--outputHISTFile', type=trfArgClasses.argFactory(trfArgClasses.argHISTFile, io='output', type='hist', multipleOK=True), nargs='+')
     parser.add_argument('--outputTXT_FTKIPFile', type=trfArgClasses.argFactory(trfArgClasses.argFTKIPFile, io='output', multipleOK=True), nargs='+')

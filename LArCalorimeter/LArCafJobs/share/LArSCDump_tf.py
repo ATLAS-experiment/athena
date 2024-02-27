@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """JobTransform to run LAr SuperCells dumping jobs"""
 
@@ -14,7 +14,7 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 if __name__ == '__main__':
 
     executorSet = set()
-    executorSet.add(athenaExecutor(name = 'LArSCDump', skeletonFile = None,
+    executorSet.add(athenaExecutor(name = 'LArSCDump',
                                    skeletonCA='LArCafJobs.LArSCDumperSkeleton',
                                    substep = 'r2e', inData = ['BS',], outData = ['NTUP_SCMON']))
     

@@ -4,8 +4,6 @@
 #include "../TrkTrackFakeReader.h"
 #include "../LArCellContFakeWriter.h"
 #include "../LArCellContFakeReader.h"
-// #include "../CaloClusterFakeWriter.h"
-// #include "../CaloClusterFakeReader.h"
 #include "../AthenaPoolTestDataWriter.h"
 #include "../AthenaPoolTestDataReader.h"
 #include "../AthenaPoolTestAttrWriter.h"
@@ -20,8 +18,6 @@ DECLARE_COMPONENT( AthenaPoolTestDataWriter )
 DECLARE_COMPONENT( AthenaPoolTestDataReader )
 DECLARE_COMPONENT( AthenaPoolTestAttrWriter )
 DECLARE_COMPONENT( AthenaPoolTestAttrReader )
-// DECLARE_COMPONENT( CaloClusterFakeWriter )
-// DECLARE_COMPONENT( CaloClusterFakeReader )
 DECLARE_COMPONENT( InDetRawDataFakeWriter )
 DECLARE_COMPONENT( InDetRawDataFakeReader )
 DECLARE_COMPONENT( TrkTrackFakeWriter )

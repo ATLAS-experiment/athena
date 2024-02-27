@@ -25,7 +25,6 @@ OutputsVsStreams={
 # The basics:
     'outputESDFile': {'dstype': 'ESD', 'ifMatch': '(?!.*DRAW.*)', 'HumanOutputs': 'always produced.'},
     'outputAODFile': {'dstype': 'AOD', 'ifMatch': cpProjTag+'(?!.(.*DRAW.*|.*ZeroBias.*x[0-9].*))', 'HumanOutputs': 'always produced except for ZeroBias (ZB-1) stream and HI.'},
-    'outputTAGFile': {'dstype': 'TAG', 'ifMatch': HIProjTag+'(?!.(.*DRAW.*|.*ZeroBias.*x[0-9].*))', 'HumanOutputs': 'Produced for HI/HIp and comm when AOD is disabled'},
     'outputHISTFile': {'dstype': 'HIST', 'ifMatch': '(?!.(.*DRAW.*|.*debugrec.*))', 'HumanOutputs': 'always produced except for debug stream'},  # note was disabled for Pb-Pb HardProbes
     
 # Ntuples
@@ -152,7 +151,6 @@ def GetProcessConfigs(release,patcharea):
     processConfigs['aodmerge'] = {
         'inputs': {'inputAODFile': {}},
         'outputs': {'outputAODFile': {'dstype': 'AOD'},
-                    'outputTAGFile': {'dstype': 'TAG'}
                     },
         'phconfig': {'--ignoreerrors': 'ALL', 'autoConfiguration': 'everything', 'preExec': 'rec.doDPD.set_Value_and_Lock(False)'},
         'transformation': 'Merging_trf.py',

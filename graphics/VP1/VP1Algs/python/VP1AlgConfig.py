@@ -52,7 +52,8 @@ def configureGeometry(flags, cfg):
 
         cfg.merge(MuonGeoModelCfg(flags))
 
-    # Material due to InDet services
+    # Trigger the build of the InDetServMat geometry
+    # if any ID subsystems have been enabled
     if flags.Detector.GeometryID:
         from InDetServMatGeoModel.InDetServMatGeoModelConfig import (
              InDetServiceMaterialCfg)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfArgClasses
 # @brief Transform argument class definitions
@@ -1474,7 +1474,6 @@ class argPOOLFile(argAthenaFile):
                             'POOL_MRG_OUTPUT' : argPOOLFile(output, type=self.type, io='output')}
         myMergeConf = executorConfig(myargdict, myDataDictionary)
         myMerger = athenaExecutor(name='POOLMergeAthenaMP{0}{1}'.format(self._subtype, counter), conf=myMergeConf, 
-                                  skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py',
                                   skeletonCA = 'RecJobTransforms.MergePool_Skeleton',
                                   inData=set(['POOL_MRG_INPUT']), outData=set(['POOL_MRG_OUTPUT']),
                                   disableMT=True, disableMP=True)
@@ -1512,7 +1511,7 @@ class argHITSFile(argPOOLFile):
         myDataDictionary = {'HITS' : argHITSFile(inputs, type=self.type, io='input'),
                             'HITS_MRG' : argHITSFile(output, type=self.type, io='output')}
         myMergeConf = executorConfig(myargdict, myDataDictionary)
-        myMerger = athenaExecutor(name = mySubstepName, skeletonFile = 'SimuJobTransforms/skeleton.HITSMerge.py',
+        myMerger = athenaExecutor(name = mySubstepName,
                                   skeletonCA = 'SimuJobTransforms.HITSMerge_Skeleton',
                                   conf=myMergeConf, 
                                   inData=set(['HITS']), outData=set(['HITS_MRG']),
@@ -1590,7 +1589,7 @@ class argRDOFile(argPOOLFile):
         myDataDictionary = {'RDO' : argHITSFile(inputs, type=self.type, io='input'),
                             'RDO_MRG' : argHITSFile(output, type=self.type, io='output')}
         myMergeConf = executorConfig(myargdict, myDataDictionary)
-        myMerger = athenaExecutor(name = 'RDOMergeAthenaMP{0}'.format(counter), skeletonFile = 'SimuJobTransforms/skeleton.RDOMerge.py',
+        myMerger = athenaExecutor(name = 'RDOMergeAthenaMP{0}'.format(counter),
                                   skeletonCA = 'SimuJobTransforms.RDOMerge_Skeleton',
                                   conf=myMergeConf, 
                                   inData=set(['RDO']), outData=set(['RDO_MRG']),
@@ -1645,70 +1644,6 @@ class argEVNTFile(argPOOLFile):
         self._resetMetadata(inputs + [output])
         return myMerger
     
-## @brief TAG file class
-#  @details Has a different validation routine to ESD/AOD POOL files
-class argTAGFile(argPOOLFile):
-
-    integrityFunction = "returnIntegrityOfTAGFile"
-
-    ## @brief Simple integrity checked for TAG files
-    #  @details Checks that the event count in the POOLCollectionTree is the same as the AthFile value
-    def _getIntegrity(self, files):
-        for fname in files:
-            eventCount = NTUPEntries(fname, ['POOLCollectionTree'])
-            if eventCount is None:
-                msg.error('Got a bad event count for the POOLCollectionTree in {0}: {1}'.format(fname, eventCount))
-                self._fileMetadata[fname]['integrity'] = False
-                return
-            if eventCount != self.getSingleMetadata(fname, 'nentries'):
-                msg.error('Event count for {0} from POOLCollectionTree disagrees with AthFile:'
-                          ' {1} != {2}'.format(fname, eventCount, self.getSingleMetadata(fname, 'nentries')))
-                self._fileMetadata[fname]['integrity'] = False
-                return
-            self._fileMetadata[fname]['integrity'] = True
-            
-    ## @brief Method which can be used to merge files of this type
-    #  @param output Target filename for this merge
-    #  @param inputs List of files to merge
-    #  @param argdict argdict of the transform
-    #  @note @c argdict is not normally used as this is a @em vanilla merge
-    def selfMerge(self, output, inputs, counter=0, argdict={}):
-        msg.debug('selfMerge attempted for {0} -> {1} with {2}'.format(inputs, output, argdict))
-        
-        # First do a little sanity check
-        for fname in inputs:
-            if fname not in self._value:
-                raise trfExceptions.TransformMergeException(trfExit.nameToCode('TRF_FILEMERGE_PROBLEM'), 
-                                                            "File {0} is not part of this agument: {1}".format(fname, self))
-        
-        from PyJobTransforms.trfExe import tagMergeExecutor, executorConfig
-        
-        ## @note Modify argdict
-        myargdict = self._mergeArgs(argdict) 
-        
-        # We need a tagMergeExecutor to do the merge
-        myDataDictionary = {'TAG_MRG_INPUT' : argTAGFile(inputs, type=self.type, io='input'),
-                            'TAG_MRG_OUTPUT' : argTAGFile(output, type=self.type, io='output')}
-        myMergeConf = executorConfig(myargdict, myDataDictionary)
-        myMerger = tagMergeExecutor(name='TAGMergeAthenaMP{0}{1}'.format(self._subtype, counter), exe = 'CollAppend', 
-                                        conf=myMergeConf, 
-                                        inData=set(['TAG_MRG_INPUT']), outData=set(['TAG_MRG_OUTPUT']),)
-        myMerger.doAll(input=set(['TAG_MRG_INPUT']), output=set(['TAG_MRG_OUTPUT']))
-        
-        # OK, if we got to here with no exceptions, we're good shape
-        # Now update our own list of files to reflect the merge
-        for fname in inputs:
-            self._value.remove(fname)
-        self._value.append(output)
-
-        msg.debug('Post self-merge files are: {0}'.format(self._value))
-        self._resetMetadata(inputs + [output])
-        return myMerger
-
-    @property
-    def prodsysDescription(self):
-        desc=super(argTAGFile, self).prodsysDescription
-        return desc
 
 ## @brief Data quality histogram file class
 class argHISTFile(argFile):
@@ -2365,7 +2300,6 @@ class argSubstepSteering(argSubstep):
     # "doOverlay" - run event overlay on presampled RDOs instead of standard HITtoRDO digitization
     # "doFCwOverlay" - run FastChain with MC-overlay (EVNTtoRDOwOverlay) instead of standard PU digitization (EVNTtoRDO)
     # "afterburn" - run the B decay afterburner for event generation
-    # "doRAWtoESD" - run legacy split workflow (RAWtoESD + ESDtoAOD)
     # "doRAWtoALL" - (deprecated) produce all DESDs and AODs directly from bytestream
     # "doTRIGtoALL" - (deprecated) produce AODs directly from trigger RDOs
     steeringAlises = {
@@ -2376,10 +2310,6 @@ class argSubstepSteering(argSubstep):
                       'doFCwOverlay': {'EVNTtoRDO': [('in', '-', 'EVNT'), ('out', '-', 'RDO')],
                                        'EVNTtoRDOwOverlay': [('in', '+', ('EVNT', 'RDO_BKG')), ('out', '+', 'RDO'), ('out', '+', 'RDO_SGNL')]},
                       'afterburn': {'generate': [('out', '-', 'EVNT')]},
-                      'doRAWtoESD': {'RAWtoALL': [('in', '-', 'BS'), ('in', '-', 'RDO'),
-                                                  ('out', '-', 'ESD'), ('out', '-', 'AOD')],
-                                     'RAWtoESD': [('in', '+', 'BS'), ('in', '+', 'RDO'),
-                                                  ('out', '+', ('ESD', 'HIST_ESD_INT')),],},
                       'doRAWtoALL': {},
                       'doTRIGtoALL': {}
                       }

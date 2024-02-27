@@ -161,7 +161,8 @@ topSequence = AlgSequence()
 
 #Detector setup:
 from AthenaCommon.DetFlags import DetFlags
-if (vp1ID): DetFlags.ID_setOn()
+if (vp1ID): 
+  DetFlags.ID_setOn()
 else:       DetFlags.ID_setOff()
 if (vp1Calo): DetFlags.Calo_setOn()
 else:         DetFlags.Calo_setOff()

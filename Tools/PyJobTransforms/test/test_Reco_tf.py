@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Run a Reco job and test key metadata in the output
 #
@@ -8,8 +8,6 @@
 import glob
 import json
 import subprocess
-import os
-import os.path
 import sys
 import unittest
 
@@ -28,7 +26,6 @@ class Reco_tftest(unittest.TestCase):
         cmd.extend(['--outputESDFile', 'my.ESD.pool.root', '--autoConfiguration', 'everything'])
         cmd.extend(['--outputAODFile', 'my.AOD.pool.root'])
         cmd.extend(['--outputHISTFile', 'my.HIST.root'])
-        cmd.extend(['--outputTAGFile', 'my.TAG.pool.root'])
         cmd.extend(['--maxEvents', '10'])
         cmd.extend(['--preExec', 'rec.doTrigger=False'])  # This is temporary while trigger doesn't work in r19
         ## Event counting currently broken for multi-step transforms

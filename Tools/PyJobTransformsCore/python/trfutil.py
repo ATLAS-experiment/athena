@@ -1611,37 +1611,6 @@ class AODFile( PoolDataFile ):
         PoolDataFile.__init__(self,contents)
 
 
-class TAGFile( RootTTreeFile ):
-    defaultContents = 'tag'
-    def __init__(self,contents=defaultContents):
-        RootTTreeFile.__init__(self,contents)
-        
-    def getGUID(self, filename):
-        # Use FClistGUID, then fallback to AthFile (N.B. tag files have funny names in the PFC!)
-        rc, guid = getGUIDfromPFC("RootCollection||PFN:" + filename)
-        if guid is not None:
-            return guid
-        if rc != 0:
-            print ('Warning: Problem with PFC')
-            
-        print ("GUID retrieval: Now attempting to use AthFile to retrieve GUID from %s." % filename)
-        guid = getCachedFileInfo( filename, 'file_guid' )
-        if guid is None:
-            print ("ERROR: GUID retrieval failed.")
-        return guid
-
-
-    def eventCount( self, arg ):
-        """Return number of events in file of argument arg.
-        Return None if event count is not applicable to file type."""
-        try:
-            fName = arg.value()
-        except Exception as e:
-            print ("Event count failed for %s: %s" % ( arg, e ))
-            return None
-        return ntup_entries( fname = fName, tree_names = "POOLCollectionTree" )
-
-
 class SANFile( RootTTreeFile ):
     defaultContents = 'san'
     def __init__(self,contents=defaultContents):
