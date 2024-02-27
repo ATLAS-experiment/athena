@@ -40,14 +40,13 @@ class FailedOrPassedCheck(WorkflowCheck):
                 self.logger.info("-----------------------------------------------------")
 
             if errors:
-
                 self.logger.info(f"{step} validation test step ERRORS")
                 errors = list(dict.fromkeys(errors))
                 for e in errors:
                     self.logger.info(f"  {e}")
                 self.logger.info("-----------------------------------------------------")
 
-            if counter:
+            if counter and not errors:
                 self.logger.info(f"{step} validation test step successful")
 
                 if step == "DQHistogramMerge":
@@ -110,6 +109,7 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
         super().__init__(setup)
         self.format = input_format
         self.max_events = str(max_events)
+        self.detailed_comparison = setup.detailed_comparison
 
     def run(self, test: WorkflowTest) -> bool:
         self.logger.info("---------------------------------------------------------------------------------------")
@@ -173,7 +173,8 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
         diff_root_list = " ".join(diff_root_list)
         diff_root_mode = "--branches-of-interest" if branches_of_interest else "--ignore-leaves"
 
-        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} --order-trees --nan-equal --exact-branches --mode semi-detailed --error-mode resilient {diff_root_mode} {diff_root_list} --entries {self.max_events} > {log_file} 2>&1"
+        comparison_mode = "detailed" if self.detailed_comparison else "semi-detailed"
+        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} --order-trees --nan-equal --exact-branches --mode {comparison_mode} --error-mode resilient {diff_root_mode} {diff_root_list} --entries {self.max_events} > {log_file} 2>&1"
         output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         output, error = output.decode("utf-8"), error.decode("utf-8")
 
