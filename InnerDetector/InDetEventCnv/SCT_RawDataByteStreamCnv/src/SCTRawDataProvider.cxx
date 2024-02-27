@@ -114,18 +114,19 @@ StatusCode SCTRawDataProvider::execute(const EventContext& ctx) const
 
 
   ATH_MSG_DEBUG("Number of ROB fragments " << vecROBFrags.size());
-  SG::WriteHandle<InDetTimeCollection> lvl1Collection;
-  SG::WriteHandle<InDetTimeCollection> bcIDCollection;
 
   if (m_storeInDetTimeColls) {
+    SG::WriteHandle<InDetTimeCollection> lvl1Collection;
+    SG::WriteHandle<InDetTimeCollection> bcIDCollection;
     lvl1Collection = SG::makeHandle(m_lvl1CollectionKey,ctx);
     bcIDCollection = SG::makeHandle(m_bcIDCollectionKey,ctx);
 
+    ATH_CHECK(lvl1Collection.record(std::make_unique<InDetTimeCollection>()));
+    ATH_CHECK(bcIDCollection.record(std::make_unique<InDetTimeCollection>()));
+
     lvl1Collection->reserve(vecROBFrags.size());
     bcIDCollection->reserve(vecROBFrags.size());
-  }
 
-  if (m_storeInDetTimeColls) {
     for (const ROBFragment* robFrag : vecROBFrags) {
       // Store LVL1ID and BCID information in InDetTimeCollection
       // to be stored in StoreGate at the end of the loop.
