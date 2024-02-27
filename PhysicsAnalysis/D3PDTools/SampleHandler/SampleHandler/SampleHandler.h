@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SAMPLE_HANDLER_SAMPLE_HANDLER_HH
@@ -143,7 +143,20 @@ namespace SH
     /// \pre !sample.empty()
     /// \pre !sample->name().empty()
   public:
-    void add (const SamplePtr& sample);
+    void add (SamplePtr& sample);
+
+
+    /// \brief add a sample to the handler
+    ///
+    /// \par Guarantee
+    ///   basic, sample is released if this is the last copy
+    /// \par Failures
+    ///   out of memory I\n
+    ///   sample of same name already in use
+    /// \pre !sample.empty()
+    /// \pre !sample->name().empty()
+  public:
+    void add (SamplePtr&& sample);
 
 
     /// \brief add all samples from the given SampleHandler to this one
@@ -190,7 +203,7 @@ namespace SH
     ///   sample not in SampleHandler
     /// \pre sample != 0
   public:
-    void remove (Sample *sample);
+    void remove (const Sample *sample);
 
 
     /// \brief get the sample with the given name
@@ -202,7 +215,19 @@ namespace SH
     /// \par Failures
     ///   out of memory II
   public:
-    Sample *get (const std::string& name) const;
+    Sample *get (const std::string& name);
+
+
+    /// \brief get the sample with the given name
+    ///
+    /// \return the sample with the given name, or NULL if the sample
+    ///   can not be found
+    /// \par Guarantee
+    ///   strong
+    /// \par Failures
+    ///   out of memory II
+  public:
+    const Sample *get (const std::string& name) const;
 
 
     /// \brief find all samples which have at least one of the given
@@ -517,7 +542,7 @@ namespace SH
 
     /// \brief the iterator for \ref m_named
   private:
-    typedef std::map<std::string,SH::SamplePtr>::const_iterator NamedIter;
+    typedef std::map<std::string,SH::SamplePtr>::iterator NamedIter;
 
     /// \brief the mutable iterator for \ref m_named
   private:

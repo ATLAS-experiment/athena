@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SAMPLE_HANDLER_SAMPLE_PTR_HH
@@ -77,6 +77,14 @@ namespace SH
     SamplePtr (const SamplePtr& that);
 
 
+    /// \brief standard move constructor
+    ///
+    /// \par Guarantee
+    ///   no-fail
+  public:
+    SamplePtr (SamplePtr&& that);
+
+
     /// \brief standard destructor
     ///
     /// \par Guarantee
@@ -91,6 +99,14 @@ namespace SH
     ///   no-fail
   public:
     SamplePtr& operator = (const SamplePtr& that);
+
+
+    /// \brief standard move operator
+    ///
+    /// \par Guarantee
+    ///   no-fail
+  public:
+    SamplePtr& operator = (SamplePtr&& that);
 
 
     /// \brief get() == 0
@@ -108,7 +124,16 @@ namespace SH
     /// \par Guarantee
     ///   no-fail
   public:
-    Sample *get () const;
+    Sample *get ();
+
+
+    /// \brief the sample itself
+    ///
+    /// \return the sample itself
+    /// \par Guarantee
+    ///   no-fail
+  public:
+    const Sample *get () const;
 
 
     /// \brief the sample itself
@@ -118,7 +143,7 @@ namespace SH
     ///   no-fail
     /// \pre !empty()
   public:
-    Sample *operator -> () const;
+    Sample *operator -> ();
 
 
     /// \brief the sample itself
@@ -128,7 +153,27 @@ namespace SH
     ///   no-fail
     /// \pre !empty()
   public:
-    Sample& operator * () const;
+    const Sample *operator -> () const;
+
+
+    /// \brief the sample itself
+    ///
+    /// \return the sample itself
+    /// \par Guarantee
+    ///   no-fail
+    /// \pre !empty()
+  public:
+    Sample& operator * ();
+
+
+    /// \brief the sample itself
+    ///
+    /// \return the sample itself
+    /// \par Guarantee
+    ///   no-fail
+    /// \pre !empty()
+  public:
+    const Sample& operator * () const;
 
 
 

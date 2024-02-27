@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -191,7 +191,7 @@ namespace SH
     hierarchy.push_back (list.dirname());
 
     std::map<std::string,SamplePtr> samples;
-    typedef std::map<std::string,SamplePtr>::const_iterator samplesIter;
+    typedef std::map<std::string,SamplePtr>::iterator samplesIter;
     recurse (samples, list, hierarchy);
     for (samplesIter sample = samples.begin(), end = samples.end();
 	 sample != end; ++ sample)

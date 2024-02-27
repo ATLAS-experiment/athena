@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -29,27 +29,22 @@ struct MergeTest : public Test
 {
   static SamplePtr getSample ()
   {
-    static SamplePtr sample;
-    if (sample.empty())
+    std::unique_ptr<SampleLocal> mysample (new SampleLocal ("test"));
     {
-      std::unique_ptr<SampleLocal> mysample (new SampleLocal ("test"));
-      {
-	mysample->add ("file1.root");
-	TFile file ("file1.root", "RECREATE");
-	TH1 *hist = new TH1F ("test", "test", 10, 0, 10);
-	hist->SetBinContent (1, 1);
-	file.Write ();
-      }
-      {
-	mysample->add ("file2.root");
-	TFile file ("file2.root", "RECREATE");
-	TH1 *hist = new TH1F ("test", "test", 10, 0, 10);
-	hist->SetBinContent (3, 1);
-	file.Write ();
-      }
-      sample = SamplePtr (std::move (mysample));
+      mysample->add ("file1.root");
+      TFile file ("file1.root", "RECREATE");
+      TH1 *hist = new TH1F ("test", "test", 10, 0, 10);
+      hist->SetBinContent (1, 1);
+      file.Write ();
     }
-    return sample;
+    {
+      mysample->add ("file2.root");
+      TFile file ("file2.root", "RECREATE");
+      TH1 *hist = new TH1F ("test", "test", 10, 0, 10);
+      hist->SetBinContent (3, 1);
+      file.Write ();
+    }
+    return SamplePtr (std::move (mysample));
   }
 
   void checkMerger (const Sample& sample,

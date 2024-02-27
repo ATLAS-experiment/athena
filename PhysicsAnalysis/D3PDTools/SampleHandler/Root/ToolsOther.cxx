@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -19,11 +19,11 @@
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/SampleLocal.h>
 #include <TFile.h>
-#include <TRandom.h>
 #include <TSystem.h>
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <random>
 
 //
 // method implementations
@@ -45,11 +45,15 @@ namespace SH
 
     std::unique_ptr<TFile> result;
 
+    static std::atomic<unsigned> seed = 0;
+    std::default_random_engine re (++seed);
+    std::uniform_real_distribution wait_dist (wait/2, wait);
+
     for (unsigned tries = 0; tries <= retries; ++ tries)
     {
       if (tries > 0)
       {
-	unsigned mywait = 1000 * gRandom->Uniform (wait/2, wait);
+	unsigned mywait = 1000 * wait_dist (re);
 	std::cout << "open failed, waiting " << (mywait/1000.) << " seconds: "
 		  << name << std::endl;
 	std::this_thread::sleep_for (std::chrono::milliseconds (mywait));

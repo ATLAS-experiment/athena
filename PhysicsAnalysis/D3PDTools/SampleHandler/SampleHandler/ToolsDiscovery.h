@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SAMPLE_HANDLER_TOOLS_DISCOVERY_H
@@ -156,7 +156,7 @@ namespace SH
   /// guarantee: strong
   /// failures: out of memory III
   /// failures: i/o errors
-  void scanForTrees (SampleHandler& sh, const Sample& sample,
+  void scanForTrees (SampleHandler& sh, Sample& sample,
 		     const std::string& pattern = ".*");
   void scanForTrees (SampleHandler& sh, const std::string& pattern = ".*");
 

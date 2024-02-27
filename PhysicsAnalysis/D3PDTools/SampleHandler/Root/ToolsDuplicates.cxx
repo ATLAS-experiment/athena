@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -27,6 +27,7 @@
 #include <RootCoreUtils/ThrowMsg.h>
 #include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleHandler.h>
+#include <CxxUtils/checker_macros.h>
 
 //
 // method implementations
@@ -49,12 +50,8 @@ namespace SH
     /// failures: out of memory II
     const std::set<std::string>& runNames ()
     {
-      static std::set<std::string> result;
-      if (result.empty())
-      {
-	result.insert ("RunNumber");
-	result.insert ("runNumber");
-      }
+      static const std::set<std::string> result =
+        { "RunNumber", "runNumber" };
       return result;
     }
 
@@ -65,12 +62,8 @@ namespace SH
     /// failures: out of memory II
     const std::set<std::string>& eventNames ()
     {
-      static std::set<std::string> result;
-      if (result.empty())
-      {
-	result.insert ("EventNumber");
-	result.insert ("eventNumber");
-      }
+      static const std::set<std::string> result =
+        { "EventNumber", "eventNumber" };
       return result;
     }
 
@@ -83,7 +76,8 @@ namespace SH
     std::string
     findBranch (const TTree& tree, const std::set<std::string>& names)
     {
-      TObjArray *branches = const_cast<TTree&>(tree).GetListOfBranches();
+      TTree& tree_nc ATLAS_THREAD_SAFE = const_cast<TTree&>(tree);
+      TObjArray *branches = tree_nc.GetListOfBranches();
 
       for (std::set<std::string>::const_iterator name = names.begin(),
 	     end = names.end(); name != end; ++ name)

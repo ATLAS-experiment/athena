@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -76,6 +76,17 @@ namespace SH
 
 
   SamplePtr ::
+  SamplePtr (SamplePtr&& that)
+    : m_sample (that.m_sample)
+  {
+    that.m_sample = nullptr;
+
+    RCU_NEW_INVARIANT (this);
+  }
+
+
+
+  SamplePtr ::
   ~SamplePtr ()
   {
     RCU_DESTROY_INVARIANT (this);
@@ -102,6 +113,21 @@ namespace SH
 
 
 
+  SamplePtr& SamplePtr ::
+  operator = (SamplePtr&& that)
+  {
+    RCU_CHANGE_INVARIANT (this);
+    RCU_READ_INVARIANT (&that);
+
+    if (m_sample)
+      m_sample->release ();
+    m_sample = that.m_sample;
+    that.m_sample = nullptr;
+    return *this;
+  }
+
+
+
   bool SamplePtr ::
   empty () const
   {
@@ -112,6 +138,14 @@ namespace SH
 
 
   Sample *SamplePtr ::
+  get ()
+  {
+    RCU_READ_INVARIANT (this);
+    return m_sample;
+  }
+
+
+  const Sample *SamplePtr ::
   get () const
   {
     RCU_READ_INVARIANT (this);
@@ -121,6 +155,16 @@ namespace SH
 
 
   Sample *SamplePtr ::
+  operator -> ()
+  {
+    RCU_READ_INVARIANT (this);
+    RCU_REQUIRE_SOFT (!empty());
+    return m_sample;
+  }
+
+
+
+  const Sample *SamplePtr ::
   operator -> () const
   {
     RCU_READ_INVARIANT (this);
@@ -131,6 +175,16 @@ namespace SH
 
 
   Sample& SamplePtr ::
+  operator * ()
+  {
+    RCU_READ_INVARIANT (this);
+    RCU_REQUIRE_SOFT (!empty());
+    return *m_sample;
+  }
+
+
+
+  const Sample& SamplePtr ::
   operator * () const
   {
     RCU_READ_INVARIANT (this);

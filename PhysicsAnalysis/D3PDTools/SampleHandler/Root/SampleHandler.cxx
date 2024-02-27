@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -151,7 +151,7 @@ namespace SH
 
 
   void SampleHandler ::
-  add (const SamplePtr& sample)
+  add (SamplePtr& sample)
   {
     RCU_CHANGE_INVARIANT (this);
     RCU_REQUIRE_SOFT (!sample.empty());
@@ -170,6 +170,14 @@ namespace SH
       if (m_samples.back() == sample.get())
 	m_samples.pop_back();
     };
+  }
+
+
+
+  void SampleHandler ::
+  add (SamplePtr&& sample)
+  {
+    add (sample);
   }
 
 
@@ -211,7 +219,7 @@ namespace SH
   remove (const std::string& name)
   {
     // invariant not used
-    Sample *sample = get (name);
+    const Sample *sample = get (name);
     if (sample == 0)
       RCU_THROW_MSG ("sample " + name + " not found in SampleHandler");
     remove (sample);
@@ -220,7 +228,7 @@ namespace SH
 
 
   void SampleHandler ::
-  remove (Sample *sample)
+  remove (const Sample *sample)
   {
     RCU_CHANGE_INVARIANT (this);
     RCU_REQUIRE_SOFT (sample != 0);
@@ -244,11 +252,23 @@ namespace SH
 
 
   Sample *SampleHandler ::
-  get (const std::string& name) const
+  get (const std::string& name)
   {
     RCU_READ_INVARIANT (this);
 
     NamedIter iter = m_named.find (name);
+    if (iter != m_named.end())
+      return iter->second.get();
+    return 0;
+  }
+
+
+  const Sample *SampleHandler ::
+  get (const std::string& name) const
+  {
+    RCU_READ_INVARIANT (this);
+
+    auto iter = m_named.find (name);
     if (iter != m_named.end())
       return iter->second.get();
     return 0;
