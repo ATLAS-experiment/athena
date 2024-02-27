@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTHCLASSIFIER_MCTRUTHCLASSIFIER_H
@@ -151,7 +151,6 @@ private:
     if (det < -M_PI) det = det + 2. * M_PI;
     return std::abs(det);
   }
-  inline float rCone(float x, float y)  const { return sqrt(x * x + y * y); }
   //
   static MCTruthPartClassifier::ParticleType defTypeOfElectron(MCTruthPartClassifier::ParticleOrigin, bool isPrompt) ;
   MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer* xTruthParticleContainer,
@@ -191,8 +190,7 @@ private:
   //
   MCTruthPartClassifier::ParticleOrigin defHadronType(int);
   static MCTruthPartClassifier::ParticleType defTypeOfHadron(int);
-  static MCTruthPartClassifier::ParticleOrigin convHadronTypeToOrig(MCTruthPartClassifier::ParticleType pType,
-                                                                    int motherPDG);
+  static MCTruthPartClassifier::ParticleOrigin convHadronTypeToOrig(MCTruthPartClassifier::ParticleType pType,int motherPDG);
   //
   static const xAOD::TruthVertex* findEndVert(const xAOD::TruthParticle*) ;
   //
@@ -208,9 +206,7 @@ private:
                      bool& isNarrowCone,
                      const CaloDetDescrManager& caloDDMgr) const;
 
-  const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,
-                                             bool,
-                                             Info* info) const;
+  const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,Info* info) const;
 #endif
 
 #ifndef GENERATIONBASE /*Disable when no recostruction packages are expected*/
