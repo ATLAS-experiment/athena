@@ -91,11 +91,11 @@ class ConfigBlock:
         stay the same, but some behavior may change.
         """
         if name in self._options :
-            raise KeyError ('duplicate option: ' + name)
+            raise KeyError (f'duplicate option: {name}')
         if type not in [str, bool, int, float, list, None] :
-            raise TypeError ('unknown option type: ' + str (type))
+            raise TypeError (f'unknown option type: {type}')
         if duplicateAction not in ['skip', 'set', 'error'] :
-            raise ValueError ('unknown duplicateAction: ' + duplicateAction)
+            raise ValueError (f'unknown duplicateAction: {duplicateAction}')
         setattr (self, name, defaultValue)
         self._options[name] = ConfigBlockOption (type=type, info=info, duplicateAction=duplicateAction, required=required)
 
@@ -111,10 +111,10 @@ class ConfigBlock:
 
         noneActions = ['error', 'set', 'ignore']
         if noneAction not in noneActions :
-            raise ValueError ('invalid noneAction: ' + noneAction + ' [allowed values: ' + str (noneActions) + ']')
+            raise ValueError (f'invalid noneAction: {noneAction} [allowed values: {noneActions}]')
 
         if name not in self._options :
-            raise KeyError ('unknown option: ' + name)
+            raise KeyError (f'unknown option "{name}" in block "{self.__class__.__name__}"')
         option = self._options[name]
 
         if isDuplicate :
@@ -123,14 +123,14 @@ class ConfigBlock:
             elif option.duplicateAction == 'skip' :
                 return
             elif option.duplicateAction == 'error' :
-                raise Exception ("can't have two options with the same name: " + self._groupName + '.' + name)
+                raise Exception (f"can't have two options with the same name: {self._groupName}.{name}")
 
         if value is not None or noneAction == 'set' :
             setattr (self, name, value)
         elif noneAction == 'ignore' :
             pass
         elif noneAction == 'error' :
-            raise ValueError ('passed None for setting option ' + name + ' with noneAction=error')
+            raise ValueError (f'passed None for setting option {name} with noneAction=error')
         else :
             raise Exception ('should not get here')
 
