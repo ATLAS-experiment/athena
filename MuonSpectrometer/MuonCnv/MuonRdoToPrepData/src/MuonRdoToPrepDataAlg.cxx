@@ -29,26 +29,23 @@ StatusCode MuonRdoToPrepDataAlg::execute(const EventContext& ctx)  const {
 
     if (m_seededDecoding) {  // decoding from trigger roi
         SG::ReadHandle<TrigRoiDescriptorCollection> muonRoI(m_roiCollectionKey, ctx);
-        if (!muonRoI.isValid()) {
-            ATH_MSG_WARNING("Cannot retrieve muonRoI " << m_roiCollectionKey.key());
-            return StatusCode::SUCCESS;
-        } else {
-            for (const auto *roi : *muonRoI) {
-                if (m_robDecoding) {
-                     m_regsel->ROBIDList(*roi, robs);
-                } else {
-                    m_regsel->HashIDList(*roi, toDecode);
-                }               
-                if (!robs.empty()) {
-                    ATH_CHECK(m_tool->decode(ctx, robs));
-                    robs.clear();
-                } else if (!toDecode.empty()) {
-                    ATH_CHECK(m_tool->decode(ctx, toDecode, toDecodeWithData));
-                } else {
-                   ATH_CHECK(m_tool->provideEmptyContainer(ctx));
-                }
+        ATH_CHECK(muonRoI.isPresent());
+        for (const auto *roi : *muonRoI) {
+            if (m_robDecoding) {
+                    m_regsel->ROBIDList(*roi, robs);
+            } else {
+                m_regsel->HashIDList(*roi, toDecode);
+            }               
+            if (!robs.empty()) {
+                ATH_CHECK(m_tool->decode(ctx, robs));
+                robs.clear();
+            } else if (!toDecode.empty()) {
+                ATH_CHECK(m_tool->decode(ctx, toDecode, toDecodeWithData));
+            } else {
+                ATH_CHECK(m_tool->provideEmptyContainer(ctx));
             }
-        }      
+        }
+              
     } else
         ATH_CHECK(m_tool->decode(ctx, toDecode, toDecodeWithData));
 
