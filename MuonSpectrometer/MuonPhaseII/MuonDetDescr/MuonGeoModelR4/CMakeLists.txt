@@ -15,7 +15,7 @@ atlas_add_library( MuonGeoModelR4Lib
                    src/*.cxx
                    PUBLIC_HEADERS MuonGeoModelR4
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel 
+                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel MuonDetDescrUtils
                                   GeoModelUtilities GaudiKernel MuonReadoutGeometryR4 StoreGateLib  CxxUtils )
 
 atlas_add_component( MuonGeoModelR4
