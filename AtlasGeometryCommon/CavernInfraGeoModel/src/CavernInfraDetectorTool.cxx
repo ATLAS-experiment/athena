@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CavernInfraDetectorTool.h"
 #include "CavernInfraDetectorFactory.h" 
-#include "CavernInfraDetectorFactory01.h" 
 #include "CavernInfraDetectorManager.h" 
 
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
@@ -15,66 +14,35 @@
 CavernInfraDetectorTool::CavernInfraDetectorTool( const std::string& type, 
 						  const std::string& name,
 						  const IInterface* parent )
-  : GeoModelTool( type, name, parent ),
-    m_manager(0)
+  : GeoModelTool( type, name, parent )
 {
 }
-
-CavernInfraDetectorTool::~CavernInfraDetectorTool()
-{
-}
-  
 
 StatusCode CavernInfraDetectorTool::create()
 { 
-  IGeoDbTagSvc *geoDbTag;
-  StatusCode sc = service ("GeoDbTagSvc",geoDbTag);
-  if(sc.isFailure()) {
-    msg(MSG::ERROR) << "Could not locate GeoDbTagSvc" << endmsg;
-    return sc;
-  }
+  ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc", name());
+  ATH_CHECK(geoDbTag.retrieve());
 
   std::string cavernInfraVersion = geoDbTag->cavernInfraVersion();
-  msg(MSG::INFO) << "Building Cavern geometry version " << cavernInfraVersion << endmsg;
   if(cavernInfraVersion.empty()) {
-    msg(MSG::INFO) << "No Cavern Infra version for the given configuration. Skip building CavernInfraGeoModel" << endmsg;
+    ATH_MSG_INFO("No Cavern Infra version for the given configuration. Skip building CavernInfraGeoModel");
     return StatusCode::SUCCESS;
+  }
+  else {
+    ATH_MSG_INFO("Building Cavern geometry version " << cavernInfraVersion);
   }
 
   std::string versionNode = "CavernInfra";
 
   GeoModelExperiment* theExpt = nullptr;
-  if (StatusCode::SUCCESS != detStore()->retrieve(theExpt,"ATLAS")) { 
-    msg(MSG::ERROR) << "Could not find GeoModelExperiment ATLAS" << endmsg; 
-    return StatusCode::FAILURE; 
-  } 
+  ATH_CHECK(detStore()->retrieve(theExpt,"ATLAS"));
  
-  GeoPhysVol *world=&*theExpt->getPhysVol();
-  IRDBAccessSvc* raccess = 0;
-  sc = service("RDBAccessSvc",raccess);
-  if(sc.isFailure()) {
-    msg(MSG::ERROR) << "Could not locate RDBAccessSvc" << endmsg;
-    return sc;
-  }
-
-  if (cavernInfraVersion.rfind("CavernInfra",0) == 0) { //starts with "CavernInfra"
-    std::string geoVersion = cavernInfraVersion.substr(12,2);
-    if(geoVersion=="00" || geoVersion=="01") {
-      msg(MSG::ERROR) << "ERROR. Version " << cavernInfraVersion << " is obsolete and cannot be supported anymore" << endmsg;
-      return StatusCode::FAILURE;
-    }
-    else if(geoVersion=="02") {
-      // This factory is chosen by CavernInfra-02 tag, but in fact it uses data from CavernInfra-01
-      CavernInfraDetectorFactory01 theCavernInfraFactory01(detStore().operator->(),raccess);
-      theCavernInfraFactory01.setTagNode(cavernInfraVersion,versionNode);
-      theCavernInfraFactory01.create(world);
-      m_manager = theCavernInfraFactory01.getDetectorManager();
-    }
-  }
+  GeoPhysVol *world=theExpt->getPhysVol();
+  ServiceHandle<IRDBAccessSvc> raccess("RDBAccessSvc",name());
+  ATH_CHECK(raccess.retrieve());
 
   if(!m_manager) {
-    // If geometry has not been built yet fall back to the default factory
-    CavernInfraDetectorFactory theCavernInfraFactory(detStore().operator->(),raccess);
+    CavernInfraDetectorFactory theCavernInfraFactory(detStore(),raccess);
     theCavernInfraFactory.setTagNode(cavernInfraVersion,versionNode);
     theCavernInfraFactory.create(world);
     m_manager = theCavernInfraFactory.getDetectorManager();
@@ -82,15 +50,10 @@ StatusCode CavernInfraDetectorTool::create()
 
   if(m_manager) {
     theExpt->addManager(m_manager);
-    sc = detStore()->record(m_manager,
-			  m_manager->getName());
-    if(sc.isFailure()) {
-      msg(MSG::ERROR) << "Could not register CavernInfra detector manager" << endmsg;
-      return sc;
-    }
+    ATH_CHECK(detStore()->record(m_manager,m_manager->getName()));
   }
   else {
-    msg(MSG::ERROR) << "ERROR. Failed to build Cavern Version " << cavernInfraVersion << endmsg;
+    ATH_MSG_ERROR("ERROR. Failed to build Cavern Version " << cavernInfraVersion);
     return StatusCode::FAILURE;
   }
 
@@ -102,7 +65,7 @@ StatusCode CavernInfraDetectorTool::clear()
   SG::DataProxy* proxy = detStore()->proxy(ClassID_traits<CavernInfraDetectorManager>::ID(),m_manager->getName());
   if(proxy) {
     proxy->reset();
-    m_manager = 0;
+    m_manager = nullptr;
   }
   return StatusCode::SUCCESS;
 }
