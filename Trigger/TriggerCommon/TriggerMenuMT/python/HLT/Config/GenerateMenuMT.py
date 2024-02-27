@@ -615,8 +615,7 @@ def makeHLTTree(flags):
     from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig import decisionTreeFromChains, sequenceScanner
     from TriggerJobOpts.TriggerConfig import collectViewMakers
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaCommon.CFElements import compName 
-    from AthenaCommon.CFElements import seqAND  
+    from AthenaCommon.CFElements import seqAND
 
     acc = ComponentAccumulator()    
     steps = seqAND('HLTAllSteps')
@@ -634,7 +633,7 @@ def makeHLTTree(flags):
         flatDecisions.extend (step)
  
     viewMakers = collectViewMakers(steps)
-    viewMakerMap = {compName(vm):vm for vm in viewMakers}
+    viewMakerMap = {vm.name:vm for vm in viewMakers}
     for vmname, vm in viewMakerMap.items():
         log.debug(f"[makeHLTTree] {vmname} InputMakerOutputDecisions: {vm.InputMakerOutputDecisions}")
         if vmname.endswith("_probe"):

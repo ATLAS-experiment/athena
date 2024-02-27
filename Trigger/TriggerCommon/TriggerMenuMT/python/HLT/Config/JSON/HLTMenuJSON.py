@@ -4,12 +4,10 @@ import re
 import json
 from functools import cache
 from TrigConfigSvc.TrigConfigSvcCfg import getHLTMenuFileName
-from AthenaCommon.CFElements import getSequenceChildren, isSequence
+from AthenaCommon.CFElements import getSequenceChildren
 from AthenaCommon.Logging import logging
 __log = logging.getLogger( __name__ )
 
-def getChildrenIfSequence( s ):
-    return  getSequenceChildren( s ) if isSequence( s ) else []
 
 # remove prescale suffixes
 def __getMenuBaseName(menuName):
@@ -26,17 +24,17 @@ def __getStepsDataFromAlgSequence(HLTAllSteps):
     """
     stepsData = []
     if HLTAllSteps is not None:
-        for HLTStep in getSequenceChildren( HLTAllSteps ):
+        for HLTStep in HLTAllSteps.Members:
             if "_reco" not in HLTStep.getName(): # Avoid the pre-step Filter execution
-                for Step in getChildrenIfSequence( HLTStep ):
-                    for View in getChildrenIfSequence( Step ):
-                        for Reco in getChildrenIfSequence( View ):
+                for Step in getSequenceChildren( HLTStep ):
+                    for View in getSequenceChildren( Step ):
+                        for Reco in getSequenceChildren( View ):
                             if "_reco" in Reco.getName() and HLTStep.getName() not in stepsData:
-                                stepsData.append( getSequenceChildren( HLTStep ) )
+                                stepsData.append( HLTStep.Members )
                                 break
                 continue
 
-            stepsData.append( getSequenceChildren( HLTStep ) )
+            stepsData.append( HLTStep.Members )
     else:
         __log.warn( "No HLTAllSteps sequencer, will not export per-Step data for chains.")
     return stepsData
@@ -57,10 +55,10 @@ def __getChainSequencers(stepsData, chainName):
     for counter, step in enumerate(stepsData, 1):
         mySequencer = None        
         for sequencer in step:     
-            seqq=getSequenceChildren( sequencer)                       
-            if not seqq: # empty steps
-                continue     
-            sequencerFilter = seqq[0] # Always the first child in the step
+            try:
+                sequencerFilter = sequencer.Members[0] # Always the first child in the step
+            except (AttributeError, IndexError):
+                continue  # empty steps
             if chainName in __getFilterChains(sequencerFilter):
                 if mySequencer is not None:
                     __log.error( "Multiple Filters found (corresponding Sequencers %s, %s) for %s in Step %i!",
@@ -95,7 +93,6 @@ def generateJSON(flags, chainDicts, chainConfigs, HLTAllSteps):
 
     # List of steps data for sequencers
     stepsData = __getStepsDataFromAlgSequence(HLTAllSteps)
-
     from TriggerMenuMT.HLT.Menu import StreamInfo
     for chain in chainDicts:
         # Prepare information for stream list and fill separate dictionary
