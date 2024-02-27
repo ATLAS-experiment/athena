@@ -52,7 +52,8 @@ def TrigSCTRawDataProviderCfg(flags, suffix, RoIs):
         'RoIs' : RoIs,   
         'isRoI_Seeded': True,
         'RDOCacheKey' : 'SctRDOCache',
-        'BSErrCacheKey' : 'SctBSErrCache'
+        'BSErrCacheKey' : 'SctBSErrCache',
+        'StoreInDetTimeCollections' : False,
     }
 
     dataPrepAcc = SCTRawDataProviderCfg(flags, **trigargs)

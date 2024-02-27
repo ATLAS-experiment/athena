@@ -32,14 +32,8 @@ class TRTRawDataProviderTool : public extends<AthAlgTool, ITRTRawDataProviderToo
   TRTRawDataProviderTool( const std::string& type, const std::string& name,
 			  const IInterface* parent ) ;
 
-  //! destructor
-  virtual ~TRTRawDataProviderTool() ;
-
   //! initialize
   virtual StatusCode initialize() override;
-
-  //! finalize
-  virtual StatusCode finalize() override;
 
   //! this is the main decoding method
   virtual StatusCode convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
@@ -54,7 +48,7 @@ private:
 
   SG::WriteHandleKey<InDetTimeCollection> m_lvl1idkey{this,"LVL1IDKey","TRT_LVL1ID","TRT_LVL1ID out-key"};
   SG::WriteHandleKey<InDetTimeCollection> m_bcidkey{this,"BCIDKey","TRT_BCID","TRT_BCID out-key"};
-  bool  m_storeInDetTimeColls;
+  Gaudi::Property<bool> m_storeInDetTimeColls{this, "StoreInDetTimeCollections", true, "Store LVL1ID and BCID"};
 };
 
 #endif

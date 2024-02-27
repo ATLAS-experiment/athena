@@ -17,27 +17,33 @@ def PixelRawDataProviderAlgCfg(flags, RDOKey="PixelRDOs", **kwargs):
     regSelTool = acc.popToolsAndMerge(regSelTool_Pixel_Cfg(flags))
 
     suffix = kwargs.pop("suffix","")
-    decoder = CompFactory.PixelRodDecoder(name="PixelRodDecoder"+suffix,
-                                          CheckDuplicatedPixel = False if "data15" in flags.Input.ProjectName else True
-                                          )
-    
-    providerTool =  CompFactory.PixelRawDataProviderTool(name="PixelRawDataProviderTool"+suffix,
-                                                         Decoder = decoder)
+    if 'Decoder' not in kwargs:
+        decoder = CompFactory.PixelRodDecoder(name="PixelRodDecoder"+suffix,
+                                              CheckDuplicatedPixel = False if "data15" in flags.Input.ProjectName else True
+                                              )
+
+    if 'ProviderTool' not in kwargs:
+        kwargs.setdefault("ProviderTool", CompFactory.PixelRawDataProviderTool(name="PixelRawDataProviderTool"+suffix,
+                                                                               Decoder = decoder))
 
     acc.addEventAlgo(CompFactory.PixelRawDataProvider(RDOKey = RDOKey,
                                                       RegSelTool = regSelTool, 
-                                                      ProviderTool = providerTool,
                                                       **kwargs))
     return acc
 
 
-def TrigPixelRawDataProviderAlgCfg(flags, suffix, RoIs):
-    trigargs = {
-        'name' : 'TrigPixelRawDataProvider'+suffix,
-        'suffix' : suffix,
-        'RoIs' : RoIs,   
-        'isRoI_Seeded': True,
-        'RDOCacheKey' : 'PixRDOCache',
-        'BSErrorsCacheKey' : 'PixBSErrCache'
-    }
-    return PixelRawDataProviderAlgCfg(flags, **trigargs)
+def TrigPixelRawDataProviderAlgCfg(flags, suffix, RoIs, **kwargs):
+    decoder = CompFactory.PixelRodDecoder(name="TrigPixelRodDecoder"+suffix,
+                                          CheckDuplicatedPixel = False if "data15" in flags.Input.ProjectName else True
+                                          )
+    providerTool =  CompFactory.PixelRawDataProviderTool(name="TrigPixelRawDataProviderTool"+suffix,
+                                                         Decoder = decoder,
+                                                         StoreInDetTimeCollections = False)
+    kwargs.setdefault('name', 'TrigPixelRawDataProvider'+suffix)
+    kwargs.setdefault('suffix', suffix)
+    kwargs.setdefault('RoIs', RoIs)
+    kwargs.setdefault('isRoI_Seeded', True)
+    kwargs.setdefault('RDOCacheKey', 'PixRDOCache')
+    kwargs.setdefault('BSErrorsCacheKey', 'PixBSErrCache')
+    kwargs.setdefault("ProviderTool", providerTool)
+    return PixelRawDataProviderAlgCfg(flags, **kwargs)
