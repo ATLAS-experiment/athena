@@ -30,7 +30,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  TauBJetGroup,
                                                                  TauMETGroup,                        
                                                                  BphysicsGroup,
-                                                                 BphysElectronGroup,
                                                                  EgammaMETGroup,
                                                                  EgammaMuonGroup,
                                                                  EgammaJetGroup,
@@ -53,7 +52,6 @@ from .Physics_pp_run3_v1 import (PhysicsStream,
                                                                  Topo3Group,
                                                                  EOFL1MuGroup,
                                                                  EOFBPhysL1MuGroup,
-                                                                 EOFBeePhIGroup,                                                               
                                                                  )
 
 DevGroup = ['Development']
@@ -166,10 +164,6 @@ def getDevSignatures():
         # test chain for EgammaPEBTLA building type
         ChainProp(name='HLT_g7_loose_EgammaPEBTLA_L1eEM5',l1SeedThresholds=['eEM5'], stream=['EgammaPEBTLA'], groups=SupportPhIGroup+DevGroup),
         ChainProp(name='HLT_g7_loose_L1eEM5',l1SeedThresholds=['eEM5'], groups=SupportPhIGroup+DevGroup),
-
-        # ATR-19501, ATR-28162
-        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5','eEM5'], stream=['BphysDelayed'], groups=SupportPhIGroup+BphysElectronGroup+['RATE:CPS_BKeePrimary']+DevGroup),
-        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5','eEM5'], stream=['BphysDelayed'], groups=EOFBeePhIGroup+BphysElectronGroup+DevGroup),
 
         # ATR-23625
         ChainProp(name='HLT_g45_medium_g20_medium_L12eEM18M', l1SeedThresholds=['eEM18M','eEM18M'], groups=SupportPhIGroup+MultiPhotonGroup),
