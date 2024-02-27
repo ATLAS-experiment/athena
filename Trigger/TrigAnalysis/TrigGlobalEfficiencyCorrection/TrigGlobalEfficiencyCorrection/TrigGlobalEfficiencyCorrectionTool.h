@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -84,7 +84,7 @@ private:
 		SG::AuxElement::ConstAccessor<char> decorator;
 		std::size_t hash;
 		bool suffixed;
-		TagDecorator(const std::string& name, std::size_t hash, bool suffixed) : decorator(name), hash(hash), suffixed(suffixed) {}
+		TagDecorator(const std::string& name, std::size_t the_hash, bool suffixed) : decorator(name), hash(the_hash), suffixed(suffixed) {}
 	};
 	struct CachedRanking
 	{

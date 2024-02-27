@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -135,7 +135,7 @@ struct Config
 	double expectedEfficiencyTolerance = 1e-6;
 	bool debug = false;
 	
-	Config(const char* name) : testName(name) { leptonPtValues = {30e4f}; }
+	Config(const char* name) : testName(name), leptonPtValues {30e4f} { }
 	Config& setTriggers(const std::string& t) { triggers = t; return *this; }
 	Config& setLeptonPDF(unsigned nmin, unsigned nmax, std::initializer_list<float> ptvalues)
 	{
@@ -567,8 +567,7 @@ bool run_test(const Config& cfg, int toy_to_debug)
 	std::vector<const xAOD::Muon*> muons;
 	std::vector<const xAOD::Photon*> photons;
 	std::vector<const xAOD::IParticle*> particles;
-	double sum_eff = 0., sum_eff_toys[nToySamples];
-	std::fill(std::begin(sum_eff_toys), std::end(sum_eff_toys), 0.);
+	double sum_eff = 0., sum_eff_toys[nToySamples] = {0};
 	for(int toy=0; toy<nToysPerTest; ++toy)
 	{
 		do
