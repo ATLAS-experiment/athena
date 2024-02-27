@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */  
   
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFiller2DProfile_h
@@ -21,7 +21,7 @@ namespace Monitored {
 
 
     virtual unsigned fill( const HistogramFiller::VariablesPack& vars ) const override {
-	if ( vars.size() != 3) {
+	  if ( vars.size() != 3) {
         return 0;
       }
 
@@ -30,28 +30,28 @@ namespace Monitored {
       if (cutMaskValuePair.first == 0) { return 0; }
       auto cutMaskAccessor = cutMaskValuePair.second;
 
-      auto histogram = this->histogram<TProfile2D>();
-      /*HERE NEED TO INCLUDE CASE IN WHICH SOME VARIABLES ARE SCALAR AND SOME VARIABLES ARE VECTORS
-      unsigned i(0);
-      if (m_variable1->size() != m_variable2->size() || m_variable1->size() != m_variable3->size() || m_variable2->size() != m_variable3->size() ) {
-
-      }*/
-
-      //For now lets just consider the case in which all variables are of the same length
-      if ( vars.weight && vars.weight->size() == vars.var[0]->size() ) {
-        // Weighted fill
-        for (unsigned i = 0; i < vars.var[0]->size(); ++i) {
-          if (cutMaskAccessor(i)) {
-            histogram->Fill(vars.var[0]->get(i), vars.var[1]->get(i), vars.var[2]->get(i), vars.weight->get(i));
+      if (vars.weight) {
+          // Weighted fill
+          auto weightAccessor = [&](size_t i){ return vars.weight->get(i); };
+          const size_t size0 = vars.var[0]->size();
+          const size_t size1 = vars.var[1]->size();
+          const size_t size2 = vars.var[2]->size();
+          const size_t sizeWeight = vars.weight->size();
+          if (ATH_UNLIKELY(size0 > 1 && size1 > 1 && size2 > 1 &&
+                           sizeWeight > 1 && size0 != sizeWeight)) {
+              MsgStream log(Athena::getMessageSvc(), "HistogramFiller2DProfile");
+              log << MSG::ERROR << "Weight does not match the size of plotted variable: "
+                  << vars.weight->size() << " " << size0 << endmsg;
+              return 0;
           }
-        }
+          // Need to fill here while weightVector is still in scope
+          if (not vars.cut) return HistogramFiller::fill<TProfile2D>(weightAccessor, detail::noCut, *vars.var[0], *vars.var[1], *vars.var[2]);
+          else              return HistogramFiller::fill<TProfile2D>(weightAccessor, cutMaskAccessor, *vars.var[0], *vars.var[1], *vars.var[2]);
+
       } else {
-        // Unweighted fill
-        for (unsigned i = 0; i < vars.var[0]->size(); ++i) {
-          if (cutMaskAccessor(i)) {
-            histogram->Fill(vars.var[0]->get(i), vars.var[1]->get(i), vars.var[2]->get(i));
-          }
-        }
+          // Unweighted fill
+          if (not vars.cut) return HistogramFiller::fill<TProfile2D>(detail::noWeight, detail::noCut, *vars.var[0], *vars.var[1], *vars.var[2]);
+          else              return HistogramFiller::fill<TProfile2D>(detail::noWeight, cutMaskAccessor, *vars.var[0], *vars.var[1], *vars.var[2]);
       }
       return vars.var[0]->size();
     }

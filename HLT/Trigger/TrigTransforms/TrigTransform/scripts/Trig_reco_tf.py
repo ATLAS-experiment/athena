@@ -75,7 +75,7 @@ def getTransform():
 
     # RAWtoALL, DQHistogramMerge are the reconstruction substeps for trigger transform
     # shortened list from addRecoSubsteps in RecJobTransforms.recTransformUtils
-    executorSet.add(athenaExecutor(name = 'RAWtoALL', skeletonFile = 'RecJobTransforms/skeleton.RAWtoALL_tf.py',
+    executorSet.add(athenaExecutor(name = 'RAWtoALL',
                                    skeletonCA = 'RecJobTransforms.RAWtoALL_Skeleton',
                                    substep = 'r2a', inData = ['BS', 'RDO'],
                                    outData = ['ESD', 'AOD', 'HIST_R2A'],
@@ -84,10 +84,10 @@ def getTransform():
 
     # Other reco steps - not currently used in trigger reprocessings
     # if remove can also remove outputNTUP_TRIGFile
-    executorSet.add(athenaExecutor(name = 'ESDtoDPD', skeletonFile = 'PATJobTransforms/skeleton.ESDtoDPD_tf.py',
+    executorSet.add(athenaExecutor(name = 'ESDtoDPD',
                                    substep = 'e2d', inData = ['ESD'], outData = ['NTUP_TRIG'],
                                    perfMonFile = 'ntuple_ESDtoDPD.pmon.gz'))
-    executorSet.add(athenaExecutor(name = 'AODtoDPD', skeletonFile = 'PATJobTransforms/skeleton.AODtoDPD_tf.py',
+    executorSet.add(athenaExecutor(name = 'AODtoDPD',
                                    substep = 'a2d', inData = ['AOD', 'EVNT'], outData = ['NTUP_TRIG'],
                                    perfMonFile = 'ntuple_AODtoDPD.pmon.gz'))
 

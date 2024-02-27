@@ -1,16 +1,13 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## Bytestream file merger, adapted from Tier0 RAWMerge_trf.py
 #  Uses TDAQ fast bytestream merger 'file_merging'
 # @version $Id: RAWMerge_tf.py 571113 2013-11-18 21:45:05Z graemes $ 
 
-import os.path
 import sys
 import time
-
-import logging
 
 # This is a hack for Prodsys I. To generate this list use the --dumpargs option to the transform, then paste in here
 # N.B. This all has to go on one line!

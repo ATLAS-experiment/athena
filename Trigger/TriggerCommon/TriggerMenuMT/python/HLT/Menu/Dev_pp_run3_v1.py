@@ -208,16 +208,6 @@ def getDevSignatures():
         ChainProp(name='HLT_xe30_pfopufit_sig30_L1XE30', l1SeedThresholds=['FSNOSEED'], groups=METGroup+DevGroup),
         ChainProp(name='HLT_xe30_tcpufit_sig30_L1XE30', l1SeedThresholds=['FSNOSEED'], groups=METGroup+DevGroup),
 
-        # ATR-25574 MET NN 
-        ChainProp(name='HLT_xe55_cell_xe90_nn_L1jXE100', l1SeedThresholds=['FSNOSEED']*2, groups=METGroup+DevGroup),
-        ChainProp(name='HLT_xe55_cell_xe105_nn_L1jXE100', l1SeedThresholds=['FSNOSEED']*2, groups=METGroup+DevGroup),
-        ChainProp(name='HLT_xe55_cell_xe90_nn_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED']*2, groups=METGroup+DevGroup),
-        ChainProp(name='HLT_xe55_cell_xe105_nn_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED']*2, groups=METGroup+DevGroup),
-        ChainProp(name='HLT_xe65_cell_xe90_nn_L1jXE100', l1SeedThresholds=['FSNOSEED']*2, groups=METGroup+DevGroup),
-        ChainProp(name='HLT_xe65_cell_xe105_nn_L1jXE100', l1SeedThresholds=['FSNOSEED']*2, groups=METGroup+DevGroup),
-        ChainProp(name='HLT_xe65_cell_xe90_nn_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED']*2, groups=METGroup+DevGroup),
-        ChainProp(name='HLT_xe65_cell_xe105_nn_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED']*2, groups=METGroup+DevGroup),
-
         #ATR-28679
         ChainProp(name='HLT_xe30_cell_L1jXE60',       l1SeedThresholds=['FSNOSEED'], groups=METGroup+DevGroup),
         ChainProp(name='HLT_xe30_mht_L1jXE60',        l1SeedThresholds=['FSNOSEED'], groups=METGroup+DevGroup),
@@ -275,10 +265,6 @@ def getDevSignatures():
         # Phase I duplicates for primary calratio TAU
         ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_roiftf_preselj20emf6_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
         ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratiormbib_roiftf_preselj20emf6_L1eTAU140', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-
-        # ATR-28563 Multi-BC L1Topo 
-        ChainProp(name='HLT_noalg_L1LLPDPHI-jXE27-jJ27', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
-        ChainProp(name='HLT_j20_calratio_roiftf_preselj20emf24_L1LLPDPHI-jXE27-jJ27', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup+DevGroup),
 
         # ATR-28412 test lower than VBF inclusive
         ChainProp(name='HLT_j70_j50a_j0_DJMASS900j50dphi200x400deta_L1MJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryLegGroup+MultiJetGroup+LegacyTopoGroup), # previously HLT_j70_j50_0eta490_invm1000j70_dphi20_deta40_L1MJJ-500-NFF
@@ -861,15 +847,6 @@ def getDevSignatures():
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_BpmumuKp_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_BsmumuPhi_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
         ChainProp(name='HLT_2mu4_noL2Comb_bBmumux_LbPqKm_L12MU3V', stream=["BphysDelayed"], groups=BphysicsGroup+DevGroup),
-
-        #ATR-27341; R(D*) measurement
-        ChainProp(name='HLT_2mu6_bBmux_BdmuDstarX_L12MU5VF', l1SeedThresholds=['MU5VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU5VF']+DevGroup),
-        ChainProp(name='HLT_mu6_mu4_bBmux_BdmuDstarX_L1MU5VF_2MU3V', l1SeedThresholds=['MU5VF','MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU5VF_2MU3V']+DevGroup),
-        ChainProp(name='HLT_mu6_mu4_bBmux_BdmuDstarX_L1MU5VF_2MU3VF', l1SeedThresholds=['MU5VF','MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU5VF_2MU3VF']+DevGroup),
-        ChainProp(name='HLT_2mu4_bBmux_BdmuDstarX_L12MU3V', l1SeedThresholds=['MU3V'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3V']+DevGroup),
-        ChainProp(name='HLT_2mu4_bBmux_BdmuDstarX_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=['BphysDelayed'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_2MU3VF']+DevGroup),
-        ChainProp(name='HLT_mu20_mu4_bBmux_BdmuDstarX_L1MU14FCH', l1SeedThresholds=['MU14FCH','MU3V'], stream=["BphysDelayed"], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU14FCH']+DevGroup),
-        ChainProp(name='HLT_mu23_mu4_bBmux_BdmuDstarX_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','MU3V'], stream=["BphysDelayed"], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU18VFCH']+DevGroup),
 
     ]
 

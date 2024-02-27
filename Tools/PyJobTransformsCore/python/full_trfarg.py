@@ -6,7 +6,7 @@ import os
 import copy
 from PyJobTransformsCore.basic_trfarg import Argument, BoolArg, InputDataFileArg, InputTarFileAndSetupArg, InputTarFileArg, IntegerArg, OutputDataFileArg, OutputFileArg, StringArg
 from PyJobTransformsCore.envutil import find_joboptions
-from PyJobTransformsCore.trfutil import AODFile, BSFile, DPDFile, ESDFile, EvgenFile, FTKIPFile, HistogramFile, HitsFile, JiveXMLTGZFile, MonitorHistFile, NtupleFile, RDOFile, SANFile, TAGFile, expandStringToList, strip_suffix
+from PyJobTransformsCore.trfutil import AODFile, BSFile, DPDFile, ESDFile, EvgenFile, FTKIPFile, HistogramFile, HitsFile, JiveXMLTGZFile, MonitorHistFile, NtupleFile, RDOFile, SANFile, expandStringToList, strip_suffix
 from PyJobTransformsCore.trferr import JobOptionsNotFoundError, TransformArgumentError, TransformDefinitionError
 from PyJobTransformsCore import fileutil
 
@@ -159,31 +159,6 @@ class OutputAODFileArg(OutputDataFileArg):
     """Output file that contains AODs"""
     def __init__(self,help='default',name='default', temporary = False, intermediate = False, **validationDict ):
         OutputDataFileArg.__init__(self,help,AODFile(),name, temporary, intermediate, **validationDict )
-
-    def isFullArgument(self):
-        return True
-
-
-class InputTAGFileArg(InputDataFileArg):
-    """Input file that contains TAGs"""
-    def __init__(self,help='default',name='default', **kwargs ):
-        InputDataFileArg.__init__(self,help,TAGFile(),name, **kwargs )
-
-    def isFullArgument(self):
-        return True
-
-class InputTAG_AODFileArg(InputDataFileArg):
-    """Input file that contains TAGs pointing to AODs, in particular"""
-    def __init__(self,help='default',name='default', **kwargs ):
-        InputDataFileArg.__init__(self,help,TAGFile(),name, **kwargs )
-
-    def isFullArgument(self):
-        return True
-
-class OutputTAGFileArg(OutputDataFileArg):
-    """Output file that contains TAGs"""
-    def __init__(self,help='default',name='default', temporary = False, intermediate = False, **validationDict ):
-        OutputDataFileArg.__init__(self,help,TAGFile(),name, temporary, intermediate, **validationDict )
 
     def isFullArgument(self):
         return True

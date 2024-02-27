@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## A simple tranform running HelloWorld 
 
@@ -34,7 +34,6 @@ def main():
 def getTransform():
     trf = transform(executor = athenaExecutor(name = 'athena', 
                                               substep='HelloWorld',
-                                              skeletonFile=None,
                                               skeletonCA="PyJobTransforms.HelloWorldSkeleton"))
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)

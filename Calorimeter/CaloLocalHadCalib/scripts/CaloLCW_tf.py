@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """JobTransform to run Calo LCW computation job"""
 
@@ -14,8 +14,7 @@ import PyJobTransforms.trfArgClasses as trfArgClasses
 if __name__ == '__main__':
 
     executorSet = set()
-    executorSet.add(athenaExecutor(name = 'CaloLCW', skeletonFile = None,
-                                   skeletonCA='CaloLocalHadCalib.CaloLCWSkeleton',
+    executorSet.add(athenaExecutor(name = 'CaloLCW', skeletonCA='CaloLocalHadCalib.CaloLCWSkeleton',
                                    substep = 'e2d', inData = ['ESD',], outData = ['HIST_CLASS','HIST_OOC','HIST_WEIGHTS','NTUP_DM']))
 
     trf = transform(executor = executorSet)

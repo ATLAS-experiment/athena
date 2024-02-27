@@ -374,8 +374,22 @@ class InDetTrigSequence:
                                             TrackContainerName = self.__flags.Tracking.ActiveConfig.trkTracks_FTF,
                                             xAODTrackParticlesFromTracksContainerName = self.__flags.Tracking.ActiveConfig.tracks_FTF))
       else:
-        from TrigInDetConfig.TrigInDetConfig import trackFTFConverterCfg
-        acc.merge(trackFTFConverterCfg(flags, signature))
+        
+        from TrkConfig.TrkParticleCreatorConfig import InDetTrigParticleCreatorToolFTFCfg
+        creatorTool = acc.popToolsAndMerge(InDetTrigParticleCreatorToolFTFCfg(flags))
+        acc.addPublicTool(creatorTool)
+
+        from xAODTrackingCnv.xAODTrackingCnvConfig import TrigTrackParticleCnvAlgCfg
+        prefix = "InDet"
+        acc.merge(
+          TrigTrackParticleCnvAlgCfg(
+            self.__flags,
+            name = prefix+'xAODParticleCreatorAlg'+self.__flags.Tracking.ActiveConfig.input_name+'_FTF',
+            TrackParticleCreator = creatorTool,
+            TrackContainerName = self.__lastTrkCollection,
+            xAODTrackParticlesFromTracksContainerName = self.__flags.Tracking.ActiveConfig.tracks_FTF,
+          )
+        )
 
     return acc
 

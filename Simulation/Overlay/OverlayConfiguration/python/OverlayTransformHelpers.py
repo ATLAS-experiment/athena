@@ -60,7 +60,6 @@ def addOverlayArguments(parser, in_reco_chain=False):
 
 def addOverlaySubstep(executor_set, in_reco_chain=False):
     executor = athenaExecutor(name='Overlay',
-                              skeletonFile=None,
                               skeletonCA='OverlayConfiguration.OverlaySkeleton',
                               substep='overlay',
                               tryDropAndReload=False,

@@ -31,7 +31,7 @@ class trfExitTests(unittest.TestCase):
                 steps.append(m.group(1))
         self.assertEqual(p.returncode, 0)
         self.assertTrue("HITtoRDO" in steps)
-        self.assertTrue("RAWtoESD" in steps)
+        self.assertTrue("RAWtoALL" in steps)
 
     def test_FullChain_tf(self):
         cmd = ['FullChain_tf.py', '--showSteps']
@@ -47,7 +47,7 @@ class trfExitTests(unittest.TestCase):
         self.assertEqual(p.returncode, 0)
         self.assertTrue("EVNTtoHITS" in steps)
         self.assertTrue("HITtoRDO" in steps)
-        self.assertTrue("RAWtoESD" in steps)
+        self.assertTrue("RAWtoALL" in steps)
         
 if __name__ == '__main__':
     unittest.main()

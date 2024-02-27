@@ -1,15 +1,12 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Small test transform which only runs HIST merging
 # @version $Id: HISTMerge_tf.py 603486 2014-06-25 09:07:28Z graemes $ 
 
-import os.path
 import sys
 import time
-
-import logging
 
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg

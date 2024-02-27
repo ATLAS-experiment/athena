@@ -1,13 +1,18 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
 //                                                         //
-//  Header file for class DumpGeo                           //
+//  Header file for class DumpGeo                          // 
 //                                                         //
-//  update: Riccardo-Maria BIANCHI <rbianchi@cern.ch>      //
-//          23 May 2014                                    //
+//  Initial version:                                       //
+//  - 2017, Sep -- Riccardo Maria BIANCHI                  //
+//                 <riccardo.maria.bianchi@cern.ch>        //
+//                                                         //
+//  Main updates:                                          //
+//  - 2024, Feb -- Riccardo Maria BIANCHI                  //
+//                 <riccardo.maria.bianchi@cern.ch>        //
 //                                                         //
 //  This is the Athena algorithm to dump the geometry      //
 //                                                         //
@@ -42,7 +47,10 @@ class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm,
   IToolSvc* m_toolSvc;
   GeoExporter* m_geoExporter;
 
-  bool m_noGui;//For testing job-options in RTT
+  // Properties
+  // -- Athena-related
+  Gaudi::Property<std::string> m_atlasRelease{this, "AtlasRelease", "", "The current, in use Atlas release"}; 
+
 };
 
 #endif

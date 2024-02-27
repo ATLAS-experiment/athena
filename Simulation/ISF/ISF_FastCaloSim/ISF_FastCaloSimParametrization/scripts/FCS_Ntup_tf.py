@@ -1,24 +1,21 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Run HITS file and produce histograms.
 """
 
-import os.path
 import sys
 import time
-import logging
 
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
 msg.info('logging set in %s' % sys.argv[0])
 from PyJobTransforms.transform import transform
 from PyJobTransforms.trfExe import athenaExecutor
-from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments, addTriggerArguments
+from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
-import PyJobTransforms.trfArgClasses as trfArgClasses
 from ISF_FastCaloSimParametrization.fcsTrfArgs import addFCS_NtupArgs
 
 @stdTrfExceptionHandler
@@ -39,7 +36,6 @@ def getTransform():
     executorSet = set()
     from SimuJobTransforms.SimTransformUtils import addSimulationArguments
     executorSet.add(athenaExecutor(name = 'FCS_Ntup',
-                                   skeletonFile = 'ISF_FastCaloSimParametrization/skeleton.ESDtoNTUP_FCS.py',
                                    skeletonCA = 'ISF_FastCaloSimParametrization.ESDtoNTUP_FCS_Skeleton',
                                    inData = ['ESD'], outData = ['NTUP_FCS'],))
     trf = transform(executor = executorSet, description = 'FastCaloSim V2 Parametrization ntuple transform. Inputs must be ESD. Outputs must be ntuple files.')

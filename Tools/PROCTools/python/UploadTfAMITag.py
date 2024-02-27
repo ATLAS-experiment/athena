@@ -43,7 +43,6 @@ OutputsVsStreams = {
     #'outputESDFile': {'dstype': '!replace RAW ESD', 'ifMatch': '(?!.*DRAW.*)(?!.*physics_Main.*)', 'HumanOutputs': 'always produced, except for DRAW input and physics_Main'},
     'outputESDFile': {'dstype': '!replace RAW ESD', 'ifMatch': '(?!.*DRAW.*)(?!.(.*physics_Main\\..*|.*Background.*|.*L1Topo.*))', 'HumanOutputs': 'always produced, except for DRAW input and physics_Main'},
     'outputAODFile': {'dstype': '!replace RAW AOD', 'ifMatch': cphiProjTag+'(?!.*DRAW_RPVLL.*)(?!.*Background.*)', 'HumanOutputs': 'always produced except for DRAW_RPVLL.'},
-    'outputTAGFile': {'dstype': 'TAG', 'ifMatch': 'data[0-9][0-9]_(cos|1beam|.*eV|comm)(.*express_express\\..*)(?!.(.*DRAW.*))', 'HumanOutputs': 'Produced in express stream'},
     'outputHISTFile': {'dstype': 'HIST', 'ifMatch': '(?!.(.*DRAW.*|.*debugrec.*))', 'HumanOutputs': 'always produced except for DRAW and debugrec'},  # note was disabled for Pb-Pb HardProbes
     'outputRDOFile': {'dstype': 'RDO', 'ifMatch': cphiProjTag, 'HumanOutputs': 'always produced.'},
 # NTuples
@@ -170,16 +169,6 @@ def GetProcessConfigs(release):
                           'trfsetupcmd': setupScript+' '+rel+' '+specialT0Setup },
         'description': 'Trf for combined DQM histogram merging and DQM webpage creation, to get periodic DQ monitoring updates. '}
 
-    # TAG merging (no TAG_COMM anymore)
-    processConfigs['tagmerge'] = {
-        'inputs': {'inputTAGFile': {}},
-        'outputs': {'outputTAG_MRGFile': {'dstype': 'TAG' }},
-        'phconfig': {},
-        'transformation': 'TAGMerge_tf.py',
-        'tasktransinfo': {'trfpath': 'TAGMerge_tf.py', 
-                          'trfsetupcmd': setupScript+' '+rel+' '+specialT0Setup },
-        'description': 'Trf for TAG merging, runs CollAppend from release area. ' }
-    
     # NTUP merging
     processConfigs['ntupmerge'] = {
         'inputs': {'inputNTUP_MUONCALIBFile': {}},
@@ -195,7 +184,6 @@ def GetProcessConfigs(release):
     processConfigs['aodmerge'] = {
         'inputs': {'inputAODFile': {}},
         'outputs': {'outputAOD_MRGFile': {'dstype': 'AOD'}
-                    #'outputTAGFile': {'dstype': 'TAG', 'ifMatch': '(?!.*calibration.*)'}
                     },
         'phconfig': {'autoConfiguration': 'everything'},
         'transformation': 'AODMerge_tf.py',
@@ -323,11 +311,11 @@ if __name__ == '__main__':
     process=None
     if inPickleFile.endswith('.pickle'): 
         process='reco'
-    elif (inPickleFile in ['histmerge', 'tagmerge', 'ntupmerge', 'aodmerge', 'daodmerge', 'dpdmerge', 'fastmon']):
+    elif (inPickleFile in ['histmerge', 'ntupmerge', 'aodmerge', 'daodmerge', 'dpdmerge', 'fastmon']):
         process = inPickleFile
     else:
         s = "Don't know how to interpret argument: '%s'.\n"%inPickleFile
-        s += "Possible arguments are: histmerge, tagmerge, ntupmerge, aodmerge, daodmerge, dpdmerge\n"
+        s += "Possible arguments are: histmerge, ntupmerge, aodmerge, daodmerge, dpdmerge\n"
         s += "...or for reconstruction tags: a pickeled dic named *.pickle\n"
         raise RuntimeError(s)
 

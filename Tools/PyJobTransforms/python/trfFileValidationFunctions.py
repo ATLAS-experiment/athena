@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfFileValidationFunctions
 # @brief Transform file validation functions
@@ -44,17 +44,6 @@ def returnIntegrityOfBSFile(fname):
         return (True, "integrity of {fileName} good".format(fileName = str(fname)))
     else:
         return (False, "integrity of {fileName} bad: return code: {integrityStatus}".format(fileName = str(fname), integrityStatus = rc))
-
-### @brief Integrity function for file class argTAGFile
-def returnIntegrityOfTAGFile(fname):
-    from PyJobTransforms.trfFileUtils import AthenaLiteFileInfo
-    dictionaryOfAthenaFileInfo = AthenaLiteFileInfo(fname, "TAG", retrieveKeys = ['nentries',])
-    msg.debug("dictionary of Athena file information: {a}".format(a = dictionaryOfAthenaFileInfo))
-    eventCount = dictionaryOfAthenaFileInfo[fname]['nentries']
-    if eventCount is None:
-        return (False, "integrity of {fileName} bad: got a bad event count in {fileName}: {eventCount}".format(fileName = str(fname), eventCount = eventCount))
-    else:
-        return (True, "integrity of {fileName} good".format(fileName = str(fname)))
 
 ## @brief Integrity function for file class argHISTFile
 def returnIntegrityOfHISTFile(fname):

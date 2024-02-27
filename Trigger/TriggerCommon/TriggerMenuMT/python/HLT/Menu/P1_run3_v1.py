@@ -319,6 +319,7 @@ def addHighMuP1Signatures(chains):
         # IDCalib Chains
         ChainProp(name='HLT_idcalib_trk9_IDCalibPEB_L1J100', stream=['IDCalib'], groups=SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
         ChainProp(name='HLT_idcalib_trk9_IDCalibPEB_L1XE50', stream=['IDCalib'], groups=SupportLegGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
+        ChainProp(name='HLT_idcalib_trk9_IDCalibPEB_L1gXEJWOJ100', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), #ATR-28838
         #IDcalib for lower lumi
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1jJ60', stream=['IDCalib'], groups=SupportPhIGroup+['RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']),
 

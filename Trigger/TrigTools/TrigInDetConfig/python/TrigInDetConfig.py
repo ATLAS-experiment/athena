@@ -42,26 +42,6 @@ def InDetIDCCacheCreatorCfg(flags):
   acc.addEventAlgo( InDetCacheCreatorTrig )
   return acc
 
-def _trackConverterCfg(flags, signature, inputTracksKey, outputTrackParticleKey):
-  acc = ComponentAccumulator()
-
-  from TrkConfig.TrkParticleCreatorConfig import InDetTrigParticleCreatorToolFTFCfg
-  creatorTool = acc.popToolsAndMerge(InDetTrigParticleCreatorToolFTFCfg(flags))
-  acc.addPublicTool(creatorTool)
-
-  trackParticleCnv=CompFactory.InDet.TrigTrackingxAODCnvMT(name = "InDetTrigTrackParticleCreatorAlg" + signature,
-                                                          TrackName           = inputTracksKey,
-                                                          TrackParticlesName  = outputTrackParticleKey,
-                                                          ParticleCreatorTool = creatorTool)
-  acc.addEventAlgo(trackParticleCnv, primary=True)
-
-  return acc
-
-def trackFTFConverterCfg(flags, signature):
-  return _trackConverterCfg(flags, signature,
-                            flags.Tracking.ActiveConfig.trkTracks_FTF,
-                            flags.Tracking.ActiveConfig.tracks_FTF)
-
 
 @AccumulatorCache
 def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):

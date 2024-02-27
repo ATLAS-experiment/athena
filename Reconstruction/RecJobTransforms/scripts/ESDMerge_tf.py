@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ## ESDMerge_tf.py - ESD merger
 # @version $Id: ESDMerge_tf.py 670203 2015-05-27 13:19:01Z graemes $ 
@@ -8,14 +8,12 @@
 import sys
 import time
 
-import logging
-
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
 msg.info('logging set in %s' % sys.argv[0])
 
 from PyJobTransforms.transform import transform
-from PyJobTransforms.trfExe import athenaExecutor, hybridPOOLMergeExecutor
+from PyJobTransforms.trfExe import hybridPOOLMergeExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
@@ -40,8 +38,7 @@ def main():
 
 def getTransform():
     executorSet = set()
-    executorSet.add(hybridPOOLMergeExecutor(name = 'ESDMerge', skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py',
-                                   skeletonCA = 'RecJobTransforms.MergePool_Skeleton', inData = ['ESD'], outData = ['ESD_MRG']))
+    executorSet.add(hybridPOOLMergeExecutor(name = 'ESDMerge', inData = ['ESD'], outData = ['ESD_MRG']))
 
     trf = transform(executor = executorSet)
     

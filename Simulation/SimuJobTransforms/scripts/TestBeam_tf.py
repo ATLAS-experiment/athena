@@ -1,16 +1,13 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 Run Geant4 simulation on generated events and produce a HITS file.
 """
 
-import os.path
 import sys
 import time
-
-import logging
 
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
@@ -21,9 +18,6 @@ from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments, addDetectorArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from SimuJobTransforms.simTrfArgs import addSimIOTrfArgs,addCommonSimTrfArgs, addCommonSimDigTrfArgs, addTestBeamArgs
-
-
-import PyJobTransforms.trfArgClasses as trfArgClasses
 
 # Prodsys hack...
 ListOfDefaultPositionalKeys=['--AMIConfig', '--AMITag', '--DBRelease', '--DataRunNumber', '--Eta', '--Theta', '--Z', '--asetup', '--athena', '--athenaopts', '--beamType', '--checkEventCount', '--command', '--conditionsTag', '--enableLooperKiller', '--env', '--eventAcceptanceEfficiency', '--execOnly', '--firstEvent', '--geometryVersion', '--ignoreErrors', '--ignoreFiles', '--ignorePatterns', '--imf', '--inputEvgenFile', '--jobNumber', '--maxEvents', '--outputHITSFile', '--physicsList', '--postExec', '--postInclude', '--preExec', '--preInclude', '--randomSeed', '--reportName', '--reportType', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation', '--tcmalloc', '--testBeamConfig', '--useISF']
@@ -46,7 +40,7 @@ def main():
     sys.exit(trf.exitCode)
 
 def getTransform():
-    trf = transform(executor = athenaExecutor(name = 'TestBeamTf', skeletonFile = 'SimuJobTransforms/skeleton.TestBeam.py', skeletonCA = 'SimuJobTransforms.TestBeam_Skeleton',
+    trf = transform(executor = athenaExecutor(name = 'TestBeamTf', skeletonCA = 'SimuJobTransforms.TestBeam_Skeleton',
                                               substep = 'TBsim', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz', inData=['NULL','Evgen'], outData=['HITS','NULL'] )) #may have to add evgen to outData if cosmics/cavern background jobs don't work.
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)

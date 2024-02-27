@@ -86,7 +86,7 @@ std::set<std::string> AnalysisConfigMT_Ntuple::get_configured_chains() {
 
     }
 
-		  ++chainitr;
+    ++chainitr;
   }
 
   m_chainNames = chainNames;
@@ -126,8 +126,9 @@ void AnalysisConfigMT_Ntuple::loop() {
 	/// FIXME: should really have hardcoded limits encoded as 
 	///        const variables 
 	Filter_etaPT       filterRef(5,500);   
-	Filter_etaPT       filter_etaPT(3.0,m_ptmin);
-	Filter_pdgIdpTeta  filter_pdgIdpTeta(m_TruthPdgId,3.0,m_ptmin); // |eta|<3, pt>1GeV 
+	/// use wide |eta|<5 range to allow for ITk studies also
+	Filter_etaPT       filter_etaPT(5.0,m_ptmin);
+	Filter_pdgIdpTeta  filter_pdgIdpTeta(m_TruthPdgId,5.0,m_ptmin); // |eta|<5, pt>m_ptmin 
 
 	TrackFilter*        truthFilter = &filter_etaPT;
 
