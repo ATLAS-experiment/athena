@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# art-description: athenaHLT test of the Dev_pp_run3_v1 menu
-# art-type: build                                                                  
+# art-description: athenaHLT test of the Dev_pp_run3_v1 menu, also used for SMK generation for HLT reprocessings
+# art-type: build
 # art-include: main/Athena
 # art-include: 24.0/Athena                                                       
 
@@ -12,8 +12,12 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts.runHLT'
 ex.input = 'data'
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_TriggerValidation_prescale"',
-            'Trigger.doLVL1=True']
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1_HLTReprocessing_prescale"',
+            'Trigger.doLVL1=True',
+            'Trigger.L1MuonSim.NSWVetoMode=False',
+            'Trigger.L1MuonSim.doMMTrigger=False',
+            'Trigger.L1MuonSim.doPadTrigger=False',
+            'Trigger.L1MuonSim.doStripTrigger=False']
 
 test = Test.Test()
 test.art_type = 'build'
