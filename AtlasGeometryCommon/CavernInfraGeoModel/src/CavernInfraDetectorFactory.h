@@ -30,7 +30,7 @@ class CavernInfraDetectorFactory : public GeoVDetectorFactory
   virtual void create(GeoPhysVol *world) override;
   
   // Access to the results:
-  const CavernInfraDetectorManager* getDetectorManager() const;
+  virtual const CavernInfraDetectorManager* getDetectorManager() const override;
   
   // Set version Tag and Node
   void setTagNode(const std::string& tag, const std::string& node);
