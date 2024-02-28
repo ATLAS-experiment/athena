@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 # Pre-config script to propagate variables to downstream projects
 #
@@ -28,6 +28,13 @@ set( _quietFlag )
 if( @CMAKE_PROJECT_NAME@_FIND_QUIETLY )
   set( _quietFlag QUIET )
 endif()
+
+# Set up the correct version of LCG. While AthSimulationExternals does this as
+# well, we need to do it explicitly here, to make the following find_package
+# calls find the packages correctly.
+set( LCG_VERSION_POSTFIX @LCG_VERSION_POSTFIX@ )
+set( LCG_COMPONENTS "@LCG_COMPONENTS@" CACHE STRING "LCG components to set up" )
+find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
 
 # Imported target(s) used by the project.
 find_package( nlohmann_json ${_quietFlag} )
