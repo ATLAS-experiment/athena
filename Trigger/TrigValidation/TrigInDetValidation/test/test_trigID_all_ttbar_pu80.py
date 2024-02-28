@@ -31,7 +31,7 @@
 
 
 # not yet - need to establish how to postinclude in the RAWtoALL
-# useCA_Reco = True
+useCA_Reco = True
 
 Slices  = ['muon','electron','tau','bjet','fsjet']
 Events  = 4000
@@ -41,8 +41,13 @@ Input   = 'ttbar_pu80'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 
 # the conditions override is needed because the RDO was produced with a single beamspot
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_singlebeamspot.py'
-postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_singlebeamspot'
+# preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_singlebeamspot.py'
+# postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_singlebeamspot'
+
+# perhaps need to have these implemented ...
+# preinclude_trig="from IOVDbSvc.CondDB import conddb ; conddb.addOverride('/Indet/Beampos', 'IndetBeampos-RunDep-MC21-BestKnowledge-002')"
+# postinclude_reco="from IOVDbSvc.CondDB import conddb ; conddb.addOverride('/Indet/Beampos', 'IndetBeampos-RunDep-MC21-BestKnowledge-002')"
+
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline.dat      -r Offline -o data-hists-offline.root" ),
          ( "OfflineVtx",  " TIDAdata-run3-offline-vtx.dat  -r Offline -o data-hists-offline-vtx.root" ) ]
