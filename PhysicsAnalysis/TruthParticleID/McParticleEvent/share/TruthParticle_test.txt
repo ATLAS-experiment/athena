@@ -14,4 +14,3 @@ StoreGateSvc.ActivateHistory = false;
 MessageSvc.useColors = false;
 MessageSvc.OutputLevel = 3;
 
-#include "IOVSvc/IOVSvc.txt"
