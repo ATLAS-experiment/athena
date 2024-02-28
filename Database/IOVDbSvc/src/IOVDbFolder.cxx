@@ -373,26 +373,8 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
           auto [since,until] = m_iovs.getCacheBounds();
           cool::IObjectIteratorPtr itr=folder->browseObjects(since,until,m_chansel,m_tag);
           if (m_outputToFile ||m_crestCoolToFile ) {
-	    std::string fMain("cool_dump");
-	    std::filesystem::create_directory(fMain); 
             Cool2Json json(folder, since, until, m_chansel, m_tag);
-            std::ofstream myFile;
-            const std::string sanitisedFolder=fMain+"/"+sanitiseFilename(m_foldername);
-            const std::string fabricatedName=sanitisedFolder+delimiter+std::to_string(vkey)+fileSuffix;
-            myFile.open(fabricatedName,std::ios::out);
-            if (not myFile.is_open()){
-              ATH_MSG_FATAL("File creation for "<<fabricatedName<<" failed.");
-            } else{
-              ATH_MSG_INFO("File "<<fabricatedName<<" created.");
-            }
-            myFile<<IOVDbNamespace::s_openJson;
-	    myFile<<json.description()<<IOVDbNamespace::s_delimiterJson<<std::endl;
-	    myFile<<json.payloadSpec()<<IOVDbNamespace::s_delimiterJson<<std::endl;
-	    if(!m_crestCoolToFile) {
-              myFile<<json.iov()<<IOVDbNamespace::s_delimiterJson<<std::endl;
-	    }
-	    myFile<<json.payload()<<std::endl;
-            myFile<<IOVDbNamespace::s_closeJson;
+	    dumpFile("cool_dump",vkey,&json,m_crestCoolToFile,nullptr,"","");
           }
           while (itr->goToNext()) {
             const cool::IObject& ref=itr->currentRef();
@@ -572,25 +554,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     }
 
     if(m_crestCoolToFile) {
-      std::ofstream myFile;
-      std::string fMain("crest_dump");
-      const std::string sanitisedFolder=fMain+"/"+sanitiseFilename(m_foldername);
-      const std::string fabricatedName=sanitisedFolder+delimiter+std::to_string(vkey)+fileSuffix;
-      std::filesystem::create_directory(fMain);
-      myFile.open(fabricatedName,std::ios::out);
-      if (not myFile.is_open()){
-        ATH_MSG_FATAL("File creation for "<<fabricatedName<<" failed.");
-      } else {
-        ATH_MSG_INFO("File "<<fabricatedName<<" created.");
-      }
-      std::string newNodeDescription = std::regex_replace(strCrestNodeDesc, std::regex("\""), "\\\"");
-      std::string newSpecString = std::regex_replace(specString, std::regex(":"), ": ");
-      newSpecString = std::regex_replace(newSpecString, std::regex(","), IOVDbNamespace::s_delimiterJson);
-      myFile<<IOVDbNamespace::s_openJson;
-      myFile<<"\"node_description\" : \""<<newNodeDescription<< '\"'<<IOVDbNamespace::s_delimiterJson<<std::endl;
-      myFile<<"\"folder_payloadspec\": \""<<newSpecString<< '\"'<<IOVDbNamespace::s_delimiterJson<<std::endl;
-      myFile<<basicFolder.jsonPayload(newNodeDescription,newSpecString)<<std::endl;
-      myFile<<IOVDbNamespace::s_closeJson;
+      dumpFile("crest_dump",vkey,nullptr,false,&basicFolder,strCrestNodeDesc,specString);
     }
 
     ATH_MSG_DEBUG( "loadCache: Expecting to see " << nChannelsExpected << " channels" );
@@ -1366,4 +1330,49 @@ std::vector<IOVDbFolder::IOVHash> IOVDbFolder::fetchCrestIOVs()
   }
 
   return result;
+}
+
+void IOVDbFolder::dumpFile(const std::string& dumpName
+		           , const cool::ValidityKey& vkey
+			   , Cool2Json* json
+			   , bool skipCoolIoV
+			   , BasicFolder* basicFolder
+			   , const std::string& crestNodeDescr
+			   , const std::string& specString) const
+{
+  std::ofstream myFile;
+  std::string fMain(dumpName);
+  const std::string sanitisedFolder=fMain+"/"+sanitiseFilename(m_foldername);
+  const std::string fabricatedName=sanitisedFolder+delimiter+std::to_string(vkey)+fileSuffix;
+  std::filesystem::create_directory(fMain);
+  myFile.open(fabricatedName,std::ios::out);
+  if (not myFile.is_open()) {
+    std::string errorMessage{"File creation for "+fabricatedName+" failed."};
+    ATH_MSG_FATAL(errorMessage);
+    throw std::runtime_error(errorMessage);
+  }
+  else {
+    ATH_MSG_INFO("File "<<fabricatedName<<" created.");
+  }
+
+  myFile<<s_openJson;
+  if(json) {
+    // Dump COOL data
+    myFile<<json->description()<<s_delimiterJson<<std::endl;
+    myFile<<json->payloadSpec()<<s_delimiterJson<<std::endl;
+    if(!skipCoolIoV) {
+      myFile<<json->iov()<<s_delimiterJson<<std::endl;
+    }
+    myFile<<json->payload()<<std::endl;
+  }
+  else {
+    // Dump CREST data
+    std::string newNodeDescription = std::regex_replace(crestNodeDescr, std::regex("\""), "\\\"");
+    std::string newSpecString = std::regex_replace(specString, std::regex(":"), ": ");
+    newSpecString = std::regex_replace(newSpecString, std::regex(","), s_delimiterJson);
+    myFile<<"\"node_description\" : \""<<newNodeDescription<< '\"'<<s_delimiterJson<<std::endl;
+    myFile<<"\"folder_payloadspec\": \""<<newSpecString<< '\"'<<s_delimiterJson<<std::endl;
+    myFile<<basicFolder->jsonPayload(newNodeDescription,newSpecString)<<std::endl;
+  }
+  myFile<<s_closeJson;
 }

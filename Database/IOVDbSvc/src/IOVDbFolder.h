@@ -40,6 +40,11 @@ class IIOVDbMetaDataTool;
 class CondAttrListCollection;
 class ITagInfoMgr;
 
+namespace IOVDbNamespace {
+  class Cool2Json;
+  class BasicFolder;
+}
+
 class IOVDbFolder : public AthMessaging {
 public:
   IOVDbFolder(IOVDbConn* conn, const IOVDbParser& folderprop, MsgStream& msg,
@@ -232,6 +237,16 @@ private:
   std::vector<IOVHash> fetchCrestIOVs();
 
   // __________________________________________________________
+
+  // Function for generating dump files
+  void dumpFile(const std::string& dumpName
+		, const cool::ValidityKey& vkey
+		, IOVDbNamespace::Cool2Json* json          // Argument for dumping COOL data
+		, bool skipCoolIoV                         // Argument for dumping COOL data
+		, IOVDbNamespace::BasicFolder* basicFolder // Argument for dumping CREST data
+		, const std::string& crestNodeDescr        // Argument for dumping CREST data
+		, const std::string& specString            // Argument for dumping CREST data
+	       ) const;
 
   ITagInfoMgr*         p_tagInfoMgr{nullptr};   // pointer to TagInfoMgr
   IClassIDSvc*         p_clidSvc{nullptr};      // pointer to CLID service
