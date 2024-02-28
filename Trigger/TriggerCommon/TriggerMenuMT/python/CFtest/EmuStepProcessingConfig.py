@@ -133,7 +133,7 @@ def generateChainsManually(flags, maskbit=0x7):
     """
     log.info("generateChainsManually mask=0x%d",maskbit)
     from TriggerMenuMT.CFtest.TestUtils import makeChain, makeChainStep
-    from TriggerMenuMT.HLT.Config.MenuComponents import getEmptyMenuSequence   
+    from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
     doMuon     = maskbit & 0x1
     doElectron = maskbit>>1 & 0x1
     doCombo    = maskbit>>2 & 0x1
@@ -203,8 +203,8 @@ def generateChainsManually(flags, maskbit=0x7):
 
     # combined chain
     if doCombo:
-        emptySeq1 = getEmptyMenuSequence("step1EmptySeqence")
-        emptySeq2 = getEmptyMenuSequence("step2EmptySeqence")
+        emptySeq1 = EmptyMenuSequence("step1EmptySeqence")
+        emptySeq2 = EmptyMenuSequence("step2EmptySeqence")
         
         if not doElectron:
             from TriggerMenuMT.CFtest.HLTSignatureConfig import elMenuSequence        

@@ -304,25 +304,29 @@ class ComboMaker(AlgNode):
 # Now sequences and chains
 ##########################################################
 
+class EmptyMenuSequence:
+    """Class to emulate reco sequences with no Hypo"""
 
-def getEmptyMenuSequence(name):
-    return EmptyMenuSequenceCA(name)
-
-             
-class EmptyMenuSequence(object):
-    """ Class to emulate reco sequences with no Hypo"""
-    """ By construction it has no Hypo;"""
-    
     def __init__(self, the_name):
+        log.debug("Made EmptySequence %s", the_name)
         self._name = the_name
-        Maker = CompFactory.InputMakerForRoI("IM"+the_name)
-        # isEmptyStep causes the IM to try at runtime to merge by feature by default (i.e for empty steps appended after a leg has finised).
-        # But if this failes then it will merge by initial ROI instead (i.e. for empy steps prepended before a leg has started)
-        Maker.isEmptyStep = True 
-        Maker.RoIsLink = 'initialRoI' #(this is the default property, just making it explicit)
-        self._maker       = InputMakerNode( Alg = Maker )
-        self._sequence    = Node( Alg = seqAND(the_name, [Maker]))
-        log.debug("Made EmptySequence %s",the_name)
+
+        # isEmptyStep causes the IM to try at runtime to merge by feature by default
+        # (i.e for empty steps appended after a leg has finised). But if this failes then it will
+        # merge by initial ROI instead (i.e. for empy steps prepended before a leg has started)
+        makerAlg = CompFactory.InputMakerForRoI(f"IM{the_name}",
+                                                isEmptyStep = True,
+                                                RoIsLink = 'initialRoI')
+
+        self._maker       = InputMakerNode( Alg = makerAlg )
+        self._sequence    = Node( Alg = seqAND(the_name, [makerAlg]))
+
+        self.ca = ComponentAccumulator()
+        self.ca.addSequence(seqAND(the_name))
+        self.ca.addEventAlgo(makerAlg, sequenceName=the_name)
+
+    def __del__(self):
+        self.ca.wasMerged()
 
     @property
     def sequence(self):
@@ -330,7 +334,12 @@ class EmptyMenuSequence(object):
 
     @property
     def maker(self):
+        self._maker.Alg = self.ca.getEventAlgo(self._maker.Alg.name)
         return self._maker
+
+    @property
+    def globalRecoCA(self):
+        return None
 
     @property
     def name(self):
@@ -340,7 +349,7 @@ class EmptyMenuSequence(object):
         return self.maker.readOutputList() # Only one since it's merged
 
     def connectToFilter(self, outfilter):
-        """ Connect filter to the InputMaker"""
+        """Connect filter to the InputMaker"""
         self.maker.addInput(outfilter)
 
     def createHypoTools(self, chainDict):
@@ -362,6 +371,7 @@ class EmptyMenuSequence(object):
     def __repr__(self):
         return "MenuSequence::%s \n Hypo::%s \n Maker::%s \n Sequence::%s \n HypoTool::%s\n"\
             %(self.name, "Empty", self.maker.Alg.getName(), self.sequence.Alg.getName(), "None")
+
 
 class MenuSequence(object):
     """ Class to group reco sequences with the Hypo"""
@@ -585,27 +595,6 @@ class MenuSequenceCA(MenuSequence):
         if self._globalCA:
             self._globalCA.wasMerged()
             
-
-class EmptyMenuSequenceCA(EmptyMenuSequence):
-    ''' EmptyMenuSequence with Component Accumulator '''
-    def __init__(self, the_name):
-        EmptyMenuSequence.__init__(self,the_name )
-        self.ca=ComponentAccumulator()
-        self.ca.addSequence(seqAND(the_name))
-        self.ca.addEventAlgo(self._maker.Alg, sequenceName=the_name)
-
-    @property
-    def maker(self):
-        makerAlg = self.ca.getEventAlgo(self._maker.Alg.getName())
-        self._maker.Alg = makerAlg
-        return self._maker
-
-    @property
-    def globalRecoCA(self):
-        return None
-
-    def __del__(self):
-        self.ca.wasMerged()
 
 class Chain(object):
     """Basic class to define the trigger menu """

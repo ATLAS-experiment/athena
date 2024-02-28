@@ -5,7 +5,7 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequenceCA
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequence
 from TrigEDMConfig.TriggerEDM import recordable
 import AthenaCommon.SystemOfUnits as Units
 
@@ -54,7 +54,7 @@ def CosmicsTrkSequenceCfg(flags):
 
 
 def EmptyMSBeforeCosmicID(flags):
-    return EmptyMenuSequenceCA("EmptyBeforeCosmicID")
+    return EmptyMenuSequence("EmptyBeforeCosmicID")
 
 #----------------------------------------------------------------
 class CosmicChainConfiguration(ChainConfigurationBase):
