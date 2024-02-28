@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -93,7 +93,6 @@ bool setupStoreGate()
     //opts.push_back("CLIDSvc.OutputLevel = 2;");
     opts.push_back("MessageSvc.useColors = false;");
     opts.push_back("MessageSvc.OutputLevel = 3;");
-    opts.push_back("#include \"IOVSvc/IOVSvc.txt\"");
     // Build job options file from list.
     for ( std::list<std::string>::const_iterator iopt=opts.begin();
           iopt!=opts.end(); ++iopt ) 
