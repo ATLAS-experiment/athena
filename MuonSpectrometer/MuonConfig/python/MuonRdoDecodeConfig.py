@@ -48,7 +48,7 @@ def MuonRdoToPrepDataAlgCfg(flags, name="MuonRdoToPrepDataAlg", **kwargs):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
     
-    kwargs.setdefault("DoSeededDecoding", flags.Common.isOnline and flags.Reco.EnableTrigger)
+    kwargs.setdefault("DoSeededDecoding", flags.Trigger.doHLT )
     the_alg = CompFactory.MuonRdoToPrepDataAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -70,7 +70,7 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
         tool_kwargs["overlap_timeTolerance"] = 1000
         tool_kwargs["solvePhiAmbiguities"] = True
         tool_kwargs["etaphi_coincidenceTime"] = 1000
-    if not flags.Common.isOnline or not flags.Reco.EnableTrigger:
+    if not flags.Trigger.doHLT:
         tool_kwargs["RpcPrdContainerCacheKey"] = ""
         tool_kwargs["RpcCoinDataContainerCacheKey"] = ""
 
@@ -109,7 +109,7 @@ def TgcRDODecodeCfg(flags, name="TgcRdoToTgcPrepData", RDOContainer = None,  **k
 
     # Get the RDO -> PRD tool
     tool_args = {}
-    if not flags.Common.isOnline or not flags.Reco.EnableTrigger:
+    if not flags.Trigger.doHLT:
        tool_args.setdefault("PrdCacheString", "")
        tool_args.setdefault("CoinCacheString", "")
     
@@ -170,7 +170,7 @@ def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
 
 def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.MmCache if flags.Common.isOnline and flags.Reco.EnableTrigger else "")
+    kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.MmCache if flags.Trigger.doHLT  else "")
 
     from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))
