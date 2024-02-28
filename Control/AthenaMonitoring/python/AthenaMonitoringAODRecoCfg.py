@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -19,7 +19,7 @@ def AthenaMonitoringAODRecoCfg(flags):
                             if _.fullname() not in flags.Input.Collections]
         # if we reschedule small R jets, check if we need to reschedule large R as well
         if jets_to_schedule:
-            jets_to_schedule += [_ for _ in (AntiKt10LCTopo_noVR, AntiKt10LCTopoTrimmed_trigger, AntiKt10UFOCSSKSoftDrop_trigger)
+            jets_to_schedule += [_ for _ in ((AntiKt10LCTopo_noVR, AntiKt10LCTopoTrimmed_trigger, AntiKt10UFOCSSKSoftDrop_trigger) if flags.Beam.Type is not BeamType.Cosmics else (AntiKt10LCTopo_noVR, AntiKt10LCTopoTrimmed_trigger))
                                  if _.fullname() not in flags.Input.Collections]
 
         if jets_to_schedule:
