@@ -142,7 +142,7 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
     }
 
     if(msgLvl(MSG::DEBUG)) {
-        std::lock_guard lock(m_debugMutex);
+        std::scoped_lock lock(m_debugMutex);
         // dump towers to histograms
         // current count units are latome counts = 12.5MeV per count
 
