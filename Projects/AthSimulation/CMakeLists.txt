@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.6 )
@@ -22,6 +22,7 @@ set( ATLAS_PYTHON_CHECKER ${ATLAS_FLAKE8}
 find_package( AtlasCMake QUIET )
 
 # Find the base project(s):
+set( LCG_COMPONENTS "externals" CACHE STRING "LCG components to set up" )
 find_package( AthSimulationExternals REQUIRED )
 find_package( Gaudi )
 
