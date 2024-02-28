@@ -1410,9 +1410,13 @@ class athenaExecutor(scriptExecutor):
 
     ## @brief Check if running with CA
     def _isCAEnabled(self):
-        # CA not present, not running with CA
+        # CA not present
         if 'CA' not in self.conf.argdict:
-            return False
+            # If there is no legacy skeleton, then we are running with CA
+            if not self._skeleton:
+                return True
+            else:
+                return False
 
         # CA present but None, all substeps running with CA
         if self.conf.argdict['CA'] is None:
