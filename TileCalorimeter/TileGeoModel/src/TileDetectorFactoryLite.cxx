@@ -135,7 +135,7 @@ void TileDetectorFactoryLite::create(GeoPhysVol *world)
     if (EnvType == 1 || EnvType == 0) {
       nModulesInSection[0] = nModulesInSection[1] = NumberOfMod;
       zShiftInSection[0] = zShiftInSection[1] = Zshift;
-    } else if (EnvType < 6) {
+    } else if (EnvType>0 and EnvType < 6) {
       nModulesInSection[EnvType] = NumberOfMod;
       zShiftInSection[EnvType] = Zshift;
     }
