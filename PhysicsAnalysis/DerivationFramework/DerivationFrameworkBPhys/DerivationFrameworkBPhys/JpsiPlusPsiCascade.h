@@ -78,7 +78,7 @@ namespace DerivationFramework {
     double m_chi2cut_Psi;
     double m_chi2cut_Jpsi;
     double m_chi2cut;
-    unsigned int m_maxPsiCandidates;
+    unsigned int m_maxCandidates;
 
     ServiceHandle<IBeamCondSvc>                      m_beamSpotSvc;
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;

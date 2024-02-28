@@ -44,6 +44,8 @@
 #include "DerivationFrameworkBPhys/JpsiPlusPsiCascade.h"
 #include "DerivationFrameworkBPhys/PsiPlusPsiCascade.h"
 #include "DerivationFrameworkBPhys/JpsiXPlusDisplaced.h"
+#include "DerivationFrameworkBPhys/JpsiXPlus2V0.h"
+#include "DerivationFrameworkBPhys/PsiPlusPsiSingleVertex.h"
 
 using namespace DerivationFramework;
 
@@ -92,6 +94,8 @@ DECLARE_TOOL_FACTORY( BPhysBGammaFinder )
 DECLARE_TOOL_FACTORY( JpsiPlusPsiCascade )
 DECLARE_TOOL_FACTORY( PsiPlusPsiCascade )
 DECLARE_TOOL_FACTORY( JpsiXPlusDisplaced )
+DECLARE_TOOL_FACTORY( JpsiXPlus2V0 )
+DECLARE_TOOL_FACTORY( PsiPlusPsiSingleVertex )
 
 DECLARE_FACTORY_ENTRIES( DerivationFrameworkBPhys ) {
    DECLARE_TOOL( Reco_mumu )
@@ -139,4 +143,6 @@ DECLARE_FACTORY_ENTRIES( DerivationFrameworkBPhys ) {
    DECLARE_TOOL( JpsiPlusPsiCascade )
    DECLARE_TOOL( PsiPlusPsiCascade )
    DECLARE_TOOL( JpsiXPlusDisplaced )
+   DECLARE_TOOL( JpsiXPlus2V0 )
+   DECLARE_TOOL( PsiPlusPsiSingleVertex )
 }
