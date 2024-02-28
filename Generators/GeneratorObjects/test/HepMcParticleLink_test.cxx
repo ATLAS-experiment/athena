@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -776,6 +776,160 @@ namespace MCTesting {
     ASSERT_EQ( refEvtNum5, testLink6b.eventIndex());
     ASSERT_EQ( HepMcParticleLink:: ExtendedBarCode::UNDEFINED, testLink6b.getEventPositionInCollection(sg));
     ASSERT_EQ( cutParticlePtr, testLink6b.cptr());
+  }
+
+  TEST_F(HepMcParticleLink_test, less_than_operator) {
+    // create dummy input McEventCollection with a name that
+    // HepMcParticleLink knows about
+    SG::WriteHandle<McEventCollection> inputTestDataHandle{"TruthEvent"};
+    inputTestDataHandle = std::make_unique<McEventCollection>();
+
+    // Add a dummy GenEvent
+    const int process_id1(20);
+    const int event_number1(17);
+    inputTestDataHandle->push_back(HepMC::newGenEvent(process_id1, event_number1));
+    const HepMcParticleLink::index_type dummyIndex1(0);
+    HepMC::GenEvent& ge1 = *(inputTestDataHandle->at(0));
+    HepMC::ConstGenParticlePtr particle1 = populateGenEvent(ge1);
+    // Add a second dummy GenEvent
+    const int process_id2(20);
+    const int event_number2(25);
+    inputTestDataHandle->push_back(HepMC::newGenEvent(process_id2, event_number2));
+    const HepMcParticleLink::index_type dummyIndex2(1);
+    HepMC::GenEvent& ge2 = *(inputTestDataHandle->at(1));
+    HepMC::ConstGenParticlePtr particle2 = populateGenEvent2(ge2);
+    // Add a third dummy GenEvent (identical to the first)
+    const int process_id3(20);
+    const int event_number3(17);
+    inputTestDataHandle->push_back(HepMC::newGenEvent(process_id3, event_number3));
+    HepMC::GenEvent& ge3 = *(inputTestDataHandle->at(2));
+    (void)populateGenEvent(ge3);
+
+    const int event_number4(89);
+    inputTestDataHandle->push_back(new HepMC::GenEvent(ge1));
+    HepMC::GenEvent& ge4 = *(inputTestDataHandle->at(3));
+    ge4.set_event_number(event_number4);
+    (void)populateFilteredGenEvent(ge4);
+
+    //Testing links to the first dummy GenEvent
+
+    // HepMcParticleLink built using a GenParticle pointer and the
+    // position of the GenEvent.
+    HepMcParticleLink testLink1a(particle1,dummyIndex1,
+                                 HepMcParticleLink::IS_POSITION);
+    ASSERT_TRUE( testLink1a.isValid() );
+    // A HepMcParticleLink built using the barcode and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink1b(HepMC::barcode(particle1),dummyIndex1,
+                                 HepMcParticleLink::IS_POSITION);
+    ASSERT_TRUE( testLink1b.isValid() );
+    // HepMcParticleLink built using a GenParticle pointer and the
+    // event_number of the GenEvent.
+    HepMcParticleLink testLink1c(particle1,event_number1);
+    ASSERT_TRUE( testLink1c.isValid() );
+    // A HepMcParticleLink built using the barcode and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink1d(HepMC::barcode(particle1),event_number1);
+    ASSERT_TRUE( testLink1d.isValid() );
+    // Comparing links to the same particle in the first event
+    ASSERT_FALSE( testLink1a < testLink1b );
+    ASSERT_FALSE( testLink1a < testLink1c );
+    ASSERT_FALSE( testLink1a < testLink1d );
+    ASSERT_FALSE( testLink1b < testLink1a );
+    ASSERT_FALSE( testLink1b < testLink1c );
+    ASSERT_FALSE( testLink1b < testLink1d );
+    ASSERT_FALSE( testLink1c < testLink1a );
+    ASSERT_FALSE( testLink1c < testLink1b );
+    ASSERT_FALSE( testLink1c < testLink1d );
+    ASSERT_FALSE( testLink1d < testLink1a );
+    ASSERT_FALSE( testLink1d < testLink1b );
+    ASSERT_FALSE( testLink1d < testLink1c );
+   // HepMcParticleLink built using a GenParticle pointer and the
+    // position of the GenEvent.
+    HepMcParticleLink testLink2a(particle2, dummyIndex2,
+                                 HepMcParticleLink::IS_POSITION);
+    ASSERT_TRUE( testLink2a.isValid() );
+    // A HepMcParticleLink built using the barcode and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink2b(HepMC::barcode(particle2), dummyIndex2,
+                                 HepMcParticleLink::IS_POSITION);
+    ASSERT_TRUE( testLink2b.isValid() );
+    // HepMcParticleLink built using a GenParticle pointer and the
+    // event_number of the GenEvent.
+    HepMcParticleLink testLink2c(particle2,event_number2);
+    ASSERT_TRUE( testLink2c.isValid() );
+    // A HepMcParticleLink built using the barcode and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink2d(HepMC::barcode(particle2),event_number2);
+    ASSERT_TRUE( testLink2d.isValid() );
+    // Comparing links to the same particle in the second event
+    ASSERT_FALSE( testLink2a < testLink2b );
+    ASSERT_FALSE( testLink2a < testLink2c );
+    ASSERT_FALSE( testLink2a < testLink2d );
+    ASSERT_FALSE( testLink2b < testLink2a );
+    ASSERT_FALSE( testLink2b < testLink2c );
+    ASSERT_FALSE( testLink2b < testLink2d );
+    ASSERT_FALSE( testLink2c < testLink2a );
+    ASSERT_FALSE( testLink2c < testLink2b );
+    ASSERT_FALSE( testLink2c < testLink2d );
+    ASSERT_FALSE( testLink2d < testLink2a );
+    ASSERT_FALSE( testLink2d < testLink2b );
+    ASSERT_FALSE( testLink2d < testLink2c );
+    // Comparing links in two different events
+    ASSERT_TRUE( testLink1a < testLink2a );
+    ASSERT_TRUE( testLink1a < testLink2b );
+    ASSERT_TRUE( testLink1a < testLink2c );
+    ASSERT_TRUE( testLink1a < testLink2d );
+    ASSERT_TRUE( testLink1b < testLink2a );
+    ASSERT_TRUE( testLink1b < testLink2b );
+    ASSERT_TRUE( testLink1b < testLink2c );
+    ASSERT_TRUE( testLink1b < testLink2d );
+    ASSERT_TRUE( testLink1c < testLink2a );
+    ASSERT_TRUE( testLink1c < testLink2b );
+    ASSERT_TRUE( testLink1c < testLink2c );
+    ASSERT_TRUE( testLink1c < testLink2d );
+    ASSERT_TRUE( testLink1d < testLink2a );
+    ASSERT_TRUE( testLink1d < testLink2b );
+    ASSERT_TRUE( testLink1d < testLink2c );
+    ASSERT_TRUE( testLink1d < testLink2d );
+
+    // Make links to another GenParticle from the first GenEvent
+    HepMC::ConstGenParticlePtr particle3 = ge1.particles().at(3);
+    // HepMcParticleLink built using a GenParticle pointer and the
+    // position of the GenEvent.
+    HepMcParticleLink testLink3a(particle3,dummyIndex1,
+                                 HepMcParticleLink::IS_POSITION);
+    ASSERT_TRUE( testLink3a.isValid() );
+    // A HepMcParticleLink built using the barcode and the position of
+    // the GenEvent.
+    HepMcParticleLink testLink3b(HepMC::barcode(particle3),dummyIndex1,
+                                 HepMcParticleLink::IS_POSITION);
+    ASSERT_TRUE( testLink3b.isValid() );
+    // HepMcParticleLink built using a GenParticle pointer and the
+    // event_number of the GenEvent.
+    HepMcParticleLink testLink3c(particle3,event_number1);
+    ASSERT_TRUE( testLink3c.isValid() );
+    // A HepMcParticleLink built using the barcode and the event_number of
+    // the GenEvent.
+    HepMcParticleLink testLink3d(HepMC::barcode(particle3),event_number1);
+    ASSERT_TRUE( testLink3d.isValid() );
+    // Comparing links to two different particles in the same GenEvent
+    ASSERT_TRUE( testLink1a < testLink3a );
+    ASSERT_TRUE( testLink1a < testLink3b );
+    ASSERT_TRUE( testLink1a < testLink3c );
+    ASSERT_TRUE( testLink1a < testLink3d );
+    ASSERT_TRUE( testLink1b < testLink3a );
+    ASSERT_TRUE( testLink1b < testLink3b );
+    ASSERT_TRUE( testLink1b < testLink3c );
+    ASSERT_TRUE( testLink1b < testLink3d );
+    ASSERT_TRUE( testLink1c < testLink3a );
+    ASSERT_TRUE( testLink1c < testLink3b );
+    ASSERT_TRUE( testLink1c < testLink3c );
+    ASSERT_TRUE( testLink1c < testLink3d );
+    ASSERT_TRUE( testLink1d < testLink3a );
+    ASSERT_TRUE( testLink1d < testLink3b );
+    ASSERT_TRUE( testLink1d < testLink3c );
+    ASSERT_TRUE( testLink1d < testLink3d );
   }
 
   TEST_F(HepMcParticleLink_test, max_event_number) {
