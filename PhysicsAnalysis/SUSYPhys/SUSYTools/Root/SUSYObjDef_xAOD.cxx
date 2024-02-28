@@ -1459,7 +1459,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
   configFromFile(m_BtagTimeStamp, "Btag.TimeStamp", rEnv, "201903", true);
   configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, "xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2021-04-16_v1.root");
-  configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "Envelope");
+  configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "SFEigen");
 
   configFromFile(m_useBtagging_trkJet, "BtagTrkJet.enable", rEnv, true);
   configFromFile(m_BtagTagger_trkJet, "BtagTrkJet.Tagger", rEnv, "DL1"); //The recommended timestamp is DL1r. Please check if this is available in your derivation!
