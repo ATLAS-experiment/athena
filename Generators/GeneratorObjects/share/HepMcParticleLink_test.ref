@@ -1,4 +1,4 @@
-[==========] Running 10 tests from 1 test suite.
+[==========] Running 11 tests from 1 test suite.
 [----------] Global test environment set-up.
 
 
@@ -7,7 +7,7 @@ EventLoopMgr      WARNING Unable to locate service "EventSelector"
 EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-[----------] 10 tests from HepMcParticleLink_test
+[----------] 11 tests from HepMcParticleLink_test
 [ RUN      ] HepMcParticleLink_test.old_test
 *** HepMcParticleLink_test starts ***
 HepMcParticleLink    INFO find_proxy: Using TruthEvent as McEventCollection key for this job 
@@ -30,12 +30,14 @@ HepMcParticleLink WARNING cptr: Mc Truth not stored for event with event number 
 HepMcParticleLink WARNING cptr: Mc Truth not stored for event with event number 460
 HepMcParticleLink WARNING cptr: Mc Truth not stored for event with event number 460
 [       OK ] HepMcParticleLink_test.truth_event_link_cut_events ((xx ms))
+[ RUN      ] HepMcParticleLink_test.less_than_operator
+[       OK ] HepMcParticleLink_test.less_than_operator ((xx ms))
 [ RUN      ] HepMcParticleLink_test.max_event_number
 [       OK ] HepMcParticleLink_test.max_event_number ((xx ms))
 [ RUN      ] HepMcParticleLink_test.size
 [       OK ] HepMcParticleLink_test.size ((xx ms))
-[----------] 10 tests from HepMcParticleLink_test ((xx ms) total)
+[----------] 11 tests from HepMcParticleLink_test ((xx ms) total)
 
 [----------] Global test environment tear-down
-[==========] 10 tests from 1 test suite ran. ((xx ms) total)
-[  PASSED  ] 10 tests.
+[==========] 11 tests from 1 test suite ran. ((xx ms) total)
+[  PASSED  ] 11 tests.
