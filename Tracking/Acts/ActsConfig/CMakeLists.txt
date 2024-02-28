@@ -14,4 +14,3 @@ atlas_add_test( ActsTrackingComponents
 atlas_add_test( ActsCheckObjectCounts
   SCRIPT test/ActsCheckObjectCounts.sh
   PROPERTIES TIMEOUT 600 )
-set_tests_properties( ActsConfig_ActsCheckObjectCounts_ctest PROPERTIES LABELS "ActsCollectionAlgs;ActsConfig;ActsDataPreparation;ActsEvent;ActsEventCnv;ActsGeantFollowing;ActsGeoUtils;ActsGeometry;ActsGeometryInterfaces;ActsInterop;ActsMonitoring;ActsPatternRecognition;ActsToolInterfaces;ActsTrackReconstruction;ActsTruth;ActsVertexReconstruction;ActsView" )
