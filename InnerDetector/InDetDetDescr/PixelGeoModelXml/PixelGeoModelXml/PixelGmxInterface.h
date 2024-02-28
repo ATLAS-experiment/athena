@@ -42,10 +42,10 @@ public:
                          std::map<std::string, int> &index,
                          int sequentialId,
                          GeoVFullPhysVol *fpv) override;
-  // virtual void addAlignable(int level,
-  //                           std::map<std::string, int> &index,
-  //                           GeoVFullPhysVol *fpv,
-  //                           GeoAlignableTransform *transform) override final;
+  virtual void addAlignable(int level,
+                            std::map<std::string, int> &index,
+                            GeoVFullPhysVol *fpv,
+                            GeoAlignableTransform *transform) override final;
 
   std::shared_ptr<const PixelDiodeMatrix> buildMatrix(double phiPitch, double etaPitch,
 						      double phiPitchLong, double phiPitchEnd,
