@@ -7,16 +7,6 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, CaloDataAccessSvcDependencies
 
 
-# TODO: delete once HI is migrated to CA
-def _algoHLTHIEventShape(flags,name='HLTEventShapeMaker', inputEDM='CellsClusters', outputEDM='HIEventShape'):
-    algo = CompFactory.HIEventShapeMaker(name = name,
-                                         InputCellKey = inputEDM,
-                                         InputTowerKey="",
-                                         NaviTowerKey="",
-                                         OutputContainerKey = outputEDM,
-                                         HIEventShapeFillerTool = CompFactory.HIEventShapeFillerTool())
-    return algo
-
 #
 # fast calo algorithm (central or forward regions)
 #

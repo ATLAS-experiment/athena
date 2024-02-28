@@ -30,19 +30,20 @@ def precisionCaloSequenceCfg(flags, ion=False, is_probe_leg=False, variant=''):
     recoAcc.mergeReco(precisionCaloRecoSequence(flags, InViewRoIs,'ePrecisionCaloRecoSequence'+hiInfo+variant, ion=ion, variant=variant))
        
     selAcc = SelectionCA('ePrecisionCaloMenuSequence'+hiInfo+variant, isProbe=is_probe_leg)
+    pedestalCA = None
     if ion is True:
         # add UE subtraction for heavy ion e/gamma triggers
         # NOTE: UE subtraction requires an average pedestal to be calculated
         # using the full event (FS info), and has to be done outside of the
-        # event views in this sequence. the egammaFSRecoSequence is thus placed
-        # before the precisionCaloInViewSequence.
-        from TriggerMenuMT.HLT.Egamma.TrigEgammaFactoriesCfg import egammaFSCaloRecoSequenceCfg
-        selAcc.merge(egammaFSCaloRecoSequenceCfg(flags))
+        # event views in this sequence. the egammaFSHIEventShapeMakerCfg is thus placed
+        # in the upSequenceCA before the recoCA.
+        from TriggerMenuMT.HLT.HeavyIon.HeavyIonMenuSequences import egammaFSHIEventShapeMakerCfg
+        pedestalCA = egammaFSHIEventShapeMakerCfg(flags)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
     robPrefetchAlg = ROBPrefetchingAlgCfg_Calo( flags, nameSuffix=InViewRoIs+hiInfo+'_probe'+variant if is_probe_leg else InViewRoIs+hiInfo+variant)
 
-    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg)
+    selAcc.mergeReco(recoAcc, robPrefetchCA=robPrefetchAlg, upSequenceCA=pedestalCA)
 
     hypoAlg = CompFactory.TrigEgammaPrecisionCaloHypoAlg('Electron' + tag(ion) + 'Hypo' + variant)
 
