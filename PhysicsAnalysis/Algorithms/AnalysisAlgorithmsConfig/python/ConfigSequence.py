@@ -83,7 +83,7 @@ class ConfigSequence:
                 block.setOptionValue (optionName, value, isDuplicate=used, **kwargs)
                 used = True
         if not used :
-            raise KeyError ('unknown option: ' + name)
+            raise KeyError (f'unknown option "{name}" in sequence "{self.__class__.__name__}"')
 
 
     def printOptions(self):

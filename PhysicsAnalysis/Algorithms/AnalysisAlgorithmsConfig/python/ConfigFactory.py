@@ -200,124 +200,124 @@ class ConfigFactory():
         return configSeq
 
 
-    def addDefaultAlgs(config):
+    def addDefaultAlgs(self):
         """add algorithms and options"""
 
         # CommonServices
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeCommonServicesConfig
-        config.addAlgConfigBlock(algName="CommonServices", alg=makeCommonServicesConfig)
+        self.addAlgConfigBlock(algName="CommonServices", alg=makeCommonServicesConfig)
 
         # pileup reweighting
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PileupReweightingBlock
-        config.addAlgConfigBlock(algName="PileupReweighting", alg=PileupReweightingBlock)
+        self.addAlgConfigBlock(algName="PileupReweighting", alg=PileupReweightingBlock)
 
         # event cleaning
         from AsgAnalysisAlgorithms.EventCleaningConfig import EventCleaningBlock
-        config.addAlgConfigBlock(algName="EventCleaning", alg=EventCleaningBlock)
+        self.addAlgConfigBlock(algName="EventCleaning", alg=EventCleaningBlock)
 
         # jets
         from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
-        config.addAlgConfigBlock(algName="Jets", alg=makeJetAnalysisConfig)
+        self.addAlgConfigBlock(algName="Jets", alg=makeJetAnalysisConfig)
         from JetAnalysisAlgorithms.JetJvtAnalysisConfig import JetJvtAnalysisConfig
-        config.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig,
+        self.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig,
             superBlocks="Jets")
         from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
-        config.addAlgConfigBlock(algName="FlavourTagging", alg=makeFTagAnalysisConfig,
+        self.addAlgConfigBlock(algName="FlavourTagging", alg=makeFTagAnalysisConfig,
             defaults={'selectionName': ''},
             superBlocks="Jets")
 
         # electrons
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig 
-        config.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibrationConfig)
+        self.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibrationConfig)
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPointConfig
-        config.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPointConfig,
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPointConfig,
             superBlocks="Electrons")
 
         # photons
         from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonCalibrationConfig
-        config.addAlgConfigBlock(algName="Photons", alg=PhotonCalibrationConfig)
+        self.addAlgConfigBlock(algName="Photons", alg=PhotonCalibrationConfig)
         from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonWorkingPointConfig
-        config.addAlgConfigBlock(algName="WorkingPoint", alg=PhotonWorkingPointConfig,
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=PhotonWorkingPointConfig,
             superBlocks="Photons")
 
         # muons
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
-        config.addAlgConfigBlock(algName="Muons", alg=MuonCalibrationConfig)
+        self.addAlgConfigBlock(algName="Muons", alg=MuonCalibrationConfig)
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPointConfig
-        config.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPointConfig,
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPointConfig,
             superBlocks="Muons")
 
         # tauJets
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauCalibrationConfig
-        config.addAlgConfigBlock(algName="TauJets", alg=TauCalibrationConfig)
+        self.addAlgConfigBlock(algName="TauJets", alg=TauCalibrationConfig)
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauWorkingPointConfig
-        config.addAlgConfigBlock(algName="WorkingPoint", alg=TauWorkingPointConfig,
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=TauWorkingPointConfig,
             superBlocks="TauJets")
 
         # SystObjectLink
         from AsgAnalysisAlgorithms.SystObjectLinkConfig import makeSystObjectLinkConfig
-        config.addAlgConfigBlock(algName="SystObjectLink", alg=makeSystObjectLinkConfig,
-            superBlocks=[config.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
+        self.addAlgConfigBlock(algName="SystObjectLink", alg=makeSystObjectLinkConfig,
+            superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 
         # IFF truth classification
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import IFFLeptonDecorationBlock
-        config.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
+        self.addAlgConfigBlock(algName="IFFClassification", alg=IFFLeptonDecorationBlock,
             superBlocks=["Electrons","Muons"])
 
         # generator level analysis
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeGeneratorAnalysisConfig 
-        config.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=makeGeneratorAnalysisConfig)
+        self.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=makeGeneratorAnalysisConfig)
 
         # pT/Eta Selection
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
-        config.addAlgConfigBlock(algName="PtEtaSelection", alg=makePtEtaSelectionConfig,
+        self.addAlgConfigBlock(algName="PtEtaSelection", alg=makePtEtaSelectionConfig,
             defaults={'selectionName': ''},
-            superBlocks=[config.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
+            superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 
         # met
         from MetAnalysisAlgorithms.MetAnalysisConfig import MetAnalysisConfig
-        config.addAlgConfigBlock(algName="MissingET", alg=MetAnalysisConfig)
+        self.addAlgConfigBlock(algName="MissingET", alg=MetAnalysisConfig)
 
         # overlap removal
         from AsgAnalysisAlgorithms.OverlapAnalysisConfig import OverlapAnalysisConfig
-        config.addAlgConfigBlock(algName="OverlapRemoval", alg=OverlapAnalysisConfig,
+        self.addAlgConfigBlock(algName="OverlapRemoval", alg=OverlapAnalysisConfig,
             defaults={'configName': 'OverlapRemoval'})
 
         # object-based cutflow
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import ObjectCutFlowBlock
-        config.addAlgConfigBlock(algName='ObjectCutFlow', alg=ObjectCutFlowBlock)
+        self.addAlgConfigBlock(algName='ObjectCutFlow', alg=ObjectCutFlowBlock)
 
         # thinning
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
-        config.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,
+        self.addAlgConfigBlock(algName="Thinning", alg=OutputThinningBlock,
             defaults={'configName': 'Thinning'},
-            superBlocks=[config.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
+            superBlocks=[self.ROOTNAME, "Jets", "Electrons", "Photons", "Muons", "TauJets"])
 
         # trigger
         from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
-        config.addAlgConfigBlock(algName="Trigger", alg=TriggerAnalysisBlock,
+        self.addAlgConfigBlock(algName="Trigger", alg=TriggerAnalysisBlock,
             defaults={'configName': 'Trigger'})
 
         # event selection
         from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
-        config.addAlgConfigBlock(algName='EventSelection', alg=makeMultipleEventSelectionConfigs)
+        self.addAlgConfigBlock(algName='EventSelection', alg=makeMultipleEventSelectionConfigs)
 
         # event-based cutflow
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
-        config.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock,
+        self.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock,
             defaults={'containerName': 'EventInfo', 'selectionName': ''})
 
         # bootstraps
         from AsgAnalysisAlgorithms.BootstrapGeneratorConfig import BootstrapGeneratorConfig
-        config.addAlgConfigBlock(algName='Bootstraps', alg=BootstrapGeneratorConfig)
+        self.addAlgConfigBlock(algName='Bootstraps', alg=BootstrapGeneratorConfig)
 
         # per-event scale factor calculation
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PerEventSFBlock
-        config.addAlgConfigBlock(algName='PerEventSF', alg=PerEventSFBlock)
+        self.addAlgConfigBlock(algName='PerEventSF', alg=PerEventSFBlock)
 
         # output
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
-        config.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
+        self.addAlgConfigBlock(algName="Output", alg=OutputAnalysisConfig,
             defaults={'configName': 'Output'})
 
         return
