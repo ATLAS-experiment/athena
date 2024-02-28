@@ -102,6 +102,8 @@ def setup_parser() -> ArgumentParser:
                                 The file should contain one regexp per line.""")
     advanced.add_argument("--no-output-checks", action="store_true", dest="disable_output_checks", default=False,
                           help="Disable output checks")
+    advanced.add_argument("--detailed-comparison", action="store_true", dest="detailed_comparison", default=False,
+                          help="Detailed output comparison")
 
     tests = parser.add_argument_group("tests")
     tests.add_argument("-t", "--test", type=str, dest="test", default=None,
@@ -145,6 +147,7 @@ def get_test_setup(name: str, options: Namespace, log: logging.Logger) -> TestSe
     setup.parallel_execution = options.fast_mode
     setup.disable_output_checks = options.disable_output_checks
     setup.custom_threads = options.threads
+    setup.detailed_comparison = options.detailed_comparison
     # not in global setup:
     # options.extra_args
 

@@ -71,6 +71,10 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'Number of PIXEL hits per track;Number of Pixel hits (PIX+IBL);Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangePixHits+1, xmin=-0.5, xmax=m_rangePixHits +0.5)
 
+    varName = 'm_npixelhits_per_track_barrel;Npixhits_per_track_barrel'
+    title = 'Number of PIXEL hits per track (Barrel);Number of Pixel hits in Barrel (PIX+IBL);Number of Tracks'
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangePixHits+1, xmin=-0.5, xmax=m_rangePixHits +0.5)
+    
     varName = 'm_nscthits_per_track;Nscthits_per_track'
     title = 'Number of SCT hits per track;Number of SCT hits per Tracks;Number of Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_rangeSCTHits+1, xmin=-0.5, xmax=m_rangeSCTHits +0.5)

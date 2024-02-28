@@ -21,9 +21,9 @@
 # art-output: NSWRecoCheck.txt
 # art-output: diff_1_vs_serial.txt
 # art-output: diff_5_vs_1.txt
-# art-output: log.RAWtoESD_serial
-# art-output: log.RAWtoESD_1thread
-# art-output: log.RAWtoESD_5thread
+# art-output: log.RAWtoALL_serial
+# art-output: log.RAWtoALL_1thread
+# art-output: log.RAWtoALL_5thread
 # art-output: log.DCubeSim
 # art-output: log.DCubeDigits
 #####################################################################
@@ -160,13 +160,18 @@ then
 fi
 #####################################################################
 
+# Run each Reco_tf in a seperate directory
+
+mkdir Serial
+cd Serial
+
 #####################################################################
 # now use the produced RDO file and run reconstruction
 # the postInclude adds a validation algorithm which writes out an ntuple for digit/RDO/PRD validation
 # (without the postInclude, a standard reconstruction job would run)
 # the postExec is needed to specify the correct (symmetric) MDT calibration setup matching the layout (ATLAS-R3S-2021-01-00-02)
 Reco_tf.py --CA True \
-           --inputRDOFile OUT_RDO.root \
+           --inputRDOFile ../OUT_RDO.root \
            --autoConfiguration everything \
            --imf False \
            --geometryVersion "${geo_version}" \
@@ -185,7 +190,10 @@ NWARNING="$(cat log.RAWtoALL | grep WARNING | wc -l)"
 NERROR="$(cat log.RAWtoALL | grep ERROR | wc -l)"
 NFATAL="$(cat log.RAWtoALL | grep FATAL | wc -l)"
 echo "Found ${NWARNING} WARNING, ${NERROR} ERROR and ${NFATAL} FATAL messages in log.RAWtoALL"
-mv log.RAWtoALL log.RAWtoESD_serial
+cd ..
+mv Serial/log.RAWtoALL log.RAWtoALL_serial
+mv Serial/OUT_ESD.root ./
+mv Serial/NSWPRDValAlg.reco.ntuple.root ./
 #####################################################################
 # check the NSW validation ntuple
 python $Athena_DIR/bin/checkNSWValTree.py -i NSWPRDValAlg.reco.ntuple.root &> NSWRecoCheck.txt
@@ -224,10 +232,13 @@ then
 fi
 #####################################################################
 
+mkdir 1thread
+cd 1thread
+
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
 Reco_tf.py --CA True \
-           --inputRDOFile OUT_RDO.root \
+           --inputRDOFile ../OUT_RDO.root \
            --autoConfiguration everything \
            --athenaopts="--threads=1" \
            --geometryVersion "${geo_version}" \
@@ -240,13 +251,18 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoALL_1thread
+cd ..
+mv 1thread/log.RAWtoALL log.RAWtoALL_1thread
+mv 1thread/OUT_ESD_1thread.root ./
 #####################################################################
+
+mkdir 5thread
+cd 5thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
 Reco_tf.py --CA True \
-           --inputRDOFile OUT_RDO.root \
+           --inputRDOFile ../OUT_RDO.root \
            --autoConfiguration everything \
            --athenaopts="--threads=5" \
            --geometryVersion "${geo_version}" \
@@ -259,7 +275,9 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoALL_5thread
+cd ..
+mv 5thread/log.RAWtoALL log.RAWtoALL_5thread
+mv 5thread/OUT_ESD_5thread.root ./
 #####################################################################
 
 #####################################################################

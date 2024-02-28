@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -28,16 +28,28 @@ StatusCode TrigJetHypoToolConfig_maxmultfilter::initialize() {
 
 FilterPtr
 TrigJetHypoToolConfig_maxmultfilter::getHypoJetVectorFilter() const {
-  /* create and return a RangeFilter with the configure range limits.*/
+  /* create and return a MaxMultFilter with the configured range limits.*/
 
   FilterPtr fp = std::unique_ptr<IHypoJetVectorFilter>(nullptr);
-  fp.reset(new MaxMultFilter(m_end));
+  auto a2d = ArgStrToDouble();
+  fp.reset(new MaxMultFilter(m_end, a2d(m_min), a2d(m_max)));
 
   return fp;
 }
 
 StatusCode TrigJetHypoToolConfig_maxmultfilter::checkVals() const {
-  if (m_end < 1u) {ATH_MSG_ERROR("MaxMultFilter < 1");
+  auto a2d = ArgStrToDouble();
+
+  auto min_val = a2d(m_min);
+  auto max_val = a2d(m_max);  
+  
+  if (min_val > max_val){
+    ATH_MSG_ERROR(" min eta >  max eta: " << min_val << max_val);
+    return StatusCode::FAILURE;
+  }
+
+  if (m_end < 1u) {
+    ATH_MSG_ERROR("MaxMultFilter < 1: " << m_end);
     return StatusCode::FAILURE;
   }  
   return StatusCode::SUCCESS;

@@ -26,7 +26,7 @@ atlas_add_component( TrkVertexSeedFinderTools
 function( run_seed_test testName )
   atlas_add_test( ${testName}
                   SCRIPT python -m TrkConfig.TrkVertexSeedFinderToolsConfig --finder ${testName}
-                  PROPERTIES TIMEOUT 300
+                  PRIVATE_WORKING_DIRECTORY
                   LOG_SELECT_PATTERN "^testalg1 " )
 endfunction (run_seed_test)
 

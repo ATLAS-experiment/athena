@@ -431,6 +431,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, nhits_per_track_m);
     auto npixelhits_per_track_m = Monitored::Scalar<float>( "m_npixelhits_per_track", nhpix );
     fill(genericTrackGroup, npixelhits_per_track_m);
+    auto npixelhits_per_track_barrel_m = Monitored::Scalar<float>( "m_npixelhits_per_track_barrel", nhpixB );
+    fill(genericTrackGroup, npixelhits_per_track_barrel_m);
     auto nscthits_per_track_m = Monitored::Scalar<float>( "m_nscthits_per_track", nhsct );
     fill(genericTrackGroup, nscthits_per_track_m);
     auto ntrthits_per_track_m = Monitored::Scalar<float>( "m_ntrthits_per_track", nhtrt );
@@ -481,7 +483,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   auto ngTracks_m = Monitored::Scalar<float>( "m_ngTracks", ngTracks );
   fill(genericTrackGroup, ngTracks_m);
   
-  ATH_MSG_DEBUG("Histogram fillim completed for #good_tracks: " << ngTracks);
+  ATH_MSG_DEBUG("Histogram filling completed for #good_tracks: " << ngTracks);
 
   return StatusCode::SUCCESS;
 }

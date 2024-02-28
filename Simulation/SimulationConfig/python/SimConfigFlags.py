@@ -14,7 +14,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.ParticleID", False)
 
     def _checkCalibrationRun(prevFlags):
-        if prevFlags.Sim.ISF.Simulator not in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.AtlasG4] \
+        if prevFlags.Sim.ISF.Simulator not in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.AtlasG4, SimulationFlavour.AtlasG4_QS] \
             or prevFlags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
             return CalibrationRun.Off
         return CalibrationRun.DeadLAr

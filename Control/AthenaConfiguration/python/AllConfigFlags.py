@@ -527,9 +527,6 @@ def initConfigFlags():
     return acf
 
 
-ConfigFlags=initConfigFlags()
-
-
 if __name__=="__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()

@@ -26,7 +26,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFDot import stepCF_DataFlow_to_dot
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFComponents import RoRSequenceFilterNode, PassFilterNode, CFSequenceCA
 from TriggerMenuMT.HLT.Config.ControlFlow.MenuComponentsNaming import CFNaming
 
-from AthenaCommon.CFElements import parOR, seqAND, getSequenceChildren, isSequence, compName
+from AthenaCommon.CFElements import parOR, seqAND, isSequence
 from AthenaCommon.AlgSequence import  dumpSequence
 from AthenaCommon.Logging import logging
 
@@ -159,26 +159,25 @@ def sequenceScanner( HLTNode ):
         """ Recursively finds the steps in which sequences are used"""
         if not isSequence(seq):
             return stepIndex
-        name = compName(seq)                
-        match=re.search('^Step([0-9]+)_filter',name)
+        match=re.search('^Step([0-9]+)_filter',seq.name)
         if match:
             stepIndex = match.group(1)
-            log.debug("sequenceScanner: This is another step: %s %s", name, stepIndex)
+            log.debug("sequenceScanner: This is another step: %s %s", seq.name, stepIndex)
         inViewSequence = ""
         inView = False
-        for c in getSequenceChildren( seq ):
+        for c in seq.Members:
             if isSequence(c):
                 # Detect whether this is the view sequence pointed to
                 # by the EV creator alg, or if it is in such a sequence
                 inView = c.getName()==inViewSequence or childInView
                 stepIndex = _mapSequencesInSteps(c, stepIndex, childInView=inView)
-                _seqMapInStep[compName(c)].add((stepIndex,inView))
-                log.verbose("sequenceScanner: Child %s of sequence %s is in view? %s --> '%s'", compName(c), name, inView, inViewSequence)
+                _seqMapInStep[c.name].add((stepIndex,inView))
+                log.verbose("sequenceScanner: Child %s of sequence %s is in view? %s --> '%s'", c.name, seq.name, inView, inViewSequence)
             else:
                 if isinstance(c, CompFactory.EventViewCreatorAlgorithm):
                     inViewSequence = c.ViewNodeName
-                    log.verbose("sequenceScanner: EventViewCreatorAlg %s is child of sequence %s with ViewNodeName %s", compName(c), name, c.ViewNodeName)
-        log.debug("sequenceScanner: Sequence %s is in view? %s --> '%s'", name, inView, inViewSequence)
+                    log.verbose("sequenceScanner: EventViewCreatorAlg %s is child of sequence %s with ViewNodeName %s", c.name, seq.name, c.ViewNodeName)
+        log.debug("sequenceScanner: Sequence %s is in view? %s --> '%s'", seq.name, inView, inViewSequence)
         return stepIndex
 
     # do the job:
@@ -305,7 +304,7 @@ def createDataFlow(flags, chains, allDicts):
                 log.error("[createDataFlow] lengths of chainlegs = %s differ from inputs = %s", str(chainLegs), str(filterInput))
                 raise Exception("[createDataFlow] Cannot proceed, exiting.")
             for finput, leg in zip(filterInput, chainLegs):
-                log.debug("Adding chain %s to input %s of %s", leg, finput,compName(sequenceFilter.Alg))
+                log.debug("Adding chain %s to input %s of %s", leg, finput, sequenceFilter.Alg.name)
                 sequenceFilter.addChain(leg, finput)
                 
             log.debug("Now Filter has chains: %s", sequenceFilter.getChains())
@@ -418,7 +417,7 @@ def buildFilter(filter_name,  filter_input, empty):
 
     log.debug("Added inputs to filter: %s", sfilter.getInputList())
     log.debug("Added outputs to filter: %s", sfilter.getOutputList())
-    log.debug("Filter Done: %s", compName(sfilter.Alg))
+    log.debug("Filter Done: %s", sfilter.Alg.name)
 
     
     return (sfilter)
