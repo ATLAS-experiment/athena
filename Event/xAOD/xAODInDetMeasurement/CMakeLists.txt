@@ -17,7 +17,7 @@ atlas_add_xaod_smart_pointer_dicts(
     OUTPUT _selectionFile
     CONTAINERS
        "xAOD::PixelClusterContainer_v1"
-       "xAOD:HGTDClusterContainer_v1"
+       "xAOD::HGTDClusterContainer_v1"
        "xAOD::StripClusterContainer_v1"
        "xAOD::SpacePointContainer_v1" )
 
