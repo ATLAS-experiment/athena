@@ -14,7 +14,8 @@ if __name__ == "__main__":
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
     flags.Exec.MaxEvents = -1
-
+    flags.Exec.OutputLevel = 3
+    
     flags.addFlag("readClusters", False)
     flags.addFlag("readSpacePoints", False)
     flags.fillFromArgs()

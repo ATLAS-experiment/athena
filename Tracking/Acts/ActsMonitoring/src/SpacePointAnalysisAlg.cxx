@@ -51,6 +51,8 @@ namespace ActsTrk {
     const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
     // Check we can have access to clusters
     for (const xAOD::SpacePoint* sp : *inputSpacePointCollection) {
+      bool connectionIsValid = true;
+
       if (sp->isAvailable< std::vector< const xAOD::UncalibratedMeasurement* > >("measurements")) {
 	const auto& els = sp->measurements();
 	for (const auto* el : els) {
@@ -60,10 +62,22 @@ namespace ActsTrk {
 	// if we are here, that means the bare pointers are not available
 	// This should not happen
 	ATH_MSG_ERROR("Space point has Element links but not bare pointers to cluster. This should not happen!");
-	return StatusCode::FAILURE;
+	connectionIsValid = false;
       } else {
 	// This should never happen
 	ATH_MSG_ERROR("There are no decorations that link the space point to the original clusters");
+	connectionIsValid = false;
+      }
+
+      if (not connectionIsValid) {
+	ATH_MSG_ERROR("  * Space Point index: " << sp->index());
+	const SG::auxid_set_t& auxids = sp->getAuxIDs();
+        SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
+        ATH_MSG_ERROR("Available decorations for this space point:");
+        for( SG::auxid_t aux : auxids) {
+          std::string name = reg.getName( aux );
+          ATH_MSG_ERROR("   -> " << name);
+        }
 	return StatusCode::FAILURE;
       }
     }
