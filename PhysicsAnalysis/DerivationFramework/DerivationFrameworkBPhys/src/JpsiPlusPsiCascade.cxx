@@ -86,27 +86,16 @@ namespace DerivationFramework {
     }
 
     //----------------------------------------------------
-    // Try to retrieve refitted primary vertices
+    // Record refitted primary vertices
     //----------------------------------------------------
-    std::unique_ptr<xAOD::VertexContainer> refPvContainer;
-    std::unique_ptr<xAOD::VertexAuxContainer> refPvAuxContainer;
-    bool ref_record = false;
+    xAOD::VertexContainer* refPvContainer = nullptr;
+    xAOD::VertexAuxContainer* refPvAuxContainer = nullptr;
     if (m_refitPV) {
-      if (evtStore()->contains<xAOD::VertexContainer>(m_refPVContainerName)) {
-	// refitted PV container exists. Get it from the store gate
-	xAOD::VertexContainer*    _refPvContainer    = nullptr;
-	xAOD::VertexAuxContainer* _refPvAuxContainer = nullptr;
-	ATH_CHECK(evtStore()->retrieve(_refPvContainer   , m_refPVContainerName       ));
-	ATH_CHECK(evtStore()->retrieve(_refPvAuxContainer, m_refPVContainerName + "Aux."));
-	refPvContainer.reset(_refPvContainer);
-	refPvAuxContainer.reset(_refPvAuxContainer);
-      } else {
-	// refitted PV container does not exist. Create a new one.
-	refPvContainer = std::make_unique<xAOD::VertexContainer>();
-	refPvAuxContainer = std::make_unique<xAOD::VertexAuxContainer>();
-	refPvContainer->setStore(refPvAuxContainer.get());
-	ref_record = true;
-      }
+      refPvContainer = new xAOD::VertexContainer;
+      refPvAuxContainer = new xAOD::VertexAuxContainer;
+      refPvContainer->setStore(refPvAuxContainer);
+      ATH_CHECK(evtStore()->record(refPvContainer   , m_refPVContainerName));
+      ATH_CHECK(evtStore()->record(refPvAuxContainer, m_refPVContainerName+"Aux."));
     }
 
     std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
@@ -266,16 +255,12 @@ namespace DerivationFramework {
       a0xyErr_SV2_decor(*cascadeVertices[1]) = m_CascadeTools->a0xyError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
 
       double Mass_Moth = m_CascadeTools->invariantMass(moms[2]); //size=2
-      ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, pvContainer, refPvContainer.get(), &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info, 2, Mass_Moth, vtx));
+      ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, pvContainer, refPvContainer, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info, 2, Mass_Moth, vtx));
     }
 
     for(int i=0; i<topoN; i++){
       ATH_CHECK(evtStore()->record(std::move(VtxWriteHandles[i])   , m_cascadeOutputsKeys[i]));
       ATH_CHECK(evtStore()->record(std::move(VtxWriteHandlesAux[i]), m_cascadeOutputsKeys[i] + "Aux."));
-    }
-    if(ref_record) {
-      ATH_CHECK(evtStore()->record(std::move(refPvContainer)   , m_refPVContainerName));
-      ATH_CHECK(evtStore()->record(std::move(refPvAuxContainer), m_refPVContainerName + "Aux."));
     }
 
     // Deleting cascadeinfo since this won't be stored.
@@ -319,7 +304,7 @@ namespace DerivationFramework {
     m_chi2cut_Psi(-1.0),
     m_chi2cut_Jpsi(-1.0),
     m_chi2cut(-1.0),
-    m_maxPsiCandidates(0),
+    m_maxCandidates(0),
     m_beamSpotSvc("BeamCondSvc",name),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_pvRefitter("Analysis::PrimaryVertexRefitter"),
@@ -361,7 +346,7 @@ namespace DerivationFramework {
     declareProperty("Chi2CutPsi",                 m_chi2cut_Psi);
     declareProperty("Chi2CutJpsi",                m_chi2cut_Jpsi);
     declareProperty("Chi2Cut",                    m_chi2cut);
-    declareProperty("MaxPsiCandidates",           m_maxPsiCandidates);
+    declareProperty("MaxCandidates",              m_maxCandidates);
     declareProperty("RefitPV",                    m_refitPV         = true);
     declareProperty("MaxnPV",                     m_PV_max          = 1000);
     declareProperty("MinNTracksInPV",             m_PV_minNTracks   = 0);
@@ -425,7 +410,7 @@ namespace DerivationFramework {
 
       selectedJpsiCandidates.push_back(*vxcItr);
     }
-    if(selectedJpsiCandidates.size()<1) return StatusCode::SUCCESS;
+    if(selectedJpsiCandidates.size()==0) return StatusCode::SUCCESS;
 
     // Select the Psi candidates before calling cascade fit
     std::vector<const xAOD::Vertex*> selectedPsiCandidates;
@@ -473,167 +458,169 @@ namespace DerivationFramework {
 
       selectedPsiCandidates.push_back(*vxcItr);
     }
-    if(selectedPsiCandidates.size()<1) return StatusCode::SUCCESS;
+    if(selectedPsiCandidates.size()==0) return StatusCode::SUCCESS;
 
-    std::sort( selectedPsiCandidates.begin(), selectedPsiCandidates.end(), [](const xAOD::Vertex* a, const xAOD::Vertex* b) { return a->chiSquared()/a->numberDoF() < b->chiSquared()/b->numberDoF(); } );
-    if(m_maxPsiCandidates>0 && selectedPsiCandidates.size()>m_maxPsiCandidates) {
-      selectedPsiCandidates.erase(selectedPsiCandidates.begin()+m_maxPsiCandidates, selectedPsiCandidates.end());
+    std::vector<std::pair<const xAOD::Vertex*, const xAOD::Vertex*> > candidatePairs;
+    for(auto jpsiItr=selectedJpsiCandidates.cbegin(); jpsiItr!=selectedJpsiCandidates.cend(); ++jpsiItr) {
+      tracksJpsi2.clear();
+      for(size_t i=0; i<(*jpsiItr)->nTrackParticles(); i++) tracksJpsi2.push_back((*jpsiItr)->trackParticle(i));
+      for(auto psiItr=selectedPsiCandidates.cbegin(); psiItr!=selectedPsiCandidates.cend(); ++psiItr) {
+	bool skip = false;
+	for(size_t j=0; j<(*psiItr)->nTrackParticles(); j++) {
+	  if(std::find(tracksJpsi2.cbegin(), tracksJpsi2.cend(), (*psiItr)->trackParticle(j)) != tracksJpsi2.cend()) { skip = true; break; }
+	}
+	if(skip) continue;
+	candidatePairs.push_back(std::pair<const xAOD::Vertex*, const xAOD::Vertex*>(*jpsiItr,*psiItr));
+      }
     }
 
-    // Select Jpsi+Psi candidates
-    // Iterate over Jpsi vertices
-    for(auto jpsiItr=selectedJpsiCandidates.cbegin(); jpsiItr!=selectedJpsiCandidates.cend(); ++jpsiItr) {
-      size_t jpsiTrkNum = (*jpsiItr)->nTrackParticles();
+    std::sort( candidatePairs.begin(), candidatePairs.end(), [](std::pair<const xAOD::Vertex*, const xAOD::Vertex*> a, std::pair<const xAOD::Vertex*, const xAOD::Vertex*> b) { return a.first->chiSquared()/a.first->numberDoF()+a.second->chiSquared()/a.second->numberDoF() < b.first->chiSquared()/b.first->numberDoF()+b.second->chiSquared()/b.second->numberDoF(); } );
+    if(m_maxCandidates>0 && candidatePairs.size()>m_maxCandidates) {
+      candidatePairs.erase(candidatePairs.begin()+m_maxCandidates, candidatePairs.end());
+    }
+
+    for(size_t ic=0; ic<candidatePairs.size(); ic++) {
+      const xAOD::Vertex* jpsiVertex = candidatePairs[ic].first;
+      const xAOD::Vertex* psiVertex = candidatePairs[ic].second;
+
       tracksJpsi2.clear();
-      for(size_t it=0; it<jpsiTrkNum; it++) tracksJpsi2.push_back((*jpsiItr)->trackParticle(it));
+      for(size_t it=0; it<jpsiVertex->nTrackParticles(); it++) tracksJpsi2.push_back(jpsiVertex->trackParticle(it));
       if (tracksJpsi2.size() != 2 || massesJpsi2.size() != 2) {
 	ATH_MSG_ERROR("Problems with Jpsi input: number of tracks or track mass inputs is not 2!");
       }
+      tracksPsi.clear();
+      for(size_t it=0; it<psiVertex->nTrackParticles(); it++) tracksPsi.push_back(psiVertex->trackParticle(it));
+      if (tracksPsi.size() != massesPsi.size()) {
+	ATH_MSG_ERROR("Problems with Psi input: number of tracks or track mass inputs is not correct!");
+      }
+      
+      tracksJpsi.clear();
+      tracksJpsi.push_back(psiVertex->trackParticle(0));
+      tracksJpsi.push_back(psiVertex->trackParticle(1));
+      tracksDiTrk.clear();
+      if(m_vtx1Daug_num==4) {
+	tracksDiTrk.push_back(psiVertex->trackParticle(2));
+	tracksDiTrk.push_back(psiVertex->trackParticle(3));
+      }
 
-      // Iterate over Psi vertices
-      for(auto psiItr=selectedPsiCandidates.cbegin(); psiItr!=selectedPsiCandidates.cend(); ++psiItr) {
-	// Check identical tracks in input
-	if(std::find(tracksJpsi2.cbegin(), tracksJpsi2.cend(), (*psiItr)->trackParticle(0)) != tracksJpsi2.cend()) continue;
-	if(std::find(tracksJpsi2.cbegin(), tracksJpsi2.cend(), (*psiItr)->trackParticle(1)) != tracksJpsi2.cend()) continue;
-	if(std::find(tracksJpsi2.cbegin(), tracksJpsi2.cend(), (*psiItr)->trackParticle(2)) != tracksJpsi2.cend()) continue;
-	if(m_vtx1Daug_num==4) {
-	  if(std::find(tracksJpsi2.cbegin(), tracksJpsi2.cend(), (*psiItr)->trackParticle(3)) != tracksJpsi2.cend()) continue;
-	}
+      TLorentzVector p4_moth;
+      TLorentzVector tmp;
+      for(size_t it=0; it<jpsiVertex->nTrackParticles(); it++) {
+	tmp.SetPtEtaPhiM(jpsiVertex->trackParticle(it)->pt(),jpsiVertex->trackParticle(it)->eta(),jpsiVertex->trackParticle(it)->phi(),massesJpsi2[it]);
+	p4_moth += tmp;
+      }
+      for(size_t it=0; it<psiVertex->nTrackParticles(); it++) {
+	tmp.SetPtEtaPhiM(psiVertex->trackParticle(it)->pt(),psiVertex->trackParticle(it)->eta(),psiVertex->trackParticle(it)->phi(),massesPsi[it]);
+	p4_moth += tmp;
+      }
+      if (p4_moth.M() < m_MassLower || p4_moth.M() > m_MassUpper) continue;
 
-	size_t psiTrkNum = (*psiItr)->nTrackParticles();
-	tracksPsi.clear();
-	for(size_t it=0; it<psiTrkNum; it++) tracksPsi.push_back((*psiItr)->trackParticle(it));
-	if (tracksPsi.size() != massesPsi.size()) {
-	  ATH_MSG_ERROR("Problems with Psi input: number of tracks or track mass inputs is not correct!");
+      // Apply the user's settings to the fitter
+      // Reset
+      m_iVertexFitter->setDefault();
+      // Robustness: http://cdsweb.cern.ch/record/685551
+      int robustness = 0;
+      m_iVertexFitter->setRobustness(robustness);
+      // Build up the topology
+      // Vertex list
+      std::vector<Trk::VertexID> vrtList;
+      // Psi vertex
+      Trk::VertexID vID1;
+      // https://gitlab.cern.ch/atlas/athena/-/blob/21.2/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
+      if (m_constrPsi) {
+	vID1 = m_iVertexFitter->startVertex(tracksPsi,massesPsi,m_mass_psi);
+      } else {
+	vID1 = m_iVertexFitter->startVertex(tracksPsi,massesPsi);
+      }
+      vrtList.push_back(vID1);
+      // Jpsi vertex
+      Trk::VertexID vID2;
+      if (m_constrJpsi2) {
+	vID2 = m_iVertexFitter->nextVertex(tracksJpsi2,massesJpsi2,m_mass_jpsi2);
+      } else {
+	vID2 = m_iVertexFitter->nextVertex(tracksJpsi2,massesJpsi2);
+      }
+      vrtList.push_back(vID2);
+      // Mother vertex including Jpsi and Psi
+      std::vector<const xAOD::TrackParticle*> tp; tp.clear();
+      std::vector<double> tp_masses; tp_masses.clear();
+      m_iVertexFitter->nextVertex(tp,tp_masses,vrtList);
+      if (m_constrJpsi) {
+	std::vector<Trk::VertexID> cnstV; cnstV.clear();
+	if ( !m_iVertexFitter->addMassConstraint(vID1,tracksJpsi,cnstV,m_mass_jpsi).isSuccess() ) {
+	  ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
 	}
-	tracksJpsi.clear();
-	tracksJpsi.push_back((*psiItr)->trackParticle(0));
-	tracksJpsi.push_back((*psiItr)->trackParticle(1));
-	tracksDiTrk.clear();
-	if(m_vtx1Daug_num==4) {
-	  tracksDiTrk.push_back((*psiItr)->trackParticle(2));
-	  tracksDiTrk.push_back((*psiItr)->trackParticle(3));
+      }
+      if (m_constrDiTrk && m_vtx1Daug_num==4 && m_mass_diTrk>0) {
+	std::vector<Trk::VertexID> cnstV; cnstV.clear();
+	if ( !m_iVertexFitter->addMassConstraint(vID1,tracksDiTrk,cnstV,m_mass_diTrk).isSuccess() ) {
+	  ATH_MSG_WARNING("addMassConstraint for DiTrk failed");
 	}
+      }
+      // Do the work
+      std::unique_ptr<Trk::VxCascadeInfo> result(m_iVertexFitter->fitCascade());
 
-	TLorentzVector p4_moth;
-	TLorentzVector tmp;
-        for(size_t it=0; it<jpsiTrkNum; it++) {
-	  tmp.SetPtEtaPhiM((*jpsiItr)->trackParticle(it)->pt(),(*jpsiItr)->trackParticle(it)->eta(),(*jpsiItr)->trackParticle(it)->phi(),massesJpsi2[it]);
-	  p4_moth += tmp;
-	}
-	for(size_t it=0; it<psiTrkNum; it++) {
-	  tmp.SetPtEtaPhiM((*psiItr)->trackParticle(it)->pt(),(*psiItr)->trackParticle(it)->eta(),(*psiItr)->trackParticle(it)->phi(),massesPsi[it]);
-	  p4_moth += tmp;
-	}
-	if (p4_moth.M() < m_MassLower || p4_moth.M() > m_MassUpper) continue;
-
-	// Apply the user's settings to the fitter
-	// Reset
-	m_iVertexFitter->setDefault();
-	// Robustness: http://cdsweb.cern.ch/record/685551
-	int robustness = 0;
-	m_iVertexFitter->setRobustness(robustness);
-	// Build up the topology
-	// Vertex list
-	std::vector<Trk::VertexID> vrtList;
-	// Psi vertex
-	Trk::VertexID vID1;
-        // https://gitlab.cern.ch/atlas/athena/-/blob/21.2/Tracking/TrkVertexFitter/TrkVKalVrtFitter/TrkVKalVrtFitter/IVertexCascadeFitter.h
-	if (m_constrPsi) {
-	  vID1 = m_iVertexFitter->startVertex(tracksPsi,massesPsi,m_mass_psi);
-	} else {
-	  vID1 = m_iVertexFitter->startVertex(tracksPsi,massesPsi);
-	}
-	vrtList.push_back(vID1);
-	// Jpsi vertex
-	Trk::VertexID vID2;
-	if (m_constrJpsi2) {
-	  vID2 = m_iVertexFitter->nextVertex(tracksJpsi2,massesJpsi2,m_mass_jpsi2);
-	} else {
-	  vID2 = m_iVertexFitter->nextVertex(tracksJpsi2,massesJpsi2);
-	}
-	vrtList.push_back(vID2);
-	// Mother vertex including Jpsi and Psi
-	std::vector<const xAOD::TrackParticle*> tp; tp.clear();
-	std::vector<double> tp_masses; tp_masses.clear();
-	m_iVertexFitter->nextVertex(tp,tp_masses,vrtList);
-	if (m_constrJpsi) {
-	  std::vector<Trk::VertexID> cnstV; cnstV.clear();
-	  if ( !m_iVertexFitter->addMassConstraint(vID1,tracksJpsi,cnstV,m_mass_jpsi).isSuccess() ) {
-	    ATH_MSG_WARNING("addMassConstraint for Jpsi failed");
+      bool pass = false;
+      if (result != nullptr) {
+	for(auto v : result->vertices()) {
+	  if(v->nTrackParticles()==0) {
+	    std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
+	    v->setTrackParticleLinks(nullLinkVector);
 	  }
 	}
-	if (m_constrDiTrk && m_vtx1Daug_num==4 && m_mass_diTrk>0) {
-	  std::vector<Trk::VertexID> cnstV; cnstV.clear();
-	  if ( !m_iVertexFitter->addMassConstraint(vID1,tracksDiTrk,cnstV,m_mass_diTrk).isSuccess() ) {
-	    ATH_MSG_WARNING("addMassConstraint for DiTrk failed");
-	  }
+	// reset links to original tracks
+	BPhysPVCascadeTools::PrepareVertexLinks(result.get(), trackContainer);
+
+	// necessary to prevent memory leak
+	result->getSVOwnership(true);
+
+	// Chi2/DOF cut
+	double chi2DOF = result->fitChi2()/result->nDoF();
+	bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
+
+	if(chi2CutPassed) {
+	  cascadeinfoContainer->push_back(result.release());
+	  pass = true;
 	}
-	// Do the work
-	std::unique_ptr<Trk::VxCascadeInfo> result(m_iVertexFitter->fitCascade());
+      }
 
-	bool pass = false;
-	if (result != nullptr) {
-	  for(auto v : result->vertices()) {
-	    if(v->nTrackParticles()==0) {
-	      std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
-	      v->setTrackParticleLinks(nullLinkVector);
-	    }
-	  }
-	  // reset links to original tracks
-	  BPhysPVCascadeTools::PrepareVertexLinks(result.get(), trackContainer);
+      // do cascade fit again without any mass constraints
+      if(pass) {
+	if(m_constrJpsi || m_constrPsi || m_constrJpsi2 || (m_constrDiTrk && m_vtx1Daug_num==4 && m_mass_diTrk>0)) {
+	  m_iVertexFitter->setDefault();
+	  m_iVertexFitter->setRobustness(robustness);
+	  std::vector<Trk::VertexID> vrtList_nc;
+	  // Psi vertex
+	  Trk::VertexID vID1_nc = m_iVertexFitter->startVertex(tracksPsi,massesPsi);
+	  vrtList_nc.push_back(vID1_nc);
+	  Trk::VertexID vID2_nc = m_iVertexFitter->nextVertex(tracksJpsi2,massesJpsi2);
+	  vrtList_nc.push_back(vID2_nc);
+	  // Mother vertex including Jpsi and Psi
+	  std::vector<const xAOD::TrackParticle*> tp; tp.clear();
+	  std::vector<double> tp_masses; tp_masses.clear();
+	  m_iVertexFitter->nextVertex(tp,tp_masses,vrtList_nc);
+	  // Do the work
+	  std::unique_ptr<Trk::VxCascadeInfo> result_nc(m_iVertexFitter->fitCascade());
 
-	  // necessary to prevent memory leak
-	  result->getSVOwnership(true);
-
-	  // Chi2/DOF cut
-	  double chi2DOF = result->fitChi2()/result->nDoF();
-	  bool chi2CutPassed = (m_chi2cut <= 0.0 || chi2DOF < m_chi2cut);
-
-	  if(chi2CutPassed) {
-	    cascadeinfoContainer->push_back(result.release());
-	    pass = true;
-	  }
-	}
-
-	// do cascade fit again without any mass constraints
-	if(pass) {
-	  if(m_constrJpsi || m_constrPsi || m_constrJpsi2 || (m_constrDiTrk && m_vtx1Daug_num==4 && m_mass_diTrk>0)) {
-	    m_iVertexFitter->setDefault();
-	    m_iVertexFitter->setRobustness(robustness);
-	    std::vector<Trk::VertexID> vrtList_nc;
-	    // Psi vertex
-	    Trk::VertexID vID1_nc = m_iVertexFitter->startVertex(tracksPsi,massesPsi);
-	    vrtList_nc.push_back(vID1_nc);
-	    Trk::VertexID vID2_nc = m_iVertexFitter->nextVertex(tracksJpsi2,massesJpsi2);
-	    vrtList_nc.push_back(vID2_nc);
-	    // Mother vertex including Jpsi and Psi
-	    std::vector<const xAOD::TrackParticle*> tp; tp.clear();
-	    std::vector<double> tp_masses; tp_masses.clear();
-	    m_iVertexFitter->nextVertex(tp,tp_masses,vrtList_nc);
-	    // Do the work
-	    std::unique_ptr<Trk::VxCascadeInfo> result_nc(m_iVertexFitter->fitCascade());
-
-	    if (result_nc != nullptr) {
-	      for(auto v : result_nc->vertices()) {
-		if(v->nTrackParticles()==0) {
-		  std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
-		  v->setTrackParticleLinks(nullLinkVector);
-		}
+	  if (result_nc != nullptr) {
+	    for(auto v : result_nc->vertices()) {
+	      if(v->nTrackParticles()==0) {
+		std::vector<ElementLink<xAOD::TrackParticleContainer> > nullLinkVector;
+		v->setTrackParticleLinks(nullLinkVector);
 	      }
-	      // reset links to original tracks
-	      BPhysPVCascadeTools::PrepareVertexLinks(result_nc.get(), trackContainer);
-
-	      // necessary to prevent memory leak
-	      result_nc->getSVOwnership(true);
-	      cascadeinfoContainer_noConstr->push_back(result_nc.release());
 	    }
-	    else cascadeinfoContainer_noConstr->push_back(0);
+	    // reset links to original tracks
+	    BPhysPVCascadeTools::PrepareVertexLinks(result_nc.get(), trackContainer);
+
+	    // necessary to prevent memory leak
+	    result_nc->getSVOwnership(true);
+	    cascadeinfoContainer_noConstr->push_back(result_nc.release());
 	  }
 	  else cascadeinfoContainer_noConstr->push_back(0);
 	}
-      } //Iterate over Psi vertices
-    } //Iterate over Jpsi vertices
+	else cascadeinfoContainer_noConstr->push_back(0);
+      }
+    } //Iterate over candidatePairs
 
     return StatusCode::SUCCESS;
   }
