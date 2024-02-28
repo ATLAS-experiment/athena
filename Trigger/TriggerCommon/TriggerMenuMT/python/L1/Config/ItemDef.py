@@ -655,7 +655,7 @@ class ItemDef:
         MenuItem('L1_jJ30_FIRSTEMPTY'         ).setLogic( d.jJ30  & firstempty).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_UNPAIRED_ISO'       ).setLogic( d.jJ30  & unpaired_isocond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_UNPAIRED_NONISO'    ).setLogic( d.jJ30  & unpaired_nonisocond).setTriggerType(TT.calo)
-        MenuItem('L1_jJ30_BRGP12'             ).setLogic( d.jJ30  & bgrp12cond).setTriggerType(TT.calo)
+        MenuItem('L1_jJ30_BGRP12'             ).setLogic( d.jJ30  & bgrp12cond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_UNPAIREDB1'         ).setLogic( d.jJ30  & bgrp13cond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30_UNPAIREDB2'         ).setLogic( d.jJ30  & bgrp14cond).setTriggerType(TT.calo)
         MenuItem('L1_jJ30p0ETA25'   ).setLogic( d.jJ300ETA25   & physcond).setTriggerType(TT.calo)
@@ -1923,7 +1923,7 @@ class ItemDef:
             MenuItem('L1_DPHI-2eEM5_VTE10').setLogic( d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE10) & physcond).setTriggerType(TT.calo)
             MenuItem('L1_DPHI-2eEM9_VTE50').setLogic( d.eEM9.x(2) & d.TOPO_27DPHI32_eEMs1_eEMs6 & Not(d.TE50) & physcond).setTriggerType(TT.calo)
             MenuItem('L1_BTAG-MU3VjJ40').setLogic( d.TOPO_0DR04_MU3Vab_CjJ40ab & physcond)
-            MenuItem('L1_BTAG-MU5VFjJ50').setLogic( d.TOPO_0DR04_MU5VFab_CjJ50ab & physcond) # added temporarily 
+            MenuItem('L1_BTAG-MU5VFjJ80').setLogic( d.TOPO_0DR04_MU5VFab_CjJ80ab & physcond)
             MenuItem('L1_BTAG-MU5VFjJ90').setLogic( d.TOPO_0DR04_MU5VFab_CjJ90ab & physcond)
             MenuItem('L1_BPH-8M15-2MU3V-BO'    ).setLogic( d.TOPO_8INVM15_2CMU3Vab & physcond)           # 96% for Upsi
 

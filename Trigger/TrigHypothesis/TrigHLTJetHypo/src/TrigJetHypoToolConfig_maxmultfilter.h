@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGJETHYPOTOOLCONFIG_MAXMULTFILTER_H
@@ -7,9 +7,10 @@
 
 #include "ITrigHypoJetVectorFilterConfig.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "./ArgStrToDouble.h"
 
 /*
- * maxmult filter - orders jets (currently by pt), and returns
+ * maxmult filter - filters jets by some eta condition, orders them in pt, and returns
  * iterators to the 0 to end / N positions of the ordered container, if N (number of jets) < max mult requested.
  */
 
@@ -27,11 +28,12 @@ public:
   
  private:
 
-  //Gaudi::Property<std::size_t>
-  //m_begin{this, "begin", {0u}, "first position in range"};
-
-  Gaudi::Property<std::size_t>
-  m_end{this, "end", {0u}, "end (last + 1)  position in range"};
+  Gaudi::Property<std::size_t> 
+    m_end{this, "end", {0u}, "end (last + 1)  position in range"};
+  Gaudi::Property<std::string>
+    m_min{this, "min", {"0."}, "Abs eta min for eta region"};
+  Gaudi::Property<std::string>
+    m_max{this, "max", {"inf"}, "Abs eta max for eta region"};
   
   StatusCode checkVals()  const;
  

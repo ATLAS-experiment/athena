@@ -6,7 +6,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import (NoHypoToolCreated,
                                                              algColor, 
                                                              isHypoBase,
                                                              isInputMakerBase)
-from AthenaCommon.CFElements import parOR, seqAND, compName, getProp, hasProp, findAlgorithmByPredicate
+from AthenaCommon.CFElements import parOR, seqAND, findAlgorithmByPredicate
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
@@ -61,7 +61,7 @@ class AlgNode(Node):
             self.addOutput(("%s_%s"%(self.Alg.getName(),self.outputProp)))
 
     def setPar(self, propname, value):
-        cval = getProp( self.Alg, propname)
+        cval = getattr( self.Alg, propname)
         if isinstance(cval, MutableSequence):
             cval.append(value)
             return setattr(self.Alg, propname, cval)
@@ -69,14 +69,14 @@ class AlgNode(Node):
             return setattr(self.Alg, propname, value)
 
     def resetPar(self, prop):
-        cval = getProp(self.Alg, prop)
+        cval = getattr(self.Alg, prop)
         if isinstance(cval, MutableSequence):
             return setattr(self.Alg, prop, [])
         else:
             return setattr(self.Alg, prop, "")
 
     def getPar(self, prop):
-        return getProp(self.Alg, prop)
+        return getattr(self.Alg, prop)
 
     def resetOutput(self):
         self.resetPar(self.outputProp)
@@ -151,7 +151,7 @@ class HypoAlgNode(AlgNode):
     """Node for HypoAlgs"""
     initialOutput= 'StoreGateSvc+UNSPECIFIED_OUTPUT'
     def __init__(self, Alg):
-        assert isHypoBase(Alg), "Error in creating HypoAlgNode from Alg "  + compName(Alg)
+        assert isHypoBase(Alg), "Error in creating HypoAlgNode from Alg "  + Alg.name
         AlgNode.__init__(self, Alg, 'HypoInputDecisions', 'HypoOutputDecisions')
         self.previous=[]
 
@@ -193,7 +193,7 @@ class HypoAlgNode(AlgNode):
 
     def __repr__(self):
         return "HypoAlg::%s  [%s] -> [%s], previous = [%s], HypoTools=[%s]" % \
-            (compName(self.Alg),' '.join(map(str, self.getInputList())),
+            (self.Alg.name,' '.join(map(str, self.getInputList())),
              ' '.join(map(str, self.getOutputList())),
              ' '.join(map(str, self.previous)),
              ' '.join([t.getName() for t in self.Alg.HypoTools]))
@@ -201,11 +201,11 @@ class HypoAlgNode(AlgNode):
 
 class InputMakerNode(AlgNode):
     def __init__(self, Alg):
-        assert isInputMakerBase(Alg), "Error in creating InputMakerNode from Alg "  + compName(Alg)
+        assert isInputMakerBase(Alg), "Error in creating InputMakerNode from Alg "  + Alg.name
         AlgNode.__init__(self,  Alg, 'InputMakerInputDecisions', 'InputMakerOutputDecisions')
         self.resetInput()
         self.resetOutput() ## why do we need this in CA mode??
-        input_maker_output = CFNaming.inputMakerOutName(compName(self.Alg))
+        input_maker_output = CFNaming.inputMakerOutName(self.Alg.name)
         self.addOutput(input_maker_output)
 
 
@@ -260,17 +260,17 @@ class ComboMaker(AlgNode):
         legsToInputCollections = self.mapRawInputsToInputsIndex()                
         if len(chainMult) != len(legsToInputCollections):
             log.error("ComboMaker for Alg:{} with addChain for:{} Chain multiplicity:{} Per leg input collection index:{}."
-                .format(compName(self.Alg), chainName, tuple(chainMult), tuple(legsToInputCollections)))
+                .format(self.Alg.name, chainName, tuple(chainMult), tuple(legsToInputCollections)))
             log.error("The size of the multiplicies vector must be the same size as the per leg input collection vector.")
             log.error("The ComboHypo needs to know which input DecisionContainers contain the DecisionObjects to be used for each leg.")
             log.error("Check why ComboMaker.addInput(...) was not called exactly once per leg.")
             raise Exception("[createDataFlow] Error in ComboMaker.addChain. Cannot proceed.")
 
-        cval1 = getProp(self.Alg, self.prop1)  # check necessary to see if chain was added already?
-        cval2 = getProp(self.Alg, self.prop2)          
+        cval1 = getattr(self.Alg, self.prop1)  # check necessary to see if chain was added already?
+        cval2 = getattr(self.Alg, self.prop2)
         if type(cval1) is dict or isinstance(cval1, GaudiConfig2.semantics._DictHelper):
             if chainName in cval1.keys():
-                log.error("ERROR in configuration: ComboAlg %s has already been configured for chain %s", compName(self.Alg), chainName)
+                log.error("ERROR in configuration: ComboAlg %s has already been configured for chain %s", self.Alg.name, chainName)
                 raise Exception("[createDataFlow] Error in ComboMaker.addChain. Cannot proceed.")
             else:
                 cval1[chainName] = chainMult
@@ -284,7 +284,7 @@ class ComboMaker(AlgNode):
         
 
     def getChains(self):
-        cval = getProp(self.Alg, self.prop1)        
+        cval = getattr(self.Alg, self.prop1)
         return cval.keys()
 
 
@@ -368,15 +368,15 @@ class MenuSequence(object):
     """ By construction it has one Hypo Only; behaviour changed to support muFastOvlpRmSequence() which has two, but this will change"""
 
     def __init__(self, flags, Sequence, Maker,  Hypo, HypoToolGen, IsProbe=False):
-        assert compName(Maker).startswith("IM"), "The input maker {} name needs to start with letter: IM".format(compName(Maker))        
+        assert Maker.name.startswith("IM"), "The input maker {} name needs to start with letter: IM".format(Maker.name)
         self._maker = InputMakerNode( Alg = Maker )
         input_maker_output= self.maker.readOutputList()[0] # only one since it's merged       
 
-        self._name = CFNaming.menuSequenceName(compName(Hypo))
+        self._name = CFNaming.menuSequenceName(Hypo.name)
         self._hypoToolConf = HypoToolConf( HypoToolGen )
         Hypo.RuntimeValidation = flags.Trigger.doRuntimeNaviVal
         self._hypo = HypoAlgNode( Alg = Hypo )
-        hypo_output = CFNaming.hypoAlgOutName(compName(Hypo))
+        hypo_output = CFNaming.hypoAlgOutName(Hypo.name)
         self._hypo.addOutput(hypo_output)
         self._hypo.setPreviousDecision( input_maker_output )
 
@@ -384,7 +384,7 @@ class MenuSequence(object):
         if ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions:
             seqChildren = Sequence.getChildren() if hasattr(Sequence,'getChildren') else Sequence.Members
             for child in seqChildren:
-                if hasProp(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions and not IsProbe:
+                if hasattr(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions and not IsProbe:
                     locked = bool(child.isLocked()) if hasattr(child,'isLocked') else False
                     if locked:
                         child.unlock()
@@ -401,7 +401,7 @@ class MenuSequence(object):
                 if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
                     for child in baseSeq.getChildren()[1:]:
                         probeChild = child.clone(child.getName()+"_probe")
-                        if hasProp(child,'ROBPrefetchingInputDecisions') and (ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions):
+                        if hasattr(child,'ROBPrefetchingInputDecisions') and (ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions):
                             # child is a ROB prefetching alg, map the probe IM decisions
                             probeChild.ROBPrefetchingInputDecisions = [str(probeIM.InputMakerOutputDecisions)]
                         elif probeIM.ViewNodeName == child.getName():
@@ -419,7 +419,7 @@ class MenuSequence(object):
             if ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions:
                 seqChildren = Sequence.getChildren() if hasattr(Sequence,'getChildren') else Sequence.Members
                 for child in seqChildren:
-                    if hasProp(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions:
+                    if hasattr(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions:
                         locked = bool(child.isLocked()) if hasattr(child,'isLocked') else False
                         if locked:
                             child.unlock()
@@ -432,10 +432,10 @@ class MenuSequence(object):
 
         log.debug("connecting InputMaker and HypoAlg, adding: \n\
         InputMaker::%s.output=%s",\
-                        compName(self.maker.Alg), input_maker_output)   
+                        self.maker.Alg.name, input_maker_output)
         log.debug("HypoAlg::%s.HypoInputDecisions=%s, \n \
         HypoAlg::%s.HypoOutputDecisions=%s",\
-                      compName(self.hypo.Alg), self.hypo.readInputList()[0], compName(self.hypo.Alg), self.hypo.readOutputList()[0])
+                      self.hypo.Alg.name, self.hypo.readInputList()[0], self.hypo.Alg.name, self.hypo.readOutputList()[0])
 
 
     @property
@@ -497,7 +497,7 @@ class MenuSequence(object):
     
     def connectToFilter(self, outfilter):
         """ Connect filter to the InputMaker"""
-        log.debug("connecting %s to inputs of %s", outfilter,compName(self.maker.Alg))
+        log.debug("connecting %s to inputs of %s", outfilter, self.maker.Alg.name)
         self.maker.addInput(outfilter)
     
   
@@ -913,7 +913,7 @@ class ChainStep(object):
              ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])),
              ' '.join(map(str, [seq.name for seq in self.sequences]) ))
         if self.combo is not None:
-            repr_string += "\n + ComboHypo = %s" %(compName(self.combo.Alg))
+            repr_string += "\n + ComboHypo = %s" % self.combo.Alg.name
             if len(self.comboToolConfs)>0:
                 repr_string +=",  ComboHypoTools = %s" %(' '.join(map(str, [tool.__name__ for tool in self.comboToolConfs]))) 
         repr_string += "\n"       

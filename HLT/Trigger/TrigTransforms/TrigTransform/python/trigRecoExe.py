@@ -15,7 +15,7 @@ import six
 from PyJobTransforms.trfExe import athenaExecutor
 
 # imports for preExecute
-from PyJobTransforms.trfUtils import asetupReport, cvmfsDBReleaseCheck, unpackDBRelease, setupDBRelease, lineByLine
+from PyJobTransforms.trfUtils import asetupReport, cvmfsDBReleaseCheck, unpackDBRelease, setupDBRelease, lineByLine, asetupReleaseIsOlderThan
 import PyJobTransforms.trfEnv as trfEnv
 import PyJobTransforms.trfExceptions as trfExceptions
 from PyJobTransforms.trfExitCodes import trfExit as trfExit
@@ -142,6 +142,23 @@ class trigRecoExecutor(athenaExecutor):
                     asetupString = dbgAsetupString
                     msg.info('Will use asetup string for debug stream analysis %s', dbgAsetupString)
 
+                # If legacy release, bring up centos7 container
+                OSSetupString = None
+                legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
+                if asetupString is not None:
+                    currentOS = os.environ['ALRB_USER_PLATFORM']
+                if legacyOSRelease and "centos7" not in currentOS:
+                    OSSetupString = "centos7"
+                    msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
+
+                # allow overriding the container OS using a flag
+                if 'runInContainer' in self.conf.argdict:
+                    OSSetupString = self.conf.argdict['runInContainer'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
+                    msg.info('The step {} will be performed in a container running {}, as explicitly requested'.format(self._substep, OSSetupString))
+                if OSSetupString is not None and asetupString is None:
+                    raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_FAIL'),
+                                                                    '--asetup must be used for the substep which requires --runInContainer')
+
                 # Set database in command line if it was missing
                 if 'useDB' in self.conf.argdict and 'DBserver' not in self.conf.argdict and dbAlias:
                     msg.warn("Database alias will be set to %s", dbAlias)
@@ -162,7 +179,6 @@ class trigRecoExecutor(athenaExecutor):
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                     f'Directory already contains files with expected output name format {expectedOutputFileName}, please remove/rename these first: {matchedOutputFileNames}')
 
-
         # Call athenaExecutor parent as the above overrides what athenaExecutor would have done
         super(athenaExecutor, self).preExecute(input, output)
 
@@ -170,7 +186,7 @@ class trigRecoExecutor(athenaExecutor):
         # This will have asetup and/or DB release setups in it
         # Do this last in this preExecute as the _cmd needs to be finalised
         msg.info('Now writing wrapper for substep executor {0}'.format(self._name))
-        self._writeAthenaWrapper(asetup=asetupString, dbsetup=dbsetup)
+        self._writeAthenaWrapper(asetup=asetupString, dbsetup=dbsetup, ossetup=OSSetupString)
         msg.info('Athena will be executed in a subshell via {0}'.format(self._cmd))
 
     def _prepAthenaCommandLine(self):

@@ -2,10 +2,6 @@
 #
 """Functionality core of the Gen_tf transform"""
 
-# temporarily force no global config flags
-from AthenaConfiguration import AllConfigFlags
-del AllConfigFlags.ConfigFlags
-
 # force no legacy job properties
 from AthenaCommon import JobProperties
 JobProperties.jobPropertiesDisallowed = True

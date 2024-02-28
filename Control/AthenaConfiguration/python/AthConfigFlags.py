@@ -121,11 +121,14 @@ class FlagAddress(object):
     def __init__(self, f, name):
         if isinstance(f, AthConfigFlags):
             self._flags = f
-            self._name = name
+            rname = self._flags._renames.get(name, name)
+            self._name = rname
 
         elif isinstance(f, FlagAddress):
             self._flags = f._flags
-            self._name  = f._name+"."+name
+            name = f._name+"."+name
+            rname = self._flags._renames.get(name, name)
+            self._name  = rname
 
     def __getattr__(self, name):
         return getattr(self._flags, self._name + "." + name)
@@ -219,6 +222,7 @@ class AthConfigFlags(object):
         self._hash = None
         self._parser = None
         self._args = None # user args from parser
+        self._renames = {}
 
     def athHash(self):
         if self._locked is False:
@@ -383,6 +387,9 @@ class AthConfigFlags(object):
         if name in self._categoryCache:
             return True
 
+        if name in self._renames:
+            return self.hasCategory(self._renames[name])
+        
         # If not found do search through all keys.
         # TODO: could be improved by using a trie for _flagdict
         for f in self._flagdict.keys():
@@ -445,7 +452,7 @@ class AthConfigFlags(object):
         return cln
 
 
-    def cloneAndReplace(self,subsetToReplace,replacementSubset):
+    def cloneAndReplace(self,subsetToReplace,replacementSubset, keepOriginal=False):
         """
         This is to replace subsets of configuration flags like
 
@@ -453,62 +460,26 @@ class AthConfigFlags(object):
         newflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon')
         """
 
-        def _copyFunction(obj):
-            return obj if self.locked() else deepcopy(obj) # if flags are locked we can reuse containers, no need to deepcopy
-
         _msg.info("cloning flags and replacing %s by %s", subsetToReplace, replacementSubset)
 
         self._loadDynaFlags( subsetToReplace )
         self._loadDynaFlags( replacementSubset )
 
-        if not subsetToReplace.endswith("."):
-            subsetToReplace+="."
-            pass
-        if not replacementSubset.endswith("."):
-            replacementSubset+="."
-            pass
+        subsetToReplace = subsetToReplace.strip(".")
+        replacementSubset = replacementSubset.strip(".")
 
         #Sanity check: Don't replace a by a
         if (subsetToReplace == replacementSubset):
             raise RuntimeError("Can not replace flags {} with themselves".format(subsetToReplace))
 
 
-        replacedNames=set()
-        replacementNames=set()
-        newFlagDict=dict()
-        for (name,flag) in self._flagdict.items():
-            if name.startswith(subsetToReplace):
-                replacedNames.add(name[len(subsetToReplace):]) #Remember replaced flag for the check later
-            elif name.startswith(replacementSubset):
-                subName=name[len(replacementSubset):]
-                replacementNames.add(subName) # remember replacement name
-                #Move the flag to the new name:
-
-                newFlagDict[subsetToReplace+subName] = _copyFunction(flag)
-                pass
-            else:
-                newFlagDict[name] = _copyFunction(flag) #All other flags are simply copied
-                pass
-            #End loop over flags
-            pass
-
-        #Last sanity check: Make sure that the replaced section still contains the same names:
-        if not replacementNames.issuperset(replacedNames):
-            _msg.error(replacedNames)
-            _msg.error(replacementNames)
-            raise RuntimeError("Attempt to replace incompatible flags subsets: distinct flag are "
-                               + repr(replacementNames - replacedNames))
-        newFlags = AthConfigFlags()
-        newFlags._flagdict = newFlagDict
-
-        for k,v in self._dynaflags.items(): # cant just assign the dicts because then they are shared when loading
-            newFlags._dynaflags[k] = _copyFunction(v)
+        newFlags = copy(self) # shallow copy
+        newFlags._renames = deepcopy(self._renames) #maintains renames
+        newFlags._renames[subsetToReplace] = replacementSubset
+        if not keepOriginal:
+            newFlags._renames[replacementSubset] = "" # block access to original flags
         newFlags._hash = None
-
-        if self._locked:
-            newFlags.lock()
         return newFlags
-
 
 
     def join(self, other, prefix=''):
@@ -535,31 +506,40 @@ class AthConfigFlags(object):
     def dump(self, pattern=".*", evaluate=False, formatStr="{:40} : {}", maxLength=None):
         import re
         compiled = re.compile(pattern)
-        print(formatStr.format( "Flag Name","Value" ) )
         def truncate(s): return s[:maxLength] + ("..." if maxLength and len(s)>maxLength else "")
+        reverse_renames = {value: key for key, value in self._renames.items() if value != ''} # new name to old
         for name in sorted(self._flagdict):
-            if compiled.match(name):
+            renamed = name
+            if any([name.startswith(r) for r in reverse_renames.keys()]):
+                for oldprefix, newprefix in reverse_renames.items():
+                    if name.startswith(oldprefix):
+                        renamed = name.replace(oldprefix, newprefix)
+                        break
+            if compiled.match(renamed):
                 if evaluate:
                     try:
                         rep = repr(self._flagdict[name] )
                         val = repr(self._flagdict[name].get(self))
                         if val != rep:
-                            print(formatStr.format(name,truncate("{} {}".format( val, rep )) ))
+                            print(formatStr.format(renamed,truncate("{} {}".format( val, rep )) ))
                         else:
-                            print(formatStr.format( name, truncate("{}".format(val)) ) )
+                            print(formatStr.format(renamed, truncate("{}".format(val)) ) )
                     except Exception as e:
-                        print(formatStr.format(name, truncate("Exception: {}".format( e )) ))
+                        print(formatStr.format(renamed, truncate("Exception: {}".format( e )) ))
                 else:
-                    print(formatStr.format( name, truncate("{}".format(repr(self._flagdict[name] ) )) ))
+                    print(formatStr.format( renamed, truncate("{}".format(repr(self._flagdict[name] ) )) ))
 
-        if len(self._dynaflags) == 0:
-            return
-        print("Flag categories that can be loaded dynamically")
-        print("{:25} : {:>30} : {}".format( "Category","Generator name", "Defined in" ) )
-        for name,gen_and_prefix in sorted(self._dynaflags.items()):
-            if compiled.match(name):
-                print("{:25} : {:>30} : {}".format( name, gen_and_prefix[0].__name__, '/'.join(gen_and_prefix[0].__code__.co_filename.split('/')[-2:]) ) )
-
+        if len(self._dynaflags) != 0:
+            print("Flag categories that can be loaded dynamically")
+            print("{:25} : {:>30} : {}".format( "Category","Generator name", "Defined in" ) )
+            for name,gen_and_prefix in sorted(self._dynaflags.items()):
+                if compiled.match(name):
+                    print("{:25} : {:>30} : {}".format( name, gen_and_prefix[0].__name__, '/'.join(gen_and_prefix[0].__code__.co_filename.split('/')[-2:]) ) )
+        if len(self._renames):
+            print("Flag categories that are redirected by the cloneAndReplace")
+            for alias,src in self._renames.items():
+                print("{:30} points to {:>30} ".format( alias, src  if src else "nothing") )
+            
 
     def initAll(self):
         """
@@ -647,7 +627,7 @@ class AthConfigFlags(object):
     # parser argument must be an ArgumentParser returned from getArgumentParser()
     def fillFromArgs(self, listOfArgs=None, parser=None):
         """
-        Used to set flags from command-line parameters, like ConfigFlags.fillFromArgs(sys.argv[1:])
+        Used to set flags from command-line parameters, like flags.fillFromArgs(sys.argv[1:])
         """
         import sys
 

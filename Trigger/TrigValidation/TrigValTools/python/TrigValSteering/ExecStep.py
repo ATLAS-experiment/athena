@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -205,26 +205,21 @@ class ExecStep(Step):
         new_cmd += precommand
         self.args = self.args.replace(old_cmd, new_cmd)
 
-    def add_hlt_jo_modifier(self, modifier):
+    def add_trf_precommand(self, precommand):
         '''
-        Same as add_precommand but checks if using HLT job options where the modifier is applicable
-        and prepends the transform step name in case of transforms
+        Same as add_precommand but prepends the transform step name in case of transforms.
         '''
-        if self.type in ['athena', 'athenaHLT'] and 'runHLT_standalone' not in self.job_options:
-            self.log.debug('Skip adding modifier %s to step %s because it does not use runHLT_standalone job options',
-                           modifier, self.name)
-            return
-        elif self.type in ['Reco_tf', 'Trig_reco_tf', 'Derivation_tf']:
+        if self.type in ['Reco_tf', 'Trig_reco_tf', 'Derivation_tf']:
             if 'inputBS_RDOFile' in self.args:
-                modifier = 'BSRDOtoRAW:' + modifier
+                precommand = 'BSRDOtoRAW:' + precommand
             elif 'outputRDO_TRIGFile' in self.args or 'doRDO_TRIG' in self.args:
-                modifier = 'RDOtoRDOTrigger:' + modifier
+                precommand = 'RDOtoRDOTrigger:' + precommand
             else:
-                self.log.debug('Skip adding modifier %s to step %s because it is a transform which does not run Trigger',
-                            modifier, self.name)
+                self.log.debug('Skip adding precommand %s to step %s because it is a transform which does not run Trigger',
+                            precommand, self.name)
                 return
 
-        return self.add_precommand(modifier)
+        return self.add_precommand(precommand)
 
     def configure_args(self, test):
         self.log.debug('Configuring args for step %s', self.name)
@@ -263,10 +258,7 @@ class ExecStep(Step):
             if self.costmon:
                 self.flags.append('Trigger.CostMonitoring.monitorAllEvents=True')
             if self.fpe_auditor:
-                if self._isCA:
-                    self.flags.append('Exec.FPE=1')
-                else:
-                    self.add_hlt_jo_modifier('fpeAuditor=True')
+                self.flags.append('Exec.FPE=1')
 
         # Run config-only if requested
         if self.config_only :
@@ -375,13 +367,13 @@ class ExecStep(Step):
                 self.misconfig_abort('Wrong type for flags. Expected list or tuple.')
 
             if self.type.endswith('_tf'):  # for transform, set flags as pre-exec
-                self.add_hlt_jo_modifier(';'.join(f'flags.{flag}' for flag in self.flags))
+                self.add_trf_precommand(';'.join(f'flags.{flag}' for flag in self.flags))
             else:  # athena(HLT)
                 if self._isCA:
                     self.args += ' ' + ' '.join(self.flags)
-                else:            # for legacy, set flags as pre-exec
-                    self.add_hlt_jo_modifier('from AthenaConfiguration.AllConfigFlags import ConfigFlags;' +
-                                            ';'.join(f'ConfigFlags.{flag}' for flag in self.flags))
+                else:
+                    self.log.warning('Setting flags in legacy job options is no longer supported. Ignoring: '
+                                     + ' '.join(self.flags))
 
         # Strip extra whitespace
         self.args = self.args.strip()

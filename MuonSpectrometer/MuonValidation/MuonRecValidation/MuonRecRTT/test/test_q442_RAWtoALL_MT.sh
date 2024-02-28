@@ -20,6 +20,11 @@
 # art-output: NSWPRDValAlg.reco.ntuple.root
 # art-output: NSWPRDValAlg.reco.dcube.root
 
+# Run each Reco_tf in a seperate directory
+
+mkdir Serial
+cd Serial
+
 #####################################################################
 Reco_tf.py \
            --CA 'True' \
@@ -35,8 +40,14 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoALL_serial
+cd ..
+mv Serial/log.RAWtoALL log.RAWtoALL_serial
+mv Serial/NSWPRDValAlg.reco.ntuple.root ./
+mv Serial/OUT_ESD.root ./
 #####################################################################
+
+mkdir 1thread
+cd 1thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
@@ -52,8 +63,13 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoALL_1thread
+cd ..
+mv 1thread/log.RAWtoALL log.RAWtoALL_1thread
+mv 1thread/OUT_ESD_1thread.root ./
 #####################################################################
+
+mkdir 5thread
+cd 5thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
@@ -69,8 +85,13 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoALL_5thread
+cd ..
+mv 5thread/log.RAWtoALL log.RAWtoALL_5thread
+mv 5thread/OUT_ESD_5thread.root ./
 #####################################################################
+
+mkdir 8thread
+cd 8thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
@@ -86,7 +107,9 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoALL log.RAWtoALL_8thread
+cd ..
+mv 8thread/log.RAWtoALL log.RAWtoALL_8thread
+mv 8thread/OUT_ESD_8thread.root ./
 #####################################################################
 
 #####################################################################

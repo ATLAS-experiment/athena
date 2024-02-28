@@ -55,6 +55,7 @@ def tauMonitoringConfig(inputFlags,**kwargs):
     tauMonAlgTauTrig5 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig5', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgTauTrig6 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig6', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgTauTrig7 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig7', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
+    tauMonAlgTauTrig8 = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgTauTrig8', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgEleTrig = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgEleTrig', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
     tauMonAlgJetTrig = cfgHelper.addAlgorithm( tauMonitorAlgorithm, name='tauMonAlgJetTrig', addFilterTools = [LArBadLBFilterToolCfg(inputFlags)])
 
@@ -74,7 +75,8 @@ def tauMonitoringConfig(inputFlags,**kwargs):
     tauMonAlgTauTrig4.TriggerChain = "HLT_tau160_mediumRNN_tracktwoMVA_L1eTAU140"
     tauMonAlgTauTrig5.TriggerChain = "HLT_tau80_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB30_L1TAU60_DR-TAU20ITAU12I"
     tauMonAlgTauTrig6.TriggerChain = "HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25"
-    tauMonAlgTauTrig7.TriggerChain = "HLT_tau200_mediumRNN_tracktwoMVA_L1TAU100"
+    tauMonAlgTauTrig7.TriggerChain = "HLT_tau80_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20"
+    tauMonAlgTauTrig8.TriggerChain = "HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55"
 
 
     tauMonAlgEleTrig.TriggerChain = "HLT_e[2-9][0-9]_.*"
@@ -102,6 +104,8 @@ def tauMonitoringConfig(inputFlags,**kwargs):
     tauMonAlgTauTrig6.etaMax = 100
     tauMonAlgTauTrig7.etaMin = -100
     tauMonAlgTauTrig7.etaMax = 100
+    tauMonAlgTauTrig8.etaMin = -100
+    tauMonAlgTauTrig8.etaMax = 100
 
     tauMonAlgEleTrig.etaMin = -100
     tauMonAlgEleTrig.etaMax = 100
@@ -119,6 +123,7 @@ def tauMonitoringConfig(inputFlags,**kwargs):
     tauMonAlgTauTrig5.kinGroupName = 'tauMonKinGroupTauTrig5'
     tauMonAlgTauTrig6.kinGroupName = 'tauMonKinGroupTauTrig6'
     tauMonAlgTauTrig7.kinGroupName = 'tauMonKinGroupTauTrig7'
+    tauMonAlgTauTrig8.kinGroupName = 'tauMonKinGroupTauTrig8'
 
     tauMonAlgEleTrig.kinGroupName = 'tauMonKinGroupEleTrig'
     tauMonAlgJetTrig.kinGroupName = 'tauMonKinGroupJetTrig'
@@ -140,6 +145,7 @@ def tauMonitoringConfig(inputFlags,**kwargs):
     myKinGroupTauTrig5 = cfgHelper.addGroup(alg=tauMonAlgTauTrig5, name='tauMonKinGroupTauTrig5', topPath='Tau/Trigger/tauTrigger5/' )
     myKinGroupTauTrig6 = cfgHelper.addGroup(alg=tauMonAlgTauTrig6, name='tauMonKinGroupTauTrig6', topPath='Tau/Trigger/tauTrigger6/' )
     myKinGroupTauTrig7 = cfgHelper.addGroup(alg=tauMonAlgTauTrig7, name='tauMonKinGroupTauTrig7', topPath='Tau/Trigger/tauTrigger7/' )
+    myKinGroupTauTrig8 = cfgHelper.addGroup(alg=tauMonAlgTauTrig8, name='tauMonKinGroupTauTrig8', topPath='Tau/Trigger/tauTrigger8/' )
     myKinGroupEleTrig = cfgHelper.addGroup(alg=tauMonAlgEleTrig, name='tauMonKinGroupEleTrig', topPath='Tau/Trigger/EleTrig/' )
     myKinGroupJetTrig = cfgHelper.addGroup(alg=tauMonAlgJetTrig, name='tauMonKinGroupJetTrig', topPath='Tau/Trigger/JetTrig/' )
 
@@ -158,6 +164,7 @@ def tauMonitoringConfig(inputFlags,**kwargs):
             'TauTrig5': "tauTriggered5_",
             'TauTrig6': "tauTriggered6_",
             'TauTrig7': "tauTriggered7_",
+            'TauTrig8': "tauTriggered8_",
 
             }
 
@@ -189,7 +196,8 @@ def tauMonitoringConfig(inputFlags,**kwargs):
                  (myKinGroupTauTrig4, 'TauTrig4'),
                  (myKinGroupTauTrig5, 'TauTrig5'),
                  (myKinGroupTauTrig6, 'TauTrig6'),
-                 (myKinGroupTauTrig7, 'TauTrig7')]:
+                 (myKinGroupTauTrig7, 'TauTrig7'),
+                 (myKinGroupTauTrig8, 'TauTrig8')]:
 
         (igroup, postfix) = itup
 
@@ -650,6 +658,7 @@ if __name__=='__main__':
     exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig5').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig6').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig7').OutputLevel = 2 # DEBUG
+    exampleMonitorAcc.getEventAlgo('tauMonAlgTauTrig8').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgEleTrig').OutputLevel = 2 # DEBUG
     exampleMonitorAcc.getEventAlgo('tauMonAlgJetTrig').OutputLevel = 2 # DEBUG
 

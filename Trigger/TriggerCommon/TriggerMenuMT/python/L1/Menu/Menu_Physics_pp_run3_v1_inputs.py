@@ -292,7 +292,7 @@ def defineInputsMenu():
                 "algorithms" : [
                     TopoMenuDef( '0INVM10-3MU3Vab',                          outputbits = 0 ), # BLS
                     TopoMenuDef( '0DR04-MU3Vab-CjJ40ab',                     outputbits = 1 ), # Bjet, TODO: not a primary
-                    TopoMenuDef( '0DR04-MU5VFab-CjJ50ab',                    outputbits = 2 ), # Bjet, TODO: not a primary
+                    TopoMenuDef( '0DR04-MU5VFab-CjJ80ab',                    outputbits = 2 ), # Bjet, TODO: not a primary
                     TopoMenuDef( '2DISAMB_jJ55ab_DR_eTAU_eTAU',              outputbits = (3,4), outputlines = [ '2DISAMB-jJ55ab-0DR25-eTAU30ab-eTAU20ab', 
                                                                                                                  '2DISAMB-jJ55ab-0DR28-eTAU30ab-eTAU20ab'  ]),
                     TopoMenuDef( 'DR_eTAU30ab_eTAU20ab',                     outputbits = (5,6), outputlines = [ '0DR25-eTAU30ab-eTAU20ab', 
