@@ -100,10 +100,10 @@ class PileupReweightingBlock (ConfigBlock):
         # PRW config files should only be configured if we run on MC
         if config.dataType() is not DataType.Data:
             # check if user provides per-campaign pileup config list
-            if self.userPileupConfigs and self.userPileupConfigsPerCampaign:
+            if self.userPileupConfigs is not None and self.userPileupConfigsPerCampaign is not None:
                 raise ValueError('Both userPileupConfigs and userPileupConfigsPerCampaign specified, '
                                  'use only one of the options!')
-            if self.userPileupConfigsPerCampaign:
+            if self.userPileupConfigsPerCampaign is not None:
                 if not campaign:
                     raise Exception('userPileupConfigsPerCampaign requires campaign to be configured!')
                 if campaign is Campaign.Unknown:
@@ -114,11 +114,11 @@ class PileupReweightingBlock (ConfigBlock):
                 except KeyError as e:
                     raise KeyError(f'Unconfigured campaign {e} for userPileupConfigsPerCampaign!')
 
-            elif self.userPileupConfigs:
+            elif self.userPileupConfigs is not None:
                 toolConfigFiles = self.userPileupConfigs[:]
                 log.info('Using user provided PRW configuration')
 
-            if not toolConfigFiles:
+            else:
                 from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
                 if campaign and campaign is not Campaign.Unknown:
                     toolConfigFiles = getConfigurationFiles(campaign=campaign,
@@ -133,16 +133,16 @@ class PileupReweightingBlock (ConfigBlock):
                     log.info('No campaign specified, no PRW config files configured')
 
             # check if user provides per-campaign lumical config list
-            if self.userLumicalcFilesPerCampaign and self.userLumicalcFiles:
+            if self.userLumicalcFilesPerCampaign is not None and self.userLumicalcFiles is not None:
                 raise ValueError('Both userLumicalcFiles and userLumicalcFilesYear specified, '
                                 'use only one of the options!')
-            if self.userLumicalcFilesPerCampaign:
+            if self.userLumicalcFilesPerCampaign is not None:
                 try:
                     toolLumicalcFiles = self.userLumicalcFilesPerCampaign[campaign.value][:]
                     log.info('Using user-provided per-campaign lumicalc files')
                 except KeyError as e:
                     raise KeyError(f'Unconfigured campaign {e} for userLumicalcFilesPerCampaign!')
-            elif self.userLumicalcFiles:
+            elif self.userLumicalcFiles is not None:
                 toolLumicalcFiles = self.userLumicalcFiles[:]
                 log.info('Using user-provided lumicalc files')
             else:
