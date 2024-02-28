@@ -56,6 +56,13 @@ def parse_args():
         action="store_true",
     )
     parser.add_argument(
+        "--ignoreOrder",
+        metavar="PROP",
+        action="append",
+        default=[],
+        help="Ignore order for sequence properties matching regex",
+    )
+    parser.add_argument(
         "--allComponentPrint",
         help="Print all component if there are differences in any of its properties",
         action="store_true",
@@ -127,11 +134,12 @@ def parse_args():
         print("Run with arguments:")
         print( "confTool.py", " ".join(sys.argv[1:]))
 
-    main(args)
+    return main(args)
 
 knownDifferences={}
 
 def main(args):
+    exit_code = 0
     if not args.quiet and args.ignoreIrrelevant:
         print(f"Properties to ignore: {args.ignore}")
     color = fullColor()
@@ -191,10 +199,9 @@ def main(args):
         global knownDifferences
         if args.knownDifferencesFile:
             knownDifferences = loadDifferencesFile(args.knownDifferencesFile)
-        _compareConfig(configRef, configChk, args, color)
+        exit_code = _compareConfig(configRef, configChk, args, color) != 0
 
-
-
+    return exit_code
 
 
 def _print(conf, color):
@@ -340,6 +347,7 @@ def _compareConfig(configRef, configChk, args, color):
     def _componentDescription(comp_name):
         return (comp_name+ " renamed from " + componentReverseRenamig[comp_name]) if comp_name in componentReverseRenamig else comp_name
 
+    countDifferent = 0
     for component in allComps:
         if component not in configRef:
             if not args.ignoreMissing:
@@ -368,7 +376,7 @@ def _compareConfig(configRef, configChk, args, color):
         else:
             print(f"{color.difference}Component", _componentDescription(component), f"may differ{color.reset}")
             if not args.allComponentPrint:
-                countDifferent = _compareComponent(refValue, chkValue, "\t", args, component, color)
+                countDifferent = _compareComponent(refValue, chkValue, "\t", args, component, "", color)
                 if countDifferent == 0:
                     print("   but all are suppressed by renaming/known differences/...") 
                 else:
@@ -382,6 +390,7 @@ def _compareConfig(configRef, configChk, args, color):
                     f"\t{color.second}Chk{color.reset}\t",
                     sorted(configChk[component].items(), key=lambda kv: kv[0]),
                 )
+    return countDifferent
 
 
 def _parseNumericalValues(values):
@@ -425,7 +434,7 @@ def _handleComponentsReanaming( refVal ):
             updatedRef.append(v)
     return updatedRef if isinstance(refVal, list) else updatedRef[0]
 
-def _compareComponent(compRef, compChk, prefix, args, component, color):
+def _compareComponent(compRef, compChk, prefix, args, component, propname, color):
     countDifferent=0
     if isinstance(compRef, dict):
         allProps = list(set(compRef.keys()) | set(compChk.keys()))
@@ -481,7 +490,7 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
                     countDifferent += _compareIOVDbFolders(refVal, chkVal, "\t", args, color)
                 else:
                     countDifferent += _compareComponent(
-                        refVal, chkVal, "\t" + prefix + ">> ", args, component, color
+                        refVal, chkVal, "\t" + prefix + ">> ", args, component, prop, color
                     )
 
     elif isinstance(compRef, (list, tuple, set)) and len(compRef) > 1:
@@ -508,16 +517,17 @@ def _compareComponent(compRef, compChk, prefix, args, component, color):
 
         if len(compRef) == len(compChk):
             if sorted(compRef) == sorted(compChk):
-                print(
-                    f"{prefix} : {color.difference} ^^ Different order ^^ {color.reset}"
-                )
-                countDifferent += 1
+                if any(re.match(f"^{regex}$",f"{component}.{propname}") for regex in args.ignoreOrder):
+                    print(f"{prefix} : {color.knowndifference} ^^ Different order ignored ^^ {color.reset}")
+                else:
+                    print(f"{prefix} : {color.difference} ^^ Different order ^^ {color.reset}")
+                    countDifferent += 1
             else:
                 for i, (refVal, chkVal) in enumerate(zip(compRef, compChk)):
                     if refVal != chkVal:
                         print(f"{prefix} : {color.first} {refVal} {color.reset} vs {color.second} {chkVal} {color.reset} {color.difference}<< at index {i} {color.reset}")
                         countDifferent += _compareComponent(
-                            refVal, chkVal, "\t" + prefix + ">> ", args, "", color
+                            refVal, chkVal, "\t" + prefix + ">> ", args, "", "", color
                         )
     return countDifferent
 
@@ -560,8 +570,8 @@ def _compareIOVDbFolders(compRef, compChk, prefix, args, color):
         refParsed.append(_parseIOVDbFolder(item))
     for item in compChk:
         chkParsed.append(_parseIOVDbFolder(item))
-    return _compareComponent(refParsed, chkParsed, prefix, args, "", color)
+    return _compareComponent(refParsed, chkParsed, prefix, args, "", "", color)
 
 
 if __name__ == "__main__":
-    parse_args()
+    sys.exit(parse_args())
