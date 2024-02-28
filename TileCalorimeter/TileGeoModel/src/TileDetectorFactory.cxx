@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileDetectorFactory.h"
@@ -645,18 +645,29 @@ pvBarrelMother->add(pvBarrelModuleMother);
     pvITCMotherNeg->add(stITCModuleMotherNeg);
 
 
-    GeoTransform* tfITCMotherPos = new GeoTransform(GeoTrf::TranslateZ3D((dbManager->TILBzoffset()+dbManager->TILEzshift())*Gaudi::Units::cm));
-    GeoNameTag* ntITCMotherPos = new GeoNameTag("TileITCPos");
-    pvTileEnvelopePosEndcap->add(tfITCMotherPos);
-    pvTileEnvelopePosEndcap->add(ntITCMotherPos);
-    pvTileEnvelopePosEndcap->add(pvITCMotherPos);
+    
+    
+    if (not pvTileEnvelopePosEndcap){
+      (*m_log)<<MSG::ERROR<<"pvTileEnvelopePosEndcap is null in "<<__func__<<endmsg;
+    } else {
+      GeoTransform* tfITCMotherPos = new GeoTransform(GeoTrf::TranslateZ3D((dbManager->TILBzoffset()+dbManager->TILEzshift())*Gaudi::Units::cm));
+      GeoNameTag* ntITCMotherPos = new GeoNameTag("TileITCPos");
+      pvTileEnvelopePosEndcap->add(tfITCMotherPos);
+      pvTileEnvelopePosEndcap->add(ntITCMotherPos);
+      pvTileEnvelopePosEndcap->add(pvITCMotherPos);
+    }
+   
 
-
-    GeoTransform* tfITCMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D((-dbManager->TILBzoffset()-dbManager->TILEzshift())*Gaudi::Units::cm));
-    GeoNameTag* ntITCMotherNeg = new GeoNameTag("TileITCNeg");
-    pvTileEnvelopeNegEndcap->add(tfITCMotherNeg);
-    pvTileEnvelopeNegEndcap->add(ntITCMotherNeg);
-    pvTileEnvelopeNegEndcap->add(pvITCMotherNeg);
+  
+    if (not pvTileEnvelopeNegEndcap){
+      (*m_log)<<MSG::ERROR<<"pvTileEnvelopeNegEndcap is null in "<<__func__<<endmsg;
+    } else {
+      GeoTransform* tfITCMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D((-dbManager->TILBzoffset()-dbManager->TILEzshift())*Gaudi::Units::cm));
+      GeoNameTag* ntITCMotherNeg = new GeoNameTag("TileITCNeg");
+      pvTileEnvelopeNegEndcap->add(tfITCMotherNeg);
+      pvTileEnvelopeNegEndcap->add(ntITCMotherNeg);
+      pvTileEnvelopeNegEndcap->add(pvITCMotherNeg);
+    }
   }
   //-------------------------- G A P ---------------------------------
   // Tube - gap mother

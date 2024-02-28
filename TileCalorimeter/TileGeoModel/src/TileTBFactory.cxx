@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTBFactory.h"
@@ -412,10 +412,14 @@ void TileTBFactory::create(GeoPhysVol *world)
         TRANSFUNCTION xfBarrelModuleMother = Pow(GeoTrf::RotateZ3D(1.0),phiInd)*GeoTrf::TranslateX3D((dbManager->TILBrmaximal()+dbManager->TILBrminimal())/2.*Gaudi::Units::cm)*GeoTrf::RotateX3D(180*Gaudi::Units::deg)*GeoTrf::RotateY3D(90*Gaudi::Units::deg);
 
         GeoSerialTransformer* stBarrelModuleMother = new GeoSerialTransformer(pvBarrelModuleMother,
-                                                                              &xfBarrelModuleMother,
-                                                                              NumberOfMod); // all modules at once
-        pvBarrelMother->add(new GeoSerialIdentifier(ModPositionNumber));
-        pvBarrelMother->add(stBarrelModuleMother);
+           &xfBarrelModuleMother,
+           NumberOfMod); // all modules at once
+        if (pvBarrelMother){                                                                 
+          pvBarrelMother->add(new GeoSerialIdentifier(ModPositionNumber));
+          pvBarrelMother->add(stBarrelModuleMother);
+        } else {
+          (*m_log) << MSG::ERROR << "pvBarrelMother is null in " << __func__ << endmsg;
+        }
 
 
         //--------------------------BARREL FINGERS MAKING------------------------------
@@ -1029,7 +1033,7 @@ void TileTBFactory::create(GeoPhysVol *world)
     if (EnvType == 1 || EnvType == 0) { // central barrel
       nModulesInSection[0] = nModulesInSection[1] = NumberOfMod;
       zShiftInSection[0] = zShiftInSection[1] = Zshift;
-    } else if (EnvType < 6) {
+    } else if ((EnvType >0) and (EnvType < 6)) {
       nModulesInSection[EnvType] = NumberOfMod;
       zShiftInSection[EnvType] = Zshift;
     }
