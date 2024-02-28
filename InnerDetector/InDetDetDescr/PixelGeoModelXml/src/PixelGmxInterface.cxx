@@ -487,5 +487,51 @@ void PixelGmxInterface::buildReadoutGeometryFromSqlite(IRDBAccessSvc * rdbAccess
 
 }
 
+void PixelGmxInterface::addAlignable(int level,
+                                     std::map<std::string, int> &index,
+                                     GeoVFullPhysVol *fpv,
+                                     GeoAlignableTransform *transform)
+{
+  ATH_MSG_DEBUG("addAlignable called");
+  const PixelID *pixelIdHelper = dynamic_cast<const PixelID *> (m_commonItems->getIdHelper());
+  Identifier id;
+  switch (level) {
+    case 0:
+      id = pixelIdHelper->wafer_id(index["barrel_endcap"],
+                                 index["layer_wheel"],
+                                 index["phi_module"],
+                                 index["eta_module"],
+                                 index["side"]);
+      break;
+    case 1:
+      id = pixelIdHelper->wafer_id(index["barrel_endcap"],
+                                 index["layer_wheel"],
+                                 index["phi_module"],
+                                 index["eta_module"],
+                                 0);
+      break;
+    case 2:
+      id = pixelIdHelper->wafer_id(index["barrel_endcap"],
+                                 index["layer_wheel"],
+                                 0,
+                                 0,
+                                 0);
+      break;
+    case 3:
+      id = pixelIdHelper->wafer_id(index["barrel_endcap"],
+                                 0,
+                                 0,
+                                 0,
+                                 0);
+      break;
+    default:
+      throw GaudiException("Unknown level " + std::to_string(level) + " for alignment in addAlignable",
+                           "PixelGmxInterface::addAlignable", StatusCode::FAILURE);
+      break;
+  }
+  m_detectorManager->addAlignableTransform(level, id, transform, fpv);
+}
+
+
 } // namespace ITk
 } // namespace InDetDD
