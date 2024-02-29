@@ -23,6 +23,7 @@
 #include <EventLoop/Driver.h>
 #include <EventLoop/EventCountModule.h>
 #include <EventLoop/EventRange.h>
+#include <EventLoop/FactoryPreloadModule.h>
 #include <EventLoop/FileExecutedModule.h>
 #include <EventLoop/GridReportingModule.h>
 #include <EventLoop/Job.h>
@@ -385,6 +386,9 @@ namespace EL
       m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("EarlyMemoryMonitor"));
     if (xAODInput)
       m_modules.push_back (std::make_unique<Detail::TEventModule> ());
+    auto factoryPreload = metaData()->castString (Job::optFactoryPreload, "");
+    if (!factoryPreload.empty())
+      m_modules.push_back (std::make_unique<Detail::FactoryPreloadModule> (factoryPreload));
     m_modules.push_back (std::make_unique<Detail::LeakCheckModule> ());
     m_modules.push_back (std::make_unique<Detail::StopwatchModule> ());
     if (metaData()->castBool (Job::optGridReporting, false))

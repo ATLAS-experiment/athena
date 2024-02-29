@@ -35,6 +35,9 @@ parser.add_option( '--algorithm-timer', dest='algorithm_timer',
 parser.add_option( '--algorithm-memory', dest='algorithm_memory',
                    action = 'store_true', default = False,
                    help = 'Run the job with a memory monitor for each algorithm' )
+parser.add_option( '--factory-preload', dest='factory_preload',
+                   action = 'store', type = 'str', default = '',
+                   help = 'Factory preloader(s) to run at the beginning of the job' )
 parser.add_option( '--no-systematics', dest='no_systematics',
                    action = 'store_true', default = False,
                    help = 'Configure the job to with no systematics' )
@@ -131,6 +134,8 @@ if options.algorithm_timer :
     job.options().setBool( ROOT.EL.Job.optAlgorithmTimer, True )
 if options.algorithm_memory :
     job.options().setBool( ROOT.EL.Job.optAlgorithmMemoryMonitor, True )
+if options.factory_preload != '' :
+    job.options().setString( ROOT.EL.Job.optFactoryPreload, options.factory_preload )
 
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSequenceAlgs
