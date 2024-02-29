@@ -45,7 +45,7 @@ StatusCode Muon::MDT_RawDataProviderToolMT::convertIntoContainer(
     for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* frag : vecRobs) {
         // convert only if data payload is delivered
         if (frag->rod_ndata() != 0) {
-            ATH_CHECK(m_decoder->fillCollections(*frag, mdtContainer));
+            m_decoder->fillCollections(*frag, mdtContainer).ignore();
         } else {
             ATH_MSG_DEBUG(" ROB " << MSG::hex << frag->source_id() << " is delivered with an empty payload" );
             // store the error condition into the StatusCode and continue

@@ -31,16 +31,18 @@ def precisionCaloSequenceCfg(flags, ion=False, is_probe_leg=False):
     recoAcc.mergeReco(precisionCaloRecoSequence(flags, InViewRoIs,'gPrecisionCaloRecoSequence'+hiInfo, ion))
        
     selAcc = SelectionCA('gPrecisionCaloMenuSequence'+hiInfo, isProbe=is_probe_leg)
+    #TODO mirrors config present is in Electrons - has to be to be unified
+    pedestalCA = None
     if ion is True:
         # add UE subtraction for heavy ion e/gamma triggers
         # NOTE: UE subtraction requires an average pedestal to be calculated
         # using the full event (FS info), and has to be done outside of the
-        # event views in this sequence. the egammaFSRecoSequence is thus placed
-        # before the precisionCaloInViewSequence.
-        from TriggerMenuMT.HLT.Egamma.TrigEgammaFactoriesCfg import egammaFSCaloRecoSequenceCfg
-        selAcc.merge(egammaFSCaloRecoSequenceCfg(flags))
+        # event views in this sequence. the egammaFSHIEventShapeMaker is thus placed
+        # in the upSequenceCA before the recoCA.
+        from TriggerMenuMT.HLT.HeavyIon.HeavyIonMenuSequences import egammaFSHIEventShapeMakerCfg
+        pedestalCA = egammaFSHIEventShapeMakerCfg(flags)
 
-    selAcc.mergeReco(recoAcc)
+    selAcc.mergeReco(recoAcc, upSequenceCA=pedestalCA)
 
     hypoAlg = CompFactory.TrigEgammaPrecisionCaloHypoAlg('Photon' + tag(ion) + 'Hypo')
 
