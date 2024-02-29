@@ -116,14 +116,23 @@ def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
 
 
 @AccumulatorCache
-def L0CaloGlobalRoIBuilderCfg(flags):
+def L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=True):
     acc = ComponentAccumulator()
     from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import RingerReFexConfig
-    ringer = RingerReFexConfig(flags,'RingerGlobalFex',RingerKey='NOTNEEDED',
-          ClustersName='CaloClustersGlobal')
-    L0CaloGlobalRoIBuilderAlg = CompFactory.CaloGlobalRoIBuilder("L0CaloGlobalRoIBuilder",
-                      Cells ="SeedLessFS", ClustersName='CaloClustersGlobal',
-                      RingerKey='RingerGlobal',
+    nameTool='RingerGlobalFex'
+    nameAlgo='L0CaloGlobalRoIBuilder'
+    nameContCalo='CaloClustersGlobal'
+    nameContRinger='RingerGlobal'
+    if ( DoNoiseThrRings ):
+        nameTool='RingerGlobal2sigFex'
+        nameAlgo='L0CaloGlobalRoI2sigBuilder'
+        nameContCalo='CaloClusters2sigGlobal'
+        nameContRinger='Ringer2sigGlobal'
+    ringer = RingerReFexConfig(flags,name=nameTool,RingerKey='NOTNEEDED',
+          ClustersName=nameContCalo,DoNoiseThrRings=DoNoiseThrRings)
+    L0CaloGlobalRoIBuilderAlg = CompFactory.CaloGlobalRoIBuilder(name=nameAlgo,
+                      Cells ="SeedLessFS", ClustersName=nameContCalo,
+                      RingerKey=nameContRinger,
                       RingerTool=ringer )
     acc.addEventAlgo(L0CaloGlobalRoIBuilderAlg)
 
@@ -132,16 +141,24 @@ def L0CaloGlobalRoIBuilderCfg(flags):
 
     return acc
 
-def CaloL0RingerPreCfg(flags):
-    flags.Trigger.ExtraEDMList=[('xAOD::TrigRingerRingsContainer#RingerGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo')]
+def CaloL0RingerPreCfg(flags,DoNoiseThrRings=True):
+    flags.Trigger.ExtraEDMList+= CaloL0RingerPrepareList(DoNoiseThrRings)
 
-def CaloL0RingerCfg(flags):
+def CaloL0RingerPrepareList(DoNoiseThrRings=True):
+    extraEDMList=[]
+    if DoNoiseThrRings : 
+       extraEDMList+=[('xAOD::TrigRingerRingsContainer#Ringer2sigGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#Ringer2sigGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#CaloClusters2sigGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#CaloClusters2sigGlobalAux.',  'BS ESD AODFULL', 'Calo')]
+    else : 
+       extraEDMList+=[('xAOD::TrigRingerRingsContainer#RingerGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterContainer#CaloClustersGlobal',  'BS ESD AODFULL', 'Calo'), ('xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.',  'BS ESD AODFULL', 'Calo')]
+    return extraEDMList
+
+def CaloL0RingerCfg(flags,DoNoiseThrRings=True):
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD,addToAOD
-    extraContent=['xAOD::TrigRingerRingsContainer#RingerGlobal','xAOD::TrigRingerRingsAuxContainer#RingerGlobalAux.','xAOD::TrigEMClusterContainer#CaloClustersGlobal','xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.']
+    extraContent=CaloL0RingerPrepareList(DoNoiseThrRings)
     acc = ComponentAccumulator()
     if (flags.Output.doWriteRDO):
        acc.merge(hltCaloCellSeedlessMakerCfg(flags))
-       acc.merge(L0CaloGlobalRoIBuilderCfg(flags))
+       acc.merge(L0CaloGlobalRoIBuilderCfg(flags,DoNoiseThrRings=DoNoiseThrRings))
 
     if (flags.Output.doWriteESD or flags.Output.doWriteAOD):
        if ( flags.Output.doWriteESD ):

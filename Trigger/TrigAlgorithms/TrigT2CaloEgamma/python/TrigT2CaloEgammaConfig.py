@@ -25,7 +25,7 @@ from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
 inputEDM = mapThresholdToL1RoICollection("FSNOSEED")
 
 def RingerReFexConfig(flags, name="RingerReMaker", RingerKey="FastCaloRings",
-                      ClustersName="HLT_FastCaloEMClusters"):
+                      ClustersName="HLT_FastCaloEMClusters",**kwargs):
 
     from TrigT2CaloEgamma.RingerConstants import Layer
     from TrigT2CaloEgamma.RingerConstants import DETID as det
@@ -68,6 +68,8 @@ def RingerReFexConfig(flags, name="RingerReMaker", RingerKey="FastCaloRings",
         DoEtaAxesDivision = [True]*_lenNRings,
         DoPhiAxesDivision = [True]*_lenNRings,
         MonTool = monTool)
+    for k, v in kwargs.items():
+       setattr(ringer,k,v)
     return ringer
 
 #=======================================================================
