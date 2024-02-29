@@ -388,8 +388,7 @@ def FPGATrackSimLogicalHistProcessAlgCfg(inputFlags):
     theFPGATrackSimLogicalHistProcessAlg.MonTool = result.getPrimaryAndMerge(FPGATrackSimLogicalHitsProcessAlgMonitoringCfg(flags))
 
     result.addEventAlgo(theFPGATrackSimLogicalHistProcessAlg)
-    return result
-
+    return result 
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -408,12 +407,24 @@ if __name__ == "__main__":
     flags.lock()
     acc=MainServicesCfg(flags)
     
+    acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = ["MONITOROUT DATAFILE='dataflow.root', OPT='RECREATE'"]))
+    
     if flags.Trigger.FPGATrackSim.wrapperFileName == [] or flags.Trigger.FPGATrackSim.wrapperFileName is None:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         acc.merge(PoolReadCfg(flags))
     
-    acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
-    acc.addService(CompFactory.THistSvc(Output = ["MONITOROUT DATAFILE='dataflow.root', OPT='RECREATE'"]))
+    if flags.Input.isMC:
+        from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+        acc.merge(GEN_AOD2xAODCfg(flags))
+    
+    if flags.Detector.EnableCalo:
+        from CaloRec.CaloRecoConfig import CaloRecoCfg
+        acc.merge(CaloRecoCfg(flags))
+    
+    if not flags.Reco.EnableTrackOverlay:
+        from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
+        acc.merge(InDetTrackRecoCfg(flags))
 
     acc.merge(FPGATrackSimLogicalHistProcessAlgCfg(flags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))
