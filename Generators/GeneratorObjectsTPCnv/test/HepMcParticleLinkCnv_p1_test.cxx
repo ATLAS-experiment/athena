@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,8 +10,8 @@
 
 #undef NDEBUG
 #include <cassert>
-#include <vector>
 #include <iostream>
+#include <vector>
 // HepMC includes
 #include "AtlasHepMC/GenEvent.h"
 #include "TruthUtils/MagicNumbers.h"
@@ -126,7 +126,6 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
     for (const auto& vtx: ge.vertices()) {
       vtxvec.push_back(vtx);
       ge.remove_vertex(vtx);
-
     }
     vtxvec.clear();
   }
@@ -146,7 +145,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
 
   //.....add new vertex with geantino
   ge.add_vertex(genVertex);
-  HepMC::suggest_barcode(genPart, std::numeric_limits<int32_t>::max());
+  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
 }
 
 void createMcEventCollectionInStoreGate(std::vector<HepMC::GenParticlePtr>& genPartList)
@@ -155,7 +154,7 @@ void createMcEventCollectionInStoreGate(std::vector<HepMC::GenParticlePtr>& genP
   // HepMcParticleLink knows about
   SG::WriteHandle<McEventCollection> inputTestDataHandle{"TruthEvent"};
   inputTestDataHandle = std::make_unique<McEventCollection>();
-
+  // create a dummy EventContext
   EventContext ctx;
   ctx.setExtension( Atlas::ExtendedEventContext( SG::CurrentEventStore::store() ) );
   Gaudi::Hive::setCurrentContext( ctx );
@@ -170,7 +169,7 @@ void createMcEventCollectionInStoreGate(std::vector<HepMC::GenParticlePtr>& genP
   // GenEvent::event_number.
   const int event_number2(std::numeric_limits<unsigned short>::max());
   // 2^16 -1 is the largest event number supported by
-  // HepMcParticleLink_p2. A workaround is used to suppport larger
+  // HepMcParticleLink_p1. A workaround is used to suppport larger
   // values for the first event in the McEventCollection.
   const int event_number3(64);
   const int event_number4(89);
@@ -211,43 +210,93 @@ void test1()
   createMcEventCollectionInStoreGate(genPartList);
   assert ( genPartList.size() == 13 );
   // HepMcParticleLinks pointing at GenParticles in the first GenEvent in the McEventCollection
-  // By event_number
   HepMC::ConstGenParticlePtr particle1 = genPartList.at(0);
-  HepMcParticleLink trans1a(HepMC::barcode(particle1),particle1->parent_event()->event_number());
+  // By ConstGenParticlePtr + event_number
+  HepMcParticleLink trans1a(particle1,particle1->parent_event()->event_number());
   testit (trans1a);
-  // By position
-  HepMcParticleLink trans1b(HepMC::barcode(particle1),0,HepMcParticleLink::IS_POSITION);
+  // By barcode + event_number
+  HepMcParticleLink trans1b(HepMC::barcode(particle1),particle1->parent_event()->event_number());
   testit (trans1b);
+  // By ConstGenParticlePtr + position
+  HepMcParticleLink trans1d(particle1,0,HepMcParticleLink::IS_POSITION);
+  testit (trans1d);
+  // By barcode + position
+  HepMcParticleLink trans1e(HepMC::barcode(particle1),0,HepMcParticleLink::IS_POSITION);
+  testit (trans1e);
+
   // HepMcParticleLinks pointing at GenParticles in other GenEvents in the McEventCollection
   HepMC::ConstGenParticlePtr particle2 = genPartList.at(7);
-  HepMcParticleLink trans2(HepMC::barcode(particle2),particle2->parent_event()->event_number());
-  testit (trans2);
+  // By ConstGenParticlePtr + event_number
+  HepMcParticleLink trans2a(particle2,particle2->parent_event()->event_number());
+  testit (trans2a);
+  // By barcode + event_number
+  HepMcParticleLink trans2b(HepMC::barcode(particle2),particle2->parent_event()->event_number());
+  testit (trans2b);
+  // By ConstGenParticlePtr + position
+  HepMcParticleLink trans2d(particle2,1,HepMcParticleLink::IS_POSITION);
+  testit (trans2d);
+  // By barcode + position
+  HepMcParticleLink trans2e(HepMC::barcode(particle2),1,HepMcParticleLink::IS_POSITION);
+  testit (trans2e);
+  //---------------------------------------------
   HepMC::ConstGenParticlePtr particle3 = genPartList.at(8);
-  HepMcParticleLink trans3(HepMC::barcode(particle3),particle3->parent_event()->event_number());
-  testit (trans3);
+  // By ConstGenParticlePtr + event_number
+  HepMcParticleLink trans3a(particle3,particle3->parent_event()->event_number());
+  testit (trans3a);
+  // By barcode + event_number
+  HepMcParticleLink trans3b(HepMC::barcode(particle3),particle3->parent_event()->event_number());
+  testit (trans3b);
+  // By ConstGenParticlePtr + position
+  HepMcParticleLink trans3d(particle3,2,HepMcParticleLink::IS_POSITION);
+  testit (trans3d);
+  // By barcode + position
+  HepMcParticleLink trans3e(HepMC::barcode(particle3),2,HepMcParticleLink::IS_POSITION);
+  testit (trans3e);
+
   // HepMcParticleLinks pointing at filtered pileup truth
   HepMC::ConstGenParticlePtr particle4 = genPartList.at(12);
-  HepMcParticleLink trans4(HepMC::barcode(particle4),particle4->parent_event()->event_number());
-  testit (trans4);
-  // HepMcParticleLinks pointing at delta-ray (barcode=0 - not recorded in McEventCollection) using event_number
-  int deltaRayBarcode(0);
-  HepMcParticleLink trans5a(deltaRayBarcode,particle1->parent_event()->event_number());
+  // By ConstGenParticlePtr + event_number
+  HepMcParticleLink trans4a(particle4,particle4->parent_event()->event_number());
+  testit (trans4a);
+  // By barcode + event_number
+  HepMcParticleLink trans4b(HepMC::barcode(particle4),particle4->parent_event()->event_number());
+  testit (trans4b);
+  // By ConstGenParticlePtr + position
+  HepMcParticleLink trans4d(particle4,3,HepMcParticleLink::IS_POSITION);
+  testit (trans4d);
+  // By barcode + position
+  HepMcParticleLink trans4e(HepMC::barcode(particle4),3,HepMcParticleLink::IS_POSITION);
+  testit (trans4e);
+
+  // HepMcParticleLinks pointing at delta-ray (barcode/id=0 - not recorded in McEventCollection) using event number
+  const int deltaRayBarcode(0);
+  const HepMcParticleLink::index_type deltaRayEventNumber = static_cast<HepMcParticleLink::index_type>(particle1->parent_event()->event_number());
+  // By barcode + event_number
+  HepMcParticleLink trans5a(deltaRayBarcode,deltaRayEventNumber);
   testit (trans5a);
-  // HepMcParticleLinks pointing at delta-ray (barcode=0 - not recorded in McEventCollection) using position
-  HepMcParticleLink trans5b(deltaRayBarcode,0,HepMcParticleLink::IS_POSITION);
-  testit (trans5b);
+  // By barcode + position
+  HepMcParticleLink trans5c(deltaRayBarcode,0,HepMcParticleLink::IS_POSITION);
+  testit (trans5c);
+
   // Link to a GenParticle which was not recorded to the
   // McEventCollection, even though other parts of the same GenEvent
   // were recorded.
-  const HepMcParticleLink::index_type refEvtNum1 = static_cast<HepMcParticleLink::index_type>(particle1->parent_event()->event_number());
-  const int cutBarcode(210001);
-  HepMcParticleLink trans6a(cutBarcode, refEvtNum1);
+  const int cutParticleBarcode(210001);
+  const HepMcParticleLink::index_type refEventNumber = static_cast<HepMcParticleLink::index_type>(particle1->parent_event()->event_number());
+  // By barcode + event_number
+  HepMcParticleLink trans6a(cutParticleBarcode,refEventNumber);
   testit (trans6a);
+  // By barcode + position
+  HepMcParticleLink trans6c(cutParticleBarcode,0,HepMcParticleLink::IS_POSITION);
+  testit (trans6c);
+
   // Link to a GenEvent which was not recorded to the McEventCollection
-  const int event_number5(460);
-  const HepMcParticleLink::index_type refEvtNum5 = static_cast<HepMcParticleLink::index_type>(event_number5);
-  HepMcParticleLink trans6b(cutBarcode, refEvtNum5);
-  testit (trans6b);
+  const HepMcParticleLink::index_type missingEvtNum = static_cast<HepMcParticleLink::index_type>(460);
+  // By barcode + event_number
+  HepMcParticleLink trans7a(cutParticleBarcode, missingEvtNum);
+  testit (trans7a);
+  // By barcode + position - NOT SUPPORTED
+  // Position is meaningless if the GenEvent is not in the McEventCollection
 }
 
 
