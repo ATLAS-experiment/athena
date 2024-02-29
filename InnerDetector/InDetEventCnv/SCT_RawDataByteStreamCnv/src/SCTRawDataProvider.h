@@ -130,6 +130,8 @@ class SCTRawDataProvider : public AthReentrantAlgorithm
   SG::UpdateHandleKey<SCT_RDO_Cache> m_rdoContainerCacheKey;
   SG::UpdateHandleKey<IDCInDetBSErrContainer_Cache> m_bsErrContainerCacheKey;
 
+  Gaudi::Property<bool> m_storeInDetTimeColls{this, "StoreInDetTimeCollections", true, "Store LVL1ID and BCID"};
+
 };
 
 #endif // SCT_RAWDATABYTESTREAMCNV_SCTRAWDATAPROVIDER_H

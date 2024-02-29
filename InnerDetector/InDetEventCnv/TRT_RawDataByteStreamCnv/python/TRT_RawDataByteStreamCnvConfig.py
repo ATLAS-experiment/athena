@@ -41,8 +41,11 @@ def TrigTRTRawDataProviderCfg(flags : AthConfigFlags, RoIs : str, **kwargs):
     suffix = flags.Tracking.ActiveConfig.input_name
     providerToolName = f"TrigTRTRawDataProviderTool_{suffix}"
     providerName = f"TrigTRTRawDataProvider_{suffix}"
+
+    providerTool = CompFactory.TRTRawDataProviderTool(name = providerToolName,
+                                                      StoreInDetTimeCollections = False)
     
-    kwargs.setdefault("ProviderTool", CompFactory.TRTRawDataProviderTool(name = providerToolName))
+    kwargs.setdefault("ProviderTool", providerTool)
     kwargs.setdefault('isRoI_Seeded', True)
     kwargs.setdefault('RoIs',         RoIs)
     kwargs.setdefault('RDOKey',       'TRT_RDOs_TRIG')
