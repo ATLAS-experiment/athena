@@ -84,6 +84,20 @@ class trigRecoExecutor(athenaExecutor):
         else:
             msg.info('Asetup report: {0}'.format(asetupReport()))
 
+        # If legacy release, bring up centos7 container
+        OSSetupString = None
+        if asetupString is not None:
+            legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
+            currentOS = os.environ['ALRB_USER_PLATFORM']
+            if legacyOSRelease and "centos7" not in currentOS:
+                OSSetupString = "centos7"
+                msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
+
+        # allow overriding the container OS using a flag
+        if 'runInContainer' in self.conf.argdict:
+            OSSetupString = self.conf.argdict['runInContainer'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
+            msg.info('The step {} will be performed in a container running {}, as explicitly requested'.format(self._substep, OSSetupString))
+
         ## DBRelease configuration
         dbrelease = dbsetup = None
         if 'DBRelease' in self.conf.argdict:
@@ -141,23 +155,16 @@ class trigRecoExecutor(athenaExecutor):
                 if asetupString is None and dbgAsetupString is not None:
                     asetupString = dbgAsetupString
                     msg.info('Will use asetup string for debug stream analysis %s', dbgAsetupString)
-
-                # If legacy release, bring up centos7 container
-                OSSetupString = None
-                legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
-                if asetupString is not None:
+                    # If legacy release, bring up centos7 container
+                    legacyOSRelease = asetupReleaseIsOlderThan(asetupString, 24)
                     currentOS = os.environ['ALRB_USER_PLATFORM']
-                if legacyOSRelease and "centos7" not in currentOS:
-                    OSSetupString = "centos7"
-                    msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
-
-                # allow overriding the container OS using a flag
-                if 'runInContainer' in self.conf.argdict:
-                    OSSetupString = self.conf.argdict['runInContainer'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
-                    msg.info('The step {} will be performed in a container running {}, as explicitly requested'.format(self._substep, OSSetupString))
-                if OSSetupString is not None and asetupString is None:
-                    raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_FAIL'),
-                                                                    '--asetup must be used for the substep which requires --runInContainer')
+                    if legacyOSRelease and "centos7" not in currentOS:
+                        OSSetupString = "centos7"
+                        msg.info('Legacy release required for the substep {}, will setup a container running {}'.format(self._substep, OSSetupString))
+                    # allow overriding the container OS using a flag
+                    if 'runInContainer' in self.conf.argdict:
+                        OSSetupString = self.conf.argdict['runInContainer'].returnMyValue(name=self._name, substep=self._substep, first=self.conf.firstExecutor)
+                        msg.info('The step {} will be performed in a container running {}, as explicitly requested'.format(self._substep, OSSetupString))
 
                 # Set database in command line if it was missing
                 if 'useDB' in self.conf.argdict and 'DBserver' not in self.conf.argdict and dbAlias:
@@ -178,6 +185,11 @@ class trigRecoExecutor(athenaExecutor):
                 msg.error(f'Directoy already contains files with expected output name format ({expectedOutputFileName}), please remove/rename these first: {matchedOutputFileNames}')
                 raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'),
                     f'Directory already contains files with expected output name format {expectedOutputFileName}, please remove/rename these first: {matchedOutputFileNames}')
+
+        # Sanity check:
+        if OSSetupString is not None and asetupString is None:
+            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_SETUP_FAIL'),
+                                                            'Athena version must be specified for the substep which requires running inside a container (either via --asetup or from DB)')
 
         # Call athenaExecutor parent as the above overrides what athenaExecutor would have done
         super(athenaExecutor, self).preExecute(input, output)
