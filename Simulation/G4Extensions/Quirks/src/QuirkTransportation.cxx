@@ -193,6 +193,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
   Quirk* quirkDef = dynamic_cast<Quirk*>(pParticleDef);
   if (quirkDef == 0) {
      G4Exception("QuirkTransportation::AlongStepGetPhysicalInteractionLength", "NonQuirk", FatalErrorInArgument, "QuirkTransportation run on non-quirk particle");
+     std::abort();
   }
   HyperbolaStepper quirkStepper(
      quirkDef->GetStringIn(),
@@ -622,6 +623,7 @@ QuirkTransportation::StartTracking(G4Track* aTrack)
   Quirk* quirkDef = dynamic_cast<Quirk*>(part_nc);
   if (quirkDef == 0) {
      G4Exception("QuirkTransportation::StartTracking", "NonQuirk", FatalErrorInArgument, "QuirkTransportation run on non-quirk particle");
+     std::abort();
   }
   quirkDef->GetStringIn().StartTracking(aTrack);
 }

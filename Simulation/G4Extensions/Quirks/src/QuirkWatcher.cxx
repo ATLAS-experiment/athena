@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4TrackStatus.hh"
@@ -37,6 +37,7 @@ G4VParticleChange* QuirkWatcher::PostStepDoIt(
     Quirk* quirkDef = dynamic_cast<Quirk*>(part_nc);
     if (quirkDef == 0) {
         G4Exception("QuirkWatcher::PostStepDoIt", "NonQuirk", FatalErrorInArgument, "QuirkWatcher run on non-quirk particle");
+        std::abort();
     }
     InfracolorForce& string = quirkDef->GetStringIn();
 
