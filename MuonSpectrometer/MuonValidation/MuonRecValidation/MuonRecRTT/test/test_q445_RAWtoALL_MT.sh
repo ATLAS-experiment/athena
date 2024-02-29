@@ -25,7 +25,7 @@
 # Run each Reco_tf in a seperate directory
 
 export ATHENA_CORE_NUMBER=1
-mdkir 1thread
+mkdir 1thread
 cd 1thread
 
 #####################################################################
