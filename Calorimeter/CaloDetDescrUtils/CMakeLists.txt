@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( CaloDetDescrUtils )
@@ -7,5 +7,5 @@ atlas_subdir( CaloDetDescrUtils )
 atlas_add_library( CaloDetDescrUtils
 		   src/*.cxx
 		   PUBLIC_HEADERS CaloDetDescrUtils
-		   PRIVATE_LINK_LIBRARIES GaudiKernel CaloIdentifier CaloConditions GeoModelUtilities
+		   PRIVATE_LINK_LIBRARIES GaudiKernel CaloIdentifier CaloConditions GeoModelUtilities CaloDetDescrLib
 		                          LArReadoutGeometry TileDetDescr StoreGateLib RDBAccessSvcLib )
