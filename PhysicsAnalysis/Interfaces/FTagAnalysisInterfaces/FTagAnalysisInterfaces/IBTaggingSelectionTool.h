@@ -30,7 +30,8 @@ class IBTaggingSelectionTool : virtual public asg::IAsgTool {
     /// Get the decision using thet jet's pt and weight values (number of weight values depends on which tagger is used)
     virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* tag_weight */ ) const = 0;
     virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta*/ , double /* taggerWeight_b */, double /* taggerWeight_c */) const = 0;
-    virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */, double /* dl1ptau */ = 0.) const = 0;
+    virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */) const = 0;
+    virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */, double /* dl1ptau */) const = 0;
 
     /// Decide in which quantile of the tagger weight distribution the jet belongs
     /// The return value represents the bin index of the quantile distribution
@@ -41,7 +42,8 @@ class IBTaggingSelectionTool : virtual public asg::IAsgTool {
 
     virtual CP::CorrectionCode getCutValue(double /* jet pt */, double & cutval) const = 0;
     virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & tagweight) const = 0;
-    virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau = 0.) const = 0;
+    virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu, double & tagweight) const = 0;
+    virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau) const = 0;
 
     //flexibility for Continuous2D
     virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & weight ,bool getCTagW) const = 0;

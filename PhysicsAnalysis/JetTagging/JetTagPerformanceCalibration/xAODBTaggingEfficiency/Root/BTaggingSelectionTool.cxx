@@ -315,6 +315,15 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
 
 }
 
+CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu, double & tagweight) const{
+  if (m_tagger.name == "GN2v01"){
+    ATH_MSG_ERROR("For GN2v01 tagger, there is a new tau claass in the NN output. Please update your getTaggerWeight() to getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau)");
+    return CorrectionCode::Error;
+  } else {
+    return getTaggerWeight(pb, pc, pu, tagweight, m_useCTag, 0.);
+  }
+}
+
 CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau) const{
   return getTaggerWeight(pb, pc, pu, tagweight, m_useCTag, ptau);
 }
@@ -511,6 +520,16 @@ asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double tagg
   return acceptData;
 }
 
+asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double pb, double pc, double pu) const
+{
+  if (m_tagger.name == "GN2v01"){
+    asg::AcceptData acceptData (&m_acceptinfo);
+    ATH_MSG_ERROR("For GN2v01 tagger, there is a new tau claass in the NN output. Please update the accept() to accept(double pT, double eta, double pb, double pc, double pu, double ptau)");
+    return acceptData;
+  } else {
+    return accept(pT, eta, pb, pc, pu, 0.);
+  }
+}
 
 asg::AcceptData BTaggingSelectionTool::accept(double pT, double eta, double pb, double pc, double pu, double ptau) const
  {
