@@ -43,6 +43,7 @@ atlas_add_executable( getLumi
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
+atlas_install_joboptions( share/*.txt )
 
 if( NOT XAOD_ANALYSIS )
    atlas_add_test( LBDurationCondAlg_test

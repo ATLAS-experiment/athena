@@ -296,7 +296,7 @@ class TriggerLeg:
 
         if tag1 == tag2: return -1
         #lower mv2 and deltaR/deltaZ/deltaPhi values are tighter, put a minus sign to trick it
-        inverseCuts = ("mv2c","dr","dz","dphi","dl1d","dl1r","gn1")
+        inverseCuts = ("mv2c","dr","dz","dphi","dl1d","dl1r","gn1","gn2")
         for cut in inverseCuts:
             tag1 = tag1.replace(cut,cut+"-")
             tag2 = tag2.replace(cut,cut+"-")

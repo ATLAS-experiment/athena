@@ -258,7 +258,8 @@ class ExecStep(Step):
             if self.costmon:
                 self.flags.append('Trigger.CostMonitoring.monitorAllEvents=True')
             if self.fpe_auditor:
-                self.flags.append('Exec.FPE=1')
+                if self._isCA:  # FIXME: this prevents flags breaking _tf command line (ATR-28872)
+                    self.flags.append('Exec.FPE=1')
 
         # Run config-only if requested
         if self.config_only :

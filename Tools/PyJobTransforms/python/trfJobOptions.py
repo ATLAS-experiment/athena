@@ -49,23 +49,23 @@ class JobOptionsTemplate(object):
         self._runArgsName = runArgsName
         self._runArgsFile = 'runargs.' + self._exe.name + '.py'
 
+    ## @brief Check for skeleton consistency
+    def consistencyCheck(self):
+        if self._exe._isCAEnabled():
+            if self._exe._skeletonCA is None:
+                errMsg = "ComponentAccumulator requested but this transform does not supply a ComponentAccumulator-based skeleton file"
+                msg.error(errMsg)
+                raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_RUNARGS_ERROR'),errMsg)
+        else: # not self._exe._isCAEnabled():
+            if self._exe._skeleton is None:
+                errMsg = "Legacy configuration requested but this transform does not supply a legacy skeleton file"
+                msg.error(errMsg)
+                raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_RUNARGS_ERROR'),errMsg)
 
     ## @brief Write the runArgs Job Options file
     def writeRunArgs(self, input = dict(), output = dict()):
         msg.info('Writing runArgs to file \"%s\"', self._runArgsFile)
 
-        ## Check consistency btw --CA flag and provided skeletons:
-        if self._exe._isCAEnabled():
-            if self._exe._skeletonCA is None:
-                errMsg = "Got the --CA option but this transform doesn't supply a ComponentAccumulator-based skeleton file"
-                msg.error(errMsg)
-                raise  trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_RUNARGS_ERROR'),errMsg)
-        else: # not self._exe._isCAEnabled():
-            if self._exe._skeleton is None:
-                errMsg = "No --CA option given, but this transform doesn't supply old-style skeleton file"
-                msg.error(errMsg)
-                raise  trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_EXEC_RUNARGS_ERROR'),errMsg)
-        
         with open(self._runArgsFile, 'w') as runargsFile:
             try:
                 if self._exe._isCAEnabled():
@@ -305,6 +305,8 @@ class JobOptionsTemplate(object):
     #  @param output Output file list
     #  @return List of runargs and skeletons to be processed by athena
     def getTopOptions(self, input = dict(), output = dict()):
+        # Consistency check
+        self.consistencyCheck()
         # Update the output name
         self._runArgsFile = 'runargs.' + self._exe.name + '.py'
         # First Make the runArgs file:
