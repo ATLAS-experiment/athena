@@ -12,16 +12,12 @@ def CsvMdtDriftCircleDumpCfg(flags, name="CsvDriftCircleDumper", **kwargs):
 
 def CsvMuonSimHitDumpCfg(flags, name="CsvMuonSimHitDumper", **kwargs):
     result = ComponentAccumulator()
-    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
-    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonSimHitCsvDumperAlg(name = name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
 def CsvMuonStripDumpCfg(flags, name="CsvStripHitDumper", **kwargs):
     result = ComponentAccumulator()
-    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
-    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonStripCsvDumperAlg(name = name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

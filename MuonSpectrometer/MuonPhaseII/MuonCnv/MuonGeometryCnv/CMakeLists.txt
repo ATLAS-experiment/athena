@@ -9,6 +9,6 @@ atlas_add_component( MuonGeometryCnv
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib MuonAlignmentDataR4
-                                     MuonReadoutGeometryR4 MuonReadoutGeometry MuonStationGeoHelpersLib StoreGateLib TrkSurfaces)
+                                     MuonReadoutGeometryR4 MuonReadoutGeometry StoreGateLib TrkSurfaces)
 
 atlas_install_python_modules( python/*.py)

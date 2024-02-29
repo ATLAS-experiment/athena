@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonDetectorBuilderTool.h"
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
+
 
 #include "Acts/Geometry/CutoutCylinderVolumeBounds.hpp"
 #include "Acts/Geometry/CylinderVolumeBounds.hpp"
@@ -21,7 +23,7 @@
 
 
 
-
+using MuonChamberSet = MuonGMR4::MuonDetectorManager::MuonChamberSet;
 namespace ActsTrk {
 
     MuonDetectorBuilderTool::MuonDetectorBuilderTool( const std::string& type, const std::string& name, const IInterface* parent ):
@@ -30,14 +32,14 @@ namespace ActsTrk {
     }
 
     StatusCode MuonDetectorBuilderTool::initialize() {
-        ATH_CHECK(m_chambTool.retrieve());
+        ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_idHelperSvc.retrieve());
         return StatusCode::SUCCESS;
     }
 
     Acts::Experimental::DetectorComponent MuonDetectorBuilderTool::construct(const Acts::GeometryContext& context) const {
         ATH_MSG_DEBUG("Building Muon Detector Volume");
-        MuonGMR4::ChamberSet chambers = m_chambTool->buildChambers();
+        const MuonChamberSet chambers = m_detMgr->getAllChambers();
 
         const ActsGeometryContext* gctx = context.get<const ActsGeometryContext* >();
         std::vector< std::shared_ptr< Acts::Experimental::DetectorVolume > > detectorVolumeBoundingVolumes{};
@@ -45,14 +47,17 @@ namespace ActsTrk {
         std::vector<std::shared_ptr<Acts::Surface> > surfaces = {};
 
         auto portalGenerator = Acts::Experimental::defaultPortalGenerator();
-        for(const MuonGMR4::MuonChamber& chamber : chambers){
-            std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds = chamber.bounds();
+        for(const MuonGMR4::MuonChamber* chamber : chambers) {
+            std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds = chamber->bounds();
             std::shared_ptr<Acts::Experimental::DetectorVolume> detectorVolume = Acts::Experimental::DetectorVolumeFactory::construct(
-                portalGenerator, gctx->context(), std::to_string(chamber.stationName())+"_"+std::to_string(chamber.stationEta())+"_"+std::to_string(chamber.stationPhi()), chamber.localToGlobalTrans(*gctx), 
+                portalGenerator, gctx->context(), std::to_string(chamber->stationName())+"_"+
+                                                  std::to_string(chamber->stationEta())+"_"+
+                                                  std::to_string(chamber->stationPhi()), 
+                                                   chamber->localToGlobalTrans(*gctx), 
                 bounds, Acts::Experimental::tryAllPortals());
             if(m_dumpVisual){
                 //If we want to view each volume independently
-                const MuonGMR4::MuonChamber::ReadoutSet readOut = chamber.readOutElements();
+                const MuonGMR4::MuonChamber::ReadoutSet readOut = chamber->readOutElements();
                 Acts::ObjVisualization3D helper;
                 Acts::GeometryView3D::drawDetectorVolume(helper, *detectorVolume, gctx->context());
                 helper.write(m_idHelperSvc->toStringDetEl(readOut[0]->identify())+".obj");

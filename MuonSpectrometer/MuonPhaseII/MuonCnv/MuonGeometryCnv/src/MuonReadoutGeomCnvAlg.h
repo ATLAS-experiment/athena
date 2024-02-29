@@ -11,7 +11,6 @@
 
 #include <MuonReadoutGeometry/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 
@@ -36,8 +35,6 @@ class MuonReadoutGeomCnvAlg : public AthReentrantAlgorithm {
                             PVLink world) const;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
-        PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
 
         SG::WriteCondHandleKey<MuonGM::MuonDetectorManager> m_writeKey{this, "WriteKey", "MuonDetectorManager"};
         

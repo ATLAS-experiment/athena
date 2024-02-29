@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCONDALGR4_ACTSMUONALIGNCONDALG_H
 #define MUONCONDALGR4_ACTSMUONALIGNCONDALG_H
@@ -8,7 +8,6 @@
 #include <StoreGate/CondHandleKeyArray.h>
 #include <StoreGate/WriteCondHandle.h>
 
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <ActsGeometryInterfaces/RawGeomAlignStore.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
@@ -85,8 +84,6 @@ private:
     Gaudi::Property<std::string> m_keyToken{this, "CondKeyToken","ActsAlignContainer",
                                             "Common name token of all written alignment objects (e.g.) MdtActsAlignContainer"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    
-    PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
 
     const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 

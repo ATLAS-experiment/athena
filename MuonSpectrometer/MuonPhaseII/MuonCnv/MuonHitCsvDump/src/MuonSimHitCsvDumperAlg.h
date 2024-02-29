@@ -11,7 +11,6 @@
 #include <StoreGate/ReadHandleKeyArray.h>
 
 #include "xAODMuonSimHit/MuonSimHitContainer.h"
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 
 /** The CsvMuonSimHitDumper reads a Simulation Hit container for muons and dumps information to csv files**/
@@ -38,7 +37,6 @@ class MuonSimHitCsvDumperAlg: public AthAlgorithm {
 
     /// Access to the readout geometry
    const MuonGMR4::MuonDetectorManager* m_r4DetMgr{nullptr};
-   PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
 
    size_t m_event{0};
 };

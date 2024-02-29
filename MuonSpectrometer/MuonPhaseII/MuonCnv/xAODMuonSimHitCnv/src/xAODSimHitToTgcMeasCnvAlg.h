@@ -15,7 +15,6 @@
 
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 
 #include <AthenaKernel/IAthRNGSvc.h>
 #include <CLHEP/Random/RandomEngine.h>
@@ -54,8 +53,6 @@ class xAODSimHitToTgcMeasCnvAlg : public AthReentrantAlgorithm {
 
         ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  // Random number service
         Gaudi::Property<std::string> m_streamName{this, "RandomStream", "TgcSimHitForkLifting"};
-
-        PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
 
 
         mutable std::array<std::atomic<unsigned>, 2> m_allHits ATLAS_THREAD_SAFE{};

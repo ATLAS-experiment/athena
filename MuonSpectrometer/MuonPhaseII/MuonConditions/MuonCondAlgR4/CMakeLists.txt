@@ -16,7 +16,7 @@ atlas_add_library( MuonCondAlgR4Lib
                    PRIVATE_INCLUDE_DIRS 
                    LINK_LIBRARIES  AthenaBaseComps AthenaKernel Identifier GaudiKernel  
                                    StoreGateLib MuonIdHelpersLib MuonAlignmentDataR4 PathResolver 
-                                   MuonStationGeoHelpersLib nlohmann_json::nlohmann_json MuonReadoutGeometryR4
+                                   nlohmann_json::nlohmann_json MuonReadoutGeometryR4
                    PRIVATE_LINK_LIBRARIES EventInfo )
 
 atlas_add_component( MuonCondAlgR4

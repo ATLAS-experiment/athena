@@ -16,11 +16,16 @@
 #include <ActsGeoUtils/SurfaceCache.h>
 #include <ActsGeometryInterfaces/IDetectorElement.h>
 
+#include <GeoModelUtilities/TransientConstSharedPtr.h>
+
 #ifndef SIMULATIONBASE
 #   include "Acts/Surfaces/LineBounds.hpp"
 #   include "Acts/Surfaces/PlanarBounds.hpp"
 #endif
 namespace MuonGMR4 {
+
+class MuonChamber;
+
 ///   The MuonReadoutElement is an abstract class representing the geometry
 ///   representing the muon detector. The segmentation of the detectors varies
 ///   along the MS subsystems and is documented further in the specific sub
@@ -30,7 +35,6 @@ namespace MuonGMR4 {
 ///   from the RAW geometry provided by GeoModelSvc. The class below is pure
 ///   virtual and implements the minimal set of methods shared by all muon
 ///   detector technolgies.
-
 class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, public ActsTrk::IDetectorElement {
 
    public:
@@ -38,7 +42,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /// around
     struct defineArgs {
         /// Pointer to the underlying physical volume in GeoModel
-        GeoVFullPhysVol* physVol{nullptr};
+        GeoIntrusivePtr<GeoVFullPhysVol> physVol{nullptr};
         /// Pointer to the alignable transformation 
         const GeoAlignableTransform* alignTransform{nullptr};
         /// chamber design name as it's occuring in the parameter book tables E.g. BMS5, RPC10, etc.
@@ -148,6 +152,11 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
     /// Returns the pointer associated to a certain wire / plane
     std::shared_ptr<Acts::Surface> surfacePtr(const IdentifierHash& hash) const;
+
+    /// Set's the link to the MuonChamber object to which the MuonReadoutElement belongs to
+    void setChamberLink(GeoModel::TransientConstSharedPtr<MuonChamber> chamber);
+
+    const MuonChamber* getChamber() const;
 #else
     /// In AthSimulation there's no Acts::DetectorElement which is declaring this method
     /// in its interface.
@@ -196,6 +205,8 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 #ifndef SIMULATIONBASE
     ///Cache of all associated surfaces
     ActsTrk::SurfaceCacheSet m_surfaces{};
+    /// Pointer to the associated MuonChamber
+    GeoModel::TransientConstSharedPtr<MuonChamber> m_chambLink{};
 #endif
 };
 }  // namespace MuonGMR4

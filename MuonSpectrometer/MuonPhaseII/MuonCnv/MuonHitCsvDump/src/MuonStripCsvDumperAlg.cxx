@@ -3,6 +3,7 @@
 */
 
 #include "MuonStripCsvDumperAlg.h"
+#include "MuonReadoutGeometryR4/MuonChamber.h"
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
@@ -17,7 +18,6 @@ MuonStripCsvDumperAlg::MuonStripCsvDumperAlg(const std::string& name, ISvcLocato
  StatusCode MuonStripCsvDumperAlg::initialize() {
    ATH_CHECK(m_stripContainerKey.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
-   ATH_CHECK(m_surfaceProvTool.retrieve());
    return StatusCode::SUCCESS;
  }
 
@@ -47,16 +47,16 @@ MuonStripCsvDumperAlg::MuonStripCsvDumperAlg(const std::string& name, ISvcLocato
    for(const xAOD::UncalibratedMeasurement* strip : *readHandle){
       Amg::Vector3D stripPos{Amg::Vector3D::Zero()};      
       const Identifier measId{(Identifier::value_type)strip->identifier()};
-
+      // const Amg::Transform toChambFrame
       if (strip->type() == xAOD::UncalibMeasType::RpcStripType) {
          const xAOD::RpcStrip* rpcStrip{static_cast<const xAOD::RpcStrip*>(strip)};
          const IdentifierHash hash{rpcStrip->measurementHash()};
-         stripPos = m_surfaceProvTool->globalToChambCenter(gctx, measId) * 
+         stripPos = rpcStrip->readoutElement()->getChamber()->globalToLocalTrans(gctx) * 
                     rpcStrip->readoutElement()->stripPosition(gctx, hash);
       } else if (strip->type() == xAOD::UncalibMeasType::TgcStripType) {
         const xAOD::TgcStrip* tgcStrip{static_cast<const xAOD::TgcStrip*>(strip)};
         const IdentifierHash hash{tgcStrip->measurementHash()};
-        stripPos = m_surfaceProvTool->globalToChambCenter(gctx, measId) * 
+        stripPos = tgcStrip->readoutElement()->getChamber()->globalToLocalTrans(gctx) * 
                    tgcStrip->readoutElement()->channelPosition(gctx, hash);                
       } else {
         ATH_MSG_FATAL("Readout type "<<m_idHelperSvc->toString(measId)

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonReadoutGeometryR4/MuonReadoutElement.h"
-
+#include "MuonReadoutGeometryR4/MuonChamber.h"
 #ifndef SIMULATIONBASE
 #    include "Acts/Surfaces/StrawSurface.hpp"
 #    include "Acts/Surfaces/PlaneSurface.hpp"
@@ -93,6 +93,11 @@ bool MuonReadoutElement::storeAlignment(RawGeomAlignStore& store) const{
     for (const std::unique_ptr<ActsTrk::TransformCache>& cache : m_globalToLocalCaches){
         cache->storeAlignment(store);
     }
+#ifndef SIMULATIONBASE
+    if (m_chambLink && m_chambLink->readOutElements()[0] == this){
+        m_chambLink->storeAlignment(store);
+    }
+#endif
     return true;
 }
 const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx) const {
@@ -163,6 +168,13 @@ StatusCode MuonReadoutElement::planeSurfaceFactory(const IdentifierHash& hash, s
     (*insert_itr.first)->setSurface(Acts::Surface::makeShared<Acts::PlaneSurface>(pBounds, **insert_itr.first));
     return StatusCode::SUCCESS;
 }
+void MuonReadoutElement::setChamberLink(GeoModel::TransientConstSharedPtr<MuonChamber> chamber) {
+    m_chambLink = std::move(chamber);
+}
+const MuonChamber* MuonReadoutElement::getChamber() const {
+    return m_chambLink.get();
+}
+
 #endif
 
 }  // namespace MuonGMR4

@@ -8,8 +8,6 @@ def MuonReadoutGeometryCnvAlgCfg(flags,name="MuonDetectorManagerCondAlg", **kwar
     result = ComponentAccumulator()
     from MuonCondAlgR4.ConditionsConfig import ActsGeomContextAlgCfg
     result.merge(ActsGeomContextAlgCfg(flags))
-    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
-    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonReadoutGeomCnvAlg(name=name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result

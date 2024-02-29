@@ -8,7 +8,6 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <StoreGate/ReadHandleKey.h>
 #include <xAODMeasurementBase/UncalibratedMeasurementContainer.h>
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 
 /** The MuonStripCsvDumperAlg reads the RpcStripContainer and dumps information to csv files
  *  The files are used for the algorithm development in acts **/
@@ -30,9 +29,6 @@ class MuonStripCsvDumperAlg: public AthAlgorithm {
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    /// Access to the readout geometry
-    PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
-   
     Gaudi::Property<std::string> m_preFix{this, "PreFix", "", "Prefix to the csv file name"};
     size_t m_event{0};
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_GEOMODELSTGCTEST_H
 #define MUONGEOMODELTESTR4_GEOMODELSTGCTEST_H
@@ -8,7 +8,6 @@
 #include <set>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
@@ -35,7 +34,6 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm{
 
       SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
-      PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
       /// Set of stations to be tested
       std::set<Identifier> m_testStations{};
   

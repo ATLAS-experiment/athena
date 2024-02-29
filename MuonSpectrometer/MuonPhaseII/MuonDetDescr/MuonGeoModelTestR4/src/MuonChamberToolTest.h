@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
 #define MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
 
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <ActsGeometryInterfaces/IDetectorVolumeSvc.h>
@@ -48,8 +47,6 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
 
         ServiceHandle<ActsTrk::IDetectorVolumeSvc> m_detVolSvc{this,"DetectorVolumeSvc", "DetectorVolumeSvc"};
         
-        PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_chambTool{this, "LayerGeoTool", "" };
-
         const MuonDetectorManager* m_detMgr{nullptr};
 
 };

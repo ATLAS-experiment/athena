@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
@@ -8,8 +8,31 @@
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
+#include "MuonReadoutGeometryR4/MuonChamber.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
+
+namespace {
+    template <class T>
+    using ElementStorage = MuonGMR4::MuonDetectorManager::ElementStorage<T>;
+    /// Helper function to copy the radout elements from a technology into the 
+    /// vector of all readout elements.
+    template <class ReadOutEleStoreType,
+              class ReadoutEleReturnType> void insert(const ElementStorage<ReadOutEleStoreType>& eleStore,
+                                                      std::vector<ReadoutEleReturnType>& returnVec) {
+        returnVec.reserve(returnVec.capacity() + eleStore.size());
+        for (const auto& ele : eleStore) {
+            if (ele) returnVec.push_back(ele.get());
+        }
+    }
+    template <class ReadOutEleType,
+              class ReadOutEleReturnType> void insert(std::vector<ReadOutEleType*>&& eleStore,
+                                                      std::vector<ReadOutEleReturnType*>& returnVec) {
+        returnVec.insert(returnVec.end(), 
+                        std::make_move_iterator(eleStore.begin()),
+                        std::make_move_iterator(eleStore.end()));
+    }
+}
 
 #define WRITE_SETTER(ELE_TYPE, SETTER, STORAGE_VEC)                                 \
     StatusCode MuonDetectorManager::SETTER(ElementPtr<ELE_TYPE> element) {          \
@@ -37,24 +60,37 @@
                                                                                     \
     std::vector<const ELE_TYPE*> MuonDetectorManager::getAll##ELE_TYPE##s() const { \
          std::vector<const ELE_TYPE*> allElements{};                                \
-         allElements.reserve(STORAGE_VEC.size());                                   \
-         for (const std::unique_ptr<ELE_TYPE>& ele : STORAGE_VEC) {                 \
-             if (ele) allElements.push_back(ele.get());                             \
-         }                                                                          \
+         insert(STORAGE_VEC, allElements);                                          \
+         return allElements;                                                        \
+    }                                                                               \
+                                                                                    \
+    std::vector<ELE_TYPE*> MuonDetectorManager::getAll##ELE_TYPE##s() {             \
+         std::vector<ELE_TYPE*> allElements{};                                      \
+         insert(STORAGE_VEC, allElements);                                          \
          return allElements;                                                        \
     }
-
-namespace {
-    /// Helper function to copy the radout elements from a technology into the 
-    /// vector of all readout elements.
-    template <class ReadoutEle> void insert(std::vector<const ReadoutEle*>&& tech_eles,
-                                            std::vector<const MuonGMR4::MuonReadoutElement*>& all_eles){
-        all_eles.reserve(all_eles.capacity() + tech_eles.size());
-        all_eles.insert(all_eles.end(), 
-                        std::make_move_iterator(tech_eles.begin()), 
-                        std::make_move_iterator(tech_eles.end()));
-    }
+#define WRITE_ALLGETTER(TYPE) \
+    std::vector<TYPE MuonReadoutElement*> MuonDetectorManager::getAllReadoutElements() TYPE { \
+        std::vector<TYPE MuonReadoutElement*> allEles{};                                      \
+        insert(getAllMdtReadoutElements(), allEles);                                          \
+        insert(getAllRpcReadoutElements(), allEles);                                          \
+        insert(getAllTgcReadoutElements(), allEles);                                          \
+        insert(getAllMmReadoutElements(), allEles);                                           \
+        insert(getAllsTgcReadoutElements(), allEles);                                         \
+        return allEles;                                                                       \
+    }                                                                                         \
+    TYPE MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifier& id) TYPE { \
+    if (m_idHelperSvc->isMdt(id)) return getMdtReadoutElement(id);                               \
+    else if (m_idHelperSvc->isRpc(id)) return getRpcReadoutElement(id);                          \
+    else if (m_idHelperSvc->isTgc(id)) return getTgcReadoutElement(id);                          \
+    else if (m_idHelperSvc->issTgc(id)) return getsTgcReadoutElement(id);                        \
+    else if (m_idHelperSvc->isMM(id)) return getMmReadoutElement(id);                            \
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Not a muon detector element "                     \
+                    <<m_idHelperSvc->toString(id));                                              \
+    return nullptr;                                                                              \
 }
+
+
 namespace MuonGMR4 {
 MuonDetectorManager::MuonDetectorManager()
     : AthMessaging{"MuonDetectorManagerR4"} {
@@ -64,15 +100,9 @@ MuonDetectorManager::MuonDetectorManager()
     }
     setName("MuonR4");
 }
- std::vector<const MuonReadoutElement*> MuonDetectorManager::getAllReadoutElements() const {
-    std::vector<const MuonReadoutElement*> allEles{};
-    insert(getAllMdtReadoutElements(), allEles);
-    insert(getAllTgcReadoutElements(), allEles);
-    insert(getAllRpcReadoutElements(), allEles);
-    insert(getAllMmReadoutElements(), allEles);
-    insert(getAllsTgcReadoutElements(), allEles);
-    return allEles;
-}
+
+WRITE_ALLGETTER(const)
+WRITE_ALLGETTER( )
 ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
 ADD_DETECTOR(TgcReadoutElement, m_tgcEles);
 ADD_DETECTOR(RpcReadoutElement, m_rpcEles);
@@ -101,16 +131,26 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
     if (!m_mmEles.empty()) types.push_back(ActsTrk::DetectorType::Mm);
     return types;
 }
-const MuonReadoutElement* MuonDetectorManager::getReadoutElement(const Identifier& id) const {
-    if (m_idHelperSvc->isMdt(id)) return getMdtReadoutElement(id);
-    else if (m_idHelperSvc->isRpc(id)) return getRpcReadoutElement(id);
-    else if (m_idHelperSvc->isTgc(id)) return getTgcReadoutElement(id);
-    else if (m_idHelperSvc->issTgc(id)) return getsTgcReadoutElement(id);
-    else if (m_idHelperSvc->isMM(id)) return getMmReadoutElement(id);
-    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Not a muon detector element "<<m_idHelperSvc->toString(id));
-    return nullptr;
-}
+
+#ifndef SIMULATIONBASE
+    const MuonChamber* MuonDetectorManager::getChamber(const Identifier& channelId) const {
+        const MuonReadoutElement* re = getReadoutElement(channelId);
+        return re ? re->getChamber() : nullptr;
+    }
+    std::set<const MuonChamber*> MuonDetectorManager::getAllChambers() const{
+         std::set<const MuonChamber*> allChambers{};
+         std::vector<const MuonReadoutElement*> allREs{getAllReadoutElements()};
+         for (const MuonReadoutElement* re : allREs) {
+            if (re->getChamber()) {
+                allChambers.insert(re->getChamber());
+            }
+         }
+         return allChambers;
+    }
+#endif
+
 
 }  // namespace MuonGMR4
 #undef WRITE_SETTER
 #undef ADD_DETECTOR
+#undef WRITE_ALLGETTER

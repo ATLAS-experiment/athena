@@ -7,6 +7,7 @@
 #include <MuonCalibEvent/MdtCalibHit.h>
 #include <xAODMuonPrepData/MdtDriftCircleAuxContainer.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/ReadCondHandle.h>
 #include <StoreGate/WriteHandle.h>
@@ -21,7 +22,6 @@ xAODSimHitToMdtMeasCnvAlg::xAODSimHitToMdtMeasCnvAlg(const std::string& name,
         AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode xAODSimHitToMdtMeasCnvAlg::initialize(){
-    ATH_CHECK(m_surfaceProvTool.retrieve());
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -66,7 +66,7 @@ StatusCode xAODSimHitToMdtMeasCnvAlg::execute(const EventContext& ctx) const {
         prd->setReadoutElement(readOutEle);
 
         const Amg::Vector3D globTubePos = readOutEle->center(gctx, prd->measurementHash());
-        prd->setTubePosInStation(xAOD::toStorage(m_surfaceProvTool->globalToChambCenter(gctx, hitId) * globTubePos));
+        prd->setTubePosInStation(xAOD::toStorage(readOutEle->getChamber()->globalToLocalTrans(gctx) * globTubePos));
         /// extract the resolution from the Mdt calibration data
         bool bound{false};
         const MuonCalib::MdtFullCalibData* tubeContants = mdtCalibData->getCalibData(hitId, msgStream());

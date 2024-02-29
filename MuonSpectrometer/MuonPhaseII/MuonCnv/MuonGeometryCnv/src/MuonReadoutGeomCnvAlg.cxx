@@ -8,7 +8,7 @@
 #include <StoreGate/ReadCondHandle.h>
 #include <GeoModelKernel/GeoFullPhysVol.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
-#include <MuonStationGeoHelpers/MuonChamber.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <MuonAlignmentDataR4/MdtAlignmentStore.h>
 #include <MuonReadoutGeometry/MuonStation.h>
 #include <MuonReadoutGeometry/MdtReadoutElement.h>
@@ -32,7 +32,6 @@ StatusCode MuonReadoutGeomCnvAlg::initialize()  {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_geoCtxKey.initialize());
-    ATH_CHECK(m_surfaceProvTool.retrieve());
     ATH_CHECK(detStore()->retrieve(m_detMgr));
     return StatusCode::SUCCESS;
 }
@@ -78,7 +77,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
         MuonGM::MuonStation* station = mgr->getMuonStation(stName, m_idHelperSvc->stationEta(reId), m_idHelperSvc->stationPhi(reId));
         
         if (!station) {
-            const MuonGMR4::MuonChamber* chamber = m_surfaceProvTool->getChamber(reId);
+            const MuonGMR4::MuonChamber* chamber = m_detMgr->getChamber(reId);
             if (!chamber) {
                 ATH_MSG_FATAL("No chamber is available for "<<m_idHelperSvc->toStringDetEl(reId));
                 return StatusCode::FAILURE;

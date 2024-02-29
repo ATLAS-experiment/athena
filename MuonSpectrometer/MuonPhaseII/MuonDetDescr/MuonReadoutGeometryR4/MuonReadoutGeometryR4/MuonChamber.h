@@ -1,9 +1,10 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONSTATIONGEOHELPERS_MUONCHAMBER_H
-#define MUONSTATIONGEOHELPERS_MUONCHAMBER_H
+#ifndef MUONREADOUTGEOMETRYR4_MUONCHAMBER_H
+#define MUONREADOUTGEOMETRYR4_MUONCHAMBER_H
 
+#ifndef SIMULATIONBASE
 /**
  *  A muon chamber is a collection of readout elements belonging to the same station.
  *  In the barrel, it's typically 2 Mdt multi layers + a couple of RPC layers, while the
@@ -27,8 +28,6 @@ namespace MuonGMR4 {
             struct defineArgs{
                 /// List of readout elements in the chamber
                 ReadoutSet readoutEles{};
-                /// Pointer to the physical volume associated with the chamber.
-                PVConstLink chamberVol{nullptr};
                 /// Definition of the surrounding box
                 double halfXLong{0.};
                 double halfXShort{0.};
@@ -77,9 +76,6 @@ namespace MuonGMR4 {
             std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
 
             const defineArgs& parameters() const;
-            /// Returns the physical volume that's associated with the chamber
-            PVConstLink physVol() const;
-
         private:
            defineArgs m_args{};
            
@@ -95,20 +91,13 @@ namespace MuonGMR4 {
            }};
 
     };
-
-    bool operator<(const MuonChamber& a, const MuonChamber& b);
-    bool operator<(const Identifier& a, const MuonChamber& b);
-    bool operator<(const MuonChamber& a, const Identifier& b);
-    bool operator<(const MuonReadoutElement& a, const MuonChamber& b);
-    bool operator<(const MuonChamber& a, const MuonReadoutElement& b);
-    using ChamberSet = std::set<MuonChamber, std::less<>>;
-
-    std::ostream& operator<<(std::ostream& ostr, 
+    
+    std::ostream& operator<<(std::ostream& ostr,
                              const MuonChamber::defineArgs& args);
 
     std::ostream& operator<<(std::ostream& ostr,
                              const MuonChamber& chamber);
 
 }
-
+#endif
 #endif

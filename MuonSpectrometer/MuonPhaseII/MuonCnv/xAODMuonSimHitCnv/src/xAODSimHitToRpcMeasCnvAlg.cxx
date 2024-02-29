@@ -6,6 +6,8 @@
 
 #include <xAODMuonPrepData/RpcStripAuxContainer.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
+
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/ReadCondHandle.h>
 #include <StoreGate/WriteHandle.h>
@@ -26,7 +28,6 @@ xAODSimHitToRpcMeasCnvAlg::xAODSimHitToRpcMeasCnvAlg(const std::string& name,
         AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode xAODSimHitToRpcMeasCnvAlg::initialize(){
-    ATH_CHECK(m_surfaceProvTool.retrieve());
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -54,11 +55,9 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
     const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
     CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
 
-    double hitTime{0.};
-    const MuonGMR4::RpcReadoutElement* readOutEle{nullptr};
-
     using CheckVector2D = MuonGMR4::CheckVector2D;
-    auto digitizeHit = [&] (const double locX,
+    auto digitizeHit = [&] (const double hitTime,
+                            const double locX,
                             const MuonGMR4::StripDesignPtr& designPtr,
                             const Identifier& hitId,                            
                             bool measPhi) {
@@ -115,16 +114,16 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
         xAOD::MeasMatrix<1> cov{uncert * uncert};
         prd->setMeasurement<1>(m_idHelperSvc->detElementHash(prdId), 
                                std::move(lPos), std::move(cov));
+        const MuonGMR4::RpcReadoutElement* readOutEle = m_DetMgr->getRpcReadoutElement(prdId);
         prd->setReadoutElement(readOutEle);
         prd->setStripNumber(stripNumber);
         prd->setGasGap(id_helper.gasGap(prdId));
         prd->setDoubletPhi(id_helper.doubletPhi(prdId));
         prd->setMeasuresPhi(id_helper.measuresPhi(prdId));
-        prd->setReadoutElement(readOutEle);
         prd->setTime(hitTime);
         prd->setAmbiguityFlag(0);
         const Amg::Vector3D strip3D  = lPos.x() * Amg::Vector3D::UnitX();
-        const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx,prdId)};
+        const Amg::Transform3D& globToCenter{readOutEle->getChamber()->globalToLocalTrans(gctx)};
         prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D));
     };
 
@@ -132,12 +131,12 @@ StatusCode xAODSimHitToRpcMeasCnvAlg::execute(const EventContext& ctx) const {
         const Identifier hitId = simHit->identify();
         // ignore radiation for now
         if (std::abs(simHit->pdgId()) != 13) continue;
-        readOutEle = m_DetMgr->getRpcReadoutElement(hitId);
+        const MuonGMR4::RpcReadoutElement* readOutEle = m_DetMgr->getRpcReadoutElement(hitId);
         const Amg::Vector3D locSimHitPos{xAOD::toEigen(simHit->localPosition())};
-        hitTime = simHit->globalTime() - invC *(readOutEle->localToGlobalTrans(gctx, hitId) * locSimHitPos).mag();
+        const double hitTime = simHit->globalTime() - invC *(readOutEle->localToGlobalTrans(gctx, hitId) * locSimHitPos).mag();
 
-        digitizeHit(locSimHitPos.x(), readOutEle->getParameters().etaDesign, hitId, false);
-        digitizeHit(locSimHitPos.y(), readOutEle->getParameters().phiDesign, hitId, true);
+        digitizeHit(hitTime, locSimHitPos.x(), readOutEle->getParameters().etaDesign, hitId, false);
+        digitizeHit(hitTime, locSimHitPos.y(), readOutEle->getParameters().phiDesign, hitId, true);
         
     }
     return StatusCode::SUCCESS;

@@ -1,10 +1,11 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODSimHitToMmMeasCnvAlg.h"
 
 #include <MuonReadoutGeometryR4/MmReadoutElement.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <xAODMuonPrepData/MMClusterAuxContainer.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/ReadCondHandle.h>
@@ -20,7 +21,6 @@ xAODSimHitToMmMeasCnvAlg::xAODSimHitToMmMeasCnvAlg(const std::string& name,
         AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode xAODSimHitToMmMeasCnvAlg::initialize(){
-    ATH_CHECK(m_surfaceProvTool.retrieve());
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -106,7 +106,7 @@ StatusCode xAODSimHitToMmMeasCnvAlg::execute(const EventContext& ctx) const {
         xAOD::MeasMatrix<1> lCov{uncert*uncert}; 
         prd->setMeasurement(m_idHelperSvc->detElementHash(clusId) ,lClusterPos, lCov);
         const Amg::Vector3D strip3D = lClusterPos.x() * Amg::Vector3D::UnitX();
-        const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx, clusId)};
+        const Amg::Transform3D& globToCenter{readOutEle->getChamber()->localToGlobalTrans(gctx)};
         prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx, prd->layerHash()) * strip3D)); 
 
     }

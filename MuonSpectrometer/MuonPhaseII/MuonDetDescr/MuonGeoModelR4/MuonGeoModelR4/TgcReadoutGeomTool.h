@@ -27,6 +27,8 @@ class TgcReadoutGeomTool : public AthAlgTool,
     StatusCode buildReadOutElements(MuonDetectorManager &mgr) override final;
 
    private:
+    /// Map the Tgc sectors to the classical Muon System sectors
+    StatusCode writeSectorMapping(const MuonDetectorManager& mgr) const;
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                           "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

@@ -17,7 +17,6 @@ AthHistogramAlgorithm(name,pSvcLocator) {}
 StatusCode GeoModelsTgcTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_geoCtxKey.initialize());    
-    ATH_CHECK(m_surfaceProvTool.retrieve());
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
 
