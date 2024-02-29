@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_EXTENDEDEVENTCONTEXT_H
@@ -14,6 +14,9 @@ class TrigRoiDescriptor; //!< Forward declaration
 namespace SG {
 class ThinningCache;
 }
+namespace std { namespace pmr {
+class memory_resource;
+}}
 
 namespace Atlas {
 
@@ -59,11 +62,23 @@ namespace Atlas {
     void setThinningCache (const SG::ThinningCache* cache) { m_thinningCache = cache; }
     const SG::ThinningCache* thinningCache() const { return m_thinningCache; }
 
+
+    /**
+     * @brief Memory resource.
+     *        Per-slot default memory resource to use with
+     *        polymorphic_allocator in contexts where we can't specify
+     *        it directly (for example, when ROOT is reading an object).
+     */
+    void setMemResource (std::pmr::memory_resource* memResource) { m_memResource = memResource; }
+    std::pmr::memory_resource* memResource ATLAS_NOT_CONST_THREAD_SAFE () const { return m_memResource; }
+
+
   private:
     IProxyDict* m_proxy {nullptr};
     EventIDBase::number_type m_conditionsRun {EventIDBase::UNDEFNUM};
     const TrigRoiDescriptor* m_roi {nullptr};
     const SG::ThinningCache* m_thinningCache {nullptr};
+    std::pmr::memory_resource* m_memResource;
   };
 
 
