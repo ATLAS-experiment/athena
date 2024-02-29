@@ -130,7 +130,7 @@ if __name__=='__main__':
              ReadDigits = False
    
    print("RUN CONFIGURATION: ReadDigits =", ReadDigits)
-   
+
    ## And now CA
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    flags = initConfigFlags()
@@ -418,7 +418,7 @@ if __name__=='__main__':
    if RunType == 0 and CONFIG!="LArDTMon":
       acc.getEventAlgo("LArRawDataReadingAlg").LArRawChannelKey="" 
 
-   #example for blocking the folder not filled during cosmics
+   # example for blocking the folder not filled during cosmics
    cil=acc.getCondAlgo('CondInputLoader')
    iovdbsvc=acc.getService('IOVDbSvc') 
    folder='/TRIGGER/LUMI/LBLB'
@@ -426,10 +426,15 @@ if __name__=='__main__':
       if (iovdbsvc.Folders[i].find(folder)>=0):
          del iovdbsvc.Folders[i]
          break
-   for i in range(0, len(cil.Load)):
-      if (cil.Load[i][-1] == folder):
-         del cil.Load[i]
+
+   remove_folder = False
+   for cil_Loadval in cil.Load:
+      if folder in cil_Loadval:
+         print(f"Removing {cil_Loadval} from cil/Load")
+         remove_folder = True
          break
+   if remove_folder: cil.Load.remove(cil_Loadval)
+
    if flags.DQ.enableLumiAccess:
       lbd = acc.getCondAlgo('LBDurationCondAlg')
       lbd.LBLBFolderInputKey=""
