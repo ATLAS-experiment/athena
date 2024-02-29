@@ -5,6 +5,7 @@
 #include "SpacePointReader.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "AthLinks/ElementLink.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
 
 namespace ActsTrk {
@@ -18,13 +19,16 @@ namespace ActsTrk {
   {
     ATH_MSG_DEBUG("Initializing " << name() << " ... ");
 
+    m_linkDecoration = m_spacePointKey.key() + "." + m_linkDecoration.key();
     m_clusterDecoration = m_spacePointKey.key() + "." + m_clusterDecoration.key();
-
+    
     ATH_MSG_DEBUG("Properties:");
     ATH_MSG_DEBUG(m_spacePointKey);
+    ATH_MSG_DEBUG(m_linkDecoration);
     ATH_MSG_DEBUG(m_clusterDecoration);
     
     ATH_CHECK(m_spacePointKey.initialize());
+    ATH_CHECK(m_linkDecoration.initialize());
     ATH_CHECK(m_clusterDecoration.initialize());
 
     return StatusCode::SUCCESS;
@@ -40,21 +44,23 @@ namespace ActsTrk {
     const xAOD::SpacePointContainer* spacePoints = spHandle.cptr();
     ATH_MSG_DEBUG("Retrieved " << spacePoints->size() << " elements from space point container");
 
+    ATH_MSG_DEBUG("Reading decoration to space point collection: element links to clusters");
+    ATH_MSG_DEBUG("Decoration name: " << m_linkDecoration.key());
+    using link_type = std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> >;
+    SG::ReadDecorHandle< xAOD::SpacePointContainer,
+			 link_type > elementLinksToClusters( m_linkDecoration, ctx );
+    ATH_CHECK(elementLinksToClusters.isAvailable());
+    
     ATH_MSG_DEBUG("Adding decoration to space point collection: bare pointers to clusters");
     ATH_MSG_DEBUG("Decoration name: " << m_clusterDecoration.key());
     using decoration_type = std::vector<const xAOD::UncalibratedMeasurement*>;
     SG::WriteDecorHandle< xAOD::SpacePointContainer,
 			  decoration_type > barePointersToClusters( m_clusterDecoration, ctx );
-    
+
     ATH_MSG_DEBUG("Retrieving Element Links to Clusters from the Space Points and attaching the bare pointers to the object");
-    static const SG::AuxElement::Accessor< std::vector<ElementLink<xAOD::UncalibratedMeasurementContainer>> > accesor("measurementLink");
     for (const xAOD::SpacePoint* sp : *spacePoints) {
-      if (not accesor.isAvailable(*sp)) {
-	ATH_MSG_ERROR("Space point does not possess element link to cluster. Decoration `measurementLink` is not available and this should not happen!");
-	return StatusCode::FAILURE;
-      }
-      
-      const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >& els = accesor(*sp);
+      const link_type& els = elementLinksToClusters(*sp);
+
       std::vector< const xAOD::UncalibratedMeasurement* > meas;
       meas.reserve(els.size());
       for (const ElementLink< xAOD::UncalibratedMeasurementContainer >& el : els) {
@@ -63,7 +69,8 @@ namespace ActsTrk {
 
       barePointersToClusters(*sp) = meas;
     }
-    
+
+    ATH_MSG_DEBUG("Decorations have been attached to space point collection");
     return StatusCode::SUCCESS;
   }
 

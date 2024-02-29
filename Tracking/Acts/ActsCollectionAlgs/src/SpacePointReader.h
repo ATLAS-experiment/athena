@@ -8,6 +8,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/EventContext.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
 // EDM
@@ -29,6 +30,9 @@ class SpacePointReader
   {this, "SpacePointKey", "",
       "Key for input space point container"};
 
+  SG::ReadDecorHandleKey< xAOD::SpacePointContainer > m_linkDecoration
+    {this, "LinkDecorationKey", "measurementLink",
+    "Decoration key for the element link to clusters"};
   SG::WriteDecorHandleKey< xAOD::SpacePointContainer > m_clusterDecoration
     {this, "ClusterDecorationKey", "measurements",
     "Decoration key for the cluster bare pointer"};
