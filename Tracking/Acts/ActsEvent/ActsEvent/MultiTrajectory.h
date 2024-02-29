@@ -445,7 +445,7 @@ class MultiTrajectory
    * Fill surfaces either from persistency or from geometry
    * If the surfaces are already there it means that the container is trainsient and this is void operation
    */
-  void fillSurfaces(const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext );
+  void fillSurfaces(const Acts::TrackingGeometry* geo, const Acts::GeometryContext& geoContext );
   /**
    * reuse surfaces from MutableMultiTrajectory
    */

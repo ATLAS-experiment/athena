@@ -32,14 +32,14 @@ namespace ActsTrk {
 
 void encodeSurface(xAOD::TrackSurfaceAuxContainer* backend, size_t index,
                    const Acts::Surface* surface,
-                   const ActsGeometryContext& geoContext);
+                   const Acts::GeometryContext& geoContext);
 /**
 * As above, but works on xAOD::TrackSurface object
 */
 
 void encodeSurface(xAOD::TrackSurface* backend,
                    const Acts::Surface* surface,
-                   const ActsGeometryContext& geoContext);
+                   const Acts::GeometryContext& geoContext);
 
 
 
@@ -49,13 +49,13 @@ void encodeSurface(xAOD::TrackSurface* backend,
  */
 
 std::shared_ptr<const Acts::Surface> decodeSurface(
-    const xAOD::TrackSurface* backend, const ActsGeometryContext& geoContext);
+    const xAOD::TrackSurface* backend, const Acts::GeometryContext& geoContext);
 
 /**
 * As above, but takes data from Aux container at an index i
 */
 std::shared_ptr<const Acts::Surface> decodeSurface(
-    const xAOD::TrackSurfaceAuxContainer* backend, size_t i, const ActsGeometryContext& geoContext);
+    const xAOD::TrackSurfaceAuxContainer* backend, size_t i, const Acts::GeometryContext& geoContext);
 
 
 }  // namespace ActsTrk

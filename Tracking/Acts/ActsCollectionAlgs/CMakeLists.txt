@@ -8,10 +8,11 @@ atlas_add_component( ActsCollectionAlgs
                         src/*.h src/*.cxx
                         src/components/*.cxx
                      LINK_LIBRARIES
-		        AthenaBaseComps
-			AthLinks
-		        GaudiKernel
-			StoreGateLib
-		        xAODInDetMeasurement
-			xAODMeasurementBase
+						AthenaBaseComps
+						AthLinks
+						GaudiKernel
+						StoreGateLib
+						xAODInDetMeasurement
+						xAODMeasurementBase
+						ActsEventLib
 		    )

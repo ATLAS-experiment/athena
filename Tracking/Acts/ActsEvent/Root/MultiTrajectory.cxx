@@ -430,7 +430,7 @@ void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
   m_trackStatesAux->geometryId[istate] = surface->geometryId().value();
   if (surface->geometryId().value() == 0) { // free surface, needs recording of properties
     m_surfacesBackend->push_back(new xAOD::TrackSurface());
-    encodeSurface(m_surfacesBackendAux.get(), m_surfacesBackendAux->size()-1, surface.get(), m_geoContext); // TODO
+    encodeSurface(m_surfacesBackendAux.get(), m_surfacesBackendAux->size()-1, surface.get(), m_geoContext.context()); // TODO
     auto el = ElementLink<xAOD::TrackSurfaceContainer>(*m_surfacesBackend, m_surfacesBackend->size()-1);
     m_trackStatesAux->surfaceLink[istate] =  el;
     m_surfaces[istate] = std::move(surface); // and memory management
@@ -586,7 +586,7 @@ void ActsTrk::MultiTrajectory::moveLinks(const ActsTrk::MutableMultiTrajectory* 
   m_uncalibratedSourceLinks = std::move(mtj->m_uncalibratedSourceLinks);
 }
 
-void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext ) {
+void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const Acts::GeometryContext& geoContext ) {
   if ( not m_surfaces.empty() )
     return;
   m_surfaces.resize(m_trackStatesAux->size(), nullptr);
