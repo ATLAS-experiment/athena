@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4ParticleTable.hh"
@@ -32,7 +32,10 @@ Quirk::Quirk(
     G4ParticleDefinition* partner = particleTable->FindParticle(GetAntiPDGEncoding());
     if (partner != 0) {
         Quirk* qpartner = dynamic_cast<Quirk*>(partner);
-        if (qpartner == 0) G4Exception("Quirk::Quirk", "NonQuirkAntiparticle", FatalErrorInArgument, "Antiparticle of quirk must be a quirk");
+        if (qpartner == 0) {
+            G4Exception("Quirk::Quirk", "NonQuirkAntiparticle", FatalErrorInArgument, "Antiparticle of quirk must be a quirk");
+            std::abort();
+        }
         m_stringIn->SetReactionForce(qpartner->m_stringIn);
         qpartner->m_stringIn->SetReactionForce(m_stringIn);
     }

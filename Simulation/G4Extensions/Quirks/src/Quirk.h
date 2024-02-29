@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef QUIRK_H
@@ -28,6 +28,9 @@ public:
     ~Quirk();
     const InfracolorForce& GetStringIn() const { return *m_stringIn; }
     InfracolorForce& GetStringIn() { return *m_stringIn; }
+
+    Quirk (const Quirk&) = delete;
+    Quirk& operator= (const Quirk&) = delete;
 
 private:
     InfracolorForce* m_stringIn;
