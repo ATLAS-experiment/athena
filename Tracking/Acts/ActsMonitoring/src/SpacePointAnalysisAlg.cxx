@@ -8,6 +8,7 @@
 #include "InDetIdentifier/SCT_ID.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "StoreGate/ReadDecorHandle.h"
 
 namespace ActsTrk {
   SpacePointAnalysisAlg::SpacePointAnalysisAlg(const std::string& name, ISvcLocator *pSvcLocator)
@@ -16,8 +17,15 @@ namespace ActsTrk {
 
   StatusCode SpacePointAnalysisAlg::initialize() {
     ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
+
+    m_clusterDecoration = m_spacePointContainerKey.key() + "." + m_clusterDecoration.key();
+
+    ATH_MSG_DEBUG("Properties:");
+    ATH_MSG_DEBUG(m_spacePointContainerKey);
+    ATH_MSG_DEBUG(m_clusterDecoration);
     
     ATH_CHECK( m_spacePointContainerKey.initialize() );
+    ATH_CHECK( m_clusterDecoration.initialize() );
 
     if (m_usePixel and m_useOverlap)
       ATH_MSG_INFO("No overlap collection when enabled for pixel space points! Check your configuration if needed.");
@@ -45,40 +53,22 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
 
+    ATH_MSG_DEBUG("Reading decoration to space point collection: bare pointers to clusters");
+    ATH_MSG_DEBUG("Decoration name: " << m_clusterDecoration.key());
+    using decoration_type = std::vector<const xAOD::UncalibratedMeasurement*>;
+    SG::ReadDecorHandle< xAOD::SpacePointContainer,
+			 decoration_type > barePointersToClusters( m_clusterDecoration, ctx );
+    ATH_CHECK(barePointersToClusters.isAvailable());
+    
     auto monitor_nsp = Monitored::Scalar<int>("Nsp", inputSpacePointContainer->size());
     fill(m_monGroupName.value(), monitor_nsp);
 
     const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
     // Check we can have access to clusters
     for (const xAOD::SpacePoint* sp : *inputSpacePointCollection) {
-      bool connectionIsValid = true;
-
-      if (sp->isAvailable< std::vector< const xAOD::UncalibratedMeasurement* > >("measurements")) {
-	const auto& els = sp->measurements();
-	for (const auto* el : els) {
-	  [[maybe_unused]] const auto idHash = el->identifierHash();
-	}
-      } else if (sp->isAvailable< std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > >("measurementLink")) {
-	// if we are here, that means the bare pointers are not available
-	// This should not happen
-	ATH_MSG_ERROR("Space point has Element links but not bare pointers to cluster. This should not happen!");
-	connectionIsValid = false;
-      } else {
-	// This should never happen
-	ATH_MSG_ERROR("There are no decorations that link the space point to the original clusters");
-	connectionIsValid = false;
-      }
-
-      if (not connectionIsValid) {
-	ATH_MSG_ERROR("  * Space Point index: " << sp->index());
-	const SG::auxid_set_t& auxids = sp->getAuxIDs();
-        SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
-        ATH_MSG_ERROR("Available decorations for this space point:");
-        for( SG::auxid_t aux : auxids) {
-          std::string name = reg.getName( aux );
-          ATH_MSG_ERROR("   -> " << name);
-        }
-	return StatusCode::FAILURE;
+      const auto& els = barePointersToClusters(*sp);
+      for (const auto* el : els) {
+          [[maybe_unused]] const auto idHash = el->identifierHash();
       }
     }
 
