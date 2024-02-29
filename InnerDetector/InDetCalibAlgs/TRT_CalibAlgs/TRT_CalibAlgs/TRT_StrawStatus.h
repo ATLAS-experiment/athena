@@ -23,6 +23,11 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 #include "CxxUtils/checker_macros.h"
+#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
+
+#include "TRT_ConditionsServices/ITRT_StrawNeighbourSvc.h"
+#include "TRT_ConditionsServices/ITRT_HWMappingSvc.h"
+#include "TRT_ConditionsServices/ITRT_DCS_ConditionsSvc.h"
 
 #include <cstdlib>
 #include <string>
@@ -34,10 +39,6 @@ class AtlasDetectorID;
 class Identifier;
 
 class TRT_ID;
-class ITRT_StrawNeighbourSvc;
-class ITRT_StrawStatusSummaryTool ;
-class ITRT_HWMappingSvc;
-class ITRT_DCS_ConditionsSvc;
 
 
 namespace InDet 
@@ -70,6 +71,25 @@ namespace InDet
 
     private:
 
+        // Decleare properties, servicies and tools
+        ServiceHandle<ITRT_HWMappingSvc> m_mapSvc {this,"HWMapSvc","TRT_HWMappingSvc","" };
+        ServiceHandle<ITRT_DCS_ConditionsSvc> m_DCSSvc {this,"InDetTRT_DCS_ConditionsSvc","TRT_DCS_ConditionsSvc","" };
+        ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc {this,"TRT_StrawNeighbourSvc","TRT_StrawNeighbourSvc","retrieve barrel and end-cap straw number later on, as well as DTMROC" };
+        ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawStatusSummaryTool {this, "TRT_StrawStatusSummaryTool", "ITRT_StrawStatusSummaryTool", ""};
+        ToolHandle<Trk::ITrackHoleSearchTool>  m_trt_hole_finder {this, "trt_hole_finder", "Trk::ITrackHoleSearchTool", ""};
+        PublicToolHandle<Trk::IUpdator> m_updator {this, "KalmanUpdator", "Trk::KalmanUpdator/TrkKalmanUpdator",""};
+
+        Gaudi::Property<double> m_locR_cut {this, "locR_cut", 1.4, ""};
+        Gaudi::Property<int> m_skipBusyEvents {this, "skipBusyEvents", 0, ""};
+        Gaudi::Property<int> m_printDetailedInformation {this, "printDetailedInformation", 0, ""};
+        Gaudi::Property<std::string> m_fileName {this, "outputFileName", "TRT_StrawStatusOutput", ""};
+        
+        // Declare Handles
+        SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo","RHK to retrieve xAOD::EventInfo"};
+        SG::ReadHandleKey<TRT_RDO_Container> m_rdoContainerKey{this,"RDO_ContainerKey","TRT_RDOs","RHK to retrieve TRT RDO's"};
+        SG::ReadHandleKey<DataVector<Trk::Track>> m_tracksName{this,"tracksCollectionKey","CombinedInDetTracks","RHK to retrieve CombinedInDetTracks"};
+        SG::ReadHandleKey<xAOD::VertexContainer> m_vxContainerKey{this,"VxContainerKey","PrimaryVertices","RHK to retrieve VX Primary candidates"};
+
       void clear();	
       void reportResults();
       void printDetailedInformation();
@@ -94,27 +114,6 @@ namespace InDet
       ACCHITS_t *m_accumulateHits;
 
       const TRT_ID *m_TRTHelper;
-
-      ServiceHandle<ITRT_HWMappingSvc> m_mapSvc;
-      ServiceHandle<ITRT_DCS_ConditionsSvc> m_DCSSvc;
-      ServiceHandle<ITRT_StrawNeighbourSvc> m_TRTStrawNeighbourSvc;
-      ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawStatusSummaryTool;
-      ToolHandle<Trk::ITrackHoleSearchTool>  m_trt_hole_finder;
-      PublicToolHandle<Trk::IUpdator> m_updator
-         {this,"KalmanUpdator","Trk::KalmanUpdator/TrkKalmanUpdator",""};
-      double m_locR_cut;
-
-      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo","RHK to retrieve xAOD::EventInfo"};
-      SG::ReadHandleKey<TRT_RDO_Container> m_rdoContainerKey{this,"RDO_ContainerKey","TRT_RDOs","RHK to retrieve TRT RDO's"};
-      SG::ReadHandleKey<DataVector<Trk::Track>> m_tracksName{this,"tracksCollectionKey","CombinedInDetTracks","RHK to retrieve CombinedInDetTracks"};
-      SG::ReadHandleKey<xAOD::VertexContainer> m_vxContainerKey{this,"VxContainerKey","PrimaryVertices","RHK to retrieve VX Primary candidates"};
-     
-      std::string m_fileName;         
-      int m_skipBusyEvents;
-
-      /** member variables for algorithm properties: */
-      int m_printDetailedInformation;
-
       mutable std::atomic<int> m_printStatusCount{0};
     }; 
 } // end of namespace
