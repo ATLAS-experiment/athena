@@ -420,6 +420,7 @@ namespace top {
         m_jet_DLx_pb[algo] = std::vector<float>();
         m_jet_DLx_pc[algo] = std::vector<float>();
         m_jet_DLx_pu[algo] = std::vector<float>();
+        m_jet_DLx_ptau[algo] = std::vector<float>();
       }
     }
 
@@ -1073,6 +1074,7 @@ namespace top {
           systematicTree->makeOutputVariable(m_jet_DLx_pb[algo.first], "jet_" + algo.first + "_pb");
           systematicTree->makeOutputVariable(m_jet_DLx_pc[algo.first], "jet_" + algo.first + "_pc");
           systematicTree->makeOutputVariable(m_jet_DLx_pu[algo.first], "jet_" + algo.first + "_pu");
+          systematicTree->makeOutputVariable(m_jet_DLx_ptau[algo.first], "jet_" + algo.first + "_ptau");
         }
       }
 
@@ -2719,6 +2721,7 @@ namespace top {
         m_jet_DLx_pb[algo.first].resize(event.m_jets.size());
         m_jet_DLx_pc[algo.first].resize(event.m_jets.size());
         m_jet_DLx_pu[algo.first].resize(event.m_jets.size());
+        m_jet_DLx_ptau[algo.first].resize(event.m_jets.size());
       }
       if (m_config->isMC()) {
         m_jet_truthflav.resize(event.m_jets.size());
@@ -2882,6 +2885,7 @@ namespace top {
         std::vector<float>& m_jet_DLx_pb_pick = m_jet_DLx_pb.at(algo.first);
         std::vector<float>& m_jet_DLx_pc_pick = m_jet_DLx_pc.at(algo.first);
         std::vector<float>& m_jet_DLx_pu_pick = m_jet_DLx_pu.at(algo.first);
+        std::vector<float>& m_jet_DLx_ptau_pick = m_jet_DLx_ptau.at(algo.first);
         const SG::AuxElement::ConstAccessor<float>& DLx_acc = DLx.at(algo.first);
         i = 0;
         for (const auto* const jetPtr : event.m_jets) {
@@ -2889,21 +2893,26 @@ namespace top {
 
           const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging(*jetPtr);
           if (btag) {
-	    // exception for GN2v00 tagger
-	    std::string taggerName = algo.first;
-	    if(taggerName == "GN2v00LegacyWP" || taggerName == "GN2v00NewAliasWP"){
-	      taggerName = "GN2v00";
-	    }
+            // exception for GN2v00 tagger
+            std::string taggerName = algo.first;
+            if(taggerName == "GN2v00LegacyWP" || taggerName == "GN2v00NewAliasWP"){
+              taggerName = "GN2v00";
+	          }
 
             double pu = -999;
             double pc = -999;
             double pb = -999;
+            double ptau = -999;
+
             btag->pu(taggerName, pu);
             btag->pc(taggerName, pc);
             btag->pb(taggerName, pb);
+            btag->ptau(taggerName, ptau);
+
             m_jet_DLx_pb_pick[i] = pb;
             m_jet_DLx_pc_pick[i] = pc;
             m_jet_DLx_pu_pick[i] = pu;
+            m_jet_DLx_ptau_pick[i] = ptau;
           }
           ++i;
         }

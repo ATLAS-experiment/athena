@@ -659,6 +659,7 @@ namespace top {
     std::unordered_map<std::string, std::vector<float>> m_jet_DLx_pb;
     std::unordered_map<std::string, std::vector<float>> m_jet_DLx_pc;
     std::unordered_map<std::string, std::vector<float>> m_jet_DLx_pu;
+    std::unordered_map<std::string, std::vector<float>> m_jet_DLx_ptau;
 
     // fail-JVT jets
     std::vector<float> m_failJvt_jet_pt;
