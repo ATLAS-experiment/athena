@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -96,13 +96,11 @@ namespace OverlayTesting
     IdentifierHash bkgElementHash(1);
     inputSigDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG1"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG1'";
@@ -130,13 +128,11 @@ namespace OverlayTesting
     IdentifierHash bkgElementHash(2);
     inputSigDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG2"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG2'";
@@ -172,14 +168,12 @@ namespace OverlayTesting
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> sigDigit = std::make_unique<HGTD_RDO>(Identifier(12),sigTOA,sigTOT,sigBCID-1,0,sigBCID-1);
-    sigCollection->push_back(sigDigit.release());
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    sigCollection->push_back(std::move(sigDigit));
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG3"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG3'";
@@ -220,17 +214,15 @@ namespace OverlayTesting
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> sigDigit = std::make_unique<HGTD_RDO>(Identifier(12),sigTOA,sigTOT,sigBCID-1,0,sigBCID-1);
-    sigCollection->push_back(sigDigit.release());
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    sigCollection->push_back(std::move(sigDigit));
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG4"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> bkgDigit = std::make_unique<HGTD_RDO>(Identifier(12),bkgTOA,bkgTOT,bkgBCID-1,0,bkgBCID-1);
-    bkgCollection->push_back(bkgDigit.release());
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    bkgCollection->push_back(std::move(bkgDigit));
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG4'";
@@ -279,17 +271,15 @@ namespace OverlayTesting
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> sigDigit = std::make_unique<HGTD_RDO>(Identifier(12),sigTOA,sigTOT,sigBCID-1,0,sigBCID-1);
-    sigCollection->push_back(sigDigit.release());
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    sigCollection->push_back(std::move(sigDigit));
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG5"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> bkgDigit = std::make_unique<HGTD_RDO>(Identifier(13),bkgTOA,bkgTOT,bkgBCID-1,0,bkgBCID-1);
-    bkgCollection->push_back(bkgDigit.release());
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    bkgCollection->push_back(std::move(bkgDigit));
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG5'";
@@ -335,17 +325,15 @@ namespace OverlayTesting
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> sigDigit = std::make_unique<HGTD_RDO>(Identifier(12),sigTOA,sigTOT,sigBCID-1,0,sigBCID-1);
-    sigCollection->push_back(sigDigit.release());
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    sigCollection->push_back(std::move(sigDigit));
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG6"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> bkgDigit = std::make_unique<HGTD_RDO>(Identifier(12),bkgTOA,bkgTOT,bkgBCID-1,0,bkgBCID-1);
-    bkgCollection->push_back(bkgDigit.release());
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    bkgCollection->push_back(std::move(bkgDigit));
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG6'";
@@ -387,17 +375,15 @@ namespace OverlayTesting
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> sigDigit = std::make_unique<HGTD_RDO>(Identifier(12),sigTOA,sigTOT,sigBCID-1,0,sigBCID-1);
-    sigCollection->push_back(sigDigit.release());
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    sigCollection->push_back(std::move(sigDigit));
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG7"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> bkgDigit = std::make_unique<HGTD_RDO>(Identifier(12),bkgTOA,bkgTOT,bkgBCID-1,0,bkgBCID-1);
-    bkgCollection->push_back(bkgDigit.release());
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    bkgCollection->push_back(std::move(bkgDigit));
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG7'";
@@ -438,17 +424,15 @@ namespace OverlayTesting
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> sigDigit = std::make_unique<HGTD_RDO>(Identifier(12),sigTOA,sigTOT,sigBCID-1,0,sigBCID-1);
-    sigCollection->push_back(sigDigit.release());
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    sigCollection->push_back(std::move(sigDigit));
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG8"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> bkgDigit = std::make_unique<HGTD_RDO>(Identifier(12),bkgTOA,bkgTOT,bkgBCID-1,0,bkgBCID-1);
-    bkgCollection->push_back(bkgDigit.release());
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    bkgCollection->push_back(std::move(bkgDigit));
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG8'";
@@ -489,17 +473,15 @@ namespace OverlayTesting
     std::unique_ptr<HGTD_RDO_Collection> sigCollection = std::make_unique<HGTD_RDO_Collection>(sigElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> sigDigit = std::make_unique<HGTD_RDO>(Identifier(13),sigTOA,sigTOT,sigBCID-1,0,sigBCID-1);
-    sigCollection->push_back(sigDigit.release());
-    ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    sigCollection->push_back(std::move(sigDigit));
+    ASSERT_TRUE(inputSigDataHandle->addOrDelete(std::move(sigCollection),sigElementHash).isSuccess());
     SG::WriteHandle<HGTD_RDO_Container> inputBkgDataHandle{"StoreGateSvc+HGTD_RDOs_BKG9"};
     inputBkgDataHandle = std::make_unique<HGTD_RDO_Container>(containerSize);
     std::unique_ptr<HGTD_RDO_Collection> bkgCollection = std::make_unique<HGTD_RDO_Collection>(bkgElementHash);
     //Add a HGTD_RDO object
     std::unique_ptr<HGTD_RDO> bkgDigit = std::make_unique<HGTD_RDO>(Identifier(12),bkgTOA,bkgTOT,bkgBCID-1,0,bkgBCID-1);
-    bkgCollection->push_back(bkgDigit.release());
-    ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    bkgCollection->push_back(std::move(bkgDigit));
+    ASSERT_TRUE(inputBkgDataHandle->addOrDelete(std::move(bkgCollection),bkgElementHash).isSuccess());
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+HGTD_RDOs_SIG9'";
