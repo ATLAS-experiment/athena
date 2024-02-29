@@ -8,7 +8,6 @@
 #include <set>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
@@ -35,7 +34,6 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
 
       SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
-      PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
       /// Set of stations to be tested
       std::set<Identifier> m_testStations{};
   

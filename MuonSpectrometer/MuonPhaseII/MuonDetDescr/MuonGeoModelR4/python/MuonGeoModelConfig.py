@@ -42,6 +42,12 @@ def MmReadoutGeomToolCfg(flags, name="MmReadoutGeomTool", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
+def ChamberAssebmbleToolCfg(flags,name="MuonChamberAssembleTool", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("GeoUtilTool", result.getPrimaryAndMerge(MuonGeoUtilityToolCfg(flags)))
+    the_tool = CompFactory.MuonGMR4.ChamberAssembleTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
 def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
     result = ComponentAccumulator()
     sub_detTools = []
@@ -59,7 +65,10 @@ def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
 
     if flags.Detector.GeometryMM:
         sub_detTools.append(result.popToolsAndMerge(MmReadoutGeomToolCfg(flags)))
-        
+    
+    from AthenaConfiguration.Enums import ProductionStep
+    if flags.Common.ProductionStep is not ProductionStep.Simulation:
+        sub_detTools.append(result.popToolsAndMerge(ChamberAssebmbleToolCfg(flags)))
     kwargs.setdefault("ReadoutEleBuilders", sub_detTools)
     the_tool = CompFactory.MuonGMR4.MuonDetectorTool(name = name, **kwargs)
     result.setPrivateTools(the_tool)

@@ -200,10 +200,14 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         std::unique_ptr<TgcReadoutElement> readoutEle = std::make_unique<TgcReadoutElement>(std::move(define));
         ATH_CHECK(mgr.addTgcReadoutElement(std::move(readoutEle)));
     }
+    ATH_CHECK(writeSectorMapping(mgr));
+    return StatusCode::SUCCESS;
+}
+StatusCode TgcReadoutGeomTool::writeSectorMapping(const MuonDetectorManager& mgr) const {
     /// Map the Tgc sectors to the classic muon sectors
     std::vector<const TgcReadoutElement*> tgcReadOutEles = mgr.getAllTgcReadoutElements();
     std::unique_ptr<std::vector<int>> tgcSectorMapping = std::make_unique<std::vector<int>>();
-    tgcSectorMapping->resize(idHelper.module_hash_max());
+    tgcSectorMapping->resize(m_idHelperSvc->tgcIdHelper().module_hash_max());
     Muon::MuonSectorMapping sectorMapping{};
     const ActsGeometryContext gctx{};
     for (const TgcReadoutElement* readoutEle : tgcReadOutEles) {

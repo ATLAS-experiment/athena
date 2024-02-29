@@ -5,6 +5,7 @@
 #include "MuonChamberToolTest.h"
 
 #include <StoreGate/ReadCondHandle.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <GaudiKernel/SystemOfUnits.h>
@@ -54,7 +55,6 @@ namespace MuonGMR4 {
     StatusCode MuonChamberToolTest::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_geoCtxKey.initialize());
-        ATH_CHECK(m_chambTool.retrieve());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_detVolSvc.retrieve());
         return StatusCode::SUCCESS;
@@ -68,13 +68,13 @@ namespace MuonGMR4 {
         }
 
         m_detVolSvc->detector();
-
-        const ChamberSet& chambers = m_chambTool->getAllChambers();
+        using ChamberSet = MuonDetectorManager::MuonChamberSet;
+        const ChamberSet chambers = m_detMgr->getAllChambers();
         std::vector<const MuonReadoutElement*> elements = m_detMgr->getAllReadoutElements();
             
-        for (const MuonChamber& chamber : chambers) {
-            ChambBoundaryNote boundNote{chamber, **gctx};
-            for(const MuonReadoutElement* readOut : chamber.readOutElements()) {
+        for (const MuonChamber* chamber : chambers) {
+            ChambBoundaryNote boundNote{*chamber, **gctx};
+            for(const MuonReadoutElement* readOut : chamber->readOutElements()) {
                 if (readOut->detectorType() == ActsTrk::DetectorType::Mdt) {
                     const MdtReadoutElement* mdtMl = static_cast<const MdtReadoutElement*>(readOut);
                     ATH_CHECK(testMdt(**gctx, *mdtMl, boundNote));
@@ -91,16 +91,6 @@ namespace MuonGMR4 {
                 }
             }
         }
-        /// Test that all readout elements have a chamber
-        for (const MuonReadoutElement* readOut : elements) {
-            ChamberSet::const_iterator itr = chambers.find(*readOut);
-            if (itr == chambers.end()) {
-                ATH_MSG_FATAL("The element "<<m_idHelperSvc->toStringDetEl(readOut->identify())
-                            <<" is not attributed with any chamber");
-                return StatusCode::FAILURE;
-            }
-        }
-
         return StatusCode::SUCCESS;
     }
     StatusCode MuonChamberToolTest::testMdt(const ActsGeometryContext& gctx,

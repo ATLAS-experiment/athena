@@ -47,6 +47,9 @@ class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthA
     /// Transforms the vertices of the Polygon shape into a std::vector consisting of Amg::Vector2D objects
     std::vector<Amg::Vector2D> polygonEdges(const GeoSimplePolygonBrep& polygon) const override;
 
+    std::vector<Amg::Vector3D> shapeEdges(const GeoShape* shape,
+                                          const Amg::Transform3D& refTrf) const override;
+
    private:
     std::string dumpVolume(const PVConstLink& physVol, const std::string& childDelim) const;
 

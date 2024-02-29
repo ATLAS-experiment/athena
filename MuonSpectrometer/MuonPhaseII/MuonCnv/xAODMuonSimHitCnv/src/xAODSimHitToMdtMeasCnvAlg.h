@@ -16,7 +16,6 @@
 
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 
 #include <MdtCalibInterfaces/IMdtCalibrationTool.h>
 #include <AthenaKernel/IAthRNGSvc.h>
@@ -52,8 +51,6 @@ class xAODSimHitToMdtMeasCnvAlg : public AthReentrantAlgorithm {
 
         ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  // Random number service
         Gaudi::Property<std::string> m_streamName{this, "RandomStream", "MdtSimHitForkLifting"};
-
-        PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
 
         SG::ReadCondHandleKey<MuonCalib::MdtCalibDataContainer> m_calibDbKey{this, "CalibDataKey", "MdtCalibConstants",
                                                                              "Conditions object containing the calibrations"};

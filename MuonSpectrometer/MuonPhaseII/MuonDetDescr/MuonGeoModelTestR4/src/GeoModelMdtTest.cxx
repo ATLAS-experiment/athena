@@ -1,11 +1,13 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMdtTest.h"
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
+#include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
+
 #include <fstream>
 
 using namespace ActsTrk;
@@ -17,7 +19,6 @@ AthHistogramAlgorithm(name,pSvcLocator) {}
 StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_geoCtxKey.initialize());    
-    ATH_CHECK(m_surfaceProvTool.retrieve());
     /// Prepare the TTree dump
     ATH_CHECK(m_tree.init(this));
 
@@ -167,7 +168,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
          m_tubeLay.push_back(lay);
          m_tubeNum.push_back(tube);         
          m_tubeTransform.push_back(tubeTransform);
-         m_tubePosInCh.push_back(m_surfaceProvTool->globalToChambCenter(gctx, readoutEle->identify()) * 
+         m_tubePosInCh.push_back(readoutEle->getChamber()->globalToLocalTrans(gctx) * 
                                  readoutEle->center(gctx, measHash));
          m_roPos.push_back(readoutEle->readOutPos(gctx, measHash));
          m_tubeLength.push_back(readoutEle->tubeLength(measHash));

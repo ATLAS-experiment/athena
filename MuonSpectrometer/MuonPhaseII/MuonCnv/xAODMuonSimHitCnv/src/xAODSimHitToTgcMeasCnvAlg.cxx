@@ -6,6 +6,7 @@
 
 #include <xAODMuonPrepData/TgcStripAuxContainer.h>
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/ReadCondHandle.h>
 #include <StoreGate/WriteHandle.h>
@@ -25,7 +26,6 @@ xAODSimHitToTgcMeasCnvAlg::xAODSimHitToTgcMeasCnvAlg(const std::string& name,
         AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode xAODSimHitToTgcMeasCnvAlg::initialize(){
-    ATH_CHECK(m_surfaceProvTool.retrieve());
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -71,7 +71,7 @@ StatusCode xAODSimHitToTgcMeasCnvAlg::execute(const EventContext& ctx) const {
         const MuonGMR4::TgcReadoutElement* readOutEle = m_DetMgr->getTgcReadoutElement(hitId);
         prd->setReadoutElement(readOutEle);
         const Amg::Vector3D strip3D = lPos.x() * Amg::Vector3D::UnitX();
-        const Amg::Transform3D& globToCenter{m_surfaceProvTool->globalToChambCenter(gctx, hitId)};
+        const Amg::Transform3D& globToCenter{readOutEle->getChamber()->localToGlobalTrans(gctx)};
         prd->setStripPosInStation(xAOD::toStorage(globToCenter * readOutEle->localToGlobalTrans(gctx,prd->layerHash()) * strip3D)); 
     };
     

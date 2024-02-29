@@ -47,13 +47,16 @@
 #define DECLARE_ELEMENT(ELE_TYPE) \
     DECLARE_GETTERSETTER(ELE_TYPE, get##ELE_TYPE, add##ELE_TYPE)   \
                                                                    \
-    std::vector<const ELE_TYPE*> getAll##ELE_TYPE##s() const;          
+    std::vector<const ELE_TYPE*> getAll##ELE_TYPE##s() const;      \
+    std::vector<ELE_TYPE*>       getAll##ELE_TYPE##s();     
 namespace MuonGMR4 {
+
 class MdtReadoutElement;
 class TgcReadoutElement;
 class RpcReadoutElement;
 class sTgcReadoutElement;
 class MmReadoutElement;
+class MuonChamber;
 
 class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
 
@@ -85,8 +88,17 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     
     /// Returns the list of all detector elements
     std::vector<const MuonReadoutElement*> getAllReadoutElements() const;
+    std::vector<MuonReadoutElement*> getAllReadoutElements();
     /// Returns a generic Muon readout element
     const MuonReadoutElement* getReadoutElement(const Identifier& id) const;
+    MuonReadoutElement* getReadoutElement(const Identifier& id);
+
+#ifndef SIMULATIONBASE
+    const MuonChamber* getChamber(const Identifier& channelId) const;
+    using MuonChamberSet = std::set<const MuonChamber*>;
+    MuonChamberSet getAllChambers() const;
+#endif
+
     /// Returns a list of all detector types
     std::vector<ActsTrk::DetectorType> getDetectorTypes() const;
    private:

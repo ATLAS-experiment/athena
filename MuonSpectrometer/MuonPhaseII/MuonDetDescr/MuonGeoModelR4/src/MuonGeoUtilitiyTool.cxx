@@ -7,17 +7,52 @@
 #include <GeoModelKernel/GeoBox.h>
 #include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoSimplePolygonBrep.h>
-#include <GeoModelKernel/GeoShapeShift.h>
+
 #include <GeoModelKernel/GeoTube.h>
+
 #include <GeoModelKernel/GeoShapeUnion.h>
-#include <GeoModelKernel/GeoTransform.h>
+#include <GeoModelKernel/GeoShapeIntersection.h>
 #include <GeoModelKernel/GeoShapeSubtraction.h>
+#include <GeoModelKernel/GeoShapeShift.h>
+
+
+#include <GeoModelKernel/GeoTransform.h>
+
 #include <GeoModelKernel/GeoSerialTransformer.h>
 #include <GeoModelKernel/GeoVolumeCursor.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <set>
 #include <sstream>
 #include <string>
+
+namespace{
+  GeoIntrusivePtr<const GeoShape> compressShift(const GeoShape* shift) {    
+    if (shift->typeID() != GeoShapeShift::getClassTypeID()) return GeoIntrusivePtr<const GeoShape>{shift};
+    const GeoShapeShift* shapeShift = dynamic_cast<const GeoShapeShift*>(shift);
+    if (shapeShift->getOp()->typeID() != GeoShapeShift::getClassTypeID()) return GeoIntrusivePtr<const GeoShape>{shift};
+    GeoIntrusivePtr<const GeoShape> subShape{compressShift(shapeShift->getOp())};
+    const GeoShapeShift* subShift = dynamic_cast<const GeoShapeShift*>(subShape.get());
+    return GeoIntrusivePtr<const GeoShape>{new GeoShapeShift(subShift->getOp(), subShift->getX() * shapeShift->getX())};
+  }
+  std::pair<const GeoShape* , const GeoShape*> getOps(const GeoShape* composed) {
+    if (composed->typeID() == GeoShapeUnion::getClassTypeID()) {
+        const GeoShapeUnion* unionShape = dynamic_cast<const GeoShapeUnion*>(composed);
+        return std::make_pair(unionShape->getOpA(), unionShape->getOpB());
+    } else if (composed->typeID() == GeoShapeSubtraction::getClassTypeID()) {
+        const GeoShapeSubtraction* shapeSubtract = dynamic_cast<const GeoShapeSubtraction*>(composed);
+        return std::make_pair(shapeSubtract->getOpA(), shapeSubtract->getOpB());
+    } else if (composed->typeID() == GeoShapeIntersection::getClassTypeID()) {
+        const GeoShapeIntersection* shapeIntersect = dynamic_cast<const GeoShapeIntersection*>(composed);
+        return std::make_pair(shapeIntersect->getOpA(), shapeIntersect->getOpB());
+    } else if (composed->typeID() == GeoShapeShift::getClassTypeID()) {
+        const GeoShapeShift* shapeShift = dynamic_cast<const GeoShapeShift*>(composed);
+        return std::make_pair(shapeShift->getOp(), nullptr);
+    }
+    return std::make_pair(nullptr, nullptr);
+}
+
+}
+
 
 using namespace ActsTrk;
 namespace MuonGMR4{
@@ -239,5 +274,70 @@ std::vector<Amg::Vector2D> MuonGeoUtilityTool::polygonEdges(const GeoSimplePolyg
     }
   return polygonEdges;
 }
+
+std::vector<Amg::Vector3D> MuonGeoUtilityTool::shapeEdges(const GeoShape* shape,
+                                                          const Amg::Transform3D& refTrf) const {
+
+    constexpr double boundary = 0.;
+    std::vector<Amg::Vector3D> edgePoints{};
+    std::pair<const GeoShape*, const GeoShape*> ops = getOps(shape);
+    if (shape->typeID() == GeoShapeUnion::getClassTypeID()){
+        edgePoints = shapeEdges(ops.first, refTrf);
+        std::vector<Amg::Vector3D> edgePoints2{shapeEdges(ops.second, refTrf)};
+        edgePoints.insert(edgePoints.end(),
+                          std::make_move_iterator(edgePoints2.begin()),
+                          std::make_move_iterator(edgePoints2.end()));
+    } else if (shape->typeID() == GeoShapeSubtraction::getClassTypeID()) {
+        return shapeEdges(ops.first, refTrf);
+    } else if (shape->typeID() == GeoBox::getClassTypeID()) {
+        edgePoints.reserve(6);
+        const GeoBox* box = static_cast<const GeoBox*>(shape);
+        for (double sX :{-1., 1.}) {
+            for (double sY :{-1., 1.}) {
+                for (double sZ: {-1., 1.}) {
+                    edgePoints.emplace_back(refTrf * Amg::Vector3D{sX* (box->getXHalfLength() - boundary),
+                                                                   sY* (box->getYHalfLength() - boundary),
+                                                                   sZ* (box->getZHalfLength() - boundary)});
+                }
+            }
+        }
+    } else if (shape->typeID() == GeoShapeShift::getClassTypeID()) {
+        GeoIntrusivePtr<const GeoShape> shift = compressShift(shape);
+        const GeoShapeShift* shiftPtr = static_cast<const GeoShapeShift*>(shift.get());
+        std::vector<Amg::Vector3D> shiftedEdges = shapeEdges(ops.first, shiftPtr->getX());
+        std::transform(shiftedEdges.begin(), shiftedEdges.end(), std::back_inserter(edgePoints),
+                       [&refTrf](const Amg::Vector3D& shift){
+                               return refTrf * shift;
+                       });
+    } else if (shape->typeID() == GeoTrd::getClassTypeID()) {
+        const GeoTrd* trd = static_cast<const GeoTrd*>(shape);
+        edgePoints.reserve(6);
+        for (double sZ : {-1., 1.}){
+            double dX = (sZ < 0 ? trd->getXHalfLength1() : trd->getXHalfLength2()) - boundary;
+            double dY = (sZ < 0 ? trd->getYHalfLength1() : trd->getYHalfLength2()) - boundary;
+            for (double sX: {-1., 1.}) {
+                for (double sY: {-1., 1.}) {
+                    edgePoints.emplace_back(refTrf * Amg::Vector3D{sX* dX, sY* dY,
+                                                                      sZ* (trd->getZHalfLength()- boundary)});
+
+                }
+            }
+            
+        }
+    } else if (shape->typeID() == GeoSimplePolygonBrep::getClassTypeID()) {
+        const GeoSimplePolygonBrep* brep = static_cast<const GeoSimplePolygonBrep*>(shape);
+        edgePoints.reserve(2* brep->getNVertices());
+        std::vector<Amg::Vector2D> planeEdges = polygonEdges(*brep);
+        for (double sZ: {-1., 1.}) {
+            for (const Amg::Vector2D& plane : planeEdges) {
+              edgePoints.emplace_back(refTrf * Amg::Vector3D{plane.x(), plane.y(), sZ * brep->getDZ()});
+            }
+        }
+    } else {
+        ATH_MSG_WARNING("The shape "<<shape->type()<<" is not supported. Please add it to the list");
+    }
+    return edgePoints;
+}
+
 
 }

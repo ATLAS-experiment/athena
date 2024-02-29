@@ -1,10 +1,11 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODSimHitTosTGCMeasCnvAlg.h"
 
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <xAODMuonPrepData/sTgcStripAuxContainer.h>
 #include <StoreGate/ReadHandle.h>
 #include <StoreGate/ReadCondHandle.h>
@@ -20,7 +21,6 @@ xAODSimHitTosTGCMeasCnvAlg::xAODSimHitTosTGCMeasCnvAlg(const std::string& name,
         AthReentrantAlgorithm{name, pSvcLocator} {}
 
 StatusCode xAODSimHitTosTGCMeasCnvAlg::initialize(){
-    ATH_CHECK(m_surfaceProvTool.retrieve());
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());

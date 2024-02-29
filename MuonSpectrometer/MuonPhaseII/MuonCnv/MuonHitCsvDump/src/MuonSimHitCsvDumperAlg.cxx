@@ -4,8 +4,8 @@
 
 #include "MuonSimHitCsvDumperAlg.h"
 
-#include <MuonReadoutGeometry/MuonReadoutElement.h>
-#include <MuonReadoutGeometry/GlobalUtilities.h>
+#include <MuonReadoutGeometryR4/MuonReadoutElement.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
 #include <fstream>
@@ -29,9 +29,7 @@ MuonSimHitCsvDumperAlg::MuonSimHitCsvDumperAlg(const std::string& name, ISvcLoca
 StatusCode MuonSimHitCsvDumperAlg::initialize() {
    ATH_CHECK(m_inSimHitKey.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
-   ATH_CHECK(m_surfaceProvTool.retrieve());
    ATH_CHECK(detStore()->retrieve(m_r4DetMgr));
-
    return StatusCode::SUCCESS;
 
 }
@@ -77,7 +75,7 @@ StatusCode MuonSimHitCsvDumperAlg::execute(){
          const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(ID);
       
          //transform from local (w.r.t tube's frame) to global (ATLAS frame) and then to chamber's frame
-         const Amg::Transform3D toChamber = m_surfaceProvTool->globalToChambCenter(gctx, ID) *
+         const Amg::Transform3D toChamber = reElement->getChamber()->globalToLocalTrans(gctx) *
                                             reElement->localToGlobalTrans(gctx, reElement->measurementHash(ID));
 
          const Amg::Vector3D localPos{toChamber * xAOD::toEigen(simHit->localPosition())};

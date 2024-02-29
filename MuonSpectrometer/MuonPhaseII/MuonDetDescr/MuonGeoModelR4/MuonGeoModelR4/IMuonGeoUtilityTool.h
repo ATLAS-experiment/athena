@@ -62,6 +62,10 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
         /// Transforms the vertices of the Polygon shape into a std::vector consisting of Amg::Vector2D objects
         virtual std::vector<Amg::Vector2D> polygonEdges(const GeoSimplePolygonBrep& polygon) const = 0;
 
+        /// Returns the edge points of the polygon like GeoShapes
+        virtual std::vector<Amg::Vector3D> shapeEdges(const GeoShape* shape,
+                                                      const Amg::Transform3D& volTrf) const = 0;
+
  
 };
 

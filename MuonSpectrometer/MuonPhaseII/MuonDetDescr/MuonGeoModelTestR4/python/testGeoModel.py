@@ -47,16 +47,12 @@ def setupHistSvcCfg(flags, out_file="MdtGeoDump.root", out_stream="GEOMODELTESTE
 
 def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result = ComponentAccumulator()
-    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
-    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
 def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", **kwargs):
     result = ComponentAccumulator()
-    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
-    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonGMR4.GeoModelRpcTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -69,8 +65,6 @@ def GeoModelTgcTestCfg(flags, name = "GeoModelTgcTest", **kwargs):
 
 def GeoModelsTgcTestCfg(flags, name = "GeoModelsTgcTest", **kwargs):
     result = ComponentAccumulator()
-    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
-    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonGMR4.GeoModelsTgcTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -83,8 +77,6 @@ def GeoModelMmTestCfg(flags, name = "GeoModelMmTest", **kwargs):
 
 def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
     result = ComponentAccumulator()
-    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
-    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     from ActsGeometry.DetectorVolumeSvcCfg import DetectorVolumeSvcCfg
     kwargs.setdefault("DetectorVolumeSvc", result.getPrimaryAndMerge(DetectorVolumeSvcCfg(flags)))
     the_alg = CompFactory.MuonGMR4.MuonChamberToolTest(name, **kwargs)

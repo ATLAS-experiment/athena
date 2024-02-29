@@ -32,8 +32,6 @@ StatusCode ActsMuonAlignCondAlg::initialize() {
     ATH_CHECK(m_readNswPassivKey.initialize(m_applyMmPassivation));
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(detStore()->retrieve(m_detMgr));
-    ATH_CHECK(m_surfaceProvTool.retrieve());
-
     m_techs = m_detMgr->getDetectorTypes();
     if (m_techs.empty()) {
         ATH_MSG_FATAL("The detector manager does not contain any elements");
@@ -275,7 +273,6 @@ StatusCode ActsMuonAlignCondAlg::execute(const EventContext& ctx) const {
         for (const MuonReadoutElement* re : readoutEles){
             numAligned+= re->storeAlignment(*writeCdo);
         }
-        m_surfaceProvTool->storeAlignment(*writeCdo);
         ATH_CHECK(declareDependencies(ctx, subDet, writeHandle));
         ATH_CHECK(writeHandle.record(std::move(writeCdo)));
     }

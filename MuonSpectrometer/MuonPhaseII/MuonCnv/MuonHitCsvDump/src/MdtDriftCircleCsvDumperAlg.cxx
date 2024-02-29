@@ -17,7 +17,6 @@ MdtDriftCircleCsvDumperAlg::MdtDriftCircleCsvDumperAlg(const std::string& name, 
  StatusCode MdtDriftCircleCsvDumperAlg::initialize(){
    ATH_CHECK(m_inDriftCircleKey.initialize());
    ATH_CHECK(m_idHelperSvc.retrieve());
-
    return StatusCode::SUCCESS;
  }
 
