@@ -29,7 +29,8 @@ class SelectionConfig :
     removed in the future."""
 
     def __init__ (self, selectionName, decoration,
-                  *, bits=0, preselection=None, comesFrom = '') :
+                  *, bits=0, preselection=None, comesFrom = '',
+                  writeToOutput=True) :
         self.name = selectionName
         self.decoration = decoration
         if preselection is not None :
@@ -37,6 +38,7 @@ class SelectionConfig :
         else :
             self.preselection = (selectionName == '')
         self.comesFrom = comesFrom
+        self.writeToOutput = writeToOutput
 
 
 
@@ -577,6 +579,17 @@ class ConfigAccumulator :
         self._outputContainers[outputContainerName] = containerName
 
 
+    def getOutputContainerOrigin (self, outputContainerName) :
+        """Get the name of the actual container, for which an output is registered"""
+        try:
+            return self._outputContainers[outputContainerName]
+        except KeyError:
+            try:
+                return self._containerConfig[outputContainerName].name
+            except KeyError:
+                raise KeyError ("output container unknown: " + outputContainerName)
+
+
     def addOutputVar (self, containerName, variableName, outputName,
                       *, noSys=False, enabled=True) :
         """add an output variable for the given container to the output
@@ -598,3 +611,18 @@ class ConfigAccumulator :
         if containerName not in self._containerConfig :
             raise KeyError ("unknown container for output: " + containerName)
         return self._containerConfig[containerName].outputs
+
+
+    def getSelectionNames (self, containerName) :
+        """Retrieve set of unique selections defined for a given container"""
+        if containerName not in self._containerConfig :
+            return []
+        config = self._containerConfig[containerName]
+        # because cuts are registered individually, selection names can repeat themselves
+        # but we are interested in unique names only
+        selectionNames = set()
+        for selection in config.selections:
+            # skip flags which should be disabled in output
+            if selection.writeToOutput:
+                selectionNames.add(selection.name)
+        return selectionNames

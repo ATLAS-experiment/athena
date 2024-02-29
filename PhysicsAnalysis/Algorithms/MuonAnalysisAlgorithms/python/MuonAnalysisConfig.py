@@ -225,15 +225,6 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'TTVA_effSF' + postfix)
 
-        # Set up an algorithm used for decorating baseline muon selection:
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
-                                      'MuonSelectionSummary' + postfix )
-        alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
-        alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
-        config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
-
-
 
 def makeMuonCalibrationConfig( seq, containerName,
                                postfix = None, ptSelectionOutput = None):

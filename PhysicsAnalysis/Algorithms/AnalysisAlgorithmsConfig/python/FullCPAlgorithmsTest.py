@@ -235,9 +235,10 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
               'OutMuons_NOSYS.phi -> mu_phi',
               'OutMuons_%SYS%.pt  -> mu_pt_%SYS%',
-              'OutMuons_NOSYS.charge -> mu_charge',
-              'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%', ]
-              #'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
+              'OutMuons_NOSYS.charge -> mu_charge',]
+    if not forCompare:
+        vars += [ 'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%', ]
+                #'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
     if dataType != 'data':
         vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_reco_effSF_medium_%SYS%', ]
                   #'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_reco_effSF_tight_%SYS%', ]
@@ -272,8 +273,9 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
                   'OutElectrons_NOSYS.phi -> el_phi',
                   'OutElectrons_NOSYS.eta -> el_eta',
-                  'OutElectrons_NOSYS.charge -> el_charge',
-                  'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%',]
+                  'OutElectrons_NOSYS.charge -> el_charge', ]
+        if not forCompare:
+            vars += [ 'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
         if dataType != 'data' and not forCompare:
             vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%',]
 
@@ -295,8 +297,9 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     algSeq += photonSequence
     vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
               'OutPhotons_NOSYS.phi -> ph_phi',
-              'OutPhotons_NOSYS.eta -> ph_eta',
-              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+              'OutPhotons_NOSYS.eta -> ph_eta', ]
+    if not forCompare:
+        vars += [ 'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
     if dataType != 'data' and not forCompare:
         vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
 
@@ -316,8 +319,9 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
               'OutTauJets_NOSYS.phi -> tau_phi',
               'OutTauJets_NOSYS.eta -> tau_eta',
-              'OutTauJets_NOSYS.charge -> tau_charge',
-              'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
+              'OutTauJets_NOSYS.charge -> tau_charge', ]
+    if not forCompare:
+        vars += [ 'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
     if dataType != 'data':
         vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
 
@@ -509,15 +513,15 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     # make filtered output containers
 
     addOutputCopyAlgorithms (algSeq, 'Electrons', 'AnaElectrons_%SYS%', 'OutElectrons_%SYS%',
-                             'selectPtEta&&baselineSelection_loose,as_char')
+                             'selectPtEta&&baselineSelection_loose,as_char&&passesOR,as_char')
     addOutputCopyAlgorithms (algSeq, 'Photons', 'AnaPhotons_%SYS%', 'OutPhotons_%SYS%',
-                             'selectPtEta&&baselineSelection_tight,as_char')
+                             'selectPtEta&&baselineSelection_tight,as_char&&passesOR,as_char')
     addOutputCopyAlgorithms (algSeq, 'Muons', 'AnaMuons_%SYS%', 'OutMuons_%SYS%',
-                             'selectPtEta&&baselineSelection_medium,as_char')
+                             'selectPtEta&&baselineSelection_medium,as_char&&passesOR,as_char')
     addOutputCopyAlgorithms (algSeq, 'TauJets', 'AnaTauJets_%SYS%', 'OutTauJets_%SYS%',
-                             'selectPtEta&&baselineSelection_tight,as_char')
+                             'selectPtEta&&baselineSelection_tight,as_char&&passesOR,as_char')
     addOutputCopyAlgorithms (algSeq, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
-                             'selectPtEta')
+                             'selectPtEta&&passesOR,as_char')
 
 
     # Add an ntuple dumper algorithm:
@@ -826,7 +830,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     if not forCompare :
         # ask to be added to the baseline selection for all objects, and to
         # provide a preselection for the objects in subsequent algorithms
-        configSeq.setOptionValue ('.selectionName', '')
+        configSeq.setOptionValue ('.addToAllSelections', True)
         configSeq.setOptionValue ('.addPreselection', True)
 
     # Include and set up a basic run of the event selection algorithm config:
@@ -896,8 +900,17 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.vars', vars)
     configSeq.setOptionValue ('.metVars', metVars)
     configSeq.setOptionValue ('.containers', outputContainers)
+    disable_commands = []
     if forCompare:
-        configSeq.setOptionValue ('.commands', ['disable jet_select_jvt.*'])
+        disable_commands += [
+            'disable jet_select_jvt.*',
+            'disable mu_select_medium.*',
+            'disable ph_select_tight.*',
+            'disable tau_select_tight.*',
+            ]
+        if not (dataType == 'afii' and forceEGammaFullSimConfig):
+            disable_commands.append('disable el_select_loose.*')
+    configSeq.setOptionValue ('.commands', disable_commands)
 
     configSeq.printOptions()
 
