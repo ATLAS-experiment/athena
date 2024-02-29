@@ -320,7 +320,7 @@ TrackParticleCnvAlg::convert(
     // protect if something went wrong and there is no converted xaod equivalent
     
     if (!(*itr_xaod)) {
-      ATH_MSG_WARNING("WTaF? Empty element in xAOD container!");
+      ATH_MSG_WARNING("Empty element in xAOD container!");
       continue;
     }
 
