@@ -44,7 +44,7 @@ namespace xAODMaker {
     for( ;itr!=end;++itr ) {
       // Create the xAOD object:
       if (!(*itr)) {
-        ATH_MSG_WARNING("WTaF? Empty element in container!");
+        ATH_MSG_WARNING("Empty element in container!");
         continue;
       }
       xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr, vtx);
@@ -79,7 +79,7 @@ namespace xAODMaker {
     for( ;itr!=end;++itr ) {
       // Create the xAOD object:
       if (!(*itr)) {
-        ATH_MSG_WARNING("convertAndAugment: WTaF? Empty element in container!");
+        ATH_MSG_WARNING("convertAndAugment: Empty element in container!");
         continue;
       }
       xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr, vtx);
