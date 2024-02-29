@@ -16,12 +16,17 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('containers', {}, type=None)
         self.addOption ('treeName', 'analysis', type=str)
         self.addOption ('metTermName', 'Final', type=str)
+        self.addOption ('storeSelectionFlags', True, type=bool)
+        self.addOption ('selectionFlagPrefix', 'select', type=str)
         self.addOption ('systematicsHistogram', None , type=str)
         self.addOption ('commands', [], type=None,
                         info="a list of commands for branch selection/configuration")
 
 
     def makeAlgs (self, config) :
+
+        if self.storeSelectionFlags:
+            self.createSelectionFlagBranches(config)
 
         outputConfigs = {}
         for prefix in self.containers.keys() :
@@ -107,3 +112,38 @@ class OutputAnalysisConfig (ConfigBlock):
         if self.systematicsHistogram is not None:
             sysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
             sysDumper.histogramName = self.systematicsHistogram
+
+    def createSelectionFlagBranches(self, config):
+        """
+        For each container and for each selection, create a single pass variable in output NTuple,
+        which aggregates all the selections flag of the given selection. For example, this can include
+        pT, eta selections, some object ID selection, overlap removal, etc.
+        The goal is to have only one flag per object and working point in the output NTuple.
+        """
+        for prefix in self.containers.keys() :
+            outputContainerName = self.containers[prefix]
+            containerName = config.getOutputContainerOrigin(outputContainerName)
+
+            # EventInfo is one obvious example of a container that has no object selections
+            if containerName == 'EventInfo':
+                continue
+
+            selectionNames = config.getSelectionNames(containerName)
+            for selectionName in selectionNames:
+                # skip default selection
+                if selectionName == '':
+                    continue
+                self.makeSelectionSummaryAlg(config, containerName, selectionName)
+
+    def makeSelectionSummaryAlg(self, config, containerName, selectionName):
+        """
+        Schedule an algorithm to pick up all cut flags for a given selectionName.
+        The summary selection flag is written to output as selectionFlagPrefix_selectionName.
+        """
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
+                                      f'ObjectSelectionSummary_{containerName}_{selectionName}')
+        selectionDecoration = f'baselineSelection_{selectionName}_%SYS%'
+        alg.selectionDecoration =  f'{selectionDecoration},as_char'
+        alg.particles = config.readName (containerName)
+        alg.preselection = config.getFullSelection (containerName, selectionName)
+        config.addOutputVar (containerName, selectionDecoration, self.selectionFlagPrefix + '_' + selectionName)

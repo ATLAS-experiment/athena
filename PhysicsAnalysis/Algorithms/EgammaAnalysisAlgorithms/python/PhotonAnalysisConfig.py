@@ -229,14 +229,6 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
-        # Set up an algorithm used for decorating baseline photon selection:
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
-                                      'PhotonSelectionSummary' + postfix )
-        alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
-        alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
-        config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
-
         # Set up the ID/reco photon efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',

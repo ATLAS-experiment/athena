@@ -295,7 +295,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.selectionTool.MaxPtForJvt = 60e3 if self.jetInput == "EMPFlow" else 120e3
             alg.selectionDecoration = "jvt_selection,as_char"
             alg.particles = config.readName(self.containerName)
-            config.addOutputVar(self.containerName, 'jvt_selection', 'select_jvt')
 
             if self.runJvtEfficiency and config.dataType() is not DataType.Data:
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
@@ -322,7 +321,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.particles = config.readName(self.containerName)
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )
             config.addSelection (self.containerName, 'fjvt', 'fjvt_selection,as_char', preselection=False)
-            config.addOutputVar(self.containerName, 'fjvt_selection', 'select_fjvt')
 
             if self.runFJvtEfficiency and self.config.dataType() is not DataType.Data:
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+postfix )
