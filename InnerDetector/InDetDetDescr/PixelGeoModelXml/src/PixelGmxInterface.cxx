@@ -494,6 +494,10 @@ void PixelGmxInterface::addAlignable(int level,
 {
   ATH_MSG_DEBUG("addAlignable called");
   const PixelID *pixelIdHelper = dynamic_cast<const PixelID *> (m_commonItems->getIdHelper());
+  if (not pixelIdHelper){
+    ATH_MSG_ERROR("Dynamic cast to PixelID failed in PixelGmxInterface::addAlignable");
+    return;
+  }
   Identifier id;
   switch (level) {
     case 0:
