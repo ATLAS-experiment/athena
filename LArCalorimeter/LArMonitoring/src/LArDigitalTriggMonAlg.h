@@ -88,13 +88,12 @@ private:
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_actualMuKey {this, "actualInteractionsPerCrossing",
            "EventInfo.actualInteractionsPerCrossing","Decoration for Actual Number of Interactions Per Crossing"};
 
-  StringArrayProperty m_layerNames{this, "LayerNames", {"EMBPA", "EMBPC", "EMB1A", "EMB1C", "EMB2A", "EMB2C", "EMB3A", "EMB3C", "HEC0A", "HEC0C", "HEC1A", "HEC1C", "HEC2A", "HEC2C", "HEC3A", "HEC3C", "EMECPA", "EMECPC", "EMEC1A", "EMEC1C", "EMEC2A", "EMEC2C", "EMEC3A", "EMEC3C", "FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C", "ALL"},
+  StringArrayProperty m_layerNames{this, "LayerNames", {"EMBPC", "EMBPA", "EMB1C", "EMB1A", "EMB2C", "EMB2A", "EMB3C", "EMB3A", "EMECPC", "EMECPA", "EMEC1C", "EMEC1A", "EMEC2C", "EMEC2A", "EMEC3C", "EMEC3A", "HEC0C", "HEC0A", "HEC1C", "HEC1A", "HEC2C", "HEC2A", "HEC3C", "HEC3A", "FCAL1C", "FCAL1A", "FCAL2C", "FCAL2A", "FCAL3C", "FCAL3A", "ALL"},
           "Names of individual layers to monitor"};
 
 
   //Enumerate layer-types, ignoring sides. Useful for configuration that is per-definition symmetric 
-  enum LayerEnumNoSides{EMBPNS=0, EMB1NS, EMB2NS, EMB3NS, HEC0NS, HEC1NS, HEC2NS, HEC3NS,
-                        EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
+  enum LayerEnumNoSides{EMBPNS=0,EMB1NS,EMB2NS,EMB3NS,EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,HEC0NS, HEC1NS, HEC2NS,HEC3NS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
 
   //Mapping of CaloCell nomencature to CaloCellMonitoring nomencature
   const std::array<unsigned,CaloSampling::Unknown> m_caloSamplingToLyrNS{ 
