@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: JetObjectCollectionMaker.cxx 809674 2017-08-23 14:10:24Z iconnell $
@@ -1010,17 +1010,19 @@ namespace top {
         double dl1_pb = -10.;
         double dl1_pc = -10.;
         double dl1_pu = -10.;
-
-	// exception for GN2v00 tagger
-	std::string taggerName = algo.first;
-	if(taggerName == "GN2v00LegacyWP" || taggerName == "GN2v00NewAliasWP"){
-	  taggerName = "GN2v00";
-	}
+        double dl1_ptau = 0.;
+        
+        // exception for GN2v00 tagger
+        std::string taggerName = algo.first;
+        if(taggerName == "GN2v00LegacyWP" || taggerName == "GN2v00NewAliasWP"){
+            taggerName = "GN2v00";
+        }
 
         if (xAOD::BTaggingUtilities::getBTagging(*jet)->pb(taggerName, dl1_pb)
             && xAOD::BTaggingUtilities::getBTagging(*jet)->pc(taggerName, dl1_pc)
-            && xAOD::BTaggingUtilities::getBTagging(*jet)->pu(taggerName, dl1_pu)) {
-          if (!algo.second->getTaggerWeight(dl1_pb, dl1_pc, dl1_pu, DL1_weight)) {
+            && xAOD::BTaggingUtilities::getBTagging(*jet)->pu(taggerName, dl1_pu)
+            && (taggerName == "GN2v01" ? xAOD::BTaggingUtilities::getBTagging(*jet)->ptau(taggerName, dl1_ptau) : true)) {
+          if (!algo.second->getTaggerWeight(dl1_pb, dl1_pc, dl1_pu, DL1_weight, dl1_ptau)) {
             DL1_weight = -999.; // value for errors from retrieving DL1x weight
           }
         } else {
