@@ -115,7 +115,4 @@ namespace xAOD {
 
 }
 
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE( xAOD::SpacePoint_v1, SG::AuxElement);
-
 #endif

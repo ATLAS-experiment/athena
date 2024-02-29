@@ -7,6 +7,7 @@
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include "InDetIdentifier/PixelID.h"
@@ -30,7 +31,8 @@ namespace ActsTrk {
 
   private:
     SG::ReadHandleKey< xAOD::SpacePointContainer > m_spacePointContainerKey {this, "SpacePointContainerKey", "ITkPixelSpacePoints", "Key of input space points"};
-
+    SG::ReadDecorHandleKey< xAOD::SpacePointContainer > m_clusterDecoration {this, "ClusterDecoration", "measurements", "Decoration to clusters (bare pointers)"};
+    
     Gaudi::Property< std::string > m_monGroupName {this, "MonGroupName", "ActsSpacePointAnalysisAlg"};
     Gaudi::Property< bool > m_usePixel {this, "UsePixel", true, "enable use of pixel ID or SCT ID"};
     Gaudi::Property< bool > m_useOverlap {this, "UseOverlap", false, "looking at strip strip space points"};
