@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( HGTD_G4_SD )
@@ -6,6 +6,7 @@ atlas_subdir( HGTD_G4_SD )
 # External dependencies:
 find_package( CLHEP )
 find_package( Geant4 )
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelRead GeoModelDBManager )
 
 # Component(s) in the package:
 atlas_add_library( HGTD_G4_SD
