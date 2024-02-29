@@ -8,10 +8,10 @@
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "GaudiKernel/StatusCode.h"
 #include "MultiTrajectory.h"
-#include "xAODTracking/TrackParametersContainer.h"
-#include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
+#include "xAODTracking/TrackParametersContainer.h"
+#include "xAODTracking/TrackStateContainer.h"
 
 namespace ActsTrk {
 
@@ -56,11 +56,12 @@ class MutableMultiTrajectoryHandle {
    * anymore, the MutableMTJ is actually purged in this operation
    */
   std::unique_ptr<ActsTrk::MultiTrajectory> moveToConst(
-      ActsTrk::MutableMultiTrajectory&& mmtj, const EventContext& context) const;
+      ActsTrk::MutableMultiTrajectory&& mmtj,
+      const EventContext& context) const;
 
  private:
   Gaudi::Property<std::string> m_prefixName;
-  
+
   SG::WriteHandleKey<xAOD::TrackStateContainer> m_statesKey;
   SG::WriteHandleKey<xAOD::TrackParametersContainer> m_parametersKey;
   SG::WriteHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey;
@@ -80,8 +81,9 @@ class ConstMultiTrajectoryHandle {
   /**
    * see constructor of MutableMultiTrajectory
    */
-  ConstMultiTrajectoryHandle(C* algorithm, const std::string& prefix,
-                             const std::string& name);
+  ConstMultiTrajectoryHandle(C* algorithm,
+                             const std::string& propertyNamePrefix,
+                             const std::string& namePrefix);
   /**
    * Sets up the handles
    */
@@ -92,13 +94,14 @@ class ConstMultiTrajectoryHandle {
    * if geo pointer is a nullptr and the surfaces are not in the original
    * collection an exception is thrown
    */
-  std::unique_ptr<const ActsTrk::MultiTrajectory> build(
-      const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext,
+  std::unique_ptr<ActsTrk::MultiTrajectory> build(
+      const Acts::TrackingGeometry* geo,
+      const Acts::GeometryContext& geoContext,
       const EventContext& context) const;
 
  private:
   Gaudi::Property<std::string> m_prefixName;
-  
+
   SG::ReadHandleKey<xAOD::TrackStateContainer> m_statesKey;
   SG::ReadHandleKey<xAOD::TrackParametersContainer> m_parametersKey;
   SG::ReadHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey;
@@ -111,37 +114,37 @@ template <class C>
 MutableMultiTrajectoryHandle<C>::MutableMultiTrajectoryHandle(
     C* algorithm, const std::string& propertyNamePrefix,
     const std::string& namePrefix)
-  : m_prefixName(algorithm, propertyNamePrefix + "MTJBackEndPrefixName",
-		 namePrefix),
-    m_statesKey(algorithm, propertyNamePrefix + "StatesKey",
-		namePrefix + "States"),
-    m_parametersKey(algorithm, propertyNamePrefix + "ParametersKey",
-		    namePrefix + "Parameters"),
-    m_jacobiansKey(algorithm, propertyNamePrefix + "JacobiansKey",
-		   namePrefix + "Jacobians"),
-    m_measurementsKey(algorithm, propertyNamePrefix + "MeasurementsKey",
-		      namePrefix + "Measurements"),
-    m_surfacesKey(algorithm, propertyNamePrefix + "StateSurfacesKey",
-		  namePrefix + "StateSurfaces") {}
-  
-  template <class C>
-  StatusCode MutableMultiTrajectoryHandle<C>::initialize() {
-    // Here we overwrite the keys in case the user has modified the BackEndPrefixName
-    // in the JO. We only modify the value
-    m_statesKey = m_prefixName + "States";
-    m_parametersKey = m_prefixName + "Parameters";
-    m_jacobiansKey = m_prefixName + "Jacobians";
-    m_measurementsKey = m_prefixName + "Measurements";
-    m_surfacesKey = m_prefixName + "StateSurfaces";
+    : m_prefixName(algorithm, propertyNamePrefix + "MTJBackEndPrefixName",
+                   namePrefix),
+      m_statesKey(algorithm, propertyNamePrefix + "StatesKey",
+                  namePrefix + "States"),
+      m_parametersKey(algorithm, propertyNamePrefix + "ParametersKey",
+                      namePrefix + "Parameters"),
+      m_jacobiansKey(algorithm, propertyNamePrefix + "JacobiansKey",
+                     namePrefix + "Jacobians"),
+      m_measurementsKey(algorithm, propertyNamePrefix + "MeasurementsKey",
+                        namePrefix + "Measurements"),
+      m_surfacesKey(algorithm, propertyNamePrefix + "StateSurfacesKey",
+                    namePrefix + "StateSurfaces") {}
 
-    // And now we initialize the keys
-    ATH_CHECK(m_statesKey.initialize());
-    ATH_CHECK(m_parametersKey.initialize());
-    ATH_CHECK(m_jacobiansKey.initialize());
-    ATH_CHECK(m_measurementsKey.initialize());
-    ATH_CHECK(m_surfacesKey.initialize());
-    
-    return StatusCode::SUCCESS;
+template <class C>
+StatusCode MutableMultiTrajectoryHandle<C>::initialize() {
+  // Here we overwrite the keys in case the user has modified the
+  // BackEndPrefixName in the JO. We only modify the value
+  m_statesKey = m_prefixName + "States";
+  m_parametersKey = m_prefixName + "Parameters";
+  m_jacobiansKey = m_prefixName + "Jacobians";
+  m_measurementsKey = m_prefixName + "Measurements";
+  m_surfacesKey = m_prefixName + "StateSurfaces";
+
+  // And now we initialize the keys
+  ATH_CHECK(m_statesKey.initialize());
+  ATH_CHECK(m_parametersKey.initialize());
+  ATH_CHECK(m_jacobiansKey.initialize());
+  ATH_CHECK(m_measurementsKey.initialize());
+  ATH_CHECK(m_surfacesKey.initialize());
+
+  return StatusCode::SUCCESS;
 }
 
 template <class C>
@@ -151,10 +154,11 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
 
   mmtj.trim();
   auto statesBackendHandle = SG::makeHandle(m_statesKey, context);
-  auto statesInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackStateContainer>(mmtj.trackStatesAux());
+  auto statesInterface =
+      ActsTrk::makeInterfaceContainer<xAOD::TrackStateContainer>(
+          mmtj.trackStatesAux());
   if (statesBackendHandle
-          .record(std::move(statesInterface),
-                  std::move(mmtj.m_trackStatesAux))
+          .record(std::move(statesInterface), std::move(mmtj.m_trackStatesAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::moveToConst, can't record TrackStates "
@@ -162,29 +166,37 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
   }
 
   auto parametersBackendHandle = SG::makeHandle(m_parametersKey, context);
-  auto parametersInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackParametersContainer>(mmtj.trackParametersAux());
+  auto parametersInterface =
+      ActsTrk::makeInterfaceContainer<xAOD::TrackParametersContainer>(
+          mmtj.trackParametersAux());
   if (parametersBackendHandle
           .record(std::move(parametersInterface),
                   std::move(mmtj.m_trackParametersAux))
           .isFailure()) {
     throw std::runtime_error(
-        "MutableMultiTrajectoryHandle::moveToConst, can't record TrackParameters "
+        "MutableMultiTrajectoryHandle::moveToConst, can't record "
+        "TrackParameters "
         "backend");
   }
 
   auto jacobiansBackendHandle = SG::makeHandle(m_jacobiansKey, context);
-  auto jacobiansInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackJacobianContainer>(mmtj.trackJacobiansAux());
+  auto jacobiansInterface =
+      ActsTrk::makeInterfaceContainer<xAOD::TrackJacobianContainer>(
+          mmtj.trackJacobiansAux());
   if (jacobiansBackendHandle
           .record(std::move(jacobiansInterface),
                   std::move(mmtj.m_trackJacobiansAux))
           .isFailure()) {
     throw std::runtime_error(
-        "MutableMultiTrajectoryHandle::moveToConst, can't record TrackJacobians "
+        "MutableMultiTrajectoryHandle::moveToConst, can't record "
+        "TrackJacobians "
         "backend");
   }
 
   auto measurementsBackendHandle = SG::makeHandle(m_measurementsKey, context);
-  auto measurementsInterface = ActsTrk::makeInterfaceContainer<xAOD::TrackMeasurementContainer>(mmtj.trackMeasurementsAux());
+  auto measurementsInterface =
+      ActsTrk::makeInterfaceContainer<xAOD::TrackMeasurementContainer>(
+          mmtj.trackMeasurementsAux());
   if (measurementsBackendHandle
           .record(std::move(measurementsInterface),
                   std::move(mmtj.m_trackMeasurementsAux))
@@ -206,12 +218,15 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
   }
 
   auto cmtj = std::make_unique<ActsTrk::MultiTrajectory>(
-      DataLink<xAOD::TrackStateAuxContainer>(m_statesKey.key()+"Aux.", context),
-      DataLink<xAOD::TrackParametersAuxContainer>(m_parametersKey.key()+"Aux.", context),
-      DataLink<xAOD::TrackJacobianAuxContainer>(m_jacobiansKey.key()+"Aux.", context),
-      DataLink<xAOD::TrackMeasurementAuxContainer>(m_measurementsKey.key()+"Aux.",
-                                                context));
-  cmtj->moveSurfaces(&mmtj);  
+      DataLink<xAOD::TrackStateAuxContainer>(m_statesKey.key() + "Aux.",
+                                             context),
+      DataLink<xAOD::TrackParametersAuxContainer>(
+          m_parametersKey.key() + "Aux.", context),
+      DataLink<xAOD::TrackJacobianAuxContainer>(m_jacobiansKey.key() + "Aux.",
+                                                context),
+      DataLink<xAOD::TrackMeasurementAuxContainer>(
+          m_measurementsKey.key() + "Aux.", context));
+  cmtj->moveSurfaces(&mmtj);
   cmtj->moveLinks(&mmtj);
 
   return cmtj;
@@ -228,7 +243,7 @@ ConstMultiTrajectoryHandle<C>::ConstMultiTrajectoryHandle(
     C* algorithm, const std::string& propertyNamePrefix,
     const std::string& namePrefix)
     : m_prefixName(algorithm, propertyNamePrefix + "MTJBackEndPrefixName",
-                 namePrefix),
+                   namePrefix),
       m_statesKey(algorithm, propertyNamePrefix + "TrackStatesKey",
                   namePrefix + "TrackStates"),
       m_parametersKey(algorithm, propertyNamePrefix + "TrackParametersKey",
@@ -240,13 +255,13 @@ ConstMultiTrajectoryHandle<C>::ConstMultiTrajectoryHandle(
 
 template <class C>
 StatusCode ConstMultiTrajectoryHandle<C>::initialize() {
-  // Here we overwrite the keys in case the user has modified the BackEndPrefixName
-  // in the JO. We only modify the value
+  // Here we overwrite the keys in case the user has modified the
+  // BackEndPrefixName in the JO. We only modify the value
   m_statesKey = m_prefixName + "States";
   m_parametersKey = m_prefixName + "Parameters";
   m_jacobiansKey = m_prefixName + "Jacobians";
   m_measurementsKey = m_prefixName + "Measurements";
-  
+
   // And not we initialize the keys
   ATH_CHECK(m_statesKey.initialize());
   ATH_CHECK(m_parametersKey.initialize());
@@ -257,21 +272,37 @@ StatusCode ConstMultiTrajectoryHandle<C>::initialize() {
 }
 
 template <class C>
-std::unique_ptr<const ActsTrk::MultiTrajectory>
-ConstMultiTrajectoryHandle<C>::build(const Acts::TrackingGeometry* geo,
-                                     const ActsGeometryContext& geoContext,
-                                     const EventContext& context) const {
+std::unique_ptr<ActsTrk::MultiTrajectory> ConstMultiTrajectoryHandle<C>::build(
+    const Acts::TrackingGeometry* geo, const Acts::GeometryContext& geoContext,
+    const EventContext& context) const {
   // we need to build it from backends
-  auto statesBackendHandle = SG::makeHandle(m_statesKey, context);
-  auto parametersBackendHandle = SG::makeHandle(m_parametersKey, context);
-  auto jacobiansBackendHandle = SG::makeHandle(m_jacobiansKey, context);
-  auto measurementsBackendHandle = SG::makeHandle(m_measurementsKey, context);
+  DataLink<xAOD::TrackStateAuxContainer> statesLink(m_statesKey.key() + "Aux.",
+                                                    context);
+  if (not statesLink.isValid()) {
+    throw std::runtime_error("ConstMultiTrajectoryHandle::build, StatesLink is invalid");
+  }
+  DataLink<xAOD::TrackParametersAuxContainer> parametersLink(
+      m_parametersKey.key() + "Aux.", context);
+  if (not parametersLink.isValid()) {
+    throw std::runtime_error("ConstMultiTrajectoryHandle::build, ParametersLink is invalid");
+  }
 
-  auto mtj = std::make_unique<ActsTrk::MultiTrajectory>(
-      *statesBackendHandle, *parametersBackendHandle, *jacobiansBackendHandle,
-      *measurementsBackendHandle);
-  mtj->fillSurfaces(geo, geoContext);
-  return mtj;
+  DataLink<xAOD::TrackJacobianAuxContainer> jacobiansLink(
+      m_jacobiansKey.key() + "Aux.", context);
+  if (not jacobiansLink.isValid()) {
+    throw std::runtime_error("ConstMultiTrajectoryHandle::build, JacobiansLink is invalid");
+  }
+
+  DataLink<xAOD::TrackMeasurementAuxContainer> measurementsLink(
+      m_measurementsKey.key() + "Aux.", context);
+  if (not measurementsLink.isValid()) {
+    throw std::runtime_error("ConstMultiTrajectoryHandle::build, MeasurementsLink is invalid");
+  }
+
+
+  auto cmtj = std::make_unique<ActsTrk::MultiTrajectory>(statesLink, parametersLink, jacobiansLink, measurementsLink);
+  cmtj->fillSurfaces(geo, geoContext);
+  return cmtj;
 }
 
 }  // namespace ActsTrk

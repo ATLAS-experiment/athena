@@ -101,7 +101,7 @@ ActsTrk::ConstCovariance ActsTrk::TrackSummaryContainer::covariance(
 
 std::shared_ptr<const Acts::Surface>  ActsTrk::TrackSummaryContainer::surface(
     ActsTrk::IndexType itrack) const {
-  const ActsGeometryContext& geoContext{};
+  const Acts::GeometryContext geoContext{};
   return decodeSurface( m_surfBackendAux.cptr(), itrack, geoContext );
 }
 

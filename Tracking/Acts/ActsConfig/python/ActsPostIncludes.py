@@ -75,3 +75,4 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
     acc.merge(addToAOD(flags, toAOD))
     return acc
+

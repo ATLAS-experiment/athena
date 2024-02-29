@@ -9,7 +9,7 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
                    std::vector<float>& rotation,
                    std::vector<float>& boundValues,
                    const Acts::Surface* surface,
-                   const ActsGeometryContext& geoContext) {
+                   const Acts::GeometryContext& geoContext) {
   // return if surf is a nullptr
   if (surface == nullptr) {
     return;
@@ -37,9 +37,9 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
   }
 
   Acts::RotationMatrix3 lRotation =
-      surface->transform(geoContext.context()).rotation();
+      surface->transform(geoContext).rotation();
   Acts::Vector3 eulerAngles = lRotation.eulerAngles(2, 1, 0);
-  Acts::Vector3 lTranslation = surface->center(geoContext.context());
+  Acts::Vector3 lTranslation = surface->center(geoContext);
 
   for (int i = 0; i < 3; i++) {
     rotation.push_back(eulerAngles[i]);
@@ -54,13 +54,13 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
 
 void encodeSurface(xAOD::TrackSurfaceAuxContainer* s, size_t i,
                    const Acts::Surface* surface,
-                   const ActsGeometryContext& geo) {
+                   const Acts::GeometryContext& geo) {
   encodeSurface(s->surfaceType[i], s->translation[i], s->rotation[i],
                 s->boundValues[i], surface, geo);
 }
 
 void encodeSurface(xAOD::TrackSurface* s, const Acts::Surface* surface,
-                   const ActsGeometryContext& geo) {
+                   const Acts::GeometryContext& geo) {
   xAOD::SurfaceType surfaceType;
   std::vector<float> translation, rotation, bounds;
   encodeSurface(surfaceType, translation, rotation, bounds, surface, geo);
@@ -74,7 +74,7 @@ void encodeSurface(xAOD::TrackSurface* s, const Acts::Surface* surface,
 std::shared_ptr<const Acts::Surface> decodeSurface(
     const xAOD::SurfaceType surfaceType, const std::vector<float>& translation,
     const std::vector<float>& rotation, const std::vector<float>& boundValues,
-    const ActsGeometryContext&) {
+    const Acts::GeometryContext&) {
 
   // Translation and rotation
 
@@ -141,14 +141,14 @@ std::shared_ptr<const Acts::Surface> decodeSurface(
 }
 
 std::shared_ptr<const Acts::Surface> decodeSurface(
-    const xAOD::TrackSurface* s, const ActsGeometryContext& geo) {
+    const xAOD::TrackSurface* s, const Acts::GeometryContext& geo) {
   return decodeSurface(s->surfaceType(), s->translation(), s->rotation(),
                        s->boundValues(), geo);
 }
 
 std::shared_ptr<const Acts::Surface> decodeSurface(
     const xAOD::TrackSurfaceAuxContainer* s, size_t i,
-    const ActsGeometryContext& geo) {
+    const Acts::GeometryContext& geo) {
   return decodeSurface(s->surfaceType[i], s->translation[i], s->rotation[i],
                        s->boundValues[i], geo);
 }

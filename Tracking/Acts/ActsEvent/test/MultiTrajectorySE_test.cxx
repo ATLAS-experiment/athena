@@ -40,11 +40,11 @@ BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectorySE)
 
 
 template<typename surfType>
-void testSurface(surfType surf, std::shared_ptr<const Acts::Surface> outSurf, const ActsGeometryContext& gctx) {
+void testSurface(surfType surf, std::shared_ptr<const Acts::Surface> outSurf, const Acts::GeometryContext& gctx) {
     BOOST_CHECK_EQUAL(int(surf->type()), int(outSurf->type()));
-    BOOST_CHECK_EQUAL(surf->center(gctx.context()), outSurf->center(gctx.context()));
-    BOOST_CHECK_EQUAL(surf->transform(gctx.context()).rotation().eulerAngles(2, 1, 0), 
-                  outSurf->transform(gctx.context()).rotation().eulerAngles(2, 1, 0));  
+    BOOST_CHECK_EQUAL(surf->center(gctx), outSurf->center(gctx));
+    BOOST_CHECK_EQUAL(surf->transform(gctx).rotation().eulerAngles(2, 1, 0), 
+                  outSurf->transform(gctx).rotation().eulerAngles(2, 1, 0));  
     BOOST_CHECK_EQUAL(size(surf->bounds().values()), size(outSurf->bounds().values()));
     for (unsigned int i=0; i<size(surf->bounds().values()); i++)  {  
       BOOST_TEST(surf->bounds().values()[i] == outSurf->bounds().values()[i], boost::test_tools::tolerance(0.001));
@@ -54,7 +54,7 @@ void testSurface(surfType surf, std::shared_ptr<const Acts::Surface> outSurf, co
 // Surface encoding/decoding test
 BOOST_AUTO_TEST_CASE(InsertRefSurface) {
 
-  const ActsGeometryContext& gctx{};
+  const Acts::GeometryContext gctx{};
 
   float layerZ = 30.;
   Acts::Transform3 transform(Acts::Translation3(0., 0., -layerZ));
