@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -15,10 +15,10 @@
 #include "xAODEgamma/Photon.h"
 
 #include <array>
+#include <cmath>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
-#include <iterator>
 #include <type_traits>
 #include <limits>
 #include <regex>
@@ -763,7 +763,7 @@ CP::CorrectionCode TrigGlobalEfficiencyCorrectionTool::getEfficiency(unsigned ru
 	{
 		efficiencyData = efficiencies.data();
 		efficiencyMc = efficiencies.mc();
-		if(efficiencies.data()<=0. || efficiencies.mc()<=0.)
+		if(std::isnan(efficiencies.data()) || efficiencies.data()<=0. || std::isnan(efficiencies.mc()) || efficiencies.mc()<=0.)
 		{
 			ATH_MSG_WARNING("Efficiencies do not seem valid");
 			m_cpCode.ignore();
