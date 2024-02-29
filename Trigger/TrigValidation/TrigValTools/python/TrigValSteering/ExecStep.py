@@ -152,74 +152,27 @@ class ExecStep(Step):
         elif self.job_options is None or len(self.job_options) == 0:
             self.misconfig_abort('Job options not provided for this step')
 
-    def add_precommand(self, precommand):
-        if self.type == 'athena':
-            precommand_arg_names = ['-c ', '--command = ', '--command ']
-        elif self.type == 'athenaHLT':
-            precommand_arg_names = ['-c ', '--precommand = ', '--precommand ']
-        elif self.type in ['Reco_tf', 'Trig_reco_tf', 'Derivation_tf']:
-            precommand_arg_names = ['--preExec ', '--preExec = ']
-        else:
-            self.log.warning('add_precommand() undefined for ExecStep with type="%s"', self.type)
-            return
-
-        if not precommand.endswith(';'):
-            precommand += ';'
-
-        opt_pattern_str = '('
-        for arg_name in precommand_arg_names:
-            if len(opt_pattern_str) > 1:
-                opt_pattern_str += '|'
-            opt_pattern_str += r'{a:s}".*"|{a:s}\'.*\''.format(a=arg_name.replace(' ', r'\s*'))
-        opt_pattern_str += ')'
-        opt_pattern = re.compile(opt_pattern_str)
-        match = re.search(opt_pattern, self.args)
-        if not match:
-            self.args += ' {:s}"{:s}"'.format(precommand_arg_names[0], precommand)
-            return
-        opt_match = match.group(0)
-
-        # Refine the match to avoid matching '--preExec "foo" --postExec "bar"' or '-c "foo" --bar'
-        refine_pattern = re.compile(r'(--\w*\s*"|--\w*\s*\'|--\w*="|--\w*=\'|-c\s*"|-c\s*\')')
-        refine_matches = re.findall(refine_pattern, opt_match)
-        if len(refine_matches) > 1:
-            opt_match = opt_match[0:opt_match.find(refine_matches[1])]
-
-        old_cmd_pattern = re.compile(r'(".*"|\'.*\')')
-        old_cmd_match = re.search(old_cmd_pattern, opt_match)
-        if not old_cmd_match:
-            self.misconfig_abort('Failed to add precommand ' + precommand + ' to step ' + self.name)
-        old_cmd = old_cmd_match.group(0)
-
-        # Transform case
-        if self.type.endswith('_tf'):
-            new_cmd = '--preExec {:s} "{:s}" '.format(old_cmd, precommand)
-            self.args = self.args.replace(opt_match, new_cmd)
-            return
-
-        # athena(HLT) case
-        old_cmd = old_cmd[1:-1]
-        new_cmd = old_cmd
-        if not new_cmd.endswith(';'):
-            new_cmd += ';'
-        new_cmd += precommand
-        self.args = self.args.replace(old_cmd, new_cmd)
-
     def add_trf_precommand(self, precommand):
-        '''
-        Same as add_precommand but prepends the transform step name in case of transforms.
-        '''
+        '''Add preExec to transform command'''
+
         if self.type in ['Reco_tf', 'Trig_reco_tf', 'Derivation_tf']:
             if 'inputBS_RDOFile' in self.args:
                 precommand = 'BSRDOtoRAW:' + precommand
             elif 'outputRDO_TRIGFile' in self.args or 'doRDO_TRIG' in self.args:
                 precommand = 'RDOtoRDOTrigger:' + precommand
             else:
-                self.log.debug('Skip adding precommand %s to step %s because it is a transform which does not run Trigger',
-                            precommand, self.name)
+                self.log.debug('Skip adding precommand %s to step %s because it is a transform which '
+                               'does not run Trigger', precommand, self.name)
                 return
 
-        return self.add_precommand(precommand)
+        # match --preExec, --preExec= ignoring spaces
+        m = re.search(r'--preExec\s*=?\s*', self.args)
+        if m is None:
+            self.args += f'--preExec "{precommand}" '
+        else:
+            # Insert new preExec. It is important to not use the '=' sign so we
+            # can chain multiple preExecs.
+            self.args = self.args[:m.span()[0]] + f'--preExec "{precommand}" ' + self.args[m.span()[1]:]
 
     def configure_args(self, test):
         self.log.debug('Configuring args for step %s', self.name)
@@ -367,7 +320,11 @@ class ExecStep(Step):
                 self.misconfig_abort('Wrong type for flags. Expected list or tuple.')
 
             if self.type.endswith('_tf'):  # for transform, set flags as pre-exec
-                self.add_trf_precommand(';'.join(f'flags.{flag}' for flag in self.flags))
+                if self.type == 'Trig_reco_tf':
+                    # No 'flags.' prefix for the trigger transform
+                    self.add_trf_precommand(';'.join(f'{flag}' for flag in self.flags))
+                else:
+                    self.add_trf_precommand(';'.join(f'flags.{flag}' for flag in self.flags))
             else:  # athena(HLT)
                 if self._isCA:
                     self.args += ' ' + ' '.join(self.flags)
