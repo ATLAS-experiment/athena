@@ -133,9 +133,12 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TrackParticle& particle, float w
     if(patternInfo.test(i)) fillHisto(m_reco_author, i, weight);
   }
 
-  static const SG::AuxElement::Accessor< float > acc("time");
-  if( acc.isAvailable(particle) ) {
-    fillHisto(m_reco_time, particle.time(), weight);
+  static const SG::AuxElement::Accessor< uint8_t > accValidTime("hasValidTime");
+  static const SG::AuxElement::Accessor< float > accTime("time");
+  if( accValidTime.isAvailable(particle) && accTime.isAvailable(particle) ) {
+    if (particle.hasValidTime()) {
+      fillHisto(m_reco_time, particle.time(), weight);
+    }
   }
 
 }
