@@ -1,20 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-*/
-
-///////////////////////////////////////////////////////////////////
-// BTaggingSelectionTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-/**
-  @class BTaggingSelectionTool
-  Tool to apply flavour-tagging requirements on jets
-  @author C. Lüdtke, M. Ughetto
-  @contact cluedtke@cern.ch, mughetto@cern.ch
-
-  Note for getTaggerWeight and getCutValue: the LAST defaulted argument
-  is now 'getCTagW', but before AB 21.2.221 it was 'useVetoWP', which has the 
-  **opposite** meaning when set to true. 
-
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CPBTAGGINGSELECTIONTOOL_H
@@ -55,7 +40,8 @@ class BTaggingSelectionTool: public asg::AsgTool,
   /// Get the decision using thet jet's pt and tag weight values
   virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* tag_weight */ ) const override;
   virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta*/ , double /* taggerWeight_b */, double /* taggerWeight_c */) const override;
-  virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */, double /* dl1ptau */ = 0.) const override;
+  virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* dl1pb */, double /* dl1pc  */, double /* dl1pu */) const override; 
+  virtual asg::AcceptData accept(double /* jet pt */, double /* jet eta */, double /* dl1pb */, double /* dl1pc  */, double /* dl1pu  */, double /* dl1ptau */) const override;
 
   /// Decide in which quantile of the tag weight distribution the jet belongs (continuous tagging)
   /// The return value represents the bin index of the quantile distribution
@@ -67,7 +53,8 @@ class BTaggingSelectionTool: public asg::AsgTool,
   virtual CP::CorrectionCode getCutValue(double /* jet pt */, double & cutval) const override;
    //1D tagging wrapper
   virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & tagweight) const override;
-  virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau = 0.) const override;
+  virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu, double & tagweight) const override;
+  virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu, double & tagweight, double ptau) const override;
 
   //flexibility for Continuous2D
   virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & weight ,bool getCTagW) const override;
