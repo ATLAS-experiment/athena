@@ -69,6 +69,10 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
     Gaudi::Property<std::string> m_mappingFile {this, "MappingFile", "L1CaloFEXByteStream/2023-02-13/scToEfexTowers.root", "PathResolver location to mapping file"};
     ToolHandle<IeFEXSuperCellTowerIdProvider> m_eFEXSuperCellTowerIdProviderTool {this, "eFEXSuperCellTowerIdProviderTool", "LVL1::eFEXSuperCellTowerIdProvider", "Tool that provides tower-FOGA mapping"};
 
+    Gaudi::Property<bool> m_applyMasking{this,"ApplyMasking",true,"Apply masking of supercells based on provenance bits. Should be set to False for MC"};
+
+    mutable std::mutex m_debugMutex;
+
 };
 
 } // end of LVL1 namespace
