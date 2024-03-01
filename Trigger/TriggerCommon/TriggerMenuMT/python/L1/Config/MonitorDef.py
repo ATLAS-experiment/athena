@@ -226,6 +226,9 @@ class MonitorDef:
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
                     "L1_jJ500_LAR",
 
+                    # Beam splashes
+                    "L1_eEM22A", "L1_eEM22C",
+
                     # Other triggers disabled in MC
                     "L1_MU3VF", "L1_MU8F", "L1_MU8FC", "L1_MU8VF",
                     "L1_MU3VC", "L1_MU3EOF", "L1_MU4BO",
