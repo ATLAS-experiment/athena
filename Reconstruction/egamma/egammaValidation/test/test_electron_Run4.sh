@@ -3,7 +3,7 @@
 # art-description: ART Monitoring Tool for electron Validation, phase II, no pileup
 #
 # art-type: grid
-# art-input: mc21_14TeV.901967.PG_single_epm_egammaET_etaFlatnp0_25.recon.RDO.e8481_s4264_r15317_tid37464680_00
+# art-input: mc21_14TeV.901967.PG_single_epm_egammaET_etaFlatnp0_25.recon.RDO.e8481_s4264_r15317
 # art-input-nfiles: 60
 # art-cores: 4
 # art-include: main/Athena
