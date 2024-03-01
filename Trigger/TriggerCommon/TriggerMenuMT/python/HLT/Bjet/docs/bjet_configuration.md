@@ -265,7 +265,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
      This file assembles all reconstruction algorithms into the bjet sequence mentioned above. As input it requires only the name of the jet-collection. In this way the code can be run for "EMTopo" and "EMPFlow" jet-collections. In the end a '*MenuSequence*' is being returned. A '*MenuSequence*' consits of three parts: '*InputMaker*', '*Sequence*' and '*Hypo*'.
     - **InputMaker**\
       The **InputMaker** defines the environement in which the **sequence** will be executed.\
-      At first an event view is being created for every Region-of-Interest (RoI, `outputRoIName = getInDetTrigConfig('bjet').roi`, currently "HLT_Roi_Bjet")
+      At first an event view is being created for every Region-of-Interest (RoI, `outputRoIName = flags.Trigger.InDetTracking.ActiveConfig.roi`, currently "HLT_Roi_Bjet")
       ```python
         InputMakerAlg = EventViewCreatorAlgorithm( "IMBJet_{jc_name}_step2" )
       ```
@@ -274,10 +274,9 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
         RoITool = ViewCreatorCentredOnJetWithPVConstraintROITool()
       ```
       Currently the default values of $`\eta (\text{half-width}) = \phi (\text{half-width}) = 0.4`$ are being used (cf. [ViewCreatorCentredOnJetWithPVConstraintROITool.h](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigSteer/DecisionHandling/src/ViewCreatorCentredOnJetWithPVConstraintROITool.h)). Hence, the total size will be $`0.8 \times 0.8`$. The event views allow us to process only the most relevant parts of the detector information and thereby speed up the computation time. In addition a constraint on the distance between jet and primary vertex of $`z < 10 mm`$ is applied when creating the view.\
-      The primary vertex (PV) has already been determined by the jet code upstream. The collection name is configured from [TrigInDetConfig/ConfigSettings.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigTools/TrigInDetConfig/python/ConfigSettings.py), currently being `HLT_IDVertex_FS`  
+      The primary vertex (PV) has already been determined by the jet code upstream. The collection name is configured from flags.Trigger.InDetTracking.ActiveConfig.vertex, currently being `HLT_IDVertex_FS`  
       ```python
-       config=getInDetTrigConfig('fullScan')
-       prmVtxKey = config.vertex
+       prmVtxKey = flags.Trigger.InDetTracking.ActiveConfig.vertex
       ```
       The vertex-collection is attached to the RoI
       ```python

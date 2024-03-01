@@ -9,8 +9,6 @@ log = logging.getLogger(__name__)
 
 
 def FullScanLRTMenuSequence(flags):
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    lrtcfg = getInDetTrigConfig("fullScanLRT")
 
     # Construct the full reco sequence
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTCfg
@@ -20,7 +18,10 @@ def FullScanLRTMenuSequence(flags):
 
     from ..CommonSequences.FullScanDefs import trkFSRoI
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
-    reco.mergeReco(trigInDetPrecisionTrackingCfg(flags, trkFSRoI, lrtcfg.input_name,in_view=False))
+    reco.mergeReco(trigInDetPrecisionTrackingCfg(flags, 
+                                                 trkFSRoI, 
+                                                 flags.Trigger.InDetTracking.fullScanLRT.input_name,
+                                                 in_view=False))
 
     # Construct the SelectionCA to hold reco + hypo
     selAcc = SelectionCA("UncFSLRTSeq")
@@ -29,10 +30,12 @@ def FullScanLRTMenuSequence(flags):
     from TrigLongLivedParticlesHypo.TrigFullScanLRTHypoTool import TrigLRTHypoToolFromDict
     from TrigEDMConfig.TriggerEDM import recordable
     
-    theHypoAlg = CompFactory.FastTrackFinderLRTHypoAlg("FullScanLRTHypoAlg",
-                                                       trackCountKey = recordable("HLT_FSLRT_TrackCount"),
-                                                       tracksKey = lrtcfg.tracks_IDTrig(),
-                                                       )
+    theHypoAlg = CompFactory.FastTrackFinderLRTHypoAlg(
+        "FullScanLRTHypoAlg",
+        trackCountKey = recordable("HLT_FSLRT_TrackCount"),
+        tracksKey = flags.Trigger.InDetTracking.fullScanLRT.tracks_IDTrig,
+    )
+    
     selAcc.addHypoAlgo(theHypoAlg)
 
     log.info("Building the Step dictinary for FullScanLRT!")

@@ -158,9 +158,9 @@ def MinBiasTrkSequenceCfg(flags):
     selAcc = SelectionCA("MBTrackCountSel")
     selAcc.mergeReco(recoAcc)
     from TrigMinBias.MinBiasCountersConfig import TrackCounterHypoAlgCfg
-    trackCountHypoAlgo = TrackCounterHypoAlgCfg(flags)
+    trackCountHypoAlgo = TrackCounterHypoAlgCfg(flagsWithTrk)
     selAcc.mergeHypo(trackCountHypoAlgo)
-    return MenuSequenceCA(flags, selAcc, HypoToolGen = TrackCountHypoToolGen)
+    return MenuSequenceCA(flagsWithTrk, selAcc, HypoToolGen = TrackCountHypoToolGen)
 
 def MinBiasMbtsSequenceCfg(flags):
     recoAcc = InEventRecoCA(name="Mbts")

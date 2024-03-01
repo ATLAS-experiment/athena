@@ -20,11 +20,6 @@ vtxCountName = "HLT_TrigDV_VtxCount"
 
 def DVRecoFragment(flags):
 
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    fscfg = getInDetTrigConfig("fullScan")
-    lrtcfg = getInDetTrigConfig( 'DVtxLRT' )
-
-
     selAcc = SelectionCA("DVRecoSequence1")
     
     inputMakerAlg = CompFactory.EventViewCreatorAlgorithm(
@@ -32,9 +27,9 @@ def DVRecoFragment(flags):
         mergeUsingFeature = False,
         RoITool = CompFactory.ViewCreatorDVROITool(
             'ViewCreatorDVRoI',
-            RoisWriteHandleKey  = recordable( lrtcfg.roi ),
-            RoIEtaWidth = lrtcfg.etaHalfWidth,
-            RoIPhiWidth = lrtcfg.phiHalfWidth,
+            RoisWriteHandleKey  = recordable( flags.Trigger.InDetTracking.DVtxLRT.roi ),
+            RoIEtaWidth = flags.Trigger.InDetTracking.DVtxLRT.etaHalfWidth,
+            RoIPhiWidth = flags.Trigger.InDetTracking.DVtxLRT.phiHalfWidth,
         ),
         Views = "DVRoIViews",
         InViewRoIs = "InViewRoIs",
@@ -45,24 +40,24 @@ def DVRecoFragment(flags):
     
     reco = InViewRecoCA('DVRecoStep',viewMaker=inputMakerAlg)
 
-    flagsWithTrk = getFlagsForActiveConfig(flags, lrtcfg.name, log)
+    flagsWithTrk = getFlagsForActiveConfig(flags, flags.Trigger.InDetTracking.DVtxLRT.name, log)
 
     lrt_algs = trigInDetLRTCfg(
         flagsWithTrk,
-        fscfg.trkTracks_FTF(),
+        flags.Tracking.ActiveConfig.trkTracks_FTF,
         inputMakerAlg.InViewRoIs,
         in_view=True,
         extra_view_inputs=(
-            ( 'xAOD::TrackParticleContainer' , fscfg.tracks_FTF() ),
-            ( 'xAOD::VertexContainer' ,        fscfg.vertex ),
+            ( 'xAOD::TrackParticleContainer' , flags.Tracking.ActiveConfig.tracks_FTF ),
+            ( 'xAOD::VertexContainer' ,        flags.Tracking.ActiveConfig.vertex ),
         )
     )
 
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
     vertexingAlgs = TrigVrtSecInclusiveCfg( flags, "TrigVrtSecInclusive_TrigDV",
-                                            FirstPassTracksName = fscfg.tracks_FTF(),
-                                            SecondPassTracksName = lrtcfg.tracks_FTF(),
-                                            PrimaryVertexInputName = fscfg.vertex,
+                                            FirstPassTracksName = flags.Tracking.ActiveConfig.tracks_FTF,
+                                            SecondPassTracksName = flags.Trigger.InDetTracking.DVtxLRT.tracks_FTF,
+                                            PrimaryVertexInputName = flags.Tracking.ActiveConfig.vertex,
                                             VxCandidatesOutputName = recordable(vtxOutName),
                                             TrkPairOutputName = recordable(trkPairOutName) )
 
