@@ -43,7 +43,7 @@ def main():
     trf.setProdTaskDatabase(taskDb)
     trf.setProdDir(taskDir)
 
-    trf.getJobRunner(joboptionpath='runBeamSpotCalibration',
+    trf.getJobRunner(joboptionpath='runBeamSpotCalibration.py',
                      autoconfparams='DetDescrVersion',
                      taskpostprocsteps=taskPostProcSteps,
                      comment=cmd)
