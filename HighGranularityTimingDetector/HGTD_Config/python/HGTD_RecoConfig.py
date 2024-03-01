@@ -16,4 +16,7 @@ def HGTD_RecoCfg(flags):
     from HGTD_Config.HGTD_TrackTimeExtensionConfig import TrackTimeDefAndQualityAlgCfg
     result.merge(TrackTimeDefAndQualityAlgCfg(flags))
 
+    from HGTD_Config.HGTD_VertexTimeConfig import VertexTimeAlgCfg
+    result.merge(VertexTimeAlgCfg(flags))
+
     return result
