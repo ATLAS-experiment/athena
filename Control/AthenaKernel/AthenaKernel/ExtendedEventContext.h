@@ -78,7 +78,7 @@ namespace Atlas {
     EventIDBase::number_type m_conditionsRun {EventIDBase::UNDEFNUM};
     const TrigRoiDescriptor* m_roi {nullptr};
     const SG::ThinningCache* m_thinningCache {nullptr};
-    std::pmr::memory_resource* m_memResource;
+    std::pmr::memory_resource* m_memResource{nullptr};
   };
 
 
