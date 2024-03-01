@@ -5553,7 +5553,7 @@ HLT_j0_HT500XX0eta240_L1HT190-J15s5pETA21:
   eventCount: 0
 HLT_j0_HT500XX0eta240_pf_ftf_L1HT190-J15s5pETA21:
   eventCount: 0
-HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_DarkJetPEBTLA_L1HT190-J15s5pETA21:
+HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_DarkJetPEBTLA_L1HT190-jJ40s5pETA21:
   eventCount: 0
 HLT_j0_HT500XX0eta240_pf_ftf_preselcHT450_L1HT190-J15s5pETA21:
   eventCount: 0
@@ -6079,7 +6079,7 @@ HLT_j20_CLEANllp_momemfrac012_calratio_roiftf_preselj20emf12_L1TAU60:
   eventCount: 0
 HLT_j20_CLEANllp_momemfrac024_calratio_roiftf_preselj20emf24_L1TAU60:
   eventCount: 0
-HLT_j20_DarkJetPEBTLA_L1HT190-J15s5pETA21:
+HLT_j20_DarkJetPEBTLA_L1HT190-jJ40s5pETA21:
   eventCount: 0
 HLT_j20_L1HT190-J15s5pETA21:
   eventCount: 0
@@ -6119,7 +6119,7 @@ HLT_j20_pf_ftf_presel5j50_PhysicsTLA_L14J15:
   eventCount: 0
 HLT_j20_pf_ftf_presel6j40_PhysicsTLA_L14J15:
   eventCount: 0
-HLT_j20_pf_ftf_preselcHT450_DarkJetPEBTLA_L1HT190-J15s5pETA21:
+HLT_j20_pf_ftf_preselcHT450_DarkJetPEBTLA_L1HT190-jJ40s5pETA21:
   eventCount: 0
 HLT_j20_pf_ftf_preselcHT450_L1HT190-J15s5pETA21:
   eventCount: 0
