@@ -581,9 +581,6 @@ def getMCSignatures():
         ChainProp(name='HLT_g25_tight_icaloloose_L1eEM26M', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_g25_tight_icalotight_L1eEM26M', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
 
-        #------------ nopid trigger and etcut from ATR-26311
-        # ATR-23723
-        ChainProp(name='HLT_e5_nopid_L1eEM5', groups=SingleElectronGroup+['PS:NoBulkMCProd']), #ATR-27264
 
         #  ATR-26311
         #  Validating/checking eFEX and primary electron trigger
