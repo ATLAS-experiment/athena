@@ -16,6 +16,7 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
+#include "StorageSvc/DbType.h"
 #include "POOLCore/APRDefaults.h"
 
 //__________________________________________________________________________
@@ -213,7 +214,13 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
             containerName = dhContainerPrefix + "(" + tname + ")";
          }
       } else if (tname.compare(0, 13, "AttributeList") == 0) {
-         containerName = "ROOTTREE:" + std::string(APRDefaults::TTreeNames::EventTag) + "(" + key + ")";
+         // Find the right storage type and name for EventTag values
+         if( pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ) {
+            containerName = "ROOTRNTUPLE:" + std::string(APRDefaults::RNTupleNames::EventTag) + "(" + key + ")";
+         } else {
+            // no indexing for TTree storage (MN:not sure why)
+            containerName = "ROOTTREE:" + std::string(APRDefaults::TTreeNames::EventTag) + "(" + key + ")";
+         }
       } else {
          const std::string typeTok = "<type>", keyTok = "<key>";
          containerName = containerPrefix + containerFriendPostfix + containerNameHint;

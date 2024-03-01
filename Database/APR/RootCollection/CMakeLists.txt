@@ -5,7 +5,8 @@ atlas_subdir( RootCollection )
 
 # External dependencies:
 find_package( CORAL COMPONENTS CoralBase )
-find_package( ROOT COMPONENTS MathCore Graf Hist Tree TreePlayer Net RIO Cint Core pthread )
+find_package( ROOT COMPONENTS MathCore Graf Hist Tree TreePlayer Net RIO Core pthread ROOTNTuple ROOTVecOps )
+find_package( VDT )
 
 # Component(s) in the package:
 atlas_add_root_dictionary( RootCollection
@@ -18,6 +19,7 @@ atlas_add_library( RootCollection
                    ${RootCollectionDictSource}
                    PUBLIC_HEADERS RootCollection
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                                ${VDT_INCLUDE_DIRS} #VDT needed by RNTuple 
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES}
                    PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CollectionBase

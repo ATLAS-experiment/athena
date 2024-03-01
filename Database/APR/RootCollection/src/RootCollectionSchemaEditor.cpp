@@ -21,15 +21,6 @@
 //#include <iostream>
 //using namespace std;
 
-void methodNotImplemented(const std::string &method)
-{
-   throw pool::Exception( std::string("method not implemented"),
-                          std::string("RootCollectionSchemaEditor::") + method,
-                          "RootCollection" );
-}
-
-
-
 
 pool::RootCollection::RootCollectionSchemaEditor::
 RootCollectionSchemaEditor( RootCollection& collection,

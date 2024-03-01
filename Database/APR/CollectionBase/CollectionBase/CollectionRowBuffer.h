@@ -19,12 +19,12 @@ namespace pool {
    * @class CollectionRowBuffer CollectionRowBuffer.h CollectionBase/CollectionRowBuffer.h
    *
    * A class that acts as a buffer to be filled with the event reference and associated metadata
-   * values of a given row to be inserted into a collection or collection fragment by its 
+   * values of a given row to be inserted into a collection by its 
    * data editor object. The reference type row values are provided by the user in the form 
    * of POOL Token objects which are then internally converted to a database storable type. 
    * Note that this interface is only intended for data changes, not schema changes. 
-   * To perform the latter operations one should use the schema editor object of the collection 
-   * or collection fragment. The CollectionRowBuffer class may also act as a buffer to contain 
+   * To perform the latter operations one should use the schema editor object of the collection.
+   * The CollectionRowBuffer class may also act as a buffer to contain 
    * the rows of event references and associated metadata resulting from a query.
    */
   class CollectionRowBuffer

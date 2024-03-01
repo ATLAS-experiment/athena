@@ -26,12 +26,12 @@
 #include "RootDatabase.h"
 
 // Root include files
-#include <ROOT/RNTuple.hxx>
-#include <ROOT/RField.hxx>
+#include "ROOT/RNTuple.hxx"
+#include "ROOT/RField.hxx"
 
 #include "TError.h"
 // for version checks
-#include <TROOT.h>
+#include "TROOT.h"
 
 #include <algorithm>
 
@@ -106,6 +106,8 @@ uint64_t RNTupleContainer::size() {
   if( m_ntupleWriter ) s += m_ntupleWriter->size();
   return s;
 }
+#include <iostream>
+using namespace std;
 
 /// Open the container for object access
 DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
@@ -179,6 +181,8 @@ DbStatus RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
          }
          // Prepare Field descriptions
          for( auto& dsc : m_fieldDescs ) {
+            log << DbPrintLvl::Debug << "Adding new RNTuple Field: name=" << dsc.fieldname 
+                << "  typename=" << dsc.typeName() << DbPrint::endmsg;
             m_ntupleWriter->addField( dsc.fieldname, dsc.typeName() );
          }
       }
@@ -313,27 +317,22 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
           }
           dsc.rows_written++;
           break;
-/*
-  MN: Following types not ported to RNTuple (yet?)
        case DbColumn::BLOB:
+          // MN: BLOBs not really tested
           s_char_Blob.m_size    = p.blobSize();
           s_char_Blob.m_buffer  = (unsigned char*)p.blobData();
           dsc.object            = &s_char_Blob;
-          p.ptr                 = &dsc.object;
+          p.ptr                 = dsc.object;
           break;
        case DbColumn::STRING:
-       case DbColumn::LONG_STRING:
-          break;
        case DbColumn::NTCHAR:
-       case DbColumn::LONG_NTCHAR:
        case DbColumn::TOKEN:
-       {
-          void *d = p.deref();
-          p.ptr   = d;
-       }
-       break;
-*/
+          // copy char* to a string buffer
+          dsc.str = p.c_str;
+          p.ptr = &dsc.str;
+          break;
        default:
+          // native types are simply passed in p.ptr
           break;
       }
       if( !p.ptr ) {
@@ -343,7 +342,6 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
              << DbPrint::endmsg;
          return Error;
       }
-
       m_ntupleWriter->addFieldValue( dsc.fieldname, p.ptr );
       // fill the index field
       m_index = action.link.second;
