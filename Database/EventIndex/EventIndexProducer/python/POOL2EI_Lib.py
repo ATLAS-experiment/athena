@@ -822,14 +822,14 @@ class POOL2EI(PyAthena.Alg):
             del eInfoTrigger
 
         # ======================================================
-        # Sel reference and Provenance
+        # Self reference and Provenance
         # ======================================================
 
         Pstream_refs = {}  # provenance references
         procTag = None
 
         # -- Stream references
-        dh = store.retrieve('DataHeader')
+        dh = store.retrieve('DataHeader', 'EventSelector')
         procTag = dh.getProcessTag()
 
         if procTag == "":
