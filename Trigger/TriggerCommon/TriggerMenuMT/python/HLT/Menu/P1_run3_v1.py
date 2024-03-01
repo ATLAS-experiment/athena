@@ -273,7 +273,7 @@ def addCommonP1Signatures(chains):
         
         ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ30_EMPTY',  l1SeedThresholds=['jJ30'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eTAU12_EMPTY', l1SeedThresholds=['eTAU12'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
-        ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ60p30ETA49_EMPTY', l1SeedThresholds=['J30p31ETA49'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
+        ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ60p30ETA49_EMPTY', l1SeedThresholds=['jJ60p30ETA49'], stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         #                         
         ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ30_FIRSTEMPTY',  l1SeedThresholds=['jJ30'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1jJ60_FIRSTEMPTY',  l1SeedThresholds=['jJ60'],  stream=['LArCellsEmpty'],groups=['RATE:Calibration','BW:Detector']+SupportPhIGroup),
