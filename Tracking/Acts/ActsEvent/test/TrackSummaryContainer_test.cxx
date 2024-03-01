@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <boost/test/tools/old/interface.hpp>
 #undef NDEBUG
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(MutableCompilesWithInterface) {
   ACTS_STATIC_CHECK_CONCEPT(Acts::TrackContainerBackend,
                             ActsTrk::MutableTrackSummaryContainer);
 
-  using MutableTrackContainer = Acts::TrackContainer<ActsTrk::MutableTrackSummaryContainer, ActsTrk::MutableMultiTrajectory>;
+  using MutableTrackContainer [[maybe_unused]] = Acts::TrackContainer<ActsTrk::MutableTrackSummaryContainer, ActsTrk::MutableMultiTrajectory>;
 }
 
 struct EmptyBackend {
