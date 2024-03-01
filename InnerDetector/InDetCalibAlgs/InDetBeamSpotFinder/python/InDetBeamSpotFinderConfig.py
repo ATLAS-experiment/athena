@@ -3,25 +3,37 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def InDetBeamSpotRooFitCfg(flags, name="InDetBeamSpotRooFit", **kwargs):
+def InDetBeamSpotRooFitCfg(flags, jobConfig={}, name="InDetBeamSpotRooFit", **kwargs):
     result = ComponentAccumulator()
+
+    kwargs.setdefault("OutputLevel",min(3,jobConfig['outputlevel']))
+    if 'InitialKFactor'   in jobConfig: kwargs.setdefault("InitialKFactor",jobConfig['InitialKFactor'])
+    if 'ConstantKFactor'  in jobConfig: kwargs.setdefault("ConstantKFactor",jobConfig['ConstantKFactor'])
+    if 'RooFitMaxTransverseErr'  in jobConfig: kwargs.setdefault("vtxResCut",jobConfig['RooFitMaxTransverseErr'])
     
     result.setPrivateTools(
         CompFactory.InDet.InDetBeamSpotRooFit(name, **kwargs))
     return result
 
-def InDetBeamSpotVertexCfg(flags, name="InDetBeamSpotVertex", **kwargs):
+def InDetBeamSpotVertexCfg(flags, jobConfig={}, name="InDetBeamSpotVertex", **kwargs):
     result = ComponentAccumulator()
 
-    kwargs.setdefault("MaxSigmaTr", 20.)
-    kwargs.setdefault("OutlierChi2Tr", 20.)
-    kwargs.setdefault("TruncatedRMS", True)
-
+    kwargs.setdefault("OutputLevel",min(3,jobConfig['outputlevel']))
+    if 'MaxSigmaTr'       in jobConfig: kwargs.setdefault("MaxSigmaTr",jobConfig['MaxSigmaTr']) 
+    if 'OutlierChi2Tr'    in jobConfig: kwargs.setdefault("OutlierChi2Tr",jobConfig['OutlierChi2Tr'])
+    if 'InitialKFactor'   in jobConfig: kwargs.setdefault("InitParK",jobConfig['InitialKFactor'])
+    if 'ConstantKFactor'  in jobConfig: kwargs.setdefault("FixParK",jobConfig['ConstantKFactor'])
+    if 'FixWidth'         in jobConfig: kwargs.setdefault("FixWidth",jobConfig['FixWidth'])
+    if 'TruncartedRMS'    in jobConfig: kwargs.setdefault("TruncatedRMS",jobConfig['TruncatedRMS'])
+    if 'SetInitialRMS'    in jobConfig: kwargs.setdefault("SetInitialRMS",jobConfig['SetInitialRMS'])
+    if 'MaxSigmaVtx'      in jobConfig: kwargs.setdefault("InitParMaxSigmaX",jobConfig['MaxSigmaVtx'])
+    if 'MaxSigmaVtx'      in jobConfig: kwargs.setdefault("InitParMaxSigmaY",jobConfig['MaxSigmaVtx'])
+    
     result.setPrivateTools(
         CompFactory.InDet.InDetBeamSpotVertex(name, **kwargs))
     return result
 
-def InDetBeamSpotFinderCfg(flags, name="InDetBeamSpotFinder", **kwargs):
+def InDetBeamSpotFinderCfg(flags, jobConfig={}, name="InDetBeamSpotFinder", **kwargs):
     # Add BunchCrossingCondData
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
     result = BunchCrossingCondAlgCfg(flags)
@@ -29,12 +41,32 @@ def InDetBeamSpotFinderCfg(flags, name="InDetBeamSpotFinder", **kwargs):
     if "BeamSpotToolList" not in kwargs:
         kwargs.setdefault("BeamSpotToolList", [
             result.addPublicTool(result.popToolsAndMerge(
-                InDetBeamSpotRooFitCfg(flags))),
+                InDetBeamSpotRooFitCfg(flags,jobConfig))),
             result.addPublicTool(result.popToolsAndMerge(
-                InDetBeamSpotVertexCfg(flags))) ])
+                InDetBeamSpotVertexCfg(flags,jobConfig))) ])
 
-    kwargs.setdefault("VertexTreeName", "Vertices") 
-    kwargs.setdefault("VertexTypes", ["PriVtx"])
+    # Job configuration
+    kwargs.setdefault("OutputLevel",min(3,jobConfig['outputlevel']))
+    if 'VertexNtuple'       in jobConfig: kwargs.setdefault("VertexNtuple",jobConfig['VertexNtuple']) 
+    if 'WriteAllVertices'   in jobConfig: kwargs.setdefault("WriteAllVertices",jobConfig['WriteAllVertices']) 
+    if 'VertexTreeName'     in jobConfig: kwargs.setdefault("VertexTreeName",jobConfig['VertexTreeName'])
+    #Event selection options
+    if 'UseBCID'            in jobConfig: kwargs.setdefault("UseBCID",jobConfig['UseBCID'])
+    if 'UseFilledBCIDsOnly' in jobConfig: kwargs.setdefault("UseFilledBCIDsOnly",jobConfig['UseFilledBCIDsOnly'])
+    #Vertex Selection options
+    if 'VertexContainer'    in jobConfig: kwargs.setdefault("VertexContainer",jobConfig['VertexContainer'])
+    if 'MinTracksPerVtx'    in jobConfig: kwargs.setdefault("MinTracksPerVtx",jobConfig['MinTracksPerVtx'])
+    if 'MaxTracksPerVtx'    in jobConfig: kwargs.setdefault("MaxTracksPerVtx",jobConfig['MaxTracksPerVtx'])
+    if 'MaxVtxNum'          in jobConfig: kwargs.setdefault("MaxVtxNum",jobConfig['MaxVtxNum'])
+    if 'MaxVtxChi2'         in jobConfig: kwargs.setdefault("MaxVtxChi2",jobConfig['MaxVtxChi2'])
+    if 'MaxTransverseErr'   in jobConfig: kwargs.setdefault("MaxTransverseErr",jobConfig['MaxTransverseErr'])                      
+    if 'VertexTypes'        in jobConfig: kwargs.setdefault("VertexTypes",jobConfig['VertexTypes']) 
+    if 'MinVtxProb'         in jobConfig: kwargs.setdefault("MinVtxProb",jobConfig['MinVtxProb'])
+    #Beamspot Sorting options
+    if 'LumiRange'          in jobConfig: kwargs.setdefault("LumiRange",jobConfig['LumiRange'])
+    if 'RunRange'           in jobConfig: kwargs.setdefault("RunRange",jobConfig['RunRange'])
+    if 'EventRange'         in jobConfig: kwargs.setdefault("EventRange",jobConfig['EventRange'])
+    if 'GroupFitsBy'        in jobConfig: kwargs.setdefault("GroupFitsBy",jobConfig['GroupFitsBy'])
 
     result.addEventAlgo(CompFactory.InDet.InDetBeamSpotFinder(name, **kwargs))
     return result

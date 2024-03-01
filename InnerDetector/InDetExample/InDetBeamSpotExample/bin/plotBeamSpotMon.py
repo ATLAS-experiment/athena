@@ -66,6 +66,7 @@ c.Divide(3,4)
 # Open monitoring file
 mon = ROOT.TFile(filename)
 mondir = 'InDetGlobal/BeamSpot/'
+mondirCA = 'run_'+run+'/InDetGlobal/BeamSpot/'
 
 
 # Summary frame
@@ -89,6 +90,8 @@ for hname in ['trkDPhi', 'trkDPhiCorr',
     print ('Processing histogram',hname)
     ROOT.gStyle.SetOptStat(hDef[hname].get('stats',0))
     h = mon.Get(mondir+hname)
+    if h == None:
+        h = mon.Get(mondirCA+hname)
     if h != None:
         h.Draw(hDef[hname].get('opts',''))
     else:
