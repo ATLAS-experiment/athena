@@ -242,6 +242,7 @@ def createDataFlow(flags, chains, allDicts):
     # initialize arrays for monitor
     finalDecisions = [ [] for n in range(NSTEPS) ]
     CFseqList = [ [] for n in range(NSTEPS) ]
+    CFSeqByFilterName = [ {} for n in range(NSTEPS) ] # CFSeqeunces keyed by filter name (speedup)
 
     # loop over chains
     for chain in chains:
@@ -269,20 +270,19 @@ def createDataFlow(flags, chains, allDicts):
             else:
                 filterOutput = [CFNaming.filterOutName(filterName, inputName) for inputName in filterInput ]
 
-            foundCFSeq = [cfseq for cfseq in CFseqList[nstep] if filterName == cfseq.filter.Alg.getName()]
             # TODO: Check sequence consistency if skipping, to avoid issues like https://its.cern.ch/jira/browse/ATR-28617
-            log.debug("Found %d CF sequences with filter name %s", len(foundCFSeq), filterName)
-            if not foundCFSeq:
+            foundCFseq = CFSeqByFilterName[nstep].get(filterName, None)
+            log.debug("%s CF sequences with filter name %s",  "Not found" if foundCFseq is None else "Found", filterName)
+            if foundCFseq is None:
                 sequenceFilter = buildFilter(filterName, filterInput, chainStep.isEmpty)
                 CFseq = CFSequenceCA( chainStep = chainStep, filterAlg = sequenceFilter)
                 CFseq.connect(filterOutput)
+                CFSeqByFilterName[nstep][CFseq.filter.Alg.getName()] = CFseq
                 CFseqList[nstep].append(CFseq)
                 lastCFseq = CFseq
             else:                
-                if len(foundCFSeq) > 1:
-                    log.error("Found more than one sequence containing filter %s", filterName)
+                lastCFseq = foundCFseq
                 
-                lastCFseq = foundCFSeq[0]
                 # skip re-merging
                 if flags.Trigger.fastMenuGeneration:
                     for menuseq in chainStep.sequences:
