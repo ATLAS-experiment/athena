@@ -88,13 +88,13 @@ class TRTOverlay : public AthReentrantAlgorithm {
   Gaudi::Property<double> m_HTOccupancyCorrectionEC_noE{
       this, "TRT_HT_OccupancyCorrectionEndcapNoE", 0.050, ""};
   Gaudi::Property<double> m_HTOccupancyCorrectionB_Ar{
-      this, "TRT_HT_OccupancyCorrectionBarrelAr", 0.040, ""};
+      this, "TRT_HT_OccupancyCorrectionBarrelAr", 0.100, ""};
   Gaudi::Property<double> m_HTOccupancyCorrectionEC_Ar{
-      this, "TRT_HT_OccupancyCorrectionEndcapAr", 0.041, ""};
+      this, "TRT_HT_OccupancyCorrectionEndcapAr", 0.101, ""};
   Gaudi::Property<double> m_HTOccupancyCorrectionB_Ar_noE{
-      this, "TRT_HT_OccupancyCorrectionBarrelArNoE", 0.033, ""};
+      this, "TRT_HT_OccupancyCorrectionBarrelArNoE", 0.088, ""};
   Gaudi::Property<double> m_HTOccupancyCorrectionEC_Ar_noE{
-      this, "TRT_HT_OccupancyCorrectionEndcapArNoE", 0.042, ""};
+      this, "TRT_HT_OccupancyCorrectionEndcapArNoE", 0.102, ""};
   ToolHandle<InDet::ITRT_LocalOccupancy> m_TRT_LocalOccupancyTool{
       this, "TRT_LocalOccupancyTool", "TRT_LocalOccupancy", ""};
 };
