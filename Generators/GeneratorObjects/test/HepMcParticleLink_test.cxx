@@ -894,7 +894,11 @@ namespace MCTesting {
     ASSERT_TRUE( testLink1d < testLink2d );
 
     // Make links to another GenParticle from the first GenEvent
+#ifdef HEPMC3
     HepMC::ConstGenParticlePtr particle3 = ge1.particles().at(3);
+ #else
+    HepMC::ConstGenParticlePtr particle3 = HepMC::barcode_to_particle(&ge1, 4);
+#endif
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
     HepMcParticleLink testLink3a(particle3,dummyIndex1,
