@@ -8,11 +8,6 @@ flags = initConfigFlags()
 
 import configMy
 
-#from AthenaCommon.Constants import DEBUG
-#from AthenaCommon.Constants import INFO
-#from AthenaCommon.Constants import WARNING
-#from AthenaCommon.Constants import ERROR
-
 #Job options
 if 'outputlevel' not in configMy.jobConfig:                   configMy.jobConfig['outputlevel'] = 3
 if 'outputfileprefix' not in configMy.jobConfig:              configMy.jobConfig['outputfileprefix'] = ''

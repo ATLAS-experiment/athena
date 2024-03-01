@@ -11,7 +11,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot):
+def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=False):
     '''Function to configures some algorithms in the monitoring system.'''
     
     # Values set by default here
