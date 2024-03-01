@@ -12,7 +12,6 @@
 #include <StoreGate/WriteHandleKey.h>
 #include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
 #include <IRegionSelector/IRegSelTool.h>
-#include <InDetReadoutGeometry/SiDetectorElementCollection.h>
 #include "Cache.h"
 
 namespace ActsTrk {
@@ -55,13 +54,6 @@ private:
 
     ToolHandle<IRegSelTool> m_regionSelector {
 	this, "RegSelTool", "", "Region selector tool"
-    };
-
-    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_detEleCollKey {
-	this,
-	"SiDetectorElementCollectionKey",
-	"",
-	"Si detector element collection key"
     };
 
     SG::ReadHandleKey<RDOContainer> m_rdoContainerKey {

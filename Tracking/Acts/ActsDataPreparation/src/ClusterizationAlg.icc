@@ -17,7 +17,6 @@ StatusCode ClusterizationAlg<IClusteringTool>::initialize()
 {
     ATH_MSG_DEBUG("Initializing " << name() << " ...");
 
-    ATH_CHECK(m_detEleCollKey.initialize());
     ATH_CHECK(m_rdoContainerKey.initialize());
     ATH_CHECK(m_clusterContainerKey.initialize());
     ATH_CHECK(m_roiCollectionKey.initialize());
@@ -44,13 +43,6 @@ StatusCode ClusterizationAlg<IClusteringTool>::execute(const EventContext& ctx) 
 {
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto mon = Monitored::Group( m_monTool, timer );
-
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> detEleHandle( m_detEleCollKey, ctx );
-    const InDetDD::SiDetectorElementCollection* detElements( *detEleHandle );
-    if (detElements == nullptr) {
-      ATH_MSG_FATAL(m_detEleCollKey.fullKey() << " is not available.");
-      return StatusCode::FAILURE;
-    }
 
     Cache_WriteHandle cacheHandle;
     if(m_cache_enabled){
