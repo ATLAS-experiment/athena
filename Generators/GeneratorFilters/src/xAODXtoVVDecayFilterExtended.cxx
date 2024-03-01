@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
@@ -122,7 +122,8 @@ bool xAODXtoVVDecayFilterExtended::RunHistory(const xAOD::TruthParticle *pitr)
     if (result == m_PDGGrandParent)
         return true;
 
-    auto pitr_current = pitr->prodVtx()->incomingParticle(0);
+    //set pitr_current to pitr of grand parent 
+    auto pitr_current = pitr;
     while (result >= 0)
     {
         pitr_current = CheckGrandparent(pitr_current, result);
