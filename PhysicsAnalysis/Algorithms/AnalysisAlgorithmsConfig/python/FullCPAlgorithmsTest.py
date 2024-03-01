@@ -33,7 +33,7 @@ SAVE
   'ejets': """
 IMPORT SUBcommon
 EL_N 25000 >= 1
-EL_N tight 25000 == 1
+EL_N loose 25000 == 1
 MU_N 5000 == 0
 MWT < 170000
 MET+MWT > 40000
@@ -42,7 +42,7 @@ SAVE
   'mujets': """
 IMPORT SUBcommon
 EL_N 5000 == 0
-MU_N tight 25000 > 0
+MU_N medium 25000 > 0
 SAVE
 """
 }

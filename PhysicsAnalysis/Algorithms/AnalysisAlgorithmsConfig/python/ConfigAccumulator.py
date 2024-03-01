@@ -502,9 +502,14 @@ class ConfigAccumulator :
 
         config = self._containerConfig[containerName]
         decorations = []
+        hasSelectionName = False
         for selection in config.selections :
             if ((selection.name == '' and not skipBase) or selection.name == selectionName) and (selection.comesFrom not in excludeFrom) :
                 decorations += [selection.decoration]
+            if selection.name == selectionName :
+                hasSelectionName = True
+        if not hasSelectionName and selectionName != '' :
+            raise KeyError ('invalid selection name: ' + containerName + '.' + selectionName)
         return '&&'.join (decorations)
 
 
