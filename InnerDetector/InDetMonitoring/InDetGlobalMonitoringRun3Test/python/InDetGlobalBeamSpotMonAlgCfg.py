@@ -110,6 +110,7 @@ def InDetGlobalBeamSpotMonAlgCfg(helper, acc,
 
     if 'MinTracksPerVtx'   in jobConfig: kwargs.setdefault("minTracksPerVtx",jobConfig['MinTracksPerVtx'])
     if 'MinTrackPt'        in jobConfig: kwargs.setdefault("minTrackPt",jobConfig['MinTrackPt'])
+    useBeamSpot = False
     if 'useBeamSpot'       in jobConfig:
         kwargs.setdefault("useBeamspot",jobConfig['useBeamSpot'])
         useBeamSpot = jobConfig['useBeamSpot']
