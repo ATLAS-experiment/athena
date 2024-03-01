@@ -43,7 +43,7 @@ def main():
     trf.setProdTaskDatabase(taskDb)
     trf.setProdDir(taskDir)
 
-    trf.getJobRunner(joboptionpath='InDetBeamSpotExample/VertexTemplate.py',
+    trf.getJobRunner(joboptionpath='runBeamSpotCalibration',
                      autoconfparams='DetDescrVersion',
                      taskpostprocsteps=taskPostProcSteps,
                      comment=cmd)
