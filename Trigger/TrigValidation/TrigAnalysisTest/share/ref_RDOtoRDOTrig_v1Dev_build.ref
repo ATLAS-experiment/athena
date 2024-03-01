@@ -2618,6 +2618,12 @@ HLT_3j45_j45_3timeSig_L14jJ40:
     0: 3
   stepFeatures:
     0: 35
+HLT_3j45_j45_L14jJ40:
+  eventCount: 12
+  stepCounts:
+    0: 12
+  stepFeatures:
+    0: 140
 HLT_3j60_0eta290_020jvt_bdl1d77_pf_ftf_presel3j45b95_L13J35p0ETA23:
   eventCount: 0
   stepCounts:
@@ -15982,6 +15988,8 @@ HLT_j220_j150_2timeSig_L1jJ160:
 HLT_j220_j150_2timing_L1jJ160:
   eventCount: 0
 HLT_j220_j150_3timeSig_L1jJ160:
+  eventCount: 0
+HLT_j220_j150_L1jJ160:
   eventCount: 0
 HLT_j220f_L1J75p31ETA49:
   eventCount: 0
