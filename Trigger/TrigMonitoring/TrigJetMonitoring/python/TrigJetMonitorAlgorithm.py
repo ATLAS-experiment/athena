@@ -63,8 +63,6 @@ L1JetCollections['pp'] = {
   
   'L1_jFexSRJetRoI': {'MatchTo': match_smallRL1_OfflineJets_List},
 
-  'L1_jFexLRJetRoI': {'MatchTo': match_largeRL1_OfflineJets_List},
-
   'L1_gFexSRJetRoI': {'MatchTo': match_smallRL1_OfflineJets_List},
 
   'L1_gFexLRJetRoI': {'MatchTo': match_largeRL1_OfflineJets_List},
@@ -103,7 +101,6 @@ for case in L1JetCollections.keys():
 l1Coll2MatcherKey = {
   'LVL1JetRoIs': 'L1JetContainerName1',
   'L1_jFexSRJetRoI': 'L1jFexSRJetRoIContainerName',
-  'L1_jFexLRJetRoI': 'L1jFexLRJetRoIContainerName',
   'L1_gFexSRJetRoI': 'L1gFexJetRoIContainerName',
   'L1_gFexLRJetRoI': 'L1gFexJetRoIContainerName',
 }
@@ -130,17 +127,15 @@ Chain2L1JetCollDict['pp'] = { # set L1 jet collection name for L1 jet chains
   'L1_jJ40': ['L1_jFexSRJetRoI'],
   'L1_jJ50': ['L1_jFexSRJetRoI'],
   'L1_jJ160': ['L1_jFexSRJetRoI'],
+  'L1_jJ85p0ETA21_3jJ40p0ETA25': ['L1_jFexSRJetRoI'],
+  'L1_3jJ70p0ETA23': ['L1_jFexSRJetRoI'],
+  'L1_4jJ40': ['L1_jFexSRJetRoI'],
 
   'L1_gJ20': ['L1_gFexSRJetRoI'],
   'L1_gJ50': ['L1_gFexSRJetRoI'],
   'L1_gJ100': ['L1_gFexSRJetRoI'],
 
   'L1_gJ160': ['L1_gFexSRJetRoI'],
-
-  'L1_jLJ40': ['L1_jFexLRJetRoI'],
-  'L1_jLJ80': ['L1_jFexLRJetRoI'],
-  'L1_jLJ120': ['L1_jFexLRJetRoI'],
-  'L1_jLJ140': ['L1_jFexLRJetRoI'],
 
   'L1_gLJ80': ['L1_gFexLRJetRoI'],
   'L1_gLJ120': ['L1_gFexLRJetRoI'],
@@ -193,9 +188,7 @@ Legacy2PhaseIgJThresholdDict = {
   'J120' : 'gJ180',
   'J400' : 'gJ500',
 }
-Legacy2PhaseIjLJThresholdDict = {
-  'J100' : 'jLJ140'
-}
+
 Legacy2PhaseIgLJThresholdDict = {
   'J100' : 'gLJ140'
 }
@@ -265,13 +258,13 @@ def getChains2Monitor(inputFlags, monMode):
         elif 'a10r' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMTopoRCJets_subjesIS"
         else: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10LCTopoJets_subjes"
       elif '_noalg_' in chainName: 
-        Chains2Monitor['pp'][chainName]["RefChain"] = "HLT_j45_pf_ftf_preselj20_L1J15" # temporarily modify to using small-R jet in turn-on for both small and large-R jets to fix tier0 jet mon crash ATR-25800!!
+        Chains2Monitor['pp'][chainName]["RefChain"] = "HLT_j45_pf_ftf_preselj20_L1jJ40" # temporarily modify to using small-R jet in turn-on for both small and large-R jets to fix tier0 jet mon crash ATR-25800!!
         Chains2Monitor['pp'][chainName]["OfflineColl"] = "AntiKt4EMPFlowJets"
-        if 'jJ' in chainName or 'gJ' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
-        if 'jLJ' in chainName or 'gLJ' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf"
+        if 'gLJ' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf"
       else: continue
 
-    # additional hard-coded chains for efficiency monitoring # Phase-I equivalents added by logic below, for now using legacy as reference
+    # only HLT_noalg get efficiency curves by default, so...
+    # these are additional hard-coded chains for efficiency monitoring
     if Chains2Monitor['pp'].get('HLT_j420_L1J100'): Chains2Monitor['pp']['HLT_j420_L1J100'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})
     if Chains2Monitor['pp'].get('HLT_3j200_L1J100'): Chains2Monitor['pp']['HLT_3j200_L1J100'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})    
     if Chains2Monitor['pp'].get('HLT_4j120_L13J50'): Chains2Monitor['pp']['HLT_4j120_L13J50'].update({"RefChain": "HLT_j85_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"}) 
@@ -279,38 +272,13 @@ def getChains2Monitor(inputFlags, monMode):
     if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})    
     if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_preselj225_L1J100'): Chains2Monitor['pp']['HLT_j400_pf_ftf_preselj225_L1J100'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1J20", "OfflineColl": "AntiKt4EMPFlowJets"})
 
+    if Chains2Monitor['pp'].get('HLT_j420_L1jJ160'): Chains2Monitor['pp']['HLT_j420_L1jJ160'].update({"RefChain": "HLT_j85_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"})
+    if Chains2Monitor['pp'].get('HLT_3j200_L1jJ160'): Chains2Monitor['pp']['HLT_3j200_L1jJ160'].update({"RefChain": "HLT_j85_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"})    
+    if Chains2Monitor['pp'].get('HLT_4j120_L13jJ90'): Chains2Monitor['pp']['HLT_4j120_L13jJ90'].update({"RefChain": "HLT_j85_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"}) 
+    if Chains2Monitor['pp'].get('HLT_5j80_pf_ftf_presel5j50_L14jJ40'): Chains2Monitor['pp']['HLT_5j80_pf_ftf_presel5j50_L14jJ40'].update({"RefChain": "HLT_j45_pf_ftf_preselj20_L1jJ40", "OfflineColl": "AntiKt4EMPFlowJets"})    
+    if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_L1jJ160'): Chains2Monitor['pp']['HLT_j400_pf_ftf_L1jJ160'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"})    
+    if Chains2Monitor['pp'].get('HLT_j400_pf_ftf_preselj225_L1jJ160'): Chains2Monitor['pp']['HLT_j400_pf_ftf_preselj225_L1jJ160'].update({"RefChain": "HLT_j85_pf_ftf_preselj50_L1jJ50", "OfflineColl": "AntiKt4EMPFlowJets"})
 
-    # Phase1: duplicate all relevant chains with jFex algos
-    temp_Phase1_chains = dict()
-    L1pattern = re.compile(r"L1([0-9]*[J][0-9]+)")
-    for chainName in Chains2Monitor['pp']:
-      foundL1 = L1pattern.search(chainName)
-      if foundL1:
-        L1Legacy =  foundL1.group(1)
-        if L1Legacy in Legacy2PhaseIjJThresholdDict:
-            L1PhaseI = Legacy2PhaseIjJThresholdDict[L1Legacy]
-            newChain = chainName.replace(L1Legacy,L1PhaseI)
-            temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
-        if L1Legacy in Legacy2PhaseIgJThresholdDict:
-            L1PhaseI = Legacy2PhaseIgJThresholdDict[L1Legacy]
-            newChain = chainName.replace(L1Legacy,L1PhaseI)
-            temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
-        if "a10" in chainName:
-            if L1Legacy in Legacy2PhaseIjLJThresholdDict:   ## For now monitor a10 chains seeded by both jLJ and jJ items.
-                L1PhaseI = Legacy2PhaseIjLJThresholdDict[L1Legacy]
-                newChain = chainName.replace(L1Legacy,L1PhaseI)
-                temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
-            if L1Legacy in Legacy2PhaseIgLJThresholdDict:   ## For now monitor a10 chains seeded by both jLJ and jJ items.
-                L1PhaseI = Legacy2PhaseIgLJThresholdDict[L1Legacy]
-                newChain = chainName.replace(L1Legacy,L1PhaseI)
-                temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
-      if 'L1SC111-CJ15' in chainName:
-        for largerSeed in ('L1SC111-CjJ40', 'L1jLJ140', 'L1jLJ160'):
-          newChain = chainName.replace('L1SC111-CJ15', largerSeed)
-          temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName]      
-          pass
-        pass
-    Chains2Monitor['pp'].update(temp_Phase1_chains)
   else: 
     errmsg = 'Returned empty Chains2Monitor due to invalid monMode'
     raise RuntimeError(errmsg)
@@ -337,7 +305,8 @@ def getBinningFromThreshold(chain,varname):
   #pt and et binning based on threshold
   if varname == "pt" or varname == "et":
     if 'noalg' in chain:
-        return 100,xmin,500000 # good enough for L1 jJ40 & jJ100
+        if 'jJ500' in chain or 'J400' in chain: return 160,xmin,800000 
+        else: return 100,xmin,500000 # good enough for L1 jJ40 & jJ100
     else:
         #threshold = int(chain.split("_")[1].split('j')[1])
         threshold = int(re.search(r'\d+',chain.split("_")[1].split('j')[1]).group())
@@ -485,8 +454,6 @@ def getL1JetCopyAlg(injets,outjets):
         jcopy_alg = CompFactory.L1JetCopyAlgorithm_JTM_JetRoIContainer_(jcopy_alg_name)    
     elif injets == "L1_jFexSRJetRoI":
         jcopy_alg = CompFactory.L1JetCopyAlgorithm_JTM_jFexSRJetRoIContainer_(jcopy_alg_name)    
-    elif injets == "L1_jFexLRJetRoI":
-        jcopy_alg = CompFactory.L1JetCopyAlgorithm_JTM_jFexLRJetRoIContainer_(jcopy_alg_name)    
     elif injets in ["L1_gFexSRJetRoI", "L1_gFexLRJetRoI"]:
         jcopy_alg = CompFactory.L1JetCopyAlgorithm_JTM_gFexJetRoIContainer_(jcopy_alg_name)    
     else:
