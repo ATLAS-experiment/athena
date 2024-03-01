@@ -223,26 +223,19 @@ def flatAlgorithmSequences( start ):
     __inner(start, c)
     return OrderedDict(c)
 
-def flatSequencers( start, algsCollection=None ):
-    """ Returns dict of sequences keyed by name and containing list of it's members """
 
-    def __inner( seq, collector ):
-        if compName(seq) not in collector:
-            collector[compName(seq)] = []
+def iterSequences( start ):
+    """Iterator of sequences and their algorithms from (and including) the `start`
+    sequence object. Do start from a sequence name use findSubSequence."""
+    def __inner( seq ):
         for c in getSequenceChildren(seq):
-            isSeq = isSequence(c)
-            if not isSeq and algsCollection is not None and compName(c) in algsCollection:
-                collector[compName(seq)].append( algsCollection[compName(c)] )
-                continue
-            collector[compName(seq)].append( c )
-            if isSeq and compName(c) not in collector:
-                __inner( c, collector )
+            yield c
+            if isSequence(c):
+                yield from __inner(c)
 
+    yield start
+    yield from __inner(start)
 
-    from collections import defaultdict
-    c = defaultdict(list)
-    __inner(start, c)
-    return c
 
 # self test
 import unittest
@@ -288,15 +281,27 @@ class TestCF(object):
         owner = findOwningSequence( self.top, "SomeAlg0")
         self.assertEqual( compName(owner) , "top", "Wrong owner %s" % compName(owner) )
 
-    def test_flatCollectors( self ):
-        flat = flatAlgorithmSequences( self.top )
-        #print "here", flat.keys()
-        expected = [ "top", "nest2" ]
-        self.assertEqual( set( flat.keys() ), set( expected ), "To many or to few sequences in flat structure, present: %s expected: %s "% ( " ".join( flat.keys() ), " ".join( expected ) ) )
+    def test_iterSequences( self ):
+        # Traverse from top
+        result = [seq.getName() for seq in iterSequences( self.top )]
+        self.assertEqual( result, ['top', 'nest1', 'nest2', 'deep_nest1', 'deep_nest2',
+                                   'SomeAlg1', 'SomeAlg2', 'SomeAlg3', 'SomeAlg0'] )
 
-        expected = [ "top", "nest1", "nest2", "deep_nest1", "deep_nest2" ]
-        flat = flatSequencers( self.top )
-        self.assertEqual( set( flat.keys() ), set( expected ), "To many or to few sequences in flat structure, present: %s expected: %s "% ( " ".join( flat.keys() ), " ".join( expected ) ) )
+        # Traverse from nested sequence
+        nest2 = findSubSequence( self.top, "nest2" )
+        result = [seq.getName() for seq in iterSequences( nest2 )]
+        self.assertEqual( result, ['nest2', 'deep_nest1', 'deep_nest2',
+                                   'SomeAlg1', 'SomeAlg2', 'SomeAlg3'] )
+
+        # Traverse empty sequence
+        deep_nest2 = findSubSequence( self.top, "deep_nest2" )
+        result = [seq.getName() for seq in iterSequences( deep_nest2 )]
+        self.assertEqual( result, ['deep_nest2'] )
+
+        # Traverse from algorithm
+        alg1 = findAlgorithm( self.top, "SomeAlg1" )
+        result = [seq.getName() for seq in iterSequences( alg1 )]
+        self.assertEqual( result, ['SomeAlg1'] )
 
     def test_findAlgorithms( self ):
         a1 = findAlgorithm( self.top, "SomeAlg0" )
