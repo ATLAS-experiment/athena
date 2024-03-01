@@ -64,6 +64,7 @@ CmdLineArgs2::initTypes()
 {
    // Is there a way to do this with static something?
    m_allowedTypes.push_back("RootCollection");
+   m_allowedTypes.push_back("RNTCollection");
    m_allowedTypes.push_back("PHYSICAL_NAME");
    m_allowedTypes.push_back("LOGICAL_NAME");
    m_allowedTypes.push_back("GUID");

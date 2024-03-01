@@ -72,6 +72,9 @@ class RNTupleContainer : public DbContainerImp
     TClass*     clazz = nullptr;
     void*       object = nullptr;
 
+    // if writing char* keep a copy here as an std::string
+    std::string str;
+
     // ----  extra variables used for AuxDyn attributes
     // number of rows written to this branch so far
     size_t rows_written = 0;

@@ -11,6 +11,8 @@ namespace APRDefaults {
       static constexpr const char* EventData {"EventData"};
       static constexpr const char* EventTag  {"EventTag"};
    };
-    
+
+   static constexpr const char* IndexColName {"index_ref"};
+
 };
   

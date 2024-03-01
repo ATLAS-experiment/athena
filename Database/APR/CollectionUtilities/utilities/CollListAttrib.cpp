@@ -113,6 +113,7 @@ int main(int argc, const char *argv[])
 	 }
 
 	 const pool::ICollectionDescription &description = collection->description();
+         // description.printOut(); // for debug
 	 collMap[i] = collection;
 	 collCounter++;
 	 vector< pair<string,string> > spec;

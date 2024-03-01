@@ -3,6 +3,7 @@
 */
 
 #include "RootCollection.h"
+#include "CollectionCommon.h"
 #include "RootCollectionQuery.h"
 
 #include "PersistentDataModel/Token.h"
@@ -39,13 +40,6 @@ namespace pool {
 
   namespace RootCollection { 
 
-    // MN: recreate replaced by update to not overwrite the file
-    const char* const RootCollection::poolOptToRootOpt[] = {
-      "CREATE", "UPDATE", "UPDATE", "READ"};
-
-    const Io::IoFlags RootCollection::poolOptToFileMgrOpt[] = { 
-      Io::WRITE|Io::CREATE, Io::WRITE|Io::APPEND, Io::WRITE|Io::APPEND, Io::READ };
-
     const char* const RootCollection::c_tokenBranchName = "Token";
     const char* const RootCollection::c_attributeListLayoutName = "Schema"; 
 
@@ -81,9 +75,10 @@ namespace pool {
      void  RootCollection::delayedFileOpen( const std::string& method )
      {
         if( m_open && !m_file && m_session && m_mode != ICollection::READ ) {
-           m_file = TFile::Open(m_fileName.c_str(), poolOptToRootOpt[m_mode] );
+           m_file = TFile::Open(m_fileName.c_str(), pool::RootCollection::poolOptToRootOpt[m_mode] );
            if(!m_file || m_file->IsZombie()) {
-              throw pool::Exception( string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName,
+              throw pool::Exception( string("ROOT cannot \"") + pool::RootCollection::poolOptToRootOpt[m_mode] 
+                                     + "\" file " + m_fileName,
                                      std::string("RootCollection::") + method,
                                      "RootCollection" );
            }
@@ -261,7 +256,7 @@ namespace pool {
       if( m_session == 0 || m_mode == ICollection::READ || m_mode == ICollection::UPDATE ) {
          // first step: Try to open the file
          m_poolOut << coral::Info << "Opening Collection File " << m_fileName << " in mode: "
-                   << poolOptToRootOpt[m_mode] << coral::MessageStream::endmsg;
+                   << pool::RootCollection::poolOptToRootOpt[m_mode] << coral::MessageStream::endmsg;
          bool fileExists = !gSystem->AccessPathName( m_fileName.c_str() );
          m_poolOut << coral::Debug << "File " << m_fileName
 		   << (fileExists? " exists." : " does not exist." ) << corENDL;
@@ -269,8 +264,8 @@ namespace pool {
          if( !fileExists && m_mode != ICollection::CREATE && m_mode != ICollection::CREATE_AND_OVERWRITE )
             m_file = 0;
          else {
-            const char* root_mode = poolOptToRootOpt[m_mode];
-	    Io::IoFlags io_mode = poolOptToFileMgrOpt[m_mode];
+            const char* root_mode = pool::RootCollection::poolOptToRootOpt[m_mode];
+            Io::IoFlags io_mode = pool::RootCollection::poolOptToFileMgrOpt[m_mode];
 
             if( fileExists && (m_mode == ICollection::CREATE
                                || m_mode == ICollection::CREATE_AND_OVERWRITE ) ) {
@@ -318,7 +313,8 @@ namespace pool {
 	    }
          }
          if(!m_file || m_file->IsZombie()) {
-            throw pool::Exception( string("ROOT cannot \"") + poolOptToRootOpt[m_mode] + "\" file " + m_fileName,
+            throw pool::Exception( string("ROOT cannot \"") + pool::RootCollection::poolOptToRootOpt[m_mode] 
+                                   + "\" file " + m_fileName,
                                    "RootCollection::open", 
                                    "RootCollection" );
          }
