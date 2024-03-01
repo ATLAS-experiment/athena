@@ -100,7 +100,7 @@ def fromRunArgs(runArgs):
         detectors = None
 
     # Setup digitization flags
-    from Digitization.DigitizationConfigFlags import digitizationRunArgsToFlags
+    from DigitizationConfig.DigitizationConfigFlags import digitizationRunArgsToFlags
     digitizationRunArgsToFlags(runArgs, flags)
 
     # Setup detector flags
@@ -141,7 +141,7 @@ def fromRunArgs(runArgs):
     cfg = OverlayMainCfg(flags)
 
     # Special message service configuration
-    from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
+    from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
     cfg.merge(DigitizationMessageSvcCfg(flags))
 
     # Special Configuration postInclude

@@ -5,9 +5,9 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
-from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
-from Digitization.PileUpToolsConfig import PileUpToolsCfg
-from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
+from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from DigitizationConfig.PileUpToolsConfig import PileUpToolsCfg
+from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from PixelConditionsAlgorithms.PixelConditionsConfig import (
     PixelConfigCondAlgCfg, PixelChargeCalibCondCfg,

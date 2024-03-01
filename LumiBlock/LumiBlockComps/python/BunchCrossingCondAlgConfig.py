@@ -15,7 +15,7 @@ def BunchCrossingCondAlgCfg(flags):
 
     if flags.Beam.BunchStructureSource == BunchStructureSource.MC:
         folder = '/Digitization/Parameters'
-        from Digitization.DigitizationParametersConfig import readDigitizationParameters
+        from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
         result.merge(readDigitizationParameters(flags))
     elif flags.Beam.BunchStructureSource == BunchStructureSource.FILLPARAMS:
         folder = '/TDAQ/OLC/LHC/FILLPARAMS'

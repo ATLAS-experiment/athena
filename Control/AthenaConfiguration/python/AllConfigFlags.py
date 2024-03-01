@@ -282,9 +282,9 @@ def initConfigFlags():
 
 #Digitization Flags:
     def __digitization():
-        from Digitization.DigitizationConfigFlags import createDigitizationCfgFlags
+        from DigitizationConfig.DigitizationConfigFlags import createDigitizationCfgFlags
         return createDigitizationCfgFlags()
-    _addFlagsCategory(acf, "Digitization", __digitization, 'Digitization' )
+    _addFlagsCategory(acf, "Digitization", __digitization, 'DigitizationConfig' )
 
 #Overlay Flags:
     def __overlay():

@@ -52,7 +52,7 @@ def LuminosityCondAlgCfg (flags, useOnlineLumi=None, suffix=None):
 
 
 def luminosityCondAlgMCCfg (flags, name, result):
-    from Digitization.DigitizationParametersConfig import readDigitizationParameters
+    from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
     result.merge(readDigitizationParameters(flags))
     return { 'LuminosityFolderInputKey' : '',
              'DigitizationFolderInputKey' : '/Digitization/Parameters',

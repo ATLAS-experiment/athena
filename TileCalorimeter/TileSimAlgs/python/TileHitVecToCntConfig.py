@@ -6,8 +6,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
-from Digitization.PileUpToolsConfig import PileUpToolsCfg
+from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from DigitizationConfig.PileUpToolsConfig import PileUpToolsCfg
 
 def getTileFirstXing():
     """Return the earliest bunch crossing time for which interactions will be sent to the TileHitVecToCntTool"""
