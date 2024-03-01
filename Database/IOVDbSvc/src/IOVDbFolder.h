@@ -5,6 +5,7 @@
 // IOVDbFolder.h
 // helper class for IOVDbSvc managing folder access
 // Richard Hawkings, started 24/11/08
+
 #ifndef IOVDBSVC_IOVDBFOLDER_H
 #define IOVDBSVC_IOVDBFOLDER_H
 
@@ -26,6 +27,7 @@
 #include <memory>
 #include <algorithm>
 #include "FolderTypes.h"
+#include "BasicFolder.h"
 #include "IovStore.h"
 
 #include <map> 
@@ -235,6 +237,13 @@ private:
   // Function which converts openended CREST IOVs into non-overlapping IOVs
   // It returns a vector of non-overlapping IOVs + corresponding Hashes
   std::vector<IOVHash> fetchCrestIOVs();
+
+  // Function which reads CREST objects by the cache IOV boundaries
+  std::vector<IOVDbNamespace::BasicFolder> fetchCrestObjects(cool::ValidityKey since
+		                                             , cool::ValidityKey until
+					                     , bool vectorPayloadFlag
+					                     , cool::ValidityKey vkey /* Temporary! */
+							     , const std::string& nodeDesc);
 
   // __________________________________________________________
 
