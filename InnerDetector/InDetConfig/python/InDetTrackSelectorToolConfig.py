@@ -276,15 +276,16 @@ def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool
     kwargs.setdefault("fitChi2OnNdfMax",50.0)
     kwargs.setdefault("z0Max",99999.0*mm)   
     kwargs.setdefault("IPd0Max",10.0*mm)    
-    kwargs.setdefault("IPd0Max",300.0*mm)   
+    kwargs.setdefault("IPz0Max",300.0*mm)   
     kwargs.setdefault("etaMax",2.1)
     kwargs.setdefault("nHitBLayer",0)
     kwargs.setdefault("nHitPix",2)
     kwargs.setdefault("nHitBLayerPlusPix",0)
     kwargs.setdefault("nHitSct",0)
     kwargs.setdefault("nHitSi",7)
+    kwargs.setdefault("nHitTrt",20)
     kwargs.setdefault("nHitTrtPlusOutliers",20)
-    kwargs.setdefault("nHitTrtPlusOutliersHighE",20)
+    kwargs.setdefault("nHitTrtPlusOutliersHighE",0)
     kwargs.setdefault("nHitTrtHighE",0)
     
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg

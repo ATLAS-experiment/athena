@@ -21,22 +21,13 @@ PixelRawDataProviderTool::PixelRawDataProviderTool(const std::string& type, cons
   declareInterface<IPixelRawDataProviderTool>(this);   
 }
 
-PixelRawDataProviderTool::~PixelRawDataProviderTool() {}
- 
 StatusCode PixelRawDataProviderTool::initialize() {
-  CHECK(AthAlgTool::initialize());
-  ATH_MSG_DEBUG("PixelRawDataProviderTool::initialize()");
+  ATH_CHECK(AthAlgTool::initialize());
   ATH_CHECK(m_decoder.retrieve());
-  ATH_MSG_INFO("Retrieved tool " << m_decoder);
   
-  ATH_CHECK(m_LVL1CollectionKey.initialize());
-  ATH_CHECK(m_BCIDCollectionKey.initialize());
+  ATH_CHECK(m_LVL1CollectionKey.initialize(m_storeInDetTimeColls));
+  ATH_CHECK(m_BCIDCollectionKey.initialize(m_storeInDetTimeColls));
 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode PixelRawDataProviderTool::finalize() {
-  ATH_MSG_DEBUG("PixelRawDataProviderTool::finalize()");
   return StatusCode::SUCCESS;
 }
 
@@ -56,16 +47,18 @@ StatusCode PixelRawDataProviderTool::convert(std::vector<const ROBFragment*>& ve
   SG::WriteHandle<InDetTimeCollection> LVL1Collection;
   SG::WriteHandle<InDetTimeCollection> BCIDCollection;
 
-  //    are we working on a new event ?
-  LVL1Collection = SG::makeHandle(m_LVL1CollectionKey,ctx);
-  ATH_CHECK(LVL1Collection.record(std::make_unique<InDetTimeCollection>()));
-  ATH_MSG_DEBUG("InDetTimeCollection " << LVL1Collection.name() << " registered in StoreGate");
-  LVL1Collection->reserve(vecRobs.size());
+  if ( m_storeInDetTimeColls ) {
+    //    are we working on a new event ?
+    LVL1Collection = SG::makeHandle(m_LVL1CollectionKey,ctx);
+    ATH_CHECK(LVL1Collection.record(std::make_unique<InDetTimeCollection>()));
+    ATH_MSG_DEBUG("InDetTimeCollection " << LVL1Collection.name() << " registered in StoreGate");
+    LVL1Collection->reserve(vecRobs.size());
 
-  BCIDCollection = SG::makeHandle(m_BCIDCollectionKey,ctx);
-  ATH_CHECK(BCIDCollection.record(std::make_unique<InDetTimeCollection>()));
-  ATH_MSG_DEBUG("InDetTimeCollection " << BCIDCollection.name() << " registered in StoreGate");
-  BCIDCollection->reserve(vecRobs.size());
+    BCIDCollection = SG::makeHandle(m_BCIDCollectionKey,ctx);
+    ATH_CHECK(BCIDCollection.record(std::make_unique<InDetTimeCollection>()));
+    ATH_MSG_DEBUG("InDetTimeCollection " << BCIDCollection.name() << " registered in StoreGate");
+    BCIDCollection->reserve(vecRobs.size());
+  }
 
 #ifdef PIXEL_DEBUG
     ATH_MSG_DEBUG(" New event, reset the collection set");
@@ -78,6 +71,7 @@ StatusCode PixelRawDataProviderTool::convert(std::vector<const ROBFragment*>& ve
     ATH_MSG_DEBUG("Found ROB " << std::hex << robid << std::dec);
 #endif
 
+  if ( m_storeInDetTimeColls ) {
     unsigned int lvl1id = (*rob_it)->rod_lvl1_id();
     LVL1Collection->emplace_back(robid,lvl1id) ;
 
@@ -87,6 +81,8 @@ StatusCode PixelRawDataProviderTool::convert(std::vector<const ROBFragment*>& ve
 #ifdef PIXEL_DEBUG
       ATH_MSG_DEBUG("Stored LVL1ID "<<lvl1id<<" and BCID "<<bcid<<" in InDetTimeCollections");
 #endif
+
+  }
 
     // here the code for the timing monitoring should be reinserted
     // using 1 container per event and subdetector

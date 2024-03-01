@@ -27,7 +27,7 @@ Digi_tf.py \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileName} \
     --postExec 'all:from IOVDbSvc.IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-13TeV-MC16-002"))' \
-    --postInclude 'PyJobTransforms.UseFrontier' 'HITtoRDO:Digitization.DigitizationSteering.DigitizationTestingPostInclude' \
+    --postInclude 'PyJobTransforms.UseFrontier' 'HITtoRDO:DigitizationConfig.DigitizationSteering.DigitizationTestingPostInclude' \
     --preInclude 'HITtoRDO:Campaigns.MC20a' \
     --preExec 'HITtoRDO:flags.Digitization.InputBeamSigmaZ=42;' \
     --skipEvents 0

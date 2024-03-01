@@ -5,9 +5,9 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
-from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
-from Digitization.PileUpToolsConfig import PileUpToolsCfg
-from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
+from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from DigitizationConfig.PileUpToolsConfig import PileUpToolsCfg
+from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
 from MuonConfig.MuonByteStreamCnvTestConfig import MM_DigitToRDOCfg
 from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg

@@ -299,10 +299,12 @@ def muCombLRTAlgSequenceCfg(flags, is_probe_leg=False):
     
     viewName="l2muCombLRT"
     ViewCreatorCenteredOnIParticleTool=CompFactory.ViewCreatorCentredOnIParticleROITool
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    IDConfig = getInDetTrigConfig("muonLRT")
   
-    roiTool         = ViewCreatorCenteredOnIParticleTool(RoisWriteHandleKey = recordable("HLT_Roi_L2SAMuon_LRT"), RoIZedWidth=IDConfig.zedHalfWidth, RoIEtaWidth=IDConfig.etaHalfWidth, RoIPhiWidth=IDConfig.phiHalfWidth, UseZedPosition=False)
+    roiTool         = ViewCreatorCenteredOnIParticleTool(RoisWriteHandleKey = recordable("HLT_Roi_L2SAMuon_LRT"), 
+                                                         RoIZedWidth=flags.Trigger.InDetTracking.muonLRT.zedHalfWidth,
+                                                         RoIEtaWidth=flags.Trigger.InDetTracking.muonLRT.etaHalfWidth,
+                                                         RoIPhiWidth=flags.Trigger.InDetTracking.muonLRT.phiHalfWidth,
+                                                         UseZedPosition=False)
     requireParentView = True
 
     recol2cb = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)
@@ -853,11 +855,10 @@ def muEFIsoAlgSequenceCfg(flags, doMSiso=False, is_probe_leg=False):
     else:
         roisWriteHandleKey = recordable("HLT_Roi_MuonIso")
 
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    IDConfig = getInDetTrigConfig("muonIso")
-
-    roiTool         = CompFactory.ViewCreatorCentredOnIParticleROITool(RoisWriteHandleKey = roisWriteHandleKey, RoIEtaWidth=IDConfig.etaHalfWidth,
-                                                                       RoIPhiWidth=IDConfig.phiHalfWidth,RoIZedWidth=IDConfig.zedHalfWidth)
+    roiTool         = CompFactory.ViewCreatorCentredOnIParticleROITool(RoisWriteHandleKey = roisWriteHandleKey, 
+                                                                       RoIEtaWidth=flags.Trigger.InDetTracking.muonIso.etaHalfWidth,
+                                                                       RoIPhiWidth=flags.Trigger.InDetTracking.muonIso.phiHalfWidth,
+                                                                       RoIZedWidth=flags.Trigger.InDetTracking.muonIso.zedHalfWidth)
 
     recoIso = InViewRecoCA(name=viewName, RoITool = roiTool, isProbe=is_probe_leg, mergeUsingFeature=True,
                           PlaceMuonInView=True, InViewMuons = "IsoViewMuons"+name, InViewMuonCandidates = "IsoMuonCandidates"+name)

@@ -1,9 +1,9 @@
 ################################################################################
-# Package: Digitization
+# Package: DigitizationConfig
 ################################################################################
 
 # Declare the package name:
-atlas_subdir( Digitization )
+atlas_subdir( DigitizationConfig )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py

@@ -50,7 +50,7 @@ Digi_tf.py \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileName} \
     --postExec 'HITtoRDO:cfg.getService("PileUpEventLoopMgr").AllowSerialAndMPToDiffer=False' \
-    --postInclude 'all:PyJobTransforms.UseFrontier' 'HITtoRDO:Digitization.DigitizationSteering.DigitizationTestingPostInclude' \
+    --postInclude 'all:PyJobTransforms.UseFrontier' 'HITtoRDO:DigitizationConfig.DigitizationSteering.DigitizationTestingPostInclude' \
     --preInclude 'HITtoRDO:Campaigns.MC23a' \
     --skipEvents 0
 

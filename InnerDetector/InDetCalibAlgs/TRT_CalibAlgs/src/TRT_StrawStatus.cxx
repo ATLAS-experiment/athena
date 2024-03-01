@@ -19,13 +19,8 @@
 
 #include "xAODEventInfo/EventInfo.h"
 
-#include "TRT_ConditionsServices/ITRT_StrawNeighbourSvc.h"
-#include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
-#include "TRT_ConditionsServices/ITRT_HWMappingSvc.h"
-#include "TRT_ConditionsServices/ITRT_DCS_ConditionsSvc.h"
-
 #include "VxVertex/VxContainer.h"
-#include "TRT_TrackHoleSearch/TRTTrackHoleSearchTool.h"
+
 #include "TrkParameters/TrackParameters.h"
 
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
@@ -46,26 +41,8 @@ InDet::TRT_StrawStatus::TRT_StrawStatus(const std::string& name, ISvcLocator* pS
 AthAlgorithm(name,pSvcLocator),
 m_nEvents(0), m_runNumber(0),
 m_accumulateHits(nullptr),
-m_TRTHelper(nullptr),
-m_mapSvc("TRT_HWMappingSvc",name),
-m_DCSSvc("TRT_DCS_ConditionsSvc",name),
-m_TRTStrawNeighbourSvc("TRT_StrawNeighbourSvc", name), // use this service to retrieve barrel and end-cap straw number later on, as well as DTMROC,..
-m_TRTStrawStatusSummaryTool("TRT_StrawStatusSummaryTool", this),
-m_trt_hole_finder("TRTTrackHoleSearchTool"),
-m_locR_cut(1.4),
-m_fileName("TRT_StrawStatusOutput"),
-m_skipBusyEvents(0), // for cosmics - reject events that are either showers or noise bursts
-m_printDetailedInformation(0) // print the information on mapping as well as which straws are declared dead etc.
-{
-    declareProperty("outputFileName", m_fileName);
-    declareProperty("skipBusyEvents", m_skipBusyEvents);
-    declareProperty("trt_hole_finder",          m_trt_hole_finder);
-    declareProperty("HWMapSvc", m_mapSvc);
-    declareProperty("InDetTRT_DCS_ConditionsSvc",m_DCSSvc);
-    declareProperty("locR_cut",                 m_locR_cut );
-    declareProperty("printDetailedInformation", m_printDetailedInformation);
-
-}
+m_TRTHelper(nullptr)
+{}
 
 //================ Destructor =================================================
 
@@ -310,7 +287,7 @@ void InDet::TRT_StrawStatus::clear() {
 void InDet::TRT_StrawStatus::reportResults() {
     ATH_MSG_INFO( "InDet::TRT_StrawStatus::reportResults() for " << m_nEvents << " events." );
     char fileName[300];
-    snprintf(fileName, 299,"%s.%07d_newFormat.txt", m_fileName.c_str(), m_runNumber);
+    snprintf(fileName, 299,"%s.%07d_newFormat.txt", m_fileName.value().c_str(), m_runNumber);
     FILE *f = fopen(fileName, "w");
     fprintf(f, "%d %d %d %d %d %d %d %d %d \n", 0, 0, 0, 0, 0, 0, 0, 0, m_nEvents);
     for (size_t i=0; i<2; i++) for (size_t j=0; j<32; j++) for (size_t k=0; k<nAllStraws; k++) {
@@ -327,7 +304,7 @@ void InDet::TRT_StrawStatus::reportResults() {
 void InDet::TRT_StrawStatus::printDetailedInformation() {
     ATH_MSG_INFO( "InDet::TRT_StrawStatus::printDetailedInformation() " );
     char fileName[300];
-    snprintf(fileName, 299,"%s.%07d_printDetailedInformation.txt", m_fileName.c_str(), m_runNumber);
+    snprintf(fileName, 299,"%s.%07d_printDetailedInformation.txt", m_fileName.value().c_str(), m_runNumber);
     FILE *f = fopen(fileName, "w");
     for (std::vector<Identifier>::const_iterator it = m_TRTHelper->straw_layer_begin(); it != m_TRTHelper->straw_layer_end(); ++it  ) {
         for (int i=0; i<=m_TRTHelper->straw_max( *it); i++) {

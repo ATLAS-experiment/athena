@@ -46,5 +46,6 @@ def getFlagsForActiveConfig(
         )
     return flags.cloneAndReplace(
         "Tracking.ActiveConfig",
-        ("Trigger.ITkTracking." if flags.Detector.GeometryITk else "Trigger.InDetTracking.") + config_name
+        ("Trigger.ITkTracking." if flags.Detector.GeometryITk else "Trigger.InDetTracking.") + config_name,
+        keepOriginal = True
     )

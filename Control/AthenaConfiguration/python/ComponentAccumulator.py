@@ -2,11 +2,12 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
+from GaudiKernel.DataHandle import DataHandle
 import GaudiKernel.GaudiHandles as GaudiHandles
 
 from AthenaCommon.Logging import logging
 from AthenaCommon.Debugging import DbgStage
-from AthenaCommon.CFElements import (isSequence, findSubSequence, findAlgorithm, flatSequencers,
+from AthenaCommon.CFElements import (isSequence, findSubSequence, findAlgorithm, iterSequences,
                                      checkSequenceConsistency, findAllAlgorithmsByName, compName)
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCachable
@@ -16,7 +17,6 @@ from AthenaConfiguration.DebuggingContext import (Context, raiseWithCurrentConte
                                                   createContextForDeduplication)
 
 import atexit
-from collections import OrderedDict
 from collections.abc import Sequence
 import sys
 
@@ -117,7 +117,7 @@ class ComponentAccumulator(AccumulatorCachable):
 
         self._sequence = sequence
         self._allSequences = [self._sequence]
-        self._algorithms = {}            #Flat algorithms list, useful for merging
+        self._algorithms = {}            #Dictionary of algorithm instances keyed by name
         self._conditionsAlgs = []        #Unordered list of conditions algorithms + their private tools
         self._services = []              #List of service, not yet sure if the order matters here in the MT age
         self._servicesToCreate = []
@@ -305,7 +305,7 @@ class ComponentAccumulator(AccumulatorCachable):
                             "comp": comp.getFullJobOptName(),
                             "mode":  "W",
                             "prop": "ExtraOutputs"})
-            from GaudiKernel.DataHandle import DataHandle
+
             for prop, descr in comp._descriptors.items():
                 if isinstance(descr.default, DataHandle):
                     io.append( {"type": descr.default.type(),
@@ -528,11 +528,8 @@ class ComponentAccumulator(AccumulatorCachable):
 
     def getEventAlgos(self, seqName=None):
         """Get all algorithms within sequence"""
-        if seqName is None:
-            seq=self._sequence
-        else:
-            seq = findSubSequence(self._sequence, seqName )
-        return list( OrderedDict.fromkeys( sum( flatSequencers( seq, algsCollection=self._algorithms ).values(), []) ).keys() )
+        seq = self._sequence if seqName is None else findSubSequence(self._sequence, seqName )
+        return [s for s in iterSequences(seq) if not isSequence(s)]
 
     def addCondAlgo(self,algo,primary=False,domain=None):
         """Add Conditions algorithm"""
@@ -1050,18 +1047,17 @@ class ComponentAccumulator(AccumulatorCachable):
                     # Recursively add properties of tools to JobOptionsSvc
                     for v1 in v:
                         getCompsToBeAdded(v1, namePrefix=name + ".")
-                elif (
-                    not isSequence(comp) and k != "Members"
-                ):  # This property is handled separately
+                else:
                     # For a list of DataHandle, we need to stringify
                     # each element individually.  Otherwise, we get the repr
                     # version of the elements, which Gaudi JO will choke on.
-                    from GaudiKernel.DataHandle import DataHandle
                     if isinstance(v, list) and v and isinstance(v[0], DataHandle):
                         v = [str(x) for x in v]
+                    # For sequences, need to convert the list of algs to names
+                    elif isSequence(comp) and k == "Members":
+                        v = [alg.getFullJobOptName() for alg in comp.Members]
                     vstr = "" if v is None else str(v)
                     bshPropsToSet.append((name, k, vstr))
-
        
         try:
             from AthenaPython import PyAthenaComps
@@ -1071,7 +1067,7 @@ class ComponentAccumulator(AccumulatorCachable):
             PyAlg = type(None)
             PySvc = type(None)
 
-        # Services:
+        # Services
         for svc in self._services:
             if svc.getName() != "MessageSvc":  # MessageSvc will exist already! Needs special treatment
                 getCompsToBeAdded(svc)
@@ -1080,22 +1076,13 @@ class ComponentAccumulator(AccumulatorCachable):
             else:
                 mspPropsToSet.update((k,str(v)) for k,v in svc._properties.items())
 
-        #Algorithms
-        for seqName, algoList in flatSequencers(self._sequence, algsCollection=self._algorithms).items():
-            seq = self.getSequence(seqName)
-            for k, v in seq._properties.items():
-                if k != "Members":  # This property is handled separately
-                    vstr = "" if v is None else str(v)
-                    bshPropsToSet.append((seqName, k, vstr))
-            bshPropsToSet.append(
-                (seqName, "Members", str([alg.getFullJobOptName() for alg in algoList]),)
-            )
-            for alg in algoList:
-                getCompsToBeAdded(alg)
-                if isinstance(alg, PyAlg):
-                    alg.setup()
+        # Algorithms and Sequences
+        for alg in iterSequences(self._sequence):
+            getCompsToBeAdded(alg)
+            if isinstance(alg, PyAlg):
+                alg.setup()
 
-        #Cond-Algs
+        # Cond Algs
         condalgseq = []
         for alg in self._conditionsAlgs:
             getCompsToBeAdded(alg)
@@ -1104,11 +1091,11 @@ class ComponentAccumulator(AccumulatorCachable):
                 alg.setup()
         bshPropsToSet.append(("AthCondSeq", "Members", str(condalgseq)))
 
-        #Public Tools:
+        # Public Tools
         for pt in self._publicTools:
             getCompsToBeAdded(pt, namePrefix="ToolSvc.")
 
-        #Auditors:
+        # Auditors
         for aud in self._auditors:
             getCompsToBeAdded(aud)
 

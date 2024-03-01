@@ -104,7 +104,7 @@ def TileTTL1OutputCfg(flags, TileHitToTTL1):
     if flags.Output.doWriteRDO:
         if flags.Digitization.EnableTruth:
             outputItemList += ["CaloCalibrationHitContainer#*"]
-            from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
+            from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
             acc.merge(TruthDigitizationOutputCfg(flags))
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, streamName = 'RDO', ItemList = outputItemList))

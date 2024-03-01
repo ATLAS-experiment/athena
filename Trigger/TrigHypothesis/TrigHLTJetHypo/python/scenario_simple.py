@@ -222,6 +222,8 @@ def get_condition_args_from_chainpart(cp):
               { '':   float('-inf')
               , '90': -0.846
               , '85': 0.048
+              , '80': 0.693
+              , '75': 1.229
               }
 
             assert (values[0] in gntau_WPs.keys()),f"The efficiency of the specified gntau cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the gntau WP dictionary."

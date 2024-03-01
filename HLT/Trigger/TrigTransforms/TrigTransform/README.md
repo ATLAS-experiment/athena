@@ -27,6 +27,9 @@ included in the setup.
 The transform is tested in the nightly tests and these give examples of which options are to be used:
 - [test_trigP1_v1PhysP1_T0MonTrf_build.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigValidation/TrigP1Test/test/test_trigP1_v1PhysP1_T0MonTrf_build.py) Running steps from BS as in Trigger Reprocessings
 - [test_trigP1_v1PhysP1_trfDbgStream_build.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigValidation/TrigP1Test/test/test_trigP1_v1PhysP1_trfDbgStream_build.py) Running the transform in the debug recovery mode
+- [test_trigP1_v1PhysP1_noL1Sim_DB_UpDownRun_build.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigValidation/TrigP1Test/test/test_trigP1_v1PhysP1_noL1Sim_DB_UpDownRun_build.py) The last part of the test runs the transform from keys that have been entered into the ART TriggerDB. 
+  - The command is hard to read from the test, so for example it is parsed into `Trig_reco_tf.py --useDB=True --DBserver=TRIGGERDBART --DBsmkey=3058 --DBl1pskey=20 --DBhltpskey=28 --prodSysBSRDO True --outputHIST_HLTMONFile=hltmon.root --athenaopts=--imf --maxEvents=50 --inputBS_RDOFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00440499.physics_EnhancedBias.merge.RAW._lb0470._SFO-11._0001.1`
+
 
 
 

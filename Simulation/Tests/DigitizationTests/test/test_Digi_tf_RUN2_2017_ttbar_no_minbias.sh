@@ -25,7 +25,7 @@ Digi_tf.py \
     --jobNumber 1 \
     --maxEvents ${Events} \
     --outputRDOFile ${DigiOutFileName} \
-    --postInclude 'PyJobTransforms.UseFrontier' 'HITtoRDO:Digitization.DigitizationSteering.DigitizationTestingPostInclude' \
+    --postInclude 'PyJobTransforms.UseFrontier' 'HITtoRDO:DigitizationConfig.DigitizationSteering.DigitizationTestingPostInclude' \
     --preInclude 'HITtoRDO:Campaigns.MC20d' \
     --skipEvents 0
 

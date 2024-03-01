@@ -83,13 +83,13 @@ def fromRunArgs(runArgs):
     simulationRunArgsToFlags(runArgs, flags)
 
     # Setup digitization flags
-    from Digitization.DigitizationConfigFlags import digitizationRunArgsToFlags
+    from DigitizationConfig.DigitizationConfigFlags import digitizationRunArgsToFlags
     digitizationRunArgsToFlags(runArgs, flags)
 
     # Setup flags for pile-up
     if not flags.Overlay.FastChain:
         # Setup common digitization flags
-        from Digitization.DigitizationConfigFlags import setupDigitizationFlags
+        from DigitizationConfig.DigitizationConfigFlags import setupDigitizationFlags
         setupDigitizationFlags(runArgs, flags)
         logFastChain.info('Running with pile-up: %s', flags.Digitization.PileUp)
 
@@ -112,7 +112,7 @@ def fromRunArgs(runArgs):
 
     if not flags.Overlay.FastChain:
         # Load pile-up stuff after pre-include/exec to ensure everything is up-to-date
-        from Digitization.DigitizationConfigFlags import pileupRunArgsToFlags
+        from DigitizationConfig.DigitizationConfigFlags import pileupRunArgsToFlags
         pileupRunArgsToFlags(runArgs, flags)
 
         # Setup pile-up profile
@@ -140,7 +140,7 @@ def fromRunArgs(runArgs):
     flags.lock()
 
     if flags.Digitization.PileUp:
-        from Digitization.PileUpConfig import PileUpEventLoopMgrCfg
+        from DigitizationConfig.PileUpConfig import PileUpEventLoopMgrCfg
         cfg = MainServicesCfg(flags, LoopMgr="PileUpEventLoopMgr")
         cfg.merge(PileUpEventLoopMgrCfg(flags))
     else:
@@ -172,11 +172,11 @@ def fromRunArgs(runArgs):
         from OverlayConfiguration.OverlaySteering import OverlayMainContentCfg
         cfg.merge(OverlayMainContentCfg(flags))
     else:
-        from Digitization.DigitizationSteering import DigitizationMainContentCfg
+        from DigitizationConfig.DigitizationSteering import DigitizationMainContentCfg
         cfg.merge(DigitizationMainContentCfg(flags))
 
     # Special message service configuration
-    from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
+    from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
     cfg.merge(DigitizationMessageSvcCfg(flags))
 
     # Special Configuration postInclude
