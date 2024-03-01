@@ -3,15 +3,10 @@
 import importlib
 import string
 
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
-
-_isCAMenu = True
-def isCAMenu():
-  return _isCAMenu
 
 
 def calibCosmicMonSignatures():
@@ -191,15 +186,8 @@ class GenerateMenuMT(object, metaclass=Singleton):
         for chainDict in self.chainDicts:
             log.debug("Next: getting chain configuration for chain %s ", chainDict['chainName'])
             chainConfig,lengthOfChainConfigs = self.__generateChainConfig(flags, chainDict)
-            if isCAMenu():
-                # skip chain generation if no ChainConfig was found
-                if chainConfig is None:
-                    continue
-                log.debug("Found CA configuration for Chain %r",chainConfig)
-                
             all_chains += [(chainDict,chainConfig,lengthOfChainConfigs)]
-            
-            
+
             #update the alignment group length dictionary if we have a longer number of steps
             #or the signature isn't registered in the dictionary yet
             for config_length, config_grp in lengthOfChainConfigs:
@@ -383,7 +371,6 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # Loop over all chainDicts and send them off to their respective assembly code
         listOfChainConfigs = []
         perSig_lengthOfChainConfigs = []
-        not_migrated=False
 
         for chainPartDict in chainDicts:
             chainPartConfig = None
@@ -415,55 +402,32 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 raise Exception('Stopping the execution. Please correct the configuration.')
 
             log.debug("Chain %s \n chain config: %s",chainPartDict['chainName'],chainPartConfig)
-            import itertools   
-            
-            # check if there are not migrated steps between migrated ones
-            # if built-up steps are not consecutive, do not build the chain because it's incomplete
-            leg_not_migrated = ( (chainPartConfig is None ) or  \
-                len([k for k, g in itertools.groupby(["_MissingCA" in step.name for step in chainPartConfig.steps]) if k==0])!=1) \
-                and 'noalg' not in chainPartDict['chainName'] # no alg chains should be excluded as they do not have any configureation
 
-            not_migrated |= leg_not_migrated
-
-            if isCAMenu() and leg_not_migrated:
-                if chainPartConfig is None:
-                    log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} chainPartConfig is None, because of failure of merging chains".format(chainPartDict['chainName'])) ))                    
-                else:
-                    listOfChainConfigs.append(chainPartConfig)                                        
-            else:
-                listOfChainConfigs.append(chainPartConfig)
-                log.debug("[__generateChainConfigs] adding to the perSig_lengthOfChainConfigs list (%s, %s)",chainPartConfig.nSteps,chainPartConfig.alignmentGroups)
-                perSig_lengthOfChainConfigs.append((chainPartConfig.nSteps,chainPartConfig.alignmentGroups))
+            listOfChainConfigs.append(chainPartConfig)
+            log.debug("[__generateChainConfigs] adding to the perSig_lengthOfChainConfigs list (%s, %s)",chainPartConfig.nSteps,chainPartConfig.alignmentGroups)
+            perSig_lengthOfChainConfigs.append((chainPartConfig.nSteps,chainPartConfig.alignmentGroups))
                 
         # this will be a list of lists for inter-sig combined chains and a list with one 
         # multi-element list for intra-sig combined chains
         # here, we flatten it accordingly (works for both cases!)
         lengthOfChainConfigs = []
-        if isCAMenu() and not_migrated: 
-            log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} removed because is incomplete".format(chainPartDict['chainName'])) ))                           
-        else:        
-            for nSteps, aGrps in perSig_lengthOfChainConfigs:
-                if len(nSteps) != len(aGrps):
-                    log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
-                else:
-                    for a,b in zip(nSteps,aGrps):
-                        lengthOfChainConfigs.append((a,b))
+        for nSteps, aGrps in perSig_lengthOfChainConfigs:
+            if len(nSteps) != len(aGrps):
+                log.error("Chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
+            else:
+                for a,b in zip(nSteps,aGrps):
+                    lengthOfChainConfigs.append((a,b))
             
        
         # This part is to deal with combined chains between different signatures
         try:
-            if isCAMenu() and not_migrated:
-                raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration".format(mainChainDict['chainName']))                               
-
             if len(listOfChainConfigs) == 0:
                 raise Exception('[__generateChainConfigs] No Chain Configuration found for {0}'.format(mainChainDict['chainName']))                    
             else:
                 if len(listOfChainConfigs)>1:
                     log.debug("Merging strategy from dictionary: %s", mainChainDict["mergingStrategy"])
                     theChainConfig, perSig_lengthOfChainConfigs = mergeChainDefs(listOfChainConfigs, mainChainDict, perSig_lengthOfChainConfigs)
-                    if isCAMenu() and perSig_lengthOfChainConfigs is None:
-                       raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration during merging".format(mainChainDict['chainName']))
-                    lengthOfChainConfigs = [] 
+                    lengthOfChainConfigs = []
                     for nSteps, aGrps in perSig_lengthOfChainConfigs:
                         if len(nSteps) != len(aGrps):
                             log.error("Post-merged chain part has %s steps and %s alignment groups - these don't match!",nSteps,aGrps)
@@ -487,15 +451,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             log.exception('[__generateChainConfigs] Full chain dictionary is\n %s ', mainChainDict)
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
         except AttributeError:                    
-            if isCAMenu():
-                log.warning(str(NoCAmigration("[__generateChainConfigs] addTopoInfo failed with CA configurables") )  )  
-                return None,[]                       
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
-        except NoCAmigration as e:
-            log.warning(str(e))
-            # flag as merged all CAs created , but not used
-            [seq.ca.wasMerged() for chainPartConfig in listOfChainConfigs for step in chainPartConfig.steps for seq in step.sequences  ]                      
-            return None,[]
 
         # Configure event building strategy
         eventBuildType = mainChainDict['eventBuildType']
