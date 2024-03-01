@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# art-description: ART Monitoring Tool for electron Validation
+# art-description: ART Monitoring Tool for forward electron Validation, phase II, no pileup
 #
 # art-type: grid
-# art-input: mc21_14TeV.901966.PG_single_epm_PtFlat20_100_etaFlatnp23_50.recon.RDO.e8481_s4149_r14697
+# art-input: mc21_14TeV.901966.PG_single_epm_PtFlat20_100_etaFlatnp23_50.recon.RDO.e8481_s4264_r15317
 # art-input-nfiles: 60
 # art-cores: 4
 # art-include: main/Athena
@@ -35,7 +35,7 @@ case $ArtProcess in
 
 	set +e
 
-	checkFile.py Nightly_AOD.pool.root > checkFile_Nightly_electron.txt
+	checkFile.py Nightly_AOD.pool.root > checkFile_Nightly.txt
 
 	echo  "art-result: $? checks_files"
 
@@ -67,7 +67,7 @@ case $ArtProcess in
 	echo "Unsetting ATHENA_NUM_PROC=${ATHENA_NUM_PROC}"
 	unset  ATHENA_NUM_PROC
 
-	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=1000 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC15c-SDR-14-05" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent
+	Reco_tf.py --CA --inputRDOFile=$x --outputAODFile=Nightly_AOD.pool.root --maxEvents=1000 --autoConfiguration="everything" --conditionsTag="OFLCOND-MC15c-SDR-14-05" --preInclude egammaConfig.egammaOnlyFromRawFlags.egammaOnlyFromRaw --postInclude egammaValidation.egammaArtSpecialContent.egammaArtSpecialContent --preExec "flags.Calo.Noise.fixedLumiForNoise=68.965" --postExec "from IOVDbSvc.IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags,\"/LAR/NoiseOfl/CellNoise\",\"LARNoiseOflCellNoise-mu200\",db=\"sqlite://;schema=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/dbNoisePhaseII/CellNoise-mu200Formu0Sample.db;dbname=OFLP200\"))"
 
 	echo  "art-result: $? reconstruction"
 
