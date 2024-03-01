@@ -47,12 +47,28 @@ class TileJetMonitorAlgorithm : public AthMonitorAlgorithm {
     bool passesJvt(const xAOD::Jet& jet) const;
     bool isGoodJet(const xAOD::Jet& jet) const;
     bool isGoodEvent(const EventContext& ctx) const;
-
+    std::string sampleName(const int ros, const int sample, const int tower) const;
+    bool matchesEnergyRange(const int sample, const int tower, const float energy, const int gain) const;
+  
     Gaudi::Property<float> m_jetPtMin{this, "JetPtMin", 20000., "Threshold in MeV"};
     Gaudi::Property<float> m_jetPtMax{this, "JetPtMax", 120000, ""};
     Gaudi::Property<float> m_jetEtaMax{this, "JetEtaMax", 1.6, ""};
     Gaudi::Property<float> m_energyChanMin{this, "ChannelEnergyMin", 2000, ""};
     Gaudi::Property<float> m_energyChanMax{this, "ChannelEnergyMax", 4000, ""};
+    Gaudi::Property<float> m_gain{this, "Gain", 1, ""};
+    Gaudi::Property<float> m_energyE1Min{this, "E1EnergyMin", -1, ""};
+    Gaudi::Property<float> m_energyE1Max{this, "E1EnergyMax", -1, ""};
+    Gaudi::Property<float> m_gainE1{this, "GainE1", -1, ""};
+    Gaudi::Property<float> m_energyE2Min{this, "E2EnergyMin", -1, ""};
+    Gaudi::Property<float> m_energyE2Max{this, "E2EnergyMax", -1, ""};
+    Gaudi::Property<float> m_gainE2{this, "GainE2", -1, ""};
+    Gaudi::Property<float> m_energyE3Min{this, "E3EnergyMin", -1, ""};
+    Gaudi::Property<float> m_energyE3Max{this, "E3EnergyMax", -1, ""};
+    Gaudi::Property<float> m_gainE3{this, "GainE3", -1, ""};
+    Gaudi::Property<float> m_energyE4Min{this, "E4EnergyMin", -1, ""};
+    Gaudi::Property<float> m_energyE4Max{this, "E4EnergyMax", -1, ""};
+    Gaudi::Property<float> m_gainE4{this, "GainE4", -1, ""};
+  //  
     Gaudi::Property<bool> m_do1DHistograms{this, "Do1DHistograms", false, ""};
     Gaudi::Property<bool> m_do2DHistograms{this, "Do2DHistograms", false, ""};
     Gaudi::Property<bool> m_doEnergyDiffHistograms{this, "DoEnergyDiffHistograms", false, ""};
