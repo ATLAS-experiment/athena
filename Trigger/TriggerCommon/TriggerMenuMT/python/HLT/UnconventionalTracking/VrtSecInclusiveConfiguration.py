@@ -7,9 +7,6 @@ log = logging.getLogger(__name__)
 
 
 def VrtSecInclusiveMenuSequence(flags):
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    fscfg = getInDetTrigConfig("fullScan")
-    lrtcfg = getInDetTrigConfig("fullScanLRT")
 
     vsivtxname =  "HLT_TrigVSIVertex"
     # Construct the full reco sequence
@@ -20,7 +17,13 @@ def VrtSecInclusiveMenuSequence(flags):
     reco.mergeReco( getCommonInDetFullScanLRTCfg(flags) )
 
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
-    theVSI = TrigVrtSecInclusiveCfg(flags, "TrigVrtSecInclusive", fscfg.tracks_FTF(), lrtcfg.tracks_FTF(), fscfg.vertex, vsivtxname, "HLT_TrigVSITrkPair",recordTrkPair=False)
+    theVSI = TrigVrtSecInclusiveCfg(flags, 
+                                    "TrigVrtSecInclusive", 
+                                    flags.Tracking.ActiveConfig.tracks_FTF,
+                                    flags.Trigger.InDetTracking.fullScanLRT.tracks_FTF,
+                                    flags.Tracking.ActiveConfig.vertex, 
+                                    vsivtxname, 
+                                    "HLT_TrigVSITrkPair",recordTrkPair=False)
     reco.mergeReco(theVSI)
 
     # Construct the SelectionCA to hold reco + hypo

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -100,7 +100,7 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
         std::map<int, float>::iterator it;
         for (auto barcode = truth_barcode.begin(); barcode != truth_barcode.end();  ++barcode) {
           auto result = barcodeSCTclustercount.emplace( std::pair<int, float>(*barcode, 0.0) ); 
-          if (!result.second) ++(result.first->second); 
+          ++(result.first->second);
         }
       }
     } // Loop over SCT clusters
@@ -114,7 +114,7 @@ InDetPhysValTruthDecoratorAlg::execute(const EventContext &ctx) const {
         std::map<int, float>::iterator it;
         for (auto barcode = truth_barcode.begin(); barcode != truth_barcode.end();  ++barcode) {
           auto result = barcodePIXclustercount.emplace( std::pair<int, float>(*barcode, 0.0) ); 
-          if (!result.second) ++(result.first->second); 
+          ++(result.first->second);
         }
       }
     } // Loop over PIX clusters

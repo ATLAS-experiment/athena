@@ -18,10 +18,7 @@ def TrackCounterHypoAlgCfg(flags):
     """"""
     acc = ComponentAccumulator()
     from TrigMinBias.TrigMinBiasMonitoring import TrackCountMonitoring
-    # TODO we should get that from the flags
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    idTrigConfig = getInDetTrigConfig('minBias')
-    alg = CompFactory.TrackCountHypoAlg(tracksKey=recordable(idTrigConfig.tracks_IDTrig()),
+    alg = CompFactory.TrackCountHypoAlg(tracksKey=recordable(flags.Trigger.InDetTracking.minBias.tracks_IDTrig),
                                         trackCountKey = recordable("HLT_TrackCount"))
     alg.MonTool = TrackCountMonitoring(flags, alg) # monitoring tool configures itself using config of the hypo alg
     acc.addEventAlgo(alg)

@@ -10,7 +10,7 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from Digitization.DigitizationParametersConfig import writeDigitizationMetadata
+from DigitizationConfig.DigitizationParametersConfig import writeDigitizationMetadata
 from RunDependentSimComps.PileUpUtils import pileupInputCollections
 
 from AthenaCommon.Logging import logging
@@ -32,11 +32,11 @@ def DigitizationMainServicesCfg(flags):
             logDigiSteering.info("DigitizationMainServicesCfg: Attempting to run pile-up digitization AthenaMT using %s threads!", str(flags.Concurrency.NumThreads))
             logDigiSteering.info("DigitizationMainServicesCfg: Using new PileUpMT code.")
             # raise RuntimeError("DigitizationSteering.DigitizationMainServicesCfg: Running pile-up digitization with AthenaMT is not supported. Please update your configuration.")
-            from Digitization.PileUpMTConfig import PileUpMTAlgCfg
+            from DigitizationConfig.PileUpMTConfig import PileUpMTAlgCfg
             acc = MainServicesCfg(flags)
             acc.merge(PileUpMTAlgCfg(flags))
         else:
-            from Digitization.PileUpConfig import PileUpEventLoopMgrCfg
+            from DigitizationConfig.PileUpConfig import PileUpEventLoopMgrCfg
             acc = MainServicesCfg(flags, LoopMgr="PileUpEventLoopMgr")
             acc.merge(PileUpEventLoopMgrCfg(flags))
     else:
@@ -73,7 +73,7 @@ def DigitizationMainContentCfg(flags):
         acc.merge(EventInfoUpdateFromContextAlgCfg(flags))
 
         # Decorate pile-up values
-        from Digitization.PileUpConfig import NoPileUpMuWriterCfg
+        from DigitizationConfig.PileUpConfig import NoPileUpMuWriterCfg
         acc.merge(NoPileUpMuWriterCfg(flags))
 
     # Signal-only truth information
@@ -115,7 +115,7 @@ def DigitizationMainContentCfg(flags):
                 acc.merge(MergeHijingParsCfg(flags))
 
 
-    from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
+    from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
     acc.merge(TruthDigitizationOutputCfg(flags))
 
     # Beam spot reweighting

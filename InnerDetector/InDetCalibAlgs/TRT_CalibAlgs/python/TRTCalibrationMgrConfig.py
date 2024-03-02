@@ -39,6 +39,7 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     acc = ComponentAccumulator()
     
     kwargs.setdefault("DoCalibrate",False)
+    kwargs.setdefault("DoRefit",False)
 
     from TRT_CalibTools.TRTCalibToolsConfig import FillAlignTrkInfoCfg, FillAlignTRTHitsCfg, FitToolCfg
     kwargs.setdefault("AlignTrkTools", [acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))), 
@@ -59,22 +60,26 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
                           
     # if a text file is in the arguments, use the constants in that instead of the DB
-    # if not calibconstants=="":
+    if not calibconstants=="":
 
-    #     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTCondWriteCfg
-    #     acc.merge(TRTCondWriteCfg(flags,calibconstants))
+        from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTCondWriteCfg
+        acc.merge(TRTCondWriteCfg(flags,calibconstants))
 
     # add this algorithm to the configuration accumulator                       
     acc.addEventAlgo(CompFactory.TRTCalibrationMgr(name, **kwargs))
 
     return acc
         
-# FIXME - where is this tool used? Needs some feedback                  
-def TRT_TrackHoleSearch(flags,name="TRT_TrackHoleSearch",**kwargs):
-                        
+        
+# FIXME - This needs to be moved to the InnerDetector/InDetRecTools/TRT_TrackHoleSearch/python/
+def TRTTrackHoleSearch(flags,name="TRT_TrackHoleSearch",**kwargs):
+    
+    acc = ComponentAccumulator()
+    
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg                          
-    acc = AtlasExtrapolatorCfg(flags)
-    kwargs.setdefault("extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+    kwargs.setdefault("extrapolator", acc.addPublicTool(acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
+    
+    
     kwargs.setdefault("use_conditions_svc",True)
     kwargs.setdefault("do_dump_bad_straw_log",False)
     kwargs.setdefault("begin_at_first_trt_hit",False)
@@ -82,17 +87,23 @@ def TRT_TrackHoleSearch(flags,name="TRT_TrackHoleSearch",**kwargs):
     kwargs.setdefault("max_trailing_holes",1)
     kwargs.setdefault("locR_cut",-1)
     kwargs.setdefault("locR_sigma_cut",-1)
-
+    
+    acc.setPrivateTools(CompFactory.TRTTrackHoleSearchTool(name, **kwargs))
     return acc
 
-# we need to recheck this, not fully sure - Sergi                     
-def TRT_StrawStatusCfg(flags,name='InDet__TRT_StrawStatus',**kwargs) :
 
-    if "TRT_TrackHoleSearch" not in kwargs:
-        kwargs.setdefault("trt_hole_finder", acc.popToolsAndMerge(CompFactory.TRT_TrackHoleSearchCfg(flags, name = name))) 
 
-    acc.addEventAlgo(CompFactory.TRT_CalibrationMgr("TRT_StrawStatus",**kwargs))
 
+def TRT_StrawStatusCfg(flags,name='InDet_TRT_StrawStatus',**kwargs) :
+    
+    acc = ComponentAccumulator()
+    
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
+    kwargs.setdefault("TRT_StrawStatusSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))    
+
+    kwargs.setdefault("trt_hole_finder", acc.popToolsAndMerge(TRTTrackHoleSearch(flags))) 
+
+    acc.addEventAlgo(CompFactory.InDet.TRT_StrawStatus(name,**kwargs))
     return acc
 
 
@@ -107,7 +118,7 @@ if __name__ == '__main__':
     flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-03"
-    flags.Exec.MaxEvents = 10
+    flags.Exec.MaxEvents = 10 
     
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, ['ID'], toggle_geometry=True)
@@ -125,11 +136,12 @@ if __name__ == '__main__':
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
     acc.merge(InDetTrackRecoCfg(flags))
     
+    # Algorithm to create the basic.root ntuple file 
     acc.merge(TRT_CalibrationMgrCfg(flags))
+    
+    # Algorithm to generate the straw masking file
+    acc.merge(TRT_StrawStatusCfg(flags))
     
     import sys
     sys.exit(not acc.run().isSuccess())
-    
-
-
     

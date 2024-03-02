@@ -399,7 +399,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       auto digi_part_diff_adc_ped_norm = Monitored::Collection("Digi_part_diff_adc_ped_norm",tool,[](const auto& v){return v.digi_diff_adc_ped_norm;});
       auto digi_part_diff_adc_ped = Monitored::Collection("Digi_part_diff_adc_ped",tool,[](const auto& v){return v.digi_diff_adc_ped;});
       auto digi_part_bcid = Monitored::Collection("Digi_part_BCID",tool,[](const auto& v){return v.digi_bcid;});
-      auto digi_part_lb = Monitored::Collection("Digi_part_LB",tool,[](const auto& v){return v.digi_bcid;});
+      auto digi_part_lb = Monitored::Collection("Digi_part_LB",tool,[](const auto& v){return v.digi_lb;});
       auto digi_part_passDigiNom = Monitored::Collection("Digi_part_passDigiNom",tool,[](const auto& v){return v.digi_passDigiNom;});
       auto digi_part_badNotMasked = Monitored::Collection("Digi_part_badNotMasked",tool,[](const auto& v){return v.digi_badNotMasked;});
 
@@ -581,7 +581,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       auto sc_part_et_onl_muscaled = Monitored::Collection("SC_part_et_onl_muscaled",tool,[](const auto& v){return v.sc_et_onl_muscaled;});
       auto sc_part_time = Monitored::Collection("SC_part_time",tool,[](const auto& v){return v.sc_time;});
       auto sc_part_bcid = Monitored::Collection("SC_part_BCID",tool,[](const auto& v){return v.sc_bcid;});
-      auto sc_part_lb = Monitored::Collection("SC_part_LB",tool,[](const auto& v){return v.sc_bcid;});
+      auto sc_part_lb = Monitored::Collection("SC_part_LB",tool,[](const auto& v){return v.sc_lb;});
       auto sc_part_passSCNom = Monitored::Collection("SC_part_passSCNom",tool,[](const auto& v){return v.sc_passSCNom;});
       auto sc_part_passSCNom1 = Monitored::Collection("SC_part_passSCNom1",tool,[](const auto& v){return v.sc_passSCNom1;});
       auto sc_part_passSCNom10 = Monitored::Collection("SC_part_passSCNom10",tool,[](const auto& v){return v.sc_passSCNom10;});

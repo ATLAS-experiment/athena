@@ -27,15 +27,9 @@ class PixelRawDataProviderTool : virtual public IPixelRawDataProviderTool, publi
   PixelRawDataProviderTool( const std::string& type, const std::string& name,
 			    const IInterface* parent ) ;
 
-  //! destructor 
-  ~PixelRawDataProviderTool() ;
-
   //! initialize
   StatusCode initialize() override;
 
-  //! finalize
-  StatusCode finalize() override;
-  
   //! this is the main decoding method
   StatusCode convert( std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
 		      IPixelRDO_Container* rdoIdc,
@@ -52,6 +46,7 @@ private:
 
   SG::WriteHandleKey<InDetTimeCollection> m_LVL1CollectionKey{this, "LVL1CollectionName", "PixelLVL1ID"};
   SG::WriteHandleKey<InDetTimeCollection> m_BCIDCollectionKey{this, "BCIDCollectionName", "PixelBCID"};
+  Gaudi::Property<bool> m_storeInDetTimeColls{this, "StoreInDetTimeCollections", true, "Store LVL1ID and BCID"};
 
   mutable std::atomic_int m_DecodeErrCount;
 };

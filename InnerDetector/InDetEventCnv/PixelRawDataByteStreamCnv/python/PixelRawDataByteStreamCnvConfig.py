@@ -2,8 +2,15 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from PixelConditionsAlgorithms.PixelConditionsConfig import PixelCablingCondAlgCfg, PixelHitDiscCnfgAlgCfg
+    
+def PixelRawDataProviderToolCfg(flags, prefix="", suffix="", storeInDetTimeCollections=True):
+    acc = ComponentAccumulator()
+    decoder = CompFactory.PixelRodDecoder(CheckDuplicatedPixel = False if "data15" in flags.Input.ProjectName else True)
+    acc.setPrivateTools(CompFactory.PixelRawDataProviderTool(Decoder = decoder, StoreInDetTimeCollections = storeInDetTimeCollections))
+    return acc
 
 def PixelRawDataProviderAlgCfg(flags, RDOKey="PixelRDOs", **kwargs):
     """ Main function to configure Pixel raw data decoding """
@@ -15,29 +22,25 @@ def PixelRawDataProviderAlgCfg(flags, RDOKey="PixelRDOs", **kwargs):
 
     from RegionSelector.RegSelToolConfig import regSelTool_Pixel_Cfg
     regSelTool = acc.popToolsAndMerge(regSelTool_Pixel_Cfg(flags))
+    storeInDetTimeCollections = kwargs.pop("StoreInDetTimeCollections",True)
 
+    prefix = kwargs.pop("prefix","")
     suffix = kwargs.pop("suffix","")
-    decoder = CompFactory.PixelRodDecoder(name="PixelRodDecoder"+suffix,
-                                          CheckDuplicatedPixel = False if "data15" in flags.Input.ProjectName else True
-                                          )
-    
-    providerTool =  CompFactory.PixelRawDataProviderTool(name="PixelRawDataProviderTool"+suffix,
-                                                         Decoder = decoder)
-
+    providerTool = acc.popToolsAndMerge(PixelRawDataProviderToolCfg(flags, prefix, suffix, storeInDetTimeCollections))
     acc.addEventAlgo(CompFactory.PixelRawDataProvider(RDOKey = RDOKey,
-                                                      RegSelTool = regSelTool, 
-                                                      ProviderTool = providerTool,
+                                                      RegSelTool = regSelTool,
+                                                      ProviderTool = providerTool, 
                                                       **kwargs))
     return acc
 
 
-def TrigPixelRawDataProviderAlgCfg(flags, suffix, RoIs):
-    trigargs = {
-        'name' : 'TrigPixelRawDataProvider'+suffix,
-        'suffix' : suffix,
-        'RoIs' : RoIs,   
-        'isRoI_Seeded': True,
-        'RDOCacheKey' : 'PixRDOCache',
-        'BSErrorsCacheKey' : 'PixBSErrCache'
-    }
-    return PixelRawDataProviderAlgCfg(flags, **trigargs)
+def TrigPixelRawDataProviderAlgCfg(flags, suffix, RoIs, **kwargs):
+    kwargs.setdefault('name', 'TrigPixelRawDataProvider'+suffix)
+    kwargs.setdefault('prefix', "Trig")
+    kwargs.setdefault('suffix', suffix)
+    kwargs.setdefault('RoIs', RoIs)
+    kwargs.setdefault('isRoI_Seeded', True)
+    kwargs.setdefault('RDOCacheKey', 'PixRDOCache')
+    kwargs.setdefault('BSErrorsCacheKey', 'PixBSErrCache')
+    kwargs.setdefault('StoreInDetTimeCollections', False)
+    return PixelRawDataProviderAlgCfg(flags, **kwargs)

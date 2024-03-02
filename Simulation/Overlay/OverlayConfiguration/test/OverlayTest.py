@@ -7,7 +7,7 @@ import sys
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
-from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
+from DigitizationConfig.DigitizationSteering import DigitizationMessageSvcCfg
 from OverlayConfiguration.OverlaySteering import OverlayMainCfg
 from OverlayConfiguration.OverlayTestHelpers import \
     CommonTestArgumentParser, OverlayJobOptsDumperCfg, \

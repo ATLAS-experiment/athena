@@ -12,10 +12,8 @@ def jetEJsMenuSequence(flags, jetsIn):
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetEJsHypoToolFromDict
 
     # Get track sequence name
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    IDTrigConfig = getInDetTrigConfig( 'fullScan' )
-    sequenceOut  = IDTrigConfig.tracks_FTF()
-    vertices     = IDTrigConfig.vertex_jet
+    sequenceOut  = flags.Trigger.InDetTracking.fullScan.tracks_FTF
+    vertices     = flags.Trigger.InDetTracking.fullScan.vertex_jet
     
     reco = InEventRecoCA(
         f"EmergingJets_{jetsIn}Reco",
@@ -71,10 +69,8 @@ def jetCROldMenuSequence(flags, jetsIn):
     from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetCROldHypoToolFromDict
 
     # Get track sequence name
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     from ..CommonSequences.FullScanDefs import fs_cells, trkFSRoI
-    IDTrigConfig = getInDetTrigConfig( 'fullScan' )
-    sequenceOut  = IDTrigConfig.tracks_FTF()
+    sequenceOut  = flags.Trigger.InDetTracking.fullScan.tracks_FTF
     cellsin=fs_cells
 
     from .JetMenuSequencesConfig import getTrackingInputMaker

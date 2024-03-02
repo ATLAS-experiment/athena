@@ -8,7 +8,7 @@ from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
-from Digitization.DigitizationSteering import DigitizationMainCfg, DigitizationMessageSvcCfg
+from DigitizationConfig.DigitizationSteering import DigitizationMainCfg, DigitizationMessageSvcCfg
 
 # Set up logging
 log.setLevel(DEBUG)

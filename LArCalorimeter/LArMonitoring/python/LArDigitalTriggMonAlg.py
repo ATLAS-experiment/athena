@@ -251,7 +251,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                                pattern=[(part)])
 
             ####  End of plots only for ALL
-
+            
             partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi;Coverage_Eta_Phi_'+thisSel,
                                            title='SC coverage '+selStrPart[thisSel]+': #phi vs #eta;#eta;#phi',
                                            type='TH2F', 
@@ -262,7 +262,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                            pattern=[(part)])
             
 
-
+            if not flags.Common.isOnline: continue   # Skip the remaining histos if we are running offline
             #### HERE - plots which should only be booked for the nominal selection
             if thisSel != "passDigiNom": continue
             partGroup_digi.defineHistogram('Digi_part_eta,Digi_part_phi,Digi_part_diff_adc_ped;Coverage_Diff_ADC_Ped_'+thisSel,  
@@ -397,7 +397,7 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                          ybins=partybins,
                                          pattern=[(part)])
 
-
+            if not flags.Common.isOnline: continue   # Skip the remaining histos if we are running offline
             #### HERE - plots which should only be booked for the nominal selection
             if thisSel !=  "passSCNom": continue
 

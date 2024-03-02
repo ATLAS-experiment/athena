@@ -666,7 +666,7 @@ def triggerRunCfg( flags, menu=None ):
     if flags.Trigger.doCFEmulationTest:
         summaryAlg.Prescaler=CompFactory.PrescalingEmulationTool()
     acc.addEventAlgo( summaryAlg, sequenceName="HLTFinalizeSeq" )
-    # TODO: Add end-of-event sequences here (port from HLTCFConfig.py)
+    acc.merge( triggerEndOfEventCfg(flags), sequenceName="HLTFinalizeSeq" )
 
     #once menu is included we should configure monitoring here as below
     hltSeedingAlg = hltSeedingAcc.getEventAlgo("HLTSeeding")
@@ -738,6 +738,64 @@ def triggerIDCCacheCreatorsCfg(flags, seqName = None):
     if flags.Trigger.doID:
         from TrigInDetConfig.TrigInDetConfig import InDetIDCCacheCreatorCfg
         acc.merge( InDetIDCCacheCreatorCfg(flags), sequenceName = seqName )
+
+    return acc
+
+
+def triggerEndOfEventCfg(flags):
+    from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
+
+    acceptedEventChainDicts = [cd for cd in HLTMenuConfig.dictsList() \
+                               if 'Calib' in cd['signatures'] \
+                               and 'acceptedevts' in cd['chainParts'][0]['purpose']]
+
+    acc = ComponentAccumulator()
+
+    # If no relevant chains or just not desired, can shortcut and return empty CA
+    if not (flags.Trigger.enableEndOfEventProcessing and acceptedEventChainDicts):
+        return acc
+
+    # Add end-of-event sequences executed conditionally on the DecisionSummaryMakerAlg filter status
+    endOfEventRoIMaker = CompFactory.EndOfEventROIConfirmerAlg('EndOfEventROIConfirmerAlg')
+    acc.addEventAlgo( endOfEventRoIMaker )
+    acc.addSequence( parOR("acceptedEventTopSeq") )
+    acc.getSequence("acceptedEventTopSeq").IgnoreFilterPassed=True
+
+    # Define the alg configuration by purpose
+    def EndOfEventSeqCfg(flags, prescaleChain, purposes):
+        acc = ComponentAccumulator()
+        seqLabel = prescaleChain.replace('HLT_acceptedevts','')
+        seqName = 'acceptedEventSeq'+seqLabel
+        acc.addSequence( seqAND(seqName) )
+
+        endOfEventFilterAlg = CompFactory.EndOfEventFilterAlg('EndOfEventFilterAlg'+seqLabel, ChainName=prescaleChain)
+        acc.addEventAlgo(endOfEventFilterAlg, sequenceName=seqName)
+        # The LAr Noise Burst end-of-event sequence
+        if 'larnoiseburst' in purposes:
+            # Add stream filter to EndOfEventFilterAlg
+            # Only accept events going to streams that already do full calo reco
+            # CosmicCalo explicitly requested [ATR-26096]
+            endOfEventFilterAlg.StreamFilter = ['Main','VBFDelayed','TLA','DarkJetPEBTLA','FTagPEBTLA','CosmicCalo']
+
+            from TriggerMenuMT.HLT.CalibCosmicMon.CalibChainConfiguration import getLArNoiseBurstRecoCfg
+            acc.merge(getLArNoiseBurstRecoCfg(flags), sequenceName=seqName)
+        elif any(purpose.startswith("met") for purpose in purposes):
+            from TriggerMenuMT.HLT.MET.EndOfEvent import getMETRecoSequences
+            metcfg, rois, streams = getMETRecoSequences(flags, purposes)
+            endOfEventFilterAlg.StreamFilter = streams
+            endOfEventRoIMaker.RoIs = [x for x in rois if x not in endOfEventRoIMaker.RoIs]
+            acc.merge(metcfg, sequenceName=seqName)
+
+        return acc
+            
+
+    for acceptedEventChainDict in acceptedEventChainDicts:
+        # Common config for each chain
+        prescaleChain = acceptedEventChainDict['chainName']
+        # Now add chain-specific end-of-event sequences executed conditionally on the prescale
+        purposes = acceptedEventChainDict['chainParts'][0]['purpose']
+
+        acc.merge(EndOfEventSeqCfg(flags, prescaleChain, purposes), sequenceName="acceptedEventTopSeq")
 
     return acc
 

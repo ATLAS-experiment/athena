@@ -139,7 +139,8 @@ def types_in_properties(comp_name, value, dict_to_update):
             else:
                 logger.debug("What is typeless comp? %s", value)
     if isinstance(value, dict):
-        [ types_in_properties(comp_name, v, dict_to_update) for v in value.values() ]
+        for v in value.values():
+            types_in_properties(comp_name, v, dict_to_update)
 
 
 def collect_types(conf):
@@ -464,8 +465,6 @@ def loadConfigFile(fname, args) -> Dict:
     if conf is None:
         sys.exit("Unable to load %s file" % fname)
 
-    known_types = collect_types(conf)
-
     if args.includeComps or args.excludeComps or args.includeClasses or args.excludeClasses:
         logger.info(f"include/exclude comps like {args.includeComps}/{args.excludeComps}")
         conf = excludeIncludeComps(conf, args, args.follow)
@@ -477,6 +476,7 @@ def loadConfigFile(fname, args) -> Dict:
         conf = renameComps(conf, args)
 
     if args.ignoreDefaults:
+        known_types = collect_types(conf)
         conf = ignoreDefaults(conf, args, known_types)
 
     if args.shortenDefaultComponents:
@@ -531,7 +531,7 @@ class ComponentsDiffFileLoader:
         return (
             first.get_name() == second.get_name()
             and first.x_pos == second.x_pos
-            and type(first) == type(second)
+            and type(first) is type(second)
         )
 
     def mark_differences(

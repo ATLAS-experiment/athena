@@ -7,12 +7,12 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from SGComps.AddressRemappingConfig import InputRenameCfg
-from Digitization.RunDependentConfig import (
+from DigitizationConfig.RunDependentConfig import (
     maxNevtsPerXing,
     LumiProfileSvcCfg,
     NoProfileSvcCfg,
 )
-from Digitization.PileUpConfig import (
+from DigitizationConfig.PileUpConfig import (
     LowPtMinBiasEventSelectorCfg,
     HighPtMinBiasEventSelectorCfg,
     CavernEventSelectorCfg,

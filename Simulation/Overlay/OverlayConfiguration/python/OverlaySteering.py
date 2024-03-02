@@ -8,7 +8,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from Digitization.DigitizationParametersConfig import writeDigitizationParameters
+from DigitizationConfig.DigitizationParametersConfig import writeDigitizationParameters
 
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \

@@ -55,9 +55,6 @@ def allTE_trkfast( flags, signature="FS" ):
 def getBeamspotVtx(flags):
         signature = "BeamspotJet"
 
-        from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-        IDTrigConfig = getInDetTrigConfig("fullScan")
-
         # run at event level
         inputMakerAlg         = CompFactory.InputMakerForRoI("IM_beamspotJet_"+signature)
         inputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
@@ -65,7 +62,7 @@ def getBeamspotVtx(flags):
         #-- Configuring Beamspot vertex alg
         from TrigT2BeamSpot.T2VertexBeamSpotConfig import T2VertexBeamSpot_activeAllTE
         vertexAlg = T2VertexBeamSpot_activeAllTE(flags, "vertex_"+signature )
-        vertexAlg.TrackCollection = IDTrigConfig.trkTracks_FTF()
+        vertexAlg.TrackCollection = flags.Trigger.InDetTracking.fullScan.trkTracks_FTF
 
         #-- Setting up beamspotSequence
         beamspotSequence = InEventRecoCA('beamspotJetSequence_'+signature,inputMaker=inputMakerAlg)
