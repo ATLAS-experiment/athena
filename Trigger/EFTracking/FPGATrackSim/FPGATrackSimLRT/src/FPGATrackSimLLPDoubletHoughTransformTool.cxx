@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #include "TH2.h"
 #include "FPGATrackSimLLPDoubletHoughTransformTool.h"
@@ -189,6 +189,6 @@ void FPGATrackSimLLPDoubletHoughTransformTool::drawImage(Image const & image) co
         for (unsigned y = 0; y < m_imageSize_y; y++)
             h.SetBinContent(x+1, y+1, image(x, y).first); // +1 since root bins are 1-indexed
 
-    h.SaveAs((name()+"_event_"+std::to_string( m_event )+".root").c_str());
+    h.SaveAs((name()+"_event_"+std::to_string( m_event )+".root").c_str(), "");
 }
 

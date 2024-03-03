@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "RadDamageUtil.h"
@@ -270,7 +270,7 @@ StatusCode RadDamageUtil::generateEfieldMap(TH1F*& eFieldMap, InDetDD::PixelModu
   dirname.ReplaceAll(".", "-");
   dirname = predirname + dirname;
   dirname += (".root");
-  eFieldMap->SaveAs(dirname.Data());
+  eFieldMap->SaveAs(dirname.Data(), "");
   return StatusCode::SUCCESS;
 }
 

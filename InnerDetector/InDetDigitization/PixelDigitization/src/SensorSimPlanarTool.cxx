@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SensorSimPlanarTool.h"
@@ -130,17 +130,17 @@ StatusCode SensorSimPlanarTool::initialize() {
         TString prename = "map_layer_";
         prename += i;
         prename += "distance_e.root";
-        distanceMap_e_hold->SaveAs(prename);
+        distanceMap_e_hold->SaveAs(prename, "");
         prename.ReplaceAll("_e", "_h");
-        distanceMap_h_hold->SaveAs(prename);
+        distanceMap_h_hold->SaveAs(prename, "");
         prename.ReplaceAll("distance", "time");
-        timeMap_h_hold->SaveAs(prename);
+        timeMap_h_hold->SaveAs(prename, "");
         prename.ReplaceAll("_h", "_e");
-        timeMap_e_hold->SaveAs(prename);
+        timeMap_e_hold->SaveAs(prename, "");
         prename.ReplaceAll("time", "lorentz");
-        lorentzMap_e_hold->SaveAs(prename);
+        lorentzMap_e_hold->SaveAs(prename, "");
         prename.ReplaceAll("_e", "_h");
-        lorentzMap_h_hold->SaveAs(prename);
+        lorentzMap_h_hold->SaveAs(prename, "");
       }
       //Safetycheck
       if (!distanceMap_e_hold || !distanceMap_h_hold || !timeMap_e_hold || !timeMap_h_hold ||
