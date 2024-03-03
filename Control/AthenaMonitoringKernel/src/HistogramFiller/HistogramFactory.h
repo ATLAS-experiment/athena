@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_HistogramFactory_h
@@ -26,12 +26,12 @@ namespace Monitored {
   class HistogramFactory {
   public:
     /**
-     * @brief Defualt constructor
+     * @brief Default constructor
      * 
      * @param histSvc ROOT framework histogramming service
      * @param groupName Name of the group to which produced histograms will belong
      */
-    HistogramFactory(const ServiceHandle<ITHistSvc>& histSvc, std::string groupName);
+    HistogramFactory(const ServiceHandle<ITHistSvc>& histSvc, const std::string& groupName);
     /**
      * @brief Virtual destructor
      */

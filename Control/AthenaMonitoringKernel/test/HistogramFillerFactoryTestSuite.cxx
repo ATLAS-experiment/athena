@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -207,7 +207,7 @@ class HistogramFillerFactoryTestSuite {
   private:
     typedef void (HistogramFillerFactoryTestSuite::*TestCase)(void);
 
-    function<void(void)> registerTestCase(TestCase testCase, string testCaseName) {
+    function<void(void)> registerTestCase(TestCase testCase, const string& testCaseName) {
       return [this, testCase, testCaseName]() {
         m_log << MSG::INFO << "Current test case: " << testCaseName << endmsg;
         beforeEach();
