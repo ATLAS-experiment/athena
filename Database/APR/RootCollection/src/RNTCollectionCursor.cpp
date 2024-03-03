@@ -50,7 +50,7 @@ RNTCollectionCursor::RNTCollectionCursor(
         tokenI != m_collectionRowBuffer.tokenList().end(); ++tokenI )
    {
       // MN: the move constructor is broken now, can't use this field to read
-      m_tokenFields.emplace_back(std::move(m_reader->GetView<std::string>( tokenI.tokenName())), &*tokenI);
+      m_tokenFields.emplace_back(m_reader->GetView<std::string>( tokenI.tokenName()), &*tokenI);
    }
 }
 
