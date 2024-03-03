@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/ActsToTrkConvertorAlg.h"
@@ -85,7 +85,7 @@ namespace ActsTrk
                                            ::TrackCollection &tracksContainer) const
   {
 
-    for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : tracks)
+    for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : tracks)
     {
       const auto lastMeasurementIndex = track.tipIndex();
       auto finalTrajectory = std::make_unique<Trk::TrackStates>();
