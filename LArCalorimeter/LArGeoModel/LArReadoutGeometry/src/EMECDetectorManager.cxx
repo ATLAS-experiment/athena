@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -146,6 +146,7 @@ const EMECHVManager& EMECDetectorManager::getHVManager (EMECHVManager::IOType io
       m_HVManager[io].set (&(manager->getEMECHVManager(io)));
     }
   }
+  // cppcheck-suppress nullPointerRedundantCheck; false positive
   return *(m_HVManager[io].get());
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -47,7 +47,7 @@ public:
     class TubePosition {                                           //
     public:                                                        //
       TubePosition();                                              //
-      TubePosition(tileName_t name, float x, float y, std::string hvFT);//
+      TubePosition(tileName_t name, float x, float y, const std::string& hvFT);//
       tileName_t  get_tileName() const;                            //
       float       x() const;                                       //
       float       y() const;                                       //
@@ -186,7 +186,7 @@ FCAL_ChannelMap::TubePosition::TubePosition()
 {}
  
 inline
-FCAL_ChannelMap::TubePosition::TubePosition(tileName_t name, float x, float y, std::string hvFT)
+FCAL_ChannelMap::TubePosition::TubePosition(tileName_t name, float x, float y, const std::string& hvFT)
     :
     m_tileName(name),
     m_x(x),
