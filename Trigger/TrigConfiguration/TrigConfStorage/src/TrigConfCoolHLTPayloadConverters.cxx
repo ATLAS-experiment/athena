@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfStorage/TrigConfCoolHLTPayloadConverters.h"
@@ -59,7 +59,7 @@ TrigConfCoolHLTPayloadConverters::createHltChainGroupPayload(cool::IFolderPtr fl
    string groups(ch.level());
    groups += ";";
    bool start(true);
-   for(string group : ch.groups()) {
+   for(const string& group : ch.groups()) {
       if(start) { start=false; } else { groups += ","; }
       groups += group;
    }
@@ -229,7 +229,7 @@ TrigConfCoolHLTPayloadConverters::addGroupsToHltChain( const coral::AttributeLis
       vector<string> grV = split(lvlGrp[1],",");
       for(HLTChain* ch : chl) {
          if( ch->chain_counter()==cc && ch->level()==level) {
-            for(string gr : grV) ch->addGroup(gr);
+            for(const string& gr : grV) ch->addGroup(gr);
             break;
          }
       }
