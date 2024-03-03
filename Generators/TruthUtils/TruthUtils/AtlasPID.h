@@ -473,6 +473,15 @@ template<class T> inline bool isCharmMeson(const T& p) { return  leadingQuark(p)
 template<class T> inline bool isBottomMeson(const T& p) { return  leadingQuark(p) == BQUARK && isMeson(p); }
 template<class T> inline bool isTopMeson(const T& p) { return  leadingQuark(p) == TQUARK && isMeson(p); }
 
+template<class T> inline bool isCCbarMeson(const T& p) { return isCCbarMeson(p->pdg_id());} 
+template<> inline bool isCCbarMeson(const DecodedPID& p) { return leadingQuark(p) == CQUARK && isMeson(p) && p(1) == CQUARK && p(2) == CQUARK; }
+template<> inline bool isCCbarMeson(const int& p) { return isCCbarMeson(DecodedPID(p)); } 
+
+template<class T> inline bool isBBbarMeson(const T& p){ return isBBbarMeson(p->pdg_id());} 
+template<> inline bool isBBbarMeson(const DecodedPID& p) { return leadingQuark(p) == BQUARK && isMeson(p) && p(1) == BQUARK && p(2) == BQUARK; }
+template<> inline bool isBBbarMeson(const int& p) { return isCCbarMeson(DecodedPID(p)); } 
+
+
 template<class T> inline bool isLightBaryon(const T& p) { auto lq = leadingQuark(p); return  (lq == DQUARK || lq == UQUARK||lq == SQUARK) && isBaryon(p); }
 template<class T> inline bool isHeavyBaryon(const T& p) {  auto lq = leadingQuark(p); return  (lq == CQUARK || lq == BQUARK || lq == TQUARK) && isBaryon(p); }
 template<class T> inline bool isStrangeBaryon(const T& p) { return  leadingQuark(p) == SQUARK && isBaryon(p); }

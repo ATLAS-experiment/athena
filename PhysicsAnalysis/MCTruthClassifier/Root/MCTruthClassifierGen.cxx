@@ -1823,7 +1823,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   return convHadronTypeToOrig(pType, motherPDG);
 }
 
-//---------------------------------------------------------------------------------
 ParticleOrigin
 MCTruthClassifier::convHadronTypeToOrig(ParticleType pType, int motherPDG)
 {
@@ -1840,19 +1839,11 @@ MCTruthClassifier::convHadronTypeToOrig(ParticleType pType, int motherPDG)
   if (pType == LightMesonPart) return LightMeson;
   return NonDefined;
 }
-//---------------------------------------------------------------------------------
+
 ParticleOrigin MCTruthClassifier::defHadronType(int pdg) {
-  //---------------------------------------------------------------------------------
-  // Special case
   if (abs(pdg) == MC::JPSI) return JPsi;
-
-  int q1 = (pdg / 1000) % 10;
-  int q2 = (pdg / 100) % 10;
-  int q3 = (pdg / 10) % 10;
-
-  if (q1 == 0 && MC::BQUARK == q2 && MC::BQUARK == q3) return BBbarMeson;
-  if (q1 == 0 && MC::CQUARK == q3 && MC::CQUARK == q2) return CCbarMeson;
-  // Now just use the central helper functions
+  if (MC::isBBbarMeson(pdg)) return BBbarMeson;
+  if (MC::isCCbarMeson(pdg)) return CCbarMeson;
   if (MC::isBottomMeson(pdg)) return BottomMeson;
   if (MC::isCharmMeson(pdg)) return CharmedMeson;
   if (MC::isBottomBaryon(pdg)) return BottomBaryon;
@@ -1864,18 +1855,9 @@ ParticleOrigin MCTruthClassifier::defHadronType(int pdg) {
   return NonDefined;
 }
 
-//---------------------------------------------------------------------------------
 ParticleType MCTruthClassifier::defTypeOfHadron(int pdg) {
-  // Note that this differs from the above by return type -- should we be more clear?
-  int q1 = (abs(pdg) / 1000) % 10;
-  int q2 = (abs(pdg) / 100) % 10;
-  int q3 = (abs(pdg) / 10) % 10;
-  // di quark
-  // if( q3 == 0 && q2 >=q3 )   cout<<"di quark"<<endl;
-  // First two do not have obvious helpers in MCUtils
-  if (q1 == 0 && MC::BQUARK == q2 && MC::BQUARK == q3) return BBbarMesonPart;
-  if (q1 == 0 && MC::CQUARK == q3 && MC::CQUARK == q2) return CCbarMesonPart;
-  // Now just use the central helper functions
+  if (MC::isBBbarMeson(pdg)) return BBbarMesonPart;
+  if (MC::isCCbarMeson(pdg)) return CCbarMesonPart;
   if (MC::isBottomMeson(pdg)) return BottomMesonPart;
   if (MC::isCharmMeson(pdg)) return CharmedMesonPart;
   if (MC::isBottomBaryon(pdg)) return BottomBaryonPart;
@@ -1887,7 +1869,6 @@ ParticleType MCTruthClassifier::defTypeOfHadron(int pdg) {
   return Unknown;
 }
 
-//---------------------------------------------------------------------------------
 const xAOD::TruthParticle* MCTruthClassifier::getMother(const xAOD::TruthParticle* thePart) const {
   ATH_MSG_DEBUG("executing getMother");
 
@@ -2162,4 +2143,3 @@ MCTruthClassifier::checkOrigOfBkgElec(const xAOD::TruthParticle* theEle, Info* i
   info->bkgElecMother = thePart;
   return part;
 }
-
