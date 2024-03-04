@@ -25,17 +25,9 @@
 
 namespace Trk {
     class IVertexFitter;
-    //    class VxCandidate;
-    //    class TrackParticleBase;
-    //    class VxTrackAtVertex;
-    //    class RecVertex;
     class TrkV0VertexFitter;
     class ITrackSelectorTool;
-    class V0Tools;
-    //    class ExtendedVxCandidate;
 }
-
-namespace InDet { class VertexPointEstimator; }
 
 namespace DerivationFramework {
     
@@ -176,9 +168,7 @@ namespace DerivationFramework {
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection;
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
         ToolHandle < Trk::IVertexFitter > m_iV0VertexFitter;
-        ToolHandle < Trk::V0Tools > m_V0Tools;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
-        ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
         SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonIndex{this, "muonIndexDec", "Muons.BPHY4MuonIndex"};
 

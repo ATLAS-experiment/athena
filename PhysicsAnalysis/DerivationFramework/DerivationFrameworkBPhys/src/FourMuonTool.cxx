@@ -13,11 +13,8 @@
 #include "DerivationFrameworkBPhys/FourMuonTool.h"
 #include "DerivationFrameworkBPhys/BPhysPVTools.h"
 #include "xAODBPhys/BPhysHelper.h"
-#include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
-#include "InDetConversionFinderTools/ConversionFinderUtils.h"
-#include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "AthLinks/ElementLink.h"
 
@@ -52,22 +49,6 @@ namespace DerivationFramework {
         } else {
             ATH_MSG_DEBUG("Retrieved tool " << m_trkSelector);
         }
-        
-        // uploading the V0 tools
-        if ( m_V0Tools.retrieve().isFailure() ) {
-            ATH_MSG_FATAL("Failed to retrieve tool " << m_V0Tools);
-            return StatusCode::FAILURE;
-        } else {
-            ATH_MSG_DEBUG("Retrieved tool " << m_V0Tools);
-        }
-        
-        // Get the vertex point estimator tool from ToolSvc
-        if ( m_vertexEstimator.retrieve().isFailure() ) {
-            ATH_MSG_FATAL("Failed to retrieve tool " << m_vertexEstimator);
-            return StatusCode::FAILURE;
-        } else {
-            ATH_MSG_DEBUG("Retrieved tool " << m_vertexEstimator);
-        }
 
         // Get the beam spot service
         CHECK( m_eventInfo_key.initialize() );
@@ -89,9 +70,7 @@ namespace DerivationFramework {
     m_TrkParticleCollection("TrackParticleCandidate"),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_iV0VertexFitter("Trk::V0VertexFitter"),
-    m_V0Tools("Trk::V0Tools"),
-    m_trkSelector("InDet::TrackSelectorTool"),
-    m_vertexEstimator("InDet::VertexPointEstimator")
+    m_trkSelector("InDet::TrackSelectorTool")
     {
         declareInterface<FourMuonTool>(this);
         declareProperty("ptCut",m_ptCut);
@@ -101,9 +80,7 @@ namespace DerivationFramework {
         declareProperty("TrackParticleCollection",m_TrkParticleCollection);
         declareProperty("TrkVertexFitterTool",m_iVertexFitter);
         declareProperty("V0VertexFitterTool",m_iV0VertexFitter);
-        declareProperty("V0Tools",m_V0Tools);
         declareProperty("TrackSelectorTool",m_trkSelector);
-        declareProperty("VertexPointEstimator",m_vertexEstimator);
     }
     
     FourMuonTool::~FourMuonTool() { }
@@ -292,12 +269,6 @@ namespace DerivationFramework {
                 return NULL;
             }
         }
-        
-        //int sflag = 0;
-        //int errorcode = 0;
-        //Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
-        //startingPoint(0) = 0.0; startingPoint(1) = 0.0; startingPoint(2) = 0.0;}
-        //Trk::Vertex vertex(beamSpot);
 
         xAOD::Vertex* myVxCandidate = nullptr;
         if (m_useV0Fitter) {
