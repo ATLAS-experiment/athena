@@ -35,11 +35,6 @@ private:
     std::string m_xaodTruthParticleContainerName;
     std::string m_xaodTruthEventContainerName;
 
-    /// Selection values for keeping METs
-    //double m_MET_pt_selection; //in GeV
-
-    bool prompt( const xAOD::TruthParticle* tp ) const;
-
     ToolHandle<IMCTruthClassifier> m_classif;
 }; // class xAODTruthParticleSlimmerMET
 

@@ -31,7 +31,6 @@ public:
     virtual StatusCode filterFinalize();
     virtual StatusCode filterEvent();
 
-    bool isPrompt( const xAOD::TruthParticle* tp ) const;
 private:
 
     double m_MinJetPt;  //!< Min pT for the truth jets
