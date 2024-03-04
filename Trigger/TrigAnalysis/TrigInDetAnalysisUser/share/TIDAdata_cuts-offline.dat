@@ -34,8 +34,13 @@ pT     = 1000;
    npix=-1;
    nsct= 2;
 #else 
+#ifdef ITk
+   npix   =  4;
+   nsct   = -1;
+#else
    npix   = 1;
    nsct   = 2;
+#endif
 #endif
 
 expectIBL = 1;
