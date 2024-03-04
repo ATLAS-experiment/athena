@@ -18,6 +18,7 @@
 #include "InDetRecToolInterfaces/IGNNTrackFinder.h"
 #include "InDetRecToolInterfaces/ISeedFitter.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
+#include "IGNNTrackReaderTool.h"
 
 namespace Trk {
   class ITrackFitter;
@@ -37,10 +38,8 @@ namespace InDet {
     class SiSPGNNTrackMaker : public AthReentrantAlgorithm {
       public:
       SiSPGNNTrackMaker(const std::string& name, ISvcLocator* pSvcLocator);
-      virtual ~SiSPGNNTrackMaker() = default;
       virtual StatusCode initialize() override;
       virtual StatusCode execute(const EventContext& ctx) const override;
-      virtual StatusCode finalize() override;
 
       /// Make this algorithm clonable.
       virtual bool isClonable() const override { return true; };
@@ -56,9 +55,9 @@ namespace InDet {
       //@{
       // input containers
       SG::ReadHandleKey<SpacePointContainer> m_SpacePointsPixelKey{
-        this, "SpacePointsPixelName", "PixelSpacePoints"};
+        this, "SpacePointsPixelName", "ITkPixelSpacePoints"};
       SG::ReadHandleKey<SpacePointContainer> m_SpacePointsSCTKey{
-        this, "SpacePointsSCTName", "SCT_SpacePoints"};
+        this, "SpacePointsSCTName", "ITkStripSpacePoints"};
       //@}
 
       // output container
@@ -71,18 +70,25 @@ namespace InDet {
       //@{
       /// GNN-based track finding tool that produces track candidates
       ToolHandle<IGNNTrackFinder> m_gnnTrackFinder{
-        this, "GNNTrackFinder", 
-        "InDet::SiGNNTrackFinder/InDetSiGNNTrackFinder", "Track Finder"
+        this, "GNNTrackFinderTool", 
+        "InDet::SiGNNTrackFinderTool", "Track Finder"
       };
       ToolHandle<ISeedFitter> m_seedFitter{
-        this, "SeedFitter",
-        "InDet::SiSeedFitter/InDetSiSeedFitter", "Seed Fitter"
+        this, "SeedFitterTool",
+        "InDet::SiSeedFitterTool", "Seed Fitter"
       };
       /// Track Fitter
       ToolHandle<Trk::ITrackFitter> m_trackFitter {
         this, "TrackFitter", 
         "Trk::GlobalChi2Fitter/InDetTrackFitter", "Track Fitter"
       };
+      ToolHandle<IGNNTrackReaderTool> m_gnnTrackReader{
+        this, "GNNTrackReaderTool",
+        "InDet::GNNTrackReaderTool", "Track Reader"
+      };
+
+      BooleanProperty m_useTrackFinder{this, "UseTrackFinder", false};
+      BooleanProperty m_useTrackReader{this, "UseTrackReader", true};
       //@}
 
       MsgStream&    dumptools(MsgStream&    out) const;

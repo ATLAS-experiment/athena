@@ -23,9 +23,22 @@ StatusCode InDet::SiSPGNNTrackMaker::initialize()
 
   ATH_CHECK(m_outputTracksKey.initialize());
 
-  ATH_CHECK(m_gnnTrackFinder.retrieve());
   ATH_CHECK(m_trackFitter.retrieve());
   ATH_CHECK(m_seedFitter.retrieve());
+
+  if (m_useTrackFinder == m_useTrackReader) {
+    ATH_MSG_ERROR("Use either track finder or track reader, not both.");
+    return StatusCode::FAILURE;
+  }
+
+  if (m_useTrackFinder) {
+    ATH_MSG_INFO("Use GNN Track Finder");
+    ATH_CHECK(m_gnnTrackFinder.retrieve());
+  }
+  if (m_useTrackReader) {
+    ATH_MSG_INFO("Use GNN Track Reader");
+    ATH_CHECK(m_gnnTrackReader.retrieve());
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -68,7 +81,14 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   getData(m_SpacePointsSCTKey);
 
   std::vector<std::vector<uint32_t> > TT;
-  ATH_CHECK(m_gnnTrackFinder->getTracks(spacePoints, TT));
+  if (m_gnnTrackFinder.isSet()) {
+    ATH_CHECK(m_gnnTrackFinder->getTracks(spacePoints, TT));
+  } else if (m_gnnTrackReader.isSet()) {
+    m_gnnTrackReader->getTracks(runNumber, eventNumber, TT);
+  } else {
+    ATH_MSG_ERROR("Both GNNTrackFinder and GNNTrackReader are not set");
+    return StatusCode::FAILURE;
+  }
 
 
   ATH_MSG_DEBUG("Obtained " << TT.size() << " Tracks");
@@ -80,6 +100,7 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
 
     std::vector<const Trk::PrepRawData*> clusters;
     std::vector<const Trk::SpacePoint*> trackCandiate;
+    trackCandiate.reserve(trackIndices.size());
 
     trackCounter++;
     ATH_MSG_DEBUG("Track " << trackCounter << " has " << trackIndices.size() << " spacepoints");
@@ -89,7 +110,7 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
     for (auto& id : trackIndices) {
       //// for each spacepoint, attach all prepRawData to a list.
       if (id > spacePoints.size()) {
-        ATH_MSG_ERROR("SpacePoint index out of range");
+        ATH_MSG_WARNING("SpacePoint index "<< id << " out of range: " << spacePoints.size());
         continue;
       }
 
@@ -108,15 +129,23 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
     // conformal mapping for track parameters
     auto trkParameters = m_seedFitter->fit(trackCandiate);
     if (trkParameters == nullptr) {
-      ATH_MSG_ERROR("Conformal mapping failed");
+      ATH_MSG_WARNING("Conformal mapping failed");
       continue;
     }
 
-    bool runOutlierRemoval = true;
-    Trk::ParticleHypothesis matEffects = Trk::pion; 
-    auto track = m_trackFitter->fit(ctx, clusters, *trkParameters, runOutlierRemoval, matEffects);
-    if (track) {
-      outputTracks->push_back(track.release());
+    Trk::ParticleHypothesis matEffects = Trk::pion;
+    // first fit the track with local parameters and without outlier removal.
+    std::unique_ptr<Trk::Track> track = m_trackFitter->fit(ctx, clusters, *trkParameters, false, matEffects);
+    if (track != nullptr && track->perigeeParameters() != nullptr) {
+      // fit the track again with perigee parameters and without outlier removal.
+      track = std::move(m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), false, matEffects));
+      if (track != nullptr) {
+        // finally fit with outlier removal
+        track = std::move(m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true, matEffects));
+        if (track != nullptr && track->trackSummary() != nullptr) {
+          outputTracks->push_back(track.release());
+        }
+      }
     }
   }
 
@@ -124,16 +153,6 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
   return StatusCode::SUCCESS;
 }
 
-
-///////////////////////////////////////////////////////////////////
-// Finalize
-///////////////////////////////////////////////////////////////////
-
-StatusCode InDet::SiSPGNNTrackMaker::finalize() 
-{
-  msg(MSG::INFO)<<(*this)<<endmsg;
-  return StatusCode::SUCCESS;
-}
 
 ///////////////////////////////////////////////////////////////////
 // Overload of << operator MsgStream

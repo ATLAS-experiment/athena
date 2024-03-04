@@ -26,9 +26,6 @@ namespace InDet {
     // Public methods:
     ///////////////////////////////////////////////////////////////////
     SeedFitterTool(const std::string&,const std::string&,const IInterface*);
-    virtual ~SeedFitterTool () = default;
-    virtual StatusCode initialize() override;
-    virtual StatusCode finalize  () override;
 
     ///////////////////////////////////////////////////////////////////
     // Methods to convert spacepoints to Trk::Track

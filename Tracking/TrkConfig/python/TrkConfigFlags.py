@@ -53,6 +53,8 @@ class TrackingComponent(FlagEnum):
     ValidateActsAmbiguityResolution = "ValidateActsAmbiguityResolution"
     # Benchmarking
     BenchmarkSpot = "BenchmarkSpot"
+    # GNN
+    GNNChain = "GNNChain"
 
 
 def createTrackingConfigFlags():
@@ -309,6 +311,10 @@ def createTrackingConfigFlags():
     # SiSPSeededTrackFinder
     icf.addFlag("Tracking.useITkFTF", False)
 
+    # GNN for ITk flags
+    icf.addFlag("Tracking.GNN.useTrackFinder", False)
+    icf.addFlag("Tracking.GNN.useTrackReader", False)
+
     # enable reco steps
     icf.addFlag("Tracking.recoChain", [TrackingComponent.AthenaChain])
 
@@ -460,6 +466,11 @@ def createTrackingConfigFlags():
                           createValidateActsAmbiguityResolutionTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkActsBenchmarkSpotPass",
                           createActsBenchmarkSpotTrackingPassFlags, prefix=True)
+
+    # GNN
+    from InDetGNNTracking.InDetGNNTrackingFlags import createGNNTrackingPassFlags
+    icf.addFlagsCategory ("Tracking.ITkGNNPass",
+                          createGNNTrackingPassFlags, prefix=True)
 
     ####################################################################
 

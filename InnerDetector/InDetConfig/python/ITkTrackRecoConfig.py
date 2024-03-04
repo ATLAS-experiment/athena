@@ -36,6 +36,12 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsPass")]
+        
+    # GNN pass
+    if TrackingComponent.GNNChain in flags.Tracking.recoChain:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkGNNPass")]
 
     # Acts Conversion Pass
     if flags.Detector.EnableCalo and flags.Acts.doITkConversion:
