@@ -71,6 +71,7 @@ def FixRegion(config: ROOT.TDirectory, top_level: dqi.HanConfigGroup, td: ROOT.T
     """Main code to translate the configuration given by 'top_level' into the
     final configuration by expanding the regexes using the objects in 'td'"""
     log.info('Translating regexes...')
+    HanConfigGroup = dqi.HanConfigGroup
 
     refmapcache = {}  # Avoid repeated lookups of reference TMaps
     mapping = {}
@@ -81,14 +82,14 @@ def FixRegion(config: ROOT.TDirectory, top_level: dqi.HanConfigGroup, td: ROOT.T
     iterate_hcfg(top_level, mapping, mapping_regex, mapping_groups)
     mapping_assessors_final.update(mapping)
     for path, g in mapping_groups.items():
-        newgroup = dqi.HanConfigGroup()
+        newgroup = HanConfigGroup()
         newgroup.SetName(g.GetName())
         newgroup.SetPathName(path)
         copyMetadata(newgroup, g)
         mapping_groups_final[path] = newgroup
 
     
-    l = []
+    l: List[str] = []
     iterate_objs(td, l, td.GetPath())
     for path, (a, p) in mapping_regex.items():
         pre = re.compile(p)
@@ -110,7 +111,7 @@ def FixRegion(config: ROOT.TDirectory, top_level: dqi.HanConfigGroup, td: ROOT.T
                         if orig in mapping_groups_final:
                             log.debug(f'Deleting {orig}')
                             del mapping_groups_final[orig]                           
-                        newgroup = dqi.HanConfigGroup()
+                        newgroup = HanConfigGroup()
                         newgroup.SetName(formatted_tok)
                         newgroup.SetPathName(target)
                         oldgroup = mapping_groups[orig]
@@ -158,9 +159,10 @@ def FixRegion(config: ROOT.TDirectory, top_level: dqi.HanConfigGroup, td: ROOT.T
             log.error(f'Unable to look up assessor parent directory. Full error follows\n{e}: path {p}, assessor {a}, assessor name {a.GetName()}')
     # need to in reverse order of depth. First count number of slashes:
     keydepths = count_slashes(mapping_groups_final.items())
-    for _, l in sorted(keydepths.items(), reverse=True):
-        for p, g in l:
-            log.debug(f'Final additions for {p}, {g}, {g.GetPathName()} into {os.path.dirname(p)}')
+    for _, l2 in sorted(keydepths.items(), reverse=True):
+        for p, g in l2:
+            if log.level <= logging.DEBUG:
+                log.debug(f'Final additions for {p}, {g.GetName()}, {g.GetPathName()} into {os.path.dirname(p)}')
             if p != 'top_level':
                 try:
                     mapping_groups_final[os.path.dirname(p)].AddGroup(g)
