@@ -35,7 +35,6 @@
 #include "GeoModelWrite/WriteGeoModel.h"
 // #include "GeoModelHelpers/defineWorld.h" //TODO: Use this as soon as we have the latest GeoModel in Athena main
 
-#include <QCoreApplication>
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
@@ -144,13 +143,6 @@ void GeoExporter::init()
   VP1Msg::message("               Launching the GeoExporter");
   VP1Msg::message("===================================================");
   VP1Msg::message("");
-
-  int argc=1;
-  char *argv[2];
-
-  QCoreApplication app(argc, argv);
-  QCoreApplication::setOrganizationName("ATLAS");
-  QCoreApplication::setApplicationName("GeoExporter");
 
   VP1Msg::message("Accessing the ATLAS geometry...");
   StoreGateSvc* detstore = m_d->detstore;
