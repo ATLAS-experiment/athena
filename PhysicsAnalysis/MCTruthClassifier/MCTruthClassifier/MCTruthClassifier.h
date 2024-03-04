@@ -166,7 +166,6 @@ public:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
   particleTruthClassifier(HepMC::ConstGenParticlePtr,Info* info = nullptr) const override;
 
-  bool compareTruthParticles(const HepMC::ConstGenParticlePtr& genPart, const xAOD::TruthParticle* truthPart) const;
 #endif
 
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
