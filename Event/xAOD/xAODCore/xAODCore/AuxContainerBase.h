@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCORE_AUXCONTAINERBASE_H
 #define XAODCORE_AUXCONTAINERBASE_H
@@ -8,6 +8,7 @@
 // STL include(s):
 #include <vector>
 #include <string>
+#include <memory>
 
 // EDM include(s):
 #include "AthContainersInterfaces/IAuxStore.h"
@@ -16,6 +17,8 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/threading.h"
 #include "AthContainers/PackedContainer.h"
+#include "CxxUtils/CachedPointer.h"
+#include "CxxUtils/checker_macros.h"
 #ifndef XAOD_STANDALONE
 #   include "AthenaKernel/ILockable.h"
 #endif // not XAOD_STANDALONE
@@ -28,6 +31,9 @@ namespace SG {
    class IAuxTypeVector;
 }
 class xAODAuxContainerBaseCnv;
+namespace std { namespace pmr {
+class memory_resource;
+}}
 
 /// Namespace holding all the xAOD EDM classes
 namespace xAOD {
@@ -60,10 +66,14 @@ namespace xAOD {
 
       /// Default constructor
       AuxContainerBase( bool allowDynamicVars = true );
+      /// Passing in a memory resource.
+      AuxContainerBase( std::pmr::memory_resource* memResource,
+                        bool allowDynamicVars = true );
       /// Copy constructor
       AuxContainerBase( const AuxContainerBase& parent );
       /// Constructor receiving a "dynamic auxiliary store"
-      AuxContainerBase( SG::IAuxStore* store );
+      AuxContainerBase( SG::IAuxStore* store,
+                        std::pmr::memory_resource* memResource = nullptr );
       /// Destructor
       ~AuxContainerBase();
 
@@ -80,6 +90,9 @@ namespace xAOD {
       virtual void setStore( SG::IAuxStore* store ) override;
       /// Return the type of the store object
       virtual AuxStoreType getStoreType() const override { return AST_ContainerStore; }
+
+      /// Return the memory resource to use.
+      std::pmr::memory_resource* memResource();
 
       /// @}
 
@@ -217,6 +230,9 @@ namespace xAOD {
 
       /// Name of the container in memory. Set externally.
       std::string m_name;
+
+      /// Memory resource to use for this container.
+      mutable CxxUtils::CachedPointer<std::pmr::memory_resource> m_memResource ATLAS_THREAD_SAFE;
 
    }; // class AuxContainerBase
 

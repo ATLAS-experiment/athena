@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,6 +18,13 @@
 #include <iostream>
 #include <sstream>
 #include <cassert>
+#include <memory>
+
+#ifndef XAOD_STANDALONE
+#include "GaudiKernel/ThreadLocalContext.h"
+#include "GaudiKernel/EventContext.h"
+#include "AthenaKernel/ExtendedEventContext.h"
+#endif
 
 
 struct MoveTest
@@ -39,6 +46,26 @@ struct MoveTest
 
 
 bool wasMoved (const MoveTest& x) { return x.m_v.empty(); }
+
+
+class TestMemResource
+  : public std::pmr::memory_resource
+{
+public:
+  virtual void* do_allocate (size_t, std::size_t) override
+  {
+    std::abort();
+  }
+  virtual void do_deallocate (void*, std::size_t, std::size_t) override
+  {
+    std::abort();
+  }
+  virtual bool do_is_equal (const std::pmr::memory_resource&) const noexcept override
+  {
+    std::abort();
+  }
+};
+
 
 
 class AuxContainerTest
@@ -200,6 +227,23 @@ void test2()
   AuxContainerTest s1;
   s1.resize(5);
   assert (s1.getData(atyp1, 5, 5) != nullptr);
+
+  xAOD::AuxContainerBase c1;
+  assert (c1.memResource() == std::pmr::get_default_resource());
+
+  TestMemResource tmr;
+  xAOD::AuxContainerBase c2 (&tmr);
+  assert (c2.memResource() == &tmr);
+  
+#ifndef XAOD_STANDALONE
+  EventContext ctx;
+  Atlas::ExtendedEventContext ectx;
+  ectx.setMemResource( &tmr );
+  Atlas::setExtendedEventContext( ctx, std::move (ectx ) );
+  Gaudi::Hive::setCurrentContext( ctx );
+  xAOD::AuxContainerBase c3;
+  assert (c3.memResource() == &tmr);
+#endif
 }
 
 
