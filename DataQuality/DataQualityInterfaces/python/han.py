@@ -9,6 +9,10 @@ from typing import List, Dict, Tuple, Optional, Iterable
 import logging
 log = logging.getLogger('DataQualityInterfaces')
 
+def logLevel(level: str='INFO') -> None:
+    log.setLevel(level)
+
+
 def copyMetadata(newgroup: dqi.HanConfigAssessor, oldgroup: dqi.HanConfigAssessor,
                 input: str=None, algrefname: str=None) -> None:
     """Copy the configuration of an old algorithm to a new one, but without the
@@ -191,9 +195,10 @@ def iterate_objs(thisdir: ROOT.TDirectory, l: List[str], prefix: str):
     # inconsistent ROOT handling of top directory name of file
     prefix = os.path.normpath(prefix)
     prefixlen = len(prefix) + 1
+    fixeddirname = os.path.normpath(thisdir.GetPath())[prefixlen:]
     for k in thisdir.GetListOfKeys():
         if k.GetClassName().startswith('TDirectory'):
             iterate_objs(k.ReadObj(), l, prefix)
         else:
             if k.GetName() != 'metadata':
-                l.append(os.path.join(thisdir.GetPath()[prefixlen:], k.GetName()))
+                l.append(os.path.join(fixeddirname, k.GetName()))
