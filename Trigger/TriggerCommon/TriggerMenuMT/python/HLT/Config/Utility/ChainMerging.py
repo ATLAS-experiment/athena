@@ -6,10 +6,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuS
 from AthenaCommon.Logging import logging
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TrigCompositeUtils.TrigCompositeUtils import legName
-from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
-from TriggerMenuMT.HLT.Config.GenerateMenuMT import isCAMenu 
 
-from collections import OrderedDict
 from copy import deepcopy
 import re
 
@@ -19,21 +16,6 @@ def mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs = Non
     #chainDefList is a list of Chain() objects
     #one for each part in the chain
     
-    # protect against serial merging in the signature code (to be fixed)
-    if isCAMenu():
-        try:           
-            for chainPartConfig in listOfChainDefs:
-                if any ([ "_MissingCA" in step.name for step in chainPartConfig.steps]):
-                    # flag as merged all CAs created , but not used   
-                    [seq.ca.wasMerged() for chainPartConfig in listOfChainDefs for step in chainPartConfig.steps for seq in step.sequences  ]                                     
-                    raise NoCAmigration (f'[mergeChainDefs] not possible for chain {chainDict["chainName"]} due to missing configurations')
-        except NoCAmigration as e:
-            log.debug(str(e))
-            if perSig_lengthOfChainConfigs is None:
-                return None
-            else:
-                return None, None 
-
     strategy = chainDict["mergingStrategy"]
     offset = chainDict["mergingOffset"]
     log.debug("[mergeChainDefs] %s: Combine by using %s merging", chainDict['chainName'], strategy)
@@ -50,7 +32,7 @@ def mergeChainDefs(listOfChainDefs, chainDict, perSig_lengthOfChainConfigs = Non
 
     elif strategy=="auto":
         ordering = getAlignmentGroupOrdering()
-        merging_dict = OrderedDict()
+        merging_dict = {}
         for ich,cConfig in enumerate(listOfChainDefs):
             chain_ag = cConfig.alignmentGroups[0]
             if chain_ag not in ordering:
@@ -154,7 +136,7 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
             log.error("[mergeParallel] Something is wrong with the combined chain name: cConfig.name = %s while chainName = %s", cConfig.name, chainName)
             raise Exception("[mergeParallel] Cannot merge this chain, exiting.")
 
-        if len(cConfig.alignmentGroups) == 1 or len(set(cConfig.alignmentGroups)) == 1:
+        if len(set(cConfig.alignmentGroups)) == 1:
             alignmentGroups.append(cConfig.alignmentGroups[0])
         elif len(cConfig.alignmentGroups) > 1:
             log.debug("[mergeParallel] Parallel merging an already merged chain with different alignment groups? This is odd! %s",cConfig.alignmentGroups)
@@ -203,7 +185,7 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
                 # edited the lengths, so need to update the leg length dict the code we did so!
                 perSig_lengthOfChainConfigs[iConfig][0][index_modified_leg] = max_length
         else: 
-            log.info("[mergeParallel] Alignment groups are empty for this combined chain - if this is not _newJO, this is not ok!")
+            log.debug("[mergeParallel] Alignment groups are empty for this combined chain")
 
         allSteps.append(cConfig.steps)
         allStepsMult.append(len(cConfig.steps[0].multiplicity))
@@ -214,7 +196,7 @@ def mergeParallel(chainDefList, offset, leg_numbering = [], perSig_lengthOfChain
     orderedSteps = list(zip_longest_parallel(allSteps, allStepsMult))
   
     if perSig_lengthOfChainConfigs is not None and len(perSig_lengthOfChainConfigs) > 0:
-      in_chain_ag_lengths = OrderedDict()
+      in_chain_ag_lengths = {}
       ag_ordering = getAlignmentGroupOrdering()
       for ag in ag_ordering:
         for ag_lengths,sig_ags in perSig_lengthOfChainConfigs:
