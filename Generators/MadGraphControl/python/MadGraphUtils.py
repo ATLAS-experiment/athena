@@ -2038,7 +2038,7 @@ def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=M
     for blockName in list(params.keys()):
        paramsUpper[blockName.upper()] = params[blockName]
        for paramName in list(params[blockName].keys()):
-          paramsUpper[blockName.upper()][paramName.upper()] = params[blockName.upper()][paramName]
+          paramsUpper[blockName.upper()][paramName.upper()] = params[blockName][paramName]
 
     if param_card_backup is not None:
         mglog.info('Keeping backup of original param card at '+param_card_backup)
