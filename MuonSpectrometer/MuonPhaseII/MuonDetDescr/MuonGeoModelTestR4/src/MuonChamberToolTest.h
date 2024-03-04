@@ -7,13 +7,17 @@
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+#include <MuonReadoutGeometryR4/MuonChamber.h>
+#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/RpcReadoutElement.h>
+#include <MuonReadoutGeometryR4/TgcReadoutElement.h>
+
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <ActsGeometryInterfaces/IDetectorVolumeSvc.h>
 #include <StoreGate/ReadCondHandleKey.h>
 
 namespace MuonGMR4 { 
 
-class ChambBoundaryNote;
 
 class MuonChamberToolTest: public AthReentrantAlgorithm {
     public:
@@ -27,18 +31,27 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         bool isReEntrant() const override final {return false;}   
     
     private:
+        StatusCode pointInside(const MuonChamber& chamb,
+                               const Acts::Volume& boundVol,
+                               const Amg::Vector3D& point,
+                               const std::string& descr,
+                               const Identifier& channelId) const;
+
         /// Test that all Mdts are inside the chamber volume
         StatusCode testMdt(const ActsGeometryContext& gctx,
                            const MdtReadoutElement& readOutEle,
-                           ChambBoundaryNote& chamb) const;
+                           const MuonChamber& chamb,
+                           const Acts::Volume& boundVol) const;
         
         StatusCode testRpc(const ActsGeometryContext& gctx,
                            const RpcReadoutElement& readoutEle,
-                           ChambBoundaryNote& chamber) const;
+                           const MuonChamber& chamber,
+                           const Acts::Volume& boundVol) const;
 
         StatusCode testTgc(const ActsGeometryContext& gctx,
                            const TgcReadoutElement& readoutEle,
-                           ChambBoundaryNote& chamber) const;
+                           const MuonChamber& chamber,
+                           const Acts::Volume& boundVol) const;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
