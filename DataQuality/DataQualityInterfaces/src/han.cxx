@@ -11,6 +11,7 @@
 #include <string>
 #include <cstdlib>
 
+#include "TPython.h"
 #include "CxxUtils/checker_macros.h"
 #include "DataQualityInterfaces/HanApp.h"
 #include "DataQualityInterfaces/ConditionsSingleton.h"
@@ -35,6 +36,7 @@ struct CmdLineArgs {
 
 int main ATLAS_NOT_THREAD_SAFE ( int argc, char *argv[] )
 {
+  TPython::Exec("import logging; logging.basicConfig()");
   CmdLineArgs arg;
   int rc = arg.parse( argc, argv );
   if (rc!=0) return rc;
