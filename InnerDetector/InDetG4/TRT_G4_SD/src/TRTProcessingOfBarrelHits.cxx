@@ -145,7 +145,7 @@ bool TRTProcessingOfBarrelHits::ProcessHit(G4Step* pStep)
 
 
   const G4TouchableHistory* pTouchableHistory =
-    dynamic_cast<const G4TouchableHistory*>(pPreStepPoint->GetTouchable());
+    static_cast<const G4TouchableHistory*>(pPreStepPoint->GetTouchable());
 
   const G4AffineTransform& topTransform = pTouchableHistory->GetHistory()->
     GetTopTransform();
