@@ -8,7 +8,8 @@
 
 #include "AnalysisUtils/AnalysisMisc.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
-
+#include "GaudiKernel/ITHistSvc.h"
+#include "PathResolver/PathResolver.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "FlavorTagDiscriminants/GNNTool.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -158,6 +159,8 @@ public:
   // Write handles
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetWriteDecorKeyVertexLink{this,"jetDecorKeyJetLink",
     "","WriteDecorHandleKey for adding VertexLink to Jets"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_jetWriteDecorKeyVertexNumber{this,"jetDecorKeyVertexNumber",
+    "","WriteDecorHandleKey for adding number of vertices within a Jet"};
 
   // Conditions
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData",
@@ -165,6 +168,12 @@ public:
   
   //Access the Primary Vertex Info
   const xAOD::Vertex* m_thePV;
+  
+  //Histograms
+  ITHistSvc* m_thistSvc{nullptr};
+  TH1F* m_vertexN  =nullptr;  
+  TH1F* m_eFrac    =nullptr;
+
   
 private:
  
@@ -204,7 +213,6 @@ private:
     double m_Rlayer1;
     double m_Rlayer2;
     double m_Rlayer3;
-    double m_SVResolutionR;
     bool   m_MultiWithPrimary;
     double m_minD0;
     double m_massPi ;

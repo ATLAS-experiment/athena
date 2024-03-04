@@ -6,7 +6,7 @@ from FlavorTagDiscriminants.FlavorTagNNConfig import GNNToolCfg
 from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
+def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", outfile="HIST.pool.root", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
     gnnTool = acc.getPrimaryAndMerge(
@@ -16,10 +16,12 @@ def GNNVertexConstructorToolCfg(flags, name="LMEdevTool", **kwargs):
                 trackLinkType    ="IPARTICLE",  #Either IPARTICLE or  TRACK_PARTICLE
                 variableRemapping={"BTagTrackToJetAssociator" : "GhostTrack"},
                 )
+ 
     ) 
+    acc.addService(CompFactory.THistSvc(Output=[f"GNNPlots DATAFILE='{outfile}', OPT='RECREATE'"])
+    )
   
     kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    
     acc.setPrivateTools(CompFactory.Rec.GNNVertexConstructorTool(GNNTool=gnnTool, **kwargs))
     return acc
     
@@ -29,6 +31,7 @@ def GNNVertexConstructorAlgCfg(flags, name="LMEdevAlg", jetkey="AntiKt4EMPFlowJe
     
     tool = acc.popToolsAndMerge(GNNVertexConstructorToolCfg(flags)) 
     acc.addEventAlgo(CompFactory.Rec.GNNVertexConstructorAlg(name, VtxTool=tool, inputJetContainer=jetkey, **kwargs))
+        
     return acc
 
 def main():

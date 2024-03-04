@@ -5,6 +5,8 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "ranges"
 #include <boost/iterator/zip_iterator.hpp>
+#include "TH1F.h"
+#include "PathResolver/PathResolver.h"
 
 namespace Rec {
 
@@ -83,6 +85,19 @@ StatusCode GNNVertexConstructorTool::initialize() {
   m_jetWriteDecorKeyVertexLink = m_jetCollection + ".GNNVerticesLink";
   ATH_CHECK( m_jetWriteDecorKeyVertexLink.initialize()); 
 
+  m_jetWriteDecorKeyVertexNumber = m_jetCollection + ".GNNVerticesNumber";
+  ATH_CHECK( m_jetWriteDecorKeyVertexNumber.initialize()); 
+
+  //Hists
+  ATH_CHECK(service("THistSvc", m_thistSvc));
+
+  StatusCode sc;
+  
+  m_eFrac                   = new TH1F("eFrac","Energy Fraction of vertices within a jet and jet energy",25,0,1);  
+  ATH_CHECK( m_thistSvc->regHist("/GNNPlots/EFrac/", m_eFrac));
+  m_vertexN                 = new TH1F("vertexN","No. of Vertices within a Jet",8,-0.5,7.5);  
+  ATH_CHECK(m_thistSvc->regHist("/GNNPlots/VertexN/", m_vertexN));
+  
   // Retrieve tools
   ATH_CHECK(m_gnn_Tool.retrieve());
   ATH_CHECK(m_vertexFitterTool.retrieve());
@@ -93,18 +108,12 @@ StatusCode GNNVertexConstructorTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-//Use GNN to decorate the tracks
-//May be removed in future
+//Use GNN to decorate the tracks || May be removed in future
 StatusCode GNNVertexConstructorTool::decorateJets(const xAOD::JetContainer *jetCont) const {
 
   for (auto jet : *jetCont) {
     m_gnn_Tool->decorate(*jet);
   }
-  
-//  auto Vars =m_gnn_Tool->getDecoratorKeys();
-//  for (auto v : Vars){
-//    ATH_MSG_INFO(v);
-//  }
   
   return StatusCode::SUCCESS;
 }
@@ -120,7 +129,8 @@ const
    }
    return sum; 
  }
- 
+
+//Vertex to Vertex Distance
 double GNNVertexConstructorTool::vrtVrtDist(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
                                           const std::vector<double>& secVrtErr, double& signif)
   const
@@ -184,17 +194,14 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
   SG::AuxElement::Decorator<float> decor_minDstMat("minDstMat");
   SG::AuxElement::Decorator<float> decor_efracsv("efracsv");
   SG::AuxElement::Decorator<float> decor_badChi2("badChi");
+  SG::AuxElement::Decorator<float> decor_JetN("JetN");
   
   // Create a map of track links and track vertexing values (Using mutlimap)
   std::multimap<int, TL> vertexMap;
-
+  
   // Loop over the jets
   for (const auto &jet : *inJetContainer) {
-    
-    
-    ATH_MSG_INFO("NEW JET !!!!!!!!!!!!");
-    
-    double TrackE=0;
+        
     //Ensure map is empty from previous iterations
     vertexMap.clear();
 
@@ -230,7 +237,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         v2tcMap[v][to].insert(tl);    
       }
     });
-
     
     auto mapComp= [](const auto &LHS, const auto &RHS)
     {
@@ -245,8 +251,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       {
            FittingMap.insert(std::pair<char, std::set<TL>>(v, n));
       };
-    };
-    
+    };    
     
     std::for_each(v2tcMap.cbegin(), v2tcMap.cend(), vertex2trackOrigin);    
     
@@ -268,6 +273,9 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
     std::vector<const xAOD::NeutralParticle *> neutralPartDummy(0);
     Amg::Vector3D IniVrt(0.,0.,0.);
 
+    float vertexN=1;
+    float TrackE=0;
+      
     for(const auto& pair : FittingMap){
           
       if (pair.second.size() >= 2) {
@@ -318,8 +326,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         //Chi2 Cut       
         auto NDOF = 2*(newvrt.trkAtVrt.size())-3.0;  //From VrtSecInclusive
         
-        ATH_MSG_INFO("NDOF  " << NDOF);
-             
         if (newvrt.chi2/NDOF<=20 ){ 
         ATH_MSG_DEBUG("Found IniVertex=" << newvrt.vertex[0] << ", " << newvrt.vertex[1] << ", "
                                          << newvrt.vertex[2] << " trks " << newvrt.trkAtVrt.size());
@@ -352,30 +358,21 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         minDstMat=TMath::Min(minDstMat,fabs(Dist2DBP-m_Rbeampipe));
         if(m_existIBL) minDstMat=TMath::Min(minDstMat,fabs(Dist2DL2-m_Rlayer3));  // 4-layer pixel detector
        
-        TLorentzVector MomentumJet = TotalMom(xAODwrk->listSelTracks);
-        TrackE+=MomentumJet.E();
+        TLorentzVector MomentumVtx = TotalMom(xAODwrk->listSelTracks);
+        TrackE+=newvrt.vertexMom.E();
+        vertexN+=1;
         
-        ATH_MSG_DEBUG("Sum Tracks " << MomentumJet.E());
-        ATH_MSG_DEBUG("Vertex " << newvrt.vertexMom.E());
-        ATH_MSG_DEBUG("Jets " << jet->p4().E());
-        
-        ATH_MSG_INFO("Test Frac  " <<TrackE/jet->p4().E());
-        ATH_MSG_DEBUG("Vertex R " << newvrt.vertex.perp());
-        
-        
-        //double eRatio = newvrt.vertexMom.E()/jet->p4().E(); 
-        double eRatio = TrackE/jet->p4().E(); 
-
+        double eRatio = MomentumVtx.E()/jet->p4().E(); 
         double signif3D;
         double Signif3D=vrtVrtDist(primVrt, newvrt.vertex, newvrt.vertexCov, signif3D);          
         
         if(newvrt.vertex.perp()>m_Rbeampipe && Signif3D<20.)  continue; 
         if(Lxy<=1 )  continue;
         if(newvrt.vertex.perp()<0.5) continue;
+        
         //Make New Container        
         xAOD::Vertex *GNNvertex = new xAOD::Vertex;
-        outVertexContainer->emplace_back(GNNvertex);
-               
+        outVertexContainer->emplace_back(GNNvertex);       
         // Registering tracks comprising the vertex to xAOD::Vertex
         // loop over the tracks comprising the vertex
         for( const auto *trk : xAODwrk->listSelTracks ) {
@@ -386,13 +383,7 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         }
        
         //Add Vertex Info into Container 
-        
-        
-        //GNNvertex->setVertexType(xAOD::VxType::PriVtx);
-        //}
-        //else{      
         GNNvertex->setVertexType(xAOD::VxType::SecVtx);
-        //}
         GNNvertex->setPosition(newvrt.vertex);
         GNNvertex->setFitQuality(newvrt.chi2, NDOF);
         decor_mass(*GNNvertex)            = newvrt.vertexMom.M();
@@ -410,7 +401,6 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
         if (newvrt.trkAtVrt.size()==2){
           decor_N2Tpair(*GNNvertex)=newvrt.trkAtVrt.size();
         }
-        
         ElementLink< xAOD::VertexContainer> linkVertex;
         linkVertex.setElement(GNNvertex);
         linkVertex.setStorableObject(*outVertexContainer);
@@ -420,6 +410,12 @@ StatusCode GNNVertexConstructorTool::performVertexFit(const xAOD::JetContainer *
       
       }//end of 2 Track requirement
     }
+    m_vertexN->Fill(vertexN, 1.);
+    if(TrackE==0)continue;
+    else{
+    float eFracNew = TrackE/jet->p4().E();
+    m_eFrac->Fill(eFracNew, 1.);
+    }    
     delete xAODwrk;
   } // end loop over jets
   return StatusCode::SUCCESS;
