@@ -11,7 +11,7 @@ BPHYDerivationName = "BPHY4"
 streamName = "StreamDAOD_BPHY4"
 
 def BPHY4Cfg(ConfigFlags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
@@ -20,12 +20,9 @@ def BPHY4Cfg(ConfigFlags):
     acc.addPublicTool(V0Tools)
     trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
-    acc.addPublicTool(vpest)
 
     BPHY4FourMuonTool = CompFactory.DerivationFramework.FourMuonTool(
             name                        = "BPHY4FourMuonTool",
-            V0Tools                     = V0Tools,
             ptCut                       = 2500.0,
             etaCut                      = 2.5,
             muonCollectionKey           = "Muons",
@@ -33,8 +30,7 @@ def BPHY4Cfg(ConfigFlags):
             V0VertexFitterTool          = None,             # V0 vertex fitter
             useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
             TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
-            TrackSelectorTool           = trackselect,
-            VertexPointEstimator        = vpest)
+            TrackSelectorTool           = trackselect)
     BPHY4_Reco_4mu = CompFactory.DerivationFramework.Reco_4mu(
             name                    = "BPHY4_Reco_4mu",
             FourMuonTool            = BPHY4FourMuonTool,
