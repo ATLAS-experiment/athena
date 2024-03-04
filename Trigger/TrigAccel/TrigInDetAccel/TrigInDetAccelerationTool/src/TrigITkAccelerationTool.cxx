@@ -155,7 +155,7 @@ size_t TrigITkAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSetti
   for(int slice = 0;slice<nSlices;slice++) {
     for(int layer = 0;layer<nLayers;layer++) {
       int layerStart = spIdx;
-      bool isBarrel = (layerTypes[layer] == 0);
+      bool isBarrel = (layerTypes[layer] == 0);  // barrel = 0, ec != 0
       std::vector<std::pair<int, const TrigSiSpacePointBase*> >& v = phiLArray[layer + slice*nLayers];
       for(std::vector<std::pair<int, const TrigSiSpacePointBase*> >::iterator it = v.begin();it!=v.end();++it) {
         const TrigSiSpacePointBase* sp  = (*it).second;
@@ -196,6 +196,9 @@ int TrigITkAccelerationTool::extractTripletsFromOutput(std::shared_ptr<TrigAccel
   output.clear();
 
   for(int k=0;k<nTriplets;k++) {
+    // Check if a valid triplet was returned
+    if ((pOutput->m_innerIndex[k] == pOutput->m_outerIndex[k])) continue;
+
     const TrigSiSpacePointBase& SPi = vsp[pOutput->m_innerIndex[k]];
     const TrigSiSpacePointBase& SPm = vsp[pOutput->m_middleIndex[k]];
     const TrigSiSpacePointBase& SPo = vsp[pOutput->m_outerIndex[k]];

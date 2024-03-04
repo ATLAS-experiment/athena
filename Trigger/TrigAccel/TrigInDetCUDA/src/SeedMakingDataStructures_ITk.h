@@ -16,7 +16,7 @@ static constexpr unsigned int NUM_TRIPLET_BLOCKS_ITk        = 1024;
 static constexpr unsigned int NUM_TRIPLET_THREADS_ITk       = 1024;
 static constexpr unsigned int NUM_DOUBLET_THREADS_ITk       = 16;
 static constexpr unsigned int MAX_TRIPLETS_ITk              = 300;
-static constexpr unsigned int TRIPLET_BUFFER_DEPTH_ITk      = 3;
+static constexpr unsigned int TRIPLET_BUFFER_DEPTH_ITk      = 2;
 
 typedef struct doubletInfoITk {
 public:

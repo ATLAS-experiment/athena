@@ -47,7 +47,9 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	__shared__ int PairIdx_array[MAX_TRIPLETS_ITk];
 	__shared__ float Q_array[MAX_TRIPLETS_ITk]; // Quality score for a triplet Q=d0*d0
 	__shared__ int sortedIdx[MAX_TRIPLETS_ITk];
+	__shared__ float pt_array[MAX_TRIPLETS_ITk]; //Store curvature of triplets
 
+	__shared__ int innerDoubletTriplets[MAX_NUMBER_DOUBLETS_ITk];
 
 	__shared__ int iDoublet;
 	__shared__ int startOfOuter;
@@ -69,8 +71,13 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	const float phiMinus = dSettings->m_phiMinus;
 	const bool isFullscan = (dSettings->m_isFullScan == 1);
 
-
 	for(int itemIdx = blockIdx.x;itemIdx<maxItem;itemIdx += gridDim.x) {
+
+		for(int innerIdx = threadIdx.x; innerIdx<MAX_NUMBER_DOUBLETS_ITk;innerIdx+=blockDim.x) {
+			innerDoubletTriplets[innerIdx] = 0;
+		}
+
+		__syncthreads();
 
 		if(threadIdx.x==0) {
 
@@ -170,9 +177,9 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 	__syncthreads();
 
 	for(int pairIdx = threadIdx.x;pairIdx<nPairs;pairIdx += blockDim.x) {
-
-		int doublet_i = pairIdx / nOuter; // inner doublet
-		int doublet_j = startOfOuter + pairIdx % nOuter; //outer doublet
+		// Decode pair index into inner and outer doublet indices
+		int doublet_i = GPUTrackSeedingItkHelpers::getInnerDoubletIdx(pairIdx, nOuter);
+		int doublet_j = GPUTrackSeedingItkHelpers::getOuterDoubletIdx(pairIdx, nOuter, startOfOuter);
 		
 		if(doublet_i >= MAX_NUMBER_DOUBLETS_ITk || doublet_j >=MAX_NUMBER_DOUBLETS_ITk ) continue;
 
@@ -241,18 +248,74 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 
 		//Calculate Quality    
 		float Q = d0*d0;
+		float pt = ptCoeff*std::sqrt(1+A*A)/(B);
 
 		int l = atomicAdd(&nTriplets, 1);
 		if(l<MAX_TRIPLETS_ITk) {
 			PairIdx_array[l] = pairIdx;
 			Q_array[l] = Q;
 			sortedIdx[l] = 0;
+			pt_array[l] = pt;
+
+			// Count the outer doublets for the inner doublet that passed the selection
+			atomicAdd(&innerDoubletTriplets[doublet_i], 1);
+
 		}
 
 	}
 
 	__syncthreads();
 
+	// Confirm the triplets by looking for duplicates
+	if (nOuter == 0) continue;
+
+	for(int doublet_i = threadIdx.x; doublet_i<iDoublet; doublet_i += blockDim.x) {
+		if (innerDoubletTriplets[doublet_i] == 0) continue;
+		int spiIdx = spIdx_array[doublet_i]; // index of inner spacepoint of the doublet
+
+		// Find pairs with the inner doublet
+		for (int l=0; l < nTriplets && l < MAX_TRIPLETS_ITk; ++l) { 
+			// Check if this doublet belongs to this triplet pair
+			if (doublet_i != GPUTrackSeedingItkHelpers::getInnerDoubletIdx(PairIdx_array[l], nOuter)) continue;
+			int doublet_j = GPUTrackSeedingItkHelpers::getOuterDoubletIdx(PairIdx_array[l], nOuter, startOfOuter); //outer doublet
+			int spoIdx = spIdx_array[doublet_j]; // index of outer spacepoint of the doublet
+
+			int nDupes = 0;
+			// Look for duplicates for this triplet
+			for (int l2=0; l2 < nTriplets && l2 < MAX_TRIPLETS_ITk; ++l2) {
+				if (l == l2) continue;
+
+				// Check if they share the inner spacepoints
+				if (doublet_i != GPUTrackSeedingItkHelpers::getInnerDoubletIdx(PairIdx_array[l2], nOuter)) continue;
+				int other_doublet_j = GPUTrackSeedingItkHelpers::getOuterDoubletIdx(PairIdx_array[l2], nOuter, startOfOuter);
+				int otherSpoIdx = spIdx_array[other_doublet_j];
+
+				// Triplet duplicates (from the same track) will not lay on the same layer
+				bool isBarrel1 = (dSpacepoints->m_type[spoIdx] == 0); // barrel = 0, ec != 0
+				bool isBarrel2 = (dSpacepoints->m_type[otherSpoIdx] == 0);
+				if ( isBarrel1 && isBarrel2 && std::abs(dSpacepoints->m_r[spoIdx]-dSpacepoints->m_r[otherSpoIdx]) < 20 ) {
+					continue;
+				} else if ( !isBarrel1 && !isBarrel2 && std::abs(dSpacepoints->m_z[spoIdx]-dSpacepoints->m_z[otherSpoIdx]) < 20 ) {
+					continue;
+				} 
+
+				// Triplet duplicates (from the same track) will have the same curvature direction
+				if (pt_array[l] * pt_array[l2] < 0) continue;
+
+				// Triplet duplicates (from the same track) will have the same pt within stddev (based on 1GeV single muon)
+				float dPt = std::abs(1./pt_array[l] - 1./pt_array[l2]);
+				if (dPt > 1*0.00015243) continue;
+
+				++nDupes;
+			}
+			
+			// Reject the seeds without duplicates - will not have a track extension
+			if (nDupes < 1) Q_array[l] += 10000;
+
+		}
+	}
+
+	__syncthreads();
 
 	if(nTriplets>TRIPLET_BUFFER_DEPTH_ITk) {//sorting
 		
@@ -281,6 +344,7 @@ __global__ static void doubletMatchingKernel_ITk(TrigAccel::ITk::SEED_FINDER_SET
 			int k = atomicAdd(&d_Out->m_nSeeds, nT);    
 			int nStored=0;
 			for(int tIdx=0;tIdx<nTriplets;tIdx++) {
+				if (Q_array[tIdx] > 10000) continue;
 				if(sortedIdx[tIdx]<TRIPLET_BUFFER_DEPTH_ITk) {//store this triplet
 
 					int pairIdx = PairIdx_array[tIdx];
