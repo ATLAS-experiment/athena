@@ -36,10 +36,8 @@ MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, Inf
   return std::make_pair(Unknown, NonDefined);
 }
 
-
 std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, Info* info /*= nullptr*/) const {
-  //---------------------------------------------------------------------------------------
   ParticleType partType = Unknown;
   ParticleOrigin partOrig = NonDefined;
 
@@ -53,31 +51,19 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, I
     ATH_MSG_WARNING( " Invalid ReadHandle for xAODTruthParticleLinkVector with key: " << truthParticleLinkVecReadHandle.key());
     return std::make_pair(partType, partOrig);
   }
-
   int theBC = HepMC::barcode(thePart);
   for (const auto *const entry : *truthParticleLinkVecReadHandle) {
     if (entry->first.isValid() && entry->second.isValid() && entry->first.barcode() == theBC) {
       const xAOD::TruthParticle* truthParticle = *entry->second;
-      if (!compareTruthParticles(thePart, truthParticle)) {
-        // if the barcode/pdg id / status of the pair does not match
-        // return default
-        return std::make_pair(partType, partOrig);
+        // if the barcode/pdg id / status of the pair does not match return default
+        if ( !thePart || !truthParticle || thePart->pdg_id() != truthParticle->pdgId() || thePart->status() != truthParticle->status() || HepMC::barcode(thePart) != truthParticle->barcode()){ 
+         ATH_MSG_DEBUG("HepMC::GenParticle and xAOD::TruthParticle do not match");
+         return std::make_pair(partType, partOrig);
       }
       return particleTruthClassifier(truthParticle, info);
     }
   }
-
   return std::make_pair(partType, partOrig);
-}
-//------------------------------------------------------------------------
-bool
-MCTruthClassifier::compareTruthParticles(const HepMC::ConstGenParticlePtr& genPart, const xAOD::TruthParticle* truthPart) const {
-  if (!genPart || !truthPart) return false;
-  if (genPart->pdg_id() != truthPart->pdgId() || genPart->status() != truthPart->status() || HepMC::barcode(genPart) != truthPart->barcode()) {
-    ATH_MSG_DEBUG("HepMC::GenParticle and xAOD::TruthParticle do not match");
-    return false;
-  }
-  return true;
 }
 #endif
 
