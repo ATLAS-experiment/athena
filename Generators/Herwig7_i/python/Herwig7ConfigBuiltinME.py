@@ -54,7 +54,7 @@ saverun {} /Herwig/Generators/EventGenerator
   ## \warning Please do not modify the generator configuration in the job options after calling the `run()` function as
   ##          the modified settings would not be applied in the event generation
   ##
-  def run(self):
+  def run(self, shower_var=True):
 
     ## add default settings if they were not overwritten in the JobOptions
 
@@ -70,7 +70,7 @@ saverun {} /Herwig/Generators/EventGenerator
       self.default_commands += self.technical_parameter_commands()
 
     # add the shower scale-variations for the ME calculation
-    self.enable_angularShowerScaleVariations(do_variations=True)
+    self.enable_angularShowerScaleVariations(shower_var)
 
     ## do read and run step in one go
 
