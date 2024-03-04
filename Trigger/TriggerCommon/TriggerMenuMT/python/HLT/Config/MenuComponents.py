@@ -334,6 +334,9 @@ class EmptyMenuSequence:
 
     @property
     def maker(self):
+        # Input makers are added during DataFlow building (connectToFilter) when a chain
+        # uses this sequence in another step. So we need to make sure to update the
+        # algorithm when accessed.
         self._maker.Alg = self.ca.getEventAlgo(self._maker.Alg.name)
         return self._maker
 
@@ -373,80 +376,64 @@ class EmptyMenuSequence:
             %(self.name, "Empty", self.maker.Alg.getName(), self.sequence.Alg.getName(), "None")
 
 
-class MenuSequence(object):
-    """ Class to group reco sequences with the Hypo"""
-    """ By construction it has one Hypo Only; behaviour changed to support muFastOvlpRmSequence() which has two, but this will change"""
+class MenuSequenceCA:
+    """Class to group reco sequences with the Hypo.
+    By construction it has one Hypo only; behaviour changed to support muFastOvlpRmSequence(),
+    which has two, but this will change."""
 
-    def __init__(self, flags, Sequence, Maker,  Hypo, HypoToolGen, IsProbe=False):
-        assert Maker.name.startswith("IM"), "The input maker {} name needs to start with letter: IM".format(Maker.name)
-        self._maker = InputMakerNode( Alg = Maker )
-        input_maker_output= self.maker.readOutputList()[0] # only one since it's merged       
+    def __init__(self, flags, selectionCA, HypoToolGen, isProbe=None, globalRecoCA=None):
+        # FIXME: isProbe argument is now unused in MenuSequenceCA and will be removed later
 
-        self._name = CFNaming.menuSequenceName(Hypo.name)
-        self._hypoToolConf = HypoToolConf( HypoToolGen )
-        Hypo.RuntimeValidation = flags.Trigger.doRuntimeNaviVal
-        self._hypo = HypoAlgNode( Alg = Hypo )
-        hypo_output = CFNaming.hypoAlgOutName(Hypo.name)
-        self._hypo.addOutput(hypo_output)
+        self.ca = selectionCA
+        self._globalCA = globalRecoCA
+        # separate the HypoCA to be merged later
+        self.hypoAcc  = selectionCA.hypoAcc
+
+        sequence = self.ca.topSequence()
+        self._sequence = Node(Alg=sequence)
+
+        # InputMaker
+        inputMaker = [ a for a in self.ca.getEventAlgos() if isInputMakerBase(a)]
+        assert len(inputMaker) == 1, f"{len(inputMaker)} input makers in the ComponentAccumulator"
+        inputMaker = inputMaker[0]
+        self._maker = InputMakerNode( Alg = inputMaker )
+        input_maker_output = self.maker.readOutputList()[0] # only one since it's merged
+        assert inputMaker.name.startswith("IM"), f"Input maker {inputMaker.name} name needs to start with 'IM'"
+
+        # HypoAlg
+        hypoAlg = selectionCA.hypoAcc.getEventAlgos()
+        assert len(hypoAlg) == 1, f"{len(hypoAlg)} hypo algs in the ComponentAccumulator"
+        hypoAlg = hypoAlg[0]
+        hypoAlg.RuntimeValidation = flags.Trigger.doRuntimeNaviVal
+
+        self._name = CFNaming.menuSequenceName(hypoAlg.name)
+        self._hypo = HypoAlgNode( Alg = hypoAlg )
+        self._hypo.addOutput( CFNaming.hypoAlgOutName(hypoAlg.name) )
         self._hypo.setPreviousDecision( input_maker_output )
+        self._hypoToolConf = HypoToolConf( HypoToolGen )
 
-         # Connect InputMaker output to ROBPrefetchingAlg(s) if there are any (except for probe seq which is handled later)
+        # Connect InputMaker output to ROBPrefetchingAlg(s) if there are any
         if ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions:
-            seqChildren = Sequence.getChildren() if hasattr(Sequence,'getChildren') else Sequence.Members
-            for child in seqChildren:
-                if hasattr(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions and not IsProbe:
-                    locked = bool(child.isLocked()) if hasattr(child,'isLocked') else False
-                    if locked:
-                        child.unlock()
-                    child.ROBPrefetchingInputDecisions += [input_maker_output]
-                    if locked:
-                        child.lock()
-        #probe legs in lagacy config need the IM cloned
-        #CA based chains should use SelectionCA which does the probe leg changes directly, so skip if already a probe sequence
-        if IsProbe and 'probe' not in Sequence.getName():
-            def getProbeSequence(baseSeq,probeIM):
-                # Add IM and sequence contents to duplicated sequence
-                probeSeq = baseSeq.clone(baseSeq.getName()+"_probe")
-                probeSeq += probeIM                
-                if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
-                    for child in baseSeq.getChildren()[1:]:
-                        probeChild = child.clone(child.getName()+"_probe")
-                        if hasattr(child,'ROBPrefetchingInputDecisions') and (ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions):
-                            # child is a ROB prefetching alg, map the probe IM decisions
-                            probeChild.ROBPrefetchingInputDecisions = [str(probeIM.InputMakerOutputDecisions)]
-                        elif probeIM.ViewNodeName == child.getName():
-                            # child is the view alg sequence, map it to the probe sequence
-                            probeIM.ViewNodeName = probeChild.getName()
-                            for viewalg in child.getChildren():
-                                probeChild += viewalg
-                        probeSeq += probeChild
-                return probeSeq
-            # Make sure nothing was lost
-            _Sequence = getProbeSequence(baseSeq=Sequence,probeIM=Maker)
-            assert len(_Sequence.getChildren()) == len(Sequence.getChildren()), f'Different number of children in sequence {_Sequence.getName()} vs {Sequence.getName()} ({len(_Sequence.getChildren())} vs {len(Sequence.getChildren())})'
-        else:
-            _Sequence = Sequence
-            if ROBPrefetching.StepRoI in flags.Trigger.ROBPrefetchingOptions:
-                seqChildren = Sequence.getChildren() if hasattr(Sequence,'getChildren') else Sequence.Members
-                for child in seqChildren:
-                    if hasattr(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions:
-                        locked = bool(child.isLocked()) if hasattr(child,'isLocked') else False
-                        if locked:
-                            child.unlock()
-                        child.ROBPrefetchingInputDecisions += [input_maker_output]
-                        if locked:
-                            child.lock()
-        
+            for child in sequence.Members:
+                if ( isinstance(child, CompFactory.ROBPrefetchingAlg) and
+                     input_maker_output not in child.ROBPrefetchingInputDecisions ):
+                    child.ROBPrefetchingInputDecisions.append(input_maker_output)
 
-        self._sequence = Node( Alg=_Sequence)
+        log.debug("connecting InputMaker and HypoAlg, adding: InputMaker::%s.output=%s",
+                  self.maker.Alg.name, input_maker_output)
+        log.debug("HypoAlg::%s.HypoInputDecisions=%s, HypoAlg::%s.HypoOutputDecisions=%s",
+                  self.hypo.Alg.name, self.hypo.readInputList()[0],
+                  self.hypo.Alg.name, self.hypo.readOutputList()[0])
 
-        log.debug("connecting InputMaker and HypoAlg, adding: \n\
-        InputMaker::%s.output=%s",\
-                        self.maker.Alg.name, input_maker_output)
-        log.debug("HypoAlg::%s.HypoInputDecisions=%s, \n \
-        HypoAlg::%s.HypoOutputDecisions=%s",\
-                      self.hypo.Alg.name, self.hypo.readInputList()[0], self.hypo.Alg.name, self.hypo.readOutputList()[0])
+    def __del__(self):
+        self.ca.wasMerged()
+        self.hypoAcc.wasMerged()
+        if self._globalCA:
+            self._globalCA.wasMerged()
 
+    @property
+    def globalRecoCA(self):
+        return self._globalCA
 
     @property
     def name(self):
@@ -458,61 +445,26 @@ class MenuSequence(object):
 
     @property
     def maker(self):
+        # Input makers are added during DataFlow building (connectToFilter) when a chain
+        # uses this sequence in another step. So we need to make sure to update the
+        # algorithm when accessed.
+        self._maker.Alg = self.ca.getEventAlgo(self._maker.Alg.name)
         return self._maker
 
     @property
     def hypo(self):
         return self._hypo
 
-    @staticmethod
-    def getProbeHypo(flags,basehypo):
-        '''Clone hypo & input maker'''
-        probehypo = basehypo.clone(basehypo.getName()+"_probe")
-        for p,v in basehypo.getValuedProperties().items():
-            setattr(probehypo,p,getattr(basehypo,p))
-        return probehypo
-
-    @staticmethod
-    def getProbeInputMaker(flags,baseIM):
-        probeIM = baseIM.clone(baseIM.getName()+"_probe")
-        for p,v in baseIM.getValuedProperties().items():
-            setattr(probeIM,p,getattr(baseIM,p))
-
-        if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
-            assert(baseIM.Views)
-            probeIM.Views = baseIM.Views.Path + "_probe"
-            probeIM.RoITool = baseIM.RoITool
-            log.debug(f"getProbeInputMaker: Setting InputCachedViews on {probeIM.getName()} to read decisions from tag leg {baseIM.getName()}: {baseIM.InputMakerOutputDecisions}")
-            probeIM.InputCachedViews = baseIM.InputMakerOutputDecisions
-            def updateHandle(baseTool, probeTool, handleName):
-                if hasattr(baseTool, handleName) and getattr(baseTool, handleName).Path!="StoreGateSvc+":
-                    setattr(probeTool, handleName, getattr(baseTool, handleName).Path + "_probe")
-            updateHandle(baseIM.RoITool, probeIM.RoITool, "RoisWriteHandleKey")
-            if hasattr(baseIM.RoITool, "RoiCreator"):
-                updateHandle(baseIM.RoITool, probeIM.RoITool, "ExtraPrefetchRoIsKey")
-                updateHandle(baseIM.RoITool.RoiCreator, probeIM.RoITool.RoiCreator, "RoisWriteHandleKey")
-        else:
-            raise TypeError(f"Probe leg input maker may not be of type '{baseIM.__class__}'.")
-
-        # Reset this initially to avoid interference
-        # with the original
-        probeIM.InputMakerInputDecisions = []
-        return probeIM
-
     def getOutputList(self):
-        outputlist = []     
-        outputlist.append(self._hypo.readOutputList()[0])
-        return outputlist
+        return [self._hypo.readOutputList()[0]]
 
-    
     def connectToFilter(self, outfilter):
-        """ Connect filter to the InputMaker"""
+        """Connect filter to the InputMaker"""
         log.debug("connecting %s to inputs of %s", outfilter, self.maker.Alg.name)
         self.maker.addInput(outfilter)
-    
-  
+
     def createHypoTools(self, flags, chainDict):
-        if type(self._hypoToolConf) is list:
+        if isinstance(self._hypoToolConf, list):
             log.warning ("This sequence %s has %d multiple HypoTools ",self.sequence.name, len(self.hypoToolConf))
             for hypo, hypoToolConf in zip(self._hypo, self._hypoToolConf):
                 hypoToolConf.setConf( chainDict )
@@ -524,17 +476,13 @@ class MenuSequence(object):
     def getHypoToolConf(self) :
         return self._hypoToolConf
 
-    def getHypoToolMap(self,chainDict) :
-        self._hypoToolConf.setConf( chainDict )
-        return (self._hypo.Alg.getName(), self._hypoToolConf)
-
     def addToSequencer(self, recoSeq_list, hypo_list):
         recoSeq_list.add(self.sequence.Alg)
         hypo_list.add(self._hypo.Alg)
             
     def buildDFDot(self, cfseq_algs, all_hypos, last_step_hypo_nodes, file):
         cfseq_algs.append(self.maker)
-        cfseq_algs.append(self.sequence )
+        cfseq_algs.append(self.sequence)
         file.write("    %s[fillcolor=%s]\n"%(self.maker.Alg.getName(), algColor(self.maker.Alg)))
         file.write("    %s[fillcolor=%s]\n"%(self.sequence.Alg.getName(), algColor(self.sequence.Alg)))    
         cfseq_algs.append(self._hypo)
@@ -543,58 +491,11 @@ class MenuSequence(object):
         return cfseq_algs, all_hypos, last_step_hypo_nodes
 
     def __repr__(self):    
-        hyponame = self._hypo.Alg.getName()
+        hyponame = self._hypo.Alg.name
         hypotool = self._hypoToolConf.name
         return "MenuSequence::%s \n Hypo::%s \n Maker::%s \n Sequence::%s \n HypoTool::%s\n"\
-          %(self.name, hyponame, self.maker.Alg.getName(), self.sequence.Alg.getName(), hypotool)
+          %(self.name, hyponame, self.maker.Alg.name, self.sequence.Alg.name, hypotool)
 
-
-class MenuSequenceCA(MenuSequence):
-    ''' MenuSequence with Component Accumulator '''
-
-    def __init__(self, flags, selectionCA, HypoToolGen, isProbe=False, globalRecoCA=None ):
-        self.ca = selectionCA
-        self._globalCA = globalRecoCA
-        allAlgs = self.ca.getEventAlgos()
-        inputMaker = [ a for a in allAlgs if isInputMakerBase(a)]
-        assert len(inputMaker) == 1, "Wrong number of input makers in the component accumulator {}".format(len(inputMaker))
-        inputMaker = inputMaker[0] 
-
-        # separate the HypoCA to be merged later
-        self.hypoAcc  = selectionCA.hypoAcc 
-        hypoAlg = selectionCA.hypoAcc.getEventAlgos()
-        # this is needed for legacy config: the tools need to be in the menuSequence
-        # following 2 lines can be removed once the legacy configuration is off
-        for tool in selectionCA.hypoAcc.getPublicTools():            
-            self.ca.addPublicTool(tool)
-        assert len(hypoAlg) == 1, "Wrong number of hypo algs in the component accumulator {}".format(len(hypoAlg))
-        hypoAlg = hypoAlg[0]
-        MenuSequence.__init__(self, flags, self.ca.topSequence(), inputMaker,  hypoAlg, HypoToolGen, IsProbe=isProbe)
-
-    @property
-    def sequence(self):
-        return self._sequence
-
-    @property
-    def maker(self):
-        makerAlg = self.ca.getEventAlgo(self._maker.Alg.getName())
-        self._maker.Alg = makerAlg
-        return self._maker
-
-    @property
-    def hypo(self):
-        return self._hypo
-
-    @property
-    def globalRecoCA(self):
-        return self._globalCA
-
-    def __del__(self):
-        self.ca.wasMerged()
-        self.hypoAcc.wasMerged()
-        if self._globalCA:
-            self._globalCA.wasMerged()
-            
 
 class Chain(object):
     """Basic class to define the trigger menu """
@@ -1029,6 +930,7 @@ class InViewRecoCA(ComponentAccumulator):
     def inputMaker( self ):
         return self.viewMakerAlg
 
+
 class SelectionCA(ComponentAccumulator):
     """ CA component for MenuSequenceCA sequence """
     def __init__(self, name, isProbe=False):
@@ -1059,15 +961,12 @@ class SelectionCA(ComponentAccumulator):
         """To be used when the hypo alg configuration comes with auxiliary tools/services""" 
         self.hypoAcc.merge(other)       
 
-
     def addHypoAlgo(self, algo):
         """To be used when the hypo alg configuration does not require auxiliary tools/services"""        
         if self.isProbe:
             newname = algo.getName()+'_probe'
             algo.name=newname
         self.hypoAcc.addEventAlgo(algo)
-
-
 
     def hypo(self):
         """Access hypo algo (or throws)"""
