@@ -33,8 +33,6 @@ private:
     std::string m_xaodTruthParticleContainerName;
     std::string m_xaodTruthEventContainerName;
 
-    bool prompt( const xAOD::TruthParticle* tp ) const;
-
     ToolHandle<IMCTruthClassifier> m_classif;
 }; // class xAODTruthParticleSlimmerGen
 

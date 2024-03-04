@@ -4,6 +4,7 @@
 
 // Header for this module
 #include "GeneratorFilters/xAODHTFilter.h"
+#include "GeneratorFilters/Common.h"
 
 // Framework Related Headers
 #include "GaudiKernel/MsgStream.h"
@@ -149,7 +150,7 @@ StatusCode xAODHTFilter::filterEvent()
 
         if (m_UseNu && MC::isNeutrino(pdgid) && (theParticle->isGenStable()))
         {
-          if (isPrompt(theParticle))
+          if (Common::prompt(theParticle,m_classif))
           {
             HT += theParticle->pt();
           }
@@ -158,7 +159,7 @@ StatusCode xAODHTFilter::filterEvent()
         // pick muons and electrons specifically -- isLepton selects both charged leptons and neutrinos
         if ( m_UseLep && (std::abs(pdgid) == 11 || std::abs(pdgid) == 13) && theParticle->isGenStable() && (theParticle)->pt() > m_MinLepPt * Gaudi::Units::GeV && std::abs(theParticle->eta()) < m_MaxLepEta)
         {
-          if (isPrompt(theParticle))
+          if (Common::prompt(theParticle,m_classif))
           {
             HT += theParticle->pt();
           }
@@ -204,35 +205,4 @@ StatusCode xAODHTFilter::filterEvent()
   return StatusCode::SUCCESS;
 }
 
-bool xAODHTFilter::isPrompt( const xAOD::TruthParticle *part ) const
-  {
-    MCTruthPartClassifier::ParticleOrigin orig = m_classif->particleTruthClassifier( part ).second;
-    ATH_MSG_DEBUG("Particle has origin " << orig);
-
-    switch(orig) {
-    case MCTruthPartClassifier::NonDefined:
-    case MCTruthPartClassifier::PhotonConv:
-    case MCTruthPartClassifier::DalitzDec:
-    case MCTruthPartClassifier::ElMagProc:
-    case MCTruthPartClassifier::Mu:
-    case MCTruthPartClassifier::LightMeson:
-    case MCTruthPartClassifier::StrangeMeson:
-    case MCTruthPartClassifier::CharmedMeson:
-    case MCTruthPartClassifier::BottomMeson:
-    case MCTruthPartClassifier::CCbarMeson:
-    case MCTruthPartClassifier::JPsi:
-    case MCTruthPartClassifier::BBbarMeson:
-    case MCTruthPartClassifier::LightBaryon:
-    case MCTruthPartClassifier::StrangeBaryon:
-    case MCTruthPartClassifier::CharmedBaryon:
-    case MCTruthPartClassifier::BottomBaryon:
-    case MCTruthPartClassifier::PionDecay:
-    case MCTruthPartClassifier::KaonDecay:
-      return false;
-    default:
-      break;
-    }
-
-    return true;
-  }
 

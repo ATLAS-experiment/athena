@@ -4,6 +4,7 @@
 
 // Header for this module
 #include "GeneratorFilters/HTFilter.h"
+#include "GeneratorFilters/Common.h"
 
 // Framework Related Headers
 #include "GaudiKernel/MsgStream.h"
@@ -121,15 +122,15 @@ return StatusCode::FAILURE;
       if ( !iter ) continue;
       int pdgid = iter->pdg_id();
       if (m_UseNu && MC::isNeutrino(pdgid) && MC::isGenStable(iter)) {
-	if( fromWZ(iter) || fromTau(iter) ) {
+	if( Common::fromWZ(iter) || Common::fromTau(iter) ) {
 	  HT += iter->momentum().perp();
 	}
       }
       // pick muons and electrons specifically -- isLepton selects both charged leptons and neutrinos
       if (m_UseLep && (std::abs(pdgid)==11 || std::abs(pdgid)==13) && MC::isGenStable(iter)
 	  && (iter)->momentum().perp()>m_MinLepPt*Gaudi::Units::GeV && std::abs(iter->momentum().eta())<m_MaxLepEta) {
-	bool isFromWZ = fromWZ(iter);
-	if( isFromWZ || fromTau(iter) ) {
+	bool isFromWZ = Common::fromWZ(iter);
+	if(isFromWZ || Common::fromTau(iter) ) {
 	  ATH_MSG_VERBOSE("Adding W/Z/tau lepton with pt " << iter->momentum().perp()
 			  << ", eta " << iter->momentum().eta()
 			  << ", phi " << iter->momentum().phi()
@@ -156,68 +157,4 @@ return StatusCode::FAILURE;
   return StatusCode::SUCCESS;
 }
 
-bool HTFilter::fromWZ(const HepMC::ConstGenParticlePtr& part ) const
-{
-  // !!! IMPORTANT !!! This is a TEMPORARY function
-  //  it's used in place of code in MCTruthClassifier as long as this package is not dual-use
-  //  when MCTruthClassifier is made dual-use, this function should be discarded.
-  // see ATLJETMET-26
-  //
-  // Loop through parents
-  // Hit a hadron -> return false
-  // Hit a parton -> return true
-  //   This catch is important - we *cannot* look explicitly for the W or Z, because some
-  //    generators do not include the W or Z in the truth record (like Sherpa)
-  //   This code, like the code before it, really assumes one incoming particle per vertex...
-  if (!part->production_vertex()) return false;
-#ifdef HEPMC3
-  for (const auto&  iter: part->production_vertex()->particles_in()){
-    int parent_pdgid = iter->pdg_id();
-    if (MC::isW(parent_pdgid) || MC::isZ(parent_pdgid)) return true;
-    if (MC::isHadron( parent_pdgid ) ) return false;
-    if ( std::abs( parent_pdgid ) < 9 ) return true;
-    if ( parent_pdgid == part->pdg_id() ) return fromWZ( iter );
-  }
-#else
-  for (HepMC::GenVertex::particles_in_const_iterator iter=part->production_vertex()->particles_in_const_begin(); 
-       iter!=part->production_vertex()->particles_in_const_end();++iter){
-    int parent_pdgid = (*iter)->pdg_id();
-    if (MC::isW(parent_pdgid) || MC::isZ(parent_pdgid)) return true;
-    if (MC::isHadron( parent_pdgid ) ) return false;
-    if ( std::abs( parent_pdgid ) < 9 ) return true;
-    if ( parent_pdgid == part->pdg_id() ) return fromWZ( *iter );
-  }
-#endif  
-  return false;
-}
 
-bool HTFilter::fromTau(const HepMC::ConstGenParticlePtr& part ) const
-{
-  // !!! IMPORTANT !!! This is a TEMPORARY function
-  //  it's used in place of code in MCTruthClassifier as long as this package is not dual-use
-  //  when MCTruthClassifier is made dual-use, this function should be discarded.
-  // see ATLJETMET-26
-  //
-  // Loop through parents
-  // Find a tau -> return true
-  // Find a hadron or parton -> return false
-  //   This code, like the code before it, really assumes one incoming particle per vertex...
-  if (!part->production_vertex()) return false;
-#ifdef HEPMC3
-  for (const auto& iter: part->production_vertex()->particles_in()){
-    int parent_pdgid = iter->pdg_id();
-    if ( std::abs( parent_pdgid ) == 15 ) return true;
-    if (MC::isHadron( parent_pdgid ) || MC::isQuark( parent_pdgid ) ) return false;
-    if ( parent_pdgid == part->pdg_id() ) return fromTau( iter );
-  }
-#else
-  for (HepMC::GenVertex::particles_in_const_iterator iter=part->production_vertex()->particles_in_const_begin(); 
-       iter!=part->production_vertex()->particles_in_const_end();++iter){
-    int parent_pdgid = (*iter)->pdg_id();
-    if ( std::abs( parent_pdgid ) == 15 ) return true;
-    if (MC::isHadron( parent_pdgid ) || MC::isQuark( parent_pdgid ) ) return false;
-    if ( parent_pdgid == part->pdg_id() ) return fromTau( *iter );
-  }
-#endif
-  return false;
-}

@@ -19,6 +19,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "GeneratorFilters/xAODTruthParticleSlimmerMET.h"
+#include "GeneratorFilters/Common.h"
 
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 
@@ -119,7 +120,7 @@ StatusCode xAODTruthParticleSlimmerMET::execute()
           *xTruthParticle=*theParticle;
 
           //Decorate
-          isPrompt(*xTruthParticle) = prompt(theParticle);
+          isPrompt(*xTruthParticle) = Common::prompt(theParticle,m_classif);
         }
         if(zero_barcode != 0 || dup_barcode !=0 ) ATH_MSG_INFO("Found " << zero_barcode << " barcode=0 particles and " <<dup_barcode <<"duplicated");
     }
@@ -127,36 +128,4 @@ StatusCode xAODTruthParticleSlimmerMET::execute()
     return StatusCode::SUCCESS;
 }
 
-bool xAODTruthParticleSlimmerMET::prompt( const xAOD::TruthParticle* part ) const
-{
-
-    MCTruthPartClassifier::ParticleOrigin orig = m_classif->particleTruthClassifier( part ).second;
-    ATH_MSG_DEBUG("Particle has origin " << orig);
-      
-    switch(orig) {
-    case MCTruthPartClassifier::NonDefined:
-    case MCTruthPartClassifier::PhotonConv:
-    case MCTruthPartClassifier::DalitzDec:
-    case MCTruthPartClassifier::ElMagProc:
-    case MCTruthPartClassifier::Mu:
-    case MCTruthPartClassifier::LightMeson:
-    case MCTruthPartClassifier::StrangeMeson:
-    case MCTruthPartClassifier::CharmedMeson:
-    case MCTruthPartClassifier::BottomMeson:
-    case MCTruthPartClassifier::CCbarMeson:
-    case MCTruthPartClassifier::JPsi:
-    case MCTruthPartClassifier::BBbarMeson:
-    case MCTruthPartClassifier::LightBaryon:
-    case MCTruthPartClassifier::StrangeBaryon:
-    case MCTruthPartClassifier::CharmedBaryon:
-    case MCTruthPartClassifier::BottomBaryon:
-    case MCTruthPartClassifier::PionDecay:
-    case MCTruthPartClassifier::KaonDecay: 
-      return false;
-    default:
-      break;
-    }
-    
-    return true;
-  }
 

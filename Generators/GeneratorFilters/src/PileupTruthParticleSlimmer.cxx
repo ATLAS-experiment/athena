@@ -16,6 +16,7 @@
 #include "xAODTruth/TruthParticleAuxContainer.h"
 
 #include "GeneratorFilters/PileupTruthParticleSlimmer.h"
+#include "GeneratorFilters/Common.h"
 #include "TruthUtils/HepMCHelpers.h"
 
 using namespace std;
@@ -99,23 +100,12 @@ StatusCode PileupTruthParticleSlimmer::execute() {
         // Fill with numerical content
         *xTruthParticle=*theParticle;
 
-#ifdef MCTRUTHCLASSIFIER_CONST
-        IMCTruthClassifier::Info info;
-        std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> classification = 
-          m_classifier->particleTruthClassifier(theParticle, &info);
-        unsigned int particleOutCome = info.particleOutCome;
-#else
-        std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> classification = 
-          m_classifier->particleTruthClassifier(theParticle);
-        unsigned int particleOutCome = m_classifier->getParticleOutCome();
-#endif
-
-        unsigned int result = (unsigned int)m_classifier->classify(theParticle);
-
-        int hadron_pdg = (int)m_classifier->getParentHadronID(theParticle);
-
-        unsigned int particleType = classification.first;
-        unsigned int particleOrigin = classification.second;
+unsigned int particleOutCome;
+unsigned int result;
+unsigned int particleType;
+unsigned int particleOrigin;
+int hadron_pdg;
+Common::classify(m_classifier,theParticle,particleOutCome,result,hadron_pdg,particleType,particleOrigin );
         typeDecorator(*xTruthParticle) = particleType;
         originDecorator(*xTruthParticle) = particleOrigin;
         outcomeDecorator(*xTruthParticle) = particleOutCome;  

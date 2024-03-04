@@ -22,9 +22,6 @@ public:
     virtual StatusCode filterFinalize();
     virtual StatusCode filterEvent();
 
-    bool fromTau(const HepMC::ConstGenParticlePtr& tp ) const;
-    bool fromWZ(const HepMC::ConstGenParticlePtr& tp ) const;
-
 private:
 
     double m_MinJetPt;  //!< Min pT for the truth jets
