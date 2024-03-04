@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg, trigInDetLRTCfg
@@ -16,7 +17,7 @@ log = logging.getLogger(__name__)
 from .FullScanDefs import trkFSRoI
 
 @AccumulatorCache
-def commonInDetFullScanCfg(flags):
+def commonInDetFullScanCfg(flags: AthConfigFlags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     seqname='TrigInDetFullScan'
     acc.addSequence(parOR(seqname),primary=True)
@@ -44,17 +45,18 @@ def commonInDetFullScanCfg(flags):
     return acc
 
 
-@AccumulatorCache
-def commonInDetLRTCfg(flags, std_cfg, lrt_cfg, rois=trkFSRoI):
+def commonInDetLRTCfg(flags    : AthConfigFlags, 
+                      flagsLRT : AthConfigFlags, 
+                      rois     : str = trkFSRoI) -> ComponentAccumulator:
+    
     acc = ComponentAccumulator()
-    seqname = 'TrigInDetLRT_'+lrt_cfg.name
+    seqname = 'TrigInDetLRT_'+flagsLRT.Tracking.ActiveConfig.name
     acc.addSequence(parOR(seqname),primary=True)
-    flagsWithTrk = getFlagsForActiveConfig(flags, lrt_cfg.name, log)
 
     acc.merge(
         trigInDetLRTCfg(
-            flagsWithTrk,
-            std_cfg.trkTracks_FTF(),
+            flagsLRT,
+            flags.Tracking.ActiveConfig.trkTracks_FTF,
             rois,
             in_view=False
         ),
