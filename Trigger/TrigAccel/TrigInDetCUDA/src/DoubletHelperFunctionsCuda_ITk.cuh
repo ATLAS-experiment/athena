@@ -32,6 +32,15 @@ __device__ static float getMaxDeltaLEta (float eta) {
   else return eta*eta*eta*eta*1.7582417 + eta*eta*-129.67033 + 3324.61538;
 }
 
+__device__ static int getInnerDoubletIdx (int pairIdx, int nOuter) {
+  return nOuter > 0 ? pairIdx/nOuter : 0;
+}
+
+__device__ static int getOuterDoubletIdx (int pairIdx, int nOuter, int startOfOuter) {
+  return startOfOuter + pairIdx % nOuter;
+}
+
+
 }
 
 #endif
