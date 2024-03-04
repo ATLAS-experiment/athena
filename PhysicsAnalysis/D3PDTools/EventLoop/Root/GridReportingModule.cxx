@@ -12,7 +12,6 @@
 
 #include <EventLoop/GridReportingModule.h>
 
-#include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <algorithm>
 #include <fstream>
@@ -25,30 +24,28 @@ namespace EL
 {
   namespace Detail
   {
-    ::StatusCode GridReportingModule ::
+    StatusCode GridReportingModule ::
     onNewInputFile (ModuleData& data)
     {
       if (std::find (m_files.begin(), m_files.end(), data.m_inputFileUrl) == m_files.end())
         m_files.push_back (data.m_inputFileUrl);
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode GridReportingModule ::
+    StatusCode GridReportingModule ::
     onExecute (ModuleData& /*data*/)
     {
       ++m_eventsProcessed;
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode GridReportingModule ::
+    StatusCode GridReportingModule ::
     postFileClose (ModuleData& /*data*/)
     {
-      using namespace msgEventLoop;
-
       // createJobSummary
       std::ofstream summaryfile("../AthSummary.txt");
       if (summaryfile.is_open()) {
@@ -62,7 +59,7 @@ namespace EL
       else {
         ANA_MSG_WARNING ("Failed to write summary file.");
       }
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
@@ -70,8 +67,6 @@ namespace EL
     void GridReportingModule ::
     reportInputFailure (ModuleData& /*data*/)
     {
-      using namespace msgEventLoop;
-
       ANA_MSG_FATAL ("encountered input error");
       exit (EC_BADINPUT);
     }

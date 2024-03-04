@@ -12,7 +12,6 @@
 
 #include <EventLoop/MemoryMonitorModule.h>
 
-#include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <TSystem.h>
 
@@ -24,13 +23,6 @@ namespace EL
 {
   namespace Detail
   {
-    MemoryMonitorModule ::
-    MemoryMonitorModule (const std::string& name)
-      : AsgMessaging (name)
-    {}
-
-
-
     StatusCode MemoryMonitorModule ::
     firstInitialize (ModuleData& /*data*/)
     {

@@ -18,7 +18,6 @@
 #include <xAODRootAccess/TStore.h>
 // #include <xAODRootAccess/D3PDPerfStats.h>
 #include <EventLoop/Job.h>
-#include <EventLoop/MessageCheck.h>
 #include <EventLoop/StatusCode.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
@@ -39,7 +38,8 @@ namespace EL
   namespace Detail
   {
     TEventModule ::
-    TEventModule ()
+    TEventModule (const std::string& name)
+      : Module (name)
     {}
 
 
@@ -50,19 +50,18 @@ namespace EL
 
 
 
-    ::StatusCode TEventModule ::
+    StatusCode TEventModule ::
     onInitialize (ModuleData& data)
     {
-      using namespace msgEventLoop;
       if (m_event != nullptr || m_store != nullptr)
       {
         ANA_MSG_ERROR ("module initialized twice");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
       if (data.m_tevent != nullptr || data.m_tstore != nullptr)
       {
         ANA_MSG_ERROR ("duplicate TEventModule??");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
 
       std::string modeStr = data.m_metaData->castString
@@ -79,7 +78,7 @@ namespace EL
         else
         {
           ANA_MSG_ERROR ("unknown XAOD access mode: " << modeStr);
-          return ::StatusCode::FAILURE;
+          return StatusCode::FAILURE;
         }
         m_event.reset (new xAOD::TEvent (mode));
       } else
@@ -105,7 +104,7 @@ namespace EL
       if (!data.m_inputFile)
       {
         ANA_MSG_ERROR ("File is not available during initialization?!?");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
       // Set up the reading from the first input file, which should be
       // open already. But note that no event is loaded with getEntry(...)
@@ -118,7 +117,7 @@ namespace EL
 
 
 
-    ::StatusCode TEventModule ::
+    StatusCode TEventModule ::
     postFinalize (ModuleData& data)
     {
       if (m_useStats)
@@ -141,46 +140,43 @@ namespace EL
 
 
 
-    ::StatusCode TEventModule ::
+    StatusCode TEventModule ::
     onNewInputFile (ModuleData& data)
     {
-      using namespace msgEventLoop;
       if (m_event == nullptr || m_store == nullptr)
       {
         ANA_MSG_ERROR ("module not inititalized");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
       ANA_CHECK (m_event->readFrom (data.m_inputFile.get()));
       if ((m_event->getEntries() > 0) && (m_event->getEntry (0) < 0))
       {
         ANA_MSG_ERROR ("Failed to load first entry from file");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
       m_store->clear ();
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode TEventModule ::
+    StatusCode TEventModule ::
     postCloseInputFile (ModuleData& /*data*/)
     {
-      using namespace msgEventLoop;
       if (m_event == nullptr || m_store == nullptr)
       {
         ANA_MSG_ERROR ("module not inititalized");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
       ANA_CHECK (m_event->readFrom ((TFile *)nullptr));
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode TEventModule ::
+    StatusCode TEventModule ::
     onExecute (ModuleData& data)
     {
-      using namespace msgEventLoop;
       m_store->clear ();
       if (m_event->getEntry (data.m_inputTreeEntry) < 0)
         RCU_THROW_MSG ("failed to read from xAOD");

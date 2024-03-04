@@ -31,9 +31,12 @@ namespace EL
       unsigned m_eventsProcessed = 0;
 
     public:
-      virtual ::StatusCode onNewInputFile (ModuleData& data) override;
-      virtual ::StatusCode onExecute (ModuleData& data) override;
-      virtual ::StatusCode postFileClose (ModuleData& data) override;
+
+      using Module::Module;
+
+      virtual StatusCode onNewInputFile (ModuleData& data) override;
+      virtual StatusCode onExecute (ModuleData& data) override;
+      virtual StatusCode postFileClose (ModuleData& data) override;
       virtual void reportInputFailure (ModuleData& data) override;
     };
   }

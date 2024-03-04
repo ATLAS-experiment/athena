@@ -32,13 +32,13 @@ namespace EL
     /// test job with this module enabled to ensure it runs and doesn't break
     /// the output.
 
-    class MemoryMonitorModule final : public Module, public asg::AsgMessaging
+    class MemoryMonitorModule final : public Module
     {
       /// Public Members
       /// ==============
     public:
 
-      MemoryMonitorModule (const std::string& name);
+      using Module::Module;
 
       virtual StatusCode firstInitialize (ModuleData& data) override;
       virtual StatusCode onInitialize (ModuleData& data) override;

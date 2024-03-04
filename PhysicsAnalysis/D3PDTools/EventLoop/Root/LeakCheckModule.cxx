@@ -14,7 +14,6 @@
 #include <EventLoop/LeakCheckModule.h>
 
 #include <EventLoop/Job.h>
-#include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <SampleHandler/MetaObject.h>
 #include <TSystem.h>
@@ -29,38 +28,34 @@ namespace EL
 {
   namespace Detail
   {
-    ::StatusCode LeakCheckModule ::
+    StatusCode LeakCheckModule ::
     postFirstEvent (ModuleData& data)
     {
-      using namespace msgEventLoop;
-
       m_skippedEvents = data.m_eventsProcessed + 1;
 
       // Get the memory usage of the process after initialisation.
       ::ProcInfo_t pinfo;
       if (gSystem->GetProcInfo (&pinfo) != 0) {
         ANA_MSG_ERROR ("Could not get memory usage information");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
       m_initMemResident = pinfo.fMemResident;
       m_initMemVirtual = pinfo.fMemVirtual;
       ANA_MSG_DEBUG ("starting memory: " << pinfo.fMemResident << " " << pinfo.fMemVirtual);
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode LeakCheckModule ::
+    StatusCode LeakCheckModule ::
     postFinalize (ModuleData& data)
     {
-      using namespace msgEventLoop;
-
       if (m_skippedEvents > 0) {
         // Get the memory usage of the process after finalisation.
         ::ProcInfo_t pinfo;
         if (gSystem->GetProcInfo (&pinfo) != 0) {
           ANA_MSG_ERROR ("Could not get memory usage information");
-          return ::StatusCode::FAILURE;
+          return StatusCode::FAILURE;
         }
         m_finMemResident = pinfo.fMemResident;
         m_finMemVirtual = pinfo.fMemVirtual;
@@ -71,24 +66,22 @@ namespace EL
         Float_t incRes = memIncreaseResident();
         if (! data.m_jobStats->Branch ("memIncreaseResident", &incRes)) {
           ANA_MSG_ERROR ("Failed to create branch memIncreaseResident");
-          return ::StatusCode::FAILURE;
+          return StatusCode::FAILURE;
         }
         Float_t incVirt = memIncreaseVirtual();
         if (! data.m_jobStats->Branch ("memIncreaseVirtual", &incVirt)) {
           ANA_MSG_ERROR ("Failed to create branch memIncreaseVirtual");
-          return ::StatusCode::FAILURE;
+          return StatusCode::FAILURE;
         }
       }
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode LeakCheckModule ::
+    StatusCode LeakCheckModule ::
     onWorkerEnd (ModuleData& data)
     {
-      using namespace msgEventLoop;
-
       // Perform a memory leak check in case at least one event was processed.
       if (m_skippedEvents > 0 &&
           data.m_eventsProcessed > m_skippedEvents) {
@@ -131,7 +124,7 @@ namespace EL
           // If not, decide what to do about it.
           if (data.m_metaData->castBool (Job::optMemFailOnLeak, false)) {
             ANA_MSG_ERROR ("A significant memory leak was detected");
-            return ::StatusCode::FAILURE;
+            return StatusCode::FAILURE;
           } else {
             ANA_MSG_WARNING ("*");
             ANA_MSG_WARNING ("* A significant memory leak was detected");
@@ -139,7 +132,7 @@ namespace EL
           }
         }
       }
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 

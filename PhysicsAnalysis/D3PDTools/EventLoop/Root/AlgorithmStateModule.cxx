@@ -32,10 +32,9 @@ namespace EL
   {
     namespace
     {
-      template<typename F> ::StatusCode
-      forAllAlgorithms (ModuleData& data, const char *funcName, F&& func)
+      template<typename F> StatusCode
+      forAllAlgorithms (MsgStream& msg, ModuleData& data, const char *funcName, F&& func)
       {
-        using namespace msgEventLoop;
         for (AlgorithmData& alg : data.m_algs)
         {
           try
@@ -43,13 +42,13 @@ namespace EL
             typedef typename std::decay<decltype(func(alg))>::type scType__;
             if (!::asg::CheckHelper<scType__>::isSuccess (func (alg)))
             {
-              ANA_MSG_ERROR ("executing " << funcName << " on algorithm " << alg->getName());
+              msg << MSG::ERROR << "executing " << funcName << " on algorithm " << alg->getName() << endmsg;
               return StatusCode::FAILURE;
             }
           } catch (...)
           {
             report_exception (std::current_exception());
-            ANA_MSG_ERROR ("executing " << funcName << " on algorithm " << alg->getName());
+            msg << MSG::ERROR << "executing " << funcName << " on algorithm " << alg->getName() << endmsg;
             return StatusCode::FAILURE;
           }
         }
@@ -59,14 +58,13 @@ namespace EL
 
 
 
-    ::StatusCode AlgorithmStateModule ::
+    StatusCode AlgorithmStateModule ::
     onInitialize (ModuleData& data)
     {
-      using namespace msgEventLoop;
       if (m_initialized)
       {
         ANA_MSG_ERROR ("getting second initialize call");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
       m_initialized = true;
       AlgorithmWorkerData workerData;
@@ -75,72 +73,67 @@ namespace EL
       workerData.m_filterWorker = data.m_worker;
       workerData.m_wk = data.m_worker;
       workerData.m_evtStore = data.m_evtStore;
-      return forAllAlgorithms (data, "initialize", [&] (AlgorithmData& alg) {
+      return forAllAlgorithms (msg(), data, "initialize", [&] (AlgorithmData& alg) {
         return alg->initialize (workerData);});
     }
 
 
 
-    ::StatusCode AlgorithmStateModule ::
+    StatusCode AlgorithmStateModule ::
     onFinalize (ModuleData& data)
     {
-      using namespace msgEventLoop;
       if (!m_initialized)
-        return ::StatusCode::SUCCESS;
-      if (forAllAlgorithms (data, "finalize", [&] (AlgorithmData& alg) {
+        return StatusCode::SUCCESS;
+      if (forAllAlgorithms (msg(), data, "finalize", [&] (AlgorithmData& alg) {
             return alg->finalize ();}).isFailure())
         return StatusCode::FAILURE;
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode AlgorithmStateModule ::
+    StatusCode AlgorithmStateModule ::
     onCloseInputFile (ModuleData& data)
     {
-      using namespace msgEventLoop;
-      return forAllAlgorithms (data, "endInputFile", [&] (AlgorithmData& alg) {
+      return forAllAlgorithms (msg(), data, "endInputFile", [&] (AlgorithmData& alg) {
           return alg->endInputFile ();});
     }
 
 
 
-    ::StatusCode AlgorithmStateModule ::
+    StatusCode AlgorithmStateModule ::
     onNewInputFile (ModuleData& data)
     {
-      using namespace msgEventLoop;
       if (!m_initialized)
       {
         ANA_MSG_ERROR ("algorithms have not been initialized yet");
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
 
       if (data.m_inputTree == nullptr ||
           data.m_inputTree->GetEntries() == 0)
-        return ::StatusCode::SUCCESS;
+        return StatusCode::SUCCESS;
 
-      if (forAllAlgorithms (data, "changeInput", [&] (AlgorithmData& alg) {
+      if (forAllAlgorithms (msg(), data, "changeInput", [&] (AlgorithmData& alg) {
             return alg->beginInputFile ();}).isFailure())
-        return ::StatusCode::FAILURE;
-      return ::StatusCode::SUCCESS;
+        return StatusCode::FAILURE;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode AlgorithmStateModule ::
+    StatusCode AlgorithmStateModule ::
     onFileExecute (ModuleData& data)
     {
-      using namespace msgEventLoop;
-      return forAllAlgorithms (data, "fileExecute", [&] (AlgorithmData& alg) {
+      return forAllAlgorithms (msg(), data, "fileExecute", [&] (AlgorithmData& alg) {
           return alg->fileExecute ();});
     }
 
 
 
-    ::StatusCode AlgorithmStateModule ::
+    StatusCode AlgorithmStateModule ::
     onExecute (ModuleData& data)
     {
-      using namespace msgEventLoop;
       RCU_CHANGE_INVARIANT (this);
 
       data.m_skipEvent = false;
@@ -154,20 +147,20 @@ namespace EL
           if (iter->m_algorithm->execute() == StatusCode::FAILURE)
           {
             ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
-            return ::StatusCode::FAILURE;
+            return StatusCode::FAILURE;
           }
 
           if (data.m_skipEvent)
           {
             iter->m_skipCount += 1;
-            return ::StatusCode::SUCCESS;
+            return StatusCode::SUCCESS;
           }
         }
       } catch (...)
       {
         Detail::report_exception (std::current_exception());
         ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
 
       /// rationale: this will make sure that the post-processing runs
@@ -180,17 +173,17 @@ namespace EL
           if (jter->m_algorithm->postExecute() == StatusCode::FAILURE)
           {
             ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
-            return ::StatusCode::FAILURE;
+            return StatusCode::FAILURE;
           }
         }
       } catch (...)
       {
         Detail::report_exception (std::current_exception());
         ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
-        return ::StatusCode::FAILURE;
+        return StatusCode::FAILURE;
       }
 
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
   }
 }

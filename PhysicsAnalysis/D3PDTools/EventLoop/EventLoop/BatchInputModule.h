@@ -28,6 +28,8 @@ namespace EL
 
     public:
 
+      using Module::Module;
+
       BatchSample *sample = nullptr;
       BatchSegment *segment = nullptr;
       std::optional<uint64_t> maxEvents;

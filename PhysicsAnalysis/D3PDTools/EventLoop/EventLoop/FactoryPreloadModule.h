@@ -31,7 +31,7 @@ namespace EL
 
       std::string preloader;
 
-      FactoryPreloadModule (const std::string& val_preloader);
+      using Module::Module;
 
       StatusCode onInitialize (ModuleData& data) override;
     };

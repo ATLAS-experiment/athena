@@ -12,7 +12,6 @@
 #include <EventLoop/WorkerConfigModule.h>
 
 #include <EventLoop/Job.h>
-#include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <EventLoop/WorkerConfig.h>
 #include <EventLoop/Worker.h>
@@ -31,7 +30,6 @@ namespace EL
     StatusCode WorkerConfigModule ::
     onInitialize (ModuleData& data)
     {
-      using namespace msgEventLoop;
       std::string configFile = data.m_worker->metaData()->castString (Job::optWorkerConfigFile, "");
       if (!configFile.empty())
       {

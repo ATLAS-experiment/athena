@@ -12,7 +12,6 @@
 #include <EventLoop/FactoryPreloadModule.h>
 
 #include <AsgTools/MessageCheckAsgTools.h>
-#include <EventLoop/MessageCheck.h>
 #include <TInterpreter.h>
 #include <TSystem.h>
 #include <boost/algorithm/string.hpp>
@@ -25,17 +24,8 @@ namespace EL
 {
   namespace Detail
   {
-    FactoryPreloadModule ::
-    FactoryPreloadModule (const std::string& val_preloader)
-      : preloader (val_preloader)
-    {
-    }
-
-
     StatusCode FactoryPreloadModule::onInitialize (ModuleData& /*data*/)
     {
-      using namespace msgEventLoop;
-
       std::vector<std::string> preloaderList;
       boost::split (preloaderList, preloader, boost::is_any_of (","));
 

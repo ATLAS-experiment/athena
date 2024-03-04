@@ -13,7 +13,6 @@
 #include <EventLoop/TreeCacheModule.h>
 
 #include <EventLoop/Job.h>
-#include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <TTree.h>
 
@@ -25,7 +24,7 @@ namespace EL
 {
   namespace Detail
   {
-    ::StatusCode TreeCacheModule ::
+    StatusCode TreeCacheModule ::
     onNewInputFile (ModuleData& data)
     {
       if (data.m_inputTree)
@@ -37,21 +36,20 @@ namespace EL
         if (cacheLearnEntries > 0)
           data.m_inputTree->SetCacheLearnEntries (cacheLearnEntries);
       }
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode TreeCacheModule ::
+    StatusCode TreeCacheModule ::
     onCloseInputFile (ModuleData& data)
     {
-      using namespace msgEventLoop;
       if (data.m_metaData->castBool (Job::optPrintPerFileStats, false))
       {
         ANA_MSG_INFO ("file stats for: " << data.m_inputFileUrl);
         data.m_inputTree->PrintCacheStats ();
       }
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
   }
 }

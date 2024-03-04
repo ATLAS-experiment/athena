@@ -33,7 +33,7 @@ namespace EL
 
 
 
-    ::StatusCode FileExecutedModule ::
+    StatusCode FileExecutedModule ::
     onInitialize (ModuleData& /*data*/)
     {
       m_fileExecutedTree = std::make_unique<TTree>
@@ -41,12 +41,12 @@ namespace EL
       m_fileExecutedTree->SetDirectory (nullptr);
       m_fileExecutedName = new TString;
       m_fileExecutedTree->Branch ("file", &m_fileExecutedName);
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode FileExecutedModule ::
+    StatusCode FileExecutedModule ::
     onFileExecute (ModuleData& data)
     {
       auto split = data.m_inputFileUrl.rfind ('/');
@@ -55,16 +55,16 @@ namespace EL
       else
         *m_fileExecutedName = data.m_inputFileUrl;
       m_fileExecutedTree->Fill ();
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
 
 
 
-    ::StatusCode FileExecutedModule ::
+    StatusCode FileExecutedModule ::
     postFinalize (ModuleData& data)
     {
       data.addOutput (std::move (m_fileExecutedTree));
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
   }
 }

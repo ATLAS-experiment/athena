@@ -24,7 +24,7 @@ namespace EL
 {
   namespace Detail
   {
-    ::StatusCode EventCountModule ::
+    StatusCode EventCountModule ::
     postFinalize (ModuleData& data)
     {
       auto eventCount = std::make_unique<TH1D>
@@ -46,7 +46,7 @@ namespace EL
       }
 
       data.addOutput (std::move (eventCount));
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
   }
 }

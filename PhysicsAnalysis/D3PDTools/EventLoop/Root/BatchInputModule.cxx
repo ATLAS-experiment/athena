@@ -15,7 +15,6 @@
 #include <EventLoop/BatchSegment.h>
 #include <EventLoop/EventRange.h>
 #include <EventLoop/IInputModuleActions.h>
-#include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
 
 //
@@ -29,8 +28,6 @@ namespace EL
     StatusCode BatchInputModule ::
     processInputs (ModuleData& /*data*/, IInputModuleActions& actions)
     {
-      using namespace msgEventLoop;
-
       Long64_t beginFile = segment->begin_file;
       Long64_t endFile   = segment->end_file;
       Long64_t lastFile  = segment->end_file;

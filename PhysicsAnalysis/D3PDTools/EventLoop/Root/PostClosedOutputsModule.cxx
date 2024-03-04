@@ -6,8 +6,8 @@
 
 
 #include <EventLoop/PostClosedOutputsModule.h>
+
 #include <EventLoop/Job.h>
-#include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/ShellExec.h>
@@ -21,18 +21,16 @@ namespace EL
 {
   namespace Detail
   {
-    ::StatusCode PostClosedOutputsModule ::
+    StatusCode PostClosedOutputsModule ::
     postFileClose (ModuleData& data)
     { 
-      using namespace msgEventLoop;
-      
       // get executable if user provided one 
       std::string postCloseExec = data.m_worker->metaData()->castString (Job::optWorkerPostClosedOutputsExecutable, ""); 
 
       if (!postCloseExec.size()){
         // user did not provide an excutable to be called after all outputs are closed
         ANA_MSG_DEBUG ("PostClosedOutputsModule: no additionnal checks/actions performed after all outputs are closed");
-        return ::StatusCode::SUCCESS;
+        return StatusCode::SUCCESS;
       }
 
       // user provided an executable to be used 
@@ -52,7 +50,7 @@ namespace EL
         ANA_MSG_INFO ("PostClosedOutputsModule: execute command line = '" << cmdLineToExecute << "'");
         RCU::Shell::exec (cmdLineToExecute.c_str());
       }
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
   }
 }

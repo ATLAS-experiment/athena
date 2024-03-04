@@ -34,15 +34,15 @@ namespace EL
       // public interface
       //
 
+    public:
+
       /// effects: standard constructor.
       /// guarantee: no-fail
-    public:
-      TEventModule ();
+      TEventModule (const std::string& name);
 
 
       /// effects: standard destructor.
       /// guarantee: no-fail
-    public:
       ~TEventModule ();
 
 
@@ -52,19 +52,12 @@ namespace EL
       //
 
     public:
-      virtual ::StatusCode onInitialize (ModuleData& data) override;
 
-    public:
-      virtual ::StatusCode postFinalize (ModuleData& data) override;
-
-    public:
-      virtual ::StatusCode onNewInputFile (ModuleData& data) override;
-
-    public:
-      virtual ::StatusCode postCloseInputFile (ModuleData& data) override;
-
-    public:
-      virtual ::StatusCode onExecute (ModuleData& data) override;
+      virtual StatusCode onInitialize (ModuleData& data) override;
+      virtual StatusCode postFinalize (ModuleData& data) override;
+      virtual StatusCode onNewInputFile (ModuleData& data) override;
+      virtual StatusCode postCloseInputFile (ModuleData& data) override;
+      virtual StatusCode onExecute (ModuleData& data) override;
 
 
 

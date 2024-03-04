@@ -31,7 +31,9 @@ namespace EL
 
     public:
 
-      virtual ::StatusCode firstInitialize (ModuleData& data) override;
+      using Module::Module;
+
+      virtual StatusCode firstInitialize (ModuleData& data) override;
     };
   }
 }
