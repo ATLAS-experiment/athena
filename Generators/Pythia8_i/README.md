@@ -83,8 +83,26 @@ to build against with your local modifications, and build & set up the run:
 
 ## Using a custom libPythia8 library
 
-Using a new copy of the Pythia8 library for testing can be a bit more involved,
-because you will also need to check out the `Pythia8` externals package and, depending on the release, also
+Using a new copy of the Pythia8 library for testing can be a bit more involved.
+
+### Compiling the library
+The compilation must be done in the same environment you will test afterwards. So, before compiling, please setup your desired athena environment (a non standard
+environment will be used in the following, just to highlight the importance of this statement):
+
+    pwd #< please check your global path and save it somewhere safe (not enough in a global variable if you are running in a container then)
+    setupATLAS -c centos7; asetup 23.6.22,AthGeneration;
+    tar -xzf mycustompy8.tgz
+    mkdir install
+    cd mycustompy8
+    ./configure --prefix=[YOUR-GLOBAL-PATH]/install --with-lhapdf6=$LHAPDF_INSTAL_PATH #< please take into account that in previous releases the LHAPDF variable could be different
+                                                                                       #< also consider to link to gzip if you need p8 o read lhe.gz files
+    make -j 4
+    make install
+
+From now on, the same AthGeneration environment must be setup (here it was centos7 container, release 23.6.22: adapt examples below to your needs).
+
+### Using the library in Athena
+In order now to link properly the compiled library, you will now also need to check out the `Pythia8` externals package and, depending on the release, also
 override some paths to point at the new version. Here is a full set of commands
 to run, again starting from a new checkout of your Git
 Athena fork:
@@ -92,11 +110,12 @@ Athena fork:
     setupATLAS; lsetup asetup; lsetup git
     git atlas init-workdir https://:@gitlab.cern.ch/USERNAME/athena.git athena-py8custom
     cd athena-py8custom
-    git atlas addpkg Pythia8 Pythia8_i #< or just Pythia8 if you don't plan to implement changes in Pythia8_i
+    git atlas addpkg Pythia8 Pythia8_i #< add here also EvtGen_i if you need to test JO with EvtGen in the sequence
+                                       #< remove otherwise EvtGen from the sequence by using the corresponding no-EvtGen JO
 
 From now on, the procedure depends on your release version: in all cases, be sure to have followed the above steps in a new terminal, where no other `asetup` commands have been called. Check also to work in a new, clean, `build` folder, where appropriate.
 
-### Older releases (development releases in R21)
+#### Older releases (development releases in R21)
 
 If you really still need to use older R21 releases, you now need to modify the project build instructions to pick up the external
 library override, by editing `athena/Projects/WorkDir/CMakeLists.txt`:
@@ -138,18 +157,18 @@ following lines, specifying which packages to build:
 You may wish to run a `make clean` before `make`, to ensure that everything is
 definitely rebuilt as intended.
 
-### Most recent releases (late R21, and R22/R23)
+#### Most recent releases (late R21, and R22/R23)
 Skip steps 1 and 2 of the procedure described above. Follow step 3. Instead of step 4, do the following:
 
     mkdir athena-py8custom-build && cd athena-py8custom-build
     asetup 21.6.99,AthGeneration
     # or in R22/23: asetup AthGeneration,main,latest
-    cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt -DPYTHIA8_LCGROOT=/cvmfs/sft-nightlies.cern.ch/lcg/nightlies/dev4/Thu/MCGenerators/pythia8/309/x86_64-centos7-gcc11-opt ../athena/Projects/WorkDir/
+    cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt -DPYTHIA8_LCGROOT=/cvmfs/sft-nightlies.cern.ch/lcg/nightlies/dev4/Thu/MCGenerators/pythia8/309/x86_64-centos7-gcc11-opt  ../athena/Projects/WorkDir/
     make
     source */setup.sh
 
 
-where in the above example Pythia8.309 has been taken from a nightly build.
+where in the above example Pythia8.309 has been taken from a nightly build (see path after `-DPYTHIA8_LCGROOT`).
 
 ## MLM matching within Athena
 Where CKKWL cannot be applied (notably, in all loop induced processes) it can be useful to run MLM matching.
