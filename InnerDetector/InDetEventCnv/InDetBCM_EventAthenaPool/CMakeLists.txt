@@ -32,7 +32,6 @@ atlas_add_test( BCM_RDO_ContainerCnv_p0_test
    LINK_LIBRARIES InDetBCM_EventAthenaPool )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Set up (a) test(s) for the converter(s):

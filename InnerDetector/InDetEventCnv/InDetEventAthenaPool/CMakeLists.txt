@@ -36,7 +36,6 @@ atlas_add_dictionary( InDetEventAthenaPoolCnvDict
    LINK_LIBRARIES Identifier GeneratorObjectsTPCnv )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Set up (a) test(s) for the converter(s):
