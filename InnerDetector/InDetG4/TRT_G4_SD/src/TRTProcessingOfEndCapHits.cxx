@@ -136,8 +136,8 @@ bool TRTProcessingOfEndCapHits::ProcessHit(G4Step* pStep)
   G4ThreeVector globalPostStepPoint = pPostStepPoint->GetPosition();
 
   const G4TouchableHistory* pTouchableHistory =
-    dynamic_cast<const G4TouchableHistory*>(pPreStepPoint->GetTouchable());
-
+    static_cast<const G4TouchableHistory*>(pPreStepPoint->GetTouchable());
+ 
   const G4AffineTransform& topTransform = pTouchableHistory->GetHistory()->
     GetTopTransform();
 
