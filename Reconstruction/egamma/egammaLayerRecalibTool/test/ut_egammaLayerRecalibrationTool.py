@@ -248,11 +248,15 @@ class TestLayer(unittest.TestCase):
 
 
 def is_file_readable(path):
-    f = ROOT.TFile.Open(path, "READ")
-    return bool(f)
+    try:
+        f = ROOT.TFile.Open(path, "READ")
+    except OSError:
+        return False
+    return True
 
 
-filename = 'root://eosatlas.cern.ch//eos/atlas/user/t/turra/user.blenzi.4956574.EXT0._000001.AOD.pool.root'
+from AthenaConfiguration.TestDefaults import defaultTestFiles
+filename = defaultTestFiles.AOD_RUN2_MC[0]
 @unittest.skipIf(not is_file_readable(filename),
                  "input file not available")
 class TestLayerxAOD(unittest.TestCase):
