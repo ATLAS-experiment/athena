@@ -96,12 +96,13 @@ def defineInputsMenu():
             'eEM1', 'eEM2',
             #ATR-26333, adding eEM12, potentially more efficient than eEM12L in central HI collisions
             'eEM12',
-
             # variable eEM  thresholds
             'eEM24VM', 'eEM26', 'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M', 
-
+            #beam splashes
+            'eEM22A', 'eEM22C',                    
+            
             # eEM thresholds for production      
-            'eEMSPARE1', 'eEMSPARE2', 'eEMSPARE3', 'eEMSPARE4',
+            'eEMSPARE1', 'eEMSPARE2', 
             
             ('ZeroBiasA', 1)
         ],
