@@ -61,7 +61,7 @@ class Test( unittest.TestCase ):
    def test_1D_labelsY( self ):
       flags = initConfigFlags()
       check = defineHistogram(flags, 'var', ylabels=["bin0", "bin1"])
-      true = '{"alias": "var", "allvars": ["var"], "convention": "", "merge": "", "path": "", "title": "var", "treeDef": "", "type": "TH1F", "weight": "", "cutMask": "", "xarray": [], "xbins": 100, "xlabels": [], "xmax": 1, "xmin": 0, "xvar": "var", "yarray": [], "ybins": 2, "ylabels": ["bin0", "bin1"], "ymax": 0.0, "ymin": 0.0, "yvar": "", "zbins": 0.0, "zlabels": [], "zmax": 0.0, "zmin": 0.0, "zvar": "", "Sumw2": false, "kLBNHistoryDepth": 0, "kAddBinsDynamically": false, "kRebinAxes": false, "kCanRebin": false, "kVec": false, "kVecUO": false, "kCumulative": false, "kLive": false, "kAlwaysCreate": false}'
+      true = '{"alias": "var", "allvars": ["var"], "convention": "", "merge": "", "path": "", "title": "var", "treeDef": "", "type": "TH1F", "weight": "", "cutMask": "", "xarray": [], "xbins": 100, "xlabels": [], "xmax": 1, "xmin": 0, "xvar": "var", "yarray": [], "ybins": 2, "ylabels": ["bin0", "bin1"], "ymax": 1.0, "ymin": 0.0, "yvar": "", "zbins": 0.0, "zlabels": [], "zmax": 0.0, "zmin": 0.0, "zvar": "", "Sumw2": false, "kLBNHistoryDepth": 0, "kAddBinsDynamically": false, "kRebinAxes": false, "kCanRebin": false, "kVec": false, "kVecUO": false, "kCumulative": false, "kLive": false, "kAlwaysCreate": false}'
       self.assertEqual(json.loads(check), json.loads(true))
 
    def test_2D( self ):
@@ -85,7 +85,7 @@ class Test( unittest.TestCase ):
    def test_2D_labelsXY( self ):
       flags = initConfigFlags()
       check = defineHistogram(flags, 'varX,varY', 'TH2F', xlabels=["bin0", "bin1"], ylabels=["bin0", "bin1", "bin2"])
-      true = '{"alias": "varY_vs_varX", "allvars": ["varX", "varY"], "convention": "", "merge": "", "path": "", "title": "varX,varY", "treeDef": "", "type": "TH2F", "weight": "", "cutMask": "", "xarray": [], "xbins": 2, "xlabels": ["bin0", "bin1"], "xmax": 1, "xmin": 0, "xvar": "varX", "yarray": [], "ybins": 3, "ylabels": ["bin0", "bin1", "bin2"], "ymax": 0.0, "ymin": 0.0, "yvar": "varY", "zbins": 0.0, "zlabels": [], "zmax": 0.0, "zmin": 0.0, "zvar": "", "Sumw2": false, "kLBNHistoryDepth": 0, "kAddBinsDynamically": false, "kRebinAxes": false, "kCanRebin": false, "kVec": false, "kVecUO": false, "kCumulative": false, "kLive": false, "kAlwaysCreate": false}'
+      true = '{"alias": "varY_vs_varX", "allvars": ["varX", "varY"], "convention": "", "merge": "", "path": "", "title": "varX,varY", "treeDef": "", "type": "TH2F", "weight": "", "cutMask": "", "xarray": [], "xbins": 2, "xlabels": ["bin0", "bin1"], "xmax": 1, "xmin": 0, "xvar": "varX", "yarray": [], "ybins": 3, "ylabels": ["bin0", "bin1", "bin2"], "ymax": 1.0, "ymin": 0.0, "yvar": "varY", "zbins": 0.0, "zlabels": [], "zmax": 0.0, "zmin": 0.0, "zvar": "", "Sumw2": false, "kLBNHistoryDepth": 0, "kAddBinsDynamically": false, "kRebinAxes": false, "kCanRebin": false, "kVec": false, "kVecUO": false, "kCumulative": false, "kLive": false, "kAlwaysCreate": false}'
       self.assertEqual(json.loads(check), json.loads(true))
 
    def test_3D( self ):
