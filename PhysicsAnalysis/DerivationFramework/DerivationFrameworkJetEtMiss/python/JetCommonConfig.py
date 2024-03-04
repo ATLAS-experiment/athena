@@ -101,15 +101,16 @@ def AddSidebandEventShapeCfg(ConfigFlags):
 
     return acc
 
-def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", **kwargs):
+def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContainer='AntiKt4EMTopo', **kwargs):
     acc = ComponentAccumulator()
     # Decorate if jet passed JVT criteria
     from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(ConfigFlags, 'AntiKt4EMTopo'))
-    passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
+
+    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(ConfigFlags, jetContainer))
+    passJvtTool.PassJVTKey = "{}Jets.DFCommonJets_passJvt".format(jetContainer)
     passJvtTool.SuppressOutputDependence = False
     kwargs.setdefault("Decorators", [passJvtTool])
-    kwargs.setdefault("JetContainer", "AntiKt4EMTopoJets")
+    kwargs.setdefault("JetContainer", "{}Jets".format(jetContainer))
     acc.addEventAlgo(CompFactory.JetDecorationAlg(algName, **kwargs), primary = True)
     return acc
 
@@ -117,16 +118,29 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     """Add event cleaning flags"""
 
     acc = ComponentAccumulator()
-    acc.merge(AddJvtDecorationAlgCfg(ConfigFlags))
-    
+    acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg_EMTopo", jetContainer='AntiKt4EMTopo'))
+    acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow'))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
     acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doLoose=True))
 
+    # Overlap for EMTopo
     from AssociationUtils.AssociationUtilsConfig import OverlapRemovalToolCfg
-    outputLabel = 'DFCommonJets_passOR'
+    outputLabel_legacy = 'DFCommonJets_passOR'
     bJetLabel = '' #default
     tauLabel = 'DFTauLoose'
+    orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
+    algOR_legacy = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
+                                                JetKey="AntiKt4EMTopoJets",
+                                                OverlapLabel=outputLabel_legacy,
+                                                OverlapRemovalTool=orTool_legacy,
+                                                TauLabel=tauLabel,
+                                                BJetLabel=bJetLabel
+                                                )
+    acc.addEventAlgo(algOR_legacy)
+
+    # Overlap for EMPFlow
+    outputLabel = 'DFCommonJets_passOR'
     orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,outputLabel=outputLabel,bJetLabel=bJetLabel))
     algOR = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg',
                                                 OverlapLabel=outputLabel,
@@ -144,6 +158,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     
     supportedWPs = ['Loose', 'Tight', 'LooseLLP', 'VeryLooseLLP', 'SuperLooseLLP']
     prefix = "DFCommonJets_"
+    evt_lvl_suppWPs_PFlow = ['LooseBad', 'TightBad']
 
     for wp in workingPoints:
         if wp not in supportedWPs:
@@ -153,23 +168,59 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
         # LLP WPs have a slightly different name format
         if 'LLP' in wp:
             cleaningLevel = wp.replace('LLP', 'BadLLP')
+        
+        # Add support for TightBad event flag as well
+        doEvent_PFlow=False
+        for evt_swp in evt_lvl_suppWPs_PFlow:
+            if evt_swp == cleaningLevel: 
+                doEvent_PFlow=True
+                break
 
-        jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(ConfigFlags, 'JetCleaningTool_'+cleaningLevel, 'AntiKt4EMTopoJets', cleaningLevel, False))
-        acc.addPublicTool(jetCleaningTool)
+        doEvent_EMTopo=False
+        if 'Loose' in cleaningLevel: 
+            doEvent_EMTopo=True
 
-        ecTool = acc.popToolsAndMerge(EventCleaningToolCfg(ConfigFlags,'EventCleaningTool_' + wp, cleaningLevel))
-        ecTool.JetCleanPrefix = prefix
-        ecTool.JetContainer = "AntiKt4EMTopoJets"
-        ecTool.JetCleaningTool = jetCleaningTool
-        acc.addPublicTool(ecTool)
+        ## for EMTopo (Legacy), also support for LLPs
+        if doEvent_EMTopo:
+            jetCleaningTool_legacy = acc.popToolsAndMerge(JetCleaningToolCfg(
+                    ConfigFlags, 'JetCleaningTool_'+cleaningLevel+'_EMTopo',
+                    'AntiKt4EMTopo', cleaningLevel, False))
+            acc.addPublicTool(jetCleaningTool_legacy)
+            ecTool_legacy = acc.popToolsAndMerge(EventCleaningToolCfg(
+                    ConfigFlags,'EventCleaningTool_'+wp+'_EMTopo', cleaningLevel))
+            ecTool_legacy.JetCleanPrefix = prefix
+            ecTool_legacy.JetContainer = "AntiKt4EMTopoJets"
+            ecTool_legacy.JetCleaningTool = jetCleaningTool_legacy
+            acc.addPublicTool(ecTool_legacy)
+    
+            eventCleanAlg_legacy = CompFactory.EventCleaningTestAlg('EventCleaningTestAlg_'+wp+'_EMTopo',
+                                                             EventCleaningTool=ecTool_legacy,
+                                                             JetCollectionName="AntiKt4EMTopoJets",
+                                                             EventCleanPrefix=prefix,
+                                                             CleaningLevel=cleaningLevel,
+                                                             doEvent=True) # Only store event-level flags for Loose and LooseLLP
+            acc.addEventAlgo(eventCleanAlg_legacy)
 
-        eventCleanAlg = CompFactory.EventCleaningTestAlg('EventCleaningTestAlg_'+wp,
-                                                         EventCleaningTool=ecTool,
-                                                         JetCollectionName="AntiKt4EMTopoJets",
-                                                         EventCleanPrefix=prefix,
-                                                         CleaningLevel=cleaningLevel,
-                                                         doEvent = ('Loose' in wp)) # Only store event-level flags for Loose and LooseLLP
-        acc.addEventAlgo(eventCleanAlg)
+        ## For PFlow
+        if doEvent_PFlow:
+            jetCleaningTool = acc.popToolsAndMerge(JetCleaningToolCfg(
+                    ConfigFlags, 'JetCleaningTool_'+cleaningLevel,
+                    'AntiKt4EMPFlowJets', cleaningLevel, False))
+            acc.addPublicTool(jetCleaningTool)
+    
+            ecTool = acc.popToolsAndMerge(EventCleaningToolCfg(ConfigFlags,'EventCleaningTool_' + wp, cleaningLevel))
+            ecTool.JetCleanPrefix = prefix
+            ecTool.JetContainer = "AntiKt4EMPFlowJets"
+            ecTool.JetCleaningTool = jetCleaningTool
+            acc.addPublicTool(ecTool)
+    
+            eventCleanAlg = CompFactory.EventCleaningTestAlg('EventCleaningTestAlg_'+wp,
+                                                             EventCleaningTool=ecTool,
+                                                             JetCollectionName="AntiKt4EMPFlowJets",
+                                                             EventCleanPrefix=prefix,
+                                                             CleaningLevel=cleaningLevel,
+                                                             doEvent=True) # for PFlow we use Loose and Tight
+            acc.addEventAlgo(eventCleanAlg)
 
     return acc
 
