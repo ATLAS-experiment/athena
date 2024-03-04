@@ -2263,6 +2263,16 @@ int main(int argc, char** argv) {
 	if ( collection.find("_HLT_")!=std::string::npos ) collection.replace( collection.find("_HLT_"), 5, " " );    
 	if ( collection.find("HLT_")!=std::string::npos )  collection.erase( collection.find("HLT_"), 4 );    
 
+
+	if ( actual_chain.size()>30 ) { 	  
+	  size_t pos = actual_chain.find_last_of("_");
+	  while ( pos!=std::string::npos && actual_chain.size()>30 ) {
+	    actual_chain.erase( pos, actual_chain.size()-pos );
+	    actual_chain+="...";
+	    pos = actual_chain.find_last_of("_");
+	  }
+	}
+
 	std::string c = actual_chain + " : " + collection;
 
 	std::cout << "track collection: " << collection   << "   <-" << std::endl;

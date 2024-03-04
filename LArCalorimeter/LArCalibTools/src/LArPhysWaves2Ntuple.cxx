@@ -20,7 +20,7 @@ LArPhysWaves2Ntuple::~LArPhysWaves2Ntuple()
 
 
 StatusCode LArPhysWaves2Ntuple::initialize() {
-  m_ntTitle="Calibration Wave";
+  m_ntTitle="Physics Wave";
   m_ntpath=std::string("/NTUPLES/FILE1/")+m_ntName;
   return LArWaves2Ntuple::initialize();
 }

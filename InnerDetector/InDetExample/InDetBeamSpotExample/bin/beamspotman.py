@@ -907,8 +907,11 @@ if cmd=='runMonJobs' and len(args)<3:
             paramValues = ''
             if options.params:
                 paramValues = '--params \''+options.params+'\''
+            testFlag = ''
+            if options.testonly:
+                testFlag = '--test'
 
-            cmd = 'beamspotman --eospath=%s -p %s -s %s -f \'.*\\.%s\\..*\' -t %s --queue %s %s --montaskname %s runMon %i %s' % (eospath,ptag,stream,filter,bstag,queue,paramValues,monTaskName,int(runnr),datatag)
+            cmd = 'beamspotman --eospath=%s -p %s -s %s -f \'.*\\.%s\\..*\' -t %s --queue %s %s %s --montaskname %s runMon %i %s' % (eospath,ptag,stream,filter,bstag,queue,paramValues,testFlag,monTaskName,int(runnr),datatag)
             print (cmd)
             sys.stdout.flush()
             status = os.system(cmd) >> 8   # Convert to standard Unix exit code

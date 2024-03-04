@@ -12,9 +12,12 @@ def VrtSecInclusiveMenuSequence(flags):
     # Construct the full reco sequence
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTCfg
     from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
-    reco = InEventRecoCA("UncFSVSIreco",inputMaker=getTrackingInputMaker("ftf"))
+    reco = InEventRecoCA("UncFSVSIreco",inputMaker=getTrackingInputMaker(flags,"ftf"))
 
-    reco.mergeReco( getCommonInDetFullScanLRTCfg(flags) )
+    from TrigInDetConfig.utils import getFlagsForActiveConfig
+    flagsLRT = getFlagsForActiveConfig(flags, "fullScanLRT", log)
+
+    reco.mergeReco( getCommonInDetFullScanLRTCfg(flags, flagsLRT) )
 
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
     theVSI = TrigVrtSecInclusiveCfg(flags, 

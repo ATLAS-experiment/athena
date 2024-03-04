@@ -16,7 +16,7 @@ from TrigEDMConfig.TriggerEDM import recordable
 from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetHypoToolFromDict
 from .JetPresel import caloPreselJetHypoToolFromDict, roiPreselJetHypoToolFromDict
 from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg, jetmetTopoClusteringCfg_LC, HICaloTowerCfg
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
 
 from AthenaCommon.Logging import logging
@@ -36,15 +36,12 @@ def getCaloInputMaker():
 # For later steps, where calo reco should not be run
 # The same instance of an algorithm cannot be run in different steps
 # Used for chains that use tracking
-def getTrackingInputMaker(trkopt):
+def getTrackingInputMaker(flags : AthConfigFlags, trkopt : str):
     if trkopt=="ftf":
-
-        IDTrigConfig = getInDetTrigConfig( 'fullScan' )
-
-        log.debug( "jet FS tracking: useDynamicRoiZWidth: %s", IDTrigConfig.useDynamicRoiZWidth )
+        log.debug( "jet FS tracking: useDynamicRoiZWidth: %s", flags.Trigger.InDetTracking.fullScan.useDynamicRoiZWidth )
         
         roiUpdater = None
-        if IDTrigConfig.useDynamicRoiZWidth:
+        if flags.Trigger.InDetTracking.fullScan.useDynamicRoiZWidth:
             roiUpdater = CompFactory.RoiUpdaterTool( useBeamSpot=True )
 
             log.info( roiUpdater )
@@ -53,7 +50,7 @@ def getTrackingInputMaker(trkopt):
                                                           mergeUsingFeature = False,
                                                           RoITool = CompFactory.ViewCreatorFSROITool( name="RoiTool_FS", 
                                                                                                       RoiUpdater=roiUpdater,
-                                                                                                      RoisWriteHandleKey=recordable( IDTrigConfig.roi ) ),
+                                                                                                      RoisWriteHandleKey=recordable( flags.Trigger.InDetTracking.fullScan.roi ) ),
                                                           RoIs = trkFSRoI )
         else: 
             InputMakerAlg = CompFactory.InputMakerForRoI( "IM_Jet_TrackingStep",
@@ -64,16 +61,15 @@ def getTrackingInputMaker(trkopt):
 
 
     elif trkopt=="roiftf":
-        IDTrigConfig = getInDetTrigConfig( 'jetSuper' )
         InputMakerAlg = CompFactory.EventViewCreatorAlgorithm(
             "IMJetRoIFTF",
             mergeUsingFeature = False,
             RoITool = CompFactory.ViewCreatorJetSuperROITool(
                 'ViewCreatorJetSuperRoI',
-                RoisWriteHandleKey  = recordable( IDTrigConfig.roi ),
-                RoIEtaWidth = IDTrigConfig.etaHalfWidth,
-                RoIPhiWidth = IDTrigConfig.phiHalfWidth,
-                RoIZWidth   = IDTrigConfig.zedHalfWidth,
+                RoisWriteHandleKey  = recordable( flags.Trigger.InDetTracking.jetSuper.roi ),
+                RoIEtaWidth = flags.Trigger.InDetTracking.jetSuper.etaHalfWidth,
+                RoIPhiWidth = flags.Trigger.InDetTracking.jetSuper.phiHalfWidth,
+                RoIZWidth   = flags.Trigger.InDetTracking.jetSuper.zedHalfWidth,
             ),
             Views = "JetSuperRoIViews",
             InViewRoIs = "InViewRoIs",
@@ -265,7 +261,7 @@ def jetHICaloHypoMenuSequence(flags, isPerf, **jetRecoDict):
 # name needs to be passed in
 @AccumulatorCache
 def jetFSTrackingSelCfg(flags, clustersKey, isPerf, **jetRecoDict):
-    reco = InEventRecoCA(f"jetFSTrackingHypo_{jetRecoDict['jetDefStr']}{'_perf' if isPerf else ''}_RecoSequence", inputMaker=getTrackingInputMaker(jetRecoDict['trkopt']))
+    reco = InEventRecoCA(f"jetFSTrackingHypo_{jetRecoDict['jetDefStr']}{'_perf' if isPerf else ''}_RecoSequence", inputMaker=getTrackingInputMaker(flags,jetRecoDict['trkopt']))
 
     assert jetRecoDict["trkopt"] != "notrk"
     from .JetTrackingConfig import JetFSTrackingCfg
@@ -316,7 +312,7 @@ def jetRoITrackJetTagSelCfg(flags, jetsIn, isPresel=True, **jetRecoDict):
     # where InViewRecoCA will do all in view
     reco = InEventRecoCA(
         f"jetRoITrackJetTagHypo_{jetRecoDict['jetDefStr']}_RecoSequence",
-        inputMaker=getTrackingInputMaker(jetRecoDict['trkopt'])
+        inputMaker=getTrackingInputMaker(flags,jetRecoDict['trkopt'])
     )
 
     # Add to top-level serial sequence after IM

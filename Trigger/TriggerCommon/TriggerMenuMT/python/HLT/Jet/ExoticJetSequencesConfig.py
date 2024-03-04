@@ -77,7 +77,7 @@ def jetCROldMenuSequence(flags, jetsIn):
     from .JetTrackingConfig import JetFSTrackingCfg
     trk_acc = JetFSTrackingCfg(flags, trkopt='ftf', RoIs=trkFSRoI)
 
-    reco = InEventRecoCA(f"CalRatioold_{jetsIn}Reco", inputMaker=getTrackingInputMaker('ftf'))
+    reco = InEventRecoCA(f"CalRatioold_{jetsIn}Reco", inputMaker=getTrackingInputMaker(flags,'ftf'))
     reco.mergeReco(trk_acc)
 
     selAcc = SelectionCA(f"CalRatioOld_{jetsIn}")

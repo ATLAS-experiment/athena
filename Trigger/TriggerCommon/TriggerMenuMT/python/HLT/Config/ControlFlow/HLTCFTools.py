@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
@@ -11,17 +10,6 @@ PassFilter   = CompFactory.PassFilter
 
 class NoHypoToolCreated(Exception):
     """Exception thrown by HypoTool generators if no HypoTool is needed"""  # see ATR-23920
-
-class NoCAmigration(Exception):
-    """Exception thrown if issues are found during CA migration"""
-    def __init__(self,message=''):
-        self.message=message
-                
-    def __str__(self):        
-        if self.message:
-            return 'CA migration: {0} '.format(self.message)
-        else:
-            return 'CA migration'
 
 
 def algColor(alg):

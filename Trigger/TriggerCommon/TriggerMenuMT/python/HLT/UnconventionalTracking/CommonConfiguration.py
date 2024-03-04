@@ -21,7 +21,7 @@ def getFullScanRecoOnlySequence(flags):
     selAcc = SelectionCA("UncTrkrecoSel")
 
     from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
-    reco = InEventRecoCA("UncTrkreco",inputMaker=getTrackingInputMaker("ftf"))
+    reco = InEventRecoCA("UncTrkreco",inputMaker=getTrackingInputMaker(flags, "ftf"))
     reco.mergeReco( commonInDetFullScanCfg(flags) )
     selAcc.mergeReco( reco )
     
@@ -38,14 +38,10 @@ def getFullScanRecoOnlySequence(flags):
 # an InEventRecoCA downstream. A plain CA is returned so that it
 # can be used in independent steps with more complex reco and different
 # InputMakers etc.
-def getCommonInDetFullScanLRTCfg(flags):
-    from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    std_cfg = getInDetTrigConfig("fullScan" )
-    lrt_cfg = getInDetTrigConfig("fullScanLRT")
-
+def getCommonInDetFullScanLRTCfg(flags, flagsLRT):
     combined_reco = ComponentAccumulator()
 
     combined_reco.merge( commonInDetFullScanCfg(flags) )
-    combined_reco.merge( commonInDetLRTCfg(flags, std_cfg, lrt_cfg) )
+    combined_reco.merge( commonInDetLRTCfg(flags, flagsLRT) )
 
     return combined_reco

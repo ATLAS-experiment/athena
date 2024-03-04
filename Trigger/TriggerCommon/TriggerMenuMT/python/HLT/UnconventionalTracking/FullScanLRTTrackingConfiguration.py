@@ -13,8 +13,12 @@ def FullScanLRTMenuSequence(flags):
     # Construct the full reco sequence
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTCfg
     from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
-    reco = InEventRecoCA("UncFSLRTreco",inputMaker=getTrackingInputMaker("ftf"))
-    reco.mergeReco( getCommonInDetFullScanLRTCfg(flags) )
+    reco = InEventRecoCA("UncFSLRTreco",inputMaker=getTrackingInputMaker(flags,"ftf"))
+
+    from TrigInDetConfig.utils import getFlagsForActiveConfig
+    flagsLRT = getFlagsForActiveConfig(flags, "fullScanLRT", log)
+
+    reco.mergeReco( getCommonInDetFullScanLRTCfg(flags, flagsLRT) )
 
     from ..CommonSequences.FullScanDefs import trkFSRoI
     from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg

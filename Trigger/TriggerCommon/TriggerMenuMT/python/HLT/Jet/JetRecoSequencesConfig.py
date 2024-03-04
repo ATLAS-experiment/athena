@@ -202,10 +202,17 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
     as a shallow copy.
     """
 
-    if jetRecoDict["jetCalib"] == "nojcalib":
+    seqname = "JetRecSeq_"+jetRecoDict['jetDefStr']
+    if jetRecoDict["jetCalib"] == "nojcalib":        
+
+        reco_acc = ComponentAccumulator()
+        reco_acc.addSequence(parOR(seqname))
+
         build_acc, jetsNoCalib, jetDef = StandardJetBuildCfg(
             flags, dataSource, clustersKey, **jetRecoDict
         )
+        reco_acc.merge(build_acc, seqname)
+
 
         # This view alg is added here rather than in StandardJetBuildCfg
         # so that we are able to get the no-calib collection name later
@@ -215,8 +222,8 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
             jetPtMin=10, # GeV converted internally
             **jetRecoDict
         )
-        build_acc.merge(jetViewAcc, 'JetBuildSeq_'+jetRecoDict['jetDefStr'])
-        return build_acc, jetsOut, jetDef
+        reco_acc.merge(jetViewAcc, seqname)
+        return reco_acc, jetsOut, jetDef
 
     # Schedule reconstruction w/o calibration
     jrdNoJCalib = cloneAndUpdateJetRecoDict(
@@ -224,13 +231,13 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         jetCalib="nojcalib"
     )
 
-    seqname = "JetRecSeq_"+jetRecoDict['jetDefStr']
     acc = ComponentAccumulator()
     acc.addSequence(parOR(seqname))
 
     build_acc, jetsNoCalib, jetDefNoCalib = StandardJetBuildCfg(
         flags, dataSource, clustersKey, **jrdNoJCalib
     )
+    acc.merge(build_acc,seqname)
 
     jetViewAcc, jetsViewNoCalib = JetViewAlgCfg(
         flags,
@@ -238,9 +245,8 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         jetPtMin=10, # GeV converted internally
         **jrdNoJCalib
     )
-    build_acc.merge(jetViewAcc, 'JetBuildSeq_'+jrdNoJCalib['jetDefStr'])
+    acc.merge(jetViewAcc, seqname)
 
-    acc.merge(build_acc,seqname)
     # Get the calibration tool
     jetDef = jetDefNoCalib.clone()
     jetDef.suffix = jetDefNoCalib.suffix.replace("nojcalib", jetRecoDict["jetCalib"])
