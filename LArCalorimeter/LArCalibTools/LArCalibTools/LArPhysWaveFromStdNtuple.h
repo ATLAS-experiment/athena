@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARPHYSWAVEFROMSTDNTUPLE_H
@@ -26,29 +26,26 @@ class LArPhysWaveFromStdNtuple : public AthAlgorithm
   ~LArPhysWaveFromStdNtuple();
 
   //standard algorithm methods
-  /// implements IAlgorithm::initialize() 
-  StatusCode initialize() ; 
-
-  /// implements IAlgorithm::execute()  : Does nothing
+  StatusCode initialize() {return StatusCode::SUCCESS;}
   StatusCode execute() {return StatusCode::SUCCESS;}
-
-  /// IAlgorithm::finalize() : Where the action takes place...
   StatusCode finalize(){return StatusCode::SUCCESS;}
   StatusCode stop();
  
  private:
   /// the first  m_skipPoints points of the waveform in the ntuple are skipped
-  unsigned int m_skipPoints;
+  Gaudi::Property< unsigned int > m_skipPoints{this, "SkipPoints", 0};
   /// make a PhysWave with the first m_prefixPoints as zeros
-  unsigned int m_prefixPoints;
+  Gaudi::Property< unsigned int > m_prefixPoints{this, "PrefixPoints", 0};
   /// list of input ntuple file names 
-  std::vector<std::string> m_root_file_names;
+  Gaudi::Property< std::vector<std::string> > m_root_file_names{this, "FileNames", {}, "Input root file names" };
   /// ntuple name
-  std::string m_ntuple_name;
+  Gaudi::Property< std::string > m_ntuple_name{this, "NtupleName", "PhysWave"};
   /// key of the PhysWave collection in Storegate
-  std::string m_store_key;
+  Gaudi::Property< std::string > m_store_key{this, "StoreKey", "FromStdNtuple", "SG key to create"};
   /// Grouping type.  Default is Feedthrough.
-  std::string m_groupingType;
+  Gaudi::Property< std::string > m_groupingType{this,"GroupingType", "ExtendedFeedThrough", "Which COOL channel grouping to use"};
+  /// is SC ?
+  Gaudi::Property< bool > m_isSC{this,"isSC",false,"Running for SuperCells ?"};
 };
 
 #endif
