@@ -5,20 +5,21 @@
 
 from JetRecTools import JetRecToolsConfig
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg, trigInDetPrecisionTrackingCfg
 from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
 from InDetUsedInVertexFitTrackDecorator.UsedInVertexFitTrackDecoratorCfg import getUsedInVertexFitTrackDecoratorAlg
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from ..Config.MenuComponents import parOR
 from ..CommonSequences.FullScanInDetConfig import commonInDetFullScanCfg
 
-def retrieveJetContext(trkopt):
+
+def retrieveJetContext(flags : AthConfigFlags, trkopt : str):
     """Tell the standard jet config about the specific track related options we are using here.
 
      This is done by defining a new jet context into jetContextDic.
@@ -32,15 +33,13 @@ def retrieveJetContext(trkopt):
     if trkopt not in jetContextDic:
         # *****************
         # Set the options corresponding to trkopt to a new entry in jetContextDic 
-        trksig = {
-            'ftf':    'fullScan',
-            'roiftf': 'jetSuper',
+        (tracksname,verticesname) = {
+            'ftf':    (flags.Trigger.InDetTracking.fullScan.tracks_FTF,
+                       flags.Trigger.InDetTracking.fullScan.vertex),
+            'roiftf': (flags.Trigger.InDetTracking.jetSuper.tracks_FTF,
+                       flags.Trigger.InDetTracking.jetSuper.vertex),
         }[trkopt]
-        IDTrigConfig = getInDetTrigConfig( trksig )
-
-        tracksname = IDTrigConfig.tracks_FTF()
-        verticesname = IDTrigConfig.vertex
-            
+        
         tvaname = f"JetTrackVtxAssoc_{trkopt}"
         label = f"GhostTrack_{trkopt}"
         ghosttracksname = f"PseudoJet{label}"
@@ -72,12 +71,10 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
     acc = ComponentAccumulator()
     acc.addSequence(parOR(seqname),primary=True)
 
-    IDTrigConfig = getInDetTrigConfig( 'fullScan' )
-
     acc.merge(commonInDetFullScanCfg(flags),seqname)
 
     # get the jetContext for trkopt (and build it if not existing yet)
-    jetContext, trkKeys = retrieveJetContext(trkopt)
+    jetContext, trkKeys = retrieveJetContext(flags,trkopt)
 
     acc.addEventAlgo(
         getUsedInVertexFitTrackDecoratorAlg(
@@ -96,7 +93,7 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
             WorkingPoint = "Custom",
             d0_cut       = 2.0, 
             dzSinTheta_cut = 2.0, 
-            doPVPriority = IDTrigConfig.adaptiveVertex,
+            doPVPriority = flags.Trigger.InDetTracking.fullScan.adaptiveVertex,
         ),
         seqname
     )
@@ -167,63 +164,10 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
     )
 
     # make sure we output only the key,value related to tracks (otherwise, alg duplication issues)
-    jetContext, trkKeys = retrieveJetContext(trkopt)
+    jetContext, trkKeys = retrieveJetContext(flagsWithTrk,trkopt)
     outmap = { k:jetContext[k] for k in trkKeys }
     if flags.Trigger.Jet.doJetSuperPrecisionTracking:
         outmap["Tracks"] = vertexInputTracks
 
     return acc, outmap
 
-def addJetTTVA( flags, jetseq, trkopt, config, verticesname=None, adaptiveVertex=None, selector=None ):
-
-    tracksname = config.tracks_FTF()
-
-    label = f"GhostTrack_{trkopt}"
-
-    # get the jetContext for trkopt (and build it if not existing yet)
-    jetContext, trkKeys = retrieveJetContext(trkopt)
-
-    vtxFitDecoAlg = getUsedInVertexFitTrackDecoratorAlg(
-        trackCont = jetContext["Tracks"],
-        vtxCont   = jetContext["Vertices"]
-    )
-
-    # *****************************
-    # Track-vtx association.
-    custom_ttva = {}
-    if flags.Trigger.Jet.TrackVtxAssocWP=="Custom":
-        custom_ttva = dict(
-            d0_cut       = 2.0, 
-            dzSinTheta_cut = 2.0, 
-        )
-
-    jettrkprepalg = JetRecToolsConfig.getJetTrackVtxAlg(
-        trkopt, algname="jetalg_TrackPrep"+trkopt,
-        # # parameters for the CP::TrackVertexAssociationTool (or the TrackVertexAssociationTool.getTTVAToolForReco function) :
-        WorkingPoint = flags.Trigger.Jet.TrackVtxAssocWP, # e.g. "Custom", or "Nonprompt_All_MaxWeight" (new default in offline - see also CHS configuration in StandardJetConstits.py)
-        doPVPriority = adaptiveVertex,
-        # schedules track decoration alg with used-in-fit links
-        add2Seq = jetseq,
-        # Option to set custom TTVA cuts
-        **custom_ttva
-    )
-
-    # Pseudojets for ghost tracks
-    pjgalg = CompFactory.PseudoJetAlgorithm(
-        "pjgalg_"+label,
-        InputContainer=tracksname,
-        OutputContainer=jetContext["GhostTracks"],
-        Label=label,
-        SkipNegativeEnergy=True
-    )
-
-    # Add the 3 algs to the sequence :
-    jetseq += vtxFitDecoAlg
-    jetseq += jettrkprepalg
-    jetseq += pjgalg
-
-    if flags.Trigger.Jet.doVRJets:
-        pv0_jettvassoc, pv0_ttvatool = JetRecToolsConfig.getPV0TrackVertexAssoAlg(trkopt, jetseq)
-        pv0trackselalg = JetRecToolsConfig.getPV0TrackSelAlg(pv0_ttvatool, trkopt)
-        jetseq += conf2toConfigurable( pv0_jettvassoc )
-        jetseq += conf2toConfigurable( pv0trackselalg )

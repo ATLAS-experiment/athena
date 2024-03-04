@@ -2,28 +2,12 @@
 
 __author__ = "Mark Sutton, Matous Vozak"
 __doc__    = "ConfigSettings"
-__all__    = [ "getInDetTrigConfig" ]
 
 import math
 from TrigInDetConfig.ConfigSettingsBase import _ConfigSettingsBase
 from TrigEDMConfig.TriggerEDM import recordable
 from AthenaCommon.SystemOfUnits import GeV
 
-
-# Function that returns specific signature setting/configuration
-# Rename to InDetTrigSignatureConfig ?
-def getInDetTrigConfig( name ):
-   if name in ConfigSettingsInstances:
-      config = ConfigSettingsInstances[name]
-      # keep a record of the configuration that is input
-      # will use this to uniquely identify the algorithms
-      config._input_name = name
-      return config
-   else :
-      #       don't just return None, and do nothing as this
-      #       will just hide the error until people try to use
-      #       the bad slice configuration
-      raise Exception( "getInDetTrigConfig() called with non existent slice: "+name )
 
 class ConfigSettings_electron( _ConfigSettingsBase ):
    def __init__( self ):
