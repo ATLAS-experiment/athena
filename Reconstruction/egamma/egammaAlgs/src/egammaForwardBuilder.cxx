@@ -214,18 +214,18 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
       const xAOD::TrackParticle* trackParticle = el->trackParticle();
       if (trackParticle) {
-	el->setCharge(trackParticle->charge());
+        el->setCharge(trackParticle->charge());
       } else {
-	ATH_MSG_WARNING("Forward electron without track particle, whereas"
-			" corresponding egammaRec has at least one");
+        ATH_MSG_WARNING("Forward electron without track particle, whereas"
+                        " corresponding egammaRec has at least one");
       }
 
       // Set DeltaEta, DeltaPhi, DeltaPhiRescaled.
       el->setTrackCaloMatchValues(
-	egRec->deltaEta(),
-	egRec->deltaPhi(),
-	egRec->deltaPhiRescaled(),
-	egRec->deltaPhiLast()
+        egRec->deltaEta(),
+        egRec->deltaPhi(),
+        egRec->deltaPhiRescaled(),
+        egRec->deltaPhiLast()
       );
     }
 
