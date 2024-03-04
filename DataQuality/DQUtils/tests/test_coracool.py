@@ -1,11 +1,10 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 import gc
 
 from collections import namedtuple
-from pprint import pprint
 
 from DQUtils.db import Databases, fetch_iovs
 from DQUtils.quick_retrieve import browse_coracool
@@ -34,7 +33,7 @@ def fetch_lb_timestamps(since, until):
 
 def test_coracool():
     
-    if not "<coracool>" in folder.description():
+    if "<coracool>" not in folder.description():
         print(f"{folder.fullPath()} is not a coracool folder")
         return
     
@@ -76,7 +75,7 @@ def test_refcounting():
     gc.collect()
     
     try: raise RuntimeError
-    except: pass
+    except Exception: pass
     
     print("Objects alive before call:", len(gc.get_objects()))
     

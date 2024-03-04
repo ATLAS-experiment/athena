@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import with_statement
 
@@ -411,9 +411,6 @@ class Databases(object):
             from PyCool import cool
             dbService = cool.DatabaseSvcFactory.databaseService()
             connection = dbService.createDatabase(res_db_string)
-        except Exception:
-            log.error(sys.exc_info()[0])
-            raise
         return connection
 
     @classmethod

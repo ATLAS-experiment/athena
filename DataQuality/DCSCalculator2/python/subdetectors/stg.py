@@ -5,9 +5,7 @@ from DQUtils                 import Databases
 from DQUtils.channel_mapping  import get_channel_ids_names
 
 folder, database = "/STG/DCS/HV", "COOLOFL_DCS/CONDBR2"
-print(folder)
-print(database)
-print(Databases.get_folder(folder, database))
+
 ids, names, _ = get_channel_ids_names(Databases.get_folder(folder, database))
 
 STGBA, STGBC, STGEA, STGEC = 1, 2, 3, 4

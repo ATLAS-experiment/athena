@@ -4,9 +4,7 @@ from ..lib import DCSC_DefectTranslate_Subdetector, DCSC_Variable
 from DQUtils                 import Databases
 from DQUtils.channel_mapping  import get_channel_ids_names
 folder, database = "/MMG/DCS/HV", "COOLOFL_DCS/CONDBR2"
-print(folder)
-print(database)
-print(Databases.get_folder(folder, database))
+
 ids, names, _ = get_channel_ids_names(Databases.get_folder(folder, database))
     
 
