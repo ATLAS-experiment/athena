@@ -215,22 +215,7 @@ if DQMonFlags.doMonitoring():
       # LAr monitoring   #
       #------------------#
       if DQMonFlags.doLArMon():
-         from LArMonTools.LArMonFlags import LArMonFlags
-         if LArMonFlags.doLArCollisionTimeMon():
-            #Schedule algorithms producing collision timing
-            include("LArClusterRec/LArClusterCollisionTime_jobOptions.py")
-            include("LArCellRec/LArCollisionTime_jobOptions.py")
-         try:
-            LArMon = AthenaMonManager(name="LArMonManager",
-                           FileKey             = DQMonFlags.monManFileKey(),
-                           Environment         = DQMonFlags.monManEnvironment(),
-                           ManualDataTypeSetup = DQMonFlags.monManManualDataTypeSetup(),
-                           DataType            = DQMonFlags.monManDataType())
-            topSequence += LArMon
-            include("LArMonTools/LArAllMonitoring_jobOptions.py")
-            include("LArMonitoring/LArMonitoring_jobOption.py")
-         except Exception:
-            treatException("DataQualitySteering_jobOptions.py: exception when setting up LAr monitoring")
+         local_logger.warning("Legacy LAr monitoring not existing anymore")
 
       #-------------------------------------------------------------------------#
       # Calo monitoring - cells and clusters independent of LAr or Tile origin  #
