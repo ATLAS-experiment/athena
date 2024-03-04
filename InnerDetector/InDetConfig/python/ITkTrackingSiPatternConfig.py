@@ -51,7 +51,8 @@ def ITkTrackingSiPatternCfg(flags,
         #
         # ------------------------------------------------------------
 
-        runTruth = flags.Tracking.ActiveConfig.doAthenaTrack or flags.Tracking.ActiveConfig.doActsToAthenaTrack
+        runTruth = flags.Tracking.ActiveConfig.doAthenaTrack or flags.Tracking.ActiveConfig.doActsToAthenaTrack or flags.Tracking.ActiveConfig.doGNNTrack
+
 
         # Athena Track
         if flags.Tracking.ActiveConfig.doAthenaTrack:
@@ -65,6 +66,13 @@ def ITkTrackingSiPatternCfg(flags,
                 SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
 
             acc.merge(SiSPSeededTrackFinderCfg(
+                flags,
+                TracksLocation=SiSPSeededTrackCollectionKey))
+
+        # GNN Track
+        if flags.Tracking.ActiveConfig.doGNNTrack:
+            from InDetGNNTracking.InDetGNNTrackingConfig import GNNTrackMakerCfg
+            acc.merge(GNNTrackMakerCfg(
                 flags,
                 TracksLocation=SiSPSeededTrackCollectionKey))
 

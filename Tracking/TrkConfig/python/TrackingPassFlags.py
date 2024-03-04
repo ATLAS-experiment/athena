@@ -465,6 +465,9 @@ def createITkTrackingPassFlags():
     icf.addFlag("doActsToAthenaTrack", False)
     icf.addFlag("doActsToAthenaResolvedTrack", False)
 
+    # --- flags for GNN tracking
+    icf.addFlag("doGNNTrack", False)
+
     return icf
 
 

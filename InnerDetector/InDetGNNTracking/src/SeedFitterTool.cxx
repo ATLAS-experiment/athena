@@ -18,9 +18,9 @@ InDet::SeedFitterTool::SeedFitterTool(
 std::unique_ptr<const Trk::TrackParameters> InDet::SeedFitterTool::fit(
   const std::vector<const Trk::SpacePoint*>& spacePoints) const
 {
-  //// @todo maybe use a even simplier version to estimate track parameters.
+  //// @todo improve the estimate track parameters.
   //// Taken from the following link:
-  //// https://gitlab.cern.ch/xju/athena/-/blob/master/InnerDetector/InDetRecTools/SiTrackMakerTool_xk/src/SiTrackMaker_xk.cxx#L851-993
+  //// https://gitlab.cern.ch/atlas/athena/-/blob/main/InnerDetector/InDetRecTools/SiTrackMakerTool_xk/src/SiTrackMaker_xk.cxx#L851-993
 
   //// Only the first 3 spacepoints are used.
   //// the fitting was not stable. Now require at least 5 SPs.
@@ -29,10 +29,10 @@ std::unique_ptr<const Trk::TrackParameters> InDet::SeedFitterTool::fit(
     return nullptr;
   }
 
-  double track_paras[9];
-
+  /// get the first cluster on the first hit
   const Trk::PrepRawData*       cl  = spacePoints[0]->clusterList().first;
   if(!cl) return nullptr;
+  /// and use the surface from this cluster as our reference plane
   const Trk::PlaneSurface*      pla = 
     static_cast<const Trk::PlaneSurface*>(&cl->detectorElement()->surface());
   if(!pla) return nullptr;
@@ -64,32 +64,26 @@ std::unique_ptr<const Trk::TrackParameters> InDet::SeedFitterTool::fit(
   // A,B are slope and intercept of the straight line in the u,v plane
   // connecting the three points.
   double A  = v2/(u2-u1);
-  double B  = 2.*(v2-A*u2);
-  double C  = B/std::sqrt(1.+A*A);  // curvature estimate. (2R)²=(1+A²)/b² => 1/2R = b/sqrt(1+A²) = B / sqrt(1+A²).
-  double T;  // estimate of the track dz/dr (1/tanTheta)
-  std::abs(C) > 1.e-6 ? T = (z2*C)/std::asin(C*std::sqrt(rn)) : T = z2/std::sqrt(rn);
+  double T = z2*sqrt(r2); 
 
   const Amg::Transform3D& Tp = pla->transform();
 
+  /// local x of the surface in the global frame
   double Ax[3] = {Tp(0,0),Tp(1,0),Tp(2,0)}; 
+  /// local y of the surface in the global frame
   double Ay[3] = {Tp(0,1),Tp(1,1),Tp(2,1)}; 
+  /// centre of the surface in the global frame
   double D [3] = {Tp(0,3),Tp(1,3),Tp(2,3)}; 
-  
+  /// location of the first SP w.r.t centre of the surface
   double   d[3] = {x0-D[0],y0-D[1],z0-D[2]};
 
+  double track_paras[5];
+  /// local x, y - coordinates of the first SP in the local frame
   track_paras[0] = d[0]*Ax[0]+d[1]*Ax[1]+d[2]*Ax[2];
   track_paras[1] = d[0]*Ay[0]+d[1]*Ay[1]+d[2]*Ay[2];
-
-  // use constant magnetic field to estimate theta and phi
-  double magnetic_field = 0.002; // kT
-  track_paras[2] = std::atan2(y2,x2);
+  track_paras[2] = std::atan2(b+a*A, a-b*A);
   track_paras[3] = std::atan2(1.,T) ;
-  track_paras[5] = -C / (0.3 * magnetic_field); // inverse momentum in GeV^-1
-
-  track_paras[4] = track_paras[5]/std::sqrt(1.+T*T);  // qoverp from qoverpt and theta
-  track_paras[6] = x0;
-  track_paras[7] = y0;
-  track_paras[8] = z0;
+  track_paras[4] = 0.001/std::sqrt(1.+T*T);  // qoverp from qoverpt and theta
 
   ATH_MSG_DEBUG(
       "linearConformalMapping: \n" << \
@@ -122,14 +116,6 @@ std::unique_ptr<const Trk::TrackParameters> InDet::SeedFitterTool::fit(
   return trkParameters;
 }
 
-StatusCode InDet::SeedFitterTool::initialize() {
-  return StatusCode::SUCCESS;
-}
-
-StatusCode InDet::SeedFitterTool::finalize() {
-  StatusCode sc = AlgTool::finalize();
-  return sc;
-}
 
 MsgStream&  InDet::SeedFitterTool::dump( MsgStream& out ) const
 {

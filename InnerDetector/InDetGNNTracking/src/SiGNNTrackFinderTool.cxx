@@ -24,11 +24,6 @@ StatusCode InDet::SiGNNTrackFinderTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode InDet::SiGNNTrackFinderTool::finalize() {
-  StatusCode sc = AlgTool::finalize();
-  return sc;
-}
-
 MsgStream&  InDet::SiGNNTrackFinderTool::dump( MsgStream& out ) const
 {
   out<<std::endl;

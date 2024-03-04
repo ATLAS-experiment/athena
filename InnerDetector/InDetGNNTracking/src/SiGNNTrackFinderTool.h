@@ -31,9 +31,7 @@ namespace InDet{
   {
     public:
     SiGNNTrackFinderTool(const std::string& type, const std::string& name, const IInterface* parent);
-    virtual ~SiGNNTrackFinderTool() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode finalize() override;
 
     ///////////////////////////////////////////////////////////////////
     // Main methods for local track finding asked by the ISiMLTrackFinder
