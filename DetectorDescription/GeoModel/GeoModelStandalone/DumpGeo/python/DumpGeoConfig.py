@@ -9,7 +9,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 #from AthenaConfiguration.Enums import Format
 
-import os
 
 def configureGeometry(flags, cfg):
     if flags.Detector.GeometryBpipe:
@@ -68,6 +67,7 @@ def getATLASVersion():
     return "Unknown"
 
 def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
+    import os, sys
     # This is based on a few old-style configuation files:
     # JiveXML_RecEx_config.py
     # JiveXML_jobOptionBase.py
@@ -78,22 +78,53 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
     # set Alg's properties
     kwargs.setdefault("AtlasRelease", getATLASVersion())
 
+    outFileName = "geometry-"
+    filterDetManagers = []
+
+    # NOTE: at this point, the user-defined Geo TAG args.detDescr, 
+    #       if set, has already replaced the default TAG
+    geoTAG = flags.GeoModel.AtlasVersion
     # TODO: Fix this
     # This is a temporary hack to reflect how detDescr is handled in the old bash-driven DumpGeo
     # This should be replaced by proper python flags and Gaudy properties
-    if args.detDescr:
-        os.environ["DUMPGEODETDESCRTAG"] = args.detDescr # save to an env var, for later use in GeoModelStandalone/GeoExporter
-        print("+ DumpGeo -- INFO -- This is the Detector Description geometry TAG you are dumping: '%s'" % args.detDescr)
-    if args.forceOverwrite is True:
-        print("+ DumpGeo -- NOTE -- You chose to overwrite an existing geometry dump file with the same name, if present.")
-        os.environ["DUMPGEOFORCEOVERWRITE"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
+    os.environ["DUMPGEODETDESCRTAG"] = geoTAG # save to an env var, for later use in GeoModelStandalone/GeoExporter
+    print("+ DumpGeo -- INFO -- This is the Detector Description geometry TAG you are dumping: '%s'" % geoTAG)
+    outFileName = outFileName + geoTAG
+
     # if args.filterTreeTops:
     #     print("+ DumpGeo -- NOTE -- Your 'GeoModel TreeTop' filter set: '%s'" % args.filterTreeTops)
     #     os.environ["DUMPGEOFILTERTREETOPS"] = args.filterTreeTops # save to an env var, for later use in GeoModelStandalone/GeoExporter
+    
     if args.filterDetManagers:
         print("+ DumpGeo -- NOTE -- Your 'GeoModel Detector Manager' filter set: '%s'" % args.filterDetManagers)
         os.environ["DUMPGEOFILTERDETMANAGERS"] = args.filterDetManagers # save to an env var, for later use in GeoModelStandalone/GeoExporter
+        filterDetManagers = args.filterDetManagers.split(",")
+    outFileName = outFileName + "-".join(filterDetManagers)
 
+    # add final extension to the name of the output SQLite file 
+    outFileName = outFileName + ".db"
+
+    # pass the file name to GeoExporter
+    # TODO: must be removed and replaced by proper Gaudi variables
+    os.environ["DUMPGEOOUTFILENAME"] = outFileName
+
+
+    # Overwrite the output SQLite file, if existing
+
+    if os.path.exists(outFileName):
+        if args.forceOverwrite is True:
+            print("+ DumpGeo -- NOTE -- You chose to overwrite an existing geometry dump file with the same name, if present.")
+            # os.environ["DUMPGEOFORCEOVERWRITE"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
+            # Check if the file exists before attempting to delete it   
+            if os.path.exists(outFileName):
+                os.remove(outFileName)
+                print(f"The file {outFileName} has been deleted.")
+            else:
+                print(f"The file {outFileName} does not exist. So, it was not needed to 'force-delete' it. Continuing...")
+        else:
+            print(f"\nDumpGeo -- ERROR! The ouput file '{outFileName}' exists already!\nPlease move or remove it, or use the 'force' option: '-f' or '--forceOverWrite'.\n\n")
+            sys.exit()
+            #raise ValueError("The output file exists already!")
 
     the_alg = CompFactory.DumpGeo(name="DumpGeoAlg", **kwargs)
     result.addEventAlgo(the_alg, primary=True)
@@ -185,7 +216,7 @@ if __name__=="__main__":
     _logger.verbose("+ ... Done")
 
     if args.detDescr:
-        _logger.verbose("+ About to set a custom detector description tag")
+        _logger.verbose("+ About to set a custom user-defined detector description tag: '%s'" % args.detDescr)
         flags.GeoModel.AtlasVersion = args.detDescr
         _logger.verbose("+ ... Done")
 
