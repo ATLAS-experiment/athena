@@ -149,35 +149,35 @@ atlas_add_citest( RecoRun4MC_DAODPHYS
 #################################################################################
 
 atlas_add_citest( CPAlgorithmsRun2MC_PHYS
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --no-physlite-broken --force-input ../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type mc --input-file ../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun2MC_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun2MC_PHYSLITE
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --physlite --no-physlite-broken --force-input ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type mc --physlite --input-file ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun2MC_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun2Data_PHYS
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --no-physlite-broken --force-input ../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type data --input-file ../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun2Data_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun2Data_PHYSLITE
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --physlite --no-physlite-broken --force-input ../DerivationRun2Data_PHYSLITE/run_data_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type data --physlite --input-file ../DerivationRun2Data_PHYSLITE/run_data_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun2Data_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun3MC_PHYS
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --no-physlite-broken --force-input ../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type mc --input-file ../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun3MC_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun3MC_PHYSLITE
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --physlite --no-physlite-broken --force-input ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type mc --physlite --input-file ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun3MC_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun3Data_PHYS
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --no-physlite-broken --force-input ../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type data --input-file ../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun3Data_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --physlite --no-physlite-broken --force-input ../DerivationRun3Data_PHYSLITE/run_data_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
+   SCRIPT FullCPAlgorithmsTest_CA.py --block-config --data-type data --physlite --input-file ../DerivationRun3Data_PHYSLITE/run_data_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
    DEPENDS_SUCCESS DerivationRun3Data_PHYSLITE )
 
 

@@ -58,7 +58,7 @@ tauMaxEta = None
 jetMinPt = None
 jetMaxEta = None
 
-def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, selection) :
+def addOutputCopyAlgorithms (algSeq, ca, postfix, inputContainer, outputContainer, selection) :
     """add a uniformly filtered set of deep copies based on the
     systematics dependent selection"""
 
@@ -70,7 +70,10 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
         unionalg.preselection = selection
         unionalg.particles = inputContainer
         unionalg.selectionDecoration = 'outputSelect'
-        algSeq += unionalg
+        if ca:
+            ca.addEventAlgo(unionalg, algSeq.name if algSeq else None)
+        else:
+            algSeq += unionalg
 
     copyalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'DeepCopyAlg' + postfix )
     copyalg.input = inputContainer
@@ -80,10 +83,13 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
     else :
         copyalg.selection = []
     copyalg.deepCopy = False
-    algSeq += copyalg
+    if ca:
+        ca.addEventAlgo(copyalg, algSeq.name if algSeq else None)
+    else:
+        algSeq += copyalg
 
 
-def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, noSystematics, autoconfigFromFlags=None, forceEGammaFullSimConfig=False) :
+def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noSystematics, forceEGammaFullSimConfig=False) :
 
     vars = []
     metVars = []
@@ -92,7 +98,10 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     if isAthena and useComponentAccumulator:
         from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
         ca = ComponentAccumulator()
-        ca.addSequence(algSeq)
+        caSeq = None
+        if algSeq:
+            ca.addSequence(algSeq)
+            caSeq = algSeq.name
     else:
         ca = None
 
@@ -103,13 +112,9 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     if not isPhyslite :
         campaign, files, prwfiles, lumicalcfiles = None, None, None, None
         useDefaultConfig = False
-        if autoconfigFromFlags is not None:
-            campaign = autoconfigFromFlags.Input.MCCampaign
-            files = autoconfigFromFlags.Input.Files
-            useDefaultConfig = True
-        else:
-            # need to convert dataType from string to enum for the call to pileupConfigFiles
-            prwfiles, lumicalcfiles = pileupConfigFiles( {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, None) )
+
+        # need to convert dataType from string to enum for the call to pileupConfigFiles
+        prwfiles, lumicalcfiles = pileupConfigFiles( {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, None) )
 
         from AsgAnalysisAlgorithms.PileupAnalysisSequence import \
             makePileupAnalysisSequence
@@ -124,14 +129,18 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         pileupSequence.configure( inputName = {}, outputName = {} )
 
         # Add the pileup sequence to the job:
-        algSeq += pileupSequence
+        if ca:
+            for element in pileupSequence.getGaudiConfig2Algorithms():
+                ca.addEventAlgo(element, caSeq)
+        else:
+            algSeq += pileupSequence
 
     # Add the pileup sequence to the job:
     vars += [ 'EventInfo.runNumber     -> runNumber',
              'EventInfo.eventNumber   -> eventNumber', ]
     if dataType != 'data':
         vars += [ 'EventInfo.mcChannelNumber -> mcChannelNumber' ]
-    if not isPhyslite and dataType in ['mc', 'afii']:
+    if not isPhyslite and dataType in ['mc']:
         vars += [ 'EventInfo.PileupWeight_%SYS% -> weight_pileup_%SYS%' ]
     if not isPhyslite and dataType in ['mc', 'afii']:
         vars += [ 'EventInfo.beamSpotWeight -> weight_beamspot' ]
@@ -145,7 +154,11 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         runEventCleaning=True,
     )
     eventCleaningSequence.configure( inputName = {}, outputName = {} )
-    algSeq += eventCleaningSequence
+    if ca:
+        for element in eventCleaningSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += eventCleaningSequence
 
 
     # Include, and then set up the jet analysis algorithm sequence:
@@ -182,8 +195,14 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
                            outputName = {  } )
 
     # Add the sequences to the job:
-    algSeq += jetSequence
-    algSeq += jvtSequence
+    if ca:
+        for element in jetSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+        for element in jvtSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += jetSequence
+        algSeq += jvtSequence
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
              'OutJets_NOSYS.eta -> jet_eta'
@@ -209,14 +228,13 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     muonSequenceMedium = makeMuonAnalysisSequence( dataType, deepCopyOutput = False, shallowViewOutput = False,
                                                    workingPoint = 'Medium.Loose_VarRad', postfix = 'medium',
                                                    enableCutflow=True, enableKinematicHistograms=True, ptSelectionOutput = True )
-    # FIX ME: the current version of the `MuonSelectionTool` doesn't work
-    # on the current version of PHYSLITE, and needs a new PHYSLITE production
-    # campaign
-    if noPhysliteBroken :
-        muonSequenceMedium.__delattr__ ('MuonSelectionAlg_medium')
     muonSequenceMedium.configure( inputName = input,
                                   outputName = 'AnaMuons_%SYS%' )
-    algSeq += muonSequenceMedium
+    if ca:
+        for element in muonSequenceMedium.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += muonSequenceMedium
 
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
     # muonSequenceTight = makeMuonAnalysisSequence( dataType, deepCopyOutput = False, shallowViewOutput = False,
@@ -226,11 +244,13 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     # # FIX ME: the current version of the `MuonSelectionTool` doesn't work
     # # on the current version of PHYSLITE, and needs a new PHYSLITE production
     # # campaign
-    # if noPhysliteBroken :
-    #     muonSequenceTight.__delattr__ ('MuonSelectionAlg_tight')
     # muonSequenceTight.configure( inputName = 'AnaMuonsMedium_%SYS%',
     #                              outputName = 'AnaMuons_%SYS%')
-    # algSeq += muonSequenceTight
+    # if ca:
+    #     for element in muonSequenceTight.getGaudiConfig2Algorithms():
+    #         ca.addEventAlgo(element, caSeq)
+    # else:
+    #     algSeq += muonSequenceTight
 
     vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
               'OutMuons_NOSYS.phi -> mu_phi',
@@ -256,10 +276,6 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         workingpoint = 'LooseBLayerLHElectron.Loose_VarRad'
     else:
         workingpoint = 'LooseDNNElectron.Loose_VarRad'
-    # FIXME: fails for PHYSLITE with missing data item
-    # ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
-    if noPhysliteBroken :
-        workingpoint = workingpoint.split('.')[0] + '.NonIso'
     electronSequence = makeElectronAnalysisSequence(
         dataType, workingpoint, postfix = 'loose',
         recomputeLikelihood=recomputeLikelihood, enableCutflow=True,
@@ -267,7 +283,11 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         forceFullSimConfig=forceEGammaFullSimConfig)
     electronSequence.configure( inputName = input,
                                 outputName = 'AnaElectrons_%SYS%' )
-    algSeq += electronSequence
+    if ca:
+        for element in electronSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += electronSequence
 
     if not(forceEGammaFullSimConfig and dataType=='afii' and forCompare):
         vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
@@ -294,7 +314,11 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         forceFullSimConfig=forceEGammaFullSimConfig)
     photonSequence.configure( inputName = input,
                               outputName = 'AnaPhotons_%SYS%' )
-    algSeq += photonSequence
+    if ca:
+        for element in photonSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += photonSequence
     vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
               'OutPhotons_NOSYS.phi -> ph_phi',
               'OutPhotons_NOSYS.eta -> ph_eta', ]
@@ -315,7 +339,13 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     tauSequence.configure( inputName = input, outputName = 'AnaTauJets_%SYS%' )
 
     # Add the sequence to the job:
-    algSeq += tauSequence
+    if ca:
+        for element in tauSequence.getGaudiConfig2PublicTools():
+            ca.addPublicTool(element)
+        for element in tauSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += tauSequence
     vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
               'OutTauJets_NOSYS.phi -> tau_phi',
               'OutTauJets_NOSYS.eta -> tau_eta',
@@ -350,7 +380,10 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         selalg.selectionTool.maxEta = electronMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaElectrons_%SYS%'
-    algSeq += selalg
+    if ca:
+        ca.addEventAlgo(selalg, caSeq)
+    else:
+        algSeq += selalg
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserPhotonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
@@ -360,7 +393,10 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         selalg.selectionTool.maxEta = photonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaPhotons_%SYS%'
-    algSeq += selalg
+    if ca:
+        ca.addEventAlgo(selalg, caSeq)
+    else:
+        algSeq += selalg
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserMuonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
@@ -370,7 +406,10 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         selalg.selectionTool.maxEta = muonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaMuons_%SYS%'
-    algSeq += selalg
+    if ca:
+        ca.addEventAlgo(selalg, caSeq)
+    else:
+        algSeq += selalg
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserTauJetsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
@@ -380,7 +419,10 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         selalg.selectionTool.maxEta = tauMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaTauJets_%SYS%'
-    algSeq += selalg
+    if ca:
+        ca.addEventAlgo(selalg, caSeq)
+    else:
+        algSeq += selalg
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserJetsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
@@ -390,7 +432,10 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         selalg.selectionTool.maxEta = jetMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaJets_%SYS%'
-    algSeq += selalg
+    if ca:
+        ca.addEventAlgo(selalg, caSeq)
+    else:
+        algSeq += selalg
 
 
 
@@ -417,7 +462,11 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
                            outputName = 'AnaMET_%SYS%' )
 
     # Add the sequence to the job:
-    algSeq += metSequence
+    if ca:
+        for element in metSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += metSequence
     metVars += [
         'AnaMET_%SYS%.met   -> met_met_%SYS%',
         'AnaMET_%SYS%.phi   -> met_phi_%SYS%',
@@ -437,32 +486,47 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     selectalg.preselection = 'selectPtEta&&baselineSelection_loose,as_char'
     selectalg.particles = 'AnaElectrons_%SYS%'
     selectalg.selectionDecoration = 'preselectOR,as_char'
-    algSeq += selectalg
+    if ca:
+        ca.addEventAlgo(selectalg, caSeq)
+    else:
+        algSeq += selectalg
     orInputs['electrons'] = 'AnaElectrons_%SYS%'
 
     selectalg = createAlgorithm( 'CP::AsgSelectionAlg','ORPhotonsSelectAlg' )
     selectalg.preselection = 'selectPtEta&&baselineSelection_tight,as_char'
     selectalg.particles = 'AnaPhotons_%SYS%'
     selectalg.selectionDecoration = 'preselectOR,as_char'
-    algSeq += selectalg
+    if ca:
+        ca.addEventAlgo(selectalg, caSeq)
+    else:
+        algSeq += selectalg
 
     selectalg = createAlgorithm( 'CP::AsgSelectionAlg','ORMuonsSelectAlg' )
     selectalg.preselection = 'selectPtEta&&baselineSelection_medium,as_char'
     selectalg.particles = 'AnaMuons_%SYS%'
     selectalg.selectionDecoration = 'preselectOR,as_char'
-    algSeq += selectalg
+    if ca:
+        ca.addEventAlgo(selectalg, caSeq)
+    else:
+        algSeq += selectalg
 
     selectalg = createAlgorithm( 'CP::AsgSelectionAlg','ORTauJetsSelectAlg' )
     selectalg.preselection = 'selectPtEta&&baselineSelection_tight,as_char'
     selectalg.particles = 'AnaTauJets_%SYS%'
     selectalg.selectionDecoration = 'preselectOR,as_char'
-    algSeq += selectalg
+    if ca:
+        ca.addEventAlgo(selectalg, caSeq)
+    else:
+        algSeq += selectalg
 
     selectalg = createAlgorithm( 'CP::AsgSelectionAlg','ORJetsSelectAlg' )
     selectalg.preselection = 'selectPtEta'
     selectalg.particles = 'AnaJets_%SYS%'
     selectalg.selectionDecoration = 'preselectOR,as_char'
-    algSeq += selectalg
+    if ca:
+        ca.addEventAlgo(selectalg, caSeq)
+    else:
+        algSeq += selectalg
 
 
     # Include, and then set up the overlap analysis algorithm sequence:
@@ -479,7 +543,11 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         },
         outputName = { } )
 
-    algSeq += overlapSequence
+    if ca:
+        for element in overlapSequence.getGaudiConfig2Algorithms():
+            ca.addEventAlgo(element, caSeq)
+    else:
+        algSeq += overlapSequence
     vars += [
         'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
         'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
@@ -494,7 +562,11 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         from AsgAnalysisAlgorithms.GeneratorAnalysisSequence import \
             makeGeneratorAnalysisSequence
         generatorSequence = makeGeneratorAnalysisSequence( dataType, saveCutBookkeepers=True, runNumber=284500, cutBookkeepersSystematics=True )
-        algSeq += generatorSequence
+        if ca:
+            for element in generatorSequence.getGaudiConfig2Algorithms():
+                ca.addEventAlgo(element, caSeq)
+        else:
+            algSeq += generatorSequence
         vars += [ 'EventInfo.generatorWeight_%SYS% -> weight_mc_%SYS%', ]
 
 
@@ -505,22 +577,26 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
             makeTriggerAnalysisSequence
         triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
-        algSeq += triggerSequence
+        if ca:
+            for element in triggerSequence.getGaudiConfig2Algorithms():
+                ca.addEventAlgo(element, caSeq)
+        else:
+            algSeq += triggerSequence
         vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
 
     # make filtered output containers
 
-    addOutputCopyAlgorithms (algSeq, 'Electrons', 'AnaElectrons_%SYS%', 'OutElectrons_%SYS%',
+    addOutputCopyAlgorithms (algSeq, ca, 'Electrons', 'AnaElectrons_%SYS%', 'OutElectrons_%SYS%',
                              'selectPtEta&&baselineSelection_loose,as_char&&passesOR,as_char')
-    addOutputCopyAlgorithms (algSeq, 'Photons', 'AnaPhotons_%SYS%', 'OutPhotons_%SYS%',
+    addOutputCopyAlgorithms (algSeq, ca, 'Photons', 'AnaPhotons_%SYS%', 'OutPhotons_%SYS%',
                              'selectPtEta&&baselineSelection_tight,as_char&&passesOR,as_char')
-    addOutputCopyAlgorithms (algSeq, 'Muons', 'AnaMuons_%SYS%', 'OutMuons_%SYS%',
+    addOutputCopyAlgorithms (algSeq, ca, 'Muons', 'AnaMuons_%SYS%', 'OutMuons_%SYS%',
                              'selectPtEta&&baselineSelection_medium,as_char&&passesOR,as_char')
-    addOutputCopyAlgorithms (algSeq, 'TauJets', 'AnaTauJets_%SYS%', 'OutTauJets_%SYS%',
+    addOutputCopyAlgorithms (algSeq, ca, 'TauJets', 'AnaTauJets_%SYS%', 'OutTauJets_%SYS%',
                              'selectPtEta&&baselineSelection_tight,as_char&&passesOR,as_char')
-    addOutputCopyAlgorithms (algSeq, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
+    addOutputCopyAlgorithms (algSeq, ca, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
                              'selectPtEta&&passesOR,as_char')
 
 
@@ -529,30 +605,40 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     treeMaker.TreeName = 'analysis'
     # the auto-flush setting still needs to be figured out
     #treeMaker.TreeAutoFlush = 0
-    algSeq += treeMaker
+    if ca:
+        ca.addEventAlgo(treeMaker, caSeq)
+    else:
+        algSeq += treeMaker
     ntupleMaker = createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' )
     ntupleMaker.TreeName = 'analysis'
     ntupleMaker.Branches = vars
     # ntupleMaker.OutputLevel = 2  # For output validation
-    algSeq += ntupleMaker
+    if ca:
+        ca.addEventAlgo(ntupleMaker, caSeq)
+    else:
+        algSeq += ntupleMaker
     if len (metVars) > 0:
         ntupleMaker = createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' )
         ntupleMaker.TreeName = 'analysis'
         ntupleMaker.Branches = metVars
         #ntupleMaker.OutputLevel = 2  # For output validation
-        algSeq += ntupleMaker
+        if ca:
+            ca.addEventAlgo(ntupleMaker, caSeq)
+        else:
+            algSeq += ntupleMaker
     treeFiller = createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
     treeFiller.TreeName = 'analysis'
-    algSeq += treeFiller
+    if ca:
+        ca.addEventAlgo(treeFiller, caSeq)
+    else:
+        algSeq += treeFiller
 
-    if ca is not None:
-        ca.addSequence (algSeq)
     return ca
 
 
 
 
-def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
+def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
                         geometry=None, autoconfigFromFlags=None, noSystematics=None, onlyNominalOR=False,  forceEGammaFullSimConfig=False) :
 
     vars = []
@@ -581,18 +667,21 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     # create factory object to build block configurations
     from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
     config = ConfigFactory()
-    # get function to make configs
-    makeConfig = config.makeConfig
 
     # noSystematics is passed in block from config accumulator
-    configSeq += makeConfig('CommonServices')
+    configSeq += config.makeConfig('CommonServices')
     if forCompare:
         configSeq.setOptionValue('.filterSystematics', "^(?:(?!PseudoData).)*$")
 
     # FIXME: this should probably be run on PHYSLITE, but the test fails with:
     #   overran integrated luminosity for RunNumber=363262 (0.000000 vs 0.000000)
-    if not isPhyslite :
-        configSeq += makeConfig('PileupReweighting')
+    if not isPhyslite:
+        configSeq += config.makeConfig('PileupReweighting')
+        if dataType == 'afii' and forCompare:
+            prwfiles, lumicalcfiles = pileupConfigFiles( {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, None) )
+            configSeq.setOptionValue('.userPileupConfigs', prwfiles)
+            configSeq.setOptionValue('.userLumicalcFiles', lumicalcfiles)
+            configSeq.setOptionValue('.useDefaultConfig', False)
     else :
         # ideally the above block would work both for PHYS and PHYSLITE, but
         # since we disabled it we need to add these variables manually.
@@ -603,11 +692,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     # Skip events with no primary vertex,
     # and perform loose jet cleaning
-    configSeq += makeConfig ('EventCleaning')
+    configSeq += config.makeConfig ('EventCleaning')
     configSeq.setOptionValue ('.runEventCleaning', True)
 
     # Include, and then set up the jet analysis algorithm sequence:
-    configSeq += makeConfig( 'Jets',
+    configSeq += config.makeConfig( 'Jets',
         containerName='AnaJets',
         jetCollection='AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', False )
@@ -616,11 +705,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.recalibratePhyslite', False)
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', containerName='AnaJets')
+    configSeq += config.makeConfig('SystObjectLink', containerName='AnaJets')
 
     btagger = "DL1dv01"
     btagWP = "FixedCutBEff_60"
-    configSeq += makeConfig( 'Jets.FlavourTagging',
+    configSeq += config.makeConfig( 'Jets.FlavourTagging',
         containerName='AnaJets',
         selectionName='ftag' )
     configSeq.setOptionValue ('.noEffSF', forCompare)
@@ -628,23 +717,23 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.kinematicSelection', True )
 
-    configSeq += makeConfig( 'Jets.JVT',
+    configSeq += config.makeConfig( 'Jets.JVT',
         containerName='AnaJets' )
 
     if largeRJets :
-        configSeq += makeConfig( 'Jets',
+        configSeq += config.makeConfig( 'Jets',
             containerName='AnaLargeRJets',
             jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' )
         configSeq.setOptionValue ('.postfix', 'largeR_jets' )
         outputContainers['larger_jet_'] = 'OutLargeRJets'
 
         # Add systematic object links
-        configSeq += makeConfig('SystObjectLink', containerName='AnaLargeRJets')
+        configSeq += config.makeConfig('SystObjectLink', containerName='AnaLargeRJets')
         if not forCompare :
             configSeq.setOptionValue ('.recalibratePhyslite', False)
 
     if trackJets :
-        configSeq += makeConfig( 'Jets',
+        configSeq += config.makeConfig( 'Jets',
             containerName='AnaTrackJets',
             jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets' )
         configSeq.setOptionValue ('.postfix', 'track_jets' )
@@ -655,12 +744,12 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     likelihood = True
     recomputeLikelihood=False
-    configSeq += makeConfig ('Electrons',
+    configSeq += config.makeConfig ('Electrons',
         containerName='AnaElectrons' )
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += makeConfig ('Electrons.WorkingPoint',
+    configSeq += config.makeConfig ('Electrons.WorkingPoint',
         containerName='AnaElectrons',
         selectionName='loose')
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
@@ -670,25 +759,20 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.likelihoodWP', 'LooseBLayerLH')
     else:
         configSeq.setOptionValue ('.likelihoodWP', 'LooseDNN')
-    # FIXME: fails for PHYSLITE with missing data item
-    # ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
-    if not noPhysliteBroken :
-        configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
-    else :
-        configSeq.setOptionValue ('.isolationWP', 'NonIso')
+    configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
     configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', containerName='AnaElectrons')
+    configSeq += config.makeConfig('SystObjectLink', containerName='AnaElectrons')
 
     # Include, and then set up the photon analysis algorithm sequence:
-    configSeq += makeConfig ('Photons',
+    configSeq += config.makeConfig ('Photons',
         containerName='AnaPhotons' )
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
     configSeq.setOptionValue ('.recomputeIsEM', False)
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += makeConfig ('Photons.WorkingPoint',
+    configSeq += config.makeConfig ('Photons.WorkingPoint',
         containerName='AnaPhotons',
         selectionName='tight')
     configSeq.setOptionValue ('.forceFullSimConfig', forceEGammaFullSimConfig)
@@ -699,15 +783,15 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.recomputeIsEM', False)
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', containerName='AnaPhotons')
+    configSeq += config.makeConfig('SystObjectLink', containerName='AnaPhotons')
 
 
     # set up the muon analysis algorithm sequence:
-    configSeq += makeConfig ('Muons',
+    configSeq += config.makeConfig ('Muons',
         containerName='AnaMuons')
     if not forCompare :
         configSeq.setOptionValue ('.recalibratePhyslite', False)
-    configSeq += makeConfig ('Muons.WorkingPoint',
+    configSeq += config.makeConfig ('Muons.WorkingPoint',
         containerName='AnaMuons',
         selectionName='medium')
     configSeq.setOptionValue ('.quality', 'Medium')
@@ -715,90 +799,90 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     if forCompare :
         configSeq.setOptionValue ('.onlyRecoEffSF', True)
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
-    # configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
+    # configSeq += config.makeConfig ('Muons.Selection', 'AnaMuons.tight')
     # configSeq.setOptionValue ('.quality', 'Tight')
     # configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', containerName='AnaMuons')
+    configSeq += config.makeConfig('SystObjectLink', containerName='AnaMuons')
 
 
     # Include, and then set up the tau analysis algorithm sequence:
-    configSeq += makeConfig ('TauJets',
+    configSeq += config.makeConfig ('TauJets',
         containerName='AnaTauJets')
-    configSeq += makeConfig ('TauJets.WorkingPoint',
+    configSeq += config.makeConfig ('TauJets.WorkingPoint',
         containerName='AnaTauJets',
         selectionName='tight')
     configSeq.setOptionValue ('.quality', 'Tight')
 
     # Add systematic object links
-    configSeq += makeConfig('SystObjectLink', containerName='AnaTauJets')
+    configSeq += config.makeConfig('SystObjectLink', containerName='AnaTauJets')
 
 
     if dataType is not DataType.Data :
         # Include, and then set up the generator analysis sequence:
-        configSeq += makeConfig( 'GeneratorLevelAnalysis')
+        configSeq += config.makeConfig( 'GeneratorLevelAnalysis')
         configSeq.setOptionValue ('.saveCutBookkeepers', True)
         configSeq.setOptionValue ('.runNumber', 284500)
         configSeq.setOptionValue ('.cutBookkeepersSystematics', True)
 
 
-    configSeq += makeConfig ('Electrons.PtEtaSelection',
+    configSeq += config.makeConfig ('Electrons.PtEtaSelection',
         containerName='AnaElectrons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', electronMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', electronMaxEta, noneAction='ignore')
-    configSeq += makeConfig ('Photons.PtEtaSelection',
+    configSeq += config.makeConfig ('Photons.PtEtaSelection',
         containerName='AnaPhotons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', photonMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', photonMaxEta, noneAction='ignore')
-    configSeq += makeConfig ('Muons.PtEtaSelection',
+    configSeq += config.makeConfig ('Muons.PtEtaSelection',
         containerName='AnaMuons')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', muonMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', muonMaxEta, noneAction='ignore')
-    configSeq += makeConfig ('TauJets.PtEtaSelection',
+    configSeq += config.makeConfig ('TauJets.PtEtaSelection',
         containerName='AnaTauJets')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', tauMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', tauMaxEta, noneAction='ignore')
-    configSeq += makeConfig ('Jets.PtEtaSelection',
+    configSeq += config.makeConfig ('Jets.PtEtaSelection',
         containerName='AnaJets')
     configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
     configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
     configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
     if largeRJets :
-        configSeq += makeConfig ('Jets.PtEtaSelection',
+        configSeq += config.makeConfig ('Jets.PtEtaSelection',
             containerName='AnaLargeRJets')
         configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
         configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
         configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
     if trackJets :
-        configSeq += makeConfig ('Jets.PtEtaSelection',
+        configSeq += config.makeConfig ('Jets.PtEtaSelection',
             containerName='AnaTrackJets')
         configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
         configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
         configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
 
-    configSeq += makeConfig ('ObjectCutFlow',
+    configSeq += config.makeConfig ('ObjectCutFlow',
         containerName='AnaElectrons',
         selectionName='loose')
-    configSeq += makeConfig ('ObjectCutFlow',
+    configSeq += config.makeConfig ('ObjectCutFlow',
         containerName='AnaPhotons',
         selectionName='tight')
-    configSeq += makeConfig ('ObjectCutFlow',
+    configSeq += config.makeConfig ('ObjectCutFlow',
         containerName='AnaMuons',
         selectionName='medium')
-    configSeq += makeConfig ('ObjectCutFlow',
+    configSeq += config.makeConfig ('ObjectCutFlow',
         containerName='AnaTauJets',
         selectionName='tight')
-    configSeq += makeConfig ('ObjectCutFlow',
+    configSeq += config.makeConfig ('ObjectCutFlow',
         containerName='AnaJets',
         selectionName='jvt')
 
     # Include, and then set up the met analysis algorithm config:
-    configSeq += makeConfig ('MissingET',
+    configSeq += config.makeConfig ('MissingET',
         containerName='AnaMET')
     configSeq.setOptionValue ('.jets', 'AnaJets')
     configSeq.setOptionValue ('.taus', 'AnaTauJets.tight')
@@ -816,7 +900,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
 
     # Include, and then set up the overlap analysis algorithm config:
-    configSeq += makeConfig( 'OverlapRemoval' )
+    configSeq += config.makeConfig( 'OverlapRemoval' )
     configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
     configSeq.setOptionValue ('.photons',     'AnaPhotons.tight')
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
@@ -835,7 +919,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     # Include and set up a basic run of the event selection algorithm config:
     if not forCompare:
-        # configSeq += makeConfig( 'EventSelection', None )
+        # configSeq += config.makeConfig( 'EventSelection', None )
         # configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
         # configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
         # configSeq.setOptionValue ('.jets',        'AnaJets')
@@ -847,31 +931,31 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
                                           selectionCutsDict = exampleSelectionCuts, noFilter = True)
 
 
-    configSeq += makeConfig ('Thinning',
+    configSeq += config.makeConfig ('Thinning',
         containerName='AnaElectrons')
     configSeq.setOptionValue ('.selectionName', 'loose')
     configSeq.setOptionValue ('.outputName', 'OutElectrons')
-    configSeq += makeConfig ('Thinning',
+    configSeq += config.makeConfig ('Thinning',
         containerName='AnaPhotons')
     configSeq.setOptionValue ('.selectionName', 'tight')
     configSeq.setOptionValue ('.outputName', 'OutPhotons')
-    configSeq += makeConfig ('Thinning',
+    configSeq += config.makeConfig ('Thinning',
         containerName='AnaMuons')
     configSeq.setOptionValue ('.selectionName', 'medium')
     configSeq.setOptionValue ('.outputName', 'OutMuons')
-    configSeq += makeConfig ('Thinning',
+    configSeq += config.makeConfig ('Thinning',
         containerName='AnaTauJets')
     configSeq.setOptionValue ('.selectionName', 'tight')
     configSeq.setOptionValue ('.outputName', 'OutTauJets')
-    configSeq += makeConfig ('Thinning',
+    configSeq += config.makeConfig ('Thinning',
         containerName='AnaJets')
     configSeq.setOptionValue ('.outputName', 'OutJets')
     if largeRJets :
-        configSeq += makeConfig ('Thinning',
+        configSeq += config.makeConfig ('Thinning',
             containerName='AnaLargeRJets')
         configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
     if trackJets :
-        configSeq += makeConfig ('Thinning',
+        configSeq += config.makeConfig ('Thinning',
             containerName='AnaTrackJets')
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
 
@@ -879,7 +963,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     # more than the sequences
     if not forCompare :
         # Include, and then set up the trigger analysis sequence:
-        configSeq += makeConfig( 'Trigger' )
+        configSeq += config.makeConfig( 'Trigger' )
         configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )
         configSeq.setOptionValue ('.noFilter', True )
         configSeq.setOptionValue ('.electronID', 'Tight' )
@@ -891,11 +975,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.muons', 'AnaMuons' )
 
     if not forCompare:
-        configSeq += makeConfig ('Bootstraps')
+        configSeq += config.makeConfig ('Bootstraps')
         configSeq.setOptionValue ('.nReplicas', 2000 )
         configSeq.setOptionValue ('.runOnMC', True )
 
-    configSeq += makeConfig ('Output')
+    configSeq += config.makeConfig ('Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
     configSeq.setOptionValue ('.vars', vars)
     configSeq.setOptionValue ('.metVars', metVars)
@@ -942,7 +1026,7 @@ def printSequenceAlgs (sequence) :
 
 
 def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hardCuts = False,
-                  isPhyslite = False, noPhysliteBroken = False, geometry = None, autoconfigFromFlags = None, onlyNominalOR = False,
+                  isPhyslite = False, geometry = None, autoconfigFromFlags = None, onlyNominalOR = False,
                   forceEGammaFullSimConfig = False) :
 
     # do some harder cuts on all object types, this is mostly used for
@@ -959,24 +1043,24 @@ def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hard
         global jetMinPt
         jetMinPt = 45e3
 
-    algSeq = AlgSequence()
+    algSeq = AlgSequence('AnalysisSequence')
 
     ca = None
     if useBlocks :
         ca = makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
-                                 isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                                 isPhyslite=isPhyslite,
                                  geometry=geometry, onlyNominalOR=onlyNominalOR,
                                  autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics,
                                  forceEGammaFullSimConfig=forceEGammaFullSimConfig)
     elif yamlPath :
         from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText
         ca = makeSequenceText(yamlPath, dataType, algSeq, geometry=geometry,
-                              isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                              isPhyslite=isPhyslite,
                               autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
     else :
         ca = makeSequenceOld (dataType, algSeq, forCompare=forCompare,
-                              isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                              autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics,
+                              isPhyslite=isPhyslite,
+                              noSystematics=noSystematics,
                               forceEGammaFullSimConfig=forceEGammaFullSimConfig)
 
     if ca is not None:
