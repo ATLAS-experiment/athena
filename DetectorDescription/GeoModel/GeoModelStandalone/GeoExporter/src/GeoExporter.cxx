@@ -19,7 +19,6 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "GeoExporter/GeoExporter.h"
-#include "VP1Base/VP1Msg.h"
 
 #include "VP1Utils/VP1JobConfigInfo.h"
 #include "VP1Utils/VP1SGAccessHelper.h"
@@ -35,18 +34,13 @@
 #include "GeoModelWrite/WriteGeoModel.h"
 // #include "GeoModelHelpers/defineWorld.h" //TODO: Use this as soon as we have the latest GeoModel in Athena main
 
-#include <QtCore/QStringList>
-#include <QtCore/QFile>
-#include <QtCore/QFileInfo>
-#include <QtCore/QUrl>
-#include <QtNetwork/QSslSocket>
-#include <QProcessEnvironment>
-#include <QDebug>
-
 #include <cassert>
 #include <iostream>
+#include <filesystem>
 
-#include <boost/range/irange.hpp>
+// define terminal colors and the reset code
+#define RESET   "\033[0m"
+#define RED     "\033[31m"  /* Red */
 
 // Units
 #include "GeoModelKernel/Units.h"
@@ -87,6 +81,45 @@ GeoPhysVol* createTheWorld()
 }
 
 
+std::vector<std::string> splitCommaSepStringIntoVector(std::string str) {
+  std::stringstream sst(str);
+  std::vector<std::string> vv;
+  while (sst.good()) {
+        std::string substr;
+        getline(sst, substr, ',');
+        vv.push_back(substr);
+    }
+ 
+    for (size_t i = 0; i < vv.size(); i++)
+        std::cout << vv[i] << std::endl;
+  return vv;
+}
+
+std::string joinVectorOfStringWithSep(std::vector<std::string> vv, std::string sep){
+  std::string str;
+    for (unsigned int i=0; i<vv.size(); i++) {
+        str += vv[i];
+        if (i >= (vv.size() - 1)) {
+            break; // escaping in the last iteration
+        }
+        str += sep; // concatenating string
+    }
+    return str;
+}
+
+bool isStringInVector(
+        const std::vector<std::string>& vec,
+        const std::string& str) {
+
+    // Use std::find() algorithm to search
+    // for the string in the vector
+    auto it = std::find(
+                    vec.begin(),
+                    vec.end(),
+                    str);
+    return it != vec.end();
+}
+
 //____________________________________________________________________
 class GeoExporter::Imp {
 public:
@@ -121,11 +154,11 @@ bool GeoExporter::argumentsAreValid() const
 {
   //Athena pointers:
   if (!m_d->sg) {
-    VP1Msg::message("ERROR: Null pointer to event store.");
+     std::cout <<"ERROR: Null pointer to event store." << std::endl;
     return false;
   }
   if (!m_d->detstore) {
-    VP1Msg::message("ERROR: Null pointer to detector store.");
+     std::cout <<"ERROR: Null pointer to detector store." << std::endl;
     return false;
   }
 
@@ -136,15 +169,13 @@ bool GeoExporter::argumentsAreValid() const
 //____________________________________________________________________
 void GeoExporter::init()
 {
-  VP1Msg::messageDebug("Start of GeoExporter::init()...");
+  std::cout << "Start of GeoExporter::init()...\n"; // TODO: move to MSG_DEBUG
 
-  VP1Msg::message("");
-  VP1Msg::message("===================================================");
-  VP1Msg::message("               Launching the GeoExporter");
-  VP1Msg::message("===================================================");
-  VP1Msg::message("");
+   std::cout << "\n===================================================\n";
+   std::cout <<"\t\tLaunching the GeoExporter\n";
+   std::cout << "===================================================\n";
 
-  VP1Msg::message("Accessing the ATLAS geometry...");
+   std::cout <<"Accessing the ATLAS geometry..." << std::endl;
   StoreGateSvc* detstore = m_d->detstore;
  //Get the world volume:
   const GeoModelExperiment * theExpt = nullptr;
@@ -157,42 +188,53 @@ void GeoExporter::init()
   // GET ATLAS GEOMETRY
   PVConstLink world(theExpt->getPhysVol());
 
-  // ### Get user's settings ###
-  QProcessEnvironment environment = QProcessEnvironment::systemEnvironment();
-  // -- get Detector Description tag
-  QString default_detdescrtag = environment.value("DUMPGEODETDESCRTAGDEFAULT");
-  QString user_detdescrtag = environment.value("DUMPGEODETDESCRTAG");
-  if ("1"==default_detdescrtag) {
-    VP1Msg::message("The user did not specify a DetDescrTag - Using the default one: " + user_detdescrtag);
-    }
-  else {
-    VP1Msg::message("User's settings - DetDescrTag: " + user_detdescrtag);
-    }
-  // -- get 'forceOverwrite' option
-  bool user_forceOverwrite = ( environment.value("DUMPGEOFORCEOVERWRITE")=="1" ? true : false );
-  VP1Msg::message("User's settings - forceOverwrite option: " + QString::number(user_forceOverwrite) );
-  // -- get sub-systems settings
-  bool user_noid = environment.value("DUMPGEO_NOID").toInt();
-  bool user_nocalo = environment.value("DUMPGEO_NOCALO").toInt();
-  bool user_nomuon = environment.value("DUMPGEO_NOMUON").toInt();
-  QString user_subsystems_filters = "" + QString(((user_noid) ? "-noID" : "")) + QString(((user_nocalo) ? "-noCalo" : "")) + QString(((user_nomuon) ? "-noMuon" : ""));
-  // -- get GeoModel Treetop filter // FIXME: check and update this!!
-  QString user_filterTreeTops = environment.value("DUMPGEOFILTERTREETOPS");
-  VP1Msg::message("User's settings - GeoModel TreeTops filter: " + user_filterTreeTops);
-  // -- get GeoModel Detector Managers filter // FIXME: check and update this!!
-  QString user_filterDetManagers = environment.value("DUMPGEOFILTERDETMANAGERS");
-  VP1Msg::message("User's settings - GeoModel DetectorManagers filter: " + user_filterDetManagers);
+//   // -- get Detector Description tag
+  char const* tmpDD = getenv( "DUMPGEODETDESCRTAG" );
+  std::string detDescrTag{""};
+  if ( tmpDD != NULL ) {
+  detDescrTag = std::string(tmpDD);
+} else {
+  std::cout << RED << "ERROR! The environmental variable 'DUMPGEODETDESCRTAG' is not set! Exiting..." << std::endl;
+  throw "env var 'DUMPGEODETDESCRTAG' not set";
+} 
+     std::cout <<"GeoExporter -- We're dumping DetDescrTag: '" + detDescrTag << "'..." << std::endl;
+  
 
+  //TODO: move to CA configuration
+  // // -- get sub-systems settings
+  // bool user_noid = environment.value("DUMPGEO_NOID").toInt();
+  // bool user_nocalo = environment.value("DUMPGEO_NOCALO").toInt();
+  // bool user_nomuon = environment.value("DUMPGEO_NOMUON").toInt();
+  
+  // ### Get user's settings ###
+  // -- get GeoModel Treetop filter // FIXME: check and update this!!
+  char const* tmpTT = getenv("DUMPGEOFILTERTREETOPS");
+  std::string user_filterTreeTops{""};
+  if ( tmpTT != NULL ) {
+    user_filterTreeTops = std::string(tmpTT);
+    std::cout <<"User's settings - GeoModel TreeTops filter: " << user_filterTreeTops << std::endl;
+  }
+  // -- get GeoModel Detector Managers filter // FIXME: check and update this!!
+  char const* tmpDM = getenv("DUMPGEOFILTERDETMANAGERS");
+  std::string user_filterDetManagers{""};
+  if ( tmpDM != NULL ) {
+    user_filterDetManagers = std::string(tmpDM);
+    std::cout <<"User's settings - GeoModel DetectorManagers filter: " + user_filterDetManagers << std::endl;
+  }
+  //TODO: move to Python Config
+  // QString user_subsystems_filters = "" + QString(((user_noid) ? "-noID" : "")) + QString(((user_nocalo) ? "-noCalo" : "")) + QString(((user_nomuon) ? "-noMuon" : ""));
 
   // Get list of TreeTops from the TREETOPFILTER
-  QStringList user_treetopslist;
-  if ( ! user_filterTreeTops.isEmpty() ) {
-    user_treetopslist = user_filterTreeTops.split(',');
+  std::vector<std::string> user_treetopslist;
+  if ( ! user_filterTreeTops.empty() ) {
+    // user_treetopslist = user_filterTreeTops.split(',');
+    user_treetopslist = splitCommaSepStringIntoVector(user_filterTreeTops);
   }
   // Get list of DetectorManagers from the TREETOPFILTER
-  QStringList user_detmanagerslist;
-  if ( ! user_filterDetManagers.isEmpty() ) {
-    user_detmanagerslist = user_filterDetManagers.split(','); 
+  std::vector<std::string> user_detmanagerslist;
+  if ( ! user_filterDetManagers.empty() ) {
+    // user_detmanagerslist = user_filterDetManagers.split(','); 
+    user_detmanagerslist = splitCommaSepStringIntoVector(user_filterDetManagers); 
   }
 
   GeoPhysVol* volTop = createTheWorld();
@@ -215,7 +257,7 @@ if ( !(user_detmanagerslist.empty()) ) {
         unsigned int nTreetops = manager->getNumTreeTops();
         std::cout << "\t" << mm << " - # TreeTops: " << nTreetops << std::endl;
 
-        if ( nTreetops > 0 && user_detmanagerslist.contains(QString::fromStdString(detManName)) ) {
+        if ( nTreetops > 0 &&  isStringInVector(user_detmanagerslist, detManName) ) {
             
             for(unsigned int i=0; i < nTreetops; ++i) {
 
@@ -265,41 +307,24 @@ if ( !(user_detmanagerslist.empty()) ) {
 // }
 
   std::cout << "Creating the SQLite DB file..." << std::endl;
-  QString fileName = "geometry";
-  if ( !(user_detdescrtag.isEmpty()) ) {
-    fileName = "geometry-" + user_detdescrtag;
-  }
-  if ( !(user_treetopslist.isEmpty()) ) {
-        fileName = fileName + "-" + user_treetopslist.join("-");
-  }
-  if ( !(user_detmanagerslist.isEmpty()) ) {
-        fileName = fileName + "-" + user_detmanagerslist.join("-");
-  }
-  if ( !(user_subsystems_filters.isEmpty()) ) {
-        fileName = fileName + "-" + user_subsystems_filters + ".db";
-  }
-  fileName = fileName + ".db";
+  char const* tmpOF = getenv("DUMPGEOOUTFILENAME");
+  std::string fileName{""};
+   if ( tmpOF != NULL ) {
+  fileName = std::string(tmpOF);
+} else {
+  std::cout << RED << "ERROR! The environmental variable 'DUMPGEOOUTFILENAME' is not set! Exiting..." << std::endl;
+  throw "env var 'DUMPGEOOUTFILENAME' not set";
+} 
+  std::cout <<"Output file name: " << fileName << std::endl;
 
-  // check if fileName exists and if yes: Is it a file and no directory?
-   bool fileExists = QFileInfo::exists(fileName) && QFileInfo(fileName).isFile();
-  if (fileExists) {
-    if (user_forceOverwrite) {
-        VP1Msg::message("Removing the existing dump file ("+fileName+")...");
-        QFile file (fileName);
-        file.remove();
-    } else if ( !user_forceOverwrite ) {
-        VP1Msg::messageWarningAllRed("The output file ("+fileName+") is already present in the current folder, but you don't use the '-f' flag to overwrite it. The program will be stopped. Please remove or move the existing file to another folder, or use the '-f' flag to replace it.");
-        throw "existing output file";
-    }
-  }
   // open the DB connection
-  GMDBManager db(fileName.toStdString());
+  GMDBManager db(fileName);
 
   // check the DB connection
   if (db.checkIsDBOpen())
-      qDebug() << "OK! Database is open!";
+      std::cout << "OK! Database is open!" << std::endl;
   else {
-      qDebug() << "Database ERROR!! Exiting...";
+      std::cout << "Database ERROR!! Exiting..." << std::endl;
       return;
   }
 
@@ -321,5 +346,5 @@ if ( !(user_detmanagerslist.empty()) ) {
   std::cout << "\nTest - list of all the GeoElement nodes in the persistified geometry:" << std::endl;
   db.printAllElements();
 
-  VP1Msg::messageDebug("end of GeoExporter::init().");
+  std::cout << "end of GeoExporter::init()." << std::endl; // TODO: move to MSG_DEBUG
 }
