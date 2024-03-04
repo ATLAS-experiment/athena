@@ -267,7 +267,8 @@ def InDetTrigTRTDriftCircleCutToolCfg(flags, name='InDetTrigTRTDriftCircleCutToo
 
 
 # Tool to select tracks to be used for TRT calibration
-def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool",**kwargs):
+def TRT_InDetDetailedTrackSelectorToolCfg(
+        flags, name="TRT_InDetDetailedTrackSelectorTool", **kwargs):
     
     from AthenaCommon.SystemOfUnits import GeV, mm
     
@@ -291,5 +292,6 @@ def InDetDetailedTrackSelectorToolCfg(flags,name="InDetDetailedTrackSelectorTool
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
     kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
     
-    acc.setPrivateTools(acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, name=name , **kwargs)))
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        InDetTrackSelectorToolCfg(flags, name, **kwargs)))
     return acc
