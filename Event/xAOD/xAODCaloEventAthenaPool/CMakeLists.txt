@@ -23,7 +23,6 @@ atlas_add_poolcnv_library( xAODCaloEventAthenaPoolPoolCnv
                   AthenaPoolUtilities xAODCaloEvent GaudiKernel ${extra_libs} )
 
 # Install files from the package.
-atlas_install_joboptions( share/*.py )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # In AthAnalysis xAOD::CaloCluster doesn't know about its CaloCell link. Which

@@ -21,7 +21,6 @@ atlas_add_poolcnv_library( xAODPFlowAthenaPoolPoolCnv
                   AthenaPoolUtilities xAODPFlow )
 
 # Install files from the package.
-atlas_install_joboptions( share/*.py )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Set up (a) test(s) for the converter(s):
