@@ -48,7 +48,8 @@ fi
 if [ $issc == 0 ]
 then
    echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannels...."
-   fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannels` 
+   #fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannels` 
+   fulltag=`getCurrentFolderTag.py "frontier://ATLF/();schema=ATLAS_COOLOFL_LAR;dbname=CONDBR2" /LAR/BadChannelsOfl/BadChannels` 
    if [ $? -ne 0 ]
    then
        exit 1
@@ -60,7 +61,8 @@ then
    upd3TagName="RUN2-UPD3-00"
 else   
    echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannelsSC...."
-   fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannelsSC` 
+   #fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannelsSC` 
+   fulltag=`getCurrentFolderTag.py "frontier://ATLF/();schema=ATLAS_COOLOFL_LAR;dbname=CONDBR2" /LAR/BadChannelsOfl/BadChannelsSC` 
    if [ $? -ne 0 ]
    then
        exit 1

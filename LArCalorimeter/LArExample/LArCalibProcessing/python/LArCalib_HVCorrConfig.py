@@ -21,7 +21,7 @@ def HVCorrConfig(flags,outputName="hvcorr",runOut=0, lbOut=0):
     result.addEventAlgo(CompFactory.LArHVCorrMaker(LArHVScaleCorr="NewLArHVScaleCorr"))
 
     #Ntuple writing ... 
-    from LArCalibProcessing.LArCalib_HVScale2NtupleConfig import LArHVScaleCorr2NtupleCfg
+    from LArCalibTools.LArCalib_HVScale2NtupleConfig import LArHVScaleCorr2NtupleCfg
     result.merge(LArHVScaleCorr2NtupleCfg(flags,rootfile=outputName+'.root'))
     result.getEventAlgo("LArHVScaleCorr2Ntuple").ContainerKey="NewLArHVScaleCorr"
 

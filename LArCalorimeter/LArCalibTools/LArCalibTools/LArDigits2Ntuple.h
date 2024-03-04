@@ -28,6 +28,9 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
 
   Gaudi::Property< unsigned int >  m_Nsamples{this, "NSamples", 32, "number of samples to store"};
   Gaudi::Property< std::vector<unsigned int> > m_FTlist{this, "FTlist", {}, "which FT to dump"};
+  Gaudi::Property< std::vector<unsigned int> > m_Slotlist{this, "Slotlist", {}, "which Slot to dump"};
+  Gaudi::Property< bool > m_fillEMB{this, "FillEMB", true, "if to fill EMB"};
+  Gaudi::Property< bool > m_fillEndcap{this, "FillEndcap", true, "if to fill Eendcap"};
   Gaudi::Property< bool > m_fillBCID{this, "FillBCID", false, "if to fill BCID"};
   Gaudi::Property< bool > m_fillLB{this, "FillLB", false, "if to fill LB in Evnt tree"};
 
