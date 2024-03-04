@@ -278,6 +278,10 @@ StatusCode
 WriteHandle<T>::WriteHandle::record (std::unique_ptr<T> data,
                                      std::unique_ptr<AUXSTORE> auxstore)
 {
+  // If there's no store association, do it now.
+  if (data->getStore() == nullptr)
+    data->setStore (auxstore.get());
+
   m_ptr = data.get();
   if (xAOD::TActiveStore::store()->record (std::move (auxstore), key() + "Aux.").isFailure())
     return StatusCode::FAILURE;
