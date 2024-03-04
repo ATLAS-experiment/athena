@@ -1,48 +1,27 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def TRTHoleSearchCfg(flags, **kwargs) :
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.ComponentFactory import CompFactory
-
-    acc=ComponentAccumulator()
-    kwargs.setdefault('name','TRTTrackHoleSearchTool')
-    if 'Extrapolator' not in kwargs :
-        extrapolator = acc.popToolsAndMerge( AtlasExtrapolatorCfg(flags) )
-        acc.addPublicTool(extrapolator)
-        kwargs.setdefault('extrapolator',extrapolator)
-    acc.setPrivateTools( CompFactory.TRTTrackHoleSearchTool(**kwargs) )
-    return acc
-
-def TRTHoleSearch(name='TRTTrackHoleSearchTool', **kwargs) :
-    kwargs.setdefault('name',name)
-    if 'Extrapolator' not in kwargs :
-        from TrkExTools.AtlasExtrapolator import AtlasExtrapolator
-        kwargs.setDefaults(kwargs,Extrapolator = AtlasExtrapolator())
-
-    from TRT_TrackHoleSearch.TRT_TrackHoleSearchConf import TRTTrackHoleSearchTool
-    return TRTTrackHoleSearchTool(**kwargs)
-
-
-def TRTMonitoringRun3RAW_AlgConfig(inputFlags):
+def TRTMonitoringRun3RAW_AlgConfig(flags):
     from AthenaMonitoring import AthMonitorCfgHelper
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     rv = ComponentAccumulator()
-    helper = AthMonitorCfgHelper(inputFlags, 'TRTMonitoringCfg')
+    helper = AthMonitorCfgHelper(flags, 'TRTMonitoringCfg')
 
     from AthenaConfiguration.ComponentFactory import CompFactory
-    algTRTMonitoringRun3RAW = helper.addAlgorithm(CompFactory.TRTMonitoringRun3RAW_Alg,
-                                                  'AlgTRTMonitoringRun3RAW',
-                                                  ByteStreamErrors= "" if inputFlags.Input.isMC else "TRT_ByteStreamErrs",
-                                                  TrackSummaryTool= "InDetTrackSummaryTool"
-                                              )
+    algTRTMonitoringRun3RAW = helper.addAlgorithm(
+        CompFactory.TRTMonitoringRun3RAW_Alg,
+        'AlgTRTMonitoringRun3RAW',
+        ByteStreamErrors= "" if flags.Input.isMC else "TRT_ByteStreamErrs"
+    )
 
     # @TODO really run the TRT hole search ? Hole search still seems to use a condition service
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-    algTRTMonitoringRun3RAW.TrackSummaryTool = rv.popToolsAndMerge(InDetTrackSummaryToolCfg(inputFlags))
-    algTRTMonitoringRun3RAW.trt_hole_search= rv.popToolsAndMerge( TRTHoleSearchCfg(inputFlags) )
+    algTRTMonitoringRun3RAW.TrackSummaryTool = rv.popToolsAndMerge(
+        InDetTrackSummaryToolCfg(flags))
+    from InDetConfig.TRT_TrackHoleSearchConfig import TRTTrackHoleSearchToolCfg
+    algTRTMonitoringRun3RAW.trt_hole_search= rv.popToolsAndMerge(
+        TRTTrackHoleSearchToolCfg(flags))
 
 
     maxLumiBlockSummary  = 3000
@@ -132,7 +111,7 @@ def TRTMonitoringRun3RAW_AlgConfig(inputFlags):
                 rdoEndcapGroup.defineHistogram('strawNumber,HitWMap_Ar_passed;hHitWMap_Ar_{0}'.format(side[iside]),cutmask='isAr',type='TProfile',title='Leading Edge in Time Window: Argon Straws (E{0});Straw Number in Stack;Probability'.format(side[iside]),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=strawMax[ibe],xmin=0,xmax=strawMax[ibe],opt='kAlwaysCreate')   
         for iside in range(2):
             regionTag = ' (' + beId[ibe] + sideId[iside] + ')'
-            regionMarker = (beId[ibe] + sideId[iside]) if inputFlags.Common.isOnline is True else (sideId[iside])
+            regionMarker = (beId[ibe] + sideId[iside]) if flags.Common.isOnline else (sideId[iside])
             rdoLLHLOccGroup = helper.addGroup(algTRTMonitoringRun3RAW,'RDOLLHLOccHistograms{0}{1}'.format(ibe,iside))
             rdoLLHLOccGroup.defineHistogram('AvgHLOcc_side_x,AvgHLOcc_side_y;hAvgHLOcc_{0}'.format(regionMarker),type='TProfile',title='Avg. HL Occupancy{0};{1};Occupancy'.format(regionTag,stackOrSector[ibe]),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=32,xmin=1,xmax=33,opt='kAlwaysCreate')
             rdoLLHLOccGroup.defineHistogram('AvgLLOcc_side_x,AvgLLOcc_side_y;hAvgLLOcc_{0}'.format(regionMarker),type='TProfile',title='Avg. LL Occupancy{0};{1};Occupancy'.format(regionTag,stackOrSector[ibe]),path='TRT/Shift/{0}'.format(barrelOrEndcap[ibe]),xbins=32,xmin=1,xmax=33,opt='kAlwaysCreate')

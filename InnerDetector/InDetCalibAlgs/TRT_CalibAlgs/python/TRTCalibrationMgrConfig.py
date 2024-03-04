@@ -18,12 +18,15 @@ def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
     kwargs.setdefault("DoShortStrawCorrection",False)
     kwargs.setdefault("DoArgonXenonSep",True)                
     if "TRTStrawSummaryTool" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-        InDetStrawSummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
-        kwargs.setdefault("TRTStrawSummaryTool", InDetStrawSummaryTool)
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+            TRT_StrawStatusSummaryToolCfg)
+        kwargs.setdefault("TRTStrawSummaryTool", acc.popToolsAndMerge(
+            TRT_StrawStatusSummaryToolCfg(flags)))
     if "NeighbourSvc" not in kwargs:
-        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawNeighbourSvcCfg
-        kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(TRT_StrawNeighbourSvcCfg(flags)))
+        from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+            TRT_StrawNeighbourSvcCfg)
+        kwargs.setdefault("NeighbourSvc", acc.getPrimaryAndMerge(
+            TRT_StrawNeighbourSvcCfg(flags)))
     if "TRTCalDbTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_CalDbToolCfg
         kwargs.setdefault("TRT_CalDbTool", acc.popToolsAndMerge(TRT_CalDbToolCfg(flags)))
@@ -41,17 +44,20 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     kwargs.setdefault("DoCalibrate",False)
     kwargs.setdefault("DoRefit",False)
 
-    from TRT_CalibTools.TRTCalibToolsConfig import FillAlignTrkInfoCfg, FillAlignTRTHitsCfg, FitToolCfg
-    kwargs.setdefault("AlignTrkTools", [acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))), 
-                                        acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags)))] )      
+    from TRT_CalibTools.TRTCalibToolsConfig import (
+        FillAlignTrkInfoCfg, FillAlignTRTHitsCfg, FitToolCfg)
+    kwargs.setdefault("AlignTrkTools", [
+        acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))),
+        acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags))) ] )
 
     kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
     
     from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
     kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(ActsFitterCfg(flags)))
     
-    from InDetConfig.InDetTrackSelectorToolConfig import InDetDetailedTrackSelectorToolCfg
-    kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(InDetDetailedTrackSelectorToolCfg(flags)))
+    from InDetConfig.InDetTrackSelectorToolConfig import TRT_InDetDetailedTrackSelectorToolCfg
+    kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(
+        TRT_InDetDetailedTrackSelectorToolCfg(flags)))
     
     # FIXME! Let all straws participate in trackfinding as default - SERGI This is wrong and needs to be UPDATED @peter    
         # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
@@ -69,39 +75,20 @@ def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kw
     acc.addEventAlgo(CompFactory.TRTCalibrationMgr(name, **kwargs))
 
     return acc
-        
-        
-# FIXME - This needs to be moved to the InnerDetector/InDetRecTools/TRT_TrackHoleSearch/python/
-def TRTTrackHoleSearch(flags,name="TRT_TrackHoleSearch",**kwargs):
-    
-    acc = ComponentAccumulator()
-    
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg                          
-    kwargs.setdefault("extrapolator", acc.addPublicTool(acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))))
-    
-    
-    kwargs.setdefault("use_conditions_svc",True)
-    kwargs.setdefault("do_dump_bad_straw_log",False)
-    kwargs.setdefault("begin_at_first_trt_hit",False)
-    kwargs.setdefault("end_at_last_trt_hit",False)
-    kwargs.setdefault("max_trailing_holes",1)
-    kwargs.setdefault("locR_cut",-1)
-    kwargs.setdefault("locR_sigma_cut",-1)
-    
-    acc.setPrivateTools(CompFactory.TRTTrackHoleSearchTool(name, **kwargs))
-    return acc
-
-
 
 
 def TRT_StrawStatusCfg(flags,name='InDet_TRT_StrawStatus',**kwargs) :
     
     acc = ComponentAccumulator()
     
-    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
-    kwargs.setdefault("TRT_StrawStatusSummaryTool", acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags)))    
+    from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
+        TRT_StrawStatusSummaryToolCfg)
+    kwargs.setdefault("TRT_StrawStatusSummaryTool", acc.popToolsAndMerge(
+        TRT_StrawStatusSummaryToolCfg(flags)))
 
-    kwargs.setdefault("trt_hole_finder", acc.popToolsAndMerge(TRTTrackHoleSearch(flags))) 
+    from InDetConfig.TRT_TrackHoleSearchConfig import TRTTrackHoleSearchToolCfg
+    kwargs.setdefault("trt_hole_finder", acc.popToolsAndMerge(
+        TRTTrackHoleSearchToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.InDet.TRT_StrawStatus(name,**kwargs))
     return acc
@@ -144,4 +131,4 @@ if __name__ == '__main__':
     
     import sys
     sys.exit(not acc.run().isSuccess())
-    
+
