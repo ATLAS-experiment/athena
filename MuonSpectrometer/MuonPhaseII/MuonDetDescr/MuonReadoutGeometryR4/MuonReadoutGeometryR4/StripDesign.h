@@ -142,6 +142,8 @@ namespace MuonGMR4 {
             const Amg::Vector2D& stripDir() const;
         private:
             void setStereoAngle(double stereo);
+            /// Resets the cache of the directions
+            void resetDirCache();
             /// Shift between the 0-th readout channel and the first strip described by the panel
             int m_channelShift{1};
             /// Number of all strips

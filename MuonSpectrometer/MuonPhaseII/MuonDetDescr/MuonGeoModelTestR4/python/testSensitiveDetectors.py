@@ -28,7 +28,7 @@ if __name__=="__main__":
     parser.set_defaults(nEvents = -1)
 
     args = parser.parse_args()
-    flags, cfg = setupGeoR4TestCfg(args)
+    flags, cfg = setupGeoR4TestCfg(args, setupSimJob = True)
     
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     cfg.merge(BeamEffectsAlgCfg(flags))

@@ -17,16 +17,25 @@ atlas_add_component( MuonGeoModelTestR4
 atlas_add_test( testR4Geometry
                 SCRIPT python -m MuonGeoModelTestR4.testGeoModel --chambers "BML1A3 T1E1A01" --noMM --noSTGC 
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( checkStripDesign
                 SCRIPT runStripDesignDump                
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( testR4SensitiveDetectors
                 SCRIPT python -m MuonGeoModelTestR4.testSensitiveDetectors  --nEvents 10 
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( testChamberBuilding
+                SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --noMM --noSTGC
+                PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh)
 
 file(GLOB_RECURSE files "util/*.cxx")

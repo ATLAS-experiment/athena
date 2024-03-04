@@ -92,6 +92,15 @@ namespace {
 
 
 namespace MuonGMR4 {
+
+#ifndef SIMULATIONBASE
+bool MuonDetectorManager::ChamberSorter::operator()(const MuonChamber* a, const MuonChamber* b) const {
+    if (a->stationName() != b->stationName()) return a->stationName() < b->stationName();
+    if (a->stationEta() != b->stationEta()) return a->stationEta() < b->stationEta();
+    return a->stationPhi() < b->stationPhi();
+}
+#endif
+
 MuonDetectorManager::MuonDetectorManager()
     : AthMessaging{"MuonDetectorManagerR4"} {
     if (!m_idHelperSvc.retrieve().isSuccess()) {
@@ -137,8 +146,8 @@ std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const
         const MuonReadoutElement* re = getReadoutElement(channelId);
         return re ? re->getChamber() : nullptr;
     }
-    std::set<const MuonChamber*> MuonDetectorManager::getAllChambers() const{
-         std::set<const MuonChamber*> allChambers{};
+    MuonDetectorManager::MuonChamberSet MuonDetectorManager::getAllChambers() const{
+         MuonChamberSet allChambers{};
          std::vector<const MuonReadoutElement*> allREs{getAllReadoutElements()};
          for (const MuonReadoutElement* re : allREs) {
             if (re->getChamber()) {

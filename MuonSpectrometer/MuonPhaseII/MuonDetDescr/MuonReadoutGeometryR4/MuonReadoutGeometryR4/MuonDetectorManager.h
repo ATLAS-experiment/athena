@@ -95,7 +95,13 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
 
 #ifndef SIMULATIONBASE
     const MuonChamber* getChamber(const Identifier& channelId) const;
-    using MuonChamberSet = std::set<const MuonChamber*>;
+    /// Helper struct to ensur that the sorting of the MuonChambers
+    /// remains constants across the jobs
+    struct ChamberSorter{
+        bool operator()(const MuonChamber* a, const MuonChamber* b) const;
+    };
+    using MuonChamberSet = std::set<const MuonChamber*, ChamberSorter>;
+    /// @brief: Returns all MuonChambers associated with the readout geometry
     MuonChamberSet getAllChambers() const;
 #endif
 

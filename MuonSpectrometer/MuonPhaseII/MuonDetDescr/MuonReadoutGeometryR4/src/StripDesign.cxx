@@ -80,7 +80,10 @@ namespace MuonGMR4{
         m_shortHalfY = HalfShortY;
         m_longHalfY = HalfLongY;
         m_halfX = HalfHeight;  
-        m_lenSlopEdge = std::hypot(2.*HalfHeight, HalfShortY - HalfLongY);     
+        m_lenSlopEdge = std::hypot(2.*HalfHeight, HalfShortY - HalfLongY);
+        resetDirCache();
+        m_isFlipped = false;
+
     }
     void StripDesign::flipTrapezoid() {
         if (m_isFlipped) {
@@ -93,6 +96,7 @@ namespace MuonGMR4{
         m_bottomRight = Amg::Vector2D{m_shortHalfY, -m_halfX};
         m_topLeft = Amg::Vector2D{-m_longHalfY, m_halfX};
         m_topRight = Amg::Vector2D{m_longHalfY, m_halfX};
+        resetDirCache();
     }
     void StripDesign::defineStripLayout(Amg::Vector2D&& posFirst,
                                         const double stripPitch,
@@ -105,7 +109,12 @@ namespace MuonGMR4{
         m_stripWidth = stripWidth;
         m_firstStripPos = std::move(posFirst);
     }
-
+    void StripDesign::resetDirCache() {
+        m_dirTopEdge.release();
+        m_dirBotEdge.release();
+        m_dirLeftEdge.release();
+        m_dirRightEdge.release();
+    }
 
 }
 #undef ORDER_PROP 

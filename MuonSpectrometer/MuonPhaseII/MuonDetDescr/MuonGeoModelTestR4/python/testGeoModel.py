@@ -75,15 +75,8 @@ def GeoModelMmTestCfg(flags, name = "GeoModelMmTest", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
-    result = ComponentAccumulator()
-    from ActsGeometry.DetectorVolumeSvcCfg import DetectorVolumeSvcCfg
-    kwargs.setdefault("DetectorVolumeSvc", result.getPrimaryAndMerge(DetectorVolumeSvcCfg(flags)))
-    the_alg = CompFactory.MuonGMR4.MuonChamberToolTest(name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)    
-    return result
 
-def setupGeoR4TestCfg(args):
+def setupGeoR4TestCfg(args, setupSimJob = False):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads
@@ -101,6 +94,13 @@ def setupGeoR4TestCfg(args):
                                 
         args.geoModelFile = "Geometry/{geoTag}.db".format(geoTag=args.geoTag)
     
+    if setupSimJob:
+        from AthenaConfiguration.Enums import ProductionStep
+        flags.Common.ProductionStep = ProductionStep.Simulation
+
+        from SimulationConfig.SimEnums import SimulationFlavour
+        flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
+
     flags.GeoModel.AtlasVersion = args.geoTag
     flags.IOVDb.GlobalTag = args.condTag
     flags.GeoModel.SQLiteDB = True
@@ -174,7 +174,7 @@ if __name__=="__main__":
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
     
-    if False and flags.Detector.GeometryMDT:
+    if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
                                      TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
                                      ReadoutSideXML="ReadoutSides.xml"))
