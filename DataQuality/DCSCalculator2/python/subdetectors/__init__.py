@@ -4,7 +4,6 @@ from .afp import AFP
 from .lar import LAr
 from .lucid import Lucid
 from .mdt import MDT
-from .pixels import Pixels
 from .rpc import RPC
 from .sct import SCT
 from .tdq import TDQ
@@ -14,11 +13,10 @@ from .tgc import TGC
 from .stg import STG
 from .mmg import MMG
 # Non-detector flags
-from .idbs import IDBS
 from .magnets import Magnets
 from .global_system import Global
 from .trig import Trigger
-ALL_SYSTEMS = [AFP, LAr, Lucid, MDT, Pixels, RPC, SCT, TDQ, Tile, TGC, TRT,  IDBS, Magnets, Global, Trigger, STG, MMG]
+ALL_SYSTEMS = [AFP, LAr, Lucid, MDT, RPC, SCT, TDQ, Tile, TGC, TRT, Magnets, Global, Trigger, STG, MMG]
 SYS_NAMES = ", ".join(map(lambda x: x.__name__, ALL_SYSTEMS))
 
 SYSTEM_MAP = dict((x.__name__, x) for x in ALL_SYSTEMS)

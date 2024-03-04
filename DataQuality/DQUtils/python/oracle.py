@@ -1,9 +1,10 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from sqlalchemy import (select, create_engine, MetaData, Table, Column, String, 
     Integer)
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import and_
 
 from DQUtils.sugar import IOVSet
@@ -62,7 +63,8 @@ def make_oracle_connection(connection_string):
     username, password = get_authentication(connection_string)
     conn_str = "oracle://%s:%s@%s" % (username, password, host)
     engine = create_engine(conn_str, pool_recycle=10*60)
-    metadata = MetaData(bind=engine)
+    metadata = MetaData()
+    metadata.reflect(engine)
     return engine, metadata
 
 #conn_str = "oracle://%s:%s@ATLAS_COOLPROD" % get_authentication()
@@ -73,6 +75,7 @@ def make_oracle_connection(connection_string):
 
 engine, metadata = make_oracle_connection("oracle://ATLAS_COOLPROD"
                                           "/ATLAS_COOLONL_GLOBAL")
+Session = sessionmaker(engine)
 
 run_table = Table("ATLAS_RUN_NUMBER.RUNNUMBER", metadata,
     Column("NAME",          String),
@@ -101,8 +104,9 @@ def fetch_recent_runs(how_recent=ONE_WEEK, ascending=False):
     
     this_recent = strftime("%Y%m%dT%H%M%S", gmtime(time()-how_recent))
     condition = and_(t.c.STARTAT >= this_recent, t.c.PARTITIONNAME == "ATLAS")
-    rows = select([run_table]).where(condition).order_by(ordering)
-    return rows.execute().fetchall()
+    rows = select(run_table).where(condition).order_by(ordering)
+    with Session() as session:
+        return session.execute(rows).fetchall()
 
 def fetch_runs_since(first_run=140000, ascending=False):
     """
@@ -113,24 +117,27 @@ def fetch_runs_since(first_run=140000, ascending=False):
     ordering = t.c.RUNNUMBER.asc() if ascending else t.c.RUNNUMBER.desc()
     
     condition = and_(t.c.RUNNUMBER > first_run, t.c.PARTITIONNAME == "ATLAS")
-    rows = select([run_table]).where(condition).order_by(ordering)
-    return rows.execute().fetchall()
+    rows = select(run_table).where(condition).order_by(ordering)
+    with Session() as session:
+        return session.execute(rows).fetchall()
 
 def make_atlas_partition_query():
-    return (select([run_table.c.RUNNUMBER])
+    return (select(run_table.c.RUNNUMBER)
                   .where(run_table.c.PARTITIONNAME == "ATLAS")
                   .order_by(run_table.c.RUNNUMBER))
 
 def fetch_last_n_atlas_runs(n=10):
-    rows = (select([run_table.c.RUNNUMBER])
+    rows = (select(run_table.c.RUNNUMBER)
             .where(run_table.c.PARTITIONNAME == "ATLAS")
             .order_by(run_table.c.RUNNUMBER.desc()).limit(n))
     
-    return [row.RUNNUMBER for row in reversed(rows.execute().fetchall())]
+    with Session() as session:
+        return [row.RUNNUMBER for row in reversed(session.execute(rows).fetchall())]
 
 def fetch_atlas_runs():
     rows = make_atlas_partition_query()
-    return rows.execute().fetchall()
+    with Session() as session:
+        return session.execute(rows).fetchall()
 
 def atlas_runs_set():
     return set(x.RUNNUMBER for x in fetch_atlas_runs())
@@ -138,9 +145,10 @@ def atlas_runs_set():
 def atlas_runs_between(first, last):
 
     rows = make_atlas_partition_query()
-    rows = rows.where(first <= run_table.c.RUNNUMBER <= last)
+    rows = rows.where(run_table.c.RUNNUMBER.between(first, last))
     
-    return [row.RUNNUMBER for row in rows.execute().fetchall()]
+    with Session() as session:
+        return [row.RUNNUMBER for row in session.execute(rows).fetchall()]
 
 def filter_atlas_runs(iovs):
 
@@ -148,10 +156,11 @@ def filter_atlas_runs(iovs):
     first, last = min(iov_runs), max(iov_runs)
     
     rows = make_atlas_partition_query()
-    rows = rows.where(first <= run_table.c.RUNNUMBER <= last)
+    rows = rows.where(run_table.c.RUNNUMBER.between(first, last))
     
-    atlas_runs = set(row.RUNNUMBER for row in rows.execute().fetchall())
-    keep_runs = atlas_runs.intersection(iov_runs)
+    with Session() as session:
+        atlas_runs = set(row.RUNNUMBER for row in session.execute(rows).fetchall())
+        keep_runs = atlas_runs.intersection(iov_runs)
     
-    return IOVSet(iov for iov in iovs if iov.since.run in keep_runs)
+        return IOVSet(iov for iov in iovs if iov.since.run in keep_runs)
     
