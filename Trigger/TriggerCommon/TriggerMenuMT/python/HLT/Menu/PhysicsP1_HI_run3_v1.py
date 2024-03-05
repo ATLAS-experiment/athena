@@ -786,7 +786,7 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_noalg_L1jTE200',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoBulkMCProd']+MinBiasGroup+SupportPhIGroup),
 
         #----ZeroBias
-        ChainProp(name='HLT_noalg_zb_L1ZB',    l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=['PS:NoBulkMCProd']+ZeroBiasGroup),
+        ChainProp(name='HLT_noalg_zb_L1ZeroBias',    l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=['PS:NoBulkMCProd']+ZeroBiasGroup),
 
         #ZDC bits streamer
         #Commented out for the 2022 Nov Pb+Pb test run as the corresponding L1 ZDC items were commented out in the L1 menu
