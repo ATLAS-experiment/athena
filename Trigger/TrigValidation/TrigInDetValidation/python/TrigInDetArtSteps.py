@@ -64,7 +64,7 @@ class TrigInDetReco(ExecStep):
         self.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
         self.args += ' --CA'
         if not self._isCA:
-            self.args += ' "default:True" "RDOtoRDOTrigger:False"'
+            self.args += ' "default:True"'
 
        
         if ( self.postinclude_trig != '' ) : 

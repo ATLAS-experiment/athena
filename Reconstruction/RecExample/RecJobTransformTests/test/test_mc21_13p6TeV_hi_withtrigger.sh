@@ -9,7 +9,7 @@
 export ATHENA_CORE_NUMBER=8
 
 Reco_tf.py \
---CA "all:True" "RDOtoRDOTrigger:False" \
+--CA "all:True" \
 --multithreaded \
 --inputHITSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/mc21_13p6TeV/HITSFiles/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8453_s3873/HITS.29625927._000632.pool.root.1 \
 --steering 'doRDO_TRIG' \

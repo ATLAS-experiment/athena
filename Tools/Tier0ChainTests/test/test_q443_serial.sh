@@ -9,7 +9,7 @@
 # art-include: 24.0/Athena
 
 Reco_tf.py \
---CA "all:True" "RDOtoRDOTrigger:False" \
+--CA "all:True" \
 --AMI=q443 \
 --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
 --maxEvents=100 \

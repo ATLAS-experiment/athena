@@ -14,7 +14,7 @@ ATHENA_CORE_NUMBER=4 Reco_tf.py \
 --multithreaded \
 --AMIConfig q445 \
 --imf False \
---CA all:True RDOtoRDOTrigger:False \
+--CA all:True \
 --preExec="all:flags.BTagging.Trackless=True" \
 --maxEvents 25
 
