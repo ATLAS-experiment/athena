@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_ATHTRUTHSELECTIONTOOL_H
@@ -14,7 +14,7 @@
 
 // STL includes
 #include <string>
-#include "InDetPhysValMonitoring/IAthSelectionTool.h"
+#include "TrkTruthTrackInterfaces/IAthSelectionTool.h"
 #include "xAODTruth/TruthParticle.h" // typedef, can't fwd declare
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetPhysValMonitoring/CutFlow.h"

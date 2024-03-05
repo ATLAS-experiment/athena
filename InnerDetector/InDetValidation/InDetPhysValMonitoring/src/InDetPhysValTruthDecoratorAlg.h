@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPHYSVALTRUTHDECORATORTOOL_H
@@ -23,7 +23,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
 #include "GaudiKernel/EventContext.h"
-#include "InDetPhysValMonitoring/IAthSelectionTool.h"
+#include "TrkTruthTrackInterfaces/IAthSelectionTool.h"
 #include "InDetPhysValMonitoring/CutFlow.h"
 #include "CxxUtils/checker_macros.h"
 #include <atomic>

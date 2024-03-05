@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_TruthClassDecoratorAlg_H
@@ -20,7 +20,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
-#include "InDetPhysValMonitoring/IAthSelectionTool.h"
+#include "TrkTruthTrackInterfaces/IAthSelectionTool.h"
 
 // class to decorate xAOD::TruthParticles with type and origin, required by validation
 class TruthClassDecoratorAlg: public AthReentrantAlgorithm {
