@@ -3,8 +3,6 @@
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    # Required for MT using --threads argument
-    flags.fillFromArgs(parser=flags.getArgumentParser())
 
     from RecExRecoTest.RecExReco_setupData22 import RecExReco_setupData22
     RecExReco_setupData22(flags)
