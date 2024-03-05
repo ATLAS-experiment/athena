@@ -943,16 +943,17 @@ def setupMenu(menu_name):
         ChainProp(name='HLT_xe0_mhtpufit_pf_L1XE55',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportLegGroup+METGroup+['RATE:CPS_XE55'], monGroups=['metMon:t0']),
         ChainProp(name='HLT_xe0_nn_L1XE55',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportLegGroup+METGroup+['RATE:CPS_XE55'], monGroups=['metMon:t0']),
 
-        ChainProp(name='HLT_xe0_cell_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']), #ATR-26456
-        ChainProp(name='HLT_xe0_tcpufit_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
-        ChainProp(name='HLT_xe0_trkmht_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
-        ChainProp(name='HLT_xe0_pfopufit_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
-        ChainProp(name='HLT_xe0_pfsum_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
-        ChainProp(name='HLT_xe0_pfsum_cssk_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
-        ChainProp(name='HLT_xe0_pfsum_vssk_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
-        ChainProp(name='HLT_xe0_mhtpufit_em_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
-        ChainProp(name='HLT_xe0_mhtpufit_pf_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
-        ChainProp(name='HLT_xe0_nn_L1ZB',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportLegGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        # ATR-28910 L1_ZB to L1_ZeroBias
+        ChainProp(name='HLT_xe0_cell_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']), #ATR-26456
+        ChainProp(name='HLT_xe0_tcpufit_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        ChainProp(name='HLT_xe0_trkmht_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        ChainProp(name='HLT_xe0_pfopufit_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        ChainProp(name='HLT_xe0_pfsum_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        ChainProp(name='HLT_xe0_pfsum_cssk_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        ChainProp(name='HLT_xe0_pfsum_vssk_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        ChainProp(name='HLT_xe0_mhtpufit_em_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        ChainProp(name='HLT_xe0_mhtpufit_pf_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
+        ChainProp(name='HLT_xe0_nn_L1ZeroBias',  l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'], groups=SupportPhIGroup+METGroup+['RATE:ZeroBias','RATE:CPS_ZB']),
 
         #ATR-28679
         ChainProp(name='HLT_xe0_cell_L1jXE110',  l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=SupportPhIGroup+METGroup+['RATE:CPS_jXE110'], monGroups=['metMon:t0']),
