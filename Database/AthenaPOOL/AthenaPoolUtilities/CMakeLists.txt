@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPoolUtilities )
@@ -26,16 +26,12 @@ atlas_add_dictionary( AthenaPoolUtilitiesDict
    LINK_LIBRARIES AthenaPoolUtilities )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_scripts( share/post_tpcnvtest.sh )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Install the CMake code from the package:
 atlas_install_generic( cmake/AthenaPoolUtilitiesTestConfig.cmake
    DESTINATION cmake )
-atlas_install_generic( share/run_tpcnv_legacy_test.sh.in
-   DESTINATION cmake/modules/scripts
-   EXECUTABLE )
 atlas_install_generic( share/run_tpcnv_test.sh.in
    DESTINATION cmake/modules/scripts
    EXECUTABLE )
