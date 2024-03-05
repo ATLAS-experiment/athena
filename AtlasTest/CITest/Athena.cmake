@@ -132,12 +132,24 @@ atlas_add_citest( DerivationRun3Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun3Data_Train
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun3MC_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3MCAF3_PHYS
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag af3_PHYS --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3MCAF3_PHYSLITE
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag af3_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( RecoRun4MC_DAODPHYS
