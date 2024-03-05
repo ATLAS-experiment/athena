@@ -67,7 +67,7 @@ RequiredL1Items = [
         'L1_RD3_FILLED',
 
          # ZB 
-        'L1_ZB', 
+        'L1_ZeroBias', 
         
 
 ]
