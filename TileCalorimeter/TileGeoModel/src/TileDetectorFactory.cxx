@@ -722,19 +722,25 @@ pvBarrelMother->add(pvBarrelModuleMother);
     pvGapMotherNeg->add(new GeoSerialIdentifier(1));
     pvGapMotherNeg->add(stGapModuleMotherNeg);
 
+    if (not pvTileEnvelopePosEndcap){
+      (*m_log)<<MSG::ERROR<<"pvTileEnvelopePosEndcap is null in "<<__func__<<endmsg;
+    } else {
+      GeoTransform* tfGapMotherPos = new GeoTransform(GeoTrf::TranslateZ3D((dbManager->TILBzoffset()+dbManager->TILEzshift())*Gaudi::Units::cm));
+      GeoNameTag* ntGapMotherPos = new GeoNameTag("TileGapPos");
+      pvTileEnvelopePosEndcap->add(tfGapMotherPos);
+      pvTileEnvelopePosEndcap->add(ntGapMotherPos);
+      pvTileEnvelopePosEndcap->add(pvGapMotherPos);
+    }
 
-    GeoTransform* tfGapMotherPos = new GeoTransform(GeoTrf::TranslateZ3D((dbManager->TILBzoffset()+dbManager->TILEzshift())*Gaudi::Units::cm));
-    GeoNameTag* ntGapMotherPos = new GeoNameTag("TileGapPos");
-    pvTileEnvelopePosEndcap->add(tfGapMotherPos);
-    pvTileEnvelopePosEndcap->add(ntGapMotherPos);
-    pvTileEnvelopePosEndcap->add(pvGapMotherPos);
-
-
-    GeoTransform* tfGapMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D((-dbManager->TILBzoffset()-dbManager->TILEzshift())*Gaudi::Units::cm));
-    GeoNameTag* ntGapMotherNeg = new GeoNameTag("TileGapNeg");
-    pvTileEnvelopeNegEndcap->add(tfGapMotherNeg);
-    pvTileEnvelopeNegEndcap->add(ntGapMotherNeg);
-    pvTileEnvelopeNegEndcap->add(pvGapMotherNeg);
+    if (not pvTileEnvelopeNegEndcap){
+      (*m_log)<<MSG::ERROR<<"pvTileEnvelopeNegEndcap is null in "<<__func__<<endmsg;
+    } else {
+      GeoTransform* tfGapMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D((-dbManager->TILBzoffset()-dbManager->TILEzshift())*Gaudi::Units::cm));
+      GeoNameTag* ntGapMotherNeg = new GeoNameTag("TileGapNeg");
+      pvTileEnvelopeNegEndcap->add(tfGapMotherNeg);
+      pvTileEnvelopeNegEndcap->add(ntGapMotherNeg);
+      pvTileEnvelopeNegEndcap->add(pvGapMotherNeg);
+    }
   }
 
   if (globalsExist) {
