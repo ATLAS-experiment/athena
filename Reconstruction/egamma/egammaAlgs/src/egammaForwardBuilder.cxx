@@ -24,6 +24,17 @@
 namespace {
   const float cellEtaSize = 0.25;
   const float cellPhiSize = 0.25;
+  
+  template <typename... T>
+  void copyMoments(const xAOD::CaloCluster& src, 
+                   std::unique_ptr<xAOD::CaloCluster>& dest,
+                   T... momentIds) {
+    for (const auto& momentId : {momentIds...}) {
+      double moment {};
+      src.retrieveMoment(momentId, moment);
+      dest->insertMoment(momentId, moment);
+    }
+  }
 }
 
 egammaForwardBuilder::egammaForwardBuilder(const std::string& name,
@@ -164,15 +175,21 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
       constituentLinks.emplace_back(*inputClusters, origClusterIndex, ctx);
     }
 
-    // Create the new cluster.
-    std::unique_ptr<xAOD::CaloCluster> newCluster = std::make_unique<xAOD::CaloCluster>(*cluster);
+    const DataLink<CaloCellContainer>& cellCont = 
+      cluster->getCellLinks()->getCellContainerLink();
 
-    if (m_doCookieCutting) {
-      cookieCut(*newCluster, *calodetdescrmgr);
+    // Create the new cluster.
+    std::optional<std::unique_ptr<xAOD::CaloCluster>> newCluster = 
+      m_doCookieCutting ? 
+        cookieCut(*cluster, *calodetdescrmgr, cellCont) :
+        std::make_unique<xAOD::CaloCluster>(*cluster);
+
+    if (!newCluster) {
+      continue;
     }
 
-    caloClusterLinks(*newCluster) = constituentLinks;
-    outClusterContainer->push_back(std::move(newCluster));
+    caloClusterLinks(**newCluster) = constituentLinks;
+    outClusterContainer->push_back(std::move(*newCluster));
 
     size_t index = outClusterContainer->size() - 1;
     const ElementLink<xAOD::CaloClusterContainer> clusterLink(*outClusterContainer, index, ctx);
@@ -287,40 +304,56 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
   return StatusCode::SUCCESS;
 }
 
-void egammaForwardBuilder::cookieCut(
-  xAOD::CaloCluster& cluster,
-  const CaloDetDescrManager& mgr
+std::optional<std::unique_ptr<xAOD::CaloCluster>> egammaForwardBuilder::cookieCut(
+  const xAOD::CaloCluster& cluster,
+  const CaloDetDescrManager& mgr,
+  const DataLink<CaloCellContainer>& cellCont
 ) const {
   if (!cluster.hasSampling(CaloSampling::EME2) &&
       !cluster.hasSampling(CaloSampling::FCAL0)) {
-    return;
+    return std::nullopt;
   }
 
   CookieCutterHelpers::CentralPosition cp0({&cluster}, mgr);
-  CaloClusterCellLink* cell_links = cluster.getOwnCellLinks();
-  CaloClusterCellLink::iterator cell_itr = cell_links->begin();
 
   const bool isEC = cp0.emaxEC >= cp0.emaxF;
   const float eta = isEC ? cp0.etaEC : cp0.etaF;
   const float phi = isEC ? cp0.phiEC : cp0.phiF;
-   
-  while (cell_itr != cell_links->end()) {
-    const float deltaEta = std::abs(eta - cell_itr->eta());
-    const float deltaPhi = std::abs(phi - cell_itr->phi());
+
+  auto newCluster = CaloClusterStoreHelper::makeCluster(cellCont);
+  CaloClusterCellLink* newCellLinks = newCluster->getOwnCellLinks();
+
+  copyMoments(cluster,
+              newCluster,
+              xAOD::CaloCluster::SECOND_LAMBDA,
+              xAOD::CaloCluster::LATERAL,
+              xAOD::CaloCluster::LONGITUDINAL,
+              xAOD::CaloCluster::ENG_FRAC_MAX,
+              xAOD::CaloCluster::SECOND_R,
+              xAOD::CaloCluster::CENTER_LAMBDA,
+              xAOD::CaloCluster::SECOND_ENG_DENS,
+              xAOD::CaloCluster::SIGNIFICANCE);
+
+  const CaloClusterCellLink* cellLinks = cluster.getCellLinks();
+  CaloClusterCellLink::const_iterator cellItr = cellLinks->begin();
+  CaloClusterCellLink::const_iterator cellEnd = cellLinks->end();
+
+  for (; cellItr != cellEnd; ++cellItr) {
+    const float deltaEta = std::abs(eta - cellItr->eta());
+    const float deltaPhi = std::abs(phi - cellItr->phi());
 
     const float deltaEta2 = deltaEta * deltaEta; 
     const float deltaPhi2 = deltaPhi * deltaPhi; 
 
-    const bool removeCell = isEC ?
+    const bool excludeCell = isEC ?
       (deltaEta >= m_maxDelEta || deltaPhi >= m_maxDelPhi) :
       (deltaEta2 + deltaPhi2 >= m_maxDelR2);
 
-    if (removeCell) {
-      cell_itr = cell_links->removeCell(cell_itr);
-    }
-    else {
-      ++cell_itr;
+    if (!excludeCell) {
+      newCellLinks->addCell(cellItr.index(), cellItr.weight());
     }
   }
+
+  return newCluster;
 }
 
