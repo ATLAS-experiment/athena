@@ -151,13 +151,6 @@ del fhistory
 if not opts.minimal:
    from AthenaCommon.AthenaCommonFlags import jobproperties as jp
    from AthenaCommon.GlobalFlags import jobproperties as jp
-   from AthenaCommon.BeamFlags import jobproperties as jp
-   try:
-      from RecExConfig.RecFlags import rec
-   except ImportError:
-    # in case we don't have enough project-karma
-      pass
-# -- end of minimal
 
 if opts.command:
    _msg.info( 'executing CLI (-c) command: "%s"' % opts.command )
