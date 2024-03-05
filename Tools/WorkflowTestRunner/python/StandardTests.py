@@ -174,7 +174,7 @@ class DerivationTest(WorkflowTest):
     def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
         test_def = ID.split("_")
         data_type = test_def[0].lower()
-        format = test_def[1].upper()
+        formats = [format.upper() for format in test_def[1:-1]]
 
         threads = 0
         if setup.custom_threads is not None:
@@ -186,14 +186,15 @@ class DerivationTest(WorkflowTest):
             flush = 80
 
             extra_args += f" --maxEvents {events}"
-            extra_args += f" --preExec 'ConfigFlags.Output.TreeAutoFlush={{\"DAOD_{format}\": {flush}}}'"
+            format_flush = ", ".join([f"\"DAOD_{format}\": {flush}" for format in formats])
+            extra_args += f" --preExec 'flags.Output.TreeAutoFlush={{{format_flush}}}'"
         if "inputAODFile" not in extra_args:
             extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
 
         # could also use p5503
         self.command = \
             (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py --CA"
-             f" --formats {format}"
+             f" --formats {' '.join(formats)}"
              " --multiprocess --multithreadedFileValidation True"
              " --athenaMPMergeTargetSize 'DAOD_*:0'"
              " --sharedWriter True"
@@ -203,12 +204,11 @@ class DerivationTest(WorkflowTest):
         # skip performance checks for now
         self.skip_performance_checks = True
 
-        enable_checks = True if format == "PHYS" else False
-        if enable_checks:
-            self.output_checks = [
-                FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10),
-                MetadataCheck(setup, f"DAOD_{format}"),
-            ]
+        self.output_checks = []
+        for format in formats:
+            if format == "PHYS":
+                self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10))
+                self.output_checks.append(MetadataCheck(setup, f"DAOD_{format}"))
 
         super().__init__(ID, run, type, steps, setup)
 
