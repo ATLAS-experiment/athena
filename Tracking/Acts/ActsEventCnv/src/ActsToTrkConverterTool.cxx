@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsToTrkConverterTool.h"
@@ -232,7 +232,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
   std::optional<AmgSymMatrix(5)> cov = std::nullopt;
   if (actsParameter.covariance()) {
     AmgSymMatrix(5)
-        newcov(actsParameter.covariance()->topLeftCorner<5, 5>(0, 0));
+        newcov(actsParameter.covariance()->topLeftCorner<5, 5>());
     // Convert the covariance matrix to GeV
     for (int i = 0; i < newcov.rows(); i++) {
       newcov(i, 4) = newcov(i, 4) * 1_MeV;
