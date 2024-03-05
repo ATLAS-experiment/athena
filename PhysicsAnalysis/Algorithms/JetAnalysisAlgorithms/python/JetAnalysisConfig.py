@@ -310,7 +310,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg.jets = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency')
-            config.addSelection (self.containerName, 'jvt', 'jvt_selection,as_char', preselection=False)
+            config.addSelection (self.containerName, 'baselineJvt', 'jvt_selection,as_char', preselection=False)
 
         if self.runFJvtSelection :
             alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg{postfix}')
@@ -320,7 +320,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.selectionDecoration = "fjvt_selection,as_char"
             alg.particles = config.readName(self.containerName)
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )
-            config.addSelection (self.containerName, 'fjvt', 'fjvt_selection,as_char', preselection=False)
+            config.addSelection (self.containerName, 'baselineFJvt', 'fjvt_selection,as_char', preselection=False)
 
             if self.runFJvtEfficiency and self.config.dataType() is not DataType.Data:
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+postfix )
