@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
@@ -26,7 +26,7 @@ StatusCode InDet::SiSPGNNTrackMaker::initialize()
   ATH_CHECK(m_trackFitter.retrieve());
   ATH_CHECK(m_seedFitter.retrieve());
 
-  if (m_useTrackFinder == m_useTrackReader) {
+  if (m_useTrackFinder.value() == m_useTrackReader.value()) {
     ATH_MSG_ERROR("Use either track finder or track reader, not both.");
     return StatusCode::FAILURE;
   }
@@ -138,10 +138,10 @@ StatusCode InDet::SiSPGNNTrackMaker::execute(const EventContext& ctx) const
     std::unique_ptr<Trk::Track> track = m_trackFitter->fit(ctx, clusters, *trkParameters, false, matEffects);
     if (track != nullptr && track->perigeeParameters() != nullptr) {
       // fit the track again with perigee parameters and without outlier removal.
-      track = std::move(m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), false, matEffects));
+      track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), false, matEffects);
       if (track != nullptr) {
         // finally fit with outlier removal
-        track = std::move(m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true, matEffects));
+        track = m_trackFitter->fit(ctx, clusters, *track->perigeeParameters(), true, matEffects);
         if (track != nullptr && track->trackSummary() != nullptr) {
           outputTracks->push_back(track.release());
         }

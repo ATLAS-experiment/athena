@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigITkAccelerationTool.h"
@@ -197,7 +197,7 @@ int TrigITkAccelerationTool::extractTripletsFromOutput(std::shared_ptr<TrigAccel
 
   for(int k=0;k<nTriplets;k++) {
     // Check if a valid triplet was returned
-    if ((pOutput->m_innerIndex[k] == pOutput->m_outerIndex[k])) continue;
+    if (pOutput->m_innerIndex[k] == pOutput->m_outerIndex[k]) continue;
 
     const TrigSiSpacePointBase& SPi = vsp[pOutput->m_innerIndex[k]];
     const TrigSiSpacePointBase& SPm = vsp[pOutput->m_middleIndex[k]];
