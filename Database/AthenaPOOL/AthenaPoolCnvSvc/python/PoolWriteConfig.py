@@ -73,6 +73,7 @@ def PoolWriteCfg(flags):
         "DAOD_PHYSVAL"   : [5, 5,  100, 0, 1],
         "DAOD_PHYS"      : [5, 5,  500, 0, 1],
         "DAOD_PHYSLITE"  : [5, 5,  500, 1, 1],
+        "DAOD_TRUTH3"    : [5, 5,  500, 1, 1],
         "D2AOD_PHYSLITE" : [5, 5,  500, 1, 1],
     }
 
