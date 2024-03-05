@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # All derivation framework formats must be listed here
 
 # Example formats
@@ -14,6 +14,8 @@ from DerivationFrameworkExamples.TEST4 import TEST4Cfg
 from DerivationFrameworkExamples.TEST5 import TEST5Cfg
 # Pre-selection example
 from DerivationFrameworkExamples.TEST6 import TEST6Cfg
+# Skimming DAOD->D2AOD with strings
+from DerivationFrameworkExamples.TEST7 import TEST7Cfg
 
 # Truth (EVNT->xAOD) formats
 # TRUTH0 - complete copy of HepMC to xAOD truth
@@ -137,7 +139,7 @@ from DerivationFrameworkNCB.NCB1 import NCB1Cfg
 
 
 # Avoids compilation warnings from Flake8
-__all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
+__all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TEST7Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
            'PHYSCfg','PHYSLITECfg',
            'PHYSVALCfg',
