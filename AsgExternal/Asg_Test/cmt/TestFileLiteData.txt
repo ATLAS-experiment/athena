@@ -1,1 +1,1 @@
-/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYSLITE/2023-01-08T2101/data18_13TeV.00357772.physics_Main.deriv.DAOD_PHYSLITE.r13286_p4910_2023-01-08T2101/100events_data18.DAOD_PHYSLITE.pool.root
+/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYSLITE/p6026/data18_13TeV.periodAllYear.physics_Main.PhysCont.DAOD_PHYSLITE.grp18_v01_p6026/DAOD_PHYSLITE.37020692._000388.pool.root.1

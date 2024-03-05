@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( Asg_Test )
@@ -28,16 +28,14 @@ file( READ ${CMAKE_CURRENT_SOURCE_DIR}/cmt/TestFileLiteMCAFII.txt
    ASG_TEST_FILE_LITE_MC_AFII )
 string( STRIP "${ASG_TEST_FILE_LITE_MC_AFII}" ASG_TEST_FILE_LITE_MC_AFII )
 
-# currently don't have a full set of Run 3 test input files
-#file( READ ${CMAKE_CURRENT_SOURCE_DIR}/cmt/TestFileR3Data.txt
-#   ASG_TEST_FILE_RUN3_DATA )
-#string( STRIP "${ASG_TEST_FILE_RUN3_DATA}" ASG_TEST_FILE_RUN3_DATA )
+# currently we only have full sim
 file( READ ${CMAKE_CURRENT_SOURCE_DIR}/cmt/TestFileR3MC.txt
    ASG_TEST_FILE_RUN3_MC )
 string( STRIP "${ASG_TEST_FILE_RUN3_MC}" ASG_TEST_FILE_RUN3_MC )
-#file( READ ${CMAKE_CURRENT_SOURCE_DIR}/cmt/TestFileR3MCAFII.txt
-#   ASG_TEST_FILE_RUN3_MC_AFII )
-#string( STRIP "${ASG_TEST_FILE_RUN3_MC_AFII}" ASG_TEST_FILE_RUN3_MC_AFII )
+
+file( READ ${CMAKE_CURRENT_SOURCE_DIR}/cmt/TestFileLiteR3MC.txt
+   ASG_TEST_FILE_LITE_RUN3_MC )
+string( STRIP "${ASG_TEST_FILE_LITE_RUN3_MC}" ASG_TEST_FILE_LITE_RUN3_MC )
 
 set( ROOTCORE_TEST_FILE ${ASG_TEST_FILE_MC} )
 
