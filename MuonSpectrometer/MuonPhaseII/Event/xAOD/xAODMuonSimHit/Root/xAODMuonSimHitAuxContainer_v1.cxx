@@ -28,7 +28,6 @@ MuonSimHitAuxContainer_v1::MuonSimHitAuxContainer_v1()
     SIM_AUXVARIABLE(kineticEnergy);    
     SIM_AUXVARIABLE(mcEventIndex);
     SIM_AUXVARIABLE(mcBarcode);
-    SIM_AUXVARIABLE(mcCollectionType);
 }
 }  // namespace xAOD
 #undef SIM_AUXVARIABLE
