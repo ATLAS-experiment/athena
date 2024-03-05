@@ -66,6 +66,10 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
   auto RNNJetScoreSigTrans =
       Monitored::Scalar<float>("RNNJetScoreSigTrans", 0.0);
 
+  auto RNNEleScore = Monitored::Scalar<float>("RNNEleScore", 0.0);
+  auto RNNEleScoreSigTrans =
+      Monitored::Scalar<float>("RNNEleScoreSigTrans", 0.0);
+
   auto NumTracks = Monitored::Scalar<int>("NumTracks", 0.0);
   auto NumTracksEt15RNNLoose =
       Monitored::Scalar<int>("NumTracksEt15RNNLoose", 0.0);
@@ -259,6 +263,10 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     RNNJetScore = tau->discriminant(xAOD::TauJetParameters::TauID::RNNJetScore);
     RNNJetScoreSigTrans =
         tau->discriminant(xAOD::TauJetParameters::TauID::RNNJetScoreSigTrans);
+
+    RNNEleScore = tau->discriminant(xAOD::TauJetParameters::TauID::RNNEleScore);
+    RNNEleScoreSigTrans =
+        tau->discriminant(xAOD::TauJetParameters::TauID::RNNEleScoreSigTrans);
 
     muonVeto = tau->isTau(xAOD::TauJetParameters::MuonVeto);
     tauRNNLoose = tau->isTau(xAOD::TauJetParameters::JetRNNSigLoose);
@@ -681,8 +689,8 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
 
       fill(tool, tauPhi, tauEta, LB, tauEt, centFrac, isolFrac, EMRadius,
            hadRadius, stripWidth2, nStrip, etEMAtEMScale, etHadAtEMScale,
-           tauCharge, RNNJetScore, RNNJetScoreSigTrans, muonVeto, tauRNNLoose,
-           tauRNNMedium, tauRNNTight, PSSFrac, EMFrac, EMFracTrk,
+           tauCharge, RNNJetScore, RNNJetScoreSigTrans, RNNEleScore, RNNEleScoreSigTrans,
+	   muonVeto, tauRNNLoose, tauRNNMedium, tauRNNTight, PSSFrac, EMFrac, EMFracTrk,
            EfracL2EffCluster, EisoEffCluster, InvMassEffClusters, nNeutPFO,
            nShot, NumTracks, nClusters, jetSeedEta, jetSeedPhi, jetSeedPt,
            dRmax, ptRatioEflowApprox, trkAvgDist);
