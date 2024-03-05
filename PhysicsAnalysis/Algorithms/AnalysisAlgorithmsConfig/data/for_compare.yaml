@@ -117,7 +117,7 @@ Output:
         met_: 'AnaMET'
         '': 'EventInfo'
     commands:
-      - 'disable jet_select_jvt.*'
+      - 'disable jet_select_baselineJvt.*'
       - 'disable el_select_loose.*'
       - 'disable mu_select_medium.*'
       - 'disable ph_select_tight.*'

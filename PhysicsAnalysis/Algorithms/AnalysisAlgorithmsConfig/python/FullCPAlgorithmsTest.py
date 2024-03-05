@@ -903,7 +903,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     disable_commands = []
     if forCompare:
         disable_commands += [
-            'disable jet_select_jvt.*',
+            'disable jet_select_baselineJvt.*',
             'disable mu_select_medium.*',
             'disable ph_select_tight.*',
             'disable tau_select_tight.*',
