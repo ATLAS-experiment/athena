@@ -15,7 +15,7 @@ from .JetMenuSequencesConfig import (
     jetCaloRecoMenuSequence, 
     jetCaloPreselMenuSequence,
 )
-from .ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRMenuSequence,jetCROldMenuSequence
+from .ExoticJetSequencesConfig import jetEJsMenuSequence, jetCRVARMenuSequence,jetCRMenuSequence
 
 from . import JetRecoCommon
 from . import JetPresel
@@ -79,7 +79,6 @@ class JetChainConfiguration(ChainConfigurationBase):
             if self.L1Threshold != '' and self.L1Threshold != l1th:
                 raise RuntimeError('Cannot configure a jet chain with different L1 thresholds')
             self.L1Threshold = l1th
-
             # Verify that the preselection is defined only once
             if p["trkpresel"]!="nopresel" and ip+1!=len(jChainParts): # Last jet chainPart, presel should go here
                 log.error("Likely inconsistency encountered in preselection specification for %s",self.chainName)
@@ -175,11 +174,11 @@ class JetChainConfiguration(ChainConfigurationBase):
         if self.exotHypo != '' and ("emerging" in self.exotHypo or "trackless" in self.exotHypo):
             EJsStep = self.getJetEJsChainStep(flags, jetCollectionName, self.exotHypo)
             chainSteps+= [EJsStep]
+        elif self.exotHypo != '' and ("calratiovar" in self.exotHypo):
+             CRVARStep = self.getJetCRVARChainStep(flags, self.jetName, self.exotHypo)
+             chainSteps+= [ CRVARStep]
         elif self.exotHypo != '' and ("calratio" in self.exotHypo):
-             CRStep = self.getJetCRChainStep(flags, self.jetName, self.exotHypo)
-             chainSteps+= [ CRStep]
-        elif self.exotHypo != '' and ("calrtold" in self.exotHypo):
-            CRStep = self.getJetCROldChainStep(flags,self.jetName, self.exotHypo)
+            CRStep = self.getJetCRChainStep(flags,self.jetName, self.exotHypo)
             chainSteps+= [self.getEmptyStep(2, 'RoIFTFEmptyStep'), CRStep]
 
         myChain = self.buildChain(chainSteps)
@@ -311,11 +310,34 @@ class JetChainConfiguration(ChainConfigurationBase):
 
         return chainStep
 
+    def getJetCRVARChainStep(self, flags, jetCollectionName, exotdictstring):
+        
+        if 'calratiovar' in exotdictstring:
+            MinjetlogR = 1.2
+            if 'calratiovarrmbib' in exotdictstring:
+               doBIBremoval = int(1)
+            else:
+               doBIBremoval = int(0)
+        else:
+            log.error('Misconfiguration of trackless exotic jet chain - need calratiovar selection')
+            exit(1)
+
+        log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
+
+        stepName = "CRVARStep_"+self.chainName
+        jetSeq = jetCRVARMenuSequence(flags, jetsIn=jetCollectionName)
+        chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
+
+        return chainStep
+
     def getJetCRChainStep(self, flags, jetCollectionName, exotdictstring):
         
-        if 'calratio' in exotdictstring:
+        if 'calratio' in exotdictstring  and  ('calratiovar' not in exotdictstring):
             MinjetlogR = 1.2
-            doBIBremoval = int(0)
+            if 'calratiormbib' in exotdictstring:
+               doBIBremoval = int(1)
+            else:
+               doBIBremoval = int(0)
         else:
             log.error('Misconfiguration of trackless exotic jet chain - need calratio selection')
             exit(1)
@@ -324,23 +346,6 @@ class JetChainConfiguration(ChainConfigurationBase):
 
         stepName = "CRStep_"+self.chainName
         jetSeq = jetCRMenuSequence(flags, jetsIn=jetCollectionName)
-        chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
-
-        return chainStep
-
-    def getJetCROldChainStep(self, flags, jetCollectionName, exotdictstring):
-        
-        if 'calrtold' in exotdictstring:
-            MinjetlogR = 1.2
-            doBIBremoval = int(0)
-        else:
-            log.error('Misconfiguration of trackless exotic jet chain - need calrtold selection')
-            exit(1)
-
-        log.debug("Running exotic jets with MinjetlogR: " + str(MinjetlogR) + "\t BIB rm " + str(doBIBremoval) + "\thypo: " + exotdictstring)
-
-        stepName = "CRPldStep_"+self.chainName
-        jetSeq = jetCROldMenuSequence(flags, jetsIn=jetCollectionName)
         chainStep = ChainStep(stepName, [jetSeq], multiplicity=[1], chainDicts=[self.dict])
 
         return chainStep

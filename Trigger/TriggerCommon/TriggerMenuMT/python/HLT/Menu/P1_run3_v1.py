@@ -284,7 +284,7 @@ def addCommonP1Signatures(chains):
 #        ChainProp(name='HLT_noalg_L1RD1_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['CosmicCalo','express'],groups=['RATE:Calibration','BW:Detector']),
 
         #ZeroBias
-        ChainProp(name='HLT_noalg_L1ZB',        l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'],groups=['RATE:CPS_ZB']+ZeroBiasGroup+SupportLegGroup),# ATR-21367
+        ChainProp(name='HLT_noalg_L1ZeroBias',        l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'],groups=['RATE:CPS_ZB']+ZeroBiasGroup+SupportPhIGroup),# ATR-21367
         ChainProp(name='HLT_noalg_zb_L1RD1_EMPTY',        l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'],groups=ZeroBiasGroup+SupportGroup),# ATR-25032
 
 
@@ -310,7 +310,7 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_mb_mbts_all_L1MBTS_C', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], monGroups=['mbMon:online'], groups=MinBiasGroup),
         ChainProp(name='HLT_mb_mbts_all_L1MBTS_1_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], monGroups=['mbMon:online'], groups=MinBiasGroup), #ATR-21740
         ChainProp(name='HLT_mb_mbts_all_L1RD2_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], monGroups=['mbMon:online'], groups=MinBiasGroup), # ATR-21367
-        ChainProp(name='HLT_mb_mbts_all_L1ZB',        l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'],monGroups=['mbMon:online'], groups=['RATE:CPS_ZB']+ZeroBiasGroup+SupportLegGroup),# ATR-21367
+        ChainProp(name='HLT_mb_mbts_all_L1ZeroBias',        l1SeedThresholds=['FSNOSEED'], stream=['ZeroBias'],monGroups=['mbMon:online'], groups=['RATE:CPS_ZB']+ZeroBiasGroup+SupportPhIGroup),# ATR-21367
         ChainProp(name='HLT_mb_mbts_all_L1MBTS_2_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], monGroups=['mbMon:online'], groups=MinBiasGroup), #ATR-21999
         ChainProp(name='HLT_mb_mbts_all_L1MBTS_1_1_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], monGroups=['mbMon:online'], groups=MinBiasGroup), #ATR-21999
 

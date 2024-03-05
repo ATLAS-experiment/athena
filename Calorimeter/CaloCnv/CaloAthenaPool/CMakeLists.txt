@@ -14,7 +14,6 @@ atlas_add_poolcnv_library( CaloAthenaPoolPoolCnv
    CaloUtilsLib StoreGateLib AthenaPoolCnvSvcLib )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Find the helper code for the T/P tests:

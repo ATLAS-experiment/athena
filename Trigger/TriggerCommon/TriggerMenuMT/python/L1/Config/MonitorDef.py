@@ -220,7 +220,7 @@ class MonitorDef:
                     "L1_MBTS_1", "L1_MBTS_1_1", "L1_MBTS_2",
                     "L1_MBTS_1_A", "L1_MBTS_1_C", "L1_MBTS_4_A", "L1_MBTS_4_C",
                     "L1_MBTS_1_1_EMPTY",
-                    "L1_ZB",
+                    "L1_ZeroBias",
                     "L1_AFP_A_AND_C_TOF_jJ50",
                     # Phase-I
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
@@ -262,7 +262,7 @@ class MonitorDef:
                 "L1_CALREQ0", "L1_CALREQ1", "L1_CALREQ2",
                 "L1_BPTX0_BGRP12","L1_BPTX1_BGRP12",
                 "L1_TGC_BURST",
-                "L1_ZB",
+                "L1_ZeroBias",
                 # Forward
                 # AFP
                 "L1_AFP_A", "L1_AFP_C",

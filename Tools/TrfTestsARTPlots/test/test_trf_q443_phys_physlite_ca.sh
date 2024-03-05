@@ -9,7 +9,7 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py --CA "all:True" "RDOtoRDOTrigger:False" \
+Reco_tf.py --CA "all:True" \
   --AMI q443 \
   --steering doRDO_TRIG doTRIGtoALL \
   --outputAODFile myAOD.pool.root \
