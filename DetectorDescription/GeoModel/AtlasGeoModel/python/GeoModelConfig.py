@@ -6,6 +6,13 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaCommon import Logging
 
 
+def GeoDbTagSvcCfg(flags, name = "GeoDbTagSvc", **kwargs):
+    result =ComponentAccumulator()
+    from RDBAccessSvc.RDBAccessSvcConfig import RDBAccessSvcCfg
+    result.merge(RDBAccessSvcCfg(flags))
+    
+    result.addService(CompFactory.GeoDbTagSvc(name, **kwargs))
+    return result
 def GeoModelCfg(flags):
     if not flags.GeoModel.AtlasVersion:
         raise ValueError('No geometry tag specified')
@@ -18,9 +25,14 @@ def GeoModelCfg(flags):
 
     result=ComponentAccumulator()
 
+    from RDBAccessSvc.RDBAccessSvcConfig import RDBAccessSvcCfg
+    result.merge(RDBAccessSvcCfg(flags))
     #Get DetDescrCnvSvc (for identifier dictionaries (identifier helpers)
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
+    result.merge(GeoDbTagSvcCfg(flags))
     result.merge(DetDescrCnvSvcCfg(flags))
+    
+
 
     #TagInfoMgr used by GeoModelSvc but no ServiceHandle. Relies on string-name
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg

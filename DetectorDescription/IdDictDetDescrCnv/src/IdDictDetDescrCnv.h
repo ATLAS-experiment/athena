@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICTDETDESCRCNV_IDDICTDETDESCRCNV_H
@@ -21,7 +21,10 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "DetDescrCnvSvc/DetDescrConverter.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "IdDictParser/IdDictParser.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 //<<<<<< PUBLIC TYPES                                                   >>>>>>
 
 class IdDictManager;
@@ -53,6 +56,10 @@ class IdDictDetDescrCnv : public DetDescrConverter, public AthMessaging {
     IdDictDetDescrCnv(ISvcLocator *svcloc);
 
    private:
+    
+    ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{"GeoDbTagSvc/GeoDbTagSvc", "IdDictDetDescrCnv"};
+    ServiceHandle<IRDBAccessSvc> m_rdbAccessSvc{"RDBAccessSvc/RDBAccessSvc", "IdDictDetDescrCnv"};
+
     /// Propxy to the DetDescrCnvSvc
     const IProperty *m_detDescrProxy{nullptr};
 

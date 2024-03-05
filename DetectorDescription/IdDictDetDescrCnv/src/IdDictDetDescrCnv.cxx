@@ -16,10 +16,8 @@
 #include "AthenaKernel/StorableConversions.h"
 #include "DetDescrCnvSvc/DetDescrAddress.h"
 #include "DetDescrCnvSvc/DetDescrConverter.h"
-#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
 #include "IdDictDetDescr/IdDictManager.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 
@@ -43,14 +41,10 @@ StatusCode IdDictDetDescrCnv::initialize() {
     m_inDetIDTag = "EMPTY";
     return StatusCode::SUCCESS;
 }
-
-//--------------------------------------------------------------------
-
 StatusCode IdDictDetDescrCnv::finalize() {
     ATH_MSG_INFO("in finalize");
     return StatusCode::SUCCESS;
 }
-
 //--------------------------------------------------------------------
 
 StatusCode IdDictDetDescrCnv::createObj(IOpaqueAddress *pAddr,
@@ -153,14 +147,6 @@ StatusCode IdDictDetDescrCnv::parseXMLDescription() {
     // Determine if the dictionary content comes from DD database or
     // if properties from JobOptions should be used.
     ATH_CHECK(loadProperty("useGeomDB_InDet", m_useGeomDB_InDet));
-
-    if (m_idDictFromRDB && !serviceLocator()->existsService("GeoDbTagSvc")) {
-        ATH_MSG_WARNING(
-            "GeoDbTagSvc not part of this job. Falling back to files name from "
-            "job options");
-        m_idDictFromRDB = false;
-        m_doNeighbours = false;
-    }
 
     if (m_idDictFromRDB)
         ATH_MSG_DEBUG("Dictonary file name from DD database");
@@ -315,13 +301,10 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromProperties() {
     // Calo ids
     ATH_CHECK(loadProperty("CaloIDFileName", m_caloIDFileName));
     // Calo neighbor files
-    ATH_CHECK(
-        loadProperty("FullAtlasNeighborsFileName", m_fullAtlasNeighborsName));
+    ATH_CHECK(loadProperty("FullAtlasNeighborsFileName", m_fullAtlasNeighborsName));
     ATH_CHECK(loadProperty("FCAL2DNeighborsFileName", m_fcal2dNeighborsName));
-    ATH_CHECK(
-        loadProperty("FCAL3DNeighborsNextFileName", m_fcal3dNeighborsNextName));
-    ATH_CHECK(
-        loadProperty("FCAL3DNeighborsPrevFileName", m_fcal3dNeighborsPrevName));
+    ATH_CHECK(loadProperty("FCAL3DNeighborsNextFileName", m_fcal3dNeighborsNextName));
+    ATH_CHECK(loadProperty("FCAL3DNeighborsPrevFileName", m_fcal3dNeighborsPrevName));
 
     ATH_CHECK(loadProperty("TileNeighborsFileName", m_tileNeighborsName));
     // Muon ids
@@ -334,13 +317,10 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromProperties() {
 //--------------------------------------------------------------------
 StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
     // Fetch file names and tags from the RDB
-
-    IGeoDbTagSvc *geoDbTagSvc{nullptr};
-    ATH_CHECK(service("GeoDbTagSvc", geoDbTagSvc));
-    ATH_MSG_DEBUG("Accessed GeoDbTagSvc.");
-    IRDBAccessSvc *rdbAccessSvc{nullptr};
-    ATH_CHECK(service(geoDbTagSvc->getParamSvcName(), rdbAccessSvc));
-    ATH_MSG_DEBUG("Accessed " << geoDbTagSvc->getParamSvcName());
+    ATH_CHECK(m_geoDbTagSvc.retrieve());
+    ATH_MSG_DEBUG("Accessed " << m_geoDbTagSvc->getParamSvcName());
+    m_rdbAccessSvc.setName(m_geoDbTagSvc->getParamSvcName());
+    ATH_CHECK(m_rdbAccessSvc.retrieve());
 
     auto assignTagAndName = [this](const IRDBRecordset_ptr &idDictSet,
                                    std::string &fileName,
@@ -360,41 +340,39 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
                           << ", with internal tag: " << m_inDetIDTag
                           << ", dictionary tag: " << dictTag);
 
-        } else
-            ATH_MSG_WARNING(
-                " no record set found for dictionary - using default "
-                "dictionary ");
+        } else {
+            ATH_MSG_WARNING(" no record set found for dictionary"<<idDictSet->nodeName()<< " - using default dictionary ");
+        }
     };
 
     // Function for reading ID dictionary as a BLOB from SQLite
     // and writing it on the disk in the run directory
-    auto getEmbeddedDict = [this](const std::string& dictName
-				  , IRDBAccessSvc* rdbAccessSvc
-				  , std::string &fileName
-				  , std::string &dictTag) -> bool
+    auto getEmbeddedDict = [this](const std::string& dictName,
+                                  std::string &fileName,
+                                  std::string &dictTag) -> bool
     {
-      IRDBRecordset_ptr rec = rdbAccessSvc->getRecordsetPtr(dictName,"","");
+      ATH_MSG_DEBUG("Try to access "<<dictName);
+      IRDBRecordset_ptr rec = m_rdbAccessSvc->getRecordsetPtr(dictName,"","");
       if(rec->size()>0) {
-	const IRDBRecord *dictRecord = (*rec)[0];
-	std::string dictString = dictRecord->getString("CONTENTS");
+        const IRDBRecord *dictRecord = (*rec)[0];
+        std::string dictString = dictRecord->getString("CONTENTS");
+        //  write to the temporary file
+        std::string dictFileName = dictName+"-fromSQLite.xml";
+        std::ofstream dictFile;
+        dictFile.open(dictFileName);
+        dictFile << dictString;
+        dictFile.close();
 
-	//  write to the temporary file
-	std::string dictFileName = dictName+"-fromSQLite.xml";
-	std::ofstream dictFile;
-	dictFile.open(dictFileName);
-	dictFile << dictString;
-	dictFile.close();
+        fileName = dictFileName;
+        dictTag.clear();   // This may change in the future if we also write dict tags into SQLite
 
-	fileName = dictFileName;
-	dictTag = std::string();  // This may change in the future if we also write dict tags into SQLite
-
-	ATH_MSG_DEBUG(dictName << " read from the SQLite database as a BLOB");
-	return true;
+        ATH_MSG_DEBUG(dictName << " read from the SQLite database as a BLOB");
+        return true;
       }
       return false;
     };
 
-    bool useGeomDB = (geoDbTagSvc->getSqliteReader() == nullptr);
+    bool useGeomDB = (m_geoDbTagSvc->getSqliteReader() == nullptr);
 
     std::string detTag{""}, detNode{""}, dictName{""};
     DecodeVersionKey detectorKey("ATLAS");
@@ -406,12 +384,12 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
     if (m_useGeomDB_InDet) {
         // Get Innner Detector xml and write to the temporary file
         // InDetIdDict.xml
-        detectorKey = DecodeVersionKey(geoDbTagSvc, "InnerDetector");
+        detectorKey = DecodeVersionKey(m_geoDbTagSvc.get(), "InnerDetector");
         ATH_MSG_DEBUG("From Version Tag: " << detectorKey.tag() << " at Node: "
                                            << detectorKey.node());
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
-        idDictSet = rdbAccessSvc->getRecordsetPtr("DICTXDD", detTag, detNode);
+        idDictSet = m_rdbAccessSvc->getRecordsetPtr("DICTXDD", detTag, detNode);
 
         // Size == 0 if not found
         if (idDictSet->size()) {
@@ -423,147 +401,125 @@ StatusCode IdDictDetDescrCnv::getFileNamesFromTags() {
             blobFile.open("InDetIdDict.xml");
             blobFile << InDetString << std::endl;
             blobFile.close();
-        } else
-            ATH_MSG_WARNING(
-                " no record set found for InDetIdentifier - using default "
-                "dictionary ");
-
+        } else {
+            ATH_MSG_WARNING(" no record set found for InDetIdentifier - using default dictionary ");
+        }
     } else {
       // Attempt to read the embedded disctionary from SQLite
-      embeddedDict = !useGeomDB && getEmbeddedDict("IdDictInnerDetector",rdbAccessSvc,m_inDetIDFileName,m_inDetIdDictTag);
+      embeddedDict = !useGeomDB && getEmbeddedDict("IdDictInnerDetector",m_inDetIDFileName,m_inDetIdDictTag);
       if(!embeddedDict) {
-	// Fall back on getting file names from the database
+        // Fall back on getting file names from the database
         if (useGeomDB) {
-	  detectorKey = DecodeVersionKey(geoDbTagSvc, "InnerDetector");
-	  ATH_MSG_DEBUG("From Version Tag: " << detectorKey.tag()
-			<< " at Node: "
-			<< detectorKey.node());
-	  detTag = detectorKey.tag();
-	  detNode = detectorKey.node();
+            detectorKey = DecodeVersionKey(m_geoDbTagSvc.get(), "InnerDetector");
+            ATH_MSG_DEBUG("From Version Tag: " << detectorKey.tag() << " at Node: " << detectorKey.node());
+            detTag = detectorKey.tag();
+            detNode = detectorKey.node();
         }
-        idDictSet = rdbAccessSvc->getRecordsetPtr("InDetIdentifier", detTag, detNode);
+        idDictSet = m_rdbAccessSvc->getRecordsetPtr("InDetIdentifier", detTag, detNode);
         assignTagAndName(idDictSet, m_inDetIDFileName, m_inDetIdDictTag);
       }
     }
 
     // Get LAr
     // Attempt to read the embedded disctionary from SQLite
-    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictLArCalorimeter",rdbAccessSvc,m_larIDFileName,m_larIdDictTag);
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictLArCalorimeter",m_larIDFileName,m_larIdDictTag);
     if(!embeddedDict) {
-      // Fall back on getting file names from the database
-      if (useGeomDB) {
-        detectorKey = DecodeVersionKey(geoDbTagSvc, "LAr");
-        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-		       << " at Node: " << detectorKey.node() );
-        detTag = detectorKey.tag();
-        detNode = detectorKey.node();
-      }
-      idDictSet = rdbAccessSvc->getRecordsetPtr("LArIdentifier", detTag, detNode);
-      assignTagAndName(idDictSet, m_larIDFileName, m_larIdDictTag);
+        // Fall back on getting file names from the database
+        if (useGeomDB) {
+            detectorKey = DecodeVersionKey(m_geoDbTagSvc.get(), "LAr");
+            ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag() << " at Node: " << detectorKey.node() );
+            detTag = detectorKey.tag();
+            detNode = detectorKey.node();
+        }
+        idDictSet = m_rdbAccessSvc->getRecordsetPtr("LArIdentifier", detTag, detNode);
+        assignTagAndName(idDictSet, m_larIDFileName, m_larIdDictTag);
     }
 
     // Get Tile
     // Attempt to read the embedded disctionary from SQLite
-    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictTileCalorimeter",rdbAccessSvc,m_tileIDFileName,m_tileIdDictTag);
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictTileCalorimeter",m_tileIDFileName,m_tileIdDictTag);
     if(!embeddedDict) {
-      // Fall back on getting file names from the database
-      if (useGeomDB) {
-        detectorKey = DecodeVersionKey(geoDbTagSvc, "TileCal");
-        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-		       << " at Node: " << detectorKey.node() );
-        detTag = detectorKey.tag();
-        detNode = detectorKey.node();
-      }
-      idDictSet = rdbAccessSvc->getRecordsetPtr("TileIdentifier", detTag, detNode);
-      assignTagAndName(idDictSet, m_tileIDFileName, m_tileIdDictTag);
+        // Fall back on getting file names from the database
+        if (useGeomDB) {
+            detectorKey = DecodeVersionKey(m_geoDbTagSvc.get(), "TileCal");
+            ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag() << " at Node: " << detectorKey.node() );
+            detTag = detectorKey.tag();
+            detNode = detectorKey.node();
+        }
+        idDictSet = m_rdbAccessSvc->getRecordsetPtr("TileIdentifier", detTag, detNode);
+        assignTagAndName(idDictSet, m_tileIDFileName, m_tileIdDictTag);
     }
 
     // Get Calo
     // Attempt to read the embedded disctionary from SQLite
-    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictCalorimeter",rdbAccessSvc,m_caloIDFileName,m_caloIdDictTag);
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictCalorimeter",m_caloIDFileName,m_caloIdDictTag);
     if(!embeddedDict) {
       // Fall back on getting file names from the database
       if (useGeomDB) {
-        detectorKey = DecodeVersionKey(geoDbTagSvc, "Calorimeter");
-        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-		       << " at Node: " << detectorKey.node() );
+        detectorKey = DecodeVersionKey(m_geoDbTagSvc.get(), "Calorimeter");
+        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()<< " at Node: " << detectorKey.node() );
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
       }
-      idDictSet = rdbAccessSvc->getRecordsetPtr("CaloIdentifier", detTag, detNode);
+      idDictSet = m_rdbAccessSvc->getRecordsetPtr("CaloIdentifier", detTag, detNode);
       assignTagAndName(idDictSet, m_caloIDFileName, m_caloIdDictTag);
     }
     // Calo neighbor files:
-    IRDBRecordset_ptr caloNeighborTable =
-        rdbAccessSvc->getRecordsetPtr("CaloNeighborTable", detTag, detNode);
+    IRDBRecordset_ptr caloNeighborTable = m_rdbAccessSvc->getRecordsetPtr("CaloNeighborTable", detTag, detNode);
 
     if (caloNeighborTable->size() == 0 && useGeomDB) {
-        caloNeighborTable = rdbAccessSvc->getRecordsetPtr(
-            "CaloNeighborTable", "CaloNeighborTable-00");
+        caloNeighborTable = m_rdbAccessSvc->getRecordsetPtr("CaloNeighborTable", "CaloNeighborTable-00");
     }
     // Size == 0 if not found
     if (caloNeighborTable->size()) {
         const IRDBRecord *neighborTable = (*caloNeighborTable)[0];
-        m_fullAtlasNeighborsName =
-            neighborTable->getString("FULLATLASNEIGHBORS");
+        m_fullAtlasNeighborsName = neighborTable->getString("FULLATLASNEIGHBORS");
         m_fcal2dNeighborsName = neighborTable->getString("FCAL2DNEIGHBORS");
-        m_fcal3dNeighborsNextName =
-            neighborTable->getString("FCAL3DNEIGHBORSNEXT");
-        m_fcal3dNeighborsPrevName =
-            neighborTable->getString("FCAL3DNEIGHBORSPREV");
+        m_fcal3dNeighborsNextName = neighborTable->getString("FCAL3DNEIGHBORSNEXT");
+        m_fcal3dNeighborsPrevName = neighborTable->getString("FCAL3DNEIGHBORSPREV");
         m_tileNeighborsName = neighborTable->getString("TILENEIGHBORS");
         ATH_MSG_DEBUG(" using neighbor files:  ");
-        ATH_MSG_DEBUG(
-            "   FullAtlasNeighborsFileName:  " << m_fullAtlasNeighborsName);
-        ATH_MSG_DEBUG(
-            "   FCAL2DNeighborsFileName:     " << m_fcal2dNeighborsName);
-        ATH_MSG_DEBUG(
-            "   FCAL3DNeighborsNextFileName: " << m_fcal3dNeighborsNextName);
-        ATH_MSG_DEBUG(
-            "   FCAL3DNeighborsPrevFileName: " << m_fcal3dNeighborsPrevName);
-        ATH_MSG_DEBUG(
-            "   TileNeighborsFileName:       " << m_tileNeighborsName);
-    } else {
-        ATH_MSG_ERROR(" no record set found neighbour file ");
-        return StatusCode::FAILURE;
+        ATH_MSG_DEBUG("   FullAtlasNeighborsFileName:  " << m_fullAtlasNeighborsName);
+        ATH_MSG_DEBUG("   FCAL2DNeighborsFileName:     " << m_fcal2dNeighborsName);
+        ATH_MSG_DEBUG("   FCAL3DNeighborsNextFileName: " << m_fcal3dNeighborsNextName);
+        ATH_MSG_DEBUG("   FCAL3DNeighborsPrevFileName: " << m_fcal3dNeighborsPrevName);
+        ATH_MSG_DEBUG("   TileNeighborsFileName:       " << m_tileNeighborsName);
     }
 
     // Get Muon
     // Attempt to read the embedded disctionary from SQLite
-    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictMuonSpectrometer",rdbAccessSvc,m_muonIDFileName,m_muonIdDictTag);
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictMuonSpectrometer", m_muonIDFileName, m_muonIdDictTag);
     if(!embeddedDict) {
       // Fall back on getting file names from the database
       if (useGeomDB) {
-        detectorKey = DecodeVersionKey(geoDbTagSvc, "MuonSpectrometer");
-        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-		       << " at Node: " << detectorKey.node() );
+        detectorKey = DecodeVersionKey(m_geoDbTagSvc.get(), "MuonSpectrometer");
+        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()<< " at Node: " << detectorKey.node() );
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
       }
-      idDictSet = rdbAccessSvc->getRecordsetPtr("MuonIdentifier", detTag, detNode);
+      idDictSet = m_rdbAccessSvc->getRecordsetPtr("MuonIdentifier", detTag, detNode);
       assignTagAndName(idDictSet, m_muonIDFileName, m_muonIdDictTag);
     }
 
     // Get Forward
     // Attempt to read the embedded disctionary from SQLite
-    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictForwardDetectors",rdbAccessSvc,m_forwardIDFileName,m_forwardIdDictTag);
+    embeddedDict = !useGeomDB && getEmbeddedDict("IdDictForwardDetectors",m_forwardIDFileName,m_forwardIdDictTag);
     if(!embeddedDict) {
       // Fall back on getting file names from the database
       if (useGeomDB) {
-        detectorKey = DecodeVersionKey(geoDbTagSvc, "ForwardDetectors");
-        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag()
-		       << " at Node: " << detectorKey.node() );
+        detectorKey = DecodeVersionKey(m_geoDbTagSvc.get(), "ForwardDetectors");
+        ATH_MSG_DEBUG( "From Version Tag: " << detectorKey.tag() << " at Node: " << detectorKey.node() );
         detTag = detectorKey.tag();
         detNode = detectorKey.node();
       }
-      idDictSet = rdbAccessSvc->getRecordsetPtr("ForDetIdentifier", detTag, detNode);
+      idDictSet = m_rdbAccessSvc->getRecordsetPtr("ForDetIdentifier", detTag, detNode);
 
       // For older datasets use ForDetIdentifier-00 as fallback
       if (idDictSet->size() == 0 && useGeomDB) {
-        idDictSet = rdbAccessSvc->getRecordsetPtr("ForDetIdentifier",
+        idDictSet = m_rdbAccessSvc->getRecordsetPtr("ForDetIdentifier",
                                                   "ForDetIdentifier-00");
         ATH_MSG_DEBUG(" explicitly requesting ForDetIdentifier-00 tag for pre-forward "
-		      "detector data  ");
+                "detector data  ");
       }
       // Size == 0 if not found
       assignTagAndName(idDictSet, m_forwardIDFileName, m_forwardIdDictTag);
@@ -649,16 +605,12 @@ StatusCode IdDictDetDescrCnv::registerInfoWithDicts() {
         return StatusCode::SUCCESS;
     };
     ATH_CHECK(setDictPaths("ATLAS", m_atlasIDFileName, m_atlasIdDictTag));
-    ATH_CHECK(
-        setDictPaths("InnerDetector", m_inDetIDFileName, m_inDetIdDictTag));
+    ATH_CHECK(setDictPaths("InnerDetector", m_inDetIDFileName, m_inDetIdDictTag));
     ATH_CHECK(setDictPaths("LArCalorimeter", m_larIDFileName, m_larIdDictTag));
-    ATH_CHECK(
-        setDictPaths("TileCalorimeter", m_tileIDFileName, m_tileIdDictTag));
+    ATH_CHECK(setDictPaths("TileCalorimeter", m_tileIDFileName, m_tileIdDictTag));
     ATH_CHECK(setDictPaths("Calorimeter", m_caloIDFileName, m_caloIdDictTag));
-    ATH_CHECK(
-        setDictPaths("MuonSpectrometer", m_muonIDFileName, m_muonIdDictTag));
-    ATH_CHECK(setDictPaths("ForwardDetectors", m_forwardIDFileName,
-                           m_forwardIdDictTag));
+    ATH_CHECK(setDictPaths("MuonSpectrometer", m_muonIDFileName, m_muonIdDictTag));
+    ATH_CHECK(setDictPaths("ForwardDetectors", m_forwardIDFileName, m_forwardIdDictTag));
 
     auto addMetaData = [&mgr, this](const std::string &key,
                                     const std::string &value) {

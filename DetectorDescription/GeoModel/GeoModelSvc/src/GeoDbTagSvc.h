@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_GEODBTAGSVC_H
 #define GEOMODELSVC_GEODBTAGSVC_H
 
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "AthenaBaseComps/AthService.h"
 
 template <class TYPE> class SvcFactory;
@@ -22,7 +23,7 @@ class GeoDbTagSvc : public extends<AthService, IGeoDbTagSvc>
   virtual ~GeoDbTagSvc() = default;
 
  protected:
-
+    ServiceHandle<IRDBAccessSvc> m_rdbAccesSvc{this, "RDBAccessSvc", "RDBAccessSvc/RDBAccessSvc"};
   void setAtlasVersion(const std::string& tag)                     { m_AtlasVersion=tag; }
   void setInDetVersionOverride(const std::string& tag)             { m_InDetVersionOverride=tag; }
   void setPixelVersionOverride(const std::string& tag)             { m_PixelVersionOverride=tag; }
@@ -102,7 +103,7 @@ class GeoDbTagSvc : public extends<AthService, IGeoDbTagSvc>
 
   GeoModel::GeoConfig m_geoConfig;
 
-  std::string m_paramSvcName;
+  std::string m_paramSvcName{"RDBAccessSvc"};
   GeoModelIO::ReadGeoModel* m_sqliteReader{nullptr};
 };
 

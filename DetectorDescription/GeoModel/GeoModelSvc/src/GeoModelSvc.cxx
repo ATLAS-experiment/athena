@@ -170,8 +170,7 @@ StatusCode GeoModelSvc::geoInit()
     m_sqliteDbManager = std::make_unique<GMDBManager>(sqliteDbPath);
     if(m_sqliteDbManager->checkIsDBOpen()) {
       ATH_MSG_INFO("Successfully opened SQLite DB file " << sqliteDbPath << " for reading in persistent GeoModel tree");
-    }
-    else {
+    } else {
       ATH_MSG_FATAL("Failed to open SQLite database " << sqliteDbPath << " for reading in persistent GeoModel tree");
       return StatusCode::FAILURE;
     }
@@ -190,8 +189,7 @@ StatusCode GeoModelSvc::geoInit()
     if(!sqliteReadSvc->connect(sqliteDbPath)) {
       ATH_MSG_FATAL("Failed to open SQLite database file " << sqliteDbPath << " for reading geometry parameters");
       return StatusCode::FAILURE;
-    }
-    else {
+    } else {
       ATH_MSG_INFO("Successfully opened SQLite DB file: " << sqliteDbPath << " for reading Det Descr parameters");
     }
     dbTagSvc->setParamSvcName("SqliteReadSvc");
@@ -308,10 +306,7 @@ StatusCode GeoModelSvc::geoInit()
     mem = GeoPerfUtils::getMem();
     cpu = GeoPerfUtils::getCpu();
       
-    if(theTool->create().isFailure()) {
-      ATH_MSG_ERROR("Unable to create detector " << theTool->name());
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(theTool->create());
       
     if(m_statisticsToFile) {
       *geoModelStats << theTool->name() << "\t SZ= " 

@@ -161,10 +161,6 @@ def setupGeoR4TestCfg(args, setupSimJob = False):
     return flags, cfg
 
 def executeTest(cfg, num_events = 1):
-    DetDescCnvSvc = cfg.getService("DetDescrCnvSvc")
-    DetDescCnvSvc.IdDictFromRDB = False
-    DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.10.00.xml"
-    DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.09.03.xml"
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     if not cfg.run(num_events).isSuccess(): exit(1)
