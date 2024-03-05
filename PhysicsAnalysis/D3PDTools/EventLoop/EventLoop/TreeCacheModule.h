@@ -27,10 +27,11 @@ namespace EL
       //
 
     public:
-      virtual ::StatusCode onNewInputFile (ModuleData& data) override;
 
-    public:
-      virtual ::StatusCode onCloseInputFile (ModuleData& data) override;
+      using Module::Module;
+
+      virtual StatusCode onNewInputFile (ModuleData& data) override;
+      virtual StatusCode onCloseInputFile (ModuleData& data) override;
     };
   }
 }

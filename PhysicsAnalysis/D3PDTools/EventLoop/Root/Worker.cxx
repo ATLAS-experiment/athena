@@ -383,27 +383,31 @@ namespace EL
 
     ANA_MSG_INFO ("xAODInput = " << xAODInput);
     if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
-      m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("EarlyMemoryMonitor"));
+      m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("EarlyMemoryMonitorModule"));
     if (xAODInput)
-      m_modules.push_back (std::make_unique<Detail::TEventModule> ());
+      m_modules.push_back (std::make_unique<Detail::TEventModule> ("TEventModule"));
     auto factoryPreload = metaData()->castString (Job::optFactoryPreload, "");
     if (!factoryPreload.empty())
-      m_modules.push_back (std::make_unique<Detail::FactoryPreloadModule> (factoryPreload));
-    m_modules.push_back (std::make_unique<Detail::LeakCheckModule> ());
-    m_modules.push_back (std::make_unique<Detail::StopwatchModule> ());
+    {
+      auto module = std::make_unique<Detail::FactoryPreloadModule> ("FactoryPreloadModule");
+      module->preloader = factoryPreload;
+      m_modules.push_back (std::move (module));
+    }
+    m_modules.push_back (std::make_unique<Detail::LeakCheckModule> ("LeakCheckModule"));
+    m_modules.push_back (std::make_unique<Detail::StopwatchModule> ("StopwatchModule"));
     if (metaData()->castBool (Job::optGridReporting, false))
-      m_modules.push_back (std::make_unique<Detail::GridReportingModule>());
+      m_modules.push_back (std::make_unique<Detail::GridReportingModule>("GridReportingModule"));
     if (metaData()->castBool (Job::optAlgorithmTimer, false))
-      m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ());
+      m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ("AlgorithmTimerModule"));
     if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
-      m_modules.push_back (std::make_unique<Detail::AlgorithmMemoryModule> ());
-    m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ());
-    m_modules.push_back (std::make_unique<Detail::EventCountModule> ());
-    m_modules.push_back (std::make_unique<Detail::WorkerConfigModule> ());
-    m_modules.push_back (std::make_unique<Detail::AlgorithmStateModule> ());
-    m_modules.push_back (std::make_unique<Detail::PostClosedOutputsModule> ());
+      m_modules.push_back (std::make_unique<Detail::AlgorithmMemoryModule> ("AlgorithmMemoryModule"));
+    m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ("FileExecutedModule"));
+    m_modules.push_back (std::make_unique<Detail::EventCountModule> ("EventCountModule"));
+    m_modules.push_back (std::make_unique<Detail::WorkerConfigModule> ("WorkerConfigModule"));
+    m_modules.push_back (std::make_unique<Detail::AlgorithmStateModule> ("AlgorithmStateModule"));
+    m_modules.push_back (std::make_unique<Detail::PostClosedOutputsModule> ("PostClosedOutputsModule"));
     if (metaData()->castBool (Job::optAlgorithmMemoryMonitor, false))
-      m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("LateMemoryMonitor"));
+      m_modules.push_back (std::make_unique<Detail::MemoryMonitorModule> ("LateMemoryMonitorModule"));
 
     if (m_outputs.find (Job::histogramStreamName) == m_outputs.end())
     {
@@ -750,7 +754,7 @@ namespace EL
     }
 
     {
-      auto module = std::make_unique<Detail::DirectInputModule> ();
+      auto module = std::make_unique<Detail::DirectInputModule> ("DirectInputModule");
       module->fileList = sample->makeFileList();
       Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
       if (maxEvents != -1)
@@ -819,7 +823,7 @@ namespace EL
       }
 
       {
-        auto module = std::make_unique<Detail::BatchInputModule> ();
+        auto module = std::make_unique<Detail::BatchInputModule> ("BatchInputModule");
         Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
         if (maxEvents != -1)
           module->maxEvents = maxEvents;
@@ -937,7 +941,7 @@ namespace EL
     setJobConfig (std::move (*jobConfig));
 
     {
-      auto module = std::make_unique<Detail::DirectInputModule> ();
+      auto module = std::make_unique<Detail::DirectInputModule> ("DirectInputModule");
       std::ifstream infile("input.txt");
       while (infile) {
         std::string sLine;

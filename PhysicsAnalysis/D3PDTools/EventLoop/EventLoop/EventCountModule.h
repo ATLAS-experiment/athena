@@ -27,7 +27,10 @@ namespace EL
       //
 
     public:
-      virtual ::StatusCode postFinalize (ModuleData& data) override;
+
+      using Module::Module;
+
+      virtual StatusCode postFinalize (ModuleData& data) override;
     };
   }
 }

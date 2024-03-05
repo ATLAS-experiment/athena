@@ -26,6 +26,8 @@ namespace EL
 
     public:
 
+      using Module::Module;
+
       std::vector<std::string> fileList;
       std::optional<uint64_t> skipEvents;
       std::optional<uint64_t> maxEvents;

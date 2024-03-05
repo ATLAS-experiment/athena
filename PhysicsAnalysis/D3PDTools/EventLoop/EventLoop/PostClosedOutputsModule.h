@@ -23,8 +23,12 @@ namespace EL
       //
       // public interfacce
       //
+
     public:
-      virtual ::StatusCode postFileClose   (ModuleData& data) override;
+
+      using Module::Module;
+
+      virtual StatusCode postFileClose   (ModuleData& data) override;
     };
   }
 }

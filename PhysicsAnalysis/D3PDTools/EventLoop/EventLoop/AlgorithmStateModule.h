@@ -40,21 +40,15 @@ namespace EL
       //
 
     public:
-      virtual ::StatusCode onInitialize (ModuleData& data) override;
 
-    public:
-      virtual ::StatusCode onFinalize (ModuleData& data) override;
+      using Module::Module;
 
-    public:
-      virtual ::StatusCode onCloseInputFile (ModuleData& data) override;
-
-    public:
-      virtual ::StatusCode onNewInputFile (ModuleData& data) override;
-
-    public:
-      virtual ::StatusCode onFileExecute (ModuleData& data) override;
-
-      virtual ::StatusCode onExecute (ModuleData& data) override;
+      virtual StatusCode onInitialize (ModuleData& data) override;
+      virtual StatusCode onFinalize (ModuleData& data) override;
+      virtual StatusCode onCloseInputFile (ModuleData& data) override;
+      virtual StatusCode onNewInputFile (ModuleData& data) override;
+      virtual StatusCode onFileExecute (ModuleData& data) override;
+      virtual StatusCode onExecute (ModuleData& data) override;
 
 
 

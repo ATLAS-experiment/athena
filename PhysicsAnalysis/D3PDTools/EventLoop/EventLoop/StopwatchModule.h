@@ -28,16 +28,13 @@ namespace EL
       //
 
     public:
-      virtual ::StatusCode firstInitialize (ModuleData& data) override;
 
-    public:
-      virtual ::StatusCode onFileExecute (ModuleData& data) override;
+      using Module::Module;
 
-    public:
-      virtual ::StatusCode postFinalize (ModuleData& data) override;
-
-    public:
-      virtual ::StatusCode onWorkerEnd (ModuleData& data) override;
+      virtual StatusCode firstInitialize (ModuleData& data) override;
+      virtual StatusCode onFileExecute (ModuleData& data) override;
+      virtual StatusCode postFinalize (ModuleData& data) override;
+      virtual StatusCode onWorkerEnd (ModuleData& data) override;
 
       //
       // private interface

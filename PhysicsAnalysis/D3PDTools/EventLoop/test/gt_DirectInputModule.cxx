@@ -101,7 +101,7 @@ namespace EL
 
     TEST_F (DirectInputModuleTest, simpleTest)
     {
-      auto module = std::make_unique<DirectInputModule> ();
+      auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
       module->fileList = {"test1.root", "test2.root"};
 
       actions.toProcessFiles =
@@ -117,7 +117,7 @@ namespace EL
 
     TEST_F (DirectInputModuleTest, skipLimitTest)
     {
-      auto module = std::make_unique<DirectInputModule> ();
+      auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
       module->fileList = {"test1.root", "test2.root"};
       module->skipEvents = 5u;
       module->maxEvents = 10u;
@@ -135,7 +135,7 @@ namespace EL
 
     TEST_F (DirectInputModuleTest, skipFileTest)
     {
-      auto module = std::make_unique<DirectInputModule> ();
+      auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
       module->fileList = {"test1.root", "test2.root"};
       module->skipEvents = 15u;
 
@@ -151,7 +151,7 @@ namespace EL
 
     TEST_F (DirectInputModuleTest, limitFileTest)
     {
-      auto module = std::make_unique<DirectInputModule> ();
+      auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
       module->fileList = {"test1.root", "test2.root"};
       module->maxEvents = 5u;
 
@@ -167,7 +167,7 @@ namespace EL
 
     TEST_F (DirectInputModuleTest, emptyFileTest)
     {
-      auto module = std::make_unique<DirectInputModule> ();
+      auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
       module->fileList = {"empty.root", "test1.root", "test2.root"};
 
       actions.toProcessFiles =
@@ -183,7 +183,7 @@ namespace EL
 
     TEST_F (DirectInputModuleTest, skipToEmptyTest)
     {
-      auto module = std::make_unique<DirectInputModule> ();
+      auto module = std::make_unique<DirectInputModule> ("DirectInputModule");
       module->fileList = {"test1.root", "empty.root", "test2.root"};
       module->skipEvents = 10u;
 

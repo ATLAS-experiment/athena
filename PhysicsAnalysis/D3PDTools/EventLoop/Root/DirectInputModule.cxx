@@ -13,7 +13,6 @@
 
 #include <EventLoop/IInputModuleActions.h>
 #include <EventLoop/EventRange.h>
-#include <EventLoop/MessageCheck.h>
 #include <RootCoreUtils/Assert.h>
 
 //
@@ -27,7 +26,6 @@ namespace EL
     StatusCode DirectInputModule ::
     processInputs (ModuleData& /*data*/, IInputModuleActions& actions)
     {
-      using namespace msgEventLoop;
       Long64_t toSkip = this->skipEvents.value_or (0);
       std::optional<Long64_t> toProcess;
       if (this->maxEvents.has_value())

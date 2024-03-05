@@ -23,12 +23,12 @@ namespace EL
 {
   namespace Detail
   {
-    ::StatusCode AlgorithmTimerModule ::
+    StatusCode AlgorithmTimerModule ::
     firstInitialize (ModuleData& data)
     {
       for (auto& alg : data.m_algs)
         alg.m_algorithm = std::make_unique<AlgorithmTimerWrapper>(std::move (alg.m_algorithm));
-      return ::StatusCode::SUCCESS;
+      return StatusCode::SUCCESS;
     }
   }
 }

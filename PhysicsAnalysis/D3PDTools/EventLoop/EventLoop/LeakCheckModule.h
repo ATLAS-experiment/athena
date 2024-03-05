@@ -28,13 +28,12 @@ namespace EL
       //
 
     public:
-      virtual ::StatusCode postFirstEvent (ModuleData& data) override;
 
-    public:
-      virtual ::StatusCode onWorkerEnd (ModuleData& data) override;
+      using Module::Module;
 
-    public:
-      virtual ::StatusCode postFinalize (ModuleData& data) override;
+      virtual StatusCode postFirstEvent (ModuleData& data) override;
+      virtual StatusCode onWorkerEnd (ModuleData& data) override;
+      virtual StatusCode postFinalize (ModuleData& data) override;
 
 
 

@@ -27,7 +27,7 @@ namespace EL
     // I pick (this is meant as a white-box test).
     TEST (MemoryMonitorModuleTest, simpleTest)
     {
-      auto module = std::make_unique<MemoryMonitorModule> ("monitor");
+      auto module = std::make_unique<MemoryMonitorModule> ("MemoryMonitorModule");
       ModuleData data;
 
       ASSERT_SUCCESS (module->firstInitialize (data));

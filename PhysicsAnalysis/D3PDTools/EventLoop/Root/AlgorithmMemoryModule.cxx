@@ -12,7 +12,6 @@
 
 #include <EventLoop/AlgorithmMemoryModule.h>
 
-#include <EventLoop/MessageCheck.h>
 #include <EventLoop/ModuleData.h>
 #include <EventLoop/AlgorithmMemoryWrapper.h>
 #include <TSystem.h>
@@ -28,7 +27,6 @@ namespace EL
     StatusCode AlgorithmMemoryModule ::
     firstInitialize (ModuleData& data)
     {
-      using namespace msgEventLoop;
       ::ProcInfo_t pinfo;
       if (gSystem->GetProcInfo (&pinfo) != 0) {
         ANA_MSG_ERROR ("Could not get memory usage information");

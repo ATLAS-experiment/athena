@@ -23,6 +23,8 @@ namespace EL
     {
     public:
 
+      using Module::Module;
+
       virtual StatusCode onInitialize (ModuleData& data) override;
     };
   }
