@@ -11,7 +11,7 @@ BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn\.GN2v00_p
 AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.GN2(.*)
 
 # JetEtMiss branches
-AntiKt4EMPFlowJetsAuxDyn(.*)
+AntiKt4EMPFlowJetsAuxDyn(?!\.jetRank)
 Kt4EMPFlowEventShapeAuxDyn.Density
 Kt4EMPFlowPUSBEventShapeAuxDyn.Density
 Kt4EMPFlowNeutEventShapeAuxDyn.Density
