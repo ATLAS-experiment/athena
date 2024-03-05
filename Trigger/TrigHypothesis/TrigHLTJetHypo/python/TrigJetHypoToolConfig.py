@@ -114,19 +114,24 @@ def  trigJetEJsHypoToolFromDict(chain_dict):
 
     return  hypo
 
-def  trigJetCRHypoToolFromDict(chain_dict):
+def  trigJetCRVARHypoToolFromDict(chain_dict):
     chain_name = chain_dict['chainName']
  
     doBIBrm = int(0)
-    if 'calratio' in chain_dict['chainParts'][0]['exotHypo'] or 'calratiormbib' in chain_dict['chainParts'][0]['exotHypo']:
-        if 'calratiormbib' in chain_dict['chainParts'][0]['exotHypo']:
-            doBIBrm = int(1)
+    if len(chain_dict['chainParts'][0]['exotHypo']) > 0:
+        exot_hypo = chain_dict['chainParts'][0]['exotHypo'][0]
     else:
-        raise Exception("misconfiguration of Exotic jet chain")
+        raise Exception("Unable to extract exotHypo calratio jet configuration from chain dict")
+    if 'calratiovar' in exot_hypo:
+            if 'calratiovarrmbib' in exot_hypo:
+                 doBIBrm = int(1)
+    else:
+        raise Exception("misconfiguration of new calratio jet chain")
+
     presel_matched = re.match(r'.*emf(?P<cut>\d?\d?[\d\D]+)', chain_dict['chainParts'][0]['trkpresel'])
     emf_cut = presel_matched.groupdict()['cut']
     import math
-    hypo = CompFactory.TrigJetCRHypoTool(chain_name)
+    hypo = CompFactory.TrigJetCRVARHypoTool(chain_name)
     hypo.MpufixLogRatio     = math.log10(1./(float(emf_cut)*0.01) - 1.)
     hypo.MinjetlogR      = 1.2
     hypo.MintrackPt      = 2*GeV
@@ -136,17 +141,21 @@ def  trigJetCRHypoToolFromDict(chain_dict):
 
     return  hypo
 
-def  trigJetCROldHypoToolFromDict(chain_dict):
+def  trigJetCRHypoToolFromDict(chain_dict):
     chain_name = chain_dict['chainName']
  
     doBIBrm = int(0)
-    if 'calrtold' in chain_dict['chainParts'][0]['exotHypo'] or 'calrtoldrmbib' in chain_dict['chainParts'][0]['exotHypo']:
-        if 'calrtoldrmbib' in chain_dict['chainParts'][0]['exotHypo']:
-            doBIBrm = int(1)
+    if len(chain_dict['chainParts'][0]['exotHypo']) > 0:
+        exot_hypo = chain_dict['chainParts'][0]['exotHypo'][0]
     else:
-        raise Exception("misconfiguration of Exotic jet chain")
+        raise Exception("Unable to extract exotHypo calratio jet configuration from chain dict")
+    if 'calratio' in exot_hypo and  ('calratiovar' not in exot_hypo):
+            if 'calratiormbib' in exot_hypo:
+                 doBIBrm = int(1)
+    else:
+        raise Exception("misconfiguration of new calratio jet chain")
 
-    hypo = CompFactory.TrigJetCROldHypoTool(chain_name)
+    hypo = CompFactory.TrigJetCRHypoTool(chain_name)
     hypo.MinjetlogR      = 1.2
     hypo.MintrackPt      = 2*GeV
     hypo.MindeltaR       = 0.2
