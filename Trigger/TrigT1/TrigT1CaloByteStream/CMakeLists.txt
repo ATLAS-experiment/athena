@@ -26,5 +26,4 @@ atlas_add_dictionary( TrigT1CaloByteStreamDict
                       LINK_LIBRARIES TrigT1CaloByteStreamLib )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py )
