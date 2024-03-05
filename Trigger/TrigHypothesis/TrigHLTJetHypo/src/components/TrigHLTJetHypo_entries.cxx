@@ -42,8 +42,8 @@
 #include "../TrigJetEJsHypoTool.h"
 #include "../TrigJetCRHypoAlg.h"
 #include "../TrigJetCRHypoTool.h"
-#include "../TrigJetCROldHypoAlg.h"
-#include "../TrigJetCROldHypoTool.h"
+#include "../TrigJetCRVARHypoAlg.h"
+#include "../TrigJetCRVARHypoTool.h"
 
 DECLARE_COMPONENT(TrigJetHypoToolConfig_fastreduction)
 DECLARE_COMPONENT(TrigJetHypoToolConfig_conditionfilter)
@@ -84,5 +84,5 @@ DECLARE_COMPONENT(TrigJetEJsHypoAlg)
 DECLARE_COMPONENT(TrigJetEJsHypoTool)
 DECLARE_COMPONENT(TrigJetCRHypoAlg)
 DECLARE_COMPONENT(TrigJetCRHypoTool)
-DECLARE_COMPONENT(TrigJetCROldHypoAlg)
-DECLARE_COMPONENT(TrigJetCROldHypoTool)
+DECLARE_COMPONENT(TrigJetCRVARHypoAlg)
+DECLARE_COMPONENT(TrigJetCRVARHypoTool)

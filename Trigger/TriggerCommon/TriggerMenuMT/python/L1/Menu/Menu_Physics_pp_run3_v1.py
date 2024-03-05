@@ -57,8 +57,8 @@ def defineMenu():
         'L1_eTAU20', 'L1_jTAU20', 'L1_jTAU30', 'L1_jTAU30M', 'L1_cTAU20M',
         'L1_eTAU20L', 'L1_eTAU20M', 
         'L1_eTAU30', 'L1_cTAU30M', 
-        'L1_eTAU35', 'L1_cTAU35M',
-        'L1_eTAU40HM', 
+        'L1_eTAU35', 'L1_cTAU35M', 
+        'L1_eTAU40HM',
         'L1_eTAU60', 'L1_eTAU60_EMPTY', 'L1_eTAU60_UNPAIRED_ISO',
         'L1_eTAU80', 'L1_eTAU140',
 
