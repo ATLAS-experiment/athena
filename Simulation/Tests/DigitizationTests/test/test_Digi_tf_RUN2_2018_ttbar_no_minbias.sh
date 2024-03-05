@@ -10,7 +10,7 @@
 # art-output: legacy.*
 # art-output: DigiPUConfig*
 
-Events=3
+Events=25
 DigiOutFileName="mc20e_ttbar_no_minbias.RDO.pool.root"
 HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.simul.HITS.e4993_s3091/HITS.10504490._000425.pool.root.1"
 
