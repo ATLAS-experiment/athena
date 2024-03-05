@@ -426,6 +426,9 @@ def defineHistogram(flags, varname, type='TH1F', path=None,
         assert isinstance(ylabels, (list, tuple)),'ylabels must be list or tuple'
         settings['ybins'] = len(ylabels)
         settings['ylabels'] = ylabels
+        # if user did not specify ymin and ymax, set it here, as cannot have ymin=ymax=0
+        if ymin is None: settings["ymin"] = 0
+        if ymax is None: settings["ymax"] = settings["ymin"]+1
     if zlabels is not None and len(zlabels)>0:
         assert isinstance(zlabels, (list, tuple)),'zlabels must be list or tuple'
         settings['zlabels'] = zlabels
