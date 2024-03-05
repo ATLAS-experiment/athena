@@ -34,7 +34,7 @@ struct ExtensionObject {
   std::array<std::unique_ptr<const Trk::TrackStateOnSurface>, 4> m_hits;
   // truth info about primary hits left by the truth particles
   // is kept independent of them being found during the track extension
-  std::array<const HGTD_Cluster*, 4> m_truth_primary_hits;
+  std::array<const HGTD_Cluster*, 4> m_truth_primary_hits = {nullptr, nullptr, nullptr, nullptr};
   std::array<HGTD::ClusterTruthInfo, 4> m_truth_primary_info;
   // point of extrapolation on HGTD layer closest to IP
   float m_extrap_x = 0;
