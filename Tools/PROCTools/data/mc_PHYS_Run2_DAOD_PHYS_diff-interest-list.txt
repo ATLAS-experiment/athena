@@ -17,7 +17,7 @@ AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.R10TruthLabel(.*)
 AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.Ghost(.*)
 
 # JetEtMiss branches
-AntiKt4EMPFlowJetsAuxDyn(.*)
+AntiKt4EMPFlowJetsAuxDyn(?!\.jetRank)
 Kt4EMPFlowEventShapeAuxDyn.Density
 Kt4EMPFlowPUSBEventShapeAuxDyn.Density
 Kt4EMPFlowNeutEventShapeAuxDyn.Density

@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 Define sets of standard variables to save in output files.
 The variable lists returned by these functions are used by the smart slimming
@@ -57,6 +57,7 @@ JetStandardAux = fold_hashes + [
     "eta",
     "btaggingLink",
     "GhostTrack",
+    "jetRank",
     "ConeExclBHadronsFinal",
     "ConeExclCHadronsFinal",
     "PartonTruthLabelID",

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_FTAG1.py
@@ -69,8 +69,11 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                            "InDetTrackParticles",
                                            "AntiKt4EMPFlowJets",
                                            "BTagging_AntiKt4EMPFlow",
+                                           "AntiKt4UFOCSSKJets",
+                                           "BTagging_AntiKt4UFOCSSK",
                                            "MET_Baseline_AntiKt4EMPFlow",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+                                           "TauJets",
                                           ]
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
