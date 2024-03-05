@@ -6,6 +6,7 @@ def addLArCalibFlags(flags, isSC=False):
     flags.addFlag("LArCalib.isSC",isSC)
     flags.addFlag("LArCalib.BadChannelDB","LAR_OFL")
     flags.addFlag("LArCalib.BadChannelTag","-RUN2-UPD3-00")
+    flags.addFlag("LArCalib.BadChannelTagSC","-RUN3-UPD3-00")
 
     #Folders:
     def _prefix(prevFlags):

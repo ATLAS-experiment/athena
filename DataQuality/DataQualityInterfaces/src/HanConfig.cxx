@@ -196,12 +196,12 @@ BuildMonitorsNewRoot( std::string configName, HanInputRootFile& input, dqm_core:
   TPython::Bind(m_config, "config");
   TPython::Bind(m_top_level, "top_level");
   TPython::Bind(topdir, "path");
-  TPython::Exec("from DataQualityInterfaces.han import FixRegion");
+  TPython::Exec("from DataQualityInterfaces.han import FixRegion, logLevel");
   const char* debugflag = std::getenv("HANDEBUG");
   if (!debugflag) {
-    TPython::Exec("import logging; logging.basicConfig(level='INFO')");
+    TPython::Exec("logLevel('INFO')");
   } else {
-    TPython::Exec("import logging; logging.basicConfig(level='DEBUG')");
+    TPython::Exec("logLevel('DEBUG')");
   }
 
   HanConfigGroup* new_top_level = TPython::Eval("FixRegion(config, top_level, path)");

@@ -46,7 +46,10 @@ echo "Creating POOL file catalog (`date`) ..."
 %(cmddefinepoolcatalog)s
 echo ''
 echo "Running athena (`date`) ..."
-/usr/bin/time -p athena.py %(configfile)s %(joboptionpath)s  
+export PYTHONPATH="%(jobdir)s:$PYTHONPATH"
+rm -f %(configmy)s
+ln -fs %(configfile)s %(configmy)s
+/usr/bin/time -p %(joboptionpath)s
 status=$?
 touch %(exitflag)s
 echo $status > %(exitstatus)s
@@ -114,6 +117,7 @@ class JobRunner:
         self.setParam('jobdir',os.getcwd(),'Directory template from where the jobs are started')
         self.setParam('rundir','.','Directory template where the jobs execute')
         self.setParam('configfile','%(jobdir)s/%(jobname)s.config.py','Job configuration file name template (use %(jobnr)i for current job number)')
+        self.setParam('configmy','%(jobdir)s/configMy.py','Job configuration file for CA configuration')
         self.setParam('logfile','%(jobdir)s/%(jobname)s.log','Log file name template')
         self.setParam('scriptfile','%(jobdir)s/%(jobname)s.sh','Script file name template')
         self.setParam('outputfileprefix','%(jobdir)s/%(jobname)s-','Output file name prefix template')

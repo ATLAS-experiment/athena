@@ -110,6 +110,10 @@ if not hasattr(ServiceMgr, 'THistSvc'):
 
 ServiceMgr.THistSvc.Output  = ["file1 DATAFILE='"+outputNtuple+"' OPT='RECREATE'"]
 
+from AthenaCommon.AlgSequence import AthSequencer
+condSequence = AthSequencer("AthCondSeq")
+if hasattr(condSequence, 'TileSamplingFractionCondAlg'):
+     condSequence.TileSamplingFractionCondAlg.G4Version = -1
 
 #--------------------------------------------------------------
 # Set output level threshold (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )

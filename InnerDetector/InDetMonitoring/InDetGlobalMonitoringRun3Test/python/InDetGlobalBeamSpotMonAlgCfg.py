@@ -11,11 +11,11 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg):
+def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=False):
     '''Function to configures some algorithms in the monitoring system.'''
     
     # Values set by default here
-    m_useBeamspot = True
+    m_useBeamspot = useBeamSpot
     expert = True
     m_vxContainerWithBeamConstraint = False
     
@@ -61,9 +61,9 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg):
         else:
             varName = 'm_pvXbeam;pvX'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: x;x (mm)",path=pathbs,xbins=100,xmin=-10,xmax=10)
-            varName = 'm_pvXbeam;pvX'
+            varName = 'm_pvYbeam;pvY'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: y;y (mm)",path=pathbs,xbins=100,xmin=-10,xmax=10)
-            varName = 'm_pvXbeam;pvX'
+            varName = 'm_pvZbeam;pvZ'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: z;z (mm)",path=pathbs,xbins=100,xmin=-500,xmax=500)
     
     
@@ -101,17 +101,24 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg):
 
 
 def InDetGlobalBeamSpotMonAlgCfg(helper, acc,
-                                 flags, name="InDetGlobalBeamSpotMonAlg", **kwargs):
+                                 flags, jobConfig={}, name="InDetGlobalBeamSpotMonAlg", **kwargs):
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
 
     from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
     from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
 
+    if 'MinTracksPerVtx'   in jobConfig: kwargs.setdefault("minTracksPerVtx",jobConfig['MinTracksPerVtx'])
+    if 'MinTrackPt'        in jobConfig: kwargs.setdefault("minTrackPt",jobConfig['MinTrackPt'])
+    useBeamSpot = False
+    if 'useBeamSpot'       in jobConfig:
+        kwargs.setdefault("useBeamspot",jobConfig['useBeamSpot'])
+        useBeamSpot = jobConfig['useBeamSpot']
+
     monAlg = helper.addAlgorithm(
         CompFactory.InDetGlobalBeamSpotMonAlg, name,
         addFilterTools = [FilledBunchFilterToolCfg(flags), AtlasReadyFilterCfg(flags)],
         **kwargs)
 
-    HistoInDetGlobalBeamSpotMonAlgCfg(helper, monAlg)
+    HistoInDetGlobalBeamSpotMonAlgCfg(helper, monAlg, useBeamSpot)
     return

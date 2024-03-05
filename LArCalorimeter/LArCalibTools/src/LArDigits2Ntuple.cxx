@@ -186,12 +186,20 @@ StatusCode LArDigits2Ntuple::execute()
 
     fillFromIdentifier(digi->hardwareID());      
 
+    if(m_fillEMB && m_barrel_ec !=0) continue;
+    if(m_fillEndcap && m_barrel_ec !=1) continue;
+
     if(m_FTlist.size() > 0) {	// should do a selection
       if(std::find(std::begin(m_FTlist), std::end(m_FTlist), m_FT)  == std::end(m_FTlist)) {	// is our FT in list ?
         continue;
       }
     }
 
+    if(m_Slotlist.size() > 0) {	// should do a selection
+      if(std::find(std::begin(m_Slotlist), std::end(m_Slotlist), m_slot)  == std::end(m_Slotlist)) {	// is our slot in list ?
+        continue;
+      }
+    }
     for(unsigned i =	0; i<trueMaxSample;++i) m_samples[i]	   = digi->samples().at(i);
 
 

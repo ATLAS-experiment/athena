@@ -47,11 +47,14 @@ def TileJetMonitoringConfig(flags, **kwargs):
             # Low Gain
             kwargs.setdefault('ChannelEnergyMin', 15000)
             kwargs.setdefault('ChannelEnergyMax', 50000)
+            kwargs.setdefault('ChannelGain', 0)
+
         else:
             # High Gain
             kwargs.setdefault('ChannelEnergyMin', 2000)
             kwargs.setdefault('ChannelEnergyMax', 4000)
-
+            kwargs.setdefault('ChannelGain', 1)
+            
     for k, v in kwargs.items():
         setattr(tileJetMonAlg, k, v)
 
@@ -153,7 +156,8 @@ def TileJetMonitoringConfig(flags, **kwargs):
     tileJetMonAlg.CellEnergyUpperLimitsHG = energiesHG
     tileJetMonAlg.CellEnergyUpperLimitsLG = energiesLG
 
-    samples = ['A', 'BC', 'D', 'E']
+    samples_LB = ['A', 'BC', 'D', 'B9']
+    samples_EB = ['A', 'B', 'C10', 'D4', 'E1', 'E2', 'E3', 'E4']
 
     # 4) Configure histograms with Tile cell time in energy slices per partition and gain
     cellTimeGroup = helper.addGroup(tileJetMonAlg, 'TileJetCellTime', 'Tile/Jet/CellTime/')
@@ -164,21 +168,28 @@ def TileJetMonitoringConfig(flags, **kwargs):
             for index in range(0, len(energies) + 1):
                 toEnergy = energies[index] if index < len(energies) else None
                 fromEnergy = energies[index - 1] if index > 0 else None
+                if not toEnergy:
+                    title_suffix = ' > ' + str(fromEnergy) + ' MeV; time [ns]'
+                elif not fromEnergy:
+                    title_suffix = ' < ' + str(toEnergy) + ' MeV; time [ns]'
+                else:
+                    title_suffix = ' [' + str(fromEnergy) + ' .. ' + str(toEnergy) + ') MeV; time [ns]'
 
                 # TD: add histograms per partition and per radial sampling
-                for samp in range(0,3):
-                    name = 'Cell_time_' + partition + '_' + samples[samp] + '_' + gain + '_slice_' + str(index)
-                    title = 'Partition ' + partition + ', sampling ' + samples[samp] + ': ' + gain + ' Tile Cell time in energy range'
-                    if not toEnergy:
-                        title += ' > ' + str(fromEnergy) + ' MeV; time [ns]'
-                    elif not fromEnergy:
-                        title += ' < ' + str(toEnergy) + ' MeV; time [ns]'
-                    else:
-                        title += ' [' + str(fromEnergy) + ' .. ' + str(toEnergy) + ') MeV; time [ns]'
-                    cellTimeGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
-                                                  xbins = 600, xmin = -30.0, xmax = 30.0)
+                if (partition == 'LBA') or (partition == 'LBC'):
+                    for samp in range(0,len(samples_LB)):
+                        name = 'Cell_time_' + partition + '_' + samples_LB[samp] + '_' + gain + '_slice_' + str(index)
+                        title = 'Partition ' + partition + ', sampling ' + samples_LB[samp] + ': ' + gain + ' Tile Cell time in energy range' + title_suffix
+                        cellTimeGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
+                                                      xbins = 600, xmin = -30.0, xmax = 30.0)
+                else:
+                    for samp in range(0,len(samples_EB)):
+                        name = 'Cell_time_' + partition + '_' + samples_EB[samp] + '_' + gain + '_slice_' + str(index)
+                        title = 'Partition ' + partition + ', sampling ' + samples_EB[samp] + ': ' + gain + ' Tile Cell time in energy range' + title_suffix
+                        cellTimeGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
+                                                      xbins = 600, xmin = -30.0, xmax = 30.0)
                     
-
+                    
     if DoEnergyProfiles:
 
         # 5) Configure 1D histograms (profiles) with Tile cell energy profile in energy slices per partition and gain
@@ -186,15 +197,26 @@ def TileJetMonitoringConfig(flags, **kwargs):
         for partition in partitions:
             for gain in gains:
                 # TD: add profiles per partition and per sampling
-                for samp in range(0,3):
-                    name = 'index_' + partition + '_' + samples[samp] + '_' + gain
-                    name += ',energy_' + partition + '_' + samples[samp] + '_' + gain
-                    name += ';Cell_ene_' + partition + '_' + samples[samp] + '_' + gain + '_prof'
-                    title = 'Partition ' + partition + ', sampling ' + samples[samp] + ': ' + gain + ' Tile Cell energy profile;Slice;Energy [MeV]'
-                    xmax = len(energiesALL[gain]) + 0.5
-                    nbins = len(energiesALL[gain]) + 1
-                    cellEnergyProfileGroup.defineHistogram(name, title = title, path = partition, type = 'TProfile',
-                                                           xbins = nbins, xmin = -0.5, xmax = xmax)
+                if (partition == 'LBA') or (partition == 'LBC'):
+                    for samp in range(0,len(samples_LB)):
+                        name = 'index_' + partition + '_' + samples_LB[samp] + '_' + gain
+                        name += ',energy_' + partition + '_' + samples_LB[samp] + '_' + gain
+                        name += ';Cell_ene_' + partition + '_' + samples_LB[samp] + '_' + gain + '_prof'
+                        title = 'Partition ' + partition + ', sampling ' + samples_LB[samp] + ': ' + gain + ' Tile Cell energy profile;Slice;Energy [MeV]'
+                        xmax = len(energiesALL[gain]) + 0.5
+                        nbins = len(energiesALL[gain]) + 1
+                        cellEnergyProfileGroup.defineHistogram(name, title = title, path = partition, type = 'TProfile',
+                                                               xbins = nbins, xmin = -0.5, xmax = xmax)
+                else:
+                    for samp in range(0,len(samples_EB)):
+                        name = 'index_' + partition + '_' + samples_EB[samp] + '_' + gain
+                        name += ',energy_' + partition + '_' + samples_EB[samp] + '_' + gain
+                        name += ';Cell_ene_' + partition + '_' + samples_EB[samp] + '_' + gain + '_prof'
+                        title = 'Partition ' + partition + ', sampling ' + samples_EB[samp] + ': ' + gain + ' Tile Cell energy profile;Slice;Energy [MeV]'
+                        xmax = len(energiesALL[gain]) + 0.5
+                        nbins = len(energiesALL[gain]) + 1
+                        cellEnergyProfileGroup.defineHistogram(name, title = title, path = partition, type = 'TProfile',
+                                                               xbins = nbins, xmin = -0.5, xmax = xmax)
 
 
     else:
@@ -213,12 +235,21 @@ def TileJetMonitoringConfig(flags, **kwargs):
                     cellEnergyGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
                                                     xbins = 100, xmin = fromEnergy, xmax = toEnergy)
                     # TD: add histograms per partition
-                    for samp in range(0,3):
-                        name = 'Cell_ene_' + partition + '_' + samples[samp] + '_' + gain + '_slice_' + str(index)
-                        title = 'Partition ' + partition + ', sampling ' + samples[samp] + ': ' + gain + ' Tile Cell Energy'
-                        title += ' in energy range [' + str(fromEnergy) + ' .. ' + str(toEnergy) + ') MeV;Energy [MeV]'
-                        cellEnergyGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
-                                                        xbins = 100, xmin = fromEnergy, xmax = toEnergy)
+                    if (partition == 'LBA') or (partition == 'LBC'):
+                        for samp in range(0,len(samples_LB)):
+                            name = 'Cell_ene_' + partition + '_' + samples_LB[samp] + '_' + gain + '_slice_' + str(index)
+                            title = 'Partition ' + partition + ', sampling ' + samples_LB[samp] + ': ' + gain + ' Tile Cell Energy'
+                            title += ' in energy range [' + str(fromEnergy) + ' .. ' + str(toEnergy) + ') MeV;Energy [MeV]'
+                            cellEnergyGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
+                                                            xbins = 100, xmin = fromEnergy, xmax = toEnergy)
+                    else:
+                        for samp in range(0,len(samples_EB)):
+                            name = 'Cell_ene_' + partition + '_' + samples_EB[samp] + '_' + gain + '_slice_' + str(index)
+                            title = 'Partition ' + partition + ', sampling ' + samples_EB[samp] + ': ' + gain + ' Tile Cell Energy'
+                            title += ' in energy range [' + str(fromEnergy) + ' .. ' + str(toEnergy) + ') MeV;Energy [MeV]'
+                            cellEnergyGroup.defineHistogram(name, title = title, path = partition, type = 'TH1F',
+                                                            xbins = 100, xmin = fromEnergy, xmax = toEnergy)
+                        
 
 
 

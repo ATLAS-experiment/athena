@@ -164,12 +164,18 @@ def createTrigTrackingPassFlags(mode="InDet"):
 
   from AthenaConfiguration.AthConfigFlags import AthConfigFlags
   flags = AthConfigFlags()
-  from TrigInDetConfig.ConfigSettings import ConfigSettingsInstances,getInDetTrigConfig
+  
+  from TrigInDetConfig.ConfigSettings import ConfigSettingsInstances
+  def __getInDetTrigConfig(name : str):
+    config = ConfigSettingsInstances[name]
+    config._input_name = name
+    return config
+  
   category = 'Trigger.InDetTracking' if mode=="InDet" else 'Trigger.ITkTracking'
   
   for i in ConfigSettingsInstances.keys():
     signatureCategory = "{}.{}".format(category,i)
-    factory = flagsFactory(getInDetTrigConfig(i),mode)     
+    factory = flagsFactory(__getInDetTrigConfig(i),mode)
     flags.addFlagsCategory(signatureCategory,factory,prefix=True)
 
   #TBD make a function for global settings too

@@ -22,6 +22,9 @@ def defineMenu():
         'L1_eEM15_EMPTY',
         'L1_eEM26', 'L1_eEM26L', 'L1_eEM26M', 'L1_eEM26T', 'L1_eEM28M',
 
+        #beam splashes
+        'L1_eEM22A', 'L1_eEM22C',
+        
         ## 
         # MU
         ##

@@ -180,7 +180,7 @@ def IDCalibTriggerCfg(flags):
 
 @AccumulatorCache
 def IDCalibFTFCfg(flags):
-    reco = InEventRecoCA('IDCalibTrkrecoSeq_reco',inputMaker=getTrackingInputMaker("ftf"))
+    reco = InEventRecoCA('IDCalibTrkrecoSeq_reco',inputMaker=getTrackingInputMaker(flags, "ftf"))
     reco.mergeReco(commonInDetFullScanCfg(flags))
 
     selAcc = SelectionCA('IDCalibTrkrecoSeq')

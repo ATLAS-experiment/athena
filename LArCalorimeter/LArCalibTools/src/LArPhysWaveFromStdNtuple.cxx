@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArPhysWaveFromStdNtuple.h"
 
 #include "LArIdentifier/LArOnlineID.h"
+#include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "CaloIdentifier/CaloGain.h"
 #include "LArRawConditions/LArPhysWave.h"
 #include "LArRawConditions/LArPhysWaveContainer.h"
@@ -19,35 +20,27 @@
 #include <fstream>
 #include <string>
 
+LArPhysWaveFromStdNtuple::LArPhysWaveFromStdNtuple(const std::string & name, ISvcLocator * pSvcLocator):AthAlgorithm(name, pSvcLocator) {};
 
-LArPhysWaveFromStdNtuple::LArPhysWaveFromStdNtuple (const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator)
-{  
-  declareProperty("SkipPoints", m_skipPoints = 0);
-  declareProperty("PrefixPoints", m_prefixPoints = 0);
-  declareProperty("FileNames", m_root_file_names);
-  declareProperty("NtupleName", m_ntuple_name="PhysWave");
-  declareProperty("StoreKey", m_store_key="FromStdNtuple");
-  declareProperty("GroupingType", m_groupingType="FeedThrough");
-}
-
-LArPhysWaveFromStdNtuple::~LArPhysWaveFromStdNtuple() 
-= default;
-
-StatusCode LArPhysWaveFromStdNtuple::initialize() 
-{
-  return StatusCode::SUCCESS ;
-}
-
+LArPhysWaveFromStdNtuple::~LArPhysWaveFromStdNtuple()= default;
 
 StatusCode LArPhysWaveFromStdNtuple::stop()
 {
   ATH_MSG_INFO ( "... in stop()" );
   
   // get LArOnlineID helper
-  const LArOnlineID* onlineHelper = nullptr;
-  ATH_CHECK( detStore()->retrieve(onlineHelper, "LArOnlineID") );
+  const LArOnlineID_Base* onlineHelper = nullptr;
+  if(m_isSC) {
+     const LArOnline_SuperCellID* onltmp;
+     ATH_CHECK( detStore()->retrieve(onltmp, "LArOnline_SuperCellID") );
+     onlineHelper = (const LArOnlineID_Base*) onltmp;
+  } else {
+     const LArOnlineID* onltmp = nullptr;
+     ATH_CHECK( detStore()->retrieve(onltmp, "LArOnlineID") );
+     onlineHelper = (const LArOnlineID_Base*) onltmp;
+  }
 
-  TChain* outfit = new TChain(m_ntuple_name.c_str());
+  TChain* outfit = new TChain(m_ntuple_name.value().c_str());
   for (const std::string& s : m_root_file_names) {
     outfit->Add(s.c_str());
   }
@@ -89,6 +82,7 @@ StatusCode LArPhysWaveFromStdNtuple::stop()
   for ( Long64_t i = 0; i < nentries; i++ )
   {
     outfit->GetEvent(i);
+    if(m_isSC && gain >0) continue;
     ATH_MSG_INFO ( " Chan " <<  std::hex << channelId << std::dec );
 
     hwid = channelId;
