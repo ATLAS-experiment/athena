@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum
@@ -23,6 +23,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.EDM.PersistifyClusters', False)
     actscf.addFlag('Acts.EDM.PersistifySpacePoints', False)
     actscf.addFlag('Acts.EDM.PersistifyTracks', False)
+    actscf.addFlag('Acts.useCache', False)
     
     # Scheduling
     actscf.addFlag('Acts.doITkConversion', False)

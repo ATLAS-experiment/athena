@@ -132,7 +132,8 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
 
     # Acts Main pass
     if flags.Tracking.ActiveConfig.extension == "Acts":
-        acc.merge(ActsMainTrackFindingCfg(flags))
+        acc.merge(ActsMainTrackFindingCfg(flags,
+                                          UncalibratedMeasurementContainerKeys = ["ITkPixelClusters_InView", "ITkStripClusters_InView"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkStripClusters"]))
         # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
         prefix="SiSPSeededActsConversionTrack"
@@ -142,7 +143,7 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
                                           SeedLabels=["SSS"],
                                           EstimatedTrackParametersKeys=["ITkConversionStripEstimatedTrackParams"],
                                           SeedContainerKeys=["ITkConversionStripSeeds"],
-                                          UncalibratedMeasurementContainerKeys=["ITkPixelClusters", "ITkConversionStripClusters"],
+                                          UncalibratedMeasurementContainerKeys=["ITkPixelClusters_InView", "ITkConversionStripClusters"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkConversionStripClusters"], # for the time being we do not pass InView collections for strips here due to issue with the CKF stage
                                           TrackBackEndPrefixName=prefix,
                                           MTJBackEndPrefixName=prefix))
     # Any other pass -> mainly validation
