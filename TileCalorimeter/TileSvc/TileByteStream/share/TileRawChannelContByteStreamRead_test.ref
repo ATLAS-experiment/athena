@@ -26,7 +26,7 @@ Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
 Py:ComponentAccumulator    INFO  \__ TileHid2RESrcIDCondAlg (cond alg)
 Py:ComponentAccumulator    INFO Services
-Py:ComponentAccumulator    INFO ['ClassIDSvc', 'AlgContextSvc', 'AuditorSvc', 'StoreGateSvc', 'DetectorStore', 'HistoryStore', 'ConditionStore', 'MessageSvc', 'CoreDumpSvc', 'ExceptionSvc', 'AthenaEventLoopMgr', 'DetDescrCnvSvc', 'EventPersistencySvc', 'TagInfoMgr', 'GeoModelSvc', 'TileCablingSvc', 'ByteStreamCnvSvc', 'ByteStreamInputSvc', 'EventSelector', 'ROBDataProviderSvc', 'ByteStreamAddressProviderSvc', 'MetaDataStore', 'InputMetaDataStore', 'MetaDataSvc', 'ProxyProviderSvc', 'IOVDbSvc', 'PoolSvc', 'AthenaPoolCnvSvc', 'CondSvc', 'DBReplicaSvc', 'Athena::DelayedConditionsCleanerSvc', 'Athena::ConditionsCleanerSvc']
+Py:ComponentAccumulator    INFO ['ClassIDSvc', 'AlgContextSvc', 'AuditorSvc', 'StoreGateSvc', 'DetectorStore', 'HistoryStore', 'ConditionStore', 'MessageSvc', 'CoreDumpSvc', 'ExceptionSvc', 'AthenaEventLoopMgr', 'RDBAccessSvc', 'GeoDbTagSvc', 'DetDescrCnvSvc', 'EventPersistencySvc', 'TagInfoMgr', 'GeoModelSvc', 'TileCablingSvc', 'ByteStreamCnvSvc', 'ByteStreamInputSvc', 'EventSelector', 'ROBDataProviderSvc', 'ByteStreamAddressProviderSvc', 'MetaDataStore', 'InputMetaDataStore', 'MetaDataSvc', 'ProxyProviderSvc', 'IOVDbSvc', 'PoolSvc', 'AthenaPoolCnvSvc', 'CondSvc', 'DBReplicaSvc', 'Athena::DelayedConditionsCleanerSvc', 'Athena::ConditionsCleanerSvc']
 Py:ComponentAccumulator    INFO Public Tools
 Py:ComponentAccumulator    INFO [
 Py:ComponentAccumulator    INFO   IOVDbMetaDataTool/IOVDbMetaDataTool,
@@ -174,7 +174,7 @@ Py:ComponentAccumulator    INFO Condition Algorithms
 Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
 Py:ComponentAccumulator    INFO  \__ TileHid2RESrcIDCondAlg (cond alg)
 Py:ComponentAccumulator    INFO Services
-Py:ComponentAccumulator    INFO ['ClassIDSvc', 'AlgContextSvc', 'AuditorSvc', 'StoreGateSvc', 'DetectorStore', 'HistoryStore', 'ConditionStore', 'MessageSvc', 'CoreDumpSvc', 'ExceptionSvc', 'EventDataSvc', 'AlgResourcePool', 'AvalancheSchedulerSvc', 'AthenaHiveEventLoopMgr', 'DetDescrCnvSvc', 'EventPersistencySvc', 'TagInfoMgr', 'GeoModelSvc', 'TileCablingSvc', 'ByteStreamCnvSvc', 'ByteStreamInputSvc', 'EventSelector', 'ROBDataProviderSvc', 'ByteStreamAddressProviderSvc', 'MetaDataStore', 'InputMetaDataStore', 'MetaDataSvc', 'ProxyProviderSvc', 'IOVDbSvc', 'PoolSvc', 'AthenaPoolCnvSvc', 'CondSvc', 'DBReplicaSvc', 'Athena::DelayedConditionsCleanerSvc', 'Athena::ConditionsCleanerSvc']
+Py:ComponentAccumulator    INFO ['ClassIDSvc', 'AlgContextSvc', 'AuditorSvc', 'StoreGateSvc', 'DetectorStore', 'HistoryStore', 'ConditionStore', 'MessageSvc', 'CoreDumpSvc', 'ExceptionSvc', 'EventDataSvc', 'AlgResourcePool', 'AvalancheSchedulerSvc', 'AthenaHiveEventLoopMgr', 'RDBAccessSvc', 'GeoDbTagSvc', 'DetDescrCnvSvc', 'EventPersistencySvc', 'TagInfoMgr', 'GeoModelSvc', 'TileCablingSvc', 'ByteStreamCnvSvc', 'ByteStreamInputSvc', 'EventSelector', 'ROBDataProviderSvc', 'ByteStreamAddressProviderSvc', 'MetaDataStore', 'InputMetaDataStore', 'MetaDataSvc', 'ProxyProviderSvc', 'IOVDbSvc', 'PoolSvc', 'AthenaPoolCnvSvc', 'CondSvc', 'DBReplicaSvc', 'Athena::DelayedConditionsCleanerSvc', 'Athena::ConditionsCleanerSvc']
 Py:ComponentAccumulator    INFO Public Tools
 Py:ComponentAccumulator    INFO [
 Py:ComponentAccumulator    INFO   IOVDbMetaDataTool/IOVDbMetaDataTool,
