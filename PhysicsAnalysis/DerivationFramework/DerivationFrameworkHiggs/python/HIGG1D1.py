@@ -301,7 +301,7 @@ def HIGG1D1Cfg(flags):
           "HggPrimaryVertices":"xAOD::VertexContainer", "HggPrimaryVerticesAux":"xAOD::ShallowAuxContainer",
           "Kt4EMPFlowCustomVtxEventShape":"xAOD::EventShape", "Kt4EMPFlowCustomVtxEventShapeAux":"xAOD::EventShapeAuxInfo",
           "Kt4EMPFlowEventShape":"xAOD::EventShape", "Kt4EMPFlowEventShapeAux":"xAOD::EventShapeAuxInfo",
-          "ZeeRefittedPrimaryVertices":"xAOD::VertexContainer","ZeeRefittedPrimaryVerticesAux":"xAOD:VertexAuxContainer",
+          "ZeeRefittedPrimaryVertices":"xAOD::VertexContainer","ZeeRefittedPrimaryVerticesAux":"xAOD::VertexAuxContainer",
           "AFPSiHitContainer":"xAOD::AFPSiHitContainer","AFPSiHitContainerAux":"xAOD::AFPSiHitAuxContainer",
           "AFPToFHitContainer":"xAOD::AFPToFHitContainer","AFPToFHitContainerAux":"xAOD::AFPToFHitAuxContainer",
           "AFPVertexContainer":"xAOD::AFPVertexContainer", "AFPVertexContainerAux":"xAOD::AFPVertexAuxContainer",
