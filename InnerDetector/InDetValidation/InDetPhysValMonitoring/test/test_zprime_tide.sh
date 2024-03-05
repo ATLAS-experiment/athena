@@ -39,7 +39,7 @@ Reco_tf.py \
     --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --digiSeedOffset1="8" \
     --digiSeedOffset2="8" \
-    --CA "default:True" "RDOtoRDOTrigger:False" \
+    --CA "default:True" \
     --steering "doRDO_TRIG" "doTRIGtoALL" \
     --outputDAOD_IDTIDEFile="DAOD_TIDE.pool.root"  \
     --outputRDOFile output.RDO.root \

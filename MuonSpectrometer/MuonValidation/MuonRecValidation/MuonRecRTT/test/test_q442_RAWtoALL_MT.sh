@@ -51,7 +51,7 @@ cd 1thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q442 \
            --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --imf False \
@@ -73,7 +73,7 @@ cd 5thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q442 \
            --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --imf False \
@@ -95,7 +95,7 @@ cd 8thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q442 \
            --preExec "all:flags.DQ.Steering.doHLTMon=False" \
            --imf False \

@@ -25,7 +25,7 @@ rdo2aod.max_events = 800
 rdo2aod.threads = 4
 rdo2aod.concurrent_events = 4
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG"'
-rdo2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
+rdo2aod.args += ' --CA "default:True"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 
 
