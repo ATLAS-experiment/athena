@@ -46,6 +46,8 @@
 #include "egammaInterfaces/IEMTrackMatchBuilder.h"
 
 #include <string>
+#include <memory>
+#include <optional>
 
 #include <Gaudi/Accumulators.h>
 
@@ -79,9 +81,10 @@ private:
   ) const;
 
   /** @brief Remove cells that are too far from the center of mass. */
-  void cookieCut(
-    xAOD::CaloCluster& cluster,
-    const CaloDetDescrManager& mgr
+  std::optional<std::unique_ptr<xAOD::CaloCluster>> cookieCut(
+    const xAOD::CaloCluster& cluster,
+    const CaloDetDescrManager& mgr,
+    const DataLink<CaloCellContainer>& cellCont
   ) const;
 
   /** @brief Tool to perform object quality. */
