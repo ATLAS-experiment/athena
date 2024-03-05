@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_CLUSTERIZATIONALG_H
@@ -76,7 +76,7 @@ private:
 
     Cache_WriteHandleKey m_ClusterCache{this,"ClusterCache",""};
     Cache_BackendUpdateHandleKey m_ClusterCacheBackend{this,"ClusterCacheBackend",""};
-    bool m_cache_enabled{false};
+    Gaudi::Property< bool > m_cache_enabled {this, "EnableCache", false};
 
     // expected number of clusters for RDO
     // This values is used for reserving enough memory of the cluster container

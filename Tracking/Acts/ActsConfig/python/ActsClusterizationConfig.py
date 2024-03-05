@@ -61,6 +61,7 @@ def ActsPixelClusterizationAlgCfg(flags,
     # Regional selection
     kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
 
+    kwargs.setdefault('EnableCache', flags.Acts.useCache)
     kwargs.setdefault('ClusterCacheBackend', 'ActsPixelClusterCache_Back')
     kwargs.setdefault('ClusterCache', 'ActsPixelClustersCache')
 
@@ -91,6 +92,7 @@ def ActsStripClusterizationAlgCfg(flags,
     # Regional selection
     kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
 
+    kwargs.setdefault('EnableCache', flags.Acts.useCache)
     kwargs.setdefault('ClusterCacheBackend', 'ActsStripClusterCache_Back')
     kwargs.setdefault('ClusterCache', 'ActsStripClustersCache')
 
@@ -121,7 +123,7 @@ def ActsClusterCacheCreatorCfg(flags, name="ActsClusterCacheCreator", **kwargs):
 
 def ActsPixelClustersViewFillerCfg(flags,name="PixelClusterViewFiller", **kwargs):
     kwargs.setdefault("InputIDC", "ActsPixelClustersCache")
-    kwargs.setdefault("Output", "ITKPixelClusters_InView")
+    kwargs.setdefault("Output", "ITkPixelClusters_InView")
 
     kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
 
@@ -137,7 +139,7 @@ def ActsPixelClustersViewFillerCfg(flags,name="PixelClusterViewFiller", **kwargs
 
 def ActsStripClustersViewFillerCfg(flags,name="StripClusterViewFiller", **kwargs):
     kwargs.setdefault("InputIDC", "ActsStripClustersCache")
-    kwargs.setdefault("Output", "ITKStripClusters_InView")
+    kwargs.setdefault("Output", "ITkStripClusters_InView")
 
     kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
 
@@ -154,14 +156,21 @@ def ActsStripClustersViewFillerCfg(flags,name="StripClusterViewFiller", **kwargs
 
 def ActsMainClusterizationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.merge(ActsClusterCacheCreatorCfg(flags))
+
+    if flags.Acts.useCache:
+        acc.merge(ActsClusterCacheCreatorCfg(flags))
+
     if flags.Detector.EnableITkPixel:
         acc.merge(ActsPixelClusterizationAlgCfg(flags))
-        acc.merge(ActsPixelClustersViewFillerCfg(flags))
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsStripClusterizationAlgCfg(flags))
-        acc.merge(ActsStripClustersViewFillerCfg(flags))
 
+    if flags.Acts.useCache:
+        if flags.Detector.EnableITkPixel:
+            acc.merge(ActsPixelClustersViewFillerCfg(flags))
+        if flags.Detector.EnableITkStrip:
+            acc.merge(ActsStripClustersViewFillerCfg(flags))
+            
     # Analysis extensions
     if flags.Acts.doAnalysis:
         if flags.Detector.EnableITkPixel:
@@ -180,9 +189,16 @@ def ActsConversionClusterizationCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsStripClusterizationAlgCfg(flags,
                                                 name="ActsConversionStripClusterizationAlg",
                                                 ClustersKey="ITkConversionStripClusters",
-                                                ClusterCache="",
+                                                EnableCache=False,
                                                 RoIs="OfflineCaloBasedRegion"))
 
+    if flags.Acts.useCache:
+        if flags.Detector.EnableITkStrip:
+            acc.merge(ActsStripClustersViewFillerCfg(flags,
+                                                     name="ActsConversionStripClustersViewFiller",
+                                                     Output="ITkConversionStripClusters_InView",
+                                                     RoIs="OfflineCaloBasedRegion"))
+    
     # Analysis extensions
     if flags.Acts.doAnalysis:
         if flags.Detector.EnableITkStrip:

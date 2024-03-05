@@ -82,7 +82,8 @@ def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsPixelSpacePointFormationCfg(flags))
+        acc.merge(ActsPixelSpacePointFormationCfg(flags,
+                                                  PixelClusters = "ITkPixelClusters_InView" if flags.Acts.useCache else "ITkPixelClusters"))
     if flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking:
         # Need to schedule this here in case the Athena space point formation is not schedule
         # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
@@ -97,7 +98,8 @@ def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
         from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
         acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
         
-        acc.merge(ActsStripSpacePointFormationCfg(flags))
+        acc.merge(ActsStripSpacePointFormationCfg(flags,
+                                                  StripClusters = "ITkStripClusters_InView" if flags.Acts.useCache else "ITkStripClusters"))
 
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -130,7 +132,7 @@ def ActsConversionSpacePointFormationCfg(flags) -> ComponentAccumulator:
         
         acc.merge(ActsStripSpacePointFormationCfg(flags,
                                                   name="ActsConversionStripSpacePointFormation",
-                                                  StripClusters="ITkConversionStripClusters",
+                                                  StripClusters="ITkConversionStripClusters_InView" if flags.Acts.useCache else "ITkConversionStripClusters",
                                                   StripSpacePoints="ITkConversionStripSpacePoints",
                                                   StripOverlapSpacePoints="ITkConversionStripOverlapSpacePoints"))
 
