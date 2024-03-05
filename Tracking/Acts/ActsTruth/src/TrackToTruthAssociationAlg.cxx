@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackToTruthAssociationAlg.h"
@@ -139,7 +139,7 @@ namespace ActsTrk
     std::array<unsigned int,s_NCounterForAssociatedTruth> tracks_with_associated_truth{};
 
     --track_i; // to have track_i at the begining of the loop
-    for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : *tracksContainer) {
+    for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
        ++track_i;
        const auto lastMeasurementIndex = track.tipIndex();
 
