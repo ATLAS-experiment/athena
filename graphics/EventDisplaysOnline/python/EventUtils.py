@@ -120,7 +120,17 @@ def cleanDirectory(directory, maxevents, checkpair,isBeamSplashMode):
 
     # disable this for beam splashes. Call zipXMLFile directly in OnlineEventDisplaysSvc.py to transfer every event.
     if len(eventlist)>0 and not isBeamSplashMode:
-        prepareFilesForTransfer(directory, eventlist, pair=checkpair, timeinterval=60)            
+        prepareFilesForTransfer(directory, eventlist, pair=checkpair, timeinterval=60)
+
+    if isBeamSplashMode:
+        for filename in os.listdir(directory):
+            if filename.startswith("vp1") and "CEST.pool.root" in filename:
+                orgname = f'{directory}/{filename}'
+                newname = orgname.replace('.pool.root', '.online.pool.root')
+                try:
+                    shutil.copyfile(Path(orgname), Path(newname))
+                except OSError as err:
+                    msg.warning("Could not copy %s to %s: %s", orgname, newname, err)
     msg.verbose('%s end clean directory', time.ctime(time.time()))
 
 def prepareFilesForTransfer(directory, eventlist, pair, timeinterval):

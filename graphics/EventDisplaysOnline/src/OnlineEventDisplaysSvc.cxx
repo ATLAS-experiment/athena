@@ -29,9 +29,9 @@ void OnlineEventDisplaysSvc::beginEvent(){
   for (std::string stream : m_streamsWanted){
     ATH_MSG_INFO(stream);
   }
-  m_eventNumber = evt->eventNumber();
-  m_runNumber = evt->runNumber();
-  
+  m_eventNumber = std::to_string(evt->eventNumber());
+  m_runNumber = std::to_string(evt->runNumber());
+
   //Check what trigger streams were fired, if in list of desired
   //streams to be reconstructed pick one randomly 
   for (const xAOD::EventInfo::StreamTag& tag : evt->streamTags()){
@@ -83,7 +83,7 @@ void OnlineEventDisplaysSvc::beginEvent(){
 }
 
 void OnlineEventDisplaysSvc::endEvent(){
-  
+  ATH_MSG_INFO("here1");  
   RootUtils::PyGILStateEnsure ensure;
   PyObject* pCheckPair = PyBool_FromLong(0); // Use 0 for False
   PyObject* pBeamSplash = PyBool_FromLong(m_BeamSplash);
@@ -91,9 +91,10 @@ void OnlineEventDisplaysSvc::endEvent(){
   const char* cString = m_entireOutputStr.c_str();
   PyObject* pDirectory = PyUnicode_FromString(cString);
   PyObject* pArgs = PyTuple_Pack(4, pDirectory, pMaxEvents, pCheckPair,pBeamSplash);
-  
+  ATH_MSG_INFO("here2");
   PyObject* pModule = PyImport_ImportModule("EventDisplaysOnline.EventUtils");
   if ( pModule ) {
+    ATH_MSG_INFO("here3");
     PyObject* cleanDirectory = PyObject_GetAttrString(pModule, "cleanDirectory");
     if ( cleanDirectory ) {
       ATH_MSG_INFO("About to clean the ED directories");
@@ -118,7 +119,7 @@ void OnlineEventDisplaysSvc::endEvent(){
       Py_DECREF(pJiveXMLFileName);
       Py_DECREF(zipXMLFile);
       Py_DECREF(pArgs_zip);
-    }
+      }
   }
   Py_DECREF(pModule);
   Py_DECREF(pArgs);

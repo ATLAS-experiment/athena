@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetRunType, GetBFields, WaitForPartition
 from AthenaConfiguration.Enums import BeamType
 
-isCosmicData = False
+isCosmicData = True
 isHIMode = False #TODO
 isBeamSplashMode = False
 isOfflineTest = False
@@ -13,36 +13,15 @@ testWithoutPartition = False
 
 # An explicit list for nominal data taking to exclude some high rate streams
 # Empty list to read all
-# 'MinBias' for beam splashes
 streamsWanted = ['express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
-
+if isBeamSplashMode:
+    streamsWanted = ['MinBias']#HltError
 # If testing at p1, write out to /tmp/ to see output
-#outputDirectory="/atlas/EventDisplayEvents/"
-outputDirectory="/tmp/myexley"
+outputDirectory="/atlas/EventDisplayEvents/"
+#outputDirectory="/tmp/myexley"
 
 if isOfflineTest:
     outputDirectory="/afs/cern.ch/user/m/myexley/WorkSpace/hackTest/run/output/"
-
-if isHIMode:
-    maxEvents=200
-    projectTags=['data24_hi']
-    projectName='data24_hi'
-    publicStreams=['MinBias']
-if isCosmicData:
-    maxEvents=200
-    projectTags=['cosmic24']
-    projectName='cosmic24'
-    publicStreams=['Main']#TODO
-if isBeamSplashMode:
-    maxEvents=-1
-    projectTags=['data24_13p6TeV']
-    projectName='data24_13p6TeV'
-    publicStreams=['']
-else:
-    maxEvents=100 # Number of events to keep per stream
-    projectTags=['data23_13p6TeV']
-    projectName='data23_13p6TeV'
-    publicStreams=['Main']
 
 sendToPublicStream = False # Gets set later, overwrite here to True to test it
 
@@ -57,7 +36,29 @@ sendToPublicStream = False # Gets set later, overwrite here to True to test it
 ## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-10-00-00/         ##
 ## without_gatherer/GMTestPartition.data.xml                            ##
 ##----------------------------------------------------------------------##
-partitionName = 'GMTestPartition' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
+partitionName = 'ATLAS' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
+
+if isHIMode:
+    maxEvents=200 # Number of events to keep per stream in /atlas/EventDisplays/stream
+    projectTags=['data24_hi']
+    projectName='data24_hi'
+    publicStreams=['MinBias']
+if isCosmicData:
+    maxEvents=200
+    projectTags=['data24_cos']
+    projectName='data24_cos'
+    publicStreams=['Main']#TODO
+if isBeamSplashMode:
+    maxEvents=-1
+    projectTags=['data24_13p6TeV']
+    projectName='data24_13p6TeV'
+    publicStreams=['']
+else:
+    maxEvents=100
+    projectTags=['data24_13p6TeV']
+    projectName='data24_13p6TeV'
+    publicStreams=['Main']
+
 
 # Pause this thread until the partition is up
 if not testWithoutPartition or not isOfflineTest:
@@ -99,7 +100,7 @@ flags.Trigger.triggerConfig='DB'
 
 # Test wth a small amount of events and write out to e.g. a tmp dir
 if testWithoutPartition or partitionName != 'ATLAS' or isOfflineTest:
-    flags.Exec.MaxEvents = -1
+    flags.Exec.MaxEvents = 5
     flags.Output.ESDFileName = outputDirectory + "ESD-%s-%s.pool.root" % (jobId[3], jobId[4])
 else:
     flags.Exec.MaxEvents = -1
@@ -117,8 +118,9 @@ else:
 
 flags.Reco.EnableTrigger = False # TODO test True
 flags.LAr.doHVCorr = False # ATLASRECTS-6823
-#flags.Detector.EnableMuon = False
-#flags.Reco.EnableCombinedMuon = False
+flags.Detector.GeometryForward = False
+flags.Detector.EnableFwdRegion = False
+
 from AthenaCommon.Constants import INFO
 flags.Exec.OutputLevel = INFO
 flags.Concurrency.NumThreads = 0
@@ -136,8 +138,9 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
     part = IPCPartition(partitionName)
     RunParams = ISObject(part, 'RunParams.RunParams', 'RunParams')
     RunParams.checkout()
-    flags.Input.OverrideRunNumber =True
-    flags.Input.RunNumbers = [RunParams.run_number]
+    run_number = RunParams.getAttributeValue('run_number')
+    flags.Input.OverrideRunNumber = True
+    flags.Input.RunNumbers = [run_number]
 
     # Is the data allowed to be seen by the general public on atlas live
     ready4physics = ISInfoAny()
@@ -159,7 +162,7 @@ if partitionName == 'ATLAS' and not testWithoutPartition and not isOfflineTest:
 # GM test partition needs to be given the below info
 if (partitionName == 'GMTestPartition' or partitionName == 'GMTestPartitionT9'):
     flags.Input.OverrideRunNumber = True
-    flags.Input.RunNumbers = [454188]#keep this number the same as (or close to) the run number of the file you are testing on
+    flags.Input.RunNumbers = [447705]#keep this number the same as (or close to) the run number of the file you are testing on
     flags.Input.LumiBlockNumbers = [1]
     flags.Input.ProjectName = projectName
 
@@ -200,10 +203,9 @@ if not testWithoutPartition:
     #bytestreamInput.StreamType = "physics" #comment out for all streams, e.g. if you also want claibration streams
     bytestreamInput.StreamLogic = "Or"
     if isBeamSplashMode:
-        bytestreamInput.KeyCount = 64 # equal or greater than the number of DCMs for beam splashes
-        bytestreamInput.BufferSize = 192 # three times of keycount for beam splashes
+        bytestreamInput.KeyCount = 62 # equal or greater than the number of DCMs for beam splashes
+        bytestreamInput.BufferSize = 186 # three times of keycount for beam splashes
         bytestreamInput.Timeout = 144000000 #(40 hrs) for beam splashes
-        bytestreamInput.StreamNames = ['MinBias']
         bytestreamInput.StreamType = "physics"
     if partitionName != 'ATLAS':
         bytestreamInput.KeyValue = [ 'Test_emon_push' ]
@@ -244,7 +246,7 @@ if not isOfflineTest:
     streamToServerTool = acc.popToolsAndMerge(StreamToServerToolCfg(flags))
 
 from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
-acc.merge(AlgoJiveXMLCfg(flags,StreamToFileTool=streamToFileTool,StreamToServerTool=streamToServerTool))
+acc.merge(AlgoJiveXMLCfg(flags,StreamToFileTool=streamToFileTool,StreamToServerTool=streamToServerTool,OnlineMode=True))
 
 # This creates an ESD file per event which is renamed and moved to the desired output
 # dir in the VP1 Event Prod alg
@@ -252,11 +254,11 @@ from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerS
 acc.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
 
 StreamESD = acc.getEventAlgo("OutputStreamESD")
-vp1Alg = CompFactory.VP1EventProd(name="VP1EventProd",
-                                  InputPoolFile = StreamESD.OutputFile,
-                                  IsOnline = True,
-                                  OnlineEventDisplaysSvc = onlineEventDisplaysSvc)
-acc.addEventAlgo(vp1Alg, primary=True)
+#vp1Alg = CompFactory.VP1EventProd(name="VP1EventProd",
+#                                  InputPoolFile = StreamESD.OutputFile,
+#                                  IsOnline = True,
+#                                  OnlineEventDisplaysSvc = onlineEventDisplaysSvc)
+#acc.addEventAlgo(vp1Alg, primary=True)
 
 acc.getService("PoolSvc").WriteCatalog = "xmlcatalog_file:PoolFileCatalog_%s_%s.xml" % (jobId[3], jobId[4])
 
