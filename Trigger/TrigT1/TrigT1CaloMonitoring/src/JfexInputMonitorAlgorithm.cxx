@@ -16,8 +16,8 @@ StatusCode JfexInputMonitorAlgorithm::initialize() {
     ATH_MSG_DEBUG("Package Name "<< m_Grouphist);
     ATH_MSG_DEBUG("jFexDataTowerKey: "<< m_jFexDataTowerKey);
     ATH_MSG_DEBUG("jFexEmulatedTowerKey: "<< m_jFexEmulatedTowerKey);
-    ATH_CHECK(m_monTool.retrieve());
-    ATH_MSG_DEBUG("Logging errors to " << m_monTool.name() << " monitoring tool");
+    //ATH_CHECK(m_monTool.retrieve());
+    //ATH_MSG_DEBUG("Logging errors to " << m_monTool.name() << " monitoring tool");
 
 
     // we initialise all the containers that we need
@@ -29,6 +29,8 @@ StatusCode JfexInputMonitorAlgorithm::initialize() {
     ATH_CHECK( m_SCellEtMeVdecorKey.initialize()  );
     ATH_CHECK( m_TileEtMeVdecorKey.initialize()   );
     ATH_CHECK( m_jTowerEtdecorKey.initialize()    );
+
+    ATH_CHECK( m_bcContKey.initialize() );
 
     // error counter
     m_nJFexWarnVar = 0;
@@ -47,13 +49,28 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         return StatusCode::FAILURE;
     }
 
+    // mismatches can be caused by recent/imminent OTF maskings, so track timings
+    auto timeSince = Monitored::Scalar<int>("timeSince", -1);
+    auto timeUntil = Monitored::Scalar<int>("timeUntil", -1);
+    SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_bcContKey, ctx };
+    if(larBadChan.isValid()) {
+        timeSince = ctx.eventID().time_stamp() - larBadChan.getRange().start().time_stamp();
+        timeUntil = larBadChan.getRange().stop().time_stamp() - ctx.eventID().time_stamp();
+    }
+    auto EventType = Monitored::Scalar<std::string>("EventType","Normal");
+    if((timeSince>=0&&timeSince<10)) EventType="JustAfterMask";
+    else if((timeUntil>=0&&timeUntil<10)) EventType="JustBeforeMask";
+
+    auto Decision = Monitored::Scalar<std::string>("Decision","");
+
     //Run the monitoring only when the input data is filled (it is pre-scaled), otherwise skip
     if(jFexTowerContainer->empty()){
         ATH_MSG_DEBUG("number of jfex towers = "<< jFexTowerContainer->size());
+        Decision += "MissingReadout;";
+        fill(m_Grouphist,EventType,Decision);
         return StatusCode::SUCCESS;
     }
 
- 
     SG::ReadHandle<xAOD::jFexTowerContainer> jFexEmulatedTowerContainer{m_jFexEmulatedTowerKey, ctx};
     if(!jFexEmulatedTowerContainer.isValid()) {
         ATH_MSG_ERROR("No jFex Tower container valid in storegate with key: "<< m_jFexEmulatedTowerKey);
@@ -182,14 +199,27 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 } 
                 
                 if( (dataTower->et_count()).at(0) != m_InvalidCode ){
-		    if ( m_nJFexWarnVar++ < m_nJFexWarnMax ) {
-                        ATH_MSG_WARNING("Tower:"<< TTID << " source:"<< +dataTower->Calosource() << " for eventNumber:"<< GetEventInfo(ctx)->eventNumber()<< " and LB:"<<GetEventInfo(ctx)->lumiBlock() << ". DataTower Et:"<< (dataTower->et_count()).at(0) <<"/"<< DataEt<<" MeV vs EmulatedTower Et:" << emulated_jtowerEt(*dataTower)<<"/"<< EmulatedEt<< " MeV");
-		    }
+                    if ( m_nJFexWarnVar++ < m_nJFexWarnMax ) {
+                                ATH_MSG_WARNING("Tower:"<< TTID << " source:"<< +dataTower->Calosource() << " for eventNumber:"<< GetEventInfo(ctx)->eventNumber()<< " and LB:"<<GetEventInfo(ctx)->lumiBlock() << ". DataTower Et:"<< (dataTower->et_count()).at(0) <<"/"<< DataEt<<" MeV vs EmulatedTower Et:" << emulated_jtowerEt(*dataTower)<<"/"<< EmulatedEt<< " MeV");
+                    }
                     frac_SCellSum = DataEt != 0 ? (EmulatedEt - DataEt)/DataEt : 0;
                     fill(m_Grouphist+"_decorated",Towereta,Towerphi,DataEt,EmulatedEt,frac_SCellSum);
+
+                    if(source!=1) {
+                        if(std::string(Decision).find("LArMismatches")==std::string::npos)  Decision+="LArMismatches;";
+                    } else {
+                        if(std::string(Decision).find("TileMismatches")==std::string::npos)  Decision+="TileMismatches;";
+                    }
+
+
                     genError("Input_Mismatch", location);
                 }
                 else{
+                    if(source!=1) {
+                        if(std::string(Decision).find("LArInvalid")==std::string::npos)  Decision+="LArInvalid;";
+                    } else {
+                        if(std::string(Decision).find("TileInvalid")==std::string::npos)  Decision+="TileInvalid;";
+                    }
                     genError("Input_Invalids", location);
                 }
                 
@@ -317,7 +347,9 @@ StatusCode JfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         }
         
     }
-    
+
+    if(std::string(Decision)=="") Decision = "AllOk";
+    fill(m_Grouphist,EventType,Decision);
 
     return StatusCode::SUCCESS;
 
@@ -328,9 +360,9 @@ int JfexInputMonitorAlgorithm::codedVal(const int ID, const int source) const{
 }
 
 
-void  JfexInputMonitorAlgorithm::genError(const std::string& location, const std::string& title) const {
-    Monitored::Group(m_monTool,
-                     Monitored::Scalar("genLocation",location.empty() ? std::string("UNKNOWN") : location),
-                     Monitored::Scalar("genType",title.empty()    ? std::string("UNKNOWN") : title)
-                    );
+void  JfexInputMonitorAlgorithm::genError(const std::string& /*location*/, const std::string& /*title*/) const {
+//    Monitored::Group(m_monTool,
+//                     Monitored::Scalar("genLocation",location.empty() ? std::string("UNKNOWN") : location),
+//                     Monitored::Scalar("genType",title.empty()    ? std::string("UNKNOWN") : title)
+//                    );
 }
