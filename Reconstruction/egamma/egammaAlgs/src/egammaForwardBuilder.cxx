@@ -321,8 +321,13 @@ std::optional<std::unique_ptr<xAOD::CaloCluster>> egammaForwardBuilder::cookieCu
   const float phi = isEC ? cp0.phiEC : cp0.phiF;
 
   auto newCluster = CaloClusterStoreHelper::makeCluster(cellCont);
-  CaloClusterCellLink* newCellLinks = newCluster->getOwnCellLinks();
 
+  if (!newCluster) {
+    ATH_MSG_ERROR("CaloClusterStoreHelper::makeCluster failed.");
+    return std::nullopt;
+  }
+
+  CaloClusterCellLink* newCellLinks = newCluster->getOwnCellLinks();
   copyMoments(cluster,
               newCluster,
               xAOD::CaloCluster::SECOND_LAMBDA,
