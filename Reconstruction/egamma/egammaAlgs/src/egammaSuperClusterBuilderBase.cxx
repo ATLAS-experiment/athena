@@ -371,28 +371,30 @@ egammaSuperClusterBuilderBase::execute(const EventContext& ctx) const
     ATH_MSG_DEBUG("Total clusters " << accumulatedClusters.size());
 
     // Create the new cluster
-    bool clusterAdded =
+    std::optional<std::unique_ptr<xAOD::CaloCluster>> newCluster = 
       createNewCluster(ctx,
                        accumulatedClusters,
                        cellCont,
                        *calodetdescrmgr,
                        getEgammaRecType(egRec),
-                       outputClusterContainer.ptr(),
                        precorrClustersH ? precorrClustersH->ptr() : nullptr);
 
     // If we failed to create a cluster revert isUsed for the cluster
-    if (!clusterAdded) {
+    if (newCluster) {
+      outputClusterContainer->push_back(std::move(*newCluster));
+    }
+    else {
       isUsed.swap(isUsedRevert);
       continue;
     }
-
+      
     // Add the cluster links to the super cluster
     ElementLink<xAOD::CaloClusterContainer> clusterLink(
       *outputClusterContainer, outputClusterContainer->size() - 1, ctx);
     std::vector<ElementLink<xAOD::CaloClusterContainer>> elClusters{
       clusterLink
     };
-
+  
     // Make egammaRec object, and push it back into output container.
     auto newEgRec = std::make_unique<egammaRec>(*egRec);
     if (newEgRec) {
@@ -462,29 +464,27 @@ egammaSuperClusterBuilderBase::matchesInWindow(
   return (dEta < m_searchWindowEtaEndcap && dPhi < m_searchWindowPhiEndcap);
 }
 
-bool
+std::optional<std::unique_ptr<xAOD::CaloCluster>>
 egammaSuperClusterBuilderBase::createNewCluster(
   const EventContext& ctx,
   const std::vector<const xAOD::CaloCluster*>& clusters,
   const DataLink<CaloCellContainer>& cellCont,
   const CaloDetDescrManager& mgr,
   xAOD::EgammaParameters::EgammaType egType,
-  xAOD::CaloClusterContainer* newClusters,
   xAOD::CaloClusterContainer* precorrClusters) const
 {
   if (clusters.empty()) {
     ATH_MSG_ERROR("Missing the seed cluster! Should not happen.");
-    return false;
+    return std::nullopt;
   }
 
   // create a new empty cluster
   // collection will own it if
-  xAOD::CaloCluster* newCluster =
-    CaloClusterStoreHelper::makeCluster(newClusters, cellCont);
+  auto newCluster = CaloClusterStoreHelper::makeCluster(cellCont);
 
   if (!newCluster) {
     ATH_MSG_ERROR("CaloClusterStoreHelper::makeCluster failed.");
-    return false;
+    return std::nullopt;
   }
   //
   newCluster->setClusterSize(xAOD::CaloCluster::SuperCluster);
@@ -503,8 +503,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
 
   // Actually fill the cluster here
   if (fillClusterConstrained(*newCluster, clusters, cp0).isFailure()) {
-    newClusters->pop_back();
-    return false;
+    return std::nullopt;
   }
   // Apply SW-style summation of TileGap3 cells (if necessary).
   float eta0 = std::abs(newCluster->eta0());
@@ -517,39 +516,35 @@ egammaSuperClusterBuilderBase::createNewCluster(
     if (addTileGap3CellsinWindow(*newCluster, mgr).isFailure()) {
       ATH_MSG_ERROR("Problem with the input cluster when running "
                     "AddTileGap3CellsinWindow?");
-      newClusters->pop_back();
-      return false;
+
+      return std::nullopt;
     }
   }
   /// Calculate the kinematics of the new cluster, after all cells are added
-  CaloClusterKineHelper::calculateKine(newCluster, true, true);
+  CaloClusterKineHelper::calculateKine(newCluster.get(), true, true);
 
   // If adding all EM cells we are somehow below the seed threshold then remove
   if (newCluster->et() < m_EtThresholdCut) {
-    newClusters->pop_back();
-    return false;
+    return std::nullopt;
   }
 
   // Check to see if cluster pases basic requirements. If not, kill it.
   if (!m_egammaCheckEnergyDepositTool.empty() &&
       !m_egammaCheckEnergyDepositTool->checkFractioninSamplingCluster(
-        newCluster)) {
-    newClusters->pop_back();
-    return false;
+        newCluster.get())) {
+    return std::nullopt;
   }
 
   // Apply correction calibration
-  if (calibrateCluster(ctx, newCluster, mgr, egType, precorrClusters)
+  if (calibrateCluster(ctx, newCluster.get(), mgr, egType, precorrClusters)
         .isFailure()) {
     ATH_MSG_WARNING("There was problem calibrating the object");
-    newClusters->pop_back();
-    return false;
+    return std::nullopt;
   }
 
   // Avoid negative energy clusters
   if (newCluster->et() < 0) {
-    newClusters->pop_back();
-    return false;
+    return std::nullopt;
   }
 
   if (m_linkToConstituents) {
@@ -574,7 +569,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
     caloClusterLinks(*newCluster) = constituentLinks;
   }
   // return the new cluster
-  return true;
+  return newCluster;
 }
 
 bool
