@@ -105,9 +105,14 @@ def ITkTrackingSiPatternCfg(flags,
         if flags.Tracking.ActiveConfig.doActsTrack and not flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
             # create track particles from acts tracks
             from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
-            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ActsTrackToAltTrackParticleCnvAlg",
-                                                        ACTSTracksLocation='ActsTracks',
-                                                        TrackParticlesOutKey='ActsTrackParticlesAlt'))
+            # The following few lines will disappear once we have imposed a proper nomenclature for our algorithms and collection
+            prefix = "Acts"
+            if 'Validate' not in flags.Tracking.ActiveConfig.extension and 'BenchmarkSpot' not in flags.Tracking.ActiveConfig.extension:
+                prefix = flags.Tracking.ActiveConfig.extension
+            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags,
+                                                        f"{prefix}TrackToAltTrackParticleCnvAlg",
+                                                        ACTSTracksLocation=f'{prefix}Tracks',
+                                                        TrackParticlesOutKey=f'{prefix}TrackParticlesAlt'))
             
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
     if flags.Tracking.doTruth and runTruth:
@@ -167,9 +172,13 @@ def ITkTrackingSiPatternCfg(flags,
         if flags.Tracking.ActiveConfig.doActsTrack and flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
             # create track particles from resolved acts tracks
             from ActsConfig.ActsTrackFindingConfig import ActsTrackToTrackParticleCnvAlgCfg
-            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, "ResolvedActsTrackToAltTrackParticleCnvAlg",
-                                                        ACTSTracksLocation='ResolvedActsTracks',
-                                                        TrackParticlesOutKey='ResolvedActsTrackParticlesAlt'))
+            # The following few lines will disappear once we have imposed a proper nomenclature for our algorithms and collection
+            prefix = "Acts"
+            if 'Validate' not in flags.Tracking.ActiveConfig.extension and 'BenchmarkSpot' not in flags.Tracking.ActiveConfig.extension:
+                prefix = flags.Tracking.ActiveConfig.extension
+            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"Resolved{prefix}TrackToAltTrackParticleCnvAlg",
+                                                        ACTSTracksLocation=f'Resolved{prefix}Tracks',
+                                                        TrackParticlesOutKey=f'Resolved{prefix}TrackParticlesAlt'))
 
 
     if flags.Tracking.doTruth and runTruth:
