@@ -15,6 +15,7 @@
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "xAODMuonPrepData/MdtDriftCircleAuxContainer.h"
 
 using namespace MuonGM;
 using namespace Trk;
@@ -131,6 +132,7 @@ namespace Muon {
         ATH_CHECK(m_mdtPrepDataContainerKey.initialize());
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_muDetMgrKey.initialize());
+        ATH_CHECK(m_mdtxAODKey.initialize(!m_mdtxAODKey.empty()));
         return StatusCode::SUCCESS;
     }
 
@@ -153,13 +155,21 @@ namespace Muon {
         ATH_MSG_WARNING("Retrieval of Mdt RDO container failed !");
         return nullptr;
     }
+    
     StatusCode MdtRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const{
         return setupMdtPrepDataContainer(ctx).prd_cont ? StatusCode::SUCCESS : StatusCode::FAILURE;
     }
+
     StatusCode MdtRdoToPrepDataToolMT::decode(const EventContext& ctx, const std::vector<IdentifierHash>& multiLayerHashInRobs) const {
         // setup output container
         ModfiablePrdColl mdtPrepDataContainer = setupMdtPrepDataContainer(ctx);
         if (!mdtPrepDataContainer.prd_cont) { return StatusCode::FAILURE; }
+
+        SG::WriteHandle<xAOD::MdtDriftCircleContainer> outputContainer;
+        if (!m_mdtxAODKey.empty()) {
+            outputContainer = SG::WriteHandle<xAOD::MdtDriftCircleContainer>(m_mdtxAODKey, ctx);
+        }
+        auto mdtxAODPrepDataContainer = setupxAODMdtPrepDataContainer(outputContainer);
 
         if (!m_decodeData) {
             ATH_MSG_DEBUG("Stored empty container. Decoding MDT RDO into MDT PrepRawData is switched off");
@@ -168,20 +178,22 @@ namespace Muon {
 
         // left unused, needed by other decode function and further down the code.
         std::vector<IdentifierHash> idWithDataVect;
-        processPRDHashes(ctx, mdtPrepDataContainer, multiLayerHashInRobs);
+        processPRDHashes(ctx, mdtPrepDataContainer, mdtxAODPrepDataContainer, multiLayerHashInRobs);
         ATH_CHECK(mdtPrepDataContainer.finalize(idWithDataVect, msgStream()));
         return StatusCode::SUCCESS;
     }  // end decode
 
     void MdtRdoToPrepDataToolMT::processPRDHashes(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer,
+                                                    xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer,
                                                     const std::vector<IdentifierHash>& multiLayerHashInRobs) const {
         for (const IdentifierHash& hash : multiLayerHashInRobs) {
-            if (!handlePRDHash(ctx, mdtPrepDataContainer, hash)) { ATH_MSG_DEBUG("Failed to process hash " << hash); }
+            if (!handlePRDHash(ctx, mdtPrepDataContainer, xAODMdtPrepDataContainer, hash)) { ATH_MSG_DEBUG("Failed to process hash " << hash); }
         }  // ends loop over chamberhash
     }
 
     bool MdtRdoToPrepDataToolMT::handlePRDHash(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer,
-                                                 IdentifierHash rdoHash) const {
+                                                xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer,
+                                                IdentifierHash rdoHash) const {
         const MdtCsmContainer* rdoContainer{getRdoContainer(ctx)};
 
         if (rdoContainer->empty()) {
@@ -199,7 +211,7 @@ namespace Muon {
             return false;
         }
 
-        if (processCsm(ctx, mdtPrepDataContainer, rdoColl, *muDetMgr).isFailure()) {
+        if (processCsm(ctx, mdtPrepDataContainer, xAODMdtPrepDataContainer, rdoColl, *muDetMgr).isFailure()) {
             ATH_MSG_WARNING("processCsm failed for RDO id " << m_idHelperSvc->toString(rdoColl->identify()));
             return false;
         }
@@ -217,13 +229,19 @@ namespace Muon {
         ModfiablePrdColl mdtPrepDataContainer = setupMdtPrepDataContainer(ctx);
         if (!mdtPrepDataContainer.prd_cont) { return StatusCode::FAILURE; }
 
+        SG::WriteHandle<xAOD::MdtDriftCircleContainer> outputContainer;
+        if (!m_mdtxAODKey.empty()) {
+            outputContainer = SG::WriteHandle<xAOD::MdtDriftCircleContainer>(m_mdtxAODKey, ctx);
+        }
+        auto mdtxAODPrepDataContainer = setupxAODMdtPrepDataContainer(outputContainer);
+
         if (!m_decodeData) {
             ATH_MSG_DEBUG("Stored empty container. Decoding MDT RDO into MDT PrepRawData is switched off");
             return StatusCode::SUCCESS;
         }
         // seeded or unseeded decoding
         if (!idVect.empty()) {
-            processPRDHashes(ctx, mdtPrepDataContainer, idVect);
+            processPRDHashes(ctx, mdtPrepDataContainer, mdtxAODPrepDataContainer, idVect);
         } else {
             /// Construct the hashes from the existing RDOs
             std::vector<IdentifierHash> rdoHashes{};
@@ -232,7 +250,7 @@ namespace Muon {
             rdoHashes.reserve(rdoContainer->size());
             for (const MdtCsm* csm : *rdoContainer) rdoHashes.push_back(csm->identifyHash());
 
-            processPRDHashes(ctx, mdtPrepDataContainer, rdoHashes);
+            processPRDHashes(ctx, mdtPrepDataContainer, mdtxAODPrepDataContainer, rdoHashes);
         }
         ATH_CHECK(mdtPrepDataContainer.finalize(idWithDataVect, msgStream()));
 
@@ -329,7 +347,64 @@ namespace Muon {
                                              calibOutput.status());
     }
 
-    StatusCode MdtRdoToPrepDataToolMT::processCsm(const EventContext& ctx, ModfiablePrdColl& prepDataContainer, const MdtCsm* rdoColl,
+    std::unique_ptr<xAOD::MdtDriftCircle> MdtRdoToPrepDataToolMT::createxAODPrepData(const MdtCalibInput& calibInput,
+                                            const MdtCalibOutput& calibOutput) const {
+      if (!calibInput.legacyDescriptor() || calibInput.isMasked() ||
+          calibInput.adc() < m_adcCut ||
+          calibOutput.status() == MdtDriftCircleStatus::MdtStatusUnDefined) {
+        ATH_MSG_VERBOSE(
+            "Do not create calib hit for "
+            << m_idHelperSvc->toString(calibInput.identify())
+            << " because it's masked " << (calibInput.isMasked() ? "si" : "no")
+            << ", "
+            << "adc: " << calibInput.adc() << " vs. " << m_adcCut
+            << ", calibration bailed out "
+            << (calibOutput.status() == MdtDriftCircleStatus::MdtStatusUnDefined
+                    ? "si"
+                    : "no"));
+        return nullptr;
+      }
+      ATH_MSG_VERBOSE("Calibrated xAOD prepdata "
+                      << m_idHelperSvc->toString(calibInput.identify())
+                      << std::endl
+                      << calibInput << std::endl
+                      << calibOutput);
+
+      xAOD::MeasVector<1> driftRadius{0.0};
+      xAOD::MeasMatrix<1> cov{0.0};
+
+      if (calibOutput.status() == MdtDriftCircleStatus::MdtStatusDriftTime) {
+        /// Test by how much do we break frozen Tier0
+        const float r = calibOutput.driftRadius();
+        const float sigR = calibOutput.driftRadiusUncert();
+        driftRadius[0] = r;
+        (cov)(0, 0) = sigR * sigR;
+      } else
+        (cov)(0, 0) = 0;
+
+      auto xprd = std::make_unique<xAOD::MdtDriftCircle>();
+
+      const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
+
+      const Identifier prdId{calibInput.identify()};
+      xprd->setIdentifier(calibInput.identify().get_identifier32().get_compact());
+
+      xprd->setMeasurement(calibInput.legacyDescriptor()->identifyHash(), driftRadius,
+                          cov);
+
+      xprd->setTdc(calibInput.tdc());
+      xprd->setAdc(calibInput.adc());
+      xprd->setTube(id_helper.tube(prdId));
+      xprd->setLayer(id_helper.tubeLayer(prdId));
+      xprd->setStatus(calibOutput.status());
+      // TODO tubePosInStation - but this needs ReadoutElement?
+
+      return xprd;                                        
+    }
+
+    StatusCode MdtRdoToPrepDataToolMT::processCsm(const EventContext& ctx, ModfiablePrdColl& prepDataContainer, 
+                                                  xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer,
+                                                  const MdtCsm* rdoColl,
                                                   const MuonGM::MuonDetectorManager* muDetMgr) const {
         const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
         // first handle the case of twin tubes
@@ -341,7 +416,7 @@ namespace Muon {
             MuonStationIndex::ChIndex chIndex = m_idHelperSvc->chamberIndex(elementId);
             if (chIndex == MuonStationIndex::BOL &&
                 (m_useAllBOLTwin || (std::abs(id_helper.stationEta(elementId)) == 4 && id_helper.stationPhi(elementId) == 7))) {
-                return processCsmTwin(ctx, prepDataContainer, rdoColl, muDetMgr);
+                return processCsmTwin(ctx, prepDataContainer, xAODMdtPrepDataContainer, rdoColl, muDetMgr);
             }
         }
 
@@ -407,6 +482,10 @@ namespace Muon {
 
             newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
             driftCircleColl->push_back(std::move(newPrepData));
+
+            if (m_mdtxAODKey.empty() && xAODMdtPrepDataContainer) {
+                xAODMdtPrepDataContainer->push_back((createxAODPrepData(calibIn, calibResult)));
+            }
         }
         return StatusCode::SUCCESS;
     }
@@ -421,7 +500,8 @@ namespace Muon {
         }
         return false;
     }
-    StatusCode MdtRdoToPrepDataToolMT::processCsmTwin(const EventContext& ctx, ModfiablePrdColl& prepDataContainer, const MdtCsm* rdoColl,
+    StatusCode MdtRdoToPrepDataToolMT::processCsmTwin(const EventContext& ctx, ModfiablePrdColl& prepDataContainer, 
+                                                      xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer, const MdtCsm* rdoColl,
                                                       const MuonGM::MuonDetectorManager* muDetMgr) const {
         const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
         ATH_MSG_DEBUG(" ***************** Start of processCsmTwin");
@@ -545,6 +625,10 @@ namespace Muon {
                     newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
                     driftCircleColl->push_back(std::move(newPrepData));
 
+                    if (m_mdtxAODKey.empty() && xAODMdtPrepDataContainer) {
+                        xAODMdtPrepDataContainer->push_back(createxAODPrepData(mdtCalibIn, mdtCalibOut));
+                    }
+
                     ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " " << mdtCalibOut);
                     continue;
                 }
@@ -604,6 +688,9 @@ namespace Muon {
                     driftCircleColl->push_back(std::move(newPrepData));
                     ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " "<<calibResult1st);
                 }
+                if (m_mdtxAODKey.empty() && xAODMdtPrepDataContainer) {
+                   xAODMdtPrepDataContainer->push_back(createxAODPrepData(calibInput1st, calibResult1st));
+                }
                 if (!second_digit) continue;
                     // Calculate radius
                     
@@ -616,7 +703,9 @@ namespace Muon {
                 if (!second_newPrepData) continue;
                 second_newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
                 driftCircleColl->push_back(std::move(second_newPrepData));
-
+                if (m_mdtxAODKey.empty() && xAODMdtPrepDataContainer) {
+                    xAODMdtPrepDataContainer->push_back(createxAODPrepData(calibInput2nd, calibResult2nd));
+                }
                 // second_digit
                 ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA FOR SECOND DIGIT " 
                               << m_idHelperSvc->toString(calibInput2nd.identify()) 
@@ -688,6 +777,21 @@ namespace Muon {
         // Pass the container from the handle
         return ModfiablePrdColl{handle.ptr()};
     }
+
+    xAOD::MdtDriftCircleContainer*
+    MdtRdoToPrepDataToolMT::setupxAODMdtPrepDataContainer(SG::WriteHandle<xAOD::MdtDriftCircleContainer>& outputContainer) const {
+
+        if (!m_mdtxAODKey.empty() && 
+                outputContainer.record(std::make_unique<xAOD::MdtDriftCircleContainer>(),
+                        std::make_unique<xAOD::MdtDriftCircleAuxContainer>())
+                .isSuccess()) {
+            ATH_MSG_DEBUG(
+                "Recorded xAOD container with key: " << outputContainer.key());
+            return outputContainer.ptr();
+        } 
+        return nullptr;
+    }
+
     void Muon::MdtRdoToPrepDataToolMT::printPrepData(const EventContext& ctx ) const {
         SG::ReadHandleKey<Muon::MdtPrepDataContainer> k(m_mdtPrepDataContainerKey.key());
         k.initialize().ignore();

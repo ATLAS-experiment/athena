@@ -21,6 +21,8 @@
 #include "MuonRDO/MdtCsmContainer.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "xAODMuonPrepData/MdtDriftCircleContainer.h"
+
 class MdtDigit;
 class MdtCalibHit;
 
@@ -30,14 +32,7 @@ namespace MuonGM {
 
 namespace Muon {
     /** @class MdtRdoToPrepDataToolMT
-
-        This is for the Doxygen-Documentation.
-        Please delete these lines and fill in information about
-        the Algorithm!
-        Please precede every member function declaration with a
-        short Doxygen comment stating the purpose of this function.
-
-        @author  Edward Moyse <Edward.Moyse@cern.ch>
+     * Tool to produce MDT PRDs
     */
 
     class MdtRdoToPrepDataToolMT : public extends<AthAlgTool, IMuonRdoToPrepDataTool> {
@@ -91,18 +86,26 @@ namespace Muon {
             PrdCollMap addedCols{};
         };
 
-        StatusCode processCsm(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, const MdtCsm* rdoColl,
+        StatusCode processCsm(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer, const MdtCsm* rdoColl,
                               const MuonGM::MuonDetectorManager* muDetMgr) const;
 
-        StatusCode processCsmTwin(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, const MdtCsm* rdoColll,
+        StatusCode processCsmTwin(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer, const MdtCsm* rdoColll,
                                   const MuonGM::MuonDetectorManager* muDetMgr) const;
         
-        /// Creates the Prepdata container
+        /// Creates the PRD object
         std::unique_ptr<MdtPrepData> createPrepData(const MdtCalibInput& calibInput,
                                                     const MdtCalibOutput& calibOutput) const;
         
+        /// Creates the xAOD PRD object
+        std::unique_ptr<xAOD::MdtDriftCircle> createxAODPrepData(const MdtCalibInput& calibInput,
+                                                    const MdtCalibOutput& calibOutput) const;
+
         /// Creates the prep data container to be written
         ModfiablePrdColl setupMdtPrepDataContainer(const EventContext& ctx) const;
+        
+        /// Creates the xAOD PRD container to be written
+        xAOD::MdtDriftCircleContainer* setupxAODMdtPrepDataContainer(SG::WriteHandle<xAOD::MdtDriftCircleContainer>& outputContainer) const;
+        
         /// Is the identifier disabled due to BMG cut outs
         bool deadBMGChannel(const Identifier& channelId) const;
 
@@ -110,9 +113,12 @@ namespace Muon {
         const MdtCsmContainer* getRdoContainer(const EventContext& ctx) const;
 
         void processPRDHashes(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer,
-                              const std::vector<IdentifierHash>& chamberHashInRobs) const;
+                                xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer,
+                                const std::vector<IdentifierHash>& chamberHashInRobs) const;
 
-        bool handlePRDHash(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, IdentifierHash rdoHash) const;
+        bool handlePRDHash(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, 
+                                xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer,
+                                IdentifierHash rdoHash) const;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -156,6 +162,8 @@ namespace Muon {
         SG::UpdateHandleKey<MdtPrepDataCollection_Cache> m_prdContainerCacheKey{this, "MdtPrdContainerCacheKey", "",
                                                                                 "Optional external cache for the MDT PRD container"};
 
+        // xAOD PRDs
+        SG::WriteHandleKey<xAOD::MdtDriftCircleContainer>   m_mdtxAODKey  {this, "MdtxAODKey", "", "If empty, do not produce xAOD, otherwise this is the key of the output xAOD MDT PRD container"};
     };
 }  // namespace Muon
 

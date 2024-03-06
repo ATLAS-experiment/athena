@@ -46,4 +46,9 @@ if( NOT SIMULATIONBASE )
                    SCRIPT python -m MuonConfig.MuonSegmentFindingConfig --threads=1
                    PROPERTIES TIMEOUT 450
                    POST_EXEC_SCRIPT noerror.sh )
+   
+   atlas_add_test( NewxAODConvertorTest
+                   SCRIPT test/MuonxAODPRDCnv_test.py 
+                   PROPERTIES TIMEOUT 450
+                   POST_EXEC_SCRIPT noerror.sh )
 endif()

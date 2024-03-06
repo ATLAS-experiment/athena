@@ -153,6 +153,7 @@ def createMuonConfigFlags():
     # configure the MM cluster reco method that is used in the cluster calibration step
     mcf.addFlag("Muon.MMClusterCalibRecoTool",  lambda prevFlags : MMClusterBuilderEnum.ClusterTimeProjection if prevFlags.Input.isMC else MMClusterBuilderEnum.Centroid, type=MMClusterBuilderEnum)
 
+    mcf.addFlag("Muon.writexAODPRD", False) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
 
 
 
