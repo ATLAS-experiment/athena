@@ -135,8 +135,7 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
 	  ATH_MSG_WARNING("There was a failure in matching truth taus with subjet " << i);
 	  return StatusCode::FAILURE;
 	}
-      if (vTruthMatch.at(i) && 
-	  (vTruthMatchedParticleType.at(i) == TruthHadronicTau || vTruthMatchedParticleType.at(i) == TruthLeptonicTau))
+      if (vTruthMatch.at(i) && vTruthMatchedParticleType.at(i) == TruthHadronicTau)
 	{
 	  xRemainingTruthTaus.erase( std::find(xRemainingTruthTaus.begin(),
 					       xRemainingTruthTaus.end(),
@@ -154,7 +153,7 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
       TruthMatchedParticleType eTruthMatchedParticleType = vTruthMatchedParticleType.at(i);
       if (xTruthMatch)
 	{
-	  if (eTruthMatchedParticleType == TruthHadronicTau or eTruthMatchedParticleType == TruthLeptonicTau)
+	  if (eTruthMatchedParticleType == TruthHadronicTau)
 	    {
 	      ElementLink < xAOD::TruthParticleContainer > lTruthParticleLink(xTruthMatch, xTruthTauContainer);
 	      vTruthLinks.push_back(lTruthParticleLink);  
@@ -300,7 +299,6 @@ StatusCode DiTauTruthMatchingTool::truthMatch(const TLorentzVector& vSubjetTLV,
                                               const xAOD::TruthParticle* &xTruthMatch,
                                               TruthMatchedParticleType &eTruthMatchedParticleType) const
 {
-  double dPtMax = 0.;
   for (auto xTruthTauIt : xTruthTauContainer)
     {
       TLorentzVector vTruthVisTLV;
@@ -310,8 +308,6 @@ StatusCode DiTauTruthMatchingTool::truthMatch(const TLorentzVector& vSubjetTLV,
 				m_accMVis(*xTruthTauIt));
       if (vSubjetTLV.DeltaR(vTruthVisTLV) <= m_dMaxDeltaR)
 	{
-	  if (vTruthVisTLV.Pt()<dPtMax)
-	    continue;
 	  static const SG::AuxElement::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
 	  if ((bool)accIsHadronicTau(*xTruthTauIt))
 	    eTruthMatchedParticleType = TruthHadronicTau;
@@ -319,7 +315,6 @@ StatusCode DiTauTruthMatchingTool::truthMatch(const TLorentzVector& vSubjetTLV,
 	    continue; // don't let leptonic taus steal truthmatch just by chance
 
 	  xTruthMatch = xTruthTauIt;
-	  dPtMax = vTruthVisTLV.Pt();
 	  break;
 	}
     }
