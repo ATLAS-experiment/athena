@@ -124,7 +124,7 @@ PP="$PP"'|^MuonIdHelper::init_neighbors'
 
 PP="$PP"'|^SCT_ID +DEBUG|HepPDT Version|^RalSessionMgr Warning Use COOL_DISABLE_CORALCONNECTIONPOOLCLEANUP|^  Z range|^  R range|^ solefittorsimtilta|^ToolSvc.BunchCrossingTool +WARNING|^ *$|^DbSession Info|^MGM::MuonDetectorManager::updateAlignment +WARNING|PixelClusterErrorData Initialize|^done|mtst|into pool catalog|problem running pool_insertFileToCatalog'
 
-PP="$PP"'|^DbSession Info +Open +DbSession|^ failed to import Digitization.DigitizationFlags'
+PP="$PP"'|^DbSession Info +Open +DbSession'
 
 PP="$PP"'|^Found new type of HLT feature:'
 PP="$PP"'|^CombLinks: FeatureIndex is invalid'
