@@ -2036,7 +2036,7 @@ def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=M
     #ensure all blocknames and paramnames are upper case
     paramsUpper = {}
     for blockName in list(params.keys()):
-       paramsUpper[blockName.upper()] = params[blockName]
+       paramsUpper[blockName.upper()] = {}
        for paramName in list(params[blockName].keys()):
           paramsUpper[blockName.upper()][paramName.upper()] = params[blockName][paramName]
 
