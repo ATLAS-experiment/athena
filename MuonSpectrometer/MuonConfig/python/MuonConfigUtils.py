@@ -8,23 +8,15 @@ def SetupMuonStandaloneConfigFlags( default_input = ['/cvmfs/atlas-nightlies.cer
     Setup flags necessary for Muon standalone.
     """
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    flags = initConfigFlags()
-    flags.Detector.GeometryMDT   = True 
-    flags.Detector.GeometryTGC   = True
-    flags.Detector.GeometryCSC   = True     
-    flags.Detector.GeometryRPC   = True
-    # TODO: disable these for now, to be determined if needed
-    flags.Detector.GeometryCalo  = False
-    flags.Detector.GeometryID    = False
-
-    # FIXME This is temporary. I think it can be removed with some other refactoring
-    flags.Muon.makePRDs          = False
-    
+    flags = initConfigFlags()    
     args = flags.fillFromArgs()
 
     if flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_'] :
         # If something is set from an arg (i.e. the command line), this takes priority
         flags.Input.Files = default_input
+
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(flags)
 
     if flags.Output.ESDFileName == '':
         flags.Output.ESDFileName='newESD.pool.root'

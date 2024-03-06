@@ -631,9 +631,6 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
             result.merge( MuonRDOtoPRDConvertorsCfg(flags) )
   
     # We need to add two algorithms - one for normal collisions, one for NCB
-    ### For the moment to not use the run 3 segment maker algorithm as we need
-    ### to migrate the TgcPrepData first. In any case, let's keep the next two lines
-    ### commented for the moment!!!
     result.merge(MuonLayerHoughAlgCfg(flags))
     result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker"))
   
@@ -655,7 +652,7 @@ def MuonSegmentFindingCfg(flags, setup_bytestream = True, cardinality=1):
 
 if __name__=="__main__":
     # To run this, do e.g. 
-    # python -m MuonConfig.MuonSegmentFindingConfig --run --threads=1
+    # python -m MuonConfig.MuonSegmentFindingConfig --threads=1
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
 
     args, flags = SetupMuonStandaloneConfigFlags()

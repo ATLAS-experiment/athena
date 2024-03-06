@@ -20,4 +20,4 @@ atlas_add_component( MuonMDT_CnvTools
    AthenaBaseComps StoreGateLib AtlasDetDescr Identifier ByteStreamCnvSvcBaseLib
    MdtCalibSvcLib MuonCalibEvent MuonReadoutGeometry MuonDigitContainer
    MuonIdHelpersLib MuonRDO MuonPrepRawData MuonCablingData GeoModelUtilities
-   MuonCnvToolInterfacesLib MuonMDT_CnvToolsLib ByteStreamCnvSvcLib )
+   MuonCnvToolInterfacesLib MuonMDT_CnvToolsLib ByteStreamCnvSvcLib xAODMuonPrepData)
