@@ -670,6 +670,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite,
 
     # noSystematics is passed in block from config accumulator
     configSeq += config.makeConfig('CommonServices')
+    configSeq.setOptionValue('.systematicsHistogram', 'systematicsList')
     if forCompare:
         configSeq.setOptionValue('.filterSystematics', "^(?:(?!PseudoData).)*$")
 

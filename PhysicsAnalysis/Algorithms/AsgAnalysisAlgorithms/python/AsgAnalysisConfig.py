@@ -18,6 +18,7 @@ class CommonServicesConfig (ConfigBlock) :
         super (CommonServicesConfig, self).__init__ ('CommonServices')
         self.addOption ('runSystematics', None, type=bool)
         self.addOption ('filterSystematics', None, type=str)
+        self.addOption ('systematicsHistogram', None , type=str)
 
     def makeAlgs (self, config) :
 
@@ -41,6 +42,9 @@ class CommonServicesConfig (ConfigBlock) :
                 sysService.systematicsRegex = self.filterSystematics
         config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
 
+        if self.systematicsHistogram is not None:
+            sysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
+            sysDumper.histogramName = self.systematicsHistogram
 
 
 class PileupReweightingBlock (ConfigBlock):
