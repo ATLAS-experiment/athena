@@ -1,28 +1,25 @@
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-def GfexInputMonitoringConfig(inputFlags):
+def GfexInputMonitoringConfig(flags):
     '''Function to configure LVL1 GfexInput algorithm in the monitoring system.'''
 
     import math 
     # get the component factory - used for getting the algorithms
-    from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
-    # make the athena monitoring helper
-    from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'GfexInputMonitoringCfg')
-
-    # get any algorithms
-    GfexInputMonAlg = helper.addAlgorithm(CompFactory.GfexInputMonitorAlgorithm,'GfexInputMonAlg')
+    # use L1Calo's special MonitoringCfgHelper
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+    helper = L1CaloMonitorCfgHelper(flags,CompFactory.GfexInputMonitorAlgorithm,'GfexInputMonAlg')
 
     # add any steering
     groupName = 'GfexInputMonitor' # the monitoring group name is also used for the package name
-    GfexInputMonAlg.PackageName = groupName
+    helper.alg.PackageName = groupName
 
-    mainDir = 'L1Calo'
-    trigPath = 'GfexInput/'
+    # mainDir = 'L1Calo'
+    trigPath = 'Developer/GfexInput/'
 
     # See if the file contains xTOBs else use TOBs
     #hasXtobs = True if "L1_eFexTower" in inputFlags.Input.Collections else False
@@ -31,39 +28,37 @@ def GfexInputMonitoringConfig(inputFlags):
 
     #tobStr = "TOB"
 
-    # add monitoring algorithm to group, with group name and main directory 
-    myGroup = helper.addGroup(GfexInputMonAlg, groupName , mainDir)
 
     # histograms of gFex tower variables
-    myGroup.defineHistogram('NGfexTowers;h_nGfexTowers', title='Number of gFex towers',
-                            type='TH1I', path=trigPath, xbins=500,xmin=0,xmax=5000)
+    helper.defineHistogram('NGfexTowers;h_nGfexTowers', title='Number of gFex towers',
+                            fillGroup = groupName, type='TH1I', path=trigPath, xbins=500,xmin=0,xmax=5000)
 
-    myGroup.defineHistogram('TowerEta;h_TowerEta', title='gFex Tower Eta',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-5.0,xmax=5.0)
+    helper.defineHistogram('TowerEta;h_TowerEta', title='gFex Tower Eta',
+                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=100,xmin=-5.0,xmax=5.0)
 
-    myGroup.defineHistogram('TowerPhi;h_TowerPhi', title='gFex Tower Phi',
-                            type='TH1F', path=trigPath, xbins=66,xmin=-math.pi,xmax=math.pi)
+    helper.defineHistogram('TowerPhi;h_TowerPhi', title='gFex Tower Phi',
+                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=66,xmin=-math.pi,xmax=math.pi)
 
-    myGroup.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='gFex Tower Eta vs Phi',
-                            type='TH2F',path=trigPath, xbins=100,xmin=-5.0,xmax=5.0,ybins=66,ymin=-math.pi,ymax=math.pi)
+    helper.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='gFex Tower Eta vs Phi',
+                            fillGroup = groupName, type='TH2F',path=trigPath, xbins=100,xmin=-5.0,xmax=5.0,ybins=66,ymin=-math.pi,ymax=math.pi)
 
-    myGroup.defineHistogram('TowerEtaindex;h_TowerEtaindex', title='gFex Tower Eta Index',
-                            type='TH1F', path=trigPath, xbins=50,xmin=0.0,xmax=35.0)
+    helper.defineHistogram('TowerEtaindex;h_TowerEtaindex', title='gFex Tower Eta Index',
+                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=50,xmin=0.0,xmax=35.0)
 
-    myGroup.defineHistogram('TowerPhiindex;h_TowerPhiindex', title='gFex Tower Phi Index',
-                            type='TH1F', path=trigPath, xbins=64,xmin=0.0,xmax=32.0)
+    helper.defineHistogram('TowerPhiindex;h_TowerPhiindex', title='gFex Tower Phi Index',
+                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=64,xmin=0.0,xmax=32.0)
 
-    myGroup.defineHistogram('TowerEtaindex,TowerPhiindex;h_TowerEtaPhiMapindex', title='gFex Tower Eta vs Phi index',
-                            type='TH2F',path=trigPath, xbins=50,xmin=0.0,xmax=35.0,ybins=64,ymin=0,ymax=32.0)
+    helper.defineHistogram('TowerEtaindex,TowerPhiindex;h_TowerEtaPhiMapindex', title='gFex Tower Eta vs Phi index',
+                            fillGroup = groupName, type='TH2F',path=trigPath, xbins=50,xmin=0.0,xmax=35.0,ybins=64,ymin=0,ymax=32.0)
 
-    myGroup.defineHistogram('TowerFpga;h_TowerFpga', title='gFex Tower FPGA Number',
-                            type='TH1F', path=trigPath, xbins=4,xmin=0,xmax=4.0)
+    helper.defineHistogram('TowerFpga;h_TowerFpga', title='gFex Tower FPGA Number',
+                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=4,xmin=0,xmax=4.0)
 
-    myGroup.defineHistogram('TowerEt;h_TowerEt', title='gFex Tower Et',
-                            type='TH1F', path=trigPath, xbins=1000,xmin=0,xmax=1000.0)
+    helper.defineHistogram('TowerEt;h_TowerEt', title='gFex Tower Et',
+                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=1000,xmin=0,xmax=1000.0)
 
-    myGroup.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='gFex Tower Saturation FLag',
-                            type='TH1F', path=trigPath, xbins=2,xmin=0,xmax=2.0)
+    helper.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='gFex Tower Saturation FLag',
+                            fillGroup = groupName, type='TH1F', path=trigPath, xbins=2,xmin=0,xmax=2.0)
     
     acc = helper.result()
     result.merge(acc)

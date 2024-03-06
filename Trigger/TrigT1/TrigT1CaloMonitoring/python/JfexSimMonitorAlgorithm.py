@@ -4,22 +4,19 @@
 def JfexSimMonitoringConfig(flags, UseOfflineCopy = True):
     '''Function to configure LVL1 Efex simulation comparison algorithm in the monitoring system.'''
 
-    # get the component factory - used for merging the algorithm results
+    # use L1Calo's special MonitoringCfgHelper
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    result = ComponentAccumulator()
+    from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+    helper = L1CaloMonitorCfgHelper(flags,CompFactory.JfexSimMonitorAlgorithm,'JfexSimMonAlg')
+    JfexSimMonAlg = helper.alg
 
-    # make the athena monitoring helper
-    from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags,'JfexSimMonitoringCfg')
-
-    # get any algorithms
-    JfexSimMonAlg = helper.addAlgorithm(CompFactory.JfexSimMonitorAlgorithm,'JfexSimMonAlg')
-
-    # add any steering
-    groupName = "JfexSimMonitor" # the monitoring group name is also used for the package name
-    JfexSimMonAlg.Grouphist = groupName
-    
+    # # add any steering
+    # groupName = "JfexSimMonitor" # the monitoring group name is also used for the package name
+    # JfexSimMonAlg.Grouphist = groupName
+    #
+    # mainDir = 'L1Calo'
+    # trigPath = 'JfexSim/'
+    #
     doXtobs = False
     if doXtobs:
         JfexSimMonAlg.jFexSRJetRoIContainer = "L1_jFexSRJetxRoI"
@@ -37,100 +34,108 @@ def JfexSimMonitoringConfig(flags, UseOfflineCopy = True):
         JfexSimMonAlg.jFexSumETRoISimContainer = "L1_jFexSumETxRoISim"
 
 
-    mainDir = 'L1Calo'
-    trigPath = 'JfexSim/'
+    helper.defineHistogram('EventType,Signature,tobMismatched;h_simSummary',title='Sim-HW Mismatches (percentage);Event Type;Signature',
+                           fillGroup="mismatches",
+                           path='Expert/Sim/detail', # place summary plot in the detail path in Expert audience
+                           hanConfig={"display":"SetPalette(87),Draw=COLZTEXT"},
+                           type='TProfile2D', # would like TProfile2D but binning with labels doesn't work
+                           xlabels=["DataTowers","EmulatedTowers"],
+                           ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
+                           opt=['kCanRebin','kAlwaysCreate'],merge="merge")
+    #
+    # # add monitoring algorithm to group, with group name and main directory
+    # myGroup = helper.addGroup(JfexSimMonAlg, groupName, mainDir)
+    #
+    #
+    #
+    #
+    # myGenericGroup = helper.addGroup(None, groupName+"Gen", mainDir)
+    #
+    # myGenericGroup.defineHistogram('genLocation,genType;h_jFEX_Errors', path=None, type='TH2I',
+    #                         title='jFEX generic monitoring for shifters;Location;Type',
+    #                         xbins=4, xmin=0, xmax=4, xlabels=["Sim_DataTowers","Sim_EmulatedTowers","Input_Mismatch","Input_Invalids"],
+    #                         ybins=4, ymin=0, ymax=4, ylabels=["TOB", "global TOB", "EM layer", "HAD layer" ],
+    #                         opt=['kCanRebin'])
+    #
+    # JfexSimMonAlg.jFEXMonTool = myGenericGroup
+    #
+    #
+    #
+    # Input_items = ["EmulatedTowers","DataTowers"]
+    # TOB_items = ["jJ","jLJ","jTau","jEM","jXE", "jTE"]
+    # FPGA_names = ["U1","U2","U4","U3"]
+    # Modules_names = ["jFEX 0","jFEX 1","jFEX 2","jFEX 3","jFEX 4","jFEX 5"]
+    #
+    # from ROOT import TMath
+    #
+    # x_phi = []
+    # for i in range(67):
+    #     phi = (-TMath.Pi()- TMath.Pi()/32) + TMath.Pi()/32*i
+    #     x_phi.append(phi)
+    # x_phi = sorted(x_phi)
+    #
+    # eta_phi_bins = {
+    #     'xbins': 100, 'xmin': -5, 'xmax': 5,
+    #     'ybins': x_phi
+    # }
+    #
+    # myGroup.defineHistogram('item,input;h_ErrorTOBs', title="Errors in each TOB item depending on the input data; TOB item; Input Tower",
+    #                         type='TH2I',path=trigPath, xbins=6,xmin=0,xmax=6,ybins=2,ymin=0,ymax=2,xlabels=TOB_items,ylabels=Input_items)
+    #
+    # for tower in Input_items:
+    #     for item in TOB_items:
+    #
+    #
+    #         if item == "jTE" or item == "jXE":
+    #             groupname = groupName+"_SimEqData_"+item+"_"+tower
+    #             SimEqDataGroup   = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
+    #
+    #             groupname = groupName+"_SimDiffData_"+item+"_"+tower
+    #             SimDiffDataGroup = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
+    #
+    #             SimEqDataGroup.defineHistogram('jfex,fpga;h_DetectorMap_'+tower, title=item+" jFex module vs FPGA - "+tower+"; jFEX module; FPGA",
+    #                                             type='TH2I',path=trigPath+item+'/matched', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
+    #
+    #             SimDiffDataGroup.defineHistogram('jfex,fpga;h_DetectorMap_'+tower, title=item+" jFex module vs FPGA - "+tower+"; jFEX module; FPGA",
+    #                                             type='TH2I',path=trigPath+item+'/unmatched', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
+    #
+    #             SimDiffDataGroup.defineHistogram('LB;h_LBerror_'+tower, title=item+" LB for the mismatch - "+tower+"; LB; Counts",
+    #                                             type='TH1I',path=trigPath+item+'/unmatched', xbins=1,xmin=0,xmax=0,opt=['kCanRebin'])
+    #
+    #         else:
+    #
+    #             groupname = groupName+"_SimEqData_"+item+"_"+tower
+    #             SimEqDataGroup = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
+    #
+    #             groupname = groupName+"_SimNoData_"+item+"_"+tower
+    #             SimNoDataGroup = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
+    #
+    #             groupname = groupName+"_DataNoSim_"+item+"_"+tower
+    #             DataNoSimGroup = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
+    #
+    #             SimEqDataGroup.defineHistogram('eta,phi;h_EtaPhiMap_'+tower, title="jFex "+item+" #eta vs #phi matched in Simulation - "+tower+";#eta;#phi",
+    #                                             type='TH2F',path=trigPath+item+'/matched', **eta_phi_bins)
+    #
+    #             SimNoDataGroup.defineHistogram('eta,phi;h_EtaPhiMap_'+tower, title=item+" in Simulation but not in Data - "+tower+";#eta;#phi",
+    #                                             type='TH2F',path=trigPath+item+'/unmatched/SimNoData', **eta_phi_bins)
+    #
+    #             SimNoDataGroup.defineHistogram('jfex,fpga;h_DetectorMap_'+tower, title=item+" jFex module vs FPGA - "+tower+"; jFEX module; FPGA",
+    #                                             type='TH2I',path=trigPath+item+'/unmatched/SimNoData', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
+    #
+    #             SimNoDataGroup.defineHistogram('LB;h_LBerror_'+tower, title=item+" LB for the mismatch - "+tower+"; LB; Counts",
+    #                                             type='TH1I',path=trigPath+item+'/unmatched/SimNoData', xbins=1,xmin=0,xmax=0,opt=['kCanRebin'])
+    #
+    #             DataNoSimGroup.defineHistogram('eta,phi;h_EtaPhiMap_'+tower, title=item+" in Simulation but not in Data - "+tower+";#eta;#phi",
+    #                                             type='TH2F',path=trigPath+item+'/unmatched/DataNoSim', **eta_phi_bins)
+    #
+    #             DataNoSimGroup.defineHistogram('jfex,fpga;h_DetectorMap_'+tower, title=item+" jFex module vs FPGA - "+tower+"; jFEX module; FPGA",
+    #                                             type='TH2I',path=trigPath+item+'/unmatched/DataNoSim', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
+    #
+    #             DataNoSimGroup.defineHistogram('LB;h_LBerror_'+tower, title=item+" LB for the mismatch - "+tower+"; LB; Counts",
+    #                                             type='TH1I',path=trigPath+item+'/unmatched/DataNoSim', xbins=1,xmin=0,xmax=0,opt=['kCanRebin'])
+    #
 
-    # add monitoring algorithm to group, with group name and main directory 
-    myGroup = helper.addGroup(JfexSimMonAlg, groupName, mainDir)
-    myGenericGroup = helper.addGroup(None, groupName+"Gen", mainDir)
-    
-    myGenericGroup.defineHistogram('genLocation,genType;h_jFEX_Errors', path=None, type='TH2I',
-                            title='jFEX generic monitoring for shifters;Location;Type',
-                            xbins=4, xmin=0, xmax=4, xlabels=["Sim_DataTowers","Sim_EmulatedTowers","Input_Mismatch","Input_Invalids"],
-                            ybins=4, ymin=0, ymax=4, ylabels=["TOB", "global TOB", "EM layer", "HAD layer" ],
-                            opt=['kCanRebin'])
-                            
-    JfexSimMonAlg.jFEXMonTool = myGenericGroup
-    
-    
-    
-    Input_items = ["EmulatedTowers","DataTowers"]
-    TOB_items = ["jJ","jLJ","jTau","jEM","jXE", "jTE"]
-    FPGA_names = ["U1","U2","U4","U3"]
-    Modules_names = ["jFEX 0","jFEX 1","jFEX 2","jFEX 3","jFEX 4","jFEX 5"]
-    
-    from ROOT import TMath
-    
-    x_phi = []
-    for i in range(67):
-        phi = (-TMath.Pi()- TMath.Pi()/32) + TMath.Pi()/32*i 
-        x_phi.append(phi)
-    x_phi = sorted(x_phi)
-    
-    eta_phi_bins = {
-        'xbins': 100, 'xmin': -5, 'xmax': 5,
-        'ybins': x_phi
-    } 
-     
-    myGroup.defineHistogram('item,input;h_ErrorTOBs', title="Errors in each TOB item depending on the input data; TOB item; Input Tower",
-                            type='TH2I',path=trigPath, xbins=6,xmin=0,xmax=6,ybins=2,ymin=0,ymax=2,xlabels=TOB_items,ylabels=Input_items)
-                            
-    for tower in Input_items:
-        for item in TOB_items:
-            
-            
-            if item == "jTE" or item == "jXE":
-                groupname = groupName+"_SimEqData_"+item+"_"+tower
-                SimEqDataGroup   = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
-                
-                groupname = groupName+"_SimDiffData_"+item+"_"+tower
-                SimDiffDataGroup = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
-
-                SimEqDataGroup.defineHistogram('jfex,fpga;h_DetectorMap_'+tower, title=item+" jFex module vs FPGA - "+tower+"; jFEX module; FPGA",
-                                                type='TH2I',path=trigPath+item+'/matched', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
-                                                
-                SimDiffDataGroup.defineHistogram('jfex,fpga;h_DetectorMap_'+tower, title=item+" jFex module vs FPGA - "+tower+"; jFEX module; FPGA",
-                                                type='TH2I',path=trigPath+item+'/unmatched', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)
-                                                
-                SimDiffDataGroup.defineHistogram('LB;h_LBerror_'+tower, title=item+" LB for the mismatch - "+tower+"; LB; Counts",
-                                                type='TH1I',path=trigPath+item+'/unmatched', xbins=1,xmin=0,xmax=0,opt=['kCanRebin'])
-                
-            else:
-                
-                groupname = groupName+"_SimEqData_"+item+"_"+tower
-                SimEqDataGroup = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
-                
-                groupname = groupName+"_SimNoData_"+item+"_"+tower
-                SimNoDataGroup = helper.addGroup(JfexSimMonAlg, groupname, mainDir)
-                
-                groupname = groupName+"_DataNoSim_"+item+"_"+tower
-                DataNoSimGroup = helper.addGroup(JfexSimMonAlg, groupname, mainDir) 
-                
-                SimEqDataGroup.defineHistogram('eta,phi;h_EtaPhiMap_'+tower, title="jFex "+item+" #eta vs #phi matched in Simulation - "+tower+";#eta;#phi", 
-                                                type='TH2F',path=trigPath+item+'/matched', **eta_phi_bins)
-                                                               
-                SimNoDataGroup.defineHistogram('eta,phi;h_EtaPhiMap_'+tower, title=item+" in Simulation but not in Data - "+tower+";#eta;#phi", 
-                                                type='TH2F',path=trigPath+item+'/unmatched/SimNoData', **eta_phi_bins) 
-                                                         
-                SimNoDataGroup.defineHistogram('jfex,fpga;h_DetectorMap_'+tower, title=item+" jFex module vs FPGA - "+tower+"; jFEX module; FPGA",
-                                                type='TH2I',path=trigPath+item+'/unmatched/SimNoData', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)     
-                                                         
-                SimNoDataGroup.defineHistogram('LB;h_LBerror_'+tower, title=item+" LB for the mismatch - "+tower+"; LB; Counts",
-                                                type='TH1I',path=trigPath+item+'/unmatched/SimNoData', xbins=1,xmin=0,xmax=0,opt=['kCanRebin'])     
-                                     
-                DataNoSimGroup.defineHistogram('eta,phi;h_EtaPhiMap_'+tower, title=item+" in Simulation but not in Data - "+tower+";#eta;#phi", 
-                                                type='TH2F',path=trigPath+item+'/unmatched/DataNoSim', **eta_phi_bins) 
-                                                         
-                DataNoSimGroup.defineHistogram('jfex,fpga;h_DetectorMap_'+tower, title=item+" jFex module vs FPGA - "+tower+"; jFEX module; FPGA",
-                                                type='TH2I',path=trigPath+item+'/unmatched/DataNoSim', xbins=6,xmin=0,xmax=6,ybins=4,ymin=0,ymax=4,xlabels=Modules_names,ylabels=FPGA_names)          
-                                                         
-                DataNoSimGroup.defineHistogram('LB;h_LBerror_'+tower, title=item+" LB for the mismatch - "+tower+"; LB; Counts",
-                                                type='TH1I',path=trigPath+item+'/unmatched/DataNoSim', xbins=1,xmin=0,xmax=0,opt=['kCanRebin'])       
-                                                 
-
-    acc = helper.result()
-    result.merge(acc)
-    return result
+    return helper.result()
 
 
 if __name__=='__main__':

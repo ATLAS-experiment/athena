@@ -1,0 +1,66 @@
+#
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#
+def GfexSimMonitoringConfig(flags, UseOfflineCopy = True):
+    '''Function to configure LVL1 Gfex simulation comparison algorithm in the monitoring system.'''
+
+    # use L1Calo's special MonitoringCfgHelper
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+    helper = L1CaloMonitorCfgHelper(flags,CompFactory.GfexSimMonitorAlgorithm,'GfexSimMonAlg')
+
+
+    helper.defineHistogram('EventType,Signature,tobMismatched;h_simSummary',title='Sim-HW Mismatches (percentage);Event Type;Signature',
+                           fillGroup="mismatches",
+                           path='Expert/Sim/detail', # place summary plot in the detail path in Expert audience
+                           hanConfig={"display":"SetPalette(87),Draw=COLZTEXT"},
+                           type='TProfile2D',
+                           xlabels=["DataTowers","EmulatedTowers"],
+                           ymin=0,ymax=len(L1CaloMonitorCfgHelper.SIGNATURES),ylabels=L1CaloMonitorCfgHelper.SIGNATURES,
+                           opt=['kCanRebin','kAlwaysCreate'],merge="merge")
+
+    return helper.result()
+
+
+if __name__=='__main__':
+    # set input file and config options
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    import glob
+
+    import argparse
+    parser = argparse.ArgumentParser(prog='python -m TrigT1CaloMonitoring.GfexSimMonitorAlgorithm',
+                                     description="""Used to run gFEX Monitoring\n\n
+                                   Example: python -m TrigT1CaloMonitoring.GfexSimMonitorAlgorithm --filesInput file.root.\n
+                                   Overwrite inputs using standard athena opts --filesInput, evtMax etc. see athena --help""")
+    parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
+    parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
+    parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
+    args = parser.parse_args()
+
+
+    flags = initConfigFlags()
+    flags.Trigger.triggerConfig='DB'
+    flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
+    flags.Output.HISTFileName = 'gFexSimData_Monitoring.root'
+
+    flags.Exec.MaxEvents = args.evtMax
+    flags.Exec.SkipEvents = args.skipEvents
+
+    flags.lock()
+
+    from AthenaCommon.AppMgr import ServiceMgr
+    ServiceMgr.Dump = False
+
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+
+    GfexSimMonitorCfg = GfexSimMonitoringConfig(flags)
+    cfg.merge(GfexSimMonitorCfg)
+
+    from TrigT1CaloMonitoring.GfexInputMonitorAlgorithm import GfexInputMonitoringConfig
+    GfexInputMonitorCfg = GfexInputMonitoringConfig(flags)
+    cfg.merge(GfexInputMonitorCfg)
+
+    cfg.run()
