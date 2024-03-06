@@ -118,8 +118,14 @@ def  trigJetCRVARHypoToolFromDict(chain_dict):
     chain_name = chain_dict['chainName']
  
     doBIBrm = int(0)
+    doExoCal = int(0)
+    ExoCalCut = 220
     if len(chain_dict['chainParts'][0]['exotHypo']) > 0:
         exot_hypo = chain_dict['chainParts'][0]['exotHypo'][0]
+        calratioX_matched = re.match(r'.*calratiovar(?P<cut>\d{1,3}[\d\D]*)', chain_dict['chainParts'][0]['exotHypo'][0])
+        if calratioX_matched:
+            doExoCal= int(1)
+            ExoCalCut = calratioX_matched.groupdict()['cut']
     else:
         raise Exception("Unable to extract exotHypo calratio jet configuration from chain dict")
     if 'calratiovar' in exot_hypo:
@@ -129,11 +135,21 @@ def  trigJetCRVARHypoToolFromDict(chain_dict):
         raise Exception("misconfiguration of new calratio jet chain")
 
     presel_matched = re.match(r'.*emf(?P<cut>\d?\d?[\d\D]+)', chain_dict['chainParts'][0]['trkpresel'])
-    emf_cut = presel_matched.groupdict()['cut']
+    if presel_matched:
+        emf_cut = presel_matched.groupdict()['cut']
+    else: 
+        presel_matched = re.match(r'.*emf(?P<cut>\d?\d?[\d\D]+)', chain_dict['chainParts'][3]['trkpresel'])
+        if presel_matched:
+            emf_cut = presel_matched.groupdict()['cut']
+        else:
+            raise Exception("misconfiguration of Exotic jet chain")
+
     import math
     hypo = CompFactory.TrigJetCRVARHypoTool(chain_name)
     hypo.MpufixLogRatio     = math.log10(1./(float(emf_cut)*0.01) - 1.)
     hypo.MinjetlogR      = 1.2
+    if doExoCal:
+        hypo.MinjetlogR      = (float(ExoCalCut)*0.01) - 1.
     hypo.MintrackPt      = 2*GeV
     hypo.MindeltaR       = 0.2
     hypo.countBIBcells   = 4

@@ -20,6 +20,7 @@
 
 #include "../EfexSimMonitorAlgorithm.h"
 #include "../JfexSimMonitorAlgorithm.h"
+#include "../GfexSimMonitorAlgorithm.h"
 #include "../L1IDFilterAlgorithm.h"
 #include "../EventNumberFilterAlgorithm.h"
 
@@ -45,6 +46,7 @@ DECLARE_COMPONENT( JfexInputMonitorAlgorithm )
 
 DECLARE_COMPONENT( EfexSimMonitorAlgorithm )
 DECLARE_COMPONENT( JfexSimMonitorAlgorithm )
+DECLARE_COMPONENT( GfexSimMonitorAlgorithm )
 
 DECLARE_COMPONENT( L1IDFilterAlgorithm )
 DECLARE_COMPONENT( EventNumberFilterAlgorithm )

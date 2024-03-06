@@ -265,12 +265,11 @@ with ConfigurableCABehavior(): # need to temporarily activate run3 behaviour to 
     if flags.Trigger.L1.dogFex:
       from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
       cfg.merge(GfexMonitoringConfig(flags))
-      # GfexSimMonitorAlgorithm not yet committed to athena
-      #from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
-      #cfg.merge(GfexSimMonitoringConfig(flags))
+      from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
+      cfg.merge(GfexSimMonitoringConfig(flags))
       # can't include efficiency monitoring because requires too many things we don't have
-      #from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgoritum import JetEfficiencyMonitoring
-      #cfg.merge(JetEfficiencyMonitoring(flags))
+      # from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
+      # cfg.merge(JetEfficiencyMonitoringConfig(flags))
 
     # input data monitoring
     if flags.Trigger.L1.doCaloInputs and not flags.Input.isMC:
@@ -380,6 +379,9 @@ if flags.Exec.MaxEvents==0: cfg.printConfig()
 print("Configured Services:",*[svc.name for svc in cfg.getServices()])
 #print("Configured EventAlgos:",*[alg.name for alg in cfg.getEventAlgos()])
 #print("Configured CondAlgos:",*[alg.name for alg in cfg.getCondAlgos()])
+
+from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+L1CaloMonitorCfgHelper.printHanConfig()
 
 
 if not isComponentAccumulatorCfg():

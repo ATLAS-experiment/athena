@@ -29,6 +29,7 @@ namespace HLT {
     RESULT_TRUNCATION     = 13,
     MISSING_CTP_FRAGMENT  = 14,
     BAD_CTP_FRAGMENT      = 15,
+    SCHEDULER_POP_FAILURE = 16,
   };
 
   // There's no cleaner way to map enum to string, but watch out for C++ Reflection TS, it may come one day
@@ -53,6 +54,7 @@ namespace HLT {
       OnlineErrorCodeSwitchCase(RESULT_TRUNCATION);
       OnlineErrorCodeSwitchCase(MISSING_CTP_FRAGMENT);
       OnlineErrorCodeSwitchCase(BAD_CTP_FRAGMENT);
+      OnlineErrorCodeSwitchCase(SCHEDULER_POP_FAILURE);
       default: return "UNDEFINED_OnlineErrorCode"; break;
     }
   }
