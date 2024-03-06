@@ -17,7 +17,15 @@ def _assertPropertyValue(kwargs, key, force_value):
         )
 
 
-def TTVAToolCfg(flags, name, addDecoAlg=True, **kwargs):
+def getTTVAToolForReco(name="TTVATool", **kwargs):
+    # First check that the user hasn't attempted to overwrite the AMVF vertices/weights decorations
+    _assertPropertyValue(kwargs, "AMVFVerticesDeco", _VERTEX_DECO)
+    _assertPropertyValue(kwargs, "AMVFWeightsDeco", _WEIGHT_DECO)
+
+    return CompFactory.CP.TrackVertexAssociationTool(name, **kwargs)
+
+
+def TTVAToolCfg(flags, name="TTVATool", addDecoAlg=True, **kwargs):
     """Create a component accumulator containing a TTVA tool
 
     If addDecoAlg is True, also adds an algorithm for decorating the 'used-in-fit' information
@@ -32,13 +40,9 @@ def TTVAToolCfg(flags, name, addDecoAlg=True, **kwargs):
     tracks = kwargs.setdefault("TrackContName", _DEFAULT_TRACK_CONT)
     vertices = kwargs.pop("VertexContName", _DEFAULT_VERTEX_CONT)
 
-    acc.setPrivateTools(
-        CompFactory.CP.TrackVertexAssociationTool(
-            name,
-            **kwargs,
-        ),
-    )
+    acc.setPrivateTools(getTTVAToolForReco(name, **kwargs))
 
     if addDecoAlg:
         acc.addEventAlgo( getUsedInVertexFitTrackDecoratorAlg(tracks, vertices) )
     return acc
+
