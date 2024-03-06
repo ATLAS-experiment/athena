@@ -52,9 +52,6 @@ namespace MuonGM {
     : MuonClusterReadoutElement(pv, mgr, Trk::DetectorElemType::sTgc)
     , m_ml(mL) {
 
-        // get the setting of the caching flag from the manager
-        setCachingFlag(mgr->cachingFlag());
-
         std::string fixName = (stName[1] == 'L') ? "STL" : "STS";
         Identifier id = mgr->stgcIdHelper()->channelID(fixName, zi, fi, mL, 1, 2, 1);
 
@@ -116,7 +113,7 @@ namespace MuonGM {
 
 
     //============================================================================
-    sTgcReadoutElement::~sTgcReadoutElement() { clearCache(); }
+    sTgcReadoutElement::~sTgcReadoutElement() = default;
 
     //============================================================================
   void sTgcReadoutElement::initDesign(double /*largeX*/, double /*smallX*/, double /*lengthY*/, double /*stripPitch*/,

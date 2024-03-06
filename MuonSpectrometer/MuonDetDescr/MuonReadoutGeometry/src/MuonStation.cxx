@@ -234,20 +234,6 @@ namespace MuonGM {
         }
     }
 
-    void MuonStation::refreshCache() {
-        ATH_MSG_DEBUG("n. of RE in this station is " << m_REwithAlTransfInStation.size());
-        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
-            ATH_MSG_DEBUG("refreshCache cache .... for RE ... iteration n. " << jobId);
-            MuonReadoutElement* re = readAlignPair.first;
-            if (!re) {
-                ATH_MSG_WARNING(" in MuonStation:refreshCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
-                        << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << jobId << " RE is null, skipping" );
-                continue;
-            }
-            re->refreshCache();
-        }
-    }
-
     void MuonStation::fillCache() {
         for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
             ATH_MSG_DEBUG("fillCache cache .... for RE ... iteration n. " << jobId);
@@ -259,6 +245,11 @@ namespace MuonGM {
             }
             re->fillCache();
         }
+    }
+
+    void MuonStation::refreshCache() {
+        clearCache();
+        fillCache();
     }
 
     void MuonStation::setBline(const BLinePar* bline) {
@@ -279,36 +270,6 @@ namespace MuonGM {
         }
     }
 
-    void MuonStation::clearBLineCache() {
-        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
-            MuonReadoutElement* re = readAlignPair.first;
-            if (!re) {
-               ATH_MSG_WARNING(" in MuonStation:clearBLineCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
-                            << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << jobId << " RE is null, skipping");
-                continue;
-            }
-            if (re->detectorType() !=Trk::DetectorElemType::Mdt) {
-                continue;
-            }
-            MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
-            mdt->clearBLineCache();           
-        }
-    }
-    void MuonStation::fillBLineCache() {
-        for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
-            MuonReadoutElement* re = readAlignPair.first;
-            if (!re) {
-                ATH_MSG_WARNING(" in MuonStation:fillBLineCache " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
-                        << getPhiIndex() << " trying to get a non existing RE, skipping "<<jobId);
-                continue;
-            }
-            if (re->detectorType() !=Trk::DetectorElemType::Mdt) {
-                continue;
-            }
-            MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
-            mdt->fillBLineCache();            
-        }
-    }
 
 #if defined(FLATTEN)
     // We compile this package with optimization, even in debug builds; otherwise,
@@ -400,7 +361,10 @@ namespace MuonGM {
         return m_XTomoData;
     }
 
-    void MuonStation::setMdtAsBuiltParams(const MdtAsBuiltPar* xtomo) { m_XTomoData = xtomo; }
+    void MuonStation::setMdtAsBuiltParams(const MdtAsBuiltPar* xtomo) { 
+        m_XTomoData = xtomo; 
+        refreshCache();
+    }
     void MuonStation::setPhysVol(const PVLink& vol) { m_physVol = vol; }
     PVConstLink MuonStation::getPhysVol() const {return m_physVol; }
     PVLink MuonStation::getPhysVol() { return m_physVol; }

@@ -101,10 +101,8 @@ namespace MuonGM {
         
         inline int nMuonReadoutElements() const;
         void clearCache();
-        void refreshCache();
         void fillCache();
-        void clearBLineCache();
-        void fillBLineCache();
+        void refreshCache();
         void setBline(const BLinePar* bline);
         inline GeoAlignableTransform* getGeoTransform() const;
         inline Amg::Transform3D getTransform() const;

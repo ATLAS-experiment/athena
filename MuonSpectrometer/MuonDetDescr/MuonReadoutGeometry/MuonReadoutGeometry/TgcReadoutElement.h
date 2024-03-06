@@ -258,10 +258,6 @@ namespace MuonGM {
         inline const TgcReadoutParams* getReadoutParams() const;
 
         virtual void fillCache() override;
-        virtual void refreshCache() override {
-            clearCache();
-            fillCache();
-        }
 
     private:
         int m_ngasgaps{0};

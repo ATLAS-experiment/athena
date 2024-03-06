@@ -10,11 +10,6 @@ namespace MuonGM {
 
     MuonClusterReadoutElement::~MuonClusterReadoutElement() = default;
 
-    void MuonClusterReadoutElement::shiftSurface(const Identifier&) { fillCache(); }
-
-    void MuonClusterReadoutElement::restoreSurfaces() {
-        m_surfaceData.reset();
-        fillCache();
-    }
+    void MuonClusterReadoutElement::clearCache() { m_surfaceData.reset(); }
 
 }  // namespace MuonGM

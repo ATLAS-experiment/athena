@@ -41,73 +41,23 @@ namespace MuonGM {
             if (ele) ele->fillCache();
         }
     }
-    template <typename read_out, size_t N> void MuonDetectorManager::refreshCache(std::array<std::unique_ptr<read_out>, N>& array) {
-        for (std::unique_ptr<read_out>& ele : array) {
-            if (!ele) continue;
-            ele->clearCache();
-            ele->fillCache();
-        }
-    }
+
     void MuonDetectorManager::clearCache() {
-        clearMdtCache();
-        clearRpcCache();
-        clearTgcCache();
-        clearCscCache();
+        clearCache(m_mdtArray);
+        clearCache(m_rpcArray);
+        clearCache(m_tgcArray);
+        if (nCscRE())   clearCache(m_cscArray);
+        if (nMMRE())    clearCache(m_mmcArray);
+        if (nsTgcRE())  clearCache(m_stgArray);
     }
-
-    void MuonDetectorManager::refreshCache() {
-        refreshMdtCache();
-        refreshRpcCache();
-        refreshTgcCache();
-        refreshCscCache();
-    }
-    void MuonDetectorManager::refreshMdtCache() {
-        // NEED to fill since FillCacheInitTime = 1 is the default now.
-        refreshCache(m_mdtArray);
-    }
-    void MuonDetectorManager::refreshRpcCache() { refreshCache(m_rpcArray); }
-    void MuonDetectorManager::refreshTgcCache() { refreshCache(m_tgcArray); }
-    void MuonDetectorManager::refreshCscCache() {
-        if (nCscRE()) refreshCache(m_cscArray);
-    }
-    void MuonDetectorManager::refreshMMCache() {
-        if (nMMRE()) refreshCache(m_mmcArray);
-    }
-    void MuonDetectorManager::refreshsTgcCache() {
-        if (nsTgcRE()) refreshCache(m_stgArray);
-    }
-
-    void MuonDetectorManager::clearMdtCache() { clearCache(m_mdtArray); }
-    void MuonDetectorManager::clearRpcCache() { clearCache(m_rpcArray); }
-    void MuonDetectorManager::clearTgcCache() { clearCache(m_tgcArray); }
-    void MuonDetectorManager::clearCscCache() {
-        if (nCscRE()) clearCache(m_cscArray);
-    }
-    void MuonDetectorManager::clearMMCache() {
-        if (nMMRE()) clearCache(m_mmcArray);
-    }
-    void MuonDetectorManager::clearsTgcCache() {
-        if (nsTgcRE()) clearCache(m_stgArray);
-    }
-    void MuonDetectorManager::fillMMCache() {
-        if (nMMRE()) fillCache(m_mmcArray);
-    }
-    void MuonDetectorManager::fillsTgcCache() {
-        if (nsTgcRE()) fillCache(m_stgArray);
-    }
-    void MuonDetectorManager::fillCache() {
-       
+    void MuonDetectorManager::fillCache() {       
         ATH_MSG_INFO( "Filling cache" );
-        fillMdtCache();
-        fillRpcCache();
-        fillTgcCache();
-        fillCscCache();
-    }
-    void MuonDetectorManager::fillMdtCache() { fillCache(m_mdtArray); }
-    void MuonDetectorManager::fillRpcCache() { fillCache(m_rpcArray); }
-    void MuonDetectorManager::fillTgcCache() { fillCache(m_tgcArray); }
-    void MuonDetectorManager::fillCscCache() {
+        fillCache(m_mdtArray);
+        fillCache(m_rpcArray);
+        fillCache(m_tgcArray);
         if (nCscRE()) fillCache(m_cscArray);
+        if (nMMRE()) fillCache(m_mmcArray);
+        if (nsTgcRE()) fillCache(m_stgArray);
     }
 
     unsigned int MuonDetectorManager::getNumTreeTops() const { return m_envelope.size(); }
@@ -490,12 +440,9 @@ namespace MuonGM {
                                                 ALine.getParameter(Parameter::rotS),
                                                 ALine.getParameter(Parameter::rotZ),
                                                 ALine.getParameter(Parameter::rotT));
-                if (cacheFillingFlag()) {
-                    thisStation->clearCache();
-                    thisStation->fillCache();
-                } else {
-                    thisStation->refreshCache();
-                }
+                
+                thisStation->clearCache();
+                thisStation->fillCache();                
             } else {
                 // job different than 0 (standard for TGC conditions for Sept 2010 repro.)
                 ATH_MSG_DEBUG( "Setting delta transform for component " << ALine);
@@ -506,12 +453,9 @@ namespace MuonGM {
                                                 ALine.getParameter(Parameter::rotS),
                                                 ALine.getParameter(Parameter::rotZ),
                                                 ALine.getParameter(Parameter::rotT));
-                if (cacheFillingFlag()) {
-                    thisStation->getMuonReadoutElement(job)->clearCache();
-                    thisStation->getMuonReadoutElement(job)->fillCache();
-                } else {
-                    thisStation->getMuonReadoutElement(job)->refreshCache();
-                }
+                
+                thisStation->getMuonReadoutElement(job)->refreshCache();
+                
             }
             nUpdates++;
         }
@@ -586,9 +530,7 @@ namespace MuonGM {
                     continue;
                 }
                 ATH_MSG_DEBUG( "Setting deformation parameters for Station " << stType << " " << jzz << " " << jff << " ");
-                thisStation->clearBLineCache();
-                thisStation->setBline(&BLine);
-                if (cacheFillingFlag()) thisStation->fillBLineCache();
+                thisStation->setBline(&BLine);                
                 nUpdates++;
             } else {
                 ATH_MSG_WARNING("BLinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job << " has JOB not 0 ");
@@ -631,13 +573,9 @@ namespace MuonGM {
                     ATH_MSG_ERROR( "The CSC I-lines container includes stations which are no CSCs! This is impossible." );
                 else {
                     CscRE->setCscInternalAlignmentPar(ILine);
-                }
-                if (cacheFillingFlag()) {
-                    thisStation->clearCache();
-                    thisStation->fillCache();
-                } else {
-                    thisStation->refreshCache();
-                }
+                }               
+                thisStation->refreshCache();
+                
                 nUpdates++;
 
             } else {
@@ -671,9 +609,7 @@ namespace MuonGM {
             if (thisStation) {
                 
                 ATH_MSG_DEBUG( "Setting as-built parameters for Station " << AsBuiltPar );
-                thisStation->clearBLineCache();
                 thisStation->setMdtAsBuiltParams(&AsBuiltPar);
-                if (cacheFillingFlag()) thisStation->fillBLineCache();
                 nUpdates++;
             } else {
                 ATH_MSG_WARNING("MdtAsBuiltPar with AmdbId " <<AsBuiltPar
@@ -783,8 +719,6 @@ namespace MuonGM {
         m_rpcIdxToStat.insert(std::make_pair(RpcStatType::BIL, rpcHelper.stationNameIndex("BIL")));
         m_rpcIdxToStat.insert(std::make_pair(RpcStatType::BIS, rpcHelper.stationNameIndex("BIS")));
     }    
-    void MuonDetectorManager::setCacheFillingFlag(int value) { m_cacheFillingFlag = value; }
-    void MuonDetectorManager::setCachingFlag(int value) { m_cachingFlag = value; }
     void MuonDetectorManager::set_DBMuonVersion(const std::string& version) { m_DBMuonVersion = version; }
     void MuonDetectorManager::setGeometryVersion(const std::string& version) { m_geometryVersion = version; }
     void MuonDetectorManager::setMinimalGeoFlag(int flag) { m_minimalgeo = flag; }
