@@ -23,7 +23,11 @@
 
 namespace ROOT::Experimental {
    class RNTupleReader;
-   template<class> class RNTupleView;
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
+   template<typename, bool> class RNTupleView;
+#else
+   template<typename> class RNTupleView;
+#endif
    class RFieldBase;
 }
 
@@ -83,8 +87,10 @@ namespace pool {
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )
          std::vector< std::pair< std::unique_ptr<RFieldBase>, void* > >  m_attrFields;
-#endif
+         std::vector< std::pair< RNTupleView< std::string, false >, Token* > >  m_tokenFields;
+#else
          std::vector< std::pair< RNTupleView< std::string >, Token* > >  m_tokenFields;
+#endif
 
          int                            m_idx;
          int64_t                        m_entries;
