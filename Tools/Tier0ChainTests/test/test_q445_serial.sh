@@ -7,6 +7,7 @@
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
 # art-include: 24.0/Athena
+# art-athena-mt: 8
 
 Reco_tf.py \
 --CA 'all:True' \
