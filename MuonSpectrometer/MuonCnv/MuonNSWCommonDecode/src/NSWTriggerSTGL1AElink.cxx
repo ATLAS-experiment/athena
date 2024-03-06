@@ -107,7 +107,7 @@ void Muon::nsw::NSWTriggerSTGL1AElink::decode_data(std::size_t& readPointer) {
   while (readPointer < endOfData) {
     static constexpr auto SIZE_DATA_HEADER = STGTPL1A::size_stream_head_nbits + STGTPL1A::size_stream_head_nwords +
                                              STGTPL1A::size_stream_head_fifo_size + STGTPL1A::size_stream_head_streamID;
-    if (readPointer + SIZE_DATA_HEADER >= endOfData) {
+    if (readPointer + SIZE_DATA_HEADER > endOfData) {
       throw std::length_error(
 			      Muon::nsw::format("Read pointer ({}) would excede memory dedicated to data chunks ({}) while parsing the header (size: {})",
 						readPointer, endOfData, SIZE_DATA_HEADER));
