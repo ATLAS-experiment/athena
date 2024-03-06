@@ -18,7 +18,6 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('metTermName', 'Final', type=str)
         self.addOption ('storeSelectionFlags', True, type=bool)
         self.addOption ('selectionFlagPrefix', 'select', type=str)
-        self.addOption ('systematicsHistogram', None , type=str)
         self.addOption ('commands', [], type=None,
                         info="a list of commands for branch selection/configuration")
 
@@ -109,9 +108,6 @@ class OutputAnalysisConfig (ConfigBlock):
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
         treeFiller.TreeName = self.treeName
 
-        if self.systematicsHistogram is not None:
-            sysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
-            sysDumper.histogramName = self.systematicsHistogram
 
     def createSelectionFlagBranches(self, config):
         """
