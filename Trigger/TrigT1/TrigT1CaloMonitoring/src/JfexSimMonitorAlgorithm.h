@@ -17,6 +17,8 @@
 
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
 
+#include "LArRecConditions/LArBadChannelCont.h"
+
 class JfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
     public:
         JfexSimMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
@@ -51,11 +53,12 @@ class JfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
         SG::ReadHandleKey< xAOD::jFexMETRoIContainer   > m_simu_key_jXE  {this,"jFexMETRoISimContainer"  ,"L1_jFexMETRoISim"  ,"SG key of the Sim jFex MET Roi container"   };
         SG::ReadHandleKey< xAOD::jFexSumETRoIContainer > m_simu_key_jTE  {this,"jFexSumETRoISimContainer","L1_jFexSumETRoISim","SG key of the Sim jFex SumEt Roi container" };
 
+    SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey{this, "LArMaskedChannelKey", "LArMaskedSC", "Key of the OTF-Masked SC" };
         
-        template <typename T> std::vector<std::array<float,5> > tobMatching(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<float,5> > & unmatched ) const;
+        template <typename T> std::vector<std::array<float,5> > tobMatching(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<float,5> > & unmatched, const std::string& evtType, const std::string& signa="" ) const;
         void fillHist(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<float,5> > & elem ) const;
         
-        template <typename T> std::vector<std::array<int,3> >  tobMatchingGlobals(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<int,3> > & unmatched ) const;
+        template <typename T> std::vector<std::array<int,3> >  tobMatchingGlobals(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<int,3> > & unmatched, const std::string& evtType, const std::string& signa="" ) const;
         void fillHistGlobals(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<int,3> > & elem ) const;
 };       
 #endif

@@ -145,8 +145,13 @@ def AthenaMonitoringCfg(flags):
                     fullpath = os.path.join(t.HistPath, ho['path'], ho['alias']) + ':' + ho['convention']
                     if fullpath in definedhists:
                         previous = definedhists[fullpath]
-                        error(f'Multiple definition of histogram {fullpath} by:\n\t{algo.getName()}/{t.getName()} ({ho}) and\n\t{previous[0]}/{previous[1]} ({previous[2]})')
-                        raise ValueError()
+                        # allow for multiple definitions as long as definitions match perfectly
+                        # use case is to have multiple monitoring algs fill the same histogram (such as a summary hist)
+                        if previous[2]==ho:
+                            info(f'Multiple matching definition of histogram {fullpath} by:\n\t{algo.getName()}/{t.getName()} ({ho}) and\n\t{previous[0]}/{previous[1]}')
+                        else:
+                            error(f'Multiple differing definition of histogram {fullpath} by:\n\t{algo.getName()}/{t.getName()} ({ho}) and\n\t{previous[0]}/{previous[1]} ({previous[2]})')
+                            raise ValueError()
                     definedhists[fullpath] = (algo.getName(), t.getName(), ho)
 
     debug('Passed histogram duplication check')
