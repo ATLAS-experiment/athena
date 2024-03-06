@@ -1,34 +1,32 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
-#include "TrigJetCROldHypoAlg.h"
-#include "TrigJetCROldHypoTool.h"
+#include "TrigJetCRVARHypoAlg.h"
+#include "TrigJetCRVARHypoTool.h"
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
 using namespace TrigCompositeUtils;
 
-
-TrigJetCROldHypoAlg::TrigJetCROldHypoAlg( const std::string& name, 
+TrigJetCRVARHypoAlg::TrigJetCRVARHypoAlg( const std::string& name, 
 				    ISvcLocator* pSvcLocator ) :
   ::HypoBase( name, pSvcLocator ) { }
 
 
-StatusCode TrigJetCROldHypoAlg::initialize() {
+StatusCode TrigJetCRVARHypoAlg::initialize() {
 
   ATH_CHECK(m_hypoTools.retrieve() );
-  ATH_CHECK(m_trackParticleKey.initialize());
   ATH_CHECK(m_cellKey.initialize());
 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode TrigJetCROldHypoAlg::execute( const EventContext& context ) const {
+StatusCode TrigJetCRVARHypoAlg::execute( const EventContext& context ) const {
 
-  ATH_MSG_DEBUG( "Executing " << name() << "..." );
+  ATH_MSG_DEBUG ( "Executing " << name() << "..." );
 
   ATH_MSG_DEBUG("Retrieving HLT decision \"" << decisionInput().key() << "\"");
   auto previousDecisionsHandle = SG::makeHandle( decisionInput(), context );
@@ -43,15 +41,7 @@ StatusCode TrigJetCROldHypoAlg::execute( const EventContext& context ) const {
   ATH_MSG_DEBUG( "Creating new output decision handle"); 
 
   // prepare imput for tools
-  std::vector<TrigJetCROldHypoTool::JetInfo> hypoToolInput;
- 
-  // get tracks from the key :
-  ATH_MSG_DEBUG( "Getting Track Handle "<<m_trackParticleKey);
-  auto trackHandle = SG::makeHandle(m_trackParticleKey, context );
-
-  ATH_CHECK( trackHandle.isValid() );
-  const xAOD::TrackParticleContainer* allTracks = trackHandle.get();
-  ATH_MSG_DEBUG ( allTracks->size() << " tracks found" );
+  std::vector<TrigJetCRVARHypoTool::JetInfo> hypoToolInput;
 
   // get cells from the key :
   ATH_MSG_DEBUG( "Getting Cells Handle "<<m_cellKey);
@@ -60,27 +50,26 @@ StatusCode TrigJetCROldHypoAlg::execute( const EventContext& context ) const {
   ATH_CHECK( cellHandle.isValid() );
   const CaloConstCellContainer* cells = cellHandle.get();
   ATH_MSG_DEBUG ( cells->size() << " cells found" );
+  
+  
 
   for (const Decision* previousDecision : *prevDecisions) {
     // Create a new output Decision object, d, backed by the 'decisions' container.
     // Links previousDecision as the parent of d.
-    
     Decision* d = newDecisionIn( decisions, previousDecision, hypoAlgNodeName(), context );
-    
 
-   const std::vector<LinkInfo< xAOD::JetContainer > >jetELs = 
-      findLinks< xAOD::JetContainer >( previousDecision, featureString().c_str(), TrigDefs::lastFeatureOfType);
-      d->setObjectLink<xAOD::JetContainer>( featureString(), jetELs.at(0).link );
-      DecisionIDContainer previousDecisionIDs;
-      decisionIDs(previousDecision, previousDecisionIDs);
+    // Obtain an ElementLink to the jet from the previous step, and set this to be the feature for this step too
+    const LinkInfo<xAOD::JetContainer> jetLinkInfo = findLink<xAOD::JetContainer>(previousDecision, featureString());
+    d->setObjectLink<xAOD::JetContainer>( featureString(), jetLinkInfo.link );
 
-        for (const LinkInfo< xAOD::JetContainer> & jetLinkInfo: jetELs){
-    // Collect all the required information for the tool together in a handy struct 
-              hypoToolInput.emplace_back( TrigJetCROldHypoTool::JetInfo{previousDecisionIDs, *(jetLinkInfo.link), allTracks, cells, d} );
-        }
     // Obtain the set of chains which are active in previousDecision
-   }
+    DecisionIDContainer previousDecisionIDs;
+    decisionIDs(previousDecision, previousDecisionIDs);
 
+    // Collect all the required information for the tool together in a handy struct 
+
+    hypoToolInput.emplace_back( TrigJetCRVARHypoTool::JetInfo{previousDecisionIDs, *(jetLinkInfo.link),cells, d} );
+  } 
 
   //Loop over all hypoToolinputs and get their decisions
   for ( auto & tool: m_hypoTools ) {
@@ -92,4 +81,3 @@ StatusCode TrigJetCROldHypoAlg::execute( const EventContext& context ) const {
   return StatusCode::SUCCESS;
 
 }
-

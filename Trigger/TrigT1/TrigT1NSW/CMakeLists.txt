@@ -13,5 +13,3 @@ atlas_add_component( TrigT1NSW
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel MuonRDO TrigT1NSWSimToolsLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

@@ -227,7 +227,11 @@ def tauMonitoringConfig(inputFlags,**kwargs):
             igroup.defineHistogram(namer('RNNJetScoreSigTrans','RNNJetScoreSigTrans','',postfix), title='RNN Jet Score Sig Trans',
                                    xbins=48, xmin=0, xmax=1.1,path=folder)
 
+            igroup.defineHistogram(namer('RNNEleScore','RNNEleScore','',postfix), title='RNN Ele Score',
+                                   xbins=100, xmin=0, xmax=1,path=folder) 
 
+            igroup.defineHistogram(namer('RNNEleScoreSigTrans','RNNEleScoreSigTrans','',postfix), title='RNN Ele Score Sig Trans',
+                                   xbins=48, xmin=0, xmax=1.1,path=folder)
 
             igroup.defineHistogram(namer('tauEt','tauEt','',postfix), title='Et of tau candidates;Transverse Energy (GeV);Number of Candidates',
                                    xbins=60, xmin=0., xmax=300.,path=folder)

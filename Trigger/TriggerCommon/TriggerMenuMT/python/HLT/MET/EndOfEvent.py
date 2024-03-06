@@ -4,7 +4,6 @@
 from typing import List
 
 from AthenaCommon.CFElements import parOR
-from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from .ConfigHelpers import AlgConfig, stringToMETRecoDict
 from ..CommonSequences.FullScanDefs import caloFSRoI, trkFSRoI
@@ -46,16 +45,16 @@ def getMETRecoSequences(flags, purposes: List[str]):
             alg for alg in _algs_by_purpose.get(purpose, []) if alg not in ef_reco_algs
         ]
     seqname = f"{''.join(purposes)}EndOfEventRecoSequence"
-    with ConfigurableCABehavior():
-        merged_ca = ComponentAccumulator()
-        merged_ca.addSequence(parOR(seqname), primary=True)
-        max_step_idx = 0
-        for alg in ef_reco_algs:
-            cfg = AlgConfig.fromRecoDict(**stringToMETRecoDict(alg))
-            step_output = cfg.make_reco_algs(flags, **cfg.interpret_reco_dict())
-            max_step_idx = max(max_step_idx, step_output.max_step_idx)
-            for ca in step_output.steps:
-                merged_ca.merge(ca, seqname)
+
+    merged_ca = ComponentAccumulator()
+    merged_ca.addSequence(parOR(seqname), primary=True)
+    max_step_idx = 0
+    for alg in ef_reco_algs:
+        cfg = AlgConfig.fromRecoDict(**stringToMETRecoDict(alg))
+        step_output = cfg.make_reco_algs(flags, **cfg.interpret_reco_dict())
+        max_step_idx = max(max_step_idx, step_output.max_step_idx)
+        for ca in step_output.steps:
+            merged_ca.merge(ca, seqname)
 
     rois = [caloFSRoI]
     if max_step_idx > 1:

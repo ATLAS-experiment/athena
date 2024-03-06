@@ -34,7 +34,7 @@ mkdir Serial
 cd Serial
 
 #####################################################################
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
            --postInclude "RAWtoALL:MuonPRDTest.NSWPRDValAlgReco.NSWPRDValAlgRecoCfg" \
@@ -60,7 +60,7 @@ cd 1thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
            --multithreaded \
@@ -85,7 +85,7 @@ cd 5thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
            --imf False \
@@ -110,7 +110,7 @@ cd 8thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
-Reco_tf.py --CA 'all:True' 'RDOtoRDOTrigger:False' \
+Reco_tf.py --CA 'all:True' \
            --AMI q443 \
            --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
            --imf False \

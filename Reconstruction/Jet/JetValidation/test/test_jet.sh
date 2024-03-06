@@ -11,7 +11,7 @@
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
   --AMI q443 \
-  --CA "all:True" "RDOtoRDOTrigger:False" \
+  --CA "all:True" \
   --sharedWriter True \
   --steering 'doRDO_TRIG' 'doTRIGtoALL' \
   --outputAODFile myAOD.pool.root \

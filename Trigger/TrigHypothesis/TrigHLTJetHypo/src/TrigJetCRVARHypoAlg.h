@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 */
 
-#ifndef TrigHLTJetHypo_TrigJetCROLDHypoAlg_H
-#define TrigHLTJetHypo_TrigJetCROLDHypoAlg_H
+#ifndef TrigHLTJetHypo_TrigJetCRVARHypoAlg_H
+#define TrigHLTJetHypo_TrigJetCRVARHypoAlg_H
 
 #include <string>
 
@@ -12,35 +12,31 @@
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include "CaloEvent/CaloConstCellContainer.h"
-#include "AthLinks/ElementLinkVector.h"
+
 #include "DecisionHandling/HypoBase.h"
 
-#include "TrigJetCROldHypoTool.h"
+#include "TrigJetCRVARHypoTool.h"
 
 /**
- * @class TrigJetCROldHypoAlg
+ * @class TrigJetCRVARHypoAlg
  * @brief HypoAlg for low-EMF trackless jets algorithm
  * @details HypoAlg needed to associate trigger navigation to jets selected for writing out by exotic jets algorithms
  * @author
  **/
 
-class TrigJetCROldHypoAlg : public ::HypoBase {
+class TrigJetCRVARHypoAlg : public ::HypoBase {
  public: 
 
-  TrigJetCROldHypoAlg( const std::string& name, ISvcLocator* pSvcLocator );
+  TrigJetCRVARHypoAlg( const std::string& name, ISvcLocator* pSvcLocator );
 
-  virtual StatusCode initialize() override;
+  virtual StatusCode  initialize() override;
   virtual StatusCode  execute( const EventContext& context ) const override;
 
-  
-private:
-  ToolHandleArray< TrigJetCROldHypoTool > m_hypoTools {this, 
+ private:
+  ToolHandleArray< TrigJetCRVARHypoTool > m_hypoTools {this, 
       "HypoTools", 
-  {}, 
+	{}, 
       "Tools to perfrom selection"};
-  
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleKey {this, 
-      "Tracks","Key for precision tracks"};
 
   SG::ReadHandleKey<CaloConstCellContainer> m_cellKey {this,
       "Cells","Key for input CaloCellContainer"};
@@ -48,5 +44,3 @@ private:
 }; 
 
 #endif
-
-
