@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaServices )
@@ -84,14 +84,8 @@ atlas_install_python_modules( python/*.py
    POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_install_joboptions( share/AthTPCnvSvc_test.py
-   share/MixingEventSelector_test.py
-   share/MultiplePassBootstrap.py
-   share/MultiplePass_test.py
-   share/MultiplePassWithAlgFilter_test.py
-   share/OverrideEventNumber.py
    share/AthDictLoaderSvc_test.py
    share/ReadAthenaPoolSeek_jobOptions.py
-   share/test_tpcnvdb.py
    share/AthenaOutputStream_test.txt
    share/FPEControlSvc_test.txt
    share/AthenaEventLoopMgr_test.txt
@@ -99,5 +93,4 @@ atlas_install_joboptions( share/AthTPCnvSvc_test.py
    share/RCUSvc_test.txt
    share/DelayedConditionsCleanerSvc_test.txt
    share/ThinningCacheTool_test.txt
-   share/MTES_test.py 
    share/MetaDataSvc_test.txt )
