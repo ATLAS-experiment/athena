@@ -27,6 +27,7 @@
 #include "xAODTracking/TrackParticleContainerFwd.h"
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 class CaloDetDescrManager;
@@ -119,13 +120,13 @@ protected:
    * egammaSuperClusterBuilderBase::calibrateCluster
    *
    */
-  bool createNewCluster(const EventContext& ctx,
-                        const std::vector<const xAOD::CaloCluster*>& clusters,
-                        const DataLink<CaloCellContainer>& cellCont,
-                        const CaloDetDescrManager& mgr,
-                        xAOD::EgammaParameters::EgammaType egType,
-                        xAOD::CaloClusterContainer* newClusters,
-                        xAOD::CaloClusterContainer* precorrClusters) const;
+  std::optional<std::unique_ptr<xAOD::CaloCluster>> createNewCluster(
+    const EventContext& ctx,
+    const std::vector<const xAOD::CaloCluster*>& clusters,
+    const DataLink<CaloCellContainer>& cellCont,
+    const CaloDetDescrManager& mgr,
+    xAOD::EgammaParameters::EgammaType egType,
+    xAOD::CaloClusterContainer* precorrClusters) const;
 
   /** check if we pass the basic criteria for
    * a seed cluster
