@@ -395,13 +395,8 @@ egammaSuperClusterBuilderBase::execute(const EventContext& ctx) const
 
     // Make egammaRec object, and push it back into output container.
     auto newEgRec = std::make_unique<egammaRec>(*egRec);
-    if (newEgRec) {
-      newEgRec->setCaloClusters(elClusters);
-      newEgammaRecs->push_back(std::move(newEgRec));
-    } else {
-      ATH_MSG_FATAL("Couldn't make an egammaRec object");
-      return StatusCode::FAILURE;
-    }
+    newEgRec->setCaloClusters(elClusters);
+    newEgammaRecs->push_back(std::move(newEgRec));
   } // End loop on egammaRecs
 
   ATH_CHECK(redoMatching(ctx, newEgammaRecs));
