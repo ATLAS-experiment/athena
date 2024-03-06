@@ -157,17 +157,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
       mgr=theFactory.getDetectorManager();
       mgr->setMinimalGeoFlag(m_minimalGeoFlag);
       mgr->setGeometryVersion(tempLayout);
-      mgr->setCachingFlag(m_cachingFlag);
-      if (m_fillCache_initTime) {
-        mgr->fillCache();
-      } else {
-        // cache for RPC / TGC / CSC must be filled once forever
-        mgr->fillRpcCache();
-        mgr->fillTgcCache();
-        mgr->fillCscCache();
-        mgr->fillMMCache();
-        mgr->fillsTgcCache();
-      }
+      mgr->fillCache();
     
       return StatusCode::SUCCESS;
     }
@@ -222,8 +212,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
                                                          << "    IncludeCutoutsBog              " << m_includeCutoutsBog << endmsg
                                                          << "    IncludeCtbBis                  " << m_includeCtbBis << endmsg 
                                                          << "    MinimalGeoFlag                 " << m_minimalGeoFlag << endmsg
-                                                         << "    EnableCscIntAlignmentFromGM    "
-                                                         << m_useCscIntAlinesFromGM << endmsg << "    FillCacheInitTime              " << m_fillCache_initTime);
+                                                         << "    EnableCscIntAlignmentFromGM    " << m_useCscIntAlinesFromGM);
    
     if (m_stationSelection > 0) {
         StationSelector::SetSelectionType(m_stationSelection);
@@ -281,8 +270,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
         theFactory.setCtbBisFlag(m_includeCtbBis);
         theFactory.setMinimalGeoFlag(m_minimalGeoFlag);
         theFactory.setDumpMemoryBreakDown(m_dumpMemoryBreakDown);
-        theFactory.setCachingFlag(m_cachingFlag);
-        theFactory.setCacheFillingFlag(m_fillCache_initTime);
         theFactory.setFineClashFixingFlag(m_enableFineClashFixing);
         theFactory.hasCSC(m_hasCSC);
         theFactory.hasSTgc(m_hasSTgc);
@@ -312,17 +299,6 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
             mem = umem;
             cpu = ucpu;
         }
-        // Register the MuonDetectorNode instance with the Transient Detector Store
-        MuonGM::MuonDetectorManager *theManager = theFactory.getDetectorManager();
-       
-        if (m_fillCache_initTime) {
-            theManager->fillCache();
-        } else {
-            // cache for RPC / TGC / CSC must be filled once forever
-            theManager->fillRpcCache();
-            theManager->fillTgcCache();
-            theManager->fillCscCache();
-        }
 
         if (m_dumpMemoryBreakDown) {
             umem = GeoPerfUtils::getMem();
@@ -334,6 +310,7 @@ StatusCode MuonDetectorTool::createFactory(MuonGM::MuonDetectorManager * & mgr, 
         }
     }
     mgr=theFactory.getDetectorManager();
+    mgr->fillCache();
     return StatusCode::SUCCESS;
 }
 

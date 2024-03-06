@@ -158,11 +158,8 @@ namespace MuonGM {
         //// Tracking interfaces
         ////////////////////////////////////////////////////////////
 
-        void clearCache() override;
-        void fillCache() override;
-        void refreshCache() override { clearCache(); }
-        void clearBLineCache();
-        void fillBLineCache();
+        void clearCache() override final;
+        void fillCache() override final;
 
         virtual const Trk::Surface& surface() const override final;
         virtual const Trk::SaggedLineSurface& surface(const Identifier& id) const override final;

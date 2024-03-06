@@ -127,10 +127,6 @@ namespace MuonGM {
         void setGenericTgcDescriptor(const GenericTGCCache& tc);
         inline const GenericTGCCache* getGenericTgcDescriptor() const;
 
-        void setCachingFlag(int value);
-        inline int cachingFlag() const;
-        void setCacheFillingFlag(int value);
-        inline int cacheFillingFlag() const;
 
         void setMinimalGeoFlag(int flag);
         inline int  MinimalGeoFlag() const;
@@ -202,29 +198,7 @@ namespace MuonGM {
         static std::string muonStationKey(const std::string& stName, int statEtaIndex, int statPhiIndex) ;
 
         void clearCache();
-        void refreshCache();
         void fillCache();
-
-        void clearMdtCache();
-        void clearRpcCache();
-        void clearCscCache();
-        void clearTgcCache();
-        void clearsTgcCache();
-        void clearMMCache();
-
-        void refreshMdtCache();
-        void refreshRpcCache();
-        void refreshCscCache();
-        void refreshTgcCache();
-        void refreshsTgcCache();
-        void refreshMMCache();
-
-        void fillMdtCache();
-        void fillRpcCache();
-        void fillCscCache();
-        void fillTgcCache();
-        void fillsTgcCache();
-        void fillMMCache();
 
         StatusCode updateAlignment(const ALineContainer& a);
         StatusCode updateDeformations(const BLineContainer& a);
@@ -261,8 +235,6 @@ namespace MuonGM {
         /// detector element
         int rpcIdentToArrayIdx(const Identifier& id, int& dbz_index) const;
 
-        int m_cachingFlag{1};
-        int m_cacheFillingFlag{1};
         int m_minimalgeo{0};
         int m_includeCutouts{0};
         int m_includeCutoutsBog{0};
@@ -364,9 +336,6 @@ namespace MuonGM {
     unsigned int MuonDetectorManager::nCscDE() const { return m_n_cscDE; }
     unsigned int MuonDetectorManager::nRpcDE() const { return m_n_rpcDE; }
     unsigned int MuonDetectorManager::nTgcDE() const { return m_n_tgcDE; }
-
-    int MuonDetectorManager::cacheFillingFlag() const { return m_cacheFillingFlag; }
-    int MuonDetectorManager::cachingFlag() const { return m_cachingFlag; }
 
 }  // namespace MuonGM
 

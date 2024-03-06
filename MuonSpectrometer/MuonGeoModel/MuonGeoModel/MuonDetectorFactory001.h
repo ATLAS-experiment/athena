@@ -56,7 +56,6 @@ namespace MuonGM {
         inline void setSelection(const std::vector<std::string>&,
                                  const std::vector<int>&,
                                  const std::vector<int>&);
-        inline void setCachingFlag(int value);
         inline void setDumpMemoryBreakDown(bool value);
         inline void setCacheFillingFlag(int value);
         inline void setMdtDeformationFlag(int mdtDeformationFlag);
@@ -67,8 +66,8 @@ namespace MuonGM {
         inline void hasMM(bool value);
         inline void setNSWAsBuiltAsciiPath(const std::string &, const std::string &);
 
-	inline void disableBEEShift(bool flag);
-	inline bool BEEShiftDisabled() const;
+	      inline void disableBEEShift(bool flag);
+	      inline bool BEEShiftDisabled() const;
  
 
       private:
@@ -87,15 +86,13 @@ namespace MuonGM {
         int m_rdb{1};
         int m_minimalGeoFlag{0};
 
-
-        int m_caching{0};
-        int m_cacheFillingFlag{0};
         bool m_dumpMemoryBreakDown{false};
         int m_enableFineClashFixing{0};
         bool m_hasCSC{true};
         bool m_hasSTgc{true};
         bool m_hasMM{true};
-	bool m_disableBEEShift{false};
+        
+        bool m_disableBEEShift{false};
 
         std::vector<std::string> m_selectedStations;
         std::vector<int> m_selectedStEta;
@@ -131,8 +128,6 @@ namespace MuonGM {
         m_selectedStPhi = vphi;
     }
 
-    void MuonDetectorFactory001::setCachingFlag(int value) { m_caching = value; }
-    void MuonDetectorFactory001::setCacheFillingFlag(int value) { m_cacheFillingFlag = value; }
     void MuonDetectorFactory001::setDumpMemoryBreakDown(bool value) { m_dumpMemoryBreakDown = value; }
     void MuonDetectorFactory001::setFineClashFixingFlag(int value) { m_enableFineClashFixing = value; }
     void MuonDetectorFactory001::hasCSC(bool value) { m_hasCSC = value; }

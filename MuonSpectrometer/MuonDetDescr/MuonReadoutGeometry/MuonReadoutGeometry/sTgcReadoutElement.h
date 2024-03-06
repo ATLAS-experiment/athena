@@ -130,10 +130,6 @@ namespace MuonGM {
 
         /** @brief function to fill tracking cache */
         virtual void fillCache() override final;
-        virtual void refreshCache() override final {
-            clearCache();
-            fillCache();
-        }
 
         /** @brief returns the hash to be used to look up the surface and transform in the MuonClusterReadoutElement tracking cache */
         virtual int surfaceHash(const Identifier& id) const override final;

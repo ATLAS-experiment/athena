@@ -174,5 +174,8 @@ namespace MuonGM {
     void MuonReadoutElement::setSsize(double v) { m_Ssize = v; }
     void MuonReadoutElement::setRsize(double v) { m_Rsize = v; }
     void MuonReadoutElement::setZsize(double v) { m_Zsize = v; }
-    void MuonReadoutElement::setCachingFlag(int value) { m_caching = value; }
+    void MuonReadoutElement::refreshCache() {
+        clearCache();
+        fillCache();
+    }
 }  // namespace MuonGM
