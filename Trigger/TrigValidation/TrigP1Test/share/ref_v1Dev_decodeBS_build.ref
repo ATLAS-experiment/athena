@@ -2749,6 +2749,8 @@ HLT_e9_lhtight_e4_idperf_tight_probe_1invmAB5_L1JPSI-1M5-eEM9:
   eventCount: 0
 HLT_e9_lhvloose_L1eEM5_mu20_mu8noL1_L1MU14FCH:
   eventCount: 0
+HLT_e9_lhvloose_L1eEM5_mu23_mu8noL1_L1MU18VFCH:
+  eventCount: 0
 HLT_e9_lhvloose_mu20_mu8noL1_L1MU14FCH:
   eventCount: 0
 HLT_e9_lhvloose_mu23_mu8noL1_L1MU18VFCH:
@@ -3404,6 +3406,10 @@ HLT_g25_medium_L1eEM24L:
     1: 2
     2: 2
     3: 1
+HLT_g25_medium_L1eEM26M_mu24_ivarmedium_L1MU14FCH:
+  eventCount: 0
+HLT_g25_medium_L1eEM26M_mu24_ivarmedium_L1MU18VFCH:
+  eventCount: 0
 HLT_g25_medium_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS700j35_pf_ftf_L1eEM26M:
   eventCount: 0
   stepCounts:
