@@ -34,8 +34,6 @@ class MuonSimHitAuxContainer_v1 : public AuxContainerBase {
     /// Information needed to save the HEPMC particle link
     std::vector<unsigned short> mcEventIndex{};
     std::vector<unsigned int>  mcBarcode{};
-    std::vector<char>           mcCollectionType{};
-
     /// @}
 };
 }  // namespace xAOD

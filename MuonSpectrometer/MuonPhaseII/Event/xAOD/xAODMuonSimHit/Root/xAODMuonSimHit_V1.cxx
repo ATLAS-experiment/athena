@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -15,7 +15,6 @@ namespace {
 
    static const SG::AuxElement::Accessor<unsigned short> acc_mcEventIndex{preFixStr+"mcEventIndex"};
    static const SG::AuxElement::Accessor<unsigned int> acc_mcBarcode{preFixStr+"mcBarcode"};
-   static const SG::AuxElement::Accessor<char> acc_mcCollectionType{preFixStr+"mcCollectionType"};
 }
 
 #define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
@@ -80,7 +79,6 @@ void MuonSimHit_v1::setGenParticleLink(const HepMcParticleLink& link) {
    m_hepMCLink.release();
    acc_mcEventIndex(*this) = link.eventIndex();
    acc_mcBarcode(*this) = link.barcode();
-   acc_mcCollectionType(*this) = 'a'; // Hard-coding as this only ever had a single value in production
 }
 
 }
