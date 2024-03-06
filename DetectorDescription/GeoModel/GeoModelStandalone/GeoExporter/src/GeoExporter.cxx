@@ -20,8 +20,7 @@
 
 #include "GeoExporter/GeoExporter.h"
 
-#include "VP1Utils/VP1JobConfigInfo.h"
-#include "VP1Utils/VP1SGAccessHelper.h"
+#include "StoreGate/StoreGateSvc.h"                                    //
 
 #include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/GeoVDetectorManager.h"
@@ -176,19 +175,15 @@ void GeoExporter::init()
    std::cout << "===================================================\n";
 
    std::cout <<"Accessing the ATLAS geometry..." << std::endl;
-  StoreGateSvc* detstore = m_d->detstore;
- //Get the world volume:
+  StoreGateSvc* detStore = m_d->detstore;
   const GeoModelExperiment * theExpt = nullptr;
-  if (!VP1SGAccessHelper(detstore).retrieve(theExpt,"ATLAS")) {
+  if ( !(detStore->retrieve(theExpt,"ATLAS")) ) {
     std::cout << "Error: Could not retrieve the ATLAS GeoModelExperiment from detector store" << std::endl; // TODO: move to ATH_MSG_
-    //ATH_MSG_FATAL ("Error: Could not retrieve the ATLAS GeoModelExperiment from detector store");
-    //return StatusCode::FAILURE;
-    return; // TODO: move to Return statuscode
   }
-  // GET ATLAS GEOMETRY
+  // Get the ATLAS GEOMETRY 'World' volume
   PVConstLink world(theExpt->getPhysVol());
 
-//   // -- get Detector Description tag
+  // -- get Detector Description tag
   char const* tmpDD = getenv( "DUMPGEODETDESCRTAG" );
   std::string detDescrTag{""};
   if ( tmpDD != NULL ) {

@@ -12,4 +12,4 @@ atlas_add_library( GeoExporter
    GeoExporter/*.h src/*.cxx
    PUBLIC_HEADERS GeoExporter
    PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-   PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoModelUtilities VP1Base VP1Utils CxxUtils )
+   PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoModelUtilities  )
