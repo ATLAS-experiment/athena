@@ -467,7 +467,6 @@ def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
 
     kwargs.setdefault("AtlasRelease", getATLASVersion())
     kwargs.setdefault("WriteToFile", True)
-    kwargs.setdefault("OnlineMode", False)
     ### Enable this to recreate the geometry XML files for Atlantis
     kwargs.setdefault("WriteGeometry", False)
 
