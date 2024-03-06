@@ -61,6 +61,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1CaloLegacy', True,
                   help='enable Run-2 L1Calo simulation and/or decoding')
 
+    flags.addFlag('Trigger.enableAsyncIO', False,
+                  help='enable HltAsyncEventLoopMgr instead of HltEventLoopMgr')
+
     # L1MuonSim category
     flags.addFlag('Trigger.L1MuonSim.EmulateNSW', False,
                   help='enable emulation tool for NSW-TGC coincidence')
