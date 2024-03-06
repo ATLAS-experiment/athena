@@ -503,7 +503,7 @@ if hasattr( runArgs, "randomSeed") :  svcMgr.TagInfoMgr.ExtraTagValuePairs.updat
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"keywords": ", ".join(evgenConfig.keywords).lower()})
 
 # print version of HepMC to the log
-evgenLog.info("HepMC version  ",str(os.environ['HEPMCVER']))
+evgenLog.info("HepMC version  " + str(os.environ['HEPMCVER']))
 
 # Set AMITag in in-file metadata
 from PyUtils import AMITagHelper
