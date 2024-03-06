@@ -1,6 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
+
+//  Initial version:                                       
+//  - 2017, Sep -- Riccardo Maria BIANCHI                  
+//                 <riccardo.maria.bianchi@cern.ch>        
+//  Main updates:                                          
+//  - 2024, Feb -- Riccardo Maria BIANCHI                  
+//                 <riccardo.maria.bianchi@cern.ch>        
 
 #include "DumpGeo/DumpGeo.h"
 
