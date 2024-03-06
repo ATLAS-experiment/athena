@@ -18,26 +18,13 @@ public:
 
   struct Cache {
 
-    Cache(const Acts::MagneticFieldContext mctx)
-    : m_atlasField{mctx.get<const AtlasFieldCacheCondObj*>()} {
-      m_atlasField->getInitializedCache(fieldCache);
-    }
+    Cache(const Acts::MagneticFieldContext mctx) {
+      const auto* atlasField = mctx.get<const AtlasFieldCacheCondObj*>();
+      atlasField->getInitializedCache(fieldCache);
 
-    Cache(const Cache& other) : m_atlasField{other.m_atlasField} {
-      m_atlasField->getInitializedCache(fieldCache);
-    }
-
-    Cache& operator=(const Cache& other) {
-      m_atlasField = other.m_atlasField;
-      fieldCache = {};
-      m_atlasField->getInitializedCache(fieldCache);
-      return *this;
     }
 
     MagField::AtlasFieldCache fieldCache;
-
-    private:
-      const AtlasFieldCacheCondObj* m_atlasField;
   };
 
   ATLASMagneticFieldWrapper() = default;
