@@ -14,6 +14,8 @@
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
 #include "xAODTrigL1Calo/jFexTower.h"
 
+#include "LArRecConditions/LArBadChannelCont.h"
+
 #include <atomic>
 
 class JfexInputMonitorAlgorithm : public AthMonitorAlgorithm {
@@ -40,7 +42,10 @@ class JfexInputMonitorAlgorithm : public AthMonitorAlgorithm {
         SG::ReadDecorHandleKey<xAOD::jFexTowerContainer> m_jTowerEtdecorKey   { this, "jTowerEtdecorKey"   , m_jFexDataTowerKey, "emulated_jtowerEt" , "jFex Tower Et information. ENCODED!"};
 
 
-        unsigned int m_InvalidCode = 4095;
+        SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey{this, "LArMaskedChannelKey", "LArMaskedSC", "Key of the OTF-Masked SC" };
+
+
+    unsigned int m_InvalidCode = 4095;
         unsigned int m_EmptyCode = 0;
 
         int codedVal(int, int) const;

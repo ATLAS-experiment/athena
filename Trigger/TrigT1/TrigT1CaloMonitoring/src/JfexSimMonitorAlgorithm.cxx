@@ -9,8 +9,8 @@ StatusCode JfexSimMonitorAlgorithm::initialize() {
 
     ATH_MSG_DEBUG("Initializing JfexSimMonitorAlgorithm algorithm with name: "<< name());
     ATH_MSG_DEBUG("Package Name "<< m_Grouphist);
-    ATH_CHECK(m_monTool.retrieve());
-    ATH_MSG_DEBUG("Logging errors to " << m_monTool.name() << " monitoring tool");
+    //ATH_CHECK(m_monTool.retrieve());
+    //ATH_MSG_DEBUG("Logging errors to " << m_monTool.name() << " monitoring tool");
 
 
     ATH_MSG_DEBUG("m_data_key_jJ "   << m_data_key_jJ   );
@@ -44,6 +44,8 @@ StatusCode JfexSimMonitorAlgorithm::initialize() {
     ATH_CHECK( m_simu_key_jTE.initialize()  );
     
     ATH_CHECK( m_jFexTowerKey.initialize()  );
+
+    ATH_CHECK( m_bcContKey.initialize() );
     
 
     // TOBs may come from trigger bytestream - renounce from scheduler
@@ -69,17 +71,30 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     }
     
     std::string inputTower = jFexTowerContainer->empty() ? "EmulatedTowers" : "DataTowers";
-    
+
+    // mismatches can be caused by recent/imminent OTF maskings, so track timings
+    auto timeSince = Monitored::Scalar<int>("timeSince", -1);
+    auto timeUntil = Monitored::Scalar<int>("timeUntil", -1);
+    SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_bcContKey, ctx };
+    if(larBadChan.isValid()) {
+        timeSince = ctx.eventID().time_stamp() - larBadChan.getRange().start().time_stamp();
+        timeUntil = larBadChan.getRange().stop().time_stamp() - ctx.eventID().time_stamp();
+    }
+    auto EventType = Monitored::Scalar<std::string>("EventType","DataTowers");
+    if(jFexTowerContainer->empty()) {
+        EventType = "EmulatedTowers";
+    }
+
     const std::string LB = std::to_string(GetEventInfo(ctx)->lumiBlock());
     
     /*************************/
     //        SR jets!
     /*************************/
     std::vector<std::array<float,5> > jJ_data_UNmatched;
-    std::vector<std::array<float,5> > jJ_data_matched = tobMatching(m_data_key_jJ, m_simu_key_jJ, ctx, jJ_data_UNmatched);
+    std::vector<std::array<float,5> > jJ_data_matched = tobMatching(m_data_key_jJ, m_simu_key_jJ, ctx, jJ_data_UNmatched,EventType);
 
     std::vector<std::array<float,5> > jJ_simu_UNmatched;
-    std::vector<std::array<float,5> > jJ_simu_matched = tobMatching(m_simu_key_jJ, m_data_key_jJ, ctx, jJ_simu_UNmatched);
+    std::vector<std::array<float,5> > jJ_simu_matched = tobMatching(m_simu_key_jJ, m_data_key_jJ, ctx, jJ_simu_UNmatched,EventType,"jJ");
 
     if(jJ_simu_matched.size() != jJ_data_matched.size()) {
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
@@ -88,15 +103,15 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     fillHist("SimEqData" ,"jJ" ,inputTower ,LB ,0 ,jJ_data_matched  );
     fillHist("DataNoSim" ,"jJ" ,inputTower ,LB ,1 ,jJ_data_UNmatched);
     fillHist("SimNoData" ,"jJ" ,inputTower ,LB ,1 ,jJ_simu_UNmatched);
-    
+
     /*************************/
     //        LR jets!
     /*************************/
     std::vector<std::array<float,5> > jLJ_data_UNmatched;
-    std::vector<std::array<float,5> > jLJ_data_matched = tobMatching(m_data_key_jLJ, m_simu_key_jLJ, ctx, jLJ_data_UNmatched);
+    std::vector<std::array<float,5> > jLJ_data_matched = tobMatching(m_data_key_jLJ, m_simu_key_jLJ, ctx, jLJ_data_UNmatched,EventType);
 
     std::vector<std::array<float,5> > jLJ_simu_UNmatched;
-    std::vector<std::array<float,5> > jLJ_simu_matched = tobMatching(m_simu_key_jLJ, m_data_key_jLJ, ctx, jLJ_simu_UNmatched);
+    std::vector<std::array<float,5> > jLJ_simu_matched = tobMatching(m_simu_key_jLJ, m_data_key_jLJ, ctx, jLJ_simu_UNmatched,EventType,"jLJ");
 
     if(jLJ_simu_matched.size() != jLJ_data_matched.size()) {
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
@@ -104,17 +119,16 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     fillHist("SimEqData" ,"jLJ" ,inputTower ,LB ,0 ,jLJ_data_matched );
     fillHist("DataNoSim" ,"jLJ" ,inputTower ,LB ,1 ,jLJ_data_UNmatched );
-    fillHist("SimNoData" ,"jLJ" ,inputTower ,LB ,1 ,jLJ_simu_UNmatched );    
-    
+    fillHist("SimNoData" ,"jLJ" ,inputTower ,LB ,1 ,jLJ_simu_UNmatched );
     
     /*************************/
     //        Taus!
     /*************************/
     std::vector<std::array<float,5> > jTau_data_UNmatched;
-    std::vector<std::array<float,5> > jTau_data_matched = tobMatching(m_data_key_jTau, m_simu_key_jTau, ctx, jTau_data_UNmatched);
+    std::vector<std::array<float,5> > jTau_data_matched = tobMatching(m_data_key_jTau, m_simu_key_jTau, ctx, jTau_data_UNmatched,EventType);
 
     std::vector<std::array<float,5> > jTau_simu_UNmatched;
-    std::vector<std::array<float,5> > jTau_simu_matched = tobMatching(m_simu_key_jTau, m_data_key_jTau, ctx, jTau_simu_UNmatched);
+    std::vector<std::array<float,5> > jTau_simu_matched = tobMatching(m_simu_key_jTau, m_data_key_jTau, ctx, jTau_simu_UNmatched,EventType,"jTAU");
 
     if(jTau_simu_matched.size() != jTau_data_matched.size()) {
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
@@ -122,17 +136,16 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     fillHist("SimEqData" ,"jTau" ,inputTower ,LB ,0 ,jTau_data_matched );
     fillHist("DataNoSim" ,"jTau" ,inputTower ,LB ,1 ,jTau_data_UNmatched );
-    fillHist("SimNoData" ,"jTau" ,inputTower ,LB ,1 ,jTau_simu_UNmatched );    
-    
+    fillHist("SimNoData" ,"jTau" ,inputTower ,LB ,1 ,jTau_simu_UNmatched );
     
     /*************************/
     //        EM!
     /*************************/
     std::vector<std::array<float,5> > jEM_data_UNmatched;
-    std::vector<std::array<float,5> > jEM_data_matched = tobMatching(m_data_key_jEM, m_simu_key_jEM, ctx, jEM_data_UNmatched);
+    std::vector<std::array<float,5> > jEM_data_matched = tobMatching(m_data_key_jEM, m_simu_key_jEM, ctx, jEM_data_UNmatched,EventType);
 
     std::vector<std::array<float,5> > jEM_simu_UNmatched;
-    std::vector<std::array<float,5> > jEM_simu_matched = tobMatching(m_simu_key_jEM, m_data_key_jEM, ctx, jEM_simu_UNmatched);
+    std::vector<std::array<float,5> > jEM_simu_matched = tobMatching(m_simu_key_jEM, m_data_key_jEM, ctx, jEM_simu_UNmatched,EventType,"jEM");
 
     if(jEM_simu_matched.size() != jEM_data_matched.size()) {
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
@@ -140,16 +153,15 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     fillHist("SimEqData" ,"jEM" ,inputTower ,LB ,0 ,jEM_data_matched );
     fillHist("DataNoSim" ,"jEM" ,inputTower ,LB ,1 ,jEM_data_UNmatched );
-    fillHist("SimNoData" ,"jEM" ,inputTower ,LB ,1 ,jEM_simu_UNmatched );    
-    
+    fillHist("SimNoData" ,"jEM" ,inputTower ,LB ,1 ,jEM_simu_UNmatched );
     
     /*************************/
     //        jXE
     /*************************/
     std::vector<std::array<int,3> > jXE_data_UNmatched;
-    std::vector<std::array<int,3> > jXE_data_matched = tobMatchingGlobals(m_data_key_jXE, m_simu_key_jXE, ctx, jXE_data_UNmatched);
+    std::vector<std::array<int,3> > jXE_data_matched = tobMatchingGlobals(m_data_key_jXE, m_simu_key_jXE, ctx, jXE_data_UNmatched,EventType);
     std::vector<std::array<int,3> > jXE_simu_UNmatched;
-    std::vector<std::array<int,3> > jXE_simu_matched = tobMatchingGlobals(m_data_key_jXE, m_simu_key_jXE, ctx, jXE_simu_UNmatched);
+    std::vector<std::array<int,3> > jXE_simu_matched = tobMatchingGlobals(m_data_key_jXE, m_simu_key_jXE, ctx, jXE_simu_UNmatched,EventType,"jXE");
 
     if(jXE_simu_matched.size() != jXE_data_matched.size()) {
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
@@ -163,9 +175,9 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     //        jTE
     /*************************/
     std::vector<std::array<int,3> > jTE_data_UNmatched;
-    std::vector<std::array<int,3> > jTE_data_matched = tobMatchingGlobals(m_data_key_jTE, m_simu_key_jTE, ctx, jTE_data_UNmatched);
+    std::vector<std::array<int,3> > jTE_data_matched = tobMatchingGlobals(m_data_key_jTE, m_simu_key_jTE, ctx, jTE_data_UNmatched,EventType);
     std::vector<std::array<int,3> > jTE_simu_UNmatched;
-    std::vector<std::array<int,3> > jTE_simu_matched = tobMatchingGlobals(m_data_key_jTE, m_simu_key_jTE, ctx, jTE_simu_UNmatched);
+    std::vector<std::array<int,3> > jTE_simu_matched = tobMatchingGlobals(m_data_key_jTE, m_simu_key_jTE, ctx, jTE_simu_UNmatched,EventType,"jTE");
 
     if(jTE_simu_matched.size() != jTE_data_matched.size()) {
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
@@ -173,12 +185,12 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     fillHistGlobals("SimEqData"   ,"jTE" ,inputTower ,LB ,0 ,jTE_data_matched );
     fillHistGlobals("SimDiffData" ,"jTE" ,inputTower ,LB ,1 ,jTE_data_UNmatched );
-    
+
     return StatusCode::SUCCESS;
 }
 
 
-template <typename T> std::vector<std::array<float,5> >  JfexSimMonitorAlgorithm::tobMatching(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<float,5> > & unmatched ) const {
+template <typename T> std::vector<std::array<float,5> >  JfexSimMonitorAlgorithm::tobMatching(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<float,5> > & unmatched, const std::string& eType, const std::string& signa ) const {
 
     bool isInValid = false;
     SG::ReadHandle<T> tobs1Cont{tobs1Key, ctx};
@@ -195,7 +207,11 @@ template <typename T> std::vector<std::array<float,5> >  JfexSimMonitorAlgorithm
     std::vector< std::array<float,5> > matched;
     
     if(isInValid) return matched;
-    
+
+    auto signature = Monitored::Scalar<std::string>("Signature",signa);
+    auto evtType = Monitored::Scalar<std::string>("EventType",eType);
+    auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
+
     for(const auto tob1 : *tobs1Cont) {
 
         bool isMatched = false;
@@ -216,13 +232,32 @@ template <typename T> std::vector<std::array<float,5> >  JfexSimMonitorAlgorithm
             std::array<float,5> tmp = {(float) word1, (float) jfex1, (float) fpga1, tob1->eta(), tob1->phi()};
             unmatched.push_back(tmp);
         }
+        if(!signa.empty()) {
+            tobMismatched = (isMatched) ? 0 : 100;
+            fill("mismatches", evtType, signature, tobMismatched);
+        }
     }
+    if(!signa.empty() && tobs1Cont->size() < tobs2Cont->size()) {
+        tobMismatched=100;
+        for(unsigned int i=0;i<(tobs2Cont->size()-tobs1Cont->size());i++) {
+            fill("mismatches",signature,tobMismatched,evtType);
+        }
+    }
+//    if(signa=="jEM") {
+//        std::cout << signa << " " << matched.size() << " matched, unmatched : " << std::hex;
+//        for (const auto tob: unmatched) {
+//            std::cout << tob.at(0) << " ";
+//        }
+//        std::cout << std::endl << std::dec;
+//    }
 
     return matched;
 }
 
 
-void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<float,5> > & elem ) const {
+void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<float,5> > & elem) const {
+
+    return;
 
     auto jFexModule  = Monitored::Scalar<int>  ("jfex",  0);
     auto jFexFPGA    = Monitored::Scalar<int>  ("fpga",  0);
@@ -253,7 +288,7 @@ void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::strin
     }
 }
 
-template <typename T> std::vector<std::array<int,3> >  JfexSimMonitorAlgorithm::tobMatchingGlobals(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<int,3> > & unmatched ) const {
+template <typename T> std::vector<std::array<int,3> >  JfexSimMonitorAlgorithm::tobMatchingGlobals(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<int,3> > & unmatched, const std::string& eType, const std::string& signa ) const {
 
     SG::ReadHandle<T> tobs1Cont{tobs1Key, ctx};
     if(!tobs1Cont.isValid()) {
@@ -265,6 +300,10 @@ template <typename T> std::vector<std::array<int,3> >  JfexSimMonitorAlgorithm::
     }
 
     std::vector< std::array<int,3> > matched;
+
+    auto signature = Monitored::Scalar<std::string>("Signature",signa);
+    auto evtType = Monitored::Scalar<std::string>("EventType",eType);
+    auto tobMismatched = Monitored::Scalar<double>("tobMismatched",0);
 
     for(const auto tob1 : *tobs1Cont) {
 
@@ -286,6 +325,16 @@ template <typename T> std::vector<std::array<int,3> >  JfexSimMonitorAlgorithm::
             std::array<int,3> tmp = {(int) word1, jfex1, fpga1};
             unmatched.push_back(tmp);
         }
+        if(!signa.empty()) {
+            tobMismatched = (isMatched) ? 0 : 100;
+            fill("mismatches", evtType, signature, tobMismatched);
+        }
+    }
+    if(!signa.empty() && tobs1Cont->size() < tobs2Cont->size()) {
+        tobMismatched=100;
+        for(unsigned int i=0;i<(tobs2Cont->size()-tobs1Cont->size());i++) {
+            fill("mismatches",signature,tobMismatched,evtType);
+        }
     }
 
     return matched;
@@ -293,6 +342,8 @@ template <typename T> std::vector<std::array<int,3> >  JfexSimMonitorAlgorithm::
 
 
 void JfexSimMonitorAlgorithm::fillHistGlobals(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<int,3> > & elem ) const {
+
+    return;
 
     auto jFexModule  = Monitored::Scalar<int>  ("jfex",  0);
     auto jFexFPGA    = Monitored::Scalar< std::string >  ("fpga",  "");
@@ -322,9 +373,9 @@ void JfexSimMonitorAlgorithm::fillHistGlobals(const std::string & pkg, const std
 }
 
 
-void  JfexSimMonitorAlgorithm::genError(const std::string& location, const std::string& title) const {
-    Monitored::Group(m_monTool,
-                     Monitored::Scalar("genLocation",location.empty() ? std::string("UNKNOWN") : location),
-                     Monitored::Scalar("genType",title.empty()    ? std::string("UNKNOWN") : title)
-                    );
+void  JfexSimMonitorAlgorithm::genError(const std::string& /*location*/, const std::string& /*title*/) const {
+//    Monitored::Group(m_monTool,
+//                     Monitored::Scalar("genLocation",location.empty() ? std::string("UNKNOWN") : location),
+//                     Monitored::Scalar("genType",title.empty()    ? std::string("UNKNOWN") : title)
+//                    );
 }

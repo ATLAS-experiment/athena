@@ -1,45 +1,43 @@
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-def JetEfficiencyMonitoringConfig(inputFlags):
+def JetEfficiencyMonitoringConfig(flags):
     '''Function to configure LVL1 JetEfficiency algorithm in the monitoring system.'''
 
     # get the component factory - used for getting the algorithms
-    from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.Enums import Format
 
     result = ComponentAccumulator()
     ###########################################################################
     # Jet and particle flow config required for data POOL files
-    if inputFlags.Input.Format is Format.POOL and not inputFlags.Input.isMC:
+    if flags.Input.Format is Format.POOL and not flags.Input.isMC:
         from JetRecConfig.JetRecConfig import JetRecCfg
         from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
         from JetRecConfig.JetConfigFlags import jetInternalFlags
         jetInternalFlags.isRecoJob = True
-        result.merge( JetRecCfg(inputFlags,AntiKt4EMPFlow) )
+        result.merge( JetRecCfg(flags,AntiKt4EMPFlow) )
         
         from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-        if inputFlags.DQ.Environment == "AOD":
-          result.merge(PFGlobalFlowElementLinkingCfg(inputFlags, useMuonTopoClusters=True))
+        if flags.DQ.Environment == "AOD":
+          result.merge(PFGlobalFlowElementLinkingCfg(flags, useMuonTopoClusters=True))
         else:
-          result.merge(PFGlobalFlowElementLinkingCfg(inputFlags))
+          result.merge(PFGlobalFlowElementLinkingCfg(flags))
         from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-        result.merge(PFGlobalFlowElementLinkingCfg(inputFlags))
+        result.merge(PFGlobalFlowElementLinkingCfg(flags))
         from METReconstruction.METAssociatorCfg import METAssociatorCfg
-        result.merge(METAssociatorCfg(inputFlags, 'AntiKt4EMPFlow'))
+        result.merge(METAssociatorCfg(flags, 'AntiKt4EMPFlow'))
         from METUtilities.METMakerConfig import getMETMakerAlg
         metCA=ComponentAccumulator()
         metCA.addEventAlgo(getMETMakerAlg('AntiKt4EMPFlow'))
         result.merge(metCA)
     ###########################################################################
     # make the athena monitoring helper
-    from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'JetEfficiencyMonitoringCfg')
-    # get any algorithms
-    JetEfficiencyMonAlg = helper.addAlgorithm(CompFactory.JetEfficiencyMonitorAlgorithm,'JetEfficiencyMonAlg')
-    # add any steering
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+    helper = L1CaloMonitorCfgHelper(flags,CompFactory.JetEfficiencyMonitorAlgorithm,'JetEfficiencyMonAlg')
     groupName = 'JetEfficiencyMonitor' # the monitoring group name is also used for the package name
+    JetEfficiencyMonAlg = helper.alg
     JetEfficiencyMonAlg.PackageName = groupName
 
 
@@ -80,8 +78,7 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     JetEfficiencyMonAlg.HLTBootstrapReferenceTrigger='HLT_noalg_L1J20' 
     HLTbootstrap_trigger = JetEfficiencyMonAlg.HLTBootstrapReferenceTrigger
 
-    mainDir = 'L1Calo'
-    trigPath = 'JetEfficiency/'
+    trigPath = 'Developer/JetEfficiency/'
     distributionPath = 'Distributions/'
     noRefPath = 'NoReferenceTrigger/'
     muonRefPath = 'MuonReferenceTrigger/'
@@ -91,7 +88,6 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     GeV = 1000
 
     # add monitoring algorithm to group, with group name and main directory
-    myGroup = helper.addGroup(JetEfficiencyMonAlg, groupName , mainDir)
     single_triggers = ['L1_J20', 'L1_J25', 'L1_J30', 'L1_J40', 'L1_J50', 'L1_J75',
                        'L1_J85', 'L1_J100', 'L1_J120',  'L1_J400']
     multijet_triggers = ['L1_J85_3J30', 'L1_3J50', 'L1_4J15', 'L1_4J20']
@@ -154,13 +150,16 @@ def JetEfficiencyMonitoringConfig(inputFlags):
 
     ######### define all the histograms 
 
-    myGroup.defineHistogram('run',title='Run Number;run;Events',
+    helper.defineHistogram('run',title='Run Number;run;Events',
+                           fillGroup=groupName,
                             path=trigPath,xbins=1000000,xmin=-0.5,xmax=999999.5)
 
-    myGroup.defineHistogram('raw_pt',title='pT for all leading offline jets (with no trigger requirments);PT [MeV];Events',
+    helper.defineHistogram('raw_pt',title='pT for all leading offline jets (with no trigger requirments);PT [MeV];Events',
+                           fillGroup=groupName,
                             path=trigPath + distributionPath,xbins=nbins["pt"],xmin=binmin["pt"], xmax=binmax["pt"])
 
-    myGroup.defineHistogram('eta',  title='Eta Distribution of offline jets for HLT random chain ' + hltRandom_reference_triggers[0] + ' and ' + hltRandom_reference_triggers[1] + ';#eta; Count',
+    helper.defineHistogram('eta',  title='Eta Distribution of offline jets for HLT random chain ' + hltRandom_reference_triggers[0] + ' and ' + hltRandom_reference_triggers[1] + ';#eta; Count',
+                           fillGroup=groupName,
                                 path=trigPath + distributionPath,xbins=nbins["eta"],xmin=binmin["eta"], xmax=binmax["eta"])
     
 
@@ -178,17 +177,19 @@ def JetEfficiencyMonitoringConfig(inputFlags):
                         eff_plot_title = title_for_prop[p] + ' Efficiency' + prescale_title_add + 'of ' + trigger_title_modifiers[tgroup] + ' for trigger ' + t + reference_titles[r]+';'+xlabel_for_prop[p]+'; Efficiency '
                         dist_plot_title = title_for_prop[p] + ' distribution' + prescale_title_add + 'of '+ trigger_title_modifiers[tgroup] +' for trigger ' + t +';'+xlabel_for_prop[p]+'; Count '
                         
-                    myGroup.defineHistogram(p+'_'+r+'_'+t+','+p+'_'+r, type='TEfficiency',  title=eff_plot_title,
+                    helper.defineHistogram(p+'_'+r+'_'+t+','+p+'_'+r, type='TEfficiency',  title=eff_plot_title,
+                                           fillGroup=groupName,
                                     path=trigPath + pathAdd+ reference_paths[r], xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
                     
-                    myGroup.defineHistogram(p+':'+r+'_'+t,  title=dist_plot_title,
+                    helper.defineHistogram(p+':'+r+'_'+t,  title=dist_plot_title,
+                                           fillGroup=groupName,
                                     path=trigPath + distributionPath, xbins=nbins[p], xmin=binmin[p], xmax=binmax[p])
 
     
 
     acc = helper.result()
     result.merge(acc)
-    print("inputFlags.DQ.Environment = " +inputFlags.DQ.Environment )
+    print("flags.DQ.Environment = " +flags.DQ.Environment )
     return result
  
 
@@ -212,6 +213,7 @@ if __name__=='__main__':
     flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
 
     flags.lock()
+
     flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr

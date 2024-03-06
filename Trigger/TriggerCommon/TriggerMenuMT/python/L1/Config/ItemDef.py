@@ -1619,6 +1619,9 @@ class ItemDef:
         MenuItem('L1_BCM_2A_FIRSTINTRAIN' ).setLogic( d.BCM6 & firstintrain)
         MenuItem('L1_BCM_2C_FIRSTINTRAIN' ).setLogic( d.BCM7 & firstintrain)
 
+        MenuItem('L1_BCM_2A_2C_BGRP12'       ).setLogic((d.BCM6 | d.BCM7) & bgrp12cond )
+        MenuItem('L1_BCM_2A_2C_UNPAIRED_ISO' ).setLogic((d.BCM6 | d.BCM7) & unpaired_isocond)
+
         # RANDOM
         MenuItem('L1_RD0_FILLED'         ).setLogic( d.RNDM0 & physcond           ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_EMPTY'          ).setLogic( d.RNDM0 & cosmiccond         ).setTriggerType(TT.rand)

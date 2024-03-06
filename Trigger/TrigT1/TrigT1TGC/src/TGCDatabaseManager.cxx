@@ -127,7 +127,7 @@ TGCDatabaseManager::TGCDatabaseManager(TGCArguments* tgcargs,
   std::string ver_TILE = "v01";
   std::string ver_NSW  = "v01";
   std::string ver_BIS78  = "v01"; // OK?
-  std::string ver_HotRoI = "v1";
+  std::string ver_HotRoI = "v2";
 
   // EIFI Coincidence Map
   ATH_MSG_DEBUG("start to create EIFI coincidence map.");

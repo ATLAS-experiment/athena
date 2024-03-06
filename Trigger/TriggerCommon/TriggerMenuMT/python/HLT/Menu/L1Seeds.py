@@ -41,8 +41,8 @@ def Lvl1ItemByTriggerType(l1object, triggertype_pattern, triggertype_bitmask):
 ##############################
 def getL1BackgroundSeed():
     return [
-        'L1_BCM_AC_CA_BGRP12', 'L1_BCM_AC_CA_UNPAIRED_ISO',
-        'L1_BCM_Wide', 'L1_BCM_Wide_BGRP12', 'L1_BCM_Wide_EMPTY', 'L1_BCM_Wide_UNPAIREDB1', 'L1_BCM_Wide_UNPAIREDB2',
+        'L1_BCM_2A_2C_BGRP12', 'L1_BCM_2A_2C_UNPAIRED_ISO',
+        'L1_BCM_Wide_CALIB', 'L1_BCM_Wide_BGRP12', 'L1_BCM_Wide_EMPTY', 'L1_BCM_Wide_UNPAIREDB1', 'L1_BCM_Wide_UNPAIREDB2',
         'L1_BCM_2A_CALIB', 'L1_BCM_2C_CALIB',
         'L1_BCM_2A_EMPTY', 'L1_BCM_2C_EMPTY',
         'L1_BCM_2A_UNPAIREDB1', 'L1_BCM_2C_UNPAIREDB1', 'L1_BCM_2A_UNPAIREDB2', 'L1_BCM_2C_UNPAIREDB2',
