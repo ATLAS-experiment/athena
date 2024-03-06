@@ -75,21 +75,19 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
 
     #print(dir("args: ", args)) # debug
 
-    # set Alg's properties
-    kwargs.setdefault("AtlasRelease", getATLASVersion())
-
-    outFileName = "geometry-"
+    outFileName = "geometry"
     filterDetManagers = []
 
     # NOTE: at this point, the user-defined Geo TAG args.detDescr, 
-    #       if set, has already replaced the default TAG
+    #       if set, has already replaced the default TAG in 'flags';
+    #       so, we can use the latter, directy.
     geoTAG = flags.GeoModel.AtlasVersion
     # TODO: Fix this
     # This is a temporary hack to reflect how detDescr is handled in the old bash-driven DumpGeo
     # This should be replaced by proper python flags and Gaudy properties
     os.environ["DUMPGEODETDESCRTAG"] = geoTAG # save to an env var, for later use in GeoModelStandalone/GeoExporter
     print("+ DumpGeo -- INFO -- This is the Detector Description geometry TAG you are dumping: '%s'" % geoTAG)
-    outFileName = outFileName + geoTAG
+    outFileName = outFileName + "-" + geoTAG
 
     # if args.filterTreeTops:
     #     print("+ DumpGeo -- NOTE -- Your 'GeoModel TreeTop' filter set: '%s'" % args.filterTreeTops)
@@ -99,7 +97,10 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
         print("+ DumpGeo -- NOTE -- Your 'GeoModel Detector Manager' filter set: '%s'" % args.filterDetManagers)
         os.environ["DUMPGEOFILTERDETMANAGERS"] = args.filterDetManagers # save to an env var, for later use in GeoModelStandalone/GeoExporter
         filterDetManagers = args.filterDetManagers.split(",")
-    outFileName = outFileName + "-".join(filterDetManagers)
+        outFileName = outFileName + "-" + "-".join(filterDetManagers)
+        # set Alg's properties
+        kwargs.setdefault("UserFilterDetManager", args.filterDetManagers.split(","))
+
 
     # add final extension to the name of the output SQLite file 
     outFileName = outFileName + ".db"
@@ -125,6 +126,14 @@ def DumpGeoCfg(flags, name="DumpGeoCA", **kwargs):
             print(f"\nDumpGeo -- ERROR! The ouput file '{outFileName}' exists already!\nPlease move or remove it, or use the 'force' option: '-f' or '--forceOverWrite'.\n\n")
             sys.exit()
             #raise ValueError("The output file exists already!")
+
+    # set diitional Alg's properties
+    _logger.verbose("Using ATLAS/Athena version: %s", getATLASVersion())
+    _logger.verbose("Using GeoModel ATLAS version: %s", geoTAG)
+    kwargs.setdefault("AtlasRelease", getATLASVersion())
+    kwargs.setdefault("AtlasVersion", geoTAG)
+    kwargs.setdefault("OutSQLiteFileName", outFileName)
+
 
     the_alg = CompFactory.DumpGeo(name="DumpGeoAlg", **kwargs)
     result.addEventAlgo(the_alg, primary=True)
