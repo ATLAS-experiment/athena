@@ -1,12 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# Retrieve the default container names from the old-style configuration file
-from TrackVertexAssociationTool.getTTVAToolForReco import (
-    _DEFAULT_TRACK_CONT,
-    _DEFAULT_VERTEX_CONT,
-    _VERTEX_DECO,
-    _WEIGHT_DECO,
-)
+_DEFAULT_TRACK_CONT  = 'InDetTrackParticles'
+_DEFAULT_VERTEX_CONT = 'PrimaryVertices'
+_VERTEX_DECO         = 'TTVA_AMVFVertices_forReco'
+_WEIGHT_DECO         = 'TTVA_AMVFWeights_forReco'
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
