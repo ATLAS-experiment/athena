@@ -387,9 +387,17 @@ namespace Rec{
                h.m_hb_fakeSVBDT->Fill(wgtSelect,1.);
                h.m_curTup->NVrtBDT[h.m_curTup->nNVrt-1] = wgtSelect;
              }
-             if(wgtSelect<m_v2tFinBDTCut) curVrt.Good = false;
+             if(wgtSelect<m_v2tFinBDTCut) {
+               curVrt.Good = false;             // Disable 2-track vertex with bad BDT score
+               if(m_multiWithOneTrkVrt){        // Check if linked 1-track vertex exists and disable it
+                 for(auto it : curVrt.selTrk){
+                   for(auto &vtmp : (*wrkVrtSet)){
+                     if(vtmp.selTrk.size()!=1 || (!vtmp.Good)) continue;
+		     if(it==vtmp.detachedTrack)vtmp.Good=false;
+               } } }
+             }
           }
-    }
+    } //End vertex set loop
 //
 //-- Debug ntuple for 1track vertex is filled here
 //
@@ -421,12 +429,16 @@ namespace Rec{
    }  }
 //-------------------------------------------
 //Sorting and check
-    std::multimap<double,WrkVrt> goodVertexMap;
+    std::multimap<double,WrkVrt,std::greater<double>> goodVertexMap;
     int nNtrVrt=0;
     for(auto & iv : (*wrkVrtSet) ) {
        nth=iv.selTrk.size(); 
+       if(nth==1)iv.BDT=-2.;  //To move 1-track vertices to the end of the vertex list later
+       double selector=iv.BDT;
+       if(nth==1)     selector=iv.BDT+std::min(iv.vertexMom.Pt()*1.e-5,1.);
+       else if(nth>2) selector=iv.BDT+iv.vertexMom.M()*1.e-5;
        if( iv.Good && nth>0 ) {
-          goodVertexMap.emplace(iv.vertex.perp(),iv);    // add it
+          goodVertexMap.emplace(selector,iv);    // add it and sort in the map
           if(nth>1)nNtrVrt++;
        }
     }
@@ -442,6 +454,8 @@ namespace Rec{
 // Final vertex refit for full covariance matrix and xAOD::Vertex creation
 //
     static const SG::AuxElement::Decorator<float> wgtBDT("wgtBDT");
+    static const SG::AuxElement::Decorator<int>   nTrksDec("nTracks");
+    static const SG::AuxElement::Decorator<int>   vChrgTot("vCharge");
     int n1trVrt=0;           // Final number of good 1-track vertices
     for(auto & iv : goodVertexMap){
           WrkVrt & curVrt=iv.second;
@@ -483,7 +497,9 @@ namespace Rec{
              n1trVrt++;
           }
           if(tmpVertex){
-            wgtBDT(*tmpVertex)=curVrt.BDT;
+            wgtBDT  (*tmpVertex) =curVrt.BDT;
+            nTrksDec(*tmpVertex) =curVrt.selTrk.size();
+            vChrgTot(*tmpVertex) =curVrt.vertexCharge;
             finalVertices.push_back(tmpVertex);
           }
     }

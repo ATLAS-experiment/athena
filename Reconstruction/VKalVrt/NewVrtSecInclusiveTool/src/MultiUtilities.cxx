@@ -139,7 +139,7 @@ namespace Rec{
          if((*badV).selTrk.size()==1 && m_multiWithOneTrkVrt){  //Special case if 1-track vertices are allowed
            (*badV).vertexCharge=allTrackList[(*badV).selTrk.at(0)]->charge();
            (*badV).vertexMom=allTrackList[(*badV).selTrk.at(0)]->p4();
-           if(badVNtrk>=2)(*badV).Good=true;  //For 1-track vertices
+           if( badVNtrk>=2 && TMath::Prob((*badV).chi2,2*badVNtrk-3)>0.1 ) (*badV).Good=true;  //Accept only if original vertex prob>10%!
          }
          return -1.;
       }
