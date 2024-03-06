@@ -39,8 +39,7 @@ namespace MuonGM {
     CscReadoutElement::CscReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, MuonDetectorManager* mgr) :
         MuonClusterReadoutElement(pv, mgr, Trk::DetectorElemType::Csc) {
         // Set a few parameters here.  The rest are set in MuonChamber::setCscReadoutGeometry
-        // get the setting of the caching flag from the manager
-        setCachingFlag(mgr->cachingFlag());
+
 
         // st name
         setStationName(stName);

@@ -256,10 +256,6 @@ namespace MuonGM {
         double sinStereo(const Identifier& stripId) const;
 
         virtual void fillCache() override;
-        virtual void refreshCache() override {
-            clearCache();
-            fillCache();
-        }
         double xCoordinateInTrackingFrame(const Identifier& id) const;
 
     private:

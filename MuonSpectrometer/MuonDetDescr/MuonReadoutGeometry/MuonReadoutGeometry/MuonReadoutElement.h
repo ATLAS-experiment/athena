@@ -129,11 +129,9 @@ namespace MuonGM {
         // Tracking related interfaces
         // Element Surface
         // This creates a new surface. The client is responsible for deleting it.
-        inline int cachingFlag() const;
-        void setCachingFlag(int value);
         virtual void clearCache() = 0;
         virtual void fillCache() = 0;
-        virtual void refreshCache() = 0;
+        void refreshCache();
         
         const Muon::IMuonIdHelperSvc* idHelperSvc() const { return m_idHelperSvc.get(); }
         
@@ -208,7 +206,6 @@ namespace MuonGM {
    
     bool MuonReadoutElement::sideA() const { return (getStationEta() > 0); }
     bool MuonReadoutElement::sideC() const { return (getStationEta() < 0); }
-    int MuonReadoutElement::cachingFlag() const { return m_caching; }
 
     inline const Amg::Transform3D& MuonReadoutElement::absTransform() const { return getMaterialGeom()->getAbsoluteTransform(); }
 

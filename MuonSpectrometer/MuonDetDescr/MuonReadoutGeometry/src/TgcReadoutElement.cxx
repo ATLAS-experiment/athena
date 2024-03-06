@@ -34,10 +34,9 @@ namespace MuonGM {
         MuonClusterReadoutElement(pv, mgr, Trk::DetectorElemType::Tgc) {
         setStationName(stName);
         // get the setting of the caching flag from the manager
-        setCachingFlag(mgr->cachingFlag());
     }
 
-    TgcReadoutElement::~TgcReadoutElement() { clearCache(); }
+    TgcReadoutElement::~TgcReadoutElement() = default;
 
     Amg::Transform3D TgcReadoutElement::localToGlobalTransf(int gasGap) const {
         const Amg::Vector3D gasgapP = localGasGapPos(gasGap);

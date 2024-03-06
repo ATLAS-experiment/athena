@@ -43,7 +43,6 @@ class MuonDetectorTool final : public GeoModelTool {
     Gaudi::Property<bool> m_includeCutoutsBog{this, "IncludeCutoutsBog", false };
     Gaudi::Property<bool> m_includeCtbBis{this, "IncludeCtbBis" , false };
       
-    Gaudi::Property<bool> m_fillCache_initTime{this, "FillCacheInitTime", false};
     Gaudi::Property<bool> m_dumpMemoryBreakDown{this, "DumpMemoryBreakDown", false};
     Gaudi::Property<bool> m_enableFineClashFixing{this, "EnableFineClashFixing", false};
     Gaudi::Property<bool> m_hasCSC{this,"HasCSC", true};
@@ -67,7 +66,6 @@ class MuonDetectorTool final : public GeoModelTool {
     Gaudi::Property<bool> m_useCscIntAlinesFromGM{this, "UseIlinesFromGM", true};
     Gaudi::Property<std::string> m_altCscIntAlinesFile{this, "AlternateCscIntAlignFile", ""};
     
-    Gaudi::Property<bool> m_cachingFlag{this, "CachingFlag", true, "Turn on/off caching of ReadoutElement surfaces etc. (i.e. for MDTs)"};
     Gaudi::Property<bool> m_beeNoShiftInDefault{this, "BEENoShift", false, "Turn off the initial 111 mm shift in BEE station (real data)"};
     MuonGM::MuonDetectorManager* m_manager{nullptr};
 };
