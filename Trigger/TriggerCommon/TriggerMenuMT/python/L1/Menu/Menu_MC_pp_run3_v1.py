@@ -349,9 +349,11 @@ def defineMenu():
         'L1_MBTSC15':'', 
 
         'L1_BCM_Wide_BGRP12':'', 
-        'L1_BCM_AC_CA_BGRP12':'',
+        'L1_BCM_2A_2C_UNPAIRED_ISO':'',
+        'L1_BCM_2A_2C_BGRP12':'',
         'L1_BCM_Wide_EMPTY':'', 
         'L1_BCM_Wide':'',
+        'L1_BCM_Wide_CALIB':'',
         'L1_BCM_Wide_UNPAIREDB1':'', 
         'L1_BCM_Wide_UNPAIREDB2':'',
         'L1_J12_UNPAIREDB1':'', 
