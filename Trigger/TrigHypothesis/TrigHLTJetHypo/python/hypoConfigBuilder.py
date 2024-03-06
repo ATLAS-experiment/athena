@@ -49,10 +49,19 @@ aliasesDict = {
   'DJMASS900j50'                 : 'DIJET50j12ptXX900djmass',
   'DJMASS1000j50'                : 'DIJET50j12ptXX1000djmass',
   'DJMASS1000j50dphi240'         : 'DIJET50j12ptXX1000djmassXXdjdphi240',
+  'DJMASS900j50dphi240'          : 'DIJET50j12ptXX900djmassXXdjdphi240',
   'DJMASS1000j50dphi200x400deta' : 'DIJET50j12ptXX1000djmassXXdjdphi200XX400djdeta',
-  'DJMASS900j50dphi200x400deta' : 'DIJET50j12ptXX900djmassXXdjdphi200XX400djdeta',
-  'DJMASS1000j50dphi250x260deta' : 'DIJET50j12ptXX1000djmassXXdjdphi150XX350djdeta',
-  'DJMASS900j50dphi250x260deta' : 'DIJET50j12ptXX1000djmassXXdjdphi150XX350djdeta',
+  'DJMASS900j50dphi200x400deta'  : 'DIJET50j12ptXX900djmassXXdjdphi200XX400djdeta',
+  'DJMASS1000j50dphi260x200deta' : 'DIJET50j12ptXX1000djmassXXdjdphi260XX200djdeta',
+  'DJMASS900j50dphi260x200deta'  : 'DIJET50j12ptXX900djmassXXdjdphi260XX200djdeta',
+  'DJMASS1000j30dphi260x200deta' : 'DIJET30j12ptXX1000djmassXXdjdphi260XX200djdeta',
+  'DJMASS900j30dphi260x200deta'  : 'DIJET30j12ptXX900djmassXXdjdphi260XX200djdeta',
+  'DJMASS1000j50x200deta'        : 'DIJET50j12ptXX1000djmassXX200djdeta',
+  'DJMASS900j50x200deta'         : 'DIJET50j12ptXX900djmassXX200djdeta',
+  
+  'DJMASS1000j50dphi260'         : 'DIJET50j12ptXX1000djmassXXdjdphi260',
+  'DJMASS900j50dphi260'          : 'DIJET50j12ptXX900djmassXXdjdphi260',
+  
 }
 
 def make_root_repcondconfig():

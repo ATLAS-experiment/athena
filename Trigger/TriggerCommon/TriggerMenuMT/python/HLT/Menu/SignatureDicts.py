@@ -146,9 +146,13 @@ JetChainParts = {
     'trkpresel'    : # Tracking preselection
       ['nopresel',
        # Single jet
+       'preslej50emf72',
+       'preslej30emf72',
+       'preselj20emf72',
+       'preselj20emf48',
        'preselj20emf24',
        'preselj20emf12',
-       'preselj20emf6',
+       'preselj20emf6', 
        'preselj20',
        'preselj50',
        'preselj80',
@@ -313,9 +317,14 @@ JetChainParts = {
                       'DJMASS1000j50dphi240', # alias
                       'DJMASS1000j50dphi200x400deta', # alias
                       'DJMASS900j50dphi200x400deta', # alias
-                      'DJMASS1000j50dphi250x260deta', # alias
-                      'DJMASS900j50dphi250x260deta', # alias
-  
+                      'DJMASS1000j50dphi260x200deta', # alias
+                      'DJMASS900j50dphi260x200deta' , # alias
+                      'DJMASS1000j50dphi260', # alias
+                      'DJMASS900j50dphi260', # alias
+                      'DJMASS1000j50x200deta', # alias
+                      'DJMASS900j50x200deta', # alias
+                      'DJMASS1000j30dphi260x200deta', # alias
+                      'DJMASS900j30dphi260x200deta', # alias
                       'DIJET70j12etXX1000djmassXXdjdphi200XX400djdeta', # needed for hypoToolTests.py
                       'DIJET80j12etXX0j12eta240XX700djmass', # needed for hypoToolTests.py
 
@@ -355,7 +364,8 @@ JetChainParts = {
     'exotHypo' : ['emergingPTF0p2dR1p2', 'emergingPTF0p1dR1p2', 'emergingPTF0p09dR1p2', 'emergingPTF0p08dR1p2', 'emergingPTF0p075dR1p2', 'emergingPTF0p07dR1p2', 'emergingPTF0p0dR1p2',
                   'emergingPTF0p2dR0p4', 'emergingPTF0p1dR0p4', 'emergingPTF0p09dR0p4', 'emergingPTF0p08dR0p4', 'emergingPTF0p075dR0p4', 'emergingPTF0p07dR0p4', 'emergingPTF0p0dR0p4',
                   'tracklessdR1p2',      'tracklessdR0p4',
-                  'calratio','calratiormbib','calratiovar','calratiovarrmbib'  # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
+                  'calratio','calratiormbib','calratiovar','calratiovarrmbib',  # Exotics CalRatio jets (trackless and low-EMF, with option to clean out BIB)
+                  'calratiovar135','calratiovar59' # Exotics CalRatio Jets ( requested by DPJ Team for alternative cut on ratio )
               ],
 
     # Simple hypo configuration. Single property cuts defined as MINvarMAX
@@ -368,7 +378,7 @@ JetChainParts = {
     'jvt'           : # Jet Vertex Tagger pileup discriminant
       ['010jvt', '011jvt', '015jvt', '020jvt', '050jvt', '059jvt'],
     'momCuts'       : # Generic moment cut on single jets
-       ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010'],
+       ['050momemfrac100','momemfrac006','momemfrac024','momemfrac012', 'momhecfrac010', '050momemfrac100XXmomhecfrac010', 'momemfrac072', 'momemfrac048' ],
     'timing'        : # delayed jets, with absolute delay requirement [ns]
     ['2timing'],
     'timeSig'       : # delayed jets, based on pT-dependent significance of delay [sigma]
