@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """
 The CTP monitors three different types of signals. In the XML file
@@ -26,6 +26,7 @@ way as L1 Items. However, since we can also monitor L1 Items directly
 3) type TBP, TAP, TAV
 
 For each of these type 64 L1Items can be monitored independently
+Please take note that the bunch mask is not applied for the per-bunch monitoring, thus one item per threshold is sufficient
 
 """
 
@@ -117,25 +118,10 @@ class MonitorDef:
                 "L1_3MU3V", "L1_MU5VF_3MU3VF", "L1_4MU3V",
                 ## Legacy L1 items
                 # L1Calo
-                #"L1_TAU8", "L1_TAU20IM",
-                #"L1_J100", 
-                #"L1_J400",
-                #"L1_XE35",
-                # "L1_XE45",
-                #"L1_XE50", 
-                "L1_XE55", "L1_XE300",
-                # "L1_XE45", "L1_XE50", "L1_XE55", "L1_XE300",
-                # Combined
-                #"L1_MU3V_J12",
-                # L1Topo
-                "L1_BPH-0DR3-eEM9jJ40_MU5VF", "L1_HT190-jJ40s5pETA21", "L1_LLP-RO-eEM", # Board 0 FPGA 0
-                "L1_jMJJ-500-NFF",                                                # Board 0 FPGA 1
-                "L1_SC111-CjJ40",                                                 # Board 1 FPGA 0
-                "L1_BPH-0M9-eEM9-eEM7_MU5VF", "L1_BPH-0DR3-eEM9jJ40_2MU3V",
-                "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
-                "L1_jMJJ-700", "L1_LLP-NOMATCH-eEM",
-                "L1_LAR-ZEE-eEM",
-
+                "L1_TAU8","L1_TAU20IM",
+                "L1_J15","L1_J100","L1_J400",
+                "L1_XE30","L1_XE50","L1_XE55","L1_XE300",
+  
                 ## Phase-I
                 # L1Calo
                 "L1_eEM5", "L1_eEM9", "L1_eEM12L",
@@ -156,16 +142,15 @@ class MonitorDef:
                 "L1_jJ60p30ETA49", "L1_jJ90p30ETA49", "L1_jJ125p30ETA49",
                 "L1_3jJ90", "L1_4jJ40", "L1_4jJ50",
                 "L1_3jJ70p0ETA23", "L1_4jJ40p0ETA25", "L1_5jJ40p0ETA25",
-                "L1_jJ140_3jJ60",
-                "L1_jLJ80", "L1_jLJ120", "L1_jLJ140",
+                "L1_jJ140_3jJ60", "L1_jJ85p0ETA21_3jJ40p0ETA25",
                 "L1_jXE60", "L1_jXE70", "L1_jXE80", "L1_jXE90", "L1_jXE100",
                 "L1_jXE110", "L1_jXE120", "L1_jXE500",
                 "L1_jXEC100",
                 "L1_jTE200",
                 "L1_jTEC200", "L1_jTEFWD100", "L1_jTEFWDA100", "L1_jTEFWDC100",
-                "L1_jJ85p0ETA21_3jJ40p0ETA25",
                 "L1_gJ20p0ETA25", "L1_gJ20p25ETA49","L1_gJ20p0ETA25_EMPTY", "L1_gJ50p0ETA25",
-                "L1_gJ100p0ETA25", "L1_gJ400p0ETA25", "L1_gLJ80p0ETA25",
+                "L1_gJ100p0ETA25", "L1_gJ400p0ETA25",
+                "L1_gLJ80p0ETA25", "L1_gLJ100p0ETA25", "L1_gLJ140p0ETA25", "L1_gLJ160p0ETA25",
                 #"L1_gXERHO70", "L1_gXERHO100",
                 "L1_gXENC70", "L1_gXENC100",
                 "L1_gXEJWOJ60", "L1_gXEJWOJ70", "L1_gXEJWOJ80", "L1_gXEJWOJ100", "L1_gXEJWOJ110", "L1_gXEJWOJ120", "L1_gXEJWOJ500",
@@ -173,26 +158,27 @@ class MonitorDef:
                 "L1_gMHT500",
                 # Combined
                 "L1_2eEM10L_MU8F", "L1_MU3V_jJ40",
+                
                 # L1Topo (Topo2 always in)
-                "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ80",
-                "L1_LAR-ZEE-eEM",
+                "L1_LLPDPHI-jXE27-jJ27",
+                "L1_BPH-0DR3-eEM9jJ40_MU5VF", "L1_BPH-0M9-eEM9-eEM7_MU5VF", "L1_BPH-0DR3-eEM9jJ40_2MU3V",
+                "L1_BPH-0M9-eEM9-eEM7",  "L1_BPH-0M10-3MU3V", "L1_BPH-0M10-3MU3VF",
                 "L1_JPSI-1M5-eEM9", "L1_JPSI-1M5-eEM15",
-                "L1_BPH-0M9-eEM9-eEM7", "L1_BPH-0M9-eEM9-eEM7_MU5VF",
+                "L1_BTAG-MU3VjJ40", "L1_BTAG-MU5VFjJ80",
                 "L1_cTAU30M_2cTAU20M_DR-eTAU30MeTAU20M",
-                "L1_DY-BOX-2MU3VF", "L1_DY-BOX-MU5VFMU3V",
-                "L1_LFV-MU5VF",
                 "L1_jMJJ-700",
-                "L1_10DR-MU14FCH-MU5VF_EMPTY",
-                "L1_BPH-0M10-3MU3V", "L1_BPH-0M10-3MU3VF",
-                "L1_DPHI-M70-2eEM12M",
+                "L1_DY-BOX-2MU3VF", "L1_DY-BOX-MU5VFMU3V",
+                "L1_LAR-ZEE-eEM",  "L1_LFV-MU5VF",
+                "L1_10DR-MU14FCH-MU5VF_EMPTY", "L1_DPHI-M70-2eEM12M",
             ]
 
             topo3_monitems = [
-                "L1_ZAFB-25DPHI-eEM18M",
+                "L1_HT190-jJ40s5pETA21",  "L1_jMJJ-500-NFF",
+                "L1_LLP-RO-eEM",  "L1_LLP-NOMATCH-eEM",
                 "L1_SC111-CjJ40",
-                "L1_jMJJ-300-NFF", "L1_jMJJ-500-NFF",
+                "L1_ZAFB-25DPHI-eEM18M",
+                "L1_jMJJ-300-NFF",
                 "L1_LFV-eEM10L-MU8VF", "L1_LFV-eEM15L-MU5VF",
-                "L1_LLP-RO-eEM", "L1_LLP-NOMATCH-eEM",
             ]
             # Add triggers that are not in the MC menu
             if 'MC' not in menuName:
@@ -200,14 +186,12 @@ class MonitorDef:
                     # Detector items
                     # "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_AND",
                     "L1_LUCID_A", "L1_LUCID_C",
-                    "L1_CALREQ2",
+                    "L1_CALREQ1","L1_CALREQ2",
                     "L1_TGC_BURST",
                     "L1_TRT_FILLED",
                     "L1_BPTX0_BGRP12", "L1_BPTX1_BGRP12",
                     "L1_NSW_MONITOR",
-                    "L1_BCM_Wide", "L1_BCM_Wide_EMPTY", "L1_BCM_Wide_BGRP12",
-                    "L1_BCM_2A_UNPAIREDB1", "L1_BCM_2C_UNPAIREDB1", "L1_BCM_2A_UNPAIREDB2", "L1_BCM_2C_UNPAIREDB2",
-                    "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN",
+                    "L1_BCM_Wide",
                     "L1_BCM_2A_EMPTY", "L1_BCM_2C_EMPTY",
                     "L1_AFP_A_AND_C_TOF_T0T1",
                     "L1_AFP_FSA_BGRP12", "L1_AFP_FSC_BGRP12",
@@ -219,15 +203,11 @@ class MonitorDef:
                     "L1_MBTS_A", "L1_MBTS_C",
                     "L1_MBTS_1", "L1_MBTS_1_1", "L1_MBTS_2",
                     "L1_MBTS_1_A", "L1_MBTS_1_C", "L1_MBTS_4_A", "L1_MBTS_4_C",
-                    "L1_MBTS_1_1_EMPTY",
                     "L1_ZeroBias",
                     "L1_AFP_A_AND_C_TOF_jJ50",
                     # Phase-I
                     "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
                     "L1_jJ500_LAR",
-
-                    # Beam splashes
-                    "L1_eEM22A", "L1_eEM22C",
 
                     # Other triggers disabled in MC
                     "L1_MU3VF", "L1_MU8F", "L1_MU8FC", "L1_MU8VF",
@@ -441,10 +421,8 @@ class MonitorDef:
 
         monItems[TBP|TAP|TAV] += topo3_monitems
 
-
+        # if any of the HF items are changed CTP and OLC shall be informed (via TrigOps)
         monItemsHF[TBP|TAP|TAV] = [
-           "L1_BCM_2A_FIRSTINTRAIN",
-           "L1_BCM_2C_FIRSTINTRAIN",
            "L1_jJ30",
            "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
            "L1_BCM_Wide",
