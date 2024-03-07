@@ -14,5 +14,4 @@ atlas_add_component( MMRawDataMonitoring
                      LINK_LIBRARIES AthenaMonitoringKernelLib AthenaMonitoringLib GaudiKernel MuonAnalysisInterfacesLib MuonCalibIdentifier MuonDQAUtilsLib MuonIdHelpersLib MuonPrepRawData MuonRIO_OnTrack MuonReadoutGeometry StoreGateLib xAODMuon xAODTracking xAODTrigger MuonSegment)
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
