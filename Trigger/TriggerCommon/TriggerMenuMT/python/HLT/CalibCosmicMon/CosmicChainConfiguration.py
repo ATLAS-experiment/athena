@@ -23,11 +23,11 @@ def CosmicsTrkSequenceCfg(flags):
     from TrigInDetConfig.utils import getFlagsForActiveConfig
     flagsWithTrk = getFlagsForActiveConfig(flags, "cosmics", log)
 
-    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-    seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
-                            rois ="CosmicRoIs", inView = "VDVCosmicsIDTracking")
-
-
+    from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+    seq = InnerTrackingTrigSequence.create(flagsWithTrk, 
+                                           flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                                           rois ="CosmicRoIs", 
+                                           inView = "VDVCosmicsIDTracking")
     idTrackingAlgs = seq.sequence("Offline")
     trkRecoSeq.mergeReco(idTrackingAlgs)
 
