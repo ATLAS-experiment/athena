@@ -47,13 +47,13 @@ def TileJetMonitoringConfig(flags, **kwargs):
             # Low Gain
             kwargs.setdefault('ChannelEnergyMin', 15000)
             kwargs.setdefault('ChannelEnergyMax', 50000)
-            kwargs.setdefault('ChannelGain', 0)
+            kwargs.setdefault('Gain', 0)
 
         else:
             # High Gain
             kwargs.setdefault('ChannelEnergyMin', 2000)
             kwargs.setdefault('ChannelEnergyMax', 4000)
-            kwargs.setdefault('ChannelGain', 1)
+            kwargs.setdefault('Gain', 1)
             
     for k, v in kwargs.items():
         setattr(tileJetMonAlg, k, v)
