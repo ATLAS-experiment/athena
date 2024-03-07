@@ -607,7 +607,7 @@ namespace FlavorTagDiscriminants {
         flip_name = "Neg";
       }
       else if (flip_config == FlipTagConfig::SIMPLE_FLIP) {
-        flip_name = "Simple";
+        flip_name = "SimpleFlip";
       }
 
       StringRegexes flip_converters {
