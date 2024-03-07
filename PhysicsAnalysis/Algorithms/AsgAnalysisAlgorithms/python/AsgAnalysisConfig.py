@@ -68,7 +68,15 @@ class PileupReweightingBlock (ConfigBlock):
         log = logging.getLogger('makePileupAnalysisSequence')
 
         if config.isPhyslite():
-            log.info(f'Physlite does not need pileup reweighting. {config.isPhyslite}')
+            # PHYSLITE already has these variables defined, just need to copy them to the output
+            log.info(f'Physlite does not need pileup reweighting. Variables will be copied from input instead. {config.isPhyslite}')
+            config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
+            config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', noSys=True)
+            if config.dataType() is not DataType.Data:
+                config.addOutputVar ('EventInfo', 'mcChannelNumber', 'mcChannelNumber', noSys=True)
+                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
+                if config.geometry() is LHCPeriod.Run2:
+                    config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
             return
 
         # check files from autoconfig flags
