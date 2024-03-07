@@ -1,6 +1,6 @@
-Tue Jul 18 18:42:28 CEST 2023
+Wed Mar  6 09:53:34 CST 2024
 Preloading tcmalloc_minimal.so
-Py:Athena            INFO using release [WorkDir-24.0.8] [x86_64-centos7-gcc11-opt] [RUN4-03-00-00_Tests/da9ed526037] -- built on [2023-07-18T1745]
+Py:Athena            INFO using release [WorkDir-24.0.24] [x86_64-centos7-gcc11-opt] [EFTrackingMapMakerUpdates/3ddf16a] -- built on [2024-03-06T0937]
 Py:Athena            INFO including file "AthenaCommon/Preparation.py"
 Py:Athena            INFO including file "AthenaCommon/Atlas.UnixStandardJob.py"
 Py:Athena            INFO executing ROOT6Setup
@@ -8,17 +8,17 @@ Py:Athena            INFO including file "AthenaCommon/Execution.py"
 Py:Athena            INFO including file "FPGATrackSimInput/FPGATrackSimRawToLogicalHitsWrapperAlg_jobOptions.py"
 Py:FPGATrackSimRawToLogicalHitsWrapperAlg    INFO OutFPGATrackSim file ['fpgatracksim_loghits_wrap.OUT.root'] 
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
-Py:ConfigurableDb    INFO Read module info for 5217 configurables from 5 genConfDb files
+Py:ConfigurableDb    INFO Read module info for 5245 configurables from 14 genConfDb files
 Py:ConfigurableDb    INFO No duplicates have been found: that's good !
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r14)
-                                          running on lxplus783.cern.ch on Tue Jul 18 18:42:42 2023
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v38r0)
+                                          running on login01.af.uchicago.edu on Wed Mar  6 09:53:46 2024
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-ClassIDSvc           INFO getRegistryEntries: read 3092 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 3102 CLIDRegistry entries for module ALL
 CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
@@ -30,14 +30,17 @@ FPGATrackSimLog...  DEBUG Initialized in READ MODE
 FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
 FPGATrackSimLog...  DEBUG Opening file fpgatracksim_loghits_wrap.OUT.root in RECREATE mode.
 FPGATrackSimLog...   INFO Creating empty branches in output file
+FPGATrackSimLog...  DEBUG Opening file fpgatracksim_loghits_wrap.OUT.root in RECREATE mode.
 FPGATrackSimLog...  DEBUG Property update for OutputLevel : new value = 2
 FPGATrackSimEve...   INFO Creating the slices object
 FPGATrackSimEve...   INFO FPGATrackSimEventSelectionSvc::initialize(): regionID =  'regionID':0, min = {phi:0.3 q/pt:-0.001 d0:-2 z0:-150 eta:0.1}, max = {phi:0.5 q/pt:0.001 d0:2 z0:150 eta:0.3}, sampleType = singleMuons, withPU = 0
 Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/ATLAS-P2-ITK-22-02-00.pmap
 Package.UserCode     INFO Allocating map for geometry ATLAS-P2-ITK-22-02-00 diskIndex size=5
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-ITK-22-02-00 diskIndex size=5
 Package.UserCode     INFO Using 8 logical layers and 9 coordinates
 Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/ATLAS-P2-ITK-22-02-00.pmap
 Package.UserCode     INFO Allocating map for geometry ATLAS-P2-ITK-22-02-00 diskIndex size=5
+FPGATrackSimMod...   INFO Allocating map for geometry ATLAS-P2-ITK-22-02-00 diskIndex size=5
 Package.UserCode     INFO Using 13 logical layers and 18 coordinates
 Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-22-02-00.rmap
 Package.UserCode     INFO Reading /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-22-02-00.rmap
@@ -108,11 +111,12 @@ FPGATrackSimLog...  DEBUG Event: Event 115001 	Run 242000	Optional: nOfflineClus
 FPGATrackSimLog...  DEBUG Mapping 39 hits using stage 1
 FPGATrackSimLog...  DEBUG Getting Event Event 115001 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 6 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 6 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 8 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 8 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 8 element in m_diskIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 6 element in m_ringIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 6 element in m_ringIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 8 element in m_ringIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 8 element in m_ringIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 8 element in m_ringIndex which is of size 5
+FPGATrackSimLog...  DEBUG Found 39 missing mapped hits in this event
 FPGATrackSimLog...  DEBUG Event: Event 115001 	Run 242000	Optional: nOfflineClusters: 19, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
@@ -186,9 +190,10 @@ FPGATrackSimLog...  DEBUG Event: Event 115006 	Run 242000	Optional: nOfflineClus
 FPGATrackSimLog...  DEBUG Mapping 49 hits using stage 1
 FPGATrackSimLog...  DEBUG Getting Event Event 115006 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 5 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 5 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 8 element in m_diskIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 5 element in m_ringIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 5 element in m_ringIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 8 element in m_ringIndex which is of size 5
+FPGATrackSimLog...  DEBUG Found 49 missing mapped hits in this event
 FPGATrackSimLog...  DEBUG Event: Event 115006 	Run 242000	Optional: nOfflineClusters: 23, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
@@ -241,10 +246,10 @@ FPGATrackSimLog...  DEBUG Event: Event 115011 	Run 242000	Optional: nOfflineClus
 FPGATrackSimLog...  DEBUG Mapping 28 hits using stage 1
 FPGATrackSimLog...  DEBUG Getting Event Event 115011 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 5 element in m_diskIndex which is of size 5
-Package.UserCode    ERROR /build/atnight/localbuilds/nightlies/Athena/main/athena/Trigger/EFTracking/FPGATrackSim/FPGATrackSimMaps/src/FPGATrackSimPlaneMap.cxx:246 (void FPGATrackSimPlaneMap::map(FPGATrackSimHit&) const): Error: requesting 7 element in m_diskIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 5 element in m_ringIndex which is of size 5
+FPGATrackSimMod...  ERROR Error: requesting 7 element in m_ringIndex which is of size 5
 FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=1 PLayer=0 section=0
-FPGATrackSimLog...  DEBUG Found 1 missing mapped hits in this event
+FPGATrackSimLog...  DEBUG Found 28 missing mapped hits in this event
 FPGATrackSimLog...  DEBUG Event: Event 115011 	Run 242000	Optional: nOfflineClusters: 18, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
@@ -299,7 +304,7 @@ FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=4 PLayer=4 sectio
 FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=5 PLayer=5 section=0
 FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=6 PLayer=6 section=0
 FPGATrackSimLog...  DEBUG Unmapped hit: pixel=0 Barrel=1 Layer=7 PLayer=7 section=0
-FPGATrackSimLog...  DEBUG Found 9 missing mapped hits in this event
+FPGATrackSimLog...  DEBUG Found 21 missing mapped hits in this event
 FPGATrackSimLog...  DEBUG Event: Event 115010 	Run 242000	Optional: nOfflineClusters: 13, nOfflineTracks: 1, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
@@ -343,6 +348,7 @@ FPGATrackSimLog...  DEBUG Event: Event 115012 	Run 242000	Optional: nOfflineClus
 FPGATrackSimLog...  DEBUG Mapping 19 hits using stage 1
 FPGATrackSimLog...  DEBUG Getting Event Event 115012 	Run 242000
 FPGATrackSimLog...  DEBUG Created 1 towers. Now map Hits
+FPGATrackSimLog...  DEBUG Found 19 missing mapped hits in this event
 FPGATrackSimLog...  DEBUG Event: Event 115012 	Run 242000	Optional: nOfflineClusters: 11, nOfflineTracks: 0, nTruthTracks: 1
 	NTowers: 1
  0  Tower: id=0	 eta=0	 phi=0	 Nhits=0
@@ -364,7 +370,7 @@ ToolSvc              INFO Removing all tools created by ToolSvc
 FPGATrackSimLog...   INFO finalize: closing files
 ******************************************************************************
 *Tree    :FPGATrackSimLogicalEventTree: data                                                   *
-*Entries :        5 : Total =          201184 bytes  File  Size =          0 *
+*Entries :        5 : Total =          202171 bytes  File  Size =          0 *
 *        :          : Tree compression factor =   1.00                       *
 ******************************************************************************
 *Branch  :FPGATrackSimLogicalEventInputHeader_1st                            *
@@ -427,7 +433,7 @@ FPGATrackSimLog...   INFO finalize: closing files
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
 *Br   14 :m_optional :                                                       *
-*Entries :        5 : Total  Size=      73761 bytes  One basket in memory    *
+*Entries :        5 : Total  Size=      74744 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
 *Br   15 :m_optional.fUniqueID : UInt_t                                      *
@@ -642,7 +648,7 @@ FPGATrackSimLog...   INFO finalize: closing files
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
 *Br   58 :m_optional.m_TruthTracks : Int_t m_optional.m_TruthTracks_         *
-*Entries :        5 : Total  Size=      16328 bytes  One basket in memory    *
+*Entries :        5 : Total  Size=      17315 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
 *Br   59 :m_optional.m_TruthTracks.fUniqueID :                               *
@@ -704,558 +710,563 @@ FPGATrackSimLog...   INFO finalize: closing files
 *Entries :        5 : Total  Size=       1029 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   71 :m_optional.m_TruthTracks.m_barcode :                               *
+*Br   71 :m_optional.m_TruthTracks.m_status :                                *
+*         | Int_t m_status[m_optional.m_TruthTracks_]                        *
+*Entries :        5 : Total  Size=       1023 bytes  One basket in memory    *
+*Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
+*............................................................................*
+*Br   72 :m_optional.m_TruthTracks.m_barcode :                               *
 *         | Int_t m_barcode[m_optional.m_TruthTracks_]                       *
 *Entries :        5 : Total  Size=       1029 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   72 :m_optional.m_TruthTracks.m_evtindex :                              *
+*Br   73 :m_optional.m_TruthTracks.m_evtindex :                              *
 *         | Int_t m_evtindex[m_optional.m_TruthTracks_]                      *
 *Entries :        5 : Total  Size=       1035 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   73 :m_optional.m_TruthTracks.m_barcode_frac_offline :                  *
+*Br   74 :m_optional.m_TruthTracks.m_barcode_frac_offline :                  *
 *         | Double_t m_barcode_frac_offline[m_optional.m_TruthTracks_]       *
 *Entries :        5 : Total  Size=       1127 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   74 :m_towers  : Int_t m_towers_                                        *
+*Br   75 :m_towers  : Int_t m_towers_                                        *
 *Entries :        5 : Total  Size=       8577 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   75 :m_towers.fUniqueID : UInt_t fUniqueID[m_towers_]                   *
+*Br   76 :m_towers.fUniqueID : UInt_t fUniqueID[m_towers_]                   *
 *Entries :        5 : Total  Size=        901 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   76 :m_towers.fBits : UInt_t fBits[m_towers_]                           *
+*Br   77 :m_towers.fBits : UInt_t fBits[m_towers_]                           *
 *Entries :        5 : Total  Size=        877 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   77 :m_towers.m_id : Int_t m_id[m_towers_]                              *
+*Br   78 :m_towers.m_id : Int_t m_id[m_towers_]                              *
 *Entries :        5 : Total  Size=        871 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   78 :m_towers.m_Eta : Double_t m_Eta[m_towers_]                         *
+*Br   79 :m_towers.m_Eta : Double_t m_Eta[m_towers_]                         *
 *Entries :        5 : Total  Size=        897 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   79 :m_towers.m_Phi : Double_t m_Phi[m_towers_]                         *
+*Br   80 :m_towers.m_Phi : Double_t m_Phi[m_towers_]                         *
 *Entries :        5 : Total  Size=        897 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   80 :m_towers.m_DeltaEta : Double_t m_DeltaEta[m_towers_]               *
+*Br   81 :m_towers.m_DeltaEta : Double_t m_DeltaEta[m_towers_]               *
 *Entries :        5 : Total  Size=        927 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   81 :m_towers.m_DeltaPhi : Double_t m_DeltaPhi[m_towers_]               *
+*Br   82 :m_towers.m_DeltaPhi : Double_t m_DeltaPhi[m_towers_]               *
 *Entries :        5 : Total  Size=        927 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   82 :m_towers.m_Hits : vector<FPGATrackSimHit> m_Hits[m_towers_]        *
+*Br   83 :m_towers.m_Hits : vector<FPGATrackSimHit> m_Hits[m_towers_]        *
 *Entries :        5 : Total  Size=        923 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
 *Branch  :FPGATrackSimLogicalEventOutputHeader                               *
 *Entries :        5 : BranchElement (see below)                              *
 *............................................................................*
-*Br   83 :fUniqueID : UInt_t                                                 *
+*Br   84 :fUniqueID : UInt_t                                                 *
 *Entries :        5 : Total  Size=        741 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   84 :fBits     : UInt_t                                                 *
+*Br   85 :fBits     : UInt_t                                                 *
 *Entries :        5 : Total  Size=        741 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   85 :m_FPGATrackSimRoads_1st : Int_t m_FPGATrackSimRoads_1st_           *
+*Br   86 :m_FPGATrackSimRoads_1st : Int_t m_FPGATrackSimRoads_1st_           *
 *Entries :        5 : Total  Size=       9085 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   86 :m_FPGATrackSimRoads_1st.fUniqueID :                                *
+*Br   87 :m_FPGATrackSimRoads_1st.fUniqueID :                                *
 *         | UInt_t fUniqueID[m_FPGATrackSimRoads_1st_]                       *
 *Entries :        5 : Total  Size=       1001 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   87 :m_FPGATrackSimRoads_1st.fBits :                                    *
+*Br   88 :m_FPGATrackSimRoads_1st.fBits :                                    *
 *         | UInt_t fBits[m_FPGATrackSimRoads_1st_]                           *
 *Entries :        5 : Total  Size=        977 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   88 :m_FPGATrackSimRoads_1st.m_roadID :                                 *
+*Br   89 :m_FPGATrackSimRoads_1st.m_roadID :                                 *
 *         | Int_t m_roadID[m_FPGATrackSimRoads_1st_]                         *
 *Entries :        5 : Total  Size=        995 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   89 :m_FPGATrackSimRoads_1st.m_pid :                                    *
+*Br   90 :m_FPGATrackSimRoads_1st.m_pid :                                    *
 *         | Int_t m_pid[m_FPGATrackSimRoads_1st_]                            *
 *Entries :        5 : Total  Size=        977 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   90 :m_FPGATrackSimRoads_1st.m_sector :                                 *
+*Br   91 :m_FPGATrackSimRoads_1st.m_sector :                                 *
 *         | Int_t m_sector[m_FPGATrackSimRoads_1st_]                         *
 *Entries :        5 : Total  Size=        995 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   91 :m_FPGATrackSimRoads_1st.m_hit_layers :                             *
+*Br   92 :m_FPGATrackSimRoads_1st.m_hit_layers :                             *
 *         | UInt_t m_hit_layers[m_FPGATrackSimRoads_1st_]                    *
 *Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   92 :m_FPGATrackSimRoads_1st.m_wildcard_layers :                        *
+*Br   93 :m_FPGATrackSimRoads_1st.m_wildcard_layers :                        *
 *         | UInt_t m_wildcard_layers[m_FPGATrackSimRoads_1st_]               *
 *Entries :        5 : Total  Size=       1049 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   93 :m_FPGATrackSimRoads_1st.m_hits :                                   *
+*Br   94 :m_FPGATrackSimRoads_1st.m_hits :                                   *
 *         | vector<vector<const FPGATrackSimHit*> > m_hits[m_FPGATrackSimRoads_1st_]*
 *Entries :        5 : Total  Size=       1013 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   94 :m_FPGATrackSimRoads_2nd : Int_t m_FPGATrackSimRoads_2nd_           *
+*Br   95 :m_FPGATrackSimRoads_2nd : Int_t m_FPGATrackSimRoads_2nd_           *
 *Entries :        5 : Total  Size=       9085 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   95 :m_FPGATrackSimRoads_2nd.fUniqueID :                                *
+*Br   96 :m_FPGATrackSimRoads_2nd.fUniqueID :                                *
 *         | UInt_t fUniqueID[m_FPGATrackSimRoads_2nd_]                       *
 *Entries :        5 : Total  Size=       1001 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   96 :m_FPGATrackSimRoads_2nd.fBits :                                    *
+*Br   97 :m_FPGATrackSimRoads_2nd.fBits :                                    *
 *         | UInt_t fBits[m_FPGATrackSimRoads_2nd_]                           *
 *Entries :        5 : Total  Size=        977 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   97 :m_FPGATrackSimRoads_2nd.m_roadID :                                 *
+*Br   98 :m_FPGATrackSimRoads_2nd.m_roadID :                                 *
 *         | Int_t m_roadID[m_FPGATrackSimRoads_2nd_]                         *
 *Entries :        5 : Total  Size=        995 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   98 :m_FPGATrackSimRoads_2nd.m_pid :                                    *
+*Br   99 :m_FPGATrackSimRoads_2nd.m_pid :                                    *
 *         | Int_t m_pid[m_FPGATrackSimRoads_2nd_]                            *
 *Entries :        5 : Total  Size=        977 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br   99 :m_FPGATrackSimRoads_2nd.m_sector :                                 *
+*Br  100 :m_FPGATrackSimRoads_2nd.m_sector :                                 *
 *         | Int_t m_sector[m_FPGATrackSimRoads_2nd_]                         *
 *Entries :        5 : Total  Size=        995 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  100 :m_FPGATrackSimRoads_2nd.m_hit_layers :                             *
+*Br  101 :m_FPGATrackSimRoads_2nd.m_hit_layers :                             *
 *         | UInt_t m_hit_layers[m_FPGATrackSimRoads_2nd_]                    *
 *Entries :        5 : Total  Size=       1019 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  101 :m_FPGATrackSimRoads_2nd.m_wildcard_layers :                        *
+*Br  102 :m_FPGATrackSimRoads_2nd.m_wildcard_layers :                        *
 *         | UInt_t m_wildcard_layers[m_FPGATrackSimRoads_2nd_]               *
 *Entries :        5 : Total  Size=       1049 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  102 :m_FPGATrackSimRoads_2nd.m_hits :                                   *
+*Br  103 :m_FPGATrackSimRoads_2nd.m_hits :                                   *
 *         | vector<vector<const FPGATrackSimHit*> > m_hits[m_FPGATrackSimRoads_2nd_]*
 *Entries :        5 : Total  Size=       1013 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  103 :m_FPGATrackSimTracks_1st : Int_t m_FPGATrackSimTracks_1st_         *
+*Br  104 :m_FPGATrackSimTracks_1st : Int_t m_FPGATrackSimTracks_1st_         *
 *Entries :        5 : Total  Size=      28510 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  104 :m_FPGATrackSimTracks_1st.fUniqueID :                               *
+*Br  105 :m_FPGATrackSimTracks_1st.fUniqueID :                               *
 *         | UInt_t fUniqueID[m_FPGATrackSimTracks_1st_]                      *
 *Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  105 :m_FPGATrackSimTracks_1st.fBits :                                   *
+*Br  106 :m_FPGATrackSimTracks_1st.fBits :                                   *
 *         | UInt_t fBits[m_FPGATrackSimTracks_1st_]                          *
 *Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  106 :m_FPGATrackSimTracks_1st.m_trackCorrType :                         *
+*Br  107 :m_FPGATrackSimTracks_1st.m_trackCorrType :                         *
 *         | Int_t m_trackCorrType[m_FPGATrackSimTracks_1st_]                 *
 *Entries :        5 : Total  Size=       1045 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  107 :m_FPGATrackSimTracks_1st.m_trackStage :                            *
+*Br  108 :m_FPGATrackSimTracks_1st.m_trackStage :                            *
 *         | Int_t m_trackStage[m_FPGATrackSimTracks_1st_]                    *
 *Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  108 :m_FPGATrackSimTracks_1st.m_doDeltaGPhis :                          *
+*Br  109 :m_FPGATrackSimTracks_1st.m_doDeltaGPhis :                          *
 *         | Bool_t m_doDeltaGPhis[m_FPGATrackSimTracks_1st_]                 *
 *Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  109 :m_FPGATrackSimTracks_1st.m_bankID :                                *
+*Br  110 :m_FPGATrackSimTracks_1st.m_bankID :                                *
 *         | Int_t m_bankID[m_FPGATrackSimTracks_1st_]                        *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  110 :m_FPGATrackSimTracks_1st.m_patternID :                             *
+*Br  111 :m_FPGATrackSimTracks_1st.m_patternID :                             *
 *         | Int_t m_patternID[m_FPGATrackSimTracks_1st_]                     *
 *Entries :        5 : Total  Size=       1021 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  111 :m_FPGATrackSimTracks_1st.m_firstSectorID :                         *
+*Br  112 :m_FPGATrackSimTracks_1st.m_firstSectorID :                         *
 *         | Int_t m_firstSectorID[m_FPGATrackSimTracks_1st_]                 *
 *Entries :        5 : Total  Size=       1045 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  112 :m_FPGATrackSimTracks_1st.m_secondSectorID :                        *
+*Br  113 :m_FPGATrackSimTracks_1st.m_secondSectorID :                        *
 *         | Int_t m_secondSectorID[m_FPGATrackSimTracks_1st_]                *
 *Entries :        5 : Total  Size=       1051 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  113 :m_FPGATrackSimTracks_1st.m_trackID :                               *
+*Br  114 :m_FPGATrackSimTracks_1st.m_trackID :                               *
 *         | Int_t m_trackID[m_FPGATrackSimTracks_1st_]                       *
 *Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  114 :m_FPGATrackSimTracks_1st.m_IdealGeoCorr :                          *
+*Br  115 :m_FPGATrackSimTracks_1st.m_IdealGeoCorr :                          *
 *         | Int_t m_IdealGeoCorr[m_FPGATrackSimTracks_1st_]                  *
 *Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  115 :m_FPGATrackSimTracks_1st.m_houghX :                                *
+*Br  116 :m_FPGATrackSimTracks_1st.m_houghX :                                *
 *         | Float_t m_houghX[m_FPGATrackSimTracks_1st_]                      *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  116 :m_FPGATrackSimTracks_1st.m_houghY :                                *
+*Br  117 :m_FPGATrackSimTracks_1st.m_houghY :                                *
 *         | Float_t m_houghY[m_FPGATrackSimTracks_1st_]                      *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  117 :m_FPGATrackSimTracks_1st.m_qoverpt :                               *
+*Br  118 :m_FPGATrackSimTracks_1st.m_qoverpt :                               *
 *         | Float_t m_qoverpt[m_FPGATrackSimTracks_1st_]                     *
 *Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  118 :m_FPGATrackSimTracks_1st.m_d0 :                                    *
+*Br  119 :m_FPGATrackSimTracks_1st.m_d0 :                                    *
 *         | Float_t m_d0[m_FPGATrackSimTracks_1st_]                          *
 *Entries :        5 : Total  Size=        979 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  119 :m_FPGATrackSimTracks_1st.m_phi :                                   *
+*Br  120 :m_FPGATrackSimTracks_1st.m_phi :                                   *
 *         | Float_t m_phi[m_FPGATrackSimTracks_1st_]                         *
 *Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  120 :m_FPGATrackSimTracks_1st.m_z0 :                                    *
+*Br  121 :m_FPGATrackSimTracks_1st.m_z0 :                                    *
 *         | Float_t m_z0[m_FPGATrackSimTracks_1st_]                          *
 *Entries :        5 : Total  Size=        979 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  121 :m_FPGATrackSimTracks_1st.m_eta :                                   *
+*Br  122 :m_FPGATrackSimTracks_1st.m_eta :                                   *
 *         | Float_t m_eta[m_FPGATrackSimTracks_1st_]                         *
 *Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  122 :m_FPGATrackSimTracks_1st.m_chi2 :                                  *
+*Br  123 :m_FPGATrackSimTracks_1st.m_chi2 :                                  *
 *         | Float_t m_chi2[m_FPGATrackSimTracks_1st_]                        *
 *Entries :        5 : Total  Size=        991 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  123 :m_FPGATrackSimTracks_1st.m_origchi2 :                              *
+*Br  124 :m_FPGATrackSimTracks_1st.m_origchi2 :                              *
 *         | Float_t m_origchi2[m_FPGATrackSimTracks_1st_]                    *
 *Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  124 :m_FPGATrackSimTracks_1st.m_nmissing :                              *
+*Br  125 :m_FPGATrackSimTracks_1st.m_nmissing :                              *
 *         | UInt_t m_nmissing[m_FPGATrackSimTracks_1st_]                     *
 *Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  125 :m_FPGATrackSimTracks_1st.m_typemask :                              *
+*Br  126 :m_FPGATrackSimTracks_1st.m_typemask :                              *
 *         | UInt_t m_typemask[m_FPGATrackSimTracks_1st_]                     *
 *Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  126 :m_FPGATrackSimTracks_1st.m_hitmap :                                *
+*Br  127 :m_FPGATrackSimTracks_1st.m_hitmap :                                *
 *         | UInt_t m_hitmap[m_FPGATrackSimTracks_1st_]                       *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  127 :m_FPGATrackSimTracks_1st.m_hits :                                  *
+*Br  128 :m_FPGATrackSimTracks_1st.m_hits :                                  *
 *         | vector<FPGATrackSimHit> m_hits[m_FPGATrackSimTracks_1st_]        *
 *Entries :        5 : Total  Size=       1031 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  128 :m_FPGATrackSimTracks_1st.m_eventindex :                            *
+*Br  129 :m_FPGATrackSimTracks_1st.m_eventindex :                            *
 *         | Long_t m_eventindex[m_FPGATrackSimTracks_1st_]                   *
 *Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  129 :m_FPGATrackSimTracks_1st.m_barcode :                               *
+*Br  130 :m_FPGATrackSimTracks_1st.m_barcode :                               *
 *         | Long_t m_barcode[m_FPGATrackSimTracks_1st_]                      *
 *Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  130 :m_FPGATrackSimTracks_1st.m_barcode_frac :                          *
+*Br  131 :m_FPGATrackSimTracks_1st.m_barcode_frac :                          *
 *         | Float_t m_barcode_frac[m_FPGATrackSimTracks_1st_]                *
 *Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  131 :m_FPGATrackSimTracks_1st.m_ORcode :                                *
+*Br  132 :m_FPGATrackSimTracks_1st.m_ORcode :                                *
 *         | UInt_t m_ORcode[m_FPGATrackSimTracks_1st_]                       *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  132 :m_FPGATrackSimTracks_2nd : Int_t m_FPGATrackSimTracks_2nd_         *
+*Br  133 :m_FPGATrackSimTracks_2nd : Int_t m_FPGATrackSimTracks_2nd_         *
 *Entries :        5 : Total  Size=      28510 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  133 :m_FPGATrackSimTracks_2nd.fUniqueID :                               *
+*Br  134 :m_FPGATrackSimTracks_2nd.fUniqueID :                               *
 *         | UInt_t fUniqueID[m_FPGATrackSimTracks_2nd_]                      *
 *Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  134 :m_FPGATrackSimTracks_2nd.fBits :                                   *
+*Br  135 :m_FPGATrackSimTracks_2nd.fBits :                                   *
 *         | UInt_t fBits[m_FPGATrackSimTracks_2nd_]                          *
 *Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  135 :m_FPGATrackSimTracks_2nd.m_trackCorrType :                         *
+*Br  136 :m_FPGATrackSimTracks_2nd.m_trackCorrType :                         *
 *         | Int_t m_trackCorrType[m_FPGATrackSimTracks_2nd_]                 *
 *Entries :        5 : Total  Size=       1045 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  136 :m_FPGATrackSimTracks_2nd.m_trackStage :                            *
+*Br  137 :m_FPGATrackSimTracks_2nd.m_trackStage :                            *
 *         | Int_t m_trackStage[m_FPGATrackSimTracks_2nd_]                    *
 *Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  137 :m_FPGATrackSimTracks_2nd.m_doDeltaGPhis :                          *
+*Br  138 :m_FPGATrackSimTracks_2nd.m_doDeltaGPhis :                          *
 *         | Bool_t m_doDeltaGPhis[m_FPGATrackSimTracks_2nd_]                 *
 *Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  138 :m_FPGATrackSimTracks_2nd.m_bankID :                                *
+*Br  139 :m_FPGATrackSimTracks_2nd.m_bankID :                                *
 *         | Int_t m_bankID[m_FPGATrackSimTracks_2nd_]                        *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  139 :m_FPGATrackSimTracks_2nd.m_patternID :                             *
+*Br  140 :m_FPGATrackSimTracks_2nd.m_patternID :                             *
 *         | Int_t m_patternID[m_FPGATrackSimTracks_2nd_]                     *
 *Entries :        5 : Total  Size=       1021 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  140 :m_FPGATrackSimTracks_2nd.m_firstSectorID :                         *
+*Br  141 :m_FPGATrackSimTracks_2nd.m_firstSectorID :                         *
 *         | Int_t m_firstSectorID[m_FPGATrackSimTracks_2nd_]                 *
 *Entries :        5 : Total  Size=       1045 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  141 :m_FPGATrackSimTracks_2nd.m_secondSectorID :                        *
+*Br  142 :m_FPGATrackSimTracks_2nd.m_secondSectorID :                        *
 *         | Int_t m_secondSectorID[m_FPGATrackSimTracks_2nd_]                *
 *Entries :        5 : Total  Size=       1051 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  142 :m_FPGATrackSimTracks_2nd.m_trackID :                               *
+*Br  143 :m_FPGATrackSimTracks_2nd.m_trackID :                               *
 *         | Int_t m_trackID[m_FPGATrackSimTracks_2nd_]                       *
 *Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  143 :m_FPGATrackSimTracks_2nd.m_IdealGeoCorr :                          *
+*Br  144 :m_FPGATrackSimTracks_2nd.m_IdealGeoCorr :                          *
 *         | Int_t m_IdealGeoCorr[m_FPGATrackSimTracks_2nd_]                  *
 *Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  144 :m_FPGATrackSimTracks_2nd.m_houghX :                                *
+*Br  145 :m_FPGATrackSimTracks_2nd.m_houghX :                                *
 *         | Float_t m_houghX[m_FPGATrackSimTracks_2nd_]                      *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  145 :m_FPGATrackSimTracks_2nd.m_houghY :                                *
+*Br  146 :m_FPGATrackSimTracks_2nd.m_houghY :                                *
 *         | Float_t m_houghY[m_FPGATrackSimTracks_2nd_]                      *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  146 :m_FPGATrackSimTracks_2nd.m_qoverpt :                               *
+*Br  147 :m_FPGATrackSimTracks_2nd.m_qoverpt :                               *
 *         | Float_t m_qoverpt[m_FPGATrackSimTracks_2nd_]                     *
 *Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  147 :m_FPGATrackSimTracks_2nd.m_d0 :                                    *
+*Br  148 :m_FPGATrackSimTracks_2nd.m_d0 :                                    *
 *         | Float_t m_d0[m_FPGATrackSimTracks_2nd_]                          *
 *Entries :        5 : Total  Size=        979 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  148 :m_FPGATrackSimTracks_2nd.m_phi :                                   *
+*Br  149 :m_FPGATrackSimTracks_2nd.m_phi :                                   *
 *         | Float_t m_phi[m_FPGATrackSimTracks_2nd_]                         *
 *Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  149 :m_FPGATrackSimTracks_2nd.m_z0 :                                    *
+*Br  150 :m_FPGATrackSimTracks_2nd.m_z0 :                                    *
 *         | Float_t m_z0[m_FPGATrackSimTracks_2nd_]                          *
 *Entries :        5 : Total  Size=        979 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  150 :m_FPGATrackSimTracks_2nd.m_eta :                                   *
+*Br  151 :m_FPGATrackSimTracks_2nd.m_eta :                                   *
 *         | Float_t m_eta[m_FPGATrackSimTracks_2nd_]                         *
 *Entries :        5 : Total  Size=        985 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  151 :m_FPGATrackSimTracks_2nd.m_chi2 :                                  *
+*Br  152 :m_FPGATrackSimTracks_2nd.m_chi2 :                                  *
 *         | Float_t m_chi2[m_FPGATrackSimTracks_2nd_]                        *
 *Entries :        5 : Total  Size=        991 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  152 :m_FPGATrackSimTracks_2nd.m_origchi2 :                              *
+*Br  153 :m_FPGATrackSimTracks_2nd.m_origchi2 :                              *
 *         | Float_t m_origchi2[m_FPGATrackSimTracks_2nd_]                    *
 *Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  153 :m_FPGATrackSimTracks_2nd.m_nmissing :                              *
+*Br  154 :m_FPGATrackSimTracks_2nd.m_nmissing :                              *
 *         | UInt_t m_nmissing[m_FPGATrackSimTracks_2nd_]                     *
 *Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  154 :m_FPGATrackSimTracks_2nd.m_typemask :                              *
+*Br  155 :m_FPGATrackSimTracks_2nd.m_typemask :                              *
 *         | UInt_t m_typemask[m_FPGATrackSimTracks_2nd_]                     *
 *Entries :        5 : Total  Size=       1015 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  155 :m_FPGATrackSimTracks_2nd.m_hitmap :                                *
+*Br  156 :m_FPGATrackSimTracks_2nd.m_hitmap :                                *
 *         | UInt_t m_hitmap[m_FPGATrackSimTracks_2nd_]                       *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  156 :m_FPGATrackSimTracks_2nd.m_hits :                                  *
+*Br  157 :m_FPGATrackSimTracks_2nd.m_hits :                                  *
 *         | vector<FPGATrackSimHit> m_hits[m_FPGATrackSimTracks_2nd_]        *
 *Entries :        5 : Total  Size=       1031 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  157 :m_FPGATrackSimTracks_2nd.m_eventindex :                            *
+*Br  158 :m_FPGATrackSimTracks_2nd.m_eventindex :                            *
 *         | Long_t m_eventindex[m_FPGATrackSimTracks_2nd_]                   *
 *Entries :        5 : Total  Size=       1027 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  158 :m_FPGATrackSimTracks_2nd.m_barcode :                               *
+*Br  159 :m_FPGATrackSimTracks_2nd.m_barcode :                               *
 *         | Long_t m_barcode[m_FPGATrackSimTracks_2nd_]                      *
 *Entries :        5 : Total  Size=       1009 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  159 :m_FPGATrackSimTracks_2nd.m_barcode_frac :                          *
+*Br  160 :m_FPGATrackSimTracks_2nd.m_barcode_frac :                          *
 *         | Float_t m_barcode_frac[m_FPGATrackSimTracks_2nd_]                *
 *Entries :        5 : Total  Size=       1039 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  160 :m_FPGATrackSimTracks_2nd.m_ORcode :                                *
+*Br  161 :m_FPGATrackSimTracks_2nd.m_ORcode :                                *
 *         | UInt_t m_ORcode[m_FPGATrackSimTracks_2nd_]                       *
 *Entries :        5 : Total  Size=       1003 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  161 :m_dataflowInfo :                                                   *
+*Br  162 :m_dataflowInfo :                                                   *
 *Entries :        5 : Total  Size=      28484 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  162 :m_dataflowInfo.nMappedHits_1st_layer : vector<unsigned long>       *
+*Br  163 :m_dataflowInfo.nMappedHits_1st_layer : vector<unsigned long>       *
 *Entries :        5 : Total  Size=        957 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  163 :m_dataflowInfo.nMappedHits_1st_total : ULong_t                     *
+*Br  164 :m_dataflowInfo.nMappedHits_1st_total : ULong_t                     *
 *Entries :        5 : Total  Size=        923 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  164 :m_dataflowInfo.nClusters_1st_layer : vector<unsigned long>         *
+*Br  165 :m_dataflowInfo.nClusters_1st_layer : vector<unsigned long>         *
 *Entries :        5 : Total  Size=        945 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  165 :m_dataflowInfo.nClusters_1st_total : ULong_t                       *
+*Br  166 :m_dataflowInfo.nClusters_1st_total : ULong_t                       *
 *Entries :        5 : Total  Size=        911 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  166 :m_dataflowInfo.nRoads_1st_total : ULong_t                          *
+*Br  167 :m_dataflowInfo.nRoads_1st_total : ULong_t                          *
 *Entries :        5 : Total  Size=        893 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  167 :m_dataflowInfo.nRoads_1st_7hits : ULong_t                          *
+*Br  168 :m_dataflowInfo.nRoads_1st_7hits : ULong_t                          *
 *Entries :        5 : Total  Size=        893 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  168 :m_dataflowInfo.nRoads_1st_8hits : ULong_t                          *
+*Br  169 :m_dataflowInfo.nRoads_1st_8hits : ULong_t                          *
 *Entries :        5 : Total  Size=        893 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  169 :m_dataflowInfo.nTracks_1st_total : ULong_t                         *
+*Br  170 :m_dataflowInfo.nTracks_1st_total : ULong_t                         *
 *Entries :        5 : Total  Size=        899 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  170 :m_dataflowInfo.nTracks_1st_passChi2 : ULong_t                      *
+*Br  171 :m_dataflowInfo.nTracks_1st_passChi2 : ULong_t                      *
 *Entries :        5 : Total  Size=        917 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  171 :m_dataflowInfo.nTracks_1st_afterOR : ULong_t                       *
+*Br  172 :m_dataflowInfo.nTracks_1st_afterOR : ULong_t                       *
 *Entries :        5 : Total  Size=        911 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  172 :m_dataflowInfo.nTracks_1st_per_patt_total : vector<unsigned long>  *
+*Br  173 :m_dataflowInfo.nTracks_1st_per_patt_total : vector<unsigned long>  *
 *Entries :        5 : Total  Size=        987 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  173 :m_dataflowInfo.nTracks_1st_per_patt_passChi2 :                     *
+*Br  174 :m_dataflowInfo.nTracks_1st_per_patt_passChi2 :                     *
 *         | vector<unsigned long>                                            *
 *Entries :        5 : Total  Size=       1005 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  174 :m_dataflowInfo.nTracks_1st_per_patt_afterOR : vector<unsigned long>*
+*Br  175 :m_dataflowInfo.nTracks_1st_per_patt_afterOR : vector<unsigned long>*
 *Entries :        5 : Total  Size=        999 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  175 :m_dataflowInfo.nConstants_1st_fitter : ULong_t                     *
+*Br  176 :m_dataflowInfo.nConstants_1st_fitter : ULong_t                     *
 *Entries :        5 : Total  Size=        923 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  176 :m_dataflowInfo.nConstants_1st_passChi2 : ULong_t                   *
+*Br  177 :m_dataflowInfo.nConstants_1st_passChi2 : ULong_t                   *
 *Entries :        5 : Total  Size=        935 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  177 :m_dataflowInfo.nConstants_1st_afterOR : ULong_t                    *
+*Br  178 :m_dataflowInfo.nConstants_1st_afterOR : ULong_t                    *
 *Entries :        5 : Total  Size=        929 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  178 :m_dataflowInfo.nRoads_2nd_total : ULong_t                          *
+*Br  179 :m_dataflowInfo.nRoads_2nd_total : ULong_t                          *
 *Entries :        5 : Total  Size=        893 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  179 :m_dataflowInfo.nTracks_2nd_total : ULong_t                         *
+*Br  180 :m_dataflowInfo.nTracks_2nd_total : ULong_t                         *
 *Entries :        5 : Total  Size=        899 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  180 :m_dataflowInfo.nTracks_2nd_passChi2 : ULong_t                      *
+*Br  181 :m_dataflowInfo.nTracks_2nd_passChi2 : ULong_t                      *
 *Entries :        5 : Total  Size=        917 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  181 :m_dataflowInfo.nTracks_2nd_afterOR : ULong_t                       *
+*Br  182 :m_dataflowInfo.nTracks_2nd_afterOR : ULong_t                       *
 *Entries :        5 : Total  Size=        911 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  182 :m_dataflowInfo.nConstants_2nd_extrapolate : ULong_t                *
+*Br  183 :m_dataflowInfo.nConstants_2nd_extrapolate : ULong_t                *
 *Entries :        5 : Total  Size=        953 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  183 :m_dataflowInfo.nConstants_2nd_fitter : ULong_t                     *
+*Br  184 :m_dataflowInfo.nConstants_2nd_fitter : ULong_t                     *
 *Entries :        5 : Total  Size=        923 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  184 :m_dataflowInfo.nConstants_2nd_passChi2 : ULong_t                   *
+*Br  185 :m_dataflowInfo.nConstants_2nd_passChi2 : ULong_t                   *
 *Entries :        5 : Total  Size=        935 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  185 :m_dataflowInfo.nConstants_2nd_afterOR : ULong_t                    *
+*Br  186 :m_dataflowInfo.nConstants_2nd_afterOR : ULong_t                    *
 *Entries :        5 : Total  Size=        929 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  186 :m_dataflowInfo.nTruthTracks : ULong_t                              *
+*Br  187 :m_dataflowInfo.nTruthTracks : ULong_t                              *
 *Entries :        5 : Total  Size=        869 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  187 :m_dataflowInfo.nOfflineTracks : ULong_t                            *
+*Br  188 :m_dataflowInfo.nOfflineTracks : ULong_t                            *
 *Entries :        5 : Total  Size=        881 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  188 :m_dataflowInfo.nTracks_1st_over_nOfflineTracks : Float_t           *
+*Br  189 :m_dataflowInfo.nTracks_1st_over_nOfflineTracks : Float_t           *
 *Entries :        5 : Total  Size=        963 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
-*Br  189 :m_dataflowInfo.nTracks_2nd_over_nOfflineTracks : Float_t           *
+*Br  190 :m_dataflowInfo.nTracks_2nd_over_nOfflineTracks : Float_t           *
 *Entries :        5 : Total  Size=        963 bytes  One basket in memory    *
 *Baskets :        0 : Basket Size=      32000 bytes  Compression=   1.00     *
 *............................................................................*
@@ -1265,9 +1276,9 @@ ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"
 Produced file fpgatracksim_loghits_wrap.OUT.root, now read it back
-Tue Jul 18 18:42:44 CEST 2023
+Wed Mar  6 09:53:52 CST 2024
 Preloading tcmalloc_minimal.so
-Py:Athena            INFO using release [WorkDir-24.0.8] [x86_64-centos7-gcc11-opt] [RUN4-03-00-00_Tests/da9ed526037] -- built on [2023-07-18T1745]
+Py:Athena            INFO using release [WorkDir-24.0.24] [x86_64-centos7-gcc11-opt] [EFTrackingMapMakerUpdates/3ddf16a] -- built on [2024-03-06T0937]
 Py:Athena            INFO including file "AthenaCommon/Preparation.py"
 Py:Athena            INFO including file "AthenaCommon/Atlas.UnixStandardJob.py"
 Py:Athena            INFO executing ROOT6Setup
@@ -1275,17 +1286,17 @@ Py:Athena            INFO including file "AthenaCommon/Execution.py"
 Py:Athena            INFO including file "FPGATrackSimInput/FPGATrackSimReadLogicalHitsAlg_jobOptions.py"
 Py:FPGATrackSimReadLogicalHitsAlg    INFO Input file ['fpgatracksim_loghits_wrap.OUT.root']
 Py:Athena            INFO including file "AthenaCommon/runbatch.py"
-Py:ConfigurableDb    INFO Read module info for 5217 configurables from 5 genConfDb files
+Py:ConfigurableDb    INFO Read module info for 5245 configurables from 14 genConfDb files
 Py:ConfigurableDb    INFO No duplicates have been found: that's good !
 ApplicationMgr    SUCCESS 
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r14)
-                                          running on lxplus783.cern.ch on Tue Jul 18 18:42:59 2023
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v38r0)
+                                          running on login01.af.uchicago.edu on Wed Mar  6 09:54:03 2024
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-ClassIDSvc           INFO getRegistryEntries: read 3092 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 3102 CLIDRegistry entries for module ALL
 CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 FPGATrackSimRea...  DEBUG Property update for OutputLevel : new value = 2

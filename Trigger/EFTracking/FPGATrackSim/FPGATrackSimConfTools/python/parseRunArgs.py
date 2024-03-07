@@ -135,6 +135,7 @@ _FPGATrackSimHoughTransformArgs = [
     ('xBufferBins', trfArgClasses.argInt),
     ('yBufferBins', trfArgClasses.argInt),
     ('slicing', trfArgClasses.argBool),
+    ('IdealGeoRoads', trfArgClasses.argBool),
     ('threshold', trfArgClasses.argIntList),
     ('convolution', trfArgClasses.argIntList),
     ('convSize_x', trfArgClasses.argInt),

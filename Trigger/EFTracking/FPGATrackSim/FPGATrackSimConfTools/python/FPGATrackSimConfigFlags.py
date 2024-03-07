@@ -85,6 +85,7 @@ def createBasicFPGATrackSimConfigFlags():
     cf.addFlag('xBufferBins', 6)
     cf.addFlag('yBufferBins', 2)
     cf.addFlag('threshold', [7])
+    cf.addFlag('IdealGeoRoads', True)
     cf.addFlag('convolution', [])
     cf.addFlag('convSizeX', 0)
     cf.addFlag('convSizeY', 0)

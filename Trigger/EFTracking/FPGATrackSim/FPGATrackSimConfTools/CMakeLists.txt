@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+	# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FPGATrackSimConfTools )
@@ -36,3 +36,8 @@ atlas_add_test( FPGATrackSimEventSelectionSvc_test
 atlas_add_test( FPGATrackSimConfigFlags_test
                 SCRIPT python -m FPGATrackSimConfTools.FPGATrackSimConfigFlags
                 POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( FPGATrackSimWorflows_test
+                SCRIPT FPGATrackWorkflow.sh 
+                POST_EXEC_SCRIPT noerror.sh)
+

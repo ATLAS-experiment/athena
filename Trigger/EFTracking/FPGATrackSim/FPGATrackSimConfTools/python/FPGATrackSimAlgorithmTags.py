@@ -53,6 +53,7 @@ empty_tag = { # template to add a new tag, and some description of the fields
     'yBufferBins': 0,
     'slicing': True, # Number of slices will be pulled from map tag
     'threshold': [],
+    'IdealGeoRoads': True,
     'convolution': [],
     'convSize_x': 0,
     'convSize_y': 0,
@@ -154,6 +155,7 @@ FPGATrackSimAlgorithmTags = {
             'yBufferBins': 0,
             'slicing': True,
             'threshold': [7],
+            'IdealGeoRoads': True,
             'convolution': [],
             'convSize_x': 0,
             'convSize_y': 0,
@@ -245,6 +247,7 @@ FPGATrackSimAlgorithmTags = {
             'yBufferBins': 2,
             'slicing': True,
             'threshold': [7],
+            'IdealGeoRoads': True,
             'convolution': [],
             'combine_layers': [],
             'scale': [],
@@ -364,6 +367,7 @@ FPGATrackSimAlgorithmTags = {
             'yBufferBins': 2,
             'slicing': True,
             'threshold': [70],
+            'IdealGeoRoads': True,
             'convolution': [1, 10, 1],
             'combine_layers': [],#[1,2,3,4,5,6,7,8],  # i.e. [1,2,3,1,2,3,1,2] will combine (1st, 4th, 7th) (2nd, 5th, 8th) (3rd, 6th) layers
             'scale': [], # i.e.  [1,1,2,2,3,3,4,4] will scale the image size by 1/2 for (2nd,3rd) layers, by 1/3 for (5th, 6th) layers, by 1/4 for (7th, 8th) layers, must be compatible with combine layers

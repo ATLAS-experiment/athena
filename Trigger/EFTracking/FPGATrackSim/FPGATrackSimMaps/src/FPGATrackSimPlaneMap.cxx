@@ -76,6 +76,8 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
     m_diskIndex = Remappings::diskIndices(geoKey);
 
     ANA_MSG_INFO("Allocating map for geometry " << geoKey <<" diskIndex size="<<m_diskIndex.size());
+    m_moduleRelabel = new FPGATrackSimModuleRelabel(geoKey, false);
+
 
 
     // Read number of logical layers
@@ -234,16 +236,11 @@ void FPGATrackSimPlaneMap::readLayers(ifstream & fin, uint32_t stage)
 
 void FPGATrackSimPlaneMap::map(FPGATrackSimHit & hit) const
 {
-    if (hit.isMapped())  return;
+    if (hit.isMapped()) return;
     
     // re-assign layers in the pixel endcap to be each individual disk
-    unsigned FPGATrackSimlayer = hit.getPhysLayer();
-    if (hit.isPixel() && !hit.isBarrel()) {
-        if (hit.getPhysLayer()< m_diskIndex.size())
-            FPGATrackSimlayer = hit.getFPGATrackSimEtaModule() + m_diskIndex[hit.getPhysLayer()];
-        else ANA_MSG_ERROR("Error: requesting "<< hit.getPhysLayer() <<" element in m_diskIndex which is of size "<< m_diskIndex.size() );
-    }
-    hit.setPhysLayer(FPGATrackSimlayer);
+    // technically this returns a success/fail but I'm not sure we need it?
+    m_moduleRelabel->remap(hit);
 
     const LayerSection &pinfo = getLayerSection(hit.getDetType(), hit.getDetectorZone(), hit.getPhysLayer());
     hit.setSection(pinfo.section);
