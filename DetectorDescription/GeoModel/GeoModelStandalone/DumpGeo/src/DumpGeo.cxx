@@ -73,12 +73,8 @@ GeoPhysVol* createTheWorld()
 }
 
 
-bool isStringInVector(
-        const std::vector<std::string>& vec,
+bool isStringInVector( const std::vector<std::string>& vec,
         const std::string& str) {
-
-    // Use std::find() algorithm to search
-    // for the string in the vector
     auto it = std::find(
                     vec.begin(),
                     vec.end(),
@@ -89,12 +85,8 @@ bool isStringInVector(
 
 //____________________________________________________________________
 DumpGeo::DumpGeo(const std::string& name, ISvcLocator* svcLocator):
-  AthAlgorithm(name, svcLocator),
-  m_toolSvc(0)
-  // ,m_geoExporter(0)
-{
-  // ::setenv("LCGPATCH_COINMULTISELECT","1",1);
-}
+  AthAlgorithm(name, svcLocator)
+{}
 
 //____________________________________________________________________
 StatusCode DumpGeo::initialize()
@@ -127,6 +119,19 @@ StatusCode DumpGeo::initialize()
     // Get list of managers
     ATH_MSG_INFO("List of GeoModel Detector Managers: ");
     std::vector<std::string> managersList = theExpt->getListOfManagers();
+
+    // safety check: 
+    // check that all DetManagers requested by the user are in the list
+    // If not, print an error message to warn the user and return
+    for (auto& userDet : m_user_filterDetManagersList) {
+      if ( !(isStringInVector(managersList, userDet)) ) {
+        ATH_MSG_FATAL("This Detector Manager you requested to dump is not in the list of DetectorManagers for the geometry tag you are using: " << userDet);
+        throw GaudiException("The Detector Manager you requested to dump is not in the list of DetectorManagers.", 
+                                    "DumpGeo", StatusCode::FAILURE);
+      }
+    }
+
+
     if ( !(managersList.empty()) ) {
     for (auto const& mm : managersList)
       {
@@ -156,7 +161,7 @@ StatusCode DumpGeo::initialize()
                   
                   // get volume's logvol's name
                   std::string volName = vol->getLogVol()->getName();
-                  //std::cout << "\t\t treetop: " << volName << std::endl; // debug msg
+                  ATH_MSG_DEBUG("\t\t treetop: " << volName);
 
 
                   // Add to the main volume a GeoNameTag with the name of the DetectorManager 
@@ -214,7 +219,6 @@ StatusCode DumpGeo::initialize()
     // Dump the tree volumes into a DB
     GeoModelIO::WriteGeoModel dumpGeoModelGraph(db); // init the GeoModel node action
     // visit all GeoModel nodes  
-    // if (!(user_detmanagerslist.empty()) || !(user_treetopslist.empty())) { // TODO: add back TreeTopList
     if ( !(m_user_filterDetManagersList.empty()) ) {
       volTop->exec(&dumpGeoModelGraph); 
     } else {
@@ -222,7 +226,7 @@ StatusCode DumpGeo::initialize()
     }
   ATH_MSG_INFO("Saving the GeoModel tree to the DB...");
     dumpGeoModelGraph.saveToDB(); // save to the SQlite DB file
-    ATH_MSG_ALWAYS("DONE. Geometry saved to: " << m_outFileName);
+    ATH_MSG_ALWAYS("DONE. Geometry saved to " << m_outFileName);
 
   // Quick test if DEBUG
   if (msgLvl (MSG::DEBUG)) {
