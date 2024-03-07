@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PROMPT_VERTEXITERATIVEFITMERGINGTOOL_H
@@ -146,6 +146,17 @@ namespace Prompt
     xAOD::Vertex* fitSeedVertexCluster(
       const FittingInput &input,
       xAOD::Vertex* seedVtx,
+      const VtxType vtxType,
+      std::vector<TwoTrackVtx> &others
+    );
+    /*
+      Second signature for the iterative vertex fit. 
+      This one assumes the seed is owned by the caller. 
+      Used to prevent memory leaks within the recursion step 
+    */
+    xAOD::Vertex* fitSeedVertexCluster(
+      const FittingInput &input,
+      std::unique_ptr<xAOD::Vertex> & seedVtx,
       const VtxType vtxType,
       std::vector<TwoTrackVtx> &others
     );

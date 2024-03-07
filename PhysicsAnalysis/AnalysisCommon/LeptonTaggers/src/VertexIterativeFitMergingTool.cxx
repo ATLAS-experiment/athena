@@ -459,14 +459,10 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
 
   /*
     Found nearby vertex - fit merged vertex
-
-    We release the unique_ptr here because we don't want
-    to deal with ownership semantics in the recursive function.
-    The caller will re-capture the vertex in a unique_ptr.
   */
-  xAOD::Vertex* candVtx = fitSeedPlusOtherVertex(
+  std::unique_ptr<xAOD::Vertex> candVtx =fitSeedPlusOtherVertex(
     input, seedVtx, currVtx, vtxType
-  ).release();
+  ); 
 
   if(!candVtx) {
     //
@@ -479,7 +475,7 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
     return fitSeedVertexCluster(input, std::move(seedVtx), vtxType, others);
   }
 
-  const double probCand = getVertexFitProb(candVtx);
+  const double probCand = getVertexFitProb(candVtx.get());
   const double probSeed = getVertexFitProb(seedVtx);
 
   double probCandOverSeed = -1.0;
@@ -488,8 +484,8 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
     probCandOverSeed = probCand/probSeed;
   }
 
-  const double distToSeed = getDistance(seedVtx, candVtx);
-  const double distToCurr = getDistance(currVtx, candVtx);
+  const double distToSeed = getDistance(seedVtx, candVtx.get());
+  const double distToCurr = getDistance(currVtx, candVtx.get());
 
   fillTH1(m_histNewVtxFitChi2, candVtx->chiSquared());
   fillTH1(m_histNewVtxFitProb, probCand);
@@ -508,13 +504,13 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
     str << "   dist to seed=" << distToSeed << ", probCandOverSeed=" << probCandOverSeed << std::endl
   << "   seed: "        << vtxAsStr(seedVtx, false) << std::endl
   << "   curr: "        << vtxAsStr(currVtx, true)
-  << "   cand: "        << vtxAsStr(candVtx, true)
+  << "   cand: "        << vtxAsStr(candVtx.get(), true)
   << "fitSeedVertexCluster - finished" << std::endl
   << "---------------------------------------------------------------------------" << std::endl;
 
 
 
-  if(!(passVertexSelection(candVtx) && probCandOverSeed > m_minCandOverSeedFitProbRatio)) {
+  if(!(passVertexSelection(candVtx.get()) && probCandOverSeed > m_minCandOverSeedFitProbRatio)) {
     //
     // New fitted merged vertex failed selection
     //
@@ -546,6 +542,27 @@ xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
 
 
   return fitSeedVertexCluster(input, candVtx, vtxType, others);
+}
+
+// this signature is only called recursively, if a merged vertex candidate has been
+// found.  Ensures that we release the final merged candidate to hand it 
+// back to the original caller. 
+xAOD::Vertex* Prompt::VertexIterativeFitMergingTool::fitSeedVertexCluster(
+  const FittingInput &input,
+      std::unique_ptr<xAOD::Vertex> & seedVtx,
+  const VtxType vtxType,
+  std::vector<TwoTrackVtx> &others
+){
+  // remember the seed vertex before the call 
+  xAOD::Vertex* originalSeed = seedVtx.get(); 
+  // call the original signature 
+  xAOD::Vertex* iterationResult = fitSeedVertexCluster(input,seedVtx.get(), vtxType,others); 
+  // if the iteration has finished (it is returning the seed), release the seed vertex. 
+  // This will be re-captured by the top level caller after exiting the recursion stack.
+  if (iterationResult == originalSeed) return seedVtx.release();
+  // otherwise, return the iteration result. The seed vertex will be deleted 
+  // when the call stack unwinds.  
+  else return iterationResult; 
 }
 
 unsigned Prompt::VertexIterativeFitMergingTool::removeMerged2TrackVertexes(
