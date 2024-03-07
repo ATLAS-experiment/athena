@@ -20,7 +20,7 @@ def readJSON(fname):
     """Read a JSON file and return its data."""
     f = open(fname,'r')
     """JSON converts strings to unicode, so we use YAML instead."""
-    data = yaml.load(f)
+    data = yaml.load(f,Loader=yaml.FullLoader)
     f.close()
     return data
 
