@@ -41,23 +41,30 @@ def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
 def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kwargs) :
     acc = ComponentAccumulator()
     
-    kwargs.setdefault("DoCalibrate",False)
-    kwargs.setdefault("DoRefit",False)
+    if "DoCalibrate" not in kwargs:
+        kwargs.setdefault("DoCalibrate",False)
 
-    from TRT_CalibTools.TRTCalibToolsConfig import (
-        FillAlignTrkInfoCfg, FillAlignTRTHitsCfg, FitToolCfg)
-    kwargs.setdefault("AlignTrkTools", [
-        acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))),
-        acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags))) ] )
+    if "DoRefit" not in kwargs:
+        kwargs.setdefault("DoRefit",False)
 
-    kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
-    
-    from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
-    kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(ActsFitterCfg(flags)))
-    
-    from InDetConfig.InDetTrackSelectorToolConfig import TRT_InDetDetailedTrackSelectorToolCfg
-    kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(
-        TRT_InDetDetailedTrackSelectorToolCfg(flags)))
+    if "AlignTrkTools" not in kwargs:
+        from TRT_CalibTools.TRTCalibToolsConfig import (
+            FillAlignTrkInfoCfg, FillAlignTRTHitsCfg, FitToolCfg)
+        kwargs.setdefault("AlignTrkTools", [
+            acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))),
+            acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags))) ] )
+
+    if "FitTools" not in kwargs:
+        kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
+
+    if "TrackFitter" not in kwargs:
+        from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
+        kwargs.setdefault("TrackFitter", acc.popToolsAndMerge(InDetTrackFitterCfg(flags))) 
+
+    if "TrackSelectorTool" not in kwargs:
+        from InDetConfig.InDetTrackSelectorToolConfig import TRT_InDetDetailedTrackSelectorToolCfg
+        kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(
+            TRT_InDetDetailedTrackSelectorToolCfg(flags)))
     
     # FIXME! Let all straws participate in trackfinding as default - SERGI This is wrong and needs to be UPDATED @peter    
         # acc.merge(addOverride('/TRT/Cond/Status','TRTCondStatus-empty-00-00'))
@@ -111,6 +118,9 @@ if __name__ == '__main__':
     setupDetectorFlags(flags, ['ID'], toggle_geometry=True)
     
     flags.fillFromArgs()
+    
+    # Reason why we need to clone and replace: https://gitlab.cern.ch/atlas/athena/-/merge_requests/68616#note_7614858
+    flags = flags.cloneAndReplace( "Tracking.ActiveConfig", f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")    
     flags.lock()
     
     # Set up the main service "acc"

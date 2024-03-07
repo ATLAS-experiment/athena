@@ -75,10 +75,7 @@ namespace MuonGM {
         virtual int numberOfStrips(int layer, bool measuresPhi) const = 0;
 
         /** clear the cache of the readout elememt */
-        virtual void clearCache() override;
-
-        /** fill the cache of the readout element, to be implemented by the concrete implementations */
-        virtual void fillCache() override = 0;
+        virtual void clearCache() override final;
 
         /** access to chamber surface (phi orientation), uses the first gas gap */
         virtual const Trk::PlaneSurface& surface() const override;
@@ -120,9 +117,6 @@ namespace MuonGM {
         
         MuonClusterReadoutElement(GeoVFullPhysVol* pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType);
 
-        void shiftSurface(const Identifier& id);
-        void restoreSurfaces();
-
         std::unique_ptr<SurfaceData> m_surfaceData{};
     };
 
@@ -137,8 +131,6 @@ namespace MuonGM {
     inline const Amg::Vector3D& MuonClusterReadoutElement::center(const Identifier& id) const { return center(layerHash(id)); }
     inline const Amg::Vector3D& MuonClusterReadoutElement::normal(const Identifier& id) const { return normal(layerHash(id)); }
     inline const Trk::SurfaceBounds& MuonClusterReadoutElement::bounds(const Identifier& id) const { return bounds(boundaryHash(id)); }
-
-    inline void MuonClusterReadoutElement::clearCache() { m_surfaceData.reset(); }
 
     inline const Trk::PlaneSurface& MuonClusterReadoutElement::surface(int hash) const {
         if (!m_surfaceData) {

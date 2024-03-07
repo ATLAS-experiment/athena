@@ -76,7 +76,7 @@ private:
     ToolHandleArray<IFillAlignTrkInfo> m_TrackInfoTools {this, "AlignTrkTools", {}, ""};
     PublicToolHandleArray<ITRTCalibrator> m_TRTCalibTools {this, "TRTCalibrator", {}, ""};
     ToolHandleArray<IFitTool> m_FitTools {this, "FitTools", {}, ""};
-    ToolHandle<Trk::ITrackFitter> m_trackFitter {this, "TrackFitter", "ActsTrk::KalmanFitter/TrkKalmanFitter", ""};
+    ToolHandle<Trk::ITrackFitter> m_trackFitter {this, "TrackFitter", "Trk::GlobalChi2Fitter/InDetTrackFitter", ""};
     ToolHandle<Trk::ITrackSelectorTool> m_trackSelector {this, "TrackSelectorTool", "InDet::InDetTrackSelectorTool/InDetTrackSelectorTool", "Tool for the selection of tracks"}; 
     ToolHandle<IAthenaOutputStreamTool> m_streamer {this, "StreamTool", "AthenaOutputStreamTool/CondStream1", "OutputStreamTool"};
 

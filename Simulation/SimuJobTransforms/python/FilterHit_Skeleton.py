@@ -102,9 +102,6 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, detectors, use_metadata=True, toggle_geometry=True, keep_beampipe=True)
 
-    ## from SimuJobTransforms.HitsFilePeeker import HitsFilePeeker
-    ## HitsFilePeeker(runArgs, filterHitLog)
-
     if hasattr(runArgs, 'outputHITS_FILTFile'):
         if runArgs.outputHITS_FILTFile == 'None':
             flags.Output.HITSFileName = ''

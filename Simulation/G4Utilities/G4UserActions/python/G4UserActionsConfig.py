@@ -68,10 +68,10 @@ def G4TrackCounterToolCfg(flags, name='G4UA::G4TrackCounterTool', **kwargs):
 def StoppedParticleActionToolCfg(flags, name="G4UA::StoppedParticleActionTool", **kwargs):
     # Just have to set the stopping condition
     result = ComponentAccumulator()
-    # FIXME UserActionConfig not yet migrated
-    # example custom configuration 
-    # if name in simFlags.UserActionConfig.get_Value().keys():
-    #     for prop,value in simFlags.UserActionConfig.get_Value()[name].iteritems():
+    # TODO UserActionConfig not yet migrated
+    # example custom configuration
+    # if name in flags.Sim.UserActionConfig.keys():
+    #     for prop,value in flags.Sim.UserActionConfig[name].iteritems():
     #         kwargs.setdefault(prop,value)
     result.setPrivateTools(CompFactory.G4UA.StoppedParticleActionTool(name, **kwargs))
     return result
@@ -85,11 +85,10 @@ def FixG4CreatorProcessToolCfg(flags, name="G4UA::FixG4CreatorProcessTool", **kw
 
 def HitWrapperToolCfg(flags, name="G4UA::HitWrapperTool", **kwargs):
     result = ComponentAccumulator()
-    # FIXME UserActionConfig not yet migrated
+    # TODO UserActionConfig flag not yet migrated
     # example custom configuration
-    # from G4AtlasApps.SimFlags import simFlags
-    # if name in simFlags.UserActionConfig.get_Value().keys():
-    #     for prop,value in simFlags.UserActionConfig.get_Value()[name].iteritems():
+    # if name in flags.Sim.UserActionConfig.keys():
+    #     for prop,value in flags.Sim.UserActionConfig[name].iteritems():
     #         kwargs.setdefault(prop,value)
     result.setPrivateTools(CompFactory.G4UA.HitWrapperTool(name, **kwargs))
     return result

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # CondDB.py
 # Configuration for Athena conditions DB access
@@ -93,9 +93,14 @@ class CondDB:
             else:
                 # real data
                 if (self.dbdata=='auto'):
-                    from RecExConfig.RecFlags import rec
-                    self.dbdata=self._InstanceFromProjectName(rec.projectName())
-                    self.msg.info("Configuring database instance %s based on project tag %s", self.dbdata, rec.projectName())
+                    project_name = ''
+                    if athenaCommonFlags.FilesInput():
+                        from PyUtils.MetaReader import read_metadata
+                        metadata = read_metadata(athenaCommonFlags.FilesInput())
+                        project_name = metadata[athenaCommonFlags.FilesInput()[0]]['project_name']
+
+                    self.dbdata=self._InstanceFromProjectName(project_name)
+                    self.msg.info("Configuring database instance '%s' based on project tag '%s'", self.dbdata, project_name)
                 self.dbname=self.dbdata
                 self.poolcats=['comcond','oflcond']
         elif (globalflags.DetGeo() in ['ctbh8','ctbh6']):
@@ -416,12 +421,12 @@ This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
         else:
             return self.dbname
         
-#decide database instance based on project tag dataXX_
+    #decide database instance based on project tag dataXX_
     def _InstanceFromProjectName(self,projectName):
         try:
             year=int(projectName[4:6])
         except Exception:
-            self.msg.warning("Failed to extract year from project tag "+ projectName+". Guessing run2")
+            self.msg.warning(f"Failed to extract year from project tag '{projectName}', using CONDBR2.")
             return "CONDBR2"
         
         if (year>13):

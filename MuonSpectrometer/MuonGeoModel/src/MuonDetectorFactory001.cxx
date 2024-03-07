@@ -125,8 +125,6 @@ namespace MuonGM {
         log << MSG::INFO << "MuonLayout set to <" << m_layout << "> = Development version for DC3 - infrastructures " << endmsg;
         log << MSG::INFO << "                   BOG cutouts are activated " << m_includeCutoutsBog << " , all other cutouts are disabled " << m_includeCutouts << endmsg;
 
-        m_manager->setCachingFlag(m_caching);
-        m_manager->setCacheFillingFlag(m_cacheFillingFlag);
         // set here the flag defining the geometry granularity
         // minimalgeo = 1 => The geo tree is built up to the Detector Level (Full PhysVol)
         //                     no internal structure of the Detector is built

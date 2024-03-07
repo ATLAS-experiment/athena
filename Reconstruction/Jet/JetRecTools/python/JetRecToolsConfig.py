@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #                                                                      #
@@ -56,16 +56,13 @@ def getTrackSelAlg(trkOpt="default", trackSelOpt=False):
 
 def getJetTrackVtxAlg( trkOpt, algname="jetTVA", **ttva_overide):
     """  theSequence and ttva_overide are options used in trigger  (HLT/Jet/JetTrackingConfig.py)"""
-    from TrackVertexAssociationTool.getTTVAToolForReco import getTTVAToolForReco
+    from TrackVertexAssociationTool.TTVAToolConfig import getTTVAToolForReco
     from JetRecConfig.StandardJetContext import jetContextDic
 
     trkProperties = jetContextDic[trkOpt]
 
     ttva_options = dict(
-        returnCompFactory = True,
-        addDecoAlg = False, # We add it ourselves for sequence management
         TrackContName = trkProperties["Tracks"],
-        VertexContName = trkProperties["Vertices"],
         HardScatterLinkDeco = ""
     )
     # allow client to overide options : 
@@ -84,17 +81,13 @@ def getJetTrackVtxAlg( trkOpt, algname="jetTVA", **ttva_overide):
 
 def getPV0TrackVertexAssoAlg(trkOpt="", theSequence=None):
     if trkOpt: "_{}".format(trkOpt)
-    from TrackVertexAssociationTool.getTTVAToolForReco import getTTVAToolForReco
+    from TrackVertexAssociationTool.TTVAToolConfig import getTTVAToolForReco
     from JetRecConfig.StandardJetContext import jetContextDic
 
     trkProperties = jetContextDic[trkOpt]
     tvatool = getTTVAToolForReco("trackjettvassoc",
                                 WorkingPoint = "Nonprompt_All_MaxWeight",
                                 TrackContName = trkProperties["JetTracks"],
-                                VertexContName = trkProperties["Vertices"],
-                                returnCompFactory = True,
-                                addDecoAlg = False, #setting this to True causes error in reconstruction because of there not being aux store associated with one of the decorations
-                                                    #It has also been set to false in buildPV0TrackSel function in JetRecConfig/python/JetInputConfig.py 
                                 )
 
     jettvassoc = CompFactory.JetTrackVtxAssoAlg("trackjetTVAAlg",

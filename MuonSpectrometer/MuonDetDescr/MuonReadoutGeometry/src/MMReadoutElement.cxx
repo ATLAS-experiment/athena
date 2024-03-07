@@ -52,10 +52,6 @@ namespace MuonGM {
       m_passivData(passivData),
       m_ml(mL) {
       
-
-        // get the setting of the caching flag from the manager
-        setCachingFlag(mgr->cachingFlag());
-
         std::string fixName = (stName[2] == 'L') ? "MML" : "MMS";
         setStationName(fixName);       
         setChamberLayer(mL);
@@ -138,7 +134,7 @@ namespace MuonGM {
 
 
     //============================================================================
-    MMReadoutElement::~MMReadoutElement() { clearCache(); }
+    MMReadoutElement::~MMReadoutElement() = default;
 
     //============================================================================
     void MMReadoutElement::initDesign() {
@@ -397,7 +393,6 @@ namespace MuonGM {
 
     //============================================================================
     void MMReadoutElement::setDelta(const ALinePar& aline) {
-
         // amdb frame (s, z, t) = chamber frame (y, z, x)
         if (aline) {
             m_delta = aline.delta();
@@ -487,11 +482,6 @@ namespace MuonGM {
         locPosML[2] += dz;
     }
 
-    void MMReadoutElement::refreshCache() {
-        clearCache();
-        fillCache();
-    }
-    
 
     //============================================================================
     bool MMReadoutElement::spacePointPosition(const Identifier& layerId, const Amg::Vector2D& lpos, Amg::Vector3D& pos) const {

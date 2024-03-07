@@ -41,9 +41,6 @@ namespace MuonGM {
         m_mirrored{is_mirrored}  {
         std::string gVersion = manager()->geometryVersion();
 
-        // get the setting of the caching flag from the manager
-        setCachingFlag(mgr->cachingFlag());
-
         m_descratzneg = (zi < 0 && !is_mirrored);
 
 
@@ -78,7 +75,7 @@ namespace MuonGM {
         }
     }
 
-    RpcReadoutElement::~RpcReadoutElement() { clearCache(); }
+    RpcReadoutElement::~RpcReadoutElement()  = default;
 
     double RpcReadoutElement::localStripSCoord(int doubletZ, int doubletPhi, bool measphi  , int strip) const {
         if ((doubletZ != m_dbZ && m_netastrippanels == 1) || (m_netastrippanels != 1 && (doubletZ < 1 || doubletZ > m_netastrippanels))) {

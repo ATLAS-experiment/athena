@@ -115,9 +115,9 @@ def BasicFwdFieldManagerToolCfg(flags, name='FwdFieldManagerTool', **kwargs):
     kwargs.setdefault('DeltaOneStep',       1e-8)
     kwargs.setdefault('MaximumEpsilonStep', 1e-8)
     kwargs.setdefault('MinimumEpsilonStep', 1e-9)
-    #from G4AtlasApps.SimFlags import simFlags
-    #if simFlags.FwdStepLimitation.statusOn:
-    #    kwargs.setdefault("MaximumStep", simFlags.FwdStepLimitation())
+    # Deliberately left commented out for now
+    #if flags.Sim.FwdStepLimitation > 0:
+    #    kwargs.setdefault("MaximumStep", flags.Sim.FwdStepLimitation)
     if False:
         kwargs.setdefault("MaximumStep", 1000.)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
@@ -328,9 +328,8 @@ def Q6VKickFwdFieldManagerToolCfg(flags, name='Q6VKickFwdFieldManager', **kwargs
 def FwdRegionFieldManagerToolCfg(flags, name='FwdRegionFieldManager', **kwargs):
     kwargs.setdefault("LogicalVolumes", ['FwdRegion::ForwardRegionGeoModel'])
     # Deliberately left commented out for now
-    #from G4AtlasApps.SimFlags import simFlags
-    #if simFlags.FwdStepLimitation.statusOn:
-    #    kwargs.setdefault("MaximumStep", simFlags.FwdStepLimitation())
+    #if flags.Sim.FwdStepLimitation > 0:
+    #    kwargs.setdefault("MaximumStep", flags.Sim.FwdStepLimitation)
     if False:
         kwargs.setdefault("MaximumStep", 1000.)
     return BasicDetectorFieldManagerToolCfg(flags, name, **kwargs)
