@@ -1,7 +1,5 @@
 """ComponentAccumulator run dependent service configuration
 
-Including features from old style DigitizationFlags.py
-
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
