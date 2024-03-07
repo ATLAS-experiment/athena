@@ -93,6 +93,8 @@ namespace Analysis
     bool EigenVectorRecomposition(const std::string& label,
 				  std::map<std::string, std::map<std::string, float>> &coefficientMap);
 
+    void setVerbose(bool);
+
   private:
     /** container object containing the basic information */
     CalibrationDataHistogramContainer* m_cnt;
@@ -134,6 +136,7 @@ namespace Analysis
     double m_totalvariance;
     double m_capturedvariance; 
 
+    bool m_verbose;
 
   };
 

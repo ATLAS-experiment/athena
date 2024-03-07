@@ -329,10 +329,10 @@ ClassImp(CalibrationDataEigenVariations)
 #endif
 //________________________________________________________________________________
 CalibrationDataEigenVariations::CalibrationDataEigenVariations(const std::string& cdipath, const std::string& tagger, const std::string& wp, const std::string& jetcollection, CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet, bool base) :
-    m_cnt(cnt), m_initialized(false), m_validate(false), m_namedExtrapolation(-1), m_statVariations(false), m_cdipath(cdipath), m_taggername(tagger), m_wp(wp), m_jetauthor(jetcollection), m_totalvariance(0), m_capturedvariance(0)
+m_cnt(cnt), m_initialized(false), m_validate(false), m_namedExtrapolation(-1), m_statVariations(false), m_cdipath(cdipath), m_taggername(tagger), m_wp(wp), m_jetauthor(jetcollection), m_totalvariance(0), m_capturedvariance(0), m_verbose(false)
 {
 
-  std::cout << " CDEV Constructor : info " << cdipath << " " << tagger << " " << wp << " " << jetcollection << std::endl;
+  if (m_verbose) std::cout << " CDEV Constructor : info " << cdipath << " " << tagger << " " << wp << " " << jetcollection << std::endl;
   // if specified, add items recommended for exclusion from EV decomposition by the calibration group to the 'named uncertainties' list
   if (excludeRecommendedUncertaintySet && base) {
     std::vector<std::string> to_exclude = split(m_cnt->getExcludedUncertainties());
@@ -396,11 +396,11 @@ CalibrationDataEigenVariations::excludeNamedUncertainty(const std::string& name,
 		 [&temp_name](const std::string& el) {
 		   return el.compare(0, temp_name.size(), temp_name) == 0;
 		 });
-    std::cout <<"Found a group of uncertainties to exclude: " <<name <<" found " <<unc_subgroup.size() <<" uncertainties corresponding to the query" <<std::endl;
+    if (m_verbose) std::cout <<"Found a group of uncertainties to exclude: " <<name <<" found " <<unc_subgroup.size() <<" uncertainties corresponding to the query" <<std::endl;
     for (const auto& single_name : unc_subgroup){
       // only really add if the entry is not yet in the list
       if (m_namedIndices.find(single_name) == m_namedIndices.end()) {
-        std::cout << "Name : " << single_name << std::endl;
+        if (m_verbose) std::cout << "Name : " << single_name << std::endl;
         m_named.push_back(std::pair<TH1*, TH1*>(0, 0));
         m_namedIndices[single_name] = m_named.size()-1;
       }
@@ -815,11 +815,11 @@ CalibrationDataEigenVariations::initialize(double min_variance)
     ++current_set;
   }
   if (final_set.size() > 0) 
-    std::cout << "CalibrationDataEigenVariations: Removing " << final_set.size() << " eigenvector variations leading to sub-tolerance effects, retaining " << m_eigen.size()-final_set.size() << " variations" << std::endl;
+    if (m_verbose) std::cout << "CalibrationDataEigenVariations: Removing " << final_set.size() << " eigenvector variations leading to sub-tolerance effects, retaining " << m_eigen.size()-final_set.size() << " variations" << std::endl;
   
   removeVariations(final_set); // <----------------- This method actually performs the reduction. The above logic simply flags which variations to GET RID OF, inserting them into "final_set"
 
-  std::cout << " The total variance is " << m_totalvariance << " and the reduction captured " << 100*(m_capturedvariance/m_totalvariance) << "% of this." << std::endl;
+  if (m_verbose) std::cout << " The total variance is " << m_totalvariance << " and the reduction captured " << 100*(m_capturedvariance/m_totalvariance) << "% of this." << std::endl;
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///// optionally: perform a validation of the 'SFEigen' method alongside the 'SFGlobalEigen'.                              /////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1158,7 +1158,7 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string& labe
 	  }
 	}// end hist bin for-loop
     if (!retain){
-      std::cout<<"Eigenvector Recomposition: Empty uncertainty "<<fullUncList.at(t)<<" is discarded."<<std::endl;
+      if (m_verbose) std::cout<<"Eigenvector Recomposition: Empty uncertainty "<<fullUncList.at(t)<<" is discarded."<<std::endl;
       continue; // discard the vector
     }
 
@@ -1168,7 +1168,7 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string& labe
 
   TH1* nom = dynamic_cast<TH1*>(m_cnt->GetValue("result")); // Nominal SF hist
   if (not nom){
-     std::cout<<"Eigenvector Recomposition: dynamic cast failed\n";
+     if (m_verbose) std::cout<<"Eigenvector Recomposition: dynamic cast failed\n";
      return false;
   }
   int dim = nom->GetDimension();
@@ -1244,6 +1244,11 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string& labe
   return true;
 }
 
+void CalibrationDataEigenVariations::setVerbose(bool verbose) {
+  m_verbose = verbose;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                                                                                  //
 // CalibrationDataGlobalEigenVariations                                                             //
@@ -1298,16 +1303,16 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
     Analysis::CalibrationDataHistogramContainer* c;
     f->GetObject(contName.Data(), c);
     if (c) {
-      std::cout << "Found " << contName.Data() << std::endl;
+      if (m_verbose) std::cout << "Found " << contName.Data() << std::endl;
       m_histcontainers.insert({flavour, c}); // Build the mapping between flavour and the corresponding "flavour container", i.e. the CalibrationDataHistogramContainer
       std::vector<std::string> uncs = c->listUncertainties();
       TH1* result = dynamic_cast<TH1*>(c->GetValue("result")); // let's get the size of this for later
       if (not result){
-        std::cout << "Dynamic cast failed at "<<__LINE__<<"\n";
+        if (m_verbose) std::cout << "Dynamic cast failed at "<<__LINE__<<"\n";
         continue;
       }
       m_blockmatrixsize+=result->GetNbinsX()*result->GetNbinsY()*result->GetNbinsZ(); // should be ~300 for fixed cut, something else for continuous
-      std::cout << "m_blockmatrixsize is now " << m_blockmatrixsize << std::endl;
+      if (m_verbose) std::cout << "m_blockmatrixsize is now " << m_blockmatrixsize << std::endl;
       for (const std::string& unc : uncs){
         if (unc.find("stat_np") != string::npos) m_statVariations = true;
         if ((unc=="result")||(unc=="comment")||(unc=="ReducedSets")||(unc=="systematics")||(unc=="statistics")||(unc=="extrapolation")||(unc=="MChadronisation")||(unc=="combined")||(unc=="extrapolation from charm")) { 
@@ -1331,21 +1336,21 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
     }
   }
   
-  std::cout << "\n number of shared uncertainties is " << m_all_shared_systematics.size() << std::endl;
+  if (m_verbose) std::cout << "\n number of shared uncertainties is " << m_all_shared_systematics.size() << std::endl;
   
   std::set<std::string>::iterator it = m_all_shared_systematics.begin();
   if (it != m_all_shared_systematics.end()){
-    std::cout << "Printing out all shared uncertainties for " << tagger << "/" << jetcollection << "/" << wp << std::endl;
-    std::cout << "| " << std::endl;
+    if (m_verbose) std::cout << "Printing out all shared uncertainties for " << tagger << "/" << jetcollection << "/" << wp << std::endl;
+    if (m_verbose) std::cout << "| " << std::endl;
     while (it != m_all_shared_systematics.end()){
-      std::cout << "|-- " << (*it) << std::endl;
+      if (m_verbose) std::cout << "|-- " << (*it) << std::endl;
       ++it;
     }
   } else {
-    std::cout << "| no shared systematics between ";
+    if (m_verbose) std::cout << "| no shared systematics between ";
     for (const auto& f : m_flavours){
-      std::cout << f << ", ";
-    } std::cout << std::endl;
+      if (m_verbose) std::cout << f << ", ";
+    } if (m_verbose) std::cout << std::endl;
   }
   // End of constructor
 }
@@ -1402,7 +1407,7 @@ CalibrationDataGlobalEigenVariations::getEigenCovarianceMatrix()
         TH1* hunc = dynamic_cast<TH1*>(c->GetValue(tunc.Data()));
         TH1* ref = dynamic_cast<TH1*>(c->GetValue("result")); // retrieving this just in case the uncertainty doesn't exist for this flavour, just need it to get dimensions right
         if (not ref){
-           std::cout << " There was no uncertainty OR SF/EFF results... Are you sure you have the right CDIContainer path?" << std::endl;
+           if (m_verbose) std::cout << " There was no uncertainty OR SF/EFF results... Are you sure you have the right CDIContainer path?" << std::endl;
            continue;
         }
         int tagweightax = c->getTagWeightAxis(); // for handling the continuous case(s)
@@ -1592,7 +1597,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     //construct the combined_result and combined_named_variations (up and down)
     if (c->getTagWeightAxis() == -1){ // For fixed cut WP, the Y axis **should** be the pT axis (but can it can potentially be different in the future)
       flav_bins[flavour] = result->GetNbinsY(); // Add the number of bins of the result histogram with non-zero results...  
-      std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
+      if (m_verbose) std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
       for(int i = 0 ; i < flav_bins[flavour] ; i++){
         // push bin content onto the combined_result vector
         Int_t bin = result->GetBin(1,i+1); // This will only pick up the CONTENTS, not of the underflow bin
@@ -1603,7 +1608,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
       flav_bins[flavour] = result->GetNbinsX()*result->GetNbinsY();
       int tagbins = result->GetNbinsX();
       int ptbins = result->GetNbinsY();
-      std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
+      if (m_verbose) std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
       for(int i = 0 ; i < tagbins ; i++){
         for(int j = 0 ; j < ptbins ; j++){
           // push bin content onto the combined_result vector
@@ -1616,7 +1621,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
       flav_bins[flavour] = result->GetNbinsX()*result->GetNbinsY();
       int tagbins = result->GetNbinsY();
       int ptbins = result->GetNbinsX();
-      std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
+      if (m_verbose) std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
       for(int i = 0 ; i < tagbins ; i++){
         for(int j = 0 ; j < ptbins ; j++){
           // push bin content onto the combined_result vector
@@ -1629,7 +1634,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
       flav_bins[flavour] = result->GetNbinsX()*result->GetNbinsZ();
       int tagbins = result->GetNbinsZ();
       int ptbins = result->GetNbinsX();
-      std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
+      if (m_verbose) std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
       for(int i = 0 ; i < tagbins ; i++){
         for(int j = 0 ; j < ptbins ; j++){
           // push bin content onto the combined_result vector
@@ -1800,7 +1805,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
     ++current_set;
   }
   if (final_set.size() > 0){ // at this point, a set of the indices of negligible variations should have been gathered, proceed to remove them...
-    std::cout << "CalibrationDataEigenVariations: Removing " << final_set.size() << " eigenvector variations leading to sub-tolerance effects, retaining " << m_eigen.size()-final_set.size() << " variations" << std::endl;
+    if (m_verbose) std::cout << "CalibrationDataEigenVariations: Removing " << final_set.size() << " eigenvector variations leading to sub-tolerance effects, retaining " << m_eigen.size()-final_set.size() << " variations" << std::endl;
   }
   
   CalibrationDataEigenVariations::removeVariations(final_set); // This method actually performs the reduction. The above logic simply flags which variations to get rid of, inserting them into "final_set"
@@ -1809,7 +1814,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
   // That correlation matrix can then be compared to the original correlation matrix "corr", simply subtracting one from the other. Better approximations will have close to zero deviation.
   // What follows is the construction of this comparison, and the reporting of the comparison (saving it to file)...  
   std::streamsize ss = std::cout.precision();
-  std::cout << " The total variance is " << m_totalvariance << " and the reduction captured " << std::setprecision(9) << 100.0*(m_capturedvariance/m_totalvariance) << "% of this." << std::endl;
+  if (m_verbose) std::cout << " The total variance is " << m_totalvariance << " and the reduction captured " << std::setprecision(9) << 100.0*(m_capturedvariance/m_totalvariance) << "% of this." << std::endl;
   std::cout.precision(ss); //restore precision
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///// optionally: perform a visual validation of the 'SFGlobalEigen' method alongside the 'SFEigen'.                       /////
@@ -1857,7 +1862,7 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
   }
 
   for(const auto& f : m_flavours){
-    std::cout << " " << f << " m_flav_eigen has " << m_flav_eigen[f].size() << std::endl;
+    if (m_verbose) std::cout << " " << f << " m_flav_eigen has " << m_flav_eigen[f].size() << std::endl;
   }
 
   m_initialized = true;
@@ -1937,7 +1942,7 @@ CalibrationDataGlobalEigenVariations::getNumberOfEigenVariations(const std::stri
   if (! m_initialized) initialize();
   
   if (m_flav_eigen.find(flavour) == m_flav_eigen.end()){
-    std::cout << "No m_flav_eigen for flavour " << flavour << std::endl;
+    if (m_verbose) std::cout << "No m_flav_eigen for flavour " << flavour << std::endl;
     return 0;
   }
   return (m_flav_eigen.find(flavour)->second).size();
