@@ -47,15 +47,15 @@ def QuirkPhysicsToolCfg(flags, name="QuirkPhysicsTool", **kwargs):
     return result
 
 
-## def getDebugSteppingActionTool(name="G4UA::DebugSteppingActionTool", **kwargs): # FIXME missing functionality
-##     from Quirks.QuirksConf import G4UA__DebugSteppingActionTool
-##     from G4AtlasApps.SimFlags import simFlags
-##     # use configuration passed through the flags
-##     if name in simFlags.UserActionConfig.get_Value().keys():
-##         for prop,value in simFlags.UserActionConfig.get_Value()[name].iteritems():
-##             kwargs.setdefault(prop,value)
-##
-##     return G4UA__DebugSteppingActionTool(name, **kwargs)
+def DebugSteppingActionToolCfg(flags, name="DebugSteppingActionTool", **kwargs):
+    result = ComponentAccumulator()
+    # TODO UserActionConfig flag not yet migrated
+    # example custom configuration
+    # if name in flags.Sim.UserActionConfig.keys():
+    #     for prop,value in flags.Sim.UserActionConfig[name].iteritems():
+    #         kwargs.setdefault(prop,value)
+    result.setPrivateTools( CompFactory.G4UA.DebugSteppingActionTool(name, **kwargs) )
+    return result
 
 
 def QuirksCfg(flags):
