@@ -24,6 +24,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
+#include "xAODJet/JetContainer.h"
 
 
 namespace Rec {
@@ -41,6 +42,8 @@ namespace Rec {
 
       SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tpContainerKey{this,"TrackParticleContainer","InDetTrackParticles","Read TrackParticle container"};
       SG::ReadHandleKey<xAOD::VertexContainer>        m_pvContainerKey{this,"PrimaryVertexContainer","PrimaryVertices","Read PrimaryVertices container"};
+      SG::ReadHandleKey<xAOD::JetContainer>           m_jetContainerKey{this,"JetContainer","AntiKt4EMPFlowJets","Read Jets container"};
+      SG::ReadHandleKey<xAOD::VertexContainer>        m_btsvContainerKey{this,"BTagSVContainer","BTagging_AntiKt4EMPFlowSecVtx","Read BTagiingSV container"};
 
       SG::WriteHandleKey<xAOD::VertexContainer>  m_foundVerticesKey{this,"BVertexContainerName","AllBVertices","Found vertices container"};
       ToolHandle < Rec::IVrtInclusive >          m_bvertextool;
