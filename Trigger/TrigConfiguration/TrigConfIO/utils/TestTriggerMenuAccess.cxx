@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdlib>
@@ -225,7 +225,7 @@ testL1Menu_Thresholds(const TrigConf::L1Menu & l1menu, bool printdetail)
       if(printdetail) {
          cout << " thresholds, going to print the first three." << endl;
          int ni = 3; // print the first 3
-         for(auto thr : l1menu.thresholds(tt) ) {
+         for(const auto& thr : l1menu.thresholds(tt) ) {
             cout << "   " << thr->name() << " of type " << thr->type() << " (mapping " << thr->mapping() << ") " << endl;
             if(--ni==0) break;
          }
@@ -233,7 +233,7 @@ testL1Menu_Thresholds(const TrigConf::L1Menu & l1menu, bool printdetail)
          cout << endl;
       }
       if(tt != "internal") {
-         for(auto thr : l1menu.thresholds(tt) ) {
+         for(const auto& thr : l1menu.thresholds(tt) ) {
             if(thr->name().find("MULT-CMU") != std::string::npos){ continue; } // tmp hack!
             const std::string & connName = l1menu.connectorNameFromThreshold(thr->name());
             if(! l1menu.connector(connName).hasLine(thr->name())) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  ParameterSpace.cxx
 //  TopoCore
@@ -130,7 +130,7 @@ std::ostream &
 operator<<(std::ostream &o, const TCS::ParameterSpace & ps) {
    if( ps.isInitialized()) {
       o << "    parameters: " << ps().size();
-      for(TCS::Parameter parameter : ps) {
+      for(const TCS::Parameter& parameter : ps) {
          o << endl << "    " << parameter;
       }
    }
