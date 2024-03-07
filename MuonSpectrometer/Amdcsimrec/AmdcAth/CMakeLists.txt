@@ -21,6 +21,4 @@ atlas_add_component( AmdcAth
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel AmdcCore MuonAlignmentData StoreGateLib AtlasDetDescr AmdcStand MuonReadoutGeometry PathResolver AmdcAthLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 
