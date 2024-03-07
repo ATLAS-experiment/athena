@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 # JetInputConfig: A helper module providing function to setup algorithms
 # in charge of preparing input sources to jets (ex: EventDensity algo, track
@@ -67,16 +67,13 @@ def buildLabelledTruth(parentjetdef, truthmod):
 
 def buildPV0TrackSel(parentjetdef, spec):
     from JetRecConfig.StandardJetContext import jetContextDic
-    from TrackVertexAssociationTool.getTTVAToolForReco import getTTVAToolForReco
+    from TrackVertexAssociationTool.TTVAToolConfig import getTTVAToolForReco
     
     trkOptions = jetContextDic[parentjetdef.context]
     tvaTool = getTTVAToolForReco("trackjetTVAtool", 
-                                 returnCompFactory = True,
-                                 addDecoAlg = False ,# not needed : UsedInFit decorations are part of other prerequisites  
                                  HardScatterLinkDeco = "",
                                  WorkingPoint = "Nonprompt_All_MaxWeight",
-                                 TrackContName = trkOptions['JetTracksQualityCuts'],
-                                 VertexContName = trkOptions['Vertices'],
+                                 TrackContName = trkOptions['JetTracksQualityCuts']
                                  )
     alg = CompFactory.PV0TrackSelectionAlg("pv0tracksel_trackjet", 
                                            InputTrackContainer = trkOptions['JetTracksQualityCuts'],
