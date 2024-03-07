@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_COREDUMPSVC_H
@@ -38,11 +38,7 @@ namespace CoreDumpSvcHandler {
  * dump record. The service collects some information during event
  * processing. Additional information can be added via setCoreDumpInfo().
  *
- * To use this service do:                                  @verbatim
-      from AthenaServices.Configurables import CoreDumpSvc
-      svcMgr += CoreDumpSvc()                               @endverbatim
- *
- * For a list of job option properties see CoreDumpSvc::CoreDumpSvc(). 
+ * For a list of job option properties see CoreDumpSvc::CoreDumpSvc().
  */
 
 class CoreDumpSvc : public extends<AthService, 
