@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file EvenEventsSelectorTool.cxx
@@ -37,7 +37,7 @@ StatusCode EvenEventsSelectorTool::postNext() const {
         ++it;
       }
       // take only even events
-      if ((*attrList)["EventNumber"].data<unsigned long long>()%2==0) {
+      if ((*attrList)["EventNumber"].data<unsigned long long>()%2!=0) {
         retc = StatusCode::RECOVERABLE;
         ATH_MSG_INFO("Rejecting event");
       }
