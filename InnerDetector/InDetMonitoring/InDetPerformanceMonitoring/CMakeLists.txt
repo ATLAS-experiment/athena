@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetPerformanceMonitoring )
@@ -13,7 +13,3 @@ atlas_add_component( InDetPerformanceMonitoring
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
 		     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaMonitoringLib AtlasHepMCLib CxxUtils ElectronPhotonSelectorToolsLib EventPrimitives GaudiKernel ITrackToVertex IdDictDetDescr BeamSpotConditionsData InDetIdentifier InDetPrepRawData InDetRIO_OnTrack InDetTrackSelectionToolLib JetInterface LWHists MuonAnalysisInterfacesLib MuonMomentumCorrectionsLib StoreGateLib TRT_ReadoutGeometry TrigDecisionToolLib TrigConfxAODLib TriggerMatchingToolLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkParticleBase TrkTrack TrkTrackSummary TrkTruthData TrkV0Vertex TrkVertexAnalysisUtilsLib TrkVertexFitterInterfaces TrackVertexAssociationToolLib egammaEvent egammaInterfacesLib xAODCaloEvent xAODEgamma xAODEventInfo xAODJet xAODMissingET xAODMuon xAODTracking xAODTruth )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
