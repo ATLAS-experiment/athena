@@ -2,6 +2,8 @@
 
 #include "../../LArClusterCellDumper/EventReaderAlg.h"
 #include "../../LArClusterCellDumper/EventReaderBaseAlg.h"
+#include "../../LArClusterCellDumper/CaloThinCellsInAODAlg.h"
 
 DECLARE_COMPONENT( EventReaderBaseAlg )
 DECLARE_COMPONENT( EventReaderAlg ) 
+DECLARE_COMPONENT( CaloThinCellsInAODAlg )

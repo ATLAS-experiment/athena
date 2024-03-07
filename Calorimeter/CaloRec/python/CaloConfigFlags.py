@@ -51,7 +51,9 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.addCPData",False)
     ccf.addFlag("Calo.TopoCluster.skipWriteList", lambda prevFlags:
                 ["CaloCalTopoClusters", "CaloTopoClusters"] if prevFlags.Reco.HIMode is HIMode.HI else [])
-
+    
+    ccf.addFlag("Calo.TopoCluster.xtalkInfoDumper", False) # dump raw energy, digits and some calibration for xtalk studies
+    
     #### Cluster correction flags:
     # If true, then reweight cells to prevent double-counting between clusters.
     ccf.addFlag ('Calo.ClusterCorrection.doSlidingWindowCellWeights', False)
