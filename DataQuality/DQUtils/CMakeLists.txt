@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DQUtils )
@@ -37,6 +37,6 @@ atlas_install_python_modules( python/*.py python/ext python/sugar
 
 atlas_install_scripts( share/count_filled_lbs.py share/dqu_grldiff.py share/dqu_lumi.py share/dqu_grl_extract_period.py share/dqu_dump_periods.py )
 
-foreach( _test coracool events iovset_pickle read iovtype )
+foreach( _test coracool events iovset_pickle read iovtype oracle )
    atlas_add_test( ${_test} SCRIPT tests/test_${_test}.py POST_EXEC_SCRIPT nopost.sh )
 endforeach()
