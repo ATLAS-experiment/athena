@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,7 +37,7 @@ namespace TCS {
 
       uint64_t decision_field(const std::string & connName) const { return m_decision.find(connName)->second; }
 
-      uint32_t decision_field(std::string connName, unsigned int clock) const;
+      uint32_t decision_field(const std::string& connName, unsigned int clock) const;
 
       bool passed(const std::string& connName, unsigned int bit) const { return ( ( (uint64_t)0x1 << bit) & m_decision.find(connName)->second) != 0; }
       uint64_t overflow_field(const std::string& connName) const { return m_overflow.find(connName)->second; }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * L1TopoDataTypes.h
@@ -52,7 +52,7 @@ namespace TSU {
     public:
        L1TopoDataTypes(T v) : m_tvalue(v) { }
        // c'tor using binary pattern as input
-       L1TopoDataTypes(std::string b="") : m_tvalue(0) { 
+       L1TopoDataTypes(const std::string& b="") : m_tvalue(0) { 
           unsigned int idx = 0;
           for(auto in = b.rbegin(); in!=b.rend(); ++in){
               if(*in=='1') m_tvalue += (1 << idx);
