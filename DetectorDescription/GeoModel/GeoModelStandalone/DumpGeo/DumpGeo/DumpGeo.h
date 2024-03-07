@@ -44,9 +44,6 @@ class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm,
   void handle(const Incident& inc);
 
  private:
-  IToolSvc* m_toolSvc;
-  // GeoExporter* m_geoExporter;
-
   // Properties
   // -- Athena-related
   Gaudi::Property<std::string> m_atlasRelease{this, "AtlasRelease", "", "The current, in use Atlas release"}; 
