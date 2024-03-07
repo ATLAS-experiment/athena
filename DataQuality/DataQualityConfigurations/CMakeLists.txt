@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataQualityConfigurations )
@@ -82,12 +82,18 @@ add_custom_target( DataQualityConfigurations_han_configs
    ALL SOURCES ${hcfgfiles} )
 add_dependencies( DataQualityConfigurations_han_configs
    han-config-gen )
-add_dependencies( Package_DataQualityConfigurations
-   DataQualityConfigurations_han_configs )
 set_target_properties( DataQualityConfigurations_han_configs PROPERTIES
    LABELS DataQualityConfigurations
    FOLDER DataQuality/DataQualityConfigurations )
 
+# Exclude very slow han config generation in debug builds (ATLASDQ-1133)
+if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+   set_target_properties( DataQualityConfigurations_han_configs PROPERTIES
+      EXCLUDE_FROM_ALL TRUE )
+else()
+   add_dependencies( Package_DataQualityConfigurations
+      DataQualityConfigurations_han_configs )
+endif()
 
 # Clean up:
 unset( hcfgfiles )
