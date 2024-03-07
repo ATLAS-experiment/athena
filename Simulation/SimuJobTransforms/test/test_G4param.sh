@@ -13,14 +13,16 @@
 # ATLAS-R2-2015-03-01-00 and OFLCOND-RUN12-SDR-30
 export TRF_ECHO=1
 AtlasG4_tf.py \
---inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
---outputHITSFile 'mu_E200_eta0-25.HITS.pool.root' \
---maxEvents 5 \
---skipEvents 0 \
---geometryVersion 'ATLAS-R2-2015-03-01-00' \
---physicsList 'FTFP_BERT_ATL' \
---preInclude 'SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
---conditionsTag OFLCOND-RUN12-SDR-30 \
---DataRunNumber 222525
+    --CA \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --postInclude 'default:PyJobTransforms.UseFrontier' \
+    --preInclude 'AtlasG4Tf:Campaigns.MC23aSimulationMultipleIoV' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+    --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mu_E200_eta0-25.evgen.pool.root' \
+    --outputHITSFile 'mu_E200_eta0-25.HITS.pool.root' \
+    --maxEvents 5 \
+    --skipEvents 0 \
+    --jobNumber 857 \
+    --imf False
 
 echo  "art-result: $? simulation"
