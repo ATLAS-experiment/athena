@@ -91,6 +91,8 @@ class FTagConfig (ConfigBlock):
                         result = "Sherpa2210"
                     elif "2.2.12" in version:
                         result = "Sherpa2212"
+                    elif "2.2.14" in version:
+                        result = "Sherpa2214"
                     elif "2.2.1" in version:
                         result = "Sherpa221"
 
