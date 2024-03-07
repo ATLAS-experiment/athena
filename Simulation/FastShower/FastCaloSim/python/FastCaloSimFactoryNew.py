@@ -90,7 +90,7 @@ def NITimedExtrapolatorCfg(flags, name="ISF_NITimedExtrapolator", **kwargs):
 # FastShowerCellBuilderTool
 def FastShowerCellBuilderToolBaseCfg(flags, name="ISF_FastShowerCellBuilderTool", **kwargs):
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     from ISF_FastCaloSimServices.ISF_FastCaloSimHelpers import AdditionalParticleParametrizationFileNames
 

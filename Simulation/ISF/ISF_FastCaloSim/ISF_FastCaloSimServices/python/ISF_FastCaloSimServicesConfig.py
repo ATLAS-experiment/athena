@@ -4,7 +4,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from RngComps.RandomServices import AthRNGSvcCfg
+from RngComps.RngCompsConfig import AthRNGSvcCfg
 from ISF_Services.ISF_ServicesConfig import TruthServiceCfg
 from ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig import FastCaloSimCaloExtrapolationCfg
 

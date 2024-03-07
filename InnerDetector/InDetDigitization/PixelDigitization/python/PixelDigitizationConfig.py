@@ -179,7 +179,7 @@ def PixelDigitizationBasicToolCfg(flags, name="PixelDigitizationBasicTool", **kw
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", Pixel_FirstXing(flags))
         kwargs.setdefault("LastXing", Pixel_LastXing(flags))
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     PixelDigitizationTool = CompFactory.PixelDigitizationTool
@@ -222,7 +222,7 @@ def PixelGeantinoTruthDigitizationToolCfg(flags, name="PixelGeantinoTruthDigitiz
         kwargs.setdefault("PileUpMergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
     kwargs.setdefault("VetoPileUpTruthLinks", False)
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     PixelDigitizationTool = CompFactory.PixelDigitizationTool
     acc.setPrivateTools(PixelDigitizationTool(name, **kwargs))

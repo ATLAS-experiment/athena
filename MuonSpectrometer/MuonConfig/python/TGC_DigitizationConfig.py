@@ -66,7 +66,7 @@ def TGC_DigitizationToolCfg(flags, name="TgcDigitizationTool", **kwargs):
     if flags.GeoModel.Run < LHCPeriod.Run3:
         kwargs.setdefault("FourBunchDigitization", False)
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     TgcDigitizationTool = CompFactory.TgcDigitizationTool
@@ -91,7 +91,7 @@ def TGC_OverlayDigitizationToolCfg(flags, name="Tgc_OverlayDigitizationTool", **
     if flags.GeoModel.Run < LHCPeriod.Run3:
         kwargs.setdefault("FourBunchDigitization", False)
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     kwargs.setdefault("PileUpMergeSvc", '')
     TgcDigitizationTool = CompFactory.TgcDigitizationTool

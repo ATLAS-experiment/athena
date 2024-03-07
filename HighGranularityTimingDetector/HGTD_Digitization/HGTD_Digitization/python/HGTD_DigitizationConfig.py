@@ -60,7 +60,7 @@ def HGTD_DigitizationBasicToolCfg(flags, name="HGTD_DigitizationBasicTool", **kw
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", HGTD_FirstXing())
         kwargs.setdefault("LastXing", HGTD_LastXing())
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     acc.setPrivateTools(CompFactory.HGTD_DigitizationTool(name, **kwargs))

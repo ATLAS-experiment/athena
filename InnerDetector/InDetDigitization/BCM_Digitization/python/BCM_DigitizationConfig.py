@@ -5,7 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
-from RngComps.RandomServices import AthRNGSvcCfg
+from RngComps.RngCompsConfig import AthRNGSvcCfg
 from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg

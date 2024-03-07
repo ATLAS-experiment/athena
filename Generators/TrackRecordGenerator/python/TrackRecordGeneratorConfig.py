@@ -24,7 +24,7 @@ def Input_TrackRecordGeneratorCfg(ConfigFlags,name="TrackRecordGenerator", **kwa
     kwargs.setdefault('StopParticles', False) # Stop the particles or not
     kwargs.setdefault('stopped_tminus', -25.) # in ns, lower bound
     kwargs.setdefault('stopped_tplus', 25.) # in ns, upper bound
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault('RndmSvc', acc.getPrimaryAndMerge(AthRNGSvcCfg(ConfigFlags)).name)
     #kwargs.setdefault('OutputLevel', DEBUG) # for turning up output during testing
     acc.addEventAlgo(TrackRecordGenerator(name,**kwargs))

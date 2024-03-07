@@ -31,7 +31,7 @@ def TileHitToTTL1Cfg(flags, **kwargs):
     acc.merge(TileCablingSvcCfg(flags))
 
     if 'RndmSvc' not in kwargs:
-        from RngComps.RandomServices import AthRNGSvcCfg
+        from RngComps.RngCompsConfig import AthRNGSvcCfg
         kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name
 
     if kwargs['maskBadChannels']:

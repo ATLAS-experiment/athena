@@ -47,7 +47,7 @@ def ZDC_PileUpToolCfg(flags, name="ZDC_PileUpTool",**kwargs):
         kwargs.setdefault("mergeSvc", '')
         #kwargs.setdefault("OnlyUseContainerName", False) #TODO in future MR
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     config = "PbPb2023"
