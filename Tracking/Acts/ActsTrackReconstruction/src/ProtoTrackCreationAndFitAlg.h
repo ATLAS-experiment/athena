@@ -17,7 +17,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "StoreGate/CondHandleKeyArray.h"
-#include "ActsEvent/TrackContainerHandle.h"
+#include "ActsEvent/TrackContainerHandlesHelper.h"
 
 namespace
 {
@@ -62,7 +62,7 @@ namespace ActsTrk{
       // output location to write to 
       SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "EFTestTracks", "Output track collection (ActsTrk variant)"};
       // acts helper for the output
-      ActsTrk::MutableTrackContainerHandle<ActsTrk::ProtoTrackCreationAndFitAlg> m_tracksBackendHandle{this, "", "Tracks"};
+      ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
 
 
 

@@ -52,9 +52,9 @@ namespace ActsTrk
      }
 
      ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
-     ATH_CHECK(m_resolvedTracksBackendHandle.initialize());
      ATH_CHECK(m_tracksKey.initialize());
      ATH_CHECK(m_resolvedTracksKey.initialize());
+     ATH_CHECK(m_resolvedTracksBackendHandles.initialize(ActsTrk::prefixFromTrackContainerName(m_resolvedTracksKey.key()))); //TODO choose prefix related to the output tracks name
      return StatusCode::SUCCESS;
   }
 
@@ -82,7 +82,7 @@ namespace ActsTrk
        auto destProxy = solvedTracks.getTrack(solvedTracks.addTrack());
        destProxy.copyFrom(trackHandle->getTrack(state.trackTips.at(iTrack)));
     }
-    std::unique_ptr<ActsTrk::TrackContainer> outputTracks = m_resolvedTracksBackendHandle.moveToConst( std::move(solvedTracks), ctx);
+    std::unique_ptr<ActsTrk::TrackContainer> outputTracks = m_resolvedTracksBackendHandles.moveToConst( std::move(solvedTracks), ctx);
     SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle(m_resolvedTracksKey, ctx);
 
     if (resolvedTrackHandle.record( std::move(outputTracks)).isFailure()) {

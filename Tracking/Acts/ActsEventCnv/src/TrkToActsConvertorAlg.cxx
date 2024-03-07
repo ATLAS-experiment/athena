@@ -16,7 +16,7 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize());
   ATH_CHECK(m_trackContainerKey.initialize());
   ATH_CHECK(m_convertorTool.retrieve());
-  ATH_CHECK(m_trackContainerBackends.initialize());
+  ATH_CHECK(m_trackContainerBackendsHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   return StatusCode::SUCCESS;
 }
 
@@ -50,11 +50,9 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   ATH_MSG_VERBOSE("TrackStateContainer has  " << tc.trackStateContainer().trackStatesAux()->size() << " states");
   ATH_MSG_VERBOSE("TrackParametersContainer has  " << tc.trackStateContainer().trackParametersAux()->size() << " parameters");
 
-  std::unique_ptr<ActsTrk::TrackContainer> constTrackContainer = m_trackContainerBackends.moveToConst(std::move(tc), ctx);
+  std::unique_ptr<ActsTrk::TrackContainer> constTrackContainer = m_trackContainerBackendsHelper.moveToConst(std::move(tc), ctx);
   auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
   ATH_MSG_VERBOSE("Saving " << constTrackContainer->size() << " tracks to "<< trackContainerHandle.key());
   ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
   return StatusCode::SUCCESS;
 }
-
-

@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/EventContext.h"
 
-#include "ActsEvent/TrackContainerHandle.h"
+#include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
 // STL includes
@@ -30,7 +30,7 @@ public:
 
 private:
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-  ActsTrk::ConstTrackContainerHandle<TrackContainerReader> m_handleKey{this, "", "SiSPSeededActsTrack"};
+  ActsTrk::ConstTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
   SG::WriteHandleKey<ActsTrk::TrackContainer> m_tracksKey{this, "TrackContainer", "TrackContainer"};
 };
 }

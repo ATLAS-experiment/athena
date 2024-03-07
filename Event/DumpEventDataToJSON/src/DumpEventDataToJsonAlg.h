@@ -86,7 +86,7 @@ protected:
   SG::ReadHandleKeyArray<TrackCollection> m_trackCollectionKeys{this, "TrackCollectionKeys", {"CombinedInDetTracks", "CombinedMuonTracks", "MuonSpectrometerTracks"}, "Keys for Track Containers"};
   
   // ACTS TrackContainer keys
-  SG::ReadHandleKeyArray<ActsTrk::TrackContainer> m_trackContainerKeys{this, "TrackContainerKeys", {"ConvertedTrackContainer"}, "Location of the converted Acts TrackContainer"};
+  SG::ReadHandleKeyArray<ActsTrk::TrackContainer> m_trackContainerKeys{this, "TrackContainerKeys", {"ConvertedTracks"}, "Location of the converted Acts TrackContainer"};
 
   SG::ReadHandleKey<Muon::CscPrepDataContainer> m_cscPrepRawDataKey{this, "CscPrepRawDataKey", "CSC_Clusters", "Key for CSC PRD Container"};
   SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_mdtPrepRawDataKey{this, "MdtPrepRawDataKey", "MDT_DriftCircles", "Key for MDT PRD Container"};
