@@ -362,7 +362,7 @@ def MUON1Cfg(ConfigFlags):
                                            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                            "TruthPrimaryVertices.t.x.y.z",
                                            "PrimaryVertices.trackWeights",
-                                           "MuonSegments.chiSquared.numberDoF",
+                                           "MuonSegments.chiSquared.numberDoF.nPrecisionHits.x.y.z",
                                            "Muons." +".".join(decoartionsMuon),
                                            "InDetTrackParticles."+ ".".join(decorationsID),
                                            "ExtrapolatedMuonTrackParticles." +".".join(decorationsME),
