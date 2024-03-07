@@ -2,7 +2,7 @@
 BTagging_AntiKt4EMPFlowAuxDyn\.DL1dv01(.*)
 BTagging_AntiKt4EMPFlowAuxDyn\.GN2v00_p
 BTagging_AntiKt4EMPFlowAuxDyn\.GN2v01_p
-BTagging_AntiKt4EMPFlowAuxDyn\.GN2v01Simple_p
+BTagging_AntiKt4EMPFlowAuxDyn\.GN2v01SimpleFlip_p
 BTagging_AntiKt4EMPFlowAuxDyn\.SV1_masssvx
 BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn\.DL1dv01_p(.*)
 BTagging_AntiKtVR30Rmax4Rmin02TrackAuxDyn\.GN2v00_p

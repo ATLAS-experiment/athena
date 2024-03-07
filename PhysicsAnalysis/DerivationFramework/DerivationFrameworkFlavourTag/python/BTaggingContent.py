@@ -77,8 +77,8 @@ JetExtendedAux = [
 # standard outputs for Run 3
 BTaggingRun3Aux = ["SV1_NGTinSvx", "SV1_masssvx",]
 BTaggingRun3Aux += _getVars("DL1dv01", flip_modes=['Flip']) # 202 r22 pre-rec tagger
-BTaggingRun3Aux += _getVars("GN2v00", flip_modes=['Simple']) # preliminary GN2 tagger
-BTaggingRun3Aux += _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['Simple']) # planned GN2 tagger for 2024 recommendations
+BTaggingRun3Aux += _getVars("GN2v00", flip_modes=['SimpleFlip']) # preliminary GN2 tagger
+BTaggingRun3Aux += _getVars("GN2v01", extra_flavours=['tau'], flip_modes=['SimpleFlip']) # planned GN2 tagger for 2024 recommendations
 
 # standard outputs for Run 4
 BTaggingRun4Aux = [
