@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include <ActsGeoUtils/TransformCache.h>
 
@@ -13,10 +13,16 @@
     }
 namespace ActsTrk {
     TransformCache::TransformCache(const IdentifierHash& hash,
-                                           TransformMaker maker): 
+                                   TransformMaker maker,
+                                   const IDetectorElement* parentEle): 
           m_hash{hash},
-          m_transform{maker} {}
+          m_transform{maker},
+          m_parent{parentEle} {}
 
+    const IDetectorElement* TransformCache::parent() const{
+        return m_parent;
+    }
+ 
     const Amg::Transform3D& TransformCache::getTransform(const ActsTrk::AlignmentStore* alignStore) const {    
         /// Valid alignment store is given -> Take the transformation from the cache there
         if (alignStore){

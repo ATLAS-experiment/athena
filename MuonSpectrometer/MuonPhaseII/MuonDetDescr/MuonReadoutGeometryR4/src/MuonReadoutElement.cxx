@@ -78,11 +78,11 @@ StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
                    <<" has already a transformation cached for hash "<<hash);
         return StatusCode::FAILURE;
     }
-    m_localToGlobalCaches.insert(std::make_unique<ActsTrk::TransformCache>(hash, make));
+    m_localToGlobalCaches.insert(std::make_unique<ActsTrk::TransformCache>(hash, make, this));
     m_globalToLocalCaches.insert(std::make_unique<ActsTrk::TransformCache>(hash,
                                             [make](RawGeomAlignStore* store, const IdentifierHash& hash){
                                                 return make(store,hash).inverse();
-                                            }));
+                                            }, this));
     return StatusCode::SUCCESS;
 }
 bool MuonReadoutElement::storeAlignment(RawGeomAlignStore& store) const{ 
