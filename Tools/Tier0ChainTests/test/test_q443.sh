@@ -11,7 +11,7 @@
 
 Reco_tf.py \
 --AMI=q443 \
---CA "all:True" \
+--CA "all:True" "RDOtoRDOTrigger:False" \
 --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-11' 'RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02' \
 --multithreaded \
 --maxEvents=500 \
