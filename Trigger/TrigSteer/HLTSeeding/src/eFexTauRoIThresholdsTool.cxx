@@ -8,8 +8,8 @@ uint64_t eFexTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& roi,
                                               const TrigConf::L1ThrExtraInfoBase& /*menuExtraInfo*/) const {
   // Get RoI properties (once, rather than for every threshold in the menu)
   unsigned int et    = roi.etTOB();
-  unsigned int rcore  = roi.rCoreThresholds();
-  unsigned int rhad  = roi.rHadThresholds();
+  unsigned int rcore  = roi.tauOneThresholds(); // eTau algorithm agnostic version corresponding to rCoreThresholds or bdtThresholds
+  unsigned int rhad  = roi.tauTwoThresholds(); // a.k.a. rHad
   int ieta = roi.iEta();
 
   uint64_t thresholdMask = 0;

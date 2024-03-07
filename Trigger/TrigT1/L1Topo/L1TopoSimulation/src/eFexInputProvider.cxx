@@ -138,17 +138,17 @@ eFexInputProvider::fillTau(TCS::TopoInputEvent& inputEvent) const {
 		   << " iPhiTopo: "
 		   << eFexTauRoI->iPhiTopo() // returns 20 x phi (custom function for L1Topo)
 		   << " rCore: "
-		   << eFexTauRoI->rCoreThresholds() 
+		   << eFexTauRoI->tauOneThresholds() // rCore or BDT working point (eTau algo agnostic accessor)
 		   << " rHad: "
-		   << eFexTauRoI->rHadThresholds()
+		   << eFexTauRoI->tauTwoThresholds() // rHad
 		  );
 
 
     unsigned int EtTopo = eFexTauRoI->etTOB();
     int etaTopo = eFexTauRoI->iEtaTopo();
     int phiTopo = eFexTauRoI->iPhiTopo();
-    unsigned int rCore = eFexTauRoI->rCoreThresholds();
-    unsigned int rHad = eFexTauRoI->rHadThresholds();
+    unsigned int rCore = eFexTauRoI->tauOneThresholds();
+    unsigned int rHad = eFexTauRoI->tauTwoThresholds();
 
     //Tau TOB
     TCS::eTauTOB etau( EtTopo, etaTopo, static_cast<unsigned int>(phiTopo), TCS::ETAU );
