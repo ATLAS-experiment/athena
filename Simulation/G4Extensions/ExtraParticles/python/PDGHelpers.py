@@ -118,8 +118,10 @@ class PDGParser(object):
     def accept(self, pdg):
         """Function to determine which extra particles are added
 
-        Function reads the ExtraParticlesRanges property in SimFlags
+        Function checks the ranges member variable
         and evaluates whether the particle should be accepted.
+
+        TODO Consider adding a Sim.ExtraParticlesRanges ConfigFlag
 
         For example, '111-556,1112-9090226' matches everything from
         111 to 555 and 1112 to 9090225.
