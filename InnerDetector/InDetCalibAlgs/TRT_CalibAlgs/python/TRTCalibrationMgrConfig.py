@@ -41,20 +41,18 @@ def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
 def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kwargs) :
     acc = ComponentAccumulator()
     
-    if "DoCalibrate" not in kwargs:
-        kwargs.setdefault("DoCalibrate",False)
-
-    if "DoRefit" not in kwargs:
-        kwargs.setdefault("DoRefit",False)
+    kwargs.setdefault("DoCalibrate",False)
+    kwargs.setdefault("DoRefit",False)
 
     if "AlignTrkTools" not in kwargs:
         from TRT_CalibTools.TRTCalibToolsConfig import (
-            FillAlignTrkInfoCfg, FillAlignTRTHitsCfg, FitToolCfg)
+            FillAlignTrkInfoCfg, FillAlignTRTHitsCfg)
         kwargs.setdefault("AlignTrkTools", [
             acc.addPublicTool(acc.popToolsAndMerge(FillAlignTrkInfoCfg(flags))),
             acc.addPublicTool(acc.popToolsAndMerge(FillAlignTRTHitsCfg(flags))) ] )
 
     if "FitTools" not in kwargs:
+        from TRT_CalibTools.TRTCalibToolsConfig import FitToolCfg
         kwargs.setdefault("FitTools", [acc.popToolsAndMerge(FitToolCfg(flags))])
 
     if "TrackFitter" not in kwargs:
