@@ -12,11 +12,11 @@ def secondStageBjetTrackingCfg(flags, inputRoI: str, inputVertex: str, inputJets
     from TrigInDetConfig.utils import getFlagsForActiveConfig
     trkflags = getFlagsForActiveConfig(flags, "bjet", log)
 
-    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-    seq = InDetTrigSequence(trkflags, 
-                            trkflags.Tracking.ActiveConfig.input_name, 
-                            rois   = inputRoI,
-                            inView = "VDVInDetFTF")
+    from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+    seq = InnerTrackingTrigSequence.create(trkflags, 
+                                           trkflags.Tracking.ActiveConfig.input_name, 
+                                           rois   = inputRoI,
+                                           inView = "VDVInDetFTF")
     acc = seq.sequence("FastTrackFinder")
     acc.merge(seq.sequenceAfterPattern())
 
