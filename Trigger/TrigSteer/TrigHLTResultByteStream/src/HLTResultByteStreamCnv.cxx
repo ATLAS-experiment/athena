@@ -188,8 +188,10 @@ StatusCode HLT::HLTResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddre
   // Convert to ByteStream
    StatusCode sc = m_tool->convert(result, re, nm);
 
+   if ( pAddr != nullptr ) pAddr->release();
    ByteStreamAddress* addr = new ByteStreamAddress(classID(), nm, "");
    pAddr = addr;
+   pAddr->addRef();
 
    return sc;
 
