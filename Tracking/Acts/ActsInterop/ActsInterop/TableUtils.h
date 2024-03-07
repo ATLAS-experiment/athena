@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <vector>
 #include <utility>
+#include <limits>
 
 // Utility class to wrap a constant variable length array interface over static sized arrays
 // This avoid duplication of compiled code for arrays which only differ
@@ -106,7 +107,8 @@ namespace TableUtils {
                        const std::size_t column_width,
                        const std::size_t min_label_width,
                        const bool dump_footer,
-                       const bool separate_last_row ) {
+                       const bool separate_last_row,
+                       const unsigned int precision) {
       if (counter && label && counter.equalSize(label)) {
          std::size_t max_size =min_label_width;
          for (const std::string &name : label ) {
@@ -121,6 +123,7 @@ namespace TableUtils {
          out << line << std::endl;
          std::size_t idx=0;
          std::string empty;
+         auto default_precision = out.precision();
          for (const T_Counter &a : counter) {
             if (separate_last_row && idx+1 == label.size()) {
                out << line << std::endl;
@@ -129,9 +132,11 @@ namespace TableUtils {
             out << "| " << (label_prefix.empty() ? std::left : std::right)
                 << std::setw(label_prefix.size()) << ( idx==0 ? label_prefix : empty)
                 << std::setw(max_size-label_prefix.size()) << label[idx] << std::right
+                << std::setprecision( precision != std::numeric_limits<unsigned int>::max() ? precision : default_precision)
                 << " | " << std::setw(column_width) << a << " |" << std::endl;
             ++idx;
          }
+         out << std::setprecision(default_precision);
          if (dump_footer) {
             out << line << std::endl;
          }
@@ -153,7 +158,8 @@ namespace TableUtils {
                        const std::size_t min_label_width,
                        const bool dump_header,
                        const bool dump_footer,
-                       const bool separate_last_row) {
+                       const bool separate_last_row,
+                       const std::vector<unsigned int> &precision) {
       if (counter && row_label && column_label
           && counter.equalSize(row_label)
           && counter.nColumns() == column_label.size()) {
@@ -188,6 +194,7 @@ namespace TableUtils {
          out << line << std::endl;
          std::size_t idx=0;
          std::string empty;
+         auto default_precision = out.precision();
          for (const Range<T_Counter> &a_row : counter) {
             if (separate_last_row && idx+1 == row_label.size()) {
                out << line << std::endl;
@@ -196,12 +203,20 @@ namespace TableUtils {
             out << "| " << (label_prefix.empty() ? std::left : std::right)
                 << std::setw(label_prefix.size()) << ( idx==0 ? label_prefix : empty)
                 << std::setw(max_size-label_prefix.size()) << row_label[idx] << std::right << " |";
+            unsigned int col_i=0;
             for (const T_Counter &a : a_row) {
-               out << " " << std::setw(the_width) << a << " |";
+               out << " "
+                   << std::setprecision( (col_i < precision.size()
+                                          && precision[col_i] != std::numeric_limits<unsigned int>::max())
+                                         ? precision[col_i]
+                                         : default_precision)
+                   << std::setw(the_width) << a << " |";
+               ++col_i;
             }
             out << std::endl;
             ++idx;
          }
+         out << std::setprecision(default_precision);
          if (dump_footer) {
             out << line;
          }
@@ -220,10 +235,12 @@ namespace TableUtils {
       StatTable &dumpFooter(bool value=true) { m_dumpFooter=value; return *this;}
       StatTable &separateLastRow(bool value=true) { m_separateLastRow=value; return *this;}
       StatTable &labelPrefix(const std::string& value) { m_labelPrefix=value; return *this;}
+      StatTable &precision(unsigned int precision) { m_precision=precision; return *this;}
 
       std::string        m_labelPrefix {};
       std::size_t        m_columnWidth=12;
       std::size_t        m_minLabelWidth=0;
+      unsigned int       m_precision = std::numeric_limits<unsigned int>::max();
       bool               m_dumpHeader=true;
       bool               m_dumpFooter=true;
       bool               m_separateLastRow=false;
@@ -241,10 +258,12 @@ namespace TableUtils {
       MultiColumnTable &dumpFooter(bool value=true) { m_dumpFooter=value; return *this;}
       MultiColumnTable &separateLastRow(bool value=true) { m_separateLastRow=value; return *this;}
       MultiColumnTable &labelPrefix(const std::string& value) { m_labelPrefix=value; return *this;}
+      MultiColumnTable &precision(std::vector<unsigned int> &&precision) { m_precision=std::move(precision); return *this;}
 
       std::string        m_labelPrefix {};
       std::size_t        m_columnWidth=12;
       std::size_t        m_minLabelWidth=0;
+      std::vector<unsigned int> m_precision{};
       bool               m_dumpHeader=true;
       bool               m_dumpFooter=true;
       bool               m_separateLastRow=false;
@@ -629,7 +648,8 @@ inline MsgStream &operator<<(MsgStream &out,
                     stat.m_columnWidth,
                     stat.m_minLabelWidth,
                     stat.m_dumpFooter,
-                    stat.m_separateLastRow);
+                    stat.m_separateLastRow,
+                    stat.m_precision);
 }
 
 // convenience method to dump wrapped two dimensional arrays in table form to a MsgStream
@@ -649,7 +669,8 @@ inline MsgStream &operator<<(MsgStream &out,
                     stat.m_minLabelWidth,
                     stat.m_dumpHeader,
                     stat.m_dumpFooter,
-                    stat.m_separateLastRow);
+                    stat.m_separateLastRow,
+                    stat.m_precision);
 }
 #endif
 
@@ -666,7 +687,8 @@ inline std::ostream &operator<<(std::ostream &out,
                     stat.m_columnWidth,
                     stat.m_minLabelWidth,
                     stat.m_dumpFooter,
-                    stat.m_separateLastRow);
+                    stat.m_separateLastRow,
+                    stat.m_precision);
 }
 
 // convenience method to dump wrapped two dimensional arrays in table form to a std output stream
@@ -685,7 +707,8 @@ inline std::ostream &operator<<(std::ostream &out,
                     stat.m_minLabelWidth,
                     stat.m_dumpHeader,
                     stat.m_dumpFooter,
-                    stat.m_separateLastRow);
+                    stat.m_separateLastRow,
+                    stat.m_precision);
 }
 
 #endif
