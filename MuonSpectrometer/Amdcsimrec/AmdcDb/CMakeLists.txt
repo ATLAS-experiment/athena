@@ -22,5 +22,4 @@ atlas_add_component( AmdcDb
                      LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel StoreGateLib AmdcAthLib AmdcCore AmdcDbLib )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_scripts( AmdcDbCnvSqlToolKit/* )

@@ -6,5 +6,5 @@
 atlas_subdir( MooPerformance )
 
 # Install files from the package:
-atlas_install_runtime( share/*.C share/*.h share/*.py scripts/*.py ExtraFiles/*.html )
+atlas_install_runtime( share/*.C share/*.h scripts/*.py ExtraFiles/*.html )
 
