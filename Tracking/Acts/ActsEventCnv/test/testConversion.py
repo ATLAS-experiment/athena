@@ -22,7 +22,7 @@ if "__main__" == __name__:
         for event in data:
             found_ni_differences = 0
             print('Processing', event)
-            acts = data[event]['TrackContainers']['ConvertedTrackContainer']
+            acts = data[event]['TrackContainers']['ConvertedTracks']
             trk = data[event]['Tracks']['CombinedITkTracks']
             if (acts != trk):
                 found_difference = False

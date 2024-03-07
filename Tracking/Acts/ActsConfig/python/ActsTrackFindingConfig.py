@@ -136,16 +136,14 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
                                           UncalibratedMeasurementContainerKeys = ["ITkPixelClusters_InView", "ITkStripClusters_InView"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkStripClusters"]))
         # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        prefix="SiSPSeededActsConversionTrack"
         acc.merge(ActsMainTrackFindingCfg(flags,
                                           name="ActsConversionTrackFindingAlg",
                                           ACTSTracksLocation="ActsConversionTracks",
                                           SeedLabels=["SSS"],
                                           EstimatedTrackParametersKeys=["ITkConversionStripEstimatedTrackParams"],
                                           SeedContainerKeys=["ITkConversionStripSeeds"],
-                                          UncalibratedMeasurementContainerKeys=["ITkPixelClusters_InView", "ITkConversionStripClusters"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkConversionStripClusters"], # for the time being we do not pass InView collections for strips here due to issue with the CKF stage
-                                          TrackBackEndPrefixName=prefix,
-                                          MTJBackEndPrefixName=prefix))
+                                          UncalibratedMeasurementContainerKeys=["ITkPixelClusters_InView", "ITkConversionStripClusters"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkConversionStripClusters"] # for the time being we do not pass InView collections for strips here due to issue with the CKF stage
+                                          ))
     # Any other pass -> mainly validation
     else:
         acc.merge(ActsMainTrackFindingCfg(flags))
@@ -181,13 +179,10 @@ def ActsAmbiguityResolutionCfg(flags) -> ComponentAccumulator:
         acc.merge(ActsMainAmbiguityResolutionCfg(flags))
     # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        prefix="ResolvedActsConversion"
         acc.merge(ActsMainAmbiguityResolutionCfg(flags,
                                                  name="ActsConversionAmbiguityResolution",
                                                  TracksLocation="ActsConversionTracks",
-                                                 ResolvedTracksLocation="ResolvedActsConversionTracks",
-                                                 TrackBackEndPrefixName=prefix,
-                                                 MTJBackEndPrefixName=prefix))
+                                                 ResolvedTracksLocation="ResolvedActsConversionTracks"))
     # Any other pass -> mainly validation
     else:
         acc.merge(ActsMainAmbiguityResolutionCfg(flags))

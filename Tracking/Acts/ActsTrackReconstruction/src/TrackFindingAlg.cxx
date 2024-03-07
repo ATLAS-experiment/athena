@@ -97,8 +97,8 @@ namespace ActsTrk
     ATH_CHECK(m_uncalibratedMeasurementContainerKeys.initialize());
     ATH_CHECK(m_detEleCollKeys.initialize());
     ATH_CHECK(m_estimatedTrackParametersKeys.initialize());
-    ATH_CHECK(m_tracksBackendHandle.initialize());
     ATH_CHECK(m_trackContainerKey.initialize());
+    ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
 
     if (m_estimatedTrackParametersKeys.size() != m_seedLabels.size())
     {
@@ -381,7 +381,7 @@ namespace ActsTrk
 
     copyStats(event_stat);
 
-    std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandle.moveToConst(std::move(tracksContainer), ctx);
+    std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), ctx);
     ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
     if (!trackContainerHandle.isValid())
     {

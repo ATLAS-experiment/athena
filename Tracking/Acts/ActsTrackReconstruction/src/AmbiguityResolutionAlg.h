@@ -26,7 +26,7 @@
 // Handle Keys
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "ActsEvent/TrackContainerHandle.h"
+#include "ActsEvent/TrackContainerHandlesHelper.h"
 
 #include <string>
 #include <memory>
@@ -48,8 +48,7 @@ namespace ActsTrk
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksKey
        {this, "TracksLocation", "ActsTracks", "Input track collection"};
-    ActsTrk::MutableTrackContainerHandle<ActsTrk::AmbiguityResolutionAlg> m_resolvedTracksBackendHandle
-      {this, "", "Resolved"};
+    ActsTrk::MutableTrackContainerHandlesHelper m_resolvedTracksBackendHandles;
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_resolvedTracksKey
        {this, "ResolvedTracksLocation", "ActsTracksResolved", "Ambiguity resolved output track collection"};
 

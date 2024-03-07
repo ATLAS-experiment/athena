@@ -44,7 +44,7 @@
 // Handle Keys
 #include "StoreGate/CondHandleKeyArray.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "ActsEvent/TrackContainerHandle.h"
+#include "ActsEvent/TrackContainerHandlesHelper.h"
 
 class TrackingSurfaceHelper;
 namespace
@@ -86,8 +86,8 @@ namespace ActsTrk
     SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
     SG::ReadCondHandleKeyArray<InDetDD::SiDetectorElementCollection> m_detEleCollKeys{this, "DetectorElementCollectionKeys", {}, "input SiDetectorElementCollection"};
 
-    ActsTrk::MutableTrackContainerHandle<ActsTrk::TrackFindingAlg> m_tracksBackendHandle{this, "", "SiSPSeededActsTrack"}; // the default names will then be SiSPSeededActsTrackStates, SiSPSeededActsTrackMeasurements etc.
     SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
+    ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper;
 
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};

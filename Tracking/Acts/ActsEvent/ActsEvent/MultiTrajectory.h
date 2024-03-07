@@ -38,6 +38,7 @@ inline std::string_view name_only(const char* s) {
 namespace ActsTrk {
 class MutableMultiTrajectory;
 class MultiTrajectory;
+class MutableTrackContainerHandlesHelper;
 }  // namespace ActsTrk
 
 namespace Acts {
@@ -353,8 +354,7 @@ class MutableMultiTrajectory final
 
   static const std::set<std::string> s_staticVariables;
 
-  template<typename X>
-  friend class MutableMultiTrajectoryHandle;
+  friend ActsTrk::MutableTrackContainerHandlesHelper;
 
 
  private:

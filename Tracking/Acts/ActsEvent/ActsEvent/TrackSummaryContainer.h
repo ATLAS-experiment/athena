@@ -18,6 +18,8 @@
 namespace ActsTrk {
 class MutableTrackSummaryContainer;
 class TrackSummaryContainer;
+class MutableTrackContainerHandlesHelper;
+
 }  // namespace ActsTrk
 
 namespace Acts {
@@ -216,8 +218,7 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
   void setParticleHypothesis_impl(ActsTrk::IndexType itrack, 
                                   const Acts::ParticleHypothesis& particleHypothesis);
 
-  template<typename T>
-  friend class MutableTrackContainerHandle;
+  friend class ActsTrk::MutableTrackContainerHandlesHelper;
 
 
   xAOD::TrackSummaryContainer* trackBackend(){

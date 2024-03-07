@@ -15,7 +15,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::initialize() {
   ATH_CHECK(m_trackContainerKey.initialize()); 
   ATH_CHECK(m_PixelClusters.initialize()); 
   ATH_CHECK(m_StripClusters.initialize()); 
-  ATH_CHECK(m_tracksBackendHandle.initialize()); 
+  ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_trackContainerKey.key())));
   ATH_CHECK(m_actsFitter.retrieve()); 
   ATH_CHECK(m_patternBuilder.retrieve()); 
   ATH_CHECK(m_detEleCollKeys.initialize());
@@ -122,7 +122,7 @@ StatusCode ActsTrk::ProtoTrackCreationAndFitAlg::execute(const EventContext & ct
     auto destProxy = trackContainer.getTrack(trackContainer.addTrack());
     destProxy.copyFrom(trackProxy, true); // make sure we copy track states!
   }
-  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandle.moveToConst(std::move(trackContainer), ctx);  
+  std::unique_ptr<ActsTrk::TrackContainer> constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(trackContainer), ctx);  
   ATH_CHECK(trackContainerHandle.record(std::move(constTracksContainer)));
 
 
