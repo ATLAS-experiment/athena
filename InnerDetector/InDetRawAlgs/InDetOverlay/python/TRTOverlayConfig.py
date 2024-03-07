@@ -47,7 +47,7 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
     from InDetConfig.TRT_ElectronPidToolsConfig import TRT_OverlayLocalOccupancyCfg
     kwargs.setdefault("TRT_LocalOccupancyTool", acc.popToolsAndMerge(TRT_OverlayLocalOccupancyCfg(flags)))
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     # Do TRT overlay

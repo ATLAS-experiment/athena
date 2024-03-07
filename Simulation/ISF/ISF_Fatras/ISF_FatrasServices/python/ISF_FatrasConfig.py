@@ -11,7 +11,7 @@ from ISF_Services.ISF_ServicesConfig import (
     ATLFAST_ParticleBrokerSvcCfg, TruthServiceCfg
 )
 from ISF_Geant4Tools.ISF_Geant4ToolsConfig import G4RunManagerHelperCfg
-from RngComps.RandomServices import dSFMT, AthRNGSvcCfg
+from RngComps.RngCompsConfig import dSFMT, AthRNGSvcCfg
 
 def TrkExRndSvcCfg(flags):
     seed = 'TrkExRnd OFFSET 0 12412330 37849324'

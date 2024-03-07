@@ -329,7 +329,7 @@ def LArSCL1MakerCfg(flags, **kwargs):
     acc.merge(LArAutoCorrNoiseCondSCAlgCfg(flags))
     kwargs.setdefault("LArAutoCorrKey", "ConditionStore+LArAutoCorrNoiseSC") # Provided by LArAutoCorrNoiseCondAlg/LArAutoCorrNoiseSCCondAlg
     kwargs.setdefault("NSamples", flags.LAr.ROD.nSamples + 2)  # For consistency with LArAutoCorrNoiseSC - see ATLASSIM-5483
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc",
                       acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:

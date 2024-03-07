@@ -36,7 +36,7 @@ def BasicTRTFastDigitizationToolCfg(flags, name, **kwargs):
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", FastTRT_FirstXing())
         kwargs.setdefault("LastXing",  FastTRT_LastXing())
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     kwargs.setdefault("RandomStreamName", "FastTRTDigitization")
     tool = CompFactory.TRTFastDigitizationTool(name,**kwargs)

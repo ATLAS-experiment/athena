@@ -154,7 +154,7 @@ def ITkPixelDistortionAlgCfg(flags, name="ITkPixelDistortionAlg", **kwargs):
     acc.merge(addFoldersSplitOnline(flags,"INDET", "/Indet/Onl/PixelDist", "/Indet/PixelDist", className="DetCondCFloat"))
     kwargs.setdefault("ReadKey", "/Indet/PixelDist")
     kwargs.setdefault("WriteKey", "ITkPixelDistortionData")
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     acc.addCondAlgo(CompFactory.PixelDistortionAlg(name, **kwargs))
     return acc

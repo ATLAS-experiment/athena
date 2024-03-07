@@ -63,7 +63,7 @@ def MM_DigitizationToolCfg(flags, name="MM_DigitizationTool", **kwargs):
         kwargs.setdefault("OutputSDOName", flags.Overlay.BkgPrefix + "MM_SDO")
     else:
         kwargs.setdefault("OutputSDOName", "MM_SDO")
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     result.setPrivateTools(CompFactory.MM_DigitizationTool(name, **kwargs))
     return result
@@ -85,7 +85,7 @@ def MM_OverlayDigitizationToolCfg(flags, name="MM_OverlayDigitizationTool", **kw
         kwargs.setdefault("InputObjectName", "MM_Hits")
     kwargs.setdefault("OutputObjectName", flags.Overlay.SigPrefix + "MM_DIGITS")
     kwargs.setdefault("OutputSDOName", flags.Overlay.SigPrefix + "MM_SDO")
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     acc.setPrivateTools(CompFactory.MM_DigitizationTool(name, **kwargs))
     return acc
