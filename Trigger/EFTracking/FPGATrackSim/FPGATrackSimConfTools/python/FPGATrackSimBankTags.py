@@ -56,9 +56,9 @@ FPGATrackSimBankTags = {
             ### Files
             'bankDir':           '/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-ITK-22-02-00/21.9.16/{regionName}/',
             'formatted':         True,
-            'constants_1st':     'SectorBanks/corrgen_raw_8L.gcon',
+            'constants_1st':     'SectorBanks/corrgen_raw_8L_reg0_checkGood1.gcon',
             'constants_2nd':     'SectorBanks/corrgen_raw_13L_reg0_checkGood1.gcon',
-            'sectorBank_1st':    'SectorBanks/sectorsHW_raw_8L.patt',
+            'sectorBank_1st':    'SectorBanks/sectorsHW_raw_8L_reg0_checkGood1.patt',
             'sectorBank_2nd':    'SectorBanks/sectorsHW_raw_13L_reg0_checkGood1.patt',
             'sectorSlices':      'SectorBanks/slices_8L.root',
             'constantsNoGuess_1st':     [
@@ -94,9 +94,9 @@ FPGATrackSimBankTags = {
             ### Files
             'bankDir':           '/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-ITK-23-00-01/21.9.15/{regionName}/',
             'formatted':         True,
-            'constants_1st':     'SectorBanks/corrgen_raw_8L.gcon',
+            'constants_1st':     'SectorBanks/corrgen_raw_8L_reg0_checkGood1.gcon',
             'constants_2nd':     'SectorBanks/corrgen_raw_13L.gcon',
-            'sectorBank_1st':    'SectorBanks/sectorsHW_raw_8L.patt',
+            'sectorBank_1st':    'SectorBanks/sectorsHW_raw_8L_reg0_checkGood1.patt',
             'sectorBank_2nd':    'SectorBanks/sectorsHW_raw_13L.patt',
             'sectorSlices':      'SectorBanks/slices_8L.root',
             'constantsNoGuess_1st':     [
@@ -132,10 +132,10 @@ FPGATrackSimBankTags = {
             ### Files
             'bankDir':           '/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-ITK-17-06-00/21.9.2/{regionName}/',
             'formatted':         True,
-            'constants_1st':     'SectorBanks/corrgen_raw_8L.gcon',
-            'constants_2nd':     'SectorBanks/corrgen_raw_13L.gcon',
-            'sectorBank_1st':    'SectorBanks/sectorsHW_raw_8L.patt',
-            'sectorBank_2nd':    'SectorBanks/sectorsHW_raw_13L.patt',
+            'constants_1st':     'SectorBanks/corrgen_raw_8L_reg0_checkGood1.gcon',
+            'constants_2nd':     'SectorBanks/corrgen_raw_13L_reg0_checkGood1.gcon',
+            'sectorBank_1st':    'SectorBanks/sectorsHW_raw_8L_reg0_checkGood1.patt',
+            'sectorBank_2nd':    'SectorBanks/sectorsHW_raw_13L_reg0_checkGood1.patt',
             'sectorSlices':      'SectorBanks/slices_8L.root',
             'constantsNoGuess_1st':     [
                     'SectorBanks/corrgen_raw_8L_skipPlane0.gcon',

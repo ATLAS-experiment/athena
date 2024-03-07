@@ -26,6 +26,8 @@
  */
 
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"
+
 
 #include <vector>
 #include <string>
@@ -143,7 +145,7 @@ class FPGATrackSimPlaneMap
         // Mapping Hits
         ///////////////////////////////////////////////////////////////////////
 
-        void map(FPGATrackSimHit & hit) const;
+        void map(FPGATrackSimHit & hit) const ;
 
     private:
 
@@ -169,6 +171,10 @@ class FPGATrackSimPlaneMap
             // Specify a detector layer with { SilictonTech * 1000 + DetectorZone * 100 + PhysicalLayer }
 
         std::vector<uint32_t> m_diskIndex; // index of disks in the pixel endcap, indexed by ITK layer_disk
+
+        // Module relabel object for remapping pixel endcap hits.
+        FPGATrackSimModuleRelabel* m_moduleRelabel = nullptr;
+
 
         ///////////////////////////////////////////////////////////////////////
         // Helper Functions

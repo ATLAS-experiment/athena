@@ -10,8 +10,7 @@ def getNSubregions(filePath):
     with open(PathResolver.FindCalibFile(filePath), 'r') as f:
         fields = f.readline()
         assert(fields.startswith('towers'))
-        # towers 10 phi 16
-        n = fields.split()[1] 
+        n = fields.split()[1]
         return int(n)
 
 
@@ -61,11 +60,11 @@ def FPGATrackSimBankSvcCfg(flags):
         f'{pathBankSvc}corrgen_raw_13L_skipPlane5.gcon', 
         f'{pathBankSvc}corrgen_raw_13L_skipPlane6.gcon', 
         f'{pathBankSvc}corrgen_raw_13L_skipPlane7.gcon']
-    FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_8L.gcon'
+    FPGATrackSimBankSvc.constants_1st = f'{pathBankSvc}corrgen_raw_8L_reg0_checkGood1.gcon'
     FPGATrackSimBankSvc.constants_2nd = f'{pathBankSvc}corrgen_raw_13L_reg0_checkGood1.gcon'
-    FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_8L.patt'
+    FPGATrackSimBankSvc.sectorBank_1st = f'{pathBankSvc}sectorsHW_raw_8L_reg0_checkGood1.patt'
     FPGATrackSimBankSvc.sectorBank_2nd = f'{pathBankSvc}sectorsHW_raw_13L_reg0_checkGood1.patt'
-    FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_8L.root'
+    FPGATrackSimBankSvc.sectorSlices = f'{pathBankSvc}slices_8L_reg0.root'
     result.addService(FPGATrackSimBankSvc, create=True, primary=True)
     return result
 
@@ -115,6 +114,7 @@ def FPGATrackSimRoadUnionToolCfg(flags):
         HoughTransform.subRegion = number
         HoughTransform.threshold = flags.Trigger.FPGATrackSim.ActiveConfig.threshold
         HoughTransform.traceHits = True
+        HoughTransform.IdealGeoRoads = flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads
         tools.append(HoughTransform)
 
     RF.tools = tools

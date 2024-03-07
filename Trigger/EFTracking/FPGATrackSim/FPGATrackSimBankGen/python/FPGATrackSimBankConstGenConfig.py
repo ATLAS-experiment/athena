@@ -19,7 +19,7 @@ def FPGATrackSimConstsGenCfg(flags, **kwargs):
     kwargs.setdefault("region", flags.Trigger.FPGATrackSim.FPGATrackSimBankRegion)
     kwargs.setdefault("CheckGood2ndStage",flags.Trigger.FPGATrackSim.CheckGood2ndStage)
     kwargs.setdefault("UseHitScaleFactor",flags.Trigger.FPGATrackSim.UseHitScaleFactor)
-    kwargs.setdefault("IsSecondStage",flags.Trigger.FPGATrackSim.IsSecondStage)
+    kwargs.setdefault("IsSecondStage",flags.Trigger.FPGATrackSim.Is2ndStage)
     kwargs.setdefault("missHitsConsts",flags.Trigger.FPGATrackSim.missHitsConsts)
 
     FPGATrackSimMapping = acc.getPrimaryAndMerge(FPGATrackSimMappingCfg(flags))

@@ -14,17 +14,6 @@ from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimRoadUni
 from AthenaCommon.SystemOfUnits import GeV
 
 
-def FPGATrackSimSpacePointsToolCfg(flags):
-    result=ComponentAccumulator()
-    SpacePointTool = CompFactory.FPGATrackSimSpacePointsTool_v2()
-    SpacePointTool.Filtering = flags.Trigger.FPGATrackSim.spacePointFiltering
-    SpacePointTool.FilteringClosePoints = False
-    SpacePointTool.PhiWindow = 0.008
-    SpacePointTool.Duplication = True
-    result.setPrivateTools(SpacePointTool)
-    return result
-
-
 def prepareFlagsForFPGATrackSimBankGen(flags):
     newFlags = flags.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag)
     return newFlags
@@ -52,8 +41,6 @@ def FPGATrackSimSGToRawHitsToolCfg(flags):
 
 def FPGATrackSimBankGenCfg(flags, **kwargs):
 
-    flags = prepareFlagsForFPGATrackSimBankGen(flags)
-
     acc = ComponentAccumulator()
 
     theFPGATrackSimMatrixGenAlg = CompFactory.FPGATrackSimMatrixGenAlgo()
@@ -79,7 +66,6 @@ def FPGATrackSimBankGenCfg(flags, **kwargs):
     # Override this. It gets set somewhere from bank_tag.
     theFPGATrackSimMatrixGenAlg.WCmax = 2
     theFPGATrackSimMatrixGenAlg.RoadFinder = acc.getPrimaryAndMerge(FPGATrackSimRoadUnionToolCfg(flags))
-
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
 
@@ -99,6 +85,11 @@ if __name__ == "__main__":
     log = logging.getLogger(__name__)
 
     flags.fillFromArgs()
+    flags = prepareFlagsForFPGATrackSimBankGen(flags)
+
+    ### we don't want to load sectors when running bank gen, set this to false
+    flags.Trigger.FPGATrackSim.ActiveConfig.IdealGeoRoads = False 
+
     flags.lock()
 
     acc=MainServicesCfg(flags)
