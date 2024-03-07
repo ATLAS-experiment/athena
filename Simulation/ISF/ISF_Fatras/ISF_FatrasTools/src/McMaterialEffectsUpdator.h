@@ -295,7 +295,7 @@ private:
   ServiceHandle<Trk::ITrackingGeometrySvc> m_trackingGeometrySvc{
     this,
     "TrackingGeometrySvc",
-    "ISF_FatrasTrackingGeometrySvc",
+    "",
     ""
   };
   /// Name of the TrackingGeometry as given in Detector Store
