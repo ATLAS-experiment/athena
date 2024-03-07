@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RngComps )
@@ -43,7 +43,7 @@ set_property( TEST RngComps_AtDSFMT_test_ctest APPEND PROPERTY
               ENVIRONMENT "ATLAS_REFERENCE_TAG=${RNGCOMPS_REFERENCE_TAG}" )
 
 atlas_add_test( TestSeedRunEvent
-   SCRIPT test/TestSeedRunEvent.sh
+   SCRIPT athena.py ${CMAKE_CURRENT_SOURCE_DIR}/share/TestSeedRunEvent.py
    ENVIRONMENT "ATLAS_REFERENCE_TAG=${RNGCOMPS_REFERENCE_TAG}"
    PROPERTIES TIMEOUT 500 )
 
@@ -60,10 +60,8 @@ if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} AthenaKernel AtlasCLHEP_RandomGenerators TestTools )
  endif()
 
-
 atlas_add_test( RandomServices_test
-                SCRIPT test/RandomServices_test.py )
+                SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RandomServices_test.py )
 
 # Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py test/*.py )
+atlas_install_python_modules( python/*.py )
