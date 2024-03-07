@@ -29,12 +29,13 @@ run.args = '--CA'
 run.threads = 1
 run.input = 'Single_mu_Run4'
 run.job_options = 'TriggerJobOpts/runHLT.py'
-run.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+run.flags = ['Trigger.triggerMenuSetup="MC_pp_run4_v1"',
              'Trigger.doRuntimeNaviVal=True',
              'ITk.doTruth=False',
              'Tracking.doTruth=False',
              'Trigger.enableL1CaloPhase1=False',
-             'Trigger.InDetTracking.doGPU=True']
+             'Trigger.InDetTracking.doGPU=True',
+             'Trigger.enabledSignatures=[\\\"Muon\\\"]']
 
 # The full test configuration
 test = Test.Test()
