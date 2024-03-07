@@ -62,7 +62,7 @@ def CaloRecoCfg(flags, clustersname=None):
         #Configure LArDigitsThinner:
         from LArROD.LArDigitThinnerConfig import LArDigitThinnerCfg
         result.merge(LArDigitThinnerCfg(flags))
-
+        
     #Configure MBTSTimeDiff
     #Clients are BackgroundWordFiller and (deprecated?) DQTBackgroundMonTool
     #Consider moving to BackgroundWordFiller config
@@ -74,7 +74,11 @@ def CaloRecoCfg(flags, clustersname=None):
     #Configure AOD Cell-Thinning based on samplings:
     from CaloRec.CaloThinCellsBySamplingAlgConfig import CaloThinCellsBySamplingAlgCfg
     result.merge(CaloThinCellsBySamplingAlgCfg(flags,'StreamAOD', ['TileGap3']))
-    
+        
+    # Optional: AOD Cell, rawCh, digits thinning, based on clusters, for XTalk studies
+    if flags.Calo.TopoCluster.xtalkInfoDumper and not flags.Overlay.DataOverlay:
+        from LArClusterCellDumper.CaloThinCellsInAODAlgConfig import CaloThinCellsInAODAlgCfg
+        result.merge(CaloThinCellsInAODAlgCfg(flags))
 
     return result
 
