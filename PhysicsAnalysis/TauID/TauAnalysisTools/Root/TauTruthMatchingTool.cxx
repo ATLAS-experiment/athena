@@ -329,7 +329,6 @@ StatusCode TauTruthMatchingTool::checkTruthMatch (const xAOD::TauJet& xTau, cons
   static const SG::AuxElement::Decorator<char> decIsTruthMatched("IsTruthMatched");
   static const SG::AuxElement::Decorator< ElementLink< xAOD::JetContainer > > decTruthJetLink("truthJetLink");
   
-  double dPtMax = 0.;
   for (auto xTruthTauIt : xTruthTauContainer)
   {
     TLorentzVector vTruthVisTLV;
@@ -339,9 +338,6 @@ StatusCode TauTruthMatchingTool::checkTruthMatch (const xAOD::TauJet& xTau, cons
                               m_accMVis(*xTruthTauIt));
     if (xTau.p4().DeltaR(vTruthVisTLV) <= m_dMaxDeltaR)
     {
-      // FIXME: useless as we break the loop on the first match
-      if (vTruthVisTLV.Pt()<dPtMax)
-        continue;
       static const SG::AuxElement::ConstAccessor<char> accIsHadronicTau("IsHadronicTau");
       if ((bool)accIsHadronicTau(*xTruthTauIt))
         eTruthMatchedParticleType = TruthHadronicTau;
@@ -349,11 +345,11 @@ StatusCode TauTruthMatchingTool::checkTruthMatch (const xAOD::TauJet& xTau, cons
         eTruthMatchedParticleType = TruthLeptonicTau;
 
       xTruthMatch = xTruthTauIt;
-      dPtMax = vTruthVisTLV.Pt();
       break;
     }
   }
 
+  double dPtMax = 0.;
   if (!xTruthMatch and truthTausEvent.m_xTruthMuonContainerConst)
   {
     dPtMax = 0.;
