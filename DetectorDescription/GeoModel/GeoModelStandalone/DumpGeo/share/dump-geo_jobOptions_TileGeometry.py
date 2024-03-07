@@ -1,4 +1,7 @@
-# 
+
+#TODO: This test script should be updated to CA! (R.M.B.)
+
+
 # An Athena job to dump a specific, custom TileCal geometry tag
 # to a standalone GeoModel SQLite `.db` file. 
 # The .db file can then be visualized with the GeoModel's 
