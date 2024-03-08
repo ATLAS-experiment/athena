@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef FPGATRACKSIM_MAPMAKERALG_H
 #define FPGATRACKSIM_MAPMAKERALG_H
 
@@ -32,8 +36,6 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm
         StatusCode finalize() override;
 
     private:
-        int m_histoPrintDetail = 0; // must be int type for gaudi
-
         // Handles
         ToolHandle<IFPGATrackSimEventInputHeaderTool>    m_hitInputTool { this, "InputTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimInputTool", "HitInput Tool" };
 
