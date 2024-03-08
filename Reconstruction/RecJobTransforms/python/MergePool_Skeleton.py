@@ -109,7 +109,7 @@ def fromRunArgs(runArgs):
     for item in flags.Input.TypedCollections:
         ctype, cname = item.split('#')
         if ctype.startswith('Trk'):
-            from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+            from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
             cfg.merge(TrkEventCnvSuperToolCfg(flags))
         if ctype.startswith('Calo') or ctype.startswith('LAr'):
             from LArGeoAlgsNV.LArGMConfig import LArGMCfg

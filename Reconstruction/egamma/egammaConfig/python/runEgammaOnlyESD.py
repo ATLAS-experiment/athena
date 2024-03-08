@@ -94,7 +94,7 @@ def _run(args):
     # Algorithms to run
 
     # For being able to read pre Run-3 data w/ Trk objects
-    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
 
     acc.merge(TrkEventCnvSuperToolCfg(flags))
 

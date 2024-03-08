@@ -234,7 +234,7 @@ def RecoSteering(flags):
 
     if flags.Output.doWriteESD:
         # Needed for Trk::Tracks TPCnv
-        from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
+        from TrkEventCnvTools.TrkEventCnvToolsConfig import (
             TrkEventCnvSuperToolCfg)
         acc.merge(TrkEventCnvSuperToolCfg(flags))
         # Needed for MetaData
