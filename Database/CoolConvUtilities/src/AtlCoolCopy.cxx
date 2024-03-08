@@ -15,6 +15,8 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
+#include <curl/curl.h>
 
 #include "CoolKernel/DatabaseId.h"
 #include "CoolKernel/Exception.h"
@@ -59,6 +61,22 @@
 #include "TTree.h"
 #include "TH1.h"
 #include "TObjString.h"
+
+size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::string *s) {
+  size_t newLength = size * nmemb;
+
+  try
+  {
+    s->append((char *)contents, newLength);
+  }
+  catch (std::bad_alloc &e)
+  {
+    // handle memory problem
+    return 0;
+  }
+  return newLength;
+}
+
 
 class AtlCoolCopy {
  public:
@@ -134,6 +152,7 @@ class AtlCoolCopy {
   bool getOnlineRun();
   bool getBulkRun();
   bool getRunList();
+
   static int getUpdateMode(std::string_view desc, std::string_view tag);
 
   bool checkChannels(const std::string& folder,
@@ -222,6 +241,7 @@ class AtlCoolCopy {
   std::string m_checkoutputfile;
   std::string m_timedb;
   std::string m_taglabel;
+  std::string m_runinfohost;
   std::vector<std::string> m_addguid; // additional guids to be processsed
   std::vector<std::string> m_addlfn; // additional LFNs to be processsed
   std::vector<std::string> m_parfile; // list of additional files with params
@@ -304,6 +324,7 @@ AtlCoolCopy::AtlCoolCopy(const std::string& sourcedb, const std::string& destdb,
   m_channel1(""),m_channel2(""),m_bufsize(1000),m_sealmsg(5),
   m_anadelt(-1),m_outfolder(""),m_outtag(""),m_newdataset(""),
   m_checkoutputfile(""),m_timedb(""),m_taglabel(""),
+  m_runinfohost("http://atlas-run-info-api.web.cern.ch/api"),
   m_coolapp(&m_coralsvc),
   m_dbSvc(&(m_coolapp.databaseService())),m_repsort(nullptr),
   m_open(false),m_chansel(cool::ChannelSelection::all()),p_rootfile(nullptr)
@@ -2328,6 +2349,9 @@ bool AtlCoolCopy::procOptVector(const int argc, const char* argv[],
     } else if ((par0=="-rf" || par0=="-runfile") && ir>1) {
       m_runfile.emplace_back(argv[ic+1]);
       ++ic;
+    } else if ((par0=="-ws" || par0=="-runinfohost") && ir>1) {
+      m_runinfohost=argv[ic+1];
+      ++ic;
     } else if (par0=="-h" || par0=="-help") {
       // help printout triggered by -999 return code
       return 999;
@@ -2659,116 +2683,148 @@ bool AtlCoolCopy::getTimeFromRun() {
 bool AtlCoolCopy::getOnlineRun() {
   // open using the ATLAS_COOLONL_GLOBAL schema, since we have authentication
   // information for this one by default
-  std::string connstr;
-  if (m_onlinerun) {
-    connstr="oracle://ATONR_COOL/ATLAS_COOLONL_GLOBAL";
-    std::cout << "Extracting current run-number from online ATONR ... " << 
-      std::endl;
-  } else {
-    connstr="oracle://ATLAS_COOLPROD/ATLAS_COOLONL_GLOBAL";
-    std::cout << "Extracting current run-number from replica ATLR ... " << 
-      std::endl;
-  }
-  coral::ISessionProxy* proxy=m_coralsvc.connect(connstr,coral::ReadOnly);
-  if (proxy==nullptr) {
-    std::cout << "Could not connect to " << connstr << std::endl;
-    return false;
-  }
-  try {
-    proxy->transaction().start(true);
-    // access table in the ATLAS_RUN_NUMBER schema (GRANTs have been done)
-    coral::ITable& table=
-      proxy->schema("ATLAS_RUN_NUMBER").tableHandle("RUNNUMBER");
-    coral::IQuery* query=table.newQuery();
-    query->setRowCacheSize(1);
-    query->addToOutputList("MAX(RUNNUMBER)","res");
-    query->defineOutputType("res","int");
-    coral::ICursor& cursor=query->execute();
-    if (cursor.next()) {
-      const coral::AttributeList& res=cursor.currentRow();
-      int nextrun=res["res"].data<int>()+1;
-      std::cout << "Next run started will be " << nextrun << std::endl;
-      const long long rtime=time(nullptr);
-      std::cout << "Epoch time extracted " << rtime << std::endl;
-      if (m_alliov) {
-	// if overwriting IOVs, set the new IOV lower limit
-	m_newrunemin=(static_cast<long long>(nextrun)) << 32;
-	m_newtimemin=rtime*static_cast<long long>(1E9);
+  // get minimum run-number/timestamp for bulk reco update
+  std::cout << "Extracting current run-number from ATLAS_RUN_NUMBER @ ATONR_ADG ... " << 
+  // Initialize libcurl
+  curl_global_init(CURL_GLOBAL_ALL);
+  CURL *curl = curl_easy_init();
+  if (curl) {
+      std::string url = m_runinfohost + "/runs?sort=runnumber:DESC&size=1";
+      // Set the URL
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+      // Follow HTTP redirections
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+      // Response data buffer
+      std::string response;
+
+      // Set the callback function to receive response data
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+      // Perform the request
+      CURLcode res = curl_easy_perform(curl);
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url.c_str() << std::endl;
+          return false;
       } else {
-	// set the query lower limit - for use with truncate option
-        m_runemin=(static_cast<long long>(nextrun)) << 32;
-	m_timemin=rtime*static_cast<long long>(1E9);
-	m_truncate=true;
+          // Print the received response
+          std::cout << "Response: " << std::endl;
+          std::cout << response << std::endl;
+          // Parse the JSON string
+          try {
+            nlohmann::json jsonData = nlohmann::json::parse(response);
+
+            // Extract the runnumber field
+            int runNumber = jsonData["resources"][0]["runnumber"];
+            int nextrun=runNumber+1;
+            std::cout << "Next run started will be " << nextrun << std::endl;
+            const long long rtime=time(nullptr);
+            std::cout << "Epoch time extracted " << rtime << std::endl;
+            if (m_alliov) {
+                // if overwriting IOVs, set the new IOV lower limit
+                m_newrunemin=(static_cast<long long>(nextrun)) << 32;
+                m_newtimemin=rtime*static_cast<long long>(1E9);
+            } else {
+                // set the query lower limit - for use with truncate option
+                m_runemin=(static_cast<long long>(nextrun)) << 32;
+                m_timemin=rtime*static_cast<long long>(1E9);
+                m_truncate=true;
+            }
+          } catch (nlohmann::json::parse_error& e) {
+              std::cerr << "Failed to parse JSON response: " << e.what() << std::endl;
+              return false;
+          } catch (nlohmann::json::type_error& e) {
+              std::cerr << "Failed to extract data from JSON response: " << e.what() << std::endl;
+              return false;
+          } catch (std::exception& e) {
+              std::cerr << "Failed to extract run and timestamp from JSON response: " << e.what() << std::endl;
+              return false;
+          }
       }
-    } else {
-      std::cout << "Query returned no data" << std::endl;
+      // Clean up
+      curl_easy_cleanup(curl);
+  } else {
+      std::cerr << "Failed to initialize libcurl." << std::endl;
       return false;
-    }
   }
-  catch (coral::Exception& e) {
-    std::cout << "Exception when querying for run number: " << e.what()
-	      << std::endl;
-    return false;
-  }
+  // Cleanup libcurl
+  curl_global_cleanup();
   return true;
 }
-
 bool AtlCoolCopy::getBulkRun() {
   // get minimum run-number/timestamp for bulk reco update
   if (m_getonline) {
     std::cout << "ERROR: -getonline and -getbulk cannot be used simultaneously"
-	      << std::endl;
+              << std::endl;
     return false;
   }
-  const std::string connstr="oracle://ATLAS_COOLPROD/ATLAS_COOLONL_GLOBAL";
-  std::cout << "Extracting bulk-reco run limit from ATLR ... " << std::endl;
-  coral::ISessionProxy* proxy=m_coralsvc.connect(connstr,coral::ReadOnly);
-  if (proxy==nullptr) {
-    std::cout << "Could not connect to " << connstr << std::endl;
-    return false;
-  }
-  try {
-    proxy->transaction().start(true);
-    // access table in the ATLAS_COOL_GLOBAL schema (GRANTs have been done)
-    coral::ITable& table=
-      proxy->schema("ATLAS_COOL_GLOBAL").tableHandle("NEMOP_SYNC");
-    coral::IQuery* query=table.newQuery();
-    query->setRowCacheSize(1);
-    query->addToOutputList("RUN","run");
-    query->defineOutputType("run","int");
-    query->addToOutputList("TIMESTAMP","timestamp");
-    query->defineOutputType("timestamp","int");
-    coral::AttributeList bindvar;
-    bindvar.extend<int>("ID");
-    bindvar[0].data<int>()=1;
-    query->setCondition("ID=:ID",bindvar);
-    coral::ICursor& cursor=query->execute();
-    if (cursor.next()) {
-      const coral::AttributeList& res=cursor.currentRow();
-      const int nextrun=res["run"].data<int>();
-      std::cout << "Next run started will be " << nextrun << std::endl;
-      long long rtime=res["timestamp"].data<int>();
-      std::cout << "Epoch time extracted " << rtime << std::endl;
-      if (m_alliov) {
-	// if overwriting IOVs, set the new IOV lower limit
-	m_newrunemin=(static_cast<long long>(nextrun)) << 32;
-	m_newtimemin=rtime*static_cast<long long>(1E9);
+  std::cout << "Call getbulk using URL" << std::endl;
+  // Initialize libcurl
+  curl_global_init(CURL_GLOBAL_ALL);
+  CURL *curl = curl_easy_init();
+  if (curl) {
+      std::string url = m_runinfohost + "/runs/nemop/sync";
+      // Set the URL
+      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+      // Follow HTTP redirections
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+      // Response data buffer
+      std::string response;
+
+      // Set the callback function to receive response data
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+      // Perform the request
+      CURLcode res = curl_easy_perform(curl);
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url.c_str() << std::endl;
+          return false;
       } else {
-	// set the query lower limit - for use with truncate option
-        m_runemin=(static_cast<long long>(nextrun)) << 32;
-	m_timemin=rtime*static_cast<long long>(1E9);
-	m_truncate=true;
-      }
-    } else {
-      std::cout << "Query returned no data" << std::endl;
+          // Print the received response
+          std::cout << "Response: " << std::endl;
+          std::cout << response << std::endl;
+          try {
+            // Split the response into two fields
+            nlohmann::json jsonData = nlohmann::json::parse(response);
+            // Extract the run and timestamp fields
+            int nextrun = jsonData["run"];
+            long long rtime = jsonData["timestamp"];
+            std::cout << "Next run started will be " << nextrun << std::endl;
+            std::cout << "Epoch time extracted " << rtime << std::endl;
+            if (m_alliov) {
+                // if overwriting IOVs, set the new IOV lower limit
+                m_newrunemin=(static_cast<long long>(nextrun)) << 32;
+                m_newtimemin=rtime*static_cast<long long>(1E9);
+            } else {
+                // set the query lower limit - for use with truncate option
+                m_runemin=(static_cast<long long>(nextrun)) << 32;
+                m_timemin=rtime*static_cast<long long>(1E9);
+                m_truncate=true;
+            }
+          } catch (nlohmann::json::parse_error& e) {
+              std::cerr << "Failed to parse JSON response: " << e.what() << std::endl;
+              return false;
+          } catch (nlohmann::json::type_error& e) {
+              std::cerr << "Failed to extract data from JSON response: " << e.what() << std::endl;
+              return false;
+          } catch (std::exception& e) {
+              std::cerr << "Failed to extract run and timestamp from JSON response: " << e.what() << std::endl;
+              return false;
+          }      }
+      // Clean up
+      curl_easy_cleanup(curl);
+  } else {
+      std::cerr << "Failed to initialize libcurl." << std::endl;
       return false;
-    }
   }
-  catch (coral::Exception& e) {
-    std::cout << "Exception when querying for run number: " << e.what()
-	      << std::endl;
-    return false;
-  }
+  // Cleanup libcurl
+  curl_global_cleanup();
+
   return true;
 }
 
