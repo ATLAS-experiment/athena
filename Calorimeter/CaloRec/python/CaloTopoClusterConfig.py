@@ -151,6 +151,9 @@ def getTopoMoments(flags):
         TopoMoments.MomentsNames += ["ENG_BAD_HV_CELLS"
                                      ,"N_BAD_HV_CELLS"
                                      ]
+    
+    TopoMoments.UseGPUCriteria = flags.Calo.TopoCluster.UseGPUCompatibleCriteria
+    
     result.setPrivateTools(TopoMoments)
     return result
 
@@ -269,13 +272,17 @@ def CaloTopoClusterToolCfg(flags, cellsname):
     
     # note E or AbsE
     #
-    # the following property must be set to TRUE in order to make double
+    # the following properties must be set to TRUE in order to make double
     # sided cuts on the seed and the cluster level
     #
     TopoMaker.SeedCutsInAbsE                 = True
+    TopoMaker.ClusterCutsInAbsEt             = True
     TopoMaker.ClusterEtorAbsEtCut            = 0.0*MeV
     # use 2-gaussian or single gaussian noise for TileCal
     TopoMaker.TwoGaussianNoise = flags.Calo.TopoCluster.doTwoGaussianNoise
+    
+    TopoMaker.UseGPUCriteria = flags.Calo.TopoCluster.UseGPUCompatibleCriteria
+    
     result.setPrivateTools(TopoMaker)
     return result
 
@@ -302,6 +309,9 @@ def CaloTopoClusterSplitterToolCfg(flags):
     TopoSplitter.ShareBorderCells = True
     TopoSplitter.RestrictHECIWandFCalNeighbors  = False
     TopoSplitter.WeightingOfNegClusters = flags.Calo.TopoCluster.doTreatEnergyCutAsAbsolute
+    
+    TopoSplitter.UseGPUCriteria = flags.Calo.TopoCluster.UseGPUCompatibleCriteria
+    
     result.setPrivateTools(TopoSplitter)
     return result
 
@@ -319,7 +329,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
 
     if clustersname=="CaloTopoClusters" and doLCCalib is True: 
-        raise RuntimeError("Inconistent arguments: Name must not be 'CaloTopoClusters' if doLCCalib is True")
+        raise RuntimeError("Inconsistent arguments: Name must not be 'CaloTopoClusters' if doLCCalib is True")
 
     result=ComponentAccumulator()
 
@@ -364,11 +374,9 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
     if flags.Calo.TopoCluster.doCalibHitMoments:
         calibHitsMomentsMaker=getTopoCalibMoments(flags)
         CaloTopoCluster.ClusterCorrectionTools += [calibHitsMomentsMaker]
-
-    CaloTopoCluster.ClustersOutputName=clustersname
     
     if doLCCalib:
-        theCaloClusterSnapshot=CaloClusterSnapshot(OutputName=clustersnapname,SetCrossLinks=True)        
+        theCaloClusterSnapshot=CaloClusterSnapshot(OutputName=clustersnapname,SetCrossLinks=True,FinalClusterContainerName=clustersname)        
         CaloTopoCluster.ClusterCorrectionTools += [theCaloClusterSnapshot]
         #if not clustersname:
         CaloTopoCluster.ClusterCorrectionTools += getTopoClusterLocalCalibTools(flags)
@@ -468,7 +476,7 @@ def addSnapshot(topomaker, corrName,contName):
     for t in corrTools:
         newCorrTools.append(t)
         if (t.getName()==corrName):
-            newSnapshot=CompFactory.CaloClusterSnapshot("Snapshot_"+corrName,OutputName=contName)
+            newSnapshot=CompFactory.CaloClusterSnapshot("Snapshot_"+corrName,OutputName=contName,FinalClusterContainerName=topomaker.ClustersOutputName)
             newCorrTools.append(newSnapshot)
             found=True
     if not found:

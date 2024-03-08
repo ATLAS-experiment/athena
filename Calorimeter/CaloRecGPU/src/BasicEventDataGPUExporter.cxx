@@ -32,7 +32,7 @@ StatusCode BasicEventDataGPUExporter::initialize()
   //ATH_CHECK(m_noiseCDOKey.initialize());
   //For Two Gaussian Noise comparisons.
   
-  ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( m_cellsKey.initialize() );
 
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 
@@ -117,7 +117,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
           export_cell(cell, cell_index);
         }
     }
-  else if (m_missingCellsToFill.size() > 0)
+  else if (cell_collection->isOrdered() && m_missingCellsToFill.size() > 0)
     //Remediated: we know the missing cells, force them to be invalid.
     //(Tests so far, on samples both oldish and newish, had 186986 and 187352 missing...)
     {
@@ -188,11 +188,12 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
   //std::cout << "-------------------------------------------------------------------------- END" << std::endl;
 
   const auto post_cells = clock_type::now();
+  
+  ed.m_clusters.allocate();
+  ed.m_cell_state.allocate();
 
   if (cluster_collection->size() > 0)
     {
-      ed.m_clusters.allocate();
-      ed.m_cell_state.allocate();
 
       for (int i = 0; i < NCaloCells; ++i)
         {

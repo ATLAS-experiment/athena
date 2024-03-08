@@ -31,7 +31,7 @@ CaloGPUClusterAndCellDataMonitor::CaloGPUClusterAndCellDataMonitor(const std::st
 
 StatusCode CaloGPUClusterAndCellDataMonitor::initialize()
 {
-  ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( m_cellsKey.initialize() );
 
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 

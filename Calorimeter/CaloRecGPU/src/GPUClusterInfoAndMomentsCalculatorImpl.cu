@@ -2088,7 +2088,7 @@ void ClusterMomentsCalculator::calculateClusterPropertiesAndMoments(CaloRecGPU::
                                                                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                                                     const bool defer_instead_of_oversize)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   const CUDAKernelLaunchConfiguration cfg_0_clu = optimizer.get_launch_configuration("ClusterMomentsCalculator", 0);
   const CUDAKernelLaunchConfiguration cfg_1_cel = optimizer.get_launch_configuration("ClusterMomentsCalculator", 1);

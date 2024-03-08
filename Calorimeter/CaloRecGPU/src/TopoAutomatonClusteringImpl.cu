@@ -197,7 +197,7 @@ void TAGrowing::signalToNoise(EventDataHolder & holder,
                               const bool synchronize,
                               CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   cudaMemsetAsync(&(holder.m_clusters_dev->number), 0, sizeof(holder.m_clusters_dev->number), stream_to_use);
 
   const CUDAKernelLaunchConfiguration config = optimizer.get_launch_configuration("TopoAutomatonGrowing", 0);
@@ -343,7 +343,7 @@ void TAGrowing::cellPairs(EventDataHolder & holder,
                           const bool synchronize,
                           CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   TopoAutomatonGrowingTemporaries * temps = TACHacks::get_temporaries(holder);
 
@@ -370,7 +370,7 @@ void TAGrowing::cellPairs(EventDataHolder & holder,
  * Series of kernels for the growing algorithm!
  ******************************************************************************/
 
-__device__ static
+static __device__
 void propagate_through_pair_main(const int pair,
                                  Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                  Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
@@ -424,7 +424,7 @@ void propagate_through_pair_main(const int pair,
 }
 
 
-__device__ static
+static __device__
 void propagate_through_pair_terminal(const int pair,
                                      Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                      Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
@@ -438,7 +438,7 @@ void propagate_through_pair_terminal(const int pair,
 }
 
 
-__global__ static
+static __global__
 void clusterGrowingMainCooperativeKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                          Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
 {
@@ -498,7 +498,7 @@ void clusterGrowingMainCooperativeKernel(Helpers::CUDA_kernel_object<CellStateAr
 
 }
 
-__global__ static
+static __global__
 void assignSeedCellsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
                            const Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
 {
@@ -514,7 +514,7 @@ void assignSeedCellsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_
     }
 }
 
-__global__ static
+static __global__
 void finalizeClusterAttributionKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                       const Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
 {
@@ -546,41 +546,29 @@ namespace
   };
 }
 
-__global__ static
+static __global__
 void propagateNeighboursKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                               Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                              );
+                               Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                               const kernel_sizes blocks, const kernel_sizes grids);
 
-__global__ static
+static __global__
 void propagateTerminalsKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                               Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                             );
+                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                              const kernel_sizes blocks, const kernel_sizes grids);
 
-__global__ static
+static __global__
 void copyTagsAndCheckTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                        Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                                       Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                      );
+                                       Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                                       const kernel_sizes blocks, const kernel_sizes grids);
 
-__global__ static
+static __global__
 void propagateNeighboursKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                               Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                              )
+                               Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                               const kernel_sizes blocks, const kernel_sizes grids)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -605,11 +593,8 @@ void propagateNeighboursKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_st
 __global__ static
 void copyTagsAndCheckTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                        Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                                       Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                      )
+                                       Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                                       const kernel_sizes blocks, const kernel_sizes grids)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -625,15 +610,15 @@ void copyTagsAndCheckTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr>
         {
           temporaries->continue_flag = 0;
 
-          propagateNeighboursKernel <<< grid.neigh_prop, block.neigh_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
-                                                                                                      temporaries,
-                                                                                                      clusters_arr,
-                                                                                                      blocks, grids);
+          propagateNeighboursKernel <<< grids.neigh_prop, blocks.neigh_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
+                                                                                                        temporaries,
+                                                                                                        clusters_arr,
+                                                                                                        blocks, grids);
         }
       else
         {
 
-          propagateTerminalsKernel <<< grid.term_prop, block.term_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
+          propagateTerminalsKernel <<< grids.term_prop, blocks.term_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
                                                                                                    temporaries,
                                                                                                    clusters_arr,
                                                                                                    blocks, grids);
@@ -656,11 +641,8 @@ void copyTagsAndCheckTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr>
 __global__ static
 void propagateTerminalsKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                               Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                             )
+                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                              const kernel_sizes blocks, const kernel_sizes grids)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -710,11 +692,13 @@ void clusterGrowingMainDefer(Helpers::CUDA_kernel_object<CellStateArr> cell_stat
         {
           propagateNeighboursKernel <<< grids.neigh_prop, blocks.neigh_prop>>>(cell_state_arr,
                                                                                temporaries,
-                                                                               clusters_arr);
+                                                                               clusters_arr,
+                                                                               blocks, grids);
 
           copyTagsAndCheckTerminationKernel <<< grids.copy_and_check, blocks.copy_and_check>>>(cell_state_arr,
                                                                                                temporaries,
-                                                                                               clusters_arr);
+                                                                                               clusters_arr,
+                                                                                               blocks, grids);
 
           //++counter;
 
@@ -724,7 +708,8 @@ void clusterGrowingMainDefer(Helpers::CUDA_kernel_object<CellStateArr> cell_stat
 
       propagateTerminalsKernel <<< grids.term_prop, blocks.term_prop>>>(cell_state_arr,
                                                                         temporaries,
-                                                                        clusters_arr);
+                                                                        clusters_arr,
+                                                                        blocks, grids);
       assignSeedCellsKernel <<< grids.seed_assign, blocks.seed_assign>>>(clusters_arr, temporaries);
 
 #endif
@@ -739,7 +724,7 @@ void TAGrowing::clusterGrowing(EventDataHolder & holder,
                                CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
 
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   TopoAutomatonGrowingTemporaries * temps = TACHacks::get_temporaries(holder);
 

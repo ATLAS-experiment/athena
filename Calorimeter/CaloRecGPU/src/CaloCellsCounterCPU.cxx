@@ -25,7 +25,7 @@ CaloCellsCounterCPU::CaloCellsCounterCPU(const std::string & type, const std::st
 StatusCode CaloCellsCounterCPU::initialize()
 {
   ATH_CHECK( m_noiseCDOKey.initialize() );
-  ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( m_cellsKey.initialize() );
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
   return StatusCode::SUCCESS;
 }

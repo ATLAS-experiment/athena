@@ -275,7 +275,7 @@ namespace CaloRecGPU
           if (qp.provenance() & mask)
             {
               const float this_time = time[cell];
-              if (fabsf(this_time) < threshold)
+              if (fabsf(this_time) >= threshold)
                 {
                   if (use_crosstalk)
                     {

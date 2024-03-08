@@ -21,7 +21,7 @@ CaloCPUOutput::CaloCPUOutput(const std::string & type, const std::string & name,
 
 StatusCode CaloCPUOutput::initialize()
 {
-  ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( m_cellsKey.initialize() );
 
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 

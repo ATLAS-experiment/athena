@@ -43,6 +43,7 @@ def TileTopoClusterCfg(flags, **kwargs):
     topoClusterMaker.SeedThresholdOnEorAbsEinSigma = 4.0
 
     topoClusterMaker.SeedCutsInAbsE = True
+    topoClusterMaker.ClusterCutsInAbsEt = True
     topoClusterMaker.ClusterEtorAbsEtCut = 0.0 * MeV
     topoClusterMaker.TwoGaussianNoise = flags.Calo.TopoCluster.doTwoGaussianNoise
 

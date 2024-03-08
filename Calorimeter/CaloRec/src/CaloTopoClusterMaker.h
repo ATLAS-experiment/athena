@@ -243,6 +243,14 @@ private:
   bool m_cellCutsInAbsE;                         
                                                  
   /**
+   * @brief if set to true final cluster cuts are on \f$|E|_\perp\f$. 
+   *
+   * The final cluster cuts will be on absolute transverse energy
+   * if this is set to true. If set to false the cuts will be on
+   * transverse energy instead.  */
+  bool m_clusterCutsInAbsE;
+  
+  /**
    * @brief \f$E_\perp\f$ cut on the final cluster. 
    *
    * The final cluster has to pass this cut (which is on \f$E_\perp\f$

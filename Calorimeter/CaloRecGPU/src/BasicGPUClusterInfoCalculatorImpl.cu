@@ -83,7 +83,7 @@ void BasicClusterInfoCalculator::updateSeedCellProperties(CaloRecGPU::EventDataH
                                                           const bool synchronize,
                                                           CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   const CUDAKernelLaunchConfiguration launch_config = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 0);
 
@@ -285,7 +285,7 @@ void BasicClusterInfoCalculator::calculateClusterProperties(CaloRecGPU::EventDat
                                                             const bool cut_in_absolute_ET, const float ET_threshold,
                                                             CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   const CUDAKernelLaunchConfiguration cfg_calculate = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 1);
   const CUDAKernelLaunchConfiguration cfg_finalize  = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 2);
