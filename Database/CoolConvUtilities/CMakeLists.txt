@@ -7,14 +7,14 @@ atlas_subdir( CoolConvUtilities )
 find_package( COOL COMPONENTS CoolKernel CoolApplication )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( ROOT COMPONENTS Hist Tree RIO Core MathCore pthread )
-
+find_package( CURL )
 # Component(s) in the package:
 atlas_add_executable( AtlCoolCopy
                       src/AtlCoolCopy.cxx
                       src/ReplicaSorter.cxx
                       src/CoolTagInfo.cxx
                       INCLUDE_DIRS ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} FileCatalog PersistencySvc CoraCool CxxUtils )
+                      LINK_LIBRARIES ${CURL_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} FileCatalog PersistencySvc CoraCool CxxUtils )
 set_target_properties( AtlCoolCopy PROPERTIES ENABLE_EXPORTS True )
 
 # Install files from the package:
