@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ByteStreamCnvSvcBase )
@@ -18,11 +18,8 @@ atlas_add_component( ByteStreamCnvSvcBase
                      src/components/*.cxx
                      LINK_LIBRARIES ByteStreamCnvSvcBaseLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
 # Tests in the package:
 atlas_add_test( ROBDataProviderSvcMT
-                SCRIPT test/test_ROBDataProviderSvcMT.sh
-                POST_EXEC_SCRIPT nopost.sh
-		        PROPERTIES TIMEOUT 1200 )
+                SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ROBDataProviderSvcMT.py
+                PROPERTIES TIMEOUT 1200
+                POST_EXEC_SCRIPT noerror.sh )
