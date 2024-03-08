@@ -124,7 +124,7 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
   CaloCellContainer::const_iterator SCit_e = superCellCont->end(); 
 
   std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> variables;
-  
+
   for ( ; SCit!=SCit_e;++SCit) {
 
     const CaloCell* superCell = *SCit; 
@@ -146,10 +146,10 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
 
     const CaloCell* superCellRef = superCellRefCont->findCell( SCcaloDDE->identifyHash() );
     float SCetRef = superCellRef->et();
-    float resolution = -100;
-    float resolutionPass = -100;
-    float resolutionHET = -100;
-    if ( SCetRef > 100 ) resolution = 100.0*(SCet-SCetRef)/SCetRef;
+    float resolution = -1000;
+    float resolutionPass = -1000;
+    float resolutionHET = -1000;
+    if ( SCetRef > m_thresholdsForResolution) resolution = 100.0*(SCet-SCetRef)/SCetRef;
     if ( SCpassTime || SCpassPF ) resolutionPass = resolution;
     if ( SCet > 4e3 ) resolutionHET=resolution;
 
@@ -168,9 +168,9 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     variables.push_back(MSCt);
     variables.push_back(MSCprov);
     variables.push_back(MSCeta);
-    if ( SCetRef > 100 ) variables.push_back(MSCres);
-    if ( (SCetRef > 100 ) && (SCpassTime || SCpassPF ) ) variables.push_back(MSCresPass);
-    if ( (SCetRef > 100 ) && (SCet > 4e3 ) ) variables.push_back(MSCresHET);
+    if (  SCetRef > m_thresholdsForResolution ) variables.push_back(MSCres);
+    if ( (SCetRef > m_thresholdsForResolution ) && (SCpassTime || SCpassPF ) ) variables.push_back(MSCresPass);
+    if ( (SCetRef > m_thresholdsForResolution ) && (SCet > 4e3 ) ) variables.push_back(MSCresHET);
     variables.push_back(MSCetRef);
     // let us put conditional to force building the linearity plot
     // only when the new signal passes BCID
@@ -195,9 +195,9 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     variables.push_back(LMSCt);
     variables.push_back(LMSCprov);
     variables.push_back(LMSCeta);
-    if ( SCetRef > 100 ) variables.push_back(LMSCres);
-    if ( (SCetRef > 100 ) && (SCpassTime || SCpassPF ) ) variables.push_back(LMSCresPass);
-    if ( (SCetRef > 100 ) && (SCet > 4e3 ) ) variables.push_back(LMSCresHET);
+    if (  SCetRef > m_thresholdsForResolution ) variables.push_back(LMSCres);
+    if ( (SCetRef > m_thresholdsForResolution ) && (SCpassTime || SCpassPF ) ) variables.push_back(LMSCresPass);
+    if ( (SCetRef > m_thresholdsForResolution ) && (SCet > 4e3 ) ) variables.push_back(LMSCresHET);
     variables.push_back(LMSCetRef);
     if ( SCpassTime || SCpassPF ) variables.push_back(LMSCtRef);
     variables.push_back(LMSCprovRef);
