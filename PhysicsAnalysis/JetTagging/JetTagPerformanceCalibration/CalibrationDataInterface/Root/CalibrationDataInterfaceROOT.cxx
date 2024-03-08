@@ -2630,6 +2630,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
     if (m_EVStrategy == Analysis::Uncertainty::SFEigen){
       ///////////////////////////////////////////////////////////////
       std::shared_ptr<CalibrationDataEigenVariations> newEigenVariation(new CalibrationDataEigenVariations(m_filenameSF, m_taggerName, OP, author, histoContainer, m_useRecommendedEVExclusions));
+      newEigenVariation->setVerbose(m_verbose);
 
       // At this point we may also want to reduce the number of eigenvector variations.
       // The choices are stored with the container object; but first we need to know what flavour we are dealing with.
