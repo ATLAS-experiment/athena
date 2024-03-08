@@ -87,7 +87,10 @@ def ITkStoreTrackSeparateContainerCfg(flags, TrackContainer="",
                                       ClusterSplitProbContainer=""):
     result = ComponentAccumulator()
     extension = flags.Tracking.ActiveConfig.extension
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     
     if doTrackOverlay:
         # schedule merger to combine signal and background tracks
@@ -145,7 +148,10 @@ def ITkTrackRecoPassCfg(flags, extension="",
         StatTrackTruthCollections = []
 
     result = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
 
     TrackContainer = "Resolved" + extension + "Tracks"
     SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
@@ -198,7 +204,10 @@ def ITkTrackFinalCfg(flags,
         StatTrackTruthCollections = []
 
     result = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
 
     TrackContainer = "CombinedITkTracks"
     if doTrackOverlay:
