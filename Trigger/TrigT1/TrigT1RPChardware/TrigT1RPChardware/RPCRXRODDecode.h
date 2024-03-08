@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1RPChardware_RPCRXRODDecode_H
@@ -17,8 +17,8 @@ public:
     sbit32 gimeRODDataAddress() { return m_RODDataAddress; };
     void RODAddresses(const RODword *RODData, const sbit32 numberOfStatusElements, const sbit32 statusBlockPosition);
     void RODHeader(const RODword *ROBData);
-    int pushWord(const ubit16 inword);
-    int pushWord(const RODword inword, ubit16 j);
+    int pushWord(const ubit16 inword, uint NOBXS);
+    int pushWord(const RODword inword, ubit16 j, uint NOBXS);
     MatrixReadOut *CMFragment() { return &CMRO; };
     SectorLogicRXReadOut *SLFragment() { return &SLRO; };
     void gimeCMROData();

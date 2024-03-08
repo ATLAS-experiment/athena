@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************//
@@ -153,7 +153,7 @@ ostream &operator<<(ostream &stream, InternalRegister &o) {
 // ### SectorLogic ###
 
 // standard constructor of the class
-SectorLogic::SectorLogic(int run, int event, CMAword debug, ubit16 subsys, ubit16 sect, bool oldSimulation) :
+SectorLogic::SectorLogic(int run, int event, CMAword debug, ubit16 subsys, ubit16 sect, bool oldSimulation, uint NOBXS, uint BCZERO) :
     BaseObject(Hardware, "SectorLogic") {
     // identificazione sector logic di aleandro
     m_run = run;
@@ -167,6 +167,7 @@ SectorLogic::SectorLogic(int run, int event, CMAword debug, ubit16 subsys, ubit1
     // define m_nBunMax
     //
     m_nBunMax = NOBXS;
+    m_bczero = BCZERO;
     // reset TC and OPL check parameters
     // EnableTCCheck and m_EnableOPLCheck
     m_EnableTCCheckLow = 0x00000000;
@@ -191,7 +192,7 @@ SectorLogic::~SectorLogic(void) {}
 //****************************************************************************//
 
 CMAword SectorLogic::outputToMuCTPI(int deltaBC) {
-    int bunchID = BCZERO + deltaBC;
+    int bunchID = m_bczero + deltaBC;
     if (bunchID < m_nBunMax && bunchID >= 0) {
         ubit16 bxsafe = (ubit16)bunchID;
         return output(bxsafe);
@@ -308,10 +309,10 @@ CMAword SectorLogic::output(ubit16 i) {
 
     // MC 2015/7/7 add bc information
     ubit16 bc = 0;
-    if (i > BCZERO) {
-        bc = i - BCZERO;
-    } else if (i < BCZERO) {
-        bc = i + 8 - BCZERO;
+    if (i > m_bczero) {
+        bc = i - m_bczero;
+    } else if (i < m_bczero) {
+        bc = i + 8 - m_bczero;
     }
 
     if (m_OutFromSectorLogic[i].pt1 == 0) m_OutFromSectorLogic[i].pt1 = 7;
@@ -540,6 +541,7 @@ void SectorLogic::execute() {
 //****************************************************************************//
 // overload of the << operator
 std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
+  int nBunMax = o.numberOfBunches();
     stream << "@@@@@@@@@@ event and sector logic identification @@@@@@@@@@\n\n";
 
     stream << "run    = " << o.m_run << std::endl;
@@ -621,11 +623,11 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
 
     // print input from pads
     stream.setf(std::ios::dec, std::ios::basefield);
-    dfpa(stream, 8, 8, NOBXS);
+    dfpa(stream, 8, 8, nBunMax);
     int ipad = 0;
     for (ipad = 0; ipad <= 7; ipad++) {
         stream << "pad[" << ipad << "] :";
-        for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+        for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
             stream << "      ";
             stream << o.m_InFromPad[ibx][ipad];
         }
@@ -635,7 +637,7 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
     // print input from tilecal
     stream.setf(std::ios::hex, std::ios::basefield);
     stream << "tile   :";
-    for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+    for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
         stream << "                 ";
         stream.width(8);
         stream.fill('0');
@@ -654,10 +656,10 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
         stream << "internal registers # " << ireg + 1 << " (input)" << std::endl;
         // DataFromPad
         stream.setf(std::ios::dec, std::ios::basefield);
-        dfpa(stream, 8, 8, NOBXS);
+        dfpa(stream, 8, 8, nBunMax);
         for (ipad = 0; ipad <= 7; ipad++) {
             stream << "pad[" << ipad << "] :";
-            for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+            for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
                 stream << "      ";
                 stream << (intreginp[ireg] + ibx)->pad[ipad];
             }
@@ -666,7 +668,7 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
         // Tile Cal
         stream.setf(ios::hex, ios::basefield);
         stream << "tile   :";
-        for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+        for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
             stream << "                 ";
             stream.width(8);
             stream.fill('0');
@@ -678,7 +680,7 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
         // Sector Logic Output
         stream.setf(std::ios::dec, std::ios::basefield);
         stream << "sl out :";
-        for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+        for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
             stream << "     ";
             stream << (intreginp[ireg] + ibx)->out;
         }
@@ -689,10 +691,10 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
         stream << "internal registers # " << ireg + 1 << " (output)" << std::endl;
         // DataFromPad
         stream.setf(std::ios::dec, std::ios::basefield);
-        dfpa(stream, 8, 8, NOBXS);
+        dfpa(stream, 8, 8, nBunMax);
         for (ipad = 0; ipad <= 7; ipad++) {
             stream << "pad[" << ipad << "] :";
-            for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+            for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
                 stream << "      ";
                 stream << (intregoutp[ireg] + ibx)->pad[ipad];
             }
@@ -701,7 +703,7 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
         // Tile Cal
         stream.setf(std::ios::hex, std::ios::basefield);
         stream << "tile   :";
-        for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+        for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
             stream << "                 ";
             stream.width(8);
             stream.fill('0');
@@ -713,7 +715,7 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
         // Sector Logic Output
         stream.setf(std::ios::dec, std::ios::basefield);
         stream << "sl out :";
-        for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+        for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
             stream << "     ";
             stream << (intregoutp[ireg] + ibx)->out;
         }
@@ -723,9 +725,9 @@ std::ostream &operator<<(std::ostream &stream, SectorLogic &o) {
     // print the output registers of the sector logic board
     stream.setf(std::ios::dec, std::ios::basefield);
     stream << "@@@@@@@@@@ sector logic output register @@@@@@@@@@\n\n";
-    ofsla(stream, 8, 5, NOBXS);
+    ofsla(stream, 8, 5, nBunMax);
     stream << "        ";
-    for (ibx = 0; ibx <= NOBXS - 1; ibx++) {
+    for (ibx = 0; ibx <= nBunMax - 1; ibx++) {
         stream << "     ";
         stream << o.m_OutFromSectorLogic[ibx];
     }

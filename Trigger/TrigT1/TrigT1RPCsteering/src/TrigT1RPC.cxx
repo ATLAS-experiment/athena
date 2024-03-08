@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPC.h"
@@ -40,6 +40,12 @@ StatusCode TrigT1RPC::initialize(){
     ATH_CHECK(m_muctpiKey.initialize(!m_useRun3Config));
     ATH_CHECK(m_bis78TrigKey.initialize());
     ATH_CHECK(m_muDetMgrKey.initialize());
+    if(m_nobxs>8){
+      //The RPC simulation uses many arrays that assume maximum 8 BCs are readout
+      //See TrigT1/TrigT1RPChardware/Matrix.h for example
+      ATH_MSG_ERROR("Readout of more than 8 BCs is not supported by the simulation");
+      return StatusCode::FAILURE;
+    }
     return StatusCode::SUCCESS;
 }
  
@@ -120,7 +126,7 @@ StatusCode TrigT1RPC::execute() {
                                                                         //
   while(SLit != sectors_patterns.end())                                 //
   {                                                                     //
-      SectorLogic* logic = (*SLit)->give_SectorL(readCdo);                     //
+    SectorLogic* logic = (*SLit)->give_SectorL(readCdo, m_nobxs, m_bczero);
       int sector     = (*SLit)->sector();                               //
       int subsystem  = (sector > 31)? 1 : 0;                            //
       int logic_sector  = sector%32;//
@@ -192,7 +198,8 @@ StatusCode TrigT1RPC::execute() {
                                (unsigned long int) m_cma_rostruct_debug,
                                (unsigned long int) m_pad_rostruct_debug,
                                (unsigned long int) m_rx_rostruct_debug,
-                               (unsigned long int) m_sl_rostruct_debug);
+			       (unsigned long int) m_sl_rostruct_debug,
+			       m_nobxs, m_bczero);
 
 
       // Example on how to access the byte stream data.

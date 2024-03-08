@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1RPChardware_SectorLogic_H
@@ -21,7 +21,6 @@
 
 #include "MuonCablingTools/BaseObject.h"
 #include "TrigT1RPChardware/Lvl1Def.h"
-#include "TrigT1RPChardware/NOBXS.h"
 
 // ### DataFromPad ###
 struct DataFromPad {
@@ -182,35 +181,38 @@ class SectorLogic : public BaseObject {
     CMAword m_EnableOPLCheck{0x00000000};
 
     // input and output data
-    DataFromPad m_InFromPad[NOBXS][8];
-    std::array<CMAword, NOBXS> m_InFromTileCal{0};
-    std::array<OutputFromSectorLogic, NOBXS> m_OutFromSectorLogic{};
+  DataFromPad m_InFromPad[8][8]; //DataFromPad m_InFromPad[NOBXS][8];
+  std::array<CMAword, 8> m_InFromTileCal{0}; //assumes NOBXS=8 at most
+  std::array<OutputFromSectorLogic, 8> m_OutFromSectorLogic{}; //assumes NOBXS=8 at most
 
     // internal registers of the various steps of the Sector Logic pipeline
     // 1st step registers
     // low Pt filter
-    std::array<InternalRegister, NOBXS> m_LowPtFilter_in{};
-    std::array<InternalRegister, NOBXS> m_LowPtFilter_out{};
+   //arrays assumes NOBXS=8 at most
+    std::array<InternalRegister, 8> m_LowPtFilter_in{};
+    std::array<InternalRegister, 8> m_LowPtFilter_out{};
     // 2nd step registers
-    std::array<InternalRegister, NOBXS> m_TileCalConfirm_in{};
-    std::array<InternalRegister, NOBXS> m_TileCalConfirm_out{};
+    std::array<InternalRegister, 8> m_TileCalConfirm_in{};
+    std::array<InternalRegister, 8> m_TileCalConfirm_out{};
     // 3rd step registers
-    std::array<InternalRegister, NOBXS> m_SolveEtaOverlap_in{};
-    std::array<InternalRegister, NOBXS> m_SolveEtaOverlap_out{};
+    std::array<InternalRegister, 8> m_SolveEtaOverlap_in{};
+    std::array<InternalRegister, 8> m_SolveEtaOverlap_out{};
     // 4th step registers
-    std::array<InternalRegister, NOBXS> m_SortHighest_in{};
-    std::array<InternalRegister, NOBXS> m_SortHighest_out{};
+    std::array<InternalRegister, 8> m_SortHighest_in{};
+    std::array<InternalRegister, 8> m_SortHighest_out{};
     // 5th step registers
-    std::array<InternalRegister, NOBXS> m_Sort2ndHighest_in{};
-    std::array<InternalRegister, NOBXS> m_Sort2ndHighest_out{};
+    std::array<InternalRegister, 8> m_Sort2ndHighest_in{};
+    std::array<InternalRegister, 8> m_Sort2ndHighest_out{};
 
-    ubit16 m_nBunMax{NOBXS};
+    ubit16 m_nBunMax{8};
+    ubit16 m_bczero{3};
+  
     // M.Corradi 1/3/2010
     bool m_oldSimulation{false};
 
 public:
     // constructor and destructor
-    SectorLogic(int run, int event, CMAword debug, ubit16 subsys, ubit16 sect, bool oldSimulation);
+  SectorLogic(int run, int event, CMAword debug, ubit16 subsys, ubit16 sect, bool oldSimulation, uint NOBXS, uint BCZERO);
     ~SectorLogic(void);
 
     ubit16 numberOfBunches() const { return m_nBunMax; };

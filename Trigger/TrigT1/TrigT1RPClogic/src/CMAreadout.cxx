@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/CMAreadout.h"
 
-CMAreadout::CMAreadout(CMApatterns* patterns) :
+CMAreadout::CMAreadout(CMApatterns* patterns, uint NOBXS, uint BCZERO) :
                   RPCtrigDataObject(patterns->number(),"CMA readout"),
                   m_CMAconfiguration(patterns->cma_parameters().conf_type()),
 		  m_sector(patterns->sector()),
                   m_cma_identity(patterns->cma_parameters().id())
 {
-    m_low_pt_matrix  = patterns->give_low_pt_matrix();
-    m_high_pt_matrix = patterns->give_high_pt_matrix();
+  m_low_pt_matrix  = patterns->give_low_pt_matrix(NOBXS, BCZERO);
+  m_high_pt_matrix = patterns->give_high_pt_matrix(NOBXS, BCZERO);
 }
 
 
@@ -71,15 +71,15 @@ CMAreadout::operator< (const CMAreadout& cmaReadout) const
 }
 
 std::array<MatrixReadOut*, 2>
-CMAreadout::give_matrix_readout(MsgStream& log)
+CMAreadout::give_matrix_readout(MsgStream& log, uint NOBXS)
 {
     MatrixReadOut::DataVersion type=(m_CMAconfiguration==CMAparameters::Atlas)? 
                             MatrixReadOut::Atlas : MatrixReadOut::Simulation;
    
     if(!m_low_pt_matrix_readout)
-        m_low_pt_matrix_readout = std::make_unique<MatrixReadOut>(m_low_pt_matrix,0,type);
+      m_low_pt_matrix_readout = std::make_unique<MatrixReadOut>(m_low_pt_matrix,0,NOBXS,type);
     if(!m_high_pt_matrix_readout)
-        m_high_pt_matrix_readout = std::make_unique<MatrixReadOut>(m_high_pt_matrix,0,type);
+      m_high_pt_matrix_readout = std::make_unique<MatrixReadOut>(m_high_pt_matrix,0,NOBXS,type);
 
     unsigned short int lowFrag = m_low_pt_matrix_readout->checkFragment();
     unsigned short int highFrag = m_high_pt_matrix_readout->checkFragment();

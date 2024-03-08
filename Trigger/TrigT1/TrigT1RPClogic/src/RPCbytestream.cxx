@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,7 +14,7 @@ RPCbytestream::RPCbytestream(CMAdata& data,std::string filename,MsgStream& log,
                              debu cma_debug,debu pad_debug,debu rx_debug,
                              debu sl_debug,debu cma_struc_debug,
                              debu pad_struc_debug,debu rx_struc_debug,
-                             debu sl_struc_debug) :
+                             debu sl_struc_debug, uint NOBXS, uint BCZERO) :
     RPCtrigDataObject(0,"RPC byte stream"),
     m_cma_ro_debug(cma_debug),
     m_pad_ro_debug(pad_debug),
@@ -37,7 +37,7 @@ RPCbytestream::RPCbytestream(CMAdata& data,std::string filename,MsgStream& log,
                   (*it)->cma_parameters().id().Ixx_index();
 		
         std::pair < CMA_Readout::iterator, bool> ins = 
-        m_cma_readout.insert(CMA_Readout::value_type(key,CMAreadout(*it)));
+	  m_cma_readout.insert(CMA_Readout::value_type(key,CMAreadout(*it, NOBXS, BCZERO)));
         if(!ins.second)
 	{
         log << MSG::ERROR << "Found duplicate CMA readout into CMA data!" << endmsg;
@@ -46,7 +46,7 @@ RPCbytestream::RPCbytestream(CMAdata& data,std::string filename,MsgStream& log,
 	++it;
     }
 
-    build_pad_readout(log);
+    build_pad_readout(log, NOBXS);
     if(m_filename != "" ) dump_rpc_bytestream();
 }
 
@@ -74,7 +74,7 @@ RPCbytestream::~RPCbytestream()
 
 
 void
-RPCbytestream::build_pad_readout(MsgStream& log)
+RPCbytestream::build_pad_readout(MsgStream& log, uint NOBXS)
 {
     for (int i=0;i<64;++i)
     {
@@ -101,7 +101,7 @@ RPCbytestream::build_pad_readout(MsgStream& log)
 
                 for (CMA_Readout::iterator it = PAD_l; it != PAD_h; ++it)
 	        {
-                    auto cma_readout = (*it).second.give_matrix_readout(log);
+		  auto cma_readout = (*it).second.give_matrix_readout(log, NOBXS);
                     pad_readout.load_readout(cma_readout);
                     if (log.level() <= MSG::DEBUG) {
                         log << MSG::DEBUG << "Dump of the matrices readout into PAD " << PADid

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/Pad.h"
@@ -13,7 +13,7 @@
 using namespace std;
 
 //--------------------------------------------------------------------//
-Pad::Pad(int run, int event, CMAword debug, ubit16 subsys, ubit16 sect, ubit16 padad, ubit16 lowhig, bool oldSimulation) {
+Pad::Pad(int run, int event, CMAword debug, ubit16 subsys, ubit16 sect, ubit16 padad, ubit16 lowhig, bool oldSimulation, int NOBXS) {
     //
     // input parameters: run     run number
     //                   event   event number
@@ -129,7 +129,7 @@ void Pad::load(ubit16 lowhig, ubit16 etaphi, ubit16 locCMadd, ubit16 BX, ubit16 
     //                                 thres    = highest threshold
     //                                 over     = overlap
     //
-    if (lowhig > 1 || etaphi > 1 || locCMadd > 1 || BX >= NOBXS) {
+    if (lowhig > 1 || etaphi > 1 || locCMadd > 1 || BX >= m_nBunMax) {
         cout << " Pad::load : lowhig=" << lowhig << " etaphi=" << etaphi << " locCMadd=" << locCMadd << " BX=" << BX << " not valid"
              << endl;
     } else {

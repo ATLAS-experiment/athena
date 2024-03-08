@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCMuonTrigger_H
@@ -85,6 +85,10 @@ private:
   SG::WriteHandleKey<LVL1MUONIF::Lvl1MuCTPIInput> m_muctpiKey{this, "MuctpiLocationRPC", "L1MuctpiStoreRPC", "Location of muctpi for Rpc"};
   SG::WriteHandleKey<LVL1MUONIF::Lvl1MuCTPIInputPhase1> m_muctpiPhase1Key{this, "MuctpiPhase1LocationRPC", "L1MuctpiStoreRPC", "Location of muctpiPhase1 for Rpc"};
   SG::WriteHandleKey<Muon::RpcBis78_TrigRawDataContainer> m_bis78TrigKey{this, "BIS78TrigContainerLocation", "BIS78TrigContainer", "Location of BIS78 Rpc"};
+
+  Gaudi::Property<int> m_nobxs { this, "NOBXS", 8, "Number of bunch crossings in readout"};
+  Gaudi::Property<int> m_bczero { this, "BCZERO", 3, "Nominal bunch crossing"};
+  
 };
 
 #endif

@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -86,6 +86,10 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kw
         tool_kwargs["NrpcInputCollection"] = ""
 
     
+    #Setup RPC RDO decoder to be consistent with RPC readout settings
+    rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
+    if flags.Muon.MuonTrigger:
+        tool_kwargs["RdoDecoderTool"]=rpcrdo_decode
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", CompFactory.Muon.RpcRdoToPrepDataToolMT(name="RpcPrepDataProviderTool",
                                                                               **tool_kwargs))

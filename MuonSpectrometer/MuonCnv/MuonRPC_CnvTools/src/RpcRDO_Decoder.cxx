@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcRDO_Decoder.h"
@@ -26,11 +26,7 @@ std::vector<std::unique_ptr<RpcDigit>> Muon::RpcRDO_Decoder::getDigit(const RpcF
     uint16_t ijk = fChan->ijk();
     uint16_t channel = fChan->channel();
 
-    // Sept 10 2014, M. Corradi changed shift to be consistent with
-    // BCzero=3 and ROOffset=2 in
-    // Trigger/TrigT1/TrigT1RPChardware/src/Matrix.cxx
-    // need to find a better way than hard-coding
-    float time = (fChan->bcid() - 3) * 25 + (fChan->time() + 0.5 - 2) * 3.125;
+    float time = (fChan->bcid() - m_bczero) * 25 + (fChan->time() + 0.5 - 2) * 3.125;
 
     // skip the trigger hits
     if (ijk == 7) { return rpcDigitVec; }
@@ -58,11 +54,7 @@ std::vector<Identifier> Muon::RpcRDO_Decoder::getOfflineData(const RpcFiredChann
     uint16_t ijk = fChan->ijk();
     uint16_t channel = fChan->channel();
 
-    // Sept 10 2014, M. Corradi changed shift to be consistent with
-    // BCzero=3 and ROOffset=2 in
-    // Trigger/TrigT1/TrigT1RPChardware/src/Matrix.cxx
-    // need to find a better way than hard-coding
-    time = (fChan->bcid() - 3) * 25 + (fChan->time() + 0.5 - 2) * 3.125;
+    time = (fChan->bcid() - m_bczero) * 25 + (fChan->time() + 0.5 - 2) * 3.125;
 
     // skip the trigger hits
     if (ijk == 7) { return rpcIdVec; }
