@@ -42,7 +42,7 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
 
 #     # To run job only with ID
 #    if hasattr(inputFlags, "Detector") and hasattr(inputFlags.Detector, "GeometryMuon") and hasattr(inputFlags.Detector, "GeometryID"):
-#        from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+#        from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
 #        TrkEventCnvSuperTool = result.getPrimaryAndMerge(TrkEventCnvSuperToolCfg(inputFlags))
 #        result.addPublicTool(TrkEventCnvSuperTool)
 

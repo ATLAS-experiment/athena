@@ -125,7 +125,7 @@ if '__main__' in __name__:
     cfg.merge(TileGMCfg(flags))
 
     # For being able to read pre Run-3 data w/ Trk objects
-    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
     cfg.merge(TrkEventCnvSuperToolCfg(flags))
 
     # Setup PerfMon
