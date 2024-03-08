@@ -37,7 +37,10 @@ def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConvers
 
 def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
     acc = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
 
     if "clusteringTool" not in kwargs:
@@ -93,7 +96,10 @@ def TrigPixelClusterizationCfg(flags, RoIs, name="InDetPixelClusterization", **k
 
 def ITkPixelClusterizationCfg(flags, name = "ITkPixelClusterization", **kwargs):
     acc = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
 
     if "clusteringTool" not in kwargs:
@@ -125,7 +131,10 @@ def ITkTrigPixelClusterizationCfg(flags, name = "ITkTrigPixelClusterization", ro
 
 def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
     acc = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
 
     if "conditionsTool" not in kwargs:
@@ -186,7 +195,10 @@ def TrigSCTClusterizationCfg(flags, RoIs, name="InDetSCT_Clusterization", **kwar
 
 def ITkStripClusterizationCfg(flags, name="ITkStripClusterization", **kwargs):
     acc = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
 
     if "conditionsTool" not in kwargs:
@@ -221,7 +233,10 @@ def ITkTrigStripClusterizationCfg(flags, name="ITkTrigStripClusterization", rois
 
 def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
     acc = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
     if "TRT_DriftCircleTool" not in kwargs:
         from InDetConfig.TRT_DriftCircleToolConfig import TRT_DriftCircleToolCfg
