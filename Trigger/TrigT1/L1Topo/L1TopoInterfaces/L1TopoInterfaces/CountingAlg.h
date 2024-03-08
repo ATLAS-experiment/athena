@@ -50,15 +50,6 @@ namespace TCS {
 
      std::vector<std::string> m_histAccept; // vector of strings for histogram names
 
-     // cTau monitoring histograms
-     std::vector<std::string> m_histcTauEt;
-     std::vector<std::string> m_histcTauPhiEta;
-     std::vector<std::string> m_histcTauEtEta;
-     std::vector<std::string> m_histcTauPartialIsoLoose;
-     std::vector<std::string> m_histcTauPartialIsoMedium;
-     std::vector<std::string> m_histcTauPartialIsoTight;
-     std::vector<std::string> m_histcTauIsoScore;
-
   private:
 
      virtual StatusCode doReset();
