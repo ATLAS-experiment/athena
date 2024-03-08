@@ -107,6 +107,7 @@ private:
 			EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
 
   FloatArrayProperty   m_thresholdsProp[MAXLYRNS];
+  FloatProperty   m_thresholdsForResolution{this,"Threshold",5e2};
   BooleanProperty m_removeMasked{this, "RemoveMasked", true};
 
   //Enumerate partitions
