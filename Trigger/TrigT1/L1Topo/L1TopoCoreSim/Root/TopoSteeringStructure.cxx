@@ -497,6 +497,7 @@ TopoSteeringStructure::sortingConnector(const std::string & connectorName) const
 }
 
 
+
 TCS::DecisionConnector *
 TCS::TopoSteeringStructure::outputConnector(const std::string & output) {
    auto c = m_outputLookup.find(output);
@@ -519,37 +520,26 @@ TCS::TopoSteeringStructure::countingConnector(const std::string & output) {
 
 void
 TCS::TopoSteeringStructure::setIsolationFW_CTAU(const TrigConf::L1Menu& l1menu) {
-   const TrigConf::L1ThrExtraInfo_cTAU &ctauExtraInfo = l1menu.thrExtraInfo().cTAU();
+   const TrigConf::L1ThrExtraInfo_cTAU &cTauExtraInfo = l1menu.thrExtraInfo().cTAU();
 
-   int CTAU_iso_fw_loose  = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE, 0).isolation_fw());
-   int CTAU_iso_fw_medium = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM, 0).isolation_fw());
-   int CTAU_iso_fw_tight  = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT, 0).isolation_fw());
+   using WP = TrigConf::Selection::WP;
+   for(const WP wp : {WP::LOOSE, WP::MEDIUM, WP::TIGHT, WP::LOOSE12, WP::LOOSE20, WP::LOOSE30, WP::LOOSE35, WP::MEDIUM12, WP::MEDIUM20, WP::MEDIUM30, WP::MEDIUM35, WP::TIGHT12, WP::TIGHT20, WP::TIGHT30, WP::TIGHT35}) {
+      const TrigConf::L1ThrExtraInfo_cTAU::WorkingPoints_cTAU& isol = cTauExtraInfo.isolation(wp, 0);
 
-   m_isolationFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = CTAU_iso_fw_loose;
-   m_isolationFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = CTAU_iso_fw_medium;
-   m_isolationFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = CTAU_iso_fw_tight;
-
-   int CTAU_iso_fw_jTAUCoreScale_loose  = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE, 0).isolation_jTAUCoreScale_fw());
-   int CTAU_iso_fw_jTAUCoreScale_medium = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM, 0).isolation_jTAUCoreScale_fw());
-   int CTAU_iso_fw_jTAUCoreScale_tight  = static_cast<int>(ctauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT, 0).isolation_jTAUCoreScale_fw());
-   
-   m_isolationFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = CTAU_iso_fw_jTAUCoreScale_loose;
-   m_isolationFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = CTAU_iso_fw_jTAUCoreScale_medium;
-   m_isolationFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = CTAU_iso_fw_jTAUCoreScale_tight;
+      m_isolationFW_CTAU[TrigConf::Selection::wpToString(wp)] = static_cast<int>(isol.isolation_fw());
+      m_isolationFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(wp)] = static_cast<int>(isol.isolation_jTAUCoreScale_fw());
+   }
 }
 
 
 void
 TCS::TopoSteeringStructure::setIsolationFW_JTAU(const TrigConf::L1Menu& l1menu) {
-   const TrigConf::L1ThrExtraInfo_jTAU &jtauExtraInfo = l1menu.thrExtraInfo().jTAU();
+   const TrigConf::L1ThrExtraInfo_jTAU &jTauExtraInfo = l1menu.thrExtraInfo().jTAU();
 
-   int JTAU_iso_fw_loose  = static_cast<int>(jtauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE, 0).isolation_fw());
-   int JTAU_iso_fw_medium = static_cast<int>(jtauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM, 0).isolation_fw());
-   int JTAU_iso_fw_tight  = static_cast<int>(jtauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT, 0).isolation_fw());
-
-   m_isolationFW_JTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = JTAU_iso_fw_loose;
-   m_isolationFW_JTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = JTAU_iso_fw_medium;
-   m_isolationFW_JTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = JTAU_iso_fw_tight;
+   using WP = TrigConf::Selection::WP;
+   for(const WP wp : {WP::LOOSE, WP::MEDIUM, WP::TIGHT}) {
+      m_isolationFW_JTAU[TrigConf::Selection::wpToString(wp)] = static_cast<int>(jTauExtraInfo.isolation(wp, 0).isolation_fw());
+   }
 }
 
 
@@ -560,21 +550,13 @@ void
 TCS::TopoSteeringStructure::setIsolationFW_CTAU(std::map<std::string, int>& isoFW_CTAU, std::map<std::string, int>& isoFW_CTAU_jTAUCoreScale, const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) {
    const TrigConf::L1ThrExtraInfo_cTAU& cTauExtraInfo = dynamic_cast<const TrigConf::L1ThrExtraInfo_cTAU&>(menuExtraInfo);
 
-   int CTAU_iso_fw_loose  = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE, 0).isolation_fw());
-   int CTAU_iso_fw_medium = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM, 0).isolation_fw());
-   int CTAU_iso_fw_tight  = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT, 0).isolation_fw());
+   using WP = TrigConf::Selection::WP;
+   for(const WP wp : {WP::LOOSE, WP::MEDIUM, WP::TIGHT, WP::LOOSE12, WP::LOOSE20, WP::LOOSE30, WP::LOOSE35, WP::MEDIUM12, WP::MEDIUM20, WP::MEDIUM30, WP::MEDIUM35, WP::TIGHT12, WP::TIGHT20, WP::TIGHT30, WP::TIGHT35}) {
+      const TrigConf::L1ThrExtraInfo_cTAU::WorkingPoints_cTAU& isol = cTauExtraInfo.isolation(wp, 0);
 
-   isoFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = CTAU_iso_fw_loose;
-   isoFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = CTAU_iso_fw_medium;
-   isoFW_CTAU[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = CTAU_iso_fw_tight;   
-
-   int CTAU_iso_fw_jTAUCoreScale_loose  = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::LOOSE, 0).isolation_jTAUCoreScale_fw());
-   int CTAU_iso_fw_jTAUCoreScale_medium = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::MEDIUM, 0).isolation_jTAUCoreScale_fw());
-   int CTAU_iso_fw_jTAUCoreScale_tight  = static_cast<int>(cTauExtraInfo.isolation(TrigConf::Selection::WP::TIGHT, 0).isolation_jTAUCoreScale_fw());
-
-   isoFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::LOOSE)] = CTAU_iso_fw_jTAUCoreScale_loose;
-   isoFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::MEDIUM)] = CTAU_iso_fw_jTAUCoreScale_medium;
-   isoFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(TrigConf::Selection::WP::TIGHT)] = CTAU_iso_fw_jTAUCoreScale_tight;   
+      isoFW_CTAU[TrigConf::Selection::wpToString(wp)] = static_cast<int>(isol.isolation_fw());
+      isoFW_CTAU_jTAUCoreScale[TrigConf::Selection::wpToString(wp)] = static_cast<int>(isol.isolation_jTAUCoreScale_fw());
+   }
 }
 
 #endif

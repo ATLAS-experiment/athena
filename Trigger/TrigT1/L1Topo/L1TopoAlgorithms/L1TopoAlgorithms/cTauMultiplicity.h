@@ -31,32 +31,45 @@ namespace TCS {
 
       virtual StatusCode initialize() override;
 
-      virtual StatusCode processBitCorrect( const TCS::InputTOBArray & input, Count & count ) override final ;
+      virtual StatusCode processBitCorrect(const TCS::InputTOBArray& input, Count& count) override final;
 
-      virtual StatusCode process( const TCS::InputTOBArray & input, Count & count ) override final ;
+      virtual StatusCode process(const TCS::InputTOBArray& input, Count& count ) override final;
 
       #ifndef TRIGCONF_STANDALONE
       // Functions for HLT seeding
       // Returns index of jtau matched to etau
-      static size_t cTauMatching( const xAOD::eFexTauRoI & eTau, const xAOD::jFexTauRoIContainer & jTauRoIs );
+      static size_t cTauMatching(const xAOD::eFexTauRoI& eTau, const xAOD::jFexTauRoIContainer& jTauRoIs);
       // Returns true when a matching is found
-      static bool cTauMatching( const xAOD::eFexTauRoI & eTau, const xAOD::jFexTauRoI & jTau );
+      static bool cTauMatching(const xAOD::eFexTauRoI& eTau, const xAOD::jFexTauRoI& jTau);
       // Converts the isolation score to bit to be used for the working point assignement 
-      static unsigned int convertIsoToBit( const std::map<std::string, int>& isoFW_CTAU, const std::map<std::string, int>& isoFW_CTAU_jTAUCoreScale,  const float jTauCoreEt, const float jTauIso, const float eTauEt );
+      static bool checkIsolationWP(const std::map<std::string, int>& isoFW_CTAU, const std::map<std::string, int>& isoFW_CTAU_jTAUCoreScale, const float jTauCoreEt, const float jTauIsoEt, const float eTauEt, const std::string& isolation_wp);
       #endif
 
    private:
 
-      TrigConf::L1Threshold const * m_threshold{nullptr};
+      const TrigConf::L1Threshold_cTAU* m_threshold{nullptr};
       std::map<std::string, int> m_isoFW_CTAU;
       std::map<std::string, int> m_isoFW_CTAU_jTAUCoreScale;
 
       // This function is used to map the ctau isolation working points into a common format with eFEX EM and taus.
       // This allows us to use same functionalities from ConfigurableAlg (L1TopoInterfaces) to apply isolation cuts in multiplicity algorithms for all flavour of TOBS 
-      unsigned int convertIsoToBit( const TCS::cTauTOB * etauCand, const TCS::cTauTOB * jtauCand ) const; 
+      bool checkIsolationWP(const TCS::cTauTOB* etauCand, const TCS::cTauTOB* jtauCand, const std::string& isolation_wp) const; 
 
       // Matching function for L1Topo
-      bool cTauMatching( const TCS::cTauTOB * etauCand, const TCS::cTauTOB * jtauCand ) const; 
+      bool cTauMatching(const TCS::cTauTOB* etauCand, const TCS::cTauTOB* jtauCand) const; 
+
+     // cTau monitoring histograms
+     std::vector<std::string> m_histcTauEt;
+     std::vector<std::string> m_histcTauPhiEta;
+     std::vector<std::string> m_histcTauEtEta;
+     std::vector<std::string> m_histcTauPartialIsoLoose;
+     std::vector<std::string> m_histcTauPartialIsoMedium;
+     std::vector<std::string> m_histcTauPartialIsoMedium12;
+     std::vector<std::string> m_histcTauPartialIsoMedium20;
+     std::vector<std::string> m_histcTauPartialIsoMedium30;
+     std::vector<std::string> m_histcTauPartialIsoMedium35;
+     std::vector<std::string> m_histcTauPartialIsoTight;
+     std::vector<std::string> m_histcTauIsoMatchedPass;
 
    };
 
