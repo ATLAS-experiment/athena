@@ -9,7 +9,7 @@
 using namespace std;
 
 //----------------------------------------------------------------------------//
-CMReprocessing::CMReprocessing(MatrixReadOut *hard, Matrix *CMsimu) : BaseObject(Hardware, "CMROReprocessing") {
+CMReprocessing::CMReprocessing(MatrixReadOut *hard, Matrix *CMsimu, int NOBXS) : BaseObject(Hardware, "CMROReprocessing") {
     //
     // load and run the Matrix object "CMsimu" using as RPC input the data available
     // in the MatrixReadOut object "hard". CMsimu is created outside this method
@@ -17,7 +17,7 @@ CMReprocessing::CMReprocessing(MatrixReadOut *hard, Matrix *CMsimu) : BaseObject
     //
     CMsimu->reset();
     hard->doMatrix(CMsimu);
-    MatrixReadOut simu(CMsimu, 0, MatrixReadOut::Atlas);
+    MatrixReadOut simu(CMsimu, 0, NOBXS, MatrixReadOut::Atlas);
     //
     // overwite header and subheader of the simulated readout fragment
     // with the records from the hardware

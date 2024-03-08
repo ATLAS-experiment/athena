@@ -1,0 +1,27 @@
+AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
+EventSelector                                       DEBUG Initializing EventSelector
+EventSelector                                        INFO reinitialization...
+AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
+EventSelector                                       DEBUG Calling EventSelectorByteStream::start()
+AthenaEventLoopMgr                                   INFO   ===>>>  start of run 431493    <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096114168, run #431493 0 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096114168, run #431493 1 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096113771, run #431493 1 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096113771, run #431493 2 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096113187, run #431493 2 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096113187, run #431493 3 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096123254, run #431493 3 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096123254, run #431493 4 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096119418, run #431493 4 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096119418, run #431493 5 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096123504, run #431493 5 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096123504, run #431493 6 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096128958, run #431493 6 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096128958, run #431493 7 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096137395, run #431493 7 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096137395, run #431493 8 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096133511, run #431493 8 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096133511, run #431493 9 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  start processing event #1096132653, run #431493 9 events processed so far  <<<===
+AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #1096132653, run #431493 10 events processed so far  <<<===
+EventSelector                                       DEBUG Calling EventSelectorByteStream::stop()

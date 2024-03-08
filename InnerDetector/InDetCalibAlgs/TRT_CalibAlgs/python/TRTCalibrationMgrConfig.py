@@ -40,7 +40,7 @@ def TRTCalibratorCfg(flags, name="TRTCalibrator", **kwargs) :
 # Steering algorithm. Either it fills track and hit ntuples, or it calls TRTCalibrator
 def TRT_CalibrationMgrCfg(flags,name='TRT_CalibrationMgr',calibconstants='',**kwargs) :
     acc = ComponentAccumulator()
-    
+
     kwargs.setdefault("DoCalibrate",False)
     kwargs.setdefault("DoRefit",False)
 

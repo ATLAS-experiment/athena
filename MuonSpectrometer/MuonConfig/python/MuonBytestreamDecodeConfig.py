@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -43,7 +43,7 @@ def RpcBytestreamDecodeCfg(flags, name="RpcRawDataProvider", **kwargs):
     acc.merge(MuonGeoModelCfg(flags)) 
     
     # Setup the RPC ROD decoder
-    RPCRodDecoder = CompFactory.Muon.RpcROD_Decoder(name	     = "RpcROD_Decoder" )
+    RPCRodDecoder = CompFactory.Muon.RpcROD_Decoder(name	     = "RpcROD_Decoder",NOBXS=flags.Trigger.L1MuonSim.RPCNBX)
 
 
     # Setup the RAW data provider tool

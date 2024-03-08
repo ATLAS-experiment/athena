@@ -16,7 +16,7 @@
 
 class CMReprocessing : public BaseObject {
 public:
-    CMReprocessing(MatrixReadOut *hard, Matrix *CMsimu);
+  CMReprocessing(MatrixReadOut *hard, Matrix *CMsimu, int NOBXS);
     ~CMReprocessing();
 
 private:

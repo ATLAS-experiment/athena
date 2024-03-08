@@ -14,7 +14,7 @@ def StandaloneMuonOutputCfg(flags):
     result = ComponentAccumulator()
 
     # FIXME! Fix for ATLASRECTS-5151. Remove when better solution found.
-    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import (
         TrkEventCnvSuperToolCfg)
     result.merge(TrkEventCnvSuperToolCfg(flags))
 

@@ -54,7 +54,7 @@ def SetupMuonStandaloneOutput(cfg, flags, itemsToRecord):
     outstream.ForceRead = True
 
     # Fix for ATLASRECTS-5151
-    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import (
         TrkEventCnvSuperToolCfg)
     cfg.merge(TrkEventCnvSuperToolCfg(flags))
 

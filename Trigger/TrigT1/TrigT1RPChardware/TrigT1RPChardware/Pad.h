@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1RPChardware_Pad_H
 #define TrigT1RPChardware_Pad_H
 
-#include "NOBXS.h"
 #include "TrigT1RPChardware/Lvl1Def.h"
 
 class Pad {
 public:
-    Pad(int run, int event, CMAword debug, ubit16 subsys, ubit16 sect, ubit16 padad, ubit16 lowhig, bool oldSimulation);
+  Pad(int run, int event, CMAword debug, ubit16 subsys, ubit16 sect, ubit16 padad, ubit16 lowhig, bool oldSimulation, int NOBXS);
     //    ubit16 padInput[2][2][2][NOBXS][2]);
     ~Pad();
     void reset();
@@ -111,7 +110,7 @@ private:
     //       |  ------------ eta-phi matrix: 0=eta; 1=phi.
     //       --------------- low-pt=0, high-pt=1;
     //
-    ubit16 m_padIn[2][2][2][NOBXS][2];
+  ubit16 m_padIn[2][2][2][8][2]; //assumes max NOBXS=8
     //
     // PAD LOGIC STEP n. 2
     //
@@ -132,7 +131,7 @@ private:
     //          -------- bunch-crossing identifier (in NOBXS bunches range)
     //
     //
-    ubit16 m_padStep2[NOBXS][2][8];
+  ubit16 m_padStep2[8][2][8]; //m_padStep2[NOBXS][2][8], assumes NOBXS=8 at most
     //
     // PAD LOGIC OUTPUT
     //
@@ -154,7 +153,7 @@ private:
     //
     //
     //
-    ubit16 m_padOut[NOBXS][7];
+  ubit16 m_padOut[8][7]; //assumes NOBXS=8 at most
     //
     void threshold();
     void overlap();

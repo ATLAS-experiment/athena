@@ -83,13 +83,13 @@ void TrigTauMonitorL1Algorithm::fillL1eTauVars(const std::string& trigger, const
 
     auto monGroup = getGroup(trigger+"_L1Vars");
 
-    auto L1RoIEt    = Monitored::Collection("L1RoIEt"       , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->et()/Gaudi::Units::GeV; });
-    auto L1RoIEta   = Monitored::Collection("L1RoIEta"      , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->eta(); });
-    auto L1RoIPhi   = Monitored::Collection("L1RoIPhi"      , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->phi(); });
-    auto L1RoIRCore = Monitored::Collection("L1eFexRoIRCore", rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->rCore(); });
-    auto L1RoIRHad  = Monitored::Collection("L1eFexRoIRHad" , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->rHad(); });
-
-    fill(monGroup, L1RoIEt, L1RoIEta, L1RoIPhi, L1RoIRCore, L1RoIRHad);
+    auto L1RoIEt        = Monitored::Collection("L1RoIEt"       , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->et()/Gaudi::Units::GeV; });
+    auto L1RoIEta       = Monitored::Collection("L1RoIEta"      , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->eta(); });
+    auto L1RoIPhi       = Monitored::Collection("L1RoIPhi"      , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->phi(); });
+    auto L1RoIRCore     = Monitored::Collection("L1eFexRoIRCore", rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->rCore(); });
+    auto L1RoIRHad      = Monitored::Collection("L1eFexRoIRHad" , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->rHad(); });
+    auto L1RoIBDTScore  = Monitored::Collection("L1eFexRoIBDTScore" , rois, [](const xAOD::eFexTauRoI* L1roi){ return L1roi->bdtScore(); });
+    fill(monGroup, L1RoIEt, L1RoIEta, L1RoIPhi, L1RoIRCore, L1RoIRHad, L1RoIBDTScore);
 
     ATH_MSG_DEBUG("After fill L1 variables: " << trigger);
 }
@@ -112,6 +112,7 @@ void TrigTauMonitorL1Algorithm::fillL1jTauVars(const std::string& trigger, const
 }
 
 
+
 void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const std::vector<std::pair<const xAOD::eFexTauRoI*, const xAOD::jFexTauRoI*>>& rois)  const
 {
     ATH_MSG_DEBUG("Fill L1 variables: " << trigger);
@@ -123,6 +124,7 @@ void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const
     auto L1RoIPhi       = Monitored::Collection("L1RoIPhi"      , rois, [](const auto L1roi){ return L1roi.first->phi(); });
     auto L1eFexRoIRCore = Monitored::Collection("L1eFexRoIRCore", rois, [](const auto L1roi){ return L1roi.first->rCore(); });
     auto L1eFexRoIRHad  = Monitored::Collection("L1eFexRoIRHad" , rois, [](const auto L1roi){ return L1roi.first->rHad(); });
+    auto L1RoIBDTScore  = Monitored::Collection("L1eFexRoIBDTScore" , rois, [](const auto L1roi){ return L1roi.first->bdtScore(); });
 
     std::vector<bool> jFex_isMatched;
     std::vector<float> jFex_eFex_et_ratio;
@@ -144,7 +146,7 @@ void TrigTauMonitorL1Algorithm::fillL1cTauVars(const std::string& trigger, const
     auto L1cTauRoIIso       = Monitored::Collection("L1cTauMatchedRoIIso"    , cTau_isolation);
     auto L1RoIcTauEtRatio   = Monitored::Collection("L1RoIcTauMatchedEtRatio", jFex_eFex_et_ratio);
 
-    fill(monGroup, L1RoIEt, L1RoIEta, L1RoIPhi, L1eFexRoIRCore, L1eFexRoIRHad, L1cTauRoITopoMatch, L1jFexRoIIso, L1cTauRoIIso, L1RoIcTauEtRatio);
+    fill(monGroup, L1RoIEt, L1RoIEta, L1RoIPhi, L1eFexRoIRCore, L1eFexRoIRHad, L1cTauRoITopoMatch, L1jFexRoIIso, L1cTauRoIIso, L1RoIcTauEtRatio, L1RoIBDTScore );
 
     ATH_MSG_DEBUG("After fill L1 variables: " << trigger);
 }

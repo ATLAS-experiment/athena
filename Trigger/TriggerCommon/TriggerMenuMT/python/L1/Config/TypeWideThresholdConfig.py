@@ -420,54 +420,68 @@ getConfig_eTAU = L1Config_eTAU()
 
 
 @dataclass
-class L1Config_cTAU():
+class L1Config_cTAU:
     # cTAU isolation parameters (ATR-28621):
     # isolation: 12 bits (0 - 4095)
     # jTAUCoreScale: 11 bits (0 - 2047)
     # (jTAU.EtIso + isolation_jTAUCoreScale_fw/1024 * jTAU.Et) / eTAU.Et < isolation_fw/1024 -> pass
 
+    # Generic L, M and T WPs, for the cTAUSpare1/2
     isolation_fw_loose: int = 410
-    isolation_fw_medium: int = 358
-    isolation_fw_tight: int = 307
-
     isolation_jTAUCoreScale_fw_loose: int = 0
+
+    isolation_fw_medium: int = 410
     isolation_jTAUCoreScale_fw_medium: int = 0
+
+    isolation_fw_tight: int = 307
     isolation_jTAUCoreScale_fw_tight: int = 0
 
+    # Dedicated M thresholds for the primary items:
+    #cTAU12M (Medium12)
+    isolation_fw_medium12: int = 358
+    isolation_jTAUCoreScale_fw_medium12: int = 0
+
+    #cTAU20M (Medium20)
+    isolation_fw_medium20: int = 358
+    isolation_jTAUCoreScale_fw_medium20: int = 0
+
+    #cTAU30M (Medium30)
+    isolation_fw_medium30: int = 358
+    isolation_jTAUCoreScale_fw_medium30: int = 0
+
+    #cTAU35M (Medium35)
+    isolation_fw_medium35: int = 358
+    isolation_jTAUCoreScale_fw_medium35: int = 0
+
+    def __post_init__(self):
+        # By default, duplicate the configs of isolation_fw_loose and isolation_fw_tight:
+        for default_wp, wp_list in {'Loose': ['Loose12', 'Loose20', 'Loose30', 'Loose35'], 'Tight': ['Tight12', 'Tight20', 'Tight30', 'Tight35']}.items():
+            for wp in wp_list:
+                setattr(self, f'isolation_fw_{wp.lower()}', getattr(self, f'isolation_fw_{default_wp.lower()}'))
+                setattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}', getattr(self, f'isolation_jTAUCoreScale_fw_{default_wp.lower()}'))
 
     def __call__(self) -> odict:
         confObj = odict()
-        confObj["workingPoints"] = odict()
-        confObj["workingPoints"]["Loose"] = [
+        confObj['workingPoints'] = odict()
 
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_loose)), ("isolation_fw", self.isolation_fw_loose),
-                   ("isolation_jTAUCoreScale", cTAUfwToFlowConversion(self.isolation_jTAUCoreScale_fw_loose)), ("isolation_jTAUCoreScale_fw", self.isolation_jTAUCoreScale_fw_loose)]),
-        ]
-        confObj["workingPoints"]["Medium"] = [
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_medium)), ("isolation_fw", self.isolation_fw_medium),
-                   ("isolation_jTAUCoreScale", cTAUfwToFlowConversion(self.isolation_jTAUCoreScale_fw_medium)), ("isolation_jTAUCoreScale_fw", self.isolation_jTAUCoreScale_fw_medium)]),
-        ]
-        confObj["workingPoints"]["Tight"] = [
-            odict([("isolation", cTAUfwToFlowConversion(self.isolation_fw_tight)), ("isolation_fw", self.isolation_fw_tight),
-                   ("isolation_jTAUCoreScale", cTAUfwToFlowConversion(self.isolation_jTAUCoreScale_fw_tight)), ("isolation_jTAUCoreScale_fw", self.isolation_jTAUCoreScale_fw_tight)]),
-        ]
-        confObj["resolutionMeV"] = 100
+        for wp in ['Loose', 'Medium', 'Tight', 'Loose12', 'Loose20', 'Loose30', 'Loose35', 'Medium12', 'Medium20', 'Medium30', 'Medium35', 'Tight12', 'Tight20', 'Tight30', 'Tight35']:
+            confObj['workingPoints'][wp] = [
+                odict([('isolation', cTAUfwToFlowConversion(getattr(self, f'isolation_fw_{wp.lower()}'))), ('isolation_fw', getattr(self, f'isolation_fw_{wp.lower()}')),
+                       ('isolation_jTAUCoreScale', cTAUfwToFlowConversion(getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'))), ('isolation_jTAUCoreScale_fw', getattr(self, f'isolation_jTAUCoreScale_fw_{wp.lower()}'))]),
+            ]
+
+        confObj['resolutionMeV'] = 100
 
         # Check that FW values are integers
-        for wp in confObj["workingPoints"]:
-            for ssthr in confObj["workingPoints"][wp]:
+        for wp in confObj['workingPoints']:
+            for ssthr in confObj['workingPoints'][wp]:
                 for ssthr_i in ssthr:
-                    if "_fw" in ssthr_i:
+                    if '_fw' in ssthr_i:
                          if not isinstance(ssthr[ssthr_i], int):
-                              raise RuntimeError("Threshold %s in cTAU configuration is not an integer!", ssthr_i )
+                              raise RuntimeError(f'Threshold {ssthr_i} in cTAU configuration is not an integer!')
                          elif ssthr[ssthr_i] < 0:
-                            raise RuntimeError("Threshold %s in cTAU configuration is negative!", ssthr_i )
+                            raise RuntimeError('Threshold {ssthr_i} in cTAU configuration is negative!')
 
-        # Check that T >= M >= L [ATR-27796]
-        # Ordering is inverted here: larger value is looser
-        for var in ["isolation_fw"]:
-            validate_ordering(var,"Medium","Loose",confObj["workingPoints"])
-            validate_ordering(var,"Tight","Medium",confObj["workingPoints"])
         return confObj
 
 getConfig_cTAU = L1Config_cTAU()

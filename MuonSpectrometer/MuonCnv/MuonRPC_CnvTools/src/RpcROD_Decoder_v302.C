@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 StatusCode Muon::RpcROD_Decoder::fillCollection_v302new(BS data, const uint32_t data_size, RpcPad& v, const uint32_t& sourceId,
@@ -284,7 +284,7 @@ StatusCode Muon::RpcROD_Decoder::fillCollectionsFromRob_v302(BS data, const uint
             ++nDecodedRX;
         } else if (isSLHeader || isSLFragment || isSLSubHeader || isSLFooter) {
             // push only the lowest 16 bits
-            int foundSL = myRPC.pushWord(currentWord, 0);
+	  int foundSL = myRPC.pushWord(currentWord, 0, m_nobxs);
 
             if (isSLHeader) {
                 SLBodyWords = 0;
@@ -434,7 +434,7 @@ StatusCode Muon::RpcROD_Decoder::fillCollectionsFromRob_v302(BS data, const uint
                 // Here's a PAD HEADER
                 nwInCM = 0;
                 // Here reset the CM Fragment and the flag SL_Found to cope with corruption of earlier data fragments (missing sl footer)
-                (myRPC.CMFragment())->reset();
+                (myRPC.CMFragment())->reset(m_nobxs);
                 myRPC.setSLFragmentFound(false);
 
                 // bsErrCheck_errorInPDHeader = false;
@@ -550,7 +550,7 @@ StatusCode Muon::RpcROD_Decoder::fillCollectionsFromRob_v302(BS data, const uint
 
             // here scrolling all PAD/CM fragments until a CM footer is found (foundCM>0 when a CM footer is found)
             int foundCM = 0;
-            foundCM = myRPC.pushWord(currentWord, 0);
+            foundCM = myRPC.pushWord(currentWord, 0, m_nobxs);
 
             if (foundCM == 1) {  // corresponds to CM footer found - all CM words stored in myRPC
 
@@ -621,7 +621,7 @@ StatusCode Muon::RpcROD_Decoder::fillCollectionsFromRob_v302(BS data, const uint
 
                 }  // end of the matrix decoding
 
-                (myRPC.CMFragment())->reset();  // reset to start storing a new CM
+                (myRPC.CMFragment())->reset(m_nobxs);  // reset to start storing a new CM
                 nwInCM = 0;
             }  // end of the CM decoding inside the PAD data fragment
             else {

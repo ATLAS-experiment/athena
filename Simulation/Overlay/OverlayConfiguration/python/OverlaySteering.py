@@ -115,7 +115,7 @@ def OverlayMainContentCfg(configFlags):
     # Track overlay
     if configFlags.Overlay.doTrackOverlay:
         #need this to ensure that the ElementLinks to the PRDs are handled correctly (since the name is hardcoded in the converters)
-        from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+        from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
         acc.merge(TrkEventCnvSuperToolCfg(configFlags))
         if configFlags.Detector.GeometryITk:
            from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyITkTrackCollectionsCfg, CopyITkPixelClusterContainerCfg, CopyITkStripClusterContainerCfg
