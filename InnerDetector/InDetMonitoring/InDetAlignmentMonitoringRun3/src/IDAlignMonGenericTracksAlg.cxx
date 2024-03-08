@@ -226,11 +226,9 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto beamSpotZ_m = Monitored::Scalar<float>( "m_beamSpotZ", beamSpotZ );
     auto beamTiltX_m = Monitored::Scalar<float>( "m_beamTiltX", beamTiltX );
     auto beamTiltY_m = Monitored::Scalar<float>( "m_beamTiltY", beamTiltY );
-    std::cout << "CLARA 1 beamSpot = " << beamSpotX_m << "  " << beamSpotY_m << "  " << beamSpotZ_m << std::endl; 
     fill(genericTrackGroup, beamSpotX_m, beamSpotY_m);
     fill(genericTrackGroup, beamSpotZ_m, beamSpotX_m);
     fill(genericTrackGroup, beamSpotZ_m, beamSpotY_m);
-    std::cout << "CLARA 2 beamSpot = " << beamSpotX_m << "  " << beamSpotY_m << "  " << beamSpotZ_m << std::endl; 
 
     // beam spot vs LB
     fill(genericTrackGroup, lb_m, beamSpotY_m);
@@ -447,12 +445,13 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto eta_m = Monitored::Scalar<float>( "m_eta", trketa );
     fill(genericTrackGroup, eta_m);
 
+    // Lines commented suggested by Makayla to avoid multiple filling
     // pixel hits vs eta
-    fill(genericTrackGroup, eta_m, npixelhits_per_track_m);    
+    //fill(genericTrackGroup, eta_m, npixelhits_per_track_m);    
     // sct hits vs eta
-    fill(genericTrackGroup, eta_m, nscthits_per_track_m);
+    //fill(genericTrackGroup, eta_m, nscthits_per_track_m);
     // trt hits vs eta
-    fill(genericTrackGroup, eta_m, ntrthits_per_track_m);
+    //fill(genericTrackGroup, eta_m, ntrthits_per_track_m);
     
     if (charge>0){
       auto eta_pos_m = Monitored::Scalar<float>( "m_eta_pos", trketa );
