@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTGC_HitsTruthRelink.h"
@@ -45,7 +45,7 @@ StatusCode sTGC_HitsTruthRelink::execute(const EventContext &ctx) const
 
   // Do relinking
   int referenceBarcode{};
-  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode));
+  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode)); // FIXME
 
   for (const sTGCSimHit &hit : *inputCollection) {
     const HepMcParticleLink& oldLink = hit.particleLink();
@@ -55,7 +55,7 @@ StatusCode sTGC_HitsTruthRelink::execute(const EventContext &ctx) const
       currentBarcode = referenceBarcode;
     }
 
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, ctx);
+    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
 
     int           id            = hit.sTGCId();
     double        time          = hit.globalTime();

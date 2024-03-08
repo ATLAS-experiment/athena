@@ -210,7 +210,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
   //AV: we set barcode here because only here the particle in HepMC3 enters event and can have a meaningful barcode.
   HepMC::suggest_barcode(genPart,particleBarcode);
   HepMC::fillBarcodesAttribute(&ge);
-  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0);
+  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based syntax
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
@@ -267,7 +267,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
   //AV: we set barcode here because only here the particle in HepMC3 enters event and can have a meaningful barcode.
   HepMC::suggest_barcode(genPart,particleBarcode);
   HepMC::fillBarcodesAttribute(&ge);
-  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode);
+  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
@@ -322,7 +322,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
   HepMC::GenEvent& ge = *(inputTestDataHandle->at(0));
   ge.add_vertex( prodVtx );
   HepMC::suggest_barcode(genPart,particleBarcode);
-  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0);
+  HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);

@@ -140,19 +140,19 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
     for (const TRTUncompressedHit &hit : *inputCollectionH) {
       const HepMcParticleLink& link = hit.particleLink();
       int pdgID = hit.GetParticleEncoding();
-      if (std::abs(pdgID) != 11 || link.barcode() == 0) continue;
+      if (std::abs(pdgID) != 11 || link.barcode() == 0) continue; // FIXME
       HepMC::ConstGenParticlePtr particle = link.cptr();
       HepMC::ConstGenVertexPtr vx = particle->production_vertex();
       HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(particle->momentum(), particle->pdg_id(), particle->status());
 #ifndef HEPMC3
-      HepMC::suggest_barcode(newParticle, link.barcode());
+      HepMC::suggest_barcode(newParticle, link.barcode()); // HepMC2 still barcode-based
 #endif
       const HepMC::FourVector &position = vx->position();
       HepMC::GenVertexPtr newVertex = HepMC::newGenVertexPtr(position);
       newVertex->add_particle_out(newParticle);
       evt->add_vertex(newVertex);
 #ifdef HEPMC3
-      HepMC::suggest_barcode(newParticle, link.barcode());
+      HepMC::suggest_barcode(newParticle, link.barcode()); // FIXME
 #endif
     }
   }
@@ -160,7 +160,7 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   //.....add new vertex with geantino
   evt->add_vertex(genVertex);
 #ifdef HEPMC3
-  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
+  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE ); // FIXME
 #endif
   int referenceBarcode = HepMC::barcode(genPart);
   ATH_MSG_DEBUG("Reference barcode: " << referenceBarcode);

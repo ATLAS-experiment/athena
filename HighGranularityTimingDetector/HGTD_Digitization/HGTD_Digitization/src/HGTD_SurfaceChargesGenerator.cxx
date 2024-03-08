@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_SurfaceChargesGenerator.h
  *
@@ -68,7 +68,7 @@ void HGTD_SurfaceChargesGenerator::createSurfaceChargesFromHit(
   // some Truth information is cut for pile up events
   unsigned short eventId = timed_hit_ptr.eventId();
   const HepMcParticleLink::PositionFlag idxFlag = (eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink trklink{HepMcParticleLink(hit.trackNumber(), eventId, idxFlag, ctx)};
+  const HepMcParticleLink trklink{HepMcParticleLink(hit.trackNumber(), eventId, idxFlag, HepMcParticleLink::IS_BARCODE, ctx)}; // FIXME barcode-based
   SiCharge::Process hitproc{SiCharge::track};
   if (hit.trackNumber() != 0) {
     if (not trklink.isValid()) {

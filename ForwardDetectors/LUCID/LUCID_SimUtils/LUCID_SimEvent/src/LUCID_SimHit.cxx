@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_SimEvent/LUCID_SimHit.h"
@@ -44,7 +44,7 @@ LUCID_SimHit::LUCID_SimHit(short tubeID,
   m_tubeID       (tubeID),
   m_pdgCode      (pdgCode),
   m_track        (track), // Susumu Oda 2011.04.03
-  m_partLink     (track),
+  m_partLink     (track, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
   m_genVolume    (genVolume),
   m_stepStartPosX(stepStartPosX),
   m_stepStartPosY(stepStartPosY),

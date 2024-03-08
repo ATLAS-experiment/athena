@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/CSCSimHit.h"
@@ -51,7 +51,7 @@ CSCSimHit::CSCSimHit(int id,
     , m_hitStart(HitStart)
     , m_hitEnd(HitEnd)
     , m_particleID(particleID)
-    , m_partLink(trackNumber)
+    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_kineticEnergy(-1.)
 {
 
@@ -70,7 +70,7 @@ CSCSimHit::CSCSimHit(int id,
     , m_hitStart(HitStart)
     , m_hitEnd(HitEnd)
     , m_particleID(particleID)
-    , m_partLink(trackNumber)
+    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_kineticEnergy(static_cast<float>(kineticEnergy))
 {
 

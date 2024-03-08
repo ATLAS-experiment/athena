@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/SiHit.h"
@@ -39,7 +39,7 @@ SiHit::SiHit(const HepGeom::Point3D<double> &localStartPosition,
   m_enZ( (float) localEndPosition.z() ),
   m_energyLoss(energyLoss),
   m_meanTime(meanTime),
-  m_partLink(trackNumber),
+  m_partLink(trackNumber,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE), //FIXME barcode-based
   m_ID(id)
 {
 }
@@ -62,7 +62,7 @@ SiHit::SiHit(const HepGeom::Point3D<double> &localStartPosition,
   m_enZ( (float) localEndPosition.z() ),
   m_energyLoss(energyLoss),
   m_meanTime(meanTime),
-  m_partLink(trackNumber),
+  m_partLink(trackNumber,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE), //FIXME barcode-based
   m_ID(0)
 {
   // Compress the location info into the integer:

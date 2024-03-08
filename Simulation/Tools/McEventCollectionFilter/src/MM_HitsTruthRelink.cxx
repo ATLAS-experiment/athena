@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MM_HitsTruthRelink.h"
@@ -45,7 +45,7 @@ StatusCode MM_HitsTruthRelink::execute(const EventContext &ctx) const
 
   // Do relinking
   int referenceBarcode{};
-  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode));
+  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode)); // FIXME
 
   for (const MMSimHit &hit : *inputCollection) {
     const HepMcParticleLink& oldLink = hit.particleLink();
@@ -55,7 +55,7 @@ StatusCode MM_HitsTruthRelink::execute(const EventContext &ctx) const
       currentBarcode = referenceBarcode;
     }
 
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, ctx);
+    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
 
     int           id            = hit.MMId();
     double        time          = hit.globalTime();

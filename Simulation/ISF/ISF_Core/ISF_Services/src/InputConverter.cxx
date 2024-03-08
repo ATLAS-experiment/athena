@@ -341,7 +341,7 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
   const auto pBarcode = HepMC::barcode(genPartPtr);
   auto tBinding = std::make_unique<ISF::TruthBinding>(genPartPtr);
 
-  auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, parentEvent->event_number());
+  auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, parentEvent->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
 
   auto sParticle = std::make_unique<ISF::ISFParticle>( std::move(pos),
                                                        std::move(mom),

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -69,7 +69,7 @@ void test1(std::vector<HepMC::GenParticlePtr> genPartVector)
   TrackTruthCollection trans1 (DataLink<TrackCollection>("tpc"));
   for (int i=0; i<10; i++) {
     auto pGenParticle = genPartVector.at(i);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number());
+    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     Trk::TrackTruthKey key (ElementLink<TrackCollection> ("tpc", i));
     TrackTruth val (trkLink, (float)i/10);
     trans1[key] = val;

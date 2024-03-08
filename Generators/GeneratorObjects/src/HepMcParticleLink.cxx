@@ -104,7 +104,7 @@ HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
   : m_store (sg),
     m_ptr (part),
-    m_extBarcode((nullptr != part) ? HepMC::barcode(part) : 0, eventIndex, positionFlag)
+    m_extBarcode((nullptr != part) ? HepMC::barcode(part) : 0, eventIndex, positionFlag, HepMcParticleLink::IS_BARCODE)
 {
   assert(part);
 

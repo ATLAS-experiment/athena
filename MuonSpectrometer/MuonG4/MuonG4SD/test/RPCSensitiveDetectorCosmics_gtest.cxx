@@ -82,7 +82,7 @@ TEST_F ( RPCSensitiveDetectorCosmicstest, ProcessHits )
   sd2.ProcessHits(&sp, &th );//invoke the tested member function
 
   int barcode = 0;
-  HepMcParticleLink plink(barcode);
+  HepMcParticleLink plink(barcode,0,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
   RPCSimHitCollection* a = sd2.m_myRPCHitColl.ptr();
 

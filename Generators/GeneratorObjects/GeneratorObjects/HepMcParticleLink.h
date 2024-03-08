@@ -59,8 +59,8 @@ class McEventCollection;
  * As a special case, a GenEvent number of 0 is interpreted as the first
  * GenEvent in the collection.
  *
- * The particle within the GenEvent is represented by a barcode.
- * A barcode of 0 implies a null link.
+ * The particle within the GenEvent is represented by a unique ID.
+ * A unique ID of 0 implies a null link.
  *
  * In order to dereference a link, we need to reference a particular
  * event store.  By default, the current store (as defined by
@@ -79,6 +79,11 @@ public:
     IS_POSITION = 1,
   };
 
+  enum UniqueIDFlag {
+    IS_ID = 0,
+    IS_BARCODE = 1,
+  };
+
 
   /**
    * @brief Persistent representation of a link.
@@ -87,18 +92,19 @@ public:
   class ExtendedBarCode {
   public:
     /// All 1's.  Used to represent an undefined index/position.
-    constexpr static index_type UNDEFINED = ~static_cast<index_type>(0);
+    constexpr static index_type UNDEFINED = ~static_cast<index_type>(0); // TODO Move to MagicNumbers.h?
+    constexpr static barcode_type UNDEFINEDBC = ~static_cast<barcode_type>(0); // TODO Move to MagicNumbers.h?
 
 
     /** 
-     * @brief Default constructor.  Makes a null link (barcode 0).
+     * @brief Default constructor.  Makes a null link (unique ID 0).
      */
     ExtendedBarCode();
 
 
     /**
      * @brief Constructor.
-     * @param barcode Barcode of target particle.
+     * @param uid Unique ID of target particle.
      * @param eventIndex Identifies the target GenEvent in a McEventCollection,
      *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
      *        or the position in the container
@@ -106,9 +112,10 @@ public:
      *        0 always means the first event in the collection.
      * @param isIndexEventPosition: See @c eventIndex.
      */
-    ExtendedBarCode (barcode_type barcode,
+    ExtendedBarCode (barcode_type uid,
                      index_type eventIndex,
-                     PositionFlag isIndexEventPosition = IS_EVENTNUM);
+                     PositionFlag isIndexEventPosition /*= IS_EVENTNUM*/,
+                     UniqueIDFlag isUniqueIDBarcode /*= IS_ID*/);
 
     /**
      * @brief Copy constructor.  (Can't be defaulted due to the atomic member.)
@@ -230,6 +237,8 @@ public:
     /// Flag marking that an index refers to an event position.
     constexpr static index_type POSITION_MASK = UNDEFINED ^ (UNDEFINED>>1);
 
+    /// Flag marking that an unique ID refers to a barcode.
+    constexpr static barcode_type BARCODE_MASK = UNDEFINEDBC ^ (UNDEFINEDBC>>1);
 
     /**
      * @brief Initialize the event index part of the link.
@@ -268,7 +277,7 @@ public:
 
   /**
    * @brief Constructor.
-   * @param barCode Barcode of the target particle.  0 means a null link.
+   * @param uid Unique ID of the target particle.  0 means a null link.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
    *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
@@ -277,15 +286,16 @@ public:
    * @param positionFlag: See @c eventIndex.
    * @param sg Optional specification of a specific store to reference.
    */
-  HepMcParticleLink (barcode_type barCode,
-                     uint32_t eventIndex = 0,
-                     PositionFlag positionFlag = IS_EVENTNUM,
+  HepMcParticleLink (barcode_type uid,
+                     uint32_t eventIndex /*= 0*/,
+                     PositionFlag positionFlag /*= IS_EVENTNUM*/,
+                     UniqueIDFlag uniqueIDFlag /*= IS_ID*/,
                      IProxyDict* sg = SG::CurrentEventStore::store());
 
 
   /**
    * @brief Constructor.
-   * @param barCode Barcode of the target particle.  0 means a null link.
+   * @param uid Unique ID of the target particle.  0 means a null link.
    * @param eventIndex Identifies the target GenEvent in a McEventCollection,
    *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
    *        or the position in the container
@@ -294,9 +304,10 @@ public:
    * @param positionFlag: See @c eventIndex.
    * @param ctx Context of the store to reference.
    */
-  HepMcParticleLink (barcode_type barCode,
+  HepMcParticleLink (barcode_type uid,
                      uint32_t eventIndex,
                      PositionFlag positionFlag,
+                     UniqueIDFlag uniqueIDFlag,
                      const EventContext& ctx);
 
 

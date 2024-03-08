@@ -415,7 +415,7 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
 
       const HepMcParticleLink::PositionFlag idxFlag = (eventId==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
       const int barcode = hit.particleLink().barcode();
-      const HepMcParticleLink particleLink(barcode, eventId, idxFlag);
+      const HepMcParticleLink particleLink(barcode, eventId, idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
       const sTGCSimHit temp_hit(hit.sTGCId(), hit.globalTime(),
                                 HPOS,
                                 hit.particleEncoding(),

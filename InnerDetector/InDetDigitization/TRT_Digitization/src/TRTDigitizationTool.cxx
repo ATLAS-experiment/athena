@@ -427,7 +427,7 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
     for (TimedHitCollection<TRTUncompressedHit>::const_iterator hit_iter(i); hit_iter != e; ++hit_iter ) {
       const HepMcParticleLink::PositionFlag idxFlag = (hit_iter->eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM; // suspect that we could use evtIndex here rather than hit_iter->eventId()
       // create a new deposit
-      InDetSimData::Deposit deposit( HepMcParticleLink((*hit_iter)->GetTrackID(), hit_iter->eventId(), idxFlag, ctx), (*hit_iter)->GetEnergyDeposit() );
+      InDetSimData::Deposit deposit( HepMcParticleLink((*hit_iter)->GetTrackID(), hit_iter->eventId(), idxFlag, HepMcParticleLink::IS_BARCODE, ctx), (*hit_iter)->GetEnergyDeposit() ); // FIXME
       if (HepMC::ignoreTruthLink(deposit.first, m_vetoPileUpTruthLinks)) {
         continue;
       }

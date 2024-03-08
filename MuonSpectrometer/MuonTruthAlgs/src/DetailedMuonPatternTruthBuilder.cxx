@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DetailedMuonPatternTruthBuilder.h"
@@ -313,7 +313,7 @@ namespace Trk {
                             ATH_MSG_VERBOSE("--> no link, noise ? PRD-ID:" << id << " subdet:" << subdet);
                             // add barcode 0 to pairs, we like to keep track of fake fakes
                             unsigned int BC(0), EV(0);
-                            pairStat[HepMcParticleLink(BC, EV)].subDetHits[subdet].insert(id);
+                            pairStat[HepMcParticleLink(BC, EV, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE)].subDetHits[subdet].insert(id); // FIXME barcode-based
                         }
                     }  // orderedPRD_Truth[] available
                 }      // subdet type check, warning in findSubDetType()
@@ -369,7 +369,7 @@ namespace Trk {
 #endif
 
             do {
-                HepMcParticleLink curlink(HepMC::barcode(current), eventIndex);
+                HepMcParticleLink curlink(HepMC::barcode(current), eventIndex, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
                 // remove the current particle from the list of particles to consider (if it is still there)
                 seeds.erase(curlink);
@@ -424,7 +424,7 @@ namespace Trk {
             TruthTrajectory traj;
             traj.reserve(2);  // The average size is about 1.05.  Hardcode that instead of using slow list::size().
             for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ++ppart) {
-                traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex()));
+                traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE)); // FIXME barcode-based
             }
 
             // Count PRDs on the TruthTrajectory
@@ -772,7 +772,7 @@ namespace Trk {
                             ATH_MSG_VERBOSE("--> no link, noise ? PRD-ID:" << id << " subdet:" << subdet);
                             // add barcode 0 to pairs, we like to keep track of fake fakes
                             unsigned int BC(0), EV(0);
-                            pairStat[HepMcParticleLink(BC, EV)].subDetHits[subdet].insert(id);
+                            pairStat[HepMcParticleLink(BC, EV, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE)].subDetHits[subdet].insert(id); // FIXME barcode-based
                         }
                     }  // orderedPRD_Truth[] available
                 }      // subdet type check, warning in findSubDetType()
@@ -829,7 +829,7 @@ namespace Trk {
 #endif
 
             do {
-                HepMcParticleLink curlink(HepMC::barcode(current), eventIndex);
+                HepMcParticleLink curlink(HepMC::barcode(current), eventIndex, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
                 // remove the current particle from the list of particles to consider (if it is still there)
                 seeds.erase(curlink);
@@ -883,7 +883,7 @@ namespace Trk {
             TruthTrajectory traj;
             traj.reserve(2);  // The average size is about 1.05.  Hardcode that instead of using slow list::size().
             for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ++ppart) {
-                traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex()));
+                traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE)); // FIXME barcode-based
             }
 
             // Count PRDs on the TruthTrajectory
@@ -983,7 +983,7 @@ namespace Trk {
                         ATH_MSG_VERBOSE("--> no link, noise ? PRD-ID:" << id << " subdet:" << subdet);
                         // add barcode 0 to pairs, we like to keep track of fake fakes
                         unsigned int BC(0), EV(0);
-                        pairStat[HepMcParticleLink(BC, EV)].subDetHits[subdet].insert(id);
+                        pairStat[HepMcParticleLink(BC, EV, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE)].subDetHits[subdet].insert(id); // FIXME barcode-based
                     }
                 }  // orderedPRD_Truth[] available
             }      // subdet type check, warning in findSubDetType()
@@ -1040,7 +1040,7 @@ namespace Trk {
 #endif
 
             do {
-                HepMcParticleLink curlink(HepMC::barcode(current), eventIndex);
+                HepMcParticleLink curlink(HepMC::barcode(current), eventIndex, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 
                 // remove the current particle from the list of particles to consider (if it is still there)
                 seeds.erase(curlink);
@@ -1094,7 +1094,7 @@ namespace Trk {
             TruthTrajectory traj;
             traj.reserve(2);  // The average size is about 1.05.  Hardcode that instead of using slow list::size().
             for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ++ppart) {
-                traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex()));
+                traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE)); // FIXME barcode-based
             }
 
             // Count PRDs on the TruthTrajectory

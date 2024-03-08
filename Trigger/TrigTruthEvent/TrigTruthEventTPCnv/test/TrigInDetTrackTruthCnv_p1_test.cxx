@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrigTruthEventTPCnv/test/TrigInDetTrackTruthCnv_p1_test.cxx
@@ -55,7 +55,8 @@ public:
     int nstat = 4;
     p.m_nr_common_hits.resize (nstat);
     for (int i=0; i < nstat; i++) {
-      HepMcParticleLink particleLink(HepMC::barcode(genPartVector.at(i)),genPartVector.at(i)->parent_event()->event_number());
+      HepMcParticleLink particleLink(HepMC::barcode(genPartVector.at(i)),genPartVector.at(i)->parent_event()->event_number(),
+                                     HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
       TrigIDHitStats tihs;
       tihs[TrigIDHitStats::PIX] = 12 + i*10;
       tihs[TrigIDHitStats::SCT] = 13 + i*10;
@@ -94,7 +95,8 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
   // Create HepMcParticleLink outside of leak check.
-  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number());
+  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number(),
+                              HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
   // Make sure HepMcParticleLink::getLastEventCollectionName is called.
   std::ostringstream ss;
   ss << dummyHMPL;

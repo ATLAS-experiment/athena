@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/TGCSimHit.h"
@@ -51,7 +51,7 @@ TGCSimHit::TGCSimHit(const int id,
     , m_globalTime(static_cast<float>(time))
     , m_localPosition(position)
     , m_localDireCos(direcos)
-    , m_partLink(trackNumber)
+    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_energyDeposit(static_cast<float>(energyDeposit))
     , m_stepLength(static_cast<float>(stepLength))
     , m_particleEncoding(particleEncoding)

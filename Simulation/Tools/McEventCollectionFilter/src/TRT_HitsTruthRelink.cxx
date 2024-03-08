@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_HitsTruthRelink.h"
@@ -45,7 +45,7 @@ StatusCode TRT_HitsTruthRelink::execute(const EventContext &ctx) const
 
   // Do relinking
   int referenceBarcode{};
-  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode));
+  ATH_CHECK(getReferenceBarcode(ctx, &referenceBarcode)); // FIXME
 
   for (const TRTUncompressedHit &hit : *inputCollection) {
     const HepMcParticleLink& oldLink = hit.particleLink();
@@ -58,7 +58,7 @@ StatusCode TRT_HitsTruthRelink::execute(const EventContext &ctx) const
       }
     }
 
-    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, ctx);
+    HepMcParticleLink particleLink(currentBarcode, oldLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
     int   id            = hit.GetHitID();
     float kineticEnergy = hit.GetKineticEnergy();
     float energyDeposit = hit.GetEnergyDeposit();

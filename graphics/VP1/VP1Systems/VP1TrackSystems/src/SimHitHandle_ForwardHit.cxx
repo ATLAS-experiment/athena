@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -45,7 +45,7 @@ SimHitHandle_ForwardHit::SimHitHandle_ForwardHit(const SimulationHit * h)
   if (!h)
     VP1Msg::message("SimHitHandle_ForwardHit constructor ERROR: Received null hit pointer");
 
-  m_link =  HepMcParticleLink(m_d->thehit->trackID());
+  m_link =  HepMcParticleLink(m_d->thehit->trackID(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
 }
 
 //____________________________________________________________________

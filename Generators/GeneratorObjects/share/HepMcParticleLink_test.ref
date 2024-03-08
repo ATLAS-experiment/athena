@@ -14,6 +14,10 @@ HepMcParticleLink    INFO find_proxy: Using TruthEvent as McEventCollection key 
 *** HepMcParticleLink_test OK ***
 [       OK ] HepMcParticleLink_test.old_test ((xx ms))
 [ RUN      ] HepMcParticleLink_test.broken_event_link
+HepMcParticleLink WARNING find_proxy: No Valid MC event Collection found 
+HepMcParticleLink WARNING cptr: McEventCollection not found
+HepMcParticleLink WARNING find_proxy: No Valid MC event Collection found 
+HepMcParticleLink WARNING cptr: McEventCollection not found
 [       OK ] HepMcParticleLink_test.broken_event_link ((xx ms))
 [ RUN      ] HepMcParticleLink_test.truth_event_link_first_event
 [       OK ] HepMcParticleLink_test.truth_event_link_first_event ((xx ms))

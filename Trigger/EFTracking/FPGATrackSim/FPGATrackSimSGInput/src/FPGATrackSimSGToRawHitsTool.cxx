@@ -292,7 +292,7 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
         tmpSGhit.setEventIndex(index);
       else
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
-      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max()));
+      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max())); // FIXME
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       tmpSGhit.setParentageMask(parentMask.to_ulong());
 
@@ -366,7 +366,7 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       else
         tmpSGhit.setEventIndex(std::numeric_limits<long>::max());
 
-      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max()));
+      tmpSGhit.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max())); // FIXME
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       tmpSGhit.setParentageMask(parentMask.to_ulong());
       tmpSGhit.setX(0.5 * (endsOfStrip.first.x() + endsOfStrip.second.x()));
@@ -514,7 +514,7 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
         clusterEquiv.setEventIndex(index);
       else
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
-      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max()));
+      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max())); // FIXME
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       clusterEquiv.setParentageMask(parentMask.to_ulong());
       clusterOut.setClusterEquiv(clusterEquiv);
@@ -584,7 +584,7 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
         clusterEquiv.setEventIndex(std::numeric_limits<long>::max());
 
 
-      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max()));
+      clusterEquiv.setBarcode((long)(bestParent ? bestExtcode.barcode() : std::numeric_limits<long>::max())); // FIXME
       clusterEquiv.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       clusterEquiv.setParentageMask(parentMask.to_ulong());
       clusterOut.setClusterEquiv(clusterEquiv);
@@ -668,8 +668,8 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       // categorize particle (prompt, secondary, etc.) based on InDetPerformanceRTT/detector paper criteria.
       bool isPrimary = true;
       if (std::abs(truth_d0corr) > 2.) { isPrimary = false; }
-      const int bc = HepMC::barcode(particle);
-      if (HepMC::is_simulation_particle(particle) || bc == 0) { isPrimary = false; }
+      const int bc = HepMC::barcode(particle); // FIXME update barcode-based syntax
+      if (HepMC::is_simulation_particle(particle) || bc == 0) { isPrimary = false; } // FIXME update barcode-based syntax
       if (isPrimary && particle->production_vertex()) {
         const HepGeom::Point3D<double> startVertex(particle->production_vertex()->position().x(), particle->production_vertex()->position().y(), particle->production_vertex()->position().z());
         if (std::abs(startVertex.z() - truth_zvertex) > 100.) { isPrimary = false; }
@@ -682,7 +682,9 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
         isPrimary = false;
       }
 
-      HepMcParticleLink::ExtendedBarCode extBarcode2(bc, ievt);
+      HepMcParticleLink::ExtendedBarCode extBarcode2(bc, ievt,
+                                                     HepMcParticleLink::IS_EVENTNUM,
+                                                     HepMcParticleLink::IS_BARCODE); // FIXME update barcode-based syntax
 
       FPGATrackSimTruthTrack tmpSGTrack;
       tmpSGTrack.setVtxX(track_truth_x0);
@@ -697,7 +699,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
       tmpSGTrack.setPZ(track_truth_p * track_truth_costheta);
       tmpSGTrack.setPDGCode(pdgcode);
       tmpSGTrack.setStatus(particle->status());
-      tmpSGTrack.setBarcode(extBarcode2.barcode());
+      tmpSGTrack.setBarcode(extBarcode2.barcode()); // FIXME
       index_type index2, position2;
       extBarcode2.eventIndex(index2, position2);
       tmpSGTrack.setEventIndex(index2);
@@ -727,13 +729,13 @@ void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::co
     // reject unstable particles
     if (!MC::isStable(particleLink)) { continue; }
     // reject secondaries and low pT (<400 MeV) pileup
-    if (HepMC::is_simulation_particle(particleLink.cptr()) ||particleLink.barcode() == 0) { continue; }
+    if (HepMC::is_simulation_particle(particleLink.cptr()) ||particleLink.barcode() == 0) { continue; }  // FIXME
     // reject far forward particles
     if (std::fabs(genEta) > m_maxEta) { continue; }
     // "bestParent" is the highest pt particle
     if (bestParent == nullptr || bestParent->momentum().perp() < genPt) {
       bestParent = particleLink.cptr();
-      bestExtcode = HepMcParticleLink::ExtendedBarCode(particleLink.barcode(), particleLink.eventIndex());
+      bestExtcode = HepMcParticleLink::ExtendedBarCode(particleLink.barcode(), particleLink.eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based-syntax
     }
  #ifdef HEPMC3
      parentMask |= FPGATrackSimInputUtils::construct_truth_bitmap(std::shared_ptr<const HepMC3::GenParticle>(particleLink.cptr()));

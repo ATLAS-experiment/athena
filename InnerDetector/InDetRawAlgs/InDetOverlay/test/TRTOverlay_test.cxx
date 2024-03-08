@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -623,7 +623,7 @@ namespace OverlayTesting {
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
     auto pGenParticle = genPartList.at(0);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number());
+    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     InDetSimData::Deposit deposit( trkLink, 0.0 );
     std::vector<InDetSimData::Deposit> depositVector(1);
     depositVector.push_back(deposit);
@@ -707,7 +707,7 @@ namespace OverlayTesting {
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
     auto pGenParticle = genPartList.at(0);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number());
+    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     InDetSimData::Deposit deposit( trkLink, 0.0 );
     std::vector<InDetSimData::Deposit> depositVector(1);
     depositVector.push_back(deposit);
@@ -799,7 +799,7 @@ namespace OverlayTesting {
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
     auto pGenParticle = genPartList.at(0);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number());
+    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     ASSERT_EQ(trkLink.cptr()->pdg_id(), -11); // Sanity check to confirm that we are linking to a positron as expected
     InDetSimData::Deposit deposit( trkLink, 0.0 );
     std::vector<InDetSimData::Deposit> depositVector(1);
@@ -883,7 +883,7 @@ namespace OverlayTesting {
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
     auto pGenParticle = genPartList.at(0);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number());
+    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     ASSERT_EQ(trkLink.cptr()->pdg_id(), -11); // Sanity check to confirm that we are linking to a positron as expected
     InDetSimData::Deposit deposit( trkLink, 0.0 );
     std::vector<InDetSimData::Deposit> depositVector(1);

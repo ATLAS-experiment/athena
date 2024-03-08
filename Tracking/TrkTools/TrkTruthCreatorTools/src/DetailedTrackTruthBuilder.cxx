@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTruthCreatorTools/DetailedTrackTruthBuilder.h"
@@ -206,27 +206,27 @@ DetailedTrackTruthBuilder::findSubDetType(const Identifier& id) const {
   return SubDetHitStatistics::NUM_SUBDETECTORS;
 }
 
-namespace {
-class ExtendedEventIndex {
-public:
-   ExtendedEventIndex(const HepMcParticleLink &source, IProxyDict *proxy)
-      : m_eventIndex(source.eventIndex()),
-        m_isPosition(m_eventIndex == HepMcParticleLink::ExtendedBarCode::UNDEFINED)
-   {
-      if (m_isPosition) {
-         m_eventIndex = source.getEventPositionInCollection(proxy);
+  namespace {
+    class ExtendedEventIndex {
+    public:
+      ExtendedEventIndex(const HepMcParticleLink &source, IProxyDict *proxy)
+        : m_eventIndex(source.eventIndex()),
+          m_isPosition(m_eventIndex == HepMcParticleLink::ExtendedBarCode::UNDEFINED)
+      {
+        if (m_isPosition) {
+          m_eventIndex = source.getEventPositionInCollection(proxy);
+        }
       }
-   }
 
-   HepMcParticleLink makeLink(HepMcParticleLink::barcode_type other_particle_barcode, IProxyDict *proxy) {
-      return {other_particle_barcode, m_eventIndex, (m_isPosition ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM ), proxy};
-   }
+      HepMcParticleLink makeLink(HepMcParticleLink::barcode_type other_particle_barcode, IProxyDict *proxy) {
+        return {other_particle_barcode, m_eventIndex, (m_isPosition ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM ), HepMcParticleLink::IS_BARCODE, proxy}; // FIXME barcode-based
+      }
 
-private:
-   HepMcParticleLink::index_type m_eventIndex;
-   bool                          m_isPosition;
-};
-}
+    private:
+      HepMcParticleLink::index_type m_eventIndex;
+      bool                          m_isPosition;
+    };
+  }
 
 //================================================================
 void DetailedTrackTruthBuilder::addTrack(DetailedTrackTruthCollection *output,
@@ -293,7 +293,7 @@ void DetailedTrackTruthBuilder::addTrack(DetailedTrackTruthCollection *output,
 	      // add barcode 0 to pairs, we like to keep track of fake fakes
 	      unsigned int BC(0);
 	      unsigned int EV(0);
-	      pairStat[HepMcParticleLink(BC,EV)].subDetHits[subdet].insert(id);
+	      pairStat[HepMcParticleLink(BC,EV,HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE)].subDetHits[subdet].insert(id); // FIXME barcode-based
 	    }
 	  } // orderedPRD_Truth[] available
 	} // subdet type check, warning in findSubDetType()
@@ -353,7 +353,7 @@ void DetailedTrackTruthBuilder::addTrack(DetailedTrackTruthCollection *output,
     HepMC::ConstGenParticlePtr current = link.cptr();
 
     do {
-      HepMcParticleLink curlink( eventIndex.makeLink(HepMC::barcode(current), proxy));
+      HepMcParticleLink curlink( eventIndex.makeLink(HepMC::barcode(current), proxy)); // FIXME barcode-based
 
       // remove the current particle from the list of particles to consider (if it is still there)
       seeds.erase(curlink);
@@ -415,7 +415,7 @@ void DetailedTrackTruthBuilder::addTrack(DetailedTrackTruthCollection *output,
     TruthTrajectory traj;
     traj.reserve(2); // The average size is about 1.05.  Hardcode that instead of using slow list::size().
     for(Sprout::const_iterator ppart=s->second.begin(); ppart!=s->second.end(); ++ppart) {
-      traj.push_back(HepMcParticleLink(ExtendedEventIndex(s->first, proxy).makeLink(HepMC::barcode(*ppart), proxy)));
+      traj.push_back(HepMcParticleLink(ExtendedEventIndex(s->first, proxy).makeLink(HepMC::barcode(*ppart), proxy))); // FIXME barcode-based
     }
 
     // Count PRDs on the TruthTrajectory
