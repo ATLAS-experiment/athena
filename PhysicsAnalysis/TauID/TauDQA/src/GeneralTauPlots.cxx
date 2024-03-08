@@ -69,7 +69,7 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
   static const SG::AuxElement::ConstAccessor<float> acc_RNNEleScoreSigTrans("RNNEleScoreSigTrans");
   if ( acc_RNNEleScoreSigTrans.isAvailable(tau) ) {
      float rnnScore = tau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans);
-     if ( rnnScore > -2.0 ) m_RNNEleScoreSigTrans->Fill(rnnScore, weight);
+     m_RNNEleScoreSigTrans->Fill(rnnScore, weight);
   }
   static const SG::AuxElement::ConstAccessor<float> acc_RNNJetScore("RNNJetScore");
   if ( acc_RNNJetScore.isAvailable(tau) ) {
@@ -79,7 +79,7 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
   static const SG::AuxElement::ConstAccessor<float> acc_RNNJetScoreSigTrans("RNNJetScoreSigTrans");
   if ( acc_RNNJetScoreSigTrans.isAvailable(tau) ) {
      float rnnScore = tau.discriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans);
-     if ( rnnScore > -2.0 ) m_RNNJetScoreSigTrans->Fill(rnnScore, weight);
+     m_RNNJetScoreSigTrans->Fill(rnnScore, weight);
   }
   if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose) ) {
      m_ptRNNVeryLoose      ->Fill(tau.pt()/1000, weight);
