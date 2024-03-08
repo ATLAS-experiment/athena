@@ -23,6 +23,9 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 
 #include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+
+#include "CaloConditions/CaloNoise.h"
 
 #include <string>
 #include <mutex>
@@ -110,14 +113,28 @@ class CaloGPUHybridClusterProcessor : public AthReentrantAlgorithm, public CaloG
   /** @brief If @p true, uses the monitoring tool specified by @p m_monitorTool.
     */
   Gaudi::Property<bool> m_doMonitoring{this, "DoMonitoring", false, "Do monitoring."};
+  Gaudi::Property<bool> m_monitorCells{this, "MonitorCells", false, "Whether to monitor cells too."};
+  Gaudi::Property<float> m_monitoring1thr { this, "Thr1", 2, "First Threshold to pass for cell monitoring" };
+  Gaudi::Property<float> m_monitoring2thr { this, "Thr2", 4, "Second Threshold to pass for cell monitoring" };
+
+
+  // adding noise handle for monitoring purposes
+  SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this, "CaloNoiseKey", "totalNoise", "SG Key of CaloNoise data object"};
 
   /** @brief Monitoring tool.
     */
-  ToolHandle< GenericMonitoringTool > m_moniTool { this, "MonitoringTool", "", "Monitoring tool" };
+  ToolHandle<GenericMonitoringTool> m_moniTool { this, "MonitoringTool", "", "Monitoring tool" };
 
   ///Event input: To get <mu> from Event Info
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_avgMuKey { this, "averageInteractionsPerCrossingKey", "EventInfo.averageInteractionsPerCrossing", "Decoration for Average Interaction Per Crossing" };
 
+  /** @brief If @p true, writes some trigger-specific decorations.
+    */
+  Gaudi::Property<bool> m_writeTriggerSpecificInfo{this, "WriteTriggerSpecificInfo", false, "Write some trigger-specific decorations and use the trigger auxiliary container."};
+
+  /** @brief Key to the handle for writing the number of cells as a decoration.
+    */
+  SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_mDecor_ncells {this, "Decor_ncells", "nCells", "Decorator containing the number of cells associated to a cluster"};
 
   /**
    * @brief Number of events for which to pre-allocate space on GPU memory
@@ -125,19 +142,30 @@ class CaloGPUHybridClusterProcessor : public AthReentrantAlgorithm, public CaloG
    *
    */
   Gaudi::Property<size_t> m_numPreAllocatedGPUData{this, "NumPreAllocatedDataHolders", 0, "Number of event data holders to pre-allocate on GPU memory"};
+
+  /**
+   * @brief vector of names of the cell containers to use as input.
+   */
+  SG::ReadHandleKey<CaloCellContainer> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
+
   /** @brief The name of the key in StoreGate for the output
       CaloClusterContainer */
   SG::WriteHandleKey<xAOD::CaloClusterContainer> m_clusterOutput {this, "ClustersOutputName", "", "The name of the key in StoreGate for the output CaloClusterContainer"};
 
   /** @brief The name of the key in StoreGate for the output
       CaloClusterCellLinkContainer */
-  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_clusterCellLinkOutput{this, "ClusterCellLinkOutputName", "", "The name of the key in StoreGate for the output CaloClusterCellLinkContainer"};
+  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_clusterCellLinkOutput{this, "ClusterCellLinksOutputName", "", "The name of the key in StoreGate for the output CaloClusterCellLinkContainer"};
 
   /** @brief If @p true, the constant data is only converted and
       sent to the GPU on the first event, in case not all the necessary
       information is available during the @p initialize phase.
       */
-  Gaudi::Property<bool> m_deferConstantDataToFirstEvent {this, "DeferConstantDataPreparationToFirstEvent", true, "Convert and send event data on first event instead of during initialize (needed for exporting geometry and noise properly?)"};
+  Gaudi::Property<bool> m_deferConstantDataToFirstEvent {this, "DeferConstantDataPreparationToFirstEvent", true, "Convert and send event data on first event instead of during initialize (needed for exporting geometry and noise properly)?"};
+
+
+  /** @brief If @p true, both constant and event data conversion is skipped.
+      */
+  Gaudi::Property<bool> m_skipConversions {this, "SkipConversions", false, "If true, skip converting CPU to GPU data (useful if only instanting CPU tools)"};
 
   /** @brief A way to reduce allocations over multiple threads by keeping a cache
   *   of previously allocated objects that get assigned to the threads as they need them.
@@ -236,9 +264,6 @@ class CaloGPUHybridClusterProcessor : public AthReentrantAlgorithm, public CaloG
     * to ensure thread safety. Otherwise, it's unused.
     */
   mutable std::mutex m_mutex;
-
-  ///@brief Do pre or post conversions of energy? (Used internally to ensure the conversion tools are given.)
-  bool m_preConvert, m_postConvert;
 
 };
 

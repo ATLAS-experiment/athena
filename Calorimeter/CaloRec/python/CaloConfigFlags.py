@@ -51,6 +51,7 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.addCPData",False)
     ccf.addFlag("Calo.TopoCluster.skipWriteList", lambda prevFlags:
                 ["CaloCalTopoClusters", "CaloTopoClusters"] if prevFlags.Reco.HIMode is HIMode.HI else [])
+    ccf.addFlag("Calo.TopoCluster.UseGPUCompatibleCriteria", False)
     
     ccf.addFlag("Calo.TopoCluster.xtalkInfoDumper", False) # dump raw energy, digits and some calibration for xtalk studies
     

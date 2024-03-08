@@ -9,25 +9,20 @@
 #and GPU growing with CPU splitting.
 
 import CaloRecGPUTestingConfig
-from PlotterConfigurator import PlotterConfigurator
 
     
 if __name__=="__main__":
 
-    
-    PlotterConfig = PlotterConfigurator(["CPU_growing", "GPU_growing", "CPUCPU_splitting", "GPUGPU_splitting", "CPUGPU_splitting", "GPUCPU_splitting"],
-                                                          ["growing", "CPU_to_GPUGPU_splitting", "CPU_to_CPUGPU_splitting", "CPU_to_GPUCPU_splitting"])   
-
-    flags, perfmon, numevents = CaloRecGPUTestingConfig.PrepareTest()
-    flags.CaloRecGPU.Default.DoMonitoring = True
-    flags.CaloRecGPU.Default.ClustersOutputName="CaloCalTopoClustersNew"
+    flags, testopts = CaloRecGPUTestingConfig.PrepareTest()
+        
     flags.lock()
-    flagsActive = flags.cloneAndReplace("CaloRecGPU.ActiveConfig", "CaloRecGPU.Default")
     
-    topoAcc = CaloRecGPUTestingConfig.MinimalSetup(flagsActive,perfmon)
-
-    topoAcc.merge(CaloRecGPUTestingConfig.FullTestConfiguration(flagsActive, TestGrow = True, TestSplit = True, DoCrossTests = True, PlotterConfigurator = PlotterConfig))
-
+    testopts.TestGrow = True
+    testopts.TestSplit = True
+    testopts.DoCrossTests = True
     
-    topoAcc.run(numevents)
-
+    PlotterConfig = CaloRecGPUTestingConfig.PlotterConfigurator(["CPU_growing", "GPU_growing", "CPUCPU_splitting", "GPUGPU_splitting", "CPUGPU_splitting", "GPUCPU_splitting"],
+                                                          ["growing", "CPU_to_GPUGPU_splitting", "CPU_to_CPUGPU_splitting", "CPU_to_GPUCPU_splitting"])   
+    
+    CaloRecGPUTestingConfig.RunFullTestConfiguration(flags, testopts, PlotterConfigurator = PlotterConfig)
+    

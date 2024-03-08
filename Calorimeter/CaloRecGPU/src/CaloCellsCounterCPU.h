@@ -66,7 +66,7 @@ class CaloCellsCounterCPU :
     /**
    * @brief vector of names of the cell containers to use as input.
    */
-  Gaudi::Property<SG::ReadHandleKey<CaloCellContainer>> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
+  SG::ReadHandleKey<CaloCellContainer> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
   
   /** @brief Key of the CaloNoise Conditions data object. Typical values
       are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default)

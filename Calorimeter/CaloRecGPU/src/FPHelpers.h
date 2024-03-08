@@ -28,7 +28,7 @@
 
 #endif
 
-#if __cpp_lib_bitops
+#if __cpp_lib_bitops || __cpp_lib_bit_cast
 
   #include <bit>
 
@@ -264,7 +264,7 @@ namespace FloatingPointHelpers
     template <class To, class From>
     constexpr inline static To bitcast(const From & x)
     {
-      return bit_cast<To, From>(x);
+      return std::bit_cast<To, From>(x);
     }
 
 #else

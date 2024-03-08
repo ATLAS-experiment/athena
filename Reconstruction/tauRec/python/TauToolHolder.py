@@ -524,6 +524,7 @@ def TauCaloTopoClusterMakerCfg(flags):
     TopoClusterForTaus.NeighborThresholdOnEorAbsEinSigma = 2.0
     TopoClusterForTaus.SeedThresholdOnEorAbsEinSigma     = 4.0
     TopoClusterForTaus.SeedCutsInAbsE                    = True
+    TopoClusterForTaus.ClusterCutsInAbsEt                = True
     TopoClusterForTaus.ClusterEtorAbsEtCut               = 0.5*GeV # 0.0*MeV in standard CaloCalTopoCluster JobOptions!
     TopoClusterForTaus.TwoGaussianNoise                  = flags.Calo.TopoCluster.doTwoGaussianNoise
     # timing cut on seed cell to suppress out-of-time pileup

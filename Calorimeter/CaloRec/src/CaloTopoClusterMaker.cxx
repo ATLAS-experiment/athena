@@ -74,6 +74,7 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
     m_seedCutsInAbsE                   (false),
     m_neighborCutsInAbsE               (true),
     m_cellCutsInAbsE                   (true),
+    m_clusterCutsInAbsE                (true),
     m_clusterEtorAbsEtCut              (    0.*MeV),
     m_twogaussiannoise                 (false),
     m_treatL1PredictedCellsAsGood      (true),
@@ -162,6 +163,9 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
   // Restrict PS Neighbors
   declareProperty("RestrictPSNeighbors",m_restrictPSNeighbors);
 
+  //Cluster cuts are in E_t or Abs E_t 
+  declareProperty("ClusterCutsInAbsEt",m_clusterCutsInAbsE);
+  
   // Cluster E_t or Abs E_t cut
   declareProperty("ClusterEtorAbsEtCut",m_clusterEtorAbsEtCut);
 
@@ -326,7 +330,7 @@ StatusCode CaloTopoClusterMaker::initialize()
   
   ATH_CHECK(m_noiseCDOKey.initialize());
 
-  ATH_MSG_INFO( (m_seedCutsInAbsE?"ClusterAbsEtCut= ":"ClusterEtCut= ")
+  ATH_MSG_INFO( (m_clusterCutsInAbsE?"ClusterAbsEtCut= ":"ClusterEtCut= ")
                 << m_clusterEtorAbsEtCut << " MeV"  );
 
   m_hashMin = 999999;
@@ -654,7 +658,7 @@ CaloTopoClusterMaker::execute(const EventContext& ctx,
 	myCluster->addCell(iCell,1.);
       }
       const float cl_et = myCluster->et();
-      if ( (m_seedCutsInAbsE ? std::abs(cl_et) : cl_et) > m_clusterEtorAbsEtCut ) {
+      if ( (m_clusterCutsInAbsE ? std::abs(cl_et) : cl_et) > m_clusterEtorAbsEtCut ) {
 	sortClusters.push_back(std::move(myCluster));
       } 
     }

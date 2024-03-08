@@ -95,7 +95,7 @@ void CaloRecGPU::EventDataHolder::returnToCPU(const bool clear_GPU,
 
 void CaloRecGPU::EventDataHolder::returnCellsToCPU(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   CUDA_ERRCHECK( cudaMemcpyAsync((CaloRecGPU::CellStateArr *) m_cell_state,
                                  (CaloRecGPU::CellStateArr *) m_cell_state_dev,
                                  sizeof(CaloRecGPU::CellStateArr),
@@ -104,7 +104,7 @@ void CaloRecGPU::EventDataHolder::returnCellsToCPU(CaloRecGPU::CUDA_Helpers::CUD
 
 void CaloRecGPU::EventDataHolder::returnClustersToCPU(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   CUDA_ERRCHECK( cudaMemcpyAsync((CaloRecGPU::ClusterInfoArr *) m_clusters,
                                  (CaloRecGPU::ClusterInfoArr *) m_clusters_dev,
                                  sizeof(CaloRecGPU::ClusterInfoArr),
@@ -113,7 +113,7 @@ void CaloRecGPU::EventDataHolder::returnClustersToCPU(CaloRecGPU::CUDA_Helpers::
 
 void CaloRecGPU::EventDataHolder::returnMomentsToCPU(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   CUDA_ERRCHECK(cudaMemcpyAsync((CaloRecGPU::ClusterMomentsArr *) m_moments,
                                 (CaloRecGPU::ClusterMomentsArr *) m_moments_dev,
                                 sizeof(CaloRecGPU::ClusterMomentsArr),
@@ -122,7 +122,7 @@ void CaloRecGPU::EventDataHolder::returnMomentsToCPU(CaloRecGPU::CUDA_Helpers::C
 
 void CaloRecGPU::EventDataHolder::returnClusterNumberToCPU(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
   CUDA_ERRCHECK(cudaMemcpyAsync(&(m_clusters->number),
                                 &(m_clusters_dev->number),
                                 sizeof(int),
@@ -158,7 +158,7 @@ void CaloRecGPU::EventDataHolder::returnClusterNumberToCPU(CaloRecGPU::CUDA_Help
 
 void CaloRecGPU::EventDataHolder::returnSomeClustersToCPU(const size_t num_clusters, CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   //We assume the cluster number we take is the known number of clusters,
   //so we skip copying that.
@@ -172,7 +172,7 @@ void CaloRecGPU::EventDataHolder::returnSomeClustersToCPU(const size_t num_clust
 
 void CaloRecGPU::EventDataHolder::returnSomeMomentsToCPU(const size_t num_clusters, CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   CALORECGPU_ASYNC_TRANSFER_PER_SAMPLE_HELPER(m_moments, energyPerSample,     float, num_clusters, stream_to_use);
   CALORECGPU_ASYNC_TRANSFER_PER_SAMPLE_HELPER(m_moments, maxEPerSample,       float, num_clusters, stream_to_use);

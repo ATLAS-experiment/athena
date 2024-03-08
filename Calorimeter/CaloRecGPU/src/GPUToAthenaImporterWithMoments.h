@@ -57,7 +57,7 @@ class GPUToAthenaImporterWithMoments :
   /**
    * @brief vector of names of the cell containers to use as input.
    */
-  Gaudi::Property<SG::ReadHandleKey<CaloCellContainer>> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
+  SG::ReadHandleKey<CaloCellContainer> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
 
   /// Cluster size. Should be set accordingly to the threshold.
   Gaudi::Property<std::string> m_clusterSizeString {this, "ClusterSize", "Topo_420", "The size/type of the clusters"};
@@ -77,6 +77,11 @@ class GPUToAthenaImporterWithMoments :
 
   //Handles for things we can't (yet) do on the GPU.
 
+  /**
+  * @brief if set to true, fill the HV-related moments using the respective tools.
+  */
+  Gaudi::Property<bool> m_fillHVMoments {this, "FillHVMoments", false, "Fill the HV-related moments using the respective tools."};
+  
   ///@brief Cabling for the CPU-based HV moments calculation.
    SG::ReadCondHandleKey<LArOnOffIdMapping> m_HVCablingKey{this, "LArCablingKey","LArOnOffIdMap","SG Key of LAr Cabling object"};
  
@@ -89,6 +94,11 @@ class GPUToAthenaImporterWithMoments :
   /** @brief Cell indices to fill as disabled cells (useful if the cell vector is always missing the same cells).
    */
   Gaudi::Property<std::vector<int>> m_missingCellsToFill {this, "MissingCellsToFill", {}, "Force fill these cells as disabled on empty containers."};
+
+  /**
+  * @brief if set to true, the uncalibrated state is saved when importing the clusters. Default is @p true.
+  */
+  Gaudi::Property<bool> m_saveUncalibrated {this, "SaveUncalibratedSignalState", true, "Use CaloClusterKineHelper::calculateKine instead of GPU-calculated cluster properties"};
 
 
   /**

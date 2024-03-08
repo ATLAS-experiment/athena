@@ -59,7 +59,7 @@ class BasicGPUToAthenaImporter :
   /**
    * @brief vector of names of the cell containers to use as input.
    */
-  Gaudi::Property<SG::ReadHandleKey<CaloCellContainer>> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
+  SG::ReadHandleKey<CaloCellContainer> m_cellsKey {this, "CellsName", "", "Name(s) of Cell Containers"};
 
   /// Cluster size. Should be set accordingly to the threshold.
   Gaudi::Property<std::string> m_clusterSizeString {this, "ClusterSize", "Topo_420", "The size/type of the clusters"};
@@ -75,6 +75,10 @@ class BasicGPUToAthenaImporter :
    */
   const CaloCell_ID * m_calo_id {nullptr};
 
+  /**
+  * @brief if set to true, the uncalibrated state is saved when importing the clusters. Default is @p true.
+  */
+  Gaudi::Property<bool> m_saveUncalibrated {this, "SaveUncalibratedSignalState", true, "Use CaloClusterKineHelper::calculateKine instead of GPU-calculated cluster properties"};
 
 };
 

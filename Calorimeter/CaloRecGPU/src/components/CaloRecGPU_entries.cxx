@@ -1,7 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-//
-// Dear emacs, this is -*- c++ -*-
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -16,7 +14,6 @@
 #include "../TopoAutomatonClustering.h"
 #include "../CaloCellsCounterCPU.h"
 #include "../CaloCellsCounterGPU.h"
-#include "../CaloTopoClusterSplitterGPU.h"
 #include "../BasicGPUClusterInfoCalculator.h"
 #include "../TopoAutomatonSplitting.h"
 #include "../CaloClusterDeleter.h"
@@ -25,6 +22,7 @@
 #include "../GPUToAthenaImporterWithMoments.h"
 #include "../CaloMomentsDumper.h"
 #include "../GPUKernelSizeOptimizerSvc.h"
+#include "../CaloClusterStoreRawProperties.h"
 
 // Declare the "components".
 DECLARE_COMPONENT( CaloGPUHybridClusterProcessor )
@@ -36,7 +34,6 @@ DECLARE_COMPONENT( CaloCPUOutput )
 DECLARE_COMPONENT( TopoAutomatonClustering )
 DECLARE_COMPONENT( CaloCellsCounterCPU )
 DECLARE_COMPONENT( CaloCellsCounterGPU )
-DECLARE_COMPONENT( CaloTopoClusterSplitterGPU )
 DECLARE_COMPONENT( BasicGPUClusterInfoCalculator )
 DECLARE_COMPONENT( CaloClusterDeleter )
 DECLARE_COMPONENT( TopoAutomatonSplitting )
@@ -45,4 +42,5 @@ DECLARE_COMPONENT( GPUClusterInfoAndMomentsCalculator )
 DECLARE_COMPONENT( GPUToAthenaImporterWithMoments )
 DECLARE_COMPONENT( CaloMomentsDumper )
 DECLARE_COMPONENT( GPUKernelSizeOptimizerSvc )
+DECLARE_COMPONENT( CaloClusterStoreRawProperties )
 

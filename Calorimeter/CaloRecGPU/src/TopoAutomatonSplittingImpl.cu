@@ -319,7 +319,7 @@ void TASplitting::fillNeighbours(EventDataHolder & holder,
                                  const bool synchronize,
                                  CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   TopoAutomatonSplittingTemporaries * temps = TASHacks::get_temporaries(holder);
 
@@ -606,7 +606,7 @@ void TASplitting::findLocalMaxima(EventDataHolder & holder,
                                   const bool synchronize,
                                   CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   TopoAutomatonSplittingTemporaries * temps = TASHacks::get_temporaries(holder);
 
@@ -655,7 +655,7 @@ void TASplitting::findLocalMaxima(EventDataHolder & holder,
  * Delete secondary maxima according to the criteria on the CPU version.
  ******************************************************************************/
 
-__device__ static
+static __device__
 void propagate_secondary_maxima_pair(const int pair,
                                      Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries)
 {
@@ -679,7 +679,7 @@ void propagate_secondary_maxima_pair(const int pair,
 }
 
 
-__global__ static
+static __global__
 void secondaryMaximaCooperativeKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries)
 {
   cooperative_groups::grid_group grid = cooperative_groups::this_grid();
@@ -730,19 +730,13 @@ void secondaryMaximaCooperativeKernel(Helpers::CUDA_kernel_object<TopoAutomatonS
 
 }
 
-__global__ static
-void checkForMaximaExclusionTermination(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const int i_dimBlock, const int i_dimGrid
-#endif
-                                       );
+static __global__
+void checkForMaximaExclusionTermination(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
+                                        const int i_dimBlock, const int i_dimGrid);
 
-__global__ static
-void propagateForMaximaExclusionKernel( Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const int i_dimBlock, const int i_dimGrid
-#endif
-                                      )
+static __global__
+void propagateForMaximaExclusionKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
+                                       const int i_dimBlock, const int i_dimGrid)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -766,12 +760,9 @@ void propagateForMaximaExclusionKernel( Helpers::CUDA_kernel_object<TopoAutomato
 #endif
 }
 
-__global__ static
-void checkForMaximaExclusionTermination(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const int i_dimBlock, const int i_dimGrid
-#endif
-                                       )
+static __global__
+void checkForMaximaExclusionTermination(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
+                                        const int i_dimBlock, const int i_dimGrid)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   if (index == 0)
@@ -782,7 +773,7 @@ void checkForMaximaExclusionTermination(Helpers::CUDA_kernel_object<TopoAutomato
           temporaries->continue_flag = 0;
 
 #if CUDA_CAN_USE_TAIL_LAUNCH
-          secondaryMaximaPropagationKernel <<< i_dimGrid, i_dimBlock, 0, cudaStreamTailLaunch>>>(temporaries, i_dimBlock, i_dimGrid);
+          propagateForMaximaExclusionKernel <<< i_dimGrid, i_dimBlock, 0, cudaStreamTailLaunch>>>(temporaries, i_dimBlock, i_dimGrid);
 
 #endif
         }
@@ -795,7 +786,7 @@ void checkForMaximaExclusionTermination(Helpers::CUDA_kernel_object<TopoAutomato
     }
 }
 
-__global__ static
+static __global__
 void excludeSecondaryMaximaDefer(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                  const int i_dimBlock, int i_dimGrid)
 {
@@ -819,8 +810,8 @@ void excludeSecondaryMaximaDefer(Helpers::CUDA_kernel_object<TopoAutomatonSplitt
 
       while (!temporaries->stop_flag)
         {
-          propagateForMaximaExclusionKernel <<< i_dimGrid, i_dimBlock>>>(temporaries);
-          checkForMaximaExclusionTermination <<< 1, 1>>>(temporaries);
+          propagateForMaximaExclusionKernel <<< i_dimGrid, i_dimBlock>>>(temporaries, i_dimBlock, i_dimGrid);
+          checkForMaximaExclusionTermination <<< 1, 1>>>(temporaries, i_dimBlock, i_dimGrid);
 
           //++counter;
         }
@@ -830,7 +821,7 @@ void excludeSecondaryMaximaDefer(Helpers::CUDA_kernel_object<TopoAutomatonSplitt
     }
 }
 
-__global__ static
+static __global__
 void cleanUpSecondariesKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                               Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
                               Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries)
@@ -881,7 +872,7 @@ void TASplitting::excludeSecondaryMaxima(EventDataHolder & holder,
                                          const bool synchronize,
                                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   TopoAutomatonSplittingTemporaries * temps = TASHacks::get_temporaries(holder);
 
@@ -941,7 +932,7 @@ void TASplitting::excludeSecondaryMaxima(EventDataHolder & holder,
  * Propagate the new tags and create the final clusters.
  ******************************************************************************************/
 
-__device__ static
+static __device__
 void propagate_main_pair(const int pair,
                          Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                          const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
@@ -1001,7 +992,7 @@ void propagate_main_pair(const int pair,
     }
 }
 
-__device__ static
+static __device__
 void update_cell_tag(const int cell,
                      Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                      Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
@@ -1062,7 +1053,7 @@ void update_cell_tag(const int cell,
   temporaries->secondary_array[cell] = new_tag;
 }
 
-__global__ static
+static __global__
 void clusterSplittingMainCooperativeKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                            Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                            const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
@@ -1133,27 +1124,23 @@ namespace
 }
 
 
-__global__ static
+static __global__
 void handleSplitterTagChangesAndTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                                   Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                                   const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
                                                   const bool counter_select,
-                                                  const bool share_cells
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                                 );
+                                                  const bool share_cells,
+                                                  const kernel_sizes blocks,
+                                                  const kernel_sizes grids);
 
-__global__ static
+static __global__
 void propagateSplitterTagsKernel(const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                  Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                  const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
                                  const bool counter_select,
-                                 const bool share_cells
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                )
+                                 const bool share_cells ,
+                                 const kernel_sizes blocks,
+                                 const kernel_sizes grids)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -1168,26 +1155,24 @@ void propagateSplitterTagsKernel(const Helpers::CUDA_kernel_object<CellStateArr>
   if (index == grid_size - 1)
     {
 
-      handleSplitterTagChangesAndTerminationKernel <<< grids.tag_change, block.tag_change, 0, cudaStreamTailLaunch>>>(cell_state_arr,
-                                                                                                                      temporaries,
-                                                                                                                      cell_info_arr,
-                                                                                                                      counter_select,
-                                                                                                                      share_cells,
-                                                                                                                      blocks, grids);
+      handleSplitterTagChangesAndTerminationKernel <<< grids.tag_change, blocks.tag_change, 0, cudaStreamTailLaunch>>>(cell_state_arr,
+                                                                                                                       temporaries,
+                                                                                                                       cell_info_arr,
+                                                                                                                       counter_select,
+                                                                                                                       share_cells,
+                                                                                                                       blocks, grids);
     }
 #endif
 }
 
-__global__ static
+static __global__
 void handleSplitterTagChangesAndTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                                   Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                                   const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
                                                   const bool counter_select,
-                                                  const bool share_cells
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                                 )
+                                                  const bool share_cells,
+                                                  const kernel_sizes blocks,
+                                                  const kernel_sizes grids)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -1224,7 +1209,7 @@ void handleSplitterTagChangesAndTerminationKernel(Helpers::CUDA_kernel_object<Ce
 
 
 
-__global__ static
+static __global__
 void clusterSplittingMainDefer(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
@@ -1261,13 +1246,15 @@ void clusterSplittingMainDefer(Helpers::CUDA_kernel_object<CellStateArr> cell_st
                                                                                temporaries,
                                                                                cell_info_arr,
                                                                                counter_select,
-                                                                               share_cells);
+                                                                               share_cells,
+                                                                               blocks, grids);
 
           handleSplitterTagChangesAndTerminationKernel <<< grids.tag_change, blocks.tag_change>>>(cell_state_arr,
                                                                                                   temporaries,
                                                                                                   cell_info_arr,
                                                                                                   counter_select,
-                                                                                                  share_cells);
+                                                                                                  share_cells,
+                                                                                                  blocks, grids);
 
           counter_select = !counter_select;
           //++counter;
@@ -1285,7 +1272,7 @@ void TASplitting::splitClusterGrowing(EventDataHolder & holder,
                                       const bool synchronize,
                                       CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   TopoAutomatonSplittingTemporaries * temps = TASHacks::get_temporaries(holder);
 
@@ -1365,7 +1352,7 @@ namespace
 }
 
 
-__global__ static
+static __global__
 void sumCellsForCentroidKernel( Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                 const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                 const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
@@ -1399,7 +1386,7 @@ void sumCellsForCentroidKernel( Helpers::CUDA_kernel_object<TopoAutomatonSplitti
 
 
 
-__global__ static
+static __global__
 void calculateCentroidsKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                               const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr)
 {
@@ -1427,7 +1414,7 @@ void calculateCentroidsKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplitting
     }
 }
 
-__global__ static
+static __global__
 void calculateCentroidsKernelDeferKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                          const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
                                          const int i_dimBlock)
@@ -1446,7 +1433,7 @@ void calculateCentroidsKernelDeferKernel(Helpers::CUDA_kernel_object<TopoAutomat
     }
 }
 
-__global__ static
+static __global__
 void assignFinalCellsKernel( Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
                              const Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
@@ -1593,7 +1580,7 @@ void TASplitting::cellWeightingAndFinalization(EventDataHolder & holder,
                                                const bool synchronize,
                                                CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
-  const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
   TopoAutomatonSplittingTemporaries * temps = TASHacks::get_temporaries(holder);
 
