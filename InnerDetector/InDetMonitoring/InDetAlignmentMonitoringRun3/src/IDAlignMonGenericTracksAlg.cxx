@@ -131,7 +131,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   using namespace Monitored;
  
   // For histogram naming
-  auto genericTrackGroup = getGroup("Tracks");
+  auto genericTrackGroup = getGroup("IDA_Tracks");
 
   //counters
   int ntrkMax=0;
@@ -219,9 +219,6 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
   float mu     = lbAverageInteractionsPerCrossing(ctx);
   auto mu_m    = Monitored::Scalar<float>("mu_m", mu);
 
-  // fill lb & beam spot histograms
-  fill(genericTrackGroup, lb_m);
-	
   if (m_extendedPlots) {
     //Fill BeamSpot Position histos
     auto beamSpotX_m = Monitored::Scalar<float>( "m_beamSpotX", beamSpotX );
@@ -229,13 +226,15 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto beamSpotZ_m = Monitored::Scalar<float>( "m_beamSpotZ", beamSpotZ );
     auto beamTiltX_m = Monitored::Scalar<float>( "m_beamTiltX", beamTiltX );
     auto beamTiltY_m = Monitored::Scalar<float>( "m_beamTiltY", beamTiltY );
-
+    std::cout << "CLARA 1 beamSpot = " << beamSpotX_m << "  " << beamSpotY_m << "  " << beamSpotZ_m << std::endl; 
     fill(genericTrackGroup, beamSpotX_m, beamSpotY_m);
-    fill(genericTrackGroup, beamSpotZ_m, beamSpotY_m);
     fill(genericTrackGroup, beamSpotZ_m, beamSpotX_m);
+    fill(genericTrackGroup, beamSpotZ_m, beamSpotY_m);
+    std::cout << "CLARA 2 beamSpot = " << beamSpotX_m << "  " << beamSpotY_m << "  " << beamSpotZ_m << std::endl; 
 
     // beam spot vs LB
     fill(genericTrackGroup, lb_m, beamSpotY_m);
+    fill(genericTrackGroup, lb_m, beamSpotX_m);
 
     // interactions per beam crossing
     fill(genericTrackGroup, mu_m);
@@ -353,7 +352,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     ngTracks++;    
     ATH_MSG_DEBUG(nTracks << " is a good track!");  
 
-   
+    // fill lb histogram for each accepted track 
+    // fill(genericTrackGroup, lb_m);	
 
     int nhpixB=0, nhpixECA=0, nhpixECC=0, nhsctB=0, nhsctECA=0, nhsctECC=0, nhtrtB=0, nhtrtECA=0, nhtrtECC=0;
 
@@ -435,9 +435,13 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, npixelhits_per_track_barrel_m);
     auto nscthits_per_track_m = Monitored::Scalar<float>( "m_nscthits_per_track", nhsct );
     fill(genericTrackGroup, nscthits_per_track_m);
+    auto nscthits_per_track_barrel_m = Monitored::Scalar<float>( "m_nscthits_per_track_barrel", nhsctB );
+    fill(genericTrackGroup, nscthits_per_track_barrel_m);
     auto ntrthits_per_track_m = Monitored::Scalar<float>( "m_ntrthits_per_track", nhtrt );
     fill(genericTrackGroup, ntrthits_per_track_m);
-    
+    auto ntrthits_per_track_barrel_m = Monitored::Scalar<float>( "m_ntrthits_per_track_barrel", nhtrtB );
+    fill(genericTrackGroup, ntrthits_per_track_barrel_m);
+
     auto chi2oDoF_m = Monitored::Scalar<float>( "m_chi2oDoF", chi2oDoF );
     fill(genericTrackGroup, chi2oDoF_m);
     auto eta_m = Monitored::Scalar<float>( "m_eta", trketa );
@@ -463,6 +467,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, phi_m);
     auto z0_m = Monitored::Scalar<float>( "m_z0", trkz0 );
     fill(genericTrackGroup, z0_m);
+    auto z0_bscorr_m = Monitored::Scalar<float>( "m_z0_bscorr", trkz0-beamSpotZ );
+    fill(genericTrackGroup, z0_bscorr_m);
     float z0sintheta = trkz0*(sin(trktheta));
     auto z0sintheta_m = Monitored::Scalar<float>( "m_z0sintheta", z0sintheta );
     fill(genericTrackGroup, z0sintheta_m);
