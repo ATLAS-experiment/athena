@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "FPGATrackSimMapMakerAlg.h"
 #include "FPGATrackSimInput/IFPGATrackSimEventOutputHeaderTool.h"
 #include "TH2.h"
