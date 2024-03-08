@@ -45,6 +45,12 @@ namespace ActsTrk {
     TH1* m_perp_barrel {};
     TH1* m_perp_endcap {};
 
+    TH1* m_total_charge_barrel {};
+    TH1* m_total_charge_endcap {};
+
+    TH1* m_total_tot_barrel {};
+    TH1* m_total_tot_endcap {};
+
     TH1* m_global_x_barrel {};
     TH1* m_global_x_endcap {};
 

@@ -68,6 +68,10 @@
 	<hist1D name="eta_endcap" plotopts="" tests="KS" type="TH1F"/>
 	<hist1D name="perp_barrel" plotopts="" tests="KS" type="TH1F"/>
 	<hist1D name="perp_endcap" plotopts="" tests="KS" type="TH1F"/>
+	<hist1D name="total_charge_barrel" plotopts="logy" tests="KS" type="TH1F"/>
+	<hist1D name="total_charge_endcap" plotopts="logy" tests="KS" type="TH1F"/>
+	<hist1D name="total_tot_barrel" plotopts="logy" tests="KS" type="TH1F"/>
+	<hist1D name="total_tot_endcap" plotopts="logy" tests="KS" type="TH1F"/>
 	<hist1D name="global_x_barrel" plotopts="" tests="KS" type="TH1F"/>
 	<hist1D name="global_x_endcap" plotopts="" tests="KS" type="TH1F"/>
 	<hist1D name="global_y_barrel" plotopts="" tests="KS" type="TH1F"/>

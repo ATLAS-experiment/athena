@@ -33,6 +33,12 @@ namespace ActsTrk {
     m_perp_barrel = Book1D("perp_barrel", "PixelCluster_perp_barrel;r [mm];Entries;", 100, 0, 320, false);
     m_perp_endcap = Book1D("perp_endcap", "PixelCluster_perp_endcap;r [mm];Entries;", 100, 0, 320, false);
 
+    m_total_charge_barrel = Book1D("total_charge_barrel", "PixelCluster_totalCharge_barrel;charge;Entries;", 50, 0, 300000, false);
+    m_total_charge_endcap = Book1D("total_charge_endcap", "PixelCluster_totalCharge_endcap;charge;Entries;", 50, 0, 300000, false);
+
+    m_total_tot_barrel = Book1D("total_tot_barrel", "PixelCluster_totalTot_barrel;charge;Entries;", 50, 0, 5000, false);
+    m_total_tot_endcap = Book1D("total_tot_endcap", "PixelCluster_totalTot_endcap;charge;Entries;", 50, 0, 5000, false);
+
     m_global_x_barrel = Book1D("global_x_barrel", "PixelCluster_global_x_barrel;Global x [mm];Entries;", 64, -350, 350, false);
     m_global_x_endcap = Book1D("global_x_endcap", "PixelCluster_global_x_endcap;Global x [mm];Entries;", 64, -350, 350, false);
 
@@ -98,6 +104,9 @@ namespace ActsTrk {
       m_eta_barrel->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_barrel->Fill(globalPosition.perp(), beamSpotWeight);
 
+      m_total_charge_barrel->Fill(cluster->totalCharge(), beamSpotWeight);
+      m_total_tot_barrel->Fill(cluster->totalToT(), beamSpotWeight);
+    
       m_global_x_barrel->Fill(globalPos(0, 0), beamSpotWeight);
       m_global_y_barrel->Fill(globalPos(1, 0), beamSpotWeight);
       m_global_z_barrel->Fill(globalPos(2, 0), beamSpotWeight);
@@ -125,6 +134,9 @@ namespace ActsTrk {
       m_eta_endcap->Fill(globalPosition.eta(), beamSpotWeight);
       m_perp_endcap->Fill(globalPosition.perp(), beamSpotWeight);
 
+      m_total_charge_endcap->Fill(cluster->totalCharge(), beamSpotWeight);
+      m_total_tot_endcap->Fill(cluster->totalToT(), beamSpotWeight);
+       
       m_global_x_endcap->Fill(globalPos(0, 0), beamSpotWeight);
       m_global_y_endcap->Fill(globalPos(1, 0), beamSpotWeight);
       m_global_z_endcap->Fill(globalPos(2, 0), beamSpotWeight);

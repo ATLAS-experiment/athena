@@ -8,12 +8,20 @@ def ActsPixelClusteringToolCfg(flags,
                                **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
+    from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelChargeCalibCondAlgCfg, ITkPixelOfflineCalibCondAlgCfg
+    acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
+    acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))
+
+    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
+    acc.merge(ITkPixelReadoutManagerCfg(flags))
+    
     if 'PixelRDOTool' not in kwargs:
         from InDetConfig.SiClusterizationToolConfig import ITkPixelRDOToolCfg
         kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(ITkPixelRDOToolCfg(flags)))
-    if 'ClusterMakerTool' not in kwargs:
-        from InDetConfig.SiClusterizationToolConfig import ITkClusterMakerToolCfg
-        kwargs.setdefault("ClusterMakerTool", acc.popToolsAndMerge(ITkClusterMakerToolCfg(flags)))
+
+    if "PixelLorentzAngleTool" not in kwargs:
+        from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+        kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
 
     kwargs.setdefault("PixelOfflineCalibData", "")
 
