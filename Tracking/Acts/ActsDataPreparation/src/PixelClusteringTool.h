@@ -10,9 +10,12 @@
 #include "InDetIdentifier/PixelID.h"
 #include "InDetRawData/InDetRawDataCollection.h"
 #include "InDetRawData/PixelRDORawData.h"
-#include "SiClusterizationTool/ClusterMakerTool.h"
 #include "SiClusterizationTool/PixelRDOTool.h"
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "InDetCondTools/ISiLorentzAngleTool.h"
+#include "PixelReadoutGeometry/IPixelReadoutManager.h"
+#include "PixelConditionsData/PixelChargeCalibCondData.h"
+#include "PixelConditionsData/PixelOfflineCalibData.h"
 
 namespace InDet {
 
@@ -73,29 +76,31 @@ public:
 
 private:
     // N.B. the cluster is added to the container
-    StatusCode makeCluster(const PixelClusteringTool::Cluster &cluster,
-			   const PixelID& pixelID,
-			   const InDetDD::SiDetectorElement* element,
-			   xAOD::PixelCluster& container) const;
+  StatusCode makeCluster(const EventContext& ctx,
+			 const PixelClusteringTool::Cluster &cluster,
+			 const PixelID& pixelID,
+			 const InDetDD::SiDetectorElement* element,
+			 xAOD::PixelCluster& container) const;
 
-
-    ToolHandle< InDet::PixelRDOTool > m_pixelRDOTool
-      {this, "PixelRDOTool", "InDet::PixelRDOTool"};
-    ToolHandle< InDet::ClusterMakerTool > m_clusterMakerTool
-      {this, "ClusterMakerTool", "InDet::ClusterMakerTool"};
-
-    Gaudi::Property<bool> m_addCorners{this, "AddCorners", true};
-    Gaudi::Property<int> m_errorStrategy{this, "ErrorStrategy", 1};
-
-    SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey
-      {this, "PixelChargeCalibCondData", "ITkPixelChargeCalibCondData",
-       "Pixel charge calibration data"};
-
-    SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_offlineCalibDataKey
-      {this, "PixelOfflineCalibData", "ITkPixelOfflineCalibData",
-       "Pixel offline calibration data"};
+  double getPixelCTBPhiError(int layer, int phi,
+			     int phiClusterSize) const;
+  
+private:  
+  ServiceHandle< InDetDD::IPixelReadoutManager > m_pixelReadout {this, "PixelReadoutManager", "ITkPixelReadoutManager",
+      "Pixel readout manager" };
+  
+  ToolHandle< InDet::PixelRDOTool > m_pixelRDOTool {this, "PixelRDOTool", "", "The Pixel RDO tool"};
+  ToolHandle< ISiLorentzAngleTool > m_pixelLorentzAngleTool {this, "PixelLorentzAngleTool", "", "Tool to retreive Lorentz angle of Pixel"};
+  
+  SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey {this, "PixelChargeCalibCondData", "ITkPixelChargeCalibCondData",
+    "Pixel charge calibration data"};
+  SG::ReadCondHandleKey<PixelCalib::PixelOfflineCalibData> m_offlineCalibDataKey {this, "PixelOfflineCalibData", "ITkPixelOfflineCalibData",
+    "Pixel offline calibration data"};
+  
+  Gaudi::Property<bool> m_addCorners {this, "AddCorners", true};
+  Gaudi::Property<int> m_errorStrategy {this, "ErrorStrategy", 1};
 };
-
+  
 } // namespace ActsTrk 
 
 #endif // ACTS_PIXEL_CLUSTERING_TOOL_H
