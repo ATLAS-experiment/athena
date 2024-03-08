@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,7 +48,7 @@ class SLpatterns : public RPCtrigDataObject
     const PADdata::PatternsList pad_patterns(void) const 
                                       {return m_pad_patterns;}
 
-    SectorLogic* give_SectorL(const RpcCablingCondData* readCdo);
+  SectorLogic* give_SectorL(const RpcCablingCondData* readCdo, int NOBXS, int BCZERO);
 
     void Print (std::ostream&,bool) const;
 };

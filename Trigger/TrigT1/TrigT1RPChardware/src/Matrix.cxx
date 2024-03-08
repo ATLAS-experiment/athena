@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/Matrix.h"
@@ -24,10 +24,6 @@ const float Matrix::s_BCtime = 25.0;
 const ubit16 Matrix::s_NDLLCYC = 8;
 // DLL period, ns
 const float Matrix::s_DLLtime = s_BCtime / (float)s_NDLLCYC;
-// Number of Bunch-Crossings to be considered
-const sbit16 Matrix::s_NBunch = NOBXS;
-// Lenght of the CMA buffers
-const sbit16 Matrix::s_nclock = s_NDLLCYC * s_NBunch;
 // ReadOut offset in DLL steps
 const sbit16 Matrix::s_ROOffset = 1;
 // number of channel in a group for the timing setting
@@ -54,7 +50,7 @@ namespace {
     }
 }  // namespace
 //----------------------------------------------------------------------------//
-Matrix::Matrix(int run, int event, CMAword debug, int subsys, int proj, int sect, int padadd, int lowhig, int add[2], int locadd) :
+Matrix::Matrix(int run, int event, CMAword debug, int subsys, int proj, int sect, int padadd, int lowhig, int add[2], int locadd, int NOBXS, int BCZERO) :
     BaseObject(Hardware, "Matrix") {
     ubit16 df = 0;  // debug flag address
     m_run = run;
@@ -73,7 +69,9 @@ Matrix::Matrix(int run, int event, CMAword debug, int subsys, int proj, int sect
     m_thisBC = 0;  // temporary initialization
 
     m_BCzero = BCZERO;
-    // m_BCzero=(s_nclock/s_NDLLCYC)/2;      // default initialization of m_BCzero
+    m_Nbunch = NOBXS;
+    m_nclock = s_NDLLCYC * m_Nbunch;
+    // m_BCzero=(m_nclock/s_NDLLCYC)/2;      // default initialization of m_BCzero
     // user setting by setBCzero
 
     //
@@ -463,7 +461,7 @@ void Matrix::putData(int sidemat, int layer, int stripaddress, float time) {
     //
     // check the stripaddress is consistent with the Matrix dimension
     //
-    if (BCID >= NOBXS) return;
+    if (BCID >= m_Nbunch) return;
 
     if (stripaddress >= 0 && stripaddress < s_nchan[sidemat]) {
         // coverity change
@@ -503,7 +501,7 @@ void Matrix::putPatt(const Matrix *p) {
     //
     //
     // for(i=0; i<2; i++)           {     // loop on the two majorities
-    //  for(j=0; j<s_nclock; j++)     {     // loop on the clock bins
+    //  for(j=0; j<m_nclock; j++)     {     // loop on the clock bins
     //   for(k=0; k<2; k++)           {   // loop on buffer words
     //    for(n=0; n<s_nthres; n++) {       // loop on the "s_nthres" registers
     //     m_mjori[n][0][i][j][k] = p->m_k_pattern[j];
@@ -527,7 +525,7 @@ void Matrix::putPatt(const Matrix *p) {
     //   }//end-of-for(ubit16 k
 
     for (i = 0; i < s_nchan[0]; i++) {
-        for (j = 0; j < s_nclock; j++) {
+        for (j = 0; j < m_nclock; j++) {
             if (p->m_k_pattern[j] & k) {
                 time = ((float)j + 0.5) * s_DLLtime + (float)m_thisBC * s_BCtime - (float)(m_BCzero)*s_BCtime;
                 putData(0, 0, i, time);
@@ -548,10 +546,10 @@ void Matrix::setBCzero(ubit16 offset) {
     //
     // set the BunchCrossing=0 to the "offset" array address in memory
     //
-    if (offset <= s_NBunch - 1)
+    if (offset <= m_Nbunch - 1)
         m_BCzero = offset;
     else
-        m_BCzero = s_NBunch - 1;
+        m_BCzero = m_Nbunch - 1;
 }  // end-of-setBCzero
 //----------------------------------------------------------------------//
 void Matrix::setDeadTime(ubit16 deadt) {
@@ -971,7 +969,7 @@ void Matrix::load() {
             //
             // store this digit if it is within time window and not masked
             //
-            if (timeadd >= 0 && timeadd < s_nclock && !rpcpnt->masked) {
+            if (timeadd >= 0 && timeadd < m_nclock && !rpcpnt->masked) {
                 if (m_matrixDebug & 1 << df) {
                     cout << " setting input with side " << i << " " << rpcpnt->layer << " " << timeadd << " 0"
                          << " for channel " << rpcpnt->stripadd << " timeadd " << timeadd << endl;
@@ -991,7 +989,7 @@ void Matrix::copyDataToReadOut() {
     //
     for (ubit16 i = 0; i < 2; i++) {                 // side address
         for (ubit16 j = 0; j < 2; j++) {             // layer address
-            for (ubit16 k = 0; k < s_nclock; k++) {  // clock bins
+            for (ubit16 k = 0; k < m_nclock; k++) {  // clock bins
                 for (ubit16 l = 0; l < 2; l++) {     // the two words to make 64 bits
                     rodat[i][j][k][l] = m_input[i][j][k][l] & ~m_channReadOutMask[i][j][l];
                 }  // end-of-for(l
@@ -1047,7 +1045,7 @@ void Matrix::coincide() {
              << " " << m_majorities[0] << " " << m_majorities[1] << " " << m_majorities[2] << endl;
     }  // end-of-if(m_matrixDebug&1<<df)
     //
-    for (i = 0; i < s_nclock; i++) {                  // loop on clock cycles
+    for (i = 0; i < m_nclock; i++) {                  // loop on clock cycles
         for (thres = 0; thres < s_nthres; thres++) {  // loop on the three possible thresholds
                                                       // thresholds address increases with
                                                       // increasing pT
@@ -1087,7 +1085,7 @@ void Matrix::coincide() {
 
                         set_to_1(&m_trigg[thres][i], j);
                         BCaddress = ((i + m_BunchPhase) / s_NDLLCYC) + m_BunchOffset;
-                        if (BCaddress >= 0 && BCaddress < s_NBunch)
+                        if (BCaddress >= 0 && BCaddress < m_Nbunch)
                             m_trigger[thres][BCaddress] = 1;  // set "m_trigger" to 1 for this threshold...
                                                               // ...and this Bunch Crossing
 
@@ -1111,7 +1109,7 @@ void Matrix::coincide() {
         CMAword previousTime = 0;
         for (chan = 0; chan < s_nchan[0]; chan++) {
             for (thres = 0; thres < s_nthres; thres++) {  // loop on the three possible thresholds
-                for (i = s_nclock - 1; i > 0; i--) {      // loop on clock cycles
+                for (i = m_nclock - 1; i > 0; i--) {      // loop on clock cycles
                     previousTime = bitstatus(&m_trigg[thres][i - 1], chan);
                     if (bitstatus(&m_trigg[thres][i], chan) && previousTime) { set_to_0(&m_trigg[thres][i], chan); }  // end-of-if(bitstatus
                 }                                                                                                     // end-of-for(i
@@ -1122,7 +1120,7 @@ void Matrix::coincide() {
 
     for (chan = 0; chan < s_nchan[0]; chan++) {
         for (thres = 0; thres < s_nthres; thres++) {  // loop on the three possible thresholds
-            for (i = s_nclock - 1; i > 0; i--) {      // loop on clock cycles
+            for (i = m_nclock - 1; i > 0; i--) {      // loop on clock cycles
                 if (bitstatus(&m_trigg[thres][i], chan)) {
                     for (ubit16 idead = 1; idead < m_trigDeadTime[chan / s_timeGroupB]; idead++) {
                         set_to_0(&m_trigg[thres][i + idead], chan);
@@ -1138,11 +1136,11 @@ void Matrix::coincide() {
         //
         for (thres = 0; thres < s_nthres; thres++) {  // loop on the three possible thresholds
             // reset trigger
-            for (j = 0; j < s_NBunch; j++) { m_trigger[thres][j] = 0; }  // end-of-for(j
+            for (j = 0; j < m_Nbunch; j++) { m_trigger[thres][j] = 0; }  // end-of-for(j
             // compute new "m_trigger"
-            for (i = 0; i < s_nclock; i++) {  // loop on clock cycles
+            for (i = 0; i < m_nclock; i++) {  // loop on clock cycles
                 BCaddress = ((i + m_BunchPhase) / s_NDLLCYC) + m_BunchOffset;
-                if (BCaddress >= 0 && BCaddress < s_NBunch) {
+                if (BCaddress >= 0 && BCaddress < m_Nbunch) {
                     if (m_trigg[thres][i]) m_trigger[thres][BCaddress] = 1;
                 }  // emd-of-if(BCadd
             }      // end-of-for(i
@@ -1154,12 +1152,12 @@ void Matrix::coincide() {
     //
     // for(thres=0; thres<s_nthres; thres++){ // loop on the three possible thresholds
     thres = m_overlapthres;
-    for (i = 0; i < s_nclock; i++) {  // loop on clock cycles
+    for (i = 0; i < m_nclock; i++) {  // loop on clock cycles
         if (m_trigg[thres][i]) {
             for (m = 0; m < 2; m++) {  // loop on left-right sides to evaluate overlap
                 if (!m_triggerOverlapRO[i][m]) { m_triggerOverlapRO[i][m] = (m_trigg[thres][i] & m_matOverlap[m]); }
                 BCaddress = ((i + m_BunchPhase) / s_NDLLCYC) + m_BunchOffset;
-                if (BCaddress >= 0 && BCaddress < s_NBunch) {
+                if (BCaddress >= 0 && BCaddress < m_Nbunch) {
                     if (!m_triggerOverlap[BCaddress][m]) m_triggerOverlap[BCaddress][m] = (m_trigg[thres][i] & m_matOverlap[m]);
                 }  // end-of-if(BCaddress
             }      // end-of-for(m
@@ -1170,7 +1168,7 @@ void Matrix::coincide() {
     //
     // normalize m_triggerOverlapRO
     //
-    for (i = 0; i < s_nclock; i++) {  // loop on clock cycles
+    for (i = 0; i < m_nclock; i++) {  // loop on clock cycles
         for (m = 0; m < 2; m++) {     // normalize to 1 overlap flags
             m_triggerOverlapRO[i][m] = m_triggerOverlapRO[i][m] ? 1 : 0;
         }  // end-of-for(m
@@ -1178,7 +1176,7 @@ void Matrix::coincide() {
     //
     // normalize m_triggerOverlap
     //
-    for (i = 0; i < s_NBunch; i++) {  // loop on bunches
+    for (i = 0; i < m_Nbunch; i++) {  // loop on bunches
         for (m = 0; m < 2; m++) {     // normalize to 1 overlap flags
             m_triggerOverlap[i][m] = m_triggerOverlap[i][m] ? 1 : 0;
         }  // end-of-for(m
@@ -1197,7 +1195,7 @@ void Matrix::maskTo1() {
             for (j = 0; j < 2; j++) {               // majority address
                 for (l = 0; l < s_nchan[i]; l++) {  // channel
                     if (bitstatus(&m_channMask1[m][i][j][0], l)) {
-                        for (k = 0; k < s_nclock; k++) {  // clock bins
+                        for (k = 0; k < m_nclock; k++) {  // clock bins
                             set_to_1(&m_mjori[m][i][j][k][0], l);
                         }  // end-of-for(k
                     }      // end-of-if(m_channMask1
@@ -1210,7 +1208,7 @@ void Matrix::maskTo1() {
 //------------------------------------------------------------------------//
 void Matrix::deadTime() {
     ubit16 i, j, k, l;
-    ubit16 temp[s_nclock];
+    ubit16 temp[s_NDLLCYC*8];
     //
     for (i = 0; i < 2; i++) {                           // loop on both matrix sides
         for (j = 0; j < 2; j++) {                       // loop on both trigger layers
@@ -1218,7 +1216,7 @@ void Matrix::deadTime() {
                                                         //
                                                         // set to 1 the bins in "temp" where signals are "on" for the first time
                                                         //
-                for (l = 0; l < (s_nclock - 1); l++) {  // loop on clock bins
+                for (l = 0; l < (m_nclock - 1); l++) {  // loop on clock bins
                     ((!bitstatus(&m_input[i][j][l][0], k)) && bitstatus(&m_input[i][j][l + 1][0], k)) ? temp[l + 1] = 1 : temp[l + 1] = 0;
                 }  // end-of-for(l
                 temp[0] = bitstatus(&m_input[i][j][0][0], k);
@@ -1226,7 +1224,7 @@ void Matrix::deadTime() {
                 // transfer to "input" the signals in "temp" far enough each other in time
                 //
                 sbit16 lastUp = -1;
-                for (l = 0; l < s_nclock; l++) {  // loop on clock bins
+                for (l = 0; l < m_nclock; l++) {  // loop on clock bins
                                                   //
                     if (!temp[l]) {
                         set_to_0(&m_input[i][j][l][0], k);
@@ -1257,11 +1255,11 @@ void Matrix::pulse_width() {
     for (i = 0; i < 2; i++) {                          // loop on the two Matrix sides
         for (j = 0; j < 2; j++) {                      // loop on both layers
             for (l = 0; l < s_nchan[i]; l++) {         // loop on all channels
-                for (k = s_nclock - 1; k >= 0; k--) {  // loop on the s_nclock cycles backwards
+                for (k = m_nclock - 1; k >= 0; k--) {  // loop on the m_nclock cycles backwards
                     if (bitstatus(&m_input[i][j][k][0], l)) {
                         // loop on all time bins to be set to 1
                         for (m = k + 1; m < k + m_pulseWidth[i][j][l / s_timeGroupB]; m++) {
-                            if (m < s_nclock) {
+                            if (m < m_nclock) {
                                 set_to_1(&m_input[i][j][m][0], l);
                             } else {
                                 break;
@@ -1299,7 +1297,7 @@ void Matrix::majori() {
     //
     for (n = 0; n < s_nthres; n++) {          // the s_nthres thresholds
         for (i = 0; i < 2; i++) {             // the two Matrix sides
-            for (j = 0; j < s_nclock; j++) {  // the clock cycles
+            for (j = 0; j < m_nclock; j++) {  // the clock cycles
                 for (k = 0; k < 2; k++) {     // the two words to make 64 bits
                                               // copy layer with address 0,1 to buffi; initialize buffoutput
                     buffi[k] = m_prepr[n][i][1][j][k];
@@ -1389,7 +1387,7 @@ void Matrix::declus() {
     //
     for (i = 0; i < 2; i++) {                       // loop on the two sides
         for (j = 0; j < 2; j++) {                   // loop on the two layers
-            for (k = 0; k < s_nclock; k++) {        // loop on the time bins
+            for (k = 0; k < m_nclock; k++) {        // loop on the time bins
                 nup = 0;                            // counter of consecutive "on" channels
                 for (l = 0; l < s_nchan[i]; l++) {  // loop on the Matrix channels
                     if (bitstatus(&m_input[i][j][k][0], l)) {
@@ -1463,7 +1461,7 @@ void Matrix::makeOut() {
     //
     // fill k-pattern
     //
-    for (j = 0; j < s_nclock; j++) {  // loop on the clock bins
+    for (j = 0; j < m_nclock; j++) {  // loop on the clock bins
         m_k_pattern[j] = m_trigg[m_lowtohigh][j];
         k_readout[j] = m_trigg[m_toreadout][j];
     }  // end-of-for(j
@@ -1471,7 +1469,7 @@ void Matrix::makeOut() {
     // find the highest satisfied threshold;
     // identify Bunch Crossing and put it in BCID.
     //
-    for (j = 0; j < s_NBunch; j++) {
+    for (j = 0; j < m_Nbunch; j++) {
         for (i = 0; i < s_nthres; i++) {
             if (m_trigger[i][j]) {
                 m_highestth[j] = i + 1;  // put threshold address+1 (correct threshold value)
@@ -1485,11 +1483,11 @@ void Matrix::makeOut() {
     //
     // Trigger in Overlapping channels is reported in m_triggerOverlap
     //
-    for (j = 0; j < s_NBunch; j++) { m_overlap[j] = m_triggerOverlap[j][0] + 2 * m_triggerOverlap[j][1]; }  // end-of-for(j
+    for (j = 0; j < m_Nbunch; j++) { m_overlap[j] = m_triggerOverlap[j][0] + 2 * m_triggerOverlap[j][1]; }  // end-of-for(j
     //
     // find the highest satisfied threshold for ReadOut pourposes;
     //
-    for (j = 0; j < s_nclock; j++) {            // loop on the clock bins
+    for (j = 0; j < m_nclock; j++) {            // loop on the clock bins
         for (i = 0; i < s_nthres; i++) {        // loop on thresholds
             for (k = 0; k < s_nchan[0]; k++) {  // loop on channels (pivot side)
                 if (m_trigg[i][j] & (1 << k)) highestthRO[j] = i + 1;
@@ -1500,7 +1498,7 @@ void Matrix::makeOut() {
     //
     // Trigger in Overlapping channels is reported in m_triggerOverlapRO
     //
-    for (j = 0; j < s_nclock; j++) { overlapRO[j] = m_triggerOverlapRO[j][0] + 2 * m_triggerOverlapRO[j][1]; }  // end-of-for(j
+    for (j = 0; j < m_nclock; j++) { overlapRO[j] = m_triggerOverlapRO[j][0] + 2 * m_triggerOverlapRO[j][1]; }  // end-of-for(j
     //
 }  // end-of-Matrix::makeOut
 //------------------------------------------------------------------------//
@@ -1585,7 +1583,7 @@ void Matrix::makeTestPattern(ubit16 mode, ubit16 ktimes) {
         }  // end-of-if(m_matrixDebug&1<<df)
     }      // end-of-if(!vhdlinput
     if (mode) {
-        vhdlinput << " RUN " << m_run << " EVENT " << m_event << " WINDOW " << s_NBunch;
+        vhdlinput << " RUN " << m_run << " EVENT " << m_event << " WINDOW " << m_Nbunch;
         vhdlinput << " LINES " << (ntimes + ktimes) << std::endl;
     }  // end-of-if(mode
     for (l = 0; l < ntimes; l++) {
@@ -1608,17 +1606,17 @@ void Matrix::makeOutPattern() {
     CMAword bit;
     ubit16 chanHistory[32] = {0};
     const ubit16 maxchan = 100;
-    const ubit16 maxtimes = s_nclock;
+    const ubit16 maxtimes = m_nclock;
     ubit16 ntimes, newtime;
-    ubit16 nchannels[maxtimes][2][2], channels[maxtimes][2][2][maxchan];
-    float time, times[maxtimes]{0};
+    ubit16 nchannels[s_NDLLCYC*8][2][2], channels[s_NDLLCYC*8][2][2][maxchan];
+    float time, times[s_NDLLCYC*8]{0};
     //
     // trigger registers: k-trigger (historically was k-pattern)
     //
     ntimes = 0;
-    for (i = 0; i < s_nclock; i++) { nchannels[i][0][0] = 0; }
+    for (i = 0; i < m_nclock; i++) { nchannels[i][0][0] = 0; }
     time = (float)m_thisBC * s_BCtime - ((float)(m_BCzero * s_NDLLCYC)) * s_DLLtime;
-    for (i = 0; i < s_nclock; time += s_DLLtime, i++) {
+    for (i = 0; i < m_nclock; time += s_DLLtime, i++) {
         bit = 1;
         newtime = 1;
         for (l = 0; l < s_nchan[0]; l++) {
@@ -1640,9 +1638,9 @@ void Matrix::makeOutPattern() {
         }  // end-of-for(l
     }      // end-of-for(i
 
-    ubit16 nthresPass, thresPass[NOBXS], overlPass[NOBXS], BCidentifier[NOBXS];
+    ubit16 nthresPass, thresPass[8], overlPass[8], BCidentifier[8];
     nthresPass = 0;
-    for (i = 0; i < s_NBunch; i++) {
+    for (i = 0; i < m_Nbunch; i++) {
         if (m_highestth[i]) {
             thresPass[nthresPass] = m_highestth[i];
             overlPass[nthresPass] = m_overlap[i];
@@ -1930,7 +1928,7 @@ void Matrix::dispRegister(const CMAword *p, ubit16 side) const {
 
     for (j = 0; j < s_nchan[side]; j += 2) { strdisp << " " << j % 10; }  // end-of-for
     strdisp << " " << endl;
-    for (j = 0; j < s_nclock; j++) {  // loop on the s_nclock cycles
+    for (j = 0; j < m_nclock; j++) {  // loop on the m_nclock cycles
         strdisp << " " << j % 10 << " ";
         for (k = 0; k < n; k++) {  // loop on the buffer words
             dispBinary(p + k + 2 * j, strdisp);
@@ -1953,7 +1951,7 @@ void Matrix::dispTrigger(const CMAword *p) const {
 
     for (j = 0; j < s_nchan[0]; j += 2) { strdisp << " " << j % 10; }  // end-of-for
     strdisp << " " << endl;
-    for (j = 0; j < s_nclock; j++) {  // loop on the s_nclock cycles
+    for (j = 0; j < m_nclock; j++) {  // loop on the m_nclock cycles
         strdisp << " " << j % 10 << " ";
         dispBinary(p + j, strdisp);
         strdisp << " " << endl;

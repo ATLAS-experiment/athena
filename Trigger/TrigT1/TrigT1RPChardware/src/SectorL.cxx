@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/SectorL.h"
@@ -15,7 +15,7 @@
 using namespace std;
 
 //--------------------------------------------------------------------//
-SectorL::SectorL(int run, int event, CMAword /*debug*/, ubit16 subsys, ubit16 sect) : BaseObject(Hardware, "SectorLogic") {
+SectorL::SectorL(int run, int event, CMAword /*debug*/, ubit16 subsys, ubit16 sect, uint NOBXS) : BaseObject(Hardware, "SectorLogic") {
     ubit16 i, j, k;
     m_padData = 7;
     m_maxNumPads = 10;

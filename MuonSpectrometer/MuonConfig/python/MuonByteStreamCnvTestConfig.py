@@ -1,6 +1,6 @@
 """Define ComponentAccumulator functions for configuration of muon data conversions
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -54,6 +54,11 @@ def RpcRdoToRpcDigitCfg(flags, name="RpcRdoToRpcDigitAlg", **kwargs):
     if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'RpcPadContainer#{kwargs["RpcRdoContainer"]}']))
+
+
+    #Set N BCs and central BC consistently with RPC readout settings
+    rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
+    kwargs.setdefault("rpcRdoDecoderTool", rpcrdo_decode)
 
     acc.addEventAlgo(CompFactory.RpcRdoToRpcDigit(name, **kwargs))
     return acc

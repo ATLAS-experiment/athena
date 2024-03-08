@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1RPChardware_MatrixReadOut_H
@@ -19,9 +19,9 @@ class MatrixReadOut : public BaseObject {
 public:
     enum DataVersion { Simulation, Atlas };
 
-    MatrixReadOut(Matrix *p, ubit16 FEevent, DataVersion = MatrixReadOut::Atlas);
-    MatrixReadOut(ubit16 FEevent = 0, DataVersion = MatrixReadOut::Atlas);
-    MatrixReadOut(ubit16 *v, ubit16 numWords, DataVersion = MatrixReadOut::Atlas);
+  MatrixReadOut(Matrix *p, ubit16 FEevent, uint NOBXS, DataVersion = MatrixReadOut::Atlas);
+  MatrixReadOut(ubit16 FEevent = 0, uint NOBXS=8, DataVersion = MatrixReadOut::Atlas);
+  MatrixReadOut(ubit16 *v, ubit16 numWords, uint NOBXS, DataVersion = MatrixReadOut::Atlas);
     MatrixReadOut(const MatrixReadOut &MROOrig);  // copy constructor
     MatrixReadOut &operator=(const MatrixReadOut &MROOrig) = delete;
     ~MatrixReadOut();
@@ -30,7 +30,7 @@ public:
     MatrixReadOutStructure getSubHeader();
     MatrixReadOutStructure getFooter();
     void deleteCMABody();
-    void reset();
+    void reset(uint NOBXS);
     //***********************************************//
     // following methods are used by Lvl1RpcTrig     //
     //***********************************************//
@@ -140,7 +140,7 @@ private:
     ubit16 m_checkCR;
     ubit16 m_checkUnkown;
     //************************//
-    void initialize();
+    void initialize(uint NOBXS);
     void makeHeader();
     void makeSubHeader();
     void makeCMABody();

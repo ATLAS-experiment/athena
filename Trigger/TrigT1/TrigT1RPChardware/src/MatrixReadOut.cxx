@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/MatrixReadOut.h"
@@ -8,12 +8,11 @@
 #include <fstream>
 #include <iomanip>
 
-#include "TrigT1RPChardware/NOBXS.h"
 
 using namespace std;
 
 //----------------------------------------------------------------------------//
-MatrixReadOut::MatrixReadOut(Matrix *m, ubit16 FEevent, DataVersion ver) : BaseObject(Hardware, "MatrixReadOut") {
+MatrixReadOut::MatrixReadOut(Matrix *m, ubit16 FEevent, uint NOBXS, DataVersion ver) : BaseObject(Hardware, "MatrixReadOut") {
     //
     // Constructor used by the simulation program
     //
@@ -21,7 +20,7 @@ MatrixReadOut::MatrixReadOut(Matrix *m, ubit16 FEevent, DataVersion ver) : BaseO
     //     FEevent        FrontEnd Event identifier
     //
     m_data_version = ver;
-    initialize();
+    initialize(NOBXS);
     FEevent = FEevent % 512;
     m_FEL1ID = FEevent;
     m_CM = m;
@@ -29,7 +28,7 @@ MatrixReadOut::MatrixReadOut(Matrix *m, ubit16 FEevent, DataVersion ver) : BaseO
     m_BS = 0;
 }  // end-of-MatrixReadOut::MatrixReadOut
 //----------------------------------------------------------------------------//
-MatrixReadOut::MatrixReadOut(ubit16 FEevent, DataVersion ver) : BaseObject(Hardware, "MatrixReadOut") {
+MatrixReadOut::MatrixReadOut(ubit16 FEevent, uint NOBXS, DataVersion ver) : BaseObject(Hardware, "MatrixReadOut") {
     //
     // Constructor used by an external user
     // the readout words are supplied by the methods:
@@ -38,7 +37,7 @@ MatrixReadOut::MatrixReadOut(ubit16 FEevent, DataVersion ver) : BaseObject(Hardw
     //     FEevent        FrontEnd Event identifier
     //
     m_data_version = ver;
-    initialize();
+    initialize(NOBXS);
     m_MROS.setInit();
     FEevent = FEevent % 512;
     m_FEL1ID = FEevent;
@@ -48,7 +47,7 @@ MatrixReadOut::MatrixReadOut(ubit16 FEevent, DataVersion ver) : BaseObject(Hardw
     m_addressOfWordScanned = 0;
 }  // end-of-MatrixReadOut::MatrixReadOut
 //----------------------------------------------------------------------------//
-MatrixReadOut::MatrixReadOut(ubit16 *v, ubit16 numWords, DataVersion ver) : BaseObject(Hardware, "MatrixReadOut") {
+MatrixReadOut::MatrixReadOut(ubit16 *v, ubit16 numWords, uint NOBXS, DataVersion ver) : BaseObject(Hardware, "MatrixReadOut") {
     //
     // Constructor used by an external user
     //
@@ -56,7 +55,7 @@ MatrixReadOut::MatrixReadOut(ubit16 *v, ubit16 numWords, DataVersion ver) : Base
     //    numWords        number of words in the readout fragment
     //
     m_data_version = ver;
-    initialize();
+    initialize(NOBXS);
     char field;
     m_CM = 0;
     m_BS = v;
@@ -146,7 +145,7 @@ MatrixReadOut::MatrixReadOut(const MatrixReadOut &MROOrig) : BaseObject(Hardware
     m_myBoss = 0;
     m_ROOffset = 2;
     m_NDLLCYC = 8;
-    m_NBunch = NOBXS;
+    m_NBunch = MROOrig.m_NBunch;
     m_nclock = m_NBunch * m_NDLLCYC;
     m_timeSeparation = 8;
     m_CM = 0;
@@ -201,7 +200,7 @@ void MatrixReadOut::writeRecord(ubit16 thisRecord, bool last) {
     m_numberOfWordsInFrag++;
 }  // end-of-MatrixReadOut::writeRecord
 //----------------------------------------------------------------------------//
-void MatrixReadOut::initialize() {
+void MatrixReadOut::initialize(uint NOBXS) {
     m_BunchFrom = 0;
     m_BunchTo = 7;
     m_Header = 0;
@@ -238,9 +237,9 @@ void MatrixReadOut::initialize() {
     m_checkUnkown = 0;
 }  // end-of-initialize
 //----------------------------------------------------------------------------//
-void MatrixReadOut::reset() {
+void MatrixReadOut::reset(uint NOBXS) {
     deleteCMABody();
-    initialize();
+    initialize(NOBXS);
     m_MROS.setInit();
 }  // end-of-reset
 //----------------------------------------------------------------------------//

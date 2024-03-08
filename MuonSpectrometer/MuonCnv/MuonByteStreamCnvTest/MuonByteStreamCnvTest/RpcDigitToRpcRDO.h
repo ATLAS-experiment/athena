@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCDIGITTORPCRDO_H
@@ -84,6 +84,10 @@ private:
 
     Gaudi::Property<std::vector<std::string>> m_exclStat{this, "ExcludeHitsFromStations",
                                                             {"BIS"}, "Digits from these stations are not converted" };
+  Gaudi::Property<int> m_nobxs { this, "NOBXS", 8, "Number of bunch crossings in readout"};
+  Gaudi::Property<int> m_bczero { this, "BCZERO", 3, "central bunch crossing in readout"};
+
+
    
     std::set<int> m_exclStatNames{};
 };

@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -78,7 +78,7 @@ PADpatterns::operator<<(CMApatterns* patterns)
 }
 
 Pad*
-PADpatterns::give_pad(const RpcCablingCondData* readCdo)
+PADpatterns::give_pad(const RpcCablingCondData* readCdo, int NOBXS, int BCZERO)
 {
   if (!m_pad)
   {
@@ -95,7 +95,7 @@ PADpatterns::give_pad(const RpcCablingCondData* readCdo)
       }
     }
 
-    m_pad = std::make_unique<Pad>(0,0,m_debug,subsystem,logic_sector,m_pad_id,1,oldSimulation);
+    m_pad = std::make_unique<Pad>(0,0,m_debug,subsystem,logic_sector,m_pad_id,1,oldSimulation, NOBXS);
 
     //M.Corradi 8/1/2015 get Pad configuration Parameters 
     bool  eta_and_phi, feet_on;
@@ -120,8 +120,8 @@ PADpatterns::give_pad(const RpcCablingCondData* readCdo)
 
     while(cma != m_cma_patterns.end())
     {
-      Matrix*  low_pt_matrix = (*cma)->give_low_pt_matrix();
-      Matrix* high_pt_matrix = (*cma)->give_high_pt_matrix();
+      Matrix*  low_pt_matrix = (*cma)->give_low_pt_matrix(NOBXS, BCZERO);
+      Matrix* high_pt_matrix = (*cma)->give_high_pt_matrix(NOBXS, BCZERO);
 
       CMAidentity id  = (*cma)->cma_parameters().id();
       int matrix_view = (id.type() == Phi)? 1 : 0;

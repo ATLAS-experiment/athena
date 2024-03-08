@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CMAPATTERNS_H
@@ -65,7 +65,7 @@ class CMApatterns : public RPCtrigDataObject
                            const bitPATTERN&) const;
     
 
-    void create_hardware(TrigType);
+    void create_hardware(TrigType, uint NOBXS, uint BCZERO);
     void load_data(int,int,const bitPATTERN&,Matrix*);
 
     public:
@@ -100,8 +100,8 @@ class CMApatterns : public RPCtrigDataObject
 
     const CMAtrigger give_trigger(Lvl1RPCalgo) const;
 
-    Matrix* give_low_pt_matrix(void);
-    Matrix* give_high_pt_matrix(void);
+    Matrix* give_low_pt_matrix(uint NOBXS, uint BCZERO);
+    Matrix* give_high_pt_matrix(uint NOBXS, uint BCZERO);
 
     void Print (std::ostream&,bool) const;
 };
