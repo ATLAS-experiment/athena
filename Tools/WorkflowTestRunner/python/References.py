@@ -32,5 +32,5 @@ references_map = {
     "data_PHYS_Run3": "v16",
     "mc_PHYS_Run2": "v21",
     "mc_PHYS_Run3": "v21",
-    "af3_PHYS_Run3": "v1",
+    "af3_PHYS_Run3": "v2",
 }
