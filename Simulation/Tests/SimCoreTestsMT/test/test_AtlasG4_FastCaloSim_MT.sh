@@ -38,7 +38,7 @@ if [ $rc -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees
+    art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees --diff-root
     rc2=$?
     if [ $status -eq 0 ]
     then
