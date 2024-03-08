@@ -182,7 +182,6 @@
 + HighGranularityTimingDetector/HGTD_G4/HGTD_G4_SD
 + InnerDetector/InDetConditions/BeamSpotConditions
 + InnerDetector/InDetConditions/BeamSpotConditionsData
-+ InnerDetector/InDetConditions/InDetCondFolders
 + InnerDetector/InDetConditions/InDetCondTools
 + InnerDetector/InDetConditions/InDetConditionsAthenaPool
 + InnerDetector/InDetConditions/InDetConditionsSummaryService
