@@ -362,6 +362,30 @@ TrigConf::Selection::wpToString(TrigConf::Selection::WP wp)
       return "HadTight";
    if (wp == Selection::WP::HAD) // Had = HadMedium for backward compatibility
       return "HadMedium";
+   if (wp == Selection::WP::LOOSE12)
+      return "Loose12";
+   if (wp == Selection::WP::LOOSE20)
+      return "Loose20";
+   if (wp == Selection::WP::LOOSE30)
+      return "Loose30";
+   if (wp == Selection::WP::LOOSE35)
+      return "Loose35";
+   if (wp == Selection::WP::MEDIUM12)
+      return "Medium12";
+   if (wp == Selection::WP::MEDIUM20)
+      return "Medium20";
+   if (wp == Selection::WP::MEDIUM30)
+      return "Medium30";
+   if (wp == Selection::WP::MEDIUM35)
+      return "Medium35";
+   if (wp == Selection::WP::TIGHT12)
+      return "Tight12";
+   if (wp == Selection::WP::TIGHT20)
+      return "Tight20";
+   if (wp == Selection::WP::TIGHT30)
+      return "Tight30";
+   if (wp == Selection::WP::TIGHT35)
+      return "Tight35";
    throw std::runtime_error("Unknown working point " + std::to_string(int(wp)));
 }
 
@@ -384,5 +408,29 @@ TrigConf::Selection::stringToWP(const std::string & wpStr)
       return Selection::WP::HADTIGHT;
    if (wpStr == "Had") // Had = HadMedium for backward compatibility
       return Selection::WP::HADMEDIUM; 
+   if (wpStr == "Loose12")
+      return Selection::WP::LOOSE12;
+   if (wpStr == "Loose20")
+      return Selection::WP::LOOSE20;
+   if (wpStr == "Loose30")
+      return Selection::WP::LOOSE30;
+   if (wpStr == "Loose35")
+      return Selection::WP::LOOSE35;
+   if (wpStr == "Medium12")
+      return Selection::WP::MEDIUM12;
+   if (wpStr == "Medium20")
+      return Selection::WP::MEDIUM20;
+   if (wpStr == "Medium30")
+      return Selection::WP::MEDIUM30;
+   if (wpStr == "Medium35")
+      return Selection::WP::MEDIUM35;
+   if (wpStr == "Tight12")
+      return Selection::WP::TIGHT12;
+   if (wpStr == "Tight20")
+      return Selection::WP::TIGHT20;
+   if (wpStr == "Tight30")
+      return Selection::WP::TIGHT30;
+   if (wpStr == "Tight35")
+      return Selection::WP::TIGHT35;
    throw std::runtime_error("Unknown working point name " + wpStr);
 }

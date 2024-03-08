@@ -9,21 +9,6 @@
 #include "L1TopoCoreSim/TopoSteeringStructure.h"
 
 
-namespace {
-  // TODO: avoid hard-coding the WP->int mapping by having cTauMultiplicity::convertIsoToBit return TrigConf::Selection::WP
-  bool isocut(TrigConf::Selection::WP WP, const unsigned int bit) {
-    // ctauWp will take values 0 (None)/ 1 (Loose)/ 2 (Medium)/ 3 (Tight)
-    unsigned int value = 0;
-    if ( WP == TrigConf::Selection::WP::NONE ) {value = 0;}
-    else if ( WP == TrigConf::Selection::WP::LOOSE ) {value = 1;}
-    else if ( WP == TrigConf::Selection::WP::MEDIUM ) {value = 2;}
-    else if ( WP == TrigConf::Selection::WP::TIGHT ) {value = 3;}
-    // TODO Add a printout in case the WP is not found
-    if (bit >= value) {return true;}
-    else {return false;}
-  };
-}
-
 StatusCode cTauRoIThresholdsTool::initialize() {
   ATH_CHECK(RoIThresholdsTool::initialize());
   ATH_CHECK(m_jTauLinkKey.initialize());
@@ -33,6 +18,15 @@ StatusCode cTauRoIThresholdsTool::initialize() {
 uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
                                            const RoIThresholdsTool::ThrVec& menuThresholds,
                                            const TrigConf::L1ThrExtraInfoBase& menuExtraInfo) const {
+
+  std::map<std::string, int> isoFW_CTAU, isoFW_CTAU_jTAUCoreScale;
+  TCS::TopoSteeringStructure::setIsolationFW_CTAU(isoFW_CTAU, isoFW_CTAU_jTAUCoreScale, menuExtraInfo);
+
+  unsigned int eFexEt{eTau.etTOB()}; // eTAU Et in units of 100 MeV
+  int eFexEta{eTau.iEta()};
+
+  unsigned int jFexCoreEt = 0, jFexIsoEt = 0; // jTAU core and isolation Et in units of 200 MeV
+
   // Get the jTau matched to the eTau
   using jTauLink_t = ElementLink<xAOD::jFexTauRoIContainer>;
   SG::ReadDecorHandle<xAOD::eFexTauRoIContainer, jTauLink_t> jTauLinkAcc{m_jTauLinkKey, Gaudi::Hive::currentContext()};
@@ -43,32 +37,20 @@ uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
   jTauLink_t jTauLink = jTauLinkAcc(eTau);
   bool matched{jTauLink.isValid()};
 
-  // Variables needed to form a cTau
-  // pT in units of 100 MeV
-  unsigned int eFexEt{eTau.etTOB()};
-  int eFexEta{eTau.iEta()};
-  unsigned int isolation_score{0};
-
   if (matched) {
     const xAOD::jFexTauRoI* jTau = *jTauLink;
 
-    // core and isolation energy in units of 200 MeV
-    unsigned int jFexIso{jTau->tobIso()};
-    unsigned int jFexCoreEt{jTau->tobEt()};
-
-    std::map<std::string, int> isoFW_CTAU, isoFW_CTAU_jTAUCoreScale;
-    TCS::TopoSteeringStructure::setIsolationFW_CTAU( isoFW_CTAU, isoFW_CTAU_jTAUCoreScale, menuExtraInfo );
-
-    // The core and isolation E_T values are multiplied by 2 to normalise to 100 MeV/counts units
-    isolation_score = TCS::cTauMultiplicity::convertIsoToBit( isoFW_CTAU, isoFW_CTAU_jTAUCoreScale, 2*static_cast<float>(jFexCoreEt), 2*static_cast<float>(jFexIso), static_cast<float>(eFexEt) );
+    jFexIsoEt = jTau->tobIso();
+    jFexCoreEt = jTau->tobEt();
 
     ATH_MSG_DEBUG("eFex tau eta,phi = " << eTau.iEta() << ", " << eTau.iPhi()
                   << ", jFex tau eta,phi = " << jTau->globalEta() << ", " << jTau->globalPhi()
-                  << ", eFex et (100 MeV/counts) = " << eFexEt << ", jFex iso (200 MeV/counts) = " << jFexIso);
+                  << ", eFex et (100 MeV/counts) = " << eFexEt << ", jFex et (200 MeV/counts) = " << jTau->tobEt() << ", jFex iso (200 MeV/counts) = " << jTau->tobIso());
   } else {
     ATH_MSG_DEBUG("eFex tau eta,phi = " << eTau.iEta() << ", " << eTau.iPhi()
                   << ", eFex et (100 MeV/counts) = " << eFexEt << ", no matching jTau found");
   }
+
 
   uint64_t thresholdMask{0};
 
@@ -77,7 +59,8 @@ uint64_t cTauRoIThresholdsTool::getPattern(const xAOD::eFexTauRoI& eTau,
     std::shared_ptr<TrigConf::L1Threshold_cTAU> thr = std::static_pointer_cast<TrigConf::L1Threshold_cTAU>(thrBase);
 
     // Check isolation threshold - unmatched eTau treated as perfectly isolated, ATR-25927
-    bool passIso = matched ? isocut(TrigConf::Selection::WP(thr->isolation()), isolation_score ) : true;
+    // The core and isolation E_T values are multiplied by 2 to normalise to 100 MeV/counts units
+    bool passIso = matched ? TCS::cTauMultiplicity::checkIsolationWP(isoFW_CTAU, isoFW_CTAU_jTAUCoreScale, 2*static_cast<float>(jFexCoreEt), 2*static_cast<float>(jFexIsoEt), static_cast<float>(eFexEt), TrigConf::Selection::wpToString(thr->isolation())) : true;
 
     // Check pt threshold - using iEta coordinate for the eFEX ensures a 0.1 granularity of the eta coordinate,
     // as expected from the menu method thrValue100MeV
