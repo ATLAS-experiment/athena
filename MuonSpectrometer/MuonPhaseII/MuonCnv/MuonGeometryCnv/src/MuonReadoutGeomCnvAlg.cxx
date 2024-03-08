@@ -166,7 +166,6 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
         station->setMdtAsBuiltParams(distort.asBuilt);
         newElement->geoInitDone();
         newElement->fillCache();
-        newElement->fillBLineCache();
         /// Add the readout element to the manager
         if (msgLvl(MSG::DEBUG)) {
             ATH_MSG_ALWAYS("Detector element "<<m_idHelperSvc->toString(copyMe->identify())

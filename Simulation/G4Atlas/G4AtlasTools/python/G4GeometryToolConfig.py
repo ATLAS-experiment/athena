@@ -9,7 +9,7 @@ from AthenaCommon import Logging
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
 
 #the physics region tools
-from G4AtlasTools.G4PhysicsRegionConfig import SX1PhysicsRegionToolCfg, BedrockPhysicsRegionToolCfg, CavernShaftsConcretePhysicsRegionToolCfg, PixelPhysicsRegionToolCfg, SCTPhysicsRegionToolCfg, TRTPhysicsRegionToolCfg, TRT_ArPhysicsRegionToolCfg,ITkPixelPhysicsRegionToolCfg,ITkStripPhysicsRegionToolCfg,HGTDPhysicsRegionToolCfg,BeampipeFwdCutPhysicsRegionToolCfg, FWDBeamLinePhysicsRegionToolCfg, CALOPhysicsRegionToolCfg, EMBPhysicsRegionToolCfg, EMECPhysicsRegionToolCfg, HECPhysicsRegionToolCfg, FCALPhysicsRegionToolCfg, FCAL2ParaPhysicsRegionToolCfg, EMECParaPhysicsRegionToolCfg, FCALParaPhysicsRegionToolCfg, PreSampLArPhysicsRegionToolCfg, DeadMaterialPhysicsRegionToolCfg
+from G4AtlasTools.G4PhysicsRegionConfig import SX1PhysicsRegionToolCfg, BedrockPhysicsRegionToolCfg, CavernShaftsConcretePhysicsRegionToolCfg, PixelPhysicsRegionToolCfg, SCTPhysicsRegionToolCfg, TRTPhysicsRegionToolCfg, TRT_ArPhysicsRegionToolCfg,ITkPixelPhysicsRegionToolCfg,ITkStripPhysicsRegionToolCfg,HGTDPhysicsRegionToolCfg,BeampipeFwdCutPhysicsRegionToolCfg, FWDBeamLinePhysicsRegionToolCfg, CALOPhysicsRegionToolCfg, EMBPhysicsRegionToolCfg, EMECPhysicsRegionToolCfg, HECPhysicsRegionToolCfg, FCALPhysicsRegionToolCfg, FCAL2ParaPhysicsRegionToolCfg, EMECParaPhysicsRegionToolCfg, FCALParaPhysicsRegionToolCfg, PreSampLArPhysicsRegionToolCfg, DeadMaterialPhysicsRegionToolCfg #, FwdRegionPhysicsRegionToolCfg
 from G4AtlasTools.G4PhysicsRegionConfig import DriftWallPhysicsRegionToolCfg, DriftWall1PhysicsRegionToolCfg, DriftWall2PhysicsRegionToolCfg, MuonSystemFastPhysicsRegionToolCfg
 
 #the field config tools
@@ -568,16 +568,14 @@ def ATLAS_RegionCreatorListCfg(flags):
                                       result.popToolsAndMerge(FCAL2ParaPhysicsRegionToolCfg(flags))]
                 if flags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly, LArParameterization.FastCaloSim]: # TODO Check this makes sense
                     pass
-                    #todo - add the line below
                     regionCreatorList += [
                         result.popToolsAndMerge(PreSampLArPhysicsRegionToolCfg(flags)),
                         result.popToolsAndMerge(DeadMaterialPhysicsRegionToolCfg(flags))]
             if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
                 regionCreatorList += [result.popToolsAndMerge(CALOPhysicsRegionToolCfg(flags))]
-    ## FIXME _initPR never called for FwdRegion??
-    #if simFlags.ForwardDetectors.statusOn:
-    #    if DetFlags.geometry.FwdRegion_on():
-    #        regionCreatorList += ['FwdRegionPhysicsRegionTool']
+    ## TODO Follow-up about whether this is still needed
+    #if flags.Detector.GeometryFwdRegion:
+    #    regionCreatorList +=[result.popToolsAndMerge(FwdRegionPhysicsRegionToolCfg(flags))]
     if flags.Detector.GeometryMuon:
         #todo - add the line below
         regionCreatorList += [
@@ -594,7 +592,6 @@ def TB_RegionCreatorListCfg(flags):
     regionCreatorList = []
     result = ComponentAccumulator()
     # Deliberately left commented out for now
-    #from G4AtlasApps.SimFlags import simFlags
     #TODO - migrate below>>
     #if (flags.GeoModel.AtlasVersion=="tb_LArH6_2003"):
     #    if (flags.Detector.GeometryLAr):
@@ -606,11 +603,11 @@ def TB_RegionCreatorListCfg(flags):
     #    if (flags.Detector.GeometryLAr):
     #        regionCreatorList += [EMECPhysicsRegionTool(flags)]
     #elif (flags.GeoModel.AtlasVersion=="tb_LArH6_2004"):
-    #    if (simFlags.LArTB_H6Hec.get_Value()):
+    #    if (flags.Sim.LArTB_H6Hec.get_Value()):
     #        regionCreatorList += [HECPhysicsRegionTool(flags)]
-    #    if (simFlags.LArTB_H6Emec.get_Value()):
+    #    if (flags.Sim.LArTB_H6Emec.get_Value()):
     #        regionCreatorList += [EMECPhysicsRegionTool(flags)]
-    #    if (simFlags.LArTB_H6Fcal.get_Value()):
+    #    if (flags.Sim.LArTB_H6Fcal.get_Value()):
     #        regionCreatorList += [FCALPhysicsRegionTool(flags)]
     #<<migrate above
     result.setPrivateTools(regionCreatorList)

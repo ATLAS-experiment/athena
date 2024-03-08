@@ -21,6 +21,4 @@ atlas_add_component( MuonTGC_CnvTools
                                                               EventPrimitives TGCcablingInterfaceLib MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib MuonRDO 
                                                               MuonPrepRawData MuonTrigCoinData TrkSurfaces MuonCnvToolInterfacesLib MuonTGC_CnvToolsLib ByteStreamCnvSvcLib CxxUtils )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 

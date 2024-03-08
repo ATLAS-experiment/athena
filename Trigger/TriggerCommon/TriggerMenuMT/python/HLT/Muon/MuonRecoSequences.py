@@ -260,9 +260,11 @@ def muonIDCosmicTrackingSequenceCfg( flags, RoIs, name, extraLoads=None, extraLo
 
   flagsWithTrk = getFlagsForActiveConfig(flags, "cosmics", log)
 
-  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-  seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
-                          rois = RoIs, inView = "muCombVDVcosmics")
+  from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+  seq = InnerTrackingTrigSequence.create(flagsWithTrk, 
+                                         flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                                         rois = RoIs, 
+                                         inView = "muCombVDVcosmics")
   acc.merge(seq.sequence("Offline"))
 
   

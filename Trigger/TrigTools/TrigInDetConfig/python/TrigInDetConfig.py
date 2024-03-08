@@ -52,11 +52,12 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
  
   """ Generates precision fast tracking config, it is a primary config function """
 
-  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-  seq = InDetTrigSequence(flags, 
-                          flags.Tracking.ActiveConfig.input_name, 
-                          rois   = roisKey,
-                          inView = "VDVInDetFTF" if in_view else None)
+  from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+
+  seq = InnerTrackingTrigSequence.create(flags, 
+                                         flags.Tracking.ActiveConfig.input_name, 
+                                         rois   = roisKey,
+                                         inView = "VDVInDetFTF" if in_view else None)
   acc = seq.sequence("FastTrackFinder")
 
   return acc
@@ -64,12 +65,12 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
 
 @AccumulatorCache
 def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inputs=tuple()):
-  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+  from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
   viewname = "VDVInDetLRT" if in_view else None
-  seq = InDetTrigSequence(flags,
-                          flags.Tracking.ActiveConfig.input_name,
-                          rois   = roisKey,
-                          inView = viewname)
+  seq = InnerTrackingTrigSequence.create(flags,
+                                         flags.Tracking.ActiveConfig.input_name,
+                                         rois   = roisKey,
+                                         inView = viewname)
   acc = ComponentAccumulator()
   if in_view:
     acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
@@ -116,11 +117,12 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
 
     acc.addEventAlgo(verifier)
 
-  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-  seq = InDetTrigSequence(flags, 
-                          flags.Tracking.ActiveConfig.input_name, 
-                          rois = flags.Tracking.ActiveConfig.roi, 
-                          inView = verifier.getName() if in_view else '')
+  from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+
+  seq = InnerTrackingTrigSequence.create(flags, 
+                                         flags.Tracking.ActiveConfig.input_name, 
+                                         rois = flags.Tracking.ActiveConfig.roi, 
+                                         inView = verifier.getName() if in_view else '')
   
   acc.merge(seq.sequenceAfterPattern(rois = rois))
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -46,17 +46,9 @@ def MuonDetectorToolCfg(flags, name = "MuonDetectorTool", **kwargs):
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
     kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
     kwargs.setdefault("HasMM", flags.Detector.GeometryMM)
-
    
     kwargs.setdefault("UseConditionDb", flags.Muon.enableAlignment)
-    # call fill cache of MuonDetectorTool such that all MdtReadoutElement caches are filled
-    # already during initialize() -> this will increase memory -> needs to be measured
-    kwargs.setdefault("FillCacheInitTime", flags.Common.ProductionStep != ProductionStep.Simulation or \
-                                           flags.Muon.enableAlignment) 
-
     kwargs.setdefault("UseAsciiConditionData", flags.Muon.enableAlignment)
-    # turn on/off caching of MdtReadoutElement surfaces
-    kwargs.setdefault("CachingFlag", 1)
     
     UseIlinesFromGM = False
     EnableCscInternalAlignment = False
@@ -226,5 +218,5 @@ def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
 def MuonGeoModelToolCfg(flags):
     result = ComponentAccumulator()
     geoModelSvc = result.getPrimaryAndMerge(GeoModelCfg(flags))
-    geoModelSvc.DetectorTools+= [result.popToolsAndMerge(MuonDetectorToolCfg(flags, FillCacheInitTime = 0))]
+    geoModelSvc.DetectorTools+= [result.popToolsAndMerge(MuonDetectorToolCfg(flags))]
     return result

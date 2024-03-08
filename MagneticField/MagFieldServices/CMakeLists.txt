@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MagFieldServices )
@@ -20,11 +20,9 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 if( NOT SIMULATIONBASE )
   atlas_add_test( MagFieldServicesConfig
                   SCRIPT python -m MagFieldServices.MagFieldServicesConfig
-                  PROPERTIES TIMEOUT 300
-                  POST_EXEC_SCRIPT nopost.sh )
+                  POST_EXEC_SCRIPT noerror.sh )
 
   atlas_add_test( MagFieldCondAlg
-                  SCRIPT athena --threads=1 ${CMAKE_CURRENT_SOURCE_DIR}/share/test_magFieldCondAlg.py
-                  PROPERTIES TIMEOUT 300
+                  SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/test_magFieldCondAlg.py
                   LOG_SELECT_PATTERN "MagFieldCondReader" )
 endif()

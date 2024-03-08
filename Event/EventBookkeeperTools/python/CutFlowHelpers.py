@@ -1,18 +1,8 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Creation: Karsten Koeneke
 def GetCurrentStreamName( msg ):
     """ Helper to decide where to get the input stream name from."""
-    # First, try to get the info from the RecFlags
-    try:
-        from RecExConfig.RecFlags import rec
-        streamName = rec.mergingStreamName()
-        if streamName:
-            msg.debug("Got the stream name from the RecFlags: %s", streamName)
-            return streamName
-    except ImportError:
-        msg.info("Couldn't get input stream name from the RecFlags... trying metadata directly.")
-
     from AthenaCommon.AppMgr import ServiceMgr as svcMgr
     try:
         input_files = svcMgr.EventSelector.InputCollections

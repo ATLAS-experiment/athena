@@ -21,6 +21,4 @@ atlas_add_component( AmdcOracle
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps GaudiKernel AmdcDbLib AmdcOracleLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 

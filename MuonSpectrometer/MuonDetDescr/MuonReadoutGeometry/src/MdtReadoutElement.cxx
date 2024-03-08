@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,6 +16,8 @@
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelUtilities/GeoGetIds.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+
 
 #include "MuonAlignmentData/BLinePar.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
@@ -57,8 +59,6 @@ namespace MuonGM {
     MdtReadoutElement::MdtReadoutElement(GeoVFullPhysVol* pv, const std::string& stName, MuonDetectorManager* mgr) :
         MuonReadoutElement(pv, mgr, Trk::DetectorElemType::Mdt) {
         // get the setting of the caching flag from the manager
-        setCachingFlag(mgr->cachingFlag());
-
         m_inBarrel = stName[0]== 'B';
 
         setStationName(stName);
@@ -141,8 +141,7 @@ namespace MuonGM {
                                 found = true;
                             }
                             ++kk;
-                        },
-                        &*cv);
+                        }, cv);
                     if (found) {
                         ATH_MSG_DEBUG( " MdtReadoutElement tube match found for BMG - input : tube(" << tube << "), layer("
                             << tubeLayer << ") - output match : tube(" << ii % maxNTubesPerLayer << "), layer(" << ii / maxNTubesPerLayer
@@ -816,12 +815,6 @@ namespace MuonGM {
 
     const Trk::SaggedLineSurface& MdtReadoutElement::surface(const int tubeLayer, const int tube) const {
 
-
-
-
-
-
-
         int ntot_tubes = m_nlayers * m_ntubesperlayer;
         int itube = (tubeLayer - 1) * m_ntubesperlayer + tube - 1;
         // consistency checks
@@ -916,21 +909,6 @@ namespace MuonGM {
         }
         return *m_associatedBounds;
     }
-
-    void MdtReadoutElement::fillBLineCache() {
-        ATH_MSG_DEBUG( "Filling BLine cache for ReadoutElement " << idHelperSvc()->toStringDetEl(identify()));
-        for (int tubeL = 1; tubeL <= m_nlayers; ++tubeL) {
-            for (int tube = 1; tube <= m_ntubesperlayer; ++tube) { fromIdealToDeformed(tubeL, tube); }
-        }
-    }
-    void MdtReadoutElement::clearBLineCache() {
-        ATH_MSG_VERBOSE( "Clearing BLine cache for ReadoutElement " << idHelperSvc()->toStringDetEl(identify()));
-        if (m_haveDeformTransf) {
-            m_haveDeformTransf = false;
-            for (auto& d : m_deformTransf) { d.release(); }
-        }
-    }
-
     void MdtReadoutElement::clearCache() {
         ATH_MSG_DEBUG( "Clearing cache for ReadoutElement " << idHelperSvc()->toStringDetEl(identify()) );
         if (m_associatedSurface) {
@@ -954,13 +932,20 @@ namespace MuonGM {
             m_haveTubeBounds = false;
             for (auto& b : m_tubeBounds) { b.release(); }
         }
-        // reset here the deform-related transforms
-        clearBLineCache();
+        // reset here the deform-related transforms        
+        if (m_haveDeformTransf) {
+            m_haveDeformTransf = false;
+            for (auto& d : m_deformTransf) { d.release(); }
+        }
     }
 
     void MdtReadoutElement::setBLinePar(const BLinePar* bLine) {
         ATH_MSG_DEBUG( "Setting B-line for " << idHelperSvc()->toStringDetEl(identify()) );
+        if (m_BLinePar == bLine) {
+            return;
+        }
         m_BLinePar = bLine;
+        refreshCache();
     }
 
     void MdtReadoutElement::fillCache() {
@@ -978,8 +963,8 @@ namespace MuonGM {
 #endif
         const Trk::CylinderBounds* tmpCil = nullptr;
         const Trk::SaggedLineSurface* tmpSaggL = nullptr;
-        Amg::Vector3D myPoint;
-        Amg::Transform3D myTransform;
+        Amg::Vector3D myPoint{Amg::Vector3D::Zero()};
+        Amg::Transform3D myTransform{Amg::Transform3D::Identity()};
         for (int tl = 1; tl <= getNLayers(); ++tl) {
             for (int tube = 1; tube <= getNtubesperlayer(); ++tube) {
                 // in case of BMG chambers, do not check the 'dead' tubes
@@ -1006,7 +991,7 @@ namespace MuonGM {
 #ifndef NDEBUG
                     if (found) {
                         ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " transform at origin  "
-                            << myTransform * Amg::Vector3D::Zero() );
+                            << Amg::toString(myTransform.linear()) );
                         ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube center          " << myPoint );
                         ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube bounds pointer  " << tmpCil );
                         ATH_MSG_VERBOSE( "tubeLayer/tube " << tl << " " << tube << " tube surface pointer " << tmpSaggL );

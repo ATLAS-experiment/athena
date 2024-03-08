@@ -101,11 +101,11 @@ def MinBiasSPSel(flags):
     reco = InViewRecoCA("SPCountingReco")
     minBiasFlags = flags.cloneAndReplace("Tracking.ActiveConfig","Trigger.InDetTracking.minBias")
 
-    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-    seq = InDetTrigSequence(minBiasFlags,
-                            minBiasFlags.Tracking.ActiveConfig.input_name, # this is already in the flags, maybe we would not need to pass it in the future?
-                            rois   = str(reco.inputMaker().InViewRoIs),
-                            inView = str(reco.inputMaker().Views))
+    from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+    seq = InnerTrackingTrigSequence.create(minBiasFlags,
+                                           minBiasFlags.Tracking.ActiveConfig.input_name, # this is already in the flags, maybe we would not need to pass it in the future?
+                                           rois   = str(reco.inputMaker().InViewRoIs),
+                                           inView = str(reco.inputMaker().Views))
     spMakingCA = seq.sequence("spacePointFormation")
 
     reco.mergeReco(spMakingCA)
@@ -150,9 +150,11 @@ def MinBiasTrkSequenceCfg(flags):
     from TrigInDetConfig.utils import getFlagsForActiveConfig
     flagsWithTrk = getFlagsForActiveConfig(flags, "minBias", log)
 
-    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-    trkSeq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
-                                rois = "InputRoI", inView = "VDVMinBiasIDTracking") # here
+    from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+    trkSeq = InnerTrackingTrigSequence.create(flagsWithTrk, 
+                                              flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                                              rois = "InputRoI", 
+                                              inView = "VDVMinBiasIDTracking") # here
     recoAcc.mergeReco(trkSeq.sequence("OfflineNoDataPrep"))
 
     selAcc = SelectionCA("MBTrackCountSel")

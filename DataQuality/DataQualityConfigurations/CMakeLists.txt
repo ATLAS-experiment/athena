@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataQualityConfigurations )
@@ -8,7 +8,7 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( scripts/MergeConfigs.py scripts/UploadDQAMITag.py
    scripts/merge_all_han_configs.sh scripts/merge_some_han_configs.sh
    scripts/han-config-indent.sh scripts/han-config-check.sh
-   scripts/han-config-parse.awk )
+   scripts/han-config-parse.awk scripts/PrepareReferenceFile.py )
 
 # The list of generated files:
 set( hcfgfiles )
@@ -82,12 +82,18 @@ add_custom_target( DataQualityConfigurations_han_configs
    ALL SOURCES ${hcfgfiles} )
 add_dependencies( DataQualityConfigurations_han_configs
    han-config-gen )
-add_dependencies( Package_DataQualityConfigurations
-   DataQualityConfigurations_han_configs )
 set_target_properties( DataQualityConfigurations_han_configs PROPERTIES
    LABELS DataQualityConfigurations
    FOLDER DataQuality/DataQualityConfigurations )
 
+# Exclude very slow han config generation in debug builds (ATLASDQ-1133)
+if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+   set_target_properties( DataQualityConfigurations_han_configs PROPERTIES
+      EXCLUDE_FROM_ALL TRUE )
+else()
+   add_dependencies( Package_DataQualityConfigurations
+      DataQualityConfigurations_han_configs )
+endif()
 
 # Clean up:
 unset( hcfgfiles )

@@ -5,7 +5,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TrigInDetConfig.utils import getFlagsForActiveConfig
-from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
 
 #logging
 from AthenaCommon.Logging import logging
@@ -24,7 +24,10 @@ def precisionTracking(inflags, RoIs, ion=False, variant=''):
                                                                     ( 'TrackCollection', flags.Tracking.ActiveConfig.trkTracks_FTF )} )
 
     acc.addEventAlgo(verifier)
-    seq = InDetTrigSequence(flags, flags.Tracking.ActiveConfig.input_name, rois = RoIs, inView = verifier.getName())
+    seq = InnerTrackingTrigSequence.create(flags, 
+                                           flags.Tracking.ActiveConfig.input_name, 
+                                           rois = RoIs, 
+                                           inView = verifier.getName())
     acc.merge(seq.sequenceAfterPattern())
 
     return acc

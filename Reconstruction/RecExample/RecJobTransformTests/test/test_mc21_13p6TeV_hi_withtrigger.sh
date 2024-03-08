@@ -4,7 +4,7 @@
 # art-athena-mt: 8
 # art-type: grid
 # art-include: main/Athena
-# art-include: 23.0/Athena
+# art-include: 24.0/Athena
 
 export ATHENA_CORE_NUMBER=8
 
@@ -21,7 +21,7 @@ Reco_tf.py \
 --preExec='flags.Egamma.doForward=False;flags.Reco.EnableZDC=False;flags.Reco.EnableTrigger=False;flags.DQ.doMonitoring=False;flags.Beam.BunchSpacing=100;flags.Trigger.triggerMenuSetup="Dev_HI_run3_v1";flags.Trigger.AODEDMSet = "AODFULL";flags.Trigger.forceEnableAllChains=True;flags.Trigger.L1.Menu.doHeavyIonTobThresholds=True' \
 --autoConfiguration 'everything' \
 --postExec='HITtoRDO:cfg.getCondAlgo("TileSamplingFractionCondAlg").G4Version=-1' \
---DataRunNumber '313000' 
+--DataRunNumber '313000'
 
 RES=$?
 echo "art-result: $RES Reco"

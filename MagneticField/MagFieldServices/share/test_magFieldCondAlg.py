@@ -1,6 +1,8 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#!/usr/bin/env python
 #
-# Job options to test magnetic field conditions algs with varying currents.
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#
+# Test magnetic field conditions algs with varying currents.
 #
 
 # Testing IOVs and currents: (since LB, solenoid, toroids)
@@ -23,6 +25,7 @@ currents = [(0, 7730, 20400),
 
 # Folder name
 folder = '/EXT/DCS/MAGNETS/SENSORDATA'
+sqlite = 'magfield.db'
 
 def createDB():
    """Create sqlite file with DCS currents"""
@@ -32,11 +35,10 @@ def createDB():
    from CoolConvUtilities import AtlCoolLib, AtlCoolTool
 
    # Cleanup previous file
-   import os
-   if os.path.isfile("magfield.db"):
-      os.remove("magfield.db")
+   if os.path.isfile(sqlite):
+      os.remove(sqlite)
 
-   db = cool.DatabaseSvcFactory.databaseService().createDatabase('sqlite://;schema=magfield.db;dbname=CONDBR2')
+   db = cool.DatabaseSvcFactory.databaseService().createDatabase(f'sqlite://;schema={sqlite};dbname=CONDBR2')
    spec = cool.RecordSpecification()
    spec.extend("value", cool.StorageType.Float)
    spec.extend("quality_invalid", cool.StorageType.Bool)
@@ -60,34 +62,26 @@ def createDB():
 # Create sqlite file with DCS currents
 createDB()
 
-# basic job configuration
-import AthenaCommon.AtlasUnixGeneratorJob  # noqa: F401
-from AthenaCommon.AppMgr import theApp, ServiceMgr as svcMgr
-from AthenaCommon.AlgSequence import AthSequencer, AlgSequence
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.MainServicesConfig import MainEvgenServicesCfg
 
-# Increment LBN every event
-from McEventSelector import McEventSelectorConf
-svcMgr += McEventSelectorConf.McEventSelector('EventSelector', EventsPerLB=1)
+flags = initConfigFlags()
+flags.Input.Files = []
+flags.Concurrency.NumThreads = 1
+flags.Exec.MaxEvents = currents[-1][0]+5   # 5 events per IOV
+flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-RUN2-01'
+flags.IOVDb.SqliteInput = sqlite
+flags.IOVDb.SqliteFolders = (folder,)
+flags.lock()
 
-# Conditions folder setup
-from AthenaCommon.GlobalFlags import globalflags
-globalflags.DataSource='data'
-globalflags.ConditionsTag='CONDBR2-BLKPA-RUN2-01'
+acc = MainEvgenServicesCfg(flags)
+acc.getService('EventSelector').EventsPerLB = 1
 
-from IOVDbSvc.CondDB import conddb
-conddb.setGlobalTag(globalflags.ConditionsTag())
-conddb.addFolder('GLOBAL', '/GLOBAL/BField/Maps <noover/>', className="CondAttrListCollection")
-conddb.addFolder('magfield.db', folder, className='CondAttrListCollection')
+from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+acc.merge( AtlasFieldCacheCondAlgCfg(flags, LockMapCurrents=False) )
 
-# Magnetic field algorithm setup
-from AthenaCommon.CfgGetter import getAlgorithm
-condSeq = AthSequencer("AthCondSeq")
-condSeq += getAlgorithm( "AtlasFieldMapCondAlg" )
-condSeq += getAlgorithm( "AtlasFieldCacheCondAlg" )
-condSeq.AtlasFieldCacheCondAlg.LockMapCurrents = False
+acc.addEventAlgo( CompFactory.MagField.CondReader('MagFieldCondReader') )
 
-import AthenaCommon.CfgMgr as CfgMgr
-topSequence = AlgSequence()
-topSequence += CfgMgr.MagField__CondReader("MagFieldCondReader")
-
-theApp.EvtMax = currents[-1][0]+5   # 5 events per IOV
+import sys
+sys.exit(acc.run().isFailure())

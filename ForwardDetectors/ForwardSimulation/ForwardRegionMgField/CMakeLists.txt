@@ -18,4 +18,3 @@ atlas_add_library( ForwardRegionMgField
 
 # Install files from the package:
 atlas_install_runtime( share/*.dat )
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
