@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTruthCnvAlg.h"
 
@@ -405,8 +405,8 @@ namespace xAODMaker {
             if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
                     
             // Create link between HepMC and xAOD truth
-            if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,0,HepMcParticleLink::IS_POSITION), eltp));
-            if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,genEvt->event_number()), eltp));
+            if (isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,0,HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), eltp)); // FIXME barcode-based
+            if (!isSignalProcess) truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink(k,genEvt->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), eltp)); // FIXME barcode-based
                     
             // Is this one of the beam particles?
             if (genEvt_valid_beam_particles) {

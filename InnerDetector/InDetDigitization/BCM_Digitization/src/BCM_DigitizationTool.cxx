@@ -116,7 +116,7 @@ void BCM_DigitizationTool::processSiHit(const SiHit &currentHit, double eventTim
   m_timeVect[moduleNo].push_back(hitTime);
   // Create new deposit and add to vector
   const HepMcParticleLink::PositionFlag idxFlag = (evtIndex==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-  const HepMcParticleLink particleLink{HepMcParticleLink(currentHit.trackNumber(), evtIndex, idxFlag, ctx)};
+  const HepMcParticleLink particleLink{HepMcParticleLink(currentHit.trackNumber(), evtIndex, idxFlag, HepMcParticleLink::IS_BARCODE, ctx)}; // FIXME
   const int barcode = particleLink.barcode();
   if (barcode == 0 || barcode == HepMC::SINGLE_PARTICLE){
     return;

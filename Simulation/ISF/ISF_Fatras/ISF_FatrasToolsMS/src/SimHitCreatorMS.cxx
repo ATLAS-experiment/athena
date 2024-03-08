@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimHitCreatorMS.h"
@@ -267,15 +267,19 @@ void iFatras::SimHitCreatorMS::createHits(const ISF::ISFParticle& isp,
       const Amg::Vector3D& entryPos(pos - 0.5*segLengthSTGC*unitMom);
       const Amg::Vector3D& exitPos(pos + 0.5*segLengthSTGC*unitMom);
 
-      MMSimHit nswMMHit = MMSimHit(simID,timeInfo, pos, 
-				 isp.pdgCode(),eKin,unitMom, 
-				 energyDeposit, isp.barcode()) ;
-      sTGCSimHit nswsTGCHit = sTGCSimHit(simID,timeInfo, exitPos, 
-				     isp.pdgCode(), unitMom, 
-				     energyDeposit, isp.barcode(), eKin, entryPos) ;
-      
-      if ( m_idHelperSvc->isMM(id) )  m_mmSimHitCollection->Insert(nswMMHit); 
-      else  m_stgcSimHitCollection->Insert(nswsTGCHit); 
+      if ( m_idHelperSvc->isMM(id) )  {
+        m_mmSimHitCollection->Emplace(simID, timeInfo, pos,
+                                      isp.pdgCode(), eKin, unitMom,
+                                      energyDeposit, isp.barcode()) ;
+      }
+      else  {
+        HepMcParticleLink partLink(isp.barcode(), 0,
+                                   HepMcParticleLink::IS_EVENTNUM,
+                                   HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+        m_stgcSimHitCollection->Emplace(simID, timeInfo, exitPos,
+                                        isp.pdgCode(), unitMom, energyDeposit,
+                                        partLink, eKin, entryPos);
+      }
 
       ATH_MSG_VERBOSE("[ muhit ] NSW hit created.");           
 

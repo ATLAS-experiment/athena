@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -69,7 +69,8 @@ ScintillatorHit::ScintillatorHit( const int volNumber,
   m_globalPostStepY(globalPostStepY),
   m_globalPostStepZ(globalPostStepZ),
   m_globalTime(globalTime),
-  m_partLink(track) {}
+  m_partLink(track, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based syntax
+{}
 	
 int ScintillatorHit::GetTrackID() const {
   return m_partLink.barcode();

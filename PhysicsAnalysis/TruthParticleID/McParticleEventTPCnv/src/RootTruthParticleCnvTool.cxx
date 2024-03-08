@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootTruthParticleCnvTool.h"
@@ -74,7 +74,7 @@ RootTruthParticleCnvTool::convert(const McEventCollection *mcCollection,
                "TruthParticle is not wrapping the GenParticle : %d !!",
                HepMC::barcode(hepMcPart));
     }
-    HepMcParticleLink mcLink( HepMC::barcode(hepMcPart), genEventIndex, HepMcParticleLink::IS_POSITION );
+    HepMcParticleLink mcLink( HepMC::barcode(hepMcPart), genEventIndex, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE ); // FIXME barcode-based
     bcToMcPart[ mcLink.compress() ] = mcPart;
 
   }//> end loop over particles

@@ -767,7 +767,7 @@ bool MdtDigitizationTool::createDigits(const EventContext& ctx, Collections_t& c
             // Create the Deposit for MuonSimData
             const HepMcParticleLink::PositionFlag idxFlag =
                 (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-            MuonSimData::Deposit deposit(HepMcParticleLink(phit->trackNumber(), phit.eventId(), idxFlag),
+            MuonSimData::Deposit deposit(HepMcParticleLink(phit->trackNumber(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE), // FIXME
                                          MuonMCData(driftRadius, hit.localPosition().z()));
 
             // Record the SDO collection in StoreGate

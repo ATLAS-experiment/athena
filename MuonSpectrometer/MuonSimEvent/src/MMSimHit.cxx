@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/MMSimHit.h"
@@ -28,7 +28,7 @@ MMSimHit::MMSimHit(HitID id, double time,
   , m_kineticEnergy(kineticEnergy)
   , m_globalDirection(direction)
   , m_depositEnergy(depositEnergy)
-  , m_partLink(trackNumber)
+  , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
 {
 }
 

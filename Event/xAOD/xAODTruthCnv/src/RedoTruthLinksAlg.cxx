@@ -63,7 +63,7 @@ namespace xAODMaker {
 	    }
 	    // Create link between HepMC and xAOD truth
 	    /// @todo AB: Truth particle links should only be made to the signal event... hence the 0. Right?
-	    truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink((*par)->barcode(), 0, HepMcParticleLink::IS_POSITION), par));
+	    truthLinkVec->push_back(new xAODTruthParticleLink(HepMcParticleLink((*par)->barcode(), 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE), par)); // FIXME is barcode-based
 	  }
 	}
         

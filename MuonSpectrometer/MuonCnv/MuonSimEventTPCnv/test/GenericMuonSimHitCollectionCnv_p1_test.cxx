@@ -80,7 +80,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr> genPartVect
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
   // Create HepMcParticleLink outside of leak check.
-  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number());
+  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
   assert(dummyHMPL.cptr()==particle);
   // Create DVL info outside of leak check.
   GenericMuonSimHitCollection dum ("coll");
@@ -89,7 +89,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr> genPartVect
   GenericMuonSimHitCollection trans1 ("coll");
   for (int i=0; i < 10; i++) {
     auto pGenParticle = genPartVector.at(i);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number());
+    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     trans1.Emplace (123, 10.5, 11.5,
                     Amg::Vector3D (12.5, 13.5, 14.5),
                     Amg::Vector3D (15.5, 16.5, 17.5),

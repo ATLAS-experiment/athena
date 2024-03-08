@@ -507,7 +507,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             }
             const HepMcParticleLink::PositionFlag idxFlag =
                 (phit.eventId() == 0) ? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
-            const HepMcParticleLink particleLink(phit->trackNumber(), phit.eventId(), idxFlag);
+            const HepMcParticleLink particleLink(phit->trackNumber(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
             // Read the information about the Micro Megas hit
             ATH_MSG_DEBUG("> hitID  " << hitID << " Hit bunch time  " << bunchTime << " tot " << globalHitTime << " tof/G4 time "
                                       << hit.globalTime() << " globalHitPosition " << globalHitPosition << "hit: r "

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -286,7 +286,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
       ATH_MSG_ERROR("TruthParticle is not wrapping the GenParticle : " 
 		    << hepMcPart << " !!");
     }
-    HepMcParticleLink mcLink( bc, genEventIndex, HepMcParticleLink::IS_POSITION, sg ); // FIXME assuming that we are using the hard-scatter McEventCollection - would need to pass this info as an argument to the convert function.
+    HepMcParticleLink mcLink( bc, genEventIndex, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE, sg ); // FIXME barcode-based
     bcToMcPart[ mcLink.compress() ] = mcPart;
 
   }//> end loop over particles

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,7 +47,7 @@ RPCSimHit::RPCSimHit(int id,
     : m_RPCid(id),
       m_globalTime(time),
       m_localPosition(position),
-      m_partLink(trackNumber),
+      m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
       m_localPostStepPosition(0.,0.,0.), // post-step position
       m_energyDeposit(-1.),              //Geant4 de/dx
       m_stepLength(-1.),                 //Geant4 step Length
@@ -65,7 +65,7 @@ RPCSimHit::RPCSimHit(int id,
 		     const int particleEncoding, const double kineticEnergy)
     : m_RPCid(id), m_globalTime(time)
     , m_localPosition(prePosition)
-    , m_partLink(trackNumber)
+    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_localPostStepPosition(postPosition)
     , m_energyDeposit(static_cast<float>(energyDeposit))
     , m_stepLength(static_cast<float>(stepLength))

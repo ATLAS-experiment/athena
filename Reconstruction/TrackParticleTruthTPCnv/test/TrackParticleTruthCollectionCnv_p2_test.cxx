@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -70,7 +70,8 @@ void test1(std::vector<HepMC::GenParticlePtr> genPartVector)
   TrackParticleTruthCollection trans1 (DataLink<Rec::TrackParticleContainer>("tpc"));
   for (int i=0; i<10; i++) {
     auto pGenParticle = genPartVector.at(i);
-    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number());
+    HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number(),
+                                     HepMcParticleLink::IS_EVENTNUM,HepMcParticleLink::IS_BARCODE);
     Rec::TrackParticleTruthKey key (ElementLink<Rec::TrackParticleContainer> ("tpc", i));
     TrackParticleTruth val (trkLink, (float)i/10);
     trans1[key] = val;

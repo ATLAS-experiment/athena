@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file GeneratorObjects/HepMcParticleLink.icc
@@ -21,7 +21,7 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode()
 
 /**
  * @brief Constructor.
- * @param barcode Barcode of target particle.
+ * @param uid Unique ID of target particle.
  * @param eventIndex Identifies the target GenEvent in a McEventCollection,
  *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
  *        or the position in the container
@@ -31,10 +31,11 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode()
  */
 inline
 HepMcParticleLink::ExtendedBarCode::ExtendedBarCode
-  (barcode_type barcode,
+  (barcode_type uid,
    index_type eventIndex,
-   PositionFlag isIndexEventPosition /*=IS_EVENTNUM*/)
-    : m_BC(barcode)
+   PositionFlag isIndexEventPosition /*=IS_EVENTNUM*/,
+   UniqueIDFlag /*isUniqueIDBarcode = IS_ID*/)
+    : m_BC(uid)
 {
   setIndex (eventIndex, isIndexEventPosition);
 }
@@ -292,7 +293,7 @@ HepMcParticleLink::HepMcParticleLink (const EventContext& ctx)
 
 /**
  * @brief Constructor.
- * @param barCode Barcode of the target particle.  0 means a null link.
+ * @param uid Unique ID of the target particle.  0 means a null link.
  * @param eventIndex Identifies the target GenEvent in a McEventCollection,
  *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
  *        or the position in the container
@@ -302,19 +303,20 @@ HepMcParticleLink::HepMcParticleLink (const EventContext& ctx)
  * @param sg Optional specification of a specific store to reference.
  */
 inline
-HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
+HepMcParticleLink::HepMcParticleLink (barcode_type uid,
                                       uint32_t eventIndex /*= 0*/,
                                       PositionFlag positionFlag /*= IS_EVENTNUM*/,
+                                      UniqueIDFlag uniqueIDFlag /*= IS_ID*/,
                                       IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
   : m_store (sg),
-    m_extBarcode (barCode, eventIndex, positionFlag)
+    m_extBarcode (uid, eventIndex, positionFlag, uniqueIDFlag)
 {
 }
 
 
 /**
  * @brief Constructor.
- * @param barCode Barcode of the target particle.  0 means a null link.
+ * @param uid Unique ID of the target particle.  0 means a null link.
  * @param eventIndex Identifies the target GenEvent in a McEventCollection,
  *        as either the event number if @c isIndexEventPosition is IS_EVENTNUM,
  *        or the position in the container
@@ -324,11 +326,12 @@ HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
  * @param ctx Context of the store to reference.
  */
 inline
-HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
+HepMcParticleLink::HepMcParticleLink (barcode_type uid,
                                       uint32_t eventIndex,
                                       PositionFlag positionFlag,
+                                      UniqueIDFlag uniqueIDFlag,
                                       const EventContext& ctx)
-  : HepMcParticleLink (barCode, eventIndex, positionFlag,
+  : HepMcParticleLink (uid, eventIndex, positionFlag, uniqueIDFlag,
                        Atlas::getExtendedEventContext(ctx).proxy())
 {
 }

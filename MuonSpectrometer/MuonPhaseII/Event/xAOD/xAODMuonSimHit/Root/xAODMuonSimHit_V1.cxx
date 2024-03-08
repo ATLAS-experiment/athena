@@ -69,7 +69,7 @@ const HepMcParticleLink& MuonSimHit_v1::genParticleLink() const {
 
       HepMcParticleLink::ExtendedBarCode barcode {acc_mcBarcode(*this),
                                                   eventIndex,
-                                                  flag};
+                                                  flag, HepMcParticleLink::IS_BARCODE}; // FIXME barcode-based
       link->setExtendedBarCode(std::move(barcode));
       return *m_hepMCLink.set(std::move(link));
    }

@@ -209,7 +209,7 @@ StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscS
         continue;
       }
       const HepMcParticleLink::PositionFlag idxFlag = (phit.eventId()==0) ? HepMcParticleLink::IS_POSITION: HepMcParticleLink::IS_EVENTNUM;
-      const HepMcParticleLink trackLink(phit->trackNumber(), phit.eventId(), idxFlag);
+      const HepMcParticleLink trackLink(phit->trackNumber(), phit.eventId(), idxFlag, HepMcParticleLink::IS_BARCODE); // FIXME
       const auto cscd = CscMcData(energy, ypos, zpos);
       for (; vecBeg != vecEnd; ++vecBeg) {
         myDeposits[(*vecBeg)].emplace_back(trackLink,cscd);

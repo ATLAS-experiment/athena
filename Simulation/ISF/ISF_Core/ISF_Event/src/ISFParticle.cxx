@@ -278,10 +278,10 @@ void ISF::ISFParticle::setBarcodeAndUpdateHepMcParticleLink( Barcode::ParticleBa
   //creating/changing the ISFParticle's HepMcParticleLink
   HepMcParticleLink* newHMPL = nullptr;
   if (m_partLink) {
-    newHMPL = new HepMcParticleLink(bc, m_partLink->eventIndex());
+    newHMPL = new HepMcParticleLink(bc, m_partLink->eventIndex(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
     delete m_partLink;
   } else {
-    newHMPL = new HepMcParticleLink(bc);
+    newHMPL = new HepMcParticleLink(bc, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
   }
   m_partLink = newHMPL;
 }

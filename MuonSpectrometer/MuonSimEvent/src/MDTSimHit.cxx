@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSimEvent/MDTSimHit.h"
@@ -47,7 +47,7 @@ MDTSimHit::MDTSimHit(HitID id,
     : m_MDTid(id), m_globalTime(time)
     , m_driftRadius(radius)
     , m_localPosition(position)
-    , m_partLink(trackNumber)
+    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
 {
  m_stepLength       = -9999999.; //total lenght of particle
  m_energyDeposit    = -1.;   //Geant4 deposited energy
@@ -67,7 +67,7 @@ MDTSimHit::MDTSimHit(HitID id,
     : m_MDTid(id), m_globalTime(time)
     , m_driftRadius(radius)
     , m_localPosition(position)
-    , m_partLink(trackNumber)
+    , m_partLink(trackNumber, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE) // FIXME barcode-based
     , m_stepLength(static_cast<float>(stepLength))
     , m_energyDeposit(static_cast<float>(energyDeposit))
     , m_particleEncoding(particleEncoding)

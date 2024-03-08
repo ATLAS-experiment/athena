@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTransportModel.h"
@@ -189,7 +189,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
       // Create postTransportISP if required.
       const auto pBarcode = HepMC::barcode(gParticle);
       auto tBinding = std::make_unique<ISF::TruthBinding>(gParticle);
-      auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, gEvent->event_number());
+      auto hmpl = std::make_unique<HepMcParticleLink>(pBarcode, gEvent->event_number(), HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
       const Amg::Vector3D pos(postTransportPosition.x(), postTransportPosition.y(), postTransportPosition.z());
       const Amg::Vector3D mom(postTransportMomentum.x(), postTransportMomentum.y(), postTransportMomentum.z());
       postTransportISP = std::make_unique<ISF::ISFParticle>(pos,

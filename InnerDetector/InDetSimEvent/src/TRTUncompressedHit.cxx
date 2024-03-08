@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/TRTUncompressedHit.h"
@@ -16,7 +16,7 @@ TRTUncompressedHit::TRTUncompressedHit(int hit,
                                        float postX, float postY, float postZ,
                                        float time):
   m_hitID(hit),
-  m_partLink(track),
+  m_partLink(track,0,HepMcParticleLink::IS_POSITION,HepMcParticleLink::IS_BARCODE), // FIXME barcode-based
   m_particleEncoding(particle),
   m_kineticEnergy(kinEnergy),
   m_energyDeposit(eneDeposit),

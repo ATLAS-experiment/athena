@@ -48,5 +48,5 @@ int TrackHelper::GetStatus() const
 HepMcParticleLink TrackHelper::GetParticleLink()
 {
   int barcode = this->GetBarcode();
-  return HepMcParticleLink(barcode);
+  return HepMcParticleLink(barcode, 0, HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based syntax
 }

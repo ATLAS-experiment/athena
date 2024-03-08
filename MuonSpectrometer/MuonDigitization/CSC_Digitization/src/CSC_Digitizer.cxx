@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Ketevi A. Assamagan
@@ -14,7 +14,6 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
-#include "GeneratorObjects/HepMcParticleLink.h"
 #include "MuonReadoutGeometry/CscReadoutElement.h"
 #include "StoreGate/StoreGateSvc.h"
 

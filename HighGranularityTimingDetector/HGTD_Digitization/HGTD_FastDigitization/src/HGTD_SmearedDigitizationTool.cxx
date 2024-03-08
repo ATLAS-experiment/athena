@@ -360,7 +360,7 @@ StatusCode HGTD_SmearedDigitizationTool::fillMultiTruthCollection(PRD_MultiTruth
 
   HepMcParticleLink::PositionFlag is_event_index_is_position = (hit.eventId() == 0)? HepMcParticleLink::IS_POSITION : HepMcParticleLink::IS_EVENTNUM;
   HepMcParticleLink trk_link(hit->trackNumber(), hit.eventId(),
-                             is_event_index_is_position, ctx);
+                             is_event_index_is_position, HepMcParticleLink::IS_BARCODE, ctx); // FIXME
 
   ATH_MSG_DEBUG("Truth map filling with cluster "
                 << *cluster << " and link = " << trk_link);

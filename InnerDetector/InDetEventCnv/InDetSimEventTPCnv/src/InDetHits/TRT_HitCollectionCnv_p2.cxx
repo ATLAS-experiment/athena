@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/TRTUncompressedHit.h"
@@ -158,8 +158,8 @@ void TRT_HitCollectionCnv_p2::persToTrans(const TRT_HitCollection_p2* persCont, 
 
         HepGeom::Point3D<double> endThis(persCont->m_endX[j], persCont->m_endY[j], persCont->m_endZ[j]);
 
-        HepMcParticleLink partLink(persCont->m_barcode[idxBC]);
-        partLink.setExtendedBarCode(HepMcParticleLink::ExtendedBarCode(persCont->m_barcode[idxBC], 0, HepMcParticleLink::IS_POSITION));;
+        HepMcParticleLink partLink(persCont->m_barcode[idxBC], 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE); // FIXME barcode-based
+        partLink.setExtendedBarCode(HepMcParticleLink::ExtendedBarCode(persCont->m_barcode[idxBC], 0, HepMcParticleLink::IS_POSITION, HepMcParticleLink::IS_BARCODE)); // FIXME barcode-based
         transCont->Emplace( persCont->m_hitId[hitCount], partLink, persCont->m_id[idxId], persCont->m_kinEne[hitCount],
                             eneLoss, endLast.x(), endLast.y(), endLast.z(), endThis.x(), endThis.y(), endThis.z(),
                             persCont->m_meanTime[hitCount] );

@@ -25,7 +25,7 @@ void HepMcParticleLinkCnv_p2::persToTrans( const HepMcParticleLink_p2* persObj,
   transObj->setExtendedBarCode
     ( HepMcParticleLink::ExtendedBarCode( persObj->m_barcode,
                                           persObj->m_mcEvtIndex,
-                                          flag) );
+                                          flag, HepMcParticleLink::IS_BARCODE) ); // FIXME barcode-based
 }
 
 void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventTPCnv/test/CscSimDataCnv_p2_test.cxx
@@ -77,16 +77,20 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
   std::cout << "test1\n";
   auto particle = genPartVector.at(0);
   // Create HepMcParticleLink outside of leak check.
-  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number());
+  HepMcParticleLink dummyHMPL(HepMC::barcode(particle),particle->parent_event()->event_number(),
+                              HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
   assert(dummyHMPL.cptr()==particle);
   Athena_test::Leakcheck check;
 
   std::vector<CscSimData::Deposit> deps;
-  HepMcParticleLink trkLink1(HepMC::barcode(genPartVector.at(0)),genPartVector.at(0)->parent_event()->event_number());
+  HepMcParticleLink trkLink1(HepMC::barcode(genPartVector.at(0)),genPartVector.at(0)->parent_event()->event_number(),
+                             HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
   deps.emplace_back (trkLink1, CscMcData ( 2.5,  3.5,  4.5));
-  HepMcParticleLink trkLink2(HepMC::barcode(genPartVector.at(1)),genPartVector.at(1)->parent_event()->event_number());
+  HepMcParticleLink trkLink2(HepMC::barcode(genPartVector.at(1)),genPartVector.at(1)->parent_event()->event_number(),
+                             HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
   deps.emplace_back (trkLink2, CscMcData (12.5, 13.5, 14.5));
-  HepMcParticleLink trkLink3(HepMC::barcode(genPartVector.at(2)),genPartVector.at(2)->parent_event()->event_number());
+  HepMcParticleLink trkLink3(HepMC::barcode(genPartVector.at(2)),genPartVector.at(2)->parent_event()->event_number(),
+                             HepMcParticleLink::IS_EVENTNUM, HepMcParticleLink::IS_BARCODE);
   deps.emplace_back (trkLink3, CscMcData (22.5, 23.5, 24.5));
   deps[0].second.setCharge ( 5.5);
   deps[1].second.setCharge (15.5);
