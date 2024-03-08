@@ -43,6 +43,8 @@ namespace ActsTrk {
 
       /// Hash of the SurfaceCache which is the same as the one of the TransformCache.
       IdentifierHash hash() const;
+      /// Returns the associated transform cache
+      const TransformCache* transformCache() const;
     private:
         const TransformCache* m_transformCache{nullptr};
         ActsTrk::DetectorType m_type{ActsTrk::DetectorType::UnDefined};

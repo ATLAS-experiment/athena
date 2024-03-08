@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsGeoUtils_TransformCache_H
 #define ActsGeoUtils_TransformCache_H
 
 #include <ActsGeoUtils/Defs.h>
+#include <ActsGeometryInterfaces/IDetectorElement.h>
 #include <CxxUtils/CachedUniquePtr.h>
 #include <Identifier/IdentifierHash.h>
 
@@ -27,7 +28,8 @@ namespace ActsTrk {
       /** @brief: Standard constructor taking the hash of the sensor element and 
        *          and the TransformMaker expressed usually as a lambda function
       **/
-      TransformCache(const IdentifierHash& hash, TransformMaker maker);
+      TransformCache(const IdentifierHash& hash, TransformMaker maker,
+                     const IDetectorElement* parentEle = nullptr);
 
       /** @brief Returns the matching transformation from the alignment store. 
        *         If a nullptr is given, then it's equivalent to the case that the transformation
@@ -41,10 +43,13 @@ namespace ActsTrk {
       IdentifierHash hash() const;
       /** @brief Returns the transform maker function of this transformation cache*/
       const TransformMaker& transformMaker() const;
+      /** @brief Returns the parent IDetectorElement owning the cache*/
+      const IDetectorElement* parent() const;
     private:
       IdentifierHash m_hash{0};
       TransformMaker m_transform{};
       mutable CxxUtils::CachedUniquePtr<Amg::Transform3D> m_nomCache ATLAS_THREAD_SAFE{};
+      const IDetectorElement* m_parent{nullptr};
   };
 
 inline bool operator<(const std::unique_ptr<TransformCache>& a,

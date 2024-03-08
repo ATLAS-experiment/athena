@@ -19,6 +19,7 @@ namespace ActsTrk{
       m_transformCache{transformCache},
       m_type{type} {}  
 
+  const TransformCache* SurfaceCache::transformCache() const { return m_transformCache; }
   const Acts::Transform3& SurfaceCache::transform(const Acts::GeometryContext& anygctx) const  {
     const ActsGeometryContext* gctx = anygctx.get<const ActsGeometryContext*>();    
     // unpack the alignment store from the context
