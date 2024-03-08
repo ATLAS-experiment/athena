@@ -53,7 +53,7 @@ private:
       "internal", // internal to CTP (randoms)
       "TOPO", "R2TOPO", // topo (data not used in HLTSeeding)
       "TE", "XE", "XS", "jTE", "jXE", "gTE", "gXE", // energy (data not used in HLTSeeding)
-      "ALFA", "BCM", "BCMCMB", "BPTX", "CALREQ", "LUCID", "MBTS", "MBTSSI", "NIM", "ZDC", "NSWMon" // direct signals from detectors to CTP (no TOB readout)
+      "ALFA", "BCM", "BCMCMB", "BPTX", "CALREQ", "LUCID", "MBTS", "MBTSSI", "NIM", "ZDC", "NSWMon", "ZBTopo" // direct signals from detectors to CTP (no TOB readout)
     },
     "L1 threshold types which are not subject to the consistency check "
     "(because either there are no corresponding TOBs or HLT doesn't use them)"};
