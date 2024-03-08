@@ -229,7 +229,9 @@ if __name__=='__main__':
             flags.Input.Files = defaultTestFiles.RAW_RUN2
 
     runNumber = flags.Input.RunNumbers[0]
-    flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00' if not flags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
+    if not flags.Input.isMC:
+        from AthenaConfiguration.TestDefaults import defaultGeometryTags
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.autoconfigure(flags)
 
     if not flags.Output.HISTFileName:
         flags.Output.HISTFileName = 'tilemon_{}.root'.format(runNumber)
