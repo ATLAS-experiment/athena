@@ -9,7 +9,10 @@ def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
                                 OutputCombinedTracks="",
                                 **kwargs):
     result = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     prefix = 'Sig_' if doTrackOverlay else ''
 
     kwargs.setdefault("TracksLocation", InputCombinedTracks)
@@ -30,7 +33,10 @@ def ITkTrackCollectionMergerAlgCfg(flags, name="ITkTrackCollectionMerger",
                                    OutputCombinedTracks="CombinedITkTracks",
                                    **kwargs):
     result = ComponentAccumulator()
-    doTrackOverlay = getattr(flags.TrackOverlay, "ActiveConfig.doTrackOverlay", None) or flags.Overlay.doTrackOverlay
+    if hasattr(flags.TrackOverlay, "ActiveConfig"):
+       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
+    else:
+       doTrackOverlay = flags.Overlay.doTrackOverlay
     prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
 
     kwargs.setdefault("TracksLocation", InputCombinedTracks)
