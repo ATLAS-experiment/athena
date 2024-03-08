@@ -446,17 +446,16 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
 
   ATH_MSG_INFO("Retrieving HLT chain's ID and Group from HLT menu.");
 
-  m_hltChainIDGroup.resize(m_triggers.size());
-  for (size_t i = 0; i < m_triggers.size(); i++)
-    m_hltChainIDGroup.at(i).resize(3);
-
   if(!m_configSvc.empty() && m_configSvc.isValid()) {
     const TrigConf::HLTMenu& hltmenu = m_configSvc->hltMenu( Gaudi::Hive::currentContext() );
     
     TrigConf::HLTMenu::const_iterator chain_itr = hltmenu.begin();
     TrigConf::HLTMenu::const_iterator chain_end = hltmenu.end();
-    size_t c = 0;
 
+    m_hltChainIDGroup.resize(hltmenu.size());
+    for (size_t i = 0; i < hltmenu.size(); i++) m_hltChainIDGroup.at(i).resize(3);
+
+    size_t c = 0;
     for( ; chain_itr != chain_end; ++chain_itr ) {
       std::string chainName = ( *chain_itr ).name() ;
       unsigned int chainID = ( *chain_itr ).counter();
