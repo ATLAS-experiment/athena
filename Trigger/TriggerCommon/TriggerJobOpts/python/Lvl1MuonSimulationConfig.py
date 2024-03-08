@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -54,7 +54,7 @@ def MuonBytestream2RdoConfig(flags):
                                                 CscCacheKey = (MuonCacheNames.CscCache if flags.Detector.GeometryCSC else ""))
     acc.addEventAlgo(cacheCreator)
     # for RPC
-    RPCRodDecoder = CompFactory.Muon.RpcROD_Decoder(name = "RpcROD_Decoder" + postFix)
+    RPCRodDecoder = CompFactory.Muon.RpcROD_Decoder(name = "RpcROD_Decoder" + postFix, NOBXS=flags.Trigger.L1MuonSim.RPCNBX)
     MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderToolMT(name = "RPC_RawDataProviderToolMT" + postFix,
                                                                              RpcContainerCacheKey = MuonCacheNames.RpcCache,
                                                                              WriteOutRpcSectorLogic = False,
@@ -195,6 +195,10 @@ def MuonRdoToMuonDigitToolCfg(flags, name="MuonRdoToMuonDigitTool", **kwargs ):
     kwargs.setdefault("mmRdoDecoderTool", result.popToolsAndMerge(MMRdoDecoderCfg(flags))
                          if flags.Detector.GeometryMM else "" )
     kwargs.setdefault("mdtRdoDecoderTool", result.popToolsAndMerge(MdtRdoDecoderCfg(flags)))
+    #Set N BCs and central BC consistently with RPC readout settings
+    rpcrdo_decode = CompFactory.Muon.RpcRDO_Decoder("RpcRDO_Decoder", BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
+    kwargs.setdefault("rpcRdoDecoderTool", rpcrdo_decode)
+    
     the_tool = CompFactory.MuonRdoToMuonDigitTool (name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
@@ -309,7 +313,9 @@ def RPCTriggerConfig(flags):
                                 RPCbytestream     = False,
                                 RPCbytestreamFile = "",
                                 RPCDigitContainer = "RPC_DIGITS_L1",
-                                useRun3Config = True )
+                                useRun3Config = True,
+                                NOBXS=flags.Trigger.L1MuonSim.RPCNBX,
+                                BCZERO=flags.Trigger.L1MuonSim.RPCNBCZ)
     acc.addEventAlgo(rpcAlg)
     from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
     acc.merge( RPCCablingConfigCfg(flags) ) # trigger roads

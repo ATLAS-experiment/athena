@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -70,7 +70,7 @@ SLpatterns::operator<<(PADpatterns* patterns)
 }
 
 SectorLogic*
-SLpatterns::give_SectorL(const RpcCablingCondData* readCdo)
+SLpatterns::give_SectorL(const RpcCablingCondData* readCdo, int NOBXS, int BCZERO)
 {
   if(!m_SectorL) 
   {
@@ -83,14 +83,14 @@ SLpatterns::give_SectorL(const RpcCablingCondData* readCdo)
     bool oldSimulation=false;
     // M. Corradi 3/3/2010: check if using old cabling 
     if (pad != m_pad_patterns.end()) {        
-      oldSimulation=(*pad)->give_pad(readCdo)->isOldSimulation();
+      oldSimulation=(*pad)->give_pad(readCdo, NOBXS, BCZERO)->isOldSimulation();
     }
 
-    m_SectorL = std::make_unique<SectorLogic>(0,0,m_debug,subsystem,logic_sector,oldSimulation);
+    m_SectorL = std::make_unique<SectorLogic>(0,0,m_debug,subsystem,logic_sector,oldSimulation, NOBXS, BCZERO);
 
     while(pad != m_pad_patterns.end())
     {
-      Pad* Pad_board = (*pad)->give_pad(readCdo);
+      Pad* Pad_board = (*pad)->give_pad(readCdo, NOBXS, BCZERO);
       for (int bunch=0;bunch<NOBXS;++bunch)
       {
         m_SectorL->load( (*pad)->pad_id(), 

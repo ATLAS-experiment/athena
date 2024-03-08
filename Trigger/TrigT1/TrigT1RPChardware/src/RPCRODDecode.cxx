@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/RPCRODDecode.h"
@@ -67,7 +67,7 @@ void RPCRODDecode::enablePrintOut() { m_enablePrintOut = true; }  // RPCRODDecod
 //----------------------------------------------------------------------------//
 void RPCRODDecode::disablePrintOut() { m_enablePrintOut = false; }  // dRPCRODDecode::disablePrintOut
 //----------------------------------------------------------------------------//
-int RPCRODDecode::pushWord(const RODword inword, ubit16 j) {
+int RPCRODDecode::pushWord(const RODword inword, ubit16 j, uint NOBXS) {
     //
     // select the less significant 16 bits (j=0) or the
     // highest significant 16 bits (j=1) of the 32 bits word inword
@@ -80,10 +80,10 @@ int RPCRODDecode::pushWord(const RODword inword, ubit16 j) {
     mask1[1] = 0xffff0000;
     shift[0] = 0;
     shift[1] = 16;
-    return pushWord((inword & mask1[j]) >> shift[j]);
+    return pushWord((inword & mask1[j]) >> shift[j], NOBXS);
 }
 //----------------------------------------------------------------------------//
-int RPCRODDecode::pushWord(const ubit16 inword) {
+int RPCRODDecode::pushWord(const ubit16 inword, uint NOBXS) {
     //
     // analyze the current inword ReadOutDriver (ROD) data word:
     // 1st) identify the type of word and
@@ -504,7 +504,7 @@ int RPCRODDecode::pushWord(const ubit16 inword) {
         // CM Header: reset MatrixReadOut and load the word
         //
         m_CMFlag++;
-        CMRO.reset();
+        CMRO.reset(NOBXS);
         CMRO.writeRecord(inword, false);
         thereIsACM = false;
 

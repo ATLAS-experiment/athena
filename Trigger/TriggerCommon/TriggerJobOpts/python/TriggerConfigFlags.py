@@ -95,6 +95,14 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1MuonSim.CondDBOffline', 'OFLCOND-MC16-SDR-RUN2-04',
                   help='offline CondDB tag for RPC/TGC coincidence window in rerunLVL1 on data')
 
+    flags.addFlag('Trigger.L1MuonSim.RPCNBX', 8,
+                  help='Number of bunch crossings in RPC readout')
+
+    flags.addFlag('Trigger.L1MuonSim.RPCNBCZ', 3,
+                  help='Nominal BC for RPC readout')
+
+
+
     # Detector flags
     flags.addFlag('Trigger.doID', True,
                   help='enable Inner Detector')

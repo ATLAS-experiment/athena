@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStreamCnvTest/RpcDigitToRpcRDO.h"
@@ -52,6 +52,13 @@ StatusCode RpcDigitToRpcRDO::initialize() {
     for (const std::string& statName : m_exclStat) {
         m_exclStatNames.insert(m_idHelperSvc->rpcIdHelper().stationNameIndex(statName));
     }
+    if(m_nobxs>8){
+      //The RPC simulation uses many arrays that assume maximum 8 BCs are readout
+      //See TrigT1/TrigT1RPChardware/Matrix.h for example
+      ATH_MSG_ERROR("Readout of more than 8 BCs is not supported by the simulation");
+      return StatusCode::FAILURE;
+    }
+
     return StatusCode::SUCCESS;
 }
 
@@ -98,7 +105,7 @@ StatusCode RpcDigitToRpcRDO::execute(const EventContext& ctx) const {
     RPCbytestream bytestream(patterns, (std::string)m_bytestream_file, msg(), (unsigned long int)m_cma_ro_debug,
                              (unsigned long int)m_pad_ro_debug, (unsigned long int)m_rx_ro_debug, (unsigned long int)m_sl_ro_debug,
                              (unsigned long int)m_cma_rostruct_debug, (unsigned long int)m_pad_rostruct_debug,
-                             (unsigned long int)m_rx_rostruct_debug, (unsigned long int)m_sl_rostruct_debug);
+                             (unsigned long int)m_rx_rostruct_debug, (unsigned long int)m_sl_rostruct_debug, m_nobxs, m_bczero);
 
     // ********************** create the RPC RDO's  *****************************
 

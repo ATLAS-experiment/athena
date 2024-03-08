@@ -30,6 +30,12 @@ StatusCode Muon::RpcROD_Decoder::initialize() {
     //==LBTAG initialize vector and variables for format failure check
     for (int i = 0; i < 13; i++) m_RPCcheckfail[i] = 0;
     m_printerror = 0;
+    if(m_nobxs>8){
+      //The RPC simulation uses many arrays that assume maximum 8 BCs are readout
+      //See TrigT1/TrigT1RPChardware/Matrix.h for example
+      ATH_MSG_ERROR("Readout of more than 8 BCs is not supported by the simulation");
+      return StatusCode::FAILURE;
+    }
 
     return StatusCode::SUCCESS;
 }

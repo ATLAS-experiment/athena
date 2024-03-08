@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAMRPCRDODECODER_H
@@ -33,7 +33,9 @@ namespace Muon {
                                                         double& time, const RpcCablingCondData* rpcCab) const override;
 
     private:
-        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+      ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+      Gaudi::Property<int> m_bczero { this, "BCZERO", 3, "Nominal BC for RPC readout"};
+
     };
 
 }  // namespace Muon
