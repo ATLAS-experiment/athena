@@ -37,6 +37,7 @@ InDetPerfPlot_TrackParameters::initializePlots() {
   book(m_reco_chi2Overndof, "reco_chi2Overndof");
   book(m_reco_author,  "reco_author");
   book(m_reco_time,    "reco_time");
+  book(m_reco_hasValidTime_eff_vs_eta, "reco_hasValidTime_eff_vs_eta");
 
   book(m_truth_d0,     "truth_d0");
   book(m_truth_z0,     "truth_z0");
@@ -139,6 +140,10 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TrackParticle& particle, float w
     if (particle.hasValidTime()) {
       fillHisto(m_reco_time, particle.time(), weight);
     }
+  }
+
+  if( accValidTime.isAvailable(particle) ) {
+    fillHisto(m_reco_hasValidTime_eff_vs_eta, eta, particle.hasValidTime(), weight);
   }
 
 }

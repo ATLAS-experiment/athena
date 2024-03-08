@@ -60,6 +60,7 @@
        <hist1D name="truth_eta" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_pt" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_lowpt" plotopts="" tests="KS" type="TH1F"/>
+       <graph name="reco_hasValidTime_eff_vs_eta" plotopts="" tests="KS" type="TEfficiency"/>
       </TDirectory>
       <TDirectory name="HitsOnTracks">
        <hist1D name="nInnerMostPixelHits" plotopts="" tests="KS" type="TH1F"/>

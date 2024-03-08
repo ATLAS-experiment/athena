@@ -403,6 +403,11 @@ end of hit residuals & cluster width plots
   <y title="Number of Entries"/>
 </h>
 
+<h id="reco_hasValidTime_eff_vs_eta" type="TEfficiency" title="hasValidTime efficiency vs eta">
+  <x title="#eta" n="100" lo="-&ETA;" hi="&ETA;"/>
+  <y title="efficiency"/>
+</h>
+
 <!--
     =======================================================
     end of HGTD timing plots
