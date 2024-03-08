@@ -17934,6 +17934,78 @@ HLT_j65a_j45a_2j35a_SHARED_2j35_0eta290_020jvt_bgn270_j0_DJMASS1000j50_pf_ftf_pr
     0: 10
     1: 62
     2: 1
+? HLT_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo80XX1c20gntau80_L1jJ85p0ETA21_3jJ40p0ETA25
+: eventCount: 11
+  stepCounts:
+    0: 16
+    1: 12
+    2: 11
+    3: 11
+  stepFeatures:
+    0: 80
+    1: 60
+    2: 245
+    3: 23
+? HLT_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo82XX1c20gntau80_L1jJ85p0ETA21_3jJ40p0ETA25
+: eventCount: 11
+  stepCounts:
+    0: 16
+    1: 12
+    2: 11
+    3: 11
+  stepFeatures:
+    0: 80
+    1: 60
+    2: 245
+    3: 23
+? HLT_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo82XX1c20gntau85_L1jJ85p0ETA21_3jJ40p0ETA25
+: eventCount: 11
+  stepCounts:
+    0: 16
+    1: 12
+    2: 11
+    3: 11
+  stepFeatures:
+    0: 80
+    1: 60
+    2: 245
+    3: 23
+? HLT_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau85_L1jJ85p0ETA21_3jJ40p0ETA25
+: eventCount: 11
+  stepCounts:
+    0: 16
+    1: 12
+    2: 11
+    3: 11
+  stepFeatures:
+    0: 80
+    1: 60
+    2: 245
+    3: 23
+? HLT_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L1jJ85p0ETA21_3jJ40p0ETA25
+: eventCount: 11
+  stepCounts:
+    0: 16
+    1: 12
+    2: 11
+    3: 11
+  stepFeatures:
+    0: 80
+    1: 60
+    2: 245
+    3: 23
+? HLT_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L1jJ85p0ETA21_3jJ40p0ETA25
+: eventCount: 13
+  stepCounts:
+    0: 16
+    1: 16
+    2: 14
+    3: 13
+  stepFeatures:
+    0: 80
+    1: 80
+    2: 298
+    3: 25
 HLT_j70_0eta290_020jvt_bdl1d60_3j70_pf_ftf_preselj50b85XX3j50_L14J20:
   eventCount: 1
   stepCounts:
