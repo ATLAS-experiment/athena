@@ -70,8 +70,9 @@ void Had3ProngPlots::fill(const xAOD::TauJet& tau, float weight) {
   test = tau.detail(xAOD::TauJetParameters::massTrkSys, avariable);
   if(test) m_tauMtrks->Fill(avariable/1000., weight);
 
-  test = tau.detail(xAOD::TauJetParameters::ipSigLeadTrk, avariable);
-  if(test) m_tauIpSig->Fill(avariable, weight);
+  if(tau.nTracks()>0 && tau.track(0)->isAvailable<float>("z0sinthetaSigTJVA")) {
+      m_tauIpSig->Fill(tau.track(0)->d0SigTJVA(), weight);
+  }
 
   test = tau.detail(xAOD::TauJetParameters::innerTrkAvgDist, avariable);
   if(test) m_innerTrkAvgDist->Fill(avariable, weight);
