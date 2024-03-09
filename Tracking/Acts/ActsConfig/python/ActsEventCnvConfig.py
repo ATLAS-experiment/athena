@@ -92,7 +92,7 @@ def RunConversion():
         cfg.merge(TrackCollectionReadCfg(flags, collection))
 
     # Needed to read tracks
-    from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+    from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
     cfg.merge(TrkEventCnvSuperToolCfg(flags))
 
     # Muon geometry not yet in ActsTrackingGeometrySvcCfg

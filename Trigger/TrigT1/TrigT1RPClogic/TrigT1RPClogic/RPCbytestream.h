@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -39,12 +39,12 @@ class RPCbytestream : public RPCtrigDataObject
     CMA_Readout m_cma_readout;
     PAD_Readout m_pad_readout;
 
-    void build_pad_readout(MsgStream& log);
+    void build_pad_readout(MsgStream& log, uint NOBXS);
     void dump_rpc_bytestream(void);
 
     public:
     RPCbytestream(CMAdata&,std::string,MsgStream&,
-                  debu,debu,debu,debu,debu,debu,debu,debu);
+                  debu,debu,debu,debu,debu,debu,debu,debu, uint, uint);
     RPCbytestream(const RPCbytestream&);
     ~RPCbytestream();
 

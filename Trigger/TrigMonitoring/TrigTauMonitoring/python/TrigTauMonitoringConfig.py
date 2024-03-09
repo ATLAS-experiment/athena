@@ -627,6 +627,7 @@ class TrigTauMonAlgBuilder:
     if 'eTAU' in trigger:
         mon_group.defineHistogram('L1eFexRoIRCore', title='L1 eTAU RoI rCore Isolation; rCore Isolation; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
         mon_group.defineHistogram('L1eFexRoIRHad' , title='L1 eTAU RoI rHad Isolation; rHad Isolation; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
+        mon_group.defineHistogram('L1eFexRoIBDTScore' , title='L1 eTAU RoI BDT score; BDT Score; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
 
     elif 'cTAU' in trigger:
         mon_group.defineHistogram('L1eFexRoIRCore', title='L1 eTAU RoI rCore Isolation; eTAU rCore Isolation; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
@@ -635,6 +636,7 @@ class TrigTauMonAlgBuilder:
         mon_group.defineHistogram('L1jFexRoIIso', title='L1 jTAU RoI Isolation; E_{T}^{jTAU Iso} [GeV]; RoIs', xbins=25, xmin=0, xmax=50, opt='kAlwaysCreate')
         mon_group.defineHistogram('L1cTauMatchedRoIIso', title='L1 cTAU Isolation score; E_{T}^{jTAU Iso}/E_{T}^{eTAU}; RoIs', xbins=50, xmin=0, xmax=5, opt='kAlwaysCreate')
         mon_group.defineHistogram('L1RoIcTauMatchedEtRatio', title='Et ratio between matched eTAU and jTAU RoIs; E_{T}^{jTAU}/E_{T}^{eTAU}; RoIs', xbins=40, xmin=0, xmax=4, opt='kAlwaysCreate')
+        mon_group.defineHistogram('L1eFexRoIBDTScore' , title='L1 eTAU RoI BDT score; BDT Score; RoIs', xbins=250, xmin=0, xmax=1, opt='kAlwaysCreate')
 
     elif 'jTAU' in trigger:
         mon_group.defineHistogram('L1jFexRoIIso', title='L1 jTAU RoI Isolation; jTAU Isolation [GeV]; N RoI', xbins=25, xmin=0, xmax=50, opt='kAlwaysCreate')

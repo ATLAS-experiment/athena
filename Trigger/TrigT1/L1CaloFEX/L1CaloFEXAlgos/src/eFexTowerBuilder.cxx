@@ -100,10 +100,11 @@ StatusCode eFexTowerBuilder::fillTowers(const EventContext& ctx) const {
         int val =  std::round(digi->energy()/(12.5*std::cosh(digi->eta()))); // 12.5 is b.c. energy is in units of 12.5MeV per count
         // note: a val of -99999 is what is produced if efex was sent an invalid code of 1022
         bool isMasked = m_applyMasking ? ((digi)->provenance()&0x80) : false;
-        bool isInvalid = m_applyMasking ? ((digi)->provenance()&0x40) : false;
-        if(isInvalid && val!=-99999) {
-            ATH_MSG_ERROR("Unexpected energy value " << val <<" for invalid channel");
-        }
+        //bool isInvalid = m_applyMasking ? ((digi)->provenance()&0x40) : false;
+        // Removing invalid check until can verify expected behaviour with LATOME experts
+        // if(isInvalid && val!=-99999) {
+        //     ATH_MSG_ERROR("Unexpected energy value " << val <<" for invalid channel");
+        // }
 
         auto& tower = towers[itr->second.first];
         if (itr->second.second.second<11) {

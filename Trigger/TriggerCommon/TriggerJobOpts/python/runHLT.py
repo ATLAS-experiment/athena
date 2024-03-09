@@ -91,7 +91,7 @@ def runHLTCfg(flags):
    # Track overlay needs this to ensure that the collections are copied correctly
    # (due to the hardcoding of the name in the converters)
    if flags.Overlay.doTrackOverlay:
-       from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
+       from TrkEventCnvTools.TrkEventCnvToolsConfig import TrkEventCnvSuperToolCfg
        cfg.merge(TrkEventCnvSuperToolCfg(flags))
 
    if flags.Common.isOnline:

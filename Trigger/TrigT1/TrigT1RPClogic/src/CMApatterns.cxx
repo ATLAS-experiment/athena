@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <math.h>
@@ -717,7 +717,7 @@ void CMApatterns::Print(std::ostream& stream,bool detail) const
 }
 
 void
-CMApatterns::create_hardware(TrigType type)
+CMApatterns::create_hardware(TrigType type, uint NOBXS, uint BCZERO)
 {   
 
     if(type == None) return;
@@ -738,7 +738,7 @@ CMApatterns::create_hardware(TrigType type)
     // Instanciate the Matrix
 
     auto matrix = std::make_unique<Matrix>(run,event,debug,subsystem,proj,sector,PADadd,lohi,
-                                           address,localAdd);
+                                           address,localAdd, NOBXS, BCZERO);
 
     ////////////////////////////////////////////////////////////////////////
     // ****************** START PROGRAMMING THE MATRIX ****************** //
@@ -925,7 +925,7 @@ CMApatterns::create_hardware(TrigType type)
         load_data(1,0,m_highPt0,matrix.get());
         load_data(1,1,m_highPt1,matrix.get());
 
-        if(!m_low_pt_matrix) create_hardware(Low);
+        if(!m_low_pt_matrix) create_hardware(Low, NOBXS, BCZERO);
 
         // Put the Low Pt patterns into the High Pt Matrix input
         matrix->putPatt(m_low_pt_matrix.get());
@@ -951,18 +951,18 @@ CMApatterns::load_data(int side,int layer,const bitPATTERN& pattern,
 }
 
 Matrix* 
-CMApatterns::give_low_pt_matrix(void)
+CMApatterns::give_low_pt_matrix(uint NOBXS, uint BCZERO)
 {
   
-  if(!m_low_pt_matrix) create_hardware(Low);
+  if(!m_low_pt_matrix) create_hardware(Low, NOBXS, BCZERO);
   return m_low_pt_matrix.get();
 }
 
 
 Matrix* 
-CMApatterns::give_high_pt_matrix(void)
+CMApatterns::give_high_pt_matrix(uint NOBXS, uint BCZERO)
 {
   
-  if(!m_high_pt_matrix) create_hardware(High);
+  if(!m_high_pt_matrix) create_hardware(High, NOBXS, BCZERO);
   return m_high_pt_matrix.get();
 }

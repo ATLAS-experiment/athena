@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1RPChardware_Matrix_H
@@ -11,10 +11,12 @@
 
 #include "MuonCablingTools/BaseObject.h"
 #include "TrigT1RPChardware/Lvl1Def.h"
-#include "TrigT1RPChardware/NOBXS.h"
 
 class Matrix : public BaseObject {
 public:
+
+  ///Note array lengths using hardcoded values rather than to depend on NOBXS as they were
+  ///in the past (assuming NOBXS is at most 8). Original NOBXS dependence in comments
     //****************************************************************************//
     //                                                                            //
     //          Coincidence Matrix data for ReadOut                               //
@@ -24,20 +26,24 @@ public:
     //                                                                            //
     // 1) raw data for readout; for more details see also below in input[][]...   //
     //                                                                            //
-    CMAword rodat[2][2][8 * NOBXS][2];  // input signals to CMA; for readout  //
+    CMAword rodat[2][2][64][2];  // input signals to CMA; for readout             //
+    //                              (rodat[2][2][8 * NOBXS][2];)                  //
     //                                                                            //
     // 2) trigger results output; for more details see below                      //
-    CMAword k_readout[8 * NOBXS];  // k-pattern for readout              //
+    CMAword k_readout[64];  // k-pattern for readout                              //
+   //                              //k_readout[8 * NOBXS];                        //
     //                                                                            //
     // 3) highest triggered threshold                                             //
-    ubit16 highestthRO[8 * NOBXS];  // highest triggered threshold (for ReadOut)//
+    ubit16 highestthRO[64];  // highest triggered threshold (for ReadOut)        //
+                                   //highestthRO[8 * NOBXS];                     //
     //                                                                            //
     // 4) trigger in overlap regions                                              //
-    ubit16 overlapRO[8 * NOBXS];  // overlap flag (for ReadOut)           //
+    ubit16 overlapRO[64];  // overlap flag (for ReadOut)                          //
+                                  //overlapRO[8 * NOBXS];                         //
     //                                                                            //
     //****************************************************************************//
     //
-    Matrix(int run, int event, CMAword debug, int subsys, int proj, int sect, int padadd, int lowhig, int add[2], int locadd);
+  Matrix(int run, int event, CMAword debug, int subsys, int proj, int sect, int padadd, int lowhig, int add[2], int locadd, int NOBXS, int BCZERO);
     ~Matrix();
     void deleteRPCdata();
     void reset();
@@ -118,6 +124,9 @@ public:
 private:
     int m_run;
     int m_event;
+
+  int m_Nbunch;
+  int m_nclock;
     //
     ////////////////////////////////////////////////////////////////////////////////
     //
@@ -199,19 +208,30 @@ private:
                                          ////////////////////////////////////////////////////////////////////////////////
                                          //
                                          // CMAword rodat   [2][2][8*NOBXS][2];
-    CMAword m_input[2][2][8 * NOBXS][2]  // input signals to CMA
+    CMAword m_input[2][2][64][2]  // input signals to CMA
         ,
-        m_prepr[3][2][2][8 * NOBXS][2]  // prepro pattern in CMA
+        m_prepr[3][2][2][64][2]  // prepro pattern in CMA
         ,
-        m_mjori[3][2][2][8 * NOBXS][2]  // majority pattern in CMA
+        m_mjori[3][2][2][64][2]  // majority pattern in CMA
         ,
-        m_trigg[3][9 * NOBXS]  // trigger pattern in CMA
+        m_trigg[3][72]  // trigger pattern in CMA
         ;                      // to high-pt CM
+
+      ////
+      // CMAword m_input[2][2][8 * NOBXS][2]  // input signals to CMA
+      //   ,
+      //   m_prepr[3][2][2][8 * NOBXS][2]  // prepro pattern in CMA
+      //   ,
+      //   m_mjori[3][2][2][8 * NOBXS][2]  // majority pattern in CMA
+      //   ,
+      //   m_trigg[3][9 * NOBXS]  // trigger pattern in CMA
+      //   ;                      // to high-pt CM
+
     //
-    ubit16 m_trigger[3][NOBXS];                // triggered thresholds 0=no_trigger; 1=trigger
-    CMAword m_triggerOverlap[NOBXS][2];        // trigger occured in an overlapping region:
+    ubit16 m_trigger[3][8];                // triggered thresholds 0=no_trigger; 1=trigger (m_trigger[3][NOBXS];)
+    CMAword m_triggerOverlap[8][2];        // trigger occured in an overlapping region: (m_triggerOverlap[NOBXS][2];)
                                                // 0=legt; 1=right;
-    CMAword m_triggerOverlapRO[8 * NOBXS][2];  // trigger occured in an overlapping
+    CMAword m_triggerOverlapRO[64][2];  // trigger occured in an overlapping (m_triggerOverlapRO[8 * NOBXS][2];)
                                                // region: 0=legt; 1=right;
     //
     ////////////////////////////////////////////////////////////////////////////////
@@ -219,14 +239,14 @@ private:
     // CMA output                    //
     // ==========                    //
     //                               //
-    CMAword m_k_pattern[8 * NOBXS];  // k-pattern for trigger
+    CMAword m_k_pattern[8 * 64];  // k-pattern for trigger (m_k_pattern[8 * NOBXS];)
     // CMAword k_readout[8*NOBXS]   ; // k-pattern for readout
-    ubit16 m_highestth[NOBXS];  // highest triggered threshold:
+    ubit16 m_highestth[8];  // highest triggered threshold: (m_highestth[NOBXS];)
     //                               //                       0=no trigger at all;
     //                               //                       1="0" threshold;
     //			         //                       2="1" threshold;
     //                               //                       3="2" threshold
-    ubit16 m_overlap[NOBXS];  // overlap flag:
+    ubit16 m_overlap[8];  // overlap flag: (ubit16 m_overlap[NOBXS];)
     //                               //          0 = no trigger in overlap regions
     //                               //          1 = trigger in overlap low channels
     //                               //          2 = trigger in overlap hig channels

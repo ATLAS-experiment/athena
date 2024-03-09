@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -52,7 +52,7 @@ class PADpatterns : public RPCtrigDataObject
     const CMAdata::PatternsList cma_patterns(void) const 
                                       {return m_cma_patterns;}
 
-    Pad* give_pad(const RpcCablingCondData* readCdo);
+  Pad* give_pad(const RpcCablingCondData* readCdo, int NOBXS, int BCZERO);
 
     void Print (std::ostream&,bool) const;
 };

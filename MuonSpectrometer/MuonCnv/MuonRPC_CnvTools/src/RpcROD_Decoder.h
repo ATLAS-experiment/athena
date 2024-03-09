@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAM_RPCROD_DECODER_H
@@ -90,6 +90,8 @@ namespace Muon {
         //====LBTAG==== Added 02112008 for buffer format check
         StatusCode checkdataformat(std::vector<uint16_t>*, int, int) const;
         void printcheckformat() const;
+        Gaudi::Property<int> m_nobxs { this, "NOBXS", 8, "Number of bunch crossings in readout"};
+
 
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -699,7 +701,7 @@ namespace Muon {
                 ATH_MSG_VERBOSE(" this is a RX Footer ");
             } else if (isSLHeader || isSLFragment || isSLSubHeader || isSLFooter) {
                 // push only the lowest 16 bits
-                int foundSL = myRPC.pushWord(currentWord, 0);
+	      int foundSL = myRPC.pushWord(currentWord, 0, m_nobxs);
 
                 if (isSLHeader) {
                     SLBodyWords = 0;
@@ -929,7 +931,7 @@ namespace Muon {
                 }
 
                 int foundCM = 0;
-                foundCM = myRPC.pushWord(currentWord, 0);
+                foundCM = myRPC.pushWord(currentWord, 0, m_nobxs);
 
                 if (foundCM == 1) {
                     if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << myRPC.CMFragment() << endmsg;
@@ -996,7 +998,7 @@ namespace Muon {
 
                     }  // end of the matrix decoding
 
-                    (myRPC.CMFragment())->reset();
+                    (myRPC.CMFragment())->reset(m_nobxs);
 
                 }  // end of the pad decoding
             }
@@ -1163,7 +1165,7 @@ namespace Muon {
                 isSLFooter ? isSLFragment = false : isSLFragment = true;
 
                 // push only the lowest 16 bits
-                int foundSL = myRPC.pushWord(currentWord, 0);
+                int foundSL = myRPC.pushWord(currentWord, 0, m_nobxs);
 
                 // Check the Sector Logic Fragment
                 if (foundSL) {
@@ -1348,7 +1350,7 @@ namespace Muon {
 #endif
 
                 int foundCM = 0;
-                foundCM = myRPC.pushWord(currentWord, 0);
+                foundCM = myRPC.pushWord(currentWord, 0, m_nobxs);
 
                 if (foundCM == 1) {
 #ifndef NVERBOSE
@@ -1412,7 +1414,7 @@ namespace Muon {
 
                     }  // end of the matrix decoding
 
-                    (myRPC.CMFragment())->reset();
+                    (myRPC.CMFragment())->reset(m_nobxs);
 
                 }  // end of the pad decoding
             }

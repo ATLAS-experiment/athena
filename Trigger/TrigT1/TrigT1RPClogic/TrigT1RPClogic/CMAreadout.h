@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,7 +31,7 @@ class CMAreadout : public RPCtrigDataObject
     std::unique_ptr<MatrixReadOut> m_low_pt_matrix_readout, m_high_pt_matrix_readout;
 
     public:
-    CMAreadout(CMApatterns*);
+  CMAreadout(CMApatterns*, uint NOBXS, uint BCZERO);
     CMAreadout(const CMAreadout&);
 
     CMAreadout operator=(const CMAreadout&);
@@ -46,7 +46,7 @@ class CMAreadout : public RPCtrigDataObject
     const CMAidentity& id(void)  const {return m_cma_identity;}
     const Matrix* low_pt_matrix(void)  const {return m_low_pt_matrix;}
     const Matrix* high_pt_matrix(void) const {return m_high_pt_matrix;}
-    std::array<MatrixReadOut*, 2> give_matrix_readout(MsgStream& log);
+    std::array<MatrixReadOut*, 2> give_matrix_readout(MsgStream& log, uint NOBXS);
 };
 
 #endif
