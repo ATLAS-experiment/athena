@@ -1,0 +1,4 @@
+ <lcgdict>
+   <class name="BDTVertexWeightCalculator" />
+   <class name="DecorateVertexScoreAlg" />
+ </lcgdict>

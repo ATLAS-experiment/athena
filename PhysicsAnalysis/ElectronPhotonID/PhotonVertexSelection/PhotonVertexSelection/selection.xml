@@ -5,7 +5,8 @@
 
   <class name="CP::IPhotonPointingTool" />
   <class name="CP::PhotonPointingTool" />
-  
+  <class name="DecoratePhotonPointingAlg" />
+
   <function pattern="xAOD::PVHelpers::*" />
   
   <class name="std::pair<const xAOD::Vertex*, float>" />
