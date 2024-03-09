@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PhotonVertexSelection_PhotonVertexSelectionDict_H
@@ -10,6 +10,9 @@
 
 #include "PhotonVertexSelection/IPhotonPointingTool.h"
 #include "PhotonVertexSelection/PhotonPointingTool.h"
+#include "PhotonVertexSelection/DecoratePhotonPointingAlg.h"
+// #include "PhotonVertexSelection/BuildVertexPointingAlg.h"
+
 
 #include "PhotonVertexSelection/PhotonVertexHelpers.h"
 
