@@ -78,11 +78,7 @@ StatusCode TauCommonCalcVars::execute(xAOD::TauJet& pTau) const {
     pTau.setDetail( xAOD::TauJetParameters::massTrkSys, static_cast<float>( sumOfTrackVector.M() ) );
   }
 
-  if (!tauTracks.empty() && pTau.nTracks()>1) {
-    // BUG?
-    // this is equivalent to: if (pTau.nTracks()>1)
-    // shouldn't it be: if (tauTracks.size()> 1 && pTau.nTracks()>0) ?
-    // currently, 1-prong taus are skipped
+  if (tauTracks.size()> 1 && pTau.nTracks()>0) {
 
     double ptSum = 0.;
     double sumWeightedDR = 0.;
