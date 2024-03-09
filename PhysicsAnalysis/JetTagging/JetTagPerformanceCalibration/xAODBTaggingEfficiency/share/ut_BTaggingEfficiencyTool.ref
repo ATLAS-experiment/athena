@@ -1,15 +1,3 @@
- CDEV Constructor : info /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 AntiKt4EMPFlowJets
-CalibrationDataEigenVariations: Removing 298 eigenvector variations leading to sub-tolerance effects, retaining 2 variations
- The total variance is 299.94 and the reduction captured 100% of this.
- CDEV Constructor : info /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 AntiKt4EMPFlowJets
-CalibrationDataEigenVariations: Removing 298 eigenvector variations leading to sub-tolerance effects, retaining 2 variations
- The total variance is 299.94 and the reduction captured 100% of this.
- CDEV Constructor : info /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 AntiKt4EMPFlowJets
-CalibrationDataEigenVariations: Removing 298 eigenvector variations leading to sub-tolerance effects, retaining 2 variations
- The total variance is 299.94 and the reduction captured 100% of this.
- CDEV Constructor : info /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 AntiKt4EMPFlowJets
-CalibrationDataEigenVariations: Removing 298 eigenvector variations leading to sub-tolerance effects, retaining 2 variations
- The total variance is 314.46 and the reduction captured 100% of this.
 Package.BtaggingEffici...INFO    Initialization of tool ToolSvc.BTagEffTest finished.
 ToolSvc.BTagEffTest      WARNING setMapIndex DSID 410470not found in config file
 Package.BtaggingEffici...INFO    -----------------------------------------------------
