@@ -92,8 +92,7 @@ void  RNTCollection::delayedFileOpen( const std::string& method )
 std::unique_ptr< RNTupleReader > RNTCollection::getCollectionRNTuple()
 {
    if( m_file ) {
-      std::string rntprefix { "RNT:" };  // MN: TODO: standarize RNTuple naming 
-      auto reader = RNTupleReader::Open( rntprefix + APRDefaults::RNTupleNames::EventTag, m_fileName /* ,opts */ );
+      auto reader = RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName /* ,opts */ );
       if( reader )
          m_poolOut << coral::Debug << "Retrieved Collection RNTuple  \""
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 31, 0 )

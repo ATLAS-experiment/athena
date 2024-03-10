@@ -149,6 +149,9 @@ namespace pool  {
     /// Access to the actual implemented file 
     TFile* file()                             { return m_file;    }
 
+    /// Get TTree by name from the TFile
+    TTree* getTree(const std::string& name);
+
     /// Access to the version string
     const std::string& fmtVersion() const     { return m_version; }
 
@@ -244,7 +247,7 @@ namespace pool  {
     /// Execute Database Transaction action
     virtual DbStatus    transAct(Transaction::Action action);
 
-    RPageSource*        getNTupleReader(std::string ntuple_name);
+    RPageSource*        getNTupleReader(const std::string& ntuple_name);
 
     // translate index value to row# for a given RNTuple  
     uint64_t            indexLookup(RPageSource *ps, uint64_t idx_val);

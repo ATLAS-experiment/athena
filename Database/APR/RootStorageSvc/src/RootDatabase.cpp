@@ -48,6 +48,7 @@ using ROOT::Experimental::Detail::RFieldBase;
 using namespace pool;
 using namespace std;
 
+
 /// Standard Constuctor
 RootDatabase::RootDatabase() :
         m_file(nullptr), 
@@ -400,6 +401,20 @@ long long int RootDatabase::byteCount(int which) const   {
   }
 }
 
+
+/// Safe way to check for a TTree with a given name
+/// Any check (even dynamic_cast) of a pointer returned by file->Get(RNTuple) will SEGV
+TTree* RootDatabase::getTree(const std::string &name) {
+   if( m_file ) {
+      TKey *key = m_file->GetKey(name.c_str());
+      if( key and strcmp(key->GetClassName(), "TTree")==0 ) {
+         return static_cast<TTree*>( m_file->Get(name.c_str()) );
+      }
+   }
+   return nullptr;
+}
+
+
 /// Access options
 DbStatus RootDatabase::getOption(DbOption& opt)  {
   const char* n = opt.name().c_str();
@@ -530,7 +545,7 @@ DbStatus RootDatabase::getOption(DbOption& opt)  {
           if (!m_treeNameWithCache.size())
               return opt._setValue((int)0);
           if ( !m_file ) return Error;
-          TTree* tr = (TTree*)m_file->Get(m_treeNameWithCache.c_str());
+          TTree* tr = getTree( m_treeNameWithCache );
           if (tr) return opt._setValue((int)tr->GetCacheSize());
           return opt._setValue((int)0);
       } else if( !strcasecmp(n+5,"CACHE_LEARN_EVENTS") ) {
@@ -691,7 +706,7 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
              log << DbPrintLvl::Error << "Must set option to tree name to start TREE_MAX_VIRTUAL_SIZE " << DbPrint::endmsg;
              return Error;
           }
-          TTree* tree = (TTree*)m_file->Get(opt.option().c_str());
+          TTree* tree = getTree( opt.option() );
           if (!tree) {
              log << DbPrintLvl::Debug << "Could not find tree " << opt.option() << ", no TREE_MAX_VIRTUAL_SIZE will be set" << DbPrint::endmsg;
              return Success;
@@ -734,7 +749,7 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
                return Error;
            }
            m_treeNameWithCache = opt.option();
-           TTree* tr = (TTree*)m_file->Get(m_treeNameWithCache.c_str());
+           TTree* tr = getTree( m_treeNameWithCache );
            if (!tr) {
                log << DbPrintLvl::Debug << "Could not find tree " << m_treeNameWithCache << ", no TREE_CACHE will be set" << DbPrint::endmsg;
                return Success;
@@ -1086,14 +1101,14 @@ DbStatus RootDatabase::fillBranchContainerTrees()
 
 
 RPageSource*
-RootDatabase::getNTupleReader(std::string ntuple_name)
+RootDatabase::getNTupleReader(const std::string& ntuple_name)
 {
    auto reader_entry = m_ntupleReaderMap.find(ntuple_name);
    if( reader_entry != m_ntupleReaderMap.end() ) {
       return reader_entry->second.get();
    }
    const std::string file_name = m_file->GetName();
-   auto native_reader = RPageSource::Create(string("RNT:")+ntuple_name, file_name);
+   auto native_reader = RPageSource::Create(ntuple_name, file_name);
    RPageSource *ps = native_reader.get();
    ps->Attach();
    if( m_rntReaderMetricsEnabled ) {
@@ -1113,7 +1128,7 @@ RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
          DbPrint log("RootDatabase.getNTupleWriter");
          log << DbPrintLvl::Warning << "Buffered writing doesn't work reliably in MT jobs yet, use at your own risk!" << DbPrint::endmsg;
       }
-      writer = RootAuxDynIO::getNTupleAuxDynWriter(m_file, string("RNT:")+ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
+      writer = RootAuxDynIO::getNTupleAuxDynWriter(m_file, ntuple_name, m_rntBufferedWriteEnabled, m_rntWriterMetricsEnabled);
    }
    if( writer and create ) {
       // treat the create flag as an indication of a new container client and count them
