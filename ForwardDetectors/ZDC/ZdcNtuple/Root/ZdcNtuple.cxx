@@ -182,8 +182,8 @@ StatusCode ZdcNtuple :: initialize ()
       m_outputTree->Branch("zdc_RpdChannelPileupStretchedExpFitMSE",&t_RpdChannelPileupStretchedExpFitMSE,"zdc_RpdChannelPileupStretchedExpFitMSE[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelAmplitude",&t_RpdChannelAmplitude,"zdc_RpdChannelAmplitude[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelAmplitudeCalib",&t_RpdChannelAmplitudeCalib,"zdc_RpdChannelAmplitudeCalib[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelMaxAdc",&t_RpdChannelMaxAdc,"zdc_RpdChannelMaxAdc[2][16]/F");
-      m_outputTree->Branch("zdc_RpdChannelMaxAdcCalib",&t_RpdChannelMaxAdcCalib,"zdc_RpdChannelMaxAdcCalib[2][16]/F");
+      m_outputTree->Branch("zdc_RpdChannelMaxADC",&t_RpdChannelMaxADC,"zdc_RpdChannelMaxADC[2][16]/F");
+      m_outputTree->Branch("zdc_RpdChannelMaxADCCalib",&t_RpdChannelMaxADCCalib,"zdc_RpdChannelMaxADCCalib[2][16]/F");
       m_outputTree->Branch("zdc_RpdChannelMaxSample",&t_RpdChannelMaxSample,"zdc_RpdChannelMaxSample[2][16]/i");
       m_outputTree->Branch("zdc_RpdChannelStatus",&t_RpdChannelStatus,"zdc_RpdChannelStatus[2][16]/i");
       m_outputTree->Branch("zdc_RpdChannelPileupFrac",&t_RpdChannelPileupFrac,"zdc_RpdChannelPileupFrac[2][16]/F");
@@ -618,8 +618,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    t_RpdChannelPileupStretchedExpFitMSE[iside][ch] = 0;
 	    t_RpdChannelAmplitude[iside][ch] = 0;
 	    t_RpdChannelAmplitudeCalib[iside][ch] = 0;
-	    t_RpdChannelMaxAdc[iside][ch] = 0;
-	    t_RpdChannelMaxAdcCalib[iside][ch] = 0;
+	    t_RpdChannelMaxADC[iside][ch] = 0;
+	    t_RpdChannelMaxADCCalib[iside][ch] = 0;
 	    t_RpdChannelMaxSample[iside][ch] = 0;
 	    t_RpdChannelStatus[iside][ch] = 0;
 	    t_RpdChannelPileupFrac[iside][ch] = 0;
@@ -791,8 +791,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    t_RpdChannelPileupStretchedExpFitMSE[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupStretchedExpFitMSE" + auxSuffix);
 	    t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
 	    t_RpdChannelAmplitudeCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitudeCalib" + auxSuffix);
-	    t_RpdChannelMaxAdc[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADC" + auxSuffix);
-	    t_RpdChannelMaxAdcCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADCCalib" + auxSuffix);
+	    t_RpdChannelMaxADC[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADC" + auxSuffix);
+	    t_RpdChannelMaxADCCalib[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelMaxADCCalib" + auxSuffix);
 	    t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
 	    t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
 	    t_RpdChannelPileupFrac[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelPileupFrac" + auxSuffix);
