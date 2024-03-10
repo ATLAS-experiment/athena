@@ -54,11 +54,18 @@ class LArFlatFromFile: public AthAlgorithm
 
   ///Input files
   Gaudi::Property<std::string> m_OFCInput{this, "OFCInput","","Input file name"};
+  Gaudi::Property<std::string> m_SingleInput{this, "SingleInput","","Input file name"};
 
   // SC switch
   Gaudi::Property<bool> m_isSC{this,"SuperCells",false,"Run for SC ?"};
+
+  // OFC properties
   Gaudi::Property<unsigned> m_ngain{this,"NGains",1,"Number of gains to process"};
   Gaudi::Property<unsigned> m_nsample{this,"NSamples",4,"Number of samples to process"};
+
+  // Single properties
+  Gaudi::Property<std::string> m_Folder{this, "Folder","","Folder to create"};
+  Gaudi::Property<std::string> m_BlobName{this, "Blob","","Blob name"};
 
   bool m_forceStop{};
 }; 
