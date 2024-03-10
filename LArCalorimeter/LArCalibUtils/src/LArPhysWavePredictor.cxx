@@ -447,6 +447,7 @@ StatusCode LArPhysWavePredictor::stop()
 
 	  // calibration pulse copy (working around the const iterator to be able to manipulate it...)
 	  LArCaliWave theLArCaliWave = larCaliWave;
+          ++nchannel;
 	  
 	  if ( !cabling->isOnlineConnected(chid)  ) { // unconnected channel : skipping ...          
 	    ATH_MSG_VERBOSE("Unconnected channel 0x" << MSG::hex << chid << MSG::dec 
