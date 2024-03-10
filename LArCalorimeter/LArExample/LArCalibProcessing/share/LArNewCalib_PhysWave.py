@@ -92,7 +92,7 @@ if __name__=='__main__':
    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
    #Define the global output Level:
-   from AthenaCommon.Constants import INFO,VERBOSE
+   from AthenaCommon.Constants import INFO
    flags.Exec.OutputLevel = INFO
    
    flags.lock()
@@ -103,8 +103,6 @@ if __name__=='__main__':
 
    cfg.printConfig(withDetails=True,printDefaults=True)
 
-   cfg.getEventAlgo("LArPhysWavePredictor").OutputLevel = VERBOSE
-   cfg.getPublicTool("LArPhysWaveTool").OutputLevel = VERBOSE
    cfg.getService("MessageSvc").defaultLimit = 9999999  # all messages
 
    #run the application
