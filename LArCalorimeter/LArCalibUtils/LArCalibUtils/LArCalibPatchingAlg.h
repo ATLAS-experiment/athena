@@ -188,7 +188,7 @@ private:
   BooleanProperty m_useCorrChannel{this, "UseCorrChannels", true, "True: Use separate correction COOL channel, False: Correction + data in the same channel"};
   BooleanProperty m_patchAllMissing{this, "PatchAllMissing", false, "True: Patch missing calibration constants regardless of their bad-channel status"};
   BooleanProperty m_unlock{this, "Unlock", false, "Modify input container"};
-  BooleanProperty m_isSC{this, "SuperCell", false, "Working on the SuperCells ?"};
+  BooleanProperty m_isSC{this, "SuperCells", false, "Working on the SuperCells ?"};
 
   const LArOnlineID_Base* m_onlineHelper;
   const CaloCell_Base_ID* m_caloId;

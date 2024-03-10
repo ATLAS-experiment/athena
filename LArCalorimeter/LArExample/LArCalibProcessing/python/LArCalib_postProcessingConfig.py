@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -64,6 +65,9 @@ if __name__=="__main__":
 
     #The global tag we are working with
     flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
+    # geometry
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
     flags.Input.Files=[]
     flags.LArCalib.Input.Files = [ ]
@@ -72,7 +76,7 @@ if __name__=="__main__":
 
     flags.LArCalib.PhysACuseHG=True
     flags.LArCalib.OFC.ShapeCorrection=True
-
+    flags.LArCalib.OFC.UsePhysCalibTDiff = False
 
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=flags.LArCalib.Input.RunNumbers
@@ -84,5 +88,6 @@ if __name__=="__main__":
     cfg.merge(finalOFCShapeCfg(flags))
 
     cfg.getService("PoolSvc").ReadCatalog+=["xmlcatalog_file:%s"%args.poolcat,]
+    cfg.getService("PoolSvc").WriteCatalog="xmlcatalog_file:%s"%args.poolcat
 
     cfg.run(1)

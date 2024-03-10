@@ -52,7 +52,10 @@ if __name__=='__main__':
    gainNumMap={"HIGH":0,"MEDIUM":1,"LOW":2}
    flags.LArCalib.Gain=gainNumMap[args.gain.upper()]
 
-   flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
+   if args.insqlitefile.startswith("/"):
+      flags.LArCalib.Input.Database = args.insqlitefile
+   else:
+      flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
 
    # pileup normalisation
    flags.LArCalib.OFC.Ncoll = 60
@@ -84,11 +87,17 @@ if __name__=='__main__':
 
    flags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputRootFileName
    flags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputPoolFileName
-   flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
+   if args.outsql.startswith("/"):
+      flags.IOVDb.DBConnection="sqlite://;schema=" + args.outsql +";dbname=CONDBR2"
+   else:
+      flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
 
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
    #Define the global output Level:
    from AthenaCommon.Constants import DEBUG
    flags.Exec.OutputLevel = DEBUG

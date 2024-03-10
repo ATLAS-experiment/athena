@@ -53,10 +53,12 @@ if __name__=='__main__':
    gainNumMap={"HIGH":0,"MEDIUM":1,"LOW":2}
    flags.LArCalib.Gain=gainNumMap[args.gain.upper()]
 
-   flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
+   if args.insqlitefile.startswith("/"):
+      flags.LArCalib.Input.Database = args.insqlitefile
+   else:   
+      flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
 
    # others flags settings
-   flags.LArCalib.isSC = args.supercells
    flags.LArCalib.Input.SubDet=args.subdet
 
    #Configure the Bad-Channel database we are reading 
@@ -78,11 +80,17 @@ if __name__=='__main__':
 
    flags.LArCalib.Output.ROOTFile = args.outrdir + "/" + OutputRootFileName
    flags.LArCalib.Output.POOLFile = args.outpdir + "/" + OutputPoolFileName
-   flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
+   if args.outsql.startswith("/"):
+      flags.IOVDb.DBConnection="sqlite://;schema=" + args.outsql +";dbname=CONDBR2"
+   else:   
+      flags.IOVDb.DBConnection="sqlite://;schema="+args.outpdir + "/" + args.outsql +";dbname=CONDBR2"
 
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
    #Define the global output Level:
    from AthenaCommon.Constants import INFO,VERBOSE
    flags.Exec.OutputLevel = INFO
@@ -93,15 +101,18 @@ if __name__=='__main__':
    
    cfg.merge(LArPhysWavePredictionCfg(flags))
 
+   cfg.printConfig(withDetails=True,printDefaults=True)
+
    cfg.getEventAlgo("LArPhysWavePredictor").OutputLevel = VERBOSE
+   cfg.getPublicTool("LArPhysWaveTool").OutputLevel = VERBOSE
    cfg.getService("MessageSvc").defaultLimit = 9999999  # all messages
 
    #run the application
    cfg.run(1) 
 
    #Copying the FCAL phys wave to sqlite here 
-   if "HEC" in args.subdet.upper():
-      copycmd='AtlCoolCopy "COOLOFL_LAR/CONDBR2" "'+flags.IOVDb.DBConnection+'" -f /LAR/ElecCalibOfl/PhysWaves/FCALFromTB -t LARElecCalibOflPhysWavesFCALFromTB-calib-01 -of /LAR/ElecCalibOfl/PhysWaves/RTM  -ot LARElecCalibOflPhysWavesRTM-RUN2-UPD3-00  -a '
+   if  "HEC" in args.subdet.upper():
+      copycmd='AtlCoolCopy "COOLOFL_LAR/CONDBR2" "'+flags.IOVDb.DBConnection+'" -f '+ flags.LArCalib.FCALPhysWave.Folder+' -t LARElecCalibOflPhysWavesFCALFromTB-calib-01 -of /LAR/ElecCalibOfl/PhysWaves/RTM  -ot LARElecCalibOflPhysWavesRTM-RUN2-UPD3-00  -a '
       from subprocess import getstatusoutput
       stat,out=getstatusoutput(copycmd)
  

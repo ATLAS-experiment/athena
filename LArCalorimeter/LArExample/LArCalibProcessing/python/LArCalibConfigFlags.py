@@ -29,6 +29,7 @@ def addLArCalibFlags(flags, isSC=False):
     flags.addFlag("LArCalib.CaliPulseParams.Folder", lambda prevFlags: _prefix(prevFlags)+"CaliPulseParams/RTM")
     flags.addFlag("LArCalib.DetCellParams.Folder", lambda prevFlags: _prefix(prevFlags)+"DetCellParams/RTM")
 
+    flags.addFlag("LArCalib.FCALPhysWave.Folder", "/LAR/ElecCalibOfl/PhysWaves/FCALFromTB")
 
     flags.addFlag("LArCalib.GroupingType",lambda prevFlags: "SuperCells" if prevFlags.LArCalib.isSC else "ExtendedSubDetector")
     flags.addFlag("LArCalib.Output.POOLFile","ouput.pool.root")
