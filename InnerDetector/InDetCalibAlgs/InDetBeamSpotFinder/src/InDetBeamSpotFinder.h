@@ -118,6 +118,7 @@ namespace InDet {
     int m_maxTrackNum{};         //max Tracks in a vertex to be added
     double m_maxChi2Vertex{};    //maxChi2 of vertex
     double m_maxTransverseError{}; // max transverse vertex resolution
+    double m_maxAbsCorrelXY{}; //max absolute XY correlation of a vertex to be added 
     double m_minVtxProb{}; // probability cut on chi2/ndf
     unsigned int m_minVertexNum{};        //min vertex count for solution
 
