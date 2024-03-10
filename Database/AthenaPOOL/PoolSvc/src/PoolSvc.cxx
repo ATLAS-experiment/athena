@@ -516,8 +516,16 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
       std::scoped_lock lock(m_pool_mut);
       collPtr = collFac->create(collDes,  pool::ICollection::READ);
    } else {
+      // Try to open APR EventTags Collection in the input file - first as RootCollection, then as RNTCollection
+      std::scoped_lock lock(m_pool_mut);
+      std::string       tree_error, rntuple_error;
       try {
-         std::scoped_lock lock(m_pool_mut);
+         collPtr = collFac->create(collDes, pool::ICollection::READ, &m_persistencySvcVec[contextId]->session());
+      } catch (std::exception &e) {
+         tree_error = e.what();
+      }
+      if( !collPtr ) try {
+         collDes.setType("RNTCollection");
          collPtr = collFac->create(collDes, pool::ICollection::READ, &m_persistencySvcVec[contextId]->session());
       } catch (std::exception &e) {
          if (insertFile) {
@@ -528,8 +536,11 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
                }
             }
          }
-         throw; // bad file, rethrow
+         rntuple_error = e.what();
       }
+      if( !collPtr ) throw pool::Exception( "Failed to open APR Collection as RootCollection or RNTCollection: "
+                                            + tree_error + " | " + rntuple_error,
+                                            "PoolSvc::createCollection", "PoolSvc" );
    }
    if (insertFile && m_attemptCatalogPatch.value()) {
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);

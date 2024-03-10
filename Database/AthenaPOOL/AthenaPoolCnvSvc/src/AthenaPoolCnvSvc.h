@@ -207,11 +207,11 @@ private: // properties
 
    /// Default Storage Tech for containers (ROOTTREE, ROOTTREEINDEX, ROOTRNTUPLE)
    StringProperty  m_storageTechProp{this,"StorageTechnology", "ROOTTREEINDEX"};
-   /// PoolContainerPrefix, prefix for top level POOL container: default = "POOLContainer"
+   /// PoolContainerPrefix, prefix for top level POOL container
    StringProperty  m_containerPrefixProp{this,"PoolContainerPrefix","CollectionTree"};
    /// TopLevelContainerName, naming hint policy for top level POOL container: default = "<type>"
    StringProperty  m_containerNameHintProp{this,"TopLevelContainerName",""};
-   /// SubLevelBranchName, naming hint policy for POOL branching: default = "" (no branching)
+   /// SubLevelBranchName, naming hint policy for POOL branching: ("" = no branching)
    StringProperty  m_branchNameHintProp{this,"SubLevelBranchName", "<type>/<key>"};
 
    /// Output PoolAttributes, vector with names and values of technology specific attributes for POOL

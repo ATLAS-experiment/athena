@@ -16,6 +16,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "PersistentDataModel/Guid.h"
+#include "POOLCore/APRDefaults.h"
 
 #include "AthenaKernel/IAthenaIPCTool.h"
 #include "AthenaKernel/IAthenaSelectorTool.h"
@@ -184,8 +185,8 @@ private: // properties
    Gaudi::Property<bool> m_processMetadata{this, "ProcessMetadata", true, ""};
    /// CollectionType, type of the collection: default = "ImplicitROOT".
    Gaudi::Property<std::string> m_collectionType{this, "CollectionType", "ImplicitROOT", ""};
-   /// CollectionTree, prefix of the collection TTree: default = "POOLContainer_".
-   Gaudi::Property<std::string> m_collectionTree{this, "CollectionTree", "POOLContainer", ""};
+   /// CollectionTree, prefix of the collection TTree: default = "POOLContainer".
+   Gaudi::Property<std::string> m_collectionTree{this, "CollectionTree", APRDefaults::TTreeNames::DataHeader, ""};
    /// Connection, connection string.
    // TODO: check if really not used anywhere
    Gaudi::Property<std::string> m_connection{this, "Connection", "", ""};
