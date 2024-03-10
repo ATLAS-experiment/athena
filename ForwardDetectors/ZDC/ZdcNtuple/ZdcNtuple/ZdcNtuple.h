@@ -204,8 +204,8 @@ public:
   float t_RpdChannelPileupStretchedExpFitMSE[2][16];
   float t_RpdChannelAmplitude[2][16];
   float t_RpdChannelAmplitudeCalib[2][16];
-  float t_RpdChannelMaxAdc[2][16];
-  float t_RpdChannelMaxAdcCalib[2][16];
+  float t_RpdChannelMaxADC[2][16];
+  float t_RpdChannelMaxADCCalib[2][16];
   unsigned int t_RpdChannelMaxSample[2][16];
   unsigned int t_RpdChannelStatus[2][16];
   float t_RpdChannelPileupFrac[2][16];
