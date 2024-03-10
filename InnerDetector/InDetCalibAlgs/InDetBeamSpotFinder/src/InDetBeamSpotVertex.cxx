@@ -98,9 +98,9 @@ InDetBeamSpotVertex::InDetBeamSpotVertex( const std::string& type,
 
  
   // selections
-  declareProperty("MaxSigmaTr", m_sigTr=100.); 
+  declareProperty("MaxSigmaTr", m_sigTr=20.); 
   declareProperty("MaxVtxErrTr", m_maxVtxErTr=100.); // in mm
-  declareProperty("OutlierChi2Tr", m_outlierChi2Tr=50.);
+  declareProperty("OutlierChi2Tr", m_outlierChi2Tr=20.);
   declareProperty("MaxOutlierLoops",m_maxOutlierLoops = 30);
   declareProperty("OutlierMaxRejection",m_singleIterationMax=30);
   declareProperty("OutlierWidthFail", m_widthFail=5.1e-3); // in mm
@@ -117,7 +117,7 @@ InDetBeamSpotVertex::InDetBeamSpotVertex( const std::string& type,
   declareProperty( "UseLLNorm" , m_useLLNorm = false);
   declareProperty( "FixWidth",   m_fixWidth  = false); 
 
-  declareProperty("TruncatedRMS", m_truncatedRMS = false); 
+  declareProperty("TruncatedRMS", m_truncatedRMS = true); 
   declareProperty("RMSFraction", m_fractionRMS = 0.95); 
   declareProperty("SetInitialRMS", m_setInitialRMS = false);
 
@@ -347,6 +347,7 @@ CLHEP::HepSymMatrix InDetBeamSpotVertex::getCov(double z) const { //x(z),y(z),ti
 
 
 bool InDetBeamSpotVertex::solveLL(bool printOut) {
+  ATH_MSG_DEBUG( "In solveLL" );
 
   TMinuit * minuit = new TMinuit(m_NPARS);
   //setInitialPars( minuit);  

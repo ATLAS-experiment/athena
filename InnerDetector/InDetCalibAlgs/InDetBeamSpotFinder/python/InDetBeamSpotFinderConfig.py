@@ -24,7 +24,7 @@ def InDetBeamSpotVertexCfg(flags, jobConfig={}, name="InDetBeamSpotVertex", **kw
     if 'InitialKFactor'   in jobConfig: kwargs.setdefault("InitParK",jobConfig['InitialKFactor'])
     if 'ConstantKFactor'  in jobConfig: kwargs.setdefault("FixParK",jobConfig['ConstantKFactor'])
     if 'FixWidth'         in jobConfig: kwargs.setdefault("FixWidth",jobConfig['FixWidth'])
-    if 'TruncartedRMS'    in jobConfig: kwargs.setdefault("TruncatedRMS",jobConfig['TruncatedRMS'])
+    if 'TruncatedRMS'     in jobConfig: kwargs.setdefault("TruncatedRMS",jobConfig['TruncatedRMS'])
     if 'SetInitialRMS'    in jobConfig: kwargs.setdefault("SetInitialRMS",jobConfig['SetInitialRMS'])
     if 'MaxSigmaVtx'      in jobConfig: kwargs.setdefault("InitParMaxSigmaX",jobConfig['MaxSigmaVtx'])
     if 'MaxSigmaVtx'      in jobConfig: kwargs.setdefault("InitParMaxSigmaY",jobConfig['MaxSigmaVtx'])
@@ -59,8 +59,14 @@ def InDetBeamSpotFinderCfg(flags, jobConfig={}, name="InDetBeamSpotFinder", **kw
     if 'MaxTracksPerVtx'    in jobConfig: kwargs.setdefault("MaxTracksPerVtx",jobConfig['MaxTracksPerVtx'])
     if 'MaxVtxNum'          in jobConfig: kwargs.setdefault("MaxVtxNum",jobConfig['MaxVtxNum'])
     if 'MaxVtxChi2'         in jobConfig: kwargs.setdefault("MaxVtxChi2",jobConfig['MaxVtxChi2'])
-    if 'MaxTransverseErr'   in jobConfig: kwargs.setdefault("MaxTransverseErr",jobConfig['MaxTransverseErr'])                      
-    if 'VertexTypes'        in jobConfig: kwargs.setdefault("VertexTypes",jobConfig['VertexTypes']) 
+    if 'MaxTransverseErr'   in jobConfig: kwargs.setdefault("MaxTransverseErr",jobConfig['MaxTransverseErr'])
+    if 'MaxAbsCorrelXY'     in jobConfig: kwargs.setdefault("MaxAbsCorrelXY",jobConfig['MaxAbsCorrelXY'])
+    
+    if 'VertexTypes'        in jobConfig:
+        kwargs.setdefault("VertexTypes",jobConfig['VertexTypes'])
+    else:
+        kwargs.setdefault("VertexTypes", ["PriVtx"])
+    
     if 'MinVtxProb'         in jobConfig: kwargs.setdefault("MinVtxProb",jobConfig['MinVtxProb'])
     #Beamspot Sorting options
     if 'LumiRange'          in jobConfig: kwargs.setdefault("LumiRange",jobConfig['LumiRange'])
