@@ -125,7 +125,6 @@ if __name__=='__main__':
    
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
-   flags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
    flags.LArCalib.BadChannelDB = args.outpdir + "/" + args.badsql
    
    #Output of this job:

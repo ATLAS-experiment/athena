@@ -165,12 +165,20 @@ if __name__=='__main__':
    flags.lock()
    
    # create bad chan sqlite file
+   cmdlinerm = (['/bin/rm', '-f', flags.LArCalib.BadChannelDB])
    if not flags.LArCalib.isSC:
       cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-t', flags.IOVDb.GlobalTag, '-c', '-a',  '-hitag'])
    else:   
-      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannels',  '-of', '/LAR/BadChannelsOfl/BadChannelsSC', '-t', 'LARBadChannelsOflBadChannels-RUN2-empty', '-ot', 'LARBadChannelsOflBadChannelsSC-RUN2-UPD3-00', '-c', '-a',  '-hitag', '-ch', '0'])
-      cmdline1 = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/MissingFEBs', '-of', '/LAR/BadChannelsOfl/MissingFEBsSC', '-t', flags.IOVDb.GlobalTag, '-ot', 'LARBadChannelsOflMissingFEBsSC-RUN2-UPD3-01', '-a',  '-hitag'])
+      cmdline = (['AtlCoolCopy', 'COOLOFL_LAR/CONDBR2', 'sqlite://;schema='+flags.LArCalib.BadChannelDB+';dbname=CONDBR2', '-f', '/LAR/BadChannelsOfl/BadChannelsSC',  '-t', 'LARBadChannelsOflBadChannelsSC'+flags.LArCalib.BadChannelTagSC, '-c', '-a',  '-hitag', '-ch', '0'])
 
+   try:
+      cp = subprocess.run(cmdlinerm, check=True, capture_output=True )
+   except Exception as e:
+      print((" ").join(cmdlinerm))
+      log.info('not existing BadChan sqlite file, fine')
+      sys.exit(-1)
+   print((" ").join(cmdlinerm))
+   print(cp.stdout)
    try:
       cp = subprocess.run(cmdline, check=True, capture_output=True )
    except Exception as e:
@@ -178,14 +186,9 @@ if __name__=='__main__':
       print((" ").join(cmdline))
       log.error('Could not create BadChan sqlite file !!!!')
       sys.exit(-1)
+   print((" ").join(cmdline))
+   print(cp.stdout)
  
-   if flags.LArCalib.isSC:
-      try:
-         cp = subprocess.run(cmdline1, check=True, capture_output=True )
-      except Exception as e:
-         log.error('Could not create BadChan sqlite file !!!!')
-         sys.exit(-1)
-   
    cfg=MainServicesCfg(flags)
 
    cfg.merge(LArPedestalAutoCorrCfg(flags))

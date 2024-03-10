@@ -144,7 +144,7 @@ StatusCode LArCaliWaveBuilder::execute()
 
  }
 
- if ( m_event_counter < 1000 || m_event_counter%100==0 ) 
+ if ( m_event_counter < 100 || m_event_counter%100==0 ) 
     ATH_MSG_INFO( "Processing event " << m_event_counter );
  
  if (m_keylist.empty()) {
