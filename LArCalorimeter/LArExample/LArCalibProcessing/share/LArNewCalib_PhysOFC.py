@@ -88,6 +88,9 @@ if __name__=='__main__':
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+
    #Define the global output Level:
    from AthenaCommon.Constants import INFO 
    flags.Exec.OutputLevel = INFO
@@ -101,4 +104,14 @@ if __name__=='__main__':
    cfg.getService("MessageSvc").defaultLimit = 9999999  # all messages
    #run the application
    cfg.run(1) 
+
+   #build tag hierarchy in output sqlite file
+   import subprocess
+   cmdline = (['/afs/cern.ch/user/l/larcalib/LArDBTools/python/BuildTagHierarchy.py',args.outpdir + "/" + args.outsql , flags.IOVDb.GlobalTag])
+   print(cmdline)
+   try:
+      subprocess.run(cmdline, check=True)
+   except Exception as e:
+      print('Could not create tag hierarchy in output sqlite file !!!!')
+      sys.exit(-1)
 

@@ -144,7 +144,7 @@ def LArDelay_OFCCaliCfg(flags):
        theCaliWaveValidationAlg.PatchMissingFEBs=True
        theCaliWaveValidationAlg.UseCorrChannels=False
        theCaliWaveValidationAlg.BadChanKey =  bcKey
-       theCaliWaveValidationAlg.SuperCell =  flags.LArCalib.isSC
+       theCaliWaveValidationAlg.SuperCells =  flags.LArCalib.isSC
 
        if flags.LArCalib.isSC:
           theCaliWaveValidationAlg.CablingKey = "LArOnOffIdMapSC"
@@ -186,6 +186,7 @@ def LArDelay_OFCCaliCfg(flags):
                                                             isSC = flags.LArCalib.isSC,
                                                             BadChanKey = bcKey,
                                                             OffId=True,
+                                                            AddCalib=True,
                                                             SaveJitter=True
                                                         ))
 
@@ -193,7 +194,8 @@ def LArDelay_OFCCaliCfg(flags):
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                       AddFEBTempInfo  = False,
                                                       BadChanKey = bcKey,
-                                                      OffId=True
+                                                      OffId=True,
+                                                      AddCalib=True
                                                   ))
 
         import os
@@ -207,7 +209,8 @@ def LArDelay_OFCCaliCfg(flags):
         result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                    AddFEBTempInfo  = False,
                                                    NtupleFile = "FILE2",
-                                                   BadChanKey = bcKey
+                                                   BadChanKey = bcKey,
+                                                   AddCalib=True
                                                ))
 
         import os
@@ -272,13 +275,16 @@ def LArDelay_OFCCali_PoolDumpCfg(flags):
                                                             AddFEBTempInfo = False,
                                                             SaveDerivedInfo = True,
                                                             ApplyCorrection = True,
-                                                            BadChanKey = bcKey
+                                                            BadChanKey = bcKey,
+                                                            AddCalib=True,
+                                                            SaveJitter=True
                                                         ))
 
         if not rootfile2:
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                       AddFEBTempInfo  = False,
-                                                      BadChanKey = bcKey
+                                                      BadChanKey = bcKey,
+                                                      AddCalib=True
                                                   ))
 
         import os
@@ -292,13 +298,15 @@ def LArDelay_OFCCali_PoolDumpCfg(flags):
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                    AddFEBTempInfo  = False,
                                                    NtupleFile = "FILE1",
-                                                   BadChanKey = bcKey
+                                                   BadChanKey = bcKey,
+                                                   AddCalib=True
                                                ))
         else:
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
                                                    AddFEBTempInfo  = False,
                                                    NtupleFile = "FILE2",
-                                                   BadChanKey = bcKey
+                                                   BadChanKey = bcKey,
+                                                   AddCalib=True
                                                ))
 
            import os

@@ -72,6 +72,7 @@ def LArRTMParamsCfg(flags):
         LArWFParams2Ntuple.DetCellParamsKey="LArDetCellParams_RTM"
         LArWFParams2Ntuple.BadChanKey = bcKey
         LArWFParams2Ntuple.isSC = flags.LArCalib.isSC
+        LArWFParams2Ntuple.AddCalib = True
         result.addEventAlgo(LArWFParams2Ntuple)
    
         if flags.LArCalib.RTM.DumpOmegaScan:

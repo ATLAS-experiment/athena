@@ -89,6 +89,9 @@ if __name__=='__main__':
 
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
+
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
    
    #Define the global output Level:
    from AthenaCommon.Constants import INFO 

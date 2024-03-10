@@ -704,7 +704,6 @@ StatusCode LArWFParamTool::RTM_Taur(const LArWave& gCali, LArWFParams& wf, const
       range.max=gCali.getSize();
     }
 
-    //std::cout << "WL2: min= " << range.min << ", max= " <<  range.max << std::endl;      
     wf.setTaur(taurMinNum ( taurmin, taurmax, m_EPSILON, gCali, wf, range));
     ATH_MSG_VERBOSE( "*** Injection point\t--> m_Taur    = " << wf.taur()) ;
   }
@@ -756,7 +755,6 @@ LArWave LArWFParamTool::cosCorr(const unsigned N, const double dt, const double 
  * residual oscillation, to be used in numerical minimisation.
  * ============================================================== */
 double LArWFParamTool::logChi2InjRespRes (const double taur, const LArWave& gCali, const LArWFParams& wf, const waveRange_t& range) const {
-  //if (m_chID==957367040) std::cout << "WL3: " << std::setprecision(8) << taur << std::endl;
   return m_wHelper.getSumSquareRegion(injRespRes(gCali,wf.omega0(),taur), range.min, range.max);
 }
 
@@ -971,7 +969,6 @@ double LArWFParamTool::fminbr(double a, double b, const double tol, double (LArW
 	   fv=ft;
         }
       }
-      
     }			/* ----- end-of-block ----- */
   }		/* ===== End of loop ===== */   
 }
