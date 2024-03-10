@@ -68,10 +68,10 @@ StatusCode RpdSubtractCentroidTool::initialize()
   ATH_CHECK(m_RPDChannelAmplitudeKey.initialize());
   m_RPDChannelAmplitudeCalibKey = m_zdcModuleContainerName + ".RPDChannelAmplitudeCalib" + m_auxSuffix;
   ATH_CHECK(m_RPDChannelAmplitudeCalibKey.initialize());
-  m_RPDChannelMaxAdcKey = m_zdcModuleContainerName + ".RPDChannelMaxAdc" + m_auxSuffix;
-  ATH_CHECK(m_RPDChannelMaxAdcKey.initialize());
-  m_RPDChannelMaxAdcCalibKey = m_zdcModuleContainerName + ".RPDChannelMaxAdcCalib" + m_auxSuffix;
-  ATH_CHECK(m_RPDChannelMaxAdcCalibKey.initialize());
+  m_RPDChannelMaxADCKey = m_zdcModuleContainerName + ".RPDChannelMaxADC" + m_auxSuffix;
+  ATH_CHECK(m_RPDChannelMaxADCKey.initialize());
+  m_RPDChannelMaxADCCalibKey = m_zdcModuleContainerName + ".RPDChannelMaxADCCalib" + m_auxSuffix;
+  ATH_CHECK(m_RPDChannelMaxADCCalibKey.initialize());
   m_RPDChannelPileupFracKey = m_zdcModuleContainerName + ".RPDChannelPileupFrac" + m_auxSuffix;
   ATH_CHECK(m_RPDChannelPileupFracKey.initialize());
   m_RPDChannelStatusKey = m_zdcModuleContainerName + ".RPDChannelStatus" + m_auxSuffix;
@@ -172,8 +172,8 @@ bool RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleCont
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> zdcModuleStatusHandle(m_ZDCModuleStatusKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelSumAdcHandle(m_RPDChannelAmplitudeKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelSumAdcCalibHandle(m_RPDChannelAmplitudeCalibKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelMaxAdcHandle(m_RPDChannelMaxAdcKey);
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelMaxAdcCalibHandle(m_RPDChannelMaxAdcCalibKey);
+  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelMaxADCHandle(m_RPDChannelMaxADCKey);
+  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelMaxADCCalibHandle(m_RPDChannelMaxADCCalibKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelPileupFracHandle(m_RPDChannelPileupFracKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> rpdChannelStatusHandle(m_RPDChannelStatusKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> rpdSideStatusHandle(m_RPDSideStatusKey);
@@ -222,9 +222,9 @@ bool RpdSubtractCentroidTool::readAOD(xAOD::ZdcModuleContainer const& moduleCont
           }
         } else {
           if (m_useCalibDecorations) {
-            m_rpdChannelData.at(side).at(row).at(col).amp = rpdChannelMaxAdcCalibHandle(*zdcModule);
+            m_rpdChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCCalibHandle(*zdcModule);
           } else {
-            m_rpdChannelData.at(side).at(row).at(col).amp = rpdChannelMaxAdcHandle(*zdcModule);
+            m_rpdChannelData.at(side).at(row).at(col).amp = rpdChannelMaxADCHandle(*zdcModule);
           }
         }
         m_rpdChannelData.at(side).at(row).at(col).pileupFrac = rpdChannelPileupFracHandle(*zdcModule);
