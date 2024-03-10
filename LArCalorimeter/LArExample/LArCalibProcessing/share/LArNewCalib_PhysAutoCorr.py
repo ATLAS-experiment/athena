@@ -99,8 +99,8 @@ if __name__=='__main__':
    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
    #Define the global output Level:
-   from AthenaCommon.Constants import DEBUG
-   flags.Exec.OutputLevel = DEBUG
+   from AthenaCommon.Constants import INFO
+   flags.Exec.OutputLevel = INFO
    
    flags.lock()
    
