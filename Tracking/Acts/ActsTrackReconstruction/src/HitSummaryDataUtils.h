@@ -52,23 +52,23 @@ namespace ActsTrk {
          Total               = 9
       };
  
-      constexpr static unsigned short LAYER_REGION_MASK   = 0x3FF; // bits 0-9
+      constexpr static unsigned short LAYER_REGION_MASK   = 0x1FF; // bits 0-8
       constexpr static unsigned short REGION_BITS = 3;             // bits 0-2
       constexpr static unsigned short REGION_MASK = 0x7;           // 3 bits
-      constexpr static unsigned short LAYER_BITS  = 7;             // bits 3-9
-      constexpr static unsigned short LAYER_MASK  = 0x7F;          // 7 bits
-      constexpr static unsigned short SIGNED_ETA_MOD_BITS  = 5;    // bits 10-14 + 15(sign)
-      constexpr static unsigned short SIGNED_ETA_MOD_MASK = 0x3F;  // 5 + 1(sign) bit
+      constexpr static unsigned short LAYER_BITS  = 6;             // bits 3-8
+      constexpr static unsigned short LAYER_MASK  = 0x3F;          // 6 bits
+      constexpr static unsigned short SIGNED_ETA_MOD_BITS  = 7;    // bits 9-14 + 15(sign)
+      constexpr static unsigned short SIGNED_ETA_MOD_MASK = 0x7F;  // 6 + 1(sign) bit
  
       /** @brief Compute a counter key for the given region, layer and module eta module index
        * @param region the detector region index (0..7).
-       * @param layer the layer index (0..127).
-       * @param the signed eta module index (-31..31).
+       * @param layer the layer index (0..63).
+       * @param the signed eta module index (-63..63).
        */
       constexpr static unsigned short makeKey(unsigned short region, unsigned short layer, int eta_mod) {
          //   3 bits region  :    0-7   : pixelBarrelFlat - unknown
-         //   7 bits layer   :    0-127
-         // 1+5 bits eta_mod : +- 0-31
+         //   6 bits layer   :    0-63
+         // 1+6 bits eta_mod : +- 0-63
          // @TODO endcap side A/C ?
          assert(region < (1<<REGION_BITS) );
          assert(layer  < (1<<LAYER_BITS));
@@ -88,7 +88,7 @@ namespace ActsTrk {
       /** @brief extract the layer index from the given key.
        */
       constexpr static uint8_t layerFromKey(unsigned short key) {
-         return (key>>REGION_BITS) & LAYER_MASK;                // bits 3-9
+         return (key>>REGION_BITS) & LAYER_MASK;                // bits 3-8
       }
  
       // To select, hits, outliers or both.
