@@ -24,8 +24,8 @@ def EfexMonitoringConfig(inputFlags):
     EfexMonAlg.PackageName = baseGroupName
     EfexMonAlg.LowPtCut = 0.0
     EfexMonAlg.HiPtCut = 15000.0
-    EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMRoI_OfflineCopy', 'L1_eEMxRoI']
-    EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauRoI_OfflineCopy', 'L1_eTauxRoI']
+    EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI']
+    EfexMonAlg.eFexTauTobKeyList = ['L1_eTauRoI', 'L1_eTauxRoI']
 
     acc = helper.result()
     result.merge(acc)
@@ -54,9 +54,9 @@ def EfexMonitoringHistConfig(flags, eFexAlg):
     # mainDir = 'L1Calo'
     trigPath = 'Developer/Efex/' # Directory trigger path for output histos
     # Map from the key name to the output directory substructure.
-    keyDirPathMap = {'L1_eEMRoI' : 'TOB/eEM', 'L1_eEMRoI_OfflineCopy' : 'TOBcopy/eEM',
+    keyDirPathMap = {'L1_eEMRoI' : 'TOB/eEM',
                      'L1_eEMxRoI' : 'xTOB/eEM', 'L1_eEMRoISim' : 'TOBSim/eEM', 'L1_eEMxRoISim' : 'xTOBSim/eEM',
-                     'L1_eTauRoI' : 'TOB/eTau', 'L1_eTauRoI_OfflineCopy' : 'TOBcopy/eTau', 
+                     'L1_eTauRoI' : 'TOB/eTau', 
                      'L1_eTauxRoI' : 'xTOB/eTau', 'L1_eTauRoISim' : 'TOBSim/eTau', 
                      'L1_eTauxRoISim' : 'xTOBSim/eTau'} 
     cut_names = ["LowPtCut", "HiPtCut"] # List of cut names, for looping over to separate out histograms into directories
