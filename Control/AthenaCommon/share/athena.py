@@ -1,8 +1,9 @@
 #!/bin/sh
+# Emacs, this is mostly -*-Python-*-
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-# athena.py is born as shell script to preload some optional libraries
+# athena.py is born as shell script to preload some optional libraries.
 #
 """date"
 
@@ -147,7 +148,7 @@ fhistory = os.path.expanduser( '~/.athena.history' )
 
 
 ## interface setup as appropriate
-if opts.run_batch and not opts.debug:
+if not (opts.interactive or opts.debug):
  # in batch there is no need for stdin
    if sys.stdin and os.isatty( sys.stdin.fileno() ):
       os.close( sys.stdin.fileno() )
@@ -171,7 +172,7 @@ else:
    del readline, rlcompleter
 
 ## use of shell escapes in interactive mode
-if not opts.run_batch:
+if opts.interactive:
    import AthenaCommon.ShellEscapes as ShellEscapes
    sys.excepthook = ShellEscapes.ShellEscapes()
    del ShellEscapes
@@ -188,7 +189,7 @@ except Exception:
    aop._help_and_exit()
 
 
-if not (opts.scripts or opts.fromdb) and opts.run_batch:
+if not (opts.scripts or opts.fromdb) and not opts.interactive:
    _msg.error( "batch mode requires at least one script" )
    from AthenaCommon.ExitCodes import INCLUDE_ERROR
    aop._help_and_exit( INCLUDE_ERROR )

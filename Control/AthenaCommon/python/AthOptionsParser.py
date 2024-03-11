@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file AthenaCommon.AthOptionsParser
 # @purpose the central module to parse command line options of athena.py
@@ -178,13 +178,10 @@ def getArgumentParser():
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Run mode')
 
-    g.add_argument('-b', '--batch', action='store_const', dest='run_batch', const=True, default=True,
-                   help=argparse.SUPPRESS)  # only needed for default value
-
     g.add_argument('--CA', action='store_true',
                    help='ComponentAccumulator mode')
 
-    g.add_argument('-i', '--interactive', action='store_const', dest='run_batch', const=False,
+    g.add_argument('-i', '--interactive', action='store_true',
                    help='interactive mode')
 
     g.add_argument('--drop-and-reload', action='store_true', dest='drop_reload',
