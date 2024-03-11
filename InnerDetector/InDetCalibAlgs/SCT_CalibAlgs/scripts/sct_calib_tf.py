@@ -114,7 +114,7 @@ def updateLastRun(RunNumber):
 @sigUsrStackTrace
 def main():
 
-    msg.info("This is %s" % sys.argv[0])
+    msg.info("This is %s", sys.argv[0])
     trf = getTransform()
     trf.parseCmdLineArgs(sys.argv[1:])
     
@@ -124,7 +124,7 @@ def main():
     trf.execute()
     trf.generateReport()
     
-    msg.info("%s stopped at %s, trf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
+    msg.info("%s stopped at %s, trf exit code %d", sys.argv[0], time.asctime(), trf.exitCode)
     sys.exit(trf.exitCode)
 
 def getTransform():
@@ -149,14 +149,14 @@ def addSCTCalibArgs(parser):
                         help = 'Prefix for output files',group='Calibration')
     parser.add_argument('--part', type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True),
                         help = 'List of calibration algorithms to be run',group='Calibration')
-    parser.add_argument('--SCTCalibConfig', type=trfArgClasses.argFactory(trfArgClasses.argList, runarg=True),
-                        help = 'Config file for the SCT Calibration',group='Calibration')
     parser.add_argument('--doRunSelector', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                         help = 'Specifies if runSelector.py is executed',group='Calibration')
     parser.add_argument('--doRunInfo', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
                         help = 'Specifies if runInfo.py is executed',group='Calibration')
     parser.add_argument('--splitHitMap', type=trfArgClasses.argFactory(trfArgClasses.argInt,runarg=True),      
                         help = 'Split task or not',group='Calibration')
+    parser.add_argument('--forceRefRunNumber', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
+                        help = 'Force reference run to current run number when checking information uploaded to COOL for previous runs',group='Calibration')
 
 def addOutputArgs(parser,dict):
     
