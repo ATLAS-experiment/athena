@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigEgammaMonitorAlgorithm.py
@@ -29,7 +29,7 @@ def TrigEgammaMonConfig(inputFlags, emulator=None):
         acc.addPublicTool(emulator.core())
 
     # configure alg and ana tools
-    from TrigEgammaMonitoring.TrigEgammaMonitoringMTConfig import TrigEgammaMonAlgBuilder
+    from TrigEgammaMonitoring.TrigEgammaMonitoringConfig import TrigEgammaMonAlgBuilder
     monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', moniAccess, detailedHistograms=False, emulator=emulator ) # Using 2018 e/g tunings
     # build monitor and book histograms
     monAlgCfg.configure()

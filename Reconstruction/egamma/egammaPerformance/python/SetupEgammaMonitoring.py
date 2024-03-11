@@ -9,7 +9,7 @@
 @brief Example python configuration for the Run III AthenaMonitoring package
 '''
 from AthenaConfiguration.ComponentFactory import CompFactory
-import TrigEgammaMonitoring.TrigEgammaMonitCategoryMT as egammaConf
+import TrigEgammaMonitoring.TrigEgammaMonitCategory as egammaConf
 
 def BookHistogramsPerRegions(thegroupe,theparttype,thename,title,path,xbins,xmin,xmax,thetype="TH1F",thecut="is_pt_gt_4gev"):
     '''

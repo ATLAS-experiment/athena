@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 '''@file TrigEgammaMonitoringConfigRun3.py
 @author D. Maximov (histograms), Joao victor Pinto (core)
@@ -11,7 +11,6 @@ import cppyy
 import functools
  
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.ComponentFactory import CompFactory as CfgMgr
 from AthenaMonitoring.DQConfigFlags import DQDataType
 
 
@@ -166,7 +165,7 @@ class TrigEgammaMonAlgBuilder:
 
   def setDefaultProperties(self):
    
-    from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import mongroupsCfg
+    from TrigEgammaMonitoring.TrigEgammaMonitCategory import mongroupsCfg
     mongroups = mongroupsCfg(self.moniAccess,self.data_type)
     
     if self.pp_mode:
@@ -216,22 +215,22 @@ class TrigEgammaMonAlgBuilder:
     # Following loads the online selectors
   
     # Offline selectors -- taken from latest conf
-    LooseElectronSelector             = CfgMgr.AsgElectronIsEMSelector("T0HLTLooseElectronSelector")
-    MediumElectronSelector            = CfgMgr.AsgElectronIsEMSelector("T0HLTMediumElectronSelector")
-    TightElectronSelector             = CfgMgr.AsgElectronIsEMSelector("T0HLTTightElectronSelector")
-    LooseLHSelector                   = CfgMgr.AsgElectronLikelihoodTool("T0HLTLooseLHSelector")
-    MediumLHSelector                  = CfgMgr.AsgElectronLikelihoodTool("T0HLTMediumLHSelector")
-    TightLHSelector                   = CfgMgr.AsgElectronLikelihoodTool("T0HLTTightLHSelector")
-    VeryLooseLHSelector               = CfgMgr.AsgElectronLikelihoodTool("T0HLTVeryLooseLHSelector")
+    LooseElectronSelector             = CompFactory.AsgElectronIsEMSelector("T0HLTLooseElectronSelector")
+    MediumElectronSelector            = CompFactory.AsgElectronIsEMSelector("T0HLTMediumElectronSelector")
+    TightElectronSelector             = CompFactory.AsgElectronIsEMSelector("T0HLTTightElectronSelector")
+    LooseLHSelector                   = CompFactory.AsgElectronLikelihoodTool("T0HLTLooseLHSelector")
+    MediumLHSelector                  = CompFactory.AsgElectronLikelihoodTool("T0HLTMediumLHSelector")
+    TightLHSelector                   = CompFactory.AsgElectronLikelihoodTool("T0HLTTightLHSelector")
+    VeryLooseLHSelector               = CompFactory.AsgElectronLikelihoodTool("T0HLTVeryLooseLHSelector")
  
     # DNN selectors 
-    LooseDNNElectronSelector          = CfgMgr.AsgElectronSelectorTool("T0HLTLooseElectronDNNSelector")
-    MediumDNNElectronSelector         = CfgMgr.AsgElectronSelectorTool("T0HLTMediumElectronDNNSelector")
-    TightDNNElectronSelector          = CfgMgr.AsgElectronSelectorTool("T0HLTTightElectronDNNSelector")
+    LooseDNNElectronSelector          = CompFactory.AsgElectronSelectorTool("T0HLTLooseElectronDNNSelector")
+    MediumDNNElectronSelector         = CompFactory.AsgElectronSelectorTool("T0HLTMediumElectronDNNSelector")
+    TightDNNElectronSelector          = CompFactory.AsgElectronSelectorTool("T0HLTTightElectronDNNSelector")
 
-    LoosePhotonSelector               = CfgMgr.AsgPhotonIsEMSelector( "T0HLTLoosePhotonSelector" )
-    MediumPhotonSelector              = CfgMgr.AsgPhotonIsEMSelector( "T0HLTMediumPhotonSelector" )
-    TightPhotonSelector               = CfgMgr.AsgPhotonIsEMSelector( "T0HLTTightPhotonSelector" )
+    LoosePhotonSelector               = CompFactory.AsgPhotonIsEMSelector( "T0HLTLoosePhotonSelector" )
+    MediumPhotonSelector              = CompFactory.AsgPhotonIsEMSelector( "T0HLTMediumPhotonSelector" )
+    TightPhotonSelector               = CompFactory.AsgPhotonIsEMSelector( "T0HLTTightPhotonSelector" )
 
     LoosePhotonSelector.ForceConvertedPhotonPID = True
     LoosePhotonSelector.isEMMask = SelectionDefPhoton.PhotonLoose
@@ -1082,7 +1081,7 @@ class TrigEgammaMonAlgBuilder:
   def bookTopoHistograms(self, monAlg, trigger_configs ):
     
     from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F, TProfile
-    from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import topo_config
+    from TrigEgammaMonitoring.TrigEgammaMonitCategory import topo_config
   
 
     for d in trigger_configs:
