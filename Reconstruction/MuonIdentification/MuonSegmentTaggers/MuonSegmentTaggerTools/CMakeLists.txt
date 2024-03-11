@@ -16,6 +16,3 @@ atlas_add_component( MuonSegmentTaggerTools
                      src/components/*.cxx
                      LINK_LIBRARIES GaudiKernel AthenaBaseComps StoreGateLib Identifier EventPrimitives MuonReadoutGeometry MuonIdHelpersLib MuonRIO_OnTrack MuonSegment MuonRecHelperToolsLib MuonSegmentMakerUtils MuonCombinedEvent TrkGeometry TrkSurfaces TrkCompetingRIOsOnTrack TrkEventPrimitives TrkParameters TrkSegment TrkTrack TrkExInterfaces TrkToolInterfaces MuonSegmentTaggerToolsLib MuonSegmentTaggerToolInterfaces )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
