@@ -529,7 +529,6 @@ def MuidCaloEnergyToolCfg(flags, name='MuidCaloEnergyTool', **kwargs):
     kwargs.setdefault("MinMuonPt", 10.0*GeV)
     kwargs.setdefault("MopParametrization", True)
     if flags.Muon.MuonTrigger:
-        # both properties also previously false if DetFlags.haveRIO.Calo_on()
         kwargs.setdefault("EnergyLossMeasurement", False)
         kwargs.setdefault("TrackIsolation", False)
     else:
