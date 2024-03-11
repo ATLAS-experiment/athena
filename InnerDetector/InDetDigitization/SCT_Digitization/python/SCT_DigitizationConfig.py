@@ -42,7 +42,7 @@ def SCT_DigitizationCommonCfg(flags, name="SCT_DigitizationToolCommon", **kwargs
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", SCT_FirstXing())
         kwargs.setdefault("LastXing", SCT_LastXing() )
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     
     SCT_DigitizationTool = CompFactory.SCT_DigitizationTool

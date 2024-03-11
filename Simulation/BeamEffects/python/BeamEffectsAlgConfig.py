@@ -58,7 +58,7 @@ def GenEventVertexPositionerCfg(flags, name="GenEventVertexPositioner", **kwargs
 # LorentzVectorGenerators
 def VertexBeamCondPositionerCfg(flags, name="VertexBeamCondPositioner", **kwargs):
     """Return a conditional (? todo) vertex positioner tool"""
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
 
     acc = ComponentAccumulator()
 

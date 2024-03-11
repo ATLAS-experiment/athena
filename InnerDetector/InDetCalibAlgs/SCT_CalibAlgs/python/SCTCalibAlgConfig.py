@@ -58,7 +58,8 @@ def SCT_CalibModuleListToolCfg(flags, name = 'SCT_CalibModuleListTool', **kwargs
     cond_kwargs.setdefault('FolderDb', '/SCT/Derived/Monitoring')
     cond_kwargs.setdefault('FolderTag', 'SctDerivedMonitoring-RUN2-UPD4-005')
     # In case of reprocessing an older run, the reference run has to be set manually, since it's not the last one uploaded to COOL
-    #cond_kwargs.setdefault('Modifiers', '<forceRunNumber>364160</forceRunNumber>')
+    if flags.SCTCalib.ForceRefRunNumber:
+        cond_kwargs.setdefault('Modifiers', f'<forceRunNumber>{flags.SCTCalib.RunNumber}</forceRunNumber>')
     cond_kwargs.setdefault('dbInstance', 'SCT_OFL')
     kwargs.setdefault('SCT_MonitorConditionsTool',
                       acc.popToolsAndMerge(SCT_MonitorConditionsToolCfg(flags, cond_kwargs = cond_kwargs)))
@@ -94,7 +95,7 @@ def SCTCalibWriteToolCfg(flags, name = 'SCTCalibWriteTool', **kwargs):
 
     # Setup for writing local COOL DB
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    acc.merge(OutputStreamCfg(flags, streamName = 'SCTCalibStream'))
+    acc.merge(OutputStreamCfg(flags, streamName = 'SCTCalibStream', disableEventTag = True))
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     acc.setPrivateTools(CompFactory.SCTCalibWriteTool(name, **kwargs))
@@ -108,7 +109,7 @@ def SCTCalibAlgCfg(flags, SORTime, EORTime, nLB, prefix, name = 'SCTCalibAlg', *
     #--- Run number
     kwargs.setdefault('RunNumber',   flags.SCTCalib.RunNumber)
     kwargs.setdefault('EventNumber', flags.SCTCalib.EventNumber)
-    #--- Run stat/end time read from runInfo.txt
+    #--- Run start/end time read from runInfo.txt
     kwargs.setdefault('RunStartTime', SORTime)
     kwargs.setdefault('RunEndTime',   EORTime)
     kwargs.setdefault('LBMax',        nLB)
@@ -128,7 +129,7 @@ def SCTCalibAlgCfg(flags, SORTime, EORTime, nLB, prefix, name = 'SCTCalibAlg', *
     if flags.SCTCalib.InputType == 'NTUP_TRKVALID':
         kwargs.setdefault('InputTrkVal', flags.Input.Files)
     elif flags.SCTCalib.InputType == 'HIST':
-        kwargs.setdefault('InputHist',   flags.Input.Files)
+        kwargs.setdefault('InputHist',   flags.SCTCalib.InputHist)
 
     #--- Methods to run
     kwargs.setdefault('DoNoisyStrip',     flags.SCTCalib.DoNoisyStrip)      # True  in alg default
@@ -248,14 +249,16 @@ def SCTCalibAlgCfg(flags, SORTime, EORTime, nLB, prefix, name = 'SCTCalibAlg', *
                       acc.popToolsAndMerge(SCT_ConfigurationConditionsToolCfg(flags)))
 
     # Configuring SCT_ReadCalibDataTool
-    from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ReadCalibDataToolCfg
-    kwargs.setdefault('SCT_ReadCalibDataTool',
-                      acc.popToolsAndMerge(SCT_ReadCalibDataToolCfg(flags)))
+    if flags.SCTCalib.UseCalibration:
+        from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ReadCalibDataToolCfg
+        kwargs.setdefault('SCT_ReadCalibDataTool',
+                          acc.popToolsAndMerge(SCT_ReadCalibDataToolCfg(flags)))
 
     # Configuring SCT_MajorityConditionsTool
-    from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_MajorityConditionsCfg
-    kwargs.setdefault('SCT_MajorityConditionsTool',
-                      acc.popToolsAndMerge(SCT_MajorityConditionsCfg(flags)))
+    if flags.SCTCalib.UseMajority:
+        from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_MajorityConditionsCfg
+        kwargs.setdefault('SCT_MajorityConditionsTool',
+                          acc.popToolsAndMerge(SCT_MajorityConditionsCfg(flags)))
 
     # Configuring SCTCablingTool
     from SCT_Cabling.SCT_CablingConfig import SCT_CablingToolCfg
@@ -271,8 +274,9 @@ def SCTCalibAlgCfg(flags, SORTime, EORTime, nLB, prefix, name = 'SCTCalibAlg', *
                       acc.popToolsAndMerge(SCT_CalibLbToolCfg(flags)))
 
     # Configuring SCT_CalibBsErrorTool
-    kwargs.setdefault('SCT_CalibBsErrorTool',
-                      acc.popToolsAndMerge(SCT_CalibBsErrorToolCfg(flags)))
+    if flags.SCTCalib.UseBSError:
+        kwargs.setdefault('SCT_CalibBsErrorTool',
+                          acc.popToolsAndMerge(SCT_CalibBsErrorToolCfg(flags)))
 
     # Configuring SCT_CalibModuleListTool
     kwargs.setdefault('SCT_CalibModuleListTool',

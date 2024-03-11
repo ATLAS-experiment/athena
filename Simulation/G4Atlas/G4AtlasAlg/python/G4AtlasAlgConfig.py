@@ -51,7 +51,7 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
     ## default true
     kwargs.setdefault("KillAbortedEvents", flags.Sim.KillAbortedEvents)
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("AtRndmGenSvc",
                       result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 

@@ -150,7 +150,7 @@ def CosmicGeneratorCfg(flags, name="CosmicGenerator", **kwargs):
     result.addService(CompFactory.PartPropSvc(InputFile="PDGTABLE.MeV"))
 
     ## Set up random seeds FIXME
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault('RndmSvc', result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     from CosmicGenerator.CosmicGeneratorConfig import CavernPropertyCalculator

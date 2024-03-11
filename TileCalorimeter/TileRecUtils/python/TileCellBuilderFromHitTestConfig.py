@@ -410,7 +410,7 @@ def TileRawChannelBuilderFromHitTestCfg(flags):
     from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
     acc.merge( TileEMScaleCondAlgCfg(flags) )
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     acc.merge( AthRNGSvcCfg(flags) )
 
     from TileConditions.TileSamplingFractionConfig import TileSamplingFractionCondAlgCfg

@@ -113,7 +113,7 @@ def PLR_DigitizationBasicToolCfg(flags, name="PLR_DigitizationBasicTool", **kwar
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", PLR_FirstXing(flags))
         kwargs.setdefault("LastXing", PLR_LastXing(flags))
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     acc.setPrivateTools(CompFactory.PixelDigitizationTool(name, **kwargs, ))
