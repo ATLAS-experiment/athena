@@ -179,7 +179,7 @@ PP="$PP"'|nsec setup for SCT/TRT|bunch spacing is|bunchSpacing could not be auto
 
 PP="$PP"'|^GEOPIXELSERVICES|ChronoAuditor.*WARNING'
 PP="$PP"'|^Py:AODSelect_setupOptions WARNING No TruthParticleContainer found|^Py:JetD3PDObject  WARNING JetMomentsFromClusters|^Py:JetMomentCalcConfig WARNING OriginCorrection'
-kPP="$PP"'|^RootClassLoader Info Failed to load dictionary for native class: "short int"'
+PP="$PP"'|^RootClassLoader Info Failed to load dictionary for native class: "short int"'
 
 PP="$PP"'|CscCalibTools/CscCalibTool_jobOptions|^with:|^from AthenaCommon.CfgGetter import getPublicTool|^getPublicTool|This is for OffLine'
 
@@ -253,12 +253,12 @@ if [ -z "$ATLAS_CTEST_TESTSTATUS" ]; then
 else
     # check exit status
     joblog=${test}.log
-    if [ -r ${test}-SKIPPED ]; then
+    if [ -r "${test}-SKIPPED" ]; then
         echo "WARNING: Test skipped because required libraries are not available."
     elif [ "$ATLAS_CTEST_TESTSTATUS" = 0 ]; then
-	reflog=../../share/${test}.ref
-        if [ ! -r $reflog ]; then
-	  reflog=../share/${test}.ref
+        reflog=../../share/${test}.ref
+        if [ ! -r "$reflog" ]; then
+            reflog=../share/${test}.ref
         fi
 
         # If we can't find the reference file, maybe it's located outside
@@ -268,49 +268,46 @@ else
         # We first look for it in DATAPATH.  If we don't find it,
         # we then look under ATLAS_REFERENCE_DATA, which falls back
         # to an afs path if it's not found.
-        if [ \( ! -r $reflog \) -a "$ATLAS_REFERENCE_TAG" != "" ]; then
+        if [ \( ! -r "$reflog" \) ] && [ "$ATLAS_REFERENCE_TAG" != "" ]; then
             # Look for the file in DATAPATH.
             # We have to look for the directory, not the file itself,
             # since get_files is hardcoded not to look more than two
             # levels down.
-            get_files -data -symlink $ATLAS_REFERENCE_TAG > /dev/null
-            reflog=`basename $ATLAS_REFERENCE_TAG`/${test}.ref
-            if [ ! -r $reflog ]; then
-                testdata=$ATLAS_REFERENCE_DATA
-                if [ "$testdata" = "" ]; then
-                    testdata=/afs/cern.ch/atlas/maxidisk/d33/referencefiles
-                fi
-                reflog=$testdata/$ATLAS_REFERENCE_TAG/${test}.ref
+            get_files -data -symlink "$ATLAS_REFERENCE_TAG" > /dev/null
+            reflog=$(basename "$ATLAS_REFERENCE_TAG")/${test}.ref
+            if [ ! -r "$reflog" ]; then
+                # old test data location: /afs/cern.ch/atlas/maxidisk/d33/referencefiles
+                reflog=$ATLAS_REFERENCE_DATA/$ATLAS_REFERENCE_TAG/${test}.ref
             fi
         fi
 
-	if [ -r $reflog ]; then
+        if [ -r "$reflog" ]; then
             jobdiff=${joblog}-todiff.bz2
-            refdiff=`basename ${reflog}`-todiff.bz2
-            sed 's/H1Topo/Topo/g' < $joblog | grep -vE "$PP" | bzip2 -9 > $jobdiff
-            sed 's/H1Topo/Topo/g' < $reflog | grep -vE "$PP" | bzip2 -9 > $refdiff
-            bzdiff -a -u -w $refdiff $jobdiff
-	    diffStatus=$?
-	    if [ $diffStatus != 0 ] ; then
-		echo "post.sh> ERROR: $reflog and $joblog differ"
+            refdiff=$(basename "${reflog}")-todiff.bz2
+            sed 's/H1Topo/Topo/g' < "$joblog" | grep -vE "$PP" | bzip2 -9 > "$jobdiff"
+            sed 's/H1Topo/Topo/g' < "$reflog" | grep -vE "$PP" | bzip2 -9 > "$refdiff"
+            bzdiff -a -u -w "$refdiff" "$jobdiff"
+            diffStatus=$?
+            if [ $diffStatus != 0 ] ; then
+                echo "post.sh> ERROR: $reflog and $joblog differ"
                 exit 1
-	    fi
+            fi
 
-            grep -H 'WARNING: new xAOD variables' ${joblog}
-	else
-	    tail $joblog
-	    echo "post.sh> WARNING: reference output $reflog not available "
-	    echo  " post.sh> Please check ${PWD}/$joblog"
+            grep -H 'WARNING: new xAOD variables' "$joblog"
+        else
+            tail "$joblog"
+            echo "post.sh> WARNING: reference output $reflog not available "
+            echo  " post.sh> Please check ${PWD}/$joblog"
             exit 1
-	fi
+        fi
     else
-	tail --lines=500 $joblog
-	echo  "post.sh> ERROR: Athena exited abnormally! Exit code: $ATLAS_CTEST_TESTSTATUS "
-	echo  " post.sh> Please check ${PWD}/$joblog"
+        tail --lines=500 "$joblog"
+        echo "post.sh> ERROR: Athena exited abnormally! Exit code: $ATLAS_CTEST_TESTSTATUS "
+        echo " post.sh> Please check ${PWD}/$joblog"
     fi
 fi
 
 # Check output for ERROR/FATAL
 joblog=${test}.log
 
-exit $ATLAS_CTEST_TESTSTATUS
+exit "$ATLAS_CTEST_TESTSTATUS"
