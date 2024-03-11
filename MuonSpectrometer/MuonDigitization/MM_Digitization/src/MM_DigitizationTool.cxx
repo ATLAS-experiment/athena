@@ -112,7 +112,7 @@ StatusCode MM_DigitizationTool::initialize() {
     ATH_CHECK(m_outputSDO_CollectionKey.initialize());
     ATH_MSG_DEBUG("Output Digits: '" << m_outputDigitCollectionKey.key() << "'");
 
-    ATH_CHECK(m_condThrshldsKey.initialize());
+    ATH_CHECK(m_condThrshldsKey.initialize(m_useCondThresholds));
     ATH_CHECK(m_fieldCondObjInputKey.initialize());
     ATH_CHECK(m_calibrationTool.retrieve());
 
@@ -966,9 +966,13 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
 MM_ElectronicsToolInput MM_DigitizationTool::combinedStripResponseAllHits(const std::vector<MM_ElectronicsToolInput>& v_stripDigitOutput) {
     // set up pointer to conditions object
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    SG::ReadCondHandle<NswCalibDbThresholdData> readThresholds{m_condThrshldsKey, ctx};
-    if (!readThresholds.isValid()) { ATH_MSG_ERROR("Cannot find conditions data container for VMM thresholds!"); }
-    const NswCalibDbThresholdData* thresholdData = readThresholds.cptr();
+    
+    const NswCalibDbThresholdData* thresholdData {nullptr};
+    if(m_useCondThresholds){
+        SG::ReadCondHandle<NswCalibDbThresholdData> readThresholds{m_condThrshldsKey, ctx};
+        if (!readThresholds.isValid()) { ATH_MSG_ERROR("Cannot find conditions data container for VMM thresholds!"); }
+        thresholdData = readThresholds.cptr();
+    }
 
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonGeoMgrHandle{m_DetectorManagerKey, ctx};
     if (!muonGeoMgrHandle.isValid()) { ATH_MSG_FATAL("Failed to retrieve the detector manager from the conditiosn store"); }
