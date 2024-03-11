@@ -55,24 +55,19 @@ void OnlineEventDisplaysSvc::beginEvent(){
       }      
     }
   }
-
   for (std::string stream : streams){
     ATH_MSG_INFO("streams where a trigger fired and in your desired streams list: " << stream);
   }
-
   std::random_shuffle(streams.begin(), streams.end());
-
   //Pick the first stream as the output directory
-  if(!m_outputStreamDir.empty()){
+  if(!streams.empty()){
     m_outputStreamDir = streams[0];
   }
   else{
     ATH_MSG_WARNING("Cannot find a stream adding to .Unknown directory");
     m_outputStreamDir = ".Unkown";
   }
-  
   gid_t zpgid = setOwnershipToZpGrpOrDefault();
-
   m_entireOutputStr = m_outputDirectory + "/" + m_outputStreamDir;
   createWriteableDir(m_outputDirectory, zpgid);
   createWriteableDir(m_entireOutputStr, zpgid);
@@ -83,21 +78,20 @@ void OnlineEventDisplaysSvc::beginEvent(){
 }
 
 void OnlineEventDisplaysSvc::endEvent(){
-  ATH_MSG_INFO("here1");  
   RootUtils::PyGILStateEnsure ensure;
-  PyObject* pCheckPair = PyBool_FromLong(0); // Use 0 for False
+  if(m_BeamSplash){
+    m_CheckPair = false;
+  }
+  PyObject* pCheckPair = PyBool_FromLong(m_CheckPair); // Use 0 for False
   PyObject* pBeamSplash = PyBool_FromLong(m_BeamSplash);
   PyObject* pMaxEvents = PyLong_FromLong(m_maxEvents);
   const char* cString = m_entireOutputStr.c_str();
   PyObject* pDirectory = PyUnicode_FromString(cString);
   PyObject* pArgs = PyTuple_Pack(4, pDirectory, pMaxEvents, pCheckPair,pBeamSplash);
-  ATH_MSG_INFO("here2");
   PyObject* pModule = PyImport_ImportModule("EventDisplaysOnline.EventUtils");
   if ( pModule ) {
-    ATH_MSG_INFO("here3");
     PyObject* cleanDirectory = PyObject_GetAttrString(pModule, "cleanDirectory");
     if ( cleanDirectory ) {
-      ATH_MSG_INFO("About to clean the ED directories");
       PyObject_CallObject(cleanDirectory, pArgs);
     }
     else {

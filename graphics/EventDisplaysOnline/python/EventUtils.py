@@ -111,7 +111,7 @@ def writeEventlist(directory, eventlist, listname='event'):
 # Perform all of these in one command
 def cleanDirectory(directory, maxevents, checkpair,isBeamSplashMode):
     msg = logging.getLogger( 'EventUtils' )
-    print('In cleanDirectory!')
+
     msg.verbose('%s begin clean directory', time.ctime(time.time()))
     eventlist = getEventlist(directory, checkpair)
     if maxevents>0:
