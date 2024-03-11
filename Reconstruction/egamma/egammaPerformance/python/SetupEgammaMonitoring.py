@@ -730,9 +730,9 @@ def MonitorPhotonConfig(inputFlags):
     ### STEP 4 ###
 
     GroupPhotonCBTight = helper.addGroup(phCBTightMonAlg, 'MonitorPhoton', 'egamma/CBTightPhotons/')
-    GroupPhotonCBTightTriggered = helper.addGroup(phCBTightTrigMonAlg, 'MonitorPhoton', 'egamma/CBTightTriggeredPhotons/')
+    GroupPhotonCBTightTriggered = helper.addGroup(phCBTightTrigMonAlg, 'MonitorPhoton', 'egamma/CBTightPhotonsWithTrigger/')
     GroupPhotonCBLoose = helper.addGroup(phCBLooseMonAlg, 'MonitorPhoton', 'egamma/CBLoosePhotons/')
-    GroupPhotonCBLooseTriggered = helper.addGroup(phCBLooseTrigMonAlg, 'MonitorPhoton', 'egamma/CBLooseTriggeredPhotons/')
+    GroupPhotonCBLooseTriggered = helper.addGroup(phCBLooseTrigMonAlg, 'MonitorPhoton', 'egamma/CBLoosePhotonsWithTrigger/')
 
     ### STEP 5 ###
     # Configure histograms
@@ -941,12 +941,12 @@ if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
-    nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
-    file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
+    #nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
+    #file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
 
-    flags.Input.Files = [nightly+file]
-    # flags.Input.Files = ['AOD.11038520._000001.pool.root.1']
-    flags.Input.isMC = False
+    #flags.Input.Files = [nightly+file]
+    flags.Input.Files = ['/eos/atlas/atlascerngroupdisk/trig-egam/ForKyle/AOD/valid/user.eegidiop/user.eegidiop.35311896.EXT0._000012.AOD.root']
+    flags.Input.isMC = True
     # flags.Output.HISTFileName = 'MonitorEgammaOutput.root'
 
 # To produce WebDisplay, filename must follow a certain format
