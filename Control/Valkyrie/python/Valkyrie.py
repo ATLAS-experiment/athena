@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # @file : Valkyrie.py
 # @author: Sebastien Binet <binet@cern.ch> 
@@ -186,7 +186,7 @@ class Valkyrie(object):
             pass
 
         # build the (athena) command
-        cmd = [ self.bin, "--batch" ]
+        cmd = [ self.bin ]
         if isinstance(self.cmdOptions, list):
             cmd.extend( self.cmdOptions )
             pass
