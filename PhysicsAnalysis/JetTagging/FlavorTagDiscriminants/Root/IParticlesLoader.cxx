@@ -28,9 +28,9 @@ namespace FlavorTagDiscriminants {
         ConstituentsInputConfig cfg,
         const FTagOptions& options
     ):
-        ConstituentsLoader(cfg),
+        IConstituentsLoader(cfg),
         m_iparticleSortVar(IParticlesLoader::iparticleSortVar(cfg.order)),
-        m_customSequenceGetter(getter_utils::CustomSequenceGetter(
+        m_customSequenceGetter(getter_utils::CustomSequenceGetter<xAOD::IParticle>(
           cfg.inputs, options))
     {
         SG::AuxElement::ConstAccessor<PartLinks> acc("constituentLinks");

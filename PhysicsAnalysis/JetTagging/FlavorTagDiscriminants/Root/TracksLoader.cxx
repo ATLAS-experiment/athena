@@ -268,11 +268,11 @@ namespace FlavorTagDiscriminants {
         ConstituentsInputConfig cfg,
         const FTagOptions& options
     ):
-        ConstituentsLoader(cfg),
+        IConstituentsLoader(cfg),
         m_trackSortVar(TracksLoader::trackSortVar(cfg.order, options)),
         m_trackFilter(TracksLoader::trackFilter(cfg.selection, options).first),
         m_flipFilter(TracksLoader::flipFilter(options).first),
-        m_customSequenceGetter(getter_utils::CustomSequenceGetter(
+        m_customSequenceGetter(getter_utils::CustomSequenceGetter<xAOD::TrackParticle>(
           cfg.inputs, options))
     {
         // We have several ways to get tracks: either we retrieve an
@@ -350,10 +350,10 @@ namespace FlavorTagDiscriminants {
         flipped_tracks = m_flipFilter(sorted_tracks, jet);
         
         for (const auto& trk: flipped_tracks) {
-            flipped_tracks_ip.push_back(dynamic_cast<const xAOD::IParticle*>(trk));
+            flipped_tracks_ip.push_back(trk);
         }
 
-        return std::make_tuple(m_config.output_name, m_customSequenceGetter.getFeats(jet, flipped_tracks_ip), flipped_tracks_ip);
+        return std::make_tuple(m_config.output_name, m_customSequenceGetter.getFeats(jet, flipped_tracks), flipped_tracks_ip);
     }
 
     std::tuple<char, std::map<std::string, std::vector<double>>> TracksLoader::getDL2Data(
@@ -368,10 +368,7 @@ namespace FlavorTagDiscriminants {
       if (ip_checker(sorted_tracks)) invalid = 1;
       flipped_tracks = m_flipFilter(sorted_tracks, jet);
       
-      for (const auto& trk: flipped_tracks) {
-          flipped_tracks_ip.push_back(dynamic_cast<const xAOD::IParticle*>(trk));
-      }
-      auto feats = m_customSequenceGetter.getDL2Feats(jet, flipped_tracks_ip);
+      auto feats = m_customSequenceGetter.getDL2Feats(jet, flipped_tracks);
       return std::make_tuple(invalid, feats);
     };
 

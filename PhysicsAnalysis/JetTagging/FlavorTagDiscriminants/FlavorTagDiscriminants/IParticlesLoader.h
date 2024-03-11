@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-  This is a subclass of ConstituentsLoader. It is used to load the general IParticles from the jet 
+  This is a subclass of IConstituentsLoader. It is used to load the general IParticles from the jet 
   and extract their features for the NN evaluation. For now it supports only neutral flow objects.
   Charged flow objects have experimental support and are not recommended for use.
 */
@@ -30,8 +30,8 @@ namespace FlavorTagDiscriminants {
     ConstituentsInputConfig createIParticlesLoaderConfig(
       std::pair<std::string, std::vector<std::string>> iparticle_names
     );
-    // Subclass for IParticles loader inherited from abstract ConstituentsLoader class
-    class IParticlesLoader : public ConstituentsLoader {
+    // Subclass for IParticles loader inherited from abstract IConstituentsLoader class
+    class IParticlesLoader : public IConstituentsLoader {
       public:
         IParticlesLoader(ConstituentsInputConfig, const FTagOptions& options);
         std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
@@ -65,7 +65,7 @@ namespace FlavorTagDiscriminants {
         std::vector<const xAOD::IParticle*> getIParticlesFromJet(const xAOD::Jet& jet) const;
 
         IParticleSortVar m_iparticleSortVar;
-        getter_utils::CustomSequenceGetter m_customSequenceGetter;        
+        getter_utils::CustomSequenceGetter<xAOD::IParticle> m_customSequenceGetter;        
         std::function<IPV(const Jet&)> m_associator;
         bool m_isCharged;
     };

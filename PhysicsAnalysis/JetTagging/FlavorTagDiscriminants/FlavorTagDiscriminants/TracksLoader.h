@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-  This is a subclass of ConstituentsLoader. It is used to load the tracks from the jet 
+  This is a subclass of IConstituentsLoader. It is used to load the tracks from the jet 
   and extract their features for the NN evaluation.
 */
 
@@ -41,8 +41,8 @@ namespace FlavorTagDiscriminants {
     );
 
 
-    // Subclass for Tracks loader inherited from abstract ConstituentsLoader class
-    class TracksLoader : public ConstituentsLoader {
+    // Subclass for Tracks loader inherited from abstract IConstituentsLoader class
+    class TracksLoader : public IConstituentsLoader {
       public:
         typedef std::vector<const xAOD::TrackParticle*> Tracks;
 
@@ -89,7 +89,7 @@ namespace FlavorTagDiscriminants {
         TrackFilter m_trackFilter;
         TrackSequenceFilter m_flipFilter;
         std::function<TPV(const SG::AuxElement&)> m_associator;
-        getter_utils::CustomSequenceGetter m_customSequenceGetter;
+        getter_utils::CustomSequenceGetter<xAOD::TrackParticle> m_customSequenceGetter;
     };
 }
 

@@ -148,12 +148,12 @@ namespace FlavorTagDiscriminants {
     Tracks input_tracks;
 
     for (auto loader : m_constituentsLoaders){
-      auto [sequence_name, sequence_data, sequence_iparticles] = loader->getData(jet, btag);
+      auto [sequence_name, sequence_data, sequence_constituents] = loader->getData(jet, btag);
       gnn_input.insert({sequence_name, sequence_data});
       // collect tracks for decoration
-      if (loader->getType() == ConstituentsType::TRACK){
-        for (auto iparticle : sequence_iparticles){
-          input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(iparticle));
+      if ((loader->getType() == ConstituentsType::TRACK) && m_decorate_tracks){
+        for (auto constituent : sequence_constituents){
+          input_tracks.push_back(dynamic_cast<const xAOD::TrackParticle*>(constituent));
         }
       }
     }

@@ -70,12 +70,12 @@ namespace FlavorTagDiscriminants {
     );
 
     // Virtual class to represent loader of any type of constituents
-    class ConstituentsLoader {
+    class IConstituentsLoader {
         public:
-            ConstituentsLoader(ConstituentsInputConfig cfg) {
+            IConstituentsLoader(ConstituentsInputConfig cfg) {
               m_config = cfg;
             };
-            virtual ~ConstituentsLoader() {
+            virtual ~IConstituentsLoader() {
             };
             virtual std::tuple<std::string, input_pair, std::vector<const xAOD::IParticle*>> getData(
                 const xAOD::Jet& jet, 
