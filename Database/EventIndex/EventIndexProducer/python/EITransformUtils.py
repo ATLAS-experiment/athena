@@ -12,12 +12,12 @@ def addEI_arguments(parser):
 
 
 # Add Sub-step Methods
-# @brief Add EI transform substep
 def addEI_Substep(executorSet):
+    """ Add EI transform substep """
     executorSet.add(
         athenaExecutor(
             name='EventIndexTf',
-            skeletonFile='EventIndexProducer/skeleton.POOLtoEI_tf.py',
+            skeletonCA='EventIndexProducer.POOLtoEI_Skeleton',
             substep='EI', tryDropAndReload=False,
             inData=['POOL', 'AOD', 'ESD', 'EVNT', 'HITS', 'RDO'],
             outData=['NULL', 'EI'],

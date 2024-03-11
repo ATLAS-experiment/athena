@@ -68,13 +68,14 @@ class POOL2EI(PyAthena.Alg):
     # ----------------------------------------
     # initialize
     # ----------------------------------------
+
     def initialize(self):
 
         import AthenaPython.PyAthena as PyAthena
         _info = self.msg.info
         _info("POOL2EI::initialize")
 
-        # Am I call on every input file ?
+        # Am I being called for every input file ?
         if self._initialized:
             return
 
@@ -131,8 +132,7 @@ class POOL2EI(PyAthena.Alg):
             cls = getattr(PyAthena, cls_name)  # noqa: F841
 
         _info("retrieving various stores...")
-        for store_name in ('evtStore', 'inputStore', 'detStore',
-                           'tagStore', 'metaStore'):
+        for store_name in ('evtStore', 'inputStore'):
             _info("retrieving [{}]...".format(store_name))
             o = getattr(self, store_name)  # noqa: F841
             _info("retrieving [{}]... [done]".format(store_name))
@@ -204,21 +204,6 @@ class POOL2EI(PyAthena.Alg):
     def evtStore(self):
         import AthenaPython.PyAthena as PyAthena
         return PyAthena.py_svc('StoreGateSvc/StoreGateSvc')
-
-    @property
-    def metaStore(self):
-        import AthenaPython.PyAthena as PyAthena
-        return PyAthena.py_svc('StoreGateSvc/MetaDataStore')
-
-    @property
-    def tagStore(self):
-        import AthenaPython.PyAthena as PyAthena
-        return PyAthena.py_svc('StoreGateSvc/TagMetaDataStore')
-
-    @property
-    def detStore(self):
-        import AthenaPython.PyAthena as PyAthena
-        return PyAthena.py_svc('StoreGateSvc/DetectorStore')
 
     @property
     def inputStore(self):
@@ -558,6 +543,8 @@ class POOL2EI(PyAthena.Alg):
                 _info("Unable to write trigger menu to output SPB. "
                       "tMenu.L1Menu is empty")
 
+        self.inputStore.clearStore()
+
         return
 
     # ----------------------------------------
@@ -580,6 +567,8 @@ class POOL2EI(PyAthena.Alg):
             self._eif_spb.write(struct.pack('<I', len(spb)))
             self._eif_spb.write(spb)
 
+        self.inputStore.clearStore()
+
         return
 
     # ----------------------------------------
@@ -601,7 +590,6 @@ class POOL2EI(PyAthena.Alg):
             _info = self.msg.info
         else:
             _info = lambda *x: None  # noqa: E731
-        _error = self.msg.error
         _warning = self.msg.warning
 
         _info("POOL2EI::execute")
@@ -655,7 +643,9 @@ class POOL2EI(PyAthena.Alg):
 
         elif self.item_eventinfo:
 
-            evt_info_keys = store.keys('EventInfo')
+            # evt_info_keys = store.keys('EventInfo') # fails. bug ?
+            evt_info_keys = [
+                x for x in store.keys() if x.endswith("EventInfo")]
             if len(evt_info_keys) != 1:
                 _info('more than one EventInfo: {}'.format(evt_info_keys))
                 _info(' ==> we\'ll use [{}]'.format(evt_info_keys[0]))
@@ -842,7 +832,7 @@ class POOL2EI(PyAthena.Alg):
 
         if self.DoProvenanceRef:
 
-            # provenance references
+            # get provenance references
             if dh.sizeProvenance() > 0:
                 prv = dh.beginProvenance()
                 for i in range(dh.sizeProvenance()):
@@ -866,7 +856,7 @@ class POOL2EI(PyAthena.Alg):
                         _warning('Provenance toke starts with Input: {}'
                                  .format(key))
                         key = key[5:]
-                    # CNT migth be empty. Complete information
+                    # CNT might be empty. Complete information
                     if key == "StreamRAW":
                         stk = "[DB={}][CNT={}][CLID={}]" \
                               "[TECH={}][OID={}]".format(
@@ -883,8 +873,12 @@ class POOL2EI(PyAthena.Alg):
                                   d['tech'], d['oid'])
                     else:
                         _info("provenance {}={}".format(key, tk))
-                        _error('Unknown provenance stream: {}'.format(key))
-                        raise RuntimeError('Unknown provenance stream')
+                        _info('Unknown provenance stream: {}'.format(key))
+                        # do not raise error, just continue. mar-2024
+                        #   _error('Unknown provenance stream: {}'.format(key))
+                        #   raise RuntimeError('Unknown provenance stream')
+                        prv += 1
+                        continue
                     _info("## P" + key + "_ref: " + stk)
                     if key not in Pstream_refs:
                         # keep only the first provenance found for each straam
@@ -892,10 +886,10 @@ class POOL2EI(PyAthena.Alg):
                     prv += 1
                 del prv
 
-        # stream references
+        # get self reference.
+        # look for the processing tag key in the Data Object vector
         if self._eif_spb is not None:
             tokenPB0 = eventPB.eitoken.add()
-
         if dh.size() > 0:
             dhe = dh.begin()
             for i in range(dh.size()):
@@ -924,7 +918,7 @@ class POOL2EI(PyAthena.Alg):
                 dhe += 1
             del dhe
 
-        # Update ref token to handle fast merged files.
+        # Update self reference  token to handle fast merged files.
         try:
             stk = store.proxy(dh).address().par().c_str()
             if self._eif_spb is not None:
@@ -934,6 +928,7 @@ class POOL2EI(PyAthena.Alg):
         except Exception:
             pass
 
+        # write provenance to protbuf message
         if self._eif_spb is not None:
             for sr in Pstream_refs:
                 try:
@@ -959,6 +954,8 @@ class POOL2EI(PyAthena.Alg):
             self._eif_spb.write(struct.pack('<I', len(spb)))
             self._eif_spb.write(spb)
             del eventPB
+            if (self._eif_entries % 1000 == 0):
+                self._eif_spb.flush()
 
         self._eif_entries += 1     # for this input file
         self._eif_totentries += 1  # for all input files
@@ -991,9 +988,17 @@ class POOL2EI(PyAthena.Alg):
 
         return StatusCode.Success
 
+    pass  # class POOL2EI
+
 
 class POOL2EISvc(PyAthena.Svc):
-    """Service
+    """
+    POOL2EI Service
+    Registers with the Incident Service so we can deal with:
+      - Begin of new input file processing
+      - End of input file processing
+      - End of the event processing loop
+    and notify the POOL2EI algorithm accordingly
     """
 
     def __init__(self, name='POOL2EISvc', **kw):
@@ -1031,6 +1036,8 @@ class POOL2EISvc(PyAthena.Svc):
         return StatusCode.Success
 
     def handle(self, incident):
+        # process registered incidents
+
         _info = self.msg.info
         tp = incident.type()
         if tp == 'EndEvent':
@@ -1049,7 +1056,7 @@ class POOL2EISvc(PyAthena.Svc):
             if self.insideInputFile:
                 self.algo.endFile()
         else:
-            _info('POOL2EISvc::handle {}'.format(tp))
+            _info('POOL2EISvc::handle {}. Unknown for POOL2EI'.format(tp))
         return
 
     pass  # class POOL2EISvc
