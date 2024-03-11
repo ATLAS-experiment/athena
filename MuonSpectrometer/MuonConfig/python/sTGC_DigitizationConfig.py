@@ -69,7 +69,7 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
     else:
         kwargs.setdefault("InputObjectName", "sTGC_Hits")
     kwargs.setdefault("OutputObjectName", "sTGC_DIGITS")
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputSDOName", flags.Overlay.BkgPrefix + "sTGC_SDO")
@@ -96,7 +96,7 @@ def sTGC_OverlayDigitizationToolCfg(flags, name="STGC_OverlayDigitizationTool", 
         kwargs.setdefault("InputObjectName", "sTGC_Hits")
     kwargs.setdefault("OutputObjectName", flags.Overlay.SigPrefix + "sTGC_DIGITS")
     kwargs.setdefault("OutputSDOName", flags.Overlay.SigPrefix + "sTGC_SDO")
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     sTgcDigitizationTool = CompFactory.sTgcDigitizationTool
     acc.setPrivateTools(sTgcDigitizationTool(name, **kwargs))

@@ -4,7 +4,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from RngComps.RandomServices import AthRNGSvcCfg
+from RngComps.RngCompsConfig import AthRNGSvcCfg
 from G4AtlasServices.G4AtlasServicesConfig import (
     DetectorGeometrySvcCfg, PhysicsListSvcCfg
 )

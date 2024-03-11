@@ -44,7 +44,7 @@ def LUCID_PileUpToolCfg(flags, name="LUCID_PileUpTool",**kwargs):
         kwargs.setdefault("mergeSvc", '')
         #kwargs.setdefault("OnlyUseContainerName", False) # FIXME in future MR
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     kwargs.setdefault('pmtSmearing', [0.317, 0.000, 0.292, 0.316, 0.208, 0.178, 0.204, 0.281, 0.233, 0.261, 0.223, 0.250, 0.254, 0.239, 0.202, 0.224,  1,  1,  1,  1,

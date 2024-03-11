@@ -56,7 +56,7 @@ def AFP_DigitizationToolCfg(flags, name="AFP_PileUpTool", **kwargs):
         kwargs.setdefault("mergeSvc", '')
         kwargs.setdefault("OnlyUseContainerName", False)
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     acc.setPrivateTools(CompFactory.AFP_PileUpTool(name, **kwargs))

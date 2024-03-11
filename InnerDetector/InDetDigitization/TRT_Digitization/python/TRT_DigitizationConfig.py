@@ -62,7 +62,7 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", TRT_FirstXing())
         kwargs.setdefault("LastXing", TRT_LastXing())
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     TRTDigitizationTool = CompFactory.TRTDigitizationTool
     tool = TRTDigitizationTool(name, **kwargs)

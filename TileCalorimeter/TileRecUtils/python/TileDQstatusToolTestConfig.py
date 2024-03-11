@@ -501,7 +501,7 @@ def TileDQstatusToolTestCfg(flags):
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     acc.merge( AthRNGSvcCfg(flags) )
 
     from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
