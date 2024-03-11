@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from EventDisplaysOnline.EventDisplaysOnlineHelpers import GetRunType, GetBFields, WaitForPartition
 from AthenaConfiguration.Enums import BeamType
 
-isCosmicData = True
+isCosmicData = False
 isHIMode = False #TODO
 isBeamSplashMode = False
 isOfflineTest = False
@@ -15,7 +15,7 @@ testWithoutPartition = False
 # Empty list to read all
 streamsWanted = ['express','ZeroBias','CosmicCalo','IDCosmic','CosmicMuons','Background','Standby','L1Calo','Main']
 if isBeamSplashMode:
-    streamsWanted = ['MinBias']#HltError
+    streamsWanted = ['MinBias']
 # If testing at p1, write out to /tmp/ to see output
 outputDirectory="/atlas/EventDisplayEvents/"
 #outputDirectory="/tmp/myexley"
@@ -30,10 +30,10 @@ sendToPublicStream = False # Gets set later, overwrite here to True to test it
 ## partitions that serve events from a raw data file.                   ##
 ## To see which files will be ran over on the test partitions, at       ##
 ## point 1, see the uncommented lines in:                               ##
-## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-10-00-00/         ##
+## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-11-02-01/         ##
 ## without_gatherer/GMTestPartitionT9.data.xml                          ##
 ## and in:                                                              ##
-## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-10-00-00/         ##
+## /det/dqm/GlobalMonitoring/GMTestPartition_oks/tdaq-11-02-01/         ##
 ## without_gatherer/GMTestPartition.data.xml                            ##
 ##----------------------------------------------------------------------##
 partitionName = 'ATLAS' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
@@ -254,11 +254,12 @@ from AthenaServices.OutputStreamSequencerSvcConfig import OutputStreamSequencerS
 acc.merge(OutputStreamSequencerSvcCfg(flags,incidentName="EndEvent"))
 
 StreamESD = acc.getEventAlgo("OutputStreamESD")
-#vp1Alg = CompFactory.VP1EventProd(name="VP1EventProd",
-#                                  InputPoolFile = StreamESD.OutputFile,
-#                                  IsOnline = True,
-#                                  OnlineEventDisplaysSvc = onlineEventDisplaysSvc)
-#acc.addEventAlgo(vp1Alg, primary=True)
+vp1Alg = CompFactory.VP1EventProd(name="VP1EventProd",
+                                  InputPoolFile = StreamESD.OutputFile,
+                                  IsOnline = True,
+                                  MaxNumberOfFiles = -1,
+                                  OnlineEventDisplaysSvc = onlineEventDisplaysSvc)
+acc.addEventAlgo(vp1Alg, primary=True)
 
 acc.getService("PoolSvc").WriteCatalog = "xmlcatalog_file:PoolFileCatalog_%s_%s.xml" % (jobId[3], jobId[4])
 
