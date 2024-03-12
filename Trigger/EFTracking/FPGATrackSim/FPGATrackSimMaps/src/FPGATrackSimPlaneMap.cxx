@@ -76,7 +76,7 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
     m_diskIndex = Remappings::diskIndices(geoKey);
 
     ANA_MSG_INFO("Allocating map for geometry " << geoKey <<" diskIndex size="<<m_diskIndex.size());
-    m_moduleRelabel = new FPGATrackSimModuleRelabel(geoKey, false);
+    m_moduleRelabel = std::make_unique<FPGATrackSimModuleRelabel>(geoKey, false);
 
 
 

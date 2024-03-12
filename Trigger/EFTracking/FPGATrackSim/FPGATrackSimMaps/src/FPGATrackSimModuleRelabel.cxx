@@ -2,6 +2,7 @@
 
 
 #include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"
+#include "FPGATrackSimObjects/FPGATrackSimHit.h"
 
 using namespace std;
 using namespace htt;
@@ -13,7 +14,7 @@ FPGATrackSimModuleRelabel::FPGATrackSimModuleRelabel(std::string geokey, bool re
 {
     // Set up the ring index reference based on configured geokey.
     if (htt::ringIndices.count(m_geoKey) == 0) {
-        m_ringIndex = new std::vector<uint>();
+        m_ringIndex = nullptr;
         ATH_MSG_ERROR("Bad geometry version " << m_geoKey);
     } else {
         m_ringIndex = &(htt::ringIndices.at(m_geoKey));
@@ -24,7 +25,7 @@ FPGATrackSimModuleRelabel::FPGATrackSimModuleRelabel(std::string geokey, bool re
 bool FPGATrackSimModuleRelabel::remap(FPGATrackSimHit& hit) const {
 
     // Quick sanity check, if we get here somehow without configuring a valid geokey.
-    if (m_ringIndex->size() == 0) {
+    if (not m_ringIndex) {
         ATH_MSG_ERROR("No configured ring index relabel for geometry " << m_geoKey);
         return false;
     }
