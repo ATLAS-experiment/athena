@@ -143,9 +143,6 @@ try:
 except Exception:
    pass            # don't worry about it failing ...
 
-## user session history (deleted in Preparation.py)
-fhistory = os.path.expanduser( '~/.athena.history' )
-
 
 ## interface setup as appropriate
 if not (opts.interactive or opts.debug):
@@ -158,25 +155,11 @@ else:
    # when Athena components dereference ROOT objects that have been deleted.
    import ROOT  # noqa: F401
 
- # readline support
-   import rlcompleter, readline  # noqa: F401 (needed for completion)
-
-   readline.parse_and_bind( 'tab: complete' )
-   readline.parse_and_bind( 'set show-all-if-ambiguous On' )
-
- # history support
-   if os.path.exists( fhistory ):
-      readline.read_history_file( fhistory )
-   readline.set_history_length( 1024 )
-
-   del readline, rlcompleter
-
-## use of shell escapes in interactive mode
+## setup interactive prompt
 if opts.interactive:
-   import AthenaCommon.ShellEscapes as ShellEscapes
-   sys.excepthook = ShellEscapes.ShellEscapes()
-   del ShellEscapes
-
+   from AthenaCommon.Interactive import configureInteractivePrompt
+   configureInteractivePrompt()
+   del configureInteractivePrompt
 
 ### logging and messages -----------------------------------------------------
 from AthenaCommon.Logging import logging, log
