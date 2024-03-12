@@ -6,6 +6,7 @@
 def defaultSCTCalibFlags(flags, **kwargs):
     flags.addFlag('SCTCalib.EventNumber', 999999)           # default; set in the job json file
     flags.addFlag('SCTCalib.RunNumber', 999999)             # default; set in the job json file
+    flags.addFlag('SCTCalib.ForceRefRunNumber', False)      # force reference run to current run number when checking information uploaded to COOL for previous runs
     flags.addFlag('SCTCalib.RunStartTime', 999999)          # default; set in the job json file
     flags.addFlag('SCTCalib.RunEndTime', 999999)            # default; set in the job json file
     flags.addFlag('SCTCalib.EvtMax', -1)                    # default; set in the job json file
@@ -20,8 +21,9 @@ def defaultSCTCalibFlags(flags, **kwargs):
     # - BS   : NoisyStrips, DeadChip, DeadStrip, QuietChip, QuietStrip (, HV)
     # - HIST : NoiseOccupancy, RawOccupancy, Efficiency, BSErrorDB, LorentzAngle
     #------------------------------------------------------------
-    flags.addFlag('SCTCalib.InputType', '')
     flags.addFlag('SCTCalib.ReadBS', True)
+    flags.addFlag('SCTCalib.InputType', '')
+    flags.addFlag('SCTCalib.InputHist', [''])
 
     #------------------------------------------------------------
     # Algorithm turned on

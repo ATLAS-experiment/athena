@@ -4,7 +4,7 @@ def TgcDigtJitterTestAlgCfg(flags, name="TgcCondDbTestAlg", **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     the_alg = CompFactory.TgcDigtJitterTestAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)

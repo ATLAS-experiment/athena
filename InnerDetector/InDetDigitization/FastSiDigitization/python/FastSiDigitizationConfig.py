@@ -34,7 +34,7 @@ def commonPixelFastDigitizationCfg(flags, name,**kwargs):
     from InDetConfig.SiClusterizationToolConfig import ClusterMakerToolCfg
     kwargs.setdefault("ClusterMaker", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)))
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     kwargs.setdefault("RndmEngine", "FastPixelDigitization")
 
@@ -57,7 +57,7 @@ def commonSCT_FastDigitizationCfg(flags, name,**kwargs):
     from InDetConfig.SiClusterizationToolConfig import ClusterMakerToolCfg
     kwargs.setdefault("ClusterMaker", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)))
 
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     kwargs.setdefault("RndmEngine", "FastSCT_Digitization")
 

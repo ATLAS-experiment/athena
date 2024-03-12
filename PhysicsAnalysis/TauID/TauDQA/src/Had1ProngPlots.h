@@ -24,7 +24,6 @@ class Had1ProngPlots: public PlotBase {
     TH1* m_tauTrkAvgDist;
     TH1* m_tauIpSig;
     TH1* m_tauDRMax;
-    TH1* m_tauSflight;
     TH1* m_tauMtrks;
     TH1* m_SumPtTrkFrac;
     

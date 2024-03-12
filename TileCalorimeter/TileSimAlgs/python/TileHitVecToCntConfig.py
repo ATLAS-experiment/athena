@@ -72,7 +72,7 @@ def TileHitVecToCntToolCfg(flags, **kwargs):
         kwargs.setdefault('TileHitContainer_DigiHSTruth', '')
 
     if 'RndmSvc' not in kwargs:
-        from RngComps.RandomServices import AthRNGSvcCfg
+        from RngComps.RngCompsConfig import AthRNGSvcCfg
         kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name
 
     if kwargs['RndmEvtOverlay']:

@@ -16,7 +16,6 @@ Had1ProngPlots::Had1ProngPlots(PlotBase* pParent, const std::string& sDir,
    m_tauTrkAvgDist(nullptr),
    m_tauIpSig(nullptr),
    m_tauDRMax(nullptr),
-   m_tauSflight(nullptr),
    m_tauMtrks(nullptr),
    m_SumPtTrkFrac(nullptr),
    m_innerTrkAvgDist(nullptr),
@@ -43,7 +42,6 @@ void Had1ProngPlots::initializePlots(){
    m_tauTrkAvgDist = Book1D("TrkAvgDist",m_sTauJetContainerName + " Tau track avg dist; TrkAvgDist; # Taus",10,-0.2,.8);
    m_tauIpSig      = Book1D("IpSig",m_sTauJetContainerName + " Tau lead track IP signif. ; IpSig; # Taus",30,-15.,15.);
    m_tauDRMax     = Book1D("DRMax",m_sTauJetContainerName + " Tau DR Max track-seed; DRMax; # Taus",20,0.,0.5);
-   m_tauSflight   = Book1D("Sflight",m_sTauJetContainerName + " Tau flight sign. ; Sflight; # Taus",100,-10.,20.);
    m_tauMtrks     = Book1D("Mtracks",m_sTauJetContainerName + " Tau tracks mass ; Mtrks; # Taus",50,-1.,10.);
    m_SumPtTrkFrac = Book1D("SumPtTrkFrac",m_sTauJetContainerName + " Tau Sum PtTrk Frac ; SumPtTrkFrac; # Taus",100,-10.,20.);   
    m_innerTrkAvgDist    = Book1D("innerTrkAvgDist",m_sTauJetContainerName + "Tau innerTrkAvgDist; innerTrkAvgDist; # of Taus",10,-0.2,.8);
@@ -69,15 +67,13 @@ void Had1ProngPlots::fill(const xAOD::TauJet& tau, float weight) {
 
   test = tau.detail(xAOD::TauJetParameters::trkAvgDist, avariable);
   if(test) m_tauTrkAvgDist->Fill(avariable, weight);
-
-  test = tau.detail(xAOD::TauJetParameters::ipSigLeadTrk, avariable);
-  if(test) m_tauIpSig->Fill(avariable, weight);
+ 
+  if(tau.nTracks()>0 && tau.track(0)->isAvailable<float>("d0SigTJVA")) {
+      m_tauIpSig->Fill(tau.track(0)->d0SigTJVA(), weight);
+  }
 
   test = tau.detail(xAOD::TauJetParameters::dRmax, avariable);
   if(test) m_tauDRMax->Fill(avariable, weight);
-
-  test = tau.detail(xAOD::TauJetParameters::trFlightPathSig, avariable);
-  if(test) m_tauSflight->Fill(avariable, weight);
 
   test = tau.detail(xAOD::TauJetParameters::massTrkSys, avariable);
   if(test) m_tauMtrks->Fill(avariable/1000., weight);

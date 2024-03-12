@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -21,7 +21,7 @@ def xAODSimHitToMdtMeasCnvAlgCfg(flags,name = "SimHitToMdtMeasurementCnvAlg", **
     result = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import MdtCalibDbAlgCfg
     result.merge(MdtCalibDbAlgCfg(flags))
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     the_alg = CompFactory.xAODSimHitToMdtMeasCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
@@ -29,7 +29,7 @@ def xAODSimHitToMdtMeasCnvAlgCfg(flags,name = "SimHitToMdtMeasurementCnvAlg", **
 
 def xAODSimHitToRpcMeasCnvAlgCfg(flags,name = "SimHitToRpcMeasurementCnvAlg", **kwargs):
     result = ComponentAccumulator()
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     the_alg = CompFactory.xAODSimHitToRpcMeasCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
@@ -37,7 +37,7 @@ def xAODSimHitToRpcMeasCnvAlgCfg(flags,name = "SimHitToRpcMeasurementCnvAlg", **
 
 def xAODSimHitToTgcMeasCnvAlgCfg(flags,name = "SimHitToTgcMeasurementCnvAlg", **kwargs):
     result = ComponentAccumulator()
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     the_alg = CompFactory.xAODSimHitToTgcMeasCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
@@ -45,7 +45,7 @@ def xAODSimHitToTgcMeasCnvAlgCfg(flags,name = "SimHitToTgcMeasurementCnvAlg", **
 
 def xAODSimHitTosTGCMeasCnvAlgCfg(flags, name = "SimHitTosTGCMeasurementCnvAlg",**kwargs):
     result = ComponentAccumulator()
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
     result.merge(NswErrorCalibDbAlgCfg(flags))
@@ -56,7 +56,7 @@ def xAODSimHitTosTGCMeasCnvAlgCfg(flags, name = "SimHitTosTGCMeasurementCnvAlg",
 
 def xAODSimHitToMmMeasCnvAlgCfg(flags, name = "SimHitToMmMeasurementCnvAlg",**kwargs):
     result = ComponentAccumulator()
-    from RngComps.RandomServices import AthRNGSvcCfg
+    from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     from MuonConfig.MuonCalibrationConfig import NswErrorCalibDbAlgCfg
     result.merge(NswErrorCalibDbAlgCfg(flags))

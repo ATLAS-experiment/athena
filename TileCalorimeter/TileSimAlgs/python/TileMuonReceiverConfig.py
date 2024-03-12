@@ -36,7 +36,7 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
     acc.merge( TileSamplingFractionCondAlgCfg(flags) )
 
     if 'RndmSvc' not in kwargs:
-        from RngComps.RandomServices import AthRNGSvcCfg
+        from RngComps.RngCompsConfig import AthRNGSvcCfg
         kwargs['RndmSvc'] = acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name
 
     if kwargs['UseCoolNoise'] or kwargs['UseCoolPedestal']:
