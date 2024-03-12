@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  cTauMultiplicity.h
 //  TopoCore
@@ -7,17 +7,19 @@
 #ifndef __TopoCore__cTauMultiplicity__
 #define __TopoCore__cTauMultiplicity__
 
-#include <iostream>
-#include <vector>
+
 #include "L1TopoInterfaces/CountingAlg.h"
 #include "L1TopoEvent/TOBArray.h"
 #include "TrigConfData/L1Threshold.h"
 
 // Include xAOD headers here
 #ifndef TRIGCONF_STANDALONE
-#include "xAODTrigger/eFexTauRoIContainer.h"
-#include "xAODTrigger/jFexTauRoIContainer.h"
+  #include "xAODTrigger/eFexTauRoIContainer.h"
+  #include "xAODTrigger/jFexTauRoIContainer.h"
 #endif
+
+#include <vector>
+#include <map>
 
 class TH2;
 

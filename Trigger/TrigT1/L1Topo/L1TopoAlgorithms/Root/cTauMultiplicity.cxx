@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 //  TopoCore
 //
 
-#include <cmath>
+
 
 #include "L1TopoAlgorithms/cTauMultiplicity.h"
 #include "L1TopoCommon/Exception.h"
@@ -13,7 +13,7 @@
 
 #include "L1TopoEvent/TOBArray.h"
 #include "L1TopoEvent/cTauTOBArray.h"
-
+#include <cmath>
 REGISTER_ALG_TCS(cTauMultiplicity)
 
 TCS::cTauMultiplicity::cTauMultiplicity(const std::string & name) : CountingAlg(name) {
@@ -26,6 +26,10 @@ TCS::cTauMultiplicity::~cTauMultiplicity() {}
 
 TCS::StatusCode TCS::cTauMultiplicity::initialize() {
   m_threshold = dynamic_cast<const TrigConf::L1Threshold_cTAU*>(getThreshold());
+  if (not m_threshold){
+    TRG_MSG_ERROR("Dynamic cast failed in TCS::cTauMultiplicity::initialize");
+    return StatusCode::FAILURE;
+  }
 
   m_isoFW_CTAU = isolationFW_CTAU();
   m_isoFW_CTAU_jTAUCoreScale = isolationFW_CTAU_jTAUCoreScale();
