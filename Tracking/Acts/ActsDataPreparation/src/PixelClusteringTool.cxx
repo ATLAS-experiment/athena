@@ -251,6 +251,7 @@ PixelClusteringTool::makeCluster(const EventContext& ctx,
   localCovariance(1, 1) = errorMatrix(1, 1);
   
   xaodcluster.setMeasurement<2>(idHash, localPosition, localCovariance);
+  xaodcluster.setIdentifier( element->identifierOfPosition(locpos).get_compact() );
   xaodcluster.setRDOlist(cluster.ids);
   xaodcluster.globalPosition() = globalPos.cast<float>();
   xaodcluster.setToTlist(cluster.tots);
