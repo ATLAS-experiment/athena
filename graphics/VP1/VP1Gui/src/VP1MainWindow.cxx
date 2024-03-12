@@ -99,11 +99,6 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
   m_userRequestedExit(false),
   m_streamMenuUpdater(0),
   m_mutex(new QMutex()),
-//  #if QT_VERSION > QT_VERSION_CHECK(5, 5, 0)
-//    m_view(new QWebEngineView(0)),
-//  #else
-//    m_view(new QWebView(0)),
-//  #endif
   m_edEditor(0)
 {
 	setupUi(this); // this sets up the GUI
@@ -445,20 +440,8 @@ void VP1MainWindow::help_openUserGuide() {
 	 * with the default system web browser
 	 */
 	VP1Msg::messageDebug("VP1MainWindow::help_openUserGuide()");
-//
-//	// we use the Qt Web Browser to show the VP1 documentation
-//  #if QT_VERSION > QT_VERSION_CHECK(5, 5, 0)
-//    QWebEngineView *old = m_view;
-//    m_view = new QWebEngineView(0);
-//  #else
-//    QWebView *old = m_view;
-//    m_view = new QWebView(0);
-//  #endif
-//
-//	m_view->load(QUrl("http://atlas-vp1.web.cern.ch/atlas-vp1/doc/"));
-//	m_view->show();
-//	delete old; old = 0;
-
+	// we use here the default system browser
+	QDesktopServices::openUrl(QUrl("http://atlas-vp1.web.cern.ch/atlas-vp1/doc/"));
 	return;
 }
 
@@ -469,19 +452,8 @@ void VP1MainWindow::help_openUserSupport() {
 	 * with the default system web browser
 	 */
 	VP1Msg::messageDebug("VP1MainWindow::help_openUserSupport()");
-
-	// fixme: apparently javascript does not work in the embedded browser, so I use the default system one
-
 	// we use here the default system browser
 	QDesktopServices::openUrl(QUrl("http://atlas-vp1.web.cern.ch/atlas-vp1/vp1_users_support/"));
-
-//	// we use the Qt Web Browser to show the VP1 user's support page
-//	QWebEngineView *old = m_view;
-//	m_view = new QWebEngineView(0);
-//	m_view->load(QUrl("http://atlas-vp1.web.cern.ch/atlas-vp1/vp1_users_support_em/"));
-//	m_view->show();
-//	delete old; old = 0;
-
 	return;
 }
 
@@ -492,20 +464,8 @@ void VP1MainWindow::help_openVP1WebSite() {
 	 * with the default system web browser
 	 */
 	VP1Msg::messageDebug("VP1MainWindow::help_openVP1WebSite()");
-//
-//	// we use the Qt Web Browser to show the VP1 web site
-//  #if QT_VERSION > QT_VERSION_CHECK(5, 5, 0)
-//    QWebEngineView *old = m_view;
-//    m_view = new QWebEngineView(0);
-//  #else
-//    QWebView *old = m_view;
-//    m_view = new QWebView(0);
-//  #endif
-//
-//	m_view->resize(1000, 800);
-//	m_view->load(QUrl("http://atlas-vp1.web.cern.ch/atlas-vp1/"));
-//	m_view->show();
-//	delete old; old = 0;
+	// we use here the default system browser
+	QDesktopServices::openUrl(QUrl("http://atlas-vp1.web.cern.ch/atlas-vp1/"));
 	return;
 }
 
@@ -513,23 +473,11 @@ void VP1MainWindow::help_openVP1WebSite() {
 //_________________________________________________________________________________
 void VP1MainWindow::help_openAbout() {
 	/*
-	 * open the online help with the internal web browser
+	 * open the online help 
 	 */
 	VP1Msg::messageDebug("VP1MainWindow::help_openAbout()");
-//
-//	// we use the Qt Web Browser to show the VP1 "About" page
-//  #if QT_VERSION > QT_VERSION_CHECK(5, 5, 0)
-//    QWebEngineView *old = m_view;
-//    m_view = new QWebEngineView(0);
-//  #else
-//    QWebView *old = m_view;
-//    m_view = new QWebView(0);
-//  #endif
-//
-//	m_view->load(QUrl("https://atlas-vp1.web.cern.ch/atlas-vp1/doc_new/about_vp1/CREDITS.html"));
-//	m_view->show();
-//	delete old; old = 0;
-
+	// we use here the default system browser
+	QDesktopServices::openUrl(QUrl("https://atlas-vp1.web.cern.ch/atlas-vp1/doc_new/about_vp1/CREDITS.html"));
 	return;
 }
 
@@ -610,8 +558,6 @@ VP1MainWindow::~VP1MainWindow()
 	delete m_mutex;
 
 	VP1Msg::messageDebug("deleting the view");
-//	delete m_view; // TODO: Qt5
-//	m_view = 0;// TODO: Qt5
 }
 
 //_________________________________________________________________________________
@@ -1191,14 +1137,14 @@ void VP1MainWindow::getAllChannelsIntoSnapshots(QList<QPixmap>& list, QStringLis
 		++nT;
 
 		// get channel name (e.g. Geometry, 3DCocktail)
-//		QString channelname = widg->unique_name().toLower();
 		QString channelname = m_tabmanager->channelToTab(widg);
 		channelname.replace(' ','_');
 		VP1Msg::messageDebug("tab: " + channelname);
 
-//		// get channel info, only for debug
-//		QString info = widg->information();
-//		VP1Msg::messageDebug("channel info: " + info);
+        // DEBUG MSGS
+		// get channel info, only for debug
+		//QString info = widg->information();
+		//VP1Msg::messageDebug("channel info: " + info);
 
 
 		QPixmap snap = getSingleChannelCustomSnapshot(widg);
