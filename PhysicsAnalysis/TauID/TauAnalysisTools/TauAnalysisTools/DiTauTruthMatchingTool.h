@@ -5,7 +5,7 @@
  * @brief Tau, lepton and jet truth matching for ditau jets
  * @date 2021-02-17
  * 
- * @copyright Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  * 
  */
 // Dear emacs, this is -*- c++ -*-
@@ -19,6 +19,7 @@
 #include "TauAnalysisTools/IDiTauTruthMatchingTool.h"
 #include "TauAnalysisTools/BuildTruthTaus.h"
 #include "xAODBase/IParticle.h"
+#include "CxxUtils/CachedValue.h"
 
 namespace TauAnalysisTools
 {
@@ -60,6 +61,9 @@ private:                        // private helper functions
 private:                        // steering variables
 
   double m_dMaxDeltaR;
+
+  CxxUtils::CachedValue<bool> m_bIsTruthMatchedAvailable;
+  CxxUtils::CachedValue<bool> m_bIsTruthParticleLinkAvailable;
 
 private:                        // private helper variables
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -34,7 +34,6 @@ class DiTauCalibrationConfig (ConfigBlock):
                                    'DiTauTruthMatchingAlg' + postfix )
             config.addPrivateTool( 'matchingTool',
                             'TauAnalysisTools::DiTauTruthMatchingTool' )
-            alg.matchingTool.WriteTruthTaus = 1
             alg.taus = self.readName (self.containerName)
             alg.preselection = config.getSelection (self.containerName, '')
 

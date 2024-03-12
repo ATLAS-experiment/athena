@@ -4,7 +4,6 @@
 # TauTruthCommonConfig.py
 # Schedules all tools needed for tau truth object selection and writes
 # results into SG. These may then be accessed along the train.
-# Uses component accumulator
 #********************************************************************
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -42,49 +41,47 @@ def BuildTruthTausCfg(flags, name, **kwargs):
     acc.addPublicTool(BuildTruthTaus(name = name, **kwargs), primary = True)
     return(acc)
 
-def TauTruthToolsCfg(ConfigFlags):
+def TauTruthToolsCfg(flags):
     """Configure tau truth making and matching"""
+
+    # Ensure that we are running on MC
+    if not flags.Input.isMC:
+        return
 
     acc = ComponentAccumulator()
 
-    # Ensure that we are running on MC
-    if not ConfigFlags.Input.isMC:
-        return
-
     DFCommonTauTruthWrapperTools = []
 
-    # Matching
-    # Only do if working with AOD
-    if "xAOD::TauJetContainer#TauJets" in ConfigFlags.Input.TypedCollections:    
+    # truth tau building
+    acc.merge(BuildTruthTausCfg(flags,
+                                name                            = "DFCommonTauTruthBuilder",
+                                WriteInvisibleFourMomentum      = True,
+                                WriteVisibleNeutralFourMomentum = True ))
+
+    acc.merge(TruthCollectionMakerTauCfg(flags,
+                                         name           = "DFCommonTauTruthCollectionMaker",
+                                         BuildTruthTaus = acc.getPublicTool("DFCommonTauTruthBuilder")))
+    DFCommonTauTruthWrapperTools.append(acc.getPublicTool("DFCommonTauTruthCollectionMaker"))
+
+    # tau truth matching, if reconstructed taus are present in the input
+    # this should be dropped from derivations and deferred to analysis level (the only use case in derivations is PHYSLITE)
+    if "xAOD::TauJetContainer#TauJets" in flags.Input.TypedCollections:
         DFCommonTauTruthMatchingTool = acc.getPrimaryAndMerge(TauTruthMatchingToolCfg(
-            ConfigFlags, 
+            flags,
             name                            = "DFCommonTauTruthMatchingTool",
-            WriteTruthTaus                  = True,
             WriteInvisibleFourMomentum      = True,
             WriteVisibleNeutralFourMomentum = True,
             TruthJetContainerName           = "AntiKt4TruthDressedWZJets"))
         DFCommonTauTruthWrapperTool = acc.getPrimaryAndMerge(TauTruthMatchingWrapperCfg(
-            ConfigFlags, 
+            flags,
             name                 = "DFCommonTauTruthMatchingWrapper",
             TauTruthMatchingTool = DFCommonTauTruthMatchingTool,
             TauContainerName     = "TauJets")) 
         DFCommonTauTruthWrapperTools.append(DFCommonTauTruthWrapperTool)
-    else:
-        # No reco taus, so just build the truth tau container
-        acc.merge(BuildTruthTausCfg(ConfigFlags, 
-                                    name                            = "DFCommonTauTruthBuilder",
-                                    WriteTruthTaus                  = True,
-                                    WriteInvisibleFourMomentum      = True,
-                                    WriteVisibleNeutralFourMomentum = True ))
 
-        acc.merge(TruthCollectionMakerTauCfg(ConfigFlags,
-                                             name           = "DFCommonTauTruthCollectionMaker",
-                                             BuildTruthTaus = acc.getPublicTool("DFCommonTauTruthBuilder")))
-        DFCommonTauTruthWrapperTools.append(acc.getPublicTool("DFCommonTauTruthCollectionMaker"))
-
-    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation    
+    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation( "TauTruthCommonKernel", AugmentationTools = DFCommonTauTruthWrapperTools,
                                         ExtraOutputs = {( 'xAOD::TruthParticleContainer' , 'StoreGateSvc+TruthTaus' ),
                                                         ( 'xAOD::IParticleContainer' , 'StoreGateSvc+TruthTaus' )} ))
-    
+
     return acc    

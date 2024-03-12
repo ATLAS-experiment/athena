@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AsgAnalysisAlgorithms.AnalysisObjectSharedSequence import makeSharedObjectSequence
@@ -97,7 +97,6 @@ def makeDiTauCalibrationSequence( seq, dataType,
                                'DiTauTruthMatchingAlg' + postfix )
         addPrivateTool( alg, 'matchingTool',
                         'TauAnalysisTools::DiTauTruthMatchingTool' )
-        alg.matchingTool.WriteTruthTaus = 1
         seq.append( alg, inputPropName = 'taus',
                     stageName = 'selection',
                     dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNames"])} )

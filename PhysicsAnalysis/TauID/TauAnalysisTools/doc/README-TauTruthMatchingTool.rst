@@ -103,15 +103,9 @@ Tool configuration
      - Name of truth particles container within the xAOD file needed if truth
        tau container needs to be created
 
-   * - WriteTruthTaus
-     - false
-     - switching this option to 'true' writes the created container (only in
-       case it is not found in the event store and thus newly created) to the
-       event store
-
    * - NewTruthTauContainerName
      - TruthTaus
-     - Name of the newly created truth tau container if WriteTruthTaus == true
+     - Name of the newly created truth tau container
 
 ------
 Output
@@ -125,10 +119,6 @@ getLink function from TauxAODHelpers::
 
     const xAOD::Jet* xTruthJet = xAOD::TauHelpers::getLink<xAOD::Jet>(xTau, "truthJetLink");
 
-If TruthTaus is created from the TauTruthMatchingTool and not connected to the
-event store with option WriteTruthTaus, only a pointer to the TruthTau can be
-attached to the tau; decoration: ``TruthTau``.
-
 In addition a variable of type char is decorated to the tau named
 ``IsTruthMatched`` indicating, if a match to a truth lepton was found (ignoring
 possible matches to a truth jet).
@@ -137,7 +127,7 @@ possible matches to a truth jet).
 Truth Tau Container
 -------------------
 
-In case the TruthTau container is created by the tool the following information
+In case the TruthTaus container is created by the tool the following information
 will be added to the truth taus. This is similar to the information added to
 truth taus in the derivation, missing is only the information form
 MCTruthClassifier (i.e. branches particleType and particleOrigin).
@@ -173,17 +163,6 @@ MCTruthClassifier (i.e. branches particleType and particleOrigin).
    * - DecayModeVector
      - std::vector<int>
      - pdg ID's of stable decay products of the tau decay stored as a vector
-
-    
-A second feature available in this tool is to retrieve a container of truth tau
-particles which can be stored in an output file. The type of the created
-container is xAOD::TruthParticleContainer and its corresponding auxiliary
-container. It contains all hadronically and leptonically decaying taus found in
-the passed truth particle container. To retrieve the truth tau container and
-auxiliary container like::
-
-  xAOD::TruthParticleContainer* xTruthTauContainer = T2MT->getTruthTauContainer();
-  xAOD::TruthParticleAuxContainer* xTruthTauAuxContainer = T2MT->getTruthTauAuxContainer();
 
 -----------------
 Wrapper functions
@@ -273,7 +252,7 @@ first need to check if it is a tau::
 
 then check the decoration::
   
-  if ((bool)xTruthParticle->auxdata<char>("IsHadronicTau"))
+  if (xTruthParticle->auxdataConst<char>("IsHadronicTau"))
   {
     ...
   }

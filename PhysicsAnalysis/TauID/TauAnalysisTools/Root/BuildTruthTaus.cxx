@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s)
 #include "TauAnalysisTools/BuildTruthTaus.h"
+#include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/WriteHandle.h"
 
 // Core include(s):
 #include "AthLinks/ElementLink.h"
@@ -21,20 +23,8 @@ using namespace TauAnalysisTools;
 //______________________________________________________________________________
 BuildTruthTaus::BuildTruthTaus( const std::string& name )
   : AsgMetadataTool(name)
-  , m_bTruthTauAvailable(true)
-  , m_sNewTruthTauContainerNameAux("TruthTausAux.")
-  , m_bTruthMuonAvailable(true)
-  , m_bTruthElectronAvailable(true)
-  , m_bTruthJetAvailable(true)
   , m_tMCTruthClassifier("MCTruthClassifier", this)
 {
-  declareProperty( "WriteTruthTaus", m_bWriteTruthTaus = false);
-  declareProperty( "NewTruthTauContainerName", m_sNewTruthTauContainerName = "TruthTaus");
-  declareProperty( "TruthTauContainerName", m_sTruthTauContainerName = "TruthTaus");
-  declareProperty( "TruthMuonContainerName", m_sTruthMuonContainerName = "TruthMuons");
-  declareProperty( "TruthElectronContainerName", m_sTruthElectronContainerName = "TruthElectrons");
-  declareProperty( "TruthJetContainerName", m_sTruthJetContainerName = "AntiKt4TruthJets");
-  declareProperty( "TruthParticlesContainerName", m_sTruthParticlesContainerName = "TruthParticles");
   declareProperty( "WriteInvisibleFourMomentum", m_bWriteInvisibleFourMomentum = false);
   declareProperty( "WriteVisibleChargedFourMomentum", m_bWriteVisibleChargedFourMomentum = false);
   declareProperty( "WriteVisibleNeutralFourMomentum", m_bWriteVisibleNeutralFourMomentum = false);
@@ -43,15 +33,19 @@ BuildTruthTaus::BuildTruthTaus( const std::string& name )
 }
 
 //______________________________________________________________________________
-BuildTruthTaus::~BuildTruthTaus()
-{
-}
-
-//______________________________________________________________________________
 StatusCode BuildTruthTaus::initialize()
 {
-  ATH_MSG_INFO( "Initializing BuildTruthTaus" );
-  m_sNewTruthTauContainerNameAux = m_sNewTruthTauContainerName + "Aux.";
+  if (!m_truthMatchingMode) ATH_MSG_INFO( "Initializing BuildTruthTaus, will generate " <<  m_truthTauOutputContainer.key() << " from " << m_truthParticleContainer.key() << " container" );
+  else ATH_MSG_INFO( "Initializing BuildTruthTaus in truth matching mode, using input container " << m_truthTauInputContainer.key() );
+
+  // input containers
+  ATH_CHECK( m_truthTauInputContainer.initialize(m_truthMatchingMode) );
+  ATH_CHECK( m_truthParticleContainer.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_truthElectronContainer.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_truthMuonContainer.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_truthJetContainer.initialize(SG::AllowEmpty) );
+  // output container
+  ATH_CHECK( m_truthTauOutputContainer.initialize(!m_truthMatchingMode) );
 
   // The following properties are only available in athena
 #ifndef XAOD_ANALYSIS
@@ -62,37 +56,8 @@ StatusCode BuildTruthTaus::initialize()
   ATH_CHECK(ASG_MAKE_ANA_TOOL(m_tMCTruthClassifier, MCTruthClassifier));
   ATH_CHECK(m_tMCTruthClassifier.initialize());
 
-  return StatusCode::SUCCESS;
-}
-
-//______________________________________________________________________________
-xAOD::TruthParticleContainer* BuildTruthTaus::getTruthTauContainer()
-{
-  if (!m_bTruthTauAvailable)
-    return m_truthTausEvent.m_xTruthTauContainer;
-  else
-  {
-    ATH_MSG_WARNING("TruthTau container was available from the event store and not rebuilt. Please get it from the event store");
-    return nullptr;
-  }
-}
-
-//______________________________________________________________________________
-xAOD::TruthParticleAuxContainer* BuildTruthTaus::getTruthTauAuxContainer()
-{
-  if (!m_bTruthTauAvailable)
-    return m_truthTausEvent.m_xTruthTauAuxContainer;
-  else
-  {
-    ATH_MSG_WARNING("TruthTau auxiliary container was available from the event store and not rebuilt. Please get it from the event store");
-    return nullptr;
-  }
-}
-
-//______________________________________________________________________________
-StatusCode BuildTruthTaus::beginEvent()
-{
-  m_truthTausEvent.m_valid = false;
+  // drop at earliest occasion
+  m_bTruthTauAvailable = !m_truthTauInputContainer.empty();
 
   return StatusCode::SUCCESS;
 }
@@ -112,69 +77,70 @@ StatusCode BuildTruthTaus::retrieveTruthTaus(ITruthTausEvent& truthTausEvent) co
 
 StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent) const
 {
-  if (truthTausEvent.m_valid)
-    return StatusCode::SUCCESS;
-  truthTausEvent.m_valid = true;
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
-  if ( m_bTruthTauAvailable )
-  {
-    if (evtStore()->contains<xAOD::TruthParticleContainer>(m_sTruthTauContainerName))
-      ATH_CHECK( evtStore()->retrieve(truthTausEvent.m_xTruthTauContainerConst, m_sTruthTauContainerName));
-    else
-    {
-      ATH_MSG_INFO("TruthTaus container with name " << m_sTruthTauContainerName << " is not available, will generate the container for each event from TruthParticles container");
-      m_bTruthTauAvailable = false;
-    }
-  }
-
-  if ( m_bTruthMuonAvailable )
-  {
-    if (evtStore()->contains<xAOD::TruthParticleContainer>(m_sTruthMuonContainerName))
-      ATH_CHECK(evtStore()->retrieve(truthTausEvent.m_xTruthMuonContainerConst, m_sTruthMuonContainerName));
-    else
-    {
-      ATH_MSG_INFO("TruthMuons container with name " << m_sTruthMuonContainerName << " is not available, won't perform matching to truth muons");
-      m_bTruthMuonAvailable = false;
-    }
-  }
-
-  if ( m_bTruthElectronAvailable )
-  {
-    if (evtStore()->contains<xAOD::TruthParticleContainer>(m_sTruthElectronContainerName))
-      ATH_CHECK(evtStore()->retrieve(truthTausEvent.m_xTruthElectronContainerConst, m_sTruthElectronContainerName));
-    else
-    {
-      ATH_MSG_INFO("TruthElectrons container with name " << m_sTruthElectronContainerName << " is not available, won't perform matching to truth electrons");
-      m_bTruthElectronAvailable = false;
-    }
-  }
-
-  if ( m_bTruthJetAvailable )
-  {
-    if (evtStore()->contains<xAOD::JetContainer>(m_sTruthJetContainerName))
-      ATH_CHECK(evtStore()->retrieve(truthTausEvent.m_xTruthJetContainerConst, m_sTruthJetContainerName));
-    else
-    {
-      ATH_MSG_INFO("TruthJets container with name " << m_sTruthJetContainerName << " is not available, won't perform matching to truth jets");
-      m_bTruthJetAvailable = false;
-    }
-  }
-
-  // go here if TruthTaus was not found in m_bTruthTauAvailable if-block
-  if ( !m_bTruthTauAvailable )
-  {
-    if (evtStore()->contains<xAOD::TruthParticleContainer>(m_sTruthParticlesContainerName))
-    {
-      if ( evtStore()->retrieve(truthTausEvent.m_xTruthParticleContainer, m_sTruthParticlesContainerName).isSuccess() )
-        return buildTruthTausFromTruthParticles(truthTausEvent);
-      else
-        return StatusCode::FAILURE;
-    }
-    else
-    {
-      ATH_MSG_FATAL("TruthParticles container is not available but needed for building truth taus");
+  if (!m_truthElectronContainer.empty()) {
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthElectronsHandle(m_truthElectronContainer, ctx);
+    if (!truthElectronsHandle.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve " << truthElectronsHandle.key());
       return StatusCode::FAILURE;
     }
+    truthTausEvent.m_xTruthElectronContainerConst = truthElectronsHandle.cptr();
+  }
+  else {
+    ATH_MSG_WARNING("Truth electron container is not available, won't perform matching to truth electrons");
+  }
+
+  if (!m_truthMuonContainer.empty()) {
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthMuonsHandle(m_truthMuonContainer, ctx);
+    if (!truthMuonsHandle.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve " << truthMuonsHandle.key());
+      return StatusCode::FAILURE;
+    }
+    truthTausEvent.m_xTruthMuonContainerConst = truthMuonsHandle.cptr();
+  }
+  else {
+    ATH_MSG_WARNING("Truth muon container is not available, won't perform matching to truth muons");
+  }
+
+  if (!m_truthJetContainer.empty()) {
+    SG::ReadHandle<xAOD::JetContainer> truthJetsHandle(m_truthJetContainer, ctx);
+    if (!truthJetsHandle.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve " << truthJetsHandle.key());
+      return StatusCode::FAILURE;
+    }
+    truthTausEvent.m_xTruthJetContainerConst = truthJetsHandle.cptr();
+  }
+  else {
+    ATH_MSG_WARNING("Truth jet container is not available, won't perform matching to truth jets");
+  }
+
+  // if TruthTaus container exists, retrieve it, else build it from TruthParticles
+  if (m_truthMatchingMode) {
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthTausHandle(m_truthTauInputContainer, ctx);
+    if (!truthTausHandle.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve " << truthTausHandle.key());
+      return StatusCode::FAILURE;
+    }
+    truthTausEvent.m_xTruthTauContainerConst = truthTausHandle.cptr();
+  }
+  else {
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticlesHandle(m_truthParticleContainer, ctx);
+    if (!truthParticlesHandle.isValid()) {
+      ATH_MSG_ERROR ("Could not retrieve " << truthParticlesHandle.key());
+      return StatusCode::FAILURE;
+    }
+    truthTausEvent.m_xTruthParticleContainer = truthParticlesHandle.cptr();
+
+    auto truthTausOutput = std::make_unique<xAOD::TruthParticleContainer>();
+    auto truthTausOutputAux = std::make_unique<xAOD::TruthParticleAuxContainer>();
+    truthTausOutput->setStore(truthTausOutputAux.get());
+    truthTausEvent.m_xTruthTauContainer = truthTausOutput.get();
+
+    ATH_CHECK( buildTruthTausFromTruthParticles(truthTausEvent) );
+
+    auto writeHandle = SG::makeHandle(m_truthTauOutputContainer, ctx);
+    ATH_CHECK(writeHandle.record(std::move(truthTausOutput), std::move(truthTausOutputAux)));
   }
 
   return StatusCode::SUCCESS;
@@ -186,32 +152,6 @@ StatusCode BuildTruthTaus::retrieveTruthTaus(TruthTausEvent& truthTausEvent) con
 StatusCode
 BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent) const
 {
-  if(truthTausEvent.m_xTruthTauContainer && !m_bWriteTruthTaus)
-  {
-    delete truthTausEvent.m_xTruthTauContainer;
-    delete truthTausEvent.m_xTruthTauAuxContainer;
-  }
-
-  // Create the new containers
-  truthTausEvent.m_xTruthTauContainer = new xAOD::TruthParticleContainer();
-  truthTausEvent.m_xTruthTauAuxContainer = new xAOD::TruthParticleAuxContainer();
-  truthTausEvent.m_xTruthTauContainer->setStore( truthTausEvent.m_xTruthTauAuxContainer );
-
-  if (m_bWriteTruthTaus)
-  {
-    if ( evtStore()->record( truthTausEvent.m_xTruthTauContainer, m_sNewTruthTauContainerName ).isFailure() )
-    {
-      ATH_MSG_FATAL("Couldn't create truth tau container with key " << m_sNewTruthTauContainerName);
-      return StatusCode::FAILURE;
-    }
-    if ( evtStore()->record( truthTausEvent.m_xTruthTauAuxContainer, m_sNewTruthTauContainerNameAux ).isFailure() )
-    {
-      ATH_MSG_FATAL("Couldn't create truth tau container with key " << m_sNewTruthTauContainerNameAux);
-      return StatusCode::FAILURE;
-    }
-    ATH_MSG_DEBUG( "Recorded new TruthParticleContainer with key: " <<  m_sNewTruthTauContainerName);
-  }
-
   for (auto xTruthParticle : *truthTausEvent.m_xTruthParticleContainer)
   {
     if ( xTruthParticle->isTau() )
@@ -255,14 +195,14 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
   TauTruthInfo truthInfo;
 
   const xAOD::TruthVertex* xDecayVertex = xTruthParticle.decayVtx();
-  if ( !xDecayVertex )
+  if (xDecayVertex == nullptr)
     return StatusCode::FAILURE;
   for ( size_t iOutgoingParticle = 0; iOutgoingParticle < xDecayVertex->nOutgoingParticles(); ++iOutgoingParticle )
   {
     const xAOD::TruthParticle* xTruthDaughter = xDecayVertex->outgoingParticle(iOutgoingParticle);
-    if (!xTruthDaughter)
+    if (xTruthDaughter == nullptr)
     {
-      ATH_MSG_FATAL("Truth daughter of tau decay was not found in "<<m_sTruthParticlesContainerName<<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.\nInformation on how to do this can be found here:\nhttps://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/TauPreRecommendations2015#Accessing_Tau_Truth_Information");
+      ATH_MSG_ERROR("Truth daughter of tau decay was not found in "<< m_truthParticleContainer.key() <<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.");
       return StatusCode::FAILURE;
     }
 
@@ -388,7 +328,7 @@ StatusCode BuildTruthTaus::examineTruthTauDecay (const xAOD::TruthParticle& xTru
   truthInfo.m_vDecayVertex.SetXYZ(xDecayVertex->x(),xDecayVertex->y(),xDecayVertex->z());
 
   if (xTruthParticle.hasProdVtx() ) {
-     const xAOD::TruthVertex * xProdVertex = xTruthParticle.prodVtx();
+     const xAOD::TruthVertex* xProdVertex = xTruthParticle.prodVtx();
      truthInfo.m_vProdVertex.SetXYZ(xProdVertex->x(),xProdVertex->y(),xProdVertex->z());
   } else {
      truthInfo.m_vProdVertex.SetXYZ(-1234,-1234,-1234);
@@ -397,9 +337,9 @@ StatusCode BuildTruthTaus::examineTruthTauDecay (const xAOD::TruthParticle& xTru
   for ( size_t iOutgoingParticle = 0; iOutgoingParticle < xDecayVertex->nOutgoingParticles(); ++iOutgoingParticle )
   {
     const xAOD::TruthParticle* xTruthDaughter = xDecayVertex->outgoingParticle(iOutgoingParticle);
-    if (!xTruthDaughter)
+    if (xTruthDaughter == nullptr)
     {
-      ATH_MSG_FATAL("Truth daughter of tau decay was not found in "<<m_sTruthParticlesContainerName<<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.\nInformation on how to do this can be found here:\nhttps://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/TauPreRecommendations2015#Accessing_Tau_Truth_Information");
+      ATH_MSG_ERROR("Truth daughter of tau decay was not found in "<< m_truthParticleContainer.key() <<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.");
       return StatusCode::FAILURE;
     }
 
@@ -469,15 +409,15 @@ void BuildTruthTaus::printDecay(const xAOD::TruthParticle& xTruthParticle, int d
   // loop over all decay particles, print their kinematic and other properties
 
   const xAOD::TruthVertex* xDecayVertex = xTruthParticle.decayVtx();
-  if (!xDecayVertex)
+  if (xDecayVertex == nullptr)
     return;
 
   for ( size_t iOutgoingParticle = 0; iOutgoingParticle < xDecayVertex->nOutgoingParticles(); ++iOutgoingParticle )
   {
     const xAOD::TruthParticle* xTruthDaughter = xDecayVertex->outgoingParticle(iOutgoingParticle);
-    if (!xTruthDaughter)
+    if (xTruthDaughter == nullptr)
     {
-      ATH_MSG_WARNING("Truth daughter of tau decay was not found in "<<m_sTruthParticlesContainerName<<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.\nInformation on how to do this can be found here:\nhttps://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/TauPreRecommendations2015#Accessing_Tau_Truth_Information");
+      ATH_MSG_WARNING("Truth daughter of tau decay was not found in "<< m_truthParticleContainer.key() <<" container. Please ensure that this container has the full tau decay information or produce the TruthTaus container in AtlasDerivation.");
       return;
     }
     ATH_MSG_WARNING("depth "<<depth

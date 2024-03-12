@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_UT_TAUANALYSISTOOLS_TEST_H
@@ -88,7 +88,6 @@ int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
   // TauTruthMatchingTool
   // ===========================================================================
   ToolHandle<TauAnalysisTools::ITauTruthMatchingTool> T2MT( "TauAnalysisTools::TauTruthMatchingTool/TauTruthMatchingTool");
-  ANA_CHECK(AthAnalysisHelper::setProperty(T2MT, "WriteTruthTaus", true));
   ANA_CHECK(AthAnalysisHelper::setProperty(T2MT, "TruthJetContainerName", "AntiKt4TruthDressedWZJets"));
   ANA_CHECK(T2MT.retrieve());
 

@@ -1,5 +1,5 @@
 /**
- * @copyright Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ * @copyright Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  *
  * @file DiTauTruthMatchingTool.cxx
  * @brief Class for ditau truth matching
@@ -44,6 +44,10 @@ DiTauTruthMatchingTool::~DiTauTruthMatchingTool( )
 StatusCode DiTauTruthMatchingTool::initialize()
 {
   ATH_MSG_INFO( "Initializing DiTauTruthMatchingTool" );
+
+  // configure BuildTruthTaus in truth matching mode, not truth tau building mode
+  DiTauTruthMatchingTool::BuildTruthTaus::setTruthMatchingMode();
+
   if (DiTauTruthMatchingTool::BuildTruthTaus::initialize().isFailure())
     {
       ATH_MSG_FATAL("Failed initializing BuildTruthTaus");

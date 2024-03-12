@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TAUANALYSISTOOLS_BUILDTRUTHTAUS_H
@@ -13,6 +13,8 @@
 // Framework include(s):
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/WriteHandleKey.h"
 
 // Core include(s):
 #include "MCTruthClassifier/IMCTruthClassifier.h"
@@ -22,9 +24,6 @@
 
 // Local include(s):
 #include "TauAnalysisTools/IBuildTruthTaus.h"
-
-#include "CxxUtils/CachedValue.h"
-#include <atomic>
 
 namespace TauAnalysisTools
 {
@@ -42,7 +41,6 @@ public:
   struct TruthTausEvent
     : public ITruthTausEvent
   {
-    bool m_valid = false;
     const xAOD::TruthParticleContainer* m_xTruthTauContainerConst = nullptr;
     const xAOD::TruthParticleContainer* m_xTruthMuonContainerConst = nullptr;
     const xAOD::TruthParticleContainer* m_xTruthElectronContainerConst = nullptr;
@@ -54,16 +52,14 @@ public:
 
   BuildTruthTaus( const std::string& name );
 
-  virtual ~BuildTruthTaus();
+  virtual ~BuildTruthTaus() = default;
 
   // initialize the tool
   virtual StatusCode initialize() override;
 
-  // get TruthTauContainer
-  virtual xAOD::TruthParticleContainer* getTruthTauContainer() override;
-
-  // get TruthTauAuxContainer
-  virtual xAOD::TruthParticleAuxContainer* getTruthTauAuxContainer() override;
+  virtual void setTruthMatchingMode() override {
+    m_truthMatchingMode = true;
+  };
 
   virtual StatusCode retrieveTruthTaus() override;
   virtual StatusCode retrieveTruthTaus(ITruthTausEvent& truthTausEvent) const override;
@@ -97,8 +93,6 @@ private:
 
   };
 
-  // Execute at each event
-  virtual StatusCode beginEvent() override;
 
   StatusCode buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent) const;
   StatusCode examineTruthTau(const xAOD::TruthParticle& xTruthParticle) const;
@@ -108,37 +102,28 @@ private:
 
 protected:
 
-  // steering variables
-  bool m_bWriteTruthTaus;
-  mutable std::atomic<bool> m_bTruthTauAvailable;
-
   TruthTausEvent m_truthTausEvent;
 
-  CxxUtils::CachedValue<bool> m_bIsTruthMatchedAvailable;
-  CxxUtils::CachedValue<bool> m_bIsTruthParticleLinkAvailable;
+  // temporary, drop at the first occasion
+  bool m_bTruthTauAvailable;
 
 private:
 
-  // steering variables
-  std::string m_sNewTruthTauContainerName;
-  std::string m_sNewTruthTauContainerNameAux;
-  std::string m_sTruthTauContainerName;
-  std::string m_sTruthMuonContainerName;
-  std::string m_sTruthElectronContainerName;
-  std::string m_sTruthJetContainerName;
-  std::string m_sTruthParticlesContainerName;
+  // input containers
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthTauInputContainer { this, "TruthTauContainerName", "TruthTaus", "Truth tau input container name (truth matching mode)" };
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainer { this, "TruthParticleContainerName", "TruthParticles", "Truth particles input container name" };
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthElectronContainer { this, "TruthElectronContainerName", "TruthElectrons", "Truth electrons input container name" };
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuonContainer { this, "TruthMuonContainerName", "TruthMuons", "Truth muons input container name" };
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthJetContainer { this, "TruthJetContainerName", "AntiKt4TruthJets", "Truth jets input container name" };
+  // output container
+  SG::WriteHandleKey<xAOD::TruthParticleContainer> m_truthTauOutputContainer { this, "NewTruthTauContainerName", "TruthTaus", "Truth tau output container name" };
 
-  mutable std::atomic<bool> m_bTruthMuonAvailable;
-  mutable std::atomic<bool> m_bTruthElectronAvailable;
-  mutable std::atomic<bool> m_bTruthJetAvailable;
-
+  bool m_truthMatchingMode = false;
   bool m_bWriteInvisibleFourMomentum;
   bool m_bWriteVisibleChargedFourMomentum;
   bool m_bWriteVisibleNeutralFourMomentum;
   bool m_bWriteDecayModeVector;
   bool m_bWriteVertices;
-
-private:
 
   asg::AnaToolHandle<IMCTruthClassifier> m_tMCTruthClassifier;
 

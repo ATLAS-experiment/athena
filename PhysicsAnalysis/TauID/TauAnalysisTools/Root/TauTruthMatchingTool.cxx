@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s)
@@ -31,6 +31,10 @@ TauTruthMatchingTool::TauTruthMatchingTool( const std::string& name )
 StatusCode TauTruthMatchingTool::initialize()
 {
   ATH_MSG_INFO( "Initializing TauTruthMatchingTool" );
+
+  // configure BuildTruthTaus in truth matching mode, not truth tau building mode
+  TauTruthMatchingTool::BuildTruthTaus::setTruthMatchingMode();
+
   if (TauTruthMatchingTool::BuildTruthTaus::initialize().isFailure())
   {
     ATH_MSG_FATAL("Failed initializing BuildTruthTaus");
@@ -84,8 +88,6 @@ const xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xT
   // if matched to a truth particle return its pointer, else return a null pointer
   if ((bool)accIsTruthMatched(xTau))
     {
-    if (m_bWriteTruthTaus or m_bTruthTauAvailable)
-    {
       if (accTruthParticleLink(xTau).isValid())
       {
         return *accTruthParticleLink(xTau);
@@ -96,12 +98,7 @@ const xAOD::TruthParticle* TauTruthMatchingTool::getTruth(const xAOD::TauJet& xT
         return nullptr;
       }
     }
-    else
-    {
-      static const SG::AuxElement::ConstAccessor< const xAOD::TruthParticle* > accTruthTau("TruthTau");
-      return accTruthTau(xTau);
-    }
-  }
+
   return nullptr;
 }
 
@@ -411,13 +408,6 @@ StatusCode TauTruthMatchingTool::checkTruthMatch (const xAOD::TauJet& xTau, cons
   {
     ElementLink < xAOD::JetContainer > lTruthParticleLink;
     decTruthJetLink(xTau) = lTruthParticleLink;
-  }
-
-  if (!m_bWriteTruthTaus and !m_bTruthTauAvailable)
-  {
-    static const SG::AuxElement::Decorator< const xAOD::TruthParticle* > decTruthTau("TruthTau");
-    decTruthTau(xTau) = xTruthMatch;
-    return StatusCode::SUCCESS;
   }
 
   // create link to the original TruthParticle

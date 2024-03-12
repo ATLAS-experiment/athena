@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SUSYTools/SUSYObjDef_xAOD.h"
@@ -1499,7 +1499,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     if (!m_tauTruthMatch.isUserConfigured() && m_tauDoTTM) {
       m_tauTruthMatch.setTypeAndName("TauAnalysisTools::TauTruthMatchingTool/TauTruthMatch");
-      ATH_CHECK( m_tauTruthMatch.setProperty("WriteTruthTaus", true) );
       ATH_CHECK( m_tauTruthMatch.setProperty("TruthJetContainerName", m_defaultTruthJets ) );
       ATH_CHECK( m_tauTruthMatch.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauTruthMatch.retrieve() );
