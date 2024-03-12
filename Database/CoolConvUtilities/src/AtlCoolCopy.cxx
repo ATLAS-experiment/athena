@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // AtlCoolCopy.cxx
@@ -2688,23 +2688,38 @@ bool AtlCoolCopy::getOnlineRun() {
   // Initialize libcurl
   curl_global_init(CURL_GLOBAL_ALL);
   CURL *curl = curl_easy_init();
+  CURLcode res = CURLE_OK;
   if (curl) {
       std::string url = m_runinfohost + "/runs?sort=runnumber:DESC&size=1";
       // Set the URL
-      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
+      res = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
+          return false;
+      }
       // Follow HTTP redirections
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
+      res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
+          return false;
+      }
       // Response data buffer
       std::string response;
 
       // Set the callback function to receive response data
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+      res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
+          return false;
+      }
+      res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
+          return false;
+      }
 
       // Perform the request
-      CURLcode res = curl_easy_perform(curl);
+      res = curl_easy_perform(curl);
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url.c_str() << std::endl;
           return false;
@@ -2764,23 +2779,38 @@ bool AtlCoolCopy::getBulkRun() {
   // Initialize libcurl
   curl_global_init(CURL_GLOBAL_ALL);
   CURL *curl = curl_easy_init();
+  CURLcode res = CURLE_OK;
+  
   if (curl) {
       std::string url = m_runinfohost + "/runs/nemop/sync";
       // Set the URL
-      curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-
+      res = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
+          return false;
+      }
       // Follow HTTP redirections
-      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
+      res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
+          return false;
+      }
       // Response data buffer
       std::string response;
 
       // Set the callback function to receive response data
-      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-      curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-
+      res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
+          return false;
+      }
+      res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+      if (res != CURLE_OK) {
+          std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
+          return false;
+      }
       // Perform the request
-      CURLcode res = curl_easy_perform(curl);
+      res = curl_easy_perform(curl);
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url.c_str() << std::endl;
           return false;
