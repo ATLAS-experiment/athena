@@ -189,6 +189,7 @@ class FlagAddress(object):
         self._flags.loadAllDynamicFlags()
         address = self._name
         for key in self._flags._flagdict.keys():
+            key = self._flags._renames.get(key, key)
             if key.startswith(address.rstrip('.') + '.'):
                 ntrim = len(address) + 1
                 remaining = key[ntrim:]
@@ -311,6 +312,7 @@ class AthConfigFlags(object):
         """
         self.loadAllDynamicFlags()
         for key in self._flagdict.keys():
+            key = self._renames.get(key, key)
             # Lots of modules are missing in analysis releases. I
             # tried to prevent imports using the _addFlagsCategory
             # function which checks if some module exists, but this

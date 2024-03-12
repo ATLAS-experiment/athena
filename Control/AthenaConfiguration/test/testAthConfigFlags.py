@@ -206,6 +206,8 @@ class BasicTests(FlagsSetup):
         self.assertEqual(self.flags.A.B.C, full_dict['A']['B']['C'])
         bdict = self.flags.A.B.asdict()
         self.assertEqual(self.flags.A.B.C, bdict['C'])
+        clone = self.flags.cloneAndReplace('X', 'A.B')
+        self.assertEqual(clone.X.asdict(), bdict)
 
     def test_iterator(self):
         self.assertTrue('A' in self.flags)
