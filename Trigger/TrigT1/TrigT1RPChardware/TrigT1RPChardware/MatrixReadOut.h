@@ -92,53 +92,53 @@ private:
     // fp
 
     friend class ReadOutManager;
-    ReadOutManager *m_myBoss;
+    ReadOutManager *m_myBoss{};
     void setManager(ReadOutManager *boss);
     void makeFragment();
 
     MatrixReadOut::DataVersion m_data_version;
 
-    MatrixReadOutStructure m_MROS;
-    ubit16 m_BunchFrom;
-    ubit16 m_BunchTo;
-    ubit16 m_FEL1ID;
-    ubit16 m_ROOffset;
-    ubit16 m_NDLLCYC;
-    ubit16 m_NBunch;
-    ubit16 m_nclock;
+    MatrixReadOutStructure m_MROS{};
+    ubit16 m_BunchFrom{};
+    ubit16 m_BunchTo{};
+    ubit16 m_FEL1ID{};
+    ubit16 m_ROOffset{};
+    ubit16 m_NDLLCYC{};
+    ubit16 m_NBunch{};
+    ubit16 m_nclock{};
     ubit16 m_nchan[2]{};
-    ubit16 m_timeSeparation;
-    Matrix *m_CM;  // pointer to the CM
-    ubit16 *m_BS;  // pointer to Fragment
+    ubit16 m_timeSeparation{};
+    Matrix *m_CM{};  // pointer to the CM
+    ubit16 *m_BS{};  // pointer to Fragment
     //**************************************//
     //                                      //
     //    Matrix ReadOut structure          //
     //                                      //
     //**************************************//
     struct CMROData {
-        ubit16 hit;
-        CMROData *next;
+        ubit16 hit{};
+        CMROData *next{};
     };
-    ubit16 m_Header;     // Header record
-    ubit16 m_Footer;     // Footer record
-    ubit16 m_SubHeader;  // Subheader record
-    CMROData *m_Body;    // Body structure record
+    ubit16 m_Header{};     // Header record
+    ubit16 m_Footer{};     // Footer record
+    ubit16 m_SubHeader{};  // Subheader record
+    CMROData *m_Body{};    // Body structure record
     //**********************************************************//
-    ubit16 m_addressOfWordScanned;
-    CMROData *m_BodyLast;  // pointer to the last hit recorded
-    CMROData *m_BodyCurr;  // pointer to the current hit scanned
+    ubit16 m_addressOfWordScanned{};
+    CMROData *m_BodyLast{};  // pointer to the last hit recorded
+    CMROData *m_BodyCurr{};  // pointer to the current hit scanned
     //**********************************************************//
-    ubit16 m_first8bitsON;
-    ubit16 m_numberOfWordsInFrag;
-    ubit16 m_numberOfWordsInBody;
-    ubit16 m_checkHeaderPos;
-    ubit16 m_checkHeaderNum;
-    ubit16 m_checkSubHeaderPos;
-    ubit16 m_checkSubHeaderNum;
-    ubit16 m_checkFooterPos;
-    ubit16 m_checkFooterNum;
-    ubit16 m_checkCR;
-    ubit16 m_checkUnkown;
+    ubit16 m_first8bitsON{};
+    ubit16 m_numberOfWordsInFrag{};
+    ubit16 m_numberOfWordsInBody{};
+    ubit16 m_checkHeaderPos{};
+    ubit16 m_checkHeaderNum{};
+    ubit16 m_checkSubHeaderPos{};
+    ubit16 m_checkSubHeaderNum{};
+    ubit16 m_checkFooterPos{};
+    ubit16 m_checkFooterNum{};
+    ubit16 m_checkCR{};
+    ubit16 m_checkUnkown{};
     //************************//
     void initialize(uint NOBXS);
     void makeHeader();
