@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -15,9 +15,9 @@ def IsoCloseByCorrectionToolCfg(flags, name="IsoCloseByCorrectionTool", ttva_wp 
     acc = ComponentAccumulator()
     kwargs.setdefault("IsolationSelectionTool", acc.popToolsAndMerge(MuonPhysValIsolationSelCfg(flags)))
     from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
-    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg
     kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(isoTrackSelectionToolCfg(flags, minPt=500)) )
-    if len(ttva_wp): 
+    if len(ttva_wp):
+        from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
         kwargs.setdefault("TTVASelectionTool", acc.popToolsAndMerge(isoTTVAToolCfg(flags, WorkingPoint = ttva_wp)))
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
     kwargs.setdefault("ParticleCaloExtensionTool", acc.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)))   

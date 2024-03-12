@@ -1,4 +1,3 @@
-
 #
 #  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
@@ -10,7 +9,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg, trigInDetPrecisionTrackingCfg
 from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
-from InDetUsedInVertexFitTrackDecorator.UsedInVertexFitTrackDecoratorCfg import getUsedInVertexFitTrackDecoratorAlg
+from InDetConfig.UsedInVertexFitTrackDecoratorConfig import getUsedInVertexFitTrackDecoratorAlg
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache

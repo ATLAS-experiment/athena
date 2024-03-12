@@ -19,11 +19,13 @@ def _buildJetAlgForInput(suffix, tools ):
     return jetalg
 
 def buildJetTrackUsedInFitDeco( parentjetdef, inputspec ):
-    from InDetUsedInVertexFitTrackDecorator.UsedInVertexFitTrackDecoratorCfg import getUsedInVertexFitTrackDecoratorAlg
+    from InDetConfig.UsedInVertexFitTrackDecoratorConfig import (
+        getUsedInVertexFitTrackDecoratorAlg)
     from JetRecConfig.StandardJetContext import jetContextDic
     trkProperties = jetContextDic[parentjetdef.context]
 
-    return getUsedInVertexFitTrackDecoratorAlg(trackCont=trkProperties["Tracks"] , vtxCont= trkProperties["Vertices"])
+    return getUsedInVertexFitTrackDecoratorAlg(trackCont=trkProperties["Tracks"],
+                                               vtxCont= trkProperties["Vertices"])
 
     
 def buildJetInputTruth(parentjetdef, truthmod):
@@ -67,7 +69,7 @@ def buildLabelledTruth(parentjetdef, truthmod):
 
 def buildPV0TrackSel(parentjetdef, spec):
     from JetRecConfig.StandardJetContext import jetContextDic
-    from TrackVertexAssociationTool.TTVAToolConfig import getTTVAToolForReco
+    from InDetConfig.TrackVertexAssociationToolConfig import getTTVAToolForReco
     
     trkOptions = jetContextDic[parentjetdef.context]
     tvaTool = getTTVAToolForReco("trackjetTVAtool", 

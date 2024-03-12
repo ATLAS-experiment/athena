@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 """Configuration sequences for the MET input reconstruction
 
@@ -29,7 +29,7 @@ from ..Jet.JetRecoCommon import (
 from ..Jet.JetRecoSequencesConfig import JetRecoCfg
 from ..Jet.JetTrackingConfig import JetFSTrackingCfg
 from .StepOutput import StepOutput
-from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
+from InDetConfig.TrackVertexAssociationToolConfig import CVF_TTVAToolCfg
 
 
 def jetRecoDictForMET(**recoDict) -> dict[str, Any]:
@@ -178,16 +178,10 @@ def cvfClusterInputCfg(flags, **recoDict) -> StepOutput:
                 CutLevel="TightPrimary"
             ),
             TVATool=acc.popToolsAndMerge(
-                TTVAToolCfg(
+                CVF_TTVAToolCfg(
                     flags,
-                    "TTVATool",
-                    addDecoAlg=False,
-                    WorkingPoint="Custom",
-                    d0_cut=2.0,
-                    dzSinTheta_cut=2.0,
                     TrackContName=inputs["Tracks"],
-                    VertexContName=inputs["Vertices"],
-                    HardScatterLinkDeco="",
+                    VertexContName=inputs["Vertices"]
                 )
             ),
             ExtensionTool=CompFactory.ApproximateTrackToLayerTool(),

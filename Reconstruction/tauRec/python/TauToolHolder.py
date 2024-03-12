@@ -29,24 +29,12 @@ def JetSeedBuilderCfg(flags):
     return result
 
 #########################################################################
-def TVAToolCfg(flags):
-    _name = flags.Tau.ActiveConfig.prefix + "TVATool"
-
-    from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg as _TTVAToolCfg
-    # returns a component accumulator instance, also sets UsedInFitDecorator
-    TVAToolCA = _TTVAToolCfg(flags, _name,
-                           WorkingPoint = "Nonprompt_Hard_MaxWeight",
-                           HardScatterLinkDeco="",
-                           TrackContName = flags.Tau.ActiveConfig.TrackCollection,
-                           VertexContName = flags.Tau.ActiveConfig.VertexCollection)
-    return TVAToolCA
-
-#########################################################################
 def TauVertexFinderCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauVertexFinder'
 
     from InDetConfig.InDetTrackSelectionToolConfig import Tau_InDetTrackSelectionToolForTJVACfg
+    from InDetConfig.TrackVertexAssociationToolConfig import TauTTVAToolCfg
 
     # Algorithm that overwrites numTrack() and charge() of tauJets in container
     # from tauRecTools.tauRecToolsConf import TauVertexFinder
@@ -58,7 +46,7 @@ def TauVertexFinderCfg(flags):
                                       InDetTrackSelectionToolForTJVA = result.popToolsAndMerge(Tau_InDetTrackSelectionToolForTJVACfg(flags)),
                                       Key_trackPartInputContainer= flags.Tau.ActiveConfig.TrackCollection,
                                       Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
-                                      TVATool = result.popToolsAndMerge(TVAToolCfg(flags)),
+                                      TVATool = result.popToolsAndMerge(TauTTVAToolCfg(flags)),
                                       inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
                                       )
 

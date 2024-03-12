@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -226,9 +226,10 @@ class METConfig:
                                                                   maxD0=2,
                                                                   minPt=500)
             #
-            from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
-            self.trkvxtool=self.accumulator.popToolsAndMerge(TTVAToolCfg(inputFlags, "TrackVertexAssociationTool_MET",addDecoAlg=True, 
-                                                                         WorkingPoint="Nonprompt_All_MaxWeight", HardScatterLinkDeco=""))
+            from InDetConfig.TrackVertexAssociationToolConfig import TTVAToolCfg
+            self.trkvxtool = self.accumulator.popToolsAndMerge(
+                TTVAToolCfg(inputFlags, "TrackVertexAssociationTool_MET", addDecoAlg=True,
+                            WorkingPoint="Nonprompt_All_MaxWeight", HardScatterLinkDeco=""))
             #
             self.trkisotool = CompFactory.getComp("xAOD::TrackIsolationTool")("TrackIsolationTool_MET")
             self.trkisotool.TrackSelectionTool = self.trkseltool # As configured above

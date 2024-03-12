@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -23,21 +23,27 @@ def TrackIsolationToolCfg(ConfigFlags,name= "TrackIsolationTool", **kwargs):
     return acc
 
 
-def MuonTrackIsolationDecorAlgCfg(ConfigFlags, name="MuonTrackIsolationDecorator", ttvaWP = "Nonprompt_All_MaxWeight", trackPt=500., **kwargs):
+def MuonTrackIsolationDecorAlgCfg(
+        ConfigFlags, name="MuonTrackIsolationDecorator",
+        ttvaWP = "Nonprompt_All_MaxWeight", trackPt=500., **kwargs):
 
-    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg, TrackIsolationToolCfg
+    result = ComponentAccumulator()
+    from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
+    ttvaTool = result.popToolsAndMerge(
+        isoTTVAToolCfg(ConfigFlags, WorkingPoint=ttvaWP))
     from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
-    result = ComponentAccumulator()    
-    ttvaTool = result.popToolsAndMerge(isoTTVAToolCfg(ConfigFlags, WorkingPoint=ttvaWP))
-    trackSelTool = result.popToolsAndMerge(isoTrackSelectionToolCfg(ConfigFlags, minPt=trackPt))
+    trackSelTool = result.popToolsAndMerge(
+        isoTrackSelectionToolCfg(ConfigFlags, minPt=trackPt))
     
     wpName = "{WP}TTVA_pt{ptCut}".format(WP = ttvaWP, ptCut = trackPt)
     kwargs.setdefault("customName", wpName)
     ## Minimal pt cut on the ID tracks
     kwargs.setdefault("PtMin", 2500.)
-    kwargs.setdefault("IsolationTool", result.popToolsAndMerge(TrackIsolationToolCfg(ConfigFlags, 
-                                                                                     TTVATool=ttvaTool, 
-                                                                                     TrackSelectionTool=trackSelTool)))
+    from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg
+    kwargs.setdefault("IsolationTool", result.popToolsAndMerge(
+        TrackIsolationToolCfg(ConfigFlags,
+                              TTVATool=ttvaTool,
+                              TrackSelectionTool=trackSelTool)))
     theAlg = CompFactory.DerivationFramework.TrackIsolationDecorAlg(name = name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)
     return result
