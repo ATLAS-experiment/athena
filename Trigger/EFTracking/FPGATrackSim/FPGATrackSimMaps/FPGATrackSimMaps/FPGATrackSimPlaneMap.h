@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSimPLANEMAP_H
 #define FPGATrackSimPLANEMAP_H
@@ -6,7 +6,7 @@
 /**
  * @file FPGATrackSimPlaneMap.h
  * @author Riley Xu - riley.xu@cern.ch (rewrite from FTK)
- * @date Janurary 7th, 2020
+ * @date January 7th, 2020
  * @brief Maps physical layers to logical layers
  *
  *
@@ -31,9 +31,9 @@
 
 #include <vector>
 #include <string>
-#include <sstream>
 #include <stdexcept>
 #include <fstream>
+#include <memory>
 
 
 struct LayerSection
@@ -121,12 +121,9 @@ class FPGATrackSimPlaneMap
         {
             try {
                 return m_map.at(static_cast<int>(siTech)).at(static_cast<int>(zone)).at(physLayer);
-            } catch (std::exception const & e)
+            } catch ( std::out_of_range const & e)
             {
                 // TMP HACK FIX REMOVE ME
-                std::stringstream s;
-                s << "getLayerSection(siTech=" << (int)siTech << ", DZ=" << (int)zone << ", layer=" << physLayer << ") out of bounds";
-		std::cerr << s.str() <<std::endl;
                 return m_map.at(1).at(0).at(0);
             }
         }
@@ -173,7 +170,7 @@ class FPGATrackSimPlaneMap
         std::vector<uint32_t> m_diskIndex; // index of disks in the pixel endcap, indexed by ITK layer_disk
 
         // Module relabel object for remapping pixel endcap hits.
-        FPGATrackSimModuleRelabel* m_moduleRelabel = nullptr;
+        std::unique_ptr<FPGATrackSimModuleRelabel> m_moduleRelabel{};
 
 
         ///////////////////////////////////////////////////////////////////////

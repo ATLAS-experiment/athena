@@ -7,14 +7,18 @@
 
 #ifndef FPGATRACKSIMMODULERELABEL_H
 #define FPGATRACKSIMMODULERELABEL_H
+#include "AthenaBaseComps/AthMessaging.h" //inheritance
 
-#include "AthenaBaseComps/AthMessaging.h"
 
-#include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include <map>
+#include <vector>
+#include <string>
+
+class FPGATrackSimHit;
 
 // this doesn't necessarily have to live in a namespace, but it would
 // if it were in FPGATrackSimMacros.h.
-// New supported geometries should be addd here.
+// New supported geometries should be added here.
 namespace htt {
     const std::map<const std::string, const std::vector<uint>> ringIndices = {
         {"ATLAS-P2-ITK-22-02-00",  {0, 17, 47, 58, 66}},
