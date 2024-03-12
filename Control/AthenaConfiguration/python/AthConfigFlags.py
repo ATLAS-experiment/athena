@@ -188,12 +188,12 @@ class FlagAddress(object):
         """
         self._flags.loadAllDynamicFlags()
         address = self._name
+        rename = self._flags._renamed_map()
         for key in self._flags._flagdict.keys():
-            key = self._flags._renames.get(key, key)
             if key.startswith(address.rstrip('.') + '.'):
                 ntrim = len(address) + 1
                 remaining = key[ntrim:]
-                yield key, getattr(self, remaining)
+                yield rename[key], getattr(self, remaining)
 
     def asdict(self):
         """Convert to a python dictionary
@@ -207,7 +207,7 @@ class FlagAddress(object):
 
         """
         d = _asdict(self._subflag_itr())
-        for k in self._name.split ('.'):
+        for k in self._name.split('.'):
             d = d[k]
         return d
 
@@ -305,14 +305,28 @@ class AthConfigFlags(object):
         """
         return _asdict(self._subflag_itr())
 
+
+    def _renamed_map(self):
+        self.loadAllDynamicFlags()
+        def rename(key):
+            for new, old in self._renames.items():
+                if key.startswith(old + '.'):
+                    stem = key.removeprefix(old)
+                    if not new:
+                        return ''
+                    else:
+                        return f'{new}{stem}'
+            return key
+        return {x:rename(x) for x in self._flagdict.keys()}
+
     def _subflag_itr(self):
         """Subflag iterator for all flags
 
         This is used by the asdict() function.
         """
         self.loadAllDynamicFlags()
-        for key in self._flagdict.keys():
-            key = self._renames.get(key, key)
+
+        for old, new in self._renamed_map().items():
             # Lots of modules are missing in analysis releases. I
             # tried to prevent imports using the _addFlagsCategory
             # function which checks if some module exists, but this
@@ -320,7 +334,7 @@ class AthConfigFlags(object):
             # the missing module exception seems to work, even if it's
             # not pretty.
             try:
-                yield key, getattr(self, key)
+                yield new, getattr(self, old)
             except ModuleNotFoundError as err:
                 _msg.debug(f'missing module: {err}')
                 pass
