@@ -151,6 +151,12 @@ StatusCode EventReaderAlg::execute(){
 
   SG::ReadHandle<xAOD::EventInfo> ei = SG::makeHandle(m_eventInfoSgKey,ctx);
   if (!ei.isValid()) ATH_MSG_ERROR(" EventInfo container is not valid!");
+
+  if (ei->errorState(xAOD::EventInfo::LAr) == xAOD::EventInfo::Error) {
+    ATH_MSG_WARNING("Event not passing LAr! Skipping event.");
+    return StatusCode::SUCCESS;
+  }
+
   SG::ReadHandle<xAOD::VertexContainer> primVertexCnt = SG::makeHandle(m_primVertSgKey,ctx);
   if (!primVertexCnt.isValid()) ATH_MSG_ERROR(" Primary Vertex container is not valid!");  
 
@@ -385,23 +391,17 @@ StatusCode EventReaderAlg::dumpZeeCut(SG::ReadHandle<xAOD::EventInfo> &ei, SG::R
   auto TagAndProbeElectronSelectionCnt  = std::make_unique<ConstDataVector<xAOD::ElectronContainer>> (SG::VIEW_ELEMENTS);
   
   SG::ReadHandle<xAOD::ElectronContainer> electronsCnt = SG::makeHandle(m_electronCntSgKey,ctx);
+
   if (!electronsCnt.isValid()) {
     ATH_MSG_ERROR("Electron container is not valid!");
-    return StatusCode::SUCCESS;
+    return StatusCode::FAILURE;
   }
    
-  // check the eventInfo container
-  if ( !ei.isValid() ){
-    ATH_MSG_WARNING("Failed to retrieve EventInfo");
-    return StatusCode::SUCCESS;
-  }
-  if (ei->errorState(xAOD::EventInfo::LAr) == xAOD::EventInfo::Error) {
-    ATH_MSG_WARNING("Event not passing LAr");
-    return StatusCode::SUCCESS;
-  }
-
   // Pre-selection of electrons
   for (auto el : *electronsCnt){
+    if (std::abs(el->eta()) > m_elecEtaCut){ // apply electron |eta| cut
+      continue;
+    }
     if (trackSelectionElectrons(el, primVertexCnt, ei) == true){
       if (eOverPElectron(el) == true){ // if 0.7 < E/p < 1.4
         electronSelectionCnt->push_back( el );

@@ -59,6 +59,7 @@ class ATLAS_NOT_THREAD_SAFE EventReaderBaseAlg: public ::AthAlgorithm
         void                      bookDatabaseBranches(TTree *tree);
 
 
+        Gaudi::Property<float> m_elecEtaCut {this, "electronEtaCut", 1.4, "Electron |eta| cut value."};
         Gaudi::Property<std::string> m_offTagTightness {this, "offTagTightness", "LHMedium"}; /*! Define the PID for tag electron */
         Gaudi::Property<std::string> m_offProbeTightness {this, "offProbeTightness", "Loose"}; /*! define the Pid of Probe from the user */
         Gaudi::Property<float> m_etMinProbe {this, "etMinProbe", 15 ,"Min electron Pt value for Zee probe selection loose (GeV)."}; // Et or pT ?

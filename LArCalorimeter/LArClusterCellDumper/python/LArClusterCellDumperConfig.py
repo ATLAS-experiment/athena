@@ -28,6 +28,7 @@ def EventReaderAlgCfg(flags, name="EventReaderAlgCfg", **kwargs):
     kwargs.setdefault("printCellsClus", False) # Debugging
 
     # Electrons and crosstalk studies
+    kwargs.setdefault("electronEtaCut", 1.4) # Electron |eta| cut value
     kwargs.setdefault("doTagAndProbe", True)  # select by tag and probe method, electron pairs (start the chain of selection: track + T&P)
     kwargs.setdefault("doElecSelectByTrackOnly", True)  # select only single electrons which pass track criteria (only track)
     kwargs.setdefault("getAssociatedTopoCluster", True)  # Get the topo cluster associated to a super cluster, which was linked to an Electron
@@ -204,7 +205,7 @@ if __name__ == "__main__":
     from AthenaCommon.GlobalFlags import globalflags
     from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
     
-    histSvc = CompFactory.THistSvc(Output = ["rec DATAFILE='dumper_outputMC.root', OPT='RECREATE'"])
+    histSvc = CompFactory.THistSvc(Output = ["rec DATAFILE='dumper_output.root', OPT='RECREATE'"])
 
     dumperFlags                             = initConfigFlags()
     dumperFlags.loadAllDynamicFlags()
