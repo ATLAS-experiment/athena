@@ -11,7 +11,7 @@ ATLAS_EXT_PROJECT_NAME="VP1LightExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=104
                         -DLCG_VERSION_POSTFIX="d_ATLAS_7"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/5.0.3/GeoModel-5.0.3.tar.bz2;URL_MD5;8f00da4b18a60c574e6f3e4badcde7d2"
+                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/5.3.0/GeoModel-5.3.0.tar.bz2;URL_MD5;69c41f2c12ada4d953b6452454f92a04"
 			-DATLAS_GEOMODEL_PATCH=""
                         -DATLAS_GEOMODEL_FORCEDOWNLOAD_MESSAGE="Forcing_the_re-download_of_GeoModel_(2024.01.27.)")
 ATLAS_EXTRA_MAKE_ARGS=()

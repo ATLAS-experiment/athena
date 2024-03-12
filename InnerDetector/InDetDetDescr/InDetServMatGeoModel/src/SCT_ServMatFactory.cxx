@@ -255,9 +255,9 @@ void SCT_ServMatFactory::create(GeoPhysVol *mother)
       const GeoLogVol* wingLog = new GeoLogVol(logName,wing,wingMat);
       GeoVPhysVol* wingPhys    = new GeoPhysVol(wingLog);
       GeoTransform* wPos1 = new GeoTransform(GeoTrf::Translate3D(0.,0., ZStartW+ZHalfLengthW));
-      GeoTransform* wPos2 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(M_PI,0,0),GeoTrf::Vector3D(0.,0., ZStartW+ZHalfLengthW)));
+      GeoTransform* wPos2 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(-M_PI,0,0),GeoTrf::Vector3D(0.,0., ZStartW+ZHalfLengthW)));
       GeoTransform* wPos3 = new GeoTransform(GeoTrf::Translate3D(0.,0.,-ZStartW-ZHalfLengthW));
-      GeoTransform* wPos4 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(M_PI,0,0),GeoTrf::Vector3D(0.,0.,-ZStartW-ZHalfLengthW)));
+      GeoTransform* wPos4 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(-M_PI,0,0),GeoTrf::Vector3D(0.,0.,-ZStartW-ZHalfLengthW)));
       mother->add(wPos1);
       mother->add(wingPhys);
       mother->add(wPos2);

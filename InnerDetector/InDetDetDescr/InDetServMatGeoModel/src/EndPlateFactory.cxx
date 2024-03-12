@@ -95,7 +95,7 @@ void EndPlateFactory::create(GeoPhysVol *mother)
     GeoTrf::Translate3D servpos1(0.,0., zposEP);
     GeoTrf::Vector3D servpos2(0.,0.,-zposEP);
     GeoTransform* xform1 = new GeoTransform(servpos1);
-    GeoTransform* xform2 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,M_PI,0),servpos2));
+    GeoTransform* xform2 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,-M_PI,0),servpos2));
     mother->add(xform1);
     mother->add(shellPhysInt);
     mother->add(xform2);
@@ -120,7 +120,7 @@ void EndPlateFactory::create(GeoPhysVol *mother)
     GeoTrf::Translate3D servpos3(0.,0., zposEP+zleng+thickShell+zgap+thickShell/2.);
     GeoTrf::Vector3D servpos4(0.,0.,-zposEP-zleng-thickShell-zgap-thickShell/2.);
     GeoTransform *xform3 = new GeoTransform(servpos3);
-    GeoTransform* xform4 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,M_PI,0),servpos4));
+    GeoTransform* xform4 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,-M_PI,0),servpos4));
 
     mother->add(xform3);
     mother->add(shellPhysExt);
@@ -160,7 +160,7 @@ void EndPlateFactory::create(GeoPhysVol *mother)
     GeoTrf::Translate3D servpos5(0.,0., zinsert);
     GeoTrf::Vector3D servpos6(0.,0.,-zinsert);
     GeoTransform *xform5 = new GeoTransform(servpos5);
-    GeoTransform* xform6 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,M_PI,0),servpos6));
+    GeoTransform* xform6 = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(0,-M_PI,0),servpos6));
 
     mother->add(xform5);
     mother->add(InsertPhys);
@@ -200,10 +200,10 @@ void EndPlateFactory::create(GeoPhysVol *mother)
       double angl= ip*M_PI/6.;
       GeoTrf::Vector3D ribpos_pos( posX*cos(angl), posX*sin(angl), zposEP+zleng+thickShell+zgap/2.);
       GeoTrf::Vector3D ribpos_neg( posX*cos(angl), posX*sin(angl),-zposEP-zleng-thickShell-zgap/2.);
-      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(-angl,0,0),ribpos_pos));
+      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(angl,0,0),ribpos_pos));
       mother->add(xrib);
       mother->add(ribShortPhys);
-      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(-angl,0,0),ribpos_neg));
+      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(angl,0,0),ribpos_neg));
       mother->add(xrib);
       mother->add(ribShortPhys);
     }
@@ -247,19 +247,19 @@ void EndPlateFactory::create(GeoPhysVol *mother)
 // 1st part
       GeoTrf::Vector3D ribpos_pos1( posX1*cos(angl), posX1*sin(angl), zposEP+zleng+thickShell+zgap/2.);
       GeoTrf::Vector3D ribpos_neg1( posX1*cos(angl), posX1*sin(angl),-zposEP-zleng-thickShell-zgap/2.);
-      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(-angl,0,0),ribpos_pos1));      
+      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(angl,0,0),ribpos_pos1));      
       mother->add(xrib);
       mother->add(ribLong1Phys);
-      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(-angl,0,0),ribpos_neg1));      
+      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(angl,0,0),ribpos_neg1));      
       mother->add(xrib);
       mother->add(ribLong1Phys);
 // 2nd part
       GeoTrf::Vector3D ribpos_pos2( posX2*cos(angl), posX2*sin(angl), zposEP+zleng+thickShell+zgap/2.);
       GeoTrf::Vector3D ribpos_neg2( posX2*cos(angl), posX2*sin(angl),-zposEP-zleng-thickShell-zgap/2.);
-      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(-angl,0,0),ribpos_pos2));      
+      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(angl,0,0),ribpos_pos2));      
       mother->add(xrib);
       mother->add(ribLong2Phys);
-      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(-angl,0,0),ribpos_neg2));      
+      xrib = new GeoTransform(GeoTrf::GeoTransformRT(GeoTrf::GeoRotation(angl,0,0),ribpos_neg2));      
       mother->add(xrib);
       mother->add(ribLong2Phys);
     }
