@@ -53,20 +53,22 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
 
     if flags.Acts.EDM.PersistifyTracks:
 
-        toAOD +=  ["xAOD::TrackSummaryContainer#SiSPSeededActsTrackTrackSummary",
-                   "xAOD::TrackSummaryAuxContainer#SiSPSeededActsTrackTrackSummaryAux.",
-                   "xAOD::TrackStateContainer#SiSPSeededActsTrackStates",
-                   "xAOD::TrackStateAuxContainer#SiSPSeededActsTrackStatesAux.",                
-                   "xAOD::TrackParametersContainer#SiSPSeededActsTrackParameters",
-                   "xAOD::TrackParametersAuxContainer#SiSPSeededActsTrackParametersAux.",
-                   "xAOD::TrackJacobianContainer#SiSPSeededActsTrackJacobians",
-                   "xAOD::TrackJacobianAuxContainer#SiSPSeededActsTrackJacobiansAux.",
-                   "xAOD::TrackMeasurementContainer#SiSPSeededActsTrackMeasurements",
-                   "xAOD::TrackMeasurementAuxContainer#SiSPSeededActsTrackMeasurementsAux.",
-                   "xAOD::TrackSurfaceContainer#SiSPSeededActsTrackStateSurfaces",
-                   "xAOD::TrackSurfaceAuxContainer#SiSPSeededActsTrackStateSurfacesAux.",
-                   "xAOD::TrackSurfaceContainer#SiSPSeededActsTrackSurfaces",
-                   "xAOD::TrackSurfaceAuxContainer#SiSPSeededActsTrackSurfacesAux."]
+        trackPrefixes = ['Acts', 'ResolvedActs']
+        for prefix in trackPrefixes:
+            toAOD +=  [f"xAOD::TrackSummaryContainer#{prefix}TrackSummary",
+                       f"xAOD::TrackSummaryAuxContainer#{prefix}TrackSummaryAux.",
+                       f"xAOD::TrackStateContainer#{prefix}TrackStates",
+                       f"xAOD::TrackStateAuxContainer#{prefix}TrackStatesAux.",                
+                       f"xAOD::TrackParametersContainer#{prefix}TrackParameters",
+                       f"xAOD::TrackParametersAuxContainer#{prefix}TrackParametersAux.",
+                       f"xAOD::TrackJacobianContainer#{prefix}TrackJacobians",
+                       f"xAOD::TrackJacobianAuxContainer#{prefix}TrackJacobiansAux.",
+                       f"xAOD::TrackMeasurementContainer#{prefix}TrackMeasurements",
+                       f"xAOD::TrackMeasurementAuxContainer#{prefix}TrackMeasurementsAux.",
+                       f"xAOD::TrackSurfaceContainer#{prefix}TrackStateSurfaces",
+                       f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackStateSurfacesAux.",
+                       f"xAOD::TrackSurfaceContainer#{prefix}TrackSurfaces",
+                       f"xAOD::TrackSurfaceAuxContainer#{prefix}TrackSurfacesAux."]
                 
     # If there is nothing to persistify, returns an empty CA
     if len(toAOD) == 0:
@@ -75,4 +77,3 @@ def PersistifyActsEDMCfg(flags) -> ComponentAccumulator:
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD    
     acc.merge(addToAOD(flags, toAOD))
     return acc
-
