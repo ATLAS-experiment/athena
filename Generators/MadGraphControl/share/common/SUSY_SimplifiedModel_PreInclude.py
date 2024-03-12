@@ -41,6 +41,8 @@ run_settings = {'event_norm':'average',
                 'xqcut':0} # use CKKW-L merging (yes, this is a weird setting)
 # Set up default PDF and systematic settings (note: action in import module)
 from MadGraphControl.MadGraph_NNPDF30NLO_Base_Fragment import *
+from AthenaCommon import Logging
+presusylog = Logging.logging.getLogger('SUSY_PreInclude')
 
 # Setting for writing out a gridpack
 writeGridpack = False
@@ -103,7 +105,7 @@ include("Pythia8_i/Pythia8_MadGraph.py")
 
 # Helper function that can be called from control file to use common mixing matrices
 def common_mixing_matrix(mtype):
-    param_blocks = {}
+    presusylog.info(f"Will set mixing to {mtype}")
     # Include various cases for common mixing matrices here
     if mtype == 'higgsino':
         # Off-diagonal chargino mixing matrix V
@@ -136,6 +138,8 @@ def common_mixing_matrix(mtype):
         param_blocks['NMIX']['4  2']='-1.00E+00'   # N_42 wino
         param_blocks['NMIX']['4  3']=' 0.00E+00'   # N_43
         param_blocks['NMIX']['4  4']=' 0.00E+00'   # N_44
+        if masses['1000022'] * masses['1000023'] > 0:
+            presusylog.warning("Expected N1 and N2 masses to have opposite sign for a higgsino signal. Possibly set after the mixing.")
     elif mtype == 'winobino':
         # Chargino mixing matrix V
         param_blocks['VMIX']={}
@@ -181,5 +185,3 @@ def common_mixing_matrix(mtype):
         param_blocks['selmix'][ '3   6' ] = '0.0' # # RRl3x6
         param_blocks['selmix'][ '6   3' ] = '0.0' # # RRl6x3
         param_blocks['selmix'][ '6   6' ] = '1.0' # # RRl6x6
-
-    return param_blocks
