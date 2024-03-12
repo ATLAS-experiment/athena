@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUSELECTIONTOOL_H
@@ -15,6 +15,7 @@
 #include "AsgTools/AnaToolHandle.h"
 #include "PATCore/IAsgSelectionTool.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
 
 // Local include(s):
 #include "TauAnalysisTools/ITauSelectionTool.h"
@@ -23,6 +24,7 @@
 
 // EDM include(s):
 #include "xAODMuon/MuonContainer.h"
+#include "xAODTau/TauJetContainer.h"
 
 // ROOT include(s):
 #include "TH1F.h"
@@ -150,7 +152,10 @@ protected:
 
 private:
   std::string m_sConfigPath;
-  SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey {this, "MuonContainerName", "Muons", "Muon container read handle key"};
+
+  SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey {this, "MuonContainerName", "Muons", "Muon container name"};
+  SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey {this, "TauContainerName", "TauJets", "Tau container name"};
+  SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_eVetoDecorKey {this, "eVetoDecorName", "", "Name of eVeto decoration"};
 
   std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::TauSelectionCut>> m_cMap;
 
