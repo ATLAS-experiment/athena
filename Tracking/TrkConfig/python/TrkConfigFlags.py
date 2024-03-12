@@ -20,8 +20,8 @@ class PrimaryPassConfig(FlagEnum):
 class ITkPrimaryPassConfig(FlagEnum):
     FTF = 'ITkFTF'
     FastTracking = 'ITkFast'
+    HeavyIon = 'ITkHeavyIon'
     Default = 'ITkMain'
-
 
 class TrackFitterType(FlagEnum):
     DistributedKalmanFilter = 'DistributedKalmanFilter'
@@ -410,13 +410,16 @@ def createTrackingConfigFlags():
         createITkTrackingPassFlags, createITkLargeD0TrackingPassFlags,
         createITkConversionTrackingPassFlags,
         createITkFastTrackingPassFlags, createITkLargeD0FastTrackingPassFlags,
-        createITkFTFPassFlags, createITkLowPtTrackingPassFlags)
+        createITkFTFPassFlags, createITkLowPtTrackingPassFlags,
+        createITkHeavyIonTrackingPassFlags)
 
     def itkPrimaryPass(flags):
         if flags.Tracking.useITkFTF:
             return ITkPrimaryPassConfig.FTF
         elif flags.Tracking.doITkFastTracking:
             return ITkPrimaryPassConfig.FastTracking
+        elif flags.Reco.EnableHI:
+            return ITkPrimaryPassConfig.HeavyIon
         else:
             return ITkPrimaryPassConfig.Default
 
@@ -437,6 +440,8 @@ def createTrackingConfigFlags():
                           createITkLargeD0FastTrackingPassFlags, prefix=True)
     icf.addFlagsCategory ("Tracking.ITkFTFPass",
                           createITkFTFPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkHeavyIonPass",
+                          createITkHeavyIonTrackingPassFlags, prefix=True)
 
     # Acts
     from ActsConfig.ActsTrackingPassFlags import (
