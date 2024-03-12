@@ -2846,5 +2846,5 @@ HLT_noalg_mb_L1MBTS_2:
   eventCount: 0
 HLT_noalg_mb_L1RD0_UNPAIRED_ISO:
   eventCount: 0
-HLT_noalg_zb_L1ZB:
+HLT_noalg_zb_L1ZeroBias:
   eventCount: 0
