@@ -17,7 +17,7 @@ StatusCode TrackContainerReader::initialize()
 {
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   ATH_CHECK(m_tracksKey.initialize());
-  ATH_CHECK(m_tracksKey.key().find("TrackContainer") != std::string::npos);
+  ATH_CHECK(m_tracksKey.key().find("Tracks") != std::string::npos);
   ATH_CHECK(m_tracksBackendHandlesHelper.initialize(ActsTrk::prefixFromTrackContainerName(m_tracksKey.key())));
 
   return StatusCode::SUCCESS;

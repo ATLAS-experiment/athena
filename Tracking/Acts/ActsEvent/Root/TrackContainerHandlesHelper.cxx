@@ -157,11 +157,11 @@ MutableTrackContainerHandlesHelper::moveToConst(
 // const version
 StatusCode ConstTrackContainerHandlesHelper::initialize(
     const std::string& prefix) {
-  m_statesKey = prefix + "States";
-  m_parametersKey = prefix + "Parameters";
-  m_jacobiansKey = prefix + "Jacobians";
-  m_measurementsKey = prefix + "Measurements";
-  m_surfacesKey = prefix + "Surfaces";
+  m_statesKey = prefix + "TrackStates";
+  m_parametersKey = prefix + "TrackParameters";
+  m_jacobiansKey = prefix + "TrackJacobians";
+  m_measurementsKey = prefix + "TrackMeasurements";
+  m_surfacesKey = prefix + "TrackSurfaces";
   m_mtjKey = prefix + "MultiTrajectory";
 
   INIT_CHECK(m_statesKey);

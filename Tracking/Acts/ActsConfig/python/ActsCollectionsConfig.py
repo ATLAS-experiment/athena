@@ -13,12 +13,12 @@ class TrackBackends:
              'xAOD::TrackSurfaceContainer')
     # Allowed post-fixes
     postFixes = ('TrackSummary',
-                 'States',
-                 'Parameters',
-                 'Jacobians',
-                 'Measurements',
-                 'StateSurfaces',
-                 'Surfaces')
+                 'TrackStates',
+                 'TrackParameters',
+                 'TrackJacobians',
+                 'TrackMeasurements',
+                 'TrackStateSurfaces',
+                 'TrackSurfaces')
     
     def __init__(self):
         self.collections = dict()
@@ -52,6 +52,8 @@ class TrackBackends:
         assert isinstance(collection, str)
         for el in TrackBackends.postFixes:
             if collection.endswith(el):
+                if self.collections[el] is not None:
+                    raise Exception(f"Trying to add collection '{collection}', but this backend is already recorded")
                 self.collections[el] = collection
                 return
         # If not in allowed post fixes we raise Exception
@@ -74,7 +76,7 @@ def ActsTrackReaderAlgCfg(flags,
     acc = ComponentAccumulator()
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     acc.addEventAlgo(CompFactory.ActsTrk.TrackContainerReader(f"Acts{prefix}ReaderAlg",
-                                                               TrackContainer=prefix+"TrackContainer",
+                                                               TrackContainer=prefix+"Tracks",
                                                                TrackingGeometryTool=acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags))
                                                               ))
     return acc
