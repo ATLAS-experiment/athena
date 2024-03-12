@@ -30,7 +30,7 @@ from AthenaCommon.Logging import log
 
 # load all entries so far into the workspace of include()
 
-if not opts.run_batch:                               # i.e. interactive
+if opts.interactive:                                 # i.e. interactive
    theApp.EventLoop = "PyAthenaEventLoopMgr"         # from AthenaServices
 
 ## create the application manager and start in a non-initialised state
@@ -75,7 +75,7 @@ else:
    min_cppyy_vmem_growth = None
 
 from PyUtils.Helpers import ROOT6Setup
-ROOT6Setup(batch=opts.run_batch)
+ROOT6Setup(batch=not opts.interactive)
 
 if min_cppyy_vmem_growth:
    grow_vmem( vmem_before_cppyy + min_cppyy_vmem_growth )
@@ -108,7 +108,7 @@ del SetMaxLimits
 del sys.modules[ 'AthenaCommon.ResourceLimits' ]
 
 ### prettification for interactive use
-if not opts.run_batch:
+if opts.interactive:
    import atexit, readline
 
  # finalize on exit (^D)
