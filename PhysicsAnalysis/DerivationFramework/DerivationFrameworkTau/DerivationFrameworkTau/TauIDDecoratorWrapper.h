@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORKTAU_TAUIDDECORATORWRAPPER_H
@@ -10,6 +10,7 @@
 #include "AsgTools/ToolHandleArray.h"
 #include "tauRecTools/TauRecToolBase.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODTau/TauJetContainer.h"
 
 #include <string>
@@ -31,6 +32,8 @@ namespace DerivationFramework {
 
     private:
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey { this, "TauContainerName", "TauJets", "Input tau container key" };
+      SG::WriteDecorHandleKeyArray<xAOD::TauJetContainer> m_decorKeys{ this, "DecorationKeys", {}, "List of decorations added to the tau"};
+
       ToolHandleArray<TauRecToolBase> m_tauIDTools { this, "TauIDTools", {}, "" };
       bool m_doEvetoWP = false;
       std::vector<std::string> m_scores;

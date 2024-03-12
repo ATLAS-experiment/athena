@@ -259,6 +259,14 @@ StatusCode TauSelectionTool::initialize()
   // initialise the ReadHandleKey of the muon container when the muon veto is applied
   ATH_CHECK( m_muonContainerKey.initialize( m_iSelectionCuts & CutMuonOLR ) );
 
+  ATH_CHECK( m_tauContainerKey.initialize() );
+
+  // initialise the ReadDecorHandleKey if eVeto is applied
+  if (m_iSelectionCuts & CutEleIDWP) {
+    ATH_CHECK( m_eVetoDecorKey.assign(m_tauContainerKey.key()+".RNNEleScoreSigTrans_v"+std::to_string(m_iEleIDVersion)) );
+  }
+  ATH_CHECK( m_eVetoDecorKey.initialize( m_iSelectionCuts & CutEleIDWP ) );
+
   // specify all available cut descriptions
   using map_type  = std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::TauSelectionCut>>;
   using pair_type = map_type::value_type;

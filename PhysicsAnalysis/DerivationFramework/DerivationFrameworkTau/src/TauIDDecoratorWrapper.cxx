@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTau/TauIDDecoratorWrapper.h"
@@ -45,10 +45,19 @@ namespace DerivationFramework {
       StringArrayProperty decorWPNames("DecorWPNames", {});
       ATH_CHECK( tool->getProperty(&decorWPNames) );
       for (const auto& WP : decorWPNames.value()) m_WPs.push_back(WP);
+
+      // declare decorations to the scheduler
+      for (const std::string& score : m_scores) {
+	m_decorKeys.emplace_back(m_tauContainerKey.key() + "." + score);
+      }
+      for (const std::string& WP : m_WPs) {
+	m_decorKeys.emplace_back(m_tauContainerKey.key() + "." + WP);
+      }
     }
     
-    // initialize read handle key
+    // initialize read/write handle keys
     ATH_CHECK( m_tauContainerKey.initialize() );
+    ATH_CHECK( m_decorKeys.initialize() );
 
     return StatusCode::SUCCESS;
   }
