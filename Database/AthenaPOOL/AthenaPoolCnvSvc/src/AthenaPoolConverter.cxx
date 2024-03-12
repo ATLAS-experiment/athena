@@ -63,12 +63,19 @@ long AthenaPoolConverter::repSvcType() const {
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) {
    TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddr);
+   
    bool ownTokAddr = false;
    if (tokAddr == nullptr || tokAddr->getToken() == nullptr) {
       ownTokAddr = true;
       Token* token = new Token;
       token->fromString(*(pAddr->par()));
       GenericAddress* genAddr = dynamic_cast<GenericAddress*>(pAddr);
+      if (not genAddr){
+        ATH_MSG_ERROR("Dynamic cast failed in AthenaPoolConverter::createObj");
+        //clean up
+        delete token;
+        return StatusCode::FAILURE;
+      }
       tokAddr = new TokenAddress(*genAddr, token);
    }
    if( tokAddr->ipar()[0] > 0 and tokAddr->getToken()->auxString().empty() ) {
@@ -177,8 +184,7 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    placement.setFileName(outputConnectionSpec);
 
    std::string containerPrefix = m_containerPrefix;
-   std::string dhContainerPrefix = pool::ROOTRNTUPLE_StorageType.exactMatch(tech)?
-      APRDefaults::RNTupleNames::DataHeader : APRDefaults::TTreeNames::DataHeader;
+   std::string dhContainerPrefix = pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ? APRDefaults::RNTupleNames::DataHeader : APRDefaults::TTreeNames::DataHeader;
    std::string containerName;
 
    // Get Technology from containerPrefix
@@ -193,18 +199,18 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    std::string containerFriendPostfix;
    while (pos1 != std::string::npos) {
       const std::string::size_type pos2 = output.find('=', pos1);
-      const std::string key = output.substr(pos1 + 1, pos2 - pos1 - 1);
+      const std::string thisKey = output.substr(pos1 + 1, pos2 - pos1 - 1);
       const std::string::size_type pos3 = output.find(']', pos2);
       const std::string value = output.substr(pos2 + 1, pos3 - pos2 - 1);
-      if (key == "OutputCollection") {
+      if (thisKey == "OutputCollection") {
          dhContainerPrefix = value;
-      } else if (key == "PoolContainerPrefix") {
+      } else if (thisKey == "PoolContainerPrefix") {
          containerPrefix = value;
-      } else if (key == "TopLevelContainerName") {
+      } else if (thisKey == "TopLevelContainerName") {
          containerNameHint = value;
-      } else if (key == "SubLevelBranchName") {
+      } else if (thisKey == "SubLevelBranchName") {
          branchNameHint = value;
-      } else if (key == "PoolContainerFriendPostfix") {
+      } else if (thisKey == "PoolContainerFriendPostfix") {
          containerFriendPostfix = value;
       }
       pos1 = output.find('[', pos3);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolCnvSvc.cxx
@@ -411,7 +411,12 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       int num = -1;
       StatusCode sc = m_outputStreamingTool->clearObject(&placementStr, num);
       if (sc.isSuccess() && placementStr != nullptr && strlen(placementStr) > 6 && num > 0) {
-         fileName = strstr(placementStr, "[FILE=");
+         const char * matchedChars = strstr(placementStr, "[FILE=");
+         if (not matchedChars){
+           ATH_MSG_ERROR("No matching filename in  " << placementStr);
+           return abortSharedWrClients(num);
+         }
+         fileName = matchedChars;
          fileName = fileName.substr(6, fileName.find(']') - 6);
          if (!this->connectOutput(fileName).isSuccess()) {
             ATH_MSG_ERROR("Failed to connectOutput for " << fileName);
