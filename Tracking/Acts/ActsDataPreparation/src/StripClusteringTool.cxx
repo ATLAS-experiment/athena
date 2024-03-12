@@ -14,20 +14,24 @@
 #include <TrkSurfaces/Surface.h>
 
 namespace ActsTrk {
-
+constexpr double ONE_TWELFTH = 1./12.;
+  
 // Required by ACTS clusterization
+static
 int getCellColumn(const StripClusteringTool::Cell& cell)
 {
     return cell.index;
 }
 
 // Required by ACTS clusterization
+static
 int& getCellLabel(StripClusteringTool::Cell& cell)
 {
     return cell.label;
 }
 
 // Required by ACTS clusterization
+static
 void clusterAddCell(StripClusteringTool::Cluster& cl, const StripClusteringTool::Cell& cell)
 {
     cl.ids.push_back(cell.id);
@@ -185,7 +189,9 @@ StripClusteringTool::clusterize(const RawDataCollection& RDOs,
 }
 
 
+static
 std::tuple<
+    Eigen::Matrix<double,2,1>,
     Eigen::Matrix<float,1,1>,
     Eigen::Matrix<float,1,1>,
     Eigen::Matrix<float,3,1>>
@@ -219,9 +225,8 @@ computePosition(const StripClusteringTool::Cluster& cluster,
     }
 
     Eigen::Matrix<float,1,1> posM(pos.xPhi());
-    Eigen::Matrix<float,1,1> varM(pitch * pitch / 12); //Assume uniform distribution
-
-    return std::make_tuple(posM, varM, posG);
+    Eigen::Matrix<float,1,1> varM(pitch * pitch * ONE_TWELFTH); //Assume uniform distribution
+    return std::make_tuple(pos, posM, varM, posG);
 }
 
 
@@ -235,10 +240,11 @@ StripClusteringTool::makeCluster(const Cluster &cluster,
 {
 
     IdentifierHash idHash = element->identifyHash();
-    auto [localPos, localCov, globalPos]
+    auto [pos, localPos, localCov, globalPos]
 	= computePosition(cluster, lorentzShift, stripID, element);
-
+    
     cl.setMeasurement<1>(idHash, localPos, localCov);
+    cl.setIdentifier( element->identifierOfPosition(pos).get_compact() );
     cl.globalPosition() = globalPos;
     cl.setRDOlist(cluster.ids);
     cl.setChannelsInPhi(cluster.ids.size());
