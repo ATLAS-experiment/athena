@@ -1335,10 +1335,10 @@ StatusCode ZdcAnalysisTool::initialize()
     ATH_CHECK( m_rpdChannelAmplitude.initialize());
     m_rpdChannelAmplitudeCalib = m_zdcModuleContainerName+".RPDChannelAmplitudeCalib"+m_auxSuffix;
     ATH_CHECK( m_rpdChannelAmplitudeCalib.initialize());
-    m_rpdChannelMaxAdc = m_zdcModuleContainerName+".RPDChannelMaxADC"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelMaxAdc.initialize());
-    m_rpdChannelMaxAdcCalib = m_zdcModuleContainerName+".RPDChannelMaxADCCalib"+m_auxSuffix;
-    ATH_CHECK( m_rpdChannelMaxAdcCalib.initialize());
+    m_rpdChannelMaxADC = m_zdcModuleContainerName+".RPDChannelMaxADC"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelMaxADC.initialize());
+    m_rpdChannelMaxADCCalib = m_zdcModuleContainerName+".RPDChannelMaxADCCalib"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelMaxADCCalib.initialize());
     m_rpdChannelMaxSample = m_zdcModuleContainerName+".RPDChannelMaxSample"+m_auxSuffix;
     ATH_CHECK( m_rpdChannelMaxSample.initialize());
     m_rpdChannelStatus = m_zdcModuleContainerName+".RPDChannelStatus"+m_auxSuffix;
@@ -1603,8 +1603,8 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelPileupStretchedExpFitMSE(m_rpdChannelPileupStretchedExpFitMSE);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitude(m_rpdChannelAmplitude);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitudeCalib(m_rpdChannelAmplitudeCalib);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelMaxAdc(m_rpdChannelMaxAdc);
-    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelMaxAdcCalib(m_rpdChannelMaxAdcCalib);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelMaxADC(m_rpdChannelMaxADC);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelMaxADCCalib(m_rpdChannelMaxADCCalib);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelMaxSample(m_rpdChannelMaxSample);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelStatus(m_rpdChannelStatus);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelPileupFrac(m_rpdChannelPileupFrac);
@@ -1640,8 +1640,8 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    rpdChannelPileupStretchedExpFitMSE(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChPileupStretchedExpFitMSE(rpdChannel);
 	    rpdChannelAmplitude(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumAdc(rpdChannel);
 	    rpdChannelAmplitudeCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumAdcCalib(rpdChannel);
-	    rpdChannelMaxAdc(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxAdc(rpdChannel);
-	    rpdChannelMaxAdcCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxAdcCalib(rpdChannel);
+	    rpdChannelMaxADC(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxAdc(rpdChannel);
+	    rpdChannelMaxADCCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxAdcCalib(rpdChannel);
 	    rpdChannelMaxSample(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxSample(rpdChannel);
 	    rpdChannelStatus(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChStatus(rpdChannel);
 	    rpdChannelPileupFrac(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChPileupFrac(rpdChannel);

@@ -214,12 +214,12 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
     this, "RPDChannelAmplitudeCalibKey", "",
     "Calibrated RPD channel amplitude"
   };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxAdcKey {
-    this, "RPDChannelMaxAdcKey", "",
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxADCKey {
+    this, "RPDChannelMaxADCKey", "",
     "RPD channel max ADC"
   };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxAdcCalibKey {
-    this, "RPDChannelMaxAdcCalibKey", "",
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxADCCalibKey {
+    this, "RPDChannelMaxADCCalibKey", "",
     "Calibrated RPD channel max ADC"
   };
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupFracKey {
