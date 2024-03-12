@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -818,28 +818,45 @@ QMap<QString,QString> VP1MainWindow::availableFiles(const QString& extension,
 	}
 
 	//Add directories from pathvar (looking in subdir instareasubdir):
-	QString varStr = QString(::getenv(pathvar.toStdString().c_str()));
-	//VP1Msg::messageDebug("Add directories from pathvar... " + pathvar + " - " + varStr);
-	QString path = QString(::getenv(pathvar.toStdString().c_str()));
-	if (!path.isEmpty()) {
-		//!instareasubdir.isEmpty()&&
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    VP1Msg::messageDebug("This is the 'pathvar' variable: " + pathvar);
+    QString path = env.value(pathvar);
+    VP1Msg::messageDebug("Add directories from 'pathvar' variable: " + path);
+
+    if (!path.isEmpty()) {
 #if QTCORE_VERSION >= 0x050E00
-		QStringList tmp = path.split(":",Qt::SkipEmptyParts);//This 'tmp' is for SLC3 compilation.
+        VP1Msg::messageDebug("We're using Qt5...");
+        QStringList tmp = path.split(":",Qt::SkipEmptyParts);//This 'tmp' is for SLC3 compilation.
 #else
-		QStringList tmp = path.split(":",QString::SkipEmptyParts);//This 'tmp' is for SLC3 compilation.
+        VP1Msg::messageDebug("We're using Qt older than 5...");
+        QStringList tmp = path.split(":",QString::SkipEmptyParts);//This 'tmp' is for SLC3 compilation.
 #endif
-		for (QString dir : tmp) {
-			vp1pluginpath << ( instareasubdir.isEmpty() ? dir : dir+QDir::separator()+QDir::separator()+instareasubdir );
-		}
-	}
+        for (QString dir : tmp) {
+            vp1pluginpath << ( instareasubdir.isEmpty() ? dir : dir+QDir::separator()+instareasubdir );
+        }
+    }
+
+    // Remove duplicates
+    int nDuplicatesRemoved = vp1pluginpath.removeDuplicates();
+    VP1Msg::messageDebug("Removed '" + QString::number(nDuplicatesRemoved) + "' duplicate paths.");
 
 	//Remove all nonexisting directories:
-	for (QString plugindir : vp1pluginpath) {
-		QFileInfo fi(plugindir);
-		if (!fi.exists()||!fi.isDir()) {
-			vp1pluginpath.removeAll(plugindir);
-		}
-	}
+    unsigned idx=0;
+    for (const auto& plugindir : vp1pluginpath) {
+        VP1Msg::messageDebug("plugindir: '" + plugindir + "'");
+        QFileInfo fi(plugindir);
+        if (!fi.exists()||!fi.isDir()) {
+            VP1Msg::messageDebug("list: " + vp1pluginpath.join(";"));
+            if (vp1pluginpath.contains(plugindir)) {
+                vp1pluginpath.removeAt(idx); // Note: do not use 'removeAll(string)' it has issues when run within loops
+                VP1Msg::messageDebug("Removed non-valid path: '" + plugindir + "'");
+            }
+            else {
+                VP1Msg::messageDebug("plugindir not present; perhaps, it has been removed already. Skipping it...");
+            }
+        }
+        ++idx;
+    }
 
 	//Find all files with required extension in the directories (in case of duplicates - the ones appearing first are used):
 	QMap<QString,QString> plugins2fullpath;
