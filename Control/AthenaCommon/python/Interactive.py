@@ -1,20 +1,12 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
-# File: AthenaCommon/python/ShellEscapes.py
-# Author: Wim Lavrijsen (LBNL, WLavrijsen@lbl.gov)
+"""Utilities for the interactive athena prompt."""
 
-"""Provide shell escapes from the prompt by catching name and syntax errors."""
-
-import os, sys
+import os
+import sys
 import re
 import AthenaCommon.Utils.unixtools as unixtools
-
-
-### data ________________________________________________________________________
-__version__ = '1.1.1'
-__author__  = 'Wim Lavrijsen (WLavrijsen@lbl.gov)'
-
-__all__ = [ 'ShellEscapes' ]
+from AthenaCommon.Logging import log
 
 _shellCommands = [ 'echo', 'emacs', 'env', 'ls', 'less', 'more', 'pico', 'vi' ]
 _unacceptable = [ 'false', 'true', 'sys' ]
@@ -22,13 +14,10 @@ _NAME = 'name'
 _NAMEREX = re.compile( r"named? '?(?P<%s>[\w\d]+)'?" % _NAME )
 
 
-### logging and messages --------------------------------------------------------
-import logging
-log = logging.getLogger( 'ShellEscapes' )
-
-
 ### LazyPython based hook for shell commands ====================================
 class ShellEscapes:
+   """Provide shell escapes from the prompt by catching name and syntax errors."""
+
    def __init__( self ):
       self._orig_ehook = sys.excepthook
       log.debug( 'shell short-cuts enabled' )
@@ -86,3 +75,32 @@ class ShellEscapes:
 
     # nothing recognizable: normal exception processing
       self._orig_ehook( exctype, value, traceb )
+
+
+def configureInteractivePrompt(completionDict = None):
+   """Configure interactive prompt. The optional completionDict is used to
+   configure the readline completer."""
+
+   # Athena-specific command history
+   import atexit
+   import readline
+   import rlcompleter  # noqa: F401 (needed for completion)
+
+   fhistory = os.path.expanduser( '~/.athena.history' )
+
+   if completionDict is not None:
+      readline.set_completer(rlcompleter.Completer(completionDict).complete)
+
+   readline.parse_and_bind( 'tab: complete' )
+   readline.parse_and_bind( 'set show-all-if-ambiguous On' )
+
+   if os.path.exists( fhistory ):
+      readline.read_history_file( fhistory )
+
+   readline.set_history_length( 1024 )
+
+   # save history on exit
+   atexit.register( readline.write_history_file, fhistory )
+
+   # enable shell commands in interactive prompt
+   sys.excepthook = ShellEscapes()
