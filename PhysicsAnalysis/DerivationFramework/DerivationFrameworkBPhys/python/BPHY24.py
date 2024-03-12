@@ -286,7 +286,7 @@ def BPHY24Cfg(flags):
     outVtxList += ["BPHY24RefittedPrimaryVertices_ee"]
     thinTrkVtxList += BPHY24JpsieeKshort.CascadeVertexCollections
 
-    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg
+    from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     TTVATool = acc.popToolsAndMerge(isoTTVAToolCfg(flags,
                                                   WorkingPoint = "Custom",
                                                   d0_cut = -1,

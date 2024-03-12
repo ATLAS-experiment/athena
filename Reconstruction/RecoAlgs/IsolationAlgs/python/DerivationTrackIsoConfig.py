@@ -15,10 +15,6 @@ def DerivationTrackIsoCfg(flags,**jwarg):
 
     acc = ComponentAccumulator()
 
-    from IsolationAlgs.IsoToolsConfig import (
-        isoTTVAToolCfg, TrackIsolationToolCfg )
-    from InDetConfig.InDetTrackSelectionToolConfig import (
-        isoTrackSelectionToolCfg )
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     # dR in decreasing order
     ptcone_list = [ [ isoPar.ptcone40, isoPar.ptcone30, isoPar.ptcone20 ] ]
@@ -35,6 +31,7 @@ def DerivationTrackIsoCfg(flags,**jwarg):
         WP = jwarg['WP']
         # TrackIsolationTool need a specific track-vertex association tool
         #   if WP is not Nonprompt_All_MaxWeight
+        from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
         ttvaCA = acc.popToolsAndMerge(
             isoTTVAToolCfg(flags, WorkingPoint = WP))
 
@@ -90,11 +87,16 @@ def DerivationTrackIsoCfg(flags,**jwarg):
             if 'WP' in jwarg:
                 toolkwargs['TTVATool'] = ttvaCA
             # and a track selection tool
+
+            from InDetConfig.InDetTrackSelectionToolConfig import (
+                isoTrackSelectionToolCfg )
             toolkwargs['TrackSelectionTool'] = acc.popToolsAndMerge(
                 isoTrackSelectionToolCfg(flags, minPt = track_pt))
-            #
+
             if loose_cone:
                 toolkwargs['CoreTrackEtaRange'] = 0.01
+
+            from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg
             kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(
                 TrackIsolationToolCfg(flags,**toolkwargs))
 

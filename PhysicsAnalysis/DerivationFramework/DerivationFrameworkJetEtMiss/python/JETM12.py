@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM12.py
@@ -118,7 +118,7 @@ def JETM12AugmentationToolsForSkimmingCfg(ConfigFlags):
                                                                                               minPt = 1000.))
 
     #Nonprompt_All_MaxWeight TTVA
-    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg
+    from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     toolkwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(ConfigFlags))
 
     toolkwargs["name"] = "TrackIsolationToolPt1000"
@@ -147,7 +147,7 @@ def JETM12AugmentationToolsCfg(ConfigFlags):
                                                                                               name = "TrackSelectionTool500_JETM12",
                                                                                               minPt = 500.))
     #Nonprompt_All_MaxWeight TTVA
-    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg
+    from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     toolkwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(ConfigFlags))
 
     toolkwargs["name"] = "TrackIsolationToolPt500"

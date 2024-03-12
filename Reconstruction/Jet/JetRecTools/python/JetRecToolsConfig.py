@@ -56,7 +56,7 @@ def getTrackSelAlg(trkOpt="default", trackSelOpt=False):
 
 def getJetTrackVtxAlg( trkOpt, algname="jetTVA", **ttva_overide):
     """  theSequence and ttva_overide are options used in trigger  (HLT/Jet/JetTrackingConfig.py)"""
-    from TrackVertexAssociationTool.TTVAToolConfig import getTTVAToolForReco
+    from InDetConfig.TrackVertexAssociationToolConfig import getTTVAToolForReco
     from JetRecConfig.StandardJetContext import jetContextDic
 
     trkProperties = jetContextDic[trkOpt]
@@ -81,7 +81,7 @@ def getJetTrackVtxAlg( trkOpt, algname="jetTVA", **ttva_overide):
 
 def getPV0TrackVertexAssoAlg(trkOpt="", theSequence=None):
     if trkOpt: "_{}".format(trkOpt)
-    from TrackVertexAssociationTool.TTVAToolConfig import getTTVAToolForReco
+    from InDetConfig.TrackVertexAssociationToolConfig import getTTVAToolForReco
     from JetRecConfig.StandardJetContext import jetContextDic
 
     trkProperties = jetContextDic[trkOpt]

@@ -1,4 +1,4 @@
-#   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon import Logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -50,8 +50,9 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
 
     components.merge(caloExtAlg)    #since its a stack of algorithms
 
-    from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
-    TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight"))
+    from InDetConfig.TrackVertexAssociationToolConfig import TTVAToolCfg
+    TrackVertexAssoTool = components.popToolsAndMerge(
+        TTVAToolCfg(flags, "tvaTool", WorkingPoint="Nonprompt_All_MaxWeight"))
 
     trackParticleClusterAssociation = CompFactory.TrackParticleClusterAssociationAlg(
         "TrackParticleClusterAssociationAlg"+assocPostfix,
@@ -114,9 +115,10 @@ def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorE
     # and a list of tools to build the various TCC types.
     tccTools = []
 
-    from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
+    from InDetConfig.TrackVertexAssociationToolConfig import TTVAToolCfg
     commonArgs=dict(
-        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
+        TrackVertexAssoTool = components.popToolsAndMerge(
+            TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
         AssoClustersDecor=decorKey("AssoClusters"),            
     )    
 
@@ -182,10 +184,10 @@ def runUFOReconstruction_r22( flags,constits, caloClusterName="CaloCalTopoCluste
     )
     
 
-    
-    from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
+    from InDetConfig.TrackVertexAssociationToolConfig import TTVAToolCfg
     commonArgs=dict(
-        TrackVertexAssoTool = components.popToolsAndMerge(TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
+        TrackVertexAssoTool = components.popToolsAndMerge(
+            TTVAToolCfg(flags,"tvaTool",WorkingPoint="Nonprompt_All_MaxWeight")),
         AssoClustersDecor=decorKey("AssoClusters"),
     )    
     

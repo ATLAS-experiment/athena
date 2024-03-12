@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Tool configuration to instantiate all
  isolationTools with default configuration"""
@@ -7,14 +7,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 
-
-def isoTTVAToolCfg(flags,**kwargs):
-    from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
-    kwargs.setdefault('name', 'ttvaToolForIso')
-    kwargs.setdefault('WorkingPoint','Nonprompt_All_MaxWeight')
-    kwargs.setdefault("HardScatterLinkDeco", "")
-    return TTVAToolCfg(flags,**kwargs)
-
 def TrackIsolationToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
         
@@ -22,6 +14,7 @@ def TrackIsolationToolCfg(flags, **kwargs):
         from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
         kwargs['TrackSelectionTool'] = acc.popToolsAndMerge(isoTrackSelectionToolCfg(flags))
     if 'TTVATool' not in kwargs:
+        from InDetConfig.TrackVertexAssociationToolConfig import isoTTVAToolCfg
         kwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(flags))
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs['VertexLocation'] = ''

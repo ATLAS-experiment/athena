@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for customs jet reconstruction + decorations
@@ -117,18 +117,12 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
     def getUsedInVertexFitTrackDecoratorAlgCustomVtx(jetdef, jetmod):
         """ Create the alg  to decorate the used-in-fit information for AMVF """
         from JetRecConfig.StandardJetContext import jetContextDic
-        context  = jetContextDic[jetdef.context] 
-        
-        alg = CompFactory.getComp("InDet::InDetUsedInVertexFitTrackDecorator")(
-            "UsedInVertexFitTrackDecoratorAlgCustomVtxAlg" ,
-            UsedInFitDecoratorTool=CompFactory.getComp("InDet::InDetUsedInFitTrackDecoratorTool")(
-                "UsedInFitTrackDecoratorToolCustomVtx",
-                AMVFVerticesDecoName= 'TTVA_AMVFVertices_forHiggs',
-                AMVFWeightsDecoName= 'TTVA_AMVFWeights_forHiggs',
-                TrackContainer=context['Tracks'],
-                VertexContainer=context['Vertices'],
-            ),
-        )
+        context  = jetContextDic[jetdef.context]
+
+        from InDetConfig.UsedInVertexFitTrackDecoratorConfig import getUsedInVertexFitTrackDecoratorAlg
+        alg = getUsedInVertexFitTrackDecoratorAlg(context['Tracks'], context['Vertices'],
+                                                  vertexDeco='TTVA_AMVFVertices_forHiggs',
+                                                  weightDeco='TTVA_AMVFWeights_forHiggs')
         return alg
 
 
