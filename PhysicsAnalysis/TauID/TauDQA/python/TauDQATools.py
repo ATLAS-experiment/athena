@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -44,7 +44,6 @@ def TauDQATauTruthMatchingToolCfg(flags, **kwargs):
     
     kwargs.setdefault("TruthElectronContainerName", "TruthElectrons")
     kwargs.setdefault("TruthMuonContainerName", "MuonTruthParticles")
-    kwargs.setdefault("WriteTruthTaus", True)
     from TauAnalysisTools.TauAnalysisToolsConfig import TauTruthMatchingToolCfg
     matchingtool = acc.popToolsAndMerge(TauTruthMatchingToolCfg(flags, "TauTruthMatchingTool", **kwargs))
 

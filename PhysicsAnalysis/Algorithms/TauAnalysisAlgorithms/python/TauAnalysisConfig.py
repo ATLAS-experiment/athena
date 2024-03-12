@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -32,7 +32,6 @@ class TauCalibrationConfig (ConfigBlock):
                                           'TauTruthMatchingAlg' + postfix )
             config.addPrivateTool( 'matchingTool',
                                    'TauAnalysisTools::TauTruthMatchingTool' )
-            alg.matchingTool.WriteTruthTaus = 1
             alg.matchingTool.TruthJetContainerName = 'AntiKt4TruthDressedWZJets'
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')

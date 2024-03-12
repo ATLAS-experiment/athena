@@ -78,15 +78,9 @@ Tool configuration
      - Name of truth particles container within the xAOD file needed if truth
        tau container needs to be created
 
-   * - WriteTruthTaus
-     - false
-     - switching this option to 'true' writes the created container (only in
-       case it is not found in the event store and thus newly created) to the
-       event store
-
    * - NewTruthTauContainerName
      - TruthTaus
-     - Name of the newly created truth tau container if WriteTruthTaus == true
+     - Name of the newly created truth tau container
 
 ------
 Output
@@ -122,4 +116,3 @@ Navigation
 
   * `TauTruthMatchingTool <README-TauTruthMatchingTool.rst>`_
   * `TauTruthTrackMatchingTool <README-TauTruthTrackMatchingTool.rst>`_
-

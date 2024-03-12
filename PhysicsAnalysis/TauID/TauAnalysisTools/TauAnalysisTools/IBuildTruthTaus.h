@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_IBUILDTRUTHTAUS_H
@@ -11,10 +11,6 @@
   author: Dirk Duschinger
   mail: dirk.duschinger@cern.ch
   documentation in: ../README.rst
-                    or
-                    https://svnweb.cern.ch/trac/atlasoff/browser/PhysicsAnalysis/TauID/TauAnalysisTools/tags/TauAnalysisTools-<tag>/README.rst
-		    or
-                    https://svnweb.cern.ch/trac/atlasoff/browser/PhysicsAnalysis/TauID/TauAnalysisTools/trunk/README.rst
 */
 
 // Framework include(s):
@@ -44,11 +40,8 @@ public:
   // initialize the tool
   virtual StatusCode initialize() = 0;
 
-  // get TruthTauContainer
-  virtual xAOD::TruthParticleContainer* getTruthTauContainer() = 0;
-
-  // get TruthTauAuxContainer
-  virtual xAOD::TruthParticleAuxContainer* getTruthTauAuxContainer() = 0;
+  // set truth matching mode, instead of truth building mode
+  virtual void setTruthMatchingMode() = 0;
 
   virtual StatusCode retrieveTruthTaus() = 0;
   virtual StatusCode retrieveTruthTaus(ITruthTausEvent& truthTausEvent) const = 0;

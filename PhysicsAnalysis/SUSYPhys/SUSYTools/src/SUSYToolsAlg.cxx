@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUSYToolsAlg.cxx
@@ -112,7 +112,6 @@ StatusCode SUSYToolsAlg::initialize() {
   // Need truth matching for tau CP tools
   if( !m_SUSYTools->isData() ){
     m_tauTruthMatchingTool.setTypeAndName("TauAnalysisTools::TauTruthMatchingTool/TauTruthMatchingTool");
-    ATH_CHECK( m_tauTruthMatchingTool.setProperty("WriteTruthTaus", true) );
     ATH_CHECK( m_tauTruthMatchingTool.setProperty("TruthJetContainerName", "AntiKt4TruthDressedWZJets") );
     ATH_CHECK( m_tauTruthMatchingTool.retrieve() );
     ATH_MSG_INFO("Retrieved tool: " << m_tauTruthMatchingTool->name() );

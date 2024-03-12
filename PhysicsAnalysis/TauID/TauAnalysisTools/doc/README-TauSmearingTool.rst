@@ -230,8 +230,7 @@ FAQ
    **Answer:** If you have full access to the TruthParticle container, you can
    create a TruthTau container and the link to the matched truth taus by setting
    up the `TauTruthMatchingTool <README-TauTruthMatchingTool.rst>`_ and to the
-   truth matching for each tau. Note that you need to must set the property
-   "WriteTruthTaus" to true to get it working.
+   truth matching for each tau.
 
 ----------
 Navigation

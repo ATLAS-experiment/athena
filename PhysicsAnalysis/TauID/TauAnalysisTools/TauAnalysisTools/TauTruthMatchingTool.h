@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TAUANALYSISTOOLS_TAUTRUTHMATCHINGTOOL_H
@@ -14,6 +14,7 @@
 // Local include(s):
 #include "TauAnalysisTools/ITauTruthMatchingTool.h"
 #include "TauAnalysisTools/BuildTruthTaus.h"
+#include "CxxUtils/CachedValue.h"
 
 namespace TauAnalysisTools
 {
@@ -74,6 +75,9 @@ private:                        // private helper functions
 private:                        // steering variables
 
   double m_dMaxDeltaR;
+
+  CxxUtils::CachedValue<bool> m_bIsTruthMatchedAvailable;
+  CxxUtils::CachedValue<bool> m_bIsTruthParticleLinkAvailable;
 
 private:                        // private helper variables
 
