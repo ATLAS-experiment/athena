@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ISFParticle.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_EVENT_ISFPARTICLE_H
 #define ISF_EVENT_ISFPARTICLE_H
@@ -84,7 +80,6 @@ namespace ISF {
                 int status,                
                 double time,
                 const DetRegionSvcIDPair &origin,
-                int bcid,
                 Barcode::ParticleBarcode barcode = Barcode::fUndefinedBarcode,
                 TruthBinding* truth = nullptr,
                 const HepMcParticleLink * partLink = nullptr );
@@ -163,12 +158,6 @@ namespace ISF {
     /** set a new barcode and update the HepMcParticleLink  */
     void setBarcodeAndUpdateHepMcParticleLink(Barcode::ParticleBarcode bc);
 
-    /** bunch-crossing identifier */
-    int getBCID() const;
-
-    /** set bunch-crossing identifier */
-    void setBCID(int bcid);
-
     /** pointer to the simulation truth - optional, can be 0 */
     const TruthBinding* getTruthBinding() const;
     TruthBinding* getTruthBinding();
@@ -204,7 +193,6 @@ namespace ISF {
     double                       m_tstamp;
     ParticleHistory              m_history;
     Barcode::ParticleBarcode     m_barcode;
-    int                          m_bcid;                  //!< bunch-crossing identifier
     TruthBinding*                m_truth;
     ParticleOrder                m_order;                 //!< particle simulation order
     ParticleUserInformation*     m_userInfo;              //!< user information stored with the ISFParticle

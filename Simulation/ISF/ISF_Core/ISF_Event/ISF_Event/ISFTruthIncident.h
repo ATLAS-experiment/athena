@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -74,8 +74,6 @@ namespace ISF {
     int      parentStatus() override final;
     /** Return the barcode of the parent particle */
     Barcode::ParticleBarcode  parentBarcode() override final;
-    /** Return the bunch-crossing identifier of the parent particle */
-    int                       parentBCID() const override final;
     /** Return a boolean whether or not the parent particle survives the incident */
     bool                      parentSurvivesIncident() const override final;
     /** Return the parent particle after the TruthIncident vertex (and give

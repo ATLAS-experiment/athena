@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_Geant4TruthIncident_H
@@ -64,8 +64,6 @@ namespace iGeant4 {
       int                       parentPdgCode() const override final;
       /** Return the barcode of the parent particle */
       Barcode::ParticleBarcode  parentBarcode() override final;
-      /** Return the bunch-crossing identifier of the parent particle */
-      int                       parentBCID() const override final;
       /** Return the status of the parent particle */
       int  parentStatus() override final;
       /** Return a boolean whether or not the parent particle survives the incident */

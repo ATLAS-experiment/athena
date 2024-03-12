@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BARCODESERVICES_GLOBALBARCODESVC_H
@@ -16,8 +16,6 @@
 //include
 #include "BarcodeEvent/Barcode.h"
 #include "BarcodeInterfaces/IBarcodeSvc.h"
-
-#include "BarcodeServices/BitCalculator.h"
 
 class IIncidentSvc;
 
@@ -77,14 +75,8 @@ namespace Barcode {
     virtual Barcode::ParticleBarcode secondaryParticleBcOffset() const;
     virtual Barcode::VertexBarcode   secondaryVertexBcOffset()  const;
 
-    virtual inline const Barcode::BitCalculator* getBitCalculator() const { return m_bitcalculator; }
-    virtual inline bool hasBitCalculator() const { return (m_bitcalculator!=0); }
-
   private:
     ServiceHandle<IIncidentSvc>                   m_incidentSvc;   //!< IncidentSvc to catch begin of event and end of envent
-
-    /** bitwise utility calculator for barcodes */
-    Barcode::BitCalculator*                       m_bitcalculator;
 
     /** barcode information used for GenVertices */
     VertexBarcode                                 m_firstVertex;

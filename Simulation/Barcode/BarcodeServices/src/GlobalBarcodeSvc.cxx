@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,7 +15,6 @@
 Barcode::GlobalBarcodeSvc::GlobalBarcodeSvc(const std::string& name,ISvcLocator* svc) :
   base_class(name,svc),
   m_incidentSvc("IncidentSvc", name),
-  m_bitcalculator(new Barcode::BitCalculator()),
   m_firstVertex(-200000),
   m_vertexIncrement(-1000000),
   m_curVertex(m_firstVertex),
@@ -39,7 +38,6 @@ Barcode::GlobalBarcodeSvc::GlobalBarcodeSvc(const std::string& name,ISvcLocator*
 
 Barcode::GlobalBarcodeSvc::~GlobalBarcodeSvc()
 {
-  delete m_bitcalculator;
 }
 
 

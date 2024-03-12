@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// ITruthIncident.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 #ifndef ISF_EVENT_ITRUTHINCIDENT_H
 #define ISF_EVENT_ITRUTHINCIDENT_H 1
 
@@ -78,8 +75,6 @@ namespace ISF {
     virtual int      parentStatus() = 0;
     /** Return the barcode of the parent particle */
     virtual Barcode::ParticleBarcode  parentBarcode() = 0;
-    /** Return the bunch-crossing identifier of the parent particle */
-    virtual int                       parentBCID() const { return 0; }
     /** Return a boolean whether or not the parent particle survives the incident */
     virtual bool                      parentSurvivesIncident() const = 0;
     /** Return the parent particle after the TruthIncident vertex (and assign

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -351,7 +351,6 @@ ISF::InputConverter::convertParticle(const HepMC::GenParticlePtr& genPartPtr) co
                                                        genPartPtr->status(),
                                                        pTime,
                                                        origin,
-                                                       0,
                                                        pBarcode,
                                                        tBinding.release(),
                                                        hmpl.release() );
@@ -1095,7 +1094,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       //For backward compatibility, if all 3-momentum components agree to the g4particle momentum within 1 keV, we keep
       //this old method. This comparison is needed, since in ISF this code could be rerun after the ID or CALO simulation, where
       //real energy was lost in previous detectors and hence genpart should NOT be changed to some g4particle values!
-      //TODO: find a way to implement this in a backward compatible way in ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr, int bcid)
+      //TODO: find a way to implement this in a backward compatible way in ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr)
       if (std::abs(px-g4px)<CLHEP::keV && std::abs(py-g4py)<CLHEP::keV && std::abs(pz-g4pz)<CLHEP::keV) {
         px=g4px;
         py=g4py;

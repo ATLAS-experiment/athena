@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -129,11 +129,6 @@ int iGeant4::Geant4TruthIncident::parentStatus()  {
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() {
   return m_atlasG4EvtUserInfo->GetCurrentlyTraced();
 }
-
-int iGeant4::Geant4TruthIncident::parentBCID() const { 
-  return m_baseISP.getBCID();
-}
-
 
 bool iGeant4::Geant4TruthIncident::parentSurvivesIncident() const { 
   const G4Track *track = m_step->GetTrack();

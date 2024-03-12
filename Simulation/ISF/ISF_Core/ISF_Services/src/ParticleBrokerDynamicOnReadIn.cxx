@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ParticleBrokerDynamicOnReadIn.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "ParticleBrokerDynamicOnReadIn.h"
@@ -400,9 +396,6 @@ void ISF::ParticleBrokerDynamicOnReadIn::push( ISFParticle *particlePtr, const I
   ISFParticle &particle = *particlePtr;
 
   if (parentPtr) {
-    int bcid = parentPtr->getBCID();
-    particle.setBCID(bcid);
-
     //Let's make sure that the new ISFParticle has a valid TruthBinding and HepMcParticleLink
     //(could happen that the new particles are not saved by the TruthSvc for instance)
     //or attach pointers to the parent otherwise
