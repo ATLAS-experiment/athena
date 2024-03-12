@@ -55,7 +55,7 @@ namespace TSU {
        L1TopoDataTypes(const std::string& b="") : m_tvalue(0) { 
           unsigned int idx = 0;
           for(auto in = b.rbegin(); in!=b.rend(); ++in){
-              if(*in=='1') m_tvalue += (1 << idx);
+              if(*in=='1') m_tvalue += (1ull << idx);
               ++idx;
           }
        }
@@ -65,11 +65,11 @@ namespace TSU {
        }
 
        L1TopoDataTypes(int i) : m_tvalue(i) {
-          m_tvalue = i*(1<<F);
+          m_tvalue = i*(1ull<<F);
        }
 
        L1TopoDataTypes(unsigned i) : m_tvalue(i) {
-          m_tvalue = i*(1<<F);
+          m_tvalue = i*(1ull<<F);
        }
 
        // converts number from one set of template parameters to another
@@ -208,7 +208,7 @@ namespace TSU {
        unsigned int frac() const { return F; }
     
     private:
-       T m_tvalue;
+       T m_tvalue{};
     };
 
     // get the 2's complement of bitset with p bits
