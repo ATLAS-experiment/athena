@@ -1635,7 +1635,6 @@ if cmd=='mctag' and len(args)<12:
     print ('  - AtlCoolConsole.py "sqlite://;schema=' + dbfile + ';dbname=OFLP200"')
     print ('* To upload to oracle use:')
     print ('  - beamspotman.py --srctag %s -t %s --srcdbname OFLP200 --destdbname OFLP200 upload %s' %(options.beamspottag, options.beamspottag, dbfile))
-    print ('  - /afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --nomail %s OFLP200 ATLAS_COOLWRITE ATLAS_COOLOFL_INDET_W <passwd>' %(dbfile))
     sys.exit(0)
 
 #

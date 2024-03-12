@@ -44,12 +44,13 @@ InDet::InDetBeamSpotFinder::InDetBeamSpotFinder(const std::string& name, ISvcLoc
   declareProperty( "MinVtxNum"      , m_minVertexNum = 100);
   declareProperty( "MaxVtxChi2"     , m_maxChi2Vertex = 10);
   declareProperty( "MaxTransverseErr", m_maxTransverseError=1000000);
+  declareProperty( "MaxAbsCorrelXY", m_maxAbsCorrelXY=0.8);
   declareProperty( "VertexTypes"       , m_vertexTypeNames);
   declareProperty( "MinVtxProb"     , m_minVtxProb=0.001);
   declareProperty( "GroupFitsBy"       , m_fitSortingKey = "none");
   declareProperty( "VertexNtuple" , m_writeVertexNtuple = true);
   declareProperty( "WriteAllVertices"  , m_writeAllVertices=false);
-  declareProperty( "VertexTreeName"    , m_vertexTreeName);
+  declareProperty( "VertexTreeName"    , m_vertexTreeName = "Vertices");
   declareProperty( "SecondsPerFit",  m_secondsPerFit = 1);
 }
   
@@ -80,6 +81,7 @@ StatusCode InDet::InDetBeamSpotFinder::execute(){
   SG::ReadHandle<xAOD::VertexContainer> vertexContainer(m_vertexContainer);
   if ( !passEventSelection( *eventInfo ) ) return StatusCode::SUCCESS;
   BeamSpot::Event currentEvent = readEvent(*eventInfo, *vertexContainer);
+
   m_eventList.push_back( currentEvent );
   if( m_writeVertexNtuple ){
     for( auto & thisVertex: currentEvent.vertices){
@@ -119,7 +121,8 @@ BeamSpot::Event InDet::InDetBeamSpotFinder::readEvent(const xAOD::EventInfo & ev
   {
     event.lumiBlock = BSeventInfo->event_ID()->lumi_block(); 
   }
-  
+
+  int count = 0;
   for(const xAOD::Vertex* vtx:vertexContainer) {
     if (vtx->vertexType() == xAOD::VxType::NoVtx) continue; 
     vertex.x          = vtx->x();
@@ -133,6 +136,19 @@ BeamSpot::Event InDet::InDetBeamSpotFinder::readEvent(const xAOD::EventInfo & ev
     vertex.nTracks    = vtx->nTrackParticles();
     vertex.passed     = passVertexSelection( vtx );
     vertex.valid      = vertex.passed;    
+    //Remove vertices with wrong x-y correlation
+    if(vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy > 1.0 ||
+       vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy < 0. ||
+       vertex.vxx < 0.) {
+      ++count;
+      ATH_MSG_INFO("Bad vertex: " << count << " " << event.eventNumber << " " 
+		   << vertex.x << " " << vertex.y << " " << vertex.z << " "
+		   << vertex.vxx << " " << vertex.vyy << " " << vertex.vzz << " " 
+		   << vertex.nTracks << " " << vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy);
+    }
+    if(vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy > m_maxAbsCorrelXY*m_maxAbsCorrelXY ||
+       vertex.vxy*vertex.vxy/vertex.vxx/vertex.vyy < 0. ||
+       vertex.vxx < 0.) continue;
     event.vertices.push_back( vertex );
   }
   return event;
@@ -246,11 +262,20 @@ StatusCode InDet::InDetBeamSpotFinder::performFits(){
   IInDetBeamSpotTool::FitStatus bsFitStatus;
   std::vector<BeamSpot::VrtHolder> verticesToFit;
 
+  int count = 0;
   for( auto & eventList: m_sortedEventList){
     verticesToFit.clear();
     for( const auto & thisEvent: eventList){
       for( const auto & thisVertex: thisEvent.vertices){
-        if( thisVertex.passed ) { verticesToFit.push_back( thisVertex ); }
+        if( thisVertex.passed ) { 
+	  ++count;
+	  ATH_MSG_DEBUG("Vertex: " << count << " " << thisEvent.eventNumber << " " 
+			<< thisVertex.x << " " << thisVertex.y << " " << thisVertex.z << " "
+			<< thisVertex.vxx << " " << thisVertex.vyy << " " << thisVertex.vzz << " "
+			<< thisVertex.vxy << " " << thisVertex.vxy/sqrt(thisVertex.vxx*thisVertex.vyy) << " " 
+			<< thisVertex.nTracks);
+	  verticesToFit.push_back( thisVertex ); 
+	}
       }
     }
 
