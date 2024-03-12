@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrkFitterUtils/TrackFitInputPreparator.h"
 #include "TrkGlobalChi2Fitter/GlobalChi2Fitter.h"
@@ -15,6 +15,7 @@
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
+#include "TrkEventPrimitives/SurfaceConsistencyCheck.h"
 
 #include "TrkGeometry/Layer.h"
 #include "TrkGeometry/CylinderLayer.h"
@@ -7374,6 +7375,14 @@ namespace Trk {
         hit->resetTrackCovariance();
         continue;
       }
+
+      if (!Trk::consistentSurfaces (hit->trackParameters(),
+                                    hit->measurement(),
+                                    hit->materialEffects()))
+      {
+        return nullptr;
+      }
+
       //should check hit->isSane() here with better equality check(other than ptr comparison)
       auto trackState = hit->trackStateOnSurface();
       hit->resetTrackCovariance();
