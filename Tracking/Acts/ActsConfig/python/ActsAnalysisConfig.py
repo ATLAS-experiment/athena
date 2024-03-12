@@ -3,6 +3,26 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def ActsTrackAnalysisAlgCfg(flags,
+                            name: str = "ActsTrackAnalysisAlg",
+                            **kwargs) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+
+    kwargs.setdefault('TracksLocation', 'ActsTracks')
+    kwargs.setdefault("MonGroupName", kwargs['TracksLocation'])
+
+    from AthenaMonitoring import AthMonitorCfgHelper
+    helper = AthMonitorCfgHelper(flags, 'ActsTrackAnalysisAlgCfg')
+
+    monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.TrackAnalysisAlg, name, **kwargs)
+    monitoringGroup = helper.addGroup(monitoringAlgorithm, kwargs['MonGroupName'], '/ActsAnalysis/')
+
+    monitoringGroup.defineHistogram('Ntracks', title='Number of Tracks;N;Entries', type='TH1I', path=kwargs['MonGroupName'],
+                                    xbins=500, xmin=0, xmax=20000)
+
+    result.merge(helper.result())
+    return result
+    
 def ActsHgtdClusterAnalysisAlgCfg(flags,
                                   name: str = "ActsHgtdClusterAnalysisAlg",
                                   **kwargs) -> ComponentAccumulator:
