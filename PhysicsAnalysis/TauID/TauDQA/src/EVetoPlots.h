@@ -21,6 +21,7 @@ class EVetoPlots: public PlotBase {
     TH1* m_IsoFrac;	 
     TH1* m_CentFrac;	 
     TH1* m_id_RNNEleScore;
+    TH1* m_id_RNNEleScoreSigTrans;
     TH1* m_pt_eleRNNloose;
     TH1* m_pt_eleRNNmed; 
     TH1* m_pt_eleRNNtight;

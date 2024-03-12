@@ -138,7 +138,7 @@ StatusCode PhysValTau::fillHistograms()
     if ( (bool)tau->auxdata<char>("IsTruthMatched") ) {
       ATH_MSG_DEBUG("Tau is truth-matched");
       if ( trueTau->isTau() ) {
-	if ( (bool)trueTau->auxdata<char>("IsHadronicTau") ) {
+	if ( (bool)trueTau->auxdata<char>("IsHadronicTau") ) {		
 	  ATH_MSG_DEBUG("Tau is hadronic tau");
 	  m_oTauValidationPlots->m_oGeneralTauAllProngsPlots.fill(*tau, weight);
 	  m_oTauValidationPlots->m_oNewCoreMatchedPlots.fill(*tau, weight);
@@ -174,52 +174,68 @@ StatusCode PhysValTau::fillHistograms()
 	    m_oTauValidationPlots->m_oMigrationPlotsNom.fill(*tau, trueMode, weight);
 	  }
 	}
-      }
+      } else if(trueTau->isElectron()) {
+	ATH_MSG_DEBUG("Tau is matched to an electron");
+        m_oTauValidationPlots->m_oElMatchedParamPlots.fill(*tau, weight);
+        m_oTauValidationPlots->m_oElMatchedEVetoPlots.fill(*tau, weight);  
+      } else if( std::abs(trueTau->pdgId()) < 7 || trueTau->pdgId() == 21){
+        ATH_MSG_DEBUG("Tau is matched to a jet");
+        m_oTauValidationPlots->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
+        // Substructure/PFO histograms
+        m_oTauValidationPlots->m_oFakeTauAllProngsPlots.fill(*tau, weight);
+        m_oTauValidationPlots->m_oNewCoreFakePlots.fill(*tau, weight);
+        m_oTauValidationPlots->m_oFakeTauEffPlots.fill(*tau, weight);
+        if ( nominal ) {
+          m_oTauValidationPlots->m_oFakeGeneralNom.fill(*tau, weight);
+          m_oTauValidationPlots->m_oFakeTauEffPlotsNom.fill(*tau, weight);
+          m_oTauValidationPlots->m_oFakeTauRecoTauPlotsNom.fill(*tau, weight);
+          m_oTauValidationPlots->m_oNewCoreFakePlotsNom.fill(*tau, weight);
+        }
+        if ( recProng == 1 ) {
+          m_oTauValidationPlots->m_oFakeHad1ProngPlots.fill(*tau, weight);
+          m_oTauValidationPlots->m_oFakeTauEff1PPlots.fill(*tau, weight);
+          if ( nominal ) {
+            m_oTauValidationPlots->m_oFakeHad1ProngNom.fill(*tau, weight);
+            m_oTauValidationPlots->m_oFakeTauEff1PPlotsNom.fill(*tau, weight);
+          }
+        }
+        if ( recProng == 3 ) {
+          m_oTauValidationPlots->m_oFakeTauEff3PPlots.fill(*tau, weight);
+          m_oTauValidationPlots->m_oFakeHad3ProngPlots.fill(*tau, weight);
+          if ( nominal ) {
+            m_oTauValidationPlots->m_oFakeHad3ProngNom.fill(*tau, weight);
+            m_oTauValidationPlots->m_oFakeTauEff3PPlotsNom.fill(*tau, weight);
+          }
+        }
+      }	       
     }
     else {
-      ATH_MSG_DEBUG("Tau is fake");
-      // try to match to truth electrons
-      bool isElectron = false;
-      for ( auto truth : *truthParticles ) {
-	if ( abs(truth->pdgId()) != 11 ) continue;
-	if ( !MC::isStable(truth) ) continue;
-	if ( truth->pt() < 10000.0 ) continue;
-	if ( tau->p4().DeltaR(truth->p4()) > 0.2 ) continue;
-	// OK, now it probably is an electron
-	isElectron = true;
-	break;
+      ATH_MSG_DEBUG("Tau is unmatched - consider it as fake");
+      m_oTauValidationPlots->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
+      // Substructure/PFO histograms
+      m_oTauValidationPlots->m_oFakeTauAllProngsPlots.fill(*tau, weight);
+      m_oTauValidationPlots->m_oNewCoreFakePlots.fill(*tau, weight);
+      m_oTauValidationPlots->m_oFakeTauEffPlots.fill(*tau, weight);
+      if ( nominal ) {
+	m_oTauValidationPlots->m_oFakeGeneralNom.fill(*tau, weight);
+	m_oTauValidationPlots->m_oFakeTauEffPlotsNom.fill(*tau, weight);
+	m_oTauValidationPlots->m_oFakeTauRecoTauPlotsNom.fill(*tau, weight);
+	m_oTauValidationPlots->m_oNewCoreFakePlotsNom.fill(*tau, weight);
       }
-      if ( isElectron ) {
-	m_oTauValidationPlots->m_oElMatchedParamPlots.fill(*tau, weight);
-	m_oTauValidationPlots->m_oElMatchedEVetoPlots.fill(*tau, weight);
-      }
-      else { // other fakes
-	m_oTauValidationPlots->m_oFakeGeneralTauAllProngsPlots.fill(*tau, weight);
-	// Substructure/PFO histograms
-	m_oTauValidationPlots->m_oFakeTauAllProngsPlots.fill(*tau, weight);
-	m_oTauValidationPlots->m_oNewCoreFakePlots.fill(*tau, weight);
-	m_oTauValidationPlots->m_oFakeTauEffPlots.fill(*tau, weight);
+      if ( recProng == 1 ) {
+	m_oTauValidationPlots->m_oFakeHad1ProngPlots.fill(*tau, weight);
+	m_oTauValidationPlots->m_oFakeTauEff1PPlots.fill(*tau, weight);
 	if ( nominal ) {
-	  m_oTauValidationPlots->m_oFakeGeneralNom.fill(*tau, weight);
-	  m_oTauValidationPlots->m_oFakeTauEffPlotsNom.fill(*tau, weight);
-	  m_oTauValidationPlots->m_oFakeTauRecoTauPlotsNom.fill(*tau, weight);
-	  m_oTauValidationPlots->m_oNewCoreFakePlotsNom.fill(*tau, weight);
+	  m_oTauValidationPlots->m_oFakeHad1ProngNom.fill(*tau, weight);
+	  m_oTauValidationPlots->m_oFakeTauEff1PPlotsNom.fill(*tau, weight);
 	}
-	if ( recProng == 1 ) {
-	  m_oTauValidationPlots->m_oFakeHad1ProngPlots.fill(*tau, weight);
-	  m_oTauValidationPlots->m_oFakeTauEff1PPlots.fill(*tau, weight);
-	  if ( nominal ) {
-	    m_oTauValidationPlots->m_oFakeHad1ProngNom.fill(*tau, weight);
-	    m_oTauValidationPlots->m_oFakeTauEff1PPlotsNom.fill(*tau, weight);
-	  }
-	}
-	if ( recProng == 3 ) {
-	  m_oTauValidationPlots->m_oFakeTauEff3PPlots.fill(*tau, weight);
-	  m_oTauValidationPlots->m_oFakeHad3ProngPlots.fill(*tau, weight);
-	  if ( nominal ) {
-	    m_oTauValidationPlots->m_oFakeHad3ProngNom.fill(*tau, weight);
-	    m_oTauValidationPlots->m_oFakeTauEff3PPlotsNom.fill(*tau, weight);
-	  }
+      }
+      if ( recProng == 3 ) {
+	m_oTauValidationPlots->m_oFakeTauEff3PPlots.fill(*tau, weight);
+	m_oTauValidationPlots->m_oFakeHad3ProngPlots.fill(*tau, weight);
+	if ( nominal ) {
+	  m_oTauValidationPlots->m_oFakeHad3ProngNom.fill(*tau, weight);
+	  m_oTauValidationPlots->m_oFakeTauEff3PPlotsNom.fill(*tau, weight);
 	}
       }
     }

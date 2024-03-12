@@ -15,6 +15,7 @@ EVetoPlots::EVetoPlots(PlotBase* pParent, const std::string& sDir, std::string s
    m_IsoFrac(nullptr),
    m_CentFrac(nullptr),
    m_id_RNNEleScore(nullptr),
+   m_id_RNNEleScoreSigTrans(nullptr),
    m_pt_eleRNNloose(nullptr),
    m_pt_eleRNNmed(nullptr),
    m_pt_eleRNNtight(nullptr),
@@ -37,7 +38,8 @@ void EVetoPlots::initializePlots(){
   m_IsoFrac   = Book1D("IsoFrac",m_sTauJetContainerName + " Iso Frac; Iso Frac; # Part",20,0,1.);
   m_CentFrac  = Book1D("CentFrac",m_sTauJetContainerName + " Cent Frac; Cent Frac; # Part",20,0,1.);
 
-  m_id_RNNEleScore      = Book1D("id_RNNEleScore",m_sTauJetContainerName + " RNNEleScore ; RNNEleScore; # Tau",10,0.,1.05);
+  m_id_RNNEleScore         = Book1D("id_RNNEleScore",m_sTauJetContainerName + " RNNEleScore ; RNNEleScore; # Tau",20,0.,1.00);
+  m_id_RNNEleScoreSigTrans = Book1D("id_RNNEleScoreSigTrans",m_sTauJetContainerName + " RNNEleScoreSigTrans ; RNNEleScoreSigTrans; # Tau",20,0.,1.00);
   m_pt_eleRNNloose      = Book1D("Pt_eleRNNloose",m_sTauJetContainerName + " Tau pt; pt; # Taus",20,0.,150.);
   m_pt_eleRNNmed        = Book1D("Pt_eleRNNmed",m_sTauJetContainerName + " Tau pt; pt; # Taus",20,0.,150.);
   m_pt_eleRNNtight      = Book1D("Pt_eleRNNtight",m_sTauJetContainerName + " Tau pt; pt; # Taus",20,0.,150.);
@@ -64,6 +66,11 @@ void EVetoPlots::initializePlots(){
 
   if(tau.isAvailable<float>("RNNEleScore")) {
     m_id_RNNEleScore->Fill(tau.discriminant(xAOD::TauJetParameters::RNNEleScore), weight);
+
+    if(tau.isAvailable<float>("RNNEleScoreSigTrans_v1")) {
+       m_id_RNNEleScoreSigTrans->Fill(tau.auxdata<float>("RNNEleScoreSigTrans_v1"), weight);	    
+    }  
+
     if ( tau.isTau(xAOD::TauJetParameters::EleRNNLoose) ) {
       m_pt_eleRNNloose->Fill(tau.pt()/1000., weight);
       m_pt_eleRNNlooseHighPt->Fill(tau.pt()/1000., weight);
