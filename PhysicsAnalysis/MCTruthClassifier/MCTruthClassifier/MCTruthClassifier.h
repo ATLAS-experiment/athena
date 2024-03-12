@@ -240,10 +240,6 @@ private:
   MCTruthPartClassifier::ParticleOrigin defHadronType(int);
   static MCTruthPartClassifier::ParticleType defTypeOfHadron(int);
   static MCTruthPartClassifier::ParticleOrigin convHadronTypeToOrig(MCTruthPartClassifier::ParticleType pType,int motherPDG);
-  //
-  static const xAOD::TruthVertex* findEndVert(const xAOD::TruthParticle*) ;
-  //
-  std::vector<const xAOD::TruthParticle*> findFinalStatePart(const xAOD::TruthVertex*) const;
 
   /* Private functions */
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE) /*Athena Only*/

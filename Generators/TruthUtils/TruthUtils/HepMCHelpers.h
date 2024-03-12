@@ -170,5 +170,50 @@ namespace MC
     return fromHad;
   }
 
+  template <class V, class T> V findEndVert(T thePart) {
+    V EndVert = thePart->end_vertex();
+    V pVert(nullptr);
+    if (EndVert != nullptr) {
+      do {
+        bool samePart = false;
+        pVert = nullptr;
+        auto outgoing = EndVert->particles_out();
+        auto incoming = EndVert->particles_in();
+        for (const auto& itrDaug: outgoing) {
+          if (!itrDaug) continue;
+          if (((itrDaug && HepMC::is_same_generator_particle(itrDaug,thePart)) ||
+             // brem on generator level for tau
+             (outgoing.size() == 1 && incoming.size() == 1 &&
+              !HepMC::is_simulation_particle(itrDaug) && !HepMC::is_simulation_particle(thePart))) &&
+            itrDaug->pdg_id() == thePart->pdg_id()) {
+            samePart = true;
+            pVert = itrDaug->end_vertex();
+          }
+        }
+        if (samePart) EndVert = pVert;
+      } while (pVert != nullptr && pVert != EndVert); // pVert!=EndVert to prevent Sherpa loop
+    }
+    return EndVert;
+  }
+
+  template <class V, class T>
+  std::vector<T> findFinalStatePart(V EndVert)  {
+    if (!EndVert) return {};
+    std::vector<T> finalStatePart;
+    auto outgoing = EndVert->particles_out();
+    for (const auto& thePart: outgoing) {
+      if (!thePart) continue;
+      finalStatePart.push_back(thePart);
+      if (isStable(thePart)) continue;
+      V pVert = findEndVert<V,T>(thePart);
+      if (pVert == EndVert) break; // to prevent Sherpa  loop
+      if (pVert != nullptr) {
+          std::vector<T>  vecPart = findFinalStatePart<V,T>(pVert);
+          finalStatePart.insert(finalStatePart.end(),vecPart.begin(),vecPart.end());
+      }
+    }
+    return finalStatePart;
+  }
+
 }
 #endif
