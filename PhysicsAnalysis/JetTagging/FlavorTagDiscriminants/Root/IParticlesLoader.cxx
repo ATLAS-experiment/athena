@@ -40,8 +40,7 @@ namespace FlavorTagDiscriminants {
             if (!link.isValid()) {
               throw std::logic_error("invalid particle link");
             }
-            const auto* particle = dynamic_cast<const xAOD::IParticle*>(*link);
-            particles.push_back(particle);
+            particles.push_back(*link);
           }
           return particles;
         };
