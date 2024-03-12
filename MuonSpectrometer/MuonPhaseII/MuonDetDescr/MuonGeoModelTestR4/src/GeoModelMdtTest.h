@@ -21,8 +21,8 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
 
         ~GeoModelMdtTest() = default;
 
-        StatusCode execute() override;        
-        StatusCode initialize() override;        
+        StatusCode execute() override;
+        StatusCode initialize() override;
         StatusCode finalize() override;
 
         unsigned int cardinality() const override final { return 1; }

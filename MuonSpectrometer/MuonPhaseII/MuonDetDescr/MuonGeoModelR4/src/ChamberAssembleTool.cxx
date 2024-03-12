@@ -42,55 +42,59 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
    ATH_CHECK(m_geoUtilTool.retrieve());
 
    /// TGC T4E chambers  & Mdt EIL chambers are glued together
-   const int stIdx_T4E = m_idHelperSvc->hasTGC() ? m_idHelperSvc->tgcIdHelper().stationNameIndex("T4E") : -1;
-   const int stIdx_EIL = m_idHelperSvc->hasMDT() ? m_idHelperSvc->mdtIdHelper().stationNameIndex("EIL") : -1;
-   
-   const auto isMdtTgcEILStation = [this, stIdx_T4E, stIdx_EIL](const MuonReadoutElement* a,
-                                                                const MuonReadoutElement* b){
-      /// At least one of the chambers needs to be EIL & T4E
-      if ( !(a->stationName() == stIdx_EIL || b->stationName() == stIdx_EIL ||
-             a->stationName() == stIdx_T4E || b->stationName() == stIdx_T4E)) return false;
-      if (m_idHelperSvc->sector(a->identify()) != m_idHelperSvc->sector(b->identify())) {
-          return false;
-      }
-      if(a->stationEta() * b->stationEta() < 0) return false;
-      if (a->stationName() == b->stationName()) return true;
-      return (a->stationName() == stIdx_EIL || b->stationName() == stIdx_EIL) &&
-             (a->stationName() == stIdx_T4E || b->stationName() == stIdx_T4E);
+   auto mdtStationIndex = [this] (const std::string& stName) {
+      return m_idHelperSvc->hasMDT() ? m_idHelperSvc->mdtIdHelper().stationNameIndex(stName) : -1;
    };
+   auto tgcStationIndex = [this] (const std::string& stName) {
+      return m_idHelperSvc->hasTGC() ? m_idHelperSvc->tgcIdHelper().stationNameIndex(stName) : -1;
+   };
+
+   const std::set<int> stIndicesEIL{mdtStationIndex("EIL"), mdtStationIndex("T4E")};
+   const std::set<int> stIndicesEM{mdtStationIndex("EML"), mdtStationIndex("EMS"),
+                                   tgcStationIndex("T1E"), tgcStationIndex("T1F"),
+                                   tgcStationIndex("T2E"), tgcStationIndex("T2F"),
+                                   tgcStationIndex("T3E"), tgcStationIndex("T3F")};
+ 
    std::vector<MuonReadoutElement*> allReadOutEles = mgr.getAllReadoutElements();
 
    std::vector<defineArgs> muonChamberCandidates{};
 
    /// Group the chambers together
-   ///  NSW -> sector & side
-   ///  Mdt + Tgc -> stationEta() + sector
+   ///  NSW  / Mdt + Tgc -> sector & side
    ///  Mdt + Rpc -> same mother volume
    for (const MuonReadoutElement* readOutEle : allReadOutEles) {
       std::vector<defineArgs>::iterator exist = 
             std::find_if(muonChamberCandidates.begin(), muonChamberCandidates.end(), 
-                         [this, readOutEle, &isMdtTgcEILStation](const defineArgs& args){
+                         [this, readOutEle, &stIndicesEIL, &stIndicesEM](const defineArgs& args){
                             const MuonReadoutElement* refEle = args.readoutEles[0];
                             const Identifier refId = refEle->identify();
                             const Identifier testId = readOutEle->identify();
-                            /// Group the NSW according to their sector & side
-                            if (isMdtTgcEILStation(refEle, readOutEle)) return true;
-                            if (isNsw(readOutEle) && isNsw(refEle)) {
-                                return sign(readOutEle->stationEta()) == sign(refEle->stationEta()) &&
-                                       m_idHelperSvc->sector(testId) == m_idHelperSvc->sector(refId);
-                            } else if (readOutEle->detectorType() == ActsTrk::DetectorType::Tgc ||
-                                       refEle->detectorType() == ActsTrk::DetectorType::Tgc) {
-                              /// Group the chambers by station Eta & sectors. Tgc chamber triplet
-                              if (m_idHelperSvc->sector(refId) != m_idHelperSvc->sector(testId)) return false;
-                              /// Ensure the same station eta
-                              if (readOutEle->stationEta() != refEle->stationEta()) return false;
-                              /// Last but not least the same Layer
-                              return Muon::MuonStationIndex::toStationIndex(readOutEle->chamberIndex()) ==
-                                     Muon::MuonStationIndex::toStationIndex(refEle->chamberIndex());
+                            /// Check that the two readout elements are on the same side
+                            if (sign(refEle->stationEta()) != sign(readOutEle->stationEta())) {
+                                 return false;
                             }
-                            return readOutEle->getMaterialGeom()->getParent() ==
-                                   refEle->getMaterialGeom()->getParent();
-
+                            /// The two readout elements shall be located in the same sector
+                            if (m_idHelperSvc->sector(testId) != m_idHelperSvc->sector(refId)) {
+                                 return false;
+                            }
+                            /// Summarize all readout element in the same sector & layer
+                            /// into a single chamber
+                            if (readOutEle->stationName() == refEle->stationName()) {
+                                 return true;
+                            }
+                            /// sTgcs && Micromegas should belong to the same chamber
+                            if (isNsw(readOutEle) && isNsw(refEle)) return true;
+                            ///  EM readout element shall be grouped together too
+                            if (stIndicesEM.count(readOutEle->stationName()) && 
+                                stIndicesEM.count(refEle->stationName())) {
+                                 return true;
+                            }
+                            /// Finally the EIL chambers should belong to the same chamber
+                            if (stIndicesEIL.count(readOutEle->stationName()) &&
+                                stIndicesEIL.count(refEle->stationName())) {
+                                 return true;    
+                            }
+                            return false;
                          });
       /// If no chamber has been found, then create a new one
       if (exist == muonChamberCandidates.end()) {
@@ -155,21 +159,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
          candidate.halfY = 0.5*(maxY - minY);
          candidate.halfZ = 0.5*(maxZ - minZ);
  
-         /// Recenter the edges 
-         minX = 1.e6, maxX = -1.e6;
-         double minX2{1.e6}, maxX2{-1.e6};
-         for (Amg::Vector3D& edge :edgePoints) {
-            edge = Amg::Translation3D{-midX, -midY, -midZ} * edge;
-            if (edge.y() < 0.){
-               minX = std::min(minX, edge.x());
-               maxX = std::max(maxX, edge.x());
-            } else {
-               minX2 = std::min(minX2, edge.x());
-               maxX2 = std::max(maxX2, edge.x());
-            }
-         }
-         candidate.halfXShort = 0.5*(maxX - minX);
-         candidate.halfXShort = candidate.halfXLong = 0.5*(maxX2 - minX2);
+         candidate.halfXShort = candidate.halfXLong = 0.5*(maxX - minX);
 
          
          candidate.centerTrans = axisRotation.inverse() * Amg::Translation3D{midX, midY, midZ};
@@ -180,6 +170,13 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             debugStream<<candidate<<std::endl;
             const Amg::Transform3D globChambTrf{candidate.readoutEles[0]->localToGlobalTrans(gctx) * candidate.centerTrans};
             for (const MuonReadoutElement* ele: candidate.readoutEles){
+                if(m_idHelperSvc->stationNameString(ele->identify()) == "BIR") {
+                  const MdtReadoutElement* mdtRe = static_cast<const MdtReadoutElement*>(ele);
+
+                  debugStream<<" *** "<<m_idHelperSvc->toString(ele->identify())<<" "
+                             <<Amg::toString(globChambTrf.inverse()*mdtRe->highVoltPos(gctx, mdtRe->identify()))
+                             <<" -- "<<Amg::toString(globChambTrf.inverse()*mdtRe->readOutPos(gctx, mdtRe->identify()))<<std::endl;
+                }else
                 debugStream<<" **** "<<m_idHelperSvc->toStringDetEl(ele->identify())<<", local RE center: "
                            <<Amg::toString(globChambTrf.inverse() * ele->center(gctx))<<", global: "
                            <<Amg::toString(ele->center(gctx))<<std::endl;

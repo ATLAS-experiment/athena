@@ -17,6 +17,9 @@ if __name__=="__main__":
     flags, cfg = setupGeoR4TestCfg(args)    
     ###
     cfg.merge(MuonChamberToolTestCfg(flags))
+    cfg.getService("MessageSvc").verboseLimit = 100000
+    from AthenaCommon.Constants import VERBOSE
+    cfg.getService("GeoModelSvc").DetectorTools["MuonDetectorToolR4"].ReadoutEleBuilders["MuonChamberAssembleTool"].OutputLevel = VERBOSE
     executeTest(cfg, num_events = args.nEvents)
 
 
