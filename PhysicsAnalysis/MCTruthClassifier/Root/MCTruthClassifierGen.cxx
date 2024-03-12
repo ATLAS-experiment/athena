@@ -1879,40 +1879,11 @@ const xAOD::TruthParticle* MCTruthClassifier::getMother(const xAOD::TruthParticl
   return theMoth;
 }
 
-//---------------------------------------------------------------------------------
-const xAOD::TruthVertex*
-MCTruthClassifier::findEndVert(const xAOD::TruthParticle* thePart) 
-{
-  const xAOD::TruthVertex* EndVert = thePart->decayVtx();
-  const xAOD::TruthVertex* pVert(nullptr);
-  if (EndVert != nullptr) {
-    do {
-      bool samePart = false;
-      pVert = nullptr;
-      for (unsigned int ipOut = 0; ipOut < EndVert->nOutgoingParticles(); ipOut++) {
-        const xAOD::TruthParticle* itrDaug = EndVert->outgoingParticle(ipOut);
-        if (!itrDaug) continue;
-        if (((itrDaug && HepMC::is_same_generator_particle(itrDaug,thePart)) ||
-             // brem on generator level for tau
-             (EndVert->nOutgoingParticles() == 1 && EndVert->nIncomingParticles() == 1 &&
-              !HepMC::is_simulation_particle(itrDaug) && !HepMC::is_simulation_particle(thePart))) &&
-            itrDaug->pdgId() == thePart->pdgId()) {
-          samePart = true;
-          pVert = itrDaug->decayVtx();
-        }
-      } // cycle itrDaug
-      if (samePart)
-        EndVert = pVert;
-    } while (pVert != nullptr && pVert != EndVert); // pVert!=EndVert to prevent Sherpa loop
 
-  } // EndVert
-
-  return EndVert;
-}
 
 ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  const xAOD::TruthVertex* EndVert = findEndVert(thePart);
+  const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
   if (EndVert == nullptr) return NonInteract;
 
   int ElecOutNumOfNucFr(0);
@@ -1936,7 +1907,7 @@ ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticl
 
 ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  const xAOD::TruthVertex* EndVert = findEndVert(thePart);
+  const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
   if (EndVert == nullptr) return NonInteract;
   int MuOutNumOfNucFr(0);
   int NumOfHadr(0);
@@ -1964,10 +1935,10 @@ ParticleOutCome MCTruthClassifier::defOutComeOfMuon(const xAOD::TruthParticle* t
 ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, Info* info) const {
   ATH_MSG_DEBUG("Executing defOutComeOfTau");
   ParticleOutCome PartOutCome = UnknownOutCome;
-  const xAOD::TruthVertex* EndVert = findEndVert(thePart);
+  const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
   if (EndVert == nullptr) return NonInteract;
   int NumOfTauDaug = EndVert->nOutgoingParticles();
-  std::vector<const xAOD::TruthParticle*> tauFinalStatePart = findFinalStatePart(EndVert);
+  std::vector<const xAOD::TruthParticle*> tauFinalStatePart = MC::findFinalStatePart<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(EndVert);
   auto PD = DecayProducts(tauFinalStatePart);
   int NumOfElec = PD.apd(11);
   int NumOfMuon = PD.apd(13);
@@ -1992,27 +1963,10 @@ ParticleOutCome MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* th
 
   return PartOutCome;
 }
-//---------------------------------------------------------------------------------
-std::vector<const xAOD::TruthParticle*> MCTruthClassifier::findFinalStatePart(const xAOD::TruthVertex* EndVert) const {
-  if (!EndVert) return {};
-  std::vector<const xAOD::TruthParticle*> finalStatePart;
-  for (const auto& thePart: EndVert->particles_out()) {
-    if (!thePart) continue;
-    finalStatePart.push_back(thePart);
-    if (MC::isStable(thePart)) continue;
-    const xAOD::TruthVertex* pVert = findEndVert(thePart);
-    if (pVert == EndVert) break; // to prevent Sherpa  loop
-    if (pVert != nullptr) {
-        std::vector<const xAOD::TruthParticle*>  vecPart = findFinalStatePart(pVert);
-        finalStatePart.insert(finalStatePart.end(),vecPart.begin(),vecPart.end());
-    }
-  }
-  return finalStatePart;
-}
 
 ParticleOutCome MCTruthClassifier::defOutComeOfPhoton(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
-  const xAOD::TruthVertex* EndVert = findEndVert(thePart);
+  const xAOD::TruthVertex* EndVert = MC::findEndVert<const xAOD::TruthVertex*,const xAOD::TruthParticle*>(thePart);
   if (EndVert == nullptr) return UnConverted;
 
   int PhtOutNumOfNucFr(0);
