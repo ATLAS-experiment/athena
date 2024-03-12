@@ -72,7 +72,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.RecordFlux", False)
     scf.addFlag("Sim.TruthStrategy", lambda prevFlags : TruthStrategy.Validation if prevFlags.Sim.ISF.ValidationMode else TruthStrategy.MC12,
                 type=TruthStrategy)
-    scf.addFlag("Sim.UseShadowEvent", False)
+    scf.addFlag("Sim.UseShadowEvent", lambda prevFlags : prevFlags.Sim.ISF.Simulator.isQuasiStable())
     scf.addFlag("Sim.G4Commands", ["/run/verbose 2"])
     scf.addFlag("Sim.FlagAbortedEvents", False)
     scf.addFlag("Sim.KillAbortedEvents", True)
