@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 def DQTDataFlowMonAlgConfig(flags):
@@ -12,16 +12,6 @@ def DQTDataFlowMonAlgConfig(flags):
     helper.result().merge(ReadyFilterCfg)
     return helper.result()
 
-def DQTDataFlowMonAlgConfigOld(flags):
-    from AthenaMonitoring import AthMonitorCfgHelperOld
-    from .DataQualityToolsConf import DQTDataFlowMonAlg
-    from AthenaCommon.GlobalFlags import globalflags
-    from AthenaMonitoring.AtlasReadyFilterTool import GetAtlasReadyFilterTool
-    helper = AthMonitorCfgHelperOld(flags, 'DQTDataFlowMonAlgCfg')
-    _DQTDataFlowMonAlgConfigCore(helper, DQTDataFlowMonAlg,
-                                 globalflags.DataSource() == 'geant4',
-                                 GetAtlasReadyFilterTool())
-    return helper.result()
 
 def _DQTDataFlowMonAlgConfigCore(helper, algConfObj, isMC, readyFilterTool):
     from ROOT import EventInfo
