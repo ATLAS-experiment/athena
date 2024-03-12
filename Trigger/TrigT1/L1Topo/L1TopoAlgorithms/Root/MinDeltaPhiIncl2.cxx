@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * MinDeltaPhiIncl2.cpp
@@ -10,16 +10,14 @@
  * @param NumberLeading
 **********************************/
 
-#include <cmath>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <algorithm>
+
 
 #include "L1TopoAlgorithms/MinDeltaPhiIncl2.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
+#include <cmath>
+#include <string>
+#include <algorithm>
 
 REGISTER_ALG_TCS(MinDeltaPhiIncl2)
 
@@ -90,7 +88,8 @@ TCS::MinDeltaPhiIncl2::processBitCorrect( const std::vector<TCS::TOBArray const 
    bool firstphi = true;
 
    // declare iterator for the tob with min dphi
-   TCS::TOBArray::const_iterator tobmin1,tobmin2;  
+   TCS::TOBArray::const_iterator tobmin1,tobmin2; 
+   const TCS::TOBArray::const_iterator invalidIterator;  
       
    if (input.size() == 2) {
    
@@ -133,7 +132,7 @@ TCS::MinDeltaPhiIncl2::processBitCorrect( const std::vector<TCS::TOBArray const 
           const bool fillAccept = fillHistos() and (fillHistosBasedOnHardware() ? getDecisionHardwareBit(i) : accept);
           const bool fillReject = fillHistos() and not fillAccept;
           const bool alreadyFilled = decision.bit(i);
-          if( accept ) {
+          if( accept and (tobmin1!=invalidIterator and tobmin2!=invalidIterator)) {
               decision.setBit(i, true);
               output[i]->push_back(TCS::CompositeTOB(*tobmin1, *tobmin2));
           }

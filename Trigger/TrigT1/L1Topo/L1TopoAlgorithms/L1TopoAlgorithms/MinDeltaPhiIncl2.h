@@ -8,8 +8,8 @@
 #ifndef __TopoCore__MinDeltaPhiIncl2__
 #define __TopoCore__MinDeltaPhiIncl2__
 
-#include <iostream>
 #include "L1TopoInterfaces/DecisionAlg.h"
+#include <vector>
 
 namespace TCS {
    
