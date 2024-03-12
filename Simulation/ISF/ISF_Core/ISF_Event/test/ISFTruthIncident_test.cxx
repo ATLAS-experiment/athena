@@ -38,7 +38,6 @@ namespace test {
   int    pdgCode = 675;
   int status     =  200045;
   double time    = 923.;
-  int    bcid    = 123;
   const ISF::DetRegionSvcIDPair origin( AtlasDetDescr::fAtlasCalo, 2 );
   Barcode::ParticleBarcode partBC = 1;
   ISF::TruthBinding *truth = 0;
@@ -50,7 +49,6 @@ namespace test {
                          status,
                          time,
                          origin,
-                         bcid,
                          partBC,
                          truth );
 

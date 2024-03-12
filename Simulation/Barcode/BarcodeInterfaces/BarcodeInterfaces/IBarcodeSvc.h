@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BARCODEINTERFACES_IBARCODESVC_H
@@ -16,8 +16,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 namespace Barcode {
-
-  class BitCalculator;
 
   /** @class IBarcodeSvc
 
@@ -63,10 +61,6 @@ namespace Barcode {
     /** Return the secondary particle and vertex offsets */
     virtual Barcode::ParticleBarcode secondaryParticleBcOffset() const = 0;
     virtual Barcode::VertexBarcode   secondaryVertexBcOffset()  const = 0;
-
-    /** return bit calculator for encoding extra barcode info */
-    virtual const BitCalculator* getBitCalculator() const { return nullptr; }
-    virtual bool hasBitCalculator() const { return false; }
   };
 
 }

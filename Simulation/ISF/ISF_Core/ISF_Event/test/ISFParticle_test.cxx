@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -19,7 +19,6 @@ void testConstructors() {
     int    pdgCode = 675;
     int    status =  10005;
     double time    = 923.;
-    int    bcid    = 123;
     const ISF::DetRegionSvcIDPair origin( AtlasDetDescr::fAtlasCalo, 2 );
     Barcode::ParticleBarcode bc = Barcode::fUndefinedBarcode;
     ISF::TruthBinding *truth = 0;
@@ -35,7 +34,6 @@ void testConstructors() {
                            status,
                            time,
                            origin,
-                           bcid,
                            bc,
                            truth );
 
@@ -49,7 +47,6 @@ void testConstructors() {
     const ISF::ParticleHistory &history1 = isp1.history();
     assert( 1       == history1.size()     );
     assert( origin  == history1[0]         );
-    assert( bcid    == isp1.getBCID()      );
     assert( bc      == isp1.barcode()      );
     assert( truth   == isp1.getTruthBinding() );
 

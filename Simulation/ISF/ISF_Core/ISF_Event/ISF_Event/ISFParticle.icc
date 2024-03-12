@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // this file contains all ISFParticle inline methods
@@ -61,20 +61,12 @@ namespace ISF {
     }
   }
 
-  // bunch-crossing identifier
-  inline int ISFParticle::getBCID() const {
-    return m_bcid;
-  }
-  inline void ISFParticle::setBCID(int bcid) {
-    m_bcid = bcid;
-  }
-
   // printout methods
   inline MsgStream& ISFParticle::dump( MsgStream& out ) const
   { out << "ISFP pdg=" << m_pdgCode << " p=" << m_momentum.mag()
         << " xyz=(" << m_position.x() << "," <<  m_position.y() << "," <<  m_position.z() << ")"
         << " r=" << m_position.perp() << " eta=" << m_position.eta() << " phi=" << m_position.phi()
-        << " barcode=" << m_barcode << " mass=" << m_mass << " order=" << m_order << " bcid=" << m_bcid;
+        << " barcode=" << m_barcode << " mass=" << m_mass << " order=" << m_order;
     if (m_partLink)
       out << " (" << *m_partLink << ")";
     else
@@ -85,7 +77,7 @@ namespace ISF {
   { out << "ISFP pdg=" << m_pdgCode << " p=" << m_momentum.mag()
         << " xyz=(" << m_position.x() << "," <<  m_position.y() << "," <<  m_position.z() << ")"
         << " r=" << m_position.perp() << " eta=" << m_position.eta() << " phi=" << m_position.phi()
-        << " barcode=" << m_barcode << " mass=" << m_mass << " order=" << m_order << " bcid=" << m_bcid;
+        << " barcode=" << m_barcode << " mass=" << m_mass << " order=" << m_order;
     if (m_partLink)
       out << " (" << *m_partLink << ")";
     else

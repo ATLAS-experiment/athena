@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __BARCODESERVICES__
@@ -15,10 +15,6 @@
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
-
-#pragma link C++ namespace Barcode;
-#pragma link C++ class Barcode::BitCalculator+;
-#pragma link C++ class Barcode::TruthDressRoom+;
 
 #endif
 

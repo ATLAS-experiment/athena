@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ISFParticle.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #include "ISF_Event/ISFParticle.h"
 
@@ -27,11 +23,10 @@ ISF::ISFParticle::ISFParticle(
   m_mass(mass),
   m_charge(charge),
   m_pdgCode(pdgCode),
-  m_status(status),  
+  m_status(status),
   m_tstamp(time),
   m_history(parent.history()),
   m_barcode(barcode),
-  m_bcid(parent.getBCID()),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
   m_userInfo(nullptr),
@@ -61,7 +56,6 @@ ISF::ISFParticle::ISFParticle(
   m_tstamp(time),
   m_history(parent.history()),
   m_barcode(barcode),
-  m_bcid(parent.getBCID()),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
   m_userInfo(nullptr),
@@ -79,7 +73,6 @@ ISF::ISFParticle::ISFParticle(
                               int status,
                               double time,
                               const DetRegionSvcIDPair &origin,
-                              int bcid,
                               Barcode::ParticleBarcode barcode,
                               TruthBinding* truth,
                               const HepMcParticleLink* partLink):
@@ -92,7 +85,6 @@ ISF::ISFParticle::ISFParticle(
   m_tstamp(time),
   m_history(1, origin),
   m_barcode(barcode),
-  m_bcid(bcid),
   m_truth(truth),
   m_order(ISF::DefaultParticleOrder),
   m_userInfo(nullptr),
@@ -111,7 +103,6 @@ ISF::ISFParticle::ISFParticle(const ISFParticle& isfp):
   m_tstamp(isfp.timeStamp()),
   m_history(isfp.history()),
   m_barcode(isfp.barcode()),
-  m_bcid(isfp.getBCID()),
   m_truth(nullptr),
   m_order(ISF::DefaultParticleOrder),
   m_userInfo(nullptr)
@@ -129,11 +120,10 @@ ISF::ISFParticle::ISFParticle(ISFParticle&& isfp):
   m_mass(isfp.mass()),
   m_charge(isfp.charge()),
   m_pdgCode(isfp.pdgCode()),
-  m_status(isfp.status()),  
+  m_status(isfp.status()),
   m_tstamp(isfp.timeStamp()),
   m_history(isfp.history()),
   m_barcode(isfp.barcode()),
-  m_bcid(isfp.getBCID()),
   m_truth(isfp.getTruthBinding()),
   m_order(isfp.getOrder()),
   m_userInfo(isfp.getUserInformation()),
@@ -161,7 +151,6 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(const ISF::ISFParticle& rhs)
     m_tstamp       = rhs.timeStamp();
     m_history      = rhs.history();
     m_barcode      = rhs.barcode();
-    m_bcid         = rhs.getBCID();
 
     delete m_truth;
     m_truth = nullptr;
@@ -191,7 +180,6 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(ISF::ISFParticle&& rhs)
   m_tstamp       = rhs.timeStamp();
   m_history      = rhs.history();
   m_barcode      = rhs.barcode();
-  m_bcid         = rhs.getBCID();
   delete m_truth;
   m_truth        = rhs.getTruthBinding();
   delete m_userInfo;
@@ -221,8 +209,6 @@ bool ISF::ISFParticle::isEqual(const ISF::ISFParticle& rhs) const
   pass &= std::fabs(m_tstamp-rhs.timeStamp()) < epsilon;
   pass &= m_history == rhs.history();
   pass &= m_barcode == rhs.barcode();
-  pass &= m_bcid == rhs.getBCID();
-
   {
     const auto rhsTruthPtr = rhs.getTruthBinding();
     if (m_truth && rhsTruthPtr) {
@@ -264,7 +250,6 @@ bool ISF::ISFParticle::isIdent(const ISF::ISFParticle& rhs) const
   pass &= m_tstamp == rhs.timeStamp();
   pass &= m_history == rhs.history();
   pass &= m_barcode == rhs.barcode();
-  pass &= m_bcid == rhs.getBCID();
   pass &= m_truth && rhs.getTruthBinding();
   pass &= m_userInfo == rhs.getUserInformation();
   pass &= m_partLink == rhs.getParticleLink();

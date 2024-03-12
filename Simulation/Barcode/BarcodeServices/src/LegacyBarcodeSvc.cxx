@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BarcodeServices/LegacyBarcodeSvc.h"
@@ -10,7 +10,6 @@
 /** Constructor **/
 Barcode::LegacyBarcodeSvc::LegacyBarcodeSvc(const std::string& name,ISvcLocator* svc) :
   base_class(name,svc),
-  m_bitcalculator(new Barcode::BitCalculator()),
   m_firstVertex(-HepMC::SIM_BARCODE_THRESHOLD-1),
   m_vertexIncrement(-1),
   m_currentVertex(-1),
@@ -28,7 +27,6 @@ Barcode::LegacyBarcodeSvc::LegacyBarcodeSvc(const std::string& name,ISvcLocator*
 
 Barcode::LegacyBarcodeSvc::~LegacyBarcodeSvc()
 {
-  delete m_bitcalculator;
 }
 
 

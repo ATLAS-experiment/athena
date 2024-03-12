@@ -216,17 +216,15 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
   ISF::DetRegionSvcIDPair expectedHistory(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
   auto expectedTruthBinding = new ISF::TruthBinding(genPart);
-  const int expectedBCID(0);
 
   ISF::ISFParticle expected(expectedPos,
                             expectedMom,
                             1234.56,
                             -1., // charge
                             11, // pdg id
-                            1, ///status                            
+                            1, ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
-                            expectedBCID, // bcid
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink);
@@ -273,7 +271,6 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
   ISF::DetRegionSvcIDPair expectedHistory(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
   auto expectedTruthBinding = new ISF::TruthBinding(genPart);
-  const int expectedBCID(0);
   ISF::ISFParticle expected(expectedPos,
                             expectedMom,
                             0., // mass from ParticleDataTable
@@ -282,7 +279,6 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
                             1,  ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
-                            expectedBCID, // bcid
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink
@@ -328,7 +324,6 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
   Amg::Vector3D expectedMom(12.3, 45.6, 78.9);
   ISF::DetRegionSvcIDPair expectedHistory(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
   auto expectedTruthBinding = new ISF::TruthBinding(genPart);
-  const int expectedBCID(0);
 
   ISF::ISFParticle expected(expectedPos,
                             expectedMom,
@@ -338,7 +333,6 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_electron) {
                             1, ///status
                             0.321/Gaudi::Units::c_light, // time
                             expectedHistory,
-                            expectedBCID, // bcid
                             particleBarcode, // barcode
                             expectedTruthBinding,
                             trackLink

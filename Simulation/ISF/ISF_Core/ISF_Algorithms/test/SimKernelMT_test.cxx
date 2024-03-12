@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -703,8 +703,7 @@ protected:
                                     11,  // PDG code
                                     1, ///status
                                     0.2*Gaudi::Units::second,  // time
-                                    particleOrigin,
-                                    123  // BCID
+                                    particleOrigin
                                     );
 
     ASSERT_NE( m_mockSimulationSelector, nullptr );
@@ -735,10 +734,9 @@ protected:
                                     123.*Gaudi::Units::GeV,  // mass
                                     -1.,  // charge
                                     11,  // PDG code
-                                    1, ///status                                    
+                                    1, ///status
                                     0.2*Gaudi::Units::second,  // time
-                                    particleOrigin,
-                                    123  // BCID
+                                    particleOrigin
                                     );
 
     ASSERT_NE( m_mockSimulationSelector, nullptr );
@@ -766,10 +764,9 @@ protected:
                                     123.*Gaudi::Units::GeV,  // mass
                                     -1.,  // charge
                                     11,  // PDG code
-                                    1, ///status                                    
+                                    1, ///status
                                     0.2*Gaudi::Units::second,  // time
-                                    particleOrigin,
-                                    123  // BCID
+                                    particleOrigin
                                     );
 
     ASSERT_NE( m_mockSimulationSelector, nullptr );
@@ -799,8 +796,7 @@ protected:
                                     11,  // PDG code
                                     1, ///status
                                     0.2*Gaudi::Units::second,  // time
-                                    particleOrigin,
-                                    123  // BCID
+                                    particleOrigin
                                     );
 
     ASSERT_NE( m_mockSimulationSelector, nullptr );
@@ -861,9 +857,8 @@ protected:
                                        1, ///status
                                        678.9/Gaudi::Units::c_light*Gaudi::Units::ns,  // time
                                        particleOrigin,
-                                       0,  // BCID
                                        10001,  // barcode
-                                     truthBinding
+                                       truthBinding
                                        );
 
     ASSERT_NE( m_mockParticleKillerTool, nullptr );

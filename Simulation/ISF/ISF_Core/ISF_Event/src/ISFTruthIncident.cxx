@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -97,10 +97,6 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
 
 Barcode::ParticleBarcode ISF::ISFTruthIncident::parentBarcode() {
   return m_parent.barcode();
-}
-
-int ISF::ISFTruthIncident::parentBCID() const {
-  return m_parent.getBCID();
 }
 
 bool ISF::ISFTruthIncident::parentSurvivesIncident() const {
