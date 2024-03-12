@@ -10,6 +10,7 @@
 #include "src/SeedAnalysisAlg.h"
 #include "src/EstimatedTrackParamsAnalysisAlg.h"
 #include "src/SeedingAlgorithmAnalysisAlg.h"
+#include "src/TrackAnalysisAlg.h"
 // Tools
 #include "src/PhysValTool.h"
 
@@ -21,5 +22,6 @@ DECLARE_COMPONENT( ActsTrk::SpacePointAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedingAlgorithmAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::EstimatedTrackParamsAnalysisAlg )
+DECLARE_COMPONENT( ActsTrk::TrackAnalysisAlg )
 // Tools
 DECLARE_COMPONENT( ActsTrk::PhysValTool )

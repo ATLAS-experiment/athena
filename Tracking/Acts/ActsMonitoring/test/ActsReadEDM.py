@@ -18,6 +18,8 @@ if __name__ == "__main__":
     
     flags.addFlag("readClusters", False)
     flags.addFlag("readSpacePoints", False)
+    flags.addFlag("readTracks", False)
+    flags.addFlag("tracks", "")
     flags.fillFromArgs()
     
     flags.lock()
@@ -48,7 +50,15 @@ if __name__ == "__main__":
             from ActsConfig.ActsAnalysisConfig import ActsStripSpacePointAnalysisAlgCfg, ActsStripOverlapSpacePointAnalysisAlgCfg
             acc.merge(ActsStripSpacePointAnalysisAlgCfg(flags))
             acc.merge(ActsStripOverlapSpacePointAnalysisAlgCfg(flags))
-             
+
+    if flags.readTracks:
+        from ActsConfig.ActsAnalysisConfig import ActsTrackAnalysisAlgCfg
+        for track in flags.tracks.split(','):
+            acc.merge(ActsTrackAnalysisAlgCfg(flags,
+                                              name=f"{track}AnalysisAlg",
+                                              OutputLevel=2,
+                                              TracksLocation=track))
+            
     acc.printConfig()
     status = acc.run()
     if status.isFailure():
