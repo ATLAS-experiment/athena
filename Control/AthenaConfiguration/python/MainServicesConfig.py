@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import INFO
@@ -237,8 +237,8 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     log.setLevel(flags.Exec.OutputLevel)
 
     if flags.Exec.Interactive == "run":
-        print ("Interactive mode, switch to PyAthenaEventLoopMgr")
         LoopMgr="PyAthenaEventLoopMgr"
+        log.info("Interactive mode, switching to %s", LoopMgr)
     else:
         # Run a serial job for threads=0
         if flags.Concurrency.NumThreads > 0:
