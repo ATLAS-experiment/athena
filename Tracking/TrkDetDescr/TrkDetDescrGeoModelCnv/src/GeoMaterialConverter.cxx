@@ -12,10 +12,9 @@
 #include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/Units.h"
-
-const double Trk::GeoMaterialConverter::s_densityCnvFactor =
-    1. / GeoModelKernelUnits::gram;
-
+namespace {
+    constexpr double s_densityCnvFactor = 1. / GeoModelKernelUnits::gram;
+}
 Trk::Material Trk::GeoMaterialConverter::convert(const GeoMaterial* gm) {
     // get the obvious things
     float x0 = gm->getRadLength();

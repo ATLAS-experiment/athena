@@ -3,6 +3,10 @@
 */
 
 #include "MuonTrackingGeometry/MuonStationBuilderImpl.h"
+#include "MuonTrackingGeometry/Utils.h"
+
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include <fstream>
 #include <map>
@@ -56,6 +60,7 @@
 #include "TrkVolumes/SimplePolygonBrepVolumeBounds.h"
 #include "TrkVolumes/TrapezoidVolumeBounds.h"
 
+
 // constructor
 Muon::MuonStationBuilderImpl::MuonStationBuilderImpl(const std::string& t,
                                                      const std::string& n,
@@ -77,116 +82,101 @@ StatusCode Muon::MuonStationBuilderImpl::initialize() {
 
     // if no muon materials are declared, take default ones
 
-    m_muonMaterial =
-        Trk::Material(10e10, 10e10, 0., 0., 0.);  // default material properties
+    // default material properties
+    m_muonMaterial = Trk::Material(10e10, 10e10, 0., 0., 0.);  
 
-    ATH_MSG_INFO(name() << " initialize() successful");
+    ATH_MSG_INFO(" initialize() successful");
 
     ATH_CHECK(m_idHelperSvc.retrieve());
 
     return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
-    const MuonGM::MuonDetectorManager* muonMgr, bool /*blend*/) const {
+Muon::MuonStationBuilderImpl::DetachedVolVec
+    Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr, bool /*blend*/) const {
 
-    auto translatedStations = std::make_unique<
-        std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>();
+    DetachedVolVec translatedStations{};
 
     // retrieve muon station branches from GeoModel tree
-    std::vector<std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>>
-        stations = retrieveGMsensitive(muonMgr);
+    std::vector<std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>> stations = retrieveGMsensitive(muonMgr);
 
-    for (auto mstation : stations) {
+    for (const auto& mstation : stations) {
         // build prototype
-        std::unique_ptr<Trk::DetachedTrackingVolume> msType =
-            buildDetachedTrackingVolumeType(muonMgr, mstation.first,
-                                            mstation.second[0]);
-        if (!msType.get())
+        std::unique_ptr<Trk::DetachedTrackingVolume> msType =  buildDetachedTrackingVolumeType(muonMgr, mstation.first,
+                                                                                               mstation.second[0]);
+        if (!msType) {
             continue;
+        }
         // clone prototype
         std::string name = mstation.first->getLogVol()->getName();
         // NSW prototypes built at position
         if (name.substr(0, 4) == "sTGC" || name.substr(0, 2) == "MM") {
             for (unsigned int i = 0; i < mstation.second.size(); i++) {
                 std::string sName = name.substr(name.find('-') + 1);
-                Identifier nswId = m_muonStationTypeBuilder->identifyNSW(
-                    muonMgr, sName, mstation.second[i].first);
+                Identifier nswId = m_muonStationTypeBuilder->identifyNSW(sName, mstation.second[i].first);
                 // clone station from prototype
                 Amg::Transform3D trdef(mstation.second[i].first *
                                        mstation.second[0].first.inverse());
-                std::unique_ptr<Trk::DetachedTrackingVolume> newStat =
-                    std::unique_ptr<Trk::DetachedTrackingVolume>(
-                        msType->clone(name, trdef));
+                std::unique_ptr<Trk::DetachedTrackingVolume> newStat{msType->clone(name, trdef)};
                 // identify layer representation
                 Trk::Layer* layer = (newStat->layerRepresentation());
-                unsigned int id = nswId.get_identifier32().get_compact();
-                layer->setLayerType(id);
+                layer->setLayerType(nswId.get_identifier32().get_compact());
                 // identify layers
-                identifyNSWLayers(newStat.get(), nswId, muonMgr);
+                identifyNSWLayers(*newStat, nswId);
                 // collect
-                translatedStations->push_back(std::move(newStat));
+                translatedStations.push_back(std::move(newStat));
             }  // end clone NSW stations
         } else {
             for (auto gminfo : mstation.second) {
                 // clone station from prototype
-                std::unique_ptr<Trk::DetachedTrackingVolume> newStat{
-                    msType->clone(name, gminfo.first)};
+                std::unique_ptr<Trk::DetachedTrackingVolume> newStat{msType->clone(name, gminfo.first)};
                 // identify layer representation
-                Trk::Layer* layer = (newStat->layerRepresentation());
-                int eta = 0;
-                int phi = 0;
+                Trk::Layer* layer = newStat->layerRepresentation();
+                int eta{0}, phi{0};
                 Identifier stId = resolveId(name, gminfo, eta, phi, muonMgr);
-                unsigned int id = stId.get_identifier32().get_compact();
-                layer->setLayerType(id);
+                layer->setLayerType(stId.get_identifier32().get_compact());
                 // glue components
                 glueComponents(newStat.get());
                 // identify layers
                 identifyLayers(newStat.get(), stId, eta, phi, muonMgr);
                 // collect
-                translatedStations->push_back(std::move(newStat));
+                translatedStations.push_back(std::move(newStat));
             }  // end clone non-NSW
         }
     }  // end loop over prototypes
 
-    ATH_MSG_INFO(name() << "returns " << translatedStations->size()
-                        << " stations");
+    ATH_MSG_DEBUG( "returns " << translatedStations.size() << " stations");
     return translatedStations;
 }
 
-void Muon::MuonStationBuilderImpl::glueComponents(
-    Trk::DetachedTrackingVolume* stat) const {
-    Trk::TrackingVolumeArray* volArray =
-        stat->trackingVolume()->confinedVolumes();
-    if (volArray) {
-        if (volArray->arrayObjectsNumber() > 1) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> components =
-                volArray->arrayObjects();
-            const Trk::BinUtility* binUtilityX = volArray->binUtility();
-            const Trk::CuboidVolumeBounds* cubVolBounds =
-                dynamic_cast<const Trk::CuboidVolumeBounds*>(
-                    &(components[0]->volumeBounds()));
+void Muon::MuonStationBuilderImpl::glueComponents(Trk::DetachedTrackingVolume* stat) const {
+    Trk::TrackingVolumeArray* volArray = stat->trackingVolume()->confinedVolumes();
+    if (!volArray || volArray->arrayObjectsNumber() <= 1) {
+        return;
+    }
 
-            // identify 'lower' and 'upper' boundary surface
-            Trk::BoundarySurfaceFace low = Trk::negativeFaceXY;
-            Trk::BoundarySurfaceFace up = Trk::positiveFaceXY;
+    Trk::BinnedArraySpan<Trk::TrackingVolume* const> components =  volArray->arrayObjects();
+    const Trk::BinUtility* binUtilityX = volArray->binUtility();
+    const Trk::CuboidVolumeBounds* cubVolBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(components[0]->volumeBounds()));
 
-            // rectangular station in x ordering (MDT barrel)
-            if (cubVolBounds && binUtilityX) {
-                low = Trk::negativeFaceYZ;
-                up = Trk::positiveFaceYZ;
-            }
+    // identify 'lower' and 'upper' boundary surface
+    Trk::BoundarySurfaceFace low = Trk::negativeFaceXY;
+    Trk::BoundarySurfaceFace up = Trk::positiveFaceXY;
 
-            if (low >= 0 && up >= 0) {
-                // glue volumes
-                for (unsigned int i = 0; i < components.size() - 1; ++i) {
-                    m_trackingVolumeHelper->glueTrackingVolumes(
-                        *(components[i]), up, *(components[i + 1]), low);
-                }
-            }
+    // rectangular station in x ordering (MDT barrel)
+    if (cubVolBounds && binUtilityX) {
+        low = Trk::negativeFaceYZ;
+        up = Trk::positiveFaceYZ;
+    }
+
+    if (low >= 0 && up >= 0) {
+        // glue volumes
+        for (unsigned int i = 0; i < components.size() - 1; ++i) {
+            m_trackingVolumeHelper->glueTrackingVolumes(*(components[i]), up, *(components[i + 1]), low);
         }
     }
+    
+    
 }
 
 void Muon::MuonStationBuilderImpl::identifyLayers(
@@ -499,284 +489,199 @@ void Muon::MuonStationBuilderImpl::identifyLayers(
     // end identification check
 }
 
-void Muon::MuonStationBuilderImpl::identifyNSWLayers(
-    Trk::DetachedTrackingVolume* station, Identifier id,
-    const MuonGM::MuonDetectorManager* muonMgr) const {
+void Muon::MuonStationBuilderImpl::identifyNSWLayers(Trk::DetachedTrackingVolume& station, 
+                                                     const Identifier& id) const {
 
-    Identifier lid(0);
 
-    if (station->trackingVolume()->confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer* const> lays =
-            station->trackingVolume()->confinedLayers()->arrayObjects();
-        for (unsigned int il = 0; il < lays.size(); il++) {
-            if (station->name().substr(0, 4) == "sTGC") {
-                lid = muonMgr->stgcIdHelper()->channelID(
-                    muonMgr->stgcIdHelper()->stationName(id),
-                    muonMgr->stgcIdHelper()->stationEta(id),
-                    muonMgr->stgcIdHelper()->stationPhi(id),
-                    muonMgr->stgcIdHelper()->multilayer(id), il + 1, 2, 1);
-                // Amg::Transform3D layTransf = stgc->transform(id);
-                unsigned int layType = lid.get_identifier32().get_compact();
-                lays[il]->setLayerType(layType);
+    if (!station.trackingVolume()->confinedLayers()) return;
+    Trk::BinnedArraySpan<Trk::Layer* const> lays = station.trackingVolume()->confinedLayers()->arrayObjects();
+    const bool isStgc{station.name().substr(0, 4) == "sTGC"};
+    const bool isMm{station.name().substr(0, 2) == "MM"};
+    if (!isMm && !isStgc) return;
+    for (unsigned int il = 0; il < lays.size(); il++) {
+        if (isStgc) {
+            const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+            const Identifier lid = idHelper.channelID(id, idHelper.multilayer(id), il + 1, 2, 1);
+            lays[il]->setLayerType(lid.get_identifier32().get_compact());
 
-            } else if (station->name().substr(0, 2) == "MM") {
-                lid = muonMgr->mmIdHelper()->channelID(
-                    muonMgr->mmIdHelper()->stationName(id),
-                    muonMgr->mmIdHelper()->stationEta(id),
-                    muonMgr->mmIdHelper()->stationPhi(id),
-                    muonMgr->mmIdHelper()->multilayer(id), il + 1, 1);
-                unsigned int layType = lid.get_identifier32().get_compact();
-                lays[il]->setLayerType(layType);
-            }
+        } else if (isMm) {
+            const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+            const Identifier lid = idHelper.channelID(id, idHelper.multilayer(id), il + 1, 1);
+            lays[il]->setLayerType(lid.get_identifier32().get_compact());
         }
     }
 }
 
-void Muon::MuonStationBuilderImpl::identifyPrototype(
-    Trk::TrackingVolume* station, int eta, int phi,
-    const Amg::Transform3D& transf,
-    const MuonGM::MuonDetectorManager* muonMgr) const {
+void Muon::MuonStationBuilderImpl::identifyPrototype(Trk::TrackingVolume& station, int eta, int phi,
+                                                     const Amg::Transform3D& transf,
+                                                     const MuonGM::MuonDetectorManager* muonMgr) const {
     ATH_MSG_VERBOSE(name() << " identifying prototype ");
 
-    const std::string& stationName = station->volumeName();
+    const std::string& stationName = station.volumeName();
     ATH_MSG_VERBOSE(" for station " << stationName);
     const std::string stationNameShort = stationName.substr(0, 3);
     const char stationFirstChar = stationName[0];
     bool is_valid{false};
 
-    if (m_idHelperSvc->hasMDT() &&
-        (stationFirstChar == 'B' || stationFirstChar == 'E')) {
+    if (m_idHelperSvc->hasMDT() && (stationFirstChar == 'B' || stationFirstChar == 'E')) {
         // MDT
-        const int nameIndex =
-            m_idHelperSvc->mdtIdHelper().stationNameIndex(stationNameShort);
+        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+        const int nameIndex = idHelper.stationNameIndex(stationNameShort);
         for (int multi = 1; multi <= 2; ++multi) {
-            const Identifier ele_id = m_idHelperSvc->mdtIdHelper().channelID(
-                nameIndex, eta, phi, multi, 1, 1, is_valid);
-            const MuonGM::MdtReadoutElement* multilayer =
-                muonMgr->getMdtReadoutElement(ele_id);
+            const Identifier ele_id = idHelper.channelID(nameIndex, eta, phi, multi, 1, 1, is_valid);
+            if (!is_valid) {
+                continue;
+            }
+            const MuonGM::MdtReadoutElement* multilayer = muonMgr->getMdtReadoutElement(ele_id);
             if (!multilayer) {
                 continue;
             }
-            Trk::TrackingVolume* assocVol = station->associatedSubVolume(
-                transf.inverse() * multilayer->center());
+            Trk::TrackingVolume* assocVol = station.associatedSubVolume(transf.inverse() * multilayer->center());
             if (!assocVol) {
-                ATH_MSG_WARNING(
-                    "valid multilayer outside station:" << stationName);
+                ATH_MSG_WARNING("valid multilayer outside station:" << stationName);
                 continue;
             }
             int nLayers = multilayer->getNLayers();
-            for (int layer = 1; layer <= nLayers; layer++) {
-                Identifier id = m_idHelperSvc->mdtIdHelper().channelID(
-                    nameIndex, eta, phi, multi, layer, 1, is_valid);
-                if (id.get_compact() > 0) {
-                    // retrieve associated layer
-                    Amg::Vector3D gp = multilayer->tubePos(id);
-                    Trk::Layer* assocLay =
-                        assocVol->associatedLayer(transf.inverse() * gp);
-                    unsigned int iD = id.get_identifier32().get_compact();
-                    if (assocLay)
-                        assocLay->setLayerType(iD);
+            for (int layer = 1; layer <= nLayers; ++layer) {
+                Identifier id = idHelper.channelID(nameIndex, eta, phi, multi, layer, 1, is_valid);
+                if (!is_valid) {
+                    continue;
+                }
+                // retrieve associated layer
+                Trk::Layer* assocLay = assocVol->associatedLayer(transf.inverse() * multilayer->tubePos(id));
+                if (assocLay) {
+                    assocLay->setLayerType(id.get_identifier32().get_compact());
                 }
             }
         }
 
         // RPC ?
-        Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes =
-            station->confinedVolumes();
+        Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = station.confinedVolumes();
         if (confinedVolumes) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols =
-                confinedVolumes->arrayObjects();
+            Trk::BinnedArraySpan<Trk::TrackingVolume* const> vols = confinedVolumes->arrayObjects();
             for (auto* vol : vols) {
-                if (m_idHelperSvc->hasRPC() && vol->volumeName() == "RPC") {
-                    // for active layers do a search of associated ROE
-                    Trk::ArraySpan<Trk::Layer* const> layers =
-                        vol->confinedArbitraryLayers();
-                    int nameIndex =
-                        m_idHelperSvc->rpcIdHelper().stationNameIndex(
-                            stationNameShort);
-                    if (stationNameShort == "BME")
-                        continue;  // BME chambers do not have RPCs
-                    if (stationNameShort == "BMG")
-                        continue;  // BMG chambers do not have RPCs
-                    // the following checks are not necessarily needed, since
-                    // calling channelID with check=true would catch them
-                    // However, since these validity checks are slow, let's
-                    // manually skip the obvious non-existant ones
-                    //
-                    // only BOG7/8 and BMS2/4 have doubletZ=3, the remaing BOG
-                    // and BOF4 have doubletZ=1
-                    int doubletZMax = 2;
-                    if (stationNameShort.find("BMS") != std::string::npos &&
-                        (std::abs(eta) == 2 || std::abs(eta) == 4))
+                if (!m_idHelperSvc->hasRPC() || vol->volumeName() != "RPC") {
+                    break;
+                }
+                
+                // for active layers do a search of associated ROE
+                Trk::ArraySpan<Trk::Layer* const> layers = vol->confinedArbitraryLayers();
+                int nameIndex = m_idHelperSvc->rpcIdHelper().stationNameIndex(stationNameShort);
+                ///
+                if (stationNameShort == "BME" || stationNameShort == "BMG") {
+                    continue;
+                }                
+                // the following checks are not necessarily needed, since
+                // calling channelID with check=true would catch them
+                // However, since these validity checks are slow, let's
+                // manually skip the obvious non-existant ones
+                //
+                // only BOG7/8 and BMS2/4 have doubletZ=3, the remaing BOG
+                // and BOF4 have doubletZ=1
+                int doubletZMax = 2;
+                if (stationNameShort.find("BMS") != std::string::npos && (std::abs(eta) == 2 || std::abs(eta) == 4)) {
+                    doubletZMax = 3;
+                }
+                else if (stationNameShort.find("BOG") != std::string::npos) {
+                    if (std::abs(eta) == 7 || std::abs(eta) == 8) {
                         doubletZMax = 3;
-                    else if (stationNameShort.find("BOG") !=
-                             std::string::npos) {
-                        if (std::abs(eta) == 7 || std::abs(eta) == 8)
-                            doubletZMax = 3;
-                        else
-                            doubletZMax = 1;
-                    } else if (stationNameShort.find("BOF") !=
-                                   std::string::npos &&
-                               std::abs(eta) == 4)
+                    } else {
                         doubletZMax = 1;
-                    // all BOL/BOS and BOF1 have doubletR=1
-                    int doubletRMax = 2;
-                    if (stationNameShort.find("BOL") != std::string::npos)
-                        doubletRMax = 1;
-                    else if (stationNameShort.find("BOS") != std::string::npos)
-                        doubletRMax = 1;
-                    else if (stationNameShort.find("BOF") !=
-                                 std::string::npos &&
-                             std::abs(eta) == 1)
-                        doubletRMax = 1;
-                    for (int doubletR = 0; doubletR < doubletRMax; doubletR++) {
-                        for (int doubletZ = 0; doubletZ < doubletZMax;
-                             doubletZ++) {
-                            for (int doubletPhi = 0; doubletPhi < 1;
-                                 doubletPhi++) {
-                                bool isValid = false;
-                                // the RpcIdHelper expects
-                                // doubletR/doubletZ/doubletPhi to start at 1
-                                Identifier id =
-                                    m_idHelperSvc->rpcIdHelper().channelID(
-                                        nameIndex, eta, phi, doubletR + 1,
-                                        doubletZ + 1, doubletPhi + 1, 1, 1, 1,
-                                        isValid);
-                                /// last 4 arguments are: int gasGap, int
-                                /// measuresPhi, int strip,  bool& isValid
-                                if (!isValid) {
-                                    ATH_MSG_DEBUG(
-                                        "Could not find valid Identifier for "
-                                        "station="
-                                        << nameIndex << ", eta=" << eta
-                                        << ", phi=" << phi
-                                        << ", doubletR=" << doubletR + 1
-                                        << ", doubletZ=" << doubletZ + 1
-                                        << ", doubletPhi=" << doubletPhi + 1
-                                        << ", continuing...");
-                                    continue;
-                                }
-                                const MuonGM::RpcReadoutElement* rpc =
-                                    muonMgr->getRpcReadoutElement(id);
-                                if (rpc) {
-                                    if (doubletZ < rpc->getDoubletZ()) {
-                                        for (int gasGap = 0; gasGap < 2;
-                                             gasGap++) {
-                                            bool is_valid{false};
-                                            Identifier etaId =
-                                                m_idHelperSvc->rpcIdHelper()
-                                                    .channelID(nameIndex, eta,
-                                                               phi,
-                                                               doubletR + 1,
-                                                               doubletZ + 1,
-                                                               doubletPhi + 1,
-                                                               gasGap + 1, 0, 1,
-                                                               is_valid);
-                                            for (auto* layer : layers) {
-                                                if (layer->layerType() != 0 &&
-                                                    layer
-                                                        ->surfaceRepresentation()
-                                                        .isOnSurface(
-                                                            transf.inverse() *
-                                                                rpc->stripPos(
-                                                                    etaId),
-                                                            false,
-                                                            0.5 *
-                                                                layer
-                                                                    ->thickness())) {
-                                                    const Amg::Vector3D locPos1 =
-                                                        layer
-                                                            ->surfaceRepresentation()
-                                                            .transform()
-                                                            .inverse() *
-                                                        transf.inverse() *
-                                                        rpc->stripPos(etaId);
-                                                    const Amg::Vector3D
-                                                        locPos2 =
-                                                            rpc->surface(etaId)
-                                                                .transform()
-                                                                .inverse() *
-                                                            rpc->stripPos(
-                                                                etaId);
-                                                    double swap =
-                                                        (std::abs(locPos1[1] -
-                                                                  locPos2[0]) >
-                                                         0.001)
-                                                            ? 20000.
-                                                            : 0.;
-                                                    unsigned int id =
-                                                        etaId.get_identifier32()
-                                                            .get_compact();
-                                                    layer->setLayerType(id);
-                                                    const Amg::Vector3D locPos =
-                                                        layer
-                                                            ->surfaceRepresentation()
-                                                            .transform()
-                                                            .inverse() *
-                                                        transf.inverse() *
-                                                        rpc->surface(etaId)
-                                                            .center();
-                                                    layer->setRef(swap +
-                                                                  locPos[0]);
-                                                }
-                                            }
-                                        }
+                    }
+                } else if (stationNameShort.find("BOF") != std::string::npos && std::abs(eta) == 4){
+                    doubletZMax = 1;
+                }
+                // all BOL/BOS and BOF1 have doubletR=1
+                const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
+                for (int doubletR = 1; doubletR <= 2; ++doubletR) {
+                    bool isValid{false};
+                    const Identifier stationId = idHelper.elementID(nameIndex, eta, phi, doubletR, isValid);
+                    if (!isValid) {
+                        continue;
+                    }
+                    for (int doubletZ = 1; doubletZ <= doubletZMax; ++doubletZ) {
+                        for (int doubletPhi = 1; doubletPhi <= 2; doubletPhi++) {
+                        
+                            const Identifier id = idHelper.channelID(stationId, doubletZ, doubletPhi, 
+                                                                        1, 1, 1, isValid);                               
+                            if (!isValid) {                                    
+                                continue;
+                            }
+                            const MuonGM::RpcReadoutElement* rpc = muonMgr->getRpcReadoutElement(id);
+                            if (!rpc) {
+                                continue;
+                            }                                    
+                            for (int gasGap = 1; gasGap <= rpc->numberOfLayers(); ++gasGap) {
+                                        
+                                Identifier etaId = idHelper.channelID(id, doubletZ, doubletPhi,
+                                                                        gasGap, 0, 1, isValid);
+                                
+                                const Amg::Vector3D stripLocPos = transf.inverse() * rpc->stripPos(etaId);
+                                for (auto* layer : layers) {
+                                    if (layer->layerType() == 0 ||
+                                        !layer->surfaceRepresentation().isOnSurface(stripLocPos, false, 0.5* layer->thickness())){
+                                        continue;
                                     }
+                                    const Amg::Vector3D locPos1 =layer->surfaceRepresentation().transform().inverse() * stripLocPos;                                                        
+                                    const Amg::Vector3D locPos2 = rpc->surface(etaId).transform().inverse() * rpc->stripPos(etaId);
+                                    
+                                    
+                                    double swap = (std::abs(locPos1[1] - locPos2[0]) > 0.001) ? 20000. : 0.;
+
+                                    layer->setLayerType(etaId.get_identifier32() .get_compact());
+                                    
+                                    
+                                    const Amg::Vector3D locPos = layer->surfaceRepresentation().transform().inverse() *
+                                                                    transf.inverse() * rpc->surface(etaId).center();
+                                    layer->setRef(swap + locPos[0]);
+                                        
                                 }
                             }
                         }
                     }
-                }
+                }                
             }
         }
     }
 
     // by now, all the layers should be identified - verify
-    if (station->confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume* const> cVols =
-            station->confinedVolumes()->arrayObjects();
+    if (station.confinedVolumes()) {
+        Trk::BinnedArraySpan<Trk::TrackingVolume* const> cVols = station.confinedVolumes()->arrayObjects();
         for (auto* cVol : cVols) {
             if (cVol->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer* const> cLays =
-                    cVol->confinedLayers()->arrayObjects();
+                Trk::BinnedArraySpan<Trk::Layer* const> cLays = cVol->confinedLayers()->arrayObjects();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
-                    if (id == 1)
-                        ATH_MSG_DEBUG(station->volumeName()
-                                      << "," << cVol->volumeName()
-                                      << ", unidentified active layer:" << il);
+                    if (id == 1) {
+                        ATH_MSG_DEBUG(station.volumeName()<< "," << cVol->volumeName()  << ", unidentified active layer:" << il);
+                    }
                 }
             }
             if (!cVol->confinedArbitraryLayers().empty()) {
-                Trk::ArraySpan<Trk::Layer* const> cLays =
-                    cVol->confinedArbitraryLayers();
+                Trk::ArraySpan<Trk::Layer* const> cLays = cVol->confinedArbitraryLayers();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
-                    if (id == 1)
-                        ATH_MSG_DEBUG(station->volumeName()
-                                      << "," << cVol->volumeName()
-                                      << ", unidentified active layer:" << il);
+                    if (id == 1) {
+                        ATH_MSG_DEBUG(station.volumeName() << "," << cVol->volumeName() << ", unidentified active layer:" << il);
+                    }
                 }
             }
         }
     }
-    if (station->confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer* const> cLays =
-            station->confinedLayers()->arrayObjects();
+    if (station.confinedLayers()) {
+        Trk::BinnedArraySpan<Trk::Layer* const> cLays = station.confinedLayers()->arrayObjects();
         for (unsigned int il = 0; il < cLays.size(); il++) {
             Identifier id(cLays[il]->layerType());
-            if (id == 1)
-                ATH_MSG_DEBUG(station->volumeName()
-                              << "," << station->volumeName()
-                              << ", unidentified active layer:" << il);
+            if (id == 1) {
+                ATH_MSG_DEBUG(station.volumeName() << ", unidentified active layer:" << il);
+            }
         }
     }
     // end identification check
 }
 
-void Muon::MuonStationBuilderImpl::getNSWStationsForTranslation(
-    const GeoVPhysVol* pv, const std::string& name,
-    const Amg::Transform3D& transform,
+void Muon::MuonStationBuilderImpl::getNSWStationsForTranslation(const GeoVPhysVol* pv, const std::string& name,
+                                                               const Amg::Transform3D& transform,
     std::vector<std::pair<std::pair<const GeoLogVol*, Trk::MaterialProperties*>,
                           std::vector<Amg::Transform3D>>>& vols,
     std::vector<std::string>& volNames) const {
@@ -792,27 +697,21 @@ void Muon::MuonStationBuilderImpl::getNSWStationsForTranslation(
 
     for (unsigned int ic = 0; ic < nc; ic++) {
         Amg::Transform3D transf = pv->getXToChildVol(ic);
-        const GeoVPhysVol* cv = &(*(pv->getChildVol(ic)));
+        const GeoVPhysVol* cv = pv->getChildVol(ic);
         const GeoLogVol* clv = cv->getLogVol();
         std::string childName = clv->getName();
         ATH_MSG_DEBUG("getNSWStationsForTranslation child " << childName);
 
-        if (childName.empty())
+        if (childName.empty()) {
             childName = "Spacer";
-        if (childName.size() > 9 &&
-            childName.substr(childName.size() - 9, 9) == "Sensitive") {
+        }
+        if (childName.size() > 9 && childName.substr(childName.size() - 9, 9) == "Sensitive") {
             childName += std::to_string(ic);
         }
 
-        std::string cName = childName.compare(0, 3, "NSW") == 0 ||
-                                    childName.compare(0, 8, "NewSmall") == 0
-                                ? name
-                                : name + childName;
-        ATH_MSG_VERBOSE("child number,name,position:"
-                        << ic << ":" << clv->getName() << ":"
-                        << (transform * transf).translation().perp() << ","
-                        << (transform * transf).translation().z() << ","
-                        << (transform * transf).translation().phi());
+        std::string cName = childName.compare(0, 3, "NSW") == 0 || childName.compare(0, 8, "NewSmall") == 0 
+                          ? name : name + childName;
+        ATH_MSG_VERBOSE("child number,name,position:" << ic << ":" << clv->getName() << ":"<< Amg::toString(transform * transf));
 
         if (!cv->getNChildVols()) {
             bool found = false;
@@ -883,25 +782,24 @@ void Muon::MuonStationBuilderImpl::getNSWStationsForTranslation(
 }
 
 std::vector<std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>>
-Muon::MuonStationBuilderImpl::retrieveGMsensitive(
-    const MuonGM::MuonDetectorManager* muonMgr) const {
+Muon::MuonStationBuilderImpl::retrieveGMsensitive(const MuonGM::MuonDetectorManager* muonMgr) const {
 
     // a single loop over GM tree to retrieve all necessary information
 
-    std::vector<std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>>
-        sensitive;
+    std::vector<std::pair<const GeoVPhysVol*, 
+                          std::vector<Muon::GMInfo>>> sensitive;
 
-    const GeoVPhysVol* top = &(*(muonMgr->getTreeTop(0)));
+    const GeoVPhysVol* top = muonMgr->getTreeTop(0);
+    
 
     // NSW stations first to avoid double-counting
     const GeoVPhysVol* sTGC_top = m_gmBrowser.findTopBranch(top, "sTGC_1");
     const GeoVPhysVol* MM_top = m_gmBrowser.findTopBranch(top, "MM_1");
     if (sTGC_top && sTGC_top != top) {
-        ATH_MSG_DEBUG(
-            "sTGC GeoModel branch found:" << sTGC_top->getLogVol()->getName());
+        ATH_MSG_DEBUG("sTGC GeoModel branch found:" << sTGC_top->getLogVol()->getName());
         GeoVolumeCursor vol(sTGC_top);
         while (!vol.atEnd()) {
-            const GeoVPhysVol* cv = &(*(vol.getVolume()));
+            const GeoVPhysVol* cv = vol.getVolume();
             const std::string& vname = cv->getLogVol()->getName();
             if (vname.find("sTGC_1") == std::string::npos) {
                 vol.next();
@@ -920,32 +818,27 @@ Muon::MuonStationBuilderImpl::retrieveGMsensitive(
             if (it == sensitive.end()) {
                 std::vector<std::pair<Amg::Transform3D, int>> cloneList;
                 cloneList.push_back(
-                    std::pair<Amg::Transform3D, int>(vol.getTransform(), 0));
-                sensitive.push_back(
-                    std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>(
-                        cv, cloneList));
+                    std::make_pair(vol.getTransform(), 0));
+                sensitive.push_back(std::make_pair(cv, cloneList));
             } else {
                 Amg::Transform3D transf = vol.getTransform();
                 // order transforms to position prototype at phi=0/ 0.125 pi
                 double phiTr = transf.translation().phi();
                 if (phiTr > -0.001 && phiTr < 0.4)
                     (*it).second.insert((*it).second.begin(),
-                                        std::pair<Amg::Transform3D, int>(
-                                            vol.getTransform(), 0));
+                                        std::make_pair(vol.getTransform(), 0));
                 else
-                    (*it).second.push_back(std::pair<Amg::Transform3D, int>(
-                        vol.getTransform(), 0));
+                    (*it).second.push_back(std::make_pair(vol.getTransform(), 0));
             }
             vol.next();
         }
     }
 
     if (MM_top && MM_top != top) {
-        ATH_MSG_DEBUG(
-            "MM GeoModel branch found:" << MM_top->getLogVol()->getName());
+        ATH_MSG_DEBUG("MM GeoModel branch found:" << MM_top->getLogVol()->getName());
         GeoVolumeCursor vol(MM_top);
         while (!vol.atEnd()) {
-            const GeoVPhysVol* cv = &(*(vol.getVolume()));
+            const GeoVPhysVol* cv = vol.getVolume();
             const std::string& vname = cv->getLogVol()->getName();
             if (vname.find("MM_1") == std::string::npos) {
                 vol.next();
@@ -963,22 +856,16 @@ Muon::MuonStationBuilderImpl::retrieveGMsensitive(
 
             if (it == sensitive.end()) {
                 std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                cloneList.push_back(
-                    std::pair<Amg::Transform3D, int>(vol.getTransform(), 0));
-                sensitive.push_back(
-                    std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>(
-                        cv, cloneList));
+                cloneList.push_back(std::make_pair(vol.getTransform(), 0));
+                sensitive.push_back(std::make_pair(cv, cloneList));
             } else {
                 Amg::Transform3D transf = vol.getTransform();
                 // order transforms to position prototype at phi=0/ 0.125 pi
                 double phiTr = transf.translation().phi();
                 if (phiTr > -0.001 && phiTr < 0.4)
-                    (*it).second.insert((*it).second.begin(),
-                                        std::pair<Amg::Transform3D, int>(
-                                            vol.getTransform(), 0));
+                    (*it).second.insert((*it).second.begin(), std::make_pair(vol.getTransform(), 0));
                 else
-                    (*it).second.push_back(std::pair<Amg::Transform3D, int>(
-                        vol.getTransform(), 0));
+                    (*it).second.push_back(std::make_pair(vol.getTransform(), 0));
             }
             vol.next();
         }
@@ -998,11 +885,9 @@ Muon::MuonStationBuilderImpl::retrieveGMsensitive(
         // TGC stations retrieved at level-1
         if (vname.substr(0, 1) == "T") {
 
-            for (const GeoVolumeVec_t::value_type& p : geoGetVolumes(cv)) {
-                const GeoVPhysVol* tv = p.first;
+            for (const auto&[tv, tvTrf] : geoGetVolumes(cv)) {
                 const GeoLogVol* tlv = tv->getLogVol();
-                const Amg::Transform3D& transform =
-                    vol.getTransform() * p.second;
+                const Amg::Transform3D transform = vol.getTransform() * tvTrf;
                 const std::string& tgc_name = tlv->getName();
 
                 std::vector<std::pair<const GeoVPhysVol*,
@@ -1018,22 +903,17 @@ Muon::MuonStationBuilderImpl::retrieveGMsensitive(
 
                 if (it == sensitive.end()) {
                     std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                    cloneList.push_back(std::pair<Amg::Transform3D, int>(
-                        transform, vol.getId()));
-                    sensitive.push_back(
-                        std::pair<const GeoVPhysVol*,
-                                  std::vector<Muon::GMInfo>>(tv, cloneList));
+                    cloneList.push_back(std::make_pair(transform, vol.getId()));
+                    sensitive.push_back(std::make_pair(tv, cloneList));
                 } else {
                     Amg::Transform3D transf = transform;
                     // order transforms to position prototype at phi=0/ 0.125 pi
                     double phiTr = transf.translation().phi();
                     if (phiTr > -0.001 && phiTr < 0.4)
                         (*it).second.insert((*it).second.begin(),
-                                            std::pair<Amg::Transform3D, int>(
-                                                transform, vol.getId()));
+                                            std::make_pair(transform, vol.getId()));
                     else
-                        (*it).second.push_back(std::pair<Amg::Transform3D, int>(
-                            transform, vol.getId()));
+                        (*it).second.push_back(std::make_pair(transform, vol.getId()));
                 }
 
             }  // end loop over TGC
@@ -1052,62 +932,47 @@ Muon::MuonStationBuilderImpl::retrieveGMsensitive(
 
             if (it == sensitive.end()) {
                 std::vector<std::pair<Amg::Transform3D, int>> cloneList;
-                cloneList.push_back(std::pair<Amg::Transform3D, int>(
-                    vol.getTransform(), vol.getId()));
-                sensitive.push_back(
-                    std::pair<const GeoVPhysVol*, std::vector<Muon::GMInfo>>(
-                        cv, cloneList));
+                cloneList.push_back(std::make_pair(vol.getTransform(), vol.getId()));
+                sensitive.push_back(std::make_pair(cv, cloneList));
             } else {
                 Amg::Transform3D transf = vol.getTransform();
                 // order transforms to position prototype at phi=0/ 0.125 pi
                 double phiTr = transf.translation().phi();
                 if (phiTr > -0.001 && phiTr < 0.4)
                     (*it).second.insert((*it).second.begin(),
-                                        std::pair<Amg::Transform3D, int>(
-                                            vol.getTransform(), vol.getId()));
+                                        std::make_pair(vol.getTransform(), vol.getId()));
                 else
-                    (*it).second.push_back(std::pair<Amg::Transform3D, int>(
-                        vol.getTransform(), vol.getId()));
+                    (*it).second.push_back(std::make_pair(vol.getTransform(), vol.getId()));
             }
         }  // end non-TGC
-
         vol.next();
     }
 
-    ATH_MSG_DEBUG(
-        "Number of muon station types in GeoModel tree:" << sensitive.size());
+    ATH_MSG_DEBUG("Number of muon station types in GeoModel tree:" << sensitive.size());
 
     return sensitive;
 }
 
 std::unique_ptr<Trk::DetachedTrackingVolume>
-Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumeType(
-    const MuonGM::MuonDetectorManager* muonMgr, const GeoVPhysVol* cv,
-    Muon::GMInfo gmInfo) const {
+Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const MuonGM::MuonDetectorManager* muonMgr, 
+                                                              const GeoVPhysVol* cv,
+                                                              Muon::GMInfo gmInfo) const {
     const GeoLogVol* clv = cv->getLogVol();
     const std::string& vname = clv->getName();
-    ATH_MSG_DEBUG(name() << " building station prototype for "
-                         << cv->getLogVol()->getName());
+    ATH_MSG_DEBUG(name() << " building station prototype for " << cv->getLogVol()->getName());
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     MuonStationTypeBuilder::Cache cache{};
 
-    std::unique_ptr<Trk::DetachedTrackingVolume> typeStat = nullptr;
+    std::unique_ptr<Trk::DetachedTrackingVolume> typeStat{};
 
     if (vname.substr(0, 4) == "sTGC" || vname.substr(0, 2) == "MM") {
         std::string sName = vname.substr(vname.find('-') + 1);
-        Identifier nswId =
-            m_muonStationTypeBuilder->identifyNSW(muonMgr, sName, gmInfo.first);
+        Identifier nswId =  m_muonStationTypeBuilder->identifyNSW(sName, gmInfo.first);
 
         if (vname.substr(0, 4) == "sTGC" && m_idHelperSvc->issTgc(nswId)) {
-            const MuonGM::sTgcReadoutElement* stgc =
-                muonMgr->getsTgcReadoutElement(nswId);
-            return m_muonStationTypeBuilder->process_sTGC(muonMgr, stgc, nswId,
-                                                          cv, gmInfo.first);
+            return m_muonStationTypeBuilder->process_sTGC(nswId, cv, gmInfo.first);
         } else if (vname.substr(0, 2) == "MM" && m_idHelperSvc->isMM(nswId)) {
-            const MuonGM::MMReadoutElement* mm =
-                muonMgr->getMMReadoutElement(nswId);
-            return m_muonStationTypeBuilder->process_MM(muonMgr, mm, nswId, cv,
-                                                        gmInfo.first);
+            return m_muonStationTypeBuilder->process_MM(nswId, cv, gmInfo.first);
         }
     }
 
@@ -1128,8 +993,7 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumeType(
     int eta = etaphi / 100;
     int phi = etaphi - eta * 100;
     eta = eta * sign;
-    const MuonGM::MuonStation* gmStation =
-        muonMgr->getMuonStation(vname.substr(0, 3), eta, phi);
+    const MuonGM::MuonStation* gmStation = muonMgr->getMuonStation(vname.substr(0, 3), eta, phi);
     if (!gmStation) {
         gmStation = muonMgr->getMuonStation(vname.substr(0, 4), eta, phi);
     }
@@ -1148,66 +1012,48 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumeType(
         gmStation = muonMgr->getMuonStation(vname.substr(0, 3), eta, phi);
     }
     //
-    std::string stname = (vname.compare(0, 1, "T") == 0)
-                             ? vname
-                             : (clv->getName()).substr(0, vname.size() - 8);
+    std::string stname = (vname.compare(0, 1, "T") == 0) ? vname : (clv->getName()).substr(0, vname.size() - 8);
     //
     if (stname.compare(0, 1, "B") == 0 && eta < 0) {
         stname = (clv->getName()).substr(0, vname.size() - 8) + "-";
     }
-    ATH_MSG_VERBOSE(" new station type " << stname << ","
-                                         << clv->getShape()->type());
+    ATH_MSG_VERBOSE(" new station type " << stname << "," << clv->getShape()->type());
     ATH_MSG_VERBOSE(" prototype built from eta, phi:" << eta << "," << phi);
 
     if (stname.compare(0, 2, "CS") == 0 || stname.compare(0, 1, "T") == 0) {
-        if (m_muonStationTypeBuilder) {
-            if (stname.compare(0, 2, "CS") == 0) {
-                Trk::TrackingVolume* csc_station =
-                    m_muonStationTypeBuilder->processCscStation(cv, stname,
-                                                                cache);
-                // create layer representation
-                std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*>
-                    layerRepr =
-                        m_muonStationTypeBuilder->createLayerRepresentation(
-                            csc_station);
-                // create prototype as detached tracking volume
-                typeStat = std::unique_ptr<Trk::DetachedTrackingVolume>(
-                    new Trk::DetachedTrackingVolume(stname, csc_station,
-                                                    layerRepr.first,
-                                                    layerRepr.second));
-            } else {
-                Trk::TrackingVolume* tgc_station =
-                    m_muonStationTypeBuilder->processTgcStation(cv, cache);
-                // create layer representation
-                std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*>
-                    layerRepr =
-                        m_muonStationTypeBuilder->createLayerRepresentation(
-                            tgc_station);
-                // create prototype as detached tracking volume
-                typeStat = std::unique_ptr<Trk::DetachedTrackingVolume>(
-                    new Trk::DetachedTrackingVolume(stname, tgc_station,
-                                                    layerRepr.first,
-                                                    layerRepr.second));
-            }
+
+        if (stname.compare(0, 2, "CS") == 0) {
+            auto csc_station = m_muonStationTypeBuilder->processCscStation(cv, stname, cache);
+            // create layer representation
+            auto layerRepr = m_muonStationTypeBuilder->createLayerRepresentation(*csc_station);
+            // create prototype as detached tracking volume
+            auto layerVec = std ::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
+            typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, csc_station.release(), 
+                                                                     layerRepr.first.release(), layerVec.release());
+        } else {
+            std::unique_ptr<Trk::TrackingVolume> tgc_station{m_muonStationTypeBuilder->processTgcStation(cv, cache)};
+            // create layer representation
+            auto layerRepr =  m_muonStationTypeBuilder->createLayerRepresentation(*tgc_station);
+            // create prototype as detached tracking volume
+            auto layerVec = std ::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
+            typeStat =  std::make_unique<Trk::DetachedTrackingVolume>(stname, tgc_station.release(), 
+                                                                      layerRepr.first.release(), layerVec.release());
         }
+        
     } else {
         const GeoShape* shapeS = clv->getShape();
         while (shapeS->type() != "Trd") {
             if (shapeS->type() == "Shift") {
-                const GeoShapeShift* shift =
-                    dynamic_cast<const GeoShapeShift*>(shapeS);
+                const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(shapeS);
                 shapeS = shift->getOp();
             } else if (shapeS->type() == "Subtraction") {
-                const GeoShapeSubtraction* sub =
-                    dynamic_cast<const GeoShapeSubtraction*>(shapeS);
+                const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(shapeS);
                 shapeS = sub->getOpA();
             } else if (shapeS->type() == "Union") {
-                const GeoShapeUnion* uni =
-                    dynamic_cast<const GeoShapeUnion*>(shapeS);
+                const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(shapeS);
                 shapeS = uni->getOpA();
             } else {
-                ATH_MSG_WARNING("unexpected station shape ? "
-                                << shapeS->type() << ", station not built");
+                ATH_MSG_WARNING("unexpected station shape ? "<< shapeS->type() << ", station not built");
                 break;
             }
         }
@@ -1223,105 +1069,77 @@ Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumeType(
             halfZ = trd->getZHalfLength();
 
             // define enveloping volume
-            Trk::TrackingVolumeArray* confinedVolumes = nullptr;
-            std::vector<Trk::Layer*>* confinedLayers = nullptr;
+            std::unique_ptr<Trk::TrackingVolumeArray> confinedVolumes{};
+            std::vector<std::unique_ptr<Trk::Layer>> confinedLayers{};
             std::unique_ptr<Trk::Volume> envelope;
             std::string shape = "Trd";
             if (halfX1 == halfX2 && halfY1 == halfY2)
                 shape = "Box";
             if (shape == "Box") {
-                Trk::CuboidVolumeBounds* envBounds =
-                    new Trk::CuboidVolumeBounds(halfX1, halfY1, halfZ);
+                auto envBounds = std::make_unique<Trk::CuboidVolumeBounds>(halfX1, halfY1, halfZ);
                 // station components
-                if (m_muonStationTypeBuilder) {
-                    confinedVolumes =
-                        m_muonStationTypeBuilder->processBoxStationComponents(
-                            cv, envBounds, cache);
-                    if (!confinedVolumes)
-                        confinedLayers = m_muonStationTypeBuilder
-                                             ->processBoxComponentsArbitrary(
-                                                 cv, envBounds, cache);
+                confinedVolumes = m_muonStationTypeBuilder->processBoxStationComponents(cv, *envBounds, cache);
+                if (!confinedVolumes) {
+                    confinedLayers = m_muonStationTypeBuilder->processBoxComponentsArbitrary(cv, *envBounds, cache);
                 }
                 // enveloping volume
-                envelope = std::make_unique<Trk::Volume>(nullptr, envBounds);
+                envelope = std::make_unique<Trk::Volume>(nullptr, envBounds.release());
             } else if (shape == "Trd") {
-                Trk::TrapezoidVolumeBounds* envBounds = nullptr;
-                Amg::Transform3D*
-                    transf;  // this pointer is passed to envelope below, and is
-                // valid only if envBounds is valid. Making it a
-                // unique_ptr results in core dump
-                if (halfY1 == halfY2) {
-                    transf = new Amg::Transform3D(Trk::s_idTransform);
-                    envBounds = new Trk::TrapezoidVolumeBounds(halfX1, halfX2,
-                                                               halfY1, halfZ);
-                    ATH_MSG_VERBOSE(
-                        "CAUTION!!!: this trapezoid volume does not require XY "
-                        "-> YZ switch");
+                std::unique_ptr<Trk::TrapezoidVolumeBounds> envBounds{};
+                Amg::Transform3D transf{Amg::Transform3D::Identity()};
+                if (halfY1 == halfY2) {                   
+                    envBounds = std::make_unique<Trk::TrapezoidVolumeBounds>(halfX1, halfX2, halfY1, halfZ);
+                    ATH_MSG_VERBOSE("CAUTION!!!: this trapezoid volume does not require XY -> YZ switch");
                 }
                 if (halfY1 != halfY2 && halfX1 == halfX2) {
-                    transf = new Amg::Transform3D(
-                        Amg::AngleAxis3D(0.5 * M_PI,
-                                         Amg::Vector3D(0., 1., 0.)) *
-                        Amg::AngleAxis3D(0.5 * M_PI,
-                                         Amg::Vector3D(0., 0., 1.)));
-                    envBounds = new Trk::TrapezoidVolumeBounds(halfY1, halfY2,
-                                                               halfZ, halfX1);
+                    transf = Amg::getRotateY3D(M_PI_2) * Amg::getRotateZ3D(M_PI_2); 
+                    envBounds = std::make_unique<Trk::TrapezoidVolumeBounds>(halfY1, halfY2, halfZ, halfX1);
                 }
-                if (halfX1 != halfX2 && halfY1 != halfY2)
-                    ATH_MSG_WARNING("station envelope arbitrary trapezoid?"
-                                    << stname);
-
+                if (halfX1 != halfX2 && halfY1 != halfY2) {
+                    ATH_MSG_WARNING("station envelope arbitrary trapezoid?"<< stname);
+                }
                 if (envBounds) {
-                    // station components
-                    if (m_muonStationTypeBuilder)
-                        confinedVolumes = m_muonStationTypeBuilder
-                                              ->processTrdStationComponents(
-                                                  cv, envBounds, cache);
+                    // station components                   
+                    confinedVolumes = m_muonStationTypeBuilder->processTrdStationComponents(cv, *envBounds, cache);
                     // enveloping volume
-                    envelope = std::make_unique<Trk::Volume>(transf, envBounds);
+                    envelope = std::make_unique<Trk::Volume>(makeTransform(transf), envBounds.release());
                 }
             }
 
             if (envelope) {
                 // ready to build the station prototype
-                Trk::TrackingVolume* newType = nullptr;
-                if (confinedLayers)
-                    newType = new Trk::TrackingVolume(*envelope, m_muonMaterial,
-                                                      confinedLayers, stname);
-                else
-                    newType = new Trk::TrackingVolume(
-                        *envelope, m_muonMaterial, nullptr, confinedVolumes,
-                        stname);  // this pointer is passed to typeStat below,
-                // which in turn is kept in vector stations.
+                std::unique_ptr<Trk::TrackingVolume> newType{};
+                if (!confinedLayers.empty()) {
+                    auto confinedLayerPtr = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(confinedLayers));
+                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, confinedLayerPtr.release(), stname);
+                } else {
+                    newType = std::make_unique<Trk::TrackingVolume>(*envelope, m_muonMaterial, nullptr, confinedVolumes.release(), stname);  
+                }
+               
 
                 // identify prototype
-                if ((stname.compare(0, 1, "B") == 0 ||
-                     stname.compare(0, 1, "E") == 0))
-                    identifyPrototype(newType, eta, phi,
-                                      gmStation->getTransform(), muonMgr);
+                if ((stname.compare(0, 1, "B") == 0 || stname.compare(0, 1, "E") == 0))
+                    identifyPrototype(*newType, eta, phi, gmStation->getTransform(), muonMgr);
 
                 // create layer representation
-                std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*>
-                    layerRepr =
-                        m_muonStationTypeBuilder->createLayerRepresentation(
-                            newType);
+                auto layerRepr = m_muonStationTypeBuilder->createLayerRepresentation(*newType);
 
                 // create prototype as detached tracking volume
-                typeStat = std::make_unique<Trk::DetachedTrackingVolume>(
-                    stname, newType, layerRepr.first, layerRepr.second);
+                auto layerVec = std::make_unique<std::vector<Trk::Layer*>>(Muon::release(layerRepr.second));
+                typeStat = std::make_unique<Trk::DetachedTrackingVolume>(stname, newType.release(), 
+                                                                         layerRepr.first.release(), layerVec.release());
             }
         }
     }  // end new station type
 
-    ATH_MSG_DEBUG(name() << " station prototype built for " << vname);
+    ATH_MSG_DEBUG(" station prototype built for " << vname);
 
     ///////////////////////////////////////////////////////////////////////////////////////
     return typeStat;
 }
 
-Identifier Muon::MuonStationBuilderImpl::resolveId(
-    std::string vname, Muon::GMInfo gm_info, int& eta, int& phi,
-    const MuonGM::MuonDetectorManager* muonMgr) const {
+Identifier Muon::MuonStationBuilderImpl::resolveId(std::string vname, Muon::GMInfo gm_info, int& eta, int& phi,
+                                                   const MuonGM::MuonDetectorManager* muonMgr) const {
 
     Identifier stId(0);
 
@@ -1487,14 +1305,9 @@ void Muon::MuonStationBuilderImpl::checkLayerId(
             id);  //!< access via extended identifier (requires unpacking)
         Amg::Transform3D trid = rpcRE->transform(id);
 
-        Amg::Transform3D check_layer_identity =
-            lay->surfaceRepresentation().transform().inverse() * trid;
-        if (check_layer_identity.translation().mag() > 0.001 ||
-            check_layer_identity.rotation()(0, 0) != 1. ||
-            check_layer_identity.rotation()(1, 1) != 1. ||
-            check_layer_identity.rotation()(2, 2) != 1.) {
-            m_muonStationTypeBuilder->printTransform(comment,
-                                                     check_layer_identity);
+        Amg::Transform3D check_layer_identity = lay->surfaceRepresentation().transform().inverse() * trid;
+        if (!Amg::doesNotDeform(check_layer_identity)) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<comment<<" "<<Amg::toString(check_layer_identity));
         }
 
     } else if (m_idHelperSvc->isTgc(id)) {
@@ -1504,14 +1317,9 @@ void Muon::MuonStationBuilderImpl::checkLayerId(
 
         Amg::Transform3D trid = tgcRE->transform(id);
 
-        Amg::Transform3D check_layer_identity =
-            lay->surfaceRepresentation().transform().inverse() * trid;
-        if (check_layer_identity.translation().mag() > 0.001 ||
-            check_layer_identity.rotation()(0, 0) != 1. ||
-            check_layer_identity.rotation()(1, 1) != 1. ||
-            check_layer_identity.rotation()(2, 2) != 1.) {
-            m_muonStationTypeBuilder->printTransform(comment,
-                                                     check_layer_identity);
+        Amg::Transform3D check_layer_identity = lay->surfaceRepresentation().transform().inverse() * trid;
+        if (!Amg::doesNotDeform(check_layer_identity)) {
+            ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<comment <<" "<<Amg::toString(check_layer_identity));
         }
     }
 }

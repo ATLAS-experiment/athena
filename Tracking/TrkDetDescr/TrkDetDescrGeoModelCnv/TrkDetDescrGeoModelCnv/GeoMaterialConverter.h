@@ -43,10 +43,6 @@ class GeoMaterialConverter {
     /** hardcoded dummy materials : TODO : find generic criterium ( density ?
      * radiation length ? )  */
     static bool dummy_material(const GeoMaterial*);
-
-   private:
-    static const double s_densityCnvFactor;  //!< the conversion factor from
-                                             //!< GeoUnits to Tracking
 };
 
 }  // end of namespace Trk

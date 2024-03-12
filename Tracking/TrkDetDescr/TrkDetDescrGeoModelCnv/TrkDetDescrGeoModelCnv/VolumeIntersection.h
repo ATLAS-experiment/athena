@@ -9,6 +9,7 @@
 #ifndef TRKDETDESCRGEOMODELCNV_VOLUMEINTERSECTION_H
 #define TRKDETDESCRGEOMODELCNV_VOLUMEINTERSECTION_H
 
+#include <memory>
 #include <utility>  //for std::pair
 #include <vector>
 
@@ -21,30 +22,25 @@ class Volume;
 namespace Trk {
 
 struct PolygonCache {
-    double hZ;
-    double minZ;
-    double maxZ;
-    Amg::Vector3D center;
-    int nVtx;
-    std::vector<Amg::Vector3D> vertices;
-    std::vector<std::pair<double, double>> xyVertices;  // size+1
-    std::vector<bool> commonVertices;
-    std::vector<std::pair<double, double>> edges;
-    PolygonCache()
-        : hZ(0.),
-          minZ(0.),
-          maxZ(0.),
-          center(Amg::Vector3D(0., 0., 0.)),
-          nVtx(0){};
+    double hZ{0.};
+    double minZ{0.};
+    double maxZ{0.};
+    Amg::Vector3D center{Amg::Vector3D::Zero()};
+    int nVtx{0};
+    std::vector<Amg::Vector3D> vertices{};
+    std::vector<std::pair<double, double>> xyVertices{};  // size+1
+    std::vector<bool> commonVertices{};
+    std::vector<std::pair<double, double>> edges{};
+    PolygonCache() = default;
 };
 
 struct EdgeCross {
 
-    std::pair<int, int> edge_id;
-    std::pair<double, double> edge_pos;
-    bool used;
+    std::pair<int, int> edge_id{};
+    std::pair<double, double> edge_pos{};
+    bool used{false};
     EdgeCross(std::pair<int, int> ei, std::pair<double, double> ep)
-        : edge_id(ei), edge_pos(ep), used(false){};
+        : edge_id(std::move(ei)), edge_pos(std::move(ep)){};
 };
 
 /**
@@ -59,19 +55,22 @@ struct EdgeCross {
 class VolumeIntersection {
 
    public:
-    std::pair<bool, const Trk::Volume*> intersect(const Volume*,
-                                                  const Volume*) const;
-    std::pair<bool, const Trk::Volume*> intersectApproximative(
-        const Volume*, const Volume*) const;
+    std::pair<bool, std::unique_ptr<Trk::Volume>> intersect(
+        const Volume& volA, const Volume& volB) const;
+
+    std::pair<bool, std::unique_ptr<Trk::Volume>> intersectApproximative(
+        const Volume& volA, const Volume& volB) const;
 
    private:
-    PolygonCache polygonXY(const Volume*, int swap = 0) const;
+    PolygonCache polygonXY(const Volume& inVol, int swap = 0) const;
     Trk::PolygonCache intersectPgon(Trk::PolygonCache&,
                                     Trk::PolygonCache&) const;
-    bool inside(std::pair<double, double> vtx,
-                std::vector<std::pair<double, double>> pgon) const;
-    double det(std::pair<double, double> a, std::pair<double, double> b,
-               bool) const;
+
+    bool inside(const std::pair<double, double>& vtx,
+                const std::vector<std::pair<double, double>>& pgon) const;
+
+    double det(const std::pair<double, double>& a,
+               const std::pair<double, double>& b, bool) const;
 };
 
 }  // end of namespace Trk

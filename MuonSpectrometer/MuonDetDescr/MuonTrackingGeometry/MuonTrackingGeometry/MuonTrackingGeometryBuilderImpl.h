@@ -31,10 +31,8 @@ class Material;
 class VolumeBounds;
 class ITrackingVolumeBuilder;
 
-typedef std::pair<SharedObject<TrackingVolume>, Amg::Vector3D>
-    TrackingVolumeOrderPosition;
-typedef std::pair<SharedObject<const TrackingVolume>, const Amg::Transform3D*>
-    TrackingVolumeNavOrder;
+using TrackingVolumeOrderPosition = std::pair<std::shared_ptr<TrackingVolume>, 
+                                              Amg::Vector3D>;
 
 }  // namespace Trk
 
@@ -60,14 +58,19 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
     /** AlgTool initailize method.*/
     virtual StatusCode initialize() override;
     /** TrackingGeometry Interface method */
-    std::unique_ptr<Trk::TrackingGeometry> trackingGeometryImpl(
-        std::unique_ptr<
-            const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-            stations,
-        std::unique_ptr<
-            const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-            inertObjs,
-        Trk::TrackingVolume* tvol) const;
+    
+    using DetachedVolPtr = std::unique_ptr<Trk::DetachedTrackingVolume>;
+    using DetachedVolVec = std::vector<DetachedVolPtr>;
+    using VolumeSpanPtr = std::shared_ptr<const Trk::VolumeSpan>;
+    using DetachedVolSpanPair = std::pair<Trk::DetachedTrackingVolume*, VolumeSpanPtr>;
+    using VolumeSpanArray = std::array<std::vector<DetachedVolSpanPair>, 9>;
+    using TrackingVolumePtr = std::unique_ptr<Trk::TrackingVolume>;
+    using SharedTrackingVolume = std::shared_ptr<Trk::TrackingVolume>;
+    using TrackingVolumeVec = std::vector<TrackingVolumePtr>;
+
+    std::unique_ptr<Trk::TrackingGeometry> trackingGeometryImpl(DetachedVolVec && stations,
+                                                                DetachedVolVec && inertObjs,
+                                                                Trk::TrackingVolume* tvol) const;
 
     /** The unique signature */
     static Trk::GeometrySignature signature() { return Trk::MS; }
@@ -92,59 +95,50 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
         std::vector<int> m_zPartitionsType;
         std::vector<float> m_adjustedPhi;
         std::vector<int> m_adjustedPhiType;
-        std::vector<const Trk::VolumeSpan*> m_spans;  // for clearing
         std::vector<
             std::vector<std::vector<std::vector<std::pair<int, float>>>>>
             m_hPartitions;
         std::vector<double> m_shieldZPart;
         std::vector<std::vector<std::pair<int, float>>> m_shieldHPart;
-        std::map<Trk::DetachedTrackingVolume*,
-                 std::vector<Trk::TrackingVolume*>*>
-            m_blendMap;
-        std::vector<Trk::DetachedTrackingVolume*> m_blendVols;
-        std::vector<std::vector<
-            std::pair<Trk::DetachedTrackingVolume*, const Trk::VolumeSpan*>>>
-            m_stationSpan;
-        std::vector<std::vector<
-            std::pair<Trk::DetachedTrackingVolume*, const Trk::VolumeSpan*>>>
-            m_inertSpan;
+        std::map<Trk::DetachedTrackingVolume*, 
+                 std::vector<Trk::TrackingVolume*>> m_blendMap;
+        VolumeSpanArray m_stationSpan{};
+        VolumeSpanArray m_inertSpan{};
         RZPairVector m_msCutoutsIn;
         RZPairVector m_msCutoutsOut;
         Trk::Material m_muonMaterial;  //!< the (empty) material
-        Trk::TrackingVolume* m_standaloneTrackingVolume =
-            nullptr;  // muon standalone tracking volume
     };
 
     /** Volume helper to find geometrical span of enclosed volumes */
     Trk::VolumeConverter m_volumeConverter;
     /** Private method to filter detached volumes in z span */
-    std::vector<std::vector<
-        std::pair<Trk::DetachedTrackingVolume*, const Trk::VolumeSpan*>>>
-    findVolumesSpan(
-        const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>* objs,
-        double zTol, double phiTol, LocalVariablesContainer& aLVC) const;
+    VolumeSpanArray findVolumesSpan(const DetachedVolVec& objs,
+                                    double zTol, double phiTol,
+                                    const LocalVariablesContainer& aLVC) const;
     /** Private methods to define subvolumes and fill them with detached volumes
      */
-    Trk::TrackingVolume* processVolume(const Trk::Volume*, int, int,
-                                       const std::string&,
-                                       LocalVariablesContainer& aLVC,
-                                       bool hasStations) const;
-    Trk::TrackingVolume* processVolume(const Trk::Volume*, int,
-                                       const std::string&,
-                                       LocalVariablesContainer& aLVC,
-                                       bool hasStations) const;
-    Trk::TrackingVolume* processShield(const Trk::Volume*, int,
-                                       const std::string&,
-                                       LocalVariablesContainer& aLVC,
-                                       bool hasStations) const;
-    /** Private method to check volume properties */
-    static void checkVolume(Trk::TrackingVolume*);
+    TrackingVolumePtr processVolume(const Trk::Volume&, int, int,
+                                    const std::string&,
+                                    LocalVariablesContainer& aLVC,
+                                    bool hasStations) const;
+    TrackingVolumePtr processVolume(const Trk::Volume&, int,
+                                    const std::string&,
+                                    LocalVariablesContainer& aLVC,
+                                    bool hasStations) const;
+    TrackingVolumePtr processShield(const Trk::Volume&, int,
+                                    const std::string&,
+                                    LocalVariablesContainer& aLVC,
+                                    bool hasStations) const;
     /** Private method to find detached volumes */
-    std::vector<Trk::DetachedTrackingVolume*>* getDetachedObjects(
-        const Trk::Volume*, std::vector<Trk::DetachedTrackingVolume*>&,
-        LocalVariablesContainer& aLVC, int mode = 0) const;
+    
+    std::vector<Trk::DetachedTrackingVolume*> 
+            getDetachedObjects(const Trk::Volume& trkVol, 
+                               std::vector<Trk::DetachedTrackingVolume*>&,
+                               LocalVariablesContainer& aLVC, 
+                               int mode = 0) const;
     /** Private method to check if constituent enclosed */
-    bool enclosed(const Trk::Volume*, const Trk::VolumeSpan*,
+    bool enclosed(const Trk::Volume& volume, 
+                  const Trk::VolumeSpan& span,
                   LocalVariablesContainer& aLVC) const;
     /** Private method to retrieve z partition */
     void getZParts(LocalVariablesContainer& aLVC) const;
@@ -194,15 +188,14 @@ class MuonTrackingGeometryBuilderImpl : public AthAlgTool {
     Gaudi::Property<double> m_innerEndcapZ{this, "InnerEndcapZ", 12900.};
     //!< maximal extend in z of the outer part of muon endcap
     Gaudi::Property<double> m_outerEndcapZ{this, "OuterEndcapZ", 26046.};
-    double m_bigWheel;    //!< maximal extend in z of the big wheel
-    double m_outerWheel;  //!< minimal extend in z of the outer wheel (EO)
-    double m_ectZ;        //!< minimal extent in z of the ECT
-    double m_beamPipeRadius;
-    double m_innerShieldRadius;
-    double m_outerShieldRadius;
-    double m_diskShieldZ;
-
-    mutable std::atomic_uint m_inertPerm{0};  // number of perm objects
+    
+    static constexpr double m_bigWheel{15600.};    //!< maximal extend in z of the big wheel
+    static constexpr double m_outerWheel{21000.};  //!< minimal extend in z of the outer wheel (EO)
+    static constexpr double m_ectZ{7920.};        //!< minimal extent in z of the ECT
+    static constexpr double m_beamPipeRadius{70.};
+    static constexpr double m_innerShieldRadius{850.};
+    static constexpr double m_outerShieldRadius{1500.};
+    static constexpr double m_diskShieldZ{6915.};
 
     Gaudi::Property<int> m_barrelEtaPartition{this, "EtaBarrelPartitions", 9};
     Gaudi::Property<int> m_innerEndcapEtaPartition{

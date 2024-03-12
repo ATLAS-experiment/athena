@@ -44,9 +44,9 @@ class MuonStationBuilderImpl : public AthAlgTool {
     virtual ~MuonStationBuilderImpl() = default;
     virtual StatusCode initialize() override;
 
-    std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-    buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr,
-                                     bool blend = false) const;
+    using DetachedVolVec = std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>;
+   DetachedVolVec buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr,
+                                                    bool blend = false) const;
 
    protected:
     MuonStationBuilderImpl(const std::string&, const std::string&,
@@ -66,12 +66,13 @@ class MuonStationBuilderImpl : public AthAlgTool {
     void encloseLayers(const Trk::DetachedTrackingVolume*) const;
     void identifyLayers(Trk::DetachedTrackingVolume*, Identifier, int, int,
                         const MuonGM::MuonDetectorManager*) const;
-    void identifyNSWLayers(Trk::DetachedTrackingVolume* station, Identifier id,
-                           const MuonGM::MuonDetectorManager* muonMgr) const;
+    
+    void identifyNSWLayers(Trk::DetachedTrackingVolume& station, 
+                           const Identifier& id) const;
 
-    void identifyPrototype(Trk::TrackingVolume*, int, int,
-                           const Amg::Transform3D&,
-                           const MuonGM::MuonDetectorManager*) const;
+    void identifyPrototype(Trk::TrackingVolume& station, int eta, int phi,
+                           const Amg::Transform3D& transf,
+                           const MuonGM::MuonDetectorManager* muonMgr) const;
 
     Identifier resolveId(std::string vname, GMInfo gm_info, int& eta, int& phi,
                          const MuonGM::MuonDetectorManager* muonMgr) const;

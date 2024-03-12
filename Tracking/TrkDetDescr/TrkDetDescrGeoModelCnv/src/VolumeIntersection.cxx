@@ -8,6 +8,8 @@
 
 #include "TrkDetDescrGeoModelCnv/VolumeIntersection.h"
 
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+
 // Trk
 #include "TrkVolumes/BevelledCylinderVolumeBounds.h"
 #include "TrkVolumes/BoundarySurface.h"
@@ -27,23 +29,14 @@
 
 // STL
 #include <iostream>
-
-// #define DEBUG
-#ifdef DEBUG
-#define DEBUG_TRACE(a) \
-    do {               \
-        a              \
-    } while (0)
-#else
-#define DEBUG_TRACE(a) \
-    do {               \
-    } while (0)
-#endif
-
-std::pair<bool, const Trk::Volume*> Trk::VolumeIntersection::intersect(
-    const Volume* volA, const Volume* volB) const {
-
-    const Trk::Volume* overlap = nullptr;
+namespace{
+    Amg::Transform3D* makeTransform(const Amg::Transform3D& trf) {
+        return std::make_unique<Amg::Transform3D>(trf).release();
+    }
+}
+std::pair<bool, std::unique_ptr<Trk::Volume>>
+Trk::VolumeIntersection::intersect(const Volume& volA,
+                                   const Volume& volB) const {
 
     // if combination of shifted polygons, calculable
     Trk::PolygonCache pgA = polygonXY(volA);
@@ -67,19 +60,20 @@ std::pair<bool, const Trk::Volume*> Trk::VolumeIntersection::intersect(
         }
         if (std::abs(std::abs((a0.cross(a1).unit()).dot(b0.cross(b1).unit())) -
                      1.) > 1.e-3) {
-            return std::pair<bool, const Trk::Volume*>(false, overlap);
+            return std::make_pair(false, nullptr);
         }
 
         Amg::Transform3D trf{Amg::Transform3D::Identity()};
-        Amg::Vector3D norm = a0.cross(a1).unit();
+        const Amg::Vector3D norm = a0.cross(a1).unit();
         if (norm.z() != 1.) {  // rotate to align with z axis
-            trf = Amg::AngleAxis3D(-norm.theta(), Amg::Vector3D::UnitY()) *
-                  Amg::AngleAxis3D(-norm.phi(), Amg::Vector3D::UnitZ());
-
-            for (size_t ia = 0; ia < pgA.vertices.size(); ia++)
-                pgA.vertices[ia] = trf * pgA.vertices[ia];
-            for (size_t ib = 0; ib < pgB.vertices.size(); ib++)
-                pgB.vertices[ib] = trf * pgB.vertices[ib];
+            trf = Amg::getRotateY3D(-norm.theta()) *
+                  Amg::getRotateZ3D(-norm.phi());
+            for (Amg::Vector3D& vertex : pgA.vertices) {
+                vertex = trf * vertex;
+            }
+            for (Amg::Vector3D& vertex : pgB.vertices) {
+                vertex = trf * vertex;
+            }
             pgA.center = trf * pgA.center;
             pgB.center = trf * pgB.center;
         }
@@ -94,51 +88,53 @@ std::pair<bool, const Trk::Volume*> Trk::VolumeIntersection::intersect(
                             2 * pgB.center.z() - pgB.vertices[0].z());
 
         if (pgA.minZ > pgB.maxZ || pgB.minZ > pgA.maxZ) {
-            return std::pair<bool, const Trk::Volume*>(true, overlap);
+            return std::make_pair(true, nullptr);
         }  // no overlap in z
 
         Trk::PolygonCache result = intersectPgon(pgA, pgB);
+        std::unique_ptr<Trk::Volume> overlap;
         if (result.nVtx > 0) {
-            Trk::SimplePolygonBrepVolumeBounds* spb =
-                new Trk::SimplePolygonBrepVolumeBounds(
-                    result.xyVertices, 0.5 * (result.maxZ - result.minZ));
-            Amg::Transform3D* transf = new Amg::Transform3D(
-                trf.inverse() *
-                Amg::Translation3D(0., 0., 0.5 * (result.maxZ + result.minZ)));
-            overlap = new Trk::Volume(transf, spb);
+            auto spb = std::make_unique<Trk::SimplePolygonBrepVolumeBounds>(result.xyVertices, 0.5 * (result.maxZ - result.minZ));
+            Amg::Transform3D transf = trf.inverse() *
+                                      Amg::Translation3D(0., 0., 0.5 * (result.maxZ + result.minZ));
+            overlap = std::make_unique<Trk::Volume>(makeTransform(std::move(transf)), spb.release());
         }
-        return (std::pair<bool, const Trk::Volume*>(true, overlap));
+        return std::make_pair(true, std::move(overlap));
     }  // end shifted polygons
 
-    return (std::pair<bool, const Trk::Volume*>(false, overlap));
+    return std::make_pair(false, nullptr);
 }
 
 Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
     Trk::PolygonCache& pgA, Trk::PolygonCache& pgB) const {
 
     // retrieve xy vertices (size+1)
-    for (auto vtx : pgA.vertices)
+    for (const Amg::Vector3D& vtx : pgA.vertices)
         pgA.xyVertices.push_back(std::make_pair(vtx.x(), vtx.y()));
     pgA.xyVertices.push_back(
         std::make_pair(pgA.vertices.front().x(), pgA.vertices.front().y()));
-    for (auto vtx : pgB.vertices)
+    for (const Amg::Vector3D& vtx : pgB.vertices)
         pgB.xyVertices.push_back(std::make_pair(vtx.x(), vtx.y()));
     pgB.xyVertices.push_back(
         std::make_pair(pgB.vertices.front().x(), pgB.vertices.front().y()));
     // find common
-    for (auto vtx : pgA.xyVertices)
+    for (const std::pair<double, double>& vtx : pgA.xyVertices) {
         pgA.commonVertices.push_back(inside(vtx, pgB.xyVertices));
-    for (auto vtx : pgB.xyVertices)
+    }
+    for (const std::pair<double, double>& vtx : pgB.xyVertices) {
         pgB.commonVertices.push_back(inside(vtx, pgA.xyVertices));
+    }
     // edges
-    for (int ia = 0; ia < pgA.nVtx; ia++)
+    for (int ia = 0; ia < pgA.nVtx; ia++) {
         pgA.edges.push_back(std::make_pair(
             pgA.xyVertices[ia + 1].first - pgA.xyVertices[ia].first,
             pgA.xyVertices[ia + 1].second - pgA.xyVertices[ia].second));
-    for (int ib = 0; ib < pgB.nVtx; ib++)
+    }
+    for (int ib = 0; ib < pgB.nVtx; ib++) {
         pgB.edges.push_back(std::make_pair(
             pgB.xyVertices[ib + 1].first - pgB.xyVertices[ib].first,
             pgB.xyVertices[ib + 1].second - pgB.xyVertices[ib].second));
+    }
     // edge intersections
     std::vector<Trk::EdgeCross> edge_cross;
     for (int ia = 0; ia < pgA.nVtx; ia++) {
@@ -180,7 +176,7 @@ Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
         if (pgA.commonVertices[ia])
             setVtx.push_back(Trk::EdgeCross(std::make_pair(ia, -1),
                                             std::make_pair(0., -1.)));
-        for (auto ie : edge_cross) {
+        for (const Trk::EdgeCross& ie : edge_cross) {
             if (ie.edge_id.first == ia) {
                 if (setVtx.size() > 0 && setVtx.back().edge_id.first == ia &&
                     setVtx.back().edge_pos.first > ie.edge_pos.first)
@@ -230,42 +226,38 @@ Trk::PolygonCache Trk::VolumeIntersection::intersectPgon(
         else if (vtx.edge_id.second == -2)
             pgon.xyVertices.push_back(pgB.xyVertices[vtx.edge_id.first]);
         else {  // calculate intersection
-            Amg::Vector2D vpos(pgA.xyVertices[vtx.edge_id.first].first,
-                               pgA.xyVertices[vtx.edge_id.first].second);
-            Amg::Vector2D vdir(pgA.edges[vtx.edge_id.first].first,
-                               pgA.edges[vtx.edge_id.first].second);
+            Amg::Vector2D vpos{pgA.xyVertices[vtx.edge_id.first].first,
+                               pgA.xyVertices[vtx.edge_id.first].second};
+            Amg::Vector2D vdir{pgA.edges[vtx.edge_id.first].first,
+                               pgA.edges[vtx.edge_id.first].second};
             Amg::Vector2D vint = vpos + vtx.edge_pos.first * vdir;
             pgon.xyVertices.push_back(std::make_pair(vint.x(), vint.y()));
         }
     }
 
-    // std::cout <<"new polygon:" << pgon.xyVertices.size() <<":" << pgon.nVtx
-    // << std::endl; for (auto xy : pgon.xyVertices ) std::cout <<"pgon vertices
-    // " << xy.first <<"," << xy.second <<":" <<  std::endl;
-
     return pgon;
 }
 
-Trk::PolygonCache Trk::VolumeIntersection::polygonXY(const Trk::Volume* vol,
+Trk::PolygonCache Trk::VolumeIntersection::polygonXY(const Trk::Volume& vol,
                                                      int swap) const {
 
-    const Trk::CuboidVolumeBounds* box =
-        dynamic_cast<const Trk::CuboidVolumeBounds*>(&(vol->volumeBounds()));
-    const Trk::TrapezoidVolumeBounds* trd =
-        dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(vol->volumeBounds()));
-    const Trk::DoubleTrapezoidVolumeBounds* trdd =
+    const CuboidVolumeBounds* box =
+        dynamic_cast<const Trk::CuboidVolumeBounds*>(&(vol.volumeBounds()));
+    const TrapezoidVolumeBounds* trd =
+        dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(vol.volumeBounds()));
+    const DoubleTrapezoidVolumeBounds* trdd =
         dynamic_cast<const Trk::DoubleTrapezoidVolumeBounds*>(
-            &(vol->volumeBounds()));
-    const Trk::PrismVolumeBounds* prism =
-        dynamic_cast<const Trk::PrismVolumeBounds*>(&(vol->volumeBounds()));
-    const Trk::SimplePolygonBrepVolumeBounds* spb =
+            &(vol.volumeBounds()));
+    const PrismVolumeBounds* prism =
+        dynamic_cast<const Trk::PrismVolumeBounds*>(&(vol.volumeBounds()));
+    const SimplePolygonBrepVolumeBounds* spb =
         dynamic_cast<const Trk::SimplePolygonBrepVolumeBounds*>(
-            &(vol->volumeBounds()));
+            &(vol.volumeBounds()));
 
     bool isPolygon = (box || trd || prism || spb || trdd);
 
     if (!isPolygon)
-        return Trk::PolygonCache();
+        return Trk::PolygonCache{};
 
     Trk::PolygonCache cache;
 
@@ -280,73 +272,57 @@ Trk::PolygonCache Trk::VolumeIntersection::polygonXY(const Trk::Volume* vol,
             if (box) {
                 hz = box->halflengthX();
                 cache.nVtx = 4;
-                vtxLocal.push_back(Amg::Vector3D(box->halflengthX(),
-                                                 box->halflengthY(),
-                                                 box->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(box->halflengthX(),
-                                                 -box->halflengthY(),
-                                                 box->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(box->halflengthX(),
-                                                 -box->halflengthY(),
-                                                 -box->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(box->halflengthX(),
-                                                 box->halflengthY(),
-                                                 -box->halflengthZ()));
+                vtxLocal.emplace_back(box->halflengthX(), box->halflengthY(),
+                                      box->halflengthZ());
+                vtxLocal.emplace_back(box->halflengthX(), -box->halflengthY(),
+                                      box->halflengthZ());
+                vtxLocal.emplace_back(box->halflengthX(), -box->halflengthY(),
+                                      -box->halflengthZ());
+                vtxLocal.emplace_back(box->halflengthX(), box->halflengthY(),
+                                      -box->halflengthZ());
             } else if (trd) {
                 hz = trd->minHalflengthX();
                 cache.nVtx = 4;
-                vtxLocal.push_back(Amg::Vector3D(trd->minHalflengthX(),
-                                                 trd->halflengthY(),
-                                                 trd->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(trd->minHalflengthX(),
-                                                 -trd->halflengthY(),
-                                                 trd->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(trd->maxHalflengthX(),
-                                                 -trd->halflengthY(),
-                                                 -trd->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(trd->maxHalflengthX(),
-                                                 trd->halflengthY(),
-                                                 -trd->halflengthZ()));
+                vtxLocal.emplace_back(trd->minHalflengthX(), trd->halflengthY(),
+                                      trd->halflengthZ());
+                vtxLocal.emplace_back(trd->minHalflengthX(),
+                                      -trd->halflengthY(), trd->halflengthZ());
+                vtxLocal.emplace_back(trd->maxHalflengthX(),
+                                      -trd->halflengthY(), -trd->halflengthZ());
+                vtxLocal.emplace_back(trd->maxHalflengthX(), trd->halflengthY(),
+                                      -trd->halflengthZ());
             }
         } else if (swap == 2) {
             if (box) {
                 hz = box->halflengthY();
                 cache.nVtx = 4;
-                vtxLocal.push_back(Amg::Vector3D(box->halflengthX(),
-                                                 box->halflengthY(),
-                                                 box->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(-box->halflengthX(),
-                                                 box->halflengthY(),
-                                                 box->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(-box->halflengthX(),
-                                                 box->halflengthY(),
-                                                 -box->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(box->halflengthX(),
-                                                 box->halflengthY(),
-                                                 -box->halflengthZ()));
+                vtxLocal.emplace_back(box->halflengthX(), box->halflengthY(),
+                                      box->halflengthZ());
+                vtxLocal.emplace_back(-box->halflengthX(), box->halflengthY(),
+                                      box->halflengthZ());
+                vtxLocal.emplace_back(-box->halflengthX(), box->halflengthY(),
+                                      -box->halflengthZ());
+                vtxLocal.emplace_back(box->halflengthX(), box->halflengthY(),
+                                      -box->halflengthZ());
             } else if (trd) {
                 hz = trd->halflengthY();
                 cache.nVtx = 4;
-                vtxLocal.push_back(Amg::Vector3D(trd->minHalflengthX(),
-                                                 trd->halflengthY(),
-                                                 trd->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(-trd->minHalflengthX(),
-                                                 trd->halflengthY(),
-                                                 trd->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(-trd->minHalflengthX(),
-                                                 trd->halflengthY(),
-                                                 -trd->halflengthZ()));
-                vtxLocal.push_back(Amg::Vector3D(trd->minHalflengthX(),
-                                                 trd->halflengthY(),
-                                                 -trd->halflengthZ()));
+                vtxLocal.emplace_back(trd->minHalflengthX(), trd->halflengthY(),
+                                      trd->halflengthZ());
+                vtxLocal.emplace_back(-trd->minHalflengthX(),
+                                      trd->halflengthY(), trd->halflengthZ());
+                vtxLocal.emplace_back(-trd->minHalflengthX(),
+                                      trd->halflengthY(), -trd->halflengthZ());
+                vtxLocal.emplace_back(trd->minHalflengthX(), trd->halflengthY(),
+                                      -trd->halflengthZ());
             }
         }
         cache.hZ = hz;
-        cache.center = vol->transform().translation();
+        cache.center = vol.transform().translation();
 
-        for (auto vtxloc : vtxLocal) {
-            Amg::Vector3D vtx = vol->transform() * vtxloc;
-            cache.vertices.push_back(vtx);
+        for (const Amg::Vector3D& vtxloc : vtxLocal) {
+            Amg::Vector3D vtx = vol.transform() * vtxloc;
+            cache.vertices.push_back(std::move(vtx));
         }
         return cache;
     }  // end swap
@@ -354,75 +330,66 @@ Trk::PolygonCache Trk::VolumeIntersection::polygonXY(const Trk::Volume* vol,
     if (box) {
         hz = box->halflengthZ();
         cache.nVtx = 4;
-        vtxLocal.push_back(Amg::Vector3D(box->halflengthX(), box->halflengthY(),
-                                         box->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(
-            -box->halflengthX(), box->halflengthY(), box->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(
-            -box->halflengthX(), -box->halflengthY(), box->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(
-            box->halflengthX(), -box->halflengthY(), box->halflengthZ()));
+        vtxLocal.emplace_back(box->halflengthX(), box->halflengthY(),
+                              box->halflengthZ());
+        vtxLocal.emplace_back(-box->halflengthX(), box->halflengthY(),
+                              box->halflengthZ());
+        vtxLocal.emplace_back(-box->halflengthX(), -box->halflengthY(),
+                              box->halflengthZ());
+        vtxLocal.emplace_back(box->halflengthX(), -box->halflengthY(),
+                              box->halflengthZ());
     } else if (trd) {
         hz = trd->halflengthZ();
         cache.nVtx = 4;
-        vtxLocal.push_back(Amg::Vector3D(
-            trd->minHalflengthX(), -trd->halflengthY(), trd->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(
-            -trd->minHalflengthX(), -trd->halflengthY(), trd->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(
-            -trd->maxHalflengthX(), trd->halflengthY(), trd->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(
-            trd->maxHalflengthX(), trd->halflengthY(), trd->halflengthZ()));
+        vtxLocal.emplace_back(trd->minHalflengthX(), -trd->halflengthY(),
+                              trd->halflengthZ());
+        vtxLocal.emplace_back(-trd->minHalflengthX(), -trd->halflengthY(),
+                              trd->halflengthZ());
+        vtxLocal.emplace_back(-trd->maxHalflengthX(), trd->halflengthY(),
+                              trd->halflengthZ());
+        vtxLocal.emplace_back(trd->maxHalflengthX(), trd->halflengthY(),
+                              trd->halflengthZ());
     } else if (trdd) {
         hz = trdd->halflengthZ();
         cache.nVtx = 6;
-        vtxLocal.push_back(Amg::Vector3D(trdd->maxHalflengthX(),
-                                         2 * trdd->halflengthY2(),
-                                         trdd->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(-trdd->maxHalflengthX(),
-                                         2 * trdd->halflengthY2(),
-                                         trdd->halflengthZ()));
-        vtxLocal.push_back(
-            Amg::Vector3D(-trdd->medHalflengthX(), 0., trdd->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(-trdd->minHalflengthX(),
-                                         -2 * trdd->halflengthY1(),
-                                         trdd->halflengthZ()));
-        vtxLocal.push_back(Amg::Vector3D(trdd->minHalflengthX(),
-                                         -2 * trdd->halflengthY1(),
-                                         trdd->halflengthZ()));
-        vtxLocal.push_back(
-            Amg::Vector3D(trdd->medHalflengthX(), 0., trdd->halflengthZ()));
+        vtxLocal.emplace_back(trdd->maxHalflengthX(), 2 * trdd->halflengthY2(),
+                              trdd->halflengthZ());
+        vtxLocal.emplace_back(-trdd->maxHalflengthX(), 2 * trdd->halflengthY2(),
+                              trdd->halflengthZ());
+        vtxLocal.emplace_back(-trdd->medHalflengthX(), 0., trdd->halflengthZ());
+        vtxLocal.emplace_back(-trdd->minHalflengthX(),
+                              -2 * trdd->halflengthY1(), trdd->halflengthZ());
+        vtxLocal.emplace_back(trdd->minHalflengthX(), -2 * trdd->halflengthY1(),
+                              trdd->halflengthZ());
+        vtxLocal.emplace_back(trdd->medHalflengthX(), 0., trdd->halflengthZ());
     } else if (prism) {
         hz = prism->halflengthZ();
-        const std::vector<std::pair<double, double> > vtcs =
-            prism->xyVertices();
+        const std::vector<std::pair<double, double>> vtcs = prism->xyVertices();
         for (const auto& vtc : vtcs)
-            vtxLocal.push_back(
-                Amg::Vector3D(vtc.first, vtc.second, prism->halflengthZ()));
+            vtxLocal.emplace_back(vtc.first, vtc.second, prism->halflengthZ());
         cache.nVtx = vtcs.size();
     } else if (spb) {
         hz = spb->halflengthZ();
-        const std::vector<std::pair<double, double> > vtcs = spb->xyVertices();
+        const std::vector<std::pair<double, double>> vtcs = spb->xyVertices();
         for (const auto& vtc : vtcs)
-            vtxLocal.push_back(
-                Amg::Vector3D(vtc.first, vtc.second, spb->halflengthZ()));
+            vtxLocal.emplace_back(vtc.first, vtc.second, spb->halflengthZ());
         cache.nVtx = vtcs.size();
     }
 
     cache.hZ = hz;
-    cache.center = vol->transform().translation();
+    cache.center = vol.transform().translation();
 
-    for (auto vtxloc : vtxLocal) {
-        Amg::Vector3D vtx = vol->transform() * vtxloc;
-        cache.vertices.push_back(vtx);
+    for (const Amg::Vector3D& vtxloc : vtxLocal) {
+        Amg::Vector3D vtx = vol.transform() * vtxloc;
+        cache.vertices.push_back(std::move(vtx));
     }
 
     return cache;
 }
 
 bool Trk::VolumeIntersection::inside(
-    std::pair<double, double> vtx,
-    std::vector<std::pair<double, double> > pgon) const {
+    const std::pair<double, double>& vtx,
+    const std::vector<std::pair<double, double>>& pgon) const {
 
     // GM code
     bool in = false;
@@ -438,8 +405,8 @@ bool Trk::VolumeIntersection::inside(
     return in;
 }
 
-double Trk::VolumeIntersection::det(std::pair<double, double> a,
-                                    std::pair<double, double> b,
+double Trk::VolumeIntersection::det(const std::pair<double, double>& a,
+                                    const std::pair<double, double>& b,
                                     bool dot) const {
 
     if (dot)
@@ -448,40 +415,37 @@ double Trk::VolumeIntersection::det(std::pair<double, double> a,
     return (a.first * b.second - a.second * b.first);
 }
 
-std::pair<bool, const Trk::Volume*>
-Trk::VolumeIntersection::intersectApproximative(const Volume* volA,
-                                                const Volume* volB) const {
-
-    const Trk::Volume* overlap = nullptr;
+std::pair<bool, std::unique_ptr<Trk::Volume>>
+Trk::VolumeIntersection::intersectApproximative(const Volume& volA,
+                                                const Volume& volB) const {
 
     // if combination of shifted polygons, calculable
     Trk::PolygonCache pgA = polygonXY(volA);
     Trk::PolygonCache pgB = polygonXY(volB);
 
-    const Trk::CylinderVolumeBounds* cylA = 0;
+    const Trk::CylinderVolumeBounds *cylA{nullptr}, *cylB{nullptr};
     if (pgA.nVtx == 0)
         cylA = dynamic_cast<const Trk::CylinderVolumeBounds*>(
-            &(volA->volumeBounds()));
-    const Trk::CylinderVolumeBounds* cylB = 0;
+            &(volA.volumeBounds()));
     if (pgB.nVtx == 0)
         cylB = dynamic_cast<const Trk::CylinderVolumeBounds*>(
-            &(volB->volumeBounds()));
+            &(volB.volumeBounds()));
 
     if (cylA && cylB) {
-        double distance_center = (volA->center() - volB->center()).norm();
+        double distance_center = (volA.center() - volB.center()).norm();
         if (distance_center >
-            (sqrt(pow(cylA->outerRadius(), 2) + pow(cylA->halflengthZ(), 2)) +
-             sqrt(pow(cylB->outerRadius(), 2) + pow(cylB->halflengthZ(), 2))))
-            return std::pair<bool, const Trk::Volume*>(true, overlap);
+            std::hypot(cylA->outerRadius(), cylA->halflengthZ()) +
+                std::hypot(cylB->outerRadius(), cylB->halflengthZ())) {
+            return std::make_pair(true, nullptr);
+        }
     }
 
     if (pgA.nVtx > 0 && pgB.nVtx > 0) {
         // check orientation of xy face
-        Amg::Vector3D a0 = pgA.vertices[1] - pgA.vertices[0];
-        Amg::Vector3D a1 = pgA.vertices[2] - pgA.vertices[1];
-        Amg::Vector3D b0 = pgB.vertices[1] - pgB.vertices[0];
-        Amg::Vector3D b1 = pgB.vertices[2] - pgB.vertices[1];
-
+        Amg::Vector3D a0{pgA.vertices[1] - pgA.vertices[0]};
+        Amg::Vector3D a1{pgA.vertices[2] - pgA.vertices[1]};
+        Amg::Vector3D b0{pgB.vertices[1] - pgB.vertices[0]};
+        Amg::Vector3D b1{pgB.vertices[2] - pgB.vertices[1]};
         if (std::abs((b0.cross(b1).unit()).dot(a0.cross(a1).unit())) < 1.e-3) {
             if (std::abs((b0.cross(b1).unit()).dot(a1)) < 1.e-3)
                 pgA = polygonXY(volA, 1);  // xy -> yz, only if cuboid-like
@@ -493,7 +457,7 @@ Trk::VolumeIntersection::intersectApproximative(const Volume* volA,
         }
         if (std::abs(std::abs((b0.cross(b1).unit()).dot(a0.cross(a1).unit())) -
                      1.) > 1.e-3) {
-            return std::pair<bool, const Trk::Volume*>(false, overlap);
+            return std::make_pair(false, nullptr);
         }
 
         Amg::Transform3D trf{Amg::Transform3D::Identity()};
@@ -502,10 +466,12 @@ Trk::VolumeIntersection::intersectApproximative(const Volume* volA,
             trf = Amg::AngleAxis3D(-norm.theta(), Amg::Vector3D::UnitY()) *
                   Amg::AngleAxis3D(-norm.phi(), Amg::Vector3D::UnitZ());
 
-            for (size_t ia = 0; ia < pgA.vertices.size(); ia++)
-                pgA.vertices[ia] = trf * pgA.vertices[ia];
-            for (size_t ib = 0; ib < pgB.vertices.size(); ib++)
-                pgB.vertices[ib] = trf * pgB.vertices[ib];
+            for (Amg::Vector3D& vtx : pgA.vertices) {
+                vtx = trf * vtx;
+            }
+            for (Amg::Vector3D& vtx : pgB.vertices) {
+                vtx = trf * vtx;
+            }
             pgA.center = trf * pgA.center;
             pgB.center = trf * pgB.center;
         }
@@ -520,21 +486,20 @@ Trk::VolumeIntersection::intersectApproximative(const Volume* volA,
                             2 * pgB.center.z() - pgB.vertices[0].z());
 
         if (pgA.minZ > pgB.maxZ || pgB.minZ > pgA.maxZ) {
-            return std::pair<bool, const Trk::Volume*>(true, overlap);
+            return std::make_pair(true, nullptr);
         }  // no overlap in z
 
         Trk::PolygonCache result = intersectPgon(pgA, pgB);
+        std::unique_ptr<Trk::Volume> overlap{};
         if (result.nVtx > 0) {
-            Trk::SimplePolygonBrepVolumeBounds* spb =
-                new Trk::SimplePolygonBrepVolumeBounds(
-                    result.xyVertices, 0.5 * (result.maxZ - result.minZ));
-            Amg::Transform3D* transf = new Amg::Transform3D(
-                trf.inverse() *
-                Amg::Translation3D(0., 0., 0.5 * (result.maxZ + result.minZ)));
-            overlap = new Trk::Volume(transf, spb);
+            auto spb = std::make_unique<Trk::SimplePolygonBrepVolumeBounds>(result.xyVertices, 
+                                                                            0.5 * (result.maxZ - result.minZ));
+            Amg::Transform3D transf = trf.inverse() *
+                                      Amg::Translation3D(0., 0., 0.5 * (result.maxZ + result.minZ));
+            overlap = std::make_unique<Trk::Volume>(makeTransform(std::move(transf)), spb.release());
         }
-        return (std::pair<bool, const Trk::Volume*>(true, overlap));
+        return std::make_pair(true, std::move(overlap));
     }  // end shifted polygons
 
-    return (std::pair<bool, const Trk::Volume*>(false, overlap));
+    return std::make_pair(false, nullptr);
 }

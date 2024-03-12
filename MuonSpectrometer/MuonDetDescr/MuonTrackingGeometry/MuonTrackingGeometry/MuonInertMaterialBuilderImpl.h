@@ -55,10 +55,10 @@ class MuonInertMaterialBuilderImpl : public AthAlgTool,
     virtual ~MuonInertMaterialBuilderImpl() = default;
     /** AlgTool initialize method.*/
     virtual StatusCode initialize() override;
-
-    std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-    buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr,
-                                     bool blend) const;
+    using DetachedVolVec = std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>;
+    
+    DetachedVolVec buildDetachedTrackingVolumesImpl(const PVConstLink treeTop,
+                                                    bool blend) const;
 
    protected:
     /** Constructor */
@@ -66,11 +66,12 @@ class MuonInertMaterialBuilderImpl : public AthAlgTool,
                                  const IInterface*);
 
     /** Method creating material object prototypes */
-
-    std::vector<
-        std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>
-    buildDetachedTrackingVolumeTypes(const MuonGM::MuonDetectorManager* muonMgr,
-                                     bool blend) const;
+    using DetachedVolumeVecWithTrfs = 
+        std::vector<std::pair<std::unique_ptr<Trk::DetachedTrackingVolume>, 
+                              std::vector<Amg::Transform3D>>>;
+    
+    DetachedVolumeVecWithTrfs buildDetachedTrackingVolumeTypes(const PVConstLink top,
+                                                               bool blend) const;
 
     /** Method extracting material objects from GeoModel tree */
     void getObjsForTranslation(

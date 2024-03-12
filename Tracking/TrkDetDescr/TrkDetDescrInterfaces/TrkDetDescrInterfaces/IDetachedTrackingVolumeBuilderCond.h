@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -36,12 +36,14 @@ namespace Trk {
     DeclareInterfaceID(IDetachedTrackingVolumeBuilderCond, 1, 0);
 
       /**Virtual destructor*/
-      virtual ~IDetachedTrackingVolumeBuilderCond(){}
+      virtual ~IDetachedTrackingVolumeBuilderCond() = default;
 
-      virtual std::unique_ptr<std::vector<std::unique_ptr<DetachedTrackingVolume> > >
-      buildDetachedTrackingVolumes(const EventContext& ctx,
-                                   SG::WriteCondHandle<TrackingGeometry>& whandle,
-                                   bool blend=false ) const = 0 ;
+      using DetachedVolumeVec = std::vector<std::unique_ptr<DetachedTrackingVolume>>; 
+      
+      virtual DetachedVolumeVec 
+              buildDetachedTrackingVolumes(const EventContext& ctx,
+                                           SG::WriteCondHandle<TrackingGeometry>& whandle,
+                                           bool blend = false) const = 0 ;
     
   };
 
