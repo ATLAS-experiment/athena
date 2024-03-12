@@ -206,10 +206,6 @@ class BasicTests(FlagsSetup):
         self.assertEqual(self.flags.A.B.C, full_dict['A']['B']['C'])
         bdict = self.flags.A.B.asdict()
         self.assertEqual(self.flags.A.B.C, bdict['C'])
-        # cloneAndReplace creates a lot more potential issues
-        clone = self.flags.cloneAndReplace('X', 'A.B')
-        self.assertEqual(clone.A.asdict(), bdict)
-        self.assertEqual(clone.asdict(), full_dict)
 
     def test_iterator(self):
         self.assertTrue('A' in self.flags)
@@ -305,7 +301,18 @@ class TestFlagsSetupDynamic(FlagsSetup):
         print("\nFlag after double remap ..")
         print("-"*80)
 
+    def test_copyAsDict(self):
+        """test for asdict with cloned flags"""
+        zdict = self.flags.asdict()['Z']
+        copyf = self.flags.cloneAndReplace('W', 'Z')
+        wdict = copyf.asdict()['W']
+        self.assertEqual(zdict, wdict)
 
+        # try again with flag address
+        cdict = self.flags.Z.asdict()['C']
+        copyf = self.flags.cloneAndReplace('Z.W', 'Z.C')
+        wdict = copyf.Z.asdict()['W']
+        self.assertEqual(cdict, wdict)
 
 
     def test_exists(self):
