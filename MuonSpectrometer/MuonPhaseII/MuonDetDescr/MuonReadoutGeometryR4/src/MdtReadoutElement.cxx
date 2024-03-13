@@ -67,7 +67,7 @@ StatusCode MdtReadoutElement::initElement() {
      ATH_CHECK(insertTransform(layHash, 
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                     const Amg::Translation3D toCenter{m_pars.halfY * Amg::Vector3D::UnitY()};
-                    return toStation(store) * toChamberLayer(hash)*toCenter; 
+                    return toStation(store) * toChamberLayer(hash)*toCenter*Amg::getRotateY3D(90*Gaudi::Units::deg); 
                 }));
 #ifndef SIMULATIONBASE
      ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(m_pars.shortHalfX, 
