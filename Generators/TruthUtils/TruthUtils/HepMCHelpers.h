@@ -62,6 +62,42 @@ namespace MC
     if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
     return false;
   }
+
+  /// @brief Function to get a mother of particle. MCTruthClassifier legacy.
+  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
+  template <class T>  T getMother(T thePart) {
+    auto partOriVert = thePart->production_vertex();
+    if (!partOriVert) return nullptr;
+
+    long partPDG = thePart->pdg_id();
+    long MotherPDG(0);
+
+    auto MothOriVert = partOriVert;
+    MothOriVert = nullptr;
+    T theMoth(nullptr);
+
+    size_t itr = 0;
+    do {
+      if (itr != 0) partOriVert = MothOriVert;
+      auto incoming = partOriVert->particles_in();
+      for ( auto p: incoming) {
+        theMoth = p;
+        if (!theMoth) continue;
+        MotherPDG = theMoth->pdg_id();
+        MothOriVert = theMoth->production_vertex();
+        if (MotherPDG == partPDG) break;
+      }
+      itr++;
+      if (itr > 100) {
+        break;
+      }
+    } while (MothOriVert != nullptr && MotherPDG == partPDG && !HepMC::is_simulation_particle(thePart) &&
+           MothOriVert != partOriVert);
+    return theMoth;
+  }
+
+
+
   /// @brief Function to find a particle in container
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */  
   template <class C, class T>  T find_matching(C TruthTES, T bcin) {

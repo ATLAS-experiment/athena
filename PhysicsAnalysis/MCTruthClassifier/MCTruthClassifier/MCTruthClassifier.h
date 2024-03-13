@@ -129,8 +129,6 @@ public:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
   checkOrigOfBkgElec(const xAOD::TruthParticle* thePart,Info* info = nullptr) const override;
 
-  const xAOD::TruthParticle* getMother(const xAOD::TruthParticle*) const;
-
   virtual unsigned int classify(const xAOD::TruthParticle*) const override;
 
   virtual const xAOD::TruthParticle* getParentHadron(const xAOD::TruthParticle*) const override;
