@@ -2687,18 +2687,19 @@ bool AtlCoolCopy::getOnlineRun() {
   std::cout << "Extracting current run-number from ATLAS_RUN_NUMBER @ ATONR_ADG ... " << 
   // Initialize libcurl
   curl_global_init(CURL_GLOBAL_ALL);
-  CURL *curl = curl_easy_init();
+   using uniqueCurl_t = std::unique_ptr<CURL,decltype(&curl_easy_cleanup)>;
+  uniqueCurl_t curl(curl_easy_init(), curl_easy_cleanup);
   CURLcode res = CURLE_OK;
   if (curl) {
       std::string url = m_runinfohost + "/runs?sort=runnumber:DESC&size=1";
       // Set the URL
-      res = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+      res = curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
           return false;
       }
       // Follow HTTP redirections
-      res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      res = curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
           return false;
@@ -2707,19 +2708,19 @@ bool AtlCoolCopy::getOnlineRun() {
       std::string response;
 
       // Set the callback function to receive response data
-      res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+      res = curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback);
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
           return false;
       }
-      res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+      res = curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
           return false;
       }
 
       // Perform the request
-      res = curl_easy_perform(curl);
+      res = curl_easy_perform(curl.get());
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url.c_str() << std::endl;
           return false;
@@ -2758,8 +2759,7 @@ bool AtlCoolCopy::getOnlineRun() {
               return false;
           }
       }
-      // Clean up
-      curl_easy_cleanup(curl);
+      // Clean up done by unique_ptr d'tor
   } else {
       std::cerr << "Failed to initialize libcurl." << std::endl;
       return false;
@@ -2778,19 +2778,21 @@ bool AtlCoolCopy::getBulkRun() {
   std::cout << "Call getbulk using URL" << std::endl;
   // Initialize libcurl
   curl_global_init(CURL_GLOBAL_ALL);
-  CURL *curl = curl_easy_init();
+  using uniqueCurl_t = std::unique_ptr<CURL,decltype(&curl_easy_cleanup)>;
+  uniqueCurl_t curl(curl_easy_init(), curl_easy_cleanup);
+  //CURL *curl = curl_easy_init();
   CURLcode res = CURLE_OK;
   
   if (curl) {
       std::string url = m_runinfohost + "/runs/nemop/sync";
       // Set the URL
-      res = curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+      res = curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
           return false;
       }
       // Follow HTTP redirections
-      res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+      res = curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
           return false;
@@ -2799,18 +2801,18 @@ bool AtlCoolCopy::getBulkRun() {
       std::string response;
 
       // Set the callback function to receive response data
-      res = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+      res = curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, WriteCallback);
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
           return false;
       }
-      res = curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+      res = curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: curl_easy_setopt, line "<<__LINE__<<std::endl;
           return false;
       }
       // Perform the request
-      res = curl_easy_perform(curl);
+      res = curl_easy_perform(curl.get());
       if (res != CURLE_OK) {
           std::cerr << "Failed to perform request: " << curl_easy_strerror(res) << ":" << url.c_str() << std::endl;
           return false;
@@ -2845,9 +2847,9 @@ bool AtlCoolCopy::getBulkRun() {
           } catch (std::exception& e) {
               std::cerr << "Failed to extract run and timestamp from JSON response: " << e.what() << std::endl;
               return false;
-          }      }
-      // Clean up
-      curl_easy_cleanup(curl);
+          }      
+      }
+      // Clean up done by unique_ptr
   } else {
       std::cerr << "Failed to initialize libcurl." << std::endl;
       return false;
