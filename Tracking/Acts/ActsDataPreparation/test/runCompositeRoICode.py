@@ -50,9 +50,9 @@ if __name__ == "__main__":
     acc.merge(PoolReadCfg(flags))
 
     # RoI creator
-    from ActsConfig.ActsViewConfig import EventViewCreatorAlgCfg
-    acc.merge(EventViewCreatorAlgCfg(flags,
-                                     RoICreatorTool=acc.popToolsAndMerge(TestCompositeRoIToolCfg(flags))))
+    from ActsConfig.ActsViewConfig import ActsEventViewCreatorAlgCfg
+    acc.merge(ActsEventViewCreatorAlgCfg(flags,
+                                         RoICreatorTool=acc.popToolsAndMerge(TestCompositeRoIToolCfg(flags))))
 
     # Data Preparation - Clustering
     from ActsConfig.ActsClusterizationConfig import ActsPixelClusterizationAlgCfg

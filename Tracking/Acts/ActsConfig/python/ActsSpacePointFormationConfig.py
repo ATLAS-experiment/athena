@@ -38,9 +38,9 @@ def ActsCoreStripSpacePointToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
     return acc
 
-def ActsPixelSpacePointFormationCfg(flags,
-                                    name: str = "ActsPixelSpacePointFormation",
-                                    **kwargs) -> ComponentAccumulator:
+def ActsPixelSpacePointFormationAlgCfg(flags,
+                                       name: str = "ActsPixelSpacePointFormationAlg",
+                                       **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
@@ -56,9 +56,9 @@ def ActsPixelSpacePointFormationCfg(flags,
     acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlg(name, **kwargs))
     return acc
 
-def ActsStripSpacePointFormationCfg(flags,
-                                    name: str = "ActsStripSpacePointFormation",
-                                    **kwargs) -> ComponentAccumulator:
+def ActsStripSpacePointFormationAlgCfg(flags,
+                                       name: str = "ActsStripSpacePointFormationAlg",
+                                       **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
@@ -82,8 +82,8 @@ def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     if flags.Detector.EnableITkPixel:
-        acc.merge(ActsPixelSpacePointFormationCfg(flags,
-                                                  PixelClusters = "ITkPixelClusters_InView" if flags.Acts.useCache else "ITkPixelClusters"))
+        acc.merge(ActsPixelSpacePointFormationAlgCfg(flags,
+                                                     PixelClusters = "ITkPixelClusters_InView" if flags.Acts.useCache else "ITkPixelClusters"))
     if flags.Detector.EnableITkStrip and not flags.Tracking.doITkFastTracking:
         # Need to schedule this here in case the Athena space point formation is not schedule
         # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
@@ -98,8 +98,8 @@ def ActsMainSpacePointFormationCfg(flags) -> ComponentAccumulator:
         from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
         acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
         
-        acc.merge(ActsStripSpacePointFormationCfg(flags,
-                                                  StripClusters = "ITkStripClusters_InView" if flags.Acts.useCache else "ITkStripClusters"))
+        acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                                                     StripClusters = "ITkStripClusters_InView" if flags.Acts.useCache else "ITkStripClusters"))
 
     # Analysis extensions
     if flags.Acts.doAnalysis:
@@ -130,11 +130,11 @@ def ActsConversionSpacePointFormationCfg(flags) -> ComponentAccumulator:
         from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
         acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
         
-        acc.merge(ActsStripSpacePointFormationCfg(flags,
-                                                  name="ActsConversionStripSpacePointFormation",
-                                                  StripClusters="ITkConversionStripClusters_InView" if flags.Acts.useCache else "ITkConversionStripClusters",
-                                                  StripSpacePoints="ITkConversionStripSpacePoints",
-                                                  StripOverlapSpacePoints="ITkConversionStripOverlapSpacePoints"))
+        acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+                                                     name="ActsConversionStripSpacePointFormation",
+                                                     StripClusters="ITkConversionStripClusters_InView" if flags.Acts.useCache else "ITkConversionStripClusters",
+                                                     StripSpacePoints="ITkConversionStripSpacePoints",
+                                                     StripOverlapSpacePoints="ITkConversionStripOverlapSpacePoints"))
 
     # Analysis extensions
     if flags.Acts.doAnalysis:

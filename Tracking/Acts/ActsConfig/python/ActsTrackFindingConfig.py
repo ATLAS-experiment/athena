@@ -15,9 +15,9 @@ def isdet(flags, pixel, strip):
         keys += strip
     return keys
 
-def ActsTrackStatePrinterCfg(
-    flags, name: str = "TrackStatePrinter", **kwargs
-) -> ComponentAccumulator:
+def ActsTrackStatePrinterCfg(flags,
+                             name: str = "ActsTrackStatePrinterTool",
+                             **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     kwargs.setdefault("InputSpacePoints", isdet(flags, ["ITkPixelSpacePoints"], ["ITkStripSpacePoints", "ITkStripOverlapSpacePoints"]))
@@ -33,9 +33,9 @@ def ActsTrackStatePrinterCfg(
 
 # ACTS only algorithm
 
-def ActsMainTrackFindingCfg(flags,
-                            name: str = "ActsTrackFindingAlg",
-                            **kwargs) -> ComponentAccumulator:
+def ActsMainTrackFindingAlgCfg(flags,
+                               name: str = "ActsTrackFindingAlg",
+                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     # Seed labels and collections. These 3 lists must match element for element.
@@ -132,27 +132,27 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
 
     # Acts Main pass
     if flags.Tracking.ActiveConfig.extension == "Acts":
-        acc.merge(ActsMainTrackFindingCfg(flags,
-                                          UncalibratedMeasurementContainerKeys = ["ITkPixelClusters_InView", "ITkStripClusters_InView"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkStripClusters"]))
+        acc.merge(ActsMainTrackFindingAlgCfg(flags,
+                                             UncalibratedMeasurementContainerKeys = ["ITkPixelClusters_InView", "ITkStripClusters_InView"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkStripClusters"]))
         # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        acc.merge(ActsMainTrackFindingCfg(flags,
-                                          name="ActsConversionTrackFindingAlg",
-                                          ACTSTracksLocation="ActsConversionTracks",
-                                          SeedLabels=["SSS"],
-                                          EstimatedTrackParametersKeys=["ITkConversionStripEstimatedTrackParams"],
-                                          SeedContainerKeys=["ITkConversionStripSeeds"],
-                                          UncalibratedMeasurementContainerKeys=["ITkPixelClusters_InView", "ITkConversionStripClusters"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkConversionStripClusters"] # for the time being we do not pass InView collections for strips here due to issue with the CKF stage
-                                          ))
+        acc.merge(ActsMainTrackFindingAlgCfg(flags,
+                                             name="ActsConversionTrackFindingAlg",
+                                             ACTSTracksLocation="ActsConversionTracks",
+                                             SeedLabels=["SSS"],
+                                             EstimatedTrackParametersKeys=["ITkConversionStripEstimatedTrackParams"],
+                                             SeedContainerKeys=["ITkConversionStripSeeds"],
+                                             UncalibratedMeasurementContainerKeys=["ITkPixelClusters_InView", "ITkConversionStripClusters"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkConversionStripClusters"] # for the time being we do not pass InView collections for strips here due to issue with the CKF stage
+                                             ))
     # Any other pass -> mainly validation
     else:
-        acc.merge(ActsMainTrackFindingCfg(flags))
+        acc.merge(ActsMainTrackFindingAlgCfg(flags))
         
     return acc
 
-def ActsMainAmbiguityResolutionCfg(flags,
-                                   name: str = "ActsAmbiguityResolution",
-                                   **kwargs) -> ComponentAccumulator:
+def ActsMainAmbiguityResolutionAlgCfg(flags,
+                                      name: str = "ActsAmbiguityResolutionAlg",
+                                      **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     kwargs.setdefault('TracksLocation', 'ActsTracks')
@@ -176,16 +176,16 @@ def ActsAmbiguityResolutionCfg(flags) -> ComponentAccumulator:
 
     # Acts Main pass
     if flags.Tracking.ActiveConfig.extension == "Acts":
-        acc.merge(ActsMainAmbiguityResolutionCfg(flags))
+        acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags))
     # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
-        acc.merge(ActsMainAmbiguityResolutionCfg(flags,
-                                                 name="ActsConversionAmbiguityResolution",
-                                                 TracksLocation="ActsConversionTracks",
-                                                 ResolvedTracksLocation="ResolvedActsConversionTracks"))
+        acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags,
+                                                    name="ActsConversionAmbiguityResolution",
+                                                    TracksLocation="ActsConversionTracks",
+                                                    ResolvedTracksLocation="ResolvedActsConversionTracks"))
     # Any other pass -> mainly validation
     else:
-        acc.merge(ActsMainAmbiguityResolutionCfg(flags))
+        acc.merge(ActsMainAmbiguityResolutionAlgCfg(flags))
         
     return acc
 

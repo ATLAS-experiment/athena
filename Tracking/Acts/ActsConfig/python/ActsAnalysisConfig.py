@@ -411,24 +411,24 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
         ITkSiSpacePointsSeedMaker.maxSize = 1e8
         MonitoringGroupNames.append("ITkSiSpacePointSeedMaker")
 
-        from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerCfg
+        from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerToolCfg
         # The default Acts pixel seeding tool performs by default a seed selection after the seed finding
         # We have to disable it or a fair comparison with the other seed computations
-        from ActsConfig.ActsSeedingConfig import ActsITkPixelSeedingToolCfg
-        seedToolPixel = result.popToolsAndMerge(ActsITkPixelSeedingToolCfg(flags, doSeedQualitySelection=False))
-        # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerCfg so that we pick this one
-        ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsSiSpacePointsSeedMakerCfg(flags, SeedToolPixel=seedToolPixel))
+        from ActsConfig.ActsSeedingConfig import ActsPixelSeedingToolCfg
+        seedToolPixel = result.popToolsAndMerge(ActsPixelSeedingToolCfg(flags, doSeedQualitySelection=False))
+        # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
+        ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags, SeedToolPixel=seedToolPixel))
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
-        from ActsConfig.ActsSeedingConfig import ActsITkPixelOrthogonalSeedingToolCfg, ActsITkStripOrthogonalSeedingToolCfg
-        pixel_orthogonal_seeding_tool = result.popToolsAndMerge(ActsITkPixelOrthogonalSeedingToolCfg(flags))
-        strip_orthogonal_seeding_tool = result.popToolsAndMerge(ActsITkStripOrthogonalSeedingToolCfg(flags))
+        from ActsConfig.ActsSeedingConfig import ActsPixelOrthogonalSeedingToolCfg, ActsStripOrthogonalSeedingToolCfg
+        pixel_orthogonal_seeding_tool = result.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
+        strip_orthogonal_seeding_tool = result.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
         ActsITkSiSpacePointsSeedMakerOrthogonal = \
-          result.popToolsAndMerge(ActsSiSpacePointsSeedMakerCfg(flags,
-                                                                name="ActsSiSpacePointsSeedMakerOrthogonal",
-                                                                SeedToolPixel=pixel_orthogonal_seeding_tool,
-                                                                SeedToolStrip=strip_orthogonal_seeding_tool))
+          result.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
+                                                                    name="ActsSiSpacePointsSeedMakerOrthogonal",
+                                                                    SeedToolPixel=pixel_orthogonal_seeding_tool,
+                                                                    SeedToolStrip=strip_orthogonal_seeding_tool))
         ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
         MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
 

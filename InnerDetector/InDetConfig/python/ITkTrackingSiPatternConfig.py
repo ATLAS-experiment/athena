@@ -176,7 +176,7 @@ def ITkTrackingSiPatternCfg(flags,
             prefix = "Acts"
             if 'Validate' not in flags.Tracking.ActiveConfig.extension and 'BenchmarkSpot' not in flags.Tracking.ActiveConfig.extension:
                 prefix = flags.Tracking.ActiveConfig.extension
-            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"Resolved{prefix}TrackToAltTrackParticleCnvAlg",
+            acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags, f"{prefix}ResolvedTrackToAltTrackParticleCnvAlg",
                                                         ACTSTracksLocation=f'Resolved{prefix}Tracks',
                                                         TrackParticlesOutKey=f'Resolved{prefix}TrackParticlesAlt'))
 
