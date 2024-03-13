@@ -345,6 +345,12 @@ class TestFlagsSetupDynamic(FlagsSetup):
         # content
         self.assertNotEqual(clonewhash, clonehash)
 
+        # copy back into Z
+        clonez = clonew.cloneAndReplace('Z', 'W')
+        clonez.lock()
+        clonezhash = clonez.athHash()
+        self.assertEqual(clonehash, clonezhash)
+
         # compare first clone to second clone
         cloneflags2 = self.flags.clone()
         cloneflags2.loadAllDynamicFlags()
