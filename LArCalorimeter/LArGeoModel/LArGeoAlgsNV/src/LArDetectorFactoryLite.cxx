@@ -81,9 +81,8 @@ void LArGeo::LArDetectorFactoryLite::create(GeoPhysVol* world)
       throw std::runtime_error(errorMessage);
     }
   }
-
   // Get the list of full phys volumes from SQLite, and record them into DetStore
-  std::map<std::string, GeoIntrusivePtr<GeoFullPhysVol>> mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoIntrusivePtr<GeoFullPhysVol>>("LAr");
+  std::map<std::string, GeoFullPhysVol*> mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("LAr");
   for( auto& [key,pv] : mapFPV) {
     StoredPhysVol *sPhysVol = new StoredPhysVol(pv);
     if(m_detStore->record(sPhysVol,key)!=StatusCode::SUCCESS) {
