@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SourceCompAlg.h"
@@ -131,7 +131,7 @@ std::vector<std::string> SourceCompAlg::getGlobalTags(RDBAccessSvc* rdbAccessSvc
   if(!tagdiff.empty()) {
     log << "The databases contain different sets of supported locked global tags" << std::endl;
     auto leftrightIt = leftright.begin();
-    for(auto tag : tagdiff ) {
+    for(const std::string& tag : tagdiff ) {
       log << *leftrightIt << " " << tag << std::endl;
       ++leftrightIt;
     }
