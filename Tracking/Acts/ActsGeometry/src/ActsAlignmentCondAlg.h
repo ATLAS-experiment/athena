@@ -26,12 +26,14 @@ public:
     bool isReEntrant() const override final { return false; }
 
 private:
-    SG::ReadCondHandleKeyArray<ActsTrk::RawGeomAlignStore> m_alignStoreKeys{
-        this, "AlignmentStores", {}, ""};
+    SG::ReadCondHandleKeyArray<ActsTrk::RawGeomAlignStore> m_alignStoreKeys{this, "AlignmentStores", {}, ""};
 
     SG::WriteCondHandleKey<ActsGeometryContext> m_wchk{this, "ActsAlignmentKey", "ActsAlignment", "cond handle key"};
 
     ServiceHandle<IActsTrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
+    Gaudi::Property<bool> m_loadTrkGeoSvc{this, "LoadTrackingGeoSvc", true, 
+                                          "Toggle whether the tracking geometry svc shall be retrieved"};
 };
 
 #endif

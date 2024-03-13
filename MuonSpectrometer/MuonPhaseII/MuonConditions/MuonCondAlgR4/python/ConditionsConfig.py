@@ -26,23 +26,4 @@ def ActsMuonAlignCondAlgCfg(flags, name="ActsMuonAlignCondAlg", **kwargs):
     result.addCondAlgo(the_alg)
     return result
 
-def ActsGeomContextAlgCfg(flags, name="ActsGeomContextAlg", **kwargs):
-    result = ComponentAccumulator()
-    ### The Acts Muon align cond alg only works with the new Detector manager
-    if not flags.Muon.usePhaseIIGeoSetup: 
-        return result
-    
-    result.merge(ActsMuonAlignCondAlgCfg(flags))
-    
-    inAlignContainers = []
-    if (flags.Muon.enableAlignment or flags.Muon.applyMMPassivation):
-        if flags.Detector.GeometryMDT: inAlignContainers += ["MdtActsAlignContainer"]
-        if flags.Detector.GeometryRPC: inAlignContainers += ["RpcActsAlignContainer"]
-        if flags.Detector.GeometryTGC: inAlignContainers += ["TgcActsAlignContainer"]
-    
-    kwargs.setdefault("AlignKeys", inAlignContainers)
-    the_alg = CompFactory.ActsMuonGeomContextAlg(name, **kwargs)
-    result.addCondAlgo(the_alg)
-    return result
-
     
