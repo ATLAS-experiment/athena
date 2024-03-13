@@ -114,7 +114,7 @@ private:
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainer { this, "TruthParticleContainerName", "TruthParticles", "Truth particles input container name" };
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthElectronContainer { this, "TruthElectronContainerName", "TruthElectrons", "Truth electrons input container name" };
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuonContainer { this, "TruthMuonContainerName", "TruthMuons", "Truth muons input container name" };
-  SG::ReadHandleKey<xAOD::JetContainer> m_truthJetContainer { this, "TruthJetContainerName", "AntiKt4TruthJets", "Truth jets input container name" };
+  SG::ReadHandleKey<xAOD::JetContainer> m_truthJetContainer { this, "TruthJetContainerName", "AntiKt4TruthDressedWZJets", "Truth jets input container name" };
   // output container
   SG::WriteHandleKey<xAOD::TruthParticleContainer> m_truthTauOutputContainer { this, "NewTruthTauContainerName", "TruthTaus", "Truth tau output container name" };
 
