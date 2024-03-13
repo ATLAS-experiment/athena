@@ -41,6 +41,9 @@
 #include "DerivationFrameworkBPhys/BPhysConversionFinder.h"
 #include "DerivationFrameworkBPhys/Cascade3Plus1.h"
 #include "DerivationFrameworkBPhys/BPhysBGammaFinder.h"
+#include "DerivationFrameworkBPhys/PsiPlusPsiSingleVertex.h"
+#include "DerivationFrameworkBPhys/JpsiXPlusDisplaced.h"
+#include "DerivationFrameworkBPhys/JpsiXPlus2V0.h"
 
 using namespace DerivationFramework;
 
@@ -86,3 +89,6 @@ DECLARE_COMPONENT( ReVertex )
 DECLARE_COMPONENT( BPhysConversionFinder )
 DECLARE_COMPONENT( Cascade3Plus1 )
 DECLARE_COMPONENT( BPhysBGammaFinder )
+DECLARE_COMPONENT( PsiPlusPsiSingleVertex )
+DECLARE_COMPONENT( JpsiXPlusDisplaced )
+DECLARE_COMPONENT( JpsiXPlus2V0 )

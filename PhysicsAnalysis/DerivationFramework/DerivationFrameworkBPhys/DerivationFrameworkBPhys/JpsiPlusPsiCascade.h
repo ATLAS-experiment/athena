@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Contact: Xin Chen <xin.chen@cern.ch>
 */
 #ifndef JPSIPLUSPSICASCADE_H
 #define JPSIPLUSPSICASCADE_H
-// Xin Chen <xin.chen@cern.ch>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODTracking/VertexContainer.h"
-#include <vector>
 #include "xAODEventInfo/EventInfo.h"
+#include <vector>
 
 namespace Trk {
     class IVertexFitter;
@@ -32,7 +32,6 @@ namespace DerivationFramework {
 
   class JpsiPlusPsiCascade : virtual public AthAlgTool, public IAugmentationTool
   {
-    typedef ElementLink<xAOD::VertexContainer> VertexLink;
   public:
     static const InterfaceID& interfaceID() { return IID_JpsiPlusPsiCascade;}
     JpsiPlusPsiCascade(const std::string& t, const std::string& n, const IInterface* p);
@@ -42,12 +41,14 @@ namespace DerivationFramework {
     virtual StatusCode addBranches() const override;
 
   private:
-    std::string m_vertexContainerKey;
-    std::string m_vertexPsiContainerKey;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexPsiContainerKey;
     std::vector<std::string> m_vertexJpsiHypoNames;
     std::vector<std::string> m_vertexPsiHypoNames;
-    std::vector<std::string> m_cascadeOutputsKeys;
-    std::string m_VxPrimaryCandidateName;   //!< Name of primary vertex container
+    SG::WriteHandleKeyArray<xAOD::VertexContainer> m_cascadeOutputsKeys;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimaryCandidateName; //!< Name of primary vertex container
+    SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainerName;
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key;
 
     double m_jpsiMassLower;
     double m_jpsiMassUpper;
@@ -78,15 +79,15 @@ namespace DerivationFramework {
     double m_chi2cut_Psi;
     double m_chi2cut_Jpsi;
     double m_chi2cut;
-    unsigned int m_maxPsiCandidates;
-    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
+    unsigned int m_maxCandidates;
+
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
     ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
     ToolHandle < Trk::V0Tools >                      m_V0Tools;
     ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
 
     bool        m_refitPV;
-    std::string m_refPVContainerName;
+    SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName;
     std::string m_hypoName;
     int         m_PV_max;
     int         m_DoVertexType;
