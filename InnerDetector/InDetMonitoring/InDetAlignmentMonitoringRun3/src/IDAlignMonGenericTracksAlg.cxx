@@ -445,13 +445,12 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto eta_m = Monitored::Scalar<float>( "m_eta", trketa );
     fill(genericTrackGroup, eta_m);
 
-    // Lines commented suggested by Makayla to avoid multiple filling
     // pixel hits vs eta
-    //fill(genericTrackGroup, eta_m, npixelhits_per_track_m);    
+    fill(genericTrackGroup, eta_m, npixelhits_per_track_m);    
     // sct hits vs eta
-    //fill(genericTrackGroup, eta_m, nscthits_per_track_m);
+    fill(genericTrackGroup, eta_m, nscthits_per_track_m);
     // trt hits vs eta
-    //fill(genericTrackGroup, eta_m, ntrthits_per_track_m);
+    fill(genericTrackGroup, eta_m, ntrthits_per_track_m);
     
     if (charge>0){
       auto eta_pos_m = Monitored::Scalar<float>( "m_eta_pos", trketa );
@@ -475,6 +474,8 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     fill(genericTrackGroup, d0_m);
     auto d0_bscorr_m = Monitored::Scalar<float>( "m_d0_bscorr", d0bscorr );
     fill(genericTrackGroup, d0_bscorr_m);
+    //d0 vs phi 
+    fill(genericTrackGroup, phi_m, d0_bscorr_m);
 
     float pT = charge*trkpt;
     auto pT_m = Monitored::Scalar<float>( "m_pT", pT );
