@@ -6,7 +6,10 @@
 #define MEASUREMENTCALIBRATOR_H
 
 #include "TrkMeasurementBase/MeasurementBase.h"
+#include "xAODMeasurementBase/MeasurementDefs.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "xAODInDetMeasurement/PixelCluster.h"
+#include "xAODInDetMeasurement/StripCluster.h"
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
@@ -18,6 +21,7 @@
 
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
+#include "ActsToolInterfaces/IOnTrackCalibratorTool.h"
 
 #include "ActsGeometry/TrackingSurfaceHelper.h"
 
@@ -79,87 +83,66 @@ public:
         m_pixelProjector( makePixelProjector() ),
         m_converterTool(&converter_tool) { assert(m_converterTool); }
 
+   template <typename state_t>
+   inline void setProjectorBitSet(xAOD::UncalibMeasType measType,
+				  Acts::SurfaceBounds::BoundsType boundType,
+				  state_t &trackState ) const {
+       switch (measType) {
+       case xAOD::UncalibMeasType::StripClusterType: {
+	   const std::size_t projector_idx  = boundType == Acts::SurfaceBounds::eAnnulus;
+	   trackState.setProjectorBitset(m_stripProjector[projector_idx]);
+	   break;
+       }
+       case xAOD::UncalibMeasType::PixelClusterType: {
+	   trackState.setProjectorBitset(m_pixelProjector);
+	   break;
+       }
+       default:
+	   throw std::domain_error("Can only handle measurement type pixel or strip");
+       }
+   }
+
+   template <size_t Dim, typename pos_t, typename cov_t, typename state_t>
+   inline void setState(xAOD::UncalibMeasType measType,
+			const pos_t& locpos,
+			const cov_t& cov,
+			Acts::SurfaceBounds::BoundsType boundType,
+			state_t &trackState) const {
+       trackState.allocateCalibrated(Dim);
+       setProjectorBitSet(measType, boundType, trackState);
+       trackState.template calibrated<Dim>() = locpos.template cast<Acts::ActsScalar>();
+       trackState.template calibratedCovariance<Dim>() = cov.template cast<Acts::ActsScalar>();
+   }
+
+
    template <class measurement_t, typename trajectory_t>
-   inline void setStateFromMeasurement( const measurement_t &measurement,
-                                        Acts::SurfaceBounds::BoundsType bound_type,
-                                        typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy &trackState ) const {
-      switch (measurement.type()) {
-      case (xAOD::UncalibMeasType::StripClusterType): {
-         trackState.allocateCalibrated(1);
-         const std::size_t projector_idx  = bound_type == Acts::SurfaceBounds::eAnnulus;
-         trackState.setProjectorBitset(m_stripProjector[ projector_idx ] );
-         trackState.template calibrated<1>()[Acts::eBoundLoc0]
-            = measurement.template localPosition<1>()[Trk::locX];
-         trackState.template calibratedCovariance<1>()
-            = measurement.template localCovariance<1>()
-                .template topLeftCorner<1, 1>();
-         break;
-      }
-      case (xAOD::UncalibMeasType::PixelClusterType): {
-         trackState.allocateCalibrated(2);
-         trackState.setProjectorBitset(m_pixelProjector);
-         trackState.template calibrated<2>()[Acts::eBoundLoc0]
-            = measurement.template localPosition<2>()[Trk::locX];
-         trackState.template calibrated<2>()[Acts::eBoundLoc1]
-            = measurement.template localPosition<2>()[Trk::locY];
-
-         trackState.template calibratedCovariance<2>()
-            = measurement.template localCovariance<2>()
-                .template topLeftCorner<2, 2>();
-         break;
-      }
-      default:
+   inline void setStateFromMeasurement(const measurement_t &measurement,
+                                       Acts::SurfaceBounds::BoundsType bound_type,
+                                       typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy &trackState ) const {
+       switch (measurement.type()) {
+       case (xAOD::UncalibMeasType::StripClusterType): {
+	   setState<1>(
+	       measurement.type(),
+	       measurement.template localPosition<1>(),
+	       measurement.template localCovariance<1>().template topLeftCorner<1, 1>(),
+	       bound_type,
+	       trackState);
+	   break;
+       }
+       case (xAOD::UncalibMeasType::PixelClusterType): {
+	   setState<2>(
+	       measurement.type(),
+	       measurement.template localPosition<2>(),
+	       measurement.template localCovariance<2>().template topLeftCorner<2, 2>(),
+	       bound_type,
+	       trackState);
+	   break;
+       }
+       default:
          throw std::domain_error("Can only handle measurement type pixel or strip");
-      };
-   }
-};
-
-class UncalibratedMeasurementCalibrator : public MeasurementCalibratorBase {
-protected:
-public:
-   UncalibratedMeasurementCalibrator(const ActsTrk::IActsToTrkConverterTool &converter_tool,
-                                     const TrackingSurfaceHelper &surface_helper)
-      : MeasurementCalibratorBase(converter_tool),
-        m_surfaceHelper(&surface_helper)
-   { assert( m_surfaceHelper); }
-
-   class MeasurementAdapter {
-   public:
-      MeasurementAdapter(const xAOD::UncalibratedMeasurement &measurement) : m_measurement(&measurement) {}
-      xAOD::UncalibMeasType type() const {
-         return m_measurement->type();
       }
-      template <std::size_t DIM>
-      inline auto localPosition() const {
-         return m_measurement->template localPosition<DIM>().template cast<Acts::ActsScalar>();
-      }
-      template <std::size_t DIM>
-      inline auto localCovariance() const {
-         return m_measurement->template localCovariance<DIM>().template cast<Acts::ActsScalar>();
-      }
-   private:
-      const xAOD::UncalibratedMeasurement *m_measurement;
-   };
-
-
-   template <typename trajectory_t>
-   void calibrate([[maybe_unused]] const Acts::GeometryContext &gctx,
-                   [[maybe_unused]] const Acts::CalibrationContext & cctx,
-                   const Acts::SourceLink& sl,
-                   typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) const {
-      auto sourceLink = sl.template get<ATLASUncalibSourceLink>();
-      trackState.setUncalibratedSourceLink(sl);
-      assert(sourceLink.isValid() && *sourceLink );
-      const xAOD::UncalibratedMeasurement *measurement = *sourceLink;
-      const Acts::Surface &surface = m_surfaceHelper->associatedActsSurface( *measurement );
-
-      this->setStateFromMeasurement<MeasurementAdapter, trajectory_t>(MeasurementAdapter(*measurement),
-                                    surface.bounds().type(),
-                                    trackState);
    }
 
-private:
-   const TrackingSurfaceHelper *m_surfaceHelper;
 };
 
 class TrkMeasurementCalibrator : public MeasurementCalibratorBase {

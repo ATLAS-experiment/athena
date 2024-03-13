@@ -46,6 +46,8 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 
+#include "OnTrackCalibrator.h"
+
 class TrackingSurfaceHelper;
 namespace
 {
