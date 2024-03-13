@@ -351,7 +351,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   numOfParents = partOriVert->nIncomingParticles();
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
   if (info){
     info->mother = mother;
     if (mother) {
@@ -391,7 +391,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
     const xAOD::TruthParticle* MotherParent(nullptr);
     do {
       pPDG = 0;
-      MotherParent = getMother(mother);
+      MotherParent = MC::getMother(mother);
       // to prevent Sherpa loop
       const xAOD::TruthVertex* mother_prdVtx(nullptr);
       const xAOD::TruthVertex* mother_endVtx(nullptr);
@@ -712,7 +712,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   int numOfParents = partOriVert->nIncomingParticles();
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfMuon:: muon  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
   if (info) info->mother = mother;
   if (!mother) {
     return NonDefined;
@@ -736,7 +736,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
       //
       const xAOD::TruthVertex* mother_prdVtx(nullptr);
       const xAOD::TruthVertex* mother_endVtx(nullptr);
-      MotherParent = getMother(mother);
+      MotherParent = MC::getMother(mother);
       // to prevent Sherpa loop
       mother_prdVtx = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
       mother_endVtx = mother->decayVtx();
@@ -997,7 +997,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   int numOfParents = partOriVert->nIncomingParticles();
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfTau:: tau  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
   if (info) {
     info->mother = mother;
     if (mother) {
@@ -1015,7 +1015,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   const xAOD::TruthParticle* MotherParent(nullptr);
 
   if (MC::isW(motherPDG) && mothOriVert != nullptr) {
-    MotherParent = getMother(mother);
+    MotherParent = MC::getMother(mother);
     long pPDG(0);
     if (MotherParent) {//MotherParent checked here...
       pPDG = MotherParent->pdgId();
@@ -1228,7 +1228,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   int numOfParents = partOriVert->nIncomingParticles();
   if (partOriVert->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfPhoton:: photon  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
   if (info) {
         info->mother = mother;
         if (mother) {
@@ -1528,7 +1528,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   numOfParents = partOriVert->nIncomingParticles();
   if (numOfParents > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino  has more than one mother ");
 
-  const xAOD::TruthParticle* mother = getMother(thePriPart);
+  const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
   if (info) info->mother = mother;
   if (!mother) {
     return NonDefined;
@@ -1554,7 +1554,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     const xAOD::TruthParticle* MotherParent(nullptr);
     do {
       pPDG = 0;
-      MotherParent = getMother(mother);
+      MotherParent = MC::getMother(mother);
       // to prevent Sherpa loop
       const xAOD::TruthVertex* mother_prdVtx(nullptr);
       const xAOD::TruthVertex* mother_endVtx(nullptr);
@@ -1843,43 +1843,6 @@ ParticleType MCTruthClassifier::defTypeOfHadron(int pdg) {
   if (MC::isLightMeson(pdg)) return LightMesonPart;
   return Unknown;
 }
-
-const xAOD::TruthParticle* MCTruthClassifier::getMother(const xAOD::TruthParticle* thePart) const {
-  ATH_MSG_DEBUG("executing getMother");
-
-  const xAOD::TruthVertex* partOriVert = thePart->hasProdVtx() ? thePart->prodVtx() : nullptr;
-
-  long partPDG = thePart->pdgId();
-  long MotherPDG(0);
-
-  const xAOD::TruthVertex* MothOriVert(nullptr);
-  const xAOD::TruthParticle* theMoth(nullptr);
-
-  if (!partOriVert) return theMoth;
-
-  int itr = 0;
-  do {
-    if (itr != 0) partOriVert = MothOriVert;
-    for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-      theMoth = partOriVert->incomingParticle(ipIn);
-      if (!theMoth) continue;
-      MotherPDG = theMoth->pdgId();
-      MothOriVert = theMoth->hasProdVtx() ? theMoth->prodVtx() : nullptr;
-      if (MotherPDG == partPDG) break;
-    }
-    itr++;
-    if (itr > 100) {
-      ATH_MSG_WARNING("getMother:: infinite while");
-      break;
-    }
-  } while (MothOriVert != nullptr && MotherPDG == partPDG && !HepMC::is_simulation_particle(thePart) &&
-           MothOriVert != partOriVert);
-
-  ATH_MSG_DEBUG("succeded getMother");
-  return theMoth;
-}
-
-
 
 ParticleOutCome MCTruthClassifier::defOutComeOfElectron(const xAOD::TruthParticle* thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
