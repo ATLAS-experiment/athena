@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
+#include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <GaudiKernel/SystemOfUnits.h>
+
 #include <optional>
 
 using namespace ActsTrk;
@@ -21,8 +22,8 @@ std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::MdtReadoutElement::
          << " inner radius: " << pars.tubeInnerRad 
          << " endplug: "<<pars.endPlugLength
          << " deadlength: "<<pars.deadLength<< std::endl;
-    for (const MdtTubeLayer& layer : pars.tubeLayers) {
-         ostr << " //   **** "<< Amg::toString(layer.tubeTransform(0).translation(), 2)<<std::endl;
+    for (const MdtTubeLayerPtr& layer : pars.tubeLayers) {
+         ostr << " //   **** "<< Amg::toString(layer->tubeTransform(0).translation(), 2)<<std::endl;
     }
     return ostr;
 }
@@ -146,7 +147,7 @@ Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
                                             const IdentifierHash& hash) const {
    const unsigned int layer = layerNumber(hash);
    const unsigned int tube  = tubeNumber(hash);
-   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+   const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
    const double length = zeroT.tubeHalfLength(tube) * m_pars.readoutSide;
    return localToGlobalTrans(ctx) * zeroT.tubeTransform(tube)*(length * Amg::Vector3D::UnitZ());
 }
@@ -154,25 +155,25 @@ Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsGeometryContext& ctx,
                                              const IdentifierHash& hash) const {
    const unsigned int layer = layerNumber(hash);
    const unsigned int tube  = tubeNumber(hash);
-   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+   const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
    const double length = - zeroT.tubeHalfLength(tube) * m_pars.readoutSide;
    return localToGlobalTrans(ctx) * zeroT.tubeTransform(tube)*(length * Amg::Vector3D::UnitZ());
 }
 Amg::Transform3D MdtReadoutElement::toChamberLayer(const IdentifierHash& hash) const {   
    const unsigned int layer = layerNumber(hash);
-   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+   const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
    return zeroT.layerTransform();
 }
 Amg::Transform3D MdtReadoutElement::toTubeFrame(const IdentifierHash& hash) const {
    const unsigned int layer = layerNumber(hash);
    const unsigned int tube = tubeNumber(hash);
-   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+   const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
    return zeroT.tubeTransform(tube);  
 }
 double MdtReadoutElement::activeTubeLength(const IdentifierHash& hash) const {
    const unsigned int layer = layerNumber(hash);
    const unsigned int tube = tubeNumber(hash);
-   const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]}; 
+   const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]}; 
    return 2. * zeroT.tubeHalfLength(tube);
 }
 double MdtReadoutElement::tubeLength(const IdentifierHash& hash) const {
@@ -188,7 +189,7 @@ double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
     /// The position of the readout chip is at the negative tube side
     const unsigned int layer = layerNumber(measHash);
     const unsigned int tube = tubeNumber(measHash);
-    const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
+    const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
     const Amg::Vector3D readOutPos = m_pars.readoutSide * 
                                      zeroT.tubeHalfLength(tube) *
                                      Amg::Vector3D::UnitZ();

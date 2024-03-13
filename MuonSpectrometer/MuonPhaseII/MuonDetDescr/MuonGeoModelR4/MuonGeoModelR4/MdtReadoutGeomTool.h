@@ -41,12 +41,14 @@ class MdtReadoutGeomTool : public AthAlgTool,
         /// List of chambers that have the readout chip at 
         /// negative Z
         std::set<Identifier> readoutOnLeftSide{};
+
+        MdtTubeLayerSet tubeLayers{};
     };
 
     /// Retrieves the auxillary tables from the database
     StatusCode readParameterBook(FactoryCache& facCache) const;
     /// Loads the chamber dimensions from GeoModel
-    StatusCode loadDimensions(const FactoryCache& facCache, MdtReadoutElement::defineArgs& args) const;
+    StatusCode loadDimensions(FactoryCache& facCache, MdtReadoutElement::defineArgs& args) const;
 
 };
 

@@ -134,7 +134,7 @@ StatusCode MuonReadoutGeomCnvAlg::buildMdt(const ActsGeometryContext& gctx,
         /// newElement->m_cutoutShift;
 
         /// Determine the tube length's 
-        const MuonGMR4::MdtTubeLayer& tubeLay{pars.tubeLayers[0]};
+        const MuonGMR4::MdtTubeLayer& tubeLay{*pars.tubeLayers[0]};
         unsigned int step{0};
         double lastLength{2.*tubeLay.tubeHalfLength(1)}; 
         for (unsigned tube = 0; tube < copyMe->numTubesInLay(); ++tube) {

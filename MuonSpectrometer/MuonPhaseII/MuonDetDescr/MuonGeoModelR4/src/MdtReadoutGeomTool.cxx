@@ -32,7 +32,7 @@ MdtReadoutGeomTool::MdtReadoutGeomTool(const std::string& type,
     declareInterface<IMuonReadoutGeomTool>(this);
 }
 
-StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache, 
+StatusCode MdtReadoutGeomTool::loadDimensions(FactoryCache& facCache, 
                                               MdtReadoutElement::defineArgs& define) const {
     
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
@@ -55,19 +55,27 @@ StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache,
         ATH_MSG_FATAL("Unknown shape type "<<shape->type());
         return StatusCode::FAILURE;
     }
-    /// The particular tubes and their lengths can be directly extracted from GeoModel
-    /// Loop over the child nodes of the multi layer to find the nodes containing 
-    /// all the tubes per layer  
-    
-    
-    std::vector<physVolWithTrans> tubeLayers = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "TubeLayerLog");
-
-    for (const physVolWithTrans & layerVol : tubeLayers) {
+    /// Loop over the child nodes of the full mdt tube layer volume to pick the ones representing the 
+    /// tubeLayer -- their logical volume is callded TubeLayerLog. 
+    /// The node right before the child volume is the associated transform node
+    for (unsigned int ch = 1; ch < define.physVol->getNChildNodes(); ++ch) {
+        const GeoGraphNode* childNode = (*define.physVol->getChildNode(ch));
+        const GeoVPhysVol* childVol = dynamic_cast<const GeoVPhysVol*>(childNode);
+        if (!childVol  || childVol->getLogVol()->getName() != "TubeLayerLog") {
+            continue;
+        }
+        const GeoTransform* trfNode = dynamic_cast<const GeoTransform*>(*define.physVol->getChildNode(ch-1));
+        if (!trfNode) {
+            ATH_MSG_FATAL("Expect a GeoTransform node right before the tubelayer node");
+            return StatusCode::FAILURE;
+        }
         ATH_MSG_VERBOSE("Add new tube layer "<<m_idHelperSvc->toStringDetEl(define.detElId)<<
-                       std::endl<<std::endl<<m_geoUtilTool->dumpVolume(layerVol.physVol));
-        define.tubeLayers.emplace_back(layerVol.physVol, layerVol.transform);
+                       std::endl<<std::endl<<m_geoUtilTool->dumpVolume(childVol));
 
-        const MdtTubeLayer& lay{define.tubeLayers.back()};
+        MdtTubeLayerPtr newLay = std::make_unique<MdtTubeLayer>(childVol, trfNode);
+        define.tubeLayers.emplace_back(*facCache.tubeLayers.insert(newLay).first);
+
+        const MdtTubeLayer& lay{*define.tubeLayers.back()};
         /// Next check all tubes whether they're made up out of air or not. If yes, then there's no tube at this place 
         /// and add the corresponding has hto the list.
         bool chEndPlug{false};
@@ -84,7 +92,7 @@ StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache,
                     /// Either all tubes have an endplug or none
                     continue;
                 }
-                const GeoShape* plugShape = m_geoUtilTool->extractShape(endPlugs[0].physVol);
+                const GeoShape* plugShape = m_geoUtilTool->extractShape(endPlugs[0].volume);
                 if (plugShape->typeID() != GeoTube::getClassTypeID()){
                     ATH_MSG_FATAL("The shape "<<m_geoUtilTool->dumpShape(plugShape)<<" is not a tube");
                     return StatusCode::FAILURE;

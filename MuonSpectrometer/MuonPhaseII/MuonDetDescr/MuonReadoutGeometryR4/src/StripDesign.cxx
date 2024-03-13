@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MuonReadoutGeometryR4/StripDesign.h>
+#include <GeoModelHelpers/TransformSorter.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <climits>
 namespace {
@@ -31,14 +32,9 @@ namespace MuonGMR4{
         ORDER_PROP(longHalfHeight());
         ORDER_PROP(shortHalfHeight());
         ORDER_PROP(stereoAngle());
-        {
-            const Amg::Vector2D dP = m_firstStripPos - other.m_firstStripPos;
-            if (std::hypot(dP.x(), dP.y()) > tolerance) {
-                if (std::abs(dP.x()) > tolerance) return dP.x()< 0.;
-                return dP.y() < 0.;
-            }
-        }
-        return isFlipped() < other.isFlipped();
+        ORDER_PROP(isFlipped());
+        static const GeoTrf::TransformSorter trfSorter{};
+        return trfSorter(m_firstStripPos, other.m_firstStripPos);
     }
     std::ostream& operator<<(std::ostream& ostr, const StripDesign& design) {
         design.print(ostr);

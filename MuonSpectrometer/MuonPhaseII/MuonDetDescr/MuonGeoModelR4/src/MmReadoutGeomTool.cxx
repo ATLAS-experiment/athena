@@ -105,7 +105,7 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
         //Add ATH_MSG_INFO("**************************************"); before the gasGap loop.
         ATH_MSG_DEBUG("quadruplet  " << define.chambDesign.substr(6,7) << "  stereoAngle : " << paramBook.stereoAngle.at(gap) << " totalStrips " << paramBook.totalActiveStrips.at(gap)  <<  "   GasGAP POS X : " << posGapI.x() );
 
-        const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.physVol);
+        const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.volume);
         if (gapShape->typeID() != GeoTrd::getClassTypeID()) {
             ATH_MSG_FATAL("Failed to extract a geo shape");
             return StatusCode::FAILURE;

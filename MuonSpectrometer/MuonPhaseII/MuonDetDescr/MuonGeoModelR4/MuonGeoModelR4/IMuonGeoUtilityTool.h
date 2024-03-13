@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELR4_IMUONGEOUTILITYTOOL_H
 #define MUONGEOMODELR4_IMUONGEOUTILITYTOOL_H
@@ -13,6 +13,7 @@
 #include <GeoModelKernel/GeoShape.h>
 #include <GeoModelKernel/GeoSimplePolygonBrep.h>
 #include <GeoModelKernel/GeoAlignableTransform.h>
+#include <GeoModelHelpers/getChildNodesWithTrf.h>
 #include <GaudiKernel/IAlgTool.h>
 
 class GeoShapeUnion;
@@ -38,22 +39,12 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
 
         /// Helper struct to cache a PhysVolume pointer together with the transformation to go from the volume to
         /// the given parent node in the tree
-        struct physVolWithTrans{
-            Amg::Transform3D transform{Amg::Transform3D::Identity()};
-            PVConstLink physVol{nullptr};
-        };
+        using physVolWithTrans = GeoChildNodeWithTrf;
         /// Searches through all child volumes and collects the nodes where the logical volumes have the requested name
         /// together with the transformations to go from the node to the parent physical volume
         virtual std::vector<physVolWithTrans> findAllLeafNodesByName(const PVConstLink& physVol, const std::string& volumeName) const = 0;
-
-        
-        /// @brief Helper struct to cache a volume with its ShapeShift transformation
-        struct geoShapeWithShift {
-            Amg::Transform3D transform{Amg::Transform3D::Identity()};
-            const GeoShape* shape{nullptr};
-        };
-        /// Splits a union into its building blocks. If one of the objects is an Union, then this is split again
-        virtual std::vector<geoShapeWithShift> getComponents(const GeoShapeUnion* unionShape) const = 0;
+        /// Splits a boolean shape into its building blocks
+        virtual std::vector<const GeoShape*> getComponents(const GeoShape* booleanShape) const = 0;
 
         ///     
         virtual std::string dumpShape(const GeoShape* inShape) const = 0;
