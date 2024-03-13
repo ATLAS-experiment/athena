@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -45,11 +45,10 @@ CBNode::CBNode(const SG::DataProxy* proxy, const std::string& name,
 }
 
 CBNode::CBNode(BFCN* fcn, const CallBackID& cb, CBNode* parent): 
+  m_name (cb.name()),
   m_proxy(0), m_fcn(fcn), m_cbid(cb), m_trig(false), m_flag(false) {
   m_serial = ++s_serial;
   
-  m_name = cb.name();
-
   if (parent != 0) {
     m_level = parent->level() + 1;
     addParent( parent );
