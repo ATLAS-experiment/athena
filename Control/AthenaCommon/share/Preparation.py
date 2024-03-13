@@ -109,40 +109,12 @@ del sys.modules[ 'AthenaCommon.ResourceLimits' ]
 
 ### prettification for interactive use
 if opts.interactive:
-   import atexit, readline
+   import atexit
 
  # finalize on exit (^D)
    atexit.register( theApp.exit )
 
- # history support
-   # The python readline module as of 2.7 has a bug:
-   # errno = write_history(s);
-   # if (!errno && _history_length >= 0)
-   #     history_truncate_file(s, _history_length);
-   # if (errno)
-   #     return PyErr_SetFromErrno(PyExc_IOError);
-   #
-   # History file truncation is controlled by _history_length, which is
-   # set by set_history_length; athena usually sets it to 1024.
-   # If this has been set then history_truncate_file is called.
-   # If the history file has more lines than this setting, then the
-   # file will be truncated.  This internally calls readlink()
-   # on the history file.  In the usual case that this isn't
-   # a symlink, this fails and sets errno to EINVAL.  readline handles
-   # this properly and returns successfully.  The readline module,
-   # however, sees at this point that errno is set and returns an
-   # error to python.  The upshot is that we get an annoying error
-   # on exit.  Try to suppress this by handling the exception here.
-   def write_history_file (f):
-      try:
-         import readline
-         readline.write_history_file (f)
-      except IOError:
-         pass
-   atexit.register( write_history_file, fhistory )
-   del readline, atexit
-
-del fhistory
+   del atexit
 
 ### pre-import some general job-flags so they can be used in CLI
 
