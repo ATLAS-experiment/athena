@@ -38,7 +38,7 @@ class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthA
       
     std::vector<physVolWithTrans> findAllLeafNodesByName(const PVConstLink& physVol, const std::string& volumeName) const override final;
 
-    std::vector<geoShapeWithShift> getComponents(const GeoShapeUnion* unionShape) const override final;
+    std::vector<const GeoShape*> getComponents(const GeoShape* booleanShape) const override final;
     /// Dumps the shape to string
     std::string dumpShape(const GeoShape* inShape) const override final;
 

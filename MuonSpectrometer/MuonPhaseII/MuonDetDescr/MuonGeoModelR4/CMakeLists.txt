@@ -8,7 +8,7 @@
 atlas_subdir( MuonGeoModelR4 )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead )
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead GeoModelHelpers )
 
 # Component(s) in the package:
 atlas_add_library( MuonGeoModelR4Lib

@@ -15,48 +15,20 @@
 #include <GeoModelKernel/GeoShapeSubtraction.h>
 #include <GeoModelKernel/GeoShapeShift.h>
 
-
 #include <GeoModelKernel/GeoTransform.h>
 
-#include <GeoModelKernel/GeoSerialTransformer.h>
 #include <GeoModelKernel/GeoVolumeCursor.h>
-#include <EventPrimitives/EventPrimitivesToStringConverter.h>
+
+#include <GeoModelHelpers/GeoShapeUtils.h>
+#include <GeoModelHelpers/TransformToStringConverter.h>
+
 #include <set>
 #include <sstream>
 #include <string>
 
-namespace{
-  GeoIntrusivePtr<const GeoShape> compressShift(const GeoShape* shift) {    
-    if (shift->typeID() != GeoShapeShift::getClassTypeID()) return GeoIntrusivePtr<const GeoShape>{shift};
-    const GeoShapeShift* shapeShift = dynamic_cast<const GeoShapeShift*>(shift);
-    if (shapeShift->getOp()->typeID() != GeoShapeShift::getClassTypeID()) return GeoIntrusivePtr<const GeoShape>{shift};
-    GeoIntrusivePtr<const GeoShape> subShape{compressShift(shapeShift->getOp())};
-    const GeoShapeShift* subShift = dynamic_cast<const GeoShapeShift*>(subShape.get());
-    return GeoIntrusivePtr<const GeoShape>{new GeoShapeShift(subShift->getOp(), subShift->getX() * shapeShift->getX())};
-  }
-  std::pair<const GeoShape* , const GeoShape*> getOps(const GeoShape* composed) {
-    if (composed->typeID() == GeoShapeUnion::getClassTypeID()) {
-        const GeoShapeUnion* unionShape = dynamic_cast<const GeoShapeUnion*>(composed);
-        return std::make_pair(unionShape->getOpA(), unionShape->getOpB());
-    } else if (composed->typeID() == GeoShapeSubtraction::getClassTypeID()) {
-        const GeoShapeSubtraction* shapeSubtract = dynamic_cast<const GeoShapeSubtraction*>(composed);
-        return std::make_pair(shapeSubtract->getOpA(), shapeSubtract->getOpB());
-    } else if (composed->typeID() == GeoShapeIntersection::getClassTypeID()) {
-        const GeoShapeIntersection* shapeIntersect = dynamic_cast<const GeoShapeIntersection*>(composed);
-        return std::make_pair(shapeIntersect->getOpA(), shapeIntersect->getOpB());
-    } else if (composed->typeID() == GeoShapeShift::getClassTypeID()) {
-        const GeoShapeShift* shapeShift = dynamic_cast<const GeoShapeShift*>(composed);
-        return std::make_pair(shapeShift->getOp(), nullptr);
-    }
-    return std::make_pair(nullptr, nullptr);
-}
-
-}
-
 
 using namespace ActsTrk;
 namespace MuonGMR4{
-using geoShapeWithShift = IMuonGeoUtilityTool::geoShapeWithShift;
 
 MuonGeoUtilityTool::~MuonGeoUtilityTool() = default;
 MuonGeoUtilityTool::MuonGeoUtilityTool(const std::string &type, const std::string &name,
@@ -74,16 +46,17 @@ const GeoShape* MuonGeoUtilityTool::extractShape(const PVConstLink& physVol) con
     return extractShape(logVol->getShape());
 }
 const GeoShape* MuonGeoUtilityTool::extractShape(const GeoShape* inShape) const {
+   
     if (!inShape) {
       ATH_MSG_INFO(__FILE__<<":"<<__LINE__<<" "<<__func__<<" nullptr given ");
       return nullptr;
-    }
+    }    
     if (inShape->typeID() == GeoShapeShift::getClassTypeID()) {
-        const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(inShape);
+        const GeoShapeShift* shift =  dynamic_pointer_cast<const GeoShapeShift>(compressShift(inShape));
         ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<
-                        "Shape is a shift by "<<Amg::toString(shift->getX())
+                        "Shape is a shift by "<<GeoTrf::toString(shift->getX())
                         << ". Continue navigation "<<shift);
-            return extractShape(shift->getOp());
+        return extractShape(shift->getOp());
     }
     if (inShape->typeID() == GeoShapeSubtraction::getClassTypeID()){
       ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<
@@ -106,49 +79,17 @@ Amg::Transform3D MuonGeoUtilityTool::extractShifts(const GeoShape* inShape) cons
   if (!inShape) {
       ATH_MSG_ERROR(__FILE__<<":"<<__LINE__<<" "<<__func__<<" nullptr given ");
       return Amg::Transform3D::Identity();
-  }
+  }  
   Amg::Transform3D sumTrans{Amg::Transform3D::Identity()};
   if (inShape->typeID() == GeoShapeShift::getClassTypeID()) {
-        const GeoShapeShift* shift = static_cast<const GeoShapeShift*>(inShape);
+        const GeoShapeShift* shift = dynamic_pointer_cast<const GeoShapeShift>(compressShift(inShape));
         ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Shape is a shift . Continue navigation "<<shift);
-        sumTrans = extractShifts(shift->getOp()) * shift->getX();
+        sumTrans = shift->getX();
     }
-    ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Extacted transformation "<<Amg::toString(sumTrans));
+    ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Extacted transformation "<<GeoTrf::toString(sumTrans));
     return sumTrans;
 }
-std::string MuonGeoUtilityTool::dumpShape(const GeoShape* shape) const {
-  std::stringstream sstr{};
-  if (shape->typeID() == GeoTrd::getClassTypeID()){
-      const GeoTrd* trd = static_cast<const GeoTrd*>(shape);
-      sstr<<"Trapezoidal geometry shape with width: "<<trd->getXHalfLength1()
-          <<", height: "<<trd->getXHalfLength2()<<" -- short/long length: "
-          <<trd->getYHalfLength1()<<"/" <<trd->getYHalfLength2()<<", chamber width: "<<trd->getZHalfLength();
-  } else if (shape->typeID() == GeoBox::getClassTypeID()){
-      const GeoBox* box = static_cast<const GeoBox*>(shape);
-      const Amg::Vector3D span{box->getXHalfLength(),
-                               box->getYHalfLength(),
-                               box->getZHalfLength()};
-      sstr<<"Box geometry shape: Half lengths "<<Amg::toString(span,1);
-  } else if (shape->typeID() == GeoTube::getClassTypeID()){
-    const GeoTube* tube = static_cast<const GeoTube*>(shape);
-    sstr<<"Tube with minimal and maximal radii of "<<tube->getRMin()<<", "<<tube->getRMax()<<" and length "<<tube->getZHalfLength();
-  } else if (shape->typeID() == GeoShapeUnion::getClassTypeID()){
-      const GeoShapeUnion* unionShape = static_cast<const GeoShapeUnion*>(shape);
-      std::vector<geoShapeWithShift> constiuents = getComponents(unionShape);
-      sstr<<"Union of  <<<<";
-      for (const geoShapeWithShift& childShape: constiuents) {
-          sstr<<dumpShape(childShape.shape);
-          if (!Amg::isIdentity(childShape.transform)) {
-             sstr<<" - shifted by "<<Amg::toString(childShape.transform);
-          }
-          sstr<<", ";
-      }
-      sstr<<" >>>>";
-  } else {
-      sstr<<"Cake tastes good "<<shape->type();
-  }
-  return sstr.str();
-}
+std::string MuonGeoUtilityTool::dumpShape(const GeoShape* shape) const { return printGeoShape(shape); }
 std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol) const {
    return dumpVolume(physVol, "");
 }
@@ -169,28 +110,24 @@ std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol, const std
   if (physVol->isShared() || !physVol->getParent()){
     sstr<<"shared volume, ";
   } else {
-    const GeoVPhysVol* pv = &*physVol; // avoid clang warning
+    const GeoVPhysVol* pv = physVol;
     if (typeid(*pv) == typeid(GeoFullPhysVol)){
       const Amg::Transform3D absTrans = static_cast<const GeoFullPhysVol&>(*physVol).getAbsoluteTransform();
-      sstr<<"absolute pos: "<<Amg::toString(absTrans) << ", ";
+      sstr<<"absolute pos: "<<GeoTrf::toString(absTrans,true) << ", ";
     } else{
-        sstr<<"relative pos: "<<Amg::toString(physVol->getX())<<", ";  
+        sstr<<"relative pos: "<<GeoTrf::toString(physVol->getX(), true)<<", ";  
     }
   }
   sstr<<dumpShape(shape)<<", ";
   const Amg::Transform3D shift = extractShifts(physVol);
   if (!Amg::isIdentity(shift)) {
-    sstr<<" shape shifted by "<<Amg::toString(shift);
+    sstr<<" shape shifted by "<<GeoTrf::toString(shift, true);
   } 
-  sstr<<"number of children "<<physVol->getNChildVols()<<", ";
-  sstr<<std::endl;
-  GeoVolumeCursor aV(physVol);
-  unsigned int child{1};
-  while (!aV.atEnd()) {
-    sstr<<childDelim<<child<<": "<<Amg::toString(aV.getTransform())<<", "<< dumpVolume(aV.getVolume(),
-                                                                                childDelim + "    ");
-    ++child;
-    aV.next();
+  sstr<<"number of children "<<physVol->getNChildVols()<<", "<<std::endl;
+  std::vector<GeoChildNodeWithTrf> children = getChildrenWithRef(physVol, false);
+  for (unsigned int child = 0; child < children.size(); ++child) {
+    sstr<<childDelim<<(child+1)<<": "<<GeoTrf::toString(children[child].transform, true)
+        <<", "<< dumpVolume(children[child].volume, childDelim + "    ");
   }
   return sstr.str();
 }
@@ -213,56 +150,29 @@ const GeoAlignableTransform* MuonGeoUtilityTool::findAlignableTransform(const PV
 }
 
 std::vector<MuonGeoUtilityTool::physVolWithTrans> MuonGeoUtilityTool::findAllLeafNodesByName(const PVConstLink& physVol, const std::string& volumeName) const {
+  const std::vector<physVolWithTrans> children = getChildrenWithRef(physVol, false);
   std::vector<physVolWithTrans> foundVols{};
-  GeoVolumeCursor aV(physVol);
-   while (!aV.atEnd()) {    
-    PVConstLink childVol = aV.getVolume();
-    const Amg::Transform3D childTrans{aV.getTransform()};
+  for (const physVolWithTrans& child : children) {    
     /// The logical volume has precisely the name for what we're searching for
-    
-    if (childVol->getLogVol()->getName() == volumeName ||
-        aV.getName() == volumeName) {
-        physVolWithTrans foundNode{};
-        foundNode.physVol = childVol;
-        foundNode.transform = childTrans;
-        foundVols.push_back(std::move(foundNode));
+    if (child.volume->getLogVol()->getName() == volumeName || child.nodeName == volumeName) {
+        foundVols.push_back(child);
     }
     /// There are no grand children of this volume. We're at a leaf node
-    if (!childVol->getNChildVols()) {
-      aV.next();
+    if (!child.volume->getNChildVols()) {
       continue;
-    }
-    
-    std::vector<physVolWithTrans> grandChildren = findAllLeafNodesByName(childVol, volumeName);
+    }    
+    std::vector<physVolWithTrans> grandChildren = findAllLeafNodesByName(child.volume, volumeName);
     std::transform(std::make_move_iterator(grandChildren.begin()),
-                   std::make_move_iterator(grandChildren.end()), std::back_inserter(foundVols),[&childTrans](physVolWithTrans&& vol){
-                      vol.transform = childTrans * vol.transform;
+                   std::make_move_iterator(grandChildren.end()), std::back_inserter(foundVols),
+                   [&child](physVolWithTrans&& vol){
+                      vol.transform = child.transform * vol.transform;
                       return vol;
                   });
-    
-    aV.next();
   }
   return foundVols;
 }
-std::vector<geoShapeWithShift> MuonGeoUtilityTool::getComponents(const GeoShapeUnion* unionShape) const {
-   std::vector<geoShapeWithShift> shapes{};
-   
-   auto fill_shape = [&shapes, this](const GeoShape* shape) {
-        if (shape->typeID() == GeoShapeUnion::getClassTypeID()) {
-           std::vector<geoShapeWithShift> childShapes = getComponents(static_cast<const GeoShapeUnion*>(shape));
-           shapes.insert(shapes.end(), std::make_move_iterator(childShapes.begin()),
-                                       std::make_move_iterator(childShapes.end()));
-        } else {
-          geoShapeWithShift compound{};
-          compound.shape = extractShape(shape);
-          compound.transform = extractShifts(shape);
-          shapes.push_back(std::move(compound));
-        }
-   };
-   fill_shape(unionShape->getOpA());
-   fill_shape(unionShape->getOpB());
- 
-   return shapes;
+std::vector<const GeoShape*> MuonGeoUtilityTool::getComponents(const GeoShape* booleanShape) const {
+   return getBooleanComponents(booleanShape);
 }
 
 std::vector<Amg::Vector2D> MuonGeoUtilityTool::polygonEdges(const GeoSimplePolygonBrep& polygon) const {
@@ -270,73 +180,14 @@ std::vector<Amg::Vector2D> MuonGeoUtilityTool::polygonEdges(const GeoSimplePolyg
   polygonEdges.reserve(polygon.getNVertices());
   for (unsigned int i = 0; i < polygon.getNVertices(); ++i) {
       polygonEdges.emplace_back(polygon.getXVertex(i), polygon.getYVertex(i));
-      ATH_MSG_VERBOSE("Polygon vertext point  " << i << ": "<< Amg::toString(polygonEdges.back(),2));
+      ATH_MSG_VERBOSE("Polygon vertext point  " << i << ": "<< GeoTrf::toString(polygonEdges.back(), 2));
     }
   return polygonEdges;
 }
 
 std::vector<Amg::Vector3D> MuonGeoUtilityTool::shapeEdges(const GeoShape* shape,
                                                           const Amg::Transform3D& refTrf) const {
-
-    constexpr double boundary = 0.;
-    std::vector<Amg::Vector3D> edgePoints{};
-    std::pair<const GeoShape*, const GeoShape*> ops = getOps(shape);
-    if (shape->typeID() == GeoShapeUnion::getClassTypeID()){
-        edgePoints = shapeEdges(ops.first, refTrf);
-        std::vector<Amg::Vector3D> edgePoints2{shapeEdges(ops.second, refTrf)};
-        edgePoints.insert(edgePoints.end(),
-                          std::make_move_iterator(edgePoints2.begin()),
-                          std::make_move_iterator(edgePoints2.end()));
-    } else if (shape->typeID() == GeoShapeSubtraction::getClassTypeID()) {
-        return shapeEdges(ops.first, refTrf);
-    } else if (shape->typeID() == GeoBox::getClassTypeID()) {
-        edgePoints.reserve(6);
-        const GeoBox* box = static_cast<const GeoBox*>(shape);
-        for (double sX :{-1., 1.}) {
-            for (double sY :{-1., 1.}) {
-                for (double sZ: {-1., 1.}) {
-                    edgePoints.emplace_back(refTrf * Amg::Vector3D{sX* (box->getXHalfLength() - boundary),
-                                                                   sY* (box->getYHalfLength() - boundary),
-                                                                   sZ* (box->getZHalfLength() - boundary)});
-                }
-            }
-        }
-    } else if (shape->typeID() == GeoShapeShift::getClassTypeID()) {
-        GeoIntrusivePtr<const GeoShape> shift = compressShift(shape);
-        const GeoShapeShift* shiftPtr = static_cast<const GeoShapeShift*>(shift.get());
-        std::vector<Amg::Vector3D> shiftedEdges = shapeEdges(ops.first, shiftPtr->getX());
-        std::transform(shiftedEdges.begin(), shiftedEdges.end(), std::back_inserter(edgePoints),
-                       [&refTrf](const Amg::Vector3D& shift){
-                               return refTrf * shift;
-                       });
-    } else if (shape->typeID() == GeoTrd::getClassTypeID()) {
-        const GeoTrd* trd = static_cast<const GeoTrd*>(shape);
-        edgePoints.reserve(6);
-        for (double sZ : {-1., 1.}){
-            double dX = (sZ < 0 ? trd->getXHalfLength1() : trd->getXHalfLength2()) - boundary;
-            double dY = (sZ < 0 ? trd->getYHalfLength1() : trd->getYHalfLength2()) - boundary;
-            for (double sX: {-1., 1.}) {
-                for (double sY: {-1., 1.}) {
-                    edgePoints.emplace_back(refTrf * Amg::Vector3D{sX* dX, sY* dY,
-                                                                      sZ* (trd->getZHalfLength()- boundary)});
-
-                }
-            }
-            
-        }
-    } else if (shape->typeID() == GeoSimplePolygonBrep::getClassTypeID()) {
-        const GeoSimplePolygonBrep* brep = static_cast<const GeoSimplePolygonBrep*>(shape);
-        edgePoints.reserve(2* brep->getNVertices());
-        std::vector<Amg::Vector2D> planeEdges = polygonEdges(*brep);
-        for (double sZ: {-1., 1.}) {
-            for (const Amg::Vector2D& plane : planeEdges) {
-              edgePoints.emplace_back(refTrf * Amg::Vector3D{plane.x(), plane.y(), sZ * brep->getDZ()});
-            }
-        }
-    } else {
-        ATH_MSG_WARNING("The shape "<<shape->type()<<" is not supported. Please add it to the list");
-    }
-    return edgePoints;
+    return getPolyShapeEdges(shape, refTrf);
 }
 
 

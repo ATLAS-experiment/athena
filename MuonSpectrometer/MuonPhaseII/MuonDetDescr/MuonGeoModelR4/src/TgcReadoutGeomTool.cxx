@@ -83,7 +83,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
                         <<" "<<define.chambDesign<<", gasGap "<<(gasGap+1));
                 return StatusCode::FAILURE;
             }
-            const GeoShape* gapShape = m_geoUtilTool->extractShape(pVolTrans.physVol);
+            const GeoShape* gapShape = m_geoUtilTool->extractShape(pVolTrans.volume);
             if (gapShape->typeID() != GeoTrd::getClassTypeID()) {
                 ATH_MSG_FATAL("Expected shape "<<m_geoUtilTool->dumpShape(gapShape)
                             <<" to be a trapezoid");

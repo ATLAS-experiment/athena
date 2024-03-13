@@ -116,7 +116,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         StripDesignPtr stripDesign = std::make_unique<StripDesign>();
         WireDesignPtr wireGroupDesign = std::make_unique<WireGroupDesign>();
 
-        sTgcShape gapPars = extractParameters(m_geoUtilTool->extractShape(gapVol.physVol));
+        sTgcShape gapPars = extractParameters(m_geoUtilTool->extractShape(gapVol.volume));
 
         if (true || !gapPars.yCutOut) {
             //StripDesign

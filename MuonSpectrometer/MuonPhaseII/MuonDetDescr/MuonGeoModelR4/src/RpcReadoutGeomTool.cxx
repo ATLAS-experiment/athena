@@ -155,7 +155,7 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     const wRPCTable& paramBook{parBookItr->second};
 
     for (gapVolume& gapVol : allGapsWithIdx) {
-        const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.physVol);
+        const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.volume);
         if (gapShape->typeID() != GeoBox::getClassTypeID()) {
             ATH_MSG_FATAL("Failed to extract a geo shape");
             return StatusCode::FAILURE;

@@ -11,7 +11,7 @@ atlas_subdir( MuonReadoutGeometryR4 )
 set( extra_libs )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelHelpers )
 
 atlas_add_library( MuonReadoutGeometryR4
                    src/*.cxx

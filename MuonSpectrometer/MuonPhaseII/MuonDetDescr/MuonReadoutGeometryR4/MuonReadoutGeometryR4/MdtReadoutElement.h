@@ -22,7 +22,7 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// The Size of the vector reflects the number of tube layers in the
         /// multi layer. The number of tubes of the readout element is taken from
         // the number of tubes of the first layer
-        std::vector<MdtTubeLayer> tubeLayers{};
+        std::vector<MdtTubeLayerPtr> tubeLayers{};
         
         /// List of tube places without tubes
         std::set<IdentifierHash> removedTubes{};

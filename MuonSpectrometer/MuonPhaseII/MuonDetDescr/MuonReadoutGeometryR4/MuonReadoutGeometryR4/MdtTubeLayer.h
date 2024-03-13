@@ -6,8 +6,21 @@
 
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GeoModelKernel/GeoVPhysVol.h>
+#include <GeoModelKernel/GeoTransform.h>
+#include <GeoModelUtilities/TransientConstSharedPtr.h>
 
+#include <set>
 namespace MuonGMR4{
+    /// Forward declaration of the MdtTubeLayer
+    class MdtTubeLayer;
+    using MdtTubeLayerPtr = GeoModel::TransientConstSharedPtr<MdtTubeLayer>;
+    /// Helper struct to sort equivalent MdtTubeLayers into a std::set
+    struct  MdtTubeLayerSorter{
+        bool operator()(const MdtTubeLayer& a, const MdtTubeLayer& b) const;
+        bool operator()(const MdtTubeLayerPtr&a, const MdtTubeLayerPtr& b) const;
+    };
+    using MdtTubeLayerSet = std::set<MdtTubeLayerPtr, MdtTubeLayerSorter>;
+
     /**
      * Helper struct to retrieve the tube lengths and the tube centers directly from the GeoModel tree
     */
@@ -16,11 +29,13 @@ namespace MuonGMR4{
          * Constructor taking the GeoModel parent node of the tube nodes
         */
     public:
+        friend MdtTubeLayerSorter;
         /// @brief Standard constructor of a MdtTube layer. Taking a GeoVPhysVol
         ///       which is usually shared across multiple layers & chambers
         /// @param layer GeoVPhysVol representing this layer
         /// @param toLayTrf Transformation to reach the layer
-        MdtTubeLayer(const PVConstLink layer, const Amg::Transform3D& toLayTrf);
+        MdtTubeLayer(const PVConstLink layer, 
+                     const GeoIntrusivePtr<const GeoTransform> toLayTrf);
         ///@brief Returns the number of tubes in the layer
         unsigned int nTubes() const;
         ///@brief: Returns the transformation from the layer to the muon station
@@ -36,7 +51,8 @@ namespace MuonGMR4{
         PVConstLink getTubeNode(unsigned int tube) const;
     private:
         PVConstLink m_layerNode{nullptr};
-        Amg::Transform3D m_layTrf{Amg::Transform3D::Identity()};      
+        GeoIntrusivePtr<const GeoTransform> m_layTrf{nullptr};      
     };
+
 }
 #endif
