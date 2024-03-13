@@ -32,7 +32,10 @@ StatusCode ActsAlignmentCondAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
     ATH_CHECK(m_alignStoreKeys.initialize());
     ATH_CHECK(m_wchk.initialize());
-    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+    if (m_loadTrkGeoSvc){
+        ATH_CHECK(m_trackingGeometrySvc.retrieve());
+    }
+    
     return StatusCode::SUCCESS;
 }
 
@@ -74,7 +77,9 @@ StatusCode ActsAlignmentCondAlg::execute(const EventContext& ctx) const {
 
     // get a nominal alignment store from the tracking geometry service
     // and plug it into a geometry context
-    ATH_CHECK(m_trackingGeometrySvc->checkAlignComplete(*gctx));
+    if (m_loadTrkGeoSvc){
+        ATH_CHECK(m_trackingGeometrySvc->checkAlignComplete(*gctx));
+    }
     ATH_CHECK(wch.record(std::move(gctx)));
     ATH_MSG_INFO("Recorded new " << wch.key() << " "
                                  << " with range " << wch.getRange());
