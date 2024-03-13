@@ -34,7 +34,7 @@ The example job option file can be found under the following path.
 
 Before running this script, first setup the Athena environment:
 
-**asetup 23.6,latest,AthGeneration,slc6**
+**asetup 23.6,latest,AthGeneration**
 
 Above command sets up the latest AthGeneration cache.
 

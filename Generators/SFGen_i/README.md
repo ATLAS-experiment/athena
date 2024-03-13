@@ -1,6 +1,6 @@
 [[_TOC_]]
 
-The *Athena SFGen interface* described here was developed by *Lorenzo Primomo*, who works for *ATLAS*. For interface questions please contact *Giancarlo Panizzo* or *Dominic Hirschbuehl*. For generator-specific questions, you might want to contact the *SFGen* author *Lucian Harland-Lang*.
+The *Athena SFGen interface* described here was developed by *Lorenzo Primomo*, who works for *ATLAS*. For interface questions please contact *Giancarlo Panizzo* or *Dominic Hirschbuehl*. For generator-specific questions, you might want to contact the *SFGen* author *Lucian Harland-Lang*. Further documentation can be found in [doc](doc/SFGen.md) `doc/SFGen.md`.
 
 List of responsibles:
 
