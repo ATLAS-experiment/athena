@@ -47,7 +47,6 @@
 
 #include <string>
 #include <memory>
-#include <optional>
 
 #include <Gaudi/Accumulators.h>
 
@@ -81,7 +80,7 @@ private:
   ) const;
 
   /** @brief Remove cells that are too far from the center of mass. */
-  std::optional<std::unique_ptr<xAOD::CaloCluster>> cookieCut(
+  std::unique_ptr<xAOD::CaloCluster> cookieCut(
     const xAOD::CaloCluster& cluster,
     const CaloDetDescrManager& mgr,
     const DataLink<CaloCellContainer>& cellCont
