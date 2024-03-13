@@ -7,7 +7,7 @@ then
     curl https://cernbox.cern.ch/remote.php/dav/public-files/12CCGeTUn0I3MLv/eos/user/t/tbold/EFTracking/rdo_small.root --output rdo_small.root
     if [ ! -f rdo_small.root ] 
     then
-        echo "Could not fetch the input rdo file, exitting, ..."
+        echo "Could not fetch the input rdo file, exiting, ..."
         return 1 2> /dev/null || exit 1    
     fi
     echo "A small input RDO has been downloaded, ..."
