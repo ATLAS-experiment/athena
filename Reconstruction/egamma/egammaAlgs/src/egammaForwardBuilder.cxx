@@ -180,7 +180,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
       cluster->getCellLinks()->getCellContainerLink();
 
     // Create the new cluster.
-    std::optional<std::unique_ptr<xAOD::CaloCluster>> newCluster = 
+    std::unique_ptr<xAOD::CaloCluster> newCluster = 
       m_doCookieCutting ? 
         cookieCut(*cluster, *calodetdescrmgr, cellCont) :
         std::make_unique<xAOD::CaloCluster>(*cluster);
@@ -189,8 +189,8 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
       continue;
     }
 
-    caloClusterLinks(**newCluster) = constituentLinks;
-    outClusterContainer->push_back(std::move(*newCluster));
+    caloClusterLinks(*newCluster) = constituentLinks;
+    outClusterContainer->push_back(std::move(newCluster));
 
     size_t index = outClusterContainer->size() - 1;
     const ElementLink<xAOD::CaloClusterContainer> clusterLink(*outClusterContainer, index, ctx);
@@ -305,14 +305,14 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
   return StatusCode::SUCCESS;
 }
 
-std::optional<std::unique_ptr<xAOD::CaloCluster>> egammaForwardBuilder::cookieCut(
+std::unique_ptr<xAOD::CaloCluster> egammaForwardBuilder::cookieCut(
   const xAOD::CaloCluster& cluster,
   const CaloDetDescrManager& mgr,
   const DataLink<CaloCellContainer>& cellCont
 ) const {
   if (!cluster.hasSampling(CaloSampling::EME2) &&
       !cluster.hasSampling(CaloSampling::FCAL0)) {
-    return std::nullopt;
+    return nullptr;
   }
 
   CookieCutterHelpers::CentralPosition cp0({&cluster}, mgr);
@@ -325,7 +325,7 @@ std::optional<std::unique_ptr<xAOD::CaloCluster>> egammaForwardBuilder::cookieCu
 
   if (!newCluster) {
     ATH_MSG_ERROR("CaloClusterStoreHelper::makeCluster failed.");
-    return std::nullopt;
+    return nullptr;
   }
 
   CaloClusterCellLink* newCellLinks = newCluster->getOwnCellLinks();

@@ -22,6 +22,7 @@
 #include "FourMomUtils/P4Helpers.h"
 
 #include <cmath>
+#include <optional>
 
 using xAOD::EgammaHelpers::summaryValueInt;
 
@@ -371,7 +372,7 @@ egammaSuperClusterBuilderBase::execute(const EventContext& ctx) const
     ATH_MSG_DEBUG("Total clusters " << accumulatedClusters.size());
 
     // Create the new cluster
-    std::optional<std::unique_ptr<xAOD::CaloCluster>> newCluster = 
+    std::unique_ptr<xAOD::CaloCluster> newCluster = 
       createNewCluster(ctx,
                        accumulatedClusters,
                        cellCont,
@@ -381,7 +382,7 @@ egammaSuperClusterBuilderBase::execute(const EventContext& ctx) const
 
     // If we failed to create a cluster revert isUsed for the cluster
     if (newCluster) {
-      outputClusterContainer->push_back(std::move(*newCluster));
+      outputClusterContainer->push_back(std::move(newCluster));
     }
     else {
       isUsed.swap(isUsedRevert);
@@ -459,7 +460,7 @@ egammaSuperClusterBuilderBase::matchesInWindow(
   return (dEta < m_searchWindowEtaEndcap && dPhi < m_searchWindowPhiEndcap);
 }
 
-std::optional<std::unique_ptr<xAOD::CaloCluster>>
+std::unique_ptr<xAOD::CaloCluster>
 egammaSuperClusterBuilderBase::createNewCluster(
   const EventContext& ctx,
   const std::vector<const xAOD::CaloCluster*>& clusters,
@@ -470,7 +471,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
 {
   if (clusters.empty()) {
     ATH_MSG_ERROR("Missing the seed cluster! Should not happen.");
-    return std::nullopt;
+    return nullptr;
   }
 
   // create a new empty cluster
@@ -479,7 +480,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
 
   if (!newCluster) {
     ATH_MSG_ERROR("CaloClusterStoreHelper::makeCluster failed.");
-    return std::nullopt;
+    return nullptr;
   }
   //
   newCluster->setClusterSize(xAOD::CaloCluster::SuperCluster);
@@ -498,7 +499,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
 
   // Actually fill the cluster here
   if (fillClusterConstrained(*newCluster, clusters, cp0).isFailure()) {
-    return std::nullopt;
+    return nullptr;
   }
   // Apply SW-style summation of TileGap3 cells (if necessary).
   float eta0 = std::abs(newCluster->eta0());
@@ -512,7 +513,7 @@ egammaSuperClusterBuilderBase::createNewCluster(
       ATH_MSG_ERROR("Problem with the input cluster when running "
                     "AddTileGap3CellsinWindow?");
 
-      return std::nullopt;
+      return nullptr;
     }
   }
   /// Calculate the kinematics of the new cluster, after all cells are added
@@ -520,26 +521,26 @@ egammaSuperClusterBuilderBase::createNewCluster(
 
   // If adding all EM cells we are somehow below the seed threshold then remove
   if (newCluster->et() < m_EtThresholdCut) {
-    return std::nullopt;
+    return nullptr;
   }
 
   // Check to see if cluster pases basic requirements. If not, kill it.
   if (!m_egammaCheckEnergyDepositTool.empty() &&
       !m_egammaCheckEnergyDepositTool->checkFractioninSamplingCluster(
         newCluster.get())) {
-    return std::nullopt;
+    return nullptr;
   }
 
   // Apply correction calibration
   if (calibrateCluster(ctx, newCluster.get(), mgr, egType, precorrClusters)
         .isFailure()) {
     ATH_MSG_WARNING("There was problem calibrating the object");
-    return std::nullopt;
+    return nullptr;
   }
 
   // Avoid negative energy clusters
   if (newCluster->et() < 0) {
-    return std::nullopt;
+    return nullptr;
   }
 
   if (m_linkToConstituents) {
