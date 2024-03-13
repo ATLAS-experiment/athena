@@ -28,7 +28,6 @@
 
 // For messaging
 #include "ISF_FastCaloSimEvent/MLogging.h"
-using ISF_FCS::MLogging;
 
 /**
  * @brief A template defining the interface to a neural network.
@@ -36,7 +35,7 @@ using ISF_FCS::MLogging;
  * Has various subclasses to cover differing network
  * libraries and save formats.
  **/
-class VNetworkBase : public MLogging {
+class VNetworkBase : public ISF_FCS::MLogging {
 public:
   /**
    * @brief VNetworkBase default constructor.
