@@ -1,9 +1,9 @@
 /*
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
-  Contact: Xin Chen <xin.chen@cern.ch>
 */
-#ifndef PSIPLUSPSICASCADE_H
-#define PSIPLUSPSICASCADE_H
+#ifndef PSIPLUSPSISINGLEVERTEX_H
+#define PSIPLUSPSISINGLEVERTEX_H
+// Xin Chen <xin.chen@cern.ch>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -14,30 +14,22 @@
 #include <vector>
 
 namespace Trk {
-    class IVertexFitter;
     class TrkVKalVrtFitter;
-    class IVertexCascadeFitter;
-    class VxCascadeInfo;
     class V0Tools;
     class ParticleDataTable;
 }
 
 namespace DerivationFramework {
-    class CascadeTools;
-}
 
-namespace DerivationFramework {
+  static const InterfaceID IID_PsiPlusPsiSingleVertex("PsiPlusPsiSingleVertex", 1, 0);
 
-  static const InterfaceID IID_PsiPlusPsiCascade("PsiPlusPsiCascade", 1, 0);
-
-  class PsiPlusPsiCascade : virtual public AthAlgTool, public IAugmentationTool
+  class PsiPlusPsiSingleVertex : virtual public AthAlgTool, public IAugmentationTool
   {
   public:
-    static const InterfaceID& interfaceID() { return IID_PsiPlusPsiCascade;}
-    PsiPlusPsiCascade(const std::string& type, const std::string& name, const IInterface* parent);
-    virtual ~PsiPlusPsiCascade() = default;
+    static const InterfaceID& interfaceID() { return IID_PsiPlusPsiSingleVertex;}
+    PsiPlusPsiSingleVertex(const std::string& t, const std::string& n, const IInterface* p);
+    virtual ~PsiPlusPsiSingleVertex() = default;
     virtual StatusCode initialize() override;
-    StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer_noConstr) const;
     virtual StatusCode addBranches() const override;
 
   private:
@@ -45,21 +37,21 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexPsi2ContainerKey;
     std::vector<std::string> m_vertexPsi1HypoNames;
     std::vector<std::string> m_vertexPsi2HypoNames;
-    SG::WriteHandleKeyArray<xAOD::VertexContainer> m_cascadeOutputsKeys;
+    SG::WriteHandleKeyArray<xAOD::VertexContainer> m_outputsKeys; // StoreGate/WriteHandleKeyArray.h
     SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimaryCandidateName; //!< Name of primary vertex container
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainerName;
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key;
 
     double m_jpsi1MassLower;
     double m_jpsi1MassUpper;
-    double m_jpsi2MassLower;
-    double m_jpsi2MassUpper;
     double m_diTrack1MassLower;
     double m_diTrack1MassUpper;
-    double m_diTrack2MassLower;
-    double m_diTrack2MassUpper;
     double m_psi1MassLower;
     double m_psi1MassUpper;
+    double m_jpsi2MassLower;
+    double m_jpsi2MassUpper;
+    double m_diTrack2MassLower;
+    double m_diTrack2MassUpper;
     double m_psi2MassLower;
     double m_psi2MassUpper;
     double m_MassLower;
@@ -74,29 +66,25 @@ namespace DerivationFramework {
     double m_vtx2Daug2MassHypo; // mass hypothesis of 2nd daughter from vertex 2
     double m_vtx2Daug3MassHypo; // mass hypothesis of 3rd daughter from vertex 2
     double m_vtx2Daug4MassHypo; // mass hypothesis of 4th daughter from vertex 2
+    unsigned int    m_maxCandidates;
 
-    double m_massPsi1;
-    double m_massPsi2;
-    double m_massJpsi1;
-    double m_massJpsi2;
-    double m_massDiTrk1;
-    double m_massDiTrk2;
-    bool   m_constrPsi1;
-    bool   m_constrPsi2;
+    double m_mass_jpsi1;
+    double m_mass_diTrk1;
+    double m_mass_psi1;
+    double m_mass_jpsi2;
+    double m_mass_diTrk2;
+    double m_mass_psi2;
     bool   m_constrJpsi1;
-    bool   m_constrJpsi2;
     bool   m_constrDiTrk1;
+    bool   m_constrPsi1;
+    bool   m_constrJpsi2;
     bool   m_constrDiTrk2;
-    double m_chi2cut_Psi1;
-    double m_chi2cut_Psi2;
+    bool   m_constrPsi2;
     double m_chi2cut;
-    bool   m_removeDuplicatePairs;
-    unsigned int m_maxCandidates;
 
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
     ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
     ToolHandle < Trk::V0Tools >                      m_V0Tools;
-    ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
 
     bool        m_refitPV;
     SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName;

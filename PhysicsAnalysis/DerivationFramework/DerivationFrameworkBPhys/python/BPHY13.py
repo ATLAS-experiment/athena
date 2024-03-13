@@ -1,13 +1,13 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
-# BPHY13.py
+# BPHY13.py for 4-muon resonance search
+# Contact: xin.chen@cern.ch
 #====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
-
 
 BPHYDerivationName = "BPHY13"
 streamName = "StreamDAOD_BPHY13"
@@ -18,7 +18,7 @@ def BPHY13Cfg(ConfigFlags):
     acc = ComponentAccumulator()
     isSimulation = ConfigFlags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName)) # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
     trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
@@ -26,392 +26,677 @@ def BPHY13Cfg(ConfigFlags):
     vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
     acc.addPublicTool(vpest)
 
-    BPHY13JpsiFinder = CompFactory.Analysis.JpsiFinder(
-     name                        = "BPHY13JpsiFinder",
-     muAndMu                     = True,
-     muAndTrack                  = False,
-     TrackAndTrack               = False,
-     assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
-     trackThresholdPt            = 2500.,
-     invMassUpper                = 12500.,
-     invMassLower                = 2000.,
-     Chi2Cut                     = 200.,
-     oppChargesOnly              = True,
-     atLeastOneComb              = True,
-     useCombinedMeasurement      = False, # Only takes effect if combOnly=True   
-     muonCollectionKey           = "Muons",
-     TrackParticleCollection     = "InDetTrackParticles",
-     V0VertexFitterTool          = None, # V0 vertex fitter
-     useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
-     TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
-     TrackSelectorTool           = trackselect,
-     VertexPointEstimator        = vpest,
-     useMCPCuts                  = False )
-    acc.addPublicTool(BPHY13JpsiFinder)
-    BPHY13_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
-        name                   = "BPHY13_Reco_mumu",
-        VertexSearchTool       = BPHY13JpsiFinder,
-        OutputVtxContainerName = "BPHY13OniaCandidates",
+    # mass bounds and constants used in the following
+    Phi_lo = 770.0
+    Phi_hi = 1300.0
+    Jpsi_lo = 2600.0
+    Jpsi_hi = 3600.0
+    Psi_lo = 3300.0
+    Psi_hi = 4200.0
+    Upsi_lo = 8800.0
+    Upsi_hi = 10000.0
+    Dimu_lo = 5000.0
+    Dimu_hi = 9100.0
+
+    Mumass = 105.658
+    Phimass = 1019.461
+    Jpsimass = 3096.916
+    Psi2Smass = 3686.10
+    Upsimass = 9460.30
+
+    BPHY13PhiFinder_mumu = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13PhiFinder_mumu",
+        muAndMu                     = True,
+        muAndTrack                  = False,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Phi_lo,
+        invMassUpper                = Phi_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = True,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False )
+    acc.addPublicTool(BPHY13PhiFinder_mumu)
+
+    BPHY13JpsiFinder_mumu = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13JpsiFinder_mumu",
+        muAndMu                     = True,
+        muAndTrack                  = False,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Jpsi_lo,
+        invMassUpper                = Jpsi_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = True,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False )
+    acc.addPublicTool(BPHY13JpsiFinder_mumu)
+
+    BPHY13PsiFinder_mumu = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13PsiFinder_mumu",
+        muAndMu                     = True,
+        muAndTrack                  = False,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Psi_lo,
+        invMassUpper                = Psi_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = True,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False )
+    acc.addPublicTool(BPHY13PsiFinder_mumu)
+
+    BPHY13UpsiFinder_mumu = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13UpsiFinder_mumu",
+        muAndMu                     = True,
+        muAndTrack                  = False,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Upsi_lo,
+        invMassUpper                = Upsi_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = True,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False )
+    acc.addPublicTool(BPHY13UpsiFinder_mumu)
+
+    BPHY13DimuFinder_mumu = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13DimuFinder_mumu",
+        muAndMu                     = True,
+        muAndTrack                  = False,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Dimu_lo,
+        invMassUpper                = Dimu_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = True,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False )
+    acc.addPublicTool(BPHY13DimuFinder_mumu)
+
+
+    BPHY13PhiFinder_mutrk = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13PhiFinder_mutrk",
+        muAndMu                     = False,
+        muAndTrack                  = True,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Phi_lo,
+        invMassUpper                = Phi_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = False,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False,
+        doTagAndProbe               = True)
+    acc.addPublicTool(BPHY13PhiFinder_mutrk)
+
+    BPHY13JpsiFinder_mutrk = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13JpsiFinder_mutrk",
+        muAndMu                     = False,
+        muAndTrack                  = True,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Jpsi_lo,
+        invMassUpper                = Jpsi_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = False,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False,
+        doTagAndProbe               = True )
+    acc.addPublicTool(BPHY13JpsiFinder_mutrk)
+
+    BPHY13PsiFinder_mutrk = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13PsiFinder_mutrk",
+        muAndMu                     = False,
+        muAndTrack                  = True,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Psi_lo,
+        invMassUpper                = Psi_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = False,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False,
+        doTagAndProbe               = True )
+    acc.addPublicTool(BPHY13PsiFinder_mutrk)
+
+    BPHY13UpsiFinder_mutrk = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13UpsiFinder_mutrk",
+        muAndMu                     = False,
+        muAndTrack                  = True,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Upsi_lo,
+        invMassUpper                = Upsi_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = False,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False,
+        doTagAndProbe               = True )
+    acc.addPublicTool(BPHY13UpsiFinder_mutrk)
+
+    BPHY13DimuFinder_mutrk = CompFactory.Analysis.JpsiFinder(
+        name                        = "BPHY13DimuFinder_mutrk",
+        muAndMu                     = False,
+        muAndTrack                  = True,
+        TrackAndTrack               = False,
+        assumeDiMuons               = True,  # If true, will assume dimu hypothesis and use PDG value for mu mass
+        muonThresholdPt             = 2400.,
+        trackThresholdPt            = 2400.,
+        invMassLower                = Dimu_lo,
+        invMassUpper                = Dimu_hi,
+        Chi2Cut                     = 50.,
+        oppChargesOnly	            = True,
+        atLeastOneComb              = False,
+        useCombinedMeasurement      = False, # Only takes effect if combOnly=True	
+        muonCollectionKey           = "Muons",
+        TrackParticleCollection     = "InDetTrackParticles",
+        V0VertexFitterTool          = None, # V0 vertex fitter
+        useV0Fitter                 = False, # if False a TrkVertexFitterTool will be used
+        TrkVertexFitterTool         = vkalvrt, # VKalVrt vertex fitter
+        TrackSelectorTool           = trackselect,
+        VertexPointEstimator        = vpest,
+        useMCPCuts                  = False,
+        doTagAndProbe               = True )
+    acc.addPublicTool(BPHY13DimuFinder_mutrk)
+
+
+    BPHY13_Reco_Phimumu = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Phimumu",
+        VertexSearchTool       = BPHY13PhiFinder_mumu,
+        OutputVtxContainerName = "BPHY13Phimumu",
         PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
         PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
-        RefPVContainerName     = "SHOULDNOTBEUSED",
-    #https://gitlab.cern.ch/atlas/athena/-/blob/21.2/PhysicsAnalysis/DerivationFramework/DerivationFrameworkBPhys/src/BPhysPVTools.cxx#L259
-    # bit pattern: doZ0BA|doZ0|doA0|doPt
         DoVertexType           = 1)
-    
-    BPHY13Plus2Tracks = CompFactory.Analysis.JpsiPlus2Tracks(
-       name = "BPHY13Plus2Tracks",
-       kaonkaonHypothesis              = False,
-       pionpionHypothesis              = False,
-       kaonpionHypothesis              = False,
-       ManualMassHypo                  = [ 105.658, 105.658, 105.658, 105.658 ],
-       trkThresholdPt                  = 1500.,
-       trkMaxEta                       = 2.5,
-       oppChargesOnly                  = False,
-       DiTrackMassUpper                = 12500.,
-       DiTrackMassLower                = 2000.,
-       TrkQuadrupletMassUpper          = 25000.,
-       TrkQuadrupletMassLower          = 0.,
-       Chi2Cut                         = 200.,
-       JpsiContainerKey                = "BPHY13OniaCandidates",
-       TrackParticleCollection         = "InDetTrackParticles",
-       MuonsUsedInJpsi                 = "Muons",
-       ExcludeJpsiMuonsOnly            = True,
-       RequireNMuonTracks              = 1,
-       TrkVertexFitterTool             = vkalvrt,
-       TrackSelectorTool               = trackselect,
-       UseMassConstraint               = False)
-    acc.addPublicTool(BPHY13Plus2Tracks)
-    BPHY13FourTrackSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
-        name                     = "BPHY13FourTrackSelectAndWrite",
-        VertexSearchTool         = BPHY13Plus2Tracks,
-        OutputVtxContainerName   = "BPHY13FourTrack",
-        PVContainerName          = "PrimaryVertices",
-        V0Tools                  = V0Tools,
-        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
-        RefPVContainerName       = "BPHY13RefittedPrimaryVertices1",
-        RefitPV                  = True,
-        MaxPVrefit               = 10000,
-        DoVertexType             = 7)
-    raise Exception("Fix passing of blinding information")
-    doBlinding = False
-    doUnblinding1 = False
-    doUnblinding2 = False
-    do_blinding = 'doBlinding' in vars() and doBlinding is True and not isSimulation
-    do_unblinding1 = not do_blinding and 'doUnblinding1' in vars() and doUnblinding1 is True and not isSimulation
-    do_unblinding2 = not do_blinding and 'doUnblinding2' in vars() and doUnblinding2 is True and not isSimulation
 
-    if do_blinding:
-        #
-        # select 4 regions (before unblinding)
-        #
-        BPHY13_Select1_FourTrack     = CompFactory.DerivationFramework.Select_onia2mumu(
-            name                       = "BPHY13_Select1_FourTrack",
-            HypothesisName             = "FourTracks1",
-            InputVtxContainerName      = "BPHY13FourTrack",
-            V0Tools                  = V0Tools,
-            TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-            VtxMassHypo                = 6900.0, # for decay time
-            MassMin                    = 7500.,
-            MassMax                    = 9000.,
-            Chi2Max                    = 200.)
-        
-       
-        BPHY13_Select2_FourTrack     = CompFactory.DerivationFramework.Select_onia2mumu(
-            name                       = "BPHY13_Select2_FourTrack",
-            HypothesisName             = "FourTracks2",
-            InputVtxContainerName      = "BPHY13FourTrack",
-            V0Tools                  = V0Tools,
-            TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-            VtxMassHypo                = 6900.0, # for decay time
-            MassMin                    = 10000.,
-            MassMax                    = 12000.,
-            Chi2Max                    = 200.)
-       
-        BPHY13_Select3_FourTrack     = CompFactory.DerivationFramework.Select_onia2mumu(
-            name                       = "BPHY13_Select3_FourTrack",
-            HypothesisName             = "FourTracks3",
-            InputVtxContainerName      = "BPHY13FourTrack",
-            V0Tools                  = V0Tools,
-            TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-            VtxMassHypo                = 6900.0,  #for decay time
-            MassMin                    = 14000.,
-            MassMax                    = 17500.,
-            Chi2Max                    = 200.)
-       
-        BPHY13_Select4_FourTrack     = CompFactory.DerivationFramework.Select_onia2mumu(
-            name                       = "BPHY13_Select4_FourTrack",
-            HypothesisName             = "FourTracks4",
-            InputVtxContainerName      = "BPHY13FourTrack",
-            V0Tools                  = V0Tools,
-            TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-            VtxMassHypo                = 6900.0,  #for decay time
-            MassMin                    = 19500.,
-            MassMax                    = 25000.,
-            Chi2Max                    = 200.)
-       
-    elif do_unblinding1 or do_unblinding2:
-     if do_unblinding1:
-         #
-         # select 2 regions (unblinding part 1)
-         #
-         BPHY13_Select1_FourTrack     = CompFactory.DerivationFramework.Select_onia2mumu(
-             name                       = "BPHY13_Select1_FourTrack",
-             HypothesisName             = "FourTracks1",
-             InputVtxContainerName      = "BPHY13FourTrack",
-             V0Tools                    = V0Tools,
-             TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-             VtxMassHypo                = 6900.0, # for decay time
-             MassMin                    = 0.,
-             MassMax                    = 7500.,
-             Chi2Max                    = 200.)
-     
-    
-         BPHY13_Select2_FourTrack     = CompFactory.DerivationFramework.Select_onia2mumu(
-             name                       = "BPHY13_Select2_FourTrack",
-             HypothesisName             = "FourTracks2",
-             InputVtxContainerName      = "BPHY13FourTrack",
-             V0Tools                    = V0Tools,
-             TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-             VtxMassHypo                = 6900.0, # for decay time
-             MassMin                    = 9000.,
-             MassMax                    = 10000.,
-             Chi2Max                    = 200.)
-    
-     if do_unblinding2:
-         #
-         # select 2 regions (unblinding part 2)
-         #
-         BPHY13_Select3_FourTrack     = CompFactory.DerivationFramework.Select_onia2mumu(
-             name                       = "BPHY13_Select3_FourTrack",
-             HypothesisName             = "FourTracks3",
-             InputVtxContainerName      = "BPHY13FourTrack",
-             V0Tools                    = V0Tools,
-             TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-             VtxMassHypo                = 6900.0,  #for decay time
-             MassMin                    = 12000.,
-             MassMax                    = 14000.,
-             Chi2Max                    = 200.)
-    
-    
-         BPHY13_Select4_FourTrack     = CompFactory.DerivationFramework.Select_onia2mumu(
-             name                       = "BPHY13_Select4_FourTrack",
-             HypothesisName             = "FourTracks4",
-             InputVtxContainerName      = "BPHY13FourTrack",
-             V0Tools                    = V0Tools,
-             TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-             VtxMassHypo                = 6900.0,  #for decay time
-             MassMin                    = 17500.,
-             MassMax                    = 19500.,
-             Chi2Max                    = 200.)
-    
-    else:
-        BPHY13_Select_FourTrack      = CompFactory.DerivationFramework.Select_onia2mumu(
-         name                       = "BPHY13_Select_FourTrack",
-         HypothesisName             = "FourTracks",
-         InputVtxContainerName      = "BPHY13FourTrack",
-         V0Tools                    = V0Tools,
-         TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-         VtxMassHypo                = 6900.0, # for decay time
-         MassMin                    = 0.,
-         MassMax                    = 25000.,
-         Chi2Max                    = 200.)
+    BPHY13_Reco_Jpsimumu = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Jpsimumu",
+        VertexSearchTool       = BPHY13JpsiFinder_mumu,
+        OutputVtxContainerName = "BPHY13Jpsimumu",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
 
-    BPHY13TrackIsolationDecorator = CompFactory.DerivationFramework.VertexTrackIsolation(
-      name                            = "BPHY13TrackIsolationDecorator",
-      TrackIsoTool                    = "xAOD::TrackIsolationTool",
-      TrackContainer                  = "InDetTrackParticles",
-      InputVertexContainer            = "BPHY13FourTrack",
-      PassFlags                       = ["passed_FourTracks","passed_FourTracks1","passed_FourTracks2","passed_FourTracks3","passed_FourTracks4"],
-      DoIsoPerTrk                     = True,
-      RemoveDuplicate                 = 2
-    )
+    BPHY13_Reco_Psimumu = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Psimumu",
+        VertexSearchTool       = BPHY13PsiFinder_mumu,
+        OutputVtxContainerName = "BPHY13Psimumu",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
 
-    BPHY13_Revertex_2mu            = CompFactory.DerivationFramework.ReVertex(
-        name                       = "BPHY13_Revertex_2mu",
-        InputVtxContainerName      = "BPHY13FourTrack",
+    BPHY13_Reco_Upsimumu = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Upsimumu",
+        VertexSearchTool       = BPHY13UpsiFinder_mumu,
+        OutputVtxContainerName = "BPHY13Upsimumu",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
+
+    BPHY13_Reco_Dimumumu = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Dimumumu",
+        VertexSearchTool       = BPHY13DimuFinder_mumu,
+        OutputVtxContainerName = "BPHY13Dimumumu",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
+
+
+    BPHY13_Reco_Phimutrk = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Phimutrk",
+        VertexSearchTool       = BPHY13PhiFinder_mutrk,
+        OutputVtxContainerName = "BPHY13Phimutrk",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
+
+    BPHY13_Reco_Jpsimutrk = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Jpsimutrk",
+        VertexSearchTool       = BPHY13JpsiFinder_mutrk,
+        OutputVtxContainerName = "BPHY13Jpsimutrk",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
+
+    BPHY13_Reco_Psimutrk = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Psimutrk",
+        VertexSearchTool       = BPHY13PsiFinder_mutrk,
+        OutputVtxContainerName = "BPHY13Psimutrk",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
+
+    BPHY13_Reco_Upsimutrk = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Upsimutrk",
+        VertexSearchTool       = BPHY13UpsiFinder_mutrk,
+        OutputVtxContainerName = "BPHY13Upsimutrk",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
+
+    BPHY13_Reco_Dimumutrk = CompFactory.DerivationFramework.Reco_Vertex(
+        name                   = "BPHY13_Reco_Dimumutrk",
+        VertexSearchTool       = BPHY13DimuFinder_mutrk,
+        OutputVtxContainerName = "BPHY13Dimumutrk",
+        PVContainerName        = "PrimaryVertices",
+        RefPVContainerName     = "SHOULDNOTBEUSED",
+        V0Tools                = V0Tools,
+        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        DoVertexType           = 1)
+
+
+    BPHY13_Rev_Phimumu = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY13_Rev_Phimumu",
+        InputVtxContainerName      = "BPHY13Phimumu",
         TrackIndices               = [ 0, 1 ],
-        RefitPV                    = True,
-        RefPVContainerName         = "BPHY13RefittedPrimaryVertices2", # cannot use existing refitted PVs
+        RefitPV                    = False,
         UseMassConstraint          = True,
+        VertexMass                 = Phimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 50.,
         PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
         V0Tools                    = V0Tools,
-        VertexMass                 = 3096.916,
-        MassInputParticles         = [105.658, 105.658],
-        TrkVertexFitterTool        = vkalvrt,
-        OutputVtxContainerName     = "BPHY13TwoMuon")
+        TrkVertexFitterTool	   = vkalvrt,
+        OutputVtxContainerName     = "BPHY13Phimumu_revtx")
 
-    BPHY13_Select_TwoMuon          = CompFactory.DerivationFramework.Select_onia2mumu(
-        name                       = "BPHY13_Select_TwoMuon",
-        HypothesisName             = "TwoMuons",
-        InputVtxContainerName      = "BPHY13TwoMuon",
-        TrkMasses                  = [105.658, 105.658],
-        V0Tools                    = V0Tools,
-        VtxMassHypo                = 3096.916,
-        MassMin                    = 2000.,
-        MassMax                    = 3600.,
-        Chi2Max                    = 200)
-
-    BPHY13_Revertex_2trk           = CompFactory.DerivationFramework.ReVertex(
-        name                       = "BPHY13_Revertex_2trk",
-        InputVtxContainerName      = "BPHY13FourTrack",
-        TrackIndices               = [ 2, 3 ],
-        RefitPV                    = True,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
-        V0Tools                    = V0Tools,
-        RefPVContainerName         = "BPHY13RefittedPrimaryVertices3", # cannot use existing refitted PVs
-        UseMassConstraint          = True,
-        VertexMass                 = 3096.916,
-        MassInputParticles         = [105.658, 105.658],
-        TrkVertexFitterTool        = vkalvrt,
-        OutputVtxContainerName     = "BPHY13TwoTrack")
-
-    BPHY13_Select_TwoTrack         = CompFactory.DerivationFramework.Select_onia2mumu(
-        name                       = "BPHY13_Select_TwoTrack",
-        HypothesisName             = "TwoTracks",
-        InputVtxContainerName      = "BPHY13TwoTrack",
-        TrkMasses                  = [105.658, 105.658],
-        V0Tools                    = V0Tools,
-        VtxMassHypo                = 3096.916,
-        MassMin                    = 2000.,
-        MassMax                    = 3600.,
-        Chi2Max                    = 200)
-
-    BPHY13_Revertex_2muHi          = CompFactory.DerivationFramework.ReVertex(
-        name                       = "BPHY13_Revertex_2muHi",
-        InputVtxContainerName      = "BPHY13FourTrack",
+    BPHY13_Rev_Jpsimumu = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY13_Rev_Jpsimumu",
+        InputVtxContainerName      = "BPHY13Jpsimumu",
         TrackIndices               = [ 0, 1 ],
-        RefitPV                    = True,
+        RefitPV                    = False,
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 50.,
         PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
         V0Tools                    = V0Tools,
-        RefPVContainerName         = "BPHY13RefittedPrimaryVertices4", # cannot use existing refitted PVs
-        UseMassConstraint          = True,
-        VertexMass                 = 9460.30,
-        MassInputParticles         = [105.658, 105.658],
-        TrkVertexFitterTool        = vkalvrt,
-        OutputVtxContainerName     = "BPHY13TwoMuonHi")
+        TrkVertexFitterTool	   = vkalvrt,
+        OutputVtxContainerName     = "BPHY13Jpsimumu_revtx")
 
-    BPHY13_Select_TwoMuonHi        = CompFactory.DerivationFramework.Select_onia2mumu(
-        name                       = "BPHY13_Select_TwoMuonHi",
-        HypothesisName             = "TwoMuonsHi",
-        InputVtxContainerName      = "BPHY13TwoMuonHi",
-        V0Tools                    = V0Tools,
-        TrkMasses                  = [105.658, 105.658],
-        VtxMassHypo                = 9460.30,
-        MassMin                    = 8500.,
-        MassMax                    = 11000.,
-        Chi2Max                    = 200)
-
-    BPHY13_Revertex_2trkHi         = CompFactory.DerivationFramework.ReVertex(
-        name                       = "BPHY13_Revertex_2trkHi",
-        InputVtxContainerName      = "BPHY13FourTrack",
-        TrackIndices               = [ 2, 3 ],
-        RefitPV                    = True,
-        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
-        V0Tools                    = V0Tools,
-        RefPVContainerName         = "BPHY13RefittedPrimaryVertices5", # cannot use existing refitted PVs
-        UseMassConstraint          = True,
-        VertexMass                 = 9460.30,
-        MassInputParticles         = [105.658, 105.658],
-        TrkVertexFitterTool        = vkalvrt,
-        OutputVtxContainerName     = "BPHY13TwoTrackHi")
-
-    BPHY13_Select_TwoTrackHi       = CompFactory.DerivationFramework.Select_onia2mumu(
-        name                       = "BPHY13_Select_TwoTrackHi",
-        HypothesisName             = "TwoTracksHi",
-        V0Tools                    = V0Tools,
-        InputVtxContainerName      = "BPHY13TwoTrackHi",
-        TrkMasses                  = [105.658, 105.658],
-        VtxMassHypo                = 9460.30,
-        MassMin                    = 8500.,
-        MassMax                    = 11000.,
-        Chi2Max                    = 200)
-
-    BPHY13_Revertex_2muMed         = CompFactory.DerivationFramework.ReVertex(
-        name                       = "BPHY13_Revertex_2muMed",
-        InputVtxContainerName      = "BPHY13FourTrack",
+    BPHY13_Rev_Psimumu = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY13_Rev_Psimumu",
+        InputVtxContainerName      = "BPHY13Psimumu",
         TrackIndices               = [ 0, 1 ],
-        RefitPV                    = True,
+        RefitPV                    = False,
+        UseMassConstraint          = True,
+        VertexMass                 = Psi2Smass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 50.,
         PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
         V0Tools                    = V0Tools,
-        RefPVContainerName         = "BPHY13RefittedPrimaryVertices6", # cannot use existing refitted PVs
+        TrkVertexFitterTool	   = vkalvrt,
+        OutputVtxContainerName     = "BPHY13Psimumu_revtx")
+
+    BPHY13_Rev_Upsimumu = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY13_Rev_Upsimumu",
+        InputVtxContainerName      = "BPHY13Upsimumu",
+        TrackIndices               = [ 0, 1 ],
+        RefitPV                    = False,
         UseMassConstraint          = True,
-        VertexMass                 = 3686.10,
-        MassInputParticles         = [105.658, 105.658],
-        TrkVertexFitterTool        = vkalvrt,
-        OutputVtxContainerName     = "BPHY13TwoMuonMed")
-
-    BPHY13_Select_TwoMuonMed       = CompFactory.DerivationFramework.Select_onia2mumu(
-        name                       = "BPHY13_Select_TwoMuonMed",
-        HypothesisName             = "TwoMuonsMed",
-        InputVtxContainerName      = "BPHY13TwoMuonMed",
-        V0Tools                    = V0Tools,
-        TrkMasses                  = [105.658, 105.658],
-        VtxMassHypo                = 3686.10,
-        MassMin                    = 3300.0,
-        MassMax                    = 4500.0,
-        Chi2Max                    = 200)
-
-    BPHY13_Revertex_2trkMed        = CompFactory.DerivationFramework.ReVertex(
-        name                       = "BPHY13_Revertex_2trkMed",
-        InputVtxContainerName      = "BPHY13FourTrack",
-        TrackIndices               = [ 2, 3 ],
-        RefitPV                    = True,
+        VertexMass                 = Upsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 50.,
         PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
         V0Tools                    = V0Tools,
-        RefPVContainerName         = "BPHY13RefittedPrimaryVertices7", # cannot use existing refitted PVs
+        TrkVertexFitterTool	   = vkalvrt,
+        OutputVtxContainerName     = "BPHY13Upsimumu_revtx")
+
+
+    BPHY13_Rev_Phimutrk = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY13_Rev_Phimutrk",
+        InputVtxContainerName      = "BPHY13Phimutrk",
+        TrackIndices               = [ 0, 1 ],
+        RefitPV                    = False,
         UseMassConstraint          = True,
-        VertexMass                 = 3686.10,
-        MassInputParticles         = [105.658, 105.658],
-        TrkVertexFitterTool        = vkalvrt,
-        OutputVtxContainerName     = "BPHY13TwoTrackMed")
-
-    BPHY13_Select_TwoTrackMed      = CompFactory.DerivationFramework.Select_onia2mumu(
-        name                       = "BPHY13_Select_TwoTrackMed",
-        HypothesisName             = "TwoTracksMed",
-        InputVtxContainerName      = "BPHY13TwoTrackMed",
+        VertexMass                 = Phimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 50.,
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
         V0Tools                    = V0Tools,
-        TrkMasses                  = [105.658, 105.658],
-        VtxMassHypo                = 3686.10,
-        MassMin                    = 3300.,
-        MassMax                    = 4500.,
-        Chi2Max                    = 200)
+        TrkVertexFitterTool	   = vkalvrt,
+        OutputVtxContainerName     = "BPHY13Phimutrk_revtx")
 
-    expression = "( count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonHi.passed_TwoMuonsHi) + count(BPHY13TwoTrackHi.passed_TwoTracksHi) > 0 )"
-    
-    if do_blinding or (do_unblinding1 and do_unblinding2):
-        expression = expression + " && count(BPHY13FourTrack.passed_FourTracks1)+count(BPHY13FourTrack.passed_FourTracks2)+count(BPHY13FourTrack.passed_FourTracks3)+count(BPHY13FourTrack.passed_FourTracks4) > 0"
-    elif do_unblinding1:
-        expression = expression + " && count(BPHY13FourTrack.passed_FourTracks1)+count(BPHY13FourTrack.passed_FourTracks2) > 0"
-    elif do_unblinding2:
-        expression = expression + " && count(BPHY13FourTrack.passed_FourTracks3)+count(BPHY13FourTrack.passed_FourTracks4) > 0"
-    else:
-        expression = expression + " && count(BPHY13FourTrack.passed_FourTracks) > 0"
+    BPHY13_Rev_Jpsimutrk = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY13_Rev_Jpsimutrk",
+        InputVtxContainerName      = "BPHY13Jpsimutrk",
+        TrackIndices               = [ 0, 1 ],
+        RefitPV                    = False,
+        UseMassConstraint          = True,
+        VertexMass                 = Jpsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 50.,
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        V0Tools                    = V0Tools,
+        TrkVertexFitterTool	   = vkalvrt,
+        OutputVtxContainerName     = "BPHY13Jpsimutrk_revtx")
 
-    BPHY13_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY13_SelectEvent", expression = expression)
+    BPHY13_Rev_Psimutrk = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY13_Rev_Psimutrk",
+        InputVtxContainerName      = "BPHY13Psimutrk",
+        TrackIndices               = [ 0, 1 ],
+        RefitPV                    = False,
+        UseMassConstraint          = True,
+        VertexMass                 = Psi2Smass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 50.,
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        V0Tools                    = V0Tools,
+        TrkVertexFitterTool	   = vkalvrt,
+        OutputVtxContainerName     = "BPHY13Psimutrk_revtx")
 
-    augmentation_tools = [BPHY13_Reco_mumu, BPHY13FourTrackSelectAndWrite]
-    if do_blinding or (do_unblinding1 and do_unblinding2):
-        augmentation_tools += [BPHY13_Select1_FourTrack, BPHY13_Select2_FourTrack, BPHY13_Select3_FourTrack, BPHY13_Select4_FourTrack]
-    elif do_unblinding1:
-        augmentation_tools += [BPHY13_Select1_FourTrack, BPHY13_Select2_FourTrack]
-    elif do_unblinding2:
-        augmentation_tools += [BPHY13_Select3_FourTrack, BPHY13_Select4_FourTrack]
-    else:
-        augmentation_tools += [BPHY13_Select_FourTrack]
-    
-    augmentation_tools += [BPHY13TrackIsolationDecorator, BPHY13_Revertex_2mu, BPHY13_Select_TwoMuon,
-               BPHY13_Revertex_2trk, BPHY13_Select_TwoTrack, BPHY13_Revertex_2muHi, BPHY13_Select_TwoMuonHi,
-               BPHY13_Revertex_2trkHi, BPHY13_Select_TwoTrackHi, BPHY13_Revertex_2muMed, BPHY13_Select_TwoMuonMed, 
-               BPHY13_Revertex_2trkMed, BPHY13_Select_TwoTrackMed]
-    for t in  augmentation_tools + [BPHY13_SelectEvent] : acc.addPublicTool(t)
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY13Kernel",
-                                                    AugmentationTools = augmentation_tools,
-                                                    #Only skim if not MC
-                                                    SkimmingTools     = [BPHY13_SelectEvent],
-                                                    ThinningTools     = []))
-    
+    BPHY13_Rev_Upsimutrk = CompFactory.DerivationFramework.ReVertex(
+        name                       = "BPHY13_Rev_Upsimutrk",
+        InputVtxContainerName      = "BPHY13Upsimutrk",
+        TrackIndices               = [ 0, 1 ],
+        RefitPV                    = False,
+        UseMassConstraint          = True,
+        VertexMass                 = Upsimass,
+        MassInputParticles         = [Mumass, Mumass],
+        Chi2Cut                    = 50.,
+        PVRefitter                 = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        V0Tools                    = V0Tools,
+        TrkVertexFitterTool	   = vkalvrt,
+        OutputVtxContainerName     = "BPHY13Upsimutrk_revtx")
+
+
+    list_4mu_hypo = ["UpsiUpsi_4mu", "UpsiPsi_4mu", "UpsiJpsi_4mu", "UpsiPhi_4mu",
+                     "PsiPsi_4mu", "PsiJpsi_4mu", "PsiPhi_4mu",
+                     "JpsiJpsi_4mu", "JpsiPhi_4mu", "PhiPhi_4mu",
+                     "UpsiDimu_4mu"]
+    list_4mu_psi1Input = ["BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx",
+                          "BPHY13Psimumu_revtx", "BPHY13Psimumu_revtx", "BPHY13Psimumu_revtx",
+                          "BPHY13Jpsimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
+                          "BPHY13Upsimumu_revtx"]
+    list_4mu_psi2Input = ["BPHY13Upsimumu_revtx", "BPHY13Psimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
+                          "BPHY13Psimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
+                          "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx", "BPHY13Phimumu_revtx",
+                          "BPHY13Dimumumu"]
+    list_4mu_jpsi1lo = [Upsi_lo,Upsi_lo,Upsi_lo,Upsi_lo,
+                        Psi_lo,Psi_lo,Psi_lo,
+                        Jpsi_lo,Jpsi_lo,Phi_lo,
+                        Upsi_lo]
+    list_4mu_jpsi1hi = [Upsi_hi,Upsi_hi,Upsi_hi,Upsi_hi,
+                        Psi_hi,Psi_hi,Psi_hi,
+                        Jpsi_hi,Jpsi_hi,Phi_hi,
+                        Upsi_hi]
+    list_4mu_jpsi1mass = [Upsimass, Upsimass, Upsimass, Upsimass,
+                          Psi2Smass, Psi2Smass, Psi2Smass,
+                          Jpsimass, Jpsimass, Phimass,
+                          Upsimass]
+    list_4mu_jpsi2lo = [Upsi_lo,Psi_lo,Jpsi_lo,Phi_lo,
+                        Psi_lo,Jpsi_lo,Phi_lo,
+                        Jpsi_lo,Phi_lo,Phi_lo,
+                        Dimu_lo]
+    list_4mu_jpsi2hi = [Upsi_hi,Psi_hi,Jpsi_hi,Phi_hi,
+                        Psi_hi,Jpsi_hi,Phi_hi,
+                        Jpsi_hi,Phi_hi,Phi_hi,
+                        Dimu_hi]
+    list_4mu_jpsi2mass = [Upsimass, Psi2Smass, Jpsimass, Phimass,
+                          Psi2Smass, Jpsimass, Phimass,
+                          Jpsimass, Phimass, Phimass]
+
+    list_4mu_obj = []
+    for hypo in list_4mu_hypo:
+        list_4mu_obj.append( CompFactory.DerivationFramework.PsiPlusPsiSingleVertex("BPHY13_"+hypo) )
+
+    for i in range(len(list_4mu_obj)):
+        list_4mu_obj[i].HypothesisName           = list_4mu_hypo[i]
+        list_4mu_obj[i].Psi1Vertices             = list_4mu_psi1Input[i]
+        list_4mu_obj[i].Psi2Vertices             = list_4mu_psi2Input[i]
+        list_4mu_obj[i].NumberOfPsi1Daughters    = 2
+        list_4mu_obj[i].NumberOfPsi2Daughters    = 2
+        list_4mu_obj[i].Jpsi1MassLowerCut        = list_4mu_jpsi1lo[i]
+        list_4mu_obj[i].Jpsi1MassUpperCut        = list_4mu_jpsi1hi[i]
+        list_4mu_obj[i].Jpsi2MassLowerCut        = list_4mu_jpsi2lo[i]
+        list_4mu_obj[i].Jpsi2MassUpperCut        = list_4mu_jpsi2hi[i]
+        list_4mu_obj[i].MassLowerCut             = 0.
+        list_4mu_obj[i].MassUpperCut             = 31000.
+        list_4mu_obj[i].Jpsi1Mass                = list_4mu_jpsi1mass[i]
+        list_4mu_obj[i].ApplyJpsi1MassConstraint = True
+        if i == len(list_4mu_obj)-1:
+            list_4mu_obj[i].ApplyJpsi2MassConstraint = False
+        else:
+            list_4mu_obj[i].Jpsi2Mass                = list_4mu_jpsi2mass[i]
+            list_4mu_obj[i].ApplyJpsi2MassConstraint = True
+        list_4mu_obj[i].Chi2Cut                  = 25.
+        list_4mu_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags))
+        list_4mu_obj[i].TrkVertexFitterTool      = vkalvrt
+        list_4mu_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
+        list_4mu_obj[i].OutputVertexCollections  = ["BPHY13_"+list_4mu_hypo[i]+"_SubVtx1","BPHY13_"+list_4mu_hypo[i]+"_SubVtx2","BPHY13_"+list_4mu_hypo[i]+"_MainVtx"]
+        list_4mu_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
+        list_4mu_obj[i].RefPVContainerName       = "BPHY13_"+list_4mu_hypo[i]+"_RefPrimaryVertices"
+        list_4mu_obj[i].RefitPV                  = True
+        list_4mu_obj[i].MaxnPV                   = 100
+
+
+    list_3mu1trk_hypo = ["UpsiUpsi_3mu1trk", "UpsiPsi_3mu1trk", "UpsiJpsi_3mu1trk", "UpsiPhi_3mu1trk",
+                         "PsiPsi_3mu1trk", "PsiJpsi_3mu1trk", "PsiPhi_3mu1trk",
+                         "JpsiJpsi_3mu1trk", "JpsiPhi_3mu1trk", "PhiPhi_3mu1trk",
+                         "PsiUpsi_3mu1trk", "JpsiUpsi_3mu1trk", "PhiUpsi_3mu1trk",
+                         "JpsiPsi_3mu1trk", "PhiPsi_3mu1trk", "PhiJpsi_3mu1trk",
+                         "UpsiDimu_3mu1trk", "DimuUpsi_3mu1trk"]
+    list_3mu1trk_psi1Input = ["BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx", "BPHY13Upsimumu_revtx",
+                              "BPHY13Psimumu_revtx", "BPHY13Psimumu_revtx", "BPHY13Psimumu_revtx",
+                              "BPHY13Jpsimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
+                              "BPHY13Psimumu_revtx", "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx",
+                              "BPHY13Jpsimumu_revtx", "BPHY13Phimumu_revtx", "BPHY13Phimumu_revtx",
+                              "BPHY13Upsimumu_revtx", "BPHY13Dimumumu"]
+    list_3mu1trk_psi2Input = ["BPHY13Upsimutrk_revtx", "BPHY13Psimutrk_revtx", "BPHY13Jpsimutrk_revtx", "BPHY13Phimutrk_revtx",
+                              "BPHY13Psimutrk_revtx", "BPHY13Jpsimutrk_revtx", "BPHY13Phimutrk_revtx",
+                              "BPHY13Jpsimutrk_revtx", "BPHY13Phimutrk_revtx", "BPHY13Phimutrk_revtx",
+                              "BPHY13Upsimutrk_revtx", "BPHY13Upsimutrk_revtx", "BPHY13Upsimutrk_revtx",
+                              "BPHY13Psimutrk_revtx", "BPHY13Psimutrk_revtx", "BPHY13Jpsimutrk_revtx",
+                              "BPHY13Dimumutrk", "BPHY13Upsimutrk_revtx"]
+    list_3mu1trk_jpsi1lo = [Upsi_lo,Upsi_lo,Upsi_lo,Upsi_lo,
+                            Psi_lo,Psi_lo,Psi_lo,
+                            Jpsi_lo,Jpsi_lo,Phi_lo,
+                            Psi_lo,Jpsi_lo,Phi_lo,
+                            Jpsi_lo,Phi_lo,Phi_lo,
+                            Upsi_lo, Dimu_lo]
+    list_3mu1trk_jpsi1hi = [Upsi_hi,Upsi_hi,Upsi_hi,Upsi_hi,
+                            Psi_hi,Psi_hi,Psi_hi,
+                            Jpsi_hi,Jpsi_hi,Phi_hi,
+                            Psi_hi,Jpsi_hi,Phi_hi,
+                            Jpsi_hi,Phi_hi,Phi_hi,
+                            Upsi_hi, Dimu_hi]
+    list_3mu1trk_jpsi1mass = [Upsimass, Upsimass, Upsimass, Upsimass,
+                              Psi2Smass, Psi2Smass, Psi2Smass,
+                              Jpsimass, Jpsimass, Phimass,
+                              Psi2Smass, Jpsimass, Phimass,
+                              Jpsimass, Phimass, Phimass,
+                              Upsimass, 0.0] # 0.0 is dummy
+    list_3mu1trk_jpsi2lo = [Upsi_lo,Psi_lo,Jpsi_lo,Phi_lo,
+                            Psi_lo,Jpsi_lo,Phi_lo,
+                            Jpsi_lo,Phi_lo,Phi_lo,
+                            Upsi_lo,Upsi_lo,Upsi_lo,
+                            Psi_lo,Psi_lo,Jpsi_lo,
+                            Dimu_lo, Upsi_lo]
+    list_3mu1trk_jpsi2hi = [Upsi_hi,Psi_hi,Jpsi_hi,Phi_hi,
+                            Psi_hi,Jpsi_hi,Phi_hi,
+                            Jpsi_hi,Phi_hi,Phi_hi,
+                            Upsi_hi,Upsi_hi,Upsi_hi,
+                            Psi_hi,Psi_hi,Jpsi_hi,
+                            Dimu_hi, Upsi_lo]
+    list_3mu1trk_jpsi2mass = [Upsimass, Psi2Smass, Jpsimass, Phimass,
+                              Psi2Smass, Jpsimass, Phimass,
+                              Jpsimass, Phimass, Phimass,
+                              Upsimass, Upsimass, Upsimass,
+                              Psi2Smass, Psi2Smass, Jpsimass,
+                              0.0, Upsimass] # 0.0 is dummy
+
+    list_3mu1trk_obj = []
+    for hypo in list_3mu1trk_hypo:
+        list_3mu1trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiSingleVertex("BPHY13_"+hypo) )
+
+    for i in range(len(list_3mu1trk_obj)):
+        list_3mu1trk_obj[i].HypothesisName           = list_3mu1trk_hypo[i]
+        list_3mu1trk_obj[i].Psi1Vertices             = list_3mu1trk_psi1Input[i]
+        list_3mu1trk_obj[i].Psi2Vertices             = list_3mu1trk_psi2Input[i]
+        list_3mu1trk_obj[i].NumberOfPsi1Daughters    = 2
+        list_3mu1trk_obj[i].NumberOfPsi2Daughters    = 2
+        list_3mu1trk_obj[i].MaxCandidates            = 20
+        list_3mu1trk_obj[i].Jpsi1MassLowerCut        = list_3mu1trk_jpsi1lo[i]
+        list_3mu1trk_obj[i].Jpsi1MassUpperCut        = list_3mu1trk_jpsi1hi[i]
+        list_3mu1trk_obj[i].Jpsi2MassLowerCut        = list_3mu1trk_jpsi2lo[i]
+        list_3mu1trk_obj[i].Jpsi2MassUpperCut        = list_3mu1trk_jpsi2hi[i]
+        list_3mu1trk_obj[i].MassLowerCut             = 0.
+        list_3mu1trk_obj[i].MassUpperCut             = 31000.
+        if i == len(list_3mu1trk_obj)-2:
+            list_3mu1trk_obj[i].Jpsi1Mass                = list_3mu1trk_jpsi1mass[i]
+            list_3mu1trk_obj[i].ApplyJpsi1MassConstraint = True
+            list_3mu1trk_obj[i].ApplyJpsi2MassConstraint = False
+        elif i == len(list_3mu1trk_obj)-1:
+            list_3mu1trk_obj[i].Jpsi2Mass                = list_3mu1trk_jpsi2mass[i]
+            list_3mu1trk_obj[i].ApplyJpsi1MassConstraint = False
+            list_3mu1trk_obj[i].ApplyJpsi2MassConstraint = True
+        else:
+            list_3mu1trk_obj[i].Jpsi1Mass                = list_3mu1trk_jpsi1mass[i]
+            list_3mu1trk_obj[i].Jpsi2Mass                = list_3mu1trk_jpsi2mass[i]
+            list_3mu1trk_obj[i].ApplyJpsi1MassConstraint = True
+            list_3mu1trk_obj[i].ApplyJpsi2MassConstraint = True
+        list_3mu1trk_obj[i].Chi2Cut                  = 25.
+        list_3mu1trk_obj[i].PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags))
+        list_3mu1trk_obj[i].TrkVertexFitterTool      = vkalvrt
+        list_3mu1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
+        list_3mu1trk_obj[i].OutputVertexCollections  = ["BPHY13_"+list_3mu1trk_hypo[i]+"_SubVtx1","BPHY13_"+list_3mu1trk_hypo[i]+"_SubVtx2","BPHY13_"+list_3mu1trk_hypo[i]+"_MainVtx"]
+        list_3mu1trk_obj[i].VxPrimaryCandidateName   = "PrimaryVertices"
+        list_3mu1trk_obj[i].RefPVContainerName       = "BPHY13_"+list_3mu1trk_hypo[i]+"_RefPrimaryVertices"
+        list_3mu1trk_obj[i].RefitPV                  = True
+        list_3mu1trk_obj[i].MaxnPV                   = 100
+
+
+    list_all_obj = list_4mu_obj + list_3mu1trk_obj
+
+    OutputCollections = []
+    RefPVContainers = []
+    RefPVAuxContainers = []
+    passedCandidates = []
+
+    for obj in list_all_obj:
+        OutputCollections += obj.OutputVertexCollections
+        RefPVContainers += ["xAOD::VertexContainer#BPHY13_" + obj.HypothesisName + "_RefPrimaryVertices"]
+        RefPVAuxContainers += ["xAOD::VertexAuxContainer#BPHY13_" + obj.HypothesisName + "_RefPrimaryVerticesAux."]
+        passedCandidates += [ "BPHY13_" + obj.HypothesisName + "_MainVtx" ]
+
+    BPHY13_SelectEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool(name = "BPHY13_SelectEvent", VertexContainerNames = passedCandidates)
+
+    augmentation_tools = [BPHY13_Reco_Phimumu, BPHY13_Reco_Jpsimumu, BPHY13_Reco_Psimumu, BPHY13_Reco_Upsimumu, BPHY13_Reco_Dimumumu, BPHY13_Reco_Phimutrk, BPHY13_Reco_Jpsimutrk, BPHY13_Reco_Psimutrk, BPHY13_Reco_Upsimutrk, BPHY13_Reco_Dimumutrk, BPHY13_Rev_Phimumu, BPHY13_Rev_Jpsimumu, BPHY13_Rev_Psimumu, BPHY13_Rev_Upsimumu, BPHY13_Rev_Phimutrk, BPHY13_Rev_Jpsimutrk, BPHY13_Rev_Psimutrk, BPHY13_Rev_Upsimutrk] + list_all_obj
+    for t in augmentation_tools : acc.addPublicTool(t)
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+        "BPHY13Kernel",
+        AugmentationTools = augmentation_tools,
+        SkimmingTools     = [BPHY13_SelectEvent]
+    ))
+
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
@@ -419,66 +704,42 @@ def BPHY13Cfg(ConfigFlags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     BPHY13_AllVariables  = getDefaultAllVariables()
     BPHY13_StaticContent = []
-    
+
     # Needed for trigger objects
     BPHY13SlimmingHelper.IncludeMuonTriggerContent = True
     BPHY13SlimmingHelper.IncludeBPhysTriggerContent = True
-    
+
     ## primary vertices
     BPHY13_AllVariables += ["PrimaryVertices"]
-    for i in range(1,8):
-        BPHY13_StaticContent += ["xAOD::VertexContainer#BPHY13RefittedPrimaryVertices%s" %str(i) ]
-        BPHY13_StaticContent += ["xAOD::VertexAuxContainer#BPHY13RefittedPrimaryVertices%sAux." %str(i)]
-    
+    BPHY13_StaticContent += RefPVContainers
+    BPHY13_StaticContent += RefPVAuxContainers
+
     ## ID track particles
     BPHY13_AllVariables += ["InDetTrackParticles"]
-    
+
     ## combined / extrapolated muon track particles 
     ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
     ##        are store in InDetTrackParticles collection)
-    BPHY13_AllVariables += ["CombinedMuonTrackParticles"]
-    BPHY13_AllVariables += ["ExtrapolatedMuonTrackParticles"]
-    
+    BPHY13_AllVariables += ["CombinedMuonTrackParticles", "ExtrapolatedMuonTrackParticles"]
+
     ## muon container
-    BPHY13_AllVariables += ["Muons"]
-    
-    
-    BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
+    BPHY13_AllVariables += ["Muons", "MuonSegments"]
+
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
-    
-    BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2mu.OutputVtxContainerName]
-    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2mu.OutputVtxContainerName]
-    
-    BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2trk.OutputVtxContainerName]
-    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2trk.OutputVtxContainerName]
-    
-    BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2muHi.OutputVtxContainerName]
-    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2muHi.OutputVtxContainerName]
-    
-    BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2trkHi.OutputVtxContainerName]
-    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2trkHi.OutputVtxContainerName]
-    
-    BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2muMed.OutputVtxContainerName]
-    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2muMed.OutputVtxContainerName]
-    
-    BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13_Revertex_2trkMed.OutputVtxContainerName]
-    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY13_Revertex_2trkMed.OutputVtxContainerName]
-    
-    
+    for output in OutputCollections:
+        BPHY13_StaticContent += ["xAOD::VertexContainer#%s" % output]
+        BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % output]
+
     # Truth information for MC only
     if isSimulation:
         BPHY13_AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
+
+    BPHY13SlimmingHelper.SmartCollections = ["Muons", "PrimaryVertices", "InDetTrackParticles"]
     BPHY13SlimmingHelper.AllVariables = BPHY13_AllVariables
     BPHY13SlimmingHelper.StaticContent = BPHY13_StaticContent
 
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY13", ItemList=BPHY13SlimmingHelper.GetItemList(), AcceptAlgs=["BPHY13Kernel"]))
+    BPHY13ItemList = BPHY13SlimmingHelper.GetItemList()
+    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY13", ItemList=BPHY13ItemList, AcceptAlgs=["BPHY13Kernel"]))
     acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY13", AcceptAlgs=["BPHY13Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc
