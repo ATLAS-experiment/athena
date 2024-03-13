@@ -21,10 +21,11 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     m_rangeTRTHits = 60
     m_etaRange = 2.7
     m_etaBins = 40
+    m_phiBins = 80
     m_d0BsNbins = 100
     m_d0Range = 2
     m_z0Range = 70.
-    m_d0BsRange = 0.5
+    m_d0BsRange = 0.05
      
     # Set a folder name from the user options
     folderName = "ExtendedTracks_NoTriggerSelection"
@@ -125,7 +126,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_phi;phi'
     title = 'phi;Track #phi;Number of Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=80, xmin=0, xmax= 2 * M_PI)
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI)
 
     varName = 'm_z0;z0_origin'
     title = 'z_{0} (computed vs origin); z_{0} (origin) [mm]; Tracks'
@@ -145,7 +146,7 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
 
     varName = 'm_d0_bscorr;d0'
     title = 'd_{0} (corrected for beamspot);d_{0} (BS) [mm]; Tracks'
-    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_d0BsRange/10, xmax=m_d0BsRange/10)
+    genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=m_d0BsNbins, xmin=-m_d0BsRange, xmax=m_d0BsRange)
 
     varName = 'm_pT;pT'
     title = 'p_{T};Signed Track p_{T} [GeV];Tracks'
@@ -154,6 +155,10 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     varName = 'm_p;P'
     title = 'Track Momentum P;Signed Track P [GeV];Tracks'
     genericTrackGroup.defineHistogram(varName, type='TH1F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange)
+
+    varName = 'm_phi,m_d0_bscorr;D0VsPhi0'
+    title = 'd_{0} (BS) Vs #phi_{0};#phi_{0} [rad];d_{0} (BS) [mm]'
+    genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange)
    
     # end histograms
 
