@@ -327,27 +327,33 @@ class TestFlagsSetupDynamic(FlagsSetup):
     def test_cloneHash(self):
         # compare copy hash to clone hash, should be equal
         copyflags = copy.deepcopy(self.flags)
+        copyflags.loadAllDynamicFlags()
         copyflags.lock()
         copyhash = copyflags.athHash()
         cloneflags = self.flags.clone()
+        cloneflags.loadAllDynamicFlags()
         cloneflags.lock()
         clonehash = cloneflags.athHash()
         self.assertEqual(copyhash, clonehash)
 
         # compare copy hash to cloneAndReplace hash, should not be equal
         clonew = self.flags.cloneAndReplace('W', 'Z')
+        clonew.loadAllDynamicFlags()
         clonew.lock()
         clonewhash = clonew.athHash()
-        self.assertNotEqual(clonewhash, copyhash)
+        # this should not be equal, the flags don't have the same
+        # content
+        self.assertNotEqual(clonewhash, clonehash)
 
         # compare first clone to second clone
         cloneflags2 = self.flags.clone()
+        cloneflags2.loadAllDynamicFlags()
         cloneflags2.lock()
         clonehash2 = cloneflags2.athHash()
-        # this should be equal and is not
-        self.assertNotEqual(clonehash2, clonehash)
-        # this should not be equal but is
-        self.assertEqual(clonehash2, clonewhash)
+        # this should be equal, they have the same flags
+        self.assertEqual(clonehash2, clonehash)
+        # this should not be equal, since a group was replaced
+        self.assertNotEqual(clonehash2, clonewhash)
 
 
 class TestDynamicDependentFlags(unittest.TestCase):
