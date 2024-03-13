@@ -7,6 +7,7 @@
 #include "egammaCaloUtils/CookieCutterHelpers.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
+#include "xAODCaloEvent/CaloClusterKineHelper.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -358,6 +359,8 @@ std::optional<std::unique_ptr<xAOD::CaloCluster>> egammaForwardBuilder::cookieCu
       newCellLinks->addCell(cellItr.index(), cellItr.weight());
     }
   }
+
+  CaloClusterKineHelper::calculateKine(newCluster.get(), true, true);
 
   return newCluster;
 }
