@@ -13,7 +13,7 @@ target="main"
 ignore=(
     "Projects/"
     "Build/"
-#    "Tools/WorkflowTestRunner/python/References.py"  # uncomment once references diverge
+    "Tools/WorkflowTestRunner/python/References.py"
 )
 
 usage() {
