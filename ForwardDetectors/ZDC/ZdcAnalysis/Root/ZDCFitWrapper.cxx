@@ -449,7 +449,7 @@ void ZDCFitExpFermiPreExp::SetT0FitLimits(float t0Min, float t0Max)
 
 ZDCFitExpFermiLHCfPreExp::ZDCFitExpFermiLHCfPreExp(const std::string& tag, float tmin, float tmax, float tau1, float tau2,
 						   float defExpTau, float fixExpTau) :
-  ZDCPreExpFitWrapper(std::make_shared<TF1>(("ExpFermiLHCfPreExp" + tag).c_str(), this, tmin, tmax, 6), defExpTau, fixExpTau),
+  ZDCPreExpFitWrapper(std::make_shared<TF1>(("ExpFermiLHCfPreExp" + tag).c_str(), this, tmin, tmax, 7), defExpTau, fixExpTau),
   m_tau1(tau1), m_tau2(tau2)
 {
   // Create the reference function that we use to evaluate ExpFermiFit more efficiently
