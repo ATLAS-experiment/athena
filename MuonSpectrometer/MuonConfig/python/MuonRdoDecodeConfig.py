@@ -341,8 +341,8 @@ def muonRdoDecodeTestData( forTrigger = False ):
     log.setLevel(INFO)
     log.info('About to setup Raw data decoding')
 
-    cfg=ComponentAccumulator()
-
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    cfg = MainServicesCfg(flags)
 
     # Add the MuonCache to ComponentAccumulator for trigger/RoI testing mode
     if forTrigger:

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -45,9 +45,6 @@ def createDQConfigFlags():
     acf.addFlag('DQ.triggerDataAvailable', True)
     # useTrigger determines whether we should use TrigDecisionTool
     acf.addFlag('DQ.useTrigger', getUseTrigger)
-
-    # temp thing for steering from inside old-style ...
-    acf.addFlag('DQ.isReallyOldStyle', False)
 
     # computed
     acf.addFlag('DQ.Environment', getEnvironment )

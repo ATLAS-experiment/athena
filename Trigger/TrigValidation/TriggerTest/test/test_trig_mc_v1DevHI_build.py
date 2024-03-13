@@ -14,11 +14,9 @@ ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.args = '--CA'
 ex.job_options = 'TriggerJobOpts/runHLT.py'
-ex.input = 'ttbar' # TODO restore to 'pbpb' once it has supercells MR: !68783
+ex.input = 'ttbar' # TODO restore to 'pbpb', MR !68783
 ex.threads = 1
 ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',
-            'Trigger.doLVL1=True',
-            'Output.RDOFileName="RDO_TRIG.pool.root"',
             'Trigger.doRuntimeNaviVal=True',
             'Trigger.L1.Menu.doHeavyIonTobThresholds=True']
 
@@ -34,7 +32,8 @@ refcomp = CheckSteps.ChainCompStep("CountRefComp")
 refcomp.input_file = 'ref_mc_v1DevHI_build.new'
 refcomp.args += ' --patch'
 refcomp.reference_from_release = True # installed from TriggerTest/share
-refcomp.required = True # Final exit code depends on this step
+# TODO: put back to True when we'll start preparing for HI data (and put back this test in the CI)
+refcomp.required = False # Final exit code depends on this step
 CheckSteps.add_step_after_type(test.check_steps, CheckSteps.ChainDumpStep, refcomp)
 
 import sys

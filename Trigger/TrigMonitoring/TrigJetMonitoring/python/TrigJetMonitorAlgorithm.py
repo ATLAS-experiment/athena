@@ -715,7 +715,7 @@ def jetMonitoringConfig(inputFlags,jetcoll,jetCollDict,monMode):
            addFlavourTagVariables(conf,"fastDips")
            addFlavourTagVariables(conf, "fastGN120230327")
            addFlavourTagVariables(conf,"fastGN220240122")
-           addFlavourTagVariables(conf,"fastGNTau20240216", flavs=["ptau", "pu"])
+           addFlavourTagVariables(conf,"fastGNTau20240216", flavs=["tau", "u"])
        if 'EMTopo' in jetcoll: #dedicated histograms for online EMTopo jets
            conf.appendHistos("Timing")
      else:

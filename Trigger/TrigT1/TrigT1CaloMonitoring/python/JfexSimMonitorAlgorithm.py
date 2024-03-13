@@ -1,7 +1,7 @@
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-def JfexSimMonitoringConfig(flags, UseOfflineCopy = True):
+def JfexSimMonitoringConfig(flags):
     '''Function to configure LVL1 Efex simulation comparison algorithm in the monitoring system.'''
 
     # use L1Calo's special MonitoringCfgHelper

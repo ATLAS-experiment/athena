@@ -1,8 +1,9 @@
 #!/bin/sh
+# Emacs, this is mostly -*-Python-*-
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
-# athena.py is born as shell script to preload some optional libraries
+# athena.py is born as shell script to preload some optional libraries.
 #
 """date"
 
@@ -142,12 +143,9 @@ try:
 except Exception:
    pass            # don't worry about it failing ...
 
-## user session history (deleted in Preparation.py)
-fhistory = os.path.expanduser( '~/.athena.history' )
-
 
 ## interface setup as appropriate
-if opts.run_batch and not opts.debug:
+if not (opts.interactive or opts.debug):
  # in batch there is no need for stdin
    if sys.stdin and os.isatty( sys.stdin.fileno() ):
       os.close( sys.stdin.fileno() )
@@ -157,25 +155,11 @@ else:
    # when Athena components dereference ROOT objects that have been deleted.
    import ROOT  # noqa: F401
 
- # readline support
-   import rlcompleter, readline  # noqa: F401 (needed for completion)
-
-   readline.parse_and_bind( 'tab: complete' )
-   readline.parse_and_bind( 'set show-all-if-ambiguous On' )
-
- # history support
-   if os.path.exists( fhistory ):
-      readline.read_history_file( fhistory )
-   readline.set_history_length( 1024 )
-
-   del readline, rlcompleter
-
-## use of shell escapes in interactive mode
-if not opts.run_batch:
-   import AthenaCommon.ShellEscapes as ShellEscapes
-   sys.excepthook = ShellEscapes.ShellEscapes()
-   del ShellEscapes
-
+## setup interactive prompt
+if opts.interactive:
+   from AthenaCommon.Interactive import configureInteractivePrompt
+   configureInteractivePrompt()
+   del configureInteractivePrompt
 
 ### logging and messages -----------------------------------------------------
 from AthenaCommon.Logging import logging, log
@@ -188,7 +172,7 @@ except Exception:
    aop._help_and_exit()
 
 
-if not (opts.scripts or opts.fromdb) and opts.run_batch:
+if not (opts.scripts or opts.fromdb) and not opts.interactive:
    _msg.error( "batch mode requires at least one script" )
    from AthenaCommon.ExitCodes import INCLUDE_ERROR
    aop._help_and_exit( INCLUDE_ERROR )

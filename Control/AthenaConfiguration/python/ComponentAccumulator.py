@@ -1206,47 +1206,35 @@ class ComponentAccumulator(AccumulatorCachable):
 def startInteractive(localVarDic):
     """Setup and start a useful interactive session including auto-completion and history"""
     import code
-    import readline
-    import rlcompleter
-    import os
-    
+
     # collect all global and local variables
     vars = sys.modules['__main__'].__dict__
     vars.update(globals())
     vars.update(localVarDic)
 
-    # setup the autocompletion
-    readline.set_completer(rlcompleter.Completer(vars).complete)
-    readline.parse_and_bind("tab: complete")    
-
-    # setup history 
-    histfile = os.path.join(os.environ["HOME"], ".athena.history")
-    readline.set_history_length(1000)    
-    if os.path.exists(histfile):
-        readline.read_history_file(histfile)
+    # configure the prompt
+    from AthenaCommon.Interactive import configureInteractivePrompt
+    configureInteractivePrompt(vars)
 
     # start the interpreter
     code.interact(local=vars)
 
-    # write out the history
-    readline.write_history_file(histfile)
 
-    
 def printInteractiveMsg_init():
     print("Interactive mode")
-    print("\tThe ComponentAccumulator is known as 'self', you can inspect it but changes are not taken into account")
-    print("\tThe application is known as 'app' but not yet initialized")
-    print("\t^D will exit the interactive mode and athena will continue")
-    print("\texit() will terminate the program now")
+    print("\tThe ComponentAccumulator is known as 'self', you can inspect it but changes are not taken into account.")
+    print("\tThe application is known as 'app' but not yet initialized.")
+    print("\t^D will exit the interactive mode and athena will continue.")
+    print("\texit() will terminate the program now.")
     return 
 
 
 def printInteractiveMsg_run():
     print("Interactive mode")
-    print("\tThe application is known as 'app' and initialized")
-    print("\tYou process n events with 'app.run(n)'") 
-    print("\tStoreGate is accessible as 'sg'") 
-    print("\t^D will exit the interactive mode and athena will finalize")
+    print("\tThe application is known as 'app' and initialized.")
+    print("\tYou can process N events with 'app.run(N)'.")
+    print("\tStoreGate is accessible as 'sg'.")
+    print("\t^D will exit the interactive mode and athena will finalize.")
     return 
 
 

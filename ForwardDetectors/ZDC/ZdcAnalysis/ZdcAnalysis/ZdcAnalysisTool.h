@@ -232,8 +232,8 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupStretchedExpFitMSE{this, "RPDChannelPileupStretchedExpFitMSE", "", "RPD channel pileup stretched exponential fit mean squared error in baseline samples"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelAmplitude{this, "RPDChannelAmplitude", "", "RPD channel sum ADC"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelAmplitudeCalib{this, "RPDChannelAmplitudeCalib", "", "RPD channel sum ADC with reconstruction calibrated factors applied"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxAdc{this, "RPDChannelMaxADC", "", "RPD channel max ADC"};
-  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxAdcCalib{this, "RPDChannelMaxADCCalib", "", "RPD channel max ADC with reconstruction calibrated factors applied"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxADC{this, "RPDChannelMaxADC", "", "RPD channel max ADC"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxADCCalib{this, "RPDChannelMaxADCCalib", "", "RPD channel max ADC with reconstruction calibrated factors applied"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxSample{this, "RPDChannelMaxSample", "", "RPD channel max sample"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelStatus{this, "RPDChannelStatus", "", "RPD channel status"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupFrac{this, "RPDChannelPileupFrac", "", "RPD channel pileup as fraction of total (nominal baseline-subtracted) sum ADC"};

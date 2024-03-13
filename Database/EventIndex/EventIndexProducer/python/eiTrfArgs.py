@@ -58,7 +58,7 @@ def addEI_Basic_tfArgs(parser):
                         group='Event Index')
     parser.add_argument("--eifmt",
                         type=argFactory(argInt),
-                        help="Value ignored. Always prduce SPB format. "
+                        help="Value ignored. Always produce SPB format. "
                         "Argument kept for compatibility",
                         group='Event Index')
 

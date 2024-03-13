@@ -1,19 +1,14 @@
 #
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def DQTBackgroundMonAlgConfig(flags, isOld=False):
-    if isOld: # replace with helper for the old configuration
-        from AthenaMonitoring import AthMonitorCfgHelperOld as AthMonitorCfgHelper
-        from .DataQualityToolsConf import DQTBackgroundMon
-    else:
-        from AthenaMonitoring import AthMonitorCfgHelper
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        DQTBackgroundMon = CompFactory.DQTBackgroundMon
+def DQTBackgroundMonAlgConfig(flags):
+    from AthenaMonitoring import AthMonitorCfgHelper
+    from AthenaConfiguration.ComponentFactory import CompFactory
     helper = AthMonitorCfgHelper(flags, 'DQTBackgroundMonAlgCfg')
     
 
-    monAlg = helper.addAlgorithm(DQTBackgroundMon,'DQTBackgroundMonAlg')
+    monAlg = helper.addAlgorithm(CompFactory.DQTBackgroundMon,'DQTBackgroundMonAlg')
     monAlg.Muons = True
     group = helper.addGroup(monAlg,'default','GLOBAL/BackgroundMon','run')
 
@@ -174,15 +169,11 @@ def DQTBackgroundMonAlgConfig(flags, isOld=False):
     group.defineHistogram('nVertex;nVertex_unpairNonIso', title=pVertexT+unpairNonIsoT,
                           weight='unpairNonIso', xbins=50, xmin=0, xmax=50)
 
-
-    if not isOld:
-        # need background objects
-        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-        acc = ComponentAccumulator()
-        from RecBackgroundAlgs.BackgroundAlgsConfig import BackgroundAlgsCfg
-        acc.merge(BackgroundAlgsCfg(flags))
-        acc.merge(helper.result())
-    else:
-        acc = helper.result()
+    # need background objects
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    acc = ComponentAccumulator()
+    from RecBackgroundAlgs.BackgroundAlgsConfig import BackgroundAlgsCfg
+    acc.merge(BackgroundAlgsCfg(flags))
+    acc.merge(helper.result())
 
     return acc

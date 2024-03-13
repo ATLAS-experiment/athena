@@ -1,7 +1,6 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 
-from egammaRec import egammaKeys
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -122,13 +121,17 @@ def getGainLayerNames(tool):
 
 def getGainDecorations(
     acc,
+    flags,
     kernel,
-    collections=[egammaKeys.outputElectronKey(), egammaKeys.outputPhotonKey()],
+    collections=None,
     info=["E", "nCells"],
 ):
     """getGainDecorations( acc, kernel collections=["Electrons", "Photons"] ) ->
     Return a list with the 'ExtraContent' to be added to the decorations to save the gain
     information per layer"""
+
+    if collections is None:
+        collections = [flags.Egamma.Keys.Output.Electrons, flags.Egamma.Keys.Output.Photons]
 
     GainDecoratorTool = None
     for toolStr in acc.getEventAlgo(kernel).AugmentationTools:

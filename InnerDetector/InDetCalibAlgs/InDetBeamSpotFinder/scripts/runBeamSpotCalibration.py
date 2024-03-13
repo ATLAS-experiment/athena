@@ -10,6 +10,10 @@ import configMy
 
 #Job options
 if 'outputlevel' not in configMy.jobConfig:                   configMy.jobConfig['outputlevel'] = 3
+if 'maxEvents' not in configMy.jobConfig:                     configMy.jobConfig['maxEvents'] = -1
+if 'skipEvents' not in configMy.jobConfig:                    configMy.jobConfig['skipEvents'] = 0
+if 'MsgLimit' not in configMy.jobConfig:                      configMy.jobConfig['MsgLimit'] = 20 
+
 if 'outputfileprefix' not in configMy.jobConfig:              configMy.jobConfig['outputfileprefix'] = ''
 if 'outputfile' not in configMy.jobConfig:                    configMy.jobConfig['outputfile'] = configMy.jobConfig['outputfileprefix']+'beamspot.db'
 if 'histfile' not in configMy.jobConfig:                      configMy.jobConfig['histfile'] = configMy.jobConfig['outputfileprefix']+'nt.root'
@@ -33,6 +37,7 @@ if 'MaxTransverseErr' not in configMy.jobConfig:           configMy.jobConfig['M
 if 'VertexTypes' not in configMy.jobConfig:                configMy.jobConfig['VertexTypes'] = ['PriVtx']
 if 'MinVtxProb' not in configMy.jobConfig:                 configMy.jobConfig['MinVtxProb'] = .001
 if 'VertexContainer' not in configMy.jobConfig:            configMy.jobConfig['VertexContainer'] = 'PrimaryVertices'
+if 'MaxAbsCorrelXY' not  in configMy.jobConfig:            configMy.jobConfig['MaxAbsCorrelXY'] = 0.8
 
 #Options for sorting vertices into fits
 if 'LumiRange' not in configMy.jobConfig:                  configMy.jobConfig['LumiRange'] = 0
@@ -67,13 +72,16 @@ if 'useBeamSpot' not in configMy.jobConfig:
 
 print("job configuration: ",configMy.jobConfig)
 
-flags.Exec.OutputLevel = configMy.jobConfig['outputlevel'] 
+flags.Exec.OutputLevel = configMy.jobConfig['outputlevel']
+flags.Exec.SkipEvents = configMy.jobConfig['skipEvents']
+flags.Exec.MaxEvents = configMy.jobConfig['maxEvents']
 
 flags.Input.Files = []
 for path in configMy.jobConfig['inputfiles']:
     print("path: ",path)
     print("glob: ",glob(path))
     flags.Input.Files += glob(path)
+
 
 flags.Trigger.triggerConfig = "DB"
 flags.DQ.enableLumiAccess = False
@@ -84,6 +92,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
+acc.getService("MessageSvc").defaultLimit = configMy.jobConfig['MsgLimit']
 
 from InDetBeamSpotFinder.InDetBeamSpotFinderConfig import InDetBeamSpotFinderCfg
 acc.merge(InDetBeamSpotFinderCfg(flags,configMy.jobConfig))

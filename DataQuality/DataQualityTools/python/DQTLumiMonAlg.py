@@ -1,30 +1,25 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #
 
-def DQTLumiMonAlgConfig(flags, isOld=False):
-    if isOld: # replace with the old version of the tool
-        from AthenaMonitoring import AthMonitorCfgHelperOld as AthMonitorCfgHelper
-        from .DataQualityToolsConf import DQTLumiMonAlg
-    else:
-        from AthenaMonitoring import AthMonitorCfgHelper
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        DQTLumiMonAlg = CompFactory.DQTLumiMonAlg
-
+def DQTLumiMonAlgConfig(flags):
+    from AthenaMonitoring import AthMonitorCfgHelper
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    DQTLumiMonAlg = CompFactory.DQTLumiMonAlg
 
     helper = AthMonitorCfgHelper(flags, 'DQTLumiMonAlgCfg')
     # Three instances of the algorithm. One using any trigger, another using only muon
     # triggers, and the final using only electron triggers.
-    DQTLumiMonAlgConfigByTriggerChain(helper, DQTLumiMonAlg, flags, isOld)
-    if (flags.useTrigger if isOld else flags.DQ.useTrigger):
-        DQTLumiMonAlgConfigByTriggerChain(helper, DQTLumiMonAlg, flags, isOld,
+    DQTLumiMonAlgConfigByTriggerChain(helper, DQTLumiMonAlg, flags)
+    if flags.DQ.useTrigger:
+        DQTLumiMonAlgConfigByTriggerChain(helper, DQTLumiMonAlg, flags,
                                         'CATEGORY_monitoring_muonIso','EF_muX')
-        DQTLumiMonAlgConfigByTriggerChain(helper, DQTLumiMonAlg, flags, isOld,
+        DQTLumiMonAlgConfigByTriggerChain(helper, DQTLumiMonAlg, flags,
                                         'CATEGORY_primary_single_ele','EF_eX')
     return helper.result()
 
 
-def DQTLumiMonAlgConfigByTriggerChain(helper, algConfObj, flags, isOld, triggerChain='', triggerPath=''):
+def DQTLumiMonAlgConfigByTriggerChain(helper, algConfObj, flags, triggerChain='', triggerPath=''):
     monAlg = helper.addAlgorithm(algConfObj, 'DQTLumiMonAlg'+triggerPath)
 
     if triggerChain:
@@ -45,14 +40,8 @@ def DQTLumiMonAlgConfigByTriggerChain(helper, algConfObj, flags, isOld, triggerC
     monAlg.TightTrackWeight = 0.01
     monAlg.TightNTracks = 4
 
-    if isOld:
-        from RecExConfig.AutoConfiguration import GetLBNumber
-        lbnum = GetLBNumber()
-        lbdict = { 'xmin': lbnum-0.5 if lbnum>0 else 0.5,
-                   'xmax': lbnum+0.5 if lbnum>0 else 1.5 }
-    else:
-        lbdict = { 'xmin': min(flags.Input.LumiBlockNumbers)-0.5 if flags.Input.LumiBlockNumbers else 0.5,
-                   'xmax': max(flags.Input.LumiBlockNumbers)+0.5 if flags.Input.LumiBlockNumbers else 1.5 }
+    lbdict = { 'xmin': min(flags.Input.LumiBlockNumbers)-0.5 if flags.Input.LumiBlockNumbers else 0.5,
+               'xmax': max(flags.Input.LumiBlockNumbers)+0.5 if flags.Input.LumiBlockNumbers else 1.5 }
     lbdict['xbins'] = int(lbdict['xmax']-lbdict['xmin'])
 
     # Raw plots of lumi variables

@@ -95,13 +95,14 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         acc.merge(jFexEmulatedTowersCfg(flags, writeKey=emulatedDataTowersKey))
 
     # Decorate any jFEX data towers
+    extraJfexInfo = False # for decorating with SCell inputs to the towers
     if flags.Trigger.L1.dojFex and isNotPool:
         from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CalojFEXDecoratorCfg
-        acc.merge(L1CalojFEXDecoratorCfg(flags))
+        acc.merge(L1CalojFEXDecoratorCfg(flags, ExtraInfo=extraJfexInfo))
 
     # Decorate the emulated jFEX towers
     if flags.Trigger.L1.dojFex and isNotPool:
-        acc.merge(L1CalojFEXDecoratorCfg(flags,name='jFexTower2SCellEmulatedDecorator',jTowersReadKey=emulatedDataTowersKey))
+        acc.merge(L1CalojFEXDecoratorCfg(flags,name='jFexTower2SCellEmulatedDecorator',jTowersReadKey=emulatedDataTowersKey,ExtraInfo=extraJfexInfo))
 
     # Emulate eFEX input towers
     if flags.Trigger.L1.doeFex and isNotPool:
@@ -109,15 +110,24 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         eFexEmulatedTool = eFexEmulatedTowersCfg(flags,'L1_eFexEmulatedTowers')
         acc.merge(eFexEmulatedTool)
 
-    # Re-simulate from LATOME
+    # Re-simulate from LATOME (for both data and POOL files with SCells)
+    from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
     if isNotPool:
-        from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
         acc.merge(L1CaloFEXSimCfg(flags, simulateAltTau=True))
+    else:
+        SCellType = flags.Trigger.L1.L1CaloSuperCellContainerName
+        if SCellType in flags.Input.Collections:
+            acc.merge(L1CaloFEXSimCfg(flags, simulateAltTau=True))
 
-    # decorate the eFEX TOBs (offline copy) - must be configured to run *after* resimulation
+    # decorate the eFEX TOBs 
     if flags.Trigger.L1.doeFex and isNotPool:
         from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import eFexTOBDecoratorCfg
-        DecoratorAlgoSim = eFexTOBDecoratorCfg(flags,'eFexTOBDecoratorSim','L1_eEMRoISim','L1_eTauRoISim')
+        # Temporary fix to ensure the L1 TOBs are decoded by the Trigger
+        from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
+        ExtraInputs = [('xAOD::TrigCompositeContainer', 'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
+        DecoratorAlgo = eFexTOBDecoratorCfg(flags,'eFexTOBDecorator','L1_eEMRoI','L1_eTauRoI',ExtraInputs)
+        acc.merge(DecoratorAlgo)
+        DecoratorAlgoSim = eFexTOBDecoratorCfg(flags,'eFexTOBDecoratorSim','L1_eEMRoISim','L1_eTauRoIAltSim')
         acc.merge(DecoratorAlgoSim)
 
     # set up the slimming helper
@@ -136,6 +146,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     L1CaloSlimmingHelper.IncludeEGammaTriggerContent = True
     L1CaloSlimmingHelper.IncludeJetTriggerContent = True
     L1CaloSlimmingHelper.IncludeBJetTriggerContent = True
+    L1CaloSlimmingHelper.IncludeTauTriggerContent = True # does not select any Run3 HLT collections - added below
 
     # Container selection based on share/L1CALO versions
     # Note: if the container is in the on-the-fly list (ContainersOnTheFly.py) then we do not have to add it to the dictionary
@@ -144,7 +155,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # some gymnastics for HLT from RAWD
     if isNotPool and L1CaloSlimmingHelper.IncludeEGammaTriggerContent:
         # replicate adding EGammaTriggerContent
-        # switch the helper off - it doesn't help to have smart slimming for eGamma
+        # switch the eGamma Trigger off for RAW data - smart slimming not required
         L1CaloSlimmingHelper.IncludeEGammaTriggerContent = False
         ElToKeep = ['ptcone20', 'ptvarcone20', 'ptcone30', 'ptvarcone30', 'trk_d0','cl_eta2','cl_phi2', 'deltaEta1PearDistortion']
         ElVars = '.'.join(ElToKeep)
@@ -171,13 +182,13 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                                                          "HLT_AntiKt4EMTopoJets_nojcalib_ftf":"xAOD::JetContainer",
                                                          "HLT_AntiKt4EMTopoJets_nojcalib_ftfAux":"xAOD::JetAuxContainer",
                                                          "HLT_AntiKt4EMTopoJets_subjesIS":"xAOD::JetContainer",
-                                                         "HLT_AntiKt4EMTopoJets_subjesISAux":"xAOD::JetAuxContainer",
+                                                         "HLT_AntiKt4EMTopoJets_subjesISAux":"xAOD::ShallowAuxContainer",
                                                          "HLT_AntiKt4EMPFlowJets_nojcalib_ftf":"xAOD::JetContainer",
                                                          "HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux":"xAOD::JetAuxContainer",
                                                          "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf":"xAOD::JetContainer",
-                                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux":"xAOD::JetAuxContainer",
+                                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux":"xAOD::ShallowAuxContainer",
                                                          "HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf":"xAOD::JetContainer",
-                                                         "HLT_AntiKt4EMPFlowJets_subjesgscIS_ftfAux":"xAOD::JetAuxContainer",
+                                                         "HLT_AntiKt4EMPFlowJets_subjesgscIS_ftfAux":"xAOD::ShallowAuxContainer",
                                                          "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf":"xAOD::JetContainer",
                                                          "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux":"xAOD::JetAuxContainer",
                                                          "HLT_IDVertex_FS":"xAOD::VertexContainer",
@@ -190,6 +201,17 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                                                          "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJetsAux": "xAOD::JetAuxContainer"})
 
     AllVariables += ["HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging", "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets"]
+
+    if L1CaloSlimmingHelper.IncludeTauTriggerContent:
+        L1CaloSlimmingHelper.AppendToDictionary.update ({"HLT_TrigTauRecMerged_MVA":"xAOD::TauJetContainer",
+                                                         "HLT_TrigTauRecMerged_MVAAux":"xAOD::TauJetAuxContainer",
+                                                         "HLT_TrigTauRecMerged_LLP":"xAOD::TauJetContainer",
+                                                         "HLT_TrigTauRecMerged_LLPAux":"xAOD::TauJetAuxContainer",
+                                                         "HLT_TrigTauRecMerged_LRT":"xAOD::TauJetContainer",
+                                                         "HLT_TrigTauRecMerged_LRTAux":"xAOD::TauJetAuxContainer",
+                                                         "HLT_TrigTauRecMerged_CaloMVAOnly":"xAOD::TauJetContainer",
+                                                         "HLT_TrigTauRecMerged_CaloMVAOnlyAux":"xAOD::TauJetAuxContainer"})
+        AllVariables += ["HLT_TrigTauRecMerged_MVA", "HLT_TrigTauRecMerged_LLP", "HLT_TrigTauRecMerged_LRT", "HLT_TrigTauRecMerged_CaloMVAOnly"]
 
     # Generic event info
     L1CaloSlimmingHelper.AppendToDictionary.update({"EventInfo":"xAOD::EventInfo","EventInfoAux":"xAOD::EventAuxInfo"}) 
@@ -204,7 +226,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "Photons":"xAOD::PhotonContainer", "PhotonsAux":"xAOD::PhotonAuxContainer",
          "TauJets":"xAOD::TauJetContainer", "TauJetsAux":"xAOD::TauJetAuxContainer"}
     )
-    AllVariables += ["AntiKt4EMPFlowJets","AntiKt10LCTopoJets","Muons","Photons"] 
+    AllVariables += ["AntiKt4EMPFlowJets","AntiKt10LCTopoJets","Muons","Photons"]
     # TauJets require smart slimming in order not to cause issues
     SmartCollections += ["TauJets"]
 
@@ -283,6 +305,11 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "MuonSegmentsAux":"xAOD::MuonSegmentAuxContainer"}
     )
     AllVariables += ["egammaClusters","TauPi0Clusters","CaloCalTopoClusters","MuonSegments"]
+
+    # Add b-tagging information directly using ExtraVariables - as done for PHYSLITE
+    ExtraVariables += [
+        'BTagging_AntiKt4EMPFlow.DL1dv01_pu.DL1dv01_pc.DL1dv01_pb.GN2v00_pu.GN2v00_pc.GN2v00_pb'
+    ]
 
     # L1Calo information
     # Legacy RoI Containers
@@ -388,9 +415,11 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
          "L1_jFexDataTowers":"xAOD::jFexTowerContainer",
          "L1_jFexDataTowersAux":"xAOD::jFexTowerAuxContainer",
          "L1_gFexDataTowers":"xAOD::gFexTowerContainer",
-         "L1_gFexDataTowersAux":"xAOD::gFexTowerAuxContainer"}
+         "L1_gFexDataTowersAux":"xAOD::gFexTowerAuxContainer",
+         "L1_gFexDataTowers50":"xAOD::gFexTowerContainer",
+         "L1_gFexDataTowers50Aux":"xAOD::gFexTowerAuxContainer"}
     )
-    AllVariables += ["L1_eFexDataTowers","L1_jFexDataTowers","L1_gFexDataTowers"]
+    AllVariables += ["L1_eFexDataTowers","L1_jFexDataTowers","L1_gFexDataTowers","L1_gFexDataTowers50"]
 
     # Emulated eFEX input tower data from LATOME
     L1CaloSlimmingHelper.AppendToDictionary.update (
