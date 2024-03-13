@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSelectorTools/MuonSelectionTool.h"
@@ -7,6 +7,7 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "PathResolver/PathResolver.h"
 #include "xAODTracking/TrackingPrimitives.h"
+#include "CxxUtils/trapping_fp.h"
 
 namespace {
     static constexpr double const MeVtoGeV = 1. / 1000.;
@@ -384,6 +385,9 @@ namespace CP {
     }
 
     float MuonSelectionTool::qOverPsignificance(const xAOD::Muon& muon) const {
+        // Avoid spurious FPEs in the clang build.
+        CXXUTILS_TRAPPING_FP;
+
         if (m_disablePtCuts) {
             ATH_MSG_VERBOSE(__FILE__ << ":"<<__LINE__
                                      << " Momentum dependent cuts are disabled. Return 0.");
