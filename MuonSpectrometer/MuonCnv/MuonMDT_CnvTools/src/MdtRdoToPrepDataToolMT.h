@@ -97,8 +97,9 @@ namespace Muon {
                                                     const MdtCalibOutput& calibOutput) const;
         
         /// Creates the xAOD PRD object
-        std::unique_ptr<xAOD::MdtDriftCircle> createxAODPrepData(const MdtCalibInput& calibInput,
-                                                    const MdtCalibOutput& calibOutput) const;
+        void createxAODPrepData(const MdtCalibInput& calibInput,
+                                                    const MdtCalibOutput& calibOutput, 
+                                                    xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer) const;
 
         /// Creates the prep data container to be written
         ModfiablePrdColl setupMdtPrepDataContainer(const EventContext& ctx) const;
