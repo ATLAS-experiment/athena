@@ -193,9 +193,6 @@ def getArgumentParser():
     g.add_argument('--dump-configuration', metavar='FILE', dest='config_dump_file',
                    help='dump an ASCII version of the configuration to %(metavar)s')
 
-    g.add_argument('--no-display', action='store_true',
-                   help='prompt, but no graphics display')
-
     # --------------------------------------------------------------------------
     g = parser.add_argument_group('Monitoring and debugging')
 
@@ -255,9 +252,6 @@ def getArgumentParser():
     # Hidden (expert) options
     g = parser.add_argument_group('Expert options')
     parser.expert_groups.append(g)
-
-    g.add_argument('--minimal', action='store_true',
-                   help="minimal athena setup (used by drop-and-reload)")
 
     g.add_argument('--cppyy_minvmem', type=float, dest='cppyy_minvmem',
                    help="artificial vmem bump around cppys's import")
