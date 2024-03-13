@@ -1,5 +1,8 @@
 # Unit test for AthTPCnvSvc
 
+from AthenaCommon.AppMgr import theApp
+from AthenaPython import PyAthena
+
 theApp.EvtMax = 1
 theApp.initialize()
 tpsvc=PyAthena.py_svc('AthTPCnvSvc',True,'ITPCnvSvc')
