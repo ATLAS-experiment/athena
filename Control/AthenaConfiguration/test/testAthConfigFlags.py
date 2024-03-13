@@ -335,10 +335,10 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.assertEqual(copyhash, clonehash)
 
         # compare copy hash to cloneAndReplace hash, should not be equal
-        copyw = self.flags.cloneAndReplace('W', 'Z')
-        copyw.lock()
-        copywhash = copyw.athHash()
-        self.assertNotEqual(copywhash, copyhash)
+        clonew = self.flags.cloneAndReplace('W', 'Z')
+        clonew.lock()
+        clonewhash = clonew.athHash()
+        self.assertNotEqual(clonewhash, copyhash)
 
         # compare first clone to second clone
         cloneflags2 = self.flags.clone()
@@ -347,7 +347,7 @@ class TestFlagsSetupDynamic(FlagsSetup):
         # this should be equal and is not
         self.assertNotEqual(clonehash2, clonehash)
         # this should not be equal but is
-        self.assertEqual(clonehash2, copywhash)
+        self.assertEqual(clonehash2, clonewhash)
 
 
 class TestDynamicDependentFlags(unittest.TestCase):
