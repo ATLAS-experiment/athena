@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -329,7 +329,7 @@ void RDBVersionAccessor::getChildTagData()
 }
 
 std::string RDBVersionAccessor::attribute2String(const coral::AttributeList& attList,
-						 std::string fieldName)
+						 const std::string& fieldName)
 {
   std::ostringstream streamValue;
   attList[fieldName].toOutputStream(streamValue);
