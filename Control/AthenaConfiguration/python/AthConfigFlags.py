@@ -161,8 +161,7 @@ class FlagAddress(object):
         raise RuntimeError( "No such flag: "+ self._name+".  The name is likely incomplete." )
 
     def __getitem__(self, name):
-        merged = self._name + "." + name
-        return self._flags._get(merged)
+        return getattr(self, name)
 
     def __setitem__(self, name, value):
         setattr(self, name, value)
@@ -237,7 +236,7 @@ class AthConfigFlags(object):
 
     def _calculateHash(self):
         fmap = self._renamed_map()
-        flags = [(fmap[x], y) for x, y in self._flagdict.items() if fmap[x]]
+        flags = ((fmap[x], y) for x, y in self._flagdict.items() if fmap[x])
         return hash(frozenset((x, repr(y)) for x, y in flags))
 
     def __getattr__(self, name):
