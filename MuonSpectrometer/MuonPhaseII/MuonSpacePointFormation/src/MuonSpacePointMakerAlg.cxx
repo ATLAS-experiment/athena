@@ -38,7 +38,7 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
     SG::ReadCondHandle<ActsGeometryContext> gctx{m_geoCtxKey, ctx};
     ATH_CHECK(gctx.isValid());
     
-    using PrdType = ContType::const_value_type;
+    using PrdType = typename ContType::const_value_type;
     using PrdVec = std::vector<PrdType>;
     /// Fill the Mdt hits directly into their respective pre sorted container
     if constexpr (std::is_same<ContType, xAOD::MdtDriftCircleContainer>::value) {
@@ -49,13 +49,19 @@ template <class ContType>StatusCode MuonSpacePointMakerAlg::loadContainerAndSort
         /// Helper pair to separate eta & phi hits
         using EtaPhiHits = std::pair<PrdVec, PrdVec>;
         /// To reduce the combinatorics store the eta & phi hits per gas gap. 
-        /// All strip detectors have at maximum 4 gasGaps
-        using EtaPhiHitsPerChamber = std::array<EtaPhiHits, 4>;
+        /// All strip detectors have at maximum 4 gasGaps, 
+        //  But the Rpcs are additionally split accoring to their doubletPhi
+        using EtaPhiHitsPerChamber = std::array<EtaPhiHits, 6>;
         std::map<const MuonGMR4::MuonReadoutElement*, EtaPhiHitsPerChamber> collectedPrds{};
         for (const PrdType prd : *readHandle) {
             EtaPhiHitsPerChamber& hitsPerChamb = collectedPrds[prd->readoutElement()];
             /// Sort the hit into a GasGap
-            EtaPhiHits& hitsPerLayer = hitsPerChamb[prd->gasGap() -1];
+            unsigned int gapIdx = prd->gasGap() -1;
+            /// Split the Rpcs additionally according to their doubletPhi. 
+            if constexpr (std::is_same<ContType, xAOD::RpcStripContainer>::value) {
+                gapIdx = 2*gapIdx + (prd->doubletPhi() - 1);
+            }
+            EtaPhiHits& hitsPerLayer = hitsPerChamb[gapIdx];
             if (!prd->measuresPhi()) {
                 hitsPerLayer.first.push_back(prd);
             } else {
@@ -201,7 +207,10 @@ void MuonSpacePointMakerAlg::distributePointsAndStore(const EventContext& ctx,
         }
     }
     MuonSpacePointBucket& lastBucket{splittedHits[splittedHits.size() - 1]};
-    newBucket(pointPos(*lastBucket.back()));    
+    newBucket(pointPos(*lastBucket.back()));
+    /// Remove the probably empty bucket again.
+    splittedHits.pop_back();
+
 }
 
 }
