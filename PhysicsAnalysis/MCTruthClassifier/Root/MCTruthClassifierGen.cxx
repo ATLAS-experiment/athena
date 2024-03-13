@@ -606,15 +606,14 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
     int NumOfEleLoop = 0;
     int NumOfLepLoop = 0;
     int NumOfEleNeuLoop = 0;
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-      for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-        if (!partOriVert->outgoingParticle(ipOut)) continue;
-        if (!partOriVert->incomingParticle(ipIn)) continue;
-        if (partOriVert->outgoingParticle(ipOut)->barcode() == partOriVert->incomingParticle(ipIn)->barcode()) {
-          if (MC::isElectron(partOriVert->outgoingParticle(ipOut))) NumOfEleLoop++;
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 12) NumOfEleNeuLoop++;
-          if (MC::isSMLepton(partOriVert->outgoingParticle(ipOut))) NumOfLepLoop++;
-        }
+    for ( const auto pout: partOriVert->particles_out()) {
+      if (!pout) continue;
+      for (const auto pin: partOriVert->particles_in()) {
+        if (!pin) continue;
+        if (pout->barcode() != pin->barcode()) continue;
+        if (MC::isElectron(pout)) NumOfEleLoop++;
+        if (std::abs(pin->pdgId()) == 12) NumOfEleNeuLoop++;
+        if (MC::isSMLepton(pout)) NumOfLepLoop++;
       }
     }
     if (NumOfEleLoop == 2 && NumOfEleNeuLoop == 0) return ZBoson;
@@ -1111,15 +1110,14 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
     int NumOfTauLoop = 0;
     int NumOfTauNeuLoop = 0;
     int NumOfLepLoop = 0;
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-      for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-        if (!partOriVert->outgoingParticle(ipOut)) continue;
-        if (!partOriVert->incomingParticle(ipIn)) continue;
-        if (partOriVert->outgoingParticle(ipOut)->barcode() == partOriVert->incomingParticle(ipIn)->barcode()) {
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 15) NumOfTauLoop++;
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 16) NumOfTauNeuLoop++;
-          if (MC::isSMLepton(partOriVert->outgoingParticle(ipOut))) NumOfLepLoop++;
-        }
+    for ( const auto pout: partOriVert->particles_out()) {
+      if (!pout) continue;
+      for (const auto pin: partOriVert->particles_in()) {
+        if (!pin) continue;
+        if (pout->barcode() != pin->barcode()) continue;
+        if (std::abs(pout->pdgId()) == 15) NumOfTauLoop++;
+        if (std::abs(pout->pdgId()) == 16) NumOfTauNeuLoop++;
+        if (MC::isSMLepton(pout)) NumOfLepLoop++;
       }
     }
     if (NumOfTauLoop == 2 && NumOfTauNeuLoop == 0) return ZBoson;
@@ -1269,13 +1267,12 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     const xAOD::TruthVertex* Vert = nullptr;
     do {
       Vert = prodVert;
-      for (unsigned int ipIn = 0; ipIn < Vert->nIncomingParticles(); ipIn++) {
-        if (!Vert->incomingParticle(ipIn)) continue;
-        PartPDG = abs(Vert->incomingParticle(ipIn)->pdgId());
-        prodVert = Vert->incomingParticle(ipIn)->hasProdVtx() ? Vert->incomingParticle(ipIn)->prodVtx() : nullptr;
-        if (PartPDG == 23 || PartPDG == 24 || PartPDG == 25)
-          foundFSR = true;
-      } // cycle itrMother
+      for (const auto & pin: Vert->particles_in()) {
+        if (!pin) continue;
+        PartPDG = abs(pin->pdgId());
+        prodVert = pin->prodVtx();
+        if (PartPDG == 23 || PartPDG == 24 || PartPDG == 25) foundFSR = true;
+      }
       itr++;
       if (itr > 100) {
         ATH_MSG_WARNING("DefOrigOfPhoton:: infinite while");
@@ -1309,10 +1306,10 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   if (numOfParents == 1 && (abs(motherPDG) < 7 || motherPDG == 21) &&
       (numOfDaug != NumOfPht + NumOfPartons ||
         (motherStatus != 62 && motherStatus != 52 && motherStatus != 21 && motherStatus != 22))) {
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-      if (!partOriVert->outgoingParticle(ipOut)) continue;
-      if (motherPDG != partOriVert->outgoingParticle(ipOut)->pdgId()) continue;
-      const xAOD::TruthVertex* Vrtx = partOriVert->outgoingParticle(ipOut)->decayVtx();
+    for (const auto& pout: partOriVert->particles_out()) {
+      if (!pout) continue;
+      if (motherPDG != pout->pdgId()) continue;
+      const xAOD::TruthVertex* Vrtx = pout->decayVtx();
       if (!Vrtx) continue;
       if (Vrtx->nOutgoingParticles() != 1 && Vrtx->nIncomingParticles() == 1) continue;
       if (!Vrtx->outgoingParticle(0)) continue;
@@ -1427,15 +1424,12 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   //--New Sherpa single photon
   if (partOriVert == mothOriVert && partOriVert != nullptr) {
     int NumOfPhtLoop = 0;
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-      if (!partOriVert->outgoingParticle(ipOut)) continue;
-      for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-        if (!partOriVert->incomingParticle(ipIn)) continue;
-        if (partOriVert->outgoingParticle(ipOut)->barcode() == partOriVert->incomingParticle(ipIn)->barcode() &&
-            std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 22)
-          NumOfPhtLoop++;
-        if (NumOfPhtLoop == 1)
-          return SinglePhot;
+    for ( const auto pout: partOriVert->particles_out()) {
+      if (!pout) continue;
+      for (const auto pin: partOriVert->particles_in()) {
+        if (!pin) continue;
+        if (pout->barcode() == pin->barcode() && MC::isPhoton(pout)) NumOfPhtLoop++;
+        if (NumOfPhtLoop == 1) return SinglePhot;
       }
     }
   }
@@ -1701,15 +1695,14 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   if (partOriVert == mothOriVert && partOriVert != nullptr) {
     int NumOfLepLoop = 0;
     int NumOfNeuLoop = 0;
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-      if (!partOriVert->outgoingParticle(ipOut)) continue;
-      for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-        if (!partOriVert->incomingParticle(ipIn)) continue;
-        if (partOriVert->outgoingParticle(ipOut)->barcode() == partOriVert->incomingParticle(ipIn)->barcode()) {
-          int apdgid = abs(partOriVert->outgoingParticle(ipOut)->pdgId());
-          if (apdgid == 12 || apdgid == 14 || apdgid == 16) NumOfNeuLoop++;
-          if (apdgid == 11 || apdgid == 13 || apdgid == 15) NumOfLepLoop++;
-        }
+    for ( const auto pout: partOriVert->particles_out()) {
+      if (!pout) continue;
+      for (const auto pin: partOriVert->particles_in()) {
+        if (!pin) continue;
+        if (pin->barcode() == pout->barcode()) continue;
+        int apdgid = abs(pout->pdgId());
+        if (apdgid == 12 || apdgid == 14 || apdgid == 16) NumOfNeuLoop++;
+        if (apdgid == 11 || apdgid == 13 || apdgid == 15) NumOfLepLoop++;
       }
     }
     if (NumOfNeuLoop == 2 && NumOfLepLoop == 0) return ZBoson;
