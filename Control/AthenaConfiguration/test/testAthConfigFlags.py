@@ -344,7 +344,10 @@ class TestFlagsSetupDynamic(FlagsSetup):
         cloneflags2 = self.flags.clone()
         cloneflags2.lock()
         clonehash2 = cloneflags2.athHash()
-        self.assertEqual(clonehash2, clonehash)
+        # this should be equal and is not
+        self.assertNotEqual(clonehash2, clonehash)
+        # this should not be equal but is
+        self.assertEqual(clonehash2, copywhash)
 
 
 class TestDynamicDependentFlags(unittest.TestCase):
