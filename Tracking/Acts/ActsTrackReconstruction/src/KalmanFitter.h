@@ -43,6 +43,7 @@
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 #include "MeasurementCalibrator.h"
+#include "OnTrackCalibrator.h"
 
 // STL
 #include <string>

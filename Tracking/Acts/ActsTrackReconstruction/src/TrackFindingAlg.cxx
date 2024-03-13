@@ -488,8 +488,10 @@ namespace ActsTrk
 
     ActsTrk::MutableTrackContainer tracksContainerTemp;
 
-    UncalibratedMeasurementCalibrator calibrator(*m_ATLASConverterTool, tracking_surface_helper);
-    options.extensions.calibrator.connect<&UncalibratedMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
+    OnTrackCalibrator calibrator = OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>
+	::NoCalibration(*m_ATLASConverterTool, tracking_surface_helper);
+
+    options.extensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
 
     std::size_t category_i = 0;
     CkfBranchStopper ckfBranchStopper{*this, tgContext, measurements.measurementOffsets(), category_i, event_stat};

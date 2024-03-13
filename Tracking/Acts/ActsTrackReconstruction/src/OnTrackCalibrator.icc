@@ -1,0 +1,105 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef ONTRACKCALIBRATOR_ICC
+#define ONTRACKCALIBRATOR_ICC
+
+namespace ActsTrk {
+
+template <typename traj_t>
+OnTrackCalibrator<traj_t> OnTrackCalibrator<traj_t>::NoCalibration(
+    const ActsTrk::IActsToTrkConverterTool &converter_tool,
+    const TrackingSurfaceHelper &surface_helper)
+{
+    return OnTrackCalibrator(converter_tool, surface_helper, nullptr, nullptr);
+}
+
+template <typename traj_t>
+OnTrackCalibrator<traj_t>::OnTrackCalibrator(
+    const ActsTrk::IActsToTrkConverterTool &converter_tool,
+    const TrackingSurfaceHelper &surface_helper,
+    IOnTrackCalibratorTool<traj_t> *pixelTool,
+    IOnTrackCalibratorTool<traj_t> *stripTool)
+    : MeasurementCalibratorBase(converter_tool),
+      m_surfaceHelper(&surface_helper)
+{
+    if (pixelTool != nullptr) {
+	pixelTool->connect(*this);
+    } else {
+	pixel_calibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<2, xAOD::PixelCluster>>(this);
+    }
+
+    if (stripTool != nullptr) {
+	stripTool->connect(*this);
+    } else {
+	strip_calibrator.template connect<&OnTrackCalibrator<traj_t>::passthrough<1, xAOD::StripCluster>>(this);
+    }
+}
+
+template <typename traj_t>
+void OnTrackCalibrator<traj_t>::calibrate(
+    const Acts::GeometryContext& geoctx,
+    const Acts::CalibrationContext& cctx,
+    const Acts::SourceLink& link,
+    TrackStateProxy state) const
+{
+    state.setUncalibratedSourceLink(link);
+    ATLASUncalibSourceLink sourceLink = link.template get<ATLASUncalibSourceLink>();
+    assert(sourceLink.isValid() && *sourceLink);
+    const xAOD::UncalibratedMeasurement *measurement = *sourceLink;
+    const Acts::Surface &surface = m_surfaceHelper->associatedActsSurface(*measurement);
+
+    switch (measurement->type()) {
+    case xAOD::UncalibMeasType::PixelClusterType: {
+	assert(pixel_calibrator.connected());
+	auto [pos, cov] = pixel_calibrator(
+	    geoctx,
+	    cctx,
+	    *dynamic_cast<const xAOD::PixelCluster*>(measurement),
+	    state);
+	setState<2>(
+	    xAOD::UncalibMeasType::PixelClusterType,
+	    pos,
+	    cov,
+	    surface.bounds().type(),
+	    state);
+	break;
+    }
+    case xAOD::UncalibMeasType::StripClusterType: {
+	assert(strip_calibrator.connected());
+	auto [pos, cov] = strip_calibrator(
+	    geoctx,
+	    cctx,
+	    *dynamic_cast<const xAOD::StripCluster*>(measurement),
+	    state);
+	setState<1>(
+	    xAOD::UncalibMeasType::StripClusterType,
+	    pos,
+	    cov,
+	    surface.bounds().type(),
+	    state);
+	break;
+    }
+    default:
+	throw std::domain_error("OnTrackCalibrator can only handle Pixel or Strip measurements");
+    }
+}
+
+template <typename traj_t>
+template <std::size_t Dim, typename Cluster>
+std::pair<xAOD::MeasVector<Dim>, xAOD::MeasMatrix<Dim>>
+OnTrackCalibrator<traj_t>::passthrough(
+    const Acts::GeometryContext& /*gctx*/,
+	    const Acts::CalibrationContext& /*cctx*/,
+	    const Cluster& cluster,
+	    const TrackStateProxy& /*state*/) const
+{
+    return std::make_pair(cluster.template localPosition<Dim>(),
+			  cluster.template localCovariance<Dim>());
+}
+
+
+} // namespace ActsTrk
+
+#endif

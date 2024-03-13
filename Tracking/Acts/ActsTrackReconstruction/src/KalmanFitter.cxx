@@ -469,9 +469,11 @@ KalmanFitter::fit(const EventContext& ,
   
   ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ &(*m_ATLASConverterTool), &tracking_surface_helper };
   kfExtensions.surfaceAccessor.connect<&ActsTrk::ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
-   
-  UncalibratedMeasurementCalibrator calibrator(*m_ATLASConverterTool, tracking_surface_helper);
-  kfExtensions.calibrator.connect<&UncalibratedMeasurementCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
+
+  OnTrackCalibrator calibrator = OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>
+      ::NoCalibration(*m_ATLASConverterTool, tracking_surface_helper);
+
+  kfExtensions.calibrator.connect<&OnTrackCalibrator<ActsTrk::MutableTrackStateBackend>::calibrate>(&calibrator);
    
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
