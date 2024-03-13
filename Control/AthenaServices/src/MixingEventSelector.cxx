@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -437,6 +437,8 @@ IEvtSelector::Context& MixingEventSelector::Trigger::currentContext() const {
       throw GaudiException("MixingEventSelector::Trigger::currentContext(): can't create context",
 			   name(),StatusCode::FAILURE);
   }
+  // cppcheck-suppress nullPointerRedundantCheck; false positive
+  //  createContext() sets m_current
   return *m_current;
 }
 
