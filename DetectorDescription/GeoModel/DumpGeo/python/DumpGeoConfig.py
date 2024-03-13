@@ -142,7 +142,6 @@ if __name__=="__main__":
 
     if 'help' in args:
         # No point doing more here, since we just want to print the help.
-        import sys
         sys.exit()
 
     _logger.verbose("+ About to set flags related to the input")
