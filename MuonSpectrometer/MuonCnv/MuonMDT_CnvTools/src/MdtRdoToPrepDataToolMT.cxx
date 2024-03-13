@@ -347,8 +347,9 @@ namespace Muon {
                                              calibOutput.status());
     }
 
-    std::unique_ptr<xAOD::MdtDriftCircle> MdtRdoToPrepDataToolMT::createxAODPrepData(const MdtCalibInput& calibInput,
-                                            const MdtCalibOutput& calibOutput) const {
+    void MdtRdoToPrepDataToolMT::createxAODPrepData(const MdtCalibInput& calibInput,
+                                            const MdtCalibOutput& calibOutput, 
+                                            xAOD::MdtDriftCircleContainer* xAODMdtPrepDataContainer) const {
       if (!calibInput.legacyDescriptor() || calibInput.isMasked() ||
           calibInput.adc() < m_adcCut ||
           calibOutput.status() == MdtDriftCircleStatus::MdtStatusUnDefined) {
@@ -362,7 +363,7 @@ namespace Muon {
             << (calibOutput.status() == MdtDriftCircleStatus::MdtStatusUnDefined
                     ? "si"
                     : "no"));
-        return nullptr;
+        return;
       }
       ATH_MSG_VERBOSE("Calibrated xAOD prepdata "
                       << m_idHelperSvc->toString(calibInput.identify())
@@ -382,7 +383,8 @@ namespace Muon {
       } else
         (cov)(0, 0) = 0;
 
-      auto xprd = std::make_unique<xAOD::MdtDriftCircle>();
+      auto xprd = new xAOD::MdtDriftCircle();
+      xAODMdtPrepDataContainer->push_back(xprd);
 
       const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
 
@@ -399,7 +401,7 @@ namespace Muon {
       xprd->setStatus(calibOutput.status());
       // TODO tubePosInStation - but this needs ReadoutElement?
 
-      return xprd;                                        
+      return;                                        
     }
 
     StatusCode MdtRdoToPrepDataToolMT::processCsm(const EventContext& ctx, ModfiablePrdColl& prepDataContainer, 
@@ -483,9 +485,7 @@ namespace Muon {
             newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
             driftCircleColl->push_back(std::move(newPrepData));
 
-            if (m_mdtxAODKey.empty() && xAODMdtPrepDataContainer) {
-                xAODMdtPrepDataContainer->push_back((createxAODPrepData(calibIn, calibResult)));
-            }
+            if (xAODMdtPrepDataContainer) createxAODPrepData(calibIn, calibResult, xAODMdtPrepDataContainer);
         }
         return StatusCode::SUCCESS;
     }
@@ -625,9 +625,8 @@ namespace Muon {
                     newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
                     driftCircleColl->push_back(std::move(newPrepData));
 
-                    if (m_mdtxAODKey.empty() && xAODMdtPrepDataContainer) {
-                        xAODMdtPrepDataContainer->push_back(createxAODPrepData(mdtCalibIn, mdtCalibOut));
-                    }
+                    if (xAODMdtPrepDataContainer) createxAODPrepData(mdtCalibIn, mdtCalibOut, xAODMdtPrepDataContainer);
+                    
 
                     ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " " << mdtCalibOut);
                     continue;
@@ -688,9 +687,8 @@ namespace Muon {
                     driftCircleColl->push_back(std::move(newPrepData));
                     ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA " << m_idHelperSvc->toString(channelId) << " "<<calibResult1st);
                 }
-                if (m_mdtxAODKey.empty() && xAODMdtPrepDataContainer) {
-                   xAODMdtPrepDataContainer->push_back(createxAODPrepData(calibInput1st, calibResult1st));
-                }
+                if (xAODMdtPrepDataContainer) createxAODPrepData(calibInput1st, calibResult1st, xAODMdtPrepDataContainer);
+                
                 if (!second_digit) continue;
                     // Calculate radius
                     
@@ -703,9 +701,8 @@ namespace Muon {
                 if (!second_newPrepData) continue;
                 second_newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
                 driftCircleColl->push_back(std::move(second_newPrepData));
-                if (m_mdtxAODKey.empty() && xAODMdtPrepDataContainer) {
-                    xAODMdtPrepDataContainer->push_back(createxAODPrepData(calibInput2nd, calibResult2nd));
-                }
+                if (xAODMdtPrepDataContainer) createxAODPrepData(calibInput2nd, calibResult2nd, xAODMdtPrepDataContainer);
+                
                 // second_digit
                 ATH_MSG_DEBUG(" MADE ORIGINAL PREPDATA FOR SECOND DIGIT " 
                               << m_idHelperSvc->toString(calibInput2nd.identify()) 
