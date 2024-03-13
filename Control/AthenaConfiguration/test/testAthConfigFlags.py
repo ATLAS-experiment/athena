@@ -324,6 +324,28 @@ class TestFlagsSetupDynamic(FlagsSetup):
         self.assertTrue( self.flags.hasFlag("Z.A") )
         self.assertTrue( self.flags.hasCategory("Z.C") )
 
+    def test_cloneHash(self):
+        # compare copy hash to clone hash, should be equal
+        copyflags = copy.deepcopy(self.flags)
+        copyflags.lock()
+        copyhash = copyflags.athHash()
+        cloneflags = self.flags.clone()
+        cloneflags.lock()
+        clonehash = cloneflags.athHash()
+        self.assertEqual(copyhash, clonehash)
+
+        # compare copy hash to cloneAndReplace hash, should not be equal
+        copyw = self.flags.cloneAndReplace('W', 'Z')
+        copyw.lock()
+        copywhash = copyw.athHash()
+        self.assertNotEqual(copywhash, copyhash)
+
+        # compare first clone to second clone
+        cloneflags2 = self.flags.clone()
+        cloneflags2.lock()
+        clonehash2 = cloneflags2.athHash()
+        self.assertEqual(clonehash2, clonehash)
+
 
 class TestDynamicDependentFlags(unittest.TestCase):
     def test(self):
