@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODEventSelector.cxx 
@@ -284,7 +284,7 @@ StatusCode xAODEventSelector::initialize()
   std::vector<std::string> propVal;
   CHECK( Gaudi::Parsers::parse( propVal , epSvc->getProperty("CnvServices").toString() ) );
   bool foundSvc(false); bool foundPoolSvc(false);
-  for(auto s : propVal) {
+  for(const std::string& s : propVal) {
     if(s=="Athena::xAODCnvSvc") { foundSvc=true; }
     if(s=="AthenaPoolCnvSvc") { foundPoolSvc=true; } //only need this if in hybrid mode
   }
@@ -308,7 +308,7 @@ StatusCode xAODEventSelector::initialize()
     }
     CHECK( Gaudi::Parsers::parse( propVal , prop->getProperty("ProviderNames").toString() ) );
     bool foundSvc(false);
-    for(auto s : propVal) {
+    for(const std::string& s : propVal) {
       if(s=="MetaDataSvc") { foundSvc=true; break; }
     }
     if(!foundSvc) {

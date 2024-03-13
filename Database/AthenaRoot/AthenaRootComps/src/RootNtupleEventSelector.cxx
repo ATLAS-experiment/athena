@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootNtupleEventSelector.cxx 
@@ -384,7 +384,7 @@ StatusCode RootNtupleEventSelector::initialize()
   std::vector<std::string> propVal;
   CHECK( Gaudi::Parsers::parse( propVal , epSvc->getProperty("CnvServices").toString() ) );
   bool foundSvc(false);
-  for(auto s : propVal) {
+  for(const std::string& s : propVal) {
     if(s=="Athena::xAODCnvSvc") { foundSvc=true; break; }
   }
   if(!foundSvc) {
