@@ -115,9 +115,9 @@ def ITkRecPreProcessingSiliconCfg(flags):
         
     if flags.Tracking.ActiveConfig.doActsCluster:
         # If ACTS clusterization is activated, then schedule RoI creator
-        from ActsConfig.ActsViewConfig import EventViewCreatorAlgCfg
-        acc.merge(EventViewCreatorAlgCfg(flags,
-                                         name=flags.Tracking.ActiveConfig.extension + "EventViewCreatorAlg"))
+        from ActsConfig.ActsViewConfig import ActsEventViewCreatorAlgCfg
+        acc.merge(ActsEventViewCreatorAlgCfg(flags,
+                                             name=f"{flags.Tracking.ActiveConfig.extension}EventViewCreatorAlg"))
 
         from ActsConfig.ActsClusterizationConfig import ActsClusterizationCfg
         acc.merge(ActsClusterizationCfg(flags))
