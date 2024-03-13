@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_WRITECONDHANDLE_H
@@ -308,6 +308,12 @@ namespace SG {
      return addDependency( args... );
   }
              
+  // helper methods to create a read cond handle from the corresponding key.
+  template <class T>
+  SG::WriteCondHandle<T> makeHandle(const SG::WriteCondHandleKey<T> &key,
+                                    const EventContext& ctx = Gaudi::Hive::currentContext()) {
+     return SG::WriteCondHandle<T>(key, ctx);
+  }
              
 }
 
