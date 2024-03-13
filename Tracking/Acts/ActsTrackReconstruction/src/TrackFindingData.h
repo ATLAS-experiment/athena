@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H 1
@@ -131,12 +131,12 @@ namespace
                    const Acts::GeometryIdentifier &geometry_id)
           : m_container(container),
             m_index(element_index),
-            m_refElementLink(*container,
-                             static_cast<ActsTrk::ATLASUncalibSourceLink::index_type>(0),
-                             Atlas::getExtendedEventContext(ctx).proxy()),
             m_geometryId(geometry_id)
 
       {
+        if (container != nullptr) {
+          m_refElementLink.toIndexedElement (*container, 0, ctx);
+        }
         if (m_refElementLink.isValid() && !container->empty())
         {
           m_refElementLink.getStorableObjectPointer();
