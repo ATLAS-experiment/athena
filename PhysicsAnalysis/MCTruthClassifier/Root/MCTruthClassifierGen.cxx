@@ -354,23 +354,15 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
   if (info){
     info->mother = mother;
-    if (mother) {
-      info->motherStatus = mother->status();
-      info->motherPDG = mother->pdg_id();
-      info->motherBarcode = mother->barcode();
-    }  
+    info->setMotherProperties(mother);
   }
   if (!mother) {
     return NonDefined;
   }
   int motherPDG = mother->pdgId();
-  int motherStatus = mother->status();
-  long motherBarcode = mother->barcode();
   if (info) {
     info->mother = mother;
-    info->motherPDG = motherPDG;
-    info->motherStatus = motherStatus;
-    info->motherBarcode = motherBarcode;
+    info->setMotherProperties(mother);
   }
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
@@ -425,7 +417,6 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
   }
 
   motherPDG = mother->pdgId();
-  motherBarcode = mother->barcode();
   partOriVert = mother->decayVtx();
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   numOfParents = partOriVert->nIncomingParticles();
@@ -433,11 +424,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
 
   if (info) {
     info->mother = mother;
-    if (mother) {
-      info->motherStatus = mother->status();
-      info->motherPDG = motherPDG;
-      info->motherBarcode = motherBarcode;
-    }
+    info->setMotherProperties(mother);
   }
 
   int NumOfPhot(0);
@@ -722,9 +709,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   int motherPDG = mother->pdgId();
   if (info) {
     info->mother = mother;
-    info->motherPDG = motherPDG;
-    info->motherStatus = mother->status();
-    info->motherBarcode = mother->barcode();
+    info->setMotherProperties(mother);
   }
 
   if ((MC::isTau(motherPDG)|| MC::isW(motherPDG)) && mothOriVert != nullptr) {
@@ -764,9 +749,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
           mother = MotherParent;
           if (info){
             info->mother = mother;
-            info->motherStatus = mother->status();
-            info->motherPDG = mother->pdg_id();
-            info->motherBarcode = mother->barcode();
+            info->setMotherProperties(mother);
           }
         }
       }
@@ -778,9 +761,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
         (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) {
       if (info) {
         info->mother = mother;
-        info->motherStatus = mother->status();
-        info->motherPDG = mother->pdg_id();
-        info->motherBarcode = mother->barcode();
+        info->setMotherProperties(mother); 
       }
     }
   }
@@ -793,9 +774,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
 
   if (info) {
     info->mother = mother;
-    info->motherStatus = mother->status();
-    info->motherPDG = motherPDG;
-    info->motherBarcode = mother->barcode();
+    info->setMotherProperties(mother);
   }
   auto DP = DecayProducts(partOriVert);  
   int NumOfPhot = DP.pd(22);
@@ -1000,11 +979,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
   if (info) {
     info->mother = mother;
-    if (mother) {
-      info->motherStatus = mother->status();
-      info->motherPDG = mother->pdg_id();
-      info->motherBarcode = mother->barcode();
-    }
+    info->setMotherProperties(mother);
   }
   if (!mother) {
     return NonDefined;
@@ -1023,9 +998,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
         mother = MotherParent; //...so mother cannot be nullptr
         if (info) {
           info->mother = mother;
-          info->motherStatus = mother->status();
-          info->motherPDG = mother->pdg_id();
-          info->motherBarcode = mother->barcode();
+          info->setMotherProperties(mother);
         }
       }
     }
@@ -1034,9 +1007,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   motherPDG = mother->pdgId();
   if (info) {
     info->mother = mother;
-    info->motherPDG = motherPDG;
-    info->motherStatus = mother->status();
-    info->motherBarcode = mother->barcode();
+    info->setMotherProperties(mother);
 }
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   partOriVert = mother->decayVtx();
@@ -1230,12 +1201,8 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
 
   const xAOD::TruthParticle* mother = MC::getMother(thePriPart);
   if (info) {
-        info->mother = mother;
-        if (mother) {
-          info->motherStatus = mother->status();
-          info->motherPDG = mother->pdg_id();
-          info->motherBarcode = mother->barcode();
-        }
+    info->mother = mother;
+    info->setMotherProperties(mother);
   }
   if (!mother) return NonDefined;
   int motherPDG = mother->pdgId();
@@ -1244,11 +1211,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
   long motherBarcode = mother->barcode();
   if (info) {
     info->mother = mother;
-    if (mother) {
-      info->motherPDG = motherPDG;
-      info->motherStatus = motherStatus;
-      info->motherBarcode = motherBarcode;
-    }
+    info->setMotherProperties(mother);
   }
   partOriVert = mother->decayVtx();
   numOfParents = partOriVert->nIncomingParticles();  
@@ -1534,13 +1497,9 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     return NonDefined;
   }
   int motherPDG = mother->pdgId();
-  long motherStatus = mother->status();
-  long motherBarcode = mother->barcode();
   if (info) {
     info->mother = mother;
-    info->motherPDG = motherPDG;
-    info->motherStatus = motherStatus;
-    info->motherBarcode = motherBarcode;
+    info->setMotherProperties(mother);
   }
   const xAOD::TruthVertex* mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
 
@@ -1582,14 +1541,10 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       }
       if (abs(pPDG) == nuFlav || abs(pPDG) == 15 || abs(pPDG) == 24 ) {
         mother = MotherParent;
-  if (info) {
-        info->mother = mother;
-        if (mother) {
-          info->motherStatus = mother->status();
-          info->motherPDG = mother->pdg_id();
-          info->motherBarcode = mother->barcode();
+        if (info) {
+          info->mother = mother;
+          info->setMotherProperties(mother);
         }
-  }
       }
 
     } while ((std::abs(pPDG) == nuFlav || std::abs(pPDG) == 15 || std::abs(pPDG) == 24));
@@ -1601,11 +1556,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       mother = MotherParent;
       if (info) {
         info->mother = mother;
-        if (mother) {
-          info->motherStatus = mother->status();
-          info->motherPDG = mother->pdg_id();
-          info->motherBarcode = mother->barcode();
-        }
+        info->setMotherProperties(mother);
      }
     }
   }
@@ -1615,8 +1566,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
   }
 
   motherPDG = mother->pdgId();
-  motherStatus = mother->status();
-  motherBarcode = mother->barcode();
   partOriVert = mother->decayVtx();
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   numOfParents = partOriVert->nIncomingParticles();
@@ -1624,9 +1573,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
 
   if (info) {
     info->mother = mother;
-    info->motherPDG = motherPDG;
-    info->motherStatus = motherStatus;
-    info->motherBarcode = motherBarcode;
+    info->setMotherProperties(mother);
   }
 
   int NumOfPhot(0);

@@ -66,6 +66,12 @@ public:
     long motherBarcode = 0;
     int motherPDG = 0;
     const xAOD::TruthParticle* Mother() const { return mother;}
+    inline void setMotherProperties(const xAOD::TruthParticle* from) {
+      if (!from) return; 
+      motherStatus = from->status(); 
+      motherBarcode = from->barcode(); 
+      motherPDG = from->pdg_id(); 
+    }
 
     long photonMotherBarcode = 0;
     long photonMotherStatus = 0;
