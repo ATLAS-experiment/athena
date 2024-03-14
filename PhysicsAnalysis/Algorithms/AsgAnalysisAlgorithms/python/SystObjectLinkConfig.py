@@ -8,7 +8,7 @@ class SystObjectLinkBlock (ConfigBlock):
     """the ConfigBlock for linking systematic variation and nominal objects"""
 
     def __init__ (self, containerName) :
-        super (SystObjectLinkBlock, self).__init__ (f'SystObjectLink.{containerName}')
+        super (SystObjectLinkBlock, self).__init__ ()
         self.containerName = containerName
 
     def makeAlgs (self, config) :

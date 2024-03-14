@@ -10,7 +10,7 @@ class MuonCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the muon four-momentum correction"""
 
     def __init__ (self, containerName) :
-        super (MuonCalibrationConfig, self).__init__ (containerName)
+        super (MuonCalibrationConfig, self).__init__ ()
         self.containerName = containerName
         self.addOption ('postfix', "", type=str)
         self.addOption ('ptSelectionOutput', False, type=bool)
@@ -89,7 +89,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
     This may at some point be split into multiple blocks (10 Mar 22)."""
 
     def __init__ (self, containerName, selectionName) :
-        super (MuonWorkingPointConfig, self).__init__ (containerName + '.' + selectionName)
+        super (MuonWorkingPointConfig, self).__init__ ()
         self.containerName = containerName
         self.selectionName = selectionName
         self.addOption ('postfix', selectionName, type=str)
@@ -245,8 +245,8 @@ def makeMuonCalibrationConfig( seq, containerName,
     """
 
     config = MuonCalibrationConfig (containerName)
-    config.setOptionValue ('postfix', postfix, noneAction='ignore')
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
+    config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
     seq.append (config)
 
 
@@ -281,8 +281,8 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, selectionName,
             raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
         config.setOptionValue ('quality', splitWP[0])
         config.setOptionValue ('isolation', splitWP[1])
-    config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput, noneAction='ignore')
-    config.setOptionValue ('systematicBreakdown', systematicBreakdown, noneAction='ignore')
-    config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
-    config.setOptionValue ('onlyRecoEffSF', onlyRecoEffSF, noneAction='ignore')
+    config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput)
+    config.setOptionValue ('systematicBreakdown', systematicBreakdown)
+    config.setOptionValue ('noEffSF', noEffSF)
+    config.setOptionValue ('onlyRecoEffSF', onlyRecoEffSF)
     seq.append (config)

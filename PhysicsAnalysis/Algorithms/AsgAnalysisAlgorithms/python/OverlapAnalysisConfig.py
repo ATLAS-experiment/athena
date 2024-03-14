@@ -7,8 +7,8 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 class OverlapAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the MET configuration"""
 
-    def __init__ (self, configName) :
-        super (OverlapAnalysisConfig, self).__init__ (configName)
+    def __init__ (self) :
+        super (OverlapAnalysisConfig, self).__init__ ()
         self.addOption ('inputLabel', '', type=str)
         self.addOption ('outputLabel', 'passesOR', type=str)
         self.addOption ('selectionName', None, type=str)
@@ -421,8 +421,7 @@ def makeOverlapAnalysisConfig( seq,
                                antiTauIDTauLabel = None, antiTauLabel = None,
                                antiTauBJetLabel = None,
                                boostedLeptons = None,
-                               postfix = None,
-                               configName = 'OverlapRemoval'):
+                               postfix = None):
     """Function creating the overlap removal algorithm sequence
 
     The function sets up a multi-input/multi-output analysis algorithm sequnce,
@@ -449,23 +448,23 @@ def makeOverlapAnalysisConfig( seq,
       boostedLeptons -- Set to True to enable boosted lepton overlap removal
     """
 
-    config = OverlapAnalysisConfig (configName)
-    config.setOptionValue ('inputLabel', inputLabel, noneAction='ignore')
-    config.setOptionValue ('outputLabel', outputLabel, noneAction='ignore')
-    config.setOptionValue ('linkOverlapObjects', linkOverlapObjects, noneAction='ignore')
-    config.setOptionValue ('doEleEleOR', doEleEleOR, noneAction='ignore')
-    config.setOptionValue ('electrons', electrons, noneAction='ignore')
-    config.setOptionValue ('muons', muons, noneAction='ignore')
-    config.setOptionValue ('jets', jets, noneAction='ignore')
-    config.setOptionValue ('taus', taus, noneAction='ignore')
-    config.setOptionValue ('doTauAntiTauJetOR', doTauAntiTauJetOR, noneAction='ignore')
-    config.setOptionValue ('photons', photons, noneAction='ignore')
-    config.setOptionValue ('fatJets', fatJets, noneAction='ignore')
-    config.setOptionValue ('enableUserPriority', enableUserPriority, noneAction='ignore')
-    config.setOptionValue ('bJetLabel', bJetLabel, noneAction='ignore')
-    config.setOptionValue ('antiTauIDTauLabel', antiTauIDTauLabel, noneAction='ignore')
-    config.setOptionValue ('antiTauLabel', antiTauLabel, noneAction='ignore')
-    config.setOptionValue ('antiTauBJetLabel', antiTauBJetLabel, noneAction='ignore')
-    config.setOptionValue ('boostedLeptons', boostedLeptons, noneAction='ignore')
-    config.setOptionValue ('postfix', postfix, noneAction='ignore')
+    config = OverlapAnalysisConfig()
+    config.setOptionValue ('inputLabel', inputLabel)
+    config.setOptionValue ('outputLabel', outputLabel)
+    config.setOptionValue ('linkOverlapObjects', linkOverlapObjects)
+    config.setOptionValue ('doEleEleOR', doEleEleOR)
+    config.setOptionValue ('electrons', electrons)
+    config.setOptionValue ('muons', muons)
+    config.setOptionValue ('jets', jets)
+    config.setOptionValue ('taus', taus)
+    config.setOptionValue ('doTauAntiTauJetOR', doTauAntiTauJetOR)
+    config.setOptionValue ('photons', photons)
+    config.setOptionValue ('fatJets', fatJets)
+    config.setOptionValue ('enableUserPriority', enableUserPriority)
+    config.setOptionValue ('bJetLabel', bJetLabel)
+    config.setOptionValue ('antiTauIDTauLabel', antiTauIDTauLabel)
+    config.setOptionValue ('antiTauLabel', antiTauLabel)
+    config.setOptionValue ('antiTauBJetLabel', antiTauBJetLabel)
+    config.setOptionValue ('boostedLeptons', boostedLeptons)
+    config.setOptionValue ('postfix', postfix)
     seq.append (config)

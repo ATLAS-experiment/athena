@@ -8,8 +8,8 @@ import copy, re
 class OutputAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the MET configuration"""
 
-    def __init__ (self, configName) :
-        super (OutputAnalysisConfig, self).__init__ (configName)
+    def __init__ (self) :
+        super (OutputAnalysisConfig, self).__init__ ()
         self.addOption ('postfix', '', type=str)
         self.addOption ('vars', [], type=None)
         self.addOption ('metVars', [], type=None)

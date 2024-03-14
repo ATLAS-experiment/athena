@@ -10,7 +10,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the JVT sequence"""
 
     def __init__ (self, containerName) :
-        super (JetJvtAnalysisConfig, self).__init__ (containerName)
+        super (JetJvtAnalysisConfig, self).__init__ ()
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('enableFJvt', False, type=bool)
@@ -54,9 +54,7 @@ def makeJetJvtAnalysisConfig( seq, containerName,
     """
 
     config = JetJvtAnalysisConfig (containerName)
-    if postfix is not None :
-        config.setOptionValue ('postfix', postfix)
-    if enableFJvt is not None :
-        config.setOptionValue ('enableFJvt', enableFJvt)
+    config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('enableFJvt', enableFJvt)
 
     seq.append (config)

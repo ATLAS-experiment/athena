@@ -16,7 +16,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the photon four-momentum correction"""
 
     def __init__ (self, containerName) :
-        super (PhotonCalibrationConfig, self).__init__ (containerName)
+        super (PhotonCalibrationConfig, self).__init__ ()
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('crackVeto', False, type=bool)
@@ -157,7 +157,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
     def __init__ (self, containerName, selectionName) :
-        super (PhotonWorkingPointConfig, self).__init__ (containerName + '.' + selectionName)
+        super (PhotonWorkingPointConfig, self).__init__ ()
         self.containerName = containerName
         self.selectionName = selectionName
         self.addOption ('postfix', selectionName, type=str)
@@ -307,13 +307,13 @@ def makePhotonCalibrationConfig( seq, containerName,
     """
 
     config = PhotonCalibrationConfig (containerName)
-    config.setOptionValue ('postfix', postfix, noneAction='ignore')
-    config.setOptionValue ('crackVeto', crackVeto, noneAction='ignore')
-    config.setOptionValue ('enableCleaning', enableCleaning, noneAction='ignore')
-    config.setOptionValue ('cleaningAllowLate', cleaningAllowLate, noneAction='ignore')
-    config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
-    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig, noneAction='ignore')
+    config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('crackVeto', crackVeto)
+    config.setOptionValue ('enableCleaning', enableCleaning)
+    config.setOptionValue ('cleaningAllowLate', cleaningAllowLate)
+    config.setOptionValue ('recomputeIsEM', recomputeIsEM)
+    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
+    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)
 
 
@@ -342,7 +342,7 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, selectionNam
             raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
         config.setOptionValue ('qualityWP',     splitWP[0])
         config.setOptionValue ('isolationWP',   splitWP[1])
-    config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
-    config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
-    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig, noneAction='ignore')
+    config.setOptionValue ('recomputeIsEM', recomputeIsEM)
+    config.setOptionValue ('noEffSF', noEffSF)
+    config.setOptionValue ('forceFullSimConfig', forceFullSimConfig)
     seq.append (config)

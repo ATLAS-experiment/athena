@@ -9,7 +9,7 @@ class MetAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the MET configuration"""
 
     def __init__ (self, containerName) :
-        super (MetAnalysisConfig, self).__init__ (containerName)
+        super (MetAnalysisConfig, self).__init__ ()
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('useFJVT', False, type=bool)
@@ -112,22 +112,13 @@ def makeMetAnalysisConfig( seq, containerName,
     """
 
     config = MetAnalysisConfig (containerName)
-    if postfix is not None :
-        config.setOptionValue ('postfix', postfix)
-    if useFJVT is not None :
-        config.setOptionValue ('useFJVT', useFJVT)
-    if treatPUJets is not None :
-        config.setOptionValue ('treatPUJets', treatPUJets)
-    if setMuonJetEMScale is not None :
-        config.setOptionValue ('setMuonJetEMScale', setMuonJetEMScale)
-    if jets is not None :
-        config.setOptionValue ('jets', jets)
-    if electrons is not None :
-        config.setOptionValue ('electrons', electrons)
-    if muons is not None :
-        config.setOptionValue ('muons', muons)
-    if photons is not None :
-        config.setOptionValue ('photons', photons)
-    if taus is not None :
-        config.setOptionValue ('taus', taus)
+    config.setOptionValue ('postfix', postfix)
+    config.setOptionValue ('useFJVT', useFJVT)
+    config.setOptionValue ('treatPUJets', treatPUJets)
+    config.setOptionValue ('setMuonJetEMScale', setMuonJetEMScale)
+    config.setOptionValue ('jets', jets)
+    config.setOptionValue ('electrons', electrons)
+    config.setOptionValue ('muons', muons)
+    config.setOptionValue ('photons', photons)
+    config.setOptionValue ('taus', taus)
     seq.append (config)

@@ -27,7 +27,7 @@ class FTagConfig (ConfigBlock):
     """the ConfigBlock for the flavor tagging config"""
 
     def __init__ (self, containerName, selectionName) :
-        super (FTagConfig, self).__init__ (containerName + '.' + selectionName)
+        super (FTagConfig, self).__init__ ()
         self.containerName = containerName
         self.postfix = selectionName
         self.addOption ('btagWP', "FixedCutBEff_77", type=str)
@@ -312,18 +312,11 @@ def makeFTagAnalysisConfig( seq, containerName,
     """
 
     config = FTagConfig (containerName, selectionName)
-    if btagWP is not None :
-        config.setOptionValue ('btagWP', btagWP)
-    if btagger is not None :
-        config.setOptionValue ('btagger', btagger)
-    if generator is not None :
-        config.setOptionValue ('generator', generator)
-    if kinematicSelection is not None :
-        config.setOptionValue ('kinematicSelection', kinematicSelection)
-    if noEffSF is not None :
-        config.setOptionValue ('noEffSF', noEffSF)
-    if globalSF is not None :
-        config.setOptionValue ('globalSF', globalSF)
-    if minPt is not None :
-        config.setOptionValue ('minPt', minPt)
+    config.setOptionValue ('btagWP', btagWP)
+    config.setOptionValue ('btagger', btagger)
+    config.setOptionValue ('generator', generator)
+    config.setOptionValue ('kinematicSelection', kinematicSelection)
+    config.setOptionValue ('noEffSF', noEffSF)
+    config.setOptionValue ('globalSF', globalSF)
+    config.setOptionValue ('minPt', minPt)
     seq.append (config)

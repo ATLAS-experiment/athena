@@ -9,7 +9,7 @@ class TauCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the tau four-momentum correction"""
 
     def __init__ (self, containerName) :
-        super (TauCalibrationConfig, self).__init__ (containerName)
+        super (TauCalibrationConfig, self).__init__ ()
         self.containerName = containerName
         self.addOption ('postfix', '', type=str)
         self.addOption ('rerunTruthMatching', True, type=bool)
@@ -58,7 +58,7 @@ class TauWorkingPointConfig (ConfigBlock) :
     This may at some point be split into multiple blocks (16 Mar 22)."""
 
     def __init__ (self, containerName, selectionName) :
-        super (TauWorkingPointConfig, self).__init__ (containerName + '.' + selectionName)
+        super (TauWorkingPointConfig, self).__init__ ()
         self.containerName = containerName
         self.selectionName = selectionName
         self.addOption ('postfix', None, type=str)
@@ -179,6 +179,6 @@ def makeTauWorkingPointConfig( seq, containerName, workingPoint, selectionName,
         if len (splitWP) != 1 :
             raise ValueError ('working point should be of format "quality", not ' + workingPoint)
         config.setOptionValue ('quality', splitWP[0])
-    config.setOptionValue ('legacyRecommendations', legacyRecommendations, noneAction='ignore')
-    config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
+    config.setOptionValue ('legacyRecommendations', legacyRecommendations)
+    config.setOptionValue ('noEffSF', noEffSF)
     seq.append (config)
