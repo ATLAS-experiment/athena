@@ -12,7 +12,7 @@ namespace ActsTrk {
 template <typename traj_t>
 class OnTrackCalibrator : MeasurementCalibratorBase {
 public:
-    using TrackStateProxy = Acts::MultiTrajectory<traj_t>::TrackStateProxy;
+    using TrackStateProxy = typename Acts::MultiTrajectory<traj_t>::TrackStateProxy;
 
     using PixelPos = xAOD::MeasVector<2>;
     using PixelCov = xAOD::MeasMatrix<2>;
