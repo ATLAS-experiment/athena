@@ -31,17 +31,14 @@
 // class GeoExporter;
 
 // Marked not thread-safe because GeoExporter uses VP1.
-class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm,
-                                     public IIncidentListener
+class ATLAS_NOT_THREAD_SAFE DumpGeo: public AthAlgorithm
 {
  public:
   DumpGeo(const std::string& name, ISvcLocator* pSvcLocator) ATLAS_CTORDTOR_NOT_THREAD_SAFE;
   ~DumpGeo()=default;
 
   StatusCode initialize();
-  StatusCode execute();
-
-  void handle(const Incident& inc);
+  StatusCode execute() {return StatusCode::SUCCESS;};
 
  private:
   // Properties
