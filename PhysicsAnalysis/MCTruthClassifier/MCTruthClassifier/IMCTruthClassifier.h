@@ -81,8 +81,6 @@ public:
 
     const xAOD::TruthParticle* bkgElecMother = nullptr;
 
-    std::vector<const xAOD::TruthParticle*> tauFinalStatePart;
-
 #ifndef GENERATIONBASE /*Disable when no recostruction packages are expected*/
     float deltaRMatch = -999;
     float deltaPhi = -999;
