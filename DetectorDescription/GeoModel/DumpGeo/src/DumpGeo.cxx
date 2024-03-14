@@ -26,7 +26,7 @@
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelDBManager/GMDBManager.h"
 #include "GeoModelWrite/WriteGeoModel.h"
-// #include <GeoModelHelpers/defineWorld.h>
+// #include "GeoModelHelpers/defineWorld.h" // not available in 24.0... 
 
 // C++ includes
 #include <vector>
@@ -88,7 +88,6 @@ StatusCode DumpGeo::initialize()
   ATH_MSG_INFO("===================================================");
 
   ATH_MSG_INFO("Accessing the ATLAS geometry...");
-  // StoreGateSvc* detStore = m_d->detstore;
   const GeoModelExperiment * theExpt = nullptr;
   ATH_CHECK(detStore()->retrieve(theExpt,"ATLAS"));
 
