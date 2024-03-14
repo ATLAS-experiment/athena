@@ -138,7 +138,7 @@ namespace Analysis {
   void ClassifiedTrackTaggerTool::decorateJets(const std::vector<const xAOD::TrackParticle*> & InpTrk, const xAOD::Vertex & primVertex, const xAOD::JetContainer & jets) const
   {
     SG::WriteDecorHandle< xAOD::JetContainer, float > jetWriteDecorHandle (m_jetWriteDecorKey);
-    for(const auto& curjet : jets){
+    for(const auto curjet : jets){
       ATH_MSG_DEBUG( " Jet  pt: " << curjet->pt()<<" eta: "<<curjet->eta()<<" phi: "<< curjet->phi() );
       float CTTScore = bJetWgts(InpTrk, primVertex, curjet->p4());
       jetWriteDecorHandle(*curjet) = CTTScore;
