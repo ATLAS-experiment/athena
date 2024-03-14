@@ -343,8 +343,7 @@ class TestFlagsSetupDynamic(FlagsSetup):
         clonewhash = clonew.athHash()
         # this should not be equal, the flags don't have the same
         # content
-        # Test 2: this is disabled because it fails with the original hash
-        # self.assertNotEqual(clonewhash, clonehash)
+        self.assertNotEqual(clonewhash, clonehash)
 
         # copy back into Z
         clonez = clonew.cloneAndReplace('Z', 'W')
@@ -360,8 +359,7 @@ class TestFlagsSetupDynamic(FlagsSetup):
         # this should be equal, they have the same flags
         self.assertEqual(clonehash2, clonehash)
         # this should not be equal, since a group was replaced
-        # Test 2: this is disabled because it fails with the original hash
-        # self.assertNotEqual(clonehash2, clonewhash)
+        self.assertNotEqual(clonehash2, clonewhash)
 
 
 class TestDynamicDependentFlags(unittest.TestCase):

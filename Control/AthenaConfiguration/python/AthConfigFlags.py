@@ -236,11 +236,7 @@ class AthConfigFlags(object):
 
     def _calculateHash(self):
         fmap = self._renamed_map()
-        #
-        # Test 2: use simpler flag def, comment out the line below
-        #
-        # flags = ((fmap[x], y) for x, y in self._flagdict.items() if fmap[x])
-        flags = (self._flagdict.items())
+        flags = ((fmap[x], y) for x, y in self._flagdict.items() if fmap[x])
         return hash(frozenset((x, repr(y)) for x, y in flags))
 
     def __getattr__(self, name):
