@@ -49,7 +49,7 @@ def StripClusterToTruthAssociationCfg(flags, name: str = 'StripClusterToTruthAss
 def TrackToTruthAssociationCfg(flags, name: str = 'ActsTracksToTruthAssociationAlg', **kwargs) :
     acc = ComponentAccumulator()
     acc.merge( MapToInDetSimDataWrapCfg(flags, 'ITkStripSDO_Map') )
-    kwargs.setdefault('ACTSTracksLocation','SiSPSeededActsTrackContainer')
+    kwargs.setdefault('ACTSTracksLocation','ActsTracks')
     kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
     kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')

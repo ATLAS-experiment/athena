@@ -132,7 +132,11 @@ def ActsTrackFindingCfg(flags) -> ComponentAccumulator:
 
     # Acts Main pass
     if flags.Tracking.ActiveConfig.extension == "Acts":
+
         acc.merge(ActsMainTrackFindingAlgCfg(flags,
+                                             SeedLabels = isdet(flags, ["PPP"], ["SSS"]) if not flags.Tracking.doITkFastTracking else ["PPP"], 
+                                             EstimatedTrackParametersKeys = isdet(flags, ["ITkPixelEstimatedTrackParams"], ["ITkStripEstimatedTrackParams"]) if not flags.Tracking.doITkFastTracking else ["ITkPixelEstimatedTrackParams"],
+                                             SeedContainerKeys = isdet(flags, ["ITkPixelSeeds"], ["ITkStripSeeds"]) if not flags.Tracking.doITkFastTracking else ["ITkPixelSeeds"],
                                              UncalibratedMeasurementContainerKeys = ["ITkPixelClusters_InView", "ITkStripClusters_InView"] if flags.Acts.useCache else ["ITkPixelClusters", "ITkStripClusters"]))
         # Acts Conversion pass
     elif flags.Tracking.ActiveConfig.extension == "ActsConversion":
