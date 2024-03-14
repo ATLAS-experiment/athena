@@ -15,12 +15,12 @@ from TrigCompositeUtils.TrigCompositeUtils import legName
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
 from collections.abc import MutableSequence
+import functools
 import inspect
 import re
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger( __name__ )
-
 # Pool of mutable ComboHypo instances
 _ComboHypoPool = dict()
 
@@ -375,6 +375,11 @@ class EmptyMenuSequence:
         return "MenuSequence::%s \n Hypo::%s \n Maker::%s \n Sequence::%s \n HypoTool::%s\n"\
             %(self.name, "Empty", self.maker.Alg.getName(), self.sequence.Alg.getName(), "None")
 
+def EmptyMenuSequenceCfg(flags, name):
+    return EmptyMenuSequence(name)
+
+def isEmptySequenceCfg(o):
+    return o == EmptyMenuSequenceCfg
 
 class MenuSequenceCA:
     """Class to group reco sequences with the Hypo.
@@ -667,8 +672,21 @@ class ChainStep(object):
                 log.error("[ChainStep] multiplicities: %s",multiplicity)
                 raise RuntimeError("Tried to configure a ChainStep %s with %i Sequences and %i multiplicities. These lists must have the same size" % (name, len(Sequences), len(multiplicity)) )
  
-        self.name      = name
-        self.sequences = Sequences
+        self.name = name
+        self.sequences = []
+        for iseq, seq in enumerate(Sequences):                
+            if isinstance(seq, MenuSequenceCA) or isinstance(seq, EmptyMenuSequence): # this is stopgap solution to handle jets
+                self.sequences.append(seq)   
+            else:
+                if not isinstance(seq, functools.partial):
+                    log.error("[ChainStep] %s Sequences verification failed, sequence %d is not partial function, likely ChainBase.getStep function was not used", name, iseq)
+                    log.error("[ChainStep] It rather seems to be of type %s trying to print it", type(seq))
+                    raise RuntimeError("Sequence is not packaged in a tuple, see error message above" )
+                    
+                # at the moment sequences are created here, 
+                #this will be deferred to later stages in followup MRs
+                self.sequences.append(seq())
+
         self.onlyJets  = False
         sig_set = None
         if len(chainDicts) > 0  and 'signature' in chainDicts[0]: 
@@ -798,10 +816,10 @@ class ChainStep(object):
         if len(self.sequences) == 0:
             return "--- ChainStep %s ---\n is Empty, ChainDict = %s "%(self.name,  ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])) )
         
-        repr_string= "--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequences = %s "%\
+        repr_string= "--- ChainStep %s ---\n , multiplicity = %s  ChainDict = %s \n + MenuSequences size = %d "%\
           (self.name,  ' '.join(map(str,[mult for mult in self.multiplicity])),
              ' '.join(map(str, [dic['chainName'] for dic in self.stepDicts])),
-             ' '.join(map(str, [seq.name for seq in self.sequences]) ))
+             len(self.sequences) )
         if self.combo is not None:
             repr_string += "\n + ComboHypo = %s" % self.combo.Alg.name
             if len(self.comboToolConfs)>0:
